@@ -37,6 +37,8 @@ const TIERS=[{min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},{min:2,name:"IRON
 const getTier = c => [...TIERS].reverse().find(t => c >= t.min) || TIERS[0];
 const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const ALNUM="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const DEMO_PLAYER={email:"demo@shotlab.app",password:"demo1234",name:"Demo Player",role:"player"};
+const DEMO_COACH={email:"coach.demo@shotlab.app",password:"demo1234",name:"Demo Coach",role:"coach"};
 const genId=(p="id")=>`${p}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
 function generateJoinCode(existing=[],length=6){
 for(let tries=0;tries<30;tries++){
@@ -186,6 +188,48 @@ else setView(p.role||"player");
 DB.set("sl:session",{email});
 return{ok:true};
 };
+const demoSignIn=async(kind="player")=>{
+const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
+let np=[...players];
+let nts=[...teams];
+const savePlayers=async()=>{await P("sl:players",np,setPlayers)};
+const saveTeams=async()=>{await P("sl:teams",nts,setTeams)};
+
+if(!np.find(p=>p.email===DEMO_COACH.email)){
+np=[...np,{email:DEMO_COACH.email,name:DEMO_COACH.name,password:hashPw(DEMO_COACH.password),role:"coach",teamId:null}];
+}
+if(!np.find(p=>p.email===DEMO_PLAYER.email)){
+np=[...np,{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,password:hashPw(DEMO_PLAYER.password),role:"player",teamId:null}];
+}
+await savePlayers();
+
+let demoTeam=nts.find(t=>t.ownerCoachId===DEMO_COACH.email);
+if(!demoTeam){
+demoTeam={id:genId("team"),name:"Demo Team",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nts.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now()};
+nts=[...nts,demoTeam];
+await saveTeams();
+}
+
+let changedPlayers=false;
+np=np.map(p=>{
+if(p.email===DEMO_COACH.email&&p.teamId!==demoTeam.id){changedPlayers=true;return {...p,teamId:demoTeam.id};}
+if(p.email===DEMO_PLAYER.email&&p.teamId!==demoTeam.id){changedPlayers=true;return {...p,teamId:demoTeam.id};}
+return p;
+});
+if(changedPlayers)await savePlayers();
+
+const hasPlayerProfile=playerProfiles.some(pp=>pp.userId===DEMO_PLAYER.email&&pp.teamId===demoTeam.id);
+if(!hasPlayerProfile){
+await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:DEMO_PLAYER.email,teamId:demoTeam.id,firstName:"Demo",lastName:"Player",createdAt:Date.now()}],setPlayerProfiles);
+}
+
+const signedIn=np.find(p=>p.email===acct.email);
+if(!signedIn)return{ok:false,err:"Unable to prepare demo account."};
+setUser({email:signedIn.email,role:signedIn.role||"player",name:signedIn.name,teamId:demoTeam.id});
+setView(kind==="coach"?"coach":"player");
+await DB.set("sl:session",{email:signedIn.email});
+return{ok:true};
+};
 const logout=()=>{setUser(null);setView("auth");DB.set("sl:session",null)};
 const deleteAccount=async()=>{
 if(!user)return;
@@ -275,7 +319,7 @@ const myTeam=teams.find(t=>t.id===user?.teamId)||null;
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
-{view==="auth"&&<Auth onLogin={login} onRegister={register} players={players}/>}{view==="create-team"&&<CreateTeam onCreate={createTeam} u={user}/>}
+{view==="auth"&&<Auth onLogin={login} onRegister={register} onDemo={demoSignIn}/>}{view==="create-team"&&<CreateTeam onCreate={createTeam} u={user}/>} 
 {view==="join-team"&&<JoinTeam onJoin={joinTeam} u={user}/>}
 {view==="player"&&<Player u={user} drills={drills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount}/>}
 {view==="coach"&&<Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/>}
@@ -285,10 +329,8 @@ return <><Styles/>
 // ═══════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════
-function Auth({onLogin,onRegister,players}){
+function Auth({onLogin,onRegister,onDemo}){
 const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[err,setErr]=useState("");
-const DEMO_PLAYER={email:"demo@shotlab.app",password:"demo1234",name:"Demo Player",role:"player"};
-const DEMO_COACH={email:"coach.demo@shotlab.app",password:"demo1234",name:"Demo Coach",role:"coach"};
 const doLogin=()=>{
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!password){setErr("Enter your password");return}
@@ -309,14 +351,8 @@ const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
 setErr("");
 setEmail(acct.email);
 setPassword(acct.password);
-const hasDemo=players.some(p=>p.email===acct.email);
-if(!hasDemo){
-const reg=await onRegister(acct.email,acct.password,acct.name,acct.role);
-if(reg.ok)return;
-if(reg.err!=="Account already exists. Please sign in."){setErr(reg.err);return}
-}
-const log=onLogin(acct.email,acct.password);
-if(!log.ok)setErr(log.err);
+const demo=await onDemo(kind);
+if(!demo.ok)setErr(demo.err||"Unable to start demo.");
 };
 const inp={width:"100%",padding:"15px 16px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none"};
 return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden"}}>
