@@ -434,20 +434,20 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
       const nextEvent=sorted.find(e=>e.date>=today);
       const myEvRsvps=rsvps.filter(r=>r.email===u.email).length;
-      return <button className="ch" onClick={()=>setTab("program")} style={{width:"100%",background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"16px 20px",marginBottom:28,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14}}>
-        <div style={{width:40,height:40,borderRadius:12,background:`${VOLT}08`,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
+      return <button className="ch" onClick={()=>setTab("program")} style={{width:"100%",background:`linear-gradient(145deg,${CYAN}08,${CARD_BG},${CYAN}03)`,border:`1px solid ${CYAN}33`,borderRadius:24,padding:"24px",marginBottom:28,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,minHeight:160,boxShadow:`0 0 24px ${CYAN}14`}}>
+        <div style={{width:44,height:44,borderRadius:14,background:`${CYAN}10`,border:`1px solid ${CYAN}22`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
         </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:2}}>PROGRAM</div>
-          {nextEvent?<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>Next: <span style={{color:VOLT,fontWeight:700}}>{nextEvent.title}</span> · {nextEvent.date.slice(5)}</div>
+          <div style={{fontFamily:FD,color:CYAN,fontSize:22,letterSpacing:3}}>PROGRAM</div>
+          {nextEvent?<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>Next: <span style={{color:CYAN,fontWeight:700}}>{nextEvent.title}</span> · {nextEvent.date.slice(5)}</div>
           :<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>Events & verified attendance</div>}
         </div>
         <div style={{textAlign:"center",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:22}}>{myEvRsvps}</div>
+          <div style={{fontFamily:FD,color:CYAN,fontSize:22}}>{myEvRsvps}</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:1,fontWeight:600}}>EVENTS</div>
         </div>
-        <svg width="12" height="12" viewBox="0 0 16 16" style={{flexShrink:0}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
+        <svg width="12" height="12" viewBox="0 0 16 16" style={{flexShrink:0}}><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
       </button>})()}
 
     {/* ══════ LEADERBOARD ══════ */}
