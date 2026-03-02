@@ -485,10 +485,10 @@ const onTM=e=>{if(!tStart)return;const el=e.currentTarget;if(el.scrollTop>0)retu
 const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else setPullY(0);setTStart(0)};
 
 return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
-<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
+<div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
 {/* Badge Reveal Overlay */}
-{badgeReveal&&<div style={{position:"fixed",inset:0,zIndex:200,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}} onClick={()=>setBadgeReveal(null)}>
+{badgeReveal&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}} onClick={()=>setBadgeReveal(null)}>
   <div className="badge-pop badge-shine" style={{textAlign:"center",padding:40}}>
     <div style={{width:120,height:120,borderRadius:"50%",background:`linear-gradient(145deg,${badgeReveal.color}22,${badgeReveal.color}08)`,border:`3px solid ${badgeReveal.color}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",boxShadow:`0 0 60px ${badgeReveal.color}33`}}>
       <span style={{fontFamily:FD,fontSize:36,color:badgeReveal.color}}>{badgeReveal.icon}</span>
@@ -501,7 +501,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
 </div>}
 
 {/* Personal Best Reveal */}
-{pbReveal&&<div style={{position:"fixed",inset:0,zIndex:199,background:"#000a",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setPbReveal(null)}>
+{pbReveal&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000a",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setPbReveal(null)}>
   <div className="badge-pop" style={{textAlign:"center",padding:32}}>
     <div style={{fontFamily:FD,color:ORANGE,fontSize:48,letterSpacing:4,lineHeight:1}}>NEW PB!</div>
     <div style={{fontFamily:FD,color:LIGHT,fontSize:64,lineHeight:1,margin:"16px 0 8px"}}>{pbReveal.score}</div>
@@ -512,29 +512,16 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
 </div>}
 
 {/* Header — Glassmorphism */}
-<div style={{position:"sticky",top:0,zIndex:10,padding:"max(16px,env(safe-area-inset-top)) 20px 0",background:T.BG+"dd",backdropFilter:"blur(20px)",WebkitBackdropFilter:"blur(20px)",borderBottom:`1px solid ${T.BORDER}80`}}>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:14}}>
-    <div style={{display:"flex",alignItems:"center",gap:14}}>
-      <div style={{position:"relative",width:56,height:56}}>
-        <svg width="56" height="56" viewBox="0 0 56 56" style={{position:"absolute",top:0,left:0,transform:"rotate(-90deg)"}}>
-          {/* Outer ring — weekly all-activity */}
-          <circle cx="28" cy="28" r="26" fill="none" stroke={T.BORDER} strokeWidth="2"/>
-          <circle cx="28" cy="28" r="26" fill="none" stroke={VOLT} strokeWidth="2" strokeLinecap="round" strokeDasharray={`${(drills.length>0?todayS.length/drills.length:0)*163} 163`} style={{transition:"stroke-dasharray .6s ease"}}/>
-          {/* Middle ring — shots */}
-          <circle cx="28" cy="28" r="22" fill="none" stroke={T.BORDER} strokeWidth="2"/>
-          <circle cx="28" cy="28" r="22" fill="none" stroke={ORANGE} strokeWidth="2" strokeLinecap="round" strokeDasharray={`${Math.min(shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0)/50,1)*138} 138`} style={{transition:"stroke-dasharray .6s ease"}}/>
-          {/* Inner ring — S&C */}
-          <circle cx="28" cy="28" r="18" fill="none" stroke={T.BORDER} strokeWidth="2"/>
-          <circle cx="28" cy="28" r="18" fill="none" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeDasharray={`${Math.min(scRsvps.filter(r=>r.email===u.email).length/5,1)*113} 113`} style={{transition:"stroke-dasharray .6s ease"}}/>
-        </svg>
-        <div style={{position:"absolute",top:8,left:8}}><Av n={u.name} sz={40} email={u.email}/></div>
-      </div>
-      <div><div style={{fontFamily:FB,color:T.MUT,fontSize:10,letterSpacing:3,fontWeight:600}}>{(()=>{
+<div style={{position:"sticky",top:0,zIndex:10,height:64,padding:"max(0px,env(safe-area-inset-top)) 16px 0",background:TOKENS.BG_BASE,borderBottom:`1px solid ${TOKENS.BG_SUBTLE}`}}>
+  <div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
+      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:36,height:36,borderRadius:"50%",background:TOKENS.BG_ELEVATED,border:`1.5px solid ${TOKENS.PRIMARY}`,color:TOKENS.TEXT_PRIMARY,fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0}}>{(u.name||"?")[0].toUpperCase()}</button>
+      <div style={{minWidth:0}}><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:11,letterSpacing:1,fontWeight:500,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(()=>{
         const allDone=todayS.length>=drills.length;const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
         if(allDone&&shotsToday>0)return <span style={{color:VOLT}}>ALL DRILLS COMPLETE · {streak}D STREAK 🔥</span>;
         if(todayS.length>0)return <span>{todayS.length}/{drills.length} DRILLS · {shotsToday>0?shotsToday+" SHOTS · ":""}{streak}D STREAK</span>;
         return "TODAY'S MISSION AWAITS";
-      })()}</div><div style={{fontFamily:FD,color:T.LT,fontSize:26,letterSpacing:2,marginTop:1}}>{u.name.toUpperCase()}</div></div>
+      })()}</div><div style={{fontFamily:FD,color:TOKENS.TEXT_PRIMARY,fontSize:16,letterSpacing:1,marginTop:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{u.name.toUpperCase()}</div></div>
     </div>
     <div style={{display:"flex",gap:6,alignItems:"center"}}>
       <SLLogo size={34} style={{opacity:.5}}/>
@@ -1523,7 +1510,7 @@ const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,spor
 
 return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative"}}>
 {/* Delete confirmation dialog */}
-{confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:200,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
+{confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
 <div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
 <div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:3,marginBottom:8}}>DELETE DRILL?</div>
 <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:20}}>Player scores will be kept but this drill will no longer appear.</p>
@@ -1533,7 +1520,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 </div>
 </div>
 </div>}
-<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
+<div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
 <div><div style={{fontFamily:FD,color:ORANGE,fontSize:13,letterSpacing:4}}>COACH MODE</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:2,marginTop:2}}>{u.name.toUpperCase()}</div></div>
@@ -2043,7 +2030,7 @@ function Empty({t,action,onTap}){return <div style={{textAlign:"center",padding:
 function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>}</>}
 function NavBar({items,active,onChange}){
 const NAV_INACTIVE=TOKENS.TEXT_MUTED,NAV_HOVER=TOKENS.TEXT_SECONDARY;
-return <nav role="navigation" aria-label="Main navigation" style={{position:"fixed",left:0,right:0,bottom:0,display:"flex",alignItems:"stretch",height:64,paddingBottom:"env(safe-area-inset-bottom)",background:TOKENS.BG_ELEVATED,borderTop:`1px solid ${TOKENS.BG_SUBTLE}`,zIndex:100}}>{items.map(t=>{const a=active===t.k;
+return <nav role="navigation" aria-label="Main navigation" style={{position:"fixed",left:0,right:0,bottom:0,display:"flex",alignItems:"stretch",height:64,paddingBottom:"env(safe-area-inset-bottom)",background:TOKENS.BG_ELEVATED,borderTop:`1px solid ${TOKENS.BG_SUBTLE}`,zIndex:20}}>{items.map(t=>{const a=active===t.k;
 return <button key={t.k} aria-label={t.l} onClick={()=>onChange(t.k)} onMouseEnter={e=>{if(!a)e.currentTarget.style.color=NAV_HOVER}} onMouseLeave={e=>{if(!a)e.currentTarget.style.color=NAV_INACTIVE}} onPointerDown={e=>{if(!a)e.currentTarget.style.color=NAV_HOVER}} onPointerUp={e=>{if(!a)e.currentTarget.style.color=NAV_INACTIVE}} onPointerCancel={e=>{if(!a)e.currentTarget.style.color=NAV_INACTIVE}} style={{flex:1,minWidth:0,minHeight:48,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"8px 4px 6px",position:"relative",background:"none",border:"none",cursor:"pointer",color:a?VOLT:NAV_INACTIVE,transition:"color 150ms ease",outlineOffset:2}}>
 {a&&<span aria-hidden="true" style={{position:"absolute",top:0,left:"50%",transform:"translateX(-50%)",width:24,height:2,borderRadius:1,background:VOLT}}/>}
 <div style={{position:"relative",lineHeight:1}}>{t.svg}{t.dot&&!a&&<div style={{position:"absolute",top:-1,right:-6,width:6,height:6,borderRadius:"50%",background:t.dot,border:`1.5px solid ${TOKENS.BG_ELEVATED}`}}/>}</div>
