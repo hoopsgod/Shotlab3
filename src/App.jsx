@@ -67,7 +67,7 @@ if(type==="fl")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M1
 if(type==="sb")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M28 32L12 24L22 12" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/><circle cx="22" cy="12" r="5" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 8l-4 2" stroke={color} strokeWidth="1.5" strokeLinecap="round"/></svg>;
 return <svg viewBox="0 0 40 40" style={s}><circle cx="20" cy="20" r="16" stroke={color} strokeWidth="2" fill="none"/></svg>;
 };
-const CourtBG=({opacity=.04})=><svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none",opacity}} viewBox="0 0 400 900" fill="none" preserveAspectRatio="xMidYMid slice"><rect x="20" y="40" width="360" height="700" stroke={VOLT} strokeWidth="1"/><line x1="20" y1="390" x2="380" y2="390" stroke={VOLT} strokeWidth=".8"/><circle cx="200" cy="390" r="60" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="40" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 40Q200 140 260 40" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="550" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 740Q200 640 260 740" stroke={VOLT} strokeWidth=".8" fill="none"/></svg>;
+const CourtBG=({opacity=.02})=><svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none",opacity}} viewBox="0 0 400 900" fill="none" preserveAspectRatio="xMidYMid slice"><rect x="20" y="40" width="360" height="700" stroke={VOLT} strokeWidth="1"/><line x1="20" y1="390" x2="380" y2="390" stroke={VOLT} strokeWidth=".8"/><circle cx="200" cy="390" r="60" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="40" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 40Q200 140 260 40" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="550" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 740Q200 640 260 740" stroke={VOLT} strokeWidth=".8" fill="none"/></svg>;
 const GlowOrb=({color=VOLT,top="20%",left="50%",size=300,animate})=><div style={{position:"absolute",top,left,width:size,height:size,borderRadius:"50%",background:`radial-gradient(circle,${color}0a 0%,transparent 70%)`,transform:"translate(-50%,-50%)",pointerEvents:"none",animation:animate?"orbDrift 12s ease-in-out infinite alternate":"none"}}/>;
 const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:${BG};overflow-x:hidden}input,textarea{font-family:${FB}}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}input[type=number]{-moz-appearance:textfield}::-webkit-scrollbar{width:0}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@keyframes scaleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes glow{0%,100%{box-shadow:0 0 20px ${VOLT}15}50%{box-shadow:0 0 40px ${VOLT}25}}@keyframes heroGlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}@keyframes rippleOut{0%{transform:scale(0);opacity:.5}100%{transform:scale(4);opacity:0}}@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes orbDrift{0%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(-40%,-60%) scale(1.1)}50%{transform:translate(-60%,-45%) scale(.95)}75%{transform:translate(-45%,-55%) scale(1.05)}100%{transform:translate(-55%,-50%) scale(1)}}@keyframes confettiBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{opacity:0}}@keyframes particleFly{0%{transform:translate(0,0) scale(1);opacity:1}60%{opacity:.8}100%{transform:var(--fly-to);opacity:0}}.fade-up{animation:fadeUp .4s ease-out both}.scale-in{animation:scaleIn .35s ease-out both}.btn-v{transition:transform .1s,box-shadow .2s;position:relative;overflow:hidden}.btn-v:active{transform:scale(.97)}.btn-v:hover{box-shadow:0 4px 24px ${VOLT}30}.btn-v::after{content:'';position:absolute;top:50%;left:50%;width:10px;height:10px;background:rgba(255,255,255,.3);border-radius:50%;transform:scale(0);opacity:0}.btn-v:active::after{animation:rippleOut .5s ease-out}.ch{transition:transform .15s,border-color .2s,box-shadow .2s}.ch:hover{transform:translateY(-2px);border-color:${VOLT}22!important;box-shadow:0 6px 20px ${BG},0 0 30px ${VOLT}08!important}.ch:active{transform:scale(.985) perspective(600px) rotateX(1deg)}.tb{background-size:200% 100%;animation:shimmer 3s linear infinite}.cnt-up{animation:countUp .5s ease-out both}.grd-bdr{background:linear-gradient(135deg,${VOLT}15,${ORANGE}10,${CYAN}10);padding:1px;border-radius:17px}.grd-bdr>div{border-radius:16px}.glass-hdr{background:${BG}cc;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid ${BORDER_CLR}80;box-shadow:0 4px 30px ${BG}80}.card-glow-v{box-shadow:0 2px 8px ${BG},0 0 20px ${VOLT}08}.card-glow-o{box-shadow:0 2px 8px ${BG},0 0 20px ${ORANGE}08}.card-glow-c{box-shadow:0 2px 8px ${BG},0 0 20px ${CYAN}08}.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleFly .7s ease-out forwards}@keyframes bbBounce{0%{transform:translateY(0) scaleY(1) scaleX(1)}40%{transform:translateY(8px) scaleY(.7) scaleX(1.3)}70%{transform:translateY(-6px) scaleY(1.1) scaleX(.95)}100%{transform:translateY(0) scaleY(1) scaleX(1)}}@keyframes badgeReveal{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}@keyframes shineSwipe{0%{left:-60%}100%{left:160%}}.badge-pop{animation:badgeReveal .6s cubic-bezier(.34,1.56,.64,1) both}.badge-shine{position:relative;overflow:hidden}.badge-shine::after{content:'';position:absolute;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);animation:shineSwipe 1.2s ease .3s}@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}@keyframes ballSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes ballBounceIn{0%{transform:scale(0) translateY(40px);opacity:0}50%{transform:scale(1.15) translateY(-10px);opacity:1}70%{transform:scale(.95) translateY(4px)}100%{transform:scale(1) translateY(0)}}@keyframes podiumPulse{0%,100%{box-shadow:0 0 12px var(--pod-c,${VOLT})22}50%{box-shadow:0 0 28px var(--pod-c,${VOLT})33}}.slide-r{animation:slideInRight .3s ease-out both}.slide-l{animation:slideInLeft .3s ease-out both}.ball-spin{animation:ballSpin 8s linear infinite}.ball-bounce{animation:ballBounceIn .7s cubic-bezier(.34,1.56,.64,1) both}.podium-glow{animation:podiumPulse 2s ease-in-out infinite}.grad-text{background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}@media(prefers-reduced-motion:reduce){*,.fade-up,.scale-in,.slide-r,.slide-l,.ball-spin,.ball-bounce,.badge-pop,.cnt-up,.podium-glow,.tb,.btn-v,.ch{animation:none!important;transition:none!important}}`;
 const Styles=()=><style>{_STYLES_CSS}</style>;
@@ -156,7 +156,7 @@ const addScSession=async(s)=>{await P("sl:sc-sessions",[...scSessions,{...s,id:D
 const removeScSession=async(id)=>{await P("sl:sc-sessions",scSessions.filter(s=>s.id!==id),setScSessions);await P("sl:sc-rsvps",scRsvps.filter(r=>r.sessionId!==id),setScRsvps)};
 const toggleScRsvp=async(sid)=>{const ex=scRsvps.find(r=>r.sessionId===sid&&r.email===user.email);if(ex)await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.email===user.email)),setScRsvps);else await P("sl:sc-rsvps",[...scRsvps,{sessionId:sid,email:user.email,name:user.name,ts:Date.now()}],setScRsvps)};
 
-if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.03}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
+if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
 {view==="auth"&&<Auth onLogin={login} onRegister={register} players={players}/>}
@@ -201,7 +201,7 @@ if(!log.ok)setErr(log.err);
 };
 const inp={width:"100%",padding:"15px 16px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none"};
 return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden"}}>
-<CourtBG opacity={.05}/><GlowOrb color={VOLT} top="15%" left="50%" size={400}/><GlowOrb color={ORANGE} top="85%" left="30%" size={250}/>
+<CourtBG opacity={.024}/><GlowOrb color={VOLT} top="15%" left="50%" size={400}/><GlowOrb color={ORANGE} top="85%" left="30%" size={250}/>
 <div className="fade-up" style={{position:"relative",zIndex:1,width:"100%",maxWidth:400,padding:"0 24px"}}>
 <div style={{textAlign:"center",marginBottom:28,position:"relative"}}>
 <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",opacity:.08,pointerEvents:"none"}}><SLLogo size={140}/></div>
@@ -305,7 +305,7 @@ const onTM=e=>{if(!tStart)return;const el=e.currentTarget;if(el.scrollTop>0)retu
 const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else setPullY(0);setTStart(0)};
 
 return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
-<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.06:.025}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
+<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
 ```
 {/* Badge Reveal Overlay */}
@@ -384,7 +384,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
         ══════════════════════════════════════════════ */}
 
     {/* ── ZONE 1: AT HOME — Full-bleed hero card ── */}
-    <button className="ch" onClick={()=>setTab("log-drill")} style={{width:"100%",background:`linear-gradient(145deg,${VOLT}06,${CARD_BG},${VOLT}03)`,border:"none",borderRadius:24,padding:0,marginBottom:14,cursor:"pointer",textAlign:"left",position:"relative",overflow:"hidden"}}>
+    <button className="ch" onClick={()=>setTab("log-drill")} style={{width:"100%",background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:"none",borderRadius:24,padding:0,marginBottom:14,cursor:"pointer",textAlign:"left",position:"relative",overflow:"hidden"}}>
       {/* Animated gradient border */}
       <div style={{position:"absolute",inset:0,borderRadius:24,padding:"1.5px",background:`linear-gradient(135deg,${VOLT}55,${VOLT}11,${VOLT}33,${VOLT}11,${VOLT}55)`,backgroundSize:"300% 300%",animation:"heroGlow 4s ease infinite",WebkitMask:"linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0)",WebkitMaskComposite:"xor",maskComposite:"exclude",pointerEvents:"none"}}/>
       {/* Top glow accent */}
@@ -434,7 +434,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
       const nextEvent=sorted.find(e=>e.date>=today);
       const myEvRsvps=rsvps.filter(r=>r.email===u.email).length;
-      return <button className="ch" onClick={()=>setTab("program")} style={{width:"100%",background:`linear-gradient(145deg,${CYAN}08,${CARD_BG},${CYAN}03)`,border:`1px solid ${CYAN}33`,borderRadius:24,padding:"24px",marginBottom:28,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,minHeight:160,boxShadow:`0 0 24px ${CYAN}14`}}>
+      return <button className="ch" onClick={()=>setTab("program")} style={{width:"100%",background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`1px solid ${CYAN}33`,borderRadius:24,padding:"24px",marginBottom:28,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,minHeight:160,boxShadow:`0 0 24px ${CYAN}14`}}>
         <div style={{width:44,height:44,borderRadius:14,background:`${CYAN}10`,border:`1px solid ${CYAN}22`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
         </div>
@@ -989,7 +989,7 @@ return <div>
 {/* YOUR POSITION — sticky anchor */}
 {(()=>{const myIdx=board.findIndex(p=>p.email===user.email);const myEntry=board[myIdx];
   if(myIdx<0)return null;
-  return <div style={{background:`linear-gradient(135deg,${accentColor}12,${CARD_BG})`,borderRadius:14,padding:"12px 16px",marginBottom:14,border:`2px solid ${accentColor}44`,display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
+  return <div style={{background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:14,padding:"12px 16px",marginBottom:14,border:`2px solid ${accentColor}44`,display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
     <div style={{width:4,height:28,borderRadius:2,background:accentColor,flexShrink:0}}/>
     <div style={{fontFamily:FD,color:accentColor,fontSize:24}}>#{myIdx+1}</div>
     <div style={{flex:1,minWidth:0}}>
@@ -1007,7 +1007,7 @@ return <div>
   const pct=Math.round((p.total/leaderTotal)*100);
   const rowBg=i%2===0?CARD_BG:T.SURFACE;
 
-  if(isLeader) return <div key={p.email} className="podium-glow" style={{"--pod-c":accentColor,display:"flex",alignItems:"center",gap:14,background:`linear-gradient(135deg,${accentColor}10,${CARD_BG})`,borderRadius:16,padding:"20px 18px",marginBottom:12,border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
+  if(isLeader) return <div key={p.email} className="podium-glow" style={{"--pod-c":accentColor,display:"flex",alignItems:"center",gap:14,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:16,padding:"20px 18px",marginBottom:12,border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
     <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
     <div style={{width:32,height:32,borderRadius:9,background:`${accentColor}18`,border:`2px solid ${accentColor}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:14,color:accentColor,flexShrink:0}}>👑</div>
     <Av n={p.name} sz={40} email={p.email}/>
@@ -1021,7 +1021,7 @@ return <div>
     </div>
   </div>;
 
-  return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:isMe?`${accentColor}0c`:rowBg,borderRadius:12,padding:"14px 14px",marginBottom:isTop3?10:8,border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
+  return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",borderRadius:12,padding:"14px 14px",marginBottom:isTop3?10:8,border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
     {isTop3&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
     {isMe&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
     <RB r={i+1} m={medals}/>
@@ -1294,7 +1294,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 </div>
 </div>
 </div>}
-<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.02}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
+<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
 <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
 <div><div style={{fontFamily:FD,color:ORANGE,fontSize:13,letterSpacing:4}}>COACH MODE</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:2,marginTop:2}}>{u.name.toUpperCase()}</div></div>
