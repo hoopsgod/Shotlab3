@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 
-const VOLT="#C8FF00",ORANGE="#FF6B2C",CYAN="#00D4FF",BG="#080808",...
+const VOLT="#C8FF00", ORANGE="#FF6B2C", CYAN="#00D4FF", BG="#080808";
 // ... 1,700 lines of app code including:
 // - Auth (login/register)
 // - Player dashboard with drill tracking
