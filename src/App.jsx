@@ -585,26 +585,29 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
         </div>
 
         {/* Stats row — integrated into the hero */}
-        <div style={{display:"flex",gap:8,marginTop:18}}>
-          <div style={{flex:1,background:BG,borderRadius:14,padding:"14px 12px 12px",border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",minHeight:82}}>
-            <div style={{display:"flex",alignItems:"baseline",lineHeight:1,marginTop:2,fontFamily:FD,color:VOLT,fontSize:34}}><AnimNum v={total} c={VOLT}/></div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:1.6,marginTop:10,fontWeight:600,opacity:.66}}>TOTAL MAKES</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10,marginTop:18}}>
+          <div style={{background:CARD_BG,borderRadius:16,padding:16,border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",minHeight:100}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:8}}><path d="M20 6L9 17l-5-5"/></svg>
+            <div style={{display:"flex",alignItems:"baseline",lineHeight:1,fontFamily:FD,color:VOLT,fontSize:36,fontWeight:700}}><AnimNum v={total} c={VOLT} size={36}/></div>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>TOTAL MAKES</div>
           </div>
-          <div style={{flex:1,background:BG,borderRadius:14,padding:"14px 12px 12px",border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",minHeight:82}}>
-            <div style={{display:"flex",alignItems:"baseline",lineHeight:1,marginTop:2,fontFamily:FD,color:ORANGE,fontSize:34}}>
-              <span>{streak}</span>
-              <span style={{fontSize:18,opacity:.74,marginLeft:1}}>D</span>
+          <div style={{background:CARD_BG,borderRadius:16,padding:16,border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",minHeight:100,boxShadow:streak>0?"0 0 12px rgba(0, 229, 255, 0.08)":"none"}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:8}}><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+            <div style={{position:"relative",display:"inline-flex",alignItems:"baseline",lineHeight:1,fontFamily:FD,color:CYAN,fontSize:36,fontWeight:700,paddingRight:8}}>
+              <AnimNum v={streak} c={CYAN} size={36}/>
+              <span style={{position:"absolute",right:0,bottom:2,fontFamily:FB,fontSize:10,color:MUTED,fontWeight:700}}>D</span>
             </div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:1.6,marginTop:10,fontWeight:600,opacity:.66}}>STREAK</div>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>STREAK</div>
           </div>
-          <div style={{flex:1.3,background:BG,borderRadius:14,padding:"14px 12px 12px",border:`1px solid ${todayS.length===drills.length?VOLT+"33":BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",minHeight:82}}>
-            <div style={{display:"flex",alignItems:"baseline",lineHeight:1,marginTop:2,gap:2,fontFamily:FD,color:todayS.length===drills.length?VOLT:LIGHT}}>
-              <span style={{fontSize:34}}>{todayS.length}</span>
-              <span style={{fontSize:18,color:T.SUB,opacity:.78}}>/{drills.length}</span>
+          <div style={{background:CARD_BG,borderRadius:16,padding:16,border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",minHeight:100}}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:8}}><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="M5 6h.01"/><path d="M5 12h.01"/><path d="M5 18h.01"/></svg>
+            <div style={{display:"flex",alignItems:"baseline",lineHeight:1,gap:2,fontFamily:FD,color:LIGHT,fontWeight:700}}>
+              <AnimNum v={todayS.length} c={LIGHT} size={36}/>
+              <span style={{fontSize:18,color:MUTED}}>/{drills.length}</span>
             </div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:1.6,marginTop:10,fontWeight:600,opacity:.66}}>{todayS.length===drills.length?"ALL DONE ✓":"DRILLS"}</div>
-            <div style={{marginTop:10,height:4,borderRadius:999,background:T.TRACK+"99",overflow:"hidden"}}>
-              <div style={{width:`${drills.length>0?Math.round(todayS.length/drills.length*100):0}%`,height:"100%",background:todayS.length===drills.length?VOLT:VOLT+"cc",borderRadius:999,transition:"width .4s ease"}}/>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>DRILLS</div>
+            <div style={{marginTop:10,width:"100%",height:4,borderRadius:2,background:BORDER_CLR,overflow:"hidden"}}>
+              <div style={{width:`${drills.length>0?Math.round(todayS.length/drills.length*100):0}%`,height:"100%",background:VOLT,borderRadius:2,transition:"width .4s ease"}}/>
             </div>
           </div>
         </div>
@@ -2029,7 +2032,7 @@ function SLLogo({size=60,glow=false,opacity:op=1,style:sx}){return <img src="dat
 function calcStreak(sc){const ds=[...new Set(sc.map(s=>s.date))].sort().reverse();let c=0,d=new Date();for(let i=0;i<400;i++){const s=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;if(ds.includes(s)){c++;d.setDate(d.getDate()-1)}else if(i===0){d.setDate(d.getDate()-1)}else break}return c}
 function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return Math.abs(h)}
 const AVG=[["#C8FF00","#00E5FF"],["#C8FF00","#C8FF00"],["#00E5FF","#C8FF00"],["#C8FF00","#C8FF00"],["#A0A0A0","#00E5FF"],["#C8FF00","#C8FF00"],["#C8FF00","#00E5FF"],["#C8FF00","#C8FF00"]];
-function AnimNum({v,c=VOLT,big}){const[display,setDisplay]=useState(0);useEffect(()=>{if(typeof v!=="number"){setDisplay(v);return}let cancelled=false;const end=v;const dur=600;const t0=Date.now();const step=()=>{if(cancelled)return;const elapsed=Date.now()-t0;const prog=Math.min(elapsed/dur,1);const eased=1-Math.pow(1-prog,3);setDisplay(Math.round(eased*end));if(prog<1)requestAnimationFrame(step)};step();return()=>{cancelled=true}},[v]);return <span className="cnt-up" style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{display}</span>}
+function AnimNum({v,c=VOLT,big,size}){const[display,setDisplay]=useState(0);const[isVisible,setIsVisible]=useState(false);useEffect(()=>{setIsVisible(false);const fadeIn=requestAnimationFrame(()=>setIsVisible(true));if(typeof v!=="number"){setDisplay(v);return()=>cancelAnimationFrame(fadeIn)}let cancelled=false;const end=v;const dur=600;const t0=Date.now();const step=()=>{if(cancelled)return;const elapsed=Date.now()-t0;const prog=Math.min(elapsed/dur,1);const eased=1-Math.pow(1-prog,3);setDisplay(Math.round(eased*end));if(prog<1)requestAnimationFrame(step)};step();return()=>{cancelAnimationFrame(fadeIn);cancelled=true}},[v]);return <span className="cnt-up" style={{fontFamily:FD,color:c,fontSize:size||(big?42:26),letterSpacing:1,lineHeight:1,fontWeight:700,opacity:isVisible?1:0,transition:"opacity 150ms ease"}}>{display}</span>}
 function SC({l,v,c=VOLT,big,small,fire,accent}){const inner=<div style={{flex:big?1.6:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:big?"22px 18px":"14px 12px",position:"relative",overflow:"hidden"}}>{fire&&<div style={{position:"absolute",top:6,right:8,fontSize:14}}>🔥</div>}{typeof v==="number"?<AnimNum v={v} c={c} big={big}/>:<div style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{v}</div>}<div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:big?6:4,fontWeight:600}}>{l}</div></div>;if(accent)return <div className="grd-bdr" style={{flex:big?1.6:1}}>{inner}</div>;return <div style={{flex:big?1.6:1}}><div style={{border:`1px solid ${BORDER_CLR}`,borderRadius:16}}>{inner}</div></div>}
 function SH({t,s}){return <div style={{marginBottom:16,display:"flex",alignItems:"baseline",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:4}}>{t}</div>{s&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{s}</div>}</div>}
 function Av({n,sz=36,style:x,email}){const idx=email?hashCode(email)%AVG.length:hashCode(n||"?")%AVG.length;const[c1,c2]=AVG[idx];return <div style={{width:sz,height:sz,borderRadius:"50%",background:`linear-gradient(135deg,${c1}44,${c2}44)`,border:`2px solid ${c1}33`,color:c1,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:sz*.42,flexShrink:0,letterSpacing:1,boxShadow:`0 0 12px ${c1}11`,...x}}>{(n||"?")[0].toUpperCase()}</div>}
