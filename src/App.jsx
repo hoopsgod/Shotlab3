@@ -24,7 +24,12 @@ const SURFACE = TOKENS.BG_CARD;
 const CARD_BG = TOKENS.BG_CARD;
 const BORDER_CLR = TOKENS.BG_SUBTLE;
 const MUTED=TOKENS.TEXT_MUTED,LIGHT=TOKENS.TEXT_PRIMARY;
-const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
+const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Inter','SF Pro Text','SF Pro Display',system-ui,-apple-system,'Segoe UI',sans-serif";
+const TYPE={
+display:{fontFamily:FD,fontSize:13,fontWeight:700,letterSpacing:"0.10em",textTransform:"uppercase",lineHeight:1,color:TOKENS.PRIMARY},
+title:{fontFamily:FD,fontSize:16,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase",lineHeight:1.2,color:TOKENS.TEXT_PRIMARY},
+body:{fontFamily:FB,fontSize:13,fontWeight:400,letterSpacing:0,textTransform:"none",lineHeight:1.5,color:TOKENS.TEXT_SECONDARY},
+};
 
 const DRILLS_INIT=[
 {id:1,name:"FORM SHOOTING",desc:"10 shots from 5 feet. Elbow, follow-through, arc.",max:10,icon:"ft"},
@@ -99,7 +104,7 @@ return <svg viewBox="0 0 40 40" style={s}><circle cx="20" cy="20" r="16" stroke=
 };
 const CourtBG=({opacity=.02})=><svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none",opacity}} viewBox="0 0 400 900" fill="none" preserveAspectRatio="xMidYMid slice"><rect x="20" y="40" width="360" height="700" stroke={VOLT} strokeWidth="1"/><line x1="20" y1="390" x2="380" y2="390" stroke={VOLT} strokeWidth=".8"/><circle cx="200" cy="390" r="60" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="40" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 40Q200 140 260 40" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="550" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 740Q200 640 260 740" stroke={VOLT} strokeWidth=".8" fill="none"/></svg>;
 const GlowOrb=({color=VOLT,top="20%",left="50%",size=300,animate})=><div style={{position:"absolute",top,left,width:size,height:size,borderRadius:"50%",background:`radial-gradient(circle,${color}0a 0%,transparent 70%)`,transform:"translate(-50%,-50%)",pointerEvents:"none",animation:animate?"orbDrift 12s ease-in-out infinite alternate":"none"}}/>;
-const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap');:root{--color-primary:#C8FF00;--color-primary-dim:#A3CC00;--color-primary-glow:rgba(200, 255, 0, 0.15);--color-secondary:#00E5FF;--color-secondary-dim:rgba(0, 229, 255, 0.12);--color-danger:#FF4545;--color-warning:#FFA500;--color-bg-base:#0A0A0A;--color-bg-card:#141414;--color-bg-elevated:#1E1E1E;--color-bg-subtle:#242424;--color-text-primary:#FFFFFF;--color-text-secondary:#A0A0A0;--color-text-muted:#555555;}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:${BG};overflow-x:hidden}input,textarea{font-family:${FB}}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}input[type=number]{-moz-appearance:textfield}::-webkit-scrollbar{width:0}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@keyframes scaleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes glow{0%,100%{box-shadow:0 0 20px ${VOLT}15}50%{box-shadow:0 0 40px ${VOLT}25}}@keyframes heroGlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}@keyframes rippleOut{0%{transform:scale(0);opacity:.5}100%{transform:scale(4);opacity:0}}@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes orbDrift{0%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(-40%,-60%) scale(1.1)}50%{transform:translate(-60%,-45%) scale(.95)}75%{transform:translate(-45%,-55%) scale(1.05)}100%{transform:translate(-55%,-50%) scale(1)}}@keyframes confettiBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{opacity:0}}@keyframes particleFly{0%{transform:translate(0,0) scale(1);opacity:1}60%{opacity:.8}100%{transform:var(--fly-to);opacity:0}}.fade-up{animation:fadeUp .4s ease-out both}.scale-in{animation:scaleIn .35s ease-out both}.btn-v{transition:transform .1s,box-shadow .2s;position:relative;overflow:hidden}.btn-v:active{transform:scale(.97)}.btn-v:hover{box-shadow:0 4px 24px ${VOLT}30}.btn-v::after{content:'';position:absolute;top:50%;left:50%;width:10px;height:10px;background:rgba(255,255,255,.3);border-radius:50%;transform:scale(0);opacity:0}.btn-v:active::after{animation:rippleOut .5s ease-out}.ch{transition:transform .15s,border-color .2s,box-shadow .2s}.ch:hover{transform:translateY(-2px);border-color:${VOLT}22!important;box-shadow:0 6px 20px ${BG},0 0 30px ${VOLT}08!important}.ch:active{transform:scale(.985) perspective(600px) rotateX(1deg)}.tb{background-size:200% 100%;animation:shimmer 3s linear infinite}.cnt-up{animation:countUp .5s ease-out both}.grd-bdr{background:linear-gradient(135deg,${VOLT}15,${ORANGE}10,${CYAN}10);padding:1px;border-radius:17px}.grd-bdr>div{border-radius:16px}.glass-hdr{background:${BG}cc;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid ${BORDER_CLR}80;box-shadow:0 4px 30px ${BG}80}.card-glow-v{box-shadow:0 2px 8px ${BG},0 0 20px ${VOLT}08}.card-glow-o{box-shadow:0 2px 8px ${BG},0 0 20px ${ORANGE}08}.card-glow-c{box-shadow:0 2px 8px ${BG},0 0 20px ${CYAN}08}.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleFly .7s ease-out forwards}@keyframes bbBounce{0%{transform:translateY(0) scaleY(1) scaleX(1)}40%{transform:translateY(8px) scaleY(.7) scaleX(1.3)}70%{transform:translateY(-6px) scaleY(1.1) scaleX(.95)}100%{transform:translateY(0) scaleY(1) scaleX(1)}}@keyframes badgeReveal{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}@keyframes shineSwipe{0%{left:-60%}100%{left:160%}}.badge-pop{animation:badgeReveal .6s cubic-bezier(.34,1.56,.64,1) both}.badge-shine{position:relative;overflow:hidden}.badge-shine::after{content:'';position:absolute;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);animation:shineSwipe 1.2s ease .3s}@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}@keyframes ballSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes ballBounceIn{0%{transform:scale(0) translateY(40px);opacity:0}50%{transform:scale(1.15) translateY(-10px);opacity:1}70%{transform:scale(.95) translateY(4px)}100%{transform:scale(1) translateY(0)}}@keyframes podiumPulse{0%,100%{box-shadow:0 0 12px var(--pod-c,${VOLT})22}50%{box-shadow:0 0 28px var(--pod-c,${VOLT})33}}.slide-r{animation:slideInRight .3s ease-out both}.slide-l{animation:slideInLeft .3s ease-out both}.ball-spin{animation:ballSpin 8s linear infinite}.ball-bounce{animation:ballBounceIn .7s cubic-bezier(.34,1.56,.64,1) both}.podium-glow{animation:podiumPulse 2s ease-in-out infinite}.grad-text{background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}@media(prefers-reduced-motion:reduce){*,.fade-up,.scale-in,.slide-r,.slide-l,.ball-spin,.ball-bounce,.badge-pop,.cnt-up,.podium-glow,.tb,.btn-v,.ch{animation:none!important;transition:none!important}}`;
+const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Bebas+Neue&display=swap');:root{--color-primary:#C8FF00;--color-primary-dim:#A3CC00;--color-primary-glow:rgba(200, 255, 0, 0.15);--color-secondary:#00E5FF;--color-secondary-dim:rgba(0, 229, 255, 0.12);--color-danger:#FF4545;--color-warning:#FFA500;--color-bg-base:#0A0A0A;--color-bg-card:#141414;--color-bg-elevated:#1E1E1E;--color-bg-subtle:#242424;--color-text-primary:#FFFFFF;--color-text-secondary:#A0A0A0;--color-text-muted:#555555;}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:${BG};overflow-x:hidden}input,textarea{font-family:${FB}}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}input[type=number]{-moz-appearance:textfield}::-webkit-scrollbar{width:0}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@keyframes scaleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes glow{0%,100%{box-shadow:0 0 20px ${VOLT}15}50%{box-shadow:0 0 40px ${VOLT}25}}@keyframes heroGlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}@keyframes rippleOut{0%{transform:scale(0);opacity:.5}100%{transform:scale(4);opacity:0}}@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes orbDrift{0%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(-40%,-60%) scale(1.1)}50%{transform:translate(-60%,-45%) scale(.95)}75%{transform:translate(-45%,-55%) scale(1.05)}100%{transform:translate(-55%,-50%) scale(1)}}@keyframes confettiBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{opacity:0}}@keyframes particleFly{0%{transform:translate(0,0) scale(1);opacity:1}60%{opacity:.8}100%{transform:var(--fly-to);opacity:0}}.fade-up{animation:fadeUp .4s ease-out both}.scale-in{animation:scaleIn .35s ease-out both}.btn-v{transition:transform .1s,box-shadow .2s;position:relative;overflow:hidden}.btn-v:active{transform:scale(.97)}.btn-v:hover{box-shadow:0 4px 24px ${VOLT}30}.btn-v::after{content:'';position:absolute;top:50%;left:50%;width:10px;height:10px;background:rgba(255,255,255,.3);border-radius:50%;transform:scale(0);opacity:0}.btn-v:active::after{animation:rippleOut .5s ease-out}.ch{transition:transform .15s,border-color .2s,box-shadow .2s}.ch:hover{transform:translateY(-2px);border-color:${VOLT}22!important;box-shadow:0 6px 20px ${BG},0 0 30px ${VOLT}08!important}.ch:active{transform:scale(.985) perspective(600px) rotateX(1deg)}.tb{background-size:200% 100%;animation:shimmer 3s linear infinite}.cnt-up{animation:countUp .5s ease-out both}.grd-bdr{background:linear-gradient(135deg,${VOLT}15,${ORANGE}10,${CYAN}10);padding:1px;border-radius:17px}.grd-bdr>div{border-radius:16px}.glass-hdr{background:${BG}cc;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid ${BORDER_CLR}80;box-shadow:0 4px 30px ${BG}80}.card-glow-v{box-shadow:0 2px 8px ${BG},0 0 20px ${VOLT}08}.card-glow-o{box-shadow:0 2px 8px ${BG},0 0 20px ${ORANGE}08}.card-glow-c{box-shadow:0 2px 8px ${BG},0 0 20px ${CYAN}08}.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleFly .7s ease-out forwards}@keyframes bbBounce{0%{transform:translateY(0) scaleY(1) scaleX(1)}40%{transform:translateY(8px) scaleY(.7) scaleX(1.3)}70%{transform:translateY(-6px) scaleY(1.1) scaleX(.95)}100%{transform:translateY(0) scaleY(1) scaleX(1)}}@keyframes badgeReveal{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}@keyframes shineSwipe{0%{left:-60%}100%{left:160%}}.badge-pop{animation:badgeReveal .6s cubic-bezier(.34,1.56,.64,1) both}.badge-shine{position:relative;overflow:hidden}.badge-shine::after{content:'';position:absolute;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);animation:shineSwipe 1.2s ease .3s}@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}@keyframes ballSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes ballBounceIn{0%{transform:scale(0) translateY(40px);opacity:0}50%{transform:scale(1.15) translateY(-10px);opacity:1}70%{transform:scale(.95) translateY(4px)}100%{transform:scale(1) translateY(0)}}@keyframes podiumPulse{0%,100%{box-shadow:0 0 12px var(--pod-c,${VOLT})22}50%{box-shadow:0 0 28px var(--pod-c,${VOLT})33}}.slide-r{animation:slideInRight .3s ease-out both}.slide-l{animation:slideInLeft .3s ease-out both}.ball-spin{animation:ballSpin 8s linear infinite}.ball-bounce{animation:ballBounceIn .7s cubic-bezier(.34,1.56,.64,1) both}.podium-glow{animation:podiumPulse 2s ease-in-out infinite}.grad-text{background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}@media(prefers-reduced-motion:reduce){*,.fade-up,.scale-in,.slide-r,.slide-l,.ball-spin,.ball-bounce,.badge-pop,.cnt-up,.podium-glow,.tb,.btn-v,.ch{animation:none!important;transition:none!important}}`;
 const Styles=()=><style>{_STYLES_CSS}</style>;
 
 // ═══════════════════════════════════════
@@ -109,7 +114,7 @@ const Styles=()=><style>{_STYLES_CSS}</style>;
 function ErrorFallback(){return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16,padding:40}}>
 <SLLogo size={64} glow/>
 
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:3}}>SOMETHING WENT WRONG</div>
+  <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:3}}>SOMETHING WENT WRONG</div>
   <p style={{fontFamily:FB,color:MUTED,fontSize:13,textAlign:"center",lineHeight:1.6,maxWidth:300}}>The app hit an unexpected error. Try refreshing the page.</p>
   <button onClick={()=>window.location.reload()} style={{padding:"12px 32px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:10,cursor:"pointer"}}>RELOAD</button>
 </div>}
@@ -328,7 +333,7 @@ const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
 const scopedScLogs=scLogs.filter(l=>l.teamId===user?.teamId);
 const myTeam=teams.find(t=>t.id===user?.teamId)||null;
 
-if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
+if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:13,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
 {view==="auth"&&<Auth onLogin={login} onRegister={register} onDemo={demoSignIn}/>}{view==="create-team"&&<CreateTeam onCreate={createTeam} u={user}/>} 
@@ -374,7 +379,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",opacity:.08,pointerEvents:"none"}}><SLLogo size={140}/></div>
 <div className="ball-bounce" style={{display:"inline-block",position:"relative",zIndex:1}}><div className="ball-spin"><DrillIcon type="ft" size={60}/></div></div>
 </div>
-<h1 style={{fontFamily:FD,fontSize:72,color:LIGHT,textAlign:"center",margin:0,lineHeight:.85,letterSpacing:4}}>SHOT<span style={{background:`linear-gradient(135deg,${VOLT},${CYAN})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>LAB</span></h1>
+<h1 style={{fontFamily:FD,fontSize:132,color:LIGHT,textAlign:"center",margin:0,lineHeight:.85,letterSpacing:4}}>SHOT<span style={{background:`linear-gradient(135deg,${VOLT},${CYAN})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>LAB</span></h1>
 <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,letterSpacing:5,margin:"8px 0 0",fontWeight:500}}>OFFSEASON DEVELOPMENT PROGRAM</p>
 <div style={{display:"flex",alignItems:"center",gap:12,margin:"32px auto",maxWidth:200}}><div style={{flex:1,height:1,background:`linear-gradient(to right,transparent,${VOLT}44)`}}/><div style={{width:6,height:6,borderRadius:"50%",background:VOLT,opacity:.6}}/><div style={{flex:1,height:1,background:`linear-gradient(to left,transparent,${VOLT}44)`}}/></div>
 <div style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:24,padding:"36px 28px",border:`1px solid ${BORDER_CLR}`}}>
@@ -384,42 +389,42 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 </div>
 
     {mode==="register"&&<>
-      <h2 style={{fontFamily:FD,color:LIGHT,fontSize:24,textAlign:"center",margin:"0 0 4px",letterSpacing:2}}>CREATE ACCOUNT</h2>
+      <h2 style={{fontFamily:FD,color:LIGHT,fontSize:16,textAlign:"center",margin:"0 0 4px",letterSpacing:2}}>CREATE ACCOUNT</h2>
       <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 22px"}}>Join your team's offseason program</p>
       {/* Role selector */}
       <div style={{display:"flex",background:BG,borderRadius:10,padding:3,marginBottom:20,border:`1px solid ${BORDER_CLR}`}}>
-        {["player","coach"].map(r=><button key={r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#555555"}}>{r}</button>)}
+        {["player","coach"].map(r=><button key={r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#555555"}}>{r}</button>)}
       </div>
-      <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>YOUR NAME</label>
+      <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>YOUR NAME</label>
       <input type="text" value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="First Last" style={{...inp,marginBottom:14}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
     </>}
 
     {mode==="login"&&<>
-      <h2 style={{fontFamily:FD,color:LIGHT,fontSize:24,textAlign:"center",margin:"0 0 4px",letterSpacing:2}}>WELCOME BACK</h2>
+      <h2 style={{fontFamily:FD,color:LIGHT,fontSize:16,textAlign:"center",margin:"0 0 4px",letterSpacing:2}}>WELCOME BACK</h2>
       <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 22px"}}>Sign in to access your dashboard</p>
     </>}
 
-    <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>EMAIL</label>
+    <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>EMAIL</label>
     <input type="email" autoComplete="email" value={email} onChange={e=>{setEmail(e.target.value);setErr("")}} onKeyDown={e=>e.key==="Enter"&&(mode==="login"?doLogin():doRegister())} placeholder="you@example.com" style={{...inp,marginBottom:14}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
 
-    <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>PASSWORD</label>
+    <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>PASSWORD</label>
     <input type="password" autoComplete={mode==="login"?"current-password":"new-password"} value={password} onChange={e=>{setPassword(e.target.value);setErr("")}} onKeyDown={e=>e.key==="Enter"&&(mode==="login"?doLogin():doRegister())} placeholder={mode==="register"?"Min 4 characters":"••••••••"} style={{...inp,marginBottom:err?8:20}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
 
-    {err&&<p style={{fontFamily:FB,color:"#FF4545",fontSize:12,margin:"0 0 14px"}}>{err}</p>}
+    {err&&<p style={{fontFamily:FB,color:"#FF4545",fontSize:13,margin:"0 0 14px"}}>{err}</p>}
 
-    <button className="btn-v" onClick={mode==="login"?doLogin:doRegister} style={{width:"100%",padding:"16px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:20,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+    <button className="btn-v" onClick={mode==="login"?doLogin:doRegister} style={{width:"100%",padding:"16px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
       {mode==="login"?"SIGN IN":"CREATE ACCOUNT"} &#8594;
     </button>
     {mode==="login"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
-      <button onClick={()=>doDemo("player")} style={{padding:"12px",background:"transparent",color:LIGHT,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:12,cursor:"pointer",textTransform:"uppercase"}}>Demo Player</button>
-      <button onClick={()=>doDemo("coach")} style={{padding:"12px",background:"transparent",color:LIGHT,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:12,cursor:"pointer",textTransform:"uppercase"}}>Demo Coach</button>
+      <button onClick={()=>doDemo("player")} style={{padding:"12px",background:"transparent",color:LIGHT,fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:12,cursor:"pointer",textTransform:"uppercase"}}>Demo Player</button>
+      <button onClick={()=>doDemo("coach")} style={{padding:"12px",background:"transparent",color:LIGHT,fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:12,cursor:"pointer",textTransform:"uppercase"}}>Demo Coach</button>
     </div>}
 
-    <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:12,marginTop:16,cursor:"pointer"}} onClick={()=>{setMode(mode==="login"?"register":"login");setErr("")}}>
+    <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,marginTop:16,cursor:"pointer"}} onClick={()=>{setMode(mode==="login"?"register":"login");setErr("")}}>
       {mode==="login"?"Don't have an account? ":"Already have an account? "}
       <span style={{color:VOLT,fontWeight:700}}>{mode==="login"?"Register":"Sign In"}</span>
     </p>
-    {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:12,lineHeight:1.5}}>By creating an account, you agree to our data practices. All data is stored locally on your device. You can delete your account and all data at any time from your Profile settings.</p>}
+    {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:13,marginTop:12,lineHeight:1.5}}>By creating an account, you agree to our data practices. All data is stored locally on your device. You can delete your account and all data at any time from your Profile settings.</p>}
   </div>
 </div>
 
@@ -429,13 +434,13 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 function CreateTeam({u,onCreate}){
 const[name,setName]=useState("");const[school,setSchool]=useState("");const[level,setLevel]=useState("");const[err,setErr]=useState("");
 const submit=async()=>{if(!name.trim())return setErr("Enter a team name");const r=await onCreate(name.trim(),{school,level});if(!r.ok)setErr(r.err||"Could not create team")}
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Welcome {u?.name}. Create your team to continue.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:"#000000",border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>CREATE TEAM</button></div></div>;
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:13,margin:"0 0 16px"}}>Welcome {u?.name}. Create your team to continue.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:13,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:"#000000",border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>CREATE TEAM</button></div></div>;
 }
 
 function JoinTeam({u,onJoin}){
 const[code,setCode]=useState("");const[err,setErr]=useState("");
 const submit=async()=>{const r=await onJoin(code);if(!r.ok)setErr(r.err||"Could not join team")};
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:"#000000",border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>JOIN TEAM</button></div></div>;
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:13,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:13,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:"#000000",border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>JOIN TEAM</button></div></div>;
 }
 
 // ═══════════════════════════════════════
@@ -493,10 +498,10 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
     <div style={{width:120,height:120,borderRadius:"50%",background:`linear-gradient(145deg,${badgeReveal.color}22,${badgeReveal.color}08)`,border:`3px solid ${badgeReveal.color}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",boxShadow:`0 0 60px ${badgeReveal.color}33`}}>
       <span style={{fontFamily:FD,fontSize:36,color:badgeReveal.color}}>{badgeReveal.icon}</span>
     </div>
-    <div style={{fontFamily:FD,color:badgeReveal.color,fontSize:32,letterSpacing:6}}>UNLOCKED</div>
-    <div style={{fontFamily:FD,color:"#FFFFFF",fontSize:22,letterSpacing:3,marginTop:8}}>{badgeReveal.name}</div>
+    <div style={{fontFamily:FD,color:badgeReveal.color,fontSize:16,letterSpacing:6}}>UNLOCKED</div>
+    <div style={{fontFamily:FD,color:"#FFFFFF",fontSize:16,letterSpacing:3,marginTop:8}}>{badgeReveal.name}</div>
     <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,marginTop:8}}>{badgeReveal.days}-day streak achieved</div>
-    <div style={{fontFamily:FB,color:T.MUT,fontSize:10,marginTop:24}}>Tap to dismiss</div>
+    <div style={{fontFamily:FB,color:T.MUT,fontSize:13,marginTop:24}}>Tap to dismiss</div>
   </div>
 </div>}
 
@@ -505,9 +510,9 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
   <div className="badge-pop" style={{textAlign:"center",padding:32}}>
     <div style={{fontFamily:FD,color:ORANGE,fontSize:48,letterSpacing:4,lineHeight:1}}>NEW PB!</div>
     <div style={{fontFamily:FD,color:LIGHT,fontSize:64,lineHeight:1,margin:"16px 0 8px"}}>{pbReveal.score}</div>
-    <div style={{fontFamily:FB,color:MUTED,fontSize:14}}>Previous best: {pbReveal.prev}</div>
+    <div style={{fontFamily:FB,color:MUTED,fontSize:13}}>Previous best: {pbReveal.prev}</div>
     <div style={{fontFamily:FB,color:ORANGE,fontSize:13,fontWeight:700,marginTop:8,letterSpacing:2}}>{pbReveal.drill}</div>
-    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:20}}>Tap to dismiss</div>
+    <div style={{fontFamily:FB,color:T.SUB,fontSize:13,marginTop:20}}>Tap to dismiss</div>
   </div>
 </div>}
 
@@ -529,12 +534,12 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
         </svg>
         <div style={{position:"absolute",top:8,left:8}}><Av n={u.name} sz={40} email={u.email}/></div>
       </div>
-      <div><div style={{fontFamily:FB,color:T.MUT,fontSize:10,letterSpacing:3,fontWeight:600}}>{(()=>{
+      <div><div style={{...TYPE.body,color:T.MUT}}>{(()=>{
         const allDone=todayS.length>=drills.length;const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
         if(allDone&&shotsToday>0)return <span style={{color:VOLT}}>ALL DRILLS COMPLETE · {streak}D STREAK 🔥</span>;
         if(todayS.length>0)return <span>{todayS.length}/{drills.length} DRILLS · {shotsToday>0?shotsToday+" SHOTS · ":""}{streak}D STREAK</span>;
         return "TODAY'S MISSION AWAITS";
-      })()}</div><div style={{fontFamily:FD,color:T.LT,fontSize:26,letterSpacing:2,marginTop:1}}>{u.name.toUpperCase()}</div></div>
+      })()}</div><div style={{...TYPE.title,color:T.LT,marginTop:2}}>{u.name}</div></div>
     </div>
     <div style={{display:"flex",gap:6,alignItems:"center"}}>
       <SLLogo size={34} style={{opacity:.5}}/>
@@ -542,7 +547,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
         {theme==="dark"?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         :<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>}
       </button>
-      <button aria-label="Log out" onClick={logout} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>&#10005;</button>
+      <button aria-label="Log out" onClick={logout} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>&#10005;</button>
     </div>
   </div>
 
@@ -552,7 +557,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
   {/* Pull-to-refresh basketball */}
   {pullY>5&&<div style={{position:"absolute",top:-44,left:"50%",transform:"translateX(-50%)",textAlign:"center",opacity:Math.min(pullY/30,1)}}>
     <svg width="24" height="24" viewBox="0 0 40 40" fill="none" style={{animation:pullY>40?"bbBounce .5s ease infinite":"none"}}><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="2.5"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="1.5"/><path d="M20 3v34" stroke={ORANGE} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/></svg>
-    <div style={{fontFamily:FB,color:ORANGE,fontSize:8,letterSpacing:2,marginTop:2}}>{pullY>40?"REFRESHING":"PULL"}</div>
+    <div style={{fontFamily:FB,color:ORANGE,fontSize:13,letterSpacing:2,marginTop:2}}>{pullY>40?"REFRESHING":"PULL"}</div>
   </div>}
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
@@ -575,8 +580,8 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>
             </div>
             <div>
-              <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:4}}>AT HOME</div>
-              <div style={{fontFamily:FB,color:MUTED,fontSize:11,fontWeight:500,marginTop:1}}>Daily drills & shot tracking</div>
+              <div style={{fontFamily:FD,color:VOLT,fontSize:16,letterSpacing:4}}>AT HOME</div>
+              <div style={{fontFamily:FB,color:MUTED,fontSize:13,fontWeight:500,marginTop:1}}>Daily drills & shot tracking</div>
             </div>
           </div>
           <div style={{width:36,height:36,borderRadius:10,background:VOLT+"10",display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -589,23 +594,23 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
           <div style={{background:CARD_BG,borderRadius:16,padding:16,border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",minHeight:100}}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:8}}><path d="M20 6L9 17l-5-5"/></svg>
             <div style={{display:"flex",alignItems:"baseline",lineHeight:1,fontFamily:FD,color:VOLT,fontSize:36,fontWeight:700}}><AnimNum v={total} c={VOLT} size={36}/></div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>TOTAL MAKES</div>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>TOTAL MAKES</div>
           </div>
           <div style={{background:CARD_BG,borderRadius:16,padding:16,border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",minHeight:100,boxShadow:streak>0?"0 0 12px rgba(0, 229, 255, 0.08)":"none"}}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:8}}><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
             <div style={{position:"relative",display:"inline-flex",alignItems:"baseline",lineHeight:1,fontFamily:FD,color:CYAN,fontSize:36,fontWeight:700,paddingRight:8}}>
               <AnimNum v={streak} c={CYAN} size={36}/>
-              <span style={{position:"absolute",right:0,bottom:2,fontFamily:FB,fontSize:10,color:MUTED,fontWeight:700}}>D</span>
+              <span style={{position:"absolute",right:0,bottom:2,fontFamily:FB,fontSize:13,color:MUTED,fontWeight:700}}>D</span>
             </div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>STREAK</div>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>STREAK</div>
           </div>
           <div style={{background:CARD_BG,borderRadius:16,padding:16,border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",minHeight:100}}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:8}}><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="M5 6h.01"/><path d="M5 12h.01"/><path d="M5 18h.01"/></svg>
             <div style={{display:"flex",alignItems:"baseline",lineHeight:1,gap:2,fontFamily:FD,color:LIGHT,fontWeight:700}}>
               <AnimNum v={todayS.length} c={LIGHT} size={36}/>
-              <span style={{fontSize:18,color:MUTED}}>/{drills.length}</span>
+              <span style={{fontSize:16,color:MUTED}}>/{drills.length}</span>
             </div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>DRILLS</div>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>DRILLS</div>
             <div style={{marginTop:10,width:"100%",height:4,borderRadius:2,background:BORDER_CLR,overflow:"hidden"}}>
               <div style={{width:`${drills.length>0?Math.round(todayS.length/drills.length*100):0}%`,height:"100%",background:VOLT,borderRadius:2,transition:"width .4s ease"}}/>
             </div>
@@ -624,17 +629,17 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
         </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FD,color:CYAN,fontSize:22,letterSpacing:3}}>PROGRAM</div>
+          <div style={{fontFamily:FD,color:CYAN,fontSize:16,letterSpacing:3}}>PROGRAM</div>
           {nextEvent?<div style={{display:"flex",flexDirection:"column",alignItems:"flex-start",marginTop:8,gap:4,maxWidth:"calc(100% - 110px)",minWidth:0}}>
-            <div style={{fontFamily:FB,color:T.MUT,fontSize:11,fontWeight:700,letterSpacing:".1em",lineHeight:1,opacity:.72,textTransform:"uppercase"}}>Next</div>
+            <div style={{fontFamily:FB,color:T.MUT,fontSize:13,fontWeight:700,letterSpacing:".1em",lineHeight:1,opacity:.72,textTransform:"uppercase"}}>Next</div>
             <div style={{fontFamily:FB,color:CYAN,fontSize:"clamp(14px,1.6vw,18px)",fontWeight:800,lineHeight:1.15,letterSpacing:".02em",maxWidth:"100%",overflowWrap:"anywhere"}}>{nextEvent.title}</div>
-            <div style={{fontFamily:FB,color:"#8ca4af",fontSize:12,fontWeight:600,lineHeight:1.1,opacity:.82}}>{nextEvent.date.slice(5)}</div>
+            <div style={{fontFamily:FB,color:"#8ca4af",fontSize:13,fontWeight:600,lineHeight:1.1,opacity:.82}}>{nextEvent.date.slice(5)}</div>
           </div>
-          :<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>Events & verified attendance</div>}
+          :<div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:2}}>Events & verified attendance</div>}
         </div>
         <div style={{textAlign:"center",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:CYAN,fontSize:22}}>{myEvRsvps}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:1,fontWeight:600}}>EVENTS</div>
+          <div style={{fontFamily:FD,color:CYAN,fontSize:16}}>{myEvRsvps}</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:1,fontWeight:600}}>EVENTS</div>
         </div>
         <svg width="12" height="12" viewBox="0 0 16 16" style={{flexShrink:0}}><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
       </button>})()}
@@ -649,46 +654,46 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
     
     <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>
-      <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:3}}>AT HOME</div>
+      <div style={{fontFamily:FD,color:VOLT,fontSize:16,letterSpacing:3}}>AT HOME</div>
     </div>
-    <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:24,fontWeight:500}}>Log your daily drills and track shots — all on the honor system.</div>
+    <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginBottom:24,fontWeight:500}}>Log your daily drills and track shots — all on the honor system.</div>
 
     {/* ── SHOT TRACKER ── */}
-    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
+    <div style={{fontFamily:FB,color:VOLT,fontSize:13,letterSpacing:3,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
       SHOT TRACKER
     </div>
     <div style={{background:CARD_BG,borderRadius:16,padding:"16px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
       <div style={{display:"flex",gap:10,marginBottom:12}}>
         <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>MAKES</label>
-          <input type="number" min="0" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0" style={{width:"100%",padding:"12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:VOLT,fontFamily:FD,fontSize:24,textAlign:"center",outline:"none"}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
+          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>MAKES</label>
+          <input type="number" min="0" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0" style={{width:"100%",padding:"12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:VOLT,fontFamily:FD,fontSize:16,textAlign:"center",outline:"none"}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
         </div>
         <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>DATE</label>
+          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>DATE</label>
           <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
         </div>
       </div>
-      <button className="btn-v" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{width:"100%",padding:"12px",background:shotSaved?VOLT:VOLT,color:BG,fontFamily:FD,fontSize:14,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",opacity:shotSaved?.7:1}}>
+      <button className="btn-v" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{width:"100%",padding:"12px",background:shotSaved?VOLT:VOLT,color:BG,fontFamily:FD,fontSize:13,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",opacity:shotSaved?.7:1}}>
         {shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
-      {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
-      <button onClick={()=>setShowShotStats(true)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:2,cursor:"pointer",marginTop:10,padding:0,width:"100%",textAlign:"center",opacity:.7}}>VIEW SHOT STATS →</button>
+      {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:13,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
+      <button onClick={()=>setShowShotStats(true)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,cursor:"pointer",marginTop:10,padding:0,width:"100%",textAlign:"center",opacity:.7}}>VIEW SHOT STATS →</button>
     </div>
 
     <CourtDivider color={VOLT} my={16}/>
 
     {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
-    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
+    <div style={{fontFamily:FB,color:VOLT,fontSize:13,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS <span style={{color:TOKENS.TEXT_MUTED}}>·</span> {todayS.length}/{drills.length} DONE</div>
     {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done?Math.round(done.score/d.max*100):0;
       return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
         <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+          <div style={{color:T.MUT,fontSize:13,marginTop:2,fontWeight:500}}>{d.desc}</div>
         </div>
         {done?<div style={{textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
+          <div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{done.score}<span style={{color:MUTED,fontSize:13}}>/{d.max}</span></div>
           <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>
         </div>
         :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
@@ -717,9 +722,9 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       </div>
       :<div className="fade-up" style={{marginTop:16,background:CARD_BG,borderRadius:16,padding:"20px 18px",border:`1px solid ${ORANGE}33`,textAlign:"left"}}>
         <div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3,marginBottom:4}}>SEND A CHALLENGE</div>
-        <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:14}}>Dare a teammate to beat your {shareData.score}/{shareData.max} on {shareData.drill}</div>
-        {players.filter(p=>p.email!==u.email).length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:12,textAlign:"center",padding:16}}>No other players yet. They need to log in first.</div>
-        :<><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PICK YOUR OPPONENT</div>
+        <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginBottom:14}}>Dare a teammate to beat your {shareData.score}/{shareData.max} on {shareData.drill}</div>
+        {players.filter(p=>p.email!==u.email).length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:13,textAlign:"center",padding:16}}>No other players yet. They need to log in first.</div>
+        :<><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,letterSpacing:2,fontWeight:700,marginBottom:8}}>PICK YOUR OPPONENT</div>
           <div style={{display:"flex",flexDirection:"column",gap:4,marginBottom:14}}>{players.filter(p=>p.email!==u.email).map(p=>
             <button key={p.email} onClick={()=>setChallTarget(p.email)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:challTarget===p.email?ORANGE+"15":BG,border:`1px solid ${challTarget===p.email?ORANGE:BORDER_CLR}`,borderRadius:10,cursor:"pointer",textAlign:"left"}}>
               <Av n={p.name} sz={28} email={p.email}/><span style={{fontFamily:FB,color:challTarget===p.email?ORANGE:LIGHT,fontSize:13,fontWeight:600,flex:1}}>{p.name}</span>
@@ -727,53 +732,53 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
             </button>)}
           </div>
           <div style={{display:"flex",gap:8}}>
-            <button onClick={()=>{setShowChallForm(false);setChallTarget("")}} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-            <button className="btn-v" onClick={sendChallenge} disabled={!challTarget} style={{flex:1,padding:"12px",background:challTarget?VOLT:MUTED,color:BG,fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:challTarget?"pointer":"default",opacity:challTarget?1:.5}}>SEND IT</button>
+            <button onClick={()=>{setShowChallForm(false);setChallTarget("")}} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
+            <button className="btn-v" onClick={sendChallenge} disabled={!challTarget} style={{flex:1,padding:"12px",background:challTarget?VOLT:MUTED,color:BG,fontFamily:FD,fontSize:13,letterSpacing:2,border:"none",borderRadius:10,cursor:challTarget?"pointer":"default",opacity:challTarget?1:.5}}>SEND IT</button>
           </div>
         </>}
       </div>}
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:12}}>Screenshot your card and share on social media</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:13,marginTop:12}}>Screenshot your card and share on social media</div>
     </div>
     :<><button onClick={()=>{setActive(null);if(tab==="home")setTab("log-drill")}} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:32,padding:"8px 16px"}}>&#8592; BACK</button>
       <div style={{width:100,height:100,borderRadius:22,background:`linear-gradient(135deg,${SURFACE},${CARD_BG})`,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px"}}><DrillIcon type={active.icon} size={48}/></div>
       <h2 style={{fontFamily:FD,color:LIGHT,fontSize:36,letterSpacing:4,margin:"0 0 8px"}}>{active.name}</h2>
-      <p style={{fontFamily:FB,color:MUTED,fontSize:14,margin:"0 auto 6px",maxWidth:280,lineHeight:1.6}}>{active.desc}</p>
+      <p style={{fontFamily:FB,color:MUTED,fontSize:13,margin:"0 auto 6px",maxWidth:280,lineHeight:1.6}}>{active.desc}</p>
       {/* Personal Best + Average */}
       {(()=>{const ds=homeScores.filter(s=>s.drillId===active.id);const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;
         return ds.length>0?<div style={{display:"flex",gap:8,justifyContent:"center",margin:"12px 0 6px"}}>
           <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${ORANGE}33`,textAlign:"center"}}>
-            <div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{pb}</div>
-            <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>YOUR PB</div>
+            <div style={{fontFamily:FD,color:ORANGE,fontSize:16}}>{pb}</div>
+            <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:2,fontWeight:600}}>YOUR PB</div>
           </div>
           <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-            <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{avg}</div>
-            <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>AVG</div>
+            <div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{avg}</div>
+            <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:2,fontWeight:600}}>AVG</div>
           </div>
           <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-            <div style={{fontFamily:FD,color:LIGHT,fontSize:18}}>{ds.length}</div>
-            <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>LOGGED</div>
+            <div style={{fontFamily:FD,color:LIGHT,fontSize:16}}>{ds.length}</div>
+            <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:2,fontWeight:600}}>LOGGED</div>
           </div>
         </div>:null})()}
       {active.instructions&&<div style={{margin:"12px auto 0",maxWidth:300,background:CARD_BG,borderRadius:12,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"left"}}>
-        <div style={{fontFamily:FD,color:CYAN,fontSize:10,letterSpacing:3,marginBottom:6,display:"flex",alignItems:"center",gap:6}}>
+        <div style={{fontFamily:FD,color:CYAN,fontSize:13,letterSpacing:3,marginBottom:6,display:"flex",alignItems:"center",gap:6}}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
           COACH NOTES
         </div>
-        <p style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap"}}>{active.instructions}</p>
+        <p style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap"}}>{active.instructions}</p>
       </div>}
       {/* Motivational line */}
-      <div style={{fontFamily:FB,color:"#555555",fontSize:12,fontStyle:"italic",letterSpacing:1,margin:"20px 0 8px",fontWeight:500}}>{["Lock in.","No shortcuts.","This rep counts.","Earn it.","Be honest with yourself.","Own the work.","Details matter.","Trust the process.","Stay disciplined.","Championship habits."][Math.floor((active.id*7+new Date().getDate())%10)]}</div>
+      <div style={{fontFamily:FB,color:"#555555",fontSize:13,fontStyle:"italic",letterSpacing:1,margin:"20px 0 8px",fontWeight:500}}>{["Lock in.","No shortcuts.","This rep counts.","Earn it.","Be honest with yourself.","Own the work.","Details matter.","Trust the process.","Stay disciplined.","Championship habits."][Math.floor((active.id*7+new Date().getDate())%10)]}</div>
       <div style={{fontFamily:FD,color:T.SUB,fontSize:13,letterSpacing:3,marginBottom:28}}>MAX: {active.max}</div>
       {/* Score input with reactive color */}
       {(()=>{const v=parseInt(input)||0;const pct=active.max>0?v/active.max:0;const glowColor=pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#FF4545":VOLT;const borderColor=v>0?glowColor:VOLT;
         return <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8,marginBottom:40}}>
         <input autoFocus type="number" min="0" max={active.max} value={input} onChange={e=>{setInput(e.target.value);playTick()}} onKeyDown={e=>e.key==="Enter"&&handleLog()} placeholder="0" style={{width:120,padding:"24px 8px",background:BG,border:`2px solid ${borderColor}`,borderRadius:20,color:borderColor,fontFamily:FD,fontSize:64,textAlign:"center",outline:"none",letterSpacing:2,boxShadow:v>0?`0 0 30px ${glowColor}20,0 0 60px ${glowColor}08`:`0 0 20px ${VOLT}15`,transition:"border-color .3s,color .3s,box-shadow .3s"}}/>
-        <div style={{fontFamily:FD,color:T.SUB,fontSize:32}}>/{active.max}</div>
+        <div style={{fontFamily:FD,color:T.SUB,fontSize:16}}>/{active.max}</div>
       </div>})()}
       {/* Score quality indicator */}
       {(()=>{const v=parseInt(input)||0;if(v<=0)return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?VOLT:pct>=75?VOLT:pct>=50?ORANGE:"#FF4545";
-        return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
-      <button className="btn-v" onClick={handleLog} style={{width:"100%",maxWidth:300,padding:"18px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:22,letterSpacing:5,border:"none",borderRadius:14,cursor:"pointer",margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>LOG SCORE &#8594;</button>
+        return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:13,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
+      <button className="btn-v" onClick={handleLog} style={{width:"100%",maxWidth:300,padding:"18px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:5,border:"none",borderRadius:14,cursor:"pointer",margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>LOG SCORE &#8594;</button>
     </>}
   </div>}
 
@@ -817,19 +822,19 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 <div style={{position:"relative",zIndex:1}}>
 <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,marginBottom:4}}>
 <SLLogo size={22}/>
-<span style={{fontFamily:FD,color:VOLT,fontSize:12,letterSpacing:4}}>SHOT LAB</span>
+<span style={{fontFamily:FD,color:VOLT,fontSize:13,letterSpacing:4}}>SHOT LAB</span>
 </div>
-<div style={{fontFamily:FB,color:T.MUT,fontSize:9,letterSpacing:2,marginBottom:20}}>WORKOUT COMPLETE</div>
+<div style={{fontFamily:FB,color:T.MUT,fontSize:13,letterSpacing:2,marginBottom:20}}>WORKOUT COMPLETE</div>
 {/* Player name */}
 <div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:3,lineHeight:1}}>{data.name.toUpperCase()}</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:2,marginTop:4,marginBottom:20}}>{data.date}</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:2,marginTop:4,marginBottom:20}}>{data.date}</div>
 {/* Drill + Score */}
 <div style={{display:"inline-flex",alignItems:"center",gap:8,background:BG,borderRadius:12,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:16}}>
 <DrillIcon type={data.icon} size={20}/>
-<span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{data.drill}</span>
+<span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2}}>{data.drill}</span>
 </div>
 {/* Big score */}
-<div style={{fontFamily:FD,fontSize:72,color:VOLT,lineHeight:.9,letterSpacing:2}}>{data.score}<span style={{color:MUTED,fontSize:32}}>/{data.max}</span></div>
+<div style={{fontFamily:FD,fontSize:132,color:VOLT,lineHeight:.9,letterSpacing:2}}>{data.score}<span style={{color:MUTED,fontSize:16}}>/{data.max}</span></div>
 {/* Personal Best badge */}
 {data.isPB&&<div style={{display:"inline-flex",alignItems:"center",gap:6,background:ORANGE+"15",borderRadius:10,padding:"6px 16px",border:`1px solid ${ORANGE}33`,marginTop:12}}>
 <span style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>★ NEW PERSONAL BEST</span>
@@ -840,14 +845,14 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 <path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke="#242424" strokeWidth="6" strokeLinecap="round"/>
 <path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke={pcol} strokeWidth="6" strokeLinecap="round" strokeDasharray={`${pct*1.1} 110`}/>
 </svg>
-<div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",fontFamily:FD,color:pcol,fontSize:18}}>{pct}%</div>
+<div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",fontFamily:FD,color:pcol,fontSize:16}}>{pct}%</div>
 </div>
 {/* Streak */}
 {data.streak>0&&<div style={{display:"inline-flex",alignItems:"center",gap:4,background:ORANGE+"12",borderRadius:8,padding:"4px 12px",border:`1px solid ${ORANGE}22`}}>
-<span style={{fontSize:14}}>🔥</span>
-<span style={{fontFamily:FD,color:ORANGE,fontSize:14,letterSpacing:2}}>{data.streak} DAY STREAK</span>
+<span style={{fontSize:13}}>🔥</span>
+<span style={{fontFamily:FD,color:ORANGE,fontSize:13,letterSpacing:2}}>{data.streak} DAY STREAK</span>
 </div>}
-{data.badges&&data.badges.length>0&&<div style={{display:"flex",gap:3,justifyContent:"center",flexWrap:"wrap",marginTop:6}}>{data.badges.map(b=><span key={b.days} style={{fontFamily:FD,fontSize:8,color:b.color,background:`${b.color}12`,border:`1px solid ${b.color}33`,borderRadius:5,padding:"1px 6px",letterSpacing:1}}>{b.icon}D</span>)}</div>}
+{data.badges&&data.badges.length>0&&<div style={{display:"flex",gap:3,justifyContent:"center",flexWrap:"wrap",marginTop:6}}>{data.badges.map(b=><span key={b.days} style={{fontFamily:FD,fontSize:13,color:b.color,background:`${b.color}12`,border:`1px solid ${b.color}33`,borderRadius:5,padding:"1px 6px",letterSpacing:1}}>{b.icon}D</span>)}</div>}
 </div>
 
   </div>;
@@ -880,8 +885,8 @@ return <div className="fade-up">
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
 </div>
 <div>
-<div style={{fontFamily:FD,color:ORANGE,fontSize:18,letterSpacing:3}}>HEAD-TO-HEAD</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Challenge teammates. Beat their score.</div>
+<div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>HEAD-TO-HEAD</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:2}}>Challenge teammates. Beat their score.</div>
 </div>
 </div>
 </div>
@@ -894,21 +899,21 @@ return <div className="fade-up">
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
         <Av n={ch.fromName} sz={38} email={ch.from}/>
         <div style={{flex:1}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:1}}>{ch.fromName.toUpperCase()}</div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>challenged you on <span style={{color:ORANGE,fontWeight:700}}>{ch.drillName}</span></div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1}}>{ch.fromName.toUpperCase()}</div>
+          <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:1}}>challenged you on <span style={{color:ORANGE,fontWeight:700}}>{ch.drillName}</span></div>
         </div>
         <div style={{textAlign:"right"}}>
-          <div style={{fontFamily:FD,color:ORANGE,fontSize:24}}>{ch.score}<span style={{color:MUTED,fontSize:14}}>/{ch.max}</span></div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1}}>TO BEAT</div>
+          <div style={{fontFamily:FD,color:ORANGE,fontSize:16}}>{ch.score}<span style={{color:MUTED,fontSize:13}}>/{ch.max}</span></div>
+          <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:1}}>TO BEAT</div>
         </div>
       </div>
-      {respSaved===ch.id?<div style={{textAlign:"center",padding:8}}><div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:3}}>RESPONSE LOGGED!</div></div>
+      {respSaved===ch.id?<div style={{textAlign:"center",padding:8}}><div style={{fontFamily:FD,color:VOLT,fontSize:16,letterSpacing:3}}>RESPONSE LOGGED!</div></div>
       :isResp?<div className="fade-up">
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-          <div style={{flex:1}}><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:6}}>YOUR SCORE</div>
+          <div style={{flex:1}}><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,letterSpacing:2,fontWeight:700,marginBottom:6}}>YOUR SCORE</div>
             <input autoFocus type="number" min="0" max={ch.max} value={respInput} onChange={e=>setRespInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"14px 8px",background:BG,border:`2px solid ${ORANGE}`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none"}}/>
           </div>
-          <div style={{fontFamily:FD,color:T.SUB,fontSize:24,paddingTop:20}}>/{ch.max}</div>
+          <div style={{fontFamily:FD,color:T.SUB,fontSize:16,paddingTop:20}}>/{ch.max}</div>
         </div>
         <div style={{display:"flex",gap:8}}>
           <button onClick={()=>{setRespId(null);setRespInput("")}} style={{flex:1,padding:"11px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
@@ -937,17 +942,17 @@ return <div className="fade-up">
     <div style={{width:40,height:40,borderRadius:12,background:resultColor+"12",border:`1px solid ${resultColor}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
       {isPending?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       :won?<svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      :tied?<span style={{fontFamily:FD,color:"#C8FF00",fontSize:14}}>=</span>
+      :tied?<span style={{fontFamily:FD,color:"#C8FF00",fontSize:13}}>=</span>
       :<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>}
     </div>
     <div style={{flex:1,minWidth:0}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{isMine?"YOU":"YOU"} vs {oppName.toUpperCase()}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>{ch.drillName} &#183; {isPending?<span style={{color:ORANGE}}>Waiting for response</span>:<span style={{color:resultColor,fontWeight:700}}>{resultText}</span>}</div>
+      <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:1}}>{ch.drillName} &#183; {isPending?<span style={{color:ORANGE}}>Waiting for response</span>:<span style={{color:resultColor,fontWeight:700}}>{resultText}</span>}</div>
     </div>
     <div style={{textAlign:"right",flexShrink:0}}>
-      {isPending?<div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{ch.score}<span style={{color:MUTED,fontSize:11}}>/{ch.max}</span></div>
-      :<><div style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:16}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>
-        <div style={{fontFamily:FB,color:MUTED,fontSize:8}}>/{ch.max}</div></>}
+      {isPending?<div style={{fontFamily:FD,color:ORANGE,fontSize:16}}>{ch.score}<span style={{color:MUTED,fontSize:13}}>/{ch.max}</span></div>
+      :<><div style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:16}}>{myScore||"-"}<span style={{color:MUTED,fontSize:13}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>
+        <div style={{fontFamily:FB,color:MUTED,fontSize:13}}>/{ch.max}</div></>}
     </div>
   </div>;
 })}
@@ -1017,7 +1022,7 @@ return <div className="fade-up">
 <div style={{width:42,height:42,borderRadius:12,background:`${SC_COLOR}12`,border:`1px solid ${SC_COLOR}22`,display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={22} color={SC_COLOR}/></div>
 <div>
 <div style={{fontFamily:FD,color:SC_COLOR,fontSize:16,letterSpacing:3}}>STRENGTH & CONDITIONING</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Show up. Get stronger. Track sessions.</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:2}}>Show up. Get stronger. Track sessions.</div>
 </div>
 </div>
 </div>
@@ -1026,38 +1031,38 @@ return <div className="fade-up">
 <div style={{display:"flex",gap:8,marginBottom:16}}>
   <div className="grd-bdr" style={{flex:1.5}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
     <AnimNum v={myCount} c={SC_COLOR} big/>
-    <div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:6,fontWeight:600}}>SESSIONS ATTENDED</div>
+    <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:3,marginTop:6,fontWeight:600}}>SESSIONS ATTENDED</div>
   </div></div>
   <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
     <div style={{flex:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"12px 12px",border:`1px solid ${BORDER_CLR}`}}>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:1,lineHeight:1}}>{upcoming.length}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:2,marginTop:4,fontWeight:600}}>UPCOMING</div>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1,lineHeight:1}}>{upcoming.length}</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:2,marginTop:4,fontWeight:600}}>UPCOMING</div>
     </div>
     <div style={{flex:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"12px 12px",border:`1px solid ${BORDER_CLR}`}}>
-      <div style={{fontFamily:FD,color:SC_COLOR,fontSize:22,letterSpacing:1,lineHeight:1}}>#{board.findIndex(b=>b.email===user.email)+1||"-"}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:2,marginTop:4,fontWeight:600}}>YOUR RANK</div>
+      <div style={{fontFamily:FD,color:SC_COLOR,fontSize:16,letterSpacing:1,lineHeight:1}}>#{board.findIndex(b=>b.email===user.email)+1||"-"}</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:2,marginTop:4,fontWeight:600}}>YOUR RANK</div>
     </div>
   </div>
 </div>
 
 <div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
   <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:10,marginBottom:10}}>
-    <div style={{fontFamily:FD,color:SC_COLOR,fontSize:22,letterSpacing:2}}>ATTENDANCE BY DATE ({currentYear})</div>
-    <div style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:1}}>{myAttendanceByDate.reduce((a,d)=>a+d.count,0)}</div>
+    <div style={{fontFamily:FD,color:SC_COLOR,fontSize:16,letterSpacing:2}}>ATTENDANCE BY DATE ({currentYear})</div>
+    <div style={{fontFamily:FD,color:LIGHT,fontSize:16,lineHeight:1}}>{myAttendanceByDate.reduce((a,d)=>a+d.count,0)}</div>
   </div>
   {myAttendanceByDate.length===0
-    ?<div style={{fontFamily:FB,color:MUTED,fontSize:12}}>No S&C sessions attended yet this year.</div>
+    ?<div style={{fontFamily:FB,color:MUTED,fontSize:13}}>No S&C sessions attended yet this year.</div>
     :<div style={{display:"grid",gap:6}}>
       {myAttendanceByDate.map(entry=><div key={entry.date} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}>
-        <span style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700}}>{entry.date}</span>
-        <span style={{fontFamily:FD,color:SC_COLOR,fontSize:18,lineHeight:1}}>{entry.count}</span>
+        <span style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>{entry.date}</span>
+        <span style={{fontFamily:FD,color:SC_COLOR,fontSize:16,lineHeight:1}}>{entry.count}</span>
       </div>)}
     </div>}
 </div></div>
 
 {/* Leaderboard toggle */}
 <button onClick={()=>setShowBoard(!showBoard)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
-  <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:SC_COLOR+"15",display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={18} color={SC_COLOR}/></div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LIFTING LEADERBOARD</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>Ranked by sessions attended</div></div></div>
+  <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:SC_COLOR+"15",display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={18} color={SC_COLOR}/></div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2}}>LIFTING LEADERBOARD</div><div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:1}}>Ranked by sessions attended</div></div></div>
   <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={SC_COLOR} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
 </button>
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
@@ -1066,7 +1071,7 @@ return <div className="fade-up">
     <RB r={i+1} m={medals}/>
     <Av n={p.name} sz={30} email={p.email}/>
     <div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{isMe?" (YOU)":""}</div>
-    <div style={{fontFamily:FD,color:SC_COLOR,fontSize:18}}>{p.count}</div>
+    <div style={{fontFamily:FD,color:SC_COLOR,fontSize:16}}>{p.count}</div>
   </div>})}
 </div>}
 
@@ -1078,14 +1083,14 @@ return <div className="fade-up">
     <div style={{gridColumn:"1 / -1"}}><FF l="PLACE" v={newLog.place} set={v=>setNewLog({...newLog,place:v})} ph="Weight Room — Bay A"/></div>
     <div style={{gridColumn:"1 / -1"}}><FF l="SPORT" v={newLog.sport} set={v=>setNewLog({...newLog,sport:v})} ph="Basketball"/></div>
   </div>
-  {logErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:11,marginTop:8}}>{logErr}</div>}
-  {logSaved&&<div style={{fontFamily:FB,color:SC_COLOR,fontSize:11,marginTop:8}}>Session logged.</div>}
-  <button className="btn-v" onClick={handleAddScLog} style={{width:"100%",marginTop:10,padding:"12px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD SESSION</button>
+  {logErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:13,marginTop:8}}>{logErr}</div>}
+  {logSaved&&<div style={{fontFamily:FB,color:SC_COLOR,fontSize:13,marginTop:8}}>Session logged.</div>}
+  <button className="btn-v" onClick={handleAddScLog} style={{width:"100%",marginTop:10,padding:"12px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:13,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD SESSION</button>
 </div></div>
 
 <div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"22px 16px",textAlign:"center"}}>
-  <div style={{fontFamily:FD,color:SC_COLOR,fontSize:72,lineHeight:.9,letterSpacing:3}}>{myScLogs.length}</div>
-  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginTop:8}}>TOTAL S&C SESSIONS LOGGED</div>
+  <div style={{fontFamily:FD,color:SC_COLOR,fontSize:132,lineHeight:.9,letterSpacing:3}}>{myScLogs.length}</div>
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:2,fontWeight:700,marginTop:8}}>TOTAL S&C SESSIONS LOGGED</div>
 </div></div>
 
 {/* Upcoming sessions */}
@@ -1098,19 +1103,19 @@ return <div className="fade-up">
       <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
         <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={24} color={going?SC_COLOR:MUTED}/></div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2}}>{s.sport||s.title}</div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}><span style={{color:SC_COLOR,fontWeight:700}}>{s.date}</span> &#183; {s.time}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{s.location}</div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:2}}>{s.sport||s.title}</div>
+          <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:3}}><span style={{color:SC_COLOR,fontWeight:700}}>{s.date}</span> &#183; {s.time}</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:13,marginTop:1}}>{s.location}</div>
         </div>
-        <div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:sr.length>0?SC_COLOR:MUTED,fontSize:20}}>{sr.length}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>GOING</div></div>
+        <div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:sr.length>0?SC_COLOR:MUTED,fontSize:16}}>{sr.length}</div><div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:1}}>GOING</div></div>
       </div>
     </button>
     {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
-      {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
+      {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
       <button className="btn-v" onClick={()=>toggleScRsvp(s.id)} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
         {going?<>&#10003; YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
       </button>
-      {sr.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>{sr.map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:4,background:CARD_BG,borderRadius:8,padding:"4px 8px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={20} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:600}}>{r.name}</span></div>)}</div>}
+      {sr.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>{sr.map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:4,background:CARD_BG,borderRadius:8,padding:"4px 8px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={20} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{r.name}</span></div>)}</div>}
     </div>}
   </div>;
 })}
@@ -1120,8 +1125,8 @@ return <div className="fade-up">
   {past.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const went=sr.some(r=>r.email===user.email);
     return <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.7}}>
       <div style={{width:36,height:36,borderRadius:10,background:went?SC_COLOR+"12":BG,border:`1px solid ${went?SC_COLOR+"33":BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={16} color={went?SC_COLOR:MUTED}/></div>
-      <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{s.sport||s.title}</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>{s.date} &#183; {sr.length} attended</div></div>
-      {went&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,color:SC_COLOR,background:SC_COLOR+"12",padding:"2px 8px",borderRadius:4,letterSpacing:1}}>ATTENDED</span>}
+      <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{s.sport||s.title}</div><div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:1}}>{s.date} &#183; {sr.length} attended</div></div>
+      {went&&<span style={{fontFamily:FB,fontSize:13,fontWeight:700,color:SC_COLOR,background:SC_COLOR+"12",padding:"2px 8px",borderRadius:4,letterSpacing:1}}>ATTENDED</span>}
     </div>;
   })}</>}
 
@@ -1186,17 +1191,17 @@ return <div>
   <div style={{display:"flex",gap:4,minWidth:"max-content"}}>
     {isHome?
       [{k:"total",l:"ALL"},{k:"shots",l:"SHOTS"},...drills.map(d=>({k:String(d.id),l:d.name}))].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{padding:"8px 14px",borderRadius:10,border:sub===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:sub===t.k?700:500,letterSpacing:1,whiteSpace:"nowrap",background:sub===t.k?VOLT:CARD_BG,color:sub===t.k?BG:MUTED,transition:"all .2s"}}>{t.l}</button>)
+        <button key={t.k} onClick={()=>setSub(t.k)} style={{padding:"8px 14px",borderRadius:10,border:sub===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:sub===t.k?700:500,letterSpacing:1,whiteSpace:"nowrap",background:sub===t.k?VOLT:CARD_BG,color:sub===t.k?BG:MUTED,transition:"all .2s"}}>{t.l}</button>)
     :[{k:"events",l:"ATTENDANCE"},{k:"sc",l:"S&C"},{k:"prog-total",l:"DRILL SCORES"},...programDrills.map(d=>({k:`prog-${d.id}`,l:d.name}))].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{padding:"8px 14px",borderRadius:10,border:sub===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:sub===t.k?700:500,letterSpacing:1,whiteSpace:"nowrap",background:sub===t.k?CYAN:CARD_BG,color:sub===t.k?BG:MUTED,transition:"all .2s"}}>{t.l}</button>)}
+        <button key={t.k} onClick={()=>setSub(t.k)} style={{padding:"8px 14px",borderRadius:10,border:sub===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:sub===t.k?700:500,letterSpacing:1,whiteSpace:"nowrap",background:sub===t.k?CYAN:CARD_BG,color:sub===t.k?BG:MUTED,transition:"all .2s"}}>{t.l}</button>)}
   </div>
 </div>
 
 {/* Title */}
 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
   <div style={{width:4,height:22,borderRadius:2,background:accentColor}}/>
-  <div style={{fontFamily:FD,color:accentColor,fontSize:18,letterSpacing:3,flex:1}}>{title} LEADERBOARD</div>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:2,fontWeight:600}}>{board.length}</div>
+  <div style={{fontFamily:FD,color:accentColor,fontSize:16,letterSpacing:3,flex:1}}>{title} LEADERBOARD</div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:2,fontWeight:600}}>{board.length}</div>
 </div>
 
 {/* Board */}
@@ -1208,12 +1213,12 @@ return <div>
   if(myIdx<0)return null;
   return <div style={{background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:14,padding:"12px 16px",marginBottom:14,border:`2px solid ${accentColor}44`,display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
     <div style={{width:4,height:28,borderRadius:2,background:accentColor,flexShrink:0}}/>
-    <div style={{fontFamily:FD,color:accentColor,fontSize:24}}>#{myIdx+1}</div>
+    <div style={{fontFamily:FD,color:accentColor,fontSize:16}}>#{myIdx+1}</div>
     <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,letterSpacing:1}}>YOUR POSITION</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>{myEntry.total} {unit}</div>
+      <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>YOUR POSITION</div>
+      <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:1}}>{myEntry.total} {unit}</div>
     </div>
-    {myIdx>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:600,letterSpacing:1}}>{board[myIdx-1].total-myEntry.total} to #{myIdx}</div>}
+    {myIdx>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:13,fontWeight:600,letterSpacing:1}}>{board[myIdx-1].total-myEntry.total} to #{myIdx}</div>}
   </div>})()}
 
 {board.map((p,i)=>{
@@ -1226,15 +1231,15 @@ return <div>
 
   if(isLeader) return <div key={p.email} className="podium-glow" style={{"--pod-c":accentColor,display:"flex",alignItems:"center",gap:14,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:16,padding:"20px 18px",marginBottom:12,border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
     <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
-    <div style={{width:32,height:32,borderRadius:9,background:`${accentColor}18`,border:`2px solid ${accentColor}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:14,color:accentColor,flexShrink:0}}>👑</div>
+    <div style={{width:32,height:32,borderRadius:9,background:`${accentColor}18`,border:`2px solid ${accentColor}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:13,color:accentColor,flexShrink:0}}>👑</div>
     <Av n={p.name} sz={40} email={p.email}/>
     <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:LIGHT,fontSize:15,fontWeight:700,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
-      <div style={{fontFamily:FB,color:accentColor,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1</div>
+      <div style={{fontFamily:FB,color:LIGHT,fontSize:16,fontWeight:700,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:13,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
+      <div style={{fontFamily:FB,color:accentColor,fontSize:13,letterSpacing:2,fontWeight:700,marginTop:2}}>#1</div>
     </div>
     <div style={{textAlign:"right",flexShrink:0}}>
       <div style={{fontFamily:FD,fontSize:28,color:accentColor}}>{p.total}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:600}}>{unit.toUpperCase()}</div>
+      <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:1,fontWeight:600}}>{unit.toUpperCase()}</div>
     </div>
   </div>;
 
@@ -1244,7 +1249,7 @@ return <div>
     <RB r={i+1} m={medals}/>
     <Av n={p.name} sz={32} email={p.email}/>
     <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:isMe?LIGHT:LIGHT,fontSize:13,fontWeight:isMe?700:600,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
+      <div style={{fontFamily:FB,color:isMe?LIGHT:LIGHT,fontSize:13,fontWeight:isMe?700:600,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:13,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
       <div style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
         <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:2,transition:"width .4s ease"}}/>
       </div>
@@ -1253,23 +1258,23 @@ return <div>
     <CourtDivider color={VOLT} my={16}/>
 
     {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
-    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
+    <div style={{fontFamily:FB,color:VOLT,fontSize:13,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS <span style={{color:TOKENS.TEXT_MUTED}}>·</span> {todayS.length}/{drills.length} DONE</div>
     {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done?Math.round(done.score/d.max*100):0;
       return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
         <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+          <div style={{color:T.MUT,fontSize:13,marginTop:2,fontWeight:500}}>{d.desc}</div>
         </div>
         {done?<div style={{textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
+          <div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{done.score}<span style={{color:MUTED,fontSize:13}}>/{d.max}</span></div>
           <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>
         </div>
         :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
       </button>})}
     <div style={{textAlign:"right",flexShrink:0}}>
-      <div style={{fontFamily:FD,color:isMe?accentColor:isTop3?accentColor:LIGHT,fontSize:20}}>{p.total}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:500}}>{unit.toUpperCase()}</div>
+      <div style={{fontFamily:FD,color:isMe?accentColor:isTop3?accentColor:LIGHT,fontSize:16}}>{p.total}</div>
+      <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:1,fontWeight:500}}>{unit.toUpperCase()}</div>
     </div>
   </div>;
 })}
@@ -1313,7 +1318,7 @@ return <div className="fade-up">
 </div>
 <div>
 <div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>SHOT TRACKER</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Log makes · Running totals · Heat map</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:2}}>Log makes · Running totals · Heat map</div>
 </div>
 </div>
 </div>
@@ -1321,12 +1326,12 @@ return <div className="fade-up">
 {/* Running totals */}
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
   <div className="grd-bdr" style={{gridColumn:"1/3"}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
-    <AnimNum v={allTime} c={VOLT} big/><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,marginTop:6,fontWeight:600}}>ALL-TIME MAKES</div>
+    <AnimNum v={allTime} c={VOLT} big/><div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:3,marginTop:6,fontWeight:600}}>ALL-TIME MAKES</div>
   </div></div>
   {[{l:"TODAY",v:todayTotal,c:LIGHT},{l:"THIS WEEK",v:weekTotal,c:VOLT},{l:"THIS MONTH",v:monthTotal,c:CYAN},{l:"THIS YEAR",v:yearTotal,c:ORANGE}].map((s,i)=>
     <div key={i} style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"14px 14px",border:`1px solid ${BORDER_CLR}`}}>
       <AnimNum v={s.v} c={s.c}/>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:2,marginTop:4,fontWeight:600}}>{s.l}</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:2,marginTop:4,fontWeight:600}}>{s.l}</div>
     </div>
   )}
 </div>
@@ -1337,20 +1342,20 @@ return <div className="fade-up">
 
   {shotSaved?<div style={{textAlign:"center",padding:"24px 0"}}>
     <div style={{width:60,height:60,borderRadius:"50%",background:VOLT+"15",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}><svg width="28" height="28" viewBox="0 0 40 40"><path d="M10 20l8 8 12-14" stroke={VOLT} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-    <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:4}}>SHOTS LOGGED</div>
+    <div style={{fontFamily:FD,color:VOLT,fontSize:16,letterSpacing:4}}>SHOTS LOGGED</div>
   </div>
   :<>
     <div style={{display:"flex",gap:10,marginBottom:16}}>
       <div style={{flex:1}}>
-        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>SHOTS MADE</label>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>SHOTS MADE</label>
         <input type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLog()} placeholder="0" style={{width:"100%",padding:"16px 14px",background:BG,border:`2px solid ${ORANGE}66`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none",letterSpacing:2}} onFocus={e=>e.target.style.borderColor=ORANGE} onBlur={e=>e.target.style.borderColor=ORANGE+"66"}/>
       </div>
       <div style={{flex:1}}>
-        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>DATE</label>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>DATE</label>
         <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
       </div>
     </div>
-    <button className="btn-v" onClick={handleLog} style={{width:"100%",padding:"15px",background:ORANGE,color:BG,fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+    <button className="btn-v" onClick={handleLog} style={{width:"100%",padding:"15px",background:ORANGE,color:BG,fontFamily:FD,fontSize:16,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
       LOG SHOTS
     </button>
@@ -1369,15 +1374,15 @@ return <div className="fade-up">
     const getColor=(c)=>{if(c===0)return BORDER_CLR;const intensity=Math.min(c/Math.max(maxCount*.6,20),1);const r=parseInt(VOLT.slice(1,3),16);const g=parseInt(VOLT.slice(3,5),16);const b=parseInt(VOLT.slice(5,7),16);return `rgba(${r},${g},${b},${.15+intensity*.85})`};
     return <div style={{overflowX:"auto",paddingBottom:8}}>
       <div style={{display:"flex",gap:3,minWidth:"fit-content"}}>
-        <div style={{display:"flex",flexDirection:"column",gap:3,paddingTop:2,marginRight:2}}>{["S","M","T","W","T","F","S"].map((d,i)=>i%2===1?<div key={i} style={{fontFamily:FB,fontSize:7,color:MUTED,height:12,lineHeight:"12px",textAlign:"right"}}>{d}</div>:<div key={i} style={{height:12}}/>)}</div>
+        <div style={{display:"flex",flexDirection:"column",gap:3,paddingTop:2,marginRight:2}}>{["S","M","T","W","T","F","S"].map((d,i)=>i%2===1?<div key={i} style={{fontFamily:FB,fontSize:13,color:MUTED,height:12,lineHeight:"12px",textAlign:"right"}}>{d}</div>:<div key={i} style={{height:12}}/>)}</div>
         {weeks.map((week,wi)=><div key={wi} style={{display:"flex",flexDirection:"column",gap:3}}>{week.map((day,di)=>
           <div key={di} title={`${day.date}: ${day.count} makes`} style={{width:12,height:12,borderRadius:2,background:day.isFuture?"transparent":getColor(day.count),border:day.isToday?`1.5px solid ${ORANGE}`:day.isFuture?"none":`1px solid ${day.count?getColor(day.count):BORDER_CLR}44`,opacity:day.isFuture?.2:1,transition:"background .3s"}}/>
         )}</div>)}
       </div>
       <div style={{display:"flex",alignItems:"center",gap:4,marginTop:8,justifyContent:"flex-end"}}>
-        <span style={{fontFamily:FB,fontSize:8,color:MUTED}}>Less</span>
+        <span style={{fontFamily:FB,fontSize:13,color:MUTED}}>Less</span>
         {[0,.2,.4,.7,1].map((v,i)=><div key={i} style={{width:10,height:10,borderRadius:2,background:`rgba(200,255,0,${.1+v*.9})`,border:`1px solid ${VOLT}22`}}/>)}
-        <span style={{fontFamily:FB,fontSize:8,color:MUTED}}>More</span>
+        <span style={{fontFamily:FB,fontSize:13,color:MUTED}}>More</span>
       </div>
     </div>;
   })()}
@@ -1393,7 +1398,7 @@ const[active,setActive]=useState(null),[val,setVal]=useState(""),[saved,setSaved
 const byDrill=useMemo(()=>{const m={};drills.forEach(d=>{m[d.id]=scores.filter(s=>s.src==="program"&&s.drillId===d.id)});return m;},[drills,scores]);
 const submit=()=>{if(!active)return;const n=parseInt(val);if(isNaN(n)||n<0||n>active.max)return;addScore(active.id,n,"program");setSaved(true);setVal("");setTimeout(()=>setSaved(false),1200)};
 if(drills.length===0)return <div style={{marginBottom:14}}><SH t="PROGRAM DRILLS" s="COACH ADDED"/><Empty t="No program drills yet" action="Your coach can add up to 7 custom shooting drills."/></div>;
-return <div style={{marginBottom:16}}><SH t="PROGRAM DRILLS" s={`${drills.length} ACTIVE`}/>{drills.map(d=>{const rows=byDrill[d.id]||[];const board=Object.values(rows.reduce((m,s)=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score;return m;},{})).sort((a,b)=>b.total-a.total).slice(0,3);return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${active?.id===d.id?CYAN+"55":BORDER_CLR}`,borderRadius:12,padding:"12px 14px",marginBottom:8}}><button onClick={()=>setActive(active?.id===d.id?null:d)} style={{width:"100%",background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:10}}><DrillIcon type={d.icon} size={18}/><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{d.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:10}}>{d.desc}</div></div><div style={{fontFamily:FB,color:CYAN,fontSize:9,fontWeight:700}}>{rows.length} LOGS</div></button>{active?.id===d.id&&<div style={{marginTop:10}}><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginBottom:6}}>TEAM LEADERBOARD {board.length>0&&"(TOTAL SCORES)"}</div>{board.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginBottom:8}}>No scores yet.</div>:board.map((p,i)=><div key={p.email} style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:11,color:LIGHT,marginBottom:4}}><span>#{i+1} {p.name}</span><span style={{color:CYAN,fontWeight:700}}>{p.total}</span></div>)}<div style={{display:"flex",gap:6,marginTop:8}}><input value={val} onChange={e=>setVal(e.target.value)} type="number" placeholder={`0-${d.max}`} style={{flex:1,padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/><button onClick={submit} style={{padding:"9px 12px",background:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:11,letterSpacing:1,cursor:"pointer"}}>LOG</button></div>{saved&&<div style={{fontFamily:FB,color:CYAN,fontSize:10,marginTop:6}}>Score saved for {user.name}.</div>}</div>}</div>})}</div>;
+return <div style={{marginBottom:16}}><SH t="PROGRAM DRILLS" s={`${drills.length} ACTIVE`}/>{drills.map(d=>{const rows=byDrill[d.id]||[];const board=Object.values(rows.reduce((m,s)=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score;return m;},{})).sort((a,b)=>b.total-a.total).slice(0,3);return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${active?.id===d.id?CYAN+"55":BORDER_CLR}`,borderRadius:12,padding:"12px 14px",marginBottom:8}}><button onClick={()=>setActive(active?.id===d.id?null:d)} style={{width:"100%",background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:10}}><DrillIcon type={d.icon} size={18}/><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{d.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:13}}>{d.desc}</div></div><div style={{fontFamily:FB,color:CYAN,fontSize:13,fontWeight:700}}>{rows.length} LOGS</div></button>{active?.id===d.id&&<div style={{marginTop:10}}><div style={{fontFamily:FB,color:MUTED,fontSize:13,marginBottom:6}}>TEAM LEADERBOARD {board.length>0&&"(TOTAL SCORES)"}</div>{board.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:13,marginBottom:8}}>No scores yet.</div>:board.map((p,i)=><div key={p.email} style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:13,color:LIGHT,marginBottom:4}}><span>#{i+1} {p.name}</span><span style={{color:CYAN,fontWeight:700}}>{p.total}</span></div>)}<div style={{display:"flex",gap:6,marginTop:8}}><input value={val} onChange={e=>setVal(e.target.value)} type="number" placeholder={`0-${d.max}`} style={{flex:1,padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/><button onClick={submit} style={{padding:"9px 12px",background:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:13,letterSpacing:1,cursor:"pointer"}}>LOG</button></div>{saved&&<div style={{fontFamily:FB,color:CYAN,fontSize:13,marginTop:6}}>Score saved for {user.name}.</div>}</div>}</div>})}</div>;
 }
 
 // EVENTS PANEL (Player Program View)
@@ -1417,7 +1422,7 @@ return <div className="fade-up">
 </div>
 <div>
 <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:3}}>PROGRAM EVENTS</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Official workouts & verified attendance</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:2}}>Official workouts & verified attendance</div>
 </div>
 </div>
 {/* Timeline strip — next 3 events as dots */}
@@ -1428,12 +1433,12 @@ const going=rsvps.some(r=>r.eventId===ev.id&&r.email===user.email);
 return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
 <div style={{width:10,height:10,borderRadius:"50%",background:going?VOLT:BORDER_CLR,border:going?`2px solid ${VOLT}`:`2px solid ${MUTED}44`,boxShadow:going?`0 0 8px ${VOLT}44`:"none"}}/>
-<div style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,color:going?VOLT:MUTED,whiteSpace:"nowrap"}}>{ev.date.slice(5)}</div>
+<div style={{fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:1,color:going?VOLT:MUTED,whiteSpace:"nowrap"}}>{ev.date.slice(5)}</div>
 </div>
 {i<Math.min(upcoming.length,3)-1&&<div style={{flex:1,height:1,background:`linear-gradient(90deg,${going?VOLT+"44":BORDER_CLR},${BORDER_CLR})`,margin:"0 6px",marginBottom:14}}/>}
 </div>})}
 </div>
-{upcoming.length>3&&<div style={{fontFamily:FB,fontSize:9,color:MUTED,marginLeft:8,marginBottom:14}}>+{upcoming.length-3}</div>}
+{upcoming.length>3&&<div style={{fontFamily:FB,fontSize:13,color:MUTED,marginLeft:8,marginBottom:14}}>+{upcoming.length-3}</div>}
 </div>}
 </div>
 
@@ -1441,23 +1446,23 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 <div style={{background:`linear-gradient(135deg,${myTier.bg},${CARD_BG})`,borderRadius:18,padding:"20px 22px",border:`1px solid ${myTier.color}33`,marginBottom:16,position:"relative",overflow:"hidden"}}>
   <div style={{position:"absolute",top:0,right:0,width:120,height:120,borderRadius:"50%",background:`radial-gradient(circle,${myTier.color}08,transparent)`,transform:"translate(30%,-30%)"}}/>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative"}}>
-    <div><div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:3,fontWeight:600}}>ATTENDANCE RANK</div><div style={{fontFamily:FD,color:myTier.color,fontSize:26,letterSpacing:4,marginTop:4}}>{myTier.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:4}}>{myRsvps} event{myRsvps!==1?"s":""} attended</div></div>
-    <div style={{width:52,height:52,borderRadius:14,background:`${myTier.color}12`,border:`2px solid ${myTier.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:22,color:myTier.color}}>{myRsvps}</div>
+    <div><div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:3,fontWeight:600}}>ATTENDANCE RANK</div><div style={{fontFamily:FD,color:myTier.color,fontSize:26,letterSpacing:4,marginTop:4}}>{myTier.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:4}}>{myRsvps} event{myRsvps!==1?"s":""} attended</div></div>
+    <div style={{width:52,height:52,borderRadius:14,background:`${myTier.color}12`,border:`2px solid ${myTier.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:16,color:myTier.color}}>{myRsvps}</div>
   </div>
-  {(()=>{const nx=[...TIERS].find(t=>t.min>myRsvps);if(!nx)return <div style={{fontFamily:FB,color:myTier.color,fontSize:11,marginTop:10,fontWeight:600}}>&#9733; MAX RANK</div>;const p=Math.round(myRsvps/nx.min*100);return <div style={{marginTop:10}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontFamily:FB,color:MUTED,fontSize:10}}>{nx.min-myRsvps} more to <span style={{color:nx.color,fontWeight:700}}>{nx.name}</span></span><span style={{fontFamily:FB,color:MUTED,fontSize:10}}>{p}%</span></div><div style={{height:5,background:T.TRACK,borderRadius:3,overflow:"hidden"}}><div style={{width:`${p}%`,height:"100%",background:`linear-gradient(90deg,${myTier.color},${nx.color})`,borderRadius:3}}/></div></div>})()}
+  {(()=>{const nx=[...TIERS].find(t=>t.min>myRsvps);if(!nx)return <div style={{fontFamily:FB,color:myTier.color,fontSize:13,marginTop:10,fontWeight:600}}>&#9733; MAX RANK</div>;const p=Math.round(myRsvps/nx.min*100);return <div style={{marginTop:10}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontFamily:FB,color:MUTED,fontSize:13}}>{nx.min-myRsvps} more to <span style={{color:nx.color,fontWeight:700}}>{nx.name}</span></span><span style={{fontFamily:FB,color:MUTED,fontSize:13}}>{p}%</span></div><div style={{height:5,background:T.TRACK,borderRadius:3,overflow:"hidden"}}><div style={{width:`${p}%`,height:"100%",background:`linear-gradient(90deg,${myTier.color},${nx.color})`,borderRadius:3}}/></div></div>})()}
 </div>
 
 {/* Leaderboard toggle */}
 <button onClick={()=>setShowBoard(!showBoard)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
-  <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:ORANGE+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>&#128293;</div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LEADERBOARD</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>Attendance, scores & streaks</div></div></div>
+  <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:ORANGE+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16}}>&#128293;</div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2}}>LEADERBOARD</div><div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:1}}>Attendance, scores & streaks</div></div></div>
   <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
 </button>
 
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
-  <div style={{display:"flex",gap:4,marginBottom:14}}>{[{k:"attend",l:"ATTENDANCE"},{k:"overall",l:"DRILL SCORES"},{k:"streaks",l:"STREAKS"}].map(t=><button key={t.k} onClick={()=>setLbMode(t.k)} style={{flex:1,padding:"9px 4px",borderRadius:10,border:lbMode===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:1,background:lbMode===t.k?CYAN:CARD_BG,color:lbMode===t.k?BG:MUTED}}>{t.l}</button>)}</div>
-  {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</span><span className="tb" style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div style={{fontFamily:FD,color:t.color,fontSize:18}}>{p.count}</div></div>})}</>}
-  {lbMode==="overall"&&<>{(()=>{const m={};scores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});const a=Object.values(m).sort((a,b)=>b.total-a.total);return a.length===0?<Empty t="No scores yet"/>:a.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{p.email===user.email?" (YOU)":""}</div><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{p.total}</div></div>)})()}</>}
-  {lbMode==="streaks"&&<>{(()=>{const es=[...new Set(scores.map(s=>s.email))];const st=es.map(e=>({email:e,name:scores.find(s=>s.email===e)?.name||e,streak:calcStreak(scores.filter(s=>s.email===e))})).sort((a,b)=>b.streak-a.streak);return st.length===0?<Empty t="No streaks yet"/>:st.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</div><div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{p.streak} &#128293;</div></div>)})()}</>}
+  <div style={{display:"flex",gap:4,marginBottom:14}}>{[{k:"attend",l:"ATTENDANCE"},{k:"overall",l:"DRILL SCORES"},{k:"streaks",l:"STREAKS"}].map(t=><button key={t.k} onClick={()=>setLbMode(t.k)} style={{flex:1,padding:"9px 4px",borderRadius:10,border:lbMode===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FD,fontSize:13,letterSpacing:1,background:lbMode===t.k?CYAN:CARD_BG,color:lbMode===t.k?BG:MUTED}}>{t.l}</button>)}</div>
+  {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</span><span className="tb" style={{fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div style={{fontFamily:FD,color:t.color,fontSize:16}}>{p.count}</div></div>})}</>}
+  {lbMode==="overall"&&<>{(()=>{const m={};scores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});const a=Object.values(m).sort((a,b)=>b.total-a.total);return a.length===0?<Empty t="No scores yet"/>:a.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{p.email===user.email?" (YOU)":""}</div><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{p.total}</div></div>)})()}</>}
+  {lbMode==="streaks"&&<>{(()=>{const es=[...new Set(scores.map(s=>s.email))];const st=es.map(e=>({email:e,name:scores.find(s=>s.email===e)?.name||e,streak:calcStreak(scores.filter(s=>s.email===e))})).sort((a,b)=>b.streak-a.streak);return st.length===0?<Empty t="No streaks yet"/>:st.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</div><div style={{fontFamily:FD,color:ORANGE,fontSize:16}}>{p.streak} &#128293;</div></div>)})()}</>}
 </div>}
 
 {/* Upcoming */}
@@ -1469,29 +1474,29 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
       {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:VOLT,borderRadius:"4px 0 0 4px"}}/>}
       <div style={{display:"flex",alignItems:"flex-start",gap:14,cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
         <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><EventIcon type={ev.type} size={24} color={going?CYAN:MUTED}/></div>
-        <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span> &#183; {ev.time}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ev.location}</div></div>
+        <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:3}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span> &#183; {ev.time}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:13,marginTop:1}}>{ev.location}</div></div>
         <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,flexShrink:0}}>
-          <div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:20}}>{evR.length}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>GOING</div></div>
+          <div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:16}}>{evR.length}</div><div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:1}}>GOING</div></div>
         </div>
       </div>
       {/* Inline quick-RSVP pill */}
-      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} style={{marginTop:12,padding:"8px 0",width:"100%",borderRadius:10,border:"none",background:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:3,color:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
+      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} style={{marginTop:12,padding:"8px 0",width:"100%",borderRadius:10,border:"none",background:VOLT,cursor:"pointer",fontFamily:FD,fontSize:13,letterSpacing:3,color:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
         {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={BG} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>I'M GOING</>:"RSVP →"}
       </button>
     </div>
     {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{ev.desc}</p>
-      <button className="btn-v" onClick={()=>toggleRsvp(ev.id)} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:14}}>
+      <button className="btn-v" onClick={()=>toggleRsvp(ev.id)} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:14}}>
         {going?"&#10003; I'M GOING":"RSVP NOW &#8594;"}
       </button>
-      {evR.length>0&&<div><div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:2,marginBottom:8,fontWeight:600}}>WHO'S GOING</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-        {evR.map((r,i)=>{const tr=getTier(rsvps.filter(rr=>rr.email===r.email).length);return <div key={i} style={{display:"flex",alignItems:"center",gap:6,background:CARD_BG,borderRadius:8,padding:"6px 10px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={22} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:600}}>{r.name}</span>{tr.min>=2&&<span style={{fontFamily:FB,fontSize:7,fontWeight:700,letterSpacing:1,padding:"1px 4px",borderRadius:3,color:tr.color,background:tr.bg}}>{tr.name}</span>}</div>})}
+      {evR.length>0&&<div><div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:2,marginBottom:8,fontWeight:600}}>WHO'S GOING</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+        {evR.map((r,i)=>{const tr=getTier(rsvps.filter(rr=>rr.email===r.email).length);return <div key={i} style={{display:"flex",alignItems:"center",gap:6,background:CARD_BG,borderRadius:8,padding:"6px 10px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={22} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{r.name}</span>{tr.min>=2&&<span style={{fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:1,padding:"1px 4px",borderRadius:3,color:tr.color,background:tr.bg}}>{tr.name}</span>}</div>})}
       </div></div>}
     </div>}
   </div>})}
 
 {past.length>0&&<><div style={{marginTop:8}}><SH t="PAST EVENTS" s={`${past.length} COMPLETED`}/></div>
-  {past.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const was=evR.some(r=>r.email===user.email);return <div key={ev.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.5}}><EventIcon type={ev.type} size={20} color={MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:MUTED,fontSize:13,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ev.date}</div></div>{was&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"3px 7px",borderRadius:5,color:VOLT,background:VOLT+"15",letterSpacing:1}}>ATTENDED</span>}<span style={{fontFamily:FD,color:MUTED,fontSize:13}}>{evR.length}</span></div>})}</>}
+  {past.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const was=evR.some(r=>r.email===user.email);return <div key={ev.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.5}}><EventIcon type={ev.type} size={20} color={MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:MUTED,fontSize:13,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:13,marginTop:1}}>{ev.date}</div></div>{was&&<span style={{fontFamily:FB,fontSize:13,fontWeight:700,padding:"3px 7px",borderRadius:5,color:VOLT,background:VOLT+"15",letterSpacing:1}}>ATTENDED</span>}<span style={{fontFamily:FD,color:MUTED,fontSize:13}}>{evR.length}</span></div>})}</>}
 
   </div>;
 }
@@ -1525,11 +1530,11 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:200,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
 <div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
-<div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:3,marginBottom:8}}>DELETE DRILL?</div>
-<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:20}}>Player scores will be kept but this drill will no longer appear.</p>
+<div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:3,marginBottom:8}}>DELETE DRILL?</div>
+<p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.5,marginBottom:20}}>Player scores will be kept but this drill will no longer appear.</p>
 <div style={{display:"flex",gap:8}}>
-<button onClick={()=>setConfirmDelete(null)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-<button onClick={confirmDrillDelete} style={{flex:1,padding:"12px",background:"#FF4545",color:"#FFFFFF",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
+<button onClick={()=>setConfirmDelete(null)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
+<button onClick={confirmDrillDelete} style={{flex:1,padding:"12px",background:"#FF4545",color:"#FFFFFF",fontFamily:FD,fontSize:13,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
 </div>
 </div>
 </div>}
@@ -1539,10 +1544,10 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 <div><div style={{fontFamily:FD,color:ORANGE,fontSize:13,letterSpacing:4}}>COACH MODE</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:2,marginTop:2}}>{u.name.toUpperCase()}</div></div>
 <div style={{display:"flex",alignItems:"center",gap:6}}>
 <SLLogo size={34} style={{opacity:.5}}/>
-<button aria-label="Log out" onClick={logout} style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:MUTED,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+<button aria-label="Log out" onClick={logout} style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:MUTED,width:44,height:44,cursor:"pointer",fontSize:13,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
 </div>
 </div>
-<div style={{display:"flex",gap:8,marginBottom:4}}><SC l="PLAYERS" v={ups.length} c={ORANGE} small/><SC l="SCORES" v={scores.length} c={LIGHT} small/><SC l="EVENTS" v={events.length} c={CYAN} small/></div><div style={{margin:"10px 0 4px",padding:"10px 12px",border:`1px solid ${ORANGE}33`,borderRadius:10,background:ORANGE+"0d"}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:2,color:ORANGE,fontWeight:700}}>TEAM CODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><div style={{fontFamily:FD,fontSize:20,color:LIGHT,letterSpacing:3}}>{team?.joinCode||"—"}</div><button onClick={()=>navigator.clipboard?.writeText(team?.joinCode||"")} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>COPY</button><button onClick={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>REGENERATE</button></div>{codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:5}}>{codeErr}</div>}</div>
+<div style={{display:"flex",gap:8,marginBottom:4}}><SC l="PLAYERS" v={ups.length} c={ORANGE} small/><SC l="SCORES" v={scores.length} c={LIGHT} small/><SC l="EVENTS" v={events.length} c={CYAN} small/></div><div style={{margin:"10px 0 4px",padding:"10px 12px",border:`1px solid ${ORANGE}33`,borderRadius:10,background:ORANGE+"0d"}}><div style={{fontFamily:FB,fontSize:13,letterSpacing:2,color:ORANGE,fontWeight:700}}>TEAM CODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><div style={{fontFamily:FD,fontSize:16,color:LIGHT,letterSpacing:3}}>{team?.joinCode||"—"}</div><button onClick={()=>navigator.clipboard?.writeText(team?.joinCode||"")} style={{padding:"6px 10px",fontSize:13,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>COPY</button><button onClick={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}} style={{padding:"6px 10px",fontSize:13,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>REGENERATE</button></div>{codeErr&&<div style={{color:"#FF4545",fontSize:13,marginTop:5}}>{codeErr}</div>}</div>
 </div>
 
 <div style={{flex:1,padding:"16px 20px 110px",overflowY:"auto",position:"relative",zIndex:1}}>
@@ -1552,7 +1557,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
     <div style={{background:`linear-gradient(135deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:"20px 20px",border:`1px solid ${ORANGE}22`,marginBottom:20,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
       <div style={{position:"absolute",bottom:8,right:12,opacity:.04,pointerEvents:"none"}}><SLLogo size={52}/></div>
-      <div style={{fontFamily:FD,color:ORANGE,fontSize:12,letterSpacing:4,marginBottom:12}}>TODAY'S PULSE</div>
+      <div style={{fontFamily:FD,color:ORANGE,fontSize:13,letterSpacing:4,marginBottom:12}}>TODAY'S PULSE</div>
       <div style={{display:"flex",gap:8,marginBottom:12}}>
         {(()=>{
           const activeToday=new Set(scores.filter(s=>s.date===today).map(s=>s.email)).size;
@@ -1567,14 +1572,14 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
           const topWeek=Object.values(weekScores).sort((a,b)=>b.total-a.total)[0];
           return <>
             <div style={{flex:1,background:BG,borderRadius:12,padding:"12px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-              <div style={{fontFamily:FD,color:activeToday>0?VOLT:MUTED,fontSize:24,lineHeight:1}}>{activeToday}<span style={{color:MUTED,fontSize:14}}>/{totalPlayers}</span></div>
-              <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,marginTop:3,fontWeight:600}}>ACTIVE TODAY</div>
+              <div style={{fontFamily:FD,color:activeToday>0?VOLT:MUTED,fontSize:16,lineHeight:1}}>{activeToday}<span style={{color:MUTED,fontSize:13}}>/{totalPlayers}</span></div>
+              <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:2,marginTop:3,fontWeight:600}}>ACTIVE TODAY</div>
             </div>
             <div style={{flex:1,background:BG,borderRadius:12,padding:"12px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
               {nextEv?<>
-                <div style={{fontFamily:FD,color:CYAN,fontSize:14,lineHeight:1.1,letterSpacing:1}}>{nextEv.title.length>12?nextEv.title.slice(0,12)+"...":nextEv.title}</div>
-                <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,marginTop:3,fontWeight:600}}>{nextEvRsvps} RSVP · {nextEv.date.slice(5)}</div>
-              </>:<div style={{fontFamily:FB,color:MUTED,fontSize:10}}>No events</div>}
+                <div style={{fontFamily:FD,color:CYAN,fontSize:13,lineHeight:1.1,letterSpacing:1}}>{nextEv.title.length>12?nextEv.title.slice(0,12)+"...":nextEv.title}</div>
+                <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:2,marginTop:3,fontWeight:600}}>{nextEvRsvps} RSVP · {nextEv.date.slice(5)}</div>
+              </>:<div style={{fontFamily:FB,color:MUTED,fontSize:13}}>No events</div>}
             </div>
           </>
         })()}
@@ -1585,39 +1590,39 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
         const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
         const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
         const inactive=ups.filter(p=>!activeThisWeek.has(p.email));
-        return inactive.length>0?<div style={{fontFamily:FB,color:ORANGE,fontSize:10,fontWeight:600,letterSpacing:1}}>
+        return inactive.length>0?<div style={{fontFamily:FB,color:ORANGE,fontSize:13,fontWeight:600,letterSpacing:1}}>
           ⚠ {inactive.length} player{inactive.length>1?"s":""} haven't logged this week: {inactive.slice(0,3).map(p=>p.name.split(" ")[0]).join(", ")}{inactive.length>3?` +${inactive.length-3} more`:""}
-        </div>:<div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:600,letterSpacing:1}}>✓ All players active this week</div>
+        </div>:<div style={{fontFamily:FB,color:VOLT,fontSize:13,fontWeight:600,letterSpacing:1}}>✓ All players active this week</div>
       })()}
     </div>
 
-    <SH t="ACTIVITY FEED" s="ALL SOURCES"/>{scores.length===0&&<Empty t="No scores yet" action="Once your players start logging drills, their activity will appear here. Share the app link to get started!"/>}{scores.slice(-20).reverse().map((s,i)=>{const dr=drills.find(d=>d.id===s.drillId);const pct=dr?Math.round(s.score/dr.max*100):0;const isHome=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:isHome?VOLT:LIGHT,background:isHome?VOLT+"15":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span></div><div style={{fontSize:10,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>}
+    <SH t="ACTIVITY FEED" s="ALL SOURCES"/>{scores.length===0&&<Empty t="No scores yet" action="Once your players start logging drills, their activity will appear here. Share the app link to get started!"/>}{scores.slice(-20).reverse().map((s,i)=>{const dr=drills.find(d=>d.id===s.drillId);const pct=dr?Math.round(s.score/dr.max*100):0;const isHome=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:isHome?VOLT:LIGHT,background:isHome?VOLT+"15":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:13,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:13}}>/{dr?.max}</span></div><div style={{fontSize:13,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>}
 
   {/* DRILLS */}
   {tab==="drills"&&!editD&&<div className="fade-up">
     <SH t="MANAGE DRILLS" s={`${drills.length} ACTIVE`}/>
-    <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
+    <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
     <div style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12,marginBottom:14}}>
-      <div style={{fontFamily:FD,color:CYAN,fontSize:12,letterSpacing:2,marginBottom:6}}>PROGRAM SHOOTING DRILLS ({programDrills.length}/7)</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginBottom:10}}>Add up to 7 coach-defined program drills for player score tracking and per-drill team leaderboards.</div>
+      <div style={{fontFamily:FD,color:CYAN,fontSize:13,letterSpacing:2,marginBottom:6}}>PROGRAM SHOOTING DRILLS ({programDrills.length}/7)</div>
+      <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginBottom:10}}>Add up to 7 coach-defined program drills for player score tracking and per-drill team leaderboards.</div>
       <div style={{display:"grid",gridTemplateColumns:"1.2fr 1fr .7fr",gap:6,marginBottom:8}}>
         <input value={newProgramDrill.name} onChange={e=>{setNewProgramDrill({...newProgramDrill,name:e.target.value});setProgramErr("")}} placeholder="Drill name" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
         <input value={newProgramDrill.desc} onChange={e=>setNewProgramDrill({...newProgramDrill,desc:e.target.value})} placeholder="Description" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
         <input value={newProgramDrill.max} onChange={e=>setNewProgramDrill({...newProgramDrill,max:e.target.value})} type="number" placeholder="Max" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
       </div>
       <div style={{display:"flex",gap:5,marginBottom:8}}>{ICONS.map(ic=><button key={`prog-${ic}`} onClick={()=>setNewProgramDrill({...newProgramDrill,icon:ic})} style={{width:34,height:34,borderRadius:8,border:`1px solid ${newProgramDrill.icon===ic?CYAN:BORDER_CLR}`,background:newProgramDrill.icon===ic?CYAN+"22":BG,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={14} color={newProgramDrill.icon===ic?CYAN:MUTED}/></button>)}</div>
-      <button onClick={handleAddProgramDrill} disabled={programDrills.length>=7} style={{width:"100%",padding:"9px",background:programDrills.length>=7?MUTED:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:11,letterSpacing:2,cursor:programDrills.length>=7?"default":"pointer",opacity:programDrills.length>=7?.6:1}}>+ ADD PROGRAM DRILL</button>
-      {programErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:10,marginTop:6}}>{programErr}</div>}
-      <div style={{marginTop:10}}>{programDrills.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:10}}>No program drills yet.</div>:programDrills.map(pd=>{const b=scores.filter(s=>s.src==="program"&&s.drillId===pd.id).reduce((m,s)=>{m[s.email]=(m[s.email]||0)+s.score;return m;},{});const lead=Object.entries(b).sort((a,b)=>b[1]-a[1]).slice(0,3);return <div key={pd.id} style={{display:"flex",alignItems:"center",gap:8,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px",marginBottom:6}}><DrillIcon type={pd.icon} size={14}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>{pd.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9}}>Leaderboard: {lead.length===0?"No scores":lead.map(([email,total],i)=>`#${i+1} ${(players.find(p=>p.email===email)?.name||email.split("@")[0])} ${total}`).join(" · ")}</div></div><button onClick={()=>removeProgramDrill(pd.id)} style={{background:"#FF454512",border:"1px solid #FF454533",borderRadius:7,color:"#FF4545",padding:"4px 7px",fontSize:9,cursor:"pointer"}}>DEL</button></div>})}</div>
+      <button onClick={handleAddProgramDrill} disabled={programDrills.length>=7} style={{width:"100%",padding:"9px",background:programDrills.length>=7?MUTED:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:13,letterSpacing:2,cursor:programDrills.length>=7?"default":"pointer",opacity:programDrills.length>=7?.6:1}}>+ ADD PROGRAM DRILL</button>
+      {programErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:13,marginTop:6}}>{programErr}</div>}
+      <div style={{marginTop:10}}>{programDrills.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:13}}>No program drills yet.</div>:programDrills.map(pd=>{const b=scores.filter(s=>s.src==="program"&&s.drillId===pd.id).reduce((m,s)=>{m[s.email]=(m[s.email]||0)+s.score;return m;},{});const lead=Object.entries(b).sort((a,b)=>b[1]-a[1]).slice(0,3);return <div key={pd.id} style={{display:"flex",alignItems:"center",gap:8,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px",marginBottom:6}}><DrillIcon type={pd.icon} size={14}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>{pd.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:13}}>Leaderboard: {lead.length===0?"No scores":lead.map(([email,total],i)=>`#${i+1} ${(players.find(p=>p.email===email)?.name||email.split("@")[0])} ${total}`).join(" · ")}</div></div><button onClick={()=>removeProgramDrill(pd.id)} style={{background:"#FF454512",border:"1px solid #FF454533",borderRadius:7,color:"#FF4545",padding:"4px 7px",fontSize:13,cursor:"pointer"}}>DEL</button></div>})}</div>
     </div>
 
     {drills.map(d=>{const dS=scores.filter(s=>s.drillId===d.id);const avg=dS.length?Math.round(dS.reduce((a,s)=>a+s.score,0)/dS.length*10)/10:0;return <div key={d.id} style={{display:"flex",gap:8,marginBottom:10,alignItems:"stretch"}}>
       <button className="ch" onClick={()=>{setEditD(d);setEName(d.name);setEDesc(d.desc);setEInstr(d.instructions||"");setEMax(String(d.max));setEIcon(d.icon||"ft")}} style={{flex:1,display:"flex",alignItems:"center",gap:14,background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"16px 18px",cursor:"pointer",textAlign:"left"}}>
         <div style={{width:44,height:44,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><DrillIcon type={d.icon} size={22}/></div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-          <div style={{color:"#484848",fontSize:10,marginTop:2,fontWeight:500}}>{d.desc}</div>
-          <div style={{color:T.SUB,fontSize:9,marginTop:3,fontWeight:600}}>MAX: {d.max} · {dS.length} logged · Avg: {avg}</div>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+          <div style={{color:"#484848",fontSize:13,marginTop:2,fontWeight:500}}>{d.desc}</div>
+          <div style={{color:T.SUB,fontSize:13,marginTop:3,fontWeight:600}}>MAX: {d.max} · {dS.length} logged · Avg: {avg}</div>
         </div>
         <svg width="14" height="14" fill="none" stroke={VOLT} strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       </button>
@@ -1635,14 +1640,14 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
       <div style={{display:"flex",gap:8}}>
         <div style={{flex:1}}><FF l="MAX SCORE" v={nd.max} set={v=>setNd({...nd,max:v})} tp="number" ph="10"/></div>
         <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
+          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
           <div style={{display:"flex",gap:4,marginBottom:14}}>{ICONS.map(ic=><button key={ic} onClick={()=>setNd({...nd,icon:ic})} style={{width:44,height:44,borderRadius:10,background:nd.icon===ic?VOLT+"22":BG,border:`1px solid ${nd.icon===ic?VOLT:BORDER_CLR}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={16} color={nd.icon===ic?VOLT:MUTED}/></button>)}</div>
         </div>
       </div>
       <FF l="DETAILED INSTRUCTIONS (OPTIONAL)" v={nd.instructions} set={v=>setNd({...nd,instructions:v})} ta ph="Coaching cues, setup details..."/>
       <div style={{display:"flex",gap:8}}>
-        <button onClick={()=>{setShowNewDrill(false);setNd({name:"",desc:"",max:"10",icon:"ft",instructions:""})}} style={{flex:1,padding:"13px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-        <button className="btn-v" onClick={handleAddDrill} style={{flex:1,padding:"13px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD DRILL</button>
+        <button onClick={()=>{setShowNewDrill(false);setNd({name:"",desc:"",max:"10",icon:"ft",instructions:""})}} style={{flex:1,padding:"13px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
+        <button className="btn-v" onClick={handleAddDrill} style={{flex:1,padding:"13px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:13,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD DRILL</button>
       </div>
     </div>}
   </div>}
@@ -1654,54 +1659,54 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
     <div style={{display:"flex",gap:8}}>
       <div style={{flex:1}}><FF l="MAX SCORE" v={eMax} set={setEMax} tp="number"/></div>
       <div style={{flex:1}}>
-        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
         <div style={{display:"flex",gap:4,marginBottom:14}}>{ICONS.map(ic=><button key={ic} onClick={()=>setEIcon(ic)} style={{width:44,height:44,borderRadius:10,background:eIcon===ic?VOLT+"22":BG,border:`1px solid ${eIcon===ic?VOLT:BORDER_CLR}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={16} color={eIcon===ic?VOLT:MUTED}/></button>)}</div>
       </div>
     </div>
     <FF l="DETAILED INSTRUCTIONS" v={eInstr} set={setEInstr} ta ph="Step-by-step breakdown, coaching cues, key focus areas..."/>
-    <button className="btn-v" onClick={saveDrill} style={{width:"100%",padding:"15px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:20,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer"}}>SAVE &#8594;</button>
+    <button className="btn-v" onClick={saveDrill} style={{width:"100%",padding:"15px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer"}}>SAVE &#8594;</button>
   </div>}
 
   {/* EVENTS */}
   {tab==="events"&&<div className="fade-up">
     <SH t="MANAGE EVENTS" s={`${events.length} TOTAL`}/>
-    <button onClick={()=>setShowAdd(!showAdd)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:18,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
+    <button onClick={()=>setShowAdd(!showAdd)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
     {showAdd&&<div className="fade-up" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
       <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="e.g. OPEN GYM RUN"/>
       <div style={{display:"flex",gap:8}}><div style={{flex:1}}><FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} ph="2026-03-15" tp="date"/></div><div style={{flex:1}}><FF l="TIME" v={ne.time} set={v=>setNe({...ne,time:v})} ph="6:00 PM"/></div></div>
       <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym"/><FF l="DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ph="Details..." ta/>
-      <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
-      <div style={{display:"flex",gap:4,marginBottom:18,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"7px 12px",borderRadius:8,border:ne.type===t?`1px solid ${VOLT}`:`1px solid ${BORDER_CLR}`,background:ne.type===t?VOLT+"15":"transparent",color:ne.type===t?VOLT:MUTED,fontFamily:FD,fontSize:11,letterSpacing:2,cursor:"pointer",textTransform:"uppercase"}}>{t}</button>)}</div>
-      <button className="btn-v" onClick={handleAddEvent} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE EVENT</button>
+      <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
+      <div style={{display:"flex",gap:4,marginBottom:18,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"7px 12px",borderRadius:8,border:ne.type===t?`1px solid ${VOLT}`:`1px solid ${BORDER_CLR}`,background:ne.type===t?VOLT+"15":"transparent",color:ne.type===t?VOLT:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,cursor:"pointer",textTransform:"uppercase"}}>{t}</button>)}</div>
+      <button className="btn-v" onClick={handleAddEvent} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE EVENT</button>
     </div>}
 
     {[...events].sort((a,b)=>a.date.localeCompare(b.date)).map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const isExp=expEv===ev.id;
       return <div key={ev.id} style={{marginBottom:10}}>
         <button onClick={()=>setExpEv(isExp?null:ev.id)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:isExp?"14px 14px 0 0":14,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,cursor:"pointer",textAlign:"left"}}>
-          <EventIcon type={ev.type} size={22} color={ev.date>=today?CYAN:MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>{ev.date} &#183; {ev.time} &#183; <span style={{color:VOLT}}>{evR.length} RSVP</span></div></div>
+          <EventIcon type={ev.type} size={22} color={ev.date>=today?CYAN:MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:2}}>{ev.date} &#183; {ev.time} &#183; <span style={{color:VOLT}}>{evR.length} RSVP</span></div></div>
           <svg width="12" height="12" viewBox="0 0 16 16" style={{transform:isExp?"rotate(90deg)":"none",transition:"transform .2s",flexShrink:0}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
         </button>
         {isExp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 14px 14px",padding:"16px 16px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
-          <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:12}}>{ev.desc}</p>
-          <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>ATTENDEES ({evR.length})</div>
-          {evR.length===0&&<p style={{fontFamily:FB,color:T.SUB,fontSize:11,marginBottom:10}}>No attendees yet</p>}
+          <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.5,marginBottom:12}}>{ev.desc}</p>
+          <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,letterSpacing:2,fontWeight:700,marginBottom:8}}>ATTENDEES ({evR.length})</div>
+          {evR.length===0&&<p style={{fontFamily:FB,color:T.SUB,fontSize:13,marginBottom:10}}>No attendees yet</p>}
           {evR.map((r,i)=>{const t=getTier(rsvps.filter(rr=>rr.email===r.email).length);return <div key={i} style={{display:"flex",alignItems:"center",gap:8,background:CARD_BG,borderRadius:10,padding:"9px 12px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}>
-            <Av n={r.name} sz={26} email={r.email}/><div style={{flex:1,minWidth:0}}><div style={{display:"flex",alignItems:"center",gap:5}}><span style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:600}}>{r.name}</span>{t.min>=2&&<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:t.color,background:t.bg}}>{t.name}</span>}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:1}}>{r.email}</div></div>
-            <button onClick={()=>removeRsvp(ev.id,r.email)} style={{background:"#FF454512",border:"1px solid #FF454533",borderRadius:7,color:"#FF4545",fontFamily:FD,fontSize:9,letterSpacing:1,padding:"4px 8px",cursor:"pointer",display:"flex",alignItems:"center",gap:3,whiteSpace:"nowrap"}}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>NO-SHOW</button>
+            <Av n={r.name} sz={26} email={r.email}/><div style={{flex:1,minWidth:0}}><div style={{display:"flex",alignItems:"center",gap:5}}><span style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{r.name}</span>{t.min>=2&&<span style={{fontFamily:FB,fontSize:13,fontWeight:700,padding:"1px 4px",borderRadius:3,color:t.color,background:t.bg}}>{t.name}</span>}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:13,marginTop:1}}>{r.email}</div></div>
+            <button onClick={()=>removeRsvp(ev.id,r.email)} style={{background:"#FF454512",border:"1px solid #FF454533",borderRadius:7,color:"#FF4545",fontFamily:FD,fontSize:13,letterSpacing:1,padding:"4px 8px",cursor:"pointer",display:"flex",alignItems:"center",gap:3,whiteSpace:"nowrap"}}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>NO-SHOW</button>
           </div>})}
 
           {/* ADD WALK-IN */}
           <div style={{marginTop:12,padding:"14px 14px",background:CARD_BG,borderRadius:12,border:`1px solid ${BORDER_CLR}`}}>
-            <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>+ ADD WALK-IN ATTENDEE</div>
-            <div style={{fontFamily:FB,color:T.MUT,fontSize:10,marginBottom:8}}>Give credit to players who showed up without an RSVP</div>
+            <div style={{fontFamily:FB,color:VOLT,fontSize:13,letterSpacing:2,fontWeight:700,marginBottom:8}}>+ ADD WALK-IN ATTENDEE</div>
+            <div style={{fontFamily:FB,color:T.MUT,fontSize:13,marginBottom:8}}>Give credit to players who showed up without an RSVP</div>
             {/* Quick-add from known players */}
             {allKnown.filter(p=>!evR.some(r=>r.email===p.email)).length>0&&<div style={{marginBottom:10}}>
-              <div style={{fontFamily:FB,color:T.MUT,fontSize:9,letterSpacing:1,marginBottom:6,fontWeight:600}}>KNOWN PLAYERS</div>
+              <div style={{fontFamily:FB,color:T.MUT,fontSize:13,letterSpacing:1,marginBottom:6,fontWeight:600}}>KNOWN PLAYERS</div>
               <div style={{display:"flex",flexWrap:"wrap",gap:4}}>
                 {allKnown.filter(p=>!evR.some(r=>r.email===p.email)).map(p=><button key={p.email} onClick={()=>addRsvp(ev.id,p.email,p.name)} style={{display:"flex",alignItems:"center",gap:5,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,padding:"5px 10px",cursor:"pointer",transition:"border-color .2s"}} onMouseEnter={e=>e.currentTarget.style.borderColor=CYAN+"66"} onMouseLeave={e=>e.currentTarget.style.borderColor=BORDER_CLR}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2"><path d="M12 5v14M5 12h14"/></svg>
-                  <span style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:600}}>{p.name}</span>
+                  <span style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{p.name}</span>
                 </button>)}
               </div>
             </div>}
@@ -1721,15 +1726,15 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 
   {tab==="players"&&!selP&&<div>
     <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:12}}>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:8}}>ADD PLAYER TO ROSTER</div>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,marginBottom:8}}>ADD PLAYER TO ROSTER</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
         <input value={newProfile.firstName} onChange={e=>{setNewProfile({...newProfile,firstName:e.target.value});setProfileErr("")}} placeholder="First" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
         <input value={newProfile.lastName} onChange={e=>{setNewProfile({...newProfile,lastName:e.target.value});setProfileErr("")}} placeholder="Last" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
         <input value={newProfile.jerseyNumber} onChange={e=>setNewProfile({...newProfile,jerseyNumber:e.target.value})} placeholder="Jersey" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
       </div>
-      {profileErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:8}}>{profileErr}</div>}
+      {profileErr&&<div style={{color:"#FF4545",fontSize:13,marginTop:8}}>{profileErr}</div>}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:10}}>
-        <div style={{fontSize:10,color:MUTED,fontFamily:FB}}>{playerProfiles.length} player profiles on team</div>
+        <div style={{fontSize:13,color:MUTED,fontFamily:FB}}>{playerProfiles.length} player profiles on team</div>
         <button onClick={async()=>{const r=await addRosterPlayer(newProfile);if(!r.ok)setProfileErr(r.err||"Could not add player");else setNewProfile({firstName:"",lastName:"",jerseyNumber:""});}} style={{padding:"8px 12px",background:VOLT,color:"#000000",border:"none",borderRadius:8,fontFamily:FD,letterSpacing:1,cursor:"pointer"}}>ADD</button>
       </div>
     </div>
@@ -1742,18 +1747,18 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
           <Av n={p.name} sz={36} email={p.email}/>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>{p.name.toUpperCase()}</div>
-            <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>{tot} makes · {rsvps.filter(r=>r.email===p.email).length} events</div>
+            <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:2}}>{tot} makes · {rsvps.filter(r=>r.email===p.email).length} events</div>
           </div>
           <svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
         </button>})}
     </div>
     {/* Account management — required by App Store §5.1.1(v) */}
     <div style={{marginTop:32,paddingTop:20,borderTop:`1px solid ${BORDER_CLR}44`}}>
-      <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#FF4545",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
-      <p style={{fontFamily:FB,color:MUTED,fontSize:9,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
+      <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:13,color:"#FF4545",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
+      <p style={{fontFamily:FB,color:MUTED,fontSize:13,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
     </div>
   </div>}
-  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {scores.filter(s=>s.email===selP.email&&(s.src==="home"||!s.src)).length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills}/></div>}
+  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:13,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:13,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {scores.filter(s=>s.email===selP.email&&(s.src==="home"||!s.src)).length}</span><span style={{fontFamily:FB,fontSize:13,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:13,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills}/></div>}
 
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="fade-up">
@@ -1772,8 +1777,8 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>
         </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{s.sport||s.title}</div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>{s.date} &#183; {s.time} &#183; <span style={{color:"#A0A0A0"}}>{sr.length} RSVPs</span></div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{s.sport||s.title}</div>
+          <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:2}}>{s.date} &#183; {s.time} &#183; <span style={{color:"#A0A0A0"}}>{sr.length} RSVPs</span></div>
         </div>
         <button onClick={()=>removeScSession(s.id)} style={{background:"none",border:"none",color:"#FF4545",cursor:"pointer",fontSize:16,padding:4}}>&#10005;</button>
       </div>;
@@ -1798,7 +1803,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 function HistPanel({sc,dr}){
 const sorted=useMemo(()=>[...sc].sort((a,b)=>(b.ts||0)-(a.ts||0)),[sc]);
 const grouped=useMemo(()=>{const m={};sorted.forEach(s=>{if(!m[s.date])m[s.date]=[];m[s.date].push(s)});return Object.entries(m)},[sorted]);
-return <div><SH t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=dr.find(d=>d.id===s.drillId);const pct=d?Math.round(s.score/d.max*100):0;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:LIGHT,background:isH?VOLT+"15":LIGHT+"10"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span></div><div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>)}</div>;
+return <div><SH t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:13,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=dr.find(d=>d.id===s.drillId);const pct=d?Math.round(s.score/d.max*100):0;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:13,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:LIGHT,background:isH?VOLT+"15":LIGHT+"10"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:13}}>/{d?.max}</span></div><div style={{fontFamily:FB,fontSize:13,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>)}</div>;
 }
 
 // ═══════════════════════════════════════
@@ -1831,8 +1836,8 @@ return{...d,pb,avg,count:ds.length,last10,trend};
 }),[drills,homeScores]);
 
 const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}>
-<div><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>{sub}</div>}</div>
-<div style={{fontFamily:FD,color,fontSize:22}}>{value}</div>
+<div><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:2}}>{sub}</div>}</div>
+<div style={{fontFamily:FD,color,fontSize:16}}>{value}</div>
 
   </div>;
 
@@ -1846,17 +1851,17 @@ return <div className="fade-up">
 {/* SL logo watermark */}
 <div style={{position:"absolute",top:12,right:16,opacity:.06,pointerEvents:"none"}}><SLLogo size={90} opacity={.06}/></div>
 
-  <div style={{fontFamily:FB,color:VOLT,fontSize:9,letterSpacing:5,fontWeight:700,marginBottom:12}}>OFFSEASON REPORT CARD</div>
+  <div style={{fontFamily:FB,color:VOLT,fontSize:13,letterSpacing:5,fontWeight:700,marginBottom:12}}>OFFSEASON REPORT CARD</div>
   <Av n={u.name} sz={64} email={u.email} style={{margin:"0 auto 14px"}}/>
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:32,letterSpacing:4,lineHeight:1}}>{u.name.toUpperCase()}</div>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:6,letterSpacing:2}}>OFFSEASON 2026</div>
+  <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:4,lineHeight:1}}>{u.name.toUpperCase()}</div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:6,letterSpacing:2}}>OFFSEASON 2026</div>
 
   {/* Big stats row */}
   <div style={{display:"flex",gap:6,marginTop:20,justifyContent:"center"}}>
     {[{v:totalMakes+totalShots,l:"TOTAL MAKES",c:VOLT},{v:bestStreak+"D",l:"BEST STREAK",c:ORANGE},{v:eventsAttended,l:"EVENTS",c:CYAN}].map(s=>
       <div key={s.l} style={{flex:1,background:"#0a0a0a",borderRadius:14,padding:"14px 8px",border:`1px solid ${BORDER_CLR}`}}>
         <div style={{fontFamily:FD,color:s.c,fontSize:26,lineHeight:1}}>{s.v}</div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:4,fontWeight:600}}>{s.l}</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:2,marginTop:4,fontWeight:600}}>{s.l}</div>
       </div>)}
   </div>
 
@@ -1868,13 +1873,13 @@ return <div className="fade-up">
       :sessionsLogged>0?`${sessionsLogged} training sessions logged`
       :null;
     return highlight?<div style={{marginTop:16,padding:"8px 16px",background:VOLT+"08",borderRadius:10,border:`1px solid ${VOLT}22`,display:"inline-block"}}>
-      <div style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:600,letterSpacing:1}}>★ {highlight.toUpperCase()}</div>
+      <div style={{fontFamily:FB,color:VOLT,fontSize:13,fontWeight:600,letterSpacing:1}}>★ {highlight.toUpperCase()}</div>
     </div>:null})()}
 
   {/* Watermark */}
   <div style={{marginTop:16,display:"flex",alignItems:"center",justifyContent:"center",gap:4,opacity:.25}}>
     <SLLogo size={24}/>
-    <span style={{fontFamily:FD,fontSize:10,color:VOLT,letterSpacing:3}}>SHOTLAB</span>
+    <span style={{fontFamily:FD,fontSize:13,color:VOLT,letterSpacing:3}}>SHOTLAB</span>
   </div>
 </div>
 
@@ -1883,24 +1888,24 @@ return <div className="fade-up">
   <div style={{position:"absolute",top:0,right:0,width:120,height:120,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}08,transparent)`,transform:"translate(30%,-30%)"}}/>
   <Av n={u.name} sz={72} email={u.email} style={{margin:"0 auto 16px"}}/>
   <div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:3}}>{u.name.toUpperCase()}</div>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:4,letterSpacing:2}}>OFFSEASON PLAYER</div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:4,letterSpacing:2}}>OFFSEASON PLAYER</div>
   {/* Quick stats row */}
   <div style={{display:"flex",gap:6,marginTop:20,justifyContent:"center"}}>
     {[{v:totalMakes+totalShots,l:"MAKES",c:VOLT},{v:sessionsLogged,l:"SESSIONS",c:LIGHT},{v:streak,l:"STREAK",c:ORANGE}].map(s=>
       <div key={s.l} style={{background:BG,borderRadius:12,padding:"10px 14px",border:`1px solid ${BORDER_CLR}`,minWidth:70}}>
-        <div style={{fontFamily:FD,color:s.c,fontSize:22,lineHeight:1}}>{s.v}</div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:3,fontWeight:600}}>{s.l}</div>
+        <div style={{fontFamily:FD,color:s.c,fontSize:16,lineHeight:1}}>{s.v}</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:2,marginTop:3,fontWeight:600}}>{s.l}</div>
       </div>)}
   </div>
 </div>
 
 {/* Badges */}
 {earnedBadges.length>0&&<div style={{marginBottom:24}}>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>BADGES EARNED</div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:3,fontWeight:700,marginBottom:10}}>BADGES EARNED</div>
   <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{earnedBadges.map(b=>
     <div key={b.days} style={{display:"flex",alignItems:"center",gap:5,background:`${b.color}10`,border:`1px solid ${b.color}33`,borderRadius:10,padding:"6px 12px"}}>
-      <span style={{fontFamily:FD,fontSize:14,color:b.color}}>{b.icon}</span>
-      <span style={{fontFamily:FB,fontSize:10,color:b.color,fontWeight:700,letterSpacing:1}}>{b.name}</span>
+      <span style={{fontFamily:FD,fontSize:13,color:b.color}}>{b.icon}</span>
+      <span style={{fontFamily:FB,fontSize:13,color:b.color,fontWeight:700,letterSpacing:1}}>{b.name}</span>
     </div>)}
   </div>
 </div>}
@@ -1917,12 +1922,12 @@ return <div className="fade-up">
 </div>
 
 {/* Per-drill breakdown with PBs and trends */}
-<div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
 {drillStats.map(d=>{const accentColor=getDrillAccentColor(d.name);return <div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
     <DrillIcon type={d.icon} size={20} color={accentColor}/>
     <div style={{flex:1,fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-    <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"2px 8px",borderRadius:5,
+    <div style={{fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:1,padding:"2px 8px",borderRadius:5,
       color:d.trend==="up"?"#C8FF00":d.trend==="down"?"#FF4545":MUTED,
       background:d.trend==="up"?"#C8FF0015":d.trend==="down"?"#FF454515":BORDER_CLR}}>
       {d.trend==="up"?"▲ IMPROVING":d.trend==="down"?"▼ DECLINING":"— STEADY"}
@@ -1930,40 +1935,40 @@ return <div className="fade-up">
   </div>
   <div style={{display:"flex",gap:8,marginBottom:d.last10.length>=2?12:0}}>
     <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-      <div style={{fontFamily:FD,color:ORANGE,fontSize:20}}>{d.pb}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>PB</div>
+      <div style={{fontFamily:FD,color:ORANGE,fontSize:16}}>{d.pb}</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:2,marginTop:2,fontWeight:600}}>PB</div>
     </div>
     <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-      <div style={{fontFamily:FD,color:VOLT,fontSize:20}}>{d.avg}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>AVG</div>
+      <div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{d.avg}</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:2,marginTop:2,fontWeight:600}}>AVG</div>
     </div>
     <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:20}}>{d.count}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>LOGGED</div>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:16}}>{d.count}</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:2,marginTop:2,fontWeight:600}}>LOGGED</div>
     </div>
   </div>
   {/* Mini sparkline chart of last 10 scores */}
   {d.last10.length>=2&&<div style={{display:"flex",alignItems:"center",gap:8}}>
-    <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:1,fontWeight:600,flexShrink:0}}>LAST {d.last10.length}</div>
+    <div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:1,fontWeight:600,flexShrink:0}}>LAST {d.last10.length}</div>
     <Sparkline data={d.last10} color={VOLT} w={200} h={20}/>
   </div>}
 </div>})}
 
 {/* ══════ ACCOUNT MANAGEMENT ══════ */}
 <div style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${BORDER_CLR}44`}}>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>ACCOUNT</div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:13,letterSpacing:3,fontWeight:700,marginBottom:12}}>ACCOUNT</div>
   {!confirmDel?<button onClick={()=>setConfirmDel(true)} style={{width:"100%",padding:"14px",background:"transparent",border:`1px solid #FF454544`,borderRadius:12,cursor:"pointer",fontFamily:FB,fontSize:13,color:"#FF4545",fontWeight:600,letterSpacing:1}}>
     Delete Account & All Data
   </button>
   :<div className="fade-up" style={{background:"#FF454508",borderRadius:16,padding:"20px",border:`1px solid #FF454533`}}>
-    <div style={{fontFamily:FD,color:"#FF4545",fontSize:18,letterSpacing:3,marginBottom:8}}>DELETE ACCOUNT?</div>
-    <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:16}}>This will permanently delete your account, scores, shot logs, RSVPs, and all associated data. This cannot be undone.</p>
+    <div style={{fontFamily:FD,color:"#FF4545",fontSize:16,letterSpacing:3,marginBottom:8}}>DELETE ACCOUNT?</div>
+    <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.5,marginBottom:16}}>This will permanently delete your account, scores, shot logs, RSVPs, and all associated data. This cannot be undone.</p>
     <div style={{display:"flex",gap:8}}>
-      <button onClick={()=>setConfirmDel(false)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-      <button onClick={deleteAccount} style={{flex:1,padding:"12px",background:"#FF4545",color:"#FFFFFF",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
+      <button onClick={()=>setConfirmDel(false)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
+      <button onClick={deleteAccount} style={{flex:1,padding:"12px",background:"#FF4545",color:"#FFFFFF",fontFamily:FD,fontSize:13,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
     </div>
   </div>}
-  <p style={{fontFamily:FB,color:MUTED,fontSize:10,textAlign:"center",marginTop:12,lineHeight:1.5}}>Your data is stored locally on this device. Deleting your account removes all your personal information and scores.</p>
+  <p style={{fontFamily:FB,color:MUTED,fontSize:13,textAlign:"center",marginTop:12,lineHeight:1.5}}>Your data is stored locally on this device. Deleting your account removes all your personal information and scores.</p>
 </div>
 
   </div>;
@@ -1990,7 +1995,7 @@ const statusLabel={complete:"ALL DONE",partial:"STARTED",active:"ACTIVE",inactiv
 
 return <div className="fade-up">
 <SH t="PLAYER ROSTER" s={`${roster.length} PLAYERS`}/>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:18,lineHeight:1.5}}>Track who's putting in work today. Tap "NUDGE" to flag inactive players for follow-up.</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:13,marginBottom:18,lineHeight:1.5}}>Track who's putting in work today. Tap "NUDGE" to flag inactive players for follow-up.</div>
 
 {roster.length===0&&<Empty t="No players registered yet" action="Players need to create an account and log their first score to appear here."/>}
 {roster.map(p=>{const c=statusColor[p.status];const isNudged=nudged.includes(p.email);
@@ -2002,9 +2007,9 @@ return <div className="fade-up">
     <div style={{flex:1,minWidth:0}}>
       <div style={{display:"flex",alignItems:"center",gap:6}}>
         <span style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>{p.name}</span>
-        <span style={{fontFamily:FB,fontSize:7,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:c,background:c+"15"}}>{statusLabel[p.status]}</span>
+        <span style={{fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:c,background:c+"15"}}>{statusLabel[p.status]}</span>
       </div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:3}}>
+      <div style={{fontFamily:FB,color:MUTED,fontSize:13,marginTop:3}}>
         {p.status==="complete"?`${p.drillsDone}/${p.totalDrills} drills · ${p.shotsToday} shots`
         :p.status==="partial"?`${p.drillsDone}/${p.totalDrills} drills done · ${p.shotsToday} shots`
         :p.daysAgo===null?"Never logged"
@@ -2013,7 +2018,7 @@ return <div className="fade-up">
         {p.streak>0&&<span style={{color:ORANGE}}> · {p.streak}D 🔥</span>}
       </div>
     </div>
-    {p.status==="inactive"&&<button onClick={()=>{if(!isNudged)setNudged(n=>[...n,p.email])}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${isNudged?VOLT+"44":"#FF454544"}`,background:isNudged?VOLT+"12":"#FF454512",cursor:"pointer",fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,color:isNudged?VOLT:"#FF4545",whiteSpace:"nowrap"}}>
+    {p.status==="inactive"&&<button onClick={()=>{if(!isNudged)setNudged(n=>[...n,p.email])}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${isNudged?VOLT+"44":"#FF454544"}`,background:isNudged?VOLT+"12":"#FF454512",cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:1,color:isNudged?VOLT:"#FF4545",whiteSpace:"nowrap"}}>
       {isNudged?"✓ NUDGED":"NUDGE"}
     </button>}
   </div>})}
@@ -2033,19 +2038,19 @@ function calcStreak(sc){const ds=[...new Set(sc.map(s=>s.date))].sort().reverse(
 function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return Math.abs(h)}
 const AVG=[["#C8FF00","#00E5FF"],["#C8FF00","#C8FF00"],["#00E5FF","#C8FF00"],["#C8FF00","#C8FF00"],["#A0A0A0","#00E5FF"],["#C8FF00","#C8FF00"],["#C8FF00","#00E5FF"],["#C8FF00","#C8FF00"]];
 function AnimNum({v,c=VOLT,big,size}){const[display,setDisplay]=useState(0);const[isVisible,setIsVisible]=useState(false);useEffect(()=>{setIsVisible(false);const fadeIn=requestAnimationFrame(()=>setIsVisible(true));if(typeof v!=="number"){setDisplay(v);return()=>cancelAnimationFrame(fadeIn)}let cancelled=false;const end=v;const dur=600;const t0=Date.now();const step=()=>{if(cancelled)return;const elapsed=Date.now()-t0;const prog=Math.min(elapsed/dur,1);const eased=1-Math.pow(1-prog,3);setDisplay(Math.round(eased*end));if(prog<1)requestAnimationFrame(step)};step();return()=>{cancelAnimationFrame(fadeIn);cancelled=true}},[v]);return <span className="cnt-up" style={{fontFamily:FD,color:c,fontSize:size||(big?42:26),letterSpacing:1,lineHeight:1,fontWeight:700,opacity:isVisible?1:0,transition:"opacity 150ms ease"}}>{display}</span>}
-function SC({l,v,c=VOLT,big,small,fire,accent}){const inner=<div style={{flex:big?1.6:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:big?"22px 18px":"14px 12px",position:"relative",overflow:"hidden"}}>{fire&&<div style={{position:"absolute",top:6,right:8,fontSize:14}}>🔥</div>}{typeof v==="number"?<AnimNum v={v} c={c} big={big}/>:<div style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{v}</div>}<div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:big?6:4,fontWeight:600}}>{l}</div></div>;if(accent)return <div className="grd-bdr" style={{flex:big?1.6:1}}>{inner}</div>;return <div style={{flex:big?1.6:1}}><div style={{border:`1px solid ${BORDER_CLR}`,borderRadius:16}}>{inner}</div></div>}
-function SH({t,s}){return <div style={{marginBottom:16,display:"flex",alignItems:"baseline",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:4}}>{t}</div>{s&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{s}</div>}</div>}
+function SC({l,v,c=VOLT,big,small,fire,accent}){const inner=<div style={{flex:big?1.6:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:big?"22px 18px":"14px 12px",position:"relative",overflow:"hidden"}}>{fire&&<div style={{position:"absolute",top:6,right:8,fontSize:13}}>🔥</div>}{typeof v==="number"?<AnimNum v={v} c={c} big={big}/>:<div style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{v}</div>}<div style={{fontFamily:FB,color:T.SUB,fontSize:13,letterSpacing:3,marginTop:big?6:4,fontWeight:600}}>{l}</div></div>;if(accent)return <div className="grd-bdr" style={{flex:big?1.6:1}}>{inner}</div>;return <div style={{flex:big?1.6:1}}><div style={{border:`1px solid ${BORDER_CLR}`,borderRadius:16}}>{inner}</div></div>}
+function SH({t,s}){return <div style={{marginTop:24,marginBottom:12,display:"flex",alignItems:"baseline",justifyContent:"space-between"}}><div style={{...TYPE.display,color:TOKENS.PRIMARY}}>{t}</div>{s&&<div style={{...TYPE.body,color:T.SUB}}>{s}</div>}</div>}
 function Av({n,sz=36,style:x,email}){const idx=email?hashCode(email)%AVG.length:hashCode(n||"?")%AVG.length;const[c1,c2]=AVG[idx];return <div style={{width:sz,height:sz,borderRadius:"50%",background:`linear-gradient(135deg,${c1}44,${c2}44)`,border:`2px solid ${c1}33`,color:c1,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:sz*.42,flexShrink:0,letterSpacing:1,boxShadow:`0 0 12px ${c1}11`,...x}}>{(n||"?")[0].toUpperCase()}</div>}
 function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i)=>{const angle=(i/24)*360*(Math.PI/180);const dist=60+Math.random()*80;const x=Math.cos(angle)*dist;const y=Math.sin(angle)*dist-20;const colors=[VOLT,ORANGE,CYAN,"#C8FF00","#C8FF00","#FFFFFF"];return {x,y,color:colors[i%colors.length],size:3+Math.random()*4,delay:Math.random()*0.15}}),[]);return <div style={{position:"absolute",top:"30%",left:"50%",zIndex:20,pointerEvents:"none"}}>{particles.map((p,i)=><div key={i} className="particle" style={{width:p.size,height:p.size,background:p.color,left:0,top:0,"–fly-to":`translate(${p.x}px,${p.y}px) scale(0)`,animationDelay:`${p.delay}s`,animationDuration:".7s"}}/>)}</div>}
 function CourtDivider({color=VOLT,my=20}){return <div style={{margin:`${my}px 0`,position:"relative",height:24,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><svg width="100%" height="24" viewBox="0 0 400 24" preserveAspectRatio="none" fill="none" style={{position:"absolute",inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:"50%",background:color,opacity:.15,position:"relative",zIndex:1}}/></div>}
 function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#555555",flexShrink:0}}>{r}</div>}
-function Empty({t,action,onTap}){return <div style={{textAlign:"center",padding:"40px 20px"}}><div className="ball-bounce" style={{display:"inline-block",opacity:.25}}><SLLogo size={48} opacity={.35}/></div><p style={{fontFamily:FB,color:"#555555",fontSize:12,marginTop:14,lineHeight:1.6}}>{t}</p>{action&&<p style={{fontFamily:FB,color:VOLT+"88",fontSize:11,marginTop:6,lineHeight:1.5,fontWeight:600}}>{action}</p>}{onTap&&<button onClick={onTap} className="btn-v" style={{marginTop:12,padding:"10px 24px",background:VOLT+"15",border:`1px solid ${VOLT}33`,borderRadius:10,color:VOLT,fontFamily:FD,fontSize:12,letterSpacing:3,cursor:"pointer"}}>GET STARTED →</button>}</div>}
-function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>}</>}
+function Empty({t,action,onTap}){return <div style={{textAlign:"center",padding:"40px 20px"}}><div className="ball-bounce" style={{display:"inline-block",opacity:.25}}><SLLogo size={48} opacity={.35}/></div><p style={{...TYPE.body,color:TOKENS.TEXT_MUTED,marginTop:14}}>{t}</p>{action&&<p style={{...TYPE.body,color:VOLT,marginTop:6}}>{action}</p>}{onTap&&<button onClick={onTap} className="btn-v" style={{marginTop:12,padding:"10px 24px",background:VOLT+"15",border:`1px solid ${VOLT}33`,borderRadius:10,color:VOLT,...TYPE.title,cursor:"pointer"}}>GET STARTED →</button>}</div>}
+function FF({l,v,set,ph,tp,ta}){return <><label style={{...TYPE.display,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:TOKENS.TEXT_SECONDARY,fontSize:13,fontFamily:FB,fontWeight:400,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.5,marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:TOKENS.TEXT_SECONDARY,fontSize:13,fontFamily:FB,fontWeight:400,outline:"none",marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>}</>}
 function NavBar({items,active,onChange}){
 const NAV_INACTIVE=TOKENS.TEXT_MUTED,NAV_HOVER=TOKENS.TEXT_SECONDARY;
 return <nav role="navigation" aria-label="Main navigation" style={{position:"fixed",left:0,right:0,bottom:0,display:"flex",alignItems:"stretch",height:64,paddingBottom:"env(safe-area-inset-bottom)",background:TOKENS.BG_ELEVATED,borderTop:`1px solid ${TOKENS.BG_SUBTLE}`,zIndex:100}}>{items.map(t=>{const a=active===t.k;
 return <button key={t.k} aria-label={t.l} onClick={()=>onChange(t.k)} onMouseEnter={e=>{if(!a)e.currentTarget.style.color=NAV_HOVER}} onMouseLeave={e=>{if(!a)e.currentTarget.style.color=NAV_INACTIVE}} onPointerDown={e=>{if(!a)e.currentTarget.style.color=NAV_HOVER}} onPointerUp={e=>{if(!a)e.currentTarget.style.color=NAV_INACTIVE}} onPointerCancel={e=>{if(!a)e.currentTarget.style.color=NAV_INACTIVE}} style={{flex:1,minWidth:0,minHeight:48,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"8px 4px 6px",position:"relative",background:"none",border:"none",cursor:"pointer",color:a?VOLT:NAV_INACTIVE,transition:"color 150ms ease",outlineOffset:2}}>
 {a&&<span aria-hidden="true" style={{position:"absolute",top:0,left:"50%",transform:"translateX(-50%)",width:24,height:2,borderRadius:1,background:VOLT}}/>}
 <div style={{position:"relative",lineHeight:1}}>{t.svg}{t.dot&&!a&&<div style={{position:"absolute",top:-1,right:-6,width:6,height:6,borderRadius:"50%",background:t.dot,border:`1.5px solid ${TOKENS.BG_ELEVATED}`}}/>}</div>
-<div style={{fontFamily:FB,fontSize:10,fontWeight:600,letterSpacing:"0.05em",textTransform:"uppercase",lineHeight:1.1,color:"currentColor",whiteSpace:"nowrap"}}>{t.l}</div>
+<div style={{...TYPE.body,color:"currentColor",whiteSpace:"nowrap"}}>{t.l}</div>
 </button>})}</nav>}
