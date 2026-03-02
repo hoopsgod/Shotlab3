@@ -776,6 +776,21 @@ const[showBoard,setShowBoard]=useState(false),[expanded,setExpanded]=useState(nu
 const sorted=useMemo(()=>[...sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
 const upcoming=sorted.filter(s=>s.date>=todayStr()),past=sorted.filter(s=>s.date<todayStr());
 const myCount=scRsvps.filter(r=>r.email===user.email).length;
+const currentYear=String(new Date().getFullYear());
+const myAttendanceByDate=useMemo(()=>{
+  const dateCounts={};
+  const sessionsById={};
+  sessions.forEach(s=>{sessionsById[s.id]=s});
+  scRsvps.forEach(r=>{
+    if(r.email!==user.email)return;
+    const session=sessionsById[r.sessionId];
+    if(!session?.date||!session.date.startsWith(currentYear))return;
+    dateCounts[session.date]=(dateCounts[session.date]||0)+1;
+  });
+  return Object.entries(dateCounts)
+    .sort((a,b)=>a[0].localeCompare(b[0]))
+    .map(([date,count])=>({date,count}));
+},[sessions,scRsvps,user,currentYear]);
 const medals=[VOLT,"#C0C0C0","#CD7F32"];
 
 const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[scRsvps]);
@@ -825,6 +840,21 @@ return <div className="fade-up">
   </div>
 </div>
 
+<div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
+  <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:10,marginBottom:10}}>
+    <div style={{fontFamily:FD,color:SC_COLOR,fontSize:22,letterSpacing:2}}>ATTENDANCE BY DATE ({currentYear})</div>
+    <div style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:1}}>{myAttendanceByDate.reduce((a,d)=>a+d.count,0)}</div>
+  </div>
+  {myAttendanceByDate.length===0
+    ?<div style={{fontFamily:FB,color:MUTED,fontSize:12}}>No S&C sessions attended yet this year.</div>
+    :<div style={{display:"grid",gap:6}}>
+      {myAttendanceByDate.map(entry=><div key={entry.date} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}>
+        <span style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700}}>{entry.date}</span>
+        <span style={{fontFamily:FD,color:SC_COLOR,fontSize:18,lineHeight:1}}>{entry.count}</span>
+      </div>)}
+    </div>}
+</div></div>
+
 {/* Leaderboard toggle */}
 <button onClick={()=>setShowBoard(!showBoard)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#131313)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
   <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:SC_COLOR+"15",display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={18} color={SC_COLOR}/></div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LIFTING LEADERBOARD</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>Ranked by sessions attended</div></div></div>
@@ -850,7 +880,7 @@ return <div className="fade-up">
       <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
         <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={24} color={going?SC_COLOR:MUTED}/></div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2}}>{s.title}</div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2}}>{s.sport||s.title}</div>
           <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}><span style={{color:SC_COLOR,fontWeight:700}}>{s.date}</span> &#183; {s.time}</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{s.location}</div>
         </div>
@@ -872,7 +902,7 @@ return <div className="fade-up">
   {past.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const went=sr.some(r=>r.email===user.email);
     return <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.7}}>
       <div style={{width:36,height:36,borderRadius:10,background:went?SC_COLOR+"12":BG,border:`1px solid ${went?SC_COLOR+"33":BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={16} color={went?SC_COLOR:MUTED}/></div>
-      <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{s.title}</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>{s.date} &#183; {sr.length} attended</div></div>
+      <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{s.sport||s.title}</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>{s.date} &#183; {sr.length} attended</div></div>
       {went&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,color:SC_COLOR,background:SC_COLOR+"12",padding:"2px 8px",borderRadius:4,letterSpacing:1}}>ATTENDED</span>}
     </div>;
   })}</>}
@@ -1232,7 +1262,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 // COACH SCREEN
 // ═══════════════════════════════════════
 function Coach({u,drills,scores,players,updateDrill,addDrill,removeDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,addScSession,removeScSession,shotLogs,logout,deleteAccount}){
-const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({title:"",date:"",time:"",location:"",desc:""});
+const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:""});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""});
 const[nudged,setNudged]=useState([]);
 const[confirmDelete,setConfirmDelete]=useState(null);
@@ -1250,7 +1280,7 @@ const e=addEmail.trim().toLowerCase();if(!e)return;
 const known=allKnown.find(p=>p.email===e);
 const name=known?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
 addRsvp(evId,e,name);setAddEmail("")};
-const handleAddSC=()=>{if(!nsc.title||!nsc.date)return;addScSession({...nsc,title:san(nsc.title),desc:san(nsc.desc),location:san(nsc.location)});setNsc({title:"",date:"",time:"",location:"",desc:""});setShowAddSC(false)};
+const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,sport:san(nsc.sport)});setNsc({sport:"",date:"",time:""});setShowAddSC(false)};
 
 return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative"}}>
 {/* Delete confirmation dialog */}
@@ -1468,10 +1498,8 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
       {showAddSC?"CANCEL":"+ ADD SESSION"}
     </button>
     {showAddSC&&<div className="fade-up" style={{background:CARD_BG,borderRadius:16,padding:"20px 18px",marginBottom:16,border:`1px solid ${BORDER_CLR}`}}>
-      <FF l="SESSION TITLE" v={nsc.title} set={v=>setNsc({...nsc,title:v})} ph="e.g. UPPER BODY POWER"/>
+      <FF l="SPORT" v={nsc.sport} set={v=>setNsc({...nsc,sport:v})} ph="e.g. Basketball"/>
       <div style={{display:"flex",gap:8}}><div style={{flex:1}}><FF l="DATE" v={nsc.date} set={v=>setNsc({...nsc,date:v})} tp="date"/></div><div style={{flex:1}}><FF l="TIME" v={nsc.time} set={v=>setNsc({...nsc,time:v})} ph="6:00 AM"/></div></div>
-      <FF l="LOCATION" v={nsc.location} set={v=>setNsc({...nsc,location:v})} ph="Weight Room — Bay A"/>
-      <FF l="DESCRIPTION" v={nsc.desc} set={v=>setNsc({...nsc,desc:v})} ph="What to expect..." ta/>
       <button className="btn-v" onClick={handleAddSC} style={{width:"100%",padding:"14px",background:"#a855f7",color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE SESSION</button>
     </div>}
     {scSessions.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);
@@ -1480,7 +1508,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>
         </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{s.title}</div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{s.sport||s.title}</div>
           <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>{s.date} &#183; {s.time} &#183; <span style={{color:"#a855f7"}}>{sr.length} RSVPs</span></div>
         </div>
         <button onClick={()=>removeScSession(s.id)} style={{background:"none",border:"none",color:"#ef4444",cursor:"pointer",fontSize:16,padding:4}}>&#10005;</button>
