@@ -1,4 +1,21 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+
+
+const IconWrap=({size=22,color="currentColor",children})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+const Users=({size=22,color="currentColor"})=><IconWrap size={size} color={color}><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="3"/><path d="M22 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></IconWrap>;
+const Search=({size=16,color="currentColor"})=><IconWrap size={size} color={color}><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.3-4.3"/></IconWrap>;
+const ChevronRight=({size=16,color="currentColor"})=><IconWrap size={size} color={color}><path d="M9 18l6-6-6-6"/></IconWrap>;
+const SortDesc=({size=16,color="currentColor"})=><IconWrap size={size} color={color}><path d="M11 5h10"/><path d="M11 9h7"/><path d="M11 13h4"/><path d="M3 17V7"/><path d="M6 14l-3 3-3-3"/></IconWrap>;
+const MessageCircle=({size=14,color="currentColor"})=><IconWrap size={size} color={color}><path d="M21 11.5a8.5 8.5 0 01-8.5 8.5H4l1.8-3.6A8.5 8.5 0 1112.5 3"/></IconWrap>;
+const UserMinus=({size=14,color="currentColor"})=><IconWrap size={size} color={color}><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="3"/><path d="M22 11h-6"/></IconWrap>;
+const UserPlus=({size=32,color="currentColor"})=><IconWrap size={size} color={color}><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="3"/><path d="M19 8v6"/><path d="M22 11h-6"/></IconWrap>;
+const Check=({size=14,color="#C8FF00"})=><IconWrap size={size} color={color}><path d="M20 6L9 17l-5-5"/></IconWrap>;
+const X=({size=14,color="#FF4545"})=><IconWrap size={size} color={color}><path d="M18 6L6 18M6 6l12 12"/></IconWrap>;
+const Home=({size=22,color="currentColor"})=><IconWrap size={size} color={color}><path d="M3 9.5L12 3l9 6.5"/><path d="M5 10.5V20h14v-9.5"/></IconWrap>;
+const Zap=({size=22,color="currentColor"})=><IconWrap size={size} color={color}><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></IconWrap>;
+const CalendarDays=({size=22,color="currentColor"})=><IconWrap size={size} color={color}><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></IconWrap>;
+const Dumbbell=({size=22,color="currentColor"})=><IconWrap size={size} color={color}><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></IconWrap>;
+const UserCircle2=({size=22,color="currentColor"})=><IconWrap size={size} color={color}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M7 18c1.6-1.6 3.3-2.5 5-2.5s3.4.9 5 2.5"/></IconWrap>;
 
 const TOKENS={
 PRIMARY:"#C8FF00",
@@ -784,7 +801,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
   {k:"sc",l:"Lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>,dot:soonSC>0?VOLT:null},
   {k:"program",l:"Events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
   {k:"profile",l:"Profile",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
-]} active={tab} onChange={switchTab}/>
+]} active={tab} onChange={switchTab} isCoach={false}/>
 
   </div>;
 }
@@ -1480,17 +1497,169 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
   </div>;
 }
 
+function isWithinLastDays(dateInput,days=7){
+if(!dateInput)return false;
+const d=new Date(dateInput);
+if(Number.isNaN(d.getTime()))return false;
+const cutoff=new Date();
+cutoff.setDate(cutoff.getDate()-days);
+return d>=cutoff;
+}
+
+function buildCoachPlayers({players,scores,rsvps,scLogs,scRsvps}){
+return players.map((p,idx)=>{
+const playerScores=scores.filter(s=>s.email===p.email);
+const playerRsvps=rsvps.filter(r=>r.email===p.email);
+const playerScLogs=scLogs.filter(l=>l.playerId===p.email);
+const playerScRsvps=scRsvps.filter(r=>r.email===p.email);
+const lastActivity=[...playerScores.map(s=>s.date),...playerRsvps.map(r=>r.date),...playerScLogs.map(s=>s.date),...playerScRsvps.map(s=>s.date)].filter(Boolean).sort().at(-1)||null;
+const activeLast7=isWithinLastDays(lastActivity,7);
+const drillsDone=playerScores.length;
+const eventsAttended=playerRsvps.length;
+const sessionsAdded=playerScLogs.length;
+const activityScore=drillsDone*2+eventsAttended+sessionsAdded;
+const topStat=drillsDone>0?`${drillsDone} drills completed`:eventsAttended>0?`${eventsAttended} events attended`:`${sessionsAdded} sessions logged`;
+return {
+...p,
+id:p.email,
+name:p.name||p.email,
+activeLast7,
+drillsDone,
+eventsAttended,
+sessionsAdded,
+activityScore,
+rank:getTier(eventsAttended+drillsDone).name,
+streak:`${activeLast7?Math.max(1,Math.min(7,drillsDone)):0}D STREAK`,
+lastActivity,
+topStat:topStat==="0 sessions logged"?"No activity yet":topStat,
+attendanceHistory:[...playerRsvps.map((r,i)=>({id:`a-${p.email}-${i}`,date:r.date||"—",eventName:r.eventTitle||"Team Event",attended:true})),{id:`a-miss-${p.email}`,date:lastActivity||todayStr(),eventName:"Team Session",attended:activeLast7}],
+drillHistory:playerScores.slice(-5).reverse().map((s,i)=>({id:`d-${p.email}-${i}`,date:s.date,score:s.score,max:s.max||0})),
+initial:(p.name||"?")[0]?.toUpperCase()||"?",
+seed:idx,
+};
+});
+}
+
+function PlayersScreen({players,onSelectPlayer,onInvite,onAddProfile,onSendMessage,onRemovePlayer,newProfile,setNewProfile,profileErr,setProfileErr}){
+const [search,setSearch]=useState("");
+const [filter,setFilter]=useState("all");
+const [sortMode,setSortMode]=useState("name");
+const mountedRef=useRef(false);
+const sortLabel=sortMode==="name"?"Name A-Z":sortMode==="most"?"Most active":"Least active";
+const filtered=useMemo(()=>{
+let list=[...players];
+if(filter==="active")list=list.filter(p=>p.activeLast7);
+if(filter==="inactive")list=list.filter(p=>!p.activeLast7);
+if(search.trim())list=list.filter(p=>p.name.toLowerCase().includes(search.trim().toLowerCase()));
+if(sortMode==="name")list.sort((a,b)=>a.name.localeCompare(b.name));
+if(sortMode==="most")list.sort((a,b)=>b.activityScore-a.activityScore);
+if(sortMode==="least")list.sort((a,b)=>a.activityScore-b.activityScore);
+return list;
+},[players,filter,search,sortMode]);
+const total=players.length,active=players.filter(p=>p.activeLast7).length,inactive=total-active;
+const canAnimate=!mountedRef.current;
+useEffect(()=>{mountedRef.current=true;},[]);
+const perDelay=filtered.length>8?Math.floor(500/Math.max(filtered.length,1)):60;
+const cardDelay=idx=>Math.min(500,idx*perDelay);
+const inviteDelay=Math.min(700,250+Math.min(500,Math.max(filtered.length-1,0)*perDelay)+100);
+return <div>
+  <div style={{padding:"0 16px",marginBottom:14,opacity:canAnimate?0:1,transform:canAnimate?"translateY(16px)":"translateY(0)",transition:"opacity 250ms ease-out, transform 250ms ease-out"}}>
+    <div style={{display:"flex",alignItems:"center",gap:8,fontFamily:FD,fontSize:24,fontWeight:900,letterSpacing:2,color:VOLT}}><Users size={22} color={VOLT}/>PLAYERS</div>
+    <div style={{fontFamily:FB,fontSize:13,color:"#A0A0A0",marginTop:4}}>Manage your roster and track player engagement.</div>
+    <div style={{marginTop:12,height:44,display:"flex",alignItems:"center",gap:12,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,transition:"border-color 150ms ease, box-shadow 150ms ease"}}>
+      <Search size={16} color="#555555"/>
+      <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search players" style={{flex:1,background:"transparent",border:"none",outline:"none",color:"#FFFFFF",fontSize:14,fontFamily:FB}} onFocus={e=>{e.target.parentElement.style.borderColor="#C8FF00";e.target.parentElement.style.boxShadow="0 0 0 3px rgba(200, 255, 0, 0.08)"}} onBlur={e=>{e.target.parentElement.style.borderColor="#333333";e.target.parentElement.style.boxShadow="none"}}/>
+    </div>
+  </div>
+  <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",padding:"0 16px",marginBottom:12,opacity:canAnimate?0:1,transform:canAnimate?"translateY(16px)":"translateY(0)",transition:"opacity 250ms ease-out 50ms, transform 250ms ease-out 50ms"}}>
+    <div style={{display:"flex",gap:8}}>
+      {[{k:"all",l:"ALL PLAYERS"},{k:"active",l:"ACTIVE"},{k:"inactive",l:"INACTIVE"}].map(ch=><button key={ch.k} onClick={()=>setFilter(ch.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:filter===ch.k?"none":"1px solid #333333",background:filter===ch.k?"#C8FF00":"#1E1E1E",color:filter===ch.k?"#000000":"#555555",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>{ch.l}</button>)}
+    </div>
+    <div style={{textAlign:"center"}}>
+      <button onClick={()=>setSortMode(s=>s==="name"?"most":s==="most"?"least":"name")} style={{width:30,height:30,borderRadius:8,border:"1px solid #333333",background:"#141414",display:"grid",placeItems:"center",cursor:"pointer"}}><SortDesc size={16} color="#A0A0A0"/></button>
+      <div style={{fontFamily:FB,fontSize:9,color:"#A0A0A0",marginTop:4}}>{sortLabel}</div>
+    </div>
+  </div>
+  <div style={{display:"flex",background:"#141414",borderRadius:12,padding:"12px 16px",margin:"0 16px 16px",opacity:canAnimate?0:1,transform:canAnimate?"translateY(16px)":"translateY(0)",transition:"opacity 250ms ease-out 100ms, transform 250ms ease-out 100ms"}}>
+    {[{label:"TOTAL",value:total,color:"#FFFFFF"},{label:"ACTIVE",value:active,color:"#C8FF00"},{label:"INACTIVE",value:inactive,color:"#555555"}].map((s,i)=><div key={s.label} style={{flex:1,display:"flex",alignItems:"center"}}><div><div style={{fontFamily:FD,fontSize:20,color:s.color}}>{s.value}</div><div style={{fontFamily:FB,fontSize:9,color:"#A0A0A0",letterSpacing:1.5}}>{s.label}</div></div>{i<2&&<div style={{width:1,alignSelf:"stretch",background:"#242424",margin:"0 16px 0 auto"}}/>}</div>)}
+  </div>
+  {filtered.length===0?<Empty t="NO PLAYERS YET" action="Invite athletes to join your roster." cta="INVITE PLAYERS" onTap={onInvite} icon={<Users size={48} color="#555555"/>}/>:filtered.map((p,i)=><button key={p.id} onClick={()=>onSelectPlayer(p)} style={{width:"calc(100% - 32px)",margin:"0 16px 10px",background:"#141414",border:"1px solid #242424",borderRadius:16,padding:16,display:"flex",alignItems:"center",gap:12,textAlign:"left",cursor:"pointer",opacity:canAnimate?0:1,transform:canAnimate?"translateY(16px)":"translateY(0)",transition:`opacity 250ms ease-out ${cardDelay(i)}ms, transform 250ms ease-out ${cardDelay(i)}ms`}}>
+    <div style={{width:44,height:44,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",border:`2px solid ${p.activeLast7?"#C8FF00":"#333333"}`,fontFamily:FB,fontSize:16,fontWeight:700,color:"#FFFFFF",flexShrink:0}}>{p.initial}</div>
+    <div style={{flex:1,minWidth:0}}>
+      <div style={{fontFamily:FD,fontSize:15,color:"#FFFFFF",letterSpacing:1.2}}>{p.name.toUpperCase()}</div>
+      <div style={{fontFamily:FB,fontSize:12,color:"#A0A0A0",marginTop:2}}>{p.topStat}</div>
+      <div style={{display:"flex",gap:6,marginTop:6}}><span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:10,color:"#C8FF00",background:"rgba(200,255,0,0.08)",border:"1px solid rgba(200,255,0,0.20)",letterSpacing:1}}>{p.rank}</span><span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:10,color:"#555555",background:"#1E1E1E",border:"1px solid #333333",letterSpacing:1}}>{p.streak}</span></div>
+    </div>
+    <ChevronRight size={16} color="#C8FF00"/>
+  </button>)}
+
+  <div style={{marginTop:24,padding:"0 16px",opacity:canAnimate?0:1,transform:canAnimate?"translateY(16px)":"translateY(0)",transition:`opacity 250ms ease-out ${inviteDelay}ms, transform 250ms ease-out ${inviteDelay}ms`}}>
+    <div style={{fontFamily:FB,fontSize:13,color:"#C8FF00",letterSpacing:"0.10em",marginBottom:12}}>GROW YOUR ROSTER</div>
+    <div style={{background:"#141414",border:"1px solid #242424",borderRadius:16,padding:16,textAlign:"center"}}>
+      <UserPlus size={32} color="#C8FF00" style={{margin:"0 auto"}}/>
+      <div style={{fontFamily:FD,fontSize:16,color:"#FFFFFF",marginTop:12}}>INVITE A PLAYER</div>
+      <div style={{fontFamily:FB,fontSize:13,color:"#A0A0A0",maxWidth:260,margin:"8px auto 0"}}>Share your program link and players can join instantly</div>
+      <button className="btn-v cta-primary" onClick={onInvite} style={{marginTop:14}}>SHARE INVITE LINK</button>
+    </div>
+    <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginTop:12}}>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:8}}>ADD PLAYER TO ROSTER</div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+        <input value={newProfile.firstName} onChange={e=>{setNewProfile({...newProfile,firstName:e.target.value});setProfileErr("")}} placeholder="First" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
+        <input value={newProfile.lastName} onChange={e=>{setNewProfile({...newProfile,lastName:e.target.value});setProfileErr("")}} placeholder="Last" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
+        <input value={newProfile.jerseyNumber} onChange={e=>setNewProfile({...newProfile,jerseyNumber:e.target.value})} placeholder="Jersey" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
+      </div>
+      {profileErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:8}}>{profileErr}</div>}
+      <div style={{display:"flex",justifyContent:"flex-end",marginTop:10}}><button onClick={onAddProfile} style={{padding:"8px 12px",background:VOLT,color:"#000",border:"none",borderRadius:8,fontFamily:FD,cursor:"pointer"}}>ADD</button></div>
+    </div>
+  </div>
+</div>;
+}
+
+function PlayerDetailScreen({player,onBack,onSendMessage,onRemove}){
+if(!player)return null;
+return <div className="fade-up"><button onClick={onBack} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button>
+  <div style={{textAlign:"center",marginBottom:20}}>
+    <div style={{width:56,height:56,borderRadius:"50%",margin:"0 auto 12px",display:"grid",placeItems:"center",background:"#1E1E1E",border:`2px solid ${player.activeLast7?"#C8FF00":"#333333"}`,color:"#FFF",fontFamily:FB,fontSize:20,fontWeight:700}}>{player.initial}</div>
+    <div style={{fontFamily:FD,fontSize:24,color:"#FFFFFF",letterSpacing:2}}>{player.name.toUpperCase()}</div>
+    <span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"2px 8px",borderRadius:10,color:"#C8FF00",background:"rgba(200,255,0,0.08)",border:"1px solid rgba(200,255,0,0.20)",letterSpacing:1,display:"inline-block",marginTop:8}}>{player.rank}</span>
+  </div>
+  <SH t="PERFORMANCE" s="CURRENT SNAPSHOT"/>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:8,marginBottom:16}}>
+    {[{l:"TOTAL MAKES",v:player.drillsDone},{l:"STREAK",v:player.streak.replace(" STREAK","")},{l:"DRILLS DONE",v:player.drillsDone}].map(c=><div key={c.l} style={{background:"#141414",border:"1px solid #242424",borderRadius:12,padding:12,textAlign:"center"}}><div style={{fontFamily:FD,fontSize:18,color:"#FFFFFF"}}>{c.v}</div><div style={{fontFamily:FB,fontSize:9,color:"#A0A0A0",letterSpacing:1}}>{c.l}</div></div>)}
+  </div>
+  <SH t="ATTENDANCE" s="EVENT HISTORY"/>
+  <div style={{marginBottom:16}}>{player.attendanceHistory.map(a=><div key={a.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:"#141414",border:"1px solid #242424",borderRadius:12,padding:"10px 12px",marginBottom:6}}><div><div style={{fontFamily:FB,color:"#FFF",fontSize:12,fontWeight:600}}>{a.eventName}</div><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10}}>{a.date}</div></div>{a.attended?<Check size={14} color="#C8FF00"/>:<X size={14} color="#FF4545"/>}</div>)}</div>
+  <SH t="DRILL HISTORY" s="LAST 5 SCORES"/>
+  <div style={{marginBottom:16}}>{player.drillHistory.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:12}}>No drills logged yet.</div>:player.drillHistory.map(d=><div key={d.id} style={{display:"flex",justifyContent:"space-between",background:"#141414",border:"1px solid #242424",borderRadius:12,padding:"10px 12px",marginBottom:6}}><span style={{fontFamily:FB,color:"#A0A0A0",fontSize:10}}>{d.date}</span><span style={{fontFamily:FD,color:VOLT,fontSize:14}}>{d.score}{d.max?`/${d.max}`:""}</span></div>)}</div>
+  <button className="btn-v cta-primary" onClick={()=>onSendMessage(player)}><MessageCircle size={14}/>SEND MESSAGE</button>
+  <button className="btn-v cta-danger" onClick={()=>onRemove(player)} style={{marginTop:10,border:"1px solid #FF4545",background:"transparent",color:"#FF4545"}}><UserMinus size={14} color="#FF4545"/>REMOVE FROM ROSTER</button>
+</div>;
+}
+
 // ═══════════════════════════════════════
 // COACH SCREEN
 // ═══════════════════════════════════════
 function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,addScSession,removeScSession,shotLogs,logout,deleteAccount}){
-const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:""});
+const[tab,setTab]=useState("home"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:""});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"10",icon:"ft"});
 const[nudged,setNudged]=useState([]);
 const[confirmDelete,setConfirmDelete]=useState(null);const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
 const ups=useMemo(()=>{const es=[...new Set(scores.map(s=>s.email))];return es.map(e=>{const p=players.find(p=>p.email===e);return{email:e,name:p?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())}})},[scores,players]);
 const allKnown=useMemo(()=>{const m={};players.forEach(p=>m[p.email]=p.name);scores.forEach(s=>{if(!m[s.email])m[s.email]=s.name||s.email});return Object.entries(m).map(([email,name])=>({email,name}))},[players,scores]);
 const today=todayStr(),todayS=scores.filter(s=>s.date===today);
+const coachPlayers=useMemo(()=>buildCoachPlayers({players,scores,rsvps,scLogs:[],scRsvps}),[players,scores,rsvps,scRsvps]);
+const handleInvitePlayers=async()=>{
+const shareUrl=window.location.origin;
+const payload={title:"Join my ShotLab Program",text:"Your coach has invited you to join their basketball training program on ShotLab",url:shareUrl};
+try{
+if(navigator.share){await navigator.share(payload);return;}
+await navigator.clipboard?.writeText(shareUrl);
+window.alert("Invite link copied");
+}catch{}
+};
+const handleAddProfile=async()=>{const r=await addRosterPlayer(newProfile);if(!r.ok)setProfileErr(r.err||"Could not add player");else setNewProfile({firstName:"",lastName:"",jerseyNumber:""});};
+const handleRemovePlayer=(player)=>{if(window.confirm(`Remove ${player.name} from roster?`)){window.alert("Player removed from roster (demo placeholder).");}};
+const handleSendMessage=(player)=>window.alert(`Message sent to ${player.name} (demo placeholder).`);
 const saveDrill=()=>{const m=parseInt(eMax);updateDrill(editD.id,{name:san(eName),desc:san(eDesc),instructions:san(eInstr),max:m>0?m:editD.max,icon:eIcon});setEditD(null)};
 const handleAddDrill=()=>{if(!nd.name)return;const m=parseInt(nd.max);addDrill({name:san(nd.name).toUpperCase(),desc:san(nd.desc),max:m>0?m:10,icon:nd.icon,instructions:san(nd.instructions)});setNd({name:"",desc:"",max:"10",icon:"ft",instructions:""});setShowNewDrill(false)};
 const handleAddProgramDrill=async()=>{if(!newProgramDrill.name)return;const m=parseInt(newProgramDrill.max);const r=await addProgramDrill({name:san(newProgramDrill.name).toUpperCase(),desc:san(newProgramDrill.desc),max:m>0?m:10,icon:newProgramDrill.icon,instructions:""});if(!r.ok){setProgramErr(r.err||"Could not add drill");return;}setProgramErr("");setNewProgramDrill({name:"",desc:"",max:"10",icon:"ft"});};
@@ -1531,7 +1700,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 
 <div style={{flex:1,padding:"16px 20px 110px",overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
-  {tab==="feed"&&<div className="fade-up">
+  {tab==="home"&&<div className="fade-up">
     {/* Coach dashboard pulse */}
     <div style={{background:`linear-gradient(135deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:"20px 20px",border:`1px solid ${ORANGE}22`,marginBottom:20,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
@@ -1578,7 +1747,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
     <SH t="ACTIVITY FEED" s="ALL SOURCES"/>{scores.length===0&&<Empty t="No scores yet" action="Once your players start logging drills, their activity will appear here. Share the app link to get started!"/>}{scores.slice(-20).reverse().map((s,i)=>{const dr=drills.find(d=>d.id===s.drillId);const pct=dr?Math.round(s.score/dr.max*100):0;const isHome=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:isHome?VOLT:LIGHT,background:isHome?VOLT+"15":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span></div><div style={{fontSize:10,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>}
 
   {/* DRILLS */}
-  {tab==="drills"&&!editD&&<div className="fade-up">
+  {tab==="quick-menu"&&!editD&&<div className="fade-up">
     <SH t="MANAGE DRILLS" s={`${drills.length} ACTIVE`}/>
     <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
     <div style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12,marginBottom:14}}>
@@ -1630,7 +1799,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
       </div>
     </div>}
   </div>}
-  {tab==="drills"&&editD&&<div className="scale-in" style={{paddingTop:8}}>
+  {tab==="quick-menu"&&editD&&<div className="scale-in" style={{paddingTop:8}}>
     <button onClick={()=>setEditD(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:28}}>&#8592; BACK</button>
     <div style={{width:80,height:80,borderRadius:18,background:`linear-gradient(135deg,${SURFACE},${CARD_BG})`,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px"}}><DrillIcon type={eIcon} size={40}/></div>
     <h2 style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:4,textAlign:"center",margin:"0 0 28px"}}>EDIT DRILL</h2>
@@ -1703,44 +1872,22 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
       </div>})}
   </div>}
 
-  {tab==="players"&&!selP&&<div>
-    <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:12}}>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:8}}>ADD PLAYER TO ROSTER</div>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
-        <input value={newProfile.firstName} onChange={e=>{setNewProfile({...newProfile,firstName:e.target.value});setProfileErr("")}} placeholder="First" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
-        <input value={newProfile.lastName} onChange={e=>{setNewProfile({...newProfile,lastName:e.target.value});setProfileErr("")}} placeholder="Last" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
-        <input value={newProfile.jerseyNumber} onChange={e=>setNewProfile({...newProfile,jerseyNumber:e.target.value})} placeholder="Jersey" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
-      </div>
-      {profileErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:8}}>{profileErr}</div>}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:10}}>
-        <div style={{fontSize:10,color:MUTED,fontFamily:FB}}>{playerProfiles.length} player profiles on team</div>
-        <button onClick={async()=>{const r=await addRosterPlayer(newProfile);if(!r.ok)setProfileErr(r.err||"Could not add player");else setNewProfile({firstName:"",lastName:"",jerseyNumber:""});}} style={{padding:"8px 12px",background:VOLT,color:"#000000",border:"none",borderRadius:8,fontFamily:FD,letterSpacing:1,cursor:"pointer"}}>ADD</button>
-      </div>
-    </div>
-    <CoachRoster players={players} scores={scores} shotLogs={shotLogs} drills={drills} nudged={nudged} setNudged={setNudged}/>
-    {/* Tap any player in roster for detail */}
-    <div style={{marginTop:16}}>
-      <SH t="PLAYER DETAILS" s="TAP TO VIEW"/>
-      {ups.map((p,i)=>{const ps=scores.filter(s=>s.email===p.email);const tot=ps.reduce((a,s)=>a+s.score,0);
-        return <button key={i} className="ch" onClick={()=>setSelP(p)} style={{width:"100%",display:"flex",alignItems:"center",gap:12,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:8,cursor:"pointer",textAlign:"left"}}>
-          <Av n={p.name} sz={36} email={p.email}/>
-          <div style={{flex:1,minWidth:0}}>
-            <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>{p.name.toUpperCase()}</div>
-            <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>{tot} makes · {rsvps.filter(r=>r.email===p.email).length} events</div>
-          </div>
-          <svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
-        </button>})}
-    </div>
-    {/* Account management — required by App Store §5.1.1(v) */}
-    <div style={{marginTop:32,paddingTop:20,borderTop:`1px solid ${BORDER_CLR}44`}}>
-      <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#FF4545",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
-      <p style={{fontFamily:FB,color:MUTED,fontSize:9,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
-    </div>
-  </div>}
-  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {scores.filter(s=>s.email===selP.email&&(s.src==="home"||!s.src)).length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills}/></div>}
+  {tab==="players"&&!selP&&<PlayersScreen
+players={coachPlayers}
+onSelectPlayer={setSelP}
+onInvite={handleInvitePlayers}
+onAddProfile={handleAddProfile}
+onSendMessage={handleSendMessage}
+onRemovePlayer={handleRemovePlayer}
+newProfile={newProfile}
+setNewProfile={setNewProfile}
+profileErr={profileErr}
+setProfileErr={setProfileErr}
+/>}
+{tab==="players"&&selP&&<PlayerDetailScreen player={selP} onBack={()=>setSelP(null)} onSendMessage={handleSendMessage} onRemove={handleRemovePlayer}/>} 
 
-  {/* ═════════════ S&C MANAGEMENT ═════════════ */}
-  {tab==="sc"&&<div className="fade-up">
+{/* ═════════════ S&C MANAGEMENT ═════════════ */}
+  {tab==="program"&&<div className="fade-up">
     <SH t="S&C SESSIONS" s={`${scSessions.length} TOTAL`}/>
     <button className="btn-v cta-primary" onClick={()=>setShowAddSC(!showAddSC)} style={{marginBottom:16}}>
       {showAddSC?"CANCEL":"+ ADD SESSION"}
@@ -1763,15 +1910,22 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
       </div>;
     })}
   </div>}
+
+  {tab==="profile"&&<div className="fade-up" style={{paddingTop:8}}>
+    <SH t="COACH PROFILE" s={u?.name?.toUpperCase()||"ACCOUNT"}/>
+    <button className="btn-v cta-primary" onClick={logout}>LOG OUT</button>
+    <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#FF4545",fontWeight:600,letterSpacing:1,marginTop:10}}>DELETE MY COACH ACCOUNT & DATA</button>
+  </div>}
 </div>
 
 <NavBar items={[
-  {k:"feed",l:"Feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>},
-  {k:"drills",l:"Drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2v20"/><path d="M5 4.5c3.5 4 5 7 5 7.5s-1.5 3.5-5 7.5"/><path d="M19 4.5c-3.5 4-5 7-5 7.5s1.5 3.5 5 7.5"/></svg>},
-  {k:"events",l:"Events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>},
-  {k:"sc",l:"S&C",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>},
-  {k:"players",l:"Players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
-]} active={tab} onChange={k=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)}}/>
+  {k:"home",l:"Home",svg:<Home size={22}/>},
+  {k:"players",l:"Players",svg:<Users size={22}/>},
+  {k:"quick-menu",l:"Quick Menu",svg:<Zap size={22}/>},
+  {k:"events",l:"Events",svg:<CalendarDays size={22}/>},
+  {k:"program",l:"Program",svg:<Dumbbell size={22}/>},
+  {k:"profile",l:"Profile",svg:<UserCircle2 size={22}/>},
+]} active={tab} onChange={k=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)}} isCoach={true}/>
 
   </div>;
 }
@@ -2030,9 +2184,11 @@ function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,heig
 function Empty({t,action,onTap,cta="GET STARTED",icon=<DrillIcon type="sb" size={48} color="#555555"/>}){return <div style={{textAlign:"center",padding:"40px 20px"}}><div style={{opacity:.8,display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#555555"}}>{icon}</div><p style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:1.5,marginTop:14,lineHeight:1.2,textTransform:"uppercase"}}>{t}</p>{action&&<p style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:13,margin:"8px auto 0",lineHeight:1.5,fontWeight:500,maxWidth:260}}>{action}</p>}<button onClick={onTap||(()=>{})} className="btn-v cta-primary" style={{marginTop:14}}>{cta}</button></div>}
 function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>}
 function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>}</>}
-function NavBar({items,active,onChange}){
+function NavBar({items,active,onChange,isCoach=false}){
 const NAV_INACTIVE="#555555",NAV_ACTIVE="#C8FF00";
-return <nav role="navigation" aria-label="Main navigation" style={{position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:64,paddingBottom:"env(safe-area-inset-bottom)",background:"#1E1E1E",borderTop:"1px solid #242424",zIndex:20}}>{items.map(t=>{const a=active===t.k;
+const coachItems=[{k:"home",l:"Home",svg:<Home size={22}/>},{k:"players",l:"Players",svg:<Users size={22}/>},{k:"quick-menu",l:"Quick Menu",svg:<Zap size={22}/>},{k:"events",l:"Events",svg:<CalendarDays size={22}/>},{k:"program",l:"Program",svg:<Dumbbell size={22}/>},{k:"profile",l:"Profile",svg:<UserCircle2 size={22}/>}];
+const navItems=isCoach?coachItems:items;
+return <nav role="navigation" aria-label="Main navigation" style={{position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:64,paddingBottom:"env(safe-area-inset-bottom)",background:"#1E1E1E",borderTop:"1px solid #242424",zIndex:20}}>{navItems.map(t=>{const a=active===t.k;
 return <button key={t.k} aria-label={t.l} onClick={()=>onChange(t.k)} style={{flex:1,minWidth:48,minHeight:48,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"8px 4px 6px",position:"relative",background:"none",border:"none",cursor:"pointer",color:a?NAV_ACTIVE:NAV_INACTIVE,transition:"color 150ms ease-out",outlineOffset:2}}>
 {a&&<span aria-hidden="true" style={{position:"absolute",top:0,left:"50%",transform:"translateX(-50%)",width:24,height:2,borderRadius:"0 0 2px 2px",background:NAV_ACTIVE}}/>}
 <div style={{position:"relative",lineHeight:1}}>{t.svg}</div>
