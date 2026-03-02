@@ -1,32 +1,39 @@
-import { useState, useEffect, useCallback, useMemo } from “react”;
+import { useState, useEffect, useCallback, useMemo } from "react";
 
-const VOLT=”#C8FF00”,ORANGE=”#FF6B2C”,CYAN=”#00D4FF”,BG=”#080808”,SURFACE=”#111111”,CARD_BG=”#161616”,BORDER_CLR=”#1e1e1e”,MUTED=”#555”,LIGHT=”#e8e8e8”;
-const FD=”‘Bebas Neue’,‘Impact’,‘Arial Black’,sans-serif”,FB=”‘Barlow Condensed’,‘Arial Narrow’,‘Helvetica Neue’,sans-serif”;
+const VOLT = "#C8FF00";
+const ORANGE = "#FF6B2C";
+const CYAN = "#00D4FF";
+const BG = "#080808";
+const SURFACE = "#111111";
+const CARD_BG = "#161616";
+const BORDER_CLR = "#1e1e1e";
+const MUTED="#555",LIGHT="#e8e8e8";
+const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
 const DRILLS_INIT=[
-{id:1,name:“FORM SHOOTING”,desc:“10 shots from 5 feet. Elbow, follow-through, arc.”,max:10,icon:“ft”},
-{id:2,name:“FREE THROWS”,desc:“10 free throw attempts. Lock in your routine.”,max:10,icon:“ft”},
-{id:3,name:“CATCH & SHOOT”,desc:“15 catch-and-shoot jumpers from 5 spots.”,max:15,icon:“3p”},
-{id:4,name:“BALL HANDLING”,desc:“5-minute handle circuit. Rate yourself 1-10.”,max:10,icon:“sb”},
-{id:5,name:“MID-RANGE”,desc:“10 pull-up jumpers from elbows and mid-post.”,max:10,icon:“mr”},
-{id:6,name:“FLOATERS”,desc:“12 runners and floaters from inside the lane.”,max:12,icon:“fl”},
+{id:1,name:"FORM SHOOTING",desc:"10 shots from 5 feet. Elbow, follow-through, arc.",max:10,icon:"ft"},
+{id:2,name:"FREE THROWS",desc:"10 free throw attempts. Lock in your routine.",max:10,icon:"ft"},
+{id:3,name:"CATCH & SHOOT",desc:"15 catch-and-shoot jumpers from 5 spots.",max:15,icon:"3p"},
+{id:4,name:"BALL HANDLING",desc:"5-minute handle circuit. Rate yourself 1-10.",max:10,icon:"sb"},
+{id:5,name:"MID-RANGE",desc:"10 pull-up jumpers from elbows and mid-post.",max:10,icon:"mr"},
+{id:6,name:"FLOATERS",desc:"12 runners and floaters from inside the lane.",max:12,icon:"fl"},
 ];
-const ICONS=[“ft”,“3p”,“mr”,“fl”,“sb”];
+const ICONS=["ft","3p","mr","fl","sb"];
 const EVENTS_INIT=[
-{id:1,title:“OPEN GYM RUN”,date:“2026-02-28”,time:“6:00 PM”,location:“Main Gym — Court 1”,desc:“Full-court 5v5 runs. First 20 players.”,type:“run”},
-{id:2,title:“SHOOTING CLINIC”,date:“2026-03-05”,time:“4:00 PM”,location:“Training Facility — Bay 3”,desc:“Guided shooting with film review.”,type:“clinic”},
-{id:3,title:“PRO-AM SCRIMMAGE”,date:“2026-03-12”,time:“7:00 PM”,location:“Community Center”,desc:“Competitive scrimmage. Jersey required.”,type:“game”},
-{id:4,title:“SKILLS CHALLENGE”,date:“2026-03-19”,time:“5:30 PM”,location:“Main Gym — Court 2”,desc:“Timed skills course. Prizes for top 3.”,type:“challenge”},
-{id:5,title:“FILM + RECOVERY”,date:“2026-03-26”,time:“3:00 PM”,location:“Film Room + Recovery Suite”,desc:“Film breakdown + cold plunge and stretch.”,type:“recovery”},
+{id:1,title:"OPEN GYM RUN",date:"2026-02-28",time:"6:00 PM",location:"Main Gym — Court 1",desc:"Full-court 5v5 runs. First 20 players.",type:"run"},
+{id:2,title:"SHOOTING CLINIC",date:"2026-03-05",time:"4:00 PM",location:"Training Facility — Bay 3",desc:"Guided shooting with film review.",type:"clinic"},
+{id:3,title:"PRO-AM SCRIMMAGE",date:"2026-03-12",time:"7:00 PM",location:"Community Center",desc:"Competitive scrimmage. Jersey required.",type:"game"},
+{id:4,title:"SKILLS CHALLENGE",date:"2026-03-19",time:"5:30 PM",location:"Main Gym — Court 2",desc:"Timed skills course. Prizes for top 3.",type:"challenge"},
+{id:5,title:"FILM + RECOVERY",date:"2026-03-26",time:"3:00 PM",location:"Film Room + Recovery Suite",desc:"Film breakdown + cold plunge and stretch.",type:"recovery"},
 ];
 const SC_INIT=[
-{id:101,title:“UPPER BODY POWER”,date:“2026-02-25”,time:“6:00 AM”,location:“Weight Room — Bay A”,desc:“Bench press, overhead press, rows, and accessory work. Bring your lifting shoes.”},
-{id:102,title:“LOWER BODY STRENGTH”,date:“2026-02-27”,time:“6:00 AM”,location:“Weight Room — Bay A”,desc:“Squats, deadlifts, lunges. Focus on posterior chain.”},
-{id:103,title:“FULL BODY CIRCUIT”,date:“2026-03-04”,time:“7:00 AM”,location:“Weight Room — Bay B”,desc:“High-intensity circuit training. 45 min. Bring water.”},
-{id:104,title:“OLYMPIC LIFTS”,date:“2026-03-11”,time:“6:00 AM”,location:“Weight Room — Platform Area”,desc:“Clean & jerk, snatch progressions. Coached session.”},
-{id:105,title:“CORE & CONDITIONING”,date:“2026-03-18”,time:“6:30 AM”,location:“Training Facility — Turf”,desc:“Core stability, sled pushes, agility ladder. Game-day conditioning.”},
+{id:101,title:"UPPER BODY POWER",date:"2026-02-25",time:"6:00 AM",location:"Weight Room — Bay A",desc:"Bench press, overhead press, rows, and accessory work. Bring your lifting shoes."},
+{id:102,title:"LOWER BODY STRENGTH",date:"2026-02-27",time:"6:00 AM",location:"Weight Room — Bay A",desc:"Squats, deadlifts, lunges. Focus on posterior chain."},
+{id:103,title:"FULL BODY CIRCUIT",date:"2026-03-04",time:"7:00 AM",location:"Weight Room — Bay B",desc:"High-intensity circuit training. 45 min. Bring water."},
+{id:104,title:"OLYMPIC LIFTS",date:"2026-03-11",time:"6:00 AM",location:"Weight Room — Platform Area",desc:"Clean & jerk, snatch progressions. Coached session."},
+{id:105,title:"CORE & CONDITIONING",date:"2026-03-18",time:"6:30 AM",location:"Training Facility — Turf",desc:"Core stability, sled pushes, agility ladder. Game-day conditioning."},
 ];
-const TIERS=[{min:0,name:“ROOKIE”,color:”#555”,bg:”#55555515”},{min:2,name:“IRON”,color:”#8B8B8B”,bg:”#8B8B8B15”},{min:3,name:“BRONZE”,color:”#CD7F32”,bg:”#CD7F3215”},{min:5,name:“SILVER”,color:”#C0C0C0”,bg:”#C0C0C015”},{min:8,name:“GOLD”,color:”#FFD700”,bg:”#FFD70015”},{min:12,name:“DIAMOND”,color:CYAN,bg:CYAN+“15”}];
+const TIERS=[{min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},{min:2,name:"IRON",color:"#8B8B8B",bg:"#8B8B8B15"},{min:3,name:"BRONZE",color:"#CD7F32",bg:"#CD7F3215"},{min:5,name:"SILVER",color:"#C0C0C0",bg:"#C0C0C015"},{min:8,name:"GOLD",color:"#FFD700",bg:"#FFD70015"},{min:12,name:"DIAMOND",color:CYAN,bg:CYAN+"15"}];
 const getTier=c=>[…TIERS].reverse().find(t=>c>=t.min)||TIERS[0];
 const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const DB={async get(k){try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null}catch{return null}},async set(k,v){try{await window.storage.set(k,JSON.stringify(v),true)}catch{}}};
@@ -34,34 +41,34 @@ const DB={async get(k){try{const r=await window.storage.get(k,true);return r?JSO
 function hashPw(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return(h>>>0).toString(36)}
 // AudioContext must be lazy-initialized on user gesture (iOS WebKit requirement)
 let _audioCtx=null;
-function getAudioCtx(){if(!_audioCtx&&typeof AudioContext!==“undefined”){try{_audioCtx=new AudioContext()}catch{}}if(_audioCtx&&_audioCtx.state===“suspended”){_audioCtx.resume().catch(()=>{})}return _audioCtx}
-function playTick(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=1200;o.type=“sine”;g.gain.setValueAtTime(.07,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.05);o.start();o.stop(audioCtx.currentTime+.05)}catch{}}
-function playScore(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[800,1200,1600].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type=“sine”;g.gain.setValueAtTime(.05,audioCtx.currentTime+i*.08);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.08+.12);o.start(audioCtx.currentTime+i*.08);o.stop(audioCtx.currentTime+i*.08+.12)})}catch{}}
-function playUnlock(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[523,659,784,1047].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type=“triangle”;g.gain.setValueAtTime(.06,audioCtx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.1+.25);o.start(audioCtx.currentTime+i*.1);o.stop(audioCtx.currentTime+i*.1+.25)})}catch{}}
-const THEMES={dark:{BG:”#080808”,SURFACE:”#111111”,CARD_BG:”#161616”,BORDER:”#1e1e1e”,MUT:”#555”,LT:”#e8e8e8”,SUB:”#3a3a3a”,TRACK:”#1a1a1a”},light:{BG:”#f0ece4”,SURFACE:”#e6e0d4”,CARD_BG:”#ffffff”,BORDER:”#d4cfc5”,MUT:”#888”,LT:”#1a1a1a”,SUB:”#999”,TRACK:”#d4cfc5”}};
+function getAudioCtx(){if(!_audioCtx&&typeof AudioContext!=="undefined"){try{_audioCtx=new AudioContext()}catch{}}if(_audioCtx&&_audioCtx.state==="suspended"){_audioCtx.resume().catch(()=>{})}return _audioCtx}
+function playTick(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=1200;o.type="sine";g.gain.setValueAtTime(.07,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.05);o.start();o.stop(audioCtx.currentTime+.05)}catch{}}
+function playScore(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[800,1200,1600].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="sine";g.gain.setValueAtTime(.05,audioCtx.currentTime+i*.08);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.08+.12);o.start(audioCtx.currentTime+i*.08);o.stop(audioCtx.currentTime+i*.08+.12)})}catch{}}
+function playUnlock(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[523,659,784,1047].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="triangle";g.gain.setValueAtTime(.06,audioCtx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.1+.25);o.start(audioCtx.currentTime+i*.1);o.stop(audioCtx.currentTime+i*.1+.25)})}catch{}}
+const THEMES={dark:{BG:"#080808",SURFACE:"#111111",CARD_BG:"#161616",BORDER:"#1e1e1e",MUT:"#555",LT:"#e8e8e8",SUB:"#3a3a3a",TRACK:"#1a1a1a"},light:{BG:"#f0ece4",SURFACE:"#e6e0d4",CARD_BG:"#ffffff",BORDER:"#d4cfc5",MUT:"#888",LT:"#1a1a1a",SUB:"#999",TRACK:"#d4cfc5"}};
 const T=THEMES.dark; // module-level default for standalone components
-const STREAK_BADGES=[{days:7,name:“WEEK WARRIOR”,icon:“7”,color:”#C0C0C0”},{days:14,name:“TWO-WEEK GRIND”,icon:“14”,color:”#CD7F32”},{days:30,name:“MONTHLY BEAST”,icon:“30”,color:”#FFD700”},{days:60,name:“IRON WILL”,icon:“60”,color:CYAN},{days:100,name:“CENTURION”,icon:“💯”,color:VOLT}];
+const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#C0C0C0"},{days:14,name:"TWO-WEEK GRIND",icon:"14",color:"#CD7F32"},{days:30,name:"MONTHLY BEAST",icon:"30",color:"#FFD700"},{days:60,name:"IRON WILL",icon:"60",color:CYAN},{days:100,name:"CENTURION",icon:"💯",color:VOLT}];
 const getEarnedBadges=s=>STREAK_BADGES.filter(b=>s>=b.days);
-function Sparkline({data,color=VOLT,w=44,h=16}){if(!data||data.length<2)return null;const max=Math.max(…data,1);const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v/max)*h*.8+h*.1)}`).join(” “);return <svg width={w} height={h} style={{display:“block”,opacity:.6}}><polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+function Sparkline({data,color=VOLT,w=44,h=16}){if(!data||data.length<2)return null;const max=Math.max(…data,1);const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v/max)*h*.8+h*.1)}`).join(" ");return <svg width={w} height={h} style={{display:"block",opacity:.6}}><polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 
-const EventIcon=({type,size=24,color=VOLT})=>{const s={width:size,height:size,display:“block”};
-if(type===“run”)return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="8" r="5" stroke={color} strokeWidth="2"/><path d="M12 38l4-14 4 6 4-6 4 14" stroke={color} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 24h12" stroke={color} strokeWidth="1.5"/></svg>;
-if(type===“clinic”)return <svg viewBox="0 0 40 40" fill="none" style={s}><rect x="6" y="10" width="28" height="22" rx="3" stroke={color} strokeWidth="2"/><path d="M6 18h28" stroke={color} strokeWidth="1.5"/><circle cx="20" cy="27" r="4" stroke={color} strokeWidth="1.5"/><path d="M14 6v6M26 6v6" stroke={color} strokeWidth="2" strokeLinecap="round"/></svg>;
-if(type===“game”)return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="20" r="16" stroke={color} strokeWidth="2"/><path d="M4 20h32M20 4v32" stroke={color} strokeWidth="1.5"/><path d="M8 6c4.5 5 6.5 9 6.5 14s-2 9-6.5 14" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 6c-4.5 5-6.5 9-6.5 14s2 9 6.5 14" stroke={color} strokeWidth="1.5" fill="none"/></svg>;
-if(type===“challenge”)return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M20 4l4 8 8 2-6 6 2 8-8-4-8 4 2-8-6-6 8-2z" stroke={color} strokeWidth="2" fill="none" strokeLinejoin="round"/></svg>;
-if(type===“recovery”)return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M20 6v10l6 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="20" cy="20" r="16" stroke={color} strokeWidth="2"/></svg>;
+const EventIcon=({type,size=24,color=VOLT})=>{const s={width:size,height:size,display:"block"};
+if(type==="run")return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="8" r="5" stroke={color} strokeWidth="2"/><path d="M12 38l4-14 4 6 4-6 4 14" stroke={color} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 24h12" stroke={color} strokeWidth="1.5"/></svg>;
+if(type==="clinic")return <svg viewBox="0 0 40 40" fill="none" style={s}><rect x="6" y="10" width="28" height="22" rx="3" stroke={color} strokeWidth="2"/><path d="M6 18h28" stroke={color} strokeWidth="1.5"/><circle cx="20" cy="27" r="4" stroke={color} strokeWidth="1.5"/><path d="M14 6v6M26 6v6" stroke={color} strokeWidth="2" strokeLinecap="round"/></svg>;
+if(type==="game")return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="20" r="16" stroke={color} strokeWidth="2"/><path d="M4 20h32M20 4v32" stroke={color} strokeWidth="1.5"/><path d="M8 6c4.5 5 6.5 9 6.5 14s-2 9-6.5 14" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 6c-4.5 5-6.5 9-6.5 14s2 9 6.5 14" stroke={color} strokeWidth="1.5" fill="none"/></svg>;
+if(type==="challenge")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M20 4l4 8 8 2-6 6 2 8-8-4-8 4 2-8-6-6 8-2z" stroke={color} strokeWidth="2" fill="none" strokeLinejoin="round"/></svg>;
+if(type==="recovery")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M20 6v10l6 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="20" cy="20" r="16" stroke={color} strokeWidth="2"/></svg>;
 return <svg viewBox="0 0 40 40" fill="none" style={s}><rect x="6" y="10" width="28" height="22" rx="3" stroke={color} strokeWidth="2"/><path d="M14 6v6M26 6v6M6 18h28" stroke={color} strokeWidth="2" strokeLinecap="round"/></svg>;
 };
-const DrillIcon=({type,size=28,color=VOLT})=>{const s={width:size,height:size,display:“block”};
-if(type===“ft”)return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="20" r="17" stroke={color} strokeWidth="2"/><path d="M3 20h34" stroke={color} strokeWidth="1.5"/><path d="M20 3v34" stroke={color} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={color} strokeWidth="1.5" fill="none"/></svg>;
-if(type===“3p”)return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M6 36Q20 4 34 36" stroke={color} strokeWidth="2" fill="none"/><circle cx="20" cy="18" r="4" fill={color} opacity=".8"/><line x1="20" y1="22" x2="20" y2="36" stroke={color} strokeWidth="1.5"/></svg>;
-if(type===“mr”)return <svg viewBox="0 0 40 40" fill="none" style={s}><rect x="6" y="6" width="28" height="28" rx="3" stroke={color} strokeWidth="1.5"/><circle cx="20" cy="20" r="8" stroke={color} strokeWidth="1.5" fill="none"/><circle cx="20" cy="20" r="2.5" fill={color}/></svg>;
-if(type===“fl”)return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M10 34Q12 14 20 10Q28 14 30 34" stroke={color} strokeWidth="2" fill="none"/><circle cx="20" cy="10" r="4" stroke={color} strokeWidth="1.5" fill="none"/><path d="M16 20h8" stroke={color} strokeWidth="1.5" strokeDasharray="2 2"/></svg>;
-if(type===“sb”)return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M28 32L12 24L22 12" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/><circle cx="22" cy="12" r="5" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 8l-4 2" stroke={color} strokeWidth="1.5" strokeLinecap="round"/></svg>;
+const DrillIcon=({type,size=28,color=VOLT})=>{const s={width:size,height:size,display:"block"};
+if(type==="ft")return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="20" r="17" stroke={color} strokeWidth="2"/><path d="M3 20h34" stroke={color} strokeWidth="1.5"/><path d="M20 3v34" stroke={color} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={color} strokeWidth="1.5" fill="none"/></svg>;
+if(type==="3p")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M6 36Q20 4 34 36" stroke={color} strokeWidth="2" fill="none"/><circle cx="20" cy="18" r="4" fill={color} opacity=".8"/><line x1="20" y1="22" x2="20" y2="36" stroke={color} strokeWidth="1.5"/></svg>;
+if(type==="mr")return <svg viewBox="0 0 40 40" fill="none" style={s}><rect x="6" y="6" width="28" height="28" rx="3" stroke={color} strokeWidth="1.5"/><circle cx="20" cy="20" r="8" stroke={color} strokeWidth="1.5" fill="none"/><circle cx="20" cy="20" r="2.5" fill={color}/></svg>;
+if(type==="fl")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M10 34Q12 14 20 10Q28 14 30 34" stroke={color} strokeWidth="2" fill="none"/><circle cx="20" cy="10" r="4" stroke={color} strokeWidth="1.5" fill="none"/><path d="M16 20h8" stroke={color} strokeWidth="1.5" strokeDasharray="2 2"/></svg>;
+if(type==="sb")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M28 32L12 24L22 12" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/><circle cx="22" cy="12" r="5" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 8l-4 2" stroke={color} strokeWidth="1.5" strokeLinecap="round"/></svg>;
 return <svg viewBox="0 0 40 40" style={s}><circle cx="20" cy="20" r="16" stroke={color} strokeWidth="2" fill="none"/></svg>;
 };
-const CourtBG=({opacity=.04})=><svg style={{position:“absolute”,inset:0,width:“100%”,height:“100%”,pointerEvents:“none”,opacity}} viewBox=“0 0 400 900” fill=“none” preserveAspectRatio=“xMidYMid slice”><rect x="20" y="40" width="360" height="700" stroke={VOLT} strokeWidth="1"/><line x1="20" y1="390" x2="380" y2="390" stroke={VOLT} strokeWidth=".8"/><circle cx="200" cy="390" r="60" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="40" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 40Q200 140 260 40" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="550" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 740Q200 640 260 740" stroke={VOLT} strokeWidth=".8" fill="none"/></svg>;
-const GlowOrb=({color=VOLT,top=“20%”,left=“50%”,size=300,animate})=><div style={{position:“absolute”,top,left,width:size,height:size,borderRadius:“50%”,background:`radial-gradient(circle,${color}0a 0%,transparent 70%)`,transform:“translate(-50%,-50%)”,pointerEvents:“none”,animation:animate?“orbDrift 12s ease-in-out infinite alternate”:“none”}}/>;
+const CourtBG=({opacity=.04})=><svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none",opacity}} viewBox="0 0 400 900" fill="none" preserveAspectRatio="xMidYMid slice"><rect x="20" y="40" width="360" height="700" stroke={VOLT} strokeWidth="1"/><line x1="20" y1="390" x2="380" y2="390" stroke={VOLT} strokeWidth=".8"/><circle cx="200" cy="390" r="60" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="40" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 40Q200 140 260 40" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="550" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 740Q200 640 260 740" stroke={VOLT} strokeWidth=".8" fill="none"/></svg>;
+const GlowOrb=({color=VOLT,top="20%",left="50%",size=300,animate})=><div style={{position:"absolute",top,left,width:size,height:size,borderRadius:"50%",background:`radial-gradient(circle,${color}0a 0%,transparent 70%)`,transform:"translate(-50%,-50%)",pointerEvents:"none",animation:animate?"orbDrift 12s ease-in-out infinite alternate":"none"}}/>;
 const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:${BG};overflow-x:hidden}input,textarea{font-family:${FB}}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}input[type=number]{-moz-appearance:textfield}::-webkit-scrollbar{width:0}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@keyframes scaleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes glow{0%,100%{box-shadow:0 0 20px ${VOLT}15}50%{box-shadow:0 0 40px ${VOLT}25}}@keyframes heroGlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}@keyframes rippleOut{0%{transform:scale(0);opacity:.5}100%{transform:scale(4);opacity:0}}@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes orbDrift{0%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(-40%,-60%) scale(1.1)}50%{transform:translate(-60%,-45%) scale(.95)}75%{transform:translate(-45%,-55%) scale(1.05)}100%{transform:translate(-55%,-50%) scale(1)}}@keyframes confettiBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{opacity:0}}@keyframes particleFly{0%{transform:translate(0,0) scale(1);opacity:1}60%{opacity:.8}100%{transform:var(--fly-to);opacity:0}}.fade-up{animation:fadeUp .4s ease-out both}.scale-in{animation:scaleIn .35s ease-out both}.btn-v{transition:transform .1s,box-shadow .2s;position:relative;overflow:hidden}.btn-v:active{transform:scale(.97)}.btn-v:hover{box-shadow:0 4px 24px ${VOLT}30}.btn-v::after{content:'';position:absolute;top:50%;left:50%;width:10px;height:10px;background:rgba(255,255,255,.3);border-radius:50%;transform:scale(0);opacity:0}.btn-v:active::after{animation:rippleOut .5s ease-out}.ch{transition:transform .15s,border-color .2s,box-shadow .2s}.ch:hover{transform:translateY(-2px);border-color:${VOLT}22!important;box-shadow:0 6px 20px ${BG},0 0 30px ${VOLT}08!important}.ch:active{transform:scale(.985) perspective(600px) rotateX(1deg)}.tb{background-size:200% 100%;animation:shimmer 3s linear infinite}.cnt-up{animation:countUp .5s ease-out both}.grd-bdr{background:linear-gradient(135deg,${VOLT}15,${ORANGE}10,${CYAN}10);padding:1px;border-radius:17px}.grd-bdr>div{border-radius:16px}.glass-hdr{background:${BG}cc;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid ${BORDER_CLR}80;box-shadow:0 4px 30px ${BG}80}.card-glow-v{box-shadow:0 2px 8px ${BG},0 0 20px ${VOLT}08}.card-glow-o{box-shadow:0 2px 8px ${BG},0 0 20px ${ORANGE}08}.card-glow-c{box-shadow:0 2px 8px ${BG},0 0 20px ${CYAN}08}.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleFly .7s ease-out forwards}@keyframes bbBounce{0%{transform:translateY(0) scaleY(1) scaleX(1)}40%{transform:translateY(8px) scaleY(.7) scaleX(1.3)}70%{transform:translateY(-6px) scaleY(1.1) scaleX(.95)}100%{transform:translateY(0) scaleY(1) scaleX(1)}}@keyframes badgeReveal{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}@keyframes shineSwipe{0%{left:-60%}100%{left:160%}}.badge-pop{animation:badgeReveal .6s cubic-bezier(.34,1.56,.64,1) both}.badge-shine{position:relative;overflow:hidden}.badge-shine::after{content:'';position:absolute;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);animation:shineSwipe 1.2s ease .3s}@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}@keyframes ballSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes ballBounceIn{0%{transform:scale(0) translateY(40px);opacity:0}50%{transform:scale(1.15) translateY(-10px);opacity:1}70%{transform:scale(.95) translateY(4px)}100%{transform:scale(1) translateY(0)}}@keyframes podiumPulse{0%,100%{box-shadow:0 0 12px var(--pod-c,${VOLT})22}50%{box-shadow:0 0 28px var(--pod-c,${VOLT})33}}.slide-r{animation:slideInRight .3s ease-out both}.slide-l{animation:slideInLeft .3s ease-out both}.ball-spin{animation:ballSpin 8s linear infinite}.ball-bounce{animation:ballBounceIn .7s cubic-bezier(.34,1.56,.64,1) both}.podium-glow{animation:podiumPulse 2s ease-in-out infinite}.grad-text{background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}@media(prefers-reduced-motion:reduce){*,.fade-up,.scale-in,.slide-r,.slide-l,.ball-spin,.ball-bounce,.badge-pop,.cnt-up,.podium-glow,.tb,.btn-v,.ch{animation:none!important;transition:none!important}}`;
 const Styles=()=><style>{_STYLES_CSS}</style>;
 
@@ -69,7 +76,7 @@ const Styles=()=><style>{_STYLES_CSS}</style>;
 // APP ROOT
 // ═══════════════════════════════════════
 // Error Boundary using try-catch pattern (functional)
-function ErrorFallback(){return <div style={{minHeight:“100dvh”,background:BG,display:“flex”,alignItems:“center”,justifyContent:“center”,flexDirection:“column”,gap:16,padding:40}}>
+function ErrorFallback(){return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16,padding:40}}>
 <SLLogo size={64} glow/>
 
   <div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:3}}>SOMETHING WENT WRONG</div>
@@ -84,13 +91,13 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[view,setView]=useState(“auth”),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState(“dark”),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[ready,setReady]=useState(false);
+const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[ready,setReady]=useState(false);
 const T=THEMES[theme];
 
 // Load persisted data + restore session
-useEffect(()=>{(async()=>{const[d,s,p,ev,rv,sl,ch,scs,scr,sess]=await Promise.all([DB.get(“sl:drills”),DB.get(“sl:scores”),DB.get(“sl:players”),DB.get(“sl:events”),DB.get(“sl:rsvps”),DB.get(“sl:shotlogs”),DB.get(“sl:challenges”),DB.get(“sl:sc-sessions”),DB.get(“sl:sc-rsvps”),DB.get(“sl:session”)]);if(d)setDrills(d);if(s)setScores(s);if(p)setPlayers(p);if(ev)setEvents(ev);if(rv)setRsvps(rv);if(sl)setShotLogs(sl);if(ch)setChallenges(ch);if(scs)setScSessions(scs);if(scr)setScRsvps(scr);
+useEffect(()=>{(async()=>{const[d,s,p,ev,rv,sl,ch,scs,scr,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:session")]);if(d)setDrills(d);if(s)setScores(s);if(p)setPlayers(p);if(ev)setEvents(ev);if(rv)setRsvps(rv);if(sl)setShotLogs(sl);if(ch)setChallenges(ch);if(scs)setScSessions(scs);if(scr)setScRsvps(scr);
 // Restore session
-if(sess&&sess.email){const found=(p||[]).find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||“player”,name:found.name});setView(found.role||“player”)}}
+if(sess&&sess.email){const found=(p||[]).find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",name:found.name});setView(found.role||"player")}}
 setReady(true)})()},[]); // eslint-disable-line react-hooks/exhaustive-deps
 
 const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
@@ -98,63 +105,63 @@ const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
 const register=async(email,password,name,role)=>{
 // Use functional state update to avoid stale closure
 const existing=players.find(p=>p.email===email);
-if(existing)return{ok:false,err:“Account already exists. Please sign in.”};
+if(existing)return{ok:false,err:"Account already exists. Please sign in."};
 const hashed=hashPw(password);
 const np=[…players,{email,name,password:hashed,role}];
-await P(“sl:players”,np,setPlayers);
+await P("sl:players",np,setPlayers);
 setUser({email,role,name});setView(role);
-DB.set(“sl:session”,{email});
+DB.set("sl:session",{email});
 return{ok:true};
 };
 const login=(email,password)=>{
 const p=players.find(p=>p.email===email);
-if(!p)return{ok:false,err:“No account found. Please register first.”};
+if(!p)return{ok:false,err:"No account found. Please register first."};
 const hashed=hashPw(password);
 if(p.password&&p.password!==hashed){
 // Support legacy unhashed passwords during migration
-if(p.password!==password)return{ok:false,err:“Incorrect password.”};
+if(p.password!==password)return{ok:false,err:"Incorrect password."};
 // Migrate to hashed
-P(“sl:players”,players.map(pl=>pl.email===email?{…pl,password:hashed}:pl),setPlayers);
+P("sl:players",players.map(pl=>pl.email===email?{…pl,password:hashed}:pl),setPlayers);
 }
-if(!p.password){P(“sl:players”,players.map(pl=>pl.email===email?{…pl,password:hashed}:pl),setPlayers)}
-setUser({email,role:p.role||“player”,name:p.name});setView(p.role||“player”);
-DB.set(“sl:session”,{email});
+if(!p.password){P("sl:players",players.map(pl=>pl.email===email?{…pl,password:hashed}:pl),setPlayers)}
+setUser({email,role:p.role||"player",name:p.name});setView(p.role||"player");
+DB.set("sl:session",{email});
 return{ok:true};
 };
-const logout=()=>{setUser(null);setView(“auth”);DB.set(“sl:session”,null)};
+const logout=()=>{setUser(null);setView("auth");DB.set("sl:session",null)};
 const deleteAccount=async()=>{
 if(!user)return;
 const e=user.email;
-await P(“sl:players”,players.filter(p=>p.email!==e),setPlayers);
-await P(“sl:scores”,scores.filter(s=>s.email!==e),setScores);
-await P(“sl:rsvps”,rsvps.filter(r=>r.email!==e),setRsvps);
-await P(“sl:shotlogs”,shotLogs.filter(s=>s.email!==e),setShotLogs);
-await P(“sl:challenges”,challenges.filter(c=>c.from!==e&&c.to!==e),setChallenges);
-await P(“sl:sc-rsvps”,scRsvps.filter(r=>r.email!==e),setScRsvps);
-DB.set(“sl:session”,null);setUser(null);setView(“auth”);
+await P("sl:players",players.filter(p=>p.email!==e),setPlayers);
+await P("sl:scores",scores.filter(s=>s.email!==e),setScores);
+await P("sl:rsvps",rsvps.filter(r=>r.email!==e),setRsvps);
+await P("sl:shotlogs",shotLogs.filter(s=>s.email!==e),setShotLogs);
+await P("sl:challenges",challenges.filter(c=>c.from!==e&&c.to!==e),setChallenges);
+await P("sl:sc-rsvps",scRsvps.filter(r=>r.email!==e),setScRsvps);
+DB.set("sl:session",null);setUser(null);setView("auth");
 };
-const addScore=async(drillId,score)=>{if(!user)return;await P(“sl:scores”,[…scores,{email:user.email,name:user.name,drillId,score,date:todayStr(),ts:Date.now(),src:“home”}],setScores)};
-const updateDrill=async(id,up)=>{await P(“sl:drills”,drills.map(d=>d.id===id?{…d,…up}:d),setDrills)};
-const addDrill=async(drill)=>{await P(“sl:drills”,[…drills,{…drill,id:Date.now()}],setDrills)};
-const removeDrill=async(id)=>{await P(“sl:drills”,drills.filter(d=>d.id!==id),setDrills)};
-const toggleRsvp=async(eid)=>{const ex=rsvps.find(r=>r.eventId===eid&&r.email===user.email);if(ex)await P(“sl:rsvps”,rsvps.filter(r=>!(r.eventId===eid&&r.email===user.email)),setRsvps);else await P(“sl:rsvps”,[…rsvps,{eventId:eid,email:user.email,name:user.name,ts:Date.now()}],setRsvps)};
-const addEvent=async ev=>{await P(“sl:events”,[…events,{…ev,id:Date.now()}],setEvents)};
-const removeEvent=async id=>{await P(“sl:events”,events.filter(e=>e.id!==id),setEvents);await P(“sl:rsvps”,rsvps.filter(r=>r.eventId!==id),setRsvps)};
-const removeRsvp=async(eid,email)=>{await P(“sl:rsvps”,rsvps.filter(r=>!(r.eventId===eid&&r.email===email)),setRsvps)};
-const addRsvp=async(eid,email,name)=>{if(rsvps.find(r=>r.eventId===eid&&r.email===email))return;await P(“sl:rsvps”,[…rsvps,{eventId:eid,email,name,ts:Date.now()}],setRsvps)};
-const addShotLog=async(made,date)=>{await P(“sl:shotlogs”,[…shotLogs,{email:user.email,name:user.name,made,date,ts:Date.now()}],setShotLogs)};
-const addChallenge=async(ch)=>{await P(“sl:challenges”,[…challenges,{…ch,id:Date.now(),from:user.email,fromName:user.name,status:“pending”,ts:Date.now()}],setChallenges)};
-const respondChallenge=async(id,score)=>{await P(“sl:challenges”,challenges.map(c=>c.id===id?{…c,respScore:score,respTs:Date.now(),status:score>c.score?“won”:score===c.score?“tied”:“lost”}:c),setChallenges)};
-const addScSession=async(s)=>{await P(“sl:sc-sessions”,[…scSessions,{…s,id:Date.now()}],setScSessions)};
-const removeScSession=async(id)=>{await P(“sl:sc-sessions”,scSessions.filter(s=>s.id!==id),setScSessions);await P(“sl:sc-rsvps”,scRsvps.filter(r=>r.sessionId!==id),setScRsvps)};
-const toggleScRsvp=async(sid)=>{const ex=scRsvps.find(r=>r.sessionId===sid&&r.email===user.email);if(ex)await P(“sl:sc-rsvps”,scRsvps.filter(r=>!(r.sessionId===sid&&r.email===user.email)),setScRsvps);else await P(“sl:sc-rsvps”,[…scRsvps,{sessionId:sid,email:user.email,name:user.name,ts:Date.now()}],setScRsvps)};
+const addScore=async(drillId,score)=>{if(!user)return;await P("sl:scores",[…scores,{email:user.email,name:user.name,drillId,score,date:todayStr(),ts:Date.now(),src:"home"}],setScores)};
+const updateDrill=async(id,up)=>{await P("sl:drills",drills.map(d=>d.id===id?{…d,…up}:d),setDrills)};
+const addDrill=async(drill)=>{await P("sl:drills",[…drills,{…drill,id:Date.now()}],setDrills)};
+const removeDrill=async(id)=>{await P("sl:drills",drills.filter(d=>d.id!==id),setDrills)};
+const toggleRsvp=async(eid)=>{const ex=rsvps.find(r=>r.eventId===eid&&r.email===user.email);if(ex)await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.email===user.email)),setRsvps);else await P("sl:rsvps",[…rsvps,{eventId:eid,email:user.email,name:user.name,ts:Date.now()}],setRsvps)};
+const addEvent=async ev=>{await P("sl:events",[…events,{…ev,id:Date.now()}],setEvents)};
+const removeEvent=async id=>{await P("sl:events",events.filter(e=>e.id!==id),setEvents);await P("sl:rsvps",rsvps.filter(r=>r.eventId!==id),setRsvps)};
+const removeRsvp=async(eid,email)=>{await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.email===email)),setRsvps)};
+const addRsvp=async(eid,email,name)=>{if(rsvps.find(r=>r.eventId===eid&&r.email===email))return;await P("sl:rsvps",[…rsvps,{eventId:eid,email,name,ts:Date.now()}],setRsvps)};
+const addShotLog=async(made,date)=>{await P("sl:shotlogs",[…shotLogs,{email:user.email,name:user.name,made,date,ts:Date.now()}],setShotLogs)};
+const addChallenge=async(ch)=>{await P("sl:challenges",[…challenges,{…ch,id:Date.now(),from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges)};
+const respondChallenge=async(id,score)=>{await P("sl:challenges",challenges.map(c=>c.id===id?{…c,respScore:score,respTs:Date.now(),status:score>c.score?"won":score===c.score?"tied":"lost"}:c),setChallenges)};
+const addScSession=async(s)=>{await P("sl:sc-sessions",[…scSessions,{…s,id:Date.now()}],setScSessions)};
+const removeScSession=async(id)=>{await P("sl:sc-sessions",scSessions.filter(s=>s.id!==id),setScSessions);await P("sl:sc-rsvps",scRsvps.filter(r=>r.sessionId!==id),setScRsvps)};
+const toggleScRsvp=async(sid)=>{const ex=scRsvps.find(r=>r.sessionId===sid&&r.email===user.email);if(ex)await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.email===user.email)),setScRsvps);else await P("sl:sc-rsvps",[…scRsvps,{sessionId:sid,email:user.email,name:user.name,ts:Date.now()}],setScRsvps)};
 
-if(!ready)return <><Styles/><div style={{minHeight:“100dvh”,background:BG,display:“flex”,alignItems:“center”,justifyContent:“center”,flexDirection:“column”,gap:24,position:“relative”,overflow:“hidden”}}><CourtBG opacity={.03}/><div style={{position:“relative”,zIndex:1,textAlign:“center”}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:“pulse 1.5s infinite”}}>LOADING</div></div></div></>;
+if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.03}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
-{view===“auth”&&<Auth onLogin={login} onRegister={register} players={players}/>}
-{view===“player”&&<Player u={user} drills={drills} scores={scores} addScore={addScore} events={events} rsvps={rsvps} toggleRsvp={toggleRsvp} shotLogs={shotLogs} addShotLog={addShotLog} challenges={challenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={players} T={T} theme={theme} setTheme={setTheme} scSessions={scSessions} scRsvps={scRsvps} toggleScRsvp={toggleScRsvp} logout={logout} deleteAccount={deleteAccount}/>}
-{view===“coach”&&<Coach u={user} drills={drills} scores={scores} players={players} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} events={events} rsvps={rsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scSessions} scRsvps={scRsvps} addScSession={addScSession} removeScSession={removeScSession} shotLogs={shotLogs} logout={logout} deleteAccount={deleteAccount}/>}
+{view==="auth"&&<Auth onLogin={login} onRegister={register} players={players}/>}
+{view==="player"&&<Player u={user} drills={drills} scores={scores} addScore={addScore} events={events} rsvps={rsvps} toggleRsvp={toggleRsvp} shotLogs={shotLogs} addShotLog={addShotLog} challenges={challenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={players} T={T} theme={theme} setTheme={setTheme} scSessions={scSessions} scRsvps={scRsvps} toggleScRsvp={toggleScRsvp} logout={logout} deleteAccount={deleteAccount}/>}
+{view==="coach"&&<Coach u={user} drills={drills} scores={scores} players={players} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} events={events} rsvps={rsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scSessions} scRsvps={scRsvps} addScSession={addScSession} removeScSession={removeScSession} shotLogs={shotLogs} logout={logout} deleteAccount={deleteAccount}/>}
 </>;
 }
 
@@ -162,37 +169,37 @@ return <><Styles/>
 // AUTH
 // ═══════════════════════════════════════
 function Auth({onLogin,onRegister,players}){
-const[mode,setMode]=useState(“login”),[role,setRole]=useState(“player”),[email,setEmail]=useState(””),[password,setPassword]=useState(””),[name,setName]=useState(””),[err,setErr]=useState(””);
+const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[err,setErr]=useState("");
 const doLogin=()=>{
-const e=email.trim().toLowerCase();if(!e){setErr(“Enter your email”);return}
-if(!password){setErr(“Enter your password”);return}
-const id=e.includes(”@”)?e:e+”@shotlab.app”;
+const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
+if(!password){setErr("Enter your password");return}
+const id=e.includes("@")?e:e+"@shotlab.app";
 const r=onLogin(id,password);
 if(!r.ok)setErr(r.err);
 };
 const doRegister=async()=>{
-const e=email.trim().toLowerCase();if(!e){setErr(“Enter your email”);return}
-if(!name.trim()){setErr(“Enter your name”);return}
-if(!password||password.length<4){setErr(“Password must be at least 4 characters”);return}
-const id=e.includes(”@”)?e:e+”@shotlab.app”;
+const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
+if(!name.trim()){setErr("Enter your name");return}
+if(!password||password.length<4){setErr("Password must be at least 4 characters");return}
+const id=e.includes("@")?e:e+"@shotlab.app";
 const r=await onRegister(id,password,name.trim(),role);
 if(!r.ok)setErr(r.err);
 };
-const inp={width:“100%”,padding:“15px 16px”,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:“none”};
-return <div style={{minHeight:“100dvh”,background:BG,display:“flex”,alignItems:“center”,justifyContent:“center”,position:“relative”,overflow:“hidden”}}>
+const inp={width:"100%",padding:"15px 16px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none"};
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden"}}>
 <CourtBG opacity={.05}/><GlowOrb color={VOLT} top="15%" left="50%" size={400}/><GlowOrb color={ORANGE} top="85%" left="30%" size={250}/>
-<div className=“fade-up” style={{position:“relative”,zIndex:1,width:“100%”,maxWidth:400,padding:“0 24px”}}>
-<div style={{textAlign:“center”,marginBottom:28,position:“relative”}}>
-<div style={{position:“absolute”,top:“50%”,left:“50%”,transform:“translate(-50%,-50%)”,opacity:.08,pointerEvents:“none”}}><SLLogo size={140}/></div>
-<div className=“ball-bounce” style={{display:“inline-block”,position:“relative”,zIndex:1}}><div className="ball-spin"><DrillIcon type="ft" size={60}/></div></div>
+<div className="fade-up" style={{position:"relative",zIndex:1,width:"100%",maxWidth:400,padding:"0 24px"}}>
+<div style={{textAlign:"center",marginBottom:28,position:"relative"}}>
+<div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",opacity:.08,pointerEvents:"none"}}><SLLogo size={140}/></div>
+<div className="ball-bounce" style={{display:"inline-block",position:"relative",zIndex:1}}><div className="ball-spin"><DrillIcon type="ft" size={60}/></div></div>
 </div>
-<h1 style={{fontFamily:FD,fontSize:72,color:LIGHT,textAlign:“center”,margin:0,lineHeight:.85,letterSpacing:4}}>SHOT<span style={{background:`linear-gradient(135deg,${VOLT},${CYAN})`,WebkitBackgroundClip:“text”,WebkitTextFillColor:“transparent”,backgroundClip:“text”}}>LAB</span></h1>
-<p style={{fontFamily:FB,color:MUTED,textAlign:“center”,fontSize:13,letterSpacing:5,margin:“8px 0 0”,fontWeight:500}}>OFFSEASON DEVELOPMENT PROGRAM</p>
-<div style={{display:“flex”,alignItems:“center”,gap:12,margin:“32px auto”,maxWidth:200}}><div style={{flex:1,height:1,background:`linear-gradient(to right,transparent,${VOLT}44)`}}/><div style={{width:6,height:6,borderRadius:“50%”,background:VOLT,opacity:.6}}/><div style={{flex:1,height:1,background:`linear-gradient(to left,transparent,${VOLT}44)`}}/></div>
-<div style={{background:`linear-gradient(180deg,${CARD_BG},#121212)`,borderRadius:24,padding:“36px 28px”,border:`1px solid ${BORDER_CLR}`}}>
+<h1 style={{fontFamily:FD,fontSize:72,color:LIGHT,textAlign:"center",margin:0,lineHeight:.85,letterSpacing:4}}>SHOT<span style={{background:`linear-gradient(135deg,${VOLT},${CYAN})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>LAB</span></h1>
+<p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,letterSpacing:5,margin:"8px 0 0",fontWeight:500}}>OFFSEASON DEVELOPMENT PROGRAM</p>
+<div style={{display:"flex",alignItems:"center",gap:12,margin:"32px auto",maxWidth:200}}><div style={{flex:1,height:1,background:`linear-gradient(to right,transparent,${VOLT}44)`}}/><div style={{width:6,height:6,borderRadius:"50%",background:VOLT,opacity:.6}}/><div style={{flex:1,height:1,background:`linear-gradient(to left,transparent,${VOLT}44)`}}/></div>
+<div style={{background:`linear-gradient(180deg,${CARD_BG},#121212)`,borderRadius:24,padding:"36px 28px",border:`1px solid ${BORDER_CLR}`}}>
 {/* Login / Register toggle */}
-<div style={{display:“flex”,background:BG,borderRadius:12,padding:3,marginBottom:24,border:`1px solid ${BORDER_CLR}`}}>
-{[“login”,“register”].map(m=><button key={m} onClick={()=>{setMode(m);setErr(””)}} style={{flex:1,padding:“11px 0”,borderRadius:10,border:“none”,cursor:“pointer”,fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:“uppercase”,transition:“all .25s”,background:mode===m?”#1a1a1a”:“transparent”,color:mode===m?LIGHT:”#444”,boxShadow:mode===m?`inset 0 -3px 0 ${VOLT},0 0 12px ${VOLT}10`:“none”}}>{m===“login”?“SIGN IN”:“REGISTER”}</button>)}
+<div style={{display:"flex",background:BG,borderRadius:12,padding:3,marginBottom:24,border:`1px solid ${BORDER_CLR}`}}>
+{["login","register"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,padding:"11px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:"uppercase",transition:"all .25s",background:mode===m?"#1a1a1a":"transparent",color:mode===m?LIGHT:"#444",boxShadow:mode===m?`inset 0 -3px 0 ${VOLT},0 0 12px ${VOLT}10`:"none"}}>{m==="login"?"SIGN IN":"REGISTER"}</button>)}
 </div>
 
 ```
@@ -240,17 +247,17 @@ return <div style={{minHeight:“100dvh”,background:BG,display:“flex”,alig
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
 function Player({u,drills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,logout,deleteAccount}){
-const[tab,setTab]=useState(“home”),[active,setActive]=useState(null),[input,setInput]=useState(””),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
-const[shotMade,setShotMade]=useState(””),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false);
-const[challTarget,setChallTarget]=useState(””),[showChallForm,setShowChallForm]=useState(false);
+const[tab,setTab]=useState("home"),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
+const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false);
+const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
-const[prevTab,setPrevTab]=useState(“home”);
-const tabOrder=[“home”,“duels”,“sc”,“program”,“profile”];
-const slideClass=useMemo(()=>{const pi=tabOrder.indexOf(prevTab);const ci=tabOrder.indexOf(tab===“log-drill”?“home”:tab);if(pi<0||ci<0||pi===ci)return “fade-up”;return ci>pi?“slide-r”:“slide-l”},[tab,prevTab]);
-const switchTab=(k)=>{setPrevTab(tab===“log-drill”?“home”:tab);setTab(k);setActive(null);setShowShotStats(false)};
+const[prevTab,setPrevTab]=useState("home");
+const tabOrder=["home","duels","sc","program","profile"];
+const slideClass=useMemo(()=>{const pi=tabOrder.indexOf(prevTab);const ci=tabOrder.indexOf(tab==="log-drill"?"home":tab);if(pi<0||ci<0||pi===ci)return "fade-up";return ci>pi?"slide-r":"slide-l"},[tab,prevTab]);
+const switchTab=(k)=>{setPrevTab(tab==="log-drill"?"home":tab);setTab(k);setActive(null);setShowShotStats(false)};
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
-const homeScores=useMemo(()=>my.filter(s=>s.src===“home”||!s.src),[my]);
+const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const total=useMemo(()=>homeScores.reduce((a,s)=>a+s.score,0),[homeScores]);
 const today=todayStr();
 const todayS=useMemo(()=>homeScores.filter(s=>s.date===today),[homeScores,today]);
@@ -260,7 +267,7 @@ const myRsvps=useMemo(()=>rsvps.filter(r=>r.email===u.email).length,[rsvps,u]);
 const tier=useMemo(()=>getTier(myRsvps),[myRsvps]);
 
 // Notification dots for nav
-const pendingDuels=useMemo(()=>challenges.filter(c=>c.to===u.email&&c.status===“pending”).length,[challenges,u]);
+const pendingDuels=useMemo(()=>challenges.filter(c=>c.to===u.email&&c.status==="pending").length,[challenges,u]);
 const unrsvpEvents=useMemo(()=>{const up=events.filter(e=>e.date>=today);return up.filter(e=>!rsvps.some(r=>r.eventId===e.id&&r.email===u.email)).length},[events,rsvps,u,today]);
 const soonSC=useMemo(()=>{const d2=new Date();d2.setDate(d2.getDate()+2);const cut=`${d2.getFullYear()}-${String(d2.getMonth()+1).padStart(2,"0")}-${String(d2.getDate()).padStart(2,"0")}`;return scSessions.filter(s=>s.date>=today&&s.date<=cut&&!scRsvps.some(r=>r.sessionId===s.id&&r.email===u.email)).length},[scSessions,scRsvps,u,today]);
 
@@ -270,11 +277,11 @@ const handleLog=()=>{if(submitting)return;const v=parseInt(input);if(isNaN(v)||v
 // Check personal best
 const prevBest=homeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
 const isPB=v>prevBest&&prevBest>0;
-addScore(active.id,v);playScore();const pct=Math.round(v/active.max*100);setShareData({drill:active.name,score:v,max:active.max,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest});setSaved(true);setConfetti(true);setInput(””);setTimeout(()=>setConfetti(false),1200);
+addScore(active.id,v);playScore();const pct=Math.round(v/active.max*100);setShareData({drill:active.name,score:v,max:active.max,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 setTimeout(()=>{const ns=calcStreak([…homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)};
-const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget(””);setSubmitting(false);setTab(“home”)};
-const sendChallenge=()=>{if(!challTarget)return;addChallenge({to:challTarget,toName:players.find(p=>p.email===challTarget)?.name||challTarget.split(”@”)[0],drillId:shareData.drillId,drillName:shareData.drill,score:shareData.score,max:shareData.max});setShowChallForm(false);setChallTarget(””);closeShare()};
+const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setSubmitting(false);setTab("home")};
+const sendChallenge=()=>{if(!challTarget)return;addChallenge({to:challTarget,toName:players.find(p=>p.email===challTarget)?.name||challTarget.split("@")[0],drillId:shareData.drillId,drillName:shareData.drill,score:shareData.score,max:shareData.max});setShowChallForm(false);setChallTarget("");closeShare()};
 
 // Pull-to-refresh
 const[tStart,setTStart]=useState(0);
@@ -282,8 +289,8 @@ const onTS=e=>{setTStart(e.touches[0].clientY)};
 const onTM=e=>{if(!tStart)return;const el=e.currentTarget;if(el.scrollTop>0)return;const dy=Math.max(0,Math.min(70,(e.touches[0].clientY-tStart)*.35));setPullY(dy)};
 const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else setPullY(0);setTStart(0)};
 
-return <div style={{minHeight:“100dvh”,background:T.BG,display:“flex”,flexDirection:“column”,fontFamily:FB,position:“relative”,transition:“background .3s”}}>
-<div style={{position:“fixed”,inset:0,pointerEvents:“none”,zIndex:0}}><CourtBG opacity={theme===“light”?.06:.025}/><GlowOrb color={tab===“program”?CYAN:tab===“duels”?ORANGE:VOLT} top=“0” left=“70%” size={300} animate/><GlowOrb color={tab===“program”?VOLT:tab===“duels”?CYAN:ORANGE} top=“60%” left=“20%” size={250} animate/></div>
+return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
+<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.06:.025}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
 ```
 {/* Badge Reveal Overlay */}
@@ -595,16 +602,16 @@ return <div style={{minHeight:“100dvh”,background:T.BG,display:“flex”,fl
 // SHAREABLE WORKOUT CARD
 // ═══════════════════════════════════════
 function ShareCard({data}){
-const pct=data.pct||0;const pcol=pct>=80?VOLT:pct>=50?ORANGE:”#ef4444”;
-return <div style={{background:`linear-gradient(145deg,#0c0c0c,#141414)`,borderRadius:24,padding:“28px 24px 24px”,border:`1px solid ${VOLT}22`,position:“relative”,overflow:“hidden”,textAlign:“center”,maxWidth:340,margin:“0 auto”}}>
+const pct=data.pct||0;const pcol=pct>=80?VOLT:pct>=50?ORANGE:"#ef4444";
+return <div style={{background:`linear-gradient(145deg,#0c0c0c,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",maxWidth:340,margin:"0 auto"}}>
 {/* Corner accents */}
-<div style={{position:“absolute”,top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:“24px 0 0 0”,opacity:.4}}/>
-<div style={{position:“absolute”,bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:“0 0 24px 0”,opacity:.4}}/>
+<div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
+<div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
 {/* Glow */}
-<div style={{position:“absolute”,top:”-30%”,left:“50%”,width:200,height:200,borderRadius:“50%”,background:`radial-gradient(circle,${VOLT}0c,transparent)`,transform:“translateX(-50%)”,pointerEvents:“none”}}/>
+<div style={{position:"absolute",top:"-30%",left:"50%",width:200,height:200,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}0c,transparent)`,transform:"translateX(-50%)",pointerEvents:"none"}}/>
 {/* Brand */}
-<div style={{position:“relative”,zIndex:1}}>
-<div style={{display:“flex”,alignItems:“center”,justifyContent:“center”,gap:4,marginBottom:4}}>
+<div style={{position:"relative",zIndex:1}}>
+<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,marginBottom:4}}>
 <SLLogo size={22}/>
 <span style={{fontFamily:FD,color:VOLT,fontSize:12,letterSpacing:4}}>SHOT LAB</span>
 </div>
@@ -613,30 +620,30 @@ return <div style={{background:`linear-gradient(145deg,#0c0c0c,#141414)`,borderR
 <div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:3,lineHeight:1}}>{data.name.toUpperCase()}</div>
 <div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:2,marginTop:4,marginBottom:20}}>{data.date}</div>
 {/* Drill + Score */}
-<div style={{display:“inline-flex”,alignItems:“center”,gap:8,background:BG,borderRadius:12,padding:“8px 16px”,border:`1px solid ${BORDER_CLR}`,marginBottom:16}}>
+<div style={{display:"inline-flex",alignItems:"center",gap:8,background:BG,borderRadius:12,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:16}}>
 <DrillIcon type={data.icon} size={20}/>
 <span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{data.drill}</span>
 </div>
 {/* Big score */}
 <div style={{fontFamily:FD,fontSize:72,color:VOLT,lineHeight:.9,letterSpacing:2}}>{data.score}<span style={{color:MUTED,fontSize:32}}>/{data.max}</span></div>
 {/* Personal Best badge */}
-{data.isPB&&<div style={{display:“inline-flex”,alignItems:“center”,gap:6,background:ORANGE+“15”,borderRadius:10,padding:“6px 16px”,border:`1px solid ${ORANGE}33`,marginTop:12}}>
+{data.isPB&&<div style={{display:"inline-flex",alignItems:"center",gap:6,background:ORANGE+"15",borderRadius:10,padding:"6px 16px",border:`1px solid ${ORANGE}33`,marginTop:12}}>
 <span style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>★ NEW PERSONAL BEST</span>
 </div>}
 {/* Accuracy ring */}
-<div style={{margin:“16px auto 12px”,width:80,position:“relative”}}>
+<div style={{margin:"16px auto 12px",width:80,position:"relative"}}>
 <svg width="80" height="40" viewBox="0 0 80 40">
 <path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinecap="round"/>
-<path d=“M5 35 A 35 35 0 0 1 75 35” fill=“none” stroke={pcol} strokeWidth=“6” strokeLinecap=“round” strokeDasharray={`${pct*1.1} 110`}/>
+<path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke={pcol} strokeWidth="6" strokeLinecap="round" strokeDasharray={`${pct*1.1} 110`}/>
 </svg>
-<div style={{position:“absolute”,bottom:0,left:“50%”,transform:“translateX(-50%)”,fontFamily:FD,color:pcol,fontSize:18}}>{pct}%</div>
+<div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",fontFamily:FD,color:pcol,fontSize:18}}>{pct}%</div>
 </div>
 {/* Streak */}
-{data.streak>0&&<div style={{display:“inline-flex”,alignItems:“center”,gap:4,background:ORANGE+“12”,borderRadius:8,padding:“4px 12px”,border:`1px solid ${ORANGE}22`}}>
+{data.streak>0&&<div style={{display:"inline-flex",alignItems:"center",gap:4,background:ORANGE+"12",borderRadius:8,padding:"4px 12px",border:`1px solid ${ORANGE}22`}}>
 <span style={{fontSize:14}}>🔥</span>
 <span style={{fontFamily:FD,color:ORANGE,fontSize:14,letterSpacing:2}}>{data.streak} DAY STREAK</span>
 </div>}
-{data.badges&&data.badges.length>0&&<div style={{display:“flex”,gap:3,justifyContent:“center”,flexWrap:“wrap”,marginTop:6}}>{data.badges.map(b=><span key={b.days} style={{fontFamily:FD,fontSize:8,color:b.color,background:`${b.color}12`,border:`1px solid ${b.color}33`,borderRadius:5,padding:“1px 6px”,letterSpacing:1}}>{b.icon}D</span>)}</div>}
+{data.badges&&data.badges.length>0&&<div style={{display:"flex",gap:3,justifyContent:"center",flexWrap:"wrap",marginTop:6}}>{data.badges.map(b=><span key={b.days} style={{fontFamily:FD,fontSize:8,color:b.color,background:`${b.color}12`,border:`1px solid ${b.color}33`,borderRadius:5,padding:"1px 6px",letterSpacing:1}}>{b.icon}D</span>)}</div>}
 </div>
 
   </div>;
@@ -646,26 +653,26 @@ return <div style={{background:`linear-gradient(145deg,#0c0c0c,#141414)`,borderR
 // HEAD-TO-HEAD DUELS
 // ═══════════════════════════════════════
 function DuelsPanel({u,challenges,drills,respondChallenge,players}){
-const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(””),[respSaved,setRespSaved]=useState(null);
+const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(""),[respSaved,setRespSaved]=useState(null);
 const incoming=useMemo(()=>challenges.filter(c=>c.to===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
 const outgoing=useMemo(()=>challenges.filter(c=>c.from===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
-const pending=incoming.filter(c=>c.status===“pending”);
-const resolved=[…incoming.filter(c=>c.status!==“pending”),…outgoing].sort((a,b)=>(b.respTs||b.ts)-(a.respTs||a.ts));
+const pending=incoming.filter(c=>c.status==="pending");
+const resolved=[…incoming.filter(c=>c.status!=="pending"),…outgoing].sort((a,b)=>(b.respTs||b.ts)-(a.respTs||a.ts));
 
 const handleRespond=(ch)=>{
 const v=parseInt(respInput);if(isNaN(v)||v<0||v>ch.max)return;
-respondChallenge(ch.id,v);setRespSaved(ch.id);setRespId(null);setRespInput(””);
+respondChallenge(ch.id,v);setRespSaved(ch.id);setRespId(null);setRespInput("");
 setTimeout(()=>setRespSaved(null),2000);
 };
 
 return <div className="fade-up">
 {/* Duels banner — aggressive, asymmetric */}
-<div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:“20px 22px”,marginBottom:16,border:`1px solid ${ORANGE}22`,position:“relative”,overflow:“hidden”}}>
-<div style={{position:“absolute”,top:-12,right:-8,opacity:.08}}><svg width="100" height="100" viewBox="0 0 24 24" fill={ORANGE} stroke="none"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-<div style={{position:“absolute”,bottom:8,right:12,opacity:.04,pointerEvents:“none”}}><SLLogo size={56}/></div>
-<div style={{position:“absolute”,bottom:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${ORANGE},${ORANGE}44,transparent)`}}/>
-<div style={{display:“flex”,alignItems:“center”,gap:14,position:“relative”}}>
-<div style={{width:48,height:48,borderRadius:14,background:`${ORANGE}15`,border:`1.5px solid ${ORANGE}33`,display:“flex”,alignItems:“center”,justifyContent:“center”,transform:“rotate(-6deg)”}}>
+<div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${ORANGE}22`,position:"relative",overflow:"hidden"}}>
+<div style={{position:"absolute",top:-12,right:-8,opacity:.08}}><svg width="100" height="100" viewBox="0 0 24 24" fill={ORANGE} stroke="none"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+<div style={{position:"absolute",bottom:8,right:12,opacity:.04,pointerEvents:"none"}}><SLLogo size={56}/></div>
+<div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${ORANGE},${ORANGE}44,transparent)`}}/>
+<div style={{display:"flex",alignItems:"center",gap:14,position:"relative"}}>
+<div style={{width:48,height:48,borderRadius:14,background:`${ORANGE}15`,border:`1.5px solid ${ORANGE}33`,display:"flex",alignItems:"center",justifyContent:"center",transform:"rotate(-6deg)"}}>
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
 </div>
 <div>
@@ -754,19 +761,19 @@ const[showBoard,setShowBoard]=useState(false),[expanded,setExpanded]=useState(nu
 const sorted=useMemo(()=>[…sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
 const upcoming=sorted.filter(s=>s.date>=todayStr()),past=sorted.filter(s=>s.date<todayStr());
 const myCount=scRsvps.filter(r=>r.email===user.email).length;
-const medals=[VOLT,”#C0C0C0”,”#CD7F32”];
+const medals=[VOLT,"#C0C0C0","#CD7F32"];
 
 const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[scRsvps]);
 
-const LiftIcon=({size=24,color=”#a855f7”})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
-const SC_COLOR=”#a855f7”;
+const LiftIcon=({size=24,color="#a855f7"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
+const SC_COLOR="#a855f7";
 
 return <div className="fade-up">
 {/* S&C banner — heavy, grounded */}
-<div style={{background:`linear-gradient(180deg,${SC_COLOR}0c,${CARD_BG})`,borderRadius:18,padding:0,marginBottom:16,border:`1px solid ${SC_COLOR}18`,overflow:“hidden”,position:“relative”}}>
-<div style={{position:“absolute”,bottom:8,right:12,opacity:.04,pointerEvents:“none”}}><SLLogo size={52}/></div>
+<div style={{background:`linear-gradient(180deg,${SC_COLOR}0c,${CARD_BG})`,borderRadius:18,padding:0,marginBottom:16,border:`1px solid ${SC_COLOR}18`,overflow:"hidden",position:"relative"}}>
+<div style={{position:"absolute",bottom:8,right:12,opacity:.04,pointerEvents:"none"}}><SLLogo size={52}/></div>
 {/* Full-width barbell illustration */}
-<div style={{padding:“14px 22px 10px”,display:“flex”,alignItems:“center”,justifyContent:“center”}}>
+<div style={{padding:"14px 22px 10px",display:"flex",alignItems:"center",justifyContent:"center"}}>
 <svg width="100%" height="16" viewBox="0 0 200 16" preserveAspectRatio="none" fill="none">
 <rect x="0" y="3" width="18" height="10" rx="2" fill={SC_COLOR} opacity=".25"/>
 <rect x="20" y="5" width="10" height="6" rx="1" fill={SC_COLOR} opacity=".15"/>
@@ -775,8 +782,8 @@ return <div className="fade-up">
 <rect x="182" y="3" width="18" height="10" rx="2" fill={SC_COLOR} opacity=".25"/>
 </svg>
 </div>
-<div style={{padding:“0 22px 18px”,display:“flex”,alignItems:“center”,gap:12}}>
-<div style={{width:42,height:42,borderRadius:12,background:`${SC_COLOR}12`,border:`1px solid ${SC_COLOR}22`,display:“flex”,alignItems:“center”,justifyContent:“center”}}><LiftIcon size={22} color={SC_COLOR}/></div>
+<div style={{padding:"0 22px 18px",display:"flex",alignItems:"center",gap:12}}>
+<div style={{width:42,height:42,borderRadius:12,background:`${SC_COLOR}12`,border:`1px solid ${SC_COLOR}22`,display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={22} color={SC_COLOR}/></div>
 <div>
 <div style={{fontFamily:FD,color:SC_COLOR,fontSize:16,letterSpacing:3}}>STRENGTH & CONDITIONING</div>
 <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Show up. Get stronger. Track sessions.</div>
@@ -863,18 +870,18 @@ return <div className="fade-up">
 // DASHBOARD LEADERBOARD — The hero section
 // ═══════════════════════════════════════
 function DashboardLeaderboard({scores,drills,user,scRsvps,rsvps,shotLogs}){
-const[mode,setMode]=useState(“home”);
-const[sub,setSub]=useState(“total”);
-const medals=[VOLT,”#C0C0C0”,”#CD7F32”];
-const homeScores=useMemo(()=>scores.filter(s=>s.src===“home”||!s.src),[scores]);
-const progScores=useMemo(()=>scores.filter(s=>s.src===“program”),[scores]);
+const[mode,setMode]=useState("home");
+const[sub,setSub]=useState("total");
+const medals=[VOLT,"#C0C0C0","#CD7F32"];
+const homeScores=useMemo(()=>scores.filter(s=>s.src==="home"||!s.src),[scores]);
+const progScores=useMemo(()=>scores.filter(s=>s.src==="program"),[scores]);
 
 const board=useMemo(()=>{
-if(mode===“home”){
-if(sub===“shots”){
+if(mode==="home"){
+if(sub==="shots"){
 const m={};shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});return Object.values(m).sort((a,b)=>b.total-a.total);
 }
-if(sub===“total”){
+if(sub==="total"){
 // Combine drill scores + shot logs
 const m={};
 homeScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
@@ -887,28 +894,28 @@ homeScores.filter(s=>s.drillId===did).forEach(s=>{if(!m[s.email])m[s.email]={ema
 return Object.values(m).sort((a,b)=>b.total-a.total);
 }
 // Program
-if(sub===“events”){
+if(sub==="events"){
 const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).sort((a,b)=>b.total-a.total);
 }
-if(sub===“sc”){
+if(sub==="sc"){
 const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).sort((a,b)=>b.total-a.total);
 }
 const m={};progScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
 return Object.values(m).sort((a,b)=>b.total-a.total);
 },[homeScores,progScores,mode,sub,scores,scRsvps,rsvps,shotLogs]);
 
-const isHome=mode===“home”;
+const isHome=mode==="home";
 const accentColor=isHome?VOLT:CYAN;
-const unit=sub===“shots”?“makes”:sub===“events”?“events”:sub===“sc”?“sessions”:“makes”;
-const title=isHome?“AT HOME”:“PROGRAM”;
+const unit=sub==="shots"?"makes":sub==="events"?"events":sub==="sc"?"sessions":"makes";
+const title=isHome?"AT HOME":"PROGRAM";
 
 // Swap sub when switching modes
-const switchMode=(m)=>{setMode(m);setSub(m===“home”?“total”:“events”)};
+const switchMode=(m)=>{setMode(m);setSub(m==="home"?"total":"events")};
 
 return <div>
 {/* Mode toggle */}
-<div style={{display:“flex”,background:SURFACE,borderRadius:14,padding:3,marginBottom:16,border:`1px solid ${BORDER_CLR}`}}>
-{[{k:“home”,l:“AT HOME”,c:VOLT},{k:“prog”,l:“PROGRAM”,c:CYAN}].map(m=><button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:“12px 0”,borderRadius:11,border:“none”,cursor:“pointer”,fontFamily:FB,fontSize:13,fontWeight:mode===m.k?700:500,letterSpacing:2,transition:“all .25s”,background:mode===m.k?`${m.c}12`:“transparent”,color:mode===m.k?m.c:”#444”,boxShadow:mode===m.k?`inset 0 -3px 0 ${m.c}`:“none”}}>{m.l}</button>)}
+<div style={{display:"flex",background:SURFACE,borderRadius:14,padding:3,marginBottom:16,border:`1px solid ${BORDER_CLR}`}}>
+{[{k:"home",l:"AT HOME",c:VOLT},{k:"prog",l:"PROGRAM",c:CYAN}].map(m=><button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"12px 0",borderRadius:11,border:"none",cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:mode===m.k?700:500,letterSpacing:2,transition:"all .25s",background:mode===m.k?`${m.c}12`:"transparent",color:mode===m.k?m.c:"#444",boxShadow:mode===m.k?`inset 0 -3px 0 ${m.c}`:"none"}}>{m.l}</button>)}
 </div>
 
 ```
@@ -1001,7 +1008,7 @@ const today=todayStr();
 
 const handleLog=()=>{
 const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;
-addShotLog(v,shotDate);setShotSaved(true);setShotMade(””);
+addShotLog(v,shotDate);setShotSaved(true);setShotMade("");
 setTimeout(()=>setShotSaved(false),1800);
 };
 
@@ -1018,11 +1025,11 @@ const allTime=useMemo(()=>my.reduce((a,s)=>a+s.made,0),[my]);
 return <div className="fade-up">
 {/* Header */}
 {/* Shot Tracker banner — arc-inspired */}
-<div style={{background:`linear-gradient(180deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:“18px 22px”,marginBottom:16,border:`1px solid ${ORANGE}12`,position:“relative”,overflow:“hidden”}}>
-<div style={{position:“absolute”,top:-20,right:20,opacity:.06}}><svg width="80" height="80" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="3"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="2"/></svg></div>
-<div style={{position:“absolute”,bottom:8,right:12,opacity:.04,pointerEvents:“none”}}><SLLogo size={52}/></div>
-<div style={{display:“flex”,alignItems:“center”,gap:12,position:“relative”}}>
-<div style={{width:42,height:42,borderRadius:12,background:`${ORANGE}12`,border:`1px solid ${ORANGE}22`,display:“flex”,alignItems:“center”,justifyContent:“center”}}>
+<div style={{background:`linear-gradient(180deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:"18px 22px",marginBottom:16,border:`1px solid ${ORANGE}12`,position:"relative",overflow:"hidden"}}>
+<div style={{position:"absolute",top:-20,right:20,opacity:.06}}><svg width="80" height="80" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="3"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="2"/></svg></div>
+<div style={{position:"absolute",bottom:8,right:12,opacity:.04,pointerEvents:"none"}}><SLLogo size={52}/></div>
+<div style={{display:"flex",alignItems:"center",gap:12,position:"relative"}}>
+<div style={{width:42,height:42,borderRadius:12,background:`${ORANGE}12`,border:`1px solid ${ORANGE}22`,display:"flex",alignItems:"center",justifyContent:"center"}}>
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
 </div>
 <div>
@@ -1107,20 +1114,20 @@ return <div className="fade-up">
 // EVENTS PANEL (Player Program View)
 // ═══════════════════════════════════════
 function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills}){
-const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState(“attend”);
+const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState("attend");
 const sorted=useMemo(()=>[…events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
 const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
 const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);
 
 const attendBoard=useMemo(()=>{const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[rsvps]);
-const medals=[VOLT,”#C0C0C0”,”#CD7F32”];
+const medals=[VOLT,"#C0C0C0","#CD7F32"];
 
 return <div className="fade-up">
 {/* Events banner — structured, timeline-oriented */}
-<div style={{background:`linear-gradient(135deg,${VOLT}04,${CARD_BG})`,borderRadius:18,padding:“20px 22px”,marginBottom:16,border:`1px solid ${BORDER_CLR}`,position:“relative”,overflow:“hidden”}}>
-<div style={{position:“absolute”,bottom:8,right:12,opacity:.04,pointerEvents:“none”}}><SLLogo size={52}/></div>
-<div style={{display:“flex”,alignItems:“center”,gap:12,marginBottom:14}}>
-<div style={{width:42,height:42,borderRadius:12,background:`${VOLT}08`,border:`1px solid ${VOLT}15`,display:“flex”,alignItems:“center”,justifyContent:“center”}}>
+<div style={{background:`linear-gradient(135deg,${VOLT}04,${CARD_BG})`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
+<div style={{position:"absolute",bottom:8,right:12,opacity:.04,pointerEvents:"none"}}><SLLogo size={52}/></div>
+<div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+<div style={{width:42,height:42,borderRadius:12,background:`${VOLT}08`,border:`1px solid ${VOLT}15`,display:"flex",alignItems:"center",justifyContent:"center"}}>
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
 </div>
 <div>
@@ -1129,16 +1136,16 @@ return <div className="fade-up">
 </div>
 </div>
 {/* Timeline strip — next 3 events as dots */}
-{upcoming.length>0&&<div style={{display:“flex”,alignItems:“center”,gap:0,paddingLeft:4}}>
-<div style={{flex:1,display:“flex”,alignItems:“center”}}>
+{upcoming.length>0&&<div style={{display:"flex",alignItems:"center",gap:0,paddingLeft:4}}>
+<div style={{flex:1,display:"flex",alignItems:"center"}}>
 {upcoming.slice(0,3).map((ev,i)=>{
 const going=rsvps.some(r=>r.eventId===ev.id&&r.email===user.email);
-return <div key={ev.id} style={{display:“flex”,alignItems:“center”,flex:1}}>
-<div style={{display:“flex”,flexDirection:“column”,alignItems:“center”,gap:3}}>
-<div style={{width:10,height:10,borderRadius:“50%”,background:going?VOLT:BORDER_CLR,border:going?`2px solid ${VOLT}`:`2px solid ${MUTED}44`,boxShadow:going?`0 0 8px ${VOLT}44`:“none”}}/>
-<div style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,color:going?VOLT:MUTED,whiteSpace:“nowrap”}}>{ev.date.slice(5)}</div>
+return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
+<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+<div style={{width:10,height:10,borderRadius:"50%",background:going?VOLT:BORDER_CLR,border:going?`2px solid ${VOLT}`:`2px solid ${MUTED}44`,boxShadow:going?`0 0 8px ${VOLT}44`:"none"}}/>
+<div style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,color:going?VOLT:MUTED,whiteSpace:"nowrap"}}>{ev.date.slice(5)}</div>
 </div>
-{i<Math.min(upcoming.length,3)-1&&<div style={{flex:1,height:1,background:`linear-gradient(90deg,${going?VOLT+"44":BORDER_CLR},${BORDER_CLR})`,margin:“0 6px”,marginBottom:14}}/>}
+{i<Math.min(upcoming.length,3)-1&&<div style={{flex:1,height:1,background:`linear-gradient(90deg,${going?VOLT+"44":BORDER_CLR},${BORDER_CLR})`,margin:"0 6px",marginBottom:14}}/>}
 </div>})}
 </div>
 {upcoming.length>3&&<div style={{fontFamily:FB,fontSize:9,color:MUTED,marginLeft:8,marginBottom:14}}>+{upcoming.length-3}</div>}
@@ -1210,48 +1217,48 @@ return <div key={ev.id} style={{display:“flex”,alignItems:“center”,flex:
 // COACH SCREEN
 // ═══════════════════════════════════════
 function Coach({u,drills,scores,players,updateDrill,addDrill,removeDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,addScSession,removeScSession,shotLogs,logout,deleteAccount}){
-const[tab,setTab]=useState(“feed”),[editD,setEditD]=useState(null),[eName,setEName]=useState(””),[eDesc,setEDesc]=useState(””),[eInstr,setEInstr]=useState(””),[eMax,setEMax]=useState(””),[eIcon,setEIcon]=useState(“ft”),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:””,date:””,time:””,location:””,desc:””,type:“run”}),[addEmail,setAddEmail]=useState(””),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({title:””,date:””,time:””,location:””,desc:””});
-const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:””,desc:””,max:“10”,icon:“ft”,instructions:””});
+const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({title:"",date:"",time:"",location:"",desc:""});
+const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""});
 const[nudged,setNudged]=useState([]);
 const[confirmDelete,setConfirmDelete]=useState(null);
-const ups=useMemo(()=>{const es=[…new Set(scores.map(s=>s.email))];return es.map(e=>{const p=players.find(p=>p.email===e);return{email:e,name:p?.name||e.split(”@”)[0].replace(/[._-]/g,” “).replace(/\b\w/g,c=>c.toUpperCase())}})},[scores,players]);
+const ups=useMemo(()=>{const es=[…new Set(scores.map(s=>s.email))];return es.map(e=>{const p=players.find(p=>p.email===e);return{email:e,name:p?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())}})},[scores,players]);
 const allKnown=useMemo(()=>{const m={};players.forEach(p=>m[p.email]=p.name);scores.forEach(s=>{if(!m[s.email])m[s.email]=s.name||s.email});return Object.entries(m).map(([email,name])=>({email,name}))},[players,scores]);
 const today=todayStr(),todayS=scores.filter(s=>s.date===today);
 const saveDrill=()=>{const m=parseInt(eMax);updateDrill(editD.id,{name:san(eName),desc:san(eDesc),instructions:san(eInstr),max:m>0?m:editD.max,icon:eIcon});setEditD(null)};
-const handleAddDrill=()=>{if(!nd.name)return;const m=parseInt(nd.max);addDrill({name:san(nd.name).toUpperCase(),desc:san(nd.desc),max:m>0?m:10,icon:nd.icon,instructions:san(nd.instructions)});setNd({name:””,desc:””,max:“10”,icon:“ft”,instructions:””});setShowNewDrill(false)};
+const handleAddDrill=()=>{if(!nd.name)return;const m=parseInt(nd.max);addDrill({name:san(nd.name).toUpperCase(),desc:san(nd.desc),max:m>0?m:10,icon:nd.icon,instructions:san(nd.instructions)});setNd({name:"",desc:"",max:"10",icon:"ft",instructions:""});setShowNewDrill(false)};
 const handleRemoveDrill=(id)=>{setConfirmDelete(id)};
 const confirmDrillDelete=()=>{if(confirmDelete)removeDrill(confirmDelete);setConfirmDelete(null)};
-const handleAddEvent=()=>{if(!ne.title||!ne.date)return;addEvent({…ne,title:san(ne.title),desc:san(ne.desc),location:san(ne.location)});setNe({title:””,date:””,time:””,location:””,desc:””,type:“run”});setShowAdd(false)};
+const handleAddEvent=()=>{if(!ne.title||!ne.date)return;addEvent({…ne,title:san(ne.title),desc:san(ne.desc),location:san(ne.location)});setNe({title:"",date:"",time:"",location:"",desc:"",type:"run"});setShowAdd(false)};
 
 const handleAddWalkin=(evId)=>{
 const e=addEmail.trim().toLowerCase();if(!e)return;
 const known=allKnown.find(p=>p.email===e);
-const name=known?.name||e.split(”@”)[0].replace(/[._-]/g,” “).replace(/\b\w/g,c=>c.toUpperCase());
-addRsvp(evId,e,name);setAddEmail(””)};
-const handleAddSC=()=>{if(!nsc.title||!nsc.date)return;addScSession({…nsc,title:san(nsc.title),desc:san(nsc.desc),location:san(nsc.location)});setNsc({title:””,date:””,time:””,location:””,desc:””});setShowAddSC(false)};
+const name=known?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
+addRsvp(evId,e,name);setAddEmail("")};
+const handleAddSC=()=>{if(!nsc.title||!nsc.date)return;addScSession({…nsc,title:san(nsc.title),desc:san(nsc.desc),location:san(nsc.location)});setNsc({title:"",date:"",time:"",location:"",desc:""});setShowAddSC(false)};
 
-return <div style={{minHeight:“100dvh”,background:BG,display:“flex”,flexDirection:“column”,fontFamily:FB,position:“relative”}}>
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative"}}>
 {/* Delete confirmation dialog */}
-{confirmDelete&&<div style={{position:“fixed”,inset:0,zIndex:200,background:”#000c”,display:“flex”,alignItems:“center”,justifyContent:“center”,backdropFilter:“blur(6px)”}} onClick={()=>setConfirmDelete(null)}>
-<div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:“28px 24px”,border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:“90%”,textAlign:“center”}}>
+{confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:200,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
+<div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
 <div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:3,marginBottom:8}}>DELETE DRILL?</div>
 <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:20}}>Player scores will be kept but this drill will no longer appear.</p>
-<div style={{display:“flex”,gap:8}}>
-<button onClick={()=>setConfirmDelete(null)} style={{flex:1,padding:“12px”,background:“transparent”,color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:“pointer”}}>CANCEL</button>
-<button onClick={confirmDrillDelete} style={{flex:1,padding:“12px”,background:”#ef4444”,color:”#fff”,fontFamily:FD,fontSize:14,letterSpacing:2,border:“none”,borderRadius:10,cursor:“pointer”}}>DELETE</button>
+<div style={{display:"flex",gap:8}}>
+<button onClick={()=>setConfirmDelete(null)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
+<button onClick={confirmDrillDelete} style={{flex:1,padding:"12px",background:"#ef4444",color:"#fff",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
 </div>
 </div>
 </div>}
-<div style={{position:“fixed”,inset:0,pointerEvents:“none”,zIndex:0}}><CourtBG opacity={.02}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
-<div style={{position:“relative”,zIndex:1,padding:“max(20px,env(safe-area-inset-top)) 20px 0”}}>
-<div style={{display:“flex”,alignItems:“center”,justifyContent:“space-between”,marginBottom:16}}>
+<div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.02}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
+<div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
+<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
 <div><div style={{fontFamily:FD,color:ORANGE,fontSize:13,letterSpacing:4}}>COACH MODE</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:2,marginTop:2}}>{u.name.toUpperCase()}</div></div>
-<div style={{display:“flex”,alignItems:“center”,gap:6}}>
+<div style={{display:"flex",alignItems:"center",gap:6}}>
 <SLLogo size={34} style={{opacity:.5}}/>
-<button aria-label=“Log out” onClick={logout} style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:MUTED,width:44,height:44,cursor:“pointer”,fontSize:14,fontWeight:700,display:“flex”,alignItems:“center”,justifyContent:“center”}}>✕</button>
+<button aria-label="Log out" onClick={logout} style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:MUTED,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
 </div>
 </div>
-<div style={{display:“flex”,gap:8,marginBottom:4}}><SC l="PLAYERS" v={ups.length} c={ORANGE} small/><SC l="SCORES" v={scores.length} c={LIGHT} small/><SC l="EVENTS" v={events.length} c={CYAN} small/></div>
+<div style={{display:"flex",gap:8,marginBottom:4}}><SC l="PLAYERS" v={ups.length} c={ORANGE} small/><SC l="SCORES" v={scores.length} c={LIGHT} small/><SC l="EVENTS" v={events.length} c={CYAN} small/></div>
 </div>
 
 ```
@@ -1485,7 +1492,7 @@ return <div style={{minHeight:“100dvh”,background:BG,display:“flex”,flex
 function HistPanel({sc,dr}){
 const sorted=useMemo(()=>[…sc].sort((a,b)=>(b.ts||0)-(a.ts||0)),[sc]);
 const grouped=useMemo(()=>{const m={};sorted.forEach(s=>{if(!m[s.date])m[s.date]=[];m[s.date].push(s)});return Object.entries(m)},[sorted]);
-return <div><SH t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=dr.find(d=>d.id===s.drillId);const pct=d?Math.round(s.score/d.max*100):0;const isH=s.src===“home”||!s.src;return <div key={i} style={{display:“flex”,alignItems:“center”,gap:12,background:CARD_BG,borderRadius:12,padding:“12px 16px”,marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:“flex”,alignItems:“center”,justifyContent:“center”,background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:“flex”,alignItems:“center”,gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:“1px 4px”,borderRadius:3,color:isH?VOLT:LIGHT,background:isH?VOLT+“15”:LIGHT+“10”}}>{isH?“HOME”:“PROG”}</span></div></div><div style={{textAlign:“right”}}><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span></div><div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?”#4ade80”:pct>=50?”#fbbf24”:”#ef4444”}}>{pct}%</div></div></div>})}</div>)}</div>;
+return <div><SH t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=dr.find(d=>d.id===s.drillId);const pct=d?Math.round(s.score/d.max*100):0;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:LIGHT,background:isH?VOLT+"15":LIGHT+"10"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span></div><div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#4ade80":pct>=50?"#fbbf24":"#ef4444"}}>{pct}%</div></div></div>})}</div>)}</div>;
 }
 
 // ═══════════════════════════════════════
@@ -1494,13 +1501,13 @@ return <div><SH t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t
 function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount}){
 const[confirmDel,setConfirmDel]=useState(false);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
-const homeScores=useMemo(()=>my.filter(s=>s.src===“home”||!s.src),[my]);
+const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const totalMakes=homeScores.reduce((a,s)=>a+s.score,0);
 const totalShots=shotLogs.filter(s=>s.email===u.email).reduce((a,s)=>a+s.made,0);
 const sessionsLogged=[…new Set(homeScores.map(s=>s.date))].length;
 const eventsAttended=rsvps.filter(r=>r.email===u.email).length;
 const scCount=scRsvps.filter(r=>r.email===u.email).length;
-const challWon=challenges.filter(c=>(c.from===u.email&&c.status===“lost”)||(c.to===u.email&&c.status===“won”)).length;
+const challWon=challenges.filter(c=>(c.from===u.email&&c.status==="lost")||(c.to===u.email&&c.status==="won")).length;
 const challTotal=challenges.filter(c=>c.from===u.email||c.to===u.email).length;
 const bestStreak=useMemo(()=>{const ds=[…new Set(homeScores.map(s=>s.date))].sort();let max=0,cur=0,prev=null;
 ds.forEach(d=>{const dt=new Date(d);if(prev){const diff=(dt-prev)/(1000*60*60*24);cur=diff<=1?cur+1:1}else cur=1;max=Math.max(max,cur);prev=dt});return max},[homeScores]);
@@ -1512,12 +1519,12 @@ const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);
 const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;
 const last10=ds.slice(-10).map(s=>s.score);
 // Trend: compare first half avg vs second half avg of last 10
-let trend=“flat”;
-if(last10.length>=4){const mid=Math.floor(last10.length/2);const first=last10.slice(0,mid).reduce((a,v)=>a+v,0)/mid;const second=last10.slice(mid).reduce((a,v)=>a+v,0)/(last10.length-mid);if(second>first*1.05)trend=“up”;else if(second<first*0.95)trend=“down”}
+let trend="flat";
+if(last10.length>=4){const mid=Math.floor(last10.length/2);const first=last10.slice(0,mid).reduce((a,v)=>a+v,0)/mid;const second=last10.slice(mid).reduce((a,v)=>a+v,0)/(last10.length-mid);if(second>first*1.05)trend="up";else if(second<first*0.95)trend="down"}
 return{…d,pb,avg,count:ds.length,last10,trend};
 }),[drills,homeScores]);
 
-const StatRow=({label,value,color=VOLT,sub})=><div style={{display:“flex”,alignItems:“center”,justifyContent:“space-between”,padding:“14px 0”,borderBottom:`1px solid ${BORDER_CLR}44`}}>
+const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}>
 <div><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>{sub}</div>}</div>
 <div style={{fontFamily:FD,color,fontSize:22}}>{value}</div>
 
@@ -1525,13 +1532,13 @@ const StatRow=({label,value,color=VOLT,sub})=><div style={{display:“flex”,al
 
 return <div className="fade-up">
 {/* ══════ SHAREABLE SEASON CARD ══════ */}
-<div style={{background:`linear-gradient(145deg,#0c0c0c,#141414)`,borderRadius:24,padding:“28px 24px 24px”,border:`1px solid ${VOLT}22`,position:“relative”,overflow:“hidden”,textAlign:“center”,marginBottom:28}}>
+<div style={{background:`linear-gradient(145deg,#0c0c0c,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
 {/* Corner accents */}
-<div style={{position:“absolute”,top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:“24px 0 0 0”,opacity:.4}}/>
-<div style={{position:“absolute”,bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:“0 0 24px 0”,opacity:.4}}/>
-<div style={{position:“absolute”,top:-40,right:-40,width:150,height:150,borderRadius:“50%”,background:`radial-gradient(circle,${VOLT}08,transparent)`}}/>
+<div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
+<div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
+<div style={{position:"absolute",top:-40,right:-40,width:150,height:150,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}08,transparent)`}}/>
 {/* SL logo watermark */}
-<div style={{position:“absolute”,top:12,right:16,opacity:.06,pointerEvents:“none”}}><SLLogo size={90} opacity={.06}/></div>
+<div style={{position:"absolute",top:12,right:16,opacity:.06,pointerEvents:"none"}}><SLLogo size={90} opacity={.06}/></div>
 
 ```
   <div style={{fontFamily:FB,color:VOLT,fontSize:9,letterSpacing:5,fontWeight:700,marginBottom:12}}>OFFSEASON REPORT CARD</div>
@@ -1674,12 +1681,12 @@ function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged}){
     }).sort((a,b)=>{const order={complete:0,partial:1,active:2,inactive:3};return(order[a.status]||3)-(order[b.status]||3)||(a.daysAgo||999)-(b.daysAgo||999)});
   },[players,scores,shotLogs,today,drills]);
 
-const statusColor={complete:VOLT,partial:ORANGE,active:CYAN,inactive:”#ef4444”};
-const statusLabel={complete:“ALL DONE”,partial:“STARTED”,active:“ACTIVE”,inactive:“INACTIVE”};
+const statusColor={complete:VOLT,partial:ORANGE,active:CYAN,inactive:"#ef4444"};
+const statusLabel={complete:"ALL DONE",partial:"STARTED",active:"ACTIVE",inactive:"INACTIVE"};
 
 return <div className="fade-up">
-<SH t=“PLAYER ROSTER” s={`${roster.length} PLAYERS`}/>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:18,lineHeight:1.5}}>Track who’s putting in work today. Tap “NUDGE” to flag inactive players for follow-up.</div>
+<SH t="PLAYER ROSTER" s={`${roster.length} PLAYERS`}/>
+<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:18,lineHeight:1.5}}>Track who's putting in work today. Tap "NUDGE" to flag inactive players for follow-up.</div>
 
 ```
 {roster.length===0&&<Empty t="No players registered yet" action="Players need to create an account and log their first score to appear here."/>}
@@ -1713,23 +1720,23 @@ return <div className="fade-up">
 }
 
 // Text sanitizer — strip HTML tags from user input
-function san(s){return typeof s===“string”?s.replace(/<[^>]*>/g,””):s}
+function san(s){return typeof s==="string"?s.replace(/<[^>]*>/g,""):s}
 
 // ═══════════════════════════════════════
 // SHARED COMPONENTS
 // ═══════════════════════════════════════
-function SLLogo({size=60,glow=false,opacity:op=1,style:sx}){return <img src=“data:image/png;base64,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” alt=“SL” width={size} height={size} style={{display:“block”,objectFit:“contain”,opacity:op,borderRadius:size*.18,…(glow?{filter:`drop-shadow(0 0 ${size*.15}px ${VOLT}66)`}:{}),…sx}}/>}
+function SLLogo({size=60,glow=false,opacity:op=1,style:sx}){return <img src="data:image/png;base64,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" alt="SL" width={size} height={size} style={{display:"block",objectFit:"contain",opacity:op,borderRadius:size*.18,…(glow?{filter:`drop-shadow(0 0 ${size*.15}px ${VOLT}66)`}:{}),…sx}}/>}
 
 function calcStreak(sc){const ds=[…new Set(sc.map(s=>s.date))].sort().reverse();let c=0,d=new Date();for(let i=0;i<400;i++){const s=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;if(ds.includes(s)){c++;d.setDate(d.getDate()-1)}else if(i===0){d.setDate(d.getDate()-1)}else break}return c}
 function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return Math.abs(h)}
-const AVG=[[”#C8FF00”,”#00D4FF”],[”#FF6B2C”,”#FFD700”],[”#00D4FF”,”#C8FF00”],[”#FF6B2C”,”#C8FF00”],[”#C0C0C0”,”#00D4FF”],[”#FFD700”,”#FF6B2C”],[”#4ade80”,”#00D4FF”],[”#C8FF00”,”#FF6B2C”]];
-function AnimNum({v,c=VOLT,big}){const[display,setDisplay]=useState(0);useEffect(()=>{if(typeof v!==“number”){setDisplay(v);return}let cancelled=false;const end=v;const dur=600;const t0=Date.now();const step=()=>{if(cancelled)return;const elapsed=Date.now()-t0;const prog=Math.min(elapsed/dur,1);const eased=1-Math.pow(1-prog,3);setDisplay(Math.round(eased*end));if(prog<1)requestAnimationFrame(step)};step();return()=>{cancelled=true}},[v]);return <span className="cnt-up" style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{display}</span>}
-function SC({l,v,c=VOLT,big,small,fire,accent}){const inner=<div style={{flex:big?1.6:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:big?“22px 18px”:“14px 12px”,position:“relative”,overflow:“hidden”}}>{fire&&<div style={{position:“absolute”,top:6,right:8,fontSize:14}}>🔥</div>}{typeof v===“number”?<AnimNum v={v} c={c} big={big}/>:<div style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{v}</div>}<div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:big?6:4,fontWeight:600}}>{l}</div></div>;if(accent)return <div className="grd-bdr" style={{flex:big?1.6:1}}>{inner}</div>;return <div style={{flex:big?1.6:1}}><div style={{border:`1px solid ${BORDER_CLR}`,borderRadius:16}}>{inner}</div></div>}
-function SH({t,s}){return <div style={{marginBottom:16,display:“flex”,alignItems:“baseline”,justifyContent:“space-between”}}><div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:4}}>{t}</div>{s&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{s}</div>}</div>}
-function Av({n,sz=36,style:x,email}){const idx=email?hashCode(email)%AVG.length:hashCode(n||”?”)%AVG.length;const[c1,c2]=AVG[idx];return <div style={{width:sz,height:sz,borderRadius:“50%”,background:`linear-gradient(135deg,${c1}44,${c2}44)`,border:`2px solid ${c1}33`,color:c1,display:“flex”,alignItems:“center”,justifyContent:“center”,fontFamily:FD,fontSize:sz*.42,flexShrink:0,letterSpacing:1,boxShadow:`0 0 12px ${c1}11`,…x}}>{(n||”?”)[0].toUpperCase()}</div>}
-function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i)=>{const angle=(i/24)*360*(Math.PI/180);const dist=60+Math.random()*80;const x=Math.cos(angle)*dist;const y=Math.sin(angle)*dist-20;const colors=[VOLT,ORANGE,CYAN,”#FFD700”,”#4ade80”,”#fff”];return {x,y,color:colors[i%colors.length],size:3+Math.random()*4,delay:Math.random()*0.15}}),[]);return <div style={{position:“absolute”,top:“30%”,left:“50%”,zIndex:20,pointerEvents:“none”}}>{particles.map((p,i)=><div key={i} className=“particle” style={{width:p.size,height:p.size,background:p.color,left:0,top:0,”–fly-to”:`translate(${p.x}px,${p.y}px) scale(0)`,animationDelay:`${p.delay}s`,animationDuration:”.7s”}}/>)}</div>}
-function CourtDivider({color=VOLT,my=20}){return <div style={{margin:`${my}px 0`,position:“relative”,height:24,display:“flex”,alignItems:“center”,justifyContent:“center”,overflow:“hidden”}}><svg width=“100%” height=“24” viewBox=“0 0 400 24” preserveAspectRatio=“none” fill=“none” style={{position:“absolute”,inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:“50%”,background:color,opacity:.15,position:“relative”,zIndex:1}}/></div>}
-function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+“18”:“transparent”,border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:“flex”,alignItems:“center”,justifyContent:“center”,fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:”#444”,flexShrink:0}}>{r}</div>}
-function Empty({t,action,onTap}){return <div style={{textAlign:“center”,padding:“40px 20px”}}><div className=“ball-bounce” style={{display:“inline-block”,opacity:.25}}><SLLogo size={48} opacity={.35}/></div><p style={{fontFamily:FB,color:”#2a2a2a”,fontSize:12,marginTop:14,lineHeight:1.6}}>{t}</p>{action&&<p style={{fontFamily:FB,color:VOLT+“88”,fontSize:11,marginTop:6,lineHeight:1.5,fontWeight:600}}>{action}</p>}{onTap&&<button onClick={onTap} className=“btn-v” style={{marginTop:12,padding:“10px 24px”,background:VOLT+“15”,border:`1px solid ${VOLT}33`,borderRadius:10,color:VOLT,fontFamily:FD,fontSize:12,letterSpacing:3,cursor:“pointer”}}>GET STARTED →</button>}</div>}
-function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:”#888”,fontSize:11,fontWeight:700,letterSpacing:3,display:“block”,marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:“100%”,padding:“13px 14px”,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,outline:“none”,minHeight:70,resize:“vertical”,lineHeight:1.6,marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+“66”} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>:<input type={tp||“text”} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:“100%”,padding:“13px 14px”,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:“none”,marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+“66”} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>}</>}
-function NavBar({items,active,onChange}){return <nav role=“navigation” aria-label=“Main navigation” style={{position:“fixed”,bottom:0,left:0,right:0,display:“flex”,background:`linear-gradient(180deg,${BG}ee,${BG})`,borderTop:`1px solid ${BORDER_CLR}`,padding:“6px 0”,paddingBottom:“max(8px,env(safe-area-inset-bottom))”,zIndex:100,backdropFilter:“blur(16px)”}}>{items.map(t=>{const a=active===t.k;return <button key={t.k} aria-label={t.l} onClick={()=>onChange(t.k)} style={{flex:1,display:“flex”,flexDirection:“column”,alignItems:“center”,padding:“6px 0”,background:“none”,border:“none”,cursor:“pointer”,color:a?VOLT:”#333”,transition:“all .25s”,position:“relative”}}><div style={{padding:“4px 14px”,borderRadius:10,background:a?VOLT+“15”:“transparent”,transition:“background .25s”,display:“flex”,flexDirection:“column”,alignItems:“center”,gap:2,position:“relative”}}><div style={{lineHeight:1}}>{t.svg}</div>{t.dot&&!a&&<div style={{position:“absolute”,top:0,right:8,width:7,height:7,borderRadius:“50%”,background:t.dot,border:`2px solid ${BG}`,boxShadow:`0 0 6px ${t.dot}66`}}/>}<div style={{fontFamily:FD,fontSize:8,letterSpacing:2,color:a?VOLT:”#333”}}>{t.l.toUpperCase()}</div></div></button>})}</nav>}
+const AVG=[["#C8FF00","#00D4FF"],["#FF6B2C","#FFD700"],["#00D4FF","#C8FF00"],["#FF6B2C","#C8FF00"],["#C0C0C0","#00D4FF"],["#FFD700","#FF6B2C"],["#4ade80","#00D4FF"],["#C8FF00","#FF6B2C"]];
+function AnimNum({v,c=VOLT,big}){const[display,setDisplay]=useState(0);useEffect(()=>{if(typeof v!=="number"){setDisplay(v);return}let cancelled=false;const end=v;const dur=600;const t0=Date.now();const step=()=>{if(cancelled)return;const elapsed=Date.now()-t0;const prog=Math.min(elapsed/dur,1);const eased=1-Math.pow(1-prog,3);setDisplay(Math.round(eased*end));if(prog<1)requestAnimationFrame(step)};step();return()=>{cancelled=true}},[v]);return <span className="cnt-up" style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{display}</span>}
+function SC({l,v,c=VOLT,big,small,fire,accent}){const inner=<div style={{flex:big?1.6:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:big?"22px 18px":"14px 12px",position:"relative",overflow:"hidden"}}>{fire&&<div style={{position:"absolute",top:6,right:8,fontSize:14}}>🔥</div>}{typeof v==="number"?<AnimNum v={v} c={c} big={big}/>:<div style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{v}</div>}<div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:big?6:4,fontWeight:600}}>{l}</div></div>;if(accent)return <div className="grd-bdr" style={{flex:big?1.6:1}}>{inner}</div>;return <div style={{flex:big?1.6:1}}><div style={{border:`1px solid ${BORDER_CLR}`,borderRadius:16}}>{inner}</div></div>}
+function SH({t,s}){return <div style={{marginBottom:16,display:"flex",alignItems:"baseline",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:4}}>{t}</div>{s&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{s}</div>}</div>}
+function Av({n,sz=36,style:x,email}){const idx=email?hashCode(email)%AVG.length:hashCode(n||"?")%AVG.length;const[c1,c2]=AVG[idx];return <div style={{width:sz,height:sz,borderRadius:"50%",background:`linear-gradient(135deg,${c1}44,${c2}44)`,border:`2px solid ${c1}33`,color:c1,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:sz*.42,flexShrink:0,letterSpacing:1,boxShadow:`0 0 12px ${c1}11`,…x}}>{(n||"?")[0].toUpperCase()}</div>}
+function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i)=>{const angle=(i/24)*360*(Math.PI/180);const dist=60+Math.random()*80;const x=Math.cos(angle)*dist;const y=Math.sin(angle)*dist-20;const colors=[VOLT,ORANGE,CYAN,"#FFD700","#4ade80","#fff"];return {x,y,color:colors[i%colors.length],size:3+Math.random()*4,delay:Math.random()*0.15}}),[]);return <div style={{position:"absolute",top:"30%",left:"50%",zIndex:20,pointerEvents:"none"}}>{particles.map((p,i)=><div key={i} className="particle" style={{width:p.size,height:p.size,background:p.color,left:0,top:0,"–fly-to":`translate(${p.x}px,${p.y}px) scale(0)`,animationDelay:`${p.delay}s`,animationDuration:".7s"}}/>)}</div>}
+function CourtDivider({color=VOLT,my=20}){return <div style={{margin:`${my}px 0`,position:"relative",height:24,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><svg width="100%" height="24" viewBox="0 0 400 24" preserveAspectRatio="none" fill="none" style={{position:"absolute",inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:"50%",background:color,opacity:.15,position:"relative",zIndex:1}}/></div>}
+function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#444",flexShrink:0}}>{r}</div>}
+function Empty({t,action,onTap}){return <div style={{textAlign:"center",padding:"40px 20px"}}><div className="ball-bounce" style={{display:"inline-block",opacity:.25}}><SLLogo size={48} opacity={.35}/></div><p style={{fontFamily:FB,color:"#2a2a2a",fontSize:12,marginTop:14,lineHeight:1.6}}>{t}</p>{action&&<p style={{fontFamily:FB,color:VOLT+"88",fontSize:11,marginTop:6,lineHeight:1.5,fontWeight:600}}>{action}</p>}{onTap&&<button onClick={onTap} className="btn-v" style={{marginTop:12,padding:"10px 24px",background:VOLT+"15",border:`1px solid ${VOLT}33`,borderRadius:10,color:VOLT,fontFamily:FD,fontSize:12,letterSpacing:3,cursor:"pointer"}}>GET STARTED →</button>}</div>}
+function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#888",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>}</>}
+function NavBar({items,active,onChange}){return <nav role="navigation" aria-label="Main navigation" style={{position:"fixed",bottom:0,left:0,right:0,display:"flex",background:`linear-gradient(180deg,${BG}ee,${BG})`,borderTop:`1px solid ${BORDER_CLR}`,padding:"6px 0",paddingBottom:"max(8px,env(safe-area-inset-bottom))",zIndex:100,backdropFilter:"blur(16px)"}}>{items.map(t=>{const a=active===t.k;return <button key={t.k} aria-label={t.l} onClick={()=>onChange(t.k)} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",padding:"6px 0",background:"none",border:"none",cursor:"pointer",color:a?VOLT:"#333",transition:"all .25s",position:"relative"}}><div style={{padding:"4px 14px",borderRadius:10,background:a?VOLT+"15":"transparent",transition:"background .25s",display:"flex",flexDirection:"column",alignItems:"center",gap:2,position:"relative"}}><div style={{lineHeight:1}}>{t.svg}</div>{t.dot&&!a&&<div style={{position:"absolute",top:0,right:8,width:7,height:7,borderRadius:"50%",background:t.dot,border:`2px solid ${BG}`,boxShadow:`0 0 6px ${t.dot}66`}}/>}<div style={{fontFamily:FD,fontSize:8,letterSpacing:2,color:a?VOLT:"#333"}}>{t.l.toUpperCase()}</div></div></button>})}</nav>}
