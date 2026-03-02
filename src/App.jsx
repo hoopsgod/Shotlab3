@@ -1,13 +1,29 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 
-const VOLT = "#C8FF00";
-const ORANGE = "#FF6B2C";
-const CYAN = "#00D4FF";
-const BG = "#080808";
-const SURFACE = "#111111";
-const CARD_BG = "#161616";
-const BORDER_CLR = "#1e1e1e";
-const MUTED="#555",LIGHT="#e8e8e8";
+const TOKENS={
+PRIMARY:"#C8FF00",
+PRIMARY_DIM:"#A3CC00",
+PRIMARY_GLOW:"rgba(200, 255, 0, 0.15)",
+SECONDARY:"#00E5FF",
+SECONDARY_DIM:"rgba(0, 229, 255, 0.12)",
+DANGER:"#FF4545",
+WARNING:"#FFA500",
+BG_BASE:"#0A0A0A",
+BG_CARD:"#141414",
+BG_ELEVATED:"#1E1E1E",
+BG_SUBTLE:"#242424",
+TEXT_PRIMARY:"#FFFFFF",
+TEXT_SECONDARY:"#A0A0A0",
+TEXT_MUTED:"#555555",
+};
+const VOLT = TOKENS.PRIMARY;
+const ORANGE = TOKENS.PRIMARY;
+const CYAN = TOKENS.SECONDARY;
+const BG = TOKENS.BG_BASE;
+const SURFACE = TOKENS.BG_CARD;
+const CARD_BG = TOKENS.BG_CARD;
+const BORDER_CLR = TOKENS.BG_SUBTLE;
+const MUTED=TOKENS.TEXT_MUTED,LIGHT=TOKENS.TEXT_PRIMARY;
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
 const DRILLS_INIT=[
@@ -33,7 +49,7 @@ const SC_INIT=[
 {id:104,title:"OLYMPIC LIFTS",date:"2026-03-11",time:"6:00 AM",location:"Weight Room — Platform Area",desc:"Clean & jerk, snatch progressions. Coached session."},
 {id:105,title:"CORE & CONDITIONING",date:"2026-03-18",time:"6:30 AM",location:"Training Facility — Turf",desc:"Core stability, sled pushes, agility ladder. Game-day conditioning."},
 ];
-const TIERS=[{min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},{min:2,name:"IRON",color:"#8B8B8B",bg:"#8B8B8B15"},{min:3,name:"BRONZE",color:"#CD7F32",bg:"#CD7F3215"},{min:5,name:"SILVER",color:"#C0C0C0",bg:"#C0C0C015"},{min:8,name:"GOLD",color:"#FFD700",bg:"#FFD70015"},{min:12,name:"DIAMOND",color:CYAN,bg:CYAN+"15"}];
+const TIERS=[{min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},{min:2,name:"IRON",color:"#A0A0A0",bg:"#A0A0A015"},{min:3,name:"BRONZE",color:"#A0A0A0",bg:"#A0A0A015"},{min:5,name:"SILVER",color:"#A0A0A0",bg:"#A0A0A015"},{min:8,name:"GOLD",color:"#C8FF00",bg:"#C8FF0015"},{min:12,name:"DIAMOND",color:CYAN,bg:CYAN+"15"}];
 const getTier = c => [...TIERS].reverse().find(t => c >= t.min) || TIERS[0];
 const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const ALNUM="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
@@ -57,18 +73,12 @@ function getAudioCtx(){if(!_audioCtx&&typeof AudioContext!=="undefined"){try{_au
 function playTick(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=1200;o.type="sine";g.gain.setValueAtTime(.07,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.05);o.start();o.stop(audioCtx.currentTime+.05)}catch{}}
 function playScore(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[800,1200,1600].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="sine";g.gain.setValueAtTime(.05,audioCtx.currentTime+i*.08);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.08+.12);o.start(audioCtx.currentTime+i*.08);o.stop(audioCtx.currentTime+i*.08+.12)})}catch{}}
 function playUnlock(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[523,659,784,1047].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="triangle";g.gain.setValueAtTime(.06,audioCtx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.1+.25);o.start(audioCtx.currentTime+i*.1);o.stop(audioCtx.currentTime+i*.1+.25)})}catch{}}
-const THEMES={dark:{BG:"#080808",SURFACE:"#111111",CARD_BG:"#161616",BORDER:"#1e1e1e",MUT:"#555",LT:"#e8e8e8",SUB:"#3a3a3a",TRACK:"#1a1a1a"},light:{BG:"#f0ece4",SURFACE:"#e6e0d4",CARD_BG:"#ffffff",BORDER:"#d4cfc5",MUT:"#888",LT:"#1a1a1a",SUB:"#999",TRACK:"#d4cfc5"}};
+const THEMES={dark:{BG:TOKENS.BG_BASE,SURFACE:TOKENS.BG_CARD,CARD_BG:TOKENS.BG_CARD,BORDER:TOKENS.BG_SUBTLE,MUT:TOKENS.TEXT_MUTED,LT:TOKENS.TEXT_PRIMARY,SUB:TOKENS.TEXT_SECONDARY,TRACK:TOKENS.BG_SUBTLE},light:{BG:TOKENS.BG_BASE,SURFACE:TOKENS.BG_CARD,CARD_BG:TOKENS.BG_CARD,BORDER:TOKENS.BG_SUBTLE,MUT:TOKENS.TEXT_MUTED,LT:TOKENS.TEXT_PRIMARY,SUB:TOKENS.TEXT_SECONDARY,TRACK:TOKENS.BG_SUBTLE}};
 const T=THEMES.dark; // module-level default for standalone components
-const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#C0C0C0"},{days:14,name:"TWO-WEEK GRIND",icon:"14",color:"#CD7F32"},{days:30,name:"MONTHLY BEAST",icon:"30",color:"#FFD700"},{days:60,name:"IRON WILL",icon:"60",color:CYAN},{days:100,name:"CENTURION",icon:"💯",color:VOLT}];
+const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#A0A0A0"},{days:14,name:"TWO-WEEK GRIND",icon:"14",color:"#A0A0A0"},{days:30,name:"MONTHLY BEAST",icon:"30",color:"#C8FF00"},{days:60,name:"IRON WILL",icon:"60",color:CYAN},{days:100,name:"CENTURION",icon:"💯",color:VOLT}];
 const getEarnedBadges=s=>STREAK_BADGES.filter(b=>s>=b.days);
-const DRILL_ACCENTS={
-  "FORM SHOOTING":"#CCFF00",
-  "FREE THROWS":"#FFFFFF",
-  "CATCH & SHOOT":"#CCFF00",
-  "BALL HANDLING":ORANGE,
-  "MID-RANGE":"#FFFFFF",
-};
-const getDrillAccentColor=name=>DRILL_ACCENTS[name]||"#CCFF00";
+const DRILL_ACCENTS={"FORM SHOOTING":VOLT,"FREE THROWS":VOLT,"CATCH & SHOOT":VOLT,"BALL HANDLING":VOLT,"MID-RANGE":VOLT,"FLOATERS":VOLT};
+const getDrillAccentColor=name=>DRILL_ACCENTS[name]||"#C8FF00";
 function Sparkline({data,color=VOLT,w=44,h=16}){if(!data||data.length<2)return null;const max=Math.max(...data,1);const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v/max)*h*.8+h*.1)}`).join(" ");return <svg width={w} height={h} style={{display:"block",opacity:.6}}><polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 
 const EventIcon=({type,size=24,color=VOLT})=>{const s={width:size,height:size,display:"block"};
@@ -89,7 +99,7 @@ return <svg viewBox="0 0 40 40" style={s}><circle cx="20" cy="20" r="16" stroke=
 };
 const CourtBG=({opacity=.02})=><svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none",opacity}} viewBox="0 0 400 900" fill="none" preserveAspectRatio="xMidYMid slice"><rect x="20" y="40" width="360" height="700" stroke={VOLT} strokeWidth="1"/><line x1="20" y1="390" x2="380" y2="390" stroke={VOLT} strokeWidth=".8"/><circle cx="200" cy="390" r="60" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="40" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 40Q200 140 260 40" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="550" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 740Q200 640 260 740" stroke={VOLT} strokeWidth=".8" fill="none"/></svg>;
 const GlowOrb=({color=VOLT,top="20%",left="50%",size=300,animate})=><div style={{position:"absolute",top,left,width:size,height:size,borderRadius:"50%",background:`radial-gradient(circle,${color}0a 0%,transparent 70%)`,transform:"translate(-50%,-50%)",pointerEvents:"none",animation:animate?"orbDrift 12s ease-in-out infinite alternate":"none"}}/>;
-const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap');*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:${BG};overflow-x:hidden}input,textarea{font-family:${FB}}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}input[type=number]{-moz-appearance:textfield}::-webkit-scrollbar{width:0}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@keyframes scaleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes glow{0%,100%{box-shadow:0 0 20px ${VOLT}15}50%{box-shadow:0 0 40px ${VOLT}25}}@keyframes heroGlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}@keyframes rippleOut{0%{transform:scale(0);opacity:.5}100%{transform:scale(4);opacity:0}}@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes orbDrift{0%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(-40%,-60%) scale(1.1)}50%{transform:translate(-60%,-45%) scale(.95)}75%{transform:translate(-45%,-55%) scale(1.05)}100%{transform:translate(-55%,-50%) scale(1)}}@keyframes confettiBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{opacity:0}}@keyframes particleFly{0%{transform:translate(0,0) scale(1);opacity:1}60%{opacity:.8}100%{transform:var(--fly-to);opacity:0}}.fade-up{animation:fadeUp .4s ease-out both}.scale-in{animation:scaleIn .35s ease-out both}.btn-v{transition:transform .1s,box-shadow .2s;position:relative;overflow:hidden}.btn-v:active{transform:scale(.97)}.btn-v:hover{box-shadow:0 4px 24px ${VOLT}30}.btn-v::after{content:'';position:absolute;top:50%;left:50%;width:10px;height:10px;background:rgba(255,255,255,.3);border-radius:50%;transform:scale(0);opacity:0}.btn-v:active::after{animation:rippleOut .5s ease-out}.ch{transition:transform .15s,border-color .2s,box-shadow .2s}.ch:hover{transform:translateY(-2px);border-color:${VOLT}22!important;box-shadow:0 6px 20px ${BG},0 0 30px ${VOLT}08!important}.ch:active{transform:scale(.985) perspective(600px) rotateX(1deg)}.tb{background-size:200% 100%;animation:shimmer 3s linear infinite}.cnt-up{animation:countUp .5s ease-out both}.grd-bdr{background:linear-gradient(135deg,${VOLT}15,${ORANGE}10,${CYAN}10);padding:1px;border-radius:17px}.grd-bdr>div{border-radius:16px}.glass-hdr{background:${BG}cc;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid ${BORDER_CLR}80;box-shadow:0 4px 30px ${BG}80}.card-glow-v{box-shadow:0 2px 8px ${BG},0 0 20px ${VOLT}08}.card-glow-o{box-shadow:0 2px 8px ${BG},0 0 20px ${ORANGE}08}.card-glow-c{box-shadow:0 2px 8px ${BG},0 0 20px ${CYAN}08}.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleFly .7s ease-out forwards}@keyframes bbBounce{0%{transform:translateY(0) scaleY(1) scaleX(1)}40%{transform:translateY(8px) scaleY(.7) scaleX(1.3)}70%{transform:translateY(-6px) scaleY(1.1) scaleX(.95)}100%{transform:translateY(0) scaleY(1) scaleX(1)}}@keyframes badgeReveal{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}@keyframes shineSwipe{0%{left:-60%}100%{left:160%}}.badge-pop{animation:badgeReveal .6s cubic-bezier(.34,1.56,.64,1) both}.badge-shine{position:relative;overflow:hidden}.badge-shine::after{content:'';position:absolute;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);animation:shineSwipe 1.2s ease .3s}@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}@keyframes ballSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes ballBounceIn{0%{transform:scale(0) translateY(40px);opacity:0}50%{transform:scale(1.15) translateY(-10px);opacity:1}70%{transform:scale(.95) translateY(4px)}100%{transform:scale(1) translateY(0)}}@keyframes podiumPulse{0%,100%{box-shadow:0 0 12px var(--pod-c,${VOLT})22}50%{box-shadow:0 0 28px var(--pod-c,${VOLT})33}}.slide-r{animation:slideInRight .3s ease-out both}.slide-l{animation:slideInLeft .3s ease-out both}.ball-spin{animation:ballSpin 8s linear infinite}.ball-bounce{animation:ballBounceIn .7s cubic-bezier(.34,1.56,.64,1) both}.podium-glow{animation:podiumPulse 2s ease-in-out infinite}.grad-text{background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}@media(prefers-reduced-motion:reduce){*,.fade-up,.scale-in,.slide-r,.slide-l,.ball-spin,.ball-bounce,.badge-pop,.cnt-up,.podium-glow,.tb,.btn-v,.ch{animation:none!important;transition:none!important}}`;
+const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap');:root{--color-primary:#C8FF00;--color-primary-dim:#A3CC00;--color-primary-glow:rgba(200, 255, 0, 0.15);--color-secondary:#00E5FF;--color-secondary-dim:rgba(0, 229, 255, 0.12);--color-danger:#FF4545;--color-warning:#FFA500;--color-bg-base:#0A0A0A;--color-bg-card:#141414;--color-bg-elevated:#1E1E1E;--color-bg-subtle:#242424;--color-text-primary:#FFFFFF;--color-text-secondary:#A0A0A0;--color-text-muted:#555555;}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:${BG};overflow-x:hidden}input,textarea{font-family:${FB}}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}input[type=number]{-moz-appearance:textfield}::-webkit-scrollbar{width:0}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@keyframes scaleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes glow{0%,100%{box-shadow:0 0 20px ${VOLT}15}50%{box-shadow:0 0 40px ${VOLT}25}}@keyframes heroGlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}@keyframes rippleOut{0%{transform:scale(0);opacity:.5}100%{transform:scale(4);opacity:0}}@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes orbDrift{0%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(-40%,-60%) scale(1.1)}50%{transform:translate(-60%,-45%) scale(.95)}75%{transform:translate(-45%,-55%) scale(1.05)}100%{transform:translate(-55%,-50%) scale(1)}}@keyframes confettiBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{opacity:0}}@keyframes particleFly{0%{transform:translate(0,0) scale(1);opacity:1}60%{opacity:.8}100%{transform:var(--fly-to);opacity:0}}.fade-up{animation:fadeUp .4s ease-out both}.scale-in{animation:scaleIn .35s ease-out both}.btn-v{transition:transform .1s,box-shadow .2s;position:relative;overflow:hidden}.btn-v:active{transform:scale(.97)}.btn-v:hover{box-shadow:0 4px 24px ${VOLT}30}.btn-v::after{content:'';position:absolute;top:50%;left:50%;width:10px;height:10px;background:rgba(255,255,255,.3);border-radius:50%;transform:scale(0);opacity:0}.btn-v:active::after{animation:rippleOut .5s ease-out}.ch{transition:transform .15s,border-color .2s,box-shadow .2s}.ch:hover{transform:translateY(-2px);border-color:${VOLT}22!important;box-shadow:0 6px 20px ${BG},0 0 30px ${VOLT}08!important}.ch:active{transform:scale(.985) perspective(600px) rotateX(1deg)}.tb{background-size:200% 100%;animation:shimmer 3s linear infinite}.cnt-up{animation:countUp .5s ease-out both}.grd-bdr{background:linear-gradient(135deg,${VOLT}15,${ORANGE}10,${CYAN}10);padding:1px;border-radius:17px}.grd-bdr>div{border-radius:16px}.glass-hdr{background:${BG}cc;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid ${BORDER_CLR}80;box-shadow:0 4px 30px ${BG}80}.card-glow-v{box-shadow:0 2px 8px ${BG},0 0 20px ${VOLT}08}.card-glow-o{box-shadow:0 2px 8px ${BG},0 0 20px ${ORANGE}08}.card-glow-c{box-shadow:0 2px 8px ${BG},0 0 20px ${CYAN}08}.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleFly .7s ease-out forwards}@keyframes bbBounce{0%{transform:translateY(0) scaleY(1) scaleX(1)}40%{transform:translateY(8px) scaleY(.7) scaleX(1.3)}70%{transform:translateY(-6px) scaleY(1.1) scaleX(.95)}100%{transform:translateY(0) scaleY(1) scaleX(1)}}@keyframes badgeReveal{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}@keyframes shineSwipe{0%{left:-60%}100%{left:160%}}.badge-pop{animation:badgeReveal .6s cubic-bezier(.34,1.56,.64,1) both}.badge-shine{position:relative;overflow:hidden}.badge-shine::after{content:'';position:absolute;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);animation:shineSwipe 1.2s ease .3s}@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}@keyframes ballSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes ballBounceIn{0%{transform:scale(0) translateY(40px);opacity:0}50%{transform:scale(1.15) translateY(-10px);opacity:1}70%{transform:scale(.95) translateY(4px)}100%{transform:scale(1) translateY(0)}}@keyframes podiumPulse{0%,100%{box-shadow:0 0 12px var(--pod-c,${VOLT})22}50%{box-shadow:0 0 28px var(--pod-c,${VOLT})33}}.slide-r{animation:slideInRight .3s ease-out both}.slide-l{animation:slideInLeft .3s ease-out both}.ball-spin{animation:ballSpin 8s linear infinite}.ball-bounce{animation:ballBounceIn .7s cubic-bezier(.34,1.56,.64,1) both}.podium-glow{animation:podiumPulse 2s ease-in-out infinite}.grad-text{background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}@media(prefers-reduced-motion:reduce){*,.fade-up,.scale-in,.slide-r,.slide-l,.ball-spin,.ball-bounce,.badge-pop,.cnt-up,.podium-glow,.tb,.btn-v,.ch{animation:none!important;transition:none!important}}`;
 const Styles=()=><style>{_STYLES_CSS}</style>;
 
 // ═══════════════════════════════════════
@@ -101,7 +111,7 @@ function ErrorFallback(){return <div style={{minHeight:"100dvh",background:BG,di
 
   <div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:3}}>SOMETHING WENT WRONG</div>
   <p style={{fontFamily:FB,color:MUTED,fontSize:13,textAlign:"center",lineHeight:1.6,maxWidth:300}}>The app hit an unexpected error. Try refreshing the page.</p>
-  <button onClick={()=>window.location.reload()} style={{padding:"12px 32px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:10,cursor:"pointer"}}>RELOAD</button>
+  <button onClick={()=>window.location.reload()} style={{padding:"12px 32px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:10,cursor:"pointer"}}>RELOAD</button>
 </div>}
 
 export default function App(){
@@ -365,10 +375,10 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <h1 style={{fontFamily:FD,fontSize:72,color:LIGHT,textAlign:"center",margin:0,lineHeight:.85,letterSpacing:4}}>SHOT<span style={{background:`linear-gradient(135deg,${VOLT},${CYAN})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>LAB</span></h1>
 <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,letterSpacing:5,margin:"8px 0 0",fontWeight:500}}>OFFSEASON DEVELOPMENT PROGRAM</p>
 <div style={{display:"flex",alignItems:"center",gap:12,margin:"32px auto",maxWidth:200}}><div style={{flex:1,height:1,background:`linear-gradient(to right,transparent,${VOLT}44)`}}/><div style={{width:6,height:6,borderRadius:"50%",background:VOLT,opacity:.6}}/><div style={{flex:1,height:1,background:`linear-gradient(to left,transparent,${VOLT}44)`}}/></div>
-<div style={{background:`linear-gradient(180deg,${CARD_BG},#121212)`,borderRadius:24,padding:"36px 28px",border:`1px solid ${BORDER_CLR}`}}>
+<div style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:24,padding:"36px 28px",border:`1px solid ${BORDER_CLR}`}}>
 {/* Login / Register toggle */}
 <div style={{display:"flex",background:BG,borderRadius:12,padding:3,marginBottom:24,border:`1px solid ${BORDER_CLR}`}}>
-{["login","register"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,padding:"11px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:"uppercase",transition:"all .25s",background:mode===m?"#1a1a1a":"transparent",color:mode===m?LIGHT:"#444",boxShadow:mode===m?`inset 0 -3px 0 ${VOLT},0 0 12px ${VOLT}10`:"none"}}>{m==="login"?"SIGN IN":"REGISTER"}</button>)}
+{["login","register"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,padding:"11px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:"uppercase",transition:"all .25s",background:mode===m?"#242424":"transparent",color:mode===m?LIGHT:"#555555",boxShadow:mode===m?`inset 0 -3px 0 ${VOLT},0 0 12px ${VOLT}10`:"none"}}>{m==="login"?"SIGN IN":"REGISTER"}</button>)}
 </div>
 
     {mode==="register"&&<>
@@ -376,9 +386,9 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 22px"}}>Join your team's offseason program</p>
       {/* Role selector */}
       <div style={{display:"flex",background:BG,borderRadius:10,padding:3,marginBottom:20,border:`1px solid ${BORDER_CLR}`}}>
-        {["player","coach"].map(r=><button key={r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#444"}}>{r}</button>)}
+        {["player","coach"].map(r=><button key={r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#555555"}}>{r}</button>)}
       </div>
-      <label style={{fontFamily:FB,color:"#888",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>YOUR NAME</label>
+      <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>YOUR NAME</label>
       <input type="text" value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="First Last" style={{...inp,marginBottom:14}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
     </>}
 
@@ -387,15 +397,15 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 22px"}}>Sign in to access your dashboard</p>
     </>}
 
-    <label style={{fontFamily:FB,color:"#888",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>EMAIL</label>
+    <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>EMAIL</label>
     <input type="email" autoComplete="email" value={email} onChange={e=>{setEmail(e.target.value);setErr("")}} onKeyDown={e=>e.key==="Enter"&&(mode==="login"?doLogin():doRegister())} placeholder="you@example.com" style={{...inp,marginBottom:14}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
 
-    <label style={{fontFamily:FB,color:"#888",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>PASSWORD</label>
+    <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>PASSWORD</label>
     <input type="password" autoComplete={mode==="login"?"current-password":"new-password"} value={password} onChange={e=>{setPassword(e.target.value);setErr("")}} onKeyDown={e=>e.key==="Enter"&&(mode==="login"?doLogin():doRegister())} placeholder={mode==="register"?"Min 4 characters":"••••••••"} style={{...inp,marginBottom:err?8:20}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
 
-    {err&&<p style={{fontFamily:FB,color:"#ef4444",fontSize:12,margin:"0 0 14px"}}>{err}</p>}
+    {err&&<p style={{fontFamily:FB,color:"#FF4545",fontSize:12,margin:"0 0 14px"}}>{err}</p>}
 
-    <button className="btn-v" onClick={mode==="login"?doLogin:doRegister} style={{width:"100%",padding:"16px",background:VOLT,color:BG,fontFamily:FD,fontSize:20,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+    <button className="btn-v" onClick={mode==="login"?doLogin:doRegister} style={{width:"100%",padding:"16px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:20,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
       {mode==="login"?"SIGN IN":"CREATE ACCOUNT"} &#8594;
     </button>
     {mode==="login"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
@@ -417,13 +427,13 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 function CreateTeam({u,onCreate}){
 const[name,setName]=useState("");const[school,setSchool]=useState("");const[level,setLevel]=useState("");const[err,setErr]=useState("");
 const submit=async()=>{if(!name.trim())return setErr("Enter a team name");const r=await onCreate(name.trim(),{school,level});if(!r.ok)setErr(r.err||"Could not create team")}
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Welcome {u?.name}. Create your team to continue.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#ef4444",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:BG,border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>CREATE TEAM</button></div></div>;
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Welcome {u?.name}. Create your team to continue.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:"#000000",border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>CREATE TEAM</button></div></div>;
 }
 
 function JoinTeam({u,onJoin}){
 const[code,setCode]=useState("");const[err,setErr]=useState("");
 const submit=async()=>{const r=await onJoin(code);if(!r.ok)setErr(r.err||"Could not join team")};
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#ef4444",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:BG,border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>JOIN TEAM</button></div></div>;
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:"#000000",border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>JOIN TEAM</button></div></div>;
 }
 
 // ═══════════════════════════════════════
@@ -482,8 +492,8 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       <span style={{fontFamily:FD,fontSize:36,color:badgeReveal.color}}>{badgeReveal.icon}</span>
     </div>
     <div style={{fontFamily:FD,color:badgeReveal.color,fontSize:32,letterSpacing:6}}>UNLOCKED</div>
-    <div style={{fontFamily:FD,color:"#fff",fontSize:22,letterSpacing:3,marginTop:8}}>{badgeReveal.name}</div>
-    <div style={{fontFamily:FB,color:"#888",fontSize:13,marginTop:8}}>{badgeReveal.days}-day streak achieved</div>
+    <div style={{fontFamily:FD,color:"#FFFFFF",fontSize:22,letterSpacing:3,marginTop:8}}>{badgeReveal.name}</div>
+    <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,marginTop:8}}>{badgeReveal.days}-day streak achieved</div>
     <div style={{fontFamily:FB,color:T.MUT,fontSize:10,marginTop:24}}>Tap to dismiss</div>
   </div>
 </div>}
@@ -513,7 +523,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
           <circle cx="28" cy="28" r="22" fill="none" stroke={ORANGE} strokeWidth="2" strokeLinecap="round" strokeDasharray={`${Math.min(shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0)/50,1)*138} 138`} style={{transition:"stroke-dasharray .6s ease"}}/>
           {/* Inner ring — S&C */}
           <circle cx="28" cy="28" r="18" fill="none" stroke={T.BORDER} strokeWidth="2"/>
-          <circle cx="28" cy="28" r="18" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeDasharray={`${Math.min(scRsvps.filter(r=>r.email===u.email).length/5,1)*113} 113`} style={{transition:"stroke-dasharray .6s ease"}}/>
+          <circle cx="28" cy="28" r="18" fill="none" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeDasharray={`${Math.min(scRsvps.filter(r=>r.email===u.email).length/5,1)*113} 113`} style={{transition:"stroke-dasharray .6s ease"}}/>
         </svg>
         <div style={{position:"absolute",top:8,left:8}}><Av n={u.name} sz={40} email={u.email}/></div>
       </div>
@@ -553,7 +563,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
     {/* ── ZONE 1: AT HOME — Full-bleed hero card ── */}
     <button className="ch" onClick={()=>setTab("log-drill")} style={{width:"100%",background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:"none",borderRadius:24,padding:0,marginBottom:14,cursor:"pointer",textAlign:"left",position:"relative",overflow:"hidden"}}>
       {/* Animated gradient border */}
-      <div style={{position:"absolute",inset:0,borderRadius:24,padding:"1.5px",background:`linear-gradient(135deg,${VOLT}55,${VOLT}11,${VOLT}33,${VOLT}11,${VOLT}55)`,backgroundSize:"300% 300%",animation:"heroGlow 4s ease infinite",WebkitMask:"linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0)",WebkitMaskComposite:"xor",maskComposite:"exclude",pointerEvents:"none"}}/>
+      <div style={{position:"absolute",inset:0,borderRadius:24,padding:"1.5px",background:`linear-gradient(135deg,${VOLT}55,${VOLT}11,${VOLT}33,${VOLT}11,${VOLT}55)`,backgroundSize:"300% 300%",animation:"heroGlow 4s ease infinite",WebkitMask:"linear-gradient(#FFFFFF 0 0) content-box,linear-gradient(#FFFFFF 0 0)",WebkitMaskComposite:"xor",maskComposite:"exclude",pointerEvents:"none"}}/>
       {/* Top glow accent */}
       <div style={{position:"absolute",top:"-40%",left:"50%",width:280,height:200,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}0a,transparent 70%)`,transform:"translateX(-50%)",pointerEvents:"none"}}/>
       <div style={{padding:"28px 24px 24px",position:"relative"}}>
@@ -646,11 +656,11 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
     <div style={{background:CARD_BG,borderRadius:16,padding:"16px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
       <div style={{display:"flex",gap:10,marginBottom:12}}>
         <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#888",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>MAKES</label>
+          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>MAKES</label>
           <input type="number" min="0" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0" style={{width:"100%",padding:"12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:VOLT,fontFamily:FD,fontSize:24,textAlign:"center",outline:"none"}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
         </div>
         <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#888",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>DATE</label>
+          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>DATE</label>
           <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
         </div>
       </div>
@@ -674,7 +684,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
         </div>
         {done?<div style={{textAlign:"right",flexShrink:0}}>
           <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
-          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#ef4444",borderRadius:2}}/></div>
+          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>
         </div>
         :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
       </button>})}
@@ -695,8 +705,8 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       <ShareCard data={shareData}/>
       {/* Challenge button */}
       {!showChallForm?<div style={{display:"flex",gap:8,marginTop:16}}>
-        <button className="btn-v" onClick={closeShare} style={{flex:1,padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer"}}>DONE</button>
-        <button className="btn-v" onClick={()=>setShowChallForm(true)} style={{flex:1,padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+        <button className="btn-v" onClick={closeShare} style={{flex:1,padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer"}}>DONE</button>
+        <button className="btn-v" onClick={()=>setShowChallForm(true)} style={{flex:1,padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>CHALLENGE
         </button>
       </div>
@@ -704,7 +714,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
         <div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3,marginBottom:4}}>SEND A CHALLENGE</div>
         <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:14}}>Dare a teammate to beat your {shareData.score}/{shareData.max} on {shareData.drill}</div>
         {players.filter(p=>p.email!==u.email).length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:12,textAlign:"center",padding:16}}>No other players yet. They need to log in first.</div>
-        :<><div style={{fontFamily:FB,color:"#888",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PICK YOUR OPPONENT</div>
+        :<><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PICK YOUR OPPONENT</div>
           <div style={{display:"flex",flexDirection:"column",gap:4,marginBottom:14}}>{players.filter(p=>p.email!==u.email).map(p=>
             <button key={p.email} onClick={()=>setChallTarget(p.email)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:challTarget===p.email?ORANGE+"15":BG,border:`1px solid ${challTarget===p.email?ORANGE:BORDER_CLR}`,borderRadius:10,cursor:"pointer",textAlign:"left"}}>
               <Av n={p.name} sz={28} email={p.email}/><span style={{fontFamily:FB,color:challTarget===p.email?ORANGE:LIGHT,fontSize:13,fontWeight:600,flex:1}}>{p.name}</span>
@@ -744,21 +754,21 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
           COACH NOTES
         </div>
-        <p style={{fontFamily:FB,color:"#999",fontSize:12,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap"}}>{active.instructions}</p>
+        <p style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap"}}>{active.instructions}</p>
       </div>}
       {/* Motivational line */}
-      <div style={{fontFamily:FB,color:"#2a2a2a",fontSize:12,fontStyle:"italic",letterSpacing:1,margin:"20px 0 8px",fontWeight:500}}>{["Lock in.","No shortcuts.","This rep counts.","Earn it.","Be honest with yourself.","Own the work.","Details matter.","Trust the process.","Stay disciplined.","Championship habits."][Math.floor((active.id*7+new Date().getDate())%10)]}</div>
+      <div style={{fontFamily:FB,color:"#555555",fontSize:12,fontStyle:"italic",letterSpacing:1,margin:"20px 0 8px",fontWeight:500}}>{["Lock in.","No shortcuts.","This rep counts.","Earn it.","Be honest with yourself.","Own the work.","Details matter.","Trust the process.","Stay disciplined.","Championship habits."][Math.floor((active.id*7+new Date().getDate())%10)]}</div>
       <div style={{fontFamily:FD,color:T.SUB,fontSize:13,letterSpacing:3,marginBottom:28}}>MAX: {active.max}</div>
       {/* Score input with reactive color */}
-      {(()=>{const v=parseInt(input)||0;const pct=active.max>0?v/active.max:0;const glowColor=pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#ef4444":VOLT;const borderColor=v>0?glowColor:VOLT;
+      {(()=>{const v=parseInt(input)||0;const pct=active.max>0?v/active.max:0;const glowColor=pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#FF4545":VOLT;const borderColor=v>0?glowColor:VOLT;
         return <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8,marginBottom:40}}>
         <input autoFocus type="number" min="0" max={active.max} value={input} onChange={e=>{setInput(e.target.value);playTick()}} onKeyDown={e=>e.key==="Enter"&&handleLog()} placeholder="0" style={{width:120,padding:"24px 8px",background:BG,border:`2px solid ${borderColor}`,borderRadius:20,color:borderColor,fontFamily:FD,fontSize:64,textAlign:"center",outline:"none",letterSpacing:2,boxShadow:v>0?`0 0 30px ${glowColor}20,0 0 60px ${glowColor}08`:`0 0 20px ${VOLT}15`,transition:"border-color .3s,color .3s,box-shadow .3s"}}/>
         <div style={{fontFamily:FD,color:T.SUB,fontSize:32}}>/{active.max}</div>
       </div>})()}
       {/* Score quality indicator */}
-      {(()=>{const v=parseInt(input)||0;if(v<=0)return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?VOLT:pct>=75?VOLT:pct>=50?ORANGE:"#ef4444";
+      {(()=>{const v=parseInt(input)||0;if(v<=0)return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?VOLT:pct>=75?VOLT:pct>=50?ORANGE:"#FF4545";
         return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
-      <button className="btn-v" onClick={handleLog} style={{width:"100%",maxWidth:300,padding:"18px",background:VOLT,color:BG,fontFamily:FD,fontSize:22,letterSpacing:5,border:"none",borderRadius:14,cursor:"pointer",margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>LOG SCORE &#8594;</button>
+      <button className="btn-v" onClick={handleLog} style={{width:"100%",maxWidth:300,padding:"18px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:22,letterSpacing:5,border:"none",borderRadius:14,cursor:"pointer",margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>LOG SCORE &#8594;</button>
     </>}
   </div>}
 
@@ -791,8 +801,8 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
 // SHAREABLE WORKOUT CARD
 // ═══════════════════════════════════════
 function ShareCard({data}){
-const pct=data.pct||0;const pcol=pct>=80?VOLT:pct>=50?ORANGE:"#ef4444";
-return <div style={{background:`linear-gradient(145deg,#0c0c0c,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",maxWidth:340,margin:"0 auto"}}>
+const pct=data.pct||0;const pcol=pct>=80?VOLT:pct>=50?ORANGE:"#FF4545";
+return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",maxWidth:340,margin:"0 auto"}}>
 {/* Corner accents */}
 <div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
 <div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
@@ -822,7 +832,7 @@ return <div style={{background:`linear-gradient(145deg,#0c0c0c,#141414)`,borderR
 {/* Accuracy ring */}
 <div style={{margin:"16px auto 12px",width:80,position:"relative"}}>
 <svg width="80" height="40" viewBox="0 0 80 40">
-<path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke="#1a1a1a" strokeWidth="6" strokeLinecap="round"/>
+<path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke="#242424" strokeWidth="6" strokeLinecap="round"/>
 <path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke={pcol} strokeWidth="6" strokeLinecap="round" strokeDasharray={`${pct*1.1} 110`}/>
 </svg>
 <div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",fontFamily:FD,color:pcol,fontSize:18}}>{pct}%</div>
@@ -874,7 +884,7 @@ return <div className="fade-up">
 {/* Pending challenges */}
 {pending.length>0&&<><SH t="INCOMING" s={`${pending.length} WAITING`}/>
   {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
-    return <div key={ch.id} className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#131313)`,borderRadius:16,padding:"18px 20px",marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
+    return <div key={ch.id} className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:"18px 20px",marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
         <Av n={ch.fromName} sz={38} email={ch.from}/>
@@ -890,7 +900,7 @@ return <div className="fade-up">
       {respSaved===ch.id?<div style={{textAlign:"center",padding:8}}><div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:3}}>RESPONSE LOGGED!</div></div>
       :isResp?<div className="fade-up">
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-          <div style={{flex:1}}><div style={{fontFamily:FB,color:"#888",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:6}}>YOUR SCORE</div>
+          <div style={{flex:1}}><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:6}}>YOUR SCORE</div>
             <input autoFocus type="number" min="0" max={ch.max} value={respInput} onChange={e=>setRespInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"14px 8px",background:BG,border:`2px solid ${ORANGE}`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none"}}/>
           </div>
           <div style={{fontFamily:FD,color:T.SUB,fontSize:24,paddingTop:20}}>/{ch.max}</div>
@@ -915,15 +925,15 @@ return <div className="fade-up">
   const won=isMine?(ch.status==="lost"):(ch.status==="won");const tied=ch.status==="tied";const isPending=ch.status==="pending";
   const oppName=isMine?ch.toName:ch.fromName;
   const myScore=isMine?ch.score:ch.respScore;const oppScore=isMine?ch.respScore:ch.score;
-  const resultColor=isPending?MUTED:won?VOLT:tied?"#FFD700":"#ef4444";
+  const resultColor=isPending?MUTED:won?VOLT:tied?"#C8FF00":"#FF4545";
   const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
 
   return <div key={ch.id+"-"+ch.ts} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"14px 16px",marginBottom:6,border:`1px solid ${isPending?ORANGE+"22":BORDER_CLR}`}}>
     <div style={{width:40,height:40,borderRadius:12,background:resultColor+"12",border:`1px solid ${resultColor}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
       {isPending?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       :won?<svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      :tied?<span style={{fontFamily:FD,color:"#FFD700",fontSize:14}}>=</span>
-      :<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>}
+      :tied?<span style={{fontFamily:FD,color:"#C8FF00",fontSize:14}}>=</span>
+      :<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>}
     </div>
     <div style={{flex:1,minWidth:0}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{isMine?"YOU":"YOU"} vs {oppName.toUpperCase()}</div>
@@ -931,7 +941,7 @@ return <div className="fade-up">
     </div>
     <div style={{textAlign:"right",flexShrink:0}}>
       {isPending?<div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{ch.score}<span style={{color:MUTED,fontSize:11}}>/{ch.max}</span></div>
-      :<><div style={{fontFamily:FD,color:won?VOLT:"#ef4444",fontSize:16}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#ef4444":VOLT}}>{oppScore}</span></div>
+      :<><div style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:16}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>
         <div style={{fontFamily:FB,color:MUTED,fontSize:8}}>/{ch.max}</div></>}
     </div>
   </div>;
@@ -964,12 +974,12 @@ const myAttendanceByDate=useMemo(()=>{
     .sort((a,b)=>a[0].localeCompare(b[0]))
     .map(([date,count])=>({date,count}));
 },[sessions,scRsvps,user,currentYear]);
-const medals=[VOLT,"#C0C0C0","#CD7F32"];
+const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 
 const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[scRsvps]);
 
-const LiftIcon=({size=24,color="#a855f7"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
-const SC_COLOR="#a855f7";
+const LiftIcon=({size=24,color="#A0A0A0"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
+const SC_COLOR="#A0A0A0";
 const myScLogs=useMemo(()=>scLogs.filter(l=>l.email===user.email),[scLogs,user]);
 const handleAddScLog=()=>{
   const date=newLog.date?.trim();
@@ -1041,7 +1051,7 @@ return <div className="fade-up">
 </div></div>
 
 {/* Leaderboard toggle */}
-<button onClick={()=>setShowBoard(!showBoard)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#131313)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
+<button onClick={()=>setShowBoard(!showBoard)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
   <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:SC_COLOR+"15",display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={18} color={SC_COLOR}/></div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LIFTING LEADERBOARD</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>Ranked by sessions attended</div></div></div>
   <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={SC_COLOR} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
 </button>
@@ -1063,9 +1073,9 @@ return <div className="fade-up">
     <div style={{gridColumn:"1 / -1"}}><FF l="PLACE" v={newLog.place} set={v=>setNewLog({...newLog,place:v})} ph="Weight Room — Bay A"/></div>
     <div style={{gridColumn:"1 / -1"}}><FF l="SPORT" v={newLog.sport} set={v=>setNewLog({...newLog,sport:v})} ph="Basketball"/></div>
   </div>
-  {logErr&&<div style={{fontFamily:FB,color:"#ef4444",fontSize:11,marginTop:8}}>{logErr}</div>}
+  {logErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:11,marginTop:8}}>{logErr}</div>}
   {logSaved&&<div style={{fontFamily:FB,color:SC_COLOR,fontSize:11,marginTop:8}}>Session logged.</div>}
-  <button className="btn-v" onClick={handleAddScLog} style={{width:"100%",marginTop:10,padding:"12px",background:VOLT,color:BG,fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD SESSION</button>
+  <button className="btn-v" onClick={handleAddScLog} style={{width:"100%",marginTop:10,padding:"12px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD SESSION</button>
 </div></div>
 
 <div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"22px 16px",textAlign:"center"}}>
@@ -1078,7 +1088,7 @@ return <div className="fade-up">
 {upcoming.length===0&&<Empty t="No upcoming sessions" action="Your coach will add S&C sessions here. Check back soon!"/>}
 {upcoming.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const going=sr.some(r=>r.email===user.email);const exp=expanded===s.id;
   return <div key={s.id} style={{marginBottom:12}}>
-    <button onClick={()=>setExpanded(exp?null:s.id)} className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#131313)`,border:`1px solid ${going?SC_COLOR+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",cursor:"pointer",position:"relative",overflow:"hidden"}}>
+    <button onClick={()=>setExpanded(exp?null:s.id)} className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?SC_COLOR+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",cursor:"pointer",position:"relative",overflow:"hidden"}}>
       {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:SC_COLOR,borderRadius:"4px 0 0 4px"}}/>}
       <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
         <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={24} color={going?SC_COLOR:MUTED}/></div>
@@ -1090,9 +1100,9 @@ return <div className="fade-up">
         <div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:sr.length>0?SC_COLOR:MUTED,fontSize:20}}>{sr.length}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>GOING</div></div>
       </div>
     </button>
-    {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#121212)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
+    {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
-      <button className="btn-v" onClick={()=>toggleScRsvp(s.id)} style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+      <button className="btn-v" onClick={()=>toggleScRsvp(s.id)} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
         {going?<>&#10003; YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
       </button>
       {sr.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>{sr.map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:4,background:CARD_BG,borderRadius:8,padding:"4px 8px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={20} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:600}}>{r.name}</span></div>)}</div>}
@@ -1119,7 +1129,7 @@ return <div className="fade-up">
 function DashboardLeaderboard({scores,drills,user,scRsvps,rsvps,shotLogs}){
 const[mode,setMode]=useState("home");
 const[sub,setSub]=useState("total");
-const medals=[VOLT,"#C0C0C0","#CD7F32"];
+const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 const homeScores=useMemo(()=>scores.filter(s=>s.src==="home"||!s.src),[scores]);
 const progScores=useMemo(()=>scores.filter(s=>s.src==="program"),[scores]);
 
@@ -1162,7 +1172,7 @@ const switchMode=(m)=>{setMode(m);setSub(m==="home"?"total":"events")};
 return <div>
 {/* Mode toggle */}
 <div style={{display:"flex",background:SURFACE,borderRadius:14,padding:3,marginBottom:16,border:`1px solid ${BORDER_CLR}`}}>
-{[{k:"home",l:"AT HOME",c:VOLT},{k:"prog",l:"PROGRAM",c:CYAN}].map(m=><button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"12px 0",borderRadius:11,border:"none",cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:mode===m.k?700:500,letterSpacing:2,transition:"all .25s",background:mode===m.k?`${m.c}12`:"transparent",color:mode===m.k?m.c:"#444",boxShadow:mode===m.k?`inset 0 -3px 0 ${m.c}`:"none"}}>{m.l}</button>)}
+{[{k:"home",l:"AT HOME",c:VOLT},{k:"prog",l:"PROGRAM",c:CYAN}].map(m=><button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"12px 0",borderRadius:11,border:"none",cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:mode===m.k?700:500,letterSpacing:2,transition:"all .25s",background:mode===m.k?`${m.c}12`:"transparent",color:mode===m.k?m.c:"#555555",boxShadow:mode===m.k?`inset 0 -3px 0 ${m.c}`:"none"}}>{m.l}</button>)}
 </div>
 
 {/* Sub-tabs */}
@@ -1247,7 +1257,7 @@ return <div>
         </div>
         {done?<div style={{textAlign:"right",flexShrink:0}}>
           <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
-          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#ef4444",borderRadius:2}}/></div>
+          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>
         </div>
         :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
       </button>})}
@@ -1316,7 +1326,7 @@ return <div className="fade-up">
 </div>
 
 {/* Input card */}
-<div style={{background:`linear-gradient(135deg,${CARD_BG},#131313)`,borderRadius:18,padding:"24px 22px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
+<div style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:18,padding:"24px 22px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
   <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:3,marginBottom:18}}>LOG MADE SHOTS</div>
 
   {shotSaved?<div style={{textAlign:"center",padding:"24px 0"}}>
@@ -1326,11 +1336,11 @@ return <div className="fade-up">
   :<>
     <div style={{display:"flex",gap:10,marginBottom:16}}>
       <div style={{flex:1}}>
-        <label style={{fontFamily:FB,color:"#888",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>SHOTS MADE</label>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>SHOTS MADE</label>
         <input type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLog()} placeholder="0" style={{width:"100%",padding:"16px 14px",background:BG,border:`2px solid ${ORANGE}66`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none",letterSpacing:2}} onFocus={e=>e.target.style.borderColor=ORANGE} onBlur={e=>e.target.style.borderColor=ORANGE+"66"}/>
       </div>
       <div style={{flex:1}}>
-        <label style={{fontFamily:FB,color:"#888",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>DATE</label>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>DATE</label>
         <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
       </div>
     </div>
@@ -1381,7 +1391,7 @@ const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date
 const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);
 
 const attendBoard=useMemo(()=>{const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[rsvps]);
-const medals=[VOLT,"#C0C0C0","#CD7F32"];
+const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 
 return <div className="fade-up">
 {/* Events banner — structured, timeline-oriented */}
@@ -1424,7 +1434,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 </div>
 
 {/* Leaderboard toggle */}
-<button onClick={()=>setShowBoard(!showBoard)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#131313)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
+<button onClick={()=>setShowBoard(!showBoard)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
   <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:ORANGE+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>&#128293;</div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LEADERBOARD</div><div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:1}}>Attendance, scores & streaks</div></div></div>
   <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
 </button>
@@ -1441,7 +1451,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 {upcoming.length===0&&<Empty t="No upcoming events" action="Your coach will post events here. RSVP to earn attendance tier badges!"/>}
 {upcoming.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;
   return <div key={ev.id} style={{marginBottom:12}}>
-    <div className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#131313)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",position:"relative",overflow:"hidden"}}>
+    <div className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",position:"relative",overflow:"hidden"}}>
       {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:VOLT,borderRadius:"4px 0 0 4px"}}/>}
       <div style={{display:"flex",alignItems:"flex-start",gap:14,cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
         <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><EventIcon type={ev.type} size={24} color={going?CYAN:MUTED}/></div>
@@ -1457,7 +1467,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
     </div>
     {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{ev.desc}</p>
-      <button className="btn-v" onClick={()=>toggleRsvp(ev.id)} style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:14}}>
+      <button className="btn-v" onClick={()=>toggleRsvp(ev.id)} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:14}}>
         {going?"&#10003; I'M GOING":"RSVP NOW &#8594;"}
       </button>
       {evR.length>0&&<div><div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:2,marginBottom:8,fontWeight:600}}>WHO'S GOING</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>
@@ -1504,7 +1514,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:20}}>Player scores will be kept but this drill will no longer appear.</p>
 <div style={{display:"flex",gap:8}}>
 <button onClick={()=>setConfirmDelete(null)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-<button onClick={confirmDrillDelete} style={{flex:1,padding:"12px",background:"#ef4444",color:"#fff",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
+<button onClick={confirmDrillDelete} style={{flex:1,padding:"12px",background:"#FF4545",color:"#FFFFFF",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
 </div>
 </div>
 </div>}
@@ -1517,7 +1527,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 <button aria-label="Log out" onClick={logout} style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:MUTED,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
 </div>
 </div>
-<div style={{display:"flex",gap:8,marginBottom:4}}><SC l="PLAYERS" v={ups.length} c={ORANGE} small/><SC l="SCORES" v={scores.length} c={LIGHT} small/><SC l="EVENTS" v={events.length} c={CYAN} small/></div><div style={{margin:"10px 0 4px",padding:"10px 12px",border:`1px solid ${ORANGE}33`,borderRadius:10,background:ORANGE+"0d"}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:2,color:ORANGE,fontWeight:700}}>TEAM CODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><div style={{fontFamily:FD,fontSize:20,color:LIGHT,letterSpacing:3}}>{team?.joinCode||"—"}</div><button onClick={()=>navigator.clipboard?.writeText(team?.joinCode||"")} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>COPY</button><button onClick={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>REGENERATE</button></div>{codeErr&&<div style={{color:"#ef4444",fontSize:11,marginTop:5}}>{codeErr}</div>}</div>
+<div style={{display:"flex",gap:8,marginBottom:4}}><SC l="PLAYERS" v={ups.length} c={ORANGE} small/><SC l="SCORES" v={scores.length} c={LIGHT} small/><SC l="EVENTS" v={events.length} c={CYAN} small/></div><div style={{margin:"10px 0 4px",padding:"10px 12px",border:`1px solid ${ORANGE}33`,borderRadius:10,background:ORANGE+"0d"}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:2,color:ORANGE,fontWeight:700}}>TEAM CODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><div style={{fontFamily:FD,fontSize:20,color:LIGHT,letterSpacing:3}}>{team?.joinCode||"—"}</div><button onClick={()=>navigator.clipboard?.writeText(team?.joinCode||"")} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>COPY</button><button onClick={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>REGENERATE</button></div>{codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:5}}>{codeErr}</div>}</div>
 </div>
 
 <div style={{flex:1,padding:"16px 20px 110px",overflowY:"auto",position:"relative",zIndex:1}}>
@@ -1566,7 +1576,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
       })()}
     </div>
 
-    <SH t="ACTIVITY FEED" s="ALL SOURCES"/>{scores.length===0&&<Empty t="No scores yet" action="Once your players start logging drills, their activity will appear here. Share the app link to get started!"/>}{scores.slice(-20).reverse().map((s,i)=>{const dr=drills.find(d=>d.id===s.drillId);const pct=dr?Math.round(s.score/dr.max*100):0;const isHome=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:isHome?VOLT:LIGHT,background:isHome?VOLT+"15":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span></div><div style={{fontSize:10,fontWeight:700,color:pct>=80?"#4ade80":pct>=50?"#fbbf24":"#ef4444"}}>{pct}%</div></div></div>})}</div>}
+    <SH t="ACTIVITY FEED" s="ALL SOURCES"/>{scores.length===0&&<Empty t="No scores yet" action="Once your players start logging drills, their activity will appear here. Share the app link to get started!"/>}{scores.slice(-20).reverse().map((s,i)=>{const dr=drills.find(d=>d.id===s.drillId);const pct=dr?Math.round(s.score/dr.max*100):0;const isHome=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:isHome?VOLT:LIGHT,background:isHome?VOLT+"15":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span></div><div style={{fontSize:10,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>}
 
   {/* DRILLS */}
   {tab==="drills"&&!editD&&<div className="fade-up">
@@ -1574,7 +1584,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
     <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
 
     {drills.map(d=>{const dS=scores.filter(s=>s.drillId===d.id);const avg=dS.length?Math.round(dS.reduce((a,s)=>a+s.score,0)/dS.length*10)/10:0;return <div key={d.id} style={{display:"flex",gap:8,marginBottom:10,alignItems:"stretch"}}>
-      <button className="ch" onClick={()=>{setEditD(d);setEName(d.name);setEDesc(d.desc);setEInstr(d.instructions||"");setEMax(String(d.max));setEIcon(d.icon||"ft")}} style={{flex:1,display:"flex",alignItems:"center",gap:14,background:`linear-gradient(135deg,${CARD_BG},#131313)`,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"16px 18px",cursor:"pointer",textAlign:"left"}}>
+      <button className="ch" onClick={()=>{setEditD(d);setEName(d.name);setEDesc(d.desc);setEInstr(d.instructions||"");setEMax(String(d.max));setEIcon(d.icon||"ft")}} style={{flex:1,display:"flex",alignItems:"center",gap:14,background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"16px 18px",cursor:"pointer",textAlign:"left"}}>
         <div style={{width:44,height:44,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><DrillIcon type={d.icon} size={22}/></div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
@@ -1583,13 +1593,13 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
         </div>
         <svg width="14" height="14" fill="none" stroke={VOLT} strokeWidth="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
       </button>
-      <button onClick={()=>handleRemoveDrill(d.id)} style={{width:44,background:`#ef444412`,border:`1px solid #ef444433`,borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+      <button onClick={()=>handleRemoveDrill(d.id)} style={{width:44,background:`#FF454512`,border:`1px solid #FF454533`,borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
       </button>
     </div>})}
 
     {/* Add new drill */}
-    {!showNewDrill?<button onClick={()=>setShowNewDrill(true)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:14,cursor:"pointer",marginTop:8}}>+ ADD DRILL</button>
+    {!showNewDrill?<button onClick={()=>setShowNewDrill(true)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:14,cursor:"pointer",marginTop:8}}>+ ADD DRILL</button>
     :<div className="fade-up" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginTop:8}}>
       <div style={{fontFamily:FD,color:VOLT,fontSize:16,letterSpacing:3,marginBottom:16}}>NEW DRILL</div>
       <FF l="DRILL NAME" v={nd.name} set={v=>setNd({...nd,name:v})} ph="e.g. STEP-BACK JUMPER"/>
@@ -1597,14 +1607,14 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
       <div style={{display:"flex",gap:8}}>
         <div style={{flex:1}}><FF l="MAX SCORE" v={nd.max} set={v=>setNd({...nd,max:v})} tp="number" ph="10"/></div>
         <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#888",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
+          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
           <div style={{display:"flex",gap:4,marginBottom:14}}>{ICONS.map(ic=><button key={ic} onClick={()=>setNd({...nd,icon:ic})} style={{width:44,height:44,borderRadius:10,background:nd.icon===ic?VOLT+"22":BG,border:`1px solid ${nd.icon===ic?VOLT:BORDER_CLR}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={16} color={nd.icon===ic?VOLT:MUTED}/></button>)}</div>
         </div>
       </div>
       <FF l="DETAILED INSTRUCTIONS (OPTIONAL)" v={nd.instructions} set={v=>setNd({...nd,instructions:v})} ta ph="Coaching cues, setup details..."/>
       <div style={{display:"flex",gap:8}}>
         <button onClick={()=>{setShowNewDrill(false);setNd({name:"",desc:"",max:"10",icon:"ft",instructions:""})}} style={{flex:1,padding:"13px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-        <button className="btn-v" onClick={handleAddDrill} style={{flex:1,padding:"13px",background:VOLT,color:BG,fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD DRILL</button>
+        <button className="btn-v" onClick={handleAddDrill} style={{flex:1,padding:"13px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD DRILL</button>
       </div>
     </div>}
   </div>}
@@ -1616,26 +1626,26 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
     <div style={{display:"flex",gap:8}}>
       <div style={{flex:1}}><FF l="MAX SCORE" v={eMax} set={setEMax} tp="number"/></div>
       <div style={{flex:1}}>
-        <label style={{fontFamily:FB,color:"#888",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
         <div style={{display:"flex",gap:4,marginBottom:14}}>{ICONS.map(ic=><button key={ic} onClick={()=>setEIcon(ic)} style={{width:44,height:44,borderRadius:10,background:eIcon===ic?VOLT+"22":BG,border:`1px solid ${eIcon===ic?VOLT:BORDER_CLR}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={16} color={eIcon===ic?VOLT:MUTED}/></button>)}</div>
       </div>
     </div>
     <FF l="DETAILED INSTRUCTIONS" v={eInstr} set={setEInstr} ta ph="Step-by-step breakdown, coaching cues, key focus areas..."/>
-    <button className="btn-v" onClick={saveDrill} style={{width:"100%",padding:"15px",background:VOLT,color:BG,fontFamily:FD,fontSize:20,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer"}}>SAVE &#8594;</button>
+    <button className="btn-v" onClick={saveDrill} style={{width:"100%",padding:"15px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:20,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer"}}>SAVE &#8594;</button>
   </div>}
 
   {/* EVENTS */}
   {tab==="events"&&<div className="fade-up">
     <SH t="MANAGE EVENTS" s={`${events.length} TOTAL`}/>
-    <button onClick={()=>setShowAdd(!showAdd)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:18,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
+    <button onClick={()=>setShowAdd(!showAdd)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:18,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
     {showAdd&&<div className="fade-up" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
       <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="e.g. OPEN GYM RUN"/>
       <div style={{display:"flex",gap:8}}><div style={{flex:1}}><FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} ph="2026-03-15" tp="date"/></div><div style={{flex:1}}><FF l="TIME" v={ne.time} set={v=>setNe({...ne,time:v})} ph="6:00 PM"/></div></div>
       <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym"/><FF l="DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ph="Details..." ta/>
-      <label style={{fontFamily:FB,color:"#888",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
+      <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
       <div style={{display:"flex",gap:4,marginBottom:18,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"7px 12px",borderRadius:8,border:ne.type===t?`1px solid ${VOLT}`:`1px solid ${BORDER_CLR}`,background:ne.type===t?VOLT+"15":"transparent",color:ne.type===t?VOLT:MUTED,fontFamily:FD,fontSize:11,letterSpacing:2,cursor:"pointer",textTransform:"uppercase"}}>{t}</button>)}</div>
-      <button className="btn-v" onClick={handleAddEvent} style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE EVENT</button>
+      <button className="btn-v" onClick={handleAddEvent} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE EVENT</button>
     </div>}
 
     {[...events].sort((a,b)=>a.date.localeCompare(b.date)).map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const isExp=expEv===ev.id;
@@ -1646,11 +1656,11 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
         </button>
         {isExp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 14px 14px",padding:"16px 16px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
           <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:12}}>{ev.desc}</p>
-          <div style={{fontFamily:FB,color:"#888",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>ATTENDEES ({evR.length})</div>
+          <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>ATTENDEES ({evR.length})</div>
           {evR.length===0&&<p style={{fontFamily:FB,color:T.SUB,fontSize:11,marginBottom:10}}>No attendees yet</p>}
           {evR.map((r,i)=>{const t=getTier(rsvps.filter(rr=>rr.email===r.email).length);return <div key={i} style={{display:"flex",alignItems:"center",gap:8,background:CARD_BG,borderRadius:10,padding:"9px 12px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}>
             <Av n={r.name} sz={26} email={r.email}/><div style={{flex:1,minWidth:0}}><div style={{display:"flex",alignItems:"center",gap:5}}><span style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:600}}>{r.name}</span>{t.min>=2&&<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:t.color,background:t.bg}}>{t.name}</span>}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:1}}>{r.email}</div></div>
-            <button onClick={()=>removeRsvp(ev.id,r.email)} style={{background:"#ef444412",border:"1px solid #ef444433",borderRadius:7,color:"#ef4444",fontFamily:FD,fontSize:9,letterSpacing:1,padding:"4px 8px",cursor:"pointer",display:"flex",alignItems:"center",gap:3,whiteSpace:"nowrap"}}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>NO-SHOW</button>
+            <button onClick={()=>removeRsvp(ev.id,r.email)} style={{background:"#FF454512",border:"1px solid #FF454533",borderRadius:7,color:"#FF4545",fontFamily:FD,fontSize:9,letterSpacing:1,padding:"4px 8px",cursor:"pointer",display:"flex",alignItems:"center",gap:3,whiteSpace:"nowrap"}}><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2"><path d="M18 6L6 18M6 6l12 12"/></svg>NO-SHOW</button>
           </div>})}
 
           {/* ADD WALK-IN */}
@@ -1670,12 +1680,12 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
             {/* Manual email entry */}
             <div style={{display:"flex",gap:6}}>
               <input value={addEmail} onChange={e=>setAddEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAddWalkin(ev.id)} placeholder="email@example.com" style={{flex:1,padding:"10px 12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,color:LIGHT,fontSize:16,fontFamily:FB,outline:"none"}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
-              <button onClick={()=>handleAddWalkin(ev.id)} style={{padding:"10px 16px",background:VOLT,color:BG,fontFamily:FD,fontSize:13,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer",whiteSpace:"nowrap"}}>ADD</button>
+              <button onClick={()=>handleAddWalkin(ev.id)} style={{padding:"10px 16px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:13,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer",whiteSpace:"nowrap"}}>ADD</button>
             </div>
           </div>
 
-          <button onClick={()=>removeEvent(ev.id)} style={{width:"100%",marginTop:14,padding:"12px",background:"#ef444412",border:"1px solid #ef444433",borderRadius:10,color:"#ef4444",fontFamily:FD,fontSize:13,letterSpacing:2,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>DELETE EVENT
+          <button onClick={()=>removeEvent(ev.id)} style={{width:"100%",marginTop:14,padding:"12px",background:"#FF454512",border:"1px solid #FF454533",borderRadius:10,color:"#FF4545",fontFamily:FD,fontSize:13,letterSpacing:2,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>DELETE EVENT
           </button>
         </div>}
       </div>})}
@@ -1689,10 +1699,10 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
         <input value={newProfile.lastName} onChange={e=>{setNewProfile({...newProfile,lastName:e.target.value});setProfileErr("")}} placeholder="Last" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
         <input value={newProfile.jerseyNumber} onChange={e=>setNewProfile({...newProfile,jerseyNumber:e.target.value})} placeholder="Jersey" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
       </div>
-      {profileErr&&<div style={{color:"#ef4444",fontSize:11,marginTop:8}}>{profileErr}</div>}
+      {profileErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:8}}>{profileErr}</div>}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:10}}>
         <div style={{fontSize:10,color:MUTED,fontFamily:FB}}>{playerProfiles.length} player profiles on team</div>
-        <button onClick={async()=>{const r=await addRosterPlayer(newProfile);if(!r.ok)setProfileErr(r.err||"Could not add player");else setNewProfile({firstName:"",lastName:"",jerseyNumber:""});}} style={{padding:"8px 12px",background:VOLT,color:BG,border:"none",borderRadius:8,fontFamily:FD,letterSpacing:1,cursor:"pointer"}}>ADD</button>
+        <button onClick={async()=>{const r=await addRosterPlayer(newProfile);if(!r.ok)setProfileErr(r.err||"Could not add player");else setNewProfile({firstName:"",lastName:"",jerseyNumber:""});}} style={{padding:"8px 12px",background:VOLT,color:"#000000",border:"none",borderRadius:8,fontFamily:FD,letterSpacing:1,cursor:"pointer"}}>ADD</button>
       </div>
     </div>
     <CoachRoster players={players} scores={scores} shotLogs={shotLogs} drills={drills} nudged={nudged} setNudged={setNudged}/>
@@ -1711,7 +1721,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
     </div>
     {/* Account management — required by App Store §5.1.1(v) */}
     <div style={{marginTop:32,paddingTop:20,borderTop:`1px solid ${BORDER_CLR}44`}}>
-      <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #ef444433`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#ef4444",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
+      <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#FF4545",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
       <p style={{fontFamily:FB,color:MUTED,fontSize:9,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
     </div>
   </div>}
@@ -1720,24 +1730,24 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="fade-up">
     <SH t="S&C SESSIONS" s={`${scSessions.length} TOTAL`}/>
-    <button className="btn-v" onClick={()=>setShowAddSC(!showAddSC)} style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+    <button className="btn-v" onClick={()=>setShowAddSC(!showAddSC)} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
       {showAddSC?"CANCEL":"+ ADD SESSION"}
     </button>
     {showAddSC&&<div className="fade-up" style={{background:CARD_BG,borderRadius:16,padding:"20px 18px",marginBottom:16,border:`1px solid ${BORDER_CLR}`}}>
       <FF l="SPORT" v={nsc.sport} set={v=>setNsc({...nsc,sport:v})} ph="e.g. Basketball"/>
       <div style={{display:"flex",gap:8}}><div style={{flex:1}}><FF l="DATE" v={nsc.date} set={v=>setNsc({...nsc,date:v})} tp="date"/></div><div style={{flex:1}}><FF l="TIME" v={nsc.time} set={v=>setNsc({...nsc,time:v})} ph="6:00 AM"/></div></div>
-      <button className="btn-v" onClick={handleAddSC} style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE SESSION</button>
+      <button className="btn-v" onClick={handleAddSC} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE SESSION</button>
     </div>}
     {scSessions.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);
       return <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"14px 16px",marginBottom:8,border:`1px solid ${BORDER_CLR}`}}>
-        <div style={{width:40,height:40,borderRadius:10,background:"#a855f712",border:"1px solid #a855f733",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>
+        <div style={{width:40,height:40,borderRadius:10,background:"#A0A0A012",border:"1px solid #A0A0A033",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>
         </div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{s.sport||s.title}</div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>{s.date} &#183; {s.time} &#183; <span style={{color:"#a855f7"}}>{sr.length} RSVPs</span></div>
+          <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>{s.date} &#183; {s.time} &#183; <span style={{color:"#A0A0A0"}}>{sr.length} RSVPs</span></div>
         </div>
-        <button onClick={()=>removeScSession(s.id)} style={{background:"none",border:"none",color:"#ef4444",cursor:"pointer",fontSize:16,padding:4}}>&#10005;</button>
+        <button onClick={()=>removeScSession(s.id)} style={{background:"none",border:"none",color:"#FF4545",cursor:"pointer",fontSize:16,padding:4}}>&#10005;</button>
       </div>;
     })}
   </div>}
@@ -1760,7 +1770,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 function HistPanel({sc,dr}){
 const sorted=useMemo(()=>[...sc].sort((a,b)=>(b.ts||0)-(a.ts||0)),[sc]);
 const grouped=useMemo(()=>{const m={};sorted.forEach(s=>{if(!m[s.date])m[s.date]=[];m[s.date].push(s)});return Object.entries(m)},[sorted]);
-return <div><SH t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=dr.find(d=>d.id===s.drillId);const pct=d?Math.round(s.score/d.max*100):0;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:LIGHT,background:isH?VOLT+"15":LIGHT+"10"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span></div><div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#4ade80":pct>=50?"#fbbf24":"#ef4444"}}>{pct}%</div></div></div>})}</div>)}</div>;
+return <div><SH t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=dr.find(d=>d.id===s.drillId);const pct=d?Math.round(s.score/d.max*100):0;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:LIGHT,background:isH?VOLT+"15":LIGHT+"10"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span></div><div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>)}</div>;
 }
 
 // ═══════════════════════════════════════
@@ -1800,7 +1810,7 @@ const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignI
 
 return <div className="fade-up">
 {/* ══════ SHAREABLE SEASON CARD ══════ */}
-<div style={{background:`linear-gradient(145deg,#0c0c0c,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
+<div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
 {/* Corner accents */}
 <div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
 <div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
@@ -1872,7 +1882,7 @@ return <div className="fade-up">
   <StatRow label="Total Drill Makes" value={totalMakes}/>
   <StatRow label="Shot Tracker Makes" value={totalShots} color={ORANGE}/>
   <StatRow label="Events Attended" value={eventsAttended} color={CYAN}/>
-  <StatRow label="S&C Sessions" value={scCount} color="#a855f7"/>
+  <StatRow label="S&C Sessions" value={scCount} color="#A0A0A0"/>
   <StatRow label="Challenges" value={`${challWon}/${challTotal}`} color={ORANGE} sub={challTotal>0?`${Math.round(challWon/challTotal*100)}% win rate`:"No challenges yet"}/>
   <StatRow label="Best Streak" value={`${bestStreak}D`} color={ORANGE}/>
   <div style={{height:4}}/>
@@ -1885,8 +1895,8 @@ return <div className="fade-up">
     <DrillIcon type={d.icon} size={20} color={accentColor}/>
     <div style={{flex:1,fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
     <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"2px 8px",borderRadius:5,
-      color:d.trend==="up"?"#4ade80":d.trend==="down"?"#ef4444":MUTED,
-      background:d.trend==="up"?"#4ade8015":d.trend==="down"?"#ef444415":BORDER_CLR}}>
+      color:d.trend==="up"?"#C8FF00":d.trend==="down"?"#FF4545":MUTED,
+      background:d.trend==="up"?"#C8FF0015":d.trend==="down"?"#FF454515":BORDER_CLR}}>
       {d.trend==="up"?"▲ IMPROVING":d.trend==="down"?"▼ DECLINING":"— STEADY"}
     </div>
   </div>
@@ -1914,15 +1924,15 @@ return <div className="fade-up">
 {/* ══════ ACCOUNT MANAGEMENT ══════ */}
 <div style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${BORDER_CLR}44`}}>
   <div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>ACCOUNT</div>
-  {!confirmDel?<button onClick={()=>setConfirmDel(true)} style={{width:"100%",padding:"14px",background:"transparent",border:`1px solid #ef444444`,borderRadius:12,cursor:"pointer",fontFamily:FB,fontSize:13,color:"#ef4444",fontWeight:600,letterSpacing:1}}>
+  {!confirmDel?<button onClick={()=>setConfirmDel(true)} style={{width:"100%",padding:"14px",background:"transparent",border:`1px solid #FF454544`,borderRadius:12,cursor:"pointer",fontFamily:FB,fontSize:13,color:"#FF4545",fontWeight:600,letterSpacing:1}}>
     Delete Account & All Data
   </button>
-  :<div className="fade-up" style={{background:"#ef444408",borderRadius:16,padding:"20px",border:`1px solid #ef444433`}}>
-    <div style={{fontFamily:FD,color:"#ef4444",fontSize:18,letterSpacing:3,marginBottom:8}}>DELETE ACCOUNT?</div>
+  :<div className="fade-up" style={{background:"#FF454508",borderRadius:16,padding:"20px",border:`1px solid #FF454533`}}>
+    <div style={{fontFamily:FD,color:"#FF4545",fontSize:18,letterSpacing:3,marginBottom:8}}>DELETE ACCOUNT?</div>
     <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:16}}>This will permanently delete your account, scores, shot logs, RSVPs, and all associated data. This cannot be undone.</p>
     <div style={{display:"flex",gap:8}}>
       <button onClick={()=>setConfirmDel(false)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-      <button onClick={deleteAccount} style={{flex:1,padding:"12px",background:"#ef4444",color:"#fff",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
+      <button onClick={deleteAccount} style={{flex:1,padding:"12px",background:"#FF4545",color:"#FFFFFF",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
     </div>
   </div>}
   <p style={{fontFamily:FB,color:MUTED,fontSize:10,textAlign:"center",marginTop:12,lineHeight:1.5}}>Your data is stored locally on this device. Deleting your account removes all your personal information and scores.</p>
@@ -1947,7 +1957,7 @@ function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged}){
     }).sort((a,b)=>{const order={complete:0,partial:1,active:2,inactive:3};return(order[a.status]||3)-(order[b.status]||3)||(a.daysAgo||999)-(b.daysAgo||999)});
   },[players,scores,shotLogs,today,drills]);
 
-const statusColor={complete:VOLT,partial:ORANGE,active:CYAN,inactive:"#ef4444"};
+const statusColor={complete:VOLT,partial:TOKENS.PRIMARY_DIM,active:CYAN,inactive:TOKENS.DANGER};
 const statusLabel={complete:"ALL DONE",partial:"STARTED",active:"ACTIVE",inactive:"INACTIVE"};
 
 return <div className="fade-up">
@@ -1956,7 +1966,7 @@ return <div className="fade-up">
 
 {roster.length===0&&<Empty t="No players registered yet" action="Players need to create an account and log their first score to appear here."/>}
 {roster.map(p=>{const c=statusColor[p.status];const isNudged=nudged.includes(p.email);
-  return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"14px 16px",marginBottom:8,border:`1px solid ${p.status==="inactive"?"#ef444433":BORDER_CLR}`}}>
+  return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"14px 16px",marginBottom:8,border:`1px solid ${p.status==="inactive"?"#FF454533":BORDER_CLR}`}}>
     <div style={{position:"relative"}}>
       <Av n={p.name} sz={38} email={p.email}/>
       <div style={{position:"absolute",bottom:-2,right:-2,width:12,height:12,borderRadius:"50%",background:c,border:`2px solid ${CARD_BG}`}}/>
@@ -1975,7 +1985,7 @@ return <div className="fade-up">
         {p.streak>0&&<span style={{color:ORANGE}}> · {p.streak}D 🔥</span>}
       </div>
     </div>
-    {p.status==="inactive"&&<button onClick={()=>{if(!isNudged)setNudged(n=>[...n,p.email])}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${isNudged?VOLT+"44":"#ef444444"}`,background:isNudged?VOLT+"12":"#ef444412",cursor:"pointer",fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,color:isNudged?VOLT:"#ef4444",whiteSpace:"nowrap"}}>
+    {p.status==="inactive"&&<button onClick={()=>{if(!isNudged)setNudged(n=>[...n,p.email])}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${isNudged?VOLT+"44":"#FF454544"}`,background:isNudged?VOLT+"12":"#FF454512",cursor:"pointer",fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,color:isNudged?VOLT:"#FF4545",whiteSpace:"nowrap"}}>
       {isNudged?"✓ NUDGED":"NUDGE"}
     </button>}
   </div>})}
@@ -1993,16 +2003,16 @@ function SLLogo({size=60,glow=false,opacity:op=1,style:sx}){return <img src="dat
 
 function calcStreak(sc){const ds=[...new Set(sc.map(s=>s.date))].sort().reverse();let c=0,d=new Date();for(let i=0;i<400;i++){const s=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;if(ds.includes(s)){c++;d.setDate(d.getDate()-1)}else if(i===0){d.setDate(d.getDate()-1)}else break}return c}
 function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return Math.abs(h)}
-const AVG=[["#C8FF00","#00D4FF"],["#FF6B2C","#FFD700"],["#00D4FF","#C8FF00"],["#FF6B2C","#C8FF00"],["#C0C0C0","#00D4FF"],["#FFD700","#FF6B2C"],["#4ade80","#00D4FF"],["#C8FF00","#FF6B2C"]];
+const AVG=[["#C8FF00","#00E5FF"],["#C8FF00","#C8FF00"],["#00E5FF","#C8FF00"],["#C8FF00","#C8FF00"],["#A0A0A0","#00E5FF"],["#C8FF00","#C8FF00"],["#C8FF00","#00E5FF"],["#C8FF00","#C8FF00"]];
 function AnimNum({v,c=VOLT,big}){const[display,setDisplay]=useState(0);useEffect(()=>{if(typeof v!=="number"){setDisplay(v);return}let cancelled=false;const end=v;const dur=600;const t0=Date.now();const step=()=>{if(cancelled)return;const elapsed=Date.now()-t0;const prog=Math.min(elapsed/dur,1);const eased=1-Math.pow(1-prog,3);setDisplay(Math.round(eased*end));if(prog<1)requestAnimationFrame(step)};step();return()=>{cancelled=true}},[v]);return <span className="cnt-up" style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{display}</span>}
 function SC({l,v,c=VOLT,big,small,fire,accent}){const inner=<div style={{flex:big?1.6:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:big?"22px 18px":"14px 12px",position:"relative",overflow:"hidden"}}>{fire&&<div style={{position:"absolute",top:6,right:8,fontSize:14}}>🔥</div>}{typeof v==="number"?<AnimNum v={v} c={c} big={big}/>:<div style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{v}</div>}<div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:big?6:4,fontWeight:600}}>{l}</div></div>;if(accent)return <div className="grd-bdr" style={{flex:big?1.6:1}}>{inner}</div>;return <div style={{flex:big?1.6:1}}><div style={{border:`1px solid ${BORDER_CLR}`,borderRadius:16}}>{inner}</div></div>}
 function SH({t,s}){return <div style={{marginBottom:16,display:"flex",alignItems:"baseline",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:4}}>{t}</div>{s&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{s}</div>}</div>}
 function Av({n,sz=36,style:x,email}){const idx=email?hashCode(email)%AVG.length:hashCode(n||"?")%AVG.length;const[c1,c2]=AVG[idx];return <div style={{width:sz,height:sz,borderRadius:"50%",background:`linear-gradient(135deg,${c1}44,${c2}44)`,border:`2px solid ${c1}33`,color:c1,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:sz*.42,flexShrink:0,letterSpacing:1,boxShadow:`0 0 12px ${c1}11`,...x}}>{(n||"?")[0].toUpperCase()}</div>}
-function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i)=>{const angle=(i/24)*360*(Math.PI/180);const dist=60+Math.random()*80;const x=Math.cos(angle)*dist;const y=Math.sin(angle)*dist-20;const colors=[VOLT,ORANGE,CYAN,"#FFD700","#4ade80","#fff"];return {x,y,color:colors[i%colors.length],size:3+Math.random()*4,delay:Math.random()*0.15}}),[]);return <div style={{position:"absolute",top:"30%",left:"50%",zIndex:20,pointerEvents:"none"}}>{particles.map((p,i)=><div key={i} className="particle" style={{width:p.size,height:p.size,background:p.color,left:0,top:0,"–fly-to":`translate(${p.x}px,${p.y}px) scale(0)`,animationDelay:`${p.delay}s`,animationDuration:".7s"}}/>)}</div>}
+function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i)=>{const angle=(i/24)*360*(Math.PI/180);const dist=60+Math.random()*80;const x=Math.cos(angle)*dist;const y=Math.sin(angle)*dist-20;const colors=[VOLT,ORANGE,CYAN,"#C8FF00","#C8FF00","#FFFFFF"];return {x,y,color:colors[i%colors.length],size:3+Math.random()*4,delay:Math.random()*0.15}}),[]);return <div style={{position:"absolute",top:"30%",left:"50%",zIndex:20,pointerEvents:"none"}}>{particles.map((p,i)=><div key={i} className="particle" style={{width:p.size,height:p.size,background:p.color,left:0,top:0,"–fly-to":`translate(${p.x}px,${p.y}px) scale(0)`,animationDelay:`${p.delay}s`,animationDuration:".7s"}}/>)}</div>}
 function CourtDivider({color=VOLT,my=20}){return <div style={{margin:`${my}px 0`,position:"relative",height:24,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><svg width="100%" height="24" viewBox="0 0 400 24" preserveAspectRatio="none" fill="none" style={{position:"absolute",inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:"50%",background:color,opacity:.15,position:"relative",zIndex:1}}/></div>}
-function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#444",flexShrink:0}}>{r}</div>}
-function Empty({t,action,onTap}){return <div style={{textAlign:"center",padding:"40px 20px"}}><div className="ball-bounce" style={{display:"inline-block",opacity:.25}}><SLLogo size={48} opacity={.35}/></div><p style={{fontFamily:FB,color:"#2a2a2a",fontSize:12,marginTop:14,lineHeight:1.6}}>{t}</p>{action&&<p style={{fontFamily:FB,color:VOLT+"88",fontSize:11,marginTop:6,lineHeight:1.5,fontWeight:600}}>{action}</p>}{onTap&&<button onClick={onTap} className="btn-v" style={{marginTop:12,padding:"10px 24px",background:VOLT+"15",border:`1px solid ${VOLT}33`,borderRadius:10,color:VOLT,fontFamily:FD,fontSize:12,letterSpacing:3,cursor:"pointer"}}>GET STARTED →</button>}</div>}
-function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#888",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>}</>}
+function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#555555",flexShrink:0}}>{r}</div>}
+function Empty({t,action,onTap}){return <div style={{textAlign:"center",padding:"40px 20px"}}><div className="ball-bounce" style={{display:"inline-block",opacity:.25}}><SLLogo size={48} opacity={.35}/></div><p style={{fontFamily:FB,color:"#555555",fontSize:12,marginTop:14,lineHeight:1.6}}>{t}</p>{action&&<p style={{fontFamily:FB,color:VOLT+"88",fontSize:11,marginTop:6,lineHeight:1.5,fontWeight:600}}>{action}</p>}{onTap&&<button onClick={onTap} className="btn-v" style={{marginTop:12,padding:"10px 24px",background:VOLT+"15",border:`1px solid ${VOLT}33`,borderRadius:10,color:VOLT,fontFamily:FD,fontSize:12,letterSpacing:3,cursor:"pointer"}}>GET STARTED →</button>}</div>}
+function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>}</>}
 function NavBar({items,active,onChange}){
-const NAV_INACTIVE="#5a5a5a",NAV_ACTIVE_BG="#1a2a0f";
-return <nav role="navigation" aria-label="Main navigation" style={{position:"fixed",bottom:0,left:0,right:0,display:"flex",background:`linear-gradient(180deg,${BG}f2,${BG})`,borderTop:`1px solid ${BORDER_CLR}`,padding:"6px 0",paddingBottom:"max(8px,env(safe-area-inset-bottom))",zIndex:100,backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)",boxShadow:`0 -12px 28px #0006`}}>{items.map(t=>{const a=active===t.k;return <button key={t.k} aria-label={t.l} onClick={()=>onChange(t.k)} onPointerDown={e=>{e.currentTarget.style.transform="scale(.98)"}} onPointerUp={e=>{e.currentTarget.style.transform="scale(1)"}} onPointerCancel={e=>{e.currentTarget.style.transform="scale(1)"}} onPointerLeave={e=>{if(e.buttons===1)e.currentTarget.style.transform="scale(1)"}} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"6px 0",background:"none",border:"none",cursor:"pointer",color:a?VOLT:NAV_INACTIVE,transition:"transform .13s ease,color .25s",position:"relative",outlineOffset:2,borderRadius:12}}><div style={{padding:t.primary?"4px 10px":"4px 12px",borderRadius:t.primary?14:10,background:a?NAV_ACTIVE_BG:"transparent",opacity:a?1:.88,transition:"background .25s,opacity .25s",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,position:"relative",minWidth:t.primary?72:64}}><div style={{lineHeight:1,transform:t.primary?"scale(1.14)":"none",filter:a?`drop-shadow(0 0 8px ${VOLT}66)`:"none"}}>{t.svg}</div>{t.dot&&!a&&<div style={{position:"absolute",top:1,right:10,width:6,height:6,borderRadius:"50%",background:t.dot,border:`1.5px solid ${BG}`,boxShadow:`0 0 6px ${t.dot}66`}}/>}{t.primary&&<div style={{position:"absolute",inset:0,borderRadius:14,border:`1px solid ${VOLT}66`,boxShadow:`inset 0 0 0 1px ${VOLT}33`}}/>}<div style={{fontFamily:FD,fontSize:8,letterSpacing:2,color:a?VOLT:NAV_INACTIVE}}>{t.l.toUpperCase()}</div></div></button>})}</nav>}
+const NAV_INACTIVE=TOKENS.TEXT_MUTED,NAV_ACTIVE_BG="transparent";
+return <nav role="navigation" aria-label="Main navigation" style={{position:"fixed",bottom:0,left:0,right:0,display:"flex",background:`linear-gradient(180deg,${BG}f2,${BG})`,borderTop:`1px solid ${BORDER_CLR}`,padding:"6px 0",paddingBottom:"max(8px,env(safe-area-inset-bottom))",zIndex:100,backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)",boxShadow:`0 -12px 28px #0006`}}>{items.map(t=>{const a=active===t.k;return <button key={t.k} aria-label={t.l} onClick={()=>onChange(t.k)} onPointerDown={e=>{e.currentTarget.style.transform="scale(.98)"}} onPointerUp={e=>{e.currentTarget.style.transform="scale(1)"}} onPointerCancel={e=>{e.currentTarget.style.transform="scale(1)"}} onPointerLeave={e=>{if(e.buttons===1)e.currentTarget.style.transform="scale(1)"}} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:"6px 0",background:"none",border:"none",cursor:"pointer",color:a?VOLT:NAV_INACTIVE,transition:"transform .13s ease,color .25s",position:"relative",outlineOffset:2,borderRadius:12}}><div style={{padding:t.primary?"4px 10px":"4px 12px",borderRadius:t.primary?14:10,background:a?NAV_ACTIVE_BG:"transparent",opacity:a?1:.88,transition:"background .25s,opacity .25s",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,position:"relative",minWidth:t.primary?72:64}}><div style={{lineHeight:1,transform:t.primary?"scale(1.14)":"none",filter:a?`drop-shadow(0 0 8px ${VOLT}66)`:"none"}}>{t.svg}</div>{t.dot&&!a&&<div style={{position:"absolute",top:1,right:10,width:6,height:6,borderRadius:"50%",background:t.dot,border:`1.5px solid ${BG}`,boxShadow:`0 0 6px ${t.dot}66`}}/>}<div style={{fontFamily:FD,fontSize:8,letterSpacing:2,color:a?VOLT:NAV_INACTIVE}}>{t.l.toUpperCase()}</div></div></button>})}</nav>}
