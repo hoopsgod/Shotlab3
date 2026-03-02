@@ -564,85 +564,26 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home"><SectionHero icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} title="AT HOME" subtitle="Daily drills and shot tracking" accent={VOLT} deco={<DrillIcon type="ft" size={16} color={VOLT}/>} isCoach={u.isCoach}/>
 
-    {/* ══════════════════════════════════════════════
-        TWO ZONES — Hero primary + compact secondary
-        ══════════════════════════════════════════════ */}
-
-    {/* ── ZONE 1: AT HOME — Full-bleed hero card ── */}
-    <button className="ch" onClick={()=>setTab("log-drill")} style={{width:"100%",background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:"none",borderRadius:24,padding:0,marginBottom:14,cursor:"pointer",textAlign:"left",position:"relative",overflow:"hidden"}}>
-      {/* Animated gradient border */}
-      <div style={{position:"absolute",inset:0,borderRadius:24,padding:"1.5px",background:`linear-gradient(135deg,${VOLT}55,${VOLT}11,${VOLT}33,${VOLT}11,${VOLT}55)`,backgroundSize:"300% 300%",animation:"heroGlow 4s ease infinite",WebkitMask:"linear-gradient(#FFFFFF 0 0) content-box,linear-gradient(#FFFFFF 0 0)",WebkitMaskComposite:"xor",maskComposite:"exclude",pointerEvents:"none"}}/>
-      {/* Top glow accent */}
-      <div style={{position:"absolute",top:"-40%",left:"50%",width:280,height:200,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}0a,transparent 70%)`,transform:"translateX(-50%)",pointerEvents:"none"}}/>
-      <div style={{padding:"28px 24px 24px",position:"relative"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-          <div style={{display:"flex",alignItems:"center",gap:12}}>
-            <div style={{width:44,height:44,borderRadius:14,background:`${VOLT}10`,border:`1px solid ${VOLT}22`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>
-            </div>
-            <div>
-              <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:4}}>AT HOME</div>{u.isCoach?<><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,letterSpacing:"0.08em",textTransform:"uppercase",marginTop:3}}>COACH</div><div style={{fontFamily:FD,color:"#FFFFFF",fontSize:20,fontWeight:900,letterSpacing:2,textTransform:"uppercase",lineHeight:1}}>{u.name.toUpperCase()}</div></>:<div style={{fontFamily:FB,color:MUTED,fontSize:11,fontWeight:500,marginTop:1}}>Daily drills & shot tracking</div>}
-            </div>
-          </div>
-          <div style={{width:36,height:36,borderRadius:10,background:VOLT+"10",display:"flex",alignItems:"center",justifyContent:"center"}}>
-            <svg width="14" height="14" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round"/></svg>
-          </div>
-        </div>
-
-        {/* Stats row — integrated into the hero */}
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10,marginTop:18}}>
-          <div style={{background:CARD_BG,borderRadius:16,padding:16,border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",minHeight:100}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:8}}><path d="M20 6L9 17l-5-5"/></svg>
-            <div style={{display:"flex",alignItems:"baseline",lineHeight:1,fontFamily:FD,color:VOLT,fontSize:36,fontWeight:700}}><span className="metric-pop"><AnimNum v={total} c={VOLT} size={36}/></span></div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>TOTAL MAKES</div>
-          </div>
-          <div style={{background:CARD_BG,borderRadius:16,padding:16,border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",minHeight:100,boxShadow:streak>0?"0 0 12px rgba(0, 229, 255, 0.08)":"none"}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:8}}><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
-            <div style={{position:"relative",display:"inline-flex",alignItems:"baseline",lineHeight:1,fontFamily:FD,color:CYAN,fontSize:36,fontWeight:700,paddingRight:8}}>
-              <span className="metric-pop"><AnimNum v={streak} c={CYAN} size={36}/></span>
-              <span style={{position:"absolute",right:0,bottom:2,fontFamily:FB,fontSize:10,color:MUTED,fontWeight:700}}>D</span>
-            </div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>STREAK</div>
-          </div>
-          <div style={{background:CARD_BG,borderRadius:16,padding:16,border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-start",minHeight:100}}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginBottom:8}}><path d="M9 6h11"/><path d="M9 12h11"/><path d="M9 18h11"/><path d="M5 6h.01"/><path d="M5 12h.01"/><path d="M5 18h.01"/></svg>
-            <div style={{display:"flex",alignItems:"baseline",lineHeight:1,gap:2,fontFamily:FD,color:LIGHT,fontWeight:700}}>
-              <span className="metric-pop"><AnimNum v={todayS.length} c={LIGHT} size={36}/></span>
-              <span style={{fontSize:18,color:MUTED}}>/{drills.length}</span>
-            </div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,letterSpacing:"0.08em",marginTop:6,fontWeight:600,opacity:1}}>DRILLS</div>
-            <div style={{marginTop:10,width:"100%",height:4,borderRadius:2,background:BORDER_CLR,overflow:"hidden"}}>
-              <div style={{width:`${drillBarW}%`,height:"100%",background:VOLT,borderRadius:2,transition:"width .6s ease-out"}}/>
-            </div>
-          </div>
-        </div>
-      </div>
-    </button>
-
-    {/* ── ZONE 2: PROGRAM — Compact secondary card ── */}
     {(()=>{
       const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
-      const nextEvent=sorted.find(e=>e.date>=today);
+      const upcomingEvents=sorted.filter(e=>e.date>=today);
+      const nextEvent=upcomingEvents[0]||null;
       const myEvRsvps=rsvps.filter(r=>r.email===u.email).length;
-      return <button className="ch" onClick={()=>setTab("program")} style={{width:"100%",background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`1px solid ${BORDER_CLR}`,borderRadius:24,padding:"24px",marginBottom:28,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,minHeight:160}}>
-        <div style={{width:44,height:44,borderRadius:14,background:`${VOLT}10`,border:`1px solid ${VOLT}22`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
+      const attendancePct=upcomingEvents.length>0?`${Math.min(100,Math.round((myEvRsvps/upcomingEvents.length)*100))}%`:"—";
+      const nextLabel=nextEvent?nextEvent.date.slice(5):"None";
+      const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
+      const programStats=[{label:"Upcoming Events",value:upcomingEvents.length,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextLabel,color:LIGHT}];
+      return <>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12,padding:"0 2px"}}>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:2.5,textTransform:"uppercase"}}>Training Mode</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase"}}>Choose your focus</div>
         </div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:16,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase"}}>PROGRAM</div>
-          {nextEvent?<div style={{display:"flex",flexDirection:"column",alignItems:"flex-start",marginTop:8,gap:4,maxWidth:"calc(100% - 110px)",minWidth:0}}>
-            <div style={{fontFamily:FB,color:T.MUT,fontSize:11,fontWeight:700,letterSpacing:".1em",lineHeight:1,opacity:.72,textTransform:"uppercase"}}>Next</div>
-            <div style={{fontFamily:FB,color:LIGHT,fontSize:"clamp(14px,1.6vw,18px)",fontWeight:800,lineHeight:1.15,letterSpacing:".02em",maxWidth:"100%",overflowWrap:"anywhere"}}>{nextEvent.title}</div>
-            <div style={{fontFamily:FB,color:"#8ca4af",fontSize:12,fontWeight:600,lineHeight:1.1,opacity:.82}}>{nextEvent.date.slice(5)}</div>
-          </div>
-          :<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>Events & verified attendance</div>}
+        <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:14,marginBottom:28,alignItems:"stretch"}}>
+          <ModeCard title="At Home" subtitle="Daily drills and shot tracking" icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
+          <ModeCard title="Program" subtitle="Official workouts and attendance" icon={<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} isActive={tab==="program"} onClick={()=>setTab("program")}/>
         </div>
-        <div style={{textAlign:"center",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:22}}>{myEvRsvps}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:1,fontWeight:600}}>EVENTS</div>
-        </div>
-        <svg width="12" height="12" viewBox="0 0 16 16" style={{flexShrink:0}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
-      </button>})()}
+      </>
+    })()}
 
     {/* ══════ LEADERBOARD ══════ */}
     <DashboardLeaderboard scores={scores} drills={drills} programDrills={programDrills} user={u} scRsvps={scRsvps} rsvps={rsvps} shotLogs={shotLogs}/>
@@ -1123,6 +1064,23 @@ return <div className="fade-up">
   </div>;
 }
 
+
+function ModeCard({title,subtitle,icon,stats,isActive,onClick}){
+return <button onClick={onClick} className="mode-card" style={{width:"100%",background:"linear-gradient(160deg, rgba(30, 30, 30, 0.96) 0%, rgba(15, 15, 15, 0.94) 100%)",border:`1.5px solid ${isActive?"rgba(200, 255, 0, 0.65)":"rgba(200, 255, 0, 0.28)"}`,borderRadius:24,padding:22,cursor:"pointer",textAlign:"left",position:"relative",minHeight:260,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:isActive?"0 12px 30px rgba(200, 255, 0, 0.16), 0 0 0 1px rgba(200, 255, 0, 0.22) inset":"0 10px 26px rgba(0, 0, 0, 0.42)",transition:"border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(200, 255, 0, 0.58)";e.currentTarget.style.boxShadow="0 12px 30px rgba(200, 255, 0, 0.18)"}} onMouseLeave={e=>{e.currentTarget.style.borderColor=isActive?"rgba(200, 255, 0, 0.65)":"rgba(200, 255, 0, 0.28)";e.currentTarget.style.boxShadow=isActive?"0 12px 30px rgba(200, 255, 0, 0.16), 0 0 0 1px rgba(200, 255, 0, 0.22) inset":"0 10px 26px rgba(0, 0, 0, 0.42)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow="0 0 0 3px rgba(200, 255, 0, 0.38), 0 12px 28px rgba(200, 255, 0, 0.16)"}} onBlur={e=>{e.currentTarget.style.boxShadow=isActive?"0 12px 30px rgba(200, 255, 0, 0.16), 0 0 0 1px rgba(200, 255, 0, 0.22) inset":"0 10px 26px rgba(0, 0, 0, 0.42)"}}>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16}}>
+    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
+      <div style={{width:44,height:44,borderRadius:14,background:"rgba(200, 255, 0, 0.10)",border:"1px solid rgba(200, 255, 0, 0.24)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>{icon}</div>
+      <div style={{minWidth:0}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:21,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase"}}>{title}</div>
+        <div style={{fontFamily:FB,color:MUTED,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em",textTransform:"uppercase"}}>{subtitle}</div>
+      </div>
+    </div>
+    <div style={{width:36,height:36,borderRadius:10,background:"rgba(200, 255, 0, 0.10)",border:"1px solid rgba(200, 255, 0, 0.2)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>
+  </div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>{stats.map(s=><div key={s.label} style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:s.color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{s.value}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{s.label}</div></div>)}</div>
+</button>
+}
+
 // ═══════════════════════════════════════
 // DASHBOARD LEADERBOARD — The hero section
 // ═══════════════════════════════════════
@@ -1172,9 +1130,8 @@ const switchMode=(m)=>{setMode(m);setSub(m==="home"?"total":"events")};
 
 return <div>
 {/* Mode toggle */}
-<div style={{display:"flex",background:"#1E1E1E",borderRadius:12,padding:2,marginBottom:16,border:"1px solid #242424",position:"relative"}}>
-<div style={{position:"absolute",top:2,left:2,width:"calc(50% - 2px)",height:"calc(100% - 4px)",borderRadius:10,background:"#C8FF00",transform:mode==="home"?"translateX(0)":"translateX(100%)",transition:"transform 150ms ease"}}/>
-{[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=><button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:mode===m.k?700:600,letterSpacing:2,transition:"color 150ms ease",background:"transparent",color:mode===m.k?"#000000":"#555555",position:"relative",zIndex:1}}>{m.l}</button>)}
+<div style={{display:"flex",gap:8,background:"#121212",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(200, 255, 0, 0.24)"}}>
+{[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=>{const active=mode===m.k;return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid rgba(200, 255, 0, ${active?0.65:0.45})`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,transition:"all 150ms ease",background:active?"#C8FF00":"#171717",color:active?"#000000":"#A0A0A0"}}>{m.l}</button>})}
 </div>
 
 {/* Sub-tabs */}
