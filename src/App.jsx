@@ -91,11 +91,11 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[ready,setReady]=useState(false);
+const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[ready,setReady]=useState(false);
 const T=THEMES[theme];
 
 // Load persisted data + restore session
-useEffect(()=>{(async()=>{const[d,s,p,ev,rv,sl,ch,scs,scr,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:session")]);if(d)setDrills(d);if(s)setScores(s);if(p)setPlayers(p);if(ev)setEvents(ev);if(rv)setRsvps(rv);if(sl)setShotLogs(sl);if(ch)setChallenges(ch);if(scs)setScSessions(scs);if(scr)setScRsvps(scr);
+useEffect(()=>{(async()=>{const[d,s,p,ev,rv,sl,ch,scs,scr,scl,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:session")]);if(d)setDrills(d);if(s)setScores(s);if(p)setPlayers(p);if(ev)setEvents(ev);if(rv)setRsvps(rv);if(sl)setShotLogs(sl);if(ch)setChallenges(ch);if(scs)setScSessions(scs);if(scr)setScRsvps(scr);if(scl)setScLogs(scl);
 // Restore session
 if(sess&&sess.email){const found=(p||[]).find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",name:found.name});setView(found.role||"player")}}
 setReady(true)})()},[]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -138,6 +138,7 @@ await P("sl:rsvps",rsvps.filter(r=>r.email!==e),setRsvps);
 await P("sl:shotlogs",shotLogs.filter(s=>s.email!==e),setShotLogs);
 await P("sl:challenges",challenges.filter(c=>c.from!==e&&c.to!==e),setChallenges);
 await P("sl:sc-rsvps",scRsvps.filter(r=>r.email!==e),setScRsvps);
+await P("sl:sc-logs",scLogs.filter(l=>l.email!==e),setScLogs);
 DB.set("sl:session",null);setUser(null);setView("auth");
 };
 const addScore=async(drillId,score)=>{if(!user)return;await P("sl:scores",[...scores,{email:user.email,name:user.name,drillId,score,date:todayStr(),ts:Date.now(),src:"home"}],setScores)};
@@ -155,12 +156,13 @@ const respondChallenge=async(id,score)=>{await P("sl:challenges",challenges.map(
 const addScSession=async(s)=>{await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now()}],setScSessions)};
 const removeScSession=async(id)=>{await P("sl:sc-sessions",scSessions.filter(s=>s.id!==id),setScSessions);await P("sl:sc-rsvps",scRsvps.filter(r=>r.sessionId!==id),setScRsvps)};
 const toggleScRsvp=async(sid)=>{const ex=scRsvps.find(r=>r.sessionId===sid&&r.email===user.email);if(ex)await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.email===user.email)),setScRsvps);else await P("sl:sc-rsvps",[...scRsvps,{sessionId:sid,email:user.email,name:user.name,ts:Date.now()}],setScRsvps)};
+const addScLog=async(log)=>{if(!user)return;await P("sl:sc-logs",[{...log,id:Date.now(),email:user.email,name:user.name},...scLogs],setScLogs)};
 
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
 {view==="auth"&&<Auth onLogin={login} onRegister={register} players={players}/>}
-{view==="player"&&<Player u={user} drills={drills} scores={scores} addScore={addScore} events={events} rsvps={rsvps} toggleRsvp={toggleRsvp} shotLogs={shotLogs} addShotLog={addShotLog} challenges={challenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={players} T={T} theme={theme} setTheme={setTheme} scSessions={scSessions} scRsvps={scRsvps} toggleScRsvp={toggleScRsvp} logout={logout} deleteAccount={deleteAccount}/>}
+{view==="player"&&<Player u={user} drills={drills} scores={scores} addScore={addScore} events={events} rsvps={rsvps} toggleRsvp={toggleRsvp} shotLogs={shotLogs} addShotLog={addShotLog} challenges={challenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={players} T={T} theme={theme} setTheme={setTheme} scSessions={scSessions} scRsvps={scRsvps} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount}/>}
 {view==="coach"&&<Coach u={user} drills={drills} scores={scores} players={players} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} events={events} rsvps={rsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scSessions} scRsvps={scRsvps} addScSession={addScSession} removeScSession={removeScSession} shotLogs={shotLogs} logout={logout} deleteAccount={deleteAccount}/>}
 </>;
 }
@@ -266,7 +268,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 // ═══════════════════════════════════════
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
-function Player({u,drills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,logout,deleteAccount}){
+function Player({u,drills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount}){
 const[tab,setTab]=useState("home"),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
 const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false);
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
@@ -600,7 +602,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
   {tab==="duels"&&<div className={slideClass} key="duels"><DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players}/></div>}
 
   {/* ═════════════ STRENGTH & CONDITIONING ═════════════ */}
-  {tab==="sc"&&<div className={slideClass} key="sc"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp}/></div>}
+  {tab==="sc"&&<div className={slideClass} key="sc"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
   {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount}/></div>}
@@ -777,8 +779,9 @@ return <div className="fade-up">
 // ═══════════════════════════════════════
 // STRENGTH & CONDITIONING PANEL
 // ═══════════════════════════════════════
-function SCPanel({sessions,scRsvps,user,toggleScRsvp}){
+function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog}){
 const[showBoard,setShowBoard]=useState(false),[expanded,setExpanded]=useState(null);
+const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"",sport:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false);
 const sorted=useMemo(()=>[...sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
 const upcoming=sorted.filter(s=>s.date>=todayStr()),past=sorted.filter(s=>s.date<todayStr());
 const myCount=scRsvps.filter(r=>r.email===user.email).length;
@@ -803,6 +806,19 @@ const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email
 
 const LiftIcon=({size=24,color="#a855f7"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
 const SC_COLOR="#a855f7";
+const myScLogs=useMemo(()=>scLogs.filter(l=>l.email===user.email),[scLogs,user]);
+const handleAddScLog=()=>{
+  const date=newLog.date?.trim();
+  const time=newLog.time?.trim();
+  const place=newLog.place?.trim();
+  const sport=newLog.sport?.trim();
+  if(!date||!time||!place||!sport){setLogErr("Please complete date, time, place, and sport.");return}
+  addScLog({date,time,place,sport,ts:Date.now()});
+  setNewLog({date:todayStr(),time:"",place:"",sport:""});
+  setLogErr("");
+  setLogSaved(true);
+  setTimeout(()=>setLogSaved(false),1800);
+};
 
 return <div className="fade-up">
 {/* S&C banner — heavy, grounded */}
@@ -875,6 +891,24 @@ return <div className="fade-up">
     <div style={{fontFamily:FD,color:SC_COLOR,fontSize:18}}>{p.count}</div>
   </div>})}
 </div>}
+
+<SH t="SESSION LOG" s="DATE · TIME · PLACE · SPORT"/>
+<div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"16px"}}>
+  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+    <FF l="DATE" v={newLog.date} set={v=>setNewLog({...newLog,date:v})} tp="date"/>
+    <FF l="TIME" v={newLog.time} set={v=>setNewLog({...newLog,time:v})} tp="time" ph="6:00 AM"/>
+    <div style={{gridColumn:"1 / -1"}}><FF l="PLACE" v={newLog.place} set={v=>setNewLog({...newLog,place:v})} ph="Weight Room — Bay A"/></div>
+    <div style={{gridColumn:"1 / -1"}}><FF l="SPORT" v={newLog.sport} set={v=>setNewLog({...newLog,sport:v})} ph="Basketball"/></div>
+  </div>
+  {logErr&&<div style={{fontFamily:FB,color:"#ef4444",fontSize:11,marginTop:8}}>{logErr}</div>}
+  {logSaved&&<div style={{fontFamily:FB,color:SC_COLOR,fontSize:11,marginTop:8}}>Session logged.</div>}
+  <button className="btn-v" onClick={handleAddScLog} style={{width:"100%",marginTop:10,padding:"12px",background:SC_COLOR,color:LIGHT,fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD SESSION</button>
+</div></div>
+
+<div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"22px 16px",textAlign:"center"}}>
+  <div style={{fontFamily:FD,color:SC_COLOR,fontSize:72,lineHeight:.9,letterSpacing:3}}>{myScLogs.length}</div>
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginTop:8}}>TOTAL S&C SESSIONS LOGGED</div>
+</div></div>
 
 {/* Upcoming sessions */}
 <SH t="UPCOMING SESSIONS" s={`${upcoming.length} SCHEDULED`}/>
