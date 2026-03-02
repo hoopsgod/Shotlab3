@@ -2073,53 +2073,118 @@ return <div className="fade-up">
   </div>;
 }
 function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged}){
-  const today=todayStr();
-  const roster=useMemo(()=>{
-    return players.filter(p=>p.role!=="coach").map(p=>{
-      const ps=scores.filter(s=>s.email===p.email);
-      const lastScore=ps.length?ps.sort((a,b)=>(b.ts||0)-(a.ts||0))[0]:null;
-      const lastDate=lastScore?.date||null;
-      const daysAgo=lastDate?Math.floor((new Date(today)-new Date(lastDate))/(1000*60*60*24)):null;
-      const todayDone=ps.filter(s=>s.date===today);
-      const drillsDone=new Set(todayDone.filter(s=>s.src==="home"||!s.src).map(s=>s.drillId)).size;
-      const shotsToday=shotLogs.filter(s=>s.email===p.email&&s.date===today).reduce((a,s)=>a+s.made,0);
-      const streak=calcStreak(ps);
-      const status=drillsDone>=drills.length?"complete":drillsDone>0||shotsToday>0?"partial":daysAgo===0?"active":"inactive";
-      return{...p,lastDate,daysAgo,drillsDone,shotsToday,streak,status,totalDrills:drills.length};
-    }).sort((a,b)=>{const order={complete:0,partial:1,active:2,inactive:3};return(order[a.status]||3)-(order[b.status]||3)||(a.daysAgo||999)-(b.daysAgo||999)});
-  },[players,scores,shotLogs,today,drills]);
+  const [sortBy,setSortBy]=useState("status");
+  const now=Date.now();
+  const dayMs=1000*60*60*24;
+  const weekStartTs=now-(7*dayMs);
+  const parseAnyDate=(v)=>{
+    if(!v)return null;
+    if(v instanceof Date)return Number.isNaN(v.getTime())?null:v;
+    const d=new Date(v);
+    return Number.isNaN(d.getTime())?null:d;
+  };
+  const toEventDate=(entry)=>{
+    if(entry?.ts)return new Date(entry.ts);
+    return parseAnyDate(entry?.date||entry?.updatedAt||entry?.createdAt);
+  };
+  const daysSince=(date)=>{
+    if(!date)return null;
+    return Math.max(0,Math.floor((now-date.getTime())/dayMs));
+  };
+  const getStatusMeta=(days)=>{
+    if(days===null||days>=5)return {pill:"INACTIVE",color:TOKENS.DANGER,rank:0};
+    if(days<=2)return {pill:"ACTIVE",color:VOLT,rank:2};
+    return {pill:"AT RISK",color:TOKENS.WARNING,rank:1};
+  };
+  const formatLastActive=(days)=>{
+    if(days===null)return "Never";
+    if(days===0)return "Today";
+    if(days===1)return "1 day ago";
+    return `${days} days ago`;
+  };
 
-const statusColor={complete:VOLT,partial:TOKENS.PRIMARY_DIM,active:CYAN,inactive:TOKENS.DANGER};
-const statusLabel={complete:"ALL DONE",partial:"STARTED",active:"ACTIVE",inactive:"INACTIVE"};
+  const roster=useMemo(()=>{
+    const enriched=players.filter(p=>p.role!=="coach").map(p=>{
+      const playerScores=scores.filter(s=>s.email===p.email);
+      const playerShotLogs=shotLogs.filter(s=>s.email===p.email);
+      const scoreDates=playerScores.map(toEventDate).filter(Boolean);
+      const shotDates=playerShotLogs.map(toEventDate).filter(Boolean);
+      const profileDates=[p.lastActiveAt,p.lastLogin,p.updatedAt,p.createdAt].map(parseAnyDate).filter(Boolean);
+      const allDates=[...scoreDates,...shotDates,...profileDates];
+      const lastActiveAt=allDates.length?new Date(Math.max(...allDates.map(d=>d.getTime()))):null;
+      const daysAgo=daysSince(lastActiveAt);
+      const statusMeta=getStatusMeta(daysAgo);
+      const weeklyScoreCount=playerScores.filter(s=>{
+        const d=toEventDate(s);
+        return d&&d.getTime()>=weekStartTs;
+      }).length;
+      const weeklyShotCount=playerShotLogs.filter(s=>{
+        const d=toEventDate(s);
+        return d&&d.getTime()>=weekStartTs;
+      }).length;
+      const weeklyActivityCount=weeklyScoreCount+weeklyShotCount;
+      const weekDrillSet=new Set(playerScores.filter(s=>{
+        const d=toEventDate(s);
+        return d&&d.getTime()>=weekStartTs&&(s.src==="home"||!s.src);
+      }).map(s=>s.drillId).filter(Boolean));
+      const weeklyCompletionPct=drills.length?Math.min(100,Math.round((weekDrillSet.size/drills.length)*100)):null;
+      return {...p,lastActiveAt,daysAgo,weeklyActivityCount,weeklyCompletionPct,statusMeta};
+    });
+    return [...enriched].sort((a,b)=>{
+      if(sortBy==="name")return (a.name||"").localeCompare(b.name||"");
+      const ageA=a.daysAgo===null?Number.POSITIVE_INFINITY:a.daysAgo;
+      const ageB=b.daysAgo===null?Number.POSITIVE_INFINITY:b.daysAgo;
+      return a.statusMeta.rank-b.statusMeta.rank||ageB-ageA||(a.name||"").localeCompare(b.name||"");
+    });
+  },[players,scores,shotLogs,drills,sortBy,weekStartTs]);
 
 return <div className="fade-up">
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PLAYER ROSTER" s={`${roster.length} PLAYERS`}/>
 <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:18,lineHeight:1.5}}>Track who's putting in work today. Tap "NUDGE" to flag inactive players for follow-up.</div>
 
+<div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}>
+  <label style={{display:"flex",alignItems:"center",gap:8,fontFamily:FB,fontSize:10,color:TOKENS.TEXT_SECONDARY,letterSpacing:"0.08em",textTransform:"uppercase"}}>
+    Sort
+    <select value={sortBy} onChange={e=>setSortBy(e.target.value)} style={{height:34,padding:"0 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:9,color:LIGHT,fontFamily:FB,fontSize:11,fontWeight:600}}>
+      <option value="status">Status (Inactive First)</option>
+      <option value="name">Name (A-Z)</option>
+    </select>
+  </label>
+</div>
+
 {roster.length===0&&<Empty t="No players registered yet" action="Players need to create an account and log their first score to appear here."/>}
-{roster.map(p=>{const c=statusColor[p.status];const isNudged=nudged.includes(p.email);
-  return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"14px 16px",marginBottom:8,border:`1px solid ${p.status==="inactive"?"#FF454533":BORDER_CLR}`}}>
-    <div style={{position:"relative"}}>
-      <Av n={p.name} sz={38} email={p.email}/>
-      <div style={{position:"absolute",bottom:-2,right:-2,width:12,height:12,borderRadius:"50%",background:c,border:`2px solid ${CARD_BG}`}}/>
-    </div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{display:"flex",alignItems:"center",gap:6}}>
-        <span style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>{p.name}</span>
-        <span style={{fontFamily:FB,fontSize:7,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:c,background:c+"15"}}>{statusLabel[p.status]}</span>
+{roster.map(p=>{const c=p.statusMeta.color;const isNudged=nudged.includes(p.email);
+  const circumference=2*Math.PI*12;
+  const ringOffset=p.weeklyCompletionPct===null?circumference:circumference-((p.weeklyCompletionPct/100)*circumference);
+  return <div key={p.email} style={{display:"flex",background:CARD_BG,borderRadius:14,marginBottom:10,border:`1px solid ${p.statusMeta.pill==="INACTIVE"?"#FF454533":BORDER_CLR}`,overflow:"hidden"}}>
+    <div style={{width:5,background:c,flexShrink:0}}/>
+    <div style={{display:"flex",alignItems:"stretch",gap:12,padding:"14px 12px",flex:1}}>
+      <div style={{position:"relative",alignSelf:"center"}}>
+        <Av n={p.name} sz={40} email={p.email}/>
       </div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:3}}>
-        {p.status==="complete"?`${p.drillsDone}/${p.totalDrills} drills · ${p.shotsToday} shots`
-        :p.status==="partial"?`${p.drillsDone}/${p.totalDrills} drills done · ${p.shotsToday} shots`
-        :p.daysAgo===null?"Never logged"
-        :p.daysAgo===0?"Logged today"
-        :`Last active ${p.daysAgo}d ago`}
-        {p.streak>0&&<span style={{color:ORANGE}}> · {p.streak}D 🔥</span>}
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,marginBottom:4}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
+            <span style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:800,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.name}</span>
+            {p.weeklyCompletionPct!==null&&<svg width="28" height="28" viewBox="0 0 28 28" aria-label={`Weekly completion ${p.weeklyCompletionPct}%`}>
+              <circle cx="14" cy="14" r="12" stroke="#333333" strokeWidth="3" fill="none"/>
+              <circle cx="14" cy="14" r="12" stroke={VOLT} strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={ringOffset} transform="rotate(-90 14 14)"/>
+            </svg>}
+          </div>
+          <span style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"3px 7px",borderRadius:999,color:c,background:c+"15",whiteSpace:"nowrap"}}>{p.statusMeta.pill}</span>
+        </div>
+        <div style={{fontFamily:FB,color:"#FFFFFFB3",fontSize:11,lineHeight:1.55}}>
+          <div>Last Active: <span style={{color:VOLT,fontWeight:700}}>{formatLastActive(p.daysAgo)}</span></div>
+          <div>This Week: <span style={{color:VOLT,fontWeight:700}}>{p.weeklyActivityCount}</span> logs</div>
+          {p.weeklyCompletionPct!==null&&<div>Weekly Completion: <span style={{color:VOLT,fontWeight:700}}>{p.weeklyCompletionPct}%</span></div>}
+        </div>
       </div>
-    </div>
-    {p.status==="inactive"&&<button onClick={()=>{if(!isNudged)setNudged(n=>[...n,p.email])}} style={{padding:"6px 12px",borderRadius:8,border:`1px solid ${isNudged?VOLT+"44":"#FF454544"}`,background:isNudged?VOLT+"12":"#FF454512",cursor:"pointer",fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,color:isNudged?VOLT:"#FF4545",whiteSpace:"nowrap"}}>
+      <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-end",gap:8,minWidth:94}}>
+    {p.statusMeta.pill==="INACTIVE"&&<button onClick={()=>{if(!isNudged)setNudged(n=>[...n,p.email])}} style={{minHeight:40,padding:"0 12px",borderRadius:8,border:`1px solid ${isNudged?VOLT+"44":"#FF454544"}`,background:isNudged?VOLT+"12":"#FF454512",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,color:isNudged?VOLT:"#FF4545",whiteSpace:"nowrap",width:"100%"}}>
       {isNudged?"✓ NUDGED":"NUDGE"}
     </button>}
+      </div>
+    </div>
   </div>})}
 
   </div>;
