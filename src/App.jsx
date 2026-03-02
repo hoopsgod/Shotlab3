@@ -49,6 +49,14 @@ const THEMES={dark:{BG:"#080808",SURFACE:"#111111",CARD_BG:"#161616",BORDER:"#1e
 const T=THEMES.dark; // module-level default for standalone components
 const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#C0C0C0"},{days:14,name:"TWO-WEEK GRIND",icon:"14",color:"#CD7F32"},{days:30,name:"MONTHLY BEAST",icon:"30",color:"#FFD700"},{days:60,name:"IRON WILL",icon:"60",color:CYAN},{days:100,name:"CENTURION",icon:"💯",color:VOLT}];
 const getEarnedBadges=s=>STREAK_BADGES.filter(b=>s>=b.days);
+const DRILL_ACCENTS={
+  "FORM SHOOTING":"#CCFF00",
+  "FREE THROWS":"#FFFFFF",
+  "CATCH & SHOOT":"#CCFF00",
+  "BALL HANDLING":ORANGE,
+  "MID-RANGE":"#FFFFFF",
+};
+const getDrillAccentColor=name=>DRILL_ACCENTS[name]||"#CCFF00";
 function Sparkline({data,color=VOLT,w=44,h=16}){if(!data||data.length<2)return null;const max=Math.max(...data,1);const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v/max)*h*.8+h*.1)}`).join(" ");return <svg width={w} height={h} style={{display:"block",opacity:.6}}><polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 
 const EventIcon=({type,size=24,color=VOLT})=>{const s={width:size,height:size,display:"block"};
@@ -1703,9 +1711,9 @@ return <div className="fade-up">
 
 {/* Per-drill breakdown with PBs and trends */}
 <div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
-{drillStats.map(d=><div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,marginBottom:10}}>
+{drillStats.map(d=>{const accentColor=getDrillAccentColor(d.name);return <div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-    <DrillIcon type={d.icon} size={20}/>
+    <DrillIcon type={d.icon} size={20} color={accentColor}/>
     <div style={{flex:1,fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
     <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"2px 8px",borderRadius:5,
       color:d.trend==="up"?"#4ade80":d.trend==="down"?"#ef4444":MUTED,
@@ -1732,7 +1740,7 @@ return <div className="fade-up">
     <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:1,fontWeight:600,flexShrink:0}}>LAST {d.last10.length}</div>
     <Sparkline data={d.last10} color={VOLT} w={200} h={20}/>
   </div>}
-</div>)}
+</div>})}
 
 {/* ══════ ACCOUNT MANAGEMENT ══════ */}
 <div style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${BORDER_CLR}44`}}>
