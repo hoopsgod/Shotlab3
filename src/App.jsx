@@ -1623,11 +1623,17 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 </div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
-<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
-<div><div style={{fontFamily:FD,color:ORANGE,fontSize:13,letterSpacing:4}}>COACH MODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:2}}><div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:2}}>{u.name.toUpperCase()}</div>{u.isCoach&&<span style={{background:"rgba(200, 255, 0, 0.12)",border:"1px solid #C8FF00",borderRadius:20,padding:"2px 8px",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.10em",color:"#C8FF00",display:"inline-flex",alignItems:"center",gap:4}}><WhistleIcon size={9} color="#C8FF00"/>COACH</span>}</div></div>
-<div style={{display:"flex",alignItems:"center",gap:10}}>
-<Av n={u.name} sz={36} email={u.email} isCoach={u.isCoach}/><BrandWordmark size={20} small/>
-<button aria-label="Log out" onClick={logout} style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:MUTED,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+<div style={{marginBottom:16,padding:"16px 14px",border:`1px solid ${ORANGE}2a`,borderRadius:18,background:"linear-gradient(135deg, rgba(200,255,0,0.12) 0%, rgba(10,10,10,0.94) 45%, rgba(10,10,10,0.98) 100%)",boxShadow:"0 14px 36px rgba(0,0,0,0.34)"}}>
+<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+<div>
+<div style={{fontFamily:FD,color:ORANGE,fontSize:11,letterSpacing:4,opacity:.9}}>COACH MODE</div>
+<div style={{display:"flex",alignItems:"center",gap:8,marginTop:4,flexWrap:"wrap"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:34,letterSpacing:2,lineHeight:1}}>{u.name.toUpperCase()}</div>{u.isCoach&&<span style={{background:"rgba(200, 255, 0, 0.16)",border:"1px solid rgba(200, 255, 0, 0.65)",borderRadius:999,padding:"3px 9px",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.11em",color:"#D9FF5C",display:"inline-flex",alignItems:"center",gap:4}}><WhistleIcon size={9} color="#D9FF5C"/>COACH</span>}</div>
+<div style={{fontFamily:FB,color:"rgba(255,255,255,0.6)",fontSize:10,letterSpacing:1.6,fontWeight:600,marginTop:4,textTransform:"uppercase"}}>Lead the squad. Track momentum. Build consistency.</div>
+</div>
+<div style={{display:"flex",alignItems:"center",gap:10,alignSelf:"flex-start"}}>
+<Av n={u.name} sz={40} email={u.email} isCoach={u.isCoach}/><BrandWordmark size={20} small/>
+<button aria-label="Log out" onClick={logout} style={{background:"rgba(20,20,20,0.95)",border:`1px solid ${BORDER_CLR}`,borderRadius:13,color:MUTED,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+</div>
 </div>
 </div>
 <CoachCommandCenter
@@ -1644,7 +1650,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   onScheduleEvent={()=>jumpToSection("events","coach-events-management")}
   onLogScore={handleLogScoreAction}
 />
-<div style={{margin:"10px 0 4px",padding:"10px 12px",border:`1px solid ${ORANGE}33`,borderRadius:10,background:ORANGE+"0d"}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:2,color:ORANGE,fontWeight:700}}>TEAM CODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><div style={{fontFamily:FD,fontSize:20,color:LIGHT,letterSpacing:3}}>{team?.joinCode||"—"}</div><button onClick={()=>navigator.clipboard?.writeText(team?.joinCode||"")} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>COPY</button><button onClick={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>REGENERATE</button></div>{codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:5}}>{codeErr}</div>}</div>
+<div style={{margin:"10px 0 4px",padding:"14px 14px",border:`1px solid ${ORANGE}44`,borderRadius:14,background:"linear-gradient(120deg, rgba(200,255,0,0.12) 0%, rgba(200,255,0,0.05) 35%, rgba(20,20,20,0.9) 100%)"}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:2,color:ORANGE,fontWeight:700}}>TEAM CODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:8,flexWrap:"wrap"}}><div style={{fontFamily:FD,fontSize:25,color:LIGHT,letterSpacing:4,minWidth:114,lineHeight:1}}>{team?.joinCode||"—"}</div><button onClick={()=>navigator.clipboard?.writeText(team?.joinCode||"")} style={{padding:"8px 12px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:1}}>COPY</button><button onClick={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}} style={{padding:"8px 12px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:1}}>REGENERATE</button></div>{codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:6}}>{codeErr}</div>}</div>
 </div>
 {u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:"0 16px",gap:8}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"0.12em",color:"rgba(200, 255, 0, 0.7)"}}>COACH VIEW — FULL ACCESS</span></div>}
 
