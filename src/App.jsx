@@ -447,7 +447,11 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
         </div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:FD,color:CYAN,fontSize:22,letterSpacing:3}}>PROGRAM</div>
-          {nextEvent?<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>Next: <span style={{color:CYAN,fontWeight:700}}>{nextEvent.title}</span> · {nextEvent.date.slice(5)}</div>
+          {nextEvent?<div style={{display:"flex",flexDirection:"column",alignItems:"flex-start",marginTop:8,gap:4,maxWidth:"calc(100% - 110px)",minWidth:0}}>
+            <div style={{fontFamily:FB,color:T.MUT,fontSize:11,fontWeight:700,letterSpacing:".1em",lineHeight:1,opacity:.72,textTransform:"uppercase"}}>Next</div>
+            <div style={{fontFamily:FB,color:CYAN,fontSize:"clamp(14px,1.6vw,18px)",fontWeight:800,lineHeight:1.15,letterSpacing:".02em",maxWidth:"100%",overflowWrap:"anywhere"}}>{nextEvent.title}</div>
+            <div style={{fontFamily:FB,color:"#8ca4af",fontSize:12,fontWeight:600,lineHeight:1.1,opacity:.82}}>{nextEvent.date.slice(5)}</div>
+          </div>
           :<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>Events & verified attendance</div>}
         </div>
         <div style={{textAlign:"center",flexShrink:0}}>
