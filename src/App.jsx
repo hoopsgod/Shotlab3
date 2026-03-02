@@ -28,11 +28,11 @@ const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Barlow Condensed'
 
 const DRILLS_INIT=[
 {id:1,name:"FORM SHOOTING",desc:"10 shots from 5 feet. Elbow, follow-through, arc.",max:10,icon:"ft"},
-{id:2,name:"FREE THROWS",desc:"10 free throw attempts. Lock in your routine.",max:10,icon:"ft"},
-{id:3,name:"CATCH & SHOOT",desc:"15 catch-and-shoot jumpers from 5 spots.",max:15,icon:"3p"},
-{id:4,name:"BALL HANDLING",desc:"5-minute handle circuit. Rate yourself 1-10.",max:10,icon:"sb"},
-{id:5,name:"MID-RANGE",desc:"10 pull-up jumpers from elbows and mid-post.",max:10,icon:"mr"},
-{id:6,name:"FLOATERS",desc:"12 runners and floaters from inside the lane.",max:12,icon:"fl"},
+{id:2,name:"FREE THROWS",desc:"10 free throw attempts. Lock in your routine.",max:10,icon:"bull"},
+{id:3,name:"CATCH & SHOOT",desc:"15 catch-and-shoot jumpers from 5 spots.",max:15,icon:"catch"},
+{id:4,name:"BALL HANDLING",desc:"5-minute handle circuit. Rate yourself 1-10.",max:10,icon:"dribble"},
+{id:5,name:"MID-RANGE",desc:"10 pull-up jumpers from elbows and mid-post.",max:10,icon:"range"},
+{id:6,name:"FLOATERS",desc:"12 runners and floaters from inside the lane.",max:12,icon:"arc"},
 ];
 const ICONS=["ft","3p","mr","fl","sb"];
 const EVENTS_INIT=[
@@ -92,6 +92,11 @@ return <svg viewBox="0 0 40 40" fill="none" style={s}><rect x="6" y="10" width="
 const DrillIcon=({type,size=28,color=VOLT})=>{const s={width:size,height:size,display:"block"};
 if(type==="ft")return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="20" r="17" stroke={color} strokeWidth="2"/><path d="M3 20h34" stroke={color} strokeWidth="1.5"/><path d="M20 3v34" stroke={color} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={color} strokeWidth="1.5" fill="none"/></svg>;
 if(type==="3p")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M6 36Q20 4 34 36" stroke={color} strokeWidth="2" fill="none"/><circle cx="20" cy="18" r="4" fill={color} opacity=".8"/><line x1="20" y1="22" x2="20" y2="36" stroke={color} strokeWidth="1.5"/></svg>;
+if(type==="bull")return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="20" r="15" stroke={color} strokeWidth="2"/><circle cx="20" cy="20" r="9" stroke={color} strokeWidth="2"/><circle cx="20" cy="20" r="3" fill={color}/><path d="M20 5v4M20 31v4M5 20h4M31 20h4" stroke={color} strokeWidth="1.5" strokeLinecap="round"/></svg>;
+if(type==="catch")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M6 24c2-4 5-6 8-6h12c3 0 6 2 8 6" stroke={color} strokeWidth="2" strokeLinecap="round"/><path d="M11 24v8M29 24v8M16 19l4-5 4 5" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+if(type==="dribble")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M8 30c5-3 9-3 14 0" stroke={color} strokeWidth="2" strokeLinecap="round"/><path d="M20 11a3 3 0 110 6 3 3 0 010-6z" stroke={color} strokeWidth="2"/><path d="M20 17v8l-5 5M20 23l6 2 4 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>;
+if(type==="range")return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="20" r="10" stroke={color} strokeWidth="2"/><path d="M20 5v6M20 29v6M5 20h6M29 20h6" stroke={color} strokeWidth="2" strokeLinecap="round"/><circle cx="20" cy="20" r="2.5" fill={color}/></svg>;
+if(type==="arc")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M6 26c4-6 10-9 14-9s10 3 14 9" stroke={color} strokeWidth="2" strokeLinecap="round"/><path d="M8 32c4-4 8-6 12-6s8 2 12 6" stroke={color} strokeWidth="2" strokeLinecap="round"/><circle cx="20" cy="14" r="3" stroke={color} strokeWidth="1.5"/></svg>;
 if(type==="mr")return <svg viewBox="0 0 40 40" fill="none" style={s}><rect x="6" y="6" width="28" height="28" rx="3" stroke={color} strokeWidth="1.5"/><circle cx="20" cy="20" r="8" stroke={color} strokeWidth="1.5" fill="none"/><circle cx="20" cy="20" r="2.5" fill={color}/></svg>;
 if(type==="fl")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M10 34Q12 14 20 10Q28 14 30 34" stroke={color} strokeWidth="2" fill="none"/><circle cx="20" cy="10" r="4" stroke={color} strokeWidth="1.5" fill="none"/><path d="M16 20h8" stroke={color} strokeWidth="1.5" strokeDasharray="2 2"/></svg>;
 if(type==="sb")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M28 32L12 24L22 12" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/><circle cx="22" cy="12" r="5" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 8l-4 2" stroke={color} strokeWidth="1.5" strokeLinecap="round"/></svg>;
@@ -447,6 +452,7 @@ const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todaySt
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
+const[shotTrackerOpen,setShotTrackerOpen]=useState(true);
 const[prevTab,setPrevTab]=useState("home");
 const tabOrder=["home","duels","sc","program","profile"];
 const slideClass=useMemo(()=>{const pi=tabOrder.indexOf(prevTab);const ci=tabOrder.indexOf(tab==="log-drill"?"home":tab);if(pi<0||ci<0||pi===ci)return "fade-up";return ci>pi?"slide-r":"slide-l"},[tab,prevTab]);
@@ -516,7 +522,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
 <div style={{position:"sticky",top:0,zIndex:10,height:64,padding:"max(0px,env(safe-area-inset-top)) 16px 0",background:TOKENS.BG_BASE,borderBottom:`1px solid ${TOKENS.BG_SUBTLE}`}}>
   <div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
     <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:36,height:36,borderRadius:"50%",background:"#1E1E1E",border:"1.5px solid #C8FF00",color:"#FFFFFF",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0}}>{(u.name||"?")[0].toUpperCase()}</button>
+      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:36,height:36,borderRadius:"50%",background:"#1E1E1E",border:"2px solid #C8FF00",color:"#FFFFFF",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0}}>{(u.name||"?")[0].toUpperCase()}</button>
       <div style={{minWidth:0}}><div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:"0.15em",fontWeight:700,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(()=>{
         const allDone=todayS.length>=drills.length;const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
         if(allDone&&shotsToday>0)return <span style={{color:VOLT}}>ALL DRILLS COMPLETE · {streak}D STREAK 🔥</span>;
@@ -526,11 +532,10 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
     </div>
     <div style={{display:"flex",gap:6,alignItems:"center"}}>
       <BrandWordmark size={20} small/>
-      <button aria-label="Toggle theme" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .3s"}}>
-        {theme==="dark"?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        :<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>}
+      <button aria-label="Toggle theme" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:"transparent",border:"none",color:"#A0A0A0",width:36,height:36,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",padding:0}}>
+        {theme==="dark"?<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        :<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>}
       </button>
-      <button aria-label="Log out" onClick={logout} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>&#10005;</button>
     </div>
   </div>
 
@@ -543,7 +548,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
     <div style={{fontFamily:FB,color:ORANGE,fontSize:8,letterSpacing:2,marginTop:2}}>{pullY>40?"REFRESHING":"PULL"}</div>
   </div>}
 
-  {tab!=="home"&&<button onClick={()=>switchTab("home")} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:16,padding:0}}>&#8592; DASHBOARD</button>}
+  {tab!=="home"&&<button onClick={()=>switchTab("home")} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:11,cursor:"pointer",fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase",minHeight:44,padding:"0 4px",display:"inline-flex",alignItems:"center",gap:6,marginTop:16,marginBottom:20}}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>DASHBOARD</button>}
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home"><SectionHero icon={<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} title="AT HOME" subtitle="Daily drills and shot tracking" accent={VOLT} deco={<DrillIcon type="ft" size={16} color={VOLT}/>}/>
@@ -636,34 +641,34 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
   {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
   {(tab==="log-drill")&&!active&&!showShotStats&&<div className="fade-up">
     
-    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>
-      <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:3}}>AT HOME</div>
+    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:0}}>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>
+      <div style={{fontFamily:FD,color:VOLT,fontSize:24,fontWeight:900,letterSpacing:1.5}}>AT HOME</div>
     </div>
-    <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:24,fontWeight:500}}>Log your daily drills and track shots — all on the honor system.</div>
+    <div style={{fontFamily:"sans-serif",color:"#A0A0A0",fontSize:13,marginTop:6,marginBottom:24,fontWeight:400}}>Log your daily drills and track shots, all on the honor system.</div>
 
     {/* ── SHOT TRACKER ── */}
-    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    <button onClick={()=>setShotTrackerOpen(v=>!v)} style={{width:"100%",minHeight:44,background:"none",border:"none",padding:0,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between",cursor:"pointer"}}><div style={{fontFamily:FB,color:VOLT,fontSize:13,letterSpacing:"0.10em",fontWeight:700,display:"flex",alignItems:"center",gap:6,textTransform:"uppercase"}}>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
       SHOT TRACKER
-    </div>
-    <div style={{background:CARD_BG,borderRadius:16,padding:"16px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
+    </div><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d={shotTrackerOpen?"M6 9l6 6 6-6":"M9 6l6 6-6 6"}/></svg></button>
+    {shotTrackerOpen&&<div style={{background:CARD_BG,borderRadius:16,padding:"16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
       <div style={{display:"flex",gap:10,marginBottom:12}}>
         <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>MAKES</label>
-          <input type="number" min="0" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0" style={{width:"100%",padding:"12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:VOLT,fontFamily:FD,fontSize:24,textAlign:"center",outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
+          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:600,letterSpacing:"0.08em",display:"block",marginBottom:8,textTransform:"uppercase"}}>MAKES</label>
+          <input type="number" min="0" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0" style={{width:"100%",height:52,padding:"0 14px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:14,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
         <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>DATE</label>
-          <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
+          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:600,letterSpacing:"0.08em",display:"block",marginBottom:8,textTransform:"uppercase"}}>DATE</label>
+          <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",height:52,padding:"0 12px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:14,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
       </div>
       <button className="btn-v cta-primary" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?.7:1}}>
         {shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
       {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
-      <button onClick={()=>setShowShotStats(true)} className="cta-secondary-link" style={{width:"100%",textAlign:"center",opacity:.85}}>VIEW SHOT STATS →</button>
-    </div>
+      <button onClick={()=>setShowShotStats(true)} className="cta-secondary-link" style={{width:"100%",textAlign:"center",opacity:.85,minHeight:44,display:"inline-flex",alignItems:"center",justifyContent:"center",gap:4,transition:"opacity 100ms ease"}} onMouseDown={e=>{e.currentTarget.style.opacity=.6}} onMouseUp={e=>{e.currentTarget.style.opacity=.85}} onMouseLeave={e=>{e.currentTarget.style.opacity=.85}}>VIEW SHOT STATS <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>}
 
     <DividerDot/>
 
@@ -2021,14 +2026,14 @@ function BrandBackdrop(){return <><div style={{position:"fixed",inset:0,backgrou
 function SectionHero({icon,title,subtitle,accent=VOLT,deco}){return <div style={{marginBottom:12}}><div style={{height:80,display:"flex",alignItems:"center",gap:14}}><div style={{width:42,height:42,borderRadius:12,background:accent+"12",border:`1px solid ${accent}33`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",flexShrink:0}}>{icon}{deco&&<div style={{position:"absolute",bottom:-6,right:-6,opacity:.6}}>{deco}</div>}</div><div><div style={{fontFamily:FD,fontSize:24,fontWeight:900,letterSpacing:2,color:accent,lineHeight:1}}>{title}</div><div style={{fontFamily:FB,fontSize:12,color:TOKENS.TEXT_SECONDARY,marginTop:4}}>{subtitle}</div></div></div><div style={{height:1,background:BORDER_CLR}}/></div>}
 function SC({l,v,c=VOLT,big,small,fire,accent}){const inner=<div style={{flex:big?1.6:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:big?"22px 18px":"14px 12px",position:"relative",overflow:"hidden"}}>{fire&&<div style={{position:"absolute",top:6,right:8,fontSize:14}}>🔥</div>}{typeof v==="number"?<AnimNum v={v} c={c} big={big}/>:<div style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{v}</div>}<div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:big?6:4,fontWeight:600}}>{l}</div></div>;if(accent)return <div className="grd-bdr" style={{flex:big?1.6:1}}>{inner}</div>;return <div style={{flex:big?1.6:1}}><div style={{border:`1px solid ${BORDER_CLR}`,borderRadius:16}}>{inner}</div></div>}
 function SH({t,s}){return <div style={{marginBottom:16,display:"flex",alignItems:"baseline",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:4}}>{t}</div>{s&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{s}</div>}</div>}
-function Av({n,sz=36,style:x,email}){const idx=email?hashCode(email)%AVG.length:hashCode(n||"?")%AVG.length;const[c1,c2]=AVG[idx];return <div style={{width:sz,height:sz,borderRadius:"50%",background:`linear-gradient(135deg,${c1}44,${c2}44)`,border:`2px solid ${c1}33`,color:c1,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:sz*.42,flexShrink:0,letterSpacing:1,boxShadow:`0 0 12px ${c1}11`,...x}}>{(n||"?")[0].toUpperCase()}</div>}
+function Av({n,sz=36,style:x,email}){return <div style={{width:sz,height:sz,borderRadius:"50%",background:"#1E1E1E",border:"2px solid #C8FF00",color:"#FFFFFF",display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FB,fontSize:14,fontWeight:700,flexShrink:0,letterSpacing:0,...x}}>{(n||"?")[0].toUpperCase()}</div>}
 function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i)=>{const angle=(i/24)*360*(Math.PI/180);const dist=60+Math.random()*80;const x=Math.cos(angle)*dist;const y=Math.sin(angle)*dist-20;const colors=[VOLT,ORANGE,CYAN,"#C8FF00","#C8FF00","#FFFFFF"];return {x,y,color:colors[i%colors.length],size:3+Math.random()*4,delay:Math.random()*0.15}}),[]);return <div style={{position:"absolute",top:"30%",left:"50%",zIndex:20,pointerEvents:"none"}}>{particles.map((p,i)=><div key={i} className="particle" style={{width:p.size,height:p.size,background:p.color,left:0,top:0,"–fly-to":`translate(${p.x}px,${p.y}px) scale(0)`,animationDelay:`${p.delay}s`,animationDuration:".7s"}}/>)}</div>}
 function CourtDivider({color=VOLT,my=20}){return <div style={{margin:`${my}px 0`,position:"relative",height:24,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><svg width="100%" height="24" viewBox="0 0 400 24" preserveAspectRatio="none" fill="none" style={{position:"absolute",inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:"50%",background:color,opacity:.15,position:"relative",zIndex:1}}/></div>}
-function DividerDot(){return <div style={{display:"flex",alignItems:"center",gap:10,width:"100%",margin:"14px 0"}}><div style={{height:1,background:BORDER_CLR,flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:VOLT}}/><div style={{height:1,background:BORDER_CLR,flex:1}}/></div>}
+function DividerDot(){return <div style={{display:"flex",alignItems:"center",width:"100%",margin:"24px 0"}}><div style={{height:1,background:"#242424",flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:VOLT,margin:"0 10px"}}/><div style={{height:1,background:"#242424",flex:1}}/></div>}
 function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#555555",flexShrink:0}}>{r}</div>}
 function Empty({t,action,onTap,cta="GET STARTED",icon=<DrillIcon type="sb" size={48} color="#555555"/>}){return <div style={{textAlign:"center",padding:"40px 20px"}}><div style={{opacity:.8,display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#555555"}}>{icon}</div><p style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:1.5,marginTop:14,lineHeight:1.2,textTransform:"uppercase"}}>{t}</p>{action&&<p style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:13,margin:"8px auto 0",lineHeight:1.5,fontWeight:500,maxWidth:260}}>{action}</p>}<button onClick={onTap||(()=>{})} className="btn-v cta-primary" style={{marginTop:14}}>{cta}</button></div>}
 function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>}
-function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>}</>}
+function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:600,letterSpacing:"0.08em",textTransform:"uppercase",display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>}</>}
 function NavBar({items,active,onChange}){
 const NAV_INACTIVE="#555555",NAV_ACTIVE="#C8FF00";
 return <nav role="navigation" aria-label="Main navigation" style={{position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:64,paddingBottom:"env(safe-area-inset-bottom)",background:"#1E1E1E",borderTop:"1px solid #242424",zIndex:20}}>{items.map(t=>{const a=active===t.k;
