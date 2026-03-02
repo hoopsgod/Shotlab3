@@ -486,28 +486,10 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
     </div>
     <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:24,fontWeight:500}}>Log your daily drills and track shots — all on the honor system.</div>
 
-    {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
-    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
-    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done?Math.round(done.score/d.max*100):0;
-      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
-        <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
-        </div>
-        {done?<div style={{textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
-          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#ef4444",borderRadius:2}}/></div>
-        </div>
-        :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
-      </button>})}
-
-    <CourtDivider color={VOLT} my={16}/>
-
-    {/* ── ALSO LOG: SHOT TRACKER (secondary, compact, unified style) ── */}
+    {/* ── SHOT TRACKER ── */}
     <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      ALSO LOG — SHOT TRACKER
+      SHOT TRACKER
     </div>
     <div style={{background:CARD_BG,borderRadius:16,padding:"16px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
       <div style={{display:"flex",gap:10,marginBottom:12}}>
@@ -526,6 +508,24 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
       <button onClick={()=>setShowShotStats(true)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:2,cursor:"pointer",marginTop:10,padding:0,width:"100%",textAlign:"center",opacity:.7}}>VIEW SHOT STATS →</button>
     </div>
+
+    <CourtDivider color={VOLT} my={16}/>
+
+    {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
+    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
+    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done?Math.round(done.score/d.max*100):0;
+      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
+        <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
+        </div>
+        {done?<div style={{textAlign:"right",flexShrink:0}}>
+          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
+          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#ef4444",borderRadius:2}}/></div>
+        </div>
+        :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
+      </button>})}
   </div>}
 
   {/* ═════ SHOT STATS sub-screen ═════ */}
@@ -1087,6 +1087,24 @@ return <div>
         <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:2,transition:"width .4s ease"}}/>
       </div>
     </div>
+
+    <CourtDivider color={VOLT} my={16}/>
+
+    {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
+    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
+    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done?Math.round(done.score/d.max*100):0;
+      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
+        <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
+        </div>
+        {done?<div style={{textAlign:"right",flexShrink:0}}>
+          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
+          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#ef4444",borderRadius:2}}/></div>
+        </div>
+        :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
+      </button>})}
     <div style={{textAlign:"right",flexShrink:0}}>
       <div style={{fontFamily:FD,color:isMe?accentColor:isTop3?accentColor:LIGHT,fontSize:20}}>{p.total}</div>
       <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:500}}>{unit.toUpperCase()}</div>
