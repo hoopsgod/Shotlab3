@@ -221,7 +221,6 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 {["login","register"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,padding:"11px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:"uppercase",transition:"all .25s",background:mode===m?"#1a1a1a":"transparent",color:mode===m?LIGHT:"#444",boxShadow:mode===m?`inset 0 -3px 0 ${VOLT},0 0 12px ${VOLT}10`:"none"}}>{m==="login"?"SIGN IN":"REGISTER"}</button>)}
 </div>
 
-```
     {mode==="register"&&<>
       <h2 style={{fontFamily:FD,color:LIGHT,fontSize:24,textAlign:"center",margin:"0 0 4px",letterSpacing:2}}>CREATE ACCOUNT</h2>
       <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 22px"}}>Join your team's offseason program</p>
@@ -261,7 +260,6 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
     {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:12,lineHeight:1.5}}>By creating an account, you agree to our data practices. All data is stored locally on your device. You can delete your account and all data at any time from your Profile settings.</p>}
   </div>
 </div>
-```
 
   </div>;
 }
@@ -315,7 +313,6 @@ const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else s
 return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
 <div style={{position:"fixed",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
-```
 {/* Badge Reveal Overlay */}
 {badgeReveal&&<div style={{position:"fixed",inset:0,zIndex:200,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}} onClick={()=>setBadgeReveal(null)}>
   <div className="badge-pop badge-shine" style={{textAlign:"center",padding:40}}>
@@ -624,7 +621,6 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
   {k:"program",l:"Events",svg:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
   {k:"profile",l:"Profile",svg:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
 ]} active={tab==="log-drill"?"home":tab} onChange={switchTab}/>
-```
 
   </div>;
 }
@@ -713,7 +709,6 @@ return <div className="fade-up">
 </div>
 </div>
 
-```
 {/* Pending challenges */}
 {pending.length>0&&<><SH t="INCOMING" s={`${pending.length} WAITING`}/>
   {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
@@ -779,7 +774,6 @@ return <div className="fade-up">
     </div>
   </div>;
 })}
-```
 
   </div>;
 }
@@ -851,7 +845,6 @@ return <div className="fade-up">
 </div>
 </div>
 
-```
 {/* Personal stats */}
 <div style={{display:"flex",gap:8,marginBottom:16}}>
   <div className="grd-bdr" style={{flex:1.5}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
@@ -954,7 +947,6 @@ return <div className="fade-up">
       {went&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,color:SC_COLOR,background:SC_COLOR+"12",padding:"2px 8px",borderRadius:4,letterSpacing:1}}>ATTENDED</span>}
     </div>;
   })}</>}
-```
 
   </div>;
 }
@@ -1011,7 +1003,6 @@ return <div>
 {[{k:"home",l:"AT HOME",c:VOLT},{k:"prog",l:"PROGRAM",c:CYAN}].map(m=><button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"12px 0",borderRadius:11,border:"none",cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:mode===m.k?700:500,letterSpacing:2,transition:"all .25s",background:mode===m.k?`${m.c}12`:"transparent",color:mode===m.k?m.c:"#444",boxShadow:mode===m.k?`inset 0 -3px 0 ${m.c}`:"none"}}>{m.l}</button>)}
 </div>
 
-```
 {/* Sub-tabs */}
 <div style={{overflowX:"auto",marginBottom:16,paddingBottom:4,WebkitOverflowScrolling:"touch"}}>
   <div style={{display:"flex",gap:4,minWidth:"max-content"}}>
@@ -1087,7 +1078,6 @@ return <div>
   </div>;
 })}
 </div>
-```
 
   </div>;
 }
@@ -1132,7 +1122,6 @@ return <div className="fade-up">
 </div>
 </div>
 
-```
 {/* Running totals */}
 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
   <div className="grd-bdr" style={{gridColumn:"1/3"}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
@@ -1198,7 +1187,6 @@ return <div className="fade-up">
   })()}
 </>:null}
 {my.length===0&&<Empty t="No shots logged yet" action="Track your makes from any session — gym, driveway, anywhere. Every shot counts!"/>}
-```
 
   </div>;
 }
@@ -1245,7 +1233,6 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 </div>}
 </div>
 
-```
 {/* Tier card */}
 <div style={{background:`linear-gradient(135deg,${myTier.bg},${CARD_BG})`,borderRadius:18,padding:"20px 22px",border:`1px solid ${myTier.color}33`,marginBottom:16,position:"relative",overflow:"hidden"}}>
   <div style={{position:"absolute",top:0,right:0,width:120,height:120,borderRadius:"50%",background:`radial-gradient(circle,${myTier.color}08,transparent)`,transform:"translate(30%,-30%)"}}/>
@@ -1301,7 +1288,6 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 {past.length>0&&<><div style={{marginTop:8}}><SH t="PAST EVENTS" s={`${past.length} COMPLETED`}/></div>
   {past.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const was=evR.some(r=>r.email===user.email);return <div key={ev.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.5}}><EventIcon type={ev.type} size={20} color={MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:MUTED,fontSize:13,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ev.date}</div></div>{was&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"3px 7px",borderRadius:5,color:VOLT,background:VOLT+"15",letterSpacing:1}}>ATTENDED</span>}<span style={{fontFamily:FD,color:MUTED,fontSize:13}}>{evR.length}</span></div>})}</>}
-```
 
   </div>;
 }
@@ -1354,7 +1340,6 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 <div style={{display:"flex",gap:8,marginBottom:4}}><SC l="PLAYERS" v={ups.length} c={VOLT} small/><SC l="SCORES" v={scores.length} c={LIGHT} small/><SC l="EVENTS" v={events.length} c={CYAN} small/></div>
 </div>
 
-```
 <div style={{flex:1,padding:"16px 20px 110px",overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="fade-up">
@@ -1572,7 +1557,6 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
   {k:"sc",l:"S&C",svg:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>},
   {k:"players",l:"Players",svg:<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
 ]} active={tab} onChange={k=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)}}/>
-```
 
   </div>;
 }
@@ -1631,7 +1615,6 @@ return <div className="fade-up">
 {/* SL logo watermark */}
 <div style={{position:"absolute",top:12,right:16,opacity:.06,pointerEvents:"none"}}><SLLogo size={90} opacity={.06}/></div>
 
-```
   <div style={{fontFamily:FB,color:VOLT,fontSize:9,letterSpacing:5,fontWeight:700,marginBottom:12}}>OFFSEASON REPORT CARD</div>
   <Av n={u.name} sz={64} email={u.email} style={{margin:"0 auto 14px"}}/>
   <div style={{fontFamily:FD,color:LIGHT,fontSize:32,letterSpacing:4,lineHeight:1}}>{u.name.toUpperCase()}</div>
@@ -1751,7 +1734,6 @@ return <div className="fade-up">
   </div>}
   <p style={{fontFamily:FB,color:MUTED,fontSize:10,textAlign:"center",marginTop:12,lineHeight:1.5}}>Your data is stored locally on this device. Deleting your account removes all your personal information and scores.</p>
 </div>
-```
 
   </div>;
 }
@@ -1779,7 +1761,6 @@ return <div className="fade-up">
 <SH t="PLAYER ROSTER" s={`${roster.length} PLAYERS`}/>
 <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:18,lineHeight:1.5}}>Track who's putting in work today. Tap "NUDGE" to flag inactive players for follow-up.</div>
 
-```
 {roster.length===0&&<Empty t="No players registered yet" action="Players need to create an account and log their first score to appear here."/>}
 {roster.map(p=>{const c=statusColor[p.status];const isNudged=nudged.includes(p.email);
   return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"14px 16px",marginBottom:8,border:`1px solid ${p.status==="inactive"?"#ef444433":BORDER_CLR}`}}>
@@ -1805,7 +1786,6 @@ return <div className="fade-up">
       {isNudged?"✓ NUDGED":"NUDGE"}
     </button>}
   </div>})}
-```
 
   </div>;
 }
