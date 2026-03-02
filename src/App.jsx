@@ -609,24 +609,24 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
       const nextEvent=sorted.find(e=>e.date>=today);
       const myEvRsvps=rsvps.filter(r=>r.email===u.email).length;
-      return <button className="ch" onClick={()=>setTab("program")} style={{width:"100%",background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`1px solid ${CYAN}33`,borderRadius:24,padding:"24px",marginBottom:28,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,minHeight:160,boxShadow:`0 0 24px ${CYAN}14`}}>
-        <div style={{width:44,height:44,borderRadius:14,background:`${CYAN}10`,border:`1px solid ${CYAN}22`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
+      return <button className="ch" onClick={()=>setTab("program")} style={{width:"100%",background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`1px solid ${BORDER_CLR}`,borderRadius:24,padding:"24px",marginBottom:28,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:14,minHeight:160}}>
+        <div style={{width:44,height:44,borderRadius:14,background:`${VOLT}10`,border:`1px solid ${VOLT}22`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>
         </div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FD,color:CYAN,fontSize:22,letterSpacing:3}}>PROGRAM</div>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:16,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase"}}>PROGRAM</div>
           {nextEvent?<div style={{display:"flex",flexDirection:"column",alignItems:"flex-start",marginTop:8,gap:4,maxWidth:"calc(100% - 110px)",minWidth:0}}>
             <div style={{fontFamily:FB,color:T.MUT,fontSize:11,fontWeight:700,letterSpacing:".1em",lineHeight:1,opacity:.72,textTransform:"uppercase"}}>Next</div>
-            <div style={{fontFamily:FB,color:CYAN,fontSize:"clamp(14px,1.6vw,18px)",fontWeight:800,lineHeight:1.15,letterSpacing:".02em",maxWidth:"100%",overflowWrap:"anywhere"}}>{nextEvent.title}</div>
+            <div style={{fontFamily:FB,color:LIGHT,fontSize:"clamp(14px,1.6vw,18px)",fontWeight:800,lineHeight:1.15,letterSpacing:".02em",maxWidth:"100%",overflowWrap:"anywhere"}}>{nextEvent.title}</div>
             <div style={{fontFamily:FB,color:"#8ca4af",fontSize:12,fontWeight:600,lineHeight:1.1,opacity:.82}}>{nextEvent.date.slice(5)}</div>
           </div>
           :<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2}}>Events & verified attendance</div>}
         </div>
         <div style={{textAlign:"center",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:CYAN,fontSize:22}}>{myEvRsvps}</div>
+          <div style={{fontFamily:FD,color:VOLT,fontSize:22}}>{myEvRsvps}</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:1,fontWeight:600}}>EVENTS</div>
         </div>
-        <svg width="12" height="12" viewBox="0 0 16 16" style={{flexShrink:0}}><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
+        <svg width="12" height="12" viewBox="0 0 16 16" style={{flexShrink:0}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
       </button>})()}
 
     {/* ══════ LEADERBOARD ══════ */}
@@ -991,18 +991,8 @@ const handleAddScLog=()=>{
 return <div className="fade-up">
 {/* S&C banner — heavy, grounded */}
 <div style={{background:`linear-gradient(180deg,${SC_COLOR}0c,${CARD_BG})`,borderRadius:18,padding:0,marginBottom:16,border:`1px solid ${SC_COLOR}18`,overflow:"hidden",position:"relative"}}>
-
-{/* Full-width barbell illustration */}
-<div style={{padding:"14px 22px 10px",display:"flex",alignItems:"center",justifyContent:"center"}}>
-<svg width="100%" height="16" viewBox="0 0 200 16" preserveAspectRatio="none" fill="none">
-<rect x="0" y="3" width="18" height="10" rx="2" fill={SC_COLOR} opacity=".25"/>
-<rect x="20" y="5" width="10" height="6" rx="1" fill={SC_COLOR} opacity=".15"/>
-<rect x="32" y="7" width="136" height="2" fill={SC_COLOR} opacity=".12"/>
-<rect x="170" y="5" width="10" height="6" rx="1" fill={SC_COLOR} opacity=".15"/>
-<rect x="182" y="3" width="18" height="10" rx="2" fill={SC_COLOR} opacity=".25"/>
-</svg>
-</div>
-<div style={{padding:"0 22px 18px",display:"flex",alignItems:"center",gap:12}}>
+<div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at top left, rgba(200, 255, 0, 0.06) 0%, transparent 70%)",pointerEvents:"none"}}/>
+<div style={{padding:"18px 22px",display:"flex",alignItems:"center",gap:12,position:"relative"}}>
 <div style={{width:42,height:42,borderRadius:12,background:`${SC_COLOR}12`,border:`1px solid ${SC_COLOR}22`,display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={22} color={SC_COLOR}/></div>
 <div>
 <div style={{fontFamily:FD,color:SC_COLOR,fontSize:16,letterSpacing:3}}>STRENGTH & CONDITIONING</div>
@@ -1059,7 +1049,7 @@ return <div className="fade-up">
   </div>})}
 </div>}
 
-<SH t="SESSION LOG" s="DATE · TIME · PLACE · SPORT"/>
+<SH t="SESSION LOG"/>
 <div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"16px"}}>
   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
     <FF l="DATE" v={newLog.date} set={v=>setNewLog({...newLog,date:v})} tp="date"/>
@@ -1072,10 +1062,10 @@ return <div className="fade-up">
   <button className="btn-v cta-primary" onClick={handleAddScLog} style={{marginTop:10}}>ADD SESSION</button>
 </div></div>
 
-<div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"22px 16px",textAlign:"center"}}>
-  <div style={{fontFamily:FD,color:SC_COLOR,fontSize:72,lineHeight:.9,letterSpacing:3}}>{myScLogs.length}</div>
-  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginTop:8}}>TOTAL S&C SESSIONS LOGGED</div>
-</div></div>
+<div style={{marginBottom:16,background:"#141414",border:"1px solid #242424",borderRadius:16,minHeight:100,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"16px"}}>
+  <div style={{fontFamily:FD,color:"#C8FF00",fontSize:48,fontWeight:900,lineHeight:1}}>{myScLogs.length}</div>
+  <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,letterSpacing:"0.08em",fontWeight:700,marginTop:8,textTransform:"uppercase"}}>TOTAL S&C SESSIONS LOGGED</div>
+</div>
 
 {/* Upcoming sessions */}
 <SH t="UPCOMING SESSIONS" s={`${upcoming.length} SCHEDULED`}/>
@@ -1166,18 +1156,19 @@ const switchMode=(m)=>{setMode(m);setSub(m==="home"?"total":"events")};
 
 return <div>
 {/* Mode toggle */}
-<div style={{display:"flex",background:SURFACE,borderRadius:14,padding:3,marginBottom:16,border:`1px solid ${BORDER_CLR}`}}>
-{[{k:"home",l:"AT HOME",c:VOLT},{k:"prog",l:"PROGRAM",c:CYAN}].map(m=><button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"12px 0",borderRadius:11,border:"none",cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:mode===m.k?700:500,letterSpacing:2,transition:"all .25s",background:mode===m.k?`${m.c}12`:"transparent",color:mode===m.k?m.c:"#555555",boxShadow:mode===m.k?`inset 0 -3px 0 ${m.c}`:"none"}}>{m.l}</button>)}
+<div style={{display:"flex",background:"#1E1E1E",borderRadius:12,padding:2,marginBottom:16,border:"1px solid #242424",position:"relative"}}>
+<div style={{position:"absolute",top:2,left:2,width:"calc(50% - 2px)",height:"calc(100% - 4px)",borderRadius:10,background:"#C8FF00",transform:mode==="home"?"translateX(0)":"translateX(100%)",transition:"transform 150ms ease"}}/>
+{[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=><button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:mode===m.k?700:600,letterSpacing:2,transition:"color 150ms ease",background:"transparent",color:mode===m.k?"#000000":"#555555",position:"relative",zIndex:1}}>{m.l}</button>)}
 </div>
 
 {/* Sub-tabs */}
-<div style={{overflowX:"auto",marginBottom:16,paddingBottom:4,WebkitOverflowScrolling:"touch"}}>
-  <div style={{display:"flex",gap:4,minWidth:"max-content"}}>
+<div style={{overflowX:"auto",marginBottom:16,paddingBottom:4,paddingLeft:16,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none"}}>
+  <div style={{display:"flex",gap:8,minWidth:"max-content"}}>
     {isHome?
       [{k:"total",l:"ALL"},{k:"shots",l:"SHOTS"},...drills.map(d=>({k:String(d.id),l:d.name}))].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{padding:"8px 14px",borderRadius:10,border:sub===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:sub===t.k?700:500,letterSpacing:1,whiteSpace:"nowrap",background:sub===t.k?VOLT:CARD_BG,color:sub===t.k?BG:MUTED,transition:"all .2s"}}>{t.l}</button>)
+        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"#C8FF00":"#1E1E1E",color:sub===t.k?"#000000":"#555555",transition:"all .2s"}}>{t.l}</button>)
     :[{k:"events",l:"ATTENDANCE"},{k:"sc",l:"S&C"},{k:"prog-total",l:"DRILL SCORES"},...programDrills.map(d=>({k:`prog-${d.id}`,l:d.name}))].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{padding:"8px 14px",borderRadius:10,border:sub===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:sub===t.k?700:500,letterSpacing:1,whiteSpace:"nowrap",background:sub===t.k?CYAN:CARD_BG,color:sub===t.k?BG:MUTED,transition:"all .2s"}}>{t.l}</button>)}
+        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"#C8FF00":"#1E1E1E",color:sub===t.k?"#000000":"#555555",transition:"all .2s"}}>{t.l}</button>)}
   </div>
 </div>
 
@@ -1427,13 +1418,18 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 </div>
 
 {/* Tier card */}
-<div style={{background:`linear-gradient(135deg,${myTier.bg},${CARD_BG})`,borderRadius:18,padding:"20px 22px",border:`1px solid ${myTier.color}33`,marginBottom:16,position:"relative",overflow:"hidden"}}>
-  <div style={{position:"absolute",top:0,right:0,width:120,height:120,borderRadius:"50%",background:`radial-gradient(circle,${myTier.color}08,transparent)`,transform:"translate(30%,-30%)"}}/>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",position:"relative"}}>
-    <div><div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:3,fontWeight:600}}>ATTENDANCE RANK</div><div style={{fontFamily:FD,color:myTier.color,fontSize:26,letterSpacing:4,marginTop:4}}>{myTier.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:4}}>{myRsvps} event{myRsvps!==1?"s":""} attended</div></div>
-    <div style={{width:52,height:52,borderRadius:14,background:`${myTier.color}12`,border:`2px solid ${myTier.color}44`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:22,color:myTier.color}}>{myRsvps}</div>
+<div style={{background:CARD_BG,borderRadius:18,padding:"20px 22px",border:`1px solid ${BORDER_CLR}`,marginBottom:16,position:"relative",overflow:"hidden"}}>
+  <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative",gap:14}}>
+    <div>
+      <div style={{fontFamily:FB,color:VOLT,fontSize:13,letterSpacing:"0.10em",fontWeight:700,textTransform:"uppercase"}}>ATTENDANCE RANK</div>
+      <div style={{display:"flex",alignItems:"baseline",gap:10,marginTop:6}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:28,fontWeight:900,letterSpacing:2}}>{myTier.name}</div>
+        <div style={{fontFamily:FD,color:VOLT,fontSize:28,fontWeight:700,lineHeight:1}}>{myRsvps}</div>
+      </div>
+      <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,marginTop:4}}>{myRsvps} event{myRsvps!==1?"s":""} attended</div>
+    </div>
   </div>
-  {(()=>{const nx=[...TIERS].find(t=>t.min>myRsvps);if(!nx)return <div style={{fontFamily:FB,color:myTier.color,fontSize:11,marginTop:10,fontWeight:600}}>&#9733; MAX RANK</div>;const p=Math.round(myRsvps/nx.min*100);return <div style={{marginTop:10}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}><span style={{fontFamily:FB,color:MUTED,fontSize:10}}>{nx.min-myRsvps} more to <span style={{color:nx.color,fontWeight:700}}>{nx.name}</span></span><span style={{fontFamily:FB,color:MUTED,fontSize:10}}>{p}%</span></div><div style={{height:5,background:T.TRACK,borderRadius:3,overflow:"hidden"}}><div style={{width:`${p}%`,height:"100%",background:`linear-gradient(90deg,${myTier.color},${nx.color})`,borderRadius:3}}/></div></div>})()}
+  {(()=>{const nx=[...TIERS].find(t=>t.min>myRsvps);if(!nx)return <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,marginTop:8}}>MAX RANK ACHIEVED</div>;const p=Math.round(myRsvps/nx.min*100);return <div style={{marginTop:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span style={{fontFamily:FB,color:"#A0A0A0",fontSize:12}}>{nx.min-myRsvps} more to <span style={{color:LIGHT,fontWeight:700}}>{nx.name}</span></span><span style={{fontFamily:FB,color:"#555555",fontSize:11}}>{p}%</span></div><div style={{height:4,background:"#242424",borderRadius:2,overflow:"hidden"}}><div style={{width:`${p}%`,height:"100%",background:"#C8FF00",borderRadius:2}}/></div></div>})()}
 </div>
 
 {/* Leaderboard toggle */}
