@@ -1500,34 +1500,37 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 
 function CoachCommandCenter({totalPlayers,activeTodayCount,nextEventDateFormatted,onPlayersClick,onActiveTodayClick,onNextEventClick,onAddPlayer,onAddDrill,onScheduleEvent,onLogScore}){
-return <section className="mb-3 rounded-2xl bg-black/40 border border-lime-400/20 p-3 backdrop-blur text-white">
-  <div className="text-xs tracking-[0.25em] uppercase text-white/80 mb-2">Coach Command Center</div>
+const metricStyle={minHeight:56,borderRadius:12,background:"rgba(0,0,0,0.5)",border:"1px solid rgba(163,230,53,0.25)",padding:"0 8px",display:"flex",flexDirection:"column",justifyContent:"center",textAlign:"left",color:"#FFFFFF",cursor:"pointer",transition:"transform .12s ease",appearance:"none",WebkitAppearance:"none"};
+const actionStyle={flexShrink:0,minWidth:140,height:40,borderRadius:999,border:"1px solid rgba(163,230,53,0.35)",background:"rgba(0,0,0,0.4)",color:"#BEF264",padding:"0 16px",fontSize:14,fontWeight:600,letterSpacing:"0.04em",cursor:"pointer",transition:"all .15s ease",appearance:"none",WebkitAppearance:"none"};
 
-  <div className="grid grid-cols-3 gap-2">
-    <button type="button" onClick={onPlayersClick} className="min-h-[56px] rounded-xl bg-black/50 border border-lime-400/25 px-2 flex flex-col justify-center text-left active:scale-[0.99] transition">
-      <div className="text-[10px] tracking-[0.22em] uppercase text-white/60 truncate">Players</div>
-      <div className="text-xl font-semibold text-lime-400 leading-tight">{totalPlayers ?? 0}</div>
+return <section style={{marginBottom:12,borderRadius:16,background:"rgba(0,0,0,0.4)",border:"1px solid rgba(163,230,53,0.2)",padding:12,backdropFilter:"blur(6px)",color:"#FFFFFF"}}>
+  <div style={{fontSize:12,letterSpacing:"0.25em",textTransform:"uppercase",color:"rgba(255,255,255,0.8)",marginBottom:8}}>COACH COMMAND CENTER</div>
+
+  <div style={{display:"grid",gridTemplateColumns:"repeat(3, minmax(0, 1fr))",gap:8}}>
+    <button type="button" onClick={onPlayersClick} style={metricStyle}>
+      <div style={{fontSize:10,letterSpacing:"0.22em",textTransform:"uppercase",color:"rgba(255,255,255,0.6)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
+      <div style={{fontSize:20,fontWeight:600,color:"#A3E635",lineHeight:1.1}}>{totalPlayers ?? 0}</div>
     </button>
 
-    <button type="button" onClick={onActiveTodayClick} className="min-h-[56px] rounded-xl bg-black/50 border border-lime-400/25 px-2 flex flex-col justify-center text-left active:scale-[0.99] transition">
-      <div className="text-[10px] tracking-[0.22em] uppercase text-white/60 truncate">Active Today</div>
-      <div className="text-xl font-semibold text-lime-400 leading-tight">{activeTodayCount ?? 0}</div>
+    <button type="button" onClick={onActiveTodayClick} style={metricStyle}>
+      <div style={{fontSize:10,letterSpacing:"0.22em",textTransform:"uppercase",color:"rgba(255,255,255,0.6)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
+      <div style={{fontSize:20,fontWeight:600,color:"#A3E635",lineHeight:1.1}}>{activeTodayCount ?? 0}</div>
     </button>
 
-    <button type="button" onClick={onNextEventClick} className="min-h-[56px] rounded-xl bg-black/50 border border-lime-400/25 px-2 flex flex-col justify-center text-left active:scale-[0.99] transition">
-      <div className="text-[10px] tracking-[0.22em] uppercase text-white/60 truncate">Next Event</div>
-      <div className="text-sm font-semibold text-white/90 truncate">{nextEventDateFormatted ?? "None"}</div>
+    <button type="button" onClick={onNextEventClick} style={metricStyle}>
+      <div style={{fontSize:10,letterSpacing:"0.22em",textTransform:"uppercase",color:"rgba(255,255,255,0.6)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
+      <div style={{fontSize:14,fontWeight:600,color:"rgba(255,255,255,0.9)",lineHeight:1.1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{nextEventDateFormatted ?? "None"}</div>
     </button>
   </div>
 
-  <div className="flex gap-2 overflow-x-auto whitespace-nowrap pt-3 pb-1 [-webkit-overflow-scrolling:touch]">
-    <button type="button" onClick={onAddPlayer} className="shrink-0 min-w-[140px] h-10 rounded-full bg-black/40 border border-lime-400/35 text-lime-300 px-4 font-semibold tracking-wide hover:bg-lime-400 hover:text-black transition">+ Add Player</button>
-    <button type="button" onClick={onAddDrill} className="shrink-0 min-w-[140px] h-10 rounded-full bg-black/40 border border-lime-400/35 text-lime-300 px-4 font-semibold tracking-wide hover:bg-lime-400 hover:text-black transition">+ Add Drill</button>
-    <button type="button" onClick={onScheduleEvent} className="shrink-0 min-w-[140px] h-10 rounded-full bg-black/40 border border-lime-400/35 text-lime-300 px-4 font-semibold tracking-wide hover:bg-lime-400 hover:text-black transition">+ Schedule Event</button>
-    <button type="button" onClick={onLogScore} className="shrink-0 min-w-[140px] h-10 rounded-full bg-black/40 border border-lime-400/35 text-lime-300 px-4 font-semibold tracking-wide hover:bg-lime-400 hover:text-black transition">+ Log Score</button>
+  <div style={{display:"flex",gap:8,overflowX:"auto",whiteSpace:"nowrap",paddingTop:12,paddingBottom:4,WebkitOverflowScrolling:"touch"}}>
+    <button type="button" onClick={onAddPlayer} style={actionStyle}>+ Add Player</button>
+    <button type="button" onClick={onAddDrill} style={actionStyle}>+ Add Drill</button>
+    <button type="button" onClick={onScheduleEvent} style={actionStyle}>+ Schedule Event</button>
+    <button type="button" onClick={onLogScore} style={actionStyle}>+ Log Score</button>
   </div>
 
-  <div className="mt-3 h-px bg-white/10" />
+  <div style={{marginTop:12,height:1,background:"rgba(255,255,255,0.1)"}} />
 </section>;
 }
 
