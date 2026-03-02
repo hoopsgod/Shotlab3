@@ -1706,25 +1706,25 @@ return <div className="fade-up">
 {drillStats.map(d=><div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,marginBottom:10}}>
   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
     <DrillIcon type={d.icon} size={20}/>
-    <div style={{flex:1,fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+    <div style={{flex:1,fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:800,letterSpacing:1.2}}>{d.name}</div>
     <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"2px 8px",borderRadius:5,
       color:d.trend==="up"?"#4ade80":d.trend==="down"?"#ef4444":MUTED,
       background:d.trend==="up"?"#4ade8015":d.trend==="down"?"#ef444415":BORDER_CLR}}>
-      {d.trend==="up"?"▲ IMPROVING":d.trend==="down"?"▼ DECLINING":"— STEADY"}
+      {d.trend==="up"?"▲ IMPROVING":d.trend==="down"?"▼ DECLINING":"→ STEADY"}
     </div>
   </div>
   <div style={{display:"flex",gap:8,marginBottom:d.last10.length>=2?12:0}}>
-    <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
+    <div style={{flex:1,background:"rgba(255, 107, 0, 0.15)",borderRadius:10,padding:"10px",border:`1px solid ${ORANGE}33`,textAlign:"center"}}>
       <div style={{fontFamily:FD,color:ORANGE,fontSize:20}}>{d.pb}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>PB</div>
+      <div style={{fontFamily:FB,color:"#a0a8b3",fontSize:7,letterSpacing:2,marginTop:2,fontWeight:700}}>PB</div>
     </div>
-    <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
+    <div style={{flex:1,background:"rgba(204, 255, 0, 0.10)",borderRadius:10,padding:"10px",border:`1px solid ${VOLT}33`,textAlign:"center"}}>
       <div style={{fontFamily:FD,color:VOLT,fontSize:20}}>{d.avg}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>AVG</div>
+      <div style={{fontFamily:FB,color:"#a0a8b3",fontSize:7,letterSpacing:2,marginTop:2,fontWeight:700}}>AVG</div>
     </div>
     <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:20}}>{d.count}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>LOGGED</div>
+      <div style={{fontFamily:FB,color:"#a0a8b3",fontSize:7,letterSpacing:2,marginTop:2,fontWeight:700}}>LOGGED</div>
     </div>
   </div>
   {/* Mini sparkline chart of last 10 scores */}
