@@ -414,22 +414,25 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
 
         {/* Stats row — integrated into the hero */}
         <div style={{display:"flex",gap:8,marginTop:18}}>
-          <div style={{flex:1,background:BG,borderRadius:14,padding:"14px 12px",border:`1px solid ${BORDER_CLR}`}}>
-            <div style={{fontFamily:FD,color:VOLT,fontSize:28,lineHeight:1}}><AnimNum v={total} c={VOLT}/></div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:2,marginTop:4,fontWeight:600}}>TOTAL MAKES</div>
+          <div style={{flex:1,background:BG,borderRadius:14,padding:"14px 12px 12px",border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",minHeight:82}}>
+            <div style={{display:"flex",alignItems:"baseline",lineHeight:1,marginTop:2,fontFamily:FD,color:VOLT,fontSize:34}}><AnimNum v={total} c={VOLT}/></div>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:1.6,marginTop:10,fontWeight:600,opacity:.66}}>TOTAL MAKES</div>
           </div>
-          <div style={{flex:1,background:BG,borderRadius:14,padding:"14px 12px",border:`1px solid ${BORDER_CLR}`}}>
-            <div style={{fontFamily:FD,color:ORANGE,fontSize:28,lineHeight:1}}>{streak}D</div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:2,marginTop:4,fontWeight:600}}>STREAK</div>
-          </div>
-          <div style={{flex:1.3,background:BG,borderRadius:14,padding:"14px 12px",border:`1px solid ${todayS.length===drills.length?VOLT+"33":BORDER_CLR}`}}>
-            <div style={{display:"flex",alignItems:"baseline",gap:3}}>
-              <span style={{fontFamily:FD,color:todayS.length===drills.length?VOLT:LIGHT,fontSize:28,lineHeight:1}}>{todayS.length}</span>
-              <span style={{fontFamily:FD,color:T.SUB,fontSize:16}}>/{drills.length}</span>
+          <div style={{flex:1,background:BG,borderRadius:14,padding:"14px 12px 12px",border:`1px solid ${BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",minHeight:82}}>
+            <div style={{display:"flex",alignItems:"baseline",lineHeight:1,marginTop:2,fontFamily:FD,color:ORANGE,fontSize:34}}>
+              <span>{streak}</span>
+              <span style={{fontSize:18,opacity:.74,marginLeft:1}}>D</span>
             </div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:2,marginTop:4,fontWeight:600}}>{todayS.length===drills.length?"ALL DONE ✓":"DRILLS"}</div>
-            <div style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
-              <div style={{width:`${drills.length>0?Math.round(todayS.length/drills.length*100):0}%`,height:"100%",background:todayS.length===drills.length?VOLT:VOLT+"88",borderRadius:2,transition:"width .4s ease"}}/>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:1.6,marginTop:10,fontWeight:600,opacity:.66}}>STREAK</div>
+          </div>
+          <div style={{flex:1.3,background:BG,borderRadius:14,padding:"14px 12px 12px",border:`1px solid ${todayS.length===drills.length?VOLT+"33":BORDER_CLR}`,display:"flex",flexDirection:"column",justifyContent:"center",minHeight:82}}>
+            <div style={{display:"flex",alignItems:"baseline",lineHeight:1,marginTop:2,gap:2,fontFamily:FD,color:todayS.length===drills.length?VOLT:LIGHT}}>
+              <span style={{fontSize:34}}>{todayS.length}</span>
+              <span style={{fontSize:18,color:T.SUB,opacity:.78}}>/{drills.length}</span>
+            </div>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:1.6,marginTop:10,fontWeight:600,opacity:.66}}>{todayS.length===drills.length?"ALL DONE ✓":"DRILLS"}</div>
+            <div style={{marginTop:10,height:4,borderRadius:999,background:T.TRACK+"99",overflow:"hidden"}}>
+              <div style={{width:`${drills.length>0?Math.round(todayS.length/drills.length*100):0}%`,height:"100%",background:todayS.length===drills.length?VOLT:VOLT+"cc",borderRadius:999,transition:"width .4s ease"}}/>
             </div>
           </div>
         </div>
