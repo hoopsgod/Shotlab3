@@ -862,7 +862,7 @@ return <div className="fade-up">
 {/* Duels banner — aggressive, asymmetric */}
 <div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${ORANGE}22`,position:"relative",overflow:"hidden"}}>
 <div style={{position:"absolute",top:-12,right:-8,opacity:.08}}><svg width="100" height="100" viewBox="0 0 24 24" fill={ORANGE} stroke="none"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-<div style={{position:"absolute",bottom:8,right:12,opacity:.04,pointerEvents:"none"}}><SLLogo size={56}/></div>
+
 <div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${ORANGE},${ORANGE}44,transparent)`}}/>
 <div style={{display:"flex",alignItems:"center",gap:14,position:"relative"}}>
 <div style={{width:48,height:48,borderRadius:14,background:`${ORANGE}15`,border:`1.5px solid ${ORANGE}33`,display:"flex",alignItems:"center",justifyContent:"center",transform:"rotate(-6deg)"}}>
@@ -991,7 +991,7 @@ const handleAddScLog=()=>{
 return <div className="fade-up">
 {/* S&C banner — heavy, grounded */}
 <div style={{background:`linear-gradient(180deg,${SC_COLOR}0c,${CARD_BG})`,borderRadius:18,padding:0,marginBottom:16,border:`1px solid ${SC_COLOR}18`,overflow:"hidden",position:"relative"}}>
-<div style={{position:"absolute",bottom:8,right:12,opacity:.04,pointerEvents:"none"}}><SLLogo size={52}/></div>
+
 {/* Full-width barbell illustration */}
 <div style={{padding:"14px 22px 10px",display:"flex",alignItems:"center",justifyContent:"center"}}>
 <svg width="100%" height="16" viewBox="0 0 200 16" preserveAspectRatio="none" fill="none">
@@ -1295,7 +1295,7 @@ return <div className="fade-up">
 {/* Shot Tracker banner — arc-inspired */}
 <div style={{background:`linear-gradient(180deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:"18px 22px",marginBottom:16,border:`1px solid ${ORANGE}12`,position:"relative",overflow:"hidden"}}>
 <div style={{position:"absolute",top:-20,right:20,opacity:.06}}><svg width="80" height="80" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="3"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="2"/></svg></div>
-<div style={{position:"absolute",bottom:8,right:12,opacity:.04,pointerEvents:"none"}}><SLLogo size={52}/></div>
+
 <div style={{display:"flex",alignItems:"center",gap:12,position:"relative"}}>
 <div style={{width:42,height:42,borderRadius:12,background:`${ORANGE}12`,border:`1px solid ${ORANGE}22`,display:"flex",alignItems:"center",justifyContent:"center"}}>
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -1399,7 +1399,7 @@ const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 return <div className="fade-up">
 {/* Events banner — structured, timeline-oriented */}
 <div style={{background:`linear-gradient(135deg,${VOLT}04,${CARD_BG})`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
-<div style={{position:"absolute",bottom:8,right:12,opacity:.04,pointerEvents:"none"}}><SLLogo size={52}/></div>
+
 <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
 <div style={{width:42,height:42,borderRadius:12,background:`${VOLT}08`,border:`1px solid ${VOLT}15`,display:"flex",alignItems:"center",justifyContent:"center"}}>
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
@@ -1540,7 +1540,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
     {/* Coach dashboard pulse */}
     <div style={{background:`linear-gradient(135deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:"20px 20px",border:`1px solid ${ORANGE}22`,marginBottom:20,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
-      <div style={{position:"absolute",bottom:8,right:12,opacity:.04,pointerEvents:"none"}}><SLLogo size={52}/></div>
+      
       <div style={{fontFamily:FD,color:ORANGE,fontSize:12,letterSpacing:4,marginBottom:12}}>TODAY'S PULSE</div>
       <div style={{display:"flex",gap:8,marginBottom:12}}>
         {(()=>{
