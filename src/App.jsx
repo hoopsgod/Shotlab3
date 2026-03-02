@@ -170,7 +170,8 @@ return <><Styles/>
 // ═══════════════════════════════════════
 function Auth({onLogin,onRegister,players}){
 const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[err,setErr]=useState("");
-const DEMO_EMAIL="demo@shotlab.app",DEMO_PASSWORD="demo1234",DEMO_NAME="Demo Player";
+const DEMO_PLAYER={email:"demo@shotlab.app",password:"demo1234",name:"Demo Player",role:"player"};
+const DEMO_COACH={email:"coach.demo@shotlab.app",password:"demo1234",name:"Demo Coach",role:"coach"};
 const doLogin=()=>{
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!password){setErr("Enter your password");return}
@@ -186,17 +187,18 @@ const id=e.includes("@")?e:e+"@shotlab.app";
 const r=await onRegister(id,password,name.trim(),role);
 if(!r.ok)setErr(r.err);
 };
-const doDemo=async()=>{
+const doDemo=async(kind="player")=>{
+const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
 setErr("");
-setEmail(DEMO_EMAIL);
-setPassword(DEMO_PASSWORD);
-const hasDemo=players.some(p=>p.email===DEMO_EMAIL);
+setEmail(acct.email);
+setPassword(acct.password);
+const hasDemo=players.some(p=>p.email===acct.email);
 if(!hasDemo){
-const reg=await onRegister(DEMO_EMAIL,DEMO_PASSWORD,DEMO_NAME,"player");
+const reg=await onRegister(acct.email,acct.password,acct.name,acct.role);
 if(reg.ok)return;
 if(reg.err!=="Account already exists. Please sign in."){setErr(reg.err);return}
 }
-const log=onLogin(DEMO_EMAIL,DEMO_PASSWORD);
+const log=onLogin(acct.email,acct.password);
 if(!log.ok)setErr(log.err);
 };
 const inp={width:"100%",padding:"15px 16px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none"};
@@ -244,7 +246,10 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
     <button className="btn-v" onClick={mode==="login"?doLogin:doRegister} style={{width:"100%",padding:"16px",background:VOLT,color:BG,fontFamily:FD,fontSize:20,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
       {mode==="login"?"SIGN IN":"CREATE ACCOUNT"} &#8594;
     </button>
-    {mode==="login"&&<button onClick={doDemo} style={{width:"100%",marginTop:10,padding:"12px",background:"transparent",color:LIGHT,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:12,cursor:"pointer",textTransform:"uppercase"}}>Try Demo Account</button>}
+    {mode==="login"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
+      <button onClick={()=>doDemo("player")} style={{padding:"12px",background:"transparent",color:LIGHT,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:12,cursor:"pointer",textTransform:"uppercase"}}>Demo Player</button>
+      <button onClick={()=>doDemo("coach")} style={{padding:"12px",background:"transparent",color:LIGHT,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:12,cursor:"pointer",textTransform:"uppercase"}}>Demo Coach</button>
+    </div>}
 
     <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:12,marginTop:16,cursor:"pointer"}} onClick={()=>{setMode(mode==="login"?"register":"login");setErr("")}}>
       {mode==="login"?"Don't have an account? ":"Already have an account? "}
