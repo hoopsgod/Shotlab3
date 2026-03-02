@@ -1499,45 +1499,38 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 }
 
 
-function CoachCommandCenter({totalPlayers,activeTodayCount,nextEventDateFormatted,highlightPlayersAttention,primaryQuickAction,onPlayersClick,onActiveTodayClick,onNextEventClick,onAddPlayer,onAddDrill,onScheduleEvent,onLogScore}){
-const metricBase="group flex min-h-[56px] flex-col justify-center rounded-xl border bg-black/50 px-2 py-2 text-left cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0A09] active:scale-[0.99]";
-const quickBase="h-10 min-w-[140px] shrink-0 rounded-full border bg-black/40 px-4 text-sm font-semibold tracking-wide text-[#C8FF00] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0A09]";
-const quickCls=(isPrimary)=>isPrimary
-?`${quickBase} border-[#C8FF00]/80 hover:bg-[#C8FF00] hover:text-[#0B0A09]`
-:`${quickBase} border-[#C8FF00]/40 text-[#BEF969] hover:bg-[#C8FF00] hover:text-[#0B0A09] active:bg-[#C8FF00] active:text-[#0B0A09]`;
+function CoachCommandCenter({totalPlayers,activeTodayCount,nextEventDateFormatted,onPlayersClick,onActiveTodayClick,onNextEventClick,onAddPlayer,onAddDrill,onScheduleEvent,onLogScore}){
+const metricStyle={minHeight:56,borderRadius:12,background:"rgba(0,0,0,0.5)",border:"1px solid rgba(163,230,53,0.25)",padding:"0 8px",display:"flex",flexDirection:"column",justifyContent:"center",textAlign:"left",color:"#FFFFFF",cursor:"pointer",transition:"transform .12s ease",appearance:"none",WebkitAppearance:"none"};
+const actionStyle={flexShrink:0,minWidth:140,height:40,borderRadius:999,border:"1px solid rgba(163,230,53,0.35)",background:"rgba(0,0,0,0.4)",color:"#BEF264",padding:"0 16px",fontSize:14,fontWeight:600,letterSpacing:"0.04em",cursor:"pointer",transition:"all .15s ease",appearance:"none",WebkitAppearance:"none"};
 
-return <section className="mx-auto mb-3 w-full max-w-[1200px] rounded-2xl border border-[#C8FF00]/20 bg-black/40 p-3 text-white backdrop-blur">
-  <div className="mt-3 mb-2 flex items-center justify-between">
-    <h2 className="text-[11px] font-[900] uppercase tracking-[0.18em] text-white/80">COACH COMMAND CENTER</h2>
-  </div>
+return <section style={{marginBottom:12,borderRadius:16,background:"rgba(0,0,0,0.4)",border:"1px solid rgba(163,230,53,0.2)",padding:12,backdropFilter:"blur(6px)",color:"#FFFFFF"}}>
+  <div style={{fontSize:12,letterSpacing:"0.25em",textTransform:"uppercase",color:"rgba(255,255,255,0.8)",marginBottom:8}}>COACH COMMAND CENTER</div>
 
-  <div className="grid grid-cols-3 gap-2">
-    <button type="button" onClick={onPlayersClick} className={`${metricBase} ${highlightPlayersAttention?"border-[#FF454566] shadow-[0_0_0_1px_rgba(255,69,69,0.3),0_0_14px_rgba(255,69,69,0.18)]":"border-[#C8FF0033] hover:border-[#C8FF0070]"}`}>
-      <div className="truncate text-[10px] font-semibold tracking-[0.14em] text-white/70">PLAYERS</div>
-      <div className="mt-1 text-[22px] font-black leading-none text-[#C8FF00]">{totalPlayers}</div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(3, minmax(0, 1fr))",gap:8}}>
+    <button type="button" onClick={onPlayersClick} style={metricStyle}>
+      <div style={{fontSize:10,letterSpacing:"0.22em",textTransform:"uppercase",color:"rgba(255,255,255,0.6)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
+      <div style={{fontSize:20,fontWeight:600,color:"#A3E635",lineHeight:1.1}}>{totalPlayers ?? 0}</div>
     </button>
 
-    <button type="button" onClick={onActiveTodayClick} className={`${metricBase} border-[#C8FF0033] hover:border-[#C8FF0070]`}>
-      <div className="truncate text-[10px] font-semibold tracking-[0.14em] text-white/70">ACTIVE TODAY</div>
-      <div className="mt-1 text-[22px] font-black leading-none text-[#C8FF00]">{activeTodayCount}</div>
+    <button type="button" onClick={onActiveTodayClick} style={metricStyle}>
+      <div style={{fontSize:10,letterSpacing:"0.22em",textTransform:"uppercase",color:"rgba(255,255,255,0.6)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
+      <div style={{fontSize:20,fontWeight:600,color:"#A3E635",lineHeight:1.1}}>{activeTodayCount ?? 0}</div>
     </button>
 
-    <button type="button" onClick={onNextEventClick} className={`${metricBase} border-[#C8FF0033] hover:border-[#C8FF0070]`}>
-      <div className="truncate text-[10px] font-semibold tracking-[0.14em] text-white/70">NEXT EVENT</div>
-      <div className="mt-1 text-[16px] font-black leading-none text-[#C8FF00]">{nextEventDateFormatted}</div>
+    <button type="button" onClick={onNextEventClick} style={metricStyle}>
+      <div style={{fontSize:10,letterSpacing:"0.22em",textTransform:"uppercase",color:"rgba(255,255,255,0.6)",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
+      <div style={{fontSize:14,fontWeight:600,color:"rgba(255,255,255,0.9)",lineHeight:1.1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{nextEventDateFormatted ?? "None"}</div>
     </button>
   </div>
 
-  <div className="mt-2 overflow-x-auto whitespace-nowrap pb-1">
-    <div className="flex gap-2">
-      <button type="button" onClick={onAddPlayer} className={quickCls(primaryQuickAction==="addPlayer")}>+ Add Player</button>
-      <button type="button" onClick={onAddDrill} className={quickCls(primaryQuickAction==="addDrill")}>+ Add Drill</button>
-      <button type="button" onClick={onScheduleEvent} className={quickCls(primaryQuickAction==="scheduleEvent")}>+ Schedule Event</button>
-      <button type="button" onClick={onLogScore} className={quickCls(false)}>+ Log Score</button>
-    </div>
+  <div style={{display:"flex",gap:8,overflowX:"auto",whiteSpace:"nowrap",paddingTop:12,paddingBottom:4,WebkitOverflowScrolling:"touch"}}>
+    <button type="button" onClick={onAddPlayer} style={actionStyle}>+ Add Player</button>
+    <button type="button" onClick={onAddDrill} style={actionStyle}>+ Add Drill</button>
+    <button type="button" onClick={onScheduleEvent} style={actionStyle}>+ Schedule Event</button>
+    <button type="button" onClick={onLogScore} style={actionStyle}>+ Log Score</button>
   </div>
 
-  <div className="mt-3 h-px w-full bg-white/10"/>
+  <div style={{marginTop:12,height:1,background:"rgba(255,255,255,0.1)"}} />
 </section>;
 }
 
@@ -1570,15 +1563,6 @@ const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
 const sortedEvents=[...events].sort((a,b)=>a.date.localeCompare(b.date));
 const nextEvent=sortedEvents.find(e=>e.date>=today);
 const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"None";
-const highlightAddPlayer=totalPlayers===0;
-const highlightAddDrill=drills.length===0;
-const highlightScheduleEvent=events.length===0||!nextEvent;
-const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
-const inactivePlayersCount=ups.filter(p=>!activeThisWeek.has(p.email)).length;
-const highlightPlayersAttention=inactivePlayersCount>0;
-const primaryQuickAction=highlightAddPlayer?"addPlayer":highlightAddDrill?"addDrill":highlightScheduleEvent?"scheduleEvent":null;
 const jumpToSection=(targetTab,sectionId)=>{setTab(targetTab);setSelP(null);setTimeout(()=>document.getElementById(sectionId)?.scrollIntoView({behavior:"smooth",block:"start"}),120)};
 const handleLogScoreAction=()=>{
   // TODO: Route to dedicated coach score logging flow when implemented.
@@ -1610,8 +1594,6 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   totalPlayers={totalPlayers}
   activeTodayCount={activeTodayCount}
   nextEventDateFormatted={nextEventDateFormatted}
-  highlightPlayersAttention={highlightPlayersAttention}
-  primaryQuickAction={primaryQuickAction}
   onPlayersClick={()=>setTab("players")}
   onActiveTodayClick={()=>setTab("players")}
   onNextEventClick={()=>setTab("events")}
