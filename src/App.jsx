@@ -536,8 +536,8 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       {/* Challenge button */}
       {!showChallForm?<div style={{display:"flex",gap:8,marginTop:16}}>
         <button className="btn-v" onClick={closeShare} style={{flex:1,padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer"}}>DONE</button>
-        <button className="btn-v" onClick={()=>setShowChallForm(true)} style={{flex:1,padding:"14px",background:"transparent",color:ORANGE,fontFamily:FD,fontSize:16,letterSpacing:3,border:`2px solid ${ORANGE}`,borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>CHALLENGE
+        <button className="btn-v" onClick={()=>setShowChallForm(true)} style={{flex:1,padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>CHALLENGE
         </button>
       </div>
       :<div className="fade-up" style={{marginTop:16,background:CARD_BG,borderRadius:16,padding:"20px 18px",border:`1px solid ${ORANGE}33`,textAlign:"left"}}>
@@ -553,7 +553,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
           </div>
           <div style={{display:"flex",gap:8}}>
             <button onClick={()=>{setShowChallForm(false);setChallTarget("")}} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-            <button className="btn-v" onClick={sendChallenge} disabled={!challTarget} style={{flex:1,padding:"12px",background:challTarget?ORANGE:MUTED,color:BG,fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:challTarget?"pointer":"default",opacity:challTarget?1:.5}}>SEND IT</button>
+            <button className="btn-v" onClick={sendChallenge} disabled={!challTarget} style={{flex:1,padding:"12px",background:challTarget?VOLT:MUTED,color:BG,fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:challTarget?"pointer":"default",opacity:challTarget?1:.5}}>SEND IT</button>
           </div>
         </>}
       </div>}
@@ -909,7 +909,7 @@ return <div className="fade-up">
   </div>
   {logErr&&<div style={{fontFamily:FB,color:"#ef4444",fontSize:11,marginTop:8}}>{logErr}</div>}
   {logSaved&&<div style={{fontFamily:FB,color:SC_COLOR,fontSize:11,marginTop:8}}>Session logged.</div>}
-  <button className="btn-v" onClick={handleAddScLog} style={{width:"100%",marginTop:10,padding:"12px",background:SC_COLOR,color:LIGHT,fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD SESSION</button>
+  <button className="btn-v" onClick={handleAddScLog} style={{width:"100%",marginTop:10,padding:"12px",background:VOLT,color:BG,fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD SESSION</button>
 </div></div>
 
 <div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"22px 16px",textAlign:"center"}}>
@@ -936,7 +936,7 @@ return <div className="fade-up">
     </button>
     {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#121212)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
-      <button className="btn-v" onClick={()=>toggleScRsvp(s.id)} style={{width:"100%",padding:"14px",background:going?"transparent":VOLT,color:going?VOLT:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:going?`2px solid ${VOLT}`:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+      <button className="btn-v" onClick={()=>toggleScRsvp(s.id)} style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
         {going?<>&#10003; YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
       </button>
       {sr.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>{sr.map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:4,background:CARD_BG,borderRadius:8,padding:"4px 8px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={20} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:600}}>{r.name}</span></div>)}</div>}
@@ -1283,13 +1283,13 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
         </div>
       </div>
       {/* Inline quick-RSVP pill */}
-      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} style={{marginTop:12,padding:"8px 0",width:"100%",borderRadius:10,border:going?`1.5px solid ${VOLT}44`:`1.5px solid ${VOLT}`,background:going?VOLT+"0c":"transparent",cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:3,color:going?VOLT:VOLT,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
-        {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>I'M GOING</>:"RSVP →"}
+      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} style={{marginTop:12,padding:"8px 0",width:"100%",borderRadius:10,border:"none",background:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:3,color:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
+        {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={BG} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>I'M GOING</>:"RSVP →"}
       </button>
     </div>
     {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{ev.desc}</p>
-      <button className="btn-v" onClick={()=>toggleRsvp(ev.id)} style={{width:"100%",padding:"14px",background:going?"transparent":VOLT,color:going?VOLT:BG,fontFamily:FD,fontSize:18,letterSpacing:4,border:going?`2px solid ${VOLT}`:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:14}}>
+      <button className="btn-v" onClick={()=>toggleRsvp(ev.id)} style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:14}}>
         {going?"&#10003; I'M GOING":"RSVP NOW &#8594;"}
       </button>
       {evR.length>0&&<div><div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:2,marginBottom:8,fontWeight:600}}>WHO'S GOING</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>
@@ -1423,7 +1423,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
     </div>})}
 
     {/* Add new drill */}
-    {!showNewDrill?<button onClick={()=>setShowNewDrill(true)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT+"15",color:VOLT,fontFamily:FD,fontSize:16,letterSpacing:3,border:`1.5px dashed ${VOLT}44`,borderRadius:14,cursor:"pointer",marginTop:8}}>+ ADD DRILL</button>
+    {!showNewDrill?<button onClick={()=>setShowNewDrill(true)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:14,cursor:"pointer",marginTop:8}}>+ ADD DRILL</button>
     :<div className="fade-up" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginTop:8}}>
       <div style={{fontFamily:FD,color:VOLT,fontSize:16,letterSpacing:3,marginBottom:16}}>NEW DRILL</div>
       <FF l="DRILL NAME" v={nd.name} set={v=>setNd({...nd,name:v})} ph="e.g. STEP-BACK JUMPER"/>
@@ -1461,7 +1461,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
   {/* EVENTS */}
   {tab==="events"&&<div className="fade-up">
     <SH t="MANAGE EVENTS" s={`${events.length} TOTAL`}/>
-    <button onClick={()=>setShowAdd(!showAdd)} className="btn-v" style={{width:"100%",padding:"14px",background:showAdd?"transparent":VOLT,color:showAdd?VOLT:BG,fontFamily:FD,fontSize:18,letterSpacing:3,border:showAdd?`2px solid ${VOLT}`:"none",borderRadius:12,cursor:"pointer",marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
+    <button onClick={()=>setShowAdd(!showAdd)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:18,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
     {showAdd&&<div className="fade-up" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
       <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="e.g. OPEN GYM RUN"/>
@@ -1541,13 +1541,13 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="fade-up">
     <SH t="S&C SESSIONS" s={`${scSessions.length} TOTAL`}/>
-    <button className="btn-v" onClick={()=>setShowAddSC(!showAddSC)} style={{width:"100%",padding:"14px",background:showAddSC?"transparent":VOLT,color:showAddSC?VOLT:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:showAddSC?`2px solid ${VOLT}`:"none",borderRadius:12,cursor:"pointer",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+    <button className="btn-v" onClick={()=>setShowAddSC(!showAddSC)} style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
       {showAddSC?"CANCEL":"+ ADD SESSION"}
     </button>
     {showAddSC&&<div className="fade-up" style={{background:CARD_BG,borderRadius:16,padding:"20px 18px",marginBottom:16,border:`1px solid ${BORDER_CLR}`}}>
       <FF l="SPORT" v={nsc.sport} set={v=>setNsc({...nsc,sport:v})} ph="e.g. Basketball"/>
       <div style={{display:"flex",gap:8}}><div style={{flex:1}}><FF l="DATE" v={nsc.date} set={v=>setNsc({...nsc,date:v})} tp="date"/></div><div style={{flex:1}}><FF l="TIME" v={nsc.time} set={v=>setNsc({...nsc,time:v})} ph="6:00 AM"/></div></div>
-      <button className="btn-v" onClick={handleAddSC} style={{width:"100%",padding:"14px",background:"#a855f7",color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE SESSION</button>
+      <button className="btn-v" onClick={handleAddSC} style={{width:"100%",padding:"14px",background:VOLT,color:BG,fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE SESSION</button>
     </div>}
     {scSessions.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);
       return <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"14px 16px",marginBottom:8,border:`1px solid ${BORDER_CLR}`}}>
