@@ -1125,6 +1125,10 @@ const isHome=mode==="home";
 const accentColor=isHome?VOLT:CYAN;
 const unit=sub==="shots"?"makes":sub==="events"?"events":sub==="sc"?"sessions":"makes";
 const title=isHome?"AT HOME":"PROGRAM";
+const modeStyles={
+home:{accent:VOLT,bg:"rgba(200, 255, 0, 0.14)",glow:"0 0 18px rgba(200, 255, 0, 0.28)",label:"🏠"},
+prog:{accent:CYAN,bg:"rgba(0, 229, 255, 0.14)",glow:"0 0 18px rgba(0, 229, 255, 0.28)",label:"📅"}
+};
 
 // Swap sub when switching modes
 const switchMode=(m)=>{setMode(m);setSub(m==="home"?"total":"events")};
@@ -1132,7 +1136,11 @@ const switchMode=(m)=>{setMode(m);setSub(m==="home"?"total":"events")};
 return <div>
 {/* Mode toggle */}
 <div style={{display:"flex",gap:8,background:"#121212",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(200, 255, 0, 0.24)"}}>
-{[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=>{const active=mode===m.k;return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid rgba(200, 255, 0, ${active?0.65:0.45})`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,transition:"all 150ms ease",background:active?"#C8FF00":"#171717",color:active?"#000000":"#A0A0A0"}}>{m.l}</button>})}
+{[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=>{
+const active=mode===m.k;
+const thisMode=modeStyles[m.k];
+return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid ${active?thisMode.accent+"AA":"#353535"}`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,transition:"all 180ms ease",background:active?`linear-gradient(180deg, ${thisMode.bg}, #131313 85%)`:"#171717",color:active?thisMode.accent:"#7A7A7A",boxShadow:active?thisMode.glow:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:8,textShadow:active?`0 0 8px ${thisMode.accent}55`:"none"}}><span aria-hidden="true" style={{fontSize:12,lineHeight:1,opacity:active?1:.65}}>{thisMode.label}</span>{m.l}</button>
+})}
 </div>
 
 {/* Sub-tabs */}
@@ -1142,7 +1150,7 @@ return <div>
       [{k:"total",l:"ALL"},{k:"shots",l:"SHOTS"},...drills.map(d=>({k:String(d.id),l:d.name}))].map(t=>
         <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"#C8FF00":"#1E1E1E",color:sub===t.k?"#000000":"#555555",transition:"all .2s"}}>{t.l}</button>)
     :[{k:"events",l:"ATTENDANCE"},{k:"sc",l:"S&C"},{k:"prog-total",l:"DRILL SCORES"},...programDrills.map(d=>({k:`prog-${d.id}`,l:d.name}))].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"#C8FF00":"#1E1E1E",color:sub===t.k?"#000000":"#555555",transition:"all .2s"}}>{t.l}</button>)}
+        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?CYAN:"#1E1E1E",color:sub===t.k?"#041014":"#555555",transition:"all .2s",boxShadow:sub===t.k?"0 0 14px rgba(0, 229, 255, 0.35)":"none"}}>{t.l}</button>)}
   </div>
 </div>
 
