@@ -170,6 +170,7 @@ return <><Styles/>
 // ═══════════════════════════════════════
 function Auth({onLogin,onRegister,players}){
 const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[err,setErr]=useState("");
+const DEMO_EMAIL="demo@shotlab.app",DEMO_PASSWORD="demo1234",DEMO_NAME="Demo Player";
 const doLogin=()=>{
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!password){setErr("Enter your password");return}
@@ -184,6 +185,19 @@ if(!password||password.length<4){setErr("Password must be at least 4 characters"
 const id=e.includes("@")?e:e+"@shotlab.app";
 const r=await onRegister(id,password,name.trim(),role);
 if(!r.ok)setErr(r.err);
+};
+const doDemo=async()=>{
+setErr("");
+setEmail(DEMO_EMAIL);
+setPassword(DEMO_PASSWORD);
+const hasDemo=players.some(p=>p.email===DEMO_EMAIL);
+if(!hasDemo){
+const reg=await onRegister(DEMO_EMAIL,DEMO_PASSWORD,DEMO_NAME,"player");
+if(reg.ok)return;
+if(reg.err!=="Account already exists. Please sign in."){setErr(reg.err);return}
+}
+const log=onLogin(DEMO_EMAIL,DEMO_PASSWORD);
+if(!log.ok)setErr(log.err);
 };
 const inp={width:"100%",padding:"15px 16px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none"};
 return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden"}}>
@@ -230,6 +244,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
     <button className="btn-v" onClick={mode==="login"?doLogin:doRegister} style={{width:"100%",padding:"16px",background:VOLT,color:BG,fontFamily:FD,fontSize:20,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
       {mode==="login"?"SIGN IN":"CREATE ACCOUNT"} &#8594;
     </button>
+    {mode==="login"&&<button onClick={doDemo} style={{width:"100%",marginTop:10,padding:"12px",background:"transparent",color:LIGHT,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:12,cursor:"pointer",textTransform:"uppercase"}}>Try Demo Account</button>}
 
     <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:12,marginTop:16,cursor:"pointer"}} onClick={()=>{setMode(mode==="login"?"register":"login");setErr("")}}>
       {mode==="login"?"Don't have an account? ":"Already have an account? "}
