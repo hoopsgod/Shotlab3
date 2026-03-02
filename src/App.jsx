@@ -542,6 +542,8 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
     <div style={{fontFamily:FB,color:ORANGE,fontSize:8,letterSpacing:2,marginTop:2}}>{pullY>40?"REFRESHING":"PULL"}</div>
   </div>}
 
+  {tab!=="home"&&<button onClick={()=>switchTab("home")} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:16,padding:0}}>&#8592; DASHBOARD</button>}
+
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
 
