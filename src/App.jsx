@@ -1500,44 +1500,68 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 
 function CoachCommandCenter({totalPlayers,activeTodayCount,nextEventDateFormatted,highlightPlayersAttention,primaryQuickAction,onPlayersClick,onActiveTodayClick,onNextEventClick,onAddPlayer,onAddDrill,onScheduleEvent,onLogScore}){
-const metricBase="group flex min-h-[56px] flex-col justify-center rounded-xl border bg-black/50 px-2 py-2 text-left cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0A09] active:scale-[0.99]";
-const quickBase="h-10 min-w-[140px] shrink-0 rounded-full border bg-black/40 px-4 text-sm font-semibold tracking-wide text-[#C8FF00] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0A09]";
-const quickCls=(isPrimary)=>isPrimary
-?`${quickBase} border-[#C8FF00]/80 hover:bg-[#C8FF00] hover:text-[#0B0A09]`
-:`${quickBase} border-[#C8FF00]/40 text-[#BEF969] hover:bg-[#C8FF00] hover:text-[#0B0A09] active:bg-[#C8FF00] active:text-[#0B0A09]`;
+const metricBase={
+  minHeight:56,
+  borderRadius:12,
+  border:"1px solid rgba(200,255,0,0.2)",
+  background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.25))",
+  padding:"10px 10px",
+  display:"flex",
+  flexDirection:"column",
+  justifyContent:"center",
+  cursor:"pointer",
+  textAlign:"left",
+};
+const quickBtn=(isPrimary)=>({
+  height:42,
+  minWidth:130,
+  borderRadius:999,
+  border:`1px solid ${isPrimary?"rgba(200,255,0,0.9)":"rgba(200,255,0,0.35)"}`,
+  background:isPrimary?"#C8FF00":"rgba(10, 10, 10, 0.72)",
+  color:isPrimary?"#0B0A09":"#C8FF00",
+  fontFamily:FB,
+  fontSize:13,
+  fontWeight:700,
+  letterSpacing:"0.05em",
+  textTransform:"uppercase",
+  padding:"0 16px",
+  cursor:"pointer",
+  boxShadow:isPrimary?"0 6px 20px rgba(200,255,0,0.35)":"none",
+  whiteSpace:"nowrap",
+});
 
-return <section className="mx-auto mb-3 w-full max-w-[1200px] rounded-2xl border border-[#C8FF00]/20 bg-black/40 p-3 text-white backdrop-blur">
-  <div className="mt-3 mb-2 flex items-center justify-between">
-    <h2 className="text-[11px] font-[900] uppercase tracking-[0.18em] text-white/80">COACH COMMAND CENTER</h2>
+return <section style={{margin:"0 auto 12px",width:"100%",maxWidth:1200,borderRadius:18,border:"1px solid rgba(200,255,0,0.22)",background:"linear-gradient(160deg, rgba(24,24,24,0.88), rgba(9,9,9,0.92))",padding:"12px 12px 14px",backdropFilter:"blur(4px)",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.04)"}}>
+  <div style={{marginTop:2,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+    <h2 style={{fontFamily:FD,fontSize:13,fontWeight:900,textTransform:"uppercase",letterSpacing:"0.15em",color:"rgba(255,255,255,0.82)",margin:0}}>Coach Command Center</h2>
   </div>
 
-  <div className="grid grid-cols-3 gap-2">
-    <button type="button" onClick={onPlayersClick} className={`${metricBase} ${highlightPlayersAttention?"border-[#FF454566] shadow-[0_0_0_1px_rgba(255,69,69,0.3),0_0_14px_rgba(255,69,69,0.18)]":"border-[#C8FF0033] hover:border-[#C8FF0070]"}`}>
-      <div className="truncate text-[10px] font-semibold tracking-[0.14em] text-white/70">PLAYERS</div>
-      <div className="mt-1 text-[22px] font-black leading-none text-[#C8FF00]">{totalPlayers}</div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(3, minmax(0, 1fr))",gap:8}}>
+    <button type="button" onClick={onPlayersClick} style={{...metricBase,border:highlightPlayersAttention?"1px solid rgba(255,69,69,0.45)":metricBase.border,boxShadow:highlightPlayersAttention?"0 0 0 1px rgba(255,69,69,0.25), 0 0 14px rgba(255,69,69,0.15)":"none"}}>
+      <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.12em",color:"rgba(255,255,255,0.68)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
+      <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{totalPlayers}</div>
     </button>
 
-    <button type="button" onClick={onActiveTodayClick} className={`${metricBase} border-[#C8FF0033] hover:border-[#C8FF0070]`}>
-      <div className="truncate text-[10px] font-semibold tracking-[0.14em] text-white/70">ACTIVE TODAY</div>
-      <div className="mt-1 text-[22px] font-black leading-none text-[#C8FF00]">{activeTodayCount}</div>
+    <button type="button" onClick={onActiveTodayClick} style={metricBase}>
+      <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.12em",color:"rgba(255,255,255,0.68)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
+      <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{activeTodayCount}</div>
     </button>
 
-    <button type="button" onClick={onNextEventClick} className={`${metricBase} border-[#C8FF0033] hover:border-[#C8FF0070]`}>
-      <div className="truncate text-[10px] font-semibold tracking-[0.14em] text-white/70">NEXT EVENT</div>
-      <div className="mt-1 text-[16px] font-black leading-none text-[#C8FF00]">{nextEventDateFormatted}</div>
+    <button type="button" onClick={onNextEventClick} style={metricBase}>
+      <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.12em",color:"rgba(255,255,255,0.68)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
+      <div style={{marginTop:5,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{nextEventDateFormatted}</div>
     </button>
   </div>
 
-  <div className="mt-2 overflow-x-auto whitespace-nowrap pb-1">
-    <div className="flex gap-2">
-      <button type="button" onClick={onAddPlayer} className={quickCls(primaryQuickAction==="addPlayer")}>+ Add Player</button>
-      <button type="button" onClick={onAddDrill} className={quickCls(primaryQuickAction==="addDrill")}>+ Add Drill</button>
-      <button type="button" onClick={onScheduleEvent} className={quickCls(primaryQuickAction==="scheduleEvent")}>+ Schedule Event</button>
-      <button type="button" onClick={onLogScore} className={quickCls(false)}>+ Log Score</button>
+  <div style={{marginTop:10,overflowX:"auto",whiteSpace:"nowrap",paddingBottom:2}}>
+    <div style={{display:"flex",gap:8}}>
+      <button type="button" onClick={onAddPlayer} style={quickBtn(primaryQuickAction==="addPlayer")}>+ Add Player</button>
+      <button type="button" onClick={onAddDrill} style={quickBtn(primaryQuickAction==="addDrill")}>+ Add Drill</button>
+      <button type="button" onClick={onScheduleEvent} style={quickBtn(primaryQuickAction==="scheduleEvent")}>+ Schedule Event</button>
+      <button type="button" onClick={onLogScore} style={quickBtn(false)}>+ Log Score</button>
     </div>
   </div>
 
-  <div className="mt-3 h-px w-full bg-white/10"/>
+  <div style={{marginTop:12,height:1,width:"100%",background:"rgba(255,255,255,0.1)"}}/>
 </section>;
 }
 
