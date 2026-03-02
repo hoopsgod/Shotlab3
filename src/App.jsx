@@ -99,7 +99,7 @@ return <svg viewBox="0 0 40 40" style={s}><circle cx="20" cy="20" r="16" stroke=
 };
 const CourtBG=({opacity=.02})=><svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none",opacity}} viewBox="0 0 400 900" fill="none" preserveAspectRatio="xMidYMid slice"><rect x="20" y="40" width="360" height="700" stroke={VOLT} strokeWidth="1"/><line x1="20" y1="390" x2="380" y2="390" stroke={VOLT} strokeWidth=".8"/><circle cx="200" cy="390" r="60" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="40" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 40Q200 140 260 40" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="550" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 740Q200 640 260 740" stroke={VOLT} strokeWidth=".8" fill="none"/></svg>;
 const GlowOrb=({color=VOLT,top="20%",left="50%",size=300,animate})=><div style={{position:"absolute",top,left,width:size,height:size,borderRadius:"50%",background:`radial-gradient(circle,${color}0a 0%,transparent 70%)`,transform:"translate(-50%,-50%)",pointerEvents:"none",animation:animate?"orbDrift 12s ease-in-out infinite alternate":"none"}}/>;
-const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap');:root{--color-primary:#C8FF00;--color-primary-dim:#A3CC00;--color-primary-glow:rgba(200, 255, 0, 0.15);--color-secondary:#00E5FF;--color-secondary-dim:rgba(0, 229, 255, 0.12);--color-danger:#FF4545;--color-warning:#FFA500;--color-bg-base:#0A0A0A;--color-bg-card:#141414;--color-bg-elevated:#1E1E1E;--color-bg-subtle:#242424;--color-text-primary:#FFFFFF;--color-text-secondary:#A0A0A0;--color-text-muted:#555555;}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:${BG};overflow-x:hidden}input,textarea{font-family:${FB}}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}input[type=number]{-moz-appearance:textfield}::-webkit-scrollbar{width:0}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@keyframes scaleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes glow{0%,100%{box-shadow:0 0 20px ${VOLT}15}50%{box-shadow:0 0 40px ${VOLT}25}}@keyframes heroGlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}@keyframes rippleOut{0%{transform:scale(0);opacity:.5}100%{transform:scale(4);opacity:0}}@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes orbDrift{0%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(-40%,-60%) scale(1.1)}50%{transform:translate(-60%,-45%) scale(.95)}75%{transform:translate(-45%,-55%) scale(1.05)}100%{transform:translate(-55%,-50%) scale(1)}}@keyframes confettiBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{opacity:0}}@keyframes particleFly{0%{transform:translate(0,0) scale(1);opacity:1}60%{opacity:.8}100%{transform:var(--fly-to);opacity:0}}.fade-up{animation:fadeUp .4s ease-out both}.scale-in{animation:scaleIn .35s ease-out both}.btn-v{transition:transform .1s,box-shadow .2s;position:relative;overflow:hidden}.btn-v:active{transform:scale(.97)}.btn-v:hover{box-shadow:0 4px 24px ${VOLT}30}.btn-v::after{content:'';position:absolute;top:50%;left:50%;width:10px;height:10px;background:rgba(255,255,255,.3);border-radius:50%;transform:scale(0);opacity:0}.btn-v:active::after{animation:rippleOut .5s ease-out}.ch{transition:transform .15s,border-color .2s,box-shadow .2s}.ch:hover{transform:translateY(-2px);border-color:${VOLT}22!important;box-shadow:0 6px 20px ${BG},0 0 30px ${VOLT}08!important}.ch:active{transform:scale(.985) perspective(600px) rotateX(1deg)}.tb{background-size:200% 100%;animation:shimmer 3s linear infinite}.cnt-up{animation:countUp .5s ease-out both}.grd-bdr{background:linear-gradient(135deg,${VOLT}15,${ORANGE}10,${CYAN}10);padding:1px;border-radius:17px}.grd-bdr>div{border-radius:16px}.glass-hdr{background:${BG}cc;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid ${BORDER_CLR}80;box-shadow:0 4px 30px ${BG}80}.card-glow-v{box-shadow:0 2px 8px ${BG},0 0 20px ${VOLT}08}.card-glow-o{box-shadow:0 2px 8px ${BG},0 0 20px ${ORANGE}08}.card-glow-c{box-shadow:0 2px 8px ${BG},0 0 20px ${CYAN}08}.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleFly .7s ease-out forwards}@keyframes bbBounce{0%{transform:translateY(0) scaleY(1) scaleX(1)}40%{transform:translateY(8px) scaleY(.7) scaleX(1.3)}70%{transform:translateY(-6px) scaleY(1.1) scaleX(.95)}100%{transform:translateY(0) scaleY(1) scaleX(1)}}@keyframes badgeReveal{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}@keyframes shineSwipe{0%{left:-60%}100%{left:160%}}.badge-pop{animation:badgeReveal .6s cubic-bezier(.34,1.56,.64,1) both}.badge-shine{position:relative;overflow:hidden}.badge-shine::after{content:'';position:absolute;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);animation:shineSwipe 1.2s ease .3s}@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}@keyframes ballSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes ballBounceIn{0%{transform:scale(0) translateY(40px);opacity:0}50%{transform:scale(1.15) translateY(-10px);opacity:1}70%{transform:scale(.95) translateY(4px)}100%{transform:scale(1) translateY(0)}}@keyframes podiumPulse{0%,100%{box-shadow:0 0 12px var(--pod-c,${VOLT})22}50%{box-shadow:0 0 28px var(--pod-c,${VOLT})33}}.slide-r{animation:slideInRight .3s ease-out both}.slide-l{animation:slideInLeft .3s ease-out both}.ball-spin{animation:ballSpin 8s linear infinite}.ball-bounce{animation:ballBounceIn .7s cubic-bezier(.34,1.56,.64,1) both}.podium-glow{animation:podiumPulse 2s ease-in-out infinite}.grad-text{background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}@media(prefers-reduced-motion:reduce){*,.fade-up,.scale-in,.slide-r,.slide-l,.ball-spin,.ball-bounce,.badge-pop,.cnt-up,.podium-glow,.tb,.btn-v,.ch{animation:none!important;transition:none!important}}`;
+const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;500;600;700;800&display=swap');:root{--color-primary:#C8FF00;--color-primary-dim:#A3CC00;--color-primary-glow:rgba(200, 255, 0, 0.15);--color-secondary:#00E5FF;--color-secondary-dim:rgba(0, 229, 255, 0.12);--color-danger:#FF4545;--color-warning:#FFA500;--color-bg-base:#0A0A0A;--color-bg-card:#141414;--color-bg-elevated:#1E1E1E;--color-bg-subtle:#242424;--color-text-primary:#FFFFFF;--color-text-secondary:#A0A0A0;--color-text-muted:#555555;}*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}body{background:${BG};overflow-x:hidden}input,textarea{font-family:${FB}}input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none}input[type=number]{-moz-appearance:textfield}::-webkit-scrollbar{width:0}@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}@keyframes scaleIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}@keyframes glow{0%,100%{box-shadow:0 0 20px ${VOLT}15}50%{box-shadow:0 0 40px ${VOLT}25}}@keyframes heroGlow{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}@keyframes rippleOut{0%{transform:scale(0);opacity:.5}100%{transform:scale(4);opacity:0}}@keyframes countUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}@keyframes orbDrift{0%{transform:translate(-50%,-50%) scale(1)}25%{transform:translate(-40%,-60%) scale(1.1)}50%{transform:translate(-60%,-45%) scale(.95)}75%{transform:translate(-45%,-55%) scale(1.05)}100%{transform:translate(-55%,-50%) scale(1)}}@keyframes confettiBurst{0%{transform:translate(0,0) scale(1);opacity:1}100%{opacity:0}}@keyframes particleFly{0%{transform:translate(0,0) scale(1);opacity:1}60%{opacity:.8}100%{transform:var(--fly-to);opacity:0}}.fade-up{animation:fadeUp .4s ease-out both}.scale-in{animation:scaleIn .35s ease-out both}.btn-v{transition:transform .1s ease,box-shadow .2s ease;position:relative;overflow:hidden}.btn-v:active{transform:scale(.97)}.btn-v::after{content:'';position:absolute;top:50%;left:50%;width:10px;height:10px;background:rgba(255,255,255,.3);border-radius:50%;transform:scale(0);opacity:0}.btn-v:active::after{animation:rippleOut .5s ease-out}.cta-primary,.cta-danger{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;gap:8px;width:calc(100% - 32px)!important;margin-left:16px!important;margin-right:16px!important;height:52px!important;padding:0 16px!important;border:none;border-radius:14px!important;cursor:pointer;font-family:${FB}!important;font-size:13px!important;font-weight:700!important;letter-spacing:.12em!important;text-transform:uppercase;color:#000000;box-shadow:0 4px 24px rgba(200,255,0,.25);background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 100%),var(--color-primary,#C8FF00);transition:transform .1s ease,box-shadow .1s ease,opacity .2s ease}.cta-primary:active,.cta-danger:active{transform:scale(.97)}.cta-primary:active{box-shadow:0 4px 24px rgba(200,255,0,.12)}.cta-danger{color:#FFFFFF;background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 100%),var(--color-danger,#FF4545);box-shadow:0 4px 24px rgba(255,69,69,.25)}.cta-danger:active{box-shadow:0 4px 24px rgba(255,69,69,.12)}.cta-primary[disabled],.cta-primary[data-loading='true'],.cta-danger[disabled],.cta-danger[data-loading='true']{opacity:.4;box-shadow:none;cursor:not-allowed}.cta-primary[disabled] .cta-icon,.cta-primary[data-loading='true'] .cta-icon,.cta-danger[disabled] .cta-icon,.cta-danger[data-loading='true'] .cta-icon{display:none}.cta-primary[disabled]::before,.cta-primary[data-loading='true']::before,.cta-danger[disabled]::before,.cta-danger[data-loading='true']::before{content:'';width:12px;height:12px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;display:inline-block;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.cta-secondary-link{margin-top:16px;font-family:${FB};font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--color-primary,#C8FF00);background:none;border:none;padding:0;cursor:pointer}.cta-secondary-link:hover,.cta-secondary-link:focus-visible{text-decoration:underline}.ch{transition:transform .15s,border-color .2s,box-shadow .2s}.ch:hover{transform:translateY(-2px);border-color:${VOLT}22!important;box-shadow:0 6px 20px ${BG},0 0 30px ${VOLT}08!important}.ch:active{transform:scale(.985) perspective(600px) rotateX(1deg)}.tb{background-size:200% 100%;animation:shimmer 3s linear infinite}.cnt-up{animation:countUp .5s ease-out both}.grd-bdr{background:linear-gradient(135deg,${VOLT}15,${ORANGE}10,${CYAN}10);padding:1px;border-radius:17px}.grd-bdr>div{border-radius:16px}.glass-hdr{background:${BG}cc;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid ${BORDER_CLR}80;box-shadow:0 4px 30px ${BG}80}.card-glow-v{box-shadow:0 2px 8px ${BG},0 0 20px ${VOLT}08}.card-glow-o{box-shadow:0 2px 8px ${BG},0 0 20px ${ORANGE}08}.card-glow-c{box-shadow:0 2px 8px ${BG},0 0 20px ${CYAN}08}.particle{position:absolute;border-radius:50%;pointer-events:none;animation:particleFly .7s ease-out forwards}@keyframes bbBounce{0%{transform:translateY(0) scaleY(1) scaleX(1)}40%{transform:translateY(8px) scaleY(.7) scaleX(1.3)}70%{transform:translateY(-6px) scaleY(1.1) scaleX(.95)}100%{transform:translateY(0) scaleY(1) scaleX(1)}}@keyframes badgeReveal{0%{transform:scale(0) rotate(-10deg);opacity:0}60%{transform:scale(1.15) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0);opacity:1}}@keyframes shineSwipe{0%{left:-60%}100%{left:160%}}.badge-pop{animation:badgeReveal .6s cubic-bezier(.34,1.56,.64,1) both}.badge-shine{position:relative;overflow:hidden}.badge-shine::after{content:'';position:absolute;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.18),transparent);animation:shineSwipe 1.2s ease .3s}@keyframes slideInRight{from{opacity:0;transform:translateX(30px)}to{opacity:1;transform:translateX(0)}}@keyframes slideInLeft{from{opacity:0;transform:translateX(-30px)}to{opacity:1;transform:translateX(0)}}@keyframes ballSpin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}@keyframes ballBounceIn{0%{transform:scale(0) translateY(40px);opacity:0}50%{transform:scale(1.15) translateY(-10px);opacity:1}70%{transform:scale(.95) translateY(4px)}100%{transform:scale(1) translateY(0)}}@keyframes podiumPulse{0%,100%{box-shadow:0 0 12px var(--pod-c,${VOLT})22}50%{box-shadow:0 0 28px var(--pod-c,${VOLT})33}}.slide-r{animation:slideInRight .3s ease-out both}.slide-l{animation:slideInLeft .3s ease-out both}.ball-spin{animation:ballSpin 8s linear infinite}.ball-bounce{animation:ballBounceIn .7s cubic-bezier(.34,1.56,.64,1) both}.podium-glow{animation:podiumPulse 2s ease-in-out infinite}.grad-text{background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}@media(prefers-reduced-motion:reduce){*,.fade-up,.scale-in,.slide-r,.slide-l,.ball-spin,.ball-bounce,.badge-pop,.cnt-up,.podium-glow,.tb,.btn-v,.ch{animation:none!important;transition:none!important}}`;
 const Styles=()=><style>{_STYLES_CSS}</style>;
 
 // ═══════════════════════════════════════
@@ -407,7 +407,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 
     {err&&<p style={{fontFamily:FB,color:"#FF4545",fontSize:12,margin:"0 0 14px"}}>{err}</p>}
 
-    <button className="btn-v" onClick={mode==="login"?doLogin:doRegister} style={{width:"100%",padding:"16px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:20,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+    <button className="btn-v cta-primary" onClick={mode==="login"?doLogin:doRegister} style={{}}>
       {mode==="login"?"SIGN IN":"CREATE ACCOUNT"} &#8594;
     </button>
     {mode==="login"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
@@ -429,13 +429,13 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 function CreateTeam({u,onCreate}){
 const[name,setName]=useState("");const[school,setSchool]=useState("");const[level,setLevel]=useState("");const[err,setErr]=useState("");
 const submit=async()=>{if(!name.trim())return setErr("Enter a team name");const r=await onCreate(name.trim(),{school,level});if(!r.ok)setErr(r.err||"Could not create team")}
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Welcome {u?.name}. Create your team to continue.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:"#000000",border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>CREATE TEAM</button></div></div>;
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Welcome {u?.name}. Create your team to continue.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>CREATE TEAM</button></div></div>;
 }
 
 function JoinTeam({u,onJoin}){
 const[code,setCode]=useState("");const[err,setErr]=useState("");
 const submit=async()=>{const r=await onJoin(code);if(!r.ok)setErr(r.err||"Could not join team")};
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:"#000000",border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>JOIN TEAM</button></div></div>;
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>JOIN TEAM</button></div></div>;
 }
 
 // ═══════════════════════════════════════
@@ -669,11 +669,11 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
           <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
         </div>
       </div>
-      <button className="btn-v" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{width:"100%",padding:"12px",background:shotSaved?VOLT:VOLT,color:BG,fontFamily:FD,fontSize:14,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",opacity:shotSaved?.7:1}}>
+      <button className="btn-v cta-primary" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?.7:1}}>
         {shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
       {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
-      <button onClick={()=>setShowShotStats(true)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:2,cursor:"pointer",marginTop:10,padding:0,width:"100%",textAlign:"center",opacity:.7}}>VIEW SHOT STATS →</button>
+      <button onClick={()=>setShowShotStats(true)} className="cta-secondary-link" style={{width:"100%",textAlign:"center",opacity:.85}}>VIEW SHOT STATS →</button>
     </div>
 
     <CourtDivider color={VOLT} my={16}/>
@@ -710,8 +710,8 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       <ShareCard data={shareData}/>
       {/* Challenge button */}
       {!showChallForm?<div style={{display:"flex",gap:8,marginTop:16}}>
-        <button className="btn-v" onClick={closeShare} style={{flex:1,padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer"}}>DONE</button>
-        <button className="btn-v" onClick={()=>setShowChallForm(true)} style={{flex:1,padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
+        <button className="btn-v cta-primary" onClick={closeShare} style={{width:"100%"}}>DONE</button>
+        <button className="btn-v cta-primary" onClick={()=>setShowChallForm(true)} style={{width:"100%"}}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>CHALLENGE
         </button>
       </div>
@@ -728,7 +728,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
           </div>
           <div style={{display:"flex",gap:8}}>
             <button onClick={()=>{setShowChallForm(false);setChallTarget("")}} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-            <button className="btn-v" onClick={sendChallenge} disabled={!challTarget} style={{flex:1,padding:"12px",background:challTarget?VOLT:MUTED,color:BG,fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:challTarget?"pointer":"default",opacity:challTarget?1:.5}}>SEND IT</button>
+            <button className="btn-v cta-primary" onClick={sendChallenge} disabled={!challTarget} style={{width:"100%",opacity:challTarget?1:.5}}>SEND IT</button>
           </div>
         </>}
       </div>}
@@ -773,7 +773,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       {/* Score quality indicator */}
       {(()=>{const v=parseInt(input)||0;if(v<=0)return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?VOLT:pct>=75?VOLT:pct>=50?ORANGE:"#FF4545";
         return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
-      <button className="btn-v" onClick={handleLog} style={{width:"100%",maxWidth:300,padding:"18px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:22,letterSpacing:5,border:"none",borderRadius:14,cursor:"pointer",margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>LOG SCORE &#8594;</button>
+      <button className="btn-v cta-primary" onClick={handleLog} style={{maxWidth:300,margin:"0 auto"}}>LOG SCORE &#8594;</button>
     </>}
   </div>}
 
@@ -912,10 +912,10 @@ return <div className="fade-up">
         </div>
         <div style={{display:"flex",gap:8}}>
           <button onClick={()=>{setRespId(null);setRespInput("")}} style={{flex:1,padding:"11px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-          <button className="btn-v" onClick={()=>handleRespond(ch)} style={{flex:1,padding:"11px",background:ORANGE,color:BG,fontFamily:FD,fontSize:13,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>SUBMIT</button>
+          <button className="btn-v cta-primary" onClick={()=>handleRespond(ch)} style={{width:"100%"}}>SUBMIT</button>
         </div>
       </div>
-      :<button className="btn-v" onClick={()=>setRespId(ch.id)} style={{width:"100%",padding:"13px",background:ORANGE,color:BG,fontFamily:FD,fontSize:16,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+      :<button className="btn-v cta-primary" onClick={()=>setRespId(ch.id)} style={{}}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>ACCEPT CHALLENGE
       </button>}
     </div>;
@@ -1080,7 +1080,7 @@ return <div className="fade-up">
   </div>
   {logErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:11,marginTop:8}}>{logErr}</div>}
   {logSaved&&<div style={{fontFamily:FB,color:SC_COLOR,fontSize:11,marginTop:8}}>Session logged.</div>}
-  <button className="btn-v" onClick={handleAddScLog} style={{width:"100%",marginTop:10,padding:"12px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD SESSION</button>
+  <button className="btn-v cta-primary" onClick={handleAddScLog} style={{marginTop:10}}>ADD SESSION</button>
 </div></div>
 
 <div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"22px 16px",textAlign:"center"}}>
@@ -1107,7 +1107,7 @@ return <div className="fade-up">
     </button>
     {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
-      <button className="btn-v" onClick={()=>toggleScRsvp(s.id)} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+      <button className="btn-v cta-primary" onClick={()=>toggleScRsvp(s.id)} style={{}}>
         {going?<>&#10003; YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
       </button>
       {sr.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>{sr.map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:4,background:CARD_BG,borderRadius:8,padding:"4px 8px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={20} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:600}}>{r.name}</span></div>)}</div>}
@@ -1350,7 +1350,7 @@ return <div className="fade-up">
         <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
       </div>
     </div>
-    <button className="btn-v" onClick={handleLog} style={{width:"100%",padding:"15px",background:ORANGE,color:BG,fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+    <button className="btn-v cta-primary" onClick={handleLog} style={{}}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
       LOG SHOTS
     </button>
@@ -1481,7 +1481,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
     </div>
     {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{ev.desc}</p>
-      <button className="btn-v" onClick={()=>toggleRsvp(ev.id)} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:14}}>
+      <button className="btn-v cta-primary" onClick={()=>toggleRsvp(ev.id)} style={{marginBottom:14}}>
         {going?"&#10003; I'M GOING":"RSVP NOW &#8594;"}
       </button>
       {evR.length>0&&<div><div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:2,marginBottom:8,fontWeight:600}}>WHO'S GOING</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>
@@ -1529,7 +1529,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:20}}>Player scores will be kept but this drill will no longer appear.</p>
 <div style={{display:"flex",gap:8}}>
 <button onClick={()=>setConfirmDelete(null)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-<button onClick={confirmDrillDelete} style={{flex:1,padding:"12px",background:"#FF4545",color:"#FFFFFF",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
+<button onClick={confirmDrillDelete} className="btn-v cta-danger" style={{}}>DELETE</button>
 </div>
 </div>
 </div>}
@@ -1606,7 +1606,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
         <input value={newProgramDrill.max} onChange={e=>setNewProgramDrill({...newProgramDrill,max:e.target.value})} type="number" placeholder="Max" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
       </div>
       <div style={{display:"flex",gap:5,marginBottom:8}}>{ICONS.map(ic=><button key={`prog-${ic}`} onClick={()=>setNewProgramDrill({...newProgramDrill,icon:ic})} style={{width:34,height:34,borderRadius:8,border:`1px solid ${newProgramDrill.icon===ic?CYAN:BORDER_CLR}`,background:newProgramDrill.icon===ic?CYAN+"22":BG,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={14} color={newProgramDrill.icon===ic?CYAN:MUTED}/></button>)}</div>
-      <button onClick={handleAddProgramDrill} disabled={programDrills.length>=7} style={{width:"100%",padding:"9px",background:programDrills.length>=7?MUTED:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:11,letterSpacing:2,cursor:programDrills.length>=7?"default":"pointer",opacity:programDrills.length>=7?.6:1}}>+ ADD PROGRAM DRILL</button>
+      <button onClick={handleAddProgramDrill} disabled={programDrills.length>=7} className="btn-v cta-primary" style={{opacity:programDrills.length>=7?.6:1}}>+ ADD PROGRAM DRILL</button>
       {programErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:10,marginTop:6}}>{programErr}</div>}
       <div style={{marginTop:10}}>{programDrills.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:10}}>No program drills yet.</div>:programDrills.map(pd=>{const b=scores.filter(s=>s.src==="program"&&s.drillId===pd.id).reduce((m,s)=>{m[s.email]=(m[s.email]||0)+s.score;return m;},{});const lead=Object.entries(b).sort((a,b)=>b[1]-a[1]).slice(0,3);return <div key={pd.id} style={{display:"flex",alignItems:"center",gap:8,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px",marginBottom:6}}><DrillIcon type={pd.icon} size={14}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>{pd.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9}}>Leaderboard: {lead.length===0?"No scores":lead.map(([email,total],i)=>`#${i+1} ${(players.find(p=>p.email===email)?.name||email.split("@")[0])} ${total}`).join(" · ")}</div></div><button onClick={()=>removeProgramDrill(pd.id)} style={{background:"#FF454512",border:"1px solid #FF454533",borderRadius:7,color:"#FF4545",padding:"4px 7px",fontSize:9,cursor:"pointer"}}>DEL</button></div>})}</div>
     </div>
@@ -1627,7 +1627,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
     </div>})}
 
     {/* Add new drill */}
-    {!showNewDrill?<button onClick={()=>setShowNewDrill(true)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:14,cursor:"pointer",marginTop:8}}>+ ADD DRILL</button>
+    {!showNewDrill?<button onClick={()=>setShowNewDrill(true)} className="btn-v cta-primary" style={{marginTop:8}}>+ ADD DRILL</button>
     :<div className="fade-up" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginTop:8}}>
       <div style={{fontFamily:FD,color:VOLT,fontSize:16,letterSpacing:3,marginBottom:16}}>NEW DRILL</div>
       <FF l="DRILL NAME" v={nd.name} set={v=>setNd({...nd,name:v})} ph="e.g. STEP-BACK JUMPER"/>
@@ -1642,7 +1642,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
       <FF l="DETAILED INSTRUCTIONS (OPTIONAL)" v={nd.instructions} set={v=>setNd({...nd,instructions:v})} ta ph="Coaching cues, setup details..."/>
       <div style={{display:"flex",gap:8}}>
         <button onClick={()=>{setShowNewDrill(false);setNd({name:"",desc:"",max:"10",icon:"ft",instructions:""})}} style={{flex:1,padding:"13px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-        <button className="btn-v" onClick={handleAddDrill} style={{flex:1,padding:"13px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>ADD DRILL</button>
+        <button className="btn-v cta-primary" onClick={handleAddDrill} style={{width:"100%"}}>ADD DRILL</button>
       </div>
     </div>}
   </div>}
@@ -1659,13 +1659,13 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
       </div>
     </div>
     <FF l="DETAILED INSTRUCTIONS" v={eInstr} set={setEInstr} ta ph="Step-by-step breakdown, coaching cues, key focus areas..."/>
-    <button className="btn-v" onClick={saveDrill} style={{width:"100%",padding:"15px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:20,letterSpacing:5,border:"none",borderRadius:12,cursor:"pointer"}}>SAVE &#8594;</button>
+    <button className="btn-v cta-primary" onClick={saveDrill} style={{}}>SAVE &#8594;</button>
   </div>}
 
   {/* EVENTS */}
   {tab==="events"&&<div className="fade-up">
     <SH t="MANAGE EVENTS" s={`${events.length} TOTAL`}/>
-    <button onClick={()=>setShowAdd(!showAdd)} className="btn-v" style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:18,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
+    <button onClick={()=>setShowAdd(!showAdd)} className="btn-v cta-primary" style={{marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
     {showAdd&&<div className="fade-up" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
       <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="e.g. OPEN GYM RUN"/>
@@ -1673,7 +1673,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
       <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym"/><FF l="DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ph="Details..." ta/>
       <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
       <div style={{display:"flex",gap:4,marginBottom:18,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"7px 12px",borderRadius:8,border:ne.type===t?`1px solid ${VOLT}`:`1px solid ${BORDER_CLR}`,background:ne.type===t?VOLT+"15":"transparent",color:ne.type===t?VOLT:MUTED,fontFamily:FD,fontSize:11,letterSpacing:2,cursor:"pointer",textTransform:"uppercase"}}>{t}</button>)}</div>
-      <button className="btn-v" onClick={handleAddEvent} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:18,letterSpacing:4,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE EVENT</button>
+      <button className="btn-v cta-primary" onClick={handleAddEvent} style={{}}>CREATE EVENT</button>
     </div>}
 
     {[...events].sort((a,b)=>a.date.localeCompare(b.date)).map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const isExp=expEv===ev.id;
@@ -1712,8 +1712,8 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
             </div>
           </div>
 
-          <button onClick={()=>removeEvent(ev.id)} style={{width:"100%",marginTop:14,padding:"12px",background:"#FF454512",border:"1px solid #FF454533",borderRadius:10,color:"#FF4545",fontFamily:FD,fontSize:13,letterSpacing:2,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>DELETE EVENT
+          <button onClick={()=>removeEvent(ev.id)} className="btn-v cta-danger" style={{marginTop:14}}>
+            <span className="cta-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></span>DELETE EVENT
           </button>
         </div>}
       </div>})}
@@ -1758,13 +1758,13 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="fade-up">
     <SH t="S&C SESSIONS" s={`${scSessions.length} TOTAL`}/>
-    <button className="btn-v" onClick={()=>setShowAddSC(!showAddSC)} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+    <button className="btn-v cta-primary" onClick={()=>setShowAddSC(!showAddSC)} style={{marginBottom:16}}>
       {showAddSC?"CANCEL":"+ ADD SESSION"}
     </button>
     {showAddSC&&<div className="fade-up" style={{background:CARD_BG,borderRadius:16,padding:"20px 18px",marginBottom:16,border:`1px solid ${BORDER_CLR}`}}>
       <FF l="SPORT" v={nsc.sport} set={v=>setNsc({...nsc,sport:v})} ph="e.g. Basketball"/>
       <div style={{display:"flex",gap:8}}><div style={{flex:1}}><FF l="DATE" v={nsc.date} set={v=>setNsc({...nsc,date:v})} tp="date"/></div><div style={{flex:1}}><FF l="TIME" v={nsc.time} set={v=>setNsc({...nsc,time:v})} ph="6:00 AM"/></div></div>
-      <button className="btn-v" onClick={handleAddSC} style={{width:"100%",padding:"14px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:12,cursor:"pointer"}}>CREATE SESSION</button>
+      <button className="btn-v cta-primary" onClick={handleAddSC} style={{}}>CREATE SESSION</button>
     </div>}
     {scSessions.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);
       return <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"14px 16px",marginBottom:8,border:`1px solid ${BORDER_CLR}`}}>
@@ -1960,7 +1960,7 @@ return <div className="fade-up">
     <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:16}}>This will permanently delete your account, scores, shot logs, RSVPs, and all associated data. This cannot be undone.</p>
     <div style={{display:"flex",gap:8}}>
       <button onClick={()=>setConfirmDel(false)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-      <button onClick={deleteAccount} style={{flex:1,padding:"12px",background:"#FF4545",color:"#FFFFFF",fontFamily:FD,fontSize:14,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer"}}>DELETE</button>
+      <button onClick={deleteAccount} className="btn-v cta-danger" style={{}}>DELETE</button>
     </div>
   </div>}
   <p style={{fontFamily:FB,color:MUTED,fontSize:10,textAlign:"center",marginTop:12,lineHeight:1.5}}>Your data is stored locally on this device. Deleting your account removes all your personal information and scores.</p>
