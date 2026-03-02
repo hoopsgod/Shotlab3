@@ -26,6 +26,16 @@ const BORDER_CLR = TOKENS.BG_SUBTLE;
 const MUTED=TOKENS.TEXT_MUTED,LIGHT=TOKENS.TEXT_PRIMARY;
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
+const IconBase=({children,size=24,color="currentColor",strokeWidth=2})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">{children}</svg>;
+const Calendar=({size=24,strokeWidth=2,color="currentColor"})=><IconBase size={size} strokeWidth={strokeWidth} color={color}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></IconBase>;
+const ClipboardList=({size=24,strokeWidth=2,color="currentColor"})=><IconBase size={size} strokeWidth={strokeWidth} color={color}><rect x="6" y="4" width="12" height="16" rx="2"/><path d="M9 4.5h6M9 10h6M9 14h6"/></IconBase>;
+const ChevronRight=({size=24,color="currentColor",strokeWidth=2})=><IconBase size={size} color={color} strokeWidth={strokeWidth}><path d="M9 6l6 6-6 6"/></IconBase>;
+const Dumbbell=({size=24,strokeWidth=2,color="currentColor"})=><IconBase size={size} strokeWidth={strokeWidth} color={color}><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></IconBase>;
+const Trophy=({size=24,strokeWidth=2,color="currentColor"})=><IconBase size={size} strokeWidth={strokeWidth} color={color}><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 01-10 0z"/><path d="M5 6H3a2 2 0 002 2h2M19 6h2a2 2 0 01-2 2h-2"/></IconBase>;
+const CircleDot=({size=24,strokeWidth=2,color="currentColor"})=><IconBase size={size} strokeWidth={strokeWidth} color={color}><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2"/></IconBase>;
+const Basketball=({size=24,strokeWidth=2,color="currentColor"})=><IconBase size={size} strokeWidth={strokeWidth} color={color}><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4.5 5.5 4.5 9S15 18 12 21M12 3c-3 3-4.5 5.5-4.5 9S9 18 12 21"/></IconBase>;
+const Whistle=({size=24,strokeWidth=2,color="currentColor"})=><IconBase size={size} strokeWidth={strokeWidth} color={color}><circle cx="9" cy="14" r="4"/><path d="M13 14h7M11 10l3-3"/></IconBase>;
+
 const DRILLS_INIT=[
 {id:1,name:"FORM SHOOTING",desc:"10 shots from 5 feet. Elbow, follow-through, arc.",max:10,icon:"ft"},
 {id:2,name:"FREE THROWS",desc:"10 free throw attempts. Lock in your routine.",max:10,icon:"ft"},
@@ -1067,7 +1077,7 @@ return <div className="fade-up">
 
 {/* Upcoming sessions */}
 <SH t="UPCOMING SESSIONS" s={`${upcoming.length} SCHEDULED`}/>
-{upcoming.length===0&&<Empty t="No upcoming sessions" action="Your coach will add S&C sessions here. Check back soon!" icon={<LiftIcon size={40} color="#555555"/>}/>}
+{upcoming.length===0&&<Empty isCoach={user.role==="coach"} icon={<Dumbbell size={48} strokeWidth={2}/>} headline={user.role==="coach"?"NO SESSIONS POSTED":"NO SESSIONS LOGGED"} supportingText={user.role==="coach"?"Post a session and your players will be notified to attend":"Start logging your S&C sessions to track your consistency"} ctaLabel={user.role==="coach"?"SCHEDULE A SESSION":"ADD A SESSION"} ctaAction={()=>{}}/>}
 {upcoming.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const going=sr.some(r=>r.email===user.email);const exp=expanded===s.id;
   return <div key={s.id} style={{marginBottom:12}}>
     <button onClick={()=>setExpanded(exp?null:s.id)} className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?SC_COLOR+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",cursor:"pointer",position:"relative",overflow:"hidden"}}>
@@ -1111,6 +1121,7 @@ return <div className="fade-up">
 function DashboardLeaderboard({scores,drills,programDrills,user,scRsvps,rsvps,shotLogs}){
 const[mode,setMode]=useState("home");
 const[sub,setSub]=useState("total");
+const[shareToast,setShareToast]=useState("");
 const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 const homeScores=useMemo(()=>scores.filter(s=>s.src==="home"||!s.src),[scores]);
 const progScores=useMemo(()=>scores.filter(s=>s.src==="program"),[scores]);
@@ -1179,7 +1190,7 @@ return <div>
 
 {/* Board */}
 <div key={mode+sub} className="slide-r">
-{board.length===0&&<Empty t={`No ${unit} logged yet`} action="Log a drill score to get on the board!" onTap={null}/>}
+{board.length===0&&<Empty isCoach={user.role==="coach"} icon={isHome?<Basketball size={48} strokeWidth={2}/>:<Trophy size={48} strokeWidth={2}/>} headline={isHome?(user.role==="coach"?"NO SCORES LOGGED YET":"BE THE FIRST ON THE BOARD"):(user.role==="coach"?"NO ACTIVITY YET":"THE BOARD IS EMPTY")} supportingText={isHome?(user.role==="coach"?"Your players haven’t logged any drill scores yet. Share the app to get them started":"Complete a drill and log your score to appear here"):(user.role==="coach"?"Once your players start logging drills their scores will appear here":"Log a drill score to claim your spot and compete with your team")} ctaLabel={isHome?(user.role==="coach"?"SHARE WITH PLAYERS":"START A DRILL"):(user.role==="coach"?"INVITE PLAYERS":"LOG A DRILL")} ctaAction={async()=>{if(user.role==="coach"&&isHome){const url=window.location.origin;try{if(navigator.share){await navigator.share({title:"Join ShotLab",text:"Your coach has invited you to join ShotLab",url});}else{await navigator.clipboard.writeText(url);setShareToast("Link copied to clipboard");setTimeout(()=>setShareToast(""),1800);}}catch{}}}} secondaryLabel={!isHome&&user.role==="coach"?"VIEW PLAYER ROSTER":undefined} secondaryAction={()=>{}}/>}
 
 {/* YOUR POSITION — sticky anchor */}
 {(()=>{const myIdx=board.findIndex(p=>p.email===user.email);const myEntry=board[myIdx];
@@ -1370,7 +1381,7 @@ function ProgramDrillsPanel({user,drills,scores,addScore}){
 const[active,setActive]=useState(null),[val,setVal]=useState(""),[saved,setSaved]=useState(false);
 const byDrill=useMemo(()=>{const m={};drills.forEach(d=>{m[d.id]=scores.filter(s=>s.src==="program"&&s.drillId===d.id)});return m;},[drills,scores]);
 const submit=()=>{if(!active)return;const n=parseInt(val);if(isNaN(n)||n<0||n>active.max)return;addScore(active.id,n,"program");setSaved(true);setVal("");setTimeout(()=>setSaved(false),1200)};
-if(drills.length===0)return <div style={{marginBottom:14}}><SH t="PROGRAM DRILLS" s="COACH ADDED"/><Empty t="NO DRILLS YET" action="Your coach can add up to 7 custom shooting drills" cta="CONTACT YOUR COACH" icon={<DrillIcon type="sb" size={48} color="#555555"/>}/></div>;
+if(drills.length===0)return <div style={{marginBottom:14}}><SH t="PROGRAM DRILLS" s="COACH ADDED"/><Empty isCoach={user.role==="coach"} icon={<ClipboardList size={48} strokeWidth={2}/>} headline={user.role==="coach"?"BUILD YOUR DRILL SET":"NO DRILLS YET"} supportingText={user.role==="coach"?"Add up to 7 custom shooting drills for your players to complete at home":"Your coach can add up to 7 custom shooting drills"} ctaLabel={user.role==="coach"?"ADD A DRILL":"CONTACT YOUR COACH"} ctaAction={()=>{}}/></div>;
 return <div style={{marginBottom:16}}><SH t="PROGRAM DRILLS" s={`${drills.length} ACTIVE`}/>{drills.map(d=>{const rows=byDrill[d.id]||[];const board=Object.values(rows.reduce((m,s)=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score;return m;},{})).sort((a,b)=>b.total-a.total).slice(0,3);return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${active?.id===d.id?CYAN+"55":BORDER_CLR}`,borderRadius:12,padding:"12px 14px",marginBottom:8}}><button onClick={()=>setActive(active?.id===d.id?null:d)} style={{width:"100%",background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:10}}><DrillIcon type={d.icon} size={18}/><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{d.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:10}}>{d.desc}</div></div><div style={{fontFamily:FB,color:CYAN,fontSize:9,fontWeight:700}}>{rows.length} LOGS</div></button>{active?.id===d.id&&<div style={{marginTop:10}}><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginBottom:6}}>TEAM LEADERBOARD {board.length>0&&"(TOTAL SCORES)"}</div>{board.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginBottom:8}}>No scores yet.</div>:board.map((p,i)=><div key={p.email} style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:11,color:LIGHT,marginBottom:4}}><span>#{i+1} {p.name}</span><span style={{color:CYAN,fontWeight:700}}>{p.total}</span></div>)}<div style={{display:"flex",gap:6,marginTop:8}}><input value={val} onChange={e=>setVal(e.target.value)} type="number" placeholder={`0-${d.max}`} style={{flex:1,padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/><button onClick={submit} style={{padding:"9px 12px",background:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:11,letterSpacing:1,cursor:"pointer"}}>LOG</button></div>{saved&&<div style={{fontFamily:FB,color:CYAN,fontSize:10,marginTop:6}}>Score saved for {user.name}.</div>}</div>}</div>})}</div>;
 }
 
@@ -1446,7 +1457,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 {/* Upcoming */}
 <SH t="UPCOMING EVENTS" s={`${upcoming.length} SCHEDULED`}/>
-{upcoming.length===0&&<Empty t="NO EVENTS SCHEDULED" action="Your coach will post workouts and events here" cta="NOTIFY MY COACH" icon={<EventIcon type="clinic" size={48} color="#555555"/>}/>}
+{upcoming.length===0&&<Empty isCoach={user.role==="coach"} icon={<Calendar size={48} strokeWidth={2}/>} headline={user.role==="coach"?"YOUR SCHEDULE IS EMPTY":"NO EVENTS SCHEDULED"} supportingText={user.role==="coach"?"Create your first event and your players will see it immediately":"Your coach will post workouts and events here"} ctaLabel={user.role==="coach"?"CREATE AN EVENT":"NOTIFY MY COACH"} ctaAction={()=>{}}/>}
 {upcoming.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;
   return <div key={ev.id} style={{marginBottom:12}}>
     <div className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",position:"relative",overflow:"hidden"}}>
@@ -2027,7 +2038,23 @@ function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i
 function CourtDivider({color=VOLT,my=20}){return <div style={{margin:`${my}px 0`,position:"relative",height:24,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><svg width="100%" height="24" viewBox="0 0 400 24" preserveAspectRatio="none" fill="none" style={{position:"absolute",inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:"50%",background:color,opacity:.15,position:"relative",zIndex:1}}/></div>}
 function DividerDot(){return <div style={{display:"flex",alignItems:"center",gap:10,width:"100%",margin:"14px 0"}}><div style={{height:1,background:BORDER_CLR,flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:VOLT}}/><div style={{height:1,background:BORDER_CLR,flex:1}}/></div>}
 function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#555555",flexShrink:0}}>{r}</div>}
-function Empty({t,action,onTap,cta="GET STARTED",icon=<DrillIcon type="sb" size={48} color="#555555"/>}){return <div style={{textAlign:"center",padding:"40px 20px"}}><div style={{opacity:.8,display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#555555"}}>{icon}</div><p style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:1.5,marginTop:14,lineHeight:1.2,textTransform:"uppercase"}}>{t}</p>{action&&<p style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:13,margin:"8px auto 0",lineHeight:1.5,fontWeight:500,maxWidth:260}}>{action}</p>}<button onClick={onTap||(()=>{})} className="btn-v cta-primary" style={{marginTop:14}}>{cta}</button></div>}
+function Empty({icon,headline,supportingText,ctaLabel,ctaAction,isCoach=false,showCta=true,secondaryLabel,secondaryAction,t,action,cta,onTap}){
+headline=headline||t||"NO DATA";
+supportingText=supportingText||action;
+ctaLabel=ctaLabel||cta||"GET STARTED";
+ctaAction=ctaAction||onTap;
+const iconColor=isCoach?"rgba(200, 255, 0, 0.6)":"#555555";
+return <div style={{minHeight:280,display:"flex",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"24px 20px"}}>
+  <div style={{width:"100%",maxWidth:340}}>
+    <div style={{position:"relative",width:88,height:88,margin:"0 auto",display:"flex",alignItems:"center",justifyContent:"center",background:isCoach?"radial-gradient(ellipse at center, rgba(200, 255, 0, 0.06) 0%, transparent 70%)":"transparent",animation:"scaleIn .3s ease-out both"}}>
+      <div style={{color:iconColor,display:"inline-flex",alignItems:"center",justifyContent:"center",opacity:1}}>{icon}</div>
+    </div>
+    <p style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:1.5,marginTop:14,lineHeight:1.2,textTransform:"uppercase",animation:"fadeUp .14s ease-out .4s both"}}>{headline}</p>
+    {supportingText&&<p style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:13,margin:"8px auto 0",lineHeight:1.5,fontWeight:500,maxWidth:260,animation:"fadeUp .12s ease-out .5s both"}}>{supportingText}</p>}
+    {showCta&&<button onClick={ctaAction||(()=>{})} className="btn-v cta-primary" style={{marginTop:14,animation:"fadeUp .12s ease-out .6s both"}}>{isCoach&&<Whistle size={12}/>} {ctaLabel||"GET STARTED"}</button>}
+    {secondaryLabel&&<button onClick={secondaryAction||(()=>{})} style={{marginTop:10,background:"none",border:"none",color:"#A0A0A0",fontFamily:FB,fontSize:12,textTransform:"uppercase",letterSpacing:"0.08em",display:"inline-flex",alignItems:"center",gap:6,cursor:"pointer"}}>{secondaryLabel}<ChevronRight size={12}/></button>}
+  </div>
+</div>} 
 function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>}
 function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>}</>}
 function NavBar({items,active,onChange}){
