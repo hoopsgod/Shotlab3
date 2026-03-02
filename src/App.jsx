@@ -538,7 +538,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
         const allDone=todayS.length>=drills.length;const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
         if(allDone&&shotsToday>0)return <span style={{color:VOLT}}>ALL DRILLS COMPLETE · {streak}D STREAK 🔥</span>;
         if(todayS.length>0)return <span>{todayS.length}/{drills.length} DRILLS · {shotsToday>0?shotsToday+" SHOTS · ":""}{streak}D STREAK</span>;
-        return "TODAY'S MISSION AWAITS";
+        return "Today's mission awaits";
       })()}</div><div style={{...TYPE.title,color:T.LT,marginTop:2}}>{u.name}</div></div>
     </div>
     <div style={{display:"flex",gap:6,alignItems:"center"}}>
