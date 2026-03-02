@@ -634,7 +634,6 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
 
   {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
   {(tab==="log-drill")&&!active&&!showShotStats&&<div className="fade-up">
-    <button onClick={()=>setTab("home")} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20,padding:0}}>&#8592; DASHBOARD</button>
     
     <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>
