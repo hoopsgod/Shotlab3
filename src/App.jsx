@@ -36,6 +36,16 @@ const SC_INIT=[
 const TIERS=[{min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},{min:2,name:"IRON",color:"#8B8B8B",bg:"#8B8B8B15"},{min:3,name:"BRONZE",color:"#CD7F32",bg:"#CD7F3215"},{min:5,name:"SILVER",color:"#C0C0C0",bg:"#C0C0C015"},{min:8,name:"GOLD",color:"#FFD700",bg:"#FFD70015"},{min:12,name:"DIAMOND",color:CYAN,bg:CYAN+"15"}];
 const getTier = c => [...TIERS].reverse().find(t => c >= t.min) || TIERS[0];
 const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
+const ALNUM="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const genId=(p="id")=>`${p}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+function generateJoinCode(existing=[],length=6){
+for(let tries=0;tries<30;tries++){
+let code="";
+for(let i=0;i<length;i++)code+=ALNUM[Math.floor(Math.random()*ALNUM.length)];
+if(!existing.includes(code))return code;
+}
+return Math.random().toString(36).slice(2,2+length).toUpperCase();
+}
 const DB={async get(k){try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null}catch{return null}},async set(k,v){try{await window.storage.set(k,JSON.stringify(v),true)}catch{}}};
 // Password hashing (simple but not plaintext)
 function hashPw(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return(h>>>0).toString(36)}
@@ -99,25 +109,62 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[ready,setReady]=useState(false);
+const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
 const T=THEMES[theme];
+const normalizeJoin=v=>String(v||"").trim().toUpperCase();
+const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
+const requirePlayer=(actor,teamId,email)=>actor?.role==="player"&&actor.teamId&&actor.teamId===teamId&&actor.email===email;
+
+const migrateData=useCallback(({players:rawPlayers,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
+const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
+const existingTeams=rawTeams||[];
+const coaches=ps.filter(p=>p.role==="coach");
+const hasTeams=existingTeams.length>0;
+const map={};
+let ts=[...existingTeams];
+const used=ts.map(t=>t.joinCode);
+if(!hasTeams){
+if(coaches.length===0){
+const tid=genId("team");
+ts=[{id:tid,name:"ShotLab Team",ownerCoachId:null,joinCode:generateJoinCode(used),joinCodeUpdatedAt:Date.now(),createdAt:Date.now()}];
+ps.forEach(p=>{map[p.email]=tid});
+}else{
+coaches.forEach((c,i)=>{const tid=genId("team");const code=generateJoinCode([...used,...ts.map(t=>t.joinCode)]);ts.push({id:tid,name:c.name?`${c.name.split(" ")[0]}'s Team`:`Team ${i+1}`,ownerCoachId:c.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now()});map[c.email]=tid;});
+ps.forEach(p=>{if(p.role!=="coach"){const firstCoach=coaches[0];if(firstCoach)map[p.email]=map[firstCoach.email];}});
+}
+}else{
+ts.forEach(t=>{if(t.ownerCoachId)map[t.ownerCoachId]=t.id;});
+}
+const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||ts[0]?.id||null}));
+const teamForEmail=e=>playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null;
+const scoresM=(rawScores||[]).map(s=>({...s,playerId:s.playerId||s.email,teamId:s.teamId||teamForEmail(s.email)}));
+const eventsM=(rawEvents||[]).map(e=>({...e,teamId:e.teamId||teamForEmail(e.ownerCoachId)}));
+const rsvpsM=(rawRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
+const shotM=(rawShotLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:l.teamId||teamForEmail(l.email)}));
+const chM=(rawChallenges||[]).map(c=>({...c,teamId:c.teamId||teamForEmail(c.from),playerId:c.playerId||c.from}));
+const scSM=(rawScSessions||[]).map(s=>({...s,teamId:s.teamId||teamForEmail(s.ownerCoachId)}));
+const scRM=(rawScRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
+const scLM=(rawScLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:l.teamId||teamForEmail(l.email)}));
+return {playersMigrated,teamsMigrated:ts,scoresM,eventsM,rsvpsM,shotM,chM,scSM,scRM,scLM};
+},[]);
 
 // Load persisted data + restore session
-useEffect(()=>{(async()=>{const[d,s,p,ev,rv,sl,ch,scs,scr,scl,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:session")]);if(d)setDrills(d);if(s)setScores(s);if(p)setPlayers(p);if(ev)setEvents(ev);if(rv)setRsvps(rv);if(sl)setShotLogs(sl);if(ch)setChallenges(ch);if(scs)setScSessions(scs);if(scr)setScRsvps(scr);if(scl)setScLogs(scl);
-// Restore session
-if(sess&&sess.email){const found=(p||[]).find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",name:found.name});setView(found.role||"player")}}
-setReady(true)})()},[]); // eslint-disable-line react-hooks/exhaustive-deps
+useEffect(()=>{(async()=>{const[d,s,p,ev,rv,sl,ch,scs,scr,scl,tm,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session")]);if(d)setDrills(d);
+const m=migrateData({players:p,scores:s,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
+setPlayers(m.playersMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
+await Promise.all([DB.set("sl:players",m.playersMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
+if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",name:found.name,teamId:found.teamId});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else setView(found.role||"player")}}
+setReady(true)})()},[migrateData]);
 
 const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
 // Auth with hashed passwords
 const register=async(email,password,name,role)=>{
-// Use functional state update to avoid stale closure
 const existing=players.find(p=>p.email===email);
 if(existing)return{ok:false,err:"Account already exists. Please sign in."};
 const hashed=hashPw(password);
-const np=[...players,{email,name,password:hashed,role}];
+const np=[...players,{email,name,password:hashed,role,teamId:null}];
 await P("sl:players",np,setPlayers);
-setUser({email,role,name});setView(role);
+setUser({email,role,name,teamId:null});setView(role==="coach"?"create-team":"join-team");
 DB.set("sl:session",{email});
 return{ok:true};
 };
@@ -126,13 +173,14 @@ const p=players.find(p=>p.email===email);
 if(!p)return{ok:false,err:"No account found. Please register first."};
 const hashed=hashPw(password);
 if(p.password&&p.password!==hashed){
-// Support legacy unhashed passwords during migration
 if(p.password!==password)return{ok:false,err:"Incorrect password."};
-// Migrate to hashed
 P("sl:players",players.map(pl=>pl.email===email?{...pl,password:hashed}:pl),setPlayers);
 }
 if(!p.password){P("sl:players",players.map(pl=>pl.email===email?{...pl,password:hashed}:pl),setPlayers)}
-setUser({email,role:p.role||"player",name:p.name});setView(p.role||"player");
+setUser({email,role:p.role||"player",name:p.name,teamId:p.teamId||null});
+if((p.role||"player")==="coach"&&!p.teamId)setView("create-team");
+else if((p.role||"player")==="player"&&!p.teamId)setView("join-team");
+else setView(p.role||"player");
 DB.set("sl:session",{email});
 return{ok:true};
 };
@@ -141,37 +189,78 @@ const deleteAccount=async()=>{
 if(!user)return;
 const e=user.email;
 await P("sl:players",players.filter(p=>p.email!==e),setPlayers);
-await P("sl:scores",scores.filter(s=>s.email!==e),setScores);
-await P("sl:rsvps",rsvps.filter(r=>r.email!==e),setRsvps);
-await P("sl:shotlogs",shotLogs.filter(s=>s.email!==e),setShotLogs);
+await P("sl:scores",scores.filter(s=>s.playerId!==e),setScores);
+await P("sl:rsvps",rsvps.filter(r=>r.playerId!==e),setRsvps);
+await P("sl:shotlogs",shotLogs.filter(s=>s.playerId!==e),setShotLogs);
 await P("sl:challenges",challenges.filter(c=>c.from!==e&&c.to!==e),setChallenges);
-await P("sl:sc-rsvps",scRsvps.filter(r=>r.email!==e),setScRsvps);
-await P("sl:sc-logs",scLogs.filter(l=>l.email!==e),setScLogs);
+await P("sl:sc-rsvps",scRsvps.filter(r=>r.playerId!==e),setScRsvps);
+await P("sl:sc-logs",scLogs.filter(l=>l.playerId!==e),setScLogs);
 DB.set("sl:session",null);setUser(null);setView("auth");
 };
-const addScore=async(drillId,score)=>{if(!user)return;await P("sl:scores",[...scores,{email:user.email,name:user.name,drillId,score,date:todayStr(),ts:Date.now(),src:"home"}],setScores)};
-const updateDrill=async(id,up)=>{await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
-const addDrill=async(drill)=>{await P("sl:drills",[...drills,{...drill,id:Date.now()}],setDrills)};
-const removeDrill=async(id)=>{await P("sl:drills",drills.filter(d=>d.id!==id),setDrills)};
-const toggleRsvp=async(eid)=>{const ex=rsvps.find(r=>r.eventId===eid&&r.email===user.email);if(ex)await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.email===user.email)),setRsvps);else await P("sl:rsvps",[...rsvps,{eventId:eid,email:user.email,name:user.name,ts:Date.now()}],setRsvps)};
-const addEvent=async ev=>{await P("sl:events",[...events,{...ev,id:Date.now()}],setEvents)};
-const removeEvent=async id=>{await P("sl:events",events.filter(e=>e.id!==id),setEvents);await P("sl:rsvps",rsvps.filter(r=>r.eventId!==id),setRsvps)};
-const removeRsvp=async(eid,email)=>{await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.email===email)),setRsvps)};
-const addRsvp=async(eid,email,name)=>{if(rsvps.find(r=>r.eventId===eid&&r.email===email))return;await P("sl:rsvps",[...rsvps,{eventId:eid,email,name,ts:Date.now()}],setRsvps)};
-const addShotLog=async(made,date)=>{await P("sl:shotlogs",[...shotLogs,{email:user.email,name:user.name,made,date,ts:Date.now()}],setShotLogs)};
-const addChallenge=async(ch)=>{await P("sl:challenges",[...challenges,{...ch,id:Date.now(),from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges)};
-const respondChallenge=async(id,score)=>{await P("sl:challenges",challenges.map(c=>c.id===id?{...c,respScore:score,respTs:Date.now(),status:score>c.score?"won":score===c.score?"tied":"lost"}:c),setChallenges)};
-const addScSession=async(s)=>{await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now()}],setScSessions)};
-const removeScSession=async(id)=>{await P("sl:sc-sessions",scSessions.filter(s=>s.id!==id),setScSessions);await P("sl:sc-rsvps",scRsvps.filter(r=>r.sessionId!==id),setScRsvps)};
-const toggleScRsvp=async(sid)=>{const ex=scRsvps.find(r=>r.sessionId===sid&&r.email===user.email);if(ex)await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.email===user.email)),setScRsvps);else await P("sl:sc-rsvps",[...scRsvps,{sessionId:sid,email:user.email,name:user.name,ts:Date.now()}],setScRsvps)};
-const addScLog=async(log)=>{if(!user)return;await P("sl:sc-logs",[{...log,id:Date.now(),email:user.email,name:user.name},...scLogs],setScLogs)};
+const createTeam=async(name,meta={})=>{
+if(!user||user.role!=="coach")return{ok:false,err:"Not authorized"};
+if(teams.some(t=>t.ownerCoachId===user.email))return{ok:false,err:"Team already exists"};
+const code=generateJoinCode(teams.map(t=>t.joinCode));
+const nt={id:genId("team"),name:san(name)||"Team",school:san(meta.school||""),level:san(meta.level||""),ownerCoachId:user.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now()};
+await P("sl:teams",[...teams,nt],setTeams);
+const np=players.map(p=>p.email===user.email?{...p,teamId:nt.id}:p);
+await P("sl:players",np,setPlayers);
+setUser({...user,teamId:nt.id});setView("coach");
+return{ok:true,team:nt};
+};
+const joinTeam=async(code)=>{
+if(!user||user.role!=="player")return{ok:false,err:"Not authorized"};
+const c=normalizeJoin(code);const t=teams.find(tm=>tm.joinCode===c);
+if(!t)return{ok:false,err:"Invalid team code."};
+const np=players.map(p=>p.email===user.email?{...p,teamId:t.id}:p);
+await P("sl:players",np,setPlayers);
+setUser({...user,teamId:t.id});setView("player");
+return{ok:true};
+};
+const regenerateJoinCode=async(teamId)=>{
+if(!requireCoach(user,teamId))return{ok:false,err:"Not authorized"};
+const t=teams.find(tm=>tm.id===teamId&&tm.ownerCoachId===user.email);
+if(!t)return{ok:false,err:"Team not found"};
+const code=generateJoinCode(teams.filter(x=>x.id!==teamId).map(x=>x.joinCode));
+await P("sl:teams",teams.map(tm=>tm.id===teamId?{...tm,joinCode:code,joinCodeUpdatedAt:Date.now()}:tm),setTeams);
+return{ok:true,joinCode:code};
+};
+const addScore=async(drillId,score)=>{if(!user||!user.teamId)return;await P("sl:scores",[...scores,{email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,drillId,score,date:todayStr(),ts:Date.now(),src:"home"}],setScores)};
+const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
+const addDrill=async(drill)=>{if(user?.role!=="coach")return;await P("sl:drills",[...drills,{...drill,id:Date.now()}],setDrills)};
+const removeDrill=async(id)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.filter(d=>d.id!==id),setDrills)};
+const toggleRsvp=async(eid)=>{if(!user?.teamId)return;const ex=rsvps.find(r=>r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex)await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId)),setRsvps);else await P("sl:rsvps",[...rsvps,{eventId:eid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setRsvps)};
+const addEvent=async ev=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:events",[...events,{...ev,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setEvents)};
+const removeEvent=async id=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:events",events.filter(e=>!(e.id===id&&e.teamId===user.teamId)),setEvents);await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===id&&r.teamId===user.teamId)),setRsvps)};
+const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps)};
+const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)return;if(rsvps.find(r=>r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId))return;await P("sl:rsvps",[...rsvps,{eventId:eid,email,playerId:email,teamId:user.teamId,name,ts:Date.now()}],setRsvps)};
+const addShotLog=async(made,date)=>{if(!user?.teamId)return;await P("sl:shotlogs",[...shotLogs,{email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,made,date,ts:Date.now()}],setShotLogs)};
+const addChallenge=async(ch)=>{if(!user?.teamId)return;await P("sl:challenges",[...challenges,{...ch,id:Date.now(),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges)};
+const respondChallenge=async(id,score)=>{if(!user?.teamId)return;await P("sl:challenges",challenges.map(c=>c.id===id&&c.teamId===user.teamId&&c.to===user.email?{...c,respScore:score,respTs:Date.now(),status:score>c.score?"won":score===c.score?"tied":"lost"}:c),setChallenges)};
+const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setScSessions)};
+const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:sc-sessions",scSessions.filter(s=>!(s.id===id&&s.teamId===user.teamId)),setScSessions);await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===id&&r.teamId===user.teamId)),setScRsvps)};
+const toggleScRsvp=async(sid)=>{if(!user?.teamId)return;const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex)await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)),setScRsvps);else await P("sl:sc-rsvps",[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setScRsvps)};
+const addScLog=async(log)=>{if(!user?.teamId)return;await P("sl:sc-logs",[{...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name},...scLogs],setScLogs)};
+
+
+const scopedPlayers=players.filter(p=>p.teamId===user?.teamId);
+const scopedScores=scores.filter(s=>s.teamId===user?.teamId);
+const scopedEvents=events.filter(e=>e.teamId===user?.teamId);
+const scopedRsvps=rsvps.filter(r=>r.teamId===user?.teamId);
+const scopedShotLogs=shotLogs.filter(l=>l.teamId===user?.teamId);
+const scopedChallenges=challenges.filter(c=>c.teamId===user?.teamId);
+const scopedScSessions=scSessions.filter(s=>s.teamId===user?.teamId);
+const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
+const scopedScLogs=scLogs.filter(l=>l.teamId===user?.teamId);
+const myTeam=teams.find(t=>t.id===user?.teamId)||null;
 
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
-{view==="auth"&&<Auth onLogin={login} onRegister={register} players={players}/>}
-{view==="player"&&<Player u={user} drills={drills} scores={scores} addScore={addScore} events={events} rsvps={rsvps} toggleRsvp={toggleRsvp} shotLogs={shotLogs} addShotLog={addShotLog} challenges={challenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={players} T={T} theme={theme} setTheme={setTheme} scSessions={scSessions} scRsvps={scRsvps} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount}/>}
-{view==="coach"&&<Coach u={user} drills={drills} scores={scores} players={players} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} events={events} rsvps={rsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scSessions} scRsvps={scRsvps} addScSession={addScSession} removeScSession={removeScSession} shotLogs={shotLogs} logout={logout} deleteAccount={deleteAccount}/>}
+{view==="auth"&&<Auth onLogin={login} onRegister={register} players={players}/>}{view==="create-team"&&<CreateTeam onCreate={createTeam} u={user}/>}
+{view==="join-team"&&<JoinTeam onJoin={joinTeam} u={user}/>}
+{view==="player"&&<Player u={user} drills={drills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount}/>}
+{view==="coach"&&<Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} drills={drills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/>}
 </>;
 }
 
@@ -271,6 +360,18 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 ```
 
   </div>;
+}
+
+function CreateTeam({u,onCreate}){
+const[name,setName]=useState("");const[school,setSchool]=useState("");const[level,setLevel]=useState("");const[err,setErr]=useState("");
+const submit=async()=>{if(!name.trim())return setErr("Enter a team name");const r=await onCreate(name.trim(),{school,level});if(!r.ok)setErr(r.err||"Could not create team")}
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Welcome {u?.name}. Create your team to continue.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#ef4444",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:BG,border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>CREATE TEAM</button></div></div>;
+}
+
+function JoinTeam({u,onJoin}){
+const[code,setCode]=useState("");const[err,setErr]=useState("");
+const submit=async()=>{const r=await onJoin(code);if(!r.ok)setErr(r.err||"Could not join team")};
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#ef4444",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v" style={{width:"100%",padding:14,background:VOLT,color:BG,border:"none",borderRadius:10,fontFamily:FD,letterSpacing:2}}>JOIN TEAM</button></div></div>;
 }
 
 // ═══════════════════════════════════════
@@ -1334,11 +1435,11 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 // ═══════════════════════════════════════
 // COACH SCREEN
 // ═══════════════════════════════════════
-function Coach({u,drills,scores,players,updateDrill,addDrill,removeDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,addScSession,removeScSession,shotLogs,logout,deleteAccount}){
+function Coach({u,team,regenerateJoinCode,drills,scores,players,updateDrill,addDrill,removeDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,addScSession,removeScSession,shotLogs,logout,deleteAccount}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:""});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""});
 const[nudged,setNudged]=useState([]);
-const[confirmDelete,setConfirmDelete]=useState(null);
+const[confirmDelete,setConfirmDelete]=useState(null);const[codeErr,setCodeErr]=useState("");
 const ups=useMemo(()=>{const es=[...new Set(scores.map(s=>s.email))];return es.map(e=>{const p=players.find(p=>p.email===e);return{email:e,name:p?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())}})},[scores,players]);
 const allKnown=useMemo(()=>{const m={};players.forEach(p=>m[p.email]=p.name);scores.forEach(s=>{if(!m[s.email])m[s.email]=s.name||s.email});return Object.entries(m).map(([email,name])=>({email,name}))},[players,scores]);
 const today=todayStr(),todayS=scores.filter(s=>s.date===today);
@@ -1376,7 +1477,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",flexDirectio
 <button aria-label="Log out" onClick={logout} style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:MUTED,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
 </div>
 </div>
-<div style={{display:"flex",gap:8,marginBottom:4}}><SC l="PLAYERS" v={ups.length} c={ORANGE} small/><SC l="SCORES" v={scores.length} c={LIGHT} small/><SC l="EVENTS" v={events.length} c={CYAN} small/></div>
+<div style={{display:"flex",gap:8,marginBottom:4}}><SC l="PLAYERS" v={ups.length} c={ORANGE} small/><SC l="SCORES" v={scores.length} c={LIGHT} small/><SC l="EVENTS" v={events.length} c={CYAN} small/></div><div style={{margin:"10px 0 4px",padding:"10px 12px",border:`1px solid ${ORANGE}33`,borderRadius:10,background:ORANGE+"0d"}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:2,color:ORANGE,fontWeight:700}}>TEAM CODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><div style={{fontFamily:FD,fontSize:20,color:LIGHT,letterSpacing:3}}>{team?.joinCode||"—"}</div><button onClick={()=>navigator.clipboard?.writeText(team?.joinCode||"")} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>COPY</button><button onClick={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>REGENERATE</button></div>{codeErr&&<div style={{color:"#ef4444",fontSize:11,marginTop:5}}>{codeErr}</div>}</div>
 </div>
 
 ```
