@@ -1501,6 +1501,36 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 // ═══════════════════════════════════════
 // COACH SCREEN
 // ═══════════════════════════════════════
+function AccordionSection({title,subtitle,countLabel,storageKey,defaultOpen=false,children}){
+const contentId=useMemo(()=>`accordion-${storageKey.replace(/[^a-zA-Z0-9-_]/g,"-")}`,[storageKey]);
+const[open,setOpen]=useState(()=>{if(typeof window==="undefined")return defaultOpen;const saved=window.localStorage.getItem(storageKey);if(saved===null)return defaultOpen;return saved==="true";});
+useEffect(()=>{if(typeof window!=="undefined")window.localStorage.setItem(storageKey,String(open));},[open,storageKey]);
+return <div>
+  <button type="button" aria-expanded={open} aria-controls={contentId} onClick={()=>setOpen(v=>!v)}
+    style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,padding:"14px 16px",background:CARD_BG,border:`1px solid ${open?VOLT+"55":BORDER_CLR}`,borderRadius:14,cursor:"pointer",textAlign:"left",transition:"all .2s",boxShadow:open?`0 0 0 1px ${VOLT}22`:"none"}}
+    onMouseEnter={e=>{e.currentTarget.style.background="#1a1a1a";e.currentTarget.style.borderColor=open?VOLT+"66":VOLT+"33";}}
+    onMouseLeave={e=>{e.currentTarget.style.background=CARD_BG;e.currentTarget.style.borderColor=open?VOLT+"55":BORDER_CLR;}}
+    onFocus={e=>{e.currentTarget.style.boxShadow=`0 0 0 2px ${VOLT}55`;}}
+    onBlur={e=>{e.currentTarget.style.boxShadow=open?`0 0 0 1px ${VOLT}22`:"none";}}
+  >
+    <div style={{minWidth:0}}>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:3,textTransform:"uppercase"}}>{title}</div>
+      {subtitle&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2,letterSpacing:"0.06em",textTransform:"uppercase"}}>{subtitle}</div>}
+    </div>
+    <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+      {countLabel&&<span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{countLabel}</span>}
+      <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:open?"rotate(180deg)":"rotate(0deg)",transition:"transform .2s"}}><path d="M3 6l5 5 5-5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
+    </div>
+  </button>
+  <div id={contentId} style={{marginTop:6,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,overflow:"hidden",display:"grid",gridTemplateRows:open?"1fr":"0fr",transition:"grid-template-rows .2s ease, opacity .2s ease",opacity:open?1:.75}}>
+    <div style={{overflow:"hidden"}}>
+      <div style={{height:1,background:`${VOLT}22`}}/>
+      <div style={{padding:"12px 12px 6px"}}>{children}</div>
+    </div>
+  </div>
+</div>
+}
+
 function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,addScSession,removeScSession,shotLogs,logout,deleteAccount}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:""});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"10",icon:"ft"});
@@ -1598,7 +1628,13 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* DRILLS */}
   {tab==="drills"&&!editD&&<div className="fade-up">
-    <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="MANAGE DRILLS" s={`${drills.length} ACTIVE`}/>
+    <AccordionSection
+      title="Manage Drills"
+      subtitle='Customize the drills your players see in "At Home".'
+      countLabel={`${drills.length} ACTIVE`}
+      storageKey="shotlab.coach.accordion.drills"
+      defaultOpen={false}
+    >
     <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
     <div style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12,marginBottom:14}}>
       <div style={{fontFamily:FD,color:CYAN,fontSize:12,letterSpacing:2,marginBottom:6}}>PROGRAM SHOOTING DRILLS ({programDrills.length}/7)</div>
@@ -1648,6 +1684,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
         <button className="btn-v cta-primary" onClick={handleAddDrill} style={{width:"100%"}}>ADD DRILL</button>
       </div>
     </div>}
+    </AccordionSection>
   </div>}
   {tab==="drills"&&editD&&<div className="scale-in" style={{paddingTop:8}}>
     <button onClick={()=>setEditD(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:28}}>&#8592; BACK</button>
@@ -1667,7 +1704,13 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* EVENTS */}
   {tab==="events"&&<div className="fade-up">
-    <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="MANAGE EVENTS" s={`${events.length} TOTAL`}/>
+    <AccordionSection
+      title="Manage Events"
+      subtitle="Schedule events, track RSVPs, and attendance"
+      countLabel={`${events.length} TOTAL`}
+      storageKey="shotlab.coach.accordion.events"
+      defaultOpen={false}
+    >
     <button onClick={()=>setShowAdd(!showAdd)} className="btn-v cta-primary" style={{marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
     {showAdd&&<div className="fade-up" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
@@ -1720,6 +1763,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
           </button>
         </div>}
       </div>})}
+    </AccordionSection>
   </div>}
 
   {tab==="players"&&!selP&&<div>
@@ -1760,7 +1804,13 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="fade-up">
-    <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="S&C SESSIONS" s={`${scSessions.length} TOTAL`}/>
+    <AccordionSection
+      title="S&C Sessions"
+      subtitle="Manage strength & conditioning schedule"
+      countLabel={`${scSessions.length} TOTAL`}
+      storageKey="shotlab.coach.accordion.sc"
+      defaultOpen={false}
+    >
     <button className="btn-v cta-primary" onClick={()=>setShowAddSC(!showAddSC)} style={{marginBottom:16}}>
       {showAddSC?"CANCEL":"+ ADD SESSION"}
     </button>
@@ -1781,6 +1831,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
         <button onClick={()=>removeScSession(s.id)} style={{background:"none",border:"none",color:"#FF4545",cursor:"pointer",fontSize:16,padding:4}}>&#10005;</button>
       </div>;
     })}
+    </AccordionSection>
   </div>}
 </div>
 
