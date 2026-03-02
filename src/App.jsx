@@ -1499,45 +1499,35 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 }
 
 
-function CoachCommandCenter({totalPlayers,activeTodayCount,nextEventDateFormatted,highlightPlayersAttention,primaryQuickAction,onPlayersClick,onActiveTodayClick,onNextEventClick,onAddPlayer,onAddDrill,onScheduleEvent,onLogScore}){
-const metricBase="group flex min-h-[56px] flex-col justify-center rounded-xl border bg-black/50 px-2 py-2 text-left cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0A09] active:scale-[0.99]";
-const quickBase="h-10 min-w-[140px] shrink-0 rounded-full border bg-black/40 px-4 text-sm font-semibold tracking-wide text-[#C8FF00] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0A09]";
-const quickCls=(isPrimary)=>isPrimary
-?`${quickBase} border-[#C8FF00]/80 hover:bg-[#C8FF00] hover:text-[#0B0A09]`
-:`${quickBase} border-[#C8FF00]/40 text-[#BEF969] hover:bg-[#C8FF00] hover:text-[#0B0A09] active:bg-[#C8FF00] active:text-[#0B0A09]`;
-
-return <section className="mx-auto mb-3 w-full max-w-[1200px] rounded-2xl border border-[#C8FF00]/20 bg-black/40 p-3 text-white backdrop-blur">
-  <div className="mt-3 mb-2 flex items-center justify-between">
-    <h2 className="text-[11px] font-[900] uppercase tracking-[0.18em] text-white/80">COACH COMMAND CENTER</h2>
-  </div>
+function CoachCommandCenter({totalPlayers,activeTodayCount,nextEventDateFormatted,onPlayersClick,onActiveTodayClick,onNextEventClick,onAddPlayer,onAddDrill,onScheduleEvent,onLogScore}){
+return <section className="mb-3 rounded-2xl bg-black/40 border border-lime-400/20 p-3 backdrop-blur text-white">
+  <div className="text-xs tracking-[0.25em] uppercase text-white/80 mb-2">Coach Command Center</div>
 
   <div className="grid grid-cols-3 gap-2">
-    <button type="button" onClick={onPlayersClick} className={`${metricBase} ${highlightPlayersAttention?"border-[#FF454566] shadow-[0_0_0_1px_rgba(255,69,69,0.3),0_0_14px_rgba(255,69,69,0.18)]":"border-[#C8FF0033] hover:border-[#C8FF0070]"}`}>
-      <div className="truncate text-[10px] font-semibold tracking-[0.14em] text-white/70">PLAYERS</div>
-      <div className="mt-1 text-[22px] font-black leading-none text-[#C8FF00]">{totalPlayers}</div>
+    <button type="button" onClick={onPlayersClick} className="min-h-[56px] rounded-xl bg-black/50 border border-lime-400/25 px-2 flex flex-col justify-center text-left active:scale-[0.99] transition">
+      <div className="text-[10px] tracking-[0.22em] uppercase text-white/60 truncate">Players</div>
+      <div className="text-xl font-semibold text-lime-400 leading-tight">{totalPlayers ?? 0}</div>
     </button>
 
-    <button type="button" onClick={onActiveTodayClick} className={`${metricBase} border-[#C8FF0033] hover:border-[#C8FF0070]`}>
-      <div className="truncate text-[10px] font-semibold tracking-[0.14em] text-white/70">ACTIVE TODAY</div>
-      <div className="mt-1 text-[22px] font-black leading-none text-[#C8FF00]">{activeTodayCount}</div>
+    <button type="button" onClick={onActiveTodayClick} className="min-h-[56px] rounded-xl bg-black/50 border border-lime-400/25 px-2 flex flex-col justify-center text-left active:scale-[0.99] transition">
+      <div className="text-[10px] tracking-[0.22em] uppercase text-white/60 truncate">Active Today</div>
+      <div className="text-xl font-semibold text-lime-400 leading-tight">{activeTodayCount ?? 0}</div>
     </button>
 
-    <button type="button" onClick={onNextEventClick} className={`${metricBase} border-[#C8FF0033] hover:border-[#C8FF0070]`}>
-      <div className="truncate text-[10px] font-semibold tracking-[0.14em] text-white/70">NEXT EVENT</div>
-      <div className="mt-1 text-[16px] font-black leading-none text-[#C8FF00]">{nextEventDateFormatted}</div>
+    <button type="button" onClick={onNextEventClick} className="min-h-[56px] rounded-xl bg-black/50 border border-lime-400/25 px-2 flex flex-col justify-center text-left active:scale-[0.99] transition">
+      <div className="text-[10px] tracking-[0.22em] uppercase text-white/60 truncate">Next Event</div>
+      <div className="text-sm font-semibold text-white/90 truncate">{nextEventDateFormatted ?? "None"}</div>
     </button>
   </div>
 
-  <div className="mt-2 overflow-x-auto whitespace-nowrap pb-1">
-    <div className="flex gap-2">
-      <button type="button" onClick={onAddPlayer} className={quickCls(primaryQuickAction==="addPlayer")}>+ Add Player</button>
-      <button type="button" onClick={onAddDrill} className={quickCls(primaryQuickAction==="addDrill")}>+ Add Drill</button>
-      <button type="button" onClick={onScheduleEvent} className={quickCls(primaryQuickAction==="scheduleEvent")}>+ Schedule Event</button>
-      <button type="button" onClick={onLogScore} className={quickCls(false)}>+ Log Score</button>
-    </div>
+  <div className="flex gap-2 overflow-x-auto whitespace-nowrap pt-3 pb-1 [-webkit-overflow-scrolling:touch]">
+    <button type="button" onClick={onAddPlayer} className="shrink-0 min-w-[140px] h-10 rounded-full bg-black/40 border border-lime-400/35 text-lime-300 px-4 font-semibold tracking-wide hover:bg-lime-400 hover:text-black transition">+ Add Player</button>
+    <button type="button" onClick={onAddDrill} className="shrink-0 min-w-[140px] h-10 rounded-full bg-black/40 border border-lime-400/35 text-lime-300 px-4 font-semibold tracking-wide hover:bg-lime-400 hover:text-black transition">+ Add Drill</button>
+    <button type="button" onClick={onScheduleEvent} className="shrink-0 min-w-[140px] h-10 rounded-full bg-black/40 border border-lime-400/35 text-lime-300 px-4 font-semibold tracking-wide hover:bg-lime-400 hover:text-black transition">+ Schedule Event</button>
+    <button type="button" onClick={onLogScore} className="shrink-0 min-w-[140px] h-10 rounded-full bg-black/40 border border-lime-400/35 text-lime-300 px-4 font-semibold tracking-wide hover:bg-lime-400 hover:text-black transition">+ Log Score</button>
   </div>
 
-  <div className="mt-3 h-px w-full bg-white/10"/>
+  <div className="mt-3 h-px bg-white/10" />
 </section>;
 }
 
@@ -1570,15 +1560,6 @@ const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
 const sortedEvents=[...events].sort((a,b)=>a.date.localeCompare(b.date));
 const nextEvent=sortedEvents.find(e=>e.date>=today);
 const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"None";
-const highlightAddPlayer=totalPlayers===0;
-const highlightAddDrill=drills.length===0;
-const highlightScheduleEvent=events.length===0||!nextEvent;
-const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
-const inactivePlayersCount=ups.filter(p=>!activeThisWeek.has(p.email)).length;
-const highlightPlayersAttention=inactivePlayersCount>0;
-const primaryQuickAction=highlightAddPlayer?"addPlayer":highlightAddDrill?"addDrill":highlightScheduleEvent?"scheduleEvent":null;
 const jumpToSection=(targetTab,sectionId)=>{setTab(targetTab);setSelP(null);setTimeout(()=>document.getElementById(sectionId)?.scrollIntoView({behavior:"smooth",block:"start"}),120)};
 const handleLogScoreAction=()=>{
   // TODO: Route to dedicated coach score logging flow when implemented.
@@ -1610,8 +1591,6 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   totalPlayers={totalPlayers}
   activeTodayCount={activeTodayCount}
   nextEventDateFormatted={nextEventDateFormatted}
-  highlightPlayersAttention={highlightPlayersAttention}
-  primaryQuickAction={primaryQuickAction}
   onPlayersClick={()=>setTab("players")}
   onActiveTodayClick={()=>setTab("players")}
   onNextEventClick={()=>setTab("events")}
