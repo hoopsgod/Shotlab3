@@ -366,7 +366,7 @@ setPassword(acct.password);
 const demo=await onDemo(kind);
 if(!demo.ok)setErr(demo.err||"Unable to start demo.");
 };
-const inp={width:"100%",padding:"15px 16px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none"};
+const inp={width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,fontWeight:500,outline:"none",transition:"border-color .15s ease, box-shadow .15s ease"};
 return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden"}}>
 <CourtBG opacity={.024}/><GlowOrb color={VOLT} top="15%" left="50%" size={400}/><GlowOrb color={ORANGE} top="85%" left="30%" size={250}/>
 <div className="fade-up" style={{position:"relative",zIndex:1,width:"100%",maxWidth:400,padding:"0 24px"}}>
@@ -374,13 +374,13 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",opacity:.08,pointerEvents:"none"}}><SLLogo size={140}/></div>
 <div className="ball-bounce" style={{display:"inline-block",position:"relative",zIndex:1}}><div className="ball-spin"><DrillIcon type="ft" size={60}/></div></div>
 </div>
-<h1 style={{fontFamily:FD,fontSize:72,color:LIGHT,textAlign:"center",margin:0,lineHeight:.85,letterSpacing:4}}>SHOT<span style={{background:`linear-gradient(135deg,${VOLT},${CYAN})`,WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent",backgroundClip:"text"}}>LAB</span></h1>
+<h1 style={{fontFamily:FD,fontSize:72,color:LIGHT,textAlign:"center",margin:0,lineHeight:.85,letterSpacing:4}}>SHOT<span style={{color:VOLT}}>LAB</span></h1>
 <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,letterSpacing:5,margin:"8px 0 0",fontWeight:500}}>OFFSEASON DEVELOPMENT PROGRAM</p>
 <div style={{display:"flex",alignItems:"center",gap:12,margin:"32px auto",maxWidth:200}}><div style={{flex:1,height:1,background:`linear-gradient(to right,transparent,${VOLT}44)`}}/><div style={{width:6,height:6,borderRadius:"50%",background:VOLT,opacity:.6}}/><div style={{flex:1,height:1,background:`linear-gradient(to left,transparent,${VOLT}44)`}}/></div>
 <div style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:24,padding:"36px 28px",border:`1px solid ${BORDER_CLR}`}}>
 {/* Login / Register toggle */}
-<div style={{display:"flex",background:BG,borderRadius:12,padding:3,marginBottom:24,border:`1px solid ${BORDER_CLR}`}}>
-{["login","register"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,padding:"11px 0",borderRadius:10,border:"none",cursor:"pointer",fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:"uppercase",transition:"all .25s",background:mode===m?"#242424":"transparent",color:mode===m?LIGHT:"#555555",boxShadow:mode===m?`inset 0 -3px 0 ${VOLT},0 0 12px ${VOLT}10`:"none"}}>{m==="login"?"SIGN IN":"REGISTER"}</button>)}
+<div style={{display:"flex",background:"#1E1E1E",borderRadius:12,padding:2,marginBottom:24,border:"1px solid #242424"}}>
+{["login","register"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,height:44,borderRadius:10,border:"none",cursor:"pointer",fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:"uppercase",transition:"all .15s ease",background:mode===m?VOLT:"transparent",color:mode===m?"#000000":"#555555",fontWeight:mode===m?700:600}}>{m==="login"?"SIGN IN":"REGISTER"}</button>)}
 </div>
 
     {mode==="register"&&<>
@@ -391,29 +391,29 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
         {["player","coach"].map(r=><button key={r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#555555"}}>{r}</button>)}
       </div>
       <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>YOUR NAME</label>
-      <input type="text" value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="First Last" style={{...inp,marginBottom:14}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
+      <input type="text" value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="First Last" style={{...inp,marginBottom:14}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
     </>}
 
     {mode==="login"&&<>
-      <h2 style={{fontFamily:FD,color:LIGHT,fontSize:24,textAlign:"center",margin:"0 0 4px",letterSpacing:2}}>WELCOME BACK</h2>
-      <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 22px"}}>Sign in to access your dashboard</p>
+      <h2 style={{fontFamily:FB,color:LIGHT,fontSize:28,fontWeight:900,textAlign:"center",margin:"0 0 4px",letterSpacing:1.5,textTransform:"uppercase"}}>WELCOME BACK</h2>
+      <p style={{fontFamily:FB,color:"#A0A0A0",textAlign:"center",fontSize:13,fontWeight:400,margin:"0 0 22px"}}>Sign in to access your dashboard</p>
     </>}
 
     <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>EMAIL</label>
-    <input type="email" autoComplete="email" value={email} onChange={e=>{setEmail(e.target.value);setErr("")}} onKeyDown={e=>e.key==="Enter"&&(mode==="login"?doLogin():doRegister())} placeholder="you@example.com" style={{...inp,marginBottom:14}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
+    <input type="email" autoComplete="email" value={email} onChange={e=>{setEmail(e.target.value);setErr("")}} onKeyDown={e=>e.key==="Enter"&&(mode==="login"?doLogin():doRegister())} placeholder="you@example.com" style={{...inp,marginBottom:14}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
 
     <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>PASSWORD</label>
-    <input type="password" autoComplete={mode==="login"?"current-password":"new-password"} value={password} onChange={e=>{setPassword(e.target.value);setErr("")}} onKeyDown={e=>e.key==="Enter"&&(mode==="login"?doLogin():doRegister())} placeholder={mode==="register"?"Min 4 characters":"••••••••"} style={{...inp,marginBottom:err?8:20}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
+    <input type="password" autoComplete={mode==="login"?"current-password":"new-password"} value={password} onChange={e=>{setPassword(e.target.value);setErr("")}} onKeyDown={e=>e.key==="Enter"&&(mode==="login"?doLogin():doRegister())} placeholder={mode==="register"?"Min 4 characters":"••••••••"} style={{...inp,marginBottom:err?8:20}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
 
     {err&&<p style={{fontFamily:FB,color:"#FF4545",fontSize:12,margin:"0 0 14px"}}>{err}</p>}
 
     <button className="btn-v cta-primary" onClick={mode==="login"?doLogin:doRegister} style={{}}>
       {mode==="login"?"SIGN IN":"CREATE ACCOUNT"} &#8594;
     </button>
-    {mode==="login"&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginTop:10}}>
-      <button onClick={()=>doDemo("player")} style={{padding:"12px",background:"transparent",color:LIGHT,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:12,cursor:"pointer",textTransform:"uppercase"}}>Demo Player</button>
-      <button onClick={()=>doDemo("coach")} style={{padding:"12px",background:"transparent",color:LIGHT,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:12,cursor:"pointer",textTransform:"uppercase"}}>Demo Coach</button>
-    </div>}
+    {mode==="login"&&<><div style={{display:"flex",alignItems:"center",gap:10,width:"100%",margin:"8px 0 12px"}}><div style={{height:1,background:"#242424",flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:"#555555"}}/><div style={{height:1,background:"#242424",flex:1}}/></div><div style={{display:"flex",gap:12,justifyContent:"center",marginTop:0}}>
+      <button onClick={()=>doDemo("player")} className="btn-v" style={{height:44,padding:"0 20px",background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:12,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Demo Player</button>
+      <button onClick={()=>doDemo("coach")} className="btn-v" style={{height:44,padding:"0 20px",background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:12,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Demo Coach</button>
+    </div></>}
 
     <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:12,marginTop:16,cursor:"pointer"}} onClick={()=>{setMode(mode==="login"?"register":"login");setErr("")}}>
       {mode==="login"?"Don't have an account? ":"Already have an account? "}
@@ -536,7 +536,7 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
 
 </div>
 
-<div style={{flex:1,padding:"14px 20px 110px",overflowY:"auto",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
+<div style={{flex:1,padding:"14px 16px 110px",overflowY:"auto",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
   {/* Pull-to-refresh basketball */}
   {pullY>5&&<div style={{position:"absolute",top:-44,left:"50%",transform:"translateX(-50%)",textAlign:"center",opacity:Math.min(pullY/30,1)}}>
     <svg width="24" height="24" viewBox="0 0 40 40" fill="none" style={{animation:pullY>40?"bbBounce .5s ease infinite":"none"}}><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="2.5"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="1.5"/><path d="M20 3v34" stroke={ORANGE} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/></svg>
@@ -651,11 +651,11 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
       <div style={{display:"flex",gap:10,marginBottom:12}}>
         <div style={{flex:1}}>
           <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>MAKES</label>
-          <input type="number" min="0" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0" style={{width:"100%",padding:"12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:VOLT,fontFamily:FD,fontSize:24,textAlign:"center",outline:"none"}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
+          <input type="number" min="0" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0" style={{width:"100%",padding:"12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:VOLT,fontFamily:FD,fontSize:24,textAlign:"center",outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
         <div style={{flex:1}}>
           <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>DATE</label>
-          <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>e.target.style.borderColor=VOLT+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
+          <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
       </div>
       <button className="btn-v cta-primary" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?.7:1}}>
@@ -668,19 +668,17 @@ return <div style={{minHeight:"100dvh",background:T.BG,display:"flex",flexDirect
     <DividerDot/>
 
     {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
-    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
-    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done?Math.round(done.score/d.max*100):0;
-      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
-        <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
+    <div style={{fontFamily:FB,color:todayS.length>=drills.length&&drills.length>0?"#FFFFFF":VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
+    <div style={{width:"100%",height:4,background:"#242424",borderRadius:2,overflow:"hidden",marginBottom:12}}><div style={{width:`${drills.length>0?Math.min(100,Math.round(todayS.length/drills.length*100)):0}%`,height:"100%",background:VOLT,borderRadius:2,transition:"width .25s ease"}}/></div>
+    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);
+      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?"rgba(200, 255, 0, 0.20)":BORDER_CLR}`,borderRadius:16,padding:"16px",marginBottom:12,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.6:1}}>
+        <div style={{width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",borderRadius:12,flexShrink:0}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"99":VOLT}/></div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
           <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
         </div>
-        {done?<div style={{textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
-          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>
-        </div>
-        :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
+        {done?<div style={{width:36,height:36,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+         :<div style={{width:36,height:36,borderRadius:10,background:"rgba(200, 255, 0, 0.10)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .1s ease"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
       </button>})}
   </div>}
 
@@ -1381,7 +1379,7 @@ function ProgramDrillsPanel({user,drills,scores,addScore}){
 const[active,setActive]=useState(null),[val,setVal]=useState(""),[saved,setSaved]=useState(false);
 const byDrill=useMemo(()=>{const m={};drills.forEach(d=>{m[d.id]=scores.filter(s=>s.src==="program"&&s.drillId===d.id)});return m;},[drills,scores]);
 const submit=()=>{if(!active)return;const n=parseInt(val);if(isNaN(n)||n<0||n>active.max)return;addScore(active.id,n,"program");setSaved(true);setVal("");setTimeout(()=>setSaved(false),1200)};
-if(drills.length===0)return <div style={{marginBottom:14}}><SH t="PROGRAM DRILLS" s="COACH ADDED"/><Empty t="No program drills yet" action="Your coach can add up to 7 custom shooting drills." icon={<DrillIcon type="3p" size={40} color="#555555"/>}/></div>;
+if(drills.length===0)return <div style={{marginBottom:14}}><SH t="PROGRAM DRILLS" s="COACH ADDED"/><Empty t="NO DRILLS YET" action="Your coach can add up to 7 custom shooting drills" cta="CONTACT YOUR COACH" icon={<DrillIcon type="sb" size={48} color="#555555"/>}/></div>;
 return <div style={{marginBottom:16}}><SH t="PROGRAM DRILLS" s={`${drills.length} ACTIVE`}/>{drills.map(d=>{const rows=byDrill[d.id]||[];const board=Object.values(rows.reduce((m,s)=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score;return m;},{})).sort((a,b)=>b.total-a.total).slice(0,3);return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${active?.id===d.id?CYAN+"55":BORDER_CLR}`,borderRadius:12,padding:"12px 14px",marginBottom:8}}><button onClick={()=>setActive(active?.id===d.id?null:d)} style={{width:"100%",background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:10}}><DrillIcon type={d.icon} size={18}/><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{d.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:10}}>{d.desc}</div></div><div style={{fontFamily:FB,color:CYAN,fontSize:9,fontWeight:700}}>{rows.length} LOGS</div></button>{active?.id===d.id&&<div style={{marginTop:10}}><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginBottom:6}}>TEAM LEADERBOARD {board.length>0&&"(TOTAL SCORES)"}</div>{board.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:10,marginBottom:8}}>No scores yet.</div>:board.map((p,i)=><div key={p.email} style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:11,color:LIGHT,marginBottom:4}}><span>#{i+1} {p.name}</span><span style={{color:CYAN,fontWeight:700}}>{p.total}</span></div>)}<div style={{display:"flex",gap:6,marginTop:8}}><input value={val} onChange={e=>setVal(e.target.value)} type="number" placeholder={`0-${d.max}`} style={{flex:1,padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/><button onClick={submit} style={{padding:"9px 12px",background:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:11,letterSpacing:1,cursor:"pointer"}}>LOG</button></div>{saved&&<div style={{fontFamily:FB,color:CYAN,fontSize:10,marginTop:6}}>Score saved for {user.name}.</div>}</div>}</div>})}</div>;
 }
 
@@ -1451,7 +1449,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 {/* Upcoming */}
 <SH t="UPCOMING EVENTS" s={`${upcoming.length} SCHEDULED`}/>
-{upcoming.length===0&&<Empty t="No upcoming events" action="Your coach will post events here. RSVP to earn attendance tier badges!" icon={<EventIcon type="run" size={40} color="#555555"/>}/>}
+{upcoming.length===0&&<Empty t="NO EVENTS SCHEDULED" action="Your coach will post workouts and events here" cta="NOTIFY MY COACH" icon={<EventIcon type="clinic" size={48} color="#555555"/>}/>}
 {upcoming.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;
   return <div key={ev.id} style={{marginBottom:12}}>
     <div className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",position:"relative",overflow:"hidden"}}>
@@ -2032,9 +2030,9 @@ function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i
 function CourtDivider({color=VOLT,my=20}){return <div style={{margin:`${my}px 0`,position:"relative",height:24,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><svg width="100%" height="24" viewBox="0 0 400 24" preserveAspectRatio="none" fill="none" style={{position:"absolute",inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:"50%",background:color,opacity:.15,position:"relative",zIndex:1}}/></div>}
 function DividerDot(){return <div style={{display:"flex",alignItems:"center",gap:10,width:"100%",margin:"14px 0"}}><div style={{height:1,background:BORDER_CLR,flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:VOLT}}/><div style={{height:1,background:BORDER_CLR,flex:1}}/></div>}
 function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#555555",flexShrink:0}}>{r}</div>}
-function Empty({t,action,onTap,icon=<SLLogo size={40} opacity={.7}/>}){return <div style={{textAlign:"center",padding:"40px 20px"}}><div style={{opacity:.6,display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#555555"}}>{icon}</div><p style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:1.5,marginTop:14,lineHeight:1.2,textTransform:"uppercase"}}>{t}</p>{action&&<p style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:13,marginTop:8,lineHeight:1.5,fontWeight:500}}>{action}</p>}{onTap&&<button onClick={onTap} className="btn-v cta-primary" style={{marginTop:14}}>GET STARTED</button>}</div>}
+function Empty({t,action,onTap,cta="GET STARTED",icon=<DrillIcon type="sb" size={48} color="#555555"/>}){return <div style={{textAlign:"center",padding:"40px 20px"}}><div style={{opacity:.8,display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#555555"}}>{icon}</div><p style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:1.5,marginTop:14,lineHeight:1.2,textTransform:"uppercase"}}>{t}</p>{action&&<p style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:13,margin:"8px auto 0",lineHeight:1.5,fontWeight:500,maxWidth:260}}>{action}</p>}<button onClick={onTap||(()=>{})} className="btn-v cta-primary" style={{marginTop:14}}>{cta}</button></div>}
 function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>}
-function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 14px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontSize:16,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>}</>}
+function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>}</>}
 function NavBar({items,active,onChange}){
 const NAV_INACTIVE="#555555",NAV_ACTIVE="#C8FF00";
 return <nav role="navigation" aria-label="Main navigation" style={{position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:64,paddingBottom:"env(safe-area-inset-bottom)",background:"#1E1E1E",borderTop:"1px solid #242424",zIndex:20}}>{items.map(t=>{const a=active===t.k;
