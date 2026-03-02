@@ -1498,6 +1498,49 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
   </div>;
 }
 
+
+function CoachCommandCenter({totalPlayers,activeTodayCount,nextEventDateFormatted,highlightPlayersAttention,primaryQuickAction,onPlayersClick,onActiveTodayClick,onNextEventClick,onAddPlayer,onAddDrill,onScheduleEvent,onLogScore}){
+const metricBase="group rounded-xl border bg-[#0F0E0D] px-3 py-2 lg:py-3 text-left cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0A09] active:scale-[0.99]";
+const quickBase="min-w-[140px] lg:min-w-0 lg:flex-1 rounded-lg border px-4 py-2.5 text-sm font-semibold tracking-wide transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C8FF00] focus-visible:ring-offset-2 focus-visible:ring-offset-[#0B0A09]";
+const quickCls=(isPrimary)=>isPrimary
+?`${quickBase} border-[#C8FF00] bg-[#C8FF00] text-[#0B0A09]`
+:`${quickBase} border-[#C8FF00]/60 bg-[#0F0E0D] text-[#C8FF00] hover:bg-[#C8FF00] hover:text-[#0B0A09] active:bg-[#C8FF00] active:text-[#0B0A09]`;
+
+return <section className="mx-auto mb-2 w-full max-w-[1200px]">
+  <div className="mb-2 flex items-center justify-between">
+    <h2 className="font-[900] tracking-[0.18em] text-[#C8FF00] text-[11px]">COACH COMMAND CENTER</h2>
+  </div>
+
+  <div className="grid grid-cols-3 gap-2">
+    <button type="button" onClick={onPlayersClick} className={`${metricBase} ${highlightPlayersAttention?"border-[#FF454566] shadow-[0_0_0_1px_rgba(255,69,69,0.3),0_0_14px_rgba(255,69,69,0.18)]":"border-[#C8FF0033] hover:border-[#C8FF0070]"}`}>
+      <div className="text-[10px] font-semibold tracking-[0.14em] text-[#A0A0A0]">PLAYERS</div>
+      <div className="mt-1 text-[22px] font-black leading-none text-[#C8FF00]">{totalPlayers}</div>
+    </button>
+
+    <button type="button" onClick={onActiveTodayClick} className={`${metricBase} border-[#C8FF0033] hover:border-[#C8FF0070]`}>
+      <div className="text-[10px] font-semibold tracking-[0.14em] text-[#A0A0A0]">ACTIVE TODAY</div>
+      <div className="mt-1 text-[22px] font-black leading-none text-[#C8FF00]">{activeTodayCount}</div>
+    </button>
+
+    <button type="button" onClick={onNextEventClick} className={`${metricBase} border-[#C8FF0033] hover:border-[#C8FF0070]`}>
+      <div className="text-[10px] font-semibold tracking-[0.14em] text-[#A0A0A0]">NEXT EVENT</div>
+      <div className="mt-1 text-[16px] font-black leading-none text-[#C8FF00]">{nextEventDateFormatted}</div>
+    </button>
+  </div>
+
+  <div className="mt-2 overflow-x-auto pb-1 lg:overflow-visible">
+    <div className="flex gap-2 lg:grid lg:grid-cols-4">
+      <button type="button" onClick={onAddPlayer} className={quickCls(primaryQuickAction==="addPlayer")}>+ Add Player</button>
+      <button type="button" onClick={onAddDrill} className={quickCls(primaryQuickAction==="addDrill")}>+ Add Drill</button>
+      <button type="button" onClick={onScheduleEvent} className={quickCls(primaryQuickAction==="scheduleEvent")}>+ Schedule Event</button>
+      <button type="button" onClick={onLogScore} className={quickCls(false)}>+ Log Score</button>
+    </div>
+  </div>
+
+  <div className="mt-3 h-px w-full bg-white/10"/>
+</section>;
+}
+
 // ═══════════════════════════════════════
 // COACH SCREEN
 // ═══════════════════════════════════════
@@ -1522,6 +1565,25 @@ const known=allKnown.find(p=>p.email===e);
 const name=known?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
 addRsvp(evId,e,name);setAddEmail("")};
 const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,sport:san(nsc.sport)});setNsc({sport:"",date:"",time:""});setShowAddSC(false)};
+const totalPlayers=ups.length;
+const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
+const sortedEvents=[...events].sort((a,b)=>a.date.localeCompare(b.date));
+const nextEvent=sortedEvents.find(e=>e.date>=today);
+const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"None";
+const highlightAddPlayer=totalPlayers===0;
+const highlightAddDrill=drills.length===0;
+const highlightScheduleEvent=events.length===0||!nextEvent;
+const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
+const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
+const inactivePlayersCount=ups.filter(p=>!activeThisWeek.has(p.email)).length;
+const highlightPlayersAttention=inactivePlayersCount>0;
+const primaryQuickAction=highlightAddPlayer?"addPlayer":highlightAddDrill?"addDrill":highlightScheduleEvent?"scheduleEvent":null;
+const jumpToSection=(targetTab,sectionId)=>{setTab(targetTab);setSelP(null);setTimeout(()=>document.getElementById(sectionId)?.scrollIntoView({behavior:"smooth",block:"start"}),120)};
+const handleLogScoreAction=()=>{
+  // TODO: Route to dedicated coach score logging flow when implemented.
+  setTab("feed");
+};
 
 return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
@@ -1544,7 +1606,21 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 <button aria-label="Log out" onClick={logout} style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:MUTED,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
 </div>
 </div>
-<div style={{display:"flex",gap:8,marginBottom:4}}><SC l="PLAYERS" v={ups.length} c={ORANGE} small/><SC l="SCORES" v={scores.length} c={LIGHT} small/><SC l="EVENTS" v={events.length} c={CYAN} small/></div><div style={{margin:"10px 0 4px",padding:"10px 12px",border:`1px solid ${ORANGE}33`,borderRadius:10,background:ORANGE+"0d"}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:2,color:ORANGE,fontWeight:700}}>TEAM CODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><div style={{fontFamily:FD,fontSize:20,color:LIGHT,letterSpacing:3}}>{team?.joinCode||"—"}</div><button onClick={()=>navigator.clipboard?.writeText(team?.joinCode||"")} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>COPY</button><button onClick={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>REGENERATE</button></div>{codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:5}}>{codeErr}</div>}</div>
+<CoachCommandCenter
+  totalPlayers={totalPlayers}
+  activeTodayCount={activeTodayCount}
+  nextEventDateFormatted={nextEventDateFormatted}
+  highlightPlayersAttention={highlightPlayersAttention}
+  primaryQuickAction={primaryQuickAction}
+  onPlayersClick={()=>setTab("players")}
+  onActiveTodayClick={()=>setTab("players")}
+  onNextEventClick={()=>setTab("events")}
+  onAddPlayer={()=>jumpToSection("players","coach-add-player-form")}
+  onAddDrill={()=>jumpToSection("drills","coach-drills-management")}
+  onScheduleEvent={()=>jumpToSection("events","coach-events-management")}
+  onLogScore={handleLogScoreAction}
+/>
+<div style={{margin:"10px 0 4px",padding:"10px 12px",border:`1px solid ${ORANGE}33`,borderRadius:10,background:ORANGE+"0d"}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:2,color:ORANGE,fontWeight:700}}>TEAM CODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><div style={{fontFamily:FD,fontSize:20,color:LIGHT,letterSpacing:3}}>{team?.joinCode||"—"}</div><button onClick={()=>navigator.clipboard?.writeText(team?.joinCode||"")} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>COPY</button><button onClick={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}} style={{padding:"6px 10px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:8,cursor:"pointer"}}>REGENERATE</button></div>{codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:5}}>{codeErr}</div>}</div>
 </div>
 {u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:"0 16px",gap:8}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"0.12em",color:"rgba(200, 255, 0, 0.7)"}}>COACH VIEW — FULL ACCESS</span></div>}
 
@@ -1597,7 +1673,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES"/>{scores.length===0&&<Empty t="No scores yet" action="Once your players start logging drills, their activity will appear here. Share the app link to get started!"/>}{scores.slice(-20).reverse().map((s,i)=>{const dr=drills.find(d=>d.id===s.drillId);const pct=dr?Math.round(s.score/dr.max*100):0;const isHome=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:isHome?VOLT:LIGHT,background:isHome?VOLT+"15":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span></div><div style={{fontSize:10,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>}
 
   {/* DRILLS */}
-  {tab==="drills"&&!editD&&<div className="fade-up">
+  {tab==="drills"&&!editD&&<div className="fade-up" id="coach-drills-management">
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="MANAGE DRILLS" s={`${drills.length} ACTIVE`}/>
     <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
     <div style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12,marginBottom:14}}>
@@ -1666,7 +1742,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   </div>}
 
   {/* EVENTS */}
-  {tab==="events"&&<div className="fade-up">
+  {tab==="events"&&<div className="fade-up" id="coach-events-management">
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="MANAGE EVENTS" s={`${events.length} TOTAL`}/>
     <button onClick={()=>setShowAdd(!showAdd)} className="btn-v cta-primary" style={{marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
@@ -1723,7 +1799,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   </div>}
 
   {tab==="players"&&!selP&&<div>
-    <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:12}}>
+    <div id="coach-add-player-form" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:12}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:8}}>ADD PLAYER TO ROSTER</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
         <input value={newProfile.firstName} onChange={e=>{setNewProfile({...newProfile,firstName:e.target.value});setProfileErr("")}} placeholder="First" style={{padding:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}/>
