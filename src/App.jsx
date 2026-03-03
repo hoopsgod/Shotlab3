@@ -820,8 +820,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 {/* Header — Glassmorphism */}
 <div style={{position:"sticky",top:0,zIndex:10,height:64,padding:"max(0px,env(safe-area-inset-top)) 16px 0",background:TOKENS.BG_BASE,borderBottom:`1px solid ${TOKENS.BG_SUBTLE}`}}>
   <div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
-    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:36,height:36,borderRadius:"50%",background:"#1E1E1E",border:"1.5px solid #C8FF00",boxShadow:u.isCoach?"0 0 0 4px rgba(200, 255, 0, 0.15)":"none",color:"#FFFFFF",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0}}>{(u.name||"?")[0].toUpperCase()}</button>
+    <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0}}>
       <div style={{minWidth:0}}><div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:"0.15em",fontWeight:700,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(()=>{
         const allDone=todayS.length>=drills.length;const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
         if(allDone&&shotsToday>0)return <span style={{color:VOLT}}>ALL DRILLS COMPLETE · {streak}D STREAK 🔥</span>;
