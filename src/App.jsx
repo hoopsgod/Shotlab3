@@ -146,6 +146,9 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeaderPillBrand:hover{background:color-mix(in srgb,#C8FF00 26%, #1A1A1A);border-color:rgba(200,255,0,.68);}
 .pageHeaderPillBrand:focus-visible{outline-color:#C8FF00;}
 .pageAccentBar{height:4px;width:48%;border-radius:999px;background:var(--headerAccent);box-shadow:0 0 16px var(--headerAccent);margin-top:12px;}
+.pageGuidance{display:flex;align-items:center;gap:8px;margin:10px 0 14px;color:#9a9a9a;font-family:${FB};font-size:clamp(12px,2.8vw,15px);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pageGuidanceDot{width:6px;height:6px;min-width:6px;border-radius:999px;background:var(--guidanceAccent,var(--page-accent));box-shadow:0 0 0 1px color-mix(in srgb,var(--guidanceAccent,var(--page-accent)) 35%, transparent);}
+.pageGuidanceText{min-width:0;overflow:hidden;text-overflow:ellipsis;}
 .heroModule{position:relative;overflow:hidden;border:1px solid color-mix(in srgb,var(--pageAccent) 30%, #242424);border-radius:15px;padding:14px;margin-bottom:14px;background:linear-gradient(120deg,var(--pageAccentBg),#131313 70%);}
 .heroModule::before{content:'';position:absolute;left:0;top:0;width:54px;height:4px;background:var(--pageAccent);box-shadow:0 0 14px var(--pageAccent);}
 .heroStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px;}
