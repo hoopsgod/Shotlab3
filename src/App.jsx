@@ -1657,10 +1657,24 @@ return <div style={{marginBottom:16}}><SH isCoach={typeof u!=="undefined"&&u?.is
 // EVENTS PANEL (Player Program View)
 // ═══════════════════════════════════════
 function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills}){
-const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState("attend"),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null);
+const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState("attend"),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null),[rankBarPct,setRankBarPct]=useState(0),[rankBarPulse,setRankBarPulse]=useState(false);
 const sorted=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
 const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
-const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);useEffect(()=>{if(lastRank===null){setLastRank(myTier.name);return;}if(lastRank!==myTier.name){setRankFx(true);setLastRank(myTier.name);const t=setTimeout(()=>setRankFx(false),650);return ()=>clearTimeout(t);}},[myTier.name,lastRank]);
+const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);
+const prefersReducedMotion=useMemo(()=>typeof window!=="undefined"&&window.matchMedia("(prefers-reduced-motion: reduce)").matches,[]);
+const nextTier=useMemo(()=>[...TIERS].find(t=>t.min>myRsvps),[myRsvps]);
+const rankProgressPct=useMemo(()=>nextTier?Math.round(myRsvps/nextTier.min*100):null,[myRsvps,nextTier]);
+useEffect(()=>{if(lastRank===null){setLastRank(myTier.name);return;}if(lastRank!==myTier.name){setRankFx(true);setLastRank(myTier.name);const t=setTimeout(()=>setRankFx(false),650);return ()=>clearTimeout(t);}},[myTier.name,lastRank]);
+useEffect(()=>{
+  if(rankProgressPct===null)return;
+  if(prefersReducedMotion){setRankBarPct(rankProgressPct);setRankBarPulse(false);return;}
+  setRankBarPulse(false);
+  setRankBarPct(0);
+  const raf=requestAnimationFrame(()=>setRankBarPct(rankProgressPct));
+  const pulseStart=setTimeout(()=>setRankBarPulse(true),600);
+  const pulseEnd=setTimeout(()=>setRankBarPulse(false),800);
+  return ()=>{cancelAnimationFrame(raf);clearTimeout(pulseStart);clearTimeout(pulseEnd);};
+},[rankProgressPct,prefersReducedMotion]);
 
 const attendBoard=useMemo(()=>{const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[rsvps]);
 const medals=[VOLT,"#A0A0A0","#A0A0A0"];
@@ -1708,7 +1722,64 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
       <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,marginTop:4}}>{myRsvps} event{myRsvps!==1?"s":""} attended</div>
     </div>
   </div>
-  {(()=>{const nx=[...TIERS].find(t=>t.min>myRsvps);if(!nx)return <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,marginTop:8}}>MAX RANK ACHIEVED</div>;const p=Math.round(myRsvps/nx.min*100);return <div style={{marginTop:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span style={{fontFamily:FB,color:"#A0A0A0",fontSize:12}}>{nx.min-myRsvps} more to <span style={{color:LIGHT,fontWeight:700}}>{nx.name}</span></span><span style={{fontFamily:FB,color:"#555555",fontSize:11}}>{p}%</span></div><div style={{height:4,background:"#242424",borderRadius:2,overflow:"hidden"}}><div style={{width:`${p}%`,height:"100%",background:"#C8FF00",borderRadius:2}}/></div><div style={{fontFamily:FB,color:"#555555",fontSize:10,letterSpacing:"0.10em",marginTop:6}}>NEXT RANK: {nx.name}</div></div>})()}
+  {!nextTier
+    ?<div style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,marginTop:8}}>MAX RANK ACHIEVED</div>
+    :<div style={{marginTop:8}}>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:24}}>
+        <span style={{fontFamily:FB,color:"#A0A0A0",fontSize:12}}>{nextTier.min-myRsvps} more to <span style={{color:LIGHT,fontWeight:700}}>{nextTier.name}</span></span>
+      </div>
+      <div style={{position:"relative",paddingTop:8}}>
+        <div style={{position:"relative"}}>
+          <div
+            style={{
+              position:"absolute",
+              left:`${Math.min(Math.max(rankBarPct,5),95)}%`,
+              top:-16,
+              transform:"translateX(-50%)",
+              color:"#CCFF00",
+              fontFamily:FB,
+              fontSize:11,
+              fontWeight:700,
+              lineHeight:1,
+              whiteSpace:"nowrap",
+              pointerEvents:"none"
+            }}
+          >
+            {rankProgressPct}%
+          </div>
+          <div
+            style={{
+              position:"absolute",
+              right:0,
+              top:-16,
+              fontFamily:FB,
+              fontSize:11,
+              fontWeight:700,
+              color:"#CCFF00",
+              opacity:.9,
+              lineHeight:1,
+              letterSpacing:"0.03em",
+              pointerEvents:"none"
+            }}
+          >
+            {nextTier.name}
+          </div>
+          <div style={{height:6,background:"rgba(255,255,255,0.12)",borderRadius:3,position:"relative",overflow:"hidden"}}>
+            <div
+              style={{
+                width:`${rankBarPct}%`,
+                height:"100%",
+                background:"#CCFF00",
+                borderRadius:3,
+                boxShadow:rankBarPulse?"2px 0 12px rgba(204,255,0,0.9)":"2px 0 8px rgba(204,255,0,0.6)",
+                transition:prefersReducedMotion?"none":"width 600ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms ease-out"
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>}
+
 </div>
 
 {/* Leaderboard toggle */}
