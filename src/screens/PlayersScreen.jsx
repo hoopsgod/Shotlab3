@@ -69,7 +69,7 @@ export default function PlayersScreen() {
     padding: "0 14px",
     fontSize: "11px",
     textTransform: "uppercase",
-    letterSpacing: "0.06em",
+    letterSpacing: "0.08em",
     cursor: "pointer",
     border: isActive ? "none" : "1px solid var(--stroke-1)",
     background: isActive ? "var(--accent)" : "var(--surface-1)",
@@ -171,13 +171,13 @@ export default function PlayersScreen() {
           </p>
           <button
             style={{
-              background: "var(--accent)",
+              background: "var(--btn-primary-bg, #CCFF00)",
               color: "#000000",
               fontSize: "13px",
               fontWeight: 700,
               textTransform: "uppercase",
               height: "52px",
-              borderRadius: "14px",
+              borderRadius: "12px",
               padding: "0 24px",
               border: "none",
               cursor: "pointer",
@@ -262,13 +262,13 @@ export default function PlayersScreen() {
         <button
           onClick={shareInviteLink}
           style={{
-            background: "var(--accent)",
+            background: "var(--btn-primary-bg, #CCFF00)",
             color: "#000000",
             fontSize: "13px",
             fontWeight: 700,
             textTransform: "uppercase",
             height: "52px",
-            borderRadius: "14px",
+            borderRadius: "12px",
             padding: "0 24px",
             border: "none",
             cursor: "pointer",
