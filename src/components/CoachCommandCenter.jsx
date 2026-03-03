@@ -4,6 +4,7 @@ const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 
 export default function CoachCommandCenter({
+  variant="full",
   totalPlayers,
   activeTodayCount,
   nextEventDateFormatted,
@@ -21,6 +22,7 @@ export default function CoachCommandCenter({
   onRegenerateJoinCode,
   codeErr,
 }) {
+  const isCompact=variant==="compact";
   const metricBase={
     minHeight:56,
     borderRadius:12,
@@ -35,7 +37,7 @@ export default function CoachCommandCenter({
   };
 
   const quickBtn=(isPrimary)=>({
-    height:42,
+    height:44,
     minWidth:130,
     borderRadius:999,
     border:`1px solid ${isPrimary?"rgba(200,255,0,0.75)":"rgba(200,255,0,0.30)"}`,
@@ -51,6 +53,43 @@ export default function CoachCommandCenter({
     boxShadow:isPrimary?"0 4px 14px rgba(200,255,0,0.28)":"none",
     whiteSpace:"nowrap",
   });
+
+  const compactActionBtn=(isPrimary)=>({
+    minHeight:44,
+    minWidth:44,
+    borderRadius:10,
+    border:`1px solid ${isPrimary?"rgba(200,255,0,0.45)":"rgba(200,255,0,0.25)"}`,
+    background:isPrimary?"rgba(200,255,0,0.16)":"rgba(20,20,20,0.66)",
+    color:"#C8FF00",
+    fontFamily:FB,
+    fontSize:10,
+    fontWeight:700,
+    letterSpacing:"var(--tracking-tight)",
+    textTransform:"uppercase",
+    padding:"0 10px",
+    cursor:"pointer",
+  });
+
+  if(isCompact){
+    return (
+      <section style={{padding:"8px 12px 12px"}}>
+        <style>{`.cc-tools-btn:focus-visible{outline:2px solid #C8FF00;outline-offset:2px;}`}</style>
+
+        <div style={{minHeight:62,border:"1px solid rgba(200,255,0,0.2)",borderRadius:14,background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.22))",padding:"8px 10px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
+            <span aria-hidden="true" style={{width:24,height:24,borderRadius:999,border:"1px solid rgba(200,255,0,0.35)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#C8FF00",fontSize:13,flexShrink:0}}>⚡</span>
+            <h2 className="u-allcaps-long" style={{fontFamily:FD,fontSize:13,color:"var(--text-secondary)",margin:0,whiteSpace:"nowrap"}}>Coach Tools</h2>
+          </div>
+
+          <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
+            <button type="button" onClick={onAddPlayer} aria-label="Add player" className="cc-tools-btn" style={compactActionBtn(primaryQuickAction==="addPlayer")}>+ Player</button>
+            <button type="button" onClick={onAddDrill} aria-label="Add drill" className="cc-tools-btn" style={compactActionBtn(primaryQuickAction==="addDrill")}>+ Drill</button>
+            <button type="button" onClick={onScheduleEvent} aria-label="Schedule event" className="cc-tools-btn" style={compactActionBtn(primaryQuickAction==="scheduleEvent")}>+ Event</button>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section style={{padding:"12px 12px 14px"}}>
