@@ -95,10 +95,10 @@ export default function CoachToolsPanel({ children }) {
           border-radius: 13px;
           background: rgba(255, 255, 255, 0.01);
           cursor: pointer;
-          color: rgba(236, 241, 232, 0.78);
+          color: var(--text-secondary);
           font-family: ${FB};
           font-weight: 700;
-          letter-spacing: 0.11em;
+          letter-spacing: var(--tracking-tight);
           text-transform: uppercase;
           font-size: 11px;
           transition: background-color 160ms ease, color 160ms ease;
@@ -117,7 +117,7 @@ export default function CoachToolsPanel({ children }) {
 
         .coach-tools-trigger:hover {
           background: rgba(255, 255, 255, 0.035);
-          color: rgba(242, 246, 239, 0.9);
+          color: var(--text-primary);
         }
 
         .coach-tools-trigger:active {
@@ -142,7 +142,7 @@ export default function CoachToolsPanel({ children }) {
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          color: rgba(184, 196, 176, 0.86);
+          color: var(--text-tertiary);
           background: rgba(255, 255, 255, 0.035);
           border: 1px solid rgba(255, 255, 255, 0.08);
         }
@@ -151,7 +151,7 @@ export default function CoachToolsPanel({ children }) {
           display: inline-flex;
           transform: ${open ? "rotate(180deg)" : "rotate(0deg)"};
           transition: transform 200ms ease;
-          color: rgba(185, 197, 180, 0.78);
+          color: var(--text-secondary);
           font-size: 14px;
           line-height: 1;
         }
