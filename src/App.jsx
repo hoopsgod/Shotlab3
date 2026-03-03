@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import PageHeader from "./components/PageHeader";
+import CoachCommandCenter from "./components/CoachCommandCenter";
+import CoachToolsPanel from "./components/CoachToolsPanel";
 
 const TOKENS={
 PRIMARY:"#C8FF00",
@@ -1543,72 +1545,6 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 }
 
 
-function CoachCommandCenter({totalPlayers,activeTodayCount,nextEventDateFormatted,highlightPlayersAttention,primaryQuickAction,onPlayersClick,onActiveTodayClick,onNextEventClick,onAddPlayer,onAddDrill,onScheduleEvent,onLogScore}){
-const metricBase={
-  minHeight:56,
-  borderRadius:12,
-  border:"1px solid rgba(200,255,0,0.2)",
-  background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.25))",
-  padding:"10px 10px",
-  display:"flex",
-  flexDirection:"column",
-  justifyContent:"center",
-  cursor:"pointer",
-  textAlign:"left",
-};
-const quickBtn=(isPrimary)=>({
-  height:42,
-  minWidth:130,
-  borderRadius:999,
-  border:`1px solid ${isPrimary?"rgba(200,255,0,0.9)":"rgba(200,255,0,0.35)"}`,
-  background:isPrimary?"#C8FF00":"rgba(10, 10, 10, 0.72)",
-  color:isPrimary?"#0B0A09":"#C8FF00",
-  fontFamily:FB,
-  fontSize:13,
-  fontWeight:700,
-  letterSpacing:"0.05em",
-  textTransform:"uppercase",
-  padding:"0 16px",
-  cursor:"pointer",
-  boxShadow:isPrimary?"0 6px 20px rgba(200,255,0,0.35)":"none",
-  whiteSpace:"nowrap",
-});
-
-return <section style={{margin:"0 auto 12px",width:"100%",maxWidth:1200,borderRadius:18,border:"1px solid rgba(200,255,0,0.22)",background:"linear-gradient(160deg, rgba(24,24,24,0.88), rgba(9,9,9,0.92))",padding:"12px 12px 14px",backdropFilter:"blur(4px)",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.04)"}}>
-  <div style={{marginTop:2,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-    <h2 style={{fontFamily:FD,fontSize:13,fontWeight:900,textTransform:"uppercase",letterSpacing:"0.15em",color:"rgba(255,255,255,0.82)",margin:0}}>Coach Command Center</h2>
-  </div>
-
-  <div style={{display:"grid",gridTemplateColumns:"repeat(3, minmax(0, 1fr))",gap:8}}>
-    <button type="button" onClick={onPlayersClick} style={{...metricBase,border:highlightPlayersAttention?"1px solid rgba(255,69,69,0.45)":metricBase.border,boxShadow:highlightPlayersAttention?"0 0 0 1px rgba(255,69,69,0.25), 0 0 14px rgba(255,69,69,0.15)":"none"}}>
-      <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.12em",color:"rgba(255,255,255,0.68)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
-      <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{totalPlayers}</div>
-    </button>
-
-    <button type="button" onClick={onActiveTodayClick} style={metricBase}>
-      <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.12em",color:"rgba(255,255,255,0.68)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
-      <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{activeTodayCount}</div>
-    </button>
-
-    <button type="button" onClick={onNextEventClick} style={metricBase}>
-      <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.12em",color:"rgba(255,255,255,0.68)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
-      <div style={{marginTop:5,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{nextEventDateFormatted}</div>
-    </button>
-  </div>
-
-  <div style={{marginTop:10,overflowX:"auto",whiteSpace:"nowrap",paddingBottom:2}}>
-    <div style={{display:"flex",gap:8}}>
-      <button type="button" onClick={onAddPlayer} style={quickBtn(primaryQuickAction==="addPlayer")}>+ Add Player</button>
-      <button type="button" onClick={onAddDrill} style={quickBtn(primaryQuickAction==="addDrill")}>+ Add Drill</button>
-      <button type="button" onClick={onScheduleEvent} style={quickBtn(primaryQuickAction==="scheduleEvent")}>+ Schedule Event</button>
-      <button type="button" onClick={onLogScore} style={quickBtn(false)}>+ Log Score</button>
-    </div>
-  </div>
-
-  <div style={{marginTop:12,height:1,width:"100%",background:"rgba(255,255,255,0.1)"}}/>
-</section>;
-}
-
 // ═══════════════════════════════════════
 // COACH SCREEN
 // ═══════════════════════════════════════
@@ -1698,6 +1634,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>
 </div>
 </div>
+<CoachToolsPanel>
 <CoachCommandCenter
   totalPlayers={totalPlayers}
   activeTodayCount={activeTodayCount}
@@ -1711,8 +1648,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   onAddDrill={()=>jumpToSection("drills","coach-drills-management")}
   onScheduleEvent={()=>jumpToSection("events","coach-events-management")}
   onLogScore={handleLogScoreAction}
+  joinCode={team?.joinCode}
+  onCopyJoinCode={()=>navigator.clipboard?.writeText(team?.joinCode||"")}
+  onRegenerateJoinCode={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}}
+  codeErr={codeErr}
 />
-<div style={{margin:"10px 0 4px",padding:"14px 14px",border:`1px solid ${ORANGE}44`,borderRadius:14,background:"linear-gradient(120deg, rgba(200,255,0,0.12) 0%, rgba(200,255,0,0.05) 35%, rgba(20,20,20,0.9) 100%)"}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:2,color:ORANGE,fontWeight:700}}>TEAM CODE</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:8,flexWrap:"wrap"}}><div style={{fontFamily:FD,fontSize:25,color:LIGHT,letterSpacing:4,minWidth:114,lineHeight:1}}>{team?.joinCode||"—"}</div><button onClick={()=>navigator.clipboard?.writeText(team?.joinCode||"")} style={{padding:"8px 12px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:1}}>COPY</button><button onClick={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}} style={{padding:"8px 12px",fontSize:10,border:`1px solid ${BORDER_CLR}`,background:SURFACE,color:LIGHT,borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:1}}>REGENERATE</button></div>{codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:6}}>{codeErr}</div>}</div>
+</CoachToolsPanel>
 </div>
 {u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:"0 16px",gap:8}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"0.12em",color:"rgba(200, 255, 0, 0.7)"}}>COACH VIEW — FULL ACCESS</span></div>}
 
