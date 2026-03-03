@@ -17,7 +17,7 @@ export default function PageHeader({
 }) {
   const resolvedAccent = ACCENT_MAP[accent] || accent || ACCENT_MAP.lime;
   const actionNode = rightSlot || (actionLabel ? (
-    <button type="button" className="pageHeaderPill" onClick={onAction}>
+    <button type="button" className="pageHeaderPill btn-text" onClick={onAction}>
       {actionLabel}
     </button>
   ) : null);
@@ -27,8 +27,8 @@ export default function PageHeader({
       <div className="pageHeaderTop">
         <div className="pageHeaderBadge">{icon}</div>
         <div className="pageHeaderText">
-          <h1>{title}</h1>
-          {subtitle ? <p>{subtitle}</p> : null}
+          <h1 className="type-h1">{title}</h1>
+          {subtitle ? <p className="type-sub">{subtitle}</p> : null}
         </div>
         {actionNode ? <div className="pageHeaderRight">{actionNode}</div> : null}
       </div>

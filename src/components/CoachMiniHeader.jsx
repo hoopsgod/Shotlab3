@@ -34,7 +34,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "#D9FF5C", textTransform: "uppercase", border: "1px solid rgba(200,255,0,0.4)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
+          <span className="type-label" style={{ color: "#D9FF5C", border: "1px solid rgba(200,255,0,0.4)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
           {avatar}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>

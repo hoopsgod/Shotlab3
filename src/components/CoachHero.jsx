@@ -32,9 +32,9 @@ export default function CoachHero({
       <style>{`@media (min-width: 768px) {.coach-hero{padding:${desktopPadding};}}`}</style>
       <div className="coach-hero" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <div>
-          <div style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", opacity: 0.96, textTransform: "uppercase", color: "var(--text-secondary)" }}>COACH MODE</div>
+          <div className="type-label" style={{ color: "var(--text-secondary)", opacity: 0.75 }}>COACH MODE</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
-            <div style={{ fontFamily: FD, color: "#fff", fontSize: isOverview ? 26 : 23, letterSpacing: "var(--tracking-default)", lineHeight: 1.02 }}>{(userName || "Demo Coach").toUpperCase()}</div>
+            <div className="type-h1" style={{ color: "#fff", fontSize: isOverview ? 28 : 24, lineHeight: 1.05 }}>{userName || "Demo Coach"}</div>
             {isCoach && (
               <span
                 style={{
@@ -42,10 +42,7 @@ export default function CoachHero({
                   border: "1px solid rgba(200, 255, 0, 0.65)",
                   borderRadius: 999,
                   padding: "2px 8px",
-                  fontSize: 8,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--tracking-tight)",
+                  
                   color: "#D9FF5C",
                   display: "inline-flex",
                   alignItems: "center",
@@ -57,17 +54,7 @@ export default function CoachHero({
             )}
           </div>
           <div
-            style={{
-              fontFamily: FB,
-              color: "var(--text-secondary)",
-              fontSize: isOverview ? 9 : 8,
-              letterSpacing: "var(--tracking-tight)",
-              fontWeight: 600,
-              marginTop: 3,
-              lineHeight: 1.2,
-              textTransform: "uppercase",
-              maxWidth: 360,
-            }}
+            className="type-sub" style={{ color: "var(--text-secondary)", marginTop: 3, maxWidth: 360 }}
           >
             Lead the squad. Track momentum. Build consistency.
           </div>

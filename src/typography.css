@@ -1,0 +1,59 @@
+:root {
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+
+  --fs-h1: 28px;
+  --lh-h1: 34px;
+  --fw-h1: 700;
+  --ls-h1: -0.5px;
+
+  --fs-h2: 20px;
+  --lh-h2: 26px;
+  --fw-h2: 600;
+  --ls-h2: 0px;
+
+  --fs-body: 16px;
+  --lh-body: 24px;
+  --fw-body: 400;
+  --ls-body: 0px;
+
+  --fs-sub: 14px;
+  --lh-sub: 20px;
+  --fw-sub: 400;
+  --ls-sub: 0px;
+
+  --fs-label: 12px;
+  --lh-label: 16px;
+  --fw-label: 500;
+  --ls-label: 0.08em;
+
+  --fs-metric: 32px;
+  --lh-metric: 36px;
+  --fw-metric: 700;
+  --ls-metric: -0.5px;
+}
+
+.type-h1 { font-family: var(--font-sans); font-size: var(--fs-h1); line-height: var(--lh-h1); font-weight: var(--fw-h1); letter-spacing: var(--ls-h1); text-transform: none; }
+.type-h2 { font-family: var(--font-sans); font-size: var(--fs-h2); line-height: var(--lh-h2); font-weight: var(--fw-h2); letter-spacing: var(--ls-h2); text-transform: none; }
+.type-body { font-family: var(--font-sans); font-size: var(--fs-body); line-height: var(--lh-body); font-weight: var(--fw-body); letter-spacing: var(--ls-body); }
+.type-sub { font-family: var(--font-sans); font-size: var(--fs-sub); line-height: var(--lh-sub); font-weight: var(--fw-sub); letter-spacing: var(--ls-sub); opacity: 0.85; }
+.type-label { font-family: var(--font-sans); font-size: var(--fs-label); line-height: var(--lh-label); font-weight: var(--fw-label); letter-spacing: var(--ls-label); text-transform: uppercase; opacity: 0.75; }
+.type-metric { font-family: var(--font-sans); font-size: var(--fs-metric); line-height: var(--lh-metric); font-weight: var(--fw-metric); letter-spacing: var(--ls-metric); text-transform: none; }
+.metric--sm { font-size: 28px; line-height: 32px; }
+.btn-text { font-size: 14px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; font-family: var(--font-sans); }
+
+/* Apply hierarchy to existing reusable structures */
+.pageHeaderText h1 { letter-spacing: var(--ls-h1) !important; text-transform: none !important; font-size: var(--fs-h1) !important; line-height: var(--lh-h1) !important; font-weight: var(--fw-h1) !important; font-family: var(--font-sans) !important; }
+.pageHeaderText p { font-family: var(--font-sans) !important; font-size: var(--fs-sub) !important; line-height: var(--lh-sub) !important; font-weight: var(--fw-sub) !important; letter-spacing: var(--ls-sub) !important; text-transform: none !important; opacity: 0.85; }
+.heroStatVal { font-family: var(--font-sans) !important; font-size: var(--fs-metric) !important; line-height: var(--lh-metric) !important; font-weight: var(--fw-metric) !important; letter-spacing: var(--ls-metric) !important; }
+.heroStatLbl,
+.u-meta-label,
+.sidebar-nav .nav-title,
+.insights-panel .panel-title { font-family: var(--font-sans) !important; font-size: var(--fs-label) !important; line-height: var(--lh-label) !important; font-weight: var(--fw-label) !important; letter-spacing: var(--ls-label) !important; text-transform: uppercase !important; opacity: 0.75; }
+
+.u-allcaps-long { text-transform: none !important; letter-spacing: var(--ls-h2) !important; font-family: var(--font-sans) !important; }
+.pageHeaderPill,
+.cta-primary,
+.cta-primary-accent,
+.cta-brand,
+.cta-danger,
+.cta-secondary { font-family: var(--font-sans) !important; font-size: 14px !important; font-weight: 600 !important; letter-spacing: 0.06em !important; text-transform: uppercase !important; }
