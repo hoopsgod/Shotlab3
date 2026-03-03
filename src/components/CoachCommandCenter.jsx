@@ -26,7 +26,7 @@ export default function CoachCommandCenter({
   const metricBase={
     minHeight:56,
     borderRadius:12,
-    border:"1px solid rgba(200,255,0,0.2)",
+    border:"1px solid var(--stroke-1)",
     background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.25))",
     padding:"10px 10px",
     display:"flex",
@@ -40,9 +40,9 @@ export default function CoachCommandCenter({
     height:44,
     minWidth:130,
     borderRadius:999,
-    border:`1px solid ${isPrimary?"rgba(200,255,0,0.75)":"rgba(200,255,0,0.30)"}`,
-    background:isPrimary?"#C8FF00":"rgba(10, 10, 10, 0.72)",
-    color:isPrimary?"#0B0A09":"#C8FF00",
+    border:`1px solid ${isPrimary?"var(--accent)":"var(--stroke-1)"}`,
+    background:isPrimary?"var(--accent)":"var(--surface-1)",
+    color:isPrimary?"#0B0D10":"var(--text-2)",
     fontFamily:FB,
     fontSize:13,
     fontWeight:700,
@@ -50,7 +50,7 @@ export default function CoachCommandCenter({
     textTransform:"uppercase",
     padding:"0 16px",
     cursor:"pointer",
-    boxShadow:isPrimary?"0 4px 14px rgba(200,255,0,0.28)":"none",
+    boxShadow:"none",
     whiteSpace:"nowrap",
   });
 
@@ -58,9 +58,9 @@ export default function CoachCommandCenter({
     minHeight:44,
     minWidth:44,
     borderRadius:10,
-    border:`1px solid ${isPrimary?"rgba(200,255,0,0.45)":"rgba(200,255,0,0.25)"}`,
-    background:isPrimary?"rgba(200,255,0,0.16)":"rgba(20,20,20,0.66)",
-    color:"#C8FF00",
+    border:`1px solid ${isPrimary?"var(--accent)":"var(--stroke-1)"}`,
+    background:isPrimary?"var(--accent-soft)":"var(--surface-2)",
+    color:isPrimary?"var(--accent)":"var(--text-2)",
     fontFamily:FB,
     fontSize:10,
     fontWeight:700,
@@ -73,11 +73,11 @@ export default function CoachCommandCenter({
   if(isCompact){
     return (
       <section style={{padding:"8px 12px 12px"}}>
-        <style>{`.cc-tools-btn:focus-visible{outline:2px solid #C8FF00;outline-offset:2px;}`}</style>
+        <style>{`.cc-tools-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}`}</style>
 
-        <div style={{minHeight:62,border:"1px solid rgba(200,255,0,0.2)",borderRadius:14,background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.22))",padding:"8px 10px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+        <div style={{minHeight:62,border:"1px solid var(--stroke-1)",borderRadius:14,background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.22))",padding:"8px 10px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
           <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
-            <span aria-hidden="true" style={{width:24,height:24,borderRadius:999,border:"1px solid rgba(200,255,0,0.35)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#C8FF00",fontSize:13,flexShrink:0}}>⚡</span>
+            <span aria-hidden="true" style={{width:24,height:24,borderRadius:999,border:"1px solid var(--stroke-1)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"var(--text-3)",fontSize:13,flexShrink:0}}>⚡</span>
             <h2 className="u-allcaps-long" style={{fontFamily:FD,fontSize:13,color:"var(--text-secondary)",margin:0,whiteSpace:"nowrap"}}>Coach Tools</h2>
           </div>
 
@@ -100,19 +100,19 @@ export default function CoachCommandCenter({
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(3, minmax(0, 1fr))",gap:8}}>
-        <button type="button" onClick={onPlayersClick} style={{...metricBase,border:highlightPlayersAttention?"1px solid rgba(255,69,69,0.45)":metricBase.border,boxShadow:highlightPlayersAttention?"0 0 0 1px rgba(255,69,69,0.25), 0 0 14px rgba(255,69,69,0.15)":"none"}}>
+        <button type="button" onClick={onPlayersClick} style={{...metricBase,border:highlightPlayersAttention?"1px solid rgba(255,69,69,0.45)":metricBase.border,boxShadow:"none"}}>
           <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
-          <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{totalPlayers}</div>
+          <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"var(--accent)"}}>{totalPlayers}</div>
         </button>
 
         <button type="button" onClick={onActiveTodayClick} style={metricBase}>
           <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
-          <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{activeTodayCount}</div>
+          <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{activeTodayCount}</div>
         </button>
 
         <button type="button" onClick={onNextEventClick} style={metricBase}>
           <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
-          <div style={{marginTop:5,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{nextEventDateFormatted}</div>
+          <div style={{marginTop:5,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{nextEventDateFormatted}</div>
         </button>
       </div>
 
@@ -125,12 +125,12 @@ export default function CoachCommandCenter({
         </div>
       </div>
 
-      <div style={{margin:"10px 0 4px",padding:"14px 14px",border:"1px solid rgba(200,255,0,0.20)",borderRadius:14,background:"linear-gradient(120deg, rgba(200,255,0,0.09) 0%, rgba(200,255,0,0.03) 35%, rgba(20,20,20,0.9) 100%)"}}>
-        <div className="u-meta-label" style={{fontFamily:FB,fontSize:10,color:"#C8FF00"}}>TEAM CODE</div>
+      <div style={{margin:"10px 0 4px",padding:"14px 14px",border:"1px solid var(--stroke-1)",borderRadius:14,background:"var(--surface-2)"}}>
+        <div className="u-meta-label" style={{fontFamily:FB,fontSize:10,color:"var(--text-2)"}}>TEAM CODE</div>
         <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8,flexWrap:"wrap"}}>
-          <div style={{fontFamily:FD,fontSize:25,color:"#FFFFFF",letterSpacing:4,minWidth:114,lineHeight:1}}>{joinCode||"—"}</div>
-          <button onClick={onCopyJoinCode} style={{padding:"8px 12px",fontSize:10,border:"1px solid #242424",background:"#141414",color:"#FFFFFF",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY</button>
-          <button onClick={onRegenerateJoinCode} style={{padding:"8px 12px",fontSize:10,border:"1px solid #242424",background:"#141414",color:"#FFFFFF",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-tight)"}}>REGENERATE</button>
+          <div style={{fontFamily:FD,fontSize:25,color:"var(--text-1)",letterSpacing:4,minWidth:114,lineHeight:1}}>{joinCode||"—"}</div>
+          <button onClick={onCopyJoinCode} style={{padding:"8px 12px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY</button>
+          <button onClick={onRegenerateJoinCode} style={{padding:"8px 12px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-tight)"}}>REGENERATE</button>
         </div>
         {codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:6}}>{codeErr}</div>}
       </div>
