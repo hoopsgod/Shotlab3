@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
+import { getAttendanceRank, getDrillStats, getLeaderboard, getNextEvent, getSummaryStats } from "./data/resolvers";
+import { isDemoUser } from "./demo/isDemoUser";
+import { useCountUp } from "./hooks/useCountUp";
 import PageHeader from "./components/PageHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
 import CoachHero from "./components/CoachHero";
@@ -741,6 +744,20 @@ const totalMakes=total;
 const today=todayStr();
 const todayS=useMemo(()=>homeScores.filter(s=>s.date===today),[homeScores,today]);
 const streak=useMemo(()=>calcStreak(homeScores),[homeScores]);
+const demoUser = isDemoUser(u);
+const [demoCountupReady, setDemoCountupReady] = useState(false);
+useEffect(()=>{
+  if(!demoUser)return;
+  const key="shotlab:demo-countup-seen";
+  if(typeof window!=="undefined"&&!window.sessionStorage.getItem(key)){
+    window.sessionStorage.setItem(key,"1");
+    setDemoCountupReady(true);
+  }
+},[demoUser]);
+const resolvedSummary = useMemo(()=>getSummaryStats(u,{totalMakes,bestStreakDays:streak,eventsAttended:rsvps.filter(r=>r.email===u.email).length,eventsTotal:events.filter(e=>e.date>=today).length}),[u,totalMakes,streak,rsvps,events,today]);
+const displayTotalMakes = useCountUp(resolvedSummary.totalMakes,{durationMs:800,easing:"easeOutCubic",enabled:demoUser&&demoCountupReady});
+const displayBestStreak = useCountUp(resolvedSummary.bestStreakDays,{durationMs:800,easing:"easeOutCubic",enabled:demoUser&&demoCountupReady});
+const displayEventsAttended = useCountUp(resolvedSummary.eventsAttended,{durationMs:800,easing:"easeOutCubic",enabled:demoUser&&demoCountupReady});
 const earnedBadges=useMemo(()=>getEarnedBadges(streak),[streak]);
 const myRsvps=useMemo(()=>rsvps.filter(r=>r.email===u.email).length,[rsvps,u]);
 const tier=useMemo(()=>getTier(myRsvps),[myRsvps]);
@@ -841,10 +858,11 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       const nextEvent=upcomingEvents[0]||null;
       const upcomingEventsCount=upcomingEvents.length||0;
       const attendanceRows=rsvps.filter(r=>r.email===u.email);
-      const attendancePct=upcomingEventsCount>0&&attendanceRows.length>0?`${Math.min(100,Math.round((attendanceRows.length/upcomingEventsCount)*100))}%`:"—";
-      const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
-      const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
-      const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
+      const resolvedNextEvent=getNextEvent(u,nextEvent?{dateLabel:nextEvent.date.slice(5),title:nextEvent.title||nextEvent.time}:{dateLabel:"NONE",title:"NONE"});
+      const attendanceDisplay=resolvedSummary.eventsTotal>0?`${resolvedSummary.eventsAttended}/${resolvedSummary.eventsTotal}`:"—";
+      const nextEventLabel=`${resolvedNextEvent.dateLabel} — ${resolvedNextEvent.title}`;
+      const homeStats=[{label:"Total Makes",value:<AnimNum v={displayTotalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Best Streak",value:`${displayBestStreak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
+      const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendanceDisplay,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
       return <div style={{marginBottom:28}}>
         <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
           <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
@@ -858,7 +876,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
     })()}
 
     {/* ══════ LEADERBOARD ══════ */}
-    <DashboardLeaderboard scores={scores} drills={drills} programDrills={programDrills} user={u} scRsvps={scRsvps} rsvps={rsvps} shotLogs={shotLogs}/>
+    <DashboardLeaderboard scores={scores} drills={drills} programDrills={programDrills} user={u} scRsvps={scRsvps} rsvps={rsvps} shotLogs={shotLogs} demoUser={demoUser}/>
   </div>}
 
   {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
@@ -993,7 +1011,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   </div>}
 
   {/* ═════════════ PROGRAM (Coach-Verified) ═════════════ */}
-  {tab==="program"&&<div className={slideClass} key="program"><SectionHero icon={<EventIcon type="star" size={28} color={VOLT}/>} title="PROGRAM EVENTS" subtitle="Official workouts and attendance" accent={VOLT} deco={<EventIcon type="run" size={16} color={VOLT}/>} isCoach={u.isCoach}/><ProgramDrillsPanel user={u} drills={programDrills} scores={scores} addScore={addScore}/><DividerDot/><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills}/></div>}
+  {tab==="program"&&<div className={slideClass} key="program"><SectionHero icon={<EventIcon type="star" size={28} color={VOLT}/>} title="PROGRAM EVENTS" subtitle="Official workouts and attendance" accent={VOLT} deco={<EventIcon type="run" size={16} color={VOLT}/>} isCoach={u.isCoach}/><ProgramDrillsPanel user={u} drills={programDrills} scores={scores} addScore={addScore} demoUser={demoUser}/><DividerDot/><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} demoUser={demoUser}/></div>}
 
   {/* ═════════════ CHALLENGES ═════════════ */}
   {!u.isCoach&&tab==="duels"&&<div className={slideClass} key="duels"><DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players}/></div>}
@@ -1003,7 +1021,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount}/></div>}
+  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} demoUser={demoUser} displayTotalMakes={displayTotalMakes} displayBestStreak={displayBestStreak} displayEventsAttended={displayEventsAttended}/></div>}
 </div>
 
 <NavBar items={[
@@ -1269,7 +1287,7 @@ return <div className="fade-up">
   <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={SC_COLOR} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
 </button>
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
-  {board.length===0&&<Empty t="No attendance yet"/>}
+  {board.length===0&&!demoUser&&<Empty t="No attendance yet"/>}
   {board.map((p,i)=>{const isMe=p.email===user.email;return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${isMe?SC_COLOR+"33":BORDER_CLR}`}}>
     <RB r={i+1} m={medals}/>
     <Av n={p.name} sz={30} email={p.email}/>
@@ -1367,7 +1385,7 @@ return <button type="button" onClick={onClick} className="mode-card" style={{wid
 // ═══════════════════════════════════════
 // DASHBOARD LEADERBOARD — The hero section
 // ═══════════════════════════════════════
-function DashboardLeaderboard({scores,drills,programDrills,user,scRsvps,rsvps,shotLogs}){
+function DashboardLeaderboard({scores,drills,programDrills,user,scRsvps,rsvps,shotLogs,demoUser}){
 const[mode,setMode]=useState("home");
 const[sub,setSub]=useState("total");
 const medals=[VOLT,"#A0A0A0","#A0A0A0"];
@@ -1377,14 +1395,17 @@ const progScores=useMemo(()=>scores.filter(s=>s.src==="program"),[scores]);
 const board=useMemo(()=>{
 if(mode==="home"){
 if(sub==="shots"){
-const m={};shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});return Object.values(m).sort((a,b)=>b.total-a.total);
+const m={};shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});
+const realBoard=Object.values(m).sort((a,b)=>b.total-a.total);
+return getLeaderboard(user,realBoard);
 }
 if(sub==="total"){
 // Combine drill scores + shot logs
 const m={};
 homeScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
 shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});
-return Object.values(m).sort((a,b)=>b.total-a.total);
+const realBoard=Object.values(m).sort((a,b)=>b.total-a.total);
+return getLeaderboard(user,realBoard);
 }
 // Per-drill
 const did=parseInt(sub);const m={};
@@ -1632,23 +1653,28 @@ return <div className="fade-up">
 }
 
 // ═══════════════════════════════════════
-function ProgramDrillsPanel({user,drills,scores,addScore}){
+function ProgramDrillsPanel({user,drills,scores,addScore,demoUser}){
 const[active,setActive]=useState(null),[val,setVal]=useState(""),[saved,setSaved]=useState(false);
-const byDrill=useMemo(()=>{const m={};drills.forEach(d=>{m[d.id]=scores.filter(s=>s.src==="program"&&s.drillId===d.id)});return m;},[drills,scores]);
+const resolvedDrills=useMemo(()=>getDrillStats(user,drills),[user,drills]);
+const byDrill=useMemo(()=>{const m={};resolvedDrills.forEach(d=>{m[d.id]=scores.filter(s=>s.src==="program"&&s.drillId===d.id)});return m;},[resolvedDrills,scores]);
 const submit=()=>{if(!active)return;const n=parseInt(val);if(isNaN(n)||n<0||n>active.max)return;addScore(active.id,n,"program");setSaved(true);setVal("");setTimeout(()=>setSaved(false),1200)};
-if(drills.length===0)return <div style={{marginBottom:14}}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PROGRAM DRILLS" s="COACH ADDED"/><Empty t="NO DRILLS YET" action="Your coach can add up to 7 custom shooting drills" cta="CONTACT YOUR COACH" ctaVariant="secondary" icon={<DrillIcon type="sb" size={48} color="#555555"/>}/></div>;
-return <div style={{marginBottom:16}}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PROGRAM DRILLS" s={`${drills.length} ACTIVE`}/>{drills.map(d=>{const rows=byDrill[d.id]||[];const board=Object.values(rows.reduce((m,s)=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score;return m;},{})).sort((a,b)=>b.total-a.total).slice(0,3);return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${active?.id===d.id?CYAN+"55":BORDER_CLR}`,borderRadius:12,padding:"12px 14px",marginBottom:8}}><button onClick={()=>setActive(active?.id===d.id?null:d)} style={{width:"100%",background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:10}}><DrillIcon type={d.icon} size={18}/><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{d.name}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{d.desc}</div></div><div style={{fontFamily:FB,color:CYAN,fontSize:9,fontWeight:700}}>{rows.length} LOGS</div></button>{active?.id===d.id&&<div style={{marginTop:10}}><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginBottom:6}}>TEAM LEADERBOARD {board.length>0&&"(TOTAL SCORES)"}</div>{board.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginBottom:8}}>No scores yet.</div>:board.map((p,i)=><div key={p.email} style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:11,color:LIGHT,marginBottom:4}}><span>#{i+1} {p.name}</span><span style={{color:CYAN,fontWeight:700}}>{p.total}</span></div>)}<div style={{display:"flex",gap:6,marginTop:8}}><input value={val} onChange={e=>setVal(e.target.value)} type="number" placeholder={`0-${d.max}`} style={{flex:1,padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/><button onClick={submit} style={{padding:"9px 12px",background:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:11,letterSpacing:1,cursor:"pointer"}}>LOG</button></div>{saved&&<div style={{fontFamily:FB,color:CYAN,fontSize:10,marginTop:6}}>Score saved for {user.name}.</div>}</div>}</div>})}</div>;
+if(resolvedDrills.length===0)return <div style={{marginBottom:14}}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PROGRAM DRILLS" s="COACH ADDED"/><Empty t="NO DRILLS YET" action="Your coach can add up to 7 custom shooting drills" cta="CONTACT YOUR COACH" ctaVariant="secondary" icon={<DrillIcon type="sb" size={48} color="#555555"/>}/></div>;
+return <div style={{marginBottom:16}}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PROGRAM DRILLS" s={`${resolvedDrills.length} ACTIVE`}/>{resolvedDrills.map(d=>{const rows=byDrill[d.id]||[];const board=Object.values(rows.reduce((m,s)=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score;return m;},{})).sort((a,b)=>b.total-a.total).slice(0,3);return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${active?.id===d.id?CYAN+"55":BORDER_CLR}`,borderRadius:12,padding:"12px 14px",marginBottom:8}}><button onClick={()=>setActive(active?.id===d.id?null:d)} style={{width:"100%",background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:10}}><DrillIcon type={d.icon} size={18}/><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{d.name}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{d.desc}</div></div><div style={{fontFamily:FB,color:CYAN,fontSize:9,fontWeight:700}}>{rows.length} LOGS</div></button>{active?.id===d.id&&<div style={{marginTop:10}}><div style={{display:"flex",gap:8,marginBottom:8}}><div style={{flex:1,background:BG,borderRadius:8,padding:"8px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}><div style={{fontFamily:FD,color:ORANGE,fontSize:16}}>{d.pb ? `${d.pb}/${d.max}` : 0}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2}}>PB</div></div><div style={{flex:1,background:BG,borderRadius:8,padding:"8px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{typeof d.avg!=="undefined"?d.avg:0}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2}}>AVG</div></div><div style={{flex:1,background:BG,borderRadius:8,padding:"8px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:16}}>{typeof d.logged!=="undefined"?d.logged:rows.length}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2}}>LOGGED</div></div></div><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginBottom:6}}>TEAM LEADERBOARD {board.length>0&&"(TOTAL SCORES)"}</div>{board.length===0&&!demoUser?<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginBottom:8}}>No scores yet.</div>:board.map((p,i)=><div key={p.email} style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:11,color:LIGHT,marginBottom:4}}><span>#{i+1} {p.name}</span><span style={{color:CYAN,fontWeight:700}}>{p.total}</span></div>)}<div style={{display:"flex",gap:6,marginTop:8}}><input value={val} onChange={e=>setVal(e.target.value)} type="number" placeholder={`0-${d.max}`} style={{flex:1,padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/><button onClick={submit} style={{padding:"9px 12px",background:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:11,letterSpacing:1,cursor:"pointer"}}>LOG</button></div>{saved&&<div style={{fontFamily:FB,color:CYAN,fontSize:10,marginTop:6}}>Score saved for {user.name}.</div>}</div>}</div>})}</div>;
 }
 
 // EVENTS PANEL (Player Program View)
 // ═══════════════════════════════════════
-function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills}){
+function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,demoUser}){
 const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState("attend"),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null);
 const sorted=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
 const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
-const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);useEffect(()=>{if(lastRank===null){setLastRank(myTier.name);return;}if(lastRank!==myTier.name){setRankFx(true);setLastRank(myTier.name);const t=setTimeout(()=>setRankFx(false),650);return ()=>clearTimeout(t);}},[myTier.name,lastRank]);
+const myRsvps=rsvps.filter(r=>r.email===user.email).length;
+const resolvedRank=getAttendanceRank(user,{tier:getTier(myRsvps).name,progress:Math.max(0,Math.min(1,myRsvps/3))});
+const myTier=getTier(myRsvps);
+const rankTier=getTier(TIERS.find(t=>t.name===resolvedRank.tier)?.min||myRsvps);
+useEffect(()=>{if(lastRank===null){setLastRank(rankTier.name);return;}if(lastRank!==rankTier.name){setRankFx(true);setLastRank(rankTier.name);const t=setTimeout(()=>setRankFx(false),650);return ()=>clearTimeout(t);}},[rankTier.name,lastRank]);
 
-const attendBoard=useMemo(()=>{const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[rsvps]);
+const attendBoard=useMemo(()=>{const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});const realBoard=Object.values(m).sort((a,b)=>b.count-a.count);return getLeaderboard(user,realBoard);},[rsvps,user]);
 const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 
 return <div className="fade-up">
@@ -1688,7 +1714,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
       <div style={{fontFamily:FB,color:VOLT,fontSize:13,letterSpacing:"0.10em",fontWeight:700,textTransform:"uppercase"}}>ATTENDANCE RANK</div>
       <div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}>
         <svg className={rankFx?"rank-badge-flash":""} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-        <div className={rankFx?"rank-bounce":""} style={{fontFamily:FD,color:LIGHT,fontSize:28,fontWeight:900,letterSpacing:2}}>{myTier.name}</div>
+        <div className={rankFx?"rank-bounce":""} style={{fontFamily:FD,color:LIGHT,fontSize:28,fontWeight:900,letterSpacing:2}}>{rankTier.name}</div>
         <div style={{fontFamily:FD,color:VOLT,fontSize:28,fontWeight:700,lineHeight:1}}>{myRsvps}</div>
       </div>
       <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,marginTop:4}}>{myRsvps} event{myRsvps!==1?"s":""} attended</div>
@@ -1705,7 +1731,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
   <div style={{display:"flex",gap:4,marginBottom:14}}>{[{k:"attend",l:"ATTENDANCE"},{k:"overall",l:"DRILL SCORES"},{k:"streaks",l:"STREAKS"}].map(t=><button key={t.k} onClick={()=>setLbMode(t.k)} style={{flex:1,padding:"9px 4px",borderRadius:10,border:lbMode===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:1,background:lbMode===t.k?CYAN:CARD_BG,color:lbMode===t.k?BG:MUTED}}>{t.l}</button>)}</div>
-  {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</span><span className="tb" style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div style={{fontFamily:FD,color:t.color,fontSize:18}}>{p.count}</div></div>})}</>}
+  {lbMode==="attend"&&<>{attendBoard.length===0&&!demoUser&&<Empty t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const attendanceCount=typeof p.count!=="undefined"?p.count:p.total||0;const t=getTier(attendanceCount);return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</span><span className="tb" style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div style={{fontFamily:FD,color:t.color,fontSize:18}}>{attendanceCount}</div></div>})}</>}
   {lbMode==="overall"&&<>{(()=>{const m={};scores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});const a=Object.values(m).sort((a,b)=>b.total-a.total);return a.length===0?<Empty t="No scores yet"/>:a.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{p.email===user.email?" (YOU)":""}</div><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{p.total}</div></div>)})()}</>}
   {lbMode==="streaks"&&<>{(()=>{const es=[...new Set(scores.map(s=>s.email))];const st=es.map(e=>({email:e,name:scores.find(s=>s.email===e)?.name||e,streak:calcStreak(scores.filter(s=>s.email===e))})).sort((a,b)=>b.streak-a.streak);return st.length===0?<Empty t="No streaks yet"/>:st.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</div><div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{p.streak} &#128293;</div></div>)})()}</>}
 </div>}
@@ -2164,7 +2190,7 @@ return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s
 // ═══════════════════════════════════════
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
-function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount}){
+function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount,demoUser,displayTotalMakes,displayBestStreak,displayEventsAttended}){
 const[confirmDel,setConfirmDel]=useState(false);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
@@ -2179,16 +2205,18 @@ const bestStreak=useMemo(()=>{const ds=[...new Set(homeScores.map(s=>s.date))].s
 ds.forEach(d=>{const dt=new Date(d);if(prev){const diff=(dt-prev)/(1000*60*60*24);cur=diff<=1?cur+1:1}else cur=1;max=Math.max(max,cur);prev=dt});return max},[homeScores]);
 
 // Per-drill stats with personal bests, averages, trends
-const drillStats=useMemo(()=>drills.map(d=>{
+const drillStats=useMemo(()=>{
+const resolvedDrills=getDrillStats(u,drills);
+return resolvedDrills.map(d=>{
 const ds=homeScores.filter(s=>s.drillId===d.id).sort((a,b)=>(a.ts||0)-(b.ts||0));
-const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);
-const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;
+const pb=typeof d.pb!=="undefined"?d.pb:ds.reduce((m,s)=>Math.max(m,s.score),0);
+const avg=typeof d.avg!=="undefined"?d.avg:(ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0);
 const last10=ds.slice(-10).map(s=>s.score);
-// Trend: compare first half avg vs second half avg of last 10
-let trend="flat";
-if(last10.length>=4){const mid=Math.floor(last10.length/2);const first=last10.slice(0,mid).reduce((a,v)=>a+v,0)/mid;const second=last10.slice(mid).reduce((a,v)=>a+v,0)/(last10.length-mid);if(second>first*1.05)trend="up";else if(second<first*0.95)trend="down"}
-return{...d,pb,avg,count:ds.length,last10,trend};
-}),[drills,homeScores]);
+let trend=d.trend||"flat";
+if(!d.trend&&last10.length>=4){const mid=Math.floor(last10.length/2);const first=last10.slice(0,mid).reduce((a,v)=>a+v,0)/mid;const second=last10.slice(mid).reduce((a,v)=>a+v,0)/(last10.length-mid);if(second>first*1.05)trend="up";else if(second<first*0.95)trend="down"}
+return{...d,pb,avg,count:typeof d.logged!=="undefined"?d.logged:ds.length,last10,trend};
+});
+},[drills,homeScores,u]);
 
 const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}>
 <div><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{sub}</div>}</div>
@@ -2268,12 +2296,12 @@ return <div className="fade-up">
 
 {/* Overall stats */}
 <div style={{background:CARD_BG,borderRadius:16,padding:"4px 20px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
-  <StatRow label="Total Drill Makes" value={totalMakes}/>
+  <StatRow label="Total Drill Makes" value={demoUser?displayTotalMakes:totalMakes}/>
   <StatRow label="Shot Tracker Makes" value={totalShots} color={ORANGE}/>
-  <StatRow label="Events Attended" value={eventsAttended} color={CYAN}/>
+  <StatRow label="Events Attended" value={demoUser?displayEventsAttended:eventsAttended} color={CYAN}/>
   <StatRow label="S&C Sessions" value={scCount} color="#A0A0A0"/>
   <StatRow label="Challenges" value={`${challWon}/${challTotal}`} color={ORANGE} sub={challTotal>0?`${Math.round(challWon/challTotal*100)}% win rate`:"No challenges yet"}/>
-  <StatRow label="Best Streak" value={`${bestStreak}D`} color={ORANGE}/>
+  <StatRow label="Best Streak" value={`${demoUser?displayBestStreak:bestStreak}D`} color={ORANGE}/>
   <div style={{height:4}}/>
 </div>
 
