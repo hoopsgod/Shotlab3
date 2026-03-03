@@ -1,0 +1,87 @@
+.root {
+  --signature-accent: #ffc400;
+  background: #131313;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+}
+
+.topRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--signature-accent) 70%, transparent);
+  background: color-mix(in srgb, var(--signature-accent) 10%, #101010);
+  color: var(--signature-accent);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 0 12px color-mix(in srgb, var(--signature-accent) 24%, transparent);
+  flex-shrink: 0;
+}
+
+.text {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f8f8f8;
+  line-height: 1.15;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 0.86rem;
+  color: #9ca3af;
+  line-height: 1.35;
+}
+
+.rightAction {
+  margin-left: auto;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--signature-accent) 55%, transparent);
+  background: transparent;
+  color: var(--signature-accent);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
+}
+
+.rightAction:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--signature-accent) 75%, transparent);
+  background: color-mix(in srgb, var(--signature-accent) 11%, transparent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--signature-accent) 16%, transparent);
+}
+
+.rightAction:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--signature-accent) 70%, white);
+  outline-offset: 2px;
+}
+
+.rightAction:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.underline {
+  margin-top: 10px;
+  height: 3px;
+  width: 52%;
+  min-width: 140px;
+  max-width: 280px;
+  border-radius: 999px;
+  background: var(--signature-accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--signature-accent) 32%, transparent);
+}
