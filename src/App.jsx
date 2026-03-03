@@ -798,26 +798,19 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   </div>
 </div>}
 
-{/* Header — Glassmorphism */}
-<div style={{position:"sticky",top:0,zIndex:10,height:64,padding:"max(0px,env(safe-area-inset-top)) 16px 0",background:TOKENS.BG_BASE,borderBottom:`1px solid ${TOKENS.BG_SUBTLE}`}}>
-  <div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
-    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:36,height:36,borderRadius:"50%",background:"#1E1E1E",border:"1.5px solid #C8FF00",boxShadow:u.isCoach?"0 0 0 4px rgba(200, 255, 0, 0.15)":"none",color:"#FFFFFF",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0}}>{(u.name||"?")[0].toUpperCase()}</button>
-      <div style={{minWidth:0}}><div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:"0.15em",fontWeight:700,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(()=>{
-        const allDone=todayS.length>=drills.length;const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
-        if(allDone&&shotsToday>0)return <span style={{color:VOLT}}>ALL DRILLS COMPLETE · {streak}D STREAK 🔥</span>;
-        if(todayS.length>0)return <span>{todayS.length}/{drills.length} DRILLS · {shotsToday>0?shotsToday+" SHOTS · ":""}{streak}D STREAK</span>;
-        return u.isCoach?"YOUR PROGRAM AWAITS":"TODAY'S MISSION AWAITS";
-      })()}</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:1}}><div style={{fontFamily:FD,color:TOKENS.TEXT_PRIMARY,fontSize:20,fontWeight:900,letterSpacing:1.5,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{u.name.toUpperCase()}</div>{u.isCoach&&<span style={{background:"rgba(200, 255, 0, 0.12)",border:"1px solid #C8FF00",borderRadius:20,padding:"2px 8px",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.10em",color:"#C8FF00",display:"inline-flex",alignItems:"center",gap:4}}><WhistleIcon size={9} color="#C8FF00"/>COACH</span>}</div></div>
+{/* Header — Sticky profile hierarchy */}
+<div style={{position:"sticky",top:0,zIndex:10,paddingTop:"max(0px,env(safe-area-inset-top))",height:"calc(72px + max(0px,env(safe-area-inset-top)))",background:TOKENS.BG_BASE,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
+  <div style={{height:72,padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+    <div style={{display:"flex",alignItems:"center",minWidth:0,flex:1}}>
+      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:44,height:44,borderRadius:"50%",background:"#1E1E1E",border:"1.5px solid #C8FF00",boxShadow:u.isCoach?"0 0 0 4px rgba(200, 255, 0, 0.15)":"none",color:"#FFFFFF",fontSize:16,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0,marginRight:12}}>{(u.name||"?")[0].toUpperCase()}</button>
+      <div style={{display:"flex",flexDirection:"column",justifyContent:"center",minWidth:0,maxWidth:"100%"}}>
+        <div style={{fontFamily:FB,color:"#FFFFFF",fontSize:18,fontWeight:700,lineHeight:1.1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{u.name}</div>
+        <div style={{fontFamily:FB,color:"rgba(255,255,255,0.5)",fontSize:11,fontWeight:400,lineHeight:1.2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",marginTop:2}}>{u.isCoach?"Your program awaits":"Today's mission awaits"}</div>
+      </div>
     </div>
-    <div style={{display:"flex",gap:6,alignItems:"center"}}>
-      <BrandWordmark size={20} small/>
-      <button aria-label="Toggle theme" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .3s"}}>
-        {theme==="dark"?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        :<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>}
-      </button>
-      <button aria-label="Log out" onClick={logout} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>&#10005;</button>
-    </div>
+    <button aria-label="Settings" title="Settings" onClick={()=>switchTab("profile")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:TOKENS.TEXT_PRIMARY,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
   </div>
 
 </div>
