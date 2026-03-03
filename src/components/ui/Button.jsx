@@ -2,9 +2,12 @@ export default function Button({ variant = "primary", className = "", type = "bu
   const variantClass =
     variant === "secondary"
       ? "sl-btn--secondary"
-      : variant === "tertiary" || variant === "tertiaryLink"
+      : variant === "tertiaryLink"
         ? "sl-btn--tertiary-link"
-        : "sl-btn--primary";
+        : variant === "tertiary"
+          ? "sl-btn--tertiary"
+          : "sl-btn--primary";
+
   return (
     <button type={type} className={`sl-btn ${variantClass} ${className}`.trim()} {...props}>
       {children}

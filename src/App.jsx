@@ -363,10 +363,8 @@ const _BUTTON_SYSTEM_CSS=`:root{--btn-primary-bg:#CCFF00;--btn-primary-fg:#00000
 .sl-btn--primary{border:none;background:var(--btn-primary-bg);color:var(--btn-primary-fg);box-shadow:0 4px 18px rgba(204,255,0,0.24);}
 .sl-btn--primary:active{transform:scale(0.97);box-shadow:0 0 12px rgba(204,255,0,0.4);}
 .sl-btn--secondary{background:var(--btn-secondary-bg);border:1.5px solid var(--btn-accent);color:var(--btn-accent);}
-.sl-btn--tertiary-link{min-height:auto;padding:2px 0;background:transparent;border:none;border-radius:0;color:#CCFF00;font-size:13px;letter-spacing:0.06em;font-weight:600;text-transform:uppercase;opacity:1;width:auto;display:inline-flex;}
-.sl-btn--tertiary-link:hover{text-decoration:underline;}
-.sl-btn--tertiary-link:active{opacity:.85;}
-.sl-btn--tertiary-link:focus-visible{outline:2px solid rgba(204,255,0,0.6);outline-offset:2px;text-decoration:underline;}
+.sl-btn--tertiary{min-height:auto;padding:0;background:transparent;border:none;border-radius:0;color:rgba(255,255,255,0.5);font-size:13px;letter-spacing:0.06em;font-weight:600;text-transform:uppercase;opacity:1;}
+.sl-btn--tertiary:hover,.sl-btn--tertiary:focus-visible{text-decoration:underline;}
 .cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{background:var(--btn-primary-bg)!important;color:var(--btn-primary-fg)!important;border-radius:var(--btn-radius)!important;letter-spacing:0.08em!important;font-weight:700!important;}
 .cta-primary:active,.cta-primary-accent:active,.cta-brand:active,.cta-danger:active{transform:scale(0.97);box-shadow:0 0 12px rgba(204,255,0,0.4)!important;}
 .cta-secondary{background:var(--btn-secondary-bg)!important;border:1.5px solid var(--btn-accent)!important;color:var(--btn-accent)!important;border-radius:var(--btn-radius)!important;letter-spacing:0.08em!important;}

@@ -1,0 +1,29 @@
+.sl-btn--tertiary-link {
+  min-height: auto;
+  padding: 2px 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: #CCFF00;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 1;
+  width: auto;
+  display: inline-flex;
+}
+
+.sl-btn--tertiary-link:hover {
+  text-decoration: underline;
+}
+
+.sl-btn--tertiary-link:active {
+  opacity: 0.85;
+}
+
+.sl-btn--tertiary-link:focus-visible {
+  outline: 2px solid rgba(204, 255, 0, 0.6);
+  outline-offset: 2px;
+  text-decoration: underline;
+}
