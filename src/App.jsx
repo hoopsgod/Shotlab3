@@ -150,7 +150,8 @@ const _PAGE_SIGNATURE_CSS=`
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{content:'';position:absolute;top:2px;left:50%;transform:translateX(-50%);width:24px;height:3px;border-radius:999px;background:var(--nav-accent);box-shadow:0 0 10px var(--nav-accent);}
 @media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
 `;
-const Styles=()=><><style>{_STYLES_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style></>;
+const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:18px;padding:18px;align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:linear-gradient(to bottom,rgba(255,255,255,0.05),rgba(255,255,255,0.025));border:1px solid var(--panel-border);border-radius:18px;padding:14px;overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:rgba(255,255,255,0.02);border:1px solid var(--panel-border);border-radius:18px;padding:18px;}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:linear-gradient(to bottom,rgba(255,255,255,0.04),rgba(255,255,255,0.02));border:1px solid var(--panel-border);border-radius:18px;padding:14px;overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
+const Styles=()=><><style>{_STYLES_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style></>;
 
 // ═══════════════════════════════════════
 // APP ROOT
@@ -1651,8 +1652,25 @@ const handleLogScoreAction=()=>{
   setTab("feed");
 };
 const shellVars=(k)=>({"--pageAccent":PAGE_ACCENTS[k].accent,"--pageAccentGlow":PAGE_ACCENTS[k].glow,"--pageAccentBg":PAGE_ACCENTS[k].bg});
+const navItems=[
+  {k:"feed",l:"Feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>},
+  {k:"drills",l:"Drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2v20"/><path d="M5 4.5c3.5 4 5 7 5 7.5s-1.5 3.5-5 7.5"/><path d="M19 4.5c-3.5 4-5 7-5 7.5s1.5 3.5 5 7.5"/></svg>},
+  {k:"events",l:"Events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>},
+  {k:"sc",l:"S&C",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>},
+  {k:"players",l:"Players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
+];
+const handleNavChange=(k)=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)};
+const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
+useEffect(()=>{
+  const onResize=()=>setIsDesktop(window.innerWidth>=1024);
+  onResize();
+  window.addEventListener("resize",onResize);
+  return()=>window.removeEventListener("resize",onResize);
+},[]);
 
-return <div className={`${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative"}}><BrandBackdrop/>
+return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
+{isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
+<main className="shell-main"><div className="content-wrap"><div className={`${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
 <div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
@@ -1935,14 +1953,10 @@ return <div className={`${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoa
   </div>}
 </div>
 
-<NavBar items={[
-  {k:"feed",l:"Feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>},
-  {k:"drills",l:"Drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2v20"/><path d="M5 4.5c3.5 4 5 7 5 7.5s-1.5 3.5-5 7.5"/><path d="M19 4.5c-3.5 4-5 7-5 7.5s1.5 3.5 5 7.5"/></svg>},
-  {k:"events",l:"Events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>},
-  {k:"sc",l:"S&C",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>},
-  {k:"players",l:"Players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
-]} active={tab} onChange={k=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)}}/>
+{!isDesktop&&<NavBar items={navItems} active={tab} onChange={handleNavChange}/>}
 
+  </div></div></main>
+{isDesktop&&<aside className="insights-panel"><div className="panel-title">COACH INSIGHTS</div><div className="placeholder">Add widgets here later (activity, upcoming events, roster changes, lifting compliance).</div></aside>}
   </div>;
 }
 
