@@ -20,17 +20,24 @@ export default function CoachHero({
     <div
       ref={heroRef}
       style={{
-        marginBottom: isOverview ? 10 : 8,
+        marginBottom: "var(--stack-gap)",
         padding: mobilePadding,
-        border: `1px solid ${accentColor}2a`,
-        borderRadius: 18,
-        background:
-          "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(10,10,10,0.94) 45%, rgba(10,10,10,0.98) 100%)",
-        boxShadow: "0 10px 24px rgba(0,0,0,0.28)",
+        border: "1px solid var(--stroke-2)",
+        borderRadius: "var(--radius-card)",
+        background: "var(--surface-3)",
+        boxShadow: "var(--shadow-2)",
       }}
     >
-      <style>{`@media (min-width: 768px) {.coach-hero{padding:${desktopPadding};}}`}</style>
-      <div className="coach-hero" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+      <style>{`
+        @media (min-width: 768px) {
+          .coach-hero { padding:${desktopPadding}; }
+        }
+        @media (hover: hover) and (pointer: fine) {
+          .coach-hero-wrap { transition: transform 150ms ease, box-shadow 150ms ease; }
+          .coach-hero-wrap:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.50); }
+        }
+      `}</style>
+      <div className="coach-hero coach-hero-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <div>
           <div style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", opacity: 0.96, textTransform: "uppercase", color: "var(--text-secondary)" }}>COACH MODE</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
