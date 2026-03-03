@@ -196,6 +196,162 @@ const _PAGE_SIGNATURE_CSS=`
   color:#B0B6BD;
   opacity:.78;
 }
+
+/* ================================
+   ShotLab Depth System (Rec #2)
+   Add-only patch: tokens + safe selectors
+   ================================ */
+
+:root{
+  --bg-0:#0B0D10;
+
+  --surface-1:#0F1115;
+  --surface-2:#141821;
+  --surface-3:#171D28;
+
+  --stroke-1:rgba(255,255,255,0.08);
+  --stroke-2:rgba(255,255,255,0.12);
+
+  --shadow-0:none;
+  --shadow-1:0 2px 10px rgba(0,0,0,0.35);
+  --shadow-2:0 8px 24px rgba(0,0,0,0.45);
+
+  --radius-card:20px;
+
+  --stack-gap:24px;
+}
+
+/* Tier 2 default "card-like" surfaces (safe, common class/id patterns) */
+.card,
+.Card,
+.panel,
+.Panel,
+.tile,
+.Tile,
+.widget,
+.Widget,
+.surface,
+.Surface,
+[class*="card"],
+[class*="Card"],
+[class*="panel"],
+[class*="Panel"],
+[class*="tile"],
+[class*="Tile"]{
+  background: var(--surface-2) !important;
+  border: 1px solid var(--stroke-1) !important;
+  border-radius: var(--radius-card) !important;
+  box-shadow: var(--shadow-1) !important;
+}
+
+/* Tier 3: hero / primary blocks (targets common "hero/summary/report/log" patterns) */
+.hero,
+.Hero,
+.summary,
+.Summary,
+.report,
+.Report,
+.sessionLog,
+.SessionLog,
+[class*="Hero"],
+[class*="hero"],
+[class*="Report"],
+[class*="report"],
+[class*="Summary"],
+[class*="summary"],
+[class*="Session"],
+[class*="session"],
+[class*="Log"],
+[class*="log"]{
+  background: var(--surface-3) !important;
+  border: 1px solid var(--stroke-2) !important;
+  box-shadow: var(--shadow-2) !important;
+}
+
+/* Tier 1: large background panels if present */
+.section,
+.Section,
+.containerPanel,
+.ContainerPanel,
+[class*="Section"],
+[class*="section"]{
+  background: var(--surface-1);
+}
+
+/* Remove neon glow from containers (only affects elements that already have glowy shadows) */
+.card,
+.Card,
+.panel,
+.Panel,
+.tile,
+.Tile,
+.widget,
+.Widget,
+[class*="card"],
+[class*="Card"],
+[class*="panel"],
+[class*="Panel"],
+[class*="tile"],
+[class*="Tile"]{
+  filter: none !important;
+  text-shadow: none !important;
+}
+
+/* Vertical rhythm: increase spacing in common stacks/lists without changing layout */
+.stack,
+.Stack,
+.list,
+.List,
+.feed,
+.Feed,
+.grid,
+.Grid,
+[class*="stack"],
+[class*="Stack"],
+[class*="list"],
+[class*="List"],
+[class*="feed"],
+[class*="Feed"]{
+  gap: var(--stack-gap);
+}
+
+/* If stacks are not using gap, add margin between siblings safely */
+.stack > * + *,
+.Stack > * + *,
+.list > * + *,
+.List > * + *,
+[class*="stack"] > * + *,
+[class*="Stack"] > * + *,
+[class*="list"] > * + *,
+[class*="List"] > * + *{
+  margin-top: var(--stack-gap);
+}
+
+/* Desktop-only subtle hover lift for Tier 3 (safe, no mobile impact) */
+@media (hover:hover) and (pointer:fine){
+  .hero:hover,
+  .Hero:hover,
+  .summary:hover,
+  .Summary:hover,
+  .report:hover,
+  .Report:hover,
+  .sessionLog:hover,
+  .SessionLog:hover,
+  [class*="Hero"]:hover,
+  [class*="hero"]:hover,
+  [class*="Report"]:hover,
+  [class*="report"]:hover,
+  [class*="Summary"]:hover,
+  [class*="summary"]:hover,
+  [class*="Session"]:hover,
+  [class*="session"]:hover,
+  [class*="Log"]:hover,
+  [class*="log"]:hover{
+    box-shadow: 0 12px 28px rgba(0,0,0,0.50) !important;
+    transform: translateY(-2px);
+    transition: transform 150ms ease, box-shadow 150ms ease;
+  }
+}
 `;
 const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:18px;padding:18px;align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:linear-gradient(to bottom,rgba(255,255,255,0.05),rgba(255,255,255,0.025));border:1px solid var(--panel-border);border-radius:18px;padding:14px;overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:rgba(255,255,255,0.02);border:1px solid var(--panel-border);border-radius:18px;padding:18px;}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:linear-gradient(to bottom,rgba(255,255,255,0.04),rgba(255,255,255,0.02));border:1px solid var(--panel-border);border-radius:18px;padding:14px;overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
 const Styles=()=><><style>{_STYLES_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style></>;
