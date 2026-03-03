@@ -1,9 +1,9 @@
 const ACCENT_MAP = {
-  lime: "#B8FF00",
-  cyan: "#38E8FF",
-  amber: "#FFC400",
-  blue: "#5B7CFF",
-  purple: "#B86CFF",
+  lime: "var(--text-2)",
+  cyan: "var(--text-2)",
+  amber: "var(--text-2)",
+  blue: "var(--text-2)",
+  purple: "var(--text-2)",
 };
 
 export default function PageHeader({

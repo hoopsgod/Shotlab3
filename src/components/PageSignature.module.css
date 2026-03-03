@@ -1,5 +1,5 @@
 .root {
-  --signature-accent: #ffc400;
+  --signature-accent: var(--text-2);
   background: #131313;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 14px;
@@ -22,7 +22,7 @@
   color: var(--signature-accent);
   display: grid;
   place-items: center;
-  box-shadow: 0 0 12px color-mix(in srgb, var(--signature-accent) 24%, transparent);
+  box-shadow:none;
   flex-shrink: 0;
 }
 
@@ -62,7 +62,7 @@
 .rightAction:hover:not(:disabled) {
   border-color: color-mix(in srgb, var(--signature-accent) 75%, transparent);
   background: color-mix(in srgb, var(--signature-accent) 11%, transparent);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--signature-accent) 16%, transparent);
+  box-shadow:none;
 }
 
 .rightAction:focus-visible {
@@ -83,5 +83,5 @@
   max-width: 280px;
   border-radius: 999px;
   background: var(--signature-accent);
-  box-shadow: 0 0 10px color-mix(in srgb, var(--signature-accent) 32%, transparent);
+  box-shadow:none;
 }

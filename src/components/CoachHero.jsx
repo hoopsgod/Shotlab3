@@ -25,7 +25,7 @@ export default function CoachHero({
         border: `1px solid ${accentColor}2a`,
         borderRadius: 18,
         background:
-          "linear-gradient(135deg, rgba(200,255,0,0.12) 0%, rgba(10,10,10,0.94) 45%, rgba(10,10,10,0.98) 100%)",
+          "linear-gradient(135deg, rgba(255,255,255,0.04) 0%, rgba(10,10,10,0.94) 45%, rgba(10,10,10,0.98) 100%)",
         boxShadow: "0 10px 24px rgba(0,0,0,0.28)",
       }}
     >
@@ -38,15 +38,15 @@ export default function CoachHero({
             {isCoach && (
               <span
                 style={{
-                  background: "rgba(200, 255, 0, 0.16)",
-                  border: "1px solid rgba(200, 255, 0, 0.65)",
+                  background: "rgba(255,255,255,0.06)",
+                  border: "1px solid var(--stroke-1)",
                   borderRadius: 999,
                   padding: "2px 8px",
                   fontSize: 8,
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "var(--tracking-tight)",
-                  color: "#D9FF5C",
+                  color: "var(--text-2)",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 4,

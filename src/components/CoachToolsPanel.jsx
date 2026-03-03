@@ -112,7 +112,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           bottom: 8px;
           width: 3px;
           border-radius: 0 3px 3px 0;
-          background: rgba(164, 214, 68, 0.78);
+          background: var(--stroke-1);
         }
 
         .coach-tools-trigger:hover {
@@ -125,7 +125,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
         }
 
         .coach-tools-trigger:focus-visible {
-          outline: 2px solid rgba(164, 214, 68, 0.86);
+          outline: 2px solid var(--accent);
           outline-offset: -2px;
         }
 
@@ -172,7 +172,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
 
         .coach-tools-content__inner {
           padding-top: 4px;
-          box-shadow: inset 0 1px 0 rgba(190, 255, 92, 0.05);
+          box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
         }
 
         @media (prefers-reduced-motion: reduce) {
