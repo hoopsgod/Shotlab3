@@ -1,9 +1,11 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import PageHeader from "./components/PageHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
 import CoachToolsPanel from "./components/CoachToolsPanel";
+import CoachHero from "./components/CoachHero";
+import CoachMiniHeader from "./components/CoachMiniHeader";
 
 const TOKENS={
 PRIMARY:"#C8FF00",
@@ -1598,12 +1600,51 @@ const navItems=[
 ];
 const handleNavChange=(k)=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)};
 const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
+const [showMiniHeader,setShowMiniHeader]=useState(false);
+const heroRef=useRef(null);
+const isOverviewTab=tab==="feed";
+
 useEffect(()=>{
   const onResize=()=>setIsDesktop(window.innerWidth>=1024);
   onResize();
   window.addEventListener("resize",onResize);
   return()=>window.removeEventListener("resize",onResize);
 },[]);
+
+useEffect(()=>{
+  const heroNode=heroRef.current;
+  if(!heroNode){
+    setShowMiniHeader(false);
+    return;
+  }
+  const updateFromRect=()=>{
+    const rect=heroNode.getBoundingClientRect();
+    const viewport=Math.max(window.innerHeight||0,1);
+    const visibleTop=Math.max(rect.top,0);
+    const visibleBottom=Math.min(rect.bottom,viewport);
+    const visibleHeight=Math.max(0,visibleBottom-visibleTop);
+    const ratio=Math.min(1,visibleHeight/Math.max(rect.height,1));
+    setShowMiniHeader(ratio<0.25);
+  };
+  if(typeof window!=="undefined" && "IntersectionObserver" in window){
+    const observer=new IntersectionObserver((entries)=>{
+      const ratio=entries[0]?.intersectionRatio ?? 1;
+      setShowMiniHeader(ratio<0.25);
+    },{threshold:[0,0.25,0.5,0.75,1]});
+    observer.observe(heroNode);
+    return()=>observer.disconnect();
+  }
+  let ticking=false;
+  const onScroll=()=>{
+    if(ticking)return;
+    ticking=true;
+    window.requestAnimationFrame(()=>{updateFromRect();ticking=false;});
+  };
+  updateFromRect();
+  window.addEventListener("scroll",onScroll,{passive:true});
+  window.addEventListener("resize",onScroll);
+  return()=>{window.removeEventListener("scroll",onScroll);window.removeEventListener("resize",onScroll);};
+},[tab]);
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
@@ -1620,20 +1661,27 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>
 </div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
+<CoachMiniHeader
+  visible={showMiniHeader}
+  avatar={<Av n={u.name} sz={24} email={u.email} isCoach={u.isCoach}/>}
+  wordmark={<BrandWordmark size={14} small/>}
+  borderColor={BORDER_CLR}
+  mutedColor={MUTED}
+  onLogout={logout}
+/>
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
-<div style={{marginBottom:16,padding:"16px 14px",border:`1px solid ${ORANGE}2a`,borderRadius:18,background:"linear-gradient(135deg, rgba(200,255,0,0.12) 0%, rgba(10,10,10,0.94) 45%, rgba(10,10,10,0.98) 100%)",boxShadow:"0 14px 36px rgba(0,0,0,0.34)"}}>
-<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
-<div>
-<div style={{fontFamily:FD,color:ORANGE,fontSize:11,letterSpacing:4,opacity:.9}}>COACH MODE</div>
-<div style={{display:"flex",alignItems:"center",gap:8,marginTop:4,flexWrap:"wrap"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:34,letterSpacing:2,lineHeight:1}}>{u.name.toUpperCase()}</div>{u.isCoach&&<span style={{background:"rgba(200, 255, 0, 0.16)",border:"1px solid rgba(200, 255, 0, 0.65)",borderRadius:999,padding:"3px 9px",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.11em",color:"#D9FF5C",display:"inline-flex",alignItems:"center",gap:4}}><WhistleIcon size={9} color="#D9FF5C"/>COACH</span>}</div>
-<div style={{fontFamily:FB,color:"rgba(255,255,255,0.6)",fontSize:10,letterSpacing:1.6,fontWeight:600,marginTop:4,textTransform:"uppercase"}}>Lead the squad. Track momentum. Build consistency.</div>
-</div>
-<div style={{display:"flex",alignItems:"center",gap:10,alignSelf:"flex-start"}}>
-<Av n={u.name} sz={40} email={u.email} isCoach={u.isCoach}/><BrandWordmark size={20} small/>
-<button aria-label="Log out" onClick={logout} style={{background:"rgba(20,20,20,0.95)",border:`1px solid ${BORDER_CLR}`,borderRadius:13,color:MUTED,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-</div>
-</div>
-</div>
+<CoachHero
+  heroRef={heroRef}
+  isOverview={isOverviewTab}
+  userName={u.name}
+  isCoach={u.isCoach}
+  accentColor={ORANGE}
+  borderColor={BORDER_CLR}
+  mutedColor={MUTED}
+  avatar={<Av n={u.name} sz={isOverviewTab?32:30} email={u.email} isCoach={u.isCoach}/>}
+  wordmark={<BrandWordmark size={isOverviewTab?17:16} small/>}
+  onLogout={logout}
+/>
 <CoachToolsPanel>
 <CoachCommandCenter
   totalPlayers={totalPlayers}
@@ -1657,7 +1705,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>
 {u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:"0 16px",gap:8}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"0.12em",color:"rgba(200, 255, 0, 0.7)"}}>COACH VIEW — FULL ACCESS</span></div>}
 
-<div style={{flex:1,padding:"16px 20px 110px",overflowY:"auto",position:"relative",zIndex:1}}>
+<div style={{flex:1,padding:`${showMiniHeader?"88px":"16px"} 20px 110px`,overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="FEED" subtitle="Daily team activity and momentum" accent={PAGE_ACCENTS.feed.accent} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} rightSlot={<span className="pageHeaderPill">Coach Mode</span>} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.feed.accent,fontSize:12,letterSpacing:2}}>TODAY'S PULSE</div><div style={{fontFamily:FB,color:MUTED,fontSize:10}}>Who's active, streaking, and needs attention</div></div><button className="pageHeaderPill" onClick={()=>setTab("players")}>View Team</button></div>
     {/* Coach dashboard pulse */}
