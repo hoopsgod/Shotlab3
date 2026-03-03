@@ -72,11 +72,11 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
 
       <style>{`
         .coach-tools-panel {
-          margin-bottom: 14px;
-          border-radius: 13px;
-          border: 1px solid rgba(255, 255, 255, 0.09);
-          background: linear-gradient(165deg, rgba(16, 16, 16, 0.88), rgba(10, 10, 10, 0.92));
-          box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
+          margin-bottom: var(--stack-gap);
+          border-radius: var(--radius-card);
+          border: 1px solid var(--stroke-1);
+          background: var(--surface-2);
+          box-shadow: var(--shadow-1);
           overflow: hidden;
         }
 
