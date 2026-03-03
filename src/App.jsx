@@ -3,7 +3,6 @@ import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import PageHeader from "./components/PageHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
-import CoachToolsPanel from "./components/CoachToolsPanel";
 import CoachHero from "./components/CoachHero";
 import CoachMiniHeader from "./components/CoachMiniHeader";
 
@@ -1646,6 +1645,9 @@ const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.i
 const [showMiniHeader,setShowMiniHeader]=useState(false);
 const heroRef=useRef(null);
 const isOverviewTab=tab==="feed";
+const coachTabs=["feed","drills","events","sc","players"];
+const isCoachTab=u.isCoach&&coachTabs.includes(tab);
+const showFullCommandCenter=isCoachTab&&tab==="feed";
 
 useEffect(()=>{
   const onResize=()=>setIsDesktop(window.innerWidth>=1024);
@@ -1725,8 +1727,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   wordmark={<BrandWordmark size={isOverviewTab?17:16} small/>}
   onLogout={logout}
 />
-<CoachToolsPanel defaultCollapsed={!isOverviewTab} storageKey={`shotlab-coach-tools-open:${tab}`}>
-<CoachCommandCenter
+{isCoachTab&&<CoachCommandCenter
+  variant={showFullCommandCenter?"full":"compact"}
   totalPlayers={totalPlayers}
   activeTodayCount={activeTodayCount}
   nextEventDateFormatted={nextEventDateFormatted}
@@ -1743,8 +1745,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   onCopyJoinCode={()=>navigator.clipboard?.writeText(team?.joinCode||"")}
   onRegenerateJoinCode={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}}
   codeErr={codeErr}
-/>
-</CoachToolsPanel>
+/>}
 </div>
 {u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:"0 16px",gap:8}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:"rgba(200, 255, 0, 0.84)"}}>COACH VIEW — FULL ACCESS</span></div>}
 
