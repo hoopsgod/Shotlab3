@@ -160,6 +160,39 @@ const _PAGE_SIGNATURE_CSS=`
 .playersAvatarRing{outline:2px solid rgba(184,108,255,.65);outline-offset:1px;border-radius:50%;}
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{content:'';position:absolute;top:2px;left:50%;transform:translateX(-50%);width:24px;height:3px;border-radius:999px;background:var(--nav-accent);box-shadow:0 0 10px var(--nav-accent);}
 @media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
+
+/* === Coach Typography Readability Patch (Rec #4) === */
+.coach-mode h1,
+.coach-mode h2,
+.coach-mode h3,
+.coach-mode .page-title,
+.coach-mode .title,
+.coach-mode .heading,
+.coach-mode .sectionTitle,
+.coach-mode .cardTitle,
+.coach-mode .pageTitle{
+  letter-spacing:0.04em;
+}
+
+.coach-mode .kicker,
+.coach-mode .label,
+.coach-mode .metaLabel,
+.coach-mode .subtitle,
+.coach-mode .pageHeaderText p{
+  letter-spacing:0.06em;
+}
+
+.coach-mode .helper,
+.coach-mode .muted,
+.coach-mode .description,
+.coach-mode .subtext,
+.coach-mode .hint,
+.coach-mode .meta,
+.coach-mode small,
+.coach-mode p:not(.page-title){
+  color:#B0B6BD;
+  opacity:.78;
+}
 `;
 const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:18px;padding:18px;align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:linear-gradient(to bottom,rgba(255,255,255,0.05),rgba(255,255,255,0.025));border:1px solid var(--panel-border);border-radius:18px;padding:14px;overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:rgba(255,255,255,0.02);border:1px solid var(--panel-border);border-radius:18px;padding:18px;}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:linear-gradient(to bottom,rgba(255,255,255,0.04),rgba(255,255,255,0.02));border:1px solid var(--panel-border);border-radius:18px;padding:14px;overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
 const Styles=()=><><style>{_STYLES_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style></>;
