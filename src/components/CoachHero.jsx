@@ -32,9 +32,9 @@ export default function CoachHero({
       <style>{`@media (min-width: 768px) {.coach-hero{padding:${desktopPadding};}}`}</style>
       <div className="coach-hero" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <div>
-          <div style={{ fontFamily: FD, color: accentColor, fontSize: 10, letterSpacing: 3.2, opacity: 0.9 }}>COACH MODE</div>
+          <div style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", opacity: 0.96, textTransform: "uppercase", color: "var(--text-secondary)" }}>COACH MODE</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
-            <div style={{ fontFamily: FD, color: "#fff", fontSize: isOverview ? 26 : 23, letterSpacing: 2 }}>{(userName || "Demo Coach").toUpperCase()}</div>
+            <div style={{ fontFamily: FD, color: "#fff", fontSize: isOverview ? 26 : 23, letterSpacing: "var(--tracking-default)", lineHeight: 1.02 }}>{(userName || "Demo Coach").toUpperCase()}</div>
             {isCoach && (
               <span
                 style={{
@@ -45,7 +45,7 @@ export default function CoachHero({
                   fontSize: 8,
                   fontWeight: 700,
                   textTransform: "uppercase",
-                  letterSpacing: "0.11em",
+                  letterSpacing: "var(--tracking-tight)",
                   color: "#D9FF5C",
                   display: "inline-flex",
                   alignItems: "center",
@@ -59,9 +59,9 @@ export default function CoachHero({
           <div
             style={{
               fontFamily: FB,
-              color: "rgba(255,255,255,0.6)",
+              color: "var(--text-secondary)",
               fontSize: isOverview ? 9 : 8,
-              letterSpacing: 1.3,
+              letterSpacing: "var(--tracking-tight)",
               fontWeight: 600,
               marginTop: 3,
               lineHeight: 1.2,
