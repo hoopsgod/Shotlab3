@@ -26,24 +26,24 @@ function UtilitySlidersIcon() {
   );
 }
 
-export default function CoachToolsPanel({ children }) {
+export default function CoachToolsPanel({ children, defaultCollapsed = true, storageKey = STORAGE_KEY }) {
   const panelId = useId();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(!defaultCollapsed);
 
   useEffect(() => {
     try {
-      const saved = window.localStorage.getItem(STORAGE_KEY);
+      const saved = window.localStorage.getItem(storageKey);
       if (saved !== null) {
         setOpen(saved === "1");
       }
     } catch {}
-  }, []);
+  }, [defaultCollapsed, storageKey]);
 
   useEffect(() => {
     try {
-      window.localStorage.setItem(STORAGE_KEY, open ? "1" : "0");
+      window.localStorage.setItem(storageKey, open ? "1" : "0");
     } catch {}
-  }, [open]);
+  }, [open, storageKey]);
 
   return (
     <section className="coach-tools-panel">
