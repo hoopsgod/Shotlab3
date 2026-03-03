@@ -44,7 +44,7 @@ export default function CoachCommandCenter({
     fontFamily:FB,
     fontSize:13,
     fontWeight:700,
-    letterSpacing:"var(--tracking-tight)",
+    letterSpacing:"var(--tracking-default)",
     textTransform:"uppercase",
     padding:"0 16px",
     cursor:"pointer",
@@ -55,24 +55,24 @@ export default function CoachCommandCenter({
   return (
     <section style={{padding:"12px 12px 14px"}}>
       <div style={{marginTop:2,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <h2 style={{fontFamily:FD,fontSize:13,fontWeight:900,textTransform:"uppercase",letterSpacing:"var(--tracking-default)",color:"var(--text-secondary)",margin:0}}>
+        <h2 className="u-allcaps-long" style={{fontFamily:FD,fontSize:13,color:"var(--text-secondary)",margin:0}}>
           Coach Command Center
         </h2>
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(3, minmax(0, 1fr))",gap:8}}>
         <button type="button" onClick={onPlayersClick} style={{...metricBase,border:highlightPlayersAttention?"1px solid rgba(255,69,69,0.45)":metricBase.border,boxShadow:highlightPlayersAttention?"0 0 0 1px rgba(255,69,69,0.25), 0 0 14px rgba(255,69,69,0.15)":"none"}}>
-          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-tight)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
+          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
           <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{totalPlayers}</div>
         </button>
 
         <button type="button" onClick={onActiveTodayClick} style={metricBase}>
-          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-tight)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
+          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
           <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{activeTodayCount}</div>
         </button>
 
         <button type="button" onClick={onNextEventClick} style={metricBase}>
-          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-tight)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
+          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
           <div style={{marginTop:5,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"#C8FF00"}}>{nextEventDateFormatted}</div>
         </button>
       </div>
@@ -87,7 +87,7 @@ export default function CoachCommandCenter({
       </div>
 
       <div style={{margin:"10px 0 4px",padding:"14px 14px",border:"1px solid rgba(200,255,0,0.20)",borderRadius:14,background:"linear-gradient(120deg, rgba(200,255,0,0.09) 0%, rgba(200,255,0,0.03) 35%, rgba(20,20,20,0.9) 100%)"}}>
-        <div style={{fontFamily:FB,fontSize:10,letterSpacing:"var(--tracking-wide)",color:"#C8FF00",fontWeight:700}}>TEAM CODE</div>
+        <div className="u-meta-label" style={{fontFamily:FB,fontSize:10,color:"#C8FF00"}}>TEAM CODE</div>
         <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8,flexWrap:"wrap"}}>
           <div style={{fontFamily:FD,fontSize:25,color:"#FFFFFF",letterSpacing:4,minWidth:114,lineHeight:1}}>{joinCode||"—"}</div>
           <button onClick={onCopyJoinCode} style={{padding:"8px 12px",fontSize:10,border:"1px solid #242424",background:"#141414",color:"#FFFFFF",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY</button>
