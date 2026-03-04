@@ -990,7 +990,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>
       <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:3}}>AT HOME</div>
     </div>
-    <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:24,fontWeight:500}}>Log your daily drills and track shots — all on the honor system.</div>
+    <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:24,fontWeight:500}}>Track your shots here on the honor system.</div>
 
     {/* ── SHOT TRACKER ── */}
     <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
@@ -1015,21 +1015,10 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       <button onClick={()=>setShowShotStats(true)} className="cta-secondary-link" style={{width:"100%",textAlign:"center",opacity:.85}}>VIEW SHOT STATS →</button>
     </div>
 
-    <DividerDot/>
-
-    {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
-    <div style={{fontFamily:FB,color:todayS.length>=drills.length&&drills.length>0?"#FFFFFF":VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
-    <div style={{width:"100%",height:4,background:"#242424",borderRadius:2,overflow:"hidden",marginBottom:12}}><div style={{width:`${drills.length>0?Math.min(100,Math.round(todayS.length/drills.length*100)):0}%`,height:"100%",background:VOLT,borderRadius:2,transition:"width .25s ease"}}/></div>
-    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);
-      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?"rgba(200, 255, 0, 0.20)":BORDER_CLR}`,borderRadius:16,padding:"16px",marginBottom:12,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.6:1}}>
-        <div style={{width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",borderRadius:12,flexShrink:0}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"99":VOLT}/></div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
-        </div>
-        {done?<div style={{width:36,height:36,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-         :<div style={{width:36,height:36,borderRadius:10,background:"rgba(200, 255, 0, 0.10)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .1s ease"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
-      </button>})}
+    <div style={{background:CARD_BG,borderRadius:14,padding:"12px 14px",border:`1px solid ${BORDER_CLR}`}}>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:1.8,textTransform:"uppercase",fontWeight:700}}>Daily drills are currently hidden</div>
+      <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:6,lineHeight:1.5}}>Coaches can still add or update At Home drills in Coach &gt; Drills and enable them again later.</div>
+    </div>
   </div>}
 
   {/* ═════ SHOT STATS sub-screen ═════ */}
