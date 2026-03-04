@@ -240,6 +240,16 @@ const _PAGE_SIGNATURE_CSS=`
 .eventsDatePill{display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:6px 8px;border-radius:999px;background:rgba(255,196,0,.16);border:1px solid rgba(255,196,0,.45);color:#FFC400;font-size:10px;font-family:${FB};font-weight:700;letter-spacing:.08em;}
 .scSection{border-top:1px solid rgba(91,124,255,.35);padding-top:10px;margin-top:10px;}
 .playersAvatarRing{outline:2px solid rgba(184,108,255,.65);outline-offset:1px;border-radius:50%;}
+.lbList{display:flex;flex-direction:column;gap:14px;}
+.lbRow{display:grid;grid-template-columns:40px 52px minmax(0,1fr) 88px;align-items:center;gap:12px;padding:14px 16px;border-radius:16px;}
+.lbRank{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;font-weight:800;opacity:.9;}
+.lbAvatar{width:44px;height:44px;border-radius:999px;display:grid;place-items:center;}
+.lbMain{min-width:0;}
+.lbName{font-size:14px;font-weight:800;letter-spacing:.03em;line-height:1.15;margin:0;font-family:${FB};color:${LIGHT};}
+.lbMeta{margin-top:6px;font-size:12px;line-height:1.2;opacity:.7;font-family:${FB};color:${T.SUB};}
+.lbMetric{justify-self:end;text-align:right;font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.02em;font-family:${FD};}
+.lbRow .decorativeLine,.lbRow .decorativeDot{opacity:.15;z-index:0;}
+.lbRow>*{position:relative;z-index:1;}
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{display:none;}
 @media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
 
@@ -1572,6 +1582,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
     {myIdx>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:600,letterSpacing:1}}>{board[myIdx-1].total-myEntry.total} to #{myIdx}</div>}
   </div>})()}
 
+<div className="lbList">
 {board.map((p,i)=>{
   const isMe=p.email===user.email;
   const isLeader=i===0&&board.length>1;
@@ -1580,40 +1591,40 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
   const pct=Math.round((p.total/leaderTotal)*100);
   const rowBg=i%2===0?CARD_BG:T.SURFACE;
 
-  if(isLeader) return <div key={p.email} className="podium-glow" style={{"--pod-c":accentColor,display:"flex",alignItems:"center",gap:14,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:16,padding:"20px 18px",marginBottom:12,border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
-    <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
-    <div style={{width:32,height:32,borderRadius:9,background:`${accentColor}18`,border:`2px solid ${accentColor}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:14,color:accentColor,flexShrink:0}}>👑</div>
-    <div className="playersAvatarRing"><Av n={p.name} sz={40} email={p.email}/></div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:LIGHT,fontSize:15,fontWeight:700,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
-	      <div style={{fontFamily:FB,color:accentColor,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1{isHome&&p.lastDate?` · ${p.lastDate}`:""}</div>
+  if(isLeader) return <div key={p.email} className="podium-glow lbRow" style={{"--pod-c":accentColor,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
+    <div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
+    <div className="lbRank" style={{background:`${accentColor}18`,border:`2px solid ${accentColor}`,fontFamily:FD,fontSize:14,color:accentColor}}>👑</div>
+    <div className="lbAvatar playersAvatarRing"><Av n={p.name} sz={40} email={p.email}/></div>
+    <div className="lbMain">
+      <div className="lbName">{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
+      <div className="lbMeta" style={{color:accentColor,opacity:1,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1{isHome&&p.lastDate?` · ${p.lastDate}`:""}</div>
     </div>
-    <div style={{textAlign:"right",flexShrink:0}}>
-      <div style={{fontFamily:FD,fontSize:28,color:accentColor}}>{p.total}</div>
+    <div style={{textAlign:"right",minWidth:0}}>
+      <div className="lbMetric" style={{color:accentColor,fontSize:28}}>{p.total}</div>
       <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:600}}>{unit.toUpperCase()}</div>
     </div>
   </div>;
 
-  return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",borderRadius:12,padding:"14px 14px",marginBottom:isTop3?10:8,border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
-    {isTop3&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
-    {isMe&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
-    <RB r={i+1} m={medals}/>
-    <Av n={p.name} sz={32} email={p.email}/>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:isMe?LIGHT:LIGHT,fontSize:13,fontWeight:isMe?700:600,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
-	      {isHome&&p.lastDate&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:2}}>{p.lastDate}</div>}
-	      <div style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
+  return <div key={p.email} className="lbRow" style={{background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
+    {isTop3&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
+    {isMe&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
+    <div className="lbRank"><RB r={i+1} m={medals}/></div>
+    <div className="lbAvatar"><Av n={p.name} sz={32} email={p.email}/></div>
+    <div className="lbMain">
+      <div className="lbName" style={{fontSize:13,fontWeight:isMe?700:600}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
+      {isHome&&p.lastDate&&<div className="lbMeta" style={{fontSize:9,marginTop:2}}>{p.lastDate}</div>}
+      <div className="decorativeLine" style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
         <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:2,transition:"width .4s ease"}}/>
       </div>
     </div>
 
-    <DividerDot/>
-    <div style={{textAlign:"right",flexShrink:0}}>
-      <div style={{fontFamily:FD,color:isMe?accentColor:isTop3?accentColor:LIGHT,fontSize:20}}>{p.total}</div>
+    <div style={{textAlign:"right",minWidth:0}}>
+      <div className="lbMetric" style={{color:isMe?accentColor:isTop3?accentColor:LIGHT}}>{p.total}</div>
       <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:500}}>{unit.toUpperCase()}</div>
     </div>
   </div>;
 })}
+</div>
 </div>
 
   </div>;
