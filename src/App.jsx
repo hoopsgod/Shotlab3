@@ -1764,6 +1764,7 @@ function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills}){
 const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState("attend"),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null),[rankBarPct,setRankBarPct]=useState(0),[rankBarPulse,setRankBarPulse]=useState(false);
 const sorted=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
 const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
+const groupedUpcoming=useMemo(()=>upcoming.reduce((groups,ev)=>{const last=groups[groups.length-1];if(!last||last.date!==ev.date){groups.push({date:ev.date,events:[ev]});}else{last.events.push(ev);}return groups;},[]),[upcoming]);
 const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);
 const prefersReducedMotion=useMemo(()=>typeof window!=="undefined"&&window.matchMedia("(prefers-reduced-motion: reduce)").matches,[]);
 const nextTier=useMemo(()=>[...TIERS].find(t=>t.min>myRsvps),[myRsvps]);
@@ -1902,32 +1903,43 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 {/* Upcoming */}
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING EVENTS" s={`${upcoming.length} SCHEDULED`}/>
 {upcoming.length===0&&<Empty variant="events" t="NO EVENTS SCHEDULED" action="Your coach will post workouts and events here" cta="NOTIFY MY COACH" ctaVariant="tertiary"/>}
-{upcoming.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;
-  return <div key={ev.id} style={{marginBottom:12}}>
-    <div className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",position:"relative",overflow:"hidden"}}>
-      {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:VOLT,borderRadius:"4px 0 0 4px"}}/>}
-      <div style={{display:"flex",alignItems:"flex-start",gap:14,cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
-        <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><EventIcon type={ev.type} size={24} color={going?CYAN:MUTED}/></div>
-        <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span> &#183; {ev.time}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ev.location}</div></div>
-        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,flexShrink:0}}>
-          <div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:20}}>{evR.length}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>GOING</div></div>
+{groupedUpcoming.map(group=><div key={group.date} style={{marginBottom:14}}>
+  <div style={{position:"sticky",top:0,zIndex:1,marginBottom:8,padding:"6px 10px",borderRadius:999,display:"inline-flex",background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
+    <span style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase"}}>{new Date(`${group.date}T00:00:00`).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"})}</span>
+  </div>
+  {group.events.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;
+    return <div key={ev.id} style={{marginBottom:10}}>
+      <div className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"14px 14px 0 0":14,padding:"12px 14px",textAlign:"left",position:"relative",overflow:"hidden"}}>
+        {going&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:VOLT,borderRadius:"4px 0 0 4px"}}/>}
+        <div style={{display:"grid",gridTemplateColumns:"44px minmax(0,1fr) auto",alignItems:"center",columnGap:12,cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
+          <div style={{width:44,height:44,borderRadius:12,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center"}}><EventIcon type={ev.type} size={20} color={going?CYAN:MUTED}/></div>
+          <div style={{minWidth:0}}>
+            <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1.3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div>
+            <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.time||"TBD"} &#183; {ev.location||"Location TBD"}</div>
+          </div>
+          <div style={{textAlign:"right",paddingLeft:4}}>
+            <div style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:18,lineHeight:1}}>{evR.length}</div>
+            <div style={{fontFamily:FB,color:going?VOLT:MUTED,fontSize:9,letterSpacing:1.2,fontWeight:700}}>{going?"GOING":"OPEN"}</div>
+          </div>
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:10,paddingTop:10,borderTop:`1px solid ${BORDER_CLR}`}}>
+          <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} style={{padding:"6px 10px",borderRadius:999,border:`1px solid ${going?VOLT+"66":BORDER_CLR}`,background:going?VOLT+"16":"transparent",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1.2,color:going?VOLT:LIGHT,textTransform:"uppercase"}}>
+            {going?"Going ✓":"I'm Going"}
+          </button>
+          <button onClick={(e)=>{e.stopPropagation();setExpanded(exp?null:ev.id)}} style={{background:"transparent",border:"none",cursor:"pointer",fontFamily:FB,fontSize:10,letterSpacing:1.2,color:MUTED,textTransform:"uppercase"}}>{exp?"Hide details":"Details"}</button>
         </div>
       </div>
-      {/* Inline quick-RSVP pill */}
-      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} style={{marginTop:12,padding:"8px 0",width:"100%",borderRadius:10,border:"none",background:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:3,color:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
-        {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={BG} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>I'M GOING</>:"RSVP →"}
-      </button>
-    </div>
-    {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
-      <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{ev.desc}</p>
-      <button className="btn-v cta-primary" onClick={()=>toggleRsvp(ev.id)} style={{marginBottom:14}}>
-        {going?"&#10003; I'M GOING":"RSVP NOW &#8594;"}
-      </button>
-      {evR.length>0&&<div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,marginBottom:8,fontWeight:600}}>WHO'S GOING</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-        {evR.map((r,i)=>{const tr=getTier(rsvps.filter(rr=>rr.email===r.email).length);return <div key={i} style={{display:"flex",alignItems:"center",gap:6,background:CARD_BG,borderRadius:8,padding:"6px 10px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={22} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:600}}>{r.name}</span>{tr.min>=2&&<span style={{fontFamily:FB,fontSize:7,fontWeight:700,letterSpacing:1,padding:"1px 4px",borderRadius:3,color:tr.color,background:tr.bg}}>{tr.name}</span>}</div>})}
-      </div></div>}
-    </div>}
-  </div>})}
+      {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 14px 14px",padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
+        <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{ev.desc}</p>
+        <button onClick={()=>toggleRsvp(ev.id)} style={{padding:"7px 12px",borderRadius:999,border:`1px solid ${going?VOLT+"66":BORDER_CLR}`,background:going?VOLT+"16":"transparent",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1.2,color:going?VOLT:LIGHT,textTransform:"uppercase",marginBottom:14}}>
+          {going?"Going ✓":"I'm Going"}
+        </button>
+        {evR.length>0&&<div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,marginBottom:8,fontWeight:600}}>WHO'S GOING</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+          {evR.map((r,i)=>{const tr=getTier(rsvps.filter(rr=>rr.email===r.email).length);return <div key={i} style={{display:"flex",alignItems:"center",gap:6,background:CARD_BG,borderRadius:8,padding:"6px 10px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={22} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:600}}>{r.name}</span>{tr.min>=2&&<span style={{fontFamily:FB,fontSize:7,fontWeight:700,letterSpacing:1,padding:"1px 4px",borderRadius:3,color:tr.color,background:tr.bg}}>{tr.name}</span>}</div>})}
+        </div></div>}
+      </div>}
+    </div>})}
+</div>)}
 
 {past.length>0&&<><div style={{marginTop:8}}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PAST EVENTS" s={`${past.length} COMPLETED`}/></div>
   {past.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const was=evR.some(r=>r.email===user.email);return <div key={ev.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.5}}><EventIcon type={ev.type} size={20} color={MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:MUTED,fontSize:13,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ev.date}</div></div>{was&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"3px 7px",borderRadius:5,color:VOLT,background:VOLT+"15",letterSpacing:1}}>ATTENDED</span>}<span style={{fontFamily:FD,color:MUTED,fontSize:13}}>{evR.length}</span></div>})}</>}
