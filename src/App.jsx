@@ -219,12 +219,12 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeaderText{min-width:0;flex:1 1 220px;}.pageHeaderText h1{font-family:${FD};font-size:26px;letter-spacing:var(--tracking-default);color:#fff;line-height:1;word-break:break-word;}
 .pageHeaderText p{font-family:${FB};font-size:11px;color:var(--text-secondary);margin-top:4px;text-transform:uppercase;letter-spacing:var(--tracking-tight);}
 .pageHeaderRight{margin-left:auto;flex-shrink:0;}
-.pageHeaderPill{padding:6px 10px;border-radius:999px;border:1px solid color-mix(in srgb,var(--pageAccent) 50%, transparent);background:color-mix(in srgb,var(--pageAccent) 14%, #1A1A1A);font-family:${FB};font-size:10px;color:var(--pageAccent);font-weight:700;letter-spacing:var(--tracking-tight);text-transform:uppercase;transition:background .15s ease,box-shadow .15s ease,border-color .15s ease,transform .1s ease;}
-.pageHeaderPill:hover{background:color-mix(in srgb,var(--pageAccent) 24%, #1A1A1A);border-color:color-mix(in srgb,var(--pageAccent) 62%, transparent);}
+.pageHeaderPill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.06);font-family:${FB};font-size:10px;color:#EAEAEA;font-weight:700;letter-spacing:var(--tracking-tight);text-transform:uppercase;transition:background .15s ease,border-color .15s ease,transform .1s ease,filter .15s ease;}
+.pageHeaderPill:hover{background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.18);filter:brightness(1.04);}
 .pageHeaderPill:active{transform:translateY(1px);}
 .pageHeaderPill:focus-visible{outline:2px solid var(--page-accent);outline-offset:2px;}
-.pageHeaderPillBrand{border-color:rgba(200,255,0,.5);background:color-mix(in srgb,#C8FF00 18%, #1A1A1A);color:#C8FF00;}
-.pageHeaderPillBrand:hover{background:color-mix(in srgb,#C8FF00 26%, #1A1A1A);border-color:rgba(200,255,0,.68);}
+.pageHeaderPillBrand{border:none;background:transparent;color:var(--lime);}
+.pageHeaderPillBrand:hover{text-decoration:underline;background:transparent;}
 .pageHeaderPillBrand:focus-visible{outline-color:#C8FF00;}
 .pageAccentBar{height:4px;width:48%;border-radius:999px;background:var(--headerAccent);box-shadow:0 0 16px var(--headerAccent);margin-top:12px;}
 .heroModule{position:relative;overflow:hidden;border:1px solid var(--stroke-2);border-radius:var(--radius-card);padding:var(--card-pad);margin-bottom:var(--stack-gap);background:var(--surface-3);box-shadow:var(--shadow-2);}
@@ -437,22 +437,30 @@ const _PAGE_SIGNATURE_CSS=`
 const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
 const _EMPTY_STATE_CSS=`.emptyState{display:flex;flex-direction:column;align-items:center}.emptyState__art{width:80px;height:80px;display:flex;align-items:center;justify-content:center}.emptyState__art svg{width:80px;height:80px;display:block}.emptyState__title{margin-top:24px}.emptyState__subtitle{margin-top:8px}.emptyState__accentDash{stroke-dasharray:72;stroke-dashoffset:72;animation:emptyArcDraw 1.2s ease-in-out infinite}.emptyState__ball{transform-box:fill-box;transform-origin:center;animation:emptyBallFloat 1.2s ease-in-out infinite}.emptyState__accentOrbit{transform-box:fill-box;transform-origin:center;animation:emptyOrbitPulse 1.2s ease-in-out infinite}.emptyState__accentPulse{animation:emptyAccentPulse 1.2s ease-in-out infinite}@keyframes emptyBallFloat{0%,100%{transform:translateY(1px)}50%{transform:translateY(-2px)}}@keyframes emptyArcDraw{0%{stroke-dashoffset:72}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-72}}@keyframes emptyOrbitPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}@keyframes emptyAccentPulse{0%,100%{opacity:.8}50%{opacity:1}}@media (prefers-reduced-motion: reduce){.emptyState__art *{animation:none!important;transition:none!important}}`;
 
-const _BUTTON_SYSTEM_CSS=`:root{--btn-primary-bg:#CCFF00;--btn-primary-fg:#000000;--btn-secondary-bg:#1E2228;--btn-accent:#CCFF00;--btn-radius:12px;}
-.sl-btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 16px;border-radius:var(--btn-radius);cursor:pointer;font-family:${FB};font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;transition:box-shadow 150ms ease,opacity .2s ease,filter .15s ease,transform 150ms ease;}
-.sl-btn--primary{border:none;background:var(--btn-primary-bg);color:var(--btn-primary-fg);box-shadow:0 4px 18px rgba(204,255,0,0.24);}
-.sl-btn--primary:active{transform:scale(0.97);box-shadow:0 0 12px rgba(204,255,0,0.4);}
-.sl-btn--secondary{background:var(--btn-secondary-bg);border:1.5px solid var(--btn-accent);color:var(--btn-accent);}
-.sl-btn--tertiary{min-height:auto;padding:0;background:transparent;border:none;border-radius:0;color:rgba(255,255,255,0.5);font-size:13px;letter-spacing:0.06em;font-weight:600;text-transform:uppercase;opacity:1;}
-.sl-btn--tertiary:hover,.sl-btn--tertiary:focus-visible{text-decoration:underline;}
-.cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{background:var(--btn-primary-bg)!important;color:var(--btn-primary-fg)!important;border-radius:var(--btn-radius)!important;letter-spacing:0.08em!important;font-weight:700!important;}
-.cta-primary:active,.cta-primary-accent:active,.cta-brand:active,.cta-danger:active{transform:scale(0.97);box-shadow:0 0 12px rgba(204,255,0,0.4)!important;}
-.cta-secondary{background:var(--btn-secondary-bg)!important;border:1.5px solid var(--btn-accent)!important;color:var(--btn-accent)!important;border-radius:var(--btn-radius)!important;letter-spacing:0.08em!important;}
-.cta-secondary-link{background:transparent;border:none;color:rgba(255,255,255,0.5);font-size:13px;letter-spacing:0.06em;}
-.drill-row-arrow{width:44px;height:44px;border-radius:10px;background:var(--btn-secondary-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(204,255,0,0.22);transition:background-color 150ms ease,box-shadow 150ms ease,border-color 150ms ease;}
-.drill-row-arrow svg path{stroke:var(--btn-accent);}
-.drill-row-arrow:hover{background:#242A32;border-color:rgba(204,255,0,0.38);}
-.drill-row-arrow:active{box-shadow:0 0 10px rgba(204,255,0,0.22);}
-@media (prefers-reduced-motion:reduce){.sl-btn,.sl-btn--primary,.drill-row-arrow,.cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{transition:none!important;transform:none!important;}}`;
+const _BUTTON_SYSTEM_CSS=`:root{--lime:var(--accent);--btn-height:44px;--btn-radius:15px;--btn-primary-bg:var(--lime);--btn-primary-fg:#0B0F0C;--btn-secondary-bg:rgba(255,255,255,0.06);--btn-secondary-border:rgba(255,255,255,0.10);--btn-secondary-fg:#EAEAEA;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--btn-height);height:var(--btn-height);padding:0 16px;border-radius:var(--btn-radius);cursor:pointer;font-family:${FB};font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;transition:filter 150ms ease,transform 120ms ease,background-color 150ms ease,border-color 150ms ease,color 150ms ease;}
+.btn:focus-visible{outline:2px solid var(--lime);outline-offset:2px;}
+@media (hover:hover) and (pointer:fine){.btn:hover{filter:brightness(1.06);}}
+.btn:active{transform:scale(0.98);}
+.btn--primary{border:none;background:var(--btn-primary-bg);color:var(--btn-primary-fg);box-shadow:none;}
+.btn--primary:active{background:color-mix(in srgb,var(--btn-primary-bg) 85%, #0B0F0C);}
+.btn--secondary{background:var(--btn-secondary-bg);border:1px solid var(--btn-secondary-border);color:var(--btn-secondary-fg);}
+.btn--secondary:active{background:rgba(255,255,255,0.04);}
+.btn--tertiary{min-height:auto;height:auto;padding:0;background:transparent;border:none;border-radius:0;color:var(--lime);font-size:13px;letter-spacing:0.08em;font-weight:700;text-transform:uppercase;}
+.btn--tertiary:hover,.btn--tertiary:focus-visible{text-decoration:underline;}
+.btn-v{transition:transform .1s ease,box-shadow .2s ease;position:relative;overflow:hidden}
+.btn-v::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,.15);opacity:0;pointer-events:none}
+.btn-v:active::after{animation:flashPress .2s ease-out forwards}
+.cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{background:var(--btn-secondary-bg)!important;color:var(--btn-secondary-fg)!important;border:1px solid var(--btn-secondary-border)!important;border-radius:var(--btn-radius)!important;letter-spacing:0.08em!important;font-weight:700!important;box-shadow:none!important;}
+.cta-primary:active,.cta-primary-accent:active,.cta-brand:active,.cta-danger:active{transform:scale(0.98);background:rgba(255,255,255,0.04)!important;}
+.cta-secondary{background:var(--btn-secondary-bg)!important;border:1px solid var(--btn-secondary-border)!important;color:var(--btn-secondary-fg)!important;border-radius:var(--btn-radius)!important;letter-spacing:0.08em!important;}
+.cta-secondary-link{background:transparent;border:none;color:var(--lime);font-size:13px;letter-spacing:0.08em;font-weight:700;text-transform:uppercase;}
+.cta-secondary-link:hover,.cta-secondary-link:focus-visible{text-decoration:underline;}
+.drill-row-arrow{width:44px;height:44px;border-radius:10px;background:var(--btn-secondary-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--btn-secondary-border);transition:background-color 150ms ease,border-color 150ms ease,transform 120ms ease;}
+.drill-row-arrow svg path{stroke:var(--lime);}
+.drill-row-arrow:hover{background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.2);}
+.drill-row-arrow:active{transform:scale(0.98);}
+@media (prefers-reduced-motion:reduce){.btn,.drill-row-arrow,.cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{transition:none!important;transform:none!important;}}`
 
 const Styles=()=><><style>{_STYLES_CSS}</style><style>{_BUTTON_SYSTEM_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style><style>{_EMPTY_STATE_CSS}</style></>;
 
@@ -1008,7 +1016,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
           <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
       </div>
-      <button className="btn-v cta-primary" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?.7:1}}>
+      <button className="btn btn--primary btn-v" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?.7:1,width:"100%"}}>
         {shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
       {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
@@ -1399,7 +1407,7 @@ return <div className="fade-up">
   </div>
   {logErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:11,marginTop:8}}>{logErr}</div>}
   {logSaved&&<div style={{fontFamily:FB,color:SC_COLOR,fontSize:11,marginTop:8}}>Session logged.</div>}
-  <button className="btn-v cta-primary" onClick={handleAddScLog} style={{marginTop:10}}>ADD SESSION</button>
+  <button className="btn btn--primary btn-v" onClick={handleAddScLog} style={{marginTop:10,width:"100%"}}>ADD SESSION</button>
 </div></div>
 
 <div style={{marginBottom:16,background:"#141414",border:"1px solid #242424",borderRadius:16,minHeight:100,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"16px"}}>
@@ -1426,7 +1434,7 @@ return <div className="fade-up">
     </button>
     {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
-      <button className="btn-v cta-primary" onClick={()=>toggleScRsvp(s.id)} style={{}}>
+      <button className="btn btn--secondary btn-v" onClick={()=>toggleScRsvp(s.id)} style={{width:"100%"}}>
         {going?<>&#10003; YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
       </button>
       {sr.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>{sr.map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:4,background:CARD_BG,borderRadius:8,padding:"4px 8px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={20} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:600}}>{r.name}</span></div>)}</div>}
@@ -1683,7 +1691,7 @@ return <div className="fade-up">
         <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
       </div>
     </div>
-    <button className="btn-v cta-primary" onClick={handleLog} style={{}}>
+    <button className="btn btn--primary btn-v" onClick={handleLog} style={{width:"100%"}}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
       LOG SHOTS
     </button>
@@ -1914,13 +1922,13 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
         </div>
       </div>
       {/* Inline quick-RSVP pill */}
-      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} style={{marginTop:12,padding:"8px 0",width:"100%",borderRadius:10,border:"none",background:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:3,color:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
+      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} className="btn btn--secondary" style={{marginTop:12,width:"100%",fontFamily:FD,fontSize:12,letterSpacing:3}}>
         {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={BG} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>I'M GOING</>:"RSVP →"}
       </button>
     </div>
     {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{ev.desc}</p>
-      <button className="btn-v cta-primary" onClick={()=>toggleRsvp(ev.id)} style={{marginBottom:14}}>
+      <button className="btn btn--secondary btn-v" onClick={()=>toggleRsvp(ev.id)} style={{marginBottom:14,width:"100%"}}>
         {going?"&#10003; I'M GOING":"RSVP NOW &#8594;"}
       </button>
       {evR.length>0&&<div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,marginBottom:8,fontWeight:600}}>WHO'S GOING</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>
@@ -2310,13 +2318,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><PageHeader title="S&C" subtitle="Strength blocks, readiness, and recovery" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S LIFT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAddSC(true)}>Add Session</button></div><div className="heroStats"><div className="heroStat"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">SESSIONS</div></div><div className="heroStat"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">RSVPS</div></div><div className="heroStat"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">LOGS</div></div></div></div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="S&C SESSIONS" s={`${scSessions.length} TOTAL`} identity/>
-    <div className="accent-card" style={{marginBottom:16,paddingLeft:10}}><button className="btn-v cta-primary" onClick={()=>setShowAddSC(!showAddSC)} style={{marginBottom:0}}>
+    <div className="accent-card" style={{marginBottom:16,paddingLeft:10}}><button className="btn btn--primary btn-v" onClick={()=>setShowAddSC(!showAddSC)} style={{marginBottom:0,width:"calc(100% - 32px)",marginLeft:16,marginRight:16}}>
       {showAddSC?"CANCEL":"+ ADD SESSION"}
     </button>
     {showAddSC&&<div className="fade-up" style={{background:CARD_BG,borderRadius:16,padding:"20px 18px",marginTop:12,border:`1px solid ${BORDER_CLR}`}}>
       <FF l="SPORT" v={nsc.sport} set={v=>setNsc({...nsc,sport:v})} ph="e.g. Basketball"/>
       <div style={{display:"flex",gap:8}}><div style={{flex:1}}><FF l="DATE" v={nsc.date} set={v=>setNsc({...nsc,date:v})} tp="date"/></div><div style={{flex:1}}><FF l="TIME" v={nsc.time} set={v=>setNsc({...nsc,time:v})} ph="6:00 AM"/></div></div>
-      <button className="btn-v cta-primary" onClick={handleAddSC} style={{}}>CREATE SESSION</button>
+      <button className="btn btn--primary btn-v" onClick={handleAddSC} style={{width:"calc(100% - 32px)",marginLeft:16,marginRight:16}}>CREATE SESSION</button>
     </div>}
     </div>
     {scSessions.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);
