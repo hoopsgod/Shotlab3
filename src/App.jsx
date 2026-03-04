@@ -533,6 +533,24 @@ body,
 `;
 const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
 const _EMPTY_STATE_CSS=`.emptyState{display:flex;flex-direction:column;align-items:center}.emptyState__art{width:80px;height:80px;display:flex;align-items:center;justify-content:center}.emptyState__art svg{width:80px;height:80px;display:block}.emptyState__title{margin-top:24px}.emptyState__subtitle{margin-top:8px}.emptyState__accentDash{stroke-dasharray:72;stroke-dashoffset:72;animation:emptyArcDraw 1.2s ease-in-out infinite}.emptyState__ball{transform-box:fill-box;transform-origin:center;animation:emptyBallFloat 1.2s ease-in-out infinite}.emptyState__accentOrbit{transform-box:fill-box;transform-origin:center;animation:emptyOrbitPulse 1.2s ease-in-out infinite}.emptyState__accentPulse{animation:emptyAccentPulse 1.2s ease-in-out infinite}@keyframes emptyBallFloat{0%,100%{transform:translateY(1px)}50%{transform:translateY(-2px)}}@keyframes emptyArcDraw{0%{stroke-dashoffset:72}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-72}}@keyframes emptyOrbitPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}@keyframes emptyAccentPulse{0%,100%{opacity:.8}50%{opacity:1}}@media (prefers-reduced-motion: reduce){.emptyState__art *{animation:none!important;transition:none!important}}`;
+const _LIST_ROW_SYSTEM_CSS=`/* ---------- List Row System ---------- */
+:root{--row-py:14px;--row-px:16px;--row-gap:12px;--row-radius:18px;--row-border:rgba(255,255,255,0.08);--row-bg:rgba(255,255,255,0.03);--row-bg-hover:rgba(255,255,255,0.05);--text-title:rgba(255,255,255,0.92);--text-meta:rgba(255,255,255,0.70);--text-muted:rgba(255,255,255,0.55);--stat-strong:rgba(190,255,0,0.95);--status-won:rgba(190,255,0,0.90);--status-wait:rgba(255,255,255,0.55);}
+.listRow{display:flex;align-items:center;justify-content:space-between;padding:var(--row-py) var(--row-px);border:1px solid var(--row-border);background:var(--row-bg);border-radius:var(--row-radius);gap:var(--row-gap);}
+.listRow+.listRow{margin-top:12px;}
+.listRowLeft{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 auto;}
+.listRowText{min-width:0;display:flex;flex-direction:column;gap:4px;}
+.listRowTitle{color:var(--text-title);font-size:16px;font-weight:700;line-height:1.15;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.listRowMeta{color:var(--text-meta);font-size:12px;line-height:1.2;letter-spacing:0.06em;text-transform:none;}
+.listRowRight{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex:0 0 auto;text-align:right;}
+.listRowStat{color:var(--stat-strong);font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;}
+.listRowStatSub{color:var(--text-muted);font-size:11px;line-height:1.1;letter-spacing:0.10em;text-transform:uppercase;}
+.listRowStatus{font-size:12px;line-height:1.2;letter-spacing:0.06em;font-weight:700;}
+.listRowStatus--won{color:var(--status-won);}
+.listRowStatus--wait{color:var(--status-wait);}
+@media (hover:hover){.listRow:hover{background:var(--row-bg-hover);}}
+.listRow .btn-primary,.listRow .primaryButton,.listRow button.primary{height:44px;min-height:44px;box-shadow:none;}
+.listRow a,.listRow button{min-height:44px;}
+/* ---------- End List Row System ---------- */`;
 
 const _BUTTON_SYSTEM_CSS=`:root{--lime:var(--accent);--btn-height:48px;--btn-height-dense:44px;--btn-radius:15px;--btn-pad-x:20px;--btn-primary-bg:var(--lime);--btn-primary-fg:#0B0F0C;--btn-secondary-bg:rgba(255,255,255,0.04);--btn-secondary-border:rgba(255,255,255,0.14);--btn-secondary-fg:#EAEAEA;}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:var(--btn-height);height:var(--btn-height);padding:0 var(--btn-pad-x);border-radius:var(--btn-radius);cursor:pointer;font-family:${FB};font-size:13px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;transition:filter 150ms ease,transform 120ms ease,background-color 150ms ease,border-color 150ms ease,color 150ms ease;}
@@ -562,7 +580,7 @@ const _BUTTON_SYSTEM_CSS=`:root{--lime:var(--accent);--btn-height:48px;--btn-hei
 .drill-row-arrow{width:44px;height:44px;border-radius:12px;background:var(--btn-secondary-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--btn-secondary-border);}
 @media (prefers-reduced-motion:reduce){.btn,.icon-btn-square,.drill-row-arrow,.cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{transition:none!important;transform:none!important;}}`
 
-const Styles=()=><><style>{_STYLES_CSS}</style><style>{_BUTTON_SYSTEM_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style><style>{_EMPTY_STATE_CSS}</style></>;
+const Styles=()=><><style>{_STYLES_CSS}</style><style>{_BUTTON_SYSTEM_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style><style>{_EMPTY_STATE_CSS}</style><style>{_LIST_ROW_SYSTEM_CSS}</style></>;
 
 // ═══════════════════════════════════════
 // APP ROOT
@@ -1370,21 +1388,23 @@ return <div className="fade-up">
   const resultColor=isPending?MUTED:won?VOLT:tied?"#C8FF00":"#FF4545";
   const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
 
-  return <div key={ch.id+"-"+ch.ts} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"14px 16px",marginBottom:6,border:`1px solid ${isPending?ORANGE+"22":BORDER_CLR}`}}>
+  return <div key={ch.id+"-"+ch.ts} className="listRow" style={{background:CARD_BG,border:isPending?`1px solid ${ORANGE}22`:undefined}}>
+    <div className="listRowLeft">
     <div style={{width:40,height:40,borderRadius:12,background:resultColor+"12",border:`1px solid ${resultColor}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
       {isPending?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       :won?<svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
       :tied?<span style={{fontFamily:FD,color:"#C8FF00",fontSize:14}}>=</span>
       :<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>}
     </div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{isMine?"YOU":"YOU"} vs {oppName.toUpperCase()}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ch.drillName} &#183; {isPending?<span style={{color:ORANGE}}>Waiting for response</span>:<span style={{color:resultColor,fontWeight:700}}>{resultText}</span>}</div>
+    <div className="listRowText" style={{flex:1}}>
+      <div className="listRowTitle" style={{fontFamily:FD,fontSize:13}}>{isMine?"YOU":"YOU"} VS {oppName.toUpperCase()}</div>
+      <div className="listRowMeta" style={{fontFamily:FB,fontSize:10}}>{ch.drillName} &#183; {isPending?<span className="listRowStatus listRowStatus--wait">Waiting for response</span>:<span className={`listRowStatus ${won?"listRowStatus--won":"listRowStatus--wait"}`}>{resultText}</span>}</div>
     </div>
-    <div style={{textAlign:"right",flexShrink:0}}>
-      {isPending?<div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{ch.score}<span style={{color:MUTED,fontSize:11}}>/{ch.max}</span></div>
-      :<><div style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:16}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>
-        <div style={{fontFamily:FB,color:MUTED,fontSize:8}}>/{ch.max}</div></>}
+    </div>
+    <div className="listRowRight">
+      {isPending?<div className="listRowStat" style={{fontFamily:FD,color:ORANGE}}>{ch.score}</div>
+      :<div className="listRowStat" style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:18}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>}
+      <div className="listRowStatSub" style={{fontFamily:FB}}>/{ch.max}</div>
     </div>
   </div>;
 })}
@@ -1681,36 +1701,40 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
   const pct=Math.round((p.total/leaderTotal)*100);
   const rowBg=i%2===0?CARD_BG:T.SURFACE;
 
-  if(isLeader) return <div key={p.email} className="podium-glow lbRow" style={{"--pod-c":accentColor,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
+  if(isLeader) return <div key={p.email} className="podium-glow lbRow listRow" style={{"--pod-c":accentColor,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
     <div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
+    <div className="listRowLeft">
     <div className="lbRank" style={{background:`${accentColor}18`,border:`2px solid ${accentColor}`,fontFamily:FD,fontSize:14,color:accentColor}}>👑</div>
     <div className="lbAvatar playersAvatarRing"><Av n={p.name} sz={40} email={p.email}/></div>
-    <div className="lbMain">
-      <div className="lbName">{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
-      <div className="lbMeta" style={{color:accentColor,opacity:1,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1{isHome&&p.lastDate?` · ${p.lastDate}`:""}</div>
+    <div className="lbMain listRowText">
+      <div className="lbName listRowTitle">{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
+      <div className="lbMeta listRowMeta" style={{color:accentColor,opacity:1,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1{isHome&&p.lastDate?` · ${p.lastDate}`:""}</div>
     </div>
-    <div style={{textAlign:"right",minWidth:0}}>
-      <div className="lbMetric" style={{color:accentColor,fontSize:28}}>{p.total}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:600}}>{unit.toUpperCase()}</div>
+    </div>
+    <div className="listRowRight" style={{minWidth:0}}>
+      <div className="lbMetric listRowStat" style={{color:accentColor,fontSize:28}}>{p.total}</div>
+      <div className="listRowStatSub" style={{fontFamily:FB,fontSize:8,fontWeight:600}}>{unit.toUpperCase()}</div>
     </div>
   </div>;
 
-  return <div key={p.email} className="lbRow" style={{background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
+  return <div key={p.email} className="lbRow listRow" style={{background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
     {isTop3&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
     {isMe&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
+    <div className="listRowLeft">
     <div className="lbRank"><RB r={i+1} m={medals}/></div>
     <div className="lbAvatar"><Av n={p.name} sz={32} email={p.email}/></div>
-    <div className="lbMain">
-      <div className="lbName" style={{fontSize:13,fontWeight:isMe?700:600}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
-      {isHome&&p.lastDate&&<div className="lbMeta" style={{fontSize:9,marginTop:2}}>{p.lastDate}</div>}
+    <div className="lbMain listRowText">
+      <div className="lbName listRowTitle" style={{fontSize:13,fontWeight:isMe?700:600}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
+      {isHome&&p.lastDate&&<div className="lbMeta listRowMeta" style={{fontSize:9,marginTop:2}}>{p.lastDate}</div>}
       <div className="decorativeLine" style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
         <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:2,transition:"width .4s ease"}}/>
       </div>
     </div>
+    </div>
 
-    <div style={{textAlign:"right",minWidth:0}}>
-      <div className="lbMetric" style={{color:isMe?accentColor:isTop3?accentColor:LIGHT}}>{p.total}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:500}}>{unit.toUpperCase()}</div>
+    <div className="listRowRight" style={{minWidth:0}}>
+      <div className="lbMetric listRowStat" style={{color:isMe?accentColor:isTop3?accentColor:LIGHT}}>{p.total}</div>
+      <div className="listRowStatSub" style={{fontFamily:FB,fontSize:8,fontWeight:500}}>{unit.toUpperCase()}</div>
     </div>
   </div>;
 })}
@@ -2014,15 +2038,17 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 <div className="eventsList">
 {upcoming.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;
   return <div key={ev.id}>
-    <div className="ch eventCard" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,textAlign:"left",position:"relative",overflow:"hidden",cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
+    <div className="ch eventCard listRow" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,textAlign:"left",position:"relative",overflow:"hidden",cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
       {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:VOLT,borderRadius:"4px 0 0 4px"}}/>}
+      <div className="listRowLeft">
       <div className="eventIcon" style={{background:BG,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><EventIcon type={ev.type} size={24} color={going?CYAN:MUTED}/></div>
-      <div className="eventMain" style={{flex:1}}><div className="eventTitle" style={{fontFamily:FD,color:LIGHT}}>{ev.title}</div><div className="eventMeta" style={{fontFamily:FB,color:MUTED}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span><span>{ev.time}</span><span style={{color:T.SUB}}>{ev.location}</span></div></div>
-      <div className="eventSide" style={{flexShrink:0}}>
-        <div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:20}}>{evR.length}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>GOING</div></div>
+      <div className="eventMain listRowText" style={{flex:1}}><div className="eventTitle listRowTitle" style={{fontFamily:FD,color:LIGHT}}>{ev.title}</div><div className="eventMeta listRowMeta" style={{fontFamily:FB,color:MUTED}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span><span>{ev.time}</span><span style={{color:T.SUB}}>{ev.location}</span></div></div>
+      </div>
+      <div className="eventSide listRowRight" style={{flexShrink:0}}>
+        <div style={{textAlign:"right"}}><div className="listRowStat" style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:20}}>{evR.length}</div><div className="listRowStatSub" style={{fontFamily:FB,fontSize:9,letterSpacing:1}}>GOING</div></div>
       </div>
       {/* Inline quick-RSVP pill */}
-      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} className="btn btn-secondary btn--dense eventCta" style={{fontFamily:FD}}>
+      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} className="btn btn-secondary btn--dense eventCta btn-primary" style={{fontFamily:FD,height:44,minHeight:44,boxShadow:"none"}}>
         {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={BG} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>I'M GOING</>:"RSVP →"}
       </button>
     </div>
