@@ -297,6 +297,16 @@ const _PAGE_SIGNATURE_CSS=`
 :root{
   --bg-0:#0B0D10;
 
+  --fs-page:clamp(28px,3.2vw,34px);
+  --fs-section:18px;
+  --fs-cardTitle:16px;
+  --fs-body:14px;
+  --fs-meta:12px;
+  --lh-tight:1.1;
+  --lh-normal:1.35;
+  --track-wide:0.08em;
+  --track-med:0.04em;
+
   --surface-1:#0F1115;
   --surface-2:#141821;
   --surface-3:#171D28;
@@ -311,6 +321,82 @@ const _PAGE_SIGNATURE_CSS=`
   --radius-card:20px;
 
   --stack-gap:24px;
+}
+
+.pageHeaderText h1,
+.page-title,
+.pageTitle,
+.pageSignatureTitle,
+.coach-mode h1{
+  font-size:var(--fs-page)!important;
+  line-height:var(--lh-tight)!important;
+  letter-spacing:var(--track-med)!important;
+}
+
+.coach-mode h2,
+.sectionTitle,
+.section-title,
+.panel-title,
+.nav-title,
+.emptyState__title,
+.coach-mode h3{
+  font-size:var(--fs-section)!important;
+  line-height:var(--lh-normal)!important;
+  letter-spacing:0.03em!important;
+  color:rgba(229,231,235,.94)!important;
+}
+
+.cardTitle,
+.card-title,
+.lbName,
+.eventTitle,
+.coach-mode .title,
+.coach-mode .heading{
+  font-size:var(--fs-cardTitle)!important;
+  line-height:var(--lh-normal)!important;
+  letter-spacing:0.02em!important;
+  text-transform:none;
+}
+
+body,
+.coach-mode p,
+.emptyState__subtitle,
+.coach-mode .helper,
+.coach-mode .description,
+.coach-mode .subtext,
+.coach-mode .hint,
+.coach-mode .placeholder,
+.coach-mode .u-secondary-text{
+  font-size:var(--fs-body);
+  line-height:var(--lh-normal);
+}
+
+.u-meta-label,
+.eventMeta,
+.lbMeta,
+.pageHeaderText p,
+.heroStatLbl,
+.eventsDatePill,
+.coach-mode .kicker,
+.coach-mode .label,
+.coach-mode .meta,
+.coach-mode small{
+  font-size:var(--fs-meta)!important;
+  letter-spacing:var(--track-wide)!important;
+  opacity:.75!important;
+  text-transform:uppercase;
+}
+
+.heroStatVal,
+.lbMetric,
+.metric-pop,
+[class*="score"],
+[class*="Score"],
+[class*="streak"],
+[class*="Streak"],
+[class*="makes"],
+[class*="Makes"]{
+  font-variant-numeric:tabular-nums;
 }
 
 /* Tier 2 default "card-like" surfaces (safe, common class/id patterns) */
