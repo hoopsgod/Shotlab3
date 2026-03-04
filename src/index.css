@@ -33,6 +33,11 @@
   box-shadow: 0 0 0 2px rgba(200,255,0,0.14), 0 10px 24px rgba(200,255,0,0.10);
 }
 
+.text-muted { color: var(--muted); }
+.text-subtle { color: var(--text-2); }
+.text-strong { color: var(--text-1); }
+.text-accent { color: var(--accent); }
+
 /* Attendance Rank labels (percent + tier) - safe, only if present */
 .progressLabels,
 .progress-labels,
@@ -49,7 +54,7 @@
 .progressPercent,
 .progress-percent,
 [class*="percent"] {
-  color: rgba(255,255,255,0.80);
+  color: var(--text-2);
   font-size: 12px;
   letter-spacing: 0.06em;
 }
@@ -57,7 +62,7 @@
 .progressTier,
 .progress-tier,
 [class*="tier"] {
-  color: #C8FF00;
+  color: var(--text-2);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.10em;
