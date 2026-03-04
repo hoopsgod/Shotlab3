@@ -1381,12 +1381,7 @@ return <div className="fade-up">
 </button>
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
   {board.length===0&&<Empty t="No attendance yet"/>}
-  {board.map((p,i)=>{const isMe=p.email===user.email;return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${isMe?SC_COLOR+"33":BORDER_CLR}`}}>
-    <RB r={i+1} m={medals}/>
-    <Av n={p.name} sz={30} email={p.email}/>
-    <div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{isMe?" (YOU)":""}</div>
-    <div style={{fontFamily:FD,color:SC_COLOR,fontSize:18}}>{p.count}</div>
-  </div>})}
+  {board.map((p,i)=>{const isMe=p.email===user.email;return <LeaderboardRow key={p.email} rank={i+1} medals={medals} name={p.name} email={p.email} isMe={isMe} metric={p.count} metricColor={SC_COLOR} metricLabel="SESSIONS" accentColor={SC_COLOR} borderColor={isMe?SC_COLOR+"44":BORDER_CLR} avatarSize={32}/>})}
 </div>}
 
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SESSION LOG"/>
@@ -1564,48 +1559,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
     {myIdx>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:600,letterSpacing:1}}>{board[myIdx-1].total-myEntry.total} to #{myIdx}</div>}
   </div>})()}
 
-{board.map((p,i)=>{
-  const isMe=p.email===user.email;
-  const isLeader=i===0&&board.length>1;
-  const isTop3=i<3;
-  const leaderTotal=board[0]?.total||1;
-  const pct=Math.round((p.total/leaderTotal)*100);
-  const rowBg=i%2===0?CARD_BG:T.SURFACE;
-
-  if(isLeader) return <div key={p.email} className="podium-glow" style={{"--pod-c":accentColor,display:"flex",alignItems:"center",gap:14,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:16,padding:"20px 18px",marginBottom:12,border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
-    <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
-    <div style={{width:32,height:32,borderRadius:9,background:`${accentColor}18`,border:`2px solid ${accentColor}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:14,color:accentColor,flexShrink:0}}>👑</div>
-    <div className="playersAvatarRing"><Av n={p.name} sz={40} email={p.email}/></div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:LIGHT,fontSize:15,fontWeight:700,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
-	      <div style={{fontFamily:FB,color:accentColor,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1{isHome&&p.lastDate?` · ${p.lastDate}`:""}</div>
-    </div>
-    <div style={{textAlign:"right",flexShrink:0}}>
-      <div style={{fontFamily:FD,fontSize:28,color:accentColor}}>{p.total}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:600}}>{unit.toUpperCase()}</div>
-    </div>
-  </div>;
-
-  return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",borderRadius:12,padding:"14px 14px",marginBottom:isTop3?10:8,border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
-    {isTop3&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
-    {isMe&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
-    <RB r={i+1} m={medals}/>
-    <Av n={p.name} sz={32} email={p.email}/>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:isMe?LIGHT:LIGHT,fontSize:13,fontWeight:isMe?700:600,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
-	      {isHome&&p.lastDate&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:2}}>{p.lastDate}</div>}
-	      <div style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
-        <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:2,transition:"width .4s ease"}}/>
-      </div>
-    </div>
-
-    <DividerDot/>
-    <div style={{textAlign:"right",flexShrink:0}}>
-      <div style={{fontFamily:FD,color:isMe?accentColor:isTop3?accentColor:LIGHT,fontSize:20}}>{p.total}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:500}}>{unit.toUpperCase()}</div>
-    </div>
-  </div>;
-})}
+{board.map((p,i)=>{const isMe=p.email===user.email;const isTop3=i<3;const rowBg=isMe?"rgba(10, 12, 14, 0.94)":i%2===0?CARD_BG:T.SURFACE;return <LeaderboardRow key={p.email} rank={i+1} medals={medals} name={p.name} email={p.email} isMe={isMe} metric={p.total} metricColor={isTop3?accentColor:LIGHT} metricLabel={unit.toUpperCase()} accentColor={accentColor} background={rowBg} borderColor={isMe?accentColor+"44":isTop3?accentColor+"2A":BORDER_CLR} avatarSize={34} nameMeta={isHome&&p.lastDate?p.lastDate:undefined}/>})}
 </div>
 
   </div>;
@@ -1894,9 +1848,9 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
   <div style={{display:"flex",gap:4,marginBottom:14}}>{[{k:"attend",l:"ATTENDANCE"},{k:"overall",l:"DRILL SCORES"},{k:"streaks",l:"STREAKS"}].map(t=><button key={t.k} onClick={()=>setLbMode(t.k)} style={{flex:1,padding:"9px 4px",borderRadius:10,border:lbMode===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:1,background:lbMode===t.k?CYAN:CARD_BG,color:lbMode===t.k?BG:MUTED}}>{t.l}</button>)}</div>
-  {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty variant="leaderboard" t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</span><span className="tb" style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div style={{fontFamily:FD,color:t.color,fontSize:18}}>{p.count}</div></div>})}</>}
-  {lbMode==="overall"&&<>{(()=>{const m={};scores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});const a=Object.values(m).sort((a,b)=>b.total-a.total);return a.length===0?<Empty variant="leaderboard" t="No scores yet"/>:a.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{p.email===user.email?" (YOU)":""}</div><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{p.total}</div></div>)})()}</>}
-  {lbMode==="streaks"&&<>{(()=>{const es=[...new Set(scores.map(s=>s.email))];const st=es.map(e=>({email:e,name:scores.find(s=>s.email===e)?.name||e,streak:calcStreak(scores.filter(s=>s.email===e))})).sort((a,b)=>b.streak-a.streak);return st.length===0?<Empty variant="leaderboard" t="No streaks yet"/>:st.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</div><div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{p.streak} &#128293;</div></div>)})()}</>}
+  {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty variant="leaderboard" t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);const isMe=p.email===user.email;return <LeaderboardRow key={p.email} rank={i+1} medals={medals} name={p.name} email={p.email} isMe={isMe} metric={p.count} metricColor={t.color} metricLabel="EVENTS" accentColor={VOLT} borderColor={isMe?VOLT+"44":BORDER_CLR} avatarSize={32} badge={<span className="tb" style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`,marginLeft:6,verticalAlign:"middle"}}>{t.name}</span>}/>})}</>}
+  {lbMode==="overall"&&<>{(()=>{const m={};scores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});const a=Object.values(m).sort((a,b)=>b.total-a.total);return a.length===0?<Empty variant="leaderboard" t="No scores yet"/>:a.map((p,i)=>{const isMe=p.email===user.email;return <LeaderboardRow key={p.email} rank={i+1} medals={medals} name={p.name} email={p.email} isMe={isMe} metric={p.total} metricColor={VOLT} metricLabel="POINTS" accentColor={VOLT} borderColor={isMe?VOLT+"44":BORDER_CLR} avatarSize={32}/>})})()}</>}
+  {lbMode==="streaks"&&<>{(()=>{const es=[...new Set(scores.map(s=>s.email))];const st=es.map(e=>({email:e,name:scores.find(s=>s.email===e)?.name||e,streak:calcStreak(scores.filter(s=>s.email===e))})).sort((a,b)=>b.streak-a.streak);return st.length===0?<Empty variant="leaderboard" t="No streaks yet"/>:st.map((p,i)=>{const isMe=p.email===user.email;return <LeaderboardRow key={p.email} rank={i+1} medals={medals} name={p.name} email={p.email} isMe={isMe} metric={`${p.streak} 🔥`} metricColor={ORANGE} metricLabel="STREAK" accentColor={VOLT} borderColor={isMe?VOLT+"44":BORDER_CLR} avatarSize={32}/>})})()}</>}
 </div>}
 
 {/* Upcoming */}
@@ -2658,6 +2612,7 @@ function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i
 function CourtDivider({color=VOLT,my=20}){return <div style={{margin:`${my}px 0`,position:"relative",height:24,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><svg width="100%" height="24" viewBox="0 0 400 24" preserveAspectRatio="none" fill="none" style={{position:"absolute",inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:"50%",background:color,opacity:.15,position:"relative",zIndex:1}}/></div>}
 function DividerDot(){return <div style={{display:"flex",alignItems:"center",gap:10,width:"100%",margin:"14px 0"}}><div style={{height:1,background:BORDER_CLR,flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:VOLT}}/><div style={{height:1,background:BORDER_CLR,flex:1}}/></div>}
 function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#555555",flexShrink:0}}>{r}</div>}
+function LeaderboardRow({rank,medals,name,email,isMe,metric,metricColor,metricLabel="",accentColor,background=CARD_BG,borderColor=BORDER_CLR,avatarSize=34,nameMeta,badge}){return <div style={{display:"grid",gridTemplateColumns:"36px 48px minmax(0,1fr) 84px",alignItems:"center",columnGap:12,background,borderRadius:16,padding:"13px 16px",marginBottom:8,border:`1px solid ${borderColor}`}}><div style={{display:"flex",justifyContent:"center"}}><RB r={rank} m={medals}/></div><div style={{display:"flex",justifyContent:"center"}}><Av n={name} sz={avatarSize} email={email}/></div><div style={{minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:isMe?700:600,letterSpacing:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}{badge}</div>{nameMeta&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{nameMeta}</div>}</div><div style={{textAlign:"right",fontVariantNumeric:"tabular-nums",fontFeatureSettings:'"tnum"',fontFamily:FD,color:metricColor||accentColor||LIGHT,fontSize:20,lineHeight:1.05}}>{metric}<div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:600,marginTop:2}}>{metricLabel}</div></div></div>}
 function Empty({t,action,onTap,cta="GET STARTED",ctaVariant="primary",icon=<DrillIcon type="sb" size={48} color="#555555"/>,variant,subtitle}){return <EmptyState variant={variant} title={t} subtitle={subtitle||action} onTap={onTap} cta={cta} ctaVariant={ctaVariant} icon={icon}/>}
 function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>}
 function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:14,fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>}</>}
