@@ -144,3 +144,42 @@ form > * + * {
 .input-group {
   margin-bottom: 14px;
 }
+
+:root{
+  --font-sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  --fs-title: 24px;
+  --fs-h2: 18px;
+  --fs-h3: 16px;
+  --fs-body: 14px;
+  --fs-caption: 12px;
+  --fw-regular: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --ls-tight: -0.01em;
+  --ls-normal: 0;
+  --ls-kicker: 0.10em;
+  --lh-tight: 1.15;
+  --lh-normal: 1.35;
+  --text-1: rgba(255,255,255,.92);
+  --text-2: rgba(255,255,255,.72);
+  --muted: rgba(255,255,255,.52);
+  --accent: #B8FF00;
+}
+
+.text-title{font-family:var(--font-sans);font-size:var(--fs-title);font-weight:var(--fw-bold);letter-spacing:var(--ls-tight);line-height:var(--lh-tight);color:var(--text-1);text-transform:none;}
+.text-h2{font-size:var(--fs-h2);font-weight:var(--fw-bold);letter-spacing:var(--ls-tight);line-height:var(--lh-tight);color:var(--text-1);text-transform:none;}
+.text-h3{font-size:var(--fs-h3);font-weight:var(--fw-semibold);letter-spacing:var(--ls-normal);line-height:var(--lh-tight);color:var(--text-1);text-transform:none;}
+.text-body{font-size:var(--fs-body);font-weight:var(--fw-regular);letter-spacing:var(--ls-normal);line-height:var(--lh-normal);color:var(--text-2);}
+.text-caption{font-size:var(--fs-caption);font-weight:var(--fw-semibold);letter-spacing:var(--ls-normal);line-height:var(--lh-normal);color:var(--muted);text-transform:none;}
+.kicker{font-size:var(--fs-caption);font-weight:var(--fw-semibold);letter-spacing:var(--ls-kicker);text-transform:uppercase;color:var(--muted);}
+.accent{color:var(--accent);}
+
+.statValue{font-size:26px;font-weight:var(--fw-bold);letter-spacing:var(--ls-tight);line-height:var(--lh-tight);color:var(--text-1);}
+.statLabel{font-size:var(--fs-caption);font-weight:var(--fw-semibold);color:var(--muted);text-transform:none;letter-spacing:var(--ls-normal);}
+
+.u-allcaps-long,
+.u-meta-label,
+.page-title.u-allcaps-long {
+  text-transform: none !important;
+  letter-spacing: var(--ls-normal) !important;
+}
