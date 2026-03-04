@@ -78,8 +78,8 @@ export default function PlayersScreen() {
   });
 
   return (
-    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "16px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
         <Users size={22} color="var(--text-2)" />
         <span
           style={{
@@ -94,7 +94,7 @@ export default function PlayersScreen() {
         </span>
       </div>
 
-      <p style={{ fontSize: "13px", color: "var(--text-2)", marginBottom: "20px" }}>
+      <p style={{ fontSize: "13px", color: "var(--text-2)", marginBottom: "var(--space-6)" }}>
         Manage your roster and track player engagement
       </p>
 
@@ -113,11 +113,11 @@ export default function PlayersScreen() {
           color: "var(--text-1)",
           width: "100%",
           boxSizing: "border-box",
-          marginBottom: "12px",
+          marginBottom: "var(--space-3)",
         }}
       />
 
-      <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+      <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
         {["ALL PLAYERS", "ACTIVE", "INACTIVE"].map((filter) => (
           <button key={filter} onClick={() => setActiveFilter(filter)} style={chipStyle(activeFilter === filter)}>
             {filter}
@@ -129,25 +129,25 @@ export default function PlayersScreen() {
         style={{
           background: "var(--surface-2)",
           borderRadius: "12px",
-          padding: "12px 16px",
-          marginBottom: "16px",
+          padding: "var(--space-3) var(--space-4)",
+          marginBottom: "var(--space-4)",
           display: "flex",
           alignItems: "center",
         }}
       >
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "4px" }}>Total</span>
+          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Total</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "4px" }}>Active</span>
+          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Active</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "4px" }}>Inactive</span>
+          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Inactive</span>
         </div>
       </div>
 
@@ -159,7 +159,7 @@ export default function PlayersScreen() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: "16px",
+            gap: "var(--space-4)",
           }}
         >
           <Users size={48} color="#555555" />
@@ -194,11 +194,11 @@ export default function PlayersScreen() {
               background: "var(--surface-2)",
               border: "1px solid var(--stroke-1)",
               borderRadius: "16px",
-              padding: "16px",
-              marginBottom: "10px",
+              padding: "15px var(--space-4)",
+              marginBottom: "var(--space-3)",
               display: "flex",
               alignItems: "center",
-              gap: "12px",
+              gap: "var(--space-3)",
               cursor: "pointer",
             }}
           >
@@ -234,8 +234,8 @@ export default function PlayersScreen() {
           textTransform: "uppercase",
           letterSpacing: "0.10em",
           color: "var(--text-1)",
-          marginTop: "24px",
-          marginBottom: "12px",
+          marginTop: "var(--space-6)",
+          marginBottom: "var(--space-3)",
         }}
       >
         GROW YOUR ROSTER
@@ -245,11 +245,11 @@ export default function PlayersScreen() {
           background: "var(--surface-2)",
           border: "1px solid var(--stroke-1)",
           borderRadius: "16px",
-          padding: "16px",
+          padding: "var(--space-4)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "12px",
+          gap: "var(--space-3)",
         }}
       >
         <UserPlus size={32} color="var(--text-2)" />
