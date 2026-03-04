@@ -1617,22 +1617,6 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
     </div>
 
     <DividerDot/>
-
-    {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
-    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
-    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done?Math.round(done.score/d.max*100):0;
-      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
-        <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
-        </div>
-        {done?<div style={{textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
-          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>
-        </div>
-         :<div className="drill-row-arrow"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
-      </button>})}
     <div style={{textAlign:"right",flexShrink:0}}>
       <div style={{fontFamily:FD,color:isMe?accentColor:isTop3?accentColor:LIGHT,fontSize:20}}>{p.total}</div>
       <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:500}}>{unit.toUpperCase()}</div>
