@@ -242,13 +242,13 @@ const _PAGE_SIGNATURE_CSS=`
 .scSection{border-top:1px solid rgba(91,124,255,.35);padding-top:var(--space-3);margin-top:var(--space-3);}
 .playersAvatarRing{outline:2px solid rgba(184,108,255,.65);outline-offset:1px;border-radius:50%;}
 .lbList{display:flex;flex-direction:column;gap:var(--space-4);}
-.lbRow{display:grid;grid-template-columns:40px 52px minmax(0,1fr) 88px;align-items:center;gap:var(--space-3);padding:15px var(--space-4);border-radius:16px;}
+.lbRow{align-items:center;gap:var(--space-3);padding:var(--space-4);border-radius:18px;}
 .lbRank{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;font-weight:800;opacity:.9;}
 .lbAvatar{width:44px;height:44px;border-radius:999px;display:grid;place-items:center;}
 .lbMain{min-width:0;}
 .lbName{font-size:14px;font-weight:800;letter-spacing:.03em;line-height:1.15;margin:0;font-family:${FB};color:${LIGHT};}
 .lbMeta{margin-top:6px;font-size:12px;line-height:1.2;opacity:.7;font-family:${FB};color:${T.SUB};}
-.lbMetric{justify-self:end;text-align:right;font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.02em;font-family:${FD};}
+.lbMetric{text-align:right;font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.02em;font-family:${FD};}
 .lbRow .decorativeLine,.lbRow .decorativeDot{opacity:.15;z-index:0;}
 .lbRow>*{position:relative;z-index:1;}
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{display:none;}
@@ -534,14 +534,16 @@ body,
 const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
 const _EMPTY_STATE_CSS=`.emptyState{display:flex;flex-direction:column;align-items:center}.emptyState__art{width:80px;height:80px;display:flex;align-items:center;justify-content:center}.emptyState__art svg{width:80px;height:80px;display:block}.emptyState__title{margin-top:24px}.emptyState__subtitle{margin-top:8px}.emptyState__accentDash{stroke-dasharray:72;stroke-dashoffset:72;animation:emptyArcDraw 1.2s ease-in-out infinite}.emptyState__ball{transform-box:fill-box;transform-origin:center;animation:emptyBallFloat 1.2s ease-in-out infinite}.emptyState__accentOrbit{transform-box:fill-box;transform-origin:center;animation:emptyOrbitPulse 1.2s ease-in-out infinite}.emptyState__accentPulse{animation:emptyAccentPulse 1.2s ease-in-out infinite}@keyframes emptyBallFloat{0%,100%{transform:translateY(1px)}50%{transform:translateY(-2px)}}@keyframes emptyArcDraw{0%{stroke-dashoffset:72}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-72}}@keyframes emptyOrbitPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}@keyframes emptyAccentPulse{0%,100%{opacity:.8}50%{opacity:1}}@media (prefers-reduced-motion: reduce){.emptyState__art *{animation:none!important;transition:none!important}}`;
 const _LIST_ROW_SYSTEM_CSS=`/* ---------- List Row System ---------- */
-:root{--row-py:14px;--row-px:16px;--row-gap:12px;--row-radius:18px;--row-border:rgba(255,255,255,0.08);--row-bg:rgba(255,255,255,0.03);--row-bg-hover:rgba(255,255,255,0.05);--text-title:rgba(255,255,255,0.92);--text-meta:rgba(255,255,255,0.70);--text-muted:rgba(255,255,255,0.55);--stat-strong:rgba(190,255,0,0.95);--status-won:rgba(190,255,0,0.90);--status-wait:rgba(255,255,255,0.55);}
-.listRow{display:flex;align-items:center;justify-content:space-between;padding:var(--row-py) var(--row-px);border:1px solid var(--row-border);background:var(--row-bg);border-radius:var(--row-radius);gap:var(--row-gap);}
+:root{--row-py:14px;--row-px:16px;--row-gap:12px;--row-radius:18px;--row-border:rgba(255,255,255,0.08);--row-bg:var(--surface-1);--row-bg-hover:var(--surface-2);--text-title:rgba(255,255,255,0.92);--text-meta:rgba(255,255,255,0.70);--text-muted:rgba(255,255,255,0.55);--stat-strong:rgba(190,255,0,0.95);--status-won:rgba(190,255,0,0.90);--status-wait:rgba(255,255,255,0.55);}
+.listRow{display:flex;align-items:center;gap:var(--row-gap);padding:var(--space-4);min-height:56px;border:1px solid var(--row-border);background:var(--row-bg);border-radius:18px;}
+.listRow--highlight{background:var(--surface-2);border-color:rgba(184,255,0,.22);}
 .listRow+.listRow{margin-top:12px;}
-.listRowLeft{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 auto;}
-.listRowText{min-width:0;display:flex;flex-direction:column;gap:4px;}
+.listRow__left,.listRowLeft{width:44px;display:flex;align-items:center;justify-content:center;flex:0 0 44px;}
+.listRow__left--stack{width:auto;flex:0 0 auto;gap:8px;justify-content:flex-start;}
+.listRow__center,.listRowText{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;}
+.listRow__right,.listRowRight{display:flex;align-items:center;gap:var(--space-2);margin-left:auto;flex:0 0 auto;text-align:right;}
 .listRowTitle{color:var(--text-title);font-size:16px;font-weight:700;line-height:1.15;letter-spacing:0.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.listRowMeta{color:var(--text-meta);font-size:12px;line-height:1.2;letter-spacing:0.06em;text-transform:none;}
-.listRowRight{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex:0 0 auto;text-align:right;}
+.listRowMeta{color:var(--text-meta);font-size:12px;line-height:1.2;letter-spacing:0.02em;text-transform:none;}
 .listRowStat{color:var(--stat-strong);font-size:22px;font-weight:800;line-height:1;font-variant-numeric:tabular-nums;}
 .listRowStatSub{color:var(--text-muted);font-size:11px;line-height:1.1;letter-spacing:0.10em;text-transform:uppercase;}
 .listRowStatus{font-size:12px;line-height:1.2;letter-spacing:0.06em;font-weight:700;}
@@ -550,6 +552,11 @@ const _LIST_ROW_SYSTEM_CSS=`/* ---------- List Row System ---------- */
 @media (hover:hover){.listRow:hover{background:var(--row-bg-hover);}}
 .listRow .btn-primary,.listRow .primaryButton,.listRow button.primary{height:44px;min-height:44px;box-shadow:none;}
 .listRow a,.listRow button{min-height:44px;}
+.text-h3{font-family:${FD};font-size:16px;letter-spacing:0.06em;line-height:1.05;color:var(--text-title);}
+.text-body{font-family:${FB};font-size:12px;color:var(--text-meta);line-height:1.3;}
+.text-caption{font-family:${FB};font-size:10px;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;}
+.eventRail{position:absolute;left:0;top:0;height:100%;width:7px;background:rgba(184,255,0,.55);border-radius:999px;opacity:.45;}
+.eventRail--next{opacity:.85;}
 /* ---------- End List Row System ---------- */`;
 
 const _BUTTON_SYSTEM_CSS=`:root{--lime:var(--accent);--btn-height:48px;--btn-height-dense:44px;--btn-radius:15px;--btn-pad-x:20px;--btn-primary-bg:var(--lime);--btn-primary-fg:#0B0F0C;--btn-secondary-bg:rgba(255,255,255,0.04);--btn-secondary-border:rgba(255,255,255,0.14);--btn-secondary-fg:#EAEAEA;}
@@ -1389,7 +1396,7 @@ return <div className="fade-up">
   const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
 
   return <div key={ch.id+"-"+ch.ts} className="listRow" style={{background:CARD_BG,border:isPending?`1px solid ${ORANGE}22`:undefined}}>
-    <div className="listRowLeft">
+    <div className="listRowLeft listRow__left--stack">
     <div style={{width:40,height:40,borderRadius:12,background:resultColor+"12",border:`1px solid ${resultColor}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
       {isPending?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
       :won?<svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
@@ -1509,11 +1516,11 @@ return <div className="fade-up">
 </button>
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
   {board.length===0&&<Empty t="No attendance yet"/>}
-  {board.map((p,i)=>{const isMe=p.email===user.email;return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${isMe?SC_COLOR+"33":BORDER_CLR}`}}>
-    <RB r={i+1} m={medals}/>
-    <Av n={p.name} sz={30} email={p.email}/>
-    <div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{isMe?" (YOU)":""}</div>
-    <div style={{fontFamily:FD,color:SC_COLOR,fontSize:18}}>{p.count}</div>
+  {board.map((p,i)=>{const isMe=p.email===user.email;return <div key={p.email} className={`listRow ${isMe?"listRow--highlight":""}`} style={{marginBottom:6,border:isMe?undefined:`1px solid ${BORDER_CLR}`}}>
+    <div className="listRow__left"><RB r={i+1} m={medals}/></div>
+    <div className="lbAvatar"><Av n={p.name} sz={30} email={p.email}/></div>
+    <div className="listRow__center"><div className="text-h3" style={{fontSize:13}}>{p.name.toUpperCase()}{isMe?" (YOU)":""}</div></div>
+    <div className="listRow__right"><div className="listRowStat" style={{fontFamily:FD,color:SC_COLOR,fontSize:18}}>{p.count}</div></div>
   </div>})}
 </div>}
 
@@ -1701,9 +1708,9 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
   const pct=Math.round((p.total/leaderTotal)*100);
   const rowBg=i%2===0?CARD_BG:T.SURFACE;
 
-  if(isLeader) return <div key={p.email} className="podium-glow lbRow listRow" style={{"--pod-c":accentColor,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
+  if(isLeader) return <div key={p.email} className="podium-glow lbRow listRow" style={{"--pod-c":accentColor,border:`1px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
     <div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
-    <div className="listRowLeft">
+    <div className="listRowLeft listRow__left--stack">
     <div className="lbRank" style={{background:`${accentColor}18`,border:`2px solid ${accentColor}`,fontFamily:FD,fontSize:14,color:accentColor}}>👑</div>
     <div className="lbAvatar playersAvatarRing"><Av n={p.name} sz={40} email={p.email}/></div>
     <div className="lbMain listRowText">
@@ -1717,10 +1724,10 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
     </div>
   </div>;
 
-  return <div key={p.email} className="lbRow listRow" style={{background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
+  return <div key={p.email} className={`lbRow listRow ${isMe?"listRow--highlight":""}`} style={{background:isMe?undefined:rowBg,border:isMe?undefined:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
     {isTop3&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
     {isMe&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
-    <div className="listRowLeft">
+    <div className="listRowLeft listRow__left--stack">
     <div className="lbRank"><RB r={i+1} m={medals}/></div>
     <div className="lbAvatar"><Av n={p.name} sz={32} email={p.email}/></div>
     <div className="lbMain listRowText">
@@ -2027,9 +2034,9 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
   <div style={{display:"flex",gap:4,marginBottom:14}}>{[{k:"attend",l:"ATTENDANCE"},{k:"overall",l:"DRILL SCORES"},{k:"streaks",l:"STREAKS"}].map(t=><button className="uiTap" key={t.k} onClick={()=>setLbMode(t.k)} style={{flex:1,padding:"9px 4px",borderRadius:10,border:lbMode===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:1,background:lbMode===t.k?CYAN:CARD_BG,color:lbMode===t.k?BG:MUTED}}>{t.l}</button>)}</div>
-  {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty variant="leaderboard" t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</span><span className="tb" style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div style={{fontFamily:FD,color:t.color,fontSize:18}}>{p.count}</div></div>})}</>}
-  {lbMode==="overall"&&<>{(()=>{const m={};scores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});const a=Object.values(m).sort((a,b)=>b.total-a.total);return a.length===0?<Empty variant="leaderboard" t="No scores yet"/>:a.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{p.email===user.email?" (YOU)":""}</div><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{p.total}</div></div>)})()}</>}
-  {lbMode==="streaks"&&<>{(()=>{const es=[...new Set(scores.map(s=>s.email))];const st=es.map(e=>({email:e,name:scores.find(s=>s.email===e)?.name||e,streak:calcStreak(scores.filter(s=>s.email===e))})).sort((a,b)=>b.streak-a.streak);return st.length===0?<Empty variant="leaderboard" t="No streaks yet"/>:st.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</div><div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{p.streak} &#128293;</div></div>)})()}</>}
+  {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty variant="leaderboard" t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);const isMe=p.email===user.email;return <div key={p.email} className={`listRow ${isMe?"listRow--highlight":""}`} style={{marginBottom:6,border:isMe?undefined:`1px solid ${BORDER_CLR}`}}><div className="listRow__left"><RB r={i+1} m={medals}/></div><div className="lbAvatar"><Av n={p.name} sz={30} email={p.email}/></div><div className="listRow__center" style={{gap:6}}><div className="text-h3" style={{fontSize:13}}>{p.name.toUpperCase()}</div><span className="tb text-caption" style={{width:"fit-content",fontWeight:700,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div className="listRow__right"><div className="listRowStat" style={{fontFamily:FD,color:t.color,fontSize:18}}>{p.count}</div></div></div>})}</>}
+  {lbMode==="overall"&&<>{(()=>{const m={};scores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});const a=Object.values(m).sort((a,b)=>b.total-a.total);return a.length===0?<Empty variant="leaderboard" t="No scores yet"/>:a.map((p,i)=>{const isMe=p.email===user.email;return <div key={p.email} className={`listRow ${isMe?"listRow--highlight":""}`} style={{marginBottom:6,border:isMe?undefined:`1px solid ${BORDER_CLR}`}}><div className="listRow__left"><RB r={i+1} m={medals}/></div><div className="lbAvatar"><Av n={p.name} sz={30} email={p.email}/></div><div className="listRow__center"><div className="text-h3" style={{fontSize:13}}>{p.name.toUpperCase()}{isMe?" (YOU)":""}</div></div><div className="listRow__right"><div className="listRowStat" style={{fontFamily:FD,color:VOLT,fontSize:18}}>{p.total}</div></div></div>})})()}</>}
+  {lbMode==="streaks"&&<>{(()=>{const es=[...new Set(scores.map(s=>s.email))];const st=es.map(e=>({email:e,name:scores.find(s=>s.email===e)?.name||e,streak:calcStreak(scores.filter(s=>s.email===e))})).sort((a,b)=>b.streak-a.streak);return st.length===0?<Empty variant="leaderboard" t="No streaks yet"/>:st.map((p,i)=>{const isMe=p.email===user.email;return <div key={p.email} className={`listRow ${isMe?"listRow--highlight":""}`} style={{marginBottom:6,border:isMe?undefined:`1px solid ${BORDER_CLR}`}}><div className="listRow__left"><RB r={i+1} m={medals}/></div><div className="lbAvatar"><Av n={p.name} sz={30} email={p.email}/></div><div className="listRow__center"><div className="text-h3" style={{fontSize:13}}>{p.name.toUpperCase()}</div></div><div className="listRow__right"><div className="listRowStat" style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{p.streak} &#128293;</div></div></div>})})()}</>}
 </div>}
 
 {/* Upcoming */}
@@ -2038,11 +2045,11 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 <div className="eventsList">
 {upcoming.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;
   return <div key={ev.id}>
-    <div className="ch eventCard listRow" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,textAlign:"left",position:"relative",overflow:"hidden",cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
-      {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:VOLT,borderRadius:"4px 0 0 4px"}}/>}
-      <div className="listRowLeft">
+    <div className={`ch eventCard listRow ${going?"listRow--highlight":""}`} style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,textAlign:"left",position:"relative",overflow:"hidden",cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
+      {going&&<div className={`eventRail ${ev.id===upcoming[0]?.id?"eventRail--next":""}`}/> }
+      <div className="listRowLeft listRow__left--stack">
       <div className="eventIcon" style={{background:BG,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><EventIcon type={ev.type} size={24} color={going?CYAN:MUTED}/></div>
-      <div className="eventMain listRowText" style={{flex:1}}><div className="eventTitle listRowTitle" style={{fontFamily:FD,color:LIGHT}}>{ev.title}</div><div className="eventMeta listRowMeta" style={{fontFamily:FB,color:MUTED}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span><span>{ev.time}</span><span style={{color:T.SUB}}>{ev.location}</span></div></div>
+      <div className="eventMain listRowText" style={{flex:1}}><div className="eventTitle listRowTitle text-h3" style={{color:LIGHT}}>{ev.title}</div><div className="eventMeta listRowMeta text-body" style={{color:MUTED}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span><span>{ev.time}</span><span style={{color:T.SUB}}>{ev.location}</span></div></div>
       </div>
       <div className="eventSide listRowRight" style={{flexShrink:0}}>
         <div style={{textAlign:"right"}}><div className="listRowStat" style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:20}}>{evR.length}</div><div className="listRowStatSub" style={{fontFamily:FB,fontSize:9,letterSpacing:1}}>GOING</div></div>
@@ -2514,9 +2521,10 @@ if(last10.length>=4){const mid=Math.floor(last10.length/2);const first=last10.sl
 return{...d,pb,avg,count:ds.length,last10,trend};
 }),[drills,homeScores]);
 
-const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}>
-<div><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{sub}</div>}</div>
-<div style={{fontFamily:FD,color,fontSize:22}}>{value}</div>
+const StatRow=({label,value,color=VOLT,sub})=><div className="listRow" style={{padding:"12px 0",background:"transparent",border:"none",borderBottom:`1px solid ${BORDER_CLR}44`,borderRadius:0}}>
+<div className="listRow__left" aria-hidden="true"><div style={{width:8,height:8,borderRadius:999,background:color,opacity:.8}}/></div>
+<div className="listRow__center"><div className="text-h3" style={{fontSize:13,fontFamily:FB,letterSpacing:"0.04em"}}>{label}</div>{sub&&<div className="text-caption" style={{marginTop:2,color:T.SUB,textTransform:"none",letterSpacing:"0.02em"}}>{sub}</div>}</div>
+<div className="listRow__right"><div style={{fontFamily:FD,color,fontSize:22}}>{value}</div></div>
 
   </div>;
 
