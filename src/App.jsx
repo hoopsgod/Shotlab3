@@ -1491,26 +1491,19 @@ return <button type="button" onClick={onClick} className="mode-card" style={{wid
 // ═══════════════════════════════════════
 function DashboardLeaderboard({scores,drills,programDrills,user,scRsvps,rsvps,shotLogs}){
 const[mode,setMode]=useState("home");
-const[sub,setSub]=useState("total");
+const[sub,setSub]=useState("shots");
 const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 const homeScores=useMemo(()=>scores.filter(s=>s.src==="home"||!s.src),[scores]);
 const progScores=useMemo(()=>scores.filter(s=>s.src==="program"),[scores]);
 
 const board=useMemo(()=>{
 if(mode==="home"){
-if(sub==="shots"){
-const m={};shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});return Object.values(m).sort((a,b)=>b.total-a.total);
-}
-if(sub==="total"){
-// Combine drill scores + shot logs
 const m={};
-homeScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
-shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});
-return Object.values(m).sort((a,b)=>b.total-a.total);
-}
-// Per-drill
-const did=parseInt(sub);const m={};
-homeScores.filter(s=>s.drillId===did).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
+shotLogs.forEach(s=>{
+if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0,lastDate:s.date||""};
+m[s.email].total+=s.made;
+if((s.date||"")>(m[s.email].lastDate||""))m[s.email].lastDate=s.date;
+});
 return Object.values(m).sort((a,b)=>b.total-a.total);
 }
 // Program
@@ -1535,7 +1528,7 @@ prog:{accent:CYAN,bg:"rgba(0, 229, 255, 0.14)",glow:"0 0 18px rgba(0, 229, 255, 
 };
 
 // Swap sub when switching modes
-const switchMode=(m)=>{setMode(m);setSub(m==="home"?"total":"events")};
+const switchMode=(m)=>{setMode(m);setSub(m==="home"?"shots":"events")};
 
 return <div>
 {/* Mode toggle */}
@@ -1551,7 +1544,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 <div style={{overflowX:"auto",marginBottom:16,paddingBottom:4,paddingLeft:16,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none"}}>
   <div style={{display:"flex",gap:8,minWidth:"max-content"}}>
     {isHome?
-      [{k:"total",l:"ALL"},{k:"shots",l:"SHOTS"},...drills.map(d=>({k:String(d.id),l:d.name}))].map(t=>
+      [{k:"shots",l:"SHOT MAKES"}].map(t=>
         <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"#C8FF00":"#1E1E1E",color:sub===t.k?"#000000":"#555555",transition:"all .2s"}}>{t.l}</button>)
     :[{k:"events",l:"ATTENDANCE"},{k:"sc",l:"S&C"},{k:"prog-total",l:"DRILL SCORES"},...programDrills.map(d=>({k:`prog-${d.id}`,l:d.name}))].map(t=>
         <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?CYAN:"#1E1E1E",color:sub===t.k?"#041014":"#555555",transition:"all .2s",boxShadow:sub===t.k?"0 0 14px rgba(0, 229, 255, 0.35)":"none"}}>{t.l}</button>)}
@@ -1577,7 +1570,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
     <div style={{fontFamily:FD,color:accentColor,fontSize:24}}>#{myIdx+1}</div>
     <div style={{flex:1,minWidth:0}}>
       <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,letterSpacing:1}}>YOUR POSITION</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{myEntry.total} {unit}</div>
+	      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{myEntry.total} {unit}{isHome&&myEntry.lastDate?` · ${myEntry.lastDate}`:""}</div>
     </div>
     {myIdx>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:600,letterSpacing:1}}>{board[myIdx-1].total-myEntry.total} to #{myIdx}</div>}
   </div>})()}
@@ -1596,7 +1589,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
     <div className="playersAvatarRing"><Av n={p.name} sz={40} email={p.email}/></div>
     <div style={{flex:1,minWidth:0}}>
       <div style={{fontFamily:FB,color:LIGHT,fontSize:15,fontWeight:700,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
-      <div style={{fontFamily:FB,color:accentColor,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1</div>
+	      <div style={{fontFamily:FB,color:accentColor,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1{isHome&&p.lastDate?` · ${p.lastDate}`:""}</div>
     </div>
     <div style={{textAlign:"right",flexShrink:0}}>
       <div style={{fontFamily:FD,fontSize:28,color:accentColor}}>{p.total}</div>
@@ -1611,7 +1604,8 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
     <Av n={p.name} sz={32} email={p.email}/>
     <div style={{flex:1,minWidth:0}}>
       <div style={{fontFamily:FB,color:isMe?LIGHT:LIGHT,fontSize:13,fontWeight:isMe?700:600,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
-      <div style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
+	      {isHome&&p.lastDate&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:2}}>{p.lastDate}</div>}
+	      <div style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
         <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:2,transition:"width .4s ease"}}/>
       </div>
     </div>
