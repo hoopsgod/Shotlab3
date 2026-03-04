@@ -1696,18 +1696,47 @@ return <div className="fade-up">
   <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SHOT HEAT MAP" s="LAST 12 WEEKS"/>
   {(()=>{
     const dayMap={};my.forEach(s=>{if(!dayMap[s.date])dayMap[s.date]=0;dayMap[s.date]+=s.made});
-    const weeks=[];const d=new Date();d.setDate(d.getDate()-d.getDay());// start of current week
-    for(let w=0;w<12;w++){const week=[];for(let day=0;day<7;day++){const dd=new Date(d);dd.setDate(dd.getDate()-(11-w)*7+day);const ds=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,"0")}-${String(dd.getDate()).padStart(2,"0")}`;const count=dayMap[ds]||0;const isFuture=ds>today;week.push({date:ds,count,isFuture,isToday:ds===today})}weeks.push(week)}
     const maxCount=Math.max(1,...Object.values(dayMap));
-    const getColor=(c)=>{if(c===0)return BORDER_CLR;const intensity=Math.min(c/Math.max(maxCount*.6,20),1);const r=parseInt(VOLT.slice(1,3),16);const g=parseInt(VOLT.slice(3,5),16);const b=parseInt(VOLT.slice(5,7),16);return `rgba(${r},${g},${b},${.15+intensity*.85})`};
+    const cells=[];
+    const end=new Date(today);
+    const mondayOffset=(end.getDay()+6)%7;
+    end.setDate(end.getDate()-mondayOffset);
+
+    for(let w=0;w<12;w++){
+      for(let day=0;day<7;day++){
+        const dd=new Date(end);
+        dd.setDate(dd.getDate()-(11-w)*7+day);
+        const ds=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,"0")}-${String(dd.getDate()).padStart(2,"0")}`;
+        const count=dayMap[ds]||0;
+        const isFuture=ds>today;
+        cells.push({date:ds,count,isFuture,isToday:ds===today,dayIndex:day,weekIndex:w,monthKey:`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,"0")}`,monthLabel:dd.toLocaleString("en-US",{month:"short"})});
+      }
+    }
+
+    const monthLabels=[];
+    cells.filter(c=>c.dayIndex===0).forEach(c=>{if(monthLabels.at(-1)?.key!==c.monthKey)monthLabels.push({key:c.monthKey,label:c.monthLabel,weekIndex:c.weekIndex});});
+    const dayLabels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+    const getColor=(c)=>{if(c===0)return BORDER_CLR;const intensity=Math.min(c/Math.max(maxCount*.6,20),1);const r=parseInt(VOLT.slice(1,3),16);const g=parseInt(VOLT.slice(3,5),16);const b=parseInt(VOLT.slice(5,7),16);return `rgba(${r},${g},${b},${.14+intensity*.86})`};
+
     return <div style={{overflowX:"auto",paddingBottom:8}}>
-      <div style={{display:"flex",gap:3,minWidth:"fit-content"}}>
-        <div style={{display:"flex",flexDirection:"column",gap:3,paddingTop:2,marginRight:2}}>{["S","M","T","W","T","F","S"].map((d,i)=>i%2===1?<div key={i} style={{fontFamily:FB,fontSize:7,color:MUTED,height:12,lineHeight:"12px",textAlign:"right"}}>{d}</div>:<div key={i} style={{height:12}}/>)}</div>
-        {weeks.map((week,wi)=><div key={wi} style={{display:"flex",flexDirection:"column",gap:3}}>{week.map((day,di)=>
-          <div key={di} title={`${day.date}: ${day.count} makes`} style={{width:12,height:12,borderRadius:2,background:day.isFuture?"transparent":getColor(day.count),border:day.isToday?`1.5px solid ${ORANGE}`:day.isFuture?"none":`1px solid ${day.count?getColor(day.count):BORDER_CLR}44`,opacity:day.isFuture?.2:1,transition:"background .3s"}}/>
-        )}</div>)}
+      <div style={{minWidth:250,width:"fit-content"}}>
+        <div style={{display:"grid",gridTemplateColumns:"42px repeat(12, 1fr)",columnGap:4,marginBottom:6}}>
+          <div/>
+          {monthLabels.map(m=><div key={m.key} style={{gridColumn:`${m.weekIndex+2} / span 1`,fontFamily:FB,fontSize:8,color:MUTED,fontWeight:700,letterSpacing:.6}}>{m.label}</div>)}
+        </div>
+
+        <div style={{display:"grid",gridTemplateColumns:"42px repeat(12, 1fr)",gap:4,alignItems:"center"}}>
+          {dayLabels.map((label,dayIndex)=><div key={label} style={{display:"contents"}}>
+            <div style={{fontFamily:FB,fontSize:8,color:MUTED,fontWeight:700}}>{label}</div>
+            {Array.from({length:12}).map((_,weekIndex)=>{
+              const day=cells[weekIndex*7+dayIndex];
+              return <div key={`${label}-${weekIndex}`} title={`${day.date}: ${day.count} makes`} style={{width:12,height:12,borderRadius:3,background:day.isFuture?"transparent":getColor(day.count),border:day.isToday?`1.5px solid ${ORANGE}`:day.isFuture?`1px dashed ${BORDER_CLR}`:`1px solid ${day.count?getColor(day.count):BORDER_CLR}66`,opacity:day.isFuture?.35:1,justifySelf:"center"}}/>;
+            })}
+          </div>)}
+        </div>
       </div>
-      <div style={{display:"flex",alignItems:"center",gap:4,marginTop:8,justifyContent:"flex-end"}}>
+
+      <div style={{display:"flex",alignItems:"center",gap:4,marginTop:10,justifyContent:"flex-end"}}>
         <span style={{fontFamily:FB,fontSize:8,color:MUTED}}>Less</span>
         {[0,.2,.4,.7,1].map((v,i)=><div key={i} style={{width:10,height:10,borderRadius:2,background:`rgba(200,255,0,${.1+v*.9})`,border:`1px solid ${VOLT}22`}}/>)}
         <span style={{fontFamily:FB,fontSize:8,color:MUTED}}>More</span>
