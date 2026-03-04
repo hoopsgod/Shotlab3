@@ -165,7 +165,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
   border-color: rgba(184, 255, 0, .35);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 35%, transparent);
+  box-shadow: 0 0 0 3px rgba(184, 255, 0, 0.28);
 }
 
 .disabled,
@@ -215,3 +215,4 @@ form > * + * {
 .input-group {
   margin-bottom: var(--field-gap);
 }
+
