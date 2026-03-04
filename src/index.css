@@ -1,3 +1,53 @@
+:root{
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+
+  --page-pad: var(--s-4);
+  --section-gap: var(--s-5);
+  --card-pad: var(--s-4);
+  --row-gap: var(--s-3);
+}
+
+.page,
+.pageContainer,
+main {
+  padding-left: var(--page-pad);
+  padding-right: var(--page-pad);
+}
+
+.section {
+  margin-top: var(--section-gap);
+}
+
+.section:first-child {
+  margin-top: 0;
+}
+
+.page > * + *,
+.pageShell > * + * {
+  margin-top: var(--section-gap);
+}
+
+.card {
+  padding: var(--card-pad);
+}
+
+.stack-12 { display: flex; flex-direction: column; gap: var(--s-3); }
+.stack-16 { display: flex; flex-direction: column; gap: var(--s-4); }
+.stack-24 { display: flex; flex-direction: column; gap: var(--s-5); }
+
+.inset-right,
+.progressLabels,
+.progress-labels,
+[class*="progressLabel"],
+[class*="ProgressLabel"] {
+  padding-right: var(--s-4);
+}
+
 /* =========================
    Micro UI Polish: Progress
    ========================= */
@@ -41,8 +91,8 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
+  gap: var(--s-2);
+  margin-bottom: var(--s-2);
   font-variant-numeric: tabular-nums;
 }
 
@@ -127,13 +177,14 @@ li,
 .row,
 .cardRow,
 .card-row {
-  padding-top: 14px;
-  padding-bottom: 14px;
+  padding-top: var(--s-3);
+  padding-bottom: var(--s-3);
+  min-height: 44px;
 }
 
 /* Forms: slightly more breathing room between fields (best effort) */
 form > * + * {
-  margin-top: 14px;
+  margin-top: var(--row-gap);
 }
 
 /* If there are common field wrappers */
@@ -142,5 +193,5 @@ form > * + * {
 .form-field,
 .inputGroup,
 .input-group {
-  margin-bottom: 14px;
+  margin-bottom: var(--row-gap);
 }
