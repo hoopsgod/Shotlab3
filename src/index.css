@@ -1,0 +1,146 @@
+/* =========================
+   Micro UI Polish: Progress
+   ========================= */
+
+/* Generic progress bar containers (best-effort, non-breaking) */
+.progress,
+.progressBar,
+.progress-bar,
+[class*="progress"] {
+  border-radius: 999px;
+}
+
+/* Track */
+.progressTrack,
+.progress-track,
+[class*="progressTrack"],
+[class*="track"] {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.10);
+  overflow: hidden;
+}
+
+/* Fill */
+.progressFill,
+.progress-fill,
+[class*="progressFill"],
+[class*="fill"] {
+  height: 100%;
+  border-radius: 999px;
+  background: #C8FF00;
+  box-shadow: 0 0 0 2px rgba(200,255,0,0.14), 0 10px 24px rgba(200,255,0,0.10);
+}
+
+/* Attendance Rank labels (percent + tier) - safe, only if present */
+.progressLabels,
+.progress-labels,
+[class*="progressLabel"],
+[class*="ProgressLabel"] {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.progressPercent,
+.progress-percent,
+[class*="percent"] {
+  color: rgba(255,255,255,0.80);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+}
+
+.progressTier,
+.progress-tier,
+[class*="tier"] {
+  color: #C8FF00;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+}
+
+/* =======================
+   Micro UI Polish: Inputs
+   ======================= */
+
+input,
+select,
+textarea {
+  background: rgba(255,255,255,0.04);
+  color: rgba(255,255,255,0.92);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding: 12px 14px;
+  min-height: 44px;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease, background 120ms ease;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(255,255,255,0.55);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: rgba(255,255,255,0.14);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  border-color: rgba(200,255,0,0.45);
+  box-shadow: 0 0 0 3px rgba(200,255,0,0.22);
+}
+
+/* If there are custom "input" wrappers, don't break them */
+input:disabled,
+select:disabled,
+textarea:disabled {
+  opacity: 0.60;
+  cursor: not-allowed;
+}
+
+/* =========================
+   Micro UI Polish: Density
+   ========================= */
+
+/* Lists: slightly tighter, keep tap targets */
+button,
+a[role="button"],
+[role="button"],
+.listRow,
+.list-row {
+  min-height: 44px;
+}
+
+/* If list items are <li> rows or card rows, tighten padding carefully */
+li,
+.listItem,
+.list-item,
+.row,
+.cardRow,
+.card-row {
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+/* Forms: slightly more breathing room between fields (best effort) */
+form > * + * {
+  margin-top: 14px;
+}
+
+/* If there are common field wrappers */
+.field,
+.formField,
+.form-field,
+.inputGroup,
+.input-group {
+  margin-bottom: 14px;
+}
