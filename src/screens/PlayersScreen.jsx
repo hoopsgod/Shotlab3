@@ -99,20 +99,13 @@ export default function PlayersScreen() {
       </p>
 
       <input
+        className="input"
         type="text"
         placeholder="Search players"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{
-          background: "var(--surface-2)",
-          border: "1px solid var(--stroke-1)",
-          borderRadius: "12px",
-          height: "44px",
-          padding: "0 16px",
           fontSize: "14px",
-          color: "var(--text-1)",
-          width: "100%",
-          boxSizing: "border-box",
           marginBottom: "var(--space-3)",
         }}
       />
