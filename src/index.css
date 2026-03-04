@@ -1,67 +1,82 @@
-/* =========================
-   Micro UI Polish: Progress
-   ========================= */
-
-/* Generic progress bar containers (best-effort, non-breaking) */
-.progress,
-.progressBar,
-.progress-bar,
-[class*="progress"] {
+/* Progress */
+.progress {
+  height: 9px;
   border-radius: 999px;
-}
-
-/* Track */
-.progressTrack,
-.progress-track,
-[class*="progressTrack"],
-[class*="track"] {
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: color-mix(in oklab, var(--surface-2, #141821) 70%, black);
   overflow: hidden;
 }
 
-/* Fill */
-.progressFill,
-.progress-fill,
-[class*="progressFill"],
-[class*="fill"] {
+.progress__fill {
   height: 100%;
+  width: var(--progress, 0%);
+  background: var(--accent, #c8ff1a);
   border-radius: 999px;
-  background: #C8FF00;
-  box-shadow: 0 0 0 2px rgba(200,255,0,0.14), 0 10px 24px rgba(200,255,0,0.10);
+  box-shadow: 0 6px 18px rgba(184, 255, 0, 0.12);
 }
 
-/* Attendance Rank labels (percent + tier) - safe, only if present */
-.progressLabels,
-.progress-labels,
-[class*="progressLabel"],
-[class*="ProgressLabel"] {
+.progressMeta {
   display: flex;
   justify-content: flex-end;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
+  gap: 18px;
+  padding-right: var(--space-4, 16px);
+  margin-top: var(--space-2, 8px);
+  color: var(--text-2, #9ca3af);
+  font-size: 12px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
 
-.progressPercent,
-.progress-percent,
-[class*="percent"] {
-  color: rgba(255,255,255,0.80);
+/* Chips */
+.chip {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: var(--surface-2, #141821);
+  border: 1px solid var(--stroke-1, rgba(255, 255, 255, 0.08));
+  color: var(--text-1, #e5e7eb);
   font-size: 12px;
-  letter-spacing: 0.06em;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
 }
 
-.progressTier,
-.progress-tier,
-[class*="tier"] {
-  color: #C8FF00;
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
+.chip--accent {
+  border-color: rgba(184, 255, 0, 0.22);
+}
+
+/* Bottom nav pattern */
+.bottom-nav .tab {
+  color: var(--text-3, #6b7280);
+}
+
+.bottom-nav .tab .tab-icon,
+.bottom-nav .tab .tab-label {
+  color: inherit;
+}
+
+.bottom-nav .tab .tab-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: currentColor;
+}
+
+.bottom-nav .tab.is-active {
+  color: var(--accent, #c8ff1a);
+}
+
+.navIndicator {
+  height: 3px;
+  width: 18px;
+  border-radius: 999px;
+  background: var(--accent, #c8ff1a);
+  margin: 0 auto 6px;
+  opacity: 0;
+}
+
+.bottom-nav .tab.is-active .navIndicator {
+  opacity: 1;
 }
 
 /* =======================
