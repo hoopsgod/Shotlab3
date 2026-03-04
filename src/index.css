@@ -1,3 +1,41 @@
+:root{
+  --bg: #070A0C;
+  --surface-1: #0C1116;
+  --surface-2: #0F1620;
+  --surface-3: #0A0F14;
+  --text-1: rgba(255,255,255,.92);
+  --text-2: rgba(255,255,255,.72);
+  --muted: rgba(255,255,255,.52);
+  --border-1: rgba(255,255,255,.08);
+  --border-2: rgba(255,255,255,.12);
+  --accent: #B8FF00;
+  --shadow-1: 0 10px 24px rgba(0,0,0,.45);
+  --shadow-2: 0 18px 40px rgba(0,0,0,.55);
+  --glow-accent: 0 0 0 1px rgba(184,255,0,.22), 0 10px 30px rgba(184,255,0,.10);
+}
+
+.card{
+  background: var(--surface-1);
+  border: 1px solid var(--border-1);
+  border-radius: 22px;
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+.card--raised{
+  background: var(--surface-2);
+  border-color: var(--border-2);
+  box-shadow: var(--shadow-2);
+}
+
+.card--accent{
+  border-color: rgba(184,255,0,.22);
+}
+
+.card--active{
+  box-shadow: var(--shadow-2), var(--glow-accent);
+}
+
 /* =========================
    Micro UI Polish: Progress
    ========================= */
