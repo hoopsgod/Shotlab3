@@ -297,15 +297,18 @@ const _PAGE_SIGNATURE_CSS=`
 :root{
   --bg-0:#0B0D10;
 
-  --fs-page:clamp(28px,3.2vw,34px);
-  --fs-section:18px;
-  --fs-cardTitle:16px;
-  --fs-body:14px;
-  --fs-meta:12px;
+  --text-1:rgba(255,255,255,.92);
+  --text-2:rgba(255,255,255,.72);
+  --text-3:rgba(255,255,255,.52);
+
+  --h1:24px;
+  --h2:16px;
+  --body:14px;
+  --meta:12px;
   --lh-tight:1.1;
   --lh-normal:1.35;
-  --track-wide:0.08em;
-  --track-med:0.04em;
+  --track-tight:0.02em;
+  --track-wide:0.10em;
 
   --surface-1:#0F1115;
   --surface-2:#141821;
@@ -326,11 +329,14 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeaderText h1,
 .page-title,
 .pageTitle,
+.PageTitle,
 .pageSignatureTitle,
 .coach-mode h1{
-  font-size:var(--fs-page)!important;
+  font-size:var(--h1)!important;
   line-height:var(--lh-tight)!important;
-  letter-spacing:var(--track-med)!important;
+  letter-spacing:var(--track-tight)!important;
+  font-weight:650!important;
+  color:var(--text-1)!important;
 }
 
 .coach-mode h2,
@@ -340,10 +346,10 @@ const _PAGE_SIGNATURE_CSS=`
 .nav-title,
 .emptyState__title,
 .coach-mode h3{
-  font-size:var(--fs-section)!important;
+  font-size:var(--h2)!important;
   line-height:var(--lh-normal)!important;
-  letter-spacing:0.03em!important;
-  color:rgba(229,231,235,.94)!important;
+  letter-spacing:0.06em!important;
+  color:var(--text-2)!important;
 }
 
 .cardTitle,
@@ -352,7 +358,7 @@ const _PAGE_SIGNATURE_CSS=`
 .eventTitle,
 .coach-mode .title,
 .coach-mode .heading{
-  font-size:var(--fs-cardTitle)!important;
+  font-size:var(--h2)!important;
   line-height:var(--lh-normal)!important;
   letter-spacing:0.02em!important;
   text-transform:none;
@@ -367,7 +373,7 @@ body,
 .coach-mode .hint,
 .coach-mode .placeholder,
 .coach-mode .u-secondary-text{
-  font-size:var(--fs-body);
+  font-size:var(--body);
   line-height:var(--lh-normal);
 }
 
@@ -381,7 +387,7 @@ body,
 .coach-mode .label,
 .coach-mode .meta,
 .coach-mode small{
-  font-size:var(--fs-meta)!important;
+  font-size:var(--meta)!important;
   letter-spacing:var(--track-wide)!important;
   opacity:.75!important;
   text-transform:uppercase;
@@ -2785,9 +2791,9 @@ const AVG=[["#C8FF00","#00E5FF"],["#C8FF00","#C8FF00"],["#00E5FF","#C8FF00"],["#
 function AnimNum({v,c=VOLT,big,size}){const[display,setDisplay]=useState(0);const[isVisible,setIsVisible]=useState(false);useEffect(()=>{setIsVisible(false);const fadeIn=requestAnimationFrame(()=>setIsVisible(true));if(typeof v!=="number"){setDisplay(v);return()=>cancelAnimationFrame(fadeIn)}let cancelled=false;const end=v;const dur=600;const t0=Date.now();const step=()=>{if(cancelled)return;const elapsed=Date.now()-t0;const prog=Math.min(elapsed/dur,1);const eased=1-Math.pow(1-prog,3);setDisplay(Math.round(eased*end));if(prog<1)requestAnimationFrame(step)};step();return()=>{cancelAnimationFrame(fadeIn);cancelled=true}},[v]);return <span className="cnt-up" style={{fontFamily:FD,color:c,fontSize:size||(big?42:26),letterSpacing:1,lineHeight:1,fontWeight:700,opacity:isVisible?1:0,transition:"opacity 150ms ease"}}>{display}</span>}
 function BrandWordmark({size=30,small}){return <div style={{fontFamily:FD,fontSize:size,lineHeight:.85,letterSpacing:small?1.5:3,fontWeight:900,whiteSpace:"nowrap"}}><span style={{color:LIGHT}}>SHOT</span><span style={{color:VOLT}}>LAB</span></div>}
 function BrandBackdrop(){return <><div style={{position:"fixed",inset:0,background:"radial-gradient(ellipse 80% 40% at 50% 0%, rgba(200, 255, 0, 0.04) 0%, transparent 100%)",pointerEvents:"none",zIndex:0}}/><div style={{position:"fixed",left:"50%",top:"50%",transform:"translate(-50%,-35%)",opacity:.03,pointerEvents:"none",zIndex:0,width:180}}><SLLogo size={180}/></div></>}
-function SectionHero({icon,title,subtitle,accent=VOLT,deco,isCoach=false}){return <div style={{marginBottom:12}}><div style={{height:80,display:"flex",alignItems:"center",gap:14}}><div style={{width:42,height:42,borderRadius:12,background:accent+"12",border:`1px solid ${accent}33`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",flexShrink:0}}>{icon}{deco&&<div style={{position:"absolute",bottom:-6,right:-6,opacity:.6}}>{deco}</div>}</div><div><div className="u-allcaps-long" style={{fontFamily:FD,fontSize:24,color:"var(--text-1)",lineHeight:1,display:"flex",alignItems:"center",gap:6}}>{title}{isCoach&&<ShieldIcon size={12} color="var(--text-3)" style={{opacity:.5,pointerEvents:"none"}}/>}</div><div className="u-secondary-text" style={{fontFamily:FB,fontSize:12,marginTop:4}}>{subtitle}</div></div></div><div style={{height:1,background:BORDER_CLR}}/></div>}
+function SectionHero({icon,title,subtitle,accent=VOLT,deco,isCoach=false}){return <div style={{marginBottom:12}}><div style={{height:80,display:"flex",alignItems:"center",gap:14}}><div style={{width:42,height:42,borderRadius:12,background:accent+"12",border:`1px solid ${accent}33`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",flexShrink:0}}>{icon}{deco&&<div style={{position:"absolute",bottom:-6,right:-6,opacity:.6}}>{deco}</div>}</div><div><div className="u-allcaps-long" style={{fontFamily:FD,fontSize:"var(--h2)",letterSpacing:"0.06em",fontWeight:600,color:"var(--text-2)",lineHeight:1.1,display:"flex",alignItems:"center",gap:6}}>{title}{isCoach&&<ShieldIcon size={12} color="var(--text-3)" style={{opacity:.5,pointerEvents:"none"}}/>}</div><div className="u-secondary-text" style={{fontFamily:FB,fontSize:12,marginTop:4}}>{subtitle}</div></div></div><div style={{height:1,background:BORDER_CLR}}/></div>}
 function SC({l,v,c=VOLT,big,small,fire,accent}){const inner=<div style={{flex:big?1.6:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:big?"22px 18px":"14px 12px",position:"relative",overflow:"hidden"}}>{fire&&<div style={{position:"absolute",top:6,right:8,fontSize:14}}>🔥</div>}{typeof v==="number"?<AnimNum v={v} c={c} big={big}/>:<div style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{v}</div>}<div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:big?6:4,fontWeight:600}}>{l}</div></div>;if(accent)return <div className="grd-bdr" style={{flex:big?1.6:1}}>{inner}</div>;return <div style={{flex:big?1.6:1}}><div style={{border:`1px solid ${BORDER_CLR}`,borderRadius:16}}>{inner}</div></div>}
-function SH({t,s,isCoach=false,identity=false}){return <div style={{marginBottom:16,display:"flex",alignItems:"baseline",justifyContent:"space-between"}}><div>{identity?<div className="page-header"><h1 className="page-title u-allcaps-long" style={{fontFamily:FD,color:LIGHT,fontSize:18,display:"inline-flex",alignItems:"center",gap:6,margin:0}}>{t}{isCoach&&<ShieldIcon size={12} color="var(--text-3)" style={{opacity:.5,pointerEvents:"none"}}/>}</h1><div className="page-identity-bar" aria-hidden="true"></div></div>:<div className="u-allcaps-long" style={{fontFamily:FD,color:LIGHT,fontSize:18,display:"inline-flex",alignItems:"center",gap:6}}>{t}{isCoach&&<ShieldIcon size={12} color="var(--text-3)" style={{opacity:.5,pointerEvents:"none"}}/>}</div>}</div>{s&&<div className="u-meta-label" style={{fontFamily:FB,fontSize:11}}>{s}</div>}</div>}
+function SH({t,s,isCoach=false,identity=false}){return <div style={{marginBottom:16,display:"flex",alignItems:"baseline",justifyContent:"space-between"}}><div>{identity?<div className="page-header"><h1 className="page-title u-allcaps-long" style={{fontFamily:FD,color:"var(--text-2)",fontSize:"var(--h2)",letterSpacing:"0.06em",fontWeight:600,display:"inline-flex",alignItems:"center",gap:6,margin:0}}>{t}{isCoach&&<ShieldIcon size={12} color="var(--text-3)" style={{opacity:.5,pointerEvents:"none"}}/>}</h1><div className="page-identity-bar" aria-hidden="true"></div></div>:<div className="u-allcaps-long" style={{fontFamily:FD,color:"var(--text-2)",fontSize:"var(--h2)",letterSpacing:"0.06em",fontWeight:600,display:"inline-flex",alignItems:"center",gap:6}}>{t}{isCoach&&<ShieldIcon size={12} color="var(--text-3)" style={{opacity:.5,pointerEvents:"none"}}/>}</div>}</div>{s&&<div className="u-meta-label" style={{fontFamily:FB,fontSize:11}}>{s}</div>}</div>}
 function Av({n,sz=36,style:x,email,isCoach=false}){const idx=email?hashCode(email)%AVG.length:hashCode(n||"?")%AVG.length;const[c1,c2]=AVG[idx];return <div style={{width:sz,height:sz,borderRadius:"50%",background:`linear-gradient(135deg,${c1}44,${c2}44)`,border:`2px solid ${c1}33`,color:c1,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:sz*.42,flexShrink:0,letterSpacing:1,boxShadow:`0 0 12px ${c1}11${isCoach?", 0 0 0 4px rgba(200, 255, 0, 0.15)":""}`,...x}}>{(n||"?")[0].toUpperCase()}</div>}
 function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i)=>{const angle=(i/24)*360*(Math.PI/180);const dist=60+Math.random()*80;const x=Math.cos(angle)*dist;const y=Math.sin(angle)*dist-20;const colors=[VOLT,ORANGE,CYAN,"#C8FF00","#C8FF00","#FFFFFF"];return {x,y,color:colors[i%colors.length],size:3+Math.random()*4,delay:Math.random()*0.15}}),[]);return <div style={{position:"absolute",top:"30%",left:"50%",zIndex:20,pointerEvents:"none"}}>{particles.map((p,i)=><div key={i} className="particle" style={{width:p.size,height:p.size,background:p.color,left:0,top:0,"–fly-to":`translate(${p.x}px,${p.y}px) scale(0)`,animationDelay:`${p.delay}s`,animationDuration:".7s"}}/>)}</div>}
 function CourtDivider({color=VOLT,my=20}){return <div className="uiDecor" aria-hidden="true" style={{margin:`${my}px 0`,position:"relative",height:24,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><svg width="100%" height="24" viewBox="0 0 400 24" preserveAspectRatio="none" fill="none" style={{position:"absolute",inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:"50%",background:color,opacity:.15,position:"relative",zIndex:1}}/></div>}
