@@ -1,7 +1,7 @@
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
-export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, onLogout }) {
+export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, onOpenSettings, onLogout }) {
   return (
     <div
       style={{
@@ -38,6 +38,23 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
           {avatar}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
+        <button
+          aria-label="Open settings"
+          onClick={onOpenSettings}
+          style={{
+            background: "rgba(20,20,20,0.95)",
+            border: `1px solid ${borderColor}`,
+            borderRadius: 10,
+            color: "var(--text-secondary)",
+            width: 32,
+            height: 32,
+            cursor: "pointer",
+            fontFamily: FB,
+            fontSize: 12,
+          }}
+        >
+          ⚙
+        </button>
         <button
           aria-label="Log out"
           onClick={onLogout}
