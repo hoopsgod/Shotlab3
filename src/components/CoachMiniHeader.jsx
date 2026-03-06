@@ -1,7 +1,7 @@
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
-export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, logoUrl, onOpenSettings, onLogout }) {
+export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, logoUrl, teamName, accentColor, onOpenSettings, onLogout }) {
   return (
     <div
       aria-hidden={!visible}
@@ -25,9 +25,9 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         style={{
           height: "clamp(52px, 7.8vw, 60px)",
           borderRadius: 12,
-          border: `1px solid ${borderColor}`,
-          background: "rgba(10, 10, 10, 0.92)",
-          boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
+          border: accentColor ? `1px solid ${accentColor}66` : `1px solid ${borderColor}`,
+          background: accentColor ? `linear-gradient(120deg, ${accentColor}26 0%, rgba(10,10,10,0.94) 55%)` : "rgba(10, 10, 10, 0.92)",
+          boxShadow: accentColor ? `0 4px 14px rgba(0,0,0,0.28), 0 0 0 1px ${accentColor}20` : "0 4px 14px rgba(0,0,0,0.25)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -38,7 +38,12 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
           {avatar}
-          {logoUrl ? <img src={logoUrl} alt="Team logo" style={{ width: 20, height: 20, borderRadius: 5, objectFit: "cover", border: "1px solid var(--stroke-1)" }} /> : null}
+          {logoUrl ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 8px", borderRadius: 999, background: accentColor ? `${accentColor}24` : "rgba(255,255,255,0.08)", border: accentColor ? `1px solid ${accentColor}55` : "1px solid var(--stroke-1)" }}>
+              <img src={logoUrl} alt="Team logo" style={{ width: 24, height: 24, borderRadius: 6, objectFit: "cover", border: accentColor ? `1px solid ${accentColor}88` : "1px solid var(--stroke-1)" }} />
+              {teamName ? <span style={{ fontFamily: FB, fontSize: 9, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "var(--tracking-tight)", fontWeight: 700, maxWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{teamName}</span> : null}
+            </div>
+          ) : null}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
         <button

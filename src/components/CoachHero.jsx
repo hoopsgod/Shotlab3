@@ -25,10 +25,14 @@ export default function CoachHero({
       style={{
         marginBottom: "var(--stack-gap)",
         padding: mobilePadding,
-        border: "1px solid var(--stroke-2)",
+        border: `1px solid ${accentColor ? `${accentColor}66` : "var(--stroke-2)"}`,
         borderRadius: "var(--radius-card)",
-        background: "var(--surface-3)",
-        boxShadow: "var(--shadow-2)",
+        background: accentColor
+          ? `linear-gradient(130deg, ${accentColor}1F 0%, var(--surface-3) 56%)`
+          : "var(--surface-3)",
+        boxShadow: accentColor
+          ? `0 18px 40px rgba(0,0,0,0.55), 0 0 0 1px ${accentColor}22, 0 14px 36px ${accentColor}24`
+          : "var(--shadow-2)",
       }}
     >
       <style>{`
@@ -82,9 +86,9 @@ export default function CoachHero({
             Lead the squad. Track momentum. Build consistency.
           </div>
           {logoUrl ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
-              <img src={logoUrl} alt="Team logo" style={{ width: 18, height: 18, borderRadius: 5, objectFit: "cover", border: "1px solid var(--stroke-1)" }} />
-              <span style={{ fontFamily: FB, color: "var(--text-2)", fontSize: 10, letterSpacing: "var(--tracking-tight)", textTransform: "uppercase" }}>{teamName || "Team Identity"}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, padding: "6px 10px", borderRadius: 999, background: accentColor ? `${accentColor}1A` : "rgba(255,255,255,0.06)", border: accentColor ? `1px solid ${accentColor}55` : "1px solid var(--stroke-1)", width: "fit-content" }}>
+              <img src={logoUrl} alt="Team logo" style={{ width: 30, height: 30, borderRadius: 8, objectFit: "cover", border: accentColor ? `1px solid ${accentColor}88` : "1px solid var(--stroke-1)", boxShadow: accentColor ? `0 0 0 3px ${accentColor}29` : "none" }} />
+              <span style={{ fontFamily: FB, color: "var(--text-1)", fontSize: 11, letterSpacing: "var(--tracking-tight)", textTransform: "uppercase", fontWeight: 700 }}>{teamName || "Team Identity"}</span>
             </div>
           ) : null}
         </div>
