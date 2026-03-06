@@ -2317,6 +2317,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   borderColor={BORDER_CLR}
   mutedColor={MUTED}
   logoUrl={team?.branding?.logoUrl}
+  teamName={team?.name}
+  accentColor={coachAccent}
   onOpenSettings={()=>setTab("settings")}
   onLogout={logout}
 />
