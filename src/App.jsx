@@ -1095,6 +1095,9 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       const nextEvent=upcomingEvents[0]||null;
       const upcomingEventsCount=upcomingEvents.length||0;
       const attendanceRows=rsvps.filter(r=>r.email===u.email);
+      const rsvpEventIds=new Set(attendanceRows.map(r=>r.eventId));
+      const upcomingRsvpd=upcomingEvents.filter(ev=>rsvpEventIds.has(ev.id));
+      const upcomingNotRsvpd=upcomingEvents.filter(ev=>!rsvpEventIds.has(ev.id));
       const attendancePct=upcomingEventsCount>0&&attendanceRows.length>0?`${Math.min(100,Math.round((attendanceRows.length/upcomingEventsCount)*100))}%`:"—";
       const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
       const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
@@ -1110,6 +1113,28 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
         </div>
       </div>
     })()}
+
+    <section style={{background:`linear-gradient(140deg, ${VOLT}22 0%, ${VOLT}10 45%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}66`,borderRadius:18,padding:"16px 14px",marginBottom:20,boxShadow:`0 14px 28px ${VOLT}22`}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:12}}>
+        <div>
+          <div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:2.2,lineHeight:1,textTransform:"uppercase"}}>Upcoming Work Events</div>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:11,marginTop:4}}>Don’t miss what’s next — RSVP status is split below.</div>
+        </div>
+        <button onClick={()=>setTab("program")} style={{background:VOLT,color:BG,border:"none",borderRadius:10,padding:"8px 10px",fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>View Events</button>
+      </div>
+
+      <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
+        <div style={{background:BG,border:`1px solid ${VOLT}40`,borderRadius:12,padding:"12px 10px"}}>
+          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:800,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>RSVP’D ({upcomingRsvpd.length})</div>
+          {upcomingRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>No upcoming events confirmed yet.</div>:upcomingRsvpd.slice(0,3).map(ev=><div key={ev.id} style={{padding:"8px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1.2,lineHeight:1.1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
+        </div>
+
+        <div style={{background:BG,border:`1px solid ${ORANGE}55`,borderRadius:12,padding:"12px 10px"}}>
+          <div style={{fontFamily:FB,color:ORANGE,fontSize:10,fontWeight:800,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>Not RSVP’d ({upcomingNotRsvpd.length})</div>
+          {upcomingNotRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>You’re RSVP’d for every upcoming event.</div>:upcomingNotRsvpd.slice(0,3).map(ev=><div key={ev.id} style={{padding:"8px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1.2,lineHeight:1.1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
+        </div>
+      </div>
+    </section>
 
     {/* ══════ LEADERBOARD ══════ */}
     <DashboardLeaderboard scores={scores} drills={drills} programDrills={programDrills} user={u} scRsvps={scRsvps} rsvps={rsvps} shotLogs={shotLogs}/>
