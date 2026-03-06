@@ -83,6 +83,13 @@ const ALNUM="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const DEMO_PLAYER={email:"demo@shotlab.app",password:"demo1234",name:"Demo Player",role:"player"};
 const DEMO_COACH={email:"coach.demo@shotlab.app",password:"demo1234",name:"Demo Coach",role:"coach"};
 const DEFAULT_TEAM_BRANDING={logoUrl:"",primaryColor:"#C8FF1A",secondaryColor:"#00E5FF"};
+const BRANDING_PRESETS=[
+{id:"volt",name:"Volt",primaryColor:"#C8FF1A",secondaryColor:"#00E5FF"},
+{id:"royal",name:"Royal",primaryColor:"#4F7CFF",secondaryColor:"#7CE7FF"},
+{id:"sunset",name:"Sunset",primaryColor:"#FF7A45",secondaryColor:"#FFD166"},
+{id:"crimson",name:"Crimson",primaryColor:"#FF5A5F",secondaryColor:"#FFE66D"},
+{id:"forest",name:"Forest",primaryColor:"#6EEB83",secondaryColor:"#4D96FF"},
+];
 const sanitizeHexColor=(value,fallback)=>/^#[0-9A-F]{6}$/i.test(String(value||"").trim())?String(value).trim().toUpperCase():fallback;
 const sanitizeTeamBranding=(branding={})=>({
 logoUrl:typeof branding.logoUrl==="string"?branding.logoUrl.trim():"",
@@ -2186,6 +2193,39 @@ const r=await updateTeamBranding(team?.id,payload);
 if(!r.ok){setBrandingMsg(r.err||"Could not save branding");return;}
 setBrandingMsg("Branding saved");
 };
+const applyBrandingPreset=(preset)=>{
+if(!preset)return;
+setBrandingDraft(prev=>({
+...prev,
+primaryColor:preset.primaryColor,
+secondaryColor:preset.secondaryColor,
+}));
+setBrandingMsg("");
+};
+const handleLogoFileChange=(event)=>{
+const file=event.target.files?.[0];
+if(!file)return;
+if(!file.type.startsWith("image/")){
+setBrandingMsg("Please choose an image file");
+event.target.value="";
+return;
+}
+if(file.size>2*1024*1024){
+setBrandingMsg("Logo must be under 2MB");
+event.target.value="";
+return;
+}
+const reader=new FileReader();
+reader.onload=()=>{
+const logoUrl=typeof reader.result==="string"?reader.result:"";
+if(!logoUrl){setBrandingMsg("Could not read logo file");return;}
+setBrandingDraft(prev=>({...prev,logoUrl}));
+setBrandingMsg("Logo selected. Save branding to apply.");
+};
+reader.onerror=()=>setBrandingMsg("Could not read logo file");
+reader.readAsDataURL(file);
+event.target.value="";
+};
 const navItems=[
   {k:"feed",l:"Feed",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>},
   {k:"drills",l:"Drills",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2v20"/><path d="M5 4.5c3.5 4 5 7 5 7.5s-1.5 3.5-5 7.5"/><path d="M19 4.5c-3.5 4-5 7-5 7.5s1.5 3.5 5 7.5"/></svg>},
@@ -2356,7 +2396,28 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         </div>
         {brandingDraft.logoUrl?<img src={brandingDraft.logoUrl} alt="Team logo preview" style={{width:34,height:34,borderRadius:8,objectFit:"cover",border:`1px solid ${BORDER_CLR}`}}/>:null}
       </div>
-      <FF l="TEAM LOGO URL" v={brandingDraft.logoUrl} set={v=>{setBrandingDraft({...brandingDraft,logoUrl:v});setBrandingMsg("");}} ph="https://your-school.com/logo.png"/>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:10}}>
+        <label style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"10px 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer"}}>
+          Upload logo file
+          <input type="file" accept="image/*" onChange={handleLogoFileChange} style={{display:"none"}}/>
+        </label>
+        <button type="button" onClick={()=>{setBrandingDraft({...brandingDraft,logoUrl:""});setBrandingMsg("");}} style={{padding:"10px 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer"}}>
+          Remove logo
+        </button>
+      </div>
+      <FF l="TEAM LOGO URL (optional)" v={brandingDraft.logoUrl} set={v=>{setBrandingDraft({...brandingDraft,logoUrl:v});setBrandingMsg("");}} ph="https://your-school.com/logo.png"/>
+      <div style={{marginTop:12}}>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:8}}>Color schemes</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(5,minmax(0,1fr))",gap:6}}>
+          {BRANDING_PRESETS.map(preset=><button key={preset.id} type="button" onClick={()=>applyBrandingPreset(preset)} style={{padding:"7px 6px",borderRadius:9,border:`1px solid ${BORDER_CLR}`,background:BG,cursor:"pointer"}}>
+            <div style={{display:"flex",justifyContent:"center",gap:5,marginBottom:5}}>
+              <span style={{width:10,height:10,borderRadius:"50%",background:preset.primaryColor}}/>
+              <span style={{width:10,height:10,borderRadius:"50%",background:preset.secondaryColor}}/>
+            </div>
+            <div style={{fontFamily:FB,color:LIGHT,fontSize:9,fontWeight:700,letterSpacing:0.8,textTransform:"uppercase"}}>{preset.name}</div>
+          </button>)}
+        </div>
+      </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10,marginTop:4}}>
         <label style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase"}}>
           Primary color
