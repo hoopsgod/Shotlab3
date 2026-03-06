@@ -11,6 +11,7 @@ export default function CoachHero({
   mutedColor,
   avatar,
   wordmark,
+  onOpenSettings,
   onLogout,
 }) {
   const mobilePadding = isOverview ? "12px 12px" : "10px 12px";
@@ -83,6 +84,28 @@ export default function CoachHero({
           {avatar}
           {wordmark}
           <button
+            type="button"
+            aria-label="Open settings"
+            onClick={onOpenSettings}
+            style={{
+              background: "rgba(20,20,20,0.95)",
+              border: `1px solid ${borderColor}`,
+              borderRadius: 12,
+              color: "var(--text-secondary)",
+              width: 38,
+              height: 38,
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            ⚙
+          </button>
+          <button
+            type="button"
             aria-label="Log out"
             onClick={onLogout}
             style={{
