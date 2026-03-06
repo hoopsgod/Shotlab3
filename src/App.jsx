@@ -1005,6 +1005,14 @@ const streak=useMemo(()=>calcStreak(homeScores),[homeScores]);
 const earnedBadges=useMemo(()=>getEarnedBadges(streak),[streak]);
 const myRsvps=useMemo(()=>rsvps.filter(r=>r.email===u.email).length,[rsvps,u]);
 const tier=useMemo(()=>getTier(myRsvps),[myRsvps]);
+const upcomingEvents=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)).filter(e=>e.date>=today),[events,today]);
+const upcomingEventsCount=upcomingEvents.length||0;
+const rsvpEventIds=useMemo(()=>new Set(rsvps.filter(r=>r.email===u.email).map(r=>r.eventId)),[rsvps,u.email]);
+const upcomingRsvpd=useMemo(()=>upcomingEvents.filter(ev=>rsvpEventIds.has(ev.id)),[upcomingEvents,rsvpEventIds]);
+const upcomingNotRsvpd=useMemo(()=>upcomingEvents.filter(ev=>!rsvpEventIds.has(ev.id)),[upcomingEvents,rsvpEventIds]);
+const attendancePct=upcomingEventsCount>0&&myRsvps>0?`${Math.min(100,Math.round((myRsvps/upcomingEventsCount)*100))}%`:"—";
+const nextEvent=upcomingEvents[0]||null;
+const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
 
 // Notification dots for nav
 const pendingDuels=useMemo(()=>challenges.filter(c=>c.to===u.email&&c.status==="pending").length,[challenges,u]);
@@ -1090,16 +1098,6 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {tab==="home"&&!active&&<div className={slideClass} key="home">
 
     {(()=>{
-      const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
-      const upcomingEvents=sorted.filter(e=>e.date>=today);
-      const nextEvent=upcomingEvents[0]||null;
-      const upcomingEventsCount=upcomingEvents.length||0;
-      const attendanceRows=rsvps.filter(r=>r.email===u.email);
-      const rsvpEventIds=new Set(attendanceRows.map(r=>r.eventId));
-      const upcomingRsvpd=upcomingEvents.filter(ev=>rsvpEventIds.has(ev.id));
-      const upcomingNotRsvpd=upcomingEvents.filter(ev=>!rsvpEventIds.has(ev.id));
-      const attendancePct=upcomingEventsCount>0&&attendanceRows.length>0?`${Math.min(100,Math.round((attendanceRows.length/upcomingEventsCount)*100))}%`:"—";
-      const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
       const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
       return <div style={{marginBottom:28}}>
