@@ -4,6 +4,7 @@ const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, onOpenSettings, onLogout }) {
   return (
     <div
+      aria-hidden={!visible}
       style={{
         position: "fixed",
         top: 0,
@@ -14,9 +15,10 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         paddingLeft: 12,
         paddingRight: 12,
         pointerEvents: visible ? "auto" : "none",
+        visibility: visible ? "visible" : "hidden",
         opacity: visible ? 1 : 0,
         transform: visible ? "translateY(0)" : "translateY(-12px)",
-        transition: "opacity 200ms ease, transform 200ms ease",
+        transition: "opacity 200ms ease, transform 200ms ease, visibility 0s linear " + (visible ? "0s" : "200ms"),
       }}
     >
       <div
@@ -39,6 +41,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
         <button
+          type="button"
           aria-label="Open settings"
           onClick={onOpenSettings}
           style={{
@@ -56,6 +59,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
           ⚙
         </button>
         <button
+          type="button"
           aria-label="Log out"
           onClick={onLogout}
           style={{

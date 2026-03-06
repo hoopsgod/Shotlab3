@@ -84,6 +84,7 @@ export default function CoachHero({
           {avatar}
           {wordmark}
           <button
+            type="button"
             aria-label="Open settings"
             onClick={onOpenSettings}
             style={{
@@ -104,6 +105,7 @@ export default function CoachHero({
             ⚙
           </button>
           <button
+            type="button"
             aria-label="Log out"
             onClick={onLogout}
             style={{
