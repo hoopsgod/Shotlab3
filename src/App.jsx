@@ -89,6 +89,12 @@ const BRANDING_PRESETS=[
 {id:"sunset",name:"Sunset",primaryColor:"#FF7A45",secondaryColor:"#FFD166"},
 {id:"crimson",name:"Crimson",primaryColor:"#FF5A5F",secondaryColor:"#FFE66D"},
 {id:"forest",name:"Forest",primaryColor:"#6EEB83",secondaryColor:"#4D96FF"},
+{id:"navy-gold",name:"Navy Gold",primaryColor:"#0B1F3B",secondaryColor:"#F4C542"},
+{id:"cardinal-gold",name:"Cardinal Gold",primaryColor:"#8C1D40",secondaryColor:"#FFB81C"},
+{id:"green-gold",name:"Green Gold",primaryColor:"#0B6B3A",secondaryColor:"#D4AF37"},
+{id:"purple-gold",name:"Purple Gold",primaryColor:"#4B2E83",secondaryColor:"#FDB927"},
+{id:"black-red",name:"Black Red",primaryColor:"#121212",secondaryColor:"#D7263D"},
+{id:"maroon-silver",name:"Maroon Silver",primaryColor:"#6E2233",secondaryColor:"#C0C6CF"},
 ];
 const sanitizeHexColor=(value,fallback)=>/^#[0-9A-F]{6}$/i.test(String(value||"").trim())?String(value).trim().toUpperCase():fallback;
 const sanitizeTeamBranding=(branding={})=>({
@@ -1040,6 +1046,9 @@ const upcomingNotRsvpd=useMemo(()=>upcomingEvents.filter(ev=>!rsvpEventIds.has(e
 const attendancePct=upcomingEventsCount>0&&myRsvps>0?`${Math.min(100,Math.round((myRsvps/upcomingEventsCount)*100))}%`:"—";
 const nextEvent=upcomingEvents[0]||null;
 const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
+const teamBranding=sanitizeTeamBranding(team?.branding);
+const coachPrimary=teamBranding.primaryColor;
+const coachSecondary=teamBranding.secondaryColor;
 
 // Notification dots for nav
 const pendingDuels=useMemo(()=>challenges.filter(c=>c.to===u.email&&c.status==="pending").length,[challenges,u]);
@@ -1098,7 +1107,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 <div style={{position:"sticky",top:0,zIndex:10,paddingTop:"max(0px,env(safe-area-inset-top))",height:"calc(72px + max(0px,env(safe-area-inset-top)))",background:TOKENS.BG_BASE,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
   <div style={{height:72,padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
     <div style={{display:"flex",alignItems:"center",minWidth:0,flex:1}}>
-      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:44,height:44,borderRadius:"50%",background:"#1E1E1E",border:"1.5px solid #C8FF00",boxShadow:u.isCoach?"0 0 0 4px rgba(200, 255, 0, 0.15)":"none",color:"#FFFFFF",fontSize:16,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0,marginRight:12}}>{(u.name||"?")[0].toUpperCase()}</button>
+      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:44,height:44,borderRadius:"50%",background:"#1E1E1E",border:`1.5px solid ${u.isCoach?coachPrimary:"#C8FF00"}`,boxShadow:u.isCoach?`0 0 0 4px ${alphaFromHex(coachPrimary,0.15)}`:"none",color:"#FFFFFF",fontSize:16,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0,marginRight:12}}>{(u.name||"?")[0].toUpperCase()}</button>
       <div style={{display:"flex",flexDirection:"column",justifyContent:"center",minWidth:0,maxWidth:"100%"}}>
         <div style={{fontFamily:FB,color:"#FFFFFF",fontSize:18,fontWeight:700,lineHeight:1.1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{u.name}</div>
         <div style={{display:"flex",alignItems:"center",gap:6,marginTop:2}}>
@@ -1113,7 +1122,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   </div>
 
 </div>
-{u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:`0 var(--page-gutter)`,gap:"var(--space-2)"}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:"rgba(200, 255, 0, 0.84)"}}>COACH VIEW — FULL ACCESS</span></div>}
+{u.isCoach&&<div style={{height:28,background:`linear-gradient(90deg, ${alphaFromHex(coachPrimary,0.14)} 0%, transparent 100%)`,borderBottom:`1px solid ${alphaFromHex(coachSecondary,0.3)}`,display:"flex",alignItems:"center",padding:`0 var(--page-gutter)`,gap:"var(--space-2)"}}><WhistleIcon size={12} color={coachPrimary}/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:alphaFromHex(coachPrimary,0.84)}}>COACH VIEW — FULL ACCESS</span></div>}
 
 <div style={{flex:1,padding:"14px 16px 124px",overflowY:"auto",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
   {/* Pull-to-refresh basketball */}
@@ -2186,6 +2195,7 @@ useEffect(()=>{setBrandingDraft(sanitizeTeamBranding(team?.branding));},[team?.b
 const teamBranding=sanitizeTeamBranding(team?.branding);
 const teamPrimary=teamBranding.primaryColor;
 const teamSecondary=teamBranding.secondaryColor;
+const coachAccent=teamPrimary;
 const shellVars=(k)=>({"--pageAccent":teamPrimary,"--pageAccentGlow":alphaFromHex(teamSecondary,0.35),"--pageAccentBg":alphaFromHex(teamPrimary,0.1),"--page-accent":teamPrimary,"--page-accent-soft":alphaFromHex(teamPrimary,0.1),"--page-accent-border":alphaFromHex(teamSecondary,0.35)});
 const saveBranding=async()=>{
 const payload=sanitizeTeamBranding(brandingDraft);
@@ -2299,13 +2309,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>
 </div>
 </div>}
-<div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
+<div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={coachAccent} top="0" left="80%" size={250}/></div>
 <CoachMiniHeader
   visible={showMiniHeader}
   avatar={<Av n={u.name} sz={24} email={u.email} isCoach={u.isCoach}/>}
   wordmark={<BrandWordmark size={14} small/>}
   borderColor={BORDER_CLR}
   mutedColor={MUTED}
+  logoUrl={team?.branding?.logoUrl}
   onOpenSettings={()=>setTab("settings")}
   onLogout={logout}
 />
@@ -2315,11 +2326,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   isOverview={isOverviewTab}
   userName={u.name}
   isCoach={u.isCoach}
-  accentColor={ORANGE}
+  accentColor={coachAccent}
   borderColor={BORDER_CLR}
   mutedColor={MUTED}
   avatar={<Av n={u.name} sz={isOverviewTab?32:30} email={u.email} isCoach={u.isCoach}/>}
   wordmark={<BrandWordmark size={isOverviewTab?17:16} small/>}
+  logoUrl={team?.branding?.logoUrl}
+  teamName={team?.name}
   onOpenSettings={()=>setTab("settings")}
   onLogout={logout}
 />
@@ -2343,16 +2356,16 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   codeErr={codeErr}
 />}
 </div>
-{u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:`0 var(--page-gutter)`,gap:"var(--space-2)"}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:"rgba(200, 255, 0, 0.84)"}}>COACH VIEW — FULL ACCESS</span></div>}
+{u.isCoach&&<div style={{height:28,background:`linear-gradient(90deg, ${alphaFromHex(coachAccent,0.18)} 0%, transparent 100%)`,borderBottom:`1px solid ${alphaFromHex(coachAccent,0.32)}`,display:"flex",alignItems:"center",padding:`0 var(--page-gutter)`,gap:"var(--space-2)"}}><WhistleIcon size={12} color={coachAccent}/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:alphaFromHex(coachAccent,0.84)}}>COACH VIEW — FULL ACCESS</span></div>}
 
 <div style={{flex:1,padding:`${showMiniHeader?"88px":"var(--space-4)"} var(--page-gutter) 110px`,overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.feed.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S PULSE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>Who's active, streaking, and needs attention</div></div><button className="pageHeaderPill" onClick={()=>setTab("players")}>View Team</button></div>
     {/* Coach dashboard pulse */}
-    <div className="accent-card" style={{background:`linear-gradient(135deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:"20px 20px",border:`1px solid ${ORANGE}22`,marginBottom:20,position:"relative",overflow:"hidden"}}>
-      <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
+    <div className="accent-card" style={{background:`linear-gradient(135deg,${alphaFromHex(coachAccent,0.1)},${CARD_BG})`,borderRadius:18,padding:"20px 20px",border:`1px solid ${alphaFromHex(coachAccent,0.24)}`,marginBottom:20,position:"relative",overflow:"hidden"}}>
+      <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:coachAccent,borderRadius:"4px 0 0 4px"}}/>
       
-      <div style={{fontFamily:FD,color:ORANGE,fontSize:12,letterSpacing:"var(--tracking-default)",marginBottom:12}}>TODAY'S PULSE</div>
+      <div style={{fontFamily:FD,color:coachAccent,fontSize:12,letterSpacing:"var(--tracking-default)",marginBottom:12}}>TODAY'S PULSE</div>
       <div style={{display:"flex",gap:8,marginBottom:12}}>
         {(()=>{
           const activeToday=new Set(scores.filter(s=>s.date===today).map(s=>s.email)).size;
@@ -2589,7 +2602,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:12}}><div><div style={{fontFamily:FD,color:teamPrimary,fontSize:14,letterSpacing:"var(--tracking-default)"}}>TEAM BRANDING</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Upload logo + set your team page colors.</div></div></div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:10}}><label style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"10px 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer"}}>Upload logo file<input type="file" accept="image/*" onChange={handleLogoFileChange} style={{display:"none"}}/></label><button type="button" onClick={()=>{setBrandingDraft({...brandingDraft,logoUrl:""});setBrandingMsg("");}} style={{padding:"10px 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer"}}>Remove logo</button></div>
       <FF l="TEAM LOGO URL (optional)" v={brandingDraft.logoUrl} set={v=>{setBrandingDraft({...brandingDraft,logoUrl:v});setBrandingMsg("");}} ph="https://your-school.com/logo.png"/>
-      <div style={{marginTop:12}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:8}}>Color schemes</div><div style={{display:"grid",gridTemplateColumns:"repeat(5,minmax(0,1fr))",gap:6}}>{BRANDING_PRESETS.map(preset=><button key={preset.id} type="button" onClick={()=>applyBrandingPreset(preset)} style={{padding:"7px 6px",borderRadius:9,border:`1px solid ${BORDER_CLR}`,background:BG,cursor:"pointer"}}><div style={{display:"flex",justifyContent:"center",gap:5,marginBottom:5}}><span style={{width:10,height:10,borderRadius:"50%",background:preset.primaryColor}}/><span style={{width:10,height:10,borderRadius:"50%",background:preset.secondaryColor}}/></div><div style={{fontFamily:FB,color:LIGHT,fontSize:9,fontWeight:700,letterSpacing:0.8,textTransform:"uppercase"}}>{preset.name}</div></button>)}</div></div>
+      <div style={{marginTop:12}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:8}}>Color schemes</div><div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:6}}>{BRANDING_PRESETS.map(preset=><button key={preset.id} type="button" onClick={()=>applyBrandingPreset(preset)} style={{padding:"7px 6px",borderRadius:9,border:`1px solid ${BORDER_CLR}`,background:BG,cursor:"pointer"}}><div style={{display:"flex",justifyContent:"center",gap:5,marginBottom:5}}><span style={{width:10,height:10,borderRadius:"50%",background:preset.primaryColor}}/><span style={{width:10,height:10,borderRadius:"50%",background:preset.secondaryColor}}/></div><div style={{fontFamily:FB,color:LIGHT,fontSize:9,fontWeight:700,letterSpacing:0.8,textTransform:"uppercase"}}>{preset.name}</div></button>)}</div></div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10,marginTop:4}}><label style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase"}}>Primary color<div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><input type="color" value={sanitizeHexColor(brandingDraft.primaryColor,DEFAULT_TEAM_BRANDING.primaryColor)} onChange={e=>{setBrandingDraft({...brandingDraft,primaryColor:e.target.value.toUpperCase()});setBrandingMsg("");}} style={{width:42,height:36,padding:0,border:"none",background:"transparent",cursor:"pointer"}}/><input value={brandingDraft.primaryColor} onChange={e=>{setBrandingDraft({...brandingDraft,primaryColor:e.target.value});setBrandingMsg("");}} placeholder="#C8FF1A" style={{flex:1,padding:9,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8,textTransform:"uppercase"}}/></div></label><label style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase"}}>Secondary color<div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><input type="color" value={sanitizeHexColor(brandingDraft.secondaryColor,DEFAULT_TEAM_BRANDING.secondaryColor)} onChange={e=>{setBrandingDraft({...brandingDraft,secondaryColor:e.target.value.toUpperCase()});setBrandingMsg("");}} style={{width:42,height:36,padding:0,border:"none",background:"transparent",cursor:"pointer"}}/><input value={brandingDraft.secondaryColor} onChange={e=>{setBrandingDraft({...brandingDraft,secondaryColor:e.target.value});setBrandingMsg("");}} placeholder="#00E5FF" style={{flex:1,padding:9,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8,textTransform:"uppercase"}}/></div></label></div>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginTop:14}}><div style={{display:"flex",gap:8,alignItems:"center"}}><span style={{width:14,height:14,borderRadius:"50%",background:sanitizeHexColor(brandingDraft.primaryColor,DEFAULT_TEAM_BRANDING.primaryColor)}}/><span style={{width:14,height:14,borderRadius:"50%",background:sanitizeHexColor(brandingDraft.secondaryColor,DEFAULT_TEAM_BRANDING.secondaryColor)}}/></div><button className="btn btn-primary btn-v" onClick={saveBranding} style={{marginBottom:0}}>Save Branding</button></div>
       {brandingMsg&&<div style={{fontFamily:FB,color:brandingMsg.includes("saved")?"#9CE77B":"#FF4545",fontSize:10,marginTop:8}}>{brandingMsg}</div>}

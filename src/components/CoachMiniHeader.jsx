@@ -1,7 +1,7 @@
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
-export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, onOpenSettings, onLogout }) {
+export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, logoUrl, onOpenSettings, onLogout }) {
   return (
     <div
       aria-hidden={!visible}
@@ -38,6 +38,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
           {avatar}
+          {logoUrl ? <img src={logoUrl} alt="Team logo" style={{ width: 20, height: 20, borderRadius: 5, objectFit: "cover", border: "1px solid var(--stroke-1)" }} /> : null}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
         <button

@@ -11,6 +11,8 @@ export default function CoachHero({
   mutedColor,
   avatar,
   wordmark,
+  logoUrl,
+  teamName,
   onOpenSettings,
   onLogout,
 }) {
@@ -79,6 +81,12 @@ export default function CoachHero({
           >
             Lead the squad. Track momentum. Build consistency.
           </div>
+          {logoUrl ? (
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 8 }}>
+              <img src={logoUrl} alt="Team logo" style={{ width: 18, height: 18, borderRadius: 5, objectFit: "cover", border: "1px solid var(--stroke-1)" }} />
+              <span style={{ fontFamily: FB, color: "var(--text-2)", fontSize: 10, letterSpacing: "var(--tracking-tight)", textTransform: "uppercase" }}>{teamName || "Team Identity"}</span>
+            </div>
+          ) : null}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, alignSelf: "flex-start" }}>
           {avatar}
