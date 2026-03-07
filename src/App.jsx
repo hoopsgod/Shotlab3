@@ -1419,38 +1419,38 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
-    <section style={{marginBottom:12,background:`linear-gradient(150deg,${VOLT}0F,#111111)`,border:`1px solid ${VOLT}33`,borderRadius:18,padding:"14px 14px 12px",boxShadow:"0 10px 28px rgba(0,0,0,0.35)"}}>
-      <div style={{fontFamily:FB,color:"#9CA3AF",fontSize:9,fontWeight:700,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>Primary action</div>
-      <button className="btn btn--primary" onClick={()=>setTab("log-drill")} style={{width:"100%",minHeight:56,fontFamily:FB,fontSize:15,fontWeight:800,letterSpacing:0.8,textTransform:"uppercase",boxShadow:"0 10px 24px rgba(5,150,105,0.35)"}}>Log today&apos;s shots</button>
-      <div style={{fontFamily:FB,color:"#D1D5DB",fontSize:11,marginTop:8,lineHeight:1.35}}>Keep your streak active with one quick session.</div>
+    <section style={{marginBottom:16,background:`linear-gradient(152deg,${VOLT}12,#101418)`,border:`1px solid ${VOLT}36`,borderRadius:20,padding:"18px 16px 16px",boxShadow:"0 12px 30px rgba(0,0,0,0.34)"}}>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:1.02,letterSpacing:1.3}}>Dashboard</div>
+      <div style={{fontFamily:FB,color:"#C9D2DF",fontSize:12,lineHeight:1.5,marginTop:8,maxWidth:480}}>Today at a glance: your shot volume, streak momentum, and the one action that keeps progress moving.</div>
+      <button className="btn btn--primary" onClick={()=>setTab("log-drill")} style={{marginTop:14,minHeight:52,padding:"0 18px",fontFamily:FB,fontSize:14,fontWeight:700,letterSpacing:0.6,textTransform:"uppercase",boxShadow:"0 7px 18px rgba(5,150,105,0.28)"}}>Log today&apos;s shots</button>
     </section>
 
-    <section style={{marginBottom:14,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"10px 10px"}}>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:1.3,textTransform:"uppercase",marginBottom:8}}>Key stats</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
-        {[{label:"Makes",value:totalMakes,color:VOLT},{label:"Streak",value:`${streak}d`,color:ORANGE},{label:"Sessions",value:upcomingEventsCount,color:CYAN}].map((item)=><div key={item.label} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"10px 8px",textAlign:"center"}}><div style={{fontFamily:FD,color:item.color,fontSize:26,lineHeight:1,fontWeight:800}}>{item.value}</div><div style={{fontFamily:FB,color:"#6B7280",fontSize:9,fontWeight:700,letterSpacing:0.8,marginTop:4,textTransform:"uppercase"}}>{item.label}</div></div>)}
+    <section style={{marginBottom:16,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 12px"}}>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.1,marginBottom:10}}>Performance snapshot</div>
+      <div style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:8}}>
+        {[{label:"Total makes",value:totalMakes,color:VOLT},{label:"Current streak",value:`${streak}d`,color:ORANGE},{label:"Upcoming sessions",value:upcomingEventsCount,color:CYAN},{label:"Attendance",value:attendancePct,color:LIGHT}].map((item)=><div key={item.label} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:11,padding:"10px 9px",minHeight:82}}><div style={{fontFamily:FD,color:item.color,fontSize:24,lineHeight:1.05,fontWeight:800}}>{item.value}</div><div style={{fontFamily:FB,color:"#8B97A9",fontSize:10,fontWeight:600,marginTop:6,lineHeight:1.35}}>{item.label}</div></div>)}
       </div>
     </section>
 
-    <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10,alignItems:"start"}}>
-      <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 12px"}}>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>Upcoming sessions</div>
+    <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:12,alignItems:"start"}}>
+      <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"13px 12px"}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:0.9,marginBottom:8}}>Upcoming sessions</div>
         {upcomingEvents.length===0?<EmptyState title="No sessions lined up yet" description="Team workouts and training sessions will show up here when they’re scheduled." ctaLabel="View events" onCtaClick={()=>setTab("program")} ctaVariant="tertiary"/>:upcomingEvents.slice(0,2).map((ev,idx)=><div key={ev.id} style={{padding:idx===0?"0 0 8px":"8px 0 0",borderTop:idx===0?"none":`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,lineHeight:1.25}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>{ev.date} · {ev.time}</div></div>)}
-        {upcomingEvents.length>0&&<button onClick={()=>setTab("program")} style={{marginTop:10,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:700,color:VOLT,cursor:"pointer"}}>View all sessions →</button>}
+        {upcomingEvents.length>0&&<button onClick={()=>setTab("program")} style={{marginTop:10,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:600,color:"#9FB4D8",cursor:"pointer"}}>View all sessions →</button>}
       </section>
 
-      <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 12px"}}>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>Duels summary</div>
+      <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"13px 12px"}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:0.9,marginBottom:8}}>Competitive activity</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8}}>
-          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"9px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Pending</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,lineHeight:1.05}}>{pendingDuels}</div></div>
-          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"9px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Open</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,lineHeight:1.05}}>{myOpenDuels}</div></div>
+          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"9px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Pending replies</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,lineHeight:1.05}}>{pendingDuels}</div></div>
+          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"9px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Open matchups</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,lineHeight:1.05}}>{myOpenDuels}</div></div>
         </div>
         <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:8,lineHeight:1.35}}>{myOpenDuels===0?"No active duels — challenge someone today.":"Check your active matchups and pending replies."}</div>
-        <button onClick={()=>setTab("duels")} style={{marginTop:8,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:700,color:VOLT,cursor:"pointer"}}>{myOpenDuels===0?"Start a duel →":"Manage duels →"}</button>
+        <button onClick={()=>setTab("duels")} style={{marginTop:8,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:600,color:"#9FB4D8",cursor:"pointer"}}>{myOpenDuels===0?"Start a duel →":"Manage duels →"}</button>
       </section>
 
-      <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 12px"}}>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>Progress snapshot</div>
+      <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"13px 12px"}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:0.9,marginBottom:8}}>Weekly trend</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
           <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>This week</div><div style={{fontFamily:FD,color:LIGHT,fontSize:24,lineHeight:1.1}}>{weekComparison.thisWeek}</div></div>
           <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Last week</div><div style={{fontFamily:FD,color:LIGHT,fontSize:24,lineHeight:1.1}}>{weekComparison.lastWeek}</div></div>
@@ -1459,7 +1459,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </section>
     </div>
 
-    <div style={{marginTop:10}}>
+    <div style={{marginTop:14}}>
       <ContextSummary title="Team context" items={contextItems} />
     </div>
   </div>}
@@ -2738,7 +2738,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 
 <div style={{flex:1,padding:`${showMiniHeader?"88px":"var(--space-4)"} var(--page-gutter) 110px`,overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
-  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" /><div className="heroModule"><div className="heroHead"><div><div className="heroKicker" style={{color:PAGE_ACCENTS.feed.accent}}>TODAY'S PULSE</div><div className="heroSub">Who's active, streaking, and needs attention</div></div><button className="pageHeaderPill" onClick={()=>setTab("players")}>View Team</button></div>
+  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}>
+    <PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
     {(()=>{
       const activeToday=new Set(scores.filter(s=>s.date===today).map(s=>s.email)).size;
       const totalPlayers=ups.length;
@@ -2752,22 +2753,49 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
       const inactive=ups.filter(p=>!activeThisWeek.has(p.email));
       return <>
-        <div className="heroBodyGrid">
-          <div className="heroStatGroup">
-            <div className="heroStatTop"><div className="heroStatVal" style={{color:activeToday>0?VOLT:MUTED}}>{activeToday}</div><span style={{fontFamily:FB,fontSize:11,color:T.SUB}}>/ {totalPlayers}</span></div>
-            <div className="heroStatLbl">ACTIVE TODAY</div>
+        <div className="heroModule" style={{marginBottom:16,padding:"18px 18px 16px",gap:14}}>
+          <div className="heroHead" style={{alignItems:"flex-start"}}>
+            <div>
+              <div className="heroKicker" style={{color:PAGE_ACCENTS.feed.accent,fontSize:12,letterSpacing:"0.09em"}}>Team dashboard</div>
+              <div style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:1,letterSpacing:1.1,marginTop:4}}>Today&apos;s pulse</div>
+              <div className="heroSub" style={{marginTop:8,maxWidth:560,color:T.SUB}}>Quickly scan participation, top output, and your next move to keep team momentum high.</div>
+            </div>
+            <button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setTab("players")} style={{fontWeight:700}}>Open roster</button>
           </div>
-          <div className="heroStatGroup">
-            <div className="heroClamp" style={{fontFamily:FD,color:CYAN,fontSize:15,lineHeight:1.05,letterSpacing:"var(--tracking-tight)"}} title={nextEv?.title||"No event"}>{nextEv?nextEv.title:"No event"}</div>
-            <div className="heroStatLbl" style={{marginTop:5}}>{nextEv?`${nextEvRsvps} RSVP · ${nextEv.date.slice(5)}`:"Schedule your next session"}</div>
+
+          <div className="heroBodyGrid" style={{gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:10,marginTop:2}}>
+            <div className="heroStatGroup" style={{padding:"10px 10px"}}>
+              <div className="heroStatVal" style={{color:activeToday>0?VOLT:MUTED,fontSize:31,lineHeight:1}}>{activeToday}</div>
+              <div className="heroStatLbl" style={{marginTop:4,fontSize:10}}>{`Active today / ${totalPlayers}`}</div>
+            </div>
+            <div className="heroStatGroup" style={{padding:"10px 10px"}}>
+              <div className="heroStatVal" style={{color:CYAN,fontSize:31,lineHeight:1}}>{nextEvRsvps}</div>
+              <div className="heroStatLbl" style={{marginTop:4,fontSize:10}}>{nextEv?"Next event RSVPs":"RSVPs"}</div>
+            </div>
+            <div className="heroStatGroup" style={{padding:"10px 10px"}}>
+              <div className="heroStatVal" style={{color:inactive.length>0?ORANGE:VOLT,fontSize:31,lineHeight:1}}>{inactive.length}</div>
+              <div className="heroStatLbl" style={{marginTop:4,fontSize:10}}>Need check-in</div>
+            </div>
+            <div className="heroStatGroup" style={{padding:"10px 10px"}}>
+              <div className="heroClamp" style={{fontFamily:FD,color:LIGHT,fontSize:16,lineHeight:1.15,letterSpacing:"var(--tracking-tight)"}} title={nextEv?.title||"No event"}>{nextEv?nextEv.title:"No event scheduled"}</div>
+              <div className="heroStatLbl" style={{marginTop:6,fontSize:10}}>{nextEv?`${nextEv.date.slice(5)} · ${nextEv.time}`:"Create this week&apos;s session"}</div>
+            </div>
+          </div>
+
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"1.2fr 1fr",gap:10,marginTop:2}}>
+            <div className="heroMetaStrip" style={{marginTop:0,color:topWeek?LIGHT:T.SUB}}>{topWeek?`Top scorer this week: ${(players.find(p=>p.email===topWeek.email)?.name||topWeek.name||topWeek.email.split("@")[0])} · ${topWeek.total} pts`:"No scores yet this week"}</div>
+            <div className="heroMetaStrip" style={{marginTop:0,color:inactive.length>0?ORANGE:VOLT}}>{inactive.length>0?`${inactive.length} player${inactive.length>1?"s":""} need a check-in`:"All players active this week"}</div>
           </div>
         </div>
-        <div className="heroMetaStrip" style={{color:topWeek?LIGHT:T.SUB}}>{topWeek?`Top scorer this week: ${(players.find(p=>p.email===topWeek.email)?.name||topWeek.name||topWeek.email.split("@")[0])} · ${topWeek.total} pts`:"No scores yet this week"}</div>
-        <div className="heroMetaStrip" style={{marginTop:8,color:inactive.length>0?ORANGE:VOLT}}>{inactive.length>0?`⚠ ${inactive.length} player${inactive.length>1?"s":""} need a check-in: ${inactive.slice(0,3).map(p=>p.name.split(" ")[0]).join(", ")}${inactive.length>3?` +${inactive.length-3} more`:""}`:"✓ All players active this week"}</div>
       </>
     })()}
+
+    <div style={{marginTop:18}}>
+      <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/>
     </div>
-    <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/>{scores.length===0&&<EmptyState title="Nothing new from the team yet" description="Team updates and shared activity will appear here as your group gets moving." ctaLabel="Refresh"/>}{scores.slice(-20).reverse().map((s,i)=>{const dr=drills.find(d=>d.id===s.drillId);const pct=dr?Math.round(s.score/dr.max*100):0;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:isHome?VOLT:LIGHT,background:isHome?VOLT+"15":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span></div><div style={{fontSize:10,fontWeight:700,color:pct>=80?"#b6aa94":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>}
+    {scores.length===0&&<EmptyState title="Nothing new from the team yet" description="Team updates and shared activity will appear here as your group gets moving." ctaLabel="Refresh"/>}
+    {scores.slice(-20).reverse().map((s,i)=>{const dr=drills.find(d=>d.id===s.drillId);const pct=dr?Math.round(s.score/dr.max*100):0;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:isHome?VOLT:LIGHT,background:isHome?VOLT+"15":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span></div><div style={{fontSize:10,fontWeight:700,color:pct>=80?"#b6aa94":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}
+  </div>}
 
   {/** DRILLS */}
   {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><PageHeader title="DRILLS" subtitle="Skill plans, assignments, and drill library" accent="cyan" icon={<DrillIcon type="ft" size={22} color={PAGE_ACCENTS.drills.accent}/>} actionLabel="Add" onAction={()=>setShowNewDrill(true)} /><div className="heroModule"><div className="heroHead"><div><div className="heroKicker" style={{color:PAGE_ACCENTS.drills.accent}}>QUICK START DRILL</div><div className="heroSub">{drills.length} total drills ready to run today</div></div><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowNewDrill(true)}>Add Drill</button></div><div className="drillsMetrics" style={{marginTop:10,marginBottom:0}}><div className="heroStat drillsMetricTile"><div className="heroStatVal">{drills.length}</div><div className="heroStatLbl">ACTIVE</div></div><div className="heroStat drillsMetricTile"><div className="heroStatVal">{programDrills.length}</div><div className="heroStatLbl">PROGRAM</div></div></div><div className="heroMetaStrip" style={{marginTop:8}}>Next action: assign program drills and review leaderboard entries for each session.</div><div className="heroActionRow"><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth"})}>Manage Drills</button><button className="pageHeaderPill" onClick={()=>setShowNewDrill(true)}>Quick Add</button></div></div>
