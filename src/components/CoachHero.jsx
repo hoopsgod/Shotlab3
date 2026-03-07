@@ -18,8 +18,8 @@ export default function CoachHero({
   onOpenSettings,
   onLogout,
 }) {
-  const mobilePadding = isOverview ? "12px 12px 10px" : "10px 12px 8px";
-  const desktopPadding = isOverview ? "13px 14px 12px" : "10px 14px 10px";
+  const mobilePadding = isOverview ? "10px 12px 8px" : "9px 12px 7px";
+  const desktopPadding = isOverview ? "11px 14px 10px" : "9px 14px 8px";
 
   return (
     <div
@@ -33,7 +33,7 @@ export default function CoachHero({
           ? `linear-gradient(140deg, ${accentColor}17 0%, var(--surface-3) 54%)`
           : "var(--surface-3)",
         boxShadow: accentColor
-          ? `0 14px 30px rgba(0,0,0,0.5), 0 0 0 1px ${accentColor}1A`
+          ? `0 10px 22px rgba(0,0,0,0.42), 0 0 0 1px ${accentColor}12`
           : "var(--shadow-2)",
         position: "relative",
         overflow: "hidden",
@@ -45,9 +45,9 @@ export default function CoachHero({
         }
       `}</style>
       {branding?.showWatermark ? (
-        <TeamWatermark logoUrl={logoUrl} primaryColor={branding?.primaryColor || accentColor} opacity={0.04} size={190} />
+        <TeamWatermark logoUrl={logoUrl} primaryColor={branding?.primaryColor || accentColor} opacity={0.022} size={190} />
       ) : null}
-      <div className="coach-hero" style={{ position: "relative", zIndex: 1, display: "grid", gap: 10 }}>
+      <div className="coach-hero" style={{ position: "relative", zIndex: 1, display: "grid", gap: 8 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
             <span
@@ -59,8 +59,9 @@ export default function CoachHero({
                 borderRadius: 999,
                 padding: "3px 9px",
                 border: "1px solid var(--stroke-1)",
-                background: "rgba(255,255,255,0.03)",
+                background: "rgba(255,255,255,0.02)",
                 color: "var(--text-2)",
+                opacity: 0.78,
                 flexShrink: 0,
               }}
             >
@@ -87,6 +88,7 @@ export default function CoachHero({
                   style={{
                     fontFamily: FB,
                     color: "var(--text-3)",
+                    opacity: 0.84,
                     fontSize: 8,
                     textTransform: "uppercase",
                     letterSpacing: "var(--tracking-tight)",
@@ -99,7 +101,7 @@ export default function CoachHero({
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <div style={{ opacity: 0.88 }}>{wordmark}</div>
+            <div style={{ opacity: 0.72 }}>{wordmark}</div>
             <button
               type="button"
               aria-label="Open settings"
@@ -145,7 +147,7 @@ export default function CoachHero({
           </div>
         </div>
 
-        <div style={{ marginTop: 2, padding: "7px 10px", borderRadius: 12, border: `1px solid ${accentColor ? `${accentColor}3D` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}0D` : "rgba(255,255,255,0.03)", maxWidth: "min(100%,460px)" }}>
+        <div style={{ marginTop: 1, padding: "6px 10px", borderRadius: 12, border: `1px solid ${accentColor ? `${accentColor}30` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}08` : "rgba(255,255,255,0.02)", maxWidth: "min(100%,460px)" }}>
           <TeamIdentity
             branding={branding || { logoUrl, primaryColor: accentColor, secondaryColor: accentColor }}
             teamName={teamName}
