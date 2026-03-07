@@ -23,13 +23,13 @@
 
   /* surfaces */
   --bg: var(--brand-background);
-  --surface-1: #0c1116;
-  --surface-2: #0f1620;
+  --surface-1: #0a0f14;
+  --surface-2: #0d141c;
 
   /* text */
   --text-1: var(--brand-text);
-  --text-2: rgba(255, 255, 255, 0.78);
-  --muted: rgba(255, 255, 255, 0.64);
+  --text-2: rgba(255, 255, 255, 0.84);
+  --muted: rgba(255, 255, 255, 0.72);
 
   /* borders */
   --border-1: rgba(255, 255, 255, 0.14);
@@ -50,7 +50,7 @@
   --fs-h2: 18px;
   --fs-h3: 16px;
   --fs-body: 14px;
-  --fs-caption: 12px;
+  --fs-caption: 13px;
 
   --fw-regular: 500;
   --fw-semibold: 600;
