@@ -4,6 +4,7 @@ import App from './App.jsx'
 import './index.css'
 import './styles/design-system.css'
 import './styles/typography-spacing.css'
+import './styles/motion.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

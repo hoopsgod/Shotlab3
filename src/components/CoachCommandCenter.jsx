@@ -1,4 +1,5 @@
 import React from "react";
+import AnimatedNumber from "./AnimatedNumber";
 
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
@@ -103,13 +104,13 @@ export default function CoachCommandCenter({
       <div style={{display:"grid",gridTemplateColumns:"repeat(3, minmax(0, 1fr))",gap:8}}>
         <button type="button" onClick={onPlayersClick} className="cc-action-btn" style={{...metricBase,border:highlightPlayersAttention?"1px solid rgba(255,69,69,0.45)":metricBase.border,boxShadow:"none"}}>
           <div style={{fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.02em",color:"var(--text-2)",lineHeight:1.2,overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
-          <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"var(--accent)"}}>{totalPlayers}</div>
+          <AnimatedNumber value={totalPlayers} className="heroStatVal" style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"var(--accent)",display:"inline-block"}} />
           <div style={{marginTop:3,fontFamily:FB,fontSize:10,color:"var(--text-2)",letterSpacing:"0.01em",lineHeight:1.3}}>{highlightPlayersAttention?"Needs check-ins":"On track"}</div>
         </button>
 
         <button type="button" onClick={onActiveTodayClick} className="cc-action-btn" style={metricBase}>
           <div style={{fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.02em",color:"var(--text-2)",lineHeight:1.2,overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
-          <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{activeTodayCount}</div>
+          <AnimatedNumber value={activeTodayCount} className="heroStatVal" style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"var(--text-1)",display:"inline-block"}} />
           <div style={{marginTop:3,fontFamily:FB,fontSize:10,color:"var(--text-2)",letterSpacing:"0.01em",lineHeight:1.3}}>Session logs</div>
         </button>
 
