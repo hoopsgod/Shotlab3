@@ -1,4 +1,12 @@
 import React, { useMemo } from "react";
+import UI_TOKENS from "../styles/tokens";
+
+const CHART_CARD_STYLE = {
+  background: UI_TOKENS.colors.bgCard,
+  border: `1px solid ${UI_TOKENS.borders.subtle}`,
+  borderRadius: UI_TOKENS.radii.md,
+  padding: UI_TOKENS.radii.md,
+};
 
 function weekKey(dateLike) {
   const date = new Date(`${dateLike}T12:00:00`);
@@ -100,13 +108,13 @@ export default function ProgressCharts({ scores = [], shotLogs = [], userEmail }
 
   return (
     <section style={{ marginBottom: 18 }}>
-      <div style={{ color: "#E5E7EB", fontSize: 12, letterSpacing: "0.08em", marginBottom: 10 }}>PROGRESS OVER TIME</div>
-      <div style={{ background: "#0C1116", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 12, padding: 12, marginBottom: 10 }}>
-        <div style={{ color: "#B2BBC7", fontSize: 12, marginBottom: 8 }}>Shot makes per week</div>
+      <div style={{ color: UI_TOKENS.colors.textPrimary, fontSize: 12, letterSpacing: "0.08em", marginBottom: 10 }}>PROGRESS OVER TIME</div>
+      <div style={{ ...CHART_CARD_STYLE, marginBottom: 10 }}>
+        <div style={{ color: UI_TOKENS.colors.textSecondary, fontSize: 12, marginBottom: 8 }}>Shot makes per week</div>
         <LineChart data={{ labels: weeklyData.labels, values: weeklyData.makes }} />
       </div>
-      <div style={{ background: "#0C1116", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 12, padding: 12 }}>
-        <div style={{ color: "#B2BBC7", fontSize: 12, marginBottom: 8 }}>Active streak days per week</div>
+      <div style={CHART_CARD_STYLE}>
+        <div style={{ color: UI_TOKENS.colors.textSecondary, fontSize: 12, marginBottom: 8 }}>Active streak days per week</div>
         <BarChart data={{ labels: weeklyData.labels, values: weeklyData.streak }} />
       </div>
     </section>
