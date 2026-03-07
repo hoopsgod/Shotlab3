@@ -1049,6 +1049,38 @@ const submit=async()=>{const r=await onJoin(code);if(!r.ok)setErr(r.err||"Could 
 return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>JOIN TEAM</button></div></div>;
 }
 
+function useDismissedGuide(storageKey){
+const[visible,setVisible]=useState(()=>{
+if(typeof window==="undefined")return true;
+try{return window.localStorage.getItem(storageKey)!=="1";}catch{return true;}
+});
+useEffect(()=>{
+if(typeof window==="undefined")return;
+try{window.localStorage.setItem(storageKey,visible?"0":"1");}catch{}
+},[storageKey,visible]);
+return [visible,()=>setVisible(false)];
+}
+
+function GuideCallout({title,body,onDismiss,tone="accent"}){
+const toneMap={
+accent:{bg:`linear-gradient(140deg, ${VOLT}22 0%, ${VOLT}12 55%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}55`,title:VOLT},
+warm:{bg:`linear-gradient(140deg, ${ORANGE}18 0%, ${ORANGE}0a 55%, ${CARD_BG} 100%)`,border:`1px solid ${ORANGE}44`,title:ORANGE},
+cool:{bg:`linear-gradient(140deg, ${CYAN}20 0%, ${CYAN}0f 55%, ${CARD_BG} 100%)`,border:`1px solid ${CYAN}40`,title:CYAN},
+};
+const palette=toneMap[tone]||toneMap.accent;
+return <div style={{background:palette.bg,border:palette.border,borderRadius:16,padding:"12px 14px",marginBottom:14,display:"flex",gap:10,alignItems:"flex-start"}}>
+<div style={{flex:1,minWidth:0}}>
+<div style={{fontFamily:FD,color:palette.title,fontSize:13,letterSpacing:1.8,textTransform:"uppercase",lineHeight:1.1}}>{title}</div>
+<div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.45,marginTop:6}}>{body}</div>
+</div>
+{onDismiss&&<button onClick={onDismiss} aria-label="Dismiss onboarding tip" style={{background:"transparent",border:`1px solid ${BORDER_CLR}`,color:MUTED,borderRadius:8,padding:"4px 8px",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer",flexShrink:0}}>Got it</button>}
+</div>;
+}
+
+function InfoHint({text}){
+return <span title={text} aria-label={text} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:18,height:18,borderRadius:"50%",border:`1px solid ${BORDER_CLR}`,color:TOKENS.TEXT_SECONDARY,fontFamily:FB,fontSize:11,fontWeight:700,flexShrink:0}}>i</span>;
+}
+
 // ═══════════════════════════════════════
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
@@ -1059,6 +1091,9 @@ const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todaySt
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
+const[showWelcomeGuide,dismissWelcomeGuide]=useDismissedGuide("sl:guide:welcome");
+const[showHomeGuide,dismissHomeGuide]=useDismissedGuide("sl:guide:home-cards");
+const[showLogGuide,dismissLogGuide]=useDismissedGuide("sl:guide:log-shots");
 const[isNarrow,setIsNarrow]=useState(typeof window!=="undefined"?window.innerWidth<768:false);
 const slideClass="screen-fade-in";
 const switchTab=(k)=>{setTab(k);setActive(null);setShowShotStats(false);
@@ -1190,6 +1225,8 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
 
+    {showWelcomeGuide&&<GuideCallout title="Welcome to ShotLab" body="At Home tracks solo shot logging and streaks. Program shows coach-run events and verified attendance. Duels let players compete on drill scores." onDismiss={dismissWelcomeGuide} tone="accent"/>}
+
     {(()=>{
       const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
@@ -1197,10 +1234,11 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
         <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
           <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:12,fontWeight:600,letterSpacing:"0.03em",marginTop:6}}>Choose how you’re training today</div>
+          {showHomeGuide&&<div style={{marginTop:10}}><GuideCallout title="Quick definitions" body="At Home is your personal tracker for Makes, Drills completed, and streaks. Program is for team sessions where attendance is verified by event RSVPs." onDismiss={dismissHomeGuide} tone="cool"/></div>}
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
-          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
-          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
+          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" helpText="At Home tracks solo shot logging and streaks." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
+          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" helpText="Program shows coach-run events and verified attendance." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
         </div>
       </div>
     })()}
@@ -1233,6 +1271,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
   {(tab==="log-drill")&&!active&&!showShotStats&&<div className="fade-up">
+    {showLogGuide&&<GuideCallout title="Log Shots" body="Log Shots captures your total makes for any solo session. Drills are skill scores, while Makes track shot volume." onDismiss={dismissLogGuide} tone="warm"/>}
     
     <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>
@@ -1438,6 +1477,7 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 // ═══════════════════════════════════════
 function DuelsPanel({u,challenges,drills,respondChallenge,players}){
 const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(""),[respSaved,setRespSaved]=useState(null);
+const[showGuide,dismissGuide]=useDismissedGuide("sl:guide:duels");
 const incoming=useMemo(()=>challenges.filter(c=>c.to===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
 const outgoing=useMemo(()=>challenges.filter(c=>c.from===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
 const pending=incoming.filter(c=>c.status==="pending");
@@ -1450,6 +1490,7 @@ setTimeout(()=>setRespSaved(null),2000);
 };
 
 return <div className="fade-up">
+{showGuide&&<GuideCallout title="How duels work" body="Duels let players compete on drill scores. Accept a challenge, log your response, and the higher score wins." onDismiss={dismissGuide} tone="warm"/>}
 {/* Duels banner — aggressive, asymmetric */}
 <div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${ORANGE}22`,position:"relative",overflow:"hidden"}}>
 <div style={{position:"absolute",top:-12,right:-8,opacity:.08}}><svg width="100" height="100" viewBox="0 0 24 24" fill={ORANGE} stroke="none"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
@@ -1705,7 +1746,7 @@ function StatTile({value,label,color}){
 return <div className="card" style={{padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
 }
 
-function ModeCard({title,subtitle,icon,stats,accent="home",isActive,onClick}){
+function ModeCard({title,subtitle,icon,stats,accent="home",isActive,onClick,helpText}){
 const accentMap={
 home:{tint:MODE_CARD_TOKENS.HOME_TINT,glow:MODE_CARD_TOKENS.HOME_GLOW,iconStroke:VOLT},
 program:{tint:MODE_CARD_TOKENS.PROGRAM_TINT,glow:MODE_CARD_TOKENS.PROGRAM_GLOW,iconStroke:CYAN}
@@ -1719,7 +1760,7 @@ return <button type="button" onClick={onClick} className={modeCardClass} style={
     <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
       <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`1.5px solid ${a.glow}`,boxShadow:`inset 0 0 10px ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{icon}</div>
       <div style={{minWidth:0}}>
-        <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase"}}>{title}</div>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase",display:"inline-flex",alignItems:"center",gap:6}}>{title}{helpText&&<InfoHint text={helpText}/>}</div>
         <div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
       </div>
     </div>
@@ -2011,16 +2052,18 @@ return <div className="fade-up">
 // ═══════════════════════════════════════
 function ProgramDrillsPanel({user,drills,scores,addScore}){
 const[active,setActive]=useState(null),[val,setVal]=useState(""),[saved,setSaved]=useState(false);
+const[showGuide,dismissGuide]=useDismissedGuide("sl:guide:program-drills");
 const byDrill=useMemo(()=>{const m={};drills.forEach(d=>{m[d.id]=scores.filter(s=>s.src==="program"&&s.drillId===d.id)});return m;},[drills,scores]);
 const submit=()=>{if(!active)return;const n=parseInt(val);if(isNaN(n)||n<0||n>active.max)return;addScore(active.id,n,"program");setSaved(true);setVal("");setTimeout(()=>setSaved(false),1200)};
 if(drills.length===0)return <div style={{marginBottom:14}}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PROGRAM DRILLS" s="COACH ADDED"/><Empty variant="drills" t="No drills assigned yet" subtitle="Your coach hasn't added drills for you yet. You can still log shots to build your streak today." cta="LOG SHOTS" ctaVariant="primary" secondaryCta="CONTACT COACH" secondaryCtaVariant="tertiary" onTap={()=>setTab("log-drill")}/></div>;
-return <div style={{marginBottom:16}}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PROGRAM DRILLS" s={`${drills.length} ACTIVE`}/>{drills.map(d=>{const rows=byDrill[d.id]||[];const board=Object.values(rows.reduce((m,s)=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score;return m;},{})).sort((a,b)=>b.total-a.total).slice(0,3);return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${active?.id===d.id?CYAN+"55":BORDER_CLR}`,borderRadius:12,padding:"12px 14px",marginBottom:8}}><button onClick={()=>setActive(active?.id===d.id?null:d)} style={{width:"100%",background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:10}}><DrillIcon type={d.icon} size={18}/><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{d.name}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{d.desc}</div></div><div style={{fontFamily:FB,color:CYAN,fontSize:9,fontWeight:700}}>{rows.length} LOGS</div></button>{active?.id===d.id&&<div style={{marginTop:10}}><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginBottom:6}}>TEAM LEADERBOARD {board.length>0&&"(TOTAL SCORES)"}</div>{board.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginBottom:8}}>No scores yet.</div>:board.map((p,i)=><div key={p.email} style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:11,color:LIGHT,marginBottom:4}}><span>#{i+1} {p.name}</span><span style={{color:CYAN,fontWeight:700}}>{p.total}</span></div>)}<div style={{display:"flex",gap:6,marginTop:8}}><input value={val} onChange={e=>setVal(e.target.value)} type="number" placeholder={`0-${d.max}`} style={{flex:1,padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/><button onClick={submit} style={{padding:"9px 12px",background:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:11,letterSpacing:1,cursor:"pointer"}}>LOG</button></div>{saved&&<div style={{fontFamily:FB,color:CYAN,fontSize:10,marginTop:6}}>Score saved for {user.name}.</div>}</div>}</div>})}</div>;
+return <div style={{marginBottom:16}}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PROGRAM DRILLS" s={`${drills.length} ACTIVE`}/>{showGuide&&<GuideCallout title="Program drills" body="Program Drills are coach-assigned score tests. Use these when you want leaderboard placement against teammates." onDismiss={dismissGuide} tone="cool"/>}{drills.map(d=>{const rows=byDrill[d.id]||[];const board=Object.values(rows.reduce((m,s)=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score;return m;},{})).sort((a,b)=>b.total-a.total).slice(0,3);return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${active?.id===d.id?CYAN+"55":BORDER_CLR}`,borderRadius:12,padding:"12px 14px",marginBottom:8}}><button onClick={()=>setActive(active?.id===d.id?null:d)} style={{width:"100%",background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left",display:"flex",alignItems:"center",gap:10}}><DrillIcon type={d.icon} size={18}/><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{d.name}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{d.desc}</div></div><div style={{fontFamily:FB,color:CYAN,fontSize:9,fontWeight:700}}>{rows.length} LOGS</div></button>{active?.id===d.id&&<div style={{marginTop:10}}><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginBottom:6}}>TEAM LEADERBOARD {board.length>0&&"(TOTAL SCORES)"}</div>{board.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginBottom:8}}>No scores yet.</div>:board.map((p,i)=><div key={p.email} style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:11,color:LIGHT,marginBottom:4}}><span>#{i+1} {p.name}</span><span style={{color:CYAN,fontWeight:700}}>{p.total}</span></div>)}<div style={{display:"flex",gap:6,marginTop:8}}><input value={val} onChange={e=>setVal(e.target.value)} type="number" placeholder={`0-${d.max}`} style={{flex:1,padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/><button onClick={submit} style={{padding:"9px 12px",background:CYAN,color:BG,border:"none",borderRadius:8,fontFamily:FD,fontSize:11,letterSpacing:1,cursor:"pointer"}}>LOG</button></div>{saved&&<div style={{fontFamily:FB,color:CYAN,fontSize:10,marginTop:6}}>Score saved for {user.name}.</div>}</div>}</div>})}</div>;
 }
 
 // EVENTS PANEL (Player Program View)
 // ═══════════════════════════════════════
 function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills}){
 const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState("attend"),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null),[rankBarPct,setRankBarPct]=useState(0),[rankBarPulse,setRankBarPulse]=useState(false);
+const[showGuide,dismissGuide]=useDismissedGuide("sl:guide:program-events");
 const sorted=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
 const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
 const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);
@@ -2045,6 +2088,7 @@ const formatEventDate=(date)=>new Date(`${date}T12:00:00`).toLocaleDateString(un
 const getRelativeLabel=(date)=>{const eventDate=new Date(`${date}T00:00:00`);const today=new Date();today.setHours(0,0,0,0);const diff=Math.round((eventDate-today)/86400000);if(diff===0)return"TODAY";if(diff===1)return"TOMORROW";if(diff>1&&diff<7)return`IN ${diff} DAYS`;return null;};
 
 return <div className="fade-up">
+{showGuide&&<GuideCallout title="Program events + attendance rank" body="Program Events are coach-run sessions. Attendance Rank increases each time you RSVP and show up, so consistency moves you up the board." onDismiss={dismissGuide} tone="accent"/>}
 {/* Events banner — structured, timeline-oriented */}
 <div className="eventPanel" style={{marginBottom:16}}>
 
@@ -2053,7 +2097,7 @@ return <div className="fade-up">
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
 </div>
 <div>
-<div className="eventPanelTitle">PROGRAM EVENTS</div>
+<div className="eventPanelTitle" style={{display:"inline-flex",alignItems:"center",gap:6}}>PROGRAM EVENTS <InfoHint text="Program Events are coach-run team sessions with RSVP tracking."/></div>
 <div className="eventPanelSub">Official workouts & verified attendance</div>
 </div>
 </div>
@@ -2078,7 +2122,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 <div className="eventPanel" style={{marginBottom:16}}>
   <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative",gap:14}}>
     <div>
-      <div className="eventPanelLabel" style={{color:"rgba(202,245,122,.9)"}}>ATTENDANCE RANK</div>
+      <div className="eventPanelLabel" style={{color:"rgba(202,245,122,.9)",display:"inline-flex",alignItems:"center",gap:6}}>ATTENDANCE RANK <InfoHint text="Attendance Rank is based on the number of program events you RSVP to and attend."/></div>
       <div style={{display:"flex",alignItems:"center",gap:10,marginTop:8}}>
         <svg className={rankFx?"rank-badge-flash":""} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
         <div className={rankFx?"rank-bounce":""} style={{fontFamily:FD,color:LIGHT,fontSize:28,fontWeight:900,letterSpacing:2}}>{myTier.name}</div>
