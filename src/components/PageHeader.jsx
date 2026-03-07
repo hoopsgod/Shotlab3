@@ -13,11 +13,18 @@ export default function PageHeader({
   accent,
   actionLabel,
   onAction,
+  actionVariant = "secondary",
   rightSlot,
 }) {
   const resolvedAccent = ACCENT_MAP[accent] || accent || ACCENT_MAP.lime;
+  const actionClass = actionVariant === "primary"
+    ? "pageHeaderPill pageHeaderPill--primary"
+    : actionVariant === "tertiary"
+      ? "pageHeaderPill pageHeaderPill--tertiary"
+      : "pageHeaderPill pageHeaderPill--secondary";
+
   const actionNode = rightSlot || (actionLabel ? (
-    <button type="button" className="pageHeaderPill" onClick={onAction}>
+    <button type="button" className={actionClass} onClick={onAction}>
       {actionLabel}
     </button>
   ) : null);
