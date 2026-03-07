@@ -180,31 +180,34 @@ select {
   bottom: max(var(--space-2), env(safe-area-inset-bottom));
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
+  column-gap: var(--space-2);
   align-items: stretch;
-  height: 64px;
+  min-height: 72px;
   padding: var(--space-2);
-  background: rgba(18, 24, 33, 0.9);
-  border: 1px solid rgba(173, 187, 205, 0.24);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.42);
+  padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, rgba(18, 24, 33, 0.97), rgba(18, 24, 33, 0.9));
+  border: 1px solid rgba(173, 187, 205, 0.3);
+  border-radius: calc(var(--radius-lg) + 2px);
+  box-shadow: 0 -1px 0 rgba(173, 187, 205, 0.16), 0 14px 28px rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(12px);
   z-index: 20;
 }
 
 .tab.shared-nav-item {
   min-width: 0;
-  min-height: 48px;
+  min-height: 54px;
   border: none;
-  border-radius: 12px;
+  border-radius: 999px;
   background: transparent;
   color: var(--text-3);
-  gap: var(--space-1);
+  gap: 6px;
   transition: transform 160ms ease, color 180ms ease, background-color 180ms ease, opacity 180ms ease;
 }
 
 .tab.shared-nav-item.is-active {
   color: #f6faff;
-  background: linear-gradient(180deg, rgba(63, 95, 151, 0.24), rgba(63, 95, 151, 0.08));
+  background: linear-gradient(180deg, rgba(63, 95, 151, 0.34), rgba(63, 95, 151, 0.16));
+  box-shadow: inset 0 0 0 1px rgba(173, 198, 235, 0.32);
 }
 
 .tab.shared-nav-item .tab-icon,
@@ -213,12 +216,14 @@ select {
 }
 
 .tab.shared-nav-item .tab-icon {
-  opacity: 0.82;
+  opacity: 0.84;
   transform: translateY(0);
+  width: 22px;
+  height: 22px;
 }
 
 .tab.shared-nav-item .tab-label {
-  opacity: 0.78;
+  opacity: 0.8;
 }
 
 .tab.shared-nav-item.is-active .tab-icon {
@@ -227,7 +232,7 @@ select {
 }
 
 .tab.shared-nav-item.is-active .tab-label {
-  opacity: 0.98;
+  opacity: 1;
 }
 
 
@@ -236,8 +241,13 @@ select {
 }
 
 .tab .tab-label {
-  font-size: 0.6rem;
-  letter-spacing: 0.08em;
+  font-size: 0.64rem;
+  letter-spacing: 0.075em;
+}
+
+.tab.shared-nav-item:focus-visible {
+  outline: 2px solid rgba(173, 198, 235, 0.58);
+  outline-offset: 2px;
 }
 
 @media (min-width: 768px) {
