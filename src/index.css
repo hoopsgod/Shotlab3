@@ -11,7 +11,7 @@
   --accent: #B8FF00;
   --shadow-1: 0 10px 24px rgba(0,0,0,.45);
   --shadow-2: 0 18px 40px rgba(0,0,0,.55);
-  --glow-accent: 0 0 0 1px rgba(184,255,0,.22), 0 10px 30px rgba(184,255,0,.10);
+  --glow-accent: 0 0 0 1px rgba(184,255,0,.18), 0 8px 20px rgba(184,255,0,.06);
 }
 
 .card{
@@ -68,7 +68,7 @@
   height: 100%;
   border-radius: 999px;
   background: #C8FF00;
-  box-shadow: 0 0 0 2px rgba(200,255,0,0.14), 0 10px 24px rgba(200,255,0,0.10);
+  box-shadow: 0 0 0 1px rgba(200,255,0,0.14), 0 6px 16px rgba(200,255,0,0.08);
 }
 
 /* Attendance Rank labels (percent + tier) - safe, only if present */
@@ -165,7 +165,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
   border-color: rgba(184, 255, 0, .35);
-  box-shadow: 0 0 0 3px rgba(184, 255, 0, 0.28);
+  box-shadow: 0 0 0 2px rgba(184, 255, 0, 0.24);
 }
 
 .disabled,

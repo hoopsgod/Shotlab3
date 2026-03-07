@@ -34,7 +34,7 @@
   --shadow-2: 0 18px 40px rgba(0, 0, 0, 0.55);
 
   /* focus */
-  --focus-ring: 0 0 0 3px rgba(184, 255, 0, 0.28);
+  --focus-ring: 0 0 0 2px rgba(184, 255, 0, 0.24);
 
   /* typography */
   --fs-title: 24px;
@@ -91,10 +91,10 @@
   box-shadow: var(--shadow-2);
 }
 .card--accent {
-  border-color: rgba(184, 255, 0, 0.22);
+  border-color: rgba(184, 255, 0, 0.18);
 }
 .card--active {
-  box-shadow: var(--shadow-2), 0 0 0 1px rgba(184, 255, 0, 0.18);
+  box-shadow: var(--shadow-2), 0 0 0 1px rgba(184, 255, 0, 0.14);
 }
 
 /* typography utilities (Task #2; no global uppercase overrides) */

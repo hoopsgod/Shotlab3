@@ -27,13 +27,13 @@ export default function CoachHero({
       style={{
         marginBottom: "var(--stack-gap)",
         padding: mobilePadding,
-        border: `1px solid ${accentColor ? `${accentColor}66` : "var(--stroke-2)"}`,
+        border: `1px solid ${accentColor ? `${accentColor}42` : "var(--stroke-2)"}`,
         borderRadius: "var(--radius-card)",
         background: accentColor
-          ? `linear-gradient(130deg, ${accentColor}1F 0%, var(--surface-3) 56%)`
+          ? `linear-gradient(130deg, ${accentColor}14 0%, var(--surface-3) 62%)`
           : "var(--surface-3)",
         boxShadow: accentColor
-          ? `0 18px 40px rgba(0,0,0,0.55), 0 0 0 1px ${accentColor}22, 0 14px 36px ${accentColor}24`
+          ? `0 16px 32px rgba(0,0,0,0.52), 0 0 0 1px ${accentColor}16`
           : "var(--shadow-2)",
       }}
     >
@@ -88,7 +88,7 @@ export default function CoachHero({
           >
             Lead the squad. Track momentum. Build consistency.
           </div>
-          <div style={{ marginTop: 12, padding: "8px 10px", borderRadius: 14, border: `1px solid ${accentColor ? `${accentColor}55` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}10` : "rgba(255,255,255,0.04)", width: "fit-content", maxWidth: "min(100%,460px)" }}>
+          <div style={{ marginTop: 12, padding: "8px 10px", borderRadius: 14, border: `1px solid ${accentColor ? `${accentColor}34` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}0C` : "rgba(255,255,255,0.04)", width: "fit-content", maxWidth: "min(100%,460px)" }}>
             <TeamIdentity
               branding={branding || { logoUrl, primaryColor: accentColor, secondaryColor: accentColor }}
               teamName={teamName}
