@@ -1080,6 +1080,8 @@ return <><Styles/>
 // ═══════════════════════════════════════
 function Auth({onLogin,onRegister,onDemo,onSocialLogin,onResetPassword,firebaseEnabled,highContrast,onToggleHighContrast}){
 const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[err,setErr]=useState("");
+const[isNarrow,setIsNarrow]=useState(typeof window!=="undefined"?window.innerWidth<480:false);
+useEffect(()=>{const onResize=()=>setIsNarrow(window.innerWidth<480);window.addEventListener("resize",onResize);return()=>window.removeEventListener("resize",onResize);},[]);
 const doLogin=async()=>{
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!password){setErr("Enter your password");return}
@@ -1104,16 +1106,16 @@ const demo=await onDemo(kind);
 if(!demo.ok)setErr(demo.err||"Unable to start demo.");
 };
 const inp={width:"100%",height:50,padding:"0 14px",background:"#141414",border:"1px solid #333333",borderRadius:10,color:LIGHT,fontSize:14,fontFamily:FB,fontWeight:500,outline:"none",transition:"border-color .15s ease, box-shadow .15s ease"};
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden",padding:"28px 0"}}>
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",overflow:"hidden",padding:isNarrow?"18px 0":"28px 0"}}>
 <CourtBG opacity={.01}/>
-<div className="fade-up" style={{position:"relative",zIndex:1,width:"100%",maxWidth:440,padding:"0 20px"}}>
-<div style={{textAlign:"center",marginBottom:20,position:"relative"}}>
+<div className="fade-up" style={{position:"relative",zIndex:1,width:"100%",maxWidth:440,padding:isNarrow?"0 14px":"0 20px"}}>
+<div style={{textAlign:"center",marginBottom:isNarrow?14:20,position:"relative"}}>
 <div className="auth-ball-enter" style={{display:"inline-flex",flexDirection:"column",alignItems:"center",position:"relative",zIndex:1}}><BrandLogo brandName="Shotlab"/><div style={{marginTop:8}}><DrillIcon type="ft" size={44}/></div></div>
 </div>
-<h1 style={{fontFamily:FD,fontSize:44,color:LIGHT,textAlign:"center",margin:0,lineHeight:.95,letterSpacing:2}}>SHOT<span style={{color:VOLT}}>LAB</span></h1>
-<p style={{fontFamily:FB,color:LIGHT,textAlign:"center",fontSize:22,lineHeight:1.25,letterSpacing:0.2,margin:"14px auto 0",fontWeight:600,maxWidth:460}}>Track your shots. Compete with teammates. Improve with purpose.</p>
+<h1 style={{fontFamily:FD,fontSize:isNarrow?36:44,color:LIGHT,textAlign:"center",margin:0,lineHeight:.95,letterSpacing:2}}>SHOT<span style={{color:VOLT}}>LAB</span></h1>
+<p style={{fontFamily:FB,color:LIGHT,textAlign:"center",fontSize:isNarrow?18:22,lineHeight:1.25,letterSpacing:0.2,margin:"14px auto 0",fontWeight:600,maxWidth:460}}>Track your shots. Compete with teammates. Improve with purpose.</p>
 <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:14,lineHeight:1.45,margin:"10px auto 0",maxWidth:440}}>Shotlab helps your team log reps, compare progress, and stay accountable through every training block.</p>
-<div className="auth-card-enter" style={{background:CARD_BG,borderRadius:18,padding:"26px 22px",border:`1px solid ${BORDER_CLR}`,marginTop:22}}>
+<div className="auth-card-enter" style={{background:CARD_BG,borderRadius:18,padding:isNarrow?"18px 14px":"26px 22px",border:`1px solid ${BORDER_CLR}`,marginTop:isNarrow?18:22}}>
 <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}><button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:36,padding:"0 10px",fontSize:11}}>{highContrast?"High contrast: ON":"High contrast: OFF"}</button></div>
 {/* Login / Register toggle */}
 <div role="tablist" aria-label="Authentication mode" style={{display:"flex",background:"#1A1A1A",borderRadius:10,padding:2,marginBottom:18,border:"1px solid #2A2A2A"}}>
@@ -1124,7 +1126,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       <h2 style={{fontFamily:FB,color:LIGHT,fontSize:22,fontWeight:700,textAlign:"center",margin:"0 0 4px",letterSpacing:0.3}}>Create your account</h2>
       <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 18px"}}>Set up your profile to start tracking with your team.</p>
       {/* Role selector */}
-      <div role="radiogroup" aria-label="Account role" style={{display:"flex",background:BG,borderRadius:10,padding:3,marginBottom:20,border:`1px solid ${BORDER_CLR}`}}>
+      <div role="radiogroup" aria-label="Account role" style={{display:"flex",background:BG,borderRadius:10,padding:3,marginBottom:20,border:`1px solid ${BORDER_CLR}`,gap:isNarrow?6:0,flexDirection:isNarrow?"column":"row"}}>
         {["player","coach"].map(r=><button key={r} role="radio" aria-checked={role===r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#555555"}}>{r}</button>)}
       </div>
       <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>YOUR NAME</label>
@@ -1376,7 +1378,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 </div>
 {u.isCoach&&<div style={{height:28,background:`linear-gradient(90deg, ${alphaFromHex(coachPrimary,0.14)} 0%, transparent 100%)`,borderBottom:`1px solid ${alphaFromHex(coachSecondary,0.3)}`,display:"flex",alignItems:"center",padding:`0 var(--page-gutter)`,gap:"var(--space-2)"}}><WhistleIcon size={12} color={coachPrimary}/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:alphaFromHex(coachPrimary,0.84)}}>COACH VIEW — FULL ACCESS</span></div>}
 
-<div style={{flex:1,padding:"14px 16px 148px",overflowY:"auto",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
+<div style={{flex:1,padding:isNarrow?"12px 12px 148px":"14px 16px 148px",overflowY:"auto",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
   {/* Pull-to-refresh basketball */}
   {pullY>5&&<div style={{position:"absolute",top:-44,left:"50%",transform:"translateX(-50%)",textAlign:"center",opacity:Math.min(pullY/30,1)}}>
     <svg width="24" height="24" viewBox="0 0 40 40" fill="none" style={{animation:pullY>40?"bbBounce .5s ease infinite":"none"}}><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="2.5"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="1.5"/><path d="M20 3v34" stroke={ORANGE} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/></svg>
@@ -1415,19 +1417,19 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
       <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
         <div style={{fontFamily:FB,color:"#6B7280",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10}}>Progress snapshot</div>
-        <div style={{display:"flex",justifyContent:"space-between",gap:10,marginBottom:10}}>
-          <div><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>This week</div><div style={{fontFamily:FD,color:"#111827",fontSize:26,lineHeight:1.1}}>{weekComparison.thisWeek}</div></div>
-          <div><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Last week</div><div style={{fontFamily:FD,color:"#111827",fontSize:26,lineHeight:1.1}}>{weekComparison.lastWeek}</div></div>
+        <div style={{display:"flex",justifyContent:"space-between",gap:10,marginBottom:10,flexWrap:isNarrow?"wrap":"nowrap"}}>
+          <div style={{minWidth:isNarrow?"calc(50% - 6px)":"auto"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>This week</div><div style={{fontFamily:FD,color:"#111827",fontSize:isNarrow?24:26,lineHeight:1.1}}>{weekComparison.thisWeek}</div></div>
+          <div style={{minWidth:isNarrow?"calc(50% - 6px)":"auto"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Last week</div><div style={{fontFamily:FD,color:"#111827",fontSize:isNarrow?24:26,lineHeight:1.1}}>{weekComparison.lastWeek}</div></div>
         </div>
         <div style={{fontFamily:FB,color:weekComparison.diff>=0?"#047857":"#B91C1C",fontSize:11,fontWeight:700}}>{weekComparison.diff>=0?`+${weekComparison.diff}`:weekComparison.diff} made shots vs last week</div>
       </section>
 
       <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
         <div style={{fontFamily:FB,color:"#6B7280",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10}}>Today at a glance</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+        <div style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(3,minmax(0,1fr))",gap:8}}>
           <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 6px",textAlign:"center"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:9}}>Makes</div><div style={{fontFamily:FD,color:"#111827",fontSize:18,lineHeight:1.1}}>{totalMakes}</div></div>
           <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 6px",textAlign:"center"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:9}}>Streak</div><div style={{fontFamily:FD,color:"#111827",fontSize:18,lineHeight:1.1}}>{streak}d</div></div>
-          <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 6px",textAlign:"center"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:9}}>Sessions</div><div style={{fontFamily:FD,color:"#111827",fontSize:18,lineHeight:1.1}}>{upcomingEventsCount}</div></div>
+          <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 6px",textAlign:"center",gridColumn:isNarrow?"1 / -1":"auto"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:9}}>Sessions</div><div style={{fontFamily:FD,color:"#111827",fontSize:18,lineHeight:1.1}}>{upcomingEventsCount}</div></div>
         </div>
       </section>
     </div>
