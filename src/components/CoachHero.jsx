@@ -1,3 +1,4 @@
+import { TeamIdentity, TeamWatermark } from "./TeamBranding";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
@@ -13,6 +14,7 @@ export default function CoachHero({
   wordmark,
   logoUrl,
   teamName,
+  branding,
   onOpenSettings,
   onLogout,
 }) {
@@ -45,6 +47,7 @@ export default function CoachHero({
         }
       `}</style>
       <div className="coach-hero coach-hero-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+        {branding?.showWatermark ? <TeamWatermark logoUrl={logoUrl} primaryColor={branding?.primaryColor || accentColor} /> : null}
         <div>
           <div style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", opacity: 0.96, textTransform: "uppercase", color: "var(--text-secondary)" }}>COACH MODE</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
@@ -85,12 +88,17 @@ export default function CoachHero({
           >
             Lead the squad. Track momentum. Build consistency.
           </div>
-          {logoUrl ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 10, padding: "6px 10px", borderRadius: 999, background: accentColor ? `${accentColor}1A` : "rgba(255,255,255,0.06)", border: accentColor ? `1px solid ${accentColor}55` : "1px solid var(--stroke-1)", width: "fit-content" }}>
-              <img src={logoUrl} alt="Team logo" style={{ width: 30, height: 30, borderRadius: 8, objectFit: "cover", border: accentColor ? `1px solid ${accentColor}88` : "1px solid var(--stroke-1)", boxShadow: accentColor ? `0 0 0 3px ${accentColor}29` : "none" }} />
-              <span style={{ fontFamily: FB, color: "var(--text-1)", fontSize: 11, letterSpacing: "var(--tracking-tight)", textTransform: "uppercase", fontWeight: 700 }}>{teamName || "Team Identity"}</span>
-            </div>
-          ) : null}
+          <div style={{ marginTop: 12, padding: "8px 10px", borderRadius: 14, border: `1px solid ${accentColor ? `${accentColor}55` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}10` : "rgba(255,255,255,0.04)", width: "fit-content", maxWidth: "min(100%,460px)" }}>
+            <TeamIdentity
+              branding={branding || { logoUrl, primaryColor: accentColor, secondaryColor: accentColor }}
+              teamName={teamName}
+              mascotName={branding?.mascotName}
+              motto={branding?.motto}
+              mode={branding?.brandingMode === "compact" ? "balanced" : "bold"}
+              compact={branding?.brandingMode === "compact"}
+              showLogo={branding?.showHeaderLogo !== false}
+            />
+          </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8, alignSelf: "flex-start" }}>
           {avatar}
