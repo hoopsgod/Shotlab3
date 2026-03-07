@@ -10,6 +10,7 @@ import EmptyState from "./components/EmptyState";
 import { TeamIdentity, TeamWatermark, TeamBrandPreview } from "./components/TeamBranding";
 import DrillDetail from "./components/DrillDetail";
 import ProgressCharts from "./components/ProgressCharts";
+import HeroBanner from "./components/HeroBanner";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -1271,6 +1272,16 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
 
+    <HeroBanner
+      title={`${u.name} Dashboard`}
+      subtitle="Welcome back. Lock in your session and keep your momentum climbing."
+      stats={[
+        { label: "Total Makes", value: totalMakes, color: VOLT },
+        { label: "Longest Streak", value: `${streak}D`, color: CYAN },
+        { label: "Upcoming Events", value: upcomingEventsCount, color: LIGHT },
+      ]}
+    />
+
     {showWelcomeGuide&&<GuideCallout title="Welcome to ShotLab" body="At Home tracks solo shot logging and streaks. Program shows coach-run events and verified attendance. Duels let players compete on drill scores." onDismiss={dismissWelcomeGuide} tone="accent"/>}
 
     {(()=>{
@@ -1560,6 +1571,7 @@ return <div className="fade-up">
 <div style={{marginBottom:12}}>{INSTRUCTIONAL_CONTENT.slice(1,3).map(item=><DrillDetail key={`duel-${item.id}`} title={item.title} description={item.description} videoUrl={item.videoUrl} techniqueTips={item.techniqueTips}/> )}</div>
 
 {/* Pending challenges */}
+<h2 style={{fontFamily:FD,color:ORANGE,fontSize:18,letterSpacing:2,margin:"0 0 10px"}}>Active Duels</h2>
 {pending.length>0&&<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>
   {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
     return <div key={ch.id} className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:"18px 20px",marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
@@ -1596,6 +1608,7 @@ return <div className="fade-up">
 
 {/* Resolved / History */}
 {pending.length>0&&<CourtDivider color={ORANGE} my={12}/>}
+<h2 style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:2,margin:"0 0 10px"}}>Past Duels</h2>
 <SH t={pending.length>0?"COMPLETED":"ALL DUELS"} s={`${resolved.length} TOTAL`}/>
 {resolved.length===0&&pending.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to dare a teammate to beat it!"/>}
 {resolved.map(ch=>{
@@ -1755,6 +1768,7 @@ return <div className="fade-up">
 
 {/* Upcoming sessions */}
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING SESSIONS" s={`${upcoming.length} SCHEDULED`}/>
+<h2 style={{fontFamily:FD,color:SC_COLOR,fontSize:18,letterSpacing:2,margin:"0 0 10px"}}>Active Sessions</h2>
 {upcoming.length===0&&<Empty variant="lifting" t="No upcoming sessions" action="Your coach will add S&C sessions here. Check back soon!"/>}
 {upcoming.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const going=sr.some(r=>r.email===user.email);const exp=expanded===s.id;
   return <div key={s.id} style={{marginBottom:12}}>
@@ -1782,6 +1796,7 @@ return <div className="fade-up">
 
 {/* Past sessions */}
 {past.length>0&&<><CourtDivider color={SC_COLOR} my={12}/><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PAST SESSIONS" s={`${past.length} COMPLETED`}/>
+  <h2 style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:2,margin:"0 0 10px"}}>Past Sessions</h2>
   {past.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const went=sr.some(r=>r.email===user.email);
     return <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.7}}>
       <div style={{width:36,height:36,borderRadius:10,background:went?SC_COLOR+"12":BG,border:`1px solid ${went?SC_COLOR+"33":BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={16} color={went?SC_COLOR:MUTED}/></div>
