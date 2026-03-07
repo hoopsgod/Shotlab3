@@ -3031,7 +3031,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {!isDesktop&&<NavBar items={navItems} active={tab} onChange={handleNavChange}/>}
 
   </div></div></main>
-{isDesktop&&<aside className="insights-panel"><div className="panel-title">COACH INSIGHTS</div><div className="placeholder">Add widgets here later (activity, upcoming events, roster changes, lifting compliance).</div></aside>}
+{isDesktop&&<aside className="insights-panel"><div className="panel-title">COACH INSIGHTS</div><div className="placeholder"><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>No coach insights yet</div><div style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:6}}>Activity trends, upcoming sessions, and roster updates will appear here as your team logs more data.</div></div></aside>}
   </div>;
 }
 
