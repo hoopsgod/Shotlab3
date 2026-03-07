@@ -1,0 +1,65 @@
+:root {
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+
+  --coach-page-pad-x: var(--space-12);
+  --coach-section-gap: var(--space-24);
+  --coach-card-pad: var(--space-16);
+  --coach-card-pad-compact: var(--space-12);
+  --coach-card-gap: var(--space-12);
+  --coach-card-gap-tight: var(--space-8);
+  --coach-button-height: 44px;
+}
+
+/* Shared alignment rhythm for coach surfaces */
+.pageShell,
+.coach-tools-panel,
+.pageHeader,
+.coach-hero-surface,
+.coach-command-center {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.pageShell {
+  gap: var(--coach-section-gap);
+}
+
+.pageHeader {
+  margin: 0 0 var(--space-24);
+  padding: var(--coach-card-pad) var(--coach-card-pad) var(--space-12);
+}
+
+.pageHeaderTop {
+  gap: var(--space-12);
+  align-items: flex-start;
+}
+
+.pageHeaderText p {
+  margin-top: var(--space-8);
+}
+
+.pageHeaderRight {
+  align-self: center;
+}
+
+.pageAccentBar {
+  margin-top: var(--space-12);
+}
+
+.coach-tools-panel {
+  margin-bottom: var(--coach-section-gap);
+}
+
+.coach-tools-trigger {
+  min-height: var(--coach-button-height);
+  padding-left: var(--coach-card-pad);
+  padding-right: var(--coach-card-pad);
+}
+
+.coach-tools-content__inner {
+  padding-top: var(--space-8);
+}

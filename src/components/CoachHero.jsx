@@ -18,12 +18,13 @@ export default function CoachHero({
   onOpenSettings,
   onLogout,
 }) {
-  const mobilePadding = isOverview ? "12px 12px" : "10px 12px";
-  const desktopPadding = isOverview ? "14px 14px" : "10px 14px";
+  const mobilePadding = isOverview ? "var(--space-16) var(--space-12)" : "var(--space-12) var(--space-12)";
+  const desktopPadding = isOverview ? "var(--space-16) var(--space-16)" : "var(--space-12) var(--space-16)";
 
   return (
     <div
       ref={heroRef}
+      className="coach-hero-surface"
       style={{
         marginBottom: "var(--stack-gap)",
         padding: mobilePadding,
@@ -46,11 +47,11 @@ export default function CoachHero({
           .coach-hero-wrap:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.50); }
         }
       `}</style>
-      <div className="coach-hero coach-hero-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+      <div className="coach-hero coach-hero-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--space-12)" }}>
         {branding?.showWatermark ? <TeamWatermark logoUrl={logoUrl} primaryColor={branding?.primaryColor || accentColor} /> : null}
         <div>
           <div style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", opacity: 0.96, textTransform: "uppercase", color: "var(--text-secondary)" }}>COACH MODE</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "var(--space-8)", marginTop: "var(--space-8)" }}>
             <div style={{ fontFamily: FD, color: "#fff", fontSize: isOverview ? 26 : 23, letterSpacing: "var(--tracking-default)", lineHeight: 1.02 }}>{(userName || "Demo Coach").toUpperCase()}</div>
             {isCoach && (
               <span
@@ -80,7 +81,7 @@ export default function CoachHero({
               fontSize: isOverview ? 9 : 8,
               letterSpacing: "var(--tracking-tight)",
               fontWeight: 600,
-              marginTop: 3,
+              marginTop: "var(--space-8)",
               lineHeight: 1.2,
               textTransform: "uppercase",
               maxWidth: 360,
@@ -88,7 +89,7 @@ export default function CoachHero({
           >
             Lead the squad. Track momentum. Build consistency.
           </div>
-          <div style={{ marginTop: 12, padding: "8px 10px", borderRadius: 14, border: `1px solid ${accentColor ? `${accentColor}55` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}10` : "rgba(255,255,255,0.04)", width: "fit-content", maxWidth: "min(100%,460px)" }}>
+          <div style={{ marginTop: "var(--space-12)", padding: "var(--space-12)", borderRadius: 14, border: `1px solid ${accentColor ? `${accentColor}55` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}10` : "rgba(255,255,255,0.04)", width: "fit-content", maxWidth: "min(100%,460px)" }}>
             <TeamIdentity
               branding={branding || { logoUrl, primaryColor: accentColor, secondaryColor: accentColor }}
               teamName={teamName}
@@ -100,7 +101,7 @@ export default function CoachHero({
             />
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, alignSelf: "flex-start" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-8)", alignSelf: "flex-start" }}>
           {avatar}
           {wordmark}
           <button
