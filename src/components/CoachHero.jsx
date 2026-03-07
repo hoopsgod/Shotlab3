@@ -30,10 +30,10 @@ export default function CoachHero({
         border: `1px solid ${accentColor ? `${accentColor}52` : "var(--stroke-2)"}`,
         borderRadius: "var(--radius-card)",
         background: accentColor
-          ? `linear-gradient(140deg, ${accentColor}17 0%, var(--surface-3) 54%)`
+          ? `linear-gradient(140deg, ${accentColor}12 0%, var(--surface-3) 54%)`
           : "var(--surface-3)",
         boxShadow: accentColor
-          ? `0 14px 30px rgba(0,0,0,0.5), 0 0 0 1px ${accentColor}1A`
+          ? `0 10px 22px rgba(0,0,0,0.44), 0 0 0 1px ${accentColor}14`
           : "var(--shadow-2)",
         position: "relative",
         overflow: "hidden",
@@ -145,7 +145,7 @@ export default function CoachHero({
           </div>
         </div>
 
-        <div style={{ marginTop: 2, padding: "7px 10px", borderRadius: 12, border: `1px solid ${accentColor ? `${accentColor}3D` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}0D` : "rgba(255,255,255,0.03)", maxWidth: "min(100%,460px)" }}>
+        <div style={{ marginTop: 2, padding: "7px 10px", borderRadius: 12, border: `1px solid ${accentColor ? `${accentColor}4A` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}0A` : "rgba(255,255,255,0.03)", maxWidth: "min(100%,460px)" }}>
           <TeamIdentity
             branding={branding || { logoUrl, primaryColor: accentColor, secondaryColor: accentColor }}
             teamName={teamName}

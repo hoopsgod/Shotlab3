@@ -20,8 +20,8 @@ export function TeamLogo({ logoUrl, teamName, size=64, primaryColor="#C8FF1A", b
         borderRadius:radius,
         padding:badgeStyle==="rectangle"?8:6,
         background:`linear-gradient(145deg, ${alphaFromHex(primaryColor,0.28)}, rgba(10,10,10,0.9))`,
-        border:`1px solid ${alphaFromHex(primaryColor,0.46)}`,
-        boxShadow:`0 0 0 2px ${alphaFromHex(primaryColor,0.1)}, 0 8px 18px rgba(0,0,0,0.34)`,
+        border:`1px solid ${alphaFromHex(primaryColor,0.5)}`,
+        boxShadow:`0 0 0 1px ${alphaFromHex(primaryColor,0.08)}, 0 7px 14px rgba(0,0,0,0.3)`,
         display:"grid",
         placeItems:"center",
         overflow:"hidden",
@@ -42,7 +42,7 @@ export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold
   return (
     <div style={{display:"flex",alignItems:"center",gap:compact?10:14,minWidth:0,position:"relative"}}>
       {showLogo ? <div style={{position:"relative"}}>
-        <div style={{position:"absolute",inset:"-10px",borderRadius:"50%",background:`radial-gradient(circle, ${alphaFromHex(branding.primaryColor,0.12)} 0%, transparent 70%)`,filter:"blur(4px)"}}/>
+        <div style={{position:"absolute",inset:"-8px",borderRadius:"50%",background:`radial-gradient(circle, ${alphaFromHex(branding.primaryColor,0.08)} 0%, transparent 70%)`,filter:"blur(3px)"}}/>
         <TeamLogo logoUrl={branding.logoUrl} teamName={teamName} size={size} primaryColor={branding.primaryColor} badgeStyle={branding.badgeStyle}/>
       </div> : null}
       <div style={{minWidth:0}}>
@@ -60,8 +60,8 @@ export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold
 export function TeamWatermark({ logoUrl, primaryColor="#C8FF1A", opacity=0.07, size=220 }) {
   if(!logoUrl)return null;
   return (
-    <div aria-hidden style={{position:"absolute",right:-28,top:-28,width:size,height:size,opacity:Math.min(opacity,0.045),pointerEvents:"none",filter:"grayscale(0.55)"}}>
-      <img src={logoUrl} alt="" style={{width:"100%",height:"100%",objectFit:"contain",mixBlendMode:"screen",filter:`drop-shadow(0 0 12px ${alphaFromHex(primaryColor,0.16)})`}}/>
+    <div aria-hidden style={{position:"absolute",right:-28,top:-28,width:size,height:size,opacity:Math.min(opacity,0.03),pointerEvents:"none",filter:"grayscale(0.55)"}}>
+      <img src={logoUrl} alt="" style={{width:"100%",height:"100%",objectFit:"contain",mixBlendMode:"screen",filter:`drop-shadow(0 0 8px ${alphaFromHex(primaryColor,0.12)})`}}/>
     </div>
   );
 }
