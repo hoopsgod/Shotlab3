@@ -15,51 +15,51 @@
 }
 
 /* Shared alignment rhythm for coach surfaces */
-.pageShell,
-.coach-tools-panel,
-.pageHeader,
-.coach-hero-surface,
-.coach-command-center {
+.coach-mode .pageShell,
+.coach-mode .coach-tools-panel,
+.coach-mode .pageHeader,
+.coach-mode .coach-hero-surface,
+.coach-mode .coach-command-center {
   margin-left: 0;
   margin-right: 0;
 }
 
-.pageShell {
+.coach-mode .pageShell {
   gap: var(--coach-section-gap);
 }
 
-.pageHeader {
+.coach-mode .pageHeader {
   margin: 0 0 var(--coach-space-24);
   padding: var(--coach-card-pad) var(--coach-card-pad) var(--coach-space-12);
 }
 
-.pageHeaderTop {
+.coach-mode .pageHeaderTop {
   gap: var(--coach-space-12);
   align-items: flex-start;
 }
 
-.pageHeaderText p {
+.coach-mode .pageHeaderText p {
   margin-top: var(--coach-space-8);
 }
 
-.pageHeaderRight {
+.coach-mode .pageHeaderRight {
   align-self: center;
 }
 
-.pageAccentBar {
+.coach-mode .pageAccentBar {
   margin-top: var(--coach-space-12);
 }
 
-.coach-tools-panel {
+.coach-mode .coach-tools-panel {
   margin-bottom: var(--coach-section-gap);
 }
 
-.coach-tools-trigger {
+.coach-mode .coach-tools-trigger {
   min-height: var(--coach-button-height);
   padding-left: var(--coach-card-pad);
   padding-right: var(--coach-card-pad);
 }
 
-.coach-tools-content__inner {
+.coach-mode .coach-tools-content__inner {
   padding-top: var(--coach-space-8);
 }
