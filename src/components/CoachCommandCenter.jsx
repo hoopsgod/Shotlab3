@@ -128,7 +128,7 @@ export default function CoachCommandCenter({
         </div>
       </div>
 
-      <div style={{margin:"10px 0 4px",padding:"12px",border:"1px solid var(--stroke-1)",borderRadius:14,background:"var(--surface-2)"}}>
+      <div style={{margin:"10px 0 4px",padding:"10px",border:"1px solid var(--stroke-1)",borderRadius:14,background:"var(--surface-2)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
           <div>
             <div style={{fontFamily:FB,fontSize:11,color:"var(--text-2)",fontWeight:700,letterSpacing:"0.02em"}}>Team code</div>
