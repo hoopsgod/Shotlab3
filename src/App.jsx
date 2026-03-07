@@ -2968,7 +2968,7 @@ const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignI
 
 return <SectionContainer className="fade-up">
 {u.isCoach&&<div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}><div style={{fontSize:13,color:"#C8FF00",textTransform:"uppercase",letterSpacing:"0.10em",fontFamily:FB,fontWeight:700,marginBottom:10}}>COACH ACCOUNT</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${BORDER_CLR}66`}}><div style={{display:"flex",alignItems:"center",gap:8}}><UsersIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ROLE</span></div><span style={{fontSize:13,color:"#FFFFFF",fontFamily:FB}}>Coach</span></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}><div style={{display:"flex",alignItems:"center",gap:8}}><ShieldIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ACCESS</span></div><span style={{fontSize:13,color:"#C8FF00",fontFamily:FB}}>Full Program Access</span></div></div>}
-<ProgressCharts scores={scores} shotLogs={shotLogs} userEmail={u.email}/>
+<ProgressCharts scores={scores} shotLogs={shotLogs} userEmail={u.email} drills={drills}/>
 {/* ══════ SHAREABLE SEASON CARD ══════ */}
 <Card variant="metric" style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
 {/* Corner accents */}
