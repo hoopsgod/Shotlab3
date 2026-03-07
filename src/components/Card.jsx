@@ -20,7 +20,7 @@ function Card({ as: Component = "div", variant = "secondary", className = "", st
   return (
     <Component
       {...props}
-      className={`shared-card ${variantStyle.className} ${className}`.trim()}
+      className={`shared-card motion-card ${variantStyle.className} ${className}`.trim()}
       style={{
         padding: variantStyle.padding,
         gap: variantStyle.gap,

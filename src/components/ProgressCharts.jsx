@@ -211,15 +211,20 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
     <section style={{ marginBottom: 18 }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <div style={{ color: UI_TOKENS.colors.textPrimary, fontSize: 12, letterSpacing: "0.08em" }}>PROGRESS OVER TIME</div>
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+        <div className="progress-controls" style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <div className="progress-segmented" role="tablist" aria-label="Progress range selector">
+            <span className={`progress-segment-indicator progress-segment-indicator--${range}`} aria-hidden="true" />
           {FILTERS.map((filter) => (
             <button
               key={filter.id}
               type="button"
               onClick={() => setRange(filter.id)}
+              className={`progress-segment-btn ${filter.id === range ? "is-active" : ""}`.trim()}
+              role="tab"
+              aria-selected={filter.id === range}
               style={{
-                border: `1px solid ${filter.id === range ? UI_TOKENS.colors.primary : UI_TOKENS.borders.subtle}`,
-                background: filter.id === range ? `${UI_TOKENS.colors.primary}1A` : "transparent",
+                border: "none",
+                background: "transparent",
                 color: UI_TOKENS.colors.textPrimary,
                 borderRadius: 999,
                 fontSize: 10,
@@ -232,9 +237,11 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
               {filter.label}
             </button>
           ))}
+          </div>
           <button
             type="button"
             onClick={() => setShowHelp(true)}
+            className="progress-help-btn"
             style={{
               border: `1px solid ${UI_TOKENS.borders.subtle}`,
               background: "transparent",
@@ -253,7 +260,7 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
       </div>
 
       {progress.drillRows.map((drill) => (
-        <div key={drill.drillId} style={{ ...CHART_CARD_STYLE, marginBottom: 10 }}>
+        <div key={drill.drillId} className="progress-drill-card" style={{ ...CHART_CARD_STYLE, marginBottom: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 8 }}>
             <div>
               <div style={{ color: UI_TOKENS.colors.textPrimary, fontSize: 12, fontWeight: 700 }}>{drill.name}</div>

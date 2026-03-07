@@ -16,6 +16,7 @@ import SectionContainer from "./components/SectionContainer";
 import HeroBanner from "./components/HeroBanner";
 import BrandLogo from "./components/BrandLogo";
 import ContextSummary from "./components/ContextSummary";
+import CountUpValue from "./components/CountUpValue";
 import spacing from "./spacing";
 import UI_TOKENS from "./styles/tokens";
 import { cloudStore } from "./lib/cloudStore";
@@ -3013,7 +3014,7 @@ return{...d,pb,avg,count:ds.length,last10,trend};
 
 const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 0",borderBottom:`1px solid ${BORDER_CLR}40`,gap:12}}>
 <div><div style={{fontFamily:FB,color:"var(--text-2)",fontSize:12,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase"}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:5,lineHeight:1.35,maxWidth:220}}>{sub}</div>}</div>
-<div style={{fontFamily:FD,color,fontSize:28,fontWeight:800,lineHeight:1,letterSpacing:1}}>{value}</div>
+<div style={{fontFamily:FD,color,fontSize:28,fontWeight:800,lineHeight:1,letterSpacing:1}}>{typeof value==="number"?<CountUpValue value={value}/>:value}</div>
 
   </div>;
 
@@ -3039,7 +3040,7 @@ return <SectionContainer className="fade-up">
   <div style={{display:"flex",gap:8,marginTop:22,justifyContent:"center"}}>
     {[{v:totalMakes+totalShots,l:"TOTAL MAKES",c:VOLT,p:true},{v:bestStreak+"D",l:"BEST STREAK",c:ORANGE},{v:eventsAttended,l:"EVENTS",c:CYAN}].map(s=>
       <div key={s.l} style={{flex:s.p?1.15:1,background:"#0a0a0a",borderRadius:14,padding:s.p?"15px 10px":"13px 8px",border:`1px solid ${s.p?`${VOLT}30`:BORDER_CLR}`}}>
-        <div style={{fontFamily:FD,color:s.c,fontSize:s.p?34:27,fontWeight:800,lineHeight:1}}>{s.v}</div>
+        <div style={{fontFamily:FD,color:s.c,fontSize:s.p?34:27,fontWeight:800,lineHeight:1}}>{typeof s.v==="number"?<CountUpValue value={s.v}/>:s.v}</div>
         <div style={{fontFamily:FB,color:s.p?"var(--text-2)":T.SUB,fontSize:s.p?7:6,letterSpacing:s.p?2.2:1.8,marginTop:s.p?5:4,fontWeight:700}}>{s.l}</div>
       </div>)}
   </div>
@@ -3071,7 +3072,7 @@ return <SectionContainer className="fade-up">
   <div style={{display:"flex",gap:8,marginTop:22,justifyContent:"center"}}>
     {[{v:totalMakes+totalShots,l:"MAKES",c:VOLT,p:true},{v:sessionsLogged,l:"SESSIONS",c:LIGHT},{v:streak,l:"STREAK",c:ORANGE}].map(s=>
       <div key={s.l} style={{background:BG,borderRadius:12,padding:s.p?"11px 15px":"10px 12px",border:`1px solid ${s.p?`${VOLT}30`:BORDER_CLR}`,minWidth:s.p?84:72}}>
-        <div style={{fontFamily:FD,color:s.c,fontSize:s.p?30:24,fontWeight:800,lineHeight:1}}>{s.v}</div>
+        <div style={{fontFamily:FD,color:s.c,fontSize:s.p?30:24,fontWeight:800,lineHeight:1}}>{typeof s.v==="number"?<CountUpValue value={s.v}/>:s.v}</div>
         <div style={{fontFamily:FB,color:s.p?"var(--text-2)":T.SUB,fontSize:s.p?7:6,letterSpacing:s.p?2.1:1.8,marginTop:4,fontWeight:700}}>{s.l}</div>
       </div>)}
   </div>

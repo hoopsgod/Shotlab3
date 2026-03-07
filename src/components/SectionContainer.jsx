@@ -1,7 +1,8 @@
-function SectionContainer({ as: Component = "section", style, children, ...props }) {
+function SectionContainer({ as: Component = "section", className = "", style, children, ...props }) {
   return (
     <Component
       {...props}
+      className={`motion-section ${className}`.trim()}
       style={{
         marginBottom: "var(--section-gap)",
         ...style,
