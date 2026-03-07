@@ -23,6 +23,8 @@ export default function CoachCommandCenter({
   codeErr,
 }) {
   const isCompact=variant==="compact";
+  const isNextEventEmpty=!nextEventDateFormatted||nextEventDateFormatted==="None"||nextEventDateFormatted==="No event set";
+  const joinCodeValue=joinCode||"Not generated";
   const metricBase={
     minHeight:66,
     borderRadius:12,
@@ -114,8 +116,8 @@ export default function CoachCommandCenter({
 
         <button type="button" onClick={onNextEventClick} style={metricBase}>
           <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
-          <div style={{marginTop:5,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{nextEventDateFormatted}</div>
-          <div style={{marginTop:2,fontFamily:FB,fontSize:9,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:"var(--tracking-tight)"}}>Timeline</div>
+          <div style={{marginTop:5,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{isNextEventEmpty?"No event set":nextEventDateFormatted}</div>
+          <div style={{marginTop:2,fontFamily:FB,fontSize:9,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:"var(--tracking-tight)"}}>{isNextEventEmpty?"Coach schedule pending":"Timeline"}</div>
         </button>
       </div>
 
@@ -134,7 +136,7 @@ export default function CoachCommandCenter({
             <div className="u-meta-label" style={{fontFamily:FB,fontSize:10,color:"var(--text-2)"}}>TEAM CODE</div>
             <div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",marginTop:2}}>Share with players to join roster</div>
           </div>
-          <div style={{fontFamily:FD,fontSize:"clamp(20px, 5vw, 24px)",color:"var(--text-1)",letterSpacing:4,lineHeight:1,maxWidth:"52%",overflow:"hidden",textOverflow:"ellipsis"}}>{joinCode||"—"}</div>
+          <div style={{fontFamily:FD,fontSize:"clamp(20px, 5vw, 24px)",color:"var(--text-1)",letterSpacing:4,lineHeight:1,maxWidth:"52%",overflow:"hidden",textOverflow:"ellipsis"}}>{joinCodeValue}</div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
           <button onClick={onCopyJoinCode} style={{height:44,padding:"0 16px",fontSize:10,border:"1px solid var(--stroke-2)",background:"transparent",color:"var(--text-2)",borderRadius:12,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY CODE</button>

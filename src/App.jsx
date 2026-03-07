@@ -1159,9 +1159,24 @@ const upcomingEventsCount=upcomingEvents.length||0;
 const rsvpEventIds=useMemo(()=>new Set(rsvps.filter(r=>r.email===u.email).map(r=>r.eventId)),[rsvps,u.email]);
 const upcomingRsvpd=useMemo(()=>upcomingEvents.filter(ev=>rsvpEventIds.has(ev.id)),[upcomingEvents,rsvpEventIds]);
 const upcomingNotRsvpd=useMemo(()=>upcomingEvents.filter(ev=>!rsvpEventIds.has(ev.id)),[upcomingEvents,rsvpEventIds]);
-const attendancePct=upcomingEventsCount>0&&myRsvps>0?`${Math.min(100,Math.round((myRsvps/upcomingEventsCount)*100))}%`:"—";
 const nextEvent=upcomingEvents[0]||null;
-const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
+const attendanceState=useMemo(()=>{
+if(upcomingEventsCount===0)return{value:"No events",detail:"No attendance to track yet",isEmpty:true};
+if(myRsvps===0)return{value:"Not checked in",detail:"RSVP to start tracking",isEmpty:true};
+return{value:`${Math.min(100,Math.round((myRsvps/upcomingEventsCount)*100))}%`,detail:`${myRsvps}/${upcomingEventsCount} confirmed`};
+},[myRsvps,upcomingEventsCount]);
+const nextEventState=nextEvent
+?{value:`${nextEvent.date.slice(5)} · ${nextEvent.time}`,detail:nextEvent.title}
+:{value:"No event set",detail:"Coach will post next session",isEmpty:true};
+const upcomingEventsState=upcomingEventsCount>0
+?{value:upcomingEventsCount,detail:"On the calendar"}
+:{value:"No events",detail:"Nothing scheduled yet",isEmpty:true};
+const streakState=streak>0
+?{value:`${streak}D`,detail:"Current run"}
+:{value:"Start today",detail:"Log one session",isEmpty:true};
+const drillsState=drills.length>0
+?{value:`${todayS.length}/${drills.length}`,detail:"Completed today"}
+:{value:"No drills",detail:"Coach assignments pending",isEmpty:true};
 const teamBranding=sanitizeTeamBranding(team?.branding);
 const coachPrimary=teamBranding.primaryColor;
 const coachSecondary=teamBranding.secondaryColor;
@@ -1297,8 +1312,16 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
     {showWelcomeGuide&&<GuideCallout title="Welcome to ShotLab" body="At Home tracks solo work. Program covers coach-run activity. Makes count your made shots, Drills are scored skill tests, and Duels are head-to-head drill competitions." onDismiss={dismissWelcomeGuide} tone="accent"/>}
 
     {(()=>{
-      const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
-      const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
+      const homeStats=[
+        {label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT,detail:"All-time logged"},
+        {label:"Streak",...streakState,color:CYAN},
+        {label:"Drills",...drillsState,color:LIGHT}
+      ];
+      const programStats=[
+        {label:"Upcoming Events",...upcomingEventsState,color:VOLT},
+        {label:"Attendance",...attendanceState,color:CYAN},
+        {label:"Next Event",...nextEventState,color:LIGHT}
+      ];
       return <div style={{marginBottom:28}}>
         <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
           <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
@@ -1819,8 +1842,9 @@ return <div className="fade-up">
 }
 
 
-function StatTile({value,label,color}){
-return <div className="card card--metric mode-card-stat" style={{padding:"14px 10px 12px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between"}}><div className="mode-card-stat-value" style={{fontFamily:FD,color:color||LIGHT,fontSize:28,fontWeight:800,lineHeight:1.02,wordBreak:"normal",overflowWrap:"anywhere"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:9,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
+function StatTile({value,label,color,detail,isEmpty}){
+const valueTone=isEmpty?TOKENS.TEXT_SECONDARY:(color||LIGHT);
+return <div className="card card--metric mode-card-stat" style={{padding:"14px 10px 12px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",background:isEmpty?"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))":undefined}}><div><div className="mode-card-stat-value" style={{fontFamily:FD,color:valueTone,fontSize:28,fontWeight:800,lineHeight:1.02,wordBreak:"normal",overflowWrap:"anywhere"}}>{value}</div>{detail&&<div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:9,marginTop:4,letterSpacing:"0.02em",textTransform:"uppercase"}}>{detail}</div>}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:9,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
 }
 
 function ModeCard({title,subtitle,icon,stats,accent="home",isActive,onClick,helpText}){
@@ -2356,7 +2380,7 @@ const totalPlayers=ups.length;
 const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
 const sortedEvents=[...events].sort((a,b)=>a.date.localeCompare(b.date));
 const nextEvent=sortedEvents.find(e=>e.date>=today);
-const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"None";
+const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"No event set";
 const highlightAddPlayer=totalPlayers===0;
 const highlightAddDrill=drills.length===0;
 const highlightScheduleEvent=events.length===0||!nextEvent;
