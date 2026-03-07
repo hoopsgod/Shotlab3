@@ -1,9 +1,9 @@
 :root {
   /* brand */
-  --brand-primary: #b8ff00;
-  --brand-secondary: #b2bbc7;
-  --brand-background: #070a0c;
-  --brand-text: rgba(255, 255, 255, 0.92);
+  --brand-primary: #63d2ff;
+  --brand-secondary: #a5afbf;
+  --brand-background: #111418;
+  --brand-text: #eef2f7;
 
   /* font */
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -15,6 +15,7 @@
   --s-4: 16px;
   --s-5: 24px;
   --s-6: 32px;
+  --s-7: 40px;
 
   --page-pad: var(--s-4);
   --section-gap: var(--s-5);
@@ -23,27 +24,32 @@
 
   /* surfaces */
   --bg: var(--brand-background);
-  --surface-1: #0a0f14;
-  --surface-2: #0d141c;
+  --surface-1: #171b21;
+  --surface-2: #1c222a;
 
   /* text */
   --text-1: var(--brand-text);
-  --text-2: rgba(255, 255, 255, 0.84);
-  --muted: rgba(255, 255, 255, 0.72);
+  --text-2: #c2cad6;
+  --muted: #97a2b0;
 
   /* borders */
-  --border-1: rgba(255, 255, 255, 0.14);
-  --border-2: rgba(255, 255, 255, 0.18);
+  --border-1: rgba(255, 255, 255, 0.1);
+  --border-2: rgba(255, 255, 255, 0.16);
 
   /* accent */
   --accent: var(--brand-primary);
 
   /* elevation */
-  --shadow-1: 0 10px 24px rgba(0, 0, 0, 0.45);
-  --shadow-2: 0 18px 40px rgba(0, 0, 0, 0.55);
+  --shadow-1: 0 8px 18px rgba(0, 0, 0, 0.28);
+  --shadow-2: 0 12px 26px rgba(0, 0, 0, 0.34);
 
   /* focus */
-  --focus-ring: 0 0 0 3px rgba(184, 255, 0, 0.28);
+  --focus-ring: 0 0 0 3px rgba(99, 210, 255, 0.26);
+
+  /* status */
+  --success: #57b58b;
+  --warning: #c39a57;
+  --error: #c56b73;
 
   /* typography */
   --fs-title: 24px;
@@ -67,14 +73,14 @@
   --btn-h-lg: 48px;
   --btn-h-md: 44px;
   --btn-h-sm: 40px;
-  --btn-radius: 12px;
+  --btn-radius: 10px;
   --btn-pad-lg: 20px;
   --btn-pad-md: 16px;
   --btn-pad-sm: 12px;
 
   /* inputs */
   --input-h: 48px;
-  --input-radius: 14px;
+  --input-radius: 10px;
   --input-pad-x: 14px;
 }
 
@@ -101,7 +107,7 @@ textarea {
 .card {
   background: var(--surface-1);
   border: 1px solid var(--border-1);
-  border-radius: 22px;
+  border-radius: 14px;
   box-shadow: var(--shadow-1);
   overflow: hidden;
 }
@@ -111,10 +117,10 @@ textarea {
   box-shadow: var(--shadow-2);
 }
 .card--accent {
-  border-color: rgba(184, 255, 0, 0.22);
+  border-color: rgba(99, 210, 255, 0.3);
 }
 .card--active {
-  box-shadow: var(--shadow-2), 0 0 0 1px rgba(184, 255, 0, 0.18);
+  box-shadow: var(--shadow-2), 0 0 0 1px rgba(99, 210, 255, 0.22);
 }
 
 /* typography utilities (Task #2; no global uppercase overrides) */
@@ -190,8 +196,8 @@ textarea {
 }
 .btn--primary {
   background: var(--accent);
-  color: #081006;
-  box-shadow: 0 8px 18px rgba(184, 255, 0, 0.12);
+  color: #0f1720;
+  box-shadow: none;
 }
 .btn--secondary {
   background: transparent;
@@ -229,7 +235,7 @@ textarea {
 @media (hover: hover) and (pointer: fine) {
   .btn--primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(184, 255, 0, 0.15);
+    box-shadow: none;
   }
 
   .btn--secondary:hover,
@@ -256,13 +262,13 @@ textarea {
 }
 
 .btn-primary {
-  box-shadow: 0 8px 18px rgba(184, 255, 0, 0.12);
+  box-shadow: none;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(184, 255, 0, 0.15);
+    box-shadow: none;
   }
 
   .btn-secondary:hover {
@@ -290,25 +296,25 @@ textarea {
 }
 
 .shared-card {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-1);
+  background: var(--surface-1);
   transition: transform 150ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
   will-change: transform;
 }
 
 .shared-card--default {
-  border-color: rgba(255, 255, 255, 0.09);
-  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border-1);
+  background: var(--surface-1);
 }
 
 .shared-card--metric {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-2);
+  background: var(--surface-2);
 }
 
 .shared-card--list {
-  border-color: rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.015);
+  border-color: var(--border-1);
+  background: var(--surface-1);
 }
 
 .shared-card--list [data-card-divider] {
@@ -316,8 +322,8 @@ textarea {
 }
 
 .shared-card--empty {
-  border-color: rgba(255, 255, 255, 0.05);
-  background: rgba(255, 255, 255, 0.012);
+  border-color: var(--border-1);
+  background: var(--surface-1);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -403,7 +409,7 @@ textarea {
 @media (hover: hover) and (pointer: fine) {
   .progress-track:hover .progress-fill,
   .progressTrack:hover .progressFill {
-    box-shadow: 0 0 0 2px rgba(200, 255, 0, 0.2), 0 10px 24px rgba(200, 255, 0, 0.12);
+    box-shadow: 0 0 0 1px rgba(99, 210, 255, 0.22);
   }
 }
 
@@ -433,6 +439,20 @@ textarea {
   }
 }
 
+
+.section-container {
+  margin-bottom: var(--section-gap);
+}
+
+.badge,
+.status-badge,
+[class*="badge"] {
+  border-radius: 999px;
+  border: 1px solid var(--border-1);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-2);
+}
+
 /* list rows (Task #6 base) */
 .listRow {
   display: flex;
@@ -442,11 +462,11 @@ textarea {
   min-height: 56px;
   background: var(--surface-1);
   border: 1px solid var(--border-1);
-  border-radius: 18px;
+  border-radius: 12px;
 }
 .listRow--highlight {
   background: var(--surface-2);
-  border-color: rgba(184, 255, 0, 0.22);
+  border-color: rgba(99, 210, 255, 0.26);
 }
 
 /* inputs (Task #5 base) */
@@ -470,7 +490,7 @@ textarea {
 .input::placeholder { color: rgba(255, 255, 255, 0.56); }
 .input:focus-visible, select:focus-visible, textarea:focus-visible {
   outline: none;
-  border-color: rgba(184, 255, 0, 0.35);
+  border-color: rgba(99, 210, 255, 0.35);
   box-shadow: var(--focus-ring);
 }
 :disabled { opacity: 0.7; cursor: not-allowed; }
