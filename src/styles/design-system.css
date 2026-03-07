@@ -72,17 +72,20 @@
 
   /* buttons */
   --btn-h-lg: 48px;
-  --btn-h-md: 44px;
+  --btn-h-md: 48px;
   --btn-h-sm: 40px;
   --btn-radius: 10px;
-  --btn-pad-lg: 16px;
+  --btn-pad-lg: 18px;
   --btn-pad-md: 12px;
   --btn-pad-sm: 8px;
 
   /* inputs */
-  --input-h: 48px;
+  --input-h: 52px;
   --input-radius: 14px;
-  --input-pad-x: 14px;
+  --input-pad-x: 16px;
+
+  /* control typography */
+  --control-font-size: 16px;
 }
 
 /* page */
@@ -180,6 +183,7 @@ textarea {
   height: var(--btn-h-lg);
   border-radius: var(--btn-radius);
   padding: 0 var(--btn-pad-lg);
+  font-size: var(--control-font-size);
   font-weight: 700;
   letter-spacing: 0.04em;
   display: inline-flex;
@@ -447,8 +451,8 @@ textarea {
   display: flex;
   align-items: center;
   gap: var(--s-3);
-  padding: var(--s-4);
-  min-height: 56px;
+  padding: var(--s-4) var(--s-4);
+  min-height: 60px;
   background: var(--surface-1);
   border: 1px solid var(--border-1);
   border-radius: 18px;
@@ -472,6 +476,8 @@ textarea {
   width: 100%;
   border-radius: var(--input-radius);
   padding: 0 var(--input-pad-x);
+  font-size: var(--control-font-size);
+  line-height: 1.35;
   background: var(--surface-2);
   border: 1px solid var(--border-1);
   color: var(--text-1);

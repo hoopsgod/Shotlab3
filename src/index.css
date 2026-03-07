@@ -80,6 +80,7 @@ select,
 textarea {
   width: 100%;
   height: var(--input-h);
+  font-size: var(--control-font-size, 16px);
   border-radius: var(--input-radius);
   padding: 0 var(--input-pad-x);
   background: var(--surface-2);
@@ -129,7 +130,7 @@ a[role="button"],
 [role="button"],
 .listRow,
 .list-row {
-  min-height: 44px;
+  min-height: 48px;
 }
 
 li,
@@ -138,8 +139,8 @@ li,
 .row,
 .cardRow,
 .card-row {
-  padding-top: 14px;
-  padding-bottom: 14px;
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
 
 form > * + * {
