@@ -285,12 +285,22 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeaderPillBrand:hover{text-decoration:underline;background:transparent;}
 .pageHeaderPillBrand:focus-visible{outline-color:#C8FF00;}
 .pageAccentBar{height:4px;width:48%;border-radius:999px;background:var(--headerAccent);box-shadow:0 0 16px var(--headerAccent);margin-top:var(--space-3);}
-.heroModule{position:relative;overflow:hidden;border:1px solid var(--stroke-2);border-radius:var(--radius-card);padding:var(--card-pad);margin-bottom:var(--stack-gap);background:var(--surface-3);box-shadow:var(--shadow-2);}
+.heroModule{position:relative;overflow:hidden;border:1px solid var(--stroke-2);border-radius:var(--radius-card);padding:12px;margin-bottom:var(--stack-gap);background:var(--surface-3);box-shadow:var(--shadow-2);}
 .heroModule::before{content:'';position:absolute;left:0;top:0;width:54px;height:4px;background:var(--pageAccent);}
 .heroStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2);margin-top:var(--space-3);}
 .heroStat{background:#0f0f0f;border:1px solid #2a2a2a;border-radius:10px;padding:var(--space-2);text-align:center;}
 .heroStatVal{font-family:${FD};color:var(--pageAccent);font-size:20px;line-height:1;}
 .heroStatLbl{font-family:${FB};font-size:9px;color:var(--text-tertiary);letter-spacing:var(--tracking-tight);margin-top:2px;}
+.heroHead{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.heroKicker{font-family:${FD};font-size:12px;letter-spacing:var(--tracking-default);line-height:1;}
+.heroSub{font-family:${FB};color:var(--text-secondary);font-size:10px;margin-top:3px;line-height:1.3;}
+.heroBodyGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px;}
+.heroClamp{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.heroStatGroup{background:rgba(0,0,0,0.22);border:1px solid var(--stroke-1);border-radius:12px;padding:10px;}
+.heroStatTop{display:flex;align-items:baseline;gap:4px;}
+.heroStatTop .heroStatVal{font-size:24px;}
+.heroMetaStrip{margin-top:10px;padding:8px 10px;border-radius:10px;border:1px solid var(--stroke-1);background:rgba(255,255,255,0.02);font-family:${FB};font-size:10px;color:var(--text-secondary);line-height:1.3;}
+.heroActionRow{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
 .feedListItem{position:relative;padding-left:14px;}
 .feedListItem::before{content:'';position:absolute;left:0;top:17px;width:6px;height:6px;border-radius:50%;background:var(--pageAccent);box-shadow:0 0 8px var(--pageAccentGlow);}
 .drillsMetrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--stack-gap);margin-bottom:var(--stack-gap);}
@@ -309,7 +319,8 @@ const _PAGE_SIGNATURE_CSS=`
 .lbRow .decorativeLine,.lbRow .decorativeDot{opacity:.15;z-index:0;}
 .lbRow>*{position:relative;z-index:1;}
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{display:none;}
-@media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:420px){.heroBodyGrid{grid-template-columns:1fr;}}
+@media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}.heroModule{padding:14px;}}
 
 
 @media (hover: hover) and (pointer: fine){.heroModule{transition:transform 150ms ease,box-shadow 150ms ease;}.heroModule:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,0.50);}}
@@ -2426,55 +2437,39 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 
 <div style={{flex:1,padding:`${showMiniHeader?"88px":"var(--space-4)"} var(--page-gutter) 110px`,overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
-  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.feed.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S PULSE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>Who's active, streaking, and needs attention</div></div><button className="pageHeaderPill" onClick={()=>setTab("players")}>View Team</button></div>
-    {/* Coach dashboard pulse */}
-    <div className="accent-card" style={{background:`linear-gradient(135deg,${alphaFromHex(coachAccent,0.1)},${CARD_BG})`,borderRadius:18,padding:"20px 20px",border:`1px solid ${alphaFromHex(coachAccent,0.24)}`,marginBottom:20,position:"relative",overflow:"hidden"}}>
-      <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:coachAccent,borderRadius:"4px 0 0 4px"}}/>
-      
-      <div style={{fontFamily:FD,color:coachAccent,fontSize:12,letterSpacing:"var(--tracking-default)",marginBottom:12}}>TODAY'S PULSE</div>
-      <div style={{display:"flex",gap:8,marginBottom:12}}>
-        {(()=>{
-          const activeToday=new Set(scores.filter(s=>s.date===today).map(s=>s.email)).size;
-          const totalPlayers=ups.length;
-          const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
-          const nextEv=sorted.find(e=>e.date>=today);
-          const nextEvRsvps=nextEv?rsvps.filter(r=>r.eventId===nextEv.id).length:0;
-          // Top scorer this week
-          const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-          const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-          const weekScores={};scores.filter(s=>s.date>=weekStr).forEach(s=>{if(!weekScores[s.email])weekScores[s.email]={email:s.email,name:s.name||s.email,total:0};weekScores[s.email].total+=s.score});
-          const topWeek=Object.values(weekScores).sort((a,b)=>b.total-a.total)[0];
-          return <>
-            <div style={{flex:1,background:BG,borderRadius:12,padding:"12px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-              <div style={{fontFamily:FD,color:activeToday>0?VOLT:MUTED,fontSize:24,lineHeight:1}}>{activeToday}<span style={{color:MUTED,fontSize:14}}>/{totalPlayers}</span></div>
-              <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,marginTop:3,fontWeight:600}}>ACTIVE TODAY</div>
-            </div>
-            <div style={{flex:1,background:BG,borderRadius:12,padding:"12px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-              {nextEv?<>
-                <div style={{fontFamily:FD,color:CYAN,fontSize:14,lineHeight:1.1,letterSpacing:1}}>{nextEv.title.length>12?nextEv.title.slice(0,12)+"...":nextEv.title}</div>
-                <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,marginTop:3,fontWeight:600}}>{nextEvRsvps} RSVP · {nextEv.date.slice(5)}</div>
-              </>:<div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>No events</div>}
-            </div>
-          </>
-        })()}
-      </div>
-      {(()=>{
-        // Players who haven't logged this week
-        const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-        const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-        const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
-        const inactive=ups.filter(p=>!activeThisWeek.has(p.email));
-        return inactive.length>0?<div style={{fontFamily:FB,color:ORANGE,fontSize:10,fontWeight:600,letterSpacing:1}}>
-          ⚠ {inactive.length} player{inactive.length>1?"s":""} haven't logged this week: {inactive.slice(0,3).map(p=>p.name.split(" ")[0]).join(", ")}{inactive.length>3?` +${inactive.length-3} more`:""}
-        </div>:<div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:600,letterSpacing:1}}>✓ All players active this week</div>
-      })()}
-    </div>
-
+  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" /><div className="heroModule"><div className="heroHead"><div><div className="heroKicker" style={{color:PAGE_ACCENTS.feed.accent}}>TODAY'S PULSE</div><div className="heroSub">Who's active, streaking, and needs attention</div></div><button className="pageHeaderPill" onClick={()=>setTab("players")}>View Team</button></div>
+    {(()=>{
+      const activeToday=new Set(scores.filter(s=>s.date===today).map(s=>s.email)).size;
+      const totalPlayers=ups.length;
+      const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
+      const nextEv=sorted.find(e=>e.date>=today);
+      const nextEvRsvps=nextEv?rsvps.filter(r=>r.eventId===nextEv.id).length:0;
+      const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+      const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
+      const weekScores={};scores.filter(s=>s.date>=weekStr).forEach(s=>{if(!weekScores[s.email])weekScores[s.email]={email:s.email,name:s.name||s.email,total:0};weekScores[s.email].total+=s.score});
+      const topWeek=Object.values(weekScores).sort((a,b)=>b.total-a.total)[0];
+      const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
+      const inactive=ups.filter(p=>!activeThisWeek.has(p.email));
+      return <>
+        <div className="heroBodyGrid">
+          <div className="heroStatGroup">
+            <div className="heroStatTop"><div className="heroStatVal" style={{color:activeToday>0?VOLT:MUTED}}>{activeToday}</div><span style={{fontFamily:FB,fontSize:11,color:T.SUB}}>/ {totalPlayers}</span></div>
+            <div className="heroStatLbl">ACTIVE TODAY</div>
+          </div>
+          <div className="heroStatGroup">
+            <div className="heroClamp" style={{fontFamily:FD,color:CYAN,fontSize:15,lineHeight:1.05,letterSpacing:"var(--tracking-tight)"}} title={nextEv?.title||"No event"}>{nextEv?nextEv.title:"No event"}</div>
+            <div className="heroStatLbl" style={{marginTop:5}}>{nextEv?`${nextEvRsvps} RSVP · ${nextEv.date.slice(5)}`:"Schedule your next session"}</div>
+          </div>
+        </div>
+        <div className="heroMetaStrip" style={{color:topWeek?LIGHT:T.SUB}}>{topWeek?`Top scorer this week: ${(players.find(p=>p.email===topWeek.email)?.name||topWeek.name||topWeek.email.split("@")[0])} · ${topWeek.total} pts`:"No scores yet this week"}</div>
+        <div className="heroMetaStrip" style={{marginTop:8,color:inactive.length>0?ORANGE:VOLT}}>{inactive.length>0?`⚠ ${inactive.length} player${inactive.length>1?"s":""} need a check-in: ${inactive.slice(0,3).map(p=>p.name.split(" ")[0]).join(", ")}${inactive.length>3?` +${inactive.length-3} more`:""}`:"✓ All players active this week"}</div>
+      </>
+    })()}
     </div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/>{scores.length===0&&<Empty t="No scores yet" action="Once your players start logging drills, their activity will appear here. Share the app link to get started!"/>}{scores.slice(-20).reverse().map((s,i)=>{const dr=drills.find(d=>d.id===s.drillId);const pct=dr?Math.round(s.score/dr.max*100):0;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 5px",borderRadius:3,color:isHome?VOLT:LIGHT,background:isHome?VOLT+"15":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span></div><div style={{fontSize:10,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>}
 
   {/** DRILLS */}
-  {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><PageHeader title="DRILLS" subtitle="Skill plans, assignments, and drill library" accent="cyan" icon={<DrillIcon type="ft" size={22} color={PAGE_ACCENTS.drills.accent}/>} actionLabel="Add" onAction={()=>setShowNewDrill(true)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.drills.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>QUICK START DRILL</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{drills.length} total drills ready to start</div></div><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowNewDrill(true)}>Start</button></div><div className="drillsMetrics"><div className="heroStat drillsMetricTile"><div className="heroStatVal">{drills.length}</div><div className="heroStatLbl">ACTIVE</div></div><div className="heroStat drillsMetricTile"><div className="heroStatVal">{programDrills.length}</div><div className="heroStatLbl">PROGRAM</div></div></div><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth"})}>Manage Drills</button></div>
+  {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><PageHeader title="DRILLS" subtitle="Skill plans, assignments, and drill library" accent="cyan" icon={<DrillIcon type="ft" size={22} color={PAGE_ACCENTS.drills.accent}/>} actionLabel="Add" onAction={()=>setShowNewDrill(true)} /><div className="heroModule"><div className="heroHead"><div><div className="heroKicker" style={{color:PAGE_ACCENTS.drills.accent}}>QUICK START DRILL</div><div className="heroSub">{drills.length} total drills ready to run today</div></div><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowNewDrill(true)}>Add Drill</button></div><div className="drillsMetrics" style={{marginTop:10,marginBottom:0}}><div className="heroStat drillsMetricTile"><div className="heroStatVal">{drills.length}</div><div className="heroStatLbl">ACTIVE</div></div><div className="heroStat drillsMetricTile"><div className="heroStatVal">{programDrills.length}</div><div className="heroStatLbl">PROGRAM</div></div></div><div className="heroMetaStrip" style={{marginTop:8}}>Next action: assign program drills and review leaderboard entries for each session.</div><div className="heroActionRow"><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth"})}>Manage Drills</button><button className="pageHeaderPill" onClick={()=>setShowNewDrill(true)}>Quick Add</button></div></div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Drill Management" s={`${drills.length} active`} identity/>
     <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
     <div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12,marginBottom:14}}>
@@ -2543,7 +2538,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   </div>}
 
   {/* EVENTS */}
-  {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} actionLabel={showAdd?"Close":"Create"} onAction={()=>setShowAdd(!showAdd)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.events.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>NEXT EVENT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{nextEvent?`${nextEvent.title} · ${nextEvent.date} ${nextEvent.time}`:"No event scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAdd(true)}>Create Event</button></div><div style={{marginTop:8}}><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth"})}>Manage Events</button></div></div>
+  {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} actionLabel={showAdd?"Close":"Create"} onAction={()=>setShowAdd(!showAdd)} /><div className="heroModule"><div className="heroHead"><div><div className="heroKicker" style={{color:PAGE_ACCENTS.events.accent}}>NEXT EVENT</div><div className="heroSub">{nextEvent?`${nextEvent.title} · ${nextEvent.date} ${nextEvent.time}`:"No event scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAdd(true)}>Create Event</button></div><div className="heroMetaStrip">{nextEvent?`Attendance check: ${rsvps.filter(r=>r.eventId===nextEvent.id).length} RSVPs locked in.`:"Add an event to set the week rhythm."}</div><div className="heroActionRow"><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth"})}>Manage Events</button><button className="pageHeaderPill" onClick={()=>setShowAdd(true)}>Quick Create</button></div></div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Event Management" s={`${events.length} total`} identity/>
     <button onClick={()=>setShowAdd(!showAdd)} className="btn-v cta-primary" style={{marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
@@ -2599,7 +2594,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       </div>})}
   </div>}
 
-  {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><PageHeader title="PLAYERS" subtitle="Roster insights, development, and availability" accent="purple" icon={<UsersIcon size={20} color={PAGE_ACCENTS.players.accent}/>} actionLabel="Add" onAction={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.players.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>ROSTER SNAPSHOT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{ups.length} players on roster</div></div><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})}>Add Player</button></div></div>
+  {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><PageHeader title="PLAYERS" subtitle="Roster insights, development, and availability" accent="purple" icon={<UsersIcon size={20} color={PAGE_ACCENTS.players.accent}/>} actionLabel="Add" onAction={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})} /><div className="heroModule"><div className="heroHead"><div><div className="heroKicker" style={{color:PAGE_ACCENTS.players.accent}}>ROSTER SNAPSHOT</div><div className="heroSub">{ups.length} players on roster</div></div><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})}>Add Player</button></div><div className="heroBodyGrid"><div className="heroStatGroup"><div className="heroStatTop"><div className="heroStatVal" style={{color:PAGE_ACCENTS.players.accent}}>{ups.length}</div></div><div className="heroStatLbl">TOTAL ROSTER</div></div><div className="heroStatGroup"><div className="heroStatTop"><div className="heroStatVal" style={{color:inactivePlayersCount>0?ORANGE:VOLT}}>{inactivePlayersCount}</div></div><div className="heroStatLbl">INACTIVE THIS WEEK</div></div></div></div>
     <div id="coach-add-player-form" className="accent-card" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:12}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:8}}>ADD PLAYER TO ROSTER</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
@@ -2636,7 +2631,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {scores.filter(s=>s.email===selP.email&&(s.src==="home"||!s.src)).length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills}/></div>}
 
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
-  {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><PageHeader title="S&C" subtitle="Strength blocks, readiness, and recovery" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S LIFT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAddSC(true)}>Add Session</button></div><div className="heroStats"><div className="heroStat"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">SESSIONS</div></div><div className="heroStat"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">RSVPS</div></div><div className="heroStat"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">LOGS</div></div></div></div>
+  {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><PageHeader title="S&C" subtitle="Strength blocks, readiness, and recovery" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="heroModule"><div className="heroHead"><div><div className="heroKicker" style={{color:PAGE_ACCENTS.sc.accent}}>TODAY'S LIFT</div><div className="heroSub">{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAddSC(true)}>Add Session</button></div><div className="heroStats" style={{marginTop:10}}><div className="heroStat"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">SESSIONS</div></div><div className="heroStat"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">RSVPS</div></div><div className="heroStat"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">LOGS</div></div></div><div className="heroMetaStrip">Focus: keep attendance up and complete post-session lift logs for readiness tracking.</div></div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="S&C SESSIONS" s={`${scSessions.length} TOTAL`} identity/>
     <div className="accent-card" style={{marginBottom:16,paddingLeft:10}}><button className="btn btn-primary btn-v" onClick={()=>setShowAddSC(!showAddSC)} style={{marginBottom:0,width:"calc(100% - 32px)",marginLeft:16,marginRight:16}}>
       {showAddSC?"CANCEL":"+ ADD SESSION"}

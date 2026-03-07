@@ -24,11 +24,11 @@ export default function CoachCommandCenter({
 }) {
   const isCompact=variant==="compact";
   const metricBase={
-    minHeight:56,
+    minHeight:66,
     borderRadius:12,
     border:"1px solid var(--stroke-1)",
     background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.25))",
-    padding:"10px 10px",
+    padding:"10px",
     display:"flex",
     flexDirection:"column",
     justifyContent:"center",
@@ -92,7 +92,7 @@ export default function CoachCommandCenter({
   }
 
   return (
-    <section style={{padding:"12px 12px 14px"}}>
+    <section style={{padding:"10px 12px 12px"}}>
       <div style={{marginTop:2,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <h2 className="u-allcaps-long" style={{fontFamily:FD,fontSize:13,color:"var(--text-secondary)",margin:0}}>
           Coach Command Center
@@ -103,20 +103,23 @@ export default function CoachCommandCenter({
         <button type="button" onClick={onPlayersClick} style={{...metricBase,border:highlightPlayersAttention?"1px solid rgba(255,69,69,0.45)":metricBase.border,boxShadow:"none"}}>
           <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
           <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"var(--accent)"}}>{totalPlayers}</div>
+          <div style={{marginTop:2,fontFamily:FB,fontSize:9,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:"var(--tracking-tight)"}}>{highlightPlayersAttention?"Needs check-ins":"On track"}</div>
         </button>
 
         <button type="button" onClick={onActiveTodayClick} style={metricBase}>
           <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
           <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{activeTodayCount}</div>
+          <div style={{marginTop:2,fontFamily:FB,fontSize:9,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:"var(--tracking-tight)"}}>Session logs</div>
         </button>
 
         <button type="button" onClick={onNextEventClick} style={metricBase}>
           <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
           <div style={{marginTop:5,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{nextEventDateFormatted}</div>
+          <div style={{marginTop:2,fontFamily:FB,fontSize:9,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:"var(--tracking-tight)"}}>Timeline</div>
         </button>
       </div>
 
-      <div style={{marginTop:10,overflowX:"auto",whiteSpace:"nowrap",paddingBottom:2}}>
+      <div style={{marginTop:9,overflowX:"auto",whiteSpace:"nowrap",paddingBottom:2}}>
         <div style={{display:"flex",gap:8}}>
           <button type="button" onClick={onAddPlayer} style={quickBtn(primaryQuickAction==="addPlayer")}>+ Add Player</button>
           <button type="button" onClick={onAddDrill} style={quickBtn(primaryQuickAction==="addDrill")}>+ Add Drill</button>
@@ -125,12 +128,17 @@ export default function CoachCommandCenter({
         </div>
       </div>
 
-      <div style={{margin:"10px 0 4px",padding:"14px 14px",border:"1px solid var(--stroke-1)",borderRadius:14,background:"var(--surface-2)"}}>
-        <div className="u-meta-label" style={{fontFamily:FB,fontSize:10,color:"var(--text-2)"}}>TEAM CODE</div>
-        <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8,flexWrap:"wrap"}}>
-          <div style={{fontFamily:FD,fontSize:25,color:"var(--text-1)",letterSpacing:4,minWidth:114,lineHeight:1}}>{joinCode||"—"}</div>
-          <button onClick={onCopyJoinCode} style={{padding:"8px 12px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY</button>
-          <button onClick={onRegenerateJoinCode} style={{padding:"8px 12px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-tight)"}}>REGENERATE</button>
+      <div style={{margin:"10px 0 4px",padding:"12px",border:"1px solid var(--stroke-1)",borderRadius:14,background:"var(--surface-2)"}}>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+          <div>
+            <div className="u-meta-label" style={{fontFamily:FB,fontSize:10,color:"var(--text-2)"}}>TEAM CODE</div>
+            <div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",marginTop:2}}>Share with players to join roster</div>
+          </div>
+          <div style={{fontFamily:FD,fontSize:"clamp(20px, 5vw, 24px)",color:"var(--text-1)",letterSpacing:4,lineHeight:1,maxWidth:"52%",overflow:"hidden",textOverflow:"ellipsis"}}>{joinCode||"—"}</div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:7,marginTop:10}}>
+          <button onClick={onCopyJoinCode} style={{padding:"9px 10px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY CODE</button>
+          <button onClick={onRegenerateJoinCode} style={{padding:"9px 10px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-tight)"}}>REGENERATE</button>
         </div>
         {codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:6}}>{codeErr}</div>}
       </div>
