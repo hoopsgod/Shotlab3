@@ -5,6 +5,7 @@ import PageHeader from "./components/PageHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
 import CoachHero from "./components/CoachHero";
 import CoachMiniHeader from "./components/CoachMiniHeader";
+import HeroBanner from "./components/HeroBanner";
 import Button from "./components/ui/Button";
 import EmptyState from "./components/EmptyState";
 import { TeamIdentity, TeamWatermark, TeamBrandPreview } from "./components/TeamBranding";
@@ -1280,7 +1281,9 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
     {(()=>{
       const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
+      const dashboardBannerStats=[{label:"Total Makes",value:totalMakes,color:VOLT},{label:"Longest Streak",value:`${streak}D`,color:CYAN}];
       return <div style={{marginBottom:28}}>
+        <HeroBanner title="Dashboard" subtitle="Your training snapshot for today." stats={dashboardBannerStats}/>
         <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
           <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:12,fontWeight:600,letterSpacing:"0.03em",marginTop:6}}>Choose how you’re training today</div>
@@ -1561,6 +1564,7 @@ return <SectionContainer className="fade-up">
 </div>
 </div>
 
+<SH t="DUELS PLAYBOOK" s="SKILL CLIPS"/>
 <div style={{marginBottom:12}}>{INSTRUCTIONAL_CONTENT.slice(1,3).map(item=><DrillDetail key={`duel-${item.id}`} title={item.title} description={item.description} videoUrl={item.videoUrl} techniqueTips={item.techniqueTips}/> )}</div>
 
 {/* Pending challenges */}
@@ -1692,6 +1696,7 @@ return <div className="fade-up">
 </div>
 
 {/* Personal stats */}
+<SH t="YOUR LIFTING SUMMARY" s="ATTENDANCE SNAPSHOT"/>
 <div style={{display:"flex",gap:8,marginBottom:16}}>
   <div className="grd-bdr" style={{flex:1.5}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
     <AnimNum v={myCount} c={SC_COLOR} big/>
