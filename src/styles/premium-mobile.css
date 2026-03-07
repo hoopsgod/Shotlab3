@@ -198,7 +198,7 @@ select {
   background: transparent;
   color: var(--text-3);
   gap: var(--space-1);
-  transition: transform 160ms ease, color 180ms ease, background-color 180ms ease, opacity 180ms ease;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-standard), color var(--motion-duration-medium) var(--motion-ease-standard), background-color var(--motion-duration-medium) var(--motion-ease-standard), opacity var(--motion-duration-medium) var(--motion-ease-standard), border-color var(--motion-duration-medium) var(--motion-ease-standard);
 }
 
 .tab.shared-nav-item.is-active {
@@ -208,7 +208,7 @@ select {
 
 .tab.shared-nav-item .tab-icon,
 .tab.shared-nav-item .tab-label {
-  transition: transform 160ms ease, opacity 180ms ease, color 180ms ease;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-standard), opacity var(--motion-duration-medium) var(--motion-ease-standard), color var(--motion-duration-medium) var(--motion-ease-standard);
 }
 
 .tab.shared-nav-item .tab-icon {
@@ -231,7 +231,7 @@ select {
 
 
 .tab.shared-nav-item:active {
-  transform: translateY(1px);
+  transform: translateY(var(--motion-distance-press-y));
 }
 
 .tab .tab-label {

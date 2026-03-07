@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -23,6 +23,56 @@ const ChevronRight = ({ size = 24, color = "currentColor" }) => (
     <path d="m9 18 6-6-6-6" />
   </svg>
 );
+
+
+
+const usePrefersReducedMotion = () => {
+  const [reduced, setReduced] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const onChange = () => setReduced(media.matches);
+    onChange();
+    media.addEventListener?.("change", onChange);
+    return () => media.removeEventListener?.("change", onChange);
+  }, []);
+
+  return reduced;
+};
+
+const AnimatedNumber = ({ value }) => {
+  const reducedMotion = usePrefersReducedMotion();
+  const [displayValue, setDisplayValue] = useState(value);
+  const rafRef = useRef(null);
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setDisplayValue(value);
+      return undefined;
+    }
+
+    const start = displayValue;
+    const delta = value - start;
+    const duration = 320;
+    const startTime = performance.now();
+
+    const tick = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplayValue(Math.round(start + delta * eased));
+      if (progress < 1) rafRef.current = requestAnimationFrame(tick);
+    };
+
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [value, reducedMotion]);
+
+  return <span className="metric-value-transition">{displayValue}</span>;
+};
 
 const StatusBadge = ({ active }) => {
   const tone = active
@@ -60,11 +110,18 @@ export default function PlayersScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All players");
   const [copied, setCopied] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const reducedMotion = usePrefersReducedMotion();
 
   const players = [];
   const totalPlayers = players.length;
   const activePlayers = 0;
   const inactivePlayers = 0;
+
+  useEffect(() => {
+    const timeout = setTimeout(() => setIsLoading(false), reducedMotion ? 0 : 650);
+    return () => clearTimeout(timeout);
+  }, [reducedMotion]);
 
   const filteredPlayers = useMemo(() => {
     return players.filter((player) => {
@@ -109,8 +166,10 @@ export default function PlayersScreen() {
     fontWeight: isActive ? 700 : 500,
   });
 
+  const sectionMotionKey = `${activeFilter}-${searchQuery}-${isLoading}`;
+
   return (
-    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)",
+    <div className="motion-fade-slide" style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)",
       paddingBottom: "calc(var(--nav-height, 74px) + var(--space-8) + env(safe-area-inset-bottom))" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
         <Users size={22} color="var(--text-2)" />
@@ -151,7 +210,7 @@ export default function PlayersScreen() {
         ))}
       </div>
 
-      <div
+      <div className="shared-card section-transition"
         style={{
           background: "var(--surface-1)",
           border: "1px solid var(--stroke-1)",
@@ -163,90 +222,102 @@ export default function PlayersScreen() {
         }}
       >
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
+          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}><AnimatedNumber value={totalPlayers} /></span>
           <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Total</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
+          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}><AnimatedNumber value={activePlayers} /></span>
           <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Active</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
+          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}><AnimatedNumber value={inactivePlayers} /></span>
           <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Inactive</span>
         </div>
       </div>
 
-      {players.length === 0 ? (
-        <div
-          style={{
-            minHeight: "280px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "var(--space-4)",
-          }}
-        >
-          <Users size={48} color="#555555" />
-          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
-            No players yet
-          </p>
-          <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
-            Invite players to join your program and begin tracking progress
-          </p>
-          <button className="btn btn--primary" aria-label="Invite players to roster">
-            Invite players
-          </button>
-        </div>
-      ) : (
-        filteredPlayers.map((player) => (
+      <div key={sectionMotionKey} className="section-transition">
+        {isLoading ? (
+          <div style={{ display: "grid", gap: "var(--space-3)", marginBottom: "var(--space-3)" }}>
+            {[0, 1, 2].map((row) => (
+              <div key={row} className="skeleton-shimmer" style={{ height: 72, borderRadius: 16, border: "1px solid rgba(173, 187, 205, 0.18)" }} />
+            ))}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "var(--space-2)", color: "var(--text-2)", fontSize: 12, letterSpacing: "0.04em", textTransform: "uppercase" }}>
+              <span className="refined-spinner" aria-hidden="true" />
+              Updating roster
+            </div>
+          </div>
+        ) : players.length === 0 ? (
           <div
-            key={player.id}
-            className="interactive-card"
-            role="button"
-            tabIndex={0}
-            aria-label={`${player.name} status ${player.active ? "active" : "inactive"}`}
             style={{
-              background: "var(--surface-2)",
-              border: "1px solid rgba(167, 187, 211, 0.34)",
-              borderRadius: "16px",
-              padding: "var(--space-4)",
-              marginBottom: "var(--space-3)",
+              minHeight: "280px",
               display: "flex",
+              flexDirection: "column",
               alignItems: "center",
-              gap: "var(--space-3)",
-              cursor: "pointer",
+              justifyContent: "center",
+              gap: "var(--space-4)",
             }}
           >
+            <Users size={48} color="#555555" />
+            <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
+              No players yet
+            </p>
+            <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
+              Invite players to join your program and begin tracking progress
+            </p>
+            <button className="btn btn--primary" aria-label="Invite players to roster">
+              Invite players
+            </button>
+          </div>
+        ) : (
+          filteredPlayers.map((player) => (
             <div
+              key={player.id}
+              className="interactive-card"
+              role="button"
+              tabIndex={0}
+              aria-label={`${player.name} status ${player.active ? "active" : "inactive"}`}
               style={{
-                width: "44px",
-                height: "44px",
-                background: "var(--surface-1)",
-                borderRadius: "50%",
+                background: "var(--surface-2)",
+                border: "1px solid rgba(167, 187, 211, 0.34)",
+                borderRadius: "16px",
+                padding: "var(--space-4)",
+                marginBottom: "var(--space-3)",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                fontSize: "16px",
-                fontWeight: 700,
-                color: "var(--text-1)",
-                border: player.active ? "2px solid rgba(91, 243, 255, 0.44)" : "2px solid rgba(167, 187, 211, 0.36)",
+                gap: "var(--space-3)",
+                cursor: "pointer",
               }}
             >
-              {player.name?.[0] || "?"}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: "var(--space-2)" }}>
-                {player.name}
+              <div
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  background: "var(--surface-1)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  color: "var(--text-1)",
+                  border: player.active ? "2px solid rgba(91, 243, 255, 0.44)" : "2px solid rgba(167, 187, 211, 0.36)",
+                }}
+              >
+                {player.name?.[0] || "?"}
               </div>
-              <StatusBadge active={player.active} />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: "var(--space-2)" }}>
+                  {player.name}
+                </div>
+                <StatusBadge active={player.active} />
+              </div>
+              <ChevronRight size={16} color="var(--text-3)" />
             </div>
-            <ChevronRight size={16} color="var(--text-3)" />
-          </div>
-        ))
-      )}
+          ))
+        )}
+      </div>
 
       <p
         style={{

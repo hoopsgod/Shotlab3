@@ -71,6 +71,24 @@ export const UI_TOKENS = {
     raised: "0 14px 30px rgba(0, 0, 0, 0.32)",
     accent: "0 0 0 3px rgba(63, 95, 151, 0.22)",
   },
+  motion: {
+    duration: {
+      instant: 80,
+      fast: 140,
+      medium: 220,
+      slow: 320,
+    },
+    easing: {
+      standard: "cubic-bezier(0.2, 0, 0, 1)",
+      emphasized: "cubic-bezier(0.16, 1, 0.3, 1)",
+      exit: "cubic-bezier(0.4, 0, 1, 1)",
+    },
+    distance: {
+      hoverY: -2,
+      pressY: 1,
+      sectionY: 8,
+    },
+  },
   borders: {
     subtle: "rgba(173, 187, 205, 0.22)",
     strong: "rgba(188, 202, 220, 0.36)",

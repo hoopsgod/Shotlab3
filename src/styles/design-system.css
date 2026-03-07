@@ -144,6 +144,19 @@ Implementation plan (small-scope motion pass):
   --s-7: var(--space-7);
   --s-8: var(--space-8);
   --s-9: var(--space-9);
+
+  /* motion tokens */
+  --motion-duration-instant: 80ms;
+  --motion-duration-fast: 140ms;
+  --motion-duration-medium: 220ms;
+  --motion-duration-slow: 320ms;
+  --motion-ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --motion-ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-ease-exit: cubic-bezier(0.4, 0, 1, 1);
+  --motion-distance-hover-y: -2px;
+  --motion-distance-press-y: 1px;
+  --motion-distance-section-y: 8px;
+
 }
 
 * { box-sizing: border-box; }
@@ -175,12 +188,43 @@ textarea {
 .stack-16 { display: flex; flex-direction: column; gap: var(--space-3); }
 .stack-24 { display: flex; flex-direction: column; gap: var(--space-4); }
 
+
+.motion-fade-slide {
+  animation: motionFadeSlide var(--motion-duration-medium) var(--motion-ease-standard) both;
+}
+
+.section-transition {
+  animation: sectionRefresh var(--motion-duration-medium) var(--motion-ease-standard) both;
+}
+
+.metric-value-transition {
+  animation: metricValueEnter var(--motion-duration-medium) var(--motion-ease-emphasized) both;
+  font-variant-numeric: tabular-nums;
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08), rgba(255,255,255,0.04));
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.2s linear infinite;
+}
+
+.refined-spinner {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(173, 187, 205, 0.28);
+  border-top-color: rgba(188, 202, 220, 0.88);
+  animation: spinnerTurn 900ms linear infinite;
+}
+
 .shared-card {
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-subtle);
   background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0)), var(--surface-1);
   box-shadow: var(--shadow-soft);
-  transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-standard), box-shadow var(--motion-duration-medium) var(--motion-ease-standard), border-color var(--motion-duration-medium) var(--motion-ease-standard), background-color var(--motion-duration-medium) var(--motion-ease-standard), opacity var(--motion-duration-medium) var(--motion-ease-standard);
 }
 
 .shared-card--primary {
@@ -210,14 +254,14 @@ textarea {
 @media (hover: hover) and (pointer: fine) {
   .shared-card:is(button, a, [role="button"]):hover,
   .interactive-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(var(--motion-distance-hover-y));
     box-shadow: var(--shadow-medium);
     border-color: var(--color-border-strong);
   }
 }
 
 .interactive-card {
-  transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-standard), box-shadow var(--motion-duration-medium) var(--motion-ease-standard), border-color var(--motion-duration-medium) var(--motion-ease-standard), background-color var(--motion-duration-medium) var(--motion-ease-standard), opacity var(--motion-duration-medium) var(--motion-ease-standard);
   cursor: pointer;
 }
 
@@ -249,10 +293,10 @@ a.interactive-card:focus-visible {
   justify-content: center;
   gap: var(--space-2);
   cursor: pointer;
-  transition: transform 120ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  transition: transform var(--motion-duration-fast) var(--motion-ease-standard), background-color var(--motion-duration-medium) var(--motion-ease-standard), color var(--motion-duration-medium) var(--motion-ease-standard), border-color var(--motion-duration-medium) var(--motion-ease-standard), box-shadow var(--motion-duration-medium) var(--motion-ease-standard), opacity var(--motion-duration-medium) var(--motion-ease-standard);
 }
 
-.btn:active { transform: scale(0.98); }
+.btn:active { transform: translateY(var(--motion-distance-press-y)) scale(0.985); }
 
 @media (hover: hover) and (pointer: fine) {
   .btn--primary:hover {
@@ -446,5 +490,57 @@ a,
   .shared-card:is(button, a, [role="button"]):hover,
   .interactive-card:hover {
     transform: none;
+  }
+}
+
+
+@keyframes motionFadeSlide {
+  from { opacity: 0; transform: translateY(var(--motion-distance-section-y)); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sectionRefresh {
+  from { opacity: 0.55; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes metricValueEnter {
+  from { opacity: 0.5; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes skeletonShimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+@keyframes spinnerTurn {
+  from { transform: rotate(0); }
+  to { transform: rotate(360deg); }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-fade-slide,
+  .section-transition,
+  .metric-value-transition,
+  .skeleton-shimmer,
+  .refined-spinner {
+    animation: none !important;
+  }
+
+  .shared-card,
+  .interactive-card,
+  .btn,
+  .tab.shared-nav-item,
+  .tab.shared-nav-item .tab-icon,
+  .tab.shared-nav-item .tab-label {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+
+  .btn:active,
+  .tab.shared-nav-item:active {
+    transform: none !important;
   }
 }
