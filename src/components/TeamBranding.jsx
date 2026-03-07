@@ -38,11 +38,11 @@ export function TeamLogo({ logoUrl, teamName, size=64, primaryColor="#C8FF1A", b
 }
 
 export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold", compact=false, subtitle, showLogo=true }) {
-  const size=compact?48:mode==="bold"?72:58;
+  const size=compact?50:mode==="bold"?76:62;
   return (
     <div style={{display:"flex",alignItems:"center",gap:compact?10:14,minWidth:0,position:"relative"}}>
       {showLogo ? <div style={{position:"relative"}}>
-        <div style={{position:"absolute",inset:"-10px",borderRadius:"50%",background:`radial-gradient(circle, ${alphaFromHex(branding.primaryColor,0.12)} 0%, transparent 70%)`,filter:"blur(4px)"}}/>
+        <div style={{position:"absolute",inset:"-8px",borderRadius:"50%",background:`radial-gradient(circle, ${alphaFromHex(branding.primaryColor,0.08)} 0%, transparent 70%)`,filter:"blur(3px)",opacity:0.72}}/>
         <TeamLogo logoUrl={branding.logoUrl} teamName={teamName} size={size} primaryColor={branding.primaryColor} badgeStyle={branding.badgeStyle}/>
       </div> : null}
       <div style={{minWidth:0}}>
@@ -60,8 +60,8 @@ export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold
 export function TeamWatermark({ logoUrl, primaryColor="#C8FF1A", opacity=0.07, size=220 }) {
   if(!logoUrl)return null;
   return (
-    <div aria-hidden style={{position:"absolute",right:-28,top:-28,width:size,height:size,opacity:Math.min(opacity,0.045),pointerEvents:"none",filter:"grayscale(0.55)"}}>
-      <img src={logoUrl} alt="" style={{width:"100%",height:"100%",objectFit:"contain",mixBlendMode:"screen",filter:`drop-shadow(0 0 12px ${alphaFromHex(primaryColor,0.16)})`}}/>
+    <div aria-hidden style={{position:"absolute",right:-28,top:-28,width:size,height:size,opacity:Math.min(opacity,0.03),pointerEvents:"none",filter:"grayscale(0.55)"}}>
+      <img src={logoUrl} alt="" style={{width:"100%",height:"100%",objectFit:"contain",mixBlendMode:"screen",filter:`drop-shadow(0 0 8px ${alphaFromHex(primaryColor,0.1)})`}}/>
     </div>
   );
 }
