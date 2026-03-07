@@ -37,11 +37,11 @@ export default function CoachCommandCenter({
   };
 
   const quickBtn=(isPrimary)=>({
-    height:46,
+    height:48,
     minWidth:130,
-    borderRadius:999,
-    border:`1px solid ${isPrimary?"var(--accent)":"var(--stroke-1)"}`,
-    background:isPrimary?"var(--accent)":"var(--surface-1)",
+    borderRadius:12,
+    border:`1px solid ${isPrimary?"var(--accent)":"var(--stroke-2)"}`,
+    background:isPrimary?"var(--accent)":"transparent",
     color:isPrimary?"#0B0D10":"var(--text-2)",
     fontFamily:FB,
     fontSize:13,
@@ -55,11 +55,11 @@ export default function CoachCommandCenter({
   });
 
   const compactActionBtn=(isPrimary)=>({
-    minHeight:46,
+    minHeight:44,
     minWidth:44,
-    borderRadius:999,
-    border:`1px solid ${isPrimary?"var(--accent)":"var(--stroke-1)"}`,
-    background:isPrimary?"var(--accent)":"var(--surface-2)",
+    borderRadius:12,
+    border:`1px solid ${isPrimary?"var(--accent)":"var(--stroke-2)"}`,
+    background:isPrimary?"var(--accent)":"transparent",
     color:isPrimary?"#0B0D10":"var(--text-3)",
     fontFamily:FB,
     fontSize:10,
@@ -137,8 +137,8 @@ export default function CoachCommandCenter({
           <div style={{fontFamily:FD,fontSize:"clamp(20px, 5vw, 24px)",color:"var(--text-1)",letterSpacing:4,lineHeight:1,maxWidth:"52%",overflow:"hidden",textOverflow:"ellipsis"}}>{joinCode||"—"}</div>
         </div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
-          <button onClick={onCopyJoinCode} style={{height:40,padding:"0 14px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-2)",color:"var(--text-2)",borderRadius:999,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY CODE</button>
-          <button onClick={onRegenerateJoinCode} style={{height:40,padding:"0 14px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-2)",color:"var(--text-2)",borderRadius:999,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-tight)"}}>REGENERATE</button>
+          <button onClick={onCopyJoinCode} style={{height:44,padding:"0 16px",fontSize:10,border:"1px solid var(--stroke-2)",background:"transparent",color:"var(--text-2)",borderRadius:12,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY CODE</button>
+          <button onClick={onRegenerateJoinCode} style={{height:44,padding:"0 16px",fontSize:10,border:"1px solid var(--stroke-2)",background:"transparent",color:"var(--text-2)",borderRadius:12,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-tight)"}}>REGENERATE</button>
         </div>
         {codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:6}}>{codeErr}</div>}
       </div>

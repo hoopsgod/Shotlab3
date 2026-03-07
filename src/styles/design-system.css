@@ -58,7 +58,10 @@
   --btn-h-lg: 48px;
   --btn-h-md: 44px;
   --btn-h-sm: 40px;
-  --btn-radius: 999px;
+  --btn-radius: 12px;
+  --btn-pad-lg: 20px;
+  --btn-pad-md: 16px;
+  --btn-pad-sm: 12px;
 
   /* inputs */
   --input-h: 48px;
@@ -152,7 +155,7 @@
 .btn {
   height: var(--btn-h-lg);
   border-radius: var(--btn-radius);
-  padding: 0 18px;
+  padding: 0 var(--btn-pad-lg);
   font-weight: 700;
   letter-spacing: 0.04em;
   display: inline-flex;
@@ -171,21 +174,30 @@
   color: #081006;
 }
 .btn--secondary {
-  background: var(--surface-2);
-  color: var(--text-1);
-  border-color: var(--border-1);
+  background: transparent;
+  color: var(--text-2);
+  border-color: var(--border-2);
+  opacity: 0.9;
 }
 .btn--tertiary {
   background: transparent;
-  color: var(--accent);
+  color: var(--text-2);
   border-color: transparent;
-  padding: 0;
-  height: auto;
+  padding: 0 var(--btn-pad-sm);
+  height: var(--btn-h-sm);
+  opacity: 0.92;
+}
+.btn .btn__icon,
+.btn__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  stroke-width: 1.9;
 }
 .iconBtn {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: var(--btn-h-md);
+  height: var(--btn-h-md);
+  border-radius: var(--btn-radius);
   background: var(--surface-2);
   border: 1px solid var(--border-1);
   display: flex;
