@@ -14,6 +14,7 @@
   --color-text-secondary: #c8d4e6;
   --color-text-muted: #95a4ba;
   --color-text-helper: #8291a7;
+  --color-text-placeholder: #9caec6;
   --brand-background: #0b1220;
   --brand-primary: #5bf3ff;
   --brand-secondary: #95a4ba;
@@ -30,6 +31,8 @@
 
   --color-border-subtle: rgba(167, 187, 211, 0.18);
   --color-border-strong: rgba(180, 201, 224, 0.32);
+  --color-focus-ring: rgba(200, 255, 0, 0.85);
+  --color-focus-shadow: rgba(91, 243, 255, 0.28);
 
   /* ------------------------------
      Spacing (8px rhythm)
@@ -58,7 +61,7 @@
 
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.22);
   --shadow-medium: 0 14px 34px rgba(0, 0, 0, 0.3);
-  --shadow-focus: 0 0 0 3px rgba(91, 243, 255, 0.35);
+  --shadow-focus: 0 0 0 2px var(--color-bg-shell), 0 0 0 4px var(--color-focus-ring), 0 0 0 6px var(--color-focus-shadow);
 
   /* ------------------------------
      Typography
@@ -169,8 +172,8 @@ textarea {
 /* cards: primary, secondary, subtle */
 .shared-card {
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-subtle);
-  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)) , var(--color-surface-primary);
+  border: 1px solid rgba(180, 201, 224, 0.24);
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0)) , var(--color-surface-primary);
   box-shadow: var(--shadow-soft);
   transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
@@ -183,7 +186,7 @@ textarea {
 
 .shared-card--secondary {
   background: var(--color-surface-primary);
-  border-color: var(--color-border-subtle);
+  border-color: rgba(180, 201, 224, 0.22);
 }
 
 .shared-card--subtle {
@@ -210,7 +213,21 @@ textarea {
 }
 
 .interactive-card {
-  transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  cursor: pointer;
+}
+
+.interactive-card:focus-visible,
+[role="button"].interactive-card:focus-visible,
+button.interactive-card:focus-visible,
+a.interactive-card:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--color-focus-ring);
+}
+
+.shared-card:not(.interactive-card) {
+  border-color: rgba(145, 164, 188, 0.18);
 }
 
 /* buttons: primary, secondary, ghost, icon */
@@ -236,6 +253,10 @@ textarea {
 .iconBtn:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
+}
+
+.btn:focus-visible {
+  border-color: rgba(200, 255, 0, 0.7);
 }
 
 .btn--primary {
@@ -312,7 +333,67 @@ textarea { padding-top: 12px; padding-bottom: 12px; }
 .input::placeholder,
 input::placeholder,
 textarea::placeholder {
-  color: var(--color-text-helper);
+  color: var(--color-text-placeholder);
+  opacity: 0.95;
+}
+
+select,
+input,
+textarea,
+button,
+a,
+[role="button"],
+[tabindex]:not([tabindex="-1"]) {
+  touch-action: manipulation;
+}
+
+.status-chip::before {
+  margin-right: 6px;
+  font-size: 0.95em;
+}
+
+.status-chip--success::before { content: "✓"; }
+.status-chip--pending::before { content: "⏳"; }
+.status-chip--neutral::before { content: "•"; }
+.status-chip--info::before { content: "ℹ"; }
+
+.u-allcaps-long,
+.u-meta-label,
+.tab-label,
+.section-kicker,
+.heroKicker {
+  letter-spacing: 0.075em;
+  font-weight: 700;
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --color-bg-shell: #0a1020;
+    --color-surface-primary: #121d31;
+    --color-surface-secondary: #1a2741;
+    --color-text-secondary: #d7e3f5;
+    --color-text-muted: #b6c5db;
+    --color-text-helper: #b6c5db;
+    --color-text-placeholder: #c2d0e4;
+    --color-border-subtle: rgba(188, 209, 235, 0.42);
+    --color-border-strong: rgba(206, 224, 247, 0.64);
+  }
+
+  .shared-card,
+  .shared-card--secondary,
+  .shared-card--subtle {
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)), var(--surface-1);
+    border-color: var(--color-border-strong);
+  }
+
+  .btn--ghost,
+  .btn--tertiary,
+  .iconBtn,
+  .btn--icon {
+    border-color: var(--color-border-strong);
+    color: var(--text-1);
+    background: rgba(179, 201, 227, 0.08);
+  }
 }
 
 /* chips and tap affordances */

@@ -70,9 +70,9 @@
   font-size: var(--type-caption-size);
   font-weight: var(--fw-semibold);
   line-height: 1.35;
-  letter-spacing: var(--ls-label);
+  letter-spacing: 0.075em;
   text-transform: uppercase;
-  color: var(--text-3);
+  color: var(--text-2);
 }
 
 @media (max-width: 540px) {

@@ -24,6 +24,38 @@ const ChevronRight = ({ size = 24, color = "currentColor" }) => (
   </svg>
 );
 
+const StatusBadge = ({ active }) => {
+  const tone = active
+    ? {
+        label: "✓ Active",
+        color: "var(--color-success)",
+        border: "rgba(99, 222, 143, 0.42)",
+        bg: "rgba(99, 222, 143, 0.16)",
+      }
+    : {
+        label: "⏳ Inactive",
+        color: "var(--color-pending)",
+        border: "rgba(255, 191, 102, 0.42)",
+        bg: "rgba(255, 191, 102, 0.18)",
+      };
+
+  return (
+    <span
+      className="status-chip"
+      style={{
+        color: tone.color,
+        border: `1px solid ${tone.border}`,
+        background: tone.bg,
+        fontSize: "11px",
+        letterSpacing: "0.04em",
+        textTransform: "none",
+      }}
+    >
+      {tone.label}
+    </span>
+  );
+};
+
 export default function PlayersScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All players");
@@ -85,12 +117,12 @@ export default function PlayersScreen() {
           style={{
             fontSize: "24px",
             fontWeight: 900,
-            textTransform: "none",
+            textTransform: "uppercase",
             color: "var(--text-1)",
-            letterSpacing: "var(--ls-tight)",
+            letterSpacing: "0.04em",
           }}
         >
-          PLAYERS
+          Players
         </span>
       </div>
 
@@ -131,17 +163,17 @@ export default function PlayersScreen() {
       >
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "none", letterSpacing: "var(--ls-label)", marginTop: "var(--space-2)" }}>Total</span>
+          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Total</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "none", letterSpacing: "var(--ls-label)", marginTop: "var(--space-2)" }}>Active</span>
+          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Active</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "none", letterSpacing: "var(--ls-label)", marginTop: "var(--space-2)" }}>Inactive</span>
+          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Inactive</span>
         </div>
       </div>
 
@@ -163,7 +195,7 @@ export default function PlayersScreen() {
           <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
             Invite players to join your program and begin tracking progress
           </p>
-          <button className="btn btn--primary">
+          <button className="btn btn--primary" aria-label="Invite players to roster">
             Invite players
           </button>
         </div>
@@ -172,9 +204,12 @@ export default function PlayersScreen() {
           <div
             key={player.id}
             className="interactive-card"
+            role="button"
+            tabIndex={0}
+            aria-label={`${player.name} status ${player.active ? "active" : "inactive"}`}
             style={{
               background: "var(--surface-2)",
-              border: "1px solid var(--stroke-1)",
+              border: "1px solid rgba(167, 187, 211, 0.34)",
               borderRadius: "16px",
               padding: "15px var(--space-4)",
               marginBottom: "var(--space-3)",
@@ -196,13 +231,16 @@ export default function PlayersScreen() {
                 fontSize: "16px",
                 fontWeight: 700,
                 color: "var(--text-1)",
-                border: player.active ? "2px solid var(--accent-soft)" : "2px solid var(--stroke-1)",
+                border: player.active ? "2px solid rgba(91, 243, 255, 0.44)" : "2px solid rgba(167, 187, 211, 0.36)",
               }}
             >
               {player.name?.[0] || "?"}
             </div>
-            <div style={{ flex: 1, fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)" }}>
-              {player.name}
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: 6 }}>
+                {player.name}
+              </div>
+              <StatusBadge active={player.active} />
             </div>
             <ChevronRight size={16} color="var(--text-3)" />
           </div>
@@ -211,16 +249,16 @@ export default function PlayersScreen() {
 
       <p
         style={{
-          fontSize: "13px",
+          fontSize: "12px",
           fontWeight: 700,
-          textTransform: "none",
-          letterSpacing: "0.10em",
-          color: "var(--text-1)",
+          textTransform: "uppercase",
+          letterSpacing: "0.06em",
+          color: "var(--text-2)",
           marginTop: "var(--space-6)",
           marginBottom: "var(--space-3)",
         }}
       >
-        ROSTER GROWTH
+        Roster growth
       </p>
       <div
         style={{
