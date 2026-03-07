@@ -82,17 +82,17 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
 
         .coach-tools-trigger {
           position: relative;
-          height: 46px;
-          min-height: 44px;
+          height: var(--coach-button-height);
+          min-height: var(--coach-button-height);
           max-height: 52px;
           width: 100%;
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 10px;
-          padding: 0 13px;
+          gap: var(--coach-space-8);
+          padding: 0 var(--coach-card-pad);
           border: 0;
-          border-radius: 13px;
+          border-radius: 12px;
           background: rgba(255, 255, 255, 0.01);
           cursor: pointer;
           color: var(--text-secondary);
@@ -108,8 +108,8 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           content: "";
           position: absolute;
           left: 0;
-          top: 8px;
-          bottom: 8px;
+          top: var(--coach-space-8);
+          bottom: var(--coach-space-8);
           width: 3px;
           border-radius: 0 3px 3px 0;
           background: var(--stroke-1);
@@ -132,13 +132,13 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
         .coach-tools-trigger__left {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: var(--coach-space-8);
         }
 
         .coach-tools-trigger__icon-wrap {
-          width: 20px;
-          height: 20px;
-          border-radius: 6px;
+          width: 24px;
+          height: 24px;
+          border-radius: 8px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -171,7 +171,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
         }
 
         .coach-tools-content__inner {
-          padding-top: 4px;
+          padding-top: var(--coach-space-8);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
         }
 
