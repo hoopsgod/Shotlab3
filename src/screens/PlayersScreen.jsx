@@ -122,37 +122,41 @@ export default function PlayersScreen() {
         style={{
           background: "var(--surface-2)",
           borderRadius: "12px",
-          padding: "var(--space-3) var(--space-4)",
+          padding: "10px var(--space-3)",
           marginBottom: "var(--space-4)",
           display: "flex",
           alignItems: "center",
         }}
       >
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Total</span>
+          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase" }}>Total</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Active</span>
+          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase" }}>Active</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Inactive</span>
+          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase" }}>Inactive</span>
         </div>
       </div>
 
       {players.length === 0 ? (
         <div
           style={{
-            minHeight: "280px",
+            minHeight: "220px",
+            background: "var(--surface-2)",
+            border: "1px solid var(--stroke-1)",
+            borderRadius: "16px",
+            padding: "18px 16px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: "var(--space-4)",
+            gap: "var(--space-3)",
           }}
         >
           <Users size={48} color="#555555" />
@@ -169,7 +173,7 @@ export default function PlayersScreen() {
               fontSize: "13px",
               fontWeight: 700,
               textTransform: "uppercase",
-              height: "52px",
+              height: "48px",
               borderRadius: "12px",
               padding: "0 24px",
               border: "none",
@@ -238,11 +242,11 @@ export default function PlayersScreen() {
           background: "var(--surface-2)",
           border: "1px solid var(--stroke-1)",
           borderRadius: "16px",
-          padding: "var(--space-4)",
+          padding: "14px var(--space-4)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "var(--space-3)",
+          gap: "var(--space-2)",
         }}
       >
         <UserPlus size={32} color="var(--text-2)" />
@@ -252,6 +256,7 @@ export default function PlayersScreen() {
         <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
           Share your program link and players can join instantly
         </p>
+        <div style={{ width: "100%", height: 1, background: "var(--stroke-1)", opacity: 0.8, margin: "4px 0 2px" }} />
         <button
           onClick={shareInviteLink}
           style={{
@@ -260,7 +265,7 @@ export default function PlayersScreen() {
             fontSize: "13px",
             fontWeight: 700,
             textTransform: "uppercase",
-            height: "52px",
+            height: "48px",
             borderRadius: "12px",
             padding: "0 24px",
             border: "none",
