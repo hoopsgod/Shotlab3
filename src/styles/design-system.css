@@ -164,6 +164,8 @@
   gap: 10px;
   border: 1px solid transparent;
   cursor: pointer;
+  transform: translateY(0) scale(1);
+  transition: transform 140ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
 }
 .btn:focus-visible {
   outline: none;
@@ -172,6 +174,7 @@
 .btn--primary {
   background: var(--accent);
   color: #081006;
+  box-shadow: 0 8px 18px rgba(184, 255, 0, 0.12);
 }
 .btn--secondary {
   background: transparent;
@@ -205,6 +208,146 @@
   justify-content: center;
 }
 .iconBtn:focus-visible { outline: none; box-shadow: var(--focus-ring); }
+
+@media (hover: hover) and (pointer: fine) {
+  .btn--primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(184, 255, 0, 0.15);
+  }
+
+  .btn--secondary:hover,
+  .btn--tertiary:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-1);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.btn:active {
+  transform: scale(0.985);
+}
+
+.btn-primary,
+.btn-secondary {
+  transition: transform 140ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.btn-primary:active,
+.btn-secondary:active {
+  transform: scale(0.985);
+}
+
+.btn-primary {
+  box-shadow: 0 8px 18px rgba(184, 255, 0, 0.12);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 24px rgba(184, 255, 0, 0.15);
+  }
+
+  .btn-secondary:hover {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-1);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.interactive-card {
+  transition: transform 150ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .interactive-card:hover {
+    transform: translateY(-1px);
+    border-color: var(--border-2);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.42);
+  }
+}
+
+.interactive-card:active {
+  transform: scale(0.992);
+}
+
+.bottom-nav .tab {
+  border-radius: 12px;
+  transition: color 180ms ease-out, transform 130ms ease, background-color 160ms ease;
+}
+
+.bottom-nav .tab .tab-icon,
+.bottom-nav .tab .tab-label {
+  transition: transform 160ms ease, opacity 160ms ease;
+}
+
+.bottom-nav .tab.is-active .tab-icon {
+  transform: translateY(-1px);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .bottom-nav .tab:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
+.bottom-nav .tab:active {
+  transform: scale(0.97);
+}
+
+.chip,
+.chip[aria-pressed="true"] {
+  transition: transform 130ms ease, background-color 140ms ease, color 140ms ease, border-color 140ms ease;
+}
+
+.chip:active {
+  transform: scale(0.98);
+}
+
+.rsvp-action {
+  transition: transform 130ms ease, filter 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .rsvp-action:hover {
+    filter: brightness(1.03);
+  }
+}
+
+.rsvp-action:active {
+  transform: scale(0.985);
+}
+
+.progressFill,
+.progress-fill,
+[class*="progressFill"],
+[class*="fill"] {
+  transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease;
+}
+
+.loadingPulse,
+.skeleton,
+[class*="skeleton"] {
+  transition: opacity 220ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .interactive-card,
+  .bottom-nav .tab,
+  .bottom-nav .tab .tab-icon,
+  .bottom-nav .tab .tab-label,
+  .chip,
+  .progressFill,
+  .progress-fill,
+  [class*="progressFill"],
+  [class*="fill"] {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
 
 /* list rows (Task #6 base) */
 .listRow {

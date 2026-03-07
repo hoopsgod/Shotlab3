@@ -112,7 +112,7 @@ export default function PlayersScreen() {
 
       <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
         {["ALL PLAYERS", "ACTIVE", "INACTIVE"].map((filter) => (
-          <button key={filter} onClick={() => setActiveFilter(filter)} className={`btn ${activeFilter === filter ? "btn--primary" : "btn--tertiary"}`} style={chipStyle(activeFilter === filter)}>
+          <button key={filter} onClick={() => setActiveFilter(filter)} className={`btn chip ${activeFilter === filter ? "btn--primary" : "btn--tertiary"}`} aria-pressed={activeFilter === filter} style={chipStyle(activeFilter === filter)}>
             {filter}
           </button>
         ))}
@@ -170,6 +170,7 @@ export default function PlayersScreen() {
         filteredPlayers.map((player) => (
           <div
             key={player.id}
+            className="interactive-card"
             style={{
               background: "var(--surface-2)",
               border: "1px solid var(--stroke-1)",

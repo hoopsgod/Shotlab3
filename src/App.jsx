@@ -1628,7 +1628,7 @@ return <div className="fade-up">
 </div></div>
 
 {/* Leaderboard toggle */}
-<button onClick={()=>setShowBoard(!showBoard)} className="ch card card--raised" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
+<button onClick={()=>setShowBoard(!showBoard)} className="ch card card--raised interactive-card" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
   <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:SC_COLOR+"15",display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={18} color={SC_COLOR}/></div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LIFTING LEADERBOARD</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Ranked by sessions attended</div></div></div>
   <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={SC_COLOR} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
 </button>
@@ -1665,7 +1665,7 @@ return <div className="fade-up">
 {upcoming.length===0&&<Empty variant="lifting" t="No upcoming sessions" action="Your coach will add S&C sessions here. Check back soon!"/>}
 {upcoming.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const going=sr.some(r=>r.email===user.email);const exp=expanded===s.id;
   return <div key={s.id} style={{marginBottom:12}}>
-    <button onClick={()=>setExpanded(exp?null:s.id)} className={`ch card ${going?"card--accent":""}`} style={{width:"100%",borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",cursor:"pointer",position:"relative"}}>
+    <button onClick={()=>setExpanded(exp?null:s.id)} className={`ch card interactive-card ${going?"card--accent":""}`} style={{width:"100%",borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",cursor:"pointer",position:"relative"}}>
       {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:SC_COLOR,borderRadius:"4px 0 0 4px"}}/>}
       <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
         <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={24} color={going?SC_COLOR:MUTED}/></div>
@@ -1679,7 +1679,7 @@ return <div className="fade-up">
     </button>
     {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
-      <button className="btn btn-secondary btn--dense btn-v" onClick={()=>toggleScRsvp(s.id)} style={{width:"100%"}}>
+      <button className="btn btn-secondary btn--dense btn-v rsvp-action" onClick={()=>toggleScRsvp(s.id)} style={{width:"100%"}}>
         {going?<>&#10003; YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
       </button>
       {sr.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>{sr.map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:4,background:CARD_BG,borderRadius:8,padding:"4px 8px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={20} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:600}}>{r.name}</span></div>)}</div>}
@@ -2129,8 +2129,9 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
           >
             {nextTier.name}
           </div>
-          <div style={{height:9,background:"rgba(255,255,255,0.12)",borderRadius:999,position:"relative",overflow:"hidden",border:"1px solid rgba(255,255,255,0.10)"}}>
+          <div className="progress-track" style={{height:9,background:"rgba(255,255,255,0.12)",borderRadius:999,position:"relative",overflow:"hidden",border:"1px solid rgba(255,255,255,0.10)"}}>
             <div
+              className="progress-fill"
               style={{
                 width:`${rankBarPct}%`,
                 height:"100%",
@@ -2148,13 +2149,13 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 </div>
 
 {/* Leaderboard toggle */}
-<button onClick={()=>setShowBoard(!showBoard)} className="ch uiTap" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
+<button onClick={()=>setShowBoard(!showBoard)} className="ch uiTap interactive-card" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
   <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:ORANGE+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>&#128293;</div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LEADERBOARD</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Attendance, scores & streaks</div></div></div>
   <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
 </button>
 
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
-  <div style={{display:"flex",gap:4,marginBottom:14}}>{[{k:"attend",l:"ATTENDANCE"},{k:"overall",l:"DRILL SCORES"},{k:"streaks",l:"STREAKS"}].map(t=><button className="uiTap" key={t.k} onClick={()=>setLbMode(t.k)} style={{flex:1,padding:"9px 4px",borderRadius:10,border:lbMode===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:1,background:lbMode===t.k?CYAN:CARD_BG,color:lbMode===t.k?BG:MUTED}}>{t.l}</button>)}</div>
+  <div style={{display:"flex",gap:4,marginBottom:14}}>{[{k:"attend",l:"ATTENDANCE"},{k:"overall",l:"DRILL SCORES"},{k:"streaks",l:"STREAKS"}].map(t=><button className="uiTap chip" key={t.k} onClick={()=>setLbMode(t.k)} aria-pressed={lbMode===t.k} style={{flex:1,padding:"9px 4px",borderRadius:10,border:lbMode===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:1,background:lbMode===t.k?CYAN:CARD_BG,color:lbMode===t.k?BG:MUTED}}>{t.l}</button>)}</div>
   {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty variant="leaderboard" t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</span><span className="tb" style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div style={{fontFamily:FD,color:t.color,fontSize:18}}>{p.count}</div></div>})}</>}
   {lbMode==="overall"&&<>{(()=>{const m={};scores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});const a=Object.values(m).sort((a,b)=>b.total-a.total);return a.length===0?<Empty variant="leaderboard" t="No scores yet"/>:a.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{p.email===user.email?" (YOU)":""}</div><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{p.total}</div></div>)})()}</>}
   {lbMode==="streaks"&&<>{(()=>{const es=[...new Set(scores.map(s=>s.email))];const st=es.map(e=>({email:e,name:scores.find(s=>s.email===e)?.name||e,streak:calcStreak(scores.filter(s=>s.email===e))})).sort((a,b)=>b.streak-a.streak);return st.length===0?<Empty variant="leaderboard" t="No streaks yet"/>:st.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</div><div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{p.streak} &#128293;</div></div>)})()}</>}
@@ -2166,7 +2167,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 <div className="eventsList">
 {upcoming.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;const relativeLabel=getRelativeLabel(ev.date);
   return <div key={ev.id}>
-    <div className="ch eventCard" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141922)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"20px 20px 0 0":20,textAlign:"left",position:"relative",overflow:"hidden",cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
+    <div className="ch eventCard interactive-card" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141922)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"20px 20px 0 0":20,textAlign:"left",position:"relative",overflow:"hidden",cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
       {going&&<div className="eventCardAccent"/>}
       <div className="eventTop">
         <div className="eventIcon" style={{border:`1px solid ${going?"rgba(184,255,0,.24)":"rgba(255,255,255,.10)"}`}}><EventIcon type={ev.type} size={24} color={going?"#D4FF6B":"#8D97A8"}/></div>
@@ -2184,7 +2185,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
           <div style={{textAlign:"right"}}><div className="listRowStat" style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:24,lineHeight:1}}>{evR.length}</div><div className="listRowStatSub" style={{fontFamily:FB,fontSize:10,letterSpacing:1}}>GOING</div></div>
         </div>
       </div>
-      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} className={`btn btn--dense eventCta ${going?"eventCta--going":"btn-secondary"}`} style={{fontFamily:FD,minHeight:44}}>
+      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} className={`btn btn--dense eventCta rsvp-action ${going?"eventCta--going":"btn-secondary"}`} style={{fontFamily:FD,minHeight:44}}>
         {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke="#0A0E08" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>I'M GOING</>:"I'M GOING"}
       </button>
     </div>
