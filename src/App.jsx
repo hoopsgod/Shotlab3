@@ -105,6 +105,11 @@ secondaryColor:sanitizeHexColor(branding.secondaryColor,DEFAULT_TEAM_BRANDING.se
 const withTeamBranding=(team)=>team?{...team,branding:sanitizeTeamBranding(team.branding)}:team;
 const hexToRgb=(hex)=>{const clean=String(hex||"").replace("#","");if(clean.length!==6)return null;const num=Number.parseInt(clean,16);if(Number.isNaN(num))return null;return {r:(num>>16)&255,g:(num>>8)&255,b:num&255};};
 const alphaFromHex=(hex,alpha)=>{const rgb=hexToRgb(hex);return rgb?`rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`:hex;};
+const relativeLuminance=(hex)=>{const rgb=hexToRgb(hex);if(!rgb)return 0;const norm=[rgb.r,rgb.g,rgb.b].map(v=>{const s=v/255;return s<=0.03928?s/12.92:((s+0.055)/1.055)**2.4;});return 0.2126*norm[0]+0.7152*norm[1]+0.0722*norm[2];};
+const contrastRatio=(c1,c2)=>{const l1=relativeLuminance(c1);const l2=relativeLuminance(c2);const light=Math.max(l1,l2);const dark=Math.min(l1,l2);return (light+0.05)/(dark+0.05);};
+const LOGO_ALLOWED_TYPES=["image/png","image/jpeg"];
+const MIN_LOGO_RATIO=0.75;
+const MAX_LOGO_RATIO=3;
 const DEMO_SEED_PLAYERS=[
 {email:"jordan.m@shotlab.app",name:"Jordan M."},
 {email:"tyler.r@shotlab.app",name:"Tyler R."},
@@ -2192,11 +2197,49 @@ const handleLogScoreAction=()=>{
   setTab("feed");
 };
 useEffect(()=>{setBrandingDraft(sanitizeTeamBranding(team?.branding));},[team?.branding?.logoUrl,team?.branding?.primaryColor,team?.branding?.secondaryColor]);
-const teamBranding=sanitizeTeamBranding(team?.branding);
-const teamPrimary=teamBranding.primaryColor;
-const teamSecondary=teamBranding.secondaryColor;
+const previewBranding=sanitizeTeamBranding(brandingDraft);
+const teamPrimary=previewBranding.primaryColor;
+const teamSecondary=previewBranding.secondaryColor;
 const coachAccent=teamPrimary;
+const [isLogoDragActive,setIsLogoDragActive]=useState(false);
+const applyBrandingDraft=useCallback((patch)=>{setBrandingDraft(prev=>({...prev,...patch}));setBrandingMsg("");},[]);
+const brandingContrast=contrastRatio(teamPrimary,teamSecondary);
+const brandingWarnings=useMemo(()=>{
+  const warnings=[];
+  if(contrastRatio(teamPrimary,TOKENS.BG_BASE)<3)warnings.push("Primary color may be hard to read on dark backgrounds.");
+  if(contrastRatio(teamSecondary,TOKENS.BG_BASE)<3)warnings.push("Secondary color may be hard to read on dark backgrounds.");
+  if(brandingContrast<3)warnings.push("Primary and secondary colors are too close together for clear contrast.");
+  return warnings;
+},[teamPrimary,teamSecondary,brandingContrast]);
 const shellVars=(k)=>({"--pageAccent":teamPrimary,"--pageAccentGlow":alphaFromHex(teamSecondary,0.35),"--pageAccentBg":alphaFromHex(teamPrimary,0.1),"--page-accent":teamPrimary,"--page-accent-soft":alphaFromHex(teamPrimary,0.1),"--page-accent-border":alphaFromHex(teamSecondary,0.35)});
+const validateAndReadLogoFile=(file)=>new Promise(resolve=>{
+  if(!file)return resolve({ok:false,msg:"No file selected"});
+  if(!LOGO_ALLOWED_TYPES.includes(file.type))return resolve({ok:false,msg:"Logo must be PNG or JPG"});
+  if(file.size>2*1024*1024)return resolve({ok:false,msg:"Logo must be under 2MB"});
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const logoUrl=typeof reader.result==="string"?reader.result:"";
+    if(!logoUrl)return resolve({ok:false,msg:"Could not read logo file"});
+    const img=new Image();
+    img.onload=()=>{
+      const ratio=img.naturalWidth/Math.max(img.naturalHeight,1);
+      if(ratio<MIN_LOGO_RATIO||ratio>MAX_LOGO_RATIO)return resolve({ok:false,msg:"Use a square or wide logo (roughly 1:1 to 3:1)."});
+      resolve({ok:true,logoUrl});
+    };
+    img.onerror=()=>resolve({ok:false,msg:"Could not validate image dimensions"});
+    img.src=logoUrl;
+  };
+  reader.onerror=()=>resolve({ok:false,msg:"Could not read logo file"});
+  reader.readAsDataURL(file);
+});
+const handleLogoFiles=async(files)=>{
+  const file=files?.[0];
+  if(!file)return;
+  const result=await validateAndReadLogoFile(file);
+  if(!result.ok){setBrandingMsg(result.msg);return;}
+  applyBrandingDraft({logoUrl:result.logoUrl});
+  setBrandingMsg("Logo selected. Save team branding to publish.");
+};
 const saveBranding=async()=>{
 const payload=sanitizeTeamBranding(brandingDraft);
 const r=await updateTeamBranding(team?.id,payload);
@@ -2212,28 +2255,8 @@ secondaryColor:preset.secondaryColor,
 }));
 setBrandingMsg("");
 };
-const handleLogoFileChange=(event)=>{
-const file=event.target.files?.[0];
-if(!file)return;
-if(!file.type.startsWith("image/")){
-setBrandingMsg("Please choose an image file");
-event.target.value="";
-return;
-}
-if(file.size>2*1024*1024){
-setBrandingMsg("Logo must be under 2MB");
-event.target.value="";
-return;
-}
-const reader=new FileReader();
-reader.onload=()=>{
-const logoUrl=typeof reader.result==="string"?reader.result:"";
-if(!logoUrl){setBrandingMsg("Could not read logo file");return;}
-setBrandingDraft(prev=>({...prev,logoUrl}));
-setBrandingMsg("Logo selected. Save branding to apply.");
-};
-reader.onerror=()=>setBrandingMsg("Could not read logo file");
-reader.readAsDataURL(file);
+const handleLogoFileChange=async(event)=>{
+await handleLogoFiles(event.target.files);
 event.target.value="";
 };
 const navItems=[
@@ -2296,7 +2319,7 @@ useEffect(()=>{
 },[tab]);
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
-{isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
+{isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div style={{display:"flex",alignItems:"center",gap:10,padding:"8px 10px",marginBottom:8,border:`1px solid ${alphaFromHex(teamPrimary,0.22)}`,borderRadius:12,background:alphaFromHex(teamPrimary,0.08)}}>{previewBranding.logoUrl?<img src={previewBranding.logoUrl} alt="Team logo" style={{width:28,height:28,borderRadius:8,objectFit:"cover",border:`1px solid ${alphaFromHex(teamPrimary,0.45)}`}}/>:<div style={{width:28,height:28,borderRadius:8,display:"grid",placeItems:"center",fontFamily:FD,fontSize:14,color:teamPrimary,border:`1px solid ${alphaFromHex(teamPrimary,0.45)}`}}>SL</div>}<div style={{minWidth:0}}><div style={{fontFamily:FB,fontSize:9,color:T.SUB,letterSpacing:1.2,textTransform:"uppercase"}}>Coach dashboard</div><div style={{fontFamily:FD,fontSize:12,color:LIGHT,letterSpacing:1.2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{team?.name||"Team"}</div></div></div><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
 <main className="shell-main"><div className="content-wrap"><div className={`${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players","settings"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
@@ -2316,7 +2339,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   wordmark={<BrandWordmark size={14} small/>}
   borderColor={BORDER_CLR}
   mutedColor={MUTED}
-  logoUrl={team?.branding?.logoUrl}
+  logoUrl={previewBranding.logoUrl}
   teamName={team?.name}
   accentColor={coachAccent}
   onOpenSettings={()=>setTab("settings")}
@@ -2333,7 +2356,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   mutedColor={MUTED}
   avatar={<Av n={u.name} sz={isOverviewTab?32:30} email={u.email} isCoach={u.isCoach}/>}
   wordmark={<BrandWordmark size={isOverviewTab?17:16} small/>}
-  logoUrl={team?.branding?.logoUrl}
+  logoUrl={previewBranding.logoUrl}
   teamName={team?.name}
   onOpenSettings={()=>setTab("settings")}
   onLogout={logout}
@@ -2602,12 +2625,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     <div className="accent-card" style={{background:`linear-gradient(135deg,${alphaFromHex(teamPrimary,0.16)},${CARD_BG})`,border:`1px solid ${alphaFromHex(teamPrimary,0.42)}`,borderRadius:16,padding:"16px 16px",marginBottom:14}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}><div><div style={{fontFamily:FD,color:teamPrimary,fontSize:14,letterSpacing:"var(--tracking-default)"}}>IDENTITY PREVIEW</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Prominent, premium styling for your program brand.</div></div>{brandingDraft.logoUrl?<img src={brandingDraft.logoUrl} alt="Team logo preview" style={{width:42,height:42,borderRadius:10,objectFit:"cover",border:`1px solid ${alphaFromHex(teamPrimary,0.5)}`}}/>:null}</div><div style={{display:"flex",gap:8,marginTop:12}}><span style={{flex:1,height:10,borderRadius:999,background:sanitizeHexColor(brandingDraft.primaryColor,DEFAULT_TEAM_BRANDING.primaryColor)}}/><span style={{flex:1,height:10,borderRadius:999,background:sanitizeHexColor(brandingDraft.secondaryColor,DEFAULT_TEAM_BRANDING.secondaryColor)}}/></div></div>
     <div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"16px 16px",marginBottom:18}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:12}}><div><div style={{fontFamily:FD,color:teamPrimary,fontSize:14,letterSpacing:"var(--tracking-default)"}}>TEAM BRANDING</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Upload logo + set your team page colors.</div></div></div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:10}}><label style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"10px 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer"}}>Upload logo file<input type="file" accept="image/*" onChange={handleLogoFileChange} style={{display:"none"}}/></label><button type="button" onClick={()=>{setBrandingDraft({...brandingDraft,logoUrl:""});setBrandingMsg("");}} style={{padding:"10px 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer"}}>Remove logo</button></div>
-      <FF l="TEAM LOGO URL (optional)" v={brandingDraft.logoUrl} set={v=>{setBrandingDraft({...brandingDraft,logoUrl:v});setBrandingMsg("");}} ph="https://your-school.com/logo.png"/>
+      <div onDrop={async e=>{e.preventDefault();setIsLogoDragActive(false);await handleLogoFiles(e.dataTransfer.files);}} onDragOver={e=>e.preventDefault()} onDragEnter={()=>setIsLogoDragActive(true)} onDragLeave={e=>{if(e.currentTarget.contains(e.relatedTarget))return;setIsLogoDragActive(false);}} style={{border:`1px dashed ${isLogoDragActive?teamPrimary:BORDER_CLR}`,background:isLogoDragActive?alphaFromHex(teamPrimary,0.1):BG,borderRadius:12,padding:"14px 12px",marginBottom:10,transition:"all .15s ease"}}>
+        <div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,letterSpacing:1,textTransform:"uppercase",textAlign:"center"}}>Drag and drop logo here</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4,textAlign:"center"}}>PNG or JPG · max 2MB · square or wide (1:1 to 3:1)</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}><label style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"10px 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer"}}>Browse logo file<input type="file" accept="image/png,image/jpeg" onChange={handleLogoFileChange} style={{display:"none"}}/></label><button type="button" onClick={()=>{applyBrandingDraft({logoUrl:""});}} style={{padding:"10px 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer"}}>Remove logo</button></div>
+      </div>
       <div style={{marginTop:12}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase",marginBottom:8}}>Color schemes</div><div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:6}}>{BRANDING_PRESETS.map(preset=><button key={preset.id} type="button" onClick={()=>applyBrandingPreset(preset)} style={{padding:"7px 6px",borderRadius:9,border:`1px solid ${BORDER_CLR}`,background:BG,cursor:"pointer"}}><div style={{display:"flex",justifyContent:"center",gap:5,marginBottom:5}}><span style={{width:10,height:10,borderRadius:"50%",background:preset.primaryColor}}/><span style={{width:10,height:10,borderRadius:"50%",background:preset.secondaryColor}}/></div><div style={{fontFamily:FB,color:LIGHT,fontSize:9,fontWeight:700,letterSpacing:0.8,textTransform:"uppercase"}}>{preset.name}</div></button>)}</div></div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10,marginTop:4}}><label style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase"}}>Primary color<div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><input type="color" value={sanitizeHexColor(brandingDraft.primaryColor,DEFAULT_TEAM_BRANDING.primaryColor)} onChange={e=>{setBrandingDraft({...brandingDraft,primaryColor:e.target.value.toUpperCase()});setBrandingMsg("");}} style={{width:42,height:36,padding:0,border:"none",background:"transparent",cursor:"pointer"}}/><input value={brandingDraft.primaryColor} onChange={e=>{setBrandingDraft({...brandingDraft,primaryColor:e.target.value});setBrandingMsg("");}} placeholder="#C8FF1A" style={{flex:1,padding:9,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8,textTransform:"uppercase"}}/></div></label><label style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase"}}>Secondary color<div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><input type="color" value={sanitizeHexColor(brandingDraft.secondaryColor,DEFAULT_TEAM_BRANDING.secondaryColor)} onChange={e=>{setBrandingDraft({...brandingDraft,secondaryColor:e.target.value.toUpperCase()});setBrandingMsg("");}} style={{width:42,height:36,padding:0,border:"none",background:"transparent",cursor:"pointer"}}/><input value={brandingDraft.secondaryColor} onChange={e=>{setBrandingDraft({...brandingDraft,secondaryColor:e.target.value});setBrandingMsg("");}} placeholder="#00E5FF" style={{flex:1,padding:9,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8,textTransform:"uppercase"}}/></div></label></div>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginTop:14}}><div style={{display:"flex",gap:8,alignItems:"center"}}><span style={{width:14,height:14,borderRadius:"50%",background:sanitizeHexColor(brandingDraft.primaryColor,DEFAULT_TEAM_BRANDING.primaryColor)}}/><span style={{width:14,height:14,borderRadius:"50%",background:sanitizeHexColor(brandingDraft.secondaryColor,DEFAULT_TEAM_BRANDING.secondaryColor)}}/></div><button className="btn btn-primary btn-v" onClick={saveBranding} style={{marginBottom:0}}>Save Branding</button></div>
-      {brandingMsg&&<div style={{fontFamily:FB,color:brandingMsg.includes("saved")?"#9CE77B":"#FF4545",fontSize:10,marginTop:8}}>{brandingMsg}</div>}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10,marginTop:4}}><label style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase"}}>Primary color<div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><input type="color" value={sanitizeHexColor(brandingDraft.primaryColor,DEFAULT_TEAM_BRANDING.primaryColor)} onChange={e=>{applyBrandingDraft({primaryColor:e.target.value.toUpperCase()});}} style={{width:42,height:36,padding:0,border:"none",background:"transparent",cursor:"pointer"}}/><input value={brandingDraft.primaryColor} onChange={e=>{applyBrandingDraft({primaryColor:e.target.value});}} placeholder="#C8FF1A" style={{flex:1,padding:9,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8,textTransform:"uppercase"}}/></div></label><label style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.5,textTransform:"uppercase"}}>Secondary color<div style={{display:"flex",alignItems:"center",gap:8,marginTop:6}}><input type="color" value={sanitizeHexColor(brandingDraft.secondaryColor,DEFAULT_TEAM_BRANDING.secondaryColor)} onChange={e=>{applyBrandingDraft({secondaryColor:e.target.value.toUpperCase()});}} style={{width:42,height:36,padding:0,border:"none",background:"transparent",cursor:"pointer"}}/><input value={brandingDraft.secondaryColor} onChange={e=>{applyBrandingDraft({secondaryColor:e.target.value});}} placeholder="#00E5FF" style={{flex:1,padding:9,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8,textTransform:"uppercase"}}/></div></label></div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginTop:14}}><div style={{display:"flex",gap:8,alignItems:"center"}}><span style={{width:14,height:14,borderRadius:"50%",background:sanitizeHexColor(brandingDraft.primaryColor,DEFAULT_TEAM_BRANDING.primaryColor)}}/><span style={{width:14,height:14,borderRadius:"50%",background:sanitizeHexColor(brandingDraft.secondaryColor,DEFAULT_TEAM_BRANDING.secondaryColor)}}/></div><button className="btn btn-primary btn-v" onClick={saveBranding} style={{marginBottom:0}}>Save team branding</button></div>
+      {brandingWarnings.length>0&&<div style={{marginTop:10,padding:"8px 10px",borderRadius:10,border:`1px solid ${alphaFromHex("#FFA500",0.45)}`,background:alphaFromHex("#FFA500",0.1)}}>{brandingWarnings.map(w=><div key={w} style={{fontFamily:FB,color:"#FFD79A",fontSize:10,lineHeight:1.4}}>⚠ {w}</div>)}</div>}{brandingMsg&&<div style={{fontFamily:FB,color:brandingMsg.includes("saved")?"#9CE77B":"#FF4545",fontSize:10,marginTop:8}}>{brandingMsg}</div>}
     </div>
     <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#FF4545",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
   </div>}
