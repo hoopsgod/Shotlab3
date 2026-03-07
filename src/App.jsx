@@ -1391,51 +1391,48 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
-    <section style={{marginBottom:12,background:"#FFFFFF",border:"1px solid #D1FAE5",borderRadius:16,padding:10,boxShadow:"0 6px 20px rgba(16,185,129,0.12)"}}>
-      <button
-        className="btn btn--primary"
-        onClick={()=>setTab("log-drill")}
-        style={{width:"100%",minHeight:56,fontFamily:FB,fontSize:15,fontWeight:800,letterSpacing:1,textTransform:"uppercase",boxShadow:"0 8px 24px rgba(5,150,105,0.35)"}}
-      >
-        Log today&apos;s shots
-      </button>
-      <div style={{fontFamily:FB,color:"#065F46",fontSize:11,fontWeight:700,marginTop:8,textAlign:"center"}}>Start here to keep your streak alive.</div>
+    <section style={{marginBottom:12,background:`linear-gradient(150deg,${VOLT}0F,#111111)`,border:`1px solid ${VOLT}33`,borderRadius:18,padding:"14px 14px 12px",boxShadow:"0 10px 28px rgba(0,0,0,0.35)"}}>
+      <div style={{fontFamily:FB,color:"#9CA3AF",fontSize:9,fontWeight:700,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>Primary action</div>
+      <button className="btn btn--primary" onClick={()=>setTab("log-drill")} style={{width:"100%",minHeight:56,fontFamily:FB,fontSize:15,fontWeight:800,letterSpacing:0.8,textTransform:"uppercase",boxShadow:"0 10px 24px rgba(5,150,105,0.35)"}}>Log today&apos;s shots</button>
+      <div style={{fontFamily:FB,color:"#D1D5DB",fontSize:11,marginTop:8,lineHeight:1.35}}>Keep your streak active with one quick session.</div>
     </section>
-    <ContextSummary title="Team context" items={contextItems} />
 
-    <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:12,alignItems:"start"}}>
-      <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
-        <div style={{fontFamily:FB,color:"#6B7280",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10}}>Upcoming sessions</div>
-        {upcomingEvents.length===0?<div style={{fontFamily:FB,color:"#374151",fontSize:12,lineHeight:1.4}}>No upcoming sessions scheduled.</div>:upcomingEvents.slice(0,3).map(ev=><div key={ev.id} style={{padding:"7px 0",borderTop:"1px solid #E5E7EB"}}><div style={{fontFamily:FB,color:"#111827",fontSize:12,fontWeight:700,lineHeight:1.2}}>{ev.title}</div><div style={{fontFamily:FB,color:"#6B7280",fontSize:11,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
-        <button onClick={()=>setTab("program")} style={{marginTop:10,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:600,color:"#4B5563",cursor:"pointer"}}>View all sessions →</button>
+    <section style={{marginBottom:14,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"10px 10px"}}>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:1.3,textTransform:"uppercase",marginBottom:8}}>Key stats</div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+        {[{label:"Makes",value:totalMakes,color:VOLT},{label:"Streak",value:`${streak}d`,color:ORANGE},{label:"Sessions",value:upcomingEventsCount,color:CYAN}].map((item)=><div key={item.label} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"10px 8px",textAlign:"center"}}><div style={{fontFamily:FD,color:item.color,fontSize:26,lineHeight:1,fontWeight:800}}>{item.value}</div><div style={{fontFamily:FB,color:"#6B7280",fontSize:9,fontWeight:700,letterSpacing:0.8,marginTop:4,textTransform:"uppercase"}}>{item.label}</div></div>)}
+      </div>
+    </section>
+
+    <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10,alignItems:"start"}}>
+      <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 12px"}}>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>Upcoming sessions</div>
+        {upcomingEvents.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.45}}>No upcoming sessions yet.<button onClick={()=>setTab("program")} style={{marginLeft:6,background:"none",border:"none",padding:0,color:VOLT,fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>Browse training</button></div>:upcomingEvents.slice(0,2).map((ev,idx)=><div key={ev.id} style={{padding:idx===0?"0 0 8px":"8px 0 0",borderTop:idx===0?"none":`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,lineHeight:1.25}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>{ev.date} · {ev.time}</div></div>)}
+        {upcomingEvents.length>0&&<button onClick={()=>setTab("program")} style={{marginTop:10,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:700,color:VOLT,cursor:"pointer"}}>View all sessions →</button>}
       </section>
 
-      <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
-        <div style={{fontFamily:FB,color:"#6B7280",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10}}>Duels</div>
+      <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 12px"}}>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>Duels summary</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8}}>
-          <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"10px 8px"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Pending</div><div style={{fontFamily:FD,color:"#111827",fontSize:24,lineHeight:1.1}}>{pendingDuels}</div></div>
-          <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"10px 8px"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Open</div><div style={{fontFamily:FD,color:"#111827",fontSize:24,lineHeight:1.1}}>{myOpenDuels}</div></div>
+          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"9px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Pending</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,lineHeight:1.05}}>{pendingDuels}</div></div>
+          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"9px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Open</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,lineHeight:1.05}}>{myOpenDuels}</div></div>
         </div>
-        <button onClick={()=>setTab("duels")} style={{marginTop:10,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:600,color:"#4B5563",cursor:"pointer"}}>Manage duels →</button>
+        <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:8,lineHeight:1.35}}>{myOpenDuels===0?"No active duels — challenge someone today.":"Check your active matchups and pending replies."}</div>
+        <button onClick={()=>setTab("duels")} style={{marginTop:8,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:700,color:VOLT,cursor:"pointer"}}>{myOpenDuels===0?"Start a duel →":"Manage duels →"}</button>
       </section>
 
-      <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
-        <div style={{fontFamily:FB,color:"#6B7280",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10}}>Progress snapshot</div>
-        <div style={{display:"flex",justifyContent:"space-between",gap:10,marginBottom:10,flexWrap:isNarrow?"wrap":"nowrap"}}>
-          <div style={{minWidth:isNarrow?"calc(50% - 6px)":"auto"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>This week</div><div style={{fontFamily:FD,color:"#111827",fontSize:isNarrow?24:26,lineHeight:1.1}}>{weekComparison.thisWeek}</div></div>
-          <div style={{minWidth:isNarrow?"calc(50% - 6px)":"auto"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Last week</div><div style={{fontFamily:FD,color:"#111827",fontSize:isNarrow?24:26,lineHeight:1.1}}>{weekComparison.lastWeek}</div></div>
+      <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 12px"}}>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>Progress snapshot</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
+          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>This week</div><div style={{fontFamily:FD,color:LIGHT,fontSize:24,lineHeight:1.1}}>{weekComparison.thisWeek}</div></div>
+          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Last week</div><div style={{fontFamily:FD,color:LIGHT,fontSize:24,lineHeight:1.1}}>{weekComparison.lastWeek}</div></div>
         </div>
-        <div style={{fontFamily:FB,color:weekComparison.diff>=0?"#047857":"#B91C1C",fontSize:11,fontWeight:700}}>{weekComparison.diff>=0?`+${weekComparison.diff}`:weekComparison.diff} made shots vs last week</div>
+        <div style={{fontFamily:FB,color:weekComparison.diff>=0?"#34D399":"#F87171",fontSize:11,fontWeight:700,lineHeight:1.35}}>{weekComparison.diff>=0?`+${weekComparison.diff}`:weekComparison.diff} made shots vs last week</div>
       </section>
+    </div>
 
-      <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
-        <div style={{fontFamily:FB,color:"#6B7280",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10}}>Today at a glance</div>
-        <div style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(3,minmax(0,1fr))",gap:8}}>
-          <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 6px",textAlign:"center"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:9}}>Makes</div><div style={{fontFamily:FD,color:"#111827",fontSize:18,lineHeight:1.1}}>{totalMakes}</div></div>
-          <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 6px",textAlign:"center"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:9}}>Streak</div><div style={{fontFamily:FD,color:"#111827",fontSize:18,lineHeight:1.1}}>{streak}d</div></div>
-          <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 6px",textAlign:"center",gridColumn:isNarrow?"1 / -1":"auto"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:9}}>Sessions</div><div style={{fontFamily:FD,color:"#111827",fontSize:18,lineHeight:1.1}}>{upcomingEventsCount}</div></div>
-        </div>
-      </section>
+    <div style={{marginTop:10}}>
+      <ContextSummary title="Team context" items={contextItems} />
     </div>
   </div>}
 
