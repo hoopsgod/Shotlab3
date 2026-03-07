@@ -4,10 +4,10 @@
   --surface-2: #0F1620;
   --surface-3: #0A0F14;
   --text-1: rgba(255,255,255,.92);
-  --text-2: rgba(255,255,255,.72);
-  --muted: rgba(255,255,255,.52);
-  --border-1: rgba(255,255,255,.08);
-  --border-2: rgba(255,255,255,.12);
+  --text-2: rgba(255,255,255,.78);
+  --muted: rgba(255,255,255,.64);
+  --border-1: rgba(255,255,255,.14);
+  --border-2: rgba(255,255,255,.18);
   --accent: #B8FF00;
   --shadow-1: 0 10px 24px rgba(0,0,0,.45);
   --shadow-2: 0 18px 40px rgba(0,0,0,.55);
@@ -157,7 +157,7 @@ textarea,
 .input::placeholder,
 input::placeholder,
 textarea::placeholder {
-  color: rgba(255, 255, 255, .45);
+  color: rgba(255, 255, 255, .56);
 }
 
 .input:focus-visible,
@@ -170,7 +170,7 @@ textarea:focus-visible {
 
 .disabled,
 :disabled {
-  opacity: .55;
+  opacity: .7;
   cursor: not-allowed;
 }
 
