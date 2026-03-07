@@ -1704,34 +1704,35 @@ const chipStyle=(kind)=>{
 return <SectionContainer className="fade-up">
 <SH t="DUELS" s="HEAD-TO-HEAD" isCoach={typeof u!=="undefined"&&u?.isCoach}/>
 {showGuide&&<GuideCallout title="How duels work" body="Duels let players compete on drill scores. Accept a challenge, log your response, and the higher score wins." onDismiss={dismissGuide} tone="warm"/>}
-<div style={{background:`radial-gradient(circle at 10% 10%,${ORANGE}24,transparent 45%),linear-gradient(130deg,#151515,#0D0D0D 60%,#181818)`,borderRadius:20,padding:"18px 18px 14px",marginBottom:12,border:`1px solid ${ORANGE}44`,position:"relative",overflow:"hidden"}}>
-  <div style={{position:"absolute",top:-20,right:-24,opacity:.12}}><svg width="120" height="120" viewBox="0 0 24 24" fill={ORANGE}><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,position:"relative"}}>
+<div style={{background:`linear-gradient(148deg,#131313 0%,#101010 55%,#181818 100%)`,borderRadius:18,padding:"14px 14px 12px",marginBottom:10,border:`1px solid ${ORANGE}3A`,position:"relative",overflow:"hidden",boxShadow:"0 10px 22px rgba(0,0,0,.28)"}}>
+  <div style={{position:"absolute",inset:0,pointerEvents:"none",background:`radial-gradient(circle at 18% 0%,${ORANGE}20,transparent 43%),radial-gradient(circle at 88% 100%,${CYAN}12,transparent 42%)`}}/>
+  <div style={{position:"absolute",top:-22,right:-24,opacity:.14}}><svg width="118" height="118" viewBox="0 0 24 24" fill={ORANGE}><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10,position:"relative"}}>
     <div>
-      <div style={{fontFamily:FB,color:"#FFD9BA",fontSize:10,fontWeight:700,letterSpacing:2,textTransform:"uppercase",marginBottom:4}}>Shotlab Arena</div>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:1.4,lineHeight:1.05}}>Compete. Respond. Win.</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,maxWidth:260}}>Track open challenges, answer incoming duels, and chase leaderboard-worthy wins.</div>
+      <div style={{fontFamily:FB,color:"#FFD9BA",fontSize:9,fontWeight:700,letterSpacing:2,textTransform:"uppercase",marginBottom:4}}>Shotlab Arena</div>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:1.2,lineHeight:1}}>Duels</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4,maxWidth:290,lineHeight:1.35}}>Challenge teammates, respond fast, and stack wins in drill battles.</div>
     </div>
-    <button onClick={()=>setActiveFilter("pending")} className="btn-v" style={{padding:"8px 10px",fontSize:11,letterSpacing:1.4,background:`${ORANGE}22`,border:`1px solid ${ORANGE}55`,color:ORANGE,whiteSpace:"nowrap"}}>RESPOND NOW</button>
+    <button onClick={()=>setActiveFilter("pending")} className="btn-v" style={{padding:"7px 10px",fontSize:10,letterSpacing:1.2,background:`${ORANGE}26`,border:`1px solid ${ORANGE}66`,color:ORANGE,whiteSpace:"nowrap",borderRadius:999}}>RESPOND NOW</button>
   </div>
-  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8,marginTop:12}}>
-    <div style={{background:"#0F0F0F",border:`1px solid ${ORANGE}3D`,borderRadius:12,padding:"8px 10px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,textTransform:"uppercase",letterSpacing:1.1}}>Pending</div><div style={{fontFamily:FD,color:ORANGE,fontSize:20,lineHeight:1.1}}>{incomingPending.length}</div></div>
-    <div style={{background:"#0F0F0F",border:`1px solid ${CYAN}3D`,borderRadius:12,padding:"8px 10px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,textTransform:"uppercase",letterSpacing:1.1}}>Open</div><div style={{fontFamily:FD,color:CYAN,fontSize:20,lineHeight:1.1}}>{openDuels.length}</div></div>
-    <div style={{background:"#0F0F0F",border:`1px solid ${VOLT}3D`,borderRadius:12,padding:"8px 10px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,textTransform:"uppercase",letterSpacing:1.1}}>Wins</div><div style={{fontFamily:FD,color:VOLT,fontSize:20,lineHeight:1.1}}>{totalWon}</div></div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:7,marginTop:10}}>
+    <div style={{background:"#0D0D0D",border:`1px solid ${ORANGE}33`,borderRadius:10,padding:"7px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:8,textTransform:"uppercase",letterSpacing:1}}>Pending</div><div style={{fontFamily:FD,color:ORANGE,fontSize:19,lineHeight:1.1}}>{incomingPending.length}</div></div>
+    <div style={{background:"#0D0D0D",border:`1px solid ${CYAN}33`,borderRadius:10,padding:"7px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:8,textTransform:"uppercase",letterSpacing:1}}>Open</div><div style={{fontFamily:FD,color:CYAN,fontSize:19,lineHeight:1.1}}>{openDuels.length}</div></div>
+    <div style={{background:"#0D0D0D",border:`1px solid ${VOLT}33`,borderRadius:10,padding:"7px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:8,textTransform:"uppercase",letterSpacing:1}}>Wins</div><div style={{fontFamily:FD,color:VOLT,fontSize:19,lineHeight:1.1}}>{totalWon}</div></div>
   </div>
 </div>
 
 <div style={{marginBottom:12}}>{getInstructionalContent("duels").map(item=><DrillDetail key={`duel-${item.id}`} title={item.title} description={item.description} videoUrl={item.videoUrl} thumbnailUrl={item.thumbnailUrl} thumbnailAlt={item.thumbnailAlt} videoCaption={item.videoCaption} techniqueTips={item.techniqueTips}/> )}</div>
 
-<div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:8,marginBottom:6}}>
+<div style={{display:"flex",gap:7,overflowX:"auto",padding:"0 1px 8px",marginBottom:4,scrollbarWidth:"thin"}}>
   {filterChips.map(chip=>{
     const active=activeFilter===chip.k;
-    return <button key={chip.k} onClick={()=>setActiveFilter(chip.k)} style={{border:active?`1px solid ${ORANGE}`:`1px solid ${BORDER_CLR}`,background:active?`${ORANGE}1A`:"#131313",color:active?ORANGE:T.SUB,borderRadius:999,padding:"6px 11px",fontFamily:FB,fontSize:11,fontWeight:700,whiteSpace:"nowrap",cursor:"pointer"}}>{chip.label} <span style={{opacity:.85}}>{chip.count}</span></button>;
+    return <button key={chip.k} onClick={()=>setActiveFilter(chip.k)} style={{border:active?`1px solid ${ORANGE}AA`:`1px solid ${BORDER_CLR}`,background:active?`linear-gradient(140deg,${ORANGE}22,${ORANGE}12)`:"#131313",color:active?"#FFE3CE":T.SUB,borderRadius:999,padding:"7px 11px",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:.4,whiteSpace:"nowrap",cursor:"pointer",display:"inline-flex",alignItems:"center",gap:6}}>{chip.label}<span style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minWidth:16,height:16,padding:"0 4px",borderRadius:999,background:active?`${ORANGE}2C`:"#1B1B1B",fontSize:9,color:active?ORANGE:MUTED}}>{chip.count}</span></button>;
   })}
 </div>
 
-{allRows.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to dare a teammate to beat it!"/>}
-{allRows.length>0&&filteredRows.length===0&&<Empty t="No duels in this filter" action="Try another tab to see more matchups."/>}
+{allRows.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to start your first head-to-head."/>}
+{allRows.length>0&&filteredRows.length===0&&<Empty t="Nothing here yet" action="Try another filter to view more matchups."/>}
 
 {filteredRows.map(({ch,bucket})=>{
   const isMine=ch.from===u.email;
@@ -1745,24 +1746,28 @@ return <SectionContainer className="fade-up">
   const secondaryChip=chipStyle(bucket==="pending"?"waiting":bucket==="completed"?"completed":"open");
   const status=chipStyle(statusKey);
   const isResp=respId===ch.id;
+  const actionLabel=bucket==="pending"?"Accept":bucket==="open"?"Waiting":"Review";
+  const hasFinalScore=bucket==="completed"&&myScore!=null&&oppScore!=null;
 
-  return <Card key={`${bucket}-${ch.id}-${ch.ts}`} variant="list" className="fade-up" style={{background:"linear-gradient(120deg,#121212,#191919)",border:`1px solid ${bucket==="pending"?ORANGE+"55":BORDER_CLR}`,borderRadius:14,padding:"10px 12px",marginBottom:8}}>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
-      <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0,flex:1}}>
-        <div style={{width:36,height:36,borderRadius:"50%",background:`linear-gradient(135deg,${ORANGE}30,#262626)`,border:`1px solid ${ORANGE}44`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:12,color:LIGHT,letterSpacing:1,flexShrink:0}}>{initialsFor(opponentName)}</div>
+  return <Card key={`${bucket}-${ch.id}-${ch.ts}`} variant="list" className="fade-up" style={{background:"linear-gradient(130deg,#101010,#171717)",border:`1px solid ${bucket==="pending"?ORANGE+"66":BORDER_CLR}`,borderRadius:12,padding:"9px 10px",marginBottom:7,boxShadow:"0 8px 14px rgba(0,0,0,.24)"}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+      <div style={{display:"flex",alignItems:"center",gap:9,minWidth:0,flex:1}}>
+        <div style={{width:34,height:34,borderRadius:"50%",background:`linear-gradient(145deg,${ORANGE}2C,#212121)`,border:`1px solid ${ORANGE}55`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:11,color:LIGHT,letterSpacing:1,flexShrink:0}}>{initialsFor(opponentName)}</div>
         <div style={{minWidth:0,flex:1}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
-            <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:.9,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>YOU <span style={{color:T.SUB}}>vs</span> {String(opponentName||"Opponent").toUpperCase()}</div>
-            <span style={{padding:"2px 7px",borderRadius:999,fontFamily:FB,fontSize:9,fontWeight:800,letterSpacing:.7,...status}}>{status.label}</span>
-            <span style={{padding:"2px 7px",borderRadius:999,fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:.7,...secondaryChip}}>{secondaryChip.label}</span>
+          <div style={{display:"flex",alignItems:"center",gap:5,flexWrap:"wrap"}}>
+            <div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:.8,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>YOU <span style={{color:T.SUB}}>VS</span> {String(opponentName||"Opponent").toUpperCase()}</div>
+            <span style={{padding:"2px 7px",borderRadius:999,fontFamily:FB,fontSize:8,fontWeight:800,letterSpacing:.7,...status}}>{status.label}</span>
+            <span style={{padding:"2px 7px",borderRadius:999,fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:.7,...secondaryChip}}>{secondaryChip.label}</span>
+            <span style={{padding:"2px 7px",borderRadius:999,fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:.6,background:"#FFFFFF10",border:`1px solid ${BORDER_CLR}`,color:T.SUB}}>{actionLabel}</span>
           </div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ch.drillName}</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",textTransform:"uppercase",letterSpacing:.5}}>{ch.drillName}</div>
         </div>
       </div>
-      <div style={{textAlign:"right",minWidth:90}}>
-        {bucket==="pending"?<><div style={{fontFamily:FB,fontSize:9,color:MUTED,letterSpacing:1,textTransform:"uppercase"}}>To Beat</div><div style={{fontFamily:FD,fontSize:24,color:ORANGE,lineHeight:1}}>{ch.score}<span style={{fontSize:11,color:T.SUB}}>/{ch.max}</span></div></>
-        :bucket==="open"?<><div style={{fontFamily:FB,fontSize:9,color:MUTED,letterSpacing:1,textTransform:"uppercase"}}>Your Score</div><div style={{fontFamily:FD,fontSize:22,color:CYAN,lineHeight:1}}>{ch.score}<span style={{fontSize:11,color:T.SUB}}>/{ch.max}</span></div></>
-        :<><div style={{fontFamily:FB,fontSize:9,color:MUTED,letterSpacing:1,textTransform:"uppercase"}}>Score</div><div style={{fontFamily:FD,fontSize:22,lineHeight:1,color:won?VOLT:tied?LIGHT:"#FF5E5E"}}>{myScore??"-"}<span style={{fontSize:10,color:MUTED,margin:"0 3px"}}>:</span><span style={{color:won?"#FF5E5E":VOLT}}>{oppScore??"-"}</span><span style={{fontSize:11,color:T.SUB}}>/{ch.max}</span></div></>
+      <div style={{textAlign:"right",minWidth:98}}>
+        {bucket==="pending"?<><div style={{fontFamily:FB,fontSize:8,color:MUTED,letterSpacing:1,textTransform:"uppercase"}}>To Beat</div><div style={{fontFamily:FD,fontSize:24,color:ORANGE,lineHeight:.95}}>{ch.score}<span style={{fontSize:10,color:T.SUB}}>/{ch.max}</span></div></>
+        :bucket==="open"?<><div style={{fontFamily:FB,fontSize:8,color:MUTED,letterSpacing:1,textTransform:"uppercase"}}>Your Score</div><div style={{fontFamily:FD,fontSize:22,color:CYAN,lineHeight:.95}}>{ch.score}<span style={{fontSize:10,color:T.SUB}}>/{ch.max}</span></div></>
+        :hasFinalScore?<><div style={{fontFamily:FB,fontSize:8,color:MUTED,letterSpacing:1,textTransform:"uppercase"}}>Final</div><div style={{fontFamily:FD,fontSize:23,lineHeight:.95,color:won?VOLT:tied?LIGHT:"#FF5E5E",letterSpacing:.8}}>{myScore}<span style={{fontSize:12,color:MUTED,margin:"0 4px"}}>VS</span><span style={{color:won?"#FF5E5E":VOLT}}>{oppScore}</span><span style={{fontSize:10,color:T.SUB}}>/{ch.max}</span></div></>
+        :<><div style={{fontFamily:FB,fontSize:8,color:MUTED,letterSpacing:1,textTransform:"uppercase"}}>Final</div><div style={{fontFamily:FB,fontSize:11,color:T.SUB,letterSpacing:.7,textTransform:"uppercase"}}>Awaiting result</div></>
         }
       </div>
     </div>
