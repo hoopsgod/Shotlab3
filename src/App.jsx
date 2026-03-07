@@ -1291,55 +1291,64 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
     <HeroBanner
       title="Dashboard"
-      subtitle="Your training snapshot for today"
+      subtitle="Know what matters today and take your next rep"
       accent={VOLT}
       icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>}
-      actionLabel="View Events"
-      onAction={()=>setTab("program")}
+      actionLabel="Log today's shots"
+      onAction={()=>setTab("log-drill")}
     />
 
     {showWelcomeGuide&&<GuideCallout title="Welcome to ShotLab" body="At Home tracks solo work. Program covers coach-run activity. Makes count your made shots, Drills are scored skill tests, and Duels are head-to-head drill competitions." onDismiss={dismissWelcomeGuide} tone="accent"/>}
 
-    {(()=>{
-      const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
-      const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
-      return <div style={{marginBottom:28}}>
-        <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
-          <div style={{fontFamily:FD,color:T.SUB,fontSize:24,letterSpacing:2.6,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:600,letterSpacing:"0.03em",marginTop:6,opacity:0.9}}>Choose how you’re training today</div>
-          {showHomeGuide&&<div style={{marginTop:10}}><GuideCallout title="Quick definitions" body="At Home is your personal tracker for Makes, Drills completed, and streaks. Program is for team sessions where attendance is verified by event RSVPs." onDismiss={dismissHomeGuide} tone="cool"/></div>}
-        </section>
-        <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
-          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" helpText="At Home tracks solo shot logging and streaks." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
-          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" helpText="Program shows coach-run events and verified attendance." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
+    <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 12px",marginBottom:16}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.5,textTransform:"uppercase"}}>Today at a glance</div>
+        <button onClick={()=>setTab("log-drill")} style={{background:VOLT,color:BG,border:"none",borderRadius:10,padding:"8px 10px",fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:1,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>Log shots</button>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+        <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px",minHeight:72}}>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>Total makes</div>
+          <div style={{marginTop:6}}><AnimNum v={totalMakes} c={VOLT} size={24}/></div>
+        </div>
+        <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px",minHeight:72}}>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>Streak</div>
+          <div style={{fontFamily:FD,color:CYAN,fontSize:24,marginTop:6}}>{streak}D</div>
+        </div>
+        <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px",minHeight:72}}>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:1}}>Drills today</div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:24,marginTop:6}}>{todayS.length}/{drills.length}</div>
         </div>
       </div>
-    })()}
-
-    <section style={{background:`linear-gradient(140deg, ${VOLT}10 0%, ${VOLT}06 42%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}2E`,borderRadius:18,padding:"15px 14px",marginBottom:20,boxShadow:`0 8px 16px ${VOLT}10`}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:12}}>
-        <div>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2,lineHeight:1,textTransform:"uppercase"}}>Upcoming Work Events</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>Don’t miss what’s next — RSVP status is split below.</div>
-        </div>
-        <button onClick={()=>setTab("program")} style={{background:VOLT,color:BG,border:"none",borderRadius:10,padding:"8px 10px",fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>View Events</button>
-      </div>
-
-      <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
-        <div style={{background:"rgba(17,17,17,0.98)",border:`1px solid ${VOLT}2A`,borderRadius:12,padding:"12px 10px"}}>
-          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:800,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>RSVP’D ({upcomingRsvpd.length})</div>
-          {upcomingRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>No upcoming events confirmed yet.</div>:upcomingRsvpd.slice(0,3).map(ev=><div key={ev.id} style={{padding:"8px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1.2,lineHeight:1.1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
-        </div>
-
-        <div style={{background:"rgba(17,17,17,0.98)",border:`1px solid ${ORANGE}34`,borderRadius:12,padding:"12px 10px"}}>
-          <div style={{fontFamily:FB,color:ORANGE,fontSize:10,fontWeight:800,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>Not RSVP’d ({upcomingNotRsvpd.length})</div>
-          {upcomingNotRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>You’re RSVP’d for every upcoming event.</div>:upcomingNotRsvpd.slice(0,3).map(ev=><div key={ev.id} style={{padding:"8px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1.2,lineHeight:1.1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
-        </div>
-      </div>
+      {showHomeGuide&&<div style={{marginTop:10}}><GuideCallout title="Quick definitions" body="At Home is your personal tracker for makes and streaks. Program covers coach-run sessions and attendance." onDismiss={dismissHomeGuide} tone="cool"/></div>}
     </section>
 
-    {/* ══════ LEADERBOARD ══════ */}
-    <DashboardLeaderboard scores={scores} drills={drills} programDrills={programDrills} user={u} scRsvps={scRsvps} rsvps={rsvps} shotLogs={shotLogs}/>
+    <section style={{background:`linear-gradient(140deg, ${VOLT}10 0%, ${VOLT}06 42%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}2E`,borderRadius:18,padding:"15px 14px",marginBottom:16,boxShadow:`0 8px 16px ${VOLT}10`}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:8}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1.6,textTransform:"uppercase"}}>Next team session</div>
+        <button onClick={()=>setTab("program")} style={{background:"transparent",color:VOLT,border:`1px solid ${VOLT}44`,borderRadius:10,padding:"7px 10px",fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:1.1,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>Open calendar</button>
+      </div>
+      {nextEvent?<div style={{background:"rgba(17,17,17,0.98)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px"}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1.2,lineHeight:1.1}}>{nextEvent.title}</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>{nextEvent.date} · {nextEvent.time}</div>
+        <div style={{marginTop:8,display:"inline-flex",alignItems:"center",padding:"4px 8px",borderRadius:999,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:1,textTransform:"uppercase",background:rsvpEventIds.has(nextEvent.id)?VOLT+"1F":ORANGE+"1A",color:rsvpEventIds.has(nextEvent.id)?VOLT:ORANGE,border:`1px solid ${rsvpEventIds.has(nextEvent.id)?VOLT:ORANGE}44`}}>{rsvpEventIds.has(nextEvent.id)?"RSVP confirmed":"RSVP needed"}</div>
+      </div>:<div style={{background:"rgba(17,17,17,0.98)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px",fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.5}}>No upcoming team sessions are scheduled yet. Use the calendar tab to check back later.</div>}
+    </section>
+
+    <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 12px",marginBottom:20}}>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1.4,textTransform:"uppercase",marginBottom:10}}>More from your team</div>
+      <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10,marginBottom:10}}>
+        <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px",minHeight:84}}>
+          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:800,letterSpacing:1.2,textTransform:"uppercase",marginBottom:6}}>RSVP&apos;d ({upcomingRsvpd.length})</div>
+          {upcomingRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>No confirmed events right now.</div>:upcomingRsvpd.slice(0,2).map(ev=><div key={ev.id} style={{padding:"6px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{ev.date} · {ev.time}</div></div>)}
+        </div>
+        <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px",minHeight:84}}>
+          <div style={{fontFamily:FB,color:ORANGE,fontSize:10,fontWeight:800,letterSpacing:1.2,textTransform:"uppercase",marginBottom:6}}>Need RSVP ({upcomingNotRsvpd.length})</div>
+          {upcomingNotRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>You’re set for all upcoming events.</div>:upcomingNotRsvpd.slice(0,2).map(ev=><div key={ev.id} style={{padding:"6px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{ev.date} · {ev.time}</div></div>)}
+        </div>
+      </div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:1.2,marginBottom:8}}>Leaderboard</div>
+      <DashboardLeaderboard scores={scores} drills={drills} programDrills={programDrills} user={u} scRsvps={scRsvps} rsvps={rsvps} shotLogs={shotLogs}/>
+    </section>
   </div>}
 
   {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
