@@ -290,8 +290,34 @@ textarea {
 }
 
 .shared-card {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
   transition: transform 150ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
   will-change: transform;
+}
+
+.shared-card--default {
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.shared-card--metric {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.shared-card--list {
+  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.015);
+}
+
+.shared-card--list [data-card-divider] {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.shared-card--empty {
+  border-color: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.012);
 }
 
 @media (hover: hover) and (pointer: fine) {
