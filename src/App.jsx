@@ -1471,7 +1471,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {tab==="program"&&<div className={slideClass} key="program"><SectionHero icon={<EventIcon type="star" size={28} color={VOLT}/>} title="PROGRAM EVENTS" subtitle="Official workouts and attendance" accent={VOLT} deco={<EventIcon type="run" size={16} color={VOLT}/>} isCoach={u.isCoach}/><ProgramDrillsPanel user={u} drills={programDrills} scores={scores} addScore={addScore}/><DividerDot/><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills}/></div>}
 
   {/* ═════════════ CHALLENGES ═════════════ */}
-  {!u.isCoach&&tab==="duels"&&<div className={slideClass} key="duels"><DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players}/></div>}
+  {!u.isCoach&&tab==="duels"&&<div className={slideClass} key="duels"><DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} addChallenge={addChallenge} players={players}/></div>}
   {u.isCoach&&tab==="players"&&<div className={slideClass} key="players"><PlayersScreen/></div>}
 
   {/* ═════════════ STRENGTH & CONDITIONING ═════════════ */}
@@ -1552,89 +1552,103 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 // ═══════════════════════════════════════
 // HEAD-TO-HEAD DUELS
 // ═══════════════════════════════════════
-function DuelsPanel({u,challenges,drills,respondChallenge,players}){
-const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(""),[respSaved,setRespSaved]=useState(null);
+function DuelsPanel({u,challenges,drills,respondChallenge,addChallenge,players}){
+const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(""),[respSaved,setRespSaved]=useState(null),[activeDuel,setActiveDuel]=useState(null);
 const[showGuide,dismissGuide]=useDismissedGuide("sl:guide:duels");
 const incoming=useMemo(()=>challenges.filter(c=>c.to===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
 const outgoing=useMemo(()=>challenges.filter(c=>c.from===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
 const pending=incoming.filter(c=>c.status==="pending");
 const resolved=[...incoming.filter(c=>c.status!=="pending"),...outgoing].sort((a,b)=>(b.respTs||b.ts)-(a.respTs||a.ts));
+const allDuels=[...pending,...resolved];
 
+const duelVideoFor=(duel)=>{
+  const byDrill=INSTRUCTIONAL_CONTENT.find(item=>duel?.drillName?.toLowerCase().includes(item.title.split(" ")[0].toLowerCase()));
+  return byDrill||INSTRUCTIONAL_CONTENT[0];
+};
 const handleRespond=(ch)=>{
 const v=parseInt(respInput);if(isNaN(v)||v<0||v>ch.max)return;
 respondChallenge(ch.id,v);setRespSaved(ch.id);setRespId(null);setRespInput("");
 setTimeout(()=>setRespSaved(null),2000);
 };
+const handleRematch=(ch)=>{
+  if(!addChallenge)return;
+  const isMine=ch.from===u.email;
+  const toEmail=isMine?ch.to:ch.from;
+  const toName=isMine?ch.toName:ch.fromName;
+  const drill=drills.find(d=>d.id===ch.drillId);
+  const baseScore=isMine?(ch.score||0):(ch.respScore||ch.score||0);
+  addChallenge({to:toEmail,toName,drillId:ch.drillId,drillName:ch.drillName||drill?.name||"DRILL",max:ch.max||drill?.max||10,score:baseScore});
+};
+
+if(activeDuel){
+  const isMine=activeDuel.from===u.email;
+  const opponentName=(isMine?activeDuel.toName:activeDuel.fromName)||"Opponent";
+  const myScore=isMine?activeDuel.score:activeDuel.respScore;
+  const oppScore=isMine?activeDuel.respScore:activeDuel.score;
+  const detailVideo=duelVideoFor(activeDuel);
+  return <SectionContainer className="fade-up">
+    <button className="interactive-action" onClick={()=>setActiveDuel(null)} style={{marginBottom:12,padding:"10px 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:"transparent",color:LIGHT,fontFamily:FB,fontSize:11,letterSpacing:1,cursor:"pointer",transition:"border-color .15s ease, background .15s ease"}}>&larr; BACK TO DUELS</button>
+    <Card variant="default" style={{background:`linear-gradient(145deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:10}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:2}}>YOU VS {opponentName.toUpperCase()}</div>
+        <div style={{fontFamily:FB,color:MUTED,fontSize:10,letterSpacing:1}}>{activeDuel.drillName}</div>
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"end",gap:10,marginBottom:14}}>
+        <div style={{textAlign:"center",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:1}}>YOUR SCORE</div><div style={{fontFamily:FD,color:VOLT,fontSize:32,lineHeight:1}}>{myScore??"-"}</div></div>
+        <div style={{fontFamily:FD,color:MUTED,fontSize:16,paddingBottom:8}}>VS</div>
+        <div style={{textAlign:"center",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:1}}>{opponentName.toUpperCase()}</div><div style={{fontFamily:FD,color:ORANGE,fontSize:32,lineHeight:1}}>{oppScore??"-"}</div></div>
+      </div>
+      <DrillDetail title={detailVideo.title} description={detailVideo.description} videoUrl={detailVideo.videoUrl} techniqueTips={detailVideo.techniqueTips}/>
+      <button className="btn-v cta-primary interactive-action" onClick={()=>handleRematch(activeDuel)} style={{width:"100%",marginTop:10}}>REMATCH</button>
+    </Card>
+  </SectionContainer>;
+}
 
 return <SectionContainer className="fade-up">
 <SH t="DUELS" s="HEAD-TO-HEAD" isCoach={typeof u!=="undefined"&&u?.isCoach}/>
 {showGuide&&<GuideCallout title="How duels work" body="Duels let players compete on drill scores. Accept a challenge, log your response, and the higher score wins." onDismiss={dismissGuide} tone="warm"/>}
-{/* Duels banner — aggressive, asymmetric */}
 <div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${ORANGE}22`,position:"relative",overflow:"hidden"}}>
 <div style={{position:"absolute",top:-12,right:-8,opacity:.08}}><svg width="100" height="100" viewBox="0 0 24 24" fill={ORANGE} stroke="none"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-
 <div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${ORANGE},${ORANGE}44,transparent)`}}/>
 <div style={{display:"flex",alignItems:"center",gap:14,position:"relative"}}>
 <div style={{width:48,height:48,borderRadius:14,background:`${ORANGE}15`,border:`1.5px solid ${ORANGE}33`,display:"flex",alignItems:"center",justifyContent:"center",transform:"rotate(-6deg)"}}>
 <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
 </div>
-<div>
-<div style={{fontFamily:FD,color:ORANGE,fontSize:18,letterSpacing:3}}>HEAD-TO-HEAD</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Challenge teammates. Beat their score.</div>
-</div>
+<div><div style={{fontFamily:FD,color:ORANGE,fontSize:18,letterSpacing:3}}>HEAD-TO-HEAD</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Challenge teammates. Beat their score.</div></div>
 </div>
 </div>
 
-<div style={{marginBottom:12}}>{INSTRUCTIONAL_CONTENT.slice(1,3).map(item=><DrillDetail key={`duel-${item.id}`} title={item.title} description={item.description} videoUrl={item.videoUrl} techniqueTips={item.techniqueTips}/> )}</div>
-
-{/* Pending challenges */}
 {pending.length>0&&<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>
-  {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
+  {pending.map(ch=>{const isResp=respId===ch.id;
     return <Card key={ch.id} variant="list" className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:`${spacing.md}px ${spacing.lg}px`,marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
         <Av n={ch.fromName} sz={38} email={ch.from}/>
-        <div style={{flex:1}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:1}}>{ch.fromName.toUpperCase()}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>challenged you on <span style={{color:ORANGE,fontWeight:700}}>{ch.drillName}</span></div>
-        </div>
-        <div style={{textAlign:"right"}}>
-          <div style={{fontFamily:FD,color:ORANGE,fontSize:24}}>{ch.score}<span style={{color:MUTED,fontSize:14}}>/{ch.max}</span></div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1}}>TO BEAT</div>
-        </div>
+        <div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:1}}>{ch.fromName.toUpperCase()}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>challenged you on <span style={{color:ORANGE,fontWeight:700}}>{ch.drillName}</span></div></div>
+        <div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:ORANGE,fontSize:24}}>{ch.score}<span style={{color:MUTED,fontSize:14}}>/{ch.max}</span></div><div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1}}>TO BEAT</div></div>
       </div>
       {respSaved===ch.id?<div style={{textAlign:"center",padding:8}}><div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:3}}>RESPONSE LOGGED!</div></div>
       :isResp?<div className="fade-up">
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
           <div style={{flex:1}}><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:6}}>YOUR SCORE</div>
             <input autoFocus type="number" min="0" max={ch.max} value={respInput} onChange={e=>setRespInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"14px 8px",background:BG,border:`2px solid ${ORANGE}`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none"}}/>
-          </div>
-          <div style={{fontFamily:FD,color:T.SUB,fontSize:24,paddingTop:20}}>/{ch.max}</div>
+          </div><div style={{fontFamily:FD,color:T.SUB,fontSize:24,paddingTop:20}}>/{ch.max}</div>
         </div>
         <div style={{display:"flex",gap:8}}>
-          <button onClick={()=>{setRespId(null);setRespInput("")}} style={{flex:1,padding:"11px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-          <button className="btn-v cta-primary" onClick={()=>handleRespond(ch)} style={{width:"100%"}}>SUBMIT</button>
+          <button className="interactive-action" onClick={()=>{setRespId(null);setRespInput("")}} style={{flex:1,padding:"11px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
+          <button className="btn-v cta-primary interactive-action" onClick={()=>handleRespond(ch)} style={{width:"100%"}}>SUBMIT</button>
         </div>
       </div>
-      :<button className="btn-v cta-primary" onClick={()=>setRespId(ch.id)} style={{}}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>ACCEPT CHALLENGE
-      </button>}
+      :<button className="btn-v cta-primary interactive-action" onClick={()=>setRespId(ch.id)} style={{}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>ACCEPT CHALLENGE</button>}
     </Card>;
   })}</>}
 
-{/* Resolved / History */}
-{pending.length>0&&<CourtDivider color={ORANGE} my={12}/>}
-<SH t={pending.length>0?"COMPLETED":"ALL DUELS"} s={`${resolved.length} TOTAL`}/>
-{resolved.length===0&&pending.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to dare a teammate to beat it!"/>}
-{resolved.map(ch=>{
-  const isMine=ch.from===u.email;const dr=drills.find(d=>d.id===ch.drillId);
-  const won=isMine?(ch.status==="lost"):(ch.status==="won");const tied=ch.status==="tied";const isPending=ch.status==="pending";
-  const oppName=isMine?ch.toName:ch.fromName;
-  const myScore=isMine?ch.score:ch.respScore;const oppScore=isMine?ch.respScore:ch.score;
-  const resultColor=isPending?MUTED:won?VOLT:tied?"#C8FF00":"#FF4545";
-  const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
+{resolved.length>0&&<><SH t={pending.length>0?"COMPLETED":"ALL DUELS"} s={`${resolved.length} TOTAL`}/>
+{resolved.map(ch=>{const isMine=ch.from===u.email;const won=isMine?(ch.status==="lost"):(ch.status==="won");const tied=ch.status==="tied";const isPending=ch.status==="pending";
+  const oppName=isMine?ch.toName:ch.fromName;const myScore=isMine?ch.score:ch.respScore;const oppScore=isMine?ch.respScore:ch.score;
+  const resultColor=isPending?MUTED:won?VOLT:tied?"#C8FF00":"#FF4545";const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
 
-  return <ListItem key={ch.id+"-"+ch.ts} className="listRow" style={{background:CARD_BG,border:isPending?`1px solid ${ORANGE}22`:undefined,padding:`${spacing.md}px ${spacing.md}px`}}>
+  return <button key={ch.id+"-"+ch.ts} className="interactive-card interactive-action" onClick={()=>setActiveDuel(ch)} style={{width:"100%",background:CARD_BG,border:isPending?`1px solid ${ORANGE}22`:`1px solid ${BORDER_CLR}`,padding:`${spacing.md}px ${spacing.md}px`,borderRadius:14,textAlign:"left",marginBottom:8,cursor:"pointer",transition:"transform .12s ease, border-color .15s ease, background .15s ease"}}>
     <div className="listRowLeft">
     <div style={{width:40,height:40,borderRadius:12,background:resultColor+"12",border:`1px solid ${resultColor}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
       {isPending?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -1642,18 +1656,13 @@ return <SectionContainer className="fade-up">
       :tied?<span style={{fontFamily:FD,color:"#C8FF00",fontSize:14}}>=</span>
       :<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>}
     </div>
-    <div className="listRowText" style={{flex:1}}>
-      <div className="listRowTitle" style={{fontFamily:FD,fontSize:13}}>{isMine?"YOU":"YOU"} VS {oppName.toUpperCase()}</div>
-      <div className="listRowMeta" style={{fontFamily:FB,fontSize:10}}>{ch.drillName} &#183; {isPending?<span className="listRowStatus listRowStatus--wait">Waiting for response</span>:<span className={`listRowStatus ${won?"listRowStatus--won":"listRowStatus--wait"}`}>{resultText}</span>}</div>
+    <div className="listRowText" style={{flex:1}}><div className="listRowTitle" style={{fontFamily:FD,fontSize:13}}>YOU VS {oppName.toUpperCase()}</div><div className="listRowMeta" style={{fontFamily:FB,fontSize:10}}>{ch.drillName} &#183; {isPending?<span className="listRowStatus listRowStatus--wait">Waiting for response</span>:<span className={`listRowStatus ${won?"listRowStatus--won":"listRowStatus--wait"}`}>{resultText}</span>}</div></div>
     </div>
-    </div>
-    <div className="listRowRight">
-      {isPending?<div className="listRowStat" style={{fontFamily:FD,color:ORANGE}}>{ch.score}</div>
-      :<div className="listRowStat" style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:18}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>}
-      <div className="listRowStatSub" style={{fontFamily:FB}}>/{ch.max}</div>
-    </div>
-  </ListItem>;
-})}
+    <div className="listRowRight">{isPending?<div className="listRowStat" style={{fontFamily:FD,color:ORANGE}}>{ch.score}</div>:<div className="listRowStat" style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:18}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>}<div className="listRowStatSub" style={{fontFamily:FB}}>/{ch.max}</div></div>
+  </button>;
+})}</>}
+
+{allDuels.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to dare a teammate to beat it!"/>}
 
   </SectionContainer>;
 }
@@ -1662,8 +1671,8 @@ return <SectionContainer className="fade-up">
 // STRENGTH & CONDITIONING PANEL
 // ═══════════════════════════════════════
 function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog}){
-const[showBoard,setShowBoard]=useState(false),[expanded,setExpanded]=useState(null);
-const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"",sport:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false);
+const[showBoard,setShowBoard]=useState(false),[expanded,setExpanded]=useState(null),[expandedPast,setExpandedPast]=useState(null);
+const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"",sport:"",exercises:"",notes:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false);
 const sorted=useMemo(()=>[...sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
 const upcoming=sorted.filter(s=>s.date>=todayStr()),past=sorted.filter(s=>s.date<todayStr());
 const myCount=scRsvps.filter(r=>r.email===user.email).length;
@@ -1689,14 +1698,26 @@ const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email
 const LiftIcon=({size=24,color="#A0A0A0"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
 const SC_COLOR="#A0A0A0";
 const myScLogs=useMemo(()=>scLogs.filter(l=>l.email===user.email),[scLogs,user]);
+const parseExerciseRows=(val)=>{
+  if(Array.isArray(val))return val;
+  if(!val)return [];
+  return String(val).split(/\n|,/).map(row=>row.trim()).filter(Boolean).map((row,idx)=>{
+    const match=row.match(/^(.*?)\s*[x×]\s*(\d+)\s*@\s*(.+)$/i)||row.match(/^(.*?)\s*[x×]\s*(\d+)$/i);
+    if(match){
+      return {id:`ex-${idx}-${row}`,name:match[1].trim(),sets:Number(match[2]),load:match[3]?.trim()||""};
+    }
+    return {id:`ex-${idx}-${row}`,name:row,sets:3,load:""};
+  });
+};
+const getSessionLog=(session)=>myScLogs.find(log=>log.date===session.date)||null;
 const handleAddScLog=()=>{
   const date=newLog.date?.trim();
   const time=newLog.time?.trim();
   const place=newLog.place?.trim();
   const sport=newLog.sport?.trim();
   if(!date||!time||!place||!sport){setLogErr("Please complete date, time, place, and sport.");return}
-  addScLog({date,time,place,sport,ts:Date.now()});
-  setNewLog({date:todayStr(),time:"",place:"",sport:""});
+  addScLog({date,time,place,sport,exercises:newLog.exercises?.trim()||"",notes:newLog.notes?.trim()||"",ts:Date.now()});
+  setNewLog({date:todayStr(),time:"",place:"",sport:"",exercises:"",notes:""});
   setLogErr("");
   setLogSaved(true);
   setTimeout(()=>setLogSaved(false),1800);
@@ -1771,6 +1792,8 @@ return <div className="fade-up">
     <FF l="Time" v={newLog.time} set={v=>setNewLog({...newLog,time:v})} tp="time" ph="6:00 AM"/>
     <div style={{gridColumn:"1 / -1"}}><FF l="Place" v={newLog.place} set={v=>setNewLog({...newLog,place:v})} ph="Weight Room — Bay A"/></div>
     <div style={{gridColumn:"1 / -1"}}><FF l="Sport" v={newLog.sport} set={v=>setNewLog({...newLog,sport:v})} ph="Basketball"/></div>
+    <div style={{gridColumn:"1 / -1"}}><label className="fieldLabel" style={{display:"block",marginBottom:6}}>Exercises (one per line, e.g. Back Squat x5 @ 225)</label><textarea value={newLog.exercises} onChange={e=>setNewLog({...newLog,exercises:e.target.value})} placeholder="Back Squat x5 @ 225" style={{minHeight:72}}/></div>
+    <div style={{gridColumn:"1 / -1"}}><label className="fieldLabel" style={{display:"block",marginBottom:6}}>Notes</label><textarea value={newLog.notes} onChange={e=>setNewLog({...newLog,notes:e.target.value})} placeholder="Felt explosive, left knee a little tight." style={{minHeight:64}}/></div>
   </div>
   {logErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:11,marginTop:8}}>{logErr}</div>}
   {logSaved&&<div style={{fontFamily:FB,color:SC_COLOR,fontSize:11,marginTop:8}}>Session logged.</div>}
@@ -1810,14 +1833,22 @@ return <div className="fade-up">
 })}
 
 {/* Past sessions */}
-{past.length>0&&<><CourtDivider color={SC_COLOR} my={12}/><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PAST SESSIONS" s={`${past.length} COMPLETED`}/>
-  {past.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const went=sr.some(r=>r.email===user.email);
-    return <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.7}}>
-      <div style={{width:36,height:36,borderRadius:10,background:went?SC_COLOR+"12":BG,border:`1px solid ${went?SC_COLOR+"33":BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={16} color={went?SC_COLOR:MUTED}/></div>
-      <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{s.sport||s.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{s.date} &#183; {sr.length} attended</div></div>
-      {went&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,color:SC_COLOR,background:SC_COLOR+"12",padding:"2px 8px",borderRadius:4,letterSpacing:1}}>ATTENDED</span>}
+<CourtDivider color={SC_COLOR} my={12}/><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PAST SESSIONS" s={`${past.length} COMPLETED`}/>
+{past.length===0&&<Empty variant="lifting" t="No past lifting sessions yet" action="Complete a session and add notes to build your history."/>}
+{past.length>0&&past.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const went=sr.some(r=>r.email===user.email);const isPastOpen=expandedPast===s.id;const log=getSessionLog(s);const exercises=parseExerciseRows(log?.exercises||s.exercises||`${s.sport||s.title} x3`);
+    return <div key={s.id} style={{marginBottom:8}}>
+      <button className="interactive-card interactive-action" onClick={()=>setExpandedPast(isPastOpen?null:s.id)} style={{width:"100%",display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:isPastOpen?"12px 12px 0 0":12,padding:"12px 16px",border:`1px solid ${BORDER_CLR}`,cursor:"pointer",textAlign:"left",transition:"border-color .15s ease, transform .12s ease"}}>
+        <div style={{width:36,height:36,borderRadius:10,background:went?SC_COLOR+"12":BG,border:`1px solid ${went?SC_COLOR+"33":BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={16} color={went?SC_COLOR:MUTED}/></div>
+        <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{s.sport||s.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{s.date} &#183; {sr.length} attended</div></div>
+        {went&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,color:SC_COLOR,background:SC_COLOR+"12",padding:"2px 8px",borderRadius:4,letterSpacing:1}}>ATTENDED</span>}
+      </button>
+      {isPastOpen&&<div className="fade-up" style={{border:`1px solid ${BORDER_CLR}`,borderTop:"none",borderRadius:"0 0 12px 12px",padding:"12px 16px",background:SURFACE}}>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.3,marginBottom:8}}>EXERCISES & SETS</div>
+        {exercises.map(ex=><div key={ex.id} style={{display:"flex",justifyContent:"space-between",gap:8,fontFamily:FB,fontSize:11,color:LIGHT,padding:"4px 0"}}><span>{ex.name}</span><span style={{color:MUTED}}>{ex.sets} sets{ex.load?` @ ${ex.load}`:""}</span></div>)}
+        <div style={{marginTop:10,paddingTop:10,borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.3,marginBottom:6}}>YOUR NOTES</div><div style={{fontFamily:FB,color:LIGHT,fontSize:11,lineHeight:1.45}}>{log?.notes||"No notes added for this session."}</div></div>
+      </div>}
     </div>;
-  })}</>}
+  })}
 
   </div>;
 }
