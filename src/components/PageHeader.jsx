@@ -1,6 +1,8 @@
 const ACCENT_MAP = {
   lime: "var(--text-2)",
+  primary: "var(--accent)",
   cyan: "var(--text-2)",
+  secondary: "var(--color-action-secondary, var(--text-2))",
   amber: "var(--text-2)",
   blue: "var(--text-2)",
   purple: "var(--text-2)",
@@ -15,7 +17,7 @@ export default function PageHeader({
   onAction,
   rightSlot,
 }) {
-  const resolvedAccent = ACCENT_MAP[accent] || accent || ACCENT_MAP.lime;
+  const resolvedAccent = ACCENT_MAP[accent] || accent || ACCENT_MAP.primary;
   const actionNode = rightSlot || (actionLabel ? (
     <button type="button" className="pageHeaderPill" onClick={onAction}>
       {actionLabel}

@@ -42,7 +42,7 @@ export default function CoachCommandCenter({
     borderRadius:12,
     border:`1px solid ${isPrimary?"var(--accent)":"var(--stroke-2)"}`,
     background:isPrimary?"var(--accent)":"transparent",
-    color:isPrimary?"#0B0D10":"var(--text-2)",
+    color:isPrimary?"var(--text-1)":"var(--text-2)",
     fontFamily:FB,
     fontSize:13,
     fontWeight:700,
@@ -60,7 +60,7 @@ export default function CoachCommandCenter({
     borderRadius:12,
     border:`1px solid ${isPrimary?"var(--accent)":"var(--stroke-2)"}`,
     background:isPrimary?"var(--accent)":"transparent",
-    color:isPrimary?"#0B0D10":"var(--text-3)",
+    color:isPrimary?"var(--text-1)":"var(--text-3)",
     fontFamily:FB,
     fontSize:11,
     fontWeight:700,
@@ -141,7 +141,7 @@ export default function CoachCommandCenter({
           <button onClick={onCopyJoinCode} className="cc-action-btn" style={{height:44,padding:"0 16px",fontSize:11,border:"1px solid var(--stroke-2)",background:"transparent",color:"var(--text-2)",borderRadius:12,cursor:"pointer",fontWeight:700,letterSpacing:"0.02em"}}>Copy code</button>
           <button onClick={onRegenerateJoinCode} className="cc-action-btn" style={{height:44,padding:"0 16px",fontSize:11,border:"1px solid var(--stroke-2)",background:"transparent",color:"var(--text-2)",borderRadius:12,cursor:"pointer",fontWeight:700,letterSpacing:"0.02em"}}>Regenerate</button>
         </div>
-        {codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:6}}>{codeErr}</div>}
+        {codeErr&&<div style={{color:"var(--color-state-danger, #a86b6b)",fontSize:11,marginTop:6}}>{codeErr}</div>}
       </div>
     </section>
   );

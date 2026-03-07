@@ -8,42 +8,39 @@ Implementation plan (small-scope motion pass):
 :root {
   color-scheme: dark;
 
-  /* ------------------------------
-     Color tokens (brand-safe)
-  ------------------------------ */
-  --color-bg-base: #070d18;
-  --color-bg-shell: #0b1220;
-  --color-surface-primary: #111a2a;
-  --color-surface-secondary: #162338;
-  --color-surface-subtle: rgba(137, 164, 196, 0.08);
+  /* Semantic design tokens (premium sports-tech refresh). */
+  /* Before: neon cyan/lime accents + glow effects. After: restrained slate + desaturated action colors. */
+  --color-bg-canvas: #121821;
+  --color-bg-surface: #1a2431;
+  --color-bg-elevated: #223043;
+  --color-bg-subtle: rgba(173, 187, 205, 0.08);
 
-  --color-text-primary: #f3f7ff;
-  --color-text-secondary: #c8d4e6;
-  --color-text-muted: #95a4ba;
-  --color-text-helper: #8291a7;
-  --color-text-placeholder: #9caec6;
-  --brand-background: #0b1220;
-  --brand-primary: #5bf3ff;
-  --brand-secondary: #95a4ba;
-  --brand-text: #f3f7ff;
+  --color-text-primary: #f1f5fb;
+  --color-text-secondary: #c1ccda;
+  --color-text-muted: #8f9caf;
+  --color-text-helper: #95a2b6;
+  --color-text-placeholder: #a6b2c4;
 
-  --color-accent-cyan: #5bf3ff;
-  --color-accent-cyan-soft: rgba(91, 243, 255, 0.16);
-  --color-accent-yellow: #c8ff00;
-  --color-accent-yellow-soft: rgba(200, 255, 0, 0.16);
-  --color-success: #63de8f;
-  --color-success-soft: rgba(99, 222, 143, 0.16);
-  --color-pending: #ffbf66;
-  --color-pending-soft: rgba(255, 191, 102, 0.18);
+  --color-border-subtle: rgba(173, 187, 205, 0.22);
+  --color-border-strong: rgba(188, 202, 220, 0.36);
 
-  --color-border-subtle: rgba(167, 187, 211, 0.18);
-  --color-border-strong: rgba(180, 201, 224, 0.32);
-  --color-focus-ring: rgba(200, 255, 0, 0.85);
-  --color-focus-shadow: rgba(91, 243, 255, 0.28);
+  --color-action-primary: #3f5f97;
+  --color-action-primary-soft: rgba(63, 95, 151, 0.2);
+  --color-action-secondary: #3b6e74;
+  --color-action-secondary-soft: rgba(59, 110, 116, 0.18);
+  --color-highlight-warm: #b6aa94;
+  --color-highlight-warm-soft: rgba(182, 170, 148, 0.18);
 
-  /* ------------------------------
-     Spacing (8px rhythm)
-  ------------------------------ */
+  --color-state-success: #5f8f78;
+  --color-state-success-soft: rgba(95, 143, 120, 0.18);
+  --color-state-warning: #a9865e;
+  --color-state-warning-soft: rgba(169, 134, 94, 0.18);
+  --color-state-danger: #a86b6b;
+  --color-state-danger-soft: rgba(168, 107, 107, 0.18);
+
+  --color-focus-ring: rgba(63, 95, 151, 0.8);
+  --color-focus-shadow: rgba(17, 24, 34, 0.65);
+
   --space-0: 0;
   --space-1: 4px;
   --space-2: 8px;
@@ -57,22 +54,16 @@ Implementation plan (small-scope motion pass):
   --section-gap: var(--space-4);
   --card-pad: var(--space-3);
 
-  /* ------------------------------
-     Radius + elevation
-  ------------------------------ */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 20px;
   --radius-pill: 999px;
 
-  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.22);
-  --shadow-medium: 0 14px 34px rgba(0, 0, 0, 0.3);
-  --shadow-focus: 0 0 0 2px var(--color-bg-shell), 0 0 0 4px var(--color-focus-ring), 0 0 0 6px var(--color-focus-shadow);
+  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.26);
+  --shadow-medium: 0 14px 30px rgba(0, 0, 0, 0.32);
+  --shadow-focus: 0 0 0 2px var(--color-bg-canvas), 0 0 0 4px var(--color-focus-ring), 0 0 0 6px var(--color-focus-shadow);
 
-  /* ------------------------------
-     Typography
-  ------------------------------ */
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
   --fs-display: clamp(1.75rem, 2.2vw, 2.25rem);
@@ -100,9 +91,6 @@ Implementation plan (small-scope motion pass):
   --ls-label: 0.09em;
   --ls-kicker: 0.09em;
 
-  /* ------------------------------
-     Controls
-  ------------------------------ */
   --btn-h: 48px;
   --btn-h-sm: 40px;
   --btn-radius: var(--radius-md);
@@ -117,18 +105,18 @@ Implementation plan (small-scope motion pass):
   --input-pad-x: 14px;
 
   /* compatibility aliases used throughout app */
-  --bg: var(--color-bg-shell);
-  --bg-0: var(--color-bg-base);
-  --surface-1: var(--color-surface-primary);
-  --surface-2: var(--color-surface-secondary);
-  --surface-3: #0e1829;
+  --bg: var(--color-bg-canvas);
+  --bg-0: var(--color-bg-canvas);
+  --surface-1: var(--color-bg-surface);
+  --surface-2: var(--color-bg-elevated);
+  --surface-3: #263449;
   --text-1: var(--color-text-primary);
   --text-2: var(--color-text-secondary);
   --text-3: var(--color-text-muted);
   --muted: var(--color-text-muted);
-  --accent: var(--color-accent-cyan);
-  --accent-soft: var(--color-accent-cyan-soft);
-  --lime: var(--color-accent-yellow);
+  --accent: var(--color-action-primary);
+  --accent-soft: var(--color-action-primary-soft);
+  --lime: var(--color-highlight-warm);
   --border-1: var(--color-border-subtle);
   --border-2: var(--color-border-strong);
   --stroke-1: var(--border-1);
@@ -165,7 +153,6 @@ textarea {
   font-family: var(--font-sans);
 }
 
-/* section rhythm + safe area */
 .page {
   padding-left: max(var(--space-3), env(safe-area-inset-left));
   padding-right: max(var(--space-3), env(safe-area-inset-right));
@@ -176,39 +163,37 @@ textarea {
 .stack-16 { display: flex; flex-direction: column; gap: var(--space-3); }
 .stack-24 { display: flex; flex-direction: column; gap: var(--space-4); }
 
-/* cards: primary, secondary, subtle */
 .shared-card {
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(180, 201, 224, 0.24);
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0)) , var(--color-surface-primary);
+  border: 1px solid var(--color-border-subtle);
+  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0)), var(--surface-1);
   box-shadow: var(--shadow-soft);
   transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
 
 .shared-card--primary {
-  background: linear-gradient(180deg, rgba(91,243,255,0.06), rgba(0,0,0,0)), var(--color-surface-secondary);
-  border-color: rgba(91, 243, 255, 0.32);
+  background: linear-gradient(180deg, rgba(63,95,151,0.14), rgba(63,95,151,0.03)), var(--surface-2);
+  border-color: rgba(122, 145, 186, 0.38);
   box-shadow: var(--shadow-medium);
 }
 
 .shared-card--secondary {
-  background: var(--color-surface-primary);
-  border-color: rgba(180, 201, 224, 0.22);
+  background: var(--surface-1);
+  border-color: var(--color-border-subtle);
 }
 
 .shared-card--subtle {
-  background: var(--color-surface-subtle);
-  border-color: rgba(167, 187, 211, 0.12);
+  background: var(--color-bg-subtle);
+  border-color: rgba(173, 187, 205, 0.16);
   box-shadow: none;
 }
 
-/* backward-compatible aliases */
 .shared-card--default,
 .shared-card--metric { }
-.shared-card--default { background: var(--color-surface-secondary); border-color: rgba(91, 243, 255, 0.3); }
+.shared-card--default { background: var(--surface-2); border-color: rgba(122, 145, 186, 0.32); }
 .shared-card--metric,
 .shared-card--list,
-.shared-card--empty { background: var(--color-surface-primary); }
+.shared-card--empty { background: var(--surface-1); }
 
 @media (hover: hover) and (pointer: fine) {
   .shared-card:is(button, a, [role="button"]):hover,
@@ -234,10 +219,9 @@ a.interactive-card:focus-visible {
 }
 
 .shared-card:not(.interactive-card) {
-  border-color: rgba(145, 164, 188, 0.18);
+  border-color: rgba(145, 164, 188, 0.2);
 }
 
-/* buttons: primary, secondary, ghost, icon */
 .btn {
   min-height: var(--btn-h);
   border-radius: var(--btn-radius);
@@ -256,14 +240,12 @@ a.interactive-card:focus-visible {
   transition: transform 120ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
 }
 
-.btn:active {
-  transform: scale(0.98);
-}
+.btn:active { transform: scale(0.98); }
 
 @media (hover: hover) and (pointer: fine) {
   .btn--primary:hover {
-    filter: brightness(1.03);
-    box-shadow: 0 12px 24px rgba(200, 255, 0, 0.2);
+    background: #4a6daa;
+    box-shadow: 0 10px 20px rgba(24, 34, 50, 0.42);
   }
 
   .btn--secondary:hover,
@@ -282,37 +264,36 @@ a.interactive-card:focus-visible {
 }
 
 .btn:focus-visible {
-  border-color: rgba(200, 255, 0, 0.7);
+  border-color: rgba(122, 145, 186, 0.82);
 }
 
 .btn--primary {
-  background: var(--color-accent-yellow);
-  color: #11150d;
-  box-shadow: 0 10px 22px rgba(200, 255, 0, 0.16);
+  background: var(--color-action-primary);
+  color: var(--color-text-primary);
+  border-color: rgba(122, 145, 186, 0.55);
 }
 
 .btn--secondary {
-  background: rgba(91, 243, 255, 0.08);
-  color: var(--color-accent-cyan);
-  border-color: rgba(91, 243, 255, 0.34);
+  background: var(--color-action-secondary-soft);
+  color: #a5c7cb;
+  border-color: rgba(106, 144, 149, 0.46);
 }
-
 
 .btn[role="switch"] {
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
 }
 
 .btn[role="switch"][aria-checked="true"] {
-  background: rgba(200, 255, 0, 0.16);
-  border-color: rgba(200, 255, 0, 0.42);
-  color: #ebffd1;
+  background: var(--color-highlight-warm-soft);
+  border-color: rgba(182, 170, 148, 0.48);
+  color: #e4d8c6;
 }
 
 .btn--ghost,
 .btn--tertiary {
   background: transparent;
   color: var(--text-2);
-  border-color: rgba(167, 187, 211, 0.28);
+  border-color: rgba(173, 187, 205, 0.3);
   min-height: var(--btn-h-sm);
   padding: 0 12px;
 }
@@ -323,12 +304,11 @@ a.interactive-card:focus-visible {
   min-height: var(--btn-h);
   padding: 0;
   border-radius: var(--btn-radius);
-  background: var(--color-surface-secondary);
+  background: var(--surface-2);
   border: 1px solid var(--color-border-subtle);
   color: var(--text-2);
 }
 
-/* status chips */
 .status-chip {
   display: inline-flex;
   align-items: center;
@@ -342,12 +322,11 @@ a.interactive-card:focus-visible {
   border: 1px solid transparent;
 }
 
-.status-chip--success { color: var(--color-success); background: var(--color-success-soft); border-color: rgba(99, 222, 143, 0.34); }
-.status-chip--pending { color: var(--color-pending); background: var(--color-pending-soft); border-color: rgba(255, 191, 102, 0.34); }
+.status-chip--success { color: #9fc4b2; background: var(--color-state-success-soft); border-color: rgba(95, 143, 120, 0.42); }
+.status-chip--pending { color: #d1b18b; background: var(--color-state-warning-soft); border-color: rgba(169, 134, 94, 0.42); }
 .status-chip--neutral { color: var(--text-2); background: rgba(167,187,211,0.12); border-color: rgba(167,187,211,0.26); }
-.status-chip--info { color: var(--color-accent-cyan); background: var(--color-accent-cyan-soft); border-color: rgba(91, 243, 255, 0.36); }
+.status-chip--info { color: #a6badb; background: var(--color-action-primary-soft); border-color: rgba(122, 145, 186, 0.4); }
 
-/* forms */
 .field { display: flex; flex-direction: column; gap: var(--space-2); }
 .fieldLabel { font-size: var(--fs-helper); color: var(--text-2); }
 .input,
@@ -384,11 +363,7 @@ a,
   touch-action: manipulation;
 }
 
-.status-chip::before {
-  margin-right: 6px;
-  font-size: 0.95em;
-}
-
+.status-chip::before { margin-right: 6px; font-size: 0.95em; }
 .status-chip--success::before { content: "✓"; }
 .status-chip--pending::before { content: "⏳"; }
 .status-chip--neutral::before { content: "•"; }
@@ -405,13 +380,13 @@ a,
 
 @media (prefers-contrast: more) {
   :root {
-    --color-bg-shell: #0a1020;
-    --color-surface-primary: #121d31;
-    --color-surface-secondary: #1a2741;
-    --color-text-secondary: #d7e3f5;
-    --color-text-muted: #b6c5db;
-    --color-text-helper: #b6c5db;
-    --color-text-placeholder: #c2d0e4;
+    --color-bg-canvas: #101722;
+    --color-bg-surface: #1c2838;
+    --color-bg-elevated: #27384f;
+    --color-text-secondary: #d9e4f2;
+    --color-text-muted: #bdcada;
+    --color-text-helper: #bdcada;
+    --color-text-placeholder: #cad5e3;
     --color-border-subtle: rgba(188, 209, 235, 0.42);
     --color-border-strong: rgba(206, 224, 247, 0.64);
   }
@@ -433,7 +408,6 @@ a,
   }
 }
 
-/* chips and tap affordances */
 .chip {
   border-radius: var(--radius-pill);
   min-height: 34px;
@@ -443,9 +417,9 @@ a,
 }
 
 .chip[aria-pressed="true"] {
-  background: rgba(91, 243, 255, 0.18);
-  border-color: rgba(91, 243, 255, 0.34);
-  color: var(--color-accent-cyan);
+  background: var(--color-action-primary-soft);
+  border-color: rgba(122, 145, 186, 0.34);
+  color: #b9c9e1;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -73,7 +73,7 @@ function SignatureIcon({ icon }) {
 export default function PageSignature({
   title,
   subtitle,
-  accent = "#FFC400",
+  accent = "#b6aa94",
   icon = "feed",
   rightActionLabel,
   onRightAction,
