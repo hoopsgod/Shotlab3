@@ -61,6 +61,9 @@ PROGRAM_GLOW:"rgba(184,255,0,.16)",
 ICON_INNER:"rgba(255, 255, 255, 0.06)",
 FOCUS_RING:"rgba(200, 255, 0, 0.45)",
 CHEVRON_BG:"rgba(255, 255, 255, 0.06)",
+INTERACTIVE_BG:"var(--surface-2)",
+INTERACTIVE_BORDER:"rgba(255,255,255,0.16)",
+INTERACTIVE_SHADOW:"0 14px 28px rgba(0,0,0,.5)",
 };
 
 const DRILLS_INIT=[
@@ -1287,7 +1290,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {tab!=="home"&&<button onClick={()=>switchTab("home")} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:16,padding:0}}>&#8592; DASHBOARD</button>}
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
-  {tab==="home"&&!active&&<div className={slideClass} key="home">
+  {tab==="home"&&!active&&<div className={slideClass} key="home" style={{background:"linear-gradient(180deg, #06090c 0%, #080d12 100%)"}}>
 
     <HeroBanner
       title="Dashboard"
@@ -1316,7 +1319,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </div>
     })()}
 
-    <section style={{background:`linear-gradient(140deg, ${VOLT}22 0%, ${VOLT}10 45%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}66`,borderRadius:18,padding:"16px 14px",marginBottom:20,boxShadow:`0 14px 28px ${VOLT}22`}}>
+    <section style={{background:`linear-gradient(140deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.015) 45%, ${CARD_BG} 100%)`,border:`1px solid ${BORDER_CLR}`,borderRadius:18,padding:"16px 14px",marginBottom:20,boxShadow:"0 12px 24px rgba(0,0,0,0.42)"}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:12}}>
         <div>
           <div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:2.2,lineHeight:1,textTransform:"uppercase"}}>Upcoming Work Events</div>
@@ -1326,12 +1329,12 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
-        <div style={{background:BG,border:`1px solid ${VOLT}40`,borderRadius:12,padding:"12px 10px"}}>
+        <div style={{background:"rgba(8,12,17,0.9)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px 10px"}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:800,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>RSVP’D ({upcomingRsvpd.length})</div>
           {upcomingRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>No upcoming events confirmed yet.</div>:upcomingRsvpd.slice(0,3).map(ev=><div key={ev.id} style={{padding:"8px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1.2,lineHeight:1.1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
         </div>
 
-        <div style={{background:BG,border:`1px solid ${ORANGE}55`,borderRadius:12,padding:"12px 10px"}}>
+        <div style={{background:"rgba(8,12,17,0.9)",border:`1px solid rgba(255,255,255,0.14)`,borderRadius:12,padding:"12px 10px"}}>
           <div style={{fontFamily:FB,color:ORANGE,fontSize:10,fontWeight:800,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>Not RSVP’d ({upcomingNotRsvpd.length})</div>
           {upcomingNotRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>You’re RSVP’d for every upcoming event.</div>:upcomingNotRsvpd.slice(0,3).map(ev=><div key={ev.id} style={{padding:"8px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1.2,lineHeight:1.1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
         </div>
@@ -1826,7 +1829,7 @@ return <div className="fade-up">
 function StatTile({value,label,color}){
 const textValue=typeof value==="string"||typeof value==="number"?String(value):"";
 const hasLongValue=textValue.length>10;
-return <div className="card card--metric mode-card-stat" style={{padding:"12px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",gap:10,borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))"}}>
+return <div className="card card--metric mode-card-stat" style={{padding:"12px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",gap:10,borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0.008))"}}>
   <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,minWidth:0}}>
     <div className="mode-card-stat-value" style={{fontFamily:FD,color:color||LIGHT,fontSize:hasLongValue?20:28,fontWeight:800,lineHeight:1.05,letterSpacing:hasLongValue?"0.04em":"0.02em",whiteSpace:hasLongValue?"normal":"nowrap",wordBreak:"normal",overflowWrap:hasLongValue?"anywhere":"normal",textAlign:"left",minWidth:0}}>{value}</div>
   </div>
@@ -1843,7 +1846,7 @@ const a=accentMap[accent]||accentMap.home;
 const baseBorder=`1px solid ${MODE_CARD_TOKENS.BASE_BORDER}`;
 const baseShadow=MODE_CARD_TOKENS.BASE_SHADOW;
 const modeCardClass=`mode-card card ${isActive?"card--active card--accent":""}`.trim();
-return <button type="button" onClick={onClick} className={modeCardClass} style={{width:"100%",background:`radial-gradient(circle at 12% 10%, ${a.tint} 0%, transparent 55%), ${MODE_CARD_TOKENS.BASE_BG}`,border:baseBorder,borderRadius:22,padding:22,cursor:"pointer",textAlign:"left",position:"relative",minHeight:272,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:baseShadow,transition:"transform .12s ease, border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)"}} onMouseLeave={e=>{e.currentTarget.style.border=baseBorder;e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.99)"}} onMouseUp={e=>{e.currentTarget.style.transform="scale(1)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow=`${baseShadow}, ${isActive?"var(--glow-accent)":`0 0 0 3px ${MODE_CARD_TOKENS.FOCUS_RING}`}`}} onBlur={e=>{e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}}>
+return <button type="button" onClick={onClick} className={modeCardClass} style={{width:"100%",background:`radial-gradient(circle at 12% 10%, ${a.tint} 0%, transparent 55%), ${MODE_CARD_TOKENS.INTERACTIVE_BG}`,border:`1px solid ${isActive?"rgba(184,255,0,0.34)":MODE_CARD_TOKENS.INTERACTIVE_BORDER}`,borderRadius:22,padding:22,cursor:"pointer",textAlign:"left",position:"relative",minHeight:272,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:isActive?`0 0 0 1px rgba(184,255,0,0.2), ${MODE_CARD_TOKENS.INTERACTIVE_SHADOW}`:MODE_CARD_TOKENS.INTERACTIVE_SHADOW,transition:"transform .12s ease, border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)"}} onMouseLeave={e=>{e.currentTarget.style.border=`1px solid ${isActive?"rgba(184,255,0,0.34)":MODE_CARD_TOKENS.INTERACTIVE_BORDER}`;e.currentTarget.style.boxShadow=isActive?`0 0 0 1px rgba(184,255,0,0.2), ${MODE_CARD_TOKENS.INTERACTIVE_SHADOW}`:MODE_CARD_TOKENS.INTERACTIVE_SHADOW;e.currentTarget.style.transform="scale(1)"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.99)"}} onMouseUp={e=>{e.currentTarget.style.transform="scale(1)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow=`${isActive?`0 0 0 1px rgba(184,255,0,0.2), ${MODE_CARD_TOKENS.INTERACTIVE_SHADOW}`:MODE_CARD_TOKENS.INTERACTIVE_SHADOW}, ${isActive?"var(--glow-accent)":`0 0 0 3px ${MODE_CARD_TOKENS.FOCUS_RING}`}`}} onBlur={e=>{e.currentTarget.style.boxShadow=isActive?`0 0 0 1px rgba(184,255,0,0.2), ${MODE_CARD_TOKENS.INTERACTIVE_SHADOW}`:MODE_CARD_TOKENS.INTERACTIVE_SHADOW;e.currentTarget.style.transform="scale(1)"}}>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16}}>
     <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
       <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`1.5px solid ${a.glow}`,boxShadow:`inset 0 0 6px ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{icon}</div>
@@ -1906,11 +1909,11 @@ const switchMode=(m)=>{setMode(m);setSub(m==="home"?"shots":"events")};
 
 return <SectionContainer>
 {/* Mode toggle */}
-<div style={{display:"flex",gap:8,background:"#121212",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(68, 82, 58, 0.6)"}}>
+<div style={{display:"flex",gap:8,background:"rgba(8,12,16,0.9)",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(255,255,255,0.14)",boxShadow:"0 10px 22px rgba(0,0,0,0.38)"}}>
 {[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=>{
 const active=mode===m.k;
 const thisMode=modeStyles[m.k];
-return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid ${active?thisMode.accent+"AA":"#353535"}`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,transition:"all 180ms ease",background:active?`linear-gradient(180deg, ${thisMode.bg}, #131313 85%)`:"#171717",color:active?thisMode.accent:"#7A7A7A",boxShadow:active?thisMode.glow:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:8,textShadow:active?`0 0 8px ${thisMode.accent}55`:"none"}}><span aria-hidden="true" style={{fontSize:12,lineHeight:1,opacity:active?1:.65}}>{thisMode.label}</span>{m.l}</button>
+return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid ${active?thisMode.accent+"66":"rgba(255,255,255,0.12)"}`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,transition:"all 180ms ease",background:active?`linear-gradient(180deg, ${thisMode.bg}, rgba(13,19,25,0.92) 85%)`:"rgba(16,21,27,0.84)",color:active?thisMode.accent:"#8A939D",boxShadow:active?"0 12px 22px rgba(0,0,0,0.42)":"none",display:"flex",alignItems:"center",justifyContent:"center",gap:8,textShadow:"none"}}><span aria-hidden="true" style={{fontSize:12,lineHeight:1,opacity:active?1:.65}}>{thisMode.label}</span>{m.l}</button>
 })}
 </div>
 
@@ -1919,9 +1922,9 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
   <div style={{display:"flex",gap:8,minWidth:"max-content"}}>
     {isHome?
       [{k:"shots",l:"SHOT MAKES"}].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"#C8FF00":"#1E1E1E",color:sub===t.k?"#000000":"#555555",transition:"all .2s"}}>{t.l}</button>)
+        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"1px solid rgba(184,255,0,0.38)":"1px solid rgba(255,255,255,0.14)",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"rgba(184,255,0,0.9)":"rgba(16,21,27,0.9)",color:sub===t.k?"#061006":"#7f8994",transition:"all .2s",boxShadow:sub===t.k?"0 10px 20px rgba(0,0,0,0.36)":"none"}}>{t.l}</button>)
     :[{k:"events",l:"ATTENDANCE"},{k:"sc",l:"S&C"},{k:"prog-total",l:"DRILL SCORES"},...programDrills.map(d=>({k:`prog-${d.id}`,l:d.name}))].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?CYAN:"#1E1E1E",color:sub===t.k?"#041014":"#555555",transition:"all .2s",boxShadow:sub===t.k?"0 0 14px rgba(0, 229, 255, 0.35)":"none"}}>{t.l}</button>)}
+        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"1px solid rgba(0,229,255,0.45)":"1px solid rgba(255,255,255,0.14)",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"rgba(0,229,255,0.78)":"rgba(16,21,27,0.9)",color:sub===t.k?"#041014":"#7f8994",transition:"all .2s",boxShadow:sub===t.k?"0 10px 20px rgba(0,0,0,0.36)":"none"}}>{t.l}</button>)}
   </div>
 </div>
 
