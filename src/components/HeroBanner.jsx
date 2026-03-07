@@ -9,12 +9,12 @@ function HeroBanner({
   return (
     <section
       style={{
-        background: `linear-gradient(140deg, ${accent}22 0%, ${accent}10 45%, var(--surface-1) 100%)`,
-        border: `1px solid ${accent}66`,
+        background: `linear-gradient(140deg, ${accent}14 0%, rgba(18, 24, 30, 0.9) 45%, var(--surface-1) 100%)`,
+        border: `1px solid var(--stroke-2)`,
         borderRadius: 18,
         padding: "16px 14px",
         marginBottom: 20,
-        boxShadow: `0 14px 28px ${accent}22`,
+        boxShadow: `0 12px 20px rgba(0,0,0,0.34)`,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
@@ -25,8 +25,8 @@ function HeroBanner({
                 width: 34,
                 height: 34,
                 borderRadius: 10,
-                border: `1px solid ${accent}55`,
-                background: `${accent}14`,
+                border: `1px solid var(--stroke-1)`,
+                background: `var(--accent-surface)`,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",

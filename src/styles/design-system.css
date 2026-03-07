@@ -37,6 +37,8 @@
 
   /* accent */
   --accent: var(--brand-primary);
+  --accent-muted: rgba(154, 176, 130, 0.34);
+  --accent-surface: rgba(154, 176, 130, 0.14);
 
   /* elevation */
   --shadow-1: 0 10px 24px rgba(0, 0, 0, 0.45);
@@ -111,10 +113,10 @@ textarea {
   box-shadow: var(--shadow-2);
 }
 .card--accent {
-  border-color: rgba(184, 255, 0, 0.22);
+  border-color: var(--accent-muted);
 }
 .card--active {
-  box-shadow: var(--shadow-2), 0 0 0 1px rgba(184, 255, 0, 0.18);
+  box-shadow: var(--shadow-2), 0 0 0 1px rgba(184, 255, 0, 0.11);
 }
 
 /* typography utilities (Task #2; no global uppercase overrides) */

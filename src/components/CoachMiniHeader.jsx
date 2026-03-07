@@ -41,9 +41,9 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         style={{
           height: "clamp(50px, 7.6vw, 62px)",
           borderRadius: 12,
-          border: accentColor ? `1px solid ${accentColor}55` : `1px solid ${borderColor}`,
-          background: accentColor ? `linear-gradient(120deg, ${accentColor}1C 0%, rgba(10,10,10,0.95) 55%)` : "rgba(10, 10, 10, 0.93)",
-          boxShadow: accentColor ? `0 4px 12px rgba(0,0,0,0.24), 0 0 0 1px ${accentColor}18` : "0 4px 12px rgba(0,0,0,0.24)",
+          border: `1px solid ${borderColor}`,
+          background: accentColor ? `linear-gradient(120deg, ${accentColor}10 0%, rgba(10,10,10,0.95) 55%)` : "rgba(10, 10, 10, 0.93)",
+          boxShadow: accentColor ? `0 4px 10px rgba(0,0,0,0.22), 0 0 0 1px ${accentColor}0A` : "0 4px 12px rgba(0,0,0,0.24)",
           display: "grid",
           gridTemplateColumns: "minmax(0,1fr) auto",
           alignItems: "center",
@@ -57,7 +57,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
           <span style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "3px 8px", whiteSpace: "nowrap" }}>Coach Mode</span>
           {avatar}
           {logoUrl && branding?.showHeaderLogo !== false ? (
-            <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 8px", borderRadius: 999, background: accentColor ? `${accentColor}1A` : "rgba(255,255,255,0.06)", border: accentColor ? `1px solid ${accentColor}40` : "1px solid var(--stroke-1)", minWidth: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 8px", borderRadius: 999, background: accentColor ? `${accentColor}10` : "rgba(255,255,255,0.06)", border: "1px solid var(--stroke-1)", minWidth: 0 }}>
               <TeamLogo logoUrl={logoUrl} teamName={teamName} size={24} primaryColor={branding?.primaryColor || accentColor} badgeStyle={branding?.badgeStyle || "round"} />
               {teamName ? <span style={{ fontFamily: FB, fontSize: 9, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "var(--tracking-tight)", fontWeight: 700, maxWidth: 84, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{teamName}</span> : null}
             </div>
