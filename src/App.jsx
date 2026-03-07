@@ -13,6 +13,7 @@ import ProgressCharts from "./components/ProgressCharts";
 import Card from "./components/Card";
 import ListItem from "./components/ListItem";
 import SectionContainer from "./components/SectionContainer";
+import HeroBanner from "./components/HeroBanner";
 import spacing from "./spacing";
 
 const TOKENS={
@@ -1275,6 +1276,15 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
 
+    <HeroBanner
+      title="Dashboard"
+      subtitle="Your training snapshot for today"
+      accent={VOLT}
+      icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>}
+      actionLabel="View Events"
+      onAction={()=>setTab("program")}
+    />
+
     {showWelcomeGuide&&<GuideCallout title="Welcome to ShotLab" body="At Home tracks solo shot logging and streaks. Program shows coach-run events and verified attendance. Duels let players compete on drill scores." onDismiss={dismissWelcomeGuide} tone="accent"/>}
 
     {(()=>{
@@ -1544,6 +1554,7 @@ setTimeout(()=>setRespSaved(null),2000);
 };
 
 return <SectionContainer className="fade-up">
+<SH t="DUELS" s="HEAD-TO-HEAD" isCoach={typeof u!=="undefined"&&u?.isCoach}/>
 {showGuide&&<GuideCallout title="How duels work" body="Duels let players compete on drill scores. Accept a challenge, log your response, and the higher score wins." onDismiss={dismissGuide} tone="warm"/>}
 {/* Duels banner — aggressive, asymmetric */}
 <div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${ORANGE}22`,position:"relative",overflow:"hidden"}}>
@@ -1679,6 +1690,7 @@ const handleAddScLog=()=>{
 };
 
 return <div className="fade-up">
+<SH t="LIFTING" s="STRENGTH & CONDITIONING" isCoach={typeof user!=="undefined"&&user?.isCoach}/>
 {/* S&C banner — heavy, grounded */}
 <div style={{background:`linear-gradient(180deg,${SC_COLOR}0c,${CARD_BG})`,borderRadius:18,padding:0,marginBottom:16,border:`1px solid ${SC_COLOR}18`,overflow:"hidden",position:"relative"}}>
 <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at top left, rgba(200, 255, 0, 0.06) 0%, transparent 70%)",pointerEvents:"none"}}/>
