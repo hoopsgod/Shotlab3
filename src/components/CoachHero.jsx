@@ -109,11 +109,12 @@ export default function CoachHero({
                 <div
                   style={{
                     fontFamily: FB,
-                    color: "var(--text-3)",
-                    opacity: 0.74,
-                    fontSize: 8,
-                    textTransform: "uppercase",
-                    letterSpacing: "var(--tracking-tight)",
+                    color: "var(--text-2)",
+                    opacity: 0.82,
+                    fontSize: 10,
+                    textTransform: "none",
+                    letterSpacing: "0.01em",
+                    lineHeight: 1.35,
                     marginTop: 1,
                     display: "flex",
                     alignItems: "center",
@@ -127,8 +128,8 @@ export default function CoachHero({
                       padding: "1px 6px",
                       border: "1px solid var(--stroke-1)",
                       background: "rgba(255,255,255,0.01)",
-                      color: "var(--text-3)",
-                      opacity: 0.58,
+                      color: "var(--text-2)",
+                      opacity: 0.72,
                     }}
                   >
                     Coach mode
