@@ -10,19 +10,22 @@ Implementation plan (small-scope motion pass):
 
   /* Semantic design tokens (premium sports-tech refresh). */
   /* Before: neon cyan/lime accents + glow effects. After: restrained slate + desaturated action colors. */
-  --color-bg-canvas: #121821;
-  --color-bg-surface: #1a2431;
-  --color-bg-elevated: #223043;
-  --color-bg-subtle: rgba(173, 187, 205, 0.08);
+  --color-bg-canvas: #131a24;
+  --color-bg-surface: #1d2735;
+  --color-bg-elevated: #263447;
+  --color-bg-overlay: #2c3d52;
+  --color-bg-input: #202d3e;
+  --color-bg-nav: rgba(21, 30, 42, 0.92);
+  --color-bg-subtle: rgba(173, 187, 205, 0.11);
 
   --color-text-primary: #f1f5fb;
-  --color-text-secondary: #c1ccda;
-  --color-text-muted: #8f9caf;
-  --color-text-helper: #95a2b6;
-  --color-text-placeholder: #a6b2c4;
+  --color-text-secondary: #cbd6e4;
+  --color-text-muted: #9aa8be;
+  --color-text-helper: #a3b1c7;
+  --color-text-placeholder: #aebad0;
 
-  --color-border-subtle: rgba(173, 187, 205, 0.22);
-  --color-border-strong: rgba(188, 202, 220, 0.36);
+  --color-border-subtle: rgba(173, 187, 205, 0.28);
+  --color-border-strong: rgba(188, 202, 220, 0.46);
 
   --color-action-primary: #3f5f97;
   --color-action-primary-soft: rgba(63, 95, 151, 0.2);
@@ -68,8 +71,9 @@ Implementation plan (small-scope motion pass):
   --radius-xl: 20px;
   --radius-pill: 999px;
 
-  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.26);
-  --shadow-medium: 0 14px 30px rgba(0, 0, 0, 0.32);
+  --shadow-soft: 0 8px 20px rgba(5, 8, 14, 0.22);
+  --shadow-medium: 0 18px 36px rgba(4, 7, 12, 0.36);
+  --shadow-overlay: 0 22px 46px rgba(3, 6, 10, 0.46);
   --shadow-focus: 0 0 0 2px var(--color-bg-canvas), 0 0 0 4px var(--color-focus-ring), 0 0 0 6px var(--color-focus-shadow);
 
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -114,10 +118,13 @@ Implementation plan (small-scope motion pass):
 
   /* compatibility aliases used throughout app */
   --bg: var(--color-bg-canvas);
+  --bg-gradient: radial-gradient(circle at 15% 0%, rgba(101, 128, 171, 0.16), transparent 42%), radial-gradient(circle at 80% 22%, rgba(72, 101, 136, 0.18), transparent 40%), var(--bg);
   --bg-0: var(--color-bg-canvas);
   --surface-1: var(--color-bg-surface);
   --surface-2: var(--color-bg-elevated);
-  --surface-3: #263449;
+  --surface-3: var(--color-bg-overlay);
+  --surface-input: var(--color-bg-input);
+  --surface-nav: var(--color-bg-nav);
   --text-1: var(--color-text-primary);
   --text-2: var(--color-text-secondary);
   --text-3: var(--color-text-muted);
@@ -146,6 +153,39 @@ Implementation plan (small-scope motion pass):
   --s-9: var(--space-9);
 }
 
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-bg-canvas: #eef2f7;
+  --color-bg-surface: #f7f9fc;
+  --color-bg-elevated: #ffffff;
+  --color-bg-overlay: #f2f5fa;
+  --color-bg-input: #ffffff;
+  --color-bg-nav: rgba(245, 248, 252, 0.94);
+  --color-bg-subtle: rgba(99, 118, 146, 0.1);
+
+  --color-text-primary: #1f2a3a;
+  --color-text-secondary: #46556c;
+  --color-text-muted: #67778f;
+  --color-text-helper: #75849c;
+  --color-text-placeholder: #8090a7;
+
+  --color-border-subtle: rgba(84, 103, 131, 0.2);
+  --color-border-strong: rgba(84, 103, 131, 0.34);
+  --color-focus-shadow: rgba(180, 195, 214, 0.64);
+
+  --color-action-primary: #3f5f97;
+  --color-action-primary-soft: rgba(63, 95, 151, 0.12);
+  --color-action-secondary: #446a72;
+  --color-action-secondary-soft: rgba(68, 106, 114, 0.12);
+
+  --shadow-soft: 0 10px 24px rgba(37, 52, 73, 0.08);
+  --shadow-medium: 0 18px 34px rgba(30, 45, 66, 0.12);
+  --shadow-overlay: 0 24px 40px rgba(25, 40, 60, 0.16);
+
+  --bg-gradient: radial-gradient(circle at 10% -5%, rgba(63, 95, 151, 0.12), transparent 42%), radial-gradient(circle at 88% 12%, rgba(94, 121, 151, 0.09), transparent 38%), var(--bg);
+}
+
 * { box-sizing: border-box; }
 
 html,
@@ -153,7 +193,7 @@ body,
 #root,
 .page,
 main {
-  background: var(--bg);
+  background: var(--bg-gradient);
   color: var(--text-1);
 }
 
@@ -177,15 +217,15 @@ textarea {
 
 .shared-card {
   border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-subtle);
-  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0)), var(--surface-1);
+  border: 1px solid rgba(173, 187, 205, 0.32);
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.008)), var(--surface-1);
   box-shadow: var(--shadow-soft);
   transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
 
 .shared-card--primary {
-  background: linear-gradient(180deg, rgba(63,95,151,0.14), rgba(63,95,151,0.03)), var(--surface-2);
-  border-color: rgba(122, 145, 186, 0.38);
+  background: linear-gradient(180deg, rgba(63,95,151,0.2), rgba(63,95,151,0.05)), var(--surface-2);
+  border-color: rgba(138, 161, 202, 0.52);
   box-shadow: var(--shadow-medium);
 }
 
@@ -195,17 +235,17 @@ textarea {
 }
 
 .shared-card--subtle {
-  background: var(--color-bg-subtle);
-  border-color: rgba(173, 187, 205, 0.16);
+  background: color-mix(in srgb, var(--surface-1) 65%, var(--surface-2));
+  border-color: rgba(173, 187, 205, 0.24);
   box-shadow: none;
 }
 
 .shared-card--default,
 .shared-card--metric { }
-.shared-card--default { background: var(--surface-2); border-color: rgba(122, 145, 186, 0.32); }
+.shared-card--default { background: var(--surface-2); border-color: rgba(138, 161, 202, 0.4); }
 .shared-card--metric,
 .shared-card--list,
-.shared-card--empty { background: var(--surface-1); }
+.shared-card--empty { background: var(--surface-1); border-color: rgba(173, 187, 205, 0.34); }
 
 @media (hover: hover) and (pointer: fine) {
   .shared-card:is(button, a, [role="button"]):hover,
@@ -231,7 +271,7 @@ a.interactive-card:focus-visible {
 }
 
 .shared-card:not(.interactive-card) {
-  border-color: rgba(145, 164, 188, 0.2);
+  border-color: rgba(145, 164, 188, 0.3);
 }
 
 .btn {
@@ -303,9 +343,9 @@ a.interactive-card:focus-visible {
 
 .btn--ghost,
 .btn--tertiary {
-  background: transparent;
+  background: color-mix(in srgb, var(--surface-2) 86%, transparent);
   color: var(--text-2);
-  border-color: rgba(173, 187, 205, 0.3);
+  border-color: rgba(173, 187, 205, 0.38);
   min-height: var(--btn-h-sm);
   padding: 0 12px;
 }
@@ -316,8 +356,8 @@ a.interactive-card:focus-visible {
   min-height: var(--btn-h);
   padding: 0;
   border-radius: var(--btn-radius);
-  background: var(--surface-2);
-  border: 1px solid var(--color-border-subtle);
+  background: var(--surface-3);
+  border: 1px solid rgba(173, 187, 205, 0.36);
   color: var(--text-2);
 }
 
@@ -349,8 +389,8 @@ textarea {
   min-height: var(--input-h);
   border-radius: var(--input-radius);
   padding: 0 var(--input-pad-x);
-  background: var(--surface-2);
-  border: 1px solid var(--border-1);
+  background: var(--surface-input);
+  border: 1px solid rgba(173, 187, 205, 0.36);
   color: var(--text-1);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
@@ -363,6 +403,21 @@ input::placeholder,
 textarea::placeholder {
   color: var(--color-text-placeholder);
   opacity: 0.95;
+}
+
+.input:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  background: color-mix(in srgb, var(--surface-input) 82%, var(--surface-3));
+}
+
+.shared-card :is(.field, .table, table, .listRow, .list-row) {
+  color: var(--text-2);
+}
+
+.shared-card :is(.fieldLabel, th, .meta, .u-meta-label) {
+  color: var(--text-3);
 }
 
 select,
@@ -392,15 +447,17 @@ a,
 
 @media (prefers-contrast: more) {
   :root {
-    --color-bg-canvas: #101722;
-    --color-bg-surface: #1c2838;
-    --color-bg-elevated: #27384f;
+    --color-bg-canvas: #0f1621;
+    --color-bg-surface: #1b2737;
+    --color-bg-elevated: #263a52;
+    --color-bg-overlay: #314964;
+    --color-bg-input: #1f3044;
     --color-text-secondary: #d9e4f2;
     --color-text-muted: #bdcada;
     --color-text-helper: #bdcada;
     --color-text-placeholder: #cad5e3;
-    --color-border-subtle: rgba(188, 209, 235, 0.42);
-    --color-border-strong: rgba(206, 224, 247, 0.64);
+    --color-border-subtle: rgba(188, 209, 235, 0.5);
+    --color-border-strong: rgba(206, 224, 247, 0.72);
   }
 
   .shared-card,
@@ -418,6 +475,21 @@ a,
     color: var(--text-1);
     background: rgba(179, 201, 227, 0.08);
   }
+}
+
+
+.bottom-nav,
+.utility-dock-button {
+  background: var(--surface-nav);
+  border-color: rgba(173, 187, 205, 0.32);
+}
+
+.modal,
+[role="dialog"],
+.dialog-surface {
+  background: var(--surface-3);
+  border: 1px solid rgba(173, 187, 205, 0.34);
+  box-shadow: var(--shadow-overlay);
 }
 
 .chip {

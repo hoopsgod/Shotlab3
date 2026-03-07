@@ -182,8 +182,8 @@ select {
   align-items: stretch;
   height: 64px;
   padding: var(--space-2);
-  background: rgba(18, 24, 33, 0.9);
-  border: 1px solid rgba(173, 187, 205, 0.24);
+  background: var(--surface-nav);
+  border: 1px solid rgba(173, 187, 205, 0.32);
   border-radius: var(--radius-lg);
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(12px);
@@ -263,4 +263,19 @@ select {
   .tab.shared-nav-item.is-active .tab-icon {
     transform: none;
   }
+}
+
+
+:root[data-theme="light"] .heroMetaStrip {
+  background: rgba(63, 95, 151, 0.06);
+  border-color: rgba(84, 103, 131, 0.22);
+}
+
+:root[data-theme="light"] .tab.shared-nav-item {
+  color: var(--text-3);
+}
+
+:root[data-theme="light"] .tab.shared-nav-item.is-active {
+  color: #274271;
+  background: linear-gradient(180deg, rgba(63, 95, 151, 0.14), rgba(63, 95, 151, 0.06));
 }
