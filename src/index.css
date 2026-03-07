@@ -163,7 +163,7 @@ form > * + * {
 }
 
 .mode-card-stat {
-  gap: 10px;
+  gap: 8px;
   text-align: left;
 }
 
@@ -179,7 +179,7 @@ form > * + * {
   }
 
   .mode-card-stat {
-    min-height: 82px !important;
+    min-height: 78px !important;
   }
 
   .mode-card-stat-value {

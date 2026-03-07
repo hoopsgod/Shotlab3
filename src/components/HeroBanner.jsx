@@ -17,8 +17,8 @@ function HeroBanner({
         background: `linear-gradient(140deg, ${accent}22 0%, ${accent}10 45%, var(--surface-1) 100%)`,
         border: `1px solid ${accent}66`,
         borderRadius: HERO_RADIUS,
-        padding: "16px 14px",
-        marginBottom: 20,
+        padding: "14px 14px",
+        marginBottom: 18,
         boxShadow: `0 14px 28px ${accent}22`,
       }}
     >
@@ -56,16 +56,16 @@ function HeroBanner({
             </div>
             {subtitle ? (
               <div
-                style={{
-                  fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
-                  color: "var(--text-2)",
-                  fontSize: 12,
-                  lineHeight: 1.4,
-                  letterSpacing: "0.01em",
-                  marginTop: 4,
-                }}
-              >
-                {subtitle}
+              style={{
+                fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
+                color: "var(--text-2)",
+                fontSize: 12,
+                lineHeight: 1.4,
+                letterSpacing: "0.01em",
+                marginTop: 3,
+              }}
+            >
+              {subtitle}
               </div>
             ) : null}
           </div>
@@ -79,7 +79,7 @@ function HeroBanner({
               color: UI_TOKENS.colors.bgBase,
               border: "none",
               borderRadius: HERO_BUTTON_RADIUS,
-              padding: "8px 10px",
+              padding: "7px 10px",
               fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
               fontSize: 11,
               fontWeight: 800,
