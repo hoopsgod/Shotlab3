@@ -17,6 +17,18 @@ import HeroBanner from "./components/HeroBanner";
 import BrandLogo from "./components/BrandLogo";
 import spacing from "./spacing";
 import UI_TOKENS from "./styles/tokens";
+import { cloudStore } from "./lib/cloudStore";
+import { firebaseAuth, firebaseEnabled, googleProvider } from "./lib/firebase";
+
+const authCreateUser=async(auth,email,password)=>auth?.createUserWithEmailAndPassword?auth.createUserWithEmailAndPassword(email,password):null;
+const authUpdateProfile=async(user,payload)=>user?.updateProfile?user.updateProfile(payload):null;
+const authSignIn=async(auth,email,password)=>auth?.signInWithEmailAndPassword?auth.signInWithEmailAndPassword(email,password):null;
+const authSignInGoogle=async(auth,provider)=>auth?.signInWithPopup?auth.signInWithPopup(provider):null;
+const authSendReset=async(auth,email)=>auth?.sendPasswordResetEmail?auth.sendPasswordResetEmail(email):null;
+const authSignOut=async(auth)=>auth?.signOut?auth.signOut():null;
+const authDeleteCurrent=async(auth)=>auth?.currentUser?.delete?auth.currentUser.delete():null;
+const authSubscribe=(auth,cb)=>auth?.onAuthStateChanged?auth.onAuthStateChanged(cb):(()=>{});
+;
 
 const TOKENS={
 PRIMARY:UI_TOKENS.colors.primary,
@@ -173,7 +185,7 @@ if(!existing.includes(code))return code;
 }
 return Math.random().toString(36).slice(2,2+length).toUpperCase();
 }
-const DB={async get(k){try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null}catch{return null}},async set(k,v){try{await window.storage.set(k,JSON.stringify(v),true)}catch{}}};
+const DB={async get(k){return cloudStore.get(k)},async set(k,v){return cloudStore.set(k,v)}};
 // Password hashing (simple but not plaintext)
 function hashPw(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return(h>>>0).toString(36)}
 // AudioContext must be lazy-initialized on user gesture (iOS WebKit requirement)
@@ -773,35 +785,99 @@ await Promise.all([DB.set("sl:players",m.playersMigrated),DB.set("sl:player-prof
 if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else setView(found.role||"player")}}
 setReady(true)})()},[migrateData]);
 
+useEffect(()=>{
+if(!firebaseEnabled||!firebaseAuth)return;
+const unsub=authSubscribe(firebaseAuth,async(current)=>{
+if(!current?.email)return;
+const found=players.find(pl=>pl.email===current.email);
+if(found){
+setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId||null});
+}
+});
+return ()=>unsub();
+},[players]);
+
 const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
-// Auth with hashed passwords
+
+const syncUserView=(person)=>{
+setUser({email:person.email,role:person.role||"player",isCoach:(person.role||"player")==="coach",name:person.name,teamId:person.teamId||null});
+if((person.role||"player")==="coach"&&!person.teamId)setView("create-team");
+else if((person.role||"player")==="player"&&!person.teamId)setView("join-team");
+else setView(person.role||"player");
+};
+
+const ensurePlayerRecord=async({email,name,role,password})=>{
+let person=players.find(p=>p.email===email);
+if(person)return person;
+const hashed=password?hashPw(password):null;
+const nextPlayers=[...players,{email,name:name||email.split("@")[0],password:hashed,role:role||"player",teamId:null}];
+await P("sl:players",nextPlayers,setPlayers);
+return nextPlayers.find(p=>p.email===email);
+};
+
+// Auth with Firebase primary + local fallback
 const register=async(email,password,name,role)=>{
 const existing=players.find(p=>p.email===email);
 if(existing)return{ok:false,err:"Account already exists. Please sign in."};
+if(firebaseEnabled&&firebaseAuth){
+try{
+const cred=await authCreateUser(firebaseAuth,email,password);
+if(name)await authUpdateProfile(cred?.user,{displayName:name});
+}catch(err){
+return{ok:false,err:err?.message||"Unable to register."};
+}
+}
 const hashed=hashPw(password);
 const np=[...players,{email,name,password:hashed,role,teamId:null}];
 await P("sl:players",np,setPlayers);
-setUser({email,role,isCoach:role==="coach",name,teamId:null});setView(role==="coach"?"create-team":"join-team");
-DB.set("sl:session",{email});
+syncUserView({email,role,name,teamId:null});
+await DB.set("sl:session",{email});
 trackEvent("auth_register",{targetRole:role,userEmail:email,userRole:role},{email,role,teamId:null});
 return{ok:true};
 };
-const login=(email,password)=>{
-const p=players.find(p=>p.email===email);
-if(!p)return{ok:false,err:"No account found. Please register first."};
-const hashed=hashPw(password);
-if(p.password&&p.password!==hashed){
-if(p.password!==password)return{ok:false,err:"Incorrect password."};
-P("sl:players",players.map(pl=>pl.email===email?{...pl,password:hashed}:pl),setPlayers);
+const login=async(email,password)=>{
+let localPlayer=players.find(p=>p.email===email);
+if(firebaseEnabled&&firebaseAuth){
+try{await authSignIn(firebaseAuth,email,password);}catch(err){
+if(!localPlayer)return{ok:false,err:err?.message||"No account found. Please register first."};
 }
-if(!p.password){P("sl:players",players.map(pl=>pl.email===email?{...pl,password:hashed}:pl),setPlayers)}
-setUser({email,role:p.role||"player",isCoach:(p.role||"player")==="coach",name:p.name,teamId:p.teamId||null});
-if((p.role||"player")==="coach"&&!p.teamId)setView("create-team");
-else if((p.role||"player")==="player"&&!p.teamId)setView("join-team");
-else setView(p.role||"player");
-DB.set("sl:session",{email});
-trackEvent("auth_login",{method:"password"},{email,role:p.role||"player",teamId:p.teamId||null});
+}
+if(!localPlayer)return{ok:false,err:"No account found. Please register first."};
+const hashed=hashPw(password);
+if(localPlayer.password&&localPlayer.password!==hashed){
+if(localPlayer.password!==password)return{ok:false,err:"Incorrect password."};
+await P("sl:players",players.map(pl=>pl.email===email?{...pl,password:hashed}:pl),setPlayers);
+localPlayer={...localPlayer,password:hashed};
+}
+if(!localPlayer.password){await P("sl:players",players.map(pl=>pl.email===email?{...pl,password:hashed}:pl),setPlayers);localPlayer={...localPlayer,password:hashed};}
+syncUserView(localPlayer);
+await DB.set("sl:session",{email});
+trackEvent("auth_login",{method:"password"},{email,role:localPlayer.role||"player",teamId:localPlayer.teamId||null});
 return{ok:true};
+};
+const socialLogin=async()=>{
+if(!firebaseEnabled||!firebaseAuth||!googleProvider)return{ok:false,err:"Firebase social login is not configured."};
+try{
+const cred=await authSignInGoogle(firebaseAuth,googleProvider);
+const email=cred.user.email;
+if(!email)return{ok:false,err:"Google account has no email."};
+const role="player";
+const name=cred.user.displayName||email.split("@")[0];
+const person=await ensurePlayerRecord({email,name,role,password:null});
+syncUserView(person||{email,name,role,teamId:null});
+await DB.set("sl:session",{email});
+trackEvent("auth_login",{method:"google"},{email,role:(person?.role)||role,teamId:person?.teamId||null});
+return{ok:true};
+}catch(err){
+return{ok:false,err:err?.message||"Google sign-in failed."};
+}
+};
+const resetPassword=async(email)=>{
+if(!email)return{ok:false,err:"Enter your email first."};
+if(firebaseEnabled&&firebaseAuth){
+try{await authSendReset(firebaseAuth,email);return{ok:true,msg:"Password reset email sent."};}catch(err){return{ok:false,err:err?.message||"Unable to send reset email."};}
+}
+return{ok:false,err:"Password reset requires Firebase configuration."};
 };
 const demoSignIn=async(kind="player")=>{
 const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
@@ -877,7 +953,7 @@ await DB.set("sl:session",{email:signedIn.email});
 await trackEvent("auth_demo_login",{kind},{email:signedIn.email,role:signedIn.role||"player",teamId:demoTeam.id});
 return{ok:true};
 };
-const logout=()=>{trackEvent("auth_logout");setUser(null);setView("auth");DB.set("sl:session",null)};
+const logout=async()=>{trackEvent("auth_logout");if(firebaseEnabled&&firebaseAuth){try{await authSignOut(firebaseAuth)}catch{}}setUser(null);setView("auth");DB.set("sl:session",null)};
 const deleteAccount=async()=>{
 if(!user)return;
 const e=user.email;
@@ -888,7 +964,9 @@ await P("sl:shotlogs",shotLogs.filter(s=>s.playerId!==e),setShotLogs);
 await P("sl:challenges",challenges.filter(c=>c.from!==e&&c.to!==e),setChallenges);
 await P("sl:sc-rsvps",scRsvps.filter(r=>r.playerId!==e),setScRsvps);
 await P("sl:sc-logs",scLogs.filter(l=>l.playerId!==e),setScLogs);
-DB.set("sl:session",null);setUser(null);setView("auth");
+DB.set("sl:session",null);
+if(firebaseEnabled&&firebaseAuth&&firebaseAuth.currentUser){try{await authDeleteCurrent(firebaseAuth)}catch{}}
+setUser(null);setView("auth");
 };
 const createTeam=async(name,meta={})=>{
 if(!user||user.role!=="coach")return{ok:false,err:"Not authorized"};
@@ -981,9 +1059,9 @@ useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
-{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
+{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onSocialLogin={socialLogin} onResetPassword={resetPassword} firebaseEnabled={firebaseEnabled} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
-{view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}
+{view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} onResetPassword={resetPassword} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} updateTeamBranding={updateTeamBranding} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/></div>}
 </>;
 }
@@ -991,13 +1069,13 @@ return <><Styles/>
 // ═══════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════
-function Auth({onLogin,onRegister,onDemo,highContrast,onToggleHighContrast}){
+function Auth({onLogin,onRegister,onDemo,onSocialLogin,onResetPassword,firebaseEnabled,highContrast,onToggleHighContrast}){
 const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[err,setErr]=useState("");
-const doLogin=()=>{
+const doLogin=async()=>{
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!password){setErr("Enter your password");return}
 const id=e.includes("@")?e:e+"@shotlab.app";
-const r=onLogin(id,password);
+const r=await onLogin(id,password);
 if(!r.ok)setErr(r.err);
 };
 const doRegister=async()=>{
@@ -1061,7 +1139,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
     <button className="btn-v cta-primary" onClick={mode==="login"?doLogin:doRegister} style={{}}>
       {mode==="login"?"SIGN IN":"CREATE ACCOUNT"} &#8594;
     </button>
-    {mode==="login"&&<><div style={{display:"flex",alignItems:"center",gap:10,width:"100%",margin:"8px 0 12px"}}><div style={{height:1,background:"#242424",flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:"#555555"}}/><div style={{height:1,background:"#242424",flex:1}}/></div><div className="auth-demo-enter" style={{display:"flex",gap:12,justifyContent:"center",marginTop:0,opacity:0}}>
+    {mode==="login"&&<>{firebaseEnabled&&<><button onClick={async()=>{const r=await onSocialLogin();if(!r.ok)setErr(r.err);}} className="btn-v" style={{height:44,padding:"0 20px",width:"100%",marginTop:8,background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:12,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Sign in with Google</button><button onClick={async()=>{const id=(email.trim().toLowerCase().includes("@")?email.trim().toLowerCase():email.trim().toLowerCase()+"@shotlab.app");const r=await onResetPassword(id);setErr(r.ok?"Reset email sent. Check inbox.":(r.err||"Unable to send reset email."));}} className="btn-v" style={{height:40,padding:"0 14px",width:"100%",marginTop:8,background:"transparent",color:"#A0A0A0",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Forgot Password</button></>}<div style={{display:"flex",alignItems:"center",gap:10,width:"100%",margin:"8px 0 12px"}}><div style={{height:1,background:"#242424",flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:"#555555"}}/><div style={{height:1,background:"#242424",flex:1}}/></div><div className="auth-demo-enter" style={{display:"flex",gap:12,justifyContent:"center",marginTop:0,opacity:0}}>
       <button onClick={()=>doDemo("player")} className="btn-v" style={{height:44,padding:"0 20px",background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:12,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Demo Player</button>
       <button onClick={()=>doDemo("coach")} className="btn-v" style={{height:44,padding:"0 20px",background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:12,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Demo Coach</button>
     </div></>}
@@ -1070,7 +1148,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       {mode==="login"?"Don't have an account? ":"Already have an account? "}
       <span style={{color:VOLT,fontWeight:700}}>{mode==="login"?"Register":"Sign In"}</span>
     </p>
-    {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:12,lineHeight:1.5}}>By creating an account, you agree to our data practices. All data is stored locally on your device. You can delete your account and all data at any time from your Profile settings.</p>}
+    {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:12,lineHeight:1.5}}>By creating an account, you agree to our data practices. Your data syncs to a secure cloud database when Firebase is configured. You can manage account deletion and privacy controls from Settings.</p>}
   </div>
 </div>
 
@@ -1124,7 +1202,7 @@ return <span title={text} aria-label={text} style={{display:"inline-flex",alignI
 // ═══════════════════════════════════════
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
-function Player({u,team,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,highContrast,onToggleHighContrast}){
+function Player({u,team,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,onResetPassword,highContrast,onToggleHighContrast}){
 const initialTab = u.isCoach && window.location.pathname === "/players" ? "players" : "home";
 const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
 const[shotMade,setShotMade]=useState(0),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false),[shotError,setShotError]=useState("");
@@ -1478,7 +1556,8 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount}/></div>}
+  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T}/></div>}
+  {tab==="settings"&&<div className={slideClass} key="settings"><PlayerSettingsPage u={u} onDeleteAccount={deleteAccount} onResetPassword={onResetPassword}/></div>}
 </div>
 
 <NavBar items={[
@@ -1489,6 +1568,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {k:"sc",l:"Lifting",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>,dot:soonSC>0?VOLT:null},
   {k:"program",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
   {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
+  {k:"settings",l:"Settings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.09 14H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4H9a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>},
 ]}
 active={tab}
 onChange={switchTab}
@@ -2849,8 +2929,7 @@ return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s
 // ═══════════════════════════════════════
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
-function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount}){
-const[confirmDel,setConfirmDel]=useState(false);
+function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T}){
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const totalMakes=homeScores.reduce((a,s)=>a+s.score,0);
@@ -2995,25 +3074,38 @@ return <SectionContainer className="fade-up">
   </div>}
 </div>})}
 
-{/* ══════ ACCOUNT MANAGEMENT ══════ */}
-<div style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${BORDER_CLR}44`}}>
-  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>ACCOUNT</div>
-  {!confirmDel?<button onClick={()=>setConfirmDel(true)} style={{width:"100%",padding:"14px",background:"transparent",border:`1px solid #FF454544`,borderRadius:12,cursor:"pointer",fontFamily:FB,fontSize:13,color:"#FF4545",fontWeight:600,letterSpacing:1}}>
-    Delete Account & All Data
-  </button>
-  :<div className="fade-up" style={{background:"#FF454508",borderRadius:16,padding:"20px",border:`1px solid #FF454533`}}>
-    <div style={{fontFamily:FD,color:"#FF4545",fontSize:18,letterSpacing:3,marginBottom:8}}>DELETE ACCOUNT?</div>
-    <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:16}}>This will permanently delete your account, scores, shot logs, RSVPs, and all associated data. This cannot be undone.</p>
-    <div style={{display:"flex",gap:8}}>
-      <button onClick={()=>setConfirmDel(false)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-      <button onClick={deleteAccount} className="btn-v cta-danger" style={{}}>DELETE</button>
-    </div>
-  </div>}
-  <p style={{fontFamily:FB,color:T.SUB,fontSize:10,textAlign:"center",marginTop:12,lineHeight:1.5}}>Your data is stored locally on this device. Deleting your account removes all your personal information and scores.</p>
-</div>
 
   </SectionContainer>;
 }
+function PlayerSettingsPage({u,onDeleteAccount,onResetPassword}){
+const [confirmDelete,setConfirmDelete]=useState(false);
+const [msg,setMsg]=useState("");
+const handleReset=async()=>{
+const r=await onResetPassword?.(u?.email);
+setMsg(r?.ok?"Password reset email sent.":(r?.err||"Unable to send reset email."));
+};
+return <SectionContainer className="fade-up">
+  <Card style={{marginBottom:16}}>
+    <div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:2}}>SETTINGS</div>
+    <p style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:8}}>Manage account security, data privacy, and account lifecycle.</p>
+  </Card>
+  <Card style={{marginBottom:16}}>
+    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>SECURITY</div>
+    <button onClick={handleReset} className="btn-v" style={{height:42,background:"transparent",border:`1px solid ${BORDER_CLR}`,color:LIGHT}}>Send password reset email</button>
+    <p style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:8}}>{u?.email}</p>
+  </Card>
+  <Card style={{marginBottom:16}}>
+    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PRIVACY POLICY</div>
+    <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5}}>Shotlab stores account, profile, shot logs, duels, RSVPs, and events in cloud-backed storage when Firebase is configured. Access is scoped by your signed-in account.</p>
+  </Card>
+  <Card>
+    <div style={{fontFamily:FB,color:"#FF4545",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>DANGER ZONE</div>
+    {!confirmDelete?<button onClick={()=>setConfirmDelete(true)} className="btn-v cta-danger" style={{height:44}}>Delete account</button>:<div><p style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:10}}>This permanently deletes your account and associated data.</p><div style={{display:"flex",gap:8}}><button onClick={()=>setConfirmDelete(false)} className="btn-v" style={{height:40,background:"transparent",border:`1px solid ${BORDER_CLR}`,color:MUTED}}>Cancel</button><button onClick={onDeleteAccount} className="btn-v cta-danger" style={{height:40}}>Confirm delete</button></div></div>}
+    {msg&&<p style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:10}}>{msg}</p>}
+  </Card>
+</SectionContainer>;
+}
+
 function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged}){
   const [sortBy,setSortBy]=useState("status");
   const now=Date.now();
