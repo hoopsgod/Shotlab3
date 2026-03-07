@@ -99,6 +99,15 @@ const SHOT_MAKES_MAX=500;
 const ALNUM="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const DEMO_PLAYER={email:"demo@shotlab.app",password:"demo1234",name:"Demo Player",role:"player"};
 const DEMO_COACH={email:"coach.demo@shotlab.app",password:"demo1234",name:"Demo Coach",role:"coach"};
+const COACH_PROFILES=[
+{id:"ramirez",name:"Elena Ramirez",role:"Head Skills Coach",credentials:"USA Basketball Gold License · 12y player development",bio:"Builds repeatable shooting mechanics and game-speed footwork for guards and wings.",photo:"https://images.unsplash.com/photo-1549060279-7e168fcee0c2?auto=format&fit=crop&w=520&q=80"},
+{id:"owens",name:"Marcus Owens",role:"Strength & Conditioning",credentials:"CSCS · EXOS Performance Specialist",bio:"Leads force production, change-of-direction, and return-to-play readiness blocks.",photo:"https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=520&q=80"},
+{id:"chen",name:"Ari Chen",role:"Performance Analyst",credentials:"MSc Sports Analytics · Hudl Certified",bio:"Turns film and workload data into weekly individual development plans.",photo:"https://images.unsplash.com/photo-1594381898411-846e7d193883?auto=format&fit=crop&w=520&q=80"},
+];
+const EARLY_TESTIMONIALS=[
+{name:"Jordan M.",meta:"Parent · U16 Guard",quote:"Shotlab made practice accountability simple. My son now tracks every rep and actually wants to review his progress."},
+{name:"Coach D. Lawson",meta:"AAU Program Director",quote:"The coach dashboard keeps attendance, skill work, and player communication in one place so we can spend more time coaching."},
+];
 const DEFAULT_TEAM_BRANDING={
 logoUrl:"",
 teamName:"",
@@ -981,7 +990,7 @@ useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
-{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
+{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} updateTeamBranding={updateTeamBranding} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/></div>}
@@ -991,7 +1000,7 @@ return <><Styles/>
 // ═══════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════
-function Auth({onLogin,onRegister,onDemo,highContrast,onToggleHighContrast}){
+function Auth({onLogin,onRegister,onDemo}){
 const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[err,setErr]=useState("");
 const doLogin=()=>{
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
@@ -1028,7 +1037,6 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,letterSpacing:5,margin:"8px 0 0",fontWeight:500}}>OFFSEASON DEVELOPMENT PROGRAM</p>
 <div style={{display:"flex",alignItems:"center",gap:12,margin:"32px auto",maxWidth:200}}><div style={{flex:1,height:1,background:`linear-gradient(to right,transparent,${VOLT}44)`}}/><div style={{width:6,height:6,borderRadius:"50%",background:VOLT,opacity:.6}}/><div style={{flex:1,height:1,background:`linear-gradient(to left,transparent,${VOLT}44)`}}/></div>
 <div className="auth-card-enter" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:24,padding:"36px 28px",border:`1px solid ${BORDER_CLR}`}}>
-<div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}><button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:36,padding:"0 10px",fontSize:11}}>{highContrast?"High contrast: ON":"High contrast: OFF"}</button></div>
 {/* Login / Register toggle */}
 <div role="tablist" aria-label="Authentication mode" style={{display:"flex",background:"#1E1E1E",borderRadius:12,padding:2,marginBottom:24,border:"1px solid #242424"}}>
 {["login","register"].map(m=><button key={m} role="tab" aria-selected={mode===m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,height:44,borderRadius:10,border:"none",cursor:"pointer",fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:"uppercase",transition:"all .15s ease",background:mode===m?VOLT:"transparent",color:mode===m?"#000000":"#555555",fontWeight:mode===m?700:600}}>{m==="login"?"SIGN IN":"REGISTER"}</button>)}
@@ -1071,6 +1079,13 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       <span style={{color:VOLT,fontWeight:700}}>{mode==="login"?"Register":"Sign In"}</span>
     </p>
     {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:12,lineHeight:1.5}}>By creating an account, you agree to our data practices. All data is stored locally on your device. You can delete your account and all data at any time from your Profile settings.</p>}
+    <div style={{marginTop:14,paddingTop:12,borderTop:`1px solid ${BORDER_CLR}`}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,flexWrap:"wrap"}}>
+        <a href="#" style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:700,letterSpacing:1}}>Privacy policy</a>
+        <div style={{display:"flex",gap:6,alignItems:"center",fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1.2,textTransform:"uppercase"}}><span style={{padding:"3px 6px",border:`1px solid ${BORDER_CLR}`,borderRadius:999}}>SSL Secured</span><span style={{padding:"3px 6px",border:`1px solid ${BORDER_CLR}`,borderRadius:999}}>Stripe Ready</span></div>
+      </div>
+      <div style={{display:"grid",gap:8,marginTop:10}}>{EARLY_TESTIMONIALS.map(t=><div key={t.name} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,lineHeight:1.4}}>&ldquo;{t.quote}&rdquo;</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:4,letterSpacing:0.8}}>{t.name} · {t.meta}</div></div>)}</div>
+    </div>
   </div>
 </div>
 
@@ -1268,7 +1283,6 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
         </div>
       </div>
     </div>
-    <button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:44,height:44,padding:"0 10px",fontFamily:FB,fontSize:10,letterSpacing:"0.06em",textTransform:"uppercase",marginRight:8}}>Contrast</button>
     <button aria-label="Settings" title="Settings" onClick={()=>switchTab("profile")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:TOKENS.TEXT_PRIMARY,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -1310,8 +1324,8 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
           {showHomeGuide&&<div style={{marginTop:10}}><GuideCallout title="Quick definitions" body="At Home is your personal tracker for Makes, Drills completed, and streaks. Program is for team sessions where attendance is verified by event RSVPs." onDismiss={dismissHomeGuide} tone="cool"/></div>}
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
-          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" helpText="At Home tracks solo shot logging and streaks." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
-          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" helpText="Program shows coach-run events and verified attendance." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
+          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" helpText="At Home tracks solo shot logging and streaks." icon={<img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?auto=format&fit=crop&w=180&q=80" alt="Athlete training at home court" style={{width:28,height:28,borderRadius:8,objectFit:"cover",border:`1px solid ${VOLT}66`}}/>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
+          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" helpText="Program shows coach-run events and verified attendance." icon={<img src="https://images.unsplash.com/photo-1571019613914-85f342c55f09?auto=format&fit=crop&w=180&q=80" alt="Athletes in team training session" style={{width:28,height:28,borderRadius:8,objectFit:"cover",border:`1px solid ${VOLT}66`}}/>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
         </div>
       </div>
     })()}
@@ -1478,7 +1492,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount}/></div>}
+  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} highContrast={highContrast} onToggleHighContrast={onToggleHighContrast}/></div>}
 </div>
 
 <NavBar items={[
@@ -2792,6 +2806,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   </div>}
 
   {tab==="settings"&&<div className="page pageShell fade-up" data-accent="feed" id="coach-settings" style={shellVars("feed")}><PageHeader title="SETTINGS" subtitle="Program identity, premium polish, and account controls" accent="lime" icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.09 14H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4H9a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>} />
+    <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="COACH PROFILES" s="WHO LEADS THE PROGRAM" identity/>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(200px,1fr))",gap:10,marginBottom:16}}>{COACH_PROFILES.map(coach=><div key={coach.id} className="accent-card" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:10}}><img src={coach.photo} alt={`${coach.name} coaching athletes`} style={{width:"100%",height:118,objectFit:"cover",borderRadius:10,marginBottom:8}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.2,lineHeight:1}}>{coach.name.toUpperCase()}</div><div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:1.2,marginTop:4}}>{coach.role}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{coach.credentials}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4,marginTop:6}}>{coach.bio}</div></div>)}</div>
+    <div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:12,marginBottom:14}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,flexWrap:"wrap"}}><div style={{fontFamily:FD,color:teamPrimary,fontSize:14,letterSpacing:"var(--tracking-default)"}}>TRUST & PRIVACY</div><a href="#" style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:700}}>Privacy policy</a></div>
+      <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10,fontFamily:FB,fontSize:10,color:T.SUB,textTransform:"uppercase",letterSpacing:1.2}}><span style={{padding:"4px 7px",border:`1px solid ${BORDER_CLR}`,borderRadius:999}}>SSL encrypted</span><span style={{padding:"4px 7px",border:`1px solid ${BORDER_CLR}`,borderRadius:999}}>PCI-compliant billing</span><span style={{padding:"4px 7px",border:`1px solid ${BORDER_CLR}`,borderRadius:999}}>Coach-only data controls</span></div>
+      <div style={{display:"grid",gap:8,marginTop:10}}>{EARLY_TESTIMONIALS.map(t=><div key={`coach-${t.name}`} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11}}>&ldquo;{t.quote}&rdquo;</div><div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:4}}>{t.name} · {t.meta}</div></div>)}</div>
+    </div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="TEAM BRANDING" s="PREMIUM IDENTITY" identity/>
     <div className="accent-card" style={{background:`linear-gradient(135deg,${alphaFromHex(teamPrimary,0.16)},${CARD_BG})`,border:`1px solid ${alphaFromHex(teamPrimary,0.42)}`,borderRadius:16,padding:"16px 16px",marginBottom:14}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}><div><div style={{fontFamily:FD,color:teamPrimary,fontSize:14,letterSpacing:"var(--tracking-default)"}}>IDENTITY PREVIEW</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Coach, player, and section branding in real time.</div></div></div>
@@ -2849,7 +2870,7 @@ return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s
 // ═══════════════════════════════════════
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
-function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount}){
+function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount,highContrast,onToggleHighContrast}){
 const[confirmDel,setConfirmDel]=useState(false);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
@@ -2950,6 +2971,13 @@ return <SectionContainer className="fade-up">
     </div>)}
   </div>
 </div>}
+
+<Card style={{background:CARD_BG,borderRadius:16,padding:"12px 14px",border:`1px solid ${BORDER_CLR}`,marginBottom:16}}>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+    <div><div style={{fontFamily:FB,color:"var(--text-2)",fontSize:10,letterSpacing:2,fontWeight:800}}>ACCESSIBILITY</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>Adjust visibility controls in settings.</div></div>
+    <button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:36,padding:"0 10px",fontSize:11}}>{highContrast?"High contrast: ON":"High contrast: OFF"}</button>
+  </div>
+</Card>
 
 {/* Overall stats */}
 <div style={{background:CARD_BG,borderRadius:16,padding:"4px 20px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
