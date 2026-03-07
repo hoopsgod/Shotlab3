@@ -1,82 +1,175 @@
 :root {
-  --type-h1-size: var(--fs-display);
-  --type-h2-size: var(--fs-h1);
-  --type-h3-size: var(--fs-h2);
-  --type-body-size: var(--fs-body);
-  --type-caption-size: var(--fs-helper);
+  --type-display-size: 32px;
+  --type-h1-size: 24px;
+  --type-h2-size: 20px;
+  --type-h3-size: 18px;
+  --type-body-size: 16px;
+  --type-body-small-size: 14px;
+  --type-label-size: 14px;
+  --type-caption-size: 12px;
+  --type-stat-value-size: 24px;
+  --type-stat-label-size: 12px;
 
-  --type-h1-weight: var(--fw-bold);
-  --type-h2-weight: var(--fw-bold);
-  --type-h3-weight: var(--fw-semibold);
-  --type-body-weight: var(--fw-regular);
+  --type-display-weight: 700;
+  --type-h1-weight: 700;
+  --type-h2-weight: 700;
+  --type-h3-weight: 600;
+  --type-body-weight: 500;
+  --type-body-small-weight: 500;
+  --type-label-weight: 600;
+  --type-caption-weight: 500;
+  --type-stat-value-weight: 700;
+  --type-stat-label-weight: 600;
+
+  --type-heading-lh: 1.25;
+  --type-body-lh: 1.5;
+  --type-caption-lh: 1.4;
+  --type-stat-lh: 1.2;
 }
 
-.page h1,
-.page .type-display {
-  font-size: var(--type-h1-size);
-  font-weight: var(--type-h1-weight);
-  line-height: var(--lh-tight);
-  letter-spacing: var(--ls-tight);
+.page .type-display,
+.page h1 {
+  font-size: var(--type-display-size);
+  font-weight: var(--type-display-weight);
+  line-height: var(--type-heading-lh);
+  letter-spacing: -0.02em;
   text-transform: none;
 }
 
+.page .type-h1,
 .page h2,
 .page .type-heading {
-  font-size: var(--type-h2-size);
-  font-weight: var(--type-h2-weight);
-  line-height: var(--lh-tight);
-  letter-spacing: var(--ls-tight);
+  font-size: var(--type-h1-size);
+  font-weight: var(--type-h1-weight);
+  line-height: var(--type-heading-lh);
+  letter-spacing: -0.01em;
   text-transform: none;
 }
 
-.page h3,
+.page .type-h2,
+.page h3 {
+  font-size: var(--type-h2-size);
+  font-weight: var(--type-h2-weight);
+  line-height: 1.28;
+  letter-spacing: -0.01em;
+  text-transform: none;
+}
+
+.page .type-h3,
 .page h4,
 .page h5,
 .page h6,
 .page .type-subheading {
   font-size: var(--type-h3-size);
   font-weight: var(--type-h3-weight);
-  line-height: 1.35;
-  letter-spacing: var(--ls-normal);
+  line-height: 1.3;
+  letter-spacing: 0;
   text-transform: none;
 }
 
+.page .type-body,
 .page p,
 .page li,
-.page .type-body,
 .page .heroSub,
 .page .u-secondary-text {
   font-size: var(--type-body-size);
   font-weight: var(--type-body-weight);
-  line-height: var(--lh-body);
-  letter-spacing: var(--ls-normal);
-  color: var(--text-2);
+  line-height: var(--type-body-lh);
+  letter-spacing: 0;
+  color: var(--color-text-secondary);
 }
 
+.page .type-body-small,
 .page small,
 .page .type-helper {
-  font-size: var(--fs-helper);
-  line-height: var(--lh-helper);
+  font-size: var(--type-body-small-size);
+  font-weight: var(--type-body-small-weight);
+  line-height: var(--type-body-lh);
+  letter-spacing: 0;
   color: var(--color-text-helper);
+}
+
+.page .type-label,
+.page .fieldLabel,
+.page .utility-label {
+  font-size: var(--type-label-size);
+  font-weight: var(--type-label-weight);
+  line-height: 1.35;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-text-secondary);
 }
 
 .page .type-caption,
 .page .heroKicker,
 .page .u-meta-label,
-.page .heroStatLbl,
-.page .tab-label,
 .page .panel-title,
-.page .section-kicker {
-  font-size: var(--type-caption-size);
-  font-weight: var(--fw-semibold);
-  line-height: 1.35;
-  letter-spacing: 0.075em;
+.page .section-kicker,
+.page .tab-label {
+  font-size: var(--type-caption-size) !important;
+  font-weight: var(--type-label-weight) !important;
+  line-height: var(--type-caption-lh) !important;
+  letter-spacing: 0.01em !important;
+  text-transform: none !important;
+  color: var(--color-text-muted);
+}
+
+.page .type-stat-value,
+.page .heroStatVal,
+.page .mode-card-stat-value,
+.page .lbMetric {
+  font-size: var(--type-stat-value-size);
+  font-weight: var(--type-stat-value-weight);
+  line-height: var(--type-stat-lh);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+.page .type-stat-label,
+.page .heroStatLbl,
+.page .lbMetricLabel {
+  font-size: var(--type-stat-label-size);
+  font-weight: var(--type-stat-label-weight);
+  line-height: var(--type-caption-lh);
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--color-text-secondary);
+}
+
+.page .type-overline {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-2);
+  color: var(--color-text-muted);
+}
+
+.page .u-allcaps-long,
+.page .page-title {
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
 }
 
 @media (max-width: 540px) {
   .page {
     --section-gap: var(--space-3);
   }
+
+  .page .type-display,
+  .page h1 {
+    font-size: 28px;
+  }
+}
+
+
+.page, .page * {
+  font-family: var(--font-sans) !important;
+}
+
+.page .status-chip,
+.page .chip {
+  text-transform: none !important;
+  letter-spacing: 0.01em !important;
 }

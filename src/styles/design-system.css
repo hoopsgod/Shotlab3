@@ -75,15 +75,15 @@ Implementation plan (small-scope motion pass):
   ------------------------------ */
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
-  --fs-display: clamp(1.75rem, 2.2vw, 2.25rem);
-  --fs-title: clamp(1.75rem, 2.2vw, 2.25rem);
-  --fs-h1: clamp(1.5rem, 2vw, 1.9rem);
-  --fs-h2: clamp(1.25rem, 1.6vw, 1.5rem);
+  --fs-display: 2rem;
+  --fs-title: 1.5rem;
+  --fs-h1: 1.5rem;
+  --fs-h2: 1.25rem;
   --fs-h3: 1.125rem;
   --fs-body: 1rem;
-  --fs-caption: 0.875rem;
+  --fs-caption: 0.75rem;
   --fs-helper: 0.875rem;
-  --fs-label: 0.75rem;
+  --fs-label: 0.875rem;
   --control-font-size: 16px;
 
   --fw-regular: 500;
@@ -91,14 +91,14 @@ Implementation plan (small-scope motion pass):
   --fw-bold: 700;
 
   --lh-tight: 1.2;
-  --lh-body: 1.6;
+  --lh-body: 1.5;
   --lh-helper: 1.45;
   --lh-normal: var(--lh-body);
 
   --ls-tight: -0.01em;
   --ls-normal: 0;
-  --ls-label: 0.09em;
-  --ls-kicker: 0.09em;
+  --ls-label: 0.01em;
+  --ls-kicker: 0.01em;
 
   /* ------------------------------
      Controls
