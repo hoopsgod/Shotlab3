@@ -153,3 +153,34 @@ form > * + * {
 .input-group {
   margin-bottom: var(--s-2);
 }
+
+/* =========================
+   Mode cards: stat spacing
+   ========================= */
+.mode-card-stats-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.mode-card-stat {
+  gap: 10px;
+}
+
+.mode-card-stat-value {
+  white-space: nowrap;
+  text-wrap: balance;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 540px) {
+  .mode-card-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mode-card-stat {
+    min-height: 88px !important;
+  }
+
+  .mode-card-stat-value {
+    font-size: clamp(24px, 7vw, 30px) !important;
+  }
+}
