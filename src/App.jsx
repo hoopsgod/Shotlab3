@@ -10,6 +10,10 @@ import EmptyState from "./components/EmptyState";
 import { TeamIdentity, TeamWatermark, TeamBrandPreview } from "./components/TeamBranding";
 import DrillDetail from "./components/DrillDetail";
 import ProgressCharts from "./components/ProgressCharts";
+import Card from "./components/Card";
+import ListItem from "./components/ListItem";
+import SectionContainer from "./components/SectionContainer";
+import spacing from "./spacing";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -1539,7 +1543,7 @@ respondChallenge(ch.id,v);setRespSaved(ch.id);setRespId(null);setRespInput("");
 setTimeout(()=>setRespSaved(null),2000);
 };
 
-return <div className="fade-up">
+return <SectionContainer className="fade-up">
 {showGuide&&<GuideCallout title="How duels work" body="Duels let players compete on drill scores. Accept a challenge, log your response, and the higher score wins." onDismiss={dismissGuide} tone="warm"/>}
 {/* Duels banner — aggressive, asymmetric */}
 <div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${ORANGE}22`,position:"relative",overflow:"hidden"}}>
@@ -1562,7 +1566,7 @@ return <div className="fade-up">
 {/* Pending challenges */}
 {pending.length>0&&<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>
   {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
-    return <div key={ch.id} className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:"18px 20px",marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
+    return <Card key={ch.id} className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:`${spacing.md}px ${spacing.lg}px`,marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
         <Av n={ch.fromName} sz={38} email={ch.from}/>
@@ -1591,7 +1595,7 @@ return <div className="fade-up">
       :<button className="btn-v cta-primary" onClick={()=>setRespId(ch.id)} style={{}}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>ACCEPT CHALLENGE
       </button>}
-    </div>;
+    </Card>;
   })}</>}
 
 {/* Resolved / History */}
@@ -1606,7 +1610,7 @@ return <div className="fade-up">
   const resultColor=isPending?MUTED:won?VOLT:tied?"#C8FF00":"#FF4545";
   const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
 
-  return <div key={ch.id+"-"+ch.ts} className="listRow" style={{background:CARD_BG,border:isPending?`1px solid ${ORANGE}22`:undefined}}>
+  return <ListItem key={ch.id+"-"+ch.ts} className="listRow" style={{background:CARD_BG,border:isPending?`1px solid ${ORANGE}22`:undefined,padding:`${spacing.md}px ${spacing.md}px`}}>
     <div className="listRowLeft">
     <div style={{width:40,height:40,borderRadius:12,background:resultColor+"12",border:`1px solid ${resultColor}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
       {isPending?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
@@ -1624,10 +1628,10 @@ return <div className="fade-up">
       :<div className="listRowStat" style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:18}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>}
       <div className="listRowStatSub" style={{fontFamily:FB}}>/{ch.max}</div>
     </div>
-  </div>;
+  </ListItem>;
 })}
 
-  </div>;
+  </SectionContainer>;
 }
 
 // ═══════════════════════════════════════
@@ -1866,7 +1870,7 @@ prog:{accent:CYAN,bg:"rgba(0, 229, 255, 0.14)",glow:"0 0 18px rgba(0, 229, 255, 
 // Swap sub when switching modes
 const switchMode=(m)=>{setMode(m);setSub(m==="home"?"shots":"events")};
 
-return <div>
+return <SectionContainer>
 {/* Mode toggle */}
 <div style={{display:"flex",gap:8,background:"#121212",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(200, 255, 0, 0.24)"}}>
 {[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=>{
@@ -1920,7 +1924,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
   const pct=Math.round((p.total/leaderTotal)*100);
   const rowBg=i%2===0?CARD_BG:T.SURFACE;
 
-  if(isLeader) return <div key={p.email} className="lbRow listRow card card--list card--raised" style={{"--pod-c":accentColor,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
+  if(isLeader) return <ListItem key={p.email} className="lbRow listRow card card--list card--raised" style={{"--pod-c":accentColor,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden",padding:`${spacing.md}px ${spacing.md}px`}}>
     <div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
     <div className="listRowLeft">
     <div className="lbRank" style={{background:`${accentColor}18`,border:`2px solid ${accentColor}`,fontFamily:FD,fontSize:14,color:accentColor}}>👑</div>
@@ -1934,9 +1938,9 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
       <div className="lbMetric listRowStat" style={{color:accentColor,fontSize:28}}>{p.total}</div>
       <div className="listRowStatSub" style={{fontFamily:FB,fontSize:8,fontWeight:600}}>{unit.toUpperCase()}</div>
     </div>
-  </div>;
+  </ListItem>;
 
-  return <div key={p.email} className={`lbRow listRow card card--list ${isMe?"card--accent card--active":""}`} style={{background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",position:"relative",overflow:"hidden"}}>
+  return <ListItem key={p.email} className={`lbRow listRow card card--list ${isMe?"card--accent card--active":""}`} style={{background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",position:"relative",overflow:"hidden",padding:`${spacing.md}px ${spacing.md}px`}}>
     {isTop3&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
     {isMe&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
     <div className="listRowLeft">
@@ -1955,12 +1959,12 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
       <div className="lbMetric listRowStat" style={{color:isMe?accentColor:isTop3?accentColor:LIGHT}}>{p.total}</div>
       <div className="listRowStatSub" style={{fontFamily:FB,fontSize:8,fontWeight:500}}>{unit.toUpperCase()}</div>
     </div>
-  </div>;
+  </ListItem>;
 })}
 </div>
 </div>
 
-  </div>;
+  </SectionContainer>;
 }
 
 // ═══════════════════════════════════════
@@ -2848,11 +2852,11 @@ const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignI
 
   </div>;
 
-return <div className="fade-up">
+return <SectionContainer className="fade-up">
 {u.isCoach&&<div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}><div style={{fontSize:13,color:"#C8FF00",textTransform:"uppercase",letterSpacing:"0.10em",fontFamily:FB,fontWeight:700,marginBottom:10}}>COACH ACCOUNT</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${BORDER_CLR}66`}}><div style={{display:"flex",alignItems:"center",gap:8}}><UsersIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ROLE</span></div><span style={{fontSize:13,color:"#FFFFFF",fontFamily:FB}}>Coach</span></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}><div style={{display:"flex",alignItems:"center",gap:8}}><ShieldIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ACCESS</span></div><span style={{fontSize:13,color:"#C8FF00",fontFamily:FB}}>Full Program Access</span></div></div>}
 <ProgressCharts scores={scores} shotLogs={shotLogs} userEmail={u.email}/>
 {/* ══════ SHAREABLE SEASON CARD ══════ */}
-<div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
+<Card style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
 {/* Corner accents */}
 <div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
 <div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
@@ -2889,10 +2893,10 @@ return <div className="fade-up">
     <SLLogo size={24}/>
     <span style={{fontFamily:FD,fontSize:10,color:VOLT,letterSpacing:3}}>SHOTLAB</span>
   </div>
-</div>
+</Card>
 
 {/* Hero card */}
-<div style={{background:`linear-gradient(135deg,${VOLT}06,${CARD_BG})`,borderRadius:20,padding:"30px 22px 24px",border:`1px solid ${VOLT}20`,marginBottom:24,textAlign:"center",position:"relative",overflow:"hidden"}}>
+<Card style={{background:`linear-gradient(135deg,${VOLT}06,${CARD_BG})`,borderRadius:20,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}20`,marginBottom:24,textAlign:"center",position:"relative",overflow:"hidden"}}>
   <div style={{position:"absolute",top:0,right:0,width:110,height:110,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}06,transparent)`,transform:"translate(30%,-30%)"}}/>
   <Av n={u.name} sz={72} email={u.email} style={{margin:"0 auto 16px"}}/>
   <div style={{fontFamily:FD,color:LIGHT,fontSize:30,letterSpacing:2.6,lineHeight:1}}>{u.name.toUpperCase()}</div>
@@ -2905,7 +2909,7 @@ return <div className="fade-up">
         <div style={{fontFamily:FB,color:s.p?"var(--text-2)":T.SUB,fontSize:s.p?8:7,letterSpacing:s.p?2.1:1.8,marginTop:4,fontWeight:700}}>{s.l}</div>
       </div>)}
   </div>
-</div>
+</Card>
 
 {/* Badges */}
 {earnedBadges.length>0&&<div style={{marginBottom:24}}>
@@ -2979,7 +2983,7 @@ return <div className="fade-up">
   <p style={{fontFamily:FB,color:T.SUB,fontSize:10,textAlign:"center",marginTop:12,lineHeight:1.5}}>Your data is stored locally on this device. Deleting your account removes all your personal information and scores.</p>
 </div>
 
-  </div>;
+  </SectionContainer>;
 }
 function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged}){
   const [sortBy,setSortBy]=useState("status");
