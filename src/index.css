@@ -100,15 +100,31 @@ textarea,
 .input::placeholder,
 input::placeholder,
 textarea::placeholder {
-  color: rgba(255, 255, 255, .56);
+  color: var(--color-text-placeholder, rgba(184, 203, 228, 0.9));
+  opacity: 0.95;
 }
 
 .input:focus-visible,
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  border-color: rgba(91,243,255,.45);
+  border-color: rgba(200, 255, 0, 0.72);
   box-shadow: var(--focus-ring);
+}
+
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.decorative-container {
+  border-color: rgba(145, 164, 188, 0.18);
+}
+
+.interactive-surface {
+  border-color: rgba(167, 187, 211, 0.3);
 }
 
 .disabled,
