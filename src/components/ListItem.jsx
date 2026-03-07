@@ -1,9 +1,10 @@
 import spacing from "../spacing";
 
-function ListItem({ as: Component = "div", style, children, ...props }) {
+function ListItem({ as: Component = "div", className = "", style, children, ...props }) {
   return (
     <Component
       {...props}
+      className={`shared-nav-item ${className}`.trim()}
       style={{
         padding: `${spacing.md}px`,
         ...style,
