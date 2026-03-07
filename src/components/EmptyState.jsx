@@ -33,7 +33,7 @@ export default function EmptyState({
   const primaryAction = onCtaClick ?? onTap;
 
   return (
-    <Card variant="empty" className={`emptyState card card--empty ${className || ""}`.trim()}>
+    <Card variant="compact" className={`emptyState card card--empty ${className || ""}`.trim()}>
       <div className="emptyState__art">
         {Art ? <Art /> : icon}
       </div>

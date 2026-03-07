@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import Card from "../components/Card";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -26,18 +27,8 @@ const ChevronRight = ({ size = 24, color = "currentColor" }) => (
 
 const StatusBadge = ({ active }) => {
   const tone = active
-    ? {
-        label: "✓ Active",
-        color: "var(--color-success)",
-        border: "rgba(99, 222, 143, 0.42)",
-        bg: "rgba(99, 222, 143, 0.16)",
-      }
-    : {
-        label: "⏳ Inactive",
-        color: "var(--color-pending)",
-        border: "rgba(255, 191, 102, 0.42)",
-        bg: "rgba(255, 191, 102, 0.18)",
-      };
+    ? { label: "✓ Active", color: "var(--color-success)", border: "rgba(99, 222, 143, 0.42)", bg: "rgba(99, 222, 143, 0.16)" }
+    : { label: "⏳ Inactive", color: "var(--color-pending)", border: "rgba(255, 191, 102, 0.42)", bg: "rgba(255, 191, 102, 0.18)" };
 
   return (
     <span
@@ -48,7 +39,6 @@ const StatusBadge = ({ active }) => {
         background: tone.bg,
         fontSize: "11px",
         letterSpacing: "0.04em",
-        textTransform: "none",
       }}
     >
       {tone.label}
@@ -66,27 +56,16 @@ export default function PlayersScreen() {
   const activePlayers = 0;
   const inactivePlayers = 0;
 
-  const filteredPlayers = useMemo(() => {
-    return players.filter((player) => {
-      const matchesSearch = (player.name || "")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
-      const matchesFilter =
-        activeFilter === "All players" ||
-        (activeFilter === "Active" && player.active) ||
-        (activeFilter === "Inactive" && !player.active);
-      return matchesSearch && matchesFilter;
-    });
-  }, [players, searchQuery, activeFilter]);
+  const filteredPlayers = useMemo(() => players.filter((player) => {
+    const matchesSearch = (player.name || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesFilter = activeFilter === "All players" || (activeFilter === "Active" && player.active) || (activeFilter === "Inactive" && !player.active);
+    return matchesSearch && matchesFilter;
+  }), [players, searchQuery, activeFilter]);
 
   const shareInviteLink = async () => {
     const url = window.location.origin;
     if (navigator.share) {
-      await navigator.share({
-        title: "Join my ShotLab Program",
-        text: "Your coach has invited you to join their basketball training program",
-        url,
-      });
+      await navigator.share({ title: "Join my ShotLab Program", text: "Your coach has invited you to join their basketball training program", url });
       return;
     }
 
@@ -95,195 +74,98 @@ export default function PlayersScreen() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const chipStyle = (isActive) => ({
-    borderRadius: "var(--btn-radius)",
-    height: "var(--btn-h-sm)",
-    padding: "0 var(--btn-pad-sm)",
-    fontSize: "11px",
-    textTransform: "none",
-    letterSpacing: "0.08em",
-    cursor: "pointer",
-    border: isActive ? "1px solid rgba(91, 243, 255, 0.34)" : "1px solid var(--stroke-1)",
-    background: isActive ? "rgba(91, 243, 255, 0.18)" : "var(--surface-1)",
-    color: isActive ? "var(--text-1)" : "var(--text-3)",
-    fontWeight: isActive ? 700 : 500,
-  });
-
   return (
     <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
         <Users size={22} color="var(--text-2)" />
-        <span
-          style={{
-            fontSize: "24px",
-            fontWeight: 900,
-            textTransform: "uppercase",
-            color: "var(--text-1)",
-            letterSpacing: "0.04em",
-          }}
-        >
-          Players
-        </span>
+        <span style={{ fontSize: "24px", fontWeight: 900, color: "var(--text-1)", letterSpacing: "0.04em" }}>Players</span>
       </div>
 
       <p style={{ fontSize: "var(--fs-helper)", color: "var(--text-2)", marginBottom: "var(--space-4)", lineHeight: "var(--lh-helper)" }}>
         Manage your roster and track player engagement with clearer status visibility
       </p>
 
-      <input
-        className="input"
-        type="text"
-        placeholder="Search players"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        style={{
-          fontSize: "var(--fs-body)",
-          marginBottom: "var(--space-3)",
-        }}
-      />
+      <input className="input" type="text" placeholder="Search players" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ fontSize: "var(--fs-body)", marginBottom: "var(--space-3)" }} />
 
       <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
         {["All players", "Active", "Inactive"].map((filter) => (
-          <button key={filter} onClick={() => setActiveFilter(filter)} className={`btn chip ${activeFilter === filter ? "btn--primary" : "btn--tertiary"}`} aria-pressed={activeFilter === filter} style={chipStyle(activeFilter === filter)}>
+          <button
+            key={filter}
+            onClick={() => setActiveFilter(filter)}
+            className={`btn chip ${activeFilter === filter ? "btn--primary" : "btn--tertiary"}`}
+            aria-pressed={activeFilter === filter}
+            style={{
+              borderRadius: "var(--radius-sm)",
+              height: "var(--btn-h-sm)",
+              padding: "0 var(--btn-pad-sm)",
+              fontSize: "11px",
+              letterSpacing: "0.06em",
+              border: activeFilter === filter ? "1px solid rgba(91, 243, 255, 0.34)" : "1px solid var(--stroke-1)",
+            }}
+          >
             {filter}
           </button>
         ))}
       </div>
 
-      <div
-        style={{
-          background: "var(--surface-1)",
-          border: "1px solid var(--stroke-1)",
-          borderRadius: "var(--radius-lg)",
-          padding: "var(--space-3) var(--space-4)",
-          marginBottom: "var(--space-4)",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Total</span>
-        </div>
-        <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Active</span>
-        </div>
-        <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Inactive</span>
-        </div>
-      </div>
+      <Card variant="default" style={{ marginBottom: "var(--space-4)", display: "flex", alignItems: "stretch", padding: "var(--space-3) var(--space-4)", gap: 0 }}>
+        {[{ label: "Total", value: totalPlayers, color: "var(--text-1)" }, { label: "Active", value: activePlayers, color: "var(--accent)" }, { label: "Inactive", value: inactivePlayers, color: "var(--text-2)" }].map((item, index) => (
+          <div
+            key={item.label}
+            style={{
+              flex: 1,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRight: index < 2 ? "1px solid var(--stroke-1)" : "none",
+            }}
+          >
+            <span style={{ fontSize: "20px", fontWeight: 900, color: item.color }}>{item.value}</span>
+            <span style={{ fontSize: "10px", color: "var(--text-2)", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>{item.label}</span>
+          </div>
+        ))}
+      </Card>
 
       {players.length === 0 ? (
-        <div
-          style={{
-            minHeight: "280px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "var(--space-4)",
-          }}
-        >
+        <div style={{ minHeight: "280px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--space-4)" }}>
           <Users size={48} color="#555555" />
-          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
-            No players yet
-          </p>
-          <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
-            Invite players to join your program and begin tracking progress
-          </p>
-          <button className="btn btn--primary" aria-label="Invite players to roster">
-            Invite players
-          </button>
+          <p style={{ fontSize: "18px", fontWeight: 700, color: "var(--text-2)", margin: 0 }}>No players yet</p>
+          <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>Invite players to join your program and begin tracking progress</p>
+          <button className="btn btn--primary" aria-label="Invite players to roster">Invite players</button>
         </div>
       ) : (
         filteredPlayers.map((player) => (
-          <div
+          <Card
             key={player.id}
-            className="interactive-card"
+            variant="interactive"
             role="button"
             tabIndex={0}
             aria-label={`${player.name} status ${player.active ? "active" : "inactive"}`}
-            style={{
-              background: "var(--surface-2)",
-              border: "1px solid rgba(167, 187, 211, 0.34)",
-              borderRadius: "16px",
-              padding: "15px var(--space-4)",
-              marginBottom: "var(--space-3)",
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--space-3)",
-              cursor: "pointer",
-            }}
+            style={{ marginBottom: "var(--space-3)", display: "flex", alignItems: "center", gap: "var(--space-3)", background: "var(--surface-2)" }}
           >
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                background: "var(--surface-1)",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "16px",
-                fontWeight: 700,
-                color: "var(--text-1)",
-                border: player.active ? "2px solid rgba(91, 243, 255, 0.44)" : "2px solid rgba(167, 187, 211, 0.36)",
-              }}
-            >
+            <div style={{ width: "44px", height: "44px", background: "var(--surface-1)", borderRadius: "50%", display: "grid", placeItems: "center", fontSize: "16px", fontWeight: 700, color: "var(--text-1)", border: `1px solid ${player.active ? "rgba(91, 243, 255, 0.44)" : "rgba(167, 187, 211, 0.36)"}` }}>
               {player.name?.[0] || "?"}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: 6 }}>
-                {player.name}
-              </div>
+              <div style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-1)", marginBottom: 6 }}>{player.name}</div>
               <StatusBadge active={player.active} />
             </div>
             <ChevronRight size={16} color="var(--text-3)" />
-          </div>
+          </Card>
         ))
       )}
 
-      <p
-        style={{
-          fontSize: "12px",
-          fontWeight: 700,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          color: "var(--text-2)",
-          marginTop: "var(--space-6)",
-          marginBottom: "var(--space-3)",
-        }}
-      >
+      <p style={{ fontSize: "12px", fontWeight: 700, letterSpacing: "0.06em", color: "var(--text-2)", marginTop: "var(--space-6)", marginBottom: "var(--space-3)" }}>
         Roster growth
       </p>
-      <div
-        style={{
-          background: "var(--surface-2)",
-          border: "1px solid var(--stroke-1)",
-          borderRadius: "16px",
-          padding: "var(--space-4)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "var(--space-3)",
-        }}
-      >
+      <Card variant="elevated" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--space-3)" }}>
         <UserPlus size={32} color="var(--text-2)" />
-        <p style={{ fontSize: "16px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
-          Invite a player
-        </p>
-        <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
-          Share your program link and players can join instantly
-        </p>
-        <button onClick={shareInviteLink} className="btn btn--primary">
-          Share invite link
-        </button>
+        <p style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-2)", margin: 0 }}>Invite a player</p>
+        <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>Share your program link and players can join instantly</p>
+        <button onClick={shareInviteLink} className="btn btn--primary">Share invite link</button>
         {copied && <p style={{ fontSize: "12px", color: "var(--text-2)", margin: 0 }}>Link copied</p>}
-      </div>
+      </Card>
     </div>
   );
 }

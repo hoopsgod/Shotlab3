@@ -61,9 +61,9 @@ Implementation plan (small-scope motion pass):
      Radius + elevation
   ------------------------------ */
   --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --radius-xl: 8px;
   --radius-pill: 999px;
 
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.22);
@@ -136,7 +136,7 @@ Implementation plan (small-scope motion pass):
   --focus-ring: var(--shadow-focus);
   --shadow-1: var(--shadow-soft);
   --shadow-2: var(--shadow-medium);
-  --radius-card: var(--radius-lg);
+  --radius-card: var(--radius-sm);
 
   --s-1: var(--space-1);
   --s-2: var(--space-2);
@@ -176,52 +176,74 @@ textarea {
 .stack-16 { display: flex; flex-direction: column; gap: var(--space-3); }
 .stack-24 { display: flex; flex-direction: column; gap: var(--space-4); }
 
-/* cards: primary, secondary, subtle */
+/* cards: unified premium system */
 .shared-card {
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(180, 201, 224, 0.24);
-  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0)) , var(--color-surface-primary);
+  position: relative;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-subtle);
+  background: var(--color-surface-primary);
   box-shadow: var(--shadow-soft);
   transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
 
-.shared-card--primary {
-  background: linear-gradient(180deg, rgba(91,243,255,0.06), rgba(0,0,0,0)), var(--color-surface-secondary);
-  border-color: rgba(91, 243, 255, 0.32);
+.shared-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 3px;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--card-accent-color, transparent);
+  opacity: 0;
+}
+
+.shared-card[data-card-accent] {
+  --card-accent-color: var(--color-accent-cyan);
+}
+
+.shared-card[data-card-accent="success"] {
+  --card-accent-color: var(--color-success);
+}
+
+.shared-card[data-card-accent="warning"] {
+  --card-accent-color: var(--color-pending);
+}
+
+.shared-card[data-card-accent="muted"] {
+  --card-accent-color: var(--color-text-muted);
+}
+
+.shared-card[data-card-accent]::before {
+  opacity: 1;
+}
+
+.shared-card--default,
+.shared-card--compact {
+  box-shadow: var(--shadow-soft);
+}
+
+.shared-card--elevated {
   box-shadow: var(--shadow-medium);
 }
 
-.shared-card--secondary {
-  background: var(--color-surface-primary);
-  border-color: rgba(180, 201, 224, 0.22);
-}
-
-.shared-card--subtle {
-  background: var(--color-surface-subtle);
-  border-color: rgba(167, 187, 211, 0.12);
+.shared-card--compact {
   box-shadow: none;
 }
 
-/* backward-compatible aliases */
-.shared-card--default,
-.shared-card--metric { }
-.shared-card--default { background: var(--color-surface-secondary); border-color: rgba(91, 243, 255, 0.3); }
-.shared-card--metric,
-.shared-card--list,
-.shared-card--empty { background: var(--color-surface-primary); }
+.shared-card--interactive,
+.interactive-card {
+  cursor: pointer;
+}
 
 @media (hover: hover) and (pointer: fine) {
-  .shared-card:is(button, a, [role="button"]):hover,
-  .interactive-card:hover {
-    transform: translateY(-2px);
+  .shared-card--interactive:hover,
+  .interactive-card:hover,
+  .shared-card:is(button, a, [role="button"]):hover {
+    transform: translateY(-1px);
     box-shadow: var(--shadow-medium);
     border-color: var(--color-border-strong);
   }
-}
-
-.interactive-card {
-  transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
-  cursor: pointer;
 }
 
 .interactive-card:focus-visible,

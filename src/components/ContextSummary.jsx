@@ -4,7 +4,7 @@ export default function ContextSummary({ title = "Training context", items = [],
   if (!items.length) return null;
 
   return (
-    <Card style={{ marginBottom: 14, ...style }}>
+    <Card variant="compact" style={{ marginBottom: 14, ...style }}>
       <div
         style={{
           fontSize: 10,
