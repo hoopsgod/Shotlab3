@@ -49,9 +49,9 @@ export default function CoachHero({
       <div className="coach-hero coach-hero-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         {branding?.showWatermark ? <TeamWatermark logoUrl={logoUrl} primaryColor={branding?.primaryColor || accentColor} /> : null}
         <div>
-          <div style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", opacity: 0.96, textTransform: "uppercase", color: "var(--text-secondary)" }}>COACH MODE</div>
+          <div style={{ fontFamily: FB, fontSize: 11, letterSpacing: "0.04em", opacity: 0.96, textTransform: "uppercase", color: "var(--text-2)", fontWeight: 700 }}>COACH MODE</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
-            <div style={{ fontFamily: FD, color: "#fff", fontSize: isOverview ? 26 : 23, letterSpacing: "var(--tracking-default)", lineHeight: 1.02 }}>{(userName || "Demo Coach").toUpperCase()}</div>
+            <div style={{ fontFamily: FD, color: "#fff", fontSize: isOverview ? 28 : 24, letterSpacing: "0.05em", lineHeight: 1 }}>{(userName || "Demo Coach").toUpperCase()}</div>
             {isCoach && (
               <span
                 style={{
@@ -59,11 +59,11 @@ export default function CoachHero({
                   border: "1px solid var(--stroke-1)",
                   borderRadius: 999,
                   padding: "2px 8px",
-                  fontSize: 8,
+                  fontSize: 9,
                   fontWeight: 700,
                   textTransform: "uppercase",
-                  letterSpacing: "var(--tracking-tight)",
-                  color: "var(--text-2)",
+                  letterSpacing: "0.03em",
+                  color: "var(--text-1)",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 4,
@@ -76,13 +76,13 @@ export default function CoachHero({
           <div
             style={{
               fontFamily: FB,
-              color: "var(--text-secondary)",
-              fontSize: isOverview ? 9 : 8,
-              letterSpacing: "var(--tracking-tight)",
+              color: "rgba(255,255,255,.82)",
+              fontSize: isOverview ? 12 : 11,
+              letterSpacing: "0.01em",
               fontWeight: 600,
-              marginTop: 3,
-              lineHeight: 1.2,
-              textTransform: "uppercase",
+              marginTop: 5,
+              lineHeight: 1.35,
+              textTransform: "none",
               maxWidth: 360,
             }}
           >
@@ -111,7 +111,7 @@ export default function CoachHero({
               background: "rgba(20,20,20,0.95)",
               border: `1px solid ${borderColor}`,
               borderRadius: 12,
-              color: "var(--text-secondary)",
+              color: "var(--text-1)",
               width: 38,
               height: 38,
               cursor: "pointer",

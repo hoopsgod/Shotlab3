@@ -46,11 +46,11 @@ export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold
         <TeamLogo logoUrl={branding.logoUrl} teamName={teamName} size={size} primaryColor={branding.primaryColor} badgeStyle={branding.badgeStyle}/>
       </div> : null}
       <div style={{minWidth:0}}>
-        <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:9,textTransform:"uppercase",letterSpacing:1.4,fontWeight:700}}>Team identity</div>
-        <div style={{fontFamily:FD,color:"#fff",fontSize:compact?20:26,letterSpacing:1.8,lineHeight:1.02,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(branding.useTeamNameInHeader===false?"ShotLab":(teamName||"ShotLab Team")).toUpperCase()}</div>
+        <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:11,textTransform:"uppercase",letterSpacing:"0.04em",fontWeight:700}}>Team identity</div>
+        <div style={{fontFamily:FD,color:"#fff",fontSize:compact?20:26,letterSpacing:"0.05em",lineHeight:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(branding.useTeamNameInHeader===false?"ShotLab":(teamName||"ShotLab Team")).toUpperCase()}</div>
         <div style={{display:"flex",gap:6,alignItems:"center",marginTop:4,flexWrap:"wrap"}}>
-          {(mascotName||subtitle)?<span style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",textTransform:"uppercase",letterSpacing:1.1,fontWeight:600}}>{mascotName||subtitle}</span>:null}
-          {motto?<span style={{fontFamily:FB,fontSize:10,color:alphaFromHex(branding.secondaryColor,0.95),textTransform:"uppercase",letterSpacing:1,fontWeight:700}}>“{motto}”</span>:null}
+          {(mascotName||subtitle)?<span style={{fontFamily:FB,fontSize:12,color:"rgba(255,255,255,.8)",textTransform:"none",letterSpacing:"0.01em",fontWeight:500}}>{mascotName||subtitle}</span>:null}
+          {motto?<span style={{fontFamily:FB,fontSize:11,color:alphaFromHex(branding.secondaryColor,0.95),textTransform:"none",letterSpacing:"0.01em",fontWeight:600}}>“{motto}”</span>:null}
         </div>
       </div>
     </div>
@@ -71,7 +71,7 @@ export function TeamBrandPreview({ branding, teamName }) {
   return <div style={{display:"grid",gap:10}}>{modes.map(mode=><div key={mode} style={{position:"relative",padding:12,borderRadius:14,border:`1px solid ${alphaFromHex(branding.primaryColor,0.36)}`,background:`linear-gradient(130deg, ${alphaFromHex(branding.primaryColor,mode==="bold"?0.18:0.1)}, rgba(12,17,22,0.95))`}}>
     <TeamWatermark logoUrl={branding.showWatermark?branding.logoUrl:""} primaryColor={branding.primaryColor} opacity={mode==="bold"?0.09:0.05} size={140}/>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8,position:"relative",zIndex:1}}>
-      <span style={{fontFamily:FB,color:"var(--text-2)",fontSize:9,textTransform:"uppercase",letterSpacing:1.2}}>{mode} preview</span>
+      <span style={{fontFamily:FB,color:"var(--text-2)",fontSize:11,textTransform:"uppercase",letterSpacing:"0.04em",fontWeight:700}}>{mode} preview</span>
       <span style={{height:3,width:36,borderRadius:999,background:branding.primaryColor}}/>
     </div>
     <div style={{position:"relative",zIndex:1}}><TeamIdentity branding={branding} teamName={teamName} compact={mode==="subtle"} mode={mode}/></div>

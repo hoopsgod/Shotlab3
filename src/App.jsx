@@ -274,8 +274,8 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeader{margin:0 0 var(--space-6);padding:var(--space-4) var(--space-4) var(--space-3);border-radius:16px;border:1px solid rgba(184,255,0,.28);background:linear-gradient(135deg,var(--pageAccentBg),rgba(10,10,10,.96) 55%);box-shadow:0 8px 24px rgba(0,0,0,.3);}
 .pageHeaderTop{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;}
 .pageHeaderBadge{width:48px;height:48px;border-radius:14px;border:1px solid rgba(184,255,0,.55);background:rgba(184,255,0,.14);display:flex;align-items:center;justify-content:center;color:var(--headerAccent);box-shadow:0 0 18px rgba(184,255,0,.35);flex-shrink:0;}
-.pageHeaderText{min-width:0;flex:1 1 220px;}.pageHeaderText h1{font-family:${FD};font-size:26px;letter-spacing:var(--tracking-default);color:#fff;line-height:1;word-break:break-word;}
-.pageHeaderText p{font-family:${FB};font-size:11px;color:var(--text-secondary);margin-top:4px;text-transform:uppercase;letter-spacing:var(--tracking-tight);}
+.pageHeaderText{min-width:0;flex:1 1 220px;}.pageHeaderText h1{font-family:${FD};font-size:28px;letter-spacing:.05em;color:#fff;line-height:1;word-break:break-word;text-transform:uppercase;}
+.pageHeaderText p{font-family:${FB};font-size:13px;color:rgba(255,255,255,.82);margin-top:6px;text-transform:none;letter-spacing:.01em;line-height:1.35;}
 .pageHeaderRight{margin-left:auto;flex-shrink:0;}
 .pageHeaderPill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.06);font-family:${FB};font-size:10px;color:#EAEAEA;font-weight:700;letter-spacing:var(--tracking-tight);text-transform:uppercase;transition:background .15s ease,border-color .15s ease,transform .1s ease,filter .15s ease;}
 .pageHeaderPill:hover{background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.18);filter:brightness(1.04);}
@@ -289,8 +289,8 @@ const _PAGE_SIGNATURE_CSS=`
 .heroModule::before{content:'';position:absolute;left:0;top:0;width:54px;height:4px;background:var(--pageAccent);}
 .heroStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:var(--space-2);margin-top:var(--space-3);}
 .heroStat{background:#0f0f0f;border:1px solid #2a2a2a;border-radius:10px;padding:var(--space-2);text-align:center;}
-.heroStatVal{font-family:${FD};color:var(--pageAccent);font-size:20px;line-height:1;}
-.heroStatLbl{font-family:${FB};font-size:9px;color:var(--text-tertiary);letter-spacing:var(--tracking-tight);margin-top:2px;}
+.heroStatVal{font-family:${FD};color:var(--pageAccent);font-size:24px;line-height:1;letter-spacing:.03em;font-variant-numeric:tabular-nums;}
+.heroStatLbl{font-family:${FB};font-size:11px;color:rgba(255,255,255,.72);letter-spacing:.04em;margin-top:4px;text-transform:uppercase;}
 .feedListItem{position:relative;padding-left:14px;}
 .feedListItem::before{content:'';position:absolute;left:0;top:17px;width:6px;height:6px;border-radius:50%;background:var(--pageAccent);box-shadow:0 0 8px var(--pageAccentGlow);}
 .drillsMetrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--stack-gap);margin-bottom:var(--stack-gap);}
@@ -308,6 +308,12 @@ const _PAGE_SIGNATURE_CSS=`
 .lbMetric{justify-self:end;text-align:right;font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.02em;font-family:${FD};}
 .lbRow .decorativeLine,.lbRow .decorativeDot{opacity:.15;z-index:0;}
 .lbRow>*{position:relative;z-index:1;}
+.bottom-nav .tab{color:var(--nav-inactive);border-top:2px solid transparent;transition:background .15s ease,border-color .15s ease,color .15s ease;}
+.bottom-nav .tab .tab-label{font-size:11px;letter-spacing:.03em;font-weight:600;color:rgba(255,255,255,.72);}
+.bottom-nav .tab .tab-icon{opacity:.82;transition:opacity .15s ease,transform .15s ease;}
+.bottom-nav .tab.is-active,.bottom-nav .tab.active{background:linear-gradient(180deg,rgba(184,255,0,.14),rgba(184,255,0,0));border-top-color:rgba(184,255,0,.8);color:var(--text-1);}
+.bottom-nav .tab.is-active .tab-label,.bottom-nav .tab.active .tab-label{color:var(--text-1);font-weight:800;letter-spacing:.04em;}
+.bottom-nav .tab.is-active .tab-icon,.bottom-nav .tab.active .tab-icon{opacity:1;transform:translateY(-1px);}
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{display:none;}
 @media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
 
@@ -3030,7 +3036,7 @@ function NavBar({items,active,onChange}){
 const navAccent=PAGE_ACCENTS[active]?.accent||PAGE_ACCENTS.feed.accent;
 return <nav className="bottom-nav" role="navigation" aria-label="Main navigation" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:64,paddingBottom:"env(safe-area-inset-bottom)",background:"var(--surface-1)",borderTop:"1px solid var(--stroke-1)",zIndex:20}}>{items.map(t=>{const a=active===t.k;
 const tabAccent="var(--accent)";
-return <button key={t.k} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:48,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"8px 4px 6px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 150ms ease-out",outlineOffset:2}}>
+return <button key={t.k} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:48,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:5,padding:"8px 4px 6px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 150ms ease-out",outlineOffset:2,fontFamily:FB,fontWeight:a?800:600}}>
 <div className="tab-icon" style={{position:"relative"}}>{t.svg}</div>
-<div className="tab-label" style={{fontFamily:FB,fontSize:10,letterSpacing:"0.05em",textTransform:"uppercase",lineHeight:1.1,whiteSpace:"nowrap"}}>{t.l}</div>
+<div className="tab-label" style={{fontFamily:FB,fontSize:11,letterSpacing:a?"0.04em":"0.03em",textTransform:"uppercase",lineHeight:1.1,whiteSpace:"nowrap",opacity:a?1:0.9}}>{t.l}</div>
 </button>})}</nav>}

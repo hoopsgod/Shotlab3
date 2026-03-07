@@ -65,16 +65,16 @@ export default function PlayersScreen() {
 
   const chipStyle = (isActive) => ({
     borderRadius: "20px",
-    height: "32px",
+    height: "34px",
     padding: "0 14px",
     fontSize: "11px",
     textTransform: "uppercase",
-    letterSpacing: "0.08em",
+    letterSpacing: "0.04em",
     cursor: "pointer",
     border: isActive ? "none" : "1px solid var(--stroke-1)",
     background: isActive ? "var(--accent)" : "var(--surface-1)",
-    color: isActive ? "#0B0D10" : "var(--text-3)",
-    fontWeight: isActive ? 700 : 500,
+    color: isActive ? "#0B0D10" : "var(--text-2)",
+    fontWeight: isActive ? 800 : 600,
   });
 
   return (
@@ -83,18 +83,19 @@ export default function PlayersScreen() {
         <Users size={22} color="var(--text-2)" />
         <span
           style={{
-            fontSize: "24px",
+            fontSize: "28px",
             fontWeight: 900,
             textTransform: "uppercase",
+            letterSpacing: "0.04em",
             color: "var(--text-1)",
-            fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
+            fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif",
           }}
         >
           PLAYERS
         </span>
       </div>
 
-      <p style={{ fontSize: "13px", color: "var(--text-2)", marginBottom: "var(--space-6)" }}>
+      <p style={{ fontSize: "14px", color: "rgba(255,255,255,.82)", lineHeight: 1.45, marginBottom: "var(--space-6)" }}>
         Manage your roster and track player engagement
       </p>
 
@@ -129,18 +130,18 @@ export default function PlayersScreen() {
         }}
       >
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Total</span>
+          <span style={{ fontSize: "24px", fontWeight: 900, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "0.03em" }}>{totalPlayers}</span>
+          <span style={{ fontSize: "11px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.04em", marginTop: "var(--space-2)" }}>Total</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Active</span>
+          <span style={{ fontSize: "24px", fontWeight: 900, color: "var(--accent)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "0.03em" }}>{activePlayers}</span>
+          <span style={{ fontSize: "11px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.04em", marginTop: "var(--space-2)" }}>Active</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Inactive</span>
+          <span style={{ fontSize: "24px", fontWeight: 900, color: "var(--text-2)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "0.03em" }}>{inactivePlayers}</span>
+          <span style={{ fontSize: "11px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.04em", marginTop: "var(--space-2)" }}>Inactive</span>
         </div>
       </div>
 
@@ -156,19 +157,20 @@ export default function PlayersScreen() {
           }}
         >
           <Users size={48} color="#555555" />
-          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-2)", margin: 0 }}>
+          <p style={{ fontSize: "22px", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "0.03em", fontWeight: 700, textTransform: "uppercase", color: "var(--text-1)", margin: 0 }}>
             NO PLAYERS YET
           </p>
-          <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
+          <p style={{ fontSize: "14px", color: "var(--text-2)", lineHeight: 1.45, textAlign: "center", maxWidth: "260px", margin: 0 }}>
             Invite players to join your program
           </p>
           <button
             style={{
               background: "var(--btn-primary-bg, #CCFF00)",
               color: "#000000",
-              fontSize: "13px",
-              fontWeight: 700,
+              fontSize: "12px",
+              fontWeight: 800,
               textTransform: "uppercase",
+              letterSpacing: "0.04em",
               height: "52px",
               borderRadius: "12px",
               padding: "0 24px",
@@ -222,10 +224,10 @@ export default function PlayersScreen() {
 
       <p
         style={{
-          fontSize: "13px",
+          fontSize: "12px",
           fontWeight: 700,
           textTransform: "uppercase",
-          letterSpacing: "0.10em",
+          letterSpacing: "0.06em",
           color: "var(--text-1)",
           marginTop: "var(--space-6)",
           marginBottom: "var(--space-3)",
@@ -246,10 +248,10 @@ export default function PlayersScreen() {
         }}
       >
         <UserPlus size={32} color="var(--text-2)" />
-        <p style={{ fontSize: "16px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-2)", margin: 0 }}>
+        <p style={{ fontSize: "20px", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "0.03em", fontWeight: 700, textTransform: "uppercase", color: "var(--text-1)", margin: 0 }}>
           INVITE A PLAYER
         </p>
-        <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
+        <p style={{ fontSize: "14px", color: "var(--text-2)", lineHeight: 1.45, textAlign: "center", maxWidth: "260px", margin: 0 }}>
           Share your program link and players can join instantly
         </p>
         <button
@@ -257,9 +259,10 @@ export default function PlayersScreen() {
           style={{
             background: "var(--btn-primary-bg, #CCFF00)",
             color: "#000000",
-            fontSize: "13px",
-            fontWeight: 700,
+            fontSize: "12px",
+            fontWeight: 800,
             textTransform: "uppercase",
+            letterSpacing: "0.04em",
             height: "52px",
             borderRadius: "12px",
             padding: "0 24px",
@@ -269,7 +272,7 @@ export default function PlayersScreen() {
         >
           SHARE INVITE LINK
         </button>
-        {copied && <p style={{ fontSize: "12px", color: "var(--text-2)", margin: 0 }}>Link copied</p>}
+        {copied && <p style={{ fontSize: "12px", color: "rgba(255,255,255,.8)", margin: 0 }}>Link copied</p>}
       </div>
     </div>
   );
