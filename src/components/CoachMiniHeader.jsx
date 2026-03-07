@@ -38,12 +38,12 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-          <span style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "3px 8px", whiteSpace: "nowrap" }}>Coach Mode</span>
+          <span style={{ fontFamily: FD, fontSize: 12, fontWeight: 700, letterSpacing: "0.04em", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "3px 8px", whiteSpace: "nowrap" }}>Coach Mode</span>
           {avatar}
           {logoUrl && branding?.showHeaderLogo !== false ? (
             <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 8px", borderRadius: 999, background: accentColor ? `${accentColor}1A` : "rgba(255,255,255,0.06)", border: accentColor ? `1px solid ${accentColor}40` : "1px solid var(--stroke-1)", minWidth: 0 }}>
               <TeamLogo logoUrl={logoUrl} teamName={teamName} size={24} primaryColor={branding?.primaryColor || accentColor} badgeStyle={branding?.badgeStyle || "round"} />
-              {teamName ? <span style={{ fontFamily: FB, fontSize: 9, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "var(--tracking-tight)", fontWeight: 700, maxWidth: 84, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{teamName}</span> : null}
+              {teamName ? <span style={{ fontFamily: FB, fontSize: 12, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "0.03em", fontWeight: 700, maxWidth: 84, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{teamName}</span> : null}
             </div>
           ) : null}
         </div>

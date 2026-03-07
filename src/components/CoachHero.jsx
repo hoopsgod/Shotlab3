@@ -53,8 +53,9 @@ export default function CoachHero({
             <span
               style={{
                 fontFamily: FD,
-                fontSize: 10,
-                letterSpacing: "var(--tracking-tight)",
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: "0.04em",
                 textTransform: "uppercase",
                 borderRadius: 999,
                 padding: "3px 9px",
@@ -74,8 +75,8 @@ export default function CoachHero({
                   style={{
                     fontFamily: FD,
                     color: "#fff",
-                    fontSize: isOverview ? 24 : 22,
-                    letterSpacing: "var(--tracking-default)",
+                    fontSize: isOverview ? 24 : 24,
+                    letterSpacing: "0.04em",
                     lineHeight: 1,
                     whiteSpace: "nowrap",
                     overflow: "hidden",
@@ -87,11 +88,13 @@ export default function CoachHero({
                 <div
                   style={{
                     fontFamily: FB,
-                    color: "var(--text-3)",
-                    opacity: 0.84,
-                    fontSize: 8,
+                    color: "var(--text-2)",
+                    opacity: 0.96,
+                    fontSize: 12,
+                    fontWeight: 600,
                     textTransform: "uppercase",
-                    letterSpacing: "var(--tracking-tight)",
+                    letterSpacing: "0.03em",
+                    lineHeight: 1.3,
                     marginTop: 2,
                   }}
                 >
