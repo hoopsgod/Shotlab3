@@ -37,7 +37,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
+          <span className="pageHeaderPill pageHeaderPill--tertiary" style={{ pointerEvents: "none" }}>Coach Mode</span>
           {avatar}
           {logoUrl && branding?.showHeaderLogo !== false ? (
             <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 8px", borderRadius: 999, background: accentColor ? `${accentColor}24` : "rgba(255,255,255,0.08)", border: accentColor ? `1px solid ${accentColor}55` : "1px solid var(--stroke-1)" }}>
@@ -47,10 +47,10 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
           ) : null}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
-        <button type="button" aria-label="Open settings" onClick={onOpenSettings} style={{ background: "rgba(20,20,20,0.95)", border: `1px solid ${borderColor}`, borderRadius: 10, color: "var(--text-secondary)", width: 32, height: 32, cursor: "pointer", fontFamily: FB, fontSize: 12 }}>
+        <button type="button" aria-label="Open settings" onClick={onOpenSettings} className="btn btn--secondary btn--icon" style={{ borderColor, color: "var(--text-secondary)", width: 32, minWidth: 32, height: 32, fontFamily: FB, fontSize: 12 }}>
           ⚙
         </button>
-        <button type="button" aria-label="Log out" onClick={onLogout} style={{ background: "rgba(20,20,20,0.95)", border: `1px solid ${borderColor}`, borderRadius: 10, color: mutedColor, width: 32, height: 32, cursor: "pointer", fontFamily: FB, fontSize: 12 }}>
+        <button type="button" aria-label="Log out" onClick={onLogout} className="btn btn--tertiary btn--icon" style={{ borderColor, color: mutedColor, width: 32, minWidth: 32, height: 32, fontFamily: FB, fontSize: 12 }}>
           ✕
         </button>
       </div>

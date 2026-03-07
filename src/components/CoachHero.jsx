@@ -107,19 +107,15 @@ export default function CoachHero({
             type="button"
             aria-label="Open settings"
             onClick={onOpenSettings}
+            className="btn btn--secondary btn--icon"
             style={{
-              background: "rgba(20,20,20,0.95)",
-              border: `1px solid ${borderColor}`,
-              borderRadius: 12,
+              borderColor,
               color: "var(--text-secondary)",
               width: 38,
+              minWidth: 38,
               height: 38,
-              cursor: "pointer",
               fontSize: 13,
               fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
             }}
           >
             ⚙
@@ -128,19 +124,15 @@ export default function CoachHero({
             type="button"
             aria-label="Log out"
             onClick={onLogout}
+            className="btn btn--tertiary btn--icon"
             style={{
-              background: "rgba(20,20,20,0.95)",
-              border: `1px solid ${borderColor}`,
-              borderRadius: 12,
+              borderColor,
               color: mutedColor,
               width: 38,
+              minWidth: 38,
               height: 38,
-              cursor: "pointer",
               fontSize: 13,
               fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
             }}
           >
             ✕
