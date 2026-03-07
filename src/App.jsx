@@ -1294,7 +1294,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       onAction={()=>setTab("program")}
     />
 
-    {showWelcomeGuide&&<GuideCallout title="Welcome to ShotLab" body="At Home tracks solo shot logging and streaks. Program shows coach-run events and verified attendance. Duels let players compete on drill scores." onDismiss={dismissWelcomeGuide} tone="accent"/>}
+    {showWelcomeGuide&&<GuideCallout title="Welcome to ShotLab" body="At Home tracks solo work. Program covers coach-run activity. Makes count your made shots, Drills are scored skill tests, and Duels are head-to-head drill competitions." onDismiss={dismissWelcomeGuide} tone="accent"/>}
 
     {(()=>{
       const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
