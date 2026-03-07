@@ -26,7 +26,7 @@ const ChevronRight = ({ size = 24, color = "currentColor" }) => (
 
 export default function PlayersScreen() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("ALL PLAYERS");
+  const [activeFilter, setActiveFilter] = useState("All players");
   const [copied, setCopied] = useState(false);
 
   const players = [];
@@ -40,9 +40,9 @@ export default function PlayersScreen() {
         .toLowerCase()
         .includes(searchQuery.toLowerCase());
       const matchesFilter =
-        activeFilter === "ALL PLAYERS" ||
-        (activeFilter === "ACTIVE" && player.active) ||
-        (activeFilter === "INACTIVE" && !player.active);
+        activeFilter === "All players" ||
+        (activeFilter === "Active" && player.active) ||
+        (activeFilter === "Inactive" && !player.active);
       return matchesSearch && matchesFilter;
     });
   }, [players, searchQuery, activeFilter]);
@@ -68,12 +68,12 @@ export default function PlayersScreen() {
     height: "var(--btn-h-sm)",
     padding: "0 var(--btn-pad-sm)",
     fontSize: "11px",
-    textTransform: "uppercase",
+    textTransform: "none",
     letterSpacing: "0.08em",
     cursor: "pointer",
-    border: isActive ? "none" : "1px solid var(--stroke-1)",
-    background: isActive ? "var(--accent)" : "var(--surface-1)",
-    color: isActive ? "#0B0D10" : "var(--text-3)",
+    border: isActive ? "1px solid rgba(91, 243, 255, 0.34)" : "1px solid var(--stroke-1)",
+    background: isActive ? "rgba(91, 243, 255, 0.18)" : "var(--surface-1)",
+    color: isActive ? "var(--text-1)" : "var(--text-3)",
     fontWeight: isActive ? 700 : 500,
   });
 
@@ -85,17 +85,17 @@ export default function PlayersScreen() {
           style={{
             fontSize: "24px",
             fontWeight: 900,
-            textTransform: "uppercase",
+            textTransform: "none",
             color: "var(--text-1)",
-            fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
+            letterSpacing: "var(--ls-tight)",
           }}
         >
           PLAYERS
         </span>
       </div>
 
-      <p style={{ fontSize: "13px", color: "var(--text-2)", marginBottom: "var(--space-6)" }}>
-        Manage your roster and track player engagement
+      <p style={{ fontSize: "var(--fs-helper)", color: "var(--text-2)", marginBottom: "var(--space-4)", lineHeight: "var(--lh-helper)" }}>
+        Manage your roster and track player engagement with clearer status visibility
       </p>
 
       <input
@@ -105,13 +105,13 @@ export default function PlayersScreen() {
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{
-          fontSize: "14px",
+          fontSize: "var(--fs-body)",
           marginBottom: "var(--space-3)",
         }}
       />
 
       <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
-        {["ALL PLAYERS", "ACTIVE", "INACTIVE"].map((filter) => (
+        {["All players", "Active", "Inactive"].map((filter) => (
           <button key={filter} onClick={() => setActiveFilter(filter)} className={`btn chip ${activeFilter === filter ? "btn--primary" : "btn--tertiary"}`} aria-pressed={activeFilter === filter} style={chipStyle(activeFilter === filter)}>
             {filter}
           </button>
@@ -120,8 +120,9 @@ export default function PlayersScreen() {
 
       <div
         style={{
-          background: "var(--surface-2)",
-          borderRadius: "12px",
+          background: "var(--surface-1)",
+          border: "1px solid var(--stroke-1)",
+          borderRadius: "var(--radius-lg)",
           padding: "var(--space-3) var(--space-4)",
           marginBottom: "var(--space-4)",
           display: "flex",
@@ -130,17 +131,17 @@ export default function PlayersScreen() {
       >
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Total</span>
+          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "none", letterSpacing: "var(--ls-label)", marginTop: "var(--space-2)" }}>Total</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Active</span>
+          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "none", letterSpacing: "var(--ls-label)", marginTop: "var(--space-2)" }}>Active</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
           <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "var(--space-2)" }}>Inactive</span>
+          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "none", letterSpacing: "var(--ls-label)", marginTop: "var(--space-2)" }}>Inactive</span>
         </div>
       </div>
 
@@ -156,14 +157,14 @@ export default function PlayersScreen() {
           }}
         >
           <Users size={48} color="#555555" />
-          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-2)", margin: 0 }}>
-            NO PLAYERS YET
+          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
+            No players yet
           </p>
           <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
-            Invite players to join your program
+            Invite players to join your program and begin tracking progress
           </p>
           <button className="btn btn--primary">
-            INVITE PLAYERS
+            Invite players
           </button>
         </div>
       ) : (
@@ -200,7 +201,7 @@ export default function PlayersScreen() {
             >
               {player.name?.[0] || "?"}
             </div>
-            <div style={{ flex: 1, fontSize: "15px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-1)" }}>
+            <div style={{ flex: 1, fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)" }}>
               {player.name}
             </div>
             <ChevronRight size={16} color="var(--text-3)" />
@@ -212,14 +213,14 @@ export default function PlayersScreen() {
         style={{
           fontSize: "13px",
           fontWeight: 700,
-          textTransform: "uppercase",
+          textTransform: "none",
           letterSpacing: "0.10em",
           color: "var(--text-1)",
           marginTop: "var(--space-6)",
           marginBottom: "var(--space-3)",
         }}
       >
-        GROW YOUR ROSTER
+        ROSTER GROWTH
       </p>
       <div
         style={{
@@ -234,14 +235,14 @@ export default function PlayersScreen() {
         }}
       >
         <UserPlus size={32} color="var(--text-2)" />
-        <p style={{ fontSize: "16px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-2)", margin: 0 }}>
-          INVITE A PLAYER
+        <p style={{ fontSize: "16px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
+          Invite a player
         </p>
         <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
           Share your program link and players can join instantly
         </p>
         <button onClick={shareInviteLink} className="btn btn--primary">
-          SHARE INVITE LINK
+          Share invite link
         </button>
         {copied && <p style={{ fontSize: "12px", color: "var(--text-2)", margin: 0 }}>Link copied</p>}
       </div>
