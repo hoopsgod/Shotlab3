@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import Button from "../components/ui/Button";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -95,20 +96,6 @@ export default function PlayersScreen() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const chipStyle = (isActive) => ({
-    borderRadius: "var(--btn-radius)",
-    height: "var(--btn-h-sm)",
-    padding: "0 var(--btn-pad-sm)",
-    fontSize: "11px",
-    textTransform: "none",
-    letterSpacing: "0.08em",
-    cursor: "pointer",
-    border: isActive ? "1px solid rgba(91, 243, 255, 0.34)" : "1px solid var(--stroke-1)",
-    background: isActive ? "rgba(91, 243, 255, 0.18)" : "var(--surface-1)",
-    color: isActive ? "var(--text-1)" : "var(--text-3)",
-    fontWeight: isActive ? 700 : 500,
-  });
-
   return (
     <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
@@ -144,9 +131,9 @@ export default function PlayersScreen() {
 
       <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
         {["All players", "Active", "Inactive"].map((filter) => (
-          <button key={filter} onClick={() => setActiveFilter(filter)} className={`btn chip ${activeFilter === filter ? "btn--primary" : "btn--tertiary"}`} aria-pressed={activeFilter === filter} style={chipStyle(activeFilter === filter)}>
+          <Button key={filter} onClick={() => setActiveFilter(filter)} variant={activeFilter === filter ? "secondary" : "tertiary"} size="md" className="chip" aria-pressed={activeFilter === filter}>
             {filter}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -195,9 +182,9 @@ export default function PlayersScreen() {
           <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
             Invite players to join your program and begin tracking progress
           </p>
-          <button className="btn btn--primary" aria-label="Invite players to roster">
+          <Button variant="primary" aria-label="Invite players to roster">
             Invite players
-          </button>
+          </Button>
         </div>
       ) : (
         filteredPlayers.map((player) => (
@@ -279,9 +266,9 @@ export default function PlayersScreen() {
         <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
           Share your program link and players can join instantly
         </p>
-        <button onClick={shareInviteLink} className="btn btn--primary">
+        <Button onClick={shareInviteLink} variant="primary">
           Share invite link
-        </button>
+        </Button>
         {copied && <p style={{ fontSize: "12px", color: "var(--text-2)", margin: 0 }}>Link copied</p>}
       </div>
     </div>

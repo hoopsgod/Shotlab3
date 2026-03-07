@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import UI_TOKENS from "../styles/tokens";
+import Button from "./ui/Button";
 
 const CHART_CARD_STYLE = {
   background: UI_TOKENS.colors.bgCard,
@@ -213,42 +214,24 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
         <div style={{ color: UI_TOKENS.colors.textPrimary, fontSize: 12, letterSpacing: "0.08em" }}>PROGRESS OVER TIME</div>
         <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
           {FILTERS.map((filter) => (
-            <button
+            <Button
               key={filter.id}
               type="button"
               onClick={() => setRange(filter.id)}
-              style={{
-                border: `1px solid ${filter.id === range ? UI_TOKENS.colors.primary : UI_TOKENS.borders.subtle}`,
-                background: filter.id === range ? `${UI_TOKENS.colors.primary}1A` : "transparent",
-                color: UI_TOKENS.colors.textPrimary,
-                borderRadius: 999,
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                padding: "4px 10px",
-                cursor: "pointer",
-              }}
+              variant={filter.id === range ? "secondary" : "tertiary"}
+              className="progress-filter-btn"
             >
               {filter.label}
-            </button>
+            </Button>
           ))}
-          <button
+          <Button
             type="button"
             onClick={() => setShowHelp(true)}
-            style={{
-              border: `1px solid ${UI_TOKENS.borders.subtle}`,
-              background: "transparent",
-              color: UI_TOKENS.colors.textSecondary,
-              borderRadius: 999,
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              padding: "4px 10px",
-              cursor: "pointer",
-            }}
+            variant="tertiary"
+            className="progress-filter-btn"
           >
-            Metric Help
-          </button>
+            Metric help
+          </Button>
         </div>
       </div>
 
@@ -313,22 +296,9 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
               <li>{HELP_COPY.Avg}</li>
               <li>{HELP_COPY.Logs}</li>
             </ul>
-            <button
-              type="button"
-              onClick={() => setShowHelp(false)}
-              style={{
-                marginTop: 12,
-                border: `1px solid ${UI_TOKENS.borders.subtle}`,
-                background: "transparent",
-                color: UI_TOKENS.colors.textPrimary,
-                borderRadius: 8,
-                fontSize: 11,
-                padding: "6px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <Button type="button" onClick={() => setShowHelp(false)} variant="tertiary" size="md" style={{ marginTop: 12 }}>
               Close
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}

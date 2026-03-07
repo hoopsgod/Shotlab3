@@ -1,30 +1,21 @@
 import { TeamIdentity, TeamWatermark } from "./TeamBranding";
+import Button from "./ui/Button";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
 function IconButton({ label, onClick, children, borderColor, color }) {
   return (
-    <button
+    <Button
       type="button"
       aria-label={label}
       onClick={onClick}
+      variant="tertiary"
+      iconOnly
       className="coach-icon-btn"
-      style={{
-        background: "transparent",
-        border: `1px solid ${borderColor}`,
-        borderRadius: 12,
-        color,
-        width: 44,
-        height: 44,
-        cursor: "pointer",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        opacity: 0.9,
-      }}
+      style={{ borderColor, color, opacity: 0.9 }}
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -76,7 +67,6 @@ export default function CoachHero({
       }}
     >
       <style>{`
-        .coach-icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
         @media (min-width: 768px) {
           .coach-hero { padding:${desktopPadding}; }
         }

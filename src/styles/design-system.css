@@ -105,7 +105,7 @@ Implementation plan (small-scope motion pass):
   ------------------------------ */
   --btn-h: 48px;
   --btn-h-sm: 40px;
-  --btn-radius: var(--radius-md);
+  --btn-radius: 8px;
   --btn-pad-x: 18px;
   --btn-pad-sm: 10px;
   --btn-pad-lg: 20px;
@@ -237,66 +237,64 @@ a.interactive-card:focus-visible {
   border-color: rgba(145, 164, 188, 0.18);
 }
 
-/* buttons: primary, secondary, ghost, icon */
+/* buttons: primary, secondary, tertiary, destructive, icon */
 .btn {
-  min-height: var(--btn-h);
+  min-height: var(--btn-h-md);
   border-radius: var(--btn-radius);
   padding: 0 var(--btn-pad-x);
   border: 1px solid transparent;
   font-size: 0.95rem;
   font-weight: var(--fw-semibold);
   line-height: 1;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   text-transform: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  gap: 8px;
   cursor: pointer;
-  transition: transform 120ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  transition: background-color 140ms ease, color 140ms ease, border-color 140ms ease, box-shadow 140ms ease, transform 100ms ease;
 }
 
-.btn:active {
-  transform: scale(0.98);
-}
+.btn--md { min-height: var(--btn-h-md); }
+.btn--lg { min-height: var(--btn-h-lg); }
+
+.btn:active { transform: translateY(1px); }
 
 @media (hover: hover) and (pointer: fine) {
-  .btn--primary:hover {
-    filter: brightness(1.03);
-    box-shadow: 0 12px 24px rgba(200, 255, 0, 0.2);
-  }
-
+  .btn--primary:hover { background: #d4ff36; }
   .btn--secondary:hover,
   .btn--ghost:hover,
   .btn--tertiary:hover,
   .btn--icon:hover,
-  .iconBtn:hover {
-    box-shadow: 0 8px 18px rgba(8, 12, 20, 0.28);
-  }
+  .btn--destructive:hover,
+  .iconBtn:hover { background: rgba(255, 255, 255, 0.08); }
 }
 
 .btn:focus-visible,
 .iconBtn:focus-visible {
   outline: none;
   box-shadow: var(--focus-ring);
-}
-
-.btn:focus-visible {
-  border-color: rgba(200, 255, 0, 0.7);
+  border-color: var(--color-focus-ring);
 }
 
 .btn--primary {
   background: var(--color-accent-yellow);
-  color: #11150d;
-  box-shadow: 0 10px 22px rgba(200, 255, 0, 0.16);
+  color: #12180d;
+  border-color: rgba(200, 255, 0, 0.46);
 }
 
 .btn--secondary {
   background: rgba(91, 243, 255, 0.08);
-  color: var(--color-accent-cyan);
+  color: var(--text-1);
   border-color: rgba(91, 243, 255, 0.34);
 }
 
+.btn--destructive {
+  background: rgba(255, 69, 69, 0.12);
+  color: #ffb0b0;
+  border-color: rgba(255, 69, 69, 0.42);
+}
 
 .btn[role="switch"] {
   transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
@@ -313,19 +311,22 @@ a.interactive-card:focus-visible {
   background: transparent;
   color: var(--text-2);
   border-color: rgba(167, 187, 211, 0.28);
-  min-height: var(--btn-h-sm);
-  padding: 0 12px;
 }
 
 .iconBtn,
 .btn--icon {
-  width: var(--btn-h);
-  min-height: var(--btn-h);
+  min-height: var(--btn-h-md);
+  width: var(--btn-h-md);
   padding: 0;
   border-radius: var(--btn-radius);
   background: var(--color-surface-secondary);
   border: 1px solid var(--color-border-subtle);
   color: var(--text-2);
+}
+
+.btn--iconOnly {
+  padding: 0;
+  min-width: var(--btn-h-md);
 }
 
 /* status chips */

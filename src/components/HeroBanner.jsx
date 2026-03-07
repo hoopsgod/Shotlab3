@@ -1,4 +1,4 @@
-import UI_TOKENS from "../styles/tokens";
+import Button from "./ui/Button";
 
 const HERO_RADIUS = 18;
 const HERO_BUTTON_RADIUS = 10;
@@ -71,26 +71,15 @@ function HeroBanner({
           </div>
         </div>
         {actionLabel && onAction ? (
-          <button
+          <Button
             type="button"
             onClick={onAction}
-            style={{
-              background: accent,
-              color: UI_TOKENS.colors.bgBase,
-              border: "1px solid transparent",
-              borderRadius: HERO_BUTTON_RADIUS,
-              padding: "8px 10px",
-              fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: "0.02em",
-              textTransform: "none",
-              cursor: "pointer",
-              whiteSpace: "nowrap",
-            }}
+            variant="secondary"
+            size="md"
+            style={{ whiteSpace: "nowrap", borderColor: `${accent}66`, color: accent }}
           >
             {actionLabel}
-          </button>
+          </Button>
         ) : null}
       </div>
     </section>

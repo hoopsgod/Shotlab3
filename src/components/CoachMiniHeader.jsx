@@ -1,5 +1,6 @@
 import { TeamLogo } from "./TeamBranding";
 import BrandLogo from "./BrandLogo";
+import Button from "./ui/Button";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
@@ -37,8 +38,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         transition: "opacity 200ms ease, transform 200ms ease, visibility 0s linear " + (visible ? "0s" : "200ms"),
       }}
     >
-      <style>{`.coach-icon-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}`}</style>
-      <div
+            <div
         style={{
           height: "clamp(50px, 7.6vw, 62px)",
           borderRadius: 12,
@@ -66,12 +66,12 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ opacity: 0.85 }}>{wordmark}</div>
-          <button type="button" aria-label="Open settings" onClick={onOpenSettings} className="coach-icon-btn" style={{ background: "transparent", border: `1px solid ${borderColor}`, borderRadius: 12, color: "var(--text-secondary)", width: 44, height: 44, cursor: "pointer", display: "grid", placeItems: "center", opacity: 0.9 }}>
+          <Button type="button" aria-label="Open settings" onClick={onOpenSettings} variant="tertiary" iconOnly className="coach-icon-btn" style={{ borderColor, color: "var(--text-secondary)", opacity: 0.9 }}>
             <GearIcon />
-          </button>
-          <button type="button" aria-label="Log out" onClick={onLogout} className="coach-icon-btn" style={{ background: "transparent", border: `1px solid ${borderColor}`, borderRadius: 12, color: mutedColor, width: 44, height: 44, cursor: "pointer", display: "grid", placeItems: "center", opacity: 0.9 }}>
+          </Button>
+          <Button type="button" aria-label="Log out" onClick={onLogout} variant="tertiary" iconOnly className="coach-icon-btn" style={{ borderColor, color: mutedColor, opacity: 0.9 }}>
             <CloseIcon />
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -47,29 +47,8 @@
 
 .rightAction {
   margin-left: auto;
-  min-height: 40px;
-  padding: 0 12px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  background: transparent;
-  color: var(--signature-accent);
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  transition: border-color 0.16s ease, background-color 0.16s ease, box-shadow 0.16s ease;
 }
 
-.rightAction:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.24);
-  background: rgba(255, 255, 255, 0.10);
-  box-shadow:none;
-}
-
-.rightAction:focus-visible {
-  outline: 2px solid rgba(255, 255, 255, 0.70);
-  outline-offset: 2px;
-}
 
 .rightAction:disabled {
   opacity: 0.55;

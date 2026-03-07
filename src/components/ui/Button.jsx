@@ -1,15 +1,35 @@
 const VARIANT_CLASS_MAP = {
   primary: "btn--primary",
   secondary: "btn--secondary",
-  ghost: "btn--ghost",
-  tertiary: "btn--ghost",
+  tertiary: "btn--tertiary",
+  ghost: "btn--tertiary",
+  destructive: "btn--destructive",
   icon: "btn--icon",
 };
 
-export default function Button({ variant = "primary", className = "", type = "button", children, ...props }) {
+const SIZE_CLASS_MAP = {
+  md: "btn--md",
+  lg: "btn--lg",
+};
+
+export default function Button({
+  variant = "primary",
+  size = "md",
+  iconOnly = false,
+  className = "",
+  type = "button",
+  children,
+  ...props
+}) {
   const variantClass = VARIANT_CLASS_MAP[variant] || VARIANT_CLASS_MAP.primary;
+  const sizeClass = SIZE_CLASS_MAP[size] || SIZE_CLASS_MAP.md;
+
   return (
-    <button type={type} className={`btn ${variantClass} ${className}`.trim()} {...props}>
+    <button
+      type={type}
+      className={`btn ${variantClass} ${sizeClass} ${iconOnly ? "btn--iconOnly" : ""} ${className}`.trim()}
+      {...props}
+    >
       {children}
     </button>
   );

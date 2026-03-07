@@ -1,3 +1,4 @@
+import Button from "./ui/Button";
 const ACCENT_MAP = {
   lime: "var(--text-2)",
   cyan: "var(--text-2)",
@@ -17,9 +18,9 @@ export default function PageHeader({
 }) {
   const resolvedAccent = ACCENT_MAP[accent] || accent || ACCENT_MAP.lime;
   const actionNode = rightSlot || (actionLabel ? (
-    <button type="button" className="pageHeaderPill" onClick={onAction}>
+    <Button type="button" variant="secondary" className="pageHeaderPill" onClick={onAction}>
       {actionLabel}
-    </button>
+    </Button>
   ) : null);
 
   return (

@@ -1,4 +1,5 @@
 import styles from "./PageSignature.module.css";
+import Button from "./ui/Button";
 
 function SignatureIcon({ icon }) {
   const common = {
@@ -93,14 +94,16 @@ export default function PageSignature({
         </div>
 
         {hasRightAction ? (
-          <button
+          <Button
             type="button"
+            variant="tertiary"
+            size="md"
             className={styles.rightAction}
             onClick={onRightAction}
             disabled={typeof onRightAction !== "function"}
           >
             {rightActionLabel}
-          </button>
+          </Button>
         ) : null}
       </div>
 
