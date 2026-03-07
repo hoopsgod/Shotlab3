@@ -1651,10 +1651,37 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 function DuelsPanel({u,challenges,drills,respondChallenge,players}){
 const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(""),[respSaved,setRespSaved]=useState(null);
 const[showGuide,dismissGuide]=useDismissedGuide("sl:guide:duels");
+const[activeFilter,setActiveFilter]=useState("all");
 const incoming=useMemo(()=>challenges.filter(c=>c.to===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
 const outgoing=useMemo(()=>challenges.filter(c=>c.from===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
-const pending=incoming.filter(c=>c.status==="pending");
-const resolved=[...incoming.filter(c=>c.status!=="pending"),...outgoing].sort((a,b)=>(b.respTs||b.ts)-(a.respTs||a.ts));
+const incomingPending=incoming.filter(c=>c.status==="pending");
+const openDuels=outgoing.filter(c=>c.status==="pending");
+const completed=[...incoming.filter(c=>c.status!=="pending"),...outgoing.filter(c=>c.status!=="pending")].sort((a,b)=>(b.respTs||b.ts)-(a.respTs||a.ts));
+const allRows=useMemo(()=>[
+  ...incomingPending.map(ch=>({ch,bucket:"pending"})),
+  ...openDuels.map(ch=>({ch,bucket:"open"})),
+  ...completed.map(ch=>({ch,bucket:"completed"}))
+].sort((a,b)=>(b.ch.respTs||b.ch.ts)-(a.ch.respTs||a.ch.ts)),[incomingPending,openDuels,completed]);
+const totalWon=useMemo(()=>completed.filter(ch=>{const isMine=ch.from===u.email;return isMine?(ch.status==="lost"):(ch.status==="won");}).length,[completed,u.email]);
+const filteredRows=allRows.filter(({bucket,ch})=>{
+  if(activeFilter==="all")return true;
+  if(activeFilter==="pending")return bucket==="pending";
+  if(activeFilter==="open")return bucket==="open";
+  if(activeFilter==="completed")return bucket==="completed";
+  if(activeFilter==="won"){
+    if(bucket!=="completed")return false;
+    const isMine=ch.from===u.email;
+    return isMine?(ch.status==="lost"):(ch.status==="won");
+  }
+  return true;
+});
+const filterChips=[
+  {k:"all",label:"All",count:allRows.length},
+  {k:"open",label:"Open",count:openDuels.length},
+  {k:"pending",label:"Pending",count:incomingPending.length},
+  {k:"completed",label:"Completed",count:completed.length},
+  {k:"won",label:"Won",count:totalWon}
+];
 
 const handleRespond=(ch)=>{
 const v=parseInt(respInput);if(isNaN(v)||v<0||v>ch.max)return;
@@ -1662,93 +1689,103 @@ respondChallenge(ch.id,v);setRespSaved(ch.id);setRespId(null);setRespInput("");
 setTimeout(()=>setRespSaved(null),2000);
 };
 
+const initialsFor=(name="")=>name.split(" ").filter(Boolean).slice(0,2).map(s=>s[0]).join("").toUpperCase()||"PL";
+const chipStyle=(kind)=>{
+  const map={
+    open:{bg:`${CYAN}1A`,border:`1px solid ${CYAN}55`,color:CYAN,label:"OPEN"},
+    waiting:{bg:`${ORANGE}1A`,border:`1px solid ${ORANGE}55`,color:ORANGE,label:"WAITING"},
+    won:{bg:`${VOLT}1A`,border:`1px solid ${VOLT}55`,color:VOLT,label:"WON"},
+    lost:{bg:"#FF4D4D1A",border:"1px solid #FF4D4D66",color:"#FF5E5E",label:"LOST"},
+    completed:{bg:"#FFFFFF10",border:`1px solid ${BORDER_CLR}`,color:MUTED,label:"COMPLETED"}
+  };
+  return map[kind]||map.completed;
+};
+
 return <SectionContainer className="fade-up">
 <SH t="DUELS" s="HEAD-TO-HEAD" isCoach={typeof u!=="undefined"&&u?.isCoach}/>
 {showGuide&&<GuideCallout title="How duels work" body="Duels let players compete on drill scores. Accept a challenge, log your response, and the higher score wins." onDismiss={dismissGuide} tone="warm"/>}
-{/* Duels banner — aggressive, asymmetric */}
-<div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${ORANGE}22`,position:"relative",overflow:"hidden"}}>
-<div style={{position:"absolute",top:-12,right:-8,opacity:.08}}><svg width="100" height="100" viewBox="0 0 24 24" fill={ORANGE} stroke="none"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-
-<div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${ORANGE},${ORANGE}44,transparent)`}}/>
-<div style={{display:"flex",alignItems:"center",gap:14,position:"relative"}}>
-<div style={{width:48,height:48,borderRadius:14,background:`${ORANGE}15`,border:`1.5px solid ${ORANGE}33`,display:"flex",alignItems:"center",justifyContent:"center",transform:"rotate(-6deg)"}}>
-<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-</div>
-<div>
-<div style={{fontFamily:FD,color:ORANGE,fontSize:18,letterSpacing:3}}>HEAD-TO-HEAD</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Challenge teammates. Beat their score.</div>
-</div>
-</div>
+<div style={{background:`radial-gradient(circle at 10% 10%,${ORANGE}24,transparent 45%),linear-gradient(130deg,#151515,#0D0D0D 60%,#181818)`,borderRadius:20,padding:"18px 18px 14px",marginBottom:12,border:`1px solid ${ORANGE}44`,position:"relative",overflow:"hidden"}}>
+  <div style={{position:"absolute",top:-20,right:-24,opacity:.12}}><svg width="120" height="120" viewBox="0 0 24 24" fill={ORANGE}><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+  <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,position:"relative"}}>
+    <div>
+      <div style={{fontFamily:FB,color:"#FFD9BA",fontSize:10,fontWeight:700,letterSpacing:2,textTransform:"uppercase",marginBottom:4}}>Shotlab Arena</div>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:1.4,lineHeight:1.05}}>Compete. Respond. Win.</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,maxWidth:260}}>Track open challenges, answer incoming duels, and chase leaderboard-worthy wins.</div>
+    </div>
+    <button onClick={()=>setActiveFilter("pending")} className="btn-v" style={{padding:"8px 10px",fontSize:11,letterSpacing:1.4,background:`${ORANGE}22`,border:`1px solid ${ORANGE}55`,color:ORANGE,whiteSpace:"nowrap"}}>RESPOND NOW</button>
+  </div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8,marginTop:12}}>
+    <div style={{background:"#0F0F0F",border:`1px solid ${ORANGE}3D`,borderRadius:12,padding:"8px 10px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,textTransform:"uppercase",letterSpacing:1.1}}>Pending</div><div style={{fontFamily:FD,color:ORANGE,fontSize:20,lineHeight:1.1}}>{incomingPending.length}</div></div>
+    <div style={{background:"#0F0F0F",border:`1px solid ${CYAN}3D`,borderRadius:12,padding:"8px 10px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,textTransform:"uppercase",letterSpacing:1.1}}>Open</div><div style={{fontFamily:FD,color:CYAN,fontSize:20,lineHeight:1.1}}>{openDuels.length}</div></div>
+    <div style={{background:"#0F0F0F",border:`1px solid ${VOLT}3D`,borderRadius:12,padding:"8px 10px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,textTransform:"uppercase",letterSpacing:1.1}}>Wins</div><div style={{fontFamily:FD,color:VOLT,fontSize:20,lineHeight:1.1}}>{totalWon}</div></div>
+  </div>
 </div>
 
 <div style={{marginBottom:12}}>{getInstructionalContent("duels").map(item=><DrillDetail key={`duel-${item.id}`} title={item.title} description={item.description} videoUrl={item.videoUrl} thumbnailUrl={item.thumbnailUrl} thumbnailAlt={item.thumbnailAlt} videoCaption={item.videoCaption} techniqueTips={item.techniqueTips}/> )}</div>
 
-{/* Pending challenges */}
-{pending.length>0&&<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>
-  {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
-    return <Card key={ch.id} variant="list" className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:`${spacing.md}px ${spacing.lg}px`,marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
-      <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
-      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
-        <Av n={ch.fromName} sz={38} email={ch.from}/>
-        <div style={{flex:1}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:1}}>{ch.fromName.toUpperCase()}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>challenged you on <span style={{color:ORANGE,fontWeight:700}}>{ch.drillName}</span></div>
-        </div>
-        <div style={{textAlign:"right"}}>
-          <div style={{fontFamily:FD,color:ORANGE,fontSize:24}}>{ch.score}<span style={{color:MUTED,fontSize:14}}>/{ch.max}</span></div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1}}>TO BEAT</div>
+<div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:8,marginBottom:6}}>
+  {filterChips.map(chip=>{
+    const active=activeFilter===chip.k;
+    return <button key={chip.k} onClick={()=>setActiveFilter(chip.k)} style={{border:active?`1px solid ${ORANGE}`:`1px solid ${BORDER_CLR}`,background:active?`${ORANGE}1A`:"#131313",color:active?ORANGE:T.SUB,borderRadius:999,padding:"6px 11px",fontFamily:FB,fontSize:11,fontWeight:700,whiteSpace:"nowrap",cursor:"pointer"}}>{chip.label} <span style={{opacity:.85}}>{chip.count}</span></button>;
+  })}
+</div>
+
+{allRows.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to dare a teammate to beat it!"/>}
+{allRows.length>0&&filteredRows.length===0&&<Empty t="No duels in this filter" action="Try another tab to see more matchups."/>}
+
+{filteredRows.map(({ch,bucket})=>{
+  const isMine=ch.from===u.email;
+  const isIncomingPending=bucket==="pending";
+  const opponentName=isMine?ch.toName:ch.fromName;
+  const myScore=isMine?ch.score:ch.respScore;
+  const oppScore=isMine?ch.respScore:ch.score;
+  const won=isMine?(ch.status==="lost"):(ch.status==="won");
+  const tied=ch.status==="tied";
+  const statusKey=bucket==="open"?"open":bucket==="pending"?"waiting":won?"won":tied?"completed":"lost";
+  const secondaryChip=chipStyle(bucket==="pending"?"waiting":bucket==="completed"?"completed":"open");
+  const status=chipStyle(statusKey);
+  const isResp=respId===ch.id;
+
+  return <Card key={`${bucket}-${ch.id}-${ch.ts}`} variant="list" className="fade-up" style={{background:"linear-gradient(120deg,#121212,#191919)",border:`1px solid ${bucket==="pending"?ORANGE+"55":BORDER_CLR}`,borderRadius:14,padding:"10px 12px",marginBottom:8}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+      <div style={{display:"flex",alignItems:"center",gap:10,minWidth:0,flex:1}}>
+        <div style={{width:36,height:36,borderRadius:"50%",background:`linear-gradient(135deg,${ORANGE}30,#262626)`,border:`1px solid ${ORANGE}44`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:12,color:LIGHT,letterSpacing:1,flexShrink:0}}>{initialsFor(opponentName)}</div>
+        <div style={{minWidth:0,flex:1}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+            <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:.9,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>YOU <span style={{color:T.SUB}}>vs</span> {String(opponentName||"Opponent").toUpperCase()}</div>
+            <span style={{padding:"2px 7px",borderRadius:999,fontFamily:FB,fontSize:9,fontWeight:800,letterSpacing:.7,...status}}>{status.label}</span>
+            <span style={{padding:"2px 7px",borderRadius:999,fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:.7,...secondaryChip}}>{secondaryChip.label}</span>
+          </div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ch.drillName}</div>
         </div>
       </div>
-      {respSaved===ch.id?<div style={{textAlign:"center",padding:8}}><div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:3}}>RESPONSE LOGGED!</div></div>
+      <div style={{textAlign:"right",minWidth:90}}>
+        {bucket==="pending"?<><div style={{fontFamily:FB,fontSize:9,color:MUTED,letterSpacing:1,textTransform:"uppercase"}}>To Beat</div><div style={{fontFamily:FD,fontSize:24,color:ORANGE,lineHeight:1}}>{ch.score}<span style={{fontSize:11,color:T.SUB}}>/{ch.max}</span></div></>
+        :bucket==="open"?<><div style={{fontFamily:FB,fontSize:9,color:MUTED,letterSpacing:1,textTransform:"uppercase"}}>Your Score</div><div style={{fontFamily:FD,fontSize:22,color:CYAN,lineHeight:1}}>{ch.score}<span style={{fontSize:11,color:T.SUB}}>/{ch.max}</span></div></>
+        :<><div style={{fontFamily:FB,fontSize:9,color:MUTED,letterSpacing:1,textTransform:"uppercase"}}>Score</div><div style={{fontFamily:FD,fontSize:22,lineHeight:1,color:won?VOLT:tied?LIGHT:"#FF5E5E"}}>{myScore??"-"}<span style={{fontSize:10,color:MUTED,margin:"0 3px"}}>:</span><span style={{color:won?"#FF5E5E":VOLT}}>{oppScore??"-"}</span><span style={{fontSize:11,color:T.SUB}}>/{ch.max}</span></div></>
+        }
+      </div>
+    </div>
+
+    {isIncomingPending&&(
+      <div style={{marginTop:10,paddingTop:10,borderTop:`1px solid ${ORANGE}25`}}>
+      {respSaved===ch.id?<div style={{textAlign:"center",padding:"4px 0"}}><div style={{fontFamily:FD,color:VOLT,fontSize:14,letterSpacing:1.6}}>RESPONSE LOGGED</div></div>
       :isResp?<div className="fade-up">
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-          <div style={{flex:1}}><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:6}}>YOUR SCORE</div>
-            <input autoFocus type="number" min="0" max={ch.max} value={respInput} onChange={e=>setRespInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"14px 8px",background:BG,border:`2px solid ${ORANGE}`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none"}}/>
-          </div>
-          <div style={{fontFamily:FD,color:T.SUB,fontSize:24,paddingTop:20}}>/{ch.max}</div>
+        <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+          <input autoFocus type="number" min="0" max={ch.max} value={respInput} onChange={e=>setRespInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"9px 8px",background:BG,border:`1.5px solid ${ORANGE}`,borderRadius:10,color:ORANGE,fontFamily:FD,fontSize:26,textAlign:"center",outline:"none"}}/>
+          <div style={{fontFamily:FD,color:T.SUB,fontSize:16,whiteSpace:"nowrap"}}>/{ch.max}</div>
         </div>
         <div style={{display:"flex",gap:8}}>
-          <button onClick={()=>{setRespId(null);setRespInput("")}} style={{flex:1,padding:"11px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-          <button className="btn-v cta-primary" onClick={()=>handleRespond(ch)} style={{width:"100%"}}>SUBMIT</button>
+          <button onClick={()=>{setRespId(null);setRespInput("")}} style={{flex:1,padding:"8px",background:"transparent",color:MUTED,fontFamily:FB,fontSize:10,letterSpacing:1.2,border:`1px solid ${BORDER_CLR}`,borderRadius:8,cursor:"pointer"}}>CANCEL</button>
+          <button className="btn-v cta-primary" onClick={()=>handleRespond(ch)} style={{flex:1,padding:"9px 8px",fontSize:11}}>SUBMIT SCORE</button>
         </div>
       </div>
-      :<button className="btn-v cta-primary" onClick={()=>setRespId(ch.id)} style={{}}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>ACCEPT CHALLENGE
+      :<button className="btn-v cta-primary" onClick={()=>setRespId(ch.id)} style={{width:"100%",fontSize:11,padding:"9px 10px"}}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>ACCEPT + RESPOND
       </button>}
-    </Card>;
-  })}</>}
-
-{/* Resolved / History */}
-{pending.length>0&&<CourtDivider color={ORANGE} my={12}/>}
-<SH t={pending.length>0?"COMPLETED":"ALL DUELS"} s={`${resolved.length} TOTAL`}/>
-{resolved.length===0&&pending.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to dare a teammate to beat it!"/>}
-{resolved.map(ch=>{
-  const isMine=ch.from===u.email;const dr=drills.find(d=>d.id===ch.drillId);
-  const won=isMine?(ch.status==="lost"):(ch.status==="won");const tied=ch.status==="tied";const isPending=ch.status==="pending";
-  const oppName=isMine?ch.toName:ch.fromName;
-  const myScore=isMine?ch.score:ch.respScore;const oppScore=isMine?ch.respScore:ch.score;
-  const resultColor=isPending?MUTED:won?VOLT:tied?"#C8FF00":"#FF4545";
-  const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
-
-  return <ListItem key={ch.id+"-"+ch.ts} className="listRow" style={{background:CARD_BG,border:isPending?`1px solid ${ORANGE}22`:undefined,padding:`${spacing.md}px ${spacing.md}px`}}>
-    <div className="listRowLeft">
-    <div style={{width:40,height:40,borderRadius:12,background:resultColor+"12",border:`1px solid ${resultColor}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-      {isPending?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      :won?<svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      :tied?<span style={{fontFamily:FD,color:"#C8FF00",fontSize:14}}>=</span>
-      :<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>}
-    </div>
-    <div className="listRowText" style={{flex:1}}>
-      <div className="listRowTitle" style={{fontFamily:FD,fontSize:13}}>{isMine?"YOU":"YOU"} VS {oppName.toUpperCase()}</div>
-      <div className="listRowMeta" style={{fontFamily:FB,fontSize:10}}>{ch.drillName} &#183; {isPending?<span className="listRowStatus listRowStatus--wait">Waiting for response</span>:<span className={`listRowStatus ${won?"listRowStatus--won":"listRowStatus--wait"}`}>{resultText}</span>}</div>
-    </div>
-    </div>
-    <div className="listRowRight">
-      {isPending?<div className="listRowStat" style={{fontFamily:FD,color:ORANGE}}>{ch.score}</div>
-      :<div className="listRowStat" style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:18}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>}
-      <div className="listRowStatSub" style={{fontFamily:FB}}>/{ch.max}</div>
-    </div>
-  </ListItem>;
+      </div>
+    )}
+  </Card>;
 })}
 
   </SectionContainer>;
