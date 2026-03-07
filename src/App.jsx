@@ -8,6 +8,7 @@ import CoachMiniHeader from "./components/CoachMiniHeader";
 import Button from "./components/ui/Button";
 import EmptyState from "./components/EmptyState";
 import { TeamIdentity, TeamWatermark, TeamBrandPreview } from "./components/TeamBranding";
+import { HeroSection, StatisticBanner, GridList, CollapsibleGroup } from "./components/layout/PageLayouts";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -1230,16 +1231,22 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
     {(()=>{
       const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
+      const heroMetrics=[
+        {label:"Total Makes",value:totalMakes,color:VOLT},
+        {label:"Streak",value:`${streak}D`,color:ORANGE},
+        {label:"Upcoming",value:upcomingEventsCount,color:CYAN},
+      ];
       return <div style={{marginBottom:28}}>
-        <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
+        <HeroSection kicker="Dashboard" title={`Welcome back, ${u.name.split(" ")[0] || "Player"}`} subtitle="Pick your training lane, then stay on top of events and momentum." metrics={heroMetrics} accent={VOLT} />
+        <section style={{marginBottom:18,padding:"4px 4px 0"}} aria-label="Training mode selector">
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:12,fontWeight:600,letterSpacing:"0.03em",marginTop:6}}>Choose how you’re training today</div>
           {showHomeGuide&&<div style={{marginTop:10}}><GuideCallout title="Quick definitions" body="At Home is your personal tracker for Makes, Drills completed, and streaks. Program is for team sessions where attendance is verified by event RSVPs." onDismiss={dismissHomeGuide} tone="cool"/></div>}
         </section>
-        <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
-          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" helpText="At Home tracks solo shot logging and streaks." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
-          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" helpText="Program shows coach-run events and verified attendance." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
-        </div>
+        <GridList items={[{id:"home",stats:homeStats},{id:"program",stats:programStats}]} columns={isNarrow?1:2} gap={isNarrow?18:16} renderItem={(item)=>item.id==="home"?
+          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" helpText="At Home tracks solo shot logging and streaks." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 0 1-1-1v-6"/></svg>} stats={item.stats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
+          :<ModeCard title="PROGRAM" subtitle="Team events & verified attendance" helpText="Program shows coach-run events and verified attendance." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={item.stats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
+        }/>
       </div>
     })()}
 
@@ -1491,6 +1498,17 @@ setTimeout(()=>setRespSaved(null),2000);
 
 return <div className="fade-up">
 {showGuide&&<GuideCallout title="How duels work" body="Duels let players compete on drill scores. Accept a challenge, log your response, and the higher score wins." onDismiss={dismissGuide} tone="warm"/>}
+<StatisticBanner
+  title="Duels Center"
+  subtitle="Compete, respond, and track your record"
+  accent={ORANGE}
+  icon={<div style={{width:30,height:30,borderRadius:10,background:`${ORANGE}22`,display:"flex",alignItems:"center",justifyContent:"center"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>}
+  stats={[
+    {label:"Pending",value:pending.length,color:ORANGE},
+    {label:"Completed",value:resolved.length,color:VOLT},
+    {label:"Total",value:incoming.length+outgoing.length,color:LIGHT},
+  ]}
+/>
 {/* Duels banner — aggressive, asymmetric */}
 <div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${ORANGE}22`,position:"relative",overflow:"hidden"}}>
 <div style={{position:"absolute",top:-12,right:-8,opacity:.08}}><svg width="100" height="100" viewBox="0 0 24 24" fill={ORANGE} stroke="none"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
@@ -1507,6 +1525,7 @@ return <div className="fade-up">
 </div>
 </div>
 
+<CollapsibleGroup title="Incoming Challenges" subtitle={`${pending.length} waiting for your response`} defaultOpen accent={ORANGE}>
 {/* Pending challenges */}
 {pending.length>0&&<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>
   {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
@@ -1541,9 +1560,11 @@ return <div className="fade-up">
       </button>}
     </div>;
   })}</>}
+</CollapsibleGroup>
 
 {/* Resolved / History */}
 {pending.length>0&&<CourtDivider color={ORANGE} my={12}/>}
+<CollapsibleGroup title="Duel History" subtitle={`${resolved.length} resolved matchups`} defaultOpen={pending.length===0} accent={ORANGE}>
 <SH t={pending.length>0?"COMPLETED":"ALL DUELS"} s={`${resolved.length} TOTAL`}/>
 {resolved.length===0&&pending.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to dare a teammate to beat it!"/>}
 {resolved.map(ch=>{
@@ -1574,6 +1595,7 @@ return <div className="fade-up">
     </div>
   </div>;
 })}
+</CollapsibleGroup>
 
   </div>;
 }
@@ -1634,6 +1656,18 @@ return <div className="fade-up">
 </div>
 </div>
 </div>
+
+<StatisticBanner
+  title="Lifting Snapshot"
+  subtitle="Attendance momentum and ranking"
+  accent={SC_COLOR}
+  icon={<div style={{width:30,height:30,borderRadius:10,background:`${SC_COLOR}18`,display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={16} color={SC_COLOR}/></div>}
+  stats={[
+    {label:"Attended",value:myCount,color:SC_COLOR},
+    {label:"Upcoming",value:upcoming.length,color:LIGHT},
+    {label:"Rank",value:`#${board.findIndex(b=>b.email===user.email)+1||"-"}`,color:VOLT},
+  ]}
+/>
 
 {/* Personal stats */}
 <div style={{display:"flex",gap:8,marginBottom:16}}>
@@ -1702,6 +1736,7 @@ return <div className="fade-up">
 </div>
 
 {/* Upcoming sessions */}
+<CollapsibleGroup title="Upcoming Sessions" subtitle={`${upcoming.length} scheduled sessions`} defaultOpen accent={SC_COLOR}>
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING SESSIONS" s={`${upcoming.length} SCHEDULED`}/>
 {upcoming.length===0&&<Empty variant="lifting" t="No upcoming sessions" action="Your coach will add S&C sessions here. Check back soon!"/>}
 {upcoming.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const going=sr.some(r=>r.email===user.email);const exp=expanded===s.id;
@@ -1727,16 +1762,17 @@ return <div className="fade-up">
     </div>}
   </div>;
 })}
+</CollapsibleGroup>
 
 {/* Past sessions */}
-{past.length>0&&<><CourtDivider color={SC_COLOR} my={12}/><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PAST SESSIONS" s={`${past.length} COMPLETED`}/>
+{past.length>0&&<><CourtDivider color={SC_COLOR} my={12}/><CollapsibleGroup title="Past Sessions" subtitle={`${past.length} completed`} defaultOpen={false} accent={SC_COLOR}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PAST SESSIONS" s={`${past.length} COMPLETED`}/>
   {past.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const went=sr.some(r=>r.email===user.email);
     return <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.7}}>
       <div style={{width:36,height:36,borderRadius:10,background:went?SC_COLOR+"12":BG,border:`1px solid ${went?SC_COLOR+"33":BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={16} color={went?SC_COLOR:MUTED}/></div>
       <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{s.sport||s.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{s.date} &#183; {sr.length} attended</div></div>
       {went&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,color:SC_COLOR,background:SC_COLOR+"12",padding:"2px 8px",borderRadius:4,letterSpacing:1}}>ATTENDED</span>}
     </div>;
-  })}</>}
+  })}</CollapsibleGroup></>}
 
   </div>;
 }
@@ -2796,6 +2832,8 @@ const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignI
 
 return <div className="fade-up">
 {u.isCoach&&<div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}><div style={{fontSize:13,color:"#C8FF00",textTransform:"uppercase",letterSpacing:"0.10em",fontFamily:FB,fontWeight:700,marginBottom:10}}>COACH ACCOUNT</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${BORDER_CLR}66`}}><div style={{display:"flex",alignItems:"center",gap:8}}><UsersIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ROLE</span></div><span style={{fontSize:13,color:"#FFFFFF",fontFamily:FB}}>Coach</span></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}><div style={{display:"flex",alignItems:"center",gap:8}}><ShieldIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ACCESS</span></div><span style={{fontSize:13,color:"#C8FF00",fontFamily:FB}}>Full Program Access</span></div></div>}
+<HeroSection kicker="Profile" title={`${u.name.split(" ")[0] || "Player"} Performance Snapshot`} subtitle="A grouped view of your production, consistency, and progress." accent={CYAN} metrics={[{label:"Makes",value:totalMakes+totalShots,color:VOLT},{label:"Best Streak",value:`${bestStreak}D`,color:ORANGE},{label:"Challenges",value:`${challWon}/${challTotal}`,color:CYAN}]}/>
+
 {/* ══════ SHAREABLE SEASON CARD ══════ */}
 <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
 {/* Corner accents */}
@@ -2864,6 +2902,7 @@ return <div className="fade-up">
 </div>}
 
 {/* Overall stats */}
+<CollapsibleGroup title="Totals" subtitle="Season-wide production" defaultOpen accent={CYAN}>
 <div style={{background:CARD_BG,borderRadius:16,padding:"4px 20px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
   <StatRow label="Total Drill Makes" value={totalMakes}/>
   <StatRow label="Shot Tracker Makes" value={totalShots} color={ORANGE}/>
@@ -2873,8 +2912,10 @@ return <div className="fade-up">
   <StatRow label="Best Streak" value={`${bestStreak}D`} color={ORANGE}/>
   <div style={{height:4}}/>
 </div>
+</CollapsibleGroup>
 
 {/* Per-drill breakdown with PBs and trends */}
+<CollapsibleGroup title="Drill Breakdown" subtitle={`${drillStats.length} drills tracked`} defaultOpen={false} accent={VOLT}>
 <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
 {drillStats.map(d=>{const accentColor=getDrillAccentColor(d.name);return <div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
@@ -2906,6 +2947,7 @@ return <div className="fade-up">
     <Sparkline data={d.last10} color={VOLT} w={200} h={20}/>
   </div>}
 </div>})}
+</CollapsibleGroup>
 
 {/* ══════ ACCOUNT MANAGEMENT ══════ */}
 <div style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${BORDER_CLR}44`}}>
