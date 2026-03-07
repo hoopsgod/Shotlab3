@@ -1,0 +1,113 @@
+:root {
+  /* 8-pt spacing system */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+
+  /* shared type scale */
+  --type-display-size: clamp(1.75rem, 2.6vw, 2.25rem);
+  --type-heading-size: clamp(1.25rem, 2vw, 1.5rem);
+  --type-subheading-size: 1rem;
+  --type-body-size: 0.875rem;
+  --type-caption-size: 0.75rem;
+
+  --type-display-weight: 700;
+  --type-heading-weight: 700;
+  --type-subheading-weight: 600;
+  --type-body-weight: 500;
+}
+
+/* Heading inventory + normalized hierarchy */
+.page h1,
+.page .type-display {
+  font-size: var(--type-display-size) !important;
+  font-weight: var(--type-display-weight) !important;
+  line-height: 1.08 !important;
+  letter-spacing: 0.04em !important;
+}
+
+.page h2,
+.page .type-heading {
+  font-size: var(--type-heading-size) !important;
+  font-weight: var(--type-heading-weight) !important;
+  line-height: 1.18 !important;
+  letter-spacing: 0.03em !important;
+}
+
+.page h3,
+.page h4,
+.page h5,
+.page h6,
+.page .type-subheading {
+  font-size: var(--type-subheading-size) !important;
+  font-weight: var(--type-subheading-weight) !important;
+  line-height: 1.3 !important;
+}
+
+.page p,
+.page li,
+.page .type-body,
+.page .heroSub,
+.page .u-secondary-text {
+  font-size: var(--type-body-size);
+  font-weight: var(--type-body-weight);
+  line-height: 1.5;
+}
+
+.page .type-caption,
+.page .heroKicker,
+.page .u-meta-label,
+.page .heroStatLbl,
+.page .tab-label,
+.page .panel-title {
+  font-size: var(--type-caption-size) !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase;
+}
+
+/* Consistent section/card spacing */
+.pageShell {
+  gap: var(--space-3) !important;
+  padding: var(--space-2) !important;
+}
+
+.pageShell > .heroModule,
+.pageShell > section,
+.pageShell > .card,
+.pageShell > .listCard,
+.pageShell > [class*="Grid"],
+.pageShell > [class*="Panel"] {
+  margin-block: var(--space-1);
+}
+
+.card,
+.listRow,
+.heroModule,
+section.card {
+  padding: var(--space-2) !important;
+}
+
+.card + .card,
+.heroModule + .card,
+.card + .heroModule,
+section + section {
+  margin-top: var(--space-2) !important;
+}
+
+@media (max-width: 767px) {
+  .pageShell {
+    padding: var(--space-1) !important;
+    gap: var(--space-2) !important;
+  }
+
+  .card,
+  .listRow,
+  .heroModule,
+  section.card {
+    padding: var(--space-1) !important;
+  }
+}
