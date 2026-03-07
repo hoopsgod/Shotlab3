@@ -79,7 +79,7 @@ export default function PlayersScreen() {
 
   return (
     <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)", paddingLeft: "var(--space-4)", paddingRight: "var(--space-4)" }}>
         <Users size={22} color="var(--text-2)" />
         <span
           style={{
@@ -94,7 +94,7 @@ export default function PlayersScreen() {
         </span>
       </div>
 
-      <p style={{ fontSize: "13px", color: "var(--text-2)", marginBottom: "var(--space-6)" }}>
+      <p style={{ fontSize: "13px", color: "var(--text-2)", marginBottom: "var(--space-4)", paddingLeft: "var(--space-4)", paddingRight: "var(--space-4)" }}>
         Manage your roster and track player engagement
       </p>
 
@@ -106,11 +106,13 @@ export default function PlayersScreen() {
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{
           fontSize: "14px",
-          marginBottom: "var(--space-3)",
+          marginBottom: "var(--space-4)",
+          marginLeft: "var(--space-4)",
+          marginRight: "var(--space-4)",
         }}
       />
 
-      <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
+      <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)", marginLeft: "var(--space-4)", marginRight: "var(--space-4)" }}>
         {["ALL PLAYERS", "ACTIVE", "INACTIVE"].map((filter) => (
           <button key={filter} onClick={() => setActiveFilter(filter)} style={chipStyle(activeFilter === filter)}>
             {filter}
@@ -122,10 +124,12 @@ export default function PlayersScreen() {
         style={{
           background: "var(--surface-2)",
           borderRadius: "12px",
-          padding: "var(--space-3) var(--space-4)",
+          padding: "var(--space-4)",
           marginBottom: "var(--space-4)",
           display: "flex",
           alignItems: "center",
+          marginLeft: "var(--space-4)",
+          marginRight: "var(--space-4)",
         }}
       >
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -187,12 +191,14 @@ export default function PlayersScreen() {
               background: "var(--surface-2)",
               border: "1px solid var(--stroke-1)",
               borderRadius: "16px",
-              padding: "15px var(--space-4)",
-              marginBottom: "var(--space-3)",
+              padding: "var(--space-4)",
+              marginBottom: "var(--space-2)",
               display: "flex",
               alignItems: "center",
               gap: "var(--space-3)",
               cursor: "pointer",
+              marginLeft: "var(--space-4)",
+              marginRight: "var(--space-4)",
             }}
           >
             <div
@@ -229,6 +235,8 @@ export default function PlayersScreen() {
           color: "var(--text-1)",
           marginTop: "var(--space-6)",
           marginBottom: "var(--space-3)",
+          paddingLeft: "var(--space-4)",
+          paddingRight: "var(--space-4)",
         }}
       >
         GROW YOUR ROSTER
@@ -243,6 +251,8 @@ export default function PlayersScreen() {
           flexDirection: "column",
           alignItems: "center",
           gap: "var(--space-3)",
+          marginLeft: "var(--space-4)",
+          marginRight: "var(--space-4)",
         }}
       >
         <UserPlus size={32} color="var(--text-2)" />

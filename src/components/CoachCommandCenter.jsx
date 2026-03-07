@@ -28,7 +28,7 @@ export default function CoachCommandCenter({
     borderRadius:12,
     border:"1px solid var(--stroke-1)",
     background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.25))",
-    padding:"10px",
+    padding:"12px",
     display:"flex",
     flexDirection:"column",
     justifyContent:"center",
@@ -48,7 +48,7 @@ export default function CoachCommandCenter({
     fontWeight:700,
     letterSpacing:"var(--tracking-default)",
     textTransform:"uppercase",
-    padding:"0 18px",
+    padding:"0 16px",
     cursor:"pointer",
     boxShadow:"none",
     whiteSpace:"nowrap",
@@ -66,7 +66,7 @@ export default function CoachCommandCenter({
     fontWeight:700,
     letterSpacing:"var(--tracking-tight)",
     textTransform:"uppercase",
-    padding:"0 14px",
+    padding:"0 12px",
     cursor:"pointer",
   });
 
@@ -75,13 +75,13 @@ export default function CoachCommandCenter({
       <section style={{padding:"8px 12px 12px"}}>
         <style>{`.cc-tools-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}`}</style>
 
-        <div style={{minHeight:62,border:"1px solid var(--stroke-1)",borderRadius:14,background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.22))",padding:"8px 10px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+        <div style={{minHeight:62,border:"1px solid var(--stroke-1)",borderRadius:14,background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.22))",padding:"8px 12px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
           <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
             <span aria-hidden="true" style={{width:24,height:24,borderRadius:999,border:"1px solid var(--stroke-1)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"var(--text-3)",fontSize:13,flexShrink:0}}>⚡</span>
             <h2 className="u-allcaps-long" style={{fontFamily:FD,fontSize:13,color:"var(--text-secondary)",margin:0,whiteSpace:"nowrap"}}>Coach Tools</h2>
           </div>
 
-          <div style={{display:"flex",alignItems:"center",gap:6,flexShrink:0}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
             <button type="button" onClick={onAddPlayer} aria-label="Add player" className="cc-tools-btn" style={compactActionBtn(primaryQuickAction==="addPlayer")}>+ Player</button>
             <button type="button" onClick={onAddDrill} aria-label="Add drill" className="cc-tools-btn" style={compactActionBtn(primaryQuickAction==="addDrill")}>+ Drill</button>
             <button type="button" onClick={onScheduleEvent} aria-label="Schedule event" className="cc-tools-btn" style={compactActionBtn(primaryQuickAction==="scheduleEvent")}>+ Event</button>
@@ -92,8 +92,8 @@ export default function CoachCommandCenter({
   }
 
   return (
-    <section style={{padding:"10px 12px 12px"}}>
-      <div style={{marginTop:2,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+    <section style={{padding:"12px"}}>
+      <div style={{marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
         <h2 className="u-allcaps-long" style={{fontFamily:FD,fontSize:13,color:"var(--text-secondary)",margin:0}}>
           Coach Command Center
         </h2>
@@ -114,12 +114,12 @@ export default function CoachCommandCenter({
 
         <button type="button" onClick={onNextEventClick} style={metricBase}>
           <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
-          <div style={{marginTop:5,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{nextEventDateFormatted}</div>
+          <div style={{marginTop:4,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{nextEventDateFormatted}</div>
           <div style={{marginTop:2,fontFamily:FB,fontSize:9,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:"var(--tracking-tight)"}}>Timeline</div>
         </button>
       </div>
 
-      <div style={{marginTop:9,overflowX:"auto",whiteSpace:"nowrap",paddingBottom:2}}>
+      <div style={{marginTop:12,overflowX:"auto",whiteSpace:"nowrap",paddingBottom:4}}>
         <div style={{display:"flex",gap:8}}>
           <button type="button" onClick={onAddPlayer} style={quickBtn(primaryQuickAction==="addPlayer")}>+ Add Player</button>
           <button type="button" onClick={onAddDrill} style={quickBtn(primaryQuickAction==="addDrill")}>+ Add Drill</button>
@@ -128,19 +128,19 @@ export default function CoachCommandCenter({
         </div>
       </div>
 
-      <div style={{margin:"10px 0 4px",padding:"12px",border:"1px solid var(--stroke-1)",borderRadius:14,background:"var(--surface-2)"}}>
+      <div style={{margin:"12px 0 0",padding:"12px",border:"1px solid var(--stroke-1)",borderRadius:14,background:"var(--surface-2)"}}>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
           <div>
             <div className="u-meta-label" style={{fontFamily:FB,fontSize:10,color:"var(--text-2)"}}>TEAM CODE</div>
-            <div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",marginTop:2}}>Share with players to join roster</div>
+            <div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",marginTop:4}}>Share with players to join roster</div>
           </div>
           <div style={{fontFamily:FD,fontSize:"clamp(20px, 5vw, 24px)",color:"var(--text-1)",letterSpacing:4,lineHeight:1,maxWidth:"52%",overflow:"hidden",textOverflow:"ellipsis"}}>{joinCode||"—"}</div>
         </div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginTop:12}}>
           <button onClick={onCopyJoinCode} style={{height:40,padding:"0 14px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-2)",color:"var(--text-2)",borderRadius:999,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY CODE</button>
           <button onClick={onRegenerateJoinCode} style={{height:40,padding:"0 14px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-2)",color:"var(--text-2)",borderRadius:999,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-tight)"}}>REGENERATE</button>
         </div>
-        {codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:6}}>{codeErr}</div>}
+        {codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:8}}>{codeErr}</div>}
       </div>
     </section>
   );

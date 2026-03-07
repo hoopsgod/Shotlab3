@@ -271,12 +271,12 @@ const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+N
 `;
 const _PAGE_SIGNATURE_CSS=`
 .pageShell{--pageAccent:#B8FF00;--pageAccentGlow:rgba(184,255,0,.35);--pageAccentBg:rgba(184,255,0,.08);--page-accent:#B8FF00;--page-accent-soft:rgba(184,255,0,.08);--page-accent-border:rgba(184,255,0,.35);display:flex;flex-direction:column;gap:var(--space-5);}
-.pageHeader{margin:0 0 var(--space-6);padding:var(--space-4) var(--space-4) var(--space-3);border-radius:16px;border:1px solid rgba(184,255,0,.28);background:linear-gradient(135deg,var(--pageAccentBg),rgba(10,10,10,.96) 55%);box-shadow:0 8px 24px rgba(0,0,0,.3);}
-.pageHeaderTop{display:flex;align-items:center;gap:var(--space-3);flex-wrap:wrap;}
+.pageHeader{margin:0 0 var(--space-4);padding:var(--space-4);border-radius:16px;border:1px solid rgba(184,255,0,.28);background:linear-gradient(135deg,var(--pageAccentBg),rgba(10,10,10,.96) 55%);box-shadow:0 8px 24px rgba(0,0,0,.3);}
+.pageHeaderTop{display:flex;align-items:flex-start;gap:var(--space-3);flex-wrap:wrap;}
 .pageHeaderBadge{width:48px;height:48px;border-radius:14px;border:1px solid rgba(184,255,0,.55);background:rgba(184,255,0,.14);display:flex;align-items:center;justify-content:center;color:var(--headerAccent);box-shadow:0 0 18px rgba(184,255,0,.35);flex-shrink:0;}
 .pageHeaderText{min-width:0;flex:1 1 220px;}.pageHeaderText h1{font-family:${FD};font-size:26px;letter-spacing:var(--tracking-default);color:#fff;line-height:1;word-break:break-word;}
-.pageHeaderText p{font-family:${FB};font-size:11px;color:var(--text-secondary);margin-top:4px;text-transform:uppercase;letter-spacing:var(--tracking-tight);}
-.pageHeaderRight{margin-left:auto;flex-shrink:0;}
+.pageHeaderText p{font-family:${FB};font-size:11px;color:var(--text-secondary);margin-top:8px;text-transform:uppercase;letter-spacing:var(--tracking-tight);}
+.pageHeaderRight{margin-left:auto;flex-shrink:0;padding-top:4px;}
 .pageHeaderPill{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.04);font-family:${FB};font-size:10px;color:var(--text-2);font-weight:700;letter-spacing:var(--tracking-tight);text-transform:uppercase;transition:background .15s ease,border-color .15s ease,transform .1s ease,filter .15s ease;}
 .pageHeaderPill:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.16);filter:brightness(1.03);}
 .pageHeaderPill:active{transform:translateY(1px);}
