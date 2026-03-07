@@ -1405,15 +1405,6 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </section>
 
       <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
-        <div style={{fontFamily:FB,color:"#6B7280",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10}}>Duels</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8}}>
-          <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"10px 8px"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Pending</div><div style={{fontFamily:FD,color:"#111827",fontSize:24,lineHeight:1.1}}>{pendingDuels}</div></div>
-          <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"10px 8px"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Open</div><div style={{fontFamily:FD,color:"#111827",fontSize:24,lineHeight:1.1}}>{myOpenDuels}</div></div>
-        </div>
-        <button onClick={()=>setTab("duels")} style={{marginTop:10,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:700,color:"#2563EB",cursor:"pointer"}}>Manage duels →</button>
-      </section>
-
-      <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
         <div style={{fontFamily:FB,color:"#6B7280",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10}}>Progress snapshot</div>
         <div style={{display:"flex",justifyContent:"space-between",gap:10,marginBottom:10}}>
           <div><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>This week</div><div style={{fontFamily:FD,color:"#111827",fontSize:26,lineHeight:1.1}}>{weekComparison.thisWeek}</div></div>
@@ -1429,6 +1420,15 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
           <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 6px",textAlign:"center"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:9}}>Streak</div><div style={{fontFamily:FD,color:"#111827",fontSize:18,lineHeight:1.1}}>{streak}d</div></div>
           <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 6px",textAlign:"center"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:9}}>Sessions</div><div style={{fontFamily:FD,color:"#111827",fontSize:18,lineHeight:1.1}}>{upcomingEventsCount}</div></div>
         </div>
+      </section>
+
+      <section style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:14,padding:"12px 12px"}}>
+        <div style={{fontFamily:FB,color:"#9CA3AF",fontSize:9,fontWeight:700,letterSpacing:1.1,textTransform:"uppercase",marginBottom:8}}>Duels</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8}}>
+          <div style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 8px"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Pending</div><div style={{fontFamily:FD,color:"#374151",fontSize:20,lineHeight:1.1}}>{pendingDuels}</div></div>
+          <div style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:10,padding:"8px 8px"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Open</div><div style={{fontFamily:FD,color:"#374151",fontSize:20,lineHeight:1.1}}>{myOpenDuels}</div></div>
+        </div>
+        <button onClick={()=>setTab("duels")} style={{marginTop:8,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:10,fontWeight:600,color:"#4B5563",cursor:"pointer"}}>Manage duels →</button>
       </section>
     </div>
   </div>}
