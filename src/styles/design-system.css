@@ -32,8 +32,8 @@
   --muted: rgba(183, 196, 214, 0.82);
 
   /* borders */
-  --border-1: rgba(159, 178, 204, 0.28);
-  --border-2: rgba(173, 192, 218, 0.38);
+  --border-1: rgba(159, 178, 204, 0.2);
+  --border-2: rgba(173, 192, 218, 0.28);
 
   /* accent */
   --accent: var(--brand-primary);
@@ -41,8 +41,8 @@
   --secondary: var(--brand-secondary);
 
   /* elevation */
-  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.22);
-  --shadow-2: 0 6px 16px rgba(0, 0, 0, 0.24);
+  --shadow-1: 0 1px 4px rgba(0, 0, 0, 0.18);
+  --shadow-2: 0 8px 20px rgba(0, 0, 0, 0.22);
 
   /* focus */
   --focus-ring: 0 0 0 3px rgba(91, 243, 255, 0.32);
@@ -293,7 +293,7 @@ textarea {
 
 .shared-card {
   border: 1px solid var(--border-1);
-  background: var(--surface-1);
+  background: rgba(14, 20, 30, 0.94);
   box-shadow: var(--shadow-1);
   border-radius: 16px;
   transition: transform 150ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
@@ -302,26 +302,26 @@ textarea {
 
 .shared-card--default {
   border-color: var(--border-1);
-  background: var(--surface-1);
+  background: rgba(14, 20, 30, 0.94);
 }
 
 .shared-card--metric {
   border-color: var(--border-2);
-  background: var(--surface-2);
+  background: rgba(16, 24, 35, 0.9);
 }
 
 .shared-card--list {
   border-color: var(--border-1);
-  background: var(--surface-1);
+  background: rgba(13, 19, 28, 0.9);
 }
 
 .shared-card--list [data-card-divider] {
-  border-top: 1px solid var(--border-1);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .shared-card--empty {
-  border-color: var(--border-1);
-  background: var(--surface-1);
+  border-color: rgba(255, 255, 255, 0.075);
+  background: rgba(14, 20, 30, 0.76);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -331,7 +331,7 @@ textarea {
 }
 
 .shared-card:active {
-  transform: scale(0.992);
+  transform: scale(0.994);
 }
 
 .shared-nav-item {
