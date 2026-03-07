@@ -1300,9 +1300,9 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
       return <div style={{marginBottom:28}}>
-        <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:12,fontWeight:600,letterSpacing:"0.03em",marginTop:6}}>Choose how you’re training today</div>
+        <section style={{marginBottom:16,padding:"8px 4px 0"}} aria-label="Training mode selector">
+          <div style={{fontFamily:FD,color:T.SUB,fontSize:20,letterSpacing:2.1,textTransform:"uppercase",lineHeight:1}}>Training Mode</div>
+          <div style={{fontFamily:FB,color:T.MUT,fontSize:11,fontWeight:500,letterSpacing:"0.02em",marginTop:4}}>Choose how you’re training today</div>
           {showHomeGuide&&<div style={{marginTop:10}}><GuideCallout title="Quick definitions" body="At Home is your personal tracker for Makes, Drills completed, and streaks. Program is for team sessions where attendance is verified by event RSVPs." onDismiss={dismissHomeGuide} tone="cool"/></div>}
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
@@ -1312,23 +1312,23 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </div>
     })()}
 
-    <section style={{background:`linear-gradient(140deg, ${VOLT}22 0%, ${VOLT}10 45%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}66`,borderRadius:18,padding:"16px 14px",marginBottom:20,boxShadow:`0 14px 28px ${VOLT}22`}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:12}}>
+    <section style={{background:`linear-gradient(155deg, rgba(12,17,22,0.96) 0%, rgba(14,20,28,0.94) 100%)`,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 14px",marginBottom:18,boxShadow:"0 6px 16px rgba(0,0,0,0.28)"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}>
         <div>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:2.2,lineHeight:1,textTransform:"uppercase"}}>Upcoming Work Events</div>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:11,marginTop:4}}>Don’t miss what’s next — RSVP status is split below.</div>
+          <div style={{fontFamily:FD,color:T.SUB,fontSize:15,letterSpacing:1.6,lineHeight:1,textTransform:"uppercase"}}>Upcoming Work Events</div>
+          <div style={{fontFamily:FB,color:T.MUT,fontSize:10,marginTop:3}}>Don’t miss what’s next — RSVP status is split below.</div>
         </div>
-        <button onClick={()=>setTab("program")} style={{background:VOLT,color:BG,border:"none",borderRadius:10,padding:"8px 10px",fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>View Events</button>
+        <button onClick={()=>setTab("program")} style={{background:"transparent",color:T.SUB,border:`1px solid ${BORDER_CLR}`,borderRadius:999,padding:"0 12px",height:32,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>View Events</button>
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
-        <div style={{background:BG,border:`1px solid ${VOLT}40`,borderRadius:12,padding:"12px 10px"}}>
-          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:800,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>RSVP’D ({upcomingRsvpd.length})</div>
+        <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px 10px"}}>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>RSVP’D ({upcomingRsvpd.length})</div>
           {upcomingRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>No upcoming events confirmed yet.</div>:upcomingRsvpd.slice(0,3).map(ev=><div key={ev.id} style={{padding:"8px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1.2,lineHeight:1.1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
         </div>
 
-        <div style={{background:BG,border:`1px solid ${ORANGE}55`,borderRadius:12,padding:"12px 10px"}}>
-          <div style={{fontFamily:FB,color:ORANGE,fontSize:10,fontWeight:800,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>Not RSVP’d ({upcomingNotRsvpd.length})</div>
+        <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px 10px"}}>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:8}}>Not RSVP’d ({upcomingNotRsvpd.length})</div>
           {upcomingNotRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>You’re RSVP’d for every upcoming event.</div>:upcomingNotRsvpd.slice(0,3).map(ev=><div key={ev.id} style={{padding:"8px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1.2,lineHeight:1.1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
         </div>
       </div>
@@ -1913,10 +1913,10 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 </div>
 
 {/* Title */}
-<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-  <div style={{width:4,height:22,borderRadius:2,background:accentColor}}/>
-  <div style={{fontFamily:FD,color:accentColor,fontSize:18,letterSpacing:3,flex:1}}>{title} LEADERBOARD</div>
-  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{board.length}</div>
+<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+  <div style={{width:3,height:18,borderRadius:2,background:`${accentColor}88`}}/>
+  <div style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:2.2,flex:1,opacity:0.9}}>{title} LEADERBOARD</div>
+  <div style={{fontFamily:FB,color:T.MUT,fontSize:9,letterSpacing:1.4,fontWeight:600}}>{board.length}</div>
 </div>
 
 {/* Board */}

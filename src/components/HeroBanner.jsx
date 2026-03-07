@@ -9,12 +9,12 @@ function HeroBanner({
   return (
     <section
       style={{
-        background: `linear-gradient(140deg, ${accent}22 0%, ${accent}10 45%, var(--surface-1) 100%)`,
-        border: `1px solid ${accent}66`,
-        borderRadius: 18,
-        padding: "16px 14px",
-        marginBottom: 20,
-        boxShadow: `0 14px 28px ${accent}22`,
+        background: `linear-gradient(150deg, ${accent}2f 0%, ${accent}16 42%, var(--surface-1) 100%)`,
+        border: `1px solid ${accent}80`,
+        borderRadius: 20,
+        padding: "20px 16px",
+        marginBottom: 26,
+        boxShadow: `0 18px 34px ${accent}2a`,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
@@ -41,8 +41,8 @@ function HeroBanner({
               style={{
                 fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif",
                 color: accent,
-                fontSize: 18,
-                letterSpacing: 2.2,
+                fontSize: 22,
+                letterSpacing: 2.6,
                 lineHeight: 1,
                 textTransform: "uppercase",
               }}
@@ -54,7 +54,7 @@ function HeroBanner({
                 style={{
                   fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
                   color: "var(--text-1)",
-                  fontSize: 11,
+                  fontSize: 12,
                   marginTop: 4,
                 }}
               >
@@ -71,15 +71,17 @@ function HeroBanner({
               background: accent,
               color: "var(--bg)",
               border: "none",
-              borderRadius: 10,
-              padding: "8px 10px",
+              borderRadius: 999,
+              minHeight: 38,
+              padding: "0 16px",
               fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 800,
-              letterSpacing: 1.2,
+              letterSpacing: 1.4,
               textTransform: "uppercase",
               cursor: "pointer",
               whiteSpace: "nowrap",
+              boxShadow: `0 0 0 1px ${accent}40, 0 10px 20px ${accent}30`,
             }}
           >
             {actionLabel}
