@@ -332,19 +332,22 @@ const _PAGE_SIGNATURE_CSS=`
 .eventsDatePill{display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:6px 8px;border-radius:999px;background:rgba(255,196,0,.16);border:1px solid rgba(255,196,0,.45);color:#FFC400;font-size:10px;font-family:${FB};font-weight:700;letter-spacing:.08em;}
 .scSection{border-top:1px solid rgba(91,124,255,.35);padding-top:var(--space-3);margin-top:var(--space-3);}
 .playersAvatarRing{outline:2px solid rgba(184,108,255,.65);outline-offset:1px;border-radius:50%;}
-.lbList{display:flex;flex-direction:column;gap:var(--space-4);}
-.lbRow{display:grid;grid-template-columns:40px 52px minmax(0,1fr) 88px;align-items:center;gap:var(--space-3);padding:15px var(--space-4);border-radius:16px;}
-.lbRank{width:32px;height:32px;display:grid;place-items:center;border-radius:10px;font-weight:800;opacity:.9;}
-.lbAvatar{width:44px;height:44px;border-radius:999px;display:grid;place-items:center;}
+.lbList{display:flex;flex-direction:column;gap:10px;}
+.lbRow{display:grid;grid-template-columns:34px 44px minmax(0,1fr) auto;align-items:center;gap:10px;padding:10px 12px;border-radius:14px;}
+.lbRank{width:28px;height:28px;display:grid;place-items:center;border-radius:8px;font-weight:800;opacity:.88;}
+.lbAvatar{width:36px;height:36px;border-radius:999px;display:grid;place-items:center;}
 .lbMain{min-width:0;}
-.lbName{font-size:14px;font-weight:800;letter-spacing:.03em;line-height:1.15;margin:0;font-family:${FB};color:${LIGHT};}
-.lbMeta{margin-top:6px;font-size:12px;line-height:1.2;opacity:.7;font-family:${FB};color:${T.SUB};}
-.lbMetric{justify-self:end;text-align:right;font-size:20px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.02em;font-family:${FD};}
+.lbName{font-size:13px;font-weight:800;letter-spacing:.03em;line-height:1.15;margin:0;font-family:${FB};color:${LIGHT};}
+.lbMeta{margin-top:3px;font-size:10px;line-height:1.2;opacity:.62;font-family:${FB};color:${T.SUB};letter-spacing:.03em;}
+.lbMetric{justify-self:end;text-align:right;font-size:24px;font-weight:900;font-variant-numeric:tabular-nums;letter-spacing:.02em;font-family:${FD};line-height:.95;}
+.lbMetricLabel{font-family:${FB};font-size:8px;font-weight:600;letter-spacing:.12em;color:${T.SUB};opacity:.72;margin-top:2px;}
+.lbRow--leader{border-color:rgba(184,255,0,.26)!important;box-shadow:0 10px 24px rgba(0,0,0,.42),0 0 0 1px rgba(184,255,0,.16) inset!important;}
 .lbRow .decorativeLine,.lbRow .decorativeDot{opacity:.15;z-index:0;}
 .lbRow>*{position:relative;z-index:1;}
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{display:none;}
 @media(max-width:420px){.heroBodyGrid{grid-template-columns:1fr;}}
-@media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}.heroModule{padding:14px;}}
+@media(min-width:480px){.lbRow{grid-template-columns:36px 46px minmax(0,1fr) auto;padding:11px 13px;}.lbName{font-size:14px;}.lbMetric{font-size:26px;}}
+@media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}.heroModule{padding:14px;}.lbRow{padding:12px 14px;}}
 
 
 @media (hover: hover) and (pointer: fine){.heroModule{transition:transform 150ms ease,box-shadow 150ms ease;}.heroModule:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(0,0,0,0.50);}}
@@ -1955,40 +1958,36 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
   const pct=Math.round((p.total/leaderTotal)*100);
   const rowBg=i%2===0?CARD_BG:T.SURFACE;
 
-  if(isLeader) return <ListItem key={p.email} className="lbRow listRow card card--list card--raised" style={{"--pod-c":accentColor,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden",padding:`${spacing.md}px ${spacing.md}px`}}>
-    <div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
-    <div className="listRowLeft">
-    <div className="lbRank" style={{background:`${accentColor}18`,border:`2px solid ${accentColor}`,fontFamily:FD,fontSize:14,color:accentColor}}>👑</div>
-    <div className="lbAvatar playersAvatarRing"><Av n={p.name} sz={40} email={p.email}/></div>
+  if(isLeader) return <ListItem key={p.email} className="lbRow lbRow--leader listRow card card--list card--raised" style={{"--pod-c":accentColor,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`1px solid ${accentColor}40`,position:"relative",overflow:"hidden"}}>
+    <div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>
+    <div className="lbRank" style={{background:`${accentColor}14`,border:`1.5px solid ${accentColor}99`,fontFamily:FD,fontSize:12,color:accentColor}}>1</div>
+    <div className="lbAvatar playersAvatarRing"><Av n={p.name} sz={34} email={p.email}/></div>
     <div className="lbMain listRowText">
-      <div className="lbName listRowTitle">{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
-      <div className="lbMeta listRowMeta" style={{color:accentColor,opacity:1,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1{isHome&&p.lastDate?` · ${p.lastDate}`:""}</div>
-    </div>
+      <div className="lbName listRowTitle">{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
+      <div className="lbMeta listRowMeta" style={{color:T.SUB}}>{isHome&&p.lastDate?`LAST LOG ${p.lastDate}`:"TOP PLAYER"}</div>
     </div>
     <div className="listRowRight" style={{minWidth:0}}>
-      <div className="lbMetric listRowStat" style={{color:accentColor,fontSize:28}}>{p.total}</div>
-      <div className="listRowStatSub" style={{fontFamily:FB,fontSize:8,fontWeight:600}}>{unit.toUpperCase()}</div>
+      <div className="lbMetric listRowStat" style={{color:accentColor}}>{p.total}</div>
+      <div className="lbMetricLabel">{unit.toUpperCase()}</div>
     </div>
   </ListItem>;
 
-  return <ListItem key={p.email} className={`lbRow listRow card card--list ${isMe?"card--accent card--active":""}`} style={{background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",position:"relative",overflow:"hidden",padding:`${spacing.md}px ${spacing.md}px`}}>
-    {isTop3&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
-    {isMe&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
-    <div className="listRowLeft">
+  return <ListItem key={p.email} className={`lbRow listRow card card--list ${isMe?"card--accent card--active":""}`} style={{background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",position:"relative",overflow:"hidden"}}>
+    {isTop3&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:2,height:"100%",background:accentColor+"55",borderRadius:"2px 0 0 2px"}}/>}
+    {isMe&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:2,height:"100%",background:accentColor,borderRadius:"2px 0 0 2px"}}/>}
     <div className="lbRank"><RB r={i+1} m={medals}/></div>
-    <div className="lbAvatar"><Av n={p.name} sz={32} email={p.email}/></div>
+    <div className="lbAvatar"><Av n={p.name} sz={30} email={p.email}/></div>
     <div className="lbMain listRowText">
-      <div className="lbName listRowTitle" style={{fontSize:13,fontWeight:isMe?700:600}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
-      {isHome&&p.lastDate&&<div className="lbMeta listRowMeta" style={{fontSize:9,marginTop:2}}>{p.lastDate}</div>}
-      <div className="decorativeLine" style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
-        <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:2,transition:"width .4s ease"}}/>
+      <div className="lbName listRowTitle" style={{fontWeight:isMe?700:600}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
+      {isHome&&p.lastDate&&<div className="lbMeta listRowMeta">{p.lastDate}</div>}
+      <div className="decorativeLine" style={{marginTop:4,height:2,borderRadius:999,background:T.TRACK,overflow:"hidden",opacity:.7}}>
+        <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:999,transition:"width .4s ease"}}/>
       </div>
-    </div>
     </div>
 
     <div className="listRowRight" style={{minWidth:0}}>
       <div className="lbMetric listRowStat" style={{color:isMe?accentColor:isTop3?accentColor:LIGHT}}>{p.total}</div>
-      <div className="listRowStatSub" style={{fontFamily:FB,fontSize:8,fontWeight:500}}>{unit.toUpperCase()}</div>
+      <div className="lbMetricLabel">{unit.toUpperCase()}</div>
     </div>
   </ListItem>;
 })}
