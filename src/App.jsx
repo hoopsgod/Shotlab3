@@ -53,10 +53,10 @@ const MODE_CARD_TOKENS={
 BASE_BG:"var(--surface-1)",
 BASE_BORDER:"var(--border-1)",
 BASE_SHADOW:"var(--shadow-1)",
-HOME_TINT:"rgba(200, 255, 0, 0.18)",
-PROGRAM_TINT:"rgba(0, 176, 255, 0.18)",
-HOME_GLOW:"rgba(184,255,0,.22)",
-PROGRAM_GLOW:"rgba(184,255,0,.22)",
+HOME_TINT:"rgba(200, 255, 0, 0.12)",
+PROGRAM_TINT:"rgba(0, 176, 255, 0.12)",
+HOME_GLOW:"rgba(184,255,0,.16)",
+PROGRAM_GLOW:"rgba(184,255,0,.16)",
 ICON_INNER:"rgba(255, 255, 255, 0.06)",
 FOCUS_RING:"rgba(200, 255, 0, 0.45)",
 CHEVRON_BG:"rgba(255, 255, 255, 0.06)",
@@ -1812,7 +1812,7 @@ return <div className="fade-up">
 
 
 function StatTile({value,label,color}){
-return <div className="card card--metric" style={{padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
+return <div className="card card--metric" style={{padding:"14px 10px 12px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:28,fontWeight:800,lineHeight:1.02,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:9,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
 }
 
 function ModeCard({title,subtitle,icon,stats,accent="home",isActive,onClick,helpText}){
@@ -1827,9 +1827,9 @@ const modeCardClass=`mode-card card ${isActive?"card--active card--accent":""}`.
 return <button type="button" onClick={onClick} className={modeCardClass} style={{width:"100%",background:`radial-gradient(circle at 12% 10%, ${a.tint} 0%, transparent 55%), ${MODE_CARD_TOKENS.BASE_BG}`,border:baseBorder,borderRadius:22,padding:22,cursor:"pointer",textAlign:"left",position:"relative",minHeight:272,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:baseShadow,transition:"transform .12s ease, border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)"}} onMouseLeave={e=>{e.currentTarget.style.border=baseBorder;e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.99)"}} onMouseUp={e=>{e.currentTarget.style.transform="scale(1)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow=`${baseShadow}, ${isActive?"var(--glow-accent)":`0 0 0 3px ${MODE_CARD_TOKENS.FOCUS_RING}`}`}} onBlur={e=>{e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}}>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16}}>
     <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-      <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`1.5px solid ${a.glow}`,boxShadow:`inset 0 0 10px ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{icon}</div>
+      <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`1.5px solid ${a.glow}`,boxShadow:`inset 0 0 6px ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{icon}</div>
       <div style={{minWidth:0}}>
-        <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase",display:"inline-flex",alignItems:"center",gap:6}}>{title}{helpText&&<InfoHint text={helpText}/>}</div>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:22,fontWeight:800,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase",display:"inline-flex",alignItems:"center",gap:6}}>{title}{helpText&&<InfoHint text={helpText}/>}</div>
         <div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
       </div>
     </div>
@@ -2860,8 +2860,8 @@ return{...d,pb,avg,count:ds.length,last10,trend};
 }),[drills,homeScores]);
 
 const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 0",borderBottom:`1px solid ${BORDER_CLR}40`,gap:12}}>
-<div><div style={{fontFamily:FB,color:"var(--text-2)",fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase"}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:5,lineHeight:1.35,maxWidth:220}}>{sub}</div>}</div>
-<div style={{fontFamily:FD,color,fontSize:24,lineHeight:1,letterSpacing:1}}>{value}</div>
+<div><div style={{fontFamily:FB,color:"var(--text-2)",fontSize:12,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase"}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:5,lineHeight:1.35,maxWidth:220}}>{sub}</div>}</div>
+<div style={{fontFamily:FD,color,fontSize:28,fontWeight:800,lineHeight:1,letterSpacing:1}}>{value}</div>
 
   </div>;
 
@@ -2873,21 +2873,21 @@ return <SectionContainer className="fade-up">
 {/* Corner accents */}
 <div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
 <div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
-<div style={{position:"absolute",top:-40,right:-40,width:150,height:150,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}08,transparent)`}}/>
+<div style={{position:"absolute",top:-32,right:-32,width:118,height:118,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}06,transparent)`}}/>
 {/* SL logo watermark */}
 <div style={{position:"absolute",top:12,right:16,opacity:.06,pointerEvents:"none"}}><SLLogo size={90} opacity={.06}/></div>
 
   <div style={{fontFamily:FB,color:VOLT,fontSize:9,letterSpacing:5,fontWeight:700,marginBottom:12}}>OFFSEASON REPORT CARD</div>
   <Av n={u.name} sz={64} email={u.email} style={{margin:"0 auto 14px"}}/>
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:32,letterSpacing:4,lineHeight:1}}>{u.name.toUpperCase()}</div>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:6,letterSpacing:2}}>OFFSEASON 2026</div>
+  <div style={{fontFamily:FD,color:LIGHT,fontSize:32,fontWeight:800,letterSpacing:4,lineHeight:1}}>{u.name.toUpperCase()}</div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:6,letterSpacing:2,fontWeight:700}}>OFFSEASON 2026</div>
 
   {/* Big stats row */}
   <div style={{display:"flex",gap:8,marginTop:22,justifyContent:"center"}}>
     {[{v:totalMakes+totalShots,l:"TOTAL MAKES",c:VOLT,p:true},{v:bestStreak+"D",l:"BEST STREAK",c:ORANGE},{v:eventsAttended,l:"EVENTS",c:CYAN}].map(s=>
       <div key={s.l} style={{flex:s.p?1.15:1,background:"#0a0a0a",borderRadius:14,padding:s.p?"15px 10px":"13px 8px",border:`1px solid ${s.p?`${VOLT}30`:BORDER_CLR}`}}>
-        <div style={{fontFamily:FD,color:s.c,fontSize:s.p?30:24,lineHeight:1}}>{s.v}</div>
-        <div style={{fontFamily:FB,color:s.p?"var(--text-2)":T.SUB,fontSize:s.p?8:7,letterSpacing:s.p?2.2:1.8,marginTop:s.p?5:4,fontWeight:700}}>{s.l}</div>
+        <div style={{fontFamily:FD,color:s.c,fontSize:s.p?34:27,fontWeight:800,lineHeight:1}}>{s.v}</div>
+        <div style={{fontFamily:FB,color:s.p?"var(--text-2)":T.SUB,fontSize:s.p?7:6,letterSpacing:s.p?2.2:1.8,marginTop:s.p?5:4,fontWeight:700}}>{s.l}</div>
       </div>)}
   </div>
 
@@ -2897,7 +2897,7 @@ return <SectionContainer className="fade-up">
       ?`${improving[0].name} avg improved to ${improving[0].avg}`
       :topBadge?`Earned ${topBadge.name} badge (${topBadge.days}D streak)`
        :sessionsLogged>0?`${sessionsLogged} training sessions logged`:"0 sessions logged — log shots to start your progress";
-    return highlight?<div style={{marginTop:16,padding:"8px 16px",background:VOLT+"08",borderRadius:10,border:`1px solid ${VOLT}22`,display:"inline-block"}}>
+    return highlight?<div style={{marginTop:16,padding:"8px 16px",background:VOLT+"06",borderRadius:10,border:`1px solid ${VOLT}18`,display:"inline-block"}}>
       <div style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:600,letterSpacing:1}}>★ {highlight.toUpperCase()}</div>
     </div>:null})()}
 
@@ -2910,23 +2910,23 @@ return <SectionContainer className="fade-up">
 
 {/* Hero card */}
 <Card style={{background:`linear-gradient(135deg,${VOLT}06,${CARD_BG})`,borderRadius:20,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}20`,marginBottom:24,textAlign:"center",position:"relative",overflow:"hidden"}}>
-  <div style={{position:"absolute",top:0,right:0,width:110,height:110,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}06,transparent)`,transform:"translate(30%,-30%)"}}/>
+  <div style={{position:"absolute",top:0,right:0,width:78,height:78,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}04,transparent)`,transform:"translate(30%,-30%)"}}/>
   <Av n={u.name} sz={72} email={u.email} style={{margin:"0 auto 16px"}}/>
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:30,letterSpacing:2.6,lineHeight:1}}>{u.name.toUpperCase()}</div>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:8,letterSpacing:1.7,fontWeight:600}}>OFFSEASON PLAYER</div>
+  <div style={{fontFamily:FD,color:LIGHT,fontSize:30,fontWeight:800,letterSpacing:2.6,lineHeight:1}}>{u.name.toUpperCase()}</div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:8,letterSpacing:1.7,fontWeight:700}}>OFFSEASON PLAYER</div>
   {/* Quick stats row */}
   <div style={{display:"flex",gap:8,marginTop:22,justifyContent:"center"}}>
     {[{v:totalMakes+totalShots,l:"MAKES",c:VOLT,p:true},{v:sessionsLogged,l:"SESSIONS",c:LIGHT},{v:streak,l:"STREAK",c:ORANGE}].map(s=>
       <div key={s.l} style={{background:BG,borderRadius:12,padding:s.p?"11px 15px":"10px 12px",border:`1px solid ${s.p?`${VOLT}30`:BORDER_CLR}`,minWidth:s.p?84:72}}>
-        <div style={{fontFamily:FD,color:s.c,fontSize:s.p?26:20,lineHeight:1}}>{s.v}</div>
-        <div style={{fontFamily:FB,color:s.p?"var(--text-2)":T.SUB,fontSize:s.p?8:7,letterSpacing:s.p?2.1:1.8,marginTop:4,fontWeight:700}}>{s.l}</div>
+        <div style={{fontFamily:FD,color:s.c,fontSize:s.p?30:24,fontWeight:800,lineHeight:1}}>{s.v}</div>
+        <div style={{fontFamily:FB,color:s.p?"var(--text-2)":T.SUB,fontSize:s.p?7:6,letterSpacing:s.p?2.1:1.8,marginTop:4,fontWeight:700}}>{s.l}</div>
       </div>)}
   </div>
 </Card>
 
 {/* Badges */}
 {earnedBadges.length>0&&<div style={{marginBottom:24}}>
-  <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:10,letterSpacing:2.4,fontWeight:700,marginBottom:12}}>BADGES EARNED</div>
+  <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:10,letterSpacing:2.4,fontWeight:800,marginBottom:12}}>BADGES EARNED</div>
   <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{earnedBadges.map(b=>
     <div key={b.days} className="animated-badge" style={{display:"flex",alignItems:"center",gap:6,background:`${b.color}0C`,border:`1px solid ${b.color}2A`,borderRadius:10,padding:"7px 12px"}}>
       <span style={{fontFamily:FD,fontSize:13,color:b.color,opacity:0.9}}>{b.icon}</span>
@@ -2947,7 +2947,7 @@ return <SectionContainer className="fade-up">
 </div>
 
 {/* Per-drill breakdown with PBs and trends */}
-<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
+<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:800,marginBottom:12}}>DRILL BREAKDOWN</div>
 {drillStats.map(d=>{const accentColor=getDrillAccentColor(d.name);return <div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
     <DrillIcon type={d.icon} size={20} color={accentColor}/>
