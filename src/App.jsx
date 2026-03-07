@@ -8,6 +8,9 @@ import CoachMiniHeader from "./components/CoachMiniHeader";
 import Button from "./components/ui/Button";
 import EmptyState from "./components/EmptyState";
 import { TeamIdentity, TeamWatermark, TeamBrandPreview } from "./components/TeamBranding";
+import Brand from "./components/Brand";
+import { BrandIcons, BrandBadges } from "./assets/brand-icons";
+import { brandTheme } from "./styles/theme";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -33,7 +36,7 @@ const SURFACE = TOKENS.BG_CARD;
 const CARD_BG = TOKENS.BG_CARD;
 const BORDER_CLR = TOKENS.BG_SUBTLE;
 const MUTED=TOKENS.TEXT_MUTED,LIGHT=TOKENS.TEXT_PRIMARY;
-const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
+const FD="var(--brand-font-heading)",FB="var(--brand-font-body)";
 const PAGE_ACCENTS={
 feed:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"rgba(200,255,26,0.08)"},
 drills:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"rgba(200,255,26,0.08)"},
@@ -168,7 +171,7 @@ function playScore(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[800,1
 function playUnlock(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[523,659,784,1047].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="triangle";g.gain.setValueAtTime(.06,audioCtx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.1+.25);o.start(audioCtx.currentTime+i*.1);o.stop(audioCtx.currentTime+i*.1+.25)})}catch{}}
 const THEMES={dark:{BG:TOKENS.BG_BASE,SURFACE:TOKENS.BG_CARD,CARD_BG:TOKENS.BG_CARD,BORDER:TOKENS.BG_SUBTLE,MUT:TOKENS.TEXT_MUTED,LT:TOKENS.TEXT_PRIMARY,SUB:TOKENS.TEXT_SECONDARY,TRACK:TOKENS.BG_SUBTLE},light:{BG:TOKENS.BG_BASE,SURFACE:TOKENS.BG_CARD,CARD_BG:TOKENS.BG_CARD,BORDER:TOKENS.BG_SUBTLE,MUT:TOKENS.TEXT_MUTED,LT:TOKENS.TEXT_PRIMARY,SUB:TOKENS.TEXT_SECONDARY,TRACK:TOKENS.BG_SUBTLE}};
 const T=THEMES.dark; // module-level default for standalone components
-const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#A0A0A0"},{days:14,name:"TWO-WEEK GRIND",icon:"14",color:"#A0A0A0"},{days:30,name:"MONTHLY BEAST",icon:"30",color:"#C8FF00"},{days:60,name:"IRON WILL",icon:"60",color:CYAN},{days:100,name:"CENTURION",icon:"💯",color:VOLT}];
+const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",badgeKey:brandTheme.badges.streak[7],iconLabel:"7",color:"#A0A0A0"},{days:14,name:"TWO-WEEK GRIND",badgeKey:brandTheme.badges.streak[14],iconLabel:"14",color:"#A0A0A0"},{days:30,name:"MONTHLY BEAST",badgeKey:brandTheme.badges.streak[30],iconLabel:"30",color:"#C8FF00"},{days:60,name:"IRON WILL",badgeKey:brandTheme.badges.streak[60],iconLabel:"60",color:CYAN},{days:100,name:"CENTURION",badgeKey:brandTheme.badges.streak[100],iconLabel:"100",color:VOLT}];
 const getEarnedBadges=s=>STREAK_BADGES.filter(b=>s>=b.days);
 
 function buildDemoSeed(teamId){
@@ -985,8 +988,8 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <div style={{position:"absolute",top:"50%",left:"50%",transform:"translate(-50%,-50%)",opacity:.08,pointerEvents:"none"}}><SLLogo size={140}/></div>
 <div className="auth-ball-enter" style={{display:"inline-flex",flexDirection:"column",alignItems:"center",position:"relative",zIndex:1}}><div className="ball-spin"><DrillIcon type="ft" size={60}/></div><div className="auth-shadow-enter" style={{width:40,height:6,marginTop:8,background:"rgba(0,0,0,0.4)",borderRadius:"50%"}}/></div>
 </div>
-<h1 style={{fontFamily:FD,fontSize:72,color:LIGHT,textAlign:"center",margin:0,lineHeight:.85,letterSpacing:4}}>SHOT<span style={{color:VOLT}}>LAB</span></h1>
-<p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,letterSpacing:5,margin:"8px 0 0",fontWeight:500}}>OFFSEASON DEVELOPMENT PROGRAM</p>
+<div style={{display:"flex",justifyContent:"center"}}><Brand /></div>
+<p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,letterSpacing:1.2,margin:"8px 0 0",fontWeight:500}}>{brandTheme.mission}</p>
 <div style={{display:"flex",alignItems:"center",gap:12,margin:"32px auto",maxWidth:200}}><div style={{flex:1,height:1,background:`linear-gradient(to right,transparent,${VOLT}44)`}}/><div style={{width:6,height:6,borderRadius:"50%",background:VOLT,opacity:.6}}/><div style={{flex:1,height:1,background:`linear-gradient(to left,transparent,${VOLT}44)`}}/></div>
 <div className="auth-card-enter" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:24,padding:"36px 28px",border:`1px solid ${BORDER_CLR}`}}>
 {/* Login / Register toggle */}
@@ -1164,7 +1167,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 {badgeReveal&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}} onClick={()=>setBadgeReveal(null)}>
   <div className="badge-pop badge-shine" style={{textAlign:"center",padding:40}}>
     <div style={{width:120,height:120,borderRadius:"50%",background:`linear-gradient(145deg,${badgeReveal.color}22,${badgeReveal.color}08)`,border:`3px solid ${badgeReveal.color}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",boxShadow:`0 0 60px ${badgeReveal.color}33`}}>
-      <span style={{fontFamily:FD,fontSize:36,color:badgeReveal.color}}>{badgeReveal.icon}</span>
+      <span style={{fontFamily:FD,fontSize:36,color:badgeReveal.color}}><BadgeGlyph badgeKey={badgeReveal.badgeKey} color={badgeReveal.color} size={48} fallback={badgeReveal.iconLabel} /></span>
     </div>
     <div style={{fontFamily:FD,color:badgeReveal.color,fontSize:32,letterSpacing:6}}>UNLOCKED</div>
     <div style={{fontFamily:FD,color:"#FFFFFF",fontSize:22,letterSpacing:3,marginTop:8}}>{badgeReveal.name}</div>
@@ -1405,13 +1408,13 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 </div>
 
 <NavBar items={[
-  {k:"home",l:"Home",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>},
+  {k:"home",l:"Home",accentVar:"--accent-feed",svg:<BrandIcons.home size={22} />},
   ...(u.isCoach
-    ? [{k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>}] 
-    : [{k:"duels",l:"Duels",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>,dot:pendingDuels>0?ORANGE:null}]),
-  {k:"sc",l:"Lifting",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>,dot:soonSC>0?VOLT:null},
-  {k:"program",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
-  {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
+    ? [{k:"players",l:"Players",accentVar:"--accent-players",svg:<BrandIcons.players size={22} />}] 
+    : [{k:"duels",l:"Duels",accentVar:"--accent-drills",svg:<BrandIcons.duels size={22} />,dot:pendingDuels>0?ORANGE:null}]),
+  {k:"sc",l:"Lifting",accentVar:"--accent-lifting",svg:<BrandIcons.strength size={22} />,dot:soonSC>0?VOLT:null},
+  {k:"program",l:"Events",accentVar:"--accent-events",svg:<BrandIcons.events size={22} />,dot:unrsvpEvents>0?VOLT:null},
+  {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<BrandIcons.players size={22} />},
 ]}
 active={tab}
 onChange={switchTab}
@@ -1466,7 +1469,7 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 <span style={{fontSize:14}}>🔥</span>
 <span style={{fontFamily:FD,color:ORANGE,fontSize:14,letterSpacing:2}}>{data.streak} DAY STREAK</span>
 </div>}
-{data.badges&&data.badges.length>0&&<div style={{display:"flex",gap:3,justifyContent:"center",flexWrap:"wrap",marginTop:6}}>{data.badges.map(b=><span key={b.days} style={{fontFamily:FD,fontSize:8,color:b.color,background:`${b.color}12`,border:`1px solid ${b.color}33`,borderRadius:5,padding:"1px 6px",letterSpacing:1}}>{b.icon}D</span>)}</div>}
+{data.badges&&data.badges.length>0&&<div style={{display:"flex",gap:3,justifyContent:"center",flexWrap:"wrap",marginTop:6}}>{data.badges.map(b=><span key={b.days} style={{fontFamily:FD,fontSize:8,color:b.color,background:`${b.color}12`,border:`1px solid ${b.color}33`,borderRadius:5,padding:"1px 6px",letterSpacing:1}}><BadgeGlyph badgeKey={b.badgeKey} color={b.color} size={12} fallback={b.iconLabel} /></span>)}</div>}
 </div>
 
   </div>;
@@ -2358,12 +2361,12 @@ await handleLogoFiles(event.target.files);
 event.target.value="";
 };
 const navItems=[
-  {k:"feed",l:"Feed",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>},
-  {k:"drills",l:"Drills",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2v20"/><path d="M5 4.5c3.5 4 5 7 5 7.5s-1.5 3.5-5 7.5"/><path d="M19 4.5c-3.5 4-5 7-5 7.5s1.5 3.5 5 7.5"/></svg>},
-  {k:"events",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>},
-  {k:"sc",l:"S&C",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>},
-  {k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
-  {k:"settings",l:"Settings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.09 14H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4H9a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>},
+  {k:"feed",l:"Feed",accentVar:"--accent-feed",svg:<BrandIcons.home size={22} />},
+  {k:"drills",l:"Drills",accentVar:"--accent-drills",svg:<BrandIcons.drills size={22} />},
+  {k:"events",l:"Events",accentVar:"--accent-events",svg:<BrandIcons.events size={22} />},
+  {k:"sc",l:"S&C",accentVar:"--accent-lifting",svg:<BrandIcons.strength size={22} />},
+  {k:"players",l:"Players",accentVar:"--accent-players",svg:<BrandIcons.players size={22} />},
+  {k:"settings",l:"Settings",accentVar:"--accent-feed",svg:<BrandIcons.settings size={22} />},
 ];
 const handleNavChange=(k)=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)};
 const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
@@ -2417,7 +2420,7 @@ useEffect(()=>{
 },[tab]);
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
-{isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div style={{padding:"10px 10px",marginBottom:8,border:`1px solid ${alphaFromHex(teamPrimary,0.22)}`,borderRadius:12,background:alphaFromHex(teamPrimary,0.08)}}><TeamIdentity branding={previewBranding} teamName={team?.name||"Team"} mascotName={previewBranding.mascotName} motto={previewBranding.brandingMode==="bold"?previewBranding.motto:""} compact /></div><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
+{isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div style={{padding:"6px 10px",marginBottom:8}}><Brand compact /></div><div style={{padding:"10px 10px",marginBottom:8,border:`1px solid ${alphaFromHex(teamPrimary,0.22)}`,borderRadius:12,background:alphaFromHex(teamPrimary,0.08)}}><TeamIdentity branding={previewBranding} teamName={team?.name||"Team"} mascotName={previewBranding.mascotName} motto={previewBranding.brandingMode==="bold"?previewBranding.motto:""} compact /></div><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
 <main className="shell-main"><div className="content-wrap"><div className={`${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players","settings"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
@@ -3068,10 +3071,11 @@ function DividerDot(){return <div className="uiDecor" aria-hidden="true" style={
 function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"12":"transparent",border:t?`1.5px solid ${m[r-1]}36`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"var(--text-3)",flexShrink:0}}>{r}</div>}
 function Empty({t,action,onTap,cta="GET STARTED",ctaVariant="primary",secondaryCta,onSecondaryTap,secondaryCtaVariant="tertiary",icon=<DrillIcon type="sb" size={48} color="#555555"/>,variant,subtitle}){return <EmptyState variant={variant} title={t} subtitle={subtitle||action} onTap={onTap} cta={cta} ctaVariant={ctaVariant} secondaryCta={secondaryCta} onSecondaryTap={onSecondaryTap} secondaryCtaVariant={secondaryCtaVariant} icon={icon}/>}
 function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>}
+function BadgeGlyph({ badgeKey, color, size=16, fallback="" }){const Icon=badgeKey?BrandBadges[badgeKey]:null; if(Icon)return <Icon size={size} color={color} />; return <span style={{fontFamily:FD,fontSize:size*0.6,color}}>{fallback}</span>;}
 function FF({l,v,set,ph,tp,ta}){return <div className="field"><label className="fieldLabel" style={{fontFamily:FB}}>{l}</label>{ta?<textarea className="input input--textarea" value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{fontSize:14,fontFamily:FB,lineHeight:1.6,resize:"vertical"}}/>:<input className="input" type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{fontSize:14,fontFamily:FB,fontWeight:500}}/>}</div>}
 function NavBar({items,active,onChange,utilityControl}){
 const navAccent=PAGE_ACCENTS[active]?.accent||PAGE_ACCENTS.feed.accent;
-return <>{utilityControl&&<div className="utility-dock"><button type="button" className={`utility-dock-button ${utilityControl.active?"is-active":""}`} onClick={utilityControl.onClick} aria-label={utilityControl.label} aria-current={utilityControl.active?"page":undefined} title={utilityControl.label}><span className="utility-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg></span><span className="utility-label">{utilityControl.label}</span></button></div>}<nav className="bottom-nav" role="navigation" aria-label="Main navigation" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"var(--nav-height)",padding:"2px 64px env(safe-area-inset-bottom) 4px",background:"rgba(12,17,22,0.92)",borderTop:"1px solid var(--stroke-1)",zIndex:20}}>{items.map(t=>{const a=active===t.k;
+return <>{utilityControl&&<div className="utility-dock"><button type="button" className={`utility-dock-button ${utilityControl.active?"is-active":""}`} onClick={utilityControl.onClick} aria-label={utilityControl.label} aria-current={utilityControl.active?"page":undefined} title={utilityControl.label}><span className="utility-icon" aria-hidden="true"><BrandIcons.menu size={18} /></span><span className="utility-label">{utilityControl.label}</span></button></div>}<nav className="bottom-nav" role="navigation" aria-label="Main navigation" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"var(--nav-height)",padding:"2px 64px env(safe-area-inset-bottom) 4px",background:"rgba(12,17,22,0.92)",borderTop:"1px solid var(--stroke-1)",zIndex:20}}><div style={{position:"absolute",left:10,top:8,opacity:0.85,pointerEvents:"none"}}><Brand compact /></div>{items.map(t=>{const a=active===t.k;
 const tabAccent="var(--accent)";
 return <button key={t.k} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:50,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"9px 4px 8px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 180ms ease-out",outlineOffset:2}}>
 <div className="tab-icon" style={{position:"relative"}}>{t.svg}</div>

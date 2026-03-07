@@ -1,0 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Teko:wght@500;600;700&display=swap');
+
+:root {
+  --brand-primary: #cbea2b;
+  --brand-primary-deep: #8ea11d;
+  --brand-secondary: #3ab7ff;
+  --brand-secondary-deep: #1d6fa1;
+  --brand-neutral-900: #070a0c;
+  --brand-neutral-800: #0e141b;
+  --brand-neutral-700: #1a2531;
+  --brand-neutral-500: #708095;
+  --brand-neutral-300: #b8c3d1;
+  --brand-neutral-100: #eef3f9;
+  --brand-font-body: 'Manrope', 'Inter', 'Segoe UI', sans-serif;
+  --brand-font-heading: 'Teko', 'Bebas Neue', 'Arial Black', sans-serif;
+}
+
+body,
+input,
+textarea,
+button {
+  font-family: var(--brand-font-body);
+}
+
+.brand-heading {
+  font-family: var(--brand-font-heading);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.brand-mark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
