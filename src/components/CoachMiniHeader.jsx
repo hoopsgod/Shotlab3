@@ -1,7 +1,8 @@
+import { TeamLogo } from "./TeamBranding";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
-export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, logoUrl, teamName, accentColor, onOpenSettings, onLogout }) {
+export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, logoUrl, teamName, accentColor, branding, onOpenSettings, onLogout }) {
   return (
     <div
       aria-hidden={!visible}
@@ -23,7 +24,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
     >
       <div
         style={{
-          height: "clamp(52px, 7.8vw, 60px)",
+          height: "clamp(52px, 7.8vw, 64px)",
           borderRadius: 12,
           border: accentColor ? `1px solid ${accentColor}66` : `1px solid ${borderColor}`,
           background: accentColor ? `linear-gradient(120deg, ${accentColor}26 0%, rgba(10,10,10,0.94) 55%)` : "rgba(10, 10, 10, 0.92)",
@@ -38,48 +39,18 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
           {avatar}
-          {logoUrl ? (
+          {logoUrl && branding?.showHeaderLogo !== false ? (
             <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "3px 8px", borderRadius: 999, background: accentColor ? `${accentColor}24` : "rgba(255,255,255,0.08)", border: accentColor ? `1px solid ${accentColor}55` : "1px solid var(--stroke-1)" }}>
-              <img src={logoUrl} alt="Team logo" style={{ width: 24, height: 24, borderRadius: 6, objectFit: "cover", border: accentColor ? `1px solid ${accentColor}88` : "1px solid var(--stroke-1)" }} />
+              <TeamLogo logoUrl={logoUrl} teamName={teamName} size={28} primaryColor={branding?.primaryColor || accentColor} badgeStyle={branding?.badgeStyle || "round"} />
               {teamName ? <span style={{ fontFamily: FB, fontSize: 9, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "var(--tracking-tight)", fontWeight: 700, maxWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{teamName}</span> : null}
             </div>
           ) : null}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
-        <button
-          type="button"
-          aria-label="Open settings"
-          onClick={onOpenSettings}
-          style={{
-            background: "rgba(20,20,20,0.95)",
-            border: `1px solid ${borderColor}`,
-            borderRadius: 10,
-            color: "var(--text-secondary)",
-            width: 32,
-            height: 32,
-            cursor: "pointer",
-            fontFamily: FB,
-            fontSize: 12,
-          }}
-        >
+        <button type="button" aria-label="Open settings" onClick={onOpenSettings} style={{ background: "rgba(20,20,20,0.95)", border: `1px solid ${borderColor}`, borderRadius: 10, color: "var(--text-secondary)", width: 32, height: 32, cursor: "pointer", fontFamily: FB, fontSize: 12 }}>
           ⚙
         </button>
-        <button
-          type="button"
-          aria-label="Log out"
-          onClick={onLogout}
-          style={{
-            background: "rgba(20,20,20,0.95)",
-            border: `1px solid ${borderColor}`,
-            borderRadius: 10,
-            color: "var(--text-secondary)",
-            width: 32,
-            height: 32,
-            cursor: "pointer",
-            fontFamily: FB,
-            fontSize: 12,
-          }}
-        >
+        <button type="button" aria-label="Log out" onClick={onLogout} style={{ background: "rgba(20,20,20,0.95)", border: `1px solid ${borderColor}`, borderRadius: 10, color: mutedColor, width: 32, height: 32, cursor: "pointer", fontFamily: FB, fontSize: 12 }}>
           ✕
         </button>
       </div>
