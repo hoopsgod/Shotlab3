@@ -90,7 +90,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           align-items: center;
           justify-content: space-between;
           gap: 10px;
-          padding: 0 13px;
+          padding: 0 12px;
           border: 0;
           border-radius: 13px;
           background: rgba(255, 255, 255, 0.01);
@@ -132,7 +132,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
         .coach-tools-trigger__left {
           display: inline-flex;
           align-items: center;
-          gap: 8px;
+          gap: 9px;
         }
 
         .coach-tools-trigger__icon-wrap {
@@ -171,7 +171,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
         }
 
         .coach-tools-content__inner {
-          padding-top: 4px;
+          padding-top: 3px;
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
         }
 

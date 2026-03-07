@@ -33,11 +33,11 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
           gridTemplateColumns: "minmax(0,1fr) auto",
           alignItems: "center",
           gap: 8,
-          padding: "0 10px 0 12px",
+          padding: "0 12px",
           backdropFilter: "blur(8px)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 9, minWidth: 0 }}>
           <span style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "3px 8px", whiteSpace: "nowrap" }}>Coach Mode</span>
           {avatar}
           {logoUrl && branding?.showHeaderLogo !== false ? (
@@ -47,7 +47,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
             </div>
           ) : null}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
           <div style={{ opacity: 0.85 }}>{wordmark}</div>
           <button type="button" aria-label="Open settings" onClick={onOpenSettings} style={{ background: "rgba(20,20,20,0.9)", border: `1px solid ${borderColor}`, borderRadius: 10, color: "var(--text-secondary)", width: 31, height: 31, cursor: "pointer", fontFamily: FB, fontSize: 11 }}>
             ⚙

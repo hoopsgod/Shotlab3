@@ -18,8 +18,8 @@ export default function CoachHero({
   onOpenSettings,
   onLogout,
 }) {
-  const mobilePadding = isOverview ? "12px 12px 10px" : "10px 12px 8px";
-  const desktopPadding = isOverview ? "13px 14px 12px" : "10px 14px 10px";
+  const mobilePadding = isOverview ? "12px 12px 10px" : "11px 12px 9px";
+  const desktopPadding = isOverview ? "13px 14px 12px" : "11px 14px 10px";
 
   return (
     <div
@@ -145,7 +145,7 @@ export default function CoachHero({
           </div>
         </div>
 
-        <div style={{ marginTop: 2, padding: "7px 10px", borderRadius: 12, border: `1px solid ${accentColor ? `${accentColor}3D` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}0D` : "rgba(255,255,255,0.03)", maxWidth: "min(100%,460px)" }}>
+        <div style={{ marginTop: 2, padding: "8px 12px", borderRadius: 12, border: `1px solid ${accentColor ? `${accentColor}3D` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}0D` : "rgba(255,255,255,0.03)", maxWidth: "min(100%,460px)" }}>
           <TeamIdentity
             branding={branding || { logoUrl, primaryColor: accentColor, secondaryColor: accentColor }}
             teamName={teamName}
