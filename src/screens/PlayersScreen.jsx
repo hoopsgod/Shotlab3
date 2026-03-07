@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import Button from "../components/ui/Button";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -144,9 +145,9 @@ export default function PlayersScreen() {
 
       <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
         {["All players", "Active", "Inactive"].map((filter) => (
-          <button key={filter} onClick={() => setActiveFilter(filter)} className={`btn chip ${activeFilter === filter ? "btn--primary" : "btn--tertiary"}`} aria-pressed={activeFilter === filter} style={chipStyle(activeFilter === filter)}>
+          <Button key={filter} onClick={() => setActiveFilter(filter)} className="chip" variant={activeFilter === filter ? "primary" : "tertiary"} aria-pressed={activeFilter === filter} style={chipStyle(activeFilter === filter)}>
             {filter}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -195,9 +196,9 @@ export default function PlayersScreen() {
           <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
             Invite players to join your program and begin tracking progress
           </p>
-          <button className="btn btn--primary" aria-label="Invite players to roster">
+          <Button variant="primary" aria-label="Invite players to roster">
             Invite players
-          </button>
+          </Button>
         </div>
       ) : (
         filteredPlayers.map((player) => (
@@ -279,9 +280,9 @@ export default function PlayersScreen() {
         <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
           Share your program link and players can join instantly
         </p>
-        <button onClick={shareInviteLink} className="btn btn--primary">
+        <Button onClick={shareInviteLink} variant="secondary">
           Share invite link
-        </button>
+        </Button>
         {copied && <p style={{ fontSize: "12px", color: "var(--text-2)", margin: 0 }}>Link copied</p>}
       </div>
     </div>

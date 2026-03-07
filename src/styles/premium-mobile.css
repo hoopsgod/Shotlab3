@@ -94,21 +94,22 @@
 }
 
 .pageHeaderPill,
-.btn {
-  border-radius: 12px;
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
-  font-weight: 700;
-  min-height: 48px;
+.btn,
+.btn-v {
+  border-radius: 8px;
+  font-size: 0.9rem;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+  min-height: var(--btn-h-md);
 }
 
-/* Before: bright lime neon CTA. After: single restrained royal-blue primary action. */
 .btn--primary,
 .pageHeaderPillBrand,
-.emptyState__primary {
-  background: linear-gradient(145deg, #4b6ea9, #3f5f97 58%, #364f7e);
+.emptyState__primary,
+.cta-primary {
+  background: var(--color-action-primary);
   color: #f2f6fc;
-  box-shadow: 0 10px 20px rgba(22, 31, 46, 0.42);
+  box-shadow: none;
 }
 
 .btn--secondary {

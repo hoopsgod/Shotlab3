@@ -319,7 +319,7 @@ const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+N
 .pageHeaderText h1{font-size:clamp(1.3rem,6.2vw,1.72rem);letter-spacing:.03em;line-height:1.02;}
 .pageHeaderText p{margin-top:2px;color:var(--text-3);font-size:.84rem;line-height:1.35;}
 .pageHeaderPill,.btn{border-radius:12px;min-height:44px;font-size:.82rem;letter-spacing:.04em;font-weight:700;}
-.btn--primary,.pageHeaderPillBrand,.emptyState__primary{background:linear-gradient(145deg,#d5ff36,#c8ff00 56%,#b7ec04)!important;color:#11160a!important;box-shadow:0 12px 26px rgba(200,255,0,.2)!important;}
+.btn--primary,.pageHeaderPillBrand,.emptyState__primary,.cta-primary{background:var(--accent)!important;color:#f1f5fb!important;box-shadow:none!important;}
 .fieldLabel{text-transform:uppercase;letter-spacing:.08em;font-size:.74rem;}
 .input,input,textarea,select{border-radius:12px;background:rgba(255,255,255,.04)!important;border:1px solid rgba(167,187,211,.18)!important;}
 .emptyState{padding:26px 18px 20px!important;text-align:center;}
@@ -3174,7 +3174,7 @@ return <SectionContainer className="fade-up">
   </Card>
   <Card style={{marginBottom:16}}>
     <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>ACCOUNT SECURITY</div>
-    <button onClick={handleReset} className="btn-v" style={{height:42,background:"transparent",border:`1px solid ${BORDER_CLR}`,color:LIGHT}}>Email password reset link</button>
+    <Button onClick={handleReset} variant="tertiary">Email password reset link</Button>
     <p style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:8}}>{u?.email}</p>
   </Card>
   <Card style={{marginBottom:16}}>
@@ -3183,7 +3183,7 @@ return <SectionContainer className="fade-up">
   </Card>
   <Card>
     <div style={{fontFamily:FB,color:"#FF4545",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>ACCOUNT DELETION</div>
-    {!confirmDelete?<button onClick={()=>setConfirmDelete(true)} className="btn-v cta-danger" style={{height:44}}>Delete my account</button>:<div><p style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:10}}>This permanently deletes your account and all associated data.</p><div style={{display:"flex",gap:8}}><button onClick={()=>setConfirmDelete(false)} className="btn-v" style={{height:40,background:"transparent",border:`1px solid ${BORDER_CLR}`,color:MUTED}}>Cancel</button><button onClick={onDeleteAccount} className="btn-v cta-danger" style={{height:40}}>Permanently delete</button></div></div>}
+    {!confirmDelete?<Button onClick={()=>setConfirmDelete(true)} variant="destructive">Delete my account</Button>:<div><p style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:10}}>This permanently deletes your account and all associated data.</p><div style={{display:"flex",gap:8}}><Button onClick={()=>setConfirmDelete(false)} variant="tertiary">Cancel</Button><Button onClick={onDeleteAccount} variant="destructive">Permanently delete</Button></div></div>}
     {msg&&<p style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:10}}>{msg}</p>}
   </Card>
 </SectionContainer>;
