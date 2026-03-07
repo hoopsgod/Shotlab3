@@ -686,6 +686,7 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 
 function AppInner(){
 const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
+const[highContrast,setHighContrast]=useState(false);
 const T=THEMES[theme];
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
@@ -699,6 +700,16 @@ view,
 meta,
 });
 },[user,view]);
+
+useEffect(()=>{
+  const stored=localStorage.getItem("sl:high-contrast");
+  setHighContrast(stored==="1");
+},[]);
+
+useEffect(()=>{
+  document.documentElement.classList.toggle("high-contrast",highContrast);
+  localStorage.setItem("sl:high-contrast",highContrast?"1":"0");
+},[highContrast]);
 
 const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
@@ -952,9 +963,9 @@ useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
-{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
+{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
-{view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount}/></div>}
+{view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} updateTeamBranding={updateTeamBranding} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/></div>}
 </>;
 }
@@ -962,7 +973,7 @@ return <><Styles/>
 // ═══════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════
-function Auth({onLogin,onRegister,onDemo}){
+function Auth({onLogin,onRegister,onDemo,highContrast,onToggleHighContrast}){
 const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[err,setErr]=useState("");
 const doLogin=()=>{
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
@@ -999,17 +1010,18 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,letterSpacing:5,margin:"8px 0 0",fontWeight:500}}>OFFSEASON DEVELOPMENT PROGRAM</p>
 <div style={{display:"flex",alignItems:"center",gap:12,margin:"32px auto",maxWidth:200}}><div style={{flex:1,height:1,background:`linear-gradient(to right,transparent,${VOLT}44)`}}/><div style={{width:6,height:6,borderRadius:"50%",background:VOLT,opacity:.6}}/><div style={{flex:1,height:1,background:`linear-gradient(to left,transparent,${VOLT}44)`}}/></div>
 <div className="auth-card-enter" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:24,padding:"36px 28px",border:`1px solid ${BORDER_CLR}`}}>
+<div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}><button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:36,padding:"0 10px",fontSize:11}}>{highContrast?"High contrast: ON":"High contrast: OFF"}</button></div>
 {/* Login / Register toggle */}
-<div style={{display:"flex",background:"#1E1E1E",borderRadius:12,padding:2,marginBottom:24,border:"1px solid #242424"}}>
-{["login","register"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,height:44,borderRadius:10,border:"none",cursor:"pointer",fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:"uppercase",transition:"all .15s ease",background:mode===m?VOLT:"transparent",color:mode===m?"#000000":"#555555",fontWeight:mode===m?700:600}}>{m==="login"?"SIGN IN":"REGISTER"}</button>)}
+<div role="tablist" aria-label="Authentication mode" style={{display:"flex",background:"#1E1E1E",borderRadius:12,padding:2,marginBottom:24,border:"1px solid #242424"}}>
+{["login","register"].map(m=><button key={m} role="tab" aria-selected={mode===m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,height:44,borderRadius:10,border:"none",cursor:"pointer",fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:"uppercase",transition:"all .15s ease",background:mode===m?VOLT:"transparent",color:mode===m?"#000000":"#555555",fontWeight:mode===m?700:600}}>{m==="login"?"SIGN IN":"REGISTER"}</button>)}
 </div>
 
     {mode==="register"&&<>
       <h2 style={{fontFamily:FD,color:LIGHT,fontSize:24,textAlign:"center",margin:"0 0 4px",letterSpacing:2}}>CREATE ACCOUNT</h2>
       <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 22px"}}>Join your team's offseason program</p>
       {/* Role selector */}
-      <div style={{display:"flex",background:BG,borderRadius:10,padding:3,marginBottom:20,border:`1px solid ${BORDER_CLR}`}}>
-        {["player","coach"].map(r=><button key={r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#555555"}}>{r}</button>)}
+      <div role="radiogroup" aria-label="Account role" style={{display:"flex",background:BG,borderRadius:10,padding:3,marginBottom:20,border:`1px solid ${BORDER_CLR}`}}>
+        {["player","coach"].map(r=><button key={r} role="radio" aria-checked={role===r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#555555"}}>{r}</button>)}
       </div>
       <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>YOUR NAME</label>
       <input type="text" value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="First Last" style={{...inp,marginBottom:14}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
@@ -1094,7 +1106,7 @@ return <span title={text} aria-label={text} style={{display:"inline-flex",alignI
 // ═══════════════════════════════════════
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
-function Player({u,team,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount}){
+function Player({u,team,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,highContrast,onToggleHighContrast}){
 const initialTab = u.isCoach && window.location.pathname === "/players" ? "players" : "home";
 const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
 const[shotMade,setShotMade]=useState(0),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false),[shotError,setShotError]=useState("");
@@ -1238,6 +1250,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
         </div>
       </div>
     </div>
+    <button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:44,height:44,padding:"0 10px",fontFamily:FB,fontSize:10,letterSpacing:"0.06em",textTransform:"uppercase",marginRight:8}}>Contrast</button>
     <button aria-label="Settings" title="Settings" onClick={()=>switchTab("profile")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:TOKENS.TEXT_PRIMARY,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
@@ -2898,7 +2911,7 @@ return <div className="fade-up">
 {earnedBadges.length>0&&<div style={{marginBottom:24}}>
   <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:10,letterSpacing:2.4,fontWeight:700,marginBottom:12}}>BADGES EARNED</div>
   <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{earnedBadges.map(b=>
-    <div key={b.days} style={{display:"flex",alignItems:"center",gap:6,background:`${b.color}0C`,border:`1px solid ${b.color}2A`,borderRadius:10,padding:"7px 12px"}}>
+    <div key={b.days} className="animated-badge" style={{display:"flex",alignItems:"center",gap:6,background:`${b.color}0C`,border:`1px solid ${b.color}2A`,borderRadius:10,padding:"7px 12px"}}>
       <span style={{fontFamily:FD,fontSize:13,color:b.color,opacity:0.9}}>{b.icon}</span>
       <span style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",fontWeight:700,letterSpacing:0.8}}>{b.name}</span>
     </div>)}
@@ -3113,9 +3126,9 @@ function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={si
 function FF({l,v,set,ph,tp,ta}){return <div className="field"><label className="fieldLabel" style={{fontFamily:FB}}>{l}</label>{ta?<textarea className="input input--textarea" value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{fontSize:14,fontFamily:FB,lineHeight:1.6,resize:"vertical"}}/>:<input className="input" type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{fontSize:14,fontFamily:FB,fontWeight:500}}/>}</div>}
 function NavBar({items,active,onChange,utilityControl}){
 const navAccent=PAGE_ACCENTS[active]?.accent||PAGE_ACCENTS.feed.accent;
-return <>{utilityControl&&<div className="utility-dock"><button type="button" className={`utility-dock-button ${utilityControl.active?"is-active":""}`} onClick={utilityControl.onClick} aria-label={utilityControl.label} aria-current={utilityControl.active?"page":undefined} title={utilityControl.label}><span className="utility-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg></span><span className="utility-label">{utilityControl.label}</span></button></div>}<nav className="bottom-nav" role="navigation" aria-label="Main navigation" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"var(--nav-height)",padding:"2px 64px env(safe-area-inset-bottom) 4px",background:"rgba(12,17,22,0.92)",borderTop:"1px solid var(--stroke-1)",zIndex:20}}>{items.map(t=>{const a=active===t.k;
+return <>{utilityControl&&<div className="utility-dock"><button type="button" className={`utility-dock-button ${utilityControl.active?"is-active":""}`} onClick={utilityControl.onClick} aria-label={utilityControl.label} aria-current={utilityControl.active?"page":undefined} title={utilityControl.label}><span className="utility-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg></span><span className="utility-label">{utilityControl.label}</span></button></div>}<nav className="bottom-nav" role="tablist" aria-label="Main navigation tabs" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"var(--nav-height)",padding:"2px 64px env(safe-area-inset-bottom) 4px",background:"rgba(12,17,22,0.92)",borderTop:"1px solid var(--stroke-1)",zIndex:20}}>{items.map(t=>{const a=active===t.k;
 const tabAccent="var(--accent)";
-return <button key={t.k} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:50,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"9px 4px 8px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 180ms ease-out",outlineOffset:2}}>
+return <button key={t.k} role="tab" aria-selected={a} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:50,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"9px 4px 8px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 180ms ease-out",outlineOffset:2}}>
 <div className="tab-icon" style={{position:"relative"}}>{t.svg}</div>
 <div className="tab-label" style={{fontFamily:FB,fontSize:10,letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1.1,whiteSpace:"nowrap"}}>{t.l}</div>
 </button>})}</nav></>}
