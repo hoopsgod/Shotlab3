@@ -390,3 +390,46 @@
   box-shadow: var(--focus-ring);
 }
 :disabled { opacity: 0.7; cursor: not-allowed; }
+
+@keyframes fadeInUpSoft {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animated-badge {
+  animation: fadeInUpSoft 260ms ease-out both;
+}
+
+.bottom-nav [role="tab"]:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+[role="switch"]:focus-visible,
+select:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+:root.high-contrast {
+  --bg: #000000;
+  --surface-1: #0a0a0a;
+  --surface-2: #101010;
+  --text-1: #ffffff;
+  --text-2: #f5f5f5;
+  --muted: #e6e6e6;
+  --border-1: #ffffff;
+  --border-2: #ffffff;
+  --accent: #ffff00;
+  --focus-ring: 0 0 0 4px #ffff00;
+  --fs-title: 28px;
+  --fs-h2: 22px;
+  --fs-h3: 20px;
+  --fs-body: 18px;
+  --fs-caption: 16px;
+}
+
+:root.high-contrast * {
+  text-shadow: none !important;
+}
