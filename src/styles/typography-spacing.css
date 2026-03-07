@@ -7,11 +7,11 @@
   --space-5: 40px;
 
   /* shared type scale */
-  --type-display-size: clamp(1.75rem, 2.6vw, 2.25rem);
-  --type-heading-size: clamp(1.25rem, 2vw, 1.5rem);
-  --type-subheading-size: 1rem;
-  --type-body-size: 0.875rem;
-  --type-caption-size: 0.8125rem;
+  --type-display-size: calc(clamp(1.85rem, 2.8vw, 2.45rem) * var(--user-font-scale) / 100);
+  --type-heading-size: calc(clamp(1.25rem, 2vw, 1.6rem) * var(--user-font-scale) / 100);
+  --type-subheading-size: calc(1.08rem * var(--user-font-scale) / 100);
+  --type-body-size: calc(1rem * var(--user-font-scale) / 100);
+  --type-caption-size: calc(0.94rem * var(--user-font-scale) / 100);
 
   --type-display-weight: 700;
   --type-heading-weight: 700;
