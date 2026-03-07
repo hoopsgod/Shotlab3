@@ -1,3 +1,10 @@
+/*
+Implementation plan (small-scope motion pass):
+- Files: src/styles/design-system.css, src/styles/premium-mobile.css
+- Approach: CSS-only micro-transitions for existing shared primitives (btn, interactive-card, bottom-nav item); no routing/state/business logic changes
+- Dependency policy: no new dependency added (React + Vite app, no animation library installed)
+*/
+
 :root {
   color-scheme: dark;
 
@@ -204,7 +211,7 @@ textarea {
 .shared-card--empty { background: var(--color-surface-primary); }
 
 @media (hover: hover) and (pointer: fine) {
-  .shared-card:hover,
+  .shared-card:is(button, a, [role="button"]):hover,
   .interactive-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-medium);
@@ -246,7 +253,26 @@ a.interactive-card:focus-visible {
   justify-content: center;
   gap: var(--space-2);
   cursor: pointer;
-  transition: transform 120ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+  transition: transform 120ms ease, background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn--primary:hover {
+    filter: brightness(1.03);
+    box-shadow: 0 12px 24px rgba(200, 255, 0, 0.2);
+  }
+
+  .btn--secondary:hover,
+  .btn--ghost:hover,
+  .btn--tertiary:hover,
+  .btn--icon:hover,
+  .iconBtn:hover {
+    box-shadow: 0 8px 18px rgba(8, 12, 20, 0.28);
+  }
 }
 
 .btn:focus-visible,
@@ -269,6 +295,17 @@ a.interactive-card:focus-visible {
   background: rgba(91, 243, 255, 0.08);
   color: var(--color-accent-cyan);
   border-color: rgba(91, 243, 255, 0.34);
+}
+
+
+.btn[role="switch"] {
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.btn[role="switch"][aria-checked="true"] {
+  background: rgba(200, 255, 0, 0.16);
+  border-color: rgba(200, 255, 0, 0.42);
+  color: #ebffd1;
 }
 
 .btn--ghost,
@@ -409,4 +446,19 @@ a,
   background: rgba(91, 243, 255, 0.18);
   border-color: rgba(91, 243, 255, 0.34);
   color: var(--color-accent-cyan);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .shared-card,
+  .interactive-card {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+
+  .btn:active,
+  .shared-card:is(button, a, [role="button"]):hover,
+  .interactive-card:hover {
+    transform: none;
+  }
 }
