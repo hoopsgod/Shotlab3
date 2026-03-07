@@ -196,13 +196,37 @@ select {
   background: transparent;
   color: var(--text-3);
   gap: 5px;
-  transition: transform 160ms ease, color 180ms ease, background-color 180ms ease;
+  transition: transform 160ms ease, color 180ms ease, background-color 180ms ease, opacity 180ms ease;
 }
 
 .tab.shared-nav-item.is-active {
   color: #f6faff;
   background: linear-gradient(180deg, rgba(91, 243, 255, 0.22), rgba(91, 243, 255, 0.06));
 }
+
+.tab.shared-nav-item .tab-icon,
+.tab.shared-nav-item .tab-label {
+  transition: transform 160ms ease, opacity 180ms ease, color 180ms ease;
+}
+
+.tab.shared-nav-item .tab-icon {
+  opacity: 0.82;
+  transform: translateY(0);
+}
+
+.tab.shared-nav-item .tab-label {
+  opacity: 0.78;
+}
+
+.tab.shared-nav-item.is-active .tab-icon {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.tab.shared-nav-item.is-active .tab-label {
+  opacity: 0.98;
+}
+
 
 .tab.shared-nav-item:active {
   transform: translateY(1px);
@@ -222,5 +246,19 @@ select {
   .heroModule,
   .shared-card {
     border-radius: 20px;
+  }
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .tab.shared-nav-item,
+  .tab.shared-nav-item .tab-icon,
+  .tab.shared-nav-item .tab-label {
+    transition-duration: 0.01ms !important;
+  }
+
+  .tab.shared-nav-item:active,
+  .tab.shared-nav-item.is-active .tab-icon {
+    transform: none;
   }
 }
