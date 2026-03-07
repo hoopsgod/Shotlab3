@@ -1578,7 +1578,7 @@ return <SectionContainer className="fade-up">
 {/* Pending challenges */}
 {pending.length>0&&<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>
   {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
-    return <Card key={ch.id} className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:`${spacing.md}px ${spacing.lg}px`,marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
+    return <Card key={ch.id} variant="list" className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:`${spacing.md}px ${spacing.lg}px`,marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
         <Av n={ch.fromName} sz={38} email={ch.from}/>
@@ -1918,7 +1918,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 {/* YOUR POSITION — sticky anchor */}
 {(()=>{const myIdx=board.findIndex(p=>p.email===user.email);const myEntry=board[myIdx];
   if(myIdx<0)return null;
-  return <div style={{background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:14,padding:"12px 16px",marginBottom:14,border:`2px solid ${accentColor}44`,display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
+  return <Card variant="metric" style={{background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:14,padding:"12px 16px",marginBottom:14,border:`2px solid ${accentColor}44`,display:"flex",flexDirection:"row",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
     <div style={{width:4,height:28,borderRadius:2,background:accentColor,flexShrink:0}}/>
     <div style={{fontFamily:FD,color:accentColor,fontSize:24}}>#{myIdx+1}</div>
     <div style={{flex:1,minWidth:0}}>
@@ -1926,7 +1926,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 	      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{myEntry.total} {unit}{isHome&&myEntry.lastDate?` · ${myEntry.lastDate}`:""}</div>
     </div>
     {myIdx>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:600,letterSpacing:1}}>{board[myIdx-1].total-myEntry.total} to #{myIdx}</div>}
-  </div>})()}
+  </Card>})()}
 
 <div className="lbList">
 {board.map((p,i)=>{
@@ -2161,7 +2161,7 @@ const getRelativeLabel=(date)=>{const eventDate=new Date(`${date}T00:00:00`);con
 return <div className="fade-up">
 {showGuide&&<GuideCallout title="Program events + attendance rank" body="Program Events are coach-run sessions. Attendance Rank increases each time you RSVP and show up, so consistency moves you up the board." onDismiss={dismissGuide} tone="accent"/>}
 {/* Events banner — structured, timeline-oriented */}
-<div className="eventPanel" style={{marginBottom:16}}>
+<Card variant="metric" className="eventPanel" style={{marginBottom:16}}>
 
 <div className="sectionContent" style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
 <div className="uiDecor" aria-hidden="true" style={{width:42,height:42,borderRadius:12,background:"rgba(184,255,0,.10)",border:"1px solid rgba(184,255,0,.22)",display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -2187,10 +2187,10 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 </div>
 {upcoming.length>3&&<div className="uiDecor" aria-hidden="true" style={{fontFamily:FB,fontSize:9,color:MUTED,marginLeft:8,marginBottom:14}}>+{upcoming.length-3}</div>}
 </div>}
-</div>
+</Card>
 
 {/* Tier card */}
-<div className="eventPanel" style={{marginBottom:16}}>
+<Card variant="metric" className="eventPanel" style={{marginBottom:16}}>
   <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative",gap:14}}>
     <div>
       <div className="eventPanelLabel" style={{color:"rgba(202,245,122,.9)",display:"inline-flex",alignItems:"center",gap:6}}>ATTENDANCE RANK <InfoHint text="Attendance Rank is based on the number of program events you RSVP to and attend."/></div>
@@ -2261,7 +2261,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
       </div>
     </div>}
 
-</div>
+</Card>
 
 {/* Leaderboard toggle */}
 <button onClick={()=>setShowBoard(!showBoard)} className="ch uiTap interactive-card" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
@@ -2869,7 +2869,7 @@ return <SectionContainer className="fade-up">
 {u.isCoach&&<div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}><div style={{fontSize:13,color:"#C8FF00",textTransform:"uppercase",letterSpacing:"0.10em",fontFamily:FB,fontWeight:700,marginBottom:10}}>COACH ACCOUNT</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${BORDER_CLR}66`}}><div style={{display:"flex",alignItems:"center",gap:8}}><UsersIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ROLE</span></div><span style={{fontSize:13,color:"#FFFFFF",fontFamily:FB}}>Coach</span></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}><div style={{display:"flex",alignItems:"center",gap:8}}><ShieldIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ACCESS</span></div><span style={{fontSize:13,color:"#C8FF00",fontFamily:FB}}>Full Program Access</span></div></div>}
 <ProgressCharts scores={scores} shotLogs={shotLogs} userEmail={u.email}/>
 {/* ══════ SHAREABLE SEASON CARD ══════ */}
-<Card style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
+<Card variant="metric" style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
 {/* Corner accents */}
 <div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
 <div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
@@ -2909,7 +2909,7 @@ return <SectionContainer className="fade-up">
 </Card>
 
 {/* Hero card */}
-<Card style={{background:`linear-gradient(135deg,${VOLT}06,${CARD_BG})`,borderRadius:20,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}20`,marginBottom:24,textAlign:"center",position:"relative",overflow:"hidden"}}>
+<Card variant="default" style={{background:`linear-gradient(135deg,${VOLT}06,${CARD_BG})`,borderRadius:20,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}20`,marginBottom:24,textAlign:"center",position:"relative",overflow:"hidden"}}>
   <div style={{position:"absolute",top:0,right:0,width:110,height:110,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}06,transparent)`,transform:"translate(30%,-30%)"}}/>
   <Av n={u.name} sz={72} email={u.email} style={{margin:"0 auto 16px"}}/>
   <div style={{fontFamily:FD,color:LIGHT,fontSize:30,letterSpacing:2.6,lineHeight:1}}>{u.name.toUpperCase()}</div>

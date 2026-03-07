@@ -2,6 +2,7 @@ import EmptyDrillsArc from "../assets/empty-states/EmptyDrillsArc";
 import EmptyEventsCourt from "../assets/empty-states/EmptyEventsCourt";
 import EmptyLeaderboardPodium from "../assets/empty-states/EmptyLeaderboardPodium";
 import EmptyLiftingRack from "../assets/empty-states/EmptyLiftingRack";
+import Card from "./Card";
 import Button from "./ui/Button";
 
 const ART_BY_VARIANT = {
@@ -26,7 +27,7 @@ export default function EmptyState({
   const Art = variant ? ART_BY_VARIANT[variant] : null;
 
   return (
-    <div className="emptyState card card--empty" style={{ textAlign: "center", padding: "28px 20px 24px" }}>
+    <Card variant="empty" className="emptyState card card--empty" style={{ textAlign: "center", padding: "28px 20px 24px" }}>
       <div className="emptyState__art" style={{ color: "rgba(255,255,255,0.4)", width: 88, height: 88, margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center" }}>
         {Art ? <Art /> : icon}
       </div>
@@ -57,6 +58,6 @@ export default function EmptyState({
           </Button>
         )}
       </div>
-    </div>
+    </Card>
   );
 }
