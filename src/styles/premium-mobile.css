@@ -1,10 +1,10 @@
 :root {
-  --surface-1: #101a2b;
-  --surface-2: #142033;
-  --border-1: rgba(160, 184, 214, 0.14);
-  --border-2: rgba(182, 209, 235, 0.26);
-  --shadow-1: 0 10px 26px rgba(0, 0, 0, 0.28);
-  --shadow-2: 0 18px 38px rgba(0, 0, 0, 0.36);
+  --surface-1: #1a2431;
+  --surface-2: #223043;
+  --border-1: rgba(173, 187, 205, 0.2);
+  --border-2: rgba(188, 202, 220, 0.34);
+  --shadow-1: 0 10px 24px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 16px 32px rgba(0, 0, 0, 0.38);
   --radius-card: 18px;
 }
 
@@ -25,9 +25,10 @@
   width: 38px;
   height: 38px;
   border-radius: 12px;
-  background: linear-gradient(145deg, rgba(91, 243, 255, 0.17), rgba(200, 255, 0, 0.07));
-  border: 1px solid rgba(91, 243, 255, 0.22);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+  /* Before: fluorescent cyan/lime gradient. After: low-contrast premium blue/stone blend. */
+  background: linear-gradient(145deg, rgba(63, 95, 151, 0.24), rgba(182, 170, 148, 0.12));
+  border: 1px solid rgba(122, 145, 186, 0.36);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
 .pageHeaderText h1 {
@@ -66,7 +67,7 @@
   margin-top: 10px;
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(167, 187, 211, 0.12);
+  border: 1px solid rgba(173, 187, 205, 0.14);
   color: var(--text-2);
   padding: 8px 10px;
 }
@@ -77,19 +78,19 @@
 }
 
 .shared-card {
-  border-color: rgba(167, 187, 211, 0.12);
+  border-color: rgba(173, 187, 205, 0.14);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0)), var(--surface-1);
   box-shadow: var(--shadow-1);
 }
 
 .shared-card--primary {
-  border-color: rgba(91, 243, 255, 0.24);
-  background: linear-gradient(180deg, rgba(91, 243, 255, 0.085), rgba(91, 243, 255, 0)), var(--surface-2);
+  border-color: rgba(122, 145, 186, 0.28);
+  background: linear-gradient(180deg, rgba(63, 95, 151, 0.14), rgba(63, 95, 151, 0.04)), var(--surface-2);
 }
 
 .shared-card--subtle {
   background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(167, 187, 211, 0.1);
+  border-color: rgba(173, 187, 205, 0.12);
 }
 
 .pageHeaderPill,
@@ -101,16 +102,17 @@
   min-height: 44px;
 }
 
+/* Before: bright lime neon CTA. After: single restrained royal-blue primary action. */
 .btn--primary,
 .pageHeaderPillBrand,
 .emptyState__primary {
-  background: linear-gradient(145deg, #d5ff36, #c8ff00 56%, #b7ec04);
-  color: #11160a;
-  box-shadow: 0 12px 26px rgba(200, 255, 0, 0.2);
+  background: linear-gradient(145deg, #4b6ea9, #3f5f97 58%, #364f7e);
+  color: #f2f6fc;
+  box-shadow: 0 10px 20px rgba(22, 31, 46, 0.42);
 }
 
 .btn--secondary {
-  background: rgba(91, 243, 255, 0.08);
+  background: rgba(59, 110, 116, 0.16);
 }
 
 .fieldLabel {
@@ -125,7 +127,7 @@ textarea,
 select {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(167, 187, 211, 0.18);
+  border: 1px solid rgba(173, 187, 205, 0.2);
 }
 
 .emptyState {
@@ -180,10 +182,10 @@ select {
   align-items: stretch;
   height: 72px;
   padding: 6px;
-  background: rgba(10, 16, 28, 0.9);
-  border: 1px solid rgba(167, 187, 211, 0.24);
+  background: rgba(18, 24, 33, 0.9);
+  border: 1px solid rgba(173, 187, 205, 0.24);
   border-radius: 18px;
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.42);
   backdrop-filter: blur(12px);
   z-index: 20;
 }
@@ -201,7 +203,7 @@ select {
 
 .tab.shared-nav-item.is-active {
   color: #f6faff;
-  background: linear-gradient(180deg, rgba(91, 243, 255, 0.22), rgba(91, 243, 255, 0.06));
+  background: linear-gradient(180deg, rgba(63, 95, 151, 0.24), rgba(63, 95, 151, 0.08));
 }
 
 .tab.shared-nav-item .tab-icon,

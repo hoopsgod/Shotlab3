@@ -27,7 +27,7 @@
   height: 100%;
   border-radius: 999px;
   background: var(--accent);
-  box-shadow: 0 0 0 1px rgba(91,243,255,0.2);
+  box-shadow: none;
 }
 
 .progressLabels,
@@ -108,7 +108,7 @@ textarea::placeholder {
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  border-color: rgba(200, 255, 0, 0.72);
+  border-color: rgba(122, 145, 186, 0.72);
   box-shadow: var(--focus-ring);
 }
 

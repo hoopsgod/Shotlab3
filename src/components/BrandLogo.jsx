@@ -30,7 +30,7 @@ export default function BrandLogo({
             borderRadius: 10,
             border: "1px solid var(--border-1)",
             background: "var(--accent)",
-            color: "#081006",
+            color: "var(--text-1)",
             fontSize: compact ? 10 : 12,
             fontWeight: 800,
             letterSpacing: "0.08em",

@@ -3,14 +3,14 @@ const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
 const alphaFromHex=(hex,alpha)=>{
   const clean=String(hex||"").replace("#","");
-  if(clean.length!==6)return `rgba(200,255,26,${alpha})`;
+  if(clean.length!==6)return `rgba(63,95,151,${alpha})`;
   const num=Number.parseInt(clean,16);
-  if(Number.isNaN(num))return `rgba(200,255,26,${alpha})`;
+  if(Number.isNaN(num))return `rgba(63,95,151,${alpha})`;
   const r=(num>>16)&255,g=(num>>8)&255,b=num&255;
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
-export function TeamLogo({ logoUrl, teamName, size=64, primaryColor="#C8FF1A", badgeStyle="round" }) {
+export function TeamLogo({ logoUrl, teamName, size=64, primaryColor="#3F5F97", badgeStyle="round" }) {
   const radius=badgeStyle==="shield"?18:badgeStyle==="rectangle"?10:999;
   return (
     <div
@@ -47,7 +47,7 @@ export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold
       </div> : null}
       <div style={{minWidth:0}}>
         <div style={{fontFamily:FB,color:"var(--text-3)",fontSize:8,textTransform:"uppercase",letterSpacing:1.1,fontWeight:700}}>Team</div>
-        <div style={{fontFamily:FD,color:"#fff",fontSize:compact?20:26,letterSpacing:1.7,lineHeight:1.03,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",marginTop:compact?1:2}}>{(branding.useTeamNameInHeader===false?"ShotLab":(teamName||"ShotLab Team")).toUpperCase()}</div>
+        <div style={{fontFamily:FD,color:"var(--text-1)",fontSize:compact?20:26,letterSpacing:1.7,lineHeight:1.03,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",marginTop:compact?1:2}}>{(branding.useTeamNameInHeader===false?"ShotLab":(teamName||"ShotLab Team")).toUpperCase()}</div>
         <div style={{display:"flex",gap:6,alignItems:"center",marginTop:5,flexWrap:"wrap"}}>
           {(mascotName||subtitle)?<span style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",textTransform:"uppercase",letterSpacing:1,fontWeight:600}}>{mascotName||subtitle}</span>:null}
           {motto?<span style={{fontFamily:FB,fontSize:9,color:alphaFromHex(branding.secondaryColor,0.7),textTransform:"uppercase",letterSpacing:0.8,fontWeight:700,opacity:0.74}}>“{motto}”</span>:null}
@@ -57,7 +57,7 @@ export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold
   );
 }
 
-export function TeamWatermark({ logoUrl, primaryColor="#C8FF1A", opacity=0.07, size=220 }) {
+export function TeamWatermark({ logoUrl, primaryColor="#3F5F97", opacity=0.07, size=220 }) {
   if(!logoUrl)return null;
   return (
     <div aria-hidden style={{position:"absolute",right:-28,top:-28,width:size,height:size,opacity:Math.min(opacity,0.02),pointerEvents:"none",filter:"grayscale(0.62)"}}>
