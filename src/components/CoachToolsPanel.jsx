@@ -62,7 +62,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           <span>COACH TOOLS</span>
         </span>
         <span className="coach-tools-trigger__chevron" aria-hidden="true">
-          ⌄
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
         </span>
       </button>
 
@@ -92,7 +92,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           gap: 10px;
           padding: 0 13px;
           border: 0;
-          border-radius: 13px;
+          border-radius: 12px;
           background: rgba(255, 255, 255, 0.01);
           cursor: pointer;
           color: var(--text-secondary);
@@ -138,7 +138,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
         .coach-tools-trigger__icon-wrap {
           width: 20px;
           height: 20px;
-          border-radius: 6px;
+          border-radius: 8px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
@@ -152,7 +152,6 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           transform: ${open ? "rotate(180deg)" : "rotate(0deg)"};
           transition: transform 200ms ease;
           color: var(--text-secondary);
-          font-size: 14px;
           line-height: 1;
         }
 

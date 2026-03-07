@@ -2,6 +2,20 @@ import { TeamLogo } from "./TeamBranding";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
+const GearIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2h0a1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .6.9h0a1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1v0a1 1 0 0 0 .9.6H20a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.6Z" />
+  </svg>
+);
+
+const CloseIcon = ({ size = 16 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M18 6 6 18" />
+    <path d="m6 6 12 12" />
+  </svg>
+);
+
 export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, logoUrl, teamName, accentColor, branding, onOpenSettings, onLogout }) {
   return (
     <div
@@ -49,11 +63,11 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ opacity: 0.85 }}>{wordmark}</div>
-          <button type="button" aria-label="Open settings" onClick={onOpenSettings} style={{ background: "rgba(20,20,20,0.9)", border: `1px solid ${borderColor}`, borderRadius: 10, color: "var(--text-secondary)", width: 31, height: 31, cursor: "pointer", fontFamily: FB, fontSize: 11 }}>
-            ⚙
+          <button type="button" aria-label="Open settings" onClick={onOpenSettings} style={{ background: "transparent", border: `1px solid ${borderColor}`, borderRadius: 12, color: "var(--text-secondary)", width: 44, height: 44, cursor: "pointer", display: "grid", placeItems: "center", opacity: 0.9 }}>
+            <GearIcon />
           </button>
-          <button type="button" aria-label="Log out" onClick={onLogout} style={{ background: "rgba(20,20,20,0.9)", border: `1px solid ${borderColor}`, borderRadius: 10, color: mutedColor, width: 31, height: 31, cursor: "pointer", fontFamily: FB, fontSize: 11 }}>
-            ✕
+          <button type="button" aria-label="Log out" onClick={onLogout} style={{ background: "transparent", border: `1px solid ${borderColor}`, borderRadius: 12, color: mutedColor, width: 44, height: 44, cursor: "pointer", display: "grid", placeItems: "center", opacity: 0.9 }}>
+            <CloseIcon />
           </button>
         </div>
       </div>
