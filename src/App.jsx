@@ -606,10 +606,18 @@ body,
 }
 `;
 const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
-const _EMPTY_STATE_CSS=`.emptyState{display:flex;flex-direction:column;align-items:center}.emptyState__art{width:80px;height:80px;display:flex;align-items:center;justify-content:center}.emptyState__art svg{width:80px;height:80px;display:block}.emptyState__title{margin-top:24px}.emptyState__subtitle{margin-top:8px}.emptyState__accentDash{stroke-dasharray:72;stroke-dashoffset:72;animation:emptyArcDraw 1.2s ease-in-out infinite}.emptyState__ball{transform-box:fill-box;transform-origin:center;animation:emptyBallFloat 1.2s ease-in-out infinite}.emptyState__accentOrbit{transform-box:fill-box;transform-origin:center;animation:emptyOrbitPulse 1.2s ease-in-out infinite}.emptyState__accentPulse{animation:emptyAccentPulse 1.2s ease-in-out infinite}@keyframes emptyBallFloat{0%,100%{transform:translateY(1px)}50%{transform:translateY(-2px)}}@keyframes emptyArcDraw{0%{stroke-dashoffset:72}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-72}}@keyframes emptyOrbitPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}@keyframes emptyAccentPulse{0%,100%{opacity:.8}50%{opacity:1}}@media (prefers-reduced-motion: reduce){.emptyState__art *{animation:none!important;transition:none!important}}`;
+const _EMPTY_STATE_CSS=`.emptyState{display:flex;flex-direction:column;align-items:center;position:relative;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(12,17,22,0.92));border-style:dashed}.emptyState::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at top right, rgba(184,255,0,0.12), transparent 55%);opacity:.7}.emptyState>*{position:relative;z-index:1}.emptyState__art{width:80px;height:80px;display:flex;align-items:center;justify-content:center}.emptyState__art svg{width:80px;height:80px;display:block}.emptyState__title{margin-top:24px}.emptyState__subtitle{margin-top:8px}.emptyState--leaderboard{background:linear-gradient(180deg,rgba(0,229,255,0.08),rgba(12,17,22,0.92));border-color:rgba(0,229,255,0.20)}.emptyState--events{background:linear-gradient(180deg,rgba(184,255,0,0.09),rgba(12,17,22,0.92));border-color:rgba(184,255,0,0.22)}.emptyState--drills{background:linear-gradient(180deg,rgba(255,255,255,0.04),rgba(12,17,22,0.92));border-color:rgba(255,255,255,0.14)}.emptyState__accentDash{stroke-dasharray:72;stroke-dashoffset:72;animation:emptyArcDraw 1.2s ease-in-out infinite}.emptyState__ball{transform-box:fill-box;transform-origin:center;animation:emptyBallFloat 1.2s ease-in-out infinite}.emptyState__accentOrbit{transform-box:fill-box;transform-origin:center;animation:emptyOrbitPulse 1.2s ease-in-out infinite}.emptyState__accentPulse{animation:emptyAccentPulse 1.2s ease-in-out infinite}@keyframes emptyBallFloat{0%,100%{transform:translateY(1px)}50%{transform:translateY(-2px)}}@keyframes emptyArcDraw{0%{stroke-dashoffset:72}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-72}}@keyframes emptyOrbitPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}@keyframes emptyAccentPulse{0%,100%{opacity:.8}50%{opacity:1}}@media (prefers-reduced-motion: reduce){.emptyState__art *{animation:none!important;transition:none!important}}`;
 const _LIST_ROW_SYSTEM_CSS=`/* ---------- List Row System ---------- */
 :root{--row-py:14px;--row-px:16px;--row-gap:12px;--row-radius:18px;--row-border:rgba(255,255,255,0.08);--row-bg:rgba(255,255,255,0.03);--row-bg-hover:rgba(255,255,255,0.05);--text-title:rgba(255,255,255,0.92);--text-meta:rgba(255,255,255,0.70);--text-muted:rgba(255,255,255,0.55);--stat-strong:rgba(190,255,0,0.95);--status-won:rgba(190,255,0,0.90);--status-wait:rgba(255,255,255,0.55);}
 .listRow{display:flex;align-items:center;justify-content:space-between;padding:var(--row-py) var(--row-px);border:1px solid var(--row-border);background:var(--row-bg);border-radius:var(--row-radius);gap:var(--row-gap);}
+.listRow--leaderboard{background:transparent;border-radius:14px;border:1px solid rgba(255,255,255,0.08);padding:10px 12px;box-shadow:none;}
+.listRow--leaderboard .listRowLeft{gap:10px;}
+.listRow--leaderboard .listRowTitle{font-size:13px;letter-spacing:0.03em;}
+.listRow--leaderboard .listRowMeta{font-size:9px;letter-spacing:0.12em;text-transform:uppercase;}
+.listRow--leaderboard .listRowRight{min-width:70px;}
+.listRow--schedule{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(12,17,22,0.92));border-radius:20px;}
+.listRow--schedule .listRowMeta{display:flex;flex-wrap:wrap;gap:6px;letter-spacing:0.04em;}
+.listRow--metric{background:linear-gradient(180deg,rgba(184,255,0,0.10),rgba(12,17,22,0.9));border-color:rgba(184,255,0,0.22);}
 .listRow+.listRow{margin-top:12px;}
 .listRowLeft{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 auto;}
 .listRowText{min-width:0;display:flex;flex-direction:column;gap:4px;}
@@ -621,7 +629,11 @@ const _LIST_ROW_SYSTEM_CSS=`/* ---------- List Row System ---------- */
 .listRowStatus{font-size:12px;line-height:1.2;letter-spacing:0.06em;font-weight:700;}
 .listRowStatus--won{color:var(--status-won);}
 .listRowStatus--wait{color:var(--status-wait);}
-@media (hover:hover){.listRow:hover{background:var(--row-bg-hover);}}
+.eventMetaGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0;}
+.eventMetaCell{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 10px;}
+.eventMetaLabel{font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif;font-size:8px;letter-spacing:0.12em;color:rgba(255,255,255,0.56);text-transform:uppercase;}
+.eventMetaValue{font-family:"Barlow Condensed","Arial Narrow","Helvetica Neue",sans-serif;font-size:11px;color:rgba(255,255,255,0.9);margin-top:2px;line-height:1.3;}
+@media (hover:hover){.listRow:hover{background:var(--row-bg-hover);}.listRow--schedule:hover{background:linear-gradient(180deg,rgba(255,255,255,0.05),rgba(12,17,22,0.96));}}
 .listRow .btn-primary,.listRow .primaryButton,.listRow button.primary{height:44px;min-height:44px;box-shadow:none;}
 .listRow a,.listRow button{min-height:44px;}
 /* ---------- End List Row System ---------- */`;
@@ -1701,8 +1713,14 @@ return <div className="fade-up">
 }
 
 
-function StatTile({value,label,color}){
-return <div className="card" style={{padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
+function StatTile({value,label,color,variant="default"}){
+const variantStyles={
+default:{alignItems:"flex-start",textAlign:"left",background:CARD_BG,border:`1px solid ${BORDER_CLR}`},
+compact:{alignItems:"center",textAlign:"center",background:BG,border:`1px dashed ${BORDER_CLR}`},
+meter:{alignItems:"flex-start",textAlign:"left",background:"linear-gradient(180deg, rgba(184,255,0,0.09), rgba(12,17,22,0.85))",border:`1px solid ${VOLT}22`},
+};
+const tileStyle=variantStyles[variant]||variantStyles.default;
+return <div className={`card statTile statTile--${variant}`} style={{padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",...tileStyle}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
 }
 
 function ModeCard({title,subtitle,icon,stats,accent="home",isActive,onClick}){
@@ -1725,7 +1743,7 @@ return <button type="button" onClick={onClick} className={modeCardClass} style={
     </div>
     <div className="icon-btn-square" style={{boxShadow:"none"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
   </div>
-  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color}/>)}</div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>{stats.map((s,idx)=><StatTile key={s.label} value={s.value} label={s.label} color={s.color} variant={idx===1?"meter":idx===2?"compact":"default"}/>)}</div>
 </button>
 }
 
@@ -1827,7 +1845,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
   const pct=Math.round((p.total/leaderTotal)*100);
   const rowBg=i%2===0?CARD_BG:T.SURFACE;
 
-  if(isLeader) return <div key={p.email} className="lbRow listRow card card--raised" style={{"--pod-c":accentColor,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
+  if(isLeader) return <div key={p.email} className="lbRow listRow listRow--leaderboard card card--raised" style={{"--pod-c":accentColor,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
     <div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
     <div className="listRowLeft">
     <div className="lbRank" style={{background:`${accentColor}18`,border:`2px solid ${accentColor}`,fontFamily:FD,fontSize:14,color:accentColor}}>👑</div>
@@ -1843,7 +1861,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
     </div>
   </div>;
 
-  return <div key={p.email} className={`lbRow listRow card ${isMe?"card--accent card--active":""}`} style={{background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",position:"relative",overflow:"hidden"}}>
+  return <div key={p.email} className={`lbRow listRow listRow--leaderboard card ${isMe?"card--accent card--active":""}`} style={{background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",position:"relative",overflow:"hidden"}}>
     {isTop3&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
     {isMe&&<div className="decorativeLine" style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
     <div className="listRowLeft">
@@ -2075,7 +2093,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 </div>
 
 {/* Tier card */}
-<div className="eventPanel" style={{marginBottom:16}}>
+<div className="eventPanel listRow--metric" style={{marginBottom:16,padding:"16px 18px",borderRadius:18}}>
   <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative",gap:14}}>
     <div>
       <div className="eventPanelLabel" style={{color:"rgba(202,245,122,.9)"}}>ATTENDANCE RANK</div>
@@ -2166,19 +2184,19 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 <div className="eventsList">
 {upcoming.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;const relativeLabel=getRelativeLabel(ev.date);
   return <div key={ev.id}>
-    <div className="ch eventCard" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141922)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"20px 20px 0 0":20,textAlign:"left",position:"relative",overflow:"hidden",cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
+    <div className="ch eventCard listRow listRow--schedule" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141922)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"20px 20px 0 0":20,textAlign:"left",position:"relative",overflow:"hidden",cursor:"pointer",display:"block",padding:"16px 18px"}} onClick={()=>setExpanded(exp?null:ev.id)}>
       {going&&<div className="eventCardAccent"/>}
-      <div className="eventTop">
+      <div className="eventTop" style={{display:"flex",alignItems:"flex-start",gap:12}}>
         <div className="eventIcon" style={{border:`1px solid ${going?"rgba(184,255,0,.24)":"rgba(255,255,255,.10)"}`}}><EventIcon type={ev.type} size={24} color={going?"#D4FF6B":"#8D97A8"}/></div>
-        <div className="eventMain" style={{fontFamily:FB,color:MUTED}}>
+        <div className="eventMain" style={{fontFamily:FB,color:MUTED,flex:1,minWidth:0}}>
           <div className="eventTitle" style={{fontFamily:FD,color:LIGHT}}>{ev.title}</div>
-          <div className="eventMeta">
-            <span className="eventMetaChip eventMetaChip--priority">{formatEventDate(ev.date)}</span>
-            <span className="eventMetaChip">🕒 {ev.time}</span>
-            {relativeLabel&&<span className="eventMetaChip eventMetaChip--countdown">{relativeLabel}</span>}
+          <div className="eventMetaGrid">
+            <div className="eventMetaCell"><div className="eventMetaLabel">Date</div><div className="eventMetaValue">{formatEventDate(ev.date)}</div></div>
+            <div className="eventMetaCell"><div className="eventMetaLabel">Time</div><div className="eventMetaValue">{ev.time}</div></div>
+            <div className="eventMetaCell" style={{gridColumn:"span 2"}}><div className="eventMetaLabel">Location</div><div className="eventMetaValue">{ev.location}</div></div>
           </div>
+          {relativeLabel&&<div className="eventMeta" style={{marginBottom:8}}><span className="eventMetaChip eventMetaChip--countdown">{relativeLabel}</span></div>}
           <p className="eventDesc">{ev.desc}</p>
-          <div className="eventMeta"><span className="eventMetaChip eventMetaChip--quiet">📍 {ev.location}</span></div>
         </div>
         <div className="eventSide">
           <div style={{textAlign:"right"}}><div className="listRowStat" style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:24,lineHeight:1}}>{evR.length}</div><div className="listRowStatSub" style={{fontFamily:FB,fontSize:10,letterSpacing:1}}>GOING</div></div>
@@ -2819,19 +2837,21 @@ return <div className="fade-up">
 </div>}
 
 {/* Overall stats */}
-<div style={{background:CARD_BG,borderRadius:16,padding:"4px 20px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
+<div className="card--raised" style={{background:CARD_BG,borderRadius:16,padding:"12px 20px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,padding:"8px 0 4px"}}>SEASON TOTALS</div>
   <StatRow label="Total Drill Makes" value={totalMakes}/>
   <StatRow label="Shot Tracker Makes" value={totalShots} color={ORANGE}/>
   <StatRow label="Events Attended" value={eventsAttended} color={CYAN}/>
-  <StatRow label="S&C Sessions" value={scCount} color="#A0A0A0"/>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,paddingTop:10}}>
+    <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"10px 12px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:1}}>S&C Sessions</div><div style={{fontFamily:FD,color:"#A0A0A0",fontSize:20,marginTop:2}}>{scCount}</div></div>
+    <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"10px 12px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:1}}>Best Streak</div><div style={{fontFamily:FD,color:ORANGE,fontSize:20,marginTop:2}}>{bestStreak}D</div></div>
+  </div>
   <StatRow label="Challenges" value={`${challWon}/${challTotal}`} color={ORANGE} sub={challTotal>0?`${Math.round(challWon/challTotal*100)}% win rate`:"No challenges yet"}/>
-  <StatRow label="Best Streak" value={`${bestStreak}D`} color={ORANGE}/>
-  <div style={{height:4}}/>
 </div>
 
 {/* Per-drill breakdown with PBs and trends */}
 <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
-{drillStats.map(d=>{const accentColor=getDrillAccentColor(d.name);return <div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
+{drillStats.map(d=>{const accentColor=getDrillAccentColor(d.name);return <div key={d.id} className="listRow listRow--leaderboard" style={{background:CARD_BG,borderRadius:14,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,borderLeft:`3px solid ${accentColor}`,marginBottom:10,display:"block"}}>
   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
     <DrillIcon type={d.icon} size={20} color={accentColor}/>
     <div style={{flex:1,fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
