@@ -18,8 +18,8 @@ export default function CoachHero({
   onOpenSettings,
   onLogout,
 }) {
-  const mobilePadding = isOverview ? "10px 12px 8px" : "9px 12px 7px";
-  const desktopPadding = isOverview ? "11px 14px 10px" : "9px 14px 8px";
+  const mobilePadding = isOverview ? "9px 12px 7px" : "8px 12px 6px";
+  const desktopPadding = isOverview ? "10px 14px 8px" : "8px 14px 7px";
 
   return (
     <div
@@ -45,28 +45,11 @@ export default function CoachHero({
         }
       `}</style>
       {branding?.showWatermark ? (
-        <TeamWatermark logoUrl={logoUrl} primaryColor={branding?.primaryColor || accentColor} opacity={0.022} size={190} />
+        <TeamWatermark logoUrl={logoUrl} primaryColor={branding?.primaryColor || accentColor} opacity={0.014} size={190} />
       ) : null}
-      <div className="coach-hero" style={{ position: "relative", zIndex: 1, display: "grid", gap: 8 }}>
+      <div className="coach-hero" style={{ position: "relative", zIndex: 1, display: "grid", gap: 6 }}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-            <span
-              style={{
-                fontFamily: FD,
-                fontSize: 10,
-                letterSpacing: "var(--tracking-tight)",
-                textTransform: "uppercase",
-                borderRadius: 999,
-                padding: "3px 9px",
-                border: "1px solid var(--stroke-1)",
-                background: "rgba(255,255,255,0.02)",
-                color: "var(--text-2)",
-                opacity: 0.78,
-                flexShrink: 0,
-              }}
-            >
-              Coach mode
-            </span>
             <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0, flex: 1 }}>
               {avatar}
               <div style={{ minWidth: 0 }}>
@@ -88,14 +71,29 @@ export default function CoachHero({
                   style={{
                     fontFamily: FB,
                     color: "var(--text-3)",
-                    opacity: 0.84,
+                    opacity: 0.74,
                     fontSize: 8,
                     textTransform: "uppercase",
                     letterSpacing: "var(--tracking-tight)",
-                    marginTop: 2,
+                    marginTop: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
                   }}
                 >
-                  {isCoach ? "Head coach" : "Team staff"}
+                  <span>{isCoach ? "Head coach" : "Team staff"}</span>
+                  <span
+                    style={{
+                      borderRadius: 999,
+                      padding: "1px 6px",
+                      border: "1px solid var(--stroke-1)",
+                      background: "rgba(255,255,255,0.01)",
+                      color: "var(--text-3)",
+                      opacity: 0.58,
+                    }}
+                  >
+                    Coach mode
+                  </span>
                 </div>
               </div>
             </div>
@@ -147,7 +145,7 @@ export default function CoachHero({
           </div>
         </div>
 
-        <div style={{ marginTop: 1, padding: "6px 10px", borderRadius: 12, border: `1px solid ${accentColor ? `${accentColor}30` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}08` : "rgba(255,255,255,0.02)", maxWidth: "min(100%,460px)" }}>
+        <div style={{ marginTop: 0, padding: "5px 10px", borderRadius: 12, border: `1px solid ${accentColor ? `${accentColor}26` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}07` : "rgba(255,255,255,0.02)", maxWidth: "min(100%,460px)" }}>
           <TeamIdentity
             branding={branding || { logoUrl, primaryColor: accentColor, secondaryColor: accentColor }}
             teamName={teamName}

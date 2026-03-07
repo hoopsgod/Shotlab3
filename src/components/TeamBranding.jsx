@@ -38,7 +38,7 @@ export function TeamLogo({ logoUrl, teamName, size=64, primaryColor="#C8FF1A", b
 }
 
 export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold", compact=false, subtitle, showLogo=true }) {
-  const size=compact?50:mode==="bold"?76:62;
+  const size=compact?54:mode==="bold"?80:66;
   return (
     <div style={{display:"flex",alignItems:"center",gap:compact?10:14,minWidth:0,position:"relative"}}>
       {showLogo ? <div style={{position:"relative"}}>
@@ -47,10 +47,10 @@ export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold
       </div> : null}
       <div style={{minWidth:0}}>
         <div style={{fontFamily:FB,color:"var(--text-3)",fontSize:8,textTransform:"uppercase",letterSpacing:1.2,fontWeight:700}}>Team</div>
-        <div style={{fontFamily:FD,color:"#fff",fontSize:compact?20:26,letterSpacing:1.8,lineHeight:1.02,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(branding.useTeamNameInHeader===false?"ShotLab":(teamName||"ShotLab Team")).toUpperCase()}</div>
-        <div style={{display:"flex",gap:6,alignItems:"center",marginTop:4,flexWrap:"wrap"}}>
+        <div style={{fontFamily:FD,color:"#fff",fontSize:compact?20:26,letterSpacing:1.8,lineHeight:1.01,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(branding.useTeamNameInHeader===false?"ShotLab":(teamName||"ShotLab Team")).toUpperCase()}</div>
+        <div style={{display:"flex",gap:6,alignItems:"center",marginTop:2,flexWrap:"wrap"}}>
           {(mascotName||subtitle)?<span style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",textTransform:"uppercase",letterSpacing:1.1,fontWeight:600}}>{mascotName||subtitle}</span>:null}
-          {motto?<span style={{fontFamily:FB,fontSize:10,color:alphaFromHex(branding.secondaryColor,0.95),textTransform:"uppercase",letterSpacing:1,fontWeight:700}}>“{motto}”</span>:null}
+          {motto?<span style={{fontFamily:FB,fontSize:9,color:alphaFromHex(branding.secondaryColor,0.8),textTransform:"uppercase",letterSpacing:0.9,fontWeight:700,opacity:0.82}}>“{motto}”</span>:null}
         </div>
       </div>
     </div>
@@ -60,7 +60,7 @@ export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold
 export function TeamWatermark({ logoUrl, primaryColor="#C8FF1A", opacity=0.07, size=220 }) {
   if(!logoUrl)return null;
   return (
-    <div aria-hidden style={{position:"absolute",right:-28,top:-28,width:size,height:size,opacity:Math.min(opacity,0.03),pointerEvents:"none",filter:"grayscale(0.55)"}}>
+    <div aria-hidden style={{position:"absolute",right:-28,top:-28,width:size,height:size,opacity:Math.min(opacity,0.02),pointerEvents:"none",filter:"grayscale(0.62)"}}>
       <img src={logoUrl} alt="" style={{width:"100%",height:"100%",objectFit:"contain",mixBlendMode:"screen",filter:`drop-shadow(0 0 8px ${alphaFromHex(primaryColor,0.1)})`}}/>
     </div>
   );
