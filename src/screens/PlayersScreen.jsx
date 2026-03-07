@@ -110,7 +110,8 @@ export default function PlayersScreen() {
   });
 
   return (
-    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)" }}>
+    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)",
+      paddingBottom: "calc(var(--nav-height, 74px) + var(--space-8) + env(safe-area-inset-bottom))" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
         <Users size={22} color="var(--text-2)" />
         <span
@@ -155,7 +156,7 @@ export default function PlayersScreen() {
           background: "var(--surface-1)",
           border: "1px solid var(--stroke-1)",
           borderRadius: "var(--radius-lg)",
-          padding: "var(--space-3) var(--space-4)",
+          padding: "var(--space-4)",
           marginBottom: "var(--space-4)",
           display: "flex",
           alignItems: "center",
@@ -211,7 +212,7 @@ export default function PlayersScreen() {
               background: "var(--surface-2)",
               border: "1px solid rgba(167, 187, 211, 0.34)",
               borderRadius: "16px",
-              padding: "15px var(--space-4)",
+              padding: "var(--space-4)",
               marginBottom: "var(--space-3)",
               display: "flex",
               alignItems: "center",
@@ -237,7 +238,7 @@ export default function PlayersScreen() {
               {player.name?.[0] || "?"}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: 6 }}>
+              <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: "var(--space-2)" }}>
                 {player.name}
               </div>
               <StatusBadge active={player.active} />
@@ -254,7 +255,7 @@ export default function PlayersScreen() {
           textTransform: "uppercase",
           letterSpacing: "0.06em",
           color: "var(--text-2)",
-          marginTop: "var(--space-6)",
+          marginTop: "var(--space-8)",
           marginBottom: "var(--space-3)",
         }}
       >
