@@ -15,6 +15,7 @@ import ListItem from "./components/ListItem";
 import SectionContainer from "./components/SectionContainer";
 import HeroBanner from "./components/HeroBanner";
 import BrandLogo from "./components/BrandLogo";
+import ContextSummary from "./components/ContextSummary";
 import spacing from "./spacing";
 import UI_TOKENS from "./styles/tokens";
 import { cloudStore } from "./lib/cloudStore";
@@ -1255,6 +1256,15 @@ const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`
 const teamBranding=sanitizeTeamBranding(team?.branding);
 const coachPrimary=teamBranding.primaryColor;
 const coachSecondary=teamBranding.secondaryColor;
+const coachName=useMemo(()=>{
+  const coach=players.find((p)=>p.teamId===u.teamId&&p.role==="coach");
+  return coach?.name||"";
+},[players,u.teamId]);
+const contextItems=useMemo(()=>[
+  team?.name?{label:"Team",value:team.name}:null,
+  coachName?{label:"Coach",value:coachName}:null,
+  u.role?{label:"Role",value:u.role.charAt(0).toUpperCase()+u.role.slice(1)}:null,
+].filter(Boolean),[coachName,team?.name,u.role]);
 
 // Notification dots for nav
 const pendingDuels=useMemo(()=>challenges.filter(c=>c.to===u.email&&c.status==="pending").length,[challenges,u]);
@@ -1396,6 +1406,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
         Log today&apos;s shots
       </button>
     </section>
+    <ContextSummary title="Team context" items={contextItems} />
 
     <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:12,alignItems:"start"}}>
       <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
@@ -1569,7 +1580,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T}/></div>}
+  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} contextItems={contextItems}/></div>}
   {tab==="settings"&&<div className={slideClass} key="settings"><PlayerSettingsPage u={u} onDeleteAccount={deleteAccount} onResetPassword={onResetPassword}/></div>}
 </div>
 
@@ -2942,7 +2953,7 @@ return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s
 // ═══════════════════════════════════════
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
-function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T}){
+function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,contextItems=[]}){
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const totalMakes=homeScores.reduce((a,s)=>a+s.score,0);
@@ -2974,6 +2985,7 @@ const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignI
   </div>;
 
 return <SectionContainer className="fade-up">
+<ContextSummary title="Team context" items={contextItems}/>
 {u.isCoach&&<div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}><div style={{fontSize:13,color:"#C8FF00",textTransform:"uppercase",letterSpacing:"0.10em",fontFamily:FB,fontWeight:700,marginBottom:10}}>COACH ACCOUNT</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${BORDER_CLR}66`}}><div style={{display:"flex",alignItems:"center",gap:8}}><UsersIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ROLE</span></div><span style={{fontSize:13,color:"#FFFFFF",fontFamily:FB}}>Coach</span></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}><div style={{display:"flex",alignItems:"center",gap:8}}><ShieldIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ACCESS</span></div><span style={{fontSize:13,color:"#C8FF00",fontFamily:FB}}>Full Program Access</span></div></div>}
 <ProgressCharts scores={scores} shotLogs={shotLogs} userEmail={u.email} drills={drills}/>
 {/* ══════ SHAREABLE SEASON CARD ══════ */}
