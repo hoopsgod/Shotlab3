@@ -54,9 +54,9 @@ const MODE_CARD_TOKENS={
 BASE_BG:"var(--surface-1)",
 BASE_BORDER:"var(--border-1)",
 BASE_SHADOW:"var(--shadow-1)",
-HOME_TINT:"rgba(200, 255, 0, 0.12)",
+HOME_TINT:"rgba(142, 170, 92, 0.08)",
 PROGRAM_TINT:"rgba(0, 176, 255, 0.12)",
-HOME_GLOW:"rgba(184,255,0,.16)",
+HOME_GLOW:"rgba(142,170,92,.09)",
 PROGRAM_GLOW:"rgba(184,255,0,.16)",
 ICON_INNER:"rgba(255, 255, 255, 0.06)",
 FOCUS_RING:"rgba(200, 255, 0, 0.45)",
@@ -1882,10 +1882,12 @@ return Object.values(m).sort((a,b)=>b.total-a.total);
 
 const isHome=mode==="home";
 const accentColor=isHome?VOLT:CYAN;
+const homeMutedAccent="rgba(142, 170, 92, 0.92)";
+const homeMutedBorder="rgba(142, 170, 92, 0.42)";
 const unit=sub==="shots"?"makes":sub==="events"?"events":sub==="sc"?"sessions":"makes";
 const title=isHome?"AT HOME":"PROGRAM";
 const modeStyles={
-home:{accent:VOLT,bg:"rgba(200, 255, 0, 0.14)",glow:"0 0 18px rgba(200, 255, 0, 0.28)",label:"🏠"},
+home:{accent:homeMutedAccent,bg:"rgba(142, 170, 92, 0.10)",glow:"0 0 8px rgba(142, 170, 92, 0.14)",label:"🏠"},
 prog:{accent:CYAN,bg:"rgba(0, 229, 255, 0.14)",glow:"0 0 18px rgba(0, 229, 255, 0.28)",label:"📅"}
 };
 
@@ -1894,7 +1896,7 @@ const switchMode=(m)=>{setMode(m);setSub(m==="home"?"shots":"events")};
 
 return <SectionContainer>
 {/* Mode toggle */}
-<div style={{display:"flex",gap:8,background:"#121212",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(200, 255, 0, 0.24)"}}>
+<div style={{display:"flex",gap:8,background:"#121212",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(68, 82, 58, 0.6)"}}>
 {[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=>{
 const active=mode===m.k;
 const thisMode=modeStyles[m.k];
@@ -1915,8 +1917,8 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 
 {/* Title */}
 <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-  <div style={{width:4,height:22,borderRadius:2,background:accentColor}}/>
-  <div style={{fontFamily:FD,color:accentColor,fontSize:18,letterSpacing:3,flex:1}}>{title} LEADERBOARD</div>
+  <div style={{width:4,height:22,borderRadius:2,background:isHome?homeMutedAccent:accentColor}}/>
+  <div style={{fontFamily:FD,color:isHome?"rgba(196, 214, 162, 0.85)":accentColor,fontSize:18,letterSpacing:3,flex:1}}>{title} LEADERBOARD</div>
   <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{board.length}</div>
 </div>
 
@@ -1927,7 +1929,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 {/* YOUR POSITION — sticky anchor */}
 {(()=>{const myIdx=board.findIndex(p=>p.email===user.email);const myEntry=board[myIdx];
   if(myIdx<0)return null;
-  return <div style={{background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:14,padding:"12px 16px",marginBottom:14,border:`2px solid ${accentColor}44`,display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
+  return <div style={{background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:14,padding:"12px 16px",marginBottom:14,border:`2px solid ${isHome?homeMutedBorder:`${accentColor}44`}`,display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
     <div style={{width:4,height:28,borderRadius:2,background:accentColor,flexShrink:0}}/>
     <div style={{fontFamily:FD,color:accentColor,fontSize:24}}>#{myIdx+1}</div>
     <div style={{flex:1,minWidth:0}}>
