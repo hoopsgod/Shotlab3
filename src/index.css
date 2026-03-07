@@ -53,7 +53,7 @@
 .progress-track,
 [class*="progressTrack"],
 [class*="track"] {
-  height: 10px;
+  height: 8px;
   border-radius: 999px;
   background: rgba(255,255,255,0.10);
   border: 1px solid rgba(255,255,255,0.10);
@@ -79,7 +79,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 8px;
   font-variant-numeric: tabular-nums;
 }
@@ -105,12 +105,12 @@
 :root {
   --input-h: 48px;
   --input-radius: 14px;
-  --input-pad-x: 14px;
+  --input-pad-x: 16px;
   --field-gap: var(--space-2, 8px);
   --label-gap: var(--space-2, 8px);
   --border-1: var(--stroke-1, rgba(255, 255, 255, 0.10));
   --muted: var(--text-2, rgba(255, 255, 255, 0.65));
-  --fs-caption: 11px;
+  --fs-caption: 12px;
   --fw-semibold: 600;
   --ls-normal: 0.02em;
   --surface-2: #141821;
@@ -198,8 +198,8 @@ li,
 .row,
 .cardRow,
 .card-row {
-  padding-top: 14px;
-  padding-bottom: 14px;
+  padding-top: 8px;
+  padding-bottom: 8px;
 }
 
 /* Forms: slightly more breathing room between fields (best effort) */
@@ -216,3 +216,23 @@ form > * + * {
   margin-bottom: var(--field-gap);
 }
 
+
+
+/* Baseline 8px rhythm */
+.section,
+section,
+.page section {
+  margin-bottom: 24px;
+}
+
+.card,
+[class*="card"] {
+  --baseline-card-padding: 16px;
+}
+
+.listRow,
+.list-row,
+.listItem,
+.list-item {
+  gap: 8px;
+}

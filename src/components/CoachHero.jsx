@@ -57,8 +57,8 @@ export default function CoachHero({
   onOpenSettings,
   onLogout,
 }) {
-  const mobilePadding = isOverview ? "9px 12px 7px" : "8px 12px 6px";
-  const desktopPadding = isOverview ? "10px 14px 8px" : "8px 14px 7px";
+  const mobilePadding = isOverview ? "16px" : "8px 16px";
+  const desktopPadding = isOverview ? "24px" : "16px 24px";
 
   return (
     <div
@@ -86,10 +86,10 @@ export default function CoachHero({
       {branding?.showWatermark ? (
         <TeamWatermark logoUrl={logoUrl} primaryColor={branding?.primaryColor || accentColor} opacity={0.014} size={190} />
       ) : null}
-      <div className="coach-hero" style={{ position: "relative", zIndex: 1, display: "grid", gap: 6 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 10 }}>
+      <div className="coach-hero" style={{ position: "relative", zIndex: 1, display: "grid", gap: 8 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0, flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0, flex: 1 }}>
               {avatar}
               <div style={{ minWidth: 0 }}>
                 <div

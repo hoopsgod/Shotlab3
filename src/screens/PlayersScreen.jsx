@@ -79,7 +79,7 @@ export default function PlayersScreen() {
 
   return (
     <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-2)" }}>
         <Users size={22} color="var(--text-2)" />
         <span
           style={{
@@ -106,7 +106,7 @@ export default function PlayersScreen() {
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{
           fontSize: "14px",
-          marginBottom: "var(--space-3)",
+          marginBottom: "var(--space-2)",
         }}
       />
 
@@ -121,8 +121,8 @@ export default function PlayersScreen() {
       <div
         style={{
           background: "var(--surface-2)",
-          borderRadius: "12px",
-          padding: "var(--space-3) var(--space-4)",
+          borderRadius: "16px",
+          padding: "var(--space-4)",
           marginBottom: "var(--space-4)",
           display: "flex",
           alignItems: "center",
@@ -175,11 +175,11 @@ export default function PlayersScreen() {
               background: "var(--surface-2)",
               border: "1px solid var(--stroke-1)",
               borderRadius: "16px",
-              padding: "15px var(--space-4)",
-              marginBottom: "var(--space-3)",
+              padding: "var(--space-4)",
+              marginBottom: "var(--space-2)",
               display: "flex",
               alignItems: "center",
-              gap: "var(--space-3)",
+              gap: "var(--space-2)",
               cursor: "pointer",
             }}
           >
@@ -216,7 +216,7 @@ export default function PlayersScreen() {
           letterSpacing: "0.10em",
           color: "var(--text-1)",
           marginTop: "var(--space-6)",
-          marginBottom: "var(--space-3)",
+          marginBottom: "var(--space-2)",
         }}
       >
         GROW YOUR ROSTER
@@ -230,7 +230,7 @@ export default function PlayersScreen() {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "var(--space-3)",
+          gap: "var(--space-2)",
         }}
       >
         <UserPlus size={32} color="var(--text-2)" />
