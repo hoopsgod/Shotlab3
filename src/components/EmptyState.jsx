@@ -17,7 +17,7 @@ export default function EmptyState({
   title,
   subtitle,
   onTap,
-  cta = "GET STARTED",
+  cta,
   ctaVariant = "primary",
   secondaryCta,
   onSecondaryTap,
@@ -39,19 +39,21 @@ export default function EmptyState({
           {subtitle}
         </p>
       )}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginTop: 16 }}>
-        <Button
-          onClick={onTap || (() => {})}
-          variant={ctaVariant}
-          className={ctaVariant === "tertiary" ? "" : "btn-v"}
-          style={{
-            width: ctaVariant === "tertiary" ? "auto" : "calc(100% - 32px)",
-            marginLeft: ctaVariant === "tertiary" ? "auto" : 16,
-            marginRight: ctaVariant === "tertiary" ? "auto" : 16,
-          }}
-        >
-          {cta}
-        </Button>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginTop: cta || secondaryCta ? 16 : 0 }}>
+        {cta && (
+          <Button
+            onClick={onTap || (() => {})}
+            variant={ctaVariant}
+            className={ctaVariant === "tertiary" ? "" : "btn-v"}
+            style={{
+              width: ctaVariant === "tertiary" ? "auto" : "calc(100% - 32px)",
+              marginLeft: ctaVariant === "tertiary" ? "auto" : 16,
+              marginRight: ctaVariant === "tertiary" ? "auto" : 16,
+            }}
+          >
+            {cta}
+          </Button>
+        )}
         {secondaryCta && (
           <Button onClick={onSecondaryTap || (() => {})} variant={secondaryCtaVariant}>
             {secondaryCta}
