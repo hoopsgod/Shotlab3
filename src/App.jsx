@@ -1114,7 +1114,6 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <p style={{fontFamily:FB,color:LIGHT,textAlign:"center",fontSize:22,lineHeight:1.25,letterSpacing:0.2,margin:"14px auto 0",fontWeight:600,maxWidth:460}}>Track your shots. Compete with teammates. Improve with purpose.</p>
 <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:14,lineHeight:1.45,margin:"10px auto 0",maxWidth:440}}>Shotlab helps your team log reps, compare progress, and stay accountable through every training block.</p>
 <div className="auth-card-enter" style={{background:CARD_BG,borderRadius:18,padding:"26px 22px",border:`1px solid ${BORDER_CLR}`,marginTop:22}}>
-<div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}><button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:36,padding:"0 10px",fontSize:11}}>{highContrast?"High contrast: ON":"High contrast: OFF"}</button></div>
 {/* Login / Register toggle */}
 <div role="tablist" aria-label="Authentication mode" style={{display:"flex",background:"#1A1A1A",borderRadius:10,padding:2,marginBottom:18,border:"1px solid #2A2A2A"}}>
 {["login","register"].map(m=><button key={m} role="tab" aria-selected={mode===m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,height:40,borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,letterSpacing:"0.08em",textTransform:"uppercase",transition:"all .15s ease",background:mode===m?"#F1F5FF":"transparent",color:mode===m?"#0E1420":"#8E95A3",fontWeight:mode===m?700:600}}>{m==="login"?"Sign in":"Register"}</button>)}
@@ -1157,6 +1156,9 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       <span style={{color:"#CED6E5",fontWeight:700}}>{mode==="login"?"Create an account":"Sign in"}</span>
     </p>
     {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:10,lineHeight:1.5}}>By creating an account, you agree to our data practices. If Firebase is configured, your training data is securely synced and can be managed from Settings.</p>}
+    <div style={{marginTop:12,paddingTop:10,borderTop:"1px solid #222222",display:"flex",justifyContent:"center"}}>
+      <button type="button" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:32,padding:"0 8px",fontSize:10,fontFamily:FB,fontWeight:600,color:MUTED,background:"transparent",border:"1px solid #2C2C2C",borderRadius:999,cursor:"pointer",opacity:0.9}}>{highContrast?"High contrast: ON":"High contrast: OFF"}</button>
+    </div>
   </div>
 </div>
 
