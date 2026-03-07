@@ -6,24 +6,24 @@
   --space-5: 20px;
   --space-6: 24px;
 
-  --type-h1-size: clamp(1.75rem, 2.8vw, 2rem);
-  --type-h2-size: clamp(1.35rem, 2.2vw, 1.5rem);
-  --type-h3-size: 1.125rem;
+  --type-h1-size: clamp(1.875rem, 3.1vw, 2.25rem);
+  --type-h2-size: clamp(1.5rem, 2.4vw, 1.75rem);
+  --type-h3-size: 1.1875rem;
   --type-body-size: 1rem;
-  --type-caption-size: 0.8125rem;
+  --type-caption-size: 0.875rem;
 
   --type-h1-weight: 700;
   --type-h2-weight: 700;
   --type-h3-weight: 600;
-  --type-body-weight: 500;
+  --type-body-weight: 400;
 }
 
 .page h1,
 .page .type-display {
   font-size: var(--type-h1-size) !important;
   font-weight: var(--type-h1-weight) !important;
-  line-height: 1.1 !important;
-  letter-spacing: 0.02em !important;
+  line-height: 1.15 !important;
+  letter-spacing: 0.01em !important;
 }
 
 .page h2,
@@ -31,7 +31,7 @@
   font-size: var(--type-h2-size) !important;
   font-weight: var(--type-h2-weight) !important;
   line-height: 1.2 !important;
-  letter-spacing: 0.02em !important;
+  letter-spacing: 0.01em !important;
 }
 
 .page h3,
@@ -42,6 +42,7 @@
   font-size: var(--type-h3-size) !important;
   font-weight: var(--type-h3-weight) !important;
   line-height: 1.3 !important;
+  letter-spacing: 0.005em !important;
 }
 
 .page p,
@@ -51,7 +52,7 @@
 .page .u-secondary-text {
   font-size: var(--type-body-size);
   font-weight: var(--type-body-weight);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .page .type-caption,
@@ -62,7 +63,7 @@
 .page .panel-title {
   font-size: var(--type-caption-size) !important;
   font-weight: 600 !important;
-  line-height: 1.35 !important;
-  letter-spacing: 0.08em !important;
-  text-transform: uppercase;
+  line-height: 1.4 !important;
+  letter-spacing: 0.03em !important;
+  text-transform: none;
 }
