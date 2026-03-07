@@ -6,7 +6,7 @@ function ListItem({ as: Component = "div", className = "", style, children, ...p
       {...props}
       className={`shared-nav-item ${className}`.trim()}
       style={{
-        padding: `${spacing.md}px`,
+        padding: `${spacing.compactCard}px`,
         ...style,
       }}
     >

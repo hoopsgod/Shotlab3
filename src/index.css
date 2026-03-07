@@ -37,7 +37,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-bottom: 8px;
   font-variant-numeric: tabular-nums;
 }
@@ -180,7 +180,7 @@ form > * + * {
 }
 
 .mode-card-stat {
-  gap: 10px;
+  gap: 12px;
   text-align: left;
 }
 
@@ -190,13 +190,17 @@ form > * + * {
   font-variant-numeric: tabular-nums;
 }
 
+.page > section + section {
+  margin-top: var(--section-gap);
+}
+
 @media (max-width: 540px) {
   .mode-card-stats-grid {
     grid-template-columns: 1fr;
   }
 
   .mode-card-stat {
-    min-height: 82px !important;
+    min-height: 80px !important;
   }
 
   .mode-card-stat-value {

@@ -1,9 +1,9 @@
 import spacing from "../spacing";
 
 const CARD_VARIANT_STYLES = {
-  primary: { className: "shared-card--primary", padding: `${spacing.lg}px`, gap: spacing.sm },
-  secondary: { className: "shared-card--secondary", padding: `${spacing.md}px`, gap: spacing.sm },
-  subtle: { className: "shared-card--subtle", padding: `${spacing.md}px`, gap: spacing.sm },
+  primary: { className: "shared-card--primary", padding: `${spacing.standardCard}px`, gap: spacing.controlGapDefault },
+  secondary: { className: "shared-card--secondary", padding: `${spacing.compactCard}px`, gap: spacing.controlGapTight },
+  subtle: { className: "shared-card--subtle", padding: `${spacing.compactCard}px`, gap: spacing.controlGapTight },
 };
 
 const LEGACY_VARIANT_MAP = {

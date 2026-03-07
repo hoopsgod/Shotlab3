@@ -3,7 +3,7 @@ function SectionContainer({ as: Component = "section", style, children, ...props
     <Component
       {...props}
       style={{
-        marginBottom: "var(--section-gap)",
+        marginBottom: "var(--stack-section)",
         ...style,
       }}
     >

@@ -110,7 +110,7 @@ export default function PlayersScreen() {
   });
 
   return (
-    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)" }}>
+    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--card-pad-standard)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
         <Users size={22} color="var(--text-2)" />
         <span
@@ -155,7 +155,7 @@ export default function PlayersScreen() {
           background: "var(--surface-1)",
           border: "1px solid var(--stroke-1)",
           borderRadius: "var(--radius-lg)",
-          padding: "var(--space-3) var(--space-4)",
+          padding: "var(--card-pad-standard)",
           marginBottom: "var(--space-4)",
           display: "flex",
           alignItems: "center",
@@ -180,7 +180,7 @@ export default function PlayersScreen() {
       {players.length === 0 ? (
         <div
           style={{
-            minHeight: "280px",
+            minHeight: "288px",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -210,8 +210,8 @@ export default function PlayersScreen() {
             style={{
               background: "var(--surface-2)",
               border: "1px solid rgba(167, 187, 211, 0.34)",
-              borderRadius: "16px",
-              padding: "15px var(--space-4)",
+              borderRadius: "var(--radius-lg)",
+              padding: "var(--card-pad-compact)",
               marginBottom: "var(--space-3)",
               display: "flex",
               alignItems: "center",
@@ -221,10 +221,10 @@ export default function PlayersScreen() {
           >
             <div
               style={{
-                width: "44px",
-                height: "44px",
+                width: "48px",
+                height: "48px",
                 background: "var(--surface-1)",
-                borderRadius: "50%",
+                borderRadius: "var(--radius-pill)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -237,7 +237,7 @@ export default function PlayersScreen() {
               {player.name?.[0] || "?"}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: 6 }}>
+              <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: 8 }}>
                 {player.name}
               </div>
               <StatusBadge active={player.active} />
@@ -254,7 +254,7 @@ export default function PlayersScreen() {
           textTransform: "uppercase",
           letterSpacing: "0.06em",
           color: "var(--text-2)",
-          marginTop: "var(--space-6)",
+          marginTop: "var(--space-8)",
           marginBottom: "var(--space-3)",
         }}
       >
@@ -264,8 +264,8 @@ export default function PlayersScreen() {
         style={{
           background: "var(--surface-2)",
           border: "1px solid var(--stroke-1)",
-          borderRadius: "16px",
-          padding: "var(--space-4)",
+          borderRadius: "var(--radius-lg)",
+          padding: "var(--card-pad-standard)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
