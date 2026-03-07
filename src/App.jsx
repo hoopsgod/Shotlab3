@@ -69,9 +69,9 @@ CARD_PAD_Y:spacing.md,
 CARD_HEAD_GAP:spacing.sm,
 ICON_GAP:spacing.sm,
 STAT_TILE_GAP:spacing.sm,
-LEADERBOARD_ROW_PAD_Y:12,
+LEADERBOARD_ROW_PAD_Y:spacing.dense,
 LEADERBOARD_ROW_PAD_X:spacing.md,
-ACTION_SIZE:36,
+ACTION_SIZE:spacing.xl + spacing.xs,
 };
 
 const DRILLS_INIT=[
@@ -1909,7 +1909,7 @@ return <SectionContainer style={{marginBottom:DASHBOARD_SPACING.SECTION_GAP}}>
 {[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=>{
 const active=mode===m.k;
 const thisMode=modeStyles[m.k];
-return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid ${active?thisMode.accent+"AA":"#353535"}`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,transition:"all 180ms ease",background:active?`linear-gradient(180deg, ${thisMode.bg}, #131313 85%)`:"#171717",color:active?thisMode.accent:"#7A7A7A",boxShadow:active?thisMode.glow:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:8,textShadow:active?`0 0 8px ${thisMode.accent}55`:"none"}}><span aria-hidden="true" style={{fontSize:12,lineHeight:1,opacity:active?1:.65}}>{thisMode.label}</span>{m.l}</button>
+return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid ${active?thisMode.accent+"AA":"#353535"}`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,transition:"all 180ms ease",background:active?`linear-gradient(180deg, ${thisMode.bg}, #131313 85%)`:"#171717",color:active?thisMode.accent:"#7A7A7A",boxShadow:active?thisMode.glow:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:DASHBOARD_SPACING.ICON_GAP,textShadow:active?`0 0 8px ${thisMode.accent}55`:"none"}}><span aria-hidden="true" style={{fontSize:12,lineHeight:1,opacity:active?1:.65}}>{thisMode.label}</span>{m.l}</button>
 })}
 </div>
 
@@ -1925,7 +1925,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 </div>
 
 {/* Title */}
-<div style={{display:"flex",alignItems:"center",gap:DASHBOARD_SPACING.ICON_GAP,marginBottom:DASHBOARD_SPACING.SECTION_GAP_SM}}> 
+<div style={{display:"flex",alignItems:"center",gap:DASHBOARD_SPACING.ICON_GAP,marginBottom:DASHBOARD_SPACING.SECTION_GAP_SM}}>
   <div style={{width:4,height:22,borderRadius:2,background:accentColor}}/>
   <div style={{fontFamily:FD,color:accentColor,fontSize:18,letterSpacing:3,flex:1}}>{title} LEADERBOARD</div>
   <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{board.length}</div>
