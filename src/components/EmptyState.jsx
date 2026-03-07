@@ -16,37 +16,45 @@ export default function EmptyState({
   variant,
   title,
   subtitle,
+  description,
   onTap,
+  onCtaClick,
   cta = "GET STARTED",
+  ctaLabel,
   ctaVariant = "primary",
   secondaryCta,
   onSecondaryTap,
   secondaryCtaVariant = "tertiary",
   icon,
+  className,
 }) {
   const Art = variant ? ART_BY_VARIANT[variant] : null;
+  const primaryLabel = ctaLabel ?? cta;
+  const primaryAction = onCtaClick ?? onTap;
 
   return (
-    <Card variant="empty" className="emptyState card card--empty">
+    <Card variant="empty" className={`emptyState card card--empty ${className || ""}`.trim()}>
       <div className="emptyState__art">
         {Art ? <Art /> : icon}
       </div>
       <p className="emptyState__title">
         {title}
       </p>
-      {subtitle && (
+      {(description || subtitle) && (
         <p className="emptyState__subtitle u-secondary-text">
-          {subtitle}
+          {description || subtitle}
         </p>
       )}
       <div className="emptyState__actions">
-        <Button
-          onClick={onTap || (() => {})}
-          variant={ctaVariant}
-          className={`${ctaVariant === "tertiary" ? "" : "btn-v"} ${ctaVariant === "primary" ? "emptyState__primary" : ""}`.trim()}
-        >
-          {cta}
-        </Button>
+        {primaryLabel && primaryAction && (
+          <Button
+            onClick={primaryAction}
+            variant={ctaVariant}
+            className={`${ctaVariant === "tertiary" ? "" : "btn-v"} ${ctaVariant === "primary" ? "emptyState__primary" : ""}`.trim()}
+          >
+            {primaryLabel}
+          </Button>
+        )}
         {secondaryCta && (
           <Button onClick={onSecondaryTap || (() => {})} variant={secondaryCtaVariant}>
             {secondaryCta}
