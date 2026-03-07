@@ -113,9 +113,9 @@
   --fs-caption: 11px;
   --fw-semibold: 600;
   --ls-normal: 0.02em;
-  --surface-2: #141821;
-  --text-1: #E5E7EB;
-  --accent: #C8FF1A;
+  --surface-2: #0F1620;
+  --text-1: rgba(255,255,255,.92);
+  --accent: #B8FF00;
 }
 
 .field {
