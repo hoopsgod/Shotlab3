@@ -1387,21 +1387,22 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
-    <section style={{marginBottom:18}}>
+    <section style={{marginBottom:18,background:"#FFFFFF",border:"1px solid #D1FAE5",borderRadius:16,padding:10,boxShadow:"0 6px 20px rgba(16,185,129,0.12)"}}>
       <button
         className="btn btn--primary"
         onClick={()=>setTab("log-drill")}
-        style={{width:"100%",minHeight:52,fontFamily:FB,fontSize:14,fontWeight:800,letterSpacing:1,textTransform:"uppercase"}}
+        style={{width:"100%",minHeight:56,fontFamily:FB,fontSize:15,fontWeight:800,letterSpacing:1,textTransform:"uppercase",boxShadow:"0 8px 24px rgba(5,150,105,0.35)"}}
       >
         Log today&apos;s shots
       </button>
+      <div style={{fontFamily:FB,color:"#065F46",fontSize:11,fontWeight:700,marginTop:8,textAlign:"center"}}>Start here to keep your streak alive.</div>
     </section>
 
     <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:12,alignItems:"start"}}>
       <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
         <div style={{fontFamily:FB,color:"#6B7280",fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase",marginBottom:10}}>Upcoming sessions</div>
         {upcomingEvents.length===0?<div style={{fontFamily:FB,color:"#374151",fontSize:12,lineHeight:1.4}}>No upcoming sessions scheduled.</div>:upcomingEvents.slice(0,3).map(ev=><div key={ev.id} style={{padding:"7px 0",borderTop:"1px solid #E5E7EB"}}><div style={{fontFamily:FB,color:"#111827",fontSize:12,fontWeight:700,lineHeight:1.2}}>{ev.title}</div><div style={{fontFamily:FB,color:"#6B7280",fontSize:11,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
-        <button onClick={()=>setTab("program")} style={{marginTop:10,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:700,color:"#2563EB",cursor:"pointer"}}>View all sessions →</button>
+        <button onClick={()=>setTab("program")} style={{marginTop:10,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:600,color:"#4B5563",cursor:"pointer"}}>View all sessions →</button>
       </section>
 
       <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
@@ -1410,7 +1411,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
           <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"10px 8px"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Pending</div><div style={{fontFamily:FD,color:"#111827",fontSize:24,lineHeight:1.1}}>{pendingDuels}</div></div>
           <div style={{background:"#F9FAFB",border:"1px solid #E5E7EB",borderRadius:10,padding:"10px 8px"}}><div style={{fontFamily:FB,color:"#6B7280",fontSize:10}}>Open</div><div style={{fontFamily:FD,color:"#111827",fontSize:24,lineHeight:1.1}}>{myOpenDuels}</div></div>
         </div>
-        <button onClick={()=>setTab("duels")} style={{marginTop:10,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:700,color:"#2563EB",cursor:"pointer"}}>Manage duels →</button>
+        <button onClick={()=>setTab("duels")} style={{marginTop:10,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:600,color:"#4B5563",cursor:"pointer"}}>Manage duels →</button>
       </section>
 
       <section style={{background:"#FFFFFF",border:"1px solid #E5E7EB",borderRadius:14,padding:"14px 14px"}}>
