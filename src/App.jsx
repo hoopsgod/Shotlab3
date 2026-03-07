@@ -1125,29 +1125,39 @@ return <span title={text} aria-label={text} style={{display:"inline-flex",alignI
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
 function Player({u,team,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,highContrast,onToggleHighContrast}){
-const initialTab = u.isCoach && window.location.pathname === "/players" ? "players" : "home";
+const resolvePlayerTabFromPath=()=>{
+  const path=window.location.pathname;
+  if(path==="/players")return "compete";
+  if(path==="/compete")return "compete";
+  if(path==="/sessions")return "sessions";
+  if(path==="/progress")return "progress";
+  if(path==="/account")return "account";
+  return "train";
+};
+const initialTab = resolvePlayerTabFromPath();
 const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
 const[shotMade,setShotMade]=useState(0),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false),[shotError,setShotError]=useState("");
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
+const[trainFilter,setTrainFilter]=useState("solo");
 const[showWelcomeGuide,dismissWelcomeGuide]=useDismissedGuide("sl:guide:welcome");
 const[showHomeGuide,dismissHomeGuide]=useDismissedGuide("sl:guide:home-cards");
 const[showLogGuide,dismissLogGuide]=useDismissedGuide("sl:guide:log-shots");
 const[isNarrow,setIsNarrow]=useState(typeof window!=="undefined"?window.innerWidth<768:false);
 const slideClass="screen-fade-in";
 const switchTab=(k)=>{setTab(k);setActive(null);setShowShotStats(false);
-if(u.isCoach&&k==="players")window.history.pushState({},"","/players");
-else if(u.isCoach&&window.location.pathname==="/players")window.history.pushState({},"","/");}
+const routeMap={train:"/train",compete:"/compete",sessions:"/sessions",progress:"/progress",account:"/account"};
+window.history.pushState({},"",routeMap[k]||"/train");
+}
 useEffect(()=>{const onResize=()=>setIsNarrow(window.innerWidth<768);window.addEventListener("resize",onResize);return()=>window.removeEventListener("resize",onResize);},[]);
 useEffect(()=>{
   const onPop=()=>{
-    if(u.isCoach&&window.location.pathname==="/players")setTab("players");
-    else if(tab==="players")setTab("home");
+    setTab(resolvePlayerTabFromPath());
   };
   window.addEventListener("popstate",onPop);
   return ()=>window.removeEventListener("popstate",onPop);
-},[u.isCoach,tab]);;
+},[]);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const total=useMemo(()=>homeScores.reduce((a,s)=>a+s.score,0),[homeScores]);
@@ -1208,7 +1218,7 @@ const isPB=v>prevBest&&prevBest>0;
 addScore(active.id,v);playScore();const pct=Math.round(v/active.max*100);setShareData({drill:active.name,score:v,max:active.max,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)};
-const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setSubmitting(false);setTab("home")};
+const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setSubmitting(false);switchTab("train");setTrainFilter("solo")};
 const sendChallenge=()=>{if(!challTarget)return;addChallenge({to:challTarget,toName:players.find(p=>p.email===challTarget)?.name||challTarget.split("@")[0],drillId:shareData.drillId,drillName:shareData.drill,score:shareData.score,max:shareData.max});setShowChallForm(false);setChallTarget("");closeShare()};
 
 // Pull-to-refresh
@@ -1220,8 +1230,8 @@ const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else s
 return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
 <BrandBackdrop/>
 {shotSaved&&<div role="status" aria-live="polite" style={{position:"fixed",left:"50%",bottom:110,transform:"translateX(-50%)",zIndex:40,background:VOLT,color:BG,padding:"10px 14px",borderRadius:999,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:1.2,boxShadow:"0 10px 28px rgba(0,0,0,0.35)"}}>Shots logged successfully</div>}
-{teamBranding.showWatermark&&tab==="home"?<TeamWatermark logoUrl={teamBranding.logoUrl} primaryColor={teamBranding.primaryColor} opacity={0.06} size={260}/>:null}
-<div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
+{teamBranding.showWatermark&&tab==="train"?<TeamWatermark logoUrl={teamBranding.logoUrl} primaryColor={teamBranding.primaryColor} opacity={0.06} size={260}/>:null}
+<div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="sessions"?CYAN:tab==="compete"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="sessions"?VOLT:tab==="compete"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
 {/* Badge Reveal Overlay */}
 {badgeReveal&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}} onClick={()=>setBadgeReveal(null)}>
@@ -1251,7 +1261,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 <div style={{position:"sticky",top:0,zIndex:10,paddingTop:"max(0px,env(safe-area-inset-top))",height:"calc(72px + max(0px,env(safe-area-inset-top)))",background:TOKENS.BG_BASE,borderBottom:"1px solid rgba(255,255,255,0.06)"}}>
   <div style={{height:72,padding:"0 16px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
     <div style={{display:"flex",alignItems:"center",minWidth:0,flex:1}}>
-      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:44,height:44,borderRadius:"50%",background:"#1E1E1E",border:`1.5px solid ${u.isCoach?coachPrimary:"#C8FF00"}`,boxShadow:u.isCoach?`0 0 0 4px ${alphaFromHex(coachPrimary,0.15)}`:"none",color:"#FFFFFF",fontSize:16,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0,marginRight:12}}>{(u.name||"?")[0].toUpperCase()}</button>
+      <button aria-label="Open profile" onClick={()=>switchTab("account")} style={{width:44,height:44,borderRadius:"50%",background:"#1E1E1E",border:`1.5px solid ${u.isCoach?coachPrimary:"#C8FF00"}`,boxShadow:u.isCoach?`0 0 0 4px ${alphaFromHex(coachPrimary,0.15)}`:"none",color:"#FFFFFF",fontSize:16,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0,marginRight:12}}>{(u.name||"?")[0].toUpperCase()}</button>
       <div style={{display:"flex",flexDirection:"column",justifyContent:"center",minWidth:0,maxWidth:"100%"}}>
         <div style={{fontFamily:FB,color:"#FFFFFF",fontSize:18,fontWeight:700,lineHeight:1.1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{u.name}</div>
         <div style={{display:"flex",alignItems:"center",gap:6,marginTop:4,minWidth:0}}>
@@ -1269,7 +1279,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </div>
     </div>
     <button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:44,height:44,padding:"0 10px",fontFamily:FB,fontSize:10,letterSpacing:"0.06em",textTransform:"uppercase",marginRight:8}}>Contrast</button>
-    <button aria-label="Settings" title="Settings" onClick={()=>switchTab("profile")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:TOKENS.TEXT_PRIMARY,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+    <button aria-label="Settings" title="Settings" onClick={()=>switchTab("account")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:TOKENS.TEXT_PRIMARY,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     </button>
   </div>
@@ -1284,21 +1294,23 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
     <div style={{fontFamily:FB,color:ORANGE,fontSize:8,letterSpacing:2,marginTop:2}}>{pullY>40?"REFRESHING":"PULL"}</div>
   </div>}
 
-  {tab!=="home"&&<button onClick={()=>switchTab("home")} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:16,padding:0}}>&#8592; DASHBOARD</button>}
+  {false&&<button onClick={()=>switchTab("train")} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:16,padding:0}}>&#8592; DASHBOARD</button>}
 
+
+  {tab==="train"&&<section style={{marginBottom:18,padding:"10px 0 6px"}}><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}><div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:2}}>TRAIN</div><button className="btn-v cta-primary" style={{maxWidth:180,padding:"10px 12px"}} onClick={()=>setTrainFilter("solo")}>LOG SHOTS</button></div><div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8}}><button className="chip" aria-pressed={trainFilter==="solo"} onClick={()=>setTrainFilter("solo")} style={{padding:"10px 12px",borderRadius:10,border:`1px solid ${trainFilter==="solo"?VOLT:BORDER_CLR}`,background:trainFilter==="solo"?`${VOLT}18`:CARD_BG,color:trainFilter==="solo"?VOLT:LIGHT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Solo workouts</button><button className="chip" aria-pressed={trainFilter==="team"} onClick={()=>setTrainFilter("team")} style={{padding:"10px 12px",borderRadius:10,border:`1px solid ${trainFilter==="team"?VOLT:BORDER_CLR}`,background:trainFilter==="team"?`${VOLT}18`:CARD_BG,color:trainFilter==="team"?VOLT:LIGHT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Team workouts</button></div></section>}
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
-  {tab==="home"&&!active&&<div className={slideClass} key="home">
+  {tab==="progress"&&!active&&<div className={slideClass} key="progress">
 
     <HeroBanner
       title="Dashboard"
       subtitle="Your training snapshot for today"
       accent={VOLT}
       icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>}
-      actionLabel="View Events"
-      onAction={()=>setTab("program")}
+      actionLabel="Log shots"
+      onAction={()=>{switchTab("train");setTrainFilter("solo");}}
     />
 
-    {showWelcomeGuide&&<GuideCallout title="Welcome to ShotLab" body="At Home tracks solo work. Program covers coach-run activity. Makes count your made shots, Drills are scored skill tests, and Duels are head-to-head drill competitions." onDismiss={dismissWelcomeGuide} tone="accent"/>}
+    {showWelcomeGuide&&<GuideCallout title="Welcome to ShotLab" body="Train is now split into Solo and Team filters. Solo tracks made shots and drills, while Team keeps workouts and attendance in one place. Compete runs your duels." onDismiss={dismissWelcomeGuide} tone="accent"/>}
 
     {(()=>{
       const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
@@ -1310,8 +1322,8 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
           {showHomeGuide&&<div style={{marginTop:10}}><GuideCallout title="Quick definitions" body="At Home is your personal tracker for Makes, Drills completed, and streaks. Program is for team sessions where attendance is verified by event RSVPs." onDismiss={dismissHomeGuide} tone="cool"/></div>}
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
-          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" helpText="At Home tracks solo shot logging and streaks." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
-          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" helpText="Program shows coach-run events and verified attendance." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
+          <ModeCard title="SOLO TRAIN" subtitle="Log makes, drills, and streaks" helpText="Solo training tracks your shot logging and streaks." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="train"&&trainFilter==="solo"} onClick={()=>{switchTab("train");setTrainFilter("solo");}}/>
+          <ModeCard title="TEAM TRAIN" subtitle="Coach workouts and attendance" helpText="Team training shows coach-run workouts and verified attendance." icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="train"&&trainFilter==="team"} onClick={()=>{switchTab("train");setTrainFilter("team");}}/>
         </div>
       </div>
     })()}
@@ -1322,7 +1334,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
           <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2,lineHeight:1,textTransform:"uppercase"}}>Upcoming Work Events</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>Don’t miss what’s next — RSVP status is split below.</div>
         </div>
-        <button onClick={()=>setTab("program")} style={{background:VOLT,color:BG,border:"none",borderRadius:10,padding:"8px 10px",fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>View Events</button>
+        <button onClick={()=>{switchTab("train");setTrainFilter("team");}} style={{background:VOLT,color:BG,border:"none",borderRadius:10,padding:"8px 10px",fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>View Events</button>
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
@@ -1343,7 +1355,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   </div>}
 
   {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
-  {(tab==="log-drill")&&!active&&!showShotStats&&<div className="fade-up">
+  {(tab==="train"&&trainFilter==="solo")&&!active&&!showShotStats&&<div className="fade-up">
     {showLogGuide&&<GuideCallout title="Log Shots" body="Log Shots captures your total makes for any solo session. Drills are skill scores, while Makes track shot volume." onDismiss={dismissLogGuide} tone="warm"/>}
     
     <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
@@ -1372,7 +1384,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
         <input aria-label="Date for shot log" type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
       </div>
       {shotError&&<div role="alert" aria-live="assertive" style={{fontFamily:FB,color:"#FF7D7D",fontSize:11,marginBottom:10}}>{shotError}</div>}
-      <button className="btn btn--primary btn-v" aria-label="Submit log shots form" disabled={!isShotValid} onClick={submitShotLog} style={{opacity:isShotValid?(shotSaved?.7:1):0.55,width:"100%",cursor:isShotValid?"pointer":"not-allowed"}}>
+      <button className="btn btn--primary btn-v" aria-label="Submit log shots form" disabled={!isShotValid} onClick={submitShotLog} style={{opacity:isShotValid?(shotSaved?0.7:1):0.55,width:"100%",cursor:isShotValid?"pointer":"not-allowed"}}>
         {shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
       {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
@@ -1386,14 +1398,14 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   </div>}
 
   {/* ═════ SHOT STATS sub-screen ═════ */}
-  {tab==="log-drill"&&showShotStats&&!active&&<div className="fade-up">
+  {tab==="train"&&trainFilter==="solo"&&showShotStats&&!active&&<div className="fade-up">
     <button onClick={()=>setShowShotStats(false)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20,padding:0}}>&#8592; BACK TO DRILLS</button>
     <ShotTracker u={u} shotLogs={shotLogs} shotMade={shotMade} updateShotMade={updateShotMade} adjustShotMade={adjustShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} shotError={shotError} isShotValid={isShotValid} submitShotLog={submitShotLog}/>
   </div>}
 
 
   {/* ═════════════ ACTIVE DRILL INPUT ═════════════ */}
-  {(tab==="home"||tab==="log-drill")&&active&&<div className="detail-enter" style={{textAlign:"center",paddingTop:12,position:"relative"}}>
+  {tab==="train"&&trainFilter==="solo"&&active&&<div className="detail-enter" style={{textAlign:"center",paddingTop:12,position:"relative"}}>
     {confetti&&<ConfettiBurst/>}
     {saved&&shareData?<div className="fade-up" style={{padding:"16px 0"}}>
       {/* ── SHAREABLE WORKOUT CARD ── */}
@@ -1424,7 +1436,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </div>}
       <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:12}}>Screenshot your card and share on social media</div>
     </div>
-    :<><button onClick={()=>{setActive(null);if(tab==="home")setTab("log-drill")}} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:32,padding:"8px 16px"}}>&#8592; BACK</button>
+    :<><button onClick={()=>{setActive(null);}} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:32,padding:"8px 16px"}}>&#8592; BACK</button>
       <div style={{width:100,height:100,borderRadius:22,background:`linear-gradient(135deg,${SURFACE},${CARD_BG})`,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px"}}><DrillIcon type={active.icon} size={48}/></div>
       <h2 style={{fontFamily:FD,color:LIGHT,fontSize:36,letterSpacing:4,margin:"0 0 8px"}}>{active.name}</h2>
       <p style={{fontFamily:FB,color:MUTED,fontSize:14,margin:"0 auto 6px",maxWidth:280,lineHeight:1.6}}>{active.desc}</p>
@@ -1468,31 +1480,28 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   </div>}
 
   {/* ═════════════ PROGRAM (Coach-Verified) ═════════════ */}
-  {tab==="program"&&<div className={slideClass} key="program"><SectionHero icon={<EventIcon type="star" size={28} color={VOLT}/>} title="PROGRAM EVENTS" subtitle="Official workouts and attendance" accent={VOLT} deco={<EventIcon type="run" size={16} color={VOLT}/>} isCoach={u.isCoach}/><ProgramDrillsPanel user={u} drills={programDrills} scores={scores} addScore={addScore}/><DividerDot/><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills}/></div>}
+  {tab==="train"&&trainFilter==="team"&&<div className={slideClass} key="train-team"><SectionHero icon={<EventIcon type="star" size={28} color={VOLT}/>} title="TEAM WORKOUTS" subtitle="Coach sessions and attendance" accent={VOLT} deco={<EventIcon type="run" size={16} color={VOLT}/>} isCoach={u.isCoach}/><ProgramDrillsPanel user={u} drills={programDrills} scores={scores} addScore={addScore}/><DividerDot/><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills}/></div>}
 
   {/* ═════════════ CHALLENGES ═════════════ */}
-  {!u.isCoach&&tab==="duels"&&<div className={slideClass} key="duels"><DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players}/></div>}
-  {u.isCoach&&tab==="players"&&<div className={slideClass} key="players"><PlayersScreen/></div>}
+  {tab==="compete"&&<div className={slideClass} key="compete"><SectionHero icon={<EventIcon type="challenge" size={28} color={ORANGE}/>} title="COMPETE" subtitle="Head-to-head challenges with teammates" accent={ORANGE} deco={<EventIcon type="run" size={16} color={ORANGE}/>} /><button className="btn-v cta-primary" style={{marginBottom:16,maxWidth:260}} onClick={()=>u.isCoach?switchTab("account"):setShowChallForm(true)}>{u.isCoach?"VIEW PLAYER HUB":"START A DUEL"}</button>{u.isCoach?<PlayersScreen/>:<DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players}/>}</div>}
 
   {/* ═════════════ STRENGTH & CONDITIONING ═════════════ */}
-  {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog}/></div>}
+  {tab==="sessions"&&<div className={slideClass} key="sessions"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="SESSIONS" subtitle="Team lifts, attendance, and training blocks" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><button className="btn-v cta-primary" style={{marginBottom:16,maxWidth:300}} onClick={()=>document.querySelector(".rsvp-action")?.scrollIntoView({behavior:"smooth",block:"center"})}>RESERVE NEXT SESSION</button><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount}/></div>}
+  {tab==="account"&&<div className={slideClass} key="account"><SectionHero icon={<UsersIcon size={24} color={VOLT}/>} title="ACCOUNT" subtitle="Profile, badges, and preferences" accent={VOLT} /><button className="btn-v cta-primary" style={{marginBottom:16,maxWidth:280}} onClick={()=>document.getElementById("profile-performance")?.scrollIntoView({behavior:"smooth"})}>MANAGE ACCOUNT</button><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount}/></div>}
 </div>
 
 <NavBar items={[
-  {k:"home",l:"Home",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>},
-  ...(u.isCoach
-    ? [{k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>}] 
-    : [{k:"duels",l:"Duels",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>,dot:pendingDuels>0?ORANGE:null}]),
-  {k:"sc",l:"Lifting",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>,dot:soonSC>0?VOLT:null},
-  {k:"program",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
-  {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
+  {k:"train",l:"Train",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>},
+  {k:"compete",l:"Compete",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>,dot:pendingDuels>0?ORANGE:null},
+  {k:"sessions",l:"Sessions",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>,dot:soonSC>0?VOLT:null},
+  {k:"progress",l:"Progress",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
+  {k:"account",l:"Account",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
 ]}
 active={tab}
 onChange={switchTab}
-utilityControl={!u.isCoach?{label:"Quick Menu",active:tab==="log-drill",onClick:()=>switchTab("log-drill")} : null}
+utilityControl={!u.isCoach?{label:"Log shots",active:tab==="train"&&trainFilter==="solo",onClick:()=>{switchTab("train");setTrainFilter("solo");}} : null}
 />
 
   </div>;
