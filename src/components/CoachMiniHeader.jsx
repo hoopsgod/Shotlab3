@@ -47,10 +47,10 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
           ) : null}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
-        <button type="button" aria-label="Open settings" onClick={onOpenSettings} style={{ background: "rgba(20,20,20,0.95)", border: `1px solid ${borderColor}`, borderRadius: 10, color: "var(--text-secondary)", width: 32, height: 32, cursor: "pointer", fontFamily: FB, fontSize: 12 }}>
+        <button type="button" aria-label="Open settings" onClick={onOpenSettings} className="btn btn--secondary btn--icon" style={{ borderColor, color: "var(--text-secondary)", width: 32, minWidth: 32, height: 32, fontFamily: FB, fontSize: 12 }}>
           ⚙
         </button>
-        <button type="button" aria-label="Log out" onClick={onLogout} style={{ background: "rgba(20,20,20,0.95)", border: `1px solid ${borderColor}`, borderRadius: 10, color: mutedColor, width: 32, height: 32, cursor: "pointer", fontFamily: FB, fontSize: 12 }}>
+        <button type="button" aria-label="Log out" onClick={onLogout} className="btn btn--tertiary btn--icon" style={{ borderColor, color: mutedColor, width: 32, minWidth: 32, height: 32, fontFamily: FB, fontSize: 12 }}>
           ✕
         </button>
       </div>

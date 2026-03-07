@@ -190,6 +190,10 @@
   border-color: transparent;
   box-shadow: none;
 }
+.btn--tertiary:hover {
+  color: var(--text-1);
+  background: rgba(255,255,255,0.03);
+}
 .btn--sm {
   height: var(--btn-h-sm);
   padding: 0 12px;
@@ -200,6 +204,7 @@
   min-width: var(--btn-h-md);
   padding: 0;
   border-radius: 12px;
+  letter-spacing: 0;
 }
 .btn--floating {
   border-radius: 999px;
@@ -207,6 +212,7 @@
   min-width: 40px;
   height: 40px;
   box-shadow: none;
+  background: rgba(255,255,255,0.02);
 }
 .iconBtn {
   width: 44px;
