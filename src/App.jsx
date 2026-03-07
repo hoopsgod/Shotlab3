@@ -1113,8 +1113,8 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <div className="auth-ball-enter" style={{display:"inline-flex",flexDirection:"column",alignItems:"center",position:"relative",zIndex:1}}><BrandLogo brandName="Shotlab"/><div style={{marginTop:8}}><DrillIcon type="ft" size={44}/></div></div>
 </div>
 <h1 style={{fontFamily:FD,fontSize:isNarrow?36:44,color:LIGHT,textAlign:"center",margin:0,lineHeight:.95,letterSpacing:2}}>SHOT<span style={{color:VOLT}}>LAB</span></h1>
-<p style={{fontFamily:FB,color:LIGHT,textAlign:"center",fontSize:isNarrow?18:22,lineHeight:1.25,letterSpacing:0.2,margin:"14px auto 0",fontWeight:600,maxWidth:460}}>Track your shots. Compete with teammates. Improve with purpose.</p>
-<p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:14,lineHeight:1.45,margin:"10px auto 0",maxWidth:440}}>Shotlab helps your team log reps, compare progress, and stay accountable through every training block.</p>
+<p style={{fontFamily:FB,color:LIGHT,textAlign:"center",fontSize:isNarrow?18:22,lineHeight:1.25,letterSpacing:0.2,margin:"14px auto 0",fontWeight:600,maxWidth:460}}>Log reps, track progress, and stay in sync with your team.</p>
+<p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:14,lineHeight:1.45,margin:"10px auto 0",maxWidth:440}}>Shotlab keeps workouts, scores, and team activity in one place.</p>
 <div className="auth-card-enter" style={{background:CARD_BG,borderRadius:18,padding:isNarrow?"18px 14px":"26px 22px",border:`1px solid ${BORDER_CLR}`,marginTop:isNarrow?18:22}}>
 <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}><button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:36,padding:"0 10px",fontSize:11}}>{highContrast?"High contrast: ON":"High contrast: OFF"}</button></div>
 {/* Login / Register toggle */}
@@ -1124,7 +1124,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 
     {mode==="register"&&<>
       <h2 style={{fontFamily:FB,color:LIGHT,fontSize:22,fontWeight:700,textAlign:"center",margin:"0 0 4px",letterSpacing:0.3}}>Create your account</h2>
-      <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 18px"}}>Set up your profile to start tracking with your team.</p>
+      <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 18px"}}>Set up your profile to start logging sessions with your team.</p>
       {/* Role selector */}
       <div role="radiogroup" aria-label="Account role" style={{display:"flex",background:BG,borderRadius:10,padding:3,marginBottom:20,border:`1px solid ${BORDER_CLR}`,gap:isNarrow?6:0,flexDirection:isNarrow?"column":"row"}}>
         {["player","coach"].map(r=><button key={r} role="radio" aria-checked={role===r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#555555"}}>{r}</button>)}
@@ -1135,7 +1135,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 
     {mode==="login"&&<>
       <h2 style={{fontFamily:FB,color:LIGHT,fontSize:24,fontWeight:700,textAlign:"center",margin:"0 0 4px",letterSpacing:0.3}}>Welcome back</h2>
-      <p style={{fontFamily:FB,color:"#A0A0A0",textAlign:"center",fontSize:13,fontWeight:400,margin:"0 0 18px"}}>Sign in to continue your training progress.</p>
+      <p style={{fontFamily:FB,color:"#A0A0A0",textAlign:"center",fontSize:13,fontWeight:400,margin:"0 0 18px"}}>Sign in to pick up where you left off.</p>
     </>}
 
     <label htmlFor="auth-email" style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>EMAIL</label>
@@ -1149,16 +1149,16 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
     <button className="btn-v cta-primary" onClick={mode==="login"?doLogin:doRegister} style={{marginTop:2,fontSize:13,letterSpacing:"0.08em"}}>
       {mode==="login"?"SIGN IN":"CREATE ACCOUNT"} &#8594;
     </button>
-    {mode==="login"&&<>{firebaseEnabled&&<><button onClick={async()=>{const r=await onSocialLogin();if(!r.ok)setErr(r.err);}} className="btn-v" style={{height:42,padding:"0 18px",width:"100%",marginTop:8,background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:12,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Sign in with Google</button><button onClick={async()=>{const id=(email.trim().toLowerCase().includes("@")?email.trim().toLowerCase():email.trim().toLowerCase()+"@shotlab.app");const r=await onResetPassword(id);setErr(r.ok?"Reset email sent. Check inbox.":(r.err||"Unable to send reset email."));}} className="btn-v" style={{height:38,padding:"0 14px",width:"100%",marginTop:8,background:"transparent",color:"#A0A0A0",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Forgot Password</button></>}<div style={{marginTop:14,paddingTop:12,borderTop:"1px solid #252525"}}><p style={{fontFamily:FB,color:MUTED,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",margin:"0 0 10px",textAlign:"center"}}>Preview mode</p><div className="auth-demo-enter" style={{display:"flex",gap:10,justifyContent:"center",marginTop:0,opacity:1,flexWrap:"wrap"}}>
-      <button onClick={()=>doDemo("player")} className="btn-v" style={{height:40,padding:"0 16px",background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase",flex:"1 1 140px"}}>Demo Player</button>
-      <button onClick={()=>doDemo("coach")} className="btn-v" style={{height:40,padding:"0 16px",background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase",flex:"1 1 140px"}}>Demo Coach</button>
+    {mode==="login"&&<>{firebaseEnabled&&<><button onClick={async()=>{const r=await onSocialLogin();if(!r.ok)setErr(r.err);}} className="btn-v" style={{height:42,padding:"0 18px",width:"100%",marginTop:8,background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:12,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Sign in with Google</button><button onClick={async()=>{const id=(email.trim().toLowerCase().includes("@")?email.trim().toLowerCase():email.trim().toLowerCase()+"@shotlab.app");const r=await onResetPassword(id);setErr(r.ok?"Reset email sent. Check inbox.":(r.err||"Unable to send reset email."));}} className="btn-v" style={{height:38,padding:"0 14px",width:"100%",marginTop:8,background:"transparent",color:"#A0A0A0",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Forgot Password</button></>}<div style={{marginTop:14,paddingTop:12,borderTop:"1px solid #252525"}}><p style={{fontFamily:FB,color:MUTED,fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",margin:"0 0 10px",textAlign:"center"}}>Demo access</p><div className="auth-demo-enter" style={{display:"flex",gap:10,justifyContent:"center",marginTop:0,opacity:1,flexWrap:"wrap"}}>
+      <button onClick={()=>doDemo("player")} className="btn-v" style={{height:40,padding:"0 16px",background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase",flex:"1 1 140px"}}>Open Player Demo</button>
+      <button onClick={()=>doDemo("coach")} className="btn-v" style={{height:40,padding:"0 16px",background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase",flex:"1 1 140px"}}>Open Coach Demo</button>
     </div></div></>}
 
     <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:12,marginTop:14,cursor:"pointer"}} onClick={()=>{setMode(mode==="login"?"register":"login");setErr("")}}>
-      {mode==="login"?"New to Shotlab? ":"Already have an account? "}
+      {mode==="login"?"Need an account? ":"Already have an account? "}
       <span style={{color:"#CED6E5",fontWeight:700}}>{mode==="login"?"Create an account":"Sign in"}</span>
     </p>
-    {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:10,lineHeight:1.5}}>By creating an account, you agree to our data practices. If Firebase is configured, your training data is securely synced and can be managed from Settings.</p>}
+    {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:10,lineHeight:1.5}}>By creating an account, you agree to Shotlab's account and data terms.</p>}
   </div>
 </div>
 
