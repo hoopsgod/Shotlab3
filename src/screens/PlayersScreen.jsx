@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import EmptyState from "../components/EmptyState";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -179,27 +180,14 @@ export default function PlayersScreen() {
       </div>
 
       {players.length === 0 ? (
-        <div
-          style={{
-            minHeight: "280px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "var(--space-4)",
-          }}
-        >
-          <Users size={48} color="#555555" />
-          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
-            No players yet
-          </p>
-          <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
-            Invite players to join your program and begin tracking progress
-          </p>
-          <button className="btn btn--primary" aria-label="Invite players to roster">
-            Invite players
-          </button>
-        </div>
+        <EmptyState
+          preset="noPlayers"
+          description="Invite athletes with a single link and start tracking availability, attendance, and progress."
+          ctaLabel="Share invite link"
+          onCtaClick={shareInviteLink}
+          secondaryCta="Learn about roster setup"
+          secondaryCtaVariant="tertiary"
+        />
       ) : (
         filteredPlayers.map((player) => (
           <div

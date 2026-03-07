@@ -12,7 +12,41 @@ const ART_BY_VARIANT = {
   lifting: EmptyLiftingRack,
 };
 
+export const EMPTY_STATE_PRESETS = {
+  noSessions: {
+    variant: "lifting",
+    title: "No sessions scheduled yet",
+    description: "Plan your next training block so players can RSVP and prepare early.",
+    ctaLabel: "Schedule session",
+  },
+  noActivity: {
+    variant: "events",
+    title: "No team activity yet",
+    description: "Scores, logs, and updates will populate here as your group starts recording reps.",
+    ctaLabel: "Log first score",
+  },
+  noPlayers: {
+    variant: "leaderboard",
+    title: "No players on the roster yet",
+    description: "Invite your squad to join and unlock player tracking, status, and leaderboards.",
+    ctaLabel: "Invite players",
+  },
+  noDuels: {
+    variant: "drills",
+    title: "No duels available yet",
+    description: "Start the first matchup to spark competition and build momentum.",
+    ctaLabel: "Start a duel",
+  },
+  noCoachInsightsYet: {
+    variant: "events",
+    title: "Coach insights are warming up",
+    description: "Once activity rolls in, you'll see attendance trends, roster movement, and session signals here.",
+    ctaLabel: "Open activity feed",
+  },
+};
+
 export default function EmptyState({
+  preset,
   variant,
   title,
   subtitle,
@@ -28,9 +62,12 @@ export default function EmptyState({
   icon,
   className,
 }) {
-  const Art = variant ? ART_BY_VARIANT[variant] : null;
-  const primaryLabel = ctaLabel ?? cta;
+  const resolvedPreset = preset ? EMPTY_STATE_PRESETS[preset] || {} : {};
+  const Art = (variant || resolvedPreset.variant) ? ART_BY_VARIANT[variant || resolvedPreset.variant] : null;
+  const primaryLabel = ctaLabel ?? resolvedPreset.ctaLabel ?? cta;
   const primaryAction = onCtaClick ?? onTap;
+  const resolvedTitle = title ?? resolvedPreset.title;
+  const resolvedDescription = description || subtitle || resolvedPreset.description;
 
   return (
     <Card variant="empty" className={`emptyState card card--empty ${className || ""}`.trim()}>
@@ -38,11 +75,11 @@ export default function EmptyState({
         {Art ? <Art /> : icon}
       </div>
       <p className="emptyState__title">
-        {title}
+        {resolvedTitle}
       </p>
-      {(description || subtitle) && (
+      {resolvedDescription && (
         <p className="emptyState__subtitle u-secondary-text">
-          {description || subtitle}
+          {resolvedDescription}
         </p>
       )}
       <div className="emptyState__actions">
