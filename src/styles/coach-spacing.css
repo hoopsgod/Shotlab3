@@ -1,16 +1,16 @@
 :root {
-  --space-8: 8px;
-  --space-12: 12px;
-  --space-16: 16px;
-  --space-24: 24px;
-  --space-32: 32px;
+  --coach-space-8: 8px;
+  --coach-space-12: 12px;
+  --coach-space-16: 16px;
+  --coach-space-24: 24px;
+  --coach-space-32: 32px;
 
-  --coach-page-pad-x: var(--space-12);
-  --coach-section-gap: var(--space-24);
-  --coach-card-pad: var(--space-16);
-  --coach-card-pad-compact: var(--space-12);
-  --coach-card-gap: var(--space-12);
-  --coach-card-gap-tight: var(--space-8);
+  --coach-page-pad-x: var(--coach-space-12);
+  --coach-section-gap: var(--coach-space-24);
+  --coach-card-pad: var(--coach-space-16);
+  --coach-card-pad-compact: var(--coach-space-12);
+  --coach-card-gap: var(--coach-space-12);
+  --coach-card-gap-tight: var(--coach-space-8);
   --coach-button-height: 44px;
 }
 
@@ -29,17 +29,17 @@
 }
 
 .pageHeader {
-  margin: 0 0 var(--space-24);
-  padding: var(--coach-card-pad) var(--coach-card-pad) var(--space-12);
+  margin: 0 0 var(--coach-space-24);
+  padding: var(--coach-card-pad) var(--coach-card-pad) var(--coach-space-12);
 }
 
 .pageHeaderTop {
-  gap: var(--space-12);
+  gap: var(--coach-space-12);
   align-items: flex-start;
 }
 
 .pageHeaderText p {
-  margin-top: var(--space-8);
+  margin-top: var(--coach-space-8);
 }
 
 .pageHeaderRight {
@@ -47,7 +47,7 @@
 }
 
 .pageAccentBar {
-  margin-top: var(--space-12);
+  margin-top: var(--coach-space-12);
 }
 
 .coach-tools-panel {
@@ -61,5 +61,5 @@
 }
 
 .coach-tools-content__inner {
-  padding-top: var(--space-8);
+  padding-top: var(--coach-space-8);
 }

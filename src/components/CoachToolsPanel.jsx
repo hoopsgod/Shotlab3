@@ -89,7 +89,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: var(--space-8);
+          gap: var(--coach-space-8);
           padding: 0 var(--coach-card-pad);
           border: 0;
           border-radius: 12px;
@@ -108,8 +108,8 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           content: "";
           position: absolute;
           left: 0;
-          top: var(--space-8);
-          bottom: var(--space-8);
+          top: var(--coach-space-8);
+          bottom: var(--coach-space-8);
           width: 3px;
           border-radius: 0 3px 3px 0;
           background: var(--stroke-1);
@@ -132,7 +132,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
         .coach-tools-trigger__left {
           display: inline-flex;
           align-items: center;
-          gap: var(--space-8);
+          gap: var(--coach-space-8);
         }
 
         .coach-tools-trigger__icon-wrap {
@@ -171,7 +171,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
         }
 
         .coach-tools-content__inner {
-          padding-top: var(--space-8);
+          padding-top: var(--coach-space-8);
           box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
         }
 

@@ -12,9 +12,9 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         left: 0,
         right: 0,
         zIndex: 25,
-        paddingTop: "max(env(safe-area-inset-top), var(--space-8))",
-        paddingLeft: "var(--space-12)",
-        paddingRight: "var(--space-12)",
+        paddingTop: "max(env(safe-area-inset-top), var(--coach-space-8))",
+        paddingLeft: "var(--coach-space-12)",
+        paddingRight: "var(--coach-space-12)",
         pointerEvents: visible ? "auto" : "none",
         visibility: visible ? "visible" : "hidden",
         opacity: visible ? 1 : 0,
@@ -32,22 +32,22 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 var(--space-12)",
+          padding: "0 var(--coach-space-12)",
           backdropFilter: "blur(8px)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-8)" }}>
-          <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px var(--space-8)" }}>Coach Mode</span>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--coach-space-8)" }}>
+          <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px var(--coach-space-8)" }}>Coach Mode</span>
           {avatar}
           {logoUrl && branding?.showHeaderLogo !== false ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-8)", padding: "4px var(--space-8)", borderRadius: 999, background: accentColor ? `${accentColor}24` : "rgba(255,255,255,0.08)", border: accentColor ? `1px solid ${accentColor}55` : "1px solid var(--stroke-1)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--coach-space-8)", padding: "4px var(--coach-space-8)", borderRadius: 999, background: accentColor ? `${accentColor}24` : "rgba(255,255,255,0.08)", border: accentColor ? `1px solid ${accentColor}55` : "1px solid var(--stroke-1)" }}>
               <TeamLogo logoUrl={logoUrl} teamName={teamName} size={28} primaryColor={branding?.primaryColor || accentColor} badgeStyle={branding?.badgeStyle || "round"} />
               {teamName ? <span style={{ fontFamily: FB, fontSize: 9, color: "var(--text-1)", textTransform: "uppercase", letterSpacing: "var(--tracking-tight)", fontWeight: 700, maxWidth: 90, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{teamName}</span> : null}
             </div>
           ) : null}
         </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, padding: "0 var(--space-8)" }}>{wordmark}</div>
-        <div style={{ display: "flex", alignItems: "center", gap: "var(--space-8)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, padding: "0 var(--coach-space-8)" }}>{wordmark}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--coach-space-8)" }}>
         <button type="button" aria-label="Open settings" onClick={onOpenSettings} style={{ background: "rgba(20,20,20,0.95)", border: `1px solid ${borderColor}`, borderRadius: 10, color: "var(--text-secondary)", width: 32, height: 32, cursor: "pointer", fontFamily: FB, fontSize: 12 }}>
           ⚙
         </button>

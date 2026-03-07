@@ -26,11 +26,11 @@ export default function EmptyState({
   const Art = variant ? ART_BY_VARIANT[variant] : null;
 
   return (
-    <div className="emptyState card" style={{ textAlign: "center", padding: "var(--space-24) var(--space-16)" }}>
-      <div className="emptyState__art" style={{ color: "rgba(255,255,255,0.4)", width: 88, height: 88, margin: "0 auto var(--space-12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <div className="emptyState card" style={{ textAlign: "center", padding: "var(--coach-space-24) var(--coach-space-16)" }}>
+      <div className="emptyState__art" style={{ color: "rgba(255,255,255,0.4)", width: 88, height: 88, margin: "0 auto var(--coach-space-12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
         {Art ? <Art /> : icon}
       </div>
-      <p className="emptyState__title" style={{ fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif", color: "#E5E7EB", fontSize: 18, fontWeight: 600, lineHeight: 1.2, marginBottom: "var(--space-8)" }}>
+      <p className="emptyState__title" style={{ fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif", color: "#E5E7EB", fontSize: 18, fontWeight: 600, lineHeight: 1.2, marginBottom: "var(--coach-space-8)" }}>
         {title}
       </p>
       {subtitle && (
@@ -38,7 +38,7 @@ export default function EmptyState({
           {subtitle}
         </p>
       )}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--space-12)", marginTop: "var(--space-16)" }}>
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "var(--coach-space-12)", marginTop: "var(--coach-space-16)" }}>
         <Button
           onClick={onTap || (() => {})}
           variant={ctaVariant}
