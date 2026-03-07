@@ -159,10 +159,12 @@ form > * + * {
    ========================= */
 .mode-card-stats-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
 }
 
 .mode-card-stat {
   gap: 10px;
+  text-align: left;
 }
 
 .mode-card-stat-value {
@@ -173,14 +175,14 @@ form > * + * {
 
 @media (max-width: 540px) {
   .mode-card-stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 
   .mode-card-stat {
-    min-height: 88px !important;
+    min-height: 82px !important;
   }
 
   .mode-card-stat-value {
-    font-size: clamp(24px, 7vw, 30px) !important;
+    font-size: clamp(22px, 7vw, 30px) !important;
   }
 }

@@ -1820,7 +1820,14 @@ return <div className="fade-up">
 
 
 function StatTile({value,label,color}){
-return <div className="card card--metric mode-card-stat" style={{padding:"14px 10px 12px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between"}}><div className="mode-card-stat-value" style={{fontFamily:FD,color:color||LIGHT,fontSize:28,fontWeight:800,lineHeight:1.02,wordBreak:"normal",overflowWrap:"anywhere"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:9,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
+const textValue=typeof value==="string"||typeof value==="number"?String(value):"";
+const hasLongValue=textValue.length>10;
+return <div className="card card--metric mode-card-stat" style={{padding:"12px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",gap:10,borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))"}}>
+  <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,minWidth:0}}>
+    <div className="mode-card-stat-value" style={{fontFamily:FD,color:color||LIGHT,fontSize:hasLongValue?20:28,fontWeight:800,lineHeight:1.05,letterSpacing:hasLongValue?"0.04em":"0.02em",whiteSpace:hasLongValue?"normal":"nowrap",wordBreak:"normal",overflowWrap:hasLongValue?"anywhere":"normal",textAlign:"left",minWidth:0}}>{value}</div>
+  </div>
+  <div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",lineHeight:1.15,textAlign:"left"}}>{label}</div>
+</div>
 }
 
 function ModeCard({title,subtitle,icon,stats,accent="home",isActive,onClick,helpText}){
@@ -1843,7 +1850,7 @@ return <button type="button" onClick={onClick} className={modeCardClass} style={
     </div>
     <div className="icon-btn-square" style={{boxShadow:"none"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
   </div>
-  <div className="mode-card-stats-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color}/>)}</div>
+  <div className="mode-card-stats-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10,alignItems:"stretch"}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color}/>)}</div>
 </button>
 }
 
