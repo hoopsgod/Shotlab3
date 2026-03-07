@@ -21,7 +21,7 @@ export function TeamLogo({ logoUrl, teamName, size=64, primaryColor="#C8FF1A", b
         padding:badgeStyle==="rectangle"?8:6,
         background:`linear-gradient(145deg, ${alphaFromHex(primaryColor,0.28)}, rgba(10,10,10,0.9))`,
         border:`1px solid ${alphaFromHex(primaryColor,0.46)}`,
-        boxShadow:`0 0 0 2px ${alphaFromHex(primaryColor,0.1)}, 0 8px 18px rgba(0,0,0,0.34)`,
+        boxShadow:`0 0 0 1px ${alphaFromHex(primaryColor,0.09)}, 0 6px 14px rgba(0,0,0,0.28)`,
         display:"grid",
         placeItems:"center",
         overflow:"hidden",
@@ -42,15 +42,15 @@ export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold
   return (
     <div style={{display:"flex",alignItems:"center",gap:compact?10:14,minWidth:0,position:"relative"}}>
       {showLogo ? <div style={{position:"relative"}}>
-        <div style={{position:"absolute",inset:"-8px",borderRadius:"50%",background:`radial-gradient(circle, ${alphaFromHex(branding.primaryColor,0.08)} 0%, transparent 70%)`,filter:"blur(3px)",opacity:0.72}}/>
+        <div style={{position:"absolute",inset:"-6px",borderRadius:"50%",background:`radial-gradient(circle, ${alphaFromHex(branding.primaryColor,0.05)} 0%, transparent 72%)`,filter:"blur(2px)",opacity:0.42}}/>
         <TeamLogo logoUrl={branding.logoUrl} teamName={teamName} size={size} primaryColor={branding.primaryColor} badgeStyle={branding.badgeStyle}/>
       </div> : null}
       <div style={{minWidth:0}}>
-        <div style={{fontFamily:FB,color:"var(--text-3)",fontSize:8,textTransform:"uppercase",letterSpacing:1.2,fontWeight:700}}>Team</div>
-        <div style={{fontFamily:FD,color:"#fff",fontSize:compact?20:26,letterSpacing:1.8,lineHeight:1.01,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(branding.useTeamNameInHeader===false?"ShotLab":(teamName||"ShotLab Team")).toUpperCase()}</div>
-        <div style={{display:"flex",gap:6,alignItems:"center",marginTop:2,flexWrap:"wrap"}}>
-          {(mascotName||subtitle)?<span style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",textTransform:"uppercase",letterSpacing:1.1,fontWeight:600}}>{mascotName||subtitle}</span>:null}
-          {motto?<span style={{fontFamily:FB,fontSize:9,color:alphaFromHex(branding.secondaryColor,0.8),textTransform:"uppercase",letterSpacing:0.9,fontWeight:700,opacity:0.82}}>“{motto}”</span>:null}
+        <div style={{fontFamily:FB,color:"var(--text-3)",fontSize:8,textTransform:"uppercase",letterSpacing:1.1,fontWeight:700}}>Team</div>
+        <div style={{fontFamily:FD,color:"#fff",fontSize:compact?20:26,letterSpacing:1.7,lineHeight:1.03,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",marginTop:compact?1:2}}>{(branding.useTeamNameInHeader===false?"ShotLab":(teamName||"ShotLab Team")).toUpperCase()}</div>
+        <div style={{display:"flex",gap:6,alignItems:"center",marginTop:5,flexWrap:"wrap"}}>
+          {(mascotName||subtitle)?<span style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",textTransform:"uppercase",letterSpacing:1,fontWeight:600}}>{mascotName||subtitle}</span>:null}
+          {motto?<span style={{fontFamily:FB,fontSize:9,color:alphaFromHex(branding.secondaryColor,0.7),textTransform:"uppercase",letterSpacing:0.8,fontWeight:700,opacity:0.74}}>“{motto}”</span>:null}
         </div>
       </div>
     </div>
