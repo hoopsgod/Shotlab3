@@ -1586,7 +1586,7 @@ return <SectionContainer className="fade-up">
 {/* Pending challenges */}
 {pending.length>0&&<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>
   {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
-    return <Card key={ch.id} className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:`${spacing.md}px ${spacing.lg}px`,marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
+    return <Card key={ch.id} variant="list" className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:`${spacing.md}px ${spacing.lg}px`,marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
       <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
         <Av n={ch.fromName} sz={38} email={ch.from}/>
@@ -2876,7 +2876,7 @@ return <SectionContainer className="fade-up">
 {u.isCoach&&<div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}><div style={{fontSize:13,color:"#C8FF00",textTransform:"uppercase",letterSpacing:"0.10em",fontFamily:FB,fontWeight:700,marginBottom:10}}>COACH ACCOUNT</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${BORDER_CLR}66`}}><div style={{display:"flex",alignItems:"center",gap:8}}><UsersIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ROLE</span></div><span style={{fontSize:13,color:"#FFFFFF",fontFamily:FB}}>Coach</span></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}><div style={{display:"flex",alignItems:"center",gap:8}}><ShieldIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ACCESS</span></div><span style={{fontSize:13,color:"#C8FF00",fontFamily:FB}}>Full Program Access</span></div></div>}
 <ProgressCharts scores={scores} shotLogs={shotLogs} userEmail={u.email}/>
 {/* ══════ SHAREABLE SEASON CARD ══════ */}
-<Card style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
+<Card variant="metric" style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
 {/* Corner accents */}
 <div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
 <div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
