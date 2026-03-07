@@ -75,8 +75,3 @@
   color: var(--text-2);
 }
 
-@media (max-width: 540px) {
-  .page {
-    --section-gap: var(--space-3);
-  }
-}

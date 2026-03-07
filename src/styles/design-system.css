@@ -44,15 +44,23 @@ Implementation plan (small-scope motion pass):
   --space-0: 0;
   --space-1: 4px;
   --space-2: 8px;
-  --space-3: 16px;
-  --space-4: 24px;
-  --space-5: 32px;
-  --space-6: 40px;
-  --space-7: 48px;
+  --space-3: 12px;
+  --space-3a: 16px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 40px;
+  --space-8: 48px;
+  --space-9: 64px;
 
-  --page-gutter: max(var(--space-3), env(safe-area-inset-left));
-  --section-gap: var(--space-4);
-  --card-pad: var(--space-3);
+  --page-gutter: max(var(--space-4), env(safe-area-inset-left));
+  --section-gap: var(--space-8);
+  --card-pad-compact: var(--space-4);
+  --card-pad-standard: var(--space-5);
+  --card-pad: var(--card-pad-standard);
+  --control-gap-tight: var(--space-3);
+  --control-gap: var(--space-4);
+  --grid-gutter: var(--space-4);
 
   --radius-sm: 8px;
   --radius-md: 12px;
@@ -94,15 +102,15 @@ Implementation plan (small-scope motion pass):
   --btn-h: 48px;
   --btn-h-sm: 40px;
   --btn-radius: var(--radius-md);
-  --btn-pad-x: 18px;
-  --btn-pad-sm: 10px;
-  --btn-pad-lg: 20px;
+  --btn-pad-x: 16px;
+  --btn-pad-sm: 8px;
+  --btn-pad-lg: 24px;
   --btn-h-lg: 48px;
-  --btn-h-md: 44px;
+  --btn-h-md: 48px;
 
   --input-h: 48px;
   --input-radius: var(--radius-md);
-  --input-pad-x: 14px;
+  --input-pad-x: 16px;
 
   /* compatibility aliases used throughout app */
   --bg: var(--color-bg-canvas);
@@ -129,9 +137,13 @@ Implementation plan (small-scope motion pass):
   --s-1: var(--space-1);
   --s-2: var(--space-2);
   --s-3: var(--space-3);
+  --s-3a: var(--space-3a);
   --s-4: var(--space-4);
   --s-5: var(--space-5);
   --s-6: var(--space-6);
+  --s-7: var(--space-7);
+  --s-8: var(--space-8);
+  --s-9: var(--space-9);
 }
 
 * { box-sizing: border-box; }
@@ -154,9 +166,9 @@ textarea {
 }
 
 .page {
-  padding-left: max(var(--space-3), env(safe-area-inset-left));
-  padding-right: max(var(--space-3), env(safe-area-inset-right));
-  padding-bottom: max(var(--space-5), env(safe-area-inset-bottom));
+  padding-left: max(var(--space-4), env(safe-area-inset-left));
+  padding-right: max(var(--space-4), env(safe-area-inset-right));
+  padding-bottom: calc(var(--nav-height, 74px) + var(--space-4) + env(safe-area-inset-bottom));
 }
 
 .stack-12 { display: flex; flex-direction: column; gap: var(--space-2); }
@@ -313,8 +325,8 @@ a.interactive-card:focus-visible {
   display: inline-flex;
   align-items: center;
   border-radius: var(--radius-pill);
-  min-height: 26px;
-  padding: 0 10px;
+  min-height: 24px;
+  padding: 0 var(--space-2);
   font-size: var(--fs-label);
   font-weight: var(--fw-semibold);
   letter-spacing: var(--ls-label);
@@ -410,7 +422,7 @@ a,
 
 .chip {
   border-radius: var(--radius-pill);
-  min-height: 34px;
+  min-height: 32px;
   font-size: var(--fs-label);
   letter-spacing: var(--ls-label);
   text-transform: uppercase;

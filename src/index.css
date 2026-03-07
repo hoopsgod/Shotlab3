@@ -13,7 +13,7 @@
 .progress-track,
 [class*="progressTrack"],
 [class*="track"] {
-  height: 10px;
+  height: 12px;
   border-radius: 999px;
   background: rgba(159, 178, 204, 0.24);
   border: 1px solid var(--border-1);
@@ -37,7 +37,7 @@
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-3);
   margin-bottom: 8px;
   font-variant-numeric: tabular-nums;
 }
@@ -94,7 +94,7 @@ textarea,
 .input--textarea {
   height: auto;
   min-height: calc(var(--input-h) * 1.5);
-  padding: 12px var(--input-pad-x);
+  padding: var(--space-3) var(--input-pad-x);
 }
 
 .input::placeholder,
@@ -180,7 +180,7 @@ form > * + * {
 }
 
 .mode-card-stat {
-  gap: 10px;
+  gap: var(--space-3);
   text-align: left;
 }
 
@@ -196,7 +196,7 @@ form > * + * {
   }
 
   .mode-card-stat {
-    min-height: 82px !important;
+    min-height: 80px !important;
   }
 
   .mode-card-stat-value {
