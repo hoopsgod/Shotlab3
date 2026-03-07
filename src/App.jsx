@@ -1305,8 +1305,8 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
       return <div style={{marginBottom:28}}>
         <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:12,fontWeight:600,letterSpacing:"0.03em",marginTop:6}}>Choose how you’re training today</div>
+          <div style={{fontFamily:FD,color:T.SUB,fontSize:24,letterSpacing:2.6,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:600,letterSpacing:"0.03em",marginTop:6,opacity:0.9}}>Choose how you’re training today</div>
           {showHomeGuide&&<div style={{marginTop:10}}><GuideCallout title="Quick definitions" body="At Home is your personal tracker for Makes, Drills completed, and streaks. Program is for team sessions where attendance is verified by event RSVPs." onDismiss={dismissHomeGuide} tone="cool"/></div>}
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
@@ -1316,11 +1316,11 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </div>
     })()}
 
-    <section style={{background:`linear-gradient(140deg, ${VOLT}22 0%, ${VOLT}10 45%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}66`,borderRadius:18,padding:"16px 14px",marginBottom:20,boxShadow:`0 14px 28px ${VOLT}22`}}>
+    <section style={{background:`linear-gradient(140deg, ${VOLT}16 0%, ${VOLT}08 45%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}44`,borderRadius:18,padding:"15px 14px",marginBottom:20,boxShadow:`0 10px 22px ${VOLT}14`}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:12}}>
         <div>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:2.2,lineHeight:1,textTransform:"uppercase"}}>Upcoming Work Events</div>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:11,marginTop:4}}>Don’t miss what’s next — RSVP status is split below.</div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2,lineHeight:1,textTransform:"uppercase"}}>Upcoming Work Events</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>Don’t miss what’s next — RSVP status is split below.</div>
         </div>
         <button onClick={()=>setTab("program")} style={{background:VOLT,color:BG,border:"none",borderRadius:10,padding:"8px 10px",fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:1.2,textTransform:"uppercase",cursor:"pointer",whiteSpace:"nowrap"}}>View Events</button>
       </div>
