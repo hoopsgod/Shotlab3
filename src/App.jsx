@@ -145,7 +145,10 @@ const DEMO_SEED_PLAYERS=[
 {email:"chris.w@shotlab.app",name:"Chris W."},
 {email:"aiden.t@shotlab.app",name:"Aiden T."},
 ];
+const DEMO_ACCOUNT_EMAILS=[DEMO_PLAYER.email,DEMO_COACH.email,...DEMO_SEED_PLAYERS.map(p=>p.email)];
+const isDemoEmail=(email)=>DEMO_ACCOUNT_EMAILS.includes(email);
 const isoDaysAgo=(days)=>{const d=new Date();d.setDate(d.getDate()-days);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
+const isoDaysFromNow=(days)=>{const d=new Date();d.setDate(d.getDate()+days);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const withTs=(daysAgo,offset=0)=>Date.now()-daysAgo*86400000+offset;
 const distributeTotal=(total,count)=>{const base=Math.floor(total/count);const rem=total-base*count;return Array.from({length:count},(_,i)=>base+(i<rem?1:0));};
 const genId=(p="id")=>`${p}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
@@ -174,66 +177,97 @@ const getEarnedBadges=s=>STREAK_BADGES.filter(b=>s>=b.days);
 function buildDemoSeed(teamId){
 const createdAt=Date.now();
 const drillSeed={
-1:[9,8,8,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7],
-2:[10,...Array(17).fill(8)],
+1:[8,9,8,7,9,8,9,10,8,9,8,9,10,9],
+2:[6,7,8,7,8,9,8,7,9,8,9,8],
 };
 const scoreRows=[];
 Object.entries(drillSeed).forEach(([drillId,vals])=>{
-vals.forEach((score,idx)=>{const day=idx+1;scoreRows.push({
+vals.forEach((score,idx)=>{const day=Math.max(1,20-idx);scoreRows.push({
 email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,drillId:Number(drillId),score,date:isoDaysAgo(day),ts:withTs(day,idx)
 })});
 });
-const shotRows=distributeTotal(312,8).map((made,idx)=>({
-email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,made,date:isoDaysAgo(idx+1),ts:withTs(idx+1,300+idx)
+const shotRows=[34,41,37,45,39,43,36,48,42,46].map((made,idx)=>({
+email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,made,date:isoDaysAgo(Math.max(1,14-idx)),ts:withTs(Math.max(1,14-idx),300+idx)
 }));
 const eventRows=[
-{id:9001,title:"Gym Session",date:"2026-03-08",time:"6:00 PM",location:"Main Gym — Court 1",desc:"Team skill work and light scrimmage.",type:"run",teamId,createdAt},
-{id:9002,title:"Shooting Clinic",date:"2026-03-12",time:"4:00 PM",location:"Training Facility — Bay 3",desc:"Guided shooting with film review.",type:"clinic",teamId,createdAt},
-{id:9003,title:"Open Gym Run",date:"2026-03-16",time:"6:30 PM",location:"Main Gym — Court 2",desc:"Competitive 5v5 run.",type:"run",teamId,createdAt},
-{id:9004,title:"Skills Challenge",date:"2026-03-20",time:"5:30 PM",location:"Main Gym — Court 2",desc:"Timed ball-handling and finishing challenge.",type:"challenge",teamId,createdAt},
-{id:9005,title:"Film + Recovery",date:"2026-03-24",time:"3:00 PM",location:"Film Room",desc:"Film review plus recovery session.",type:"recovery",teamId,createdAt},
-{id:9006,title:"Pro-Am Scrimmage",date:"2026-03-28",time:"7:00 PM",location:"Community Center",desc:"Full-court scrimmage night.",type:"game",teamId,createdAt},
-{id:9007,title:"Conditioning Block",date:"2026-04-02",time:"6:00 PM",location:"Training Turf",desc:"Conditioning and agility block.",type:"run",teamId,createdAt},
-{id:9008,title:"Team Shootaround",date:"2026-04-06",time:"5:00 PM",location:"Main Gym — Court 1",desc:"Shootaround before weekend games.",type:"clinic",teamId,createdAt},
+{id:9001,title:"Skill Tune-Up",date:isoDaysAgo(10),time:"6:15 PM",location:"Main Gym — Court 1",desc:"Footwork reads, finishing angles, and controlled live reps.",type:"clinic",teamId,createdAt},
+{id:9002,title:"Recovery + Film",date:isoDaysAgo(6),time:"4:30 PM",location:"Film Room",desc:"Short film review followed by mobility and recovery circuits.",type:"recovery",teamId,createdAt},
+{id:9003,title:"Saturday Open Run",date:isoDaysAgo(2),time:"7:00 PM",location:"Community Center",desc:"High-tempo open run with three timed game blocks.",type:"run",teamId,createdAt},
+{id:9004,title:"Shooting Lab",date:isoDaysFromNow(2),time:"5:45 PM",location:"Training Facility — Bay 3",desc:"Game-speed catch-and-shoot and relocation reps.",type:"clinic",teamId,createdAt},
+{id:9005,title:"Team Install",date:isoDaysFromNow(5),time:"6:30 PM",location:"Main Gym — Court 2",desc:"Install day: spacing, timing, and special-situation execution.",type:"run",teamId,createdAt},
+{id:9006,title:"Skills Challenge Night",date:isoDaysFromNow(9),time:"6:00 PM",location:"Main Gym — Court 2",desc:"Timed handle, finishing, and free throw pressure challenges.",type:"challenge",teamId,createdAt},
+{id:9007,title:"Pro-Am Scrimmage",date:isoDaysFromNow(13),time:"7:30 PM",location:"Downtown Sportsplex",desc:"Extended scrimmage with score tracking and post-game notes.",type:"game",teamId,createdAt},
+{id:9008,title:"Pre-Weekend Shootaround",date:isoDaysFromNow(18),time:"5:00 PM",location:"Main Gym — Court 1",desc:"Light install refresh and confidence shooting block.",type:"clinic",teamId,createdAt},
 ];
-const rsvpEmails=[DEMO_PLAYER.email,"jordan.m@shotlab.app","tyler.r@shotlab.app","chris.w@shotlab.app"];
 const rsvpRows=[];
-eventRows.slice(0,6).forEach((ev,idx)=>{rsvpEmails.forEach((email,order)=>{const name=email===DEMO_PLAYER.email?DEMO_PLAYER.name:DEMO_SEED_PLAYERS.find(p=>p.email===email)?.name||email;rsvpRows.push({eventId:ev.id,email,playerId:email,teamId,name,ts:withTs(20-idx,order)});});});
+const attendanceByEvent={
+9001:[DEMO_PLAYER.email,"jordan.m@shotlab.app","tyler.r@shotlab.app","chris.w@shotlab.app"],
+9002:[DEMO_PLAYER.email,"jordan.m@shotlab.app","aiden.t@shotlab.app"],
+9003:[DEMO_PLAYER.email,"jordan.m@shotlab.app","tyler.r@shotlab.app","chris.w@shotlab.app","aiden.t@shotlab.app"],
+9004:[DEMO_PLAYER.email,"tyler.r@shotlab.app","chris.w@shotlab.app"],
+9005:[DEMO_PLAYER.email,"jordan.m@shotlab.app","tyler.r@shotlab.app"],
+9006:[DEMO_PLAYER.email,"jordan.m@shotlab.app","chris.w@shotlab.app","aiden.t@shotlab.app"],
+9007:["jordan.m@shotlab.app","tyler.r@shotlab.app","chris.w@shotlab.app"],
+9008:[DEMO_PLAYER.email,"aiden.t@shotlab.app"],
+};
+eventRows.forEach((ev,idx)=>{
+  const attendees=attendanceByEvent[ev.id]||[];
+  attendees.forEach((email,order)=>{
+    const name=email===DEMO_PLAYER.email?DEMO_PLAYER.name:DEMO_SEED_PLAYERS.find(p=>p.email===email)?.name||email;
+    rsvpRows.push({eventId:ev.id,email,playerId:email,teamId,name,ts:withTs(16-idx,order)});
+  });
+});
 const scRows=[
-{id:8101,title:"Upper Body Power",date:isoDaysAgo(14),time:"6:00 AM",location:"Weight Room — Bay A",desc:"Bench, push press, rows.",teamId},
-{id:8102,title:"Lower Body Strength",date:isoDaysAgo(13),time:"6:00 AM",location:"Weight Room — Bay A",desc:"Squats and posterior-chain focus.",teamId},
-{id:8103,title:"Core & Conditioning",date:isoDaysAgo(12),time:"6:30 AM",location:"Training Facility — Turf",desc:"Core stability and conditioning work.",teamId},
-{id:8104,title:"Explosive Circuit",date:isoDaysAgo(11),time:"6:15 AM",location:"Weight Room — Bay B",desc:"Power circuit + mobility.",teamId},
-{id:8105,title:"Olympic Lifts",date:isoDaysAgo(10),time:"6:00 AM",location:"Weight Room — Platform",desc:"Clean progressions and pulls.",teamId},
-{id:8106,title:"Recovery Lift",date:isoDaysAgo(9),time:"7:00 AM",location:"Recovery Suite",desc:"Lighter movement and activation.",teamId},
-{id:8107,title:"Full Body Circuit",date:isoDaysAgo(8),time:"6:00 AM",location:"Weight Room — Bay B",desc:"High-intensity full body block.",teamId},
-{id:8108,title:"Strength Endurance",date:isoDaysAgo(7),time:"6:30 AM",location:"Weight Room — Bay A",desc:"Strength endurance ladder.",teamId},
-{id:8109,title:"Athletic Movement",date:isoDaysAgo(6),time:"6:15 AM",location:"Training Turf",desc:"Footwork and acceleration patterns.",teamId},
+{id:8101,title:"Upper Body Power",date:isoDaysAgo(9),time:"6:00 AM",location:"Weight Room — Bay A",desc:"Bench clusters, push press, and upper pull volume.",teamId},
+{id:8102,title:"Lower Body Strength",date:isoDaysAgo(6),time:"6:15 AM",location:"Weight Room — Bay A",desc:"Front squat emphasis with posterior-chain accessories.",teamId},
+{id:8103,title:"Movement + Core",date:isoDaysAgo(3),time:"6:30 AM",location:"Training Turf",desc:"Core stiffness, deceleration, and acceleration mechanics.",teamId},
+{id:8104,title:"Explosive Circuit",date:isoDaysFromNow(1),time:"6:10 AM",location:"Weight Room — Bay B",desc:"Jump complexes and med-ball transfer series.",teamId},
+{id:8105,title:"Olympic Lift Progression",date:isoDaysFromNow(3),time:"6:00 AM",location:"Weight Room — Platform",desc:"Clean pull progressions with bar-speed targets.",teamId},
+{id:8106,title:"Recovery Lift",date:isoDaysFromNow(5),time:"7:00 AM",location:"Recovery Suite",desc:"Low-load tissue prep and mobility reset.",teamId},
+{id:8107,title:"Strength Endurance",date:isoDaysFromNow(8),time:"6:25 AM",location:"Weight Room — Bay A",desc:"Ladder sets and tempo work for late-game durability.",teamId},
 ];
-const scRsvpRows=scRows.map((s,idx)=>({sessionId:s.id,email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,ts:withTs(14-idx,500+idx)}));
+const scAttendanceBySession={
+8101:[DEMO_PLAYER.email,"jordan.m@shotlab.app","tyler.r@shotlab.app"],
+8102:[DEMO_PLAYER.email,"jordan.m@shotlab.app","chris.w@shotlab.app"],
+8103:[DEMO_PLAYER.email,"aiden.t@shotlab.app"],
+8104:[DEMO_PLAYER.email,"tyler.r@shotlab.app","chris.w@shotlab.app"],
+8105:["jordan.m@shotlab.app","tyler.r@shotlab.app","aiden.t@shotlab.app"],
+8106:[DEMO_PLAYER.email,"jordan.m@shotlab.app"],
+8107:[DEMO_PLAYER.email,"chris.w@shotlab.app","aiden.t@shotlab.app"],
+};
+const scRsvpRows=[];
+scRows.forEach((s,idx)=>{
+  (scAttendanceBySession[s.id]||[]).forEach((email,order)=>{
+    const name=email===DEMO_PLAYER.email?DEMO_PLAYER.name:DEMO_SEED_PLAYERS.find(p=>p.email===email)?.name||email;
+    scRsvpRows.push({sessionId:s.id,email,playerId:email,teamId,name,ts:withTs(12-idx,500+order)});
+  });
+});
 const challengeRows=[
-{id:7001,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"chris.w@shotlab.app",toName:"Chris W.",drillId:1,drillName:"FORM SHOOTING",score:8,max:10,status:"pending",ts:withTs(5,1)},
-{id:7002,teamId,playerId:"jordan.m@shotlab.app",from:"jordan.m@shotlab.app",fromName:"Jordan M.",to:DEMO_PLAYER.email,toName:DEMO_PLAYER.name,drillId:2,drillName:"FREE THROWS",score:9,max:10,status:"won",respScore:10,respTs:withTs(4,2),ts:withTs(4,1)},
-{id:7003,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"aiden.t@shotlab.app",toName:"Aiden T.",drillId:1,drillName:"FORM SHOOTING",score:9,max:10,status:"pending",ts:withTs(3,1)},
-{id:7004,teamId,playerId:"tyler.r@shotlab.app",from:"tyler.r@shotlab.app",fromName:"Tyler R.",to:DEMO_PLAYER.email,toName:DEMO_PLAYER.name,drillId:2,drillName:"FREE THROWS",score:9,max:10,status:"won",respScore:10,respTs:withTs(2,2),ts:withTs(2,1)},
-{id:7005,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"jordan.m@shotlab.app",toName:"Jordan M.",drillId:2,drillName:"FREE THROWS",score:8,max:10,status:"pending",ts:withTs(1,1)},
+{id:7001,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"chris.w@shotlab.app",toName:"Chris W.",drillId:1,drillName:"FORM SHOOTING",score:8,max:10,status:"pending",ts:withTs(4,1)},
+{id:7002,teamId,playerId:"jordan.m@shotlab.app",from:"jordan.m@shotlab.app",fromName:"Jordan M.",to:DEMO_PLAYER.email,toName:DEMO_PLAYER.name,drillId:2,drillName:"FREE THROWS",score:9,max:10,status:"won",respScore:10,respTs:withTs(3,2),ts:withTs(3,1)},
+{id:7003,teamId,playerId:"tyler.r@shotlab.app",from:"tyler.r@shotlab.app",fromName:"Tyler R.",to:DEMO_PLAYER.email,toName:DEMO_PLAYER.name,drillId:1,drillName:"FORM SHOOTING",score:10,max:10,status:"lost",respScore:8,respTs:withTs(2,2),ts:withTs(2,1)},
+{id:7004,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"aiden.t@shotlab.app",toName:"Aiden T.",drillId:2,drillName:"FREE THROWS",score:9,max:10,status:"pending",ts:withTs(1,1)},
+{id:7005,teamId,playerId:"chris.w@shotlab.app",from:"chris.w@shotlab.app",fromName:"Chris W.",to:DEMO_PLAYER.email,toName:DEMO_PLAYER.name,drillId:2,drillName:"FREE THROWS",score:8,max:10,status:"won",respScore:9,respTs:withTs(1,4),ts:withTs(1,3)},
 ];
 const leaderboardRows=[
-{email:"jordan.m@shotlab.app",name:"Jordan M.",total:1240},
-{email:"tyler.r@shotlab.app",name:"Tyler R.",total:1105},
-{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,total:847},
-{email:"chris.w@shotlab.app",name:"Chris W.",total:601},
-{email:"aiden.t@shotlab.app",name:"Aiden T.",total:489},
+{email:"jordan.m@shotlab.app",name:"Jordan M.",total:1336},
+{email:"tyler.r@shotlab.app",name:"Tyler R.",total:1198},
+{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,total:982},
+{email:"chris.w@shotlab.app",name:"Chris W.",total:854},
+{email:"aiden.t@shotlab.app",name:"Aiden T.",total:746},
 ];
+const playerActivity={
+"jordan.m@shotlab.app":{home:[84,79,76,80,72,74,78,69,75,77,73,73],shots:[58,63,54,67,59,62,63],homeDays:[21,19,18,16,14,12,10,8,6,4,2,1],shotDays:[20,17,13,9,7,5,3]},
+"tyler.r@shotlab.app":{home:[73,70,67,68,71,66,69,64,65,67,66,66],shots:[54,57,51,55,53,58,58],homeDays:[21,20,18,16,15,13,11,9,7,5,3,1],shotDays:[19,17,14,12,8,6,2]},
+"demo@shotlab.app":{home:[59,56,52,54,53,57,55,51,54,58,60,59],shots:[42,45,44,47,43,46,47],homeDays:[20,18,17,15,14,12,10,8,6,4,2,1],shotDays:[19,16,13,9,7,5,3]},
+"chris.w@shotlab.app":{home:[52,49,46,45,48,47,50,46,49,50,49,49],shots:[36,39,40,41,38,40,40],homeDays:[22,20,18,16,14,12,10,8,6,4,2,1],shotDays:[19,15,13,11,7,5,3]},
+"aiden.t@shotlab.app":{home:[43,41,39,40,42,44,43,40,43,45,44,44],shots:[31,34,33,35,34,35,36],homeDays:[23,21,19,17,15,13,11,9,7,5,3,1],shotDays:[20,18,14,10,8,6,2]},
+};
 const playerRows=leaderboardRows.flatMap((p,rankIdx)=>{
-const homeTotal=Math.round(p.total*0.68);
-const shotTotal=p.total-homeTotal;
-const base=Math.floor(homeTotal/16);
-const extra=homeTotal-base*16;
-const scoreSet=Array.from({length:16},(_,i)=>base+(i<extra?1:0));
-const shotSet=distributeTotal(shotTotal,6);
-const scoreEntries=scoreSet.map((val,idx)=>({email:p.email,playerId:p.email,teamId,name:p.name,drillId:idx%2===0?1:2,score:val,date:isoDaysAgo(22+idx),ts:withTs(22+idx,rankIdx*100+idx),src:"home"}));
-const shotEntries=shotSet.map((made,idx)=>({email:p.email,playerId:p.email,teamId,name:p.name,made,date:isoDaysAgo(22+idx),ts:withTs(22+idx,rankIdx*100+50+idx)}));
+const activity=playerActivity[p.email];
+if(!activity)return[];
+const scoreEntries=activity.home.map((val,idx)=>({email:p.email,playerId:p.email,teamId,name:p.name,drillId:idx%2===0?1:2,score:val,date:isoDaysAgo(activity.homeDays[idx]),ts:withTs(activity.homeDays[idx],rankIdx*100+idx),src:"home"}));
+const shotEntries=activity.shots.map((made,idx)=>({email:p.email,playerId:p.email,teamId,name:p.name,made,date:isoDaysAgo(activity.shotDays[idx]),ts:withTs(activity.shotDays[idx],rankIdx*100+50+idx)}));
 return [...scoreEntries,...shotEntries];
 });
 return{scoreRows,shotRows,eventRows,rsvpRows,scRows,scRsvpRows,challengeRows,leaderboardRows,playerRows};
@@ -1543,6 +1577,7 @@ return <div className="fade-up">
 function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog}){
 const[showBoard,setShowBoard]=useState(false),[expanded,setExpanded]=useState(null);
 const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"",sport:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false);
+const demoUser=isDemoEmail(user?.email);
 const sorted=useMemo(()=>[...sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
 const upcoming=sorted.filter(s=>s.date>=todayStr()),past=sorted.filter(s=>s.date<todayStr());
 const myCount=scRsvps.filter(r=>r.email===user.email).length;
@@ -1633,7 +1668,7 @@ return <div className="fade-up">
   <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={SC_COLOR} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
 </button>
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
-  {board.length===0&&<Empty t="No attendance yet"/>}
+  {board.length===0&&<Empty t={demoUser?"Demo attendance is being refreshed":"No attendance yet"} action={demoUser?"Re-enter the demo account to repopulate S&C attendance samples.":"No one has RSVPed to a session yet."}/>}
   {board.map((p,i)=>{const isMe=p.email===user.email;return <div key={p.email} className={`card ${isMe?"card--active card--accent":""}`} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",marginBottom:6}}>
     <RB r={i+1} m={medals}/>
     <Av n={p.name} sz={30} email={p.email}/>
@@ -1662,7 +1697,7 @@ return <div className="fade-up">
 
 {/* Upcoming sessions */}
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING SESSIONS" s={`${upcoming.length} SCHEDULED`}/>
-{upcoming.length===0&&<Empty variant="lifting" t="No upcoming sessions" action="Your coach will add S&C sessions here. Check back soon!"/>}
+{upcoming.length===0&&<Empty variant="lifting" t={demoUser?"No upcoming demo lifts":"No upcoming sessions"} action={demoUser?"Your demo feed is still useful — open Event Leaderboards to explore attendance trends.":"Your coach will add S&C sessions here. Check back soon!"}/>}
 {upcoming.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const going=sr.some(r=>r.email===user.email);const exp=expanded===s.id;
   return <div key={s.id} style={{marginBottom:12}}>
     <button onClick={()=>setExpanded(exp?null:s.id)} className={`ch card ${going?"card--accent":""}`} style={{width:"100%",borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",cursor:"pointer",position:"relative"}}>
@@ -2021,6 +2056,7 @@ return <div style={{marginBottom:16}}><SH isCoach={typeof u!=="undefined"&&u?.is
 // ═══════════════════════════════════════
 function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills}){
 const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState("attend"),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null),[rankBarPct,setRankBarPct]=useState(0),[rankBarPulse,setRankBarPulse]=useState(false);
+const demoUser=isDemoEmail(user?.email);
 const sorted=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
 const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
 const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);
@@ -2155,14 +2191,14 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
   <div style={{display:"flex",gap:4,marginBottom:14}}>{[{k:"attend",l:"ATTENDANCE"},{k:"overall",l:"DRILL SCORES"},{k:"streaks",l:"STREAKS"}].map(t=><button className="uiTap" key={t.k} onClick={()=>setLbMode(t.k)} style={{flex:1,padding:"9px 4px",borderRadius:10,border:lbMode===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:1,background:lbMode===t.k?CYAN:CARD_BG,color:lbMode===t.k?BG:MUTED}}>{t.l}</button>)}</div>
-  {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty variant="leaderboard" t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</span><span className="tb" style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div style={{fontFamily:FD,color:t.color,fontSize:18}}>{p.count}</div></div>})}</>}
+  {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty variant="leaderboard" t={demoUser?"Attendance sample unavailable":"No RSVPs yet"} action={demoUser?"Re-enter demo mode to restore realistic attendance and ranking data.":"When teammates RSVP, attendance rankings will appear here."}/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</span><span className="tb" style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div style={{fontFamily:FD,color:t.color,fontSize:18}}>{p.count}</div></div>})}</>}
   {lbMode==="overall"&&<>{(()=>{const m={};scores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});const a=Object.values(m).sort((a,b)=>b.total-a.total);return a.length===0?<Empty variant="leaderboard" t="No scores yet"/>:a.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{p.email===user.email?" (YOU)":""}</div><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{p.total}</div></div>)})()}</>}
   {lbMode==="streaks"&&<>{(()=>{const es=[...new Set(scores.map(s=>s.email))];const st=es.map(e=>({email:e,name:scores.find(s=>s.email===e)?.name||e,streak:calcStreak(scores.filter(s=>s.email===e))})).sort((a,b)=>b.streak-a.streak);return st.length===0?<Empty variant="leaderboard" t="No streaks yet"/>:st.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</div><div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{p.streak} &#128293;</div></div>)})()}</>}
 </div>}
 
 {/* Upcoming */}
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING EVENTS" s={`${upcoming.length} SCHEDULED`}/>
-{upcoming.length===0&&<Empty variant="events" t="No events scheduled yet" subtitle="Your coach hasn't posted any team sessions yet. Keep momentum by logging today's work at home." cta="LOG SHOTS" ctaVariant="primary" secondaryCta="NOTIFY MY COACH" secondaryCtaVariant="tertiary" onTap={()=>setTab("log-drill")}/>}
+{upcoming.length===0&&<Empty variant="events" t={demoUser?"No upcoming demo events":"No events scheduled yet"} subtitle={demoUser?"The demo timeline may have been cleared. Re-enter demo to reload a full schedule with attendance trends.":"Your coach hasn't posted any team sessions yet. Keep momentum by logging today's work at home."} cta="LOG SHOTS" ctaVariant="primary" secondaryCta="NOTIFY MY COACH" secondaryCtaVariant="tertiary" onTap={()=>setTab("log-drill")}/>}
 <div className="eventsList">
 {upcoming.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;const relativeLabel=getRelativeLabel(ev.date);
   return <div key={ev.id}>
