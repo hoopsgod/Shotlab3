@@ -1,46 +1,7 @@
-:root{
-  --bg: #070A0C;
-  --surface-1: #0C1116;
-  --surface-2: #0F1620;
-  --surface-3: #0A0F14;
-  --text-1: rgba(255,255,255,.92);
-  --text-2: rgba(255,255,255,.78);
-  --muted: rgba(255,255,255,.64);
-  --border-1: rgba(255,255,255,.14);
-  --border-2: rgba(255,255,255,.18);
-  --accent: #B8FF00;
-  --shadow-1: 0 10px 24px rgba(0,0,0,.45);
-  --shadow-2: 0 18px 40px rgba(0,0,0,.55);
-  --glow-accent: 0 0 0 1px rgba(184,255,0,.22), 0 10px 30px rgba(184,255,0,.10);
-}
-
-.card{
-  background: var(--surface-1);
-  border: 1px solid var(--border-1);
-  border-radius: 22px;
-  box-shadow: var(--shadow-1);
-  overflow: hidden;
-}
-
-.card--raised{
-  background: var(--surface-2);
-  border-color: var(--border-2);
-  box-shadow: var(--shadow-2);
-}
-
-.card--accent{
-  border-color: rgba(184,255,0,.22);
-}
-
-.card--active{
-  box-shadow: var(--shadow-2), var(--glow-accent);
-}
-
 /* =========================
    Micro UI Polish: Progress
    ========================= */
 
-/* Generic progress bar containers (best-effort, non-breaking) */
 .progress,
 .progressBar,
 .progress-bar,
@@ -48,7 +9,6 @@
   border-radius: 999px;
 }
 
-/* Track */
 .progressTrack,
 .progress-track,
 [class*="progressTrack"],
@@ -60,18 +20,16 @@
   overflow: hidden;
 }
 
-/* Fill */
 .progressFill,
 .progress-fill,
 [class*="progressFill"],
 [class*="fill"] {
   height: 100%;
   border-radius: 999px;
-  background: #C8FF00;
+  background: var(--accent);
   box-shadow: 0 0 0 2px rgba(200,255,0,0.14), 0 10px 24px rgba(200,255,0,0.10);
 }
 
-/* Attendance Rank labels (percent + tier) - safe, only if present */
 .progressLabels,
 .progress-labels,
 [class*="progressLabel"],
@@ -95,33 +53,17 @@
 .progressTier,
 .progress-tier,
 [class*="tier"] {
-  color: #C8FF00;
+  color: var(--accent);
   font-size: 12px;
   font-weight: 800;
   letter-spacing: 0.10em;
   text-transform: uppercase;
 }
 
-:root {
-  --input-h: 48px;
-  --input-radius: 14px;
-  --input-pad-x: 14px;
-  --field-gap: var(--space-2, 8px);
-  --label-gap: var(--space-2, 8px);
-  --border-1: var(--stroke-1, rgba(255, 255, 255, 0.10));
-  --muted: var(--text-2, rgba(255, 255, 255, 0.65));
-  --fs-caption: 11px;
-  --fw-semibold: 600;
-  --ls-normal: 0.02em;
-  --surface-2: #141821;
-  --text-1: #E5E7EB;
-  --accent: #C8FF1A;
-}
-
 .field {
   display: flex;
   flex-direction: column;
-  gap: var(--label-gap);
+  gap: var(--s-2);
 }
 
 .fieldLabel {
@@ -165,7 +107,7 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
   border-color: rgba(184, 255, 0, .35);
-  box-shadow: 0 0 0 3px rgba(184, 255, 0, 0.28);
+  box-shadow: var(--focus-ring);
 }
 
 .disabled,
@@ -182,7 +124,6 @@ textarea:focus-visible {
    Micro UI Polish: Density
    ========================= */
 
-/* Lists: slightly tighter, keep tap targets */
 button,
 a[role="button"],
 [role="button"],
@@ -191,7 +132,6 @@ a[role="button"],
   min-height: 44px;
 }
 
-/* If list items are <li> rows or card rows, tighten padding carefully */
 li,
 .listItem,
 .list-item,
@@ -202,17 +142,14 @@ li,
   padding-bottom: 14px;
 }
 
-/* Forms: slightly more breathing room between fields (best effort) */
 form > * + * {
-  margin-top: var(--field-gap);
+  margin-top: var(--s-2);
 }
 
-/* If there are common field wrappers */
 .field,
 .formField,
 .form-field,
 .inputGroup,
 .input-group {
-  margin-bottom: var(--field-gap);
+  margin-bottom: var(--s-2);
 }
-
