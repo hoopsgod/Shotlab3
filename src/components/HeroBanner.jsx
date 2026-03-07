@@ -1,3 +1,8 @@
+import UI_TOKENS from "../styles/tokens";
+
+const HERO_RADIUS = 18;
+const HERO_BUTTON_RADIUS = 10;
+
 function HeroBanner({
   title,
   subtitle,
@@ -11,7 +16,7 @@ function HeroBanner({
       style={{
         background: `linear-gradient(140deg, ${accent}22 0%, ${accent}10 45%, var(--surface-1) 100%)`,
         border: `1px solid ${accent}66`,
-        borderRadius: 18,
+        borderRadius: HERO_RADIUS,
         padding: "16px 14px",
         marginBottom: 20,
         boxShadow: `0 14px 28px ${accent}22`,
@@ -24,7 +29,7 @@ function HeroBanner({
               style={{
                 width: 34,
                 height: 34,
-                borderRadius: 10,
+                borderRadius: HERO_BUTTON_RADIUS,
                 border: `1px solid ${accent}55`,
                 background: `${accent}14`,
                 display: "flex",
@@ -69,9 +74,9 @@ function HeroBanner({
             onClick={onAction}
             style={{
               background: accent,
-              color: "var(--bg)",
+              color: UI_TOKENS.colors.bgBase,
               border: "none",
-              borderRadius: 10,
+              borderRadius: HERO_BUTTON_RADIUS,
               padding: "8px 10px",
               fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
               fontSize: 10,

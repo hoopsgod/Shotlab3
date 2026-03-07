@@ -16,22 +16,23 @@ import SectionContainer from "./components/SectionContainer";
 import HeroBanner from "./components/HeroBanner";
 import BrandLogo from "./components/BrandLogo";
 import spacing from "./spacing";
+import UI_TOKENS from "./styles/tokens";
 
 const TOKENS={
-PRIMARY:"#C8FF1A",
-PRIMARY_DIM:"#9CA3AF",
-PRIMARY_GLOW:"rgba(200, 255, 26, 0.18)",
-SECONDARY:"#9CA3AF",
-SECONDARY_DIM:"rgba(0, 229, 255, 0.12)",
-DANGER:"#FF4545",
-WARNING:"#FFA500",
-BG_BASE:"#070A0C",
-BG_CARD:"#0C1116",
-BG_ELEVATED:"#0F1620",
-BG_SUBTLE:"rgba(255,255,255,0.14)",
-TEXT_PRIMARY:"#E5E7EB",
-TEXT_SECONDARY:"#C7CFDA",
-TEXT_MUTED:"#A7B0BE",
+PRIMARY:UI_TOKENS.colors.primary,
+PRIMARY_DIM:UI_TOKENS.colors.primaryDim,
+PRIMARY_GLOW:UI_TOKENS.colors.primaryGlow,
+SECONDARY:UI_TOKENS.colors.secondary,
+SECONDARY_DIM:UI_TOKENS.colors.secondaryDim,
+DANGER:UI_TOKENS.colors.danger,
+WARNING:UI_TOKENS.colors.warning,
+BG_BASE:UI_TOKENS.colors.bgBase,
+BG_CARD:UI_TOKENS.colors.bgCard,
+BG_ELEVATED:UI_TOKENS.colors.bgElevated,
+BG_SUBTLE:UI_TOKENS.borders.subtle,
+TEXT_PRIMARY:UI_TOKENS.colors.textPrimary,
+TEXT_SECONDARY:UI_TOKENS.colors.textSecondary,
+TEXT_MUTED:UI_TOKENS.colors.textMuted,
 };
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
@@ -3150,7 +3151,7 @@ function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={si
 function FF({l,v,set,ph,tp,ta}){return <div className="field"><label className="fieldLabel" style={{fontFamily:FB}}>{l}</label>{ta?<textarea className="input input--textarea" value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{fontSize:14,fontFamily:FB,lineHeight:1.6,resize:"vertical"}}/>:<input className="input" type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{fontSize:14,fontFamily:FB,fontWeight:500}}/>}</div>}
 function NavBar({items,active,onChange,utilityControl}){
 const navAccent=PAGE_ACCENTS[active]?.accent||PAGE_ACCENTS.feed.accent;
-return <>{utilityControl&&<div className="utility-dock"><button type="button" className={`utility-dock-button ${utilityControl.active?"is-active":""}`} onClick={utilityControl.onClick} aria-label={utilityControl.label} aria-current={utilityControl.active?"page":undefined} title={utilityControl.label}><span className="utility-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg></span><span className="utility-label">{utilityControl.label}</span></button></div>}<nav className="bottom-nav" role="tablist" aria-label="Main navigation tabs" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"var(--nav-height)",padding:"2px 64px env(safe-area-inset-bottom) 4px",background:"rgba(12,17,22,0.92)",borderTop:"1px solid var(--stroke-1)",zIndex:20}}>{items.map(t=>{const a=active===t.k;
+return <>{utilityControl&&<div className="utility-dock"><button type="button" className={`utility-dock-button ${utilityControl.active?"is-active":""}`} onClick={utilityControl.onClick} aria-label={utilityControl.label} aria-current={utilityControl.active?"page":undefined} title={utilityControl.label}><span className="utility-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg></span><span className="utility-label">{utilityControl.label}</span></button></div>}<nav className="bottom-nav" role="tablist" aria-label="Main navigation tabs" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"var(--nav-height)",padding:"2px 64px env(safe-area-inset-bottom) 4px",background:"rgba(12,17,22,0.92)",borderTop:`1px solid ${UI_TOKENS.borders.subtle}`,zIndex:20}}>{items.map(t=>{const a=active===t.k;
 const tabAccent="var(--accent)";
 return <button key={t.k} role="tab" aria-selected={a} aria-label={t.l} aria-current={a?"page":undefined} className={`tab shared-nav-item ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:50,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"9px 4px 8px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 180ms ease-out",outlineOffset:2}}>
 <div className="tab-icon" style={{position:"relative"}}>{t.svg}</div>
