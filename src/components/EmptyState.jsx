@@ -19,7 +19,7 @@ export default function EmptyState({
   description,
   onTap,
   onCtaClick,
-  cta = "GET STARTED",
+  cta = "Get started",
   ctaLabel,
   ctaVariant = "primary",
   secondaryCta,
@@ -50,7 +50,7 @@ export default function EmptyState({
           <Button
             onClick={primaryAction}
             variant={ctaVariant}
-            className={`${ctaVariant === "tertiary" ? "" : "btn-v"} ${ctaVariant === "primary" ? "emptyState__primary" : ""}`.trim()}
+            className={`${ctaVariant === "primary" ? "emptyState__primary" : ""}`.trim()}
           >
             {primaryLabel}
           </Button>
