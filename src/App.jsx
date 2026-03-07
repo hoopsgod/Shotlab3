@@ -277,12 +277,12 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeaderText{min-width:0;flex:1 1 220px;}.pageHeaderText h1{font-family:${FD};font-size:26px;letter-spacing:var(--tracking-default);color:#fff;line-height:1;word-break:break-word;}
 .pageHeaderText p{font-family:${FB};font-size:11px;color:var(--text-secondary);margin-top:4px;text-transform:uppercase;letter-spacing:var(--tracking-tight);}
 .pageHeaderRight{margin-left:auto;flex-shrink:0;}
-.pageHeaderPill{padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.06);font-family:${FB};font-size:10px;color:#EAEAEA;font-weight:700;letter-spacing:var(--tracking-tight);text-transform:uppercase;transition:background .15s ease,border-color .15s ease,transform .1s ease,filter .15s ease;}
-.pageHeaderPill:hover{background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.18);filter:brightness(1.04);}
+.pageHeaderPill{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 16px;border-radius:999px;border:1px solid rgba(255,255,255,0.10);background:rgba(255,255,255,0.04);font-family:${FB};font-size:10px;color:var(--text-2);font-weight:700;letter-spacing:var(--tracking-tight);text-transform:uppercase;transition:background .15s ease,border-color .15s ease,transform .1s ease,filter .15s ease;}
+.pageHeaderPill:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.16);filter:brightness(1.03);}
 .pageHeaderPill:active{transform:translateY(1px);}
 .pageHeaderPill:focus-visible{outline:2px solid var(--page-accent);outline-offset:2px;}
-.pageHeaderPillBrand{border:none;background:transparent;color:var(--lime);}
-.pageHeaderPillBrand:hover{text-decoration:underline;background:transparent;}
+.pageHeaderPillBrand{border:1px solid transparent;background:var(--page-accent,var(--color-primary,#C8FF00));color:#0B0D10;box-shadow:0 4px 16px rgba(184,255,0,.22);}
+.pageHeaderPillBrand:hover{text-decoration:none;filter:brightness(1.03);}
 .pageHeaderPillBrand:focus-visible{outline-color:#C8FF00;}
 .pageAccentBar{height:4px;width:48%;border-radius:999px;background:var(--headerAccent);box-shadow:0 0 16px var(--headerAccent);margin-top:var(--space-3);}
 .heroModule{position:relative;overflow:hidden;border:1px solid var(--stroke-2);border-radius:var(--radius-card);padding:12px;margin-bottom:var(--stack-gap);background:var(--surface-3);box-shadow:var(--shadow-2);}
@@ -2586,7 +2586,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
             {/* Manual email entry */}
             <div style={{display:"flex",gap:6}}>
               <input value={addEmail} onChange={e=>setAddEmail(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleAddWalkin(ev.id)} placeholder="email@example.com" style={{flex:1,padding:"10px 12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,color:LIGHT,fontSize:16,fontFamily:FB,outline:"none"}} onFocus={e=>e.target.style.borderColor=CYAN+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
-              <button onClick={()=>handleAddWalkin(ev.id)} style={{padding:"10px 16px",background:"var(--page-accent)",color:"#000000",fontFamily:FD,fontSize:13,letterSpacing:2,border:"none",borderRadius:10,cursor:"pointer",whiteSpace:"nowrap"}}>ADD</button>
+              <button onClick={()=>handleAddWalkin(ev.id)} style={{height:42,padding:"0 16px",background:"var(--page-accent)",color:"#000000",fontFamily:FD,fontSize:13,letterSpacing:2,border:"none",borderRadius:999,cursor:"pointer",whiteSpace:"nowrap"}}>ADD</button>
             </div>
           </div>
 
@@ -2608,7 +2608,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       {profileErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:8}}>{profileErr}</div>}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:10}}>
         <div style={{fontSize:10,color:MUTED,fontFamily:FB}}>{playerProfiles.length} player profiles on team</div>
-        <button onClick={async()=>{const r=await addRosterPlayer(newProfile);if(!r.ok)setProfileErr(r.err||"Could not add player");else setNewProfile({firstName:"",lastName:"",jerseyNumber:""});}} style={{padding:"8px 12px",background:"var(--page-accent)",color:"#000000",border:"none",borderRadius:8,fontFamily:FD,letterSpacing:1,cursor:"pointer"}}>ADD</button>
+        <button onClick={async()=>{const r=await addRosterPlayer(newProfile);if(!r.ok)setProfileErr(r.err||"Could not add player");else setNewProfile({firstName:"",lastName:"",jerseyNumber:""});}} style={{height:42,padding:"0 16px",background:"var(--page-accent)",color:"#000000",border:"none",borderRadius:999,fontFamily:FD,letterSpacing:1,cursor:"pointer"}}>ADD</button>
       </div>
     </div>
     <CoachRoster players={players} scores={scores} shotLogs={shotLogs} drills={drills} nudged={nudged} setNudged={setNudged}/>
