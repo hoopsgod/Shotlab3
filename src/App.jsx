@@ -80,6 +80,8 @@ const SC_INIT=[
 const TIERS=[{min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},{min:2,name:"IRON",color:"#A0A0A0",bg:"#A0A0A015"},{min:3,name:"BRONZE",color:"#A0A0A0",bg:"#A0A0A015"},{min:5,name:"SILVER",color:"#A0A0A0",bg:"#A0A0A015"},{min:8,name:"GOLD",color:"#C8FF00",bg:"#C8FF0015"},{min:12,name:"DIAMOND",color:CYAN,bg:CYAN+"15"}];
 const getTier = c => [...TIERS].reverse().find(t => c >= t.min) || TIERS[0];
 const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
+const SHOT_MAKES_MIN=1;
+const SHOT_MAKES_MAX=500;
 const ALNUM="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const DEMO_PLAYER={email:"demo@shotlab.app",password:"demo1234",name:"Demo Player",role:"player"};
 const DEMO_COACH={email:"coach.demo@shotlab.app",password:"demo1234",name:"Demo Coach",role:"coach"};
@@ -1087,7 +1089,7 @@ return <span title={text} aria-label={text} style={{display:"inline-flex",alignI
 function Player({u,team,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount}){
 const initialTab = u.isCoach && window.location.pathname === "/players" ? "players" : "home";
 const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
-const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false);
+const[shotMade,setShotMade]=useState(0),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false),[shotError,setShotError]=useState("");
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
@@ -1135,6 +1137,28 @@ const pendingDuels=useMemo(()=>challenges.filter(c=>c.to===u.email&&c.status==="
 const unrsvpEvents=useMemo(()=>{const up=events.filter(e=>e.date>=today);return up.filter(e=>!rsvps.some(r=>r.eventId===e.id&&r.email===u.email)).length},[events,rsvps,u,today]);
 const soonSC=useMemo(()=>{const d2=new Date();d2.setDate(d2.getDate()+2);const cut=`${d2.getFullYear()}-${String(d2.getMonth()+1).padStart(2,"0")}-${String(d2.getDate()).padStart(2,"0")}`;return scSessions.filter(s=>s.date>=today&&s.date<=cut&&!scRsvps.some(r=>r.sessionId===s.id&&r.email===u.email)).length},[scSessions,scRsvps,u,today]);
 
+const shotMadeValue=Number(shotMade);
+const isShotValid=Number.isInteger(shotMadeValue)&&shotMadeValue>=SHOT_MAKES_MIN&&shotMadeValue<=SHOT_MAKES_MAX;
+const updateShotMade=(next)=>{
+const parsed=Number(next);
+if(!Number.isFinite(parsed)){setShotError("Enter a whole number between 1 and 500.");return;}
+const clamped=Math.max(0,Math.min(SHOT_MAKES_MAX,Math.round(parsed)));
+setShotMade(clamped);
+if(clamped<SHOT_MAKES_MIN)setShotError("Select at least 1 make before submitting.");
+else setShotError("");
+};
+const adjustShotMade=(delta)=>updateShotMade((Number(shotMade)||0)+delta);
+const submitShotLog=async()=>{
+if(!isShotValid){setShotError(`Enter a valid make count between ${SHOT_MAKES_MIN} and ${SHOT_MAKES_MAX}.`);return false;}
+await addShotLog(shotMadeValue,shotDate);
+setShotSaved(true);
+setShotError("");
+setShotMade(0);
+setShotDate(todayStr());
+setTimeout(()=>setShotSaved(false),1800);
+return true;
+};
+
 const[pbReveal,setPbReveal]=useState(null);
 const[submitting,setSubmitting]=useState(false);
 const[drillBarW,setDrillBarW]=useState(0);
@@ -1157,6 +1181,7 @@ const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else s
 
 return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
 <BrandBackdrop/>
+{shotSaved&&<div role="status" aria-live="polite" style={{position:"fixed",left:"50%",bottom:110,transform:"translateX(-50%)",zIndex:40,background:VOLT,color:BG,padding:"10px 14px",borderRadius:999,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:1.2,boxShadow:"0 10px 28px rgba(0,0,0,0.35)"}}>Shots logged successfully</div>}
 {teamBranding.showWatermark&&tab==="home"?<TeamWatermark logoUrl={teamBranding.logoUrl} primaryColor={teamBranding.primaryColor} opacity={0.06} size={260}/>:null}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
@@ -1285,17 +1310,21 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       SHOT TRACKER
     </div>
     <div style={{background:CARD_BG,borderRadius:16,padding:"16px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
-      <div style={{display:"flex",gap:10,marginBottom:12}}>
-        <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>MAKES</label>
-          <input type="number" min="0" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0" style={{width:"100%",padding:"12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:VOLT,fontFamily:FD,fontSize:24,textAlign:"center",outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
+      <div style={{marginBottom:12}}>
+        <label id="home-shot-makes-label" style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:8}}>NUMBER OF MAKES</label>
+        <div style={{display:"flex",alignItems:"center",gap:8}}>
+          <button type="button" aria-label="Decrease number of makes" onClick={()=>adjustShotMade(-1)} style={{width:40,height:40,borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:22,fontWeight:700,cursor:"pointer"}}>–</button>
+          <input id="home-shot-slider" type="range" min="0" max={SHOT_MAKES_MAX} step="1" value={shotMade} onChange={e=>updateShotMade(e.target.value)} aria-labelledby="home-shot-makes-label" aria-label="Number of makes" style={{flex:1,accentColor:VOLT,cursor:"pointer"}}/>
+          <button type="button" aria-label="Increase number of makes" onClick={()=>adjustShotMade(1)} style={{width:40,height:40,borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:22,fontWeight:700,cursor:"pointer"}}>+</button>
         </div>
-        <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>DATE</label>
-          <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
-        </div>
+        <div style={{marginTop:8,fontFamily:FD,color:VOLT,fontSize:24,textAlign:"center"}} aria-live="polite">{shotMade}</div>
       </div>
-      <button className="btn btn--primary btn-v" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?.7:1,width:"100%"}}>
+      <div style={{marginBottom:12}}>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>DATE</label>
+        <input aria-label="Date for shot log" type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
+      </div>
+      {shotError&&<div role="alert" aria-live="assertive" style={{fontFamily:FB,color:"#FF7D7D",fontSize:11,marginBottom:10}}>{shotError}</div>}
+      <button className="btn btn--primary btn-v" aria-label="Submit log shots form" disabled={!isShotValid} onClick={submitShotLog} style={{opacity:isShotValid?(shotSaved?.7:1):0.55,width:"100%",cursor:isShotValid?"pointer":"not-allowed"}}>
         {shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
       {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
@@ -1311,7 +1340,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {/* ═════ SHOT STATS sub-screen ═════ */}
   {tab==="log-drill"&&showShotStats&&!active&&<div className="fade-up">
     <button onClick={()=>setShowShotStats(false)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20,padding:0}}>&#8592; BACK TO DRILLS</button>
-    <ShotTracker u={u} shotLogs={shotLogs} addShotLog={addShotLog} shotMade={shotMade} setShotMade={setShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} setShotSaved={setShotSaved}/>
+    <ShotTracker u={u} shotLogs={shotLogs} shotMade={shotMade} updateShotMade={updateShotMade} adjustShotMade={adjustShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} shotError={shotError} isShotValid={isShotValid} submitShotLog={submitShotLog}/>
   </div>}
 
 
@@ -1914,15 +1943,11 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 // ═══════════════════════════════════════
 // SHOT TRACKER — Log makes by date with running totals
 // ═══════════════════════════════════════
-function ShotTracker({u,shotLogs,addShotLog,shotMade,setShotMade,shotDate,setShotDate,shotSaved,setShotSaved}){
+function ShotTracker({u,shotLogs,shotMade,updateShotMade,adjustShotMade,shotDate,setShotDate,shotSaved,shotError,isShotValid,submitShotLog}){
 const my=useMemo(()=>shotLogs.filter(s=>s.email===u.email),[shotLogs,u]);
 const today=todayStr();
 
-const handleLog=()=>{
-const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;
-addShotLog(v,shotDate);setShotSaved(true);setShotMade("");
-setTimeout(()=>setShotSaved(false),1800);
-};
+const handleLog=()=>{submitShotLog();};
 
 // Running totals
 const todayTotal=useMemo(()=>my.filter(s=>s.date===today).reduce((a,s)=>a+s.made,0),[my,today]);
@@ -1973,17 +1998,21 @@ return <div className="fade-up">
     <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:4}}>SHOTS LOGGED</div>
   </div>
   :<>
-    <div style={{display:"flex",gap:10,marginBottom:16}}>
-      <div style={{flex:1}}>
-        <label className="fieldLabel" style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>SHOTS MADE</label>
-        <input className="input" type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLog()} placeholder="0" style={{width:"100%",padding:"16px 14px",background:BG,border:`2px solid ${ORANGE}66`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none",letterSpacing:2}} onFocus={e=>e.target.style.borderColor=ORANGE} onBlur={e=>e.target.style.borderColor=ORANGE+"66"}/>
+    <div style={{marginBottom:16}}>
+      <label id="tracker-shot-makes-label" className="fieldLabel" style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>NUMBER OF MAKES</label>
+      <div style={{display:"flex",alignItems:"center",gap:10}}>
+        <button type="button" aria-label="Decrease number of makes" onClick={()=>adjustShotMade(-1)} style={{width:44,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:24,fontWeight:700,cursor:"pointer"}}>–</button>
+        <input id="tracker-shot-slider" className="input" type="range" min="0" max={SHOT_MAKES_MAX} step="1" value={shotMade} onChange={e=>updateShotMade(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLog()} aria-labelledby="tracker-shot-makes-label" aria-label="Number of makes" style={{flex:1,accentColor:ORANGE,cursor:"pointer"}}/>
+        <button type="button" aria-label="Increase number of makes" onClick={()=>adjustShotMade(1)} style={{width:44,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:24,fontWeight:700,cursor:"pointer"}}>+</button>
       </div>
-      <div style={{flex:1}}>
-        <label className="fieldLabel" style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>DATE</label>
-        <input className="input" type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
-      </div>
+      <div style={{fontFamily:FD,color:ORANGE,fontSize:34,textAlign:"center",marginTop:8}} aria-live="polite">{shotMade}</div>
     </div>
-    <button className="btn btn--primary btn-v" onClick={handleLog} style={{width:"100%"}}>
+    <div style={{marginBottom:16}}>
+      <label className="fieldLabel" style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>DATE</label>
+      <input className="input" aria-label="Date for shot log" type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
+    </div>
+    {shotError&&<div role="alert" aria-live="assertive" style={{fontFamily:FB,color:"#FF7D7D",fontSize:11,marginBottom:10}}>{shotError}</div>}
+    <button className="btn btn--primary btn-v" aria-label="Submit log shots form" disabled={!isShotValid} onClick={handleLog} style={{width:"100%",opacity:isShotValid?1:0.55,cursor:isShotValid?"pointer":"not-allowed"}}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
       LOG SHOTS
     </button>
