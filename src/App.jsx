@@ -3115,20 +3115,20 @@ setMsg(r?.ok?"Password reset email sent.":(r?.err||"Unable to send reset email."
 return <SectionContainer className="fade-up">
   <Card style={{marginBottom:16}}>
     <div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:2}}>SETTINGS</div>
-    <p style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:8}}>Manage account security, data privacy, and account lifecycle.</p>
+    <p style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:8}}>Manage your account security, privacy, and deletion options.</p>
   </Card>
   <Card style={{marginBottom:16}}>
-    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>SECURITY</div>
-    <button onClick={handleReset} className="btn-v" style={{height:42,background:"transparent",border:`1px solid ${BORDER_CLR}`,color:LIGHT}}>Send password reset email</button>
+    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>ACCOUNT SECURITY</div>
+    <button onClick={handleReset} className="btn-v" style={{height:42,background:"transparent",border:`1px solid ${BORDER_CLR}`,color:LIGHT}}>Email password reset link</button>
     <p style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:8}}>{u?.email}</p>
   </Card>
   <Card style={{marginBottom:16}}>
-    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PRIVACY POLICY</div>
-    <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5}}>Shotlab stores account, profile, shot logs, duels, RSVPs, and events in cloud-backed storage when Firebase is configured. Access is scoped by your signed-in account.</p>
+    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PRIVACY</div>
+    <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5}}>Your account, profile, shot logs, duels, RSVPs, and events are stored in cloud-backed storage when Firebase is enabled. Access is limited to your signed-in account.</p>
   </Card>
   <Card>
-    <div style={{fontFamily:FB,color:"#FF4545",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>DANGER ZONE</div>
-    {!confirmDelete?<button onClick={()=>setConfirmDelete(true)} className="btn-v cta-danger" style={{height:44}}>Delete account</button>:<div><p style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:10}}>This permanently deletes your account and associated data.</p><div style={{display:"flex",gap:8}}><button onClick={()=>setConfirmDelete(false)} className="btn-v" style={{height:40,background:"transparent",border:`1px solid ${BORDER_CLR}`,color:MUTED}}>Cancel</button><button onClick={onDeleteAccount} className="btn-v cta-danger" style={{height:40}}>Confirm delete</button></div></div>}
+    <div style={{fontFamily:FB,color:"#FF4545",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>ACCOUNT DELETION</div>
+    {!confirmDelete?<button onClick={()=>setConfirmDelete(true)} className="btn-v cta-danger" style={{height:44}}>Delete my account</button>:<div><p style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:10}}>This permanently deletes your account and all associated data.</p><div style={{display:"flex",gap:8}}><button onClick={()=>setConfirmDelete(false)} className="btn-v" style={{height:40,background:"transparent",border:`1px solid ${BORDER_CLR}`,color:MUTED}}>Cancel</button><button onClick={onDeleteAccount} className="btn-v cta-danger" style={{height:40}}>Permanently delete</button></div></div>}
     {msg&&<p style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:10}}>{msg}</p>}
   </Card>
 </SectionContainer>;
