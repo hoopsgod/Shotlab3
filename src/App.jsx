@@ -56,10 +56,10 @@ BASE_BORDER:"var(--border-1)",
 BASE_SHADOW:"var(--shadow-1)",
 HOME_TINT:"rgba(142, 170, 92, 0.08)",
 PROGRAM_TINT:"rgba(0, 176, 255, 0.12)",
-HOME_GLOW:"rgba(142,170,92,.09)",
-PROGRAM_GLOW:"rgba(184,255,0,.16)",
+HOME_GLOW:"rgba(142,170,92,.05)",
+PROGRAM_GLOW:"rgba(184,255,0,.10)",
 ICON_INNER:"rgba(255, 255, 255, 0.06)",
-FOCUS_RING:"rgba(200, 255, 0, 0.45)",
+FOCUS_RING:"rgba(200, 255, 0, 0.30)",
 CHEVRON_BG:"rgba(255, 255, 255, 0.06)",
 };
 
@@ -1316,7 +1316,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </div>
     })()}
 
-    <section style={{background:`linear-gradient(140deg, ${VOLT}16 0%, ${VOLT}08 45%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}44`,borderRadius:18,padding:"15px 14px",marginBottom:20,boxShadow:`0 10px 22px ${VOLT}14`}}>
+    <section style={{background:`linear-gradient(140deg, ${VOLT}10 0%, ${VOLT}06 42%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}2E`,borderRadius:18,padding:"15px 14px",marginBottom:20,boxShadow:`0 8px 16px ${VOLT}10`}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:12}}>
         <div>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2,lineHeight:1,textTransform:"uppercase"}}>Upcoming Work Events</div>
@@ -1326,12 +1326,12 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </div>
 
       <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
-        <div style={{background:BG,border:`1px solid ${VOLT}40`,borderRadius:12,padding:"12px 10px"}}>
+        <div style={{background:"rgba(17,17,17,0.98)",border:`1px solid ${VOLT}2A`,borderRadius:12,padding:"12px 10px"}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:800,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>RSVP’D ({upcomingRsvpd.length})</div>
           {upcomingRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>No upcoming events confirmed yet.</div>:upcomingRsvpd.slice(0,3).map(ev=><div key={ev.id} style={{padding:"8px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1.2,lineHeight:1.1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
         </div>
 
-        <div style={{background:BG,border:`1px solid ${ORANGE}55`,borderRadius:12,padding:"12px 10px"}}>
+        <div style={{background:"rgba(17,17,17,0.98)",border:`1px solid ${ORANGE}34`,borderRadius:12,padding:"12px 10px"}}>
           <div style={{fontFamily:FB,color:ORANGE,fontSize:10,fontWeight:800,letterSpacing:1.4,textTransform:"uppercase",marginBottom:8}}>Not RSVP’d ({upcomingNotRsvpd.length})</div>
           {upcomingNotRsvpd.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>You’re RSVP’d for every upcoming event.</div>:upcomingNotRsvpd.slice(0,3).map(ev=><div key={ev.id} style={{padding:"8px 0",borderTop:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FD,color:LIGHT,fontSize:12,letterSpacing:1.2,lineHeight:1.1}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time}</div></div>)}
         </div>

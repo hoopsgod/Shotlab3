@@ -14,12 +14,12 @@ function HeroBanner({
   return (
     <section
       style={{
-        background: `linear-gradient(140deg, ${accent}26 0%, ${accent}14 45%, var(--surface-1) 100%)`,
-        border: `1px solid ${accent}7A`,
+        background: `linear-gradient(140deg, ${accent}1F 0%, ${accent}12 42%, var(--surface-2) 100%)`,
+        border: `1px solid ${accent}4A`,
         borderRadius: HERO_RADIUS,
         padding: "17px 14px",
         marginBottom: 20,
-        boxShadow: `0 16px 30px ${accent}26`,
+        boxShadow: `0 10px 22px ${accent}16`,
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
