@@ -1105,6 +1105,22 @@ return <div style={{background:palette.bg,border:palette.border,borderRadius:16,
 </div>;
 }
 
+function WelcomeOverlay({onDismiss}){
+return <div role="dialog" aria-modal="true" aria-label="ShotLab welcome" style={{position:"fixed",inset:0,background:"rgba(6, 10, 13, 0.82)",backdropFilter:"blur(2px)",zIndex:120,display:"flex",alignItems:"center",justifyContent:"center",padding:18}}>
+  <div style={{width:"100%",maxWidth:420,background:`linear-gradient(160deg, ${CARD_BG}, #0a1219)`,border:`1px solid ${VOLT}45`,borderRadius:18,padding:"16px 16px 14px",boxShadow:`0 18px 40px ${VOLT}22`}}>
+    <div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:2,textTransform:"uppercase"}}>Welcome to ShotLab</div>
+    <div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.45,marginTop:8}}>At Home = solo makes and drill logs. Program = coach-run sessions with tracked attendance. Duels are player vs. player drill battles.</div>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginTop:12}}>
+      {["Makes = shots you logged","Drills = scored skill reps","Program vs At Home = team vs solo","Duels = challenge mode"].map(item=><div key={item} style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,background:"rgba(255,255,255,0.04)",border:`1px solid ${BORDER_CLR}`,borderRadius:8,padding:"7px 8px",lineHeight:1.35}}>{item}</div>)}
+    </div>
+    <div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:14}}>
+      <button type="button" onClick={onDismiss} style={{background:"transparent",border:`1px solid ${BORDER_CLR}`,color:MUTED,borderRadius:9,padding:"8px 10px",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.04em",cursor:"pointer"}}>Dismiss</button>
+      <button type="button" onClick={onDismiss} className="btn-v cta-primary" style={{width:"auto",padding:"0 12px"}}>Got it</button>
+    </div>
+  </div>
+</div>;
+}
+
 function InfoHint({text}){
 return <span title={text} aria-label={text} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:18,height:18,borderRadius:"50%",border:`1px solid ${BORDER_CLR}`,color:TOKENS.TEXT_SECONDARY,fontFamily:FB,fontSize:11,fontWeight:700,flexShrink:0}}>i</span>;
 }
@@ -1119,6 +1135,7 @@ const[shotMade,setShotMade]=useState(0),[shotDate,setShotDate]=useState(todayStr
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
+const[showWelcomeOverlay,dismissWelcomeOverlay]=useDismissedGuide("sl:guide:dashboard-overlay");
 const[showWelcomeGuide,dismissWelcomeGuide]=useDismissedGuide("sl:guide:welcome");
 const[showHomeGuide,dismissHomeGuide]=useDismissedGuide("sl:guide:home-cards");
 const[showLogGuide,dismissLogGuide]=useDismissedGuide("sl:guide:log-shots");
@@ -1289,7 +1306,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
     {showWelcomeGuide&&<GuideCallout title="Welcome to ShotLab" body="At Home tracks solo shot logging and streaks. Program shows coach-run events and verified attendance. Duels let players compete on drill scores." onDismiss={dismissWelcomeGuide} tone="accent"/>}
 
     {(()=>{
-      const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
+      const homeStats=[{label:"Total Makes",hint:"Makes are total shots you logged in At Home.",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",hint:"Drills are skill scores submitted from your At Home list.",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
       return <div style={{marginBottom:28}}>
         <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
@@ -1483,6 +1500,8 @@ onChange={switchTab}
 utilityControl={!u.isCoach?{label:"Quick Menu",active:tab==="log-drill",onClick:()=>switchTab("log-drill")} : null}
 />
 
+{!u.isCoach&&tab==="home"&&showWelcomeOverlay&&<WelcomeOverlay onDismiss={dismissWelcomeOverlay}/>}
+
   </div>;
 }
 
@@ -1568,7 +1587,7 @@ return <SectionContainer className="fade-up">
 </div>
 <div>
 <div style={{fontFamily:FD,color:ORANGE,fontSize:18,letterSpacing:3}}>HEAD-TO-HEAD</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Challenge teammates. Beat their score.</div>
+<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2,display:"inline-flex",alignItems:"center",gap:6}}>Challenge teammates. Beat their score.<InfoHint text="Duels are head-to-head drill challenges. Higher response score wins."/></div>
 </div>
 </div>
 </div>
@@ -1811,8 +1830,8 @@ return <div className="fade-up">
 }
 
 
-function StatTile({value,label,color}){
-return <div className="card card--metric" style={{padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
+function StatTile({value,label,color,hint}){
+return <div className="card card--metric" style={{padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between"}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",display:"inline-flex",alignItems:"center",gap:6}}>{label}{hint&&<InfoHint text={hint}/>}</div></div>
 }
 
 function ModeCard({title,subtitle,icon,stats,accent="home",isActive,onClick,helpText}){
@@ -1835,7 +1854,7 @@ return <button type="button" onClick={onClick} className={modeCardClass} style={
     </div>
     <div className="icon-btn-square" style={{boxShadow:"none"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
   </div>
-  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color}/>)}</div>
+  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color} hint={s.hint}/>)}</div>
 </button>
 }
 
