@@ -1399,7 +1399,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
-    <section style={{marginBottom:18,background:"#FFFFFF",border:"1px solid #D1FAE5",borderRadius:16,padding:10,boxShadow:"0 6px 20px rgba(16,185,129,0.12)"}}>
+    <section style={{marginBottom:12,background:"#FFFFFF",border:"1px solid #D1FAE5",borderRadius:16,padding:10,boxShadow:"0 6px 20px rgba(16,185,129,0.12)"}}>
       <button
         className="btn btn--primary"
         onClick={()=>setTab("log-drill")}
