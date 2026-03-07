@@ -162,7 +162,7 @@ form > * + * {
 }
 
 .mode-card-stat {
-  gap: 10px;
+  gap: var(--space-1);
 }
 
 .mode-card-stat-value {
