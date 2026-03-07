@@ -8,6 +8,7 @@ export default function CoachCommandCenter({
   totalPlayers,
   activeTodayCount,
   nextEventDateFormatted,
+  hasNextEvent=true,
   highlightPlayersAttention,
   primaryQuickAction,
   onPlayersClick,
@@ -23,7 +24,7 @@ export default function CoachCommandCenter({
   codeErr,
 }) {
   const isCompact=variant==="compact";
-  const isNextEventEmpty=!nextEventDateFormatted||nextEventDateFormatted==="None"||nextEventDateFormatted==="No event set";
+  const isNextEventEmpty=!hasNextEvent;
   const joinCodeValue=joinCode||"Not generated";
   const metricBase={
     minHeight:66,

@@ -1159,12 +1159,13 @@ const upcomingEventsCount=upcomingEvents.length||0;
 const rsvpEventIds=useMemo(()=>new Set(rsvps.filter(r=>r.email===u.email).map(r=>r.eventId)),[rsvps,u.email]);
 const upcomingRsvpd=useMemo(()=>upcomingEvents.filter(ev=>rsvpEventIds.has(ev.id)),[upcomingEvents,rsvpEventIds]);
 const upcomingNotRsvpd=useMemo(()=>upcomingEvents.filter(ev=>!rsvpEventIds.has(ev.id)),[upcomingEvents,rsvpEventIds]);
+const upcomingRsvpdCount=upcomingRsvpd.length;
 const nextEvent=upcomingEvents[0]||null;
 const attendanceState=useMemo(()=>{
 if(upcomingEventsCount===0)return{value:"No events",detail:"No attendance to track yet",isEmpty:true};
-if(myRsvps===0)return{value:"Not checked in",detail:"RSVP to start tracking",isEmpty:true};
-return{value:`${Math.min(100,Math.round((myRsvps/upcomingEventsCount)*100))}%`,detail:`${myRsvps}/${upcomingEventsCount} confirmed`};
-},[myRsvps,upcomingEventsCount]);
+if(upcomingRsvpdCount===0)return{value:"Not checked in",detail:"RSVP to start tracking",isEmpty:true};
+return{value:`${Math.min(100,Math.round((upcomingRsvpdCount/upcomingEventsCount)*100))}%`,detail:`${upcomingRsvpdCount}/${upcomingEventsCount} confirmed`};
+},[upcomingEventsCount,upcomingRsvpdCount]);
 const nextEventState=nextEvent
 ?{value:`${nextEvent.date.slice(5)} · ${nextEvent.time}`,detail:nextEvent.title}
 :{value:"No event set",detail:"Coach will post next session",isEmpty:true};
@@ -2380,6 +2381,7 @@ const totalPlayers=ups.length;
 const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
 const sortedEvents=[...events].sort((a,b)=>a.date.localeCompare(b.date));
 const nextEvent=sortedEvents.find(e=>e.date>=today);
+const hasNextEvent=Boolean(nextEvent);
 const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"No event set";
 const highlightAddPlayer=totalPlayers===0;
 const highlightAddDrill=drills.length===0;
@@ -2568,6 +2570,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   totalPlayers={totalPlayers}
   activeTodayCount={activeTodayCount}
   nextEventDateFormatted={nextEventDateFormatted}
+  hasNextEvent={hasNextEvent}
   highlightPlayersAttention={highlightPlayersAttention}
   primaryQuickAction={primaryQuickAction}
   onPlayersClick={()=>setTab("players")}
