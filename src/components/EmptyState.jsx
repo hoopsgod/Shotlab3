@@ -5,59 +5,99 @@ import EmptyLiftingRack from "../assets/empty-states/EmptyLiftingRack";
 import Card from "./Card";
 import Button from "./ui/Button";
 
+const lineIcon = (path) => (
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    {path}
+  </svg>
+);
+
 const ART_BY_VARIANT = {
   events: EmptyEventsCourt,
   drills: EmptyDrillsArc,
   leaderboard: EmptyLeaderboardPodium,
   lifting: EmptyLiftingRack,
+  duels: () => lineIcon(<><path d="M13 2 4 14h7l-1 8 10-14h-7z" /><path d="M9 8h4" /></>),
+  activity: () => lineIcon(<><rect x="3" y="4" width="18" height="16" rx="3" /><path d="M7 9h10" /><path d="M7 13h7" /></>),
+  players: () => lineIcon(<><circle cx="9" cy="8" r="3" /><path d="M3 19a6 6 0 0 1 12 0" /><path d="M17 8h4" /><path d="M19 6v4" /></>),
 };
 
 export default function EmptyState({
   variant,
+  icon,
   title,
+  description,
   subtitle,
+  ctaLabel,
+  cta,
+  onCtaClick,
   onTap,
-  cta = "GET STARTED",
   ctaVariant = "primary",
   secondaryCta,
   onSecondaryTap,
   secondaryCtaVariant = "tertiary",
-  icon,
+  align = "center",
 }) {
   const Art = variant ? ART_BY_VARIANT[variant] : null;
+  const resolvedDescription = description ?? subtitle;
+  const resolvedCtaLabel = ctaLabel ?? cta;
+  const handlePrimary = onCtaClick ?? onTap;
 
   return (
-    <Card variant="empty" className="emptyState card card--empty" style={{ textAlign: "center", padding: "28px 20px 24px" }}>
-      <div className="emptyState__art" style={{ color: "rgba(255,255,255,0.4)", width: 88, height: 88, margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <Card
+      variant="empty"
+      className="emptyState card card--empty"
+      style={{
+        textAlign: align === "left" ? "left" : "center",
+        padding: "20px 16px",
+        background: "linear-gradient(180deg, rgba(16,23,34,0.7), rgba(11,18,32,0.55))",
+        border: "1px solid rgba(159,178,204,0.24)",
+        boxShadow: "none",
+      }}
+    >
+      <div
+        className="emptyState__art"
+        style={{
+          color: "rgba(201,210,223,0.56)",
+          width: 72,
+          height: 72,
+          margin: align === "left" ? "0 0 10px" : "0 auto 10px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         {Art ? <Art /> : icon}
       </div>
-      <p className="emptyState__title" style={{ fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif", color: "#E5E7EB", fontSize: 18, fontWeight: 600, lineHeight: 1.2, marginBottom: 8 }}>
+      <p className="emptyState__title" style={{ color: "#E5E7EB", fontSize: 18, fontWeight: 600, lineHeight: 1.2, marginBottom: 8 }}>
         {title}
       </p>
-      {subtitle && (
-        <p className="emptyState__subtitle u-secondary-text" style={{ fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif", fontSize: 14, lineHeight: 1.6, fontWeight: 500, opacity: 0.8, maxWidth: 300, marginInline: "auto" }}>
-          {subtitle}
+      {resolvedDescription && (
+        <p className="emptyState__subtitle u-secondary-text" style={{ fontSize: 13, lineHeight: 1.45, fontWeight: 500, opacity: 0.82, maxWidth: 360, marginInline: align === "left" ? 0 : "auto" }}>
+          {resolvedDescription}
         </p>
       )}
-      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 10, marginTop: 16 }}>
-        <Button
-          onClick={onTap || (() => {})}
-          variant={ctaVariant}
-          className={ctaVariant === "tertiary" ? "" : "btn-v"}
+      {(resolvedCtaLabel || secondaryCta) && (
+        <div
           style={{
-            width: ctaVariant === "tertiary" ? "auto" : "calc(100% - 32px)",
-            marginLeft: ctaVariant === "tertiary" ? "auto" : 16,
-            marginRight: ctaVariant === "tertiary" ? "auto" : 16,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: align === "left" ? "flex-start" : "center",
+            gap: 10,
+            marginTop: 14,
           }}
         >
-          {cta}
-        </Button>
-        {secondaryCta && (
-          <Button onClick={onSecondaryTap || (() => {})} variant={secondaryCtaVariant}>
-            {secondaryCta}
-          </Button>
-        )}
-      </div>
+          {resolvedCtaLabel && handlePrimary && (
+            <Button onClick={handlePrimary} variant={ctaVariant} className={ctaVariant === "tertiary" ? "" : "btn-v"}>
+              {resolvedCtaLabel}
+            </Button>
+          )}
+          {secondaryCta && (
+            <Button onClick={onSecondaryTap || (() => {})} variant={secondaryCtaVariant}>
+              {secondaryCta}
+            </Button>
+          )}
+        </div>
+      )}
     </Card>
   );
 }
