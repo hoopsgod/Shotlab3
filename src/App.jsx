@@ -1113,7 +1113,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <div className="auth-ball-enter" style={{display:"inline-flex",flexDirection:"column",alignItems:"center",position:"relative",zIndex:1}}><BrandLogo brandName="Shotlab"/><div style={{marginTop:8}}><DrillIcon type="ft" size={44}/></div></div>
 </div>
 <h1 style={{fontFamily:FD,fontSize:isNarrow?36:44,color:LIGHT,textAlign:"center",margin:0,lineHeight:.95,letterSpacing:2}}>SHOT<span style={{color:VOLT}}>LAB</span></h1>
-<p style={{fontFamily:FB,color:LIGHT,textAlign:"center",fontSize:isNarrow?18:22,lineHeight:1.25,letterSpacing:0.2,margin:"14px auto 0",fontWeight:600,maxWidth:460}}>Track your shots. Compete with teammates. Improve with purpose.</p>
+<p style={{fontFamily:FB,color:LIGHT,textAlign:"center",fontSize:isNarrow?18:22,lineHeight:1.25,letterSpacing:0.2,margin:"14px auto 0",fontWeight:600,maxWidth:460}}>Track your shots, train with your team, and improve with purpose.</p>
 <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:14,lineHeight:1.45,margin:"10px auto 0",maxWidth:440}}>Shotlab helps your team log reps, compare progress, and stay accountable through every training block.</p>
 <div className="auth-card-enter" style={{background:CARD_BG,borderRadius:18,padding:isNarrow?"18px 14px":"26px 22px",border:`1px solid ${BORDER_CLR}`,marginTop:isNarrow?18:22}}>
 <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}><button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:36,padding:"0 10px",fontSize:11}}>{highContrast?"High contrast: ON":"High contrast: OFF"}</button></div>
