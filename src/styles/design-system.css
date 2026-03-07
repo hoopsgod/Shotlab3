@@ -1,9 +1,9 @@
 :root {
   /* brand */
-  --brand-primary: #b8ff00;
-  --brand-secondary: #b2bbc7;
-  --brand-background: #070a0c;
-  --brand-text: rgba(255, 255, 255, 0.92);
+  --brand-primary: #5bf3ff;
+  --brand-secondary: #8f9bab;
+  --brand-background: #0b1220;
+  --brand-text: rgba(241, 245, 255, 0.93);
 
   /* font */
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -13,8 +13,8 @@
   --s-2: 8px;
   --s-3: 12px;
   --s-4: 16px;
-  --s-5: 24px;
-  --s-6: 32px;
+  --s-5: 20px;
+  --s-6: 24px;
 
   --page-pad: var(--s-4);
   --section-gap: var(--s-5);
@@ -23,33 +23,35 @@
 
   /* surfaces */
   --bg: var(--brand-background);
-  --surface-1: #0a0f14;
-  --surface-2: #0d141c;
+  --surface-1: #121a28;
+  --surface-2: #1a2536;
 
   /* text */
   --text-1: var(--brand-text);
-  --text-2: rgba(255, 255, 255, 0.84);
-  --muted: rgba(255, 255, 255, 0.72);
+  --text-2: rgba(223, 231, 242, 0.86);
+  --muted: rgba(183, 196, 214, 0.82);
 
   /* borders */
-  --border-1: rgba(255, 255, 255, 0.14);
-  --border-2: rgba(255, 255, 255, 0.18);
+  --border-1: rgba(159, 178, 204, 0.28);
+  --border-2: rgba(173, 192, 218, 0.38);
 
   /* accent */
   --accent: var(--brand-primary);
+  --primary: var(--brand-primary);
+  --secondary: var(--brand-secondary);
 
   /* elevation */
-  --shadow-1: 0 10px 24px rgba(0, 0, 0, 0.45);
-  --shadow-2: 0 18px 40px rgba(0, 0, 0, 0.55);
+  --shadow-1: 0 2px 8px rgba(0, 0, 0, 0.22);
+  --shadow-2: 0 6px 16px rgba(0, 0, 0, 0.24);
 
   /* focus */
-  --focus-ring: 0 0 0 3px rgba(184, 255, 0, 0.28);
+  --focus-ring: 0 0 0 3px rgba(91, 243, 255, 0.32);
 
   /* typography */
-  --fs-title: 24px;
-  --fs-h2: 18px;
-  --fs-h3: 16px;
-  --fs-body: 14px;
+  --fs-title: 32px;
+  --fs-h2: 24px;
+  --fs-h3: 20px;
+  --fs-body: 16px;
   --fs-caption: 13px;
 
   --fw-regular: 500;
@@ -67,10 +69,10 @@
   --btn-h-lg: 48px;
   --btn-h-md: 44px;
   --btn-h-sm: 40px;
-  --btn-radius: 12px;
-  --btn-pad-lg: 20px;
-  --btn-pad-md: 16px;
-  --btn-pad-sm: 12px;
+  --btn-radius: 10px;
+  --btn-pad-lg: 16px;
+  --btn-pad-md: 12px;
+  --btn-pad-sm: 8px;
 
   /* inputs */
   --input-h: 48px;
@@ -191,7 +193,7 @@ textarea {
 .btn--primary {
   background: var(--accent);
   color: #081006;
-  box-shadow: 0 8px 18px rgba(184, 255, 0, 0.12);
+  box-shadow: var(--shadow-1);
 }
 .btn--secondary {
   background: transparent;
@@ -229,7 +231,7 @@ textarea {
 @media (hover: hover) and (pointer: fine) {
   .btn--primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(184, 255, 0, 0.15);
+    box-shadow: var(--shadow-2);
   }
 
   .btn--secondary:hover,
@@ -256,13 +258,13 @@ textarea {
 }
 
 .btn-primary {
-  box-shadow: 0 8px 18px rgba(184, 255, 0, 0.12);
+  box-shadow: var(--shadow-1);
 }
 
 @media (hover: hover) and (pointer: fine) {
   .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 12px 24px rgba(184, 255, 0, 0.15);
+    box-shadow: var(--shadow-2);
   }
 
   .btn-secondary:hover {
@@ -281,7 +283,7 @@ textarea {
   .interactive-card:hover {
     transform: translateY(-1px);
     border-color: var(--border-2);
-    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.42);
+    box-shadow: var(--shadow-2);
   }
 }
 
@@ -290,34 +292,36 @@ textarea {
 }
 
 .shared-card {
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-1);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-1);
+  border-radius: 16px;
   transition: transform 150ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
   will-change: transform;
 }
 
 .shared-card--default {
-  border-color: rgba(255, 255, 255, 0.09);
-  background: rgba(255, 255, 255, 0.02);
+  border-color: var(--border-1);
+  background: var(--surface-1);
 }
 
 .shared-card--metric {
-  border-color: rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--border-2);
+  background: var(--surface-2);
 }
 
 .shared-card--list {
-  border-color: rgba(255, 255, 255, 0.06);
-  background: rgba(255, 255, 255, 0.015);
+  border-color: var(--border-1);
+  background: var(--surface-1);
 }
 
 .shared-card--list [data-card-divider] {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid var(--border-1);
 }
 
 .shared-card--empty {
-  border-color: rgba(255, 255, 255, 0.05);
-  background: rgba(255, 255, 255, 0.012);
+  border-color: var(--border-1);
+  background: var(--surface-1);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -403,7 +407,7 @@ textarea {
 @media (hover: hover) and (pointer: fine) {
   .progress-track:hover .progress-fill,
   .progressTrack:hover .progressFill {
-    box-shadow: 0 0 0 2px rgba(200, 255, 0, 0.2), 0 10px 24px rgba(200, 255, 0, 0.12);
+    box-shadow: 0 0 0 2px rgba(91, 243, 255, 0.16);
   }
 }
 

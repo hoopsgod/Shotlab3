@@ -68,12 +68,8 @@ export default function CoachHero({
         padding: mobilePadding,
         border: `1px solid ${accentColor ? `${accentColor}52` : "var(--stroke-2)"}`,
         borderRadius: "var(--radius-card)",
-        background: accentColor
-          ? `linear-gradient(140deg, ${accentColor}17 0%, var(--surface-3) 54%)`
-          : "var(--surface-3)",
-        boxShadow: accentColor
-          ? `0 10px 22px rgba(0,0,0,0.42), 0 0 0 1px ${accentColor}12`
-          : "var(--shadow-2)",
+        background: "var(--surface-2)",
+        boxShadow: "var(--shadow-1)",
         position: "relative",
         overflow: "hidden",
       }}

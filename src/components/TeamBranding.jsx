@@ -19,9 +19,9 @@ export function TeamLogo({ logoUrl, teamName, size=64, primaryColor="#C8FF1A", b
         height:size,
         borderRadius:radius,
         padding:badgeStyle==="rectangle"?8:6,
-        background:`linear-gradient(145deg, ${alphaFromHex(primaryColor,0.28)}, rgba(10,10,10,0.9))`,
+        background:"var(--surface-2)",
         border:`1px solid ${alphaFromHex(primaryColor,0.46)}`,
-        boxShadow:`0 0 0 1px ${alphaFromHex(primaryColor,0.09)}, 0 6px 14px rgba(0,0,0,0.28)`,
+        boxShadow:"var(--shadow-1)",
         display:"grid",
         placeItems:"center",
         overflow:"hidden",
@@ -42,7 +42,7 @@ export function TeamIdentity({ branding, teamName, mascotName, motto, mode="bold
   return (
     <div style={{display:"flex",alignItems:"center",gap:compact?10:14,minWidth:0,position:"relative"}}>
       {showLogo ? <div style={{position:"relative"}}>
-        <div style={{position:"absolute",inset:"-6px",borderRadius:"50%",background:`radial-gradient(circle, ${alphaFromHex(branding.primaryColor,0.05)} 0%, transparent 72%)`,filter:"blur(2px)",opacity:0.42}}/>
+        
         <TeamLogo logoUrl={branding.logoUrl} teamName={teamName} size={size} primaryColor={branding.primaryColor} badgeStyle={branding.badgeStyle}/>
       </div> : null}
       <div style={{minWidth:0}}>
@@ -61,14 +61,14 @@ export function TeamWatermark({ logoUrl, primaryColor="#C8FF1A", opacity=0.07, s
   if(!logoUrl)return null;
   return (
     <div aria-hidden style={{position:"absolute",right:-28,top:-28,width:size,height:size,opacity:Math.min(opacity,0.02),pointerEvents:"none",filter:"grayscale(0.62)"}}>
-      <img src={logoUrl} alt="" style={{width:"100%",height:"100%",objectFit:"contain",mixBlendMode:"screen",filter:`drop-shadow(0 0 8px ${alphaFromHex(primaryColor,0.1)})`}}/>
+      <img src={logoUrl} alt="" style={{width:"100%",height:"100%",objectFit:"contain",mixBlendMode:"screen",filter:"none"}}/>
     </div>
   );
 }
 
 export function TeamBrandPreview({ branding, teamName }) {
   const modes=["subtle","balanced","bold"];
-  return <div style={{display:"grid",gap:10}}>{modes.map(mode=><div key={mode} style={{position:"relative",padding:12,borderRadius:14,border:`1px solid ${alphaFromHex(branding.primaryColor,0.36)}`,background:`linear-gradient(130deg, ${alphaFromHex(branding.primaryColor,mode==="bold"?0.18:0.1)}, rgba(12,17,22,0.95))`}}>
+  return <div style={{display:"grid",gap:10}}>{modes.map(mode=><div key={mode} style={{position:"relative",padding:12,borderRadius:14,border:`1px solid ${alphaFromHex(branding.primaryColor,0.36)}`,background:"var(--surface-2)"}}>
     <TeamWatermark logoUrl={branding.showWatermark?branding.logoUrl:""} primaryColor={branding.primaryColor} opacity={mode==="bold"?0.09:0.05} size={140}/>
     <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8,position:"relative",zIndex:1}}>
       <span style={{fontFamily:FB,color:"var(--text-2)",fontSize:9,textTransform:"uppercase",letterSpacing:1.2}}>{mode} preview</span>
