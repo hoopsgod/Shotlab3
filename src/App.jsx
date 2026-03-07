@@ -2260,8 +2260,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
                 height:"100%",
                 background:"#CCFF00",
                 borderRadius:999,
-                boxShadow:rankBarPulse?"0 0 10px rgba(184,255,0,0.38)":"none",
-                transition:prefersReducedMotion?"none":"width 600ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 200ms ease-out"
+                boxShadow:rankBarPulse?"0 0 10px rgba(184,255,0,0.38)":"none"
               }}
             />
           </div>
@@ -3153,7 +3152,7 @@ function NavBar({items,active,onChange,utilityControl}){
 const navAccent=PAGE_ACCENTS[active]?.accent||PAGE_ACCENTS.feed.accent;
 return <>{utilityControl&&<div className="utility-dock"><button type="button" className={`utility-dock-button ${utilityControl.active?"is-active":""}`} onClick={utilityControl.onClick} aria-label={utilityControl.label} aria-current={utilityControl.active?"page":undefined} title={utilityControl.label}><span className="utility-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg></span><span className="utility-label">{utilityControl.label}</span></button></div>}<nav className="bottom-nav" role="tablist" aria-label="Main navigation tabs" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"var(--nav-height)",padding:"2px 64px env(safe-area-inset-bottom) 4px",background:"rgba(12,17,22,0.92)",borderTop:"1px solid var(--stroke-1)",zIndex:20}}>{items.map(t=>{const a=active===t.k;
 const tabAccent="var(--accent)";
-return <button key={t.k} role="tab" aria-selected={a} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:50,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"9px 4px 8px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 180ms ease-out",outlineOffset:2}}>
+return <button key={t.k} role="tab" aria-selected={a} aria-label={t.l} aria-current={a?"page":undefined} className={`tab shared-nav-item ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:50,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"9px 4px 8px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 180ms ease-out",outlineOffset:2}}>
 <div className="tab-icon" style={{position:"relative"}}>{t.svg}</div>
 <div className="tab-label" style={{fontFamily:FB,fontSize:10,letterSpacing:"0.06em",textTransform:"uppercase",lineHeight:1.1,whiteSpace:"nowrap"}}>{t.l}</div>
 </button>})}</nav></>}

@@ -242,6 +242,7 @@ textarea {
 
 .btn:active {
   transform: scale(0.985);
+  filter: brightness(0.98);
 }
 
 .btn-primary,
@@ -286,6 +287,35 @@ textarea {
 
 .interactive-card:active {
   transform: scale(0.992);
+}
+
+.shared-card {
+  transition: transform 150ms ease, border-color 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+  will-change: transform;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .shared-card:hover {
+    transform: translateY(-1px);
+  }
+}
+
+.shared-card:active {
+  transform: scale(0.992);
+}
+
+.shared-nav-item {
+  transition: transform 130ms ease, color 170ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .shared-nav-item:hover {
+    background-color: rgba(255, 255, 255, 0.035);
+  }
+}
+
+.shared-nav-item:active {
+  transform: scale(0.98);
 }
 
 .bottom-nav .tab {
@@ -339,7 +369,16 @@ textarea {
 .progress-fill,
 [class*="progressFill"],
 [class*="fill"] {
-  transition: width 360ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease;
+  transform-origin: left center;
+  transition: width 520ms cubic-bezier(0.22, 1, 0.36, 1), background-color 180ms ease, box-shadow 220ms ease;
+  will-change: width;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .progress-track:hover .progress-fill,
+  .progressTrack:hover .progressFill {
+    box-shadow: 0 0 0 2px rgba(200, 255, 0, 0.2), 0 10px 24px rgba(200, 255, 0, 0.12);
+  }
 }
 
 .loadingPulse,
@@ -353,6 +392,8 @@ textarea {
   .btn-primary,
   .btn-secondary,
   .interactive-card,
+  .shared-card,
+  .shared-nav-item,
   .bottom-nav .tab,
   .bottom-nav .tab .tab-icon,
   .bottom-nav .tab .tab-label,
