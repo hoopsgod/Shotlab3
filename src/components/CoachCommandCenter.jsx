@@ -27,7 +27,7 @@ export default function CoachCommandCenter({
     minHeight:66,
     borderRadius:12,
     border:"1px solid var(--stroke-1)",
-    background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.25))",
+    background:"var(--surface-2)",
     padding:"10px",
     display:"flex",
     flexDirection:"column",
@@ -75,7 +75,7 @@ export default function CoachCommandCenter({
       <section style={{padding:"8px 12px 12px"}}>
         <style>{`.cc-tools-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}`}</style>
 
-        <div style={{minHeight:62,border:"1px solid var(--stroke-1)",borderRadius:14,background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.22))",padding:"8px 10px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+        <div style={{minHeight:62,border:"1px solid var(--stroke-1)",borderRadius:14,background:"var(--surface-2)",padding:"8px 10px",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
           <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
             <span aria-hidden="true" style={{width:24,height:24,borderRadius:999,border:"1px solid var(--stroke-1)",display:"inline-flex",alignItems:"center",justifyContent:"center",color:"var(--text-3)",fontSize:13,flexShrink:0}}>⚡</span>
             <h2 className="u-allcaps-long" style={{fontFamily:FD,fontSize:13,color:"var(--text-secondary)",margin:0,whiteSpace:"nowrap"}}>Coach Tools</h2>

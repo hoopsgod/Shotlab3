@@ -14,12 +14,12 @@ function HeroBanner({
   return (
     <section
       style={{
-        background: `linear-gradient(140deg, ${accent}1F 0%, ${accent}12 42%, var(--surface-2) 100%)`,
-        border: `1px solid ${accent}4A`,
+        background: "var(--surface-2)",
+        border: `1px solid ${accent}66`,
         borderRadius: HERO_RADIUS,
-        padding: "17px 14px",
+        padding: "16px 12px",
         marginBottom: 20,
-        boxShadow: `0 10px 22px ${accent}16`,
+        boxShadow: "var(--shadow-1)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
@@ -30,8 +30,8 @@ function HeroBanner({
                 width: 34,
                 height: 34,
                 borderRadius: HERO_BUTTON_RADIUS,
-                border: `1px solid ${accent}55`,
-                background: `${accent}14`,
+                border: `1px solid ${accent}66`,
+                background: "var(--surface-1)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -77,7 +77,7 @@ function HeroBanner({
             style={{
               background: accent,
               color: UI_TOKENS.colors.bgBase,
-              border: "none",
+              border: "1px solid transparent",
               borderRadius: HERO_BUTTON_RADIUS,
               padding: "8px 10px",
               fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",

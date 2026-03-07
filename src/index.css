@@ -15,8 +15,8 @@
 [class*="track"] {
   height: 10px;
   border-radius: 999px;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(159, 178, 204, 0.24);
+  border: 1px solid var(--border-1);
   overflow: hidden;
 }
 
@@ -27,7 +27,7 @@
   height: 100%;
   border-radius: 999px;
   background: var(--accent);
-  box-shadow: 0 0 0 2px rgba(200,255,0,0.14), 0 10px 24px rgba(200,255,0,0.10);
+  box-shadow: 0 0 0 1px rgba(91,243,255,0.2);
 }
 
 .progressLabels,
@@ -106,7 +106,7 @@ textarea::placeholder {
 input:focus-visible,
 select:focus-visible,
 textarea:focus-visible {
-  border-color: rgba(184, 255, 0, .35);
+  border-color: rgba(91,243,255,.45);
   box-shadow: var(--focus-ring);
 }
 

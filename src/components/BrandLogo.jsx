@@ -29,7 +29,7 @@ export default function BrandLogo({
             height: markSize,
             borderRadius: 10,
             border: "1px solid var(--border-1)",
-            background: "linear-gradient(135deg, var(--accent), rgba(184, 255, 0, 0.28))",
+            background: "var(--accent)",
             color: "#081006",
             fontSize: compact ? 10 : 12,
             fontWeight: 800,
