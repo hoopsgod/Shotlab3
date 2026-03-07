@@ -101,11 +101,11 @@ export default function ProgressCharts({ scores = [], shotLogs = [], userEmail }
   return (
     <section style={{ marginBottom: 18 }}>
       <div style={{ color: "#E5E7EB", fontSize: 12, letterSpacing: "0.08em", marginBottom: 10 }}>PROGRESS OVER TIME</div>
-      <div style={{ background: "#0C1116", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 12, padding: 12, marginBottom: 10 }}>
+      <div style={{ background: "var(--surface-card)", border: "1px solid rgba(255,255,255,0.06)", boxShadow: "var(--shadow-1)", borderRadius: 12, padding: 12, marginBottom: 10 }}>
         <div style={{ color: "#B2BBC7", fontSize: 12, marginBottom: 8 }}>Shot makes per week</div>
         <LineChart data={{ labels: weeklyData.labels, values: weeklyData.makes }} />
       </div>
-      <div style={{ background: "#0C1116", border: "1px solid rgba(255,255,255,0.14)", borderRadius: 12, padding: 12 }}>
+      <div style={{ background: "var(--surface-elevated)", border: "1px solid rgba(255,255,255,0.12)", boxShadow: "var(--shadow-2)", borderRadius: 12, padding: 12 }}>
         <div style={{ color: "#B2BBC7", fontSize: 12, marginBottom: 8 }}>Active streak days per week</div>
         <BarChart data={{ labels: weeklyData.labels, values: weeklyData.streak }} />
       </div>

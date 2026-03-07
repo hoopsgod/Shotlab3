@@ -71,8 +71,8 @@ export default function PlayersScreen() {
     textTransform: "uppercase",
     letterSpacing: "0.08em",
     cursor: "pointer",
-    border: isActive ? "none" : "1px solid var(--stroke-1)",
-    background: isActive ? "var(--accent)" : "var(--surface-1)",
+    border: isActive ? "none" : "1px solid var(--border-1)",
+    background: isActive ? "var(--accent)" : "color-mix(in oklab, var(--surface-card) 86%, var(--surface-page) 14%)",
     color: isActive ? "#0B0D10" : "var(--text-3)",
     fontWeight: isActive ? 700 : 500,
   });
@@ -120,7 +120,7 @@ export default function PlayersScreen() {
 
       <div
         style={{
-          background: "var(--surface-2)",
+          background: "var(--surface-card)",
           borderRadius: "12px",
           padding: "var(--space-3) var(--space-4)",
           marginBottom: "var(--space-4)",
@@ -172,8 +172,8 @@ export default function PlayersScreen() {
             key={player.id}
             className="interactive-card"
             style={{
-              background: "var(--surface-2)",
-              border: "1px solid var(--stroke-1)",
+              background: "color-mix(in oklab, var(--surface-elevated) 78%, var(--surface-card) 22%)",
+              border: "1px solid rgba(255,255,255,0.06)",
               borderRadius: "16px",
               padding: "15px var(--space-4)",
               marginBottom: "var(--space-3)",
@@ -195,7 +195,7 @@ export default function PlayersScreen() {
                 fontSize: "16px",
                 fontWeight: 700,
                 color: "var(--text-1)",
-                border: player.active ? "2px solid var(--accent-soft)" : "2px solid var(--stroke-1)",
+                border: player.active ? "2px solid var(--accent-soft)" : "2px solid rgba(255,255,255,0.08)",
               }}
             >
               {player.name?.[0] || "?"}
@@ -223,8 +223,8 @@ export default function PlayersScreen() {
       </p>
       <div
         style={{
-          background: "var(--surface-2)",
-          border: "1px solid var(--stroke-1)",
+          background: "var(--surface-card)",
+          border: "1px solid rgba(255,255,255,0.06)",
           borderRadius: "16px",
           padding: "var(--space-4)",
           display: "flex",
