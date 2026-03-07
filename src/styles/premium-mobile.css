@@ -9,7 +9,7 @@
 }
 
 .page {
-  padding-bottom: calc(var(--nav-height, 74px) + var(--space-4) + env(safe-area-inset-bottom));
+  padding-bottom: calc(var(--nav-height, 74px) + var(--space-8) + env(safe-area-inset-bottom));
 }
 
 .pageHeader {
