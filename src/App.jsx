@@ -1303,8 +1303,8 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
     {(()=>{
       const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
-      return <div style={{marginBottom:28}}>
-        <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
+      return <div style={{marginBottom:24}}>
+        <section style={{marginBottom:16,padding:"16px 4px 0"}} aria-label="Training mode selector">
           <div style={{fontFamily:FD,color:T.SUB,fontSize:24,letterSpacing:2.6,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:600,letterSpacing:"0.03em",marginTop:6,opacity:0.9}}>Choose how you’re training today</div>
           {showHomeGuide&&<div style={{marginTop:10}}><GuideCallout title="Quick definitions" body="At Home is your personal tracker for Makes, Drills completed, and streaks. Program is for team sessions where attendance is verified by event RSVPs." onDismiss={dismissHomeGuide} tone="cool"/></div>}
@@ -1316,7 +1316,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       </div>
     })()}
 
-    <section style={{background:`linear-gradient(140deg, ${VOLT}16 0%, ${VOLT}08 45%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}44`,borderRadius:18,padding:"15px 14px",marginBottom:20,boxShadow:`0 10px 22px ${VOLT}14`}}>
+    <section style={{background:`linear-gradient(140deg, ${VOLT}16 0%, ${VOLT}08 45%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}44`,borderRadius:18,padding:"14px 14px",marginBottom:16,boxShadow:`0 10px 22px ${VOLT}14`}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:12}}>
         <div>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2,lineHeight:1,textTransform:"uppercase"}}>Upcoming Work Events</div>
@@ -1520,7 +1520,7 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 <div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:3,lineHeight:1}}>{data.name.toUpperCase()}</div>
 <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,marginTop:4,marginBottom:20}}>{data.date}</div>
 {/* Drill + Score */}
-<div style={{display:"inline-flex",alignItems:"center",gap:8,background:BG,borderRadius:12,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:16}}>
+<div style={{display:"inline-flex",alignItems:"center",gap:8,background:BG,borderRadius:12,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:14}}>
 <DrillIcon type={data.icon} size={20}/>
 <span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{data.drill}</span>
 </div>
@@ -1843,18 +1843,18 @@ const a=accentMap[accent]||accentMap.home;
 const baseBorder=`1px solid ${MODE_CARD_TOKENS.BASE_BORDER}`;
 const baseShadow=MODE_CARD_TOKENS.BASE_SHADOW;
 const modeCardClass=`mode-card card ${isActive?"card--active card--accent":""}`.trim();
-return <button type="button" onClick={onClick} className={modeCardClass} style={{width:"100%",background:`radial-gradient(circle at 12% 10%, ${a.tint} 0%, transparent 55%), ${MODE_CARD_TOKENS.BASE_BG}`,border:baseBorder,borderRadius:22,padding:22,cursor:"pointer",textAlign:"left",position:"relative",minHeight:272,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:baseShadow,transition:"transform .12s ease, border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)"}} onMouseLeave={e=>{e.currentTarget.style.border=baseBorder;e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.99)"}} onMouseUp={e=>{e.currentTarget.style.transform="scale(1)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow=`${baseShadow}, ${isActive?"var(--glow-accent)":`0 0 0 3px ${MODE_CARD_TOKENS.FOCUS_RING}`}`}} onBlur={e=>{e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}}>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16}}>
+return <button type="button" onClick={onClick} className={modeCardClass} style={{width:"100%",background:`radial-gradient(circle at 12% 10%, ${a.tint} 0%, transparent 55%), ${MODE_CARD_TOKENS.BASE_BG}`,border:baseBorder,borderRadius:22,padding:20,cursor:"pointer",textAlign:"left",position:"relative",minHeight:272,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:baseShadow,transition:"transform .12s ease, border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.transform="translateY(-1px)"}} onMouseLeave={e=>{e.currentTarget.style.border=baseBorder;e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.99)"}} onMouseUp={e=>{e.currentTarget.style.transform="scale(1)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow=`${baseShadow}, ${isActive?"var(--glow-accent)":`0 0 0 3px ${MODE_CARD_TOKENS.FOCUS_RING}`}`}} onBlur={e=>{e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}}>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:14}}>
     <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
       <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`1.5px solid ${a.glow}`,boxShadow:`inset 0 0 6px ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{icon}</div>
       <div style={{minWidth:0}}>
         <div style={{fontFamily:FD,color:LIGHT,fontSize:22,fontWeight:800,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase",display:"inline-flex",alignItems:"center",gap:6}}>{title}{helpText&&<InfoHint text={helpText}/>}</div>
-        <div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
+        <div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:11,fontWeight:600,marginTop:4,letterSpacing:"0.04em"}}>{subtitle}</div>
       </div>
     </div>
     <div className="icon-btn-square" style={{boxShadow:"none"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
   </div>
-  <div className="mode-card-stats-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10,alignItems:"stretch"}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color}/>)}</div>
+  <div className="mode-card-stats-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8,alignItems:"stretch"}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color}/>)}</div>
 </button>
 }
 
