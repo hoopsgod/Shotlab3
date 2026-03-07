@@ -1111,8 +1111,8 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <div className="auth-ball-enter" style={{display:"inline-flex",flexDirection:"column",alignItems:"center",position:"relative",zIndex:1}}><BrandLogo brandName="Shotlab"/><div style={{marginTop:8}}><DrillIcon type="ft" size={44}/></div></div>
 </div>
 <h1 style={{fontFamily:FD,fontSize:44,color:LIGHT,textAlign:"center",margin:0,lineHeight:.95,letterSpacing:2}}>SHOT<span style={{color:VOLT}}>LAB</span></h1>
-<p style={{fontFamily:FB,color:LIGHT,textAlign:"center",fontSize:22,lineHeight:1.25,letterSpacing:0.2,margin:"14px auto 0",fontWeight:600,maxWidth:460}}>Track your shots. Compete with teammates. Improve with purpose.</p>
-<p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:14,lineHeight:1.45,margin:"10px auto 0",maxWidth:440}}>Shotlab helps your team log reps, compare progress, and stay accountable through every training block.</p>
+<p style={{fontFamily:FB,color:LIGHT,textAlign:"center",fontSize:22,lineHeight:1.25,letterSpacing:0.2,margin:"14px auto 0",fontWeight:600,maxWidth:460}}>Track reps, monitor progress, and stay game ready.</p>
+<p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:14,lineHeight:1.45,margin:"10px auto 0",maxWidth:440}}>Built for players and coaches. Your training history and team progress stay in one place.</p>
 <div className="auth-card-enter" style={{background:CARD_BG,borderRadius:18,padding:"26px 22px",border:`1px solid ${BORDER_CLR}`,marginTop:22}}>
 <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}><button type="button" className="btn btn--secondary" role="switch" aria-checked={highContrast} aria-label="Toggle high contrast mode" onClick={onToggleHighContrast} style={{minHeight:36,padding:"0 10px",fontSize:11}}>{highContrast?"High contrast: ON":"High contrast: OFF"}</button></div>
 {/* Login / Register toggle */}
@@ -1122,7 +1122,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 
     {mode==="register"&&<>
       <h2 style={{fontFamily:FB,color:LIGHT,fontSize:22,fontWeight:700,textAlign:"center",margin:"0 0 4px",letterSpacing:0.3}}>Create your account</h2>
-      <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 18px"}}>Set up your profile to start tracking with your team.</p>
+      <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 18px"}}>Create your account to save progress and train with your team.</p>
       {/* Role selector */}
       <div role="radiogroup" aria-label="Account role" style={{display:"flex",background:BG,borderRadius:10,padding:3,marginBottom:20,border:`1px solid ${BORDER_CLR}`}}>
         {["player","coach"].map(r=><button key={r} role="radio" aria-checked={role===r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#555555"}}>{r}</button>)}
@@ -1133,7 +1133,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 
     {mode==="login"&&<>
       <h2 style={{fontFamily:FB,color:LIGHT,fontSize:24,fontWeight:700,textAlign:"center",margin:"0 0 4px",letterSpacing:0.3}}>Welcome back</h2>
-      <p style={{fontFamily:FB,color:"#A0A0A0",textAlign:"center",fontSize:13,fontWeight:400,margin:"0 0 18px"}}>Sign in to continue your training progress.</p>
+      <p style={{fontFamily:FB,color:"#A0A0A0",textAlign:"center",fontSize:13,fontWeight:400,margin:"0 0 18px"}}>Sign in to pick up where your training left off.</p>
     </>}
 
     <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>EMAIL</label>
@@ -1156,7 +1156,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       {mode==="login"?"New to Shotlab? ":"Already have an account? "}
       <span style={{color:"#CED6E5",fontWeight:700}}>{mode==="login"?"Create an account":"Sign in"}</span>
     </p>
-    {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:10,lineHeight:1.5}}>By creating an account, you agree to our data practices. If Firebase is configured, your training data is securely synced and can be managed from Settings.</p>}
+    {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:10,lineHeight:1.5}}>By creating an account, you agree to our data practices. If Firebase is enabled, your training history is saved to your account and can be managed in Settings.</p>}
   </div>
 </div>
 
@@ -2884,7 +2884,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     })}
   </div>}
 
-  {tab==="settings"&&<div className="page pageShell fade-up" data-accent="feed" id="coach-settings" style={shellVars("feed")}><PageHeader title="SETTINGS" subtitle="Program identity, premium polish, and account controls" accent="lime" icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.09 14H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4H9a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>} />
+  {tab==="settings"&&<div className="page pageShell fade-up" data-accent="feed" id="coach-settings" style={shellVars("feed")}><PageHeader title="SETTINGS" subtitle="Program identity, team setup, and account controls" accent="lime" icon={<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.09 14H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4H9a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>} />
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="TEAM BRANDING" s="PREMIUM IDENTITY" identity/>
     <div className="accent-card" style={{background:`linear-gradient(135deg,${alphaFromHex(teamPrimary,0.16)},${CARD_BG})`,border:`1px solid ${alphaFromHex(teamPrimary,0.42)}`,borderRadius:16,padding:"16px 16px",marginBottom:14}}>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:10}}><div><div style={{fontFamily:FD,color:teamPrimary,fontSize:14,letterSpacing:"var(--tracking-default)"}}>IDENTITY PREVIEW</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Coach, player, and section branding in real time.</div></div></div>
@@ -3100,16 +3100,16 @@ setMsg(r?.ok?"Password reset email sent.":(r?.err||"Unable to send reset email."
 return <SectionContainer className="fade-up">
   <Card style={{marginBottom:16}}>
     <div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:2}}>SETTINGS</div>
-    <p style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:8}}>Manage account security, data privacy, and account lifecycle.</p>
+    <p style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:8}}>Manage account security and privacy settings for your training profile.</p>
   </Card>
   <Card style={{marginBottom:16}}>
     <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>SECURITY</div>
     <button onClick={handleReset} className="btn-v" style={{height:42,background:"transparent",border:`1px solid ${BORDER_CLR}`,color:LIGHT}}>Send password reset email</button>
-    <p style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:8}}>{u?.email}</p>
+    <p style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:8}}>{u?.email}</p><p style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:8,lineHeight:1.4}}>Your progress is saved to your account, so your training history is available each time you sign in.</p>
   </Card>
   <Card style={{marginBottom:16}}>
     <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PRIVACY POLICY</div>
-    <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5}}>Shotlab stores account, profile, shot logs, duels, RSVPs, and events in cloud-backed storage when Firebase is configured. Access is scoped by your signed-in account.</p>
+    <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5}}>Shotlab stores your account profile, training logs, team activity, and events in cloud-backed storage when Firebase is configured. Access is scoped to your signed-in account.</p>
   </Card>
   <Card>
     <div style={{fontFamily:FB,color:"#FF4545",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>DANGER ZONE</div>
