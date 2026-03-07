@@ -2999,141 +2999,133 @@ const challTotal=challenges.filter(c=>c.from===u.email||c.to===u.email).length;
 const bestStreak=useMemo(()=>{const ds=[...new Set(homeScores.map(s=>s.date))].sort();let max=0,cur=0,prev=null;
 ds.forEach(d=>{const dt=new Date(d);if(prev){const diff=(dt-prev)/(1000*60*60*24);cur=diff<=1?cur+1:1}else cur=1;max=Math.max(max,cur);prev=dt});return max},[homeScores]);
 
-// Per-drill stats with personal bests, averages, trends
 const drillStats=useMemo(()=>drills.map(d=>{
 const ds=homeScores.filter(s=>s.drillId===d.id).sort((a,b)=>(a.ts||0)-(b.ts||0));
 const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);
 const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;
 const last10=ds.slice(-10).map(s=>s.score);
-// Trend: compare first half avg vs second half avg of last 10
 let trend="flat";
 if(last10.length>=4){const mid=Math.floor(last10.length/2);const first=last10.slice(0,mid).reduce((a,v)=>a+v,0)/mid;const second=last10.slice(mid).reduce((a,v)=>a+v,0)/(last10.length-mid);if(second>first*1.05)trend="up";else if(second<first*0.95)trend="down"}
 return{...d,pb,avg,count:ds.length,last10,trend};
 }),[drills,homeScores]);
 
-const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"16px 0",borderBottom:`1px solid ${BORDER_CLR}40`,gap:12}}>
-<div><div style={{fontFamily:FB,color:"var(--text-2)",fontSize:12,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase"}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:5,lineHeight:1.35,maxWidth:220}}>{sub}</div>}</div>
-<div style={{fontFamily:FD,color,fontSize:28,fontWeight:800,lineHeight:1,letterSpacing:1}}>{value}</div>
+const totalCareerMakes=totalMakes+totalShots;
+const topBadge=earnedBadges.length>0?earnedBadges[earnedBadges.length-1]:null;
+const improving=drillStats.filter(d=>d.trend==="up"&&d.count>=4);
+const featuredHighlight=improving.length>0
+  ?`${improving[0].name} trending up • avg ${improving[0].avg}`
+  :topBadge?`${topBadge.name} unlocked • ${topBadge.days}D streak`
+  :sessionsLogged>0?`${sessionsLogged} training sessions logged`
+  :"Start logging sessions to build momentum";
 
-  </div>;
+const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",padding:"12px 0",borderBottom:`1px solid ${BORDER_CLR}40`,gap:12}}>
+  <div>
+    <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:11,fontWeight:800,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div>
+    {sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:4,lineHeight:1.35,maxWidth:220}}>{sub}</div>}
+  </div>
+  <div style={{fontFamily:FD,color,fontSize:26,fontWeight:800,lineHeight:1,letterSpacing:1}}>{value}</div>
+</div>;
+
+const SpotlightStat=({label,value,color,sub})=><div style={{flex:1,minWidth:0,padding:"14px 8px",textAlign:"center"}}>
+  <div style={{fontFamily:FD,fontSize:36,color,fontWeight:800,lineHeight:.9,letterSpacing:1}}>{value}</div>
+  <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:9,fontWeight:800,letterSpacing:"0.16em",marginTop:8,textTransform:"uppercase"}}>{label}</div>
+  {sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:8,marginTop:5,letterSpacing:"0.06em"}}>{sub}</div>}
+</div>;
 
 return <SectionContainer className="fade-up">
-<ContextSummary title="Team context" items={contextItems}/>
-{u.isCoach&&<div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}><div style={{fontSize:13,color:"#C8FF00",textTransform:"uppercase",letterSpacing:"0.10em",fontFamily:FB,fontWeight:700,marginBottom:10}}>COACH ACCOUNT</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${BORDER_CLR}66`}}><div style={{display:"flex",alignItems:"center",gap:8}}><UsersIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ROLE</span></div><span style={{fontSize:13,color:"#FFFFFF",fontFamily:FB}}>Coach</span></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}><div style={{display:"flex",alignItems:"center",gap:8}}><ShieldIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ACCESS</span></div><span style={{fontSize:13,color:"#C8FF00",fontFamily:FB}}>Full Program Access</span></div></div>}
-<ProgressCharts scores={scores} shotLogs={shotLogs} userEmail={u.email} drills={drills}/>
-{/* ══════ SHAREABLE SEASON CARD ══════ */}
-<Card variant="metric" style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",marginBottom:28}}>
-{/* Corner accents */}
-<div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
-<div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
-<div style={{position:"absolute",top:-32,right:-32,width:118,height:118,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}06,transparent)`}}/>
-{/* SL logo watermark */}
-<div style={{position:"absolute",top:12,right:16,opacity:.06,pointerEvents:"none"}}><SLLogo size={90} opacity={.06}/></div>
+  <ContextSummary title="Team context" items={contextItems}/>
+  {u.isCoach&&<div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}><div style={{fontSize:13,color:"#C8FF00",textTransform:"uppercase",letterSpacing:"0.10em",fontFamily:FB,fontWeight:700,marginBottom:10}}>COACH ACCOUNT</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${BORDER_CLR}66`}}><div style={{display:"flex",alignItems:"center",gap:8}}><UsersIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ROLE</span></div><span style={{fontSize:13,color:"#FFFFFF",fontFamily:FB}}>Coach</span></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}><div style={{display:"flex",alignItems:"center",gap:8}}><ShieldIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ACCESS</span></div><span style={{fontSize:13,color:"#C8FF00",fontFamily:FB}}>Full Program Access</span></div></div>}
+  <ProgressCharts scores={scores} shotLogs={shotLogs} userEmail={u.email} drills={drills}/>
 
-  <div style={{fontFamily:FB,color:VOLT,fontSize:9,letterSpacing:5,fontWeight:700,marginBottom:12}}>OFFSEASON REPORT CARD</div>
-  <Av n={u.name} sz={64} email={u.email} style={{margin:"0 auto 14px"}}/>
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:32,fontWeight:800,letterSpacing:4,lineHeight:1}}>{u.name.toUpperCase()}</div>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:6,letterSpacing:2,fontWeight:700}}>OFFSEASON 2026</div>
+  <Card variant="metric" style={{background:`radial-gradient(circle at 18% 0%,${VOLT}1E,transparent 42%), radial-gradient(circle at 100% 0%,${CYAN}16,transparent 46%), linear-gradient(165deg,#080d14,#101927 56%,#0d1522)`,borderRadius:24,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}30`,position:"relative",overflow:"hidden",marginBottom:20}}>
+    <div style={{position:"absolute",inset:"auto auto -56px -30px",width:140,height:140,borderRadius:"50%",background:`radial-gradient(circle,${ORANGE}18,transparent 68%)`}}/>
+    <div style={{position:"absolute",top:14,right:14,opacity:.18,pointerEvents:"none"}}><SLLogo size={54}/></div>
 
-  {/* Big stats row */}
-  <div style={{display:"flex",gap:8,marginTop:22,justifyContent:"center"}}>
-    {[{v:totalMakes+totalShots,l:"TOTAL MAKES",c:VOLT,p:true},{v:bestStreak+"D",l:"BEST STREAK",c:ORANGE},{v:eventsAttended,l:"EVENTS",c:CYAN}].map(s=>
-      <div key={s.l} style={{flex:s.p?1.15:1,background:"#0a0a0a",borderRadius:14,padding:s.p?"15px 10px":"13px 8px",border:`1px solid ${s.p?`${VOLT}30`:BORDER_CLR}`}}>
-        <div style={{fontFamily:FD,color:s.c,fontSize:s.p?34:27,fontWeight:800,lineHeight:1}}>{s.v}</div>
-        <div style={{fontFamily:FB,color:s.p?"var(--text-2)":T.SUB,fontSize:s.p?7:6,letterSpacing:s.p?2.2:1.8,marginTop:s.p?5:4,fontWeight:700}}>{s.l}</div>
-      </div>)}
-  </div>
-
-  {/* Highlight stat — best improving drill */}
-  {(()=>{const improving=drillStats.filter(d=>d.trend==="up"&&d.count>=4);const topBadge=earnedBadges.length>0?earnedBadges[earnedBadges.length-1]:null;
-    const highlight=improving.length>0
-      ?`${improving[0].name} avg improved to ${improving[0].avg}`
-      :topBadge?`Earned ${topBadge.name} badge (${topBadge.days}D streak)`
-       :sessionsLogged>0?`${sessionsLogged} training sessions logged`:"0 sessions logged — log shots to start your progress";
-    return highlight?<div style={{marginTop:16,padding:"8px 16px",background:VOLT+"06",borderRadius:10,border:`1px solid ${VOLT}18`,display:"inline-block"}}>
-      <div style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:600,letterSpacing:1}}>★ {highlight.toUpperCase()}</div>
-    </div>:null})()}
-
-  {/* Watermark */}
-  <div style={{marginTop:16,display:"flex",alignItems:"center",justifyContent:"center",gap:4,opacity:.25}}>
-    <SLLogo size={24}/>
-    <span style={{fontFamily:FD,fontSize:10,color:VOLT,letterSpacing:3}}>SHOTLAB</span>
-  </div>
-</Card>
-
-{/* Hero card */}
-<Card style={{background:`linear-gradient(135deg,${VOLT}06,${CARD_BG})`,borderRadius:20,padding:`${spacing.xl}px ${spacing.lg}px ${spacing.lg}px`,border:`1px solid ${VOLT}20`,marginBottom:24,textAlign:"center",position:"relative",overflow:"hidden"}}>
-  <div style={{position:"absolute",top:0,right:0,width:78,height:78,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}04,transparent)`,transform:"translate(30%,-30%)"}}/>
-  <Av n={u.name} sz={72} email={u.email} style={{margin:"0 auto 16px"}}/>
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:30,fontWeight:800,letterSpacing:2.6,lineHeight:1}}>{u.name.toUpperCase()}</div>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:10,marginTop:8,letterSpacing:1.7,fontWeight:700}}>OFFSEASON PLAYER</div>
-  {/* Quick stats row */}
-  <div style={{display:"flex",gap:8,marginTop:22,justifyContent:"center"}}>
-    {[{v:totalMakes+totalShots,l:"MAKES",c:VOLT,p:true},{v:sessionsLogged,l:"SESSIONS",c:LIGHT},{v:streak,l:"STREAK",c:ORANGE}].map(s=>
-      <div key={s.l} style={{background:BG,borderRadius:12,padding:s.p?"11px 15px":"10px 12px",border:`1px solid ${s.p?`${VOLT}30`:BORDER_CLR}`,minWidth:s.p?84:72}}>
-        <div style={{fontFamily:FD,color:s.c,fontSize:s.p?30:24,fontWeight:800,lineHeight:1}}>{s.v}</div>
-        <div style={{fontFamily:FB,color:s.p?"var(--text-2)":T.SUB,fontSize:s.p?7:6,letterSpacing:s.p?2.1:1.8,marginTop:4,fontWeight:700}}>{s.l}</div>
-      </div>)}
-  </div>
-</Card>
-
-{/* Badges */}
-{earnedBadges.length>0&&<div style={{marginBottom:24}}>
-  <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:10,letterSpacing:2.4,fontWeight:800,marginBottom:12}}>BADGES EARNED</div>
-  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{earnedBadges.map(b=>
-    <div key={b.days} className="animated-badge" style={{display:"flex",alignItems:"center",gap:6,background:`${b.color}0C`,border:`1px solid ${b.color}2A`,borderRadius:10,padding:"7px 12px"}}>
-      <span style={{fontFamily:FD,fontSize:13,color:b.color,opacity:0.9}}>{b.icon}</span>
-      <span style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",fontWeight:700,letterSpacing:0.8}}>{b.name}</span>
-    </div>)}
-  </div>
-</div>}
-
-{/* Overall stats */}
-<div style={{background:CARD_BG,borderRadius:16,padding:"4px 20px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
-  <StatRow label="Total Drill Makes" value={totalMakes}/>
-  <StatRow label="Shot Tracker Makes" value={totalShots} color={ORANGE}/>
-  <StatRow label="Events Attended" value={eventsAttended} color={CYAN}/>
-  <StatRow label="S&C Sessions" value={scCount} color="#A0A0A0"/>
-  <StatRow label="Challenges" value={`${challWon}/${challTotal}`} color={ORANGE} sub={challTotal>0?`${Math.round(challWon/challTotal*100)}% win rate`:"No challenges yet"}/>
-  <StatRow label="Best Streak" value={`${bestStreak}D`} color={ORANGE}/>
-  <div style={{height:4}}/>
-</div>
-
-{/* Per-drill breakdown with PBs and trends */}
-<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:800,marginBottom:12}}>DRILL BREAKDOWN</div>
-{drillStats.map(d=>{const accentColor=getDrillAccentColor(d.name);return <div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
-  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-    <DrillIcon type={d.icon} size={20} color={accentColor}/>
-    <div style={{flex:1,fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-    <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"2px 8px",borderRadius:5,
-      color:d.trend==="up"?"#C8FF00":d.trend==="down"?"#FF4545":MUTED,
-      background:d.trend==="up"?"#C8FF0015":d.trend==="down"?"#FF454515":BORDER_CLR}}>
-      {d.trend==="up"?"▲ IMPROVING":d.trend==="down"?"▼ DECLINING":"— STEADY"}
+    <div style={{display:"flex",alignItems:"center",gap:14}}>
+      <Av n={u.name} sz={72} email={u.email}/>
+      <div style={{minWidth:0,flex:1}}>
+        <div style={{fontFamily:FB,color:VOLT,fontSize:9,fontWeight:800,letterSpacing:"0.28em",textTransform:"uppercase"}}>Season Profile</div>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:34,fontWeight:800,letterSpacing:2.4,lineHeight:.95,marginTop:6,wordBreak:"break-word"}}>{u.name.toUpperCase()}</div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:10}}>
+          <span style={{fontFamily:FB,fontSize:9,color:"var(--text-1)",fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",padding:"3px 8px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}3A`}}>Offseason 2026</span>
+          <span style={{fontFamily:FB,fontSize:9,color:ORANGE,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",padding:"3px 8px",borderRadius:999,background:`${ORANGE}18`,border:`1px solid ${ORANGE}44`}}>🔥 {streak} day active streak</span>
+        </div>
+      </div>
     </div>
-  </div>
-  <div style={{display:"flex",gap:8,marginBottom:d.last10.length>=2?12:0}}>
-    <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-      <div style={{fontFamily:FD,color:ORANGE,fontSize:20}}>{d.pb}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>PB</div>
-    </div>
-    <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-      <div style={{fontFamily:FD,color:VOLT,fontSize:20}}>{d.avg}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>AVG</div>
-    </div>
-    <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:20}}>{d.count}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>LOGGED</div>
-    </div>
-  </div>
-  {/* Mini sparkline chart of last 10 scores */}
-  {d.last10.length>=2&&<div style={{display:"flex",alignItems:"center",gap:8}}>
-    <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:1,fontWeight:600,flexShrink:0}}>LAST {d.last10.length}</div>
-    <Sparkline data={d.last10} color={VOLT} w={200} h={20}/>
-  </div>}
-</div>})}
 
+    <div style={{marginTop:16,padding:"10px 12px",borderRadius:12,border:`1px solid ${VOLT}24`,background:"rgba(10,14,21,.64)"}}>
+      <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:8,fontWeight:700,letterSpacing:"0.18em",textTransform:"uppercase",marginBottom:5}}>Top achievement</div>
+      <div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,lineHeight:1.4,letterSpacing:"0.04em"}}>{featuredHighlight.toUpperCase()}</div>
+    </div>
+  </Card>
 
-  </SectionContainer>;
+  <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:20,padding:"4px 8px",display:"flex",gap:4,marginBottom:20}}>
+    <SpotlightStat label="Total Makes" value={totalCareerMakes} color={VOLT} sub="Drills + tracker"/>
+    <div style={{width:1,background:`${BORDER_CLR}66`,margin:"12px 0"}}/>
+    <SpotlightStat label="Best Streak" value={`${bestStreak}D`} color={ORANGE} sub={`Current ${streak}D`} />
+    <div style={{width:1,background:`${BORDER_CLR}66`,margin:"12px 0"}}/>
+    <SpotlightStat label="Events" value={eventsAttended} color={CYAN} sub={`${scCount} S&C sessions`} />
+  </div>
+
+  <Card style={{background:`linear-gradient(160deg,${CARD_BG},#111a29)`,border:`1px solid ${VOLT}24`,borderRadius:18,padding:"18px 16px",marginBottom:20}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:12}}>
+      <div style={{fontFamily:FB,color:"var(--text-1)",fontSize:12,fontWeight:800,letterSpacing:"0.18em",textTransform:"uppercase"}}>Achievement vault</div>
+      <div style={{fontFamily:FD,color:VOLT,fontSize:16,letterSpacing:1}}>{earnedBadges.length}</div>
+    </div>
+    {topBadge&&<div style={{display:"flex",alignItems:"center",gap:10,background:`${topBadge.color}16`,border:`1px solid ${topBadge.color}3F`,borderRadius:12,padding:"10px 12px",marginBottom:10}}>
+      <div style={{width:34,height:34,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",background:`${topBadge.color}20`,fontSize:18}}>{topBadge.icon}</div>
+      <div style={{minWidth:0}}>
+        <div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:800,letterSpacing:"0.06em"}}>{topBadge.name.toUpperCase()}</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:2,letterSpacing:"0.06em"}}>{topBadge.days} day consistency milestone</div>
+      </div>
+    </div>}
+    {earnedBadges.length>0?<div style={{display:"flex",gap:8,flexWrap:"wrap"}}>{earnedBadges.map(b=><div key={b.days} className="animated-badge" style={{display:"flex",alignItems:"center",gap:6,background:`linear-gradient(140deg,${b.color}18,${b.color}08)`,border:`1px solid ${b.color}44`,borderRadius:999,padding:"6px 11px",boxShadow:`0 0 0 1px ${b.color}1F inset`}}>
+      <span style={{fontFamily:FD,fontSize:12,color:b.color}}>{b.icon}</span>
+      <span style={{fontFamily:FB,fontSize:9,color:"var(--text-2)",fontWeight:800,letterSpacing:"0.08em",textTransform:"uppercase"}}>{b.name}</span>
+    </div>)}</div>:<div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>No badges unlocked yet. Keep stacking sessions.</div>}
+  </Card>
+
+  <div style={{background:CARD_BG,borderRadius:16,padding:"2px 20px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
+    <StatRow label="Drill makes" value={totalMakes}/>
+    <StatRow label="Shot tracker makes" value={totalShots} color={ORANGE}/>
+    <StatRow label="Sessions logged" value={sessionsLogged} color={LIGHT}/>
+    <StatRow label="S&C sessions" value={scCount} color="#A0A0A0"/>
+    <StatRow label="Challenges" value={`${challWon}/${challTotal}`} color={ORANGE} sub={challTotal>0?`${Math.round(challWon/challTotal*100)}% win rate`:"No challenges yet"}/>
+    <div style={{height:4}}/>
+  </div>
+
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:800,marginBottom:12}}>DRILL BREAKDOWN</div>
+  {drillStats.map(d=>{const accentColor=getDrillAccentColor(d.name);return <div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
+    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+      <DrillIcon type={d.icon} size={20} color={accentColor}/>
+      <div style={{flex:1,fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+      <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"2px 8px",borderRadius:999,
+        color:d.trend==="up"?"#C8FF00":d.trend==="down"?"#FF4545":MUTED,
+        background:d.trend==="up"?"#C8FF0015":d.trend==="down"?"#FF454515":BORDER_CLR}}>
+        {d.trend==="up"?"▲ IMPROVING":d.trend==="down"?"▼ DECLINING":"— STEADY"}
+      </div>
+    </div>
+    <div style={{display:"flex",gap:8,marginBottom:d.last10.length>=2?12:0}}>
+      <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
+        <div style={{fontFamily:FD,color:ORANGE,fontSize:20}}>{d.pb}</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>PB</div>
+      </div>
+      <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
+        <div style={{fontFamily:FD,color:VOLT,fontSize:20}}>{d.avg}</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>AVG</div>
+      </div>
+      <div style={{flex:1,background:BG,borderRadius:10,padding:"10px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:20}}>{d.count}</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:2,fontWeight:600}}>LOGGED</div>
+      </div>
+    </div>
+    {d.last10.length>=2&&<div style={{display:"flex",alignItems:"center",gap:8}}>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:1,fontWeight:600,flexShrink:0}}>LAST {d.last10.length}</div>
+      <Sparkline data={d.last10} color={VOLT} w={200} h={20}/>
+    </div>}
+  </div>})}
+
+</SectionContainer>;
 }
 function PlayerSettingsPage({u,onDeleteAccount,onResetPassword}){
 const [confirmDelete,setConfirmDelete]=useState(false);
