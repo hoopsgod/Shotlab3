@@ -1,7 +1,7 @@
 import UI_TOKENS from "../styles/tokens";
 
-const HERO_RADIUS = 18;
-const HERO_BUTTON_RADIUS = 10;
+const HERO_RADIUS = 16;
+const HERO_BUTTON_RADIUS = 12;
 
 function HeroBanner({
   title,
@@ -17,18 +17,18 @@ function HeroBanner({
         background: "var(--surface-2)",
         border: `1px solid ${accent}66`,
         borderRadius: HERO_RADIUS,
-        padding: "16px 12px",
-        marginBottom: 20,
+        padding: "var(--card-pad-standard) var(--card-pad-compact)",
+        marginBottom: "var(--space-5)",
         boxShadow: "var(--shadow-1)",
       }}
     >
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--control-gap-tight)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "var(--control-gap-tight)", minWidth: 0 }}>
           {icon ? (
             <div
               style={{
-                width: 34,
-                height: 34,
+                width: 32,
+                height: 32,
                 borderRadius: HERO_BUTTON_RADIUS,
                 border: `1px solid ${accent}66`,
                 background: "var(--surface-1)",
@@ -62,7 +62,7 @@ function HeroBanner({
                   fontSize: 12,
                   lineHeight: 1.4,
                   letterSpacing: "0.01em",
-                  marginTop: 4,
+                  marginTop: "var(--space-1)",
                 }}
               >
                 {subtitle}
@@ -79,7 +79,7 @@ function HeroBanner({
               color: UI_TOKENS.colors.bgBase,
               border: "1px solid transparent",
               borderRadius: HERO_BUTTON_RADIUS,
-              padding: "8px 10px",
+              padding: "var(--space-2) var(--space-3)",
               fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
               fontSize: 11,
               fontWeight: 800,

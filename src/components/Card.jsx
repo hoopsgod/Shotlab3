@@ -1,9 +1,9 @@
 import spacing from "../spacing";
 
 const CARD_VARIANT_STYLES = {
-  primary: { className: "shared-card--primary", padding: `${spacing.lg}px`, gap: spacing.sm },
-  secondary: { className: "shared-card--secondary", padding: `${spacing.md}px`, gap: spacing.sm },
-  subtle: { className: "shared-card--subtle", padding: `${spacing.md}px`, gap: spacing.sm },
+  primary: { className: "shared-card--primary", padding: spacing.lg, gap: spacing.md },
+  secondary: { className: "shared-card--secondary", padding: spacing.lg, gap: spacing.smd },
+  subtle: { className: "shared-card--subtle", padding: spacing.md, gap: spacing.smd },
 };
 
 const LEGACY_VARIANT_MAP = {
@@ -22,8 +22,8 @@ function Card({ as: Component = "div", variant = "secondary", className = "", st
       {...props}
       className={`shared-card ${variantStyle.className} ${className}`.trim()}
       style={{
-        padding: variantStyle.padding,
-        gap: variantStyle.gap,
+        padding: `${variantStyle.padding}px`,
+        gap: `${variantStyle.gap}px`,
         ...style,
       }}
     >
