@@ -1,78 +1,152 @@
 :root {
-  --type-h1-size: var(--fs-display);
-  --type-h2-size: var(--fs-h1);
-  --type-h3-size: var(--fs-h2);
-  --type-body-size: var(--fs-body);
-  --type-caption-size: var(--fs-helper);
+  --type-hero-display-size: clamp(2.1rem, 3.6vw, 3.1rem);
+  --type-page-title-size: clamp(1.55rem, 2.2vw, 2.2rem);
+  --type-section-title-size: clamp(1.1rem, 1.45vw, 1.42rem);
+  --type-stat-number-size: clamp(1.8rem, 3.8vw, 3rem);
+  --type-stat-label-size: 0.72rem;
+  --type-body-size: 1rem;
+  --type-secondary-size: 0.9rem;
+  --type-micro-size: 0.7rem;
 
-  --type-h1-weight: var(--fw-bold);
-  --type-h2-weight: var(--fw-bold);
-  --type-h3-weight: var(--fw-semibold);
-  --type-body-weight: var(--fw-regular);
+  --type-hero-display-weight: 700;
+  --type-page-title-weight: 650;
+  --type-section-title-weight: 620;
+  --type-stat-number-weight: 720;
+  --type-stat-label-weight: 650;
+  --type-body-weight: 500;
+  --type-secondary-weight: 500;
+  --type-micro-weight: 600;
+
+  --type-hero-display-line: 1.06;
+  --type-page-title-line: 1.12;
+  --type-section-title-line: 1.24;
+  --type-stat-number-line: 1;
+  --type-stat-label-line: 1.25;
+  --type-body-line: 1.58;
+  --type-secondary-line: 1.5;
+  --type-micro-line: 1.2;
+
+  --type-tight-track: -0.015em;
+  --type-title-track: -0.01em;
+  --type-body-track: 0;
+  --type-label-track: 0.08em;
+  --type-micro-track: 0.11em;
 }
 
 .page h1,
-.page .type-display {
-  font-size: var(--type-h1-size);
-  font-weight: var(--type-h1-weight);
-  line-height: var(--lh-tight);
-  letter-spacing: var(--ls-tight);
+.page .type-page-title,
+.page .pageHeaderText h1,
+.page .page-title,
+.page .pageTitle {
+  font-size: var(--type-page-title-size);
+  font-weight: var(--type-page-title-weight);
+  line-height: var(--type-page-title-line);
+  letter-spacing: var(--type-title-track);
+  text-transform: none;
+  color: var(--text-1);
+}
+
+.page .type-hero-display,
+.page .heroModule .heroStatVal,
+.page .heroModule .heroStatVal span,
+.page .heroModule .cnt-up {
+  font-size: var(--type-hero-display-size);
+  font-weight: var(--type-hero-display-weight);
+  line-height: var(--type-hero-display-line);
+  letter-spacing: var(--type-tight-track);
   text-transform: none;
 }
 
 .page h2,
-.page .type-heading {
-  font-size: var(--type-h2-size);
-  font-weight: var(--type-h2-weight);
-  line-height: var(--lh-tight);
-  letter-spacing: var(--ls-tight);
-  text-transform: none;
-}
-
 .page h3,
 .page h4,
-.page h5,
-.page h6,
-.page .type-subheading {
-  font-size: var(--type-h3-size);
-  font-weight: var(--type-h3-weight);
-  line-height: 1.35;
-  letter-spacing: var(--ls-normal);
+.page .type-section-title,
+.page .section-title,
+.page .panel-title,
+.page .emptyState__title,
+.page .lbName,
+.page .cardTitle {
+  font-size: var(--type-section-title-size);
+  font-weight: var(--type-section-title-weight);
+  line-height: var(--type-section-title-line);
+  letter-spacing: var(--type-title-track);
   text-transform: none;
+  color: var(--text-1);
+}
+
+.page .type-stat-number,
+.page .heroStatVal,
+.page .mode-card-stat-value,
+.page .lbMetric,
+.page .cnt-up {
+  font-size: var(--type-stat-number-size) !important;
+  font-weight: var(--type-stat-number-weight) !important;
+  line-height: var(--type-stat-number-line) !important;
+  letter-spacing: var(--type-tight-track) !important;
+  color: var(--text-1);
+  font-variant-numeric: tabular-nums;
+}
+
+.page .type-stat-label,
+.page .heroStatLbl,
+.page .lbMetricLabel,
+.page .mode-card-stat .fieldLabel {
+  font-size: var(--type-stat-label-size) !important;
+  font-weight: var(--type-stat-label-weight) !important;
+  line-height: var(--type-stat-label-line);
+  letter-spacing: var(--type-label-track) !important;
+  text-transform: uppercase;
+  color: var(--text-3);
 }
 
 .page p,
 .page li,
 .page .type-body,
 .page .heroSub,
-.page .u-secondary-text {
+.page .u-secondary-text,
+.page .emptyState__subtitle,
+.page .type-body-copy {
   font-size: var(--type-body-size);
   font-weight: var(--type-body-weight);
-  line-height: var(--lh-body);
-  letter-spacing: var(--ls-normal);
+  line-height: var(--type-body-line);
+  letter-spacing: var(--type-body-track);
+  text-transform: none;
   color: var(--text-2);
 }
 
 .page small,
+.page .type-secondary,
+.page .type-meta,
+.page .lbMeta,
+.page .pageHeaderText p,
 .page .type-helper {
-  font-size: var(--fs-helper);
-  line-height: var(--lh-helper);
+  font-size: var(--type-secondary-size);
+  line-height: var(--type-secondary-line);
+  font-weight: var(--type-secondary-weight);
+  letter-spacing: 0.01em;
+  text-transform: none;
   color: var(--color-text-helper);
 }
 
-.page .type-caption,
+.page .type-micro-label,
 .page .heroKicker,
 .page .u-meta-label,
-.page .heroStatLbl,
 .page .tab-label,
 .page .panel-title,
-.page .section-kicker {
-  font-size: var(--type-caption-size);
-  font-weight: var(--fw-semibold);
-  line-height: 1.35;
-  letter-spacing: var(--ls-label);
+.page .section-kicker,
+.page .fieldLabel,
+.page .progressTier {
+  font-size: var(--type-micro-size) !important;
+  font-weight: var(--type-micro-weight) !important;
+  line-height: var(--type-micro-line);
+  letter-spacing: var(--type-micro-track) !important;
   text-transform: uppercase;
   color: var(--text-3);
+}
+
+.page .u-allcaps-long {
+  text-transform: none;
+  letter-spacing: var(--type-title-track);
 }
 
 @media (max-width: 540px) {
