@@ -18,8 +18,8 @@ export default function CoachHero({
   onOpenSettings,
   onLogout,
 }) {
-  const mobilePadding = isOverview ? "12px 12px" : "10px 12px";
-  const desktopPadding = isOverview ? "14px 14px" : "10px 14px";
+  const mobilePadding = isOverview ? "12px 12px 10px" : "10px 12px 8px";
+  const desktopPadding = isOverview ? "13px 14px 12px" : "10px 14px 10px";
 
   return (
     <div
@@ -27,124 +27,134 @@ export default function CoachHero({
       style={{
         marginBottom: "var(--stack-gap)",
         padding: mobilePadding,
-        border: `1px solid ${accentColor ? `${accentColor}66` : "var(--stroke-2)"}`,
+        border: `1px solid ${accentColor ? `${accentColor}52` : "var(--stroke-2)"}`,
         borderRadius: "var(--radius-card)",
         background: accentColor
-          ? `linear-gradient(130deg, ${accentColor}1F 0%, var(--surface-3) 56%)`
+          ? `linear-gradient(140deg, ${accentColor}17 0%, var(--surface-3) 54%)`
           : "var(--surface-3)",
         boxShadow: accentColor
-          ? `0 18px 40px rgba(0,0,0,0.55), 0 0 0 1px ${accentColor}22, 0 14px 36px ${accentColor}24`
+          ? `0 14px 30px rgba(0,0,0,0.5), 0 0 0 1px ${accentColor}1A`
           : "var(--shadow-2)",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
       <style>{`
         @media (min-width: 768px) {
           .coach-hero { padding:${desktopPadding}; }
         }
-        @media (hover: hover) and (pointer: fine) {
-          .coach-hero-wrap { transition: transform 150ms ease, box-shadow 150ms ease; }
-          .coach-hero-wrap:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.50); }
-        }
       `}</style>
-      <div className="coach-hero coach-hero-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-        {branding?.showWatermark ? <TeamWatermark logoUrl={logoUrl} primaryColor={branding?.primaryColor || accentColor} /> : null}
-        <div>
-          <div style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", opacity: 0.96, textTransform: "uppercase", color: "var(--text-secondary)" }}>COACH MODE</div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
-            <div style={{ fontFamily: FD, color: "#fff", fontSize: isOverview ? 26 : 23, letterSpacing: "var(--tracking-default)", lineHeight: 1.02 }}>{(userName || "Demo Coach").toUpperCase()}</div>
-            {isCoach && (
-              <span
-                style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid var(--stroke-1)",
-                  borderRadius: 999,
-                  padding: "2px 8px",
-                  fontSize: 8,
-                  fontWeight: 700,
-                  textTransform: "uppercase",
-                  letterSpacing: "var(--tracking-tight)",
-                  color: "var(--text-2)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 4,
-                }}
-              >
-                COACH
-              </span>
-            )}
+      {branding?.showWatermark ? (
+        <TeamWatermark logoUrl={logoUrl} primaryColor={branding?.primaryColor || accentColor} opacity={0.04} size={190} />
+      ) : null}
+      <div className="coach-hero" style={{ position: "relative", zIndex: 1, display: "grid", gap: 10 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr auto", alignItems: "center", gap: 10 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+            <span
+              style={{
+                fontFamily: FD,
+                fontSize: 10,
+                letterSpacing: "var(--tracking-tight)",
+                textTransform: "uppercase",
+                borderRadius: 999,
+                padding: "3px 9px",
+                border: "1px solid var(--stroke-1)",
+                background: "rgba(255,255,255,0.03)",
+                color: "var(--text-2)",
+                flexShrink: 0,
+              }}
+            >
+              Coach mode
+            </span>
+            <div style={{ display: "flex", alignItems: "center", gap: 7, minWidth: 0, flex: 1 }}>
+              {avatar}
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    fontFamily: FD,
+                    color: "#fff",
+                    fontSize: isOverview ? 24 : 22,
+                    letterSpacing: "var(--tracking-default)",
+                    lineHeight: 1,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {(userName || "Demo Coach").toUpperCase()}
+                </div>
+                <div
+                  style={{
+                    fontFamily: FB,
+                    color: "var(--text-3)",
+                    fontSize: 8,
+                    textTransform: "uppercase",
+                    letterSpacing: "var(--tracking-tight)",
+                    marginTop: 2,
+                  }}
+                >
+                  {isCoach ? "Head coach" : "Team staff"}
+                </div>
+              </div>
+            </div>
           </div>
-          <div
-            style={{
-              fontFamily: FB,
-              color: "var(--text-secondary)",
-              fontSize: isOverview ? 9 : 8,
-              letterSpacing: "var(--tracking-tight)",
-              fontWeight: 600,
-              marginTop: 3,
-              lineHeight: 1.2,
-              textTransform: "uppercase",
-              maxWidth: 360,
-            }}
-          >
-            Lead the squad. Track momentum. Build consistency.
-          </div>
-          <div style={{ marginTop: 12, padding: "8px 10px", borderRadius: 14, border: `1px solid ${accentColor ? `${accentColor}55` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}10` : "rgba(255,255,255,0.04)", width: "fit-content", maxWidth: "min(100%,460px)" }}>
-            <TeamIdentity
-              branding={branding || { logoUrl, primaryColor: accentColor, secondaryColor: accentColor }}
-              teamName={teamName}
-              mascotName={branding?.mascotName}
-              motto={branding?.motto}
-              mode={branding?.brandingMode === "compact" ? "balanced" : "bold"}
-              compact={branding?.brandingMode === "compact"}
-              showLogo={branding?.showHeaderLogo !== false}
-            />
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ opacity: 0.88 }}>{wordmark}</div>
+            <button
+              type="button"
+              aria-label="Open settings"
+              onClick={onOpenSettings}
+              style={{
+                background: "rgba(20,20,20,0.88)",
+                border: `1px solid ${borderColor}`,
+                borderRadius: 10,
+                color: "var(--text-secondary)",
+                width: 34,
+                height: 34,
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              ⚙
+            </button>
+            <button
+              type="button"
+              aria-label="Log out"
+              onClick={onLogout}
+              style={{
+                background: "rgba(20,20,20,0.88)",
+                border: `1px solid ${borderColor}`,
+                borderRadius: 10,
+                color: mutedColor,
+                width: 34,
+                height: 34,
+                cursor: "pointer",
+                fontSize: 12,
+                fontWeight: 700,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              ✕
+            </button>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, alignSelf: "flex-start" }}>
-          {avatar}
-          {wordmark}
-          <button
-            type="button"
-            aria-label="Open settings"
-            onClick={onOpenSettings}
-            style={{
-              background: "rgba(20,20,20,0.95)",
-              border: `1px solid ${borderColor}`,
-              borderRadius: 12,
-              color: "var(--text-secondary)",
-              width: 38,
-              height: 38,
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            ⚙
-          </button>
-          <button
-            type="button"
-            aria-label="Log out"
-            onClick={onLogout}
-            style={{
-              background: "rgba(20,20,20,0.95)",
-              border: `1px solid ${borderColor}`,
-              borderRadius: 12,
-              color: mutedColor,
-              width: 38,
-              height: 38,
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 700,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            ✕
-          </button>
+
+        <div style={{ marginTop: 2, padding: "7px 10px", borderRadius: 12, border: `1px solid ${accentColor ? `${accentColor}3D` : "var(--stroke-1)"}`, background: accentColor ? `${accentColor}0D` : "rgba(255,255,255,0.03)", maxWidth: "min(100%,460px)" }}>
+          <TeamIdentity
+            branding={branding || { logoUrl, primaryColor: accentColor, secondaryColor: accentColor }}
+            teamName={teamName}
+            mascotName={branding?.mascotName}
+            motto={branding?.motto}
+            mode="balanced"
+            compact={branding?.brandingMode === "compact"}
+            showLogo={branding?.showHeaderLogo !== false}
+          />
         </div>
       </div>
     </div>
