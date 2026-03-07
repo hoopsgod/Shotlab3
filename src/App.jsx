@@ -174,8 +174,8 @@ const getEarnedBadges=s=>STREAK_BADGES.filter(b=>s>=b.days);
 function buildDemoSeed(teamId){
 const createdAt=Date.now();
 const drillSeed={
-1:[9,8,8,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7],
-2:[10,...Array(17).fill(8)],
+1:[5,6,6,6,7,7,7,8,8,8,9,9],
+2:[4,5,5,6,6,7,7,7,8,8,9,9],
 };
 const scoreRows=[];
 Object.entries(drillSeed).forEach(([drillId,vals])=>{
@@ -183,22 +183,22 @@ vals.forEach((score,idx)=>{const day=idx+1;scoreRows.push({
 email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,drillId:Number(drillId),score,date:isoDaysAgo(day),ts:withTs(day,idx)
 })});
 });
-const shotRows=distributeTotal(312,8).map((made,idx)=>({
+const shotRows=distributeTotal(186,8).map((made,idx)=>({
 email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,made,date:isoDaysAgo(idx+1),ts:withTs(idx+1,300+idx)
 }));
 const eventRows=[
-{id:9001,title:"Gym Session",date:"2026-03-08",time:"6:00 PM",location:"Main Gym — Court 1",desc:"Team skill work and light scrimmage.",type:"run",teamId,createdAt},
-{id:9002,title:"Shooting Clinic",date:"2026-03-12",time:"4:00 PM",location:"Training Facility — Bay 3",desc:"Guided shooting with film review.",type:"clinic",teamId,createdAt},
-{id:9003,title:"Open Gym Run",date:"2026-03-16",time:"6:30 PM",location:"Main Gym — Court 2",desc:"Competitive 5v5 run.",type:"run",teamId,createdAt},
-{id:9004,title:"Skills Challenge",date:"2026-03-20",time:"5:30 PM",location:"Main Gym — Court 2",desc:"Timed ball-handling and finishing challenge.",type:"challenge",teamId,createdAt},
-{id:9005,title:"Film + Recovery",date:"2026-03-24",time:"3:00 PM",location:"Film Room",desc:"Film review plus recovery session.",type:"recovery",teamId,createdAt},
-{id:9006,title:"Pro-Am Scrimmage",date:"2026-03-28",time:"7:00 PM",location:"Community Center",desc:"Full-court scrimmage night.",type:"game",teamId,createdAt},
-{id:9007,title:"Conditioning Block",date:"2026-04-02",time:"6:00 PM",location:"Training Turf",desc:"Conditioning and agility block.",type:"run",teamId,createdAt},
-{id:9008,title:"Team Shootaround",date:"2026-04-06",time:"5:00 PM",location:"Main Gym — Court 1",desc:"Shootaround before weekend games.",type:"clinic",teamId,createdAt},
+{id:9001,title:"Early Workout",date:"2026-03-08",time:"6:00 AM",location:"Main Gym — Court 1",desc:"Small-group form shooting before school.",type:"clinic",teamId,createdAt},
+{id:9002,title:"JV/Varsity Skills Block",date:"2026-03-12",time:"4:15 PM",location:"Training Facility — Bay 3",desc:"Position-based skill stations and finishing reps.",type:"clinic",teamId,createdAt},
+{id:9003,title:"Open Run",date:"2026-03-16",time:"6:30 PM",location:"Main Gym — Court 2",desc:"Competitive 5v5 with capped rotations.",type:"run",teamId,createdAt},
+{id:9004,title:"Pressure FT Ladder",date:"2026-03-20",time:"5:45 PM",location:"Main Gym — Court 2",desc:"Timed free-throw ladder and accountability chart.",type:"challenge",teamId,createdAt},
+{id:9005,title:"Film + Mobility",date:"2026-03-24",time:"3:00 PM",location:"Film Room",desc:"Opponent clips, then guided recovery and mobility.",type:"recovery",teamId,createdAt},
+{id:9006,title:"Saturday Scrimmage",date:"2026-03-28",time:"10:00 AM",location:"Community Center",desc:"Live officiated scrimmage to prep for league play.",type:"game",teamId,createdAt},
+{id:9007,title:"Sprint & Change-of-Direction",date:"2026-04-02",time:"6:00 PM",location:"Training Turf",desc:"Acceleration work and defensive slide intervals.",type:"run",teamId,createdAt},
+{id:9008,title:"Game-Week Shootaround",date:"2026-04-06",time:"5:00 PM",location:"Main Gym — Court 1",desc:"Short high-focus session before weekend games.",type:"clinic",teamId,createdAt},
 ];
 const rsvpEmails=[DEMO_PLAYER.email,"jordan.m@shotlab.app","tyler.r@shotlab.app","chris.w@shotlab.app"];
 const rsvpRows=[];
-eventRows.slice(0,6).forEach((ev,idx)=>{rsvpEmails.forEach((email,order)=>{const name=email===DEMO_PLAYER.email?DEMO_PLAYER.name:DEMO_SEED_PLAYERS.find(p=>p.email===email)?.name||email;rsvpRows.push({eventId:ev.id,email,playerId:email,teamId,name,ts:withTs(20-idx,order)});});});
+eventRows.slice(0,6).forEach((ev,idx)=>{rsvpEmails.forEach((email,order)=>{if(email===DEMO_PLAYER.email&&idx===2)return;const name=email===DEMO_PLAYER.email?DEMO_PLAYER.name:DEMO_SEED_PLAYERS.find(p=>p.email===email)?.name||email;rsvpRows.push({eventId:ev.id,email,playerId:email,teamId,name,ts:withTs(20-idx,order)});});});
 const scRows=[
 {id:8101,title:"Upper Body Power",date:isoDaysAgo(14),time:"6:00 AM",location:"Weight Room — Bay A",desc:"Bench, push press, rows.",teamId},
 {id:8102,title:"Lower Body Strength",date:isoDaysAgo(13),time:"6:00 AM",location:"Weight Room — Bay A",desc:"Squats and posterior-chain focus.",teamId},
@@ -212,18 +212,18 @@ const scRows=[
 ];
 const scRsvpRows=scRows.map((s,idx)=>({sessionId:s.id,email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,ts:withTs(14-idx,500+idx)}));
 const challengeRows=[
-{id:7001,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"chris.w@shotlab.app",toName:"Chris W.",drillId:1,drillName:"FORM SHOOTING",score:8,max:10,status:"pending",ts:withTs(5,1)},
-{id:7002,teamId,playerId:"jordan.m@shotlab.app",from:"jordan.m@shotlab.app",fromName:"Jordan M.",to:DEMO_PLAYER.email,toName:DEMO_PLAYER.name,drillId:2,drillName:"FREE THROWS",score:9,max:10,status:"won",respScore:10,respTs:withTs(4,2),ts:withTs(4,1)},
+{id:7001,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"chris.w@shotlab.app",toName:"Chris W.",drillId:1,drillName:"FORM SHOOTING",score:7,max:10,status:"lost",respScore:8,respTs:withTs(4,2),ts:withTs(5,1)},
+{id:7002,teamId,playerId:"jordan.m@shotlab.app",from:"jordan.m@shotlab.app",fromName:"Jordan M.",to:DEMO_PLAYER.email,toName:DEMO_PLAYER.name,drillId:2,drillName:"FREE THROWS",score:8,max:10,status:"won",respScore:9,respTs:withTs(4,2),ts:withTs(4,1)},
 {id:7003,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"aiden.t@shotlab.app",toName:"Aiden T.",drillId:1,drillName:"FORM SHOOTING",score:9,max:10,status:"pending",ts:withTs(3,1)},
 {id:7004,teamId,playerId:"tyler.r@shotlab.app",from:"tyler.r@shotlab.app",fromName:"Tyler R.",to:DEMO_PLAYER.email,toName:DEMO_PLAYER.name,drillId:2,drillName:"FREE THROWS",score:9,max:10,status:"won",respScore:10,respTs:withTs(2,2),ts:withTs(2,1)},
-{id:7005,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"jordan.m@shotlab.app",toName:"Jordan M.",drillId:2,drillName:"FREE THROWS",score:8,max:10,status:"pending",ts:withTs(1,1)},
+{id:7005,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"jordan.m@shotlab.app",toName:"Jordan M.",drillId:2,drillName:"FREE THROWS",score:9,max:10,status:"pending",ts:withTs(1,1)},
 ];
 const leaderboardRows=[
-{email:"jordan.m@shotlab.app",name:"Jordan M.",total:1240},
-{email:"tyler.r@shotlab.app",name:"Tyler R.",total:1105},
-{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,total:847},
-{email:"chris.w@shotlab.app",name:"Chris W.",total:601},
-{email:"aiden.t@shotlab.app",name:"Aiden T.",total:489},
+{email:"jordan.m@shotlab.app",name:"Jordan M.",total:1018},
+{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,total:972},
+{email:"tyler.r@shotlab.app",name:"Tyler R.",total:944},
+{email:"chris.w@shotlab.app",name:"Chris W.",total:836},
+{email:"aiden.t@shotlab.app",name:"Aiden T.",total:788},
 ];
 const playerRows=leaderboardRows.flatMap((p,rankIdx)=>{
 const homeTotal=Math.round(p.total*0.68);
