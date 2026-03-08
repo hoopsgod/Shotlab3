@@ -1,3 +1,27 @@
+
+.home-header {
+  padding-top: calc(env(safe-area-inset-top) + 12px);
+  margin-bottom: 14px;
+}
+
+.home-greeting {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #7A7E8A;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.home-name {
+  display: block;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 34px;
+  letter-spacing: 0.04em;
+  color: #F0EEE8;
+  line-height: 1.1;
+}
+
 /* =========================
    Micro UI Polish: Progress
    ========================= */

@@ -1363,6 +1363,15 @@ const contextItems=useMemo(()=>[
   coachName?{label:"Coach",value:coachName}:null,
   u.role?{label:"Role",value:u.role.charAt(0).toUpperCase()+u.role.slice(1)}:null,
 ].filter(Boolean),[coachName,team?.name,u.role]);
+const greeting=useMemo(()=>{
+  const hour = new Date().getHours();
+  return hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+},[]);
+const firstName=useMemo(()=>{
+  const profileName=`${u?.name||""}`.trim()||`${firebaseAuth?.currentUser?.displayName||""}`.trim();
+  const parsed=profileName.split(/\s+/).filter(Boolean)[0];
+  return parsed||"Baller";
+},[u?.name]);
 
 // Notification dots for nav
 const pendingDuels=useMemo(()=>challenges.filter(c=>c.to===u.email&&c.status==="pending").length,[challenges,u]);
@@ -1495,6 +1504,11 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
+    <div className="home-header">
+      <span className="home-greeting">{greeting},</span>
+      <span className="home-name">{firstName} 🏀</span>
+    </div>
+
     <section style={{marginBottom:16,background:`linear-gradient(152deg,${VOLT}12,#101418)`,border:`1px solid ${VOLT}36`,borderRadius:20,padding:"18px 16px 16px",boxShadow:"0 12px 30px rgba(0,0,0,0.34)"}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:1.02,letterSpacing:1.3}}>Dashboard</div>
       <div style={{fontFamily:FB,color:"#C9D2DF",fontSize:12,lineHeight:1.5,marginTop:8,maxWidth:480}}>Today at a glance: your shot volume, streak momentum, and the one action that keeps progress moving.</div>
