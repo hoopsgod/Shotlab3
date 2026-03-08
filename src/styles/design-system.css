@@ -45,8 +45,8 @@ Implementation plan (small-scope motion pass):
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
-  --space-3a: 16px;
   --space-4: 16px;
+  --space-4a: 20px;
   --space-5: 24px;
   --space-6: 32px;
   --space-7: 40px;
@@ -54,9 +54,10 @@ Implementation plan (small-scope motion pass):
   --space-9: 64px;
 
   --page-gutter: max(var(--space-4), env(safe-area-inset-left));
-  --section-gap: var(--space-8);
+  --page-gutter-right: max(var(--space-4), env(safe-area-inset-right));
+  --section-gap: var(--space-5);
   --card-pad-compact: var(--space-4);
-  --card-pad-standard: var(--space-5);
+  --card-pad-standard: var(--space-4a);
   --card-pad: var(--card-pad-standard);
   --control-gap-tight: var(--space-3);
   --control-gap: var(--space-4);
@@ -137,7 +138,7 @@ Implementation plan (small-scope motion pass):
   --s-1: var(--space-1);
   --s-2: var(--space-3);
   --s-3: var(--space-3);
-  --s-3a: var(--space-3a);
+  --s-3a: var(--space-4);
   --s-4: var(--space-4);
   --s-5: var(--space-5);
   --s-6: var(--space-6);
@@ -166,14 +167,22 @@ textarea {
 }
 
 .page {
-  padding-left: max(var(--space-4), env(safe-area-inset-left));
-  padding-right: max(var(--space-4), env(safe-area-inset-right));
+  padding-left: var(--page-gutter);
+  padding-right: var(--page-gutter-right);
   padding-bottom: calc(var(--nav-height, 74px) + var(--space-4) + env(safe-area-inset-bottom));
 }
 
-.stack-12 { display: flex; flex-direction: column; gap: var(--space-2); }
-.stack-16 { display: flex; flex-direction: column; gap: var(--space-3); }
-.stack-24 { display: flex; flex-direction: column; gap: var(--space-4); }
+.stack-12 { display: flex; flex-direction: column; gap: var(--space-3); }
+.stack-16 { display: flex; flex-direction: column; gap: var(--space-4); }
+.stack-24 { display: flex; flex-direction: column; gap: var(--space-5); }
+
+@media (min-width: 430px) {
+  :root {
+    --page-gutter: max(var(--space-4a), env(safe-area-inset-left));
+    --page-gutter-right: max(var(--space-4a), env(safe-area-inset-right));
+    --section-gap: var(--space-6);
+  }
+}
 
 .shared-card {
   border-radius: var(--radius-lg);

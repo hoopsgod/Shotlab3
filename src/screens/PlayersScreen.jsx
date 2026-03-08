@@ -111,9 +111,9 @@ export default function PlayersScreen() {
   });
 
   return (
-    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "var(--page-gutter)",
+    <div style={{ background: "var(--bg-0)", minHeight: "100vh", paddingLeft: "var(--page-gutter)", paddingRight: "var(--page-gutter-right)", paddingTop: "var(--space-5)",
       paddingBottom: "calc(var(--nav-height, 74px) + var(--space-8) + env(safe-area-inset-bottom))" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", marginBottom: "var(--space-2)" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", marginBottom: "var(--space-3)" }}>
         <Users size={22} color="var(--text-2)" />
         <span
           style={{
@@ -128,7 +128,7 @@ export default function PlayersScreen() {
         </span>
       </div>
 
-      <p style={{ fontSize: "var(--fs-helper)", color: "var(--text-2)", marginBottom: "var(--space-4)", lineHeight: "var(--lh-helper)" }}>
+      <p style={{ fontSize: "var(--fs-helper)", color: "var(--text-2)", marginBottom: "var(--space-5)", lineHeight: "var(--lh-helper)" }}>
         Manage your roster and track player engagement with clearer status visibility
       </p>
 
@@ -140,11 +140,11 @@ export default function PlayersScreen() {
         onChange={(e) => setSearchQuery(e.target.value)}
         style={{
           fontSize: "var(--fs-body)",
-          marginBottom: "var(--space-3)",
+          marginBottom: "var(--space-4)",
         }}
       />
 
-      <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
+      <div style={{ display: "flex", gap: "var(--space-3)", marginBottom: "var(--space-5)", flexWrap: "wrap" }}>
         {["All players", "Active", "Inactive"].map((filter) => (
           <Button key={filter} onClick={() => setActiveFilter(filter)} className="chip" variant={activeFilter === filter ? "primary" : "tertiary"} aria-pressed={activeFilter === filter} style={chipStyle(activeFilter === filter)}>
             {filter}
@@ -157,8 +157,8 @@ export default function PlayersScreen() {
           background: "var(--surface-1)",
           border: "1px solid var(--stroke-1)",
           borderRadius: "var(--radius-lg)",
-          padding: "var(--space-4)",
-          marginBottom: "var(--space-4)",
+          padding: "var(--space-5)",
+          marginBottom: "var(--space-5)",
           display: "flex",
           alignItems: "center",
         }}
@@ -187,7 +187,7 @@ export default function PlayersScreen() {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: "var(--space-4)",
+            gap: "var(--space-5)",
           }}
         >
           <Users size={48} color="#555555" />
@@ -213,11 +213,11 @@ export default function PlayersScreen() {
               background: "var(--surface-2)",
               border: "1px solid rgba(167, 187, 211, 0.34)",
               borderRadius: "16px",
-              padding: "var(--space-4)",
-              marginBottom: "var(--space-3)",
+              padding: "var(--space-5)",
+              marginBottom: "var(--space-4)",
               display: "flex",
               alignItems: "center",
-              gap: "var(--space-3)",
+              gap: "var(--space-4)",
               cursor: "pointer",
             }}
           >
@@ -256,8 +256,8 @@ export default function PlayersScreen() {
           textTransform: "uppercase",
           letterSpacing: "0.06em",
           color: "var(--text-2)",
-          marginTop: "var(--space-8)",
-          marginBottom: "var(--space-3)",
+          marginTop: "var(--space-6)",
+          marginBottom: "var(--space-4)",
         }}
       >
         Roster growth
@@ -267,11 +267,11 @@ export default function PlayersScreen() {
           background: "var(--surface-2)",
           border: "1px solid var(--stroke-1)",
           borderRadius: "16px",
-          padding: "var(--space-4)",
+          padding: "var(--space-5)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "var(--space-3)",
+          gap: "var(--space-4)",
         }}
       >
         <UserPlus size={32} color="var(--text-2)" />
