@@ -248,10 +248,22 @@ form > * + * {
   min-height: 100vh;
 }
 
+.viewport-preview-shell--desktop {
+  padding: 0;
+  background: transparent;
+}
+
 .viewport-preview-shell--mobile {
   min-height: 100vh;
   padding: 64px 14px 20px;
   background: radial-gradient(circle at top, rgba(65, 85, 121, 0.28), rgba(4, 6, 10, 0.96) 45%);
+  overflow-x: hidden;
+}
+
+.viewport-preview-content--desktop {
+  width: 100%;
+  margin: 0;
+  min-height: 100vh;
 }
 
 .viewport-preview-content--mobile {
@@ -262,4 +274,12 @@ form > * + * {
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 18px 55px rgba(0, 0, 0, 0.44);
   overflow-x: hidden;
+}
+
+.viewport-preview-content--mobile-small {
+  width: min(375px, 100%);
+}
+
+.viewport-preview-content--mobile-large {
+  width: min(430px, 100%);
 }
