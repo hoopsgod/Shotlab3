@@ -1530,7 +1530,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 </div>
 {u.isCoach&&<div style={{height:28,background:`linear-gradient(90deg, ${alphaFromHex(coachPrimary,0.14)} 0%, transparent 100%)`,borderBottom:`1px solid ${alphaFromHex(coachSecondary,0.3)}`,display:"flex",alignItems:"center",padding:`0 var(--page-gutter)`,gap:"var(--space-2)"}}><WhistleIcon size={12} color={coachPrimary}/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:alphaFromHex(coachPrimary,0.84)}}>COACH VIEW — FULL ACCESS</span></div>}
 
-<div style={{flex:1,padding:isNarrow?"12px 12px 148px":"14px 16px 148px",overflowY:"auto",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
+<div style={{flex:1,padding:isNarrow?"12px 12px 90px":"14px 16px 90px",overflowY:"auto",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
   {/* Pull-to-refresh basketball */}
   {pullY>5&&<div style={{position:"absolute",top:-44,left:"50%",transform:"translateX(-50%)",textAlign:"center",opacity:Math.min(pullY/30,1)}}>
     <svg width="24" height="24" viewBox="0 0 40 40" fill="none" style={{animation:pullY>40?"bbBounce .5s ease infinite":"none"}}><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="2.5"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="1.5"/><path d="M20 3v34" stroke={ORANGE} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/></svg>
@@ -2901,7 +2901,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>
 {u.isCoach&&<div style={{height:28,background:`linear-gradient(90deg, ${alphaFromHex(coachAccent,0.18)} 0%, transparent 100%)`,borderBottom:`1px solid ${alphaFromHex(coachAccent,0.32)}`,display:"flex",alignItems:"center",padding:`0 var(--page-gutter)`,gap:"var(--space-2)"}}><WhistleIcon size={12} color={coachAccent}/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:alphaFromHex(coachAccent,0.84)}}>COACH VIEW — FULL ACCESS</span></div>}
 
-<div style={{flex:1,padding:`${showMiniHeader?"88px":"var(--space-4)"} var(--page-gutter) 110px`,overflowY:"auto",position:"relative",zIndex:1}}>
+  <div style={{flex:1,padding:`${showMiniHeader?"88px":"var(--space-4)"} var(--page-gutter) 90px`,overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}>
     <PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
@@ -3516,8 +3516,9 @@ const offset=event.key==="ArrowRight"?1:-1;
 const next=(index+offset+items.length)%items.length;
 onChange(items[next].k);
 };
-return <>{utilityControl&&<div className="utility-dock"><button type="button" className={`utility-dock-button ${utilityControl.active?"is-active":""}`} onClick={utilityControl.onClick} aria-label={utilityControl.label} aria-current={utilityControl.active?"page":undefined} title={utilityControl.label}><span className="utility-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg></span><span className="utility-label">{utilityControl.label}</span></button></div>}<nav className="bottom-nav" role="tablist" aria-label="Main navigation tabs" style={{"--nav-accent":navAccent,gridTemplateColumns:`repeat(${items.length}, minmax(0, 1fr))`}}>{items.map((t,index)=>{const a=active===t.k;
+return <>{utilityControl&&<div className="utility-dock"><button type="button" className={`utility-dock-button ${utilityControl.active?"is-active":""}`} onClick={utilityControl.onClick} aria-label={utilityControl.label} aria-current={utilityControl.active?"page":undefined} title={utilityControl.label}><span className="utility-icon" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg></span><span className="utility-label">{utilityControl.label}</span></button></div>}<div className="bottom-nav-wrap"><nav className="bottom-nav bottom-nav-pill" role="tablist" aria-label="Main navigation tabs" style={{"--nav-accent":navAccent,gridTemplateColumns:`repeat(${items.length}, minmax(0, 1fr))`}}>{items.map((t,index)=>{const a=active===t.k;
 return <button key={t.k} role="tab" type="button" aria-selected={a} aria-label={t.l} aria-current={a?"page":undefined} title={t.l} tabIndex={a?0:-1} className={`tab shared-nav-item ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} onKeyDown={event=>handleKeyNav(event,index)}>
-<div className="tab-icon" aria-hidden="true" style={{position:"relative",display:"flex",alignItems:"center",justifyContent:"center",width:22,height:22,lineHeight:0}}>{t.svg}</div>
-<div className="tab-label" style={{fontFamily:FB,fontSize:11,letterSpacing:"0.05em",textTransform:"uppercase",lineHeight:1,whiteSpace:"nowrap"}}>{t.l}</div>
-</button>})}</nav></>}
+<div className="tab-icon" aria-hidden="true">{t.svg}</div>
+<div className="tab-label" style={{fontFamily:FB}}>{t.l}</div>
+{a&&<span className="tab-pip" aria-hidden="true"/>}
+</button>})}</nav></div></>}
