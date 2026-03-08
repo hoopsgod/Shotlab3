@@ -786,7 +786,9 @@ const _BUTTON_SYSTEM_CSS=`:root{--lime:var(--accent);--btn-height:48px;--btn-hei
 .drill-row-arrow{width:44px;height:44px;border-radius:12px;background:var(--btn-secondary-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--btn-secondary-border);}
 @media (prefers-reduced-motion:reduce){.btn,.icon-btn-square,.drill-row-arrow,.cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{transition:none!important;transform:none!important;}}`
 
-const Styles=()=><><style>{_STYLES_CSS}</style><style>{_BUTTON_SYSTEM_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style><style>{_EMPTY_STATE_CSS}</style><style>{_LIST_ROW_SYSTEM_CSS}</style></>;
+const _TAB_BAR_REDESIGN_CSS=`.bottom-nav-wrap{position:fixed;bottom:0;left:0;right:0;z-index:200;display:flex;align-items:flex-start;justify-content:space-around;padding:10px 8px calc(12px + env(safe-area-inset-bottom));pointer-events:none;}.bottom-nav.bottom-nav-pill{width:100%;display:flex!important;align-items:flex-start;justify-content:space-around;background:rgba(13,14,19,.96)!important;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid rgba(255,255,255,.07);border-left:none!important;border-right:none!important;border-bottom:none!important;border-radius:0!important;box-shadow:none!important;padding:0!important;pointer-events:auto;}.bottom-nav.bottom-nav-pill .tab.shared-nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;flex:1;min-height:44px;min-width:44px;text-decoration:none;position:relative;border-radius:12px;padding:6px 4px 8px;transition:background .15s ease;cursor:pointer;-webkit-tap-highlight-color:transparent;background:transparent!important;}.bottom-nav.bottom-nav-pill .tab .tab-icon{width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.35)!important;transition:color .15s ease,transform .15s ease;}.bottom-nav.bottom-nav-pill .tab .tab-icon svg{width:22px;height:22px;stroke-width:1.75;opacity:1!important;}.bottom-nav.bottom-nav-pill .tab .tab-icon svg *{fill:none!important;stroke:currentColor!important;}.bottom-nav.bottom-nav-pill .tab .tab-label{display:block!important;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;letter-spacing:.02em;line-height:1.1;color:rgba(255,255,255,.3)!important;white-space:nowrap;transition:color .15s ease;text-transform:none;}.bottom-nav.bottom-nav-pill .tab .tab-pip{width:4px;height:4px;border-radius:50%;background:#FF5C1A;position:absolute;bottom:2px;left:50%;transform:translateX(-50%);}.bottom-nav.bottom-nav-pill .tab::after,.bottom-nav.bottom-nav-pill .tab::before{content:none!important;}.bottom-nav.bottom-nav-pill .tab.is-active .tab-icon,.bottom-nav.bottom-nav-pill .tab.active .tab-icon{color:#FF5C1A!important;transform:translateY(-1px);filter:none!important;}.bottom-nav.bottom-nav-pill .tab.is-active .tab-label,.bottom-nav.bottom-nav-pill .tab.active .tab-label{color:#FF5C1A!important;font-weight:600;}.bottom-nav.bottom-nav-pill .tab.is-active,.bottom-nav.bottom-nav-pill .tab.active{background:transparent!important;}@media (hover:hover) and (pointer:fine){.bottom-nav.bottom-nav-pill .tab:hover:not(.is-active):not(.active){background:rgba(255,255,255,.04)!important;}.bottom-nav.bottom-nav-pill .tab:hover:not(.is-active):not(.active) .tab-icon{color:rgba(255,255,255,.6)!important;}.bottom-nav.bottom-nav-pill .tab:hover:not(.is-active):not(.active) .tab-label{color:rgba(255,255,255,.5)!important;}}.page-content,.page{padding-bottom:calc(70px + env(safe-area-inset-bottom));}@media (max-width:360px){.bottom-nav.bottom-nav-pill .tab .tab-label{font-size:9px;}}`
+
+const Styles=()=><><style>{_STYLES_CSS}</style><style>{_BUTTON_SYSTEM_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style><style>{_EMPTY_STATE_CSS}</style><style>{_LIST_ROW_SYSTEM_CSS}</style><style>{_TAB_BAR_REDESIGN_CSS}</style></>;
 
 // ═══════════════════════════════════════
 // APP ROOT
@@ -1773,7 +1775,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} contextItems={contextItems}/></div>}
+  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} contextItems={contextItems} onOpenSettings={()=>switchTab("settings")}/></div>}
   {tab==="settings"&&<div className={slideClass} key="settings"><PlayerSettingsPage u={u} onDeleteAccount={deleteAccount} onResetPassword={onResetPassword}/></div>}
 </div>
 
@@ -1781,12 +1783,11 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {k:"home",l:"Home",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>},
   ...(u.isCoach
     ? [{k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>}] 
-    : [{k:"duels",l:"Challenges",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>,dot:pendingDuels>0?ORANGE:null}]),
+    : [{k:"duels",l:"Duels",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>,dot:pendingDuels>0?ORANGE:null}]),
   {k:"sc",l:"Strength",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>,dot:soonSC>0?VOLT:null},
   {k:"program",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
   {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
-  {k:"settings",l:"Settings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.09 14H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4H9a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>},
-]}
+  ]}
 active={tab}
 onChange={switchTab}
 utilityControl={!u.isCoach?{label:"Quick Menu",active:tab==="log-drill",onClick:()=>switchTab("log-drill")} : null}
@@ -2820,8 +2821,7 @@ const navItems=[
   {k:"events",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>},
   {k:"sc",l:"Strength",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>},
   {k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
-  {k:"settings",l:"Settings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 3.09 14H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 8.92 4H9a1.65 1.65 0 0 0 1-1.51V2a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>},
-];
+  ];
 const handleNavChange=(k)=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)};
 const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
 const [isNarrow,setIsNarrow]=useState(()=>typeof window!=="undefined"?window.innerWidth<768:false);
@@ -3320,7 +3320,7 @@ function ShotZoneHeatMap({shotLogs,userEmail}){
 // ═══════════════════════════════════════
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
-function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,contextItems=[]}){
+function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,contextItems=[],onOpenSettings}){
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const totalMakes=homeScores.reduce((a,s)=>a+s.score,0);
@@ -3459,6 +3459,8 @@ return <SectionContainer className="fade-up">
       <Sparkline data={d.last10} color={VOLT} w={200} h={20}/>
     </div>}
   </div>})}
+
+  <Card style={{marginTop:14}}><button type="button" onClick={onOpenSettings} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:"transparent",border:"none",padding:"2px 0",cursor:"pointer"}}><span style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,letterSpacing:"0.04em",textTransform:"uppercase"}}>Settings</span><span style={{fontFamily:FB,color:T.SUB,fontSize:12}}>Manage account →</span></button></Card>
 
 </SectionContainer>;
 }
