@@ -61,9 +61,9 @@ export const UI_TOKENS = {
   radii: {
     sm: 8,
     md: 14,
-    lg: 14,
-    xl: 14,
-    card: 14,
+    lg: 16,
+    xl: 20,
+    card: 16,
     pill: 999,
   },
   shadows: {

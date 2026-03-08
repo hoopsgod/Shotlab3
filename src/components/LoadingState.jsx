@@ -1,4 +1,4 @@
-import Card from "./Card";
+import { InsightCard } from "./cards/MobileCards";
 import UI_TOKENS from "../styles/tokens";
 
 const SHIMMER_STYLE = {
@@ -48,8 +48,6 @@ export default function LoadingState({
   );
 
   return (
-    <Card variant="empty" className={className}>
-      <div style={{ border: `1px solid ${UI_TOKENS.borders.subtle}`, borderRadius: 14, padding: 14, background: "rgba(11,18,32,0.6)" }}>{body}</div>
-    </Card>
+    <InsightCard className={className}>{body}</InsightCard>
   );
 }

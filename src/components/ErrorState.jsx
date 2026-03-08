@@ -1,4 +1,4 @@
-import Card from "./Card";
+import { InsightCard } from "./cards/MobileCards";
 import Button from "./ui/Button";
 import UI_TOKENS from "../styles/tokens";
 
@@ -12,7 +12,7 @@ export default function ErrorState({
   className,
 }) {
   return (
-    <Card variant="empty" className={className}>
+    <InsightCard className={className}>
       <div
         style={{
           border: `1px solid ${UI_TOKENS.colors.danger}55`,
@@ -29,6 +29,6 @@ export default function ErrorState({
           {secondaryLabel && onSecondaryAction ? <Button variant="tertiary" onClick={onSecondaryAction}>{secondaryLabel}</Button> : null}
         </div>
       </div>
-    </Card>
+    </InsightCard>
   );
 }

@@ -2,14 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import UI_TOKENS from "../styles/tokens";
 import LoadingState from "./LoadingState";
 import ErrorState from "./ErrorState";
+import { InsightCard } from "./cards/MobileCards";
 
-const CHART_CARD_STYLE = {
-  background: UI_TOKENS.colors.bgCard,
-  border: `1px solid ${UI_TOKENS.borders.subtle}`,
-  borderRadius: UI_TOKENS.radii.card,
-  padding: UI_TOKENS.spacing.md,
-  boxShadow: UI_TOKENS.shadows.card,
-};
 
 const FILTERS = [
   { id: "week", label: "Week", days: 7 },
@@ -272,7 +266,7 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
       </div>
 
       {progress.drillRows.map((drill) => (
-        <div key={drill.drillId} style={{ ...CHART_CARD_STYLE, marginBottom: 10 }}>
+        <InsightCard key={drill.drillId} style={{ marginBottom: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 8 }}>
             <div>
               <div style={{ color: UI_TOKENS.colors.textPrimary, fontSize: 12, fontWeight: 700 }}>{drill.name}</div>
@@ -286,11 +280,11 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
             </div>
           </div>
           <LineChart data={{ labels: drill.labels, values: drill.values }} yAxisLabel={drill.yAxisLabel} />
-        </div>
+        </InsightCard>
       ))}
 
       {progress.recommendations.length > 0 ? (
-        <div style={{ ...CHART_CARD_STYLE, borderColor: `${UI_TOKENS.colors.state.warning}66` }}>
+        <InsightCard style={{ borderColor: `${UI_TOKENS.colors.state.warning}66` }}>
           <div style={{ color: UI_TOKENS.colors.state.warning, fontSize: 11, fontWeight: 700, marginBottom: 8, letterSpacing: "0.06em" }}>
             PERSONALIZED RECOMMENDATIONS
           </div>
@@ -299,7 +293,7 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
               <li key={item}>{item}</li>
             ))}
           </ul>
-        </div>
+        </InsightCard>
       ) : null}
 
       {showHelp ? (
@@ -318,11 +312,10 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
             padding: 16,
           }}
         >
-          <div
+          <InsightCard
             onClick={(event) => event.stopPropagation()}
             style={{
               width: "min(520px, 100%)",
-              ...CHART_CARD_STYLE,
               background: UI_TOKENS.colors.bg.elevated,
             }}
           >
@@ -348,7 +341,7 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
             >
               Close
             </button>
-          </div>
+          </InsightCard>
         </div>
       ) : null}
     </section>

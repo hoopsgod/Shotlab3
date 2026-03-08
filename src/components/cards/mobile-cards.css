@@ -1,0 +1,115 @@
+.mobile-card {
+  --mobile-card-gap: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--mobile-card-gap);
+  border: 1px solid var(--border-1);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-1);
+}
+
+.mobile-card__header,
+.mobile-card__footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mobile-card__header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.mobile-card__kicker,
+.mobile-card__helper,
+.mobile-card__list-subtitle,
+.mobile-card__metric-delta {
+  color: var(--text-2);
+  font-size: 0.72rem;
+}
+
+.mobile-card__kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-3);
+  font-weight: 700;
+}
+
+.mobile-card__list-title,
+.mobile-card__metric-value,
+.mobile-card__empty-title {
+  color: var(--text-1);
+  font-weight: 700;
+}
+
+.mobile-card__metric-value {
+  font-size: 1.3rem;
+  line-height: 1.1;
+}
+
+.mobile-card__list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.mobile-card__list-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mobile-card__list-trailing,
+.mobile-card__list-leading {
+  flex-shrink: 0;
+}
+
+.mobile-card__media-frame {
+  position: relative;
+  min-height: 208px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border-2);
+  background: rgba(10, 15, 25, 0.82);
+}
+
+.mobile-card--hero {
+  background: var(--surface-2);
+}
+
+.mobile-card--emptyState {
+  text-align: center;
+}
+
+.mobile-card__empty-icon {
+  width: 86px;
+  height: 86px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.mobile-card__empty-title {
+  margin: 0;
+  font-size: 1.04rem;
+}
+
+.mobile-card__empty-description {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 0.87rem;
+  line-height: 1.45;
+}
+
+.mobile-card__empty-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--control-gap);
+}

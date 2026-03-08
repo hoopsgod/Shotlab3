@@ -56,7 +56,7 @@ Implementation plan (small-scope motion pass):
   --page-gutter: max(var(--space-4), env(safe-area-inset-left));
   --section-gap: var(--space-8);
   --card-pad-compact: var(--space-4);
-  --card-pad-standard: var(--space-5);
+  --card-pad-standard: var(--space-4);
   --card-pad: var(--card-pad-standard);
   --control-gap-tight: var(--space-3);
   --control-gap: var(--space-4);
@@ -64,8 +64,8 @@ Implementation plan (small-scope motion pass):
 
   --radius-sm: 8px;
   --radius-md: 14px;
-  --radius-lg: 14px;
-  --radius-xl: 14px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-pill: 999px;
 
   --shadow-soft: 0 6px 18px rgba(6, 11, 19, 0.28);

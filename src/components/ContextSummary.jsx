@@ -1,22 +1,14 @@
-import Card from "./Card";
+import { InsightCard } from "./cards/MobileCards";
 
 export default function ContextSummary({ title = "Training context", items = [], style }) {
   if (!items.length) return null;
 
   return (
-    <Card style={{ marginBottom: "var(--space-4)", ...style }}>
-      <div
-        style={{
-          fontSize: 10,
-          letterSpacing: "0.08em",
-          textTransform: "uppercase",
-          color: "var(--text-3)",
-          fontWeight: 700,
-          marginBottom: "var(--space-3)",
-        }}
-      >
-        {title}
-      </div>
+    <InsightCard
+      style={{ marginBottom: "var(--space-4)", ...style }}
+      title={title}
+      subtitle={null}
+    >
       <div style={{ display: "flex", flexWrap: "wrap", gap: "var(--control-gap-tight)" }}>
         {items.map((item) => (
           <div
@@ -38,6 +30,6 @@ export default function ContextSummary({ title = "Training context", items = [],
           </div>
         ))}
       </div>
-    </Card>
+    </InsightCard>
   );
 }

@@ -5,6 +5,7 @@ import './index.css'
 import './styles/design-system.css'
 import './styles/typography-spacing.css'
 import './styles/premium-mobile.css'
+import './components/cards/mobile-cards.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

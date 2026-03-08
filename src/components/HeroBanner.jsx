@@ -1,6 +1,6 @@
 import UI_TOKENS from "../styles/tokens";
+import { HeroCard } from "./cards/MobileCards";
 
-const HERO_RADIUS = 16;
 const HERO_BUTTON_RADIUS = 12;
 
 function HeroBanner({
@@ -12,14 +12,10 @@ function HeroBanner({
   onAction,
 }) {
   return (
-    <section
+    <HeroCard
       style={{
-        background: "var(--surface-2)",
-        border: `1px solid ${accent}66`,
-        borderRadius: HERO_RADIUS,
-        padding: "var(--card-pad-standard) var(--card-pad-compact)",
+        borderColor: `${accent}66`,
         marginBottom: "var(--space-5)",
-        boxShadow: "var(--shadow-1)",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--control-gap-tight)" }}>
@@ -93,7 +89,7 @@ function HeroBanner({
           </button>
         ) : null}
       </div>
-    </section>
+    </HeroCard>
   );
 }
 

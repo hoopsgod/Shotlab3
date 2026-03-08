@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import Button from "../components/ui/Button";
+import { EmptyStateCard, HeroCard, ListItemCard, MetricCard } from "../components/cards/MobileCards";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -152,100 +153,54 @@ export default function PlayersScreen() {
         ))}
       </div>
 
-      <div
-        style={{
-          background: "var(--surface-1)",
-          border: "1px solid var(--stroke-1)",
-          borderRadius: "var(--radius-lg)",
-          padding: "var(--space-4)",
-          marginBottom: "var(--space-4)",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Total</span>
-        </div>
-        <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Active</span>
-        </div>
-        <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Inactive</span>
-        </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "var(--space-2)", marginBottom: "var(--space-4)" }}>
+        <MetricCard title="Total" value={totalPlayers} style={{ alignItems: "center", textAlign: "center" }} />
+        <MetricCard title="Active" value={activePlayers} style={{ alignItems: "center", textAlign: "center" }} />
+        <MetricCard title="Inactive" value={inactivePlayers} style={{ alignItems: "center", textAlign: "center" }} />
       </div>
 
       {players.length === 0 ? (
-        <div
-          style={{
-            minHeight: "280px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "var(--space-4)",
-          }}
-        >
-          <Users size={48} color="#555555" />
-          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
-            No players yet
-          </p>
-          <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
-            Invite players to join your program and begin tracking progress
-          </p>
-          <Button variant="primary" aria-label="Invite players to roster">
-            Invite players
-          </Button>
-        </div>
+        <EmptyStateCard
+          style={{ minHeight: "280px", justifyContent: "center", marginBottom: "var(--space-3)" }}
+          icon={<Users size={48} color="#555555" />}
+          title="No players yet"
+          description="Invite players to join your program and begin tracking progress"
+          actions={<Button variant="primary" aria-label="Invite players to roster">Invite players</Button>}
+        />
       ) : (
         filteredPlayers.map((player) => (
-          <div
+          <ListItemCard
             key={player.id}
+            as="div"
             className="interactive-card"
             role="button"
             tabIndex={0}
             aria-label={`${player.name} status ${player.active ? "active" : "inactive"}`}
-            style={{
-              background: "var(--surface-2)",
-              border: "1px solid rgba(167, 187, 211, 0.34)",
-              borderRadius: "16px",
-              padding: "var(--space-4)",
-              marginBottom: "var(--space-3)",
-              display: "flex",
-              alignItems: "center",
-              gap: "var(--space-3)",
-              cursor: "pointer",
-            }}
-          >
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                background: "var(--surface-1)",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "16px",
-                fontWeight: 700,
-                color: "var(--text-1)",
-                border: player.active ? "2px solid rgba(91, 243, 255, 0.44)" : "2px solid rgba(167, 187, 211, 0.36)",
-              }}
-            >
-              {player.name?.[0] || "?"}
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: "var(--space-2)" }}>
-                {player.name}
+            variant="primary"
+            style={{ marginBottom: "var(--space-3)", cursor: "pointer" }}
+            leading={(
+              <div
+                style={{
+                  width: "44px",
+                  height: "44px",
+                  background: "var(--surface-1)",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "16px",
+                  fontWeight: 700,
+                  color: "var(--text-1)",
+                  border: player.active ? "2px solid rgba(91, 243, 255, 0.44)" : "2px solid rgba(167, 187, 211, 0.36)",
+                }}
+              >
+                {player.name?.[0] || "?"}
               </div>
-              <StatusBadge active={player.active} />
-            </div>
-            <ChevronRight size={16} color="var(--text-3)" />
-          </div>
+            )}
+            title={player.name}
+            subtitle={<StatusBadge active={player.active} />}
+            trailing={<ChevronRight size={16} color="var(--text-3)" />}
+          />
         ))
       )}
 
@@ -262,16 +217,11 @@ export default function PlayersScreen() {
       >
         Roster growth
       </p>
-      <div
+      <HeroCard
         style={{
-          background: "var(--surface-2)",
-          border: "1px solid var(--stroke-1)",
-          borderRadius: "16px",
-          padding: "var(--space-4)",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: "var(--space-3)",
         }}
       >
         <UserPlus size={32} color="var(--text-2)" />
@@ -285,7 +235,7 @@ export default function PlayersScreen() {
           Share invite link
         </Button>
         {copied && <p style={{ fontSize: "12px", color: "var(--text-2)", margin: 0 }}>Link copied</p>}
-      </div>
+      </HeroCard>
     </div>
   );
 }
