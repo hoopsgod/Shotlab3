@@ -2648,6 +2648,7 @@ const navItems=[
 ];
 const handleNavChange=(k)=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)};
 const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
+const [isNarrow,setIsNarrow]=useState(()=>typeof window!=="undefined"?window.innerWidth<768:false);
 const [showMiniHeader,setShowMiniHeader]=useState(false);
 const heroRef=useRef(null);
 const isOverviewTab=tab==="feed";
@@ -2656,7 +2657,10 @@ const isCoachTab=u.isCoach&&coachTabs.includes(tab);
 const showFullCommandCenter=isCoachTab&&tab==="feed";
 
 useEffect(()=>{
-  const onResize=()=>setIsDesktop(window.innerWidth>=1024);
+  const onResize=()=>{
+    setIsDesktop(window.innerWidth>=1024);
+    setIsNarrow(window.innerWidth<768);
+  };
   onResize();
   window.addEventListener("resize",onResize);
   return()=>window.removeEventListener("resize",onResize);
