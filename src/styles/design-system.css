@@ -513,10 +513,78 @@ a,
   border-color: rgba(163, 190, 230, 0.32);
 }
 
+
+
+:root {
+  --motion-duration-instant: 90ms;
+  --motion-duration-fast: 140ms;
+  --motion-duration-medium: 220ms;
+  --motion-duration-slow: 320ms;
+  --motion-ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --motion-ease-emphasized: cubic-bezier(0.2, 0.9, 0.22, 1);
+  --motion-ease-press: cubic-bezier(0.22, 0.78, 0.32, 1);
+}
+
+.motion-screen {
+  animation: motionScreenIn var(--motion-duration-medium) var(--motion-ease-emphasized) both;
+}
+
+.motion-toast {
+  animation: motionToastIn var(--motion-duration-medium) var(--motion-ease-emphasized) both;
+}
+
+.motion-success {
+  animation: motionSuccessPop var(--motion-duration-fast) var(--motion-ease-press) both;
+}
+
+.motion-expand {
+  transform-origin: top center;
+  animation: motionExpandIn var(--motion-duration-medium) var(--motion-ease-standard) both;
+}
+
+.skeleton-card {
+  overflow: hidden;
+}
+
+.skeleton-line {
+  background-image: linear-gradient(100deg, rgba(255,255,255,0.03) 22%, rgba(255,255,255,0.12) 48%, rgba(255,255,255,0.03) 72%);
+  background-size: 220% 100%;
+  animation: motionShimmer 1.2s linear infinite;
+}
+
+@keyframes motionScreenIn {
+  from { opacity: 0; transform: translateY(10px) scale(0.996); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes motionToastIn {
+  from { opacity: 0; transform: translate(-50%, 8px) scale(0.98); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+@keyframes motionSuccessPop {
+  from { opacity: 0.82; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes motionExpandIn {
+  from { opacity: 0; transform: translateY(-4px) scaleY(0.985); }
+  to { opacity: 1; transform: translateY(0) scaleY(1); }
+}
+
+@keyframes motionShimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
 @media (prefers-reduced-motion: reduce) {
   .btn,
   .shared-card,
-  .interactive-card {
+  .interactive-card,
+  .motion-screen,
+  .motion-toast,
+  .motion-success,
+  .motion-expand,
+  .skeleton-line {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }

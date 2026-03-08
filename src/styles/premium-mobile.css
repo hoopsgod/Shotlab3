@@ -263,10 +263,82 @@ select {
 }
 
 
+
+
+/* Premium micro-interactions: subtle, tactile, intentional */
+.btn,
+.btn-v,
+.pageHeaderPill,
+.emptyState__primary,
+.cta-primary {
+  transition: transform var(--motion-duration-fast, 140ms) var(--motion-ease-press, ease),
+    filter var(--motion-duration-fast, 140ms) var(--motion-ease-standard, ease),
+    background-color var(--motion-duration-medium, 220ms) var(--motion-ease-standard, ease),
+    box-shadow var(--motion-duration-medium, 220ms) var(--motion-ease-standard, ease);
+}
+
+.btn:active,
+.btn-v:active,
+.pageHeaderPill:active,
+.emptyState__primary:active,
+.cta-primary:active {
+  transform: translateY(1px) scale(0.985);
+  filter: brightness(0.98);
+}
+
+.shared-card:is(button, a, [role="button"]):active,
+.interactive-card:active,
+.shared-nav-item:active {
+  transform: translateY(1px) scale(0.992);
+}
+
+.pageShell,
+.fade-up,
+.screen-fade-in {
+  animation: motionScreenIn var(--motion-duration-medium, 220ms) var(--motion-ease-emphasized, ease) both;
+  will-change: transform, opacity;
+}
+
+.tab.shared-nav-item {
+  transition: transform var(--motion-duration-fast, 140ms) var(--motion-ease-press, ease),
+    color var(--motion-duration-fast, 140ms) var(--motion-ease-standard, ease),
+    background-color var(--motion-duration-fast, 140ms) var(--motion-ease-standard, ease),
+    opacity var(--motion-duration-fast, 140ms) var(--motion-ease-standard, ease),
+    box-shadow var(--motion-duration-fast, 140ms) var(--motion-ease-standard, ease);
+}
+
+.bottom-nav {
+  transition: transform var(--motion-duration-medium, 220ms) var(--motion-ease-emphasized, ease),
+    box-shadow var(--motion-duration-medium, 220ms) var(--motion-ease-standard, ease);
+}
+
+.bottom-nav:active {
+  transform: translateY(1px);
+}
+
+.coach-tools-panel,
+.coach-tools-content,
+.coach-tools-content.is-open {
+  transition-timing-function: cubic-bezier(0.22, 0.88, 0.28, 1);
+}
+
+.motion-sheet {
+  animation: motionSheetIn var(--motion-duration-medium, 220ms) cubic-bezier(0.2, 0.9, 0.24, 1) both;
+  transform-origin: bottom center;
+}
+
+@keyframes motionSheetIn {
+  from { opacity: 0; transform: translateY(14px) scale(0.995); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 @media (prefers-reduced-motion: reduce) {
   .tab.shared-nav-item,
   .tab.shared-nav-item .tab-icon,
-  .tab.shared-nav-item .tab-label {
+  .tab.shared-nav-item .tab-label,
+  .pageShell,
+  .fade-up,
+  .screen-fade-in,
+  .motion-sheet {
     transition-duration: 0.01ms !important;
   }
 

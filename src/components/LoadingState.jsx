@@ -1,14 +1,14 @@
 import Card from "./Card";
 import UI_TOKENS from "../styles/tokens";
 
-const SHIMMER_STYLE = {
-  backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.03) 100%)",
-  backgroundSize: "200% 100%",
-  animation: "shimmer 1.4s linear infinite",
-};
-
 function SkeletonLine({ width = "100%", height = 10, radius = 999 }) {
-  return <div style={{ ...SHIMMER_STYLE, width, height, borderRadius: radius }} />;
+  return (
+    <div
+      className="skeleton-line"
+      style={{ width, height, borderRadius: radius }}
+      aria-hidden="true"
+    />
+  );
 }
 
 export default function LoadingState({
@@ -48,7 +48,7 @@ export default function LoadingState({
   );
 
   return (
-    <Card variant="empty" className={className}>
+    <Card variant="empty" className={`skeleton-card ${className || ""}`.trim()}>
       <div style={{ border: `1px solid ${UI_TOKENS.borders.subtle}`, borderRadius: 14, padding: 14, background: "rgba(11,18,32,0.6)" }}>{body}</div>
     </Card>
   );

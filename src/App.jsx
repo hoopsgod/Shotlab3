@@ -745,7 +745,21 @@ const _BUTTON_SYSTEM_CSS=`:root{--lime:var(--accent);--btn-height:48px;--btn-hei
 .drill-row-arrow{width:44px;height:44px;border-radius:12px;background:var(--btn-secondary-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--btn-secondary-border);}
 @media (prefers-reduced-motion:reduce){.btn,.icon-btn-square,.drill-row-arrow,.cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{transition:none!important;transform:none!important;}}`
 
-const Styles=()=><><style>{_STYLES_CSS}</style><style>{_BUTTON_SYSTEM_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style><style>{_EMPTY_STATE_CSS}</style><style>{_LIST_ROW_SYSTEM_CSS}</style></>;
+const _MOTION_POLISH_CSS=`
+.motion-screen,.pageShell,.fade-up,.screen-fade-in{animation:motionScreenIn 220ms cubic-bezier(.2,.88,.24,1) both;will-change:transform,opacity;}
+.motion-toast{animation:motionToastIn 200ms cubic-bezier(.2,.88,.24,1) both;}
+.motion-success{animation:motionSuccessPop 140ms cubic-bezier(.22,.78,.32,1) both;}
+.motion-expand{transform-origin:top center;animation:motionExpandIn 200ms cubic-bezier(.2,.8,.2,1) both;}
+.motion-sheet{transform-origin:bottom center;animation:motionSheetIn 240ms cubic-bezier(.2,.9,.24,1) both;}
+@keyframes motionScreenIn{from{opacity:0;transform:translateY(10px) scale(.996)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes motionToastIn{from{opacity:0;transform:translate(-50%,8px) scale(.98)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+@keyframes motionSuccessPop{from{opacity:.82;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
+@keyframes motionExpandIn{from{opacity:0;transform:translateY(-4px) scaleY(.985)}to{opacity:1;transform:translateY(0) scaleY(1)}}
+@keyframes motionSheetIn{from{opacity:0;transform:translateY(14px) scale(.995)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.motion-screen,.motion-toast,.motion-success,.motion-expand,.motion-sheet,.pageShell,.fade-up,.screen-fade-in{animation:none!important;transition:none!important;}}
+`;
+
+const Styles=()=><><style>{_STYLES_CSS}</style><style>{_BUTTON_SYSTEM_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style><style>{_EMPTY_STATE_CSS}</style><style>{_LIST_ROW_SYSTEM_CSS}</style><style>{_MOTION_POLISH_CSS}</style></>;
 
 // ═══════════════════════════════════════
 // APP ROOT
@@ -1391,7 +1405,7 @@ const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else s
 
 return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
 <BrandBackdrop/>
-{shotSaved&&<div role="status" aria-live="polite" style={{position:"fixed",left:"50%",bottom:110,transform:"translateX(-50%)",zIndex:40,background:VOLT,color:BG,padding:"10px 14px",borderRadius:999,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:1.2,boxShadow:"0 10px 28px rgba(0,0,0,0.35)"}}>Shots logged successfully</div>}
+{shotSaved&&<div className="motion-toast motion-success" role="status" aria-live="polite" style={{position:"fixed",left:"50%",bottom:110,transform:"translateX(-50%)",zIndex:40,background:VOLT,color:BG,padding:"10px 14px",borderRadius:999,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:1.2,boxShadow:"0 10px 28px rgba(0,0,0,0.35)"}}>Shots logged successfully</div>}
 {teamBranding.showWatermark&&tab==="home"?<TeamWatermark logoUrl={teamBranding.logoUrl} primaryColor={teamBranding.primaryColor} opacity={0.06} size={260}/>:null}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
@@ -2916,7 +2930,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Event Management" s={`${events.length} total`} identity/>
     <button onClick={()=>setShowAdd(!showAdd)} className="btn-v cta-primary" style={{marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
-    {showAdd&&<div className="fade-up accent-card" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
+    {showAdd&&<div className="fade-up accent-card motion-sheet" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
       <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="e.g. OPEN GYM RUN"/>
       <div style={{display:"flex",gap:8}}><div style={{flex:1}}><FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} ph="2026-03-15" tp="date"/></div><div style={{flex:1}}><FF l="TIME" v={ne.time} set={v=>setNe({...ne,time:v})} ph="6:00 PM"/></div></div>
       <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym"/><FF l="DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ph="Details..." ta/>
@@ -2931,7 +2945,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <span className="eventsDatePill">{new Date(`${ev.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"})}</span><EventIcon type={ev.type} size={22} color={ev.date>=today?CYAN:MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{ev.date} &#183; {ev.time} &#183; <span style={{color:VOLT}}>{evR.length} RSVP</span></div></div>
           <svg width="12" height="12" viewBox="0 0 16 16" style={{transform:isExp?"rotate(90deg)":"none",transition:"transform .2s",flexShrink:0}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
         </button>
-        {isExp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 14px 14px",padding:"16px 16px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
+        {isExp&&<div className="fade-up motion-expand" style={{background:SURFACE,borderRadius:"0 0 14px 14px",padding:"16px 16px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
           <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:12}}>{ev.desc}</p>
           <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>ATTENDEES ({evR.length})</div>
           {evR.length===0&&<p style={{fontFamily:FB,color:T.SUB,fontSize:11,marginBottom:10}}>No attendees yet</p>}
@@ -3066,7 +3080,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         <label style={{fontFamily:FB,color:T.SUB,fontSize:10,textTransform:"uppercase"}}>Header accent<select value={brandingDraft.headerAccentStyle} onChange={e=>applyBrandingDraft({headerAccentStyle:e.target.value})} style={{width:"100%",marginTop:6,padding:8,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8}}><option value="underline">Underline</option><option value="side-stripe">Side stripe</option><option value="top-glow">Top glow bar</option></select></label>
       </div>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginTop:14}}><div style={{display:"flex",gap:8,alignItems:"center"}}><span style={{width:14,height:14,borderRadius:"50%",background:sanitizeHexColor(brandingDraft.primaryColor,DEFAULT_TEAM_BRANDING.primaryColor)}}/><span style={{width:14,height:14,borderRadius:"50%",background:sanitizeHexColor(brandingDraft.secondaryColor,DEFAULT_TEAM_BRANDING.secondaryColor)}}/></div><button className="btn btn-primary btn-v" onClick={saveBranding} style={{marginBottom:0}}>Save team branding</button></div>
-      {brandingWarnings.length>0&&<div style={{marginTop:10,padding:"8px 10px",borderRadius:10,border:`1px solid ${alphaFromHex("#FFA500",0.45)}`,background:alphaFromHex("#FFA500",0.1)}}>{brandingWarnings.map(w=><div key={w} style={{fontFamily:FB,color:"#FFD79A",fontSize:10,lineHeight:1.4}}>⚠ {w}</div>)}</div>}{brandingMsg&&<div style={{fontFamily:FB,color:brandingMsg.includes("saved")?"#9CE77B":"#FF4545",fontSize:10,marginTop:8}}>{brandingMsg}</div>}
+      {brandingWarnings.length>0&&<div style={{marginTop:10,padding:"8px 10px",borderRadius:10,border:`1px solid ${alphaFromHex("#FFA500",0.45)}`,background:alphaFromHex("#FFA500",0.1)}}>{brandingWarnings.map(w=><div key={w} style={{fontFamily:FB,color:"#FFD79A",fontSize:10,lineHeight:1.4}}>⚠ {w}</div>)}</div>}{brandingMsg&&<div className={brandingMsg.includes("saved")?"motion-success":""} style={{fontFamily:FB,color:brandingMsg.includes("saved")?"#9CE77B":"#FF4545",fontSize:10,marginTop:8}}>{brandingMsg}</div>}
     </div>
     <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#FF4545",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
   </div>}
