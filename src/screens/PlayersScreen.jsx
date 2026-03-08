@@ -104,8 +104,8 @@ export default function PlayersScreen() {
     textTransform: "none",
     letterSpacing: "0.08em",
     cursor: "pointer",
-    border: isActive ? "1px solid rgba(91, 243, 255, 0.34)" : "1px solid var(--stroke-1)",
-    background: isActive ? "rgba(91, 243, 255, 0.18)" : "var(--surface-1)",
+    border: isActive ? "1px solid var(--border-2)" : "1px solid var(--stroke-1)",
+    background: isActive ? "var(--accent-soft)" : "var(--surface-1)",
     color: isActive ? "var(--text-1)" : "var(--text-3)",
     fontWeight: isActive ? 700 : 500,
   });
@@ -212,7 +212,7 @@ export default function PlayersScreen() {
             style={{
               background: "var(--surface-2)",
               border: "1px solid rgba(167, 187, 211, 0.34)",
-              borderRadius: "16px",
+              borderRadius: "var(--radius-card)",
               padding: "var(--space-5)",
               marginBottom: "var(--space-4)",
               display: "flex",
@@ -233,7 +233,7 @@ export default function PlayersScreen() {
                 fontSize: "16px",
                 fontWeight: 700,
                 color: "var(--text-1)",
-                border: player.active ? "2px solid rgba(91, 243, 255, 0.44)" : "2px solid rgba(167, 187, 211, 0.36)",
+                border: player.active ? "2px solid rgba(116, 147, 200, 0.52)" : "2px solid rgba(167, 187, 211, 0.3)",
               }}
             >
               {player.name?.[0] || "?"}
@@ -266,7 +266,7 @@ export default function PlayersScreen() {
         style={{
           background: "var(--surface-2)",
           border: "1px solid var(--stroke-1)",
-          borderRadius: "16px",
+          borderRadius: "var(--radius-card)",
           padding: "var(--space-5)",
           display: "flex",
           flexDirection: "column",

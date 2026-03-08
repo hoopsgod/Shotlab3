@@ -3,14 +3,6 @@ import UI_TOKENS from "../styles/tokens";
 import LoadingState from "./LoadingState";
 import ErrorState from "./ErrorState";
 
-const CHART_CARD_STYLE = {
-  background: UI_TOKENS.colors.bgCard,
-  border: `1px solid ${UI_TOKENS.borders.subtle}`,
-  borderRadius: UI_TOKENS.radii.card,
-  padding: UI_TOKENS.spacing.md,
-  boxShadow: UI_TOKENS.shadows.card,
-};
-
 const FILTERS = [
   { id: "week", label: "Week", days: 7 },
   { id: "month", label: "Month", days: 30 },
@@ -79,43 +71,27 @@ function LineChart({ data, yAxisLabel, color = UI_TOKENS.colors.action.primary }
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="200" role="img" aria-label={`${yAxisLabel} line chart`}>
-      <text
-        x="14"
-        y={height / 2}
-        fill={UI_TOKENS.colors.textMuted}
-        fontSize="9"
-        transform={`rotate(-90,14,${height / 2})`}
-        style={{ letterSpacing: "0.06em", textTransform: "uppercase" }}
-      >
+      <text x="14" y={height / 2} fill={UI_TOKENS.colors.textMuted} fontSize="9" transform={`rotate(-90,14,${height / 2})`} style={{ letterSpacing: "0.06em", textTransform: "uppercase" }}>
         {yAxisLabel}
       </text>
-
       {yTicks.map((tick) => {
         const y = height - bottomPad - (tick / max) * (height - topPad - bottomPad);
         return (
           <g key={tick}>
-            <line x1={leftPad} y1={y} x2={width - rightPad} y2={y} stroke="rgba(199,210,226,0.22)" />
-            <text x={leftPad - 6} y={y + 3} textAnchor="end" fill={UI_TOKENS.colors.textMuted} fontSize="9">
-              {tick}
-            </text>
+            <line x1={leftPad} y1={y} x2={width - rightPad} y2={y} stroke="rgba(199,210,226,0.2)" />
+            <text x={leftPad - 6} y={y + 3} textAnchor="end" fill={UI_TOKENS.colors.textMuted} fontSize="9">{tick}</text>
           </g>
         );
       })}
-
-      <polyline fill="none" stroke={color} strokeWidth="3" points={points} />
-
+      <polyline fill="none" stroke={color} strokeWidth="2.4" points={points} />
       {data.values.map((v, i) => {
         const x = leftPad + (i / Math.max(1, data.values.length - 1)) * (width - leftPad - rightPad);
         const y = height - bottomPad - (v / max) * (height - topPad - bottomPad);
         const isEdge = i === 0 || i === data.values.length - 1;
         return (
           <g key={`${v}-${i}`}>
-            <circle cx={x} cy={y} r="3.2" fill={color} />
-            {isEdge ? (
-              <text x={x} y={height - 8} fill={UI_TOKENS.colors.textMuted} fontSize="9" textAnchor={i === 0 ? "start" : "end"}>
-                {data.labels[i]}
-              </text>
-            ) : null}
+            <circle cx={x} cy={y} r="3" fill={color} />
+            {isEdge ? <text x={x} y={height - 8} fill={UI_TOKENS.colors.textMuted} fontSize="9" textAnchor={i === 0 ? "start" : "end"}>{data.labels[i]}</text> : null}
           </g>
         );
       })}
@@ -127,7 +103,6 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
   const [range, setRange] = useState("week");
   const [showHelp, setShowHelp] = useState(false);
   const activeFilter = FILTERS.find((f) => f.id === range) || FILTERS[0];
-
   const [chartsLoading, setChartsLoading] = useState(true);
 
   useEffect(() => {
@@ -145,7 +120,6 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
   const progress = useMemo(() => {
     const buckets = buildDailyBuckets(activeFilter.days);
     const bucketSet = new Set(buckets.map((b) => b.key));
-
     const byDrill = new Map();
 
     scores.forEach((row) => {
@@ -153,13 +127,9 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
       if (!date) return;
       const key = date.toISOString().slice(0, 10);
       if (!bucketSet.has(key)) return;
-      if (!byDrill.has(row.drillId)) {
-        byDrill.set(row.drillId, { mine: [], team: [] });
-      }
+      if (!byDrill.has(row.drillId)) byDrill.set(row.drillId, { mine: [], team: [] });
       const bin = byDrill.get(row.drillId);
-      if (row.email === userEmail) {
-        bin.mine.push({ ...row, key });
-      }
+      if (row.email === userEmail) bin.mine.push({ ...row, key });
       bin.team.push({ ...row, key });
     });
 
@@ -181,20 +151,12 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
         });
 
         const personalBest = rows.mine.reduce((max, item) => Math.max(max, item.score || 0), 0);
-        const myAvg = rows.mine.length
-          ? Math.round((rows.mine.reduce((a, item) => a + (item.score || 0), 0) / rows.mine.length) * 10) / 10
-          : 0;
-        const teamAvg = rows.team.length
-          ? Math.round((rows.team.reduce((a, item) => a + (item.score || 0), 0) / rows.team.length) * 10) / 10
-          : 0;
-
-        const trend = calcTrend(dailyAverages.filter((v) => v > 0));
-        const drill = drillLookup.get(drillId);
+        const myAvg = rows.mine.length ? Math.round((rows.mine.reduce((a, item) => a + (item.score || 0), 0) / rows.mine.length) * 10) / 10 : 0;
+        const teamAvg = rows.team.length ? Math.round((rows.team.reduce((a, item) => a + (item.score || 0), 0) / rows.team.length) * 10) / 10 : 0;
 
         return {
           drillId,
-          name: drill?.name || `Drill ${drillId}`,
-          max: drill?.max || Math.max(10, personalBest),
+          name: drillLookup.get(drillId)?.name || `Drill ${drillId}`,
           logs: rows.mine.length,
           personalBest,
           myAvg,
@@ -202,7 +164,7 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
           yAxisLabel: "makes per session",
           labels: buckets.map((b) => b.label),
           values: dailyAverages,
-          trend,
+          trend: calcTrend(dailyAverages.filter((v) => v > 0)),
         };
       })
       .filter(Boolean)
@@ -216,73 +178,36 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
     return { drillRows, recommendations };
   }, [activeFilter.days, scores, userEmail, drillLookup]);
 
-  if (errorMessage) {
-    return <ErrorState title="Progress charts unavailable" description={errorMessage} onRetry={onRetry} className="progressChartsState" />;
-  }
-
-  if (chartsLoading) {
-    return <LoadingState variant="chart" title="Building charts" description="Crunching your latest drill history and trend metrics." className="progressChartsState" />;
-  }
-
+  if (errorMessage) return <ErrorState title="Progress charts unavailable" description={errorMessage} onRetry={onRetry} className="progressChartsState" />;
+  if (chartsLoading) return <LoadingState variant="chart" title="Building charts" description="Crunching your latest drill history and trend metrics." className="progressChartsState" />;
   if (!progress.drillRows.length) return null;
 
   return (
-    <section style={{ marginBottom: 18 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 10 }}>
-        <div style={{ color: UI_TOKENS.colors.textPrimary, fontSize: 12, letterSpacing: "0.08em" }}>PROGRESS OVER TIME</div>
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+    <section className="progressChartSection">
+      <div className="progressChartHeader">
+        <div className="progressChartKicker">Progress Over Time</div>
+        <div className="progressChartActions">
           {FILTERS.map((filter) => (
-            <button
-              key={filter.id}
-              type="button"
-              onClick={() => setRange(filter.id)}
-              style={{
-                border: `1px solid ${filter.id === range ? UI_TOKENS.colors.action.primary : UI_TOKENS.borders.subtle}`,
-                background: filter.id === range ? `${UI_TOKENS.colors.action.primary}26` : "transparent",
-                color: UI_TOKENS.colors.textPrimary,
-                borderRadius: 999,
-                fontSize: 10,
-                fontWeight: 700,
-                letterSpacing: "0.08em",
-                padding: "4px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button key={filter.id} type="button" onClick={() => setRange(filter.id)} className={`btn btn--ghost progressChartFilter ${filter.id === range ? "is-active" : ""}`.trim()}>
               {filter.label}
             </button>
           ))}
-          <button
-            type="button"
-            onClick={() => setShowHelp(true)}
-            style={{
-              border: `1px solid ${UI_TOKENS.borders.subtle}`,
-              background: "transparent",
-              color: UI_TOKENS.colors.textSecondary,
-              borderRadius: 999,
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              padding: "4px 10px",
-              cursor: "pointer",
-            }}
-          >
-            Metric Help
-          </button>
+          <button type="button" onClick={() => setShowHelp(true)} className="btn btn--ghost progressChartHelpBtn">Metric Help</button>
         </div>
       </div>
 
       {progress.drillRows.map((drill) => (
-        <div key={drill.drillId} style={{ ...CHART_CARD_STYLE, marginBottom: 10 }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 8 }}>
+        <div key={drill.drillId} className="shared-card progressChartCard">
+          <div className="progressChartHeader">
             <div>
-              <div style={{ color: UI_TOKENS.colors.textPrimary, fontSize: 12, fontWeight: 700 }}>{drill.name}</div>
-              <div style={{ color: UI_TOKENS.colors.textMuted, fontSize: 10 }}>Daily average in selected {range}</div>
+              <div className="progressChartKicker" style={{ fontSize: "0.82rem", letterSpacing: "0.02em", textTransform: "none" }}>{drill.name}</div>
+              <div className="progressChartSubtitle">Daily average in selected {range}</div>
             </div>
-            <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "flex-end" }}>
-              <span title={HELP_COPY.PR} style={{ color: UI_TOKENS.colors.textSecondary, fontSize: 10 }}>PR {drill.personalBest}</span>
-              <span title={HELP_COPY.Avg} style={{ color: UI_TOKENS.colors.textSecondary, fontSize: 10 }}>Avg {drill.myAvg}</span>
-              <span title={HELP_COPY.Logs} style={{ color: UI_TOKENS.colors.textSecondary, fontSize: 10 }}>Logs {drill.logs}</span>
-              <span style={{ color: UI_TOKENS.colors.action.secondary, fontSize: 10 }}>Team Avg {drill.teamAvg}</span>
+            <div className="progressChartMeta">
+              <span title={HELP_COPY.PR}>PR {drill.personalBest}</span>
+              <span title={HELP_COPY.Avg}>Avg {drill.myAvg}</span>
+              <span title={HELP_COPY.Logs}>Logs {drill.logs}</span>
+              <span style={{ color: "var(--color-action-secondary)" }}>Team Avg {drill.teamAvg}</span>
             </div>
           </div>
           <LineChart data={{ labels: drill.labels, values: drill.values }} yAxisLabel={drill.yAxisLabel} />
@@ -290,62 +215,24 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [], er
       ))}
 
       {progress.recommendations.length > 0 ? (
-        <div style={{ ...CHART_CARD_STYLE, borderColor: `${UI_TOKENS.colors.state.warning}66` }}>
-          <div style={{ color: UI_TOKENS.colors.state.warning, fontSize: 11, fontWeight: 700, marginBottom: 8, letterSpacing: "0.06em" }}>
-            PERSONALIZED RECOMMENDATIONS
-          </div>
-          <ul style={{ margin: 0, paddingLeft: 18, color: UI_TOKENS.colors.textSecondary, fontSize: 11, lineHeight: 1.5 }}>
-            {progress.recommendations.map((item) => (
-              <li key={item}>{item}</li>
-            ))}
+        <div className="shared-card progressChartCard" style={{ borderColor: "rgba(179, 144, 98, 0.55)" }}>
+          <div className="progressChartRecommendationsTitle">Personalized Recommendations</div>
+          <ul style={{ margin: 0, paddingLeft: 18, color: "var(--text-2)", fontSize: "var(--fs-helper)", lineHeight: 1.5 }}>
+            {progress.recommendations.map((item) => <li key={item}>{item}</li>)}
           </ul>
         </div>
       ) : null}
 
       {showHelp ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setShowHelp(false)}
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.65)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 60,
-            padding: 16,
-          }}
-        >
-          <div
-            onClick={(event) => event.stopPropagation()}
-            style={{
-              width: "min(520px, 100%)",
-              ...CHART_CARD_STYLE,
-              background: UI_TOKENS.colors.bg.elevated,
-            }}
-          >
-            <div style={{ color: UI_TOKENS.colors.textPrimary, fontWeight: 700, marginBottom: 8 }}>Metrics Guide</div>
-            <ul style={{ margin: 0, paddingLeft: 16, color: UI_TOKENS.colors.textSecondary, fontSize: 12, lineHeight: 1.6 }}>
+        <div role="dialog" aria-modal="true" onClick={() => setShowHelp(false)} className="progressChartModal">
+          <div onClick={(event) => event.stopPropagation()} className="shared-card progressChartDialog">
+            <div className="progressChartKicker" style={{ fontSize: "0.94rem", textTransform: "none", letterSpacing: "0.01em", marginBottom: "var(--space-2)" }}>Metrics Guide</div>
+            <ul style={{ margin: 0, paddingLeft: 16, color: "var(--text-2)", fontSize: "var(--fs-helper)", lineHeight: 1.6 }}>
               <li>{HELP_COPY.PR}</li>
               <li>{HELP_COPY.Avg}</li>
               <li>{HELP_COPY.Logs}</li>
             </ul>
-            <button
-              type="button"
-              onClick={() => setShowHelp(false)}
-              style={{
-                marginTop: 12,
-                border: `1px solid ${UI_TOKENS.borders.subtle}`,
-                background: "transparent",
-                color: UI_TOKENS.colors.textPrimary,
-                borderRadius: 8,
-                fontSize: 11,
-                padding: "6px 10px",
-                cursor: "pointer",
-              }}
-            >
+            <button type="button" onClick={() => setShowHelp(false)} className="btn btn--ghost progressChartCloseBtn" style={{ marginTop: "var(--space-3)" }}>
               Close
             </button>
           </div>
