@@ -3,8 +3,7 @@ import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import PageHeader from "./components/PageHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
-import CoachHero from "./components/CoachHero";
-import CoachMiniHeader from "./components/CoachMiniHeader";
+import AppHeader from "./components/AppHeader";
 import Button from "./components/ui/Button";
 import EmptyState from "./components/EmptyState";
 import LoadingState from "./components/LoadingState";
@@ -2818,9 +2817,6 @@ const navItems=[
 const handleNavChange=(k)=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)};
 const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
 const [isNarrow,setIsNarrow]=useState(()=>typeof window!=="undefined"?window.innerWidth<768:false);
-const [showMiniHeader,setShowMiniHeader]=useState(false);
-const heroRef=useRef(null);
-const isOverviewTab=tab==="feed";
 const coachTabs=["feed","drills","events","sc","players","settings"];
 const isCoachTab=u.isCoach&&coachTabs.includes(tab);
 const showFullCommandCenter=isCoachTab&&tab==="feed";
@@ -2834,41 +2830,6 @@ useEffect(()=>{
   window.addEventListener("resize",onResize);
   return()=>window.removeEventListener("resize",onResize);
 },[]);
-
-useEffect(()=>{
-  const heroNode=heroRef.current;
-  if(!heroNode){
-    setShowMiniHeader(false);
-    return;
-  }
-  const updateFromRect=()=>{
-    const rect=heroNode.getBoundingClientRect();
-    const viewport=Math.max(window.innerHeight||0,1);
-    const visibleTop=Math.max(rect.top,0);
-    const visibleBottom=Math.min(rect.bottom,viewport);
-    const visibleHeight=Math.max(0,visibleBottom-visibleTop);
-    const ratio=Math.min(1,visibleHeight/Math.max(rect.height,1));
-    setShowMiniHeader(ratio<0.25);
-  };
-  if(typeof window!=="undefined" && "IntersectionObserver" in window){
-    const observer=new IntersectionObserver((entries)=>{
-      const ratio=entries[0]?.intersectionRatio ?? 1;
-      setShowMiniHeader(ratio<0.25);
-    },{threshold:[0,0.25,0.5,0.75,1]});
-    observer.observe(heroNode);
-    return()=>observer.disconnect();
-  }
-  let ticking=false;
-  const onScroll=()=>{
-    if(ticking)return;
-    ticking=true;
-    window.requestAnimationFrame(()=>{updateFromRect();ticking=false;});
-  };
-  updateFromRect();
-  window.addEventListener("scroll",onScroll,{passive:true});
-  window.addEventListener("resize",onScroll);
-  return()=>{window.removeEventListener("scroll",onScroll);window.removeEventListener("resize",onScroll);};
-},[tab]);
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div style={{padding:"10px 10px",marginBottom:8,border:`1px solid ${alphaFromHex(teamPrimary,0.22)}`,borderRadius:12,background:alphaFromHex(teamPrimary,0.08)}}><TeamIdentity branding={previewBranding} teamName={team?.name||"Team"} mascotName={previewBranding.mascotName} motto={previewBranding.brandingMode==="bold"?previewBranding.motto:""} compact /></div><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)} aria-current={active?"page":undefined} style={{display:"flex",alignItems:"center",gap:12,minHeight:52,padding:"0 14px",fontSize:13,fontWeight:700,letterSpacing:"0.03em"}}><span className="shared-nav-icon" aria-hidden="true">{item.svg}</span><span>{item.l}</span></button>;})}</aside>}
@@ -2885,35 +2846,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>
 </div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={coachAccent} top="0" left="80%" size={250}/></div>
-<CoachMiniHeader
-  visible={showMiniHeader}
-  avatar={<Av n={u.name} sz={24} email={u.email} isCoach={u.isCoach}/>}
-  wordmark={<BrandWordmark size={14} small/>}
-  borderColor={BORDER_CLR}
-  mutedColor={MUTED}
-  logoUrl={previewBranding.logoUrl}
-  teamName={team?.name}
-  branding={previewBranding}
-  accentColor={coachAccent}
+<div style={{position:"relative",zIndex:1,padding:"0 var(--page-gutter) 0"}}>
+<AppHeader
+  title={(navItems.find(item=>item.k===tab)?.l||"Dashboard").toUpperCase()}
+  initials={String(u?.name||u?.email||"SL").trim().split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join("").toUpperCase()||"SL"}
   onOpenSettings={()=>setTab("settings")}
-  onLogout={logout}
-/>
-<div style={{position:"relative",zIndex:1,padding:`max(var(--space-5),env(safe-area-inset-top)) var(--page-gutter) 0`}}>
-<CoachHero
-  heroRef={heroRef}
-  isOverview={isOverviewTab}
-  userName={u.name}
-  isCoach={u.isCoach}
-  accentColor={coachAccent}
-  borderColor={BORDER_CLR}
-  mutedColor={MUTED}
-  avatar={<Av n={u.name} sz={isOverviewTab?32:30} email={u.email} isCoach={u.isCoach}/>}
-  wordmark={<BrandWordmark size={isOverviewTab?17:16} small/>}
-  logoUrl={previewBranding.logoUrl}
-  teamName={team?.name}
-  branding={previewBranding}
-  onOpenSettings={()=>setTab("settings")}
-  onLogout={logout}
+  contextTeam={selP?.name||team?.name}
+  contextView={u.isCoach?"Coach View":"Player View"}
 />
 {isCoachTab&&<CoachCommandCenter
   variant={showFullCommandCenter?"full":"compact"}
@@ -2937,7 +2876,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>
 {u.isCoach&&<div style={{height:28,background:`linear-gradient(90deg, ${alphaFromHex(coachAccent,0.18)} 0%, transparent 100%)`,borderBottom:`1px solid ${alphaFromHex(coachAccent,0.32)}`,display:"flex",alignItems:"center",padding:`0 var(--page-gutter)`,gap:"var(--space-2)"}}><WhistleIcon size={12} color={coachAccent}/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:alphaFromHex(coachAccent,0.84)}}>COACH VIEW — FULL ACCESS</span></div>}
 
-  <div style={{flex:1,padding:`${showMiniHeader?"88px":"var(--space-4)"} var(--page-gutter) 90px`,overflowY:"auto",position:"relative",zIndex:1}}>
+  <div style={{flex:1,padding:`var(--space-4) var(--page-gutter) 90px`,overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}>
     <PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
