@@ -23,6 +23,14 @@ import { cloudStore } from "./lib/cloudStore";
 import { firebaseAuth, firebaseEnabled, googleProvider } from "./lib/firebase";
 
 const PREVIEW_MODE_STORAGE_KEY="sl:preview-mode";
+const PREVIEW_MODES={
+DESKTOP:"desktop",
+MOBILE:"mobile",
+MOBILE_SMALL:"mobile-small",
+MOBILE_LARGE:"mobile-large",
+};
+const MOBILE_PREVIEW_MODES=new Set([PREVIEW_MODES.MOBILE,PREVIEW_MODES.MOBILE_SMALL,PREVIEW_MODES.MOBILE_LARGE]);
+const isValidPreviewMode=value=>Object.values(PREVIEW_MODES).includes(value);
 
 const authCreateUser=async(auth,email,password)=>auth?.createUserWithEmailAndPassword?auth.createUserWithEmailAndPassword(email,password):null;
 const authUpdateProfile=async(user,payload)=>user?.updateProfile?user.updateProfile(payload):null;
@@ -759,9 +767,9 @@ function AppInner(){
 const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
 const[highContrast,setHighContrast]=useState(false);
 const[previewMode,setPreviewMode]=useState(()=>{
-if(typeof window==="undefined")return "desktop";
+if(typeof window==="undefined")return PREVIEW_MODES.DESKTOP;
 const stored=window.localStorage.getItem(PREVIEW_MODE_STORAGE_KEY);
-return stored==="mobile"?"mobile":"desktop";
+return isValidPreviewMode(stored)?stored:PREVIEW_MODES.DESKTOP;
 });
 const T=THEMES[theme];
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
@@ -790,6 +798,9 @@ useEffect(()=>{
 useEffect(()=>{
 localStorage.setItem(PREVIEW_MODE_STORAGE_KEY,previewMode);
 },[previewMode]);
+
+const previewShellClass=MOBILE_PREVIEW_MODES.has(previewMode)?"viewport-preview-shell viewport-preview-shell--mobile":"viewport-preview-shell viewport-preview-shell--desktop";
+const previewContentClass=MOBILE_PREVIEW_MODES.has(previewMode)?`viewport-preview-content viewport-preview-content--mobile ${previewMode===PREVIEW_MODES.MOBILE_SMALL?"viewport-preview-content--mobile-small":""} ${previewMode===PREVIEW_MODES.MOBILE_LARGE?"viewport-preview-content--mobile-large":""}`.trim():"viewport-preview-content viewport-preview-content--desktop";
 
 const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
@@ -1110,8 +1121,8 @@ if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,displa
 
 return <><Styles/>
 <ViewportPreviewToggle mode={previewMode} onChange={setPreviewMode}/>
-<div className={`viewport-preview-shell viewport-preview-shell--${previewMode}`}>
-<div className={`viewport-preview-content viewport-preview-content--${previewMode}`}>
+<div className={previewShellClass}>
+<div className={previewContentClass}>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onSocialLogin={socialLogin} onResetPassword={resetPassword} firebaseEnabled={firebaseEnabled} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} onResetPassword={resetPassword} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}
