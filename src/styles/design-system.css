@@ -10,35 +10,35 @@ Implementation plan (small-scope motion pass):
 
   /* Semantic design tokens (premium sports-tech refresh). */
   /* Before: neon cyan/lime accents + glow effects. After: restrained slate + desaturated action colors. */
-  --color-bg-canvas: #121821;
-  --color-bg-surface: #1a2431;
-  --color-bg-elevated: #223043;
-  --color-bg-subtle: rgba(173, 187, 205, 0.08);
+  --color-bg-canvas: #0f1722;
+  --color-bg-surface: #182230;
+  --color-bg-elevated: #1f2b3b;
+  --color-bg-subtle: rgba(175, 191, 214, 0.09);
 
-  --color-text-primary: #f1f5fb;
-  --color-text-secondary: #c1ccda;
-  --color-text-muted: #8f9caf;
-  --color-text-helper: #95a2b6;
-  --color-text-placeholder: #a6b2c4;
+  --color-text-primary: #f4f7fc;
+  --color-text-secondary: #c7d2e2;
+  --color-text-muted: #9aa9bc;
+  --color-text-helper: #a8b5c7;
+  --color-text-placeholder: #afbdcf;
 
-  --color-border-subtle: rgba(173, 187, 205, 0.22);
-  --color-border-strong: rgba(188, 202, 220, 0.36);
+  --color-border-subtle: rgba(175, 191, 214, 0.22);
+  --color-border-strong: rgba(195, 211, 231, 0.4);
 
-  --color-action-primary: #3f5f97;
-  --color-action-primary-soft: rgba(63, 95, 151, 0.2);
-  --color-action-secondary: #3b6e74;
-  --color-action-secondary-soft: rgba(59, 110, 116, 0.18);
-  --color-highlight-warm: #b6aa94;
-  --color-highlight-warm-soft: rgba(182, 170, 148, 0.18);
+  --color-action-primary: #5379be;
+  --color-action-primary-soft: rgba(83, 121, 190, 0.22);
+  --color-action-secondary: #4b7f86;
+  --color-action-secondary-soft: rgba(75, 127, 134, 0.2);
+  --color-highlight-warm: #baa98f;
+  --color-highlight-warm-soft: rgba(186, 169, 143, 0.18);
 
-  --color-state-success: #5f8f78;
+  --color-state-success: #5e9479;
   --color-state-success-soft: rgba(95, 143, 120, 0.18);
-  --color-state-warning: #a9865e;
+  --color-state-warning: #af8c5f;
   --color-state-warning-soft: rgba(169, 134, 94, 0.18);
-  --color-state-danger: #a86b6b;
+  --color-state-danger: #ab6e6e;
   --color-state-danger-soft: rgba(168, 107, 107, 0.18);
 
-  --color-focus-ring: rgba(63, 95, 151, 0.8);
+  --color-focus-ring: rgba(83, 121, 190, 0.78);
   --color-focus-shadow: rgba(17, 24, 34, 0.65);
 
   --space-0: 0;
@@ -63,13 +63,13 @@ Implementation plan (small-scope motion pass):
   --grid-gutter: var(--space-4);
 
   --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
+  --radius-md: 14px;
+  --radius-lg: 14px;
+  --radius-xl: 14px;
   --radius-pill: 999px;
 
-  --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.26);
-  --shadow-medium: 0 14px 30px rgba(0, 0, 0, 0.32);
+  --shadow-soft: 0 6px 18px rgba(6, 11, 19, 0.28);
+  --shadow-medium: 0 12px 26px rgba(6, 11, 19, 0.34);
   --shadow-focus: 0 0 0 2px var(--color-bg-canvas), 0 0 0 4px var(--color-focus-ring), 0 0 0 6px var(--color-focus-shadow);
 
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
@@ -101,7 +101,7 @@ Implementation plan (small-scope motion pass):
 
   --btn-h: 48px;
   --btn-h-sm: 40px;
-  --btn-radius: 8px;
+  --btn-radius: 10px;
   --btn-pad-x: 16px;
   --btn-pad-sm: 8px;
   --btn-pad-lg: 24px;
@@ -178,15 +178,15 @@ textarea {
 .shared-card {
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-subtle);
-  background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0)), var(--surface-1);
+  background: var(--surface-1);
   box-shadow: var(--shadow-soft);
   transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease;
 }
 
 .shared-card--primary {
-  background: linear-gradient(180deg, rgba(63,95,151,0.14), rgba(63,95,151,0.03)), var(--surface-2);
-  border-color: rgba(122, 145, 186, 0.38);
-  box-shadow: var(--shadow-medium);
+  background: var(--surface-2);
+  border-color: rgba(131, 156, 196, 0.34);
+  box-shadow: var(--shadow-soft);
 }
 
 .shared-card--secondary {
@@ -196,13 +196,13 @@ textarea {
 
 .shared-card--subtle {
   background: var(--color-bg-subtle);
-  border-color: rgba(173, 187, 205, 0.16);
+  border-color: var(--color-border-subtle);
   box-shadow: none;
 }
 
 .shared-card--default,
 .shared-card--metric { }
-.shared-card--default { background: var(--surface-2); border-color: rgba(122, 145, 186, 0.32); }
+.shared-card--default { background: var(--surface-2); border-color: var(--color-border-subtle); }
 .shared-card--metric,
 .shared-card--list,
 .shared-card--empty { background: var(--surface-1); }
@@ -270,7 +270,7 @@ a.interactive-card:focus-visible {
 
   .btn--primary:hover,
   .cta-primary:hover {
-    background: #4a6daa;
+    background: #5f86cc;
   }
 }
 
@@ -290,9 +290,9 @@ a.interactive-card:focus-visible {
 }
 
 .btn--secondary {
-  background: rgba(59, 110, 116, 0.14);
-  color: #c1d6d9;
-  border-color: rgba(106, 144, 149, 0.42);
+  background: rgba(75, 127, 134, 0.18);
+  color: #d2e2e5;
+  border-color: rgba(122, 168, 176, 0.4);
 }
 
 .btn[role="switch"] {
@@ -309,7 +309,7 @@ a.interactive-card:focus-visible {
 .btn--tertiary {
   background: transparent;
   color: var(--text-2);
-  border-color: rgba(173, 187, 205, 0.32);
+  border-color: var(--color-border-subtle);
 }
 
 .btn--destructive,
@@ -431,9 +431,9 @@ a,
 }
 
 .sidebar-nav .nav-item.is-active {
-  background: linear-gradient(90deg, rgba(63, 95, 151, 0.24), rgba(63, 95, 151, 0.08));
+  background: rgba(83, 121, 190, 0.18);
   color: var(--text-1);
-  box-shadow: inset 0 0 0 1px rgba(173, 198, 235, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(163, 190, 230, 0.28);
 }
 
 @media (prefers-contrast: more) {
@@ -478,6 +478,30 @@ a,
   background: var(--color-action-primary-soft);
   border-color: rgba(122, 145, 186, 0.34);
   color: #b9c9e1;
+}
+
+
+.pill,
+.pageHeaderPill,
+.chip,
+.status-chip {
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border-subtle);
+  background: rgba(175, 191, 214, 0.12);
+  color: var(--text-2);
+}
+
+.tab {
+  border-radius: var(--radius-pill);
+  border: 1px solid transparent;
+  color: var(--text-3);
+}
+
+.tab.is-active,
+.tab[aria-selected="true"] {
+  color: var(--text-1);
+  background: rgba(83, 121, 190, 0.2);
+  border-color: rgba(163, 190, 230, 0.32);
 }
 
 @media (prefers-reduced-motion: reduce) {
