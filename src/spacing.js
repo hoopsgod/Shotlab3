@@ -6,8 +6,8 @@ const spacing = {
   lg: 24,
   xl: 32,
   xxl: 40,
-  section: 48,
-  xxxl: 64,
+  section: 56,
+  xxxl: 72,
 };
 
 export default spacing;

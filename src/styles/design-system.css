@@ -50,16 +50,16 @@ Implementation plan (small-scope motion pass):
   --space-5: 24px;
   --space-6: 32px;
   --space-7: 40px;
-  --space-8: 48px;
-  --space-9: 64px;
+  --space-8: 56px;
+  --space-9: 72px;
 
-  --page-gutter: max(var(--space-4), env(safe-area-inset-left));
-  --section-gap: var(--space-8);
-  --card-pad-compact: var(--space-4);
-  --card-pad-standard: var(--space-5);
+  --page-gutter: max(20px, env(safe-area-inset-left));
+  --section-gap: clamp(var(--space-6), 9vw, var(--space-8));
+  --card-pad-compact: 20px;
+  --card-pad-standard: 28px;
   --card-pad: var(--card-pad-standard);
-  --control-gap-tight: var(--space-3);
-  --control-gap: var(--space-4);
+  --control-gap-tight: var(--space-3a);
+  --control-gap: var(--space-5);
   --grid-gutter: var(--space-4);
 
   --radius-sm: 8px;
@@ -166,14 +166,14 @@ textarea {
 }
 
 .page {
-  padding-left: max(var(--space-4), env(safe-area-inset-left));
-  padding-right: max(var(--space-4), env(safe-area-inset-right));
-  padding-bottom: calc(var(--nav-height, 74px) + var(--space-4) + env(safe-area-inset-bottom));
+  padding-left: max(var(--page-gutter), env(safe-area-inset-left));
+  padding-right: max(var(--page-gutter), env(safe-area-inset-right));
+  padding-bottom: calc(var(--nav-height, 74px) + var(--space-5) + env(safe-area-inset-bottom));
 }
 
-.stack-12 { display: flex; flex-direction: column; gap: var(--space-2); }
-.stack-16 { display: flex; flex-direction: column; gap: var(--space-3); }
-.stack-24 { display: flex; flex-direction: column; gap: var(--space-4); }
+.stack-12 { display: flex; flex-direction: column; gap: var(--space-3); }
+.stack-16 { display: flex; flex-direction: column; gap: var(--space-3a); }
+.stack-24 { display: flex; flex-direction: column; gap: var(--space-5); }
 
 .shared-card {
   border-radius: var(--radius-lg);
