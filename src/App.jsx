@@ -1300,12 +1300,12 @@ warm:{bg:`linear-gradient(140deg, ${ORANGE}18 0%, ${ORANGE}0a 55%, ${CARD_BG} 10
 cool:{bg:`linear-gradient(140deg, ${CYAN}20 0%, ${CYAN}0f 55%, ${CARD_BG} 100%)`,border:`1px solid ${CYAN}40`,title:CYAN},
 };
 const palette=toneMap[tone]||toneMap.accent;
-return <div style={{background:palette.bg,border:palette.border,borderRadius:16,padding:"12px 14px",marginBottom:14,display:"flex",gap:10,alignItems:"flex-start"}}>
+return <div className="info-explainer-card" style={{background:palette.bg,border:palette.border,marginBottom:14,display:"flex",gap:10,alignItems:"flex-start"}}>
 <div style={{flex:1,minWidth:0}}>
-<div style={{fontFamily:FD,color:palette.title,fontSize:13,letterSpacing:1.8,textTransform:"uppercase",lineHeight:1.1}}>{title}</div>
-<div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.45,marginTop:6}}>{body}</div>
+<div className="info-explainer-card__title" style={{color:palette.title}}>{title}</div>
+<div className="info-explainer-card__body">{body}</div>
 </div>
-{onDismiss&&<button onClick={onDismiss} aria-label="Dismiss onboarding tip" style={{background:"transparent",border:`1px solid ${BORDER_CLR}`,color:MUTED,borderRadius:8,padding:"4px 8px",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer",flexShrink:0}}>Got it</button>}
+{onDismiss&&<button className="info-explainer-card__button" onClick={onDismiss} aria-label="Dismiss onboarding tip">Got it</button>}
 </div>;
 }
 
@@ -1905,14 +1905,14 @@ const chipStyle=(kind)=>{
 return <SectionContainer className="fade-up">
 <SH t="DUELS" s="HEAD-TO-HEAD" isCoach={typeof u!=="undefined"&&u?.isCoach}/>
 {showGuide&&<GuideCallout title="How duels work" body="Duels let players compete on drill scores. Accept a challenge, log your response, and the higher score wins." onDismiss={dismissGuide} tone="warm"/>}
-<div style={{background:`linear-gradient(148deg,#131313 0%,#101010 55%,#181818 100%)`,borderRadius:18,padding:"14px 14px 12px",marginBottom:10,border:`1px solid ${ORANGE}3A`,position:"relative",overflow:"hidden",boxShadow:"0 10px 22px rgba(0,0,0,.28)"}}>
+<div className="feature-hero-card" style={{marginBottom:10}}>
   <div style={{position:"absolute",inset:0,pointerEvents:"none",background:`radial-gradient(circle at 18% 0%,${ORANGE}20,transparent 43%),radial-gradient(circle at 88% 100%,${CYAN}12,transparent 42%)`}}/>
-  <div style={{position:"absolute",top:-22,right:-24,opacity:.14}}><svg width="118" height="118" viewBox="0 0 24 24" fill={ORANGE}><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+  <div className="feature-hero-card__watermark" aria-hidden="true">🏀</div>
   <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10,position:"relative"}}>
     <div>
-      <div style={{fontFamily:FB,color:"#FFD9BA",fontSize:9,fontWeight:700,letterSpacing:2,textTransform:"uppercase",marginBottom:4}}>Shotlab Arena</div>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:1.2,lineHeight:1}}>Duels</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4,maxWidth:290,lineHeight:1.35}}>Challenge teammates, respond fast, and stack wins in drill battles.</div>
+      <div className="feature-hero-card__label">Shotlab Arena</div>
+      <div className="feature-hero-card__headline">Duels</div>
+      <div className="feature-hero-card__body">Challenge teammates, respond fast, and stack wins in drill battles.</div>
     </div>
     <button onClick={()=>setActiveFilter("pending")} className="btn-v" style={{padding:"7px 10px",fontSize:10,letterSpacing:1.2,background:`${ORANGE}26`,border:`1px solid ${ORANGE}66`,color:ORANGE,whiteSpace:"nowrap",borderRadius:999}}>RESPOND NOW</button>
   </div>
@@ -2044,15 +2044,17 @@ const handleAddScLog=()=>{
 return <div className="fade-up">
 <SH t="LIFTING" s="STRENGTH & CONDITIONING" isCoach={typeof user!=="undefined"&&user?.isCoach}/>
 {/* S&C banner — heavy, grounded */}
-<div style={{background:`linear-gradient(180deg,${SC_COLOR}0c,${CARD_BG})`,borderRadius:18,padding:0,marginBottom:16,border:`1px solid ${SC_COLOR}18`,overflow:"hidden",position:"relative"}}>
+<div className="feature-hero-card" style={{marginBottom:16,padding:0}}>
 <div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at top left, rgba(200, 255, 0, 0.06) 0%, transparent 70%)",pointerEvents:"none"}}/>
 <div style={{padding:"18px 22px",display:"flex",alignItems:"center",gap:12,position:"relative"}}>
 <div style={{width:42,height:42,borderRadius:12,background:`${SC_COLOR}12`,border:`1px solid ${SC_COLOR}22`,display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={22} color={SC_COLOR}/></div>
 <div>
-<div style={{fontFamily:FD,color:SC_COLOR,fontSize:16,letterSpacing:3}}>STRENGTH & CONDITIONING</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Show up. Get stronger. Track sessions.</div>
+<div className="feature-hero-card__label" style={{color:SC_COLOR}}>SHOTLAB PERFORMANCE</div>
+<div className="feature-hero-card__headline" style={{fontSize:32}}>STRENGTH & CONDITIONING</div>
+<div className="feature-hero-card__body">Show up. Get stronger. Track sessions.</div>
 </div>
 </div>
+<div className="feature-hero-card__watermark" aria-hidden="true">🏋️</div>
 </div>
 
 {/* Personal stats */}
@@ -2089,9 +2091,9 @@ return <div className="fade-up">
 </div></div>
 
 {/* Leaderboard toggle */}
-<button onClick={()=>setShowBoard(!showBoard)} className="ch card card--raised interactive-card" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
-  <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:SC_COLOR+"15",display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={18} color={SC_COLOR}/></div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LIFTING LEADERBOARD</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Ranked by sessions attended</div></div></div>
-  <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={SC_COLOR} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
+<button onClick={()=>setShowBoard(!showBoard)} className="ch nav-link-card" style={{width:"100%",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
+  <div style={{display:"flex",alignItems:"center",gap:10}}><div className="nav-link-card__icon"><LiftIcon size={18} color={SC_COLOR}/></div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LIFTING LEADERBOARD</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Ranked by sessions attended</div></div></div>
+  <svg className="nav-link-card__chevron" width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={SC_COLOR} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
 </button>
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
   {board.length===0&&<Empty t="No attendance yet"/>}
@@ -2548,15 +2550,16 @@ const getRelativeLabel=(date)=>{const eventDate=new Date(`${date}T00:00:00`);con
 return <div className="fade-up">
 {showGuide&&<GuideCallout title="Program events + attendance rank" body="Program Events are coach-run sessions. Attendance Rank increases each time you RSVP and show up, so consistency moves you up the board." onDismiss={dismissGuide} tone="accent"/>}
 {/* Events banner — structured, timeline-oriented */}
-<div className="eventPanel" style={{marginBottom:16}}>
+<div className="feature-hero-card" style={{marginBottom:16}}>
 
 <div className="sectionContent" style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
 <div className="uiDecor" aria-hidden="true" style={{width:42,height:42,borderRadius:12,background:"rgba(184,255,0,.10)",border:"1px solid rgba(122,145,186,.28)",display:"flex",alignItems:"center",justifyContent:"center"}}>
 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
 </div>
 <div>
-<div className="eventPanelTitle" style={{display:"inline-flex",alignItems:"center",gap:6}}>PROGRAM EVENTS <InfoHint text="Program Events are coach-run team sessions with RSVP tracking."/></div>
-<div className="eventPanelSub">Official workouts & verified attendance</div>
+<div className="feature-hero-card__label" style={{display:"inline-flex",alignItems:"center",gap:6}}>PROGRAM EVENTS <InfoHint text="Program Events are coach-run team sessions with RSVP tracking."/></div>
+<div className="feature-hero-card__headline" style={{fontSize:32}}>Events</div>
+<div className="feature-hero-card__body">Official workouts & verified attendance</div>
 </div>
 </div>
 {/* Timeline strip — next 3 events as dots */}
@@ -2574,17 +2577,18 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 </div>
 {upcoming.length>3&&<div className="uiDecor" aria-hidden="true" style={{fontFamily:FB,fontSize:9,color:MUTED,marginLeft:8,marginBottom:14}}>+{upcoming.length-3}</div>}
 </div>}
+<div className="feature-hero-card__watermark" aria-hidden="true">📅</div>
 </div>
 
 {/* Tier card */}
-<div className="eventPanel" style={{marginBottom:16}}>
+<div className="stat-rank-card" style={{marginBottom:16}}>
   <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative",gap:14}}>
     <div>
-      <div className="eventPanelLabel" style={{color:"rgba(202,245,122,.9)",display:"inline-flex",alignItems:"center",gap:6}}>ATTENDANCE RANK <InfoHint text="Attendance Rank is based on the number of program events you RSVP to and attend."/></div>
+      <div className="stat-rank-card__label" style={{display:"inline-flex",alignItems:"center",gap:6}}>ATTENDANCE RANK <InfoHint text="Attendance Rank is based on the number of program events you RSVP to and attend."/></div>
       <div style={{display:"flex",alignItems:"center",gap:10,marginTop:8}}>
         <svg className={rankFx?"rank-badge-flash":""} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b6aa94" strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-        <div className={rankFx?"rank-bounce":""} style={{fontFamily:FD,color:LIGHT,fontSize:28,fontWeight:900,letterSpacing:2}}>{myTier.name}</div>
-        <div style={{fontFamily:FD,color:VOLT,fontSize:28,fontWeight:700,lineHeight:1}}>{myRsvps}</div>
+        <div className={`stat-rank-card__value ${rankFx?"rank-bounce":""}`}>{myTier.name}</div>
+        <div className="stat-rank-card__value stat-rank-card__value-number">{myRsvps}</div>
       </div>
       <div style={{fontFamily:FB,color:"rgba(173,180,189,.88)",fontSize:12,marginTop:6}}>{myRsvps} event{myRsvps!==1?"s":""} attended</div>
     </div>
@@ -2650,9 +2654,9 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 </div>
 
 {/* Leaderboard toggle */}
-<button onClick={()=>setShowBoard(!showBoard)} className="ch uiTap interactive-card" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
-  <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:ORANGE+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>&#128293;</div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LEADERBOARD</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Attendance, scores & streaks</div></div></div>
-  <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
+<button onClick={()=>setShowBoard(!showBoard)} className="ch uiTap nav-link-card" style={{width:"100%",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
+  <div style={{display:"flex",alignItems:"center",gap:10}}><div className="nav-link-card__icon">&#128293;</div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LEADERBOARD</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Attendance, scores & streaks</div></div></div>
+  <svg className="nav-link-card__chevron" width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
 </button>
 
 {showBoard&&<div className="fade-up" style={{marginBottom:20}}>
@@ -3092,9 +3096,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   const FormField=({label,helper,placeholder,type="text",value,onChange})=><label style={{display:"block"}}><div style={{fontFamily:FB,color:"#D7DEE8",fontSize:11,fontWeight:700,letterSpacing:1.4,textTransform:"uppercase",marginBottom:6}}>{label}</div><input type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder} style={{width:"100%",height:46,padding:"0 14px",background:"rgba(8,11,18,0.95)",color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:12,fontFamily:FB,fontSize:14,fontWeight:500,outline:"none",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.04)"}}/><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:6,lineHeight:1.4}}>{helper}</div></label>;
   return <>
     <PageHeader title="Strength & Conditioning" subtitle="Plan sessions, track attendance, and keep your team consistent" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add Session"} onAction={()=>setShowAddSC(!showAddSC)} />
-    <div className="accent-card" style={{background:`linear-gradient(165deg,rgba(21,28,40,0.96),rgba(10,14,21,0.98))`,border:`1px solid ${BORDER_CLR}`,borderRadius:18,padding:"18px 16px",marginBottom:12}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:8}}><div><div className="heroKicker" style={{color:PAGE_ACCENTS.sc.accent,marginBottom:4}}>Strength & Conditioning Hub</div><div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.45,maxWidth:520}}>Create sessions quickly, share location details, and monitor attendance trends in one place.</div></div></div>
+    <div className="feature-hero-card" style={{marginBottom:12,padding:"18px 16px"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:8}}><div><div className="feature-hero-card__label" style={{color:PAGE_ACCENTS.sc.accent,marginBottom:4}}>Strength & Conditioning Hub</div><div className="feature-hero-card__body" style={{maxWidth:520}}>Create sessions quickly, share location details, and monitor attendance trends in one place.</div></div></div>
       <div style={{fontFamily:FB,color:"#DCE3ED",fontSize:12}}>Next up: <span style={{color:PAGE_ACCENTS.sc.accent,fontWeight:700}}>{nextLift?`${nextLift.sport||nextLift.title} · ${nextLift.date}${nextLift.time?` · ${nextLift.time}`:""}`:"No session scheduled"}</span></div>
+      <div className="feature-hero-card__watermark" aria-hidden="true">🏋️</div>
     </div>
 
     <button type="button" className="newSessionCta" onClick={()=>setShowAddSC(v=>!v)}>+ Start New Session</button>

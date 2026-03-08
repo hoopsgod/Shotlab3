@@ -21,6 +21,166 @@ body {
   color: var(--text);
 }
 
+/* Card system redesign */
+.feature-hero-card {
+  background: linear-gradient(135deg, #0F1A2E 0%, #0A1520 100%);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 20px;
+  padding: 24px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-hero-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 2px;
+  background: linear-gradient(90deg, #FF5C1A, #FFB830, transparent);
+  border-radius: 0 0 2px 2px;
+}
+
+.feature-hero-card__watermark {
+  position: absolute;
+  right: -16px;
+  bottom: -16px;
+  font-size: 96px;
+  opacity: 0.08;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.feature-hero-card__label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #FF5C1A;
+  margin-bottom: 6px;
+  position: relative;
+  z-index: 1;
+}
+
+.feature-hero-card__headline {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 36px;
+  letter-spacing: 0.04em;
+  color: #F0EEE8;
+  line-height: 1;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 1;
+}
+
+.feature-hero-card__body {
+  font-family: "DM Sans", sans-serif;
+  font-size: 13px;
+  color: #7A7E8A;
+  line-height: 1.6;
+  position: relative;
+  z-index: 1;
+}
+
+.info-explainer-card {
+  background: rgba(0, 212, 255, 0.05);
+  border: 1px solid rgba(0, 212, 255, 0.18);
+  border-radius: 16px;
+  padding: 18px 20px;
+}
+
+.info-explainer-card__title {
+  color: #00D4FF;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.info-explainer-card__body {
+  color: #7A7E8A;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.info-explainer-card__button {
+  background: rgba(0, 212, 255, 0.12);
+  border: 1px solid rgba(0, 212, 255, 0.3);
+  color: #00D4FF;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.stat-rank-card {
+  background: linear-gradient(135deg, #141000 0%, #1A1600 100%);
+  border: 1px solid rgba(255, 184, 48, 0.25);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 0 32px rgba(255,184,48,0.06);
+}
+
+.stat-rank-card__label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #FFB830;
+}
+
+.stat-rank-card__value {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 42px;
+  color: #F0EEE8;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+.stat-rank-card__value-number {
+  color: #FFB830;
+}
+
+.nav-link-card {
+  background: #111318;
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.nav-link-card:hover,
+.nav-link-card:active {
+  border-color: rgba(255,92,26,0.35);
+  transform: translateX(4px);
+}
+
+.nav-link-card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255,92,26,0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.nav-link-card__chevron {
+  color: #FF5C1A;
+  margin-left: auto;
+}
+
 /* =========================
    Micro UI Polish: Progress
    ========================= */
