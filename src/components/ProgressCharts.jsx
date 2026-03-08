@@ -4,8 +4,9 @@ import UI_TOKENS from "../styles/tokens";
 const CHART_CARD_STYLE = {
   background: UI_TOKENS.colors.bgCard,
   border: `1px solid ${UI_TOKENS.borders.subtle}`,
-  borderRadius: UI_TOKENS.radii.md,
-  padding: UI_TOKENS.radii.md,
+  borderRadius: UI_TOKENS.radii.card,
+  padding: UI_TOKENS.spacing.md,
+  boxShadow: UI_TOKENS.shadows.card,
 };
 
 const FILTERS = [
@@ -55,7 +56,7 @@ function calcTrend(values) {
   return { direction: "stable", delta };
 }
 
-function LineChart({ data, yAxisLabel, color = UI_TOKENS.colors.primary }) {
+function LineChart({ data, yAxisLabel, color = UI_TOKENS.colors.action.primary }) {
   const width = 540;
   const height = 200;
   const leftPad = 44;
@@ -91,7 +92,7 @@ function LineChart({ data, yAxisLabel, color = UI_TOKENS.colors.primary }) {
         const y = height - bottomPad - (tick / max) * (height - topPad - bottomPad);
         return (
           <g key={tick}>
-            <line x1={leftPad} y1={y} x2={width - rightPad} y2={y} stroke="rgba(255,255,255,0.08)" />
+            <line x1={leftPad} y1={y} x2={width - rightPad} y2={y} stroke="rgba(199,210,226,0.22)" />
             <text x={leftPad - 6} y={y + 3} textAnchor="end" fill={UI_TOKENS.colors.textMuted} fontSize="9">
               {tick}
             </text>
@@ -218,8 +219,8 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
               type="button"
               onClick={() => setRange(filter.id)}
               style={{
-                border: `1px solid ${filter.id === range ? UI_TOKENS.colors.primary : UI_TOKENS.borders.subtle}`,
-                background: filter.id === range ? `${UI_TOKENS.colors.primary}1A` : "transparent",
+                border: `1px solid ${filter.id === range ? UI_TOKENS.colors.action.primary : UI_TOKENS.borders.subtle}`,
+                background: filter.id === range ? `${UI_TOKENS.colors.action.primary}26` : "transparent",
                 color: UI_TOKENS.colors.textPrimary,
                 borderRadius: 999,
                 fontSize: 10,
@@ -263,7 +264,7 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
               <span title={HELP_COPY.PR} style={{ color: UI_TOKENS.colors.textSecondary, fontSize: 10 }}>PR {drill.personalBest}</span>
               <span title={HELP_COPY.Avg} style={{ color: UI_TOKENS.colors.textSecondary, fontSize: 10 }}>Avg {drill.myAvg}</span>
               <span title={HELP_COPY.Logs} style={{ color: UI_TOKENS.colors.textSecondary, fontSize: 10 }}>Logs {drill.logs}</span>
-              <span style={{ color: UI_TOKENS.colors.secondary, fontSize: 10 }}>Team Avg {drill.teamAvg}</span>
+              <span style={{ color: UI_TOKENS.colors.action.secondary, fontSize: 10 }}>Team Avg {drill.teamAvg}</span>
             </div>
           </div>
           <LineChart data={{ labels: drill.labels, values: drill.values }} yAxisLabel={drill.yAxisLabel} />
@@ -271,8 +272,8 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
       ))}
 
       {progress.recommendations.length > 0 ? (
-        <div style={{ ...CHART_CARD_STYLE, borderColor: `${UI_TOKENS.colors.warning}55` }}>
-          <div style={{ color: UI_TOKENS.colors.warning, fontSize: 11, fontWeight: 700, marginBottom: 8, letterSpacing: "0.06em" }}>
+        <div style={{ ...CHART_CARD_STYLE, borderColor: `${UI_TOKENS.colors.state.warning}66` }}>
+          <div style={{ color: UI_TOKENS.colors.state.warning, fontSize: 11, fontWeight: 700, marginBottom: 8, letterSpacing: "0.06em" }}>
             PERSONALIZED RECOMMENDATIONS
           </div>
           <ul style={{ margin: 0, paddingLeft: 18, color: UI_TOKENS.colors.textSecondary, fontSize: 11, lineHeight: 1.5 }}>
@@ -304,7 +305,7 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
             style={{
               width: "min(520px, 100%)",
               ...CHART_CARD_STYLE,
-              background: UI_TOKENS.colors.bgElevated,
+              background: UI_TOKENS.colors.bg.elevated,
             }}
           >
             <div style={{ color: UI_TOKENS.colors.textPrimary, fontWeight: 700, marginBottom: 8 }}>Metrics Guide</div>

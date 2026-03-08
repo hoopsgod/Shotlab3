@@ -1,11 +1,11 @@
 :root {
-  --surface-1: #1a2431;
-  --surface-2: #223043;
-  --border-1: rgba(173, 187, 205, 0.2);
-  --border-2: rgba(188, 202, 220, 0.34);
-  --shadow-1: 0 10px 24px rgba(0, 0, 0, 0.3);
-  --shadow-2: 0 16px 32px rgba(0, 0, 0, 0.38);
-  --radius-card: 18px;
+  --surface-1: #182230;
+  --surface-2: #1f2b3b;
+  --border-1: rgba(175, 191, 214, 0.22);
+  --border-2: rgba(195, 211, 231, 0.4);
+  --shadow-1: 0 6px 18px rgba(6, 11, 19, 0.28);
+  --shadow-2: 0 12px 26px rgba(6, 11, 19, 0.34);
+  --radius-card: 14px;
 }
 
 .page {
@@ -26,8 +26,8 @@
   height: 40px;
   border-radius: 12px;
   /* Before: fluorescent cyan/lime gradient. After: low-contrast premium blue/stone blend. */
-  background: linear-gradient(145deg, rgba(63, 95, 151, 0.24), rgba(182, 170, 148, 0.12));
-  border: 1px solid rgba(122, 145, 186, 0.36);
+  background: rgba(83, 121, 190, 0.2);
+  border: 1px solid rgba(163, 190, 230, 0.34);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
 }
 
@@ -52,7 +52,7 @@
 .heroModule {
   border-radius: var(--radius-card);
   border: 1px solid var(--border-1);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.025), rgba(255, 255, 255, 0)), var(--surface-1);
+  background: var(--surface-1);
   box-shadow: var(--shadow-1);
   padding: var(--card-pad-standard);
   margin-bottom: var(--space-4);
@@ -65,9 +65,9 @@
 
 .heroMetaStrip {
   margin-top: var(--space-3);
-  border-radius: 12px;
+  border-radius: var(--radius-card);
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(173, 187, 205, 0.14);
+  border: 1px solid var(--border-1);
   color: var(--text-2);
   padding: var(--space-2) var(--space-3);
 }
@@ -78,25 +78,25 @@
 }
 
 .shared-card {
-  border-color: rgba(173, 187, 205, 0.14);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0)), var(--surface-1);
+  border-color: var(--border-1);
+  background: var(--surface-1);
   box-shadow: var(--shadow-1);
 }
 
 .shared-card--primary {
-  border-color: rgba(122, 145, 186, 0.28);
-  background: linear-gradient(180deg, rgba(63, 95, 151, 0.14), rgba(63, 95, 151, 0.04)), var(--surface-2);
+  border-color: rgba(163, 190, 230, 0.3);
+  background: var(--surface-2);
 }
 
 .shared-card--subtle {
   background: rgba(255, 255, 255, 0.03);
-  border-color: rgba(173, 187, 205, 0.12);
+  border-color: var(--border-1);
 }
 
 .pageHeaderPill,
 .btn,
 .btn-v {
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 0.9rem;
   letter-spacing: 0.01em;
   font-weight: 600;
@@ -113,7 +113,7 @@
 }
 
 .btn--secondary {
-  background: rgba(59, 110, 116, 0.16);
+  background: rgba(75, 127, 134, 0.2);
 }
 
 .fieldLabel {
@@ -126,9 +126,9 @@
 input,
 textarea,
 select {
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(173, 187, 205, 0.2);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-1);
 }
 
 .emptyState {
@@ -185,10 +185,10 @@ select {
   min-height: 72px;
   padding: var(--space-2);
   padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(18, 24, 33, 0.97), rgba(18, 24, 33, 0.9));
-  border: 1px solid rgba(173, 187, 205, 0.3);
-  border-radius: calc(var(--radius-lg) + 2px);
-  box-shadow: 0 -1px 0 rgba(173, 187, 205, 0.16), 0 14px 28px rgba(0, 0, 0, 0.42);
+  background: rgba(15, 23, 34, 0.94);
+  border: 1px solid var(--border-1);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 -1px 0 rgba(175, 191, 214, 0.16), 0 8px 20px rgba(6, 11, 19, 0.36);
   backdrop-filter: blur(12px);
   z-index: 20;
 }
@@ -206,8 +206,8 @@ select {
 
 .tab.shared-nav-item.is-active {
   color: #f6faff;
-  background: linear-gradient(180deg, rgba(63, 95, 151, 0.34), rgba(63, 95, 151, 0.16));
-  box-shadow: inset 0 0 0 1px rgba(173, 198, 235, 0.32);
+  background: rgba(83, 121, 190, 0.24);
+  box-shadow: inset 0 0 0 1px rgba(163, 190, 230, 0.32);
 }
 
 .tab.shared-nav-item .tab-icon,
@@ -258,7 +258,7 @@ select {
 
   .heroModule,
   .shared-card {
-    border-radius: 20px;
+    border-radius: var(--radius-card);
   }
 }
 
