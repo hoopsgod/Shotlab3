@@ -18,6 +18,7 @@ import HeroBanner from "./components/HeroBanner";
 import BrandLogo from "./components/BrandLogo";
 import ContextSummary from "./components/ContextSummary";
 import ViewportPreviewToggle from "./components/ViewportPreviewToggle";
+import MobileFocusPanel from "./components/MobileFocusPanel";
 import spacing from "./spacing";
 import UI_TOKENS from "./styles/tokens";
 import { cloudStore } from "./lib/cloudStore";
@@ -2798,40 +2799,20 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
       const inactive=ups.filter(p=>!activeThisWeek.has(p.email));
       return <>
-        <div className="heroModule" style={{marginBottom:16,padding:"18px 18px 16px",gap:14}}>
-          <div className="heroHead" style={{alignItems:"flex-start"}}>
-            <div>
-              <div className="heroKicker" style={{color:PAGE_ACCENTS.feed.accent,fontSize:12,letterSpacing:"0.09em"}}>Team dashboard</div>
-              <div style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:1,letterSpacing:1.1,marginTop:4}}>Today&apos;s pulse</div>
-              <div className="heroSub" style={{marginTop:8,maxWidth:560,color:T.SUB}}>Quickly scan participation, top output, and your next move to keep team momentum high.</div>
-            </div>
-            <button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setTab("players")} style={{fontWeight:700}}>Open roster</button>
-          </div>
-
-          <div className="heroBodyGrid" style={{gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:10,marginTop:2}}>
-            <div className="heroStatGroup" style={{padding:"10px 10px"}}>
-              <div className="heroStatVal" style={{color:activeToday>0?VOLT:MUTED,fontSize:31,lineHeight:1}}>{activeToday}</div>
-              <div className="heroStatLbl" style={{marginTop:4,fontSize:10}}>{`Active today / ${totalPlayers}`}</div>
-            </div>
-            <div className="heroStatGroup" style={{padding:"10px 10px"}}>
-              <div className="heroStatVal" style={{color:CYAN,fontSize:31,lineHeight:1}}>{nextEvRsvps}</div>
-              <div className="heroStatLbl" style={{marginTop:4,fontSize:10}}>{nextEv?"Next event RSVPs":"RSVPs"}</div>
-            </div>
-            <div className="heroStatGroup" style={{padding:"10px 10px"}}>
-              <div className="heroStatVal" style={{color:inactive.length>0?ORANGE:VOLT,fontSize:31,lineHeight:1}}>{inactive.length}</div>
-              <div className="heroStatLbl" style={{marginTop:4,fontSize:10}}>Need check-in</div>
-            </div>
-            <div className="heroStatGroup" style={{padding:"10px 10px"}}>
-              <div className="heroClamp" style={{fontFamily:FD,color:LIGHT,fontSize:16,lineHeight:1.15,letterSpacing:"var(--tracking-tight)"}} title={nextEv?.title||"No event"}>{nextEv?nextEv.title:"No event scheduled"}</div>
-              <div className="heroStatLbl" style={{marginTop:6,fontSize:10}}>{nextEv?`${nextEv.date.slice(5)} · ${nextEv.time}`:"Create this week&apos;s session"}</div>
-            </div>
-          </div>
-
-          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"1.2fr 1fr",gap:10,marginTop:2}}>
-            <div className="heroMetaStrip" style={{marginTop:0,color:topWeek?LIGHT:T.SUB}}>{topWeek?`Top scorer this week: ${(players.find(p=>p.email===topWeek.email)?.name||topWeek.name||topWeek.email.split("@")[0])} · ${topWeek.total} pts`:"No scores yet this week"}</div>
-            <div className="heroMetaStrip" style={{marginTop:0,color:inactive.length>0?ORANGE:VOLT}}>{inactive.length>0?`${inactive.length} player${inactive.length>1?"s":""} need a check-in`:"All players active this week"}</div>
-          </div>
-        </div>
+        <MobileFocusPanel
+          accent={PAGE_ACCENTS.feed.accent}
+          goal="Keep team momentum visible"
+          summary="Check participation first, then coach the next move."
+          metricLabel={`Primary metric · Active today / ${totalPlayers}`}
+          metricValue={activeToday}
+          primaryActionLabel="Review roster"
+          onPrimaryAction={()=>setTab("players")}
+          secondaryLabel="See secondary status"
+        >
+          <div className="heroMetaStrip" style={{marginTop:0,color:topWeek?LIGHT:T.SUB}}>{topWeek?`Top scorer: ${(players.find(p=>p.email===topWeek.email)?.name||topWeek.name||topWeek.email.split("@")[0])} · ${topWeek.total} pts`:"No scores yet this week"}</div>
+          <div className="heroMetaStrip" style={{marginTop:8,color:inactive.length>0?ORANGE:VOLT}}>{inactive.length>0?`${inactive.length} player${inactive.length>1?"s":""} need check-in`:"All players active this week"}</div>
+          <div className="heroMetaStrip" style={{marginTop:8,color:T.SUB}}>{nextEv?`Next event: ${nextEv.title} · ${nextEv.date} ${nextEv.time} · ${nextEvRsvps} RSVPs`:"No event scheduled"}</div>
+        </MobileFocusPanel>
       </>
     })()}
 
@@ -2843,7 +2824,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   </div>}
 
   {/** DRILLS */}
-  {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><PageHeader title="DRILLS" subtitle="Skill plans, assignments, and drill library" accent="cyan" icon={<DrillIcon type="ft" size={22} color={PAGE_ACCENTS.drills.accent}/>} actionLabel="Add" onAction={()=>setShowNewDrill(true)} /><div className="heroModule"><div className="heroHead"><div><div className="heroKicker" style={{color:PAGE_ACCENTS.drills.accent}}>QUICK START DRILL</div><div className="heroSub">{drills.length} total drills ready to run today</div></div><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowNewDrill(true)}>Add Drill</button></div><div className="drillsMetrics" style={{marginTop:10,marginBottom:0}}><div className="heroStat drillsMetricTile"><div className="heroStatVal">{drills.length}</div><div className="heroStatLbl">ACTIVE</div></div><div className="heroStat drillsMetricTile"><div className="heroStatVal">{programDrills.length}</div><div className="heroStatLbl">PROGRAM</div></div></div><div className="heroMetaStrip" style={{marginTop:8}}>Next action: assign program drills and review leaderboard entries for each session.</div><div className="heroActionRow"><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth"})}>Manage Drills</button><button className="pageHeaderPill" onClick={()=>setShowNewDrill(true)}>Quick Add</button></div></div>
+  {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><PageHeader title="DRILLS" subtitle="Skill plans, assignments, and drill library" accent="cyan" icon={<DrillIcon type="ft" size={22} color={PAGE_ACCENTS.drills.accent}/>} actionLabel="Add" onAction={()=>setShowNewDrill(true)} /><MobileFocusPanel accent={PAGE_ACCENTS.drills.accent} goal="Keep drill library game-ready" summary="Prioritize adding or updating drills players run this week." metricLabel="Primary metric · Active drills" metricValue={drills.length} primaryActionLabel="Add drill" onPrimaryAction={()=>setShowNewDrill(true)} secondaryLabel="See program drill status"><div className="heroMetaStrip" style={{marginTop:0}}>Program drills configured: {programDrills.length}/7</div><div className="heroMetaStrip" style={{marginTop:8,color:T.SUB}}>Secondary action: review drill leaderboards after assigning each drill.</div></MobileFocusPanel>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Drill Management" s={`${drills.length} active`} identity/>
     <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
     <div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12,marginBottom:14}}>
@@ -2912,7 +2893,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   </div>}
 
   {/* EVENTS */}
-  {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} actionLabel={showAdd?"Close":"Create"} onAction={()=>setShowAdd(!showAdd)} /><div className="heroModule"><div className="heroHead"><div><div className="heroKicker" style={{color:PAGE_ACCENTS.events.accent}}>NEXT EVENT</div><div className="heroSub">{nextEvent?`${nextEvent.title} · ${nextEvent.date} ${nextEvent.time}`:"No event scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAdd(true)}>Create Event</button></div><div className="heroMetaStrip">{nextEvent?`Attendance check: ${rsvps.filter(r=>r.eventId===nextEvent.id).length} RSVPs locked in.`:"Add an event to set the week rhythm."}</div><div className="heroActionRow"><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth"})}>Manage Events</button><button className="pageHeaderPill" onClick={()=>setShowAdd(true)}>Quick Create</button></div></div>
+  {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} actionLabel={showAdd?"Close":"Create"} onAction={()=>setShowAdd(!showAdd)} /><MobileFocusPanel accent={PAGE_ACCENTS.events.accent} goal="Fill upcoming sessions" summary="Get the next event posted so players can RSVP early." metricLabel="Primary metric · Next event RSVPs" metricValue={nextEvent?rsvps.filter(r=>r.eventId===nextEvent.id).length:0} primaryActionLabel="Create event" onPrimaryAction={()=>setShowAdd(true)} secondaryLabel="See schedule status"><div className="heroMetaStrip" style={{marginTop:0,color:T.SUB}}>{nextEvent?`${nextEvent.title} · ${nextEvent.date} ${nextEvent.time}`:"No event scheduled"}</div><div className="heroMetaStrip" style={{marginTop:8,color:T.SUB}}>{events.length} total events in calendar</div></MobileFocusPanel>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Event Management" s={`${events.length} total`} identity/>
     <button onClick={()=>setShowAdd(!showAdd)} className="btn-v cta-primary" style={{marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
@@ -2968,7 +2949,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       </div>})}
   </div>}
 
-  {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><PageHeader title="PLAYERS" subtitle="Roster insights, development, and availability" accent="purple" icon={<UsersIcon size={20} color={PAGE_ACCENTS.players.accent}/>} actionLabel="Add" onAction={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})} /><div className="heroModule"><div className="heroHead"><div><div className="heroKicker" style={{color:PAGE_ACCENTS.players.accent}}>ROSTER SNAPSHOT</div><div className="heroSub">{ups.length} players on roster</div></div><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})}>Add Player</button></div><div className="heroBodyGrid"><div className="heroStatGroup"><div className="heroStatTop"><div className="heroStatVal" style={{color:PAGE_ACCENTS.players.accent}}>{ups.length}</div></div><div className="heroStatLbl">TOTAL ROSTER</div></div><div className="heroStatGroup"><div className="heroStatTop"><div className="heroStatVal" style={{color:inactivePlayersCount>0?ORANGE:VOLT}}>{inactivePlayersCount}</div></div><div className="heroStatLbl">INACTIVE THIS WEEK</div></div></div></div>
+  {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><PageHeader title="PLAYERS" subtitle="Roster insights, development, and availability" accent="purple" icon={<UsersIcon size={20} color={PAGE_ACCENTS.players.accent}/>} actionLabel="Add" onAction={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})} /><MobileFocusPanel accent={PAGE_ACCENTS.players.accent} goal="Grow and activate the roster" summary="Add players first, then follow up with inactive athletes." metricLabel="Primary metric · Inactive this week" metricValue={inactivePlayersCount} primaryActionLabel="Add player" onPrimaryAction={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})} secondaryLabel="See roster status"><div className="heroMetaStrip" style={{marginTop:0,color:T.SUB}}>Total roster: {ups.length}</div><div className="heroMetaStrip" style={{marginTop:8,color:inactivePlayersCount>0?ORANGE:VOLT}}>{inactivePlayersCount>0?"Focus check-ins after adding players":"Roster is fully active this week"}</div></MobileFocusPanel>
     <div id="coach-add-player-form" className="accent-card" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:12}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:8}}>ADD PLAYER TO ROSTER</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
