@@ -764,10 +764,13 @@ const _BUTTON_SYSTEM_CSS=`:root{--lime:var(--accent);--btn-height:48px;--btn-hei
 .btn:focus-visible{outline:2px solid var(--lime);outline-offset:2px;}
 @media (hover:hover) and (pointer:fine){.btn:hover{filter:brightness(1.06);}}
 .btn:active{transform:scale(0.98);}
-.btn-primary{border:none;background:var(--btn-primary-bg);color:var(--btn-primary-fg);box-shadow:none;}
-.btn-primary:active{background:var(--btn-primary-bg);}
-.btn-secondary{background:transparent;border:1px solid rgba(255,255,255,0.22);color:var(--text-2);box-shadow:none;opacity:.9;}
-.btn-secondary:active{background:rgba(255,255,255,0.02);}
+.btn-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:#FF5C1A;color:#ffffff;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:0 24px;height:48px;border:none;border-radius:12px;cursor:pointer;white-space:nowrap;box-shadow:0 0 0 1px rgba(255,92,26,.5),0 6px 20px rgba(255,92,26,.4);transition:all .15s ease;}
+.btn-primary:hover{box-shadow:0 0 0 1px rgba(255,92,26,.7),0 10px 28px rgba(255,92,26,.5);transform:translateY(-1px);}
+.btn-primary:active{transform:translateY(1px);box-shadow:0 2px 8px rgba(255,92,26,.4);}
+.btn-secondary{display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,.07);color:#F0EEE8;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:0 20px;height:44px;border:1px solid rgba(255,255,255,.12);border-radius:12px;cursor:pointer;white-space:nowrap;transition:all .15s ease;}
+.btn-secondary:hover{background:rgba(255,255,255,.11);border-color:rgba(255,255,255,.2);}
+.btn-ghost-icon{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center;color:#7A7E8A;cursor:pointer;transition:background .15s,color .15s;flex-shrink:0;}
+.btn-ghost-icon:hover{background:rgba(255,255,255,.1);color:#F0EEE8;}
 .btn-link{min-height:40px;height:40px;padding:0 12px;background:transparent;border:none;border-radius:var(--btn-radius);color:var(--text-2);font-size:13px;letter-spacing:0.08em;font-weight:700;text-transform:uppercase;opacity:.92;}
 .btn-link:hover,.btn-link:focus-visible{text-decoration:underline;}
 .btn-v{transition:transform .1s ease,box-shadow .2s ease;position:relative;overflow:hidden}
@@ -778,13 +781,8 @@ const _BUTTON_SYSTEM_CSS=`:root{--lime:var(--accent);--btn-height:48px;--btn-hei
 .cta-secondary{background:transparent!important;border:1px solid rgba(255,255,255,0.22)!important;color:var(--text-2)!important;border-radius:var(--btn-radius)!important;letter-spacing:0.08em!important;opacity:.9;}
 .cta-secondary-link{background:transparent;border:none;color:var(--text-2);font-size:13px;letter-spacing:0.08em;font-weight:700;text-transform:uppercase;min-height:40px;padding:0 12px;border-radius:var(--btn-radius);opacity:.92;}
 .cta-secondary-link:hover,.cta-secondary-link:focus-visible{text-decoration:underline;}
-.icon-btn-square{width:44px;height:44px;border-radius:var(--btn-radius);background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.22);transition:background-color 150ms ease,border-color 150ms ease,transform 120ms ease;opacity:.9;}
-.icon-btn-square svg path{stroke:var(--lime);}
-.icon-btn-square:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.22);}
-.icon-btn-square:active{transform:scale(0.98);}
-.icon-btn-square:focus-visible{outline:2px solid var(--lime);outline-offset:2px;}
 .drill-row-arrow{width:44px;height:44px;border-radius:12px;background:var(--btn-secondary-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--btn-secondary-border);}
-@media (prefers-reduced-motion:reduce){.btn,.icon-btn-square,.drill-row-arrow,.cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{transition:none!important;transform:none!important;}}`
+@media (prefers-reduced-motion:reduce){.btn,.btn-ghost-icon,.drill-row-arrow,.cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{transition:none!important;transform:none!important;}}`
 
 const Styles=()=><><style>{_STYLES_CSS}</style><style>{_BUTTON_SYSTEM_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style><style>{_EMPTY_STATE_CSS}</style><style>{_LIST_ROW_SYSTEM_CSS}</style></>;
 
@@ -1304,7 +1302,7 @@ return <div style={{background:palette.bg,border:palette.border,borderRadius:16,
 <div style={{fontFamily:FD,color:palette.title,fontSize:13,letterSpacing:1.8,textTransform:"uppercase",lineHeight:1.1}}>{title}</div>
 <div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.45,marginTop:6}}>{body}</div>
 </div>
-{onDismiss&&<button onClick={onDismiss} aria-label="Dismiss onboarding tip" style={{background:"transparent",border:`1px solid ${BORDER_CLR}`,color:MUTED,borderRadius:8,padding:"4px 8px",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer",flexShrink:0}}>Got it</button>}
+{onDismiss&&<button onClick={onDismiss} aria-label="Dismiss onboarding tip" className="btn-secondary" style={{height:44,padding:"0 20px",flexShrink:0}}>GOT IT</button>}
 </div>;
 }
 
@@ -1914,7 +1912,7 @@ return <SectionContainer className="fade-up">
       <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:1.2,lineHeight:1}}>Duels</div>
       <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4,maxWidth:290,lineHeight:1.35}}>Challenge teammates, respond fast, and stack wins in drill battles.</div>
     </div>
-    <button onClick={()=>setActiveFilter("pending")} className="btn-v" style={{padding:"7px 10px",fontSize:10,letterSpacing:1.2,background:`${ORANGE}26`,border:`1px solid ${ORANGE}66`,color:ORANGE,whiteSpace:"nowrap",borderRadius:999}}>RESPOND NOW</button>
+    <button onClick={()=>setActiveFilter("pending")} className="btn-primary btn-v" style={{padding:"0 24px",height:48}}>RESPOND NOW</button>
   </div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:7,marginTop:10}}>
     <div style={{background:"#0D0D0D",border:`1px solid ${ORANGE}33`,borderRadius:10,padding:"7px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:8,textTransform:"uppercase",letterSpacing:1}}>Pending</div><div style={{fontFamily:FD,color:ORANGE,fontSize:19,lineHeight:1.1}}>{incomingPending.length}</div></div>
@@ -2191,7 +2189,7 @@ return <button type="button" onClick={onClick} className={modeCardClass} style={
         <div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
       </div>
     </div>
-    <div className="icon-btn-square" style={{boxShadow:"none"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
+    <button type="button" aria-label={`Open ${title}`} className="btn-ghost-icon" style={{boxShadow:"none"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></button>
   </div>
   <div className="mode-card-stats-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10,alignItems:"stretch"}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color}/>)}</div>
 </button>
