@@ -7,6 +7,7 @@ import CoachHero from "./components/CoachHero";
 import CoachMiniHeader from "./components/CoachMiniHeader";
 import Button from "./components/ui/Button";
 import EmptyState from "./components/EmptyState";
+import LoadingState from "./components/LoadingState";
 import { TeamIdentity, TeamWatermark, TeamBrandPreview } from "./components/TeamBranding";
 import DrillDetail from "./components/DrillDetail";
 import ProgressCharts from "./components/ProgressCharts";
@@ -102,7 +103,7 @@ const INSTRUCTIONAL_CONTENT=[
 {id:"floater-series",title:"Floater Touch Series (Paint Reads)",description:"Coach-led scoring package for one-foot and two-foot floaters with pace changes and read-based release points.",videoUrl:"https://www.youtube.com/embed?listType=search&list=basketball+floater+drill",thumbnailUrl:"",thumbnailAlt:"YouTube search results for floater drill clips",videoCaption:"Video: YouTube floater drill clips for lane-entry pacing, release windows, and soft touch off one foot or two.",isPublished:true,availableIn:["duels"],techniqueTips:["Get the defender on your hip before lifting into the shot.","Pick a high target and release before the shot blocker recovers.","Alternate left and right finishes each set to stay unpredictable."]},
 {id:"contact-finishing",title:"Contact Finishing Series",description:"Finishing-through-contact sequence for guards and wings.",videoUrl:"",thumbnailUrl:"",thumbnailAlt:"",videoCaption:"",isPublished:false,availableIn:["program","duels"],techniqueTips:[]}
 ];
-const getInstructionalContent=(surface)=>INSTRUCTIONAL_CONTENT.filter(item=>item.isPublished&&item.videoUrl&&item.availableIn.includes(surface));
+const getInstructionalContent=(surface)=>INSTRUCTIONAL_CONTENT.filter(item=>item.availableIn.includes(surface));
 const EVENTS_INIT=[
 {id:1,title:"OPEN GYM RUN",date:"2026-02-28",time:"6:00 PM",location:"Main Gym — Court 1",desc:"Full-court 5v5 runs. First 20 players.",type:"run"},
 {id:2,title:"SHOOTING CLINIC",date:"2026-03-05",time:"4:00 PM",location:"Training Facility — Bay 3",desc:"Guided shooting with film review.",type:"clinic"},
@@ -1128,7 +1129,7 @@ useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.locat
 useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);
 useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.message||"unknown"});const onRej=(e)=>trackEvent("app_error",{kind:"unhandledrejection",message:e?.reason?.message||String(e?.reason||"unknown")});window.addEventListener("error",onErr);window.addEventListener("unhandledrejection",onRej);return()=>{window.removeEventListener("error",onErr);window.removeEventListener("unhandledrejection",onRej);};},[trackEvent]);
 
-if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
+if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:16,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,width:"min(460px,100%)"}}><LoadingState variant="chart" title="Loading your Shotlab workspace" description="Syncing drills, media, team activity, and coaching data." /></div></div></>;
 
 return <><Styles/>
 {isDesktopViewport&&<ViewportPreviewToggle mode={previewMode} onChange={setPreviewMode}/>}
