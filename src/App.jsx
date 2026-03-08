@@ -1922,7 +1922,7 @@ return <SectionContainer className="fade-up">
       <div className="feature-hero-card__headline">Duels</div>
       <div className="feature-hero-card__body">Challenge teammates, respond fast, and stack wins in drill battles.</div>
     </div>
-    <button onClick={()=>setActiveFilter("pending")} className="btn-v" style={{padding:"7px 10px",fontSize:10,letterSpacing:1.2,background:`${ORANGE}26`,border:`1px solid ${ORANGE}66`,color:ORANGE,whiteSpace:"nowrap",borderRadius:999}}>RESPOND NOW</button>
+    <button onClick={()=>setActiveFilter("pending")} className="btn btn-v btn--primary btn--md" style={{padding:"0 12px",fontSize:10,letterSpacing:1.2,whiteSpace:"nowrap",borderRadius:999}}>RESPOND NOW</button>
   </div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:7,marginTop:10}}>
     <div style={{background:"#0D0D0D",border:`1px solid ${ORANGE}33`,borderRadius:10,padding:"7px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:8,textTransform:"uppercase",letterSpacing:1}}>Pending</div><div style={{fontFamily:FD,color:ORANGE,fontSize:19,lineHeight:1.1}}>{incomingPending.length}</div></div>

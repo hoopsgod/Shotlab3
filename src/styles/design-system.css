@@ -303,15 +303,15 @@ a.interactive-card:focus-visible {
 
 .btn--primary,
 .cta-primary {
-  background: var(--color-action-primary);
-  color: var(--color-text-primary);
-  border-color: rgba(122, 145, 186, 0.55);
+  background: var(--color-action-primary-strong);
+  color: #0b111a;
+  border-color: rgba(182, 201, 224, 0.86);
 }
 
 .btn--secondary {
-  background: rgba(75, 127, 134, 0.18);
-  color: #d2e2e5;
-  border-color: rgba(122, 168, 176, 0.4);
+  background: rgba(139, 162, 198, 0.18);
+  color: var(--color-text-primary);
+  border-color: rgba(169, 191, 220, 0.54);
 }
 
 .btn[role="switch"] {
@@ -322,6 +322,13 @@ a.interactive-card:focus-visible {
   background: var(--color-highlight-warm-soft);
   border-color: rgba(182, 170, 148, 0.48);
   color: #e4d8c6;
+}
+
+
+.btn--ghostIcon {
+  background: rgba(175, 191, 214, 0.12);
+  color: var(--color-text-secondary);
+  border-color: rgba(150, 171, 199, 0.4);
 }
 
 .btn--ghost,

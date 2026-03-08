@@ -9,7 +9,7 @@ function IconButton({ label, onClick, children, borderColor, color }) {
       type="button"
       aria-label={label}
       onClick={onClick}
-      variant="tertiary"
+      variant="ghostIcon"
       iconOnly
       className="coach-icon-btn"
       style={{ border: `1px solid ${borderColor}`, color, opacity: 0.9 }}

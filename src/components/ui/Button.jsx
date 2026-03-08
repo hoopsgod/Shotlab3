@@ -1,6 +1,7 @@
 const VARIANT_CLASS_MAP = {
   primary: "btn--primary",
   secondary: "btn--secondary",
+  ghostIcon: "btn--ghostIcon",
   ghost: "btn--ghost",
   tertiary: "btn--ghost",
   destructive: "btn--destructive",
