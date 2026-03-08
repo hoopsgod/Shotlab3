@@ -786,7 +786,9 @@ const _BUTTON_SYSTEM_CSS=`:root{--lime:var(--accent);--btn-height:48px;--btn-hei
 .drill-row-arrow{width:44px;height:44px;border-radius:12px;background:var(--btn-secondary-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid var(--btn-secondary-border);}
 @media (prefers-reduced-motion:reduce){.btn,.icon-btn-square,.drill-row-arrow,.cta-primary,.cta-primary-accent,.cta-brand,.cta-danger{transition:none!important;transform:none!important;}}`
 
-const Styles=()=><><style>{_STYLES_CSS}</style><style>{_BUTTON_SYSTEM_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style><style>{_EMPTY_STATE_CSS}</style><style>{_LIST_ROW_SYSTEM_CSS}</style></>;
+const _AMBIENT_DEPTH_CSS=`.screen-home{background:radial-gradient(ellipse 65% 45% at 85% 5%,rgba(255,92,26,0.14) 0%,transparent 60%),radial-gradient(ellipse 45% 35% at 10% 90%,rgba(0,212,255,0.07) 0%,transparent 55%),#0A0B0F;}.screen-duels{background:radial-gradient(ellipse 70% 40% at 50% 0%,rgba(255,92,26,0.16) 0%,transparent 65%),radial-gradient(ellipse 50% 30% at 90% 100%,rgba(255,59,92,0.08) 0%,transparent 50%),#0A0B0F;}.screen-strength{background:radial-gradient(ellipse 60% 40% at 20% 10%,rgba(0,212,255,0.10) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 80% 85%,rgba(30,224,127,0.07) 0%,transparent 50%),#0A0B0F;}.screen-events{background:radial-gradient(ellipse 55% 40% at 75% 5%,rgba(255,184,48,0.10) 0%,transparent 55%),radial-gradient(ellipse 40% 30% at 15% 80%,rgba(255,92,26,0.07) 0%,transparent 50%),#0A0B0F;}.screen-profile{background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(0,212,255,0.10) 0%,transparent 60%),#0A0B0F;}.card{box-shadow:0 1px 0 rgba(255,255,255,0.04) inset,0 -1px 0 rgba(0,0,0,0.3) inset,0 4px 24px rgba(0,0,0,0.4),0 1px 4px rgba(0,0,0,0.5)!important;}.section-divider,.card hr,.card [data-card-divider="true"],hr{height:1px;border:none!important;background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.08) 20%,rgba(255,255,255,0.08) 80%,transparent 100%)!important;margin:8px 0!important;}.section-divider{display:block;}::-webkit-scrollbar{width:4px!important;}::-webkit-scrollbar-track{background:transparent!important;}::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1)!important;border-radius:99px;}::-webkit-scrollbar-thumb:hover{background:rgba(255,92,26,0.4)!important;}[style*="border-bottom"],[style*="borderBottom"]{border-bottom:none!important;background-image:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.08) 20%,rgba(255,255,255,0.08) 80%,transparent 100%)!important;background-repeat:no-repeat!important;background-size:100% 1px!important;background-position:left bottom!important;}`;
+
+const Styles=()=><><style>{_STYLES_CSS}</style><style>{_BUTTON_SYSTEM_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style><style>{_EMPTY_STATE_CSS}</style><style>{_LIST_ROW_SYSTEM_CSS}</style><style>{_AMBIENT_DEPTH_CSS}</style></>;
 
 // ═══════════════════════════════════════
 // APP ROOT
@@ -1497,6 +1499,7 @@ const onTM=e=>{if(!tStart)return;const el=e.currentTarget;if(el.scrollTop>0)retu
 const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else setPullY(0);setTStart(0)};
 const greeting=(()=>{const hour=new Date().getHours();if(hour<12)return "Good morning";if(hour<17)return "Good afternoon";return "Good evening";})();
 const firstName=((u?.name||u?.firstName||u?.displayName||"").trim().split(/\s+/)[0]||"Baller");
+const screenClassName=tab==="home"?"screen-home":tab==="duels"?"screen-duels":tab==="sc"?"screen-strength":tab==="program"||tab==="events"?"screen-events":tab==="profile"||tab==="settings"?"screen-profile":"";
 
 return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
 <BrandBackdrop/>
@@ -1568,7 +1571,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 </div>
 {u.isCoach&&<div style={{height:28,background:`linear-gradient(90deg, ${alphaFromHex(coachPrimary,0.14)} 0%, transparent 100%)`,borderBottom:`1px solid ${alphaFromHex(coachSecondary,0.3)}`,display:"flex",alignItems:"center",padding:`0 var(--page-gutter)`,gap:"var(--space-2)"}}><WhistleIcon size={12} color={coachPrimary}/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:alphaFromHex(coachPrimary,0.84)}}>COACH VIEW — FULL ACCESS</span></div>}
 
-<div style={{flex:1,padding:isNarrow?"12px 12px 90px":"14px 16px 90px",overflowY:"auto",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
+<div className={screenClassName} style={{flex:1,padding:isNarrow?"12px 12px 90px":"14px 16px 90px",overflowY:"auto",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
   {/* Pull-to-refresh basketball */}
   {pullY>5&&<div style={{position:"absolute",top:-44,left:"50%",transform:"translateX(-50%)",textAlign:"center",opacity:Math.min(pullY/30,1)}}>
     <svg width="24" height="24" viewBox="0 0 40 40" fill="none" style={{animation:pullY>40?"bbBounce .5s ease infinite":"none"}}><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="2.5"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="1.5"/><path d="M20 3v34" stroke={ORANGE} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/></svg>
@@ -2944,7 +2947,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>
 {u.isCoach&&<div style={{height:28,background:`linear-gradient(90deg, ${alphaFromHex(coachAccent,0.18)} 0%, transparent 100%)`,borderBottom:`1px solid ${alphaFromHex(coachAccent,0.32)}`,display:"flex",alignItems:"center",padding:`0 var(--page-gutter)`,gap:"var(--space-2)"}}><WhistleIcon size={12} color={coachAccent}/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:alphaFromHex(coachAccent,0.84)}}>COACH VIEW — FULL ACCESS</span></div>}
 
-  <div style={{flex:1,padding:`${showMiniHeader?"88px":"var(--space-4)"} var(--page-gutter) 90px`,overflowY:"auto",position:"relative",zIndex:1}}>
+  <div className={screenClassName} style={{flex:1,padding:`${showMiniHeader?"88px":"var(--space-4)"} var(--page-gutter) 90px`,overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}>
     <PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
