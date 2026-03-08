@@ -1,3 +1,26 @@
+:root {
+  --bg: #0A0B0F;
+  --surface: #111318;
+  --surface2: #181C24;
+  --border: rgba(255, 255, 255, 0.07);
+  --text: #F0EEE8;
+  --muted: #7A7E8A;
+
+  /* Backward-compatible aliases used throughout existing styles. */
+  --bg-0: var(--bg);
+  --surface-1: var(--surface);
+  --surface-2: var(--surface2);
+  --border-1: var(--border);
+  --text-1: var(--text);
+  --text-2: var(--text);
+  --text-3: var(--muted);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text);
+}
+
 /* =========================
    Micro UI Polish: Progress
    ========================= */
