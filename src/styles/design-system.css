@@ -71,6 +71,10 @@ Implementation plan (small-scope motion pass):
   --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.26);
   --shadow-medium: 0 14px 30px rgba(0, 0, 0, 0.32);
   --shadow-focus: 0 0 0 2px var(--color-bg-canvas), 0 0 0 4px var(--color-focus-ring), 0 0 0 6px var(--color-focus-shadow);
+  --motion-duration-fast: 120ms;
+  --motion-duration-base: 160ms;
+  --motion-duration-slow: 200ms;
+  --motion-ease-standard: cubic-bezier(0.2, 0, 0.2, 1);
 
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
@@ -180,7 +184,7 @@ textarea {
   border: 1px solid var(--color-border-subtle);
   background: linear-gradient(180deg, rgba(255,255,255,0.025), rgba(255,255,255,0)), var(--surface-1);
   box-shadow: var(--shadow-soft);
-  transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  transition: transform var(--motion-duration-base) var(--motion-ease-standard), box-shadow var(--motion-duration-base) var(--motion-ease-standard), border-color var(--motion-duration-base) var(--motion-ease-standard);
 }
 
 .shared-card--primary {
@@ -217,7 +221,7 @@ textarea {
 }
 
 .interactive-card {
-  transition: transform 140ms ease, box-shadow 160ms ease, border-color 160ms ease, background-color 160ms ease;
+  transition: transform var(--motion-duration-base) var(--motion-ease-standard), box-shadow var(--motion-duration-base) var(--motion-ease-standard), border-color var(--motion-duration-base) var(--motion-ease-standard), background-color var(--motion-duration-base) var(--motion-ease-standard);
   cursor: pointer;
 }
 
@@ -253,7 +257,7 @@ a.interactive-card:focus-visible {
   justify-content: center;
   gap: var(--space-2);
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+  transition: background-color var(--motion-duration-base) var(--motion-ease-standard), color var(--motion-duration-base) var(--motion-ease-standard), border-color var(--motion-duration-base) var(--motion-ease-standard), box-shadow var(--motion-duration-base) var(--motion-ease-standard), transform var(--motion-duration-fast) var(--motion-ease-standard), opacity var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .btn--md { min-height: var(--btn-h-md); height: var(--btn-h-md); }
@@ -261,6 +265,11 @@ a.interactive-card:focus-visible {
 
 .btn:active,
 .btn-v:active { transform: translateY(1px); }
+
+.btn:disabled,
+.btn-v:disabled {
+  transition: opacity var(--motion-duration-fast) var(--motion-ease-standard);
+}
 
 @media (hover: hover) and (pointer: fine) {
   .btn:hover,
@@ -421,6 +430,18 @@ a,
   font-size: 0.82rem;
   letter-spacing: 0.04em;
   color: var(--text-2);
+  transition: background-color var(--motion-duration-base) var(--motion-ease-standard), color var(--motion-duration-base) var(--motion-ease-standard), box-shadow var(--motion-duration-base) var(--motion-ease-standard), transform var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sidebar-nav .nav-item:hover {
+    transform: translateY(-1px);
+    background: rgba(173, 187, 205, 0.06);
+  }
+}
+
+.sidebar-nav .nav-item:active {
+  transform: translateY(1px);
 }
 
 .sidebar-nav .nav-item svg,
@@ -483,14 +504,17 @@ a,
 @media (prefers-reduced-motion: reduce) {
   .btn,
   .shared-card,
-  .interactive-card {
+  .interactive-card,
+  .sidebar-nav .nav-item {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
 
   .btn:active,
   .shared-card:is(button, a, [role="button"]):hover,
-  .interactive-card:hover {
+  .interactive-card:hover,
+  .sidebar-nav .nav-item:hover,
+  .sidebar-nav .nav-item:active {
     transform: none;
   }
 }
