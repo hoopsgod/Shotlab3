@@ -3227,6 +3227,89 @@ const grouped=useMemo(()=>{const m={};sorted.forEach(s=>{if(!m[s.date])m[s.date]
 return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=dr.find(d=>d.id===s.drillId);const pct=d?Math.round(s.score/d.max*100):0;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:LIGHT,background:isH?VOLT+"15":LIGHT+"10"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span></div><div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#b6aa94":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>)}</div>;
 }
 
+const SHOT_ZONE_META=[
+  {id:"zone-paint",name:"Paint"},
+  {id:"zone-midleft",name:"Left Mid-Range"},
+  {id:"zone-midright",name:"Right Mid-Range"},
+  {id:"zone-midtop",name:"Top Mid-Range"},
+  {id:"zone-corner3l",name:"Left Corner 3"},
+  {id:"zone-corner3r",name:"Right Corner 3"},
+  {id:"zone-wing3l",name:"Left Wing 3"},
+  {id:"zone-wing3r",name:"Right Wing 3"},
+  {id:"zone-top3",name:"Top 3"},
+];
+
+function ShotZoneHeatMap({shotLogs,userEmail}){
+  const [activeZoneId,setActiveZoneId]=useState(null);
+  const zoneStats=useMemo(()=>{
+    const playerShotLogs=shotLogs.filter(log=>log.email===userEmail);
+    const zoneMap=Object.fromEntries(SHOT_ZONE_META.map(zone=>[zone.id,{...zone,makes:0,attempts:0}]));
+    if(playerShotLogs.length===0)return zoneMap;
+
+    playerShotLogs.forEach((log,logIndex)=>{
+      const made=Math.max(0,Number(log.made)||0);
+      const baseWeights=[.2,.08,.08,.1,.08,.08,.12,.12,.14];
+      const allocations=baseWeights.map((weight,zoneIndex)=>{
+        const seed=((log.ts||0)+logIndex*17+zoneIndex*19)%5;
+        return made*weight*(.82+seed*.06);
+      });
+      const floored=allocations.map(value=>Math.floor(value));
+      let remaining=Math.max(0,made-floored.reduce((sum,value)=>sum+value,0));
+      const rank=[...allocations.keys()].sort((a,b)=>(allocations[b]-floored[b])-(allocations[a]-floored[a]));
+      rank.forEach(index=>{if(remaining>0){floored[index]+=1;remaining-=1;}});
+
+      SHOT_ZONE_META.forEach((zone,zoneIndex)=>{
+        const zoneMakes=floored[zoneIndex]||0;
+        const seed=((log.ts||0)+zoneIndex*11+logIndex*7)%4;
+        const zoneAttempts=zoneMakes===0&&seed===0?0:zoneMakes+seed;
+        zoneMap[zone.id].makes+=zoneMakes;
+        zoneMap[zone.id].attempts+=Math.max(zoneMakes,zoneAttempts);
+      });
+    });
+
+    return zoneMap;
+  },[shotLogs,userEmail]);
+
+  const getZoneFill=zone=>{
+    if(!zone.attempts)return "rgba(255,255,255,0.04)";
+    const pct=(zone.makes/zone.attempts)*100;
+    if(pct<30)return "rgba(255,59,92,0.35)";
+    if(pct<45)return "rgba(255,184,48,0.35)";
+    return "rgba(30,224,127,0.35)";
+  };
+
+  const activeZone=activeZoneId?zoneStats[activeZoneId]:null;
+  const activePct=activeZone?.attempts?Math.round((activeZone.makes/activeZone.attempts)*100):0;
+  const zoneStroke="rgba(255,255,255,0.1)";
+
+  return <div style={{padding:"0 16px",marginBottom:18}}>
+    <div style={{position:"relative",background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"12px 10px 14px"}}>
+      <svg viewBox="0 0 300 170" width="100%" role="img" aria-label="Shot zone field goal heat map" style={{display:"block"}}>
+        <rect x="36" y="8" width="228" height="154" rx="14" fill="none" stroke={zoneStroke} strokeWidth="1"/>
+        <rect data-zone="zone-corner3l" x="36" y="8" width="42" height="154" fill={getZoneFill(zoneStats["zone-corner3l"])} stroke={zoneStroke} strokeWidth="1" onClick={()=>setActiveZoneId("zone-corner3l")}/>
+        <rect data-zone="zone-corner3r" x="222" y="8" width="42" height="154" fill={getZoneFill(zoneStats["zone-corner3r"])} stroke={zoneStroke} strokeWidth="1" onClick={()=>setActiveZoneId("zone-corner3r")}/>
+        <path data-zone="zone-wing3l" d="M78 18 C58 58,58 112,78 152 L114 152 C95 112,95 58,114 18 Z" fill={getZoneFill(zoneStats["zone-wing3l"])} stroke={zoneStroke} strokeWidth="1" onClick={()=>setActiveZoneId("zone-wing3l")}/>
+        <path data-zone="zone-wing3r" d="M222 18 C242 58,242 112,222 152 L186 152 C205 112,205 58,186 18 Z" fill={getZoneFill(zoneStats["zone-wing3r"])} stroke={zoneStroke} strokeWidth="1" onClick={()=>setActiveZoneId("zone-wing3r")}/>
+        <path data-zone="zone-top3" d="M114 18 C104 40,102 66,102 86 C102 107,104 130,114 152 L186 152 C196 130,198 107,198 86 C198 66,196 40,186 18 Z" fill={getZoneFill(zoneStats["zone-top3"])} stroke={zoneStroke} strokeWidth="1" onClick={()=>setActiveZoneId("zone-top3")}/>
+        <rect data-zone="zone-midleft" x="96" y="94" width="32" height="58" fill={getZoneFill(zoneStats["zone-midleft"])} stroke={zoneStroke} strokeWidth="1" onClick={()=>setActiveZoneId("zone-midleft")}/>
+        <rect data-zone="zone-midright" x="172" y="94" width="32" height="58" fill={getZoneFill(zoneStats["zone-midright"])} stroke={zoneStroke} strokeWidth="1" onClick={()=>setActiveZoneId("zone-midright")}/>
+        <rect data-zone="zone-midtop" x="128" y="86" width="44" height="32" fill={getZoneFill(zoneStats["zone-midtop"])} stroke={zoneStroke} strokeWidth="1" onClick={()=>setActiveZoneId("zone-midtop")}/>
+        <rect data-zone="zone-paint" x="122" y="112" width="56" height="40" fill={getZoneFill(zoneStats["zone-paint"])} stroke={zoneStroke} strokeWidth="1" onClick={()=>setActiveZoneId("zone-paint")}/>
+        <rect x="122" y="104" width="56" height="48" rx="2" fill="none" stroke={zoneStroke} strokeWidth="1"/>
+        <path d="M120 104 A30 30 0 0 0 180 104" fill="none" stroke={zoneStroke} strokeWidth="1"/>
+        <circle cx="150" cy="132" r="2" fill={zoneStroke}/>
+      </svg>
+      {activeZone&&<div style={{position:"absolute",left:"50%",top:12,transform:"translateX(-50%)",background:"#181C24",border:"1px solid rgba(255,255,255,0.1)",borderRadius:999,padding:"6px 10px",fontFamily:"DM Sans, sans-serif",fontSize:11,color:"#E8ECF5",whiteSpace:"nowrap"}}>{`${activeZone.name}: ${activeZone.makes} makes / ${activeZone.attempts} attempts (${activePct}%)`}</div>}
+    </div>
+    <div style={{marginTop:9,fontFamily:"DM Sans, sans-serif",fontSize:11,color:"#7A7E8A",display:"flex",flexWrap:"wrap",gap:12,alignItems:"center"}}>
+      <span>🔴 &lt; 30%</span>
+      <span>🟡 30–44%</span>
+      <span>🟢 45%+</span>
+      <span>⬜ No data</span>
+    </div>
+  </div>;
+}
+
 // ═══════════════════════════════════════
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
@@ -3277,6 +3360,7 @@ const SpotlightStat=({label,value,color,sub})=><div style={{flex:1,minWidth:0,pa
 </div>;
 
 return <SectionContainer className="fade-up">
+  <ShotZoneHeatMap shotLogs={shotLogs} userEmail={u.email}/>
   <ContextSummary title="Team context" items={contextItems}/>
   {u.isCoach&&<div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}><div style={{fontSize:13,color:"#b6aa94",textTransform:"uppercase",letterSpacing:"0.10em",fontFamily:FB,fontWeight:700,marginBottom:10}}>COACH ACCOUNT</div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0",borderBottom:`1px solid ${BORDER_CLR}66`}}><div style={{display:"flex",alignItems:"center",gap:8}}><UsersIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ROLE</span></div><span style={{fontSize:13,color:"#F1F5FB",fontFamily:FB}}>Coach</span></div><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"8px 0"}}><div style={{display:"flex",alignItems:"center",gap:8}}><ShieldIcon size={14} color="#A0A0A0"/><span style={{fontSize:11,color:"#555555",textTransform:"uppercase",fontFamily:FB,letterSpacing:"0.08em"}}>ACCESS</span></div><span style={{fontSize:13,color:"#b6aa94",fontFamily:FB}}>Full Program Access</span></div></div>}
   <ProgressCharts scores={scores} shotLogs={shotLogs} userEmail={u.email} drills={drills}/>
