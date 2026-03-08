@@ -66,10 +66,10 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <div style={{ opacity: 0.85 }}>{wordmark}</div>
-          <Button type="button" aria-label="Open settings" onClick={onOpenSettings} variant="tertiary" iconOnly className="coach-icon-btn" style={{ border: `1px solid ${borderColor}`, color: "var(--text-secondary)", opacity: 0.9 }}>
+          <Button type="button" aria-label="Open settings" onClick={onOpenSettings} variant="ghostIcon" iconOnly className="coach-icon-btn" style={{ border: `1px solid ${borderColor}`, color: "var(--text-secondary)", opacity: 0.9 }}>
             <GearIcon />
           </Button>
-          <Button type="button" aria-label="Log out" onClick={onLogout} variant="tertiary" iconOnly className="coach-icon-btn" style={{ border: `1px solid ${borderColor}`, color: mutedColor, opacity: 0.9 }}>
+          <Button type="button" aria-label="Log out" onClick={onLogout} variant="ghostIcon" iconOnly className="coach-icon-btn" style={{ border: `1px solid ${borderColor}`, color: mutedColor, opacity: 0.9 }}>
             <CloseIcon />
           </Button>
         </div>
