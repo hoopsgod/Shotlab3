@@ -46,9 +46,9 @@ function HeroBanner({
               style={{
                 fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif",
                 color: accent,
-                fontSize: 19,
+                fontSize: "var(--fs-section-title)",
                 letterSpacing: 1.6,
-                lineHeight: 1.05,
+                lineHeight: 1.18,
                 textTransform: "uppercase",
               }}
             >
@@ -59,8 +59,8 @@ function HeroBanner({
                 style={{
                   fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
                   color: "var(--text-2)",
-                  fontSize: 12,
-                  lineHeight: 1.4,
+                  fontSize: "var(--fs-body)",
+                  lineHeight: "var(--lh-body)",
                   letterSpacing: "0.01em",
                   marginTop: "var(--space-1)",
                 }}
@@ -81,7 +81,7 @@ function HeroBanner({
               borderRadius: HERO_BUTTON_RADIUS,
               padding: "var(--space-2) var(--space-3)",
               fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
-              fontSize: 11,
+              fontSize: "var(--fs-caption)",
               fontWeight: 800,
               letterSpacing: "0.02em",
               textTransform: "none",

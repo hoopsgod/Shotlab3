@@ -9,6 +9,13 @@
 }
 
 .page {
+  --h1: var(--fs-display);
+  --h2: var(--fs-screen-title);
+  --h3: var(--fs-section-title);
+  --body: var(--fs-body);
+  --meta: var(--fs-caption);
+  --text-2: var(--color-text-secondary);
+  --text-3: var(--color-text-muted);
   padding-bottom: calc(var(--nav-height, 74px) + var(--space-8) + env(safe-area-inset-bottom));
 }
 
@@ -32,16 +39,16 @@
 }
 
 .pageHeaderText h1 {
-  font-size: clamp(1.3rem, 6.2vw, 1.72rem);
-  letter-spacing: 0.03em;
-  line-height: 1.02;
+  font-size: var(--fs-screen-title);
+  letter-spacing: 0.014em;
+  line-height: 1.14;
 }
 
 .pageHeaderText p {
   margin-top: var(--space-1);
-  color: var(--text-3);
-  font-size: 0.84rem;
-  line-height: 1.35;
+  color: var(--text-2);
+  font-size: var(--fs-caption);
+  line-height: 1.56;
 }
 
 .pageAccentBar {
@@ -60,7 +67,8 @@
 
 .heroSub {
   color: var(--text-2);
-  font-size: 0.93rem;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
 }
 
 .heroMetaStrip {
@@ -117,9 +125,10 @@
 }
 
 .fieldLabel {
-  font-size: 0.74rem;
+  font-size: var(--fs-caption);
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: var(--text-2);
 }
 
 .input,
@@ -148,15 +157,16 @@ select {
 
 .emptyState__title {
   color: #eaf0fb;
-  font-size: 1.04rem;
-  line-height: 1.2;
+  font-size: var(--fs-card-title);
+  line-height: 1.32;
   letter-spacing: 0.01em;
 }
 
 .emptyState__subtitle {
-  font-size: 0.87rem;
-  line-height: 1.45;
-  opacity: 0.82;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-2);
+  opacity: 1;
   max-width: 300px;
   margin: var(--space-2) auto 0;
 }

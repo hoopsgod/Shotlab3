@@ -47,7 +47,7 @@ const StatusBadge = ({ active }) => {
         color: tone.color,
         border: `1px solid ${tone.border}`,
         background: tone.bg,
-        fontSize: "11px",
+        fontSize: "var(--fs-caption)",
         letterSpacing: "0.04em",
         textTransform: "none",
       }}
@@ -100,13 +100,13 @@ export default function PlayersScreen() {
     borderRadius: "var(--btn-radius)",
     height: "var(--btn-h-sm)",
     padding: "0 var(--btn-pad-sm)",
-    fontSize: "11px",
+    fontSize: "var(--fs-caption)",
     textTransform: "none",
     letterSpacing: "0.08em",
     cursor: "pointer",
     border: isActive ? "1px solid rgba(91, 243, 255, 0.34)" : "1px solid var(--stroke-1)",
     background: isActive ? "rgba(91, 243, 255, 0.18)" : "var(--surface-1)",
-    color: isActive ? "var(--text-1)" : "var(--text-3)",
+    color: isActive ? "var(--text-1)" : "var(--text-2)",
     fontWeight: isActive ? 700 : 500,
   });
 
@@ -117,7 +117,7 @@ export default function PlayersScreen() {
         <Users size={22} color="var(--text-2)" />
         <span
           style={{
-            fontSize: "24px",
+            fontSize: "var(--fs-screen-title)",
             fontWeight: 900,
             textTransform: "uppercase",
             color: "var(--text-1)",
@@ -164,18 +164,18 @@ export default function PlayersScreen() {
         }}
       >
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Total</span>
+          <span style={{ fontSize: "var(--fs-section-title)", fontWeight: 800, color: "var(--text-1)" }}>{totalPlayers}</span>
+          <span style={{ fontSize: "var(--fs-caption)", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Total</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Active</span>
+          <span style={{ fontSize: "var(--fs-section-title)", fontWeight: 800, color: "var(--accent)" }}>{activePlayers}</span>
+          <span style={{ fontSize: "var(--fs-caption)", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Active</span>
         </div>
         <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Inactive</span>
+          <span style={{ fontSize: "var(--fs-section-title)", fontWeight: 800, color: "var(--text-2)" }}>{inactivePlayers}</span>
+          <span style={{ fontSize: "var(--fs-caption)", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Inactive</span>
         </div>
       </div>
 
@@ -191,10 +191,10 @@ export default function PlayersScreen() {
           }}
         >
           <Users size={48} color="#555555" />
-          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
+          <p style={{ fontSize: "var(--fs-card-title)", fontWeight: 700, textTransform: "none", color: "var(--text-1)", margin: 0 }}>
             No players yet
           </p>
-          <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
+          <p style={{ fontSize: "var(--fs-body)", color: "var(--text-2)", textAlign: "center", maxWidth: "260px", margin: 0, lineHeight: "var(--lh-body)" }}>
             Invite players to join your program and begin tracking progress
           </p>
           <Button variant="primary" aria-label="Invite players to roster">
@@ -239,19 +239,19 @@ export default function PlayersScreen() {
               {player.name?.[0] || "?"}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: "var(--space-2)" }}>
+              <div style={{ fontSize: "var(--fs-card-title)", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: "var(--space-2)", lineHeight: 1.32 }}>
                 {player.name}
               </div>
               <StatusBadge active={player.active} />
             </div>
-            <ChevronRight size={16} color="var(--text-3)" />
+            <ChevronRight size={16} color="var(--text-2)" />
           </div>
         ))
       )}
 
       <p
         style={{
-          fontSize: "12px",
+          fontSize: "var(--fs-caption)",
           fontWeight: 700,
           textTransform: "uppercase",
           letterSpacing: "0.06em",
@@ -275,16 +275,16 @@ export default function PlayersScreen() {
         }}
       >
         <UserPlus size={32} color="var(--text-2)" />
-        <p style={{ fontSize: "16px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
+        <p style={{ fontSize: "var(--fs-card-title)", fontWeight: 700, textTransform: "none", color: "var(--text-1)", margin: 0 }}>
           Invite a player
         </p>
-        <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
+        <p style={{ fontSize: "var(--fs-body)", color: "var(--text-2)", textAlign: "center", maxWidth: "260px", margin: 0, lineHeight: "var(--lh-body)" }}>
           Share your program link and players can join instantly
         </p>
         <Button onClick={shareInviteLink} variant="secondary">
           Share invite link
         </Button>
-        {copied && <p style={{ fontSize: "12px", color: "var(--text-2)", margin: 0 }}>Link copied</p>}
+        {copied && <p style={{ fontSize: "var(--fs-caption)", color: "var(--text-2)", margin: 0 }}>Link copied</p>}
       </div>
     </div>
   );
