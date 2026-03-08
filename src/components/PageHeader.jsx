@@ -1,11 +1,11 @@
 const ACCENT_MAP = {
-  lime: "var(--text-2)",
+  lime: "var(--color-highlight-warm)",
   primary: "var(--accent)",
-  cyan: "var(--text-2)",
+  cyan: "var(--color-action-primary-strong, var(--accent))",
   secondary: "var(--color-action-secondary, var(--text-2))",
-  amber: "var(--text-2)",
-  blue: "var(--text-2)",
-  purple: "var(--text-2)",
+  amber: "var(--color-highlight-warm)",
+  blue: "var(--color-action-primary-strong, var(--accent))",
+  purple: "var(--color-action-secondary, var(--text-2))",
 };
 
 export default function PageHeader({
