@@ -342,8 +342,8 @@ const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+N
 .emptyState__subtitle{font-size:.87rem;line-height:1.45;opacity:.82;max-width:300px;margin:8px auto 0;}
 .emptyState__actions{display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:14px;}
 .emptyState__actions .btn{width:min(100%,280px);} 
-.bottom-nav{position:fixed!important;left:10px!important;right:10px!important;bottom:max(8px,env(safe-area-inset-bottom))!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;height:72px!important;padding:6px!important;background:rgba(10,16,28,.9)!important;border:1px solid rgba(167,187,211,.24)!important;border-radius:18px!important;box-shadow:0 16px 36px rgba(0,0,0,.45)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:30!important;pointer-events:auto!important;} 
-.bottom-nav .tab.shared-nav-item{min-width:0;min-height:56px;border-radius:12px;gap:5px;transition:transform 160ms ease,color 180ms ease,background-color 180ms ease;}
+.bottom-nav{position:fixed!important;left:10px!important;right:10px!important;bottom:max(8px,env(safe-area-inset-bottom))!important;display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;height:72px!important;padding:6px!important;padding-bottom:calc(12px + env(safe-area-inset-bottom))!important;background:rgba(10,16,28,.9)!important;border:1px solid rgba(167,187,211,.24)!important;border-radius:18px!important;box-shadow:0 16px 36px rgba(0,0,0,.45)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);z-index:30!important;pointer-events:auto!important;} 
+.bottom-nav .tab.shared-nav-item{min-width:0;min-height:56px;border-radius:12px;padding-bottom:12px;gap:5px;transition:transform 160ms ease,color 180ms ease,background-color 180ms ease;}
 .bottom-nav .tab.shared-nav-item.is-active,.bottom-nav .tab.shared-nav-item.active{background:linear-gradient(180deg,rgba(91,243,255,.22),rgba(91,243,255,.06))!important;color:#f6faff!important;}
 .bottom-nav .tab.shared-nav-item:active{transform:translateY(1px);} 
 .bottom-nav .tab .tab-label{font-size:.6rem;letter-spacing:.08em;} 
@@ -1406,6 +1406,9 @@ return true;
 
 const[pbReveal,setPbReveal]=useState(null);
 const[submitting,setSubmitting]=useState(false);
+const triggerHaptic=useCallback((pattern)=>{if(typeof navigator!=="undefined"&&navigator.vibrate)navigator.vibrate(pattern);},[]);
+const handleMakeTap=()=>{triggerHaptic(12);adjustShotMade(1);};
+const handleMissTap=()=>{triggerHaptic([10,50,10]);adjustShotMade(-1);};
 const[drillBarW,setDrillBarW]=useState(0);
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
 const handleLog=()=>{if(submitting)return;const v=parseInt(input);if(isNaN(v)||v<0||v>active.max)return;setSubmitting(true);const oldStreak=streak;
@@ -1413,7 +1416,7 @@ const handleLog=()=>{if(submitting)return;const v=parseInt(input);if(isNaN(v)||v
 const prevBest=homeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
 const isPB=v>prevBest&&prevBest>0;
 addScore(active.id,v);playScore();const pct=Math.round(v/active.max*100);setShareData({drill:active.name,score:v,max:active.max,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
-if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
+if(isPB){setTimeout(()=>{triggerHaptic([20,60,20,60,40]);setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)};
 const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setSubmitting(false);setTab("home")};
 const sendChallenge=()=>{if(!challTarget)return;addChallenge({to:challTarget,toName:players.find(p=>p.email===challTarget)?.name||challTarget.split("@")[0],drillId:shareData.drillId,drillName:shareData.drill,score:shareData.score,max:shareData.max});setShowChallForm(false);setChallTarget("");closeShare()};
@@ -1424,7 +1427,7 @@ const onTS=e=>{setTStart(e.touches[0].clientY)};
 const onTM=e=>{if(!tStart)return;const el=e.currentTarget;if(el.scrollTop>0)return;const dy=Math.max(0,Math.min(70,(e.touches[0].clientY-tStart)*.35));setPullY(dy)};
 const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else setPullY(0);setTStart(0)};
 
-return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
+return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingTop:"env(safe-area-inset-top)",paddingBottom:"env(safe-area-inset-bottom)",paddingLeft:"env(safe-area-inset-left)",paddingRight:"env(safe-area-inset-right)"}}>
 <BrandBackdrop/>
 {shotSaved&&<div role="status" aria-live="polite" style={{position:"fixed",left:"50%",bottom:110,transform:"translateX(-50%)",zIndex:40,background:VOLT,color:BG,padding:"10px 14px",borderRadius:999,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:1.2,boxShadow:"0 10px 28px rgba(0,0,0,0.35)"}}>Shots logged successfully</div>}
 {teamBranding.showWatermark&&tab==="home"?<TeamWatermark logoUrl={teamBranding.logoUrl} primaryColor={teamBranding.primaryColor} opacity={0.06} size={260}/>:null}
@@ -1559,9 +1562,9 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       <div style={{marginBottom:12}}>
         <label id="home-shot-makes-label" style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:8}}>NUMBER OF MAKES</label>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <button type="button" aria-label="Decrease number of makes" onClick={()=>adjustShotMade(-1)} style={{width:40,height:40,borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:22,fontWeight:700,cursor:"pointer"}}>–</button>
+          <button type="button" aria-label="Decrease number of makes" onClick={handleMissTap} style={{width:72,height:40,borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:11,fontWeight:700,letterSpacing:1,cursor:"pointer"}}>MISS</button>
           <input id="home-shot-slider" type="range" min="0" max={SHOT_MAKES_MAX} step="1" value={shotMade} onChange={e=>updateShotMade(e.target.value)} aria-labelledby="home-shot-makes-label" aria-label="Number of makes" style={{flex:1,accentColor:VOLT,cursor:"pointer"}}/>
-          <button type="button" aria-label="Increase number of makes" onClick={()=>adjustShotMade(1)} style={{width:40,height:40,borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:22,fontWeight:700,cursor:"pointer"}}>+</button>
+          <button type="button" aria-label="Increase number of makes" onClick={handleMakeTap} style={{width:72,height:40,borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:11,fontWeight:700,letterSpacing:1,cursor:"pointer"}}>MAKE</button>
         </div>
         <div style={{marginTop:8,fontFamily:FD,color:VOLT,fontSize:24,textAlign:"center"}} aria-live="polite">{shotMade}</div>
       </div>
@@ -1586,7 +1589,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {/* ═════ SHOT STATS sub-screen ═════ */}
   {tab==="log-drill"&&showShotStats&&!active&&<div className="fade-up">
     <button onClick={()=>setShowShotStats(false)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20,padding:0}}>&#8592; BACK TO DRILLS</button>
-    <ShotTracker u={u} shotLogs={shotLogs} shotMade={shotMade} updateShotMade={updateShotMade} adjustShotMade={adjustShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} shotError={shotError} isShotValid={isShotValid} submitShotLog={submitShotLog}/>
+    <ShotTracker u={u} shotLogs={shotLogs} shotMade={shotMade} updateShotMade={updateShotMade} adjustShotMade={adjustShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} shotError={shotError} isShotValid={isShotValid} submitShotLog={submitShotLog} triggerMakeHaptic={()=>triggerHaptic(12)} triggerMissHaptic={()=>triggerHaptic([10,50,10])}/>
   </div>}
 
 
@@ -2242,11 +2245,13 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 // ═══════════════════════════════════════
 // SHOT TRACKER — Log makes by date with running totals
 // ═══════════════════════════════════════
-function ShotTracker({u,shotLogs,shotMade,updateShotMade,adjustShotMade,shotDate,setShotDate,shotSaved,shotError,isShotValid,submitShotLog}){
+function ShotTracker({u,shotLogs,shotMade,updateShotMade,adjustShotMade,shotDate,setShotDate,shotSaved,shotError,isShotValid,submitShotLog,triggerMakeHaptic,triggerMissHaptic}){
 const my=useMemo(()=>shotLogs.filter(s=>s.email===u.email),[shotLogs,u]);
 const today=todayStr();
 
 const handleLog=()=>{submitShotLog();};
+const handleTrackerMakeTap=()=>{triggerMakeHaptic();adjustShotMade(1);};
+const handleTrackerMissTap=()=>{triggerMissHaptic();adjustShotMade(-1);};
 
 // Running totals
 const todayTotal=useMemo(()=>my.filter(s=>s.date===today).reduce((a,s)=>a+s.made,0),[my,today]);
@@ -2300,9 +2305,9 @@ return <div className="fade-up">
     <div style={{marginBottom:16}}>
       <label id="tracker-shot-makes-label" className="fieldLabel" style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>NUMBER OF MAKES</label>
       <div style={{display:"flex",alignItems:"center",gap:10}}>
-        <button type="button" aria-label="Decrease number of makes" onClick={()=>adjustShotMade(-1)} style={{width:44,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:24,fontWeight:700,cursor:"pointer"}}>–</button>
+        <button type="button" aria-label="Decrease number of makes" onClick={handleTrackerMissTap} style={{width:78,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:11,fontWeight:700,letterSpacing:1,cursor:"pointer"}}>MISS</button>
         <input id="tracker-shot-slider" className="input" type="range" min="0" max={SHOT_MAKES_MAX} step="1" value={shotMade} onChange={e=>updateShotMade(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLog()} aria-labelledby="tracker-shot-makes-label" aria-label="Number of makes" style={{flex:1,accentColor:ORANGE,cursor:"pointer"}}/>
-        <button type="button" aria-label="Increase number of makes" onClick={()=>adjustShotMade(1)} style={{width:44,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:24,fontWeight:700,cursor:"pointer"}}>+</button>
+        <button type="button" aria-label="Increase number of makes" onClick={handleTrackerMakeTap} style={{width:78,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:11,fontWeight:700,letterSpacing:1,cursor:"pointer"}}>MAKE</button>
       </div>
       <div style={{fontFamily:FD,color:ORANGE,fontSize:34,textAlign:"center",marginTop:8}} aria-live="polite">{shotMade}</div>
     </div>

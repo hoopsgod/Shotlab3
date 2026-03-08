@@ -163,3 +163,11 @@
 1. Strength + Challenges (highest density, quick wins).
 2. Profile (shared segmented/disclosure patterns).
 3. Coach (largest IA change; reuse patterns from earlier steps).
+
+---
+
+## Mobile haptics support note
+
+- Shot logging haptics are implemented with the Vibration API (`navigator.vibrate`) and wrapped in feature detection.
+- On iOS, Safari browser tabs do not expose vibration support, so taps will degrade silently with no haptic response.
+- In iOS installed PWA context (Add to Home Screen), haptic behavior is supported by the app context and will be available there.
