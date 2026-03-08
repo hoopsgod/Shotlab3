@@ -1305,6 +1305,38 @@ return <div style={{background:palette.bg,border:palette.border,borderRadius:16,
 </div>;
 }
 
+function FgArc({percentage=0,label="FG%"}){
+const arcRef=useRef(null);
+const normalizedPct=Math.max(0,Math.min(100,Number(percentage)||0));
+const radius=50;
+const circumference=Math.PI*radius;
+const color=normalizedPct<40?"#FF3B5C":normalizedPct<55?"#FFB830":"#1EE07F";
+useEffect(()=>{
+  const arc=arcRef.current;
+  if(!arc)return;
+  const targetOffset=circumference-(normalizedPct/100)*circumference;
+  arc.style.strokeDasharray=`${circumference}`;
+  arc.style.transition="none";
+  arc.style.strokeDashoffset=`${circumference}`;
+  const raf=requestAnimationFrame(()=>{
+    arc.style.transition="stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)";
+    arc.style.strokeDashoffset=`${targetOffset}`;
+  });
+  return ()=>cancelAnimationFrame(raf);
+},[circumference,normalizedPct]);
+
+return <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6}}>
+  <svg viewBox="0 0 120 70" width="100%" style={{maxWidth:260,display:"block"}} aria-label={`${label} ${normalizedPct}%`} role="img">
+    <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#181C24" strokeWidth="10"/>
+    <path ref={arcRef} d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke={color} strokeWidth="10" strokeLinecap="round"/>
+  </svg>
+  <div style={{textAlign:"center",lineHeight:1}}>
+    <div style={{fontFamily:FD,color:color,fontSize:38,letterSpacing:1}}>{normalizedPct}%</div>
+    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,textTransform:"uppercase"}}>{label}</div>
+  </div>
+</div>;
+}
+
 function InfoHint({text}){
 return <span title={text} aria-label={text} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:18,height:18,borderRadius:"50%",border:`1px solid ${BORDER_CLR}`,color:TOKENS.TEXT_SECONDARY,fontFamily:FB,fontSize:11,fontWeight:700,flexShrink:0}}>i</span>;
 }
@@ -1384,6 +1416,17 @@ const weekComparison=useMemo(()=>{
   const lastWeek=mine.reduce((sum,log)=>{const ts=new Date(`${log.date}T12:00:00`).getTime();return ts>=startOfLastWeek&&ts<=endOfLastWeek?sum+Number(log.made||0):sum},0);
   return {thisWeek,lastWeek,diff:thisWeek-lastWeek};
 },[shotLogs,u.email]);
+const homeFgPct=useMemo(()=>{
+  const attempts=homeScores.reduce((sum,s)=>sum+Number(s.max||0),0);
+  if(attempts<=0)return 0;
+  const makes=homeScores.reduce((sum,s)=>sum+Number(s.score||0),0);
+  return Math.max(0,Math.min(100,Math.round(makes/attempts*100)));
+},[homeScores]);
+const activeSessionPct=useMemo(()=>{
+  if(!active?.max)return 0;
+  const makes=Math.max(0,Number.parseInt(input,10)||0);
+  return Math.max(0,Math.min(100,Math.round((makes/active.max)*100)));
+},[active,input]);
 
 const shotMadeValue=Number(shotMade);
 const isShotValid=Number.isInteger(shotMadeValue)&&shotMadeValue>=SHOT_MAKES_MIN&&shotMadeValue<=SHOT_MAKES_MAX;
@@ -1498,6 +1541,11 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
+    <section style={{marginBottom:16,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:20,padding:"18px 16px 12px",boxShadow:"0 12px 30px rgba(0,0,0,0.28)"}}>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.4,textAlign:"center",marginBottom:8}}>SESSION FG%</div>
+      <FgArc percentage={homeFgPct} label="All sessions"/>
+    </section>
+
     <section style={{marginBottom:16,background:`linear-gradient(152deg,${VOLT}12,#101418)`,border:`1px solid ${VOLT}36`,borderRadius:20,padding:"18px 16px 16px",boxShadow:"0 12px 30px rgba(0,0,0,0.34)"}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:1.02,letterSpacing:1.3}}>Dashboard</div>
       <div style={{fontFamily:FB,color:"#C9D2DF",fontSize:12,lineHeight:1.5,marginTop:8,maxWidth:480}}>Today at a glance: your shot volume, streak momentum, and the one action that keeps progress moving.</div>
@@ -1629,6 +1677,9 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       <div style={{width:100,height:100,borderRadius:22,background:`linear-gradient(135deg,${SURFACE},${CARD_BG})`,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px"}}><DrillIcon type={active.icon} size={48}/></div>
       <h2 style={{fontFamily:FD,color:LIGHT,fontSize:36,letterSpacing:4,margin:"0 0 8px"}}>{active.name}</h2>
       <p style={{fontFamily:FB,color:MUTED,fontSize:14,margin:"0 auto 6px",maxWidth:280,lineHeight:1.6}}>{active.desc}</p>
+      <div style={{maxWidth:260,margin:"6px auto 14px"}}>
+        <FgArc percentage={activeSessionPct} label="Current session"/>
+      </div>
       {/* Personal Best + Average */}
       {(()=>{const ds=homeScores.filter(s=>s.drillId===active.id);const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;
         return ds.length>0?<div style={{display:"flex",gap:8,justifyContent:"center",margin:"12px 0 6px"}}>
