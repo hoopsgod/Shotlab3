@@ -1,27 +1,11 @@
 import UI_TOKENS from "../styles/tokens";
+import { HeroActionCard } from "./PremiumCards";
 
-const HERO_RADIUS = 16;
 const HERO_BUTTON_RADIUS = 12;
 
-function HeroBanner({
-  title,
-  subtitle,
-  accent = "var(--accent)",
-  icon = null,
-  actionLabel,
-  onAction,
-}) {
+function HeroBanner({ title, subtitle, accent = "var(--accent)", icon = null, actionLabel, onAction }) {
   return (
-    <section
-      style={{
-        background: "var(--surface-2)",
-        border: `1px solid ${accent}66`,
-        borderRadius: HERO_RADIUS,
-        padding: "var(--card-pad-standard) var(--card-pad-compact)",
-        marginBottom: "var(--space-5)",
-        boxShadow: "var(--shadow-1)",
-      }}
-    >
+    <HeroActionCard style={{ marginBottom: "var(--space-5)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "var(--control-gap-tight)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "var(--control-gap-tight)", minWidth: 0 }}>
           {icon ? (
@@ -30,8 +14,7 @@ function HeroBanner({
                 width: 32,
                 height: 32,
                 borderRadius: HERO_BUTTON_RADIUS,
-                border: `1px solid ${accent}66`,
-                background: "var(--surface-1)",
+                background: "rgba(255,255,255,0.05)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -77,7 +60,7 @@ function HeroBanner({
             style={{
               background: accent,
               color: UI_TOKENS.colors.bgBase,
-              border: "1px solid transparent",
+              border: "none",
               borderRadius: HERO_BUTTON_RADIUS,
               padding: "var(--space-2) var(--space-3)",
               fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
@@ -93,7 +76,7 @@ function HeroBanner({
           </button>
         ) : null}
       </div>
-    </section>
+    </HeroActionCard>
   );
 }
 

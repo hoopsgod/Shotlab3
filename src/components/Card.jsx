@@ -1,16 +1,22 @@
 import spacing from "../spacing";
 
 const CARD_VARIANT_STYLES = {
+  hero: { className: "shared-card--hero", padding: spacing.lg, gap: spacing.md },
   primary: { className: "shared-card--primary", padding: spacing.lg, gap: spacing.md },
   secondary: { className: "shared-card--secondary", padding: spacing.lg, gap: spacing.smd },
+  metric: { className: "shared-card--metric", padding: spacing.lg, gap: spacing.smd },
+  list: { className: "shared-card--list", padding: spacing.md, gap: spacing.smd },
+  media: { className: "shared-card--media", padding: spacing.md, gap: spacing.smd },
+  chart: { className: "shared-card--chart", padding: spacing.md, gap: spacing.smd },
+  empty: { className: "shared-card--empty", padding: spacing.lg, gap: spacing.md },
   subtle: { className: "shared-card--subtle", padding: spacing.md, gap: spacing.smd },
 };
 
 const LEGACY_VARIANT_MAP = {
   default: "secondary",
-  metric: "secondary",
-  list: "subtle",
-  empty: "subtle",
+  metric: "metric",
+  list: "list",
+  empty: "empty",
 };
 
 function Card({ as: Component = "div", variant = "secondary", className = "", style, children, ...props }) {

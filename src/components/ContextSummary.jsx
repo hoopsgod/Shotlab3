@@ -1,10 +1,10 @@
-import Card from "./Card";
+import { MetricCard } from "./PremiumCards";
 
 export default function ContextSummary({ title = "Training context", items = [], style }) {
   if (!items.length) return null;
 
   return (
-    <Card style={{ marginBottom: "var(--space-4)", ...style }}>
+    <MetricCard style={{ marginBottom: "var(--space-4)", ...style }}>
       <div
         style={{
           fontSize: 10,
@@ -22,8 +22,7 @@ export default function ContextSummary({ title = "Training context", items = [],
           <div
             key={item.label}
             style={{
-              background: "var(--surface-1)",
-              border: "1px solid var(--border-1)",
+              background: "rgba(255,255,255,0.04)",
               borderRadius: 999,
               padding: "var(--space-2) var(--space-3)",
               fontSize: 11,
@@ -38,6 +37,6 @@ export default function ContextSummary({ title = "Training context", items = [],
           </div>
         ))}
       </div>
-    </Card>
+    </MetricCard>
   );
 }

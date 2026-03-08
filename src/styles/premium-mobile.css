@@ -275,3 +275,22 @@ select {
     transform: none;
   }
 }
+
+.premium-card {
+  border-radius: var(--radius-card);
+}
+
+.premium-card--metric {
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+  min-height: 92px;
+}
+
+.premium-card--empty {
+  text-align: center;
+}
+
+.premium-card--list {
+  backdrop-filter: blur(2px);
+}

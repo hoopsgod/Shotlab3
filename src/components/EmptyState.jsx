@@ -2,7 +2,7 @@ import EmptyDrillsArc from "../assets/empty-states/EmptyDrillsArc";
 import EmptyEventsCourt from "../assets/empty-states/EmptyEventsCourt";
 import EmptyLeaderboardPodium from "../assets/empty-states/EmptyLeaderboardPodium";
 import EmptyLiftingRack from "../assets/empty-states/EmptyLiftingRack";
-import Card from "./Card";
+import { EmptyStateCard } from "./PremiumCards";
 import Button from "./ui/Button";
 
 const ART_BY_VARIANT = {
@@ -33,25 +33,13 @@ export default function EmptyState({
   const primaryAction = onCtaClick ?? onTap;
 
   return (
-    <Card variant="empty" className={`emptyState card card--empty ${className || ""}`.trim()}>
-      <div className="emptyState__art">
-        {Art ? <Art /> : icon}
-      </div>
-      <p className="emptyState__title">
-        {title}
-      </p>
-      {(description || subtitle) && (
-        <p className="emptyState__subtitle u-secondary-text">
-          {description || subtitle}
-        </p>
-      )}
+    <EmptyStateCard className={`emptyState ${className || ""}`.trim()}>
+      <div className="emptyState__art">{Art ? <Art /> : icon}</div>
+      <p className="emptyState__title">{title}</p>
+      {(description || subtitle) && <p className="emptyState__subtitle u-secondary-text">{description || subtitle}</p>}
       <div className="emptyState__actions">
         {primaryLabel && primaryAction && (
-          <Button
-            onClick={primaryAction}
-            variant={ctaVariant}
-            className={`${ctaVariant === "primary" ? "emptyState__primary" : ""}`.trim()}
-          >
+          <Button onClick={primaryAction} variant={ctaVariant} className={`${ctaVariant === "primary" ? "emptyState__primary" : ""}`.trim()}>
             {primaryLabel}
           </Button>
         )}
@@ -61,6 +49,6 @@ export default function EmptyState({
           </Button>
         )}
       </div>
-    </Card>
+    </EmptyStateCard>
   );
 }

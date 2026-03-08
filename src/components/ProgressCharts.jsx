@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import UI_TOKENS from "../styles/tokens";
+import { ChartInsightCard } from "./PremiumCards";
 
 const CHART_CARD_STYLE = {
   background: UI_TOKENS.colors.bgCard,
@@ -183,7 +184,6 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
         return {
           drillId,
           name: drill?.name || `Drill ${drillId}`,
-          max: drill?.max || Math.max(10, personalBest),
           logs: rows.mine.length,
           personalBest,
           myAvg,
@@ -253,7 +253,7 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
       </div>
 
       {progress.drillRows.map((drill) => (
-        <div key={drill.drillId} style={{ ...CHART_CARD_STYLE, marginBottom: 10 }}>
+        <ChartInsightCard key={drill.drillId} style={{ marginBottom: 10 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 8 }}>
             <div>
               <div style={{ color: UI_TOKENS.colors.textPrimary, fontSize: 12, fontWeight: 700 }}>{drill.name}</div>
@@ -267,11 +267,11 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
             </div>
           </div>
           <LineChart data={{ labels: drill.labels, values: drill.values }} yAxisLabel={drill.yAxisLabel} />
-        </div>
+        </ChartInsightCard>
       ))}
 
       {progress.recommendations.length > 0 ? (
-        <div style={{ ...CHART_CARD_STYLE, borderColor: `${UI_TOKENS.colors.warning}55` }}>
+        <ChartInsightCard style={{ borderColor: `${UI_TOKENS.colors.warning}55` }}>
           <div style={{ color: UI_TOKENS.colors.warning, fontSize: 11, fontWeight: 700, marginBottom: 8, letterSpacing: "0.06em" }}>
             PERSONALIZED RECOMMENDATIONS
           </div>
@@ -280,7 +280,7 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
               <li key={item}>{item}</li>
             ))}
           </ul>
-        </div>
+        </ChartInsightCard>
       ) : null}
 
       {showHelp ? (
