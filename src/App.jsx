@@ -48,6 +48,13 @@ TEXT_SECONDARY:UI_TOKENS.colors.textSecondary,
 TEXT_MUTED:UI_TOKENS.colors.textMuted,
 };
 const VOLT = TOKENS.PRIMARY;
+const VIEWPORT_PREVIEW_MODES={
+  desktop:{label:"Desktop",width:null},
+  mobile:{label:"Mobile",width:390},
+  mobileSmall:{label:"Mobile Small",width:375},
+  mobileLarge:{label:"Mobile Large",width:430},
+};
+const VIEWPORT_PREVIEW_STORAGE_KEY="sl:viewport-preview-mode";
 const ORANGE = TOKENS.PRIMARY;
 const CYAN = TOKENS.SECONDARY;
 const BG = TOKENS.BG_BASE;
@@ -779,6 +786,19 @@ useEffect(()=>{
   localStorage.setItem("sl:high-contrast",highContrast?"1":"0");
 },[highContrast]);
 
+const [viewportPreviewMode,setViewportPreviewMode]=useState(()=>{
+  if(typeof window==="undefined")return "desktop";
+  const saved=window.localStorage.getItem(VIEWPORT_PREVIEW_STORAGE_KEY);
+  return saved&&VIEWPORT_PREVIEW_MODES[saved]?saved:"desktop";
+});
+
+useEffect(()=>{
+  window.localStorage.setItem(VIEWPORT_PREVIEW_STORAGE_KEY,viewportPreviewMode);
+},[viewportPreviewMode]);
+
+const viewportPreviewConfig=VIEWPORT_PREVIEW_MODES[viewportPreviewMode]||VIEWPORT_PREVIEW_MODES.desktop;
+const isViewportPreviewMobile=viewportPreviewMode!=="desktop";
+
 const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
 const existingTeams=rawTeams||[];
@@ -1097,11 +1117,39 @@ useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
-{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onSocialLogin={socialLogin} onResetPassword={resetPassword} firebaseEnabled={firebaseEnabled} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
-{view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
-{view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} onResetPassword={resetPassword} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}
-{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} updateTeamBranding={updateTeamBranding} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/></div>}
+<div className={`preview-root ${isViewportPreviewMobile?"preview-root--mobile":"preview-root--desktop"}`}>
+  <ViewportPreviewToggle mode={viewportPreviewMode} onChange={setViewportPreviewMode}/>
+  <div
+    className={`preview-viewport ${isViewportPreviewMobile?"preview-viewport--mobile":"preview-viewport--desktop"}`}
+    style={isViewportPreviewMobile?{"--preview-mobile-width":`${viewportPreviewConfig.width}px`}:undefined}
+  >
+    <div className="preview-viewport__inner">
+      {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onSocialLogin={socialLogin} onResetPassword={resetPassword} firebaseEnabled={firebaseEnabled} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>}
+      {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
+      {view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} onResetPassword={resetPassword} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}
+      {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} updateTeamBranding={updateTeamBranding} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/></div>}
+    </div>
+  </div>
+</div>
 </>;
+}
+
+function ViewportPreviewToggle({mode,onChange}){
+const options=Object.entries(VIEWPORT_PREVIEW_MODES);
+return <div className="preview-toggle" role="group" aria-label="Viewport preview mode">
+  {options.map(([key,config])=>{
+    const active=mode===key;
+    return <button
+      key={key}
+      type="button"
+      className={`preview-toggle__button ${active?"is-active":""}`}
+      onClick={()=>onChange(key)}
+      aria-pressed={active}
+    >
+      {config.label}
+    </button>;
+  })}
+</div>;
 }
 
 // ═══════════════════════════════════════
