@@ -201,7 +201,7 @@ select {
   background: transparent;
   color: var(--text-3);
   gap: 6px;
-  transition: transform 160ms ease, color 180ms ease, background-color 180ms ease, opacity 180ms ease;
+  transition: transform 140ms ease, color 180ms ease, background-color 180ms ease, opacity 140ms ease;
 }
 
 .tab.shared-nav-item.is-active {
@@ -237,7 +237,8 @@ select {
 
 
 .tab.shared-nav-item:active {
-  transform: translateY(1px);
+  transform: scale(0.98);
+  opacity: 0.95;
 }
 
 .tab .tab-label {
