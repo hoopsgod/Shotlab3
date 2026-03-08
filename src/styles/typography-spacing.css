@@ -1,21 +1,24 @@
 :root {
-  --type-h1-size: var(--fs-display);
-  --type-h2-size: var(--fs-h1);
-  --type-h3-size: var(--fs-h2);
+  --type-h1-size: var(--type-display-size);
+  --type-h2-size: var(--type-screen-title-size);
+  --type-h3-size: var(--type-section-title-size);
+  --type-card-size: var(--type-card-title-size);
   --type-body-size: var(--fs-body);
-  --type-caption-size: var(--fs-helper);
+  --type-caption-size: var(--type-meta-size);
 
-  --type-h1-weight: var(--fw-bold);
-  --type-h2-weight: var(--fw-bold);
-  --type-h3-weight: var(--fw-semibold);
+  --type-h1-weight: var(--type-display-weight);
+  --type-h2-weight: var(--type-screen-title-weight);
+  --type-h3-weight: var(--type-section-title-weight);
+  --type-card-weight: var(--type-card-title-weight);
   --type-body-weight: var(--fw-regular);
+  --type-caption-weight: var(--type-meta-weight);
 }
 
 .page h1,
 .page .type-display {
   font-size: var(--type-h1-size);
   font-weight: var(--type-h1-weight);
-  line-height: var(--lh-tight);
+  line-height: var(--type-display-line-height);
   letter-spacing: var(--ls-tight);
   text-transform: none;
 }
@@ -24,7 +27,7 @@
 .page .type-heading {
   font-size: var(--type-h2-size);
   font-weight: var(--type-h2-weight);
-  line-height: var(--lh-tight);
+  line-height: var(--type-screen-title-line-height);
   letter-spacing: var(--ls-tight);
   text-transform: none;
 }
@@ -36,9 +39,22 @@
 .page .type-subheading {
   font-size: var(--type-h3-size);
   font-weight: var(--type-h3-weight);
-  line-height: 1.35;
+  line-height: var(--type-section-title-line-height);
   letter-spacing: var(--ls-normal);
   text-transform: none;
+}
+
+.page .type-card-title,
+.page .cardTitle,
+.page .card-title,
+.page .emptyState__title,
+.page .eventTitle,
+.page .lbName {
+  font-size: var(--type-card-size);
+  font-weight: var(--type-card-weight);
+  line-height: var(--type-card-title-line-height);
+  letter-spacing: var(--ls-normal);
+  color: var(--text-1);
 }
 
 .page p,
@@ -48,15 +64,16 @@
 .page .u-secondary-text {
   font-size: var(--type-body-size);
   font-weight: var(--type-body-weight);
-  line-height: var(--lh-body);
+  line-height: var(--type-body-line-height);
   letter-spacing: var(--ls-normal);
   color: var(--text-2);
 }
 
 .page small,
 .page .type-helper {
-  font-size: var(--fs-helper);
-  line-height: var(--lh-helper);
+  font-size: var(--type-caption-size);
+  line-height: var(--type-meta-line-height);
+  font-weight: var(--type-caption-weight);
   color: var(--color-text-helper);
 }
 
@@ -68,9 +85,9 @@
 .page .panel-title,
 .page .section-kicker {
   font-size: var(--type-caption-size);
-  font-weight: var(--fw-semibold);
-  line-height: 1.35;
-  letter-spacing: 0.075em;
+  font-weight: var(--type-caption-weight);
+  line-height: var(--type-meta-line-height);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-2);
 }

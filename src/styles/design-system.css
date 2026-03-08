@@ -16,9 +16,9 @@ Implementation plan (small-scope motion pass):
   --color-bg-subtle: rgba(175, 191, 214, 0.09);
 
   --color-text-primary: #f4f7fc;
-  --color-text-secondary: #c7d2e2;
-  --color-text-muted: #9aa9bc;
-  --color-text-helper: #a8b5c7;
+  --color-text-secondary: #d2dced;
+  --color-text-muted: #b8c4d8;
+  --color-text-helper: #bec9db;
   --color-text-placeholder: #afbdcf;
 
   --color-border-subtle: rgba(175, 191, 214, 0.22);
@@ -74,24 +74,43 @@ Implementation plan (small-scope motion pass):
 
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
-  --fs-display: clamp(1.75rem, 2.2vw, 2.25rem);
-  --fs-title: clamp(1.75rem, 2.2vw, 2.25rem);
-  --fs-h1: clamp(1.5rem, 2vw, 1.9rem);
-  --fs-h2: clamp(1.25rem, 1.6vw, 1.5rem);
-  --fs-h3: 1.125rem;
-  --fs-body: 1rem;
-  --fs-caption: 0.875rem;
-  --fs-helper: 0.875rem;
-  --fs-label: 0.75rem;
+  --type-display-size: 28px;
+  --type-display-line-height: 34px;
+  --type-display-weight: 700;
+  --type-screen-title-size: 24px;
+  --type-screen-title-line-height: 30px;
+  --type-screen-title-weight: 700;
+  --type-section-title-size: 18px;
+  --type-section-title-line-height: 24px;
+  --type-section-title-weight: 600;
+  --type-card-title-size: 16px;
+  --type-card-title-line-height: 22px;
+  --type-card-title-weight: 600;
+  --type-body-size: 15px;
+  --type-body-line-height: 22px;
+  --type-body-weight: 400;
+  --type-meta-size: 13px;
+  --type-meta-line-height: 18px;
+  --type-meta-weight: 500;
+
+  --fs-display: var(--type-display-size);
+  --fs-title: var(--type-display-size);
+  --fs-h1: var(--type-screen-title-size);
+  --fs-h2: var(--type-section-title-size);
+  --fs-h3: var(--type-card-title-size);
+  --fs-body: var(--type-body-size);
+  --fs-caption: var(--type-meta-size);
+  --fs-helper: var(--type-meta-size);
+  --fs-label: var(--type-meta-size);
   --control-font-size: 16px;
 
-  --fw-regular: 500;
+  --fw-regular: 400;
   --fw-semibold: 600;
   --fw-bold: 700;
 
-  --lh-tight: 1.2;
-  --lh-body: 1.6;
-  --lh-helper: 1.45;
+  --lh-tight: 1.25;
+  --lh-body: 1.47;
+  --lh-helper: 1.38;
   --lh-normal: var(--lh-body);
 
   --ls-tight: -0.01em;

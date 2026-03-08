@@ -32,16 +32,18 @@
 }
 
 .pageHeaderText h1 {
-  font-size: clamp(1.3rem, 6.2vw, 1.72rem);
-  letter-spacing: 0.03em;
-  line-height: 1.02;
+  font-size: var(--type-screen-title-size);
+  font-weight: var(--type-screen-title-weight);
+  letter-spacing: 0.02em;
+  line-height: var(--type-screen-title-line-height);
 }
 
 .pageHeaderText p {
   margin-top: var(--space-1);
-  color: var(--text-3);
-  font-size: 0.84rem;
-  line-height: 1.35;
+  color: var(--text-2);
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-meta-weight);
+  line-height: var(--type-meta-line-height);
 }
 
 .pageAccentBar {
@@ -60,7 +62,8 @@
 
 .heroSub {
   color: var(--text-2);
-  font-size: 0.93rem;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line-height);
 }
 
 .heroMetaStrip {
@@ -69,6 +72,8 @@
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-1);
   color: var(--text-2);
+  font-size: var(--type-meta-size);
+  line-height: var(--type-meta-line-height);
   padding: var(--space-2) var(--space-3);
 }
 
@@ -117,9 +122,12 @@
 }
 
 .fieldLabel {
-  font-size: 0.74rem;
-  letter-spacing: 0.08em;
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-meta-weight);
+  line-height: var(--type-meta-line-height);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  color: var(--text-2);
 }
 
 .input,
@@ -147,16 +155,18 @@ select {
 }
 
 .emptyState__title {
-  color: #eaf0fb;
-  font-size: 1.04rem;
-  line-height: 1.2;
+  color: var(--text-1);
+  font-size: var(--type-card-title-size);
+  font-weight: var(--type-card-title-weight);
+  line-height: var(--type-card-title-line-height);
   letter-spacing: 0.01em;
 }
 
 .emptyState__subtitle {
-  font-size: 0.87rem;
-  line-height: 1.45;
-  opacity: 0.82;
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line-height);
+  color: var(--text-2);
+  opacity: 1;
   max-width: 300px;
   margin: var(--space-2) auto 0;
 }
@@ -241,8 +251,10 @@ select {
 }
 
 .tab .tab-label {
-  font-size: 0.64rem;
-  letter-spacing: 0.075em;
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-meta-weight);
+  line-height: var(--type-meta-line-height);
+  letter-spacing: 0.06em;
 }
 
 .tab.shared-nav-item:focus-visible {
