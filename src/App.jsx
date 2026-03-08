@@ -1171,7 +1171,7 @@ useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.locat
 useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);
 useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.message||"unknown"});const onRej=(e)=>trackEvent("app_error",{kind:"unhandledrejection",message:e?.reason?.message||String(e?.reason||"unknown")});window.addEventListener("error",onErr);window.addEventListener("unhandledrejection",onRej);return()=>{window.removeEventListener("error",onErr);window.removeEventListener("unhandledrejection",onRej);};},[trackEvent]);
 
-if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:16,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,width:"min(460px,100%)"}}><LoadingState variant="chart" title="Loading your Shotlab workspace" description="Syncing drills, media, team activity, and coaching data." /></div></div></>;
+if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:16,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,width:"min(460px,100%)"}}><LoadingState variant="chart" title="Loading your Shotlab workspace" description="Syncing drills, media, team activity, and coaching data." /><div style={{display:"grid",gap:10,marginTop:14}}>{Array.from({length:3}).map((_,idx)=><div key={`app-loading-skeleton-${idx}`} className="skeleton" style={{height:118,padding:14}}><div className="skeleton-line title"/><div className="skeleton-line long"/><div className="skeleton-line medium"/><div className="skeleton-line short" style={{marginBottom:0}}/></div>)}</div></div></div></>;
 
 return <><Styles/>
 {isDesktopViewport&&<ViewportPreviewToggle mode={previewMode} onChange={setPreviewMode}/>}
@@ -1766,7 +1766,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
   {tab==="program"&&<div className={slideClass} key="program"><SectionHero icon={<EventIcon type="star" size={28} color={VOLT}/>} title="PROGRAM EVENTS" subtitle="Official workouts and attendance" accent={VOLT} deco={<EventIcon type="run" size={16} color={VOLT}/>} isCoach={u.isCoach}/><ProgramDrillsPanel user={u} drills={programDrills} scores={scores} addScore={addScore}/><DividerDot/><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills}/></div>}
 
   {/* ═════════════ CHALLENGES ═════════════ */}
-  {!u.isCoach&&tab==="duels"&&<div className={slideClass} key="duels"><DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players}/></div>}
+  {!u.isCoach&&tab==="duels"&&<div className={slideClass} key="duels"><DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players} isLoading={!ready}/></div>}
   {u.isCoach&&tab==="players"&&<div className={slideClass} key="players"><PlayersScreen/></div>}
 
   {/* ═════════════ STRENGTH & CONDITIONING ═════════════ */}
@@ -1849,7 +1849,7 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 // ═══════════════════════════════════════
 // HEAD-TO-HEAD DUELS
 // ═══════════════════════════════════════
-function DuelsPanel({u,challenges,drills,respondChallenge,players}){
+function DuelsPanel({u,challenges,drills,respondChallenge,players,isLoading=false}){
 const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(""),[respSaved,setRespSaved]=useState(null);
 const[showGuide,dismissGuide]=useDismissedGuide("sl:guide:duels");
 const[activeFilter,setActiveFilter]=useState("all");
@@ -1932,10 +1932,11 @@ return <SectionContainer className="fade-up">
   })}
 </div>
 
-{allRows.length===0&&<EmptyState title="No duels yet" description="Challenge a teammate or wait for a head-to-head matchup to appear." ctaLabel="Browse duels"/>}
-{allRows.length>0&&filteredRows.length===0&&<Empty t="Nothing here yet" action="Try another filter to view more matchups."/>}
+{isLoading&&<div style={{display:"grid",gap:10,marginBottom:8}}>{Array.from({length:3}).map((_,idx)=><div key={`duel-skeleton-${idx}`} className="skeleton" style={{height:124,padding:14}}><div className="skeleton-line title"/><div className="skeleton-line medium"/><div className="skeleton-line long"/><div className="skeleton-line short" style={{marginBottom:0}}/></div>)}</div>}
+{!isLoading&&allRows.length===0&&<div className="empty-state"><div className="empty-state__icon" aria-hidden="true">🏀</div><h3 className="empty-state__title">NO ACTIVE DUELS</h3><p className="empty-state__body">Challenge a teammate to a drill battle and prove your game.</p><button className="btn-primary" onClick={()=>{}}>Send a Challenge</button></div>}
+{!isLoading&&allRows.length>0&&filteredRows.length===0&&<Empty t="Nothing here yet" action="Try another filter to view more matchups."/>}
 
-{filteredRows.map(({ch,bucket})=>{
+{!isLoading&&filteredRows.map(({ch,bucket})=>{
   const isMine=ch.from===u.email;
   const isIncomingPending=bucket==="pending";
   const opponentName=isMine?ch.toName:ch.fromName;
@@ -2120,6 +2121,8 @@ return <div className="fade-up">
   <div style={{fontFamily:FD,color:"#b6aa94",fontSize:48,fontWeight:900,lineHeight:1}}>{myScLogs.length}</div>
   <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,letterSpacing:"0.08em",fontWeight:700,marginTop:8,textTransform:"uppercase"}}>TOTAL S&C SESSIONS LOGGED</div>
 </div>
+
+{myScLogs.length===0&&<div className="empty-state" style={{margin:"6px 0 16px",border:`1px solid ${BORDER_CLR}`,borderRadius:14,background:CARD_BG}}><div className="empty-state__icon" aria-hidden="true">🏋️</div><h3 className="empty-state__title">NO SESSIONS LOGGED</h3><p className="empty-state__body">Start tracking your lifts to build consistency.</p><button className="btn-primary" onClick={()=>setShowForm(true)}>Log First Session</button></div>}
 
 {/* Upcoming sessions */}
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING SESSIONS" s={`${upcoming.length} SCHEDULED`}/>
@@ -2574,6 +2577,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 </div>
 {upcoming.length>3&&<div className="uiDecor" aria-hidden="true" style={{fontFamily:FB,fontSize:9,color:MUTED,marginLeft:8,marginBottom:14}}>+{upcoming.length-3}</div>}
 </div>}
+{upcoming.length===0&&<div className="empty-state" style={{marginBottom:12}}><div className="empty-state__icon" aria-hidden="true">📅</div><h3 className="empty-state__title">NO EVENTS YET</h3><p className="empty-state__body">Your coach hasn't scheduled any sessions. Check back soon.</p></div>}
 </div>
 
 {/* Tier card */}
