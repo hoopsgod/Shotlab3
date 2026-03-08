@@ -1504,7 +1504,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
     <section style={{marginBottom:16,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 12px"}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.1,marginBottom:10}}>Performance snapshot</div>
       <div style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:8}}>
-        {[{label:"Total makes",value:totalMakes,color:VOLT},{label:"Current streak",value:`${streak}d`,color:ORANGE},{label:"Upcoming sessions",value:upcomingEventsCount,color:CYAN},{label:"Attendance",value:attendancePct,color:LIGHT}].map((item)=><div key={item.label} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:11,padding:"10px 9px",minHeight:82}}><div style={{fontFamily:FD,color:item.color,fontSize:24,lineHeight:1.05,fontWeight:800}}>{item.value}</div><div style={{fontFamily:FB,color:"#8B97A9",fontSize:10,fontWeight:600,marginTop:6,lineHeight:1.35}}>{item.label}</div></div>)}
+        {[{label:"Total makes",value:totalMakes,color:VOLT},{label:"Current streak",value:`${streak}d`,color:ORANGE},{label:"Upcoming sessions",value:upcomingEventsCount,color:CYAN},{label:"Attendance",value:attendancePct,color:LIGHT}].map((item)=><div key={item.label} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:11,padding:"10px 9px",minHeight:82}}><div className="stat-display--secondary" style={{color:item.color,fontSize:32,lineHeight:1.05}}>{item.value}</div><div style={{fontFamily:FB,color:"#8B97A9",fontSize:10,fontWeight:600,marginTop:6,lineHeight:1.35}}>{item.label}</div></div>)}
       </div>
     </section>
 
@@ -1518,8 +1518,8 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
       <section style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"13px 12px"}}>
         <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:0.9,marginBottom:8}}>Competitive activity</div>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8}}>
-          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"9px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Pending replies</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,lineHeight:1.05}}>{pendingDuels}</div></div>
-          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"9px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Open matchups</div><div style={{fontFamily:FD,color:LIGHT,fontSize:28,lineHeight:1.05}}>{myOpenDuels}</div></div>
+          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"9px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Pending replies</div><div className="stat-display--secondary" style={{color:LIGHT,fontSize:32,lineHeight:1.05}}>{pendingDuels}</div></div>
+          <div style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"9px 8px"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>Open matchups</div><div className="stat-display--secondary" style={{color:LIGHT,fontSize:32,lineHeight:1.05}}>{myOpenDuels}</div></div>
         </div>
         <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:8,lineHeight:1.35}}>{myOpenDuels===0?"No active duels — challenge someone today.":"Check your active matchups and pending replies."}</div>
         <button onClick={()=>setTab("duels")} style={{marginTop:8,background:"none",border:"none",padding:0,fontFamily:FB,fontSize:11,fontWeight:600,color:"#9FB4D8",cursor:"pointer"}}>{myOpenDuels===0?"Start a duel →":"Manage duels →"}</button>
@@ -1563,7 +1563,7 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
           <input id="home-shot-slider" type="range" min="0" max={SHOT_MAKES_MAX} step="1" value={shotMade} onChange={e=>updateShotMade(e.target.value)} aria-labelledby="home-shot-makes-label" aria-label="Number of makes" style={{flex:1,accentColor:VOLT,cursor:"pointer"}}/>
           <button type="button" aria-label="Increase number of makes" onClick={()=>adjustShotMade(1)} style={{width:40,height:40,borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:22,fontWeight:700,cursor:"pointer"}}>+</button>
         </div>
-        <div style={{marginTop:8,fontFamily:FD,color:VOLT,fontSize:24,textAlign:"center"}} aria-live="polite">{shotMade}</div>
+        <div className="stat-display--secondary" style={{marginTop:8,color:VOLT,fontSize:32,textAlign:"center"}} aria-live="polite">{shotMade}</div>
       </div>
       <div style={{marginBottom:12}}>
         <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>DATE</label>
@@ -2020,7 +2020,7 @@ return <div className="fade-up">
 </div>
 
 <div className="card" style={{marginBottom:16,minHeight:100,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"16px"}}>
-  <div style={{fontFamily:FD,color:"#b6aa94",fontSize:48,fontWeight:900,lineHeight:1}}>{myScLogs.length}</div>
+  <div className="stat-display" style={{color:"#b6aa94",fontSize:56}}>{myScLogs.length}</div>
   <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,letterSpacing:"0.08em",fontWeight:700,marginTop:8,textTransform:"uppercase"}}>TOTAL S&C SESSIONS LOGGED</div>
 </div>
 
@@ -2070,7 +2070,7 @@ const textValue=typeof value==="string"||typeof value==="number"?String(value):"
 const hasLongValue=textValue.length>10;
 return <div className="card card--metric mode-card-stat" style={{padding:"12px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",gap:10,borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))"}}>
   <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8,minWidth:0}}>
-    <div className="mode-card-stat-value" style={{fontFamily:FD,color:color||LIGHT,fontSize:hasLongValue?20:28,fontWeight:800,lineHeight:1.05,letterSpacing:hasLongValue?"0.04em":"0.02em",whiteSpace:hasLongValue?"normal":"nowrap",wordBreak:"normal",overflowWrap:hasLongValue?"anywhere":"normal",textAlign:"left",minWidth:0}}>{value}</div>
+    <div className="mode-card-stat-value stat-display--secondary" style={{color:color||LIGHT,fontSize:hasLongValue?24:32,lineHeight:1.05,letterSpacing:hasLongValue?"0.04em":"0.03em",whiteSpace:hasLongValue?"normal":"nowrap",wordBreak:"normal",overflowWrap:hasLongValue?"anywhere":"normal",textAlign:"left",minWidth:0}}>{value}</div>
   </div>
   <div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",lineHeight:1.15,textAlign:"left"}}>{label}</div>
 </div>
@@ -2304,7 +2304,7 @@ return <div className="fade-up">
         <input id="tracker-shot-slider" className="input" type="range" min="0" max={SHOT_MAKES_MAX} step="1" value={shotMade} onChange={e=>updateShotMade(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLog()} aria-labelledby="tracker-shot-makes-label" aria-label="Number of makes" style={{flex:1,accentColor:ORANGE,cursor:"pointer"}}/>
         <button type="button" aria-label="Increase number of makes" onClick={()=>adjustShotMade(1)} style={{width:44,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:24,fontWeight:700,cursor:"pointer"}}>+</button>
       </div>
-      <div style={{fontFamily:FD,color:ORANGE,fontSize:34,textAlign:"center",marginTop:8}} aria-live="polite">{shotMade}</div>
+      <div className="stat-display--secondary" style={{color:ORANGE,fontSize:32,textAlign:"center",marginTop:8}} aria-live="polite">{shotMade}</div>
     </div>
     <div style={{marginBottom:16}}>
       <label className="fieldLabel" style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>DATE</label>
@@ -2455,8 +2455,8 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
       <div className="eventPanelLabel" style={{color:"rgba(202,245,122,.9)",display:"inline-flex",alignItems:"center",gap:6}}>ATTENDANCE RANK <InfoHint text="Attendance Rank is based on the number of program events you RSVP to and attend."/></div>
       <div style={{display:"flex",alignItems:"center",gap:10,marginTop:8}}>
         <svg className={rankFx?"rank-badge-flash":""} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b6aa94" strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-        <div className={rankFx?"rank-bounce":""} style={{fontFamily:FD,color:LIGHT,fontSize:28,fontWeight:900,letterSpacing:2}}>{myTier.name}</div>
-        <div style={{fontFamily:FD,color:VOLT,fontSize:28,fontWeight:700,lineHeight:1}}>{myRsvps}</div>
+        <div className={rankFx?"rank-bounce":""} style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:2}}>{myTier.name}</div>
+        <div className="stat-display--secondary" style={{color:VOLT,fontSize:32,lineHeight:1}}>{myRsvps}</div>
       </div>
       <div style={{fontFamily:FB,color:"rgba(173,180,189,.88)",fontSize:12,marginTop:6}}>{myRsvps} event{myRsvps!==1?"s":""} attended</div>
     </div>
@@ -3144,11 +3144,11 @@ const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignI
     <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:11,fontWeight:800,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div>
     {sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,marginTop:4,lineHeight:1.35,maxWidth:220}}>{sub}</div>}
   </div>
-  <div style={{fontFamily:FD,color,fontSize:26,fontWeight:800,lineHeight:1,letterSpacing:1}}>{value}</div>
+  <div className="stat-display--secondary" style={{color,fontSize:32,letterSpacing:1}}>{value}</div>
 </div>;
 
 const SpotlightStat=({label,value,color,sub})=><div style={{flex:1,minWidth:0,padding:"14px 8px",textAlign:"center"}}>
-  <div style={{fontFamily:FD,fontSize:36,color,fontWeight:800,lineHeight:.9,letterSpacing:1}}>{value}</div>
+  <div className="stat-display--secondary" style={{fontSize:56,color,lineHeight:.9,letterSpacing:1}}>{value}</div>
   <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:9,fontWeight:800,letterSpacing:"0.16em",marginTop:8,textTransform:"uppercase"}}>{label}</div>
   {sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:8,marginTop:5,letterSpacing:"0.06em"}}>{sub}</div>}
 </div>;
@@ -3166,7 +3166,7 @@ return <SectionContainer className="fade-up">
       <Av n={u.name} sz={72} email={u.email}/>
       <div style={{minWidth:0,flex:1}}>
         <div style={{fontFamily:FB,color:VOLT,fontSize:9,fontWeight:800,letterSpacing:"0.28em",textTransform:"uppercase"}}>Season Profile</div>
-        <div style={{fontFamily:FD,color:LIGHT,fontSize:34,fontWeight:800,letterSpacing:2.4,lineHeight:.95,marginTop:6,wordBreak:"break-word"}}>{u.name.toUpperCase()}</div>
+        <div className="stat-display" style={{color:LIGHT,fontSize:56,letterSpacing:0.03,marginTop:6,wordBreak:"break-word"}}>{u.name.toUpperCase()}</div>
         <div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:10}}>
           <span style={{fontFamily:FB,fontSize:9,color:"var(--text-1)",fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",padding:"3px 8px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}3A`}}>Offseason 2026</span>
           <span style={{fontFamily:FB,fontSize:9,color:ORANGE,fontWeight:700,letterSpacing:"0.12em",textTransform:"uppercase",padding:"3px 8px",borderRadius:999,background:`${ORANGE}18`,border:`1px solid ${ORANGE}44`}}>🔥 {streak} day active streak</span>
@@ -3406,7 +3406,7 @@ function SLLogo({size=60,glow=false,opacity:op=1,style:sx}){return <img src="dat
 function calcStreak(sc){const ds=[...new Set(sc.map(s=>s.date))].sort().reverse();let c=0,d=new Date();for(let i=0;i<400;i++){const s=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;if(ds.includes(s)){c++;d.setDate(d.getDate()-1)}else if(i===0){d.setDate(d.getDate()-1)}else break}return c}
 function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return Math.abs(h)}
 const AVG=[["#b6aa94","#6f8fc3"],["#b6aa94","#b6aa94"],["#6f8fc3","#b6aa94"],["#b6aa94","#b6aa94"],["#A0A0A0","#6f8fc3"],["#b6aa94","#b6aa94"],["#b6aa94","#6f8fc3"],["#b6aa94","#b6aa94"]];
-function AnimNum({v,c=VOLT,big,size}){const[display,setDisplay]=useState(0);const[isVisible,setIsVisible]=useState(false);useEffect(()=>{setIsVisible(false);const fadeIn=requestAnimationFrame(()=>setIsVisible(true));if(typeof v!=="number"){setDisplay(v);return()=>cancelAnimationFrame(fadeIn)}let cancelled=false;const end=v;const dur=600;const t0=Date.now();const step=()=>{if(cancelled)return;const elapsed=Date.now()-t0;const prog=Math.min(elapsed/dur,1);const eased=1-Math.pow(1-prog,3);setDisplay(Math.round(eased*end));if(prog<1)requestAnimationFrame(step)};step();return()=>{cancelAnimationFrame(fadeIn);cancelled=true}},[v]);return <span className="cnt-up" style={{fontFamily:FD,color:c,fontSize:size||(big?42:26),letterSpacing:1,lineHeight:1,fontWeight:700,opacity:isVisible?1:0,transition:"opacity 150ms ease"}}>{display}</span>}
+function AnimNum({v,c=VOLT,big,size}){const[display,setDisplay]=useState(0);const[isVisible,setIsVisible]=useState(false);useEffect(()=>{setIsVisible(false);const fadeIn=requestAnimationFrame(()=>setIsVisible(true));if(typeof v!=="number"){setDisplay(v);return()=>cancelAnimationFrame(fadeIn)}let cancelled=false;const end=v;const dur=600;const t0=Date.now();const step=()=>{if(cancelled)return;const elapsed=Date.now()-t0;const prog=Math.min(elapsed/dur,1);const eased=1-Math.pow(1-prog,3);setDisplay(Math.round(eased*end));if(prog<1)requestAnimationFrame(step)};step();return()=>{cancelAnimationFrame(fadeIn);cancelled=true}},[v]);return <span className={`cnt-up ${big?"stat-display":"stat-display--secondary"}`} style={{color:c,fontSize:size||(big?56:32),letterSpacing:1,lineHeight:1,opacity:isVisible?1:0,transition:"opacity 150ms ease"}}>{display}</span>}
 function BrandWordmark({size=30,small}){return <div style={{fontFamily:FD,fontSize:size,lineHeight:.85,letterSpacing:small?1.5:3,fontWeight:900,whiteSpace:"nowrap"}}><span style={{color:LIGHT}}>SHOT</span><span style={{color:VOLT}}>LAB</span></div>}
 function BrandBackdrop(){return <><div style={{position:"fixed",inset:0,background:"radial-gradient(ellipse 80% 40% at 50% 0%, rgba(63, 95, 151, 0.08) 0%, transparent 100%)",pointerEvents:"none",zIndex:0}}/><div style={{position:"fixed",left:"50%",top:"50%",transform:"translate(-50%,-35%)",opacity:.03,pointerEvents:"none",zIndex:0,width:180}}><SLLogo size={180}/></div></>}
 function SectionHero({icon,title,subtitle,accent=VOLT,deco,isCoach=false}){return <div style={{marginBottom:14}}><div style={{height:84,display:"flex",alignItems:"center",gap:14}}><div style={{width:40,height:40,borderRadius:12,background:accent+"10",border:`1px solid ${accent}2E`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",flexShrink:0}}>{icon}{deco&&<div style={{position:"absolute",bottom:-5,right:-5,opacity:.4,transform:"scale(.92)"}}>{deco}</div>}</div><div><div className="u-allcaps-long" style={{fontFamily:FD,fontSize:"calc(var(--h2) + 1px)",letterSpacing:"0.05em",fontWeight:700,color:"var(--text-1)",lineHeight:1.08,display:"flex",alignItems:"center",gap:6}}>{title}{isCoach&&<ShieldIcon size={12} color="var(--text-3)" style={{opacity:.45,pointerEvents:"none"}}/>}</div><div className="u-secondary-text" style={{fontFamily:FB,fontSize:12,marginTop:7,lineHeight:1.45,color:"var(--text-2)"}}>{subtitle}</div></div></div><div style={{height:1,background:BORDER_CLR,opacity:.85}}/></div>}
