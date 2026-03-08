@@ -10,15 +10,6 @@ const Users = ({ size = 24, color = "currentColor" }) => (
   </svg>
 );
 
-const UserPlus = ({ size = 24, color = "currentColor" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-    <circle cx="8.5" cy="7" r="4" />
-    <path d="M20 8v6" />
-    <path d="M23 11h-6" />
-  </svg>
-);
-
 const ChevronRight = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="m9 18 6-6-6-6" />
@@ -28,13 +19,13 @@ const ChevronRight = ({ size = 24, color = "currentColor" }) => (
 const StatusBadge = ({ active }) => {
   const tone = active
     ? {
-        label: "✓ Active",
+        label: "Active",
         color: "var(--color-success)",
         border: "rgba(99, 222, 143, 0.42)",
         bg: "rgba(99, 222, 143, 0.16)",
       }
     : {
-        label: "⏳ Inactive",
+        label: "Inactive",
         color: "var(--color-pending)",
         border: "rgba(255, 191, 102, 0.42)",
         bg: "rgba(255, 191, 102, 0.18)",
@@ -49,7 +40,7 @@ const StatusBadge = ({ active }) => {
         background: tone.bg,
         fontSize: "11px",
         letterSpacing: "0.04em",
-        textTransform: "none",
+        textTransform: "uppercase",
       }}
     >
       {tone.label}
@@ -69,9 +60,7 @@ export default function PlayersScreen() {
 
   const filteredPlayers = useMemo(() => {
     return players.filter((player) => {
-      const matchesSearch = (player.name || "")
-        .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+      const matchesSearch = (player.name || "").toLowerCase().includes(searchQuery.toLowerCase());
       const matchesFilter =
         activeFilter === "All players" ||
         (activeFilter === "Active" && player.active) ||
@@ -85,7 +74,7 @@ export default function PlayersScreen() {
     if (navigator.share) {
       await navigator.share({
         title: "Join my ShotLab Program",
-        text: "Your coach has invited you to join their basketball training program",
+        text: "Your coach invited you to the training roster",
         url,
       });
       return;
@@ -96,110 +85,95 @@ export default function PlayersScreen() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const chipStyle = (isActive) => ({
-    borderRadius: "var(--btn-radius)",
-    height: "var(--btn-h-sm)",
-    padding: "0 var(--btn-pad-sm)",
-    fontSize: "11px",
-    textTransform: "none",
-    letterSpacing: "0.08em",
-    cursor: "pointer",
-    border: isActive ? "1px solid rgba(91, 243, 255, 0.34)" : "1px solid var(--stroke-1)",
-    background: isActive ? "rgba(91, 243, 255, 0.18)" : "var(--surface-1)",
-    color: isActive ? "var(--text-1)" : "var(--text-3)",
-    fontWeight: isActive ? 700 : 500,
-  });
-
   return (
-    <div style={{ background: "var(--bg-0)", minHeight: "100vh", paddingLeft: "var(--page-gutter)", paddingRight: "var(--page-gutter-right)", paddingTop: "var(--space-5)",
-      paddingBottom: "calc(var(--nav-height, 74px) + var(--space-8) + env(safe-area-inset-bottom))" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-4)", marginBottom: "var(--space-3)" }}>
-        <Users size={22} color="var(--text-2)" />
-        <span
-          style={{
-            fontSize: "24px",
-            fontWeight: 900,
-            textTransform: "uppercase",
-            color: "var(--text-1)",
-            letterSpacing: "0.04em",
-          }}
-        >
-          Players
-        </span>
-      </div>
-
-      <p style={{ fontSize: "var(--fs-helper)", color: "var(--text-2)", marginBottom: "var(--space-5)", lineHeight: "var(--lh-helper)" }}>
-        Manage your roster and track player engagement with clearer status visibility
-      </p>
-
-      <input
-        className="input"
-        type="text"
-        placeholder="Search players"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+    <div
+      style={{
+        background: "var(--bg-0)",
+        minHeight: "100vh",
+        paddingLeft: "var(--page-gutter)",
+        paddingRight: "var(--page-gutter-right)",
+        paddingTop: "var(--space-5)",
+        paddingBottom: "calc(var(--nav-height, 74px) + var(--space-8) + env(safe-area-inset-bottom))",
+      }}
+    >
+      <section
         style={{
-          fontSize: "var(--fs-body)",
+          background: "var(--surface-1)",
+          border: "1px solid rgba(122,145,186,.36)",
+          borderRadius: "16px",
+          padding: "var(--space-4)",
           marginBottom: "var(--space-4)",
         }}
-      />
-
-      <div style={{ display: "flex", gap: "var(--space-3)", marginBottom: "var(--space-5)", flexWrap: "wrap" }}>
-        {["All players", "Active", "Inactive"].map((filter) => (
-          <Button key={filter} onClick={() => setActiveFilter(filter)} className="chip" variant={activeFilter === filter ? "primary" : "tertiary"} aria-pressed={activeFilter === filter} style={chipStyle(activeFilter === filter)}>
-            {filter}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "var(--space-3)" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "var(--space-2)", marginBottom: "var(--space-2)" }}>
+              <Users size={18} color="var(--accent)" />
+              <span style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-2)", fontWeight: 700 }}>Primary goal</span>
+            </div>
+            <h1 style={{ margin: 0, fontSize: 24, lineHeight: 1.05, color: "var(--text-1)" }}>Grow active players</h1>
+            <p style={{ margin: "8px 0 0", color: "var(--text-2)", fontSize: 13, lineHeight: 1.35 }}>Add players first, then monitor who needs follow-up.</p>
+          </div>
+          <Button variant="primary" onClick={shareInviteLink} aria-label="Invite players">
+            Invite
           </Button>
+        </div>
+
+        <div
+          style={{
+            marginTop: "var(--space-4)",
+            border: "1px solid var(--stroke-1)",
+            borderRadius: "12px",
+            padding: "10px 12px",
+            background: "var(--surface-2)",
+          }}
+        >
+          <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-2)", fontWeight: 700 }}>Primary metric</div>
+          <div style={{ fontSize: 34, color: "var(--accent)", fontWeight: 900, lineHeight: 1 }}>{inactivePlayers}</div>
+          <div style={{ fontSize: 12, color: "var(--text-2)" }}>Inactive players this week</div>
+        </div>
+
+        <details style={{ marginTop: "var(--space-3)" }}>
+          <summary style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-2)", cursor: "pointer" }}>See roster summary</summary>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: "var(--space-2)", marginTop: "var(--space-3)" }}>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--stroke-1)", borderRadius: 10, padding: "8px" }}><div style={{ fontSize: 18, fontWeight: 800, color: "var(--text-1)" }}>{totalPlayers}</div><div style={{ fontSize: 10, color: "var(--text-2)", textTransform: "uppercase" }}>Total</div></div>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--stroke-1)", borderRadius: 10, padding: "8px" }}><div style={{ fontSize: 18, fontWeight: 800, color: "var(--accent)" }}>{activePlayers}</div><div style={{ fontSize: 10, color: "var(--text-2)", textTransform: "uppercase" }}>Active</div></div>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--stroke-1)", borderRadius: 10, padding: "8px" }}><div style={{ fontSize: 18, fontWeight: 800, color: "var(--text-2)" }}>{inactivePlayers}</div><div style={{ fontSize: 10, color: "var(--text-2)", textTransform: "uppercase" }}>Inactive</div></div>
+          </div>
+        </details>
+      </section>
+
+      <input className="input" type="text" placeholder="Search players" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ fontSize: "var(--fs-body)", marginBottom: "var(--space-3)" }} />
+
+      <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)", flexWrap: "wrap" }}>
+        {["All players", "Active", "Inactive"].map((filter) => (
+          <button
+            key={filter}
+            onClick={() => setActiveFilter(filter)}
+            style={{
+              borderRadius: 999,
+              height: 32,
+              padding: "0 12px",
+              fontSize: 11,
+              letterSpacing: "0.06em",
+              textTransform: "uppercase",
+              border: activeFilter === filter ? "1px solid rgba(91, 243, 255, 0.34)" : "1px solid var(--stroke-1)",
+              background: activeFilter === filter ? "rgba(91, 243, 255, 0.18)" : "var(--surface-1)",
+              color: activeFilter === filter ? "var(--text-1)" : "var(--text-3)",
+              fontWeight: 700,
+              cursor: "pointer",
+            }}
+          >
+            {filter}
+          </button>
         ))}
       </div>
 
-      <div
-        style={{
-          background: "var(--surface-1)",
-          border: "1px solid var(--stroke-1)",
-          borderRadius: "var(--radius-lg)",
-          padding: "var(--space-5)",
-          marginBottom: "var(--space-5)",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Total</span>
-        </div>
-        <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Active</span>
-        </div>
-        <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
-          <span style={{ fontSize: "10px", color: "var(--text-2)", textTransform: "uppercase", letterSpacing: "0.06em", marginTop: "var(--space-2)", fontWeight: 700 }}>Inactive</span>
-        </div>
-      </div>
-
       {players.length === 0 ? (
-        <div
-          style={{
-            minHeight: "280px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "var(--space-5)",
-          }}
-        >
-          <Users size={48} color="#555555" />
-          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
-            No players yet
-          </p>
-          <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
-            Invite players to join your program and begin tracking progress
-          </p>
-          <Button variant="primary" aria-label="Invite players to roster">
-            Invite players
-          </Button>
+        <div style={{ minHeight: "220px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "var(--space-3)" }}>
+          <Users size={44} color="#555555" />
+          <p style={{ fontSize: "17px", fontWeight: 700, color: "var(--text-2)", margin: 0 }}>No players yet</p>
+          <p style={{ fontSize: "12px", color: "var(--text-3)", textAlign: "center", maxWidth: "230px", margin: 0 }}>Invite your first player to start roster tracking.</p>
         </div>
       ) : (
         filteredPlayers.map((player) => (
@@ -213,24 +187,24 @@ export default function PlayersScreen() {
               background: "var(--surface-2)",
               border: "1px solid rgba(167, 187, 211, 0.34)",
               borderRadius: "16px",
-              padding: "var(--space-5)",
-              marginBottom: "var(--space-4)",
+              padding: "var(--space-4)",
+              marginBottom: "var(--space-3)",
               display: "flex",
               alignItems: "center",
-              gap: "var(--space-4)",
+              gap: "var(--space-3)",
               cursor: "pointer",
             }}
           >
             <div
               style={{
-                width: "44px",
-                height: "44px",
+                width: "42px",
+                height: "42px",
                 background: "var(--surface-1)",
                 borderRadius: "50%",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                fontSize: "16px",
+                fontSize: "15px",
                 fontWeight: 700,
                 color: "var(--text-1)",
                 border: player.active ? "2px solid rgba(91, 243, 255, 0.44)" : "2px solid rgba(167, 187, 211, 0.36)",
@@ -239,9 +213,7 @@ export default function PlayersScreen() {
               {player.name?.[0] || "?"}
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: "15px", fontWeight: 700, textTransform: "none", color: "var(--text-1)", marginBottom: "var(--space-2)" }}>
-                {player.name}
-              </div>
+              <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-1)", marginBottom: "6px" }}>{player.name}</div>
               <StatusBadge active={player.active} />
             </div>
             <ChevronRight size={16} color="var(--text-3)" />
@@ -249,43 +221,7 @@ export default function PlayersScreen() {
         ))
       )}
 
-      <p
-        style={{
-          fontSize: "12px",
-          fontWeight: 700,
-          textTransform: "uppercase",
-          letterSpacing: "0.06em",
-          color: "var(--text-2)",
-          marginTop: "var(--space-6)",
-          marginBottom: "var(--space-4)",
-        }}
-      >
-        Roster growth
-      </p>
-      <div
-        style={{
-          background: "var(--surface-2)",
-          border: "1px solid var(--stroke-1)",
-          borderRadius: "16px",
-          padding: "var(--space-5)",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "var(--space-4)",
-        }}
-      >
-        <UserPlus size={32} color="var(--text-2)" />
-        <p style={{ fontSize: "16px", fontWeight: 700, textTransform: "none", color: "var(--text-2)", margin: 0 }}>
-          Invite a player
-        </p>
-        <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
-          Share your program link and players can join instantly
-        </p>
-        <Button onClick={shareInviteLink} variant="secondary">
-          Share invite link
-        </Button>
-        {copied && <p style={{ fontSize: "12px", color: "var(--text-2)", margin: 0 }}>Link copied</p>}
-      </div>
+      {copied && <p style={{ fontSize: "12px", color: "var(--text-2)", margin: 0 }}>Invite link copied</p>}
     </div>
   );
 }
