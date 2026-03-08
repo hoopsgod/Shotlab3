@@ -16,10 +16,13 @@ import SectionContainer from "./components/SectionContainer";
 import HeroBanner from "./components/HeroBanner";
 import BrandLogo from "./components/BrandLogo";
 import ContextSummary from "./components/ContextSummary";
+import ViewportPreviewToggle from "./components/ViewportPreviewToggle";
 import spacing from "./spacing";
 import UI_TOKENS from "./styles/tokens";
 import { cloudStore } from "./lib/cloudStore";
 import { firebaseAuth, firebaseEnabled, googleProvider } from "./lib/firebase";
+
+const PREVIEW_MODE_STORAGE_KEY="sl:preview-mode";
 
 const authCreateUser=async(auth,email,password)=>auth?.createUserWithEmailAndPassword?auth.createUserWithEmailAndPassword(email,password):null;
 const authUpdateProfile=async(user,payload)=>user?.updateProfile?user.updateProfile(payload):null;
@@ -755,6 +758,11 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 function AppInner(){
 const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
 const[highContrast,setHighContrast]=useState(false);
+const[previewMode,setPreviewMode]=useState(()=>{
+if(typeof window==="undefined")return "desktop";
+const stored=window.localStorage.getItem(PREVIEW_MODE_STORAGE_KEY);
+return stored==="mobile"?"mobile":"desktop";
+});
 const T=THEMES[theme];
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
@@ -778,6 +786,10 @@ useEffect(()=>{
   document.documentElement.classList.toggle("high-contrast",highContrast);
   localStorage.setItem("sl:high-contrast",highContrast?"1":"0");
 },[highContrast]);
+
+useEffect(()=>{
+localStorage.setItem(PREVIEW_MODE_STORAGE_KEY,previewMode);
+},[previewMode]);
 
 const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
@@ -1097,10 +1109,15 @@ useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
+<ViewportPreviewToggle mode={previewMode} onChange={setPreviewMode}/>
+<div className={`viewport-preview-shell viewport-preview-shell--${previewMode}`}>
+<div className={`viewport-preview-content viewport-preview-content--${previewMode}`}>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onSocialLogin={socialLogin} onResetPassword={resetPassword} firebaseEnabled={firebaseEnabled} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} onResetPassword={resetPassword} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} updateTeamBranding={updateTeamBranding} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/></div>}
+</div>
+</div>
 </>;
 }
 
