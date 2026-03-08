@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import UI_TOKENS from "../styles/tokens";
+import LoadingState from "./LoadingState";
+import ErrorState from "./ErrorState";
 
 const CHART_CARD_STYLE = {
   background: UI_TOKENS.colors.bgCard,
@@ -121,10 +123,18 @@ function LineChart({ data, yAxisLabel, color = UI_TOKENS.colors.action.primary }
   );
 }
 
-export default function ProgressCharts({ scores = [], userEmail, drills = [] }) {
+export default function ProgressCharts({ scores = [], userEmail, drills = [], errorMessage, onRetry }) {
   const [range, setRange] = useState("week");
   const [showHelp, setShowHelp] = useState(false);
   const activeFilter = FILTERS.find((f) => f.id === range) || FILTERS[0];
+
+  const [chartsLoading, setChartsLoading] = useState(true);
+
+  useEffect(() => {
+    setChartsLoading(true);
+    const timeoutId = window.setTimeout(() => setChartsLoading(false), 450);
+    return () => window.clearTimeout(timeoutId);
+  }, [range, scores.length, drills.length]);
 
   const drillLookup = useMemo(() => {
     const map = new Map();
@@ -205,6 +215,14 @@ export default function ProgressCharts({ scores = [], userEmail, drills = [] }) 
 
     return { drillRows, recommendations };
   }, [activeFilter.days, scores, userEmail, drillLookup]);
+
+  if (errorMessage) {
+    return <ErrorState title="Progress charts unavailable" description={errorMessage} onRetry={onRetry} className="progressChartsState" />;
+  }
+
+  if (chartsLoading) {
+    return <LoadingState variant="chart" title="Building charts" description="Crunching your latest drill history and trend metrics." className="progressChartsState" />;
+  }
 
   if (!progress.drillRows.length) return null;
 
