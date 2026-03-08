@@ -1495,6 +1495,8 @@ const[tStart,setTStart]=useState(0);
 const onTS=e=>{setTStart(e.touches[0].clientY)};
 const onTM=e=>{if(!tStart)return;const el=e.currentTarget;if(el.scrollTop>0)return;const dy=Math.max(0,Math.min(70,(e.touches[0].clientY-tStart)*.35));setPullY(dy)};
 const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else setPullY(0);setTStart(0)};
+const greeting=(()=>{const hour=new Date().getHours();if(hour<12)return "Good morning";if(hour<17)return "Good afternoon";return "Good evening";})();
+const firstName=((u?.name||u?.firstName||u?.displayName||"").trim().split(/\s+/)[0]||"Baller");
 
 return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
 <BrandBackdrop/>
@@ -1577,6 +1579,11 @@ return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",bac
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
+    <section style={{marginBottom:12,padding:"2px 2px 0"}}>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:1.2,textTransform:"uppercase"}}>{greeting},</div>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:32,lineHeight:1,letterSpacing:1.1,marginTop:4}}>{firstName} 🏀</div>
+    </section>
+
     <section style={{marginBottom:16,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:20,padding:"18px 16px 12px",boxShadow:"0 12px 30px rgba(0,0,0,0.28)"}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.4,textAlign:"center",marginBottom:8}}>SESSION FG%</div>
       <FgArc percentage={homeFgPct} label="All sessions"/>
