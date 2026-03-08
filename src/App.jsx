@@ -2580,11 +2580,13 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 <div className="eventPanel" style={{marginBottom:16}}>
   <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative",gap:14}}>
     <div>
-      <div className="eventPanelLabel" style={{color:"rgba(202,245,122,.9)",display:"inline-flex",alignItems:"center",gap:6}}>ATTENDANCE RANK <InfoHint text="Attendance Rank is based on the number of program events you RSVP to and attend."/></div>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginTop:8}}>
-        <svg className={rankFx?"rank-badge-flash":""} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b6aa94" strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-        <div className={rankFx?"rank-bounce":""} style={{fontFamily:FD,color:LIGHT,fontSize:28,fontWeight:900,letterSpacing:2}}>{myTier.name}</div>
-        <div style={{fontFamily:FD,color:VOLT,fontSize:28,fontWeight:700,lineHeight:1}}>{myRsvps}</div>
+      <div className="eventPanelLabel" style={{color:"rgba(255,184,48,.9)",display:"inline-flex",alignItems:"center",gap:6}}>ATTENDANCE RANK <InfoHint text="Attendance Rank is based on the number of program events you RSVP to and attend."/></div>
+      <div className={`rank-badge ${myTier.name==="GOLD"?"rank-gold":myTier.name==="SILVER"?"rank-silver":myTier.name==="BRONZE"?"rank-bronze":"rank-silver"} ${rankFx?"rank-badge-flash":""}`}>
+        <span className={`rank-icon ${rankFx?"rank-bounce":""}`}>★</span>
+        <div className="rank-info">
+          <span className="rank-tier">{myTier.name}</span>
+          <span className="rank-number">{myRsvps}</span>
+        </div>
       </div>
       <div style={{fontFamily:FB,color:"rgba(173,180,189,.88)",fontSize:12,marginTop:6}}>{myRsvps} event{myRsvps!==1?"s":""} attended</div>
     </div>
@@ -2603,7 +2605,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
               left:`${Math.min(Math.max(rankBarPct,5),95)}%`,
               top:-16,
               transform:"translateX(-50%)",
-              color:"#CCFF00",
+              color:"#FFB830",
               fontFamily:FB,
               fontSize:11,
               fontWeight:700,
@@ -2622,7 +2624,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
               fontFamily:FB,
               fontSize:11,
               fontWeight:700,
-              color:"#CCFF00",
+              color:"#FFB830",
               opacity:.9,
               lineHeight:1,
               letterSpacing:"0.03em",
@@ -2631,15 +2633,13 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
           >
             {nextTier.name}
           </div>
-          <div className="progress-track" style={{height:9,background:"rgba(255,255,255,0.12)",borderRadius:999,position:"relative",overflow:"hidden",border:"1px solid rgba(255,255,255,0.10)"}}>
+          <div className="progress-track">
             <div
-              className="progress-fill"
+              className="progress-fill progress-fill--rank"
               style={{
                 width:`${rankBarPct}%`,
                 height:"100%",
-                background:"#CCFF00",
-                borderRadius:999,
-                boxShadow:rankBarPulse?"0 0 10px rgba(184,255,0,0.38)":"none"
+                boxShadow:rankBarPulse?"0 0 12px rgba(255,140,32,0.40)":"none"
               }}
             />
           </div>
