@@ -362,6 +362,9 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeaderPill:hover{background:rgba(41,55,76,.72);border-color:rgba(184,201,222,.34);filter:brightness(1.03);}
 .pageHeaderPill:active{transform:translateY(1px);}
 .pageHeaderPill:focus-visible{outline:2px solid var(--page-accent);outline-offset:2px;}
+.newSessionCta{width:100%;min-height:56px;display:flex;align-items:center;justify-content:center;margin:0 0 12px;padding:0 16px;background:#FF5C1A;color:#ffffff;font-size:16px;font-weight:700;letter-spacing:0.05em;text-transform:uppercase;border:none;border-radius:14px;box-shadow:0 8px 28px rgba(255, 92, 26, 0.45);cursor:pointer;transition:transform 0.15s ease, box-shadow 0.15s ease;}
+.newSessionCta:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(255,92,26,0.55);}
+.newSessionCta:active{transform:translateY(0px);box-shadow:0 4px 16px rgba(255,92,26,0.4);}
 .pageHeaderPillBrand{border:1px solid rgba(178,198,222,.36);background:var(--page-accent,var(--color-primary,#8ba2c6));color:#070b12;box-shadow:0 8px 20px rgba(55,79,114,.34);}
 .pageHeaderPillBrand:hover{text-decoration:none;filter:brightness(1.03);}
 .pageHeaderPillBrand:focus-visible{outline-color:#B6AA94;}
@@ -3026,12 +3029,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   return <>
     <PageHeader title="Strength & Conditioning" subtitle="Plan sessions, track attendance, and keep your team consistent" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add Session"} onAction={()=>setShowAddSC(!showAddSC)} />
     <div className="accent-card" style={{background:`linear-gradient(165deg,rgba(21,28,40,0.96),rgba(10,14,21,0.98))`,border:`1px solid ${BORDER_CLR}`,borderRadius:18,padding:"18px 16px",marginBottom:12}}>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:8}}><div><div className="heroKicker" style={{color:PAGE_ACCENTS.sc.accent,marginBottom:4}}>Strength & Conditioning Hub</div><div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.45,maxWidth:520}}>Create sessions quickly, share location details, and monitor attendance trends in one place.</div></div><button className="pageHeaderPill" onClick={()=>setShowAddSC(v=>!v)}>{showAddSC?"Close Form":"Add Session"}</button></div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:8}}><div><div className="heroKicker" style={{color:PAGE_ACCENTS.sc.accent,marginBottom:4}}>Strength & Conditioning Hub</div><div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.45,maxWidth:520}}>Create sessions quickly, share location details, and monitor attendance trends in one place.</div></div></div>
       <div style={{fontFamily:FB,color:"#DCE3ED",fontSize:12}}>Next up: <span style={{color:PAGE_ACCENTS.sc.accent,fontWeight:700}}>{nextLift?`${nextLift.sport||nextLift.title} · ${nextLift.date}${nextLift.time?` · ${nextLift.time}`:""}`:"No session scheduled"}</span></div>
     </div>
 
+    <button type="button" className="newSessionCta" onClick={()=>setShowAddSC(v=>!v)}>+ Start New Session</button>
+
     <div className="accent-card fade-up" style={{background:CARD_BG,borderRadius:16,padding:"16px 14px",marginBottom:12,border:`1px solid ${BORDER_CLR}`}}>
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:12}}><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1.4}}>SESSION LOG</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Add training details for players before they RSVP.</div></div><button className="btn btn-primary btn-v" onClick={()=>setShowAddSC(v=>!v)} style={{width:"auto",margin:0,padding:"0 16px",minHeight:40}}>{showAddSC?"Hide":"Add Session"}</button></div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:12}}><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1.4}}>SESSION LOG</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Add training details for players before they RSVP.</div></div></div>
       {showAddSC?<><div style={{display:"grid",gridTemplateColumns:"repeat(1,minmax(0,1fr))",gap:10}}>
         <FormField label="Sport / Focus" helper="Example: Lower Body Strength" placeholder="e.g. Basketball Strength" value={nsc.sport} onChange={v=>setNsc({...nsc,sport:v})}/>
         <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:10}}><FormField label="Date" helper="When the session takes place" type="date" value={nsc.date} onChange={v=>setNsc({...nsc,date:v})}/><FormField label="Time" helper="Optional start time" placeholder="6:00 AM" value={nsc.time} onChange={v=>setNsc({...nsc,time:v})}/></div>
