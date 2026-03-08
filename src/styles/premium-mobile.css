@@ -237,7 +237,9 @@ select {
 
 
 .tab.shared-nav-item:active {
-  transform: translateY(1px);
+  transform: scale(0.99);
+  opacity: 0.9;
+  transition-duration: 100ms;
 }
 
 .tab .tab-label {
@@ -273,5 +275,6 @@ select {
   .tab.shared-nav-item:active,
   .tab.shared-nav-item.is-active .tab-icon {
     transform: none;
+    opacity: 1;
   }
 }

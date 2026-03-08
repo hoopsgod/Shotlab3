@@ -263,14 +263,25 @@ a.interactive-card:focus-visible {
   justify-content: center;
   gap: var(--space-2);
   cursor: pointer;
-  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 120ms ease;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 140ms ease, opacity 140ms ease;
 }
 
 .btn--md { min-height: var(--btn-h-md); height: var(--btn-h-md); }
 .btn--lg { min-height: var(--btn-h-lg); height: var(--btn-h-lg); padding: 0 var(--btn-pad-lg); }
 
 .btn:active,
-.btn-v:active { transform: translateY(1px); }
+.btn-v:active {
+  transform: scale(0.99);
+  opacity: 0.92;
+  transition-duration: 100ms;
+}
+
+.shared-card:is(button, a, [role="button"]):active,
+.interactive-card:active {
+  transform: scale(0.992);
+  opacity: 0.93;
+  transition-duration: 100ms;
+}
 
 @media (hover: hover) and (pointer: fine) {
   .btn:hover,
@@ -548,9 +559,13 @@ a,
   }
 
   .btn:active,
+  .btn-v:active,
+  .shared-card:is(button, a, [role="button"]):active,
+  .interactive-card:active,
   .shared-card:is(button, a, [role="button"]):hover,
   .interactive-card:hover {
     transform: none;
+    opacity: 1;
   }
 }
 
