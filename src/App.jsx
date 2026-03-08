@@ -733,6 +733,9 @@ body,
     transition: transform 150ms ease, box-shadow 150ms ease;
   }
 }
+
+#pb-moment .pb-particle{position:absolute;bottom:14%;width:10px;height:16px;border-radius:999px;opacity:0;animation:pbConfettiUp 1.35s ease-out infinite;will-change:transform,opacity}
+@keyframes pbConfettiUp{0%{transform:translate3d(0,0,0) scale(.8) rotate(0deg);opacity:0}12%{opacity:1}100%{transform:translate3d(var(--pb-x,0px),-72vh,0) scale(1.15) rotate(220deg);opacity:0}}
 `;
 const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.72);}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#B6AA94;}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.24);border-radius:14px;padding:14px;color:rgba(255,255,255,0.7);font-size:13px;line-height:1.35;}}`;
 const _EMPTY_STATE_CSS=`.emptyState{display:flex;flex-direction:column;align-items:center}.emptyState__art{width:80px;height:80px;display:flex;align-items:center;justify-content:center}.emptyState__art svg{width:80px;height:80px;display:block}.emptyState__title{margin-top:24px}.emptyState__subtitle{margin-top:8px}.emptyState__accentDash{stroke-dasharray:72;stroke-dashoffset:72;animation:emptyArcDraw 1.2s ease-in-out infinite}.emptyState__ball{transform-box:fill-box;transform-origin:center;animation:emptyBallFloat 1.2s ease-in-out infinite}.emptyState__accentOrbit{transform-box:fill-box;transform-origin:center;animation:emptyOrbitPulse 1.2s ease-in-out infinite}.emptyState__accentPulse{animation:emptyAccentPulse 1.2s ease-in-out infinite}@keyframes emptyBallFloat{0%,100%{transform:translateY(1px)}50%{transform:translateY(-2px)}}@keyframes emptyArcDraw{0%{stroke-dashoffset:72}50%{stroke-dashoffset:0}100%{stroke-dashoffset:-72}}@keyframes emptyOrbitPulse{0%,100%{opacity:.7;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}@keyframes emptyAccentPulse{0%,100%{opacity:.8}50%{opacity:1}}@media (prefers-reduced-motion: reduce){.emptyState__art *{animation:none!important;transition:none!important}}`;
@@ -1451,14 +1454,37 @@ return true;
 };
 
 const[pbReveal,setPbReveal]=useState(null);
+const[pbMoment,setPbMoment]=useState(null);
+const[allTimeBestFGPercent,setAllTimeBestFGPercent]=useState(0);
+const pbDismissTimerRef=useRef(null);
+const pbTouchStartRef=useRef(null);
+const pbParticles=useMemo(()=>Array.from({length:26},(_,idx)=>({
+  id:idx,
+  left:`${6+((idx*37)%88)}%`,
+  xOffset:`${((idx%2===0?1:-1)*(36+((idx*19)%120)))}px`,
+  delay:`${(idx*32)%801}ms`,
+  color:["#FF5C1A","#FFB830","#1EE07F","#00D4FF"][idx%4],
+  duration:`${1100+((idx*67)%900)}ms`
+})),[]);
 const[submitting,setSubmitting]=useState(false);
 const[drillBarW,setDrillBarW]=useState(0);
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
+useEffect(()=>{(async()=>{const stored=await DB.get("sl:best-fg-percent");if(Number.isFinite(Number(stored)))setAllTimeBestFGPercent(Number(stored));})();},[]);
+useEffect(()=>()=>{if(pbDismissTimerRef.current)clearTimeout(pbDismissTimerRef.current);},[]);
+const dismissPBMoment=()=>{if(pbDismissTimerRef.current){clearTimeout(pbDismissTimerRef.current);pbDismissTimerRef.current=null;}setPbMoment(null);pbTouchStartRef.current=null;};
+const updateAllTimeBest=async(nextPercent)=>{const safe=Math.max(0,Math.round(Number(nextPercent)||0));setAllTimeBestFGPercent(prev=>Math.max(prev,safe));await DB.set("sl:best-fg-percent",safe);};
+const showPBMoment=(sessionFGPercent,prevBest)=>{if(pbDismissTimerRef.current)clearTimeout(pbDismissTimerRef.current);setPbMoment({current:Math.round(sessionFGPercent),previous:Math.round(prevBest||0)});pbDismissTimerRef.current=setTimeout(()=>dismissPBMoment(),6000);};
+const onPBMomentTouchStart=e=>{pbTouchStartRef.current=e.touches?.[0]?.clientY??null;};
+const onPBMomentTouchEnd=e=>{const endY=e.changedTouches?.[0]?.clientY;const startY=pbTouchStartRef.current;if(startY!==null&&Number.isFinite(endY)&&startY-endY>28){dismissPBMoment();return;}pbTouchStartRef.current=null;};
+
 const handleLog=()=>{if(submitting)return;const v=parseInt(input);if(isNaN(v)||v<0||v>active.max)return;setSubmitting(true);const oldStreak=streak;
 // Check personal best
 const prevBest=homeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
 const isPB=v>prevBest&&prevBest>0;
 addScore(active.id,v);playScore();const pct=Math.round(v/active.max*100);setShareData({drill:active.name,score:v,max:active.max,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
+const totalAttempts=Number(active?.max)||0;
+const sessionFGPercent=totalAttempts>0?Math.round(v/totalAttempts*100):0;
+if(sessionFGPercent>allTimeBestFGPercent&&totalAttempts>=10){showPBMoment(sessionFGPercent,allTimeBestFGPercent);void updateAllTimeBest(sessionFGPercent);}
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)};
 const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setSubmitting(false);setTab("home")};
@@ -1473,6 +1499,16 @@ const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else s
 return <div className={u.isCoach?"coach-mode":""} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
 <BrandBackdrop/>
 {shotSaved&&<div role="status" aria-live="polite" style={{position:"fixed",left:"50%",bottom:110,transform:"translateX(-50%)",zIndex:40,background:VOLT,color:BG,padding:"10px 14px",borderRadius:999,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:1.2,boxShadow:"0 10px 28px rgba(0,0,0,0.35)"}}>Shots logged successfully</div>}
+<div id="pb-moment" role="dialog" aria-modal="true" aria-hidden={!pbMoment} onClick={dismissPBMoment} onTouchStart={onPBMomentTouchStart} onTouchEnd={onPBMomentTouchEnd} style={{position:"fixed",inset:0,zIndex:9999,background:"rgba(10,11,15,0.96)",backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",opacity:pbMoment?1:0,pointerEvents:pbMoment?"all":"none",transition:"opacity 0.3s ease",padding:"24px",overflow:"hidden"}}>
+  {pbParticles.map(p=><div key={p.id} className="pb-particle" aria-hidden="true" style={{left:p.left,background:p.color,animationDelay:p.delay,animationDuration:p.duration,"--pb-x":p.xOffset}}/>)}
+  <div onClick={e=>e.stopPropagation()} style={{position:"relative",zIndex:2,textAlign:"center",maxWidth:420}}>
+    <div aria-hidden="true" style={{fontSize:64,lineHeight:1}}>🔥</div>
+    <div style={{fontFamily:"'Bebas Neue', sans-serif",fontSize:52,color:"#FF5C1A",letterSpacing:1.4,lineHeight:1,marginTop:14}}>NEW PERSONAL BEST</div>
+    <div style={{fontFamily:FB,color:"#EFF4FF",fontSize:22,lineHeight:1.35,marginTop:14}}>You shot {pbMoment?.current??0}% — your highest ever</div>
+    <div style={{fontFamily:FB,color:"rgba(207,216,228,0.72)",fontSize:14,marginTop:8}}>Previous best: {pbMoment?.previous??0}%</div>
+    <button className="btn btn--primary" onClick={dismissPBMoment} style={{marginTop:22,minWidth:210,minHeight:50,fontFamily:FB,fontSize:15,fontWeight:700}}>Let&apos;s Go →</button>
+  </div>
+</div>
 {teamBranding.showWatermark&&tab==="home"?<TeamWatermark logoUrl={teamBranding.logoUrl} primaryColor={teamBranding.primaryColor} opacity={0.06} size={260}/>:null}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
