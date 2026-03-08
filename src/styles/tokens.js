@@ -52,6 +52,7 @@ export const UI_TOKENS = {
     sm: 8,
     smd: 12,
     md: 16,
+    mdlg: 20,
     lg: 24,
     xl: 32,
     xxl: 40,
