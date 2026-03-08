@@ -2248,8 +2248,32 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 function ShotTracker({u,shotLogs,shotMade,updateShotMade,adjustShotMade,shotDate,setShotDate,shotSaved,shotError,isShotValid,submitShotLog}){
 const my=useMemo(()=>shotLogs.filter(s=>s.email===u.email),[shotLogs,u]);
 const today=todayStr();
+const[sessionMisses,setSessionMisses]=useState(0);
+const[fgFlash,setFgFlash]=useState(false);
+const makeButtonRef=useRef(null);
+const missButtonRef=useRef(null);
 
 const handleLog=()=>{submitShotLog();};
+const triggerAnimation=(buttonRef,className)=>{
+  if(!buttonRef?.current)return;
+  buttonRef.current.classList.remove(className);
+  void buttonRef.current.offsetWidth;
+  buttonRef.current.classList.add(className);
+};
+const flashFgCard=()=>{
+  setFgFlash(true);
+  setTimeout(()=>setFgFlash(false),600);
+};
+const handleMadeTap=()=>{
+  adjustShotMade(1);
+  triggerAnimation(makeButtonRef,"shot-btn--made-animate");
+  flashFgCard();
+};
+const handleMissTap=()=>{
+  setSessionMisses(v=>v+1);
+  triggerAnimation(missButtonRef,"shot-btn--miss-animate");
+  flashFgCard();
+};
 
 // Running totals
 const todayTotal=useMemo(()=>my.filter(s=>s.date===today).reduce((a,s)=>a+s.made,0),[my,today]);
@@ -2260,8 +2284,12 @@ return my.filter(s=>s.date>=startStr&&s.date<=today).reduce((a,s)=>a+s.made,0);
 const monthTotal=useMemo(()=>{const mo=today.slice(0,7);return my.filter(s=>s.date.startsWith(mo)).reduce((a,s)=>a+s.made,0)},[my,today]);
 const yearTotal=useMemo(()=>{const yr=today.slice(0,4);return my.filter(s=>s.date.startsWith(yr)).reduce((a,s)=>a+s.made,0)},[my,today]);
 const allTime=useMemo(()=>my.reduce((a,s)=>a+s.made,0),[my]);
+const sessionMakes=Math.max(0,Number(shotMade)||0);
+const sessionAttempts=sessionMakes+sessionMisses;
+const fgPct=sessionAttempts>0?Math.round(sessionMakes/sessionAttempts*100):0;
 
 return <div className="fade-up">
+<style>{`@keyframes shotMade{0%{transform:scale(0.8);opacity:0.9;box-shadow:0 0 0 0 rgba(30,224,127,0.6);}70%{transform:scale(1);opacity:1;box-shadow:0 0 0 18px rgba(30,224,127,0);}100%{transform:scale(1);opacity:1;box-shadow:0 0 0 0 rgba(30,224,127,0);}}@keyframes shotMiss{0%,100%{transform:translateX(0);}20%{transform:translateX(-6px);}40%{transform:translateX(6px);}60%{transform:translateX(-4px);}80%{transform:translateX(4px);}}.shot-btn--made-animate{animation:shotMade 0.4s ease-out;}.shot-btn--miss-animate{animation:shotMiss 0.35s ease-in-out;}`}</style>
 {/* Header */}
 {/* Shot Tracker banner — arc-inspired */}
 <div style={{background:`linear-gradient(180deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:"18px 22px",marginBottom:16,border:`1px solid ${ORANGE}12`,position:"relative",overflow:"hidden"}}>
@@ -2283,6 +2311,9 @@ return <div className="fade-up">
   <div className="grd-bdr" style={{gridColumn:"1/3"}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
     <AnimNum v={allTime} c={VOLT} big/><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,marginTop:6,fontWeight:600}}>ALL-TIME MAKES</div>
   </div></div>
+  <div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"14px 14px",border:fgFlash?"1px solid #1EE07F":`1px solid ${BORDER_CLR}`,transition:"border-color .2s ease"}}>
+    <AnimNum v={fgPct} c="#1EE07F"/><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:2,marginTop:4,fontWeight:600}}>CURRENT FG%</div>
+  </div>
   {[{l:"TODAY",v:todayTotal,c:LIGHT},{l:"THIS WEEK",v:weekTotal,c:VOLT},{l:"THIS MONTH",v:monthTotal,c:CYAN},{l:"THIS YEAR",v:yearTotal,c:ORANGE}].map((s,i)=>
     <div key={i} style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"14px 14px",border:`1px solid ${BORDER_CLR}`}}>
       <AnimNum v={s.v} c={s.c}/>
@@ -2303,9 +2334,9 @@ return <div className="fade-up">
     <div style={{marginBottom:16}}>
       <label id="tracker-shot-makes-label" className="fieldLabel" style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>NUMBER OF MAKES</label>
       <div style={{display:"flex",alignItems:"center",gap:10}}>
-        <button type="button" aria-label="Decrease number of makes" onClick={()=>adjustShotMade(-1)} style={{width:44,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:24,fontWeight:700,cursor:"pointer"}}>–</button>
+        <button ref={missButtonRef} type="button" className="shot-btn shot-btn--miss" aria-label="Log missed shot" onClick={handleMissTap} style={{width:64,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:"#F59E0B",fontSize:13,fontWeight:700,cursor:"pointer",textTransform:"uppercase",letterSpacing:.8}}>Miss</button>
         <input id="tracker-shot-slider" className="input" type="range" min="0" max={SHOT_MAKES_MAX} step="1" value={shotMade} onChange={e=>updateShotMade(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLog()} aria-labelledby="tracker-shot-makes-label" aria-label="Number of makes" style={{flex:1,accentColor:ORANGE,cursor:"pointer"}}/>
-        <button type="button" aria-label="Increase number of makes" onClick={()=>adjustShotMade(1)} style={{width:44,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontSize:24,fontWeight:700,cursor:"pointer"}}>+</button>
+        <button ref={makeButtonRef} type="button" className="shot-btn shot-btn--made" aria-label="Log made shot" onClick={handleMadeTap} style={{width:64,height:44,borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:BG,color:"#1EE07F",fontSize:13,fontWeight:700,cursor:"pointer",textTransform:"uppercase",letterSpacing:.8}}>Make</button>
       </div>
       <div style={{fontFamily:FD,color:ORANGE,fontSize:34,textAlign:"center",marginTop:8}} aria-live="polite">{shotMade}</div>
     </div>
