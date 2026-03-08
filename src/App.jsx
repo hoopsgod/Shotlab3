@@ -766,6 +766,7 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 function AppInner(){
 const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
 const[highContrast,setHighContrast]=useState(false);
+const[isDesktopViewport,setIsDesktopViewport]=useState(()=>typeof window!=="undefined"?window.innerWidth>=960:true);
 const[previewMode,setPreviewMode]=useState(()=>{
 if(typeof window==="undefined")return PREVIEW_MODES.DESKTOP;
 const stored=window.localStorage.getItem(PREVIEW_MODE_STORAGE_KEY);
@@ -799,8 +800,18 @@ useEffect(()=>{
 localStorage.setItem(PREVIEW_MODE_STORAGE_KEY,previewMode);
 },[previewMode]);
 
-const previewShellClass=MOBILE_PREVIEW_MODES.has(previewMode)?"viewport-preview-shell viewport-preview-shell--mobile":"viewport-preview-shell viewport-preview-shell--desktop";
-const previewContentClass=MOBILE_PREVIEW_MODES.has(previewMode)?`viewport-preview-content viewport-preview-content--mobile ${previewMode===PREVIEW_MODES.MOBILE_SMALL?"viewport-preview-content--mobile-small":""} ${previewMode===PREVIEW_MODES.MOBILE_LARGE?"viewport-preview-content--mobile-large":""}`.trim():"viewport-preview-content viewport-preview-content--desktop";
+useEffect(()=>{
+if(typeof window==="undefined")return;
+const syncViewport=()=>setIsDesktopViewport(window.innerWidth>=960);
+syncViewport();
+window.addEventListener("resize",syncViewport);
+return ()=>window.removeEventListener("resize",syncViewport);
+},[]);
+
+const activePreviewMode=isDesktopViewport?previewMode:PREVIEW_MODES.MOBILE;
+
+const previewShellClass=MOBILE_PREVIEW_MODES.has(activePreviewMode)?"viewport-preview-shell viewport-preview-shell--mobile":"viewport-preview-shell viewport-preview-shell--desktop";
+const previewContentClass=MOBILE_PREVIEW_MODES.has(activePreviewMode)?`viewport-preview-content viewport-preview-content--mobile ${activePreviewMode===PREVIEW_MODES.MOBILE_SMALL?"viewport-preview-content--mobile-small":""} ${activePreviewMode===PREVIEW_MODES.MOBILE_LARGE?"viewport-preview-content--mobile-large":""}`.trim():"viewport-preview-content viewport-preview-content--desktop";
 
 const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
@@ -1120,7 +1131,7 @@ useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <><Styles/>
-<ViewportPreviewToggle mode={previewMode} onChange={setPreviewMode}/>
+{isDesktopViewport&&<ViewportPreviewToggle mode={previewMode} onChange={setPreviewMode}/>}
 <div className={previewShellClass}>
 <div className={previewContentClass}>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onSocialLogin={socialLogin} onResetPassword={resetPassword} firebaseEnabled={firebaseEnabled} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
