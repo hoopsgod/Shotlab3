@@ -1,30 +1,40 @@
 :root {
-  --type-h1-size: var(--fs-display);
-  --type-h2-size: var(--fs-h1);
-  --type-h3-size: var(--fs-h2);
+  --type-display-size: var(--fs-display);
+  --type-screen-title-size: var(--fs-h1);
+  --type-section-title-size: var(--fs-h2);
+  --type-card-title-size: var(--fs-h3);
   --type-body-size: var(--fs-body);
-  --type-caption-size: var(--fs-helper);
+  --type-meta-size: var(--fs-helper);
 
-  --type-h1-weight: var(--fw-bold);
-  --type-h2-weight: var(--fw-bold);
-  --type-h3-weight: var(--fw-semibold);
+  --type-display-weight: var(--fw-bold);
+  --type-screen-title-weight: var(--fw-bold);
+  --type-section-title-weight: var(--fw-semibold);
+  --type-card-title-weight: var(--fw-semibold);
   --type-body-weight: var(--fw-regular);
+  --type-meta-weight: var(--fw-medium);
+
+  --type-display-line: 1.2143;
+  --type-screen-title-line: 1.25;
+  --type-section-title-line: 1.3334;
+  --type-card-title-line: 1.375;
+  --type-body-line: 1.4667;
+  --type-meta-line: 1.3846;
 }
 
 .page h1,
 .page .type-display {
-  font-size: var(--type-h1-size);
-  font-weight: var(--type-h1-weight);
-  line-height: var(--lh-tight);
+  font-size: var(--type-display-size);
+  font-weight: var(--type-display-weight);
+  line-height: var(--type-display-line);
   letter-spacing: var(--ls-tight);
   text-transform: none;
 }
 
 .page h2,
 .page .type-heading {
-  font-size: var(--type-h2-size);
-  font-weight: var(--type-h2-weight);
-  line-height: var(--lh-tight);
+  font-size: var(--type-screen-title-size);
+  font-weight: var(--type-screen-title-weight);
+  line-height: var(--type-screen-title-line);
   letter-spacing: var(--ls-tight);
   text-transform: none;
 }
@@ -34,11 +44,19 @@
 .page h5,
 .page h6,
 .page .type-subheading {
-  font-size: var(--type-h3-size);
-  font-weight: var(--type-h3-weight);
-  line-height: 1.35;
+  font-size: var(--type-section-title-size);
+  font-weight: var(--type-section-title-weight);
+  line-height: var(--type-section-title-line);
   letter-spacing: var(--ls-normal);
   text-transform: none;
+}
+
+.page .cardTitle,
+.page .type-card-title {
+  font-size: var(--type-card-title-size);
+  font-weight: var(--type-card-title-weight);
+  line-height: var(--type-card-title-line);
+  letter-spacing: var(--ls-normal);
 }
 
 .page p,
@@ -48,15 +66,15 @@
 .page .u-secondary-text {
   font-size: var(--type-body-size);
   font-weight: var(--type-body-weight);
-  line-height: var(--lh-body);
+  line-height: var(--type-body-line);
   letter-spacing: var(--ls-normal);
   color: var(--text-2);
 }
 
 .page small,
 .page .type-helper {
-  font-size: var(--fs-helper);
-  line-height: var(--lh-helper);
+  font-size: var(--type-meta-size);
+  line-height: var(--type-meta-line);
   color: var(--color-text-helper);
 }
 
@@ -67,11 +85,10 @@
 .page .tab-label,
 .page .panel-title,
 .page .section-kicker {
-  font-size: var(--type-caption-size);
-  font-weight: var(--fw-semibold);
-  line-height: 1.35;
+  font-size: var(--type-meta-size);
+  font-weight: var(--type-meta-weight);
+  line-height: var(--type-meta-line);
   letter-spacing: 0.075em;
   text-transform: uppercase;
-  color: var(--text-2);
+  color: var(--text-3);
 }
-

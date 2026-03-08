@@ -16,9 +16,9 @@ Implementation plan (small-scope motion pass):
   --color-bg-subtle: rgba(175, 191, 214, 0.09);
 
   --color-text-primary: #f4f7fc;
-  --color-text-secondary: #c7d2e2;
-  --color-text-muted: #9aa9bc;
-  --color-text-helper: #a8b5c7;
+  --color-text-secondary: #d2dcef;
+  --color-text-muted: #b3bfd2;
+  --color-text-helper: #bec8d9;
   --color-text-placeholder: #afbdcf;
 
   --color-border-subtle: rgba(175, 191, 214, 0.22);
@@ -75,24 +75,25 @@ Implementation plan (small-scope motion pass):
 
   --font-sans: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
 
-  --fs-display: clamp(1.75rem, 2.2vw, 2.25rem);
-  --fs-title: clamp(1.75rem, 2.2vw, 2.25rem);
-  --fs-h1: clamp(1.5rem, 2vw, 1.9rem);
-  --fs-h2: clamp(1.25rem, 1.6vw, 1.5rem);
-  --fs-h3: 1.125rem;
-  --fs-body: 1rem;
-  --fs-caption: 0.875rem;
-  --fs-helper: 0.875rem;
+  --fs-display: 28px;
+  --fs-title: 24px;
+  --fs-h1: 24px;
+  --fs-h2: 18px;
+  --fs-h3: 16px;
+  --fs-body: 15px;
+  --fs-caption: 13px;
+  --fs-helper: 13px;
   --fs-label: 0.75rem;
   --control-font-size: 16px;
 
-  --fw-regular: 500;
+  --fw-regular: 400;
+  --fw-medium: 500;
   --fw-semibold: 600;
   --fw-bold: 700;
 
-  --lh-tight: 1.2;
-  --lh-body: 1.6;
-  --lh-helper: 1.45;
+  --lh-tight: 1.25;
+  --lh-body: 1.4667;
+  --lh-helper: 1.3846;
   --lh-normal: var(--lh-body);
 
   --ls-tight: -0.01em;

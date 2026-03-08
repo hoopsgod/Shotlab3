@@ -8,8 +8,8 @@ export const UI_TOKENS = {
     },
     text: {
       primary: "#f4f7fc",
-      secondary: "#c7d2e2",
-      muted: "#9aa9bc",
+      secondary: "#d2dcef",
+      muted: "#b3bfd2",
     },
     border: {
       subtle: "rgba(175, 191, 214, 0.22)",
@@ -44,8 +44,8 @@ export const UI_TOKENS = {
     bgElevated: "#1f2b3b",
     bgSubtle: "rgba(175, 191, 214, 0.09)",
     textPrimary: "#f4f7fc",
-    textSecondary: "#c7d2e2",
-    textMuted: "#9aa9bc",
+    textSecondary: "#d2dcef",
+    textMuted: "#b3bfd2",
   },
   spacing: {
     xs: 4,
@@ -66,6 +66,15 @@ export const UI_TOKENS = {
     xl: 14,
     card: 14,
     pill: 999,
+  },
+
+  typography: {
+    display: { fontSize: 28, lineHeight: 34, fontWeight: 700 },
+    screenTitle: { fontSize: 24, lineHeight: 30, fontWeight: 700 },
+    sectionTitle: { fontSize: 18, lineHeight: 24, fontWeight: 600 },
+    cardTitle: { fontSize: 16, lineHeight: 22, fontWeight: 600 },
+    body: { fontSize: 15, lineHeight: 22, fontWeight: 400 },
+    meta: { fontSize: 13, lineHeight: 18, fontWeight: 500 },
   },
   shadows: {
     card: "0 6px 18px rgba(6, 11, 19, 0.28)",
