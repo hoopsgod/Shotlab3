@@ -8,7 +8,9 @@
     "dev": "vite",
     "start": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "npx --yes eslint .",
+    "format:check": "npx --yes prettier --check ."
   },
   "dependencies": {
     "react": "^18.2.0",
