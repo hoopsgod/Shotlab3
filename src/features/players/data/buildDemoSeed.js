@@ -1,3 +1,5 @@
+/** @typedef {import("../../../domain/models/coreModels").ScheduledEvent} ScheduledEvent */
+
 import { DEMO_PLAYER } from "./demoAccounts";
 import { DEMO_SEED_PLAYERS } from "./demoSeedPlayers";
 import { isoDaysAgo, withTs, distributeTotal } from "../../../shared/utils/coreUtils";
@@ -17,6 +19,7 @@ email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,
 const shotRows=[18,24,21,27,19,26,23,20].map((made,idx)=>({
 email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,made,date:isoDaysAgo(idx+1),ts:withTs(idx+1,300+idx)
 }));
+/** @type {ScheduledEvent[]} */
 const eventRows=[
 {id:9001,title:"Early Workout",date:isoDaysAgo(76),time:"6:00 AM",location:"Main Gym — Court 1",desc:"Small-group form shooting before school.",type:"clinic",teamId,createdAt},
 {id:9002,title:"JV/Varsity Skills Block",date:isoDaysAgo(61),time:"4:15 PM",location:"Training Facility — Bay 3",desc:"Position-based skill stations and finishing reps.",type:"clinic",teamId,createdAt},
