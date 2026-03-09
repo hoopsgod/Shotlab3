@@ -1,5 +1,7 @@
 export const UI_TOKENS = {
   colors: {
+    // Canonical color values currently remain in this JS map for legacy alpha-concatenation usage
+    // (for example `${UI_TOKENS.colors.danger}55` in inline styles).
     // Semantic palette: premium mobile-first sports product
     bg: {
       canvas: "#0f1722",
@@ -47,35 +49,37 @@ export const UI_TOKENS = {
     textSecondary: "#c7d2e2",
     textMuted: "#9aa9bc",
   },
+  // Canonical source for shared spacing/radius/shadow/border values is `src/styles/design-system.css`.
+  // Keep this JS export as a compatibility wrapper for inline styles and existing imports.
   spacing: {
-    xs: 4,
-    sm: 8,
-    smd: 12,
-    md: 16,
-    mdlg: 20,
-    lg: 24,
-    xl: 32,
-    xxl: 40,
-    section: 48,
-    xxxl: 64,
+    xs: "var(--space-1)",
+    sm: "var(--space-2)",
+    smd: "var(--space-3)",
+    md: "var(--space-4)",
+    mdlg: "var(--space-4a)",
+    lg: "var(--space-5)",
+    xl: "var(--space-6)",
+    xxl: "var(--space-7)",
+    section: "var(--space-8)",
+    xxxl: "var(--space-9)",
   },
   radii: {
-    sm: 8,
-    md: 14,
-    lg: 14,
-    xl: 14,
-    card: 14,
-    pill: 999,
+    sm: "var(--radius-sm)",
+    md: "var(--radius-md)",
+    lg: "var(--radius-lg)",
+    xl: "var(--radius-xl)",
+    card: "var(--radius-md)",
+    pill: "var(--radius-pill)",
   },
   shadows: {
-    card: "0 6px 18px rgba(6, 11, 19, 0.28)",
-    raised: "0 12px 26px rgba(6, 11, 19, 0.34)",
-    accent: "0 0 0 3px rgba(83, 121, 190, 0.24)",
+    card: "var(--shadow-1)",
+    raised: "var(--shadow-2)",
+    accent: "var(--focus-ring)",
   },
   borders: {
-    subtle: "rgba(175, 191, 214, 0.22)",
-    strong: "rgba(195, 211, 231, 0.4)",
-    accent: "rgba(83, 121, 190, 0.36)",
+    subtle: "var(--border-1)",
+    strong: "var(--border-2)",
+    accent: "var(--color-focus-ring)",
   },
 };
 
