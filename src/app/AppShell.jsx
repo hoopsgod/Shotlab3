@@ -1,3 +1,4 @@
+// App shell host extracted from App.jsx for merge-safe top-level composition.
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "../screens/PlayersScreen";
 import { initializeAnalytics, trackAnalyticsBackendEvent } from "../services/analytics/analyticsService";
