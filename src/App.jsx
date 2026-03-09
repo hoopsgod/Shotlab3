@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
-import { initializeAnalytics, trackAnalyticsBackendEvent } from "./services/analytics/analyticsService";
+import { initAnalytics, trackBackendEvent } from "./services/analytics/analyticsService";
 import PageHeader from "./components/PageHeader";
 import CoachCommandCenter from "./features/coach/components/CoachCommandCenter";
 import AppHeader from "./components/AppHeader";
@@ -663,7 +663,7 @@ const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
 const requirePlayer=(actor,teamId,email)=>actor?.role==="player"&&actor.teamId&&actor.teamId===teamId&&actor.email===email;
 const trackEvent=useCallback((type,meta={},actor=user)=>{
-trackAnalyticsBackendEvent(type,{
+trackBackendEvent(type,{
 teamId:meta.teamId??actor?.teamId??null,
 userEmail:actor?.email||meta.userEmail||null,
 userRole:actor?.role||meta.userRole||null,
@@ -1010,7 +1010,7 @@ const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
 const scopedScLogs=scLogs.filter(l=>l.teamId===user?.teamId);
 const myTeam=withTeamBranding(teams.find(t=>t.id===user?.teamId)||null);
 
-useEffect(()=>{initializeAnalytics();trackAnalyticsBackendEvent("app_loaded",{path:window.location.pathname});},[]);
+useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.location.pathname});},[]);
 useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);
 useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.message||"unknown"});const onRej=(e)=>trackEvent("app_error",{kind:"unhandledrejection",message:e?.reason?.message||String(e?.reason||"unknown")});window.addEventListener("error",onErr);window.addEventListener("unhandledrejection",onRej);return()=>{window.removeEventListener("error",onErr);window.removeEventListener("unhandledrejection",onRej);};},[trackEvent]);
 
