@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./services/analytics/analyticsService";
 import PageHeader from "./components/PageHeader";
-import CoachCommandCenter from "./features/coach/components/CoachCommandCenter";
+import CoachCommandCenter from "./components/CoachCommandCenter";
 import AppHeader from "./components/AppHeader";
 import Button from "./shared/ui/Button";
 import EmptyState from "./shared/ui/EmptyState";
