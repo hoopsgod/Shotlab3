@@ -1,9 +1,9 @@
-import EmptyDrillsArc from "../assets/empty-states/EmptyDrillsArc";
-import EmptyEventsCourt from "../assets/empty-states/EmptyEventsCourt";
-import EmptyLeaderboardPodium from "../assets/empty-states/EmptyLeaderboardPodium";
-import EmptyLiftingRack from "../assets/empty-states/EmptyLiftingRack";
+import EmptyDrillsArc from "../../assets/empty-states/EmptyDrillsArc";
+import EmptyEventsCourt from "../../assets/empty-states/EmptyEventsCourt";
+import EmptyLeaderboardPodium from "../../assets/empty-states/EmptyLeaderboardPodium";
+import EmptyLiftingRack from "../../assets/empty-states/EmptyLiftingRack";
 import Card from "./Card";
-import Button from "./ui/Button";
+import Button from "./Button";
 
 const ART_BY_VARIANT = {
   events: EmptyEventsCourt,

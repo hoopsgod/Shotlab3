@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import UI_TOKENS from "../styles/tokens";
-import LoadingState from "./LoadingState";
+import LoadingState from "../shared/ui/LoadingState";
 import ErrorState from "./ErrorState";
 
 const CHART_CARD_STYLE = {

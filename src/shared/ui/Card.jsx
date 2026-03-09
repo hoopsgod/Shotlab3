@@ -1,4 +1,4 @@
-import spacing from "../spacing";
+import spacing from "../../spacing";
 
 const CARD_VARIANT_STYLES = {
   primary: { className: "shared-card--primary", padding: spacing.mdlg, gap: spacing.md },

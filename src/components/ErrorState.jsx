@@ -1,5 +1,5 @@
-import Card from "./Card";
-import Button from "./ui/Button";
+import Card from "../shared/ui/Card";
+import Button from "../shared/ui/Button";
 import UI_TOKENS from "../styles/tokens";
 
 export default function ErrorState({
