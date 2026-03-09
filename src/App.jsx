@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
-import { initAnalytics, trackBackendEvent } from "./lib/analytics";
+import { initializeAnalytics, trackAnalyticsBackendEvent } from "./services/analytics/analyticsService";
 import PageHeader from "./components/PageHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
 import AppHeader from "./components/AppHeader";
@@ -20,28 +20,16 @@ import ViewportPreviewToggle from "./components/ViewportPreviewToggle";
 import MobileFocusPanel from "./components/MobileFocusPanel";
 import spacing from "./spacing";
 import UI_TOKENS from "./styles/tokens";
-import { cloudStore } from "./lib/cloudStore";
 import { firebaseAuth, firebaseEnabled, googleProvider } from "./lib/firebase";
-
-const PREVIEW_MODE_STORAGE_KEY="sl:preview-mode";
-const PREVIEW_MODES={
-DESKTOP:"desktop",
-MOBILE:"mobile",
-MOBILE_SMALL:"mobile-small",
-MOBILE_LARGE:"mobile-large",
-};
-const MOBILE_PREVIEW_MODES=new Set([PREVIEW_MODES.MOBILE,PREVIEW_MODES.MOBILE_SMALL,PREVIEW_MODES.MOBILE_LARGE]);
-const isValidPreviewMode=value=>Object.values(PREVIEW_MODES).includes(value);
-
-const authCreateUser=async(auth,email,password)=>auth?.createUserWithEmailAndPassword?auth.createUserWithEmailAndPassword(email,password):null;
-const authUpdateProfile=async(user,payload)=>user?.updateProfile?user.updateProfile(payload):null;
-const authSignIn=async(auth,email,password)=>auth?.signInWithEmailAndPassword?auth.signInWithEmailAndPassword(email,password):null;
-const authSignInGoogle=async(auth,provider)=>auth?.signInWithPopup?auth.signInWithPopup(provider):null;
-const authSendReset=async(auth,email)=>auth?.sendPasswordResetEmail?auth.sendPasswordResetEmail(email):null;
-const authSignOut=async(auth)=>auth?.signOut?auth.signOut():null;
-const authDeleteCurrent=async(auth)=>auth?.currentUser?.delete?auth.currentUser.delete():null;
-const authSubscribe=(auth,cb)=>auth?.onAuthStateChanged?auth.onAuthStateChanged(cb):(()=>{});
-;
+import { PREVIEW_MODE_STORAGE_KEY, PREVIEW_MODES, MOBILE_PREVIEW_MODES, isValidPreviewMode } from "./app/config/previewModes";
+import { authCreateUser, authUpdateProfile, authSignIn, authSignInGoogle, authSendReset, authSignOut, authDeleteCurrent, authSubscribe } from "./features/auth/services/authService";
+import { DEMO_PLAYER, DEMO_COACH } from "./features/players/data/demoAccounts";
+import { DEMO_SEED_PLAYERS } from "./features/players/data/demoSeedPlayers";
+import { buildDemoSeed } from "./features/players/data/buildDemoSeed";
+import { DEFAULT_TEAM_BRANDING, BRANDING_PRESETS, LOGO_ALLOWED_TYPES, MIN_LOGO_RATIO, MAX_LOGO_RATIO } from "./features/branding/constants/defaultTeamBranding";
+import { sanitizeHexColor, sanitizeTeamBranding, withTeamBranding, hexToRgb, alphaFromHex, contrastRatio } from "./features/branding/utils/brandingUtils";
+import { todayStr, isoDaysAgo, withTs, distributeTotal, genId, generateJoinCode } from "./shared/utils/coreUtils";
+import { DB } from "./services/storage/cloudStoreAdapter";
 
 const TOKENS={
 PRIMARY:UI_TOKENS.colors.primary,
@@ -120,87 +108,8 @@ const SC_INIT=[
 ];
 const TIERS=[{min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},{min:2,name:"IRON",color:"#A0A0A0",bg:"#A0A0A015"},{min:3,name:"BRONZE",color:"#A0A0A0",bg:"#A0A0A015"},{min:5,name:"SILVER",color:"#A0A0A0",bg:"#A0A0A015"},{min:8,name:"GOLD",color:"#b6aa94",bg:"#b6aa941f"},{min:12,name:"DIAMOND",color:CYAN,bg:CYAN+"15"}];
 const getTier = c => [...TIERS].reverse().find(t => c >= t.min) || TIERS[0];
-const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const SHOT_MAKES_MIN=1;
 const SHOT_MAKES_MAX=500;
-const ALNUM="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const DEMO_PLAYER={email:"demo@shotlab.app",password:"demo1234",name:"Demo Player",role:"player"};
-const DEMO_COACH={email:"coach.demo@shotlab.app",password:"demo1234",name:"Demo Coach",role:"coach"};
-const DEFAULT_TEAM_BRANDING={
-logoUrl:"",
-teamName:"",
-mascotName:"",
-motto:"",
-primaryColor:"#3f5f97",
-secondaryColor:"#3b6e74",
-brandingMode:"balanced",
-showHeaderLogo:true,
-showWatermark:false,
-useTeamColors:true,
-useTeamNameInHeader:true,
-watermarkEmptyStates:true,
-headerAccentStyle:"underline",
-badgeStyle:"round",
-homeTexture:"none",
-};
-const BRANDING_PRESETS=[
-{id:"volt",name:"Volt",primaryColor:"#3f5f97",secondaryColor:"#3b6e74"},
-{id:"royal",name:"Royal",primaryColor:"#4F7CFF",secondaryColor:"#7CE7FF"},
-{id:"sunset",name:"Sunset",primaryColor:"#FF7A45",secondaryColor:"#FFD166"},
-{id:"crimson",name:"Crimson",primaryColor:"#FF5A5F",secondaryColor:"#FFE66D"},
-{id:"forest",name:"Forest",primaryColor:"#6EEB83",secondaryColor:"#4D96FF"},
-{id:"navy-gold",name:"Navy Gold",primaryColor:"#0B1F3B",secondaryColor:"#F4C542"},
-{id:"cardinal-gold",name:"Cardinal Gold",primaryColor:"#8C1D40",secondaryColor:"#FFB81C"},
-{id:"green-gold",name:"Green Gold",primaryColor:"#0B6B3A",secondaryColor:"#D4AF37"},
-{id:"purple-gold",name:"Purple Gold",primaryColor:"#4B2E83",secondaryColor:"#FDB927"},
-{id:"black-red",name:"Black Red",primaryColor:"#121212",secondaryColor:"#D7263D"},
-{id:"maroon-silver",name:"Maroon Silver",primaryColor:"#6E2233",secondaryColor:"#C0C6CF"},
-];
-const sanitizeHexColor=(value,fallback)=>/^#[0-9A-F]{6}$/i.test(String(value||"").trim())?String(value).trim().toUpperCase():fallback;
-const sanitizeTeamBranding=(branding={})=>({
-logoUrl:typeof branding.logoUrl==="string"?branding.logoUrl.trim():"",
-teamName:typeof branding.teamName==="string"?branding.teamName.trim():"",
-mascotName:typeof branding.mascotName==="string"?branding.mascotName.trim():"",
-motto:typeof branding.motto==="string"?branding.motto.trim().slice(0,48):"",
-primaryColor:sanitizeHexColor(branding.primaryColor,DEFAULT_TEAM_BRANDING.primaryColor),
-secondaryColor:sanitizeHexColor(branding.secondaryColor,DEFAULT_TEAM_BRANDING.secondaryColor),
-brandingMode:["subtle","balanced","bold","compact"].includes(branding.brandingMode)?branding.brandingMode:DEFAULT_TEAM_BRANDING.brandingMode,
-showHeaderLogo:branding.showHeaderLogo!==false,
-showWatermark:Boolean(branding.showWatermark),
-useTeamColors:branding.useTeamColors!==false,
-useTeamNameInHeader:branding.useTeamNameInHeader!==false,
-watermarkEmptyStates:Boolean(branding.watermarkEmptyStates),
-headerAccentStyle:["underline","side-stripe","top-glow"].includes(branding.headerAccentStyle)?branding.headerAccentStyle:DEFAULT_TEAM_BRANDING.headerAccentStyle,
-badgeStyle:["shield","round","rectangle"].includes(branding.badgeStyle)?branding.badgeStyle:DEFAULT_TEAM_BRANDING.badgeStyle,
-homeTexture:["none","diagonal","court-lines","matte"].includes(branding.homeTexture)?branding.homeTexture:DEFAULT_TEAM_BRANDING.homeTexture,
-});
-const withTeamBranding=(team)=>team?{...team,branding:sanitizeTeamBranding(team.branding)}:team;
-const hexToRgb=(hex)=>{const clean=String(hex||"").replace("#","");if(clean.length!==6)return null;const num=Number.parseInt(clean,16);if(Number.isNaN(num))return null;return {r:(num>>16)&255,g:(num>>8)&255,b:num&255};};
-const alphaFromHex=(hex,alpha)=>{const rgb=hexToRgb(hex);return rgb?`rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`:hex;};
-const relativeLuminance=(hex)=>{const rgb=hexToRgb(hex);if(!rgb)return 0;const norm=[rgb.r,rgb.g,rgb.b].map(v=>{const s=v/255;return s<=0.03928?s/12.92:((s+0.055)/1.055)**2.4;});return 0.2126*norm[0]+0.7152*norm[1]+0.0722*norm[2];};
-const contrastRatio=(c1,c2)=>{const l1=relativeLuminance(c1);const l2=relativeLuminance(c2);const light=Math.max(l1,l2);const dark=Math.min(l1,l2);return (light+0.05)/(dark+0.05);};
-const LOGO_ALLOWED_TYPES=["image/png","image/jpeg"];
-const MIN_LOGO_RATIO=0.75;
-const MAX_LOGO_RATIO=3;
-const DEMO_SEED_PLAYERS=[
-{email:"jordan.m@shotlab.app",name:"Jordan M."},
-{email:"tyler.r@shotlab.app",name:"Tyler R."},
-{email:"chris.w@shotlab.app",name:"Chris W."},
-{email:"aiden.t@shotlab.app",name:"Aiden T."},
-];
-const isoDaysAgo=(days)=>{const d=new Date();d.setDate(d.getDate()-days);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
-const withTs=(daysAgo,offset=0)=>Date.now()-daysAgo*86400000+offset;
-const distributeTotal=(total,count)=>{const base=Math.floor(total/count);const rem=total-base*count;return Array.from({length:count},(_,i)=>base+(i<rem?1:0));};
-const genId=(p="id")=>`${p}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
-function generateJoinCode(existing=[],length=6){
-for(let tries=0;tries<30;tries++){
-let code="";
-for(let i=0;i<length;i++)code+=ALNUM[Math.floor(Math.random()*ALNUM.length)];
-if(!existing.includes(code))return code;
-}
-return Math.random().toString(36).slice(2,2+length).toUpperCase();
-}
-const DB={async get(k){return cloudStore.get(k)},async set(k,v){return cloudStore.set(k,v)}};
 // Password hashing (simple but not plaintext)
 function hashPw(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return(h>>>0).toString(36)}
 // AudioContext must be lazy-initialized on user gesture (iOS WebKit requirement)
@@ -215,81 +124,6 @@ const T=THEMES.dark; // module-level default for standalone components
 const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#A0A0A0"},{days:14,name:"TWO-WEEK GRIND",icon:"14",color:"#A0A0A0"},{days:30,name:"MONTHLY BEAST",icon:"30",color:"#b6aa94"},{days:60,name:"IRON WILL",icon:"60",color:CYAN},{days:100,name:"CENTURION",icon:"💯",color:VOLT}];
 const getEarnedBadges=s=>STREAK_BADGES.filter(b=>s>=b.days);
 
-function buildDemoSeed(teamId){
-const createdAt=Date.now();
-const drillSeed={
-1:[4,5,6,6,7,8,7,9,8,9,10,9],
-2:[3,4,5,6,5,7,6,8,7,8,9,8],
-};
-const scoreRows=[];
-Object.entries(drillSeed).forEach(([drillId,vals])=>{
-vals.forEach((score,idx)=>{const day=idx+1;scoreRows.push({
-email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,drillId:Number(drillId),score,date:isoDaysAgo(day),ts:withTs(day,idx)
-})});
-});
-const shotRows=[18,24,21,27,19,26,23,20].map((made,idx)=>({
-email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,made,date:isoDaysAgo(idx+1),ts:withTs(idx+1,300+idx)
-}));
-const eventRows=[
-{id:9001,title:"Early Workout",date:isoDaysAgo(76),time:"6:00 AM",location:"Main Gym — Court 1",desc:"Small-group form shooting before school.",type:"clinic",teamId,createdAt},
-{id:9002,title:"JV/Varsity Skills Block",date:isoDaysAgo(61),time:"4:15 PM",location:"Training Facility — Bay 3",desc:"Position-based skill stations and finishing reps.",type:"clinic",teamId,createdAt},
-{id:9003,title:"Open Run",date:isoDaysAgo(49),time:"6:30 PM",location:"Main Gym — Court 2",desc:"Competitive 5v5 with capped rotations.",type:"run",teamId,createdAt},
-{id:9004,title:"Pressure FT Ladder",date:isoDaysAgo(36),time:"5:45 PM",location:"Main Gym — Court 2",desc:"Timed free-throw ladder and accountability chart.",type:"challenge",teamId,createdAt},
-{id:9005,title:"Film + Mobility",date:isoDaysAgo(23),time:"3:00 PM",location:"Film Room",desc:"Opponent clips, then guided recovery and mobility.",type:"recovery",teamId,createdAt},
-{id:9006,title:"Saturday Scrimmage",date:isoDaysAgo(12),time:"10:00 AM",location:"Community Center",desc:"Live officiated scrimmage to prep for league play.",type:"game",teamId,createdAt},
-{id:9007,title:"Sprint & Change-of-Direction",date:isoDaysAgo(6),time:"6:00 PM",location:"Training Turf",desc:"Acceleration work and defensive slide intervals.",type:"run",teamId,createdAt},
-{id:9008,title:"Game-Week Shootaround",date:isoDaysAgo(2),time:"5:00 PM",location:"Main Gym — Court 1",desc:"Short high-focus session before weekend games.",type:"clinic",teamId,createdAt},
-];
-const rsvpEmails=[DEMO_PLAYER.email,"jordan.m@shotlab.app","tyler.r@shotlab.app","chris.w@shotlab.app"];
-const rsvpRows=[];
-const attendancePlan=[
-[DEMO_PLAYER.email,"jordan.m@shotlab.app","tyler.r@shotlab.app"],
-[DEMO_PLAYER.email,"jordan.m@shotlab.app","chris.w@shotlab.app"],
-["jordan.m@shotlab.app","tyler.r@shotlab.app","chris.w@shotlab.app"],
-[DEMO_PLAYER.email,"chris.w@shotlab.app"],
-[DEMO_PLAYER.email,"jordan.m@shotlab.app","tyler.r@shotlab.app","chris.w@shotlab.app"],
-[DEMO_PLAYER.email,"jordan.m@shotlab.app"],
-];
-eventRows.slice(0,attendancePlan.length).forEach((ev,idx)=>{attendancePlan[idx].forEach((email,order)=>{if(!rsvpEmails.includes(email))return;const name=email===DEMO_PLAYER.email?DEMO_PLAYER.name:DEMO_SEED_PLAYERS.find(p=>p.email===email)?.name||email;rsvpRows.push({eventId:ev.id,email,playerId:email,teamId,name,ts:withTs(80-idx*9,order)});});});
-const scRows=[
-{id:8101,title:"Upper Body Power",date:isoDaysAgo(14),time:"6:00 AM",location:"Weight Room — Bay A",desc:"Bench, push press, rows.",teamId},
-{id:8102,title:"Lower Body Strength",date:isoDaysAgo(13),time:"6:00 AM",location:"Weight Room — Bay A",desc:"Squats and posterior-chain focus.",teamId},
-{id:8103,title:"Core & Conditioning",date:isoDaysAgo(12),time:"6:30 AM",location:"Training Facility — Turf",desc:"Core stability and conditioning work.",teamId},
-{id:8104,title:"Explosive Circuit",date:isoDaysAgo(11),time:"6:15 AM",location:"Weight Room — Bay B",desc:"Power circuit + mobility.",teamId},
-{id:8105,title:"Olympic Lifts",date:isoDaysAgo(10),time:"6:00 AM",location:"Weight Room — Platform",desc:"Clean progressions and pulls.",teamId},
-{id:8106,title:"Recovery Lift",date:isoDaysAgo(9),time:"7:00 AM",location:"Recovery Suite",desc:"Lighter movement and activation.",teamId},
-{id:8107,title:"Full Body Circuit",date:isoDaysAgo(8),time:"6:00 AM",location:"Weight Room — Bay B",desc:"High-intensity full body block.",teamId},
-{id:8108,title:"Strength Endurance",date:isoDaysAgo(7),time:"6:30 AM",location:"Weight Room — Bay A",desc:"Strength endurance ladder.",teamId},
-{id:8109,title:"Athletic Movement",date:isoDaysAgo(6),time:"6:15 AM",location:"Training Turf",desc:"Footwork and acceleration patterns.",teamId},
-];
-const scRsvpRows=[0,1,3,4,7].map((sessionIdx,idx)=>({sessionId:scRows[sessionIdx].id,email:DEMO_PLAYER.email,playerId:DEMO_PLAYER.email,teamId,name:DEMO_PLAYER.name,ts:withTs(16-sessionIdx,500+idx)}));
-const challengeRows=[
-{id:7001,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"chris.w@shotlab.app",toName:"Chris W.",drillId:1,drillName:"FORM SHOOTING",score:7,max:10,status:"lost",respScore:8,respTs:withTs(4,2),ts:withTs(5,1)},
-{id:7002,teamId,playerId:"jordan.m@shotlab.app",from:"jordan.m@shotlab.app",fromName:"Jordan M.",to:DEMO_PLAYER.email,toName:DEMO_PLAYER.name,drillId:2,drillName:"FREE THROWS",score:8,max:10,status:"won",respScore:9,respTs:withTs(4,2),ts:withTs(4,1)},
-{id:7003,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"aiden.t@shotlab.app",toName:"Aiden T.",drillId:1,drillName:"FORM SHOOTING",score:9,max:10,status:"pending",ts:withTs(3,1)},
-{id:7004,teamId,playerId:"tyler.r@shotlab.app",from:"tyler.r@shotlab.app",fromName:"Tyler R.",to:DEMO_PLAYER.email,toName:DEMO_PLAYER.name,drillId:2,drillName:"FREE THROWS",score:9,max:10,status:"won",respScore:10,respTs:withTs(2,2),ts:withTs(2,1)},
-{id:7005,teamId,playerId:DEMO_PLAYER.email,from:DEMO_PLAYER.email,fromName:DEMO_PLAYER.name,to:"jordan.m@shotlab.app",toName:"Jordan M.",drillId:2,drillName:"FREE THROWS",score:9,max:10,status:"pending",ts:withTs(1,1)},
-];
-const leaderboardRows=[
-{email:"jordan.m@shotlab.app",name:"Jordan M.",total:1124},
-{email:"tyler.r@shotlab.app",name:"Tyler R.",total:1058},
-{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,total:998},
-{email:"chris.w@shotlab.app",name:"Chris W.",total:934},
-{email:"aiden.t@shotlab.app",name:"Aiden T.",total:876},
-];
-const playerRows=leaderboardRows.flatMap((p,rankIdx)=>{
-const homeTotal=Math.round(p.total*0.68);
-const shotTotal=p.total-homeTotal;
-const base=Math.floor(homeTotal/16);
-const extra=homeTotal-base*16;
-const scoreSet=Array.from({length:16},(_,i)=>base+(i<extra?1:0));
-const shotSet=distributeTotal(shotTotal,6);
-const scoreEntries=scoreSet.map((val,idx)=>({email:p.email,playerId:p.email,teamId,name:p.name,drillId:idx%2===0?1:2,score:val,date:isoDaysAgo(22+idx),ts:withTs(22+idx,rankIdx*100+idx),src:"home"}));
-const shotEntries=shotSet.map((made,idx)=>({email:p.email,playerId:p.email,teamId,name:p.name,made,date:isoDaysAgo(22+idx),ts:withTs(22+idx,rankIdx*100+50+idx)}));
-return [...scoreEntries,...shotEntries];
-});
-return{scoreRows,shotRows,eventRows,rsvpRows,scRows,scRsvpRows,challengeRows,leaderboardRows,playerRows};
-}
 const DRILL_ACCENTS={"FORM SHOOTING":VOLT,"FREE THROWS":VOLT,"CATCH & SHOOT":VOLT,"BALL HANDLING":VOLT,"MID-RANGE":VOLT,"FLOATERS":VOLT};
 const getDrillAccentColor=name=>DRILL_ACCENTS[name]||"#b6aa94";
 function Sparkline({data,color=VOLT,w=44,h=16}){if(!data||data.length<2)return null;const max=Math.max(...data,1);const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v/max)*h*.8+h*.1)}`).join(" ");return <svg width={w} height={h} style={{display:"block",opacity:.6}}><polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
@@ -829,7 +663,7 @@ const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
 const requirePlayer=(actor,teamId,email)=>actor?.role==="player"&&actor.teamId&&actor.teamId===teamId&&actor.email===email;
 const trackEvent=useCallback((type,meta={},actor=user)=>{
-trackBackendEvent(type,{
+trackAnalyticsBackendEvent(type,{
 teamId:meta.teamId??actor?.teamId??null,
 userEmail:actor?.email||meta.userEmail||null,
 userRole:actor?.role||meta.userRole||null,
@@ -1176,7 +1010,7 @@ const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
 const scopedScLogs=scLogs.filter(l=>l.teamId===user?.teamId);
 const myTeam=withTeamBranding(teams.find(t=>t.id===user?.teamId)||null);
 
-useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.location.pathname});},[]);
+useEffect(()=>{initializeAnalytics();trackAnalyticsBackendEvent("app_loaded",{path:window.location.pathname});},[]);
 useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);
 useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.message||"unknown"});const onRej=(e)=>trackEvent("app_error",{kind:"unhandledrejection",message:e?.reason?.message||String(e?.reason||"unknown")});window.addEventListener("error",onErr);window.addEventListener("unhandledrejection",onRej);return()=>{window.removeEventListener("error",onErr);window.removeEventListener("unhandledrejection",onRej);};},[trackEvent]);
 
