@@ -1,4 +1,10 @@
-import { initAnalytics, trackBackendEvent } from "../../lib/analytics";
+import {
+  initAnalytics,
+  trackBackendEvent,
+  flushAnalyticsQueue,
+} from "../../lib/analytics";
 
-export const initializeAnalytics = initAnalytics;
-export const trackAnalyticsBackendEvent = trackBackendEvent;
+export { initAnalytics, trackBackendEvent, flushAnalyticsQueue };
+
+// Generic alias for future non-backend specific call sites.
+export const trackEvent = trackBackendEvent;
