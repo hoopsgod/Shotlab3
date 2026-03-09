@@ -1,5 +1,6 @@
 import React from "react";
 import Button from "../../../shared/ui/Button";
+import { getActionVariant, getPlayersMetricSummary } from "./coachCommandCenterViewHelpers";
 
 const FB = "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 const FD = "'Bebas Neue','Impact','Arial Black',sans-serif";
@@ -37,7 +38,7 @@ export default function CoachCommandCenter({
     textAlign: "left",
   };
 
-  const actionVariant = (isPrimary) => (isPrimary ? "primary" : "tertiary");
+  const playersMetricSummary = getPlayersMetricSummary(highlightPlayersAttention);
 
   if (isCompact) {
     return (
@@ -49,9 +50,9 @@ export default function CoachCommandCenter({
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "var(--space-1)", flexShrink: 0 }}>
-            <Button onClick={onAddPlayer} aria-label="Add player" variant={actionVariant(primaryQuickAction === "addPlayer")} size="medium">Add player</Button>
-            <Button onClick={onAddDrill} aria-label="Add drill" variant={actionVariant(primaryQuickAction === "addDrill")} size="medium">Add drill</Button>
-            <Button onClick={onScheduleEvent} aria-label="Schedule event" variant={actionVariant(primaryQuickAction === "scheduleEvent")} size="medium">Schedule event</Button>
+            <Button onClick={onAddPlayer} aria-label="Add player" variant={getActionVariant(primaryQuickAction === "addPlayer")} size="medium">Add player</Button>
+            <Button onClick={onAddDrill} aria-label="Add drill" variant={getActionVariant(primaryQuickAction === "addDrill")} size="medium">Add drill</Button>
+            <Button onClick={onScheduleEvent} aria-label="Schedule event" variant={getActionVariant(primaryQuickAction === "scheduleEvent")} size="medium">Schedule event</Button>
           </div>
         </div>
       </section>
@@ -67,10 +68,10 @@ export default function CoachCommandCenter({
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0, 1fr))", gap: "var(--grid-gutter)" }}>
-        <button type="button" onClick={onPlayersClick} className="cc-action-btn" style={{ ...metricBase, border: highlightPlayersAttention ? "1px solid rgba(255,69,69,0.45)" : metricBase.border, boxShadow: "none" }}>
+        <button type="button" onClick={onPlayersClick} className="cc-action-btn" style={{ ...metricBase, border: playersMetricSummary.border, boxShadow: "none" }}>
           <div style={{ fontFamily: FB, fontSize: 11, fontWeight: 700, letterSpacing: "0.02em", color: "var(--text-2)", lineHeight: 1.2, overflow: "hidden", textOverflow: "ellipsis" }}>Players</div>
           <div style={{ marginTop: "var(--space-1)", fontFamily: FD, fontSize: 23, fontWeight: 900, lineHeight: 1, color: "var(--accent)" }}>{totalPlayers}</div>
-          <div style={{ marginTop: "var(--space-1)", fontFamily: FB, fontSize: 10, color: "var(--text-2)", letterSpacing: "0.01em", lineHeight: 1.3 }}>{highlightPlayersAttention ? "Needs check-ins" : "On track"}</div>
+          <div style={{ marginTop: "var(--space-1)", fontFamily: FB, fontSize: 10, color: "var(--text-2)", letterSpacing: "0.01em", lineHeight: 1.3 }}>{playersMetricSummary.statusLabel}</div>
         </button>
 
         <button type="button" onClick={onActiveTodayClick} className="cc-action-btn" style={metricBase}>
@@ -88,9 +89,9 @@ export default function CoachCommandCenter({
 
       <div style={{ marginTop: "var(--space-3)", overflowX: "auto", whiteSpace: "nowrap", paddingBottom: "var(--space-1)" }}>
         <div style={{ display: "flex", gap: "var(--control-gap)" }}>
-          <Button onClick={onAddPlayer} variant={actionVariant(primaryQuickAction === "addPlayer")} size="large">Add player</Button>
-          <Button onClick={onAddDrill} variant={actionVariant(primaryQuickAction === "addDrill")} size="large">Add drill</Button>
-          <Button onClick={onScheduleEvent} variant={actionVariant(primaryQuickAction === "scheduleEvent")} size="large">Schedule event</Button>
+          <Button onClick={onAddPlayer} variant={getActionVariant(primaryQuickAction === "addPlayer")} size="large">Add player</Button>
+          <Button onClick={onAddDrill} variant={getActionVariant(primaryQuickAction === "addDrill")} size="large">Add drill</Button>
+          <Button onClick={onScheduleEvent} variant={getActionVariant(primaryQuickAction === "scheduleEvent")} size="large">Schedule event</Button>
           <Button onClick={onLogScore} variant="tertiary" size="large">Log score</Button>
         </div>
       </div>
