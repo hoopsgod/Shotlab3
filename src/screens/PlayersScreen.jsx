@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import Button from "../shared/ui/Button";
+import { PLAYER_FILTERS, getFilteredPlayers, getStatusTone } from "./playersViewHelpers";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -17,19 +18,7 @@ const ChevronRight = ({ size = 24, color = "currentColor" }) => (
 );
 
 const StatusBadge = ({ active }) => {
-  const tone = active
-    ? {
-        label: "Active",
-        color: "var(--color-success)",
-        border: "rgba(99, 222, 143, 0.42)",
-        bg: "rgba(99, 222, 143, 0.16)",
-      }
-    : {
-        label: "Inactive",
-        color: "var(--color-pending)",
-        border: "rgba(255, 191, 102, 0.42)",
-        bg: "rgba(255, 191, 102, 0.18)",
-      };
+  const tone = getStatusTone(active);
 
   return (
     <span
@@ -58,16 +47,7 @@ export default function PlayersScreen() {
   const activePlayers = 0;
   const inactivePlayers = 0;
 
-  const filteredPlayers = useMemo(() => {
-    return players.filter((player) => {
-      const matchesSearch = (player.name || "").toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesFilter =
-        activeFilter === "All players" ||
-        (activeFilter === "Active" && player.active) ||
-        (activeFilter === "Inactive" && !player.active);
-      return matchesSearch && matchesFilter;
-    });
-  }, [players, searchQuery, activeFilter]);
+  const filteredPlayers = useMemo(() => getFilteredPlayers(players, searchQuery, activeFilter), [players, searchQuery, activeFilter]);
 
   const shareInviteLink = async () => {
     const url = window.location.origin;
@@ -146,7 +126,7 @@ export default function PlayersScreen() {
       <input className="input" type="text" placeholder="Search players" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} style={{ fontSize: "var(--fs-body)", marginBottom: "var(--space-3)" }} />
 
       <div style={{ display: "flex", gap: "var(--space-2)", marginBottom: "var(--space-4)", flexWrap: "wrap" }}>
-        {["All players", "Active", "Inactive"].map((filter) => (
+        {PLAYER_FILTERS.map((filter) => (
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
