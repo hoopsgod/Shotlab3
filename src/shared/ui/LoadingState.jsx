@@ -1,5 +1,5 @@
 import Card from "./Card";
-import UI_TOKENS from "../styles/tokens";
+import UI_TOKENS from "../../styles/tokens";
 
 const SHIMMER_STYLE = {
   backgroundImage: "linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.12) 50%, rgba(255,255,255,0.03) 100%)",

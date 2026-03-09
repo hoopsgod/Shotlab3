@@ -1,5 +1,5 @@
-import Button from "./ui/Button";
-import { TeamIdentity, TeamWatermark } from "./TeamBranding";
+import Button from "../shared/ui/Button";
+import { TeamIdentity, TeamWatermark } from "../features/branding/components/TeamBranding";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 

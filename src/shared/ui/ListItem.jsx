@@ -1,4 +1,4 @@
-import spacing from "../spacing";
+import spacing from "../../spacing";
 
 function ListItem({ as: Component = "div", className = "", style, children, ...props }) {
   return (

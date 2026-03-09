@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "./ui/Button";
+import Button from "../../../shared/ui/Button";
 
 const FB = "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 const FD = "'Bebas Neue','Impact','Arial Black',sans-serif";

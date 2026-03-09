@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import EmptyState from "./EmptyState";
-import LoadingState from "./LoadingState";
+import EmptyState from "../shared/ui/EmptyState";
+import LoadingState from "../shared/ui/LoadingState";
 import ErrorState from "./ErrorState";
 import UI_TOKENS from "../styles/tokens";
 
