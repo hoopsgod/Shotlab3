@@ -21,8 +21,7 @@ import MobileFocusPanel from "./components/MobileFocusPanel";
 import spacing from "./spacing";
 import UI_TOKENS from "./styles/tokens";
 import { firebaseAuth, firebaseEnabled, googleProvider } from "./lib/firebase";
-import { PREVIEW_MODE_STORAGE_KEY, PREVIEW_MODES, MOBILE_PREVIEW_MODES, isValidPreviewMode } from "./app/config/previewModes";
-import { authCreateUser, authUpdateProfile, authSignIn, authSignInGoogle, authSendReset, authSignOut, authDeleteCurrent, authSubscribe } from "./features/auth/services/authService";
+import { authCreateUser, authUpdateProfile, authSignIn, authSignInGoogle, authSendReset, authSignOut, authDeleteCurrent } from "./features/auth/services/authService";
 import { DEMO_PLAYER, DEMO_COACH } from "./features/players/data/demoAccounts";
 import { DEMO_SEED_PLAYERS } from "./features/players/data/demoSeedPlayers";
 import { buildDemoSeed } from "./features/players/data/buildDemoSeed";
@@ -30,6 +29,9 @@ import { DEFAULT_TEAM_BRANDING, BRANDING_PRESETS, LOGO_ALLOWED_TYPES, MIN_LOGO_R
 import { sanitizeHexColor, sanitizeTeamBranding, withTeamBranding, hexToRgb, alphaFromHex, contrastRatio } from "./features/branding/utils/brandingUtils";
 import { todayStr, isoDaysAgo, withTs, distributeTotal, genId, generateJoinCode } from "./shared/utils/coreUtils";
 import { DB } from "./services/storage/cloudStoreAdapter";
+import usePreviewMode from "./app/hooks/usePreviewMode";
+import useHighContrastMode from "./app/hooks/useHighContrastMode";
+import useAuthSession from "./features/auth/hooks/useAuthSession";
 
 const TOKENS={
 PRIMARY:UI_TOKENS.colors.primary,
@@ -650,14 +652,10 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
-const[highContrast,setHighContrast]=useState(false);
-const[isDesktopViewport,setIsDesktopViewport]=useState(()=>typeof window!=="undefined"?window.innerWidth>=960:true);
-const[previewMode,setPreviewMode]=useState(()=>{
-if(typeof window==="undefined")return PREVIEW_MODES.DESKTOP;
-const stored=window.localStorage.getItem(PREVIEW_MODE_STORAGE_KEY);
-return isValidPreviewMode(stored)?stored:PREVIEW_MODES.DESKTOP;
-});
+const[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
+const { highContrast, setHighContrast } = useHighContrastMode();
+const { isDesktopViewport, previewMode, setPreviewMode, activePreviewMode, previewShellClass, previewContentClass } = usePreviewMode();
+const { view, setView, user, setUser, syncUserView } = useAuthSession(players);
 const T=THEMES[theme];
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
@@ -672,32 +670,6 @@ meta,
 });
 },[user,view]);
 
-useEffect(()=>{
-  const stored=localStorage.getItem("sl:high-contrast");
-  setHighContrast(stored==="1");
-},[]);
-
-useEffect(()=>{
-  document.documentElement.classList.toggle("high-contrast",highContrast);
-  localStorage.setItem("sl:high-contrast",highContrast?"1":"0");
-},[highContrast]);
-
-useEffect(()=>{
-localStorage.setItem(PREVIEW_MODE_STORAGE_KEY,previewMode);
-},[previewMode]);
-
-useEffect(()=>{
-if(typeof window==="undefined")return;
-const syncViewport=()=>setIsDesktopViewport(window.innerWidth>=960);
-syncViewport();
-window.addEventListener("resize",syncViewport);
-return ()=>window.removeEventListener("resize",syncViewport);
-},[]);
-
-const activePreviewMode=isDesktopViewport?previewMode:PREVIEW_MODES.MOBILE;
-
-const previewShellClass=MOBILE_PREVIEW_MODES.has(activePreviewMode)?"viewport-preview-shell viewport-preview-shell--mobile":"viewport-preview-shell viewport-preview-shell--desktop";
-const previewContentClass=MOBILE_PREVIEW_MODES.has(activePreviewMode)?`viewport-preview-content viewport-preview-content--mobile ${activePreviewMode===PREVIEW_MODES.MOBILE_SMALL?"viewport-preview-content--mobile-small":""} ${activePreviewMode===PREVIEW_MODES.MOBILE_LARGE?"viewport-preview-content--mobile-large":""}`.trim():"viewport-preview-content viewport-preview-content--desktop";
 
 const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
@@ -740,29 +712,11 @@ useEffect(()=>{(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess]=awa
 const m=migrateData({players:p,playerProfiles:pp,scores:s,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
 await Promise.all([DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
-if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else setView(found.role||"player")}}
+if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found)syncUserView(found)}
 setReady(true)})()},[migrateData]);
-
-useEffect(()=>{
-if(!firebaseEnabled||!firebaseAuth)return;
-const unsub=authSubscribe(firebaseAuth,async(current)=>{
-if(!current?.email)return;
-const found=players.find(pl=>pl.email===current.email);
-if(found){
-setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId||null});
-}
-});
-return ()=>unsub();
-},[players]);
 
 const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
 
-const syncUserView=(person)=>{
-setUser({email:person.email,role:person.role||"player",isCoach:(person.role||"player")==="coach",name:person.name,teamId:person.teamId||null});
-if((person.role||"player")==="coach"&&!person.teamId)setView("create-team");
-else if((person.role||"player")==="player"&&!person.teamId)setView("join-team");
-else setView(person.role||"player");
-};
 
 const ensurePlayerRecord=async({email,name,role,password})=>{
 let person=players.find(p=>p.email===email);
@@ -905,8 +859,7 @@ await P("sl:challenges",[...preservedChallenges,...demoSeed.challengeRows],setCh
 
 const signedIn=np.find(p=>p.email===acct.email);
 if(!signedIn)return{ok:false,err:"Unable to prepare demo account."};
-setUser({email:signedIn.email,role:signedIn.role||"player",isCoach:(signedIn.role||"player")==="coach",name:signedIn.name,teamId:demoTeam.id});
-setView(kind==="coach"?"coach":"player");
+syncUserView({...signedIn,teamId:demoTeam.id,role:kind==="coach"?"coach":"player"});
 await DB.set("sl:session",{email:signedIn.email});
 await trackEvent("auth_demo_login",{kind},{email:signedIn.email,role:signedIn.role||"player",teamId:demoTeam.id});
 return{ok:true};
@@ -934,7 +887,7 @@ const nt={id:genId("team"),name:san(name)||"Team",school:san(meta.school||""),le
 await P("sl:teams",[...teams,nt],setTeams);
 const np=players.map(p=>p.email===user.email?{...p,teamId:nt.id}:p);
 await P("sl:players",np,setPlayers);
-setUser({...user,teamId:nt.id});setView("coach");
+syncUserView({...user,teamId:nt.id,role:"coach"});
 return{ok:true,team:nt};
 };
 const joinTeam=async(code)=>{
@@ -949,7 +902,7 @@ if(!hasProfile){
 const parts=(user.name||"Player").trim().split(/\s+/);
 await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:user.email,teamId:t.id,firstName:parts[0]||"Player",lastName:parts.slice(1).join(" "),createdAt:Date.now()}],setPlayerProfiles);
 }
-setUser({...user,teamId:t.id});setView("player");
+syncUserView({...user,teamId:t.id,role:"player"});
 return{ok:true};
 };
 const addRosterPlayer=async(data)=>{
