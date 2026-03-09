@@ -1,3 +1,6 @@
+/** @typedef {import("../../../domain/models/coreModels").Player} Player */
+
+/** @type {Player[]} */
 export const DEMO_SEED_PLAYERS = [
   { email: "jordan.m@shotlab.app", name: "Jordan M." },
   { email: "tyler.r@shotlab.app", name: "Tyler R." },

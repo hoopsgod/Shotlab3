@@ -1,3 +1,6 @@
+/** @typedef {import("../../../domain/models/coreModels").TeamBranding} TeamBranding */
+
+/** @type {TeamBranding} */
 export const DEFAULT_TEAM_BRANDING = {
   logoUrl: "",
   teamName: "",
