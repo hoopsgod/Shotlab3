@@ -3,7 +3,7 @@ export const ROUTE_PATHS = {
   PLAYER: "/player",
   COACH: "/coach",
   SETTINGS: "/settings",
-};
+} as const;
 
 export const FUTURE_ROUTE_PATHS = [
   ROUTE_PATHS.PLAYER,
