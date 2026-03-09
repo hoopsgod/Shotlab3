@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
-import UI_TOKENS from "../styles/tokens";
-import LoadingState from "./LoadingState";
-import ErrorState from "./ErrorState";
+import UI_TOKENS from "../../../styles/tokens";
+import LoadingState from "../../../shared/components/LoadingState";
+import ErrorState from "../../../shared/components/ErrorState";
 
 const CHART_CARD_STYLE = {
   background: UI_TOKENS.colors.bgCard,

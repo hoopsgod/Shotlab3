@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
-import EmptyState from "./EmptyState";
-import LoadingState from "./LoadingState";
-import ErrorState from "./ErrorState";
-import UI_TOKENS from "../styles/tokens";
+import EmptyState from "../../../shared/components/EmptyState";
+import LoadingState from "../../../shared/components/LoadingState";
+import ErrorState from "../../../shared/components/ErrorState";
+import UI_TOKENS from "../../../styles/tokens";
 
 const DRILL_DETAIL_STYLE = {
   background: "rgba(12,17,22,0.9)",

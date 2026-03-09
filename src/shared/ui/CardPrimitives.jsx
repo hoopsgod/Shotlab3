@@ -1,4 +1,4 @@
-import UI_TOKENS from "../styles/tokens";
+import UI_TOKENS from "../../styles/tokens";
 
 const CARD_TOKENS = {
   radius: 16,

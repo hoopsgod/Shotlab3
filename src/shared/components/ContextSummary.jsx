@@ -1,4 +1,4 @@
-import Card from "./Card";
+import Card from "../ui/Card";
 
 export default function ContextSummary({ title = "Training context", items = [], style }) {
   if (!items.length) return null;

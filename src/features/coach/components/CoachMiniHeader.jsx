@@ -1,6 +1,6 @@
-import Button from "./ui/Button";
-import { TeamLogo } from "./TeamBranding";
-import BrandLogo from "./BrandLogo";
+import Button from "../../../shared/ui/Button";
+import { TeamLogo } from "../../branding/components/TeamBranding";
+import BrandLogo from "../../branding/components/BrandLogo";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 

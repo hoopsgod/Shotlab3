@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import Button from "../components/ui/Button";
+import Button from "../../../shared/ui/Button";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -1,4 +1,4 @@
-import { firebaseDb, firebaseEnabled } from "./firebase";
+import { firebaseDb, firebaseEnabled } from "../firebase";
 
 const localGet = async (key) => {
   try {

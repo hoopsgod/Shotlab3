@@ -1,4 +1,4 @@
-import UI_TOKENS from "../styles/tokens";
+import UI_TOKENS from "../../styles/tokens";
 
 const HERO_RADIUS = 16;
 const HERO_BUTTON_RADIUS = 12;

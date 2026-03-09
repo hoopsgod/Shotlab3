@@ -1,6 +1,6 @@
-import Card from "./Card";
-import Button from "./ui/Button";
-import UI_TOKENS from "../styles/tokens";
+import Card from "../ui/Card";
+import Button from "../ui/Button";
+import UI_TOKENS from "../../styles/tokens";
 
 export default function ErrorState({
   title = "Something went wrong",
