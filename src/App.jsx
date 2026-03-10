@@ -40,6 +40,7 @@ import AppShell from "./app/AppShell";
 import AppRoutes from "./app/AppRoutes";
 import useAuthSession from "./features/auth/hooks/useAuthSession";
 import buildPlayerContainerConfig, { FgArc, GuideCallout, InfoHint, useDismissedGuide } from "./features/players/components/PlayerContainer";
+import buildCoachRouteConfig from "./features/coach/components/buildCoachRouteConfig";
 
 const TOKENS={
 PRIMARY:UI_TOKENS.colors.primary,
@@ -937,6 +938,38 @@ const loadingFallback=<div style={{minHeight:"100dvh",background:BG,display:"fle
 
 const playerContainerConfig=buildPlayerContainerConfig({PlayerComponent:Player,user,myTeam,drills,programDrills,scopedScores,addScore,scopedEvents,scopedRsvps,toggleRsvp,scopedShotLogs,addShotLog,scopedChallenges,addChallenge,respondChallenge,scopedPlayers,T,theme,setTheme,scopedScSessions,scopedScRsvps,toggleScRsvp,scopedScLogs,addScLog,logout,deleteAccount,resetPassword,highContrast,setHighContrast});
 
+const coachProps=buildCoachRouteConfig({
+user,
+myTeam,
+regenerateJoinCode,
+updateTeamBranding,
+addRosterPlayer,
+playerProfiles,
+drills,
+programDrills,
+scopedScores,
+scopedPlayers,
+updateDrill,
+addDrill,
+removeDrill,
+addProgramDrill,
+removeProgramDrill,
+scopedEvents,
+scopedRsvps,
+addEvent,
+removeEvent,
+removeRsvp,
+addRsvp,
+scopedScSessions,
+scopedScRsvps,
+scopedScLogs,
+addScSession,
+removeScSession,
+scopedShotLogs,
+logout,
+deleteAccount,
+});
+
 const screens=AppRoutes({
 AuthComponent:Auth,
 CreateTeamComponent:CreateTeam,
@@ -946,7 +979,7 @@ CoachComponent:Coach,
 authProps:{onLogin:login,onRegister:register,onDemo:demoSignIn,onSocialLogin:socialLogin,onResetPassword:resetPassword,firebaseEnabled,highContrast,onToggleHighContrast:()=>setHighContrast(v=>!v)},
 createTeamProps:{onCreate:createTeam,u:user},
 joinTeamProps:{onJoin:joinTeam,u:user},
-coachProps:{u:user,team:myTeam,teamId:user?.teamId,regenerateJoinCode,updateTeamBranding,addRosterPlayer,playerProfiles,drills,programDrills,scores:scopedScores,players:scopedPlayers,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events:scopedEvents,rsvps:scopedRsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions:scopedScSessions,scRsvps:scopedScRsvps,scLogs:scopedScLogs,addScSession,removeScSession,shotLogs:scopedShotLogs,logout,deleteAccount},
+coachProps,
 });
 
 return <AppShell ready={ready} loadingFallback={loadingFallback} StylesComponent={Styles} isDesktopViewport={isDesktopViewport} previewMode={previewMode} onPreviewModeChange={setPreviewMode} previewShellClass={previewShellClass} previewContentClass={previewContentClass} view={view} screens={screens}/>;
