@@ -1,4 +1,5 @@
 import App from "../../App";
+import CoachScreen from "../../screens/CoachScreen";
 import PlayersScreen from "../../screens/PlayersScreen";
 import { ROUTE_PATHS } from "./routePaths";
 
@@ -10,15 +11,17 @@ const normalizePathname = (pathname) => {
   return pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 };
 
+const PLAYER_PATHS = new Set([ROUTE_PATHS.PLAYER, ROUTE_PATHS.PLAYERS]);
+
 export default function AppRoutes() {
   const currentPath = normalizePathname(window.location.pathname);
 
-  if (currentPath === ROUTE_PATHS.PLAYER) {
+  if (PLAYER_PATHS.has(currentPath)) {
     return <PlayersScreen />;
   }
 
-  if (currentPath === ROUTE_PATHS.HOME || currentPath === ROUTE_PATHS.COACH || currentPath === ROUTE_PATHS.SETTINGS) {
-    return <App />;
+  if (currentPath === ROUTE_PATHS.COACH) {
+    return <CoachScreen />;
   }
 
   return <App />;
