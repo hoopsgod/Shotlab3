@@ -25,7 +25,7 @@ import { DEMO_PLAYER, DEMO_COACH } from "./features/players/data/demoAccounts";
 import { DEMO_SEED_PLAYERS } from "./features/players/data/demoSeedPlayers";
 import { buildDemoSeed } from "./features/players/data/buildDemoSeed";
 import { DEFAULT_TEAM_BRANDING, BRANDING_PRESETS } from "./features/branding/constants/defaultTeamBranding";
-import { sanitizeHexColor, sanitizeTeamBranding, withTeamBranding, hexToRgb, alphaFromHex } from "./features/branding/utils/brandingUtils";
+import { sanitizeHexColor, sanitizeTeamBranding, hexToRgb, alphaFromHex } from "./features/branding/utils/brandingUtils";
 import useCoachBrandingState from "./features/branding/hooks/useCoachBrandingState";
 import useCoachDashboardState from "./features/coach/hooks/useCoachDashboardState";
 import { todayStr, isoDaysAgo, withTs, distributeTotal, genId, generateJoinCode } from "./shared/utils/coreUtils";
@@ -35,6 +35,7 @@ import useHighContrastMode from "./app/hooks/useHighContrastMode";
 import useThemeMode from "./app/hooks/useThemeMode";
 import useAppBootstrap from "./app/hooks/useAppBootstrap";
 import useAppAnalytics from "./app/hooks/useAppAnalytics";
+import useTeamScopeState from "./app/hooks/useTeamScopeState";
 import AppShell from "./app/AppShell";
 import AppRoutes from "./app/AppRoutes";
 import useAuthSession from "./features/auth/hooks/useAuthSession";
@@ -915,16 +916,19 @@ const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email)
 const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:sc-logs",[{...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name},...scLogs],setScLogs)};
 
 
-const scopedPlayers=players.filter(p=>p.teamId===user?.teamId);
-const scopedScores=scores.filter(s=>s.teamId===user?.teamId);
-const scopedEvents=events.filter(e=>e.teamId===user?.teamId);
-const scopedRsvps=rsvps.filter(r=>r.teamId===user?.teamId);
-const scopedShotLogs=shotLogs.filter(l=>l.teamId===user?.teamId);
-const scopedChallenges=challenges.filter(c=>c.teamId===user?.teamId);
-const scopedScSessions=scSessions.filter(s=>s.teamId===user?.teamId);
-const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
-const scopedScLogs=scLogs.filter(l=>l.teamId===user?.teamId);
-const myTeam=withTeamBranding(teams.find(t=>t.id===user?.teamId)||null);
+const{scopedPlayers,scopedScores,scopedEvents,scopedRsvps,scopedShotLogs,scopedChallenges,scopedScSessions,scopedScRsvps,scopedScLogs,myTeam}=useTeamScopeState({
+user,
+players,
+scores,
+events,
+rsvps,
+shotLogs,
+challenges,
+scSessions,
+scRsvps,
+scLogs,
+teams,
+});
 
 useAppAnalytics({ ready, user, view, trackEvent });
 
