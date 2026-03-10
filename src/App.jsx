@@ -34,6 +34,7 @@ import usePreviewMode from "./app/hooks/usePreviewMode";
 import useHighContrastMode from "./app/hooks/useHighContrastMode";
 import useThemeMode from "./app/hooks/useThemeMode";
 import AppShell from "./app/AppShell";
+import AppRoutes from "./app/AppRoutes";
 import useAuthSession from "./features/auth/hooks/useAuthSession";
 
 const TOKENS={
@@ -972,13 +973,18 @@ useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.
 
 const loadingFallback=<div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:16,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,width:"min(460px,100%)"}}><LoadingState variant="chart" title="Loading your Shotlab workspace" description="Syncing drills, media, team activity, and coaching data." /></div></div>;
 
-const screens={
-auth:<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onSocialLogin={socialLogin} onResetPassword={resetPassword} firebaseEnabled={firebaseEnabled} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>,
-"create-team":<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>,
-"join-team":<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>,
-player:<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} onResetPassword={resetPassword} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>,
-coach:<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} updateTeamBranding={updateTeamBranding} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/></div>,
-};
+const screens=AppRoutes({
+AuthComponent:Auth,
+CreateTeamComponent:CreateTeam,
+JoinTeamComponent:JoinTeam,
+PlayerComponent:Player,
+CoachComponent:Coach,
+authProps:{onLogin:login,onRegister:register,onDemo:demoSignIn,onSocialLogin:socialLogin,onResetPassword:resetPassword,firebaseEnabled,highContrast,onToggleHighContrast:()=>setHighContrast(v=>!v)},
+createTeamProps:{onCreate:createTeam,u:user},
+joinTeamProps:{onJoin:joinTeam,u:user},
+playerProps:{u:user,team:myTeam,drills,programDrills,scores:scopedScores,addScore,events:scopedEvents,rsvps:scopedRsvps,toggleRsvp,shotLogs:scopedShotLogs,addShotLog,challenges:scopedChallenges,addChallenge,respondChallenge,players:scopedPlayers,T,theme,setTheme,scSessions:scopedScSessions,scRsvps:scopedScRsvps,toggleScRsvp,scLogs:scopedScLogs,addScLog,logout,deleteAccount,onResetPassword:resetPassword,highContrast,onToggleHighContrast:()=>setHighContrast(v=>!v)},
+coachProps:{u:user,team:myTeam,teamId:user?.teamId,regenerateJoinCode,updateTeamBranding,addRosterPlayer,playerProfiles,drills,programDrills,scores:scopedScores,players:scopedPlayers,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events:scopedEvents,rsvps:scopedRsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions:scopedScSessions,scRsvps:scopedScRsvps,scLogs:scopedScLogs,addScSession,removeScSession,shotLogs:scopedShotLogs,logout,deleteAccount},
+});
 
 return <AppShell ready={ready} loadingFallback={loadingFallback} StylesComponent={Styles} isDesktopViewport={isDesktopViewport} previewMode={previewMode} onPreviewModeChange={setPreviewMode} previewShellClass={previewShellClass} previewContentClass={previewContentClass} view={view} screens={screens}/>;
 }
