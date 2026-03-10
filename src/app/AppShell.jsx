@@ -9,7 +9,8 @@ export default function AppShell({
   onPreviewModeChange,
   previewShellClass,
   previewContentClass,
-  children,
+  view,
+  screens,
 }) {
   if (!ready) {
     return (
@@ -27,7 +28,7 @@ export default function AppShell({
         <ViewportPreviewToggle mode={previewMode} onChange={onPreviewModeChange} />
       )}
       <div className={previewShellClass}>
-        <div className={previewContentClass}>{children}</div>
+        <div className={previewContentClass}>{screens?.[view] ?? null}</div>
       </div>
     </>
   );
