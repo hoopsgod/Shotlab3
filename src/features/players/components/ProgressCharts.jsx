@@ -3,6 +3,8 @@ import UI_TOKENS from "../../../styles/tokens";
 import LoadingState from "../../../shared/ui/LoadingState";
 import ErrorState from "../../../shared/ui/ErrorState";
 
+/** @typedef {import("../../../domain/models/coreModels").Drill} Drill */
+
 const CHART_CARD_STYLE = {
   background: UI_TOKENS.colors.bgCard,
   border: `1px solid ${UI_TOKENS.borders.subtle}`,
@@ -123,6 +125,9 @@ function LineChart({ data, yAxisLabel, color = UI_TOKENS.colors.action.primary }
   );
 }
 
+/**
+ * @param {{ scores?: Array<Object>, userEmail: string, drills?: Drill[], errorMessage?: string, onRetry?: () => void }} props
+ */
 export default function ProgressCharts({ scores = [], userEmail, drills = [], errorMessage, onRetry }) {
   const [range, setRange] = useState("week");
   const [showHelp, setShowHelp] = useState(false);
