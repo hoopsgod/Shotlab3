@@ -8,14 +8,17 @@
 
 /**
  * @typedef {Object} Player
+ * @property {string|number} [id]
  * @property {string} email
  * @property {string} name
+ * @property {boolean} [active]
  */
 
 /**
  * @typedef {Object} Drill
  * @property {number|string} id
  * @property {string} name
+ * @property {string} [category]
  * @property {string} [desc]
  * @property {number} [max]
  * @property {string} [icon]

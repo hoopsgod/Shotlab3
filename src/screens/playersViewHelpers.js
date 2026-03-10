@@ -1,5 +1,12 @@
+/** @typedef {import("../domain/models/coreModels").Player} Player */
+
 export const PLAYER_FILTERS = ["All players", "Active", "Inactive"];
 
+/**
+ * @param {Player[]} players
+ * @param {string} searchQuery
+ * @param {string} activeFilter
+ */
 export function getFilteredPlayers(players, searchQuery, activeFilter) {
   const normalizedQuery = searchQuery.toLowerCase();
 
