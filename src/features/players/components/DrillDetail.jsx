@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import EmptyState from "../../../shared/ui/EmptyState";
 import LoadingState from "../../../shared/ui/LoadingState";
 import ErrorState from "../../../shared/ui/ErrorState";
