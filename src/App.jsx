@@ -27,6 +27,7 @@ import { buildDemoSeed } from "./features/players/data/buildDemoSeed";
 import { DEFAULT_TEAM_BRANDING, BRANDING_PRESETS } from "./features/branding/constants/defaultTeamBranding";
 import { sanitizeHexColor, sanitizeTeamBranding, withTeamBranding, hexToRgb, alphaFromHex } from "./features/branding/utils/brandingUtils";
 import useCoachBrandingState from "./features/branding/hooks/useCoachBrandingState";
+import useCoachDashboardState from "./features/coach/hooks/useCoachDashboardState";
 import { todayStr, isoDaysAgo, withTs, distributeTotal, genId, generateJoinCode } from "./shared/utils/coreUtils";
 import { DB } from "./services/storage/cloudStoreAdapter";
 import usePreviewMode from "./app/hooks/usePreviewMode";
@@ -2505,45 +2506,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 // COACH SCREEN
 // ═══════════════════════════════════════
 function Coach({u,team,regenerateJoinCode,updateTeamBranding,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount}){
-const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",location:""});
-const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"10",icon:"ft"});
-const[nudged,setNudged]=useState([]);
-const[confirmDelete,setConfirmDelete]=useState(null);const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
-const ups=useMemo(()=>{const es=[...new Set(scores.map(s=>s.email))];return es.map(e=>{const p=players.find(p=>p.email===e);return{email:e,name:p?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())}})},[scores,players]);
-const allKnown=useMemo(()=>{const m={};players.forEach(p=>m[p.email]=p.name);scores.forEach(s=>{if(!m[s.email])m[s.email]=s.name||s.email});return Object.entries(m).map(([email,name])=>({email,name}))},[players,scores]);
-const today=todayStr(),todayS=scores.filter(s=>s.date===today);
-const saveDrill=()=>{const m=parseInt(eMax);updateDrill(editD.id,{name:san(eName),desc:san(eDesc),instructions:san(eInstr),max:m>0?m:editD.max,icon:eIcon});setEditD(null)};
-const handleAddDrill=()=>{if(!nd.name)return;const m=parseInt(nd.max);addDrill({name:san(nd.name).toUpperCase(),desc:san(nd.desc),max:m>0?m:10,icon:nd.icon,instructions:san(nd.instructions)});setNd({name:"",desc:"",max:"10",icon:"ft",instructions:""});setShowNewDrill(false)};
-const handleAddProgramDrill=async()=>{if(!newProgramDrill.name)return;const m=parseInt(newProgramDrill.max);const r=await addProgramDrill({name:san(newProgramDrill.name).toUpperCase(),desc:san(newProgramDrill.desc),max:m>0?m:10,icon:newProgramDrill.icon,instructions:""});if(!r.ok){setProgramErr(r.err||"Could not add drill");return;}setProgramErr("");setNewProgramDrill({name:"",desc:"",max:"10",icon:"ft"});};
-const handleRemoveDrill=(id)=>{setConfirmDelete(id)};
-const confirmDrillDelete=()=>{if(confirmDelete)removeDrill(confirmDelete);setConfirmDelete(null)};
-const handleAddEvent=()=>{if(!ne.title||!ne.date)return;addEvent({...ne,title:san(ne.title),desc:san(ne.desc),location:san(ne.location)});setNe({title:"",date:"",time:"",location:"",desc:"",type:"run"});setShowAdd(false)};
-
-const handleAddWalkin=(evId)=>{
-const e=addEmail.trim().toLowerCase();if(!e)return;
-const known=allKnown.find(p=>p.email===e);
-const name=known?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
-addRsvp(evId,e,name);setAddEmail("")};
-const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,sport:san(nsc.sport),location:san(nsc.location)});setNsc({sport:"",date:"",time:"",location:""});setShowAddSC(false)};
-const totalPlayers=ups.length;
-const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
-const sortedEvents=[...events].sort((a,b)=>a.date.localeCompare(b.date));
-const nextEvent=sortedEvents.find(e=>e.date>=today);
-const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"None";
-const highlightAddPlayer=totalPlayers===0;
-const highlightAddDrill=drills.length===0;
-const highlightScheduleEvent=events.length===0||!nextEvent;
-const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
-const inactivePlayersCount=ups.filter(p=>!activeThisWeek.has(p.email)).length;
-const highlightPlayersAttention=inactivePlayersCount>0;
-const primaryQuickAction=highlightAddPlayer?"addPlayer":highlightAddDrill?"addDrill":highlightScheduleEvent?"scheduleEvent":null;
-const jumpToSection=(targetTab,sectionId)=>{setTab(targetTab);setSelP(null);setTimeout(()=>document.getElementById(sectionId)?.scrollIntoView({behavior:"smooth",block:"start"}),120)};
-const handleLogScoreAction=()=>{
-  // TODO: Route to dedicated coach score logging flow when implemented.
-  setTab("feed");
-};
+const {tab,setTab,editD,setEditD,eName,setEName,eDesc,setEDesc,eInstr,setEInstr,eMax,setEMax,eIcon,setEIcon,selP,setSelP,showAdd,setShowAdd,expEv,setExpEv,ne,setNe,addEmail,setAddEmail,showAddSC,setShowAddSC,nsc,setNsc,showNewDrill,setShowNewDrill,nd,setNd,programErr,setProgramErr,newProgramDrill,setNewProgramDrill,nudged,setNudged,confirmDelete,setConfirmDelete,codeErr,setCodeErr,newProfile,setNewProfile,profileErr,setProfileErr,ups,allKnown,today,todayS,saveDrill,handleAddDrill,handleAddProgramDrill,handleRemoveDrill,confirmDrillDelete,handleAddEvent,handleAddWalkin,handleAddSC,totalPlayers,activeTodayCount,sortedEvents,nextEvent,nextEventDateFormatted,highlightAddPlayer,highlightAddDrill,highlightScheduleEvent,inactivePlayersCount,highlightPlayersAttention,primaryQuickAction,jumpToSection,handleLogScoreAction,handleNavChange,isDesktop,isNarrow}=useCoachDashboardState({scores,players,events,drills,updateDrill,addDrill,addProgramDrill,removeDrill,addEvent,addRsvp,addScSession,sanitize:san});
 const {brandingDraft,brandingMsg,previewBranding,teamPrimary,teamSecondary,coachAccent,isLogoDragActive,setIsLogoDragActive,applyBrandingDraft,brandingWarnings,shellVars,handleLogoFiles,handleLogoFileChange,applyBrandingPreset,saveBranding}=useCoachBrandingState({teamBranding:team?.branding,teamId:team?.id,updateTeamBranding});
 const navItems=[
   {k:"feed",l:"Feed",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>},
@@ -2552,22 +2515,9 @@ const navItems=[
   {k:"sc",l:"Strength",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>},
   {k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
   ];
-const handleNavChange=(k)=>{setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)};
-const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
-const [isNarrow,setIsNarrow]=useState(()=>typeof window!=="undefined"?window.innerWidth<768:false);
 const coachTabs=["feed","drills","events","sc","players","settings"];
 const isCoachTab=u.isCoach&&coachTabs.includes(tab);
 const showFullCommandCenter=isCoachTab&&tab==="feed";
-
-useEffect(()=>{
-  const onResize=()=>{
-    setIsDesktop(window.innerWidth>=1024);
-    setIsNarrow(window.innerWidth<768);
-  };
-  onResize();
-  window.addEventListener("resize",onResize);
-  return()=>window.removeEventListener("resize",onResize);
-},[]);
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div style={{padding:"10px 10px",marginBottom:8,border:`1px solid ${alphaFromHex(teamPrimary,0.22)}`,borderRadius:12,background:alphaFromHex(teamPrimary,0.08)}}><TeamIdentity branding={previewBranding} teamName={team?.name||"Team"} mascotName={previewBranding.mascotName} motto={previewBranding.brandingMode==="bold"?previewBranding.motto:""} compact /></div><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)} aria-current={active?"page":undefined} style={{display:"flex",alignItems:"center",gap:12,minHeight:52,padding:"0 14px",fontSize:13,fontWeight:700,letterSpacing:"0.03em"}}><span className="shared-nav-icon" aria-hidden="true">{item.svg}</span><span>{item.l}</span></button>;})}</aside>}
