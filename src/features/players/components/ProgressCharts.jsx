@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import UI_TOKENS from "../../../styles/tokens";
 import LoadingState from "../../../shared/ui/LoadingState";
 import ErrorState from "../../../shared/ui/ErrorState";
