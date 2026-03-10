@@ -9,9 +9,9 @@ export const UI_TOKENS = {
       elevated: "#1f2b3b",
     },
     text: {
-      primary: "#f4f7fc",
-      secondary: "#c7d2e2",
-      muted: "#9aa9bc",
+      primary: "var(--color-text-primary)",
+      secondary: "var(--color-text-secondary)",
+      muted: "var(--color-text-muted)",
     },
     border: {
       subtle: "rgba(175, 191, 214, 0.22)",
@@ -45,9 +45,9 @@ export const UI_TOKENS = {
     bgCard: "#182230",
     bgElevated: "#1f2b3b",
     bgSubtle: "rgba(175, 191, 214, 0.09)",
-    textPrimary: "#f4f7fc",
-    textSecondary: "#c7d2e2",
-    textMuted: "#9aa9bc",
+    textPrimary: "var(--color-text-primary)",
+    textSecondary: "var(--color-text-secondary)",
+    textMuted: "var(--color-text-muted)",
   },
   // Canonical source for shared spacing/radius/shadow/border values is `src/styles/design-system.css`.
   // Keep this JS export as a compatibility wrapper for inline styles and existing imports.
