@@ -31,6 +31,7 @@ import { todayStr, isoDaysAgo, withTs, distributeTotal, genId, generateJoinCode 
 import { DB } from "./services/storage/cloudStoreAdapter";
 import usePreviewMode from "./app/hooks/usePreviewMode";
 import useHighContrastMode from "./app/hooks/useHighContrastMode";
+import useThemeMode from "./app/hooks/useThemeMode";
 import AppShell from "./app/AppShell";
 import useAuthSession from "./features/auth/hooks/useAuthSession";
 
@@ -653,11 +654,11 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
+const[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
 const { highContrast, setHighContrast } = useHighContrastMode();
 const { isDesktopViewport, previewMode, setPreviewMode, activePreviewMode, previewShellClass, previewContentClass } = usePreviewMode();
+const { theme, setTheme, themeTokens: T } = useThemeMode(THEMES);
 const { view, setView, user, setUser, syncUserView } = useAuthSession(players);
-const T=THEMES[theme];
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
 const requirePlayer=(actor,teamId,email)=>actor?.role==="player"&&actor.teamId&&actor.teamId===teamId&&actor.email===email;
