@@ -8,7 +8,7 @@ import Button from "./shared/ui/Button";
 import EmptyState from "./shared/ui/EmptyState";
 import LoadingState from "./shared/ui/LoadingState";
 import { TeamIdentity, TeamWatermark, TeamBrandPreview } from "./features/branding/components/TeamBranding";
-import DrillDetail from "./components/DrillDetail";
+import DrillDetail from "./features/players/components/DrillDetail";
 import ProgressCharts from "./components/ProgressCharts";
 import Card from "./shared/ui/Card";
 import ListItem from "./shared/ui/ListItem";
