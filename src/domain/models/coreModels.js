@@ -16,6 +16,7 @@
  * @typedef {Object} Drill
  * @property {number|string} id
  * @property {string} name
+ * @property {string} [desc]
  * @property {number} [max]
  * @property {string} [icon]
  */
