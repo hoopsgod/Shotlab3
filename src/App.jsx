@@ -16,7 +16,6 @@ import SectionContainer from "./shared/ui/SectionContainer";
 import HeroBanner from "./components/HeroBanner";
 import BrandLogo from "./components/BrandLogo";
 import ContextSummary from "./components/ContextSummary";
-import ViewportPreviewToggle from "./components/ViewportPreviewToggle";
 import MobileFocusPanel from "./components/MobileFocusPanel";
 import spacing from "./spacing";
 import UI_TOKENS from "./styles/tokens";
@@ -31,6 +30,7 @@ import { todayStr, isoDaysAgo, withTs, distributeTotal, genId, generateJoinCode 
 import { DB } from "./services/storage/cloudStoreAdapter";
 import usePreviewMode from "./app/hooks/usePreviewMode";
 import useHighContrastMode from "./app/hooks/useHighContrastMode";
+import AppShell from "./app/AppShell";
 import useAuthSession from "./features/auth/hooks/useAuthSession";
 
 const TOKENS={
@@ -967,19 +967,14 @@ useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.locat
 useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);
 useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.message||"unknown"});const onRej=(e)=>trackEvent("app_error",{kind:"unhandledrejection",message:e?.reason?.message||String(e?.reason||"unknown")});window.addEventListener("error",onErr);window.addEventListener("unhandledrejection",onRej);return()=>{window.removeEventListener("error",onErr);window.removeEventListener("unhandledrejection",onRej);};},[trackEvent]);
 
-if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:16,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,width:"min(460px,100%)"}}><LoadingState variant="chart" title="Loading your Shotlab workspace" description="Syncing drills, media, team activity, and coaching data." /></div></div></>;
+const loadingFallback=<div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:16,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,width:"min(460px,100%)"}}><LoadingState variant="chart" title="Loading your Shotlab workspace" description="Syncing drills, media, team activity, and coaching data." /></div></div>;
 
-return <><Styles/>
-{isDesktopViewport&&<ViewportPreviewToggle mode={previewMode} onChange={setPreviewMode}/>}
-<div className={previewShellClass}>
-<div className={previewContentClass}>
+return <AppShell ready={ready} loadingFallback={loadingFallback} StylesComponent={Styles} isDesktopViewport={isDesktopViewport} previewMode={previewMode} onPreviewModeChange={setPreviewMode} previewShellClass={previewShellClass} previewContentClass={previewContentClass}>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onSocialLogin={socialLogin} onResetPassword={resetPassword} firebaseEnabled={firebaseEnabled} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} onResetPassword={resetPassword} highContrast={highContrast} onToggleHighContrast={()=>setHighContrast(v=>!v)}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} updateTeamBranding={updateTeamBranding} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/></div>}
-</div>
-</div>
-</>;
+</AppShell>;
 }
 
 // ═══════════════════════════════════════
