@@ -1,51 +1,35 @@
 export const colorTokenRefs = {
-  bg: {
-    canvas: "var(--color-bg-canvas)",
-    surface: "var(--color-bg-surface)",
-    elevated: "var(--color-bg-elevated)",
-    subtle: "var(--color-bg-subtle)",
-  },
-  text: {
-    primary: "var(--color-text-primary)",
-    secondary: "var(--color-text-secondary)",
-    muted: "var(--color-text-muted)",
-    helper: "var(--color-text-helper)",
-    placeholder: "var(--color-text-placeholder)",
-  },
-  border: {
-    subtle: "var(--color-border-subtle)",
-    strong: "var(--color-border-strong)",
-  },
-  action: {
-    primary: "var(--color-action-primary)",
-    primarySoft: "var(--color-action-primary-soft)",
-    primaryStrong: "var(--color-action-primary-strong)",
-    secondary: "var(--color-action-secondary)",
-    secondarySoft: "var(--color-action-secondary-soft)",
-    highlight: "var(--color-highlight-warm)",
-    highlightSoft: "var(--color-highlight-warm-soft)",
-  },
-  state: {
-    success: "var(--color-state-success)",
-    successSoft: "var(--color-state-success-soft)",
-    warning: "var(--color-state-warning)",
-    warningSoft: "var(--color-state-warning-soft)",
-    danger: "var(--color-state-danger)",
-    dangerSoft: "var(--color-state-danger-soft)",
-  },
+  bgCanvas: "var(--color-bg-canvas)",
+  bgSurface: "var(--color-bg-surface)",
+  bgElevated: "var(--color-bg-elevated)",
+  bgSubtle: "var(--color-bg-subtle)",
 
-  // Existing compatibility aliases backed by design-system variables.
-  accent: "var(--accent)",
-  accentSoft: "var(--accent-soft)",
-  lime: "var(--lime)",
-  bgBase: "var(--bg)",
-  bgCard: "var(--surface-1)",
-  bgElevated: "var(--surface-2)",
-  textPrimary: "var(--text-1)",
-  textSecondary: "var(--text-2)",
-  textMuted: "var(--text-3)",
-  borderSubtle: "var(--border-1)",
-  borderStrong: "var(--border-2)",
+  textPrimary: "var(--color-text-primary)",
+  textSecondary: "var(--color-text-secondary)",
+  textMuted: "var(--color-text-muted)",
+  textHelper: "var(--color-text-helper)",
+  textPlaceholder: "var(--color-text-placeholder)",
+
+  borderSubtle: "var(--color-border-subtle)",
+  borderStrong: "var(--color-border-strong)",
+
+  actionPrimary: "var(--color-action-primary)",
+  actionPrimarySoft: "var(--color-action-primary-soft)",
+  actionPrimaryStrong: "var(--color-action-primary-strong)",
+  actionSecondary: "var(--color-action-secondary)",
+  actionSecondarySoft: "var(--color-action-secondary-soft)",
+  highlightWarm: "var(--color-highlight-warm)",
+  highlightWarmSoft: "var(--color-highlight-warm-soft)",
+
+  stateSuccess: "var(--color-state-success)",
+  stateSuccessSoft: "var(--color-state-success-soft)",
+  stateWarning: "var(--color-state-warning)",
+  stateWarningSoft: "var(--color-state-warning-soft)",
+  stateDanger: "var(--color-state-danger)",
+  stateDangerSoft: "var(--color-state-danger-soft)",
+
+  focusRing: "var(--color-focus-ring)",
+  focusShadow: "var(--color-focus-shadow)",
 };
 
 export default colorTokenRefs;
