@@ -39,6 +39,7 @@ import useTeamScopeState from "./app/hooks/useTeamScopeState";
 import AppShell from "./app/AppShell";
 import AppRoutes from "./app/AppRoutes";
 import useAuthSession from "./features/auth/hooks/useAuthSession";
+import buildPlayerContainerConfig, { FgArc, GuideCallout, InfoHint, useDismissedGuide } from "./features/players/components/PlayerContainer";
 
 const TOKENS={
 PRIMARY:UI_TOKENS.colors.primary,
@@ -934,16 +935,17 @@ useAppAnalytics({ ready, user, view, trackEvent });
 
 const loadingFallback=<div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:16,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,width:"min(460px,100%)"}}><LoadingState variant="chart" title="Loading your Shotlab workspace" description="Syncing drills, media, team activity, and coaching data." /></div></div>;
 
+const playerContainerConfig=buildPlayerContainerConfig({PlayerComponent:Player,user,myTeam,drills,programDrills,scopedScores,addScore,scopedEvents,scopedRsvps,toggleRsvp,scopedShotLogs,addShotLog,scopedChallenges,addChallenge,respondChallenge,scopedPlayers,T,theme,setTheme,scopedScSessions,scopedScRsvps,toggleScRsvp,scopedScLogs,addScLog,logout,deleteAccount,resetPassword,highContrast,setHighContrast});
+
 const screens=AppRoutes({
 AuthComponent:Auth,
 CreateTeamComponent:CreateTeam,
 JoinTeamComponent:JoinTeam,
-PlayerComponent:Player,
+...playerContainerConfig,
 CoachComponent:Coach,
 authProps:{onLogin:login,onRegister:register,onDemo:demoSignIn,onSocialLogin:socialLogin,onResetPassword:resetPassword,firebaseEnabled,highContrast,onToggleHighContrast:()=>setHighContrast(v=>!v)},
 createTeamProps:{onCreate:createTeam,u:user},
 joinTeamProps:{onJoin:joinTeam,u:user},
-playerProps:{u:user,team:myTeam,drills,programDrills,scores:scopedScores,addScore,events:scopedEvents,rsvps:scopedRsvps,toggleRsvp,shotLogs:scopedShotLogs,addShotLog,challenges:scopedChallenges,addChallenge,respondChallenge,players:scopedPlayers,T,theme,setTheme,scSessions:scopedScSessions,scRsvps:scopedScRsvps,toggleScRsvp,scLogs:scopedScLogs,addScLog,logout,deleteAccount,onResetPassword:resetPassword,highContrast,onToggleHighContrast:()=>setHighContrast(v=>!v)},
 coachProps:{u:user,team:myTeam,teamId:user?.teamId,regenerateJoinCode,updateTeamBranding,addRosterPlayer,playerProfiles,drills,programDrills,scores:scopedScores,players:scopedPlayers,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events:scopedEvents,rsvps:scopedRsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions:scopedScSessions,scRsvps:scopedScRsvps,scLogs:scopedScLogs,addScSession,removeScSession,shotLogs:scopedShotLogs,logout,deleteAccount},
 });
 
@@ -1042,70 +1044,6 @@ function JoinTeam({u,onJoin}){
 const[code,setCode]=useState("");const[err,setErr]=useState("");
 const submit=async()=>{const r=await onJoin(code);if(!r.ok)setErr(r.err||"Could not join team")};
 return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>JOIN TEAM</button></div></div>;
-}
-
-function useDismissedGuide(storageKey){
-const[visible,setVisible]=useState(()=>{
-if(typeof window==="undefined")return true;
-try{return window.localStorage.getItem(storageKey)!=="1";}catch{return true;}
-});
-useEffect(()=>{
-if(typeof window==="undefined")return;
-try{window.localStorage.setItem(storageKey,visible?"0":"1");}catch{}
-},[storageKey,visible]);
-return [visible,()=>setVisible(false)];
-}
-
-function GuideCallout({title,body,onDismiss,tone="accent"}){
-const toneMap={
-accent:{bg:`linear-gradient(140deg, ${VOLT}22 0%, ${VOLT}12 55%, ${CARD_BG} 100%)`,border:`1px solid ${VOLT}55`,title:VOLT},
-warm:{bg:`linear-gradient(140deg, ${ORANGE}18 0%, ${ORANGE}0a 55%, ${CARD_BG} 100%)`,border:`1px solid ${ORANGE}44`,title:ORANGE},
-cool:{bg:`linear-gradient(140deg, ${CYAN}20 0%, ${CYAN}0f 55%, ${CARD_BG} 100%)`,border:`1px solid ${CYAN}40`,title:CYAN},
-};
-const palette=toneMap[tone]||toneMap.accent;
-return <div className="info-explainer-card" style={{background:palette.bg,border:palette.border,marginBottom:14,display:"flex",gap:10,alignItems:"flex-start"}}>
-<div style={{flex:1,minWidth:0}}>
-<div className="info-explainer-card__title" style={{color:palette.title}}>{title}</div>
-<div className="info-explainer-card__body">{body}</div>
-</div>
-{onDismiss&&<button className="info-explainer-card__button" onClick={onDismiss} aria-label="Dismiss onboarding tip">Got it</button>}
-</div>;
-}
-
-function FgArc({percentage=0,label="FG%"}){
-const arcRef=useRef(null);
-const normalizedPct=Math.max(0,Math.min(100,Number(percentage)||0));
-const radius=50;
-const circumference=Math.PI*radius;
-const color=normalizedPct<40?"#FF3B5C":normalizedPct<55?"#FFB830":"#1EE07F";
-useEffect(()=>{
-  const arc=arcRef.current;
-  if(!arc)return;
-  const targetOffset=circumference-(normalizedPct/100)*circumference;
-  arc.style.strokeDasharray=`${circumference}`;
-  arc.style.transition="none";
-  arc.style.strokeDashoffset=`${circumference}`;
-  const raf=requestAnimationFrame(()=>{
-    arc.style.transition="stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)";
-    arc.style.strokeDashoffset=`${targetOffset}`;
-  });
-  return ()=>cancelAnimationFrame(raf);
-},[circumference,normalizedPct]);
-
-return <div style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:6}}>
-  <svg viewBox="0 0 120 70" width="100%" style={{maxWidth:260,display:"block"}} aria-label={`${label} ${normalizedPct}%`} role="img">
-    <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#181C24" strokeWidth="10"/>
-    <path ref={arcRef} d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke={color} strokeWidth="10" strokeLinecap="round"/>
-  </svg>
-  <div style={{textAlign:"center",lineHeight:1}}>
-    <div style={{fontFamily:FD,color:color,fontSize:38,letterSpacing:1}}>{normalizedPct}%</div>
-    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,textTransform:"uppercase"}}>{label}</div>
-  </div>
-</div>;
-}
-
-function InfoHint({text}){
-return <span title={text} aria-label={text} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:18,height:18,borderRadius:"50%",border:`1px solid ${BORDER_CLR}`,color:TOKENS.TEXT_SECONDARY,fontFamily:FB,fontSize:11,fontWeight:700,flexShrink:0}}>i</span>;
 }
 
 // ═══════════════════════════════════════
