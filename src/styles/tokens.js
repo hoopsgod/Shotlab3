@@ -1,53 +1,57 @@
+const COLOR_TOKENS = {
+  bg: {
+    canvas: "#0f1722",
+    surface: "#182230",
+    elevated: "#1f2b3b",
+  },
+  text: {
+    primary: "#f4f7fc",
+    secondary: "#c7d2e2",
+    muted: "#9aa9bc",
+  },
+  border: {
+    subtle: "rgba(175, 191, 214, 0.22)",
+    strong: "rgba(195, 211, 231, 0.4)",
+  },
+  action: {
+    primary: "#5379be",
+    secondary: "#4b7f86",
+    highlight: "#baa98f",
+  },
+  state: {
+    success: "#5e9479",
+    warning: "#af8c5f",
+    danger: "#ab6e6e",
+  },
+};
+
 export const UI_TOKENS = {
   colors: {
     // Canonical color values currently remain in this JS map for legacy alpha-concatenation usage
     // (for example `${UI_TOKENS.colors.danger}55` in inline styles).
     // Semantic palette: premium mobile-first sports product
-    bg: {
-      canvas: "#0f1722",
-      surface: "#182230",
-      elevated: "#1f2b3b",
-    },
-    text: {
-      primary: "#f4f7fc",
-      secondary: "#c7d2e2",
-      muted: "#9aa9bc",
-    },
-    border: {
-      subtle: "rgba(175, 191, 214, 0.22)",
-      strong: "rgba(195, 211, 231, 0.4)",
-    },
-    action: {
-      primary: "#5379be",
-      secondary: "#4b7f86",
-      highlight: "#baa98f",
-    },
-    state: {
-      success: "#5e9479",
-      warning: "#af8c5f",
-      danger: "#ab6e6e",
-    },
+    ...COLOR_TOKENS,
 
     // Backward-compat aliases (legacy token names kept for existing components)
-    primary: "#5379be",
-    primaryDim: "#9aa9bc",
+    primary: COLOR_TOKENS.action.primary,
+    primaryDim: COLOR_TOKENS.text.muted,
     primaryGlow: "rgba(83, 121, 190, 0.22)",
-    secondary: "#4b7f86",
+    secondary: COLOR_TOKENS.action.secondary,
     secondaryDim: "rgba(75, 127, 134, 0.22)",
-    primaryCyan: "#5379be",
-    primaryYellow: "#baa98f",
-    highlight: "#baa98f",
-    success: "#5e9479",
-    pending: "#af8c5f",
-    warning: "#af8c5f",
-    danger: "#ab6e6e",
-    bgBase: "#0f1722",
-    bgCard: "#182230",
-    bgElevated: "#1f2b3b",
+    primaryCyan: COLOR_TOKENS.action.primary,
+    primaryYellow: COLOR_TOKENS.action.highlight,
+    highlight: COLOR_TOKENS.action.highlight,
+    success: COLOR_TOKENS.state.success,
+    pending: COLOR_TOKENS.state.warning,
+    warning: COLOR_TOKENS.state.warning,
+    danger: COLOR_TOKENS.state.danger,
+    bgBase: COLOR_TOKENS.bg.canvas,
+    bgCard: COLOR_TOKENS.bg.surface,
+    bgElevated: COLOR_TOKENS.bg.elevated,
     bgSubtle: "rgba(175, 191, 214, 0.09)",
-    textPrimary: "#f4f7fc",
-    textSecondary: "#c7d2e2",
-    textMuted: "#9aa9bc",
+    textPrimary: COLOR_TOKENS.text.primary,
+    textSecondary: COLOR_TOKENS.text.secondary,
+    textMuted: COLOR_TOKENS.text.muted,
   },
   // Canonical source for shared spacing/radius/shadow/border values is `src/styles/design-system.css`.
   // Keep this JS export as a compatibility wrapper for inline styles and existing imports.
