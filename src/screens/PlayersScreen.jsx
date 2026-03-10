@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import Button from "../shared/ui/Button";
 import { PLAYER_FILTERS, getFilteredPlayers, getStatusTone } from "./playersViewHelpers";
+import { getFilterButtonStyles, getRosterSummary } from "./playersDisplayUtils";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -43,9 +44,7 @@ export default function PlayersScreen() {
   const [copied, setCopied] = useState(false);
 
   const players = [];
-  const totalPlayers = players.length;
-  const activePlayers = 0;
-  const inactivePlayers = 0;
+  const { totalPlayers, activePlayers, inactivePlayers } = useMemo(() => getRosterSummary(players), [players]);
 
   const filteredPlayers = useMemo(() => getFilteredPlayers(players, searchQuery, activeFilter), [players, searchQuery, activeFilter]);
 
@@ -130,19 +129,7 @@ export default function PlayersScreen() {
           <button
             key={filter}
             onClick={() => setActiveFilter(filter)}
-            style={{
-              borderRadius: 999,
-              height: 32,
-              padding: "0 12px",
-              fontSize: 11,
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              border: activeFilter === filter ? "1px solid rgba(91, 243, 255, 0.34)" : "1px solid var(--stroke-1)",
-              background: activeFilter === filter ? "rgba(91, 243, 255, 0.18)" : "var(--surface-1)",
-              color: activeFilter === filter ? "var(--text-1)" : "var(--text-3)",
-              fontWeight: 700,
-              cursor: "pointer",
-            }}
+            style={getFilterButtonStyles(activeFilter, filter)}
           >
             {filter}
           </button>
