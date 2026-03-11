@@ -683,8 +683,8 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       {mode==="login"?"SIGN IN":"CREATE ACCOUNT"} &#8594;
     </button>
     {mode==="login"&&<><div style={{display:"flex",alignItems:"center",gap:10,width:"100%",margin:"8px 0 12px"}}><div style={{height:1,background:"#242424",flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:"#555555"}}/><div style={{height:1,background:"#242424",flex:1}}/></div><div className="auth-demo-enter" style={{display:"flex",gap:12,justifyContent:"center",marginTop:0,opacity:0}}>
-      <button onClick={()=>doDemo("player")} className="btn-v" style={{height:44,padding:"0 20px",background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:12,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Demo Player</button>
-      <button onClick={()=>doDemo("coach")} className="btn-v" style={{height:44,padding:"0 20px",background:"#1E1E1E",color:"#A0A0A0",fontFamily:FB,fontSize:12,fontWeight:600,letterSpacing:"0.08em",border:"1px solid #333333",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Demo Coach</button>
+      <button onClick={()=>doDemo("player")} className="btn-v" style={{height:44,padding:"0 20px",background:"#213217",color:"#E6FFD0",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:"0.08em",border:"1px solid #78FF4D",boxShadow:"0 0 0 1px rgba(120,255,77,0.2), 0 8px 20px rgba(72,168,44,0.25)",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Demo Player</button>
+      <button onClick={()=>doDemo("coach")} className="btn-v" style={{height:44,padding:"0 20px",background:"#213217",color:"#E6FFD0",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:"0.08em",border:"1px solid #78FF4D",boxShadow:"0 0 0 1px rgba(120,255,77,0.2), 0 8px 20px rgba(72,168,44,0.25)",borderRadius:10,cursor:"pointer",textTransform:"uppercase"}}>Demo Coach</button>
     </div></>}
 
     <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:12,marginTop:16,cursor:"pointer"}} onClick={()=>{setMode(mode==="login"?"register":"login");setErr("")}}>
