@@ -2125,13 +2125,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <button className="btn-v cta-primary" onClick={handleAddEvent} style={{width:"100%",margin:0,minHeight:44,height:44,borderRadius:10}}>CREATE EVENT</button>
         </div>
       </div>
-      </>:<div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"fixed",inset:0,zIndex:100,background:BG,display:"flex",flexDirection:"column",overflow:"hidden",paddingBottom:"max(10px, env(safe-area-inset-bottom, 0px))"}}>
-        <div style={{position:"sticky",top:0,zIndex:2,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:`1px solid ${BORDER_CLR}`,background:BG,gap:10}}>
+      </>:<div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"relative",zIndex:100,width:"100%",height:"100dvh",maxHeight:"100dvh",background:BG,display:"flex",flexDirection:"column",overflow:"hidden",minHeight:0,paddingBottom:"max(10px, env(safe-area-inset-bottom, 0px))"}}>
+        <div style={{position:"sticky",top:0,zIndex:2,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:`1px solid ${BORDER_CLR}`,background:BG,gap:10,flexShrink:0}}>
           <button onClick={()=>setShowAdd(false)} style={{background:"none",border:"none",color:T.SUB,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",cursor:"pointer",padding:0}}>Cancel</button>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.5,textAlign:"center",flex:1}}>CREATE EVENT</div>
           <button aria-label="Close" onClick={()=>setShowAdd(false)} style={{background:"none",border:`1px solid ${BORDER_CLR}`,color:T.SUB,borderRadius:8,width:28,height:28,display:"grid",placeItems:"center",cursor:"pointer",fontSize:16,lineHeight:1}}>×</button>
         </div>
-        <div style={{padding:"12px 12px 108px",overflowY:"auto",flex:1,minHeight:0}}>
+        <div style={{padding:"12px 12px 132px",overflowY:"auto",flex:1,minHeight:0,WebkitOverflowScrolling:"touch"}}>
           <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="Open Gym Run"/>
           <div style={{display:"block"}}>
             <FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} tp="date"/>
@@ -2144,7 +2144,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"8px 12px",borderRadius:999,border:`1px solid ${ne.type===t?VOLT:BORDER_CLR}`,background:ne.type===t?VOLT+"22":BG,color:ne.type===t?VOLT:T.SUB,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer"}}>{t}</button>)}</div>
           </div>
         </div>
-        <div style={{position:"sticky",bottom:0,zIndex:2,padding:"10px 12px",borderTop:`1px solid ${BORDER_CLR}`,background:BG}}>
+        <div style={{position:"sticky",bottom:0,zIndex:2,padding:"10px 12px max(10px, env(safe-area-inset-bottom, 0px))",borderTop:`1px solid ${BORDER_CLR}`,background:BG,flexShrink:0}}>
           <button className="btn-v cta-primary" onClick={handleAddEvent} style={{width:"100%",margin:0,minHeight:44,height:44,borderRadius:10}}>CREATE EVENT</button>
         </div>
       </div>}
