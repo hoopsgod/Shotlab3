@@ -2078,7 +2078,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       {events.length===0?<div style={{display:"inline-block",maxWidth:"100%",background:"rgba(20,24,33,0.72)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px",marginBottom:10}}>
         <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events scheduled</div>
         <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:5,lineHeight:1.35}}>Create your first event to organize practices, games, camps, or meetings.</div>
-        <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"10px 0 0",width:"100%",minHeight:40,height:40,borderRadius:10,fontSize:11}}>+ ADD EVENT</button>
       </div>:<div style={{display:"grid",gap:8,marginBottom:10}}>
         {(() => {
           const parseTime=(time="")=>{const m=String(time).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);if(!m)return Number.MAX_SAFE_INTEGER;let hour=Number(m[1]);const minute=Number(m[2]||"0");const meridiem=(m[3]||"").toUpperCase();if(meridiem==="PM"&&hour<12)hour+=12;if(meridiem==="AM"&&hour===12)hour=0;return hour*60+minute;};
