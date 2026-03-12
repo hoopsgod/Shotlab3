@@ -2051,14 +2051,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 
   {/* EVENTS */}
   {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><div className="coachEventsHeaderCard"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} /></div><header className="coachEventsSlimHeader" aria-label="Events"><div className="coachEventsSlimHeaderLeft"><EventIcon type="event" size={20} color={PAGE_ACCENTS.events.accent}/><span className="coachEventsSlimHeaderLabel">EVENTS</span></div></header>{nextEvent&&<div className="heroModule"><div style={{fontFamily:FD,color:PAGE_ACCENTS.events.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>NEXT EVENT</div><div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,marginTop:4}}>{nextEvent.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>{nextEvent.date} {nextEvent.time}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>📍 {nextEvent.location}</div></div>}
-    <div style={!isDesktop?{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 12px 10px",marginBottom:10}:{}}>
-      <div style={{display:"flex",flexDirection:!isDesktop?"column":"row",alignItems:!isDesktop?"stretch":"center",gap:!isDesktop?8:0}}>
+    <div style={!isDesktop?{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:events.length===0?"12px":"12px 12px 10px",marginBottom:10}:{}}>
+      <div style={{display:"flex",flexDirection:!isDesktop?"column":"row",alignItems:!isDesktop?"stretch":"center",gap:!isDesktop?6:0}}>
         <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Event Management" s={`${events.length} total`} identity/>
-        <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={!isDesktop?{margin:"0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}:{marginBottom:20}}>+ ADD EVENT</button>
+        {events.length>0&&<button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={!isDesktop?{margin:"0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}:{marginBottom:20}}>+ ADD EVENT</button>}
       </div>
-      {events.length===0&&<div style={{marginTop:8,padding:"14px 12px",border:`1px dashed ${BORDER_CLR}`,borderRadius:12,background:"rgba(255,255,255,0.02)",textAlign:"left"}}>
-        <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1.5,lineHeight:1}}>NO EVENTS YET</div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>Create your first event to publish schedule details and start tracking attendance.</div>
+      {events.length===0&&<div style={{marginTop:4,padding:"10px 0 2px",textAlign:"left"}}>
+        <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700}}>No events scheduled yet.</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4,lineHeight:1.35}}>Create your first event to organize practices, games, camps, or meetings.</div>
+        <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"10px 0 0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
       </div>}
     </div>
 
@@ -2066,22 +2067,23 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"8px 14px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?VOLT:SURFACE,color:active?"#111827":(T.SUB||LIGHT),fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"var(--tracking-tight)",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
     </div>}
 
-    {showAdd&&<div className="fade-up" style={{position:"fixed",inset:0,zIndex:90,display:"flex",alignItems:"flex-end",paddingTop:!isDesktop?"max(10px, env(safe-area-inset-top, 0px))":0}}>
+    {showAdd&&<div className="fade-up" style={{position:"fixed",inset:0,zIndex:90,display:"flex",alignItems:"flex-end",paddingTop:!isDesktop?"max(10px, env(safe-area-inset-top, 0px))":0,overscrollBehavior:"none"}}>
       <button aria-label="Close create event form" onClick={()=>setShowAdd(false)} style={{position:"absolute",inset:0,border:"none",background:"rgba(0,0,0,0.62)",cursor:"pointer"}}/>
-      <div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"relative",zIndex:1,width:"100%",height:!isDesktop?"min(92svh, calc(100svh - max(10px, env(safe-area-inset-top, 0px))))":"auto",maxHeight:!isDesktop?"min(92svh, calc(100svh - max(10px, env(safe-area-inset-top, 0px))))":"88dvh",borderRadius:"20px 20px 0 0",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderBottom:"none",boxShadow:"0 -14px 30px rgba(0,0,0,0.45)",display:"flex",flexDirection:"column",overflow:"hidden",minHeight:0}}>
-        <div style={{padding:"12px 16px 10px",borderBottom:`1px solid ${BORDER_CLR}`}}>
-          <div style={{width:44,height:4,borderRadius:999,background:"rgba(255,255,255,0.25)",margin:"0 auto 10px",display:!isDesktop?"block":"none"}}/>
-          <button aria-label="Close" onClick={()=>setShowAdd(false)} style={{position:"absolute",top:16,right:14,width:30,height:30,borderRadius:999,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontFamily:FB,fontSize:16,lineHeight:1,cursor:"pointer"}}>×</button>
+      <div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"relative",zIndex:1,width:"100%",maxWidth:"100vw",height:"auto",maxHeight:!isDesktop?"min(92dvh, calc(100dvh - max(8px, env(safe-area-inset-top, 0px))))":"88dvh",borderRadius:"20px 20px 0 0",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderBottom:"none",boxShadow:"0 -14px 30px rgba(0,0,0,0.45)",display:"flex",flexDirection:"column",overflow:"hidden",minHeight:0,touchAction:"pan-y"}}>
+        {!isDesktop&&<div style={{display:"flex",justifyContent:"center",padding:"8px 0 2px",flexShrink:0}}><span aria-hidden style={{width:42,height:4,borderRadius:999,background:"rgba(255,255,255,0.26)",display:"block"}}/></div>}
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:!isDesktop?"10px 16px":"16px 18px",borderBottom:`1px solid ${BORDER_CLR}`,flexShrink:0}}>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:2,textAlign:"left",paddingRight:34}}>CREATE EVENT</div>
+          <button aria-label="Close" onClick={()=>setShowAdd(false)} style={{width:30,height:30,borderRadius:999,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontFamily:FB,fontSize:16,lineHeight:1,cursor:"pointer",flexShrink:0}}>×</button>
         </div>
-        <div style={{padding:!isDesktop?"14px 16px calc(140px + env(safe-area-inset-bottom, 0px))":"14px 16px 108px",overflowY:"auto",overflowX:"hidden",flex:1,minHeight:0,WebkitOverflowScrolling:"touch",overscrollBehavior:"contain"}}>
+        <div style={{padding:!isDesktop?"12px 16px calc(168px + env(safe-area-inset-bottom, 0px))":"14px 16px 108px",overflowY:"auto",overflowX:"hidden",flex:1,minHeight:0,WebkitOverflowScrolling:"touch",overscrollBehavior:"contain"}}>
           <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="e.g. OPEN GYM RUN"/>
-          <div style={{display:"flex",gap:8}}><div style={{flex:1,minWidth:0}}><FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} ph="2026-03-15" tp="date"/></div><div style={{flex:1,minWidth:0}}><FF l="TIME" v={ne.time} set={v=>setNe({...ne,time:v})} ph="6:00 PM"/></div></div>
+          <div style={{display:"flex",flexDirection:!isDesktop?"column":"row",gap:8}}><div style={{flex:1,minWidth:0}}><FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} ph="2026-03-15" tp="date"/></div><div style={{flex:1,minWidth:0}}><FF l="TIME" v={ne.time} set={v=>setNe({...ne,time:v})} ph="6:00 PM"/></div></div>
+          <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym"/>
+          <FF l="DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ph="Details..." ta/>
           <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
           <div style={{display:"flex",gap:4,marginBottom:14,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"7px 12px",borderRadius:8,border:ne.type===t?`1px solid ${VOLT}`:`1px solid ${BORDER_CLR}`,background:ne.type===t?VOLT+"15":"transparent",color:ne.type===t?VOLT:MUTED,fontFamily:FD,fontSize:11,letterSpacing:2,cursor:"pointer",textTransform:"uppercase"}}>{t}</button>)}</div>
-          <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym"/><FF l="DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ph="Details..." ta/>
         </div>
-        <div style={{position:!isDesktop?"sticky":"absolute",left:0,right:0,bottom:0,padding:"12px 16px calc(12px + env(safe-area-inset-bottom, 0px))",borderTop:`1px solid ${BORDER_CLR}`,background:SURFACE,flexShrink:0,zIndex:2}}>
+        <div style={{position:!isDesktop?"sticky":"absolute",left:0,right:0,bottom:0,padding:"12px 16px calc(12px + env(safe-area-inset-bottom, 0px))",borderTop:`1px solid ${BORDER_CLR}`,background:"linear-gradient(180deg, rgba(20,24,33,0.94) 0%, rgba(20,24,33,1) 35%)",backdropFilter:!isDesktop?"blur(8px)":"none",flexShrink:0,zIndex:2}}>
           <button className="btn-v cta-primary" onClick={handleAddEvent} style={{width:"100%",margin:0}}>CREATE EVENT</button>
         </div>
       </div>
