@@ -2070,45 +2070,33 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"8px 14px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?VOLT:SURFACE,color:active?"#111827":(T.SUB||LIGHT),fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"var(--tracking-tight)",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
       </div>}
     </>:<>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"8px 10px",borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:"rgba(20,24,33,0.82)",marginBottom:8}}>
-        <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}><EventIcon type="event" size={16} color={VOLT}/><span style={{fontFamily:FD,fontSize:14,color:LIGHT,letterSpacing:1.2}}>EVENTS</span></div>
-        <div style={{fontFamily:FB,fontSize:11,color:T.SUB,fontWeight:700}}>{events.length} total</div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"8px 10px",borderBottom:`1px solid ${BORDER_CLR}`,marginBottom:10}}>
+        <div style={{display:"flex",alignItems:"center",gap:7,minWidth:0}}><EventIcon type="event" size={15} color={VOLT}/><span style={{fontFamily:FD,fontSize:14,color:LIGHT,letterSpacing:1.2}}>EVENTS</span></div>
+        <div style={{fontFamily:FB,fontSize:10,color:T.SUB,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em"}}>{events.length} total</div>
       </div>
-      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
-        <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:0,flex:1,minHeight:42,height:42,borderRadius:11,fontSize:12}}>+ ADD EVENT</button>
-      </div>
-      {nextEvent?<div style={{background:"linear-gradient(145deg, rgba(200,255,26,0.13), rgba(20,24,33,0.98) 55%)",border:`1px solid ${VOLT}44`,borderRadius:14,padding:"12px",marginBottom:10,boxShadow:"0 10px 26px rgba(0,0,0,0.32)"}}>
-        <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:1.4,textTransform:"uppercase",marginBottom:7}}>Next Up</div>
-        <div style={{fontFamily:FB,color:LIGHT,fontWeight:700,fontSize:14,lineHeight:1.2}}>{nextEvent.title}</div>
-        <div style={{display:"flex",alignItems:"center",flexWrap:"wrap",gap:"5px 10px",marginTop:7,fontFamily:FB,color:T.SUB,fontSize:10}}>
-          <span>{nextEvent.date}</span><span>•</span><span>{nextEvent.time}</span>
-        </div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>📍 {nextEvent.location}</div>
-        <span style={{display:"inline-flex",marginTop:8,padding:"3px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:`${VOLT}1A`,fontFamily:FB,fontSize:9,fontWeight:700,color:VOLT,textTransform:"uppercase"}}>{nextEvent.type||"event"}</span>
-      </div>:<div style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 12px",marginBottom:10}}>
+      <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"0 0 10px",width:"100%",minHeight:44,height:44,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
+      {events.length===0?<div style={{background:"rgba(20,24,33,0.75)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px 12px 10px",marginBottom:10}}>
         <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events scheduled</div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>Add your first event to build the weekly agenda.</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:5,lineHeight:1.35}}>Create your first event to organize practices, games, camps, or meetings.</div>
         <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"10px 0 0",width:"100%",minHeight:42,height:42,borderRadius:10,fontSize:12}}>+ ADD EVENT</button>
-      </div>}
-      {events.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",padding:"0 0 6px",marginBottom:8}}>
-        {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"7px 12px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?VOLT:SURFACE,color:active?"#111827":(T.SUB||LIGHT),fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:".07em",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
-      </div>}
+      </div>:<>
+      <div style={{display:"flex",gap:7,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",padding:"0 1px 6px",marginBottom:8}}>
+        {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"6px 11px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?`${VOLT}22`:"rgba(20,24,33,0.75)",color:active?VOLT:(T.SUB||LIGHT),fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
+      </div>
       {filteredEvents.length>0&&(() => {
         const grouped=filteredEvents.reduce((acc,ev)=>{(acc[ev.date]=acc[ev.date]||[]).push(ev);return acc;},{});
-        return Object.entries(grouped).map(([dateKey,dateEvents])=><div key={dateKey} style={{marginBottom:12}}>
-          <div style={{display:"inline-flex",padding:"5px 10px",borderRadius:999,border:`1px solid ${BORDER_CLR}`,background:"rgba(20,24,33,0.8)",fontFamily:FB,fontSize:10,fontWeight:700,color:T.SUB,letterSpacing:".08em",textTransform:"uppercase",marginBottom:8}}>{dateKey}</div>
-          <div style={{display:"grid",gap:8}}>
-            {dateEvents.map(ev=>{const evR=rsvpsByEvent.get(ev.id)||[];const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
-              return <div key={ev.id} style={{background:"linear-gradient(180deg, rgba(20,24,33,0.98), rgba(15,17,21,0.98))",border:`1px solid ${BORDER_CLR}`,borderLeft:`3px solid ${VOLT}`,borderRadius:12,padding:"10px 11px",boxShadow:"0 8px 18px rgba(0,0,0,0.24)"}}>
-                <button className="ch" onClick={()=>setExpEv(expEv===ev.id?null:ev.id)} style={{width:"100%",display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:10,background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left"}}>
-                  <div style={{minWidth:0,flex:1}}>
-                    <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,lineHeight:1.2}}>{ev.title}</div>
-                    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>{ev.time}</div>
-                    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>📍 {ev.location}</div>
-                  </div>
-                  <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:6,flexShrink:0}}>
-                    <span style={{padding:"3px 8px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}55`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase"}}>{ev.type||"event"}</span>
-                    <span style={{fontFamily:FB,color:T.SUB,fontSize:9}}>{evR.length} RSVP</span>
+        return Object.entries(grouped).map(([dateKey,dateEvents])=>{const d=new Date(`${dateKey}T00:00:00`);const weekday=d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();const monthDay=d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();
+        return <div key={dateKey} style={{marginBottom:12}}>
+          <div style={{position:"sticky",top:0,zIndex:1,display:"flex",alignItems:"baseline",gap:8,padding:"4px 0 8px",background:"linear-gradient(180deg, rgba(11,10,9,0.95) 75%, rgba(11,10,9,0))"}}><span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:".1em"}}>{weekday}</span><span style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1}}>{monthDay}</span></div>
+          <div style={{display:"grid",gap:0,border:`1px solid ${BORDER_CLR}`,borderRadius:14,overflow:"hidden",background:"rgba(20,24,33,0.82)"}}>
+            {dateEvents.map((ev,idx)=>{const evR=rsvpsByEvent.get(ev.id)||[];const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
+              return <div key={ev.id} style={{padding:"10px 10px 9px",borderTop:idx?`1px solid ${BORDER_CLR}`:"none"}}>
+                <button className="ch" onClick={()=>setExpEv(expEv===ev.id?null:ev.id)} style={{width:"100%",display:"grid",gridTemplateColumns:"72px 1fr",alignItems:"start",gap:8,background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left"}}>
+                  <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:600,letterSpacing:".05em",paddingTop:1}}>{ev.time||"TBD"}</div>
+                  <div style={{minWidth:0,display:"grid",gap:4}}>
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,lineHeight:1.2}}>{ev.title}</div><span style={{padding:"2px 7px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}55`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase",flexShrink:0}}>{ev.type||"event"}</span></div>
+                    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.3}}>📍 {ev.location||"Location TBD"}</div>
+                    <div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>{evR.length} RSVP</div>
                   </div>
                 </button>
                 {isExp&&<div className="fade-up" style={{marginTop:10,paddingTop:10,borderTop:`1px solid ${BORDER_CLR}`}}>
@@ -2133,16 +2121,18 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
                 </div>}
               </div>})}
           </div>
-        </div>);
+        </div>});
       })()}
+      {filteredEvents.length===0&&<div style={{background:"rgba(20,24,33,0.7)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px",fontFamily:FB,fontSize:11,color:T.SUB}}>No events match this filter.</div>}
+      </>}
     </>}
 
     {showAdd&&<div className="fade-up" style={{position:"fixed",inset:0,zIndex:90,display:"flex",alignItems:isDesktop?"flex-end":"stretch",paddingTop:isDesktop?0:"max(0px, env(safe-area-inset-top, 0px))",overscrollBehavior:"none"}}>
       <button aria-label="Close create event form" onClick={()=>setShowAdd(false)} style={{position:"absolute",inset:0,border:"none",background:"rgba(0,0,0,0.70)",cursor:"pointer"}}/>
       <div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"relative",zIndex:1,width:"100%",maxWidth:"100vw",height:isDesktop?"auto":"100dvh",maxHeight:isDesktop?"88dvh":"100dvh",borderRadius:isDesktop?"20px 20px 0 0":"0",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderBottom:"none",boxShadow:isDesktop?"0 -14px 30px rgba(0,0,0,0.45)":"none",display:"flex",flexDirection:"column",overflow:"hidden",minHeight:0,touchAction:"pan-y",paddingBottom:isDesktop?0:"max(10px, env(safe-area-inset-bottom, 0px))"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:isDesktop?"16px 18px":"12px 14px",borderBottom:`1px solid ${BORDER_CLR}`,flexShrink:0}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:isDesktop?18:16,letterSpacing:2,textAlign:"left",paddingRight:34}}>CREATE EVENT</div>
-          <button aria-label="Close" onClick={()=>setShowAdd(false)} style={{background:"none",border:`1px solid ${BORDER_CLR}`,color:T.SUB,borderRadius:8,width:32,height:32,display:"grid",placeItems:"center",cursor:"pointer",fontSize:18,lineHeight:1}}>×</button>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:isDesktop?"16px 18px":"12px 14px",borderBottom:`1px solid ${BORDER_CLR}`,flexShrink:0,gap:10}}>
+          {isDesktop?<div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:2,textAlign:"left",paddingRight:34}}>CREATE EVENT</div>:<><button onClick={()=>setShowAdd(false)} style={{background:"none",border:"none",color:T.SUB,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",cursor:"pointer",padding:"4px 0"}}>Cancel</button><div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:".04em",textAlign:"center",flex:1}}>New Event</div><button aria-label="Close" onClick={()=>setShowAdd(false)} style={{background:"none",border:`1px solid ${BORDER_CLR}`,color:T.SUB,borderRadius:8,width:28,height:28,display:"grid",placeItems:"center",cursor:"pointer",fontSize:16,lineHeight:1}}>×</button></>}
+          {isDesktop&&<button aria-label="Close" onClick={()=>setShowAdd(false)} style={{background:"none",border:`1px solid ${BORDER_CLR}`,color:T.SUB,borderRadius:8,width:32,height:32,display:"grid",placeItems:"center",cursor:"pointer",fontSize:18,lineHeight:1}}>×</button>}
         </div>
         <div style={{padding:isDesktop?"16px 18px":"12px 12px",overflowY:"auto",flex:1,minHeight:0,paddingBottom:isDesktop?18:90}}>
           <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="Open Gym Run"/>
