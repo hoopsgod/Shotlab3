@@ -836,7 +836,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>
 {u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:"0 16px",gap:8}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:"rgba(200, 255, 0, 0.84)"}}>COACH VIEW — FULL ACCESS</span></div>}
 
-<div style={{flex:1,padding:"14px 16px 124px",overflowY:"auto",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={onTS} onTouchMove={onTM} onTouchEnd={onTE}>
+<div style={{flex:1,padding:isDesktop?"14px 20px 36px":"14px 16px 124px",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
   {/* Pull-to-refresh basketball */}
   {pullY>5&&<div style={{position:"absolute",top:-44,left:"50%",transform:"translateX(-50%)",textAlign:"center",opacity:Math.min(pullY/30,1)}}>
     <svg width="24" height="24" viewBox="0 0 40 40" fill="none" style={{animation:pullY>40?"bbBounce .5s ease infinite":"none"}}><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="2.5"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="1.5"/><path d="M20 3v34" stroke={ORANGE} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/></svg>
@@ -1022,7 +1022,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {!isDesktop&&<NavBar items={playerNavItems} active={tab} onChange={switchTab}/>} 
 
   </div></div></main>
-{isDesktop&&<aside className="insights-panel"><div className="panel-title">UPCOMING ACTIVITY</div><div style={{display:"grid",gap:10}}><div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:"0.10em",color:MUTED,textTransform:"uppercase"}}>Current Streak</div><div style={{fontFamily:FD,fontSize:28,color:VOLT,lineHeight:1.1,marginTop:4}}>{streak}D</div></div><div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:"0.10em",color:MUTED,textTransform:"uppercase"}}>Total Makes</div><div style={{fontFamily:FD,fontSize:28,color:LIGHT,lineHeight:1.1,marginTop:4}}>{totalMakes}</div></div><div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12}}><div style={{fontFamily:FB,fontSize:10,letterSpacing:"0.10em",color:MUTED,textTransform:"uppercase"}}>Attendance Tier</div><div style={{fontFamily:FD,fontSize:18,color:VOLT,lineHeight:1.1,marginTop:6}}>{tier.name}</div></div><div className="placeholder" style={{marginTop:2}}>Reserved for upcoming player widgets (goals, reminders, coach notes).</div></div></aside>}
+{isDesktop&&<aside className="insights-panel"><div className="panel-title">PLAYER INSIGHTS</div><div className="placeholder">Add widgets here later (goals, reminders, coach notes, and progress snapshots).</div></aside>}
   </div>;
 }
 
