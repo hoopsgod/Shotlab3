@@ -2070,33 +2070,33 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"8px 14px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?VOLT:SURFACE,color:active?"#111827":(T.SUB||LIGHT),fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"var(--tracking-tight)",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
       </div>}
     </>:<>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"8px 10px",borderBottom:`1px solid ${BORDER_CLR}`,marginBottom:10}}>
-        <div style={{display:"flex",alignItems:"center",gap:7,minWidth:0}}><EventIcon type="event" size={15} color={VOLT}/><span style={{fontFamily:FD,fontSize:14,color:LIGHT,letterSpacing:1.2}}>EVENTS</span></div>
-        <div style={{fontFamily:FB,fontSize:10,color:T.SUB,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em"}}>{events.length} total</div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"4px 2px 8px",borderBottom:`1px solid ${BORDER_CLR}`,marginBottom:10}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><EventIcon type="event" size={14} color={VOLT}/><span style={{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1}}>EVENTS</span></div>
+        <div style={{fontFamily:FB,fontSize:10,color:T.SUB,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em",whiteSpace:"nowrap"}}>{events.length} total</div>
       </div>
       <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"0 0 10px",width:"100%",minHeight:44,height:44,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
-      {events.length===0?<div style={{background:"rgba(20,24,33,0.75)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px 12px 10px",marginBottom:10}}>
+      {events.length===0?<div style={{background:"rgba(20,24,33,0.72)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px",marginBottom:10}}>
         <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events scheduled</div>
         <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:5,lineHeight:1.35}}>Create your first event to organize practices, games, camps, or meetings.</div>
-        <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"10px 0 0",width:"100%",minHeight:42,height:42,borderRadius:10,fontSize:12}}>+ ADD EVENT</button>
+        <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"10px 0 0",width:"100%",minHeight:40,height:40,borderRadius:10,fontSize:11}}>+ ADD EVENT</button>
       </div>:<>
       <div style={{display:"flex",gap:7,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",padding:"0 1px 6px",marginBottom:8}}>
         {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"6px 11px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?`${VOLT}22`:"rgba(20,24,33,0.75)",color:active?VOLT:(T.SUB||LIGHT),fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
       </div>
       {filteredEvents.length>0&&(() => {
-        const grouped=filteredEvents.reduce((acc,ev)=>{(acc[ev.date]=acc[ev.date]||[]).push(ev);return acc;},{});
+        const parseTime=(time="")=>{const m=String(time).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);if(!m)return Number.MAX_SAFE_INTEGER;let hour=Number(m[1]);const minute=Number(m[2]||"0");const meridiem=(m[3]||"").toUpperCase();if(meridiem==="PM"&&hour<12)hour+=12;if(meridiem==="AM"&&hour===12)hour=0;return hour*60+minute;};
+        const grouped=[...filteredEvents].sort((a,b)=>a.date.localeCompare(b.date)||parseTime(a.time)-parseTime(b.time)).reduce((acc,ev)=>{(acc[ev.date]=acc[ev.date]||[]).push(ev);return acc;},{});
         return Object.entries(grouped).map(([dateKey,dateEvents])=>{const d=new Date(`${dateKey}T00:00:00`);const weekday=d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();const monthDay=d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();
         return <div key={dateKey} style={{marginBottom:12}}>
-          <div style={{position:"sticky",top:0,zIndex:1,display:"flex",alignItems:"baseline",gap:8,padding:"4px 0 8px",background:"linear-gradient(180deg, rgba(11,10,9,0.95) 75%, rgba(11,10,9,0))"}}><span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:".1em"}}>{weekday}</span><span style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1}}>{monthDay}</span></div>
-          <div style={{display:"grid",gap:0,border:`1px solid ${BORDER_CLR}`,borderRadius:14,overflow:"hidden",background:"rgba(20,24,33,0.82)"}}>
-            {dateEvents.map((ev,idx)=>{const evR=rsvpsByEvent.get(ev.id)||[];const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
-              return <div key={ev.id} style={{padding:"10px 10px 9px",borderTop:idx?`1px solid ${BORDER_CLR}`:"none"}}>
-                <button className="ch" onClick={()=>setExpEv(expEv===ev.id?null:ev.id)} style={{width:"100%",display:"grid",gridTemplateColumns:"72px 1fr",alignItems:"start",gap:8,background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left"}}>
-                  <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:600,letterSpacing:".05em",paddingTop:1}}>{ev.time||"TBD"}</div>
+          <div style={{display:"flex",alignItems:"baseline",gap:8,padding:"2px 3px 7px"}}><span style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:".1em"}}>{weekday}</span><span style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:1}}>{monthDay}</span></div>
+          <div style={{display:"grid",gap:7}}>
+            {dateEvents.map((ev)=>{const evR=rsvpsByEvent.get(ev.id)||[];const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
+              return <div key={ev.id} style={{padding:"10px",border:`1px solid ${BORDER_CLR}`,borderRadius:12,background:"rgba(20,24,33,0.82)"}}>
+                <button className="ch" onClick={()=>setExpEv(expEv===ev.id?null:ev.id)} style={{width:"100%",display:"grid",gridTemplateColumns:"70px 1fr",alignItems:"start",gap:8,background:"none",border:"none",padding:0,cursor:"pointer",textAlign:"left"}}>
+                  <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:600,letterSpacing:".04em",paddingTop:2}}>{ev.time||"TBD"}</div>
                   <div style={{minWidth:0,display:"grid",gap:4}}>
-                    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,lineHeight:1.2}}>{ev.title}</div><span style={{padding:"2px 7px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}55`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase",flexShrink:0}}>{ev.type||"event"}</span></div>
-                    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.3}}>📍 {ev.location||"Location TBD"}</div>
-                    <div style={{fontFamily:FB,color:T.SUB,fontSize:9}}>{evR.length} RSVP</div>
+                    <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8}}><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,lineHeight:1.2}}>{ev.title}</div><span style={{padding:"2px 7px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}55`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase",flexShrink:0}}>{ev.type||"event"}</span></div>
+                    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>📍 {ev.location||"Location TBD"}</div>
                   </div>
                 </button>
                 {isExp&&<div className="fade-up" style={{marginTop:10,paddingTop:10,borderTop:`1px solid ${BORDER_CLR}`}}>
@@ -2123,7 +2123,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           </div>
         </div>});
       })()}
-      {filteredEvents.length===0&&<div style={{background:"rgba(20,24,33,0.7)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px",fontFamily:FB,fontSize:11,color:T.SUB}}>No events match this filter.</div>}
+      {filteredEvents.length===0&&<div style={{background:"rgba(20,24,33,0.7)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"11px",fontFamily:FB,fontSize:11,color:T.SUB}}>No events match this filter.</div>}
       </>}
     </>}
 
