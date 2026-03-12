@@ -1820,7 +1820,7 @@ const coachTabs=["feed","drills","events","sc","players"];
 const isCoachTab=u.isCoach&&coachTabs.includes(tab);
 const showFullCommandCenter=isCoachTab&&tab==="feed";
 const handleManageEventsScroll=useCallback(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth"}),[]);
-const handleToggleAddEvent=useCallback(()=>setShowAdd(v=>!v),[]);
+const handleToggleAddEvent=useCallback(()=>setShowAdd(true),[]);
 
 useEffect(()=>{
   const onResize=()=>setIsDesktop(window.innerWidth>=1024);
@@ -2043,7 +2043,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {/* EVENTS */}
   {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><div className="coachEventsHeaderCard"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} /></div><header className="coachEventsSlimHeader" aria-label="Events"><div className="coachEventsSlimHeaderLeft"><EventIcon type="event" size={20} color={PAGE_ACCENTS.events.accent}/><span className="coachEventsSlimHeaderLabel">EVENTS</span></div></header>{nextEvent&&<div className="heroModule"><div style={{fontFamily:FD,color:PAGE_ACCENTS.events.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>NEXT EVENT</div><div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,marginTop:4}}>{nextEvent.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>{nextEvent.date} {nextEvent.time}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>📍 {nextEvent.location}</div></div>}
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Event Management" s={`${events.length} total`} identity/>
-    <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
+    <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{marginBottom:20}}>+ ADD EVENT</button>
 
     {showAdd&&<div className="fade-up" style={{position:"fixed",inset:0,zIndex:90,display:"flex",alignItems:"flex-end"}}>
       <button aria-label="Close create event form" onClick={()=>setShowAdd(false)} style={{position:"absolute",inset:0,border:"none",background:"rgba(0,0,0,0.62)",cursor:"pointer"}}/>
