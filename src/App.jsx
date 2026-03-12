@@ -2045,13 +2045,25 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Event Management" s={`${events.length} total`} identity/>
     <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
-    {showAdd&&<div className="fade-up accent-card" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
-      <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="e.g. OPEN GYM RUN"/>
-      <div style={{display:"flex",gap:8}}><div style={{flex:1}}><FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} ph="2026-03-15" tp="date"/></div><div style={{flex:1}}><FF l="TIME" v={ne.time} set={v=>setNe({...ne,time:v})} ph="6:00 PM"/></div></div>
-      <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym"/><FF l="DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ph="Details..." ta/>
-      <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
-      <div style={{display:"flex",gap:4,marginBottom:18,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"7px 12px",borderRadius:8,border:ne.type===t?`1px solid ${VOLT}`:`1px solid ${BORDER_CLR}`,background:ne.type===t?VOLT+"15":"transparent",color:ne.type===t?VOLT:MUTED,fontFamily:FD,fontSize:11,letterSpacing:2,cursor:"pointer",textTransform:"uppercase"}}>{t}</button>)}</div>
-      <button className="btn-v cta-primary" onClick={handleAddEvent} style={{}}>CREATE EVENT</button>
+    {showAdd&&<div className="fade-up" style={{position:"fixed",inset:0,zIndex:90,display:"flex",alignItems:"flex-end"}}>
+      <button aria-label="Close create event form" onClick={()=>setShowAdd(false)} style={{position:"absolute",inset:0,border:"none",background:"rgba(0,0,0,0.62)",cursor:"pointer"}}/>
+      <div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"relative",zIndex:1,width:"100%",maxHeight:"88dvh",borderRadius:"20px 20px 0 0",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderBottom:"none",boxShadow:"0 -14px 30px rgba(0,0,0,0.45)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+        <div style={{padding:"12px 16px 10px",borderBottom:`1px solid ${BORDER_CLR}`}}>
+          <div style={{width:44,height:4,borderRadius:999,background:"rgba(255,255,255,0.25)",margin:"0 auto 10px"}}/>
+          <button aria-label="Close" onClick={()=>setShowAdd(false)} style={{position:"absolute",top:16,right:14,width:30,height:30,borderRadius:999,border:`1px solid ${BORDER_CLR}`,background:BG,color:LIGHT,fontFamily:FB,fontSize:16,lineHeight:1,cursor:"pointer"}}>×</button>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:2,textAlign:"left",paddingRight:34}}>CREATE EVENT</div>
+        </div>
+        <div style={{padding:"14px 16px 0",overflowY:"auto",overflowX:"hidden",flex:1}}>
+          <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="e.g. OPEN GYM RUN"/>
+          <div style={{display:"flex",gap:8}}><div style={{flex:1,minWidth:0}}><FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} ph="2026-03-15" tp="date"/></div><div style={{flex:1,minWidth:0}}><FF l="TIME" v={ne.time} set={v=>setNe({...ne,time:v})} ph="6:00 PM"/></div></div>
+          <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym"/><FF l="DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ph="Details..." ta/>
+          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
+          <div style={{display:"flex",gap:4,marginBottom:14,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"7px 12px",borderRadius:8,border:ne.type===t?`1px solid ${VOLT}`:`1px solid ${BORDER_CLR}`,background:ne.type===t?VOLT+"15":"transparent",color:ne.type===t?VOLT:MUTED,fontFamily:FD,fontSize:11,letterSpacing:2,cursor:"pointer",textTransform:"uppercase"}}>{t}</button>)}</div>
+        </div>
+        <div style={{padding:"12px 16px calc(12px + env(safe-area-inset-bottom, 0px))",borderTop:`1px solid ${BORDER_CLR}`,background:SURFACE,flexShrink:0}}>
+          <button className="btn-v cta-primary" onClick={handleAddEvent} style={{width:"100%",margin:0}}>CREATE EVENT</button>
+        </div>
+      </div>
     </div>}
 
     {sortedEvents.map(ev=>{const evR=rsvpsByEvent.get(ev.id)||[];const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
