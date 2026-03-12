@@ -1763,6 +1763,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:""});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"10",icon:"ft"});
+const[eventFilter,setEventFilter]=useState("all");
 const[nudged,setNudged]=useState([]);
 const[confirmDelete,setConfirmDelete]=useState(null);const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
 const ups=useMemo(()=>{const es=[...new Set(scores.map(s=>s.email))];return es.map(e=>{const p=players.find(p=>p.email===e);return{email:e,name:p?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())}})},[scores,players]);
@@ -1784,6 +1785,14 @@ const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,spor
 const totalPlayers=ups.length;
 const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
 const sortedEvents=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
+const eventFilterPills=useMemo(()=>[
+  {label:"All",value:"all"},
+  {label:"Practice",value:"run"},
+  {label:"Game",value:"game"},
+  {label:"Camp",value:"clinic"},
+  {label:"Meeting",value:"recovery"},
+],[]);
+const filteredEvents=useMemo(()=>eventFilter==="all"?sortedEvents:sortedEvents.filter(ev=>String(ev.type||"").toLowerCase()===eventFilter.toLowerCase()),[sortedEvents,eventFilter]);
 const nextEvent=sortedEvents.find(e=>e.date>=today);
 const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"None";
 const rsvpsByEvent=useMemo(()=>{const buckets=new Map();for(const rsvp of rsvps){if(!buckets.has(rsvp.eventId))buckets.set(rsvp.eventId,[]);buckets.get(rsvp.eventId).push(rsvp);}return buckets;},[rsvps]);
@@ -2045,6 +2054,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Event Management" s={`${events.length} total`} identity/>
     <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{marginBottom:20}}>+ ADD EVENT</button>
 
+    {events.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",paddingBottom:4,marginBottom:14}}>
+      {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"8px 14px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?VOLT:SURFACE,color:active?"#111827":(T.SUB||LIGHT),fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"var(--tracking-tight)",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
+    </div>}
+
     {showAdd&&<div className="fade-up" style={{position:"fixed",inset:0,zIndex:90,display:"flex",alignItems:"flex-end"}}>
       <button aria-label="Close create event form" onClick={()=>setShowAdd(false)} style={{position:"absolute",inset:0,border:"none",background:"rgba(0,0,0,0.62)",cursor:"pointer"}}/>
       <div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"relative",zIndex:1,width:"100%",maxHeight:"88dvh",borderRadius:"20px 20px 0 0",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderBottom:"none",boxShadow:"0 -14px 30px rgba(0,0,0,0.45)",display:"flex",flexDirection:"column",overflow:"hidden"}}>
@@ -2066,7 +2079,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       </div>
     </div>}
 
-    {sortedEvents.map(ev=>{const evR=rsvpsByEvent.get(ev.id)||[];const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
+    {filteredEvents.map(ev=>{const evR=rsvpsByEvent.get(ev.id)||[];const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
       return <div key={ev.id} style={{marginBottom:10}}>
         <button onClick={()=>setExpEv(isExp?null:ev.id)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:isExp?"14px 14px 0 0":14,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,cursor:"pointer",textAlign:"left"}}>
           <span className="eventsDatePill">{new Date(`${ev.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"})}</span><EventIcon type={ev.type} size={22} color={ev.date>=today?CYAN:MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{ev.date} &#183; {ev.time} &#183; <span style={{color:VOLT}}>{evR.length} RSVP</span></div></div>
