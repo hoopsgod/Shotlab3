@@ -2066,11 +2066,19 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       </div>
     </div>}
 
-    {sortedEvents.map(ev=>{const evR=rsvpsByEvent.get(ev.id)||[];const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
+    {[...sortedEvents].sort((a,b)=>a.date.localeCompare(b.date)).map(ev=>{const evR=rsvpsByEvent.get(ev.id)||[];const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
+      const formattedDate=new Date(`${ev.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();
       return <div key={ev.id} style={{marginBottom:10}}>
-        <button onClick={()=>setExpEv(isExp?null:ev.id)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:isExp?"14px 14px 0 0":14,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,cursor:"pointer",textAlign:"left"}}>
-          <span className="eventsDatePill">{new Date(`${ev.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"})}</span><EventIcon type={ev.type} size={22} color={ev.date>=today?CYAN:MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{ev.date} &#183; {ev.time} &#183; <span style={{color:VOLT}}>{evR.length} RSVP</span></div></div>
-          <svg width="12" height="12" viewBox="0 0 16 16" style={{transform:isExp?"rotate(90deg)":"none",transition:"transform .2s",flexShrink:0}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
+        <button onClick={()=>setExpEv(isExp?null:ev.id)} className="ch" style={{width:"100%",background:CARD_BG,borderRadius:isExp?"14px 14px 0 0":14,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,borderLeft:`3px solid ${VOLT}`,cursor:"pointer",textAlign:"left"}}>
+          <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:12}}>
+            <div style={{fontFamily:FB,color:VOLT,fontSize:13,fontWeight:800,letterSpacing:"0.08em"}}>{formattedDate}</div>
+            <span style={{padding:"4px 10px",borderRadius:999,background:"rgba(255,255,255,0.12)",color:LIGHT,fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",whiteSpace:"nowrap"}}>{ev.type}</span>
+          </div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:1,marginTop:10,lineHeight:1.1}}>{ev.title}</div>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,fontFamily:FB,color:T.SUB,fontSize:11,marginTop:12}}>
+            <span>📍 {ev.location||"TBD"}</span>
+            <span>🕐 {ev.time||"TBD"}</span>
+          </div>
         </button>
         {isExp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 14px 14px",padding:"16px 16px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
           <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:12}}>{ev.desc}</p>
