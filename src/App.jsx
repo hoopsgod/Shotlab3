@@ -148,6 +148,8 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeaderPillBrand:hover{background:color-mix(in srgb,#C8FF00 26%, #1A1A1A);border-color:rgba(200,255,0,.68);}
 .pageHeaderPillBrand:focus-visible{outline-color:#C8FF00;}
 .pageAccentBar{height:4px;width:48%;border-radius:999px;background:var(--headerAccent);box-shadow:0 0 16px var(--headerAccent);margin-top:12px;}
+.eventsSubheader{display:flex;align-items:center;gap:8px;margin:0 0 10px;padding:10px 12px;background:var(--surface-3);border:1px solid var(--stroke-2);border-radius:12px;box-shadow:var(--shadow-1);}
+.eventsSubheaderLabel{font-family:${FD};font-size:20px;letter-spacing:var(--tracking-default);color:var(--text-1);line-height:1;}
 .heroModule{position:relative;overflow:hidden;border:1px solid var(--stroke-2);border-radius:var(--radius-card);padding:var(--card-pad);margin-bottom:var(--stack-gap);background:var(--surface-3);box-shadow:var(--shadow-2);}
 .heroModule::before{content:'';position:absolute;left:0;top:0;width:54px;height:4px;background:var(--pageAccent);}
 .heroStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px;}
@@ -1815,7 +1817,6 @@ const isOverviewTab=tab==="feed";
 const coachTabs=["feed","drills","events","sc","players"];
 const isCoachTab=u.isCoach&&coachTabs.includes(tab);
 const showFullCommandCenter=isCoachTab&&tab==="feed";
-const handleManageEventsScroll=useCallback(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth"}),[]);
 
 useEffect(()=>{
   const onResize=()=>setIsDesktop(window.innerWidth>=1024);
@@ -2036,7 +2037,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   </div>}
 
   {/* EVENTS */}
-  {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} actionLabel={showAdd?"Close":"Create"} onAction={()=>setShowAdd(!showAdd)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.events.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>NEXT EVENT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{nextEvent?`${nextEvent.title} · ${nextEvent.date} ${nextEvent.time}`:"No event scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAdd(true)}>Create Event</button></div><div style={{marginTop:8}}><button className="pageHeaderPill" onClick={handleManageEventsScroll}>Manage Events</button></div></div>
+  {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><div className="eventsSubheader"><EventIcon type="event" size={20} color={PAGE_ACCENTS.events.accent}/><span className="eventsSubheaderLabel">EVENTS</span></div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Event Management" s={`${events.length} total`} identity/>
     <button onClick={()=>setShowAdd(!showAdd)} className="btn-v cta-primary" style={{marginBottom:20}}>{showAdd?"CANCEL":"+ ADD EVENT"}</button>
 
