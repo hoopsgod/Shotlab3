@@ -1,17 +1,27 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
+import DEFAULT_BRANDING from "../theme/brandingDefaults";
+import buildThemeTokens from "../theme/buildThemeTokens";
+import applyThemeVariables from "../theme/applyThemeVariables";
+import resolveTeamBranding from "../theme/resolveTeamBranding";
 
 export interface TeamBranding {
   name?: string;
   shortName?: string;
   wordmark?: string;
-  primary?: string;
-  primarySoft?: string;
-  surface?: string;
-  text?: string;
-  muted?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  textOnPrimary?: string;
+  logoUrl?: string;
+  logoMarkUrl?: string;
+  updatedAt?: number | null;
+  updatedBy?: string | null;
+  version?: number;
 }
 
 interface TeamBrandingContextValue {
+  branding: TeamBranding;
+  theme: ReturnType<typeof buildThemeTokens>;
   teamName: string;
   teamWordmark: string;
   tokens: {
@@ -23,12 +33,16 @@ interface TeamBrandingContextValue {
   };
 }
 
+const defaultTheme = buildThemeTokens(DEFAULT_BRANDING);
+
 const defaultValue: TeamBrandingContextValue = {
+  branding: resolveTeamBranding(DEFAULT_BRANDING),
+  theme: defaultTheme,
   teamName: "ShotLab",
   teamWordmark: "ShotLab",
   tokens: {
-    primary: "var(--accent)",
-    primarySoft: "var(--accent-soft)",
+    primary: defaultTheme.colors.primary,
+    primarySoft: defaultTheme.colors.primarySoft,
     surface: "var(--surface-2)",
     text: "var(--text-1)",
     muted: "var(--text-2)",
@@ -38,20 +52,27 @@ const defaultValue: TeamBrandingContextValue = {
 const TeamBrandingContext = createContext<TeamBrandingContextValue>(defaultValue);
 
 export function TeamBrandingProvider({ branding, children }: { branding?: TeamBranding; children: React.ReactNode }) {
+  const safeBranding = useMemo(() => resolveTeamBranding(branding || DEFAULT_BRANDING), [branding]);
+  const theme = useMemo(() => buildThemeTokens(safeBranding), [safeBranding]);
+
+  useEffect(() => applyThemeVariables(theme.cssVariables), [theme]);
+
   const value = useMemo<TeamBrandingContextValue>(() => {
-    const teamName = branding?.name || branding?.shortName || defaultValue.teamName;
+    const teamName = safeBranding?.name || safeBranding?.shortName || "ShotLab";
     return {
+      branding: safeBranding,
+      theme,
       teamName,
-      teamWordmark: branding?.wordmark || teamName,
+      teamWordmark: safeBranding?.wordmark || teamName,
       tokens: {
-        primary: branding?.primary || "var(--accent)",
-        primarySoft: branding?.primarySoft || "var(--accent-soft)",
-        surface: branding?.surface || "var(--surface-2)",
-        text: branding?.text || "var(--text-1)",
-        muted: branding?.muted || "var(--text-2)",
+        primary: theme.colors.primary,
+        primarySoft: theme.colors.primarySoft,
+        surface: "var(--surface-2)",
+        text: "var(--text-1)",
+        muted: "var(--text-2)",
       },
     };
-  }, [branding]);
+  }, [safeBranding, theme]);
 
   return <TeamBrandingContext.Provider value={value}>{children}</TeamBrandingContext.Provider>;
 }
