@@ -22,35 +22,40 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
       <div
         style={{
           height: "clamp(52px, 7.8vw, 60px)",
-          borderRadius: 12,
-          border: `1px solid ${borderColor}`,
-          background: "rgba(10, 10, 10, 0.92)",
-          boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
+          borderRadius: 14,
+          border: `1px solid color-mix(in srgb, ${borderColor} 58%, var(--stroke-1))`,
+          background: "linear-gradient(170deg, color-mix(in srgb, var(--surface-1) 92%, #000) 0%, var(--surface-2) 100%)",
+          boxShadow: "var(--shadow-2)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
           padding: "0 12px",
           backdropFilter: "blur(8px)",
+          position: "relative",
+          overflow: "hidden",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", background: "radial-gradient(circle at 85% 12%, color-mix(in srgb, var(--accent-soft) 72%, transparent) 0%, transparent 60%)", opacity: 0.55 }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, position: "relative", zIndex: 1 }}>
           <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
           {avatar}
         </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1, position: "relative", zIndex: 1 }}>{wordmark}</div>
         <button
           aria-label="Log out"
           onClick={onLogout}
           style={{
-            background: "rgba(20,20,20,0.95)",
-            border: `1px solid ${borderColor}`,
+            background: "linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.01))",
+            border: `1px solid color-mix(in srgb, ${borderColor} 55%, var(--stroke-1))`,
             borderRadius: 10,
-            color: "var(--text-secondary)",
+            color: mutedColor,
             width: 32,
             height: 32,
             cursor: "pointer",
             fontFamily: FB,
             fontSize: 12,
+            position: "relative",
+            zIndex: 1,
           }}
         >
           ✕

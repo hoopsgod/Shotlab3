@@ -24,11 +24,21 @@ export default function CoachHero({
         padding: mobilePadding,
         border: "1px solid var(--stroke-2)",
         borderRadius: "var(--radius-card)",
-        background: "var(--surface-3)",
+        background: "linear-gradient(160deg, color-mix(in srgb, var(--surface-3) 88%, #000) 0%, var(--surface-3) 55%, color-mix(in srgb, var(--accent-soft) 14%, var(--surface-3)) 100%)",
         boxShadow: "var(--shadow-2)",
+        position: "relative",
+        overflow: "hidden",
       }}
     >
       <style>{`
+        .coach-hero-shell::before{
+          content:'';
+          position:absolute;
+          inset:0;
+          pointer-events:none;
+          background:radial-gradient(circle at 88% 12%, color-mix(in srgb, var(--accent-soft) 78%, transparent) 0%, transparent 55%);
+          opacity:0.65;
+        }
         @media (min-width: 768px) {
           .coach-hero { padding:${desktopPadding}; }
         }
@@ -37,7 +47,7 @@ export default function CoachHero({
           .coach-hero-wrap:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(0,0,0,0.50); }
         }
       `}</style>
-      <div className="coach-hero coach-hero-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
+      <div className="coach-hero-shell coach-hero coach-hero-wrap" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, position: "relative", zIndex: 1 }}>
         <div>
           <div style={{ fontFamily: FD, fontSize: 10, letterSpacing: "var(--tracking-tight)", opacity: 0.96, textTransform: "uppercase", color: "var(--text-secondary)" }}>COACH MODE</div>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 3 }}>
@@ -45,15 +55,15 @@ export default function CoachHero({
             {isCoach && (
               <span
                 style={{
-                  background: "rgba(255,255,255,0.06)",
-                  border: "1px solid var(--stroke-1)",
+                  background: "color-mix(in srgb, var(--accent-soft) 42%, rgba(255,255,255,0.04))",
+                  border: "1px solid color-mix(in srgb, var(--accent) 20%, var(--stroke-1))",
                   borderRadius: 999,
-                  padding: "2px 8px",
+                  padding: "3px 9px",
                   fontSize: 8,
                   fontWeight: 700,
                   textTransform: "uppercase",
                   letterSpacing: "var(--tracking-tight)",
-                  color: "var(--text-2)",
+                  color: "var(--text-1)",
                   display: "inline-flex",
                   alignItems: "center",
                   gap: 4,
@@ -86,8 +96,8 @@ export default function CoachHero({
             aria-label="Log out"
             onClick={onLogout}
             style={{
-              background: "rgba(20,20,20,0.95)",
-              border: `1px solid ${borderColor}`,
+              background: "linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0.01))",
+              border: `1px solid color-mix(in srgb, ${borderColor} 58%, var(--stroke-1))`,
               borderRadius: 12,
               color: mutedColor,
               width: 38,
@@ -98,6 +108,7 @@ export default function CoachHero({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              boxShadow: "0 6px 14px rgba(0,0,0,0.32)",
             }}
           >
             ✕

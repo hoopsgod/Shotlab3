@@ -1035,51 +1035,52 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 // ═══════════════════════════════════════
 function ShareCard({data}){
 const pct=data.pct||0;const pcol=pct>=80?VOLT:pct>=50?ORANGE:"#FF4545";
-return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",maxWidth:340,margin:"0 auto"}}>
+return <div style={{background:"linear-gradient(165deg, color-mix(in srgb, var(--surface-1) 92%, #000) 0%, var(--surface-2) 62%, color-mix(in srgb, var(--accent-soft) 16%, var(--surface-3)) 100%)",borderRadius:24,padding:"24px 22px 22px",border:"1px solid var(--stroke-2)",position:"relative",overflow:"hidden",textAlign:"center",maxWidth:352,margin:"0 auto",boxShadow:"var(--shadow-2)"}}>
 {/* Corner accents */}
-<div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
-<div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
+<div style={{position:"absolute",top:0,left:0,width:66,height:66,borderTop:"2px solid color-mix(in srgb, var(--accent) 45%, transparent)",borderLeft:"2px solid color-mix(in srgb, var(--accent) 45%, transparent)",borderRadius:"24px 0 0 0",opacity:.85}}/>
+<div style={{position:"absolute",bottom:0,right:0,width:66,height:66,borderBottom:"2px solid color-mix(in srgb, var(--accent) 45%, transparent)",borderRight:"2px solid color-mix(in srgb, var(--accent) 45%, transparent)",borderRadius:"0 0 24px 0",opacity:.85}}/>
 {/* Glow */}
-<div style={{position:"absolute",top:"-30%",left:"50%",width:200,height:200,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}0c,transparent)`,transform:"translateX(-50%)",pointerEvents:"none"}}/>
+<div style={{position:"absolute",top:"-35%",left:"50%",width:220,height:220,borderRadius:"50%",background:"radial-gradient(circle, color-mix(in srgb, var(--accent-soft) 72%, transparent) 0%, transparent 68%)",transform:"translateX(-50%)",pointerEvents:"none"}}/>
 {/* Brand */}
-<div style={{position:"relative",zIndex:1}}>
-<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,marginBottom:4}}>
-<SLLogo size={22}/>
-<span style={{fontFamily:FD,color:VOLT,fontSize:12,letterSpacing:4}}>SHOT LAB</span>
+<div style={{position:"relative",zIndex:1,display:"flex",flexDirection:"column",gap:10}}>
+<div style={{display:"inline-flex",alignItems:"center",justifyContent:"center",gap:8,marginBottom:2}}>
+<div style={{width:34,height:34,borderRadius:12,border:"1px solid var(--stroke-2)",background:"linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.01))",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 8px 16px rgba(0,0,0,0.28)"}}><SLLogo size={20}/></div>
+<span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:"var(--tracking-default)"}}>SHOT<span style={{color:VOLT}}>LAB</span></span>
 </div>
-<div style={{fontFamily:FB,color:T.MUT,fontSize:9,letterSpacing:2,marginBottom:20}}>WORKOUT COMPLETE</div>
+<div style={{fontFamily:FB,color:"var(--text-secondary)",fontSize:9,letterSpacing:"var(--tracking-wide)",marginBottom:6,fontWeight:700}}>WORKOUT COMPLETE</div>
 {/* Player name */}
-<div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:3,lineHeight:1}}>{data.name.toUpperCase()}</div>
-<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,marginTop:4,marginBottom:20}}>{data.date}</div>
+<div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:"var(--tracking-default)",lineHeight:1}}>{data.name.toUpperCase()}</div>
+<div style={{fontFamily:FB,color:"var(--text-tertiary)",fontSize:10,letterSpacing:"var(--tracking-tight)",marginTop:2,marginBottom:10,textTransform:"uppercase"}}>{data.date}</div>
 {/* Drill + Score */}
-<div style={{display:"inline-flex",alignItems:"center",gap:8,background:BG,borderRadius:12,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:16}}>
-<DrillIcon type={data.icon} size={20}/>
-<span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{data.drill}</span>
+<div style={{display:"inline-flex",alignItems:"center",gap:8,background:"var(--surface-1)",borderRadius:999,padding:"7px 14px",border:"1px solid var(--stroke-1)",marginBottom:6}}>
+<DrillIcon type={data.icon} size={18}/>
+<span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:"var(--tracking-tight)"}}>{data.drill}</span>
 </div>
 {/* Big score */}
-<div style={{fontFamily:FD,fontSize:72,color:VOLT,lineHeight:.9,letterSpacing:2}}>{data.score}<span style={{color:MUTED,fontSize:32}}>/{data.max}</span></div>
+<div style={{fontFamily:FD,fontSize:74,color:VOLT,lineHeight:.9,letterSpacing:"var(--tracking-tight)",marginTop:2}}>{data.score}<span style={{color:"var(--text-tertiary)",fontSize:30}}>/{data.max}</span></div>
 {/* Personal Best badge */}
-{data.isPB&&<div style={{display:"inline-flex",alignItems:"center",gap:6,background:ORANGE+"15",borderRadius:10,padding:"6px 16px",border:`1px solid ${ORANGE}33`,marginTop:12}}>
-<span style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>★ NEW PERSONAL BEST</span>
+{data.isPB&&<div style={{display:"inline-flex",alignItems:"center",gap:6,background:"color-mix(in srgb, var(--color-warning) 18%, transparent)",borderRadius:999,padding:"6px 14px",border:"1px solid color-mix(in srgb, var(--color-warning) 44%, transparent)",marginTop:4}}>
+<span style={{fontFamily:FD,color:"var(--color-warning)",fontSize:14,letterSpacing:"var(--tracking-tight)"}}>★ NEW PERSONAL BEST</span>
 </div>}
 {/* Accuracy ring */}
-<div style={{margin:"16px auto 12px",width:80,position:"relative"}}>
-<svg width="80" height="40" viewBox="0 0 80 40">
-<path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke="#242424" strokeWidth="6" strokeLinecap="round"/>
-<path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke={pcol} strokeWidth="6" strokeLinecap="round" strokeDasharray={`${pct*1.1} 110`}/>
+<div style={{margin:"12px auto 2px",width:90,position:"relative"}}>
+<svg width="90" height="46" viewBox="0 0 90 46">
+<path d="M8 38 A 37 37 0 0 1 82 38" fill="none" stroke="var(--stroke-1)" strokeWidth="6" strokeLinecap="round"/>
+<path d="M8 38 A 37 37 0 0 1 82 38" fill="none" stroke={pcol} strokeWidth="6" strokeLinecap="round" strokeDasharray={`${pct*1.18} 118`}/>
 </svg>
 <div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",fontFamily:FD,color:pcol,fontSize:18}}>{pct}%</div>
 </div>
 {/* Streak */}
-{data.streak>0&&<div style={{display:"inline-flex",alignItems:"center",gap:4,background:ORANGE+"12",borderRadius:8,padding:"4px 12px",border:`1px solid ${ORANGE}22`}}>
-<span style={{fontSize:14}}>🔥</span>
-<span style={{fontFamily:FD,color:ORANGE,fontSize:14,letterSpacing:2}}>{data.streak} DAY STREAK</span>
+{data.streak>0&&<div style={{display:"inline-flex",alignItems:"center",gap:5,background:"color-mix(in srgb, var(--color-warning) 14%, transparent)",borderRadius:999,padding:"4px 12px",border:"1px solid color-mix(in srgb, var(--color-warning) 38%, transparent)",marginTop:2}}>
+<span style={{fontSize:13}}>🔥</span>
+<span style={{fontFamily:FD,color:"var(--color-warning)",fontSize:13,letterSpacing:"var(--tracking-tight)"}}>{data.streak} DAY STREAK</span>
 </div>}
-{data.badges&&data.badges.length>0&&<div style={{display:"flex",gap:3,justifyContent:"center",flexWrap:"wrap",marginTop:6}}>{data.badges.map(b=><span key={b.days} style={{fontFamily:FD,fontSize:8,color:b.color,background:`${b.color}12`,border:`1px solid ${b.color}33`,borderRadius:5,padding:"1px 6px",letterSpacing:1}}>{b.icon}D</span>)}</div>}
+{data.badges&&data.badges.length>0&&<div style={{display:"flex",gap:6,justifyContent:"center",flexWrap:"wrap",marginTop:8}}>{data.badges.map(b=><span key={b.days} style={{fontFamily:FB,fontSize:9,color:b.color,background:"color-mix(in srgb, var(--surface-1) 90%, transparent)",border:`1px solid ${b.color}55`,borderRadius:999,padding:"3px 8px",letterSpacing:"var(--tracking-tight)",fontWeight:700}}>{b.icon} {b.days}D</span>)}</div>}
 </div>
 
   </div>;
 }
+
 
 // ═══════════════════════════════════════
 // HEAD-TO-HEAD DUELS
@@ -2567,7 +2568,7 @@ function calcStreak(sc){const ds=[...new Set(sc.map(s=>s.date))].sort().reverse(
 function hashCode(s){let h=0;for(let i=0;i<s.length;i++){h=((h<<5)-h)+s.charCodeAt(i);h|=0}return Math.abs(h)}
 const AVG=[["#C8FF00","#00E5FF"],["#C8FF00","#C8FF00"],["#00E5FF","#C8FF00"],["#C8FF00","#C8FF00"],["#A0A0A0","#00E5FF"],["#C8FF00","#C8FF00"],["#C8FF00","#00E5FF"],["#C8FF00","#C8FF00"]];
 function AnimNum({v,c=VOLT,big,size}){const[display,setDisplay]=useState(0);const[isVisible,setIsVisible]=useState(false);useEffect(()=>{setIsVisible(false);const fadeIn=requestAnimationFrame(()=>setIsVisible(true));if(typeof v!=="number"){setDisplay(v);return()=>cancelAnimationFrame(fadeIn)}let cancelled=false;const end=v;const dur=600;const t0=Date.now();const step=()=>{if(cancelled)return;const elapsed=Date.now()-t0;const prog=Math.min(elapsed/dur,1);const eased=1-Math.pow(1-prog,3);setDisplay(Math.round(eased*end));if(prog<1)requestAnimationFrame(step)};step();return()=>{cancelAnimationFrame(fadeIn);cancelled=true}},[v]);return <span className="cnt-up" style={{fontFamily:FD,color:c,fontSize:size||(big?42:26),letterSpacing:1,lineHeight:1,fontWeight:700,opacity:isVisible?1:0,transition:"opacity 150ms ease"}}>{display}</span>}
-function BrandWordmark({size=30,small}){return <div style={{fontFamily:FD,fontSize:size,lineHeight:.85,letterSpacing:small?1.5:3,fontWeight:900,whiteSpace:"nowrap"}}><span style={{color:LIGHT}}>SHOT</span><span style={{color:VOLT}}>LAB</span></div>}
+function BrandWordmark({size=30,small}){return <div style={{fontFamily:FD,fontSize:size,lineHeight:.85,letterSpacing:small?1.5:3,fontWeight:900,whiteSpace:"nowrap",display:"inline-flex",alignItems:"center",gap:small?2:4,textShadow:"0 2px 10px rgba(0,0,0,0.3)"}}><span style={{color:LIGHT}}>SHOT</span><span style={{color:VOLT}}>LAB</span></div>}
 function BrandBackdrop(){return <><div style={{position:"fixed",inset:0,background:"radial-gradient(ellipse 80% 40% at 50% 0%, rgba(200, 255, 0, 0.04) 0%, transparent 100%)",pointerEvents:"none",zIndex:0}}/><div style={{position:"fixed",left:"50%",top:"50%",transform:"translate(-50%,-35%)",opacity:.03,pointerEvents:"none",zIndex:0,width:180}}><SLLogo size={180}/></div></>}
 function SectionHero({icon,title,subtitle,accent=VOLT,deco,isCoach=false}){return <div style={{marginBottom:12}}><div style={{height:80,display:"flex",alignItems:"center",gap:14}}><div style={{width:42,height:42,borderRadius:12,background:accent+"12",border:`1px solid ${accent}33`,display:"flex",alignItems:"center",justifyContent:"center",position:"relative",flexShrink:0}}>{icon}{deco&&<div style={{position:"absolute",bottom:-6,right:-6,opacity:.6}}>{deco}</div>}</div><div><div className="u-allcaps-long" style={{fontFamily:FD,fontSize:24,color:"var(--text-1)",lineHeight:1,display:"flex",alignItems:"center",gap:6}}>{title}{isCoach&&<ShieldIcon size={12} color="var(--text-3)" style={{opacity:.5,pointerEvents:"none"}}/>}</div><div className="u-secondary-text" style={{fontFamily:FB,fontSize:12,marginTop:4}}>{subtitle}</div></div></div><div style={{height:1,background:BORDER_CLR}}/></div>}
 function SC({l,v,c=VOLT,big,small,fire,accent}){const inner=<div style={{flex:big?1.6:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:big?"22px 18px":"14px 12px",position:"relative",overflow:"hidden"}}>{fire&&<div style={{position:"absolute",top:6,right:8,fontSize:14}}>🔥</div>}{typeof v==="number"?<AnimNum v={v} c={c} big={big}/>:<div style={{fontFamily:FD,color:c,fontSize:big?42:26,letterSpacing:1,lineHeight:1}}>{v}</div>}<div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:big?6:4,fontWeight:600}}>{l}</div></div>;if(accent)return <div className="grd-bdr" style={{flex:big?1.6:1}}>{inner}</div>;return <div style={{flex:big?1.6:1}}><div style={{border:`1px solid ${BORDER_CLR}`,borderRadius:16}}>{inner}</div></div>}
