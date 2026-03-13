@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import AppHeader from "../components/AppHeader";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -79,24 +80,11 @@ export default function PlayersScreen() {
 
   return (
     <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "16px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
-        <Users size={22} color="var(--text-2)" />
-        <span
-          style={{
-            fontSize: "24px",
-            fontWeight: 900,
-            textTransform: "uppercase",
-            color: "var(--text-1)",
-            fontFamily: "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif",
-          }}
-        >
-          PLAYERS
-        </span>
-      </div>
-
-      <p style={{ fontSize: "13px", color: "var(--text-2)", marginBottom: "20px" }}>
-        Manage your roster and track player engagement
-      </p>
+      <AppHeader
+        title="PLAYERS"
+        subtitle="Manage your roster and track player engagement"
+        leading={<Users size={22} color="var(--text-2)" />}
+      />
 
       <input
         type="text"
