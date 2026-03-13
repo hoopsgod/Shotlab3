@@ -1,47 +1,83 @@
 import resolveTeamBranding from "./resolveTeamBranding";
+import DEFAULT_BRANDING from "./brandingDefaults";
+import { balanceBrandColor, mixHex, normalizeHexColor, resolveOnColor, rgba } from "./brandColorUtils";
 
 export default function buildThemeTokens(teamBranding = {}) {
   const branding = resolveTeamBranding(teamBranding);
 
-  const primarySoft = `color-mix(in srgb, ${branding.primaryColor} 22%, transparent)`;
-  const accentSoft = `color-mix(in srgb, ${branding.accentColor} 22%, transparent)`;
-  const accentBg = `color-mix(in srgb, ${branding.accentColor} 8%, transparent)`;
+  const rawPrimary = normalizeHexColor(branding.primaryColor, DEFAULT_BRANDING.primaryColor);
+  const rawSecondary = normalizeHexColor(branding.secondaryColor, rawPrimary);
+
+  const brandPrimary = balanceBrandColor(rawPrimary);
+  const brandSecondary = balanceBrandColor(rawSecondary);
+  const brandPrimarySoft = rgba(brandPrimary, 0.22);
+  const brandPrimaryMuted = rgba(brandPrimary, 0.14);
+  const brandPrimaryGlow = rgba(brandPrimary, 0.34);
+  const brandOnPrimary = resolveOnColor(brandPrimary, normalizeHexColor(branding.textOnPrimary, DEFAULT_BRANDING.textOnPrimary));
+  const brandBorder = rgba(brandPrimary, 0.5);
+  const brandTintSurface = rgba(brandPrimary, 0.1);
+  const brandAccentText = mixHex(brandPrimary, "#E5E7EB", 0.2);
+  const brandNavActive = mixHex(brandPrimary, "#FFFFFF", 0.12);
+  const brandIconAccent = mixHex(brandSecondary, brandPrimary, 0.45);
 
   return {
-    branding,
+    branding: {
+      ...branding,
+      primaryColor: brandPrimary,
+      secondaryColor: brandSecondary,
+      accentColor: brandNavActive,
+      textOnPrimary: brandOnPrimary,
+    },
     colors: {
-      primary: branding.primaryColor,
-      primaryText: branding.textOnPrimary,
-      primarySoft,
-      headerAccent: branding.accentColor,
-      logoAccent: branding.accentColor,
-      navActive: branding.accentColor,
-      badgeBg: `color-mix(in srgb, ${branding.accentColor} 16%, transparent)`,
-      badgeBorder: `color-mix(in srgb, ${branding.accentColor} 42%, transparent)`,
-      badgeText: branding.accentColor,
-      accentSoft,
-      accentBg,
-      secondary: branding.secondaryColor,
+      brandPrimary,
+      brandPrimarySoft,
+      brandPrimaryMuted,
+      brandPrimaryGlow,
+      brandOnPrimary,
+      brandBorder,
+      brandTintSurface,
+      brandAccentText,
+      brandNavActive,
+      brandIconAccent,
+      primary: brandPrimary,
+      primaryText: brandOnPrimary,
+      primarySoft: brandPrimarySoft,
+      headerAccent: brandAccentText,
+      logoAccent: brandIconAccent,
+      navActive: brandNavActive,
+      badgeBg: brandTintSurface,
+      badgeBorder: brandBorder,
+      badgeText: brandAccentText,
+      accentSoft: brandPrimarySoft,
+      accentBg: brandTintSurface,
+      secondary: brandSecondary,
     },
     cssVariables: {
-      "--team-brand-primary": branding.primaryColor,
-      "--team-brand-primary-text": branding.textOnPrimary,
-      "--team-brand-secondary": branding.secondaryColor,
-      "--team-brand-accent": branding.accentColor,
-      "--team-brand-primary-soft": primarySoft,
-      "--team-brand-header-accent": branding.accentColor,
-      "--team-brand-logo-accent": branding.accentColor,
-      "--team-brand-nav-active": branding.accentColor,
-      "--team-brand-badge-bg": `color-mix(in srgb, ${branding.accentColor} 16%, transparent)`,
-      "--team-brand-badge-border": `color-mix(in srgb, ${branding.accentColor} 42%, transparent)`,
-      "--team-brand-badge-text": branding.accentColor,
-      "--accent": branding.accentColor,
-      "--accent-soft": primarySoft,
-      "--team-brand-accent-soft": accentSoft,
-      "--team-brand-accent-bg": accentBg,
-      "--color-primary": branding.primaryColor,
-      "--nav-active-text": branding.accentColor,
-      "--page-accent": branding.accentColor,
+      "--team-brand-primary": brandPrimary,
+      "--team-brand-primary-text": brandOnPrimary,
+      "--team-brand-secondary": brandSecondary,
+      "--team-brand-accent": brandAccentText,
+      "--team-brand-primary-soft": brandPrimarySoft,
+      "--team-brand-primary-muted": brandPrimaryMuted,
+      "--team-brand-primary-glow": brandPrimaryGlow,
+      "--team-brand-on-primary": brandOnPrimary,
+      "--team-brand-border": brandBorder,
+      "--team-brand-tint-surface": brandTintSurface,
+      "--team-brand-accent-text": brandAccentText,
+      "--team-brand-nav-active": brandNavActive,
+      "--team-brand-icon-accent": brandIconAccent,
+      "--team-brand-header-accent": brandAccentText,
+      "--team-brand-logo-accent": brandIconAccent,
+      "--team-brand-badge-bg": brandTintSurface,
+      "--team-brand-badge-border": brandBorder,
+      "--team-brand-badge-text": brandAccentText,
+      "--accent": brandAccentText,
+      "--accent-soft": brandPrimarySoft,
+      "--team-brand-accent-soft": brandPrimarySoft,
+      "--team-brand-accent-bg": brandTintSurface,
+      "--color-primary": brandPrimary,
+      "--nav-active-text": brandNavActive,
+      "--page-accent": brandAccentText,
     },
   };
 }
