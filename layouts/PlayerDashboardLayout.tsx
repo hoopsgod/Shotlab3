@@ -1,24 +1,23 @@
 import { ReactNode } from 'react';
-import PlayerSidebar from '../components/PlayerSidebar';
-import PlayerWidgets from '../components/PlayerWidgets';
+import PlayerSidebar from '../src/components/PlayerSidebar';
+import PlayerWidgets from '../src/components/PlayerWidgets';
+import { TeamBranding, TeamBrandingProvider } from '../src/branding/TeamBrandingProvider';
 
 interface PlayerDashboardLayoutProps {
   children: ReactNode;
+  teamBranding?: TeamBranding;
 }
 
-export default function PlayerDashboardLayout({ children }: PlayerDashboardLayoutProps) {
+export default function PlayerDashboardLayout({ children, teamBranding }: PlayerDashboardLayoutProps) {
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-100">
-      {/* Left navigation (visible on lg+) */}
-      <PlayerSidebar />
-
-      {/* Main content */}
-      <main className="flex-1 p-4 overflow-x-hidden">
-        {children}
-      </main>
-
-      {/* Right widgets (visible on xl+) */}
-      <PlayerWidgets />
-    </div>
+    <TeamBrandingProvider branding={teamBranding}>
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--surface-1)' }}>
+        <div style={{ display: 'flex', flex: 1 }}>
+          <PlayerSidebar />
+          <main style={{ flex: 1, padding: '16px', overflowX: 'hidden' }}>{children}</main>
+          <PlayerWidgets />
+        </div>
+      </div>
+    </TeamBrandingProvider>
   );
 }
