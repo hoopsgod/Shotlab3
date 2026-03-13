@@ -24,17 +24,17 @@ const ACTION_BASE = {
   border: "1px solid var(--stroke-1)",
   background: "color-mix(in srgb, var(--surface-1) 88%, transparent)",
   color: "var(--text-2)",
-  height: 34,
-  minWidth: 34,
-  padding: "0 12px",
-  fontSize: 11,
+  height: 30,
+  minWidth: 30,
+  padding: "0 10px",
+  fontSize: 10,
   fontWeight: 700,
   letterSpacing: "var(--tracking-tight)",
   textTransform: "uppercase",
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
-  gap: 6,
+  gap: 4,
   cursor: "pointer",
 };
 
@@ -89,10 +89,10 @@ export default function AppHeader({
         </div>
 
         {(brandLockup || action) ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto", maxWidth: "100%" }}>
-            {brandLockup ? <div style={{ opacity: 0.8, transform: "scale(.95)", transformOrigin: "right center" }}>{brandLockup}</div> : null}
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", maxWidth: "100%" }}>
+            {brandLockup ? <div style={{ minWidth: 0 }}>{brandLockup}</div> : null}
             {action ? (
-              <button type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={ACTION_BASE}>
+              <button type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, opacity: 0.85 }}>
                 {action.icon}
                 {action.label ? <span>{action.label}</span> : null}
               </button>

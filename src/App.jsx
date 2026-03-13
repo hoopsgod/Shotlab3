@@ -1929,13 +1929,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {u?.isCoach&&<div style={{display:"flex",justifyContent:"flex-end",marginBottom:10}}><button onClick={openTeamBranding} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--team-brand-badge-border)",background:"var(--team-brand-badge-bg)",color:"var(--team-brand-badge-text)",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>Team Branding Settings</button></div>}
 <CoachHero
   heroRef={heroRef}
-  isOverview={isOverviewTab}
   userName={u.name}
-  isCoach={u.isCoach}
   accentColor={ORANGE}
   borderColor={BORDER_CLR}
   mutedColor={MUTED}
-  avatar={<Av n={u.name} sz={isOverviewTab?32:30} email={u.email} isCoach={u.isCoach}/>}
   wordmark={<BrandWordmark size={isOverviewTab?17:16} small/>}
   onLogout={logout}
 />
