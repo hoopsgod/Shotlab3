@@ -8,17 +8,22 @@ export default function buildThemeTokens(teamBranding = {}) {
   const rawPrimary = normalizeHexColor(branding.primaryColor, DEFAULT_BRANDING.primaryColor);
   const rawSecondary = normalizeHexColor(branding.secondaryColor, rawPrimary);
 
+  // Derive a controlled accent system so approved team colors never repaint the full dark shell.
+  const darkSurfaceBase = "#0F1115";
+  const darkSurfaceElevated = "#171D28";
+  const neutralText = "#E5E7EB";
+
   const brandPrimary = balanceBrandColor(rawPrimary);
   const brandSecondary = balanceBrandColor(rawSecondary);
-  const brandPrimarySoft = rgba(brandPrimary, 0.22);
-  const brandPrimaryMuted = rgba(brandPrimary, 0.14);
-  const brandPrimaryGlow = rgba(brandPrimary, 0.34);
+  const brandPrimarySoft = rgba(brandPrimary, 0.2);
+  const brandPrimaryMuted = rgba(brandPrimary, 0.12);
+  const brandPrimaryGlow = rgba(brandPrimary, 0.38);
   const brandOnPrimary = resolveOnColor(brandPrimary, normalizeHexColor(branding.textOnPrimary, DEFAULT_BRANDING.textOnPrimary));
-  const brandBorder = rgba(brandPrimary, 0.5);
-  const brandTintSurface = rgba(brandPrimary, 0.1);
-  const brandAccentText = mixHex(brandPrimary, "#E5E7EB", 0.2);
-  const brandNavActive = mixHex(brandPrimary, "#FFFFFF", 0.12);
-  const brandIconAccent = mixHex(brandSecondary, brandPrimary, 0.45);
+  const brandBorder = mixHex(brandPrimary, darkSurfaceElevated, 0.52);
+  const brandTintSurface = mixHex(darkSurfaceBase, brandPrimary, 0.15);
+  const brandAccentText = mixHex(brandPrimary, neutralText, 0.34);
+  const brandNavActive = mixHex(brandPrimary, neutralText, 0.2);
+  const brandIconAccent = mixHex(brandSecondary, brandPrimary, 0.6);
   const brandActionBg = rgba(brandPrimary, 0.18);
   const brandActionBgHover = rgba(brandPrimary, 0.28);
 
