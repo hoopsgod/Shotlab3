@@ -1,11 +1,11 @@
 import AppHeader from "./AppHeader";
 
 const ACCENT_MAP = {
-  lime: "var(--text-2)",
-  cyan: "var(--text-2)",
-  amber: "var(--text-2)",
-  blue: "var(--text-2)",
-  purple: "var(--text-2)",
+  lime: "var(--team-brand-header-accent, var(--text-2))",
+  cyan: "var(--team-brand-header-accent, var(--text-2))",
+  amber: "var(--team-brand-header-accent, var(--text-2))",
+  blue: "var(--team-brand-header-accent, var(--text-2))",
+  purple: "var(--team-brand-header-accent, var(--text-2))",
 };
 
 export default function PageHeader({
@@ -32,8 +32,8 @@ export default function PageHeader({
               width: 38,
               height: 38,
               borderRadius: 12,
-              border: "1px solid color-mix(in srgb, var(--headerAccent) 35%, var(--stroke-1))",
-              background: "color-mix(in srgb, var(--headerAccent) 12%, var(--surface-1))",
+              border: "1px solid color-mix(in srgb, var(--headerAccent) 20%, var(--stroke-1))",
+              background: "color-mix(in srgb, var(--headerAccent) 7%, var(--surface-1))",
               color: "var(--headerAccent)",
               display: "flex",
               alignItems: "center",
