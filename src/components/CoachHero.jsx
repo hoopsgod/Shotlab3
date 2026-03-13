@@ -28,15 +28,16 @@ export default function CoachHero({
             </span>
             <div
               style={{
-                border: "1px solid var(--stroke-2)",
-                borderRadius: 14,
-                background: "color-mix(in srgb, var(--surface-1) 70%, transparent)",
-                padding: "10px 14px",
-                minHeight: 58,
+                border: "1px solid color-mix(in srgb, var(--team-brand-border, var(--stroke-2)) 70%, transparent)",
+                borderRadius: 16,
+                background: "linear-gradient(135deg, color-mix(in srgb, var(--team-brand-surface, var(--surface-1)) 88%, transparent), color-mix(in srgb, var(--team-brand-surface-soft, var(--surface-2)) 76%, transparent))",
+                padding: "12px 16px",
+                minHeight: 68,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                maxWidth: "min(280px, 72vw)",
+                boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--team-brand-accent, var(--accent)) 22%, transparent)",
+                maxWidth: "min(320px, 78vw)",
               }}
             >
               {wordmark}

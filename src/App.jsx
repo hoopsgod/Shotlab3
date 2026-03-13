@@ -1924,7 +1924,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 <CoachMiniHeader
   visible={showMiniHeader}
   avatar={<Av n={u.name} sz={24} email={u.email} isCoach={u.isCoach}/>}
-  wordmark={<BrandWordmark size={14} small/>}
+  wordmark={<BrandWordmark size={16} small/>}
   borderColor={BORDER_CLR}
   mutedColor={MUTED}
   onLogout={logout}
@@ -1937,7 +1937,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   accentColor={ORANGE}
   borderColor={BORDER_CLR}
   mutedColor={MUTED}
-  wordmark={<BrandWordmark size={isOverviewTab?17:16} small/>}
+  wordmark={<BrandWordmark size={isOverviewTab?20:18} small/>}
   onLogout={logout}
 />
 {isCoachTab&&<CoachCommandCenter
