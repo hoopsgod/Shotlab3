@@ -1,11 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_BRANDING } from "../../theme/brandingDefaults";
 
-const COLOR_FIELDS = [
-  { name: "primaryColor", label: "Primary Color", type: "color" },
-  { name: "secondaryColor", label: "Secondary Color", type: "color" },
-  { name: "accentColor", label: "Accent Color", type: "color" },
-  { name: "textOnPrimary", label: "Text on Primary", type: "color" },
+const APPROVED_BRAND_PALETTES = [
+  { key: "blue", label: "Blue", primaryColor: "#3B82F6", secondaryColor: "#93C5FD", accentColor: "#2563EB", textOnPrimary: "#EAF2FF" },
+  { key: "red", label: "Red", primaryColor: "#EF4444", secondaryColor: "#FCA5A5", accentColor: "#DC2626", textOnPrimary: "#FFECEC" },
+  { key: "green", label: "Green", primaryColor: "#22C55E", secondaryColor: "#86EFAC", accentColor: "#16A34A", textOnPrimary: "#E9FFEF" },
+  { key: "gold", label: "Gold", primaryColor: "#EAB308", secondaryColor: "#FDE68A", accentColor: "#CA8A04", textOnPrimary: "#1C1500" },
+  { key: "orange", label: "Orange", primaryColor: "#F97316", secondaryColor: "#FDBA74", accentColor: "#EA580C", textOnPrimary: "#FFF0E6" },
+  { key: "purple", label: "Purple", primaryColor: "#A855F7", secondaryColor: "#D8B4FE", accentColor: "#9333EA", textOnPrimary: "#F6EDFF" },
+  { key: "teal", label: "Teal", primaryColor: "#14B8A6", secondaryColor: "#99F6E4", accentColor: "#0D9488", textOnPrimary: "#E8FFFC" },
+  { key: "steel", label: "Steel", primaryColor: "#64748B", secondaryColor: "#CBD5E1", accentColor: "#475569", textOnPrimary: "#F1F5F9" },
 ];
 
 const LOGO_FIELDS = [
@@ -56,8 +60,23 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
     onChange?.(values);
   }, [onChange, values]);
 
+  const selectedPaletteKey = useMemo(() => {
+    const matched = APPROVED_BRAND_PALETTES.find((palette) => palette.primaryColor === values.primaryColor);
+    return matched?.key || null;
+  }, [values.primaryColor]);
+
   const handleChange = (name, value) => {
     setValues((prev) => ({ ...prev, [name]: value || DEFAULT_BRANDING[name] || "" }));
+  };
+
+  const handlePaletteSelect = (palette) => {
+    setValues((prev) => ({
+      ...prev,
+      primaryColor: palette.primaryColor,
+      secondaryColor: palette.secondaryColor,
+      accentColor: palette.accentColor,
+      textOnPrimary: palette.textOnPrimary,
+    }));
   };
 
   const fileToDataUrl = (file) =>
@@ -85,7 +104,14 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
 
   const submit = (e) => {
     e.preventDefault();
-    onSave?.(values);
+    const safePalette = APPROVED_BRAND_PALETTES.find((palette) => palette.primaryColor === values.primaryColor) || APPROVED_BRAND_PALETTES[0];
+    onSave?.({
+      ...values,
+      primaryColor: safePalette.primaryColor,
+      secondaryColor: safePalette.secondaryColor,
+      accentColor: safePalette.accentColor,
+      textOnPrimary: safePalette.textOnPrimary,
+    });
   };
 
   return (
@@ -96,9 +122,48 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
           <div style={{ color: "#9CA3AF", fontSize: 12 }}>These colors flow through coach and player surfaces.</div>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 10 }}>
-          {COLOR_FIELDS.map((field) => (
-            <Field key={field.name} field={field} value={values[field.name]} onChange={handleChange} />
-          ))}
+          {APPROVED_BRAND_PALETTES.map((palette) => {
+            const selected = selectedPaletteKey === palette.key;
+            return (
+              <button
+                key={palette.key}
+                type="button"
+                onClick={() => handlePaletteSelect(palette)}
+                style={{
+                  display: "grid",
+                  gap: 10,
+                  textAlign: "left",
+                  minHeight: 64,
+                  borderRadius: 10,
+                  padding: "10px 12px",
+                  border: selected ? "1px solid rgba(157,255,122,0.9)" : "1px solid rgba(255,255,255,0.14)",
+                  background: selected ? "rgba(157,255,122,0.1)" : "#111620",
+                  boxShadow: selected ? "0 0 0 1px rgba(157,255,122,0.2) inset" : "none",
+                  color: "#E5E7EB",
+                  cursor: "pointer",
+                }}
+                aria-pressed={selected}
+              >
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700 }}>{palette.label}</span>
+                  {selected ? <span style={{ fontSize: 11, color: "#9DFF7A", fontWeight: 700 }}>Selected</span> : null}
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(0, 1fr))", gap: 6 }}>
+                  {[palette.primaryColor, palette.secondaryColor, palette.accentColor, palette.textOnPrimary].map((swatch) => (
+                    <span
+                      key={swatch}
+                      style={{
+                        height: 16,
+                        borderRadius: 999,
+                        border: "1px solid rgba(255,255,255,0.24)",
+                        background: swatch,
+                      }}
+                    />
+                  ))}
+                </div>
+              </button>
+            );
+          })}
         </div>
       </section>
 
