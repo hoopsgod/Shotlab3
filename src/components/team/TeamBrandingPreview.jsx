@@ -1,4 +1,4 @@
-import { useTeamBranding } from "../../context/TeamBrandingContext";
+import { TeamBrandingProvider, useTeamBranding } from "../../context/TeamBrandingContext";
 
 function Card({ title, subtitle }) {
   const { theme } = useTeamBranding();
@@ -41,11 +41,23 @@ function Card({ title, subtitle }) {
   );
 }
 
-export default function TeamBrandingPreview() {
+function TeamBrandingPreviewContent() {
   return (
     <div style={{ display: "grid", gap: 10 }}>
       <Card title="Coach Preview" subtitle="Coach tools using team branding" />
       <Card title="Player Preview" subtitle="Player experience inherits same team branding" />
     </div>
   );
+}
+
+export default function TeamBrandingPreview({ branding }) {
+  if (branding) {
+    return (
+      <TeamBrandingProvider branding={branding}>
+        <TeamBrandingPreviewContent />
+      </TeamBrandingProvider>
+    );
+  }
+
+  return <TeamBrandingPreviewContent />;
 }

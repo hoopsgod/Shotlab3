@@ -7,8 +7,7 @@ import CoachHero from "./components/CoachHero";
 import CoachMiniHeader from "./components/CoachMiniHeader";
 import DEFAULT_BRANDING from "./theme/brandingDefaults";
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
-import TeamBrandingForm from "./components/team/TeamBrandingForm";
-import TeamBrandingPreview from "./components/team/TeamBrandingPreview";
+import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -633,44 +632,9 @@ return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")}/></div>}
-{view==="coach-branding"&&<div className="screen-fade-in"><TeamBrandingSettings branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
+{view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 </TeamBrandingProvider>;
 }
-
-
-function TeamBrandingSettings({branding,onSave,onBack,teamName}){
-const[saving,setSaving]=useState(false);
-const[message,setMessage]=useState("");
-const handleSave=async(next)=>{
-setSaving(true);
-setMessage("");
-const result=await onSave?.(next);
-setSaving(false);
-if(result?.ok){setMessage("Team branding saved for all coach/player views.");return;}
-setMessage(result?.err||"Could not save team branding.");
-};
-return <div className="team-brand" style={{minHeight:"100dvh",background:BG,color:LIGHT,padding:20,fontFamily:FB}}>
-<div style={{maxWidth:740,margin:"0 auto",display:"grid",gap:16}}>
-  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-    <div>
-      <div style={{fontFamily:FD,fontSize:24,letterSpacing:2}}>TEAM BRANDING</div>
-      <div style={{color:MUTED,fontSize:13}}>{teamName} branding is shared by coaches and players.</div>
-    </div>
-    <button onClick={onBack} style={{padding:"8px 12px",borderRadius:10,border:"1px solid rgba(255,255,255,0.2)",background:"transparent",color:LIGHT}}>Back</button>
-  </div>
-  <div style={{background:SURFACE,border:"1px solid rgba(255,255,255,0.12)",borderRadius:16,padding:16}}>
-    <TeamBrandingForm branding={branding} onSave={handleSave} onCancel={onBack} saving={saving}/>
-  </div>
-  <div style={{background:SURFACE,border:"1px solid rgba(255,255,255,0.12)",borderRadius:16,padding:16}}>
-    <div style={{fontFamily:FD,fontSize:18,letterSpacing:1,marginBottom:10}}>Shared Preview</div>
-    <TeamBrandingPreview/>
-  </div>
-  {message&&<div style={{color:message.toLowerCase().includes("saved")?"#9DFF7A":"#FF8E8E",fontSize:13}}>{message}</div>}
-</div>
-</div>;
-}
-
-
 // ═══════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════
