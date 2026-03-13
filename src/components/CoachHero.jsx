@@ -31,12 +31,12 @@ export default function CoachHero({
                 border: "1px solid var(--stroke-2)",
                 borderRadius: 14,
                 background: "color-mix(in srgb, var(--surface-1) 70%, transparent)",
-                padding: "10px 12px",
-                minHeight: 52,
+                padding: "10px 14px",
+                minHeight: 58,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                maxWidth: "min(260px, 72vw)",
+                maxWidth: "min(280px, 72vw)",
               }}
             >
               {wordmark}
