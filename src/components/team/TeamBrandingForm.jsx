@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DEFAULT_BRANDING } from "../../theme/brandingDefaults";
 
 const FIELDS = [
@@ -10,9 +10,17 @@ const FIELDS = [
   { name: "logoMarkUrl", label: "Logo Mark URL", type: "url", placeholder: "https://..." },
 ];
 
-export default function TeamBrandingForm({ branding, onSave, onCancel, saving = false }) {
+export default function TeamBrandingForm({ branding, onSave, onCancel, onChange, saving = false }) {
   const initial = useMemo(() => ({ ...DEFAULT_BRANDING, ...(branding || {}) }), [branding]);
   const [values, setValues] = useState(initial);
+
+  useEffect(() => {
+    setValues(initial);
+  }, [initial]);
+
+  useEffect(() => {
+    onChange?.(values);
+  }, [onChange, values]);
 
   const handleChange = (name, value) => {
     setValues((prev) => ({ ...prev, [name]: value || DEFAULT_BRANDING[name] || "" }));
