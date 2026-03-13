@@ -170,6 +170,15 @@ const _PAGE_SIGNATURE_CSS=`
 .scSection{border-top:1px solid rgba(91,124,255,.35);padding-top:10px;margin-top:10px;}
 .playersAvatarRing{outline:2px solid rgba(184,108,255,.65);outline-offset:1px;border-radius:50%;}
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{display:none;}
+.bottom-nav{backdrop-filter:saturate(120%) blur(10px);}
+.bottom-nav .tab{color:var(--nav-inactive,var(--text-3));opacity:.84;}
+.bottom-nav .tab .tab-icon{color:var(--nav-inactive-icon,var(--text-3));opacity:.88;transition:color 160ms ease,opacity 160ms ease,filter 160ms ease;}
+.bottom-nav .tab .tab-label{color:var(--nav-inactive,var(--text-3));font-weight:500;transition:color 160ms ease,opacity 160ms ease;}
+.bottom-nav .tab.is-active,.bottom-nav .tab.active{opacity:1;color:var(--nav-active-text,var(--team-brand-nav-active,var(--accent)));}
+.bottom-nav .tab.is-active .tab-icon,.bottom-nav .tab.active .tab-icon{color:var(--nav-active-text,var(--team-brand-nav-active,var(--accent)));opacity:1;filter:drop-shadow(0 1px 4px color-mix(in srgb,var(--nav-active-text,var(--team-brand-nav-active,var(--accent))) 24%, transparent));}
+.bottom-nav .tab.is-active .tab-label,.bottom-nav .tab.active .tab-label{color:var(--nav-active-text,var(--team-brand-nav-active,var(--accent)));font-weight:600;}
+.bottom-nav .tab::after{content:'';position:absolute;left:16px;right:16px;top:0;height:var(--nav-indicator-height,2px);border-radius:999px;background:var(--nav-active-text,var(--team-brand-nav-active,var(--accent)));opacity:0;transition:opacity 160ms ease;}
+.bottom-nav .tab.is-active::after,.bottom-nav .tab.active::after{opacity:.82;}
 @media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:767px){.coachEventsHeaderCard{display:none;}.coachEventsSlimHeader{display:flex;}}
 
