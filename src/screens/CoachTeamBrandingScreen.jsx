@@ -2,6 +2,7 @@ import { useState } from "react";
 import { DEFAULT_BRANDING } from "../theme/brandingDefaults";
 import TeamBrandingForm from "../components/team/TeamBrandingForm";
 import TeamBrandingPreview from "../components/team/TeamBrandingPreview";
+import AppHeader from "../components/AppHeader";
 
 const BG = "#0B0D10";
 const SURFACE = "#141821";
@@ -30,15 +31,16 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
   return (
     <div className="team-brand" style={{ minHeight: "100dvh", background: BG, color: LIGHT, padding: 20, fontFamily: FB }}>
       <div style={{ maxWidth: 740, margin: "0 auto", display: "grid", gap: 16 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-          <div>
-            <div style={{ fontFamily: FD, fontSize: 24, letterSpacing: 2 }}>TEAM BRANDING</div>
-            <div style={{ color: MUTED, fontSize: 13 }}>{teamName} branding is shared by coaches and players.</div>
-          </div>
-          <button onClick={onBack} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.2)", background: "transparent", color: LIGHT }}>
-            Back
-          </button>
-        </div>
+        <AppHeader
+          variant="utility"
+          title="Team Branding"
+          subtitle={`${teamName} branding is shared by coaches and players.`}
+          rightSlot={(
+            <button onClick={onBack} style={{ padding: "8px 12px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.2)", background: "transparent", color: LIGHT }}>
+              Back
+            </button>
+          )}
+        />
         <div style={{ background: SURFACE, border: "1px solid rgba(255,255,255,0.12)", borderRadius: 16, padding: 16 }}>
           <TeamBrandingForm
             branding={branding}

@@ -5,6 +5,7 @@ import PageHeader from "./components/PageHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
 import CoachHero from "./components/CoachHero";
 import CoachMiniHeader from "./components/CoachMiniHeader";
+import AppHeader from "./components/AppHeader";
 import DEFAULT_BRANDING from "./theme/brandingDefaults";
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
@@ -836,30 +837,23 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   </div>
 </div>}
 
-{/* Header — Glassmorphism */}
-<div style={{position:"sticky",top:0,zIndex:10,height:64,padding:isDesktop?"max(0px,env(safe-area-inset-top)) 16px 0":"max(0px,env(safe-area-inset-top)) 20px 0",background:TOKENS.BG_BASE,borderBottom:`1px solid ${TOKENS.BG_SUBTLE}`}}>
-  <div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
-    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:36,height:36,borderRadius:"50%",background:"#1E1E1E",border:"1.5px solid #C8FF00",boxShadow:u.isCoach?"0 0 0 4px rgba(200, 255, 0, 0.15)":"none",color:"#FFFFFF",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0}}>{(u.name||"?")[0].toUpperCase()}</button>
-      <div style={{minWidth:0}}><div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:"0.15em",fontWeight:700,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(()=>{
-        const allDone=todayS.length>=drills.length;const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
-        if(allDone&&shotsToday>0)return <span style={{color:VOLT}}>ALL DRILLS COMPLETE · {streak}D STREAK 🔥</span>;
-        if(todayS.length>0)return <span>{todayS.length}/{drills.length} DRILLS · {shotsToday>0?shotsToday+" SHOTS · ":""}{streak}D STREAK</span>;
-        return u.isCoach?"YOUR PROGRAM AWAITS":"TODAY'S MISSION AWAITS";
-      })()}</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:1}}><div style={{fontFamily:FD,color:TOKENS.TEXT_PRIMARY,fontSize:20,fontWeight:900,letterSpacing:1.5,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{u.name.toUpperCase()}</div>{u.isCoach&&<span style={{background:"rgba(200, 255, 0, 0.12)",border:"1px solid #C8FF00",borderRadius:20,padding:"2px 8px",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.10em",color:"#C8FF00",display:"inline-flex",alignItems:"center",gap:4}}><WhistleIcon size={9} color="#C8FF00"/>COACH</span>}</div></div>
-    </div>
-    <div style={{display:"flex",gap:6,alignItems:"center"}}>
-      <BrandWordmark size={20} small/>
-      <button aria-label="Toggle theme" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .3s"}}>
-        {theme==="dark"?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-        :<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>}
-      </button>
-      <button aria-label="Log out" onClick={logout} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>&#10005;</button>
-    </div>
-  </div>
-
+{/* Shared dashboard header */}
+<div style={{position:"sticky",top:0,zIndex:10,padding:isDesktop?"max(0px,env(safe-area-inset-top)) 16px 0":"max(0px,env(safe-area-inset-top)) 20px 0",background:TOKENS.BG_BASE}}>
+  <AppHeader
+    variant="branded"
+    eyebrow="PLAYER MODE"
+    title={u.name.toUpperCase()}
+    subtitle={(()=>{
+      const allDone=todayS.length>=drills.length;
+      const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
+      if(allDone&&shotsToday>0)return `All drills complete · ${streak}D streak`;
+      if(todayS.length>0)return `${todayS.length}/${drills.length} drills · ${shotsToday>0?`${shotsToday} shots · `:""}${streak}D streak`;
+      return "Today's mission awaits";
+    })()}
+    icon={<button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:36,height:36,borderRadius:"50%",background:"#1E1E1E",border:"1.5px solid #C8FF00",color:"#FFFFFF",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB}}>{(u.name||"?")[0].toUpperCase()}</button>}
+    rightSlot={<div style={{display:"flex",gap:6,alignItems:"center"}}><BrandWordmark size={20} small/><button aria-label="Toggle theme" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .3s"}}>{theme==="dark"?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>:<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>}</button><button aria-label="Log out" onClick={logout} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>&#10005;</button></div>}
+  />
 </div>
-{u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:"0 16px",gap:8}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:"rgba(200, 255, 0, 0.84)"}}>COACH VIEW — FULL ACCESS</span></div>}
 
 <div style={{flex:1,padding:isDesktop?"14px 20px 36px":"16px 20px 124px",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
   {/* Pull-to-refresh basketball */}
@@ -1925,7 +1919,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   onLogout={logout}
 />
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
-{u?.isCoach&&<div style={{display:"flex",justifyContent:"flex-end",marginBottom:10}}><button onClick={openTeamBranding} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--team-brand-badge-border)",background:"var(--team-brand-badge-bg)",color:"var(--team-brand-badge-text)",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>Team Branding Settings</button></div>}
+{u?.isCoach&&<div style={{display:"flex",justifyContent:"flex-end",marginBottom:10}}><button onClick={openTeamBranding} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--team-brand-badge-border)",background:"var(--team-brand-badge-bg)",color:"var(--team-brand-badge-text)",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>Team Branding</button></div>}
 <CoachHero
   heroRef={heroRef}
   isOverview={isOverviewTab}
@@ -1958,11 +1952,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   codeErr={codeErr}
 />}
 </div>
-{u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:"0 16px",gap:8}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:"rgba(200, 255, 0, 0.84)"}}>COACH VIEW — FULL ACCESS</span></div>}
+
 
 <div style={{flex:1,padding:`${showMiniHeader?"88px":"16px"} 20px 110px`,overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
-  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.feed.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S PULSE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>Who's active, streaking, and needs attention</div></div><button className="pageHeaderPill" onClick={()=>setTab("players")}>View Team</button></div>
+  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader eyebrow="Content" title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.feed.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S PULSE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>Who's active, streaking, and needs attention</div></div><button className="pageHeaderPill" onClick={()=>setTab("players")}>View Team</button></div>
     {/* Coach dashboard pulse */}
     <div className="accent-card" style={{background:`linear-gradient(135deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:"20px 20px",border:`1px solid ${ORANGE}22`,marginBottom:20,position:"relative",overflow:"hidden"}}>
       <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>

@@ -1,3 +1,5 @@
+import AppHeader from "./AppHeader";
+
 const ACCENT_MAP = {
   lime: "var(--text-2)",
   cyan: "var(--text-2)",
@@ -14,6 +16,8 @@ export default function PageHeader({
   actionLabel,
   onAction,
   rightSlot,
+  eyebrow,
+  variant = "standard",
 }) {
   const resolvedAccent = ACCENT_MAP[accent] || accent || ACCENT_MAP.lime;
   const actionNode = rightSlot || (actionLabel ? (
@@ -23,16 +27,14 @@ export default function PageHeader({
   ) : null);
 
   return (
-    <header className="pageHeader" style={{ "--headerAccent": resolvedAccent }}>
-      <div className="pageHeaderTop">
-        <div className="pageHeaderBadge">{icon}</div>
-        <div className="pageHeaderText">
-          <h1>{title}</h1>
-          {subtitle ? <p>{subtitle}</p> : null}
-        </div>
-        {actionNode ? <div className="pageHeaderRight">{actionNode}</div> : null}
-      </div>
-      <div className="pageAccentBar" />
-    </header>
+    <AppHeader
+      variant={variant}
+      eyebrow={eyebrow}
+      title={title}
+      subtitle={subtitle}
+      icon={icon}
+      rightSlot={actionNode}
+      style={{ "--headerAccent": resolvedAccent }}
+    />
   );
 }
