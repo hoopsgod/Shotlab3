@@ -1,3 +1,5 @@
+import AppHeader from "./AppHeader";
+
 const ACCENT_MAP = {
   lime: "var(--text-2)",
   cyan: "var(--text-2)",
@@ -16,23 +18,34 @@ export default function PageHeader({
   rightSlot,
 }) {
   const resolvedAccent = ACCENT_MAP[accent] || accent || ACCENT_MAP.lime;
-  const actionNode = rightSlot || (actionLabel ? (
-    <button type="button" className="pageHeaderPill" onClick={onAction}>
-      {actionLabel}
-    </button>
-  ) : null);
 
   return (
-    <header className="pageHeader" style={{ "--headerAccent": resolvedAccent }}>
-      <div className="pageHeaderTop">
-        <div className="pageHeaderBadge">{icon}</div>
-        <div className="pageHeaderText">
-          <h1>{title}</h1>
-          {subtitle ? <p>{subtitle}</p> : null}
-        </div>
-        {actionNode ? <div className="pageHeaderRight">{actionNode}</div> : null}
-      </div>
-      <div className="pageAccentBar" />
-    </header>
+    <div style={{ "--headerAccent": resolvedAccent }}>
+      <AppHeader
+        variant="standard"
+        eyebrow="Coach workspace"
+        title={title}
+        subtitle={subtitle}
+        leading={icon ? (
+          <div
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              border: "1px solid color-mix(in srgb, var(--headerAccent) 35%, var(--stroke-1))",
+              background: "color-mix(in srgb, var(--headerAccent) 12%, var(--surface-1))",
+              color: "var(--headerAccent)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            {icon}
+          </div>
+        ) : null}
+        brandLockup={rightSlot || null}
+        action={actionLabel ? { label: actionLabel, onClick: onAction } : null}
+      />
+    </div>
   );
 }
