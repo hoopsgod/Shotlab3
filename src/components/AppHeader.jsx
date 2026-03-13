@@ -90,7 +90,7 @@ export default function AppHeader({
 
         {(brandLockup || action) ? (
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginLeft: "auto", maxWidth: "100%" }}>
-            {brandLockup ? <div style={{ opacity: 0.8, transform: "scale(.95)", transformOrigin: "right center" }}>{brandLockup}</div> : null}
+            {brandLockup ? <div style={{ opacity: 0.92 }}>{brandLockup}</div> : null}
             {action ? (
               <button type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={ACTION_BASE}>
                 {action.icon}

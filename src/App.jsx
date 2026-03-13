@@ -149,9 +149,9 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeaderPill:hover{background:color-mix(in srgb,var(--pageAccent) 24%, #1A1A1A);border-color:color-mix(in srgb,var(--pageAccent) 62%, transparent);}
 .pageHeaderPill:active{transform:translateY(1px);}
 .pageHeaderPill:focus-visible{outline:2px solid var(--page-accent);outline-offset:2px;}
-.pageHeaderPillBrand{border-color:rgba(200,255,0,.5);background:color-mix(in srgb,#C8FF00 18%, #1A1A1A);color:#C8FF00;}
-.pageHeaderPillBrand:hover{background:color-mix(in srgb,#C8FF00 26%, #1A1A1A);border-color:rgba(200,255,0,.68);}
-.pageHeaderPillBrand:focus-visible{outline-color:#C8FF00;}
+.pageHeaderPillBrand{border-color:color-mix(in srgb,var(--pageAccent) 52%, transparent);background:color-mix(in srgb,var(--pageAccent) 18%, #1A1A1A);color:var(--pageAccent);}
+.pageHeaderPillBrand:hover{background:color-mix(in srgb,var(--pageAccent) 26%, #1A1A1A);border-color:color-mix(in srgb,var(--pageAccent) 68%, transparent);}
+.pageHeaderPillBrand:focus-visible{outline-color:var(--pageAccent);}
 .pageAccentBar{height:4px;width:48%;border-radius:999px;background:var(--headerAccent);box-shadow:0 0 16px var(--headerAccent);margin-top:12px;}
 .coachEventsSlimHeader{display:none;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid color-mix(in srgb,var(--pageAccent) 24%, transparent);background:var(--surface-3);margin:0 0 12px;min-width:0;}
 .coachEventsSlimHeaderLeft{display:flex;align-items:center;gap:8px;min-width:0;}
@@ -165,10 +165,10 @@ const _PAGE_SIGNATURE_CSS=`
 .feedListItem{position:relative;padding-left:14px;}
 .feedListItem::before{content:'';position:absolute;left:0;top:17px;width:6px;height:6px;border-radius:50%;background:var(--pageAccent);box-shadow:0 0 8px var(--pageAccentGlow);}
 .drillsMetrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--stack-gap);margin-bottom:var(--stack-gap);}
-.drillsMetricTile{border-left:2px solid rgba(56,232,255,.65);}
-.eventsDatePill{display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:6px 8px;border-radius:999px;background:rgba(255,196,0,.16);border:1px solid rgba(255,196,0,.45);color:#FFC400;font-size:10px;font-family:${FB};font-weight:700;letter-spacing:.08em;}
-.scSection{border-top:1px solid rgba(91,124,255,.35);padding-top:10px;margin-top:10px;}
-.playersAvatarRing{outline:2px solid rgba(184,108,255,.65);outline-offset:1px;border-radius:50%;}
+.drillsMetricTile{border-left:2px solid color-mix(in srgb,var(--pageAccent) 62%, transparent);}
+.eventsDatePill{display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:6px 8px;border-radius:999px;background:color-mix(in srgb,var(--pageAccent) 16%, transparent);border:1px solid color-mix(in srgb,var(--pageAccent) 45%, transparent);color:var(--pageAccent);font-size:10px;font-family:${FB};font-weight:700;letter-spacing:.08em;}
+.scSection{border-top:1px solid color-mix(in srgb,var(--pageAccent) 35%, transparent);padding-top:10px;margin-top:10px;}
+.playersAvatarRing{outline:2px solid color-mix(in srgb,var(--pageAccent) 60%, transparent);outline-offset:1px;border-radius:50%;}
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{display:none;}
 @media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
 @media(max-width:767px){.coachEventsHeaderCard{display:none;}.coachEventsSlimHeader{display:flex;}}
