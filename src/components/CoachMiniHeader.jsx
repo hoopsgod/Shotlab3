@@ -34,7 +34,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
+          <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--team-brand-badge-text, var(--text-2))", textTransform: "uppercase", border: "1px solid var(--team-brand-badge-border, var(--stroke-1))", background: "var(--team-brand-badge-bg, transparent)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
           {avatar}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
@@ -42,10 +42,10 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
           aria-label="Log out"
           onClick={onLogout}
           style={{
-            background: "rgba(20,20,20,0.95)",
-            border: `1px solid ${borderColor}`,
+            background: "var(--team-brand-action-bg, rgba(20,20,20,0.95))",
+            border: "1px solid var(--team-brand-border, var(--stroke-1))",
             borderRadius: 10,
-            color: "var(--text-secondary)",
+            color: "var(--team-brand-action-text, var(--text-secondary))",
             width: 32,
             height: 32,
             cursor: "pointer",

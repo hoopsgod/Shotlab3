@@ -18,7 +18,7 @@ export default function CoachHero({
             <span
               style={{
                 fontSize: 9,
-                color: "var(--text-3)",
+                color: "var(--team-brand-badge-text, var(--text-3))",
                 letterSpacing: "var(--tracking-tight)",
                 textTransform: "uppercase",
                 fontWeight: 700,
@@ -28,9 +28,9 @@ export default function CoachHero({
             </span>
             <div
               style={{
-                border: "1px solid var(--stroke-2)",
+                border: "1px solid var(--team-brand-badge-border, var(--stroke-2))",
                 borderRadius: 14,
-                background: "color-mix(in srgb, var(--surface-1) 70%, transparent)",
+                background: "linear-gradient(180deg, color-mix(in srgb, var(--team-brand-badge-bg, transparent) 62%, transparent), color-mix(in srgb, var(--surface-1) 76%, transparent))",
                 padding: "10px 12px",
                 minHeight: 52,
                 display: "flex",

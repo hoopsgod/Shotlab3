@@ -2609,13 +2609,14 @@ function BrandWordmark({size=30,small}){
 const {branding,tokens}=useTeamBranding();
 const logoAccent=tokens?.colors?.logoAccent||"var(--team-brand-logo-accent,var(--accent))";
 const logoHeight=Math.max(18,Math.round(size*(small?1.15:1.25)));
+const logoBadgeStyle={border:"1px solid var(--team-brand-badge-border,var(--stroke-2))",background:"var(--team-brand-badge-bg, color-mix(in srgb, var(--surface-1) 70%, transparent))",borderRadius:12,padding:small?"6px 10px":"8px 12px"};
 if(branding?.logoUrl){
-  return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minWidth:0,maxWidth:"100%"}}>
+  return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minWidth:0,maxWidth:"100%",...logoBadgeStyle}}>
     <img src={branding.logoUrl} alt={`${branding?.teamName||"Team"} logo`} style={{height:logoHeight,maxWidth:small?160:220,objectFit:"contain"}}/>
   </div>;
 }
 if(branding?.logoMarkUrl){
-  return <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}>
+  return <div style={{display:"flex",alignItems:"center",gap:8,minWidth:0,...logoBadgeStyle}}>
     <img src={branding.logoMarkUrl} alt="Team logo mark" style={{height:logoHeight*0.9,width:logoHeight*0.9,objectFit:"contain"}}/>
     <div style={{fontFamily:FD,fontSize:size,lineHeight:.85,letterSpacing:small?1.5:3,fontWeight:900,whiteSpace:"nowrap"}}><span style={{color:LIGHT}}>SHOT</span><span style={{color:logoAccent}}>LAB</span></div>
   </div>;
@@ -2637,7 +2638,7 @@ function FF({l,v,set,ph,tp,ta}){return <><label style={{fontFamily:FB,color:"#A0
 function NavBar({items,active,onChange}){
 const navAccent=PAGE_ACCENTS[active]?.accent||PAGE_ACCENTS.feed.accent;
 return <nav className="bottom-nav" role="navigation" aria-label="Main navigation" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:64,paddingBottom:"env(safe-area-inset-bottom)",background:"var(--surface-1)",borderTop:"1px solid var(--stroke-1)",zIndex:20}}>{items.map(t=>{const a=active===t.k;
-const tabAccent="var(--accent)";
+const tabAccent="var(--team-brand-nav-active,var(--nav-active-text,var(--accent)))";
 return <button key={t.k} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:48,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"8px 4px 6px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 150ms ease-out",outlineOffset:2}}>
 <div className="tab-icon" style={{position:"relative"}}>{t.svg}</div>
 <div className="tab-label" style={{fontFamily:FB,fontSize:10,letterSpacing:"0.05em",textTransform:"uppercase",lineHeight:1.1,whiteSpace:"nowrap"}}>{t.l}</div>

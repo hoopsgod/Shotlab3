@@ -7,8 +7,8 @@ const VARIANT_STYLES = {
   },
   branded: {
     padding: "16px",
-    border: "1px solid var(--stroke-2)",
-    background: "var(--surface-3)",
+    border: "1px solid var(--team-brand-border, var(--stroke-2))",
+    background: "linear-gradient(180deg, color-mix(in srgb, var(--team-brand-tint-surface, transparent) 46%, transparent), transparent), var(--surface-3)",
     shadow: "var(--shadow-2)",
   },
   utility: {
@@ -74,7 +74,7 @@ export default function AppHeader({
           {leading ? <div style={{ marginTop: 1, color: "var(--text-2)", flexShrink: 0 }}>{leading}</div> : null}
           <div style={{ minWidth: 0 }}>
             {eyebrow ? (
-              <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", color: "var(--text-3)", fontWeight: 700, marginBottom: 4 }}>
+              <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", color: "var(--team-brand-header-accent, var(--text-3))", fontWeight: 700, marginBottom: 4 }}>
                 {eyebrow}
               </div>
             ) : null}
