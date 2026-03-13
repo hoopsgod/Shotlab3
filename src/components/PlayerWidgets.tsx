@@ -1,15 +1,42 @@
-export default function PlayerWidgets() {
-  return (
-    <aside className="hidden xl:block w-64 bg-gray-50 border-l border-gray-200 p-4 overflow-y-auto">
-      <div className="font-semibold text-lg mb-4">Upcoming Activities</div>
+import { useTeamBranding } from "../branding/TeamBrandingProvider";
 
-      {/* Example widget */}
-      <div className="mb-6">
-        <h3 className="font-medium text-sm mb-2">Next Workout</h3>
-        <p className="text-sm text-gray-600">Strength training on March 15, 2026 at 5 PM</p>
+export default function PlayerWidgets() {
+  const { teamName, tokens } = useTeamBranding();
+
+  return (
+    <aside
+      style={{
+        width: "256px",
+        background: "var(--surface-1)",
+        borderLeft: "1px solid var(--stroke-1)",
+        padding: "16px",
+        overflowY: "auto",
+      }}
+    >
+      <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: "16px", color: tokens.text }}>{teamName} Updates</div>
+
+      <div style={{ marginBottom: "20px", padding: "12px", border: "1px solid var(--stroke-1)", borderRadius: "12px", background: tokens.surface }}>
+        <h3 style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.08em", color: tokens.muted, margin: "0 0 8px" }}>Next Workout</h3>
+        <p style={{ fontSize: "0.875rem", color: tokens.text, margin: 0 }}>Strength training on March 15, 2026 at 5 PM</p>
       </div>
 
-      {/* Additional widgets go here */}
+      <button
+        style={{
+          width: "100%",
+          border: "none",
+          borderRadius: "12px",
+          padding: "12px 14px",
+          fontWeight: 700,
+          letterSpacing: "0.05em",
+          textTransform: "uppercase",
+          cursor: "pointer",
+          color: "#111",
+          background: tokens.primary,
+          boxShadow: `0 0 0 1px ${tokens.primarySoft}`,
+        }}
+      >
+        Open Training Plan
+      </button>
     </aside>
   );
 }
