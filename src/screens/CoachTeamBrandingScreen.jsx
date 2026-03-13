@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DEFAULT_BRANDING } from "../theme/brandingDefaults";
 import TeamBrandingForm from "../components/team/TeamBrandingForm";
 import TeamBrandingPreview from "../components/team/TeamBrandingPreview";
@@ -14,6 +14,10 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [draftBranding, setDraftBranding] = useState({ ...DEFAULT_BRANDING, ...(branding || {}) });
+
+  useEffect(() => {
+    setDraftBranding({ ...DEFAULT_BRANDING, ...(branding || {}) });
+  }, [branding]);
 
   const handleSave = async (next) => {
     setSaving(true);
