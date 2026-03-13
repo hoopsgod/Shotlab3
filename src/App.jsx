@@ -139,7 +139,7 @@ const _STYLES_CSS=`@import url('https://fonts.googleapis.com/css2?family=Bebas+N
 `;
 const _PAGE_SIGNATURE_CSS=`
 .pageShell{--pageAccent:#B8FF00;--pageAccentGlow:rgba(184,255,0,.35);--pageAccentBg:rgba(184,255,0,.08);--page-accent:#B8FF00;--page-accent-soft:rgba(184,255,0,.08);--page-accent-border:rgba(184,255,0,.35);display:flex;flex-direction:column;gap:var(--stack-gap);}
-.pageShell{--surface-panel:var(--surface-2);--surface-panel-strong:var(--surface-3);--surface-border:var(--stroke-1);--surface-border-strong:var(--stroke-2);--surface-radius:16px;--surface-shadow:var(--shadow-1);--surface-shadow-strong:var(--shadow-2);}
+.pageShell{--surface-panel:var(--surface-2);--surface-panel-strong:var(--surface-3);--surface-border:color-mix(in srgb,var(--stroke-1) 88%, rgba(255,255,255,0.02));--surface-border-strong:var(--stroke-2);--surface-radius:var(--radius-card);--surface-shadow:var(--shadow-1);--surface-shadow-strong:var(--shadow-2);}
 .pageHeader{margin:0 0 14px;padding:14px 14px 10px;border-radius:16px;border:1px solid color-mix(in srgb,var(--pageAccent) 28%, transparent);background:linear-gradient(135deg,var(--pageAccentBg),rgba(10,10,10,.96) 55%);box-shadow:0 8px 24px rgba(0,0,0,.3);}
 .pageHeader{border-radius:var(--surface-radius);border:1px solid var(--surface-border);background:linear-gradient(180deg,color-mix(in srgb,var(--surface-panel-strong) 88%, #000),var(--surface-panel));box-shadow:var(--surface-shadow);}
 .pageHeaderTop{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
@@ -253,9 +253,9 @@ const _PAGE_SIGNATURE_CSS=`
 [class*="Panel"],
 [class*="tile"],
 [class*="Tile"]{
-  background: var(--surface-2) !important;
-  border: 1px solid var(--stroke-1) !important;
-  border-radius: var(--radius-card) !important;
+  background: color-mix(in srgb, var(--surface-2) 94%, #0A0C10) !important;
+  border: 1px solid color-mix(in srgb, var(--stroke-1) 86%, rgba(255,255,255,0.02)) !important;
+  border-radius: var(--surface-radius, var(--radius-card)) !important;
   box-shadow: var(--shadow-1) !important;
 }
 
