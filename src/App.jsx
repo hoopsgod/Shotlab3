@@ -37,11 +37,11 @@ const BORDER_CLR = TOKENS.BG_SUBTLE;
 const MUTED=TOKENS.TEXT_MUTED,LIGHT=TOKENS.TEXT_PRIMARY;
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 const PAGE_ACCENTS={
-feed:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"rgba(200,255,26,0.08)"},
-drills:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"rgba(200,255,26,0.08)"},
-events:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"rgba(200,255,26,0.08)"},
-sc:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"rgba(200,255,26,0.08)"},
-players:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"rgba(200,255,26,0.08)"},
+feed:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
+drills:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
+events:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
+sc:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
+players:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
 };
 const MODE_CARD_TOKENS={
 BASE_BG:"linear-gradient(160deg, rgba(30, 30, 30, 0.96) 0%, rgba(15, 15, 15, 0.94) 100%)",
