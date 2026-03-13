@@ -9,6 +9,7 @@ import CoachMiniHeader from "./components/CoachMiniHeader";
 import DEFAULT_BRANDING from "./theme/brandingDefaults";
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
+import resolveTeamBranding from "./theme/resolveTeamBranding";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -420,7 +421,7 @@ ps.forEach(p=>{if(p.role!=="coach"){const firstCoach=coaches[0];if(firstCoach)ma
 }else{
 ts.forEach(t=>{if(t.ownerCoachId)map[t.ownerCoachId]=t.id;});
 }
-const teamsWithBranding=ts.map(t=>({...t,branding:t.branding||DEFAULT_BRANDING}));
+const teamsWithBranding=ts.map(t=>({...t,branding:resolveTeamBranding(t.branding||DEFAULT_BRANDING)}));
 const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithBranding[0]?.id||null}));
 const profilesExisting=rawPlayerProfiles||[];
 const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null}));
@@ -596,14 +597,13 @@ const saveTeamBranding=async(nextBranding)=>{
 if(user?.role!=="coach"||!user?.teamId)return{ok:false,err:"Not authorized"};
 const team=teams.find(t=>t.id===user.teamId);
 if(!team)return{ok:false,err:"Team not found"};
-const mergedBranding={
-...DEFAULT_BRANDING,
+const mergedBranding=resolveTeamBranding({
 ...(team.branding||{}),
 ...(nextBranding||{}),
 updatedAt:Date.now(),
 updatedBy:user.email,
 version:Number(team.branding?.version||DEFAULT_BRANDING.version||1)+1,
-};
+});
 const nextTeams=teams.map(t=>t.id===team.id?{...t,branding:mergedBranding}:t);
 await P("sl:teams",nextTeams,setTeams);
 trackEvent("team_branding_saved",{teamId:team.id});
@@ -620,7 +620,7 @@ const scopedScSessions=scSessions.filter(s=>s.teamId===user?.teamId);
 const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
 const scopedScLogs=scLogs.filter(l=>l.teamId===user?.teamId);
 const myTeam=teams.find(t=>t.id===user?.teamId)||null;
-const resolvedTeamBranding=myTeam?.branding||DEFAULT_BRANDING;
+const resolvedTeamBranding=resolveTeamBranding(myTeam?.branding||DEFAULT_BRANDING);
 
 useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.location.pathname});},[]);
 useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);

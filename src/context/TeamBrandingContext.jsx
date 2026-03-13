@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo } from "react";
 import DEFAULT_BRANDING from "../theme/brandingDefaults";
 import buildThemeTokens from "../theme/buildThemeTokens";
 import applyThemeVariables from "../theme/applyThemeVariables";
+import resolveTeamBranding from "../theme/resolveTeamBranding";
 
 const defaultTheme = buildThemeTokens(DEFAULT_BRANDING);
 
@@ -12,7 +13,7 @@ const TeamBrandingContext = createContext({
 });
 
 export function TeamBrandingProvider({ branding, children }) {
-  const safeBranding = useMemo(() => ({ ...DEFAULT_BRANDING, ...(branding || {}) }), [branding]);
+  const safeBranding = useMemo(() => resolveTeamBranding(branding || DEFAULT_BRANDING), [branding]);
   const theme = useMemo(() => buildThemeTokens(safeBranding), [safeBranding]);
 
   useEffect(() => applyThemeVariables(theme.cssVariables), [theme]);

@@ -1,18 +1,7 @@
-import { DEFAULT_BRANDING } from "./brandingDefaults";
+import resolveTeamBranding from "./resolveTeamBranding";
 
 export default function buildThemeTokens(teamBranding = {}) {
-  const legacyColors = teamBranding?.colors || {};
-  const branding = {
-    ...DEFAULT_BRANDING,
-    ...teamBranding,
-    primaryColor: teamBranding?.primaryColor || legacyColors.primary || DEFAULT_BRANDING.primaryColor,
-    secondaryColor: teamBranding?.secondaryColor || DEFAULT_BRANDING.secondaryColor,
-    accentColor:
-      teamBranding?.accentColor || legacyColors.headerAccent || legacyColors.logoAccent || DEFAULT_BRANDING.accentColor,
-    textOnPrimary: teamBranding?.textOnPrimary || legacyColors.primaryText || DEFAULT_BRANDING.textOnPrimary,
-    logoUrl: teamBranding?.logoUrl || "",
-    logoMarkUrl: teamBranding?.logoMarkUrl || "",
-  };
+  const branding = resolveTeamBranding(teamBranding);
 
   const primarySoft = `color-mix(in srgb, ${branding.primaryColor} 22%, transparent)`;
 
