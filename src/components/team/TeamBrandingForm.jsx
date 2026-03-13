@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_BRANDING } from "../../theme/brandingDefaults";
 
 const COLOR_FIELDS = [
@@ -12,6 +12,11 @@ const LOGO_FIELDS = [
   { name: "logoUrl", label: "Logo URL", type: "url", placeholder: "https://..." },
   { name: "logoMarkUrl", label: "Logo Mark URL", type: "url", placeholder: "https://..." },
 ];
+
+const FILE_TO_FIELD_MAP = {
+  full: "logoUrl",
+  mark: "logoMarkUrl",
+};
 
 function Field({ field, value, onChange }) {
   return (
@@ -39,6 +44,9 @@ function Field({ field, value, onChange }) {
 export default function TeamBrandingForm({ branding, onSave, onCancel, onChange, saving = false }) {
   const initial = useMemo(() => ({ ...DEFAULT_BRANDING, ...(branding || {}) }), [branding]);
   const [values, setValues] = useState(initial);
+  const [uploadError, setUploadError] = useState("");
+  const fullLogoInputRef = useRef(null);
+  const markLogoInputRef = useRef(null);
 
   useEffect(() => {
     setValues(initial);
@@ -50,6 +58,29 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
 
   const handleChange = (name, value) => {
     setValues((prev) => ({ ...prev, [name]: value || DEFAULT_BRANDING[name] || "" }));
+  };
+
+  const fileToDataUrl = (file) =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(String(reader.result || ""));
+      reader.onerror = () => reject(new Error("Could not read image file."));
+      reader.readAsDataURL(file);
+    });
+
+  const handleLogoUpload = async (kind, file) => {
+    if (!file) return;
+    if (!file.type?.startsWith("image/")) {
+      setUploadError("Please upload an image file (PNG, JPG, SVG, etc).");
+      return;
+    }
+    try {
+      const dataUrl = await fileToDataUrl(file);
+      handleChange(FILE_TO_FIELD_MAP[kind], dataUrl);
+      setUploadError("");
+    } catch (err) {
+      setUploadError(err.message || "Could not load this image.");
+    }
   };
 
   const submit = (e) => {
@@ -81,6 +112,55 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
             <Field key={field.name} field={field} value={values[field.name]} onChange={handleChange} />
           ))}
         </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
+          <button
+            type="button"
+            onClick={() => fullLogoInputRef.current?.click()}
+            style={{
+              minHeight: 40,
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.18)",
+              background: "rgba(255,255,255,0.04)",
+              color: "#E5E7EB",
+            }}
+          >
+            Upload Full Logo
+          </button>
+          <button
+            type="button"
+            onClick={() => markLogoInputRef.current?.click()}
+            style={{
+              minHeight: 40,
+              borderRadius: 10,
+              border: "1px solid rgba(255,255,255,0.18)",
+              background: "rgba(255,255,255,0.04)",
+              color: "#E5E7EB",
+            }}
+          >
+            Upload Logo Mark
+          </button>
+          <input
+            ref={fullLogoInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              handleLogoUpload("full", e.target.files?.[0]);
+              e.target.value = "";
+            }}
+          />
+          <input
+            ref={markLogoInputRef}
+            type="file"
+            accept="image/*"
+            style={{ display: "none" }}
+            onChange={(e) => {
+              handleLogoUpload("mark", e.target.files?.[0]);
+              e.target.value = "";
+            }}
+          />
+        </div>
+        {uploadError && <div style={{ color: "#FF8E8E", fontSize: 12 }}>{uploadError}</div>}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 90px", gap: 8 }}>
           <div style={{ minHeight: 44, borderRadius: 10, border: "1px solid rgba(255,255,255,0.1)", background: "#0D1118", display: "flex", alignItems: "center", justifyContent: "center", padding: "6px 10px", overflow: "hidden" }}>
             {values.logoUrl ? (
