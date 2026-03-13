@@ -19,6 +19,8 @@ export default function buildThemeTokens(teamBranding = {}) {
   const brandAccentText = mixHex(brandPrimary, "#E5E7EB", 0.2);
   const brandNavActive = mixHex(brandPrimary, "#FFFFFF", 0.12);
   const brandIconAccent = mixHex(brandSecondary, brandPrimary, 0.45);
+  const brandActionBg = rgba(brandPrimary, 0.18);
+  const brandActionBgHover = rgba(brandPrimary, 0.28);
 
   return {
     branding: {
@@ -48,6 +50,9 @@ export default function buildThemeTokens(teamBranding = {}) {
       badgeBg: brandTintSurface,
       badgeBorder: brandBorder,
       badgeText: brandAccentText,
+      actionBg: brandActionBg,
+      actionBgHover: brandActionBgHover,
+      actionText: brandAccentText,
       accentSoft: brandPrimarySoft,
       accentBg: brandTintSurface,
       secondary: brandSecondary,
@@ -71,6 +76,9 @@ export default function buildThemeTokens(teamBranding = {}) {
       "--team-brand-badge-bg": brandTintSurface,
       "--team-brand-badge-border": brandBorder,
       "--team-brand-badge-text": brandAccentText,
+      "--team-brand-action-bg": brandActionBg,
+      "--team-brand-action-bg-hover": brandActionBgHover,
+      "--team-brand-action-text": brandAccentText,
       "--accent": brandAccentText,
       "--accent-soft": brandPrimarySoft,
       "--team-brand-accent-soft": brandPrimarySoft,

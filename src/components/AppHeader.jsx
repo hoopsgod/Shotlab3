@@ -21,9 +21,9 @@ const VARIANT_STYLES = {
 
 const ACTION_BASE = {
   borderRadius: 999,
-  border: "1px solid var(--stroke-1)",
-  background: "color-mix(in srgb, var(--surface-1) 88%, transparent)",
-  color: "var(--text-2)",
+  border: "1px solid var(--team-brand-border, var(--stroke-1))",
+  background: "var(--team-brand-action-bg, color-mix(in srgb, var(--surface-1) 88%, transparent))",
+  color: "var(--team-brand-action-text, var(--text-2))",
   height: 30,
   minWidth: 30,
   padding: "0 10px",
@@ -36,6 +36,7 @@ const ACTION_BASE = {
   justifyContent: "center",
   gap: 4,
   cursor: "pointer",
+  transition: "background-color 0.16s ease, border-color 0.16s ease",
 };
 
 export default function AppHeader({
