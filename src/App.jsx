@@ -2083,31 +2083,35 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}>
     {isDesktop?<>
       <div className="coachEventsHeaderCard"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} /></div>
-      <header className="coachEventsSlimHeader" aria-label="Events"><div className="coachEventsSlimHeaderLeft"><EventIcon type="event" size={20} color={PAGE_ACCENTS.events.accent}/><span className="coachEventsSlimHeaderLabel">EVENTS</span></div></header>
       {nextEvent&&<div className="heroModule"><div style={{fontFamily:FD,color:PAGE_ACCENTS.events.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>NEXT EVENT</div><div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,marginTop:4}}>{nextEvent.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>{nextEvent.date} {nextEvent.time}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>📍 {nextEvent.location}</div></div>}
-      <div style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:events.length===0?"12px":"12px 12px 10px",marginBottom:10}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-          <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Event Management" s={`${events.length} total`} identity/>
-          {events.length>0&&<button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{marginBottom:20}}>+ ADD EVENT</button>}
+      <div style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:14,marginBottom:12}}>
+        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:10,marginBottom:events.length===0?0:8}}>
+          <div>
+            <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"var(--tracking-tight)"}}>EVENT MANAGEMENT</div>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>{events.length} total scheduled</div>
+          </div>
+          {events.length>0&&<button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:0,minHeight:42,height:42,padding:"0 14px",borderRadius:12,whiteSpace:"nowrap"}}>+ ADD EVENT</button>}
         </div>
-        {events.length===0&&<div style={{marginTop:4,padding:"10px 0 2px",textAlign:"left"}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700}}>No events scheduled yet.</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4,lineHeight:1.35}}>Create your first event to organize practices, games, camps, or meetings.</div>
-          <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"10px 0 0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
+        {events.length===0&&<div style={{marginTop:6,padding:"14px 12px",textAlign:"center",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14}}>
+          <div style={{width:44,height:44,borderRadius:12,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={20} color={VOLT}/></div>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events scheduled yet</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.45,maxWidth:360,marginLeft:"auto",marginRight:"auto"}}>Create your first event to organize practices, games, camps, or meetings.</div>
+          <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"12px 0 0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
         </div>}
       </div>
       {events.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",paddingBottom:4,marginBottom:14}}>
         {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"8px 14px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?VOLT:SURFACE,color:active?"#111827":(T.SUB||LIGHT),fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"var(--tracking-tight)",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
       </div>}
     </>:<>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"6px 2px 10px",borderBottom:`1px solid ${BORDER_CLR}`,marginBottom:10}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"6px 2px 10px",borderBottom:`1px solid ${BORDER_CLR}`,marginBottom:12}}>
         <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><EventIcon type="event" size={14} color={VOLT}/><span style={{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1}}>EVENTS</span></div>
         <div style={{fontFamily:FB,fontSize:10,color:T.SUB,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em",whiteSpace:"nowrap"}}>{events.length} total</div>
       </div>
-      <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"0 0 10px",width:"100%",minHeight:44,height:44,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
-      {events.length===0?<div style={{display:"inline-block",maxWidth:"100%",background:"rgba(20,24,33,0.72)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"12px",marginBottom:10}}>
+      <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"0 0 12px",width:"100%",minHeight:44,height:44,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
+      {events.length===0?<div style={{display:"inline-block",maxWidth:"100%",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 12px",marginBottom:12,textAlign:"center"}}>
+        <div style={{width:40,height:40,borderRadius:11,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={18} color={VOLT}/></div>
         <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events scheduled</div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:5,lineHeight:1.35}}>Create your first event to organize practices, games, camps, or meetings.</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.4}}>Create your first event to organize practices, games, camps, or meetings.</div>
       </div>:<div style={{display:"grid",gap:8,marginBottom:10}}>
         {(() => {
           const parseTime=(time="")=>{const m=String(time).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);if(!m)return Number.MAX_SAFE_INTEGER;let hour=Number(m[1]);const minute=Number(m[2]||"0");const meridiem=(m[3]||"").toUpperCase();if(meridiem==="PM"&&hour<12)hour+=12;if(meridiem==="AM"&&hour===12)hour=0;return hour*60+minute;};
