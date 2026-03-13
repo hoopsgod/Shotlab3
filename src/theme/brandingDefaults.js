@@ -1,17 +1,13 @@
-export const BRANDING_DEFAULTS = {
-  name: "ShotLab",
-  logoText: "SHOTLAB",
-  colors: {
-    primary: "#C8FF1A",
-    primaryText: "#0B0D10",
-    primarySoft: "rgba(200, 255, 26, 0.18)",
-    headerAccent: "#C8FF1A",
-    logoAccent: "#C8FF1A",
-    navActive: "#C8FF1A",
-    badgeBg: "rgba(200, 255, 26, 0.14)",
-    badgeBorder: "rgba(200, 255, 26, 0.42)",
-    badgeText: "#C8FF1A",
-  },
+export const DEFAULT_BRANDING = {
+  primaryColor: "#C8FF1A",
+  secondaryColor: "#9CA3AF",
+  accentColor: "#C8FF1A",
+  textOnPrimary: "#0B0D10",
+  logoUrl: "",
+  logoMarkUrl: "",
+  updatedAt: null,
+  updatedBy: null,
+  version: 1,
 };
 
-export default BRANDING_DEFAULTS;
+export default DEFAULT_BRANDING;

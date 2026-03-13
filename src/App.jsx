@@ -5,8 +5,10 @@ import PageHeader from "./components/PageHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
 import CoachHero from "./components/CoachHero";
 import CoachMiniHeader from "./components/CoachMiniHeader";
-import BRANDING_DEFAULTS from "./theme/brandingDefaults";
+import DEFAULT_BRANDING from "./theme/brandingDefaults";
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
+import TeamBrandingForm from "./components/team/TeamBrandingForm";
+import TeamBrandingPreview from "./components/team/TeamBrandingPreview";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -409,16 +411,16 @@ const used=ts.map(t=>t.joinCode);
 if(!hasTeams){
 if(coaches.length===0){
 const tid=genId("team");
-ts=[{id:tid,name:"ShotLab Team",ownerCoachId:null,joinCode:generateJoinCode(used),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:BRANDING_DEFAULTS}];
+ts=[{id:tid,name:"ShotLab Team",ownerCoachId:null,joinCode:generateJoinCode(used),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING}];
 ps.forEach(p=>{map[p.email]=tid});
 }else{
-coaches.forEach((c,i)=>{const tid=genId("team");const code=generateJoinCode([...used,...ts.map(t=>t.joinCode)]);ts.push({id:tid,name:c.name?`${c.name.split(" ")[0]}'s Team`:`Team ${i+1}`,ownerCoachId:c.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:BRANDING_DEFAULTS});map[c.email]=tid;});
+coaches.forEach((c,i)=>{const tid=genId("team");const code=generateJoinCode([...used,...ts.map(t=>t.joinCode)]);ts.push({id:tid,name:c.name?`${c.name.split(" ")[0]}'s Team`:`Team ${i+1}`,ownerCoachId:c.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING});map[c.email]=tid;});
 ps.forEach(p=>{if(p.role!=="coach"){const firstCoach=coaches[0];if(firstCoach)map[p.email]=map[firstCoach.email];}});
 }
 }else{
 ts.forEach(t=>{if(t.ownerCoachId)map[t.ownerCoachId]=t.id;});
 }
-const teamsWithBranding=ts.map(t=>({...t,branding:t.branding||BRANDING_DEFAULTS}));
+const teamsWithBranding=ts.map(t=>({...t,branding:t.branding||DEFAULT_BRANDING}));
 const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithBranding[0]?.id||null}));
 const profilesExisting=rawPlayerProfiles||[];
 const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null}));
@@ -489,7 +491,7 @@ await savePlayers();
 
 let demoTeam=nts.find(t=>t.ownerCoachId===DEMO_COACH.email);
 if(!demoTeam){
-demoTeam={id:genId("team"),name:"Demo Team",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nts.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:BRANDING_DEFAULTS};
+demoTeam={id:genId("team"),name:"Demo Team",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nts.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
 nts=[...nts,demoTeam];
 await saveTeams();
 }
@@ -532,7 +534,7 @@ const createTeam=async(name,meta={})=>{
 if(!user||user.role!=="coach")return{ok:false,err:"Not authorized"};
 if(teams.some(t=>t.ownerCoachId===user.email))return{ok:false,err:"Team already exists"};
 const code=generateJoinCode(teams.map(t=>t.joinCode));
-const nt={id:genId("team"),name:san(name)||"Team",school:san(meta.school||""),level:san(meta.level||""),ownerCoachId:user.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:BRANDING_DEFAULTS};
+const nt={id:genId("team"),name:san(name)||"Team",school:san(meta.school||""),level:san(meta.level||""),ownerCoachId:user.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
 await P("sl:teams",[...teams,nt],setTeams);
 const np=players.map(p=>p.email===user.email?{...p,teamId:nt.id}:p);
 await P("sl:players",np,setPlayers);
@@ -590,7 +592,23 @@ const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return;await
 const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:sc-sessions",scSessions.filter(s=>!(s.id===id&&s.teamId===user.teamId)),setScSessions);await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===id&&r.teamId===user.teamId)),setScRsvps)};
 const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)),setScRsvps);trackEvent("sc_rsvp_removed",{sessionId:sid});}else{await P("sl:sc-rsvps",[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setScRsvps);trackEvent("sc_rsvp_added",{sessionId:sid});}};
 const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:sc-logs",[{...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name},...scLogs],setScLogs)};
-
+const saveTeamBranding=async(nextBranding)=>{
+if(user?.role!=="coach"||!user?.teamId)return{ok:false,err:"Not authorized"};
+const team=teams.find(t=>t.id===user.teamId);
+if(!team)return{ok:false,err:"Team not found"};
+const mergedBranding={
+...DEFAULT_BRANDING,
+...(team.branding||{}),
+...(nextBranding||{}),
+updatedAt:Date.now(),
+updatedBy:user.email,
+version:Number(team.branding?.version||DEFAULT_BRANDING.version||1)+1,
+};
+const nextTeams=teams.map(t=>t.id===team.id?{...t,branding:mergedBranding}:t);
+await P("sl:teams",nextTeams,setTeams);
+trackEvent("team_branding_saved",{teamId:team.id});
+return{ok:true};
+};
 
 const scopedPlayers=players.filter(p=>p.teamId===user?.teamId);
 const scopedScores=scores.filter(s=>s.teamId===user?.teamId);
@@ -602,7 +620,7 @@ const scopedScSessions=scSessions.filter(s=>s.teamId===user?.teamId);
 const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
 const scopedScLogs=scLogs.filter(l=>l.teamId===user?.teamId);
 const myTeam=teams.find(t=>t.id===user?.teamId)||null;
-const resolvedTeamBranding=myTeam?.branding||BRANDING_DEFAULTS;
+const resolvedTeamBranding=myTeam?.branding||DEFAULT_BRANDING;
 
 useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.location.pathname});},[]);
 useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);
@@ -614,9 +632,44 @@ return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount}/></div>}
-{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount}/></div>}
+{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")}/></div>}
+{view==="coach-branding"&&<div className="screen-fade-in"><TeamBrandingSettings branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 </TeamBrandingProvider>;
 }
+
+
+function TeamBrandingSettings({branding,onSave,onBack,teamName}){
+const[saving,setSaving]=useState(false);
+const[message,setMessage]=useState("");
+const handleSave=async(next)=>{
+setSaving(true);
+setMessage("");
+const result=await onSave?.(next);
+setSaving(false);
+if(result?.ok){setMessage("Team branding saved for all coach/player views.");return;}
+setMessage(result?.err||"Could not save team branding.");
+};
+return <div className="team-brand" style={{minHeight:"100dvh",background:BG,color:LIGHT,padding:20,fontFamily:FB}}>
+<div style={{maxWidth:740,margin:"0 auto",display:"grid",gap:16}}>
+  <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+    <div>
+      <div style={{fontFamily:FD,fontSize:24,letterSpacing:2}}>TEAM BRANDING</div>
+      <div style={{color:MUTED,fontSize:13}}>{teamName} branding is shared by coaches and players.</div>
+    </div>
+    <button onClick={onBack} style={{padding:"8px 12px",borderRadius:10,border:"1px solid rgba(255,255,255,0.2)",background:"transparent",color:LIGHT}}>Back</button>
+  </div>
+  <div style={{background:SURFACE,border:"1px solid rgba(255,255,255,0.12)",borderRadius:16,padding:16}}>
+    <TeamBrandingForm branding={branding} onSave={handleSave} onCancel={onBack} saving={saving}/>
+  </div>
+  <div style={{background:SURFACE,border:"1px solid rgba(255,255,255,0.12)",borderRadius:16,padding:16}}>
+    <div style={{fontFamily:FD,fontSize:18,letterSpacing:1,marginBottom:10}}>Shared Preview</div>
+    <TeamBrandingPreview/>
+  </div>
+  {message&&<div style={{color:message.toLowerCase().includes("saved")?"#9DFF7A":"#FF8E8E",fontSize:13}}>{message}</div>}
+</div>
+</div>;
+}
+
 
 // ═══════════════════════════════════════
 // AUTH
@@ -1764,7 +1817,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 // ═══════════════════════════════════════
 // COACH SCREEN
 // ═══════════════════════════════════════
-function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount}){
+function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount,openTeamBranding}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:""});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"10",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all");
@@ -1901,6 +1954,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   onLogout={logout}
 />
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
+{u?.isCoach&&<div style={{display:"flex",justifyContent:"flex-end",marginBottom:10}}><button onClick={openTeamBranding} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--team-brand-badge-border)",background:"var(--team-brand-badge-bg)",color:"var(--team-brand-badge-text)",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>Team Branding Settings</button></div>}
 <CoachHero
   heroRef={heroRef}
   isOverview={isOverviewTab}

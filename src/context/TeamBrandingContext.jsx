@@ -1,20 +1,26 @@
 import { createContext, useContext, useEffect, useMemo } from "react";
-import BRANDING_DEFAULTS from "../theme/brandingDefaults";
+import DEFAULT_BRANDING from "../theme/brandingDefaults";
 import buildThemeTokens from "../theme/buildThemeTokens";
 import applyThemeVariables from "../theme/applyThemeVariables";
 
+const defaultTheme = buildThemeTokens(DEFAULT_BRANDING);
+
 const TeamBrandingContext = createContext({
-  branding: BRANDING_DEFAULTS,
-  tokens: buildThemeTokens(BRANDING_DEFAULTS),
+  branding: DEFAULT_BRANDING,
+  theme: defaultTheme,
+  tokens: defaultTheme,
 });
 
 export function TeamBrandingProvider({ branding, children }) {
-  const safeBranding = branding || BRANDING_DEFAULTS;
-  const tokens = useMemo(() => buildThemeTokens(safeBranding), [safeBranding]);
+  const safeBranding = useMemo(() => ({ ...DEFAULT_BRANDING, ...(branding || {}) }), [branding]);
+  const theme = useMemo(() => buildThemeTokens(safeBranding), [safeBranding]);
 
-  useEffect(() => applyThemeVariables(tokens.cssVariables), [tokens]);
+  useEffect(() => applyThemeVariables(theme.cssVariables), [theme]);
 
-  const value = useMemo(() => ({ branding: safeBranding, tokens }), [safeBranding, tokens]);
+  const value = useMemo(
+    () => ({ branding: safeBranding, theme, tokens: theme }),
+    [safeBranding, theme]
+  );
 
   return <TeamBrandingContext.Provider value={value}>{children}</TeamBrandingContext.Provider>;
 }
