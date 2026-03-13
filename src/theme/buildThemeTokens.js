@@ -4,6 +4,8 @@ export default function buildThemeTokens(teamBranding = {}) {
   const branding = resolveTeamBranding(teamBranding);
 
   const primarySoft = `color-mix(in srgb, ${branding.primaryColor} 22%, transparent)`;
+  const accentSoft = `color-mix(in srgb, ${branding.accentColor} 22%, transparent)`;
+  const accentBg = `color-mix(in srgb, ${branding.accentColor} 8%, transparent)`;
 
   return {
     branding,
@@ -17,6 +19,8 @@ export default function buildThemeTokens(teamBranding = {}) {
       badgeBg: `color-mix(in srgb, ${branding.accentColor} 16%, transparent)`,
       badgeBorder: `color-mix(in srgb, ${branding.accentColor} 42%, transparent)`,
       badgeText: branding.accentColor,
+      accentSoft,
+      accentBg,
       secondary: branding.secondaryColor,
     },
     cssVariables: {
@@ -33,6 +37,8 @@ export default function buildThemeTokens(teamBranding = {}) {
       "--team-brand-badge-text": branding.accentColor,
       "--accent": branding.accentColor,
       "--accent-soft": primarySoft,
+      "--team-brand-accent-soft": accentSoft,
+      "--team-brand-accent-bg": accentBg,
       "--color-primary": branding.primaryColor,
       "--nav-active-text": branding.accentColor,
       "--page-accent": branding.accentColor,
