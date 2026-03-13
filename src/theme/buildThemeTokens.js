@@ -90,6 +90,7 @@ export default function buildThemeTokens(teamBranding = {}) {
       "--team-brand-accent-bg": brandTintSurface,
       "--color-primary": brandPrimary,
       "--nav-active-text": brandNavActive,
+      "--nav-active-glow": rgba(brandNavActive, 0.22),
       "--page-accent": brandAccentText,
     },
   };
