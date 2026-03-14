@@ -1871,6 +1871,7 @@ const isCoachTab=u.isCoach&&coachTabs.includes(tab);
 const showFullCommandCenter=isCoachTab&&tab==="feed";
 const handleManageEventsScroll=useCallback(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth"}),[]);
 const handleToggleAddEvent=useCallback(()=>setShowAdd(true),[]);
+const coachTextScale=COACH_TEXT_SIZES.includes(coachTextSize)?coachTextSize:"standard";
 
 useEffect(()=>{
   const onResize=()=>setIsDesktop(window.innerWidth>=1024);
@@ -1914,7 +1915,7 @@ useEffect(()=>{
   return()=>{window.removeEventListener("scroll",onScroll);window.removeEventListener("resize",onScroll);};
 },[tab]);
 
-return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
+return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-text-scale={coachTextScale}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
 <main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
