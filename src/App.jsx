@@ -454,7 +454,7 @@ const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
 const setCoachTextSize=useCallback(async(size)=>{
 if(user?.role!=="coach"||!user?.email)return;
 const safeSize=COACH_TEXT_SIZES.includes(size)?size:"standard";
-const nextPrefs={...coachPreferences,[user.email]:{...(coachPreferences[user.email]||{}),textSize:safeSize,updatedAt:Date.now()}};
+const nextPrefs={...coachPreferences,[user.email]:{...(coachPreferences[user.email]||{}),textSize:safeSize}};
 await P("sl:coach-preferences",nextPrefs,setCoachPreferences);
 },[P,coachPreferences,user]);
 // Auth with hashed passwords
