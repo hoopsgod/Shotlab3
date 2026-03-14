@@ -2608,10 +2608,10 @@ function AnimNum({v,c=VOLT,big,size}){const[display,setDisplay]=useState(0);cons
 function BrandWordmark({size=30,small}){
 const {branding,tokens}=useTeamBranding();
 const logoAccent=tokens?.colors?.logoAccent||"var(--team-brand-logo-accent,var(--accent))";
-const logoHeight=Math.max(32,Math.round(size*(small?2.2:1.85)));
+const logoHeight=Math.max(32,Math.round(size*(small?2.35:2)));
 if(branding?.logoUrl){
   return <div style={{display:"flex",alignItems:"center",justifyContent:"center",minWidth:0,maxWidth:"100%",width:"100%"}}>
-    <img src={branding.logoUrl} alt={`${branding?.teamName||"Team"} logo`} style={{height:logoHeight,maxHeight:"74%",maxWidth:"100%",objectFit:"contain"}}/>
+    <img src={branding.logoUrl} alt={`${branding?.teamName||"Team"} logo`} style={{height:logoHeight,maxHeight:"88%",maxWidth:"100%",objectFit:"contain"}}/>
   </div>;
 }
 if(branding?.logoMarkUrl){
