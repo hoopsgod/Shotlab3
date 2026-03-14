@@ -5,6 +5,7 @@ export const DEFAULT_BRANDING = {
   textOnPrimary: "#0B0D10",
   logoUrl: "",
   logoMarkUrl: "",
+  textScale: "standard",
   updatedAt: null,
   updatedBy: null,
   version: 1,

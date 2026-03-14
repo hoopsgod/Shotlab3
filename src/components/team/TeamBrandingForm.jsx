@@ -22,6 +22,12 @@ const FILE_TO_FIELD_MAP = {
   mark: "logoMarkUrl",
 };
 
+const TEXT_SCALE_OPTIONS = [
+  { key: "standard", label: "Default", hint: "Current ShotLab sizing" },
+  { key: "large", label: "Large", hint: "More readable body and control text" },
+  { key: "xl", label: "Extra Large", hint: "Strong readability while keeping hierarchy" },
+];
+
 function Field({ field, value, onChange }) {
   return (
     <label style={{ display: "grid", gap: 6, color: "#E5E7EB", fontSize: 12.5 }}>
@@ -161,6 +167,42 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
                     />
                   ))}
                 </div>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      <section style={{ display: "grid", gap: 10, paddingTop: 4, borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <div style={{ display: "grid", gap: 2 }}>
+          <div style={{ color: "#E5E7EB", fontSize: 13, fontWeight: 700, letterSpacing: 0.4 }}>Text Size</div>
+          <div style={{ color: "#9CA3AF", fontSize: 12 }}>Controls shared body, helper, button, input, and navigation labels.</div>
+        </div>
+        <div role="radiogroup" aria-label="Text size" style={{ display: "grid", gap: 8 }}>
+          {TEXT_SCALE_OPTIONS.map((option) => {
+            const selected = values.textScale === option.key;
+            return (
+              <button
+                key={option.key}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                onClick={() => handleChange("textScale", option.key)}
+                style={{
+                  textAlign: "left",
+                  minHeight: 42,
+                  borderRadius: 10,
+                  padding: "9px 12px",
+                  border: selected ? "1px solid rgba(157,255,122,0.9)" : "1px solid rgba(255,255,255,0.14)",
+                  background: selected ? "rgba(157,255,122,0.1)" : "#111620",
+                  color: "#E5E7EB",
+                  display: "grid",
+                  gap: 2,
+                  cursor: "pointer",
+                }}
+              >
+                <span style={{ fontSize: 12.5, fontWeight: 700 }}>{option.label}</span>
+                <span style={{ fontSize: 11.5, color: "#9CA3AF" }}>{option.hint}</span>
               </button>
             );
           })}

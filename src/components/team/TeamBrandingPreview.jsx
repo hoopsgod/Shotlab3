@@ -110,6 +110,9 @@ function PreviewCard({ title, subtitle, chip }) {
 }
 
 function TeamBrandingPreviewContent() {
+  const { branding } = useTeamBranding();
+  const currentTextScale = branding?.textScale || "standard";
+
   return (
     <div style={{ display: "grid", gap: 12 }}>
       <div style={{ display: "grid", gap: 4 }}>
@@ -119,6 +122,11 @@ function TeamBrandingPreviewContent() {
       <div style={{ display: "grid", gap: 10 }}>
         <PreviewCard title="Coach App Preview" subtitle="Command center header and branded UI" chip="Coach" />
         <PreviewCard title="Player App Preview" subtitle="Training and feed views with shared identity" chip="Player" />
+      </div>
+      <div style={{ borderRadius: 12, border: "1px solid rgba(255,255,255,0.12)", background: "#10151F", padding: "12px 14px", display: "grid", gap: 8 }}>
+        <div style={{ color: "#E5E7EB", fontSize: 12, fontWeight: 700, letterSpacing: 0.4 }}>Typography Preview · {currentTextScale === "xl" ? "Extra Large" : currentTextScale === "large" ? "Large" : "Default"}</div>
+        <div style={{ color: "#E5E7EB", fontSize: "calc(13px * var(--coach-text-scale-medium))", fontWeight: 600 }}>Button and section labels stay crisp.</div>
+        <div style={{ color: "#9CA3AF", fontSize: "calc(11px * var(--coach-text-scale-small))", lineHeight: 1.5 }}>Helper and supporting copy scale more for readability while display-sized headers remain visually stable.</div>
       </div>
     </div>
   );
