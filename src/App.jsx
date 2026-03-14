@@ -55,6 +55,7 @@ ICON_INNER:"rgba(255, 255, 255, 0.06)",
 FOCUS_RING:"rgba(200, 255, 0, 0.45)",
 CHEVRON_BG:"rgba(255, 255, 255, 0.06)",
 };
+const COACH_TEXT_SIZES=["standard","large","xl"];
 
 const DRILLS_INIT=[
 {id:1,name:"FORM SHOOTING",desc:"10 shots from 5 feet. Elbow, follow-through, arc.",max:10,icon:"ft"},
@@ -390,7 +391,7 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
+const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[coachPreferences,setCoachPreferences]=useState({}),[ready,setReady]=useState(false);
 const T=THEMES[theme];
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
@@ -442,7 +443,7 @@ return {playersMigrated,profilesMigrated,teamsMigrated:teamsWithBranding,scoresM
 },[]);
 
 // Load persisted data + restore session
-useEffect(()=>{(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session")]);if(d)setDrills(d);if(pd)setProgramDrills(pd);
+useEffect(()=>{(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess,cp]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session"),DB.get("sl:coach-preferences")]);if(d)setDrills(d);if(pd)setProgramDrills(pd);if(cp&&typeof cp==="object")setCoachPreferences(cp);
 const m=migrateData({players:p,playerProfiles:pp,scores:s,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
 await Promise.all([DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
@@ -450,6 +451,12 @@ if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.emai
 setReady(true)})()},[migrateData]);
 
 const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
+const setCoachTextSize=useCallback(async(size)=>{
+if(user?.role!=="coach"||!user?.email)return;
+const safeSize=COACH_TEXT_SIZES.includes(size)?size:"standard";
+const nextPrefs={...coachPreferences,[user.email]:{...(coachPreferences[user.email]||{}),textSize:safeSize,updatedAt:Date.now()}};
+await P("sl:coach-preferences",nextPrefs,setCoachPreferences);
+},[P,coachPreferences,user]);
 // Auth with hashed passwords
 const register=async(email,password,name,role)=>{
 const existing=players.find(p=>p.email===email);
@@ -625,6 +632,7 @@ const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
 const scopedScLogs=scLogs.filter(l=>l.teamId===user?.teamId);
 const myTeam=teams.find(t=>t.id===user?.teamId)||null;
 const resolvedTeamBranding=resolveTeamBranding(myTeam?.branding||DEFAULT_BRANDING);
+const coachTextSize=(user?.role==="coach"&&COACH_TEXT_SIZES.includes(coachPreferences?.[user?.email]?.textSize))?coachPreferences[user.email].textSize:"standard";
 
 useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.location.pathname});},[]);
 useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);
@@ -636,7 +644,7 @@ return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount}/></div>}
-{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")}/></div>}
+{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} onCoachTextSizeChange={setCoachTextSize}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 </TeamBrandingProvider>;
 }
@@ -1786,7 +1794,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 // ═══════════════════════════════════════
 // COACH SCREEN
 // ═══════════════════════════════════════
-function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount,openTeamBranding}){
+function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount,openTeamBranding,coachTextSize="standard",onCoachTextSizeChange}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:""});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"10",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all");
@@ -2006,6 +2014,17 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           • {inactive.length} player{inactive.length>1?"s":""} haven't logged this week: {inactive.slice(0,3).map(p=>p.name.split(" ")[0]).join(", ")}{inactive.length>3?` +${inactive.length-3} more`:""}
         </div>:<div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:600,letterSpacing:1}}>✓ All players active this week</div>
       })()}
+    </div>
+
+    <div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 16px",marginBottom:14}}>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:"0.08em",textTransform:"uppercase",fontWeight:700,marginBottom:10}}>Coach Preferences</div>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:8}}>
+        <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:600}}>Text size</div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>Coach-only</div>
+      </div>
+      <div role="radiogroup" aria-label="Coach text size" style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+        {COACH_TEXT_SIZES.map(size=>{const active=coachTextSize===size;const label=size==="xl"?"Extra Large":size.charAt(0).toUpperCase()+size.slice(1);return <button key={size} type="button" role="radio" aria-checked={active} onClick={()=>onCoachTextSizeChange?.(size)} style={{padding:"7px 10px",borderRadius:999,border:`1px solid ${active?VOLT:BORDER_CLR}`,background:active?VOLT+"22":BG,color:active?VOLT:LIGHT,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>{label}</button>;})}
+      </div>
     </div>
 
     </div>
