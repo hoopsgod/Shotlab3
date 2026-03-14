@@ -2660,5 +2660,5 @@ return <nav className="bottom-nav" role="navigation" aria-label="Main navigation
 const tabAccent="var(--nav-active-text,var(--nav-accent))";
 return <button key={t.k} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:48,height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:4,padding:"8px 4px 6px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 150ms ease-out",outlineOffset:2}}>
 <div className="tab-icon" style={{position:"relative"}}>{t.svg}</div>
-<div className="tab-label" style={{fontFamily:FB,fontSize:10,letterSpacing:"0.05em",textTransform:"uppercase",lineHeight:1.1,whiteSpace:"nowrap"}}>{t.l}</div>
+<div className="tab-label" style={{fontFamily:FB,fontSize:"calc(10px * var(--coach-text-scale-small))",letterSpacing:"0.05em",textTransform:"uppercase",lineHeight:1.1,whiteSpace:"nowrap"}}>{t.l}</div>
 </button>})}</nav>}
