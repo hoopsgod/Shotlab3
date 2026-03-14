@@ -56,10 +56,10 @@ export default function AppHeader({
       minWidth: 28,
       padding: 0,
       fontSize: 10,
-      color: "color-mix(in srgb, var(--team-brand-action-text, var(--text-2)) 74%, transparent)",
-      borderColor: "color-mix(in srgb, var(--team-brand-border, var(--stroke-1)) 62%, transparent)",
-      background: "color-mix(in srgb, var(--surface-1) 70%, transparent)",
-      opacity: 0.68,
+      color: "color-mix(in srgb, var(--team-brand-action-text, var(--text-2)) 62%, transparent)",
+      borderColor: "color-mix(in srgb, var(--team-brand-border, var(--stroke-1)) 48%, transparent)",
+      background: "color-mix(in srgb, var(--surface-1) 58%, transparent)",
+      opacity: 0.6,
     }
     : null;
 
