@@ -49,6 +49,19 @@ export default function AppHeader({
   action,
 }) {
   const stylePreset = VARIANT_STYLES[variant] || VARIANT_STYLES.standard;
+  const isIconOnlyAction = Boolean(action && !action.label);
+  const quietBrandedActionStyle = variant === "branded" && isIconOnlyAction
+    ? {
+      height: 28,
+      minWidth: 28,
+      padding: 0,
+      fontSize: 10,
+      color: "color-mix(in srgb, var(--team-brand-action-text, var(--text-2)) 74%, transparent)",
+      borderColor: "color-mix(in srgb, var(--team-brand-border, var(--stroke-1)) 62%, transparent)",
+      background: "color-mix(in srgb, var(--surface-1) 70%, transparent)",
+      opacity: 0.68,
+    }
+    : null;
 
   return (
     <header
@@ -93,7 +106,7 @@ export default function AppHeader({
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", maxWidth: "100%" }}>
             {brandLockup ? <div style={{ minWidth: 0 }}>{brandLockup}</div> : null}
             {action ? (
-              <button type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, opacity: 0.85 }}>
+              <button type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, opacity: 0.85, ...(quietBrandedActionStyle || {}) }}>
                 {action.icon}
                 {action.label ? <span>{action.label}</span> : null}
               </button>
