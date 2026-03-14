@@ -85,7 +85,29 @@ const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.get
 const ALNUM="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const DEMO_PLAYER={email:"demo@shotlab.app",password:"demo1234",name:"Demo Player",role:"player"};
 const DEMO_COACH={email:"coach.demo@shotlab.app",password:"demo1234",name:"Demo Coach",role:"coach"};
+const COACH_TEXT_SCALES=new Set(["standard","large","xl"]);
 const genId=(p="id")=>`${p}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+
+function normalizeCoachTextScale(value){
+  if(typeof value!=="string")return "standard";
+  const normalized=value.trim().toLowerCase();
+  return COACH_TEXT_SCALES.has(normalized)?normalized:"standard";
+}
+
+function resolveCoachTextScalePreference(user){
+  if(!user?.isCoach)return "standard";
+  return normalizeCoachTextScale(
+    user?.coachTextSize
+    ??user?.textSize
+    ??user?.preferences?.coachTextSize
+    ??user?.preferences?.textSize
+  );
+}
+
+function useCoachTextScale(user){
+  return useMemo(()=>resolveCoachTextScalePreference(user),[user]);
+}
+
 function generateJoinCode(existing=[],length=6){
 for(let tries=0;tries<30;tries++){
 let code="";
@@ -625,6 +647,8 @@ const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
 const scopedScLogs=scLogs.filter(l=>l.teamId===user?.teamId);
 const myTeam=teams.find(t=>t.id===user?.teamId)||null;
 const resolvedTeamBranding=resolveTeamBranding(myTeam?.branding||DEFAULT_BRANDING);
+const coachTextScale=useCoachTextScale(user);
+const coachTextScaleFactor=coachTextScale==="xl"?"1.2":coachTextScale==="large"?"1.1":"1";
 
 useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.location.pathname});},[]);
 useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);
@@ -632,13 +656,14 @@ useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.
 
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
-return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
+return <TeamBrandingProvider branding={resolvedTeamBranding}><div className="app-root" data-text-scale={coachTextScale} style={{"--coach-text-scale":coachTextScaleFactor}}>
+<Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
-</TeamBrandingProvider>;
+</div></TeamBrandingProvider>;
 }
 // ═══════════════════════════════════════
 // AUTH
