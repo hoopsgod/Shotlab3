@@ -31,12 +31,12 @@ export default function CoachHero({
                 border: "1px solid color-mix(in srgb, var(--team-brand-border, var(--stroke-2)) 70%, transparent)",
                 borderRadius: 16,
                 background: "linear-gradient(135deg, color-mix(in srgb, var(--team-brand-surface, var(--surface-1)) 88%, transparent), color-mix(in srgb, var(--team-brand-surface-soft, var(--surface-2)) 76%, transparent))",
-                padding: "12px 16px",
-                minHeight: 68,
+                padding: "8px 10px",
+                minHeight: 64,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--team-brand-accent, var(--accent)) 22%, transparent)",
+                boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--team-brand-accent, var(--accent)) 14%, transparent)",
                 maxWidth: "min(320px, 78vw)",
               }}
             >
