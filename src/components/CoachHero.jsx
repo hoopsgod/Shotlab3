@@ -28,7 +28,7 @@ export default function CoachHero({
             </span>
             <div
               style={{
-                border: "1px solid color-mix(in srgb, var(--team-brand-border, var(--stroke-2)) 48%, transparent)",
+                border: "1px solid color-mix(in srgb, var(--team-brand-border, var(--stroke-2)) 36%, transparent)",
                 borderRadius: 16,
                 background: "linear-gradient(135deg, color-mix(in srgb, var(--team-brand-surface, var(--surface-1)) 88%, transparent), color-mix(in srgb, var(--team-brand-surface-soft, var(--surface-2)) 76%, transparent))",
                 padding: "5px 8px",
