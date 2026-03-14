@@ -24,17 +24,20 @@ const ACTION_BASE = {
   border: "1px solid var(--team-brand-border, var(--stroke-1))",
   background: "var(--team-brand-action-bg, color-mix(in srgb, var(--surface-1) 88%, transparent))",
   color: "var(--team-brand-action-text, var(--text-2))",
-  height: 30,
+  minHeight: 30,
   minWidth: 30,
-  padding: "0 10px",
+  padding: "6px 10px",
   fontSize: 10,
+  lineHeight: 1.2,
   fontWeight: 700,
   letterSpacing: "var(--tracking-tight)",
   textTransform: "uppercase",
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
+  textAlign: "center",
   gap: 4,
+  whiteSpace: "normal",
   cursor: "pointer",
   transition: "background-color 0.16s ease, border-color 0.16s ease",
 };
@@ -52,9 +55,9 @@ export default function AppHeader({
   const isIconOnlyAction = Boolean(action && !action.label);
   const quietBrandedActionStyle = variant === "branded" && isIconOnlyAction
     ? {
-      height: 28,
+      minHeight: 28,
       minWidth: 28,
-      padding: 0,
+      padding: 4,
       fontSize: 10,
       color: "color-mix(in srgb, var(--team-brand-action-text, var(--text-2)) 62%, transparent)",
       borderColor: "color-mix(in srgb, var(--team-brand-border, var(--stroke-1)) 48%, transparent)",
@@ -91,11 +94,11 @@ export default function AppHeader({
                 {eyebrow}
               </div>
             ) : null}
-            <h1 style={{ fontSize: variant === "utility" ? 18 : 28, lineHeight: 1.03, margin: 0, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "var(--tracking-default)" }}>
+            <h1 style={{ fontSize: variant === "utility" ? 18 : 28, lineHeight: 1.08, margin: 0, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "var(--tracking-default)" }}>
               {title}
             </h1>
             {subtitle ? (
-              <p style={{ marginTop: 6, marginBottom: 0, color: "var(--text-2)", fontSize: 12, letterSpacing: "0.03em", maxWidth: 520 }}>
+              <p style={{ marginTop: 6, marginBottom: 0, color: "var(--text-2)", fontSize: 12, letterSpacing: "0.03em", lineHeight: 1.35, overflowWrap: "anywhere", maxWidth: 520 }}>
                 {subtitle}
               </p>
             ) : null}
@@ -103,7 +106,7 @@ export default function AppHeader({
         </div>
 
         {(brandLockup || action) ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginLeft: "auto", maxWidth: "100%" }}>
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 6, marginLeft: "auto", maxWidth: "100%", flexWrap: "wrap" }}>
             {brandLockup ? <div style={{ minWidth: 0 }}>{brandLockup}</div> : null}
             {action ? (
               <button type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, opacity: 0.85, ...(quietBrandedActionStyle || {}) }}>
