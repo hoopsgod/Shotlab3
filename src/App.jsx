@@ -199,6 +199,7 @@ const _PAGE_SIGNATURE_CSS=`
 .coach-mode .subtitle,
 .coach-mode .pageHeaderText p{
   letter-spacing:0.06em;
+  font-size:calc(1em * var(--coach-text-scale-small));
 }
 
 .coach-mode .helper,
@@ -211,6 +212,7 @@ const _PAGE_SIGNATURE_CSS=`
 .coach-mode p:not(.page-title){
   color:#B0B6BD;
   opacity:.78;
+  font-size:calc(1em * var(--coach-text-scale-small));
 }
 
 /* ================================
