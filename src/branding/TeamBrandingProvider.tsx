@@ -14,6 +14,7 @@ export interface TeamBranding {
   textOnPrimary?: string;
   logoUrl?: string;
   logoMarkUrl?: string;
+  textScale?: "standard" | "large" | "xl";
   updatedAt?: number | null;
   updatedBy?: string | null;
   version?: number;

@@ -6,6 +6,10 @@ function resolveLegacyColor(value, fallback) {
   return typeof value === "string" && value.trim() ? value : fallback;
 }
 
+function resolveTextScale(value) {
+  return ["standard", "large", "xl"].includes(value) ? value : DEFAULT_BRANDING.textScale;
+}
+
 function withBrandingCacheBust(url, branding) {
   if (!url || !HTTP_URL_RE.test(url)) return url || "";
 
@@ -33,6 +37,7 @@ export default function resolveTeamBranding(teamBranding = {}) {
     textOnPrimary: resolveLegacyColor(teamBranding?.textOnPrimary || legacyColors.primaryText, DEFAULT_BRANDING.textOnPrimary),
     logoUrl: teamBranding?.logoUrl || "",
     logoMarkUrl: teamBranding?.logoMarkUrl || "",
+    textScale: resolveTextScale(teamBranding?.textScale),
   };
 
   return {

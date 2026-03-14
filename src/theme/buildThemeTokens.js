@@ -4,6 +4,12 @@ import { balanceBrandColor, mixHex, normalizeHexColor, resolveOnColor, rgba } fr
 
 export default function buildThemeTokens(teamBranding = {}) {
   const branding = resolveTeamBranding(teamBranding);
+  const textScale = branding.textScale || DEFAULT_BRANDING.textScale;
+  const textScaleTokens = textScale === "xl"
+    ? { small: 1.16, medium: 1.12 }
+    : textScale === "large"
+      ? { small: 1.08, medium: 1.06 }
+      : { small: 1, medium: 1 };
 
   const rawPrimary = normalizeHexColor(branding.primaryColor, DEFAULT_BRANDING.primaryColor);
   const rawSecondary = normalizeHexColor(branding.secondaryColor, rawPrimary);
@@ -92,6 +98,8 @@ export default function buildThemeTokens(teamBranding = {}) {
       "--nav-active-text": brandNavActive,
       "--nav-active-glow": rgba(brandNavActive, 0.22),
       "--page-accent": brandAccentText,
+      "--coach-text-scale-small": String(textScaleTokens.small),
+      "--coach-text-scale-medium": String(textScaleTokens.medium),
     },
   };
 }
