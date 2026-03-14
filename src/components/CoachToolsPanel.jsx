@@ -82,15 +82,13 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
 
         .coach-tools-trigger {
           position: relative;
-          height: 46px;
-          min-height: 44px;
-          max-height: 52px;
+          min-height: 46px;
           width: 100%;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: space-between;
           gap: 10px;
-          padding: 0 13px;
+          padding: 8px 13px;
           border: 0;
           border-radius: 13px;
           background: rgba(255, 255, 255, 0.01);
@@ -101,6 +99,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           letter-spacing: var(--tracking-tight);
           text-transform: uppercase;
           font-size: 11px;
+          line-height: 1.3;
           transition: background-color 160ms ease, color 160ms ease;
         }
 
@@ -131,12 +130,18 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
 
         .coach-tools-trigger__left {
           display: inline-flex;
-          align-items: center;
+          align-items: flex-start;
           gap: 8px;
+          min-width: 0;
+          flex: 1 1 auto;
+          text-align: left;
+          white-space: normal;
+          overflow-wrap: anywhere;
         }
 
         .coach-tools-trigger__icon-wrap {
           width: 20px;
+          min-width: 20px;
           height: 20px;
           border-radius: 6px;
           display: inline-flex;
@@ -149,6 +154,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
 
         .coach-tools-trigger__chevron {
           display: inline-flex;
+          align-self: center;
           transform: ${open ? "rotate(180deg)" : "rotate(0deg)"};
           transition: transform 200ms ease;
           color: var(--text-secondary);

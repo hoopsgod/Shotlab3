@@ -77,13 +77,13 @@ function PreviewCard({ title, subtitle, chip }) {
           padding: "11px 14px",
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: "flex-start",
           gap: 10,
         }}
       >
-        <div style={{ display: "grid", gap: 2 }}>
+        <div style={{ display: "grid", gap: 2, minWidth: 0, flex: "1 1 auto" }}>
           <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 0.4 }}>{title}</div>
-          <div style={{ color: "rgba(229,231,235,0.64)", fontSize: 11 }}>{subtitle}</div>
+          <div style={{ color: "rgba(229,231,235,0.64)", fontSize: 11, lineHeight: 1.35, overflowWrap: "anywhere" }}>{subtitle}</div>
         </div>
         <span
           style={{
@@ -92,7 +92,8 @@ function PreviewCard({ title, subtitle, chip }) {
             background: theme.colors.badgeBg,
             border: `1px solid ${theme.colors.badgeBorder}`,
             color: theme.colors.badgeText,
-            padding: "3px 8px",
+            minHeight: 22,
+            padding: "4px 8px",
             borderRadius: 999,
             fontSize: 10,
             fontWeight: 600,
