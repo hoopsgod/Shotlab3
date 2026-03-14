@@ -34,7 +34,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
+          <span style={{ fontFamily: FD, fontSize: "calc(11px * var(--text-scale-label, 1))", letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
           {avatar}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
@@ -50,7 +50,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
             height: 32,
             cursor: "pointer",
             fontFamily: FB,
-            fontSize: 12,
+            fontSize: "calc(12px * var(--text-scale-button, 1))",
           }}
         >
           ✕

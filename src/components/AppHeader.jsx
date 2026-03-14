@@ -27,7 +27,7 @@ const ACTION_BASE = {
   height: 30,
   minWidth: 30,
   padding: "0 10px",
-  fontSize: 10,
+  fontSize: "calc(10px * var(--text-scale-button, 1))",
   fontWeight: 700,
   letterSpacing: "var(--tracking-tight)",
   textTransform: "uppercase",
@@ -55,7 +55,7 @@ export default function AppHeader({
       height: 28,
       minWidth: 28,
       padding: 0,
-      fontSize: 10,
+      fontSize: "calc(10px * var(--text-scale-button, 1))",
       color: "color-mix(in srgb, var(--team-brand-action-text, var(--text-2)) 62%, transparent)",
       borderColor: "color-mix(in srgb, var(--team-brand-border, var(--stroke-1)) 48%, transparent)",
       background: "color-mix(in srgb, var(--surface-1) 58%, transparent)",
@@ -87,15 +87,15 @@ export default function AppHeader({
           {leading ? <div style={{ marginTop: 1, color: "var(--text-2)", flexShrink: 0 }}>{leading}</div> : null}
           <div style={{ minWidth: 0 }}>
             {eyebrow ? (
-              <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", color: "var(--text-3)", fontWeight: 700, marginBottom: 4 }}>
+              <div style={{ fontSize: "calc(10px * var(--text-scale-label, 1))", textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", color: "var(--text-3)", fontWeight: 700, marginBottom: 4 }}>
                 {eyebrow}
               </div>
             ) : null}
-            <h1 style={{ fontSize: variant === "utility" ? 18 : 28, lineHeight: 1.03, margin: 0, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "var(--tracking-default)" }}>
+            <h1 style={{ fontSize: variant === "utility" ? "calc(18px * var(--text-scale-title, 1))" : "calc(28px * var(--text-scale-title, 1))", lineHeight: 1.03, margin: 0, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "var(--tracking-default)" }}>
               {title}
             </h1>
             {subtitle ? (
-              <p style={{ marginTop: 6, marginBottom: 0, color: "var(--text-2)", fontSize: 12, letterSpacing: "0.03em", maxWidth: 520 }}>
+              <p style={{ marginTop: 6, marginBottom: 0, color: "var(--text-2)", fontSize: "calc(12px * var(--text-scale-subtitle, 1))", letterSpacing: "0.03em", maxWidth: 520 }}>
                 {subtitle}
               </p>
             ) : null}
