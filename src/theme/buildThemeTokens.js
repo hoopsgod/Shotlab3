@@ -6,10 +6,10 @@ export default function buildThemeTokens(teamBranding = {}) {
   const branding = resolveTeamBranding(teamBranding);
   const textScale = branding.textScale || DEFAULT_BRANDING.textScale;
   const textScaleTokens = textScale === "xl"
-    ? { small: 1.16, medium: 1.12 }
+    ? { small: 1.2, medium: 1.18, display: 1.05 }
     : textScale === "large"
-      ? { small: 1.08, medium: 1.06 }
-      : { small: 1, medium: 1 };
+      ? { small: 1.11, medium: 1.1, display: 1.03 }
+      : { small: 1, medium: 1, display: 1 };
 
   const rawPrimary = normalizeHexColor(branding.primaryColor, DEFAULT_BRANDING.primaryColor);
   const rawSecondary = normalizeHexColor(branding.secondaryColor, rawPrimary);
@@ -100,6 +100,7 @@ export default function buildThemeTokens(teamBranding = {}) {
       "--page-accent": brandAccentText,
       "--coach-text-scale-small": String(textScaleTokens.small),
       "--coach-text-scale-medium": String(textScaleTokens.medium),
+      "--coach-text-scale-display": String(textScaleTokens.display),
     },
   };
 }
