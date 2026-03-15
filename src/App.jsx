@@ -1967,7 +1967,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 </div>
 {u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:"0 16px",gap:8}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:"rgba(200, 255, 0, 0.84)"}}>COACH VIEW — FULL ACCESS</span></div>}
 
-<div style={{flex:1,padding:`${showMiniHeader?"88px":"16px"} 20px 110px`,overflowY:"auto",position:"relative",zIndex:1}}>
+<div style={{flex:1,padding:`${showMiniHeader?"88px":"16px"} 20px 110px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.feed.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S PULSE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>Who's active, streaking, and needs attention</div></div><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setTab("players")}>View Team</button></div>
     {/* Coach dashboard pulse */}
@@ -2144,7 +2144,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       </div>}
     </>}
 
-    {showAdd&&<div className="fade-up" style={{position:"fixed",inset:0,zIndex:90,display:"flex",alignItems:isDesktop?"flex-end":"stretch",paddingTop:isDesktop?0:"max(0px, env(safe-area-inset-top, 0px))",overscrollBehavior:"none"}}>
+    {showAdd&&<div className="fade-up" style={{position:"fixed",inset:0,zIndex:90,display:"flex",alignItems:isDesktop?"flex-end":"stretch",paddingTop:0,overscrollBehavior:"none"}}>
       {isDesktop&&<button aria-label="Close create event form" onClick={()=>setShowAdd(false)} style={{position:"absolute",inset:0,border:"none",background:"rgba(0,0,0,0.70)",cursor:"pointer"}}/>}
       {isDesktop?<>
       <button aria-label="Close create event form" onClick={()=>setShowAdd(false)} style={{position:"absolute",inset:0,border:"none",background:"rgba(0,0,0,0.70)",cursor:"pointer"}}/>
@@ -2170,8 +2170,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           <button className="btn-v cta-primary" onClick={handleAddEvent} style={{width:"100%",margin:0,minHeight:44,height:44,borderRadius:10}}>CREATE EVENT</button>
         </div>
       </div>
-      </>:<div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"relative",zIndex:100,width:"100%",height:"100dvh",maxHeight:"100dvh",background:BG,display:"flex",flexDirection:"column",overflow:"hidden",minHeight:0,paddingBottom:"max(10px, env(safe-area-inset-bottom, 0px))"}}>
-        <div style={{position:"sticky",top:0,zIndex:2,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 14px",borderBottom:`1px solid ${BORDER_CLR}`,background:BG,gap:10,flexShrink:0}}>
+      </>:<div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"relative",zIndex:100,width:"100%",height:"100%",maxHeight:"100%",background:BG,display:"flex",flexDirection:"column",overflow:"hidden",minHeight:0,paddingBottom:"max(10px, env(safe-area-inset-bottom, 0px))"}}>
+        <div style={{position:"sticky",top:0,zIndex:2,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"max(12px, env(safe-area-inset-top, 0px)) 14px 12px",borderBottom:`1px solid ${BORDER_CLR}`,background:BG,gap:10,flexShrink:0}}>
           <button onClick={()=>setShowAdd(false)} style={{background:"none",border:"none",color:T.SUB,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",cursor:"pointer",padding:0}}>Cancel</button>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.5,textAlign:"center",flex:1}}>CREATE EVENT</div>
           <button aria-label="Close" onClick={()=>setShowAdd(false)} style={{background:"none",border:`1px solid ${BORDER_CLR}`,color:T.SUB,borderRadius:8,width:28,height:28,display:"grid",placeItems:"center",cursor:"pointer",fontSize:16,lineHeight:1}}>×</button>
