@@ -35,8 +35,8 @@ export default function resolveTeamBranding(teamBranding = {}) {
       DEFAULT_BRANDING.accentColor
     ),
     textOnPrimary: resolveLegacyColor(teamBranding?.textOnPrimary || legacyColors.primaryText, DEFAULT_BRANDING.textOnPrimary),
-    logoUrl: teamBranding?.logoUrl || "",
-    logoMarkUrl: teamBranding?.logoMarkUrl || "",
+    logoUrl: teamBranding?.logoUrl || DEFAULT_BRANDING.logoUrl,
+    logoMarkUrl: teamBranding?.logoMarkUrl || DEFAULT_BRANDING.logoMarkUrl,
     textScale: resolveTextScale(teamBranding?.textScale),
   };
 
