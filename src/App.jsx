@@ -55,6 +55,30 @@ ICON_INNER:"rgba(255, 255, 255, 0.06)",
 FOCUS_RING:"rgba(200, 255, 0, 0.45)",
 CHEVRON_BG:"rgba(255, 255, 255, 0.06)",
 };
+const MODE_CARD_VARIANTS={
+home:{
+  tint:MODE_CARD_TOKENS.HOME_TINT,
+  glow:MODE_CARD_TOKENS.HOME_GLOW,
+  iconStroke:VOLT,
+  ctaBg:"rgba(200, 255, 0, 0.16)",
+  ctaBorder:"rgba(200, 255, 0, 0.45)",
+  ctaShadow:"0 0 14px rgba(200, 255, 0, 0.28)",
+  anchorBg:"rgba(200, 255, 0, 0.07)",
+  anchorBorder:"rgba(200, 255, 0, 0.28)",
+  anchorTrack:"rgba(200, 255, 0, 0.15)",
+  anchorFill:"linear-gradient(90deg, rgba(200, 255, 0, 0.92) 0%, rgba(0, 229, 255, 0.72) 100%)",
+},
+program:{
+  tint:MODE_CARD_TOKENS.PROGRAM_TINT,
+  glow:MODE_CARD_TOKENS.PROGRAM_GLOW,
+  iconStroke:CYAN,
+  ctaBg:"rgba(18, 25, 34, 0.9)",
+  ctaBorder:"rgba(148, 163, 184, 0.36)",
+  ctaShadow:"inset 0 0 0 1px rgba(148, 163, 184, 0.12)",
+  anchorBg:"rgba(12, 19, 30, 0.82)",
+  anchorBorder:"rgba(148, 163, 184, 0.3)",
+},
+};
 const COACH_TEXT_SIZES=["standard","large","xl"];
 
 const DRILLS_INIT=[
@@ -892,14 +916,16 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
       const homeStats=[{label:"Total Makes",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Streak",value:`${streak}D`,color:CYAN},{label:"Drills",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance",value:attendancePct,color:CYAN},{label:"Next Event",value:nextEventLabel,color:LIGHT}];
+      const homeProgressPct=drills.length>0?Math.round((todayS.length/drills.length)*100):0;
+      const nextProgramLabel=nextEvent?`NEXT: ${nextEvent.date.slice(5)} · ${nextEvent.time}`:"NO EVENT SCHEDULED";
       return <div style={{marginBottom:28}}>
         <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
           <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:12,fontWeight:600,letterSpacing:"0.03em",marginTop:6}}>Choose how you’re training today</div>
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
-          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
-          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
+          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} anchor={{type:"progress",label:"Daily Progress",value:homeProgressPct}} onClick={()=>setTab("log-drill")}/>
+          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} anchor={{type:"schedule",label:"Schedule",value:nextProgramLabel}} onClick={()=>setTab("program")}/>
         </div>
       </div>
     })()}
@@ -1381,24 +1407,30 @@ function StatTile({value,label,color}){
 return <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.02)"}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
 }
 
-function ModeCard({title,subtitle,icon,stats,accent="home",isActive,onClick}){
-const accentMap={
-home:{tint:MODE_CARD_TOKENS.HOME_TINT,glow:MODE_CARD_TOKENS.HOME_GLOW,iconStroke:VOLT},
-program:{tint:MODE_CARD_TOKENS.PROGRAM_TINT,glow:MODE_CARD_TOKENS.PROGRAM_GLOW,iconStroke:CYAN}
-};
-const a=accentMap[accent]||accentMap.home;
+function ModeCard({title,subtitle,icon,stats,accent="home",isActive,onClick,anchor}){
+const a=MODE_CARD_VARIANTS[accent]||MODE_CARD_VARIANTS.home;
 const baseBorder=isActive?`1.5px solid ${a.glow}`:`1.5px solid ${MODE_CARD_TOKENS.BASE_BORDER}`;
 const baseShadow=isActive?`0 14px 32px rgba(0,0,0,.45), 0 0 0 1px ${a.glow} inset`:MODE_CARD_TOKENS.BASE_SHADOW;
 return <button type="button" onClick={onClick} className="mode-card" style={{width:"100%",background:`radial-gradient(circle at 12% 10%, ${a.tint} 0%, transparent 55%), ${MODE_CARD_TOKENS.BASE_BG}`,border:baseBorder,borderRadius:24,padding:22,cursor:"pointer",textAlign:"left",position:"relative",minHeight:272,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:baseShadow,transition:"transform .12s ease, border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.glow;e.currentTarget.style.boxShadow=`0 16px 34px rgba(0,0,0,.48), 0 0 0 1px ${a.glow} inset, 0 0 24px ${a.glow}`}} onMouseLeave={e=>{e.currentTarget.style.border=baseBorder;e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.99)";e.currentTarget.style.boxShadow=`0 0 0 2px ${a.glow}, 0 14px 28px rgba(0,0,0,.45)`}} onMouseUp={e=>{e.currentTarget.style.transform="scale(1)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow=`0 0 0 3px ${MODE_CARD_TOKENS.FOCUS_RING}, 0 14px 28px rgba(0,0,0,.45), 0 0 0 1px ${a.glow} inset`}} onBlur={e=>{e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}}>
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16}}>
-    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-      <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`1.5px solid ${a.glow}`,boxShadow:`inset 0 0 10px ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{icon}</div>
-      <div style={{minWidth:0}}>
-        <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase"}}>{title}</div>
-        <div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
+  <div>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16}}>
+      <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
+        <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`1.5px solid ${a.glow}`,boxShadow:`inset 0 0 10px ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{icon}</div>
+        <div style={{minWidth:0}}>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase"}}>{title}</div>
+          <div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
+        </div>
       </div>
+      <div style={{width:38,height:38,borderRadius:10,background:a.ctaBg,border:`1.5px solid ${a.ctaBorder}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:a.ctaShadow}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
     </div>
-    <div style={{width:38,height:38,borderRadius:10,background:MODE_CARD_TOKENS.CHEVRON_BG,border:`1.5px solid ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:`0 0 10px ${a.glow}`}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
+    {anchor&&anchor.type==="progress"&&<div style={{background:a.anchorBg,border:`1px solid ${a.anchorBorder}`,borderRadius:12,padding:"10px 12px",marginBottom:14}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}><span style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{anchor.label}</span><span style={{fontFamily:FB,color:a.iconStroke,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>{anchor.value}%</span></div>
+      <div style={{width:"100%",height:4,background:a.anchorTrack,borderRadius:999,overflow:"hidden"}}><div style={{width:`${anchor.value}%`,height:"100%",background:a.anchorFill,borderRadius:999,transition:"width .25s ease"}}/></div>
+    </div>}
+    {anchor&&anchor.type==="schedule"&&<div style={{background:a.anchorBg,border:`1px solid ${a.anchorBorder}`,borderRadius:12,padding:"10px 12px",marginBottom:14,display:"flex",alignItems:"center",justifyContent:"space-between",gap:10}}>
+      <span style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{anchor.label}</span>
+      <span style={{fontFamily:FB,color:a.iconStroke,fontSize:10,fontWeight:700,letterSpacing:"0.07em",textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{anchor.value}</span>
+    </div>}
   </div>
   <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color}/>)}</div>
 </button>
