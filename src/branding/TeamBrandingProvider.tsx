@@ -58,6 +58,28 @@ export function TeamBrandingProvider({ branding, children }: { branding?: TeamBr
 
   useEffect(() => applyThemeVariables(theme.cssVariables), [theme]);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return undefined;
+
+    const root = document.documentElement;
+    const previousScale = root.getAttribute("data-text-scale");
+    const nextScale = safeBranding?.textScale || DEFAULT_BRANDING.textScale;
+
+    if (nextScale && nextScale !== DEFAULT_BRANDING.textScale) {
+      root.setAttribute("data-text-scale", nextScale);
+    } else {
+      root.removeAttribute("data-text-scale");
+    }
+
+    return () => {
+      if (previousScale) {
+        root.setAttribute("data-text-scale", previousScale);
+      } else {
+        root.removeAttribute("data-text-scale");
+      }
+    };
+  }, [safeBranding?.textScale]);
+
   const value = useMemo<TeamBrandingContextValue>(() => {
     const teamName = safeBranding?.name || safeBranding?.shortName || "ShotLab";
     return {
