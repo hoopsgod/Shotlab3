@@ -1791,7 +1791,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 // COACH SCREEN
 // ═══════════════════════════════════════
 function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount,openTeamBranding,coachTextSize="standard"}){
-const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:""});
+const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"10",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all");
 const[nudged,setNudged]=useState([]);
@@ -1811,7 +1811,7 @@ const e=addEmail.trim().toLowerCase();if(!e)return;
 const known=allKnown.find(p=>p.email===e);
 const name=known?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
 addRsvp(evId,e,name);setAddEmail("")};
-const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,sport:san(nsc.sport)});setNsc({sport:"",date:"",time:""});setShowAddSC(false)};
+const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,sport:san(nsc.sport),sessionType:san(nsc.sessionType||"School")});setNsc({sport:"",date:"",time:"",sessionType:"School"});setShowAddSC(false)};
 const totalPlayers=ups.length;
 const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
 const sortedEvents=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
@@ -2279,6 +2279,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     </button>
     {showAddSC&&<div className="fade-up" style={{background:CARD_BG,borderRadius:16,padding:"20px 18px",marginTop:12,border:`1px solid ${BORDER_CLR}`}}>
       <FF l="SPORT" v={nsc.sport} set={v=>setNsc({...nsc,sport:v})} ph="e.g. Basketball"/>
+      <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:"calc(11px * var(--coach-text-scale-medium))",fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>SESSION TYPE</label>
+      <select value={nsc.sessionType||"School"} onChange={e=>setNsc({...nsc,sessionType:e.target.value})} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14}}>
+        <option value="School">School</option>
+        <option value="Home">Home</option>
+        <option value="Private Trainer">Private Trainer</option>
+      </select>
       <div style={{display:"flex",gap:8}}><div style={{flex:1}}><FF l="DATE" v={nsc.date} set={v=>setNsc({...nsc,date:v})} tp="date"/></div><div style={{flex:1}}><FF l="TIME" v={nsc.time} set={v=>setNsc({...nsc,time:v})} ph="6:00 AM"/></div></div>
       <button className="btn-v cta-primary" onClick={handleAddSC} style={{}}>CREATE SESSION</button>
     </div>}
@@ -2290,7 +2296,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         </div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{s.sport||s.title}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{s.date} &#183; {s.time} &#183; <span style={{color:"#A0A0A0"}}>{sr.length} RSVPs</span></div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{s.date} &#183; {s.time} &#183; {s.sessionType||"School"} &#183; <span style={{color:"#A0A0A0"}}>{sr.length} RSVPs</span></div>
         </div>
         <button onClick={()=>removeScSession(s.id)} style={{background:"none",border:"none",color:"#FF4545",cursor:"pointer",fontSize:16,padding:4}}>&#10005;</button>
       </div>;
