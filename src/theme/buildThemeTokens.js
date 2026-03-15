@@ -6,9 +6,9 @@ export default function buildThemeTokens(teamBranding = {}) {
   const branding = resolveTeamBranding(teamBranding);
   const textScale = branding.textScale || DEFAULT_BRANDING.textScale;
   const textScaleTokens = textScale === "xl"
-    ? { small: 1.2, medium: 1.18, display: 1.05 }
+    ? { small: 1.22, medium: 1.2, display: 1.06 }
     : textScale === "large"
-      ? { small: 1.11, medium: 1.1, display: 1.03 }
+      ? { small: 1.12, medium: 1.11, display: 1.04 }
       : { small: 1, medium: 1, display: 1 };
 
   const rawPrimary = normalizeHexColor(branding.primaryColor, DEFAULT_BRANDING.primaryColor);

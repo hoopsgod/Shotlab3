@@ -12,7 +12,6 @@ const FB = "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
 export default function CoachTeamBrandingScreen({ branding, onSave, onBack, teamName }) {
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
   const [draftBranding, setDraftBranding] = useState({ ...DEFAULT_BRANDING, ...(branding || {}) });
 
   useEffect(() => {
@@ -21,14 +20,8 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
 
   const handleSave = async (next) => {
     setSaving(true);
-    setMessage("");
-    const result = await onSave?.(next);
+    await onSave?.(next);
     setSaving(false);
-    if (result?.ok) {
-      setMessage("Team branding saved for all coach/player views.");
-      return;
-    }
-    setMessage(result?.err || "Could not save team branding.");
   };
 
   return (
@@ -53,7 +46,6 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
           <div style={{ fontFamily: FD, fontSize: 18, letterSpacing: 1, marginBottom: 10 }}>Shared Preview</div>
           <TeamBrandingPreview branding={draftBranding} />
         </div>
-        {message && <div style={{ color: message.toLowerCase().includes("saved") ? "#9DFF7A" : "#FF8E8E", fontSize: 13 }}>{message}</div>}
       </div>
     </div>
   );
