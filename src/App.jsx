@@ -912,6 +912,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const attendanceRows=rsvps.filter(r=>r.email===u.email);
       const attendancePct=upcomingEventsCount>0&&attendanceRows.length>0?`${Math.min(100,Math.round((attendanceRows.length/upcomingEventsCount)*100))}%`:"—";
       const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
+      const nextEventBadge=nextEvent?`Next · ${nextEvent.date.slice(5).replace("-","/")}`:"Schedule";
       const homeStats=[{label:"Makes Today",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Training Streak",value:`${streak}D`,color:CYAN},{label:"Drills Completed",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance Rate",value:attendancePct,color:CYAN},{label:"Next Team Event",value:nextEventLabel,color:LIGHT}];
       return <div style={{marginBottom:28}}>
@@ -921,7 +922,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
           <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" variant="active" actionLabel={todayS.length>0?"Continue Training":"Start Session"} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
-          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" variant={"structured"} actionLabel="View Schedule" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
+          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" variant={"structured"} actionLabel={nextEventBadge} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
         </div>
       </div>
     })()}
