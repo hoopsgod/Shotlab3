@@ -121,7 +121,7 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
   };
 
   return (
-    <form onSubmit={submit} style={{ display: "grid", gap: 16 }}>
+    <form noValidate onSubmit={submit} style={{ display: "grid", gap: 16 }}>
       <section style={{ display: "grid", gap: 10 }}>
         <div style={{ display: "grid", gap: 2 }}>
           <div style={{ color: "#E5E7EB", fontSize: 13, fontWeight: 700, letterSpacing: 0.4 }}>Brand Colors</div>
