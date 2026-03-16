@@ -922,7 +922,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
           <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" variant="active" actionLabel={todayS.length>0?"Continue Training":"Start Session"} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
-          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" variant={"structured"} actionLabel={nextEventBadge} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
+          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" variant={"structured"} infoLayout="schedule" actionLabel={nextEventBadge} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
         </div>
       </div>
     })()}
@@ -1400,11 +1400,11 @@ return <div className="fade-up">
 }
 
 
-function StatTile({value,label,color}){
-return <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.02)"}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
+function StatTile({value,label,color,compact=false}){
+return <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:compact?"10px":"12px 10px",minHeight:compact?70:98,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.02)"}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:compact?20:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
 }
 
-function ModeCard({title,subtitle,icon,stats,accent="home",variant="active",isActive,onClick,actionLabel="Open"}){
+function ModeCard({title,subtitle,icon,stats,accent="home",variant="active",isActive,onClick,actionLabel="Open",infoLayout="equal"}){
 const accentMap={
 home:{tint:MODE_CARD_TOKENS.HOME_TINT,glow:MODE_CARD_TOKENS.HOME_GLOW,iconStroke:VOLT},
 program:{tint:MODE_CARD_TOKENS.PROGRAM_TINT,glow:MODE_CARD_TOKENS.PROGRAM_GLOW,iconStroke:CYAN}
@@ -1428,7 +1428,13 @@ return <button type="button" onClick={onClick} className="mode-card" style={{"--
       <div style={{width:38,height:38,borderRadius:10,background:v.ctaBackground,border:`1.5px solid ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:v.ctaShadow.replaceAll("var(--glow)",a.glow)}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
     </div>
   </div>
-  <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color}/>)}</div>
+  {infoLayout==="schedule"&&stats.length>=3
+    ?<div style={{display:"grid",gridTemplateColumns:"minmax(0,1.45fr) minmax(0,1fr)",gridTemplateRows:"repeat(2,minmax(0,1fr))",gap:10}}>
+      <div style={{gridRow:"1 / span 2"}}><StatTile value={stats[0].value} label={stats[0].label} color={stats[0].color}/></div>
+      <StatTile value={stats[1].value} label={stats[1].label} color={stats[1].color} compact/>
+      <StatTile value={stats[2].value} label={stats[2].label} color={stats[2].color} compact/>
+    </div>
+    :<div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10}}>{stats.map(s=><StatTile key={s.label} value={s.value} label={s.label} color={s.color}/>)}</div>}
 </button>
 }
 
