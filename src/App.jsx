@@ -2302,9 +2302,25 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><PageHeader title="S&C" subtitle="Strength blocks, readiness, and recovery" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S LIFT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAddSC(true)}>Add Session</button></div><div className="heroStats"><div className="heroStat"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">SESSIONS</div></div><div className="heroStat"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">RSVPS</div></div><div className="heroStat"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">LOGS</div></div></div></div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="S&C SESSIONS" s={`${scSessions.length} TOTAL`} identity/>
-    <div className="accent-card" style={{marginBottom:16,paddingLeft:10}}><button className="btn-v cta-primary" onClick={()=>setShowAddSC(!showAddSC)} style={{marginBottom:0}}>
-      {showAddSC?"CANCEL":"+ ADD SESSION"}
-    </button>
+    <div className="accent-card" style={{marginBottom:16,paddingLeft:10,paddingRight:10,paddingTop:10,paddingBottom:10}}>
+      <div style={{display:"flex",justifyContent:"flex-end"}}>
+        <button
+          className="pageHeaderPill btn-v"
+          onClick={()=>setShowAddSC(!showAddSC)}
+          style={{
+            minHeight:40,
+            padding:"0 18px",
+            fontSize:11,
+            letterSpacing:2,
+            borderColor:"color-mix(in srgb,var(--page-accent) 60%, transparent)",
+            background:"color-mix(in srgb,var(--page-accent) 16%, #111826)",
+            boxShadow:"0 10px 24px color-mix(in srgb,var(--page-accent) 12%, transparent)",
+            gap:6
+          }}
+        >
+          {showAddSC?"CANCEL":"+ ADD SESSION"}
+        </button>
+      </div>
     {showAddSC&&<div className="fade-up" style={{background:CARD_BG,borderRadius:16,padding:"20px 18px",marginTop:12,border:`1px solid ${BORDER_CLR}`}}>
       <FF l="SPORT" v={nsc.sport} set={v=>setNsc({...nsc,sport:v})} ph="e.g. Basketball"/>
       <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:"calc(11px * var(--coach-text-scale-medium))",fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>SESSION TYPE</label>
