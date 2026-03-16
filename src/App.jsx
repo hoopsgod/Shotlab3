@@ -924,7 +924,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
       const nextEventBadge=nextEvent?`Next · ${nextEvent.date.slice(5).replace("-","/")}`:"Schedule";
       const homeStats=[{label:"Makes Today",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Training Streak",value:`${streak}D`,color:CYAN},{label:"Drills Completed",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
-      const programStats=[{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance Rate",value:attendancePct,color:CYAN},{label:"Next Team Event",value:nextEventLabel,color:LIGHT}];
+      const programStats=[{label:"Next Team Event",value:nextEventLabel,color:LIGHT},{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance Rate",value:attendancePct,color:CYAN}];
       return <div style={{marginBottom:28}}>
         <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
           <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
