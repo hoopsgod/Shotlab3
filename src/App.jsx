@@ -2393,6 +2393,7 @@ const eventsAttended=rsvps.filter(r=>r.email===u.email).length;
 const scCount=scRsvps.filter(r=>r.email===u.email).length;
 const challWon=challenges.filter(c=>(c.from===u.email&&c.status==="lost")||(c.to===u.email&&c.status==="won")).length;
 const challTotal=challenges.filter(c=>c.from===u.email||c.to===u.email).length;
+const hasReportCardData=(totalMakes+totalShots+sessionsLogged+eventsAttended+scCount+challTotal)>0;
 const bestStreak=useMemo(()=>{const ds=[...new Set(homeScores.map(s=>s.date))].sort();let max=0,cur=0,prev=null;
 ds.forEach(d=>{const dt=new Date(d);if(prev){const diff=(dt-prev)/(1000*60*60*24);cur=diff<=1?cur+1:1}else cur=1;max=Math.max(max,cur);prev=dt});return max},[homeScores]);
 
@@ -2425,10 +2426,10 @@ return <div className="fade-up">
 {/* SL logo watermark */}
 <div style={{position:"absolute",top:12,right:16,opacity:.06,pointerEvents:"none"}}><SLLogo size={90} opacity={.06}/></div>
 
-  <div style={{fontFamily:FB,color:VOLT,fontSize:9,letterSpacing:5,fontWeight:700,marginBottom:12}}>OFFSEASON REPORT CARD</div>
+  <div style={{fontFamily:FB,color:VOLT,fontSize:9,letterSpacing:5,fontWeight:700,marginBottom:12}}>{hasReportCardData?"OFFSEASON REPORT CARD":"SEASON IN PROGRESS"}</div>
   <Av n={u.name} sz={64} email={u.email} style={{margin:"0 auto 14px"}}/>
   <div style={{fontFamily:FD,color:LIGHT,fontSize:32,letterSpacing:4,lineHeight:1}}>{u.name.toUpperCase()}</div>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:6,letterSpacing:2}}>OFFSEASON 2026</div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:6,letterSpacing:2}}>{hasReportCardData?"OFFSEASON 2026":"KEEP LOGGING WORKOUTS TO BUILD YOUR CARD"}</div>
 
   {/* Big stats row */}
   <div style={{display:"flex",gap:6,marginTop:20,justifyContent:"center"}}>
