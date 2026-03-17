@@ -933,7 +933,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:12,fontWeight:600,letterSpacing:"0.03em",marginTop:6}}>Choose how you’re training today</div>
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
-          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" variant="active" actionLabel={todayS.length>0?"Continue Training":"Start Session"} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
+          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" variant="active" actionLabel={null} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
           <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" variant="structured" infoLayout="schedule" actionLabel={nextEventBadge} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
         </div>
       </div>
@@ -1437,7 +1437,7 @@ return <button type="button" onClick={onClick} className="mode-card" style={{"--
       </div>
     </div>
     <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-      <div style={{fontFamily:FB,color:v.chipColor.replaceAll("var(--chip-color)",a.iconStroke),fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",padding:"7px 10px",borderRadius:999,border:v.chipBorder.replaceAll("var(--chip-border)",a.glow),background:v.chipBackground.replaceAll("var(--chip-bg)",a.tint),whiteSpace:"nowrap"}}>{actionLabel}</div>
+      {actionLabel&&<div style={{fontFamily:FB,color:v.chipColor.replaceAll("var(--chip-color)",a.iconStroke),fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",padding:"7px 10px",borderRadius:999,border:v.chipBorder.replaceAll("var(--chip-border)",a.glow),background:v.chipBackground.replaceAll("var(--chip-bg)",a.tint),whiteSpace:"nowrap"}}>{actionLabel}</div>}
       <div style={{width:38,height:38,borderRadius:10,background:v.ctaBackground,border:`1.5px solid ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:v.ctaShadow.replaceAll("var(--glow)",a.glow)}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
     </div>
   </div>
