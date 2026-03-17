@@ -1357,7 +1357,7 @@ return <div className="fade-up">
 <div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"16px"}}>
   <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
     <FF l="DATE" v={newLog.date} set={v=>setNewLog({...newLog,date:v})} tp="date"/>
-    <FF l="TIME" v={newLog.time} set={v=>setNewLog({...newLog,time:v})} tp="time" ph="6:00 AM"/>
+    <FF l="TIME" v={newLog.time} set={v=>setNewLog({...newLog,time:v})} ph="e.g. 7:00 AM"/>
     <div style={{gridColumn:"1 / -1"}}><FF l="PLACE" v={newLog.place} set={v=>setNewLog({...newLog,place:v})} opts={["School","Private Trainer","Gym Membership","At Home"]}/></div>
     <div style={{gridColumn:"1 / -1"}}><FF l="SPORT" v={newLog.sport} set={v=>setNewLog({...newLog,sport:v})} ph="Basketball"/></div>
   </div>
