@@ -142,6 +142,7 @@ const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#A0A0A0"},{days
 const getEarnedBadges=s=>STREAK_BADGES.filter(b=>s>=b.days);
 const DRILL_ACCENTS={"FORM SHOOTING":VOLT,"FREE THROWS":VOLT,"CATCH & SHOOT":VOLT,"BALL HANDLING":VOLT,"MID-RANGE":VOLT,"FLOATERS":VOLT};
 const getDrillAccentColor=name=>DRILL_ACCENTS[name]||"#C8FF00";
+const isLeaderboardEligible=(players,email)=>players.find(p=>p.email===email)?.hideFromLeaderboards!==true;
 function Sparkline({data,color=VOLT,w=44,h=16}){if(!data||data.length<2)return null;const max=Math.max(...data,1);const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v/max)*h*.8+h*.1)}`).join(" ");return <svg width={w} height={h} style={{display:"block",opacity:.6}}><polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 
 const EventIcon=({type,size=24,color=VOLT})=>{const s={width:size,height:size,display:"block"};
@@ -461,7 +462,7 @@ ps.forEach(p=>{if(p.role!=="coach"){const firstCoach=coaches[0];if(firstCoach)ma
 ts.forEach(t=>{if(t.ownerCoachId)map[t.ownerCoachId]=t.id;});
 }
 const teamsWithBranding=ts.map(t=>({...t,branding:resolveTeamBranding(t.branding||DEFAULT_BRANDING)}));
-const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithBranding[0]?.id||null}));
+const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithBranding[0]?.id||null,hideFromLeaderboards:p.hideFromLeaderboards===true}));
 const profilesExisting=rawPlayerProfiles||[];
 const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null}));
 const teamForEmail=e=>playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null;
@@ -481,7 +482,7 @@ useEffect(()=>{(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess]=awa
 const m=migrateData({players:p,playerProfiles:pp,scores:s,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
 await Promise.all([DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
-if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else setView(found.role||"player")}}
+if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else setView(found.role||"player")}}
 setReady(true)})()},[migrateData]);
 
 const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
@@ -490,9 +491,9 @@ const register=async(email,password,name,role)=>{
 const existing=players.find(p=>p.email===email);
 if(existing)return{ok:false,err:"Account already exists. Please sign in."};
 const hashed=hashPw(password);
-const np=[...players,{email,name,password:hashed,role,teamId:null}];
+const np=[...players,{email,name,password:hashed,role,teamId:null,hideFromLeaderboards:false}];
 await P("sl:players",np,setPlayers);
-setUser({email,role,isCoach:role==="coach",name,teamId:null});setView(role==="coach"?"create-team":"join-team");
+setUser({email,role,isCoach:role==="coach",name,teamId:null,hideFromLeaderboards:false});setView(role==="coach"?"create-team":"join-team");
 DB.set("sl:session",{email});
 trackEvent("auth_register",{targetRole:role,userEmail:email,userRole:role},{email,role,teamId:null});
 return{ok:true};
@@ -506,7 +507,7 @@ if(p.password!==password)return{ok:false,err:"Incorrect password."};
 P("sl:players",players.map(pl=>pl.email===email?{...pl,password:hashed}:pl),setPlayers);
 }
 if(!p.password){P("sl:players",players.map(pl=>pl.email===email?{...pl,password:hashed}:pl),setPlayers)}
-setUser({email,role:p.role||"player",isCoach:(p.role||"player")==="coach",name:p.name,teamId:p.teamId||null});
+setUser({email,role:p.role||"player",isCoach:(p.role||"player")==="coach",name:p.name,teamId:p.teamId||null,hideFromLeaderboards:p.hideFromLeaderboards===true});
 if((p.role||"player")==="coach"&&!p.teamId)setView("create-team");
 else if((p.role||"player")==="player"&&!p.teamId)setView("join-team");
 else setView(p.role||"player");
@@ -522,10 +523,10 @@ const savePlayers=async()=>{await P("sl:players",np,setPlayers)};
 const saveTeams=async()=>{await P("sl:teams",nts,setTeams)};
 
 if(!np.find(p=>p.email===DEMO_COACH.email)){
-np=[...np,{email:DEMO_COACH.email,name:DEMO_COACH.name,password:hashPw(DEMO_COACH.password),role:"coach",teamId:null}];
+np=[...np,{email:DEMO_COACH.email,name:DEMO_COACH.name,password:hashPw(DEMO_COACH.password),role:"coach",teamId:null,hideFromLeaderboards:false}];
 }
 if(!np.find(p=>p.email===DEMO_PLAYER.email)){
-np=[...np,{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,password:hashPw(DEMO_PLAYER.password),role:"player",teamId:null}];
+np=[...np,{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,password:hashPw(DEMO_PLAYER.password),role:"player",teamId:null,hideFromLeaderboards:false}];
 }
 await savePlayers();
 
@@ -551,7 +552,7 @@ await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:DEMO_PLAY
 
 const signedIn=np.find(p=>p.email===acct.email);
 if(!signedIn)return{ok:false,err:"Unable to prepare demo account."};
-setUser({email:signedIn.email,role:signedIn.role||"player",isCoach:(signedIn.role||"player")==="coach",name:signedIn.name,teamId:demoTeam.id});
+setUser({email:signedIn.email,role:signedIn.role||"player",isCoach:(signedIn.role||"player")==="coach",name:signedIn.name,teamId:demoTeam.id,hideFromLeaderboards:signedIn.hideFromLeaderboards===true});
 setView(kind==="coach"?"coach":"player");
 await DB.set("sl:session",{email:signedIn.email});
 await trackEvent("auth_demo_login",{kind},{email:signedIn.email,role:signedIn.role||"player",teamId:demoTeam.id});
@@ -632,6 +633,7 @@ const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return;await
 const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:sc-sessions",scSessions.filter(s=>!(s.id===id&&s.teamId===user.teamId)),setScSessions);await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===id&&r.teamId===user.teamId)),setScRsvps)};
 const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)),setScRsvps);trackEvent("sc_rsvp_removed",{sessionId:sid});}else{await P("sl:sc-rsvps",[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setScRsvps);trackEvent("sc_rsvp_added",{sessionId:sid});}};
 const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:sc-logs",[{...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name},...scLogs],setScLogs)};
+const toggleLeaderboardVisibility=async()=>{if(!user||user.role!=="player")return;const np=players.map(p=>p.email===user.email?{...p,hideFromLeaderboards:!(p.hideFromLeaderboards===true)}:p);await P("sl:players",np,setPlayers);const updated=np.find(p=>p.email===user.email);if(updated)setUser(prev=>prev?{...prev,hideFromLeaderboards:updated.hideFromLeaderboards===true}:prev)};
 const saveTeamBranding=async(nextBranding)=>{
 if(user?.role!=="coach"||!user?.teamId)return{ok:false,err:"Not authorized"};
 const team=teams.find(t=>t.id===user.teamId);
@@ -671,7 +673,7 @@ if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,displa
 return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
-{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount}/></div>}
+{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 </TeamBrandingProvider>;
@@ -779,7 +781,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 // ═══════════════════════════════════════
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
-function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount}){
+function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility}){
 const initialTab = u.isCoach && window.location.pathname === "/players" ? "players" : "home";
 const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
 const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false);
@@ -938,7 +940,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     })()}
 
     {/* ══════ LEADERBOARD ══════ */}
-    <DashboardLeaderboard scores={scores} drills={drills} programDrills={programDrills} user={u} scRsvps={scRsvps} rsvps={rsvps} shotLogs={shotLogs}/>
+    <DashboardLeaderboard scores={scores} drills={drills} programDrills={programDrills} user={u} scRsvps={scRsvps} rsvps={rsvps} shotLogs={shotLogs} players={players}/>
   </div>}
 
   {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
@@ -1080,10 +1082,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {u.isCoach&&tab==="players"&&<div className={slideClass} key="players"><PlayersScreen/></div>}
 
   {/* ═════════════ STRENGTH & CONDITIONING ═════════════ */}
-  {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog}/></div>}
+  {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount}/></div>}
+  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
 </div>
 
 {!isDesktop&&<NavBar items={playerNavItems} active={tab} onChange={switchTab}/>} 
@@ -1249,7 +1251,7 @@ return <div className="fade-up">
 // ═══════════════════════════════════════
 // STRENGTH & CONDITIONING PANEL
 // ═══════════════════════════════════════
-function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog}){
+function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog,players}){
 const[showBoard,setShowBoard]=useState(false),[expanded,setExpanded]=useState(null);
 const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"School",sport:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false);
 const sorted=useMemo(()=>[...sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
@@ -1272,7 +1274,7 @@ const myAttendanceByDate=useMemo(()=>{
 },[sessions,scRsvps,user,currentYear]);
 const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 
-const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[scRsvps]);
+const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!isLeaderboardEligible(players,r.email))return;if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[scRsvps,players]);
 
 const LiftIcon=({size=24,color="#A0A0A0"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
 const SC_COLOR="#A0A0A0";
@@ -1446,41 +1448,42 @@ return <button type="button" onClick={onClick} className="mode-card" style={{"--
 // ═══════════════════════════════════════
 // DASHBOARD LEADERBOARD — The hero section
 // ═══════════════════════════════════════
-function DashboardLeaderboard({scores,drills,programDrills,user,scRsvps,rsvps,shotLogs}){
+function DashboardLeaderboard({scores,drills,programDrills,user,scRsvps,rsvps,shotLogs,players}){
 const[mode,setMode]=useState("home");
 const[sub,setSub]=useState("total");
 const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 const homeScores=useMemo(()=>scores.filter(s=>s.src==="home"||!s.src),[scores]);
 const progScores=useMemo(()=>scores.filter(s=>s.src==="program"),[scores]);
 
+const leaderboardEligible=useMemo(()=>new Set(players.filter(p=>p.role!=="coach"&&isLeaderboardEligible(players,p.email)).map(p=>p.email)),[players]);
 const board=useMemo(()=>{
 if(mode==="home"){
 if(sub==="shots"){
-const m={};shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});return Object.values(m).sort((a,b)=>b.total-a.total);
+const m={};shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
 }
 if(sub==="total"){
 // Combine drill scores + shot logs
 const m={};
 homeScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
 shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});
-return Object.values(m).sort((a,b)=>b.total-a.total);
+return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
 }
 // Per-drill
 const did=parseInt(sub);const m={};
 homeScores.filter(s=>s.drillId===did).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
-return Object.values(m).sort((a,b)=>b.total-a.total);
+return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
 }
 // Program
 if(sub==="events"){
-const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).sort((a,b)=>b.total-a.total);
+const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
 }
 if(sub==="sc"){
-const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).sort((a,b)=>b.total-a.total);
+const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
 }
-if(sub.startsWith("prog-")){const did=parseInt(sub.slice(5));const m={};progScores.filter(s=>s.drillId===did).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});return Object.values(m).sort((a,b)=>b.total-a.total);}
+if(sub.startsWith("prog-")){const did=parseInt(sub.slice(5));const m={};progScores.filter(s=>s.drillId===did).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);}
 const m={};progScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
-return Object.values(m).sort((a,b)=>b.total-a.total);
-},[homeScores,progScores,mode,sub,scores,scRsvps,rsvps,shotLogs,programDrills]);
+return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
+},[homeScores,progScores,mode,sub,scores,scRsvps,rsvps,shotLogs,programDrills,leaderboardEligible]);
 
 const isHome=mode==="home";
 const accentColor=isHome?VOLT:CYAN;
@@ -2072,7 +2075,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       <div style={{display:"flex",gap:5,marginBottom:8}}>{ICONS.map(ic=><button key={`prog-${ic}`} onClick={()=>setNewProgramDrill({...newProgramDrill,icon:ic})} style={{width:34,height:34,borderRadius:8,border:`1px solid ${newProgramDrill.icon===ic?PAGE_ACCENTS.drills.accent+"55":BORDER_CLR}`,background:newProgramDrill.icon===ic?PAGE_ACCENTS.drills.glow:BG,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={14} color={newProgramDrill.icon===ic?PAGE_ACCENTS.drills.accent:MUTED}/></button>)}</div>
       <button onClick={handleAddProgramDrill} disabled={programDrills.length>=7} className="btn-v cta-primary" style={{opacity:programDrills.length>=7?.6:1}}>+ ADD PROGRAM DRILL</button>
       {programErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:10,marginTop:6}}>{programErr}</div>}
-      <div style={{marginTop:12}}>{programDrills.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>No program drills yet.</div>:programDrills.map(pd=>{const b=scores.filter(s=>s.src==="program"&&s.drillId===pd.id).reduce((m,s)=>{m[s.email]=(m[s.email]||0)+s.score;return m;},{});const lead=Object.entries(b).sort((a,b)=>b[1]-a[1]).slice(0,3);return <div key={pd.id} style={{display:"flex",alignItems:"center",gap:10,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px 12px",marginBottom:8}}><div style={{width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:8,background:BG,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><DrillIcon type={pd.icon} size={14}/></div><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>{pd.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:1}}>Leaderboard: {lead.length===0?"No scores":lead.map(([email,total],i)=>`#${i+1} ${(players.find(p=>p.email===email)?.name||email.split("@")[0])} ${total}`).join(" · ")}</div></div><button onClick={()=>removeProgramDrill(pd.id)} style={{background:"transparent",border:"1px solid #FF454544",borderRadius:8,color:"#FF6A6A",padding:"5px 8px",fontSize:9,fontWeight:700,cursor:"pointer",letterSpacing:".04em"}}>DELETE</button></div>})}</div>
+      <div style={{marginTop:12}}>{programDrills.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>No program drills yet.</div>:programDrills.map(pd=>{const b=scores.filter(s=>s.src==="program"&&s.drillId===pd.id&&isLeaderboardEligible(players,s.email)).reduce((m,s)=>{m[s.email]=(m[s.email]||0)+s.score;return m;},{});const lead=Object.entries(b).sort((a,b)=>b[1]-a[1]).slice(0,3);return <div key={pd.id} style={{display:"flex",alignItems:"center",gap:10,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px 12px",marginBottom:8}}><div style={{width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:8,background:BG,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><DrillIcon type={pd.icon} size={14}/></div><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>{pd.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:1}}>Leaderboard: {lead.length===0?"No scores":lead.map(([email,total],i)=>`#${i+1} ${(players.find(p=>p.email===email)?.name||email.split("@")[0])} ${total}`).join(" · ")}</div></div><button onClick={()=>removeProgramDrill(pd.id)} style={{background:"transparent",border:"1px solid #FF454544",borderRadius:8,color:"#FF6A6A",padding:"5px 8px",fontSize:9,fontWeight:700,cursor:"pointer",letterSpacing:".04em"}}>DELETE</button></div>})}</div>
     </div>
 
     {drills.map(d=>{const dS=scores.filter(s=>s.drillId===d.id);const avg=dS.length?Math.round(dS.reduce((a,s)=>a+s.score,0)/dS.length*10)/10:0;return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 14px 12px",marginBottom:10}}>
@@ -2379,7 +2382,7 @@ return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s
 // ═══════════════════════════════════════
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
-function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount}){
+function ProfilePage({u,scores,shotLogs,drills,rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount,onToggleLeaderboardVisibility}){
 const[confirmDel,setConfirmDel]=useState(false);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
@@ -2524,6 +2527,18 @@ return <div className="fade-up">
     <Sparkline data={d.last10} color={VOLT} w={200} h={20}/>
   </div>}
 </div>})}
+
+<div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>PRIVACY</div>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:8}}>
+    <div>
+      <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>Hide me from leaderboards</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Coach can still view your workouts and progress.</div>
+    </div>
+    <button onClick={onToggleLeaderboardVisibility} style={{minWidth:88,height:34,borderRadius:999,border:`1px solid ${u.hideFromLeaderboards?BORDER_CLR:VOLT+"66"}`,background:u.hideFromLeaderboards?"transparent":VOLT+"16",color:u.hideFromLeaderboards?MUTED:VOLT,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>{u.hideFromLeaderboards?"OFF":"ON"}</button>
+  </div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:10}}>{u.hideFromLeaderboards?"You are hidden from public leaderboard rankings.":"You are visible in team leaderboards."}</div>
+</div>
 
 {/* ══════ ACCOUNT MANAGEMENT ══════ */}
 <div style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${BORDER_CLR}44`}}>
