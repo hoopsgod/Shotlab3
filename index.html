@@ -9,11 +9,22 @@
   <title>ShotLab</title>
   <style>
     html,body{margin:0;padding:0;background:#080808;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    #root{min-height:100vh}
+    .boot-auth-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 22%,rgba(200,255,26,.2) 0,rgba(200,255,26,0) 45%),#080808}
+    .boot-auth-card{width:min(420px,100%);border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,#15171B,#111317);border-radius:22px;padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;box-sizing:border-box}
+    .boot-auth-logo{width:min(220px,65vw);height:auto;display:block}
+    .boot-auth-copy{font:600 12px/1.4 "Barlow Condensed",system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:rgba(229,231,235,.8)}
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <div class="boot-auth-shell" aria-label="Loading ShotLab">
+      <div class="boot-auth-card">
+        <img class="boot-auth-logo" src="/branding/titans-exact-logo.png.PNG" alt="ShotLab" width="220" height="53" />
+        <div class="boot-auth-copy">Preparing your training dashboard…</div>
+      </div>
+    </div>
+  </div>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
-
