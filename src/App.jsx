@@ -112,7 +112,15 @@ const SC_INIT=[
 {id:104,title:"OLYMPIC LIFTS",date:"2026-03-11",time:"6:00 AM",location:"Weight Room — Platform Area",desc:"Clean & jerk, snatch progressions. Coached session."},
 {id:105,title:"CORE & CONDITIONING",date:"2026-03-18",time:"6:30 AM",location:"Training Facility — Turf",desc:"Core stability, sled pushes, agility ladder. Game-day conditioning."},
 ];
-const TIERS=[{min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},{min:2,name:"IRON",color:"#A0A0A0",bg:"#A0A0A015"},{min:3,name:"BRONZE",color:"#A0A0A0",bg:"#A0A0A015"},{min:5,name:"SILVER",color:"#A0A0A0",bg:"#A0A0A015"},{min:8,name:"GOLD",color:"#C8FF00",bg:"#C8FF0015"},{min:12,name:"DIAMOND",color:CYAN,bg:CYAN+"15"}];
+const TIERS=[
+{min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},
+{min:3,name:"STARTER",color:"#7D7D7D",bg:"#7D7D7D15"},
+{min:6,name:"VARSITY",color:"#A0A0A0",bg:"#A0A0A015"},
+{min:10,name:"ALL-STAR",color:"#D7E7FF",bg:"#D7E7FF15"},
+{min:15,name:"ELITE",color:"#C8FF00",bg:"#C8FF0015"},
+{min:22,name:"MVP",color:"#FFE082",bg:"#FFE08215"},
+{min:30,name:"LEGEND",color:CYAN,bg:CYAN+"15"},
+];
 const getTier = c => [...TIERS].reverse().find(t => c >= t.min) || TIERS[0];
 const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
 const ALNUM="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
