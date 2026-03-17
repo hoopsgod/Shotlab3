@@ -112,6 +112,8 @@ const SC_INIT=[
 {id:104,title:"OLYMPIC LIFTS",date:"2026-03-11",time:"6:00 AM",location:"Weight Room — Platform Area",desc:"Clean & jerk, snatch progressions. Coached session."},
 {id:105,title:"CORE & CONDITIONING",date:"2026-03-18",time:"6:30 AM",location:"Training Facility — Turf",desc:"Core stability, sled pushes, agility ladder. Game-day conditioning."},
 ];
+const PLAYER_TAB_PATHS={home:"/",duels:"/duels","log-drill":"/quick-menu",sc:"/lifting",program:"/events",profile:"/profile",players:"/players"};
+const PLAYER_PATH_TABS={"/":"home","/duels":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/profile":"profile","/players":"players"};
 const TIERS=[
 {min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},
 {min:3,name:"STARTER",color:"#7D7D7D",bg:"#7D7D7D15"},
@@ -790,7 +792,17 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
 function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility}){
-const initialTab = u.isCoach && window.location.pathname === "/players" ? "players" : "home";
+const canAccessTab=useCallback((nextTab)=>{
+  if(nextTab==="players")return u.isCoach;
+  if(nextTab==="duels")return !u.isCoach;
+  return true;
+},[u.isCoach]);
+const tabFromPath=useCallback((path)=>{
+  const normalized=path==="/"?"/":path.replace(/\/+$/,"")||"/";
+  const nextTab=PLAYER_PATH_TABS[normalized]||"home";
+  return canAccessTab(nextTab)?nextTab:"home";
+},[canAccessTab]);
+const initialTab = tabFromPath(window.location.pathname);
 const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
 const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false);
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
@@ -800,17 +812,20 @@ const[isNarrow,setIsNarrow]=useState(typeof window!=="undefined"?window.innerWid
 const[isDesktop,setIsDesktop]=useState(typeof window!=="undefined"?window.innerWidth>=1024:false);
 const slideClass="screen-fade-in";
 const switchTab=(k)=>{setTab(k);setActive(null);setShowShotStats(false);
-if(u.isCoach&&k==="players")window.history.pushState({},"","/players");
-else if(u.isCoach&&window.location.pathname==="/players")window.history.pushState({},"","/");}
+const nextPath=PLAYER_TAB_PATHS[k]||"/";
+if(window.location.pathname!==nextPath)window.history.pushState({},"",nextPath);}
 useEffect(()=>{const onResize=()=>{setIsNarrow(window.innerWidth<768);setIsDesktop(window.innerWidth>=1024)};window.addEventListener("resize",onResize);return()=>window.removeEventListener("resize",onResize);},[]);
 useEffect(()=>{
-  const onPop=()=>{
-    if(u.isCoach&&window.location.pathname==="/players")setTab("players");
-    else if(tab==="players")setTab("home");
-  };
+  const onPop=()=>{setTab(tabFromPath(window.location.pathname));setActive(null);setShowShotStats(false)};
   window.addEventListener("popstate",onPop);
   return ()=>window.removeEventListener("popstate",onPop);
-},[u.isCoach,tab]);;
+},[tabFromPath]);
+useEffect(()=>{
+  if(!canAccessTab(tab)){
+    setTab("home");
+    if(window.location.pathname!=="/")window.history.replaceState({},"","/");
+  }
+},[tab,canAccessTab]);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const total=useMemo(()=>homeScores.reduce((a,s)=>a+s.score,0),[homeScores]);
