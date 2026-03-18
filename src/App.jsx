@@ -1163,24 +1163,24 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       </div>}
       <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:12}}>Screenshot your card and share on social media</div>
     </div>
-    :<><button onClick={()=>{setActive(null);if(tab==="home")switchTab("log-drill");if(tab==="duels")switchTab("duels")}} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:32,padding:"8px 16px"}}>&#8592; BACK</button>
-      <div style={{width:100,height:100,borderRadius:22,background:`linear-gradient(135deg,${SURFACE},${CARD_BG})`,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px"}}><DrillIcon type={active.icon} size={48}/></div>
-      <h2 style={{fontFamily:FD,color:LIGHT,fontSize:36,letterSpacing:4,margin:"0 0 8px"}}>{active.name}</h2>
-      <p style={{fontFamily:FB,color:MUTED,fontSize:14,margin:"0 auto 6px",maxWidth:280,lineHeight:1.6}}>{active.desc}</p>
+    :<><button onClick={()=>{setActive(null);if(tab==="home")switchTab("log-drill");if(tab==="duels")switchTab("duels")}} style={{background:"none",border:"none",color:activeMode==="program"?CYAN:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:32,padding:"8px 16px"}}>&#8592; BACK</button>
+      <div style={{width:100,height:100,borderRadius:22,background:`linear-gradient(135deg,${SURFACE},${CARD_BG})`,border:`1px solid ${activeMode==="program"?CYAN+"40":BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",boxShadow:activeMode==="program"?`0 0 24px ${CYAN}14`:"none"}}><DrillIcon type={active.icon} size={48} color={activeMode==="program"?CYAN:undefined}/></div>
+      <h2 style={{fontFamily:FD,color:activeMode==="program"?CYAN:LIGHT,fontSize:36,letterSpacing:4,margin:"0 0 8px"}}>{active.name}</h2>
+      <p style={{fontFamily:FB,color:activeMode==="program"?CYAN: MUTED,fontSize:14,margin:"0 auto 6px",maxWidth:280,lineHeight:1.6,textShadow:activeMode==="program"?`0 0 18px ${CYAN}22`:"none"}}>{active.desc}</p>
       {/* Personal Best + Average */}
       {(()=>{const ds=activeScores.filter(s=>s.drillId===active.id);const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;const statAccent=activeMode==="program"?CYAN:ORANGE;
         return ds.length>0?<div style={{display:"flex",gap:8,justifyContent:"center",margin:"12px 0 6px"}}>
           <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${statAccent}33`,textAlign:"center"}}>
             <div style={{fontFamily:FD,color:statAccent,fontSize:18}}>{pb}</div>
-            <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>YOUR PB</div>
+            <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>YOUR PB</div>
           </div>
           <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
             <div style={{fontFamily:FD,color:activeMode==="program"?CYAN:VOLT,fontSize:18}}>{avg}</div>
-            <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>AVG</div>
+            <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>AVG</div>
           </div>
           <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-            <div style={{fontFamily:FD,color:LIGHT,fontSize:18}}>{ds.length}</div>
-            <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>LOGGED</div>
+            <div style={{fontFamily:FD,color:activeMode==="program"?CYAN:LIGHT,fontSize:18}}>{ds.length}</div>
+            <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>LOGGED</div>
           </div>
         </div>:null})()}
       {active.instructions&&<div style={{margin:"12px auto 0",maxWidth:300,background:CARD_BG,borderRadius:12,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"left"}}>
@@ -1188,11 +1188,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
           COACH NOTES
         </div>
-        <p style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap"}}>{active.instructions}</p>
+        <p style={{fontFamily:FB,color:CYAN,fontSize:12,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap",textShadow:`0 0 18px ${CYAN}18`}}>{active.instructions}</p>
       </div>}
       {/* Motivational line */}
-      <div style={{fontFamily:FB,color:"#555555",fontSize:12,fontStyle:"italic",letterSpacing:1,margin:"20px 0 8px",fontWeight:500}}>{["Lock in.","No shortcuts.","This rep counts.","Earn it.","Be honest with yourself.","Own the work.","Details matter.","Trust the process.","Stay disciplined.","Championship habits."][Math.floor((active.id*7+new Date().getDate())%10)]}</div>
-      <div style={{fontFamily:FD,color:T.SUB,fontSize:13,letterSpacing:3,marginBottom:28}}>MAX: {active.max}</div>
+      <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:"#555555",fontSize:12,fontStyle:"italic",letterSpacing:1,margin:"20px 0 8px",fontWeight:500,textShadow:activeMode==="program"?`0 0 16px ${CYAN}18`:"none"}}>{["Lock in.","No shortcuts.","This rep counts.","Earn it.","Be honest with yourself.","Own the work.","Details matter.","Trust the process.","Stay disciplined.","Championship habits."][Math.floor((active.id*7+new Date().getDate())%10)]}</div>
+      <div style={{fontFamily:FD,color:activeMode==="program"?CYAN:T.SUB,fontSize:13,letterSpacing:3,marginBottom:28}}>MAX: {active.max}</div>
       {/* Score input with reactive color */}
       {(()=>{const v=parseInt(input)||0;const pct=active.max>0?v/active.max:0;const glowColor=pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#FF4545":VOLT;const borderColor=v>0?glowColor:VOLT;
         return <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8,marginBottom:40}}>
@@ -1217,16 +1217,16 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>
       <div style={{fontFamily:FD,color:CYAN,fontSize:22,letterSpacing:3}}>PROGRAM LOG</div>
     </div>
-    <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:24,fontWeight:500}}>Log your coach-assigned program drills and keep the team leaderboard moving.</div>
+    <div style={{fontFamily:FB,color:CYAN,fontSize:12,marginBottom:24,fontWeight:500,textShadow:`0 0 18px ${CYAN}18`}}>Log your coach-assigned program drills and keep the team leaderboard moving.</div>
 
-    <div style={{fontFamily:FB,color:todayProgramScores.length>=programDrills.length&&programDrills.length>0?LIGHT:CYAN,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8}}>PROGRAM DRILLS · {todayProgramScores.length}/{programDrills.length} DONE</div>
+    <div style={{fontFamily:FB,color:CYAN,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8,textShadow:`0 0 16px ${CYAN}18`}}>PROGRAM DRILLS · {todayProgramScores.length}/{programDrills.length} DONE</div>
     <div style={{width:"100%",height:4,background:"#242424",borderRadius:2,overflow:"hidden",marginBottom:12}}><div style={{width:`${programDrills.length>0?Math.min(100,Math.round(todayProgramScores.length/programDrills.length*100)):0}%`,height:"100%",background:CYAN,borderRadius:2,transition:"width .25s ease"}}/></div>
     {programDrills.map(d=>{const done=todayProgramScores.find(s=>s.drillId===d.id);
       return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?CYAN+"20":BORDER_CLR}`,borderRadius:16,padding:"16px",marginBottom:12,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.6:1}}>
         <div style={{width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",borderRadius:12,flexShrink:0}}><DrillIcon type={d.icon} size={22} color={done?CYAN+"99":CYAN}/></div>
         <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
+          <div style={{fontFamily:FB,color:CYAN,fontSize:14,fontWeight:700,letterSpacing:1,textShadow:`0 0 16px ${CYAN}16`}}>{d.name}</div>
+          <div style={{color:CYAN,fontSize:11,marginTop:2,fontWeight:500,textShadow:`0 0 14px ${CYAN}12`}}>{d.desc}</div>
         </div>
         {done?<div style={{width:36,height:36,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={CYAN} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
          :<div style={{width:36,height:36,borderRadius:10,background:"rgba(0, 229, 255, 0.10)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .1s ease"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
