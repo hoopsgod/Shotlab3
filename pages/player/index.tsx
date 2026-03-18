@@ -1,6 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import PlayerDashboardLayout from '../../layouts/PlayerDashboardLayout';
 
 const rootEl = document.getElementById('root');
 
@@ -10,10 +9,16 @@ if (!rootEl) {
 
 ReactDOM.createRoot(rootEl).render(
   <React.StrictMode>
-    <PlayerDashboardLayout>
-      <div style={{ color: 'white', padding: '24px' }}>
-        PLAYER LAYOUT TEST
-      </div>
-    </PlayerDashboardLayout>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: '#05070b',
+        color: 'white',
+        padding: '24px',
+        fontSize: '24px'
+      }}
+    >
+      PLAYER DEMO TEST
+    </div>
   </React.StrictMode>
 );
