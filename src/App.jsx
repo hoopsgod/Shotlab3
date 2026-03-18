@@ -1065,7 +1065,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:12,fontWeight:600,letterSpacing:"0.03em",marginTop:6}}>Choose how you’re training today</div>
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
-          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" variant="active" actionLabel={null} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
+          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" titleColor={VOLT} subtitleColor={VOLT} variant="active" actionLabel={null} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
           <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" variant="active" infoLayout={"schedule"} actionLabel={nextEventBadge} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="duels"} onClick={()=>switchTab("duels")}/>
         </div>
       </div>
@@ -1571,7 +1571,7 @@ function StatTile({value,label,color,style}){
 return <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.02)",...style}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
 }
 
-function ModeCard({title,subtitle,icon,stats,accent="home",variant="active",infoLayout="equal",isActive,onClick,actionLabel="Open"}){
+function ModeCard({title,subtitle,icon,stats,accent="home",variant="active",infoLayout="equal",isActive,onClick,actionLabel="Open",titleColor=LIGHT,subtitleColor}){
 const a=MODE_CARD_ACCENTS[accent]||MODE_CARD_ACCENTS.home;
 const v=MODE_CARD_VARIANTS[variant]||MODE_CARD_VARIANTS.active;
 const infoLayoutConfig=MODE_CARD_INFO_LAYOUTS[infoLayout]||MODE_CARD_INFO_LAYOUTS.equal;
@@ -1589,8 +1589,8 @@ return <button type="button" onClick={onClick} className="mode-card" style={{"--
     <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
       <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`${v.iconBorderWidth} solid ${a.glow}`,boxShadow:v.iconGlow.replaceAll("var(--glow)",a.glow),display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{themedIcon}</div>
       <div style={{minWidth:0}}>
-        <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase"}}>{title}</div>
-        <div style={{fontFamily:FB,color:chipColor,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
+        <div style={{fontFamily:FD,color:titleColor,fontSize:22,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase"}}>{title}</div>
+        <div style={{fontFamily:FB,color:subtitleColor||chipColor,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
       </div>
     </div>
     <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
