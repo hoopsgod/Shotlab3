@@ -1306,9 +1306,21 @@ export default function ShotLabCharts({
       ),
     [activeDrills, contextScores],
   );
+  const homeScoreCount = useMemo(
+    () => normalizedScores.filter((score) => score.src === "home").length,
+    [normalizedScores],
+  );
+  const programScoreCount = useMemo(
+    () => normalizedScores.filter((score) => score.src === "program").length,
+    [normalizedScores],
+  );
   const [selectedDrillId, setSelectedDrillId] = useState(null);
 
   useEffect(() => {
+    if (context === "home" && !homeScoreCount && programScoreCount) {
+      setContext("program");
+      return;
+    }
     if (!drillOptions.length) {
       setSelectedDrillId(null);
       return;
@@ -1320,7 +1332,7 @@ export default function ShotLabCharts({
     ) {
       setSelectedDrillId(drillOptions[0].id);
     }
-  }, [drillOptions, selectedDrillId]);
+  }, [context, drillOptions, homeScoreCount, programScoreCount, selectedDrillId]);
 
   const selectedDrill = useMemo(
     () =>
@@ -1475,8 +1487,8 @@ export default function ShotLabCharts({
             <Card style={{ padding: 12 }}>
               <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
                 {[
-                  { id: "home", label: "AT HOME" },
-                  { id: "program", label: "PROGRAM" },
+                  { id: "home", label: `AT HOME (${homeScoreCount})` },
+                  { id: "program", label: `PROGRAM (${programScoreCount})` },
                 ].map((option) => (
                   <button
                     key={option.id}
