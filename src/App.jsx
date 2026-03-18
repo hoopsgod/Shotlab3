@@ -11,6 +11,7 @@ import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingCon
 import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 import ShotLabCharts from "./components/ShotLabCharts";
 import resolveTeamBranding from "./theme/resolveTeamBranding";
+import { buildDemoFixtureBundle } from "./demo/demoFixtures";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -237,6 +238,7 @@ if(!existing.includes(code))return code;
 return Math.random().toString(36).slice(2,2+length).toUpperCase();
 }
 const DB={async get(k){try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null}catch{return null}},async set(k,v){try{await window.storage.set(k,JSON.stringify(v),true)}catch{}}};
+const STORAGE_KEYS={drills:"sl:drills",programDrills:"sl:program-drills",scores:"sl:scores",players:"sl:players",playerProfiles:"sl:player-profiles",events:"sl:events",rsvps:"sl:rsvps",shotLogs:"sl:shotlogs",challenges:"sl:challenges",scSessions:"sl:sc-sessions",scRsvps:"sl:sc-rsvps",scLogs:"sl:sc-logs",teams:"sl:teams",session:"sl:session"};
 // Password hashing (simple but not plaintext)
 function hashPw(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return(h>>>0).toString(36)}
 // AudioContext must be lazy-initialized on user gesture (iOS WebKit requirement)
@@ -630,47 +632,51 @@ DB.set("sl:session",{email});
 trackEvent("auth_login",{method:"password"},{email,role:p.role||"player",teamId:p.teamId||null});
 return{ok:true};
 };
+const persistDemoDataBundle=useCallback(async(bundle)=>{
+const nextTeams=(bundle.teams||[]).map(team=>({...team,branding:resolveTeamBranding(team.branding||DEFAULT_BRANDING)}));
+setDrills(bundle.drills||DRILLS_INIT);
+setProgramDrills(bundle.programDrills||PROGRAM_DRILLS_INIT);
+setPlayers(bundle.players||[]);
+setPlayerProfiles(bundle.playerProfiles||[]);
+setTeams(nextTeams);
+setScores(bundle.scores||[]);
+setEvents(bundle.events||EVENTS_INIT);
+setRsvps(bundle.rsvps||[]);
+setShotLogs(bundle.shotLogs||[]);
+setChallenges(bundle.challenges||[]);
+setScSessions(bundle.scSessions||SC_INIT);
+setScRsvps(bundle.scRsvps||[]);
+setScLogs(bundle.scLogs||[]);
+await Promise.all([
+DB.set(STORAGE_KEYS.drills,bundle.drills||DRILLS_INIT),
+DB.set(STORAGE_KEYS.programDrills,bundle.programDrills||PROGRAM_DRILLS_INIT),
+DB.set(STORAGE_KEYS.players,bundle.players||[]),
+DB.set(STORAGE_KEYS.playerProfiles,bundle.playerProfiles||[]),
+DB.set(STORAGE_KEYS.teams,nextTeams),
+DB.set(STORAGE_KEYS.scores,bundle.scores||[]),
+DB.set(STORAGE_KEYS.events,bundle.events||EVENTS_INIT),
+DB.set(STORAGE_KEYS.rsvps,bundle.rsvps||[]),
+DB.set(STORAGE_KEYS.shotLogs,bundle.shotLogs||[]),
+DB.set(STORAGE_KEYS.challenges,bundle.challenges||[]),
+DB.set(STORAGE_KEYS.scSessions,bundle.scSessions||SC_INIT),
+DB.set(STORAGE_KEYS.scRsvps,bundle.scRsvps||[]),
+DB.set(STORAGE_KEYS.scLogs,bundle.scLogs||[]),
+DB.set(STORAGE_KEYS.session,bundle.session||null),
+]);
+return {...bundle,teams:nextTeams};
+},[]);
+const applyDemoData=useCallback(async()=>persistDemoDataBundle(buildDemoFixtureBundle({defaultBranding:DEFAULT_BRANDING,homeDrills:DRILLS_INIT,programDrills:PROGRAM_DRILLS_INIT,events:EVENTS_INIT,scSessions:SC_INIT,demoCoach:DEMO_COACH,demoPlayer:DEMO_PLAYER,now:Date.now,genId,generateJoinCode,hashPw})),[persistDemoDataBundle]);
+const resetDemoData=useCallback(async()=>persistDemoDataBundle({drills:DRILLS_INIT,programDrills:PROGRAM_DRILLS_INIT,players:[],playerProfiles:[],teams:[],scores:[],events:EVENTS_INIT,rsvps:[],shotLogs:[],challenges:[],scSessions:SC_INIT,scRsvps:[],scLogs:[],session:null}),[persistDemoDataBundle]);
 const demoSignIn=async(kind="player")=>{
 const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
-let np=[...players];
-let nts=[...teams];
-const savePlayers=async()=>{await P("sl:players",np,setPlayers)};
-const saveTeams=async()=>{await P("sl:teams",nts,setTeams)};
-
-if(!np.find(p=>p.email===DEMO_COACH.email)){
-np=[...np,{email:DEMO_COACH.email,name:DEMO_COACH.name,password:hashPw(DEMO_COACH.password),role:"coach",teamId:null,hideFromLeaderboards:false}];
-}
-if(!np.find(p=>p.email===DEMO_PLAYER.email)){
-np=[...np,{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,password:hashPw(DEMO_PLAYER.password),role:"player",teamId:null,hideFromLeaderboards:false}];
-}
-await savePlayers();
-
-let demoTeam=nts.find(t=>t.ownerCoachId===DEMO_COACH.email);
-if(!demoTeam){
-demoTeam={id:genId("team"),name:"Demo Team",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nts.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
-nts=[...nts,demoTeam];
-await saveTeams();
-}
-
-let changedPlayers=false;
-np=np.map(p=>{
-if(p.email===DEMO_COACH.email&&p.teamId!==demoTeam.id){changedPlayers=true;return {...p,teamId:demoTeam.id};}
-if(p.email===DEMO_PLAYER.email&&p.teamId!==demoTeam.id){changedPlayers=true;return {...p,teamId:demoTeam.id};}
-return p;
-});
-if(changedPlayers)await savePlayers();
-
-const hasPlayerProfile=playerProfiles.some(pp=>pp.userId===DEMO_PLAYER.email&&pp.teamId===demoTeam.id);
-if(!hasPlayerProfile){
-await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:DEMO_PLAYER.email,teamId:demoTeam.id,firstName:"Demo",lastName:"Player",createdAt:Date.now()}],setPlayerProfiles);
-}
-
-const signedIn=np.find(p=>p.email===acct.email);
-if(!signedIn)return{ok:false,err:"Unable to prepare demo account."};
+const demoData=await applyDemoData();
+const demoTeam=demoData.teams?.[0]||null;
+const signedIn=(demoData.players||[]).find(p=>p.email===acct.email);
+if(!signedIn||!demoTeam)return{ok:false,err:"Unable to prepare demo account."};
 setUser({email:signedIn.email,role:signedIn.role||"player",isCoach:(signedIn.role||"player")==="coach",name:signedIn.name,teamId:demoTeam.id,hideFromLeaderboards:signedIn.hideFromLeaderboards===true});
 if(kind!=="coach")navigateToPlayerHome();
 setView(kind==="coach"?"coach":"player");
-await DB.set("sl:session",{email:signedIn.email});
+await DB.set(STORAGE_KEYS.session,{email:signedIn.email});
 await trackEvent("auth_demo_login",{kind},{email:signedIn.email,role:signedIn.role||"player",teamId:demoTeam.id});
 return{ok:true};
 };
