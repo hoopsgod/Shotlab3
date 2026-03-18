@@ -1181,17 +1181,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     <div style={{fontFamily:FB,color:todayProgramScores.length>=programDrills.length&&programDrills.length>0?LIGHT:CYAN,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8}}>PROGRAM DRILLS · {todayProgramScores.length}/{programDrills.length} DONE</div>
     <div style={{width:"100%",height:4,background:"#242424",borderRadius:2,overflow:"hidden",marginBottom:12}}><div style={{width:`${programDrills.length>0?Math.min(100,Math.round(todayProgramScores.length/programDrills.length*100)):0}%`,height:"100%",background:CYAN,borderRadius:2,transition:"width .25s ease"}}/></div>
     {programDrills.map(d=>{const done=todayProgramScores.find(s=>s.drillId===d.id);
-      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?CYAN+"33":BORDER_CLR}`,borderRadius:16,padding:"16px",marginBottom:12,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
+      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?CYAN+"20":BORDER_CLR}`,borderRadius:16,padding:"16px",marginBottom:12,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.6:1}}>
         <div style={{width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",borderRadius:12,flexShrink:0}}><DrillIcon type={d.icon} size={22} color={done?CYAN+"99":CYAN}/></div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
           <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
         </div>
-        {done?<div style={{textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:CYAN,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
-          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${Math.round(done.score/d.max*100)}%`,height:"100%",background:CYAN,borderRadius:2}}/></div>
-        </div>
-         :<div style={{width:36,height:36,borderRadius:10,background:"rgba(0, 229, 255, 0.10)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
+        {done?<div style={{width:36,height:36,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={CYAN} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+         :<div style={{width:36,height:36,borderRadius:10,background:"rgba(0, 229, 255, 0.10)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .1s ease"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
       </button>})}
   </div>}
 
