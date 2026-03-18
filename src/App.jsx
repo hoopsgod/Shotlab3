@@ -90,14 +90,71 @@ getTileStyle:(index,total)=>total>=3&&index===0?{gridRow:"1 / span 2"}: {},
 };
 const COACH_TEXT_SIZES=["standard","large","xl"];
 
-const DRILLS_INIT=[
-{id:1,name:"FORM SHOOTING",desc:"10 shots from 5 feet. Elbow, follow-through, arc.",max:10,icon:"ft"},
-{id:2,name:"FREE THROWS",desc:"10 free throw attempts. Lock in your routine.",max:10,icon:"ft"},
-{id:3,name:"CATCH & SHOOT",desc:"15 catch-and-shoot jumpers from 5 spots.",max:15,icon:"3p"},
-{id:4,name:"BALL HANDLING",desc:"5-minute handle circuit. Rate yourself 1-10.",max:10,icon:"sb"},
-{id:5,name:"MID-RANGE",desc:"10 pull-up jumpers from elbows and mid-post.",max:10,icon:"mr"},
-{id:6,name:"FLOATERS",desc:"12 runners and floaters from inside the lane.",max:12,icon:"fl"},
+const DEFAULT_DEMO_DRILL_CATALOG=[
+{key:"warm-up-shooting-4-minute",name:"4 MINUTE WARM UP SHOOTING",desc:"4-minute weighted shooting circuit.",max:100,icon:"mr",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+
+1st minute: FT line jumpers = 1 point
+2nd minute: wing 15 foot jumpers = 2 points
+3rd minute: baseline 15 foot jumpers = 2 points
+4th minute: top of key 3 pointers = 3 points`,homeId:"demo-home-warm-up-shooting-4-minute",programId:"demo-program-warm-up-shooting-4-minute"},
+{key:"calipari-shooting",name:"CALIPARI SHOOTING",desc:"Complete as many 3-point spots as possible in 1:30.",max:5,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+
+1:30 on clock
+5 spots: 2 corners, 2 wings, top of key
+All 3 pointers
+Make 2 in a row from each spot, then move on
+Score is how many spots were completed in 1:30`,homeId:"demo-home-calipari-shooting",programId:"demo-program-calipari-shooting"},
+{key:"3-minute-shooting",name:"3 MINUTE SHOOTING",desc:"Make as many 3s as possible in 3 minutes.",max:60,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+
+Make as many 3s as possible in 3 minutes at any spot or spots
+
+Reference:
+Standard score = 32
+Good shooters = 40+`,homeId:"demo-home-3-minute-shooting",programId:"demo-program-3-minute-shooting"},
+{key:"47-shooting",name:"47 SHOOTING",desc:"Finish the sequence, then score top-of-key 3s with time left.",max:50,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+
+4:00 on clock
+5 spots: 2 corners, 2 wings, top of key
+First make 3/5 at each of the 5 spots
+If player goes 2/5 at a spot, stay there and restart from 0/0
+Next make 5 in a row, 1 from each of the 5 spots
+If any of the 5 is missed, restart from either corner at 0
+Then make 5 in a row again with the same rules
+Once completed, go to top of key and make as many 3s as possible in the remaining time
+Only those final top of key makes count as the posted score`,homeId:"demo-home-47-shooting",programId:"demo-program-47-shooting"},
+{key:"buddy-hield-shooting",name:"BUDDY HIELD SHOOTING",desc:"Keep shooting until you miss twice in a row.",max:100,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+
+No time
+Start with a make
+Continue shooting until 2 misses in a row
+Score is total makes before the drill ends`,homeId:"demo-home-buddy-hield-shooting",programId:"demo-program-buddy-hield-shooting"},
+{key:"make-20",name:"MAKE 20",desc:"Track how many shots it takes to make 20 threes.",max:100,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+
+No time
+Take 3s from any spot
+Continue until 20 made 3 pointers
+Score is total shots taken`,homeId:"demo-home-make-20",programId:"demo-program-make-20"},
+{key:"230s",name:"230'S",desc:"2:30 weighted shooting circuit from elbows, corners, and top.",max:100,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+
+2 minutes 30 seconds on clock
+30 seconds from one elbow
+30 seconds from the other elbow
+30 seconds from one corner
+30 seconds from the other corner
+30 seconds from top of key 3s
+
+Scoring:
+Elbows and corners = 1 point per make
+Top of key 3s = 2 points per make`,homeId:"demo-home-230s",programId:"demo-program-230s"},
 ];
+const DEFAULT_HOME_DRILLS=DEFAULT_DEMO_DRILL_CATALOG.map(({homeId,key,...drill})=>({...drill,id:homeId,slug:`home-${key}`,isDefaultDemo:true,mode:"home"}));
+const DEFAULT_PROGRAM_DRILLS=DEFAULT_DEMO_DRILL_CATALOG.map(({programId,key,...drill})=>({...drill,id:programId,slug:`program-${key}`,isDefaultDemo:true,mode:"program"}));
+const DEFAULT_HOME_DRILL_SLUGS=new Set(DEFAULT_HOME_DRILLS.map(d=>d.slug));
+const DEFAULT_PROGRAM_DRILL_SLUGS=new Set(DEFAULT_PROGRAM_DRILLS.map(d=>d.slug));
+const mergeDefaultDrills=(existing=[],defaults=[])=>{const list=Array.isArray(existing)?existing:[];const next=[...list];defaults.forEach(def=>{const matchIndex=next.findIndex(item=>item?.id===def.id||item?.slug===def.slug);if(matchIndex>=0){const current=next[matchIndex]||{};next[matchIndex]={...current,...def,id:current.slug===def.slug&&current.id?current.id:def.id};}else next.push(def);});return next;};
+const countCustomProgramDrills=list=>(Array.isArray(list)?list:[]).filter(d=>!d?.isDefaultDemo&&!DEFAULT_PROGRAM_DRILL_SLUGS.has(d?.slug)).length;
+const DRILLS_INIT=DEFAULT_HOME_DRILLS;
+const PROGRAM_DRILLS_INIT=DEFAULT_PROGRAM_DRILLS;
 const ICONS=["ft","3p","mr","fl","sb"];
 const EVENTS_INIT=[
 {id:1,title:"OPEN GYM RUN",date:"2026-02-28",time:"6:00 PM",location:"Main Gym — Court 1",desc:"Full-court 5v5 runs. First 20 players.",type:"run"},
@@ -437,7 +494,7 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState([]),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
+const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
 const T=THEMES[theme];
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
@@ -489,10 +546,10 @@ return {playersMigrated,profilesMigrated,teamsMigrated:teamsWithBranding,scoresM
 },[]);
 
 // Load persisted data + restore session
-useEffect(()=>{(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session")]);if(d)setDrills(d);if(pd)setProgramDrills(pd);
+useEffect(()=>{(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session")]);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
 const m=migrateData({players:p,playerProfiles:pp,scores:s,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
-await Promise.all([DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
+await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
 if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else setView(found.role||"player")}}
 setReady(true)})()},[migrateData]);
 
@@ -630,7 +687,7 @@ const addScore=async(drillId,score,src="home")=>{if(!requirePlayer(user,user?.te
 const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
 const addDrill=async(drill)=>{if(user?.role!=="coach")return;await P("sl:drills",[...drills,{...drill,id:Date.now()}],setDrills)};
 const removeDrill=async(id)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.filter(d=>d.id!==id),setDrills)};
-const addProgramDrill=async(drill)=>{if(user?.role!=="coach")return{ok:false,err:"Not authorized"};if(programDrills.length>=7)return{ok:false,err:"Program drill limit reached (7)."};await P("sl:program-drills",[...programDrills,{...drill,id:Date.now()}],setProgramDrills);return{ok:true}};
+const addProgramDrill=async(drill)=>{if(user?.role!=="coach")return{ok:false,err:"Not authorized"};if(countCustomProgramDrills(programDrills)>=7)return{ok:false,err:"Program drill limit reached (7 custom drills)."};await P("sl:program-drills",[...programDrills,{...drill,id:Date.now()}],setProgramDrills);return{ok:true}};
 const removeProgramDrill=async(id)=>{if(user?.role!=="coach")return;await P("sl:program-drills",programDrills.filter(d=>d.id!==id),setProgramDrills)};
 const toggleRsvp=async(eid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=rsvps.find(r=>r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId)),setRsvps);trackEvent("event_rsvp_removed",{eventId:eid});}else{await P("sl:rsvps",[...rsvps,{eventId:eid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setRsvps);trackEvent("event_rsvp_added",{eventId:eid});}};
 const addEvent=async ev=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:events",[...events,{...ev,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setEvents);trackEvent("event_created",{eventType:ev.type||"run"})};
@@ -1860,6 +1917,7 @@ function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"10",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all");
+const customProgramDrillCount=countCustomProgramDrills(programDrills);
 const[nudged,setNudged]=useState([]);
 const[confirmDelete,setConfirmDelete]=useState(null);const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
 const ups=useMemo(()=>{const es=[...new Set(scores.map(s=>s.email))];return es.map(e=>{const p=players.find(p=>p.email===e);return{email:e,name:p?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())}})},[scores,players]);
@@ -2089,17 +2147,17 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Drill Management" s={`${drills.length} active`} identity/>
     <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
     <div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:16}}>
-      <div style={{fontFamily:FD,color:PAGE_ACCENTS.drills.accent,fontSize:12,letterSpacing:"var(--tracking-default)",marginBottom:6}}>PROGRAM SHOOTING DRILLS ({programDrills.length}/7)</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginBottom:10}}>Add up to 7 coach-defined program drills for player score tracking and per-drill team leaderboards.</div>
+      <div style={{fontFamily:FD,color:PAGE_ACCENTS.drills.accent,fontSize:12,letterSpacing:"var(--tracking-default)",marginBottom:6}}>PROGRAM SHOOTING DRILLS ({customProgramDrillCount}/7 CUSTOM)</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginBottom:10}}>The 7 demo defaults are seeded automatically. Coaches can still add up to 7 custom program drills for player score tracking and per-drill team leaderboards.</div>
       <div style={{display:"grid",gridTemplateColumns:"1.2fr 1fr .7fr",gap:6,marginBottom:8}}>
         <input value={newProgramDrill.name} onChange={e=>{setNewProgramDrill({...newProgramDrill,name:e.target.value});setProgramErr("")}} placeholder="Drill name" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
         <input value={newProgramDrill.desc} onChange={e=>setNewProgramDrill({...newProgramDrill,desc:e.target.value})} placeholder="Description" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
         <input value={newProgramDrill.max} onChange={e=>setNewProgramDrill({...newProgramDrill,max:e.target.value})} type="number" placeholder="Max" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
       </div>
       <div style={{display:"flex",gap:5,marginBottom:8}}>{ICONS.map(ic=><button key={`prog-${ic}`} onClick={()=>setNewProgramDrill({...newProgramDrill,icon:ic})} style={{width:34,height:34,borderRadius:8,border:`1px solid ${newProgramDrill.icon===ic?PAGE_ACCENTS.drills.accent+"55":BORDER_CLR}`,background:newProgramDrill.icon===ic?PAGE_ACCENTS.drills.glow:BG,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={14} color={newProgramDrill.icon===ic?PAGE_ACCENTS.drills.accent:MUTED}/></button>)}</div>
-      <button onClick={handleAddProgramDrill} disabled={programDrills.length>=7} className="btn-v cta-primary" style={{opacity:programDrills.length>=7?.6:1}}>+ ADD PROGRAM DRILL</button>
+      <button onClick={handleAddProgramDrill} disabled={customProgramDrillCount>=7} className="btn-v cta-primary" style={{opacity:customProgramDrillCount>=7?.6:1}}>+ ADD PROGRAM DRILL</button>
       {programErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:10,marginTop:6}}>{programErr}</div>}
-      <div style={{marginTop:12}}>{programDrills.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>No program drills yet.</div>:programDrills.map(pd=>{const b=scores.filter(s=>s.src==="program"&&s.drillId===pd.id&&isLeaderboardEligible(players,s.email)).reduce((m,s)=>{m[s.email]=(m[s.email]||0)+s.score;return m;},{});const lead=Object.entries(b).sort((a,b)=>b[1]-a[1]).slice(0,3);return <div key={pd.id} style={{display:"flex",alignItems:"center",gap:10,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px 12px",marginBottom:8}}><div style={{width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:8,background:BG,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><DrillIcon type={pd.icon} size={14}/></div><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>{pd.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:1}}>Leaderboard: {lead.length===0?"No scores":lead.map(([email,total],i)=>`#${i+1} ${(players.find(p=>p.email===email)?.name||email.split("@")[0])} ${total}`).join(" · ")}</div></div><button onClick={()=>removeProgramDrill(pd.id)} style={{background:"transparent",border:"1px solid #FF454544",borderRadius:8,color:"#FF6A6A",padding:"5px 8px",fontSize:9,fontWeight:700,cursor:"pointer",letterSpacing:".04em"}}>DELETE</button></div>})}</div>
+      <div style={{marginTop:12}}>{programDrills.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>No program drills yet.</div>:programDrills.map(pd=>{const b=scores.filter(s=>s.src==="program"&&s.drillId===pd.id&&isLeaderboardEligible(players,s.email)).reduce((m,s)=>{m[s.email]=(m[s.email]||0)+s.score;return m;},{});const lead=Object.entries(b).sort((a,b)=>b[1]-a[1]).slice(0,3);return <div key={pd.id} style={{display:"flex",alignItems:"center",gap:10,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px 12px",marginBottom:8}}><div style={{width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:8,background:BG,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><DrillIcon type={pd.icon} size={14}/></div><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>{pd.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:1}}>Leaderboard: {lead.length===0?"No scores":lead.map(([email,total],i)=>`#${i+1} ${(players.find(p=>p.email===email)?.name||email.split("@")[0])} ${total}`).join(" · ")}</div></div>{pd.isDefaultDemo?<span style={{background:"transparent",border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:MUTED,padding:"5px 8px",fontSize:9,fontWeight:700,letterSpacing:".04em"}}>DEMO DEFAULT</span>:<button onClick={()=>removeProgramDrill(pd.id)} style={{background:"transparent",border:"1px solid #FF454544",borderRadius:8,color:"#FF6A6A",padding:"5px 8px",fontSize:9,fontWeight:700,cursor:"pointer",letterSpacing:".04em"}}>DELETE</button>}</div>})}</div>
     </div>
 
     {drills.map(d=>{const dS=scores.filter(s=>s.drillId===d.id);const avg=dS.length?Math.round(dS.reduce((a,s)=>a+s.score,0)/dS.length*10)/10:0;return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 14px 12px",marginBottom:10}}>
@@ -2113,10 +2171,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       </div>
       <div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:12,paddingTop:10,borderTop:`1px solid ${BORDER_CLR}66`}}>
         <button className="pageHeaderPill" onClick={()=>{setEditD(d);setEName(d.name);setEDesc(d.desc);setEInstr(d.instructions||"");setEMax(String(d.max));setEIcon(d.icon||"ft")}} style={{minHeight:34,padding:"0 12px",fontSize:10}}>Edit</button>
-        <button onClick={()=>handleRemoveDrill(d.id)} style={{minHeight:34,background:"transparent",border:`1px solid #FF454544`,borderRadius:999,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"0 12px",color:"#FF6A6A",fontFamily:FB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em"}}>
+        {d.isDefaultDemo?<span style={{minHeight:34,background:"transparent",border:`1px solid ${BORDER_CLR}`,borderRadius:999,display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"0 12px",color:MUTED,fontFamily:FB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em"}}>DEMO DEFAULT</span>:<button onClick={()=>handleRemoveDrill(d.id)} style={{minHeight:34,background:"transparent",border:`1px solid #FF454544`,borderRadius:999,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"0 12px",color:"#FF6A6A",fontFamily:FB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em"}}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
           Delete
-        </button>
+        </button>}
       </div>
     </div>})}
 
