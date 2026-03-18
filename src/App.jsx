@@ -2421,7 +2421,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       <p style={{fontFamily:FB,color:MUTED,fontSize:9,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
     </div>
   </div>}
-  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {scores.filter(s=>s.email===selP.email&&(s.src==="home"||!s.src)).length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills}/></div>}
+  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {scores.filter(s=>s.email===selP.email&&(s.src==="home"||!s.src)).length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills} programDr={programDrills}/></div>}
 
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><PageHeader title="S&C" subtitle="Strength blocks, readiness, and recovery" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S LIFT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAddSC(true)}>Add Session</button></div><div className="heroStats"><div className="heroStat"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">SESSIONS</div></div><div className="heroStat"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">RSVPS</div></div><div className="heroStat"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">LOGS</div></div></div></div>
@@ -2483,10 +2483,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 // ═══════════════════════════════════════
 // HISTORY
 // ═══════════════════════════════════════
-function HistPanel({sc,dr}){
+function HistPanel({sc,dr,programDr=[]}){
 const sorted=useMemo(()=>[...sc].sort((a,b)=>(b.ts||0)-(a.ts||0)),[sc]);
 const grouped=useMemo(()=>{const m={};sorted.forEach(s=>{if(!m[s.date])m[s.date]=[];m[s.date].push(s)});return Object.entries(m)},[sorted]);
-return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=dr.find(d=>d.id===s.drillId);const pct=d?Math.round(s.score/d.max*100):0;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:LIGHT,background:isH?VOLT+"15":LIGHT+"10"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:VOLT,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span></div><div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>)}</div>;
+const findDrillForScore=score=>((score?.src||"home")==="program"?programDr:dr).find(d=>d.id===score.drillId);
+return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=findDrillForScore(s);const pct=d?Math.round(s.score/d.max*100):0;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:CYAN,background:isH?VOLT+"15":CYAN+"15"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:isH?VOLT:CYAN,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span></div><div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>)}</div>;
 }
 
 // ═══════════════════════════════════════
@@ -2496,20 +2497,24 @@ function ProfilePage({u,scores,shotLogs,drills,programDrills=[],rsvps,scRsvps,ch
 const[confirmDel,setConfirmDel]=useState(false);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
+const programScores=useMemo(()=>my.filter(s=>s.src==="program"),[my]);
 const totalMakes=homeScores.reduce((a,s)=>a+s.score,0);
+const totalProgramMakes=programScores.reduce((a,s)=>a+s.score,0);
 const totalShots=shotLogs.filter(s=>s.email===u.email).reduce((a,s)=>a+s.made,0);
 const sessionsLogged=[...new Set(homeScores.map(s=>s.date))].length;
+const programSessionsLogged=[...new Set(programScores.map(s=>s.date))].length;
 const eventsAttended=rsvps.filter(r=>r.email===u.email).length;
 const scCount=scRsvps.filter(r=>r.email===u.email).length;
 const challWon=challenges.filter(c=>(c.from===u.email&&c.status==="lost")||(c.to===u.email&&c.status==="won")).length;
 const challTotal=challenges.filter(c=>c.from===u.email||c.to===u.email).length;
-const hasReportCardData=(totalMakes+totalShots+sessionsLogged+eventsAttended+scCount+challTotal)>0;
+const hasReportCardData=(totalMakes+totalProgramMakes+totalShots+sessionsLogged+programSessionsLogged+eventsAttended+scCount+challTotal)>0;
 const bestStreak=useMemo(()=>{const ds=[...new Set(homeScores.map(s=>s.date))].sort();let max=0,cur=0,prev=null;
 ds.forEach(d=>{const dt=new Date(d);if(prev){const diff=(dt-prev)/(1000*60*60*24);cur=diff<=1?cur+1:1}else cur=1;max=Math.max(max,cur);prev=dt});return max},[homeScores]);
 
 // Per-drill stats with personal bests, averages, trends
-const drillStats=useMemo(()=>drills.map(d=>{
-const ds=homeScores.filter(s=>s.drillId===d.id).sort((a,b)=>(a.ts||0)-(b.ts||0));
+const drillStats=useMemo(()=>[...drills.map(d=>({...d,src:"home"})),...programDrills.map(d=>({...d,src:"program"}))].map(d=>{
+const sourceScores=d.src==="program"?programScores:homeScores;
+const ds=sourceScores.filter(s=>s.drillId===d.id).sort((a,b)=>(a.ts||0)-(b.ts||0));
 const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);
 const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;
 const last10=ds.slice(-10).map(s=>s.score);
@@ -2517,7 +2522,7 @@ const last10=ds.slice(-10).map(s=>s.score);
 let trend="flat";
 if(last10.length>=4){const mid=Math.floor(last10.length/2);const first=last10.slice(0,mid).reduce((a,v)=>a+v,0)/mid;const second=last10.slice(mid).reduce((a,v)=>a+v,0)/(last10.length-mid);if(second>first*1.05)trend="up";else if(second<first*0.95)trend="down"}
 return{...d,pb,avg,count:ds.length,last10,trend};
-}),[drills,homeScores]);
+}),[drills,programDrills,homeScores,programScores]);
 
 const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}>
 <div><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{sub}</div>}</div>
@@ -2543,7 +2548,7 @@ return <div className="fade-up">
 
   {/* Big stats row */}
   <div style={{display:"flex",gap:6,marginTop:20,justifyContent:"center"}}>
-    {[{v:totalMakes+totalShots,l:"TOTAL MAKES",c:VOLT},{v:formatStreakDays(bestStreak),l:"BEST STREAK",c:ORANGE},{v:eventsAttended,l:"EVENTS",c:CYAN}].map(s=>
+    {[{v:totalMakes+totalProgramMakes+totalShots,l:"TOTAL MAKES",c:VOLT},{v:formatStreakDays(bestStreak),l:"BEST STREAK",c:ORANGE},{v:eventsAttended,l:"EVENTS",c:CYAN}].map(s=>
       <div key={s.l} style={{flex:1,background:"#0a0a0a",borderRadius:14,padding:"14px 8px",border:`1px solid ${BORDER_CLR}`}}>
         <div style={{fontFamily:FD,color:s.c,fontSize:26,lineHeight:1}}>{s.v}</div>
         <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:4,fontWeight:600}}>{s.l}</div>
@@ -2576,7 +2581,7 @@ return <div className="fade-up">
   <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:4,letterSpacing:2}}>OFFSEASON PLAYER</div>
   {/* Quick stats row */}
   <div style={{display:"flex",gap:6,marginTop:20,justifyContent:"center"}}>
-    {[{v:totalMakes+totalShots,l:"MAKES",c:VOLT},{v:sessionsLogged,l:"SESSIONS",c:LIGHT},{v:streak,l:"STREAK",c:ORANGE}].map(s=>
+    {[{v:totalMakes+totalProgramMakes+totalShots,l:"MAKES",c:VOLT},{v:sessionsLogged+programSessionsLogged,l:"SESSIONS",c:LIGHT},{v:streak,l:"STREAK",c:ORANGE}].map(s=>
       <div key={s.l} style={{background:BG,borderRadius:12,padding:"10px 14px",border:`1px solid ${BORDER_CLR}`,minWidth:70}}>
         <div style={{fontFamily:FD,color:s.c,fontSize:22,lineHeight:1}}>{s.v}</div>
         <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:3,fontWeight:600}}>{s.l}</div>
@@ -2597,7 +2602,7 @@ return <div className="fade-up">
 
 {/* Overall stats */}
 <div style={{background:CARD_BG,borderRadius:16,padding:"4px 20px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
-  <StatRow label="Total Drill Makes" value={totalMakes}/>
+  <StatRow label="At Home Drill Makes" value={totalMakes}/><StatRow label="Program Drill Makes" value={totalProgramMakes} color={CYAN}/>
   <StatRow label="Shot Tracker Makes" value={totalShots} color={ORANGE}/>
   <StatRow label="Events Attended" value={eventsAttended} color={CYAN}/>
   <StatRow label="S&C Sessions" value={scCount} color="#A0A0A0"/>
@@ -2610,11 +2615,11 @@ return <div className="fade-up">
 
 {/* Per-drill breakdown with PBs and trends */}
 <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
-{drillStats.map(d=>{const accentColor=getDrillAccentColor(d.name);return <div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
+{drillStats.map(d=>{const accentColor=d.src==="program"?CYAN:getDrillAccentColor(d.name);return <div key={`${d.src}-${d.id}`} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
   <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:12}}>
     <DrillIcon type={d.icon} size={20} color={accentColor}/>
     <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+      <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div><span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"2px 6px",borderRadius:999,color:d.src==="program"?CYAN:VOLT,background:d.src==="program"?CYAN+"15":VOLT+"15"}}>{d.src==="program"?"PROGRAM":"AT HOME"}</span></div>
       {d.desc&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.5,marginTop:4}}>{d.desc}</div>}
     </div>
     <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"2px 8px",borderRadius:5,
