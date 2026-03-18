@@ -12,6 +12,7 @@ import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 import ShotLabCharts from "./components/ShotLabCharts";
 import resolveTeamBranding from "./theme/resolveTeamBranding";
 import { buildDemoFixtureBundle } from "./demo/demoFixtures";
+import { DEMO_PROGRESS_HISTORY_FIXTURE } from "./demoFixtures";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -194,6 +195,15 @@ const findMatchingDefaultDrill=(drill,index)=>{if(!drill)return null;return inde
 const mergeDefaultDrills=(existing=[],defaults=[])=>{const list=Array.isArray(existing)?existing:[];const index=defaults===DEFAULT_PROGRAM_DRILLS?DEFAULT_PROGRAM_DRILL_INDEX:DEFAULT_HOME_DRILL_INDEX;const custom=[];const seenDefaults=new Set();list.forEach(item=>{const match=findMatchingDefaultDrill(item,index);if(match){if(seenDefaults.has(match.slug))return;seenDefaults.add(match.slug);custom.push({...item,...match,id:match.id,slug:match.slug,isDefaultDemo:true,mode:match.mode});return;}custom.push(item);});defaults.forEach(def=>{if(!seenDefaults.has(def.slug))custom.push(def);});return custom;};
 const buildDefaultDrillIdAliases=(existing=[],defaults=[])=>{const aliases=new Map();const index=defaults===DEFAULT_PROGRAM_DRILLS?DEFAULT_PROGRAM_DRILL_INDEX:DEFAULT_HOME_DRILL_INDEX;(Array.isArray(existing)?existing:[]).forEach(item=>{const match=findMatchingDefaultDrill(item,index);if(!match)return;aliases.set(String(match.id),match.id);if(item?.id!=null)aliases.set(String(item.id),match.id);if(item?.slug)aliases.set(item.slug,match.id);});defaults.forEach(def=>{aliases.set(String(def.id),def.id);aliases.set(def.slug,def.id);});return aliases;};
 const normalizeScoresForDefaultDrills=(scores=[],homeAliases=new Map(),programAliases=new Map())=>(Array.isArray(scores)?scores:[]).map(score=>{const src=score?.src||"home";const aliases=src==="program"?programAliases:homeAliases;const nextDrillId=aliases.get(String(score?.drillId))||score?.drillId;return nextDrillId===score?.drillId&&src===score?.src?score:{...score,src,drillId:nextDrillId};});
+const getSeededDemoProgressScoresForUser=user=>{
+if(!user?.email||user.email!==DEMO_PLAYER.email)return[];
+return (DEMO_PROGRESS_HISTORY_FIXTURE.scores||[]).map(score=>({...score,email:user.email,playerId:user.email,teamId:user.teamId||score.teamId,name:user.name||score.name}));
+};
+const getProgressHistoryScoresForUser=(scores=[],user=null)=>{
+const scopedScores=(Array.isArray(scores)?scores:[]).filter(score=>!user?.email||score.email===user.email);
+if(scopedScores.length>0||!user)return scopedScores;
+return getSeededDemoProgressScoresForUser(user);
+};
 const countCustomProgramDrills=list=>(Array.isArray(list)?list:[]).filter(d=>!findMatchingDefaultDrill(d,DEFAULT_PROGRAM_DRILL_INDEX)).length;
 const DRILLS_INIT=DEFAULT_HOME_DRILLS;
 const PROGRAM_DRILLS_INIT=DEFAULT_PROGRAM_DRILLS;
@@ -2472,7 +2482,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       <p style={{fontFamily:FB,color:MUTED,fontSize:9,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
     </div>
   </div>}
-  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {scores.filter(s=>s.email===selP.email&&(s.src==="home"||!s.src)).length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills} programDr={programDrills}/></div>}
+  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {scores.filter(s=>s.email===selP.email&&(s.src==="home"||!s.src)).length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div></div><HistPanel sc={getProgressHistoryScoresForUser(scores,selP)} dr={drills} programDr={programDrills}/></div>}
 
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><PageHeader title="S&C" subtitle="Strength blocks, readiness, and recovery" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S LIFT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAddSC(true)}>Add Session</button></div><div className="heroStats"><div className="heroStat"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">SESSIONS</div></div><div className="heroStat"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">RSVPS</div></div><div className="heroStat"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">LOGS</div></div></div></div>
@@ -2546,7 +2556,7 @@ return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s
 // ═══════════════════════════════════════
 function ProfilePage({u,scores,shotLogs,drills,programDrills=[],rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount,onToggleLeaderboardVisibility}){
 const[confirmDel,setConfirmDel]=useState(false);
-const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
+const my=useMemo(()=>getProgressHistoryScoresForUser(scores,u),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const programScores=useMemo(()=>my.filter(s=>s.src==="program"),[my]);
 const totalMakes=homeScores.reduce((a,s)=>a+s.score,0);
@@ -2662,7 +2672,7 @@ return <div className="fade-up">
   <div style={{height:4}}/>
 </div>
 
-<ShotLabCharts scores={scores} drills={drills} programDrills={programDrills} user={u} />
+<ShotLabCharts scores={my} drills={drills} programDrills={programDrills} user={u} />
 
 {/* Per-drill breakdown with PBs and trends */}
 <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
