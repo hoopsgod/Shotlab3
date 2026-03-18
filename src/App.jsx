@@ -2590,9 +2590,12 @@ return <div className="fade-up">
 {/* Per-drill breakdown with PBs and trends */}
 <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
 {drillStats.map(d=>{const accentColor=getDrillAccentColor(d.name);return <div key={d.id} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
-  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
+  <div style={{display:"flex",alignItems:"flex-start",gap:10,marginBottom:12}}>
     <DrillIcon type={d.icon} size={20} color={accentColor}/>
-    <div style={{flex:1,fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+    <div style={{flex:1,minWidth:0}}>
+      <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+      {d.desc&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.5,marginTop:4}}>{d.desc}</div>}
+    </div>
     <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"2px 8px",borderRadius:5,
       color:d.trend==="up"?"#C8FF00":d.trend==="down"?"#FF4545":MUTED,
       background:d.trend==="up"?"#C8FF0015":d.trend==="down"?"#FF454515":BORDER_CLR}}>
