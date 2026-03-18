@@ -9,6 +9,7 @@ import CoachMiniHeader from "./components/CoachMiniHeader";
 import DEFAULT_BRANDING from "./theme/brandingDefaults";
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
+import ShotLabCharts from "./components/ShotLabCharts";
 import resolveTeamBranding from "./theme/resolveTeamBranding";
 
 const TOKENS={
@@ -2518,6 +2519,8 @@ return <div className="fade-up">
   <StatRow label="Best Streak" value={formatStreakDays(bestStreak)} color={ORANGE}/>
   <div style={{height:4}}/>
 </div>
+
+<ShotLabCharts />
 
 {/* Per-drill breakdown with PBs and trends */}
 <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
