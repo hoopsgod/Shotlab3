@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { cloneElement, isValidElement, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import PageHeader from "./components/PageHeader";
@@ -49,33 +49,67 @@ BASE_BG:"linear-gradient(160deg, rgba(30, 30, 30, 0.96) 0%, rgba(15, 15, 15, 0.9
 BASE_BORDER:"rgba(255, 255, 255, 0.18)",
 BASE_SHADOW:"0 12px 30px rgba(0, 0, 0, 0.42)",
 HOME_TINT:"rgba(200, 255, 0, 0.18)",
-PROGRAM_TINT:"rgba(0, 176, 255, 0.18)",
+PROGRAM_TINT:"rgba(0, 176, 255, 0.14)",
 HOME_GLOW:"rgba(200, 255, 0, 0.20)",
-PROGRAM_GLOW:"rgba(0, 176, 255, 0.20)",
+PROGRAM_GLOW:"rgba(0, 176, 255, 0.22)",
+HOME_FOCUS_RING:"rgba(200, 255, 0, 0.45)",
+PROGRAM_FOCUS_RING:"rgba(0, 176, 255, 0.38)",
+PROGRAM_ACCENT_LINE:"rgba(124, 223, 255, 0.9)",
+PROGRAM_CTA_BG:"rgba(0, 176, 255, 0.05)",
+PROGRAM_CTA_SHADOW:"0 0 16px rgba(0, 176, 255, 0.12)",
+PROGRAM_CHIP_BG:"rgba(0, 176, 255, 0.08)",
+PROGRAM_CHIP_BORDER:"rgba(0, 176, 255, 0.26)",
 ICON_INNER:"rgba(255, 255, 255, 0.06)",
-FOCUS_RING:"rgba(200, 255, 0, 0.45)",
 CHEVRON_BG:"rgba(255, 255, 255, 0.06)",
+};
+const MODE_CARD_ACCENTS={
+home:{
+  tint:MODE_CARD_TOKENS.HOME_TINT,
+  glow:MODE_CARD_TOKENS.HOME_GLOW,
+  iconStroke:VOLT,
+  focusRing:MODE_CARD_TOKENS.HOME_FOCUS_RING,
+  topAccentStart:VOLT,
+  topAccentEnd:MODE_CARD_TOKENS.HOME_GLOW,
+  ctaBackground:MODE_CARD_TOKENS.CHEVRON_BG,
+  ctaShadow:"0 0 10px var(--glow)",
+  chipBackground:"var(--chip-bg)",
+  chipBorder:"1.5px solid var(--chip-border)",
+  chipColor:"var(--chip-color)",
+},
+program:{
+  tint:MODE_CARD_TOKENS.PROGRAM_TINT,
+  glow:MODE_CARD_TOKENS.PROGRAM_GLOW,
+  iconStroke:CYAN,
+  focusRing:MODE_CARD_TOKENS.PROGRAM_FOCUS_RING,
+  topAccentStart:MODE_CARD_TOKENS.PROGRAM_ACCENT_LINE,
+  topAccentEnd:MODE_CARD_TOKENS.PROGRAM_GLOW,
+  ctaBackground:MODE_CARD_TOKENS.PROGRAM_CTA_BG,
+  ctaShadow:MODE_CARD_TOKENS.PROGRAM_CTA_SHADOW,
+  chipBackground:MODE_CARD_TOKENS.PROGRAM_CHIP_BG,
+  chipBorder:`1px solid ${MODE_CARD_TOKENS.PROGRAM_CHIP_BORDER}`,
+  chipColor:CYAN,
+},
 };
 const MODE_CARD_VARIANTS={
 active:{
 showTopAccent:true,
-chipBackground:"var(--chip-bg)",
-chipBorder:"1.5px solid var(--chip-border)",
-chipColor:"var(--chip-color)",
+chipBackground:"accent",
+chipBorder:"accent",
+chipColor:"accent",
 iconBorderWidth:"1.5px",
 iconGlow:"inset 0 0 10px var(--glow)",
-ctaShadow:"0 0 10px var(--glow)",
-ctaBackground:MODE_CARD_TOKENS.CHEVRON_BG,
+ctaShadow:"accent",
+ctaBackground:"accent",
 },
 structured:{
 showTopAccent:false,
-chipBackground:"rgba(255, 255, 255, 0.04)",
-chipBorder:"1px solid rgba(255, 255, 255, 0.18)",
-chipColor:TOKENS.TEXT_SECONDARY,
+chipBackground:"accent",
+chipBorder:"accent",
+chipColor:"accent",
 iconBorderWidth:"1px",
 iconGlow:"none",
-ctaShadow:"none",
-ctaBackground:"rgba(255, 255, 255, 0.03)",
+ctaShadow:"accent",
+ctaBackground:"accent",
 	},
 };
 const MODE_CARD_INFO_LAYOUTS={
@@ -1538,28 +1572,30 @@ return <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRa
 }
 
 function ModeCard({title,subtitle,icon,stats,accent="home",variant="active",infoLayout="equal",isActive,onClick,actionLabel="Open"}){
-const accentMap={
-home:{tint:MODE_CARD_TOKENS.HOME_TINT,glow:MODE_CARD_TOKENS.HOME_GLOW,iconStroke:VOLT},
-program:{tint:MODE_CARD_TOKENS.PROGRAM_TINT,glow:MODE_CARD_TOKENS.PROGRAM_GLOW,iconStroke:CYAN}
-};
-const a=accentMap[accent]||accentMap.home;
+const a=MODE_CARD_ACCENTS[accent]||MODE_CARD_ACCENTS.home;
 const v=MODE_CARD_VARIANTS[variant]||MODE_CARD_VARIANTS.active;
 const infoLayoutConfig=MODE_CARD_INFO_LAYOUTS[infoLayout]||MODE_CARD_INFO_LAYOUTS.equal;
 const baseBorder=isActive?`1.5px solid ${a.glow}`:`1.5px solid ${MODE_CARD_TOKENS.BASE_BORDER}`;
 const baseShadow=isActive?`0 14px 32px rgba(0,0,0,.45), 0 0 0 1px ${a.glow} inset`:MODE_CARD_TOKENS.BASE_SHADOW;
-return <button type="button" onClick={onClick} className="mode-card" style={{"--glow":a.glow,"--chip-bg":a.tint,"--chip-border":a.glow,"--chip-color":a.iconStroke,width:"100%",background:`radial-gradient(circle at 12% 10%, ${a.tint} 0%, transparent 55%), ${MODE_CARD_TOKENS.BASE_BG}`,border:baseBorder,borderRadius:24,padding:22,cursor:"pointer",textAlign:"left",position:"relative",overflow:"hidden",minHeight:272,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:baseShadow,transition:"transform .12s ease, border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.glow;e.currentTarget.style.boxShadow=`0 16px 34px rgba(0,0,0,.48), 0 0 0 1px ${a.glow} inset, 0 0 24px ${a.glow}`}} onMouseLeave={e=>{e.currentTarget.style.border=baseBorder;e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.99)";e.currentTarget.style.boxShadow=`0 0 0 2px ${a.glow}, 0 14px 28px rgba(0,0,0,.45)`}} onMouseUp={e=>{e.currentTarget.style.transform="scale(1)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow=`0 0 0 3px ${MODE_CARD_TOKENS.FOCUS_RING}, 0 14px 28px rgba(0,0,0,.45), 0 0 0 1px ${a.glow} inset`}} onBlur={e=>{e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}}>
-  {v.showTopAccent&&<div aria-hidden="true" style={{position:"absolute",top:0,left:0,right:0,height:4,background:`linear-gradient(90deg, ${a.iconStroke}, ${a.glow})`,opacity:.9}}/>}
+const chipBackground=v.chipBackground==="accent"?a.chipBackground:v.chipBackground;
+const chipBorder=v.chipBorder==="accent"?a.chipBorder:v.chipBorder;
+const chipColor=v.chipColor==="accent"?a.chipColor:v.chipColor;
+const ctaBackground=v.ctaBackground==="accent"?a.ctaBackground:v.ctaBackground;
+const ctaShadow=v.ctaShadow==="accent"?a.ctaShadow:v.ctaShadow;
+const themedIcon=isValidElement(icon)?cloneElement(icon,{stroke:a.iconStroke,color:a.iconStroke}):icon;
+return <button type="button" onClick={onClick} className="mode-card" style={{"--glow":a.glow,width:"100%",background:`radial-gradient(circle at 12% 10%, ${a.tint} 0%, transparent 55%), ${MODE_CARD_TOKENS.BASE_BG}`,border:baseBorder,borderRadius:24,padding:22,cursor:"pointer",textAlign:"left",position:"relative",overflow:"hidden",minHeight:272,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:baseShadow,transition:"transform .12s ease, border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.glow;e.currentTarget.style.boxShadow=`0 16px 34px rgba(0,0,0,.48), 0 0 0 1px ${a.glow} inset, 0 0 24px ${a.glow}`}} onMouseLeave={e=>{e.currentTarget.style.border=baseBorder;e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.99)";e.currentTarget.style.boxShadow=`0 0 0 2px ${a.glow}, 0 14px 28px rgba(0,0,0,.45)`}} onMouseUp={e=>{e.currentTarget.style.transform="scale(1)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow=`0 0 0 3px ${a.focusRing}, 0 14px 28px rgba(0,0,0,.45), 0 0 0 1px ${a.glow} inset`}} onBlur={e=>{e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}}>
+  {v.showTopAccent&&<div aria-hidden="true" style={{position:"absolute",top:0,left:0,right:0,height:4,background:`linear-gradient(90deg, ${a.topAccentStart}, ${a.topAccentEnd})`,opacity:.9}}/>}
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16}}>
     <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-      <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`${v.iconBorderWidth} solid ${a.glow}`,boxShadow:v.iconGlow.replaceAll("var(--glow)",a.glow),display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{icon}</div>
+      <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`${v.iconBorderWidth} solid ${a.glow}`,boxShadow:v.iconGlow.replaceAll("var(--glow)",a.glow),display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{themedIcon}</div>
       <div style={{minWidth:0}}>
         <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase"}}>{title}</div>
-        <div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
+        <div style={{fontFamily:FB,color:chipColor,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
       </div>
     </div>
     <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-      {actionLabel&&<div style={{fontFamily:FB,color:v.chipColor.replaceAll("var(--chip-color)",a.iconStroke),fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",padding:"7px 10px",borderRadius:999,border:v.chipBorder.replaceAll("var(--chip-border)",a.glow),background:v.chipBackground.replaceAll("var(--chip-bg)",a.tint),whiteSpace:"nowrap"}}>{actionLabel}</div>}
-      <div style={{width:38,height:38,borderRadius:10,background:v.ctaBackground,border:`1.5px solid ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:v.ctaShadow.replaceAll("var(--glow)",a.glow)}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
+      {actionLabel&&<div style={{fontFamily:FB,color:chipColor,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",padding:"7px 10px",borderRadius:999,border:chipBorder,background:chipBackground,whiteSpace:"nowrap"}}>{actionLabel}</div>}
+      <div style={{width:38,height:38,borderRadius:10,background:ctaBackground,border:`1.5px solid ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:ctaShadow.replaceAll("var(--glow)",a.glow)}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
     </div>
   </div>
   <div style={infoLayoutConfig.container}>{stats.map((s,index)=><StatTile key={s.label} value={s.value} label={s.label} color={s.color} style={infoLayoutConfig.getTileStyle(index,stats.length)}/>)}</div>
