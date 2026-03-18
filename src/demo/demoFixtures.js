@@ -1,3 +1,5 @@
+import { SHOTLAB_DEMO_FIXTURES } from "../demoFixtures";
+
 export function buildDemoFixtureBundle({
   defaultBranding,
   homeDrills,
@@ -29,6 +31,14 @@ export function buildDemoFixtureBundle({
     teamId,
     hideFromLeaderboards: false,
   };
+  const seededProgress = SHOTLAB_DEMO_FIXTURES.progress || {};
+  const remapDemoRecord = (record) => ({
+    ...record,
+    email: demoPlayer.email,
+    playerId: demoPlayer.email,
+    teamId,
+    name: demoPlayer.name,
+  });
 
   return {
     drills: homeDrills,
@@ -55,9 +65,9 @@ export function buildDemoFixtureBundle({
         branding: defaultBranding,
       },
     ],
-    scores: [],
-    rsvps: [],
-    shotLogs: [],
+    scores: (seededProgress.scores || []).map(remapDemoRecord),
+    rsvps: (seededProgress.rsvps || []).map(remapDemoRecord),
+    shotLogs: (seededProgress.shotLogs || []).map(remapDemoRecord),
     challenges: [],
     events,
     scSessions,
