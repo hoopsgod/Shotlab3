@@ -177,8 +177,8 @@ const SC_INIT=[
 {id:104,title:"OLYMPIC LIFTS",date:"2026-03-11",time:"6:00 AM",location:"Weight Room — Platform Area",desc:"Clean & jerk, snatch progressions. Coached session."},
 {id:105,title:"CORE & CONDITIONING",date:"2026-03-18",time:"6:30 AM",location:"Training Facility — Turf",desc:"Core stability, sled pushes, agility ladder. Game-day conditioning."},
 ];
-const PLAYER_TAB_PATHS={home:"/",duels:"/duels","log-drill":"/quick-menu",sc:"/lifting",program:"/events",profile:"/profile",players:"/players"};
-const PLAYER_PATH_TABS={"/":"home","/duels":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/profile":"profile","/players":"players"};
+const PLAYER_TAB_PATHS={home:"/",duels:"/program-log","log-drill":"/quick-menu",sc:"/lifting",program:"/events",profile:"/profile",players:"/players"};
+const PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/profile":"profile","/players":"players"};
 const TIERS=[
 {min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},
 {min:3,name:"STARTER",color:"#7D7D7D",bg:"#7D7D7D15"},
@@ -893,17 +893,18 @@ useEffect(()=>{
 },[tab,canAccessTab]);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
+const programScores=useMemo(()=>my.filter(s=>s.src==="program"),[my]);
 const total=useMemo(()=>homeScores.reduce((a,s)=>a+s.score,0),[homeScores]);
 const totalMakes=total;
 const today=todayStr();
 const todayS=useMemo(()=>homeScores.filter(s=>s.date===today),[homeScores,today]);
+const todayProgramScores=useMemo(()=>programScores.filter(s=>s.date===today),[programScores,today]);
 const streak=useMemo(()=>calcStreak(homeScores),[homeScores]);
 const earnedBadges=useMemo(()=>getEarnedBadges(streak),[streak]);
 const myRsvps=useMemo(()=>rsvps.filter(r=>r.email===u.email).length,[rsvps,u]);
 const tier=useMemo(()=>getTier(myRsvps),[myRsvps]);
 
 // Notification dots for nav
-const pendingDuels=useMemo(()=>challenges.filter(c=>c.to===u.email&&c.status==="pending").length,[challenges,u]);
 const unrsvpEvents=useMemo(()=>{const up=events.filter(e=>e.date>=today);return up.filter(e=>!rsvps.some(r=>r.eventId===e.id&&r.email===u.email)).length},[events,rsvps,u,today]);
 const soonSC=useMemo(()=>{const d2=new Date();d2.setDate(d2.getDate()+2);const cut=`${d2.getFullYear()}-${String(d2.getMonth()+1).padStart(2,"0")}-${String(d2.getDate()).padStart(2,"0")}`;return scSessions.filter(s=>s.date>=today&&s.date<=cut&&!scRsvps.some(r=>r.sessionId===s.id&&r.email===u.email)).length},[scSessions,scRsvps,u,today]);
 
@@ -911,14 +912,16 @@ const[pbReveal,setPbReveal]=useState(null);
 const[submitting,setSubmitting]=useState(false);
 const[drillBarW,setDrillBarW]=useState(0);
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
-const handleLog=()=>{if(submitting)return;const v=parseInt(input);if(isNaN(v)||v<0||v>active.max)return;setSubmitting(true);const oldStreak=streak;
-// Check personal best
-const prevBest=homeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
+const activeMode=tab==="duels"?"program":"home";
+const activeScores=activeMode==="program"?programScores:homeScores;
+const handleLog=()=>{if(submitting||!active)return;const v=parseInt(input);if(isNaN(v)||v<0||v>active.max)return;setSubmitting(true);const oldStreak=streak;
+const prevBest=activeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
 const isPB=v>prevBest&&prevBest>0;
-addScore(active.id,v);playScore();const pct=Math.round(v/active.max*100);setShareData({drill:active.name,score:v,max:active.max,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
+addScore(active.id,v,activeMode);playScore();const pct=Math.round(v/active.max*100);setShareData({drill:active.name,score:v,max:active.max,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
-setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)};
-const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setSubmitting(false);setTab("home")};
+if(activeMode!=="program"){setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)}
+};
+const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setSubmitting(false);switchTab(activeMode==="program"?"duels":"home")};
 const sendChallenge=()=>{if(!challTarget)return;addChallenge({to:challTarget,toName:players.find(p=>p.email===challTarget)?.name||challTarget.split("@")[0],drillId:shareData.drillId,drillName:shareData.drill,score:shareData.score,max:shareData.max});setShowChallForm(false);setChallTarget("");closeShare()};
 
 // Pull-to-refresh
@@ -930,7 +933,7 @@ const playerNavItems=[
   {k:"home",l:"Home",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>},
   ...(u.isCoach
     ? [{k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>}]
-    : [{k:"duels",l:"Duels",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>,dot:pendingDuels>0?ORANGE:null}]),
+    : [{k:"duels",l:"Program Log",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>}]),
   {k:"log-drill",l:"AT Home Log",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>},
   {k:"sc",l:"Lifting",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>,dot:soonSC>0?VOLT:null},
   {k:"program",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
@@ -999,7 +1002,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     <div style={{fontFamily:FB,color:ORANGE,fontSize:8,letterSpacing:2,marginTop:2}}>{pullY>40?"REFRESHING":"PULL"}</div>
   </div>}
 
-  {tab!=="home"&&<button onClick={()=>switchTab("home")} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:16,padding:0}}>&#8592; DASHBOARD</button>}
+  {tab!=="home"&&!active&&<button onClick={()=>switchTab("home")} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:16,padding:0}}>&#8592; DASHBOARD</button>}
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
@@ -1022,7 +1025,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         </section>
         <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
           <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" variant="active" actionLabel={null} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
-          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" variant="structured" infoLayout={"schedule"} actionLabel={nextEventBadge} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="program"} onClick={()=>setTab("program")}/>
+          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" variant="structured" infoLayout={"schedule"} actionLabel={nextEventBadge} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="duels"} onClick={()=>switchTab("duels")}/>
         </div>
       </div>
     })()}
@@ -1088,7 +1091,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 
 
   {/* ═════════════ ACTIVE DRILL INPUT ═════════════ */}
-  {(tab==="home"||tab==="log-drill")&&active&&<div className="detail-enter" style={{textAlign:"center",paddingTop:12,position:"relative"}}>
+  {(tab==="home"||tab==="log-drill"||tab==="duels")&&active&&<div className="detail-enter" style={{textAlign:"center",paddingTop:12,position:"relative"}}>
     {confetti&&<ConfettiBurst/>}
     {saved&&shareData?<div className="fade-up" style={{padding:"16px 0"}}>
       {/* ── SHAREABLE WORKOUT CARD ── */}
@@ -1096,14 +1099,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       {/* Challenge button */}
       {!showChallForm?<div style={{display:"flex",gap:8,marginTop:16}}>
         <button className="btn-v cta-primary" onClick={closeShare} style={{width:"100%"}}>DONE</button>
-        <button className="btn-v cta-primary" onClick={()=>setShowChallForm(true)} style={{width:"100%"}}>
+        {shareData?.src!=="program"&&<button className="btn-v cta-primary" onClick={()=>setShowChallForm(true)} style={{width:"100%"}}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>CHALLENGE
-        </button>
+        </button>}
       </div>
       :<div className="fade-up" style={{marginTop:16,background:CARD_BG,borderRadius:16,padding:"20px 18px",border:`1px solid ${ORANGE}33`,textAlign:"left"}}>
         <div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3,marginBottom:4}}>SEND A CHALLENGE</div>
         <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:14}}>Dare a teammate to beat your {shareData.score}/{shareData.max} on {shareData.drill}</div>
-        {players.filter(p=>p.email!==u.email).length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:12,textAlign:"center",padding:16}}>No other players yet. They need to log in first.</div>
+        {shareData?.src==="program"?<div style={{fontFamily:FB,color:T.SUB,fontSize:11}}>Program scores save directly to the team program leaderboard.</div>:players.filter(p=>p.email!==u.email).length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:12,textAlign:"center",padding:16}}>No other players yet. They need to log in first.</div>
         :<><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PICK YOUR OPPONENT</div>
           <div style={{display:"flex",flexDirection:"column",gap:4,marginBottom:14}}>{players.filter(p=>p.email!==u.email).map(p=>
             <button key={p.email} onClick={()=>setChallTarget(p.email)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:challTarget===p.email?ORANGE+"15":BG,border:`1px solid ${challTarget===p.email?ORANGE:BORDER_CLR}`,borderRadius:10,cursor:"pointer",textAlign:"left"}}>
@@ -1119,19 +1122,19 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       </div>}
       <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:12}}>Screenshot your card and share on social media</div>
     </div>
-    :<><button onClick={()=>{setActive(null);if(tab==="home")setTab("log-drill")}} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:32,padding:"8px 16px"}}>&#8592; BACK</button>
+    :<><button onClick={()=>{setActive(null);if(tab==="home")switchTab("log-drill");if(tab==="duels")switchTab("duels")}} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:32,padding:"8px 16px"}}>&#8592; BACK</button>
       <div style={{width:100,height:100,borderRadius:22,background:`linear-gradient(135deg,${SURFACE},${CARD_BG})`,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px"}}><DrillIcon type={active.icon} size={48}/></div>
       <h2 style={{fontFamily:FD,color:LIGHT,fontSize:36,letterSpacing:4,margin:"0 0 8px"}}>{active.name}</h2>
       <p style={{fontFamily:FB,color:MUTED,fontSize:14,margin:"0 auto 6px",maxWidth:280,lineHeight:1.6}}>{active.desc}</p>
       {/* Personal Best + Average */}
-      {(()=>{const ds=homeScores.filter(s=>s.drillId===active.id);const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;
+      {(()=>{const ds=activeScores.filter(s=>s.drillId===active.id);const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;const statAccent=activeMode==="program"?CYAN:ORANGE;
         return ds.length>0?<div style={{display:"flex",gap:8,justifyContent:"center",margin:"12px 0 6px"}}>
-          <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${ORANGE}33`,textAlign:"center"}}>
-            <div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{pb}</div>
+          <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${statAccent}33`,textAlign:"center"}}>
+            <div style={{fontFamily:FD,color:statAccent,fontSize:18}}>{pb}</div>
             <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>YOUR PB</div>
           </div>
           <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-            <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{avg}</div>
+            <div style={{fontFamily:FD,color:activeMode==="program"?CYAN:VOLT,fontSize:18}}>{avg}</div>
             <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>AVG</div>
           </div>
           <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
@@ -1165,8 +1168,34 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {/* ═════════════ PROGRAM (Coach-Verified) ═════════════ */}
   {tab==="program"&&<div className={slideClass} key="program"><SectionHero icon={<EventIcon type="star" size={28} color={VOLT}/>} title="PROGRAM EVENTS" subtitle="Official workouts and attendance" accent={VOLT} deco={<EventIcon type="run" size={16} color={VOLT}/>} isCoach={u.isCoach}/><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills}/></div>}
 
+
+
+  {/* ═════════════ PROGRAM LOG ═════════════ */}
+  {tab==="duels"&&!active&&<div className="fade-up">
+    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>
+      <div style={{fontFamily:FD,color:CYAN,fontSize:22,letterSpacing:3}}>PROGRAM LOG</div>
+    </div>
+    <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:24,fontWeight:500}}>Log your coach-assigned program drills and keep the team leaderboard moving.</div>
+
+    <div style={{fontFamily:FB,color:todayProgramScores.length>=programDrills.length&&programDrills.length>0?LIGHT:CYAN,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8}}>PROGRAM DRILLS · {todayProgramScores.length}/{programDrills.length} DONE</div>
+    <div style={{width:"100%",height:4,background:"#242424",borderRadius:2,overflow:"hidden",marginBottom:12}}><div style={{width:`${programDrills.length>0?Math.min(100,Math.round(todayProgramScores.length/programDrills.length*100)):0}%`,height:"100%",background:CYAN,borderRadius:2,transition:"width .25s ease"}}/></div>
+    {programDrills.map(d=>{const done=todayProgramScores.find(s=>s.drillId===d.id);
+      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?CYAN+"33":BORDER_CLR}`,borderRadius:16,padding:"16px",marginBottom:12,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
+        <div style={{width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",borderRadius:12,flexShrink:0}}><DrillIcon type={d.icon} size={22} color={done?CYAN+"99":CYAN}/></div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
+          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
+        </div>
+        {done?<div style={{textAlign:"right",flexShrink:0}}>
+          <div style={{fontFamily:FD,color:CYAN,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
+          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${Math.round(done.score/d.max*100)}%`,height:"100%",background:CYAN,borderRadius:2}}/></div>
+        </div>
+         :<div style={{width:36,height:36,borderRadius:10,background:"rgba(0, 229, 255, 0.10)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
+      </button>})}
+  </div>}
+
   {/* ═════════════ CHALLENGES ═════════════ */}
-  {!u.isCoach&&tab==="duels"&&<div className={slideClass} key="duels"><DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players}/></div>}
   {u.isCoach&&tab==="players"&&<div className={slideClass} key="players"><PlayersScreen/></div>}
 
   {/* ═════════════ STRENGTH & CONDITIONING ═════════════ */}
