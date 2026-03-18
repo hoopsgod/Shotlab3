@@ -1487,30 +1487,59 @@ export default function ShotLabCharts({
             <Card style={{ padding: 12 }}>
               <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
                 {[
-                  { id: "home", label: `AT HOME (${homeScoreCount})` },
-                  { id: "program", label: `PROGRAM (${programScoreCount})` },
-                ].map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => setContext(option.id)}
-                    style={{
-                      flex: 1,
-                      borderRadius: 999,
-                      border: `1px solid ${context === option.id ? accent : T.border}`,
-                      background:
-                        context === option.id ? `${accent}18` : "transparent",
-                      color: context === option.id ? accent : T.mutedLt,
-                      padding: "8px 10px",
-                      fontSize: 10,
-                      fontWeight: 800,
-                      letterSpacing: 1.5,
-                      fontFamily: T.font,
-                      cursor: "pointer",
-                    }}
-                  >
-                    {option.label}
-                  </button>
-                ))}
+                  {
+                    id: "home",
+                    label: `AT HOME (${homeScoreCount})`,
+                    accentColor: T.lime,
+                  },
+                  {
+                    id: "program",
+                    label: `PROGRAM (${programScoreCount})`,
+                    accentColor: T.teal,
+                  },
+                ].map((option) => {
+                  const activeOption = context === option.id;
+                  const isProgramOption = option.id === "program";
+
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => setContext(option.id)}
+                      style={{
+                        flex: 1,
+                        borderRadius: 999,
+                        border: `1px solid ${
+                          activeOption
+                            ? option.accentColor
+                            : isProgramOption
+                              ? `${T.teal}55`
+                              : T.border
+                        }`,
+                        background: activeOption
+                          ? isProgramOption
+                            ? `linear-gradient(180deg, ${T.teal}26 0%, rgba(34, 211, 238, 0.08) 100%)`
+                            : `${option.accentColor}18`
+                          : isProgramOption
+                            ? "linear-gradient(180deg, rgba(34, 211, 238, 0.12) 0%, rgba(34, 211, 238, 0.04) 100%)"
+                            : "transparent",
+                        color: activeOption ? option.accentColor : T.mutedLt,
+                        boxShadow:
+                          activeOption && isProgramOption
+                            ? "inset 0 0 0 1px rgba(255,255,255,0.06), 0 0 16px rgba(34,211,238,0.14)"
+                            : "none",
+                        padding: "8px 10px",
+                        fontSize: 10,
+                        fontWeight: 800,
+                        letterSpacing: 1.5,
+                        fontFamily: T.font,
+                        cursor: "pointer",
+                        transition: "all 0.15s ease",
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  );
+                })}
               </div>
               {drillOptions.length > 0 ? (
                 <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
