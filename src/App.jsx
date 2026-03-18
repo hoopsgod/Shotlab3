@@ -1,6 +1,7 @@
 import { cloneElement, isValidElement, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
+import { applySharedDemoData, resetSharedDemoData, DEMO_STORAGE_KEYS } from "./lib/demoData";
 import PageHeader from "./components/PageHeader";
 import AppHeader from "./components/AppHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
@@ -630,42 +631,81 @@ DB.set("sl:session",{email});
 trackEvent("auth_login",{method:"password"},{email,role:p.role||"player",teamId:p.teamId||null});
 return{ok:true};
 };
-const demoSignIn=async(kind="player")=>{
-const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
-let np=[...players];
-let nts=[...teams];
-const savePlayers=async()=>{await P("sl:players",np,setPlayers)};
-const saveTeams=async()=>{await P("sl:teams",nts,setTeams)};
+const buildDemoSeedState=useCallback(()=>{
+let nextPlayers=[...players];
+let nextTeams=[...teams];
+let nextProfiles=[...playerProfiles];
 
-if(!np.find(p=>p.email===DEMO_COACH.email)){
-np=[...np,{email:DEMO_COACH.email,name:DEMO_COACH.name,password:hashPw(DEMO_COACH.password),role:"coach",teamId:null,hideFromLeaderboards:false}];
+if(!nextPlayers.find(p=>p.email===DEMO_COACH.email)){
+nextPlayers=[...nextPlayers,{email:DEMO_COACH.email,name:DEMO_COACH.name,password:hashPw(DEMO_COACH.password),role:"coach",teamId:null,hideFromLeaderboards:false}];
 }
-if(!np.find(p=>p.email===DEMO_PLAYER.email)){
-np=[...np,{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,password:hashPw(DEMO_PLAYER.password),role:"player",teamId:null,hideFromLeaderboards:false}];
+if(!nextPlayers.find(p=>p.email===DEMO_PLAYER.email)){
+nextPlayers=[...nextPlayers,{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,password:hashPw(DEMO_PLAYER.password),role:"player",teamId:null,hideFromLeaderboards:false}];
 }
-await savePlayers();
 
-let demoTeam=nts.find(t=>t.ownerCoachId===DEMO_COACH.email);
+let demoTeam=nextTeams.find(t=>t.ownerCoachId===DEMO_COACH.email);
 if(!demoTeam){
-demoTeam={id:genId("team"),name:"Demo Team",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nts.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
-nts=[...nts,demoTeam];
-await saveTeams();
+demoTeam={id:genId("team"),name:"Demo Team",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nextTeams.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
+nextTeams=[...nextTeams,demoTeam];
 }
 
-let changedPlayers=false;
-np=np.map(p=>{
-if(p.email===DEMO_COACH.email&&p.teamId!==demoTeam.id){changedPlayers=true;return {...p,teamId:demoTeam.id};}
-if(p.email===DEMO_PLAYER.email&&p.teamId!==demoTeam.id){changedPlayers=true;return {...p,teamId:demoTeam.id};}
+nextPlayers=nextPlayers.map(p=>{
+if(p.email===DEMO_COACH.email)return {...p,teamId:demoTeam.id};
+if(p.email===DEMO_PLAYER.email)return {...p,teamId:demoTeam.id};
 return p;
 });
-if(changedPlayers)await savePlayers();
 
-const hasPlayerProfile=playerProfiles.some(pp=>pp.userId===DEMO_PLAYER.email&&pp.teamId===demoTeam.id);
-if(!hasPlayerProfile){
-await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:DEMO_PLAYER.email,teamId:demoTeam.id,firstName:"Demo",lastName:"Player",createdAt:Date.now()}],setPlayerProfiles);
+if(!nextProfiles.some(pp=>pp.userId===DEMO_PLAYER.email&&pp.teamId===demoTeam.id)){
+nextProfiles=[...nextProfiles,{id:genId("pp"),userId:DEMO_PLAYER.email,teamId:demoTeam.id,firstName:"Demo",lastName:"Player",createdAt:Date.now()}];
 }
 
-const signedIn=np.find(p=>p.email===acct.email);
+return {demoTeam,nextPlayers,nextTeams,nextProfiles,nextDrills:mergeDefaultDrills(drills,DRILLS_INIT),nextProgramDrills:mergeDefaultDrills(programDrills,PROGRAM_DRILLS_INIT)};
+},[drills,playerProfiles,players,programDrills,teams]);
+
+const loadDemoData=useCallback(async()=>{
+const {nextPlayers,nextTeams,nextProfiles,nextDrills,nextProgramDrills}=buildDemoSeedState();
+await applySharedDemoData({
+  persist:P,
+  slices:[
+    {key:DEMO_STORAGE_KEYS.players,value:nextPlayers,setter:setPlayers},
+    {key:DEMO_STORAGE_KEYS.teams,value:nextTeams,setter:setTeams},
+    {key:DEMO_STORAGE_KEYS.playerProfiles,value:nextProfiles,setter:setPlayerProfiles},
+    {key:DEMO_STORAGE_KEYS.drills,value:nextDrills,setter:setDrills},
+    {key:DEMO_STORAGE_KEYS.programDrills,value:nextProgramDrills,setter:setProgramDrills},
+  ],
+});
+return {ok:true};
+},[P,buildDemoSeedState]);
+
+const clearDemoData=useCallback(async()=>{
+const nextTeams=teams.filter(t=>t.ownerCoachId!==DEMO_COACH.email);
+const nextPlayers=players.filter(p=>p.email!==DEMO_COACH.email&&p.email!==DEMO_PLAYER.email);
+const nextProfiles=playerProfiles.filter(pp=>pp.userId!==DEMO_PLAYER.email);
+const nextScores=scores.filter(s=>s.email!==DEMO_PLAYER.email&&s.email!==DEMO_COACH.email&&s.playerId!==DEMO_PLAYER.email&&s.playerId!==DEMO_COACH.email);
+await resetSharedDemoData({
+  persist:P,
+  slices:[
+    {key:DEMO_STORAGE_KEYS.players,value:nextPlayers,setter:setPlayers},
+    {key:DEMO_STORAGE_KEYS.teams,value:nextTeams,setter:setTeams},
+    {key:DEMO_STORAGE_KEYS.playerProfiles,value:nextProfiles,setter:setPlayerProfiles},
+    {key:DEMO_STORAGE_KEYS.drills,value:mergeDefaultDrills(drills,DRILLS_INIT),setter:setDrills},
+    {key:DEMO_STORAGE_KEYS.programDrills,value:mergeDefaultDrills(programDrills,PROGRAM_DRILLS_INIT),setter:setProgramDrills},
+    {key:DEMO_STORAGE_KEYS.scores,value:nextScores,setter:setScores},
+  ],
+});
+if(user?.email===DEMO_PLAYER.email||user?.email===DEMO_COACH.email){
+  await DB.set("sl:session",null);
+  setUser(null);
+  setView("auth");
+}
+return {ok:true};
+},[P,drills,playerProfiles,players,programDrills,scores,teams,user]);
+
+const demoSignIn=async(kind="player")=>{
+const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
+const {demoTeam,nextPlayers}=buildDemoSeedState();
+await loadDemoData();
+const signedIn=nextPlayers.find(p=>p.email===acct.email);
 if(!signedIn)return{ok:false,err:"Unable to prepare demo account."};
 setUser({email:signedIn.email,role:signedIn.role||"player",isCoach:(signedIn.role||"player")==="coach",name:signedIn.name,teamId:demoTeam.id,hideFromLeaderboards:signedIn.hideFromLeaderboards===true});
 if(kind!=="coach")navigateToPlayerHome();
@@ -1240,7 +1280,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
+  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility} onLoadDemoData={u?.isCoach?loadDemoData:undefined} onClearDemoData={u?.isCoach?clearDemoData:undefined}/></div>}
 </div>
 
 {!isDesktop&&<NavBar items={playerNavItems} active={tab} onChange={switchTab}/>} 
@@ -2533,7 +2573,7 @@ return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s
 // ═══════════════════════════════════════
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
-function ProfilePage({u,scores,shotLogs,drills,programDrills=[],rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount,onToggleLeaderboardVisibility}){
+function ProfilePage({u,scores,shotLogs,drills,programDrills=[],rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount,onToggleLeaderboardVisibility,onLoadDemoData,onClearDemoData}){
 const[confirmDel,setConfirmDel]=useState(false);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
@@ -2688,6 +2728,15 @@ return <div className="fade-up">
     <Sparkline data={d.last10} color={VOLT} w={200} h={20}/>
   </div>}
 </div>})}
+
+{u.isCoach&&<div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DEMO SETTINGS</div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5,marginBottom:12}}>Trigger the shared demo seed/reset flow without changing other settings.</div>
+  <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+    <button onClick={onLoadDemoData} className="pageHeaderPill" style={{minHeight:36,padding:"0 14px",fontSize:10}}>Load Demo Data</button>
+    <button onClick={onClearDemoData} style={{minHeight:36,padding:"0 14px",background:"transparent",border:`1px solid #FF454544`,borderRadius:999,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",color:"#FF6A6A",fontFamily:FB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em"}}>Clear Demo Data</button>
+  </div>
+</div>}
 
 <div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
   <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>PRIVACY</div>
