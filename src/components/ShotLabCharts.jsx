@@ -1500,6 +1500,9 @@ export default function ShotLabCharts({
                 ].map((option) => {
                   const activeOption = context === option.id;
                   const isProgramOption = option.id === "program";
+                  const programBackground = activeOption
+                    ? `linear-gradient(180deg, ${T.teal}24 0%, rgba(34, 211, 238, 0.1) 55%, rgba(34, 211, 238, 0.04) 100%)`
+                    : "linear-gradient(180deg, rgba(34, 211, 238, 0.16) 0%, rgba(34, 211, 238, 0.08) 55%, rgba(34, 211, 238, 0.03) 100%)";
 
                   return (
                     <button
@@ -1512,21 +1515,26 @@ export default function ShotLabCharts({
                           activeOption
                             ? option.accentColor
                             : isProgramOption
-                              ? `${T.teal}55`
+                              ? `${T.teal}70`
                               : T.border
                         }`,
                         background: activeOption
                           ? isProgramOption
-                            ? `linear-gradient(180deg, ${T.teal}26 0%, rgba(34, 211, 238, 0.08) 100%)`
+                            ? programBackground
                             : `${option.accentColor}18`
                           : isProgramOption
-                            ? "linear-gradient(180deg, rgba(34, 211, 238, 0.12) 0%, rgba(34, 211, 238, 0.04) 100%)"
+                            ? programBackground
                             : "transparent",
-                        color: activeOption ? option.accentColor : T.mutedLt,
-                        boxShadow:
-                          activeOption && isProgramOption
-                            ? "inset 0 0 0 1px rgba(255,255,255,0.06), 0 0 16px rgba(34,211,238,0.14)"
-                            : "none",
+                        color: activeOption
+                          ? option.accentColor
+                          : isProgramOption
+                            ? `${T.teal}D9`
+                            : T.mutedLt,
+                        boxShadow: isProgramOption
+                          ? activeOption
+                            ? "inset 0 0 0 1px rgba(255,255,255,0.08), 0 0 18px rgba(34,211,238,0.16)"
+                            : "inset 0 0 0 1px rgba(255,255,255,0.04)"
+                          : "none",
                         padding: "8px 10px",
                         fontSize: 10,
                         fontWeight: 800,
