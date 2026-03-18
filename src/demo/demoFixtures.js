@@ -1,5 +1,9 @@
 import { SHOTLAB_DEMO_FIXTURES } from "../demoFixtures";
 
+const asArray = (value, fallback = []) => (Array.isArray(value) ? value : fallback);
+const asObject = (value, fallback = {}) =>
+  value && typeof value === "object" && !Array.isArray(value) ? value : fallback;
+
 export function buildDemoFixtureBundle({
   defaultBranding,
   homeDrills,
@@ -31,9 +35,10 @@ export function buildDemoFixtureBundle({
     teamId,
     hideFromLeaderboards: false,
   };
-  const seededProgress = SHOTLAB_DEMO_FIXTURES.progress || {};
+  const seededFixtures = asObject(SHOTLAB_DEMO_FIXTURES);
+  const seededProgress = asObject(seededFixtures.progress);
   const remapDemoRecord = (record) => ({
-    ...record,
+    ...asObject(record),
     email: demoPlayer.email,
     playerId: demoPlayer.email,
     teamId,
@@ -41,8 +46,8 @@ export function buildDemoFixtureBundle({
   });
 
   return {
-    drills: homeDrills,
-    programDrills,
+    drills: asArray(homeDrills),
+    programDrills: asArray(programDrills),
     players: [coach, player],
     playerProfiles: [
       {
@@ -65,12 +70,12 @@ export function buildDemoFixtureBundle({
         branding: defaultBranding,
       },
     ],
-    scores: (seededProgress.scores || []).map(remapDemoRecord),
-    rsvps: (seededProgress.rsvps || []).map(remapDemoRecord),
-    shotLogs: (seededProgress.shotLogs || []).map(remapDemoRecord),
+    scores: asArray(seededProgress.scores).map(remapDemoRecord),
+    rsvps: asArray(seededProgress.rsvps).map(remapDemoRecord),
+    shotLogs: asArray(seededProgress.shotLogs).map(remapDemoRecord),
     challenges: [],
-    events,
-    scSessions,
+    events: asArray(events),
+    scSessions: asArray(scSessions),
     scRsvps: [],
     scLogs: [],
     session: null,
