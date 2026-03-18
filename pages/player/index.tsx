@@ -1,13 +1,19 @@
+import React from 'react';
 import ReactDOM from 'react-dom/client';
 import PlayerDashboardLayout from '../../layouts/PlayerDashboardLayout';
-import HomePage from '../../features/player/HomePage';
 
-function PlayerHome() {
-  return (
-    <PlayerDashboardLayout>
-      <HomePage />
-    </PlayerDashboardLayout>
-  );
+const rootEl = document.getElementById('root');
+
+if (!rootEl) {
+  throw new Error('Player demo root element not found');
 }
 
-ReactDOM.createRoot(document.getElementById('root')!).render(<PlayerHome />);
+ReactDOM.createRoot(rootEl).render(
+  <React.StrictMode>
+    <PlayerDashboardLayout>
+      <div style={{ color: 'white', padding: '24px' }}>
+        PLAYER LAYOUT TEST
+      </div>
+    </PlayerDashboardLayout>
+  </React.StrictMode>
+);
