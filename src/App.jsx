@@ -552,13 +552,19 @@ const scLM=(rawScLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:l.t
 return {playersMigrated,profilesMigrated,teamsMigrated:teamsWithBranding,scoresM,eventsM,rsvpsM,shotM,chM,scSM,scRM,scLM};
 },[]);
 
+const navigateToPlayerHome=useCallback(()=>{
+if(typeof window==="undefined")return;
+const homePath=PLAYER_TAB_PATHS.home||"/";
+if(window.location.pathname!==homePath)window.history.replaceState({},"",homePath);
+},[]);
+
 // Load persisted data + restore session
 useEffect(()=>{(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session")]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
 const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
 await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
-if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else setView(found.role||"player")}}
-setReady(true)})()},[migrateData]);
+if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}}}
+setReady(true)})()},[migrateData,navigateToPlayerHome]);
 
 const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
 // Auth with hashed passwords
@@ -585,7 +591,7 @@ if(!p.password){P("sl:players",players.map(pl=>pl.email===email?{...pl,password:
 setUser({email,role:p.role||"player",isCoach:(p.role||"player")==="coach",name:p.name,teamId:p.teamId||null,hideFromLeaderboards:p.hideFromLeaderboards===true});
 if((p.role||"player")==="coach"&&!p.teamId)setView("create-team");
 else if((p.role||"player")==="player"&&!p.teamId)setView("join-team");
-else setView(p.role||"player");
+else {if((p.role||"player")==="player")navigateToPlayerHome();setView(p.role||"player");}
 DB.set("sl:session",{email});
 trackEvent("auth_login",{method:"password"},{email,role:p.role||"player",teamId:p.teamId||null});
 return{ok:true};
@@ -628,6 +634,7 @@ await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:DEMO_PLAY
 const signedIn=np.find(p=>p.email===acct.email);
 if(!signedIn)return{ok:false,err:"Unable to prepare demo account."};
 setUser({email:signedIn.email,role:signedIn.role||"player",isCoach:(signedIn.role||"player")==="coach",name:signedIn.name,teamId:demoTeam.id,hideFromLeaderboards:signedIn.hideFromLeaderboards===true});
+if(kind!=="coach")navigateToPlayerHome();
 setView(kind==="coach"?"coach":"player");
 await DB.set("sl:session",{email:signedIn.email});
 await trackEvent("auth_demo_login",{kind},{email:signedIn.email,role:signedIn.role||"player",teamId:demoTeam.id});
@@ -661,7 +668,7 @@ const joinTeam=async(code)=>{
 if(!user||user.role!=="player")return{ok:false,err:"Not authorized"};
 const c=normalizeJoin(code);const t=teams.find(tm=>tm.joinCode===c);
 if(!t)return{ok:false,err:"Invalid team code."};
-if(user.teamId===t.id){setView("player");return{ok:true,alreadyJoined:true};}
+if(user.teamId===t.id){navigateToPlayerHome();setView("player");return{ok:true,alreadyJoined:true};}
 const np=players.map(p=>p.email===user.email?{...p,teamId:t.id}:p);
 await P("sl:players",np,setPlayers);
 const hasProfile=playerProfiles.some(pp=>pp.userId===user.email&&pp.teamId===t.id);
@@ -669,7 +676,7 @@ if(!hasProfile){
 const parts=(user.name||"Player").trim().split(/\s+/);
 await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:user.email,teamId:t.id,firstName:parts[0]||"Player",lastName:parts.slice(1).join(" "),createdAt:Date.now()}],setPlayerProfiles);
 }
-setUser({...user,teamId:t.id});setView("player");
+setUser({...user,teamId:t.id});navigateToPlayerHome();setView("player");
 return{ok:true};
 };
 const addRosterPlayer=async(data)=>{
