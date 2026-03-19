@@ -1272,9 +1272,6 @@ const TABS = [
   { id: "goals", label: "GOALS", icon: "🎯" },
 ];
 
-const isSeededDemoDrillResult = (score) =>
-  /^demo-(home|program)-/.test(String(score?.drillId || ""));
-
 export default function ShotLabCharts({
   scores = [],
   drills = [],
@@ -1284,18 +1281,10 @@ export default function ShotLabCharts({
   const [tab, setTab] = useState("progress");
   const [context, setContext] = useState("home");
 
-  const myScores = useMemo(() => {
-    const directMatches = scores.filter(
-      (score) => !user?.email || score.email === user.email,
-    );
-    if (directMatches.length || !user?.email) return directMatches;
-
-    const seededDemoScores = scores.filter(isSeededDemoDrillResult);
-    const seededOwners = [...new Set(seededDemoScores.map((score) => score.email))];
-    if (seededOwners.length !== 1) return directMatches;
-
-    return seededDemoScores.filter((score) => score.email === seededOwners[0]);
-  }, [scores, user]);
+  const myScores = useMemo(
+    () => scores.filter((score) => !user?.email || score.email === user.email),
+    [scores, user],
+  );
   const normalizedScores = useMemo(
     () => myScores.map((score) => ({ ...score, src: score.src || "home" })),
     [myScores],
