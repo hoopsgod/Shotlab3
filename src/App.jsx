@@ -608,7 +608,13 @@ const existing=players.find(p=>p.email===email);
 if(existing)return{ok:false,err:"Account already exists. Please sign in."};
 const hashed=hashPw(password);
 const np=[...players,{email,name,password:hashed,role,teamId:null,hideFromLeaderboards:false}];
-await P("sl:players",np,setPlayers);
+const seededDrills=mergeDefaultDrills(drills,DRILLS_INIT);
+const seededProgramDrills=mergeDefaultDrills(programDrills,PROGRAM_DRILLS_INIT);
+await Promise.all([
+P("sl:players",np,setPlayers),
+P("sl:drills",seededDrills,setDrills),
+P("sl:program-drills",seededProgramDrills,setProgramDrills),
+]);
 setUser({email,role,isCoach:role==="coach",name,teamId:null,hideFromLeaderboards:false});setView(role==="coach"?"create-team":"join-team");
 DB.set("sl:session",{email});
 trackEvent("auth_register",{targetRole:role,userEmail:email,userRole:role},{email,role,teamId:null});
