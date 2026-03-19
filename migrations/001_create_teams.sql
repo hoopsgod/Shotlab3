@@ -7,8 +7,8 @@ create table teams (
     "secondaryColor": "#101726",
     "accentColor": "#84CC16",
     "textOnPrimary": "#081018",
-    "logoUrl": null,
-    "logoMarkUrl": null,
+    "logoUrl": "/branding/titans-exact-logo.png.PNG",
+    "logoMarkUrl": "/branding/titans-default-mark.svg",
     "updatedAt": "",
     "updatedBy": "",
     "version": 1
