@@ -125,27 +125,27 @@ getTileStyle:(index,total)=>total>=3&&index===0?{gridRow:"1 / span 2"}: {},
 const COACH_TEXT_SIZES=["standard","large","xl"];
 
 const DEFAULT_DEMO_DRILL_CATALOG=[
-{key:"warm-up-shooting-4-minute",name:"4 MINUTE WARM UP SHOOTING",desc:"4-minute weighted shooting circuit.",max:100,icon:"mr",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+{key:"warm-up-shooting-4-minute",name:"4 MINUTE WARM UP SHOOTING",desc:"4-minute weighted shooting circuit.",icon:"mr",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
 
 1st minute: FT line jumpers = 1 point
 2nd minute: wing 15 foot jumpers = 2 points
 3rd minute: baseline 15 foot jumpers = 2 points
 4th minute: top of key 3 pointers = 3 points`,homeId:"demo-home-warm-up-shooting-4-minute",programId:"demo-program-warm-up-shooting-4-minute"},
-{key:"calipari-shooting",name:"CALIPARI SHOOTING",desc:"Complete as many 3-point spots as possible in 1:30.",max:5,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+{key:"calipari-shooting",name:"CALIPARI SHOOTING",desc:"Complete as many 3-point spots as possible in 1:30.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
 
 1:30 on clock
 5 spots: 2 corners, 2 wings, top of key
 All 3 pointers
 Make 2 in a row from each spot, then move on
 Score is how many spots were completed in 1:30`,homeId:"demo-home-calipari-shooting",programId:"demo-program-calipari-shooting"},
-{key:"3-minute-shooting",name:"3 MINUTE SHOOTING",desc:"Make as many 3s as possible in 3 minutes.",max:60,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+{key:"3-minute-shooting",name:"3 MINUTE SHOOTING",desc:"Make as many 3s as possible in 3 minutes.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
 
 Make as many 3s as possible in 3 minutes at any spot or spots
 
 Reference:
 Standard score = 32
 Good shooters = 40+`,homeId:"demo-home-3-minute-shooting",programId:"demo-program-3-minute-shooting"},
-{key:"47-shooting",name:"47 SHOOTING",desc:"Finish the sequence, then score top-of-key 3s with time left.",max:50,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+{key:"47-shooting",name:"47 SHOOTING",desc:"Finish the sequence, then score top-of-key 3s with time left.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
 
 4:00 on clock
 5 spots: 2 corners, 2 wings, top of key
@@ -156,19 +156,19 @@ If any of the 5 is missed, restart from either corner at 0
 Then make 5 in a row again with the same rules
 Once completed, go to top of key and make as many 3s as possible in the remaining time
 Only those final top of key makes count as the posted score`,homeId:"demo-home-47-shooting",programId:"demo-program-47-shooting"},
-{key:"buddy-hield-shooting",name:"BUDDY HIELD SHOOTING",desc:"Keep shooting until you miss twice in a row.",max:100,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+{key:"buddy-hield-shooting",name:"BUDDY HIELD SHOOTING",desc:"Keep shooting until you miss twice in a row.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
 
 No time
 Start with a make
 Continue shooting until 2 misses in a row
 Score is total makes before the drill ends`,homeId:"demo-home-buddy-hield-shooting",programId:"demo-program-buddy-hield-shooting"},
-{key:"make-20",name:"MAKE 20",desc:"Track how many shots it takes to make 20 threes.",max:100,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+{key:"make-20",name:"MAKE 20",desc:"Track how many shots it takes to make 20 threes.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
 
 No time
 Take 3s from any spot
 Continue until 20 made 3 pointers
 Score is total shots taken`,homeId:"demo-home-make-20",programId:"demo-program-make-20"},
-{key:"230s",name:"230'S",desc:"2:30 weighted shooting circuit from elbows, corners, and top.",max:100,icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
+{key:"230s",name:"230'S",desc:"2:30 weighted shooting circuit from elbows, corners, and top.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
 
 2 minutes 30 seconds on clock
 30 seconds from one elbow
@@ -197,6 +197,7 @@ const countCustomProgramDrills=list=>(Array.isArray(list)?list:[]).filter(d=>!fi
 const DRILLS_INIT=DEFAULT_HOME_DRILLS;
 const PROGRAM_DRILLS_INIT=DEFAULT_PROGRAM_DRILLS;
 const ICONS=["ft","3p","mr","fl","sb"];
+const hasDrillMax=drill=>Number.isFinite(Number(drill?.max))&&Number(drill.max)>0;
 const EVENTS_INIT=[
 {id:1,title:"OPEN GYM RUN",date:"2026-02-28",time:"6:00 PM",location:"Main Gym — Court 1",desc:"Full-court 5v5 runs. First 20 players.",type:"run"},
 {id:2,title:"SHOOTING CLINIC",date:"2026-03-05",time:"4:00 PM",location:"Training Facility — Bay 3",desc:"Guided shooting with film review.",type:"clinic"},
@@ -955,10 +956,10 @@ const[drillBarW,setDrillBarW]=useState(0);
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
 const activeMode=tab==="duels"?"program":"home";
 const activeScores=activeMode==="program"?programScores:homeScores;
-const handleLog=()=>{if(submitting||!active)return;const v=parseInt(input);if(isNaN(v)||v<0||v>active.max)return;setSubmitting(true);const oldStreak=streak;
+const handleLog=()=>{if(submitting||!active)return;const v=parseInt(input);if(isNaN(v)||v<0||(hasDrillMax(active)&&v>active.max))return;setSubmitting(true);const oldStreak=streak;
 const prevBest=activeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
 const isPB=v>prevBest&&prevBest>0;
-addScore(active.id,v,activeMode);playScore();const pct=Math.round(v/active.max*100);setShareData({drill:active.name,score:v,max:active.max,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
+addScore(active.id,v,activeMode);playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 if(activeMode!=="program"){setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)}
 };
@@ -1146,7 +1147,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       </div>
       :<div className="fade-up" style={{marginTop:16,background:CARD_BG,borderRadius:16,padding:"20px 18px",border:`1px solid ${ORANGE}33`,textAlign:"left"}}>
         <div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3,marginBottom:4}}>SEND A CHALLENGE</div>
-        <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:14}}>Dare a teammate to beat your {shareData.score}/{shareData.max} on {shareData.drill}</div>
+        <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:14}}>Dare a teammate to beat your {shareData.score}{shareData.max?`/${shareData.max}`:""} on {shareData.drill}</div>
         {shareData?.src==="program"?<div style={{fontFamily:FB,color:T.SUB,fontSize:11}}>Program scores save directly to the team program leaderboard.</div>:players.filter(p=>p.email!==u.email).length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:12,textAlign:"center",padding:16}}>No other players yet. They need to log in first.</div>
         :<><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PICK YOUR OPPONENT</div>
           <div style={{display:"flex",flexDirection:"column",gap:4,marginBottom:14}}>{players.filter(p=>p.email!==u.email).map(p=>
@@ -1192,15 +1193,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       </div>}
       {/* Motivational line */}
       <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:"#555555",fontSize:12,fontStyle:"italic",letterSpacing:1,margin:"20px 0 8px",fontWeight:500,textShadow:activeMode==="program"?`0 0 16px ${CYAN}18`:"none"}}>{["Lock in.","No shortcuts.","This rep counts.","Earn it.","Be honest with yourself.","Own the work.","Details matter.","Trust the process.","Stay disciplined.","Championship habits."][Math.floor((active.id*7+new Date().getDate())%10)]}</div>
-      <div style={{fontFamily:FD,color:activeMode==="program"?CYAN:T.SUB,fontSize:13,letterSpacing:3,marginBottom:28}}>MAX: {active.max}</div>
+      {hasDrillMax(active)&&<div style={{fontFamily:FD,color:activeMode==="program"?CYAN:T.SUB,fontSize:13,letterSpacing:3,marginBottom:28}}>MAX: {active.max}</div>}
       {/* Score input with reactive color */}
-      {(()=>{const v=parseInt(input)||0;const pct=active.max>0?v/active.max:0;const glowColor=pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#FF4545":VOLT;const borderColor=v>0?glowColor:VOLT;
+      {(()=>{const v=parseInt(input)||0;const pct=hasDrillMax(active)&&active.max>0?v/active.max:0;const glowColor=hasDrillMax(active)?(pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#FF4545":VOLT):VOLT;const borderColor=v>0?glowColor:VOLT;
         return <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8,marginBottom:40}}>
-        <input autoFocus type="number" min="0" max={active.max} value={input} onChange={e=>{setInput(e.target.value);playTick()}} onKeyDown={e=>e.key==="Enter"&&handleLog()} placeholder="0" style={{width:120,padding:"24px 8px",background:BG,border:`2px solid ${borderColor}`,borderRadius:20,color:borderColor,fontFamily:FD,fontSize:64,textAlign:"center",outline:"none",letterSpacing:2,boxShadow:v>0?`0 0 30px ${glowColor}20,0 0 60px ${glowColor}08`:`0 0 20px ${VOLT}15`,transition:"border-color .3s,color .3s,box-shadow .3s"}}/>
-        <div style={{fontFamily:FD,color:T.SUB,fontSize:32}}>/{active.max}</div>
+        <input autoFocus type="number" min="0" max={hasDrillMax(active)?active.max:undefined} value={input} onChange={e=>{setInput(e.target.value);playTick()}} onKeyDown={e=>e.key==="Enter"&&handleLog()} placeholder="0" style={{width:120,padding:"24px 8px",background:BG,border:`2px solid ${borderColor}`,borderRadius:20,color:borderColor,fontFamily:FD,fontSize:64,textAlign:"center",outline:"none",letterSpacing:2,boxShadow:v>0?`0 0 30px ${glowColor}20,0 0 60px ${glowColor}08`:`0 0 20px ${VOLT}15`,transition:"border-color .3s,color .3s,box-shadow .3s"}}/>
+        {hasDrillMax(active)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:32}}>/{active.max}</div>}
       </div>})()}
       {/* Score quality indicator */}
-      {(()=>{const v=parseInt(input)||0;if(v<=0)return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?VOLT:pct>=75?VOLT:pct>=50?ORANGE:"#FF4545";
+      {(()=>{const v=parseInt(input)||0;if(v<=0||!hasDrillMax(active))return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?VOLT:pct>=75?VOLT:pct>=50?ORANGE:"#FF4545";
         return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
       <button className="btn-v cta-primary" onClick={handleLog} style={{maxWidth:300,margin:"0 auto"}}>LOG SCORE &#8594;</button>
     </>}
@@ -1277,19 +1278,19 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 <span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{data.drill}</span>
 </div>
 {/* Big score */}
-<div style={{fontFamily:FD,fontSize:72,color:VOLT,lineHeight:.9,letterSpacing:2}}>{data.score}<span style={{color:MUTED,fontSize:32}}>/{data.max}</span></div>
+<div style={{fontFamily:FD,fontSize:72,color:VOLT,lineHeight:.9,letterSpacing:2}}>{data.score}{data.max?<span style={{color:MUTED,fontSize:32}}>/{data.max}</span>:null}</div>
 {/* Personal Best badge */}
 {data.isPB&&<div style={{display:"inline-flex",alignItems:"center",gap:6,background:ORANGE+"15",borderRadius:10,padding:"6px 16px",border:`1px solid ${ORANGE}33`,marginTop:12}}>
 <span style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>★ NEW PERSONAL BEST</span>
 </div>}
 {/* Accuracy ring */}
-<div style={{margin:"16px auto 12px",width:80,position:"relative"}}>
+{typeof data.pct==="number"&&<div style={{margin:"16px auto 12px",width:80,position:"relative"}}>
 <svg width="80" height="40" viewBox="0 0 80 40">
 <path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke="#242424" strokeWidth="6" strokeLinecap="round"/>
 <path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke={pcol} strokeWidth="6" strokeLinecap="round" strokeDasharray={`${pct*1.1} 110`}/>
 </svg>
 <div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",fontFamily:FD,color:pcol,fontSize:18}}>{pct}%</div>
-</div>
+</div>}
 {/* Streak */}
 {data.streak>0&&<div style={{display:"inline-flex",alignItems:"center",gap:4,background:ORANGE+"12",borderRadius:8,padding:"4px 12px",border:`1px solid ${ORANGE}22`}}>
 <span style={{fontSize:14}}>🔥</span>
@@ -1312,7 +1313,7 @@ const pending=incoming.filter(c=>c.status==="pending");
 const resolved=[...incoming.filter(c=>c.status!=="pending"),...outgoing].sort((a,b)=>(b.respTs||b.ts)-(a.respTs||a.ts));
 
 const handleRespond=(ch)=>{
-const v=parseInt(respInput);if(isNaN(v)||v<0||v>ch.max)return;
+const v=parseInt(respInput);if(isNaN(v)||v<0||(hasDrillMax(ch)&&v>ch.max))return;
 respondChallenge(ch.id,v);setRespSaved(ch.id);setRespId(null);setRespInput("");
 setTimeout(()=>setRespSaved(null),2000);
 };
@@ -1346,7 +1347,7 @@ return <div className="fade-up">
           <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>challenged you on <span style={{color:ORANGE,fontWeight:700}}>{ch.drillName}</span></div>
         </div>
         <div style={{textAlign:"right"}}>
-          <div style={{fontFamily:FD,color:ORANGE,fontSize:24}}>{ch.score}<span style={{color:MUTED,fontSize:14}}>/{ch.max}</span></div>
+          <div style={{fontFamily:FD,color:ORANGE,fontSize:24}}>{ch.score}{hasDrillMax(ch)&&<span style={{color:MUTED,fontSize:14}}>/{ch.max}</span>}</div>
           <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1}}>TO BEAT</div>
         </div>
       </div>
@@ -1354,9 +1355,9 @@ return <div className="fade-up">
       :isResp?<div className="fade-up">
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
           <div style={{flex:1}}><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:6}}>YOUR SCORE</div>
-            <input autoFocus type="number" min="0" max={ch.max} value={respInput} onChange={e=>setRespInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"14px 8px",background:BG,border:`2px solid ${ORANGE}`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none"}}/>
+            <input autoFocus type="number" min="0" max={hasDrillMax(ch)?ch.max:undefined} value={respInput} onChange={e=>setRespInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"14px 8px",background:BG,border:`2px solid ${ORANGE}`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none"}}/>
           </div>
-          <div style={{fontFamily:FD,color:T.SUB,fontSize:24,paddingTop:20}}>/{ch.max}</div>
+          {hasDrillMax(ch)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:24,paddingTop:20}}>/{ch.max}</div>}
         </div>
         <div style={{display:"flex",gap:8}}>
           <button onClick={()=>{setRespId(null);setRespInput("")}} style={{flex:1,padding:"11px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
@@ -1393,9 +1394,9 @@ return <div className="fade-up">
       <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ch.drillName} &#183; {isPending?<span style={{color:ORANGE}}>Waiting for response</span>:<span style={{color:resultColor,fontWeight:700}}>{resultText}</span>}</div>
     </div>
     <div style={{textAlign:"right",flexShrink:0}}>
-      {isPending?<div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{ch.score}<span style={{color:MUTED,fontSize:11}}>/{ch.max}</span></div>
+      {isPending?<div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{ch.score}{hasDrillMax(ch)&&<span style={{color:MUTED,fontSize:11}}>/{ch.max}</span>}</div>
       :<><div style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:16}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>
-        <div style={{fontFamily:FB,color:MUTED,fontSize:8}}>/{ch.max}</div></>}
+        {hasDrillMax(ch)&&<div style={{fontFamily:FB,color:MUTED,fontSize:8}}>/{ch.max}</div>}</>}
     </div>
   </div>;
 })}
@@ -1737,7 +1738,7 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 
     {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
     <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
-    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done?Math.round(done.score/d.max*100):0;
+    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done&&hasDrillMax(d)?Math.round(done.score/d.max*100):0;
       return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
         <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
         <div style={{flex:1,minWidth:0}}>
@@ -1745,8 +1746,8 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
           <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
         </div>
         {done?<div style={{textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}<span style={{color:MUTED,fontSize:11}}>/{d.max}</span></div>
-          <div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>
+          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}{hasDrillMax(d)&&<span style={{color:MUTED,fontSize:11}}>/{d.max}</span>}</div>
+          {hasDrillMax(d)&&<div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>}
         </div>
         :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
       </button>})}
@@ -1983,7 +1984,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 // ═══════════════════════════════════════
 function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount,openTeamBranding,coachTextSize="standard"}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
-const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"10",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"10",icon:"ft"});
+const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all");
 const customProgramDrillCount=countCustomProgramDrills(programDrills);
 const[nudged,setNudged]=useState([]);
@@ -1991,9 +1992,9 @@ const[confirmDelete,setConfirmDelete]=useState(null);const[codeErr,setCodeErr]=u
 const ups=useMemo(()=>{const es=[...new Set(scores.map(s=>s.email))];return es.map(e=>{const p=players.find(p=>p.email===e);return{email:e,name:p?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())}})},[scores,players]);
 const allKnown=useMemo(()=>{const m={};players.forEach(p=>m[p.email]=p.name);scores.forEach(s=>{if(!m[s.email])m[s.email]=s.name||s.email});return Object.entries(m).map(([email,name])=>({email,name}))},[players,scores]);
 const today=todayStr(),todayS=scores.filter(s=>s.date===today);
-const saveDrill=()=>{const m=parseInt(eMax);updateDrill(editD.id,{name:san(eName),desc:san(eDesc),instructions:san(eInstr),max:m>0?m:editD.max,icon:eIcon});setEditD(null)};
-const handleAddDrill=()=>{if(!nd.name)return;const m=parseInt(nd.max);addDrill({name:san(nd.name).toUpperCase(),desc:san(nd.desc),max:m>0?m:10,icon:nd.icon,instructions:san(nd.instructions)});setNd({name:"",desc:"",max:"10",icon:"ft",instructions:""});setShowNewDrill(false)};
-const handleAddProgramDrill=async()=>{if(!newProgramDrill.name)return;const m=parseInt(newProgramDrill.max);const r=await addProgramDrill({name:san(newProgramDrill.name).toUpperCase(),desc:san(newProgramDrill.desc),max:m>0?m:10,icon:newProgramDrill.icon,instructions:""});if(!r.ok){setProgramErr(r.err||"Could not add drill");return;}setProgramErr("");setNewProgramDrill({name:"",desc:"",max:"10",icon:"ft"});};
+const saveDrill=()=>{const m=parseInt(eMax);updateDrill(editD.id,{name:san(eName),desc:san(eDesc),instructions:san(eInstr),max:m>0?m:null,icon:eIcon});setEditD(null)};
+const handleAddDrill=()=>{if(!nd.name)return;const m=parseInt(nd.max);addDrill({name:san(nd.name).toUpperCase(),desc:san(nd.desc),max:m>0?m:null,icon:nd.icon,instructions:san(nd.instructions)});setNd({name:"",desc:"",max:"",icon:"ft",instructions:""});setShowNewDrill(false)};
+const handleAddProgramDrill=async()=>{if(!newProgramDrill.name)return;const m=parseInt(newProgramDrill.max);const r=await addProgramDrill({name:san(newProgramDrill.name).toUpperCase(),desc:san(newProgramDrill.desc),max:m>0?m:null,icon:newProgramDrill.icon,instructions:""});if(!r.ok){setProgramErr(r.err||"Could not add drill");return;}setProgramErr("");setNewProgramDrill({name:"",desc:"",max:"",icon:"ft"});};
 const handleRemoveDrill=(id)=>{setConfirmDelete(id)};
 const confirmDrillDelete=()=>{if(confirmDelete)removeDrill(confirmDelete);setConfirmDelete(null)};
 const handleAddEvent=()=>{if(!ne.title||!ne.date)return;addEvent({...ne,title:san(ne.title),desc:san(ne.desc),location:san(ne.location)});setNe({title:"",date:"",time:"",location:"",desc:"",type:"run"});setShowAdd(false)};
@@ -2208,7 +2209,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     
 
     </div>
-    <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/><div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"6px 14px",marginTop:12}}>{scores.length===0&&<Empty t="No scores yet" action="Once your players start logging drills, their activity will appear here. Invite players to get momentum started." cta="Invite Players" onTap={()=>setTab("players")} icon={<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>}/>}{scores.slice(-20).reverse().map((s,i)=>{const dr=drills.find(d=>d.id===s.drillId);const pct=dr?Math.round(s.score/dr.max*100):0;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 10px",borderBottom:`1px solid ${BORDER_CLR}33`,borderRadius:12,background:i%2===0?"rgba(255,255,255,0.01)":"transparent"}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:999,color:isHome?"#0B0D10":LIGHT,background:isHome?"var(--accent)":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span></div><div style={{fontSize:10,fontWeight:700,color:pct>=70?"var(--accent)":T.SUB}}>{pct}%</div></div></div>})}</div></div>}
+    <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/><div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"6px 14px",marginTop:12}}>{scores.length===0&&<Empty t="No scores yet" action="Once your players start logging drills, their activity will appear here. Invite players to get momentum started." cta="Invite Players" onTap={()=>setTab("players")} icon={<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>}/>}{scores.slice(-20).reverse().map((s,i)=>{const drillList=(s.src==="program"?programDrills:drills);const dr=drillList.find(d=>d.id===s.drillId);const pct=dr&&hasDrillMax(dr)?Math.round(s.score/dr.max*100):null;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 10px",borderBottom:`1px solid ${BORDER_CLR}33`,borderRadius:12,background:i%2===0?"rgba(255,255,255,0.01)":"transparent"}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:999,color:isHome?"#0B0D10":LIGHT,background:isHome?"var(--accent)":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}{hasDrillMax(dr)&&<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontSize:10,fontWeight:700,color:pct>=70?"var(--accent)":T.SUB}}>{pct}%</div>}</div></div>})}</div></div>}
 
   {/** DRILLS */}
   {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><PageHeader title="DRILLS" subtitle="Skill plans, assignments, and drill library" accent="cyan" icon={<DrillIcon type="ft" size={22} color={PAGE_ACCENTS.drills.accent}/>} actionLabel="Add" onAction={()=>setShowNewDrill(true)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.drills.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>QUICK START DRILL</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{drills.length} total drills ready to start</div></div><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowNewDrill(true)}>Start</button></div><div className="drillsMetrics"><div className="heroStat drillsMetricTile"><div className="heroStatVal">{drills.length}</div><div className="heroStatLbl">ACTIVE</div></div><div className="heroStat drillsMetricTile"><div className="heroStatVal">{programDrills.length}</div><div className="heroStatLbl">PROGRAM</div></div></div><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth"})}>Manage Drills</button></div>
@@ -2220,7 +2221,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       <div style={{display:"grid",gridTemplateColumns:"1.2fr 1fr .7fr",gap:6,marginBottom:8}}>
         <input value={newProgramDrill.name} onChange={e=>{setNewProgramDrill({...newProgramDrill,name:e.target.value});setProgramErr("")}} placeholder="Drill name" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
         <input value={newProgramDrill.desc} onChange={e=>setNewProgramDrill({...newProgramDrill,desc:e.target.value})} placeholder="Description" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
-        <input value={newProgramDrill.max} onChange={e=>setNewProgramDrill({...newProgramDrill,max:e.target.value})} type="number" placeholder="Max" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
+        <input value={newProgramDrill.max} onChange={e=>setNewProgramDrill({...newProgramDrill,max:e.target.value})} type="number" placeholder="Max (optional)" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
       </div>
       <div style={{display:"flex",gap:5,marginBottom:8}}>{ICONS.map(ic=><button key={`prog-${ic}`} onClick={()=>setNewProgramDrill({...newProgramDrill,icon:ic})} style={{width:34,height:34,borderRadius:8,border:`1px solid ${newProgramDrill.icon===ic?PAGE_ACCENTS.drills.accent+"55":BORDER_CLR}`,background:newProgramDrill.icon===ic?PAGE_ACCENTS.drills.glow:BG,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={14} color={newProgramDrill.icon===ic?PAGE_ACCENTS.drills.accent:MUTED}/></button>)}</div>
       <button onClick={handleAddProgramDrill} disabled={customProgramDrillCount>=7} className="btn-v cta-primary" style={{opacity:customProgramDrillCount>=7?.6:1}}>+ ADD PROGRAM DRILL</button>
@@ -2234,11 +2235,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
           <div style={{color:T.SUB,fontSize:10,marginTop:2,fontWeight:500}}>{d.desc}</div>
-          <div style={{color:MUTED,fontSize:9,marginTop:4,fontWeight:600}}>MAX: {d.max} · {dS.length} logged · Avg: {avg}</div>
+          <div style={{color:MUTED,fontSize:9,marginTop:4,fontWeight:600}}>{hasDrillMax(d)?`MAX: ${d.max} · `:""}{dS.length} logged · Avg: {avg}</div>
         </div>
       </div>
       <div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:12,paddingTop:10,borderTop:`1px solid ${BORDER_CLR}66`}}>
-        <button className="pageHeaderPill" onClick={()=>{setEditD(d);setEName(d.name);setEDesc(d.desc);setEInstr(d.instructions||"");setEMax(String(d.max));setEIcon(d.icon||"ft")}} style={{minHeight:34,padding:"0 12px",fontSize:10}}>Edit</button>
+        <button className="pageHeaderPill" onClick={()=>{setEditD(d);setEName(d.name);setEDesc(d.desc);setEInstr(d.instructions||"");setEMax(hasDrillMax(d)?String(d.max):"");setEIcon(d.icon||"ft")}} style={{minHeight:34,padding:"0 12px",fontSize:10}}>Edit</button>
         {d.isDefaultDemo?<span style={{minHeight:34,background:"transparent",border:`1px solid ${BORDER_CLR}`,borderRadius:999,display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"0 12px",color:MUTED,fontFamily:FB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em"}}>DEMO DEFAULT</span>:<button onClick={()=>handleRemoveDrill(d.id)} style={{minHeight:34,background:"transparent",border:`1px solid #FF454544`,borderRadius:999,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"0 12px",color:"#FF6A6A",fontFamily:FB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em"}}>
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
           Delete
@@ -2253,7 +2254,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       <FF l="DRILL NAME" v={nd.name} set={v=>setNd({...nd,name:v})} ph="e.g. STEP-BACK JUMPER"/>
       <FF l="SHORT DESCRIPTION" v={nd.desc} set={v=>setNd({...nd,desc:v})} ph="Brief description for players"/>
       <div style={{display:"flex",gap:8}}>
-        <div style={{flex:1}}><FF l="MAX SCORE" v={nd.max} set={v=>setNd({...nd,max:v})} tp="number" ph="10"/></div>
+        <div style={{flex:1}}><FF l="MAX SCORE" v={nd.max} set={v=>setNd({...nd,max:v})} tp="number" ph="Optional"/></div>
         <div style={{flex:1}}>
           <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
           <div style={{display:"flex",gap:4,marginBottom:14}}>{ICONS.map(ic=><button key={ic} onClick={()=>setNd({...nd,icon:ic})} style={{width:44,height:44,borderRadius:10,background:nd.icon===ic?VOLT+"22":BG,border:`1px solid ${nd.icon===ic?VOLT:BORDER_CLR}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={16} color={nd.icon===ic?VOLT:MUTED}/></button>)}</div>
@@ -2261,7 +2262,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       </div>
       <FF l="DETAILED INSTRUCTIONS (OPTIONAL)" v={nd.instructions} set={v=>setNd({...nd,instructions:v})} ta ph="Coaching cues, setup details..."/>
       <div style={{display:"flex",gap:8}}>
-        <button onClick={()=>{setShowNewDrill(false);setNd({name:"",desc:"",max:"10",icon:"ft",instructions:""})}} style={{flex:1,padding:"13px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
+        <button onClick={()=>{setShowNewDrill(false);setNd({name:"",desc:"",max:"",icon:"ft",instructions:""})}} style={{flex:1,padding:"13px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
         <button className="btn-v cta-primary" onClick={handleAddDrill} style={{width:"100%"}}>ADD DRILL</button>
       </div>
     </div>}
@@ -2527,7 +2528,7 @@ function HistPanel({sc,dr,programDr=[]}){
 const sorted=useMemo(()=>[...sc].sort((a,b)=>(b.ts||0)-(a.ts||0)),[sc]);
 const grouped=useMemo(()=>{const m={};sorted.forEach(s=>{if(!m[s.date])m[s.date]=[];m[s.date].push(s)});return Object.entries(m)},[sorted]);
 const findDrillForScore=score=>((score?.src||"home")==="program"?programDr:dr).find(d=>d.id===score.drillId);
-return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=findDrillForScore(s);const pct=d?Math.round(s.score/d.max*100):0;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:CYAN,background:isH?VOLT+"15":CYAN+"15"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:isH?VOLT:CYAN,fontSize:16}}>{s.score}<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span></div><div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div></div></div>})}</div>)}</div>;
+return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No scores yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=findDrillForScore(s);const pct=d&&hasDrillMax(d)?Math.round(s.score/d.max*100):null;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:CYAN,background:isH?VOLT+"15":CYAN+"15"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:isH?VOLT:CYAN,fontSize:16}}>{s.score}{hasDrillMax(d)&&<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div>}</div></div>})}</div>)}</div>;
 }
 
 // ═══════════════════════════════════════
