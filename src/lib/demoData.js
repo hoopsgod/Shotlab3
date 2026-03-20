@@ -118,12 +118,15 @@ const baseScores = [
   { id: "score-demo-010", email: "micah.santos@demo.shotlab.app", name: "Micah Santos", teamId: DEMO_TEAM_ID, drillId: "demo-home-230s", score: 36, date: "2026-03-12", ts: Date.parse("2026-03-12T18:42:00.000Z"), src: "home" },
   { id: "score-demo-011", email: "micah.santos@demo.shotlab.app", name: "Micah Santos", teamId: DEMO_TEAM_ID, drillId: "demo-program-calipari-shooting", score: 25, date: "2026-03-16", ts: Date.parse("2026-03-16T18:08:00.000Z"), src: "program" },
   { id: "score-demo-012", email: "micah.santos@demo.shotlab.app", name: "Micah Santos", teamId: DEMO_TEAM_ID, drillId: "demo-program-3-minute-shooting", score: 35, date: "2026-03-18", ts: Date.parse("2026-03-18T18:18:00.000Z"), src: "program" },
+  { id: "score-demo-013", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 41, date: "2026-03-19", ts: Date.parse("2026-03-19T18:12:00.000Z"), src: "home" },
+  { id: "score-demo-014", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-230s", score: 34, date: "2026-03-20", ts: Date.parse("2026-03-20T18:27:00.000Z"), src: "home" },
 ];
 
 const baseShotLogs = [
   { id: "shotlog-demo-ava-week-1", email: "ava.brooks@demo.shotlab.app", teamId: DEMO_TEAM_ID, made: 182, date: "2026-03-09", ts: Date.parse("2026-03-09T20:00:00.000Z") },
   { id: "shotlog-demo-jordan-week-1", email: "jordan.lee@demo.shotlab.app", teamId: DEMO_TEAM_ID, made: 156, date: "2026-03-12", ts: Date.parse("2026-03-12T20:00:00.000Z") },
   { id: "shotlog-demo-micah-week-1", email: "micah.santos@demo.shotlab.app", teamId: DEMO_TEAM_ID, made: 204, date: "2026-03-15", ts: Date.parse("2026-03-15T20:00:00.000Z") },
+  { id: "shotlog-demo-player-today", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, made: 167, date: "2026-03-20", ts: Date.parse("2026-03-20T20:00:00.000Z") },
 ];
 
 const baseProgressSnapshots = [
