@@ -1607,17 +1607,51 @@ export default function ShotLabCharts({
         )}
 
         {tab === "skills" && (
-          <>
-            <SkillRadar />
-            <ShootingPctByDrill />
-          </>
+          <Card>
+            <CardLabel color={T.teal}>SKILLS BREAKDOWN</CardLabel>
+            <div
+              style={{ color: T.text, fontFamily: T.font, fontSize: 13 }}
+            >
+              Skill visuals only appear after they are derived from real logged
+              drill data.
+            </div>
+            <div
+              style={{
+                color: T.muted,
+                fontFamily: T.font,
+                fontSize: 11,
+                marginTop: 8,
+                lineHeight: 1.5,
+              }}
+            >
+              Keep logging at-home and program sessions to unlock drill-level
+              skill comparisons.
+            </div>
+          </Card>
         )}
 
         {tab === "streaks" && (
-          <>
-            <StreakCalendar />
-            <TrainingHeatmap />
-          </>
+          <Card>
+            <CardLabel color={T.orange}>STREAKS</CardLabel>
+            <div
+              style={{ color: T.text, fontFamily: T.font, fontSize: 13 }}
+            >
+              Streak and heatmap visuals are hidden until they can be generated
+              from real activity history.
+            </div>
+            <div
+              style={{
+                color: T.muted,
+                fontFamily: T.font,
+                fontSize: 11,
+                marginTop: 8,
+                lineHeight: 1.5,
+              }}
+            >
+              Log more sessions to populate these views naturally instead of
+              showing placeholder data.
+            </div>
+          </Card>
         )}
 
         {tab === "goals" && (

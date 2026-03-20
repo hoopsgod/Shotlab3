@@ -7,6 +7,7 @@ const STORAGE_KEYS = Object.freeze({
   shotLogs: "sl:shotlogs",
   progressSnapshots: "sl:progress-snapshots",
   demoMeta: "sl:demo-data-meta",
+  demoBackup: "sl:demo-data-backup",
 });
 
 const DEMO_TEAM_ID = "team-demo-titans";
@@ -193,8 +194,53 @@ async function writeStorage(key, value) {
   await window.storage.set(key, JSON.stringify(value), true);
 }
 
+async function readStorage(key) {
+  if (typeof window === "undefined" || !window.storage?.get) {
+    throw new Error("Persistent storage is unavailable in this environment.");
+  }
+
+  const result = await window.storage.get(key, true);
+  return result ? JSON.parse(result.value) : null;
+}
+
+async function snapshotCurrentData() {
+  const [
+    teams,
+    players,
+    playerProfiles,
+    events,
+    scores,
+    shotLogs,
+    progressSnapshots,
+  ] = await Promise.all([
+    readStorage(STORAGE_KEYS.teams),
+    readStorage(STORAGE_KEYS.players),
+    readStorage(STORAGE_KEYS.playerProfiles),
+    readStorage(STORAGE_KEYS.events),
+    readStorage(STORAGE_KEYS.scores),
+    readStorage(STORAGE_KEYS.shotLogs),
+    readStorage(STORAGE_KEYS.progressSnapshots),
+  ]);
+
+  return {
+    teams,
+    players,
+    playerProfiles,
+    events,
+    scores,
+    shotLogs,
+    progressSnapshots,
+  };
+}
+
 export async function applyDemoData(bundle = DEMO_DATA_BUNDLE) {
   const nextBundle = clone(bundle);
+  const existingBackup = await readStorage(STORAGE_KEYS.demoBackup);
+
+  if (!existingBackup) {
+    const backup = await snapshotCurrentData();
+    await writeStorage(STORAGE_KEYS.demoBackup, backup);
+  }
 
   await Promise.all([
     writeStorage(STORAGE_KEYS.teams, nextBundle.teams || []),
@@ -211,16 +257,32 @@ export async function applyDemoData(bundle = DEMO_DATA_BUNDLE) {
 }
 
 export async function clearDemoData() {
+  const backup = await readStorage(STORAGE_KEYS.demoBackup);
+  const restoredBundle = backup
+    ? {
+        teams: backup.teams || [],
+        players: backup.players || [],
+        playerProfiles: backup.playerProfiles || [],
+        events: backup.events || [],
+        scores: backup.scores || [],
+        shotLogs: backup.shotLogs || [],
+        progressSnapshots: backup.progressSnapshots || [],
+      }
+    : null;
+
   await Promise.all([
-    writeStorage(STORAGE_KEYS.teams, null),
-    writeStorage(STORAGE_KEYS.players, null),
-    writeStorage(STORAGE_KEYS.playerProfiles, null),
-    writeStorage(STORAGE_KEYS.events, null),
-    writeStorage(STORAGE_KEYS.scores, null),
-    writeStorage(STORAGE_KEYS.shotLogs, null),
-    writeStorage(STORAGE_KEYS.progressSnapshots, null),
+    writeStorage(STORAGE_KEYS.teams, restoredBundle?.teams ?? null),
+    writeStorage(STORAGE_KEYS.players, restoredBundle?.players ?? null),
+    writeStorage(STORAGE_KEYS.playerProfiles, restoredBundle?.playerProfiles ?? null),
+    writeStorage(STORAGE_KEYS.events, restoredBundle?.events ?? null),
+    writeStorage(STORAGE_KEYS.scores, restoredBundle?.scores ?? null),
+    writeStorage(STORAGE_KEYS.shotLogs, restoredBundle?.shotLogs ?? null),
+    writeStorage(STORAGE_KEYS.progressSnapshots, restoredBundle?.progressSnapshots ?? null),
     writeStorage(STORAGE_KEYS.demoMeta, null),
+    writeStorage(STORAGE_KEYS.demoBackup, null),
   ]);
+
+  return restoredBundle;
 }
 
 export { STORAGE_KEYS };

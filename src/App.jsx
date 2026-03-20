@@ -786,6 +786,7 @@ setPlayerProfiles(bundle?.playerProfiles||[]);
 setEvents(bundle?.events||[]);
 setScores(bundle?.scores||[]);
 setShotLogs(bundle?.shotLogs||[]);
+ setUser(prev=>prev?{...prev,teamId:bundle?.meta?.teamId||prev.teamId}:prev);
 }finally{
 setDemoSettingsBusy(false);
 }
@@ -794,13 +795,19 @@ const handleClearDemoData=async()=>{
 if(demoSettingsBusy)return;
 setDemoSettingsBusy(true);
 try{
-await clearDemoData();
-setTeams([]);
-setPlayers([]);
-setPlayerProfiles([]);
-setEvents([]);
-setScores([]);
-setShotLogs([]);
+const restoredBundle=await clearDemoData();
+const restoredPlayers=restoredBundle?.players||[];
+setTeams(restoredBundle?.teams||[]);
+setPlayers(restoredPlayers);
+setPlayerProfiles(restoredBundle?.playerProfiles||[]);
+setEvents(restoredBundle?.events||[]);
+setScores(restoredBundle?.scores||[]);
+setShotLogs(restoredBundle?.shotLogs||[]);
+setUser(prev=>{
+if(!prev)return prev;
+const restoredUser=restoredPlayers.find(player=>player.email===prev.email);
+return restoredUser?{...prev,name:restoredUser.name,teamId:restoredUser.teamId||null,hideFromLeaderboards:restoredUser.hideFromLeaderboards===true}:prev;
+});
 }finally{
 setDemoSettingsBusy(false);
 }
