@@ -181,6 +181,40 @@ export const DEMO_DATA_BUNDLE = Object.freeze({
   },
 });
 
+
+function remapCollectionTeamId(items, nextTeamId) {
+  return (items || []).map((item) => ({ ...item, teamId: nextTeamId }));
+}
+
+export function buildDemoDataBundle(overrides = {}) {
+  const nextTeamId = overrides.teamId || DEMO_TEAM_ID;
+  const nextCoachEmail = overrides.coachEmail || DEMO_DATA_BUNDLE.teams?.[0]?.createdBy || "coach.demo@shotlab.app";
+  const existingTeam = overrides.team || {};
+  const teamSeed = DEMO_DATA_BUNDLE.teams?.[0] || {};
+
+  return clone({
+    ...DEMO_DATA_BUNDLE,
+    teams: [
+      {
+        ...teamSeed,
+        ...existingTeam,
+        id: nextTeamId,
+        createdBy: nextCoachEmail,
+      },
+    ],
+    players: remapCollectionTeamId(DEMO_DATA_BUNDLE.players, nextTeamId),
+    playerProfiles: remapCollectionTeamId(DEMO_DATA_BUNDLE.playerProfiles, nextTeamId),
+    events: remapCollectionTeamId(DEMO_DATA_BUNDLE.events, nextTeamId),
+    scores: remapCollectionTeamId(DEMO_DATA_BUNDLE.scores, nextTeamId),
+    shotLogs: remapCollectionTeamId(DEMO_DATA_BUNDLE.shotLogs, nextTeamId),
+    progressSnapshots: remapCollectionTeamId(DEMO_DATA_BUNDLE.progressSnapshots, nextTeamId),
+    meta: {
+      ...DEMO_DATA_BUNDLE.meta,
+      teamId: nextTeamId,
+      seededForCoach: nextCoachEmail,
+    },
+  });
+}
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }

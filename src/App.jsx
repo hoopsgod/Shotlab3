@@ -11,7 +11,7 @@ import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingCon
 import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 import ShotLabCharts from "./components/ShotLabCharts";
 import resolveTeamBranding from "./theme/resolveTeamBranding";
-import { applyDemoData, clearDemoData } from "./lib/demoData";
+import { applyDemoData, buildDemoDataBundle, clearDemoData } from "./lib/demoData";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -595,13 +595,16 @@ const homePath=PLAYER_TAB_PATHS.home||"/";
 if(window.location.pathname!==homePath)window.history.replaceState({},"",homePath);
 },[]);
 
-// Load persisted data + restore session
-useEffect(()=>{(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session")]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
+const hydratePersistedData=useCallback(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session")]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
 const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
 await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
 if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}}}
-setReady(true)})()},[migrateData,navigateToPlayerHome]);
+return {teams:m.teamsMigrated,players:m.playersMigrated};
+},[migrateData,navigateToPlayerHome]);
+
+// Load persisted data + restore session
+useEffect(()=>{(async()=>{await hydratePersistedData();setReady(true)})()},[hydratePersistedData]);
 
 const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
 // Auth with hashed passwords
@@ -779,13 +782,10 @@ const onLoadDemoData=async()=>{
 if(demoSettingsBusy)return;
 setDemoSettingsBusy(true);
 try{
-const bundle=await applyDemoData();
-setTeams(bundle?.teams||[]);
-setPlayers(bundle?.players||[]);
-setPlayerProfiles(bundle?.playerProfiles||[]);
-setEvents(bundle?.events||[]);
-setScores(bundle?.scores||[]);
-setShotLogs(bundle?.shotLogs||[]);
+const activeTeam=teams.find(team=>team.id===user?.teamId)||null;
+const bundle=buildDemoDataBundle({teamId:activeTeam?.id,coachEmail:user?.email,team:activeTeam?{...activeTeam,createdAt:activeTeam.createdAt||Date.now()}:undefined});
+await applyDemoData(bundle);
+await hydratePersistedData();
 }finally{
 setDemoSettingsBusy(false);
 }
@@ -795,12 +795,7 @@ if(demoSettingsBusy)return;
 setDemoSettingsBusy(true);
 try{
 await clearDemoData();
-setTeams([]);
-setPlayers([]);
-setPlayerProfiles([]);
-setEvents([]);
-setScores([]);
-setShotLogs([]);
+await hydratePersistedData();
 }finally{
 setDemoSettingsBusy(false);
 }
