@@ -227,17 +227,59 @@ async function writeStorage(key, value) {
   await window.storage.set(key, JSON.stringify(value), true);
 }
 
+async function readStorage(key) {
+  if (typeof window === "undefined" || !window.storage?.get) {
+    throw new Error("Persistent storage is unavailable in this environment.");
+  }
+
+  const stored = await window.storage.get(key, true);
+  return stored?.value ? JSON.parse(stored.value) : null;
+}
+
+function mergeById(existingItems = [], nextItems = []) {
+  const merged = new Map();
+
+  for (const item of Array.isArray(existingItems) ? existingItems : []) {
+    if (item?.id == null) continue;
+    merged.set(String(item.id), item);
+  }
+
+  for (const item of Array.isArray(nextItems) ? nextItems : []) {
+    if (item?.id == null) continue;
+    merged.set(String(item.id), item);
+  }
+
+  return Array.from(merged.values());
+}
+
 export async function applyDemoData(bundle = DEMO_DATA_BUNDLE) {
   const nextBundle = clone(bundle);
+  const [
+    existingTeams,
+    existingPlayers,
+    existingPlayerProfiles,
+    existingEvents,
+    existingScores,
+    existingShotLogs,
+    existingProgressSnapshots,
+  ] = await Promise.all([
+    readStorage(STORAGE_KEYS.teams),
+    readStorage(STORAGE_KEYS.players),
+    readStorage(STORAGE_KEYS.playerProfiles),
+    readStorage(STORAGE_KEYS.events),
+    readStorage(STORAGE_KEYS.scores),
+    readStorage(STORAGE_KEYS.shotLogs),
+    readStorage(STORAGE_KEYS.progressSnapshots),
+  ]);
 
   await Promise.all([
-    writeStorage(STORAGE_KEYS.teams, nextBundle.teams || []),
-    writeStorage(STORAGE_KEYS.players, nextBundle.players || []),
-    writeStorage(STORAGE_KEYS.playerProfiles, nextBundle.playerProfiles || []),
-    writeStorage(STORAGE_KEYS.events, nextBundle.events || []),
-    writeStorage(STORAGE_KEYS.scores, nextBundle.scores || []),
-    writeStorage(STORAGE_KEYS.shotLogs, nextBundle.shotLogs || []),
-    writeStorage(STORAGE_KEYS.progressSnapshots, nextBundle.progressSnapshots || []),
+    writeStorage(STORAGE_KEYS.teams, mergeById(existingTeams, nextBundle.teams || [])),
+    writeStorage(STORAGE_KEYS.players, mergeById(existingPlayers, nextBundle.players || [])),
+    writeStorage(STORAGE_KEYS.playerProfiles, mergeById(existingPlayerProfiles, nextBundle.playerProfiles || [])),
+    writeStorage(STORAGE_KEYS.events, mergeById(existingEvents, nextBundle.events || [])),
+    writeStorage(STORAGE_KEYS.scores, mergeById(existingScores, nextBundle.scores || [])),
+    writeStorage(STORAGE_KEYS.shotLogs, mergeById(existingShotLogs, nextBundle.shotLogs || [])),
+    writeStorage(STORAGE_KEYS.progressSnapshots, mergeById(existingProgressSnapshots, nextBundle.progressSnapshots || [])),
     writeStorage(STORAGE_KEYS.demoMeta, nextBundle.meta || {}),
   ]);
 
