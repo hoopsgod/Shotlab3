@@ -657,7 +657,8 @@ np=[...np,{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,password:hashPw(DEMO_PL
 }
 await savePlayers();
 
-let demoTeam=nts.find(t=>t.ownerCoachId===DEMO_COACH.email);
+const seededDemoPlayer=np.find(p=>p.email===DEMO_PLAYER.email&&p.teamId);
+let demoTeam=(seededDemoPlayer&&nts.find(t=>t.id===seededDemoPlayer.teamId))||nts.find(t=>t.ownerCoachId===DEMO_COACH.email);
 if(!demoTeam){
 demoTeam={id:genId("team"),name:"Demo Team",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nts.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
 nts=[...nts,demoTeam];
