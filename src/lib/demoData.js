@@ -40,6 +40,15 @@ const basePlayers = [
     hideFromLeaderboards: false,
     createdAt: DEMO_TIMESTAMP + 2,
   },
+  {
+    id: "player-demo-primary",
+    email: "demo@shotlab.app",
+    name: "Demo Player",
+    role: "player",
+    teamId: DEMO_TEAM_ID,
+    hideFromLeaderboards: false,
+    createdAt: DEMO_TIMESTAMP + 3,
+  },
 ];
 
 const basePlayerProfiles = [
@@ -69,6 +78,15 @@ const basePlayerProfiles = [
     lastName: "Santos",
     jerseyNumber: "24",
     createdAt: DEMO_TIMESTAMP + 2,
+  },
+  {
+    id: "profile-demo-primary",
+    userId: "demo@shotlab.app",
+    teamId: DEMO_TEAM_ID,
+    firstName: "Demo",
+    lastName: "Player",
+    jerseyNumber: "0",
+    createdAt: DEMO_TIMESTAMP + 3,
   },
 ];
 
