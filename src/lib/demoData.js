@@ -3,6 +3,7 @@ const STORAGE_KEYS = Object.freeze({
   players: "sl:players",
   playerProfiles: "sl:player-profiles",
   events: "sl:events",
+  rsvps: "sl:rsvps",
   scores: "sl:scores",
   shotLogs: "sl:shotlogs",
   progressSnapshots: "sl:progress-snapshots",
@@ -92,6 +93,44 @@ const basePlayerProfiles = [
 
 const baseEvents = [
   {
+    id: "event-demo-january-open-gym",
+    teamId: DEMO_TEAM_ID,
+    title: "January Open Gym",
+    date: "2026-01-18",
+    time: "5:30 PM",
+    location: "Main Gym",
+    desc: "Team shooting and finishing reps with light scrimmage segments.",
+    type: "workout",
+  },
+  {
+    id: "event-demo-february-skills-clinic",
+    teamId: DEMO_TEAM_ID,
+    title: "February Skills Clinic",
+    date: "2026-02-07",
+    time: "9:00 AM",
+    location: "Aux Gym",
+    desc: "Ball-screen reads, finishing counters, and guided partner work.",
+    type: "clinic",
+  },
+  {
+    id: "event-demo-february-recovery-lab",
+    teamId: DEMO_TEAM_ID,
+    title: "Recovery Lab",
+    date: "2026-02-21",
+    time: "11:15 AM",
+    location: "Training Room",
+    desc: "Recovery-focused mobility session with coach-led tissue work stations.",
+    type: "recovery",
+  },
+  {
+    id: "evt-upcoming-1",
+    teamId: DEMO_TEAM_ID,
+    title: "Gym Session",
+    date: "2026-03-08",
+    location: "Main Gym",
+    type: "workout",
+  },
+  {
     id: "event-demo-skill-lab",
     teamId: DEMO_TEAM_ID,
     title: "Skill Lab: Finishing Reads",
@@ -123,6 +162,104 @@ const baseEvents = [
   },
 ];
 
+const baseRsvps = baseEvents.slice(0, 6).map((event, index) => ({
+  id: `rsvp-demo-${String(index + 1).padStart(3, "0")}`,
+  email: "demo@shotlab.app",
+  playerId: "demo@shotlab.app",
+  name: "Demo Player",
+  eventId: event.id,
+  teamId: DEMO_TEAM_ID,
+  attended: true,
+  ts: DEMO_TIMESTAMP + index,
+}));
+
+const DEMO_SCORE_EMAIL = "demo@shotlab.app";
+const DEMO_SCORE_NAME = "Demo Player";
+const demoHistoricalDates = [
+  "2026-01-21",
+  "2026-01-24",
+  "2026-01-27",
+  "2026-01-30",
+  "2026-02-02",
+  "2026-02-05",
+  "2026-02-08",
+  "2026-02-11",
+  "2026-02-14",
+  "2026-02-17",
+  "2026-02-20",
+  "2026-02-23",
+  "2026-02-26",
+  "2026-03-01",
+  "2026-03-04",
+];
+const demoScorePlans = [
+  {
+    drillId: "demo-home-warm-up-shooting-4-minute",
+    startDate: "2026-03-06",
+    scores: [9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8],
+  },
+  {
+    drillId: "free-throws",
+    dates: demoHistoricalDates,
+    scores: [10, 10, 10, 10, 10, 10, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 8, 8],
+  },
+  {
+    drillId: "catch-and-shoot",
+    dates: demoHistoricalDates,
+    scores: [9, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 7, 7, 7],
+  },
+  {
+    drillId: "mid-range",
+    dates: demoHistoricalDates,
+    scores: [8, 8, 8, 8, 8, 7, 7, 7, 7, 7, 7, 7],
+  },
+  {
+    drillId: "floaters",
+    dates: demoHistoricalDates,
+    scores: [7, 7, 7, 7, 7, 7, 6, 6, 6],
+  },
+  {
+    drillId: "ball-handling",
+    dates: demoHistoricalDates,
+    scores: [8, 8, 8, 8, 8, 8, 8, 8],
+  },
+];
+
+function buildDemoScoreEntries(plans = []) {
+  let nextId = 13;
+  let nextTs = 0;
+
+  return plans.flatMap((plan) => {
+    const scores = Array.isArray(plan.scores) ? plan.scores : [];
+
+    return scores.map((score, index) => {
+      const resolvedDate = plan.startDate
+        ? new Date(Date.parse(`${plan.startDate}T18:00:00.000Z`) + index * 24 * 60 * 60 * 1000)
+        : new Date(Date.parse(`${plan.dates[index % plan.dates.length]}T18:00:00.000Z`));
+      const date = resolvedDate;
+      const isoDate = date.toISOString();
+      const minuteOffset = nextTs % 60;
+      const entry = {
+        id: `score-demo-${String(nextId).padStart(3, "0")}`,
+        email: DEMO_SCORE_EMAIL,
+        name: DEMO_SCORE_NAME,
+        teamId: DEMO_TEAM_ID,
+        drillId: plan.drillId,
+        score,
+        date: isoDate.slice(0, 10),
+        ts: Date.parse(`${isoDate.slice(0, 10)}T18:${String(minuteOffset).padStart(2, "0")}:00.000Z`),
+        src: "home",
+      };
+
+      nextId += 1;
+      nextTs += 1;
+      return entry;
+    });
+  });
+}
+
+const demoPrimaryScores = buildDemoScoreEntries(demoScorePlans);
+
 const baseScores = [
   { id: "score-demo-001", email: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 47, date: "2026-03-10", ts: Date.parse("2026-03-10T18:20:00.000Z"), src: "home" },
   { id: "score-demo-002", email: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", teamId: DEMO_TEAM_ID, drillId: "demo-home-3-minute-shooting", score: 39, date: "2026-03-12", ts: Date.parse("2026-03-12T18:24:00.000Z"), src: "home" },
@@ -136,8 +273,7 @@ const baseScores = [
   { id: "score-demo-010", email: "micah.santos@demo.shotlab.app", name: "Micah Santos", teamId: DEMO_TEAM_ID, drillId: "demo-home-230s", score: 36, date: "2026-03-12", ts: Date.parse("2026-03-12T18:42:00.000Z"), src: "home" },
   { id: "score-demo-011", email: "micah.santos@demo.shotlab.app", name: "Micah Santos", teamId: DEMO_TEAM_ID, drillId: "demo-program-calipari-shooting", score: 25, date: "2026-03-16", ts: Date.parse("2026-03-16T18:08:00.000Z"), src: "program" },
   { id: "score-demo-012", email: "micah.santos@demo.shotlab.app", name: "Micah Santos", teamId: DEMO_TEAM_ID, drillId: "demo-program-3-minute-shooting", score: 35, date: "2026-03-18", ts: Date.parse("2026-03-18T18:18:00.000Z"), src: "program" },
-  { id: "score-demo-013", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 41, date: "2026-03-19", ts: Date.parse("2026-03-19T18:12:00.000Z"), src: "home" },
-  { id: "score-demo-014", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-230s", score: 34, date: "2026-03-20", ts: Date.parse("2026-03-20T18:27:00.000Z"), src: "home" },
+  ...demoPrimaryScores,
 ];
 
 const baseShotLogs = [
@@ -189,6 +325,7 @@ export const DEMO_DATA_BUNDLE = Object.freeze({
   players: basePlayers,
   playerProfiles: basePlayerProfiles,
   events: baseEvents,
+  rsvps: baseRsvps,
   scores: baseScores,
   shotLogs: baseShotLogs,
   progressSnapshots: baseProgressSnapshots,
@@ -197,6 +334,7 @@ export const DEMO_DATA_BUNDLE = Object.freeze({
     seededAt: "2026-03-20T12:00:00.000Z",
     playerCount: basePlayers.length,
     eventCount: baseEvents.length,
+    rsvpCount: baseRsvps.length,
     scoreCount: baseScores.length,
     snapshotCount: baseProgressSnapshots.length,
   },
@@ -226,6 +364,7 @@ export function buildDemoDataBundle(overrides = {}) {
     players: remapCollectionTeamId(DEMO_DATA_BUNDLE.players, nextTeamId),
     playerProfiles: remapCollectionTeamId(DEMO_DATA_BUNDLE.playerProfiles, nextTeamId),
     events: remapCollectionTeamId(DEMO_DATA_BUNDLE.events, nextTeamId),
+    rsvps: remapCollectionTeamId(DEMO_DATA_BUNDLE.rsvps, nextTeamId),
     scores: remapCollectionTeamId(DEMO_DATA_BUNDLE.scores, nextTeamId),
     shotLogs: remapCollectionTeamId(DEMO_DATA_BUNDLE.shotLogs, nextTeamId),
     progressSnapshots: remapCollectionTeamId(DEMO_DATA_BUNDLE.progressSnapshots, nextTeamId),
@@ -280,6 +419,7 @@ export async function applyDemoData(bundle = DEMO_DATA_BUNDLE) {
     existingPlayers,
     existingPlayerProfiles,
     existingEvents,
+    existingRsvps,
     existingScores,
     existingShotLogs,
     existingProgressSnapshots,
@@ -288,6 +428,7 @@ export async function applyDemoData(bundle = DEMO_DATA_BUNDLE) {
     readStorage(STORAGE_KEYS.players),
     readStorage(STORAGE_KEYS.playerProfiles),
     readStorage(STORAGE_KEYS.events),
+    readStorage(STORAGE_KEYS.rsvps),
     readStorage(STORAGE_KEYS.scores),
     readStorage(STORAGE_KEYS.shotLogs),
     readStorage(STORAGE_KEYS.progressSnapshots),
@@ -298,6 +439,7 @@ export async function applyDemoData(bundle = DEMO_DATA_BUNDLE) {
     writeStorage(STORAGE_KEYS.players, mergeById(existingPlayers, nextBundle.players || [])),
     writeStorage(STORAGE_KEYS.playerProfiles, mergeById(existingPlayerProfiles, nextBundle.playerProfiles || [])),
     writeStorage(STORAGE_KEYS.events, mergeById(existingEvents, nextBundle.events || [])),
+    writeStorage(STORAGE_KEYS.rsvps, mergeById(existingRsvps, nextBundle.rsvps || [])),
     writeStorage(STORAGE_KEYS.scores, mergeById(existingScores, nextBundle.scores || [])),
     writeStorage(STORAGE_KEYS.shotLogs, mergeById(existingShotLogs, nextBundle.shotLogs || [])),
     writeStorage(STORAGE_KEYS.progressSnapshots, mergeById(existingProgressSnapshots, nextBundle.progressSnapshots || [])),
@@ -313,6 +455,7 @@ export async function clearDemoData() {
     writeStorage(STORAGE_KEYS.players, null),
     writeStorage(STORAGE_KEYS.playerProfiles, null),
     writeStorage(STORAGE_KEYS.events, null),
+    writeStorage(STORAGE_KEYS.rsvps, null),
     writeStorage(STORAGE_KEYS.scores, null),
     writeStorage(STORAGE_KEYS.shotLogs, null),
     writeStorage(STORAGE_KEYS.progressSnapshots, null),
