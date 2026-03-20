@@ -11,6 +11,7 @@ import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingCon
 import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 import ShotLabCharts from "./components/ShotLabCharts";
 import resolveTeamBranding from "./theme/resolveTeamBranding";
+import { applyDemoData, clearDemoData } from "./lib/demoData";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -537,6 +538,7 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 
 function AppInner(){
 const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
+const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
 const T=THEMES[theme];
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
@@ -772,6 +774,36 @@ const nextTeams=teams.map(t=>t.id===team.id?{...t,branding:mergedBranding}:t);
 await P("sl:teams",nextTeams,setTeams);
 trackEvent("team_branding_saved",{teamId:team.id});
 return{ok:true};
+};
+const handleLoadDemoData=async()=>{
+if(demoSettingsBusy)return;
+setDemoSettingsBusy(true);
+try{
+const bundle=await applyDemoData();
+setTeams(bundle?.teams||[]);
+setPlayers(bundle?.players||[]);
+setPlayerProfiles(bundle?.playerProfiles||[]);
+setEvents(bundle?.events||[]);
+setScores(bundle?.scores||[]);
+setShotLogs(bundle?.shotLogs||[]);
+}finally{
+setDemoSettingsBusy(false);
+}
+};
+const handleClearDemoData=async()=>{
+if(demoSettingsBusy)return;
+setDemoSettingsBusy(true);
+try{
+await clearDemoData();
+setTeams([]);
+setPlayers([]);
+setPlayerProfiles([]);
+setEvents([]);
+setScores([]);
+setShotLogs([]);
+}finally{
+setDemoSettingsBusy(false);
+}
 };
 
 const scopedPlayers=players.filter(p=>p.teamId===user?.teamId);
@@ -2464,6 +2496,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     </div>
     {/* Account management — required by App Store §5.1.1(v) */}
     <div style={{marginTop:32,paddingTop:20,borderTop:`1px solid ${BORDER_CLR}44`}}>
+      <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 14px 12px",marginBottom:14}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:6}}>DEMO SETTINGS</div>
+        <p style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.5,marginBottom:12}}>Load or clear demo data using the shared demo tools.</p>
+        <div style={{display:"grid",gap:8}}>
+          <button onClick={handleLoadDemoData} disabled={demoSettingsBusy} className="btn-v cta-secondary" style={{width:"100%",margin:0,minHeight:42,height:42,borderRadius:10,opacity:demoSettingsBusy?0.5:1}}>LOAD DEMO DATA</button>
+          <button onClick={handleClearDemoData} disabled={demoSettingsBusy} className="btn-v cta-danger" style={{width:"100%",margin:0,minHeight:42,height:42,borderRadius:10,opacity:demoSettingsBusy?0.5:1}}>CLEAR DEMO DATA</button>
+        </div>
+      </div>
       <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#FF4545",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
       <p style={{fontFamily:FB,color:MUTED,fontSize:9,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
     </div>
