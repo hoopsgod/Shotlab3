@@ -11,7 +11,7 @@ import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingCon
 import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 import ShotLabCharts from "./components/ShotLabCharts";
 import resolveTeamBranding from "./theme/resolveTeamBranding";
-import { applyDemoData, clearDemoData } from "./lib/demoData";
+import { applyDemoData, clearDemoData, DEMO_DATA_BUNDLE } from "./lib/demoData";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -194,6 +194,8 @@ const findMatchingDefaultDrill=(drill,index)=>{if(!drill)return null;return inde
 const mergeDefaultDrills=(existing=[],defaults=[])=>{const list=Array.isArray(existing)?existing:[];const index=defaults===DEFAULT_PROGRAM_DRILLS?DEFAULT_PROGRAM_DRILL_INDEX:DEFAULT_HOME_DRILL_INDEX;const custom=[];const seenDefaults=new Set();list.forEach(item=>{const match=findMatchingDefaultDrill(item,index);if(match){if(seenDefaults.has(match.slug))return;seenDefaults.add(match.slug);custom.push({...item,...match,id:match.id,slug:match.slug,isDefaultDemo:true,mode:match.mode});return;}custom.push(item);});defaults.forEach(def=>{if(!seenDefaults.has(def.slug))custom.push(def);});return custom;};
 const buildDefaultDrillIdAliases=(existing=[],defaults=[])=>{const aliases=new Map();const index=defaults===DEFAULT_PROGRAM_DRILLS?DEFAULT_PROGRAM_DRILL_INDEX:DEFAULT_HOME_DRILL_INDEX;(Array.isArray(existing)?existing:[]).forEach(item=>{const match=findMatchingDefaultDrill(item,index);if(!match)return;aliases.set(String(match.id),match.id);if(item?.id!=null)aliases.set(String(item.id),match.id);if(item?.slug)aliases.set(item.slug,match.id);});defaults.forEach(def=>{aliases.set(String(def.id),def.id);aliases.set(def.slug,def.id);});return aliases;};
 const normalizeScoresForDefaultDrills=(scores=[],homeAliases=new Map(),programAliases=new Map())=>(Array.isArray(scores)?scores:[]).map(score=>{const src=score?.src||"home";const aliases=src==="program"?programAliases:homeAliases;const nextDrillId=aliases.get(String(score?.drillId))||score?.drillId;return nextDrillId===score?.drillId&&src===score?.src?score:{...score,src,drillId:nextDrillId};});
+const replaceRecordsByKey=(current=[],incoming=[],key="id")=>{const currentList=Array.isArray(current)?current:[];const nextList=Array.isArray(incoming)?incoming:[];const incomingKeys=new Set(nextList.map(item=>String(item?.[key]??"")).filter(Boolean));return [...currentList.filter(item=>{const itemKey=String(item?.[key]??"");return !itemKey||!incomingKeys.has(itemKey);}),...nextList];};
+const removeRecordsByKey=(current=[],recordsToRemove=[],key="id")=>{const currentList=Array.isArray(current)?current:[];const doomedKeys=new Set((Array.isArray(recordsToRemove)?recordsToRemove:[]).map(item=>String(item?.[key]??"")).filter(Boolean));if(doomedKeys.size===0)return currentList;return currentList.filter(item=>!doomedKeys.has(String(item?.[key]??"")));};
 const countCustomProgramDrills=list=>(Array.isArray(list)?list:[]).filter(d=>!findMatchingDefaultDrill(d,DEFAULT_PROGRAM_DRILL_INDEX)).length;
 const DRILLS_INIT=DEFAULT_HOME_DRILLS;
 const PROGRAM_DRILLS_INIT=DEFAULT_PROGRAM_DRILLS;
@@ -775,17 +777,62 @@ await P("sl:teams",nextTeams,setTeams);
 trackEvent("team_branding_saved",{teamId:team.id});
 return{ok:true};
 };
+const buildDemoScopedBundle=useCallback((bundle)=>{
+const activeTeamId=user?.teamId||bundle?.meta?.teamId||bundle?.teams?.[0]?.id||null;
+const activeTeam=teams.find(t=>t.id===activeTeamId)||null;
+const sourceTeamId=bundle?.meta?.teamId||bundle?.teams?.[0]?.id||null;
+const mapTeamId=value=>value===sourceTeamId&&activeTeamId?activeTeamId:value;
+const playersScoped=(bundle?.players||[]).map(player=>({...player,teamId:mapTeamId(player.teamId)}));
+const profilesScoped=(bundle?.playerProfiles||[]).map(profile=>({...profile,teamId:mapTeamId(profile.teamId)}));
+const scoresScoped=(bundle?.scores||[]).map(score=>({...score,teamId:mapTeamId(score.teamId),playerId:score.playerId||score.email,src:score.src||"home"}));
+const eventsScoped=(bundle?.events||[]).map(event=>({...event,teamId:mapTeamId(event.teamId),ownerCoachId:user?.role==="coach"&&user?.email?user.email:(event.ownerCoachId||user?.email||null)}));
+const shotLogsScoped=(bundle?.shotLogs||[]).map(log=>({...log,teamId:mapTeamId(log.teamId),playerId:log.playerId||log.email}));
+const teamsScoped=activeTeam?[activeTeam]:(bundle?.teams||[]).map(team=>({...team,id:mapTeamId(team.id)}));
+return {
+teams: teamsScoped,
+players: playersScoped,
+playerProfiles: profilesScoped,
+scores: scoresScoped,
+events: eventsScoped,
+shotLogs: shotLogsScoped,
+meta: {...(bundle?.meta||{}),teamId:activeTeamId||sourceTeamId||null},
+};
+},[teams,user]);
 const handleLoadDemoData=async()=>{
 if(demoSettingsBusy)return;
 setDemoSettingsBusy(true);
 try{
-const bundle=await applyDemoData();
-setTeams(bundle?.teams||[]);
-setPlayers(bundle?.players||[]);
-setPlayerProfiles(bundle?.playerProfiles||[]);
-setEvents(bundle?.events||[]);
-setScores(bundle?.scores||[]);
-setShotLogs(bundle?.shotLogs||[]);
+const seededDrills=mergeDefaultDrills(drills,DRILLS_INIT);
+const seededProgramDrills=mergeDefaultDrills(programDrills,PROGRAM_DRILLS_INIT);
+const nextBundle=buildDemoScopedBundle(await applyDemoData());
+const homeDrillAliases=buildDefaultDrillIdAliases(seededDrills,DRILLS_INIT);
+const programDrillAliases=buildDefaultDrillIdAliases(seededProgramDrills,PROGRAM_DRILLS_INIT);
+const normalizedScores=normalizeScoresForDefaultDrills(nextBundle.scores,homeDrillAliases,programDrillAliases);
+const migrated=migrateData({players:nextBundle.players,playerProfiles:nextBundle.playerProfiles,scores:normalizedScores,events:nextBundle.events,shotLogs:nextBundle.shotLogs,teams:nextBundle.teams});
+const nextTeams=nextBundle.teams?.length?replaceRecordsByKey(teams,migrated.teamsMigrated,"id"):teams;
+const nextPlayers=replaceRecordsByKey(players,migrated.playersMigrated,"email");
+const nextProfiles=replaceRecordsByKey(playerProfiles,migrated.profilesMigrated,"id");
+const nextEvents=replaceRecordsByKey(events,migrated.eventsM,"id");
+const nextScores=replaceRecordsByKey(scores,migrated.scoresM,"id");
+const nextShotLogs=replaceRecordsByKey(shotLogs,migrated.shotM,"id");
+setDrills(seededDrills);
+setProgramDrills(seededProgramDrills);
+setTeams(nextTeams);
+setPlayers(nextPlayers);
+setPlayerProfiles(nextProfiles);
+setEvents(nextEvents);
+setScores(nextScores);
+setShotLogs(nextShotLogs);
+await Promise.all([
+DB.set("sl:drills",seededDrills),
+DB.set("sl:program-drills",seededProgramDrills),
+DB.set("sl:teams",nextTeams),
+DB.set("sl:players",nextPlayers),
+DB.set("sl:player-profiles",nextProfiles),
+DB.set("sl:events",nextEvents),
+DB.set("sl:scores",nextScores),
+DB.set("sl:shotlogs",nextShotLogs),
+]);
 }finally{
 setDemoSettingsBusy(false);
 }
@@ -795,12 +842,23 @@ if(demoSettingsBusy)return;
 setDemoSettingsBusy(true);
 try{
 await clearDemoData();
-setTeams([]);
-setPlayers([]);
-setPlayerProfiles([]);
-setEvents([]);
-setScores([]);
-setShotLogs([]);
+const nextPlayers=removeRecordsByKey(players,DEMO_DATA_BUNDLE.players,"email");
+const nextProfiles=removeRecordsByKey(playerProfiles,DEMO_DATA_BUNDLE.playerProfiles,"id");
+const nextEvents=removeRecordsByKey(events,DEMO_DATA_BUNDLE.events,"id");
+const nextScores=removeRecordsByKey(scores,DEMO_DATA_BUNDLE.scores,"id");
+const nextShotLogs=removeRecordsByKey(shotLogs,DEMO_DATA_BUNDLE.shotLogs,"id");
+setPlayers(nextPlayers);
+setPlayerProfiles(nextProfiles);
+setEvents(nextEvents);
+setScores(nextScores);
+setShotLogs(nextShotLogs);
+await Promise.all([
+DB.set("sl:players",nextPlayers),
+DB.set("sl:player-profiles",nextProfiles),
+DB.set("sl:events",nextEvents),
+DB.set("sl:scores",nextScores),
+DB.set("sl:shotlogs",nextShotLogs),
+]);
 }finally{
 setDemoSettingsBusy(false);
 }
