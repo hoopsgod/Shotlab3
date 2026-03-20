@@ -260,6 +260,29 @@ function buildDemoScoreEntries(plans = []) {
 
 const demoPrimaryScores = buildDemoScoreEntries(demoScorePlans);
 
+const demoProfilePageScores = [
+  { id: "score-dp-001", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 9, date: "2026-03-06", ts: Date.parse("2026-03-06T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-002", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 8, date: "2026-03-05", ts: Date.parse("2026-03-05T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-003", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 9, date: "2026-03-04", ts: Date.parse("2026-03-04T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-004", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 10, date: "2026-03-03", ts: Date.parse("2026-03-03T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-005", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 8, date: "2026-03-02", ts: Date.parse("2026-03-02T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-006", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 9, date: "2026-03-01", ts: Date.parse("2026-03-01T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-007", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 7, date: "2026-02-28", ts: Date.parse("2026-02-28T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-008", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 9, date: "2026-02-27", ts: Date.parse("2026-02-27T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-009", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 8, date: "2026-02-26", ts: Date.parse("2026-02-26T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-010", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 10, date: "2026-02-25", ts: Date.parse("2026-02-25T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-011", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 9, date: "2026-02-24", ts: Date.parse("2026-02-24T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-012", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 8, date: "2026-02-23", ts: Date.parse("2026-02-23T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-013", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 9, date: "2026-02-22", ts: Date.parse("2026-02-22T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-014", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 8, date: "2026-02-21", ts: Date.parse("2026-02-21T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-015", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "free-throws", score: 9, date: "2026-02-10", ts: Date.parse("2026-02-10T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-016", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "catch-and-shoot", score: 8, date: "2026-02-05", ts: Date.parse("2026-02-05T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-017", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "mid-range", score: 10, date: "2026-01-28", ts: Date.parse("2026-01-28T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-018", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "floaters", score: 7, date: "2026-01-20", ts: Date.parse("2026-01-20T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-019", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "ball-handling", score: 9, date: "2026-01-15", ts: Date.parse("2026-01-15T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-020", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "free-throws", score: 8, date: "2026-01-08", ts: Date.parse("2026-01-08T18:00:00.000Z"), src: "home" },
+];
+
 const baseScores = [
   { id: "score-demo-001", email: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 47, date: "2026-03-10", ts: Date.parse("2026-03-10T18:20:00.000Z"), src: "home" },
   { id: "score-demo-002", email: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", teamId: DEMO_TEAM_ID, drillId: "demo-home-3-minute-shooting", score: 39, date: "2026-03-12", ts: Date.parse("2026-03-12T18:24:00.000Z"), src: "home" },
@@ -274,6 +297,7 @@ const baseScores = [
   { id: "score-demo-011", email: "micah.santos@demo.shotlab.app", name: "Micah Santos", teamId: DEMO_TEAM_ID, drillId: "demo-program-calipari-shooting", score: 25, date: "2026-03-16", ts: Date.parse("2026-03-16T18:08:00.000Z"), src: "program" },
   { id: "score-demo-012", email: "micah.santos@demo.shotlab.app", name: "Micah Santos", teamId: DEMO_TEAM_ID, drillId: "demo-program-3-minute-shooting", score: 35, date: "2026-03-18", ts: Date.parse("2026-03-18T18:18:00.000Z"), src: "program" },
   ...demoPrimaryScores,
+  ...demoProfilePageScores,
 ];
 
 const baseShotLogs = [
