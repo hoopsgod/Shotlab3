@@ -117,21 +117,47 @@ export function buildDemoDataBundle({ teamId = DEMO_TEAM_ID, coachEmail = null, 
 }
 
 export async function applyDemoData(bundle) {
-  if (typeof window === "undefined" || !window.localStorage) return;
-
   const payload = bundle || buildDemoDataBundle();
-  window.localStorage.setItem(STORAGE_KEYS.teams, JSON.stringify(payload.teams || []));
-  window.localStorage.setItem(STORAGE_KEYS.players, JSON.stringify(payload.players || []));
-  window.localStorage.setItem(STORAGE_KEYS.playerProfiles, JSON.stringify(payload.playerProfiles || []));
-  window.localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(payload.events || []));
-  window.localStorage.setItem(STORAGE_KEYS.rsvps, JSON.stringify(payload.rsvps || []));
-  window.localStorage.setItem(STORAGE_KEYS.scores, JSON.stringify(payload.scores || []));
-  window.localStorage.setItem(STORAGE_KEYS.shotLogs, JSON.stringify(payload.shotLogs || []));
-  window.localStorage.setItem(STORAGE_KEYS.progressSnapshots, JSON.stringify(payload.progressSnapshots || []));
-  window.localStorage.setItem(STORAGE_KEYS.demoMeta, JSON.stringify(payload.demoMeta || {}));
+  const keys = [
+    ["sl:teams", payload.teams || []],
+    ["sl:players", payload.players || []],
+    ["sl:player-profiles", payload.playerProfiles || []],
+    ["sl:events", payload.events || []],
+    ["sl:rsvps", payload.rsvps || []],
+    ["sl:scores", payload.scores || []],
+    ["sl:shotlogs", payload.shotLogs || []],
+    ["sl:progress-snapshots", payload.progressSnapshots || []],
+    ["sl:demo-data-meta", payload.demoMeta || {}],
+  ];
+  for (const [key, value] of keys) {
+    const json = JSON.stringify(value);
+    if (typeof window !== "undefined") {
+      if (window.localStorage) window.localStorage.setItem(key, json);
+      if (window.storage && typeof window.storage.set === "function") {
+        await window.storage.set(key, json, true);
+      }
+    }
+  }
 }
 
 export async function clearDemoData() {
-  if (typeof window === "undefined" || !window.localStorage) return;
-  Object.values(STORAGE_KEYS).forEach((key) => window.localStorage.removeItem(key));
+  const keys = Object.values({
+    teams: "sl:teams",
+    players: "sl:players",
+    playerProfiles: "sl:player-profiles",
+    events: "sl:events",
+    rsvps: "sl:rsvps",
+    scores: "sl:scores",
+    shotLogs: "sl:shotlogs",
+    progressSnapshots: "sl:progress-snapshots",
+    demoMeta: "sl:demo-data-meta",
+  });
+  for (const key of keys) {
+    if (typeof window !== "undefined") {
+      if (window.localStorage) window.localStorage.removeItem(key);
+      if (window.storage && typeof window.storage.set === "function") {
+        await window.storage.set(key, JSON.stringify([]), true);
+      }
+    }
+  }
 }
