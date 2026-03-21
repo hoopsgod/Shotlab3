@@ -1,4 +1,4 @@
-import React, { cloneElement, isValidElement, useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { cloneElement, isValidElement, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import PageHeader from "./components/PageHeader";
@@ -539,7 +539,6 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 function AppInner(){
 const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
 const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
-const [debugOutput, setDebugOutput] = React.useState("");
 const T=THEMES[theme];
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
@@ -802,34 +801,6 @@ await hydratePersistedData();
 setDemoSettingsBusy(false);
 }
 };
-const onDebugStorage = async () => {
-  try {
-    let output = "";
-    const keys = ["sl:scores","sl:rsvps","sl:events","sl:players"];
-    for (const k of keys) {
-      const r = await window.storage.get(k, true);
-      const parsed = r?.value ? JSON.parse(r.value) : null;
-      const count = Array.isArray(parsed) ? parsed.length : "null";
-      const demoCount = Array.isArray(parsed)
-        ? parsed.filter(x => x.email === "demo@shotlab.app").length
-        : 0;
-      output += k + ": total=" + count + " demo=" + demoCount + "\n";
-    }
-    const sr = await window.storage.get("sl:scores", true);
-    const scores = sr?.value ? JSON.parse(sr.value) : [];
-    const home = scores.filter(s =>
-      s.email === "demo@shotlab.app" && (s.src === "home" || !s.src)
-    );
-    output += "\nhome scores: " + home.length;
-    output += "\ntotalMakes: " + home.reduce((a,s) => a + (s.score||0), 0);
-    const dates = [...new Set(home.map(s => s.date))].sort();
-    output += "\ndates: " + dates.join(", ");
-    setDebugOutput(output);
-  } catch(e) {
-    setDebugOutput("ERROR: " + e.message);
-  }
-};
-
 const scopedPlayers=players.filter(p=>p.teamId===user?.teamId);
 const scopedScores=scores.filter(s=>s.teamId===user?.teamId);
 const scopedEvents=events.filter(e=>e.teamId===user?.teamId);
@@ -2525,21 +2496,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         <p style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.5,marginBottom:12}}>Load or clear demo data using the shared demo tools.</p>
         <div style={{display:"grid",gap:8}}>
           <button onClick={onLoadDemoData} disabled={demoSettingsBusy} className="btn-v cta-secondary" style={{width:"100%",margin:0,minHeight:42,height:42,borderRadius:10,opacity:demoSettingsBusy?0.5:1}}>LOAD DEMO DATA</button>
-          <button onClick={onDebugStorage} className="btn-v cta-secondary" style={{width:"100%",margin:0,minHeight:42,height:42,borderRadius:10}}>DEBUG STORAGE</button>
-          {debugOutput && (
-            <pre style={{
-              fontSize: "11px",
-              color: "lime",
-              background: "black",
-              padding: "12px",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-all",
-              margin: "8px 0",
-              borderRadius: "8px",
-              userSelect: "text",
-              WebkitUserSelect: "text"
-            }}>{debugOutput}</pre>
-          )}
           <button onClick={onClearDemoData} disabled={demoSettingsBusy} className="btn-v cta-danger" style={{width:"100%",margin:0,minHeight:42,height:42,borderRadius:10,opacity:demoSettingsBusy?0.5:1}}>CLEAR DEMO DATA</button>
         </div>
       </div>
