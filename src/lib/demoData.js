@@ -49,4 +49,89 @@ const baseRsvps = baseEvents.slice(0, 6).map((event, index) => ({
 }));
 
 const demoPrimaryScores = [
-  { id: "score-dp-s01", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting​​​​​​​​​​​​​​​​
+  { id: "score-dp-s01", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 9, date: "2026-03-20", ts: Date.parse("2026-03-20T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-s02", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-form-shooting", score: 22, date: "2026-03-19", ts: Date.parse("2026-03-19T18:00:00.000Z"), src: "home" },
+  { id: "score-dp-s03", email: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 11, date: "2026-03-20", ts: Date.parse("2026-03-20T18:05:00.000Z"), src: "home" },
+  { id: "score-dp-s04", email: "jordan.lee@demo.shotlab.app", name: "Jordan Lee", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 10, date: "2026-03-20", ts: Date.parse("2026-03-20T18:10:00.000Z"), src: "home" },
+];
+
+const demoShotLogs = [
+  { id: "shotlog-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, name: "Demo Player", made: 125, date: "2026-03-20", ts: Date.parse("2026-03-20T19:00:00.000Z") },
+  { id: "shotlog-demo-02", email: "ava.brooks@demo.shotlab.app", playerId: "ava.brooks@demo.shotlab.app", teamId: DEMO_TEAM_ID, name: "Ava Brooks", made: 160, date: "2026-03-20", ts: Date.parse("2026-03-20T19:05:00.000Z") },
+];
+
+const demoProgressSnapshots = [
+  { id: "progress-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, label: "Weekly shots", value: 125, date: "2026-03-20", ts: Date.parse("2026-03-20T19:10:00.000Z") },
+];
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function buildDemoTeam(teamId, coachEmail, team) {
+  if (team) {
+    return {
+      ...clone(team),
+      id: teamId || team.id,
+      ownerCoachId: coachEmail || team.ownerCoachId || team.coachEmail || null,
+      updatedAt: Date.now(),
+    };
+  }
+
+  return {
+    id: teamId || DEMO_TEAM_ID,
+    name: "Demo Titans",
+    ownerCoachId: coachEmail || null,
+    createdAt: DEMO_TIMESTAMP,
+    joinCode: "DEMO26",
+    updatedAt: Date.now(),
+  };
+}
+
+export function buildDemoDataBundle({ teamId = DEMO_TEAM_ID, coachEmail = null, team } = {}) {
+  const resolvedTeam = buildDemoTeam(teamId, coachEmail, team);
+  const players = basePlayers.map((player) => ({ ...player, teamId: resolvedTeam.id }));
+  const playerProfiles = basePlayerProfiles.map((profile) => ({ ...profile, teamId: resolvedTeam.id }));
+  const events = baseEvents.map((event) => ({ ...event, teamId: resolvedTeam.id }));
+  const rsvps = baseRsvps.map((rsvp) => ({ ...rsvp, teamId: resolvedTeam.id }));
+  const scores = demoPrimaryScores.map((score) => ({ ...score, teamId: resolvedTeam.id, playerId: score.playerId || score.email }));
+  const shotLogs = demoShotLogs.map((log) => ({ ...log, teamId: resolvedTeam.id }));
+  const progressSnapshots = demoProgressSnapshots.map((snapshot) => ({ ...snapshot, teamId: resolvedTeam.id }));
+
+  return {
+    teams: [resolvedTeam],
+    players,
+    playerProfiles,
+    events,
+    rsvps,
+    scores,
+    shotLogs,
+    progressSnapshots,
+    demoMeta: {
+      seededAt: Date.now(),
+      teamId: resolvedTeam.id,
+      coachEmail,
+      source: "demo-data",
+    },
+  };
+}
+
+export async function applyDemoData(bundle) {
+  if (typeof window === "undefined" || !window.localStorage) return;
+
+  const payload = bundle || buildDemoDataBundle();
+  window.localStorage.setItem(STORAGE_KEYS.teams, JSON.stringify(payload.teams || []));
+  window.localStorage.setItem(STORAGE_KEYS.players, JSON.stringify(payload.players || []));
+  window.localStorage.setItem(STORAGE_KEYS.playerProfiles, JSON.stringify(payload.playerProfiles || []));
+  window.localStorage.setItem(STORAGE_KEYS.events, JSON.stringify(payload.events || []));
+  window.localStorage.setItem(STORAGE_KEYS.rsvps, JSON.stringify(payload.rsvps || []));
+  window.localStorage.setItem(STORAGE_KEYS.scores, JSON.stringify(payload.scores || []));
+  window.localStorage.setItem(STORAGE_KEYS.shotLogs, JSON.stringify(payload.shotLogs || []));
+  window.localStorage.setItem(STORAGE_KEYS.progressSnapshots, JSON.stringify(payload.progressSnapshots || []));
+  window.localStorage.setItem(STORAGE_KEYS.demoMeta, JSON.stringify(payload.demoMeta || {}));
+}
+
+export async function clearDemoData() {
+  if (typeof window === "undefined" || !window.localStorage) return;
+  Object.values(STORAGE_KEYS).forEach((key) => window.localStorage.removeItem(key));
+}
