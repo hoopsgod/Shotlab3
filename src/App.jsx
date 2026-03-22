@@ -12,6 +12,7 @@ import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 import ShotLabCharts from "./components/ShotLabCharts";
 import resolveTeamBranding from "./theme/resolveTeamBranding";
 import { applyDemoData, buildDemoDataBundle, clearDemoData } from "./lib/demoData";
+import { supabase } from "./lib/supabase.js";
 
 const TOKENS={
 PRIMARY:"#C8FF1A",
@@ -238,7 +239,47 @@ if(!existing.includes(code))return code;
 }
 return Math.random().toString(36).slice(2,2+length).toUpperCase();
 }
-const DB={async get(k){try{const r=await window.storage.get(k,true);return r?JSON.parse(r.value):null}catch{return null}},async set(k,v){try{await window.storage.set(k,JSON.stringify(v),true)}catch{}}};
+const TABLE_MAP = {
+  "sl:scores": "scores",
+  "sl:players": "players",
+  "sl:player-profiles": "player_profiles",
+  "sl:events": "events",
+  "sl:rsvps": "rsvps",
+  "sl:shotlogs": "shot_logs",
+  "sl:teams": "teams",
+  "sl:session": "sessions",
+};
+
+const DB = {
+  async get(k) {
+    try {
+      const r = await window.storage.get(k, true);
+      const local = r?.value ? JSON.parse(r.value) : null;
+      if (local && (Array.isArray(local) ? local.length > 0 : Object.keys(local).length > 0)) {
+        return local;
+      }
+    } catch (e) {}
+    const table = TABLE_MAP[k];
+    if (table) {
+      try {
+        const { data } = await supabase.from(table).select("*");
+        return data || null;
+      } catch (e) {}
+    }
+    return null;
+  },
+  async set(k, v) {
+    try {
+      await window.storage.set(k, JSON.stringify(v), true);
+    } catch (e) {}
+    const table = TABLE_MAP[k];
+    if (table && Array.isArray(v) && v.length > 0) {
+      try {
+        await supabase.from(table).upsert(v, { onConflict: "id" });
+      } catch (e) {}
+    }
+  }
+};
 // Password hashing (simple but not plaintext)
 function hashPw(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return(h>>>0).toString(36)}
 // AudioContext must be lazy-initialized on user gesture (iOS WebKit requirement)
