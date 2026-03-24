@@ -1,5 +1,11 @@
 import { isDemoMode } from "./lib/demoMode";
 import { seedDemo, resetDemo } from "./lib/seedDemo";
+{isDemoMode() && (
+  <div style={{ display: "flex", gap: 8, padding: 12, flexWrap: "wrap" }}>
+    <button onClick={() => seedDemo({ force: false })}>Seed Demo Data</button>
+    <button onClick={() => seedDemo({ force: true })}>Reseed (Force)</button>
+    <button onClick={() => resetDemo()}>Reset Demo</button>
+  </div>
 import { cloneElement, isValidElement, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
@@ -15,12 +21,7 @@ import ShotLabCharts from "./components/ShotLabCharts";
 import resolveTeamBranding from "./theme/resolveTeamBranding";
 import { applyDemoData, buildDemoDataBundle, clearDemoData } from "./lib/demoData";
 import { supabase } from "./lib/supabase.js";
-{isDemoMode() && (
-  <div style={{ display: "flex", gap: 8, padding: 12, flexWrap: "wrap" }}>
-    <button onClick={() => seedDemo({ force: false })}>Seed Demo Data</button>
-    <button onClick={() => seedDemo({ force: true })}>Reseed (Force)</button>
-    <button onClick={() => resetDemo()}>Reset Demo</button>
-  </div>
+
 )}
 const TOKENS={
 PRIMARY:"#C8FF1A",
