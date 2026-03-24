@@ -15,7 +15,13 @@ import ShotLabCharts from "./components/ShotLabCharts";
 import resolveTeamBranding from "./theme/resolveTeamBranding";
 import { applyDemoData, buildDemoDataBundle, clearDemoData } from "./lib/demoData";
 import { supabase } from "./lib/supabase.js";
-
+{isDemoMode() && (
+  <div style={{ display: "flex", gap: 8, padding: 12, flexWrap: "wrap" }}>
+    <button onClick={() => seedDemo({ force: false })}>Seed Demo Data</button>
+    <button onClick={() => seedDemo({ force: true })}>Reseed (Force)</button>
+    <button onClick={() => resetDemo()}>Reset Demo</button>
+  </div>
+)}
 const TOKENS={
 PRIMARY:"#C8FF1A",
 PRIMARY_DIM:"#9CA3AF",
