@@ -722,6 +722,14 @@ await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:DEMO_PLAY
 const signedIn=np.find(p=>p.email===acct.email);
 if(!signedIn)return{ok:false,err:"Unable to prepare demo account."};
 setUser({email:signedIn.email,role:signedIn.role||"player",isCoach:(signedIn.role||"player")==="coach",name:signedIn.name,teamId:demoTeam.id,hideFromLeaderboards:signedIn.hideFromLeaderboards===true});
+try {
+  const { buildDemoDataBundle, applyDemoData } = await import("./lib/demoData.js");
+  const bundle = buildDemoDataBundle({ teamId: demoTeam.id, coachEmail: "coach.demo@shotlab.app" });
+  await applyDemoData(bundle);
+  await hydratePersistedData();
+} catch(e) {
+  console.warn("Demo seed skipped", e);
+}
 if(kind!=="coach")navigateToPlayerHome();
 setView(kind==="coach"?"coach":"player");
 await DB.set("sl:session",{email:signedIn.email});
