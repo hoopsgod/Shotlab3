@@ -27,10 +27,9 @@ import resolveTeamBranding from "./theme/resolveTeamBranding";
 
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import { buildDemoDataBundle, applyDemoData, clearDemoData } from "./lib/demoData";
-import { isDemoMode } from "./lib/demoMode";
+import { isDemoMode } from "./lib/demoMode.js";
 
 import { supabase } from "./lib/supabase.js";
-};
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
 const CYAN = TOKENS.SECONDARY;
