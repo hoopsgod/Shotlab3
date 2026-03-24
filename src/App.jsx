@@ -1,3 +1,5 @@
+import { isDemoMode } from "./lib/demoMode";
+import { seedDemo, resetDemo } from "./lib/seedDemo";
 import { cloneElement, isValidElement, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import PlayersScreen from "./screens/PlayersScreen";
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
