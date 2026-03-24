@@ -1,43 +1,35 @@
-import { isDemoMode } from "./lib/demoMode";
-import { seedDemo, resetDemo } from "./lib/seedDemo";
-{isDemoMode() && (
-  <div style={{ display: "flex", gap: 8, padding: 12, flexWrap: "wrap" }}>
-    <button onClick={() => seedDemo({ force: false })}>Seed Demo Data</button>
-    <button onClick={() => seedDemo({ force: true })}>Reseed (Force)</button>
-    <button onClick={() => resetDemo()}>Reset Demo</button>
-  </div>
-import { cloneElement, isValidElement, useState, useEffect, useCallback, useMemo, useRef } from "react";
+// src/App.jsx
+
+import {
+  cloneElement,
+  isValidElement,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+
 import PlayersScreen from "./screens/PlayersScreen";
-import { initAnalytics, trackBackendEvent } from "./lib/analytics";
+import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
+
 import PageHeader from "./components/PageHeader";
 import AppHeader from "./components/AppHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
 import CoachHero from "./components/CoachHero";
 import CoachMiniHeader from "./components/CoachMiniHeader";
-import DEFAULT_BRANDING from "./theme/brandingDefaults";
-import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
-import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 import ShotLabCharts from "./components/ShotLabCharts";
-import resolveTeamBranding from "./theme/resolveTeamBranding";
-import { applyDemoData, buildDemoDataBundle, clearDemoData } from "./lib/demoData";
-import { supabase } from "./lib/supabase.js";
 
-)}
-const TOKENS={
-PRIMARY:"#C8FF1A",
-PRIMARY_DIM:"#9CA3AF",
-PRIMARY_GLOW:"rgba(200, 255, 26, 0.18)",
-SECONDARY:"#9CA3AF",
-SECONDARY_DIM:"rgba(0, 229, 255, 0.12)",
-DANGER:"#FF4545",
-WARNING:"#FFA500",
-BG_BASE:"#0B0D10",
-BG_CARD:"#141821",
-BG_ELEVATED:"#0F1115",
-BG_SUBTLE:"rgba(255,255,255,0.08)",
-TEXT_PRIMARY:"#E5E7EB",
-TEXT_SECONDARY:"#9CA3AF",
-TEXT_MUTED:"#6B7280",
+import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
+
+import DEFAULT_BRANDING from "./theme/brandingDefaults";
+import resolveTeamBranding from "./theme/resolveTeamBranding";
+
+import { initAnalytics, trackBackendEvent } from "./lib/analytics";
+import { buildDemoDataBundle, applyDemoData, clearDemoData } from "./lib/demoData";
+import { isDemoMode } from "./lib/demoMode";
+
+import { supabase } from "./lib/supabase.js";
 };
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
