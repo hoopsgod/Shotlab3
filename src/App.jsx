@@ -19,6 +19,8 @@ import CoachCommandCenter from "./components/CoachCommandCenter";
 import CoachHero from "./components/CoachHero";
 import CoachMiniHeader from "./components/CoachMiniHeader";
 import ShotLabCharts from "./components/ShotLabCharts";
+import HelpAnchor from "./components/help/HelpAnchor";
+import HelpWhatsNew from "./components/help/HelpWhatsNew";
 
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 
@@ -214,8 +216,8 @@ const SC_INIT=[
 {id:104,title:"OLYMPIC LIFTS",date:"2026-03-11",time:"6:00 AM",location:"Weight Room — Platform Area",desc:"Clean & jerk, snatch progressions. Coached session."},
 {id:105,title:"CORE & CONDITIONING",date:"2026-03-18",time:"6:30 AM",location:"Training Facility — Turf",desc:"Core stability, sled pushes, agility ladder. Game-day conditioning."},
 ];
-const PLAYER_TAB_PATHS={home:"/",duels:"/program-log","log-drill":"/quick-menu",sc:"/lifting",program:"/events",profile:"/profile",players:"/players"};
-const PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/profile":"profile","/players":"players"};
+const PLAYER_TAB_PATHS={home:"/",duels:"/program-log","log-drill":"/quick-menu",sc:"/lifting",program:"/events",profile:"/profile",players:"/players",help:"/help"};
+const PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/profile":"profile","/players":"players","/help":"help"};
 const TIERS=[
 {min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},
 {min:3,name:"STARTER",color:"#7D7D7D",bg:"#7D7D7D15"},
@@ -966,7 +968,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 function JoinTeam({u,onJoin}){
 const[code,setCode]=useState("");const[err,setErr]=useState("");
 const submit=async()=>{const r=await onJoin(code);if(!r.ok)setErr(r.err||"Could not join team")};
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>JOIN TEAM</button></div></div>;
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><HelpAnchor topicKey="teamCode" coachmarkId="team-code-entry" showCoachmark><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/></HelpAnchor>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>JOIN TEAM</button></div></div>;
 }
 
 // ═══════════════════════════════════════
@@ -1054,6 +1056,7 @@ const playerNavItems=[
   {k:"sc",l:"Lifting",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>,dot:soonSC>0?VOLT:null},
   {k:"program",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
   {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
+  {k:"help",l:"Help",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>},
 ];
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
@@ -1277,7 +1280,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       {/* Score quality indicator */}
       {(()=>{const v=parseInt(input)||0;if(v<=0||!hasDrillMax(active))return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?VOLT:pct>=75?VOLT:pct>=50?ORANGE:"#FF4545";
         return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
-      <button className="btn-v cta-primary" onClick={handleLog} style={{maxWidth:300,margin:"0 auto"}}>LOG SCORE &#8594;</button>
+      <HelpAnchor topicKey="logScore" coachmarkId="log-score-entry" showCoachmark><button className="btn-v cta-primary" onClick={handleLog} style={{maxWidth:300,margin:"0 auto"}}>LOG SCORE &#8594;</button></HelpAnchor>
     </>}
   </div>}
 
@@ -1316,6 +1319,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
   {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
+  {tab==="help"&&<div className={slideClass} key="help"><HelpWhatsNew isCoach={u.isCoach}/></div>}
 </div>
 
 {!isDesktop&&<NavBar items={playerNavItems} active={tab} onChange={switchTab}/>} 
@@ -2117,6 +2121,7 @@ const navItems=[
   {k:"sc",l:"S&C",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>},
   {k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
   {k:"branding",l:"Brand",accentVar:"--accent",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l8 4v6c0 4.5-3 7.7-8 8-5-.3-8-3.5-8-8V7l8-4z"/><path d="M9.5 12.5l1.8 1.8 3.2-3.2"/></svg>},
+  {k:"help",l:"Help",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 2-3 4"/><path d="M12 17h.01"/></svg>},
 ];
 const handleNavChange=(k)=>{
   if(k==="branding"){
@@ -2129,7 +2134,7 @@ const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.i
 const [showMiniHeader,setShowMiniHeader]=useState(false);
 const heroRef=useRef(null);
 const isOverviewTab=tab==="feed";
-const coachTabs=["feed","drills","events","sc","players"];
+const coachTabs=["feed","drills","events","sc","players","help"];
 const isCoachTab=u.isCoach&&coachTabs.includes(tab);
 const showFullCommandCenter=isCoachTab&&tab==="feed";
 const handleManageEventsScroll=useCallback(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth"}),[]);
@@ -2368,13 +2373,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"var(--tracking-tight)"}}>EVENT MANAGEMENT</div>
             <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>{events.length} total scheduled</div>
           </div>
-          {events.length>0&&<button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:0,minHeight:42,height:42,padding:"0 14px",borderRadius:12,whiteSpace:"nowrap"}}>+ ADD EVENT</button>}
+          {events.length>0&&<HelpAnchor topicKey="addEvent" coachmarkId="add-event-desktop" showCoachmark><button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:0,minHeight:42,height:42,padding:"0 14px",borderRadius:12,whiteSpace:"nowrap"}}>+ ADD EVENT</button></HelpAnchor>}
         </div>
         {events.length===0&&<div style={{marginTop:6,padding:"14px 12px",textAlign:"center",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14}}>
           <div style={{width:44,height:44,borderRadius:12,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={20} color={VOLT}/></div>
           <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events scheduled yet</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.45,maxWidth:360,marginLeft:"auto",marginRight:"auto"}}>Create your first event to organize practices, games, camps, or meetings.</div>
-          <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"12px 0 0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
+          <HelpAnchor topicKey="addEvent" coachmarkId="add-event-empty" showCoachmark><button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"12px 0 0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}}>+ ADD EVENT</button></HelpAnchor>
         </div>}
       </div>
       {events.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",paddingBottom:4,marginBottom:14}}>
@@ -2385,7 +2390,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><EventIcon type="event" size={14} color={VOLT}/><span style={{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1}}>EVENTS</span></div>
         <div style={{fontFamily:FB,fontSize:10,color:T.SUB,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em",whiteSpace:"nowrap"}}>{events.length} total</div>
       </div>
-      <button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"0 0 12px",width:"100%",minHeight:44,height:44,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
+      <HelpAnchor topicKey="addEvent" coachmarkId="add-event-mobile" showCoachmark><button onClick={handleToggleAddEvent} className="btn-v cta-primary" style={{margin:"0 0 12px",width:"100%",minHeight:44,height:44,borderRadius:12,fontSize:12}}>+ ADD EVENT</button></HelpAnchor>
       {events.length===0?<div style={{display:"inline-block",maxWidth:"100%",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 12px",marginBottom:12,textAlign:"center"}}>
         <div style={{width:40,height:40,borderRadius:11,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={18} color={VOLT}/></div>
         <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events scheduled</div>
@@ -2420,7 +2425,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           {isDesktop?<div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:2,textAlign:"left",paddingRight:34}}>CREATE EVENT</div>:<><button onClick={()=>setShowAdd(false)} style={{background:"none",border:"none",color:T.SUB,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",cursor:"pointer",padding:"4px 0"}}>Cancel</button><div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:".04em",textAlign:"center",flex:1}}>New Event</div><button aria-label="Close" onClick={()=>setShowAdd(false)} style={{background:"none",border:`1px solid ${BORDER_CLR}`,color:T.SUB,borderRadius:8,width:28,height:28,display:"grid",placeItems:"center",cursor:"pointer",fontSize:16,lineHeight:1}}>×</button></>}
           {isDesktop&&<button aria-label="Close" onClick={()=>setShowAdd(false)} style={{background:"none",border:`1px solid ${BORDER_CLR}`,color:T.SUB,borderRadius:8,width:32,height:32,display:"grid",placeItems:"center",cursor:"pointer",fontSize:18,lineHeight:1}}>×</button>}
         </div>
-        <div style={{padding:isDesktop?"16px 18px":"12px 12px",overflowY:"auto",flex:1,minHeight:0,paddingBottom:isDesktop?18:90}}>
+        <HelpAnchor topicKey="addEvent" coachmarkId="add-event-form" showCoachmark><div style={{padding:isDesktop?"16px 18px":"12px 12px",overflowY:"auto",flex:1,minHeight:0,paddingBottom:isDesktop?18:90}}>
           <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="Open Gym Run"/>
           <div style={{display:isDesktop?"grid":"block",gridTemplateColumns:"1fr 1fr",gap:8}}>
             <FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} tp="date"/>
@@ -2432,7 +2437,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"8px 12px",borderRadius:999,border:`1px solid ${ne.type===t?VOLT:BORDER_CLR}`,background:ne.type===t?VOLT+"22":BG,color:ne.type===t?VOLT:T.SUB,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer"}}>{t}</button>)}</div>
           </div>
-        </div>
+        </div></HelpAnchor>
         <div style={{padding:isDesktop?"12px 18px 16px":"10px 12px",borderTop:`1px solid ${BORDER_CLR}`,background:SURFACE,position:isDesktop?"static":"sticky",bottom:0,zIndex:2}}>
           <button className="btn-v cta-primary" onClick={handleAddEvent} style={{width:"100%",margin:0,minHeight:44,height:44,borderRadius:10}}>CREATE EVENT</button>
         </div>
@@ -2545,6 +2550,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     </div>
   </div>}
   {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {scores.filter(s=>s.email===selP.email&&(s.src==="home"||!s.src)).length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills} programDr={programDrills}/></div>}
+
+  {tab==="help"&&<div className="page pageShell fade-up" data-accent="feed" style={shellVars("feed")}><HelpWhatsNew isCoach={u.isCoach}/></div>}
 
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><PageHeader title="S&C" subtitle="Strength blocks, readiness, and recovery" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S LIFT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAddSC(true)}>Add Session</button></div><div className="heroStats"><div className="heroStat"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">SESSIONS</div></div><div className="heroStat"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">RSVPS</div></div><div className="heroStat"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">LOGS</div></div></div></div>
