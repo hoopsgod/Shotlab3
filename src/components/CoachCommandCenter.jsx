@@ -1,4 +1,5 @@
 import React from "react";
+import HelpAnchor from "./common/HelpAnchor";
 
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
@@ -21,6 +22,7 @@ export default function CoachCommandCenter({
   onCopyJoinCode,
   onRegenerateJoinCode,
   codeErr,
+  onOpenHelp,
 }) {
   const isCompact=variant==="compact";
   const metricBase={
@@ -121,12 +123,18 @@ export default function CoachCommandCenter({
           <button type="button" onClick={onAddPlayer} style={quickBtn(primaryQuickAction==="addPlayer")}>+ Add Player</button>
           <button type="button" onClick={onAddDrill} style={quickBtn(primaryQuickAction==="addDrill")}>+ Add Drill</button>
           <button type="button" onClick={onScheduleEvent} style={quickBtn(primaryQuickAction==="scheduleEvent")}>+ Schedule Event</button>
-          <button type="button" onClick={onLogScore} style={quickBtn(false)}>+ Log Score</button>
+          <div style={{display:"inline-flex",alignItems:"center",gap:6}}>
+            <button type="button" onClick={onLogScore} style={quickBtn(false)}>+ Log Score</button>
+            <HelpAnchor topicKey="logScore" coachmarkId="logScore" onOpenHelp={onOpenHelp} />
+          </div>
         </div>
       </div>
 
       <div style={{margin:"10px 0 4px",padding:"14px 14px",border:"1px solid var(--stroke-1)",borderRadius:14,background:"var(--surface-2)"}}>
-        <div className="u-meta-label" style={{fontFamily:FB,fontSize:10,color:"var(--text-2)"}}>TEAM CODE</div>
+        <div className="u-meta-label" style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",display:"inline-flex",alignItems:"center",gap:6}}>
+          TEAM CODE
+          <HelpAnchor topicKey="teamCode" coachmarkId="teamCode" onOpenHelp={onOpenHelp} />
+        </div>
         <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8,flexWrap:"wrap"}}>
           <div style={{fontFamily:FD,fontSize:25,color:"var(--text-1)",letterSpacing:4,minWidth:114,lineHeight:1}}>{joinCode||"—"}</div>
           <button onClick={onCopyJoinCode} style={{padding:"8px 12px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY</button>
