@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
-import { HELP_TOPICS } from "../../help/helpContent";
+import { HELP_TOPICS } from "../../lib/helpContent";
 
-export default function InfoHint({ topicKey, className = "" }) {
+export default function InfoHint({ topicKey, className = "", onOpenHelp }) {
   const topic = HELP_TOPICS[topicKey];
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -60,12 +60,19 @@ export default function InfoHint({ topicKey, className = "" }) {
           )}
 
           <div className="sl-help__actions">
+            <button type="button" className="sl-help__linkBtn" onClick={() => setExpanded((prev) => !prev)}>
+              {expanded ? "Show less" : "Learn more"}
+            </button>
             <button
               type="button"
               className="sl-help__linkBtn"
-              onClick={() => setExpanded((prev) => !prev)}
+              onClick={() => {
+                setOpen(false);
+                setExpanded(false);
+                onOpenHelp?.();
+              }}
             >
-              {expanded ? "Show less" : "Learn more"}
+              What&apos;s New
             </button>
 
             <button
