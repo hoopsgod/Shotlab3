@@ -595,8 +595,14 @@ meta,
 },[user,view]);
 
 const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
-const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
+let ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
 const existingTeams=rawTeams||[];
+const demoEmails=new Set([DEMO_COACH.email,DEMO_PLAYER.email]);
+const hasDemoData=[rawPlayers,rawPlayerProfiles,rawScores,rawEvents,rawRsvps,rawShotLogs,rawChallenges,rawScSessions,rawScRsvps,rawScLogs,rawTeams].some(list=>(Array.isArray(list)?list:[]).some(item=>demoEmails.has(item?.email)||demoEmails.has(item?.playerId)||demoEmails.has(item?.userId)||demoEmails.has(item?.from)||demoEmails.has(item?.to)||demoEmails.has(item?.ownerCoachId)||item?.name==="Demo Team"));
+if(hasDemoData){
+if(!ps.some(p=>p.email===DEMO_COACH.email))ps=[...ps,{email:DEMO_COACH.email,name:DEMO_COACH.name,password:hashPw(DEMO_COACH.password),role:"coach",teamId:null,hideFromLeaderboards:false}];
+if(!ps.some(p=>p.email===DEMO_PLAYER.email))ps=[...ps,{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,password:hashPw(DEMO_PLAYER.password),role:"player",teamId:null,hideFromLeaderboards:false}];
+}
 const coaches=ps.filter(p=>p.role==="coach");
 const hasTeams=existingTeams.length>0;
 const map={};
@@ -614,19 +620,28 @@ ps.forEach(p=>{if(p.role!=="coach"){const firstCoach=coaches[0];if(firstCoach)ma
 }else{
 ts.forEach(t=>{if(t.ownerCoachId)map[t.ownerCoachId]=t.id;});
 }
+let demoTeam=ts.find(t=>t.ownerCoachId===DEMO_COACH.email||t.name==="Demo Team");
+if(hasDemoData&&!demoTeam){
+demoTeam={id:genId("team"),name:"Demo Team",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode([...used,...ts.map(t=>t.joinCode)]),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
+ts=[...ts,demoTeam];
+}
+if(demoTeam){
+map[DEMO_COACH.email]=demoTeam.id;
+map[DEMO_PLAYER.email]=demoTeam.id;
+}
 const teamsWithBranding=ts.map(t=>({...t,branding:resolveTeamBranding(t.branding||DEFAULT_BRANDING)}));
-const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithBranding[0]?.id||null,hideFromLeaderboards:p.hideFromLeaderboards===true}));
+const playersMigrated=ps.map(p=>({...p,teamId:(demoTeam&&demoEmails.has(p.email)?demoTeam.id:(p.teamId||map[p.email]||teamsWithBranding[0]?.id||null)),hideFromLeaderboards:p.hideFromLeaderboards===true}));
 const profilesExisting=rawPlayerProfiles||[];
-const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null}));
-const teamForEmail=e=>playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null;
-const scoresM=(rawScores||[]).map(s=>({...s,playerId:s.playerId||s.email,teamId:s.teamId||teamForEmail(s.email),src:s.src||"home"}));
-const eventsM=(rawEvents||[]).map(e=>({...e,teamId:e.teamId||teamForEmail(e.ownerCoachId)}));
-const rsvpsM=(rawRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
-const shotM=(rawShotLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:l.teamId||teamForEmail(l.email)}));
-const chM=(rawChallenges||[]).map(c=>({...c,teamId:c.teamId||teamForEmail(c.from),playerId:c.playerId||c.from}));
-const scSM=(rawScSessions||[]).map(s=>({...s,teamId:s.teamId||teamForEmail(s.ownerCoachId)}));
-const scRM=(rawScRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
-const scLM=(rawScLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:l.teamId||teamForEmail(l.email)}));
+const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:(demoTeam&&demoEmails.has(pp.userId)?demoTeam.id:(pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null))}));
+const teamForEmail=e=>demoEmails.has(e)&&demoTeam?demoTeam.id:(playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null);
+const scoresM=(rawScores||[]).map(s=>({...s,playerId:s.playerId||s.email,teamId:(demoEmails.has(s.email)||demoEmails.has(s.playerId))&&demoTeam?demoTeam.id:(s.teamId||teamForEmail(s.email||s.playerId)),src:s.src||"home"}));
+const eventsM=(rawEvents||[]).map(e=>({...e,teamId:e.ownerCoachId===DEMO_COACH.email&&demoTeam?demoTeam.id:(e.teamId||teamForEmail(e.ownerCoachId))}));
+const rsvpsM=(rawRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:(demoEmails.has(r.email)||demoEmails.has(r.playerId))&&demoTeam?demoTeam.id:(r.teamId||teamForEmail(r.email||r.playerId))}));
+const shotM=(rawShotLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:(demoEmails.has(l.email)||demoEmails.has(l.playerId))&&demoTeam?demoTeam.id:(l.teamId||teamForEmail(l.email||l.playerId))}));
+const chM=(rawChallenges||[]).map(c=>({...c,teamId:(demoEmails.has(c.from)||demoEmails.has(c.to)||demoEmails.has(c.playerId))&&demoTeam?demoTeam.id:(c.teamId||teamForEmail(c.from||c.playerId)),playerId:c.playerId||c.from}));
+const scSM=(rawScSessions||[]).map(s=>({...s,teamId:s.ownerCoachId===DEMO_COACH.email&&demoTeam?demoTeam.id:(s.teamId||teamForEmail(s.ownerCoachId))}));
+const scRM=(rawScRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:(demoEmails.has(r.email)||demoEmails.has(r.playerId))&&demoTeam?demoTeam.id:(r.teamId||teamForEmail(r.email||r.playerId))}));
+const scLM=(rawScLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:(demoEmails.has(l.email)||demoEmails.has(l.playerId))&&demoTeam?demoTeam.id:(l.teamId||teamForEmail(l.email||l.playerId))}));
 return {playersMigrated,profilesMigrated,teamsMigrated:teamsWithBranding,scoresM,eventsM,rsvpsM,shotM,chM,scSM,scRM,scLM};
 },[]);
 
