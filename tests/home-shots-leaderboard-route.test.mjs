@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { mapLeaderboardError, parseLimit } from "../functions/v1/leaderboards/home-shots.js";
+import { mapLeaderboardError, parseLimit, parseScope } from "../functions/v1/leaderboards/home-shots.js";
 
 test("parseLimit clamps and defaults safely", () => {
   assert.equal(parseLimit(undefined), 10);
@@ -12,9 +12,18 @@ test("parseLimit clamps and defaults safely", () => {
   assert.equal(parseLimit("99"), 10);
 });
 
+test("parseScope normalizes valid values and rejects invalid ones", () => {
+  assert.equal(parseScope(undefined), "players");
+  assert.equal(parseScope("coaches"), "coaches");
+  assert.equal(parseScope("ALL"), "all");
+  assert.equal(parseScope("players"), "players");
+  assert.equal(parseScope("managers"), "");
+});
+
 test("mapLeaderboardError maps known authorization and validation errors", () => {
   assert.deepEqual(mapLeaderboardError(new Error("TEAM_ID_REQUIRED")), { status: 400, code: "team_id_required" });
   assert.deepEqual(mapLeaderboardError(new Error("REQUESTER_REQUIRED")), { status: 401, code: "unauthorized" });
   assert.deepEqual(mapLeaderboardError(new Error("NOT_AUTHORIZED_FOR_TEAM")), { status: 403, code: "forbidden" });
+  assert.deepEqual(mapLeaderboardError(new Error("SCOPE_INVALID")), { status: 400, code: "invalid_scope" });
   assert.deepEqual(mapLeaderboardError(new Error("unexpected")), { status: 500, code: "internal_error" });
 });

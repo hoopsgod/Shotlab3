@@ -33,6 +33,7 @@ test("leaderboard route clamps requested limit to top 10 before RPC", async () =
     assert.equal(requests.length, 1);
     const body = JSON.parse(requests[0].init.body);
     assert.equal(body.p_limit, 10);
+    assert.equal(body.p_scope, "players");
   } finally {
     global.fetch = originalFetch;
   }
@@ -147,8 +148,39 @@ test("empty leaderboard responses emit query_empty telemetry", async () => {
     assert.equal(logs[0].event, "leaderboard.home_shots.query_start");
     assert.equal(logs[1].event, "leaderboard.home_shots.query_empty");
     assert.equal(logs[1].rows, 0);
+    assert.equal(logs[1].scope, "players");
   } finally {
     global.fetch = originalFetch;
     console.log = originalLog;
   }
+});
+
+test("route passes coaches scope to RPC", async () => {
+  const requests = [];
+  const originalFetch = global.fetch;
+  global.fetch = async (url, init) => {
+    requests.push({ url: String(url), init });
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+
+  try {
+    const context = makeContext("https://shotlab.test/v1/leaderboards/home-shots?team_id=team-1&scope=coaches", {
+      "x-user-id": "coach@team.test",
+    });
+    const res = await onRequestGet(context);
+    assert.equal(res.status, 200);
+    const body = JSON.parse(requests[0].init.body);
+    assert.equal(body.p_scope, "coaches");
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test("invalid scope is rejected", async () => {
+  const context = makeContext("https://shotlab.test/v1/leaderboards/home-shots?team_id=team-1&scope=staff", {
+    "x-user-id": "coach@team.test",
+  });
+  const res = await onRequestGet(context);
+  assert.equal(res.status, 400);
+  assert.deepEqual(await res.json(), { error: "invalid_scope" });
 });

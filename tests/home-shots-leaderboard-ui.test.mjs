@@ -34,6 +34,12 @@ test("player landing page includes shared HomeShotsLeaderboardCard", () => {
   assert.match(appSource, /tab===\"home\"[\s\S]*?<HomeShotsLeaderboardCard/);
 });
 
+test("home shots leaderboard includes players/coaches scope toggle", () => {
+  assert.match(appSource, /HOME_SHOTS_LEADERBOARD_SCOPES/);
+  assert.match(appSource, /scopeOption\.label/);
+  assert.match(appSource, /COACHES/);
+});
+
 test("leaderboard card renders loading, empty, and error states", () => {
   const HomeShotsLeaderboardCard = loadCardComponent();
   const loadingHtml = renderToStaticMarkup(React.createElement(HomeShotsLeaderboardCard, { status: "loading", rows: [] }));
