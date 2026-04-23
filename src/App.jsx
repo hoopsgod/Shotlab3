@@ -255,21 +255,29 @@ const HOME_SHOTS_LEADERBOARD_LIMIT = 10;
 
 const DB = {
   async get(k) {
+    const hasData = (value) => {
+      if (Array.isArray(value)) return value.length > 0;
+      if (value && typeof value === "object") return Object.keys(value).length > 0;
+      return Boolean(value);
+    };
+
+    let local = null;
     try {
       const r = await window.storage.get(k, true);
-      const local = r?.value ? JSON.parse(r.value) : null;
-      if (local && (Array.isArray(local) ? local.length > 0 : Object.keys(local).length > 0)) {
-        return local;
-      }
+      local = r?.value ? JSON.parse(r.value) : null;
     } catch (e) {}
+
     const table = TABLE_MAP[k];
     if (table) {
       try {
         const { data } = await supabase.from(table).select("*");
-        return data || null;
+        if (hasData(data)) {
+          return data;
+        }
       } catch (e) {}
     }
-    return null;
+
+    return hasData(local) ? local : null;
   },
   async set(k, v) {
     try {
