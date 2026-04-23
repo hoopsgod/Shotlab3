@@ -23,15 +23,23 @@ function parseLimit(raw) {
   return Math.max(1, Math.min(parsed, 10));
 }
 
+function parseScope(raw) {
+  const value = String(raw || "players").trim().toLowerCase();
+  if (!value) return "players";
+  if (value === "players" || value === "coaches" || value === "all") return value;
+  return "";
+}
+
 function mapLeaderboardError(error) {
   const message = String(error?.message || "").toUpperCase();
   if (message.includes("TEAM_ID_REQUIRED")) return { status: 400, code: "team_id_required" };
   if (message.includes("REQUESTER_REQUIRED")) return { status: 401, code: "unauthorized" };
   if (message.includes("NOT_AUTHORIZED_FOR_TEAM")) return { status: 403, code: "forbidden" };
+  if (message.includes("SCOPE_INVALID")) return { status: 400, code: "invalid_scope" };
   return { status: 500, code: "internal_error" };
 }
 
-export { parseLimit, mapLeaderboardError };
+export { parseLimit, parseScope, mapLeaderboardError };
 
 export async function onRequestGet(context) {
   const { request, env } = context;
@@ -59,12 +67,14 @@ export async function onRequestGet(context) {
   const url = new URL(request.url);
   const teamId = String(url.searchParams.get("team_id") || "").trim();
   const limit = parseLimit(url.searchParams.get("limit"));
+  const scope = parseScope(url.searchParams.get("scope"));
   const rate = enforceRateLimit({ key: getClientKey(request, `${userId}:${teamId}`), max: 40, windowMs: 60_000 });
   if (!rate.allowed) {
     return Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
   }
 
   if (!teamId) return Response.json({ error: "team_id_required" }, { status: 400 });
+  if (!scope) return Response.json({ error: "invalid_scope" }, { status: 400 });
 
   const startedAt = Date.now();
   recordLeaderboardEvent(LEADERBOARD_EVENTS.QUERY_START, {
@@ -72,6 +82,7 @@ export async function onRequestGet(context) {
     requesterUserId: maskRequesterUserId(userId),
     teamId,
     limit,
+    scope,
   });
 
   try {
@@ -79,6 +90,7 @@ export async function onRequestGet(context) {
       p_team_id: teamId,
       p_requester_user_id: userId,
       p_limit: limit,
+      p_scope: scope,
     });
 
     const leaderboard = (Array.isArray(rows) ? rows : []).map((row) => ({
@@ -93,6 +105,7 @@ export async function onRequestGet(context) {
       requesterUserId: maskRequesterUserId(userId),
       teamId,
       limit,
+      scope,
       rows: leaderboard.length,
       durationMs: Date.now() - startedAt,
     });
@@ -101,6 +114,7 @@ export async function onRequestGet(context) {
       {
         team_id: teamId,
         limit,
+        scope,
         count: leaderboard.length,
         leaderboard,
       },
@@ -113,6 +127,7 @@ export async function onRequestGet(context) {
       requesterUserId: maskRequesterUserId(userId),
       teamId,
       limit,
+      scope,
       durationMs: Date.now() - startedAt,
       errorCode: mapped.code,
       errorMessage: String(error?.message || "unknown_error"),
