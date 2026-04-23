@@ -249,6 +249,7 @@ const TABLE_MAP = {
   "sl:teams": "teams",
   "sl:session": "sessions",
 };
+const PENDING_JOIN_CONTEXT_KEY = "sl:pending-join-context";
 
 const DB = {
   async get(k) {
@@ -578,7 +579,7 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false);
+const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
 const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
 const T=THEMES[theme];
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
@@ -636,18 +637,72 @@ const homePath=PLAYER_TAB_PATHS.home||"/";
 if(window.location.pathname!==homePath)window.history.replaceState({},"",homePath);
 },[]);
 
-const hydratePersistedData=useCallback(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session")]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
+const hydratePersistedData=useCallback(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
 const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
 await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
 if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}}}
+setPendingJoinContext(pendingCtx&&pendingCtx.token?pendingCtx:null);
 return {teams:m.teamsMigrated,players:m.playersMigrated};
 },[migrateData,navigateToPlayerHome]);
 
 // Load persisted data + restore session
 useEffect(()=>{(async()=>{await hydratePersistedData();setReady(true)})()},[hydratePersistedData]);
+useEffect(()=>{
+if(!ready||!user||user.role!=="player"||user.teamId||!pendingJoinContext?.token)return;
+let canceled=false;
+(async()=>{
+const r=await consumeJoinContext(user);
+if(canceled||!r.ok||!r.teamId)return;
+const np=players.map(p=>p.email===user.email?{...p,teamId:r.teamId}:p);
+await P("sl:players",np,setPlayers);
+const hasProfile=playerProfiles.some(pp=>pp.userId===user.email&&pp.teamId===r.teamId);
+if(!hasProfile){
+const parts=(user.name||"Player").trim().split(/\s+/);
+await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:user.email,teamId:r.teamId,firstName:parts[0]||"Player",lastName:parts.slice(1).join(" "),createdAt:Date.now()}],setPlayerProfiles);
+}
+setUser(prev=>prev?{...prev,teamId:r.teamId}:prev);
+navigateToPlayerHome();
+setView("player");
+})();
+return()=>{canceled=true;};
+},[ready,user,pendingJoinContext,consumeJoinContext,players,playerProfiles,P,navigateToPlayerHome]);
 
 const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
+const savePendingJoinContext=useCallback(async(next)=>{
+setPendingJoinContext(next||null);
+await DB.set(PENDING_JOIN_CONTEXT_KEY,next||null);
+},[]);
+const startJoinContext=useCallback(async(code,subjectKey)=>{
+const normalizedCode=normalizeJoin(code).replace(/[-\s]+/g,"");
+const normalizedSubject=String(subjectKey||"").trim().toLowerCase();
+if(!normalizedCode)return{ok:false,err:"Enter a valid team code."};
+if(!normalizedSubject)return{ok:false,err:"Enter a valid email."};
+try{
+const res=await fetch("/v1/team-invites/context/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({invite_code:normalizedCode,subject_key:normalizedSubject})});
+const body=await res.json().catch(()=>({}));
+if(!res.ok)return{ok:false,err:body?.error||"Could not validate team code."};
+const ctx={token:body.join_context_token,expiresAt:body.expires_at,subjectKey:normalizedSubject,inviteId:body.invite_id,createdAt:Date.now()};
+await savePendingJoinContext(ctx);
+return{ok:true,context:ctx};
+}catch{
+return{ok:false,err:"Could not validate team code."};
+}
+},[normalizeJoin,savePendingJoinContext]);
+const consumeJoinContext=useCallback(async(actor,clientRequestId=null)=>{
+if(!actor?.email||!pendingJoinContext?.token)return{ok:false,err:"No validated invite context."};
+const subject=String(pendingJoinContext.subjectKey||"").trim().toLowerCase();
+if(subject!==String(actor.email||"").trim().toLowerCase())return{ok:false,err:"Invite context is tied to a different email."};
+try{
+const res=await fetch("/v1/team-memberships/confirm-context",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":actor.email},body:JSON.stringify({join_context_token:pendingJoinContext.token,subject_key:subject,client_request_id:clientRequestId||genId("join")})});
+const body=await res.json().catch(()=>({}));
+if(!res.ok)return{ok:false,err:body?.error||"Could not join team."};
+await savePendingJoinContext(null);
+return{ok:true,teamId:body.team_id,status:body.status||"joined"};
+}catch{
+return{ok:false,err:"Could not join team."};
+}
+},[pendingJoinContext,savePendingJoinContext]);
 // Auth with hashed passwords
 const register=async(email,password,name,role)=>{
 const existing=players.find(p=>p.email===email);
@@ -754,17 +809,19 @@ return{ok:true,team:nt};
 };
 const joinTeam=async(code)=>{
 if(!user||user.role!=="player")return{ok:false,err:"Not authorized"};
-const c=normalizeJoin(code);const t=teams.find(tm=>tm.joinCode===c);
-if(!t)return{ok:false,err:"Invalid team code."};
-if(user.teamId===t.id){navigateToPlayerHome();setView("player");return{ok:true,alreadyJoined:true};}
-const np=players.map(p=>p.email===user.email?{...p,teamId:t.id}:p);
+const ctx=await startJoinContext(code,user.email);
+if(!ctx.ok)return{ok:false,err:ctx.err||"Invalid team code."};
+const joined=await consumeJoinContext(user);
+if(!joined.ok)return{ok:false,err:joined.err||"Could not join team."};
+if(user.teamId===joined.teamId){navigateToPlayerHome();setView("player");return{ok:true,alreadyJoined:true};}
+const np=players.map(p=>p.email===user.email?{...p,teamId:joined.teamId}:p);
 await P("sl:players",np,setPlayers);
-const hasProfile=playerProfiles.some(pp=>pp.userId===user.email&&pp.teamId===t.id);
+const hasProfile=playerProfiles.some(pp=>pp.userId===user.email&&pp.teamId===joined.teamId);
 if(!hasProfile){
 const parts=(user.name||"Player").trim().split(/\s+/);
-await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:user.email,teamId:t.id,firstName:parts[0]||"Player",lastName:parts.slice(1).join(" "),createdAt:Date.now()}],setPlayerProfiles);
+await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:user.email,teamId:joined.teamId,firstName:parts[0]||"Player",lastName:parts.slice(1).join(" "),createdAt:Date.now()}],setPlayerProfiles);
 }
-setUser({...user,teamId:t.id});navigateToPlayerHome();setView("player");
+setUser({...user,teamId:joined.teamId});navigateToPlayerHome();setView("player");
 return{ok:true};
 };
 const addRosterPlayer=async(data)=>{
@@ -862,8 +919,8 @@ useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 
 return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
-{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
-{view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user}/></div>}
+{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
+{view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
@@ -872,8 +929,8 @@ return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 // ═══════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════
-function Auth({onLogin,onRegister,onDemo}){
-const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[err,setErr]=useState("");
+function Auth({onLogin,onRegister,onDemo,onCreateJoinContext}){
+const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[inviteCode,setInviteCode]=useState(""),[err,setErr]=useState("");
 const doLogin=()=>{
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!password){setErr("Enter your password");return}
@@ -886,6 +943,10 @@ const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!name.trim()){setErr("Enter your name");return}
 if(!password||password.length<4){setErr("Password must be at least 4 characters");return}
 const id=e.includes("@")?e:e+"@shotlab.app";
+if(role==="player"&&inviteCode.trim()){
+const invite=await onCreateJoinContext(inviteCode,id);
+if(!invite?.ok){setErr(invite?.err||"Team code is invalid or expired.");return}
+}
 const r=await onRegister(id,password,name.trim(),role);
 if(!r.ok)setErr(r.err);
 };
@@ -923,6 +984,10 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       </div>
       <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>YOUR NAME</label>
       <input type="text" value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="First Last" style={{...inp,marginBottom:14}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
+      {role==="player"&&<>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>TEAM CODE</label>
+        <input type="text" value={inviteCode} onChange={e=>{setInviteCode(e.target.value.toUpperCase());setErr("")}} placeholder="ENTER COACH CODE" style={{...inp,marginBottom:14,textTransform:"uppercase",letterSpacing:2}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
+      </>}
     </>}
 
     {mode==="login"&&<>
@@ -963,10 +1028,10 @@ const submit=async()=>{if(!name.trim())return setErr("Enter a team name");const 
 return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Welcome {u?.name}. Create your team to continue.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>CREATE TEAM</button></div></div>;
 }
 
-function JoinTeam({u,onJoin}){
+function JoinTeam({u,onJoin,pendingJoinContext,onClearPendingJoinContext}){
 const[code,setCode]=useState("");const[err,setErr]=useState("");
 const submit=async()=>{const r=await onJoin(code);if(!r.ok)setErr(r.err||"Could not join team")};
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p><input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>JOIN TEAM</button></div></div>;
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p>{pendingJoinContext?.token&&<div style={{border:`1px solid ${BORDER_CLR}`,background:BG,borderRadius:10,padding:10,marginBottom:10,fontFamily:FB,fontSize:11,color:T.SUB}}>Validated invite context is saved for {pendingJoinContext.subjectKey}. <button onClick={onClearPendingJoinContext} style={{marginLeft:8,background:"transparent",border:"none",color:VOLT,cursor:"pointer",fontWeight:700}}>Clear</button></div>}<input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>JOIN TEAM</button></div></div>;
 }
 
 // ═══════════════════════════════════════
