@@ -25,6 +25,7 @@ import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingCon
 
 import DEFAULT_BRANDING from "./theme/brandingDefaults";
 import resolveTeamBranding from "./theme/resolveTeamBranding";
+import TOKENS from "./theme/appTokens";
 
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import { buildDemoDataBundle, applyDemoData, clearDemoData } from "./lib/demoData";
