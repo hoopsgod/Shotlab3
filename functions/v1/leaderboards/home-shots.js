@@ -35,11 +35,26 @@ export { parseLimit, mapLeaderboardError };
 
 export async function onRequestGet(context) {
   const { request, env } = context;
+  const requestId = request.headers.get("cf-ray") || null;
   const auth = requireApiToken(request, env);
-  if (!auth.ok) return Response.json({ error: auth.error }, { status: auth.status });
+  if (!auth.ok) {
+    recordLeaderboardEvent(LEADERBOARD_EVENTS.AUTH_FAILURE, {
+      requestId,
+      reason: auth.error,
+      status: auth.status,
+    });
+    return Response.json({ error: auth.error }, { status: auth.status });
+  }
 
   const userId = normalizeRequesterUserId(readUserId(request));
-  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401 });
+  if (!userId) {
+    recordLeaderboardEvent(LEADERBOARD_EVENTS.AUTH_FAILURE, {
+      requestId,
+      reason: "unauthorized",
+      status: 401,
+    });
+    return Response.json({ error: "unauthorized" }, { status: 401 });
+  }
 
   const url = new URL(request.url);
   const teamId = String(url.searchParams.get("team_id") || "").trim();
@@ -52,7 +67,6 @@ export async function onRequestGet(context) {
   if (!teamId) return Response.json({ error: "team_id_required" }, { status: 400 });
 
   const startedAt = Date.now();
-  const requestId = request.headers.get("cf-ray") || null;
   recordLeaderboardEvent(LEADERBOARD_EVENTS.QUERY_START, {
     requestId,
     requesterUserId: maskRequesterUserId(userId),
@@ -73,7 +87,8 @@ export async function onRequestGet(context) {
       total_home_shots: row.total_home_shots,
     }));
 
-    recordLeaderboardEvent(LEADERBOARD_EVENTS.QUERY_SUCCESS, {
+    const event = leaderboard.length === 0 ? LEADERBOARD_EVENTS.QUERY_EMPTY : LEADERBOARD_EVENTS.QUERY_SUCCESS;
+    recordLeaderboardEvent(event, {
       requestId,
       requesterUserId: maskRequesterUserId(userId),
       teamId,

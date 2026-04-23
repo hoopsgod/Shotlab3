@@ -110,3 +110,45 @@ test("cross-team access denied is mapped to forbidden", async () => {
     global.fetch = originalFetch;
   }
 });
+
+test("unauthorized requests emit auth_failure telemetry", async () => {
+  const originalLog = console.log;
+  const logs = [];
+  console.log = (line) => logs.push(JSON.parse(line));
+
+  try {
+    const context = makeContext("https://shotlab.test/v1/leaderboards/home-shots?team_id=team-1", {});
+    const res = await onRequestGet(context);
+    assert.equal(res.status, 401);
+    assert.equal(logs.length, 1);
+    assert.equal(logs[0].event, "leaderboard.home_shots.auth_failure");
+    assert.equal(logs[0].reason, "unauthorized");
+  } finally {
+    console.log = originalLog;
+  }
+});
+
+test("empty leaderboard responses emit query_empty telemetry", async () => {
+  const originalFetch = global.fetch;
+  const originalLog = console.log;
+  const logs = [];
+  console.log = (line) => logs.push(JSON.parse(line));
+  global.fetch = async () => new Response(JSON.stringify([]), { status: 200 });
+
+  try {
+    const context = makeContext("https://shotlab.test/v1/leaderboards/home-shots?team_id=team-1", {
+      "x-user-id": "coach@team.test",
+    });
+    const res = await onRequestGet(context);
+    assert.equal(res.status, 200);
+    const payload = await res.json();
+    assert.equal(payload.count, 0);
+
+    assert.equal(logs[0].event, "leaderboard.home_shots.query_start");
+    assert.equal(logs[1].event, "leaderboard.home_shots.query_empty");
+    assert.equal(logs[1].rows, 0);
+  } finally {
+    global.fetch = originalFetch;
+    console.log = originalLog;
+  }
+});
