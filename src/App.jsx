@@ -886,6 +886,26 @@ const profile={id:genId("pp"),userId:null,teamId:user.teamId,firstName,lastName,
 await P("sl:player-profiles",[...playerProfiles,profile],setPlayerProfiles);
 return{ok:true};
 };
+const removeRosterPlayer=async(playerEmail)=>{
+if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
+if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
+const email=String(playerEmail||"").trim().toLowerCase();
+if(!email)return{ok:false,err:"Player email is required"};
+const target=players.find(p=>String(p.email||"").toLowerCase()===email);
+if(!target||target.role==="coach"||target.teamId!==user.teamId)return{ok:false,err:"Player not found on roster"};
+const nextPlayers=players.map(p=>String(p.email||"").toLowerCase()===email?{...p,teamId:null}:p);
+await Promise.all([
+P("sl:players",nextPlayers,setPlayers),
+P("sl:scores",scores.filter(s=>String(s.playerId||s.email||"").toLowerCase()!==email),setScores),
+P("sl:rsvps",rsvps.filter(r=>String(r.playerId||r.email||"").toLowerCase()!==email),setRsvps),
+P("sl:shotlogs",shotLogs.filter(l=>String(l.playerId||l.email||"").toLowerCase()!==email),setShotLogs),
+P("sl:challenges",challenges.filter(c=>String(c.playerId||"").toLowerCase()!==email&&String(c.from||"").toLowerCase()!==email&&String(c.to||"").toLowerCase()!==email),setChallenges),
+P("sl:sc-rsvps",scRsvps.filter(r=>String(r.playerId||r.email||"").toLowerCase()!==email),setScRsvps),
+P("sl:sc-logs",scLogs.filter(l=>String(l.playerId||l.email||"").toLowerCase()!==email),setScLogs),
+P("sl:player-profiles",playerProfiles.filter(pp=>!(String(pp.userId||"").toLowerCase()===email&&pp.teamId===user.teamId)),setPlayerProfiles),
+]);
+return{ok:true};
+};
 const regenerateJoinCode=async(teamId)=>{
 if(!requireCoach(user,teamId))return{ok:false,err:"Not authorized"};
 const t=teams.find(tm=>tm.id===teamId&&tm.ownerCoachId===user.email);
@@ -978,7 +998,7 @@ return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId)}/></div>}
-{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId)}/></div>}
+{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId)}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 </TeamBrandingProvider>;
 }
@@ -2183,14 +2203,14 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 // ═══════════════════════════════════════
 // COACH SCREEN
 // ═══════════════════════════════════════
-function Coach({u,team,regenerateJoinCode,addRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
+function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all");
 const customProgramDrillCount=countCustomProgramDrills(programDrills);
 const[nudged,setNudged]=useState([]);
 const[confirmDelete,setConfirmDelete]=useState(null);const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
-const ups=useMemo(()=>{const es=[...new Set(scores.map(s=>s.email))];return es.map(e=>{const p=players.find(p=>p.email===e);return{email:e,name:p?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())}})},[scores,players]);
+const ups=useMemo(()=>players.filter(p=>p.role!=="coach"&&p.teamId===u?.teamId).map(p=>({email:p.email,name:p.name||String(p.email||"").split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())})),[players,u?.teamId]);
 const allKnown=useMemo(()=>{const m={};players.forEach(p=>m[p.email]=p.name);scores.forEach(s=>{if(!m[s.email])m[s.email]=s.name||s.email});return Object.entries(m).map(([email,name])=>({email,name}))},[players,scores]);
 const today=todayStr(),todayS=scores.filter(s=>s.date===today);
 const saveDrill=()=>{const m=parseInt(eMax);updateDrill(editD.id,{name:san(eName),desc:san(eDesc),instructions:san(eInstr),max:m>0?m:null,icon:eIcon});setEditD(null)};
@@ -2651,19 +2671,20 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         <button onClick={async()=>{const r=await addRosterPlayer(newProfile);if(!r.ok)setProfileErr(r.err||"Could not add player");else setNewProfile({firstName:"",lastName:"",jerseyNumber:""});}} style={{padding:"8px 12px",background:"var(--page-accent)",color:"#000000",border:"none",borderRadius:8,fontFamily:FD,letterSpacing:1,cursor:"pointer"}}>ADD</button>
       </div>
     </div>
-    <CoachRoster players={players} scores={scores} shotLogs={shotLogs} drills={drills} nudged={nudged} setNudged={setNudged}/>
+    <CoachRoster players={players} scores={scores} shotLogs={shotLogs} drills={drills} nudged={nudged} setNudged={setNudged} onRemovePlayer={removeRosterPlayer}/>
     {/* Tap any player in roster for detail */}
     <div style={{marginTop:16}}>
       <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PLAYER DETAILS" s="TAP TO VIEW"/>
       {ups.map((p,i)=>{const ps=scores.filter(s=>s.email===p.email);const tot=ps.reduce((a,s)=>a+s.score,0);
-        return <button key={i} className="ch" onClick={()=>setSelP(p)} style={{width:"100%",display:"flex",alignItems:"center",gap:12,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:8,cursor:"pointer",textAlign:"left"}}>
+        return <div key={i} className="ch" onClick={()=>setSelP(p)} role="button" tabIndex={0} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")setSelP(p);}} style={{width:"100%",display:"flex",alignItems:"center",gap:12,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 16px",marginBottom:8,cursor:"pointer",textAlign:"left"}}>
           <Av n={p.name} sz={36} email={p.email}/>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>{p.name.toUpperCase()}</div>
             <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{tot} makes · {rsvps.filter(r=>r.email===p.email).length} events</div>
           </div>
+          <button onClick={async(e)=>{e.stopPropagation();await removeRosterPlayer(p.email);if(selP?.email===p.email)setSelP(null);}} style={{background:"#FF454512",border:"1px solid #FF454533",borderRadius:8,color:"#FF4545",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",padding:"6px 10px",cursor:"pointer"}}>REMOVE</button>
           <svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
-        </button>})}
+        </div>})}
     </div>
     {/* Account management — required by App Store §5.1.1(v) */}
     <div style={{marginTop:32,paddingTop:20,borderTop:`1px solid ${BORDER_CLR}44`}}>
@@ -2938,7 +2959,7 @@ return <div className="fade-up">
 
   </div>;
 }
-function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged}){
+function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged,onRemovePlayer}){
   const [sortBy,setSortBy]=useState("status");
   const now=Date.now();
   const dayMs=1000*60*60*24;
@@ -3049,6 +3070,9 @@ return <div className="fade-up">
     {p.statusMeta.pill==="INACTIVE"&&<button onClick={()=>{if(!isNudged)setNudged(n=>[...n,p.email])}} style={{minHeight:40,padding:"0 12px",borderRadius:8,border:`1px solid ${isNudged?VOLT+"44":"#FF454544"}`,background:isNudged?VOLT+"12":"#FF454512",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,color:isNudged?VOLT:"#FF4545",whiteSpace:"nowrap",width:"100%"}}>
       {isNudged?"✓ NUDGED":"NUDGE"}
     </button>}
+    <button onClick={()=>onRemovePlayer?.(p.email)} style={{minHeight:34,padding:"0 12px",borderRadius:8,border:"1px solid #FF454533",background:"#FF454510",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",color:"#FF4545",whiteSpace:"nowrap",width:"100%"}}>
+      REMOVE
+    </button>
       </div>
     </div>
   </div>})}
