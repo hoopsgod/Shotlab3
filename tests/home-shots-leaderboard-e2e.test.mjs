@@ -106,3 +106,62 @@ test("e2e: seed shot data -> fetch leaderboard -> verify order and values on bot
     global.fetch = originalFetch;
   }
 });
+
+test("e2e: player data only appears on registered team's coach dashboard leaderboard", async () => {
+  const seeded = [
+    { teamId: "team-a", playerId: "a1", name: "Ava", made: 140 },
+    { teamId: "team-a", playerId: "a2", name: "Mia", made: 80 },
+    { teamId: "team-b", playerId: "b1", name: "Noah", made: 210 },
+    { teamId: "team-b", playerId: "b2", name: "Luca", made: 90 },
+  ];
+  const rowsByTeam = {
+    "team-a": buildLeaderboardRows(seeded.filter((entry) => entry.teamId === "team-a")),
+    "team-b": buildLeaderboardRows(seeded.filter((entry) => entry.teamId === "team-b")),
+  };
+
+  const originalFetch = global.fetch;
+  global.fetch = async (url, init) => {
+    const body = JSON.parse(init?.body || "{}");
+    const teamId = body.p_team_id;
+    return new Response(JSON.stringify(rowsByTeam[teamId] || []), { status: 200 });
+  };
+
+  try {
+    const teamACoachRequest = new Request("https://shotlab.test/v1/leaderboards/home-shots?team_id=team-a&limit=10", {
+      headers: { "x-user-id": "coach@team-a.test" },
+    });
+    const teamBCoachRequest = new Request("https://shotlab.test/v1/leaderboards/home-shots?team_id=team-b&limit=10", {
+      headers: { "x-user-id": "coach@team-b.test" },
+    });
+
+    const teamARes = await onRequestGet({ request: teamACoachRequest, env: ENV });
+    const teamBRes = await onRequestGet({ request: teamBCoachRequest, env: ENV });
+    assert.equal(teamARes.status, 200);
+    assert.equal(teamBRes.status, 200);
+
+    const teamAPayload = await teamARes.json();
+    const teamBPayload = await teamBRes.json();
+
+    assert.deepEqual(
+      teamAPayload.leaderboard.map((r) => r.player_display_name),
+      ["Ava", "Mia"],
+    );
+    assert.deepEqual(
+      teamBPayload.leaderboard.map((r) => r.player_display_name),
+      ["Noah", "Luca"],
+    );
+    assert.equal(teamAPayload.leaderboard.some((r) => r.player_display_name === "Noah"), false);
+    assert.equal(teamBPayload.leaderboard.some((r) => r.player_display_name === "Ava"), false);
+
+    const HomeShotsLeaderboardCard = loadCardComponent();
+    const coachTeamAHtml = renderToStaticMarkup(
+      React.createElement(HomeShotsLeaderboardCard, { status: "success", rows: teamAPayload.leaderboard, title: "TOP 10 HOME SHOTS" }),
+    );
+
+    assert.match(coachTeamAHtml, /AVA/);
+    assert.match(coachTeamAHtml, /MIA/);
+    assert.doesNotMatch(coachTeamAHtml, /NOAH/);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
