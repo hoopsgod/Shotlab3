@@ -27,6 +27,13 @@ class FakeInviteEngine {
     return `ABCD${String(this.inviteSeq + 1).padStart(4, '0')}`;
   }
 
+  getRosterForTeam(teamId) {
+    return [...this.memberships.values()]
+      .filter((membership) => membership.teamId === teamId)
+      .map((membership) => membership.userId)
+      .sort();
+  }
+
   findInviteByCode(inviteCode) {
     const normalized = normalizeInviteCode(inviteCode);
     for (const invite of this.invites.values()) {
@@ -364,4 +371,33 @@ test('integration happy path: coach signup -> invite -> validate -> player signu
   assert.equal(join.data.status, 'joined');
   assert.equal(join.data.team_id, coachBootstrap.data.team_id);
   assert.equal(engine.memberships.size, 1);
+});
+
+test('player registration appears on the registering coach roster only', async () => {
+  const engine = new FakeInviteEngine();
+  const teamA = await setupCoachWithInvite(engine, { maxUses: 5 });
+  const teamB = await bootstrapCoachSignup({
+    callRpc: (fn, params) => engine.callRpc(fn, params),
+    coachUserId: 'coach-b@shotlab.app',
+    teamName: 'Warriors',
+    inviteTtlHours: 24,
+    maxUses: 5,
+  });
+
+  const context = await startInviteContext({
+    callRpc: (fn, params) => engine.callRpc(fn, params),
+    subjectKey: 'new.player@shotlab.app',
+    inviteCode: teamA.invite_code,
+  });
+  const join = await confirmInviteContext({
+    callRpc: (fn, params) => engine.callRpc(fn, params),
+    userId: 'new.player@shotlab.app',
+    subjectKey: 'new.player@shotlab.app',
+    joinContextToken: context.data.join_context_token,
+  });
+
+  assert.equal(join.ok, true);
+  assert.equal(join.data.status, 'joined');
+  assert.deepEqual(engine.getRosterForTeam(teamA.team_id), ['new.player@shotlab.app']);
+  assert.deepEqual(engine.getRosterForTeam(teamB.data.team_id), []);
 });
