@@ -56,7 +56,29 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
   });
 
   const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
+  let data = null;
+  if (text) {
+    try {
+      data = JSON.parse(text);
+    } catch {
+      if (!response.ok) {
+        return {
+          data: null,
+          error: {
+            code: "invalid_json_error_response",
+            message: "Supabase returned an invalid error payload.",
+          },
+        };
+      }
+      return {
+        data: null,
+        error: {
+          code: "invalid_json_success_response",
+          message: "Supabase returned an invalid success payload.",
+        },
+      };
+    }
+  }
 
   if (!response.ok) {
     return {
