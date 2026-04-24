@@ -947,6 +947,20 @@ const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return;a
 const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)),setScRsvps);trackEvent("sc_rsvp_removed",{sessionId:sid});}else{await P("sl:sc-rsvps",[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setScRsvps);trackEvent("sc_rsvp_added",{sessionId:sid});}};
 const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:sc-logs",[{...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name},...scLogs],setScLogs)};
 const toggleLeaderboardVisibility=async()=>{if(!user||user.role!=="player")return;const np=players.map(p=>p.email===user.email?{...p,hideFromLeaderboards:!(p.hideFromLeaderboards===true)}:p);await P("sl:players",np,setPlayers);const updated=np.find(p=>p.email===user.email);if(updated)setUser(prev=>prev?{...prev,hideFromLeaderboards:updated.hideFromLeaderboards===true}:prev)};
+useEffect(()=>{
+if(view!=="coach"||!user?.teamId)return;
+let cancelled=false;
+const refreshScores=async()=>{
+const latest=await DB.get("sl:scores");
+if(cancelled||!Array.isArray(latest))return;
+setScores(latest.map(s=>({...s,playerId:s.playerId||s.email,teamId:s.teamId||null,src:s.src||"home"})));
+};
+refreshScores();
+const pollId=setInterval(refreshScores,15000);
+const onFocus=()=>{refreshScores();};
+window.addEventListener("focus",onFocus);
+return()=>{cancelled=true;clearInterval(pollId);window.removeEventListener("focus",onFocus);};
+},[view,user?.teamId]);
 const saveTeamBranding=async(nextBranding)=>{
 if(user?.role!=="coach"||!user?.teamId)return{ok:false,err:"Not authorized"};
 const team=teams.find(t=>t.id===user.teamId);
