@@ -78,11 +78,11 @@ if (!fs.existsSync(envPath)) {
 const port = 4173;
 const available = await checkPortAvailable(port);
 if (available) {
-  log('ok', `Port ${port} is available.`);
+  log('ok', `Preferred port ${port} is available.`);
 } else {
-  log('bad', `Port ${port} is already in use. Stop the other process or choose a different port.`);
+  log('warn', `Preferred port ${port} is already in use. Vite will auto-pick the next available port.`);
 }
 
 console.log('\nRecommended startup command for container/remote environments:');
 console.log('  npm run dev:agent');
-console.log('Then open: http://localhost:4173/');
+console.log('Then open the exact URL printed by Vite (for example http://localhost:4173/ or http://localhost:4174/).');
