@@ -1,13 +1,10 @@
 import { callRpc, readUserId } from "../../_utils/supabase.js";
 import { logEvent } from "../../_utils/invite.js";
 import { bootstrapCoachSignup } from "../../_utils/inviteFlowCore.js";
-import { requireApiToken } from "../../_utils/security.js";
 import { recordTeamJoinEvent, TEAM_JOIN_EVENTS } from "../../_utils/teamJoinTelemetry.js";
 
 export async function onRequestPost(context) {
   const { request, env } = context;
-  const auth = requireApiToken(request, env);
-  if (!auth.ok) return Response.json({ error: auth.error }, { status: auth.status });
   const userId = readUserId(request);
   const body = await request.json().catch(() => ({}));
   const teamName = String(body?.team_name || "").trim();
