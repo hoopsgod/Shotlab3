@@ -4,17 +4,49 @@
 
 1. Install dependencies:
    - `npm install`
-2. Create a `.env` file in the project root with:
+2. (Optional but recommended) run the diagnostics checker:
+   - `npm run doctor`
+3. Create a `.env` file in the project root with:
    - `VITE_SUPABASE_URL=...`
    - `VITE_SUPABASE_ANON_KEY=...`
-3. Start the app:
-   - `npm run dev`
+4. Start the app:
+   - local machine: `npm run dev`
+   - container/remote workspace: `npm run dev:agent`
+5. Open:
+   - `http://localhost:4173/` when using `dev:agent`
 
 > `.env` is intentionally gitignored, so each environment (local machine, CI, Cloudflare Pages) must provide these values.
 
+## Why the app may appear to “not open”
+
+Most startup issues in this project come from one of these:
+
+1. **Wrong start command for remote/container setup**
+   - `npm run dev` binds to localhost by default.
+   - If you are using a remote IDE/container, use `npm run dev:agent` so Vite binds to `0.0.0.0:4173`.
+2. **Port conflict**
+   - If 4173 is already in use, Vite will not start with `--strictPort`.
+3. **Missing dependencies**
+   - `node_modules` not installed or corrupted.
+4. **Supabase env vars missing**
+   - The UI can still load, but backend calls will fail and can make the app look broken.
+
+Use `npm run doctor` to check all of the above quickly.
+
+## Run/fix plan (recommended order)
+
+1. `npm install`
+2. `npm run doctor`
+3. `npm run dev:agent`
+4. Open `http://localhost:4173/`
+5. If still failing:
+   - run `npm run build` (compile-time check)
+   - run `npm test` (behavioral check)
+   - inspect browser console for runtime errors
+
 ## If the app won't load
 
-- Confirm Vite starts without errors: `npm run dev`.
+- Confirm Vite starts without errors: `npm run dev:agent`.
 - Open browser devtools and check for runtime errors related to missing Supabase config.
 - Verify both required variables are present and non-empty:
   - `VITE_SUPABASE_URL`
