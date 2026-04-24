@@ -10,8 +10,9 @@
     "test": "node --test tests/**/*.test.mjs",
     "preview": "vite preview",
     "deploy:cloudflare": "npm run build && npx wrangler pages deploy dist",
-    "dev:agent": "vite --host 0.0.0.0 --port 4173 --strictPort",
-    "preview:agent": "vite preview --host 0.0.0.0 --port 4173 --strictPort"
+    "dev:agent": "vite --host 0.0.0.0 --port 4173",
+    "preview:agent": "vite preview --host 0.0.0.0 --port 4173",
+    "doctor": "node scripts/doctor.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",
