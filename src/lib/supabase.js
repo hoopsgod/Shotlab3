@@ -1,5 +1,6 @@
 const baseUrl = import.meta.env.VITE_SUPABASE_URL;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const hasConfig = Boolean(baseUrl && anonKey);
 
 const buildHeaders = ({ upsert = false, onConflict } = {}) => {
   const headers = {
@@ -16,7 +17,29 @@ const buildHeaders = ({ upsert = false, onConflict } = {}) => {
 };
 
 const request = async (table, { method = "GET", body, upsert = false, onConflict } = {}) => {
-  const url = new URL(`${baseUrl}/rest/v1/${table}`);
+  if (!hasConfig) {
+    return {
+      data: null,
+      error: {
+        code: "config_missing",
+        message:
+          "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.",
+      },
+    };
+  }
+
+  let url;
+  try {
+    url = new URL(`${baseUrl}/rest/v1/${table}`);
+  } catch (error) {
+    return {
+      data: null,
+      error: {
+        code: "config_invalid",
+        message: `Supabase URL is invalid: ${String(baseUrl)}`,
+      },
+    };
+  }
 
   if (method === "GET") {
     url.searchParams.set("select", "*");
@@ -46,6 +69,7 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
 };
 
 export const supabase = {
+  isConfigured: hasConfig,
   from(table) {
     return {
       select() {
