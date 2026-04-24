@@ -258,6 +258,15 @@ const HOME_SHOTS_LEADERBOARD_SCOPES = [
   { key: "coaches", label: "COACHES" },
 ];
 
+const HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE = {
+  borderRadius: 999,
+  padding: "7px 12px",
+  fontSize: 10,
+  fontWeight: 700,
+  letterSpacing: "0.08em",
+  cursor: "pointer",
+};
+
 const DB = {
   async get(k) {
     const hasData = (value) => {
@@ -1302,16 +1311,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
             type="button"
             onClick={() => onLeaderboardScopeChange(scopeOption.key)}
             style={{
-              borderRadius: 999,
+              ...HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE,
               border: isActive ? "1px solid var(--accent)" : "1px solid var(--stroke-1)",
               background: isActive ? "var(--accent-soft)" : "var(--surface-1)",
               color: isActive ? "var(--accent)" : "var(--text-2)",
-              padding: "7px 12px",
               fontFamily: FB,
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              cursor: "pointer",
             }}
           >
             {scopeOption.label}
@@ -2424,16 +2428,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             type="button"
             onClick={() => onLeaderboardScopeChange(scopeOption.key)}
             style={{
-              borderRadius: 999,
+              ...HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE,
               border: isActive ? "1px solid var(--accent)" : "1px solid var(--stroke-1)",
               background: isActive ? "var(--accent-soft)" : "var(--surface-1)",
               color: isActive ? "var(--accent)" : "var(--text-2)",
-              padding: "7px 12px",
               fontFamily: FB,
-              fontSize: 10,
-              fontWeight: 700,
-              letterSpacing: "0.08em",
-              cursor: "pointer",
             }}
           >
             {scopeOption.label}
