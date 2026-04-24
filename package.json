@@ -5,12 +5,12 @@
   "description": "Offseason Basketball Development Platform",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0 --port 4173",
     "build": "vite build",
     "test": "node --test tests/**/*.test.mjs",
     "preview": "vite preview",
     "deploy:cloudflare": "npm run build && npx wrangler pages deploy dist",
-    "dev:agent": "vite --host 0.0.0.0 --port 4173",
+    "dev:agent": "npm run dev",
     "preview:agent": "vite preview --host 0.0.0.0 --port 4173",
     "doctor": "node scripts/doctor.mjs"
   },

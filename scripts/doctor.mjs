@@ -84,5 +84,5 @@ if (available) {
 }
 
 console.log('\nRecommended startup command for container/remote environments:');
-console.log('  npm run dev:agent');
+console.log('  npm run dev');
 console.log('Then open the exact URL printed by Vite (for example http://localhost:4173/ or http://localhost:4174/).');
