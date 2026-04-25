@@ -121,10 +121,77 @@ export async function bootstrapCoachSignup({ callRpc, coachUserId, teamName, inv
       },
     };
   } catch (error) {
-    const message = String(error?.message || "").toUpperCase();
+    const rawMessage = String(error?.message || "");
+    const message = rawMessage.toUpperCase();
     if (message.includes("SUPABASE_URL_MISSING") || message.includes("SUPABASE_SERVICE_ROLE_KEY_MISSING")) {
       return { ok: false, status: 500, error: "env_config_mismatch" };
     }
-    return { ok: false, status: 500, error: "team_invite_creation_failed" };
+    if (message.includes("COACH_USER_NOT_FOUND")) {
+      return { ok: false, status: 404, error: "coach_user_not_found", diagnostic_message: "Coach user could not be resolved to a backend UUID." };
+    }
+    const status = Number(error?.status) || 500;
+    const pgCode = String(error?.details?.code || "").toUpperCase();
+
+    if (
+      status === 404 ||
+      pgCode === "PGRST202" ||
+      message.includes("COULD NOT FIND THE FUNCTION") ||
+      (message.includes("FUNCTION") && message.includes("DOES NOT EXIST"))
+    ) {
+      const fnMatch = rawMessage.match(/function\s+([a-zA-Z0-9_.]+)/i);
+      const missingFn = fnMatch?.[1] ? String(fnMatch[1]).replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase() : "";
+      if (missingFn) {
+        return {
+          ok: false,
+          status: 500,
+          error: `missing_function_${missingFn}`,
+          diagnostic_message: `Required function ${missingFn} is not available in Supabase.`,
+        };
+      }
+      return { ok: false, status: 500, error: "missing_rpc", diagnostic_message: "coach_signup_create_team_and_invite is not available in Supabase." };
+    }
+
+    if (
+      pgCode === "42883" ||
+      pgCode === "22P02" ||
+      message.includes("NO FUNCTION MATCHES THE GIVEN NAME AND ARGUMENT TYPES") ||
+      message.includes("WITH THE GIVEN NAME AND ARGUMENT TYPES") ||
+      message.includes("INVALID INPUT SYNTAX FOR TYPE UUID")
+    ) {
+      return { ok: false, status: 500, error: "rpc_argument_mismatch", diagnostic_message: "RPC arguments do not match expected types (coach id must match backend type)." };
+    }
+
+    if (
+      status === 401 ||
+      status === 403 ||
+      pgCode === "42501" ||
+      message.includes("PERMISSION DENIED") ||
+      message.includes("NOT AUTHORIZED")
+    ) {
+      const invalidKey = message.includes("INVALID API KEY") || message.includes("JWT") || message.includes("ANON KEY");
+      if (invalidKey) {
+        return { ok: false, status: 500, error: "invalid_service_key", diagnostic_message: "Supabase service role key is invalid for RPC access." };
+      }
+      return { ok: false, status: 500, error: "rpc_permission_denied", diagnostic_message: "Supabase denied permission to execute coach signup RPC." };
+    }
+
+    if (
+      pgCode === "42P01" ||
+      message.includes("RELATION") && message.includes("DOES NOT EXIST")
+    ) {
+      const relationMatch = rawMessage.match(/relation\s+"?([a-zA-Z0-9_.]+)"?\s+does not exist/i);
+      const missingRelation = relationMatch?.[1] ? String(relationMatch[1]).replace(/[^a-zA-Z0-9_]/g, "_").toLowerCase() : "";
+      if (missingRelation) {
+        return {
+          ok: false,
+          status: 500,
+          error: `table_missing_${missingRelation}`,
+          diagnostic_message: `Required table ${missingRelation} is missing.`,
+        };
+      }
+      return { ok: false, status: 500, error: "table_missing", diagnostic_message: "One or more required team invite tables are missing." };
+    }
+
+    return { ok: false, status: 500, error: "unknown_rpc_failure", diagnostic_message: "Supabase RPC failed for an unknown reason." };
   }
 }
