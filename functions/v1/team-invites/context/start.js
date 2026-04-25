@@ -38,7 +38,19 @@ export async function onRequestPost(context) {
       requestId: request.headers.get("cf-ray") || null,
     });
     const generic = publicValidationError();
-    return Response.json({ error: generic.error }, { status: generic.status });
+    return Response.json(
+      {
+        error: generic.error,
+        normalized_code: result?.debug?.normalizedCode || normalizedCode,
+        lookup_hash_prefix: result?.debug?.lookupHashPrefix || "",
+        hash_source: result?.debug?.hashSource || "public.hash_invite_code(public.normalize_invite_code(code))",
+        lookup_count: Number(result?.debug?.lookupCount || 0),
+        matched_team_id: result?.debug?.matchedTeamId || "",
+        invite_state: result?.debug?.inviteState || "",
+        expires_at: result?.debug?.expiresAt || null,
+      },
+      { status: generic.status },
+    );
   }
 
   logEvent("invite_found", { subjectKey, inviteId: result.data.invite_id, teamId: result.data.team_id, mode: "context_start" });

@@ -43,6 +43,30 @@ class FakeInviteEngine {
   }
 
   async callRpc(fnName, params) {
+    if (fnName === 'lookup_team_invite_by_code') {
+      const normalized = normalizeInviteCode(params.p_invite_code);
+      const invite = this.findInviteByCode(normalized);
+      if (!invite) {
+        return [{
+          normalized_code: normalized,
+          lookup_hash_prefix: normalized ? `hash_${normalized.slice(0, 6)}` : '',
+          lookup_count: 0,
+          team_id: '',
+          invite_state: '',
+          expires_at: null,
+        }];
+      }
+
+      return [{
+        normalized_code: normalized,
+        lookup_hash_prefix: `hash_${normalized.slice(0, 6)}`,
+        lookup_count: 1,
+        team_id: invite.teamId,
+        invite_state: invite.state,
+        expires_at: invite.expiresAt,
+      }];
+    }
+
     if (fnName === 'coach_signup_create_team_and_invite') {
       this.teamSeq += 1;
       this.inviteSeq += 1;
@@ -356,6 +380,8 @@ test('integration happy path: coach signup -> invite -> validate -> player signu
     inviteCode: coachBootstrap.data.invite_code,
   });
   assert.equal(context.ok, true);
+  assert.equal(context.data.lookup_count, 1);
+  assert.equal(context.data.matched_team_id, coachBootstrap.data.team_id);
 
   const playerSignupUserId = 'rookie@shotlab.app';
 
