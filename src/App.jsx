@@ -253,6 +253,7 @@ const TABLE_MAP = {
 };
 const PENDING_JOIN_CONTEXT_KEY = "sl:pending-join-context";
 const HOME_SHOTS_LEADERBOARD_LIMIT = 10;
+const INVITE_CONTEXT_STORAGE_KEY = "sl:invite-context";
 const HOME_SHOTS_LEADERBOARD_SCOPES = [
   { key: "players", label: "PLAYERS" },
   { key: "coaches", label: "COACHES" },
@@ -293,20 +294,29 @@ const DB = {
 
     return hasData(local) ? local : null;
   },
-  async set(k, v) {
+  async set(k, v, options = {}) {
+    const strictRemote = options?.strictRemote === true;
     try {
       await window.storage.set(k, JSON.stringify(v), true);
     } catch (e) {}
     const table = TABLE_MAP[k];
     if (table && Array.isArray(v) && v.length > 0) {
       try {
-        await supabase.from(table).upsert(v, { onConflict: "id" });
-      } catch (e) {}
+        const { error } = await supabase.from(table).upsert(v, { onConflict: "id" });
+        if (error && strictRemote) {
+          throw new Error(error?.message || "remote_persist_failed");
+        }
+      } catch (e) {
+        if (strictRemote) throw e;
+      }
     }
   }
 };
 
-const parseLeaderboardErrorMessage = (errorCode = "") => {
+const parseLeaderboardErrorMessage = (errorCode = "", status = 0, parseMode = "json") => {
+  if (parseMode === "non_json") return "Leaderboard endpoint unavailable (invalid response format).";
+  if (status === 404) return "Leaderboard endpoint missing.";
+  if (status >= 500) return "Leaderboard service error.";
   switch (String(errorCode || "").toLowerCase()) {
     case "unauthorized":
       return "Sign in required.";
@@ -314,11 +324,57 @@ const parseLeaderboardErrorMessage = (errorCode = "") => {
       return "Not allowed for this team.";
     case "team_id_required":
       return "Team id is required.";
+    case "invalid_scope":
+      return "Leaderboard scope is invalid.";
+    case "internal_error":
+      return "Leaderboard service error.";
     case "rate_limited":
       return "Too many requests. Try again shortly.";
     default:
       return "Leaderboard unavailable.";
   }
+};
+const parseCreateTeamErrorMessage=(status=0,errorCode="",parseMode="json")=>{
+if(parseMode==="non_json"||parseMode==="invalid_json")return"Team setup returned an invalid response.";
+if(status===404)return"Team setup endpoint is missing.";
+if(status===401||status===403)return"Coach authorization failed. Please sign in again.";
+if(status>=500&&String(errorCode||"").toLowerCase()==="env_config_mismatch")return"Team setup is not configured on the server.";
+if(status>=500)return"Team setup service error. Please try again.";
+const normalizedErrorCode=String(errorCode||"").toLowerCase();
+if(normalizedErrorCode.startsWith("table_missing_"))return`Team setup is missing backend table: ${normalizedErrorCode.replace("table_missing_","")}.`;
+if(normalizedErrorCode.startsWith("missing_function_"))return`Team setup is missing backend function: ${normalizedErrorCode.replace("missing_function_","")}.`;
+switch(normalizedErrorCode){
+case"team_invite_creation_failed":
+return"Could not create team code.";
+case"unauthorized":
+return"Coach authorization failed. Please sign in again.";
+case"coach_user_not_found":
+return"Coach account was not found in backend auth users.";
+case"missing_rpc":
+return"Team setup RPC is missing on the backend.";
+case"rpc_permission_denied":
+return"Team setup RPC permission was denied.";
+case"table_missing":
+return"Team setup tables are missing on the backend.";
+case"invalid_service_key":
+return"Team setup backend key is invalid.";
+case"rpc_argument_mismatch":
+return"Team setup RPC arguments do not match backend signature.";
+case"schema_type_mismatch_teams_id":
+return"Team setup backend schema has incompatible teams id types.";
+case"unknown_rpc_failure":
+return"Team setup RPC failed unexpectedly.";
+default:
+return"Could not create team.";
+}
+};
+const parseStartupErrorMessage=(error)=>{
+const raw=String(error?.message||error||"").toLowerCase();
+if(raw.includes("supabase")&&raw.includes("missing"))return"Startup failed: Supabase environment configuration is missing.";
+if(raw.includes("config_missing")||raw.includes("config_invalid"))return"Startup failed: Supabase client configuration is invalid.";
+if(raw.includes("unauthorized")||raw.includes("forbidden"))return"Startup failed: access was denied while loading app data.";
+if(raw.includes("network")||raw.includes("failed to fetch"))return"Startup failed: network request failed while loading app data.";
+return"Startup failed due to an unexpected runtime error while loading app data.";
 };
 // Password hashing (simple but not plaintext)
 function hashPw(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return(h>>>0).toString(36)}
@@ -620,10 +676,15 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 function AppInner(){
 const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
 const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
+const[startupError,setStartupError]=useState("");
 const [homeShotsLeaderboard,setHomeShotsLeaderboard]=useState({status:"idle",rows:[],error:""});
 const [homeShotsLeaderboardScope,setHomeShotsLeaderboardScope]=useState("players");
+const [statSyncError,setStatSyncError]=useState("");
+const [dataDebug,setDataDebug]=useState({join:{enteredCode:"",normalizedCode:"",status:"idle",lookupSource:"none",lookupField:"none",lookupHashPrefix:"",lookupHashSource:"",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:"",contextSubjectMatchesUser:"no",update:"idle",error:""},leaderboard:{endpoint:"",httpStatus:null,errorCode:"",resultCount:null,isEmpty:false},createTeam:{teamName:"",endpoint:"",httpStatus:null,errorCode:"",responseSummary:"",teamId:"",joinCode:"",stateUpdated:false,remotePersisted:false,status:"idle"}});
 const leaderboardRequestRef=useRef({teamId:null,requestId:0});
+const bootMark=(stage,detail="")=>{try{window.__shotlabBootMark?.(stage,detail);}catch{}};
 const T=THEMES[theme];
+const dataDebugEnabled=typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("dataDebug")==="1";
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
 const requirePlayer=(actor,teamId,email)=>actor?.role==="player"&&actor.teamId&&actor.teamId===teamId&&actor.email===email;
@@ -644,20 +705,32 @@ leaderboardRequestRef.current={teamId,requestId};
 setHomeShotsLeaderboard(prev=>({...prev,status:"loading",error:""}));
 try{
 const url=`/v1/leaderboards/home-shots?team_id=${encodeURIComponent(teamId)}&limit=${HOME_SHOTS_LEADERBOARD_LIMIT}&scope=${encodeURIComponent(scope)}`;
+setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,endpoint:url,httpStatus:null,errorCode:"",resultCount:null,isEmpty:false}}));
 const res=await fetch(url,{headers:{"x-user-id":user.email}});
-const body=await res.json().catch(()=>({}));
+const contentType=String(res.headers.get("content-type")||"").toLowerCase();
+let body={};
+let parseMode="json";
+if(contentType.includes("application/json")){
+body=await res.json().catch(()=>{parseMode="invalid_json";return{};});
+}else{
+parseMode="non_json";
+await res.text().catch(()=>"");
+}
 if(!res.ok){
-const msg=parseLeaderboardErrorMessage(body?.error);
+const msg=parseLeaderboardErrorMessage(body?.error,res.status,parseMode==="non_json"?"non_json":"json");
 if(leaderboardRequestRef.current.requestId!==requestId)return;
 setHomeShotsLeaderboard({status:"error",rows:[],error:msg});
+setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),resultCount:0,isEmpty:false}}));
 return;
 }
 const rows=Array.isArray(body?.leaderboard)?body.leaderboard:[];
 if(leaderboardRequestRef.current.requestId!==requestId)return;
 setHomeShotsLeaderboard({status:"success",rows,error:""});
+setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:"",resultCount:rows.length,isEmpty:rows.length===0}}));
 }catch{
 if(leaderboardRequestRef.current.requestId!==requestId)return;
 setHomeShotsLeaderboard({status:"error",rows:[],error:"Leaderboard unavailable."});
+setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:null,errorCode:"network_error",resultCount:0,isEmpty:false}}));
 }
 },[user,homeShotsLeaderboardScope]);
 
@@ -708,17 +781,135 @@ const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,progra
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
 await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
 if(sess&&sess.email){const found=m.playersMigrated.find(pl=>pl.email===sess.email);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}}}
-setPendingJoinContext(pendingCtx&&pendingCtx.token?pendingCtx:null);
+setPendingJoinContext(normalizeStoredInviteContext(pendingCtx)||readInviteContextFromStorage()||null);
 return {teams:m.teamsMigrated,players:m.playersMigrated};
-},[migrateData,navigateToPlayerHome]);
+},[migrateData,navigateToPlayerHome,normalizeStoredInviteContext,readInviteContextFromStorage]);
+const P=useCallback(async(k,v,set,options)=>{set(v);await DB.set(k,v,options)},[]);
+const normalizeStoredInviteContext=useCallback((ctx)=>{
+if(!ctx||typeof ctx!=="object")return null;
+const joinContextToken=String(ctx.joinContextToken||ctx.token||"").trim();
+if(!joinContextToken)return null;
+return{
+joinContextToken,
+token:joinContextToken,
+inviteId:String(ctx.inviteId||ctx.invite_id||"").trim(),
+teamId:String(ctx.teamId||ctx.team_id||"").trim(),
+inviteCode:String(ctx.inviteCode||ctx.invite_code||ctx.normalizedCode||"").trim().toUpperCase(),
+subject:String(ctx.subject||ctx.subjectKey||ctx.subject_key||"").trim().toLowerCase(),
+subjectKey:String(ctx.subject||ctx.subjectKey||ctx.subject_key||"").trim().toLowerCase(),
+expiresAt:ctx.expiresAt||ctx.expires_at||null,
+createdAt:Number(ctx.createdAt||Date.now()),
+};
+},[]);
+const readInviteContextFromStorage=useCallback(()=>{
+if(typeof window==="undefined")return null;
+const parse=(raw)=>{if(!raw)return null;try{return JSON.parse(raw);}catch{return null;}};
+const sessionValue=parse(window.sessionStorage?.getItem(INVITE_CONTEXT_STORAGE_KEY)||"");
+const localValue=parse(window.localStorage?.getItem(INVITE_CONTEXT_STORAGE_KEY)||"");
+return normalizeStoredInviteContext(sessionValue||localValue||null);
+},[normalizeStoredInviteContext]);
+const writeInviteContextToStorage=useCallback((ctx)=>{
+if(typeof window==="undefined")return;
+const normalized=normalizeStoredInviteContext(ctx);
+const serialized=JSON.stringify(normalized||null);
+window.sessionStorage?.setItem(INVITE_CONTEXT_STORAGE_KEY,serialized);
+window.localStorage?.setItem(INVITE_CONTEXT_STORAGE_KEY,serialized);
+},[normalizeStoredInviteContext]);
+const savePendingJoinContext=useCallback(async(next)=>{
+const normalized=normalizeStoredInviteContext(next);
+setPendingJoinContext(normalized||null);
+writeInviteContextToStorage(normalized||null);
+await DB.set(PENDING_JOIN_CONTEXT_KEY,normalized||null);
+},[normalizeStoredInviteContext,writeInviteContextToStorage]);
+const startJoinContext=useCallback(async(code,subjectKey)=>{
+const normalizedCode=normalizeJoin(code).replace(/[-\s]+/g,"");
+const normalizedSubject=String(subjectKey||"").trim().toLowerCase();
+setDataDebug(prev=>({...prev,join:{...prev.join,enteredCode:String(code||""),normalizedCode,status:"lookup",lookupSource:"backend_invite_context",lookupField:"team_invites.code_hash",lookupHashPrefix:"",lookupHashSource:"public.hash_invite_code(public.normalize_invite_code(code))",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:normalizedSubject,currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"no",update:"idle",error:""}}));
+if(!normalizedCode)return{ok:false,err:"Enter a valid team code."};
+if(!normalizedSubject)return{ok:false,err:"Enter a valid email."};
+try{
+const res=await fetch("/v1/team-invites/context/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({invite_code:normalizedCode,subject_key:normalizedSubject})});
+const body=await res.json().catch(()=>({}));
+const resolvedNormalizedCode=String(body?.normalized_code||normalizedCode||"");
+const resolvedHashPrefix=String(body?.lookup_hash_prefix||"");
+const resolvedHashSource=String(body?.hash_source||"public.hash_invite_code(public.normalize_invite_code(code))");
+const resolvedLookupCount=Number.isFinite(Number(body?.lookup_count))?Number(body?.lookup_count):0;
+const resolvedMatchedTeamId=String(body?.matched_team_id||body?.team_id||"");
+const resolvedInviteState=String(body?.invite_state||"");
+const resolvedExpiresAt=body?.expires_at||body?.invite_expires_at||null;
+if(!res.ok){
+const safeError=String(body?.error||"lookup_failed");
+setDataDebug(prev=>({...prev,join:{...prev.join,normalizedCode:resolvedNormalizedCode,status:"failed",lookupHashPrefix:resolvedHashPrefix,lookupHashSource:resolvedHashSource,lookupCount:resolvedLookupCount,matchedTeamId:resolvedMatchedTeamId,inviteState:resolvedInviteState,expiresAt:resolvedExpiresAt,inviteContextSaved:"no",inviteContextTokenPresent:"no",inviteContextTeamId:resolvedMatchedTeamId,inviteContextSubject:normalizedSubject,currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"no",error:safeError}}));
+if(safeError==="invalid_or_unavailable_code"||safeError==="invalid_code")return{ok:false,err:"Invalid team code."};
+return{ok:false,err:"Could not validate team code."};
+}
+const ctx={joinContextToken:body.join_context_token,token:body.join_context_token,expiresAt:body.expires_at,subject:normalizedSubject,subjectKey:normalizedSubject,inviteId:body.invite_id,teamId:resolvedMatchedTeamId,inviteCode:resolvedNormalizedCode,createdAt:Date.now()};
+setDataDebug(prev=>({...prev,join:{...prev.join,normalizedCode:resolvedNormalizedCode,status:"validated",lookupHashPrefix:resolvedHashPrefix,lookupHashSource:resolvedHashSource,lookupCount:Number.isFinite(resolvedLookupCount)&&resolvedLookupCount>0?resolvedLookupCount:1,matchedTeamId:resolvedMatchedTeamId,inviteState:resolvedInviteState,expiresAt:resolvedExpiresAt,error:""}}));
+await savePendingJoinContext(ctx);
+setDataDebug(prev=>({...prev,join:{...prev.join,inviteContextSaved:"yes",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:ctx.joinContextToken?"yes":"no",inviteContextTeamId:ctx.teamId||"",inviteContextSubject:ctx.subject||"",currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"yes"}}));
+return{ok:true,context:ctx};
+}catch{
+setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,error:"network_error"}}));
+return{ok:false,err:"Could not validate team code."};
+}
+},[normalizeJoin,savePendingJoinContext]);
+const consumeJoinContext=useCallback(async(actor,clientRequestId=null,contextOverride=null)=>{
+const currentUserEmail=String(actor?.email||"").trim().toLowerCase();
+const resolvedContext=normalizeStoredInviteContext(contextOverride)||normalizeStoredInviteContext(pendingJoinContext)||readInviteContextFromStorage();
+if(!currentUserEmail){
+setDataDebug(prev=>({...prev,join:{...prev.join,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:"",contextSubjectMatchesUser:"no",error:"missing_current_user_email"}}));
+return{ok:false,err:"No validated invite context (missing current user email)."};
+}
+if(!resolvedContext?.joinContextToken){
+setDataDebug(prev=>({...prev,join:{...prev.join,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail,contextSubjectMatchesUser:"no",error:`missing_invite_context:${INVITE_CONTEXT_STORAGE_KEY}`}}));
+return{ok:false,err:`No validated invite context (checked ${INVITE_CONTEXT_STORAGE_KEY}).`};
+}
+const subject=String(resolvedContext.subject||resolvedContext.subjectKey||"").trim().toLowerCase();
+const contextSubjectMatchesUser=subject===currentUserEmail?"yes":"no";
+setDataDebug(prev=>({...prev,join:{...prev.join,inviteContextSaved:"yes",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:resolvedContext.joinContextToken?"yes":"no",inviteContextTeamId:resolvedContext.teamId||"",inviteContextSubject:subject||"",currentUserEmail,contextSubjectMatchesUser}}));
+if(contextSubjectMatchesUser!=="yes")return{ok:false,err:"Invite context is tied to a different email."};
+try{
+const res=await fetch("/v1/team-memberships/confirm-context",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":actor.email},body:JSON.stringify({join_context_token:resolvedContext.joinContextToken,subject_key:subject,client_request_id:clientRequestId||genId("join")})});
+const body=await res.json().catch(()=>({}));
+if(!res.ok)return{ok:false,err:body?.error||"Could not join team."};
+await savePendingJoinContext(null);
+return{ok:true,teamId:body.team_id||resolvedContext.teamId,status:body.status||"joined"};
+}catch{
+return{ok:false,err:"Could not join team."};
+}
+},[pendingJoinContext,normalizeStoredInviteContext,readInviteContextFromStorage,savePendingJoinContext]);
 
 // Load persisted data + restore session
-useEffect(()=>{(async()=>{await hydratePersistedData();setReady(true)})()},[hydratePersistedData]);
 useEffect(()=>{
-if(!ready||!user||user.role!=="player"||user.teamId||!pendingJoinContext?.token)return;
 let canceled=false;
 (async()=>{
-const r=await consumeJoinContext(user);
+try{
+bootMark("hydration_started");
+await hydratePersistedData();
+bootMark("hydration_data_loaded");
+}catch(error){
+if(canceled)return;
+bootMark("hydration_failed",String(error?.message||error||"unknown"));
+setStartupError(parseStartupErrorMessage(error));
+}finally{
+if(!canceled)setReady(true);
+}
+})();
+return()=>{canceled=true;};
+},[hydratePersistedData]);
+useEffect(()=>{
+if(ready){
+bootMark("app_ready");
+window.dispatchEvent(new CustomEvent("shotlab:app-ready"));
+}
+},[ready]);
+useEffect(()=>{
+if(!ready||!user||user.role!=="player"||user.teamId)return;
+const savedInviteContext=normalizeStoredInviteContext(pendingJoinContext)||readInviteContextFromStorage();
+if(!savedInviteContext?.joinContextToken)return;
+let canceled=false;
+(async()=>{
+const r=await consumeJoinContext(user,null,savedInviteContext);
 if(canceled||!r.ok||!r.teamId)return;
 const np=players.map(p=>p.email===user.email?{...p,teamId:r.teamId}:p);
 await P("sl:players",np,setPlayers);
@@ -732,43 +923,8 @@ navigateToPlayerHome();
 setView("player");
 })();
 return()=>{canceled=true;};
-},[ready,user,pendingJoinContext,consumeJoinContext,players,playerProfiles,P,navigateToPlayerHome]);
+},[ready,user,pendingJoinContext,consumeJoinContext,players,playerProfiles,P,navigateToPlayerHome,normalizeStoredInviteContext,readInviteContextFromStorage]);
 
-const P=useCallback(async(k,v,set)=>{set(v);await DB.set(k,v)},[]);
-const savePendingJoinContext=useCallback(async(next)=>{
-setPendingJoinContext(next||null);
-await DB.set(PENDING_JOIN_CONTEXT_KEY,next||null);
-},[]);
-const startJoinContext=useCallback(async(code,subjectKey)=>{
-const normalizedCode=normalizeJoin(code).replace(/[-\s]+/g,"");
-const normalizedSubject=String(subjectKey||"").trim().toLowerCase();
-if(!normalizedCode)return{ok:false,err:"Enter a valid team code."};
-if(!normalizedSubject)return{ok:false,err:"Enter a valid email."};
-try{
-const res=await fetch("/v1/team-invites/context/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({invite_code:normalizedCode,subject_key:normalizedSubject})});
-const body=await res.json().catch(()=>({}));
-if(!res.ok)return{ok:false,err:body?.error||"Could not validate team code."};
-const ctx={token:body.join_context_token,expiresAt:body.expires_at,subjectKey:normalizedSubject,inviteId:body.invite_id,createdAt:Date.now()};
-await savePendingJoinContext(ctx);
-return{ok:true,context:ctx};
-}catch{
-return{ok:false,err:"Could not validate team code."};
-}
-},[normalizeJoin,savePendingJoinContext]);
-const consumeJoinContext=useCallback(async(actor,clientRequestId=null)=>{
-if(!actor?.email||!pendingJoinContext?.token)return{ok:false,err:"No validated invite context."};
-const subject=String(pendingJoinContext.subjectKey||"").trim().toLowerCase();
-if(subject!==String(actor.email||"").trim().toLowerCase())return{ok:false,err:"Invite context is tied to a different email."};
-try{
-const res=await fetch("/v1/team-memberships/confirm-context",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":actor.email},body:JSON.stringify({join_context_token:pendingJoinContext.token,subject_key:subject,client_request_id:clientRequestId||genId("join")})});
-const body=await res.json().catch(()=>({}));
-if(!res.ok)return{ok:false,err:body?.error||"Could not join team."};
-await savePendingJoinContext(null);
-return{ok:true,teamId:body.team_id,status:body.status||"joined"};
-}catch{
-return{ok:false,err:"Could not join team."};
-}
-},[pendingJoinContext,savePendingJoinContext]);
 // Auth with hashed passwords
 const register=async(email,password,name,role)=>{
 const existing=players.find(p=>p.email===email);
@@ -865,29 +1021,77 @@ DB.set("sl:session",null);setUser(null);setView("auth");
 const createTeam=async(name,meta={})=>{
 if(!user||user.role!=="coach")return{ok:false,err:"Not authorized"};
 if(teams.some(t=>t.ownerCoachId===user.email))return{ok:false,err:"Team already exists"};
-const code=generateJoinCode(teams.map(t=>t.joinCode));
-const nt={id:genId("team"),name:san(name)||"Team",school:san(meta.school||""),level:san(meta.level||""),ownerCoachId:user.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
+const endpoint="/v1/coach-signup/bootstrap";
+setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,teamName:String(name||""),endpoint,status:"request_start",httpStatus:null,errorCode:"",responseSummary:"",teamId:"",joinCode:"",stateUpdated:false,remotePersisted:false}}));
+let bootstrapBody={};
+let bootstrapStatus=0;
+try{
+const bootstrapRes=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({team_name:san(name)||"Team"})});
+bootstrapStatus=bootstrapRes.status;
+const contentType=String(bootstrapRes.headers.get("content-type")||"").toLowerCase();
+let parseMode="json";
+if(contentType.includes("application/json")){
+bootstrapBody=await bootstrapRes.json().catch(()=>{parseMode="invalid_json";return{};});
+}else{
+parseMode="non_json";
+await bootstrapRes.text().catch(()=>"");
+}
+const errorCode=String(bootstrapBody?.error||"");
+setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,httpStatus:bootstrapStatus,errorCode:errorCode||parseMode,responseSummary:bootstrapRes.ok?`invite:${Boolean(bootstrapBody?.invite_code)} team:${Boolean(bootstrapBody?.team_id)}`:`error:${errorCode||parseMode}`,status:bootstrapRes.ok?"response_ok":"response_error"}}));
+if(!bootstrapRes.ok)return{ok:false,err:parseCreateTeamErrorMessage(bootstrapStatus,errorCode,parseMode)};
+}catch{
+setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,httpStatus:bootstrapStatus||null,errorCode:"network_error",responseSummary:"request_failed",status:"request_failed"}}));
+return{ok:false,err:"Network error while creating team."};
+}
+const code=normalizeJoin(bootstrapBody?.invite_code||"");
+const teamId=String(bootstrapBody?.team_id||"").trim();
+if(!code||!teamId){
+setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,errorCode:"invalid_response_shape",responseSummary:"missing team_id/invite_code",status:"response_invalid"}}));
+return{ok:false,err:"Team setup response was incomplete."};
+}
+const nt={id:teamId,name:san(name)||"Team",school:san(meta.school||""),level:san(meta.level||""),ownerCoachId:user.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
 await P("sl:teams",[...teams,nt],setTeams);
 const np=players.map(p=>p.email===user.email?{...p,teamId:nt.id}:p);
 await P("sl:players",np,setPlayers);
 setUser({...user,teamId:nt.id});setView("coach");
+setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,teamId,joinCode:code,stateUpdated:true,remotePersisted:true,status:"success"}}));
 return{ok:true,team:nt};
 };
 const joinTeam=async(code)=>{
 if(!user||user.role!=="player")return{ok:false,err:"Not authorized"};
-const ctx=await startJoinContext(code,user.email);
-if(!ctx.ok)return{ok:false,err:ctx.err||"Invalid team code."};
-const joined=await consumeJoinContext(user);
-if(!joined.ok)return{ok:false,err:joined.err||"Could not join team."};
-if(user.teamId===joined.teamId){navigateToPlayerHome();setView("player");return{ok:true,alreadyJoined:true};}
-const np=players.map(p=>p.email===user.email?{...p,teamId:joined.teamId}:p);
+const normalizedCode=normalizeJoin(code).replace(/[-\s]+/g,"");
+setDataDebug(prev=>({...prev,join:{...prev.join,enteredCode:String(code||""),normalizedCode,status:"lookup",lookupSource:"backend_invite_context",lookupField:"team_invites.code_hash",lookupHashPrefix:"",lookupHashSource:"public.hash_invite_code(public.normalize_invite_code(code))",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:String(user?.email||"").trim().toLowerCase(),contextSubjectMatchesUser:"no",update:"idle",error:""}}));
+let resolvedTeamId=null;
+const savedInviteContext=normalizeStoredInviteContext(pendingJoinContext)||readInviteContextFromStorage();
+let activeContext=savedInviteContext;
+const normalizedUserEmail=String(user.email||"").trim().toLowerCase();
+const canUseSavedContext=Boolean(activeContext?.joinContextToken)&&String(activeContext?.subject||activeContext?.subjectKey||"").trim().toLowerCase()===normalizedUserEmail&&(!normalizedCode||!String(activeContext?.inviteCode||"").trim()||String(activeContext?.inviteCode||"").trim()===normalizedCode);
+if(!canUseSavedContext){
+const ctx=await startJoinContext(normalizedCode,user.email);
+if(!ctx.ok){
+setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,error:ctx.err||"invalid_code"}}));
+return{ok:false,err:ctx.err||"Invalid team code."};
+}
+activeContext=ctx.context||null;
+}
+const joined=await consumeJoinContext(user,null,activeContext);
+if(!joined.ok){
+setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,error:joined.err||"join_failed"}}));
+return{ok:false,err:joined.err||"Could not join team."};
+}
+resolvedTeamId=joined.teamId;
+setDataDebug(prev=>({...prev,join:{...prev.join,status:"backend_match",lookupCount:1,matchedTeamId:resolvedTeamId}}));
+if(!resolvedTeamId)return{ok:false,err:"Could not resolve team."};
+if(user.teamId===resolvedTeamId){navigateToPlayerHome();setView("player");return{ok:true,alreadyJoined:true};}
+const np=players.map(p=>p.email===user.email?{...p,teamId:resolvedTeamId}:p);
 await P("sl:players",np,setPlayers);
-const hasProfile=playerProfiles.some(pp=>pp.userId===user.email&&pp.teamId===joined.teamId);
+const hasProfile=playerProfiles.some(pp=>pp.userId===user.email&&pp.teamId===resolvedTeamId);
 if(!hasProfile){
 const parts=(user.name||"Player").trim().split(/\s+/);
-await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:user.email,teamId:joined.teamId,firstName:parts[0]||"Player",lastName:parts.slice(1).join(" "),createdAt:Date.now()}],setPlayerProfiles);
+await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:user.email,teamId:resolvedTeamId,firstName:parts[0]||"Player",lastName:parts.slice(1).join(" "),createdAt:Date.now()}],setPlayerProfiles);
 }
-setUser({...user,teamId:joined.teamId});navigateToPlayerHome();setView("player");
+setUser({...user,teamId:resolvedTeamId});navigateToPlayerHome();setView("player");
+setDataDebug(prev=>({...prev,join:{...prev.join,status:"joined",update:"success",error:""}}));
 return{ok:true};
 };
 const addRosterPlayer=async(data)=>{
@@ -928,7 +1132,19 @@ const code=generateJoinCode(teams.filter(x=>x.id!==teamId).map(x=>x.joinCode));
 await P("sl:teams",teams.map(tm=>tm.id===teamId?{...tm,joinCode:code,joinCodeUpdatedAt:Date.now()}:tm),setTeams);
 return{ok:true,joinCode:code};
 };
-const addScore=async(drillId,score,src="home")=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:scores",[...scores,{email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,drillId,score,date:todayStr(),ts:Date.now(),src}],setScores);trackEvent("score_logged",{drillId,score,src})};
+const addScore=async(drillId,score,src="home")=>{
+if(!requirePlayer(user,user?.teamId,user?.email))return;
+try{
+const nextScores=[...scores,{id:genId("score"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,drillId,score,date:todayStr(),ts:Date.now(),src}];
+await P("sl:scores",nextScores,setScores,{strictRemote:true});
+setStatSyncError("");
+trackEvent("score_logged",{drillId,score,src});
+await fetchHomeShotsLeaderboard(user.teamId,homeShotsLeaderboardScope);
+}catch(e){
+setStatSyncError("Could not save score to team dashboard. Please try again.");
+trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unknown")});
+}
+};
 const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
 const addDrill=async(drill)=>{if(user?.role!=="coach")return;await P("sl:drills",[...drills,{...drill,id:Date.now()}],setDrills)};
 const removeDrill=async(id)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.filter(d=>d.id!==id),setDrills)};
@@ -939,7 +1155,19 @@ const addEvent=async ev=>{if(user?.role!=="coach"||!user.teamId)return;await P("
 const removeEvent=async id=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:events",events.filter(e=>!(e.id===id&&e.teamId===user.teamId)),setEvents);await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===id&&r.teamId===user.teamId)),setRsvps)};
 const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps)};
 const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)return;if(rsvps.find(r=>r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId))return;await P("sl:rsvps",[...rsvps,{eventId:eid,email,playerId:email,teamId:user.teamId,name,ts:Date.now()}],setRsvps)};
-const addShotLog=async(made,date)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:shotlogs",[...shotLogs,{email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,made,date,ts:Date.now()}],setShotLogs);trackEvent("shot_log_added",{made,date})};
+const addShotLog=async(made,date)=>{
+if(!requirePlayer(user,user?.teamId,user?.email))return;
+try{
+const nextLogs=[...shotLogs,{id:genId("shotlog"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,made,date,ts:Date.now()}];
+await P("sl:shotlogs",nextLogs,setShotLogs,{strictRemote:true});
+setStatSyncError("");
+trackEvent("shot_log_added",{made,date});
+await fetchHomeShotsLeaderboard(user.teamId,homeShotsLeaderboardScope);
+}catch(e){
+setStatSyncError("Could not save home shots to team dashboard. Please try again.");
+trackEvent("shot_log_failed",{made,date,error:String(e?.message||"unknown")});
+}
+};
 const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",[...challenges,{...ch,id:Date.now(),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges);trackEvent("challenge_created",{to:ch.to||null})};
 const respondChallenge=async(id,score)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",challenges.map(c=>c.id===id&&c.teamId===user.teamId&&c.to===user.email?{...c,respScore:score,respTs:Date.now(),status:score>c.score?"won":score===c.score?"tied":"lost"}:c),setChallenges)};
 const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setScSessions);trackEvent("sc_session_created",{sport:s.sport||""})};
@@ -1021,13 +1249,17 @@ fetchHomeShotsLeaderboard(user.teamId,homeShotsLeaderboardScope);
 },[ready,user?.teamId,view,homeShotsLeaderboardScope,fetchHomeShotsLeaderboard]);
 
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
+if(startupError)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:520,background:CARD_BG,border:`1px solid rgba(255,69,69,0.45)`,borderRadius:16,padding:20}}><div style={{fontFamily:FD,color:"#FF8B8B",fontSize:20,letterSpacing:2,marginBottom:8}}>STARTUP ERROR</div><div style={{fontFamily:FB,color:"#FFB5B5",fontSize:13,lineHeight:1.55}}>{startupError}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:12}}>Check deployment environment variables and network access, then reload.</div><button onClick={()=>window.location.reload()} className="btn-v cta-primary" style={{marginTop:14}}>RELOAD</button></div></div></>;
+
+const dataDebugPanel=dataDebugEnabled?<div style={{position:"fixed",right:12,bottom:12,zIndex:60,width:"min(360px, calc(100vw - 24px))",maxHeight:"45vh",overflow:"auto",background:"rgba(8,8,8,0.94)",border:"1px solid rgba(255,255,255,0.18)",borderRadius:10,padding:10,fontFamily:"system-ui,-apple-system,Segoe UI,Roboto,sans-serif",fontSize:11,color:"#E5E7EB"}}><div style={{fontWeight:700,letterSpacing:"0.06em",marginBottom:6,color:"#C8FF1A"}}>DATA DEBUG (?dataDebug=1)</div><div>User: {user?.email||"none"}</div><div>Role: {user?.role||"none"}</div><div>Team ID: {user?.teamId||"none"}</div><div>Team Code: {myTeam?.joinCode||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Create team name: {dataDebug.createTeam.teamName||"none"}</div><div>Create endpoint: {dataDebug.createTeam.endpoint||"none"}</div><div>Create status: {dataDebug.createTeam.status||"none"}</div><div>Create HTTP status: {dataDebug.createTeam.httpStatus==null?"n/a":dataDebug.createTeam.httpStatus}</div><div>Create error code: {dataDebug.createTeam.errorCode||"none"}</div><div>Create response summary: {dataDebug.createTeam.responseSummary||"none"}</div><div>Returned teamId: {dataDebug.createTeam.teamId||"none"}</div><div>Returned joinCode: {dataDebug.createTeam.joinCode||"none"}</div><div>Coach state updated: {dataDebug.createTeam.stateUpdated?"yes":"no"}</div><div>Remote persisted: {dataDebug.createTeam.remotePersisted?"yes":"no"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Join code entered: {dataDebug.join.enteredCode||"none"}</div><div>Normalized code: {dataDebug.join.normalizedCode||"none"}</div><div>Lookup source: {dataDebug.join.lookupSource}</div><div>Lookup field: {dataDebug.join.lookupField}</div><div>Lookup hash prefix: {dataDebug.join.lookupHashPrefix||"none"}</div><div>Lookup hash source: {dataDebug.join.lookupHashSource||"none"}</div><div>Join status: {dataDebug.join.status}</div><div>Lookup count: {dataDebug.join.lookupCount==null?"n/a":dataDebug.join.lookupCount}</div><div>Matched teamId: {dataDebug.join.matchedTeamId||"none"}</div><div>Invite state: {dataDebug.join.inviteState||"none"}</div><div>Invite expiresAt: {dataDebug.join.expiresAt||"none"}</div><div>Invite context saved: {dataDebug.join.inviteContextSaved||"no"}</div><div>Invite context storage key: {dataDebug.join.inviteContextStorageKey||"none"}</div><div>Invite context token present: {dataDebug.join.inviteContextTokenPresent||"no"}</div><div>Invite context teamId: {dataDebug.join.inviteContextTeamId||"none"}</div><div>Invite context subject: {dataDebug.join.inviteContextSubject||"none"}</div><div>Current user email: {dataDebug.join.currentUserEmail||"none"}</div><div>Context subject matches user: {dataDebug.join.contextSubjectMatchesUser||"no"}</div><div>Profile update: {dataDebug.join.update}</div><div>Join error: {dataDebug.join.error||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Leaderboard endpoint: {dataDebug.leaderboard.endpoint||"none"}</div><div>HTTP status: {dataDebug.leaderboard.httpStatus==null?"n/a":dataDebug.leaderboard.httpStatus}</div><div>Error code: {dataDebug.leaderboard.errorCode||"none"}</div><div>Result count: {dataDebug.leaderboard.resultCount==null?"n/a":dataDebug.leaderboard.resultCount}</div><div>Empty data: {dataDebug.leaderboard.isEmpty?"yes":"no"}</div></div>:null;
 
 return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)}/></div>}
-{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} leaderboardScope={homeShotsLeaderboardScope} onLeaderboardScopeChange={setHomeShotsLeaderboardScope} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,homeShotsLeaderboardScope)}/></div>}
+{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} leaderboardScope={homeShotsLeaderboardScope} onLeaderboardScopeChange={setHomeShotsLeaderboardScope} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,homeShotsLeaderboardScope)} statSyncError={statSyncError}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} leaderboardScope={homeShotsLeaderboardScope} onLeaderboardScopeChange={setHomeShotsLeaderboardScope} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,homeShotsLeaderboardScope)}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
+{dataDebugPanel}
 </TeamBrandingProvider>;
 }
 // ═══════════════════════════════════════
@@ -1141,7 +1373,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 // ═══════════════════════════════════════
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
-function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,leaderboardScope,onLeaderboardScopeChange,refreshHomeShotsLeaderboard}){
+function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,leaderboardScope,onLeaderboardScopeChange,refreshHomeShotsLeaderboard,statSyncError=""}){
 const canAccessTab=useCallback((nextTab)=>{
   if(nextTab==="players")return u.isCoach;
   if(nextTab==="duels")return !u.isCoach;
@@ -1229,6 +1461,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Player navigation"><div className="nav-title">PLAYER DASHBOARD</div>{playerNavItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>switchTab(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
 <main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
 <BrandBackdrop/>
+{statSyncError&&<div style={{position:"relative",zIndex:2,margin:"10px 12px 0",padding:"10px 12px",borderRadius:10,border:"1px solid rgba(255,69,69,0.45)",background:"rgba(255,69,69,0.10)",color:"#FFB5B5",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.02em"}}>{statSyncError}</div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
 {/* Badge Reveal Overlay */}
