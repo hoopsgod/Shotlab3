@@ -13,6 +13,7 @@ class FakeInviteEngine {
     this.invites = new Map();
     this.sessions = new Map();
     this.memberships = new Map();
+    this.userUuidByIdentifier = new Map();
   }
 
   now() {
@@ -23,6 +24,21 @@ class FakeInviteEngine {
     return `${prefix}-${n}`;
   }
 
+  ensureUserUuid(identifier) {
+    const normalized = String(identifier || '').trim().toLowerCase();
+    if (!normalized) return '';
+    const existing = this.userUuidByIdentifier.get(normalized);
+    if (existing) return existing;
+    const hex = Array.from(normalized)
+      .map((ch) => ch.codePointAt(0).toString(16).padStart(2, '0'))
+      .join('')
+      .slice(0, 32)
+      .padEnd(32, '0');
+    const uuid = `${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20, 32)}`;
+    this.userUuidByIdentifier.set(normalized, uuid);
+    return uuid;
+  }
+
   createInviteCode() {
     return `ABCD${String(this.inviteSeq + 1).padStart(4, '0')}`;
   }
@@ -30,7 +46,7 @@ class FakeInviteEngine {
   getRosterForTeam(teamId) {
     return [...this.memberships.values()]
       .filter((membership) => membership.teamId === teamId)
-      .map((membership) => membership.userId)
+      .map((membership) => membership.subjectKey || membership.userId)
       .sort();
   }
 
@@ -43,6 +59,38 @@ class FakeInviteEngine {
   }
 
   async callRpc(fnName, params) {
+    if (fnName === 'resolve_app_user_uuid') {
+      const identifier = String(params.p_identifier || '').trim().toLowerCase();
+      if (!identifier) {
+        return [];
+      }
+      return [{ resolve_app_user_uuid: this.ensureUserUuid(identifier) }];
+    }
+
+    if (fnName === 'lookup_team_invite_by_code') {
+      const normalized = normalizeInviteCode(params.p_invite_code);
+      const invite = this.findInviteByCode(normalized);
+      if (!invite) {
+        return [{
+          normalized_code: normalized,
+          lookup_hash_prefix: normalized ? `hash_${normalized.slice(0, 6)}` : '',
+          lookup_count: 0,
+          team_id: '',
+          invite_state: '',
+          expires_at: null,
+        }];
+      }
+
+      return [{
+        normalized_code: normalized,
+        lookup_hash_prefix: `hash_${normalized.slice(0, 6)}`,
+        lookup_count: 1,
+        team_id: invite.teamId,
+        invite_state: invite.state,
+        expires_at: invite.expiresAt,
+      }];
+    }
+
     if (fnName === 'coach_signup_create_team_and_invite') {
       this.teamSeq += 1;
       this.inviteSeq += 1;
@@ -127,7 +175,7 @@ class FakeInviteEngine {
 
       this.membershipSeq += 1;
       const membershipId = this.randomId('membership', this.membershipSeq);
-      const membership = { id: membershipId, teamId: session.teamId, userId };
+      const membership = { id: membershipId, teamId: session.teamId, userId, subjectKey: subject };
       this.memberships.set(membershipKey, membership);
 
       invite.useCount += 1;
@@ -356,6 +404,8 @@ test('integration happy path: coach signup -> invite -> validate -> player signu
     inviteCode: coachBootstrap.data.invite_code,
   });
   assert.equal(context.ok, true);
+  assert.equal(context.data.lookup_count, 1);
+  assert.equal(context.data.matched_team_id, coachBootstrap.data.team_id);
 
   const playerSignupUserId = 'rookie@shotlab.app';
 
