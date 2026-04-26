@@ -393,10 +393,44 @@ $confirm_ctx$;
 -- Preserve missing_rpc fix by ensuring API roles can execute invite RPCs.
 grant execute on function public.coach_signup_create_team_and_invite(text, text, integer, integer)
   to anon, authenticated, service_role;
+grant execute on function public.lookup_team_invite_by_code(text)
+  to anon, authenticated, service_role;
+grant execute on function public.resolve_app_user_uuid(text)
+  to anon, authenticated, service_role;
 grant execute on function public.resolve_team_invite_context(text, text, integer)
   to anon, authenticated, service_role;
 grant execute on function public.confirm_team_invite_join_from_context(text, text, text, text)
   to anon, authenticated, service_role;
+
+-- Manual verification queries for operators after applying this migration:
+--
+-- 1) Confirm required RPCs exist:
+-- select p.oid::regprocedure as function_signature
+-- from pg_proc p
+-- join pg_namespace n on n.oid = p.pronamespace
+-- where n.nspname = 'public'
+--   and p.proname in (
+--     'coach_signup_create_team_and_invite',
+--     'lookup_team_invite_by_code',
+--     'resolve_team_invite_context',
+--     'confirm_team_invite_join_from_context'
+--   )
+-- order by p.proname, p.oid::regprocedure::text;
+--
+-- 2) Confirm team_id column types are aligned for text-based production ids:
+-- select table_name, column_name, data_type
+-- from information_schema.columns
+-- where table_schema = 'public'
+--   and (
+--     (table_name = 'teams' and column_name = 'id')
+--     or (table_name in (
+--       'team_memberships',
+--       'team_invites',
+--       'invite_join_sessions',
+--       'team_invite_redemptions'
+--     ) and column_name = 'team_id')
+--   )
+-- order by table_name, column_name;
 
 do $$
 begin
