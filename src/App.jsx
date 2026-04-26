@@ -688,7 +688,12 @@ const joinConsumeFlightRef=useRef({active:false,key:"",startedAt:0,lastClearedAt
 const autoJoinAttemptRef=useRef("");
 const bootMark=(stage,detail="")=>{try{window.__shotlabBootMark?.(stage,detail);}catch{}};
 const T=THEMES[theme];
-const dataDebugEnabled=typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("dataDebug")==="1";
+const dataDebugRequested=typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("dataDebug")==="1";
+const dataDebugEnvOverride=String(import.meta.env.VITE_ENABLE_DATA_DEBUG||"").trim().toLowerCase();
+const dataDebugEnvEnabled=dataDebugEnvOverride==="1"||dataDebugEnvOverride==="true"||dataDebugEnvOverride==="yes";
+const dataDebugLocalHost=typeof window!=="undefined"&&["localhost","127.0.0.1","::1"].includes(window.location.hostname);
+const dataDebugSafeMode=Boolean(import.meta.env.DEV||dataDebugLocalHost||(dataDebugEnvEnabled&&user?.role==="coach"));
+const dataDebugEnabled=dataDebugRequested&&dataDebugSafeMode;
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const mapConsumeDiagnostic=(errorCode,status)=>{
 const code=String(errorCode||"").toLowerCase();
