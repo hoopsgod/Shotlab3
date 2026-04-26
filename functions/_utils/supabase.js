@@ -35,6 +35,49 @@ export async function callRpc(env, fnName, params = {}) {
   return json;
 }
 
+async function callRest(env, path, { method = "GET", query = "", body = null, prefer = "return=representation" } = {}) {
+  const { supabaseUrl, serviceRoleKey } = getConfig(env);
+  const response = await fetch(`${supabaseUrl}/rest/v1/${path}${query ? `?${query}` : ""}`, {
+    method,
+    headers: {
+      apikey: serviceRoleKey,
+      Authorization: `Bearer ${serviceRoleKey}`,
+      "Content-Type": "application/json",
+      Prefer: prefer,
+    },
+    ...(body == null ? {} : { body: JSON.stringify(body) }),
+  });
+
+  const text = await response.text();
+  const json = text ? JSON.parse(text) : null;
+  if (!response.ok) {
+    const message = json?.message || json?.hint || `REST_${path}_FAILED`;
+    const error = new Error(message);
+    error.status = response.status;
+    error.details = json;
+    throw error;
+  }
+  return json;
+}
+
+export async function selectRows(env, tableName, query) {
+  return callRest(env, tableName, { method: "GET", query, prefer: "return=representation" });
+}
+
+export async function upsertRows(env, tableName, rows, onConflict = "") {
+  const query = onConflict ? `on_conflict=${encodeURIComponent(onConflict)}` : "";
+  return callRest(env, tableName, {
+    method: "POST",
+    query,
+    body: Array.isArray(rows) ? rows : [rows],
+    prefer: "resolution=merge-duplicates,return=representation",
+  });
+}
+
+export async function updateRows(env, tableName, query, patch) {
+  return callRest(env, tableName, { method: "PATCH", query, body: patch, prefer: "return=representation" });
+}
+
 export function readUserId(request) {
   const userId = request.headers.get("x-user-id") || request.headers.get("x-user-email");
   return userId ? userId.trim() : "";
