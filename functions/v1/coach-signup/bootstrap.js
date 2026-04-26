@@ -34,7 +34,14 @@ export async function onRequestPost(context) {
       result.error === "env_config_mismatch" ? TEAM_JOIN_EVENTS.ENV_CONFIG_MISMATCH : TEAM_JOIN_EVENTS.MEMBERSHIP_INSERT_FAILED,
       { route: "coach-signup/bootstrap", userIdPresent: Boolean(userId), errorCode: result.error, requestId: request.headers.get("cf-ray") || null },
     );
-    return Response.json({ error: result.error }, { status: result.status });
+    return Response.json(
+      {
+        error: result.error,
+        diagnostic_code: result.error,
+        diagnostic_message: result.diagnostic_message || null,
+      },
+      { status: result.status },
+    );
   }
 
   recordTeamJoinEvent(TEAM_JOIN_EVENTS.COACH_INVITE_CREATED, {
