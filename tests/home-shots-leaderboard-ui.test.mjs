@@ -72,3 +72,17 @@ test("leaderboard card renders backend-provided order and rank labels without cl
   assert.match(html, /#2/);
   assert.doesNotMatch(fs.readFileSync(cardFileUrl, "utf8"), /rows\.sort\(/);
 });
+
+test("leaderboard card renders a coach-facing player row with at-home-shots total", () => {
+  const HomeShotsLeaderboardCard = loadCardComponent();
+  const html = renderToStaticMarkup(
+    React.createElement(HomeShotsLeaderboardCard, {
+      status: "success",
+      rows: [{ rank: 1, player_display_name: "Test Player", total_home_shots: 137 }],
+      title: "TOP 10 HOME SHOTS",
+    }),
+  );
+
+  assert.match(html, /TEST PLAYER/);
+  assert.match(html, />137</);
+});

@@ -23,6 +23,23 @@ function seedHomeShots() {
   ];
 }
 
+function saveHomeShotsLog(logStore, { teamId, playerId, email, name, made, date = "2026-04-27" }) {
+  const entry = {
+    id: `shotlog-${logStore.length + 1}`,
+    teamId,
+    team_id: teamId,
+    playerId,
+    player_id: playerId,
+    email,
+    name,
+    made,
+    date,
+    ts: Date.now(),
+  };
+  logStore.push(entry);
+  return entry;
+}
+
 function buildLeaderboardRows(shots) {
   const totals = new Map();
   shots.forEach((entry) => {
@@ -161,6 +178,73 @@ test("e2e: player data only appears on registered team's coach dashboard leaderb
     assert.match(coachTeamAHtml, /AVA/);
     assert.match(coachTeamAHtml, /MIA/);
     assert.doesNotMatch(coachTeamAHtml, /NOAH/);
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test("e2e regression: coach home-shots route + leaderboard card include same-team at-home shots and exclude other teams", async () => {
+  const shotLogs = [];
+  const playerLog = saveHomeShotsLog(shotLogs, {
+    teamId: "team_test_123",
+    playerId: "player_test_123",
+    email: "player@test.example",
+    name: "Test Player",
+    made: 137,
+  });
+  saveHomeShotsLog(shotLogs, {
+    teamId: "team_other_999",
+    playerId: "other_player_1",
+    email: "other@test.example",
+    name: "Other Team Player",
+    made: 222,
+  });
+
+  assert.equal(playerLog.teamId, "team_test_123");
+  assert.equal(playerLog.team_id, "team_test_123");
+  assert.equal(playerLog.playerId, "player_test_123");
+  assert.equal(playerLog.player_id, "player_test_123");
+  assert.equal(playerLog.email, "player@test.example");
+
+  const rpcRequests = [];
+  const originalFetch = global.fetch;
+  global.fetch = async (url, init) => {
+    const body = JSON.parse(init?.body || "{}");
+    rpcRequests.push(body);
+    const rows = buildLeaderboardRows(
+      shotLogs
+        .filter((log) => log.teamId === body.p_team_id)
+        .map((log) => ({ teamId: log.teamId, playerId: log.playerId, name: log.name, made: log.made })),
+    );
+    return new Response(JSON.stringify(rows), { status: 200 });
+  };
+
+  try {
+    const coachRequest = new Request("https://shotlab.test/v1/leaderboards/home-shots?team_id=team_test_123&limit=10", {
+      headers: { "x-user-id": "coach@test.example" },
+    });
+    const res = await onRequestGet({ request: coachRequest, env: ENV });
+    assert.equal(res.status, 200);
+
+    assert.equal(rpcRequests.length, 1);
+    assert.equal(rpcRequests[0].p_team_id, "team_test_123");
+    assert.equal(rpcRequests[0].p_requester_user_id, "coach@test.example");
+
+    const payload = await res.json();
+    assert.deepEqual(payload.leaderboard, [{ rank: 1, player_display_name: "Test Player", total_home_shots: 137 }]);
+
+    const HomeShotsLeaderboardCard = loadCardComponent();
+    const coachHtml = renderToStaticMarkup(
+      React.createElement(HomeShotsLeaderboardCard, { status: "success", rows: payload.leaderboard, title: "TOP 10 HOME SHOTS" }),
+    );
+    assert.match(coachHtml, /TEST PLAYER/);
+    assert.match(coachHtml, />137</);
+    assert.doesNotMatch(coachHtml, /OTHER TEAM PLAYER/);
+
+    const emptyHtml = renderToStaticMarkup(
+      React.createElement(HomeShotsLeaderboardCard, { status: "success", rows: [], title: "TOP 10 HOME SHOTS" }),
+    );
+    assert.match(emptyHtml, /No home shots logged yet\./);
   } finally {
     global.fetch = originalFetch;
   }
