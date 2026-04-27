@@ -1,0 +1,107 @@
+-- Align home shots leaderboard RPC with production text team ids (e.g. team_xxxxx).
+-- Idempotent and non-destructive: preserves summary-table reads and existing trigger pipeline.
+
+drop function if exists public.get_team_home_shots_leaderboard(uuid, text, integer, text);
+drop function if exists public.get_team_home_shots_leaderboard(uuid, text, integer);
+drop function if exists public.get_team_home_shots_leaderboard(text, text, integer);
+
+create or replace function public.get_team_home_shots_leaderboard(
+  p_team_id text,
+  p_requester_user_id text,
+  p_limit integer default 10,
+  p_scope text default 'players'
+)
+returns table(
+  rank integer,
+  player_display_name text,
+  total_home_shots bigint
+)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_limit integer := greatest(1, least(coalesce(p_limit, 10), 10));
+  v_scope text := lower(trim(coalesce(p_scope, 'players')));
+  v_team_id text := nullif(trim(coalesce(p_team_id, '')), '');
+  v_requester_user_id text := trim(coalesce(p_requester_user_id, ''));
+begin
+  if v_team_id is null then
+    raise exception 'TEAM_ID_REQUIRED';
+  end if;
+
+  if v_requester_user_id = '' then
+    raise exception 'REQUESTER_REQUIRED';
+  end if;
+
+  if v_scope not in ('players', 'coaches', 'all') then
+    raise exception 'SCOPE_INVALID';
+  end if;
+
+  if not exists (
+    select 1
+    from team_memberships tm
+    where coalesce(nullif(to_jsonb(tm)->>'team_id', ''), nullif(to_jsonb(tm)->>'teamId', '')) = v_team_id
+      and coalesce(nullif(to_jsonb(tm)->>'user_id', ''), nullif(to_jsonb(tm)->>'userId', '')) = v_requester_user_id
+      and lower(coalesce(to_jsonb(tm)->>'status', '')) = 'active'
+  ) then
+    raise exception 'NOT_AUTHORIZED_FOR_TEAM';
+  end if;
+
+  return query
+  with eligible_participants as (
+    select
+      coalesce(
+        nullif(rec->>'player_id', ''),
+        nullif(rec->>'playerId', ''),
+        nullif(rec->>'email', '')
+      ) as player_id,
+      coalesce(
+        nullif(trim(coalesce(rec->>'name', rec->>'display_name', rec->>'player_name', '')), ''),
+        'Player'
+      ) as player_display_name,
+      lower(coalesce(nullif(rec->>'role', ''), 'player')) as participant_role,
+      coalesce(
+        case when coalesce(rec->>'hideFromLeaderboards', '') in ('true', 'false') then (rec->>'hideFromLeaderboards')::boolean else null end,
+        case when coalesce(rec->>'hide_from_leaderboards', '') in ('true', 'false') then (rec->>'hide_from_leaderboards')::boolean else null end,
+        false
+      ) as is_hidden
+    from (
+      select to_jsonb(p) as rec
+      from players p
+    ) p
+    where coalesce(p.rec->>'team_id', p.rec->>'teamId') = v_team_id
+  ),
+  filtered_participants as (
+    select ep.player_id, ep.player_display_name
+    from eligible_participants ep
+    where ep.is_hidden = false
+      and (
+        (v_scope = 'players' and ep.participant_role <> 'coach')
+        or (v_scope = 'coaches' and ep.participant_role = 'coach')
+        or v_scope = 'all'
+      )
+  ),
+  ranked as (
+    select
+      row_number() over (
+        order by t.total_home_shots desc, ep.player_display_name asc, ep.player_id asc
+      )::integer as rank,
+      ep.player_display_name,
+      t.total_home_shots
+    from team_player_home_shot_totals t
+    join filtered_participants ep on ep.player_id = t.player_id
+    where t.team_id = v_team_id
+      and t.total_home_shots > 0
+  )
+  select r.rank, r.player_display_name, r.total_home_shots
+  from ranked r
+  order by r.rank
+  limit v_limit;
+end;
+$$;
+
+grant execute on function public.get_team_home_shots_leaderboard(text, text, integer, text)
+  to anon, authenticated, service_role;
+
+notify pgrst, 'reload schema';
