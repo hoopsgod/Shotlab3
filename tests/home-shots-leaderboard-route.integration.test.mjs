@@ -39,6 +39,30 @@ test("leaderboard route clamps requested limit to top 10 before RPC", async () =
   }
 });
 
+
+
+test("route forwards text-style production team ids to RPC unchanged", async () => {
+  const requests = [];
+  const originalFetch = global.fetch;
+  global.fetch = async (url, init) => {
+    requests.push({ url: String(url), init });
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+
+  try {
+    const context = makeContext("https://shotlab.test/v1/leaderboards/home-shots?team_id=team_abc123&limit=10", {
+      "x-user-id": "coach@team.test",
+    });
+    const res = await onRequestGet(context);
+    assert.equal(res.status, 200);
+
+    const body = JSON.parse(requests[0].init.body);
+    assert.equal(body.p_team_id, "team_abc123");
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
 test("route preserves backend ranking order (no client-side re-sort)", async () => {
   const backendRows = [
     { rank: 1, player_display_name: "Zoe", total_home_shots: 300 },
