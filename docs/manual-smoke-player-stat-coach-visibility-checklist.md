@@ -12,7 +12,8 @@ Use this in production (or production-like) as a lightweight verification checkl
 8. Open the coach team/dashboard view and verify **At Home Shots** in the **Home Shots leaderboard area** shows the player and the exact unique value (example: `137`) for that team.
 9. Verify **Drill Scores** as a separate check still show the player and unique drill value for that same team.
 10. Confirm data from another team does not appear in either leaderboard view.
-11. Optional cleanup: remove/archive temporary test users and team after verification.
+11. Verify coach Home Shots leaderboard does **not** show the error banner: `Could not load leaderboard.`
+12. Optional cleanup: remove/archive temporary test users and team after verification.
 
 ## Regression intent
 
