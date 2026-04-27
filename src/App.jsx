@@ -33,6 +33,7 @@ import { isDemoMode } from "./lib/demoMode.js";
 import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard } from "./lib/joinConsumeGuard.js";
 
 import { supabase } from "./lib/supabase.js";
+import { buildRemoteRows } from "./lib/remotePersistence.js";
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
 const CYAN = TOKENS.SECONDARY;
@@ -301,11 +302,23 @@ const DB = {
       await window.storage.set(k, JSON.stringify(v), true);
     } catch (e) {}
     const table = TABLE_MAP[k];
-    if (table && Array.isArray(v) && v.length > 0) {
+    const remoteRows = buildRemoteRows(k, v, options);
+    if (table && remoteRows.length > 0) {
       try {
-        const { error } = await supabase.from(table).upsert(v, { onConflict: "id" });
-        if (error && strictRemote) {
-          throw new Error(error?.message || "remote_persist_failed");
+        const { error } = await supabase.from(table).upsert(remoteRows, { onConflict: "id" });
+        if (error) {
+          console.error("[remote-persist] upsert failed", {
+            key: k,
+            table,
+            message: error?.message || "",
+            code: error?.code || "",
+            details: error?.details || "",
+            hint: error?.hint || "",
+            rowCount: remoteRows.length,
+          });
+          if (strictRemote) {
+            throw new Error(error?.message || "remote_persist_failed");
+          }
         }
       } catch (e) {
         if (strictRemote) throw e;
@@ -780,10 +793,10 @@ const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithB
 const profilesExisting=rawPlayerProfiles||[];
 const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null}));
 const teamForEmail=e=>playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null;
-const scoresM=(rawScores||[]).map(s=>({...s,playerId:s.playerId||s.email,teamId:s.teamId||teamForEmail(s.email),src:s.src||"home"}));
+const scoresM=(rawScores||[]).map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||teamForEmail(s.email),drillId:s.drillId||s.drill_id,src:s.src||"home"}));
 const eventsM=(rawEvents||[]).map(e=>({...e,teamId:e.teamId||teamForEmail(e.ownerCoachId)}));
 const rsvpsM=(rawRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
-const shotM=(rawShotLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:l.teamId||teamForEmail(l.email)}));
+const shotM=(rawShotLogs||[]).map(l=>({...l,playerId:l.playerId||l.player_id||l.email,teamId:l.teamId||l.team_id||teamForEmail(l.email),hideFromLeaderboards:l.hideFromLeaderboards===true||l.hide_from_leaderboards===true}));
 const chM=(rawChallenges||[]).map(c=>({...c,teamId:c.teamId||teamForEmail(c.from),playerId:c.playerId||c.from}));
 const scSM=(rawScSessions||[]).map(s=>({...s,teamId:s.teamId||teamForEmail(s.ownerCoachId)}));
 const scRM=(rawScRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
