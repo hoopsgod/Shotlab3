@@ -33,6 +33,7 @@ import { isDemoMode } from "./lib/demoMode.js";
 import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard } from "./lib/joinConsumeGuard.js";
 
 import { supabase } from "./lib/supabase.js";
+import { buildRemoteRows, shouldThrowOnEmptyStrictRemotePayload } from "./lib/remotePersistence.js";
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
 const CYAN = TOKENS.SECONDARY;
@@ -301,11 +302,32 @@ const DB = {
       await window.storage.set(k, JSON.stringify(v), true);
     } catch (e) {}
     const table = TABLE_MAP[k];
-    if (table && Array.isArray(v) && v.length > 0) {
+    const remoteRows = buildRemoteRows(k, v, options);
+    if (shouldThrowOnEmptyStrictRemotePayload({ key: k, rows: v, remoteRows, strictRemote, table })) {
+      console.error("[remote-persist] strict payload empty", {
+        key: k,
+        table,
+        originalRowCount: Array.isArray(v) ? v.length : 0,
+        remoteRowCount: remoteRows.length,
+      });
+      throw new Error("remote_persist_payload_empty");
+    }
+    if (table && remoteRows.length > 0) {
       try {
-        const { error } = await supabase.from(table).upsert(v, { onConflict: "id" });
-        if (error && strictRemote) {
-          throw new Error(error?.message || "remote_persist_failed");
+        const { error } = await supabase.from(table).upsert(remoteRows, { onConflict: "id" });
+        if (error) {
+          console.error("[remote-persist] upsert failed", {
+            key: k,
+            table,
+            message: error?.message || "",
+            code: error?.code || "",
+            details: error?.details || "",
+            hint: error?.hint || "",
+            rowCount: remoteRows.length,
+          });
+          if (strictRemote) {
+            throw new Error(error?.message || "remote_persist_failed");
+          }
         }
       } catch (e) {
         if (strictRemote) throw e;
@@ -780,10 +802,10 @@ const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithB
 const profilesExisting=rawPlayerProfiles||[];
 const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null}));
 const teamForEmail=e=>playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null;
-const scoresM=(rawScores||[]).map(s=>({...s,playerId:s.playerId||s.email,teamId:s.teamId||teamForEmail(s.email),src:s.src||"home"}));
+const scoresM=(rawScores||[]).map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||teamForEmail(s.email),drillId:s.drillId||s.drill_id,src:s.src||"home"}));
 const eventsM=(rawEvents||[]).map(e=>({...e,teamId:e.teamId||teamForEmail(e.ownerCoachId)}));
 const rsvpsM=(rawRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
-const shotM=(rawShotLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:l.teamId||teamForEmail(l.email)}));
+const shotM=(rawShotLogs||[]).map(l=>({...l,playerId:l.playerId||l.player_id||l.email,teamId:l.teamId||l.team_id||teamForEmail(l.email),hideFromLeaderboards:l.hideFromLeaderboards===true||l.hide_from_leaderboards===true}));
 const chM=(rawChallenges||[]).map(c=>({...c,teamId:c.teamId||teamForEmail(c.from),playerId:c.playerId||c.from}));
 const scSM=(rawScSessions||[]).map(s=>({...s,teamId:s.teamId||teamForEmail(s.ownerCoachId)}));
 const scRM=(rawScRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
@@ -1213,9 +1235,15 @@ const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return
 const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)return;if(rsvps.find(r=>r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId))return;await P("sl:rsvps",[...rsvps,{eventId:eid,email,playerId:email,teamId:user.teamId,name,ts:Date.now()}],setRsvps)};
 const addShotLog=async(made,date)=>{
 if(!requirePlayer(user,user?.teamId,user?.email))return;
+const payload={id:genId("shotlog"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,made,date,ts:Date.now()};
 try{
-const nextLogs=[...shotLogs,{id:genId("shotlog"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,made,date,ts:Date.now()}];
-await P("sl:shotlogs",nextLogs,setShotLogs,{strictRemote:true});
+const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify(payload)});
+if(!res.ok){
+let errorCode="persist_failed";
+try{const body=await res.json();errorCode=String(body?.error||errorCode);}catch{}
+throw new Error(errorCode);
+}
+await P("sl:shotlogs",[...shotLogs,payload],setShotLogs,{remoteRows:[]});
 setStatSyncError("");
 trackEvent("shot_log_added",{made,date});
 await fetchHomeShotsLeaderboard(user.teamId,homeShotsLeaderboardScope);
