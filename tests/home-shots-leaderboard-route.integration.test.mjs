@@ -208,3 +208,25 @@ test("invalid scope is rejected", async () => {
   assert.equal(res.status, 400);
   assert.deepEqual(await res.json(), { error: "invalid_scope" });
 });
+
+
+test("leaderboard authorization works when requester email maps to UUID membership", async () => {
+  const originalFetch = global.fetch;
+  const calls = [];
+  global.fetch = async (url, init) => {
+    calls.push({ url: String(url), init });
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+
+  try {
+    const context = makeContext("https://shotlab.test/v1/leaderboards/home-shots?team_id=team-1", {
+      "x-user-id": "player@team.test",
+    });
+    const res = await onRequestGet(context);
+    assert.equal(res.status, 200);
+    const rpcBody = JSON.parse(calls[0].init.body);
+    assert.equal(rpcBody.p_requester_user_id, "player@team.test");
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
