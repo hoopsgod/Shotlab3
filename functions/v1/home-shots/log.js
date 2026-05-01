@@ -1,4 +1,4 @@
-import { readUserId, selectRows, upsertRows } from "../../_utils/supabase.js";
+import { callRpc, readUserId, selectRows, upsertRows } from "../../_utils/supabase.js";
 
 function normalizeIdentity(value) {
   return String(value || "").trim().toLowerCase();
@@ -27,10 +27,23 @@ export async function onRequestPost({ request, env }) {
   if (!Number.isFinite(made) || made < 0) return Response.json({ ok: false, error: "invalid_made" }, { status: 400 });
   if (!date) return Response.json({ ok: false, error: "date_required" }, { status: 400 });
 
+  let resolvedUuid = "";
+  try {
+    const resolved = await callRpc(env, "resolve_app_user_uuid", { p_identifier: requester });
+    const candidate = Array.isArray(resolved) ? resolved[0] : resolved;
+    resolvedUuid = normalizeIdentity(candidate?.user_id || candidate?.resolved_user_id || candidate?.uuid || candidate);
+  } catch (_error) {
+    resolvedUuid = "";
+  }
+
+  const membershipFilters = [
+    `user_id.eq.${encodeURIComponent(requester)}`,
+    ...(resolvedUuid && resolvedUuid !== requester ? [`user_id.eq.${encodeURIComponent(resolvedUuid)}`] : []),
+  ];
   const memberships = await selectRows(
     env,
     "team_memberships",
-    `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&user_id=eq.${encodeURIComponent(requester)}&status=eq.active&limit=1`,
+    `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&status=eq.active&or=(${membershipFilters.join(",")})&limit=1`,
   );
   if (!Array.isArray(memberships) || memberships.length === 0) {
     return Response.json({ ok: false, error: "forbidden" }, { status: 403 });

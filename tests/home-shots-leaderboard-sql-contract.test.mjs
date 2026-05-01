@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const migration = fs.readFileSync(
-  new URL("../migrations/020_home_shots_leaderboard_text_team_id_alignment.sql", import.meta.url),
+  new URL("../migrations/022_home_shots_leaderboard_membership_uuid_resolution.sql", import.meta.url),
   "utf8",
 );
 
@@ -38,4 +38,11 @@ test("SQL contract: RPC grants and schema reload are present", () => {
   assert.match(migration, /grant execute on function public\.get_team_home_shots_leaderboard\(text, text, integer, text\)/);
   assert.match(migration, /to anon, authenticated, service_role/);
   assert.match(migration, /notify pgrst, 'reload schema';/);
+});
+
+
+test("SQL contract: authorization supports raw requester and resolved UUID", () => {
+  assert.match(migration, /resolve_app_user_uuid\(v_requester_user_id\)/);
+  assert.match(migration, /\) = v_requester_user_id/);
+  assert.match(migration, /\) = v_requester_uuid/);
 });
