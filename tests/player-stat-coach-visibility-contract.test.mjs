@@ -4,12 +4,10 @@ import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 
-test('player shot log persistence includes player and team identity', () => {
-  assert.match(
-    source,
-    /const addShotLog=async\(made,date\)=>\{[\s\S]*const nextLogs=\[\.\.\.shotLogs,\{id:genId\("shotlog"\),email:user\.email,playerId:user\.email,teamId:user\.teamId,name:user\.name,made,date,ts:Date\.now\(\)\}\];/,
-  );
-  assert.match(source, /await P\("sl:shotlogs",nextLogs,setShotLogs,\{strictRemote:true\}\);/);
+test('player at-home shots save uses backend endpoint and updates local state only after success', () => {
+  assert.match(source, /const addShotLog=async\(made,date\)=>\{[\s\S]*fetch\("\/v1\/home-shots\/log"/);
+  assert.match(source, /if\(!res\.ok\)throw new Error/);
+  assert.match(source, /setShotLogs\(prev=>\[\.\.\.prev,localLog\]\)/);
 });
 
 test('coach/team scoped data path filters shot logs by active team id', () => {
