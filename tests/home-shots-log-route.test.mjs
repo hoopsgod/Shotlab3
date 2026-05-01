@@ -9,12 +9,17 @@ function ctx(body, headers = {}) {
   return { request: new Request("https://shotlab.test/v1/home-shots/log", { method: "POST", headers: { "content-type": "application/json", ...headers }, body: JSON.stringify(body ?? {}) }), env: ENV };
 }
 
-test("succeeds without x-internal-api-token when x-user-id is active member", async () => {
+test("succeeds when requester email resolves to UUID membership", async () => {
   const calls = [];
   const originalFetch = global.fetch;
   global.fetch = async (url, init) => {
     calls.push({ url: String(url), init });
-    if (String(url).includes("/team_memberships")) return new Response(JSON.stringify([{ id: "m1", status: "active" }]), { status: 200 });
+    if (String(url).includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("153d0eb3-ee14-108e-bcb0-6f5414ff0665"), { status: 200 });
+    if (String(url).includes("/team_memberships")) {
+      assert.match(String(url), /user_id=eq\.p%40x\.com/);
+      assert.match(String(url), /user_id=eq\.153d0eb3-ee14-108e-bcb0-6f5414ff0665/);
+      return new Response(JSON.stringify([{ id: "m1", status: "active" }]), { status: 200 });
+    }
     return new Response(JSON.stringify([{ id: 10, ...JSON.parse(init.body)[0] }]), { status: 201 });
   };
   try {
@@ -22,7 +27,7 @@ test("succeeds without x-internal-api-token when x-user-id is active member", as
     assert.equal(res.status, 200);
     const payload = await res.json();
     assert.equal(payload.ok, true);
-    assert.equal(calls.length, 2);
+    assert.equal(calls.length, 3);
   } finally { global.fetch = originalFetch; }
 });
 
@@ -76,5 +81,19 @@ test("coach leaderboard reads inserted row and excludes other team", async () =>
     const bodyA = await resA.json();
     assert.equal(bodyA.leaderboard[0].player_display_name, "Player A");
     assert.equal(bodyA.leaderboard.some((r) => r.player_display_name === "Other"), false);
+  } finally { global.fetch = originalFetch; }
+});
+
+
+test("succeeds when membership stores raw email", async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async (url, init) => {
+    if (String(url).includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify(null), { status: 200 });
+    if (String(url).includes("/team_memberships")) return new Response(JSON.stringify([{ id: "m1", status: "active" }]), { status: 200 });
+    return new Response(JSON.stringify([{ id: 12, ...JSON.parse(init.body)[0] }]), { status: 201 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 20, date: "2026-05-01" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
   } finally { global.fetch = originalFetch; }
 });
