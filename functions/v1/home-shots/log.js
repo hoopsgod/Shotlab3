@@ -28,15 +28,23 @@ export async function onRequestPost({ request, env }) {
   if (!date) return Response.json({ ok: false, error: "date_required" }, { status: 400 });
 
   const resolvedUserUuid = normalizeIdentity(await callRpc(env, "resolve_app_user_uuid", { p_identifier: requester }).catch(() => ""));
-  const membershipFilter = resolvedUserUuid
-    ? `or=(user_id.eq.${encodeURIComponent(requester)},user_id.eq.${encodeURIComponent(resolvedUserUuid)})`
-    : `user_id.eq.${encodeURIComponent(requester)}`;
-  const memberships = await selectRows(
+  const membershipsByEmail = await selectRows(
     env,
     "team_memberships",
-    `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&${membershipFilter}&status=eq.active&limit=1`,
+    `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&user_id=eq.${encodeURIComponent(requester)}&status=eq.active&limit=1`,
   );
-  if (!Array.isArray(memberships) || memberships.length === 0) {
+  const hasEmailMembership = Array.isArray(membershipsByEmail) && membershipsByEmail.length > 0;
+  let hasUuidMembership = false;
+  if (!hasEmailMembership && resolvedUserUuid) {
+    const membershipsByUuid = await selectRows(
+      env,
+      "team_memberships",
+      `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&user_id=eq.${encodeURIComponent(resolvedUserUuid)}&status=eq.active&limit=1`,
+    );
+    hasUuidMembership = Array.isArray(membershipsByUuid) && membershipsByUuid.length > 0;
+  }
+
+  if (!hasEmailMembership && !hasUuidMembership) {
     return Response.json({ ok: false, error: "forbidden" }, { status: 403 });
   }
 
