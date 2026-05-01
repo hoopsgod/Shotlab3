@@ -19,7 +19,8 @@ test('player-entered stats require durable ids, strict remote persistence, sync 
 
   assert.match(source, /const addShotLog=async\(made,date\)=>\{/);
   assert.match(source, /id:genId\("shotlog"\),email:user\.email,playerId:user\.email,teamId:user\.teamId/);
-  assert.match(source, /await P\("sl:shotlogs",nextLogs,setShotLogs,\{strictRemote:true\}\)/);
+  assert.match(source, /const res=await fetch\("\/v1\/home-shots\/log"/);
+  assert.match(source, /await P\("sl:shotlogs",\[\.\.\.shotLogs,payload\],setShotLogs,\{remoteRows:\[\]\}\)/);
   assert.match(source, /setStatSyncError\("Could not save home shots to team dashboard\. Please try again\."\)/);
 
   assert.match(source, /const \[statSyncError,setStatSyncError\]=useState\(""\)/);
