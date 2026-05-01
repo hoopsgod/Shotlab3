@@ -7,9 +7,9 @@ const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8
 test('player shot log persistence includes player and team identity', () => {
   assert.match(
     source,
-    /const addShotLog=async\(made,date\)=>\{[\s\S]*const nextLogs=\[\.\.\.shotLogs,\{id:genId\("shotlog"\),email:user\.email,playerId:user\.email,teamId:user\.teamId,name:user\.name,made,date,ts:Date\.now\(\)\}\];/,
+    /const addShotLog=async\(made,date\)=>\{[\s\S]*const payload=\{id:genId\("shotlog"\),email:user\.email,playerId:user\.email,teamId:user\.teamId,name:user\.name,made,date,ts:Date\.now\(\)\};[\s\S]*fetch\("\/v1\/home-shots\/log"/,
   );
-  assert.match(source, /await P\("sl:shotlogs",nextLogs,setShotLogs,\{strictRemote:true\}\);/);
+  assert.match(source, /await P\("sl:shotlogs",\[\.\.\.shotLogs,payload\],setShotLogs,\{remoteRows:\[\]\}\);/);
 });
 
 test('coach/team scoped data path filters shot logs by active team id', () => {
