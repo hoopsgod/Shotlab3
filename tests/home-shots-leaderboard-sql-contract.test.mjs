@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const migration = fs.readFileSync(
-  new URL("../migrations/020_home_shots_leaderboard_text_team_id_alignment.sql", import.meta.url),
+  new URL("../migrations/022_home_shots_leaderboard_membership_uuid_resolution.sql", import.meta.url),
   "utf8",
 );
 
@@ -21,10 +21,10 @@ test("SQL contract: players with zero\/no home shots are excluded", () => {
   assert.match(migration, /where t\.team_id = v_team_id\s+and t\.total_home_shots > 0/);
 });
 
-test("SQL contract: privacy boundary requires active team membership using text comparisons", () => {
-  assert.match(migration, /from team_memberships tm/);
-  assert.match(migration, /to_jsonb\(tm\)->>'team_id'/);
+test("SQL contract: privacy boundary allows email or resolved UUID active membership", () => {
+  assert.match(migration, /resolve_app_user_uuid\(v_requester_user_id\)::text/);
   assert.match(migration, /to_jsonb\(tm\)->>'user_id'/);
+  assert.match(migration, /v_requester_user_uuid <> ''/);
   assert.match(migration, /lower\(coalesce\(to_jsonb\(tm\)->>'status', ''\)\) = 'active'/);
 });
 
