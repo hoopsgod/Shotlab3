@@ -1227,8 +1227,12 @@ const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)retu
 const addShotLog=async(made,date)=>{
 if(!requirePlayer(user,user?.teamId,user?.email))return;
 try{
-const nextLogs=[...shotLogs,{id:genId("shotlog"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,made,date,ts:Date.now()}];
-await P("sl:shotlogs",nextLogs,setShotLogs,{strictRemote:true});
+const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({team_id:user.teamId,player_id:user.email,email:user.email,name:user.name,made,date})});
+const body=await res.json().catch(()=>({}));
+if(!res.ok)throw new Error(String(body?.error||"home_shot_log_failed"));
+const saved=body?.shot_log||{};
+const localLog={id:saved.id||genId("shotlog"),email:saved.email||user.email,playerId:saved.player_id||saved.playerId||user.email,teamId:saved.team_id||saved.teamId||user.teamId,name:saved.name||user.name,made:Number(saved.made??made),date:saved.date||date,ts:saved.ts||Date.now()};
+setShotLogs(prev=>[...prev,localLog]);
 setStatSyncError("");
 trackEvent("shot_log_added",{made,date});
 await fetchHomeShotsLeaderboard(user.teamId,homeShotsLeaderboardScope);
