@@ -21,7 +21,11 @@ test('player-entered stats require durable ids, strict remote persistence, sync 
   assert.match(source, /fetch\("\/v1\/home-shots\/log"/);
   assert.match(source, /if\(!res\.ok\)throw new Error/);
   assert.match(source, /setShotLogs\(prev=>\[\.\.\.prev,localLog\]\)/);
-  assert.match(source, /setStatSyncError\("Could not save home shots to team dashboard\. Please try again\."\)/);
+  assert.match(source, /const homeShotDebugMode=window\.location\.search\.includes\("homeShotDebug=1"\);/);
+  assert.match(source, /const baseError="Could not save home shots to team dashboard\. Please try again\.";/);
+  assert.match(source, /setStatSyncError\(homeShotDebugMode\?`\$\{baseError\} Error: \$\{backendErrorCode\}`:baseError\)/);
+  assert.match(source, /console\.error\("home_shots_save_failed",\{errorCode:backendErrorCode/);
+  assert.match(source, /setStatSyncError\(homeShotDebugMode\?/);
 
   assert.match(source, /const \[statSyncError,setStatSyncError\]=useState\(""\)/);
   assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,homeShotsLeaderboardScope\)\} statSyncError=\{statSyncError\}/);
