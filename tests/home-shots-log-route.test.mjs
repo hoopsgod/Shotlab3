@@ -25,7 +25,9 @@ test("succeeds when x-user-id email resolves to UUID membership", async () => {
     const payload = await res.json();
     assert.equal(payload.ok, true);
     assert.equal(payload.diagnostic.authorized_by, "uuid");
-    assert.equal(calls.length, 4);
+    assert.equal(payload.diagnostic.uuid_membership_query_attempted, "yes");
+    assert.equal(payload.diagnostic.email_membership_query_attempted, "no");
+    assert.equal(calls.length, 3);
   } finally { global.fetch = originalFetch; }
 });
 
@@ -37,23 +39,25 @@ test("missing user identity returns diagnostic error", async () => {
   assert.equal(body.diagnostic.stage, "request_identity");
 });
 
-test("email membership query failure is caught and surfaced", async () => {
+test("email membership query type mismatch is treated as no match when uuid is also missing", async () => {
   const originalFetch = global.fetch;
   global.fetch = async (url) => {
     if (String(url).includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("uuid-2"), { status: 200 });
+    if (String(url).includes("/team_memberships") && String(url).includes("user_id=eq.uuid-2")) return new Response(JSON.stringify([]), { status: 200 });
     if (String(url).includes("/team_memberships") && String(url).includes("user_id=eq.p%40x.com")) return new Response(JSON.stringify({ message: "boom" }), { status: 500 });
     return new Response(JSON.stringify([]), { status: 200 });
   };
   try {
     const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 1, date: "2026-05-01" }, { "x-user-id": "p@x.com" }));
-    assert.equal(res.status, 500);
+    assert.equal(res.status, 403);
     const body = await res.json();
-    assert.equal(body.error, "membership_email_query_failed");
-    assert.equal(body.diagnostic.stage, "email_membership_lookup");
+    assert.equal(body.error, "forbidden");
+    assert.equal(body.diagnostic.stage, "authorization");
+    assert.match(body.diagnostic.email_membership_query_result, /^error_treated_as_no_match:/);
   } finally { global.fetch = originalFetch; }
 });
 
-test("uuid membership query is attempted when email membership has no rows", async () => {
+test("uuid membership query is attempted before email query when uuid exists", async () => {
   const calls = [];
   const originalFetch = global.fetch;
   global.fetch = async (url, init) => {
@@ -68,7 +72,27 @@ test("uuid membership query is attempted when email membership has no rows", asy
     assert.equal(res.status, 200);
     const body = await res.json();
     assert.equal(body.diagnostic.uuid_membership_query_attempted, "yes");
-    assert.equal(calls.filter((u) => u.includes("/team_memberships")).length, 2);
+    assert.equal(body.diagnostic.email_membership_query_attempted, "no");
+    const membershipCalls = calls.filter((u) => u.includes("/team_memberships"));
+    assert.equal(membershipCalls.length, 1);
+    assert.match(membershipCalls[0], /user_id=eq.uuid-1/);
+  } finally { global.fetch = originalFetch; }
+});
+
+test("raw email membership still authorizes when table stores email values", async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async (url, init) => {
+    if (String(url).includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("uuid-miss"), { status: 200 });
+    if (String(url).includes("/team_memberships") && String(url).includes("user_id=eq.uuid-miss")) return new Response(JSON.stringify([]), { status: 200 });
+    if (String(url).includes("/team_memberships") && String(url).includes("user_id=eq.p%40x.com")) return new Response(JSON.stringify([{ id: "m-email", status: "active" }]), { status: 200 });
+    return new Response(JSON.stringify([{ id: 22, ...JSON.parse(init.body)[0] }]), { status: 201 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 2, date: "2026-05-01" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.diagnostic.authorized_by, "email");
+    assert.equal(body.diagnostic.shot_logs_insert_success, "yes");
   } finally { global.fetch = originalFetch; }
 });
 
