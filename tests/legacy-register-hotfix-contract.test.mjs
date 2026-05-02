@@ -15,7 +15,9 @@ test('legacy registration uses backend source of truth and emits required diagno
   assert.match(source, /reg\.errorCode==="invalid_request"\?"Please enter a valid email, name, role, and an 8\+ character password\."/);
   assert.match(source, /reg\.errorCode==="rate_limited"\?"Too many attempts\. Wait and try again\."/);
   assert.match(source, /\(reg\.status===404\|\|reg\.parseMode!=="json"\)\?"Registration service is not deployed yet\."/);
-  assert.match(source, /isConfigError\?"Registration service is not configured correctly\."/);
+  assert.match(source, /reg\.errorCode==="config_error"\?"Registration service is not configured correctly\."/);
+  assert.match(source, /reg\.errorCode==="table_error"\?"Registration database is not ready\. Please try again shortly\."/);
+  assert.match(source, /reg\.errorCode==="internal_error"\?"Registration service error\. Please try again\."/);
   assert.match(source, /console\.error\("\[legacy-auth\] register failed",\{endpoint:registerEndpoint,status:reg\.status,code:reg\.errorCode\|\|"register_failed",parseMode:reg\.parseMode\}\);/);
   assert.match(source, /registerEndpoint:"\/v1\/legacy-auth\/register"/);
   assert.match(source, /registerParseMode:""/);
