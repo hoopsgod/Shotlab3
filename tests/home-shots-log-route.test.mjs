@@ -112,6 +112,77 @@ test("shot_logs insert failure returns persist_failed with safe diagnostic", asy
   } finally { global.fetch = originalFetch; }
 });
 
+
+test("insert includes non-empty text id and numeric ts fallback", async () => {
+  const originalFetch = global.fetch;
+  let insertedRow;
+  global.fetch = async (url, init) => {
+    if (String(url).includes("/team_memberships")) return new Response(JSON.stringify([{ id: "m2", status: "active" }]), { status: 200 });
+    if (String(url).includes("/shot_logs")) {
+      insertedRow = JSON.parse(init.body)[0];
+      return new Response(JSON.stringify([insertedRow]), { status: 201 });
+    }
+    return new Response(JSON.stringify(""), { status: 200 });
+  };
+  const realNow = Date.now;
+  Date.now = () => 1777777777777;
+  try {
+    const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 3, date: "2026-05-01" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
+    assert.equal(typeof insertedRow.id, "string");
+    assert.equal(insertedRow.id.length > 0, true);
+    assert.equal(typeof insertedRow.ts, "number");
+    assert.equal(insertedRow.ts, 1777777777777);
+  } finally {
+    Date.now = realNow;
+    global.fetch = originalFetch;
+  }
+});
+
+test("numeric body.ts is preserved as number", async () => {
+  const originalFetch = global.fetch;
+  let insertedRow;
+  global.fetch = async (url, init) => {
+    if (String(url).includes("/team_memberships")) return new Response(JSON.stringify([{ id: "m2", status: "active" }]), { status: 200 });
+    if (String(url).includes("/shot_logs")) {
+      insertedRow = JSON.parse(init.body)[0];
+      return new Response(JSON.stringify([insertedRow]), { status: 201 });
+    }
+    return new Response(JSON.stringify(""), { status: 200 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 3, date: "2026-05-01", ts: 1234567890 }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
+    assert.equal(insertedRow.ts, 1234567890);
+    assert.equal(typeof insertedRow.ts, "number");
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+test("persist_failed is not caused by missing id or invalid ts in route payload", async () => {
+  const originalFetch = global.fetch;
+  let insertedRow;
+  global.fetch = async (url, init) => {
+    if (String(url).includes("/team_memberships")) return new Response(JSON.stringify([{ id: "m2", status: "active" }]), { status: 200 });
+    if (String(url).includes("/shot_logs")) {
+      insertedRow = JSON.parse(init.body)[0];
+      return new Response(JSON.stringify([insertedRow]), { status: 201 });
+    }
+    return new Response(JSON.stringify(""), { status: 200 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 3, date: "2026-05-01", ts: "2026-05-01T00:00:00.000Z" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
+    assert.equal(typeof insertedRow.id, "string");
+    assert.equal(typeof insertedRow.ts, "number");
+    const body = await res.json();
+    assert.equal(body.diagnostic.shot_logs_insert_success, "yes");
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
 test("coach leaderboard reads inserted row and excludes other team", async () => {
   const rowsByTeam = { "team-a": [{ rank: 1, player_display_name: "Player A", total_home_shots: 33 }], "team-b": [{ rank: 1, player_display_name: "Other", total_home_shots: 99 }] };
   const originalFetch = global.fetch;
