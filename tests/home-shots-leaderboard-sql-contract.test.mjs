@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const migration = fs.readFileSync(
-  new URL("../migrations/023_home_shots_leaderboard_left_join_profiles.sql", import.meta.url),
+  new URL("../migrations/024_home_shots_leaderboard_use_shot_log_name_safe.sql", import.meta.url),
   "utf8",
 );
 
@@ -19,12 +19,26 @@ test("SQL contract: totals remain source of truth and missing profiles are allow
   assert.match(migration, /t\.total_home_shots > 0/);
 });
 
-test("SQL contract: profile join and display-name fallback are explicit", () => {
-  assert.match(migration, /coalesce\(nullif\(profiles\.rec->>'team_id'/);
-  assert.match(migration, /totals\.player_id in \(/);
-  assert.match(migration, /nullif\(trim\(coalesce\(profiles\.rec->>'name', ''\)\), ''\)/);
+test("SQL contract: uses latest_shot_names from shot_logs.name", () => {
+  assert.match(migration, /latest_shot_names as \(/);
+  assert.match(migration, /from shot_logs sl/);
+  assert.match(migration, /nullif\(trim\(coalesce\(sl\.name, ''\)\), ''\) as submitted_name/);
+});
+
+test("SQL contract: display-name priority prefers profile name, then shot log name, then email/local-part", () => {
+  assert.match(migration, /nullif\(trim\(coalesce\(profiles\.rec->>'name', ''\)\), ''\),\s*latest_shot_names\.submitted_name/s);
+  assert.match(migration, /latest_shot_names\.submitted_name,\s*nullif\(trim\(coalesce\(profiles\.rec->>'email', ''\)\), ''\)/s);
   assert.match(migration, /split_part\(totals\.player_id, '@', 1\)/);
   assert.match(migration, /'Player'/);
+});
+
+test("SQL contract: numeric ts/date ordering does not mix bigint and timestamptz", () => {
+  assert.match(migration, /coalesce\(\s*sl\.ts,\s*case\s+when coalesce\(sl\.date, ''\) ~ '\^\\d\{4\}-\\d\{2\}-\\d\{2\}\$'\s+then \(extract\(epoch from sl\.date::date\)::bigint \* 1000\)\s+else 0\s+end\s*\) desc/s);
+  assert.doesNotMatch(migration, /::timestamptz/);
+});
+
+test("SQL contract: latest_shot_names ordering excludes to_timestamp", () => {
+  assert.doesNotMatch(migration, /to_timestamp\(/);
 });
 
 test("SQL contract: scope and hidden-profile behavior handles missing profiles", () => {
