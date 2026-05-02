@@ -122,14 +122,19 @@ export async function onRequestPost({ request, env }) {
     return diagnosticError("forbidden", 403, "authorization", "No active membership found.", diagnostic);
   }
 
+  const randomSuffix = Math.random().toString(36).slice(2, 10);
+  const rowId = String(body.id || "").trim() || `shotlog_${Date.now()}_${randomSuffix}`;
+  const ts = Number.isFinite(body.ts) ? body.ts : Date.now();
+
   const row = {
+    id: rowId,
     email: requester,
     name: String(body.name || "").trim() || requester,
     player_id: requester,
     team_id: teamId,
     made,
     date,
-    ts: body.ts || new Date().toISOString(),
+    ts,
   };
 
   diagnostic.shot_logs_insert_attempted = "yes";
