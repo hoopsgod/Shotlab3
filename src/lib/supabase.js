@@ -92,6 +92,47 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
 
 export const supabase = {
   isConfigured: hasConfig,
+  auth: {
+    async signUp({ email, password }) {
+      if (!hasConfig) return { data: null, error: { code: "config_missing", message: "Supabase is not configured." } };
+      const response = await fetch(`${baseUrl}/auth/v1/signup`, {
+        method: "POST",
+        headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) return { data: null, error: payload?.error ? payload : { code: payload?.code || "auth_signup_failed", message: payload?.msg || "Signup failed" } };
+      return { data: payload, error: null };
+    },
+    async signInWithPassword({ email, password }) {
+      if (!hasConfig) return { data: null, error: { code: "config_missing", message: "Supabase is not configured." } };
+      const response = await fetch(`${baseUrl}/auth/v1/token?grant_type=password`, {
+        method: "POST",
+        headers: { apikey: anonKey, Authorization: `Bearer ${anonKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) return { data: null, error: payload?.error ? payload : { code: payload?.code || "auth_login_failed", message: payload?.error_description || "Login failed" } };
+      return { data: payload, error: null };
+    },
+    async getSession() {
+      if (!hasConfig) return { data: { session: null }, error: null };
+      const token = window.localStorage?.getItem("sl:supabase-access-token") || "";
+      if (!token) return { data: { session: null }, error: null };
+      const response = await fetch(`${baseUrl}/auth/v1/user`, { headers: { apikey: anonKey, Authorization: `Bearer ${token}` } });
+      if (!response.ok) return { data: { session: null }, error: { code: "session_invalid", message: "Session invalid" } };
+      const user = await response.json().catch(() => null);
+      return { data: { session: user ? { access_token: token, user } : null }, error: null };
+    },
+    async signOut() {
+      const token = window.localStorage?.getItem("sl:supabase-access-token") || "";
+      if (hasConfig && token) {
+        await fetch(`${baseUrl}/auth/v1/logout`, { method: "POST", headers: { apikey: anonKey, Authorization: `Bearer ${token}` } }).catch(() => null);
+      }
+      try { window.localStorage?.removeItem("sl:supabase-access-token"); } catch {}
+      return { error: null };
+    },
+  },
   from(table) {
     return {
       select() {
