@@ -1226,6 +1226,7 @@ const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return
 const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)return;if(rsvps.find(r=>r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId))return;await P("sl:rsvps",[...rsvps,{eventId:eid,email,playerId:email,teamId:user.teamId,name,ts:Date.now()}],setRsvps)};
 const addShotLog=async(made,date)=>{
 if(!requirePlayer(user,user?.teamId,user?.email))return;
+const homeShotDebugMode=window.location.search.includes("homeShotDebug=1");
 try{
 const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({team_id:user.teamId,player_id:user.email,email:user.email,name:user.name,made,date})});
 const body=await res.json().catch(()=>({}));
@@ -1237,8 +1238,11 @@ setStatSyncError("");
 trackEvent("shot_log_added",{made,date});
 await fetchHomeShotsLeaderboard(user.teamId,homeShotsLeaderboardScope);
 }catch(e){
-setStatSyncError("Could not save home shots to team dashboard. Please try again.");
-trackEvent("shot_log_failed",{made,date,error:String(e?.message||"unknown")});
+const backendErrorCode=String(e?.message||"home_shot_log_failed");
+console.error("home_shots_save_failed",{errorCode:backendErrorCode,status:"failed",userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made,date});
+const baseError="Could not save home shots to team dashboard. Please try again.";
+setStatSyncError(homeShotDebugMode?`${baseError} Error: ${backendErrorCode}`:baseError);
+trackEvent("shot_log_failed",{made,date,error:backendErrorCode});
 }
 };
 const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",[...challenges,{...ch,id:Date.now(),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges);trackEvent("challenge_created",{to:ch.to||null})};
