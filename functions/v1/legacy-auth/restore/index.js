@@ -1,5 +1,6 @@
-import { enforceRateLimit, getClientKey } from "../../_utils/security.js";
-import { selectRows } from "../../_utils/supabase.js";
+import { enforceRateLimit, getClientKey } from "../../../_utils/security.js";
+import { selectRows } from "../../../_utils/supabase.js";
 const normalizeEmail=v=>String(v||"").trim().toLowerCase();
 const safeProfile=row=>({email:row.email,name:row.name,role:row.role,team_id:row.team_id||null,hide_from_leaderboards:row.hide_from_leaderboards===true});
+export async function onRequestGet(){return Response.json({ok:true,service:"legacy-auth-restore"});}
 export async function onRequestPost({request,env}){const body=await request.json().catch(()=>({}));const email=normalizeEmail(body?.email);const rl=enforceRateLimit({key:`legacy_restore:${getClientKey(request,email)}`,max:20,windowMs:60_000});if(!rl.allowed)return Response.json({error:"rate_limited"},{status:429,headers:{"Retry-After":String(rl.retryAfterSeconds)}});if(!email)return Response.json({error:"invalid_request"},{status:400});const rows=await selectRows(env,"legacy_auth_profiles",`select=email,name,role,team_id,hide_from_leaderboards&email=eq.${encodeURIComponent(email)}&limit=1`).catch(()=>[]);const row=Array.isArray(rows)?rows[0]:null;if(!row)return Response.json({error:"account_not_found"},{status:404});return Response.json({profile:safeProfile(row)});}
