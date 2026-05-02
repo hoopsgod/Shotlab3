@@ -1050,8 +1050,7 @@ return{ok:true};
 const registerEndpoint="/v1/legacy-auth/register";
 const reg=await legacyAuthFetch(registerEndpoint,{email:normalizedEmail,password,name,role});
 if(!reg.ok){
-const isConfigError=reg.status>=500||["table_error","config_error","service_role_missing","internal_error"].includes(reg.errorCode);
-const msg=reg.errorCode==="account_exists"?"Account already exists. Please sign in.":reg.errorCode==="invalid_request"?"Please enter a valid email, name, role, and an 8+ character password.":reg.errorCode==="rate_limited"?"Too many attempts. Wait and try again.":(reg.status===404||reg.parseMode!=="json")?"Registration service is not deployed yet.":isConfigError?"Registration service is not configured correctly.":"Could not register account.";
+const msg=reg.errorCode==="account_exists"?"Account already exists. Please sign in.":reg.errorCode==="invalid_request"?"Please enter a valid email, name, role, and an 8+ character password.":reg.errorCode==="rate_limited"?"Too many attempts. Wait and try again.":(reg.status===404||reg.parseMode!=="json")?"Registration service is not deployed yet.":reg.errorCode==="config_error"?"Registration service is not configured correctly.":reg.errorCode==="table_error"?"Registration database is not ready. Please try again shortly.":reg.errorCode==="internal_error"?"Registration service error. Please try again.":reg.status>=500?"Registration service error. Please try again.":"Could not register account.";
 setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthRegisterStatus:"failed",signupHttpStatus:reg.status,signupCode:String(reg.errorCode||"register_failed"),signupMessage:reg.safeMessage||"",providerHint:"legacy_backend",profilePersistStatus:"failed",registerEndpoint,registerParseMode:reg.parseMode}}));
 console.error("[legacy-auth] register failed",{endpoint:registerEndpoint,status:reg.status,code:reg.errorCode||"register_failed",parseMode:reg.parseMode});
 return{ok:false,err:msg};}
