@@ -130,7 +130,9 @@ test("cross-team access denied is mapped to forbidden", async () => {
     });
     const res = await onRequestGet(context);
     assert.equal(res.status, 403);
-    assert.deepEqual(await res.json(), { error: "forbidden" });
+    const payload = await res.json();
+    assert.equal(payload.error, "forbidden");
+    assert.equal(payload.diagnostics.rpc_name_called, "get_team_home_shots_leaderboard");
   } finally {
     global.fetch = originalFetch;
   }
@@ -207,4 +209,34 @@ test("invalid scope is rejected", async () => {
   const res = await onRequestGet(context);
   assert.equal(res.status, 400);
   assert.deepEqual(await res.json(), { error: "invalid_scope" });
+});
+
+
+test("rpc failure returns safe diagnostics payload", async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () =>
+    new Response(JSON.stringify({ code: "PGRST202", message: "Function public.get_team_home_shots_leaderboard does not exist" }), {
+      status: 404,
+    });
+
+  try {
+    const context = makeContext("https://shotlab.test/v1/leaderboards/home-shots?team_id=team-err&scope=coaches", {
+      "x-user-id": "coach@team.test",
+    });
+    const res = await onRequestGet(context);
+    assert.equal(res.status, 500);
+    const payload = await res.json();
+    assert.equal(payload.error, "internal_error");
+    assert.equal(payload.diagnostics.requester_identity_present, "yes");
+    assert.equal(payload.diagnostics.team_id_present, "yes");
+    assert.equal(payload.diagnostics.scope, "coaches");
+    assert.equal(payload.diagnostics.rpc_name_called, "get_team_home_shots_leaderboard");
+    assert.equal(payload.diagnostics.rpc_arguments.p_team_id, "team-err");
+    assert.equal(payload.diagnostics.rpc_success, "no");
+    assert.equal(typeof payload.diagnostics.rpc_error.code, "string");
+    assert.match(payload.diagnostics.rpc_error.message, /does not exist/i);
+    assert.equal(payload.diagnostics.rpc_exists_detectable, "no");
+  } finally {
+    global.fetch = originalFetch;
+  }
 });
