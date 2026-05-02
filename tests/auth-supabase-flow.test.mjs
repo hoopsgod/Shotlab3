@@ -69,3 +69,44 @@ test('login handler awaits async auth result', async () => {
   assert.match(src, /const doLogin=async\(\)=>/);
   assert.match(src, /const r=await onLogin\(id,password\)/);
 });
+
+test('signup/login auth error payloads are parsed with safe allowlist fields', async () => {
+  const src = await readFile(new URL('../src/lib/supabase.js', import.meta.url), 'utf8');
+  assert.match(src, /AUTH_SAFE_FIELDS = \["status", "code", "message", "error", "error_description", "msg"\]/);
+  assert.match(src, /sanitizeAuthError\(payload, "auth_signup_failed", "Signup failed", response\.status\)/);
+  assert.match(src, /sanitizeAuthError\(payload, "auth_login_failed", "Login failed", response\.status\)/);
+});
+
+test('register maps weak password, signup disabled, and user exists messages', async () => {
+  const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(src, /Email signup is disabled in Supabase Auth settings\./);
+  assert.match(src, /Password does not meet the required policy\./);
+  assert.match(src, /Account already exists\. Please sign in\./);
+});
+
+test('login maps invalid credentials and email-not-confirmed messages', async () => {
+  const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(src, /Invalid email or password\./);
+  assert.match(src, /Please confirm your email before signing in\./);
+  assert.match(src, /No Supabase Auth account found for this email\./);
+});
+
+test('auth diagnostics expose signup/login status and messages in data debug panel', async () => {
+  const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(src, /signupHttpStatus/);
+  assert.match(src, /signupCode/);
+  assert.match(src, /signupMessage/);
+  assert.match(src, /loginHttpStatus/);
+  assert.match(src, /loginCode/);
+  assert.match(src, /loginMessage/);
+  assert.match(src, /providerHint/);
+});
+
+test('auth failure logs are safe and do not include password/token/header fields', async () => {
+  const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  const signupLog = src.match(/console\.error\("\[auth\] signup failed",\{([^}]+)\}\)/);
+  const loginLog = src.match(/console\.error\("\[auth\] login failed",\{([^}]+)\}\)/);
+  assert.ok(signupLog && loginLog, 'expected auth console.error diagnostics');
+  const combined = `${signupLog[1]} ${loginLog[1]}`.toLowerCase();
+  assert.doesNotMatch(combined, /password|token|header|apikey|authorization|anon|service_role/);
+});

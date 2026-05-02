@@ -33,6 +33,19 @@ const clearSession = () => {
   window.localStorage?.removeItem(SESSION_KEY);
   window.localStorage?.removeItem(LEGACY_TOKEN_KEY);
 };
+const AUTH_SAFE_FIELDS = ["status", "code", "message", "error", "error_description", "msg"];
+const sanitizeAuthError = (payload, fallbackCode, fallbackMessage, status) => {
+  const src = payload && typeof payload === "object" ? payload : {};
+  const safe = {};
+  AUTH_SAFE_FIELDS.forEach((key) => {
+    if (src[key] == null) return;
+    safe[key] = typeof src[key] === "string" || typeof src[key] === "number" ? src[key] : String(src[key]);
+  });
+  if (!safe.status && Number.isFinite(Number(status))) safe.status = Number(status);
+  if (!safe.code) safe.code = fallbackCode;
+  if (!safe.message) safe.message = safe.error_description || safe.msg || safe.error || fallbackMessage;
+  return safe;
+};
 
 const buildHeaders = ({ upsert = false, onConflict } = {}) => {
   const headers = {
@@ -133,7 +146,7 @@ export const supabase = {
         body: JSON.stringify({ email, password }),
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) return { data: null, error: payload?.error ? payload : { code: payload?.code || "auth_signup_failed", message: payload?.msg || "Signup failed" } };
+      if (!response.ok) return { data: null, error: sanitizeAuthError(payload, "auth_signup_failed", "Signup failed", response.status) };
       if (payload?.access_token || payload?.refresh_token) storeSession(payload);
       return { data: payload, error: null };
     },
@@ -145,7 +158,7 @@ export const supabase = {
         body: JSON.stringify({ email, password }),
       });
       const payload = await response.json().catch(() => ({}));
-      if (!response.ok) return { data: null, error: payload?.error ? payload : { code: payload?.code || "auth_login_failed", message: payload?.error_description || "Login failed" } };
+      if (!response.ok) return { data: null, error: sanitizeAuthError(payload, "auth_login_failed", "Login failed", response.status) };
       if (payload?.access_token || payload?.refresh_token) storeSession(payload);
       return { data: payload, error: null };
     },
