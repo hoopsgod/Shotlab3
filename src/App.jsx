@@ -394,10 +394,10 @@ return"Startup failed due to an unexpected runtime error while loading app data.
 function hashPw(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return(h>>>0).toString(36)}
 // AudioContext must be lazy-initialized on user gesture (iOS WebKit requirement)
 let _audioCtx=null;
-function getAudioCtx(){if(!_audioCtx&&typeof AudioContext!=="undefined"){try{_audioCtx=new AudioContext()}catch{}}if(_audioCtx&&_audioCtx.state==="suspended"){_audioCtx.resume().catch(()=>{})}return _audioCtx}
-function playTick(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=1200;o.type="sine";g.gain.setValueAtTime(.07,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.05);o.start();o.stop(audioCtx.currentTime+.05)}catch{}}
-function playScore(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[800,1200,1600].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="sine";g.gain.setValueAtTime(.05,audioCtx.currentTime+i*.08);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.08+.12);o.start(audioCtx.currentTime+i*.08);o.stop(audioCtx.currentTime+i*.08+.12)})}catch{}}
-function playUnlock(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[523,659,784,1047].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="triangle";g.gain.setValueAtTime(.06,audioCtx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.1+.25);o.start(audioCtx.currentTime+i*.1);o.stop(audioCtx.currentTime+i*.1+.25)})}catch{}}
+function getAudioCtx(){if(!_audioCtx&&typeof AudioContext!=="undefined"){try{_audioCtx=new AudioContext()}catch(error){}}if(_audioCtx&&_audioCtx.state==="suspended"){_audioCtx.resume().catch(()=>{})}return _audioCtx}
+function playTick(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=1200;o.type="sine";g.gain.setValueAtTime(.07,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.05);o.start();o.stop(audioCtx.currentTime+.05)}catch(error){}}
+function playScore(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[800,1200,1600].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="sine";g.gain.setValueAtTime(.05,audioCtx.currentTime+i*.08);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.08+.12);o.start(audioCtx.currentTime+i*.08);o.stop(audioCtx.currentTime+i*.08+.12)})}catch(error){}}
+function playUnlock(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[523,659,784,1047].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="triangle";g.gain.setValueAtTime(.06,audioCtx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.1+.25);o.start(audioCtx.currentTime+i*.1);o.stop(audioCtx.currentTime+i*.1+.25)})}catch(error){}}
 const THEMES={dark:{BG:TOKENS.BG_BASE,SURFACE:TOKENS.BG_CARD,CARD_BG:TOKENS.BG_CARD,BORDER:TOKENS.BG_SUBTLE,MUT:TOKENS.TEXT_MUTED,LT:TOKENS.TEXT_PRIMARY,SUB:TOKENS.TEXT_SECONDARY,TRACK:TOKENS.BG_SUBTLE},light:{BG:TOKENS.BG_BASE,SURFACE:TOKENS.BG_CARD,CARD_BG:TOKENS.BG_CARD,BORDER:TOKENS.BG_SUBTLE,MUT:TOKENS.TEXT_MUTED,LT:TOKENS.TEXT_PRIMARY,SUB:TOKENS.TEXT_SECONDARY,TRACK:TOKENS.BG_SUBTLE}};
 const T=THEMES.dark; // module-level default for standalone components
 const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#A0A0A0"},{days:14,name:"TWO-WEEK GRIND",icon:"14",color:"#A0A0A0"},{days:30,name:"MONTHLY BEAST",icon:"30",color:"#C8FF00"},{days:60,name:"IRON WILL",icon:"60",color:CYAN},{days:100,name:"CENTURION",icon:"💯",color:VOLT}];
@@ -699,7 +699,7 @@ const leaderboardRequestRef=useRef({teamId:null,requestId:0});
 const [isJoinConsumeActive,setIsJoinConsumeActive]=useState(false);
 const joinConsumeFlightRef=useRef({active:false,key:"",startedAt:0,lastClearedAt:0,lastClearedReason:"",promise:null,abortController:null});
 const autoJoinAttemptRef=useRef("");
-const bootMark=(stage,detail="")=>{try{window.__shotlabBootMark?.(stage,detail);}catch{}};
+const bootMark=(stage,detail="")=>{try{window.__shotlabBootMark?.(stage,detail);}catch(error){}};
 const T=THEMES[theme];
 const dataDebugRequested=typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("dataDebug")==="1";
 const dataDebugEnvOverride=String(import.meta.env.VITE_ENABLE_DATA_DEBUG||"").trim().toLowerCase();
@@ -732,6 +732,7 @@ meta,
 });
 },[user,view]);
 
+const homeShotDebugMode=typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("homeShotDebug")==="1";
 const fetchHomeShotsLeaderboard=useCallback(async(teamId,scope=homeShotsLeaderboardScope)=>{
 if(!teamId||!user?.email)return;
 const requestId=Date.now();
@@ -752,8 +753,12 @@ await res.text().catch(()=>"");
 }
 if(!res.ok){
 const msg=parseLeaderboardErrorMessage(body?.error,res.status,parseMode==="non_json"?"non_json":"json");
+const backendErrorCode=String(body?.diagnostics?.rpc_error?.code||body?.error||"unknown");
+const backendErrorMessage=String(body?.diagnostics?.rpc_error?.message||"unknown_error");
+const debugErrorDetail=`${backendErrorCode}: ${backendErrorMessage}`;
+console.error("[home-shots-leaderboard] load failed",{status:res.status,error:body?.error||"",scope,teamId,requesterIdentityPresent:body?.diagnostics?.requester_identity_present||"unknown",teamIdPresent:body?.diagnostics?.team_id_present||"unknown",rpcName:body?.diagnostics?.rpc_name_called||"",rpcSuccess:body?.diagnostics?.rpc_success||"unknown",rpcExistsDetectable:body?.diagnostics?.rpc_exists_detectable||"unknown",requesterResolvedUuidAvailable:body?.diagnostics?.requester_resolved_uuid_available||"unknown",rpcErrorCode:backendErrorCode,rpcErrorMessage:backendErrorMessage});
 if(leaderboardRequestRef.current.requestId!==requestId)return;
-setHomeShotsLeaderboard({status:"error",rows:[],error:msg});
+setHomeShotsLeaderboard({status:"error",rows:[],error:homeShotDebugMode?`${msg} (${debugErrorDetail})`:msg});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),resultCount:0,isEmpty:false}}));
 return;
 }
@@ -761,8 +766,9 @@ const rows=Array.isArray(body?.leaderboard)?body.leaderboard:[];
 if(leaderboardRequestRef.current.requestId!==requestId)return;
 setHomeShotsLeaderboard({status:"success",rows,error:""});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:"",resultCount:rows.length,isEmpty:rows.length===0}}));
-}catch{
+}catch(error){
 if(leaderboardRequestRef.current.requestId!==requestId)return;
+console.error("[home-shots-leaderboard] network failure",{scope,teamId,message:String(error?.message||"network_error")});
 setHomeShotsLeaderboard({status:"error",rows:[],error:"Leaderboard unavailable."});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:null,errorCode:"network_error",resultCount:0,isEmpty:false}}));
 }
@@ -828,7 +834,7 @@ createdAt:Number(ctx.createdAt||Date.now()),
 },[]);
 const readInviteContextFromStorage=useCallback(()=>{
 if(typeof window==="undefined")return null;
-const parse=(raw)=>{if(!raw)return null;try{return JSON.parse(raw);}catch{return null;}};
+const parse=(raw)=>{if(!raw)return null;try{return JSON.parse(raw);}catch(error){return null;}};
 const sessionValue=parse(window.sessionStorage?.getItem(INVITE_CONTEXT_STORAGE_KEY)||"");
 const localValue=parse(window.localStorage?.getItem(INVITE_CONTEXT_STORAGE_KEY)||"");
 return normalizeStoredInviteContext(sessionValue||localValue||null);
@@ -882,7 +888,7 @@ setDataDebug(prev=>({...prev,join:{...prev.join,normalizedCode:resolvedNormalize
 await savePendingJoinContext(ctx);
 setDataDebug(prev=>({...prev,join:{...prev.join,inviteContextSaved:"yes",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:ctx.joinContextToken?"yes":"no",inviteContextTeamId:ctx.teamId||"",inviteContextSubject:ctx.subject||"",currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"yes"}}));
 return{ok:true,context:ctx};
-}catch{
+}catch(error){
 setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,error:"network_error"}}));
 return{ok:false,err:"Could not validate team code."};
 }
@@ -1100,7 +1106,7 @@ await bootstrapRes.text().catch(()=>"");
 const errorCode=String(bootstrapBody?.error||"");
 setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,httpStatus:bootstrapStatus,errorCode:errorCode||parseMode,responseSummary:bootstrapRes.ok?`invite:${Boolean(bootstrapBody?.invite_code)} team:${Boolean(bootstrapBody?.team_id)}`:`error:${errorCode||parseMode}`,status:bootstrapRes.ok?"response_ok":"response_error"}}));
 if(!bootstrapRes.ok)return{ok:false,err:parseCreateTeamErrorMessage(bootstrapStatus,errorCode,parseMode)};
-}catch{
+}catch(error){
 setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,httpStatus:bootstrapStatus||null,errorCode:"network_error",responseSummary:"request_failed",status:"request_failed"}}));
 return{ok:false,err:"Network error while creating team."};
 }
@@ -1158,7 +1164,7 @@ setDataDebug(prev=>({...prev,join:{...prev.join,profileUpdateStatus:"profile_ins
 setUser({...user,teamId:resolvedTeamId});navigateToPlayerHome();setView("player");
 setDataDebug(prev=>({...prev,join:{...prev.join,status:"joined",update:"success",profileUpdateStatus:prev.join.profileUpdateStatus==="idle"?"profile_unchanged":prev.join.profileUpdateStatus,finalRouteDecision:"route_player_dashboard",error:""}}));
 return{ok:true};
-}catch{
+}catch(error){
 setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",consumeDiagnosticCode:"consume_profile_update_failed",consumeDiagnosticMessage:"Local profile/team persistence failed after membership confirmation.",profileUpdateStatus:"failed",finalRouteDecision:"stay_join_team",error:"consume_profile_update_failed"}}));
 return{ok:false,err:"Could not save player team profile locally.",diagnosticCode:"consume_profile_update_failed"};
 }

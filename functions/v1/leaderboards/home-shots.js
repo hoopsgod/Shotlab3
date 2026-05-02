@@ -41,6 +41,13 @@ function mapLeaderboardError(error) {
 
 export { parseLimit, parseScope, mapLeaderboardError };
 
+function sanitizeRpcError(error) {
+  return {
+    code: String(error?.code || ""),
+    message: String(error?.message || "unknown_error"),
+  };
+}
+
 export async function onRequestGet(context) {
   const { request, env } = context;
   const requestId = request.headers.get("cf-ray") || null;
@@ -76,6 +83,14 @@ export async function onRequestGet(context) {
   if (!teamId) return Response.json({ error: "team_id_required" }, { status: 400 });
   if (!scope) return Response.json({ error: "invalid_scope" }, { status: 400 });
 
+  const rpcName = "get_team_home_shots_leaderboard";
+  const rpcArgs = {
+    p_team_id: teamId,
+    p_requester_user_id: userId,
+    p_limit: limit,
+    p_scope: scope,
+  };
+
   const startedAt = Date.now();
   recordLeaderboardEvent(LEADERBOARD_EVENTS.QUERY_START, {
     requestId,
@@ -86,12 +101,7 @@ export async function onRequestGet(context) {
   });
 
   try {
-    const rows = await callRpc(env, "get_team_home_shots_leaderboard", {
-      p_team_id: teamId,
-      p_requester_user_id: userId,
-      p_limit: limit,
-      p_scope: scope,
-    });
+    const rows = await callRpc(env, rpcName, rpcArgs);
 
     const leaderboard = (Array.isArray(rows) ? rows : []).map((row) => ({
       rank: row.rank,
@@ -132,6 +142,18 @@ export async function onRequestGet(context) {
       errorCode: mapped.code,
       errorMessage: String(error?.message || "unknown_error"),
     });
-    return Response.json({ error: mapped.code }, { status: mapped.status });
+    const safeRpcError = sanitizeRpcError(error);
+    const diagnostics = {
+      requester_identity_present: userId ? "yes" : "no",
+      team_id_present: teamId ? "yes" : "no",
+      scope,
+      rpc_name_called: rpcName,
+      rpc_arguments: { ...rpcArgs },
+      rpc_success: "no",
+      rpc_error: safeRpcError,
+      rpc_exists_detectable: /function[\s_]+get_team_home_shots_leaderboard|does not exist/i.test(safeRpcError.message) ? "no" : "unknown",
+      requester_resolved_uuid_available: /requester_uuid|resolved.*uuid/i.test(safeRpcError.message) ? "yes" : "unknown",
+    };
+    return Response.json({ error: mapped.code, diagnostics }, { status: mapped.status });
   }
 }

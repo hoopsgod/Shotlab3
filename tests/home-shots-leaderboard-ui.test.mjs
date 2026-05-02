@@ -86,3 +86,9 @@ test("leaderboard card renders a coach-facing player row with at-home-shots tota
   assert.match(html, /TEST PLAYER/);
   assert.match(html, />137</);
 });
+
+
+test("leaderboard debug error details are only shown when homeShotDebug=1", () => {
+  assert.match(appSource, /homeShotDebug"\)==="1"/);
+  assert.match(appSource, /setHomeShotsLeaderboard\(\{status:"error",rows:\[\],error:homeShotDebugMode\?/);
+});
