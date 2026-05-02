@@ -2,12 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-test('registration calls Supabase Auth signUp', async () => {
+test('supabase-enabled registration calls Supabase Auth signUp', async () => {
   const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
   assert.match(src, /supabase\.auth\.signUp\(\{email:normalizedEmail,password\}\)/);
 });
 
-test('login calls Supabase Auth signInWithPassword', async () => {
+test('supabase-enabled login calls Supabase Auth signInWithPassword', async () => {
   const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
   assert.match(src, /supabase\.auth\.signInWithPassword\(\{email:normalizedEmail,password\}\)/);
 });
@@ -32,12 +32,12 @@ test('signup pending confirmation returns clear UX message', async () => {
 test('pending confirmation still creates app profile before returning', async () => {
   const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
   const setPlayersIdx = src.indexOf('P("sl:players",np,setPlayers)');
-  const pendingIdx = src.indexOf('if(isPendingConfirmation(authRes.data))return{ok:true,pendingConfirmation:true');
+  const pendingIdx = src.indexOf('if(SUPABASE_AUTH_ENABLED&&isPendingConfirmation(authRes.data))return{ok:true,pendingConfirmation:true');
   assert.ok(setPlayersIdx > -1 && pendingIdx > -1 && setPlayersIdx < pendingIdx);
 });
 test('pending confirmation branch returns before setUser', async () => {
   const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
-  const pendingIdx = src.indexOf('if(isPendingConfirmation(authRes.data))return{ok:true,pendingConfirmation:true');
+  const pendingIdx = src.indexOf('if(SUPABASE_AUTH_ENABLED&&isPendingConfirmation(authRes.data))return{ok:true,pendingConfirmation:true');
   const setUserIdx = src.indexOf('setUser({email:normalizedEmail,role,isCoach:role==="coach",name,teamId:null,hideFromLeaderboards:false})');
   assert.ok(pendingIdx > -1 && setUserIdx > -1 && pendingIdx < setUserIdx);
 });
@@ -109,4 +109,25 @@ test('auth failure logs are safe and do not include password/token/header fields
   assert.ok(signupLog && loginLog, 'expected auth console.error diagnostics');
   const combined = `${signupLog[1]} ${loginLog[1]}`.toLowerCase();
   assert.doesNotMatch(combined, /password|token|header|apikey|authorization|anon|service_role/);
+});
+
+
+test('feature flag defaults Supabase auth off unless exactly true', async () => {
+  const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(src, /VITE_ENABLE_SUPABASE_AUTH/);
+  assert.match(src, /trim\(\) === "true"/);
+});
+
+test('legacy mode bypasses Supabase signUp and signIn flows', async () => {
+  const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(src, /if\(SUPABASE_AUTH_ENABLED\)\{\nconst authRes=await supabase\.auth\.signUp/);
+  assert.match(src, /if\(SUPABASE_AUTH_ENABLED\)\{\nconst authRes=await supabase\.auth\.signInWithPassword/);
+  assert.match(src, /pLocal\.password!==hashPw\(password\)/);
+});
+
+test('auth debug includes mode and supabaseEnabled state fields', async () => {
+  const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(src, /auth:\{mode:SUPABASE_AUTH_ENABLED\?"supabase":"legacy",supabaseEnabled:SUPABASE_AUTH_ENABLED\?"yes":"no"/);
+  assert.match(src, /Auth mode:/);
+  assert.match(src, /Supabase auth enabled:/);
 });
