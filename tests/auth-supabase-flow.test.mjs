@@ -56,7 +56,7 @@ test('session restore retries refresh when user endpoint 401s', async () => {
 
 test('missing profile after successful auth is not invalid login', async () => {
   const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
-  assert.match(src, /Login succeeded, but profile was not found\./);
+  assert.match(src, /Account not found\. Please register again\./);
 });
 
 test('login after confirmation can find normalized profile email', async () => {
@@ -122,7 +122,7 @@ test('legacy mode bypasses Supabase signUp and signIn flows', async () => {
   const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
   assert.match(src, /if\(SUPABASE_AUTH_ENABLED\)\{\nconst authRes=await supabase\.auth\.signUp/);
   assert.match(src, /if\(SUPABASE_AUTH_ENABLED\)\{\nconst authRes=await supabase\.auth\.signInWithPassword/);
-  assert.match(src, /pLocal\.password!==hashPw\(password\)/);
+  assert.match(src, /legacy-auth\/login/);
 });
 
 test('auth debug includes mode and supabaseEnabled state fields', async () => {
