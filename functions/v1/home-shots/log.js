@@ -75,38 +75,43 @@ export async function onRequestPost({ request, env }) {
   }
 
   let membershipsByEmail = [];
-  try {
-    diagnostic.email_membership_query_attempted = "yes";
-    membershipsByEmail = await selectRows(
-      env,
-      "team_memberships",
-      `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&user_id=eq.${encodeURIComponent(requester)}&status=eq.active&limit=1`,
-    );
-    diagnostic.email_membership_query_result = String(Array.isArray(membershipsByEmail) ? membershipsByEmail.length : 0);
-  } catch (error) {
-    diagnostic.email_membership_query_result = `error:${safeErrorMessage(error)}`;
-    return diagnosticError("membership_email_query_failed", 500, "email_membership_lookup", "Failed to check email membership.", diagnostic);
-  }
-
-  const hasEmailMembership = Array.isArray(membershipsByEmail) && membershipsByEmail.length > 0;
+  let hasEmailMembership = false;
   let hasUuidMembership = false;
-  if (!hasEmailMembership) {
+  if (resolvedUserUuid) {
     diagnostic.uuid_membership_query_attempted = "yes";
-    if (!resolvedUserUuid) {
-      diagnostic.uuid_membership_query_result = "error:missing_resolved_uuid";
-    } else {
-      try {
-        const membershipsByUuid = await selectRows(
-          env,
-          "team_memberships",
-          `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&user_id=eq.${encodeURIComponent(resolvedUserUuid)}&status=eq.active&limit=1`,
-        );
-        hasUuidMembership = Array.isArray(membershipsByUuid) && membershipsByUuid.length > 0;
-        diagnostic.uuid_membership_query_result = String(Array.isArray(membershipsByUuid) ? membershipsByUuid.length : 0);
-      } catch (error) {
-        diagnostic.uuid_membership_query_result = `error:${safeErrorMessage(error)}`;
-        return diagnosticError("membership_uuid_query_failed", 500, "uuid_membership_lookup", "Failed to check uuid membership.", diagnostic);
+    try {
+      const membershipsByUuid = await selectRows(
+        env,
+        "team_memberships",
+        `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&user_id=eq.${encodeURIComponent(resolvedUserUuid)}&status=eq.active&limit=1`,
+      );
+      hasUuidMembership = Array.isArray(membershipsByUuid) && membershipsByUuid.length > 0;
+      diagnostic.uuid_membership_query_result = String(Array.isArray(membershipsByUuid) ? membershipsByUuid.length : 0);
+    } catch (error) {
+      diagnostic.uuid_membership_query_result = `error:${safeErrorMessage(error)}`;
+      return diagnosticError("membership_uuid_query_failed", 500, "uuid_membership_lookup", "Failed to check uuid membership.", diagnostic);
+    }
+  }
+  if (!resolvedUserUuid) diagnostic.uuid_membership_query_result = "skipped_missing_resolved_uuid";
+
+  if (!hasUuidMembership) {
+    diagnostic.email_membership_query_attempted = "yes";
+    try {
+      membershipsByEmail = await selectRows(
+        env,
+        "team_memberships",
+        `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&user_id=eq.${encodeURIComponent(requester)}&status=eq.active&limit=1`,
+      );
+      hasEmailMembership = Array.isArray(membershipsByEmail) && membershipsByEmail.length > 0;
+      diagnostic.email_membership_query_result = String(Array.isArray(membershipsByEmail) ? membershipsByEmail.length : 0);
+    } catch (error) {
+      const safeMessage = safeErrorMessage(error);
+      if (safeMessage) {
+        diagnostic.email_membership_query_result = `error_treated_as_no_match:${safeMessage}`;
+      } else {
+        diagnostic.email_membership_query_result = "error_treated_as_no_match";
       }
+      hasEmailMembership = false;
     }
   }
 
