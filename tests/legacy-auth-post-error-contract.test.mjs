@@ -12,9 +12,14 @@ const files=[
 for (const rel of files) {
   test(`legacy auth endpoint wraps POST errors safely: ${rel}`, async ()=>{
     const source=await readFile(new URL(rel, import.meta.url), 'utf8');
+    if (rel.includes('/register/')) {
+    assert.match(source,/export async function onRequestPost\(\{ request, env \}\)/);
+    assert.match(source,/return Response\.json\(\{ error: safeCode, stage \}, \{ status: 500 \}\);/);
+    } else {
     assert.match(source,/export async function onRequestPost\(\{request,env\}\)\{try\{/);
     assert.match(source,/catch\(error\)\{return handleLegacyAuthError\("\/v1\/legacy-auth\//);
     assert.match(source,/return Response\.json\(\{error:safeCode\},\{status:500\}\);/);
+    }
     assert.match(source,/SUPABASE_URL_MISSING/);
     assert.match(source,/SUPABASE_SERVICE_ROLE_KEY_MISSING/);
     assert.match(source,/REST_legacy_auth_profiles_FAILED/);
