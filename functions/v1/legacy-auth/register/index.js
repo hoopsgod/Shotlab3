@@ -1,19 +1,13 @@
 import { enforceRateLimit, getClientKey } from "../../../_utils/security.js";
 import { selectRows, upsertRows } from "../../../_utils/supabase.js";
+import { hashLegacyPassword } from "../_password.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const encoder = new TextEncoder();
 const ENDPOINT = "/v1/legacy-auth/register";
 
 const normalizeEmail = v => String(v || "").trim().toLowerCase();
 const toHex = bytes => Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join("");
 const safeProfile = row => ({ email: row.email, name: row.name, role: row.role, team_id: row.team_id || null, hide_from_leaderboards: row.hide_from_leaderboards === true });
-
-async function hashPassword(password, saltHex) {
-  const key = await crypto.subtle.importKey("raw", encoder.encode(password), "PBKDF2", false, ["deriveBits"]);
-  const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", salt: Uint8Array.from(saltHex.match(/../g).map(h => parseInt(h, 16))), iterations: 120000, hash: "SHA-256" }, key, 256);
-  return toHex(new Uint8Array(bits));
-}
 
 const CONFIG_ERROR_PATTERNS = ["SUPABASE_URL_MISSING", "SUPABASE_SERVICE_ROLE_KEY_MISSING"];
 const TABLE_ERROR_PATTERNS = ["legacy_auth_profiles", "relation does not exist", "schema cache", "permission denied", "REST_legacy_auth_profiles_FAILED", "PGRST"];
@@ -81,7 +75,7 @@ export async function onRequestPost({ request, env }) {
 
   let hashHex = "";
   try {
-    hashHex = await hashPassword(password, saltHex);
+    hashHex = await hashLegacyPassword(password, saltHex);
   } catch (error) {
     return stageErrorResponse({ endpoint: ENDPOINT, stage: "hash_password", error });
   }
