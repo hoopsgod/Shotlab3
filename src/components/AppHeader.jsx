@@ -24,13 +24,13 @@ const ACTION_BASE = {
   border: "1px solid var(--team-brand-border, var(--stroke-1))",
   background: "var(--team-brand-action-bg, color-mix(in srgb, var(--surface-1) 88%, transparent))",
   color: "var(--team-brand-action-text, var(--text-2))",
-  minHeight: 30,
-  minWidth: 30,
-  padding: "6px 10px",
-  fontSize: 10,
+  minHeight: 36,
+  minWidth: 36,
+  padding: "8px 12px",
+  fontSize: 11,
   lineHeight: 1.2,
   fontWeight: 700,
-  letterSpacing: "var(--tracking-tight)",
+  letterSpacing: "0.02em",
   textTransform: "uppercase",
   display: "inline-flex",
   alignItems: "center",
@@ -98,7 +98,7 @@ export default function AppHeader({
               {title}
             </h1>
             {subtitle ? (
-              <p style={{ marginTop: 6, marginBottom: 0, color: "var(--text-2)", fontSize: 12, letterSpacing: "0.03em", lineHeight: 1.35, overflowWrap: "anywhere", maxWidth: 520 }}>
+              <p style={{ marginTop: 6, marginBottom: 0, color: "var(--text-2)", fontSize: 13, letterSpacing: "0.01em", lineHeight: 1.45, overflowWrap: "anywhere", maxWidth: 560 }}>
                 {subtitle}
               </p>
             ) : null}
