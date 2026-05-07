@@ -43,7 +43,7 @@ export default function PlayerSidebar() {
         <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "10px", borderRadius: "12px", border: "1px solid var(--stroke-1)", background: tokens.surface }}>
           <div style={{ width: 32, height: 32, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", color: "#111", background: tokens.primary, fontWeight: 800 }}>{teamInitial}</div>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: "0.75rem", color: tokens.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>Team Identity</div>
+            <div style={{ fontSize: "0.75rem", color: tokens.muted, textTransform: "uppercase", letterSpacing: "0.04em" }}>Team Identity</div>
             <div style={{ fontSize: "1rem", fontWeight: 700, lineHeight: 1.25, overflowWrap: "anywhere" }}>{teamWordmark}</div>
           </div>
         </div>
@@ -58,15 +58,16 @@ export default function PlayerSidebar() {
               href={item.href}
               style={{
                 display: "flex",
-                alignItems: "flex-start",
+                alignItems: "center",
                 gap: "12px",
-                minHeight: "40px",
+                minHeight: "44px",
                 padding: "10px 12px",
                 borderRadius: "8px",
                 color: isActive ? tokens.primary : tokens.text,
                 textDecoration: "none",
                 fontSize: "0.875rem",
                 fontWeight: 600,
+                letterSpacing: "0.01em",
                 border: isActive ? `1px solid ${tokens.primarySoft}` : "1px solid transparent",
                 background: isActive ? tokens.primarySoft : "transparent",
               }}

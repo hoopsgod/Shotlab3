@@ -39,14 +39,13 @@ export default function HomeShotsLeaderboardCard({
         border: "1px solid var(--stroke-1)",
         background: "var(--surface-2)",
         color: "var(--text-2)",
-        fontSize: 12,
-        padding: "14px 12px",
-        textTransform: "uppercase",
-        letterSpacing: "0.06em",
+        fontSize: 13,
+        padding: "16px 14px",
         fontWeight: 600,
       }}
     >
-      No home shots logged yet.
+      <div style={{ color: "var(--text-1)", fontWeight: 700, marginBottom: 4 }}>No home shots logged yet.</div>
+      <div style={{ color: "var(--text-2)" }}>Have players log their first home session to populate this leaderboard.</div>
     </div>
   );
 
@@ -57,11 +56,11 @@ export default function HomeShotsLeaderboardCard({
         border: "1px solid rgba(255,69,69,0.4)",
         background: "rgba(255,69,69,0.08)",
         color: "#FF8B8B",
-        fontSize: 12,
-        padding: "14px 12px",
+        fontSize: 13,
+        padding: "16px 14px",
       }}
     >
-      <div style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>Could not load leaderboard</div>
+      <div style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Could not load leaderboard</div>
       <div style={{ marginTop: 6, color: "#FFB5B5" }}>{error || "Please try again."}</div>
       {typeof onRetry === "function" && (
         <button
@@ -74,9 +73,9 @@ export default function HomeShotsLeaderboardCard({
             color: "#FFE2E2",
             cursor: "pointer",
             padding: "6px 10px",
-            fontSize: 11,
+            fontSize: 12,
             textTransform: "uppercase",
-            letterSpacing: "0.06em",
+            letterSpacing: "0.03em",
             fontWeight: 700,
           }}
         >
@@ -93,10 +92,10 @@ export default function HomeShotsLeaderboardCard({
           key={`${entry.rank}-${entry.player_display_name}`}
           style={{
             display: "grid",
-            gridTemplateColumns: "40px 1fr auto",
+            gridTemplateColumns: "50px 1fr auto",
             alignItems: "center",
             gap: 10,
-            padding: "10px 12px",
+            padding: "12px 14px",
             borderRadius: 12,
             border: "1px solid var(--stroke-1)",
             background: "var(--surface-2)",
@@ -105,18 +104,18 @@ export default function HomeShotsLeaderboardCard({
           <div
             style={{
               color: "var(--accent)",
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: 800,
-              letterSpacing: "0.06em",
+              letterSpacing: "0.03em",
               textAlign: "center",
             }}
           >
-            #{entry.rank}
+            <span style={{ display: "inline-flex", minWidth: 28, justifyContent: "center", borderRadius: 999, padding: "2px 6px", border: "1px solid color-mix(in srgb, var(--accent) 45%, transparent)", background: "color-mix(in srgb, var(--accent) 14%, transparent)" }}>#{entry.rank}</span>
           </div>
-          <div style={{ color: "var(--text-1)", fontSize: 13, fontWeight: 700, letterSpacing: "0.04em" }}>
+          <div style={{ color: "var(--text-1)", fontSize: 13, fontWeight: 700, letterSpacing: "0.01em" }}>
             {String(entry.player_display_name || "Player").toUpperCase()}
           </div>
-          <div style={{ color: "var(--text-1)", fontSize: 13, fontWeight: 700 }}>{entry.total_home_shots}</div>
+          <div style={{ color: "var(--text-1)", fontSize: 14, fontWeight: 800 }}>{entry.total_home_shots}</div>
         </div>
       ))}
     </div>
@@ -133,8 +132,8 @@ export default function HomeShotsLeaderboardCard({
       aria-live="polite"
     >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 10 }}>
-        <div style={{ color: "var(--text-1)", fontSize: 12, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase" }}>{title}</div>
-        <div style={{ color: "var(--text-3)", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>
+        <div style={{ color: "var(--text-1)", fontSize: 12, fontWeight: 800, letterSpacing: "0.07em", textTransform: "uppercase" }}>{title}</div>
+        <div style={{ color: "var(--text-3)", fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>
           Rank 1–10
         </div>
       </div>

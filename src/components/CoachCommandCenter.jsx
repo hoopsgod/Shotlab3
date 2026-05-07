@@ -1,4 +1,5 @@
 import React from "react";
+import { useState } from "react";
 
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
@@ -22,6 +23,7 @@ export default function CoachCommandCenter({
   onRegenerateJoinCode,
   codeErr,
 }) {
+  const [copied, setCopied] = useState(false);
   const isCompact=variant==="compact";
   const metricBase={
     minHeight:56,
@@ -46,7 +48,7 @@ export default function CoachCommandCenter({
     fontFamily:FB,
     fontSize:13,
     fontWeight:700,
-    letterSpacing:"var(--tracking-default)",
+    letterSpacing:"0.03em",
     textTransform:"uppercase",
     padding:"0 16px",
     cursor:"pointer",
@@ -55,7 +57,7 @@ export default function CoachCommandCenter({
   });
 
   const compactActionBtn=(isPrimary)=>({
-    minHeight:44,
+    minHeight:46,
     minWidth:44,
     borderRadius:10,
     border:`1px solid ${isPrimary?"var(--accent)":"var(--stroke-1)"}`,
@@ -64,7 +66,7 @@ export default function CoachCommandCenter({
     fontFamily:FB,
     fontSize:10,
     fontWeight:700,
-    letterSpacing:"var(--tracking-tight)",
+    letterSpacing:"0.03em",
     textTransform:"uppercase",
     padding:"0 10px",
     cursor:"pointer",
@@ -93,25 +95,28 @@ export default function CoachCommandCenter({
 
   return (
     <section style={{padding:"12px 12px 14px"}}>
-      <div style={{marginTop:2,marginBottom:10,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <h2 className="u-allcaps-long" style={{fontFamily:FD,fontSize:13,color:"var(--text-secondary)",margin:0}}>
+      <div style={{marginTop:2,marginBottom:6,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <h2 className="u-allcaps-long" style={{fontFamily:FD,fontSize:14,color:"var(--text-secondary)",margin:0}}>
           Coach Command Center
         </h2>
       </div>
+      <p style={{margin:"0 0 12px",fontFamily:FB,fontSize:12,color:"var(--text-2)",letterSpacing:"0.01em"}}>
+        Quick access to daily roster actions, event planning, and team onboarding.
+      </p>
 
       <div style={{display:"grid",gridTemplateColumns:"repeat(3, minmax(0, 1fr))",gap:8}}>
         <button type="button" onClick={onPlayersClick} style={{...metricBase,border:highlightPlayersAttention?"1px solid rgba(255,69,69,0.45)":metricBase.border,boxShadow:"none"}}>
-          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
+          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.03em",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Players</div>
           <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"var(--accent)"}}>{totalPlayers}</div>
         </button>
 
         <button type="button" onClick={onActiveTodayClick} style={metricBase}>
-          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
+          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.03em",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Active Today</div>
           <div style={{marginTop:4,fontFamily:FD,fontSize:23,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{activeTodayCount}</div>
         </button>
 
         <button type="button" onClick={onNextEventClick} style={metricBase}>
-          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"var(--tracking-default)",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
+          <div style={{fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.03em",color:"var(--text-tertiary)",textTransform:"uppercase",overflow:"hidden",textOverflow:"ellipsis"}}>Next Event</div>
           <div style={{marginTop:5,fontFamily:FD,fontSize:16,fontWeight:900,lineHeight:1,color:"var(--text-1)"}}>{nextEventDateFormatted}</div>
         </button>
       </div>
@@ -125,13 +130,17 @@ export default function CoachCommandCenter({
         </div>
       </div>
 
-      <div style={{margin:"10px 0 4px",padding:"14px 14px",border:"1px solid var(--stroke-1)",borderRadius:14,background:"var(--surface-2)"}}>
+      <div style={{margin:"10px 0 4px",padding:"14px 14px",border:"1px solid var(--stroke-1)",borderRadius:14,background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.20))"}}>
         <div className="u-meta-label" style={{fontFamily:FB,fontSize:10,color:"var(--text-2)"}}>TEAM CODE</div>
+        <p style={{margin:"6px 0 0",fontFamily:FB,fontSize:12,color:"var(--text-2)",letterSpacing:"0.01em"}}>
+          Share this code with players to join your team.
+        </p>
         <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8,flexWrap:"wrap"}}>
           <div style={{fontFamily:FD,fontSize:25,color:"var(--text-1)",letterSpacing:4,minWidth:114,lineHeight:1}}>{joinCode||"—"}</div>
-          <button onClick={onCopyJoinCode} style={{padding:"8px 12px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-wide)"}}>COPY</button>
-          <button onClick={onRegenerateJoinCode} style={{padding:"8px 12px",fontSize:10,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"var(--tracking-tight)"}}>REGENERATE</button>
+          <button onClick={() => { onCopyJoinCode?.(); setCopied(true); setTimeout(() => setCopied(false), 1600); }} style={{padding:"10px 14px",fontSize:11,border:"1px solid var(--accent)",background:"var(--accent)",color:"#0B0D10",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"0.03em",minHeight:40}}>COPY CODE</button>
+          <button onClick={onRegenerateJoinCode} style={{padding:"10px 14px",fontSize:11,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-2)",borderRadius:10,cursor:"pointer",fontWeight:700,letterSpacing:"0.03em",minHeight:40}}>REGENERATE</button>
         </div>
+        {copied && <div style={{color:"var(--accent)",fontSize:11,marginTop:8,fontWeight:700,letterSpacing:"0.03em"}}>Copied to clipboard.</div>}
         {codeErr&&<div style={{color:"#FF4545",fontSize:11,marginTop:6}}>{codeErr}</div>}
       </div>
     </section>

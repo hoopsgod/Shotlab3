@@ -14,7 +14,7 @@ export default function PlayerDashboardLayout({ children, teamBranding }: Player
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--surface-1)' }}>
         <div style={{ display: 'flex', flex: 1 }}>
           <PlayerSidebar />
-          <main style={{ flex: 1, padding: '16px', overflowX: 'hidden' }}>{children}</main>
+          <main style={{ flex: 1, padding: '14px 16px 16px', overflowX: 'hidden' }}>{children}</main>
           <PlayerWidgets />
         </div>
       </div>

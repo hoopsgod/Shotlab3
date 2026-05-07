@@ -13,11 +13,11 @@ export default function PlayerWidgets() {
         overflowY: "auto",
       }}
     >
-      <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: "16px", color: tokens.text }}>{teamName} Updates</div>
+      <div style={{ fontWeight: 700, fontSize: "1rem", marginBottom: "14px", color: tokens.text, letterSpacing: "0.01em" }}>{teamName} Updates</div>
 
       <div style={{ marginBottom: "20px", padding: "12px", border: "1px solid var(--stroke-1)", borderRadius: "12px", background: tokens.surface }}>
-        <h3 style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.08em", color: tokens.muted, margin: "0 0 8px" }}>Next Workout</h3>
-        <p style={{ fontSize: "0.875rem", color: tokens.text, margin: 0 }}>Strength training on March 15, 2026 at 5 PM</p>
+        <h3 style={{ fontSize: "0.75rem", textTransform: "uppercase", letterSpacing: "0.04em", color: tokens.muted, margin: "0 0 8px" }}>Next Workout</h3>
+        <p style={{ fontSize: "0.875rem", color: tokens.text, margin: 0, lineHeight: 1.45, letterSpacing: "0.01em" }}>Strength training on March 15, 2026 at 5 PM</p>
       </div>
 
       <button
@@ -25,9 +25,10 @@ export default function PlayerWidgets() {
           width: "100%",
           border: "none",
           borderRadius: "12px",
+          minHeight: "44px",
           padding: "12px 14px",
           fontWeight: 700,
-          letterSpacing: "0.05em",
+          letterSpacing: "0.03em",
           textTransform: "uppercase",
           cursor: "pointer",
           color: "#111",
