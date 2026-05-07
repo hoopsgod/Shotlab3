@@ -825,7 +825,7 @@ const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated
 const teamForEmail=e=>playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null;
 const scoresM=(rawScores||[]).map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||teamForEmail(s.email),drillId:s.drillId||s.drill_id,src:s.src||"home"}));
 const eventsM=(rawEvents||[]).map(e=>({...e,teamId:e.teamId||teamForEmail(e.ownerCoachId)}));
-const rsvpsM=(rawRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
+const rsvpsM=(rawRsvps||[]).map(r=>({...r,id:r.id||null,eventId:r.eventId||r.event_id,playerId:r.playerId||r.player_id||r.email,teamId:r.teamId||r.team_id||teamForEmail(r.email),email:normalizeEmail(r.email||""),name:String(r.name||""),ts:Number.isFinite(Number(r.ts))?Number(r.ts):Date.now()}));
 const shotM=(rawShotLogs||[]).map(l=>({...l,playerId:l.playerId||l.player_id||l.email,teamId:l.teamId||l.team_id||teamForEmail(l.email),hideFromLeaderboards:l.hideFromLeaderboards===true||l.hide_from_leaderboards===true}));
 const chM=(rawChallenges||[]).map(c=>({...c,teamId:c.teamId||teamForEmail(c.from),playerId:c.playerId||c.from}));
 const scSM=(rawScSessions||[]).map(s=>({...s,teamId:s.teamId||teamForEmail(s.ownerCoachId)}));
