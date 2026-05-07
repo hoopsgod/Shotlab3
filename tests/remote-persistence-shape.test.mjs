@@ -6,6 +6,7 @@ import {
   buildRemoteRows,
   normalizeScoreRowForDb,
   normalizeShotLogRowForDb,
+  normalizeRsvpRowForDb,
 } from '../src/lib/remotePersistence.js';
 
 test('score rows normalize to db-compatible snake_case fields', () => {
@@ -122,4 +123,61 @@ test('wrong-team rows are excluded from coach team views', () => {
   const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /const scopedScores=scores;/);
   assert.doesNotMatch(source, /const scopedShotLogs=shotLogs;/);
+});
+
+
+test('rsvp rows normalize to db-compatible snake_case fields', () => {
+  const row = normalizeRsvpRowForDb({
+    id: 'rsvp-1',
+    eventId: 42,
+    email: 'Player@One.com',
+    playerId: 'player-1',
+    teamId: 'team-1',
+    name: 'Player One',
+    ts: 789,
+    ignoredField: 'drop-me',
+  });
+
+  assert.deepEqual(row, {
+    id: 'rsvp-1',
+    event_id: '42',
+    email: 'player@one.com',
+    player_id: 'player-1',
+    team_id: 'team-1',
+    name: 'Player One',
+    ts: 789,
+  });
+  assert.equal(Object.hasOwn(row, 'eventId'), false);
+  assert.equal(Object.hasOwn(row, 'playerId'), false);
+  assert.equal(Object.hasOwn(row, 'teamId'), false);
+  assert.equal(Object.hasOwn(row, 'ignoredField'), false);
+});
+
+test('player RSVP save shape includes team and event identifiers', () => {
+  const [row] = buildRemoteRows('sl:rsvps', [{
+    id: 'rsvp-2',
+    eventId: 'event-7',
+    email: 'player@one.com',
+    playerId: 'player@one.com',
+    teamId: 'team-2',
+    name: 'Player One',
+    ts: 800,
+  }]);
+
+  assert.equal(row.event_id, 'event-7');
+  assert.equal(row.team_id, 'team-2');
+  assert.equal(row.player_id, 'player@one.com');
+  assert.equal(row.email, 'player@one.com');
+});
+
+
+test('rsvp remote rows are normalized back to app camelCase shape on hydration', () => {
+  const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(source, /const rsvpsM=\(rawRsvps\|\|\[\]\)\.map\(r=>\(\{\.\.\.r,id:r\.id\|\|null,eventId:r\.eventId\|\|r\.event_id,playerId:r\.playerId\|\|r\.player_id\|\|r\.email,teamId:r\.teamId\|\|r\.team_id\|\|teamForEmail\(r\.email\),email:normalizeEmail\(r\.email\|\|""\),name:String\(r\.name\|\|""\),ts:Number\.isFinite\(Number\(r\.ts\)\)\?Number\(r\.ts\):Date\.now\(\)\}\)\);/);
+});
+
+test('coach and player RSVP scopes remain team/event based after reload normalization', () => {
+  const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(source, /const scopedRsvps=rsvps\.filter\(r=>r\.teamId===user\?\.teamId\);/);
+  assert.match(source, /const evR=rsvpsByEvent\.get\(ev\.id\)\|\|\[\];/);
 });
