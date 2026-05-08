@@ -1702,7 +1702,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const attendancePct=upcomingEventsCount>0&&attendanceRows.length>0?`${Math.min(100,Math.round((attendanceRows.length/upcomingEventsCount)*100))}%`:"—";
       const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
       const nextEventBadge=nextEvent?`Next · ${nextEvent.date.slice(5).replace("-","/")}`:"Schedule";
-      const weeklyMakes=shotLogs.filter(s=>s.email===u.email&&daysAgo(s.date)<=6).reduce((a,s)=>a+s.made,0);
+      const isWithinLastSevenDays=(dateValue)=>{
+        if(!dateValue)return false;
+        const shotDate=new Date(`${dateValue}T00:00:00`);
+        const todayDate=new Date(`${today}T00:00:00`);
+        if(Number.isNaN(shotDate.getTime())||Number.isNaN(todayDate.getTime()))return false;
+        const diffDays=Math.floor((todayDate-shotDate)/86400000);
+        return diffDays>=0&&diffDays<=6;
+      };
+      const weeklyMakes=shotLogs.filter(s=>s.email===u.email&&isWithinLastSevenDays(s.date)).reduce((a,s)=>a+s.made,0);
       const todaysMakes=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
       const hasAnyShots=shotLogs.some(s=>s.email===u.email&&s.made>0);
       const leaderboardRank=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows.findIndex((row)=>normalizeEmail(row?.email||"")===normalizeEmail(u.email))+1:0;
