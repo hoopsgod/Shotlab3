@@ -8,6 +8,9 @@ import {
   normalizeShotLogRowForDb,
   normalizeEventRowForDb,
   normalizeEventRowForApp,
+  normalizePlayerRowForDb,
+  normalizePlayerProfileRowForDb,
+  mergeHydratedRows,
   buildAppRows,
 } from '../src/lib/remotePersistence.js';
 
@@ -185,4 +188,45 @@ test('event/rsvp ids remain compatible through normalization', () => {
 
   assert.equal(eventRow.id, 'event-4');
   assert.equal(rsvpRow.event_id, eventRow.id);
+});
+
+
+test('remote event row hydrates with teamId for player team filters', () => {
+  const [row] = buildAppRows('sl:events', [{ id: 'event-remote', team_id: 'team-r', owner_coach_id: 'coach@r.com', title: 'Remote Event' }]);
+  assert.equal(row.teamId, 'team-r');
+  assert.equal(row.ownerCoachId, 'coach@r.com');
+});
+
+test('player/profile normalization preserves teamId and email identity', () => {
+  const player = normalizePlayerRowForDb({ email: 'P@One.com', teamId: 'team-a', hideFromLeaderboards: true });
+  const profile = normalizePlayerProfileRowForDb({ id: 'pp-1', userId: 'P@One.com', teamId: 'team-a', firstName: 'P' });
+
+  assert.equal(player.team_id, 'team-a');
+  assert.equal(player.email, 'p@one.com');
+  assert.equal(player.hide_from_leaderboards, true);
+  assert.equal(profile.team_id, 'team-a');
+  assert.equal(profile.user_id, 'p@one.com');
+  assert.equal(profile.email, 'p@one.com');
+});
+
+test('coach roster hydration merge keeps local players when remote is incomplete', () => {
+  const merged = mergeHydratedRows('sl:players', [{ id: 'team-a:coach@a.com', email: 'coach@a.com', teamId: 'team-a', role: 'coach' }], [{ id: 'team-a:player@a.com', email: 'player@a.com', teamId: 'team-a', role: 'player' }]);
+  assert.equal(merged.some(r => r.email === 'player@a.com'), true);
+});
+
+test('hydration merge keeps valid local team events when remote is incomplete', () => {
+  const merged = mergeHydratedRows('sl:events', [{ id: 'event-1', teamId: 'team-a', ownerCoachId: 'coach@a.com' }], [{ id: 'event-2', teamId: 'team-a', ownerCoachId: 'coach@a.com' }]);
+  assert.equal(merged.length, 2);
+  assert.equal(merged.some(r => r.id === 'event-2'), true);
+});
+
+test('home shots leaderboard persistence path remains unchanged', () => {
+  const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(source, /const scopedShotLogs=shotLogs\.filter\(l=>l\.teamId===user\?\.teamId\);/);
+});
+
+test('existing RSVP normalization flow remains intact', () => {
+  const [row] = buildRemoteRows('sl:rsvps', [{ id: 'r1', eventId: 'e1', teamId: 't1', playerId: 'p1@t.com', email: 'p1@t.com' }]);
+  assert.equal(row.event_id, 'e1');
+  assert.equal(row.team_id, 't1');
 });
