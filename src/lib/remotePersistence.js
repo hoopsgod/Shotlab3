@@ -8,6 +8,153 @@ const cleanText = (value) => {
   return String(value).trim();
 };
 
+const toLowerIdentity = (value) => cleanText(value).toLowerCase();
+
+const buildProfileFallbackId = ({ id, teamId, email }) => {
+  const cleanId = cleanText(id);
+  if (cleanId) return cleanId;
+  const cleanTeamId = cleanText(teamId);
+  const cleanEmail = toLowerIdentity(email);
+  if (!cleanTeamId || !cleanEmail) return "";
+  return `pp-shell:${cleanTeamId}:${cleanEmail}`;
+};
+
+export const normalizePlayerProfileRowForDb = (row = {}) => {
+  const teamId = cleanText(row.team_id || row.teamId);
+  const email = toLowerIdentity(row.email);
+  const userId = cleanText(row.user_id || row.userId);
+  const id = buildProfileFallbackId({ id: row.id, teamId, email });
+  if (!id || !teamId || (!email && !userId)) return null;
+
+  const payload = {
+    id,
+    team_id: teamId,
+    email,
+    user_id: userId,
+    first_name: cleanText(row.first_name || row.firstName),
+    last_name: cleanText(row.last_name || row.lastName),
+    jersey_number: cleanText(row.jersey_number || row.jerseyNumber),
+    created_at: toFiniteNumber(row.created_at || row.createdAt),
+  };
+
+  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
+};
+
+export const normalizePlayerProfileRowForApp = (row = {}) => {
+  const teamId = cleanText(row.team_id || row.teamId);
+  const email = toLowerIdentity(row.email);
+  const userId = cleanText(row.user_id || row.userId);
+  const id = buildProfileFallbackId({ id: row.id, teamId, email });
+  if (!id || !teamId || (!email && !userId)) return null;
+
+  const payload = {
+    id,
+    teamId,
+    email,
+    userId: userId || null,
+    firstName: cleanText(row.first_name || row.firstName),
+    lastName: cleanText(row.last_name || row.lastName),
+    jerseyNumber: cleanText(row.jersey_number || row.jerseyNumber),
+    createdAt: toFiniteNumber(row.created_at || row.createdAt),
+  };
+
+  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
+};
+
+const profileMergeIdentity = (row = {}) => {
+  const id = cleanText(row.id);
+  if (id) return `id:${id}`;
+  const teamId = cleanText(row.team_id || row.teamId);
+  const email = toLowerIdentity(row.email);
+  if (teamId && email) return `team-email:${teamId}:${email}`;
+  const userId = cleanText(row.user_id || row.userId);
+  if (teamId && userId) return `team-user:${teamId}:${userId}`;
+  return "";
+};
+
+const playerMergeIdentity = (row = {}) => {
+  const id = cleanText(row.id);
+  if (id) return `id:${id}`;
+  const teamId = cleanText(row.team_id || row.teamId);
+  const email = toLowerIdentity(row.email);
+  if (teamId && email) return `team-email:${teamId}:${email}`;
+  return "";
+};
+
+const eventMergeIdentity = (row = {}) => {
+  const id = cleanText(row.id);
+  if (!id) return "";
+  return `id:${id}`;
+};
+
+const mergeRowsByIdentity = (localRows = [], remoteRows = [], identityResolver) => {
+  const merged = new Map();
+  (Array.isArray(localRows) ? localRows : []).forEach((row) => {
+    const identity = identityResolver(row);
+    if (!identity) return;
+    merged.set(identity, row);
+  });
+  (Array.isArray(remoteRows) ? remoteRows : []).forEach((row) => {
+    const identity = identityResolver(row);
+    if (!identity) return;
+    merged.set(identity, row);
+  });
+  return [...merged.values()];
+};
+
+export const mergeHydratedRows = (key, localRows = [], remoteRows = []) => {
+  if (key === "sl:player-profiles") return mergeRowsByIdentity(localRows, remoteRows, profileMergeIdentity);
+  if (key === "sl:players") return mergeRowsByIdentity(localRows, remoteRows, playerMergeIdentity);
+  if (key === "sl:events") return mergeRowsByIdentity(localRows, remoteRows, eventMergeIdentity);
+  return Array.isArray(remoteRows) && remoteRows.length > 0 ? remoteRows : localRows;
+};
+
+export const normalizePlayerRowForDb = (row = {}) => {
+  const id = cleanText(row.id);
+  const teamId = cleanText(row.team_id || row.teamId);
+  const email = toLowerIdentity(row.email);
+  if (!teamId || !email) return null;
+
+  const payload = {
+    id,
+    email,
+    name: cleanText(row.name),
+    role: cleanText(row.role),
+    team_id: teamId,
+    hide_from_leaderboards:
+      typeof row.hide_from_leaderboards === "boolean"
+        ? row.hide_from_leaderboards
+        : typeof row.hideFromLeaderboards === "boolean"
+          ? row.hideFromLeaderboards
+          : undefined,
+  };
+
+  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== "" && value !== undefined));
+};
+
+export const normalizePlayerRowForApp = (row = {}) => {
+  const id = cleanText(row.id);
+  const teamId = cleanText(row.team_id || row.teamId);
+  const email = toLowerIdentity(row.email);
+  if (!teamId || !email) return null;
+
+  const payload = {
+    id,
+    email,
+    name: cleanText(row.name),
+    role: cleanText(row.role),
+    teamId,
+    hideFromLeaderboards:
+      typeof row.hide_from_leaderboards === "boolean"
+        ? row.hide_from_leaderboards
+        : typeof row.hideFromLeaderboards === "boolean"
+          ? row.hideFromLeaderboards
+          : undefined,
+  };
+
+  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== "" && value !== undefined));
+};
+
 export const normalizeScoreRowForDb = (row = {}) => {
   const id = cleanText(row.id);
   const email = cleanText(row.email).toLowerCase();
@@ -147,6 +294,8 @@ export const buildAppRows = (key, rows) => {
   if (!Array.isArray(rows) || rows.length === 0) return [];
   if (key === "sl:events") return rows.map(normalizeEventRowForApp).filter(Boolean);
   if (key === "sl:rsvps") return rows.map(normalizeRsvpRowForApp).filter(Boolean);
+  if (key === "sl:player-profiles") return rows.map(normalizePlayerProfileRowForApp).filter(Boolean);
+  if (key === "sl:players") return rows.map(normalizePlayerRowForApp).filter(Boolean);
   return rows;
 };
 
@@ -156,7 +305,21 @@ export const buildRemoteRows = (key, rows, options = {}) => {
 
   if (key === "sl:scores") return sourceRows.map(normalizeScoreRowForDb).filter(Boolean);
   if (key === "sl:shotlogs") return sourceRows.map(normalizeShotLogRowForDb).filter(Boolean);
-  if (key === "sl:events") return sourceRows.map(normalizeEventRowForDb).filter(Boolean);
+  if (key === "sl:events") {
+    const rowsForDb = sourceRows.map(normalizeEventRowForDb).filter(Boolean);
+    if (sourceRows.length > 0 && rowsForDb.length === 0) console.warn("[remote-persist] all rows dropped during normalization", { key, sourceCount: sourceRows.length });
+    return rowsForDb;
+  }
   if (key === "sl:rsvps") return sourceRows.map(normalizeRsvpRowForDb).filter(Boolean);
+  if (key === "sl:player-profiles") {
+    const rowsForDb = sourceRows.map(normalizePlayerProfileRowForDb).filter(Boolean);
+    if (sourceRows.length > 0 && rowsForDb.length === 0) console.warn("[remote-persist] all rows dropped during normalization", { key, sourceCount: sourceRows.length });
+    return rowsForDb;
+  }
+  if (key === "sl:players") {
+    const rowsForDb = sourceRows.map(normalizePlayerRowForDb).filter(Boolean);
+    if (sourceRows.length > 0 && rowsForDb.length === 0) console.warn("[remote-persist] all rows dropped during normalization", { key, sourceCount: sourceRows.length });
+    return rowsForDb;
+  }
   return sourceRows;
 };
