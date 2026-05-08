@@ -2689,6 +2689,9 @@ const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).to
 const rsvpsByEvent=useMemo(()=>{const buckets=new Map();for(const rsvp of rsvps){if(!buckets.has(rsvp.eventId))buckets.set(rsvp.eventId,[]);buckets.get(rsvp.eventId).push(rsvp);}return buckets;},[rsvps]);
 const attendanceCountByEmail=useMemo(()=>{const counts=new Map();for(const rsvp of rsvps){counts.set(rsvp.email,(counts.get(rsvp.email)||0)+1);}return counts;},[rsvps]);
 const availableWalkInByEvent=useMemo(()=>{const byEvent=new Map();for(const ev of sortedEvents){const attendees=new Set((rsvpsByEvent.get(ev.id)||[]).map(r=>r.email));byEvent.set(ev.id,allKnown.filter(p=>!attendees.has(p.email)));}return byEvent;},[allKnown,sortedEvents,rsvpsByEvent]);
+const rosterNameByEmail=useMemo(()=>{const map=new Map();for(const p of players){const email=String(p?.email||'').toLowerCase();if(email&&!map.has(email))map.set(email,p?.name||'');}for(const p of allKnown){const email=String(p?.email||'').toLowerCase();if(email&&!map.has(email))map.set(email,p?.name||'');}return map;},[players,allKnown]);
+const coachEventRsvpRows=useCallback((eventId)=>rsvps.filter(r=>r.eventId===eventId&&r.teamId===u?.teamId),[rsvps,u?.teamId]);
+const coachRsvpLabel=useCallback((r)=>{const directName=String(r?.name||'').trim();if(directName)return directName;const fallbackEmail=String(r?.email||r?.playerId||'').toLowerCase();const rosterName=rosterNameByEmail.get(fallbackEmail);if(rosterName&&String(rosterName).trim())return rosterName;return String(r?.email||r?.playerId||'Unknown player');},[rosterNameByEmail]);
 const highlightAddPlayer=totalPlayers===0;
 const highlightAddDrill=drills.length===0;
 const highlightScheduleEvent=events.length===0||!nextEvent;
@@ -3020,7 +3023,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           return Object.entries(grouped).map(([dateKey,dateEvents])=>{const d=new Date(`${dateKey}T00:00:00`);const weekday=d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();const monthDay=d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();
           return <div key={dateKey} style={{display:"grid",gap:6}}>
             <div style={{display:"flex",alignItems:"baseline",gap:7,padding:"2px 2px 0"}}><span style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:".1em"}}>{weekday}</span><span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{monthDay}</span></div>
-            {dateEvents.map(ev=><div key={ev.id} style={{background:"rgba(20,24,33,0.82)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"11px 12px",display:"grid",gap:5,maxWidth:"100%"}}>
+            {dateEvents.map(ev=>{const evCoachRsvps=coachEventRsvpRows(ev.id);const evCoachRsvpNames=evCoachRsvps.map(coachRsvpLabel);return <div key={ev.id} style={{background:"rgba(20,24,33,0.82)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"11px 12px",display:"grid",gap:5,maxWidth:"100%"}}>
               <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8}}>
                 <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,lineHeight:1.25,minWidth:0,wordBreak:"break-word"}}>{ev.title}</div>
                 <span style={{padding:"2px 7px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}55`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase",flexShrink:0}}>{ev.type||"event"}</span>
@@ -3028,7 +3031,9 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
               <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>{ev.date}</div>
               <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>{ev.time||"TBD"}</div>
               <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25,wordBreak:"break-word"}}>📍 {ev.location||"Location TBD"}</div>
-            </div>)}
+              <div style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,marginTop:2}}>{`${evCoachRsvps.length} going`}</div>
+              {evCoachRsvpNames.length>0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35,wordBreak:"break-word"}}>{evCoachRsvpNames.join(", ")}</div>:<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35}}>No players RSVP'd yet.</div>}
+            </div>})})
           </div>});
         })()}
       </div>}
@@ -3085,7 +3090,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       </div>}
     </div>}
 
-    {isDesktop&&filteredEvents.map(ev=>{const evR=rsvpsByEvent.get(ev.id)||[];const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
+    {isDesktop&&filteredEvents.map(ev=>{const evR=coachEventRsvpRows(ev.id);const evRsvpPreview=evR.slice(0,3).map(coachRsvpLabel);const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
       return <div key={ev.id} className="accent-card" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,marginBottom:10,overflow:"hidden"}}>
         <button className="ch" onClick={()=>setExpEv(expEv===ev.id?null:ev.id)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"14px 16px",background:"none",border:"none",cursor:"pointer",textAlign:"left"}}>
           <div style={{minWidth:0}}>
@@ -3095,9 +3100,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           </div>
           <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
             <span style={{padding:"4px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:`${VOLT}1A`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase"}}>{ev.type||"event"}</span>
-            <span style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{evR.length} RSVPs</span>
+            <span style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{`${evR.length} going`}</span>
           </div>
         </button>
+        <div style={{padding:"0 16px 12px",fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35,wordBreak:"break-word"}}>
+          {evRsvpPreview.length>0?evRsvpPreview.join(", "):"No players RSVP'd yet."}
+        </div>
         {isExp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 14px 14px",padding:"16px 16px",borderTop:`1px solid ${BORDER_CLR}`}}>
           <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:12}}>{ev.desc}</p>
           <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>ATTENDEES ({evR.length})</div>
