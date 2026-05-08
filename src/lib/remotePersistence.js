@@ -62,8 +62,9 @@ export const normalizeShotLogRowForDb = (row = {}) => {
 export const normalizeEventRowForDb = (row = {}) => {
   const id = cleanText(row.id);
   const teamId = cleanText(row.team_id || row.teamId);
+  if (!id || !teamId) return null;
+
   const ownerCoachId = cleanText(row.owner_coach_id || row.ownerCoachId);
-  if (!id || !teamId || !ownerCoachId) return null;
 
   const payload = {
     id,
@@ -71,10 +72,10 @@ export const normalizeEventRowForDb = (row = {}) => {
     date: cleanText(row.date),
     time: cleanText(row.time),
     location: cleanText(row.location),
-    desc: cleanText(row.desc),
+    description: cleanText(row.description || row.desc),
     type: cleanText(row.type),
     team_id: teamId,
-    owner_coach_id: ownerCoachId,
+    ...(ownerCoachId ? { owner_coach_id: ownerCoachId } : {}),
   };
 
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
@@ -83,8 +84,9 @@ export const normalizeEventRowForDb = (row = {}) => {
 export const normalizeEventRowForApp = (row = {}) => {
   const id = cleanText(row.id);
   const teamId = cleanText(row.team_id || row.teamId);
+  if (!id || !teamId) return null;
+
   const ownerCoachId = cleanText(row.owner_coach_id || row.ownerCoachId);
-  if (!id || !teamId || !ownerCoachId) return null;
 
   const payload = {
     id,
@@ -92,10 +94,10 @@ export const normalizeEventRowForApp = (row = {}) => {
     date: cleanText(row.date),
     time: cleanText(row.time),
     location: cleanText(row.location),
-    desc: cleanText(row.desc),
+    desc: cleanText(row.description || row.desc),
     type: cleanText(row.type),
     teamId,
-    ownerCoachId,
+    ...(ownerCoachId ? { ownerCoachId } : {}),
   };
 
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
