@@ -13,7 +13,7 @@ test('coach-created events are team-scoped', async () => {
 
   assert.match(
     source,
-    /const addEvent=async ev=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return;await P\("sl:events",\[\.\.\.events,\{\.\.\.ev,id:Date\.now\(\),teamId:user\.teamId,ownerCoachId:user\.email\}\],setEvents\)/,
+    /const addEvent=async ev=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return;await P\("sl:events",\[\.\.\.events,\{\.\.\.ev,id:genId\("event"\),teamId:user\.teamId,ownerCoachId:user\.email\}\],setEvents\)/,
   );
 });
 
