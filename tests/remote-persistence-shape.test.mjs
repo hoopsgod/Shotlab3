@@ -133,13 +133,17 @@ test('event write normalization maps camelCase keys to snake_case keys', () => {
     id: 'event-1',
     title: 'Morning Run',
     teamId: 'team-1',
+    desc: 'Bring water',
     ownerCoachId: 'coach@team.com',
   });
 
   assert.equal(row.team_id, 'team-1');
-  assert.equal(row.owner_coach_id, 'coach@team.com');
+  assert.equal(row.description, 'Bring water');
+  assert.equal(row.id, 'event-1');
+  assert.equal(row.title, 'Morning Run');
   assert.equal(Object.hasOwn(row, 'teamId'), false);
-  assert.equal(Object.hasOwn(row, 'ownerCoachId'), false);
+  assert.equal(Object.hasOwn(row, 'desc'), false);
+  assert.equal(Object.hasOwn(row, 'owner_coach_id'), false);
 });
 
 test('event read normalization maps snake_case keys to camelCase keys', () => {
@@ -147,13 +151,13 @@ test('event read normalization maps snake_case keys to camelCase keys', () => {
     id: 'event-2',
     title: 'Lift',
     team_id: 'team-2',
-    owner_coach_id: 'coach2@team.com',
+    description: 'Heavy day',
   });
 
   assert.equal(row.teamId, 'team-2');
-  assert.equal(row.ownerCoachId, 'coach2@team.com');
+  assert.equal(row.desc, 'Heavy day');
   assert.equal(Object.hasOwn(row, 'team_id'), false);
-  assert.equal(Object.hasOwn(row, 'owner_coach_id'), false);
+  assert.equal(Object.hasOwn(row, 'description'), false);
 });
 
 test('existing local camelCase event rows still normalize for app reads', () => {
@@ -161,11 +165,23 @@ test('existing local camelCase event rows still normalize for app reads', () => 
     id: 'event-3',
     title: 'Practice',
     teamId: 'team-3',
-    ownerCoachId: 'coach3@team.com',
+    desc: 'Closeout drills',
   }]);
 
   assert.equal(row.teamId, 'team-3');
-  assert.equal(row.ownerCoachId, 'coach3@team.com');
+  assert.equal(row.desc, 'Closeout drills');
+});
+
+test('event row survives normalization without ownerCoachId', () => {
+  const [row] = buildRemoteRows('sl:events', [{
+    id: 'event-no-owner',
+    title: 'Film Session',
+    teamId: 'team-9',
+  }]);
+
+  assert.equal(row.id, 'event-no-owner');
+  assert.equal(row.team_id, 'team-9');
+  assert.equal(row.title, 'Film Session');
 });
 
 test('event/rsvp ids remain compatible through normalization', () => {
