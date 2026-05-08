@@ -6,6 +6,9 @@ import {
   buildRemoteRows,
   normalizeScoreRowForDb,
   normalizeShotLogRowForDb,
+  normalizeEventRowForDb,
+  normalizeEventRowForApp,
+  buildAppRows,
 } from '../src/lib/remotePersistence.js';
 
 test('score rows normalize to db-compatible snake_case fields', () => {
@@ -122,4 +125,64 @@ test('wrong-team rows are excluded from coach team views', () => {
   const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /const scopedScores=scores;/);
   assert.doesNotMatch(source, /const scopedShotLogs=shotLogs;/);
+});
+
+
+test('event write normalization maps camelCase keys to snake_case keys', () => {
+  const row = normalizeEventRowForDb({
+    id: 'event-1',
+    title: 'Morning Run',
+    teamId: 'team-1',
+    ownerCoachId: 'coach@team.com',
+  });
+
+  assert.equal(row.team_id, 'team-1');
+  assert.equal(row.owner_coach_id, 'coach@team.com');
+  assert.equal(Object.hasOwn(row, 'teamId'), false);
+  assert.equal(Object.hasOwn(row, 'ownerCoachId'), false);
+});
+
+test('event read normalization maps snake_case keys to camelCase keys', () => {
+  const row = normalizeEventRowForApp({
+    id: 'event-2',
+    title: 'Lift',
+    team_id: 'team-2',
+    owner_coach_id: 'coach2@team.com',
+  });
+
+  assert.equal(row.teamId, 'team-2');
+  assert.equal(row.ownerCoachId, 'coach2@team.com');
+  assert.equal(Object.hasOwn(row, 'team_id'), false);
+  assert.equal(Object.hasOwn(row, 'owner_coach_id'), false);
+});
+
+test('existing local camelCase event rows still normalize for app reads', () => {
+  const [row] = buildAppRows('sl:events', [{
+    id: 'event-3',
+    title: 'Practice',
+    teamId: 'team-3',
+    ownerCoachId: 'coach3@team.com',
+  }]);
+
+  assert.equal(row.teamId, 'team-3');
+  assert.equal(row.ownerCoachId, 'coach3@team.com');
+});
+
+test('event/rsvp ids remain compatible through normalization', () => {
+  const [eventRow] = buildRemoteRows('sl:events', [{
+    id: 'event-4',
+    title: 'Weights',
+    teamId: 'team-4',
+    ownerCoachId: 'coach4@team.com',
+  }]);
+  const [rsvpRow] = buildRemoteRows('sl:rsvps', [{
+    id: 'rsvp-4',
+    eventId: 'event-4',
+    teamId: 'team-4',
+    playerId: 'p4@team.com',
+    email: 'p4@team.com',
+  }]);
+
+  assert.equal(eventRow.id, 'event-4');
+  assert.equal(rsvpRow.event_id, eventRow.id);
 });

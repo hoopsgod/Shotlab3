@@ -13,7 +13,7 @@ test('coach-created events are team-scoped', async () => {
 
   assert.match(
     source,
-    /const addEvent=async ev=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return;await P\("sl:events",\[\.\.\.events,\{\.\.\.ev,id:Date\.now\(\),teamId:user\.teamId,ownerCoachId:user\.email\}\],setEvents\)/,
+    /const addEvent=async ev=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return;await P\("sl:events",\[\.\.\.events,\{\.\.\.ev,id:genId\("event"\),teamId:user\.teamId,ownerCoachId:user\.email\}\],setEvents\)/,
   );
 });
 
@@ -55,4 +55,14 @@ test('coach events RSVP label prefers RSVP name, then roster lookup, then email'
   assert.match(source, /const directName=String\(r\?\.name\|\|''\)\.trim\(\);if\(directName\)return directName;/);
   assert.match(source, /const rosterName=rosterNameByEmail\.get\(fallbackEmail\);if\(rosterName&&String\(rosterName\)\.trim\(\)\)return rosterName;/);
   assert.match(source, /return String\(r\?\.email\|\|r\?\.playerId\|\|'Unknown player'\);/);
+});
+
+
+test('regression: addScSession still uses Date.now() id generation', async () => {
+  const source = await appSource();
+
+  assert.match(
+    source,
+    /const addScSession=async\(s\)=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return;await P\("sl:sc-sessions",\[\.\.\.scSessions,\{\.\.\.s,id:Date\.now\(\),teamId:user\.teamId,ownerCoachId:user\.email\}\],setScSessions\);/,
+  );
 });
