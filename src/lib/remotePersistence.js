@@ -101,6 +101,93 @@ export const normalizeEventRowForApp = (row = {}) => {
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
 };
 
+export const normalizePlayerRowForApp = (row = {}) => {
+  const id = cleanText(row.id);
+  const email = cleanText(row.email).toLowerCase();
+  const teamId = cleanText(row.team_id || row.teamId);
+  if (!id || !email || !teamId) return null;
+
+  return {
+    id,
+    email,
+    teamId,
+    role: cleanText(row.role || "player") || "player",
+    name: cleanText(row.name),
+    hideFromLeaderboards: row.hide_from_leaderboards === true || row.hideFromLeaderboards === true,
+  };
+};
+
+export const normalizePlayerProfileRowForApp = (row = {}) => {
+  const teamId = cleanText(row.team_id || row.teamId);
+  const email = cleanText(row.email).toLowerCase();
+  const userId = cleanText(row.user_id || row.userId).toLowerCase();
+  if (!teamId || (!email && !userId)) return null;
+  const id = cleanText(row.id) || (email ? `pp-shell:${teamId}:${email}` : "");
+  if (!id) return null;
+
+  return {
+    id,
+    teamId,
+    email,
+    userId: userId || null,
+    firstName: cleanText(row.first_name || row.firstName),
+    lastName: cleanText(row.last_name || row.lastName),
+    hideFromLeaderboards: row.hide_from_leaderboards === true || row.hideFromLeaderboards === true,
+    createdAt: row.created_at || row.createdAt || null,
+  };
+};
+
+const keyEmailTeam = (row = {}) => {
+  const email = cleanText(row.email).toLowerCase();
+  const teamId = cleanText(row.teamId || row.team_id);
+  return email && teamId ? `${email}::${teamId}` : "";
+};
+
+const keyUserTeam = (row = {}) => {
+  const userId = cleanText(row.userId || row.user_id).toLowerCase();
+  const teamId = cleanText(row.teamId || row.team_id);
+  return userId && teamId ? `${userId}::${teamId}` : "";
+};
+
+export const mergeHydratedRows = (key, remoteRows = [], localRows = []) => {
+  const remote = buildAppRows(key, remoteRows);
+  const local = buildAppRows(key, localRows);
+  if (!Array.isArray(remote) || remote.length === 0) return local;
+  if (!Array.isArray(local) || local.length === 0) return remote;
+  if (!["sl:events", "sl:players", "sl:player-profiles"].includes(key)) return remote;
+
+  const output = [];
+  const byId = new Map();
+  const fallback = new Map();
+  const fallbackKeyFor = (row) => {
+    if (key === "sl:players") return keyEmailTeam(row);
+    if (key === "sl:player-profiles") return keyEmailTeam(row) || keyUserTeam(row);
+    return "";
+  };
+
+  for (const row of local) {
+    byId.set(row.id, row);
+    const fk = fallbackKeyFor(row);
+    if (fk) fallback.set(fk, row.id);
+  }
+  for (const row of remote) {
+    byId.set(row.id, row);
+    const fk = fallbackKeyFor(row);
+    if (fk) fallback.set(fk, row.id);
+  }
+  for (const row of local) {
+    const fk = fallbackKeyFor(row);
+    if (fk && fallback.has(fk)) {
+      const winnerId = fallback.get(fk);
+      byId.set(winnerId, { ...row, ...byId.get(winnerId) });
+      if (winnerId !== row.id) byId.delete(row.id);
+    }
+  }
+
+  for (const row of byId.values()) output.push(row);
+  return output;
+};
+
 export const normalizeRsvpRowForDb = (row = {}) => {
   const id = cleanText(row.id);
   const eventId = cleanText(row.event_id || row.eventId);
@@ -146,6 +233,8 @@ export const normalizeRsvpRowForApp = (row = {}) => {
 export const buildAppRows = (key, rows) => {
   if (!Array.isArray(rows) || rows.length === 0) return [];
   if (key === "sl:events") return rows.map(normalizeEventRowForApp).filter(Boolean);
+  if (key === "sl:players") return rows.map(normalizePlayerRowForApp).filter(Boolean);
+  if (key === "sl:player-profiles") return rows.map(normalizePlayerProfileRowForApp).filter(Boolean);
   if (key === "sl:rsvps") return rows.map(normalizeRsvpRowForApp).filter(Boolean);
   return rows;
 };
