@@ -8,6 +8,8 @@ import {
   normalizeShotLogRowForDb,
   normalizeEventRowForDb,
   normalizeEventRowForApp,
+  normalizePlayerRowForDb,
+  normalizePlayerProfileRowForDb,
   buildAppRows,
 } from '../src/lib/remotePersistence.js';
 
@@ -185,4 +187,28 @@ test('event/rsvp ids remain compatible through normalization', () => {
 
   assert.equal(eventRow.id, 'event-4');
   assert.equal(rsvpRow.event_id, eventRow.id);
+});
+
+test('buildRemoteRows("sl:players") normalizes teamId and hideFromLeaderboards to snake_case', () => {
+  const [row] = buildRemoteRows('sl:players', [{
+    email: 'Player@Team.com',
+    teamId: 'team-7',
+    hideFromLeaderboards: true,
+    role: 'player',
+    name: 'Player 7',
+  }]);
+  assert.equal(row.team_id, 'team-7');
+  assert.equal(row.hide_from_leaderboards, true);
+  assert.equal(row.id, 'player:team-7:player@team.com');
+});
+
+test('buildRemoteRows("sl:player-profiles") normalizes teamId/userId to team_id/user_id', () => {
+  const [row] = buildRemoteRows('sl:player-profiles', [{
+    id: 'pp-7',
+    teamId: 'team-7',
+    userId: 'USER-7',
+    email: 'player7@team.com',
+  }]);
+  assert.equal(row.team_id, 'team-7');
+  assert.equal(row.user_id, 'user-7');
 });
