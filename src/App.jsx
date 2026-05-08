@@ -34,7 +34,7 @@ import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard 
 
 import { supabase } from "./lib/supabase.js";
 import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
-import { buildAppRows, buildRemoteRows } from "./lib/remotePersistence.js";
+import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
 const CYAN = TOKENS.SECONDARY;
@@ -290,17 +290,19 @@ const DB = {
       local = r?.value ? JSON.parse(r.value) : null;
     } catch (e) {}
 
+    const normalizedLocal = hasData(local) ? buildAppRows(k, local) : null;
     const table = TABLE_MAP[k];
     if (table) {
       try {
         const { data } = await supabase.from(table).select("*");
         if (hasData(data)) {
-          return buildAppRows(k, data);
+          const normalizedRemote = buildAppRows(k, data);
+          return mergeHydratedRows(k, normalizedLocal || [], normalizedRemote);
         }
       } catch (e) {}
     }
 
-    return hasData(local) ? buildAppRows(k, local) : null;
+    return normalizedLocal;
   },
   async set(k, v, options = {}) {
     const strictRemote = options?.strictRemote === true;
