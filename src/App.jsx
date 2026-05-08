@@ -1696,13 +1696,50 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const nextEvent=upcomingEvents[0]||null;
       const upcomingEventsCount=upcomingEvents.length||0;
       const attendanceRows=rsvps.filter(r=>r.email===u.email);
+      const eventsAttended=attendanceRows.length;
       const attendancePct=upcomingEventsCount>0&&attendanceRows.length>0?`${Math.min(100,Math.round((attendanceRows.length/upcomingEventsCount)*100))}%`:"—";
       const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
       const nextEventBadge=nextEvent?`Next · ${nextEvent.date.slice(5).replace("-","/")}`:"Schedule";
+      const weeklyMakes=shotLogs.filter(s=>s.email===u.email&&daysAgo(s.date)<=6).reduce((a,s)=>a+s.made,0);
+      const todaysMakes=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
+      const hasAnyShots=shotLogs.some(s=>s.email===u.email&&s.made>0);
+      const leaderboardRank=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows.findIndex((row)=>normalizeEmail(row?.email||"")===normalizeEmail(u.email))+1:0;
+      const missionCtaLabel=hasAnyShots?"Start Training":"Log Shots";
+      const missionStatus=hasAnyShots?`You're ${weeklyMakes>0?"building momentum":"ready to build momentum"} this week.`:"Log your first shots to start building your week.";
       const homeStats=[{label:"Makes Today",value:<AnimNum v={totalMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Training Streak",value:formatStreakDays(streak),color:CYAN},{label:"Drills Completed",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Next Team Event",value:nextEventLabel,color:LIGHT},{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance Rate",value:attendancePct,color:CYAN}];
-      return <div style={{marginBottom:28}}>
-        <section style={{marginBottom:18,padding:"16px 4px 0"}} aria-label="Training mode selector">
+      const quickStats=[
+        {label:"Today's Makes",value:todaysMakes,color:VOLT},
+        {label:"Weekly Total",value:weeklyMakes,color:LIGHT},
+        {label:"Streak",value:formatStreakDays(streak),color:CYAN},
+        {label:"Rank",value:leaderboardRank>0?`#${leaderboardRank}`:"—",color:ORANGE},
+        {label:"Events Attended",value:eventsAttended,color:LIGHT},
+      ];
+      const dailyGoal=100;
+      const weeklyGoal=500;
+      const dailyPct=Math.min(100,Math.round((todaysMakes/dailyGoal)*100));
+      const weeklyPct=Math.min(100,Math.round((weeklyMakes/weeklyGoal)*100));
+      return <div style={{marginBottom:20}}>
+        <section style={{marginBottom:14,padding:"8px 0 0"}} aria-label="Today's mission">
+          <div style={{padding:"14px 14px 12px",borderRadius:16,border:`1px solid ${VOLT}33`,background:"linear-gradient(140deg, rgba(200,255,0,0.10), rgba(200,255,0,0.03) 46%, rgba(0,0,0,0.18))",boxShadow:"0 10px 24px rgba(0,0,0,0.22)"}}>
+            <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase",marginBottom:6}}>Today’s Mission</div>
+            <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?24:28,letterSpacing:2,lineHeight:1.05,textTransform:"uppercase"}}>{todaysMakes>0?`Add ${Math.max(0,dailyGoal-todaysMakes)} more makes`:"Get your first makes on the board"}</div>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:6,lineHeight:1.45}}>{missionStatus}</div>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginTop:12,flexWrap:"wrap"}}>
+              <button className="btn-v cta-primary" style={{minHeight:46,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel}</button>
+              <div style={{fontFamily:FB,color:MUTED,fontSize:11,fontWeight:600}}>Weekly: <span style={{color:LIGHT}}>{weeklyMakes}/{weeklyGoal}</span> makes</div>
+            </div>
+          </div>
+        </section>
+        <section style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(5,minmax(0,1fr))",gap:8,marginBottom:12}}>
+          {quickStats.map(stat=><div key={stat.label} style={{padding:"11px 10px",borderRadius:12,background:CARD_BG,border:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase"}}>{stat.label}</div><div style={{fontFamily:FD,color:stat.color,fontSize:22,letterSpacing:1.2,lineHeight:1.1,marginTop:4}}>{stat.value}</div></div>)}
+        </section>
+        <section style={{marginBottom:12,padding:"12px",borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.01)"}}>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"1fr 1fr",gap:10}}>
+            {[{label:"Daily Progress",makes:todaysMakes,goal:dailyGoal,pct:dailyPct,color:VOLT},{label:"Weekly Progress",makes:weeklyMakes,goal:weeklyGoal,pct:weeklyPct,color:CYAN}].map(progress=><div key={progress.label}><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:6}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.07em",textTransform:"uppercase"}}>{progress.label}</div><div style={{fontFamily:FB,color:progress.color,fontSize:11,fontWeight:700}}>{progress.makes}/{progress.goal}</div></div><div style={{height:8,borderRadius:999,background:"rgba(255,255,255,0.07)",overflow:"hidden"}}><div style={{height:"100%",width:`${progress.pct}%`,background:progress.color,boxShadow:`0 0 14px ${progress.color}55`,transition:"width .35s ease"}}/></div></div>)}
+          </div>
+        </section>
+        <section style={{marginBottom:14,padding:"2px 4px 0"}} aria-label="Training mode selector">
           <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:12,fontWeight:600,letterSpacing:"0.03em",marginTop:6}}>Choose how you’re training today</div>
         </section>
