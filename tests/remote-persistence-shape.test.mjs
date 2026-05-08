@@ -9,6 +9,7 @@ import {
   normalizeEventRowForDb,
   normalizeEventRowForApp,
   buildAppRows,
+  mergeHydratedRows,
 } from '../src/lib/remotePersistence.js';
 
 test('score rows normalize to db-compatible snake_case fields', () => {
@@ -185,4 +186,57 @@ test('event/rsvp ids remain compatible through normalization', () => {
 
   assert.equal(eventRow.id, 'event-4');
   assert.equal(rsvpRow.event_id, eventRow.id);
+});
+
+test('coach-created profile shell with null userId is preserved for remote payload using email/team fallback id', () => {
+  const [row] = buildRemoteRows('sl:player-profiles', [{
+    userId: null,
+    email: 'Shell@Example.com',
+    teamId: 'team-shell',
+    firstName: 'Shell',
+    lastName: 'Player',
+  }]);
+
+  assert.equal(row.id, 'pp-shell:team-shell:shell@example.com');
+  assert.equal(row.team_id, 'team-shell');
+  assert.equal(row.email, 'shell@example.com');
+  assert.equal(Object.hasOwn(row, 'user_id'), false);
+});
+
+test('profile shell hydrates for app reads with teamId and email while userId stays null', () => {
+  const [row] = buildAppRows('sl:player-profiles', [{
+    team_id: 'team-shell',
+    email: 'Shell@Example.com',
+    user_id: null,
+    first_name: 'Shell',
+  }]);
+
+  assert.equal(row.teamId, 'team-shell');
+  assert.equal(row.email, 'shell@example.com');
+  assert.equal(Object.hasOwn(row, 'userId'), false);
+});
+
+test('claimed profile with userId continues to normalize for remote payloads', () => {
+  const [row] = buildRemoteRows('sl:player-profiles', [{
+    id: 'pp-claimed-1',
+    userId: 'claimed@example.com',
+    teamId: 'team-claimed',
+    firstName: 'Claimed',
+  }]);
+
+  assert.equal(row.id, 'pp-claimed-1');
+  assert.equal(row.user_id, 'claimed@example.com');
+  assert.equal(row.team_id, 'team-claimed');
+});
+
+test('mergeHydratedRows for player profiles prefers remote rows on exact id conflict', () => {
+  const merged = mergeHydratedRows('sl:player-profiles', [
+    { id: 'pp-1', teamId: 'team-1', email: 'local@example.com', firstName: 'Local' },
+  ], [
+    { id: 'pp-1', teamId: 'team-1', email: 'remote@example.com', firstName: 'Remote' },
+  ]);
+
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].firstName, 'Remote');
+  assert.equal(merged[0].email, 'remote@example.com');
 });
