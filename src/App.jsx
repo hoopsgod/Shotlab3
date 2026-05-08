@@ -34,7 +34,7 @@ import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard 
 
 import { supabase } from "./lib/supabase.js";
 import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
-import { buildAppRows, buildRemoteRows } from "./lib/remotePersistence.js";
+import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
 const CYAN = TOKENS.SECONDARY;
@@ -294,9 +294,13 @@ const DB = {
     if (table) {
       try {
         const { data } = await supabase.from(table).select("*");
-        if (hasData(data)) {
-          return buildAppRows(k, data);
+        const localRows = hasData(local) ? buildAppRows(k, local) : [];
+        const remoteRows = hasData(data) ? buildAppRows(k, data) : [];
+        if (k === "sl:events" || k === "sl:players" || k === "sl:player-profiles") {
+          const merged = mergeHydratedRows(k, localRows, remoteRows);
+          if (hasData(merged)) return merged;
         }
+        if (hasData(remoteRows)) return remoteRows;
       } catch (e) {}
     }
 
@@ -309,6 +313,9 @@ const DB = {
     } catch (e) {}
     const table = TABLE_MAP[k];
     const remoteRows = buildRemoteRows(k, v, options);
+    if ((k === "sl:events" || k === "sl:players" || k === "sl:player-profiles") && Array.isArray(v) && v.length > 0 && remoteRows.length === 0) {
+      console.warn("[remote-persist] buildRemoteRows dropped all rows", { key: k, inputCount: v.length });
+    }
     if (table && remoteRows.length > 0) {
       try {
         const { error } = await supabase.from(table).upsert(remoteRows, { onConflict: "id" });
