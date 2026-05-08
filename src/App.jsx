@@ -34,7 +34,7 @@ import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard 
 
 import { supabase } from "./lib/supabase.js";
 import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
-import { buildAppRows, buildRemoteRows } from "./lib/remotePersistence.js";
+import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
 const CYAN = TOKENS.SECONDARY;
@@ -294,6 +294,10 @@ const DB = {
     if (table) {
       try {
         const { data } = await supabase.from(table).select("*");
+        if (k === "sl:events" || k === "sl:players" || k === "sl:player-profiles") {
+          const mergedRows = mergeHydratedRows(k, local, data);
+          return hasData(mergedRows) ? mergedRows : null;
+        }
         if (hasData(data)) {
           return buildAppRows(k, data);
         }
@@ -309,6 +313,9 @@ const DB = {
     } catch (e) {}
     const table = TABLE_MAP[k];
     const remoteRows = buildRemoteRows(k, v, options);
+    if (table && (k === "sl:events" || k === "sl:players" || k === "sl:player-profiles") && Array.isArray(v) && v.length > 0 && remoteRows.length === 0) {
+      console.warn("[remote-persist] normalization dropped all rows", { key: k, inputRowCount: v.length });
+    }
     if (table && remoteRows.length > 0) {
       try {
         const { error } = await supabase.from(table).upsert(remoteRows, { onConflict: "id" });

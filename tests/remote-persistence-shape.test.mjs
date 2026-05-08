@@ -8,6 +8,9 @@ import {
   normalizeShotLogRowForDb,
   normalizeEventRowForDb,
   normalizeEventRowForApp,
+  normalizePlayerRowForDb,
+  normalizePlayerProfileRowForDb,
+  mergeHydratedRows,
   buildAppRows,
 } from '../src/lib/remotePersistence.js';
 
@@ -185,4 +188,105 @@ test('event/rsvp ids remain compatible through normalization', () => {
 
   assert.equal(eventRow.id, 'event-4');
   assert.equal(rsvpRow.event_id, eventRow.id);
+});
+
+test('player rows normalize to db shape with fallback id when id is missing', () => {
+  const row = normalizePlayerRowForDb({
+    email: 'Player@One.com',
+    teamId: 'team-5',
+    name: 'Player One',
+    mustChangePassword: true,
+  });
+
+  assert.equal(row.id, 'player:team-5:player@one.com');
+  assert.equal(row.team_id, 'team-5');
+  assert.equal(row.email, 'player@one.com');
+  assert.equal(row.must_change_password, true);
+  assert.equal(Object.hasOwn(row, 'teamId'), false);
+  assert.equal(Object.hasOwn(row, 'mustChangePassword'), false);
+});
+
+test('player profile rows preserve shell fallback ids and snake_case db keys', () => {
+  const row = normalizePlayerProfileRowForDb({
+    teamId: 'team-6',
+    userId: 'shell@team.com',
+    firstName: 'Shell',
+    lastName: 'Player',
+    createdAt: '1700000000000',
+  });
+
+  assert.equal(row.id, 'pp-shell:team-6:shell@team.com');
+  assert.equal(row.user_id, 'shell@team.com');
+  assert.equal(row.team_id, 'team-6');
+  assert.equal(row.first_name, 'Shell');
+  assert.equal(row.last_name, 'Player');
+  assert.equal(row.created_at, 1700000000000);
+  assert.equal(Object.hasOwn(row, 'firstName'), false);
+});
+
+test('buildRemoteRows normalizes sl:players and sl:player-profiles writes', () => {
+  const [playerRow] = buildRemoteRows('sl:players', [{ email: 'p7@team.com', teamId: 'team-7', hideFromLeaderboards: true }]);
+  const [profileRow] = buildRemoteRows('sl:player-profiles', [{ userId: 'p7@team.com', teamId: 'team-7' }]);
+
+  assert.equal(playerRow.id, 'player:team-7:p7@team.com');
+  assert.equal(playerRow.team_id, 'team-7');
+  assert.equal(playerRow.hide_from_leaderboards, true);
+  assert.equal(profileRow.id, 'pp-shell:team-7:p7@team.com');
+  assert.equal(profileRow.user_id, 'p7@team.com');
+  assert.equal(profileRow.team_id, 'team-7');
+});
+
+test('sl:events hydration preserves local row when remote row is incomplete', () => {
+  const merged = mergeHydratedRows('sl:events', [{
+    id: 'event-local-1',
+    teamId: 'team-10',
+    ownerCoachId: 'coach@team.com',
+    title: 'Local Event',
+  }], [{
+    id: 'event-remote-bad',
+    team_id: 'team-10',
+  }]);
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].id, 'event-local-1');
+});
+
+test('sl:players hydration preserves local row when remote row is incomplete', () => {
+  const merged = mergeHydratedRows('sl:players', [{
+    id: 'player-local-1',
+    teamId: 'team-11',
+    email: 'local@team.com',
+    name: 'Local Player',
+  }], [{
+    email: 'remote@team.com',
+  }]);
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].id, 'player-local-1');
+});
+
+test('sl:player-profiles preserves userId null shell rows', () => {
+  const [row] = buildAppRows('sl:player-profiles', [{
+    id: 'pp-shell:team-12:coach-shell@team.com',
+    team_id: 'team-12',
+    user_id: null,
+    first_name: 'Shell',
+    last_name: 'Only',
+  }]);
+  assert.equal(row.userId, null);
+  assert.equal(row.id, 'pp-shell:team-12:coach-shell@team.com');
+});
+
+test('remote wins on exact player conflict identity', () => {
+  const merged = mergeHydratedRows('sl:players', [{
+    id: 'player:team-13:player@team.com',
+    teamId: 'team-13',
+    email: 'player@team.com',
+    name: 'Local Name',
+  }], [{
+    id: 'player:team-13:player@team.com',
+    team_id: 'team-13',
+    email: 'player@team.com',
+    name: 'Remote Name',
+  }]);
+  assert.equal(merged.length, 1);
+  assert.equal(merged[0].name, 'Remote Name');
 });
