@@ -143,6 +143,55 @@ export const normalizeRsvpRowForApp = (row = {}) => {
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
 };
 
+export const normalizePlayerRowForDb = (row = {}) => {
+  const email = cleanText(row.email).toLowerCase();
+  const teamId = cleanText(row.team_id || row.teamId);
+  const id = cleanText(row.id || (teamId && email ? `player:${teamId}:${email}` : ""));
+  if (!id || !email || !teamId) return null;
+
+  const payload = {
+    id,
+    email,
+    team_id: teamId,
+    name: cleanText(row.name),
+    role: cleanText(row.role),
+    pw: cleanText(row.pw),
+    must_change_password:
+      typeof row.must_change_password === "boolean"
+        ? row.must_change_password
+        : typeof row.mustChangePassword === "boolean"
+          ? row.mustChangePassword
+          : undefined,
+    hide_from_leaderboards:
+      typeof row.hide_from_leaderboards === "boolean"
+        ? row.hide_from_leaderboards
+        : typeof row.hideFromLeaderboards === "boolean"
+          ? row.hideFromLeaderboards
+          : undefined,
+  };
+
+  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== "" && value !== undefined));
+};
+
+export const normalizePlayerProfileRowForDb = (row = {}) => {
+  const teamId = cleanText(row.team_id || row.teamId);
+  const email = cleanText(row.user_id || row.userId || row.email).toLowerCase();
+  const id = cleanText(row.id || (teamId && email ? `pp-shell:${teamId}:${email}` : ""));
+  if (!id || !teamId || !email) return null;
+
+  const payload = {
+    id,
+    user_id: email,
+    team_id: teamId,
+    first_name: cleanText(row.first_name || row.firstName),
+    last_name: cleanText(row.last_name || row.lastName),
+    created_at: toFiniteNumber(row.created_at || row.createdAt),
+    role: cleanText(row.role),
+  };
+
+  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
+};
+
 export const buildAppRows = (key, rows) => {
   if (!Array.isArray(rows) || rows.length === 0) return [];
   if (key === "sl:events") return rows.map(normalizeEventRowForApp).filter(Boolean);
@@ -157,6 +206,8 @@ export const buildRemoteRows = (key, rows, options = {}) => {
   if (key === "sl:scores") return sourceRows.map(normalizeScoreRowForDb).filter(Boolean);
   if (key === "sl:shotlogs") return sourceRows.map(normalizeShotLogRowForDb).filter(Boolean);
   if (key === "sl:events") return sourceRows.map(normalizeEventRowForDb).filter(Boolean);
+  if (key === "sl:players") return sourceRows.map(normalizePlayerRowForDb).filter(Boolean);
+  if (key === "sl:player-profiles") return sourceRows.map(normalizePlayerProfileRowForDb).filter(Boolean);
   if (key === "sl:rsvps") return sourceRows.map(normalizeRsvpRowForDb).filter(Boolean);
   return sourceRows;
 };
