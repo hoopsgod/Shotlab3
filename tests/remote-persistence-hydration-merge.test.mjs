@@ -10,6 +10,19 @@ test('sl:events hydration preserves local event when remote is incomplete', () =
   assert.equal(merged[0].id, 'e1');
 });
 
+test('sl:events app hydration keeps Supabase-style description row visible without owner_coach_id', () => {
+  const [event] = buildAppRows('sl:events', [{
+    id: 'e-supa-1',
+    team_id: 't1',
+    title: 'Open Gym',
+    description: 'Team run',
+  }]);
+
+  assert.equal(event.id, 'e-supa-1');
+  assert.equal(event.teamId, 't1');
+  assert.equal(event.desc, 'Team run');
+});
+
 test('sl:players hydration preserves local player when remote is incomplete', () => {
   const local = [{ id: 'p1', teamId: 't1', email: 'a@b.com', name: 'A', role: 'player' }];
   const remote = [{ id: 'p1', team_id: '', email: 'a@b.com' }];
