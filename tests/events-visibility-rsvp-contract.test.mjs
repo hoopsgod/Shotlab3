@@ -13,7 +13,7 @@ test('coach-created events are team-scoped', async () => {
 
   assert.match(
     source,
-    /const addEvent=async ev=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return;await P\("sl:events",\[\.\.\.events,\{\.\.\.ev,id:genId\("event"\),teamId:user\.teamId,ownerCoachId:user\.email\}\],setEvents\)/,
+    /const addEvent=async ev=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return\{ok:false\};const eventPayload=\{\.\.\.ev,id:genId\("event"\),teamId:user\.teamId,ownerCoachId:user\.email\};\s*try\{await P\("sl:events",\[\.\.\.events,eventPayload\],setEvents,\{strictRemote:true\}\);trackEvent\("event_created",\{eventType:ev\.type\|\|"run"\}\);return\{ok:true\};\}catch\(error\)\{/,
   );
 });
 
@@ -55,6 +55,19 @@ test('coach events RSVP label prefers RSVP name, then roster lookup, then email'
   assert.match(source, /const directName=String\(r\?\.name\|\|''\)\.trim\(\);if\(directName\)return directName;/);
   assert.match(source, /const rosterName=rosterNameByEmail\.get\(fallbackEmail\);if\(rosterName&&String\(rosterName\)\.trim\(\)\)return rosterName;/);
   assert.match(source, /return String\(r\?\.email\|\|r\?\.playerId\|\|'Unknown player'\);/);
+});
+
+test('event save failures show a visible non-technical coach error', async () => {
+  const source = await appSource();
+
+  assert.match(source, /setEventSaveError\("Event could not be saved\. Please try again\."\);/);
+  assert.match(source, /\{eventSaveError&&<div role="alert"[^>]*>Event could not be saved\. Please try again\.<\/div>\}/);
+});
+
+test('event save failures keep detailed logging in console', async () => {
+  const source = await appSource();
+
+  assert.match(source, /console\.error\("event_save_failed",\{error,userEmail:String\(user\?\.email\|\|""\),teamId:String\(user\?\.teamId\|\|""\),eventTitle:String\(ev\?\.title\|\|""\)\}\);/);
 });
 
 
