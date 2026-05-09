@@ -46,7 +46,7 @@ test('coach events cards display RSVP count and attendee labels', async () => {
 
   assert.match(source, /\{`\$\{evCoachRsvps\.length\} going`\}/);
   assert.match(source, /\{evCoachRsvpNames\.join\(", "\)\}/);
-  assert.match(source, /No players RSVP'd yet\./);
+  assert.match(source, /No RSVPs yet — players can RSVP from their Events page\./);
 });
 
 test('coach events RSVP label prefers RSVP name, then roster lookup, then email', async () => {

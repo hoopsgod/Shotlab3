@@ -30,5 +30,5 @@ test('coach/player home shots cards handle empty stats without crashing', () => 
     'utf8',
   );
   assert.match(leaderboardCardSource, /rows\.length === 0/);
-  assert.match(leaderboardCardSource, /No home shots logged yet\./);
+  assert.match(leaderboardCardSource, /No shots logged yet — once players log At Home Shots, leaders will appear here\./);
 });
