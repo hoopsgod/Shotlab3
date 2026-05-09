@@ -44,8 +44,8 @@ export default function HomeShotsLeaderboardCard({
         fontWeight: 600,
       }}
     >
-      <div style={{ color: "var(--text-1)", fontWeight: 700, marginBottom: 4 }}>No home shots logged yet.</div>
-      <div style={{ color: "var(--text-2)" }}>Have players log their first home session to populate this leaderboard.</div>
+      <div style={{ color: "var(--text-1)", fontWeight: 700, marginBottom: 4 }}>No shots logged yet — once players log At Home Shots, leaders will appear here.</div>
+      <div style={{ color: "var(--text-2)" }}>Nothing to show yet — once your team starts using ShotLab, this section will fill in.</div>
     </div>
   );
 
