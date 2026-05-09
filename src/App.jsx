@@ -1775,21 +1775,27 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const hasShotLogs=shotLogs.some(s=>normalizeEmail(s.email)===normalizeEmail(u.email)&&s.teamId===u?.teamId&&Number(s.made)>0);
       const playerChecklist=[
         {label:"Join team",done:playerHasTeam},
-        {label:"View upcoming event",done:hasUpcomingEvents},
-        {label:"RSVP to an event",done:hasRsvped},
-        {label:"Log At Home Shots",done:hasShotLogs},
-        {label:"Check progress",done:false,info:true},
+        {label:"View upcoming event",done:hasUpcomingEvents,onClick:()=>switchTab("program"),ariaLabel:"View upcoming events in Program"},
+        {label:"RSVP to an event",done:hasRsvped,onClick:()=>switchTab("program"),ariaLabel:"Go to Program events to RSVP"},
+        {label:"Log At Home Shots",done:hasShotLogs,onClick:()=>switchTab("log-drill"),ariaLabel:"Go to Log Drill to log At Home Shots"},
+        {label:"Check progress",done:false,info:true,onClick:()=>switchTab("profile"),ariaLabel:"Go to profile progress"},
       ];
       return <div style={{marginBottom:24}}>
         <section style={{...CHECKLIST_CARD_STYLE,padding:isNarrow?"10px 11px":"11px 12px"}} aria-label="Getting started checklist">
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Getting Started</div>
           <div style={{display:"grid",gap:8,marginTop:8}}>
-            {playerChecklist.map((item)=>(
-              <div key={item.label} style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
-                <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
-              </div>
-            ))}
+            {playerChecklist.map((item)=>{
+              const rowStyle={display:"flex",alignItems:"center",gap:8,width:"100%",textAlign:"left",padding:0,margin:0,background:"none",border:"none"};
+              return item.onClick
+                ?<button key={item.label} type="button" onClick={item.onClick} aria-label={item.ariaLabel||item.label} style={{...rowStyle,cursor:"pointer"}}>
+                  <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
+                  <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
+                </button>
+                :<div key={item.label} style={rowStyle}>
+                  <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
+                  <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
+                </div>;
+            })}
           </div>
         </section>
         <section style={{marginBottom:16,padding:"8px 0 0"}} aria-label="Today's mission">
@@ -2949,8 +2955,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     {(()=>{
       const coachChecklist=[
         {label:"Create or restore team",done:Boolean(u?.teamId)},
-        {label:"Invite or add players",done:ups.length>0},
-        {label:"Add first event",done:events.length>0},
+        {label:"Invite or add players",done:ups.length>0,onClick:()=>setTab("players"),ariaLabel:"Go to Players tab"},
+        {label:"Add first event",done:events.length>0,onClick:()=>setTab("events"),ariaLabel:"Go to Events tab"},
         {label:"Review Today's Pulse",done:false,info:true},
         {label:"Check At Home Shots leaderboard",done:Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0,info:!(Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0)},
       ];
@@ -2960,12 +2966,18 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           <span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{coachChecklist.filter(item=>item.done).length}/{coachChecklist.length}</span>
         </div>
         <div style={{display:"grid",gap:7,marginTop:9}}>
-          {coachChecklist.map((item)=>(
-            <div key={item.label} style={{display:"flex",alignItems:"center",gap:8}}>
-              <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
-              <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
-            </div>
-          ))}
+          {coachChecklist.map((item)=>{
+            const rowStyle={display:"flex",alignItems:"center",gap:8,width:"100%",textAlign:"left",padding:0,margin:0,background:"none",border:"none"};
+            return item.onClick
+              ?<button key={item.label} type="button" onClick={item.onClick} aria-label={item.ariaLabel||item.label} style={{...rowStyle,cursor:"pointer"}}>
+                <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
+                <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
+              </button>
+              :<div key={item.label} style={rowStyle}>
+                <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
+                <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
+              </div>;
+          })}
         </div>
       </section>;
     })()}
