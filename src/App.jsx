@@ -1718,7 +1718,9 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const attendanceRows=rsvps.filter(r=>r.email===u.email);
       const eventsAttended=attendanceRows.length;
       const attendancePct=upcomingEventsCount>0&&attendanceRows.length>0?`${Math.min(100,Math.round((attendanceRows.length/upcomingEventsCount)*100))}%`:"—";
-      const nextEventLabel=nextEvent?`${nextEvent.date.slice(5)} · ${nextEvent.time}`:"None";
+      const nextEventLabel=nextEvent?
+        <><button type="button" onClick={(event)=>{event.stopPropagation();switchTab("program");}} aria-label="View all events" style={{background:"none",border:"none",padding:0,margin:0,color:"inherit",font:"inherit",cursor:"pointer",lineHeight:"inherit"}}>{nextEvent.date.slice(5)}</button> &#183; {nextEvent.time}</>
+        :"None";
       const nextEventBadge=nextEvent?`Next · ${nextEvent.date.slice(5).replace("-","/")}`:"Schedule";
       const isWithinLastSevenDays=(dateValue)=>{
         if(!dateValue)return false;
