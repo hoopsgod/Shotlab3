@@ -275,6 +275,26 @@ const HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE = {
   letterSpacing: "0.08em",
   cursor: "pointer",
 };
+const CHECKLIST_CARD_STYLE = {
+  marginBottom: 12,
+  padding: "12px",
+  borderRadius: 14,
+  border: `1px solid ${BORDER_CLR}`,
+  background: "linear-gradient(155deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))",
+};
+const CHECKLIST_ITEM_DOT_STYLE = (done) => ({
+  width: 18,
+  height: 18,
+  borderRadius: "50%",
+  border: `1px solid ${done ? "rgba(200,255,0,0.7)" : BORDER_CLR}`,
+  background: done ? "rgba(200,255,0,0.18)" : "transparent",
+  color: done ? VOLT : MUTED,
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: 11,
+  flexShrink: 0,
+});
 
 const DB = {
   async get(k) {
@@ -1749,7 +1769,29 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const weeklyGoal=PLAYER_WEEKLY_SHOT_TARGET;
       const dailyPct=Math.min(100,Math.round((todaysMakes/dailyGoal)*100));
       const weeklyPct=Math.min(100,Math.round((weeklyMakes/weeklyGoal)*100));
+      const playerHasTeam=Boolean(u?.teamId);
+      const hasUpcomingEvents=upcomingEventsCount>0;
+      const hasRsvped=rsvps.some(r=>normalizeEmail(r.email)===normalizeEmail(u.email)&&r.teamId===u?.teamId);
+      const hasShotLogs=shotLogs.some(s=>normalizeEmail(s.email)===normalizeEmail(u.email)&&s.teamId===u?.teamId&&Number(s.made)>0);
+      const playerChecklist=[
+        {label:"Join team",done:playerHasTeam},
+        {label:"View upcoming event",done:hasUpcomingEvents},
+        {label:"RSVP to an event",done:hasRsvped},
+        {label:"Log At Home Shots",done:hasShotLogs},
+        {label:"Check progress",done:false,info:true},
+      ];
       return <div style={{marginBottom:20}}>
+        <section style={CHECKLIST_CARD_STYLE} aria-label="Getting started checklist">
+          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Getting Started</div>
+          <div style={{display:"grid",gap:7,marginTop:9}}>
+            {playerChecklist.map((item)=>(
+              <div key={item.label} style={{display:"flex",alignItems:"center",gap:8}}>
+                <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
+                <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
+              </div>
+            ))}
+          </div>
+        </section>
         <section style={{marginBottom:14,padding:"8px 0 0"}} aria-label="Today's mission">
           <div style={{padding:"14px 14px 12px",borderRadius:16,border:`1px solid ${VOLT}33`,background:"linear-gradient(140deg, rgba(200,255,0,0.10), rgba(200,255,0,0.03) 46%, rgba(0,0,0,0.18))",boxShadow:"0 10px 24px rgba(0,0,0,0.22)"}}>
             <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase",marginBottom:6}}>Today’s Mission</div>
@@ -2904,6 +2946,29 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 <div style={{flex:1,padding:`${showMiniHeader?"88px":"16px"} 20px 110px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
+    {(()=>{
+      const coachChecklist=[
+        {label:"Create or restore team",done:Boolean(u?.teamId)},
+        {label:"Invite or add players",done:ups.length>0},
+        {label:"Add first event",done:events.length>0},
+        {label:"Review Today's Pulse",done:false,info:true},
+        {label:"Check At Home Shots leaderboard",done:Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0,info:!(Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0)},
+      ];
+      return <section style={CHECKLIST_CARD_STYLE} aria-label="Coach setup checklist">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Coach Setup</div>
+          <span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{coachChecklist.filter(item=>item.done).length}/{coachChecklist.length}</span>
+        </div>
+        <div style={{display:"grid",gap:7,marginTop:9}}>
+          {coachChecklist.map((item)=>(
+            <div key={item.label} style={{display:"flex",alignItems:"center",gap:8}}>
+              <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
+              <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>;
+    })()}
     <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
       {HOME_SHOTS_LEADERBOARD_SCOPES.map((scopeOption) => {
         const isActive = leaderboardScope === scopeOption.key;
