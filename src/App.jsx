@@ -276,8 +276,8 @@ const HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE = {
   cursor: "pointer",
 };
 const CHECKLIST_CARD_STYLE = {
-  marginBottom: 12,
-  padding: "12px",
+  marginBottom: 16,
+  padding: "11px 12px",
   borderRadius: 14,
   border: `1px solid ${BORDER_CLR}`,
   background: "linear-gradient(155deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))",
@@ -1780,10 +1780,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         {label:"Log At Home Shots",done:hasShotLogs},
         {label:"Check progress",done:false,info:true},
       ];
-      return <div style={{marginBottom:20}}>
-        <section style={CHECKLIST_CARD_STYLE} aria-label="Getting started checklist">
+      return <div style={{marginBottom:24}}>
+        <section style={{...CHECKLIST_CARD_STYLE,padding:isNarrow?"10px 11px":"11px 12px"}} aria-label="Getting started checklist">
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Getting Started</div>
-          <div style={{display:"grid",gap:7,marginTop:9}}>
+          <div style={{display:"grid",gap:8,marginTop:8}}>
             {playerChecklist.map((item)=>(
               <div key={item.label} style={{display:"flex",alignItems:"center",gap:8}}>
                 <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
@@ -1792,21 +1792,21 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
             ))}
           </div>
         </section>
-        <section style={{marginBottom:14,padding:"8px 0 0"}} aria-label="Today's mission">
+        <section style={{marginBottom:16,padding:"8px 0 0"}} aria-label="Today's mission">
           <div style={{padding:"14px 14px 12px",borderRadius:16,border:`1px solid ${VOLT}33`,background:"linear-gradient(140deg, rgba(200,255,0,0.10), rgba(200,255,0,0.03) 46%, rgba(0,0,0,0.18))",boxShadow:"0 10px 24px rgba(0,0,0,0.22)"}}>
             <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase",marginBottom:6}}>Today’s Mission</div>
             <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?24:28,letterSpacing:2,lineHeight:1.05,textTransform:"uppercase"}}>{todaysMakes>0?`Add ${Math.max(0,dailyGoal-todaysMakes)} more makes`:"Get your first makes on the board"}</div>
             <div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:6,lineHeight:1.45}}>{missionStatus}</div>
             <div style={{display:"flex",alignItems:"center",gap:10,marginTop:12,flexWrap:"wrap"}}>
-              <button className="btn-v cta-primary" style={{minHeight:46,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel}</button>
+              <button className="btn-v cta-primary" style={{minHeight:48,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel}</button>
               <div style={{fontFamily:FB,color:MUTED,fontSize:11,fontWeight:600}}>Weekly: <span style={{color:LIGHT}}>{weeklyMakes}/{weeklyGoal}</span> makes</div>
             </div>
           </div>
         </section>
-        <section style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(5,minmax(0,1fr))",gap:8,marginBottom:12}}>
+        <section style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(5,minmax(0,1fr))",gap:10,marginBottom:16}}>
           {quickStats.map(stat=><div key={stat.label} style={{padding:"11px 10px",borderRadius:12,background:CARD_BG,border:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase"}}>{stat.label}</div><div style={{fontFamily:FD,color:stat.color,fontSize:22,letterSpacing:1.2,lineHeight:1.1,marginTop:4}}>{stat.value}</div></div>)}
         </section>
-        <section style={{marginBottom:12,padding:"12px",borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.01)"}}>
+        <section style={{marginBottom:16,padding:"12px",borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.01)"}}>
           <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"1fr 1fr",gap:10}}>
             {[{label:"Daily Progress",makes:todaysMakes,goal:dailyGoal,pct:dailyPct,color:VOLT},{label:"Weekly Progress",makes:weeklyMakes,goal:weeklyGoal,pct:weeklyPct,color:CYAN}].map(progress=><div key={progress.label}><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:6}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.07em",textTransform:"uppercase"}}>{progress.label}</div><div style={{fontFamily:FB,color:progress.color,fontSize:11,fontWeight:700}}>{progress.makes}/{progress.goal}</div></div><div style={{height:8,borderRadius:999,background:"rgba(255,255,255,0.07)",overflow:"hidden"}}><div style={{height:"100%",width:`${progress.pct}%`,background:progress.color,boxShadow:`0 0 14px ${progress.color}55`,transition:"width .35s ease"}}/></div></div>)}
           </div>
@@ -2954,7 +2954,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {label:"Review Today's Pulse",done:false,info:true},
         {label:"Check At Home Shots leaderboard",done:Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0,info:!(Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0)},
       ];
-      return <section style={CHECKLIST_CARD_STYLE} aria-label="Coach setup checklist">
+      return <section style={{...CHECKLIST_CARD_STYLE,padding:isDesktop?"11px 12px":"10px 11px"}} aria-label="Coach setup checklist">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Coach Setup</div>
           <span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{coachChecklist.filter(item=>item.done).length}/{coachChecklist.length}</span>
@@ -3148,12 +3148,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><EventIcon type="event" size={14} color={VOLT}/><span style={{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1}}>EVENTS</span></div>
         <div style={{fontFamily:FB,fontSize:10,color:T.SUB,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em",whiteSpace:"nowrap"}}>{events.length} total</div>
       </div>
-      <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:"0 0 12px",width:"100%",minHeight:44,height:44,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
+      <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:"0 0 14px",width:"100%",minHeight:48,height:48,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
       {events.length===0?<div style={{display:"inline-block",maxWidth:"100%",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 12px",marginBottom:12,textAlign:"center"}}>
         <div style={{width:40,height:40,borderRadius:11,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={18} color={VOLT}/></div>
         <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events scheduled</div>
         <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.4}}>Create your first event to organize practices, games, camps, or meetings.</div>
-      </div>:<div style={{display:"grid",gap:8,marginBottom:10}}>
+      </div>:<div style={{display:"grid",gap:10,marginBottom:14}}>
         {(() => {
           const parseTime=(time="")=>{const m=String(time).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);if(!m)return Number.MAX_SAFE_INTEGER;let hour=Number(m[1]);const minute=Number(m[2]||"0");const meridiem=(m[3]||"").toUpperCase();if(meridiem==="PM"&&hour<12)hour+=12;if(meridiem==="AM"&&hour===12)hour=0;return hour*60+minute;};
           const grouped=[...events].sort((a,b)=>a.date.localeCompare(b.date)||parseTime(a.time)-parseTime(b.time)).reduce((acc,ev)=>{(acc[ev.date]=acc[ev.date]||[]).push(ev);return acc;},{});
