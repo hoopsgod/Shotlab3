@@ -28,6 +28,21 @@ test('player getting started checklist copy exists on player home', async () => 
   assert.match(source, /Check progress/);
 });
 
+test('coach setup checklist actionable navigation targets remain wired', async () => {
+  const source = await appSource();
+  assert.match(source, /Invite or add players",done:ups\.length>0,onClick:\(\)=>setTab\("players"\)/);
+  assert.match(source, /Add first event",done:events\.length>0,onClick:\(\)=>setTab\("events"\)/);
+  assert.match(source, /aria-label=\{item\.ariaLabel\|\|item\.label\}/);
+});
+
+test('player checklist actionable navigation targets remain wired', async () => {
+  const source = await appSource();
+  assert.match(source, /View upcoming event",done:hasUpcomingEvents,onClick:\(\)=>switchTab\("duels"\)/);
+  assert.match(source, /RSVP to an event",done:hasRsvped,onClick:\(\)=>switchTab\("duels"\)/);
+  assert.match(source, /Log At Home Shots",done:hasShotLogs,onClick:\(\)=>switchTab\("log-drill"\)/);
+  assert.match(source, /Check progress",done:false,info:true,onClick:\(\)=>switchTab\("profile"\)/);
+});
+
 test('event persistence and RSVP logic contract strings remain intact', async () => {
   const source = await appSource();
   assert.match(source, /const scopedEvents=events\.filter\(e=>e\.teamId===user\?\.teamId\);/);
