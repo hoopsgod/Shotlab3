@@ -431,7 +431,8 @@ function getAudioCtx(){if(!_audioCtx&&typeof AudioContext!=="undefined"){try{_au
 function playTick(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=1200;o.type="sine";g.gain.setValueAtTime(.07,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.05);o.start();o.stop(audioCtx.currentTime+.05)}catch(error){}}
 function playScore(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[800,1200,1600].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="sine";g.gain.setValueAtTime(.05,audioCtx.currentTime+i*.08);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.08+.12);o.start(audioCtx.currentTime+i*.08);o.stop(audioCtx.currentTime+i*.08+.12)})}catch(error){}}
 function playUnlock(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[523,659,784,1047].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="triangle";g.gain.setValueAtTime(.06,audioCtx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.1+.25);o.start(audioCtx.currentTime+i*.1);o.stop(audioCtx.currentTime+i*.1+.25)})}catch(error){}}
-export function formatInactivePlayersPulseCopy(inactivePlayers=[]){
+export function formatInactivePlayersPulseCopy(inactivePlayers=[],totalPlayers=0){
+if(totalPlayers<=0)return"No players yet — invite players to start tracking activity.";
 if(inactivePlayers.length===0)return"All players have logged activity this week.";
 if(inactivePlayers.length===1){
 const name=inactivePlayers[0]?.name?.split(" ")[0]||"Player";
@@ -3047,9 +3048,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
         const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
         const inactive=ups.filter(p=>!activeThisWeek.has(p.email));
-        const pulseCopy=formatInactivePlayersPulseCopy(inactive);
-        return <div style={{fontFamily:FB,color:inactive.length>0?T.SUB:VOLT,fontSize:10,fontWeight:600,letterSpacing:1}}>
-          {inactive.length>0?"• ":"✓ "}{pulseCopy}
+        const hasRosterPlayers=ups.length>0;
+        const pulseIsGood=hasRosterPlayers&&inactive.length===0;
+        const pulseCopy=formatInactivePlayersPulseCopy(inactive,ups.length);
+        return <div style={{fontFamily:FB,color:pulseIsGood?VOLT:T.SUB,fontSize:10,fontWeight:600,letterSpacing:1}}>
+          {pulseIsGood?"✓ ":"• "}{pulseCopy}
         </div>
       })()}
     </div>
