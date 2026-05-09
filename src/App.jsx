@@ -411,6 +411,16 @@ function getAudioCtx(){if(!_audioCtx&&typeof AudioContext!=="undefined"){try{_au
 function playTick(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=1200;o.type="sine";g.gain.setValueAtTime(.07,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.05);o.start();o.stop(audioCtx.currentTime+.05)}catch(error){}}
 function playScore(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[800,1200,1600].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="sine";g.gain.setValueAtTime(.05,audioCtx.currentTime+i*.08);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.08+.12);o.start(audioCtx.currentTime+i*.08);o.stop(audioCtx.currentTime+i*.08+.12)})}catch(error){}}
 function playUnlock(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[523,659,784,1047].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="triangle";g.gain.setValueAtTime(.06,audioCtx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.1+.25);o.start(audioCtx.currentTime+i*.1);o.stop(audioCtx.currentTime+i*.1+.25)})}catch(error){}}
+export function formatInactivePlayersPulseCopy(inactivePlayers=[]){
+if(inactivePlayers.length===0)return"All players have logged activity this week.";
+if(inactivePlayers.length===1){
+const name=inactivePlayers[0]?.name?.split(" ")[0]||"Player";
+return`Needs follow-up: ${name} hasn't logged activity this week.`;
+}
+const listedNames=inactivePlayers.slice(0,3).map(p=>p?.name?.split(" ")[0]||"Player").join(", ");
+const moreSuffix=inactivePlayers.length>3?` +${inactivePlayers.length-3} more`:"";
+return`Needs follow-up: ${inactivePlayers.length} players haven't logged activity this week: ${listedNames}${moreSuffix}`;
+}
 const THEMES={dark:{BG:TOKENS.BG_BASE,SURFACE:TOKENS.BG_CARD,CARD_BG:TOKENS.BG_CARD,BORDER:TOKENS.BG_SUBTLE,MUT:TOKENS.TEXT_MUTED,LT:TOKENS.TEXT_PRIMARY,SUB:TOKENS.TEXT_SECONDARY,TRACK:TOKENS.BG_SUBTLE},light:{BG:TOKENS.BG_BASE,SURFACE:TOKENS.BG_CARD,CARD_BG:TOKENS.BG_CARD,BORDER:TOKENS.BG_SUBTLE,MUT:TOKENS.TEXT_MUTED,LT:TOKENS.TEXT_PRIMARY,SUB:TOKENS.TEXT_SECONDARY,TRACK:TOKENS.BG_SUBTLE}};
 const T=THEMES.dark; // module-level default for standalone components
 const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#A0A0A0"},{days:14,name:"TWO-WEEK GRIND",icon:"14",color:"#A0A0A0"},{days:30,name:"MONTHLY BEAST",icon:"30",color:"#C8FF00"},{days:60,name:"IRON WILL",icon:"60",color:CYAN},{days:100,name:"CENTURION",icon:"💯",color:VOLT}];
@@ -2957,9 +2967,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
         const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
         const inactive=ups.filter(p=>!activeThisWeek.has(p.email));
-        return inactive.length>0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:600,letterSpacing:1}}>
-          • {inactive.length} player{inactive.length>1?"s":""} haven't logged this week: {inactive.slice(0,3).map(p=>p.name.split(" ")[0]).join(", ")}{inactive.length>3?` +${inactive.length-3} more`:""}
-        </div>:<div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:600,letterSpacing:1}}>✓ All players active this week</div>
+        const pulseCopy=formatInactivePlayersPulseCopy(inactive);
+        return <div style={{fontFamily:FB,color:inactive.length>0?T.SUB:VOLT,fontSize:10,fontWeight:600,letterSpacing:1}}>
+          {inactive.length>0?"• ":"✓ "}{pulseCopy}
+        </div>
       })()}
     </div>
 
