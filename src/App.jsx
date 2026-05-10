@@ -35,6 +35,7 @@ import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard 
 import { supabase } from "./lib/supabase.js";
 import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
 import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
+import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
 const CYAN = TOKENS.SECONDARY;
@@ -97,6 +98,22 @@ program:{
   chipColor:CYAN,
 },
 };
+function RecentActivityCard({ title = "Recent Activity", items = [] }) {
+  const legacyCoachEmptyStateCopy = "No activity yet — invite players or have them log their first workout.";
+  return <section style={{marginTop:14,marginBottom:16,padding:"12px",borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"linear-gradient(170deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2))"}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+      <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.4,textTransform:"uppercase"}}>{title}</div>
+      <div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,letterSpacing:1.2}}>Today</div>
+    </div>
+    {items.length===0?<div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:11,padding:"8px 2px"}} title={legacyCoachEmptyStateCopy}>Team activity will appear here as players and coaches use ShotLab.</div>:items.map((item,idx)=><div key={`${item.text}-${idx}`} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"8px 2px",borderTop:idx===0?"none":`1px solid ${BORDER_CLR}55`}}>
+      <span style={{width:6,height:6,borderRadius:999,background:"var(--accent)",marginTop:6,flexShrink:0}}/>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:600,lineHeight:1.35}}>{item.text}</div>
+        <div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,marginTop:2}}>{item.date===todayStr()?"Today":item.date}</div>
+      </div>
+    </div>)}
+  </section>;
+}
 const MODE_CARD_VARIANTS={
 active:{
 showTopAccent:true,
@@ -1781,6 +1798,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         {label:"Log At Home Shots",done:hasShotLogs,onClick:()=>switchTab("log-drill"),ariaLabel:"Go to Log Drill to log At Home Shots"},
         {label:"Check progress",done:false,info:true,onClick:()=>switchTab("profile"),ariaLabel:"Go to profile progress"},
       ];
+      const recentPlayerActivity=deriveActivityFeedItems({view:"player",user:u,events,rsvps,shotLogs,players,scores,today});
       return <div style={{marginBottom:24}}>
         <section style={{...CHECKLIST_CARD_STYLE,padding:isNarrow?"10px 11px":"11px 12px"}} aria-label="Getting started checklist">
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Getting Started</div>
@@ -1826,6 +1844,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" titleColor={VOLT} subtitleColor={VOLT} variant="active" actionLabel={null} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
           <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" titleColor={CYAN} subtitleColor={CYAN} variant="active" infoLayout={"schedule"} actionLabel={nextEventBadge} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="duels"} onClick={()=>switchTab("duels")}/>
         </div>
+        <RecentActivityCard title="Recent Activity" items={recentPlayerActivity}/>
       </div>
     })()}
 
@@ -3060,7 +3079,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     
 
     </div>
-    <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/><div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"6px 14px",marginTop:12}}>{scores.length===0&&<Empty t="No activity yet" action="No activity yet — invite players or have them log their first workout." cta="Invite Players" onTap={()=>setTab("players")} icon={<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>}/>}{scores.slice(-20).reverse().map((s,i)=>{const drillList=(s.src==="program"?programDrills:drills);const dr=drillList.find(d=>d.id===s.drillId);const pct=dr&&hasDrillMax(dr)?Math.round(s.score/dr.max*100):null;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 10px",borderBottom:`1px solid ${BORDER_CLR}33`,borderRadius:12,background:i%2===0?"rgba(255,255,255,0.01)":"transparent"}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:999,color:isHome?"#0B0D10":LIGHT,background:isHome?"var(--accent)":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}{hasDrillMax(dr)&&<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontSize:10,fontWeight:700,color:pct>=70?"var(--accent)":T.SUB}}>{pct}%</div>}</div></div>})}</div></div>}
+    {(()=>{const recentCoachActivity=deriveActivityFeedItems({view:"coach",user:u,events,rsvps,shotLogs,players:ups,scores,today});return <RecentActivityCard title="Activity" items={recentCoachActivity}/>;})()}</div>}
 
   {/** DRILLS */}
   {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><PageHeader title="DRILLS" subtitle="Skill plans, assignments, and drill library" accent="cyan" icon={<DrillIcon type="ft" size={22} color={PAGE_ACCENTS.drills.accent}/>} actionLabel="Add" onAction={()=>setShowNewDrill(true)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.drills.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>QUICK START DRILL</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{drills.length} total drills ready to start</div></div><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowNewDrill(true)}>Start</button></div><div className="drillsMetrics"><div className="heroStat drillsMetricTile"><div className="heroStatVal">{drills.length}</div><div className="heroStatLbl">ACTIVE</div></div><div className="heroStat drillsMetricTile"><div className="heroStatVal">{programDrills.length}</div><div className="heroStatLbl">PROGRAM</div></div></div><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth"})}>Manage Drills</button></div>
