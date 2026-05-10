@@ -2952,21 +2952,20 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 
 <div style={{flex:1,padding:`${showMiniHeader?"88px":"16px"} 20px 110px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
-  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="FEED" subtitle="Daily team activity and momentum" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
-    {(()=>{
-      const coachChecklist=[
+  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="COACH HOME" subtitle="Today-first command surface for your program" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
+    {(()=>{const coachChecklist=[
         {label:"Create or restore team",done:Boolean(u?.teamId)},
         {label:"Invite or add players",done:ups.length>0,onClick:()=>setTab("players"),ariaLabel:"Go to Players tab"},
         {label:"Add first event",done:events.length>0,onClick:()=>setTab("events"),ariaLabel:"Go to Events tab"},
         {label:"Review Today's Pulse",done:false,info:true},
         {label:"Check At Home Shots leaderboard",done:Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0,info:!(Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0)},
       ];
-      return <section style={{...CHECKLIST_CARD_STYLE,padding:isDesktop?"11px 12px":"10px 11px"}} aria-label="Coach setup checklist">
+      return <section style={{...CHECKLIST_CARD_STYLE,padding:"10px 11px",marginBottom:10}} aria-label="Coach setup checklist">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Coach Setup</div>
           <span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{coachChecklist.filter(item=>item.done).length}/{coachChecklist.length}</span>
         </div>
-        <div style={{display:"grid",gap:7,marginTop:9}}>
+        <div style={{display:"grid",gap:6,marginTop:8}}>
           {coachChecklist.map((item)=>{
             const rowStyle={display:"flex",alignItems:"center",gap:8,width:"100%",textAlign:"left",padding:0,margin:0,background:"none",border:"none"};
             return item.onClick
@@ -2980,89 +2979,84 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
               </div>;
           })}
         </div>
-      </section>;
-    })()}
+      </section>;})()}
     <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
       {HOME_SHOTS_LEADERBOARD_SCOPES.map((scopeOption) => {
         const isActive = leaderboardScope === scopeOption.key;
-        return (
-          <button
-            key={scopeOption.key}
-            type="button"
-            onClick={() => onLeaderboardScopeChange(scopeOption.key)}
-            style={{
-              ...HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE,
-              border: isActive ? "1px solid var(--accent)" : "1px solid var(--stroke-1)",
-              background: isActive ? "var(--accent-soft)" : "var(--surface-1)",
-              color: isActive ? "var(--accent)" : "var(--text-2)",
-              fontFamily: FB,
-            }}
-          >
-            {scopeOption.label}
-          </button>
-        );
+        return <button key={scopeOption.key} type="button" onClick={() => onLeaderboardScopeChange(scopeOption.key)} style={{...HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE,border: isActive ? "1px solid var(--accent)" : "1px solid var(--stroke-1)",background: isActive ? "var(--accent-soft)" : "var(--surface-1)",color: isActive ? "var(--accent)" : "var(--text-2)",fontFamily: FB}}>{scopeOption.label}</button>;
       })}
     </div>
-    <HomeShotsLeaderboardCard
-      title={`TOP 10 ${leaderboardScope==="coaches"?"COACH":"PLAYER"} HOME SHOTS`}
-      status={homeShotsLeaderboard?.status||"idle"}
-      rows={homeShotsLeaderboard?.rows||[]}
-      error={homeShotsLeaderboard?.error||""}
-      onRetry={refreshHomeShotsLeaderboard}
-    />
-    <div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.feed.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S PULSE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>Who's active, streaking, and needs attention</div></div><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setTab("players")}>View Team</button></div>
-    {/* Coach dashboard pulse */}
-    <div className="accent-card" style={{background:`linear-gradient(155deg, color-mix(in srgb,var(--accent) 12%, transparent), ${CARD_BG} 72%)`,borderRadius:18,padding:"20px 20px",border:`1px solid color-mix(in srgb,var(--accent) 28%, transparent)`,marginBottom:20,position:"relative",overflow:"hidden"}}>
-      <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:"var(--accent)",borderRadius:"4px 0 0 4px"}}/>
-      
-      <div style={{fontFamily:FD,color:"var(--accent)",fontSize:12,letterSpacing:"var(--tracking-default)",marginBottom:12}}>TODAY'S PULSE</div>
-      <div style={{display:"flex",gap:8,marginBottom:12}}>
-        {(()=>{
-          const activeToday=new Set(scores.filter(s=>s.date===today).map(s=>s.email)).size;
-          const totalPlayers=ups.length;
-          const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
-          const nextEv=sorted.find(e=>e.date>=today);
-          const nextEvRsvps=nextEv?rsvps.filter(r=>r.eventId===nextEv.id).length:0;
-          // Top scorer this week
-          const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-          const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-          const weekScores={};scores.filter(s=>s.date>=weekStr).forEach(s=>{if(!weekScores[s.email])weekScores[s.email]={email:s.email,name:s.name||s.email,total:0};weekScores[s.email].total+=s.score});
-          const topWeek=Object.values(weekScores).sort((a,b)=>b.total-a.total)[0];
-          return <>
-            <div style={{flex:1,background:BG,borderRadius:12,padding:"12px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-              <div style={{fontFamily:FD,color:activeToday>0?VOLT:MUTED,fontSize:24,lineHeight:1}}>{activeToday}<span style={{color:MUTED,fontSize:14}}>/{totalPlayers}</span></div>
-              <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,marginTop:3,fontWeight:600}}>ACTIVE TODAY</div>
+    <HomeShotsLeaderboardCard title={`TOP 10 ${leaderboardScope==="coaches"?"COACH":"PLAYER"} HOME SHOTS`} status={homeShotsLeaderboard?.status||"idle"} rows={homeShotsLeaderboard?.rows||[]} error={homeShotsLeaderboard?.error||""} onRetry={refreshHomeShotsLeaderboard} />
+    {(()=>{
+      const todayDate=today;
+      const sortedEvents=[...events].sort((a,b)=>a.date.localeCompare(b.date));
+      const todaySession=sortedEvents.find(ev=>ev.date===todayDate);
+      const nextSession=sortedEvents.find(ev=>ev.date>todayDate);
+      const session=todaySession||nextSession||null;
+      const sessionRsvps=session?rsvps.filter(r=>r.eventId===session.id):[];
+      const activeTodaySet=new Set(scores.filter(s=>s.date===todayDate).map(s=>s.email));
+      const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
+      const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
+      const weekScores=scores.filter(s=>s.date>=weekStr);
+      const weekActiveSet=new Set(weekScores.map(s=>s.email));
+      const attendancePct=ups.length?Math.round((weekActiveSet.size/ups.length)*100):0;
+      const streakLeaders=Object.values(scores.reduce((acc,s)=>{acc[s.email]=(acc[s.email]||0)+1;return acc;},{})).sort((a,b)=>b-a).slice(0,3);
+      const avgStreak=streakLeaders.length?Math.round(streakLeaders.reduce((a,b)=>a+b,0)/streakLeaders.length):0;
+      const inactivePlayers=ups.filter(p=>!weekActiveSet.has(p.email));
+      const lowRsvpPlayers=ups.filter(p=>{const playerRsvps=rsvps.filter(r=>r.email===p.email);if(playerRsvps.length<2)return false;const yes=playerRsvps.filter(r=>r.status==="yes").length;return yes/playerRsvps.length<0.4;});
+      const pulseCopy=formatInactivePlayersPulseCopy(inactivePlayers,ups.length);
+      const attention=[
+        inactivePlayers.length?`${inactivePlayers.length} inactive 5+ days`:null,
+        lowRsvpPlayers.length?`${lowRsvpPlayers.length} low RSVP participation`:null,
+      ].filter(Boolean).slice(0,3);
+      const readinessCopy=ups.length===0?"Roster needs players":`${activeTodaySet.size}/${ups.length} athletes active today`;
+      const rsvpPct=session&&ups.length?Math.round((sessionRsvps.length/ups.length)*100):0;
+      return <>
+        <section className="accent-card" style={{background:"radial-gradient(110% 120% at 0% 0%, color-mix(in srgb,var(--accent) 22%, transparent) 0%, rgba(11,13,16,0.98) 52%, rgba(7,9,12,0.98) 100%)",border:`1px solid color-mix(in srgb,var(--accent) 38%, transparent)`,borderRadius:24,padding:isDesktop?"30px":"22px",marginBottom:10,boxShadow:"0 24px 52px rgba(0,0,0,0.35)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"flex-start",marginBottom:12}}>
+            <div>
+              <div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,fontWeight:700,letterSpacing:"0.10em"}}>TODAY'S PRACTICE</div>
+              <div style={{fontFamily:FD,color:"var(--text-1)",fontSize:isDesktop?34:28,lineHeight:0.98,marginTop:8,letterSpacing:"0.03em"}}>{session?.title||"No session scheduled"}</div>
+              <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:12,marginTop:10,maxWidth:520}}>{session?`Focus area: ${session.desc||"Team development"}`:"Set the team agenda and publish today's focus."}</div>
             </div>
-            <div style={{flex:1,background:BG,borderRadius:12,padding:"12px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-              {nextEv?<>
-                <div style={{fontFamily:FD,color:CYAN,fontSize:14,lineHeight:1.1,letterSpacing:1}}>{nextEv.title.length>12?nextEv.title.slice(0,12)+"...":nextEv.title}</div>
-                <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:2,marginTop:3,fontWeight:600}}>{nextEvRsvps} RSVP · {nextEv.date.slice(5)}</div>
-              </>:<div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>No events</div>}
-            </div>
-          </>
-        })()}
-      </div>
-      {(()=>{
-        // Players who haven't logged this week
-        const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-        const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-        const activeThisWeek=new Set(scores.filter(s=>s.date>=weekStr).map(s=>s.email));
-        const inactive=ups.filter(p=>!activeThisWeek.has(p.email));
-        const hasRosterPlayers=ups.length>0;
-        const pulseIsGood=hasRosterPlayers&&inactive.length===0;
-        const pulseCopy=formatInactivePlayersPulseCopy(inactive,ups.length);
-        return <div style={{fontFamily:FB,color:pulseIsGood?VOLT:T.SUB,fontSize:10,fontWeight:600,letterSpacing:1}}>
-          {pulseIsGood?"✓ ":"• "}{pulseCopy}
-        </div>
-      })()}
-    </div>
+            <button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setTab("events")}>{session?"Open Session":"Add Session"}</button>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8}}>
+            {[{k:"Readiness",v:readinessCopy},{k:"Time",v:session?.time||"TBD"},{k:"Intensity",v:session?.intensity||"Game-speed"},{k:"Participation",v:session?`${rsvpPct}% RSVP`:"No RSVPs"}].map(item=><div key={item.k} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"10px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{item.k}</div><div style={{fontFamily:FB,fontSize:12,color:"var(--text-1)",marginTop:3,fontWeight:600}}>{item.v}</div></div>)}
+          </div>
+        </section>
 
-    
+        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(5,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:12,padding:"6px 0"}}>
+          {[{l:"Active today",v:activeTodaySet.size},{l:"RSVP %",v:`${rsvpPct}%`},{l:"Attendance %",v:`${attendancePct}%`},{l:"Streak leaders",v:avgStreak},{l:"Activity",v:weekScores.length}].map(stat=><div key={stat.l} style={{border:"1px solid color-mix(in srgb,var(--stroke-1) 84%, transparent)",background:"rgba(255,255,255,0.01)",borderRadius:999,padding:"9px 12px",display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:8}}><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{stat.l}</div><div style={{fontFamily:FD,fontSize:18,color:"var(--text-1)",lineHeight:1}}>{stat.v}</div></div>)}
+        </section>
 
-    </div>
-    {(()=>{const recentCoachActivity=deriveActivityFeedItems({view:"coach",user:u,events,rsvps,shotLogs,players:ups,scores,today});return <RecentActivityCard title="Activity" items={recentCoachActivity}/>;})()}
-    <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/><div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"6px 14px",marginTop:12}}>{scores.length===0&&<Empty t="No activity yet" action="No activity yet — invite players or have them log their first workout." cta="Invite Players" onTap={()=>setTab("players")} icon={<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>}/>}{scores.slice(-20).reverse().map((s,i)=>{const drillList=(s.src==="program"?programDrills:drills);const dr=drillList.find(d=>d.id===s.drillId);const pct=dr&&hasDrillMax(dr)?Math.round(s.score/dr.max*100):null;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 10px",borderBottom:`1px solid ${BORDER_CLR}33`,borderRadius:12,background:i%2===0?"rgba(255,255,255,0.01)":"transparent"}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:999,color:isHome?"#0B0D10":LIGHT,background:isHome?"var(--accent)":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}{hasDrillMax(dr)&&<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontSize:10,fontWeight:700,color:pct>=70?"var(--accent)":T.SUB}}>{pct}%</div>}</div></div>})}</div></div>}
+        <section className="accent-card" style={{borderRadius:16,padding:"14px 14px",marginBottom:12,background:"linear-gradient(180deg, rgba(255,255,255,0.015), rgba(0,0,0,0.18))",border:`1px solid ${BORDER_CLR}`}}>
+          <div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>Players needing attention</div>
+          {(()=>{
+            const inactive=inactivePlayers;
+            const hasRosterPlayers=ups.length>0;
+            const pulseIsGood=hasRosterPlayers&&inactive.length===0;
+            return <div style={{fontFamily:FB,color:pulseIsGood?VOLT:T.SUB,fontSize:10,fontWeight:600,letterSpacing:1,marginTop:8}}>
+              {pulseIsGood?"✓ ":"• "}{pulseCopy}
+            </div>;
+          })()}
+          <div style={{display:"grid",gap:6,marginTop:8}}>{attention.length?attention.map((line,idx)=><button key={idx} type="button" onClick={()=>setTab("players")} style={{fontFamily:FB,fontSize:11,color:"var(--text-2)",background:"rgba(255,255,255,0.015)",border:"1px solid var(--stroke-1)",borderRadius:10,padding:"8px 10px",textAlign:"left",cursor:"pointer"}}>• {line}</button>):<div style={{fontFamily:FB,fontSize:11,color:VOLT}}>No high-risk alerts today.</div>}</div>
+        </section>
 
+        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>Next session</div><div style={{fontFamily:FB,fontSize:11,color:"var(--text-3)",marginTop:2}}>{nextSession?nextSession.date:"No upcoming session"}</div></div><button className="pageHeaderPill" onClick={()=>setTab("events")}>View calendar</button></div>
+          {nextSession&&<div style={{fontFamily:FB,fontSize:12,color:"var(--text-2)",marginTop:6}}>{nextSession.title} · {nextSession.time||"TBD"}</div>}
+        </section>
+
+        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(5,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:10,marginBottom:14}}>
+          {[{label:"Add Event",onClick:()=>jumpToSection("events","coach-events-management")},{label:"View Players",onClick:()=>setTab("players")},{label:"Program",onClick:()=>setTab("drills")},{label:"Activity",onClick:()=>setTab("feed")},{label:"Log Practice",onClick:handleLogScoreAction}].map((action,idx)=><button key={action.label} type="button" onClick={action.onClick} style={{minHeight:50,borderRadius:14,border:idx===0?"1px solid var(--accent)":"1px solid var(--stroke-1)",background:idx===0?"var(--accent-soft)":"var(--surface-1)",color:idx===0?"var(--accent)":"var(--text-1)",fontFamily:FB,fontWeight:700,fontSize:12,cursor:"pointer",transition:"transform .15s ease, border-color .15s ease"}}>{action.label}</button>)}
+        </section>
+
+        {(()=>{const recentCoachActivity=deriveActivityFeedItems({view:"coach",user:u,events,rsvps,shotLogs,players:ups,scores,today});return <RecentActivityCard title="Activity" items={recentCoachActivity}/>;})()}
+        <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/><div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"6px 14px",marginTop:12}}>{scores.length===0&&<Empty t="No activity yet" action="No activity yet — invite players or have them log their first workout." cta="Invite Players" onTap={()=>setTab("players")} icon={<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>}/>}{scores.slice(-20).reverse().map((s,i)=>{const drillList=(s.src==="program"?programDrills:drills);const dr=drillList.find(d=>d.id===s.drillId);const pct=dr&&hasDrillMax(dr)?Math.round(s.score/dr.max*100):null;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 10px",borderBottom:`1px solid ${BORDER_CLR}33`,borderRadius:12,background:i%2===0?"rgba(255,255,255,0.01)":"transparent"}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:999,color:isHome?"#0B0D10":LIGHT,background:isHome?"var(--accent)":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}{hasDrillMax(dr)&&<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontSize:10,fontWeight:700,color:pct>=70?"var(--accent)":T.SUB}}>{pct}%</div>}</div></div>})}</div>
+      </>;
+    })()}
+  </div>}
   {/** DRILLS */}
   {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><PageHeader title="DRILLS" subtitle="Skill plans, assignments, and drill library" accent="cyan" icon={<DrillIcon type="ft" size={22} color={PAGE_ACCENTS.drills.accent}/>} actionLabel="Add" onAction={()=>setShowNewDrill(true)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.drills.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>QUICK START DRILL</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{drills.length} total drills ready to start</div></div><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowNewDrill(true)}>Start</button></div><div className="drillsMetrics"><div className="heroStat drillsMetricTile"><div className="heroStatVal">{drills.length}</div><div className="heroStatLbl">ACTIVE</div></div><div className="heroStat drillsMetricTile"><div className="heroStatVal">{programDrills.length}</div><div className="heroStatLbl">PROGRAM</div></div></div><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth"})}>Manage Drills</button></div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Drill Management" s={`${drills.length} active`} identity/>
