@@ -2919,6 +2919,19 @@ const customProgramDrillCount=countCustomProgramDrills(programDrills);
 const[nudged,setNudged]=useState([]);
 const[confirmDelete,setConfirmDelete]=useState(null);const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
 const ups=useMemo(()=>players.filter(p=>p.role!=="coach"&&p.teamId===u?.teamId).map(p=>({email:p.email,name:p.name||String(p.email||"").split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())})),[players,u?.teamId]);
+const safeEvents=useMemo(()=>Array.isArray(events)?events:[],[events]);
+const safeRsvps=useMemo(()=>Array.isArray(rsvps)?rsvps:[],[rsvps]);
+const safeScores=useMemo(()=>Array.isArray(scores)?scores:[],[scores]);
+const safeRoster=useMemo(()=>Array.isArray(ups)?ups:[],[ups]);
+const coachAttendancePct=useMemo(()=>{
+  if(safeRoster.length===0)return 0;
+  const weekStartDate=new Date();
+  weekStartDate.setDate(weekStartDate.getDate()-weekStartDate.getDay());
+  const weekStart=`${weekStartDate.getFullYear()}-${String(weekStartDate.getMonth()+1).padStart(2,"0")}-${String(weekStartDate.getDate()).padStart(2,"0")}`;
+  const activeThisWeek=new Set(safeScores.filter((score)=>score?.email&&score?.date>=weekStart).map((score)=>score.email));
+  const pct=Math.round((activeThisWeek.size/safeRoster.length)*100);
+  return Number.isFinite(pct)?pct:0;
+},[safeRoster,safeScores]);
 const allKnown=useMemo(()=>{const m={};players.forEach(p=>m[p.email]=p.name);scores.forEach(s=>{if(!m[s.email])m[s.email]=s.name||s.email});return Object.entries(m).map(([email,name])=>({email,name}))},[players,scores]);
 const today=todayStr(),todayS=scores.filter(s=>s.date===today);
 const saveDrill=()=>{const m=parseInt(eMax);updateDrill(editD.id,{name:san(eName),desc:san(eDesc),instructions:san(eInstr),max:m>0?m:null,icon:eIcon});setEditD(null)};
@@ -2936,7 +2949,7 @@ addRsvp(evId,e,name);setAddEmail("")};
 const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,sport:san(nsc.sport),sessionType:san(nsc.sessionType||"School")});setNsc({sport:"",date:"",time:"",sessionType:"School"});setShowAddSC(false)};
 const totalPlayers=ups.length;
 const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
-const sortedEvents=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
+const sortedEvents=useMemo(()=>[...safeEvents].sort((a,b)=>String(a?.date||"").localeCompare(String(b?.date||""))),[safeEvents]);
 const eventFilterPills=useMemo(()=>[
   {label:"All",value:"all"},
   {label:"Practice",value:"run"},
@@ -2947,8 +2960,8 @@ const eventFilterPills=useMemo(()=>[
 const filteredEvents=useMemo(()=>eventFilter==="all"?sortedEvents:sortedEvents.filter(ev=>String(ev.type||"").toLowerCase()===eventFilter.toLowerCase()),[sortedEvents,eventFilter]);
 const nextEvent=sortedEvents.find(e=>e.date>=today);
 const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"None";
-const rsvpsByEvent=useMemo(()=>{const buckets=new Map();for(const rsvp of rsvps){if(!buckets.has(rsvp.eventId))buckets.set(rsvp.eventId,[]);buckets.get(rsvp.eventId).push(rsvp);}return buckets;},[rsvps]);
-const attendanceCountByEmail=useMemo(()=>{const counts=new Map();for(const rsvp of rsvps){counts.set(rsvp.email,(counts.get(rsvp.email)||0)+1);}return counts;},[rsvps]);
+const rsvpsByEvent=useMemo(()=>{const buckets=new Map();for(const rsvp of safeRsvps){if(!buckets.has(rsvp.eventId))buckets.set(rsvp.eventId,[]);buckets.get(rsvp.eventId).push(rsvp);}return buckets;},[safeRsvps]);
+const attendanceCountByEmail=useMemo(()=>{const counts=new Map();for(const rsvp of safeRsvps){counts.set(rsvp.email,(counts.get(rsvp.email)||0)+1);}return counts;},[safeRsvps]);
 const availableWalkInByEvent=useMemo(()=>{const byEvent=new Map();for(const ev of sortedEvents){const attendees=new Set((rsvpsByEvent.get(ev.id)||[]).map(r=>r.email));byEvent.set(ev.id,allKnown.filter(p=>!attendees.has(p.email)));}return byEvent;},[allKnown,sortedEvents,rsvpsByEvent]);
 const rosterNameByEmail=useMemo(()=>{const map=new Map();for(const p of players){const email=String(p?.email||'').toLowerCase();if(email&&!map.has(email))map.set(email,p?.name||'');}for(const p of allKnown){const email=String(p?.email||'').toLowerCase();if(email&&!map.has(email))map.set(email,p?.name||'');}return map;},[players,allKnown]);
 const coachEventRsvpRows=useCallback((eventId)=>rsvps.filter(r=>r.eventId===eventId&&r.teamId===u?.teamId),[rsvps,u?.teamId]);
@@ -3103,7 +3116,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {label:"Check At Home Shots leaderboard",done:Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0,info:!(Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0)},
       ];
       const coachActivation=[
-        {label:"First attendance flow",done:attendance.length>0,onClick:()=>setTab("events")},
+        {label:"First attendance flow",done:coachAttendancePct>0||safeRsvps.length>0,onClick:()=>setTab("events")},
         {label:"First team-management action",done:ups.length>0||events.length>0,onClick:()=>setTab("players")},
         {label:"First RSVP tracking pass",done:rsvps.length>0,onClick:()=>setTab("events")},
       ];
@@ -3141,10 +3154,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     <HomeShotsLeaderboardCard title={`TOP 10 ${leaderboardScope==="coaches"?"COACH":"PLAYER"} HOME SHOTS`} status={homeShotsLeaderboard?.status||"idle"} rows={homeShotsLeaderboard?.rows||[]} error={homeShotsLeaderboard?.error||""} onRetry={refreshHomeShotsLeaderboard} />
     {(()=>{
       const todayDate=today;
-      const safeEvents=Array.isArray(events)?events:[];
-      const safeRsvps=Array.isArray(rsvps)?rsvps:[];
-      const safeScores=Array.isArray(scores)?scores:[];
-      const safeRoster=Array.isArray(ups)?ups:[];
       const nextWeekEndDate=new Date(`${todayDate}T00:00:00`);
       nextWeekEndDate.setDate(nextWeekEndDate.getDate()+6);
       const nextWeekEndStr=`${nextWeekEndDate.getFullYear()}-${String(nextWeekEndDate.getMonth()+1).padStart(2,"0")}-${String(nextWeekEndDate.getDate()).padStart(2,"0")}`;
@@ -3159,8 +3168,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
       const weekScores=safeScores.filter(s=>s?.date>=weekStr);
       const weekActiveSet=new Set(weekScores.map(s=>s.email));
-      const attendancePct=safeRoster.length?Math.round((weekActiveSet.size/safeRoster.length)*100):0;
-      const attendance=Number.isFinite(attendancePct)?attendancePct:0;
+      const attendancePct=coachAttendancePct;
+      const attendance=coachAttendancePct;
       const streakLeaders=Object.values(safeScores.reduce((acc,s)=>{acc[s.email]=(acc[s.email]||0)+1;return acc;},{})).sort((a,b)=>b-a).slice(0,3);
       const avgStreak=streakLeaders.length?Math.round(streakLeaders.reduce((a,b)=>a+b,0)/streakLeaders.length):0;
       const inactivePlayers=safeRoster.filter(p=>p?.email&&!weekActiveSet.has(p.email));
