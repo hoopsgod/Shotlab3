@@ -24,7 +24,7 @@ const navItems: NavItem[] = [
 
 export default function PlayerSidebar() {
   const { teamName, teamWordmark, tokens } = useTeamBranding();
-  const activePath = typeof window !== "undefined" ? window.location.pathname : "";
+  const activePath = typeof window !== "undefined" ? window.location.pathname.replace(/\/$/, "") : "";
   const teamInitial = useMemo(() => (teamName || "S").trim().charAt(0).toUpperCase(), [teamName]);
 
   return (
@@ -51,18 +51,20 @@ export default function PlayerSidebar() {
 
       <nav style={{ flex: 1, padding: "0 8px 12px", display: "flex", flexDirection: "column", gap: "4px" }}>
         {navItems.map((item) => {
-          const isActive = activePath.startsWith(item.href);
+          const normalizedHref = item.href.replace(/\/$/, "");
+          const isActive = activePath === normalizedHref || activePath.startsWith(`${normalizedHref}/`);
           return (
             <a
               key={item.href}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "12px",
-                minHeight: "44px",
+                minHeight: "46px",
                 padding: "10px 12px",
-                borderRadius: "8px",
+                borderRadius: "10px",
                 color: isActive ? tokens.primary : tokens.text,
                 textDecoration: "none",
                 fontSize: "0.875rem",
@@ -70,6 +72,8 @@ export default function PlayerSidebar() {
                 letterSpacing: "0.01em",
                 border: isActive ? `1px solid ${tokens.primarySoft}` : "1px solid transparent",
                 background: isActive ? tokens.primarySoft : "transparent",
+                transition: "background-color 160ms ease, color 160ms ease, border-color 160ms ease, transform 120ms ease",
+                WebkitTapHighlightColor: "transparent",
               }}
             >
               <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", color: isActive ? tokens.primary : tokens.muted, marginTop: "1px", flexShrink: 0 }}>{item.icon}</span>
