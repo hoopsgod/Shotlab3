@@ -1619,22 +1619,33 @@ const[showShotStats,setShowShotStats]=useState(false);
 const[isNarrow,setIsNarrow]=useState(typeof window!=="undefined"?window.innerWidth<768:false);
 const[isDesktop,setIsDesktop]=useState(typeof window!=="undefined"?window.innerWidth>=1024:false);
 const slideClass="screen-fade-in";
-const switchTab=(k)=>{setTab(k);setActive(null);setShowShotStats(false);
-const nextPath=PLAYER_TAB_PATHS[k]||"/";
-if(window.location.pathname!==nextPath)window.history.pushState({},"",nextPath);
-window.scrollTo({top:0,left:0,behavior:"auto"});}
+const switchTab=useCallback((requestedTab)=>{
+  const nextTab=canAccessTab(requestedTab)?requestedTab:"home";
+  const nextPath=PLAYER_TAB_PATHS[nextTab]||"/";
+  const currentPath=window.location.pathname==="/"?"/":(window.location.pathname.replace(/\/+$/,"" )||"/");
+  if(currentPath!==nextPath)window.history.pushState({},"",nextPath);
+  setTab(nextTab);
+  setActive(null);
+  setShowShotStats(false);
+},[canAccessTab]);
 useEffect(()=>{const onResize=()=>{setIsNarrow(window.innerWidth<768);setIsDesktop(window.innerWidth>=1024)};window.addEventListener("resize",onResize);return()=>window.removeEventListener("resize",onResize);},[]);
 useEffect(()=>{
-  const onPop=()=>{setTab(tabFromPath(window.location.pathname));setActive(null);setShowShotStats(false)};
+  const onPop=()=>{
+    setTab(tabFromPath(window.location.pathname));
+    setActive(null);
+    setShowShotStats(false);
+  };
   window.addEventListener("popstate",onPop);
   return ()=>window.removeEventListener("popstate",onPop);
 },[tabFromPath]);
 useEffect(()=>{
   if(!canAccessTab(tab)){
-    setTab("home");
-    if(window.location.pathname!=="/")window.history.replaceState({},"","/");
+    switchTab("home");
   }
-},[tab,canAccessTab]);
+},[tab,canAccessTab,switchTab]);
+useEffect(()=>{
+  window.scrollTo({top:0,left:0,behavior:"auto"});
+},[tab]);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const programScores=useMemo(()=>my.filter(s=>s.src==="program"),[my]);
