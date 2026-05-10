@@ -1828,12 +1828,19 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const hasUpcomingEvents=upcomingEventsCount>0;
       const hasRsvped=rsvps.some(r=>normalizeEmail(r.email)===normalizeEmail(u.email)&&r.teamId===u?.teamId);
       const hasShotLogs=shotLogs.some(s=>normalizeEmail(s.email)===normalizeEmail(u.email)&&s.teamId===u?.teamId&&Number(s.made)>0);
+      const firstWorkoutComplete=hasShotLogs||scLogs.some(log=>normalizeEmail(log?.email||"")===normalizeEmail(u.email));
+      const firstEventInteraction=hasUpcomingEvents||rsvps.some(r=>normalizeEmail(r?.email||"")===normalizeEmail(u.email));
       const playerChecklist=[
         {label:"Join team",done:playerHasTeam},
         {label:"View upcoming event",done:hasUpcomingEvents,onClick:()=>switchTab("program"),ariaLabel:"View upcoming events in Program"},
         {label:"RSVP to an event",done:hasRsvped,onClick:()=>switchTab("program"),ariaLabel:"Go to Program events to RSVP"},
         {label:"Log At Home Shots",done:hasShotLogs,onClick:()=>switchTab("log-drill"),ariaLabel:"Go to Log Drill to log At Home Shots"},
         {label:"Check progress",done:false,info:true,onClick:()=>switchTab("profile"),ariaLabel:"Go to profile progress"},
+      ];
+      const firstWeekActivation=[
+        {label:"First RSVP",done:hasRsvped,onClick:()=>switchTab("program")},
+        {label:"First completed workout",done:firstWorkoutComplete,onClick:()=>switchTab("sc")},
+        {label:"First event interaction",done:firstEventInteraction,onClick:()=>switchTab("program")},
       ];
       const recentPlayerActivity=deriveActivityFeedItems({view:"player",user:u,events,rsvps,shotLogs,players,scores,today});
       const eventTypeTone=(type)=>{
@@ -1920,7 +1927,17 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         </section>
         <section style={{padding:"11px",borderRadius:12,background:"rgba(255,255,255,0.015)"}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>Getting Started</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>Understand what matters now: events, RSVP accountability, and progress momentum.</div>
           <div style={{display:"grid",gap:6,marginTop:7}}>{playerChecklist.slice(0,4).map(item=><div key={item.label} style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11}}>{item.done?"✓":"•"} {item.label}</div>)}</div>
+        </section>
+        <section aria-label="First week activation for players" style={{padding:"11px",borderRadius:12,background:"linear-gradient(150deg, rgba(255,255,255,0.03), rgba(200,255,0,0.03))",border:"1px solid rgba(255,255,255,0.12)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+            <div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,letterSpacing:"0.05em"}}>FIRST-WEEK ACTIVATION</div>
+            <span style={{fontFamily:FB,color:VOLT,fontSize:10}}>{firstWeekActivation.filter(item=>item.done).length}/{firstWeekActivation.length}</span>
+          </div>
+          <div style={{display:"grid",gap:6,marginTop:7}}>
+            {firstWeekActivation.map((item)=><button key={item.label} type="button" onClick={item.onClick} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"8px 9px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(12,14,18,0.45)",color:LIGHT,fontFamily:FB,fontSize:11,textAlign:"left",cursor:"pointer"}}><span>{item.done?"✓":"•"} {item.label}</span><span style={{color:item.done?VOLT:T.SUB,fontSize:10}}>{item.done?"Momentum locked":"Start now"}</span></button>)}
+          </div>
         </section>
         <section aria-label="Training identity" style={{padding:"12px",borderRadius:14,background:"linear-gradient(150deg, rgba(200,255,0,0.10), rgba(255,255,255,0.03) 36%, rgba(11,13,16,0.92))",border:"1px solid rgba(200,255,0,0.28)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
@@ -3085,11 +3102,17 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {label:"Review Today's Pulse",done:false,info:true},
         {label:"Check At Home Shots leaderboard",done:Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0,info:!(Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0)},
       ];
+      const coachActivation=[
+        {label:"First attendance flow",done:attendance.length>0,onClick:()=>setTab("events")},
+        {label:"First team-management action",done:ups.length>0||events.length>0,onClick:()=>setTab("players")},
+        {label:"First RSVP tracking pass",done:rsvps.length>0,onClick:()=>setTab("events")},
+      ];
       return <section style={{...CHECKLIST_CARD_STYLE,padding:"10px 11px",marginBottom:10}} aria-label="Coach setup checklist">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Coach Setup</div>
           <span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{coachChecklist.filter(item=>item.done).length}/{coachChecklist.length}</span>
         </div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>Operational onboarding: roster flow, event readiness, RSVP visibility, and alert confidence.</div>
         <div style={{display:"grid",gap:6,marginTop:8}}>
           {coachChecklist.map((item)=>{
             const rowStyle={display:"flex",alignItems:"center",gap:8,width:"100%",textAlign:"left",padding:0,margin:0,background:"none",border:"none"};
@@ -3103,6 +3126,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
                 <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
               </div>;
           })}
+        </div>
+        <div style={{display:"grid",gap:6,marginTop:9,paddingTop:8,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>FIRST-WEEK ACTIVATION</div>
+          {coachActivation.map(item=><button key={item.label} type="button" onClick={item.onClick} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"7px 8px",borderRadius:9,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.015)",color:LIGHT,fontFamily:FB,fontSize:11,cursor:"pointer"}}><span>{item.done?"✓":"•"} {item.label}</span><span style={{fontSize:9,color:item.done?VOLT:T.SUB}}>{item.done?"Completed":"Next best action"}</span></button>)}
         </div>
       </section>;})()}
     <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
@@ -4017,7 +4044,7 @@ function ConfettiBurst(){const particles=useMemo(()=>Array.from({length:24},(_,i
 function CourtDivider({color=VOLT,my=20}){return <div style={{margin:`${my}px 0`,position:"relative",height:24,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}><svg width="100%" height="24" viewBox="0 0 400 24" preserveAspectRatio="none" fill="none" style={{position:"absolute",inset:0,opacity:.12}}><line x1="0" y1="12" x2="160" y2="12" stroke={color} strokeWidth="1"/><path d="M160 12Q200 -4 240 12" stroke={color} strokeWidth="1" fill="none"/><line x1="240" y1="12" x2="400" y2="12" stroke={color} strokeWidth="1"/></svg><div style={{width:6,height:6,borderRadius:"50%",background:color,opacity:.15,position:"relative",zIndex:1}}/></div>}
 function DividerDot(){return <div style={{display:"flex",alignItems:"center",gap:10,width:"100%",margin:"14px 0"}}><div style={{height:1,background:BORDER_CLR,flex:1}}/><div style={{width:4,height:4,borderRadius:"50%",background:VOLT}}/><div style={{height:1,background:BORDER_CLR,flex:1}}/></div>}
 function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#555555",flexShrink:0}}>{r}</div>}
-function Empty({t,action,onTap,cta="GET STARTED",ctaVariant="primary",icon=<DrillIcon type="sb" size={48} color="#555555"/>}){const hasAction=typeof onTap==="function";return <div className="state-fade" style={{textAlign:"center",padding:"40px 20px",borderRadius:16,border:`1px dashed ${BORDER_CLR}`,background:"linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0))"}}><div style={{opacity:.9,display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#555555"}}>{icon}</div><p className="u-allcaps-long" style={{fontFamily:FD,color:LIGHT,fontSize:18,marginTop:14,lineHeight:1.2}}>{t}</p>{action&&<p className="u-secondary-text" style={{fontFamily:FB,fontSize:13,margin:"8px auto 0",lineHeight:1.5,fontWeight:500,maxWidth:300}}>{action}</p>}{hasAction?<button onClick={onTap} className={`btn-v ${ctaVariant==="secondary"?"cta-secondary":"cta-primary"}`} style={{marginTop:14}}>{cta}</button>:<div style={{marginTop:12,fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,letterSpacing:"0.06em",textTransform:"uppercase"}}>Complete your next session to activate this panel</div>}</div>}
+function Empty({t,action,onTap,cta="GET STARTED",ctaVariant="primary",icon=<DrillIcon type="sb" size={48} color="#555555"/>}){const hasAction=typeof onTap==="function";return <div className="state-fade" style={{textAlign:"center",padding:"40px 20px",borderRadius:16,border:`1px solid ${BORDER_CLR}`,background:"linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01))",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.08)"}}><div style={{opacity:.9,display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#777777"}}>{icon}</div><p className="u-allcaps-long" style={{fontFamily:FD,color:LIGHT,fontSize:18,marginTop:14,lineHeight:1.2}}>{t}</p>{action&&<p className="u-secondary-text" style={{fontFamily:FB,fontSize:13,margin:"8px auto 0",lineHeight:1.5,fontWeight:500,maxWidth:320}}>{action}</p>}{hasAction?<button onClick={onTap} className={`btn-v ${ctaVariant==="secondary"?"cta-secondary":"cta-primary"}`} style={{marginTop:14}}>{cta}</button>:<div style={{marginTop:12,fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,letterSpacing:"0.06em",textTransform:"uppercase"}}>Next best action: complete one session to activate this panel</div>}</div>}
 function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>}
 function FF({l,v,set,ph,tp,ta,opts}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:"calc(11px * var(--coach-text-scale-medium))",fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>:opts?<select value={v} onChange={e=>set(e.target.value)} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}>{opts.map(o=><option key={o} value={o}>{o}</option>)}</select>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>}</>}
 function NavBar({items,active,onChange}){
