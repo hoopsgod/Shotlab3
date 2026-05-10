@@ -3252,9 +3252,9 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           <div style={{display:"grid",gap:7}}>
             {next7Events.length===0?<div style={{fontFamily:FB,color:"var(--text-2)",fontSize:11}}>No sessions scheduled this week.</div>:next7Events.map((ev)=>{
               const tone=coachTypeTone(ev.type);
-              const evRsvps=rsvps.filter(r=>r.eventId===ev.id);
-              const missingCount=Math.max(0,ups.length-evRsvps.length);
-              const pct=ups.length?Math.round((evRsvps.length/ups.length)*100):0;
+              const evRsvps=safeRsvps.filter((r)=>r?.eventId===ev.id);
+              const missingCount=Math.max(0,safeRoster.length-evRsvps.length);
+              const pct=safeRoster.length?Math.round((evRsvps.length/safeRoster.length)*100):0;
               const day=dayBadge(ev.date);
               const isPriority=day==="TODAY"||day==="TOMORROW";
               return <button key={ev.id} type="button" onClick={()=>setTab("events")} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",width:"100%",textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${isPriority?"rgba(200,255,0,0.36)":"rgba(255,255,255,0.12)"}`,background:isPriority?"rgba(200,255,0,0.08)":"rgba(255,255,255,0.02)",cursor:"pointer"}}>
