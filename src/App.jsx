@@ -3021,12 +3021,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             </div>
             <button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setTab("events")}>{session?"Open Session":"Add Session"}</button>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
+          <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8}}>
             {[{k:"Readiness",v:readinessCopy},{k:"Time",v:session?.time||"TBD"},{k:"Intensity",v:session?.intensity||"Game-speed"},{k:"Participation",v:session?`${rsvpPct}% RSVP`:"No RSVPs"}].map(item=><div key={item.k} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"10px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{item.k}</div><div style={{fontFamily:FB,fontSize:12,color:"var(--text-1)",marginTop:3,fontWeight:600}}>{item.v}</div></div>)}
           </div>
         </section>
 
-        <section style={{display:"grid",gridTemplateColumns:"repeat(5,minmax(0,1fr))",gap:8,marginBottom:12}}>
+        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(5,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:12}}>
           {[{l:"Active today",v:activeTodaySet.size},{l:"RSVP %",v:`${rsvpPct}%`},{l:"Attendance %",v:`${attendancePct}%`},{l:"Streak leaders",v:avgStreak},{l:"Activity",v:weekScores.length}].map(stat=><div key={stat.l} style={{border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)",borderRadius:12,padding:"10px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)"}}>{stat.l}</div><div style={{fontFamily:FD,fontSize:20,color:"var(--text-1)",lineHeight:1,marginTop:4}}>{stat.v}</div></div>)}
         </section>
 
@@ -3048,7 +3048,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           {nextSession&&<div style={{fontFamily:FB,fontSize:12,color:"var(--text-2)",marginTop:6}}>{nextSession.title} · {nextSession.time||"TBD"}</div>}
         </section>
 
-        <section style={{display:"grid",gridTemplateColumns:"repeat(5,minmax(0,1fr))",gap:8,marginBottom:12}}>
+        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(5,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:12}}>
           {[{label:"Add Event",onClick:()=>jumpToSection("events","coach-events-management")},{label:"View Players",onClick:()=>setTab("players")},{label:"Program",onClick:()=>setTab("drills")},{label:"Activity",onClick:()=>setTab("feed")},{label:"Log Practice",onClick:handleLogScoreAction}].map(action=><button key={action.label} type="button" onClick={action.onClick} style={{minHeight:44,borderRadius:12,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer",transition:"transform .15s ease, border-color .15s ease"}}>{action.label}</button>)}
         </section>
 
