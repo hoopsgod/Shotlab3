@@ -51,3 +51,22 @@ test('event persistence and RSVP logic contract strings remain intact', async ()
   assert.match(source, /\{id:genId\("rsvp"\),eventId:eid,email:user\.email,playerId:user\.email,teamId:user\.teamId,name:user\.name,ts:Date\.now\(\)\}/);
   assert.match(source, /const addEvent=async ev=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return\{ok:false\};/);
 });
+
+
+test('coach startup uses safe attendance derivation and no raw undefined attendance references', async () => {
+  const source = await appSource();
+  assert.doesNotMatch(source, /First attendance flow",done:attendance\.length>0/);
+  assert.match(source, /const coachAttendancePct=useMemo\(\(\)=>\{/);
+  assert.match(source, /First attendance flow",done:coachAttendancePct>0\|\|safeRsvps\.length>0/);
+});
+
+test('coach dashboard derives readiness and attendance from safe arrays', async () => {
+  const source = await appSource();
+  assert.match(source, /const safeEvents=useMemo\(\(\)=>Array\.isArray\(events\)\?events:\[\],\[events\]\);/);
+  assert.match(source, /const safeRsvps=useMemo\(\(\)=>Array\.isArray\(rsvps\)\?rsvps:\[\],\[rsvps\]\);/);
+  assert.match(source, /const safeScores=useMemo\(\(\)=>Array\.isArray\(scores\)\?scores:\[\],\[scores\]\);/);
+  assert.match(source, /const safeRoster=useMemo\(\(\)=>Array\.isArray\(ups\)\?ups:\[\],\[ups\]\);/);
+  assert.match(source, /const readinessCopy=safeRoster\.length===0\?"Roster needs players"/);
+  assert.match(source, /const unresolvedNext7Count=next7Events\.reduce/);
+  assert.match(source, /const unresolvedGapsLabel=unresolvedNext7Count===0\?"No open gaps"/);
+});
