@@ -24,7 +24,7 @@ const ACTION_BASE = {
   border: "1px solid var(--team-brand-border, var(--stroke-1))",
   background: "var(--team-brand-action-bg, color-mix(in srgb, var(--surface-1) 88%, transparent))",
   color: "var(--team-brand-action-text, var(--text-2))",
-  minHeight: 36,
+  minHeight: 38,
   minWidth: 36,
   padding: "8px 12px",
   fontSize: 11,
@@ -39,7 +39,7 @@ const ACTION_BASE = {
   gap: 4,
   whiteSpace: "normal",
   cursor: "pointer",
-  transition: "background-color 0.16s ease, border-color 0.16s ease",
+  transition: "background-color 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease",
 };
 
 export default function AppHeader({
@@ -82,23 +82,23 @@ export default function AppHeader({
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "space-between",
-          gap: 12,
+          gap: 14,
           flexWrap: "wrap",
         }}
       >
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 10, minWidth: 0, flex: "1 1 220px" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, minWidth: 0, flex: "1 1 220px" }}>
           {leading ? <div style={{ marginTop: 1, color: "var(--text-2)", flexShrink: 0 }}>{leading}</div> : null}
           <div style={{ minWidth: 0 }}>
             {eyebrow ? (
-              <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", color: "var(--text-3)", fontWeight: 700, marginBottom: 4 }}>
+              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", color: "var(--text-3)", fontWeight: 700, marginBottom: 6, lineHeight: 1.2 }}>
                 {eyebrow}
               </div>
             ) : null}
-            <h1 style={{ fontSize: variant === "utility" ? 18 : 28, lineHeight: 1.08, margin: 0, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "var(--tracking-default)" }}>
+            <h1 style={{ fontSize: variant === "utility" ? 18 : 28, lineHeight: 1.08, margin: 0, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "var(--tracking-default)", textTransform: "uppercase" }}>
               {title}
             </h1>
             {subtitle ? (
-              <p style={{ marginTop: 6, marginBottom: 0, color: "var(--text-2)", fontSize: 13, letterSpacing: "0.01em", lineHeight: 1.45, overflowWrap: "anywhere", maxWidth: 560 }}>
+              <p style={{ marginTop: 8, marginBottom: 0, color: "var(--text-2)", fontSize: 13, letterSpacing: "0.01em", lineHeight: 1.5, overflowWrap: "anywhere", maxWidth: 560 }}>
                 {subtitle}
               </p>
             ) : null}
@@ -109,7 +109,7 @@ export default function AppHeader({
           <div style={{ display: "flex", alignItems: "flex-start", gap: 6, marginLeft: "auto", maxWidth: "100%", flexWrap: "wrap" }}>
             {brandLockup ? <div style={{ minWidth: 0 }}>{brandLockup}</div> : null}
             {action ? (
-              <button type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, opacity: 0.85, ...(quietBrandedActionStyle || {}) }}>
+              <button type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, opacity: 0.9, ...(quietBrandedActionStyle || {}) }}>
                 {action.icon}
                 {action.label ? <span>{action.label}</span> : null}
               </button>
