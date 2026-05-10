@@ -3114,39 +3114,44 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     <HomeShotsLeaderboardCard title={`TOP 10 ${leaderboardScope==="coaches"?"COACH":"PLAYER"} HOME SHOTS`} status={homeShotsLeaderboard?.status||"idle"} rows={homeShotsLeaderboard?.rows||[]} error={homeShotsLeaderboard?.error||""} onRetry={refreshHomeShotsLeaderboard} />
     {(()=>{
       const todayDate=today;
+      const safeEvents=Array.isArray(events)?events:[];
+      const safeRsvps=Array.isArray(rsvps)?rsvps:[];
+      const safeScores=Array.isArray(scores)?scores:[];
+      const safeRoster=Array.isArray(ups)?ups:[];
       const nextWeekEndDate=new Date(`${todayDate}T00:00:00`);
       nextWeekEndDate.setDate(nextWeekEndDate.getDate()+6);
       const nextWeekEndStr=`${nextWeekEndDate.getFullYear()}-${String(nextWeekEndDate.getMonth()+1).padStart(2,"0")}-${String(nextWeekEndDate.getDate()).padStart(2,"0")}`;
-      const sortedEvents=[...events].sort((a,b)=>a.date.localeCompare(b.date));
+      const sortedEvents=[...safeEvents].filter(ev=>ev?.date).sort((a,b)=>a.date.localeCompare(b.date));
       const next7Events=sortedEvents.filter(ev=>ev.date>=todayDate&&ev.date<=nextWeekEndStr).slice(0,isDesktop?5:4);
       const todaySession=sortedEvents.find(ev=>ev.date===todayDate);
       const nextSession=sortedEvents.find(ev=>ev.date>todayDate);
       const session=todaySession||nextSession||null;
-      const sessionRsvps=session?rsvps.filter(r=>r.eventId===session.id):[];
-      const activeTodaySet=new Set(scores.filter(s=>s.date===todayDate).map(s=>s.email));
+      const sessionRsvps=session?safeRsvps.filter(r=>r.eventId===session.id):[];
+      const activeTodaySet=new Set(safeScores.filter(s=>s?.date===todayDate).map(s=>s.email));
       const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
       const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-      const weekScores=scores.filter(s=>s.date>=weekStr);
+      const weekScores=safeScores.filter(s=>s?.date>=weekStr);
       const weekActiveSet=new Set(weekScores.map(s=>s.email));
-      const attendancePct=ups.length?Math.round((weekActiveSet.size/ups.length)*100):0;
-      const streakLeaders=Object.values(scores.reduce((acc,s)=>{acc[s.email]=(acc[s.email]||0)+1;return acc;},{})).sort((a,b)=>b-a).slice(0,3);
+      const attendancePct=safeRoster.length?Math.round((weekActiveSet.size/safeRoster.length)*100):0;
+      const attendance=Number.isFinite(attendancePct)?attendancePct:0;
+      const streakLeaders=Object.values(safeScores.reduce((acc,s)=>{acc[s.email]=(acc[s.email]||0)+1;return acc;},{})).sort((a,b)=>b-a).slice(0,3);
       const avgStreak=streakLeaders.length?Math.round(streakLeaders.reduce((a,b)=>a+b,0)/streakLeaders.length):0;
-      const inactivePlayers=ups.filter(p=>!weekActiveSet.has(p.email));
-      const lowRsvpPlayers=ups.filter(p=>{const playerRsvps=rsvps.filter(r=>r.email===p.email);if(playerRsvps.length<2)return false;const yes=playerRsvps.filter(r=>r.status==="yes").length;return yes/playerRsvps.length<0.4;});
-      const pulseCopy=formatInactivePlayersPulseCopy(inactivePlayers,ups.length);
+      const inactivePlayers=safeRoster.filter(p=>p?.email&&!weekActiveSet.has(p.email));
+      const lowRsvpPlayers=safeRoster.filter(p=>{if(!p?.email)return false;const playerRsvps=safeRsvps.filter(r=>r.email===p.email);if(playerRsvps.length<2)return false;const yes=playerRsvps.filter(r=>r.status==="yes").length;return yes/playerRsvps.length<0.4;});
+      const pulseCopy=formatInactivePlayersPulseCopy(inactivePlayers,safeRoster.length);
       const attention=[
         inactivePlayers.length?`${inactivePlayers.length} inactive 5+ days`:null,
         lowRsvpPlayers.length?`${lowRsvpPlayers.length} low RSVP participation`:null,
       ].filter(Boolean).slice(0,3);
-      const readinessCopy=ups.length===0?"Roster needs players":`${activeTodaySet.size}/${ups.length} athletes active today`;
-      const rsvpPct=session&&ups.length?Math.round((sessionRsvps.length/ups.length)*100):0;
+      const readinessCopy=safeRoster.length===0?"Roster needs players":`${activeTodaySet.size}/${safeRoster.length} athletes active today`;
+      const rsvpPct=session&&safeRoster.length?Math.round((sessionRsvps.length/safeRoster.length)*100):0;
       const participationMomentum=Math.max(-100,Math.min(100,rsvpPct-attendancePct));
       const participationMomentumLabel=participationMomentum>=8?`+${participationMomentum}% rising`:participationMomentum<=-8?`${participationMomentum}% slipping`:"Stable";
       const playersNeedingAttention=inactivePlayers.slice(0,3);
-      const topEngagedPlayers=[...ups]
+      const topEngagedPlayers=[...safeRoster]
         .map((player)=>{
           const playerScores=weekScores.filter((score)=>score.email===player.email).length;
-          const playerRsvps=rsvps.filter((rsvp)=>rsvp.email===player.email&&rsvp.status==="yes").length;
+          const playerRsvps=safeRsvps.filter((rsvp)=>rsvp.email===player.email&&rsvp.status==="yes").length;
           const score=(playerScores*2)+playerRsvps;
           return { player, score };
         })
@@ -3181,15 +3186,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         if(dateValue===tomorrow)return "TOMORROW";
         return new Date(`${dateValue}T00:00:00`).toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();
       };
-      const unresolvedNext7Count=next7Events.reduce((acc,ev)=>acc+Math.max(0,ups.length-rsvps.filter(r=>r.eventId===ev.id).length),0);
+      const unresolvedNext7Count=next7Events.reduce((acc,ev)=>acc+Math.max(0,safeRoster.length-safeRsvps.filter(r=>r.eventId===ev.id).length),0);
       const criticalNext7Count=next7Events.filter((ev)=>dayBadge(ev.date)==="TODAY"||dayBadge(ev.date)==="TOMORROW").length;
       const unresolvedGapsLabel=unresolvedNext7Count===0?"No open gaps":`${unresolvedNext7Count} unresolved RSVPs`;
       const coachPriorityStyle={critical:{label:"CRITICAL",color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.26)"},important:{label:"IMPORTANT",color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)"},passive:{label:"PASSIVE",color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)"}};
       const readinessRisk=session&&rsvpPct<60;
       const scheduleGap=next7Events.length<2;
       const coachAlerts=[
-        unresolvedNext7Count>0?{priority:unresolvedNext7Count>=Math.max(3,ups.length)?"critical":"important",title:"Unresolved RSVPs",detail:`${unresolvedNext7Count} unresolved RSVP slots in the next 7 days.`,cta:"Open events",onClick:()=>setTab("events")}:null,
-        inactivePlayers.length>0?{priority:inactivePlayers.length>=Math.max(2,Math.ceil(ups.length*0.4))?"important":"passive",title:"Inactive players",detail:`${inactivePlayers.length} player${inactivePlayers.length===1?"":"s"} need follow-up this week.`,cta:"Open players",onClick:()=>setTab("players")}:null,
+        unresolvedNext7Count>0?{priority:unresolvedNext7Count>=Math.max(3,safeRoster.length)?"critical":"important",title:"Unresolved RSVPs",detail:`${unresolvedNext7Count} unresolved RSVP slots in the next 7 days.`,cta:"Open events",onClick:()=>setTab("events")}:null,
+        inactivePlayers.length>0?{priority:inactivePlayers.length>=Math.max(2,Math.ceil(safeRoster.length*0.4))?"important":"passive",title:"Inactive players",detail:`${inactivePlayers.length} player${inactivePlayers.length===1?"":"s"} need follow-up this week.`,cta:"Open players",onClick:()=>setTab("players")}:null,
         {priority:readinessRisk?"critical":"passive",title:"Session readiness",detail:session?`${rsvpPct}% RSVP for ${session.title}.`:"No active session is scheduled.",cta:"Review session",onClick:()=>setTab("events")},
         {priority:scheduleGap?"important":"passive",title:"Schedule stability",detail:scheduleGap?"Add at least one more session to stabilize the 7-day calendar.":"7-day schedule cadence is stable.",cta:"Manage schedule",onClick:()=>setTab("events")},
       ].filter(Boolean).slice(0,4);
@@ -3239,7 +3244,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         </section>
 
         <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
-          {[{l:"Active today",v:activeTodaySet.size,sub:`${ups.length?Math.round((activeTodaySet.size/ups.length)*100):0}% of roster`},{l:"Attendance",v:`${attendancePct}%`,sub:"7-day participation rate"},{l:"Consistency",v:avgStreak,sub:"Avg logs from top streaks"},{l:"Weekly activity",v:weekScores.length,sub:"Total workouts logged"}].map(stat=><div key={stat.l} style={{border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{stat.l}</div><div style={{fontFamily:FD,fontSize:21,color:"var(--text-1)",lineHeight:1,marginTop:4}}>{stat.v}</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:4}}>{stat.sub}</div></div>)}
+          {[{l:"Active today",v:activeTodaySet.size,sub:`${safeRoster.length?Math.round((activeTodaySet.size/safeRoster.length)*100):0}% of roster`},{l:"Attendance",v:`${attendance}%`,sub:"7-day participation rate"},{l:"Consistency",v:avgStreak,sub:"Avg logs from top streaks"},{l:"Weekly activity",v:weekScores.length,sub:"Total workouts logged"}].map(stat=><div key={stat.l} style={{border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{stat.l}</div><div style={{fontFamily:FD,fontSize:21,color:"var(--text-1)",lineHeight:1,marginTop:4}}>{stat.v}</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:4}}>{stat.sub}</div></div>)}
         </section>
 
         <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(3,minmax(0,1fr))":"1fr",gap:8,marginBottom:12}}>
