@@ -1695,7 +1695,7 @@ const playerNavItems=[
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Player navigation"><div className="nav-title">PLAYER DASHBOARD</div>{playerNavItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>switchTab(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:"calc(98px + env(safe-area-inset-bottom, 0px))"}}>
+<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:"var(--bottom-nav-content-padding, calc(132px + env(safe-area-inset-bottom, 0px)))"}}>
 <BrandBackdrop/>
 {statSyncError&&<div style={{position:"relative",zIndex:2,margin:"10px 12px 0",padding:"10px 12px",borderRadius:10,border:"1px solid rgba(255,69,69,0.45)",background:"rgba(255,69,69,0.10)",color:"#FFB5B5",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.02em"}}>{statSyncError}</div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
@@ -2908,7 +2908,7 @@ useEffect(()=>{
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-text-scale={coachTextScale}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"calc(98px + env(safe-area-inset-bottom, 0px))"}}><BrandBackdrop/>
+<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"var(--bottom-nav-content-padding, calc(132px + env(safe-area-inset-bottom, 0px)))"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
 <div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
@@ -3763,9 +3763,35 @@ function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={si
 function FF({l,v,set,ph,tp,ta,opts}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:"calc(11px * var(--coach-text-scale-medium))",fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>:opts?<select value={v} onChange={e=>set(e.target.value)} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}>{opts.map(o=><option key={o} value={o}>{o}</option>)}</select>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>}</>}
 function NavBar({items,active,onChange}){
 const navAccent=PAGE_ACCENTS[active]?.accent||PAGE_ACCENTS.feed.accent;
-return <nav className="bottom-nav" role="navigation" aria-label="Main navigation" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:"max(12px, env(safe-area-inset-bottom, 0px))",display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"calc(64px + ((var(--coach-text-scale-medium) - 1) * 12px))",paddingBottom:"max(0px, env(safe-area-inset-bottom, 0px))",background:"var(--surface-1)",borderTop:"1px solid var(--stroke-1)",zIndex:60,pointerEvents:"auto",touchAction:"manipulation"}}>{items.map(t=>{const a=active===t.k;
+useEffect(()=>{
+  if(typeof window==="undefined") return undefined;
+  const root=document.documentElement;
+  const supportsVV=!!window.visualViewport;
+  const isLikelyMobileSafari=/iP(ad|hone|od)/.test(navigator.userAgent)||(/Mac/.test(navigator.platform)&&navigator.maxTouchPoints>1);
+  const baseBottom=isLikelyMobileSafari?24:16;
+  const navHeight=64;
+  const update=()=>{
+    const vv=window.visualViewport;
+    const keyboardInset=supportsVV?Math.max(0,window.innerHeight-(vv.height+vv.offsetTop)):0;
+    const visualOffset=supportsVV?Math.max(0,window.innerHeight-(vv.height+vv.offsetTop)):0;
+    root.style.setProperty("--bottom-nav-offset",`calc(${baseBottom}px + env(safe-area-inset-bottom, 0px) + ${Math.round(visualOffset)}px)`);
+    root.style.setProperty("--bottom-nav-content-padding",`calc(${navHeight+baseBottom+24}px + env(safe-area-inset-bottom, 0px) + ${Math.round(keyboardInset)}px)`);
+  };
+  update();
+  window.addEventListener("resize",update,{passive:true});
+  window.addEventListener("orientationchange",update,{passive:true});
+  window.visualViewport?.addEventListener("resize",update,{passive:true});
+  window.visualViewport?.addEventListener("scroll",update,{passive:true});
+  return ()=>{
+    window.removeEventListener("resize",update);
+    window.removeEventListener("orientationchange",update);
+    window.visualViewport?.removeEventListener("resize",update);
+    window.visualViewport?.removeEventListener("scroll",update);
+  };
+},[]);
+return <nav className="bottom-nav" role="navigation" aria-label="Main navigation" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:"var(--bottom-nav-offset, max(24px, calc(env(safe-area-inset-bottom, 0px) + 16px)))",display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"calc(64px + ((var(--coach-text-scale-medium) - 1) * 12px))",paddingBottom:"max(0px, env(safe-area-inset-bottom, 0px))",background:"var(--surface-1)",borderTop:"1px solid var(--stroke-1)",zIndex:60,pointerEvents:"auto",touchAction:"manipulation"}}>{items.map(t=>{const a=active===t.k;
 const tabAccent="var(--nav-active-text,var(--nav-accent))";
-return <button key={t.k} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:"calc(48px + ((var(--coach-text-scale-medium) - 1) * 10px))",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"calc(4px + ((var(--coach-text-scale-medium) - 1) * 3px))",padding:"8px 4px 6px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 150ms ease-out",outlineOffset:2}}>
+return <button key={t.k} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:"calc(48px + ((var(--coach-text-scale-medium) - 1) * 10px))",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"calc(4px + ((var(--coach-text-scale-medium) - 1) * 3px))",padding:"8px 4px 6px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 150ms ease-out",outlineOffset:2,touchAction:"manipulation",pointerEvents:"auto"}}>
 <div className="tab-icon" style={{position:"relative"}}>{t.svg}</div>
 <div className="tab-label" style={{fontFamily:FB,fontSize:"calc(10px * var(--coach-text-scale-medium))",letterSpacing:"0.05em",textTransform:"uppercase",lineHeight:1.2,whiteSpace:"nowrap"}}>{t.l}</div>
 </button>})}</nav>}
