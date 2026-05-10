@@ -1667,10 +1667,16 @@ const[drillBarW,setDrillBarW]=useState(0);
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
 const activeMode=tab==="duels"?"program":"home";
 const activeScores=activeMode==="program"?programScores:homeScores;
+const[completionCue,setCompletionCue]=useState(null);
+const pushCompletionCue=useCallback((cue)=>{
+  setCompletionCue({...cue,id:Date.now()});
+  setTimeout(()=>setCompletionCue(null),3200);
+},[]);
 const handleLog=()=>{if(submitting||!active)return;const v=parseInt(input);if(isNaN(v)||v<0||(hasDrillMax(active)&&v>active.max))return;setSubmitting(true);const oldStreak=streak;
 const prevBest=activeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
 const isPB=v>prevBest&&prevBest>0;
 addScore(active.id,v,activeMode);playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
+pushCompletionCue({title:activeMode==="program"?"Program drill completed":"Drill completed",detail:`${active.name} · ${v}${hasDrillMax(active)?`/${active.max}`:""} logged`,momentum:`${Math.max(1,streak+(activeMode==="program"?0:1))}-day momentum`,next:activeMode==="program"?"Review Program leaderboard":"Log shots or complete your next drill"});
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 if(activeMode!=="program"){setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)}
 };
@@ -1697,6 +1703,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Player navigation"><div className="nav-title">PLAYER DASHBOARD</div>{playerNavItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>switchTab(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
 <main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:"var(--bottom-nav-content-padding, calc(132px + env(safe-area-inset-bottom, 0px)))"}}>
 <BrandBackdrop/>
+{completionCue&&<div className="fade-up" style={{position:"sticky",top:70,zIndex:18,margin:"8px 12px 0",padding:"12px 14px",borderRadius:14,background:"linear-gradient(155deg, rgba(200,255,26,0.14), rgba(94,208,255,0.08))",border:"1px solid rgba(200,255,26,0.34)",boxShadow:"0 12px 24px rgba(0,0,0,0.25)"}}>
+  <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>COMPLETED</div>
+  <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1.2,marginTop:2}}>{completionCue.title}</div>
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:2}}>{completionCue.detail}</div>
+  <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:8}}>
+    <span style={{fontFamily:FB,fontSize:10,color:CYAN,border:"1px solid rgba(94,208,255,0.28)",borderRadius:999,padding:"3px 8px"}}>{completionCue.momentum}</span>
+    <span style={{fontFamily:FB,fontSize:10,color:LIGHT,border:"1px solid rgba(255,255,255,0.16)",borderRadius:999,padding:"3px 8px"}}>Next: {completionCue.next}</span>
+  </div>
+</div>}
 {statSyncError&&<div style={{position:"relative",zIndex:2,margin:"10px 12px 0",padding:"10px 12px",borderRadius:10,border:"1px solid rgba(255,69,69,0.45)",background:"rgba(255,69,69,0.10)",color:"#FFB5B5",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.02em"}}>{statSyncError}</div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
@@ -1897,7 +1912,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
       </div>
-      <button className="btn-v cta-primary" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?.7:1}}>
+      <button className="btn-v cta-primary" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);pushCompletionCue({title:"Shot activity logged",detail:`${v} makes added for ${shotDate}`,momentum:`${streak}-day momentum`,next:"Check your shot trend or continue drills"});setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?.7:1}}>
         {shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
       {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
@@ -2004,7 +2019,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   </div>}
 
   {/* ═════════════ PROGRAM (Coach-Verified) ═════════════ */}
-  {tab==="program"&&<div className={slideClass} key="program"><SectionHero icon={<EventIcon type="star" size={28} color={VOLT}/>} title="PROGRAM EVENTS" subtitle="Official workouts and attendance" accent={VOLT} deco={<EventIcon type="run" size={16} color={VOLT}/>} isCoach={u.isCoach}/><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills}/></div>}
+  {tab==="program"&&<div className={slideClass} key="program"><SectionHero icon={<EventIcon type="star" size={28} color={VOLT}/>} title="PROGRAM EVENTS" subtitle="Official workouts and attendance" accent={VOLT} deco={<EventIcon type="run" size={16} color={VOLT}/>} isCoach={u.isCoach}/><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div>}
 
 
 
@@ -2034,7 +2049,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {u.isCoach&&tab==="players"&&<div className={slideClass} key="players"><PlayersScreen/></div>}
 
   {/* ═════════════ STRENGTH & CONDITIONING ═════════════ */}
-  {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players}/></div>}
+  {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
   {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} rsvps={rsvps} events={events} players={players} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
@@ -2203,7 +2218,7 @@ return <div className="fade-up">
 // ═══════════════════════════════════════
 // STRENGTH & CONDITIONING PANEL
 // ═══════════════════════════════════════
-function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog,players}){
+function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog,players,onCompletionCue}){
 const[showBoard,setShowBoard]=useState(false),[expanded,setExpanded]=useState(null);
 const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"School",sport:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false);
 const sorted=useMemo(()=>[...sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
@@ -2238,6 +2253,7 @@ const handleAddScLog=()=>{
   const sport=newLog.sport?.trim();
   if(!date||!time||!place||!sport){setLogErr("Please complete date, time, place, and sport.");return}
   addScLog({date,time,place,sport,ts:Date.now()});
+  onCompletionCue?.({title:"S&C activity logged",detail:`${sport} · ${place} · ${time}`,momentum:"Consistency compounds",next:"RSVP to your next session"});
   setNewLog({date:todayStr(),time:"",place:"School",sport:""});
   setLogErr("");
   setLogSaved(true);
@@ -2670,7 +2686,7 @@ return <div className="fade-up">
 // ═══════════════════════════════════════
 // EVENTS PANEL (Player Program View)
 // ═══════════════════════════════════════
-function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills}){
+function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue}){
 const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState("attend"),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null);
 const sorted=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
 const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
@@ -2678,6 +2694,7 @@ const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvp
 
 const attendBoard=useMemo(()=>{const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[rsvps]);
 const medals=[VOLT,"#A0A0A0","#A0A0A0"];
+const handleEventRsvp=(event)=>{const going=rsvps.some(r=>r.eventId===event.id&&r.email===user.email);toggleRsvp(event.id);if(!going){onCompletionCue?.({title:"Event participation confirmed",detail:`You're in for ${event.title}`,momentum:"Attendance momentum building",next:"Show up and log post-session activity"});}};
 
 return <div className="fade-up">
 {/* Events banner — structured, timeline-oriented */}
@@ -2753,13 +2770,13 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
         </div>
       </div>
       {/* Inline quick-RSVP pill */}
-      <button onClick={(e)=>{e.stopPropagation();toggleRsvp(ev.id)}} style={{marginTop:12,padding:"8px 0",width:"100%",borderRadius:10,border:"none",background:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:3,color:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
+      <button onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:12,padding:"8px 0",width:"100%",borderRadius:10,border:"none",background:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:3,color:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
         {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={BG} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>I'M GOING</>:"RSVP →"}
       </button>
     </div>
     {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{ev.desc}</p>
-      <button className="btn-v cta-primary" onClick={()=>toggleRsvp(ev.id)} style={{marginBottom:14}}>
+      <button className="btn-v cta-primary" onClick={()=>handleEventRsvp(ev)} style={{marginBottom:14}}>
         {going?"&#10003; I'M GOING":"RSVP NOW &#8594;"}
       </button>
       {evR.length>0&&<div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,marginBottom:8,fontWeight:600}}>WHO'S GOING</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>
