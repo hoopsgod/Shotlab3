@@ -1852,9 +1852,28 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         const d=new Date(`${dateValue}T00:00:00`);
         return Number.isNaN(d.getTime())?"UPCOMING":d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();
       };
-      const weekConfirmedCount=upcomingWeekEvents.filter(ev=>rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes")).length;
+const weekConfirmedCount=upcomingWeekEvents.filter(ev=>rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes")).length;
       const weekMissingCount=upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length;
+      const playerNotificationQueue=[
+        ...(nextEvent?[{priority:"critical",title:`${nextEvent.type?.toUpperCase()||"EVENT"} UPCOMING`,detail:`${nextEvent.title} · ${nextEvent.date} ${nextEvent.time||"TBD"}`,cta:"Open Events",onClick:()=>switchTab("program")}]:[]),
+        ...(weekMissingCount>0?[{priority:"important",title:"UNRESOLVED RSVP",detail:`${weekMissingCount} event${weekMissingCount===1?"":"s"} in the next 7 days still need your response.`,cta:"Confirm availability",onClick:()=>switchTab("program")}]:[]),
+        ...(soonSC>0?[{priority:"important",title:"LIFTING SESSION READY",detail:`${soonSC} upcoming lifting session${soonSC===1?"":"s"} waiting for your RSVP.`,cta:"Open Lifting",onClick:()=>switchTab("sc")}]:[]),
+        ...((streak>0&&todayS.length===0)?[{priority:"passive",title:"STREAK CONTINUITY",detail:`${streak}-day training streak is live. Log today's reps to keep momentum.`,cta:"Log now",onClick:()=>switchTab("log-drill")}]:[]),
+      ].slice(0,3);
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
+        {playerNotificationQueue.length>0&&<section aria-label="Notification center" style={{padding:"12px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <div style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>NOTIFICATION BRIEFING</div>
+            <span style={{fontFamily:FB,color:T.SUB,fontSize:10}}>Prioritized</span>
+          </div>
+          <div style={{display:"grid",gap:7}}>
+            {playerNotificationQueue.map((item)=>{const accent=item.priority==="critical"?"#FFB86B":item.priority==="important"?VOLT:CYAN;return <button key={item.title} type="button" onClick={item.onClick} style={{textAlign:"left",background:"rgba(10,12,16,0.66)",border:`1px solid ${accent}44`,borderRadius:11,padding:"9px 10px",cursor:"pointer"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><span style={{fontFamily:FB,fontSize:9,color:accent,letterSpacing:"0.07em"}}>{item.priority.toUpperCase()}</span><span style={{fontFamily:FB,fontSize:10,color:T.SUB}}>{item.cta} →</span></div>
+              <div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,marginTop:3}}>{item.title}</div>
+              <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{item.detail}</div>
+            </button>;})}
+          </div>
+        </section>}
         <section aria-label="Next 7 days events intelligence" style={{padding:isNarrow?"13px":"15px",borderRadius:18,background:"linear-gradient(150deg, rgba(200,255,0,0.14), rgba(200,255,0,0.03) 40%, rgba(0,0,0,0.25))",border:"1px solid rgba(200,255,0,0.3)",boxShadow:"0 16px 34px rgba(0,0,0,0.24)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:9}}>
             <div>
@@ -3169,7 +3188,26 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       };
       const unresolvedNext7Count=next7Events.reduce((acc,ev)=>acc+Math.max(0,ups.length-rsvps.filter(r=>r.eventId===ev.id).length),0);
       const criticalNext7Count=next7Events.filter((ev)=>dayBadge(ev.date)==="TODAY"||dayBadge(ev.date)==="TOMORROW").length;
+      const coachOperationalAlerts=[
+        ...(unresolvedNext7Count>0?[{priority:"critical",title:"Unresolved player RSVPs",detail:`${unresolvedNext7Count} unresolved responses across next 7 days.`,cta:"Resolve in Events",onClick:()=>setTab("events")}]:[]),
+        ...(inactivePlayers.length>0?[{priority:"important",title:"Participation drop detected",detail:`${inactivePlayers.length} athlete${inactivePlayers.length===1?"":"s"} inactive in the last week.`,cta:"Open Players",onClick:()=>setTab("players")}]:[]),
+        ...(session?[{priority:"important",title:"Upcoming session readiness",detail:`${rsvpPct}% RSVP for ${session.title}.`,cta:"Review session",onClick:()=>setTab("events")}]:[]),
+        ...(criticalNext7Count===0?[{priority:"passive",title:"Schedule stability",detail:"No critical sessions in the next 48 hours. Keep next week visible.",cta:"Plan calendar",onClick:()=>setTab("events")}]:[]),
+      ].slice(0,4);
       return <>
+        <section style={{padding:"12px 13px",borderRadius:14,marginBottom:12,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.14)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:7}}>
+            <div style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,letterSpacing:"0.09em"}}>OPERATIONAL ALERTS</div>
+            <span style={{fontFamily:FB,color:"var(--text-3)",fontSize:10}}>Critical · Important · Passive</span>
+          </div>
+          <div style={{display:"grid",gap:7}}>
+            {coachOperationalAlerts.map((alert)=>{const accent=alert.priority==="critical"?"#FFB86B":alert.priority==="important"?VOLT:CYAN;return <button key={alert.title} type="button" onClick={alert.onClick} style={{textAlign:"left",padding:"8px 10px",borderRadius:10,border:`1px solid ${accent}44`,background:"rgba(10,12,16,0.65)",cursor:"pointer"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><span style={{fontFamily:FB,fontSize:9,color:accent,letterSpacing:"0.07em"}}>{alert.priority.toUpperCase()}</span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{alert.cta} →</span></div>
+              <div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,marginTop:3}}>{alert.title}</div>
+              <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:10,marginTop:2}}>{alert.detail}</div>
+            </button>;})}
+          </div>
+        </section>
         <section className="accent-card" style={{background:"linear-gradient(155deg, color-mix(in srgb,var(--accent) 13%, transparent), rgba(11,13,16,0.96) 68%)",border:`1px solid color-mix(in srgb,var(--accent) 30%, transparent)`,borderRadius:22,padding:isDesktop?"24px":"20px",marginBottom:14,boxShadow:"0 18px 40px rgba(0,0,0,0.24)"}}>
           <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"flex-start",marginBottom:12}}>
             <div>
