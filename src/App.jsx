@@ -1800,51 +1800,31 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         {label:"Check progress",done:false,info:true,onClick:()=>switchTab("profile"),ariaLabel:"Go to profile progress"},
       ];
       const recentPlayerActivity=deriveActivityFeedItems({view:"player",user:u,events,rsvps,shotLogs,players,scores,today});
-      return <div style={{marginBottom:24}}>
-        <section style={{...CHECKLIST_CARD_STYLE,padding:isNarrow?"10px 11px":"11px 12px"}} aria-label="Getting started checklist">
-          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Getting Started</div>
-          <div style={{display:"grid",gap:8,marginTop:8}}>
-            {playerChecklist.map((item)=>{
-              const rowStyle={display:"flex",alignItems:"center",gap:8,width:"100%",textAlign:"left",padding:0,margin:0,background:"none",border:"none"};
-              return item.onClick
-                ?<button key={item.label} type="button" onClick={item.onClick} aria-label={item.ariaLabel||item.label} style={{...rowStyle,cursor:"pointer"}}>
-                  <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
-                  <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
-                </button>
-                :<div key={item.label} style={rowStyle}>
-                  <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"✓":"•"}</span>
-                  <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
-                </div>;
-            })}
+      return <div style={{marginBottom:24,display:"grid",gap:14}}>
+        <section aria-label="Today's focus" style={{padding:isNarrow?"16px":"18px",borderRadius:18,background:"linear-gradient(155deg, rgba(200,255,0,0.16), rgba(200,255,0,0.04) 46%, rgba(0,0,0,0.24))",boxShadow:"0 14px 34px rgba(0,0,0,0.30)",border:"1px solid rgba(200,255,0,0.24)"}}>
+          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S FOCUS</div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?28:32,lineHeight:1.05,letterSpacing:1.2,marginTop:8}}>{todaysMakes>0?`Add ${Math.max(0,dailyGoal-todaysMakes)} makes`:"Form Shooting Start"}</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.45,marginTop:6}}>{missionStatus}</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
+            {[`Intensity · ${todaysMakes>=dailyGoal?"High":"Build"}`,`Duration · 30 min`,`Progress · ${dailyPct}%`,`Category · Shooting`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.45)",border:"1px solid rgba(255,255,255,0.12)"}}>{tag}</span>)}
           </div>
+          <button className="btn-v cta-primary" style={{marginTop:14,minHeight:46,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel}</button>
         </section>
-        <section style={{marginBottom:16,padding:"8px 0 0"}} aria-label="Today's mission">
-          <div style={{padding:"14px 14px 12px",borderRadius:16,border:`1px solid ${VOLT}33`,background:"linear-gradient(140deg, rgba(200,255,0,0.10), rgba(200,255,0,0.03) 46%, rgba(0,0,0,0.18))",boxShadow:"0 10px 24px rgba(0,0,0,0.22)"}}>
-            <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase",marginBottom:6}}>Today’s Mission</div>
-            <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?24:28,letterSpacing:2,lineHeight:1.05,textTransform:"uppercase"}}>{todaysMakes>0?`Add ${Math.max(0,dailyGoal-todaysMakes)} more makes`:"Get your first makes on the board"}</div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:6,lineHeight:1.45}}>{missionStatus}</div>
-            <div style={{display:"flex",alignItems:"center",gap:10,marginTop:12,flexWrap:"wrap"}}>
-              <button className="btn-v cta-primary" style={{minHeight:48,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel}</button>
-              <div style={{fontFamily:FB,color:MUTED,fontSize:11,fontWeight:600}}>Weekly: <span style={{color:LIGHT}}>{weeklyMakes}/{weeklyGoal}</span> makes</div>
-            </div>
-          </div>
+        <section aria-label="Performance snapshot" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:8}}>
+          {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly",value:weeklyMakes,color:LIGHT},{label:"Completion",value:`${dailyPct}%`,color:VOLT},{label:"Trend",value:weeklyMakes>=PLAYER_WEEKLY_SHOT_TARGET/2?"↑ On track":"→ Build",color:ORANGE}].map(item=><div key={item.label} style={{padding:"10px 10px",borderRadius:12,background:"rgba(255,255,255,0.03)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:21,marginTop:3,lineHeight:1.1}}>{item.value}</div></div>)}
         </section>
-        <section style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(5,minmax(0,1fr))",gap:10,marginBottom:16}}>
-          {quickStats.map(stat=><div key={stat.label} style={{padding:"11px 10px",borderRadius:12,background:CARD_BG,border:`1px solid ${BORDER_CLR}`}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase"}}>{stat.label}</div><div style={{fontFamily:FD,color:stat.color,fontSize:22,letterSpacing:1.2,lineHeight:1.1,marginTop:4}}>{stat.value}</div></div>)}
+        <section aria-label="Next session" style={{padding:"12px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:`1px solid ${BORDER_CLR}77`}}>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>NEXT SESSION</div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:20,marginTop:4}}>{nextEvent?nextEvent.title:"No upcoming events"}</div>
+          <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"Check Program for schedule updates."}</div>
         </section>
-        <section style={{marginBottom:16,padding:"12px",borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.01)"}}>
-          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"1fr 1fr",gap:10}}>
-            {[{label:"Daily Progress",makes:todaysMakes,goal:dailyGoal,pct:dailyPct,color:VOLT},{label:"Weekly Progress",makes:weeklyMakes,goal:weeklyGoal,pct:weeklyPct,color:CYAN}].map(progress=><div key={progress.label}><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:6}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.07em",textTransform:"uppercase"}}>{progress.label}</div><div style={{fontFamily:FB,color:progress.color,fontSize:11,fontWeight:700}}>{progress.makes}/{progress.goal}</div></div><div style={{height:8,borderRadius:999,background:"rgba(255,255,255,0.07)",overflow:"hidden"}}><div style={{height:"100%",width:`${progress.pct}%`,background:progress.color,boxShadow:`0 0 14px ${progress.color}55`,transition:"width .35s ease"}}/></div></div>)}
-          </div>
+        <section aria-label="Quick actions" style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
+          {[{label:"Log Shots",onClick:()=>switchTab("log-drill")},{label:"Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:58,borderRadius:12,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer",transition:"transform .18s ease, opacity .2s ease, box-shadow .2s ease"}}>{action.label}</button>)}
         </section>
-        <section style={{marginBottom:14,padding:"2px 4px 0"}} aria-label="Training mode selector">
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:2.8,textTransform:"uppercase",lineHeight:1}}>TRAINING MODE</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:12,fontWeight:600,letterSpacing:"0.03em",marginTop:6}}>Choose how you’re training today</div>
+        <section style={{padding:"11px",borderRadius:12,background:"rgba(255,255,255,0.015)"}}>
+          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>Getting Started</div>
+          <div style={{display:"grid",gap:6,marginTop:7}}>{playerChecklist.slice(0,4).map(item=><div key={item.label} style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11}}>{item.done?"✓":"•"} {item.label}</div>)}</div>
         </section>
-        <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:isNarrow?18:16,alignItems:"stretch"}}>
-          <ModeCard title="AT HOME" subtitle="Solo drills & shot tracking" titleColor={VOLT} subtitleColor={VOLT} variant="active" actionLabel={null} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>} stats={homeStats} accent="home" isActive={tab==="log-drill"} onClick={()=>setTab("log-drill")}/>
-          <ModeCard title="PROGRAM" subtitle="Team events & verified attendance" titleColor={CYAN} subtitleColor={CYAN} variant="active" infoLayout={"schedule"} actionLabel={nextEventBadge} icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>} stats={programStats} accent="program" isActive={tab==="duels"} onClick={()=>switchTab("duels")}/>
-        </div>
         <RecentActivityCard title="Recent Activity" items={recentPlayerActivity}/>
       </div>
     })()}
