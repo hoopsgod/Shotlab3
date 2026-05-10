@@ -100,7 +100,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           text-transform: uppercase;
           font-size: 11px;
           line-height: 1.3;
-          transition: background-color 160ms ease, color 160ms ease;
+          transition: background-color 180ms cubic-bezier(0.2, 0, 0, 1), color 180ms cubic-bezier(0.2, 0, 0, 1), transform 120ms cubic-bezier(0.2, 0, 0, 1);
         }
 
         .coach-tools-trigger::before {
@@ -117,10 +117,12 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
         .coach-tools-trigger:hover {
           background: rgba(255, 255, 255, 0.035);
           color: var(--text-primary);
+          transform: translateY(-1px);
         }
 
         .coach-tools-trigger:active {
           background: rgba(0, 0, 0, 0.24);
+          transform: scale(0.99);
         }
 
         .coach-tools-trigger:focus-visible {
@@ -156,7 +158,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           display: inline-flex;
           align-self: center;
           transform: ${open ? "rotate(180deg)" : "rotate(0deg)"};
-          transition: transform 200ms ease;
+          transition: transform 220ms cubic-bezier(0.2, 0, 0, 1), color 180ms cubic-bezier(0.2, 0, 0, 1);
           color: var(--text-secondary);
           font-size: 14px;
           line-height: 1;
@@ -167,7 +169,7 @@ export default function CoachToolsPanel({ children, defaultCollapsed = true, sto
           opacity: 0;
           overflow: hidden;
           border-top: 1px solid transparent;
-          transition: max-height 200ms ease, opacity 200ms ease, border-color 200ms ease;
+          transition: max-height 240ms cubic-bezier(0.2, 0, 0, 1), opacity 180ms cubic-bezier(0.2, 0, 0, 1), border-color 180ms cubic-bezier(0.2, 0, 0, 1); will-change: max-height, opacity;
         }
 
         .coach-tools-content.is-open {
