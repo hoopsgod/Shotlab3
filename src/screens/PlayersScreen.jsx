@@ -10,15 +10,6 @@ const Users = ({ size = 24, color = "currentColor" }) => (
   </svg>
 );
 
-const UserPlus = ({ size = 24, color = "currentColor" }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-    <circle cx="8.5" cy="7" r="4" />
-    <path d="M20 8v6" />
-    <path d="M23 11h-6" />
-  </svg>
-);
-
 const ChevronRight = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="m9 18 6-6-6-6" />
@@ -51,11 +42,7 @@ export default function PlayersScreen() {
   const shareInviteLink = async () => {
     const url = window.location.origin;
     if (navigator.share) {
-      await navigator.share({
-        title: "Join my ShotLab Program",
-        text: "Your coach has invited you to join their basketball training program",
-        url,
-      });
+      await navigator.share({ title: "Join my ShotLab Program", text: "Your coach has invited you to join their basketball training program", url });
       return;
     }
 
@@ -65,47 +52,33 @@ export default function PlayersScreen() {
   };
 
   const chipStyle = (isActive) => ({
-    borderRadius: "20px",
-    height: "32px",
+    borderRadius: "999px",
+    minHeight: "34px",
     padding: "0 14px",
     fontSize: "11px",
     textTransform: "uppercase",
-    letterSpacing: "0.06em",
+    letterSpacing: "0.08em",
     cursor: "pointer",
-    border: isActive ? "none" : "1px solid var(--stroke-1)",
-    background: isActive ? "var(--accent)" : "var(--surface-1)",
-    color: isActive ? "#0B0D10" : "var(--text-3)",
-    fontWeight: isActive ? 700 : 500,
+    border: isActive ? "1px solid color-mix(in srgb,var(--accent) 26%, transparent)" : "1px solid var(--stroke-1)",
+    background: isActive ? "linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0)), var(--accent)" : "var(--surface-1)",
+    color: isActive ? "#0B0D10" : "var(--text-2)",
+    fontWeight: isActive ? 700 : 600,
+    transition: "all .15s ease",
   });
 
   return (
-    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "16px" }}>
-      <AppHeader
-        title="PLAYERS"
-        subtitle="Manage your roster and track player engagement"
-        leading={<Users size={22} color="var(--text-2)" />}
-      />
+    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "14px 14px 28px", display: "grid", gap: 12 }}>
+      <AppHeader title="PLAYERS" subtitle="Manage your roster and track player engagement" leading={<Users size={22} color="var(--text-2)" />} />
 
       <input
         type="text"
         placeholder="Search players"
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
-        style={{
-          background: "var(--surface-2)",
-          border: "1px solid var(--stroke-1)",
-          borderRadius: "12px",
-          height: "44px",
-          padding: "0 16px",
-          fontSize: "14px",
-          color: "var(--text-1)",
-          width: "100%",
-          boxSizing: "border-box",
-          marginBottom: "12px",
-        }}
+        style={{ background: "var(--surface-2)", border: "1px solid var(--stroke-1)", borderRadius: "12px", height: "46px", padding: "0 14px", fontSize: "14px", color: "var(--text-1)", width: "100%" }}
       />
 
-      <div style={{ display: "flex", gap: "8px", marginBottom: "16px" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
         {["ALL PLAYERS", "ACTIVE", "INACTIVE"].map((filter) => (
           <button key={filter} onClick={() => setActiveFilter(filter)} style={chipStyle(activeFilter === filter)}>
             {filter}
@@ -113,159 +86,35 @@ export default function PlayersScreen() {
         ))}
       </div>
 
-      <div
-        style={{
-          background: "var(--surface-2)",
-          borderRadius: "12px",
-          padding: "12px 16px",
-          marginBottom: "16px",
-          display: "flex",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-1)" }}>{totalPlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "4px" }}>Total</span>
-        </div>
-        <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--accent)" }}>{activePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "4px" }}>Active</span>
-        </div>
-        <div style={{ width: "1px", background: "var(--stroke-1)", alignSelf: "stretch" }} />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <span style={{ fontSize: "20px", fontWeight: 900, color: "var(--text-2)" }}>{inactivePlayers}</span>
-          <span style={{ fontSize: "9px", color: "var(--text-3)", textTransform: "uppercase", marginTop: "4px" }}>Inactive</span>
-        </div>
+      <div style={{ background: "var(--surface-2)", border: "1px solid var(--stroke-1)", borderRadius: "16px", padding: "14px 12px", display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
+        {[[totalPlayers, "Total", "var(--text-1)"], [activePlayers, "Active", "var(--accent)"], [inactivePlayers, "Inactive", "var(--text-2)"]].map(([count, label, color]) => (
+          <div key={label} style={{ display: "grid", placeItems: "center", borderLeft: label === "Total" ? "none" : "1px solid var(--stroke-1)" }}>
+            <span style={{ fontSize: "22px", fontWeight: 900, color }}>{count}</span>
+            <span style={{ fontSize: "10px", letterSpacing: ".08em", color: "var(--text-3)", textTransform: "uppercase", marginTop: "4px" }}>{label}</span>
+          </div>
+        ))}
       </div>
 
       {players.length === 0 ? (
-        <div
-          style={{
-            minHeight: "280px",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "16px",
-          }}
-        >
-          <Users size={48} color="#555555" />
-          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-2)", margin: 0 }}>
-            NO PLAYERS YET
-          </p>
-          <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
-            Invite players to join your program
-          </p>
-          <button
-            style={{
-              background: "var(--accent)",
-              color: "#000000",
-              fontSize: "13px",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              height: "52px",
-              borderRadius: "14px",
-              padding: "0 24px",
-              border: "none",
-              cursor: "pointer",
-            }}
-          >
-            INVITE PLAYERS
+        <div style={{ minHeight: "260px", border: "1px dashed var(--stroke-2)", borderRadius: "16px", background: "linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0))", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px", padding: "20px" }}>
+          <Users size={44} color="var(--text-3)" />
+          <p style={{ fontSize: "18px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-1)", margin: 0, letterSpacing: ".05em" }}>Build your roster</p>
+          <p style={{ fontSize: "13px", color: "var(--text-2)", textAlign: "center", maxWidth: "280px", margin: 0 }}>No players are linked yet. Share your invite and start tracking engagement immediately.</p>
+          <button onClick={shareInviteLink} style={{ background: "var(--accent)", color: "#000", fontSize: "12px", fontWeight: 700, letterSpacing: ".08em", textTransform: "uppercase", minHeight: "48px", borderRadius: "12px", padding: "0 18px", border: "1px solid color-mix(in srgb,var(--accent) 70%, transparent)", cursor: "pointer" }}>
+            {copied ? "Link Copied" : "Invite Players"}
           </button>
         </div>
       ) : (
         filteredPlayers.map((player) => (
-          <div
-            key={player.id}
-            style={{
-              background: "var(--surface-2)",
-              border: "1px solid var(--stroke-1)",
-              borderRadius: "16px",
-              padding: "16px",
-              marginBottom: "10px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px",
-              cursor: "pointer",
-            }}
-          >
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                background: "var(--surface-1)",
-                borderRadius: "50%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                fontSize: "16px",
-                fontWeight: 700,
-                color: "var(--text-1)",
-                border: player.active ? "2px solid var(--accent-soft)" : "2px solid var(--stroke-1)",
-              }}
-            >
+          <div key={player.id} style={{ background: "var(--surface-2)", border: "1px solid var(--stroke-1)", borderRadius: "16px", padding: "14px", marginBottom: "10px", display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+            <div style={{ width: "42px", height: "42px", background: "var(--surface-1)", borderRadius: "50%", display: "grid", placeItems: "center", fontSize: "16px", fontWeight: 700, color: "var(--text-1)", border: player.active ? "2px solid var(--accent-soft)" : "2px solid var(--stroke-1)" }}>
               {player.name?.[0] || "?"}
             </div>
-            <div style={{ flex: 1, fontSize: "15px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-1)" }}>
-              {player.name}
-            </div>
+            <div style={{ flex: 1, fontSize: "14px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-1)", letterSpacing: ".04em" }}>{player.name}</div>
             <ChevronRight size={16} color="var(--text-3)" />
           </div>
         ))
       )}
-
-      <p
-        style={{
-          fontSize: "13px",
-          fontWeight: 700,
-          textTransform: "uppercase",
-          letterSpacing: "0.10em",
-          color: "var(--text-1)",
-          marginTop: "24px",
-          marginBottom: "12px",
-        }}
-      >
-        GROW YOUR ROSTER
-      </p>
-      <div
-        style={{
-          background: "var(--surface-2)",
-          border: "1px solid var(--stroke-1)",
-          borderRadius: "16px",
-          padding: "16px",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "12px",
-        }}
-      >
-        <UserPlus size={32} color="var(--text-2)" />
-        <p style={{ fontSize: "16px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-2)", margin: 0 }}>
-          INVITE A PLAYER
-        </p>
-        <p style={{ fontSize: "13px", color: "var(--text-3)", textAlign: "center", maxWidth: "260px", margin: 0 }}>
-          Share your program link and players can join instantly
-        </p>
-        <button
-          onClick={shareInviteLink}
-          style={{
-            background: "var(--accent)",
-            color: "#000000",
-            fontSize: "13px",
-            fontWeight: 700,
-            textTransform: "uppercase",
-            height: "52px",
-            borderRadius: "14px",
-            padding: "0 24px",
-            border: "none",
-            cursor: "pointer",
-          }}
-        >
-          SHARE INVITE LINK
-        </button>
-        {copied && <p style={{ fontSize: "12px", color: "var(--text-2)", margin: 0 }}>Link copied</p>}
-      </div>
     </div>
   );
 }
