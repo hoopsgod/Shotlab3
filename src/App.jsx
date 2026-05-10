@@ -1847,7 +1847,37 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         const d=new Date(`${dateValue}T00:00:00`);
         return Number.isNaN(d.getTime())?"UPCOMING":d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();
       };
+      const weekConfirmedCount=upcomingWeekEvents.filter(ev=>rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes")).length;
+      const weekMissingCount=upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length;
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
+        <section aria-label="Next 7 days events intelligence" style={{padding:isNarrow?"13px":"15px",borderRadius:18,background:"linear-gradient(150deg, rgba(200,255,0,0.14), rgba(200,255,0,0.03) 40%, rgba(0,0,0,0.25))",border:"1px solid rgba(200,255,0,0.3)",boxShadow:"0 16px 34px rgba(0,0,0,0.24)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:9}}>
+            <div>
+              <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em"}}>NEXT 7 DAYS</div>
+              <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:2}}>Your practices, games, workouts, and RSVP priorities.</div>
+            </div>
+            <button className="pageHeaderPill" onClick={()=>switchTab("program")}>Open Events</button>
+          </div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:9}}>
+            <span style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,255,255,0.24)"}}>Upcoming {upcomingWeekEvents.length}</span>
+            <span style={{fontFamily:FB,fontSize:10,color:VOLT,padding:"3px 8px",borderRadius:999,border:"1px solid rgba(200,255,0,0.45)"}}>Confirmed {weekConfirmedCount}</span>
+            <span style={{fontFamily:FB,fontSize:10,color:"#FFB86B",padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,184,107,0.45)"}}>Unresolved {weekMissingCount}</span>
+          </div>
+          <div style={{display:"grid",gap:7}}>
+            {upcomingWeekEvents.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11}}>No events in the next 7 days. Tap Events to plan your week.</div>:upcomingWeekEvents.map((ev)=>{
+              const tone=eventTypeTone(ev.type);
+              const isConfirmed=rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes");
+              const isMissing=!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email));
+              const day=dayLabel(ev.date);
+              const isUrgent=day==="TODAY"||day==="TOMORROW";
+              return <button key={ev.id} type="button" onClick={()=>switchTab("program")} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",textAlign:"left",padding:isNarrow?"9px 9px":"9px 10px",borderRadius:11,border:`1px solid ${isUrgent?"rgba(200,255,0,0.32)":"rgba(255,255,255,0.12)"}`,background:isUrgent?"rgba(200,255,0,0.08)":"rgba(12,14,18,0.58)",cursor:"pointer"}}>
+                <span style={{fontFamily:FB,fontSize:9,color:tone.color,background:tone.bg,padding:"3px 7px",borderRadius:999,border:`1px solid ${tone.color}33`}}>{tone.label}</span>
+                <div style={{minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{day} · {ev.time||"TBD"}</div></div>
+                <span style={{fontFamily:FB,fontSize:9,color:isConfirmed?VOLT:isMissing?"#FFB86B":"#D2C6FF",border:`1px solid ${isConfirmed?"rgba(200,255,0,0.45)":isMissing?"rgba(255,184,107,0.42)":"rgba(210,198,255,0.42)"}`,borderRadius:999,padding:"3px 7px"}}>{isConfirmed?"CONFIRMED":isMissing?"MISSING RSVP":"PENDING"}</span>
+              </button>;
+            })}
+          </div>
+        </section>
         <section aria-label="Today's focus" style={{padding:isNarrow?"16px":"18px",borderRadius:18,background:"linear-gradient(155deg, rgba(200,255,0,0.16), rgba(200,255,0,0.04) 46%, rgba(0,0,0,0.24))",boxShadow:"0 14px 34px rgba(0,0,0,0.30)",border:"1px solid rgba(200,255,0,0.24)"}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S FOCUS</div>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?28:32,lineHeight:1.05,letterSpacing:1.2,marginTop:8}}>{todaysMakes>0?`Add ${Math.max(0,dailyGoal-todaysMakes)} makes`:"Form Shooting Start"}</div>
@@ -1864,31 +1894,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>NEXT SESSION</div>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:20,marginTop:4}}>{nextEvent?nextEvent.title:"No upcoming events"}</div>
           <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"Check Program for schedule updates."}</div>
-        </section>
-        <section aria-label="Next 7 days events intelligence" style={{padding:isNarrow?"12px":"14px",borderRadius:16,background:"linear-gradient(160deg, rgba(255,255,255,0.04), rgba(0,0,0,0.24))",border:"1px solid rgba(255,255,255,0.12)",boxShadow:"0 14px 30px rgba(0,0,0,0.22)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:8}}>
-            <div>
-              <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.09em"}}>NEXT 7 DAYS</div>
-              <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:2}}>Stay ahead of practices, games, workouts, and meetings.</div>
-            </div>
-            <button className="pageHeaderPill" onClick={()=>switchTab("program")}>Open Events</button>
-          </div>
-          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
-            <span style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,255,255,0.2)"}}>Confirmed {upcomingWeekEvents.filter(ev=>rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes")).length}</span>
-            <span style={{fontFamily:FB,fontSize:10,color:"#FFB86B",padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,184,107,0.4)"}}>Missing RSVP {upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length}</span>
-          </div>
-          <div style={{display:"grid",gap:7}}>
-            {upcomingWeekEvents.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11}}>No events in the next 7 days. Tap Events to plan your week.</div>:upcomingWeekEvents.map((ev)=>{
-              const tone=eventTypeTone(ev.type);
-              const isConfirmed=rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes");
-              const isMissing=!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email));
-              return <button key={ev.id} type="button" onClick={()=>switchTab("program")} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",textAlign:"left",padding:"9px 10px",borderRadius:11,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(12,14,18,0.58)",cursor:"pointer"}}>
-                <span style={{fontFamily:FB,fontSize:9,color:tone.color,background:tone.bg,padding:"3px 7px",borderRadius:999,border:`1px solid ${tone.color}33`}}>{tone.label}</span>
-                <div style={{minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{dayLabel(ev.date)} · {ev.time||"TBD"}</div></div>
-                <span style={{fontFamily:FB,fontSize:9,color:isConfirmed?VOLT:isMissing?"#FFB86B":"#D2C6FF",border:`1px solid ${isConfirmed?"rgba(200,255,0,0.45)":isMissing?"rgba(255,184,107,0.42)":"rgba(210,198,255,0.42)"}`,borderRadius:999,padding:"3px 7px"}}>{isConfirmed?"CONFIRMED":isMissing?"MISSING RSVP":"PENDING"}</span>
-              </button>;
-            })}
-          </div>
         </section>
         <section aria-label="Quick actions" style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
           {[{label:"Log Shots",onClick:()=>switchTab("log-drill")},{label:"Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:58,borderRadius:12,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer",transition:"transform .18s ease, opacity .2s ease, box-shadow .2s ease"}}>{action.label}</button>)}
@@ -3144,6 +3149,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         if(dateValue===tomorrow)return "TOMORROW";
         return new Date(`${dateValue}T00:00:00`).toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();
       };
+      const unresolvedNext7Count=next7Events.reduce((acc,ev)=>acc+Math.max(0,ups.length-rsvps.filter(r=>r.eventId===ev.id).length),0);
+      const criticalNext7Count=next7Events.filter((ev)=>dayBadge(ev.date)==="TODAY"||dayBadge(ev.date)==="TOMORROW").length;
       return <>
         <section className="accent-card" style={{background:"linear-gradient(155deg, color-mix(in srgb,var(--accent) 13%, transparent), rgba(11,13,16,0.96) 68%)",border:`1px solid color-mix(in srgb,var(--accent) 30%, transparent)`,borderRadius:22,padding:isDesktop?"24px":"20px",marginBottom:14,boxShadow:"0 18px 40px rgba(0,0,0,0.24)"}}>
           <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"flex-start",marginBottom:12}}>
@@ -3158,18 +3165,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             {[{k:"Readiness",v:readinessCopy},{k:"Time",v:session?.time||"TBD"},{k:"Intensity",v:session?.intensity||"Game-speed"},{k:"Participation",v:session?`${rsvpPct}% RSVP`:"No RSVPs"}].map(item=><div key={item.k} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"10px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{item.k}</div><div style={{fontFamily:FB,fontSize:12,color:"var(--text-1)",marginTop:3,fontWeight:600}}>{item.v}</div></div>)}
           </div>
         </section>
-
-        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
-          {[{l:"Active today",v:activeTodaySet.size,sub:`${ups.length?Math.round((activeTodaySet.size/ups.length)*100):0}% of roster`},{l:"Attendance",v:`${attendancePct}%`,sub:"7-day participation rate"},{l:"Consistency",v:avgStreak,sub:"Avg logs from top streaks"},{l:"Weekly activity",v:weekScores.length,sub:"Total workouts logged"}].map(stat=><div key={stat.l} style={{border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{stat.l}</div><div style={{fontFamily:FD,fontSize:21,color:"var(--text-1)",lineHeight:1,marginTop:4}}>{stat.v}</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:4}}>{stat.sub}</div></div>)}
-        </section>
-
-        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(3,minmax(0,1fr))":"1fr",gap:8,marginBottom:12}}>
-          {trendCards.map((trend)=><div key={trend.label} style={{border:"1px solid var(--stroke-1)",background:"linear-gradient(160deg, rgba(255,255,255,0.035), rgba(0,0,0,0.18))",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{trend.label}</div><div style={{fontFamily:FB,fontSize:13,color:trend.tone==="good"?"var(--accent)":trend.tone==="warn"?"#FFB86B":"var(--text-1)",fontWeight:700,marginTop:5}}>{trend.value}</div></div>)}
-        </section>
-        <section className="accent-card" style={{borderRadius:16,padding:"12px 13px",marginBottom:12,background:"linear-gradient(162deg, rgba(255,255,255,0.04), rgba(8,10,14,0.8))",border:"1px solid rgba(255,255,255,0.13)"}}>
+        <section className="accent-card" style={{borderRadius:18,padding:isDesktop?"14px 14px":"12px 12px",marginBottom:12,background:"linear-gradient(152deg, rgba(200,255,0,0.12), rgba(255,255,255,0.03) 32%, rgba(8,10,14,0.82))",border:"1px solid rgba(200,255,0,0.3)",boxShadow:"0 14px 30px rgba(0,0,0,0.2)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}>
-            <div><div style={{fontFamily:FD,fontSize:14,color:LIGHT,letterSpacing:"0.04em"}}>NEXT 7 DAYS</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Priority sessions, participation, and unresolved RSVPs.</div></div>
+            <div><div style={{fontFamily:FD,fontSize:15,color:LIGHT,letterSpacing:"0.04em"}}>NEXT 7 DAYS</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Critical sessions, unresolved RSVP risk, and readiness.</div></div>
             <button className="pageHeaderPill" onClick={()=>setTab("events")}>Open Events</button>
+          </div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
+            <span style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,255,255,0.22)"}}>Sessions {next7Events.length}</span>
+            <span style={{fontFamily:FB,fontSize:10,color:"#FFB86B",padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,184,107,0.42)"}}>Unresolved {unresolvedNext7Count}</span>
+            <span style={{fontFamily:FB,fontSize:10,color:VOLT,padding:"3px 8px",borderRadius:999,border:"1px solid rgba(200,255,0,0.45)"}}>Today/Tomorrow {criticalNext7Count}</span>
           </div>
           <div style={{display:"grid",gap:7}}>
             {next7Events.length===0?<div style={{fontFamily:FB,color:"var(--text-2)",fontSize:11}}>No sessions scheduled this week.</div>:next7Events.map((ev)=>{
@@ -3177,14 +3181,23 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
               const evRsvps=rsvps.filter(r=>r.eventId===ev.id);
               const missingCount=Math.max(0,ups.length-evRsvps.length);
               const pct=ups.length?Math.round((evRsvps.length/ups.length)*100):0;
-              const isPriority=ev.date===todayDate||ev.date===nextSession?.date;
-              return <button key={ev.id} type="button" onClick={()=>setTab("events")} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",width:"100%",textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${isPriority?"rgba(200,255,0,0.36)":"rgba(255,255,255,0.12)"}`,background:isPriority?"rgba(200,255,0,0.07)":"rgba(255,255,255,0.02)",cursor:"pointer"}}>
+              const day=dayBadge(ev.date);
+              const isPriority=day==="TODAY"||day==="TOMORROW";
+              return <button key={ev.id} type="button" onClick={()=>setTab("events")} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",width:"100%",textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${isPriority?"rgba(200,255,0,0.36)":"rgba(255,255,255,0.12)"}`,background:isPriority?"rgba(200,255,0,0.08)":"rgba(255,255,255,0.02)",cursor:"pointer"}}>
                 <span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.color}44`,borderRadius:999,padding:"3px 7px"}}>{tone.label}</span>
-                <div style={{minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,marginTop:2}}>{dayBadge(ev.date)} · {ev.time||"TBD"} · {pct}% RSVP</div></div>
+                <div style={{minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,marginTop:2}}>{day} · {ev.time||"TBD"} · {pct}% RSVP</div></div>
                 <span style={{fontFamily:FB,fontSize:9,color:missingCount>0?"#FFB86B":VOLT,border:`1px solid ${missingCount>0?"rgba(255,184,107,0.4)":"rgba(200,255,0,0.45)"}`,borderRadius:999,padding:"3px 7px"}}>{missingCount>0?`${missingCount} missing`:`${evRsvps.length} confirmed`}</span>
               </button>;
             })}
           </div>
+        </section>
+
+        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
+          {[{l:"Active today",v:activeTodaySet.size,sub:`${ups.length?Math.round((activeTodaySet.size/ups.length)*100):0}% of roster`},{l:"Attendance",v:`${attendancePct}%`,sub:"7-day participation rate"},{l:"Consistency",v:avgStreak,sub:"Avg logs from top streaks"},{l:"Weekly activity",v:weekScores.length,sub:"Total workouts logged"}].map(stat=><div key={stat.l} style={{border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{stat.l}</div><div style={{fontFamily:FD,fontSize:21,color:"var(--text-1)",lineHeight:1,marginTop:4}}>{stat.v}</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:4}}>{stat.sub}</div></div>)}
+        </section>
+
+        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(3,minmax(0,1fr))":"1fr",gap:8,marginBottom:12}}>
+          {trendCards.map((trend)=><div key={trend.label} style={{border:"1px solid var(--stroke-1)",background:"linear-gradient(160deg, rgba(255,255,255,0.035), rgba(0,0,0,0.18))",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{trend.label}</div><div style={{fontFamily:FB,fontSize:13,color:trend.tone==="good"?"var(--accent)":trend.tone==="warn"?"#FFB86B":"var(--text-1)",fontWeight:700,marginTop:5}}>{trend.value}</div></div>)}
         </section>
 
         <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
