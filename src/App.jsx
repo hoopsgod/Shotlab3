@@ -2690,6 +2690,15 @@ function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue
 const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState("attend"),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null);
 const sorted=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
 const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
+const nextEvent=upcoming[0]||null;
+const eventTypeLabel=(type="event")=>{
+  const value=String(type||"event").toLowerCase();
+  if(["game","scrimmage"].includes(value))return "Game";
+  if(["practice","run","workout","clinic","shooting"].includes(value))return "Practice";
+  if(["recovery","training","lift"].includes(value))return "Training";
+  if(["meeting","film"].includes(value))return "Meeting";
+  return "Team Event";
+};
 const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);useEffect(()=>{if(lastRank===null){setLastRank(myTier.name);return;}if(lastRank!==myTier.name){setRankFx(true);setLastRank(myTier.name);const t=setTimeout(()=>setRankFx(false),650);return ()=>clearTimeout(t);}},[myTier.name,lastRank]);
 
 const attendBoard=useMemo(()=>{const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[rsvps]);
@@ -2697,6 +2706,14 @@ const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 const handleEventRsvp=(event)=>{const going=rsvps.some(r=>r.eventId===event.id&&r.email===user.email);toggleRsvp(event.id);if(!going){onCompletionCue?.({title:"Event participation confirmed",detail:`You're in for ${event.title}`,momentum:"Attendance momentum building",next:"Show up and log post-session activity"});}};
 
 return <div className="fade-up">
+<div className="accent-card" style={{borderRadius:18,padding:"16px 16px",marginBottom:12,background:"linear-gradient(145deg, rgba(119,215,255,.14), rgba(11,13,16,.94) 64%)",border:"1px solid color-mix(in srgb,var(--accent-events) 35%, var(--stroke-1))"}}>
+  <div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",fontWeight:700,letterSpacing:"0.08em"}}>WHAT'S NEXT</div>
+  <div style={{fontFamily:FD,color:LIGHT,fontSize:22,lineHeight:1.05,marginTop:7}}>{nextEvent?.title||"No session locked in"}</div>
+  <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
+    <span style={{padding:"4px 8px",borderRadius:999,border:`1px solid ${BORDER_CLR}`,fontFamily:FB,fontSize:10,color:T.SUB}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time||"TBD"}`:"Set your next team event"}</span>
+    {nextEvent&&<span style={{padding:"4px 8px",borderRadius:999,border:`1px solid ${VOLT}44`,background:`${VOLT}15`,fontFamily:FB,fontSize:10,color:VOLT,fontWeight:700}}>{eventTypeLabel(nextEvent.type)}</span>}
+  </div>
+</div>
 {/* Events banner — structured, timeline-oriented */}
 <div style={{background:`linear-gradient(135deg,${VOLT}04,${CARD_BG})`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
 
@@ -2758,20 +2775,20 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 {/* Upcoming */}
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING EVENTS" s={`${upcoming.length} SCHEDULED`}/>
 {upcoming.length===0&&<Empty t="NO EVENTS SCHEDULED" action="Your coach will post workouts and events here" cta="NOTIFY MY COACH" ctaVariant="secondary" icon={<EventIcon type="clinic" size={48} color="#555555"/>}/>}
-{upcoming.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;
+{upcoming.map((ev,index)=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;
   return <div key={ev.id} style={{marginBottom:12}}>
-    <div className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",position:"relative",overflow:"hidden"}}>
+    <div className="ch" style={{width:"100%",background:index===0?`linear-gradient(140deg, ${VOLT}18, ${CARD_BG} 58%)`:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"55":index===0?VOLT+"40":BORDER_CLR}`,borderRadius:exp?"18px 18px 0 0":18,padding:"20px 20px",textAlign:"left",position:"relative",overflow:"hidden",boxShadow:index===0?"0 10px 24px rgba(0,0,0,0.28)":"none"}}>
       {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:VOLT,borderRadius:"4px 0 0 4px"}}/>}
       <div style={{display:"flex",alignItems:"flex-start",gap:14,cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
         <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><EventIcon type={ev.type} size={24} color={going?CYAN:MUTED}/></div>
-        <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span> &#183; {ev.time}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ev.location}</div></div>
+        <div style={{flex:1,minWidth:0}}><div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1.6}}>{ev.title}</div>{index===0&&<span style={{fontFamily:FB,fontSize:8,padding:"2px 7px",borderRadius:999,color:"#0b0d10",background:VOLT,fontWeight:700,letterSpacing:"0.07em"}}>UP NEXT</span>}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:5}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span> &#183; {ev.time||"TBD"} &#183; {eventTypeLabel(ev.type)}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{ev.location||"Location TBD"}</div></div>
         <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,flexShrink:0}}>
           <div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:20}}>{evR.length}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>GOING</div></div>
         </div>
       </div>
       {/* Inline quick-RSVP pill */}
-      <button onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:12,padding:"8px 0",width:"100%",borderRadius:10,border:"none",background:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:3,color:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
-        {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={BG} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>I'M GOING</>:"RSVP →"}
+      <button onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:14,padding:"11px 0",width:"100%",borderRadius:12,border:going?`1px solid ${VOLT}66`:"none",background:going?`${VOLT}24`:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:2,color:going?VOLT:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
+        {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>YOU'RE LOCKED IN</>:"RSVP NOW →"}
       </button>
     </div>
     {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
@@ -3241,7 +3258,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           return Object.entries(grouped).map(([dateKey,dateEvents])=>{const d=new Date(`${dateKey}T00:00:00`);const weekday=d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();const monthDay=d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();
           return <div key={dateKey} style={{display:"grid",gap:6}}>
             <div style={{display:"flex",alignItems:"baseline",gap:7,padding:"2px 2px 0"}}><span style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:".1em"}}>{weekday}</span><span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{monthDay}</span></div>
-            {dateEvents.map(ev=>{const evCoachRsvps=coachEventRsvpRows(ev.id);const evCoachRsvpNames=evCoachRsvps.map(coachRsvpLabel);return <div key={ev.id} style={{background:"rgba(20,24,33,0.82)",border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"11px 12px",display:"grid",gap:5,maxWidth:"100%"}}>
+            {dateEvents.map((ev,eventIdx)=>{const evCoachRsvps=coachEventRsvpRows(ev.id);const evCoachRsvpNames=evCoachRsvps.map(coachRsvpLabel);return <div key={ev.id} style={{background:eventIdx===0?"linear-gradient(150deg, rgba(200,255,26,0.14), rgba(20,24,33,0.92) 58%)":"rgba(20,24,33,0.82)",border:`1px solid ${eventIdx===0?VOLT+"44":BORDER_CLR}`,borderRadius:14,padding:"13px 13px",display:"grid",gap:6,maxWidth:"100%"}}>
               <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8}}>
                 <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,lineHeight:1.25,minWidth:0,wordBreak:"break-word"}}>{ev.title}</div>
                 <span style={{padding:"2px 7px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}55`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase",flexShrink:0}}>{ev.type||"event"}</span>
@@ -3249,7 +3266,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
               <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>{ev.date}</div>
               <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>{ev.time||"TBD"}</div>
               <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25,wordBreak:"break-word"}}>📍 {ev.location||"Location TBD"}</div>
-              <div style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,marginTop:2}}>{`${evCoachRsvps.length} going`}</div>
+              <div style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,marginTop:2}}>{`${evCoachRsvps.length} going`} {eventIdx===0?"· Priority session":""}</div>
               {evCoachRsvpNames.length>0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35,wordBreak:"break-word"}}>{evCoachRsvpNames.join(", ")}</div>:<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35}}>No RSVPs yet — players can RSVP from their Events page.</div>}
             </div>})})
           </div>});
@@ -3309,11 +3326,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     </div>}
 
     {isDesktop&&filteredEvents.map(ev=>{const evR=coachEventRsvpRows(ev.id);const evRsvpPreview=evR.slice(0,3).map(coachRsvpLabel);const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
-      return <div key={ev.id} className="accent-card" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,marginBottom:10,overflow:"hidden"}}>
+      return <div key={ev.id} className="accent-card" style={{background:ev===filteredEvents[0]?`linear-gradient(145deg, rgba(200,255,26,0.12), ${CARD_BG} 65%)`:CARD_BG,border:`1px solid ${ev===filteredEvents[0]?VOLT+"44":BORDER_CLR}`,borderRadius:16,marginBottom:12,overflow:"hidden"}}>
         <button className="ch" onClick={()=>setExpEv(expEv===ev.id?null:ev.id)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"14px 16px",background:"none",border:"none",cursor:"pointer",textAlign:"left"}}>
           <div style={{minWidth:0}}>
-            <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>{ev.title}</div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{ev.date} · {ev.time}</div>
+            <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}><div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700}}>{ev.title}</div>{ev===filteredEvents[0]&&<span style={{fontFamily:FB,fontSize:8,padding:"2px 6px",borderRadius:999,background:VOLT,color:"#101010",fontWeight:700}}>UP NEXT</span>}</div>
+            <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{ev.date} · {ev.time||"TBD"}</div>
             <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>📍 {ev.location}</div>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
