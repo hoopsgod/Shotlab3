@@ -36,6 +36,7 @@ import { supabase } from "./lib/supabase.js";
 import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
 import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
+import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
 const CYAN = TOKENS.SECONDARY;
@@ -2044,7 +2045,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} rsvps={rsvps} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
+  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} rsvps={rsvps} events={events} players={players} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
 </div>
 
 {!isDesktop&&<NavBar items={playerNavItems} active={tab} onChange={switchTab}/>} 
@@ -3348,7 +3349,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       <p style={{fontFamily:FB,color:MUTED,fontSize:9,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
     </div>
   </div>}
-  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {getPlayerHomeShotMakes(selP.email,shotLogs,u?.teamId)}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills} programDr={programDrills}/></div>}
+  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {getPlayerHomeShotMakes(selP.email,shotLogs,u?.teamId)}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div><div style={{marginTop:10,fontFamily:FB,fontSize:10,color:MUTED}}>{(()=>{const snap=derivePlayerProgressProfile({playerEmail:selP.email,shotLogs,scores,rsvps,events,players});return `${snap.coachSnapshot.consistency} · ${snap.coachSnapshot.engagement} · ${snap.coachSnapshot.developmentSignal}`;})()}</div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills} programDr={programDrills}/></div>}
 
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><PageHeader title="S&C" subtitle="Strength blocks, readiness, and recovery" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S LIFT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAddSC(true)}>Add Session</button></div><div className="heroStats"><div className="heroStat"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">SESSIONS</div></div><div className="heroStat"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">RSVPS</div></div><div className="heroStat"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">LOGS</div></div></div></div>
@@ -3420,7 +3421,7 @@ return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s
 // ═══════════════════════════════════════
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
-function ProfilePage({u,scores,shotLogs,drills,programDrills=[],rsvps,scRsvps,challenges,streak,earnedBadges,T,deleteAccount,onToggleLeaderboardVisibility}){
+function ProfilePage({u,scores,shotLogs,drills,programDrills=[],rsvps,events=[],players=[],scRsvps,challenges,streak,earnedBadges,T,deleteAccount,onToggleLeaderboardVisibility}){
 const[confirmDel,setConfirmDel]=useState(false);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
@@ -3435,6 +3436,8 @@ const scCount=scRsvps.filter(r=>r.email===u.email).length;
 const challWon=challenges.filter(c=>(c.from===u.email&&c.status==="lost")||(c.to===u.email&&c.status==="won")).length;
 const challTotal=challenges.filter(c=>c.from===u.email||c.to===u.email).length;
 const hasReportCardData=(totalMakes+totalProgramMakes+totalShots+sessionsLogged+programSessionsLogged+eventsAttended+scCount+challTotal)>0;
+const progress=useMemo(()=>derivePlayerProgressProfile({playerEmail:u.email,shotLogs,scores,rsvps,events,players}),[u.email,shotLogs,scores,rsvps,events,players]);
+
 const bestStreak=useMemo(()=>{const ds=[...new Set(homeScores.map(s=>s.date))].sort();let max=0,cur=0,prev=null;
 ds.forEach(d=>{const dt=new Date(d);if(prev){const diff=(dt-prev)/(1000*60*60*24);cur=diff<=1?cur+1:1}else cur=1;max=Math.max(max,cur);prev=dt});return max},[homeScores]);
 
@@ -3527,7 +3530,9 @@ return <div className="fade-up">
   </div>
 </div>}
 
-{/* Overall stats */}
+{
+<div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>PLAYER PROGRESS PROFILE</div>{progress.isEmpty?<div style={{fontFamily:FB,color:MUTED,fontSize:11,lineHeight:1.5}}>No progress data yet. Log your first at-home session and RSVP to upcoming events to build your profile.</div>:<><div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:10}}>{[{l:"TOTAL AT HOME SHOTS",v:progress.totalAtHomeShots,c:VOLT},{l:"CURRENT STREAK",v:progress.currentStreak,c:ORANGE},{l:"WEEKLY ACTIVITY",v:progress.weeklyActivityCount,c:LIGHT},{l:"EVENTS",v:progress.eventsAttended,c:CYAN},{l:"RSVP RATE",v:`${progress.rsvpParticipationRate}%`,c:VOLT}].map(item=><div key={item.l} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}><div style={{fontFamily:FD,color:item.c,fontSize:18}}>{item.v}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:1.4,fontWeight:700}}>{item.l}</div></div>)}</div><div style={{marginBottom:8}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:2,fontWeight:700,marginBottom:6}}>7-DAY TREND</div><div style={{display:"flex",alignItems:"flex-end",gap:4,height:44}}>{progress.sevenDayTrend.map(d=>{const max=Math.max(1,...progress.sevenDayTrend.map(x=>x.made));const h=Math.max(4,Math.round((d.made/max)*40));return <div key={d.day} title={`${d.day}: ${d.made}`} style={{flex:1,height:h,borderRadius:4,background:d.made>0?VOLT+"66":BORDER_CLR}}/>;})}</div></div><div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5}}>{progress.recentActivitySummary.join(" · ")}</div></>}</div>
+/* Overall stats */}
 <div style={{background:CARD_BG,borderRadius:16,padding:"4px 20px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
   <StatRow label="At Home Drill Makes" value={totalMakes}/><StatRow label="Program Drill Makes" value={totalProgramMakes} color={CYAN}/>
   <StatRow label="Shot Tracker Makes" value={totalShots} color={ORANGE}/>
