@@ -38,6 +38,7 @@ export default function PageHeader({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--headerAccent) 8%, transparent)",
             }}
           >
             {icon}
