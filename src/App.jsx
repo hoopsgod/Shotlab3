@@ -3221,7 +3221,18 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}>
     {isDesktop?<>
       <div className="coachEventsHeaderCard"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} /></div>
-      {nextEvent&&<div className="heroModule"><div style={{fontFamily:FD,color:PAGE_ACCENTS.events.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>NEXT EVENT</div><div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,marginTop:4}}>{nextEvent.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>{nextEvent.date} {nextEvent.time}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>📍 {nextEvent.location}</div></div>}
+      {nextEvent&&(()=>{const nextRows=coachEventRsvpRows(nextEvent.id);const rosterCount=allKnown.length;const missingCount=Math.max(rosterCount-nextRows.length,0);return <div className="heroModule" style={{background:"linear-gradient(145deg, rgba(200,255,26,0.16), rgba(15,20,28,0.94) 60%)",border:`1px solid ${VOLT}55`,boxShadow:"0 20px 45px rgba(0,0,0,0.38)",padding:16}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,flexWrap:"wrap"}}>
+          <div style={{fontFamily:FD,color:PAGE_ACCENTS.events.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>UPCOMING TEAM SESSION</div>
+          <span style={{padding:"3px 10px",borderRadius:999,border:`1px solid ${VOLT}66`,background:`${VOLT}1A`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase"}}>{nextEvent.type||"event"}</span>
+        </div>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:1.1,marginTop:10,lineHeight:1}}>{nextEvent.title}</div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginTop:12}}>
+          {[{k:"Date",v:nextEvent.date},{k:"Time",v:nextEvent.time||"TBD"},{k:"Confirmed",v:`${nextRows.length}`},{k:"Missing RSVP",v:`${missingCount}`}].map(item=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 10px",background:"rgba(255,255,255,0.03)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:".08em",textTransform:"uppercase"}}>{item.k}</div><div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,marginTop:2}}>{item.v}</div></div>)}
+        </div>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:10}}>📍 {nextEvent.location||"Location TBD"}</div>
+        <button onClick={()=>setExpEv(nextEvent.id)} className="btn-v cta-primary" style={{marginTop:12,minHeight:42,height:42,width:"100%"}}>REVIEW ATTENDANCE</button>
+      </div>;})()}
       <div style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:14,marginBottom:12}}>
         <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:10,marginBottom:events.length===0?0:8}}>
           <div>
@@ -3258,7 +3269,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           return Object.entries(grouped).map(([dateKey,dateEvents])=>{const d=new Date(`${dateKey}T00:00:00`);const weekday=d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();const monthDay=d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();
           return <div key={dateKey} style={{display:"grid",gap:6}}>
             <div style={{display:"flex",alignItems:"baseline",gap:7,padding:"2px 2px 0"}}><span style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:".1em"}}>{weekday}</span><span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{monthDay}</span></div>
-            {dateEvents.map((ev,eventIdx)=>{const evCoachRsvps=coachEventRsvpRows(ev.id);const evCoachRsvpNames=evCoachRsvps.map(coachRsvpLabel);return <div key={ev.id} style={{background:eventIdx===0?"linear-gradient(150deg, rgba(200,255,26,0.14), rgba(20,24,33,0.92) 58%)":"rgba(20,24,33,0.82)",border:`1px solid ${eventIdx===0?VOLT+"44":BORDER_CLR}`,borderRadius:14,padding:"13px 13px",display:"grid",gap:6,maxWidth:"100%"}}>
+            {dateEvents.map((ev,eventIdx)=>{const evCoachRsvps=coachEventRsvpRows(ev.id);const evCoachRsvpNames=evCoachRsvps.map(coachRsvpLabel);const missing=Math.max(allKnown.length-evCoachRsvps.length,0);return <div key={ev.id} style={{background:eventIdx===0?"linear-gradient(154deg, rgba(200,255,26,0.18), rgba(16,22,32,0.95) 60%)":"linear-gradient(154deg, rgba(255,255,255,0.05), rgba(16,20,30,0.9) 72%)",border:`1px solid ${eventIdx===0?VOLT+"55":BORDER_CLR}`,boxShadow:eventIdx===0?"0 14px 34px rgba(0,0,0,0.34)":"0 10px 24px rgba(0,0,0,0.24)",borderRadius:16,padding:"14px 14px",display:"grid",gap:8,maxWidth:"100%"}}>
               <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8}}>
                 <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,lineHeight:1.25,minWidth:0,wordBreak:"break-word"}}>{ev.title}</div>
                 <span style={{padding:"2px 7px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}55`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase",flexShrink:0}}>{ev.type||"event"}</span>
@@ -3266,7 +3277,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
               <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>{ev.date}</div>
               <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>{ev.time||"TBD"}</div>
               <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25,wordBreak:"break-word"}}>📍 {ev.location||"Location TBD"}</div>
-              <div style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,marginTop:2}}>{`${evCoachRsvps.length} going`} {eventIdx===0?"· Priority session":""}</div>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                <span style={{display:"none"}}>{`${evCoachRsvps.length} going`}</span>
+                <span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:"rgba(200,255,26,0.14)",fontFamily:FB,color:LIGHT,fontSize:9,fontWeight:700}}>{`${evCoachRsvps.length} confirmed`}</span>
+                <span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.05)",fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700}}>{`${missing} missing`}</span>
+                {eventIdx===0&&<span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:`${VOLT}1A`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700}}>UP NEXT</span>}
+              </div>
               {evCoachRsvpNames.length>0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35,wordBreak:"break-word"}}>{evCoachRsvpNames.join(", ")}</div>:<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35}}>No RSVPs yet — players can RSVP from their Events page.</div>}
             </div>})})
           </div>});
@@ -3326,7 +3342,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     </div>}
 
     {isDesktop&&filteredEvents.map(ev=>{const evR=coachEventRsvpRows(ev.id);const evRsvpPreview=evR.slice(0,3).map(coachRsvpLabel);const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
-      return <div key={ev.id} className="accent-card" style={{background:ev===filteredEvents[0]?`linear-gradient(145deg, rgba(200,255,26,0.12), ${CARD_BG} 65%)`:CARD_BG,border:`1px solid ${ev===filteredEvents[0]?VOLT+"44":BORDER_CLR}`,borderRadius:16,marginBottom:12,overflow:"hidden"}}>
+      const missingResponses=Math.max(allKnown.length-evR.length,0);
+      return <div key={ev.id} className="accent-card" style={{background:ev===filteredEvents[0]?`linear-gradient(150deg, rgba(200,255,26,0.16), ${CARD_BG} 62%)`:"linear-gradient(160deg, rgba(255,255,255,0.02), rgba(15,15,15,0.9))",border:`1px solid ${ev===filteredEvents[0]?VOLT+"55":BORDER_CLR}`,borderRadius:16,marginBottom:12,overflow:"hidden",boxShadow:ev===filteredEvents[0]?"0 18px 34px rgba(0,0,0,0.34)":"0 10px 24px rgba(0,0,0,0.24)"}}>
         <button className="ch" onClick={()=>setExpEv(expEv===ev.id?null:ev.id)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"14px 16px",background:"none",border:"none",cursor:"pointer",textAlign:"left"}}>
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}><div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700}}>{ev.title}</div>{ev===filteredEvents[0]&&<span style={{fontFamily:FB,fontSize:8,padding:"2px 6px",borderRadius:999,background:VOLT,color:"#101010",fontWeight:700}}>UP NEXT</span>}</div>
@@ -3335,14 +3352,23 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           </div>
           <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
             <span style={{padding:"4px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:`${VOLT}1A`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase"}}>{ev.type||"event"}</span>
-            <span style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{`${evR.length} going`}</span>
+            <span style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{`${evR.length} confirmed`}</span>
           </div>
         </button>
-        <div style={{padding:"0 16px 12px",fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35,wordBreak:"break-word"}}>
-          {evRsvpPreview.length>0?evRsvpPreview.join(", "):"No RSVPs yet — players can RSVP from their Events page."}
+        <div style={{padding:"0 16px 12px",display:"grid",gap:7}}>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+            <span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:`${VOLT}1A`,fontFamily:FB,color:LIGHT,fontSize:9,fontWeight:700}}>{evR.length} CONFIRMED</span>
+            <span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.04)",fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700}}>{missingResponses} NO RESPONSE</span>
+          </div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35,wordBreak:"break-word"}}>
+            {evRsvpPreview.length>0?evRsvpPreview.join(", "):"No RSVPs yet — players can RSVP from their Events page."}
+          </div>
         </div>
         {isExp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 14px 14px",padding:"16px 16px",borderTop:`1px solid ${BORDER_CLR}`}}>
           <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:12}}>{ev.desc}</p>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:7,marginBottom:10}}>
+            {[{k:"Confirmed",v:evR.length,c:LIGHT},{k:"No response",v:missingResponses,c:T.SUB},{k:"Walk-ins",v:Math.max(evR.length-(rsvpsByEvent.get(ev.id)||[]).length,0),c:CYAN}].map(stat=><div key={stat.k} style={{border:`1px solid ${BORDER_CLR}`,borderRadius:9,padding:"7px 8px",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:".07em",textTransform:"uppercase"}}>{stat.k}</div><div style={{fontFamily:FD,color:stat.c,fontSize:17,letterSpacing:1,marginTop:1}}>{stat.v}</div></div>)}
+          </div>
           <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>ATTENDEES ({evR.length})</div>
           {evR.length===0&&<p style={{fontFamily:FB,color:T.SUB,fontSize:11,marginBottom:10}}>No RSVPs yet — players can RSVP from their Events page.</p>}
           {evR.map((r,i)=>{const t=getTier(attendanceCountByEmail.get(r.email)||0);return <div key={i} style={{display:"flex",alignItems:"center",gap:8,background:CARD_BG,borderRadius:10,padding:"9px 12px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}>
