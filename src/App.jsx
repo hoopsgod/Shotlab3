@@ -3040,6 +3040,29 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       ].filter(Boolean).slice(0,3);
       const readinessCopy=ups.length===0?"Roster needs players":`${activeTodaySet.size}/${ups.length} athletes active today`;
       const rsvpPct=session&&ups.length?Math.round((sessionRsvps.length/ups.length)*100):0;
+      const participationMomentum=Math.max(-100,Math.min(100,rsvpPct-attendancePct));
+      const participationMomentumLabel=participationMomentum>=8?`+${participationMomentum}% rising`:participationMomentum<=-8?`${participationMomentum}% slipping`:"Stable";
+      const playersNeedingAttention=inactivePlayers.slice(0,3);
+      const topEngagedPlayers=[...ups]
+        .map((player)=>{
+          const playerScores=weekScores.filter((score)=>score.email===player.email).length;
+          const playerRsvps=rsvps.filter((rsvp)=>rsvp.email===player.email&&rsvp.status==="yes").length;
+          const score=(playerScores*2)+playerRsvps;
+          return { player, score };
+        })
+        .filter((entry)=>entry.score>0)
+        .sort((a,b)=>b.score-a.score)
+        .slice(0,3);
+      const trendCards=[
+        {label:"Participation momentum",value:participationMomentumLabel,tone:participationMomentum>=8?"good":participationMomentum<=-8?"warn":"neutral"},
+        {label:"Consistency pulse",value:avgStreak>=4?`Strong (${avgStreak} avg streak)`:`Needs reps (${avgStreak} avg streak)`,tone:avgStreak>=4?"good":"warn"},
+        {label:"Attendance trend",value:attendancePct>=70?`${attendancePct}% in rhythm`:`${attendancePct}% this week`,tone:attendancePct>=70?"good":"warn"},
+      ];
+      const nextActions=[
+        inactivePlayers.length?{label:"Check in with inactive athletes",detail:`${inactivePlayers.length} need a follow-up touch`,onClick:()=>setTab("players")}:null,
+        session?{label:"Confirm today's session attendance",detail:`${rsvpPct}% RSVP for ${session.title}`,onClick:()=>setTab("events")}:{label:"Schedule next team session",detail:"No session is currently set",onClick:()=>setTab("events")},
+        {label:"Review weekly activity feed",detail:`${weekScores.length} logs this week`,onClick:()=>setTab("feed")},
+      ].filter(Boolean);
       return <>
         <section className="accent-card" style={{background:"linear-gradient(155deg, color-mix(in srgb,var(--accent) 13%, transparent), rgba(11,13,16,0.96) 68%)",border:`1px solid color-mix(in srgb,var(--accent) 30%, transparent)`,borderRadius:22,padding:isDesktop?"24px":"20px",marginBottom:14,boxShadow:"0 18px 40px rgba(0,0,0,0.24)"}}>
           <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"flex-start",marginBottom:12}}>
@@ -3055,12 +3078,19 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           </div>
         </section>
 
-        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(5,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:12}}>
-          {[{l:"Active today",v:activeTodaySet.size},{l:"RSVP %",v:`${rsvpPct}%`},{l:"Attendance %",v:`${attendancePct}%`},{l:"Streak leaders",v:avgStreak},{l:"Activity",v:weekScores.length}].map(stat=><div key={stat.l} style={{border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)",borderRadius:12,padding:"10px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)"}}>{stat.l}</div><div style={{fontFamily:FD,fontSize:20,color:"var(--text-1)",lineHeight:1,marginTop:4}}>{stat.v}</div></div>)}
+        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
+          {[{l:"Active today",v:activeTodaySet.size,sub:`${ups.length?Math.round((activeTodaySet.size/ups.length)*100):0}% of roster`},{l:"Attendance",v:`${attendancePct}%`,sub:"7-day participation rate"},{l:"Consistency",v:avgStreak,sub:"Avg logs from top streaks"},{l:"Weekly activity",v:weekScores.length,sub:"Total workouts logged"}].map(stat=><div key={stat.l} style={{border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{stat.l}</div><div style={{fontFamily:FD,fontSize:21,color:"var(--text-1)",lineHeight:1,marginTop:4}}>{stat.v}</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:4}}>{stat.sub}</div></div>)}
+        </section>
+
+        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(3,minmax(0,1fr))":"1fr",gap:8,marginBottom:12}}>
+          {trendCards.map((trend)=><div key={trend.label} style={{border:"1px solid var(--stroke-1)",background:"linear-gradient(160deg, rgba(255,255,255,0.035), rgba(0,0,0,0.18))",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{trend.label}</div><div style={{fontFamily:FB,fontSize:13,color:trend.tone==="good"?"var(--accent)":trend.tone==="warn"?"#FFB86B":"var(--text-1)",fontWeight:700,marginTop:5}}>{trend.value}</div></div>)}
         </section>
 
         <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
-          <div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>Players needing attention</div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+            <div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>Players needing attention</div>
+            <button className="pageHeaderPill" onClick={()=>setTab("players")}>Open roster</button>
+          </div>
           {(()=>{
             const inactive=inactivePlayers;
             const hasRosterPlayers=ups.length>0;
@@ -3070,6 +3100,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             </div>;
           })()}
           <div style={{display:"grid",gap:6,marginTop:8}}>{attention.length?attention.map((line,idx)=><div key={idx} style={{fontFamily:FB,fontSize:11,color:"var(--text-2)"}}>• {line}</div>):<div style={{fontFamily:FB,fontSize:11,color:VOLT}}>No high-risk alerts today.</div>}</div>
+          {playersNeedingAttention.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:9}}>{playersNeedingAttention.map((player)=><span key={player.email} style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",border:"1px solid var(--stroke-1)",borderRadius:999,padding:"5px 8px",background:"rgba(255,255,255,0.02)"}}>{player.name?.split(" ")[0]||player.email?.split("@")[0]}</span>)}</div>}
+        </section>
+
+        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
+          <div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>Top engagement patterns</div>
+          <div style={{fontFamily:FB,fontSize:11,color:"var(--text-3)",marginTop:4}}>Who is setting the tone this week.</div>
+          <div style={{display:"grid",gap:7,marginTop:10}}>
+            {topEngagedPlayers.length?topEngagedPlayers.map((entry,idx)=><div key={entry.player.email} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"8px 10px",borderRadius:10,border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)"}}><div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}><span style={{fontFamily:FD,fontSize:14,color:idx===0?VOLT:"var(--text-2)"}}>#{idx+1}</span><span style={{fontFamily:FB,fontSize:12,color:"var(--text-1)",fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{entry.player.name||entry.player.email}</span></div><span style={{fontFamily:FB,fontSize:10,color:"var(--text-2)"}}>{entry.score} engagement pts</span></div>):<div style={{fontFamily:FB,fontSize:11,color:"var(--text-2)"}}>No standout engagement pattern yet. Activity will surface here as athletes log and RSVP.</div>}
+          </div>
         </section>
 
         <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
@@ -3077,8 +3116,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           {nextSession&&<div style={{fontFamily:FB,fontSize:12,color:"var(--text-2)",marginTop:6}}>{nextSession.title} · {nextSession.time||"TBD"}</div>}
         </section>
 
-        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(5,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:12}}>
-          {[{label:"Add Event",onClick:()=>jumpToSection("events","coach-events-management")},{label:"View Players",onClick:()=>setTab("players")},{label:"Program",onClick:()=>setTab("drills")},{label:"Activity",onClick:()=>setTab("feed")},{label:"Log Practice",onClick:handleLogScoreAction}].map(action=><button key={action.label} type="button" onClick={action.onClick} style={{minHeight:44,borderRadius:12,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer",transition:"transform .15s ease, border-color .15s ease"}}>{action.label}</button>)}
+        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
+          <div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>Recommended next actions</div>
+          <div style={{display:"grid",gap:8,marginTop:10}}>
+            {nextActions.map((action)=><button key={action.label} type="button" onClick={action.onClick} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,minHeight:44,borderRadius:11,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer",padding:"9px 10px",textAlign:"left"}}><span>{action.label}<span style={{display:"block",fontSize:10,color:"var(--text-2)",fontWeight:500,marginTop:3}}>{action.detail}</span></span><span aria-hidden="true" style={{color:"var(--text-3)"}}>›</span></button>)}
+          </div>
         </section>
 
         {(()=>{const recentCoachActivity=deriveActivityFeedItems({view:"coach",user:u,events,rsvps,shotLogs,players:ups,scores,today});return <RecentActivityCard title="Activity" items={recentCoachActivity}/>;})()}
