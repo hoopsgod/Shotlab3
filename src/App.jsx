@@ -1819,6 +1819,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const weeklyGoal=PLAYER_WEEKLY_SHOT_TARGET;
       const dailyPct=Math.min(100,Math.round((todaysMakes/dailyGoal)*100));
       const weeklyPct=Math.min(100,Math.round((weeklyMakes/weeklyGoal)*100));
+      const seasonProgressPct=Math.min(100,Math.round(((weeklyPct*0.45)+(dailyPct*0.2)+Math.min(streak*6,100)*0.35)));
+      const commitmentLevel=weeklyPct>=90&&streak>=5?"Elite discipline":weeklyPct>=70?"Reliable builder":weeklyPct>=45?"Work in progress":"Needs consistency";
+      const momentumLabel=weeklyMakes>=weeklyGoal?"Rising fast":weeklyMakes>=Math.round(weeklyGoal*0.65)?"Building":"Early in cycle";
+      const trainingIdentity=eventsAttended>=3&&weeklyMakes>=Math.round(weeklyGoal*0.75)?"Two-way standard":weeklyMakes>=Math.round(weeklyGoal*0.75)?"Skill-volume specialist":eventsAttended>=3?"Team-first competitor":"Foundation phase";
+      const currentFocus=todaysMakes<dailyGoal?"Daily shot volume + attendance":"Sustain form and quality reps";
       const playerHasTeam=Boolean(u?.teamId);
       const hasUpcomingEvents=upcomingEventsCount>0;
       const hasRsvped=rsvps.some(r=>normalizeEmail(r.email)===normalizeEmail(u.email)&&r.teamId===u?.teamId);
@@ -1901,6 +1906,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         <section style={{padding:"11px",borderRadius:12,background:"rgba(255,255,255,0.015)"}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>Getting Started</div>
           <div style={{display:"grid",gap:6,marginTop:7}}>{playerChecklist.slice(0,4).map(item=><div key={item.label} style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11}}>{item.done?"✓":"•"} {item.label}</div>)}</div>
+        </section>
+        <section aria-label="Training identity" style={{padding:"12px",borderRadius:14,background:"linear-gradient(150deg, rgba(200,255,0,0.10), rgba(255,255,255,0.03) 36%, rgba(11,13,16,0.92))",border:"1px solid rgba(200,255,0,0.28)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+            <div style={{fontFamily:FD,fontSize:14,color:LIGHT,letterSpacing:"0.04em"}}>TRAINING IDENTITY</div>
+            <span style={{fontFamily:FB,fontSize:10,color:VOLT,border:"1px solid rgba(200,255,0,0.45)",borderRadius:999,padding:"3px 8px"}}>{momentumLabel}</span>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:7,marginTop:8}}>
+            {[{k:"Current Focus",v:currentFocus},{k:"Season Progress",v:`${seasonProgressPct}%`},{k:"Training Identity",v:trainingIdentity},{k:"Commitment Level",v:commitmentLevel}].map((item)=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 9px",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k}</div><div style={{fontFamily:FB,fontSize:11,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.4}}>{item.v}</div></div>)}
+          </div>
         </section>
         <RecentActivityCard title="Recent Activity" items={recentPlayerActivity}/>
       </div>
@@ -3129,6 +3143,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {label:"Consistency pulse",value:avgStreak>=4?`Strong (${avgStreak} avg streak)`:`Needs reps (${avgStreak} avg streak)`,tone:avgStreak>=4?"good":"warn"},
         {label:"Attendance trend",value:attendancePct>=70?`${attendancePct}% in rhythm`:`${attendancePct}% this week`,tone:attendancePct>=70?"good":"warn"},
       ];
+      const teamCommitmentLabel=attendancePct>=75&&rsvpPct>=75?"High standard":attendancePct>=60?"Building standard":"Addressing standards";
+      const unresolvedGapsLabel=unresolvedNext7Count===0?"No open gaps":`${unresolvedNext7Count} unresolved RSVPs`;
+      const readinessLabel=session?`${rsvpPct}% session readiness`:"Session not set";
+      const cultureMomentum=participationMomentum>=8?"Rising":participationMomentum<=-8?"Slipping":"Steady";
       const nextActions=[
         inactivePlayers.length?{label:"Check in with inactive athletes",detail:`${inactivePlayers.length} need a follow-up touch`,onClick:()=>setTab("players")}:null,
         session?{label:"Confirm today's session attendance",detail:`${rsvpPct}% RSVP for ${session.title}`,onClick:()=>setTab("events")}:{label:"Schedule next team session",detail:"No session is currently set",onClick:()=>setTab("events")},
@@ -3198,6 +3216,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 
         <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(3,minmax(0,1fr))":"1fr",gap:8,marginBottom:12}}>
           {trendCards.map((trend)=><div key={trend.label} style={{border:"1px solid var(--stroke-1)",background:"linear-gradient(160deg, rgba(255,255,255,0.035), rgba(0,0,0,0.18))",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{trend.label}</div><div style={{fontFamily:FB,fontSize:13,color:trend.tone==="good"?"var(--accent)":trend.tone==="warn"?"#FFB86B":"var(--text-1)",fontWeight:700,marginTop:5}}>{trend.value}</div></div>)}
+        </section>
+        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:"linear-gradient(152deg, rgba(200,255,0,0.12), rgba(255,255,255,0.03) 32%, rgba(8,10,14,0.82))",border:"1px solid rgba(200,255,0,0.3)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+            <div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>TEAM CULTURE READINESS</div>
+            <span style={{fontFamily:FB,fontSize:10,color:VOLT,border:"1px solid rgba(200,255,0,0.45)",borderRadius:999,padding:"3px 8px"}}>{cultureMomentum}</span>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(2,minmax(0,1fr))":"1fr",gap:8,marginTop:9}}>
+            {[{k:"Team Commitment",v:teamCommitmentLabel},{k:"Attendance / Readiness",v:readinessLabel},{k:"Participation Gaps",v:unresolvedGapsLabel},{k:"Current Momentum",v:participationMomentumLabel}].map((item)=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 9px",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k}</div><div style={{fontFamily:FB,fontSize:12,color:"var(--text-1)",fontWeight:700,marginTop:4}}>{item.v}</div></div>)}
+          </div>
         </section>
 
         <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
