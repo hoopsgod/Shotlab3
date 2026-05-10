@@ -1619,22 +1619,33 @@ const[showShotStats,setShowShotStats]=useState(false);
 const[isNarrow,setIsNarrow]=useState(typeof window!=="undefined"?window.innerWidth<768:false);
 const[isDesktop,setIsDesktop]=useState(typeof window!=="undefined"?window.innerWidth>=1024:false);
 const slideClass="screen-fade-in";
-const switchTab=(k)=>{setTab(k);setActive(null);setShowShotStats(false);
-const nextPath=PLAYER_TAB_PATHS[k]||"/";
-if(window.location.pathname!==nextPath)window.history.pushState({},"",nextPath);
-window.scrollTo({top:0,left:0,behavior:"auto"});}
+const switchTab=useCallback((requestedTab)=>{
+  const nextTab=canAccessTab(requestedTab)?requestedTab:"home";
+  const nextPath=PLAYER_TAB_PATHS[nextTab]||"/";
+  const currentPath=window.location.pathname==="/"?"/":(window.location.pathname.replace(/\/+$/,"" )||"/");
+  if(currentPath!==nextPath)window.history.pushState({},"",nextPath);
+  setTab(nextTab);
+  setActive(null);
+  setShowShotStats(false);
+},[canAccessTab]);
 useEffect(()=>{const onResize=()=>{setIsNarrow(window.innerWidth<768);setIsDesktop(window.innerWidth>=1024)};window.addEventListener("resize",onResize);return()=>window.removeEventListener("resize",onResize);},[]);
 useEffect(()=>{
-  const onPop=()=>{setTab(tabFromPath(window.location.pathname));setActive(null);setShowShotStats(false)};
+  const onPop=()=>{
+    setTab(tabFromPath(window.location.pathname));
+    setActive(null);
+    setShowShotStats(false);
+  };
   window.addEventListener("popstate",onPop);
   return ()=>window.removeEventListener("popstate",onPop);
 },[tabFromPath]);
 useEffect(()=>{
   if(!canAccessTab(tab)){
-    setTab("home");
-    if(window.location.pathname!=="/")window.history.replaceState({},"","/");
+    switchTab("home");
   }
-},[tab,canAccessTab]);
+},[tab,canAccessTab,switchTab]);
+useEffect(()=>{
+  window.scrollTo({top:0,left:0,behavior:"auto"});
+},[tab]);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const programScores=useMemo(()=>my.filter(s=>s.src==="program"),[my]);
@@ -1684,7 +1695,7 @@ const playerNavItems=[
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Player navigation"><div className="nav-title">PLAYER DASHBOARD</div>{playerNavItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>switchTab(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s"}}>
+<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:"calc(98px + env(safe-area-inset-bottom, 0px))"}}>
 <BrandBackdrop/>
 {statSyncError&&<div style={{position:"relative",zIndex:2,margin:"10px 12px 0",padding:"10px 12px",borderRadius:10,border:"1px solid rgba(255,69,69,0.45)",background:"rgba(255,69,69,0.10)",color:"#FFB5B5",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.02em"}}>{statSyncError}</div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
@@ -2897,7 +2908,7 @@ useEffect(()=>{
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-text-scale={coachTextScale}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative"}}><BrandBackdrop/>
+<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"calc(98px + env(safe-area-inset-bottom, 0px))"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
 <div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
@@ -3752,7 +3763,7 @@ function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={si
 function FF({l,v,set,ph,tp,ta,opts}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:"calc(11px * var(--coach-text-scale-medium))",fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>:opts?<select value={v} onChange={e=>set(e.target.value)} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}>{opts.map(o=><option key={o} value={o}>{o}</option>)}</select>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>}</>}
 function NavBar({items,active,onChange}){
 const navAccent=PAGE_ACCENTS[active]?.accent||PAGE_ACCENTS.feed.accent;
-return <nav className="bottom-nav" role="navigation" aria-label="Main navigation" style={{"--nav-accent":navAccent,position:"fixed",left:0,right:0,bottom:0,display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"calc(64px + ((var(--coach-text-scale-medium) - 1) * 12px))",paddingBottom:"env(safe-area-inset-bottom)",background:"var(--surface-1)",borderTop:"1px solid var(--stroke-1)",zIndex:20}}>{items.map(t=>{const a=active===t.k;
+return <nav className="bottom-nav" role="navigation" aria-label="Main navigation" style={{"--nav-accent":navAccent,position:"fixed",left:"max(10px, env(safe-area-inset-left, 0px))",right:"max(10px, env(safe-area-inset-right, 0px))",bottom:"max(12px, env(safe-area-inset-bottom, 0px))",display:"flex",justifyContent:"space-evenly",alignItems:"center",height:"calc(64px + ((var(--coach-text-scale-medium) - 1) * 12px))",background:"var(--surface-1)",border:"1px solid var(--stroke-1)",borderRadius:16,boxShadow:"0 10px 30px rgba(0,0,0,0.45)",zIndex:60,pointerEvents:"auto",touchAction:"manipulation"}}>{items.map(t=>{const a=active===t.k;
 const tabAccent="var(--nav-active-text,var(--nav-accent))";
 return <button key={t.k} aria-label={t.l} aria-current={a?"page":undefined} className={`tab ${a?"is-active active":""}`} onClick={()=>onChange(t.k)} style={{"--tab-accent":tabAccent,flex:1,minWidth:48,minHeight:"calc(48px + ((var(--coach-text-scale-medium) - 1) * 10px))",height:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"calc(4px + ((var(--coach-text-scale-medium) - 1) * 3px))",padding:"8px 4px 6px",position:"relative",background:"none",border:"none",cursor:"pointer",transition:"color 150ms ease-out",outlineOffset:2}}>
 <div className="tab-icon" style={{position:"relative"}}>{t.svg}</div>
