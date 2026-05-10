@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
-import { DSButton, DSCard, DSChip, DSEmptyState, DSInput, DSMetricCard, DSSectionHeader } from "../components/ui/designSystem";
+import { DSButton, DSCard, DSChip, DSEmptyState, DSInput, DSLoadingState, DSMetricCard, DSSectionHeader } from "../components/ui/designSystem";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -21,6 +21,7 @@ export default function PlayersScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("ALL PLAYERS");
   const [copied, setCopied] = useState(false);
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
 
   const players = [];
   const totalPlayers = players.length;
@@ -50,6 +51,11 @@ export default function PlayersScreen() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  useEffect(() => {
+    const timer = setTimeout(() => setIsBootstrapping(false), 650);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "14px 14px 28px", display: "grid", gap: 12 }}>
       <AppHeader title="PLAYERS" subtitle="Manage your roster and track player engagement" leading={<Users size={22} color="var(--text-2)" />} />
@@ -78,21 +84,38 @@ export default function PlayersScreen() {
         </div>
       </DSCard>
 
-      {players.length === 0 ? (
+      {isBootstrapping ? (
+        <DSLoadingState
+          label="Preparing your coaching command center"
+          lines={4}
+          style={{ minHeight: 140, display: "grid", alignContent: "center" }}
+        />
+      ) : null}
+
+      {!isBootstrapping && players.length === 0 ? (
         <DSCard style={{ padding: 14 }}>
-          <div style={{ minHeight: 240, display: "grid", alignContent: "center", justifyItems: "center", gap: 10 }}>
-            <Users size={44} color="var(--text-3)" />
+          <div style={{ minHeight: 240, display: "grid", alignContent: "center", justifyItems: "center", gap: 12 }}>
+            <Users size={44} color="var(--accent)" />
+            <div style={{ color: "var(--text-3)", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "center" }}>First session setup</div>
             <DSEmptyState
-              title="Build your roster"
-              message="No players are linked yet. Share your invite and start tracking engagement immediately."
-              style={{ maxWidth: 360, textAlign: "center", background: "transparent", border: "1px dashed var(--stroke-2)" }}
+              title="Build your roster foundation"
+              message="Invite your first players to unlock attendance trends, drill momentum, and habit streak tracking from day one."
+              style={{ maxWidth: 380, textAlign: "center", background: "transparent", border: "1px dashed var(--stroke-2)" }}
             />
+            <div style={{ display: "grid", gap: 6, width: "100%", maxWidth: 360 }}>
+              {["Share your invite link", "Ask players to join before the next session", "Use Events to schedule your first team workout"].map((step, index) => (
+                <div key={step} style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid var(--stroke-1)", background: "var(--surface-1)", borderRadius: 10, padding: "8px 10px" }}>
+                  <span style={{ width: 18, height: 18, borderRadius: 999, display: "grid", placeItems: "center", fontSize: 10, fontWeight: 700, color: "#0B0D10", background: "var(--accent)" }}>{index + 1}</span>
+                  <span style={{ color: "var(--text-2)", fontSize: 12, fontWeight: 600 }}>{step}</span>
+                </div>
+              ))}
+            </div>
             <DSButton onClick={shareInviteLink} variant="primary" style={{ minHeight: 44, paddingInline: 18 }}>
-              {copied ? "Link Copied" : "Invite Players"}
+              {copied ? "Invite Link Copied" : "Invite Players"}
             </DSButton>
           </div>
         </DSCard>
-      ) : (
+      ) : !isBootstrapping ? (
         <>
           <DSSectionHeader title="Roster" meta={`${filteredPlayers.length} shown`} />
           {filteredPlayers.map((player) => (
@@ -105,7 +128,7 @@ export default function PlayersScreen() {
             </DSCard>
           ))}
         </>
-      )}
+      ) : null}
     </div>
   );
 }

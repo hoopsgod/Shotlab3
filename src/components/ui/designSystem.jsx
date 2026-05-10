@@ -9,4 +9,12 @@ export function DSChip({ active, children, style, ...props }) { return <button t
 export function DSInput({ style, ...props }) { return <input {...props} className="ds-input" style={{ minHeight: 42, borderRadius: DS_TOKENS.radius.md, border: "1px solid var(--stroke-1)", background: "var(--surface-1)", color: "var(--text-1)", padding: "10px 12px", transition: `border-color ${DS_TOKENS.transition.base}, box-shadow ${DS_TOKENS.transition.base}, background ${DS_TOKENS.transition.base}`, ...style }} />; }
 export function DSEmptyState({ title, message, style }) { return <div style={{ borderRadius: DS_TOKENS.radius.md, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", color: "var(--text-2)", fontSize: 13, padding: "16px 14px", fontWeight: 600, ...style }}><div style={{ color: "var(--text-1)", fontWeight: 700, marginBottom: 4 }}>{title}</div><div>{message}</div></div>; }
 
-export function DSLoadingState({ label = "Loading", style }) { return <div role="status" aria-live="polite" style={{ borderRadius: DS_TOKENS.radius.md, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", color: "var(--text-2)", fontSize: 12, padding: "12px 14px", fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", ...style }}>{label}…</div>; }
+export function DSLoadingState({ label = "Loading", lines = 3, style }) {
+  const skeletonLines = Array.from({ length: Math.max(1, lines) });
+  return <div role="status" aria-live="polite" style={{ borderRadius: DS_TOKENS.radius.md, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", padding: "14px", ...style }}>
+    <div style={{ color: "var(--text-2)", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 }}>{label}…</div>
+    <div style={{ display: "grid", gap: 8 }}>
+      {skeletonLines.map((_, index) => <div key={index} className="tb" style={{ height: 10, borderRadius: 999, width: `${index === skeletonLines.length - 1 ? 72 : 100}%`, background: "linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.13), rgba(255,255,255,0.03))" }} />)}
+    </div>
+  </div>;
+}
