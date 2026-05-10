@@ -21,20 +21,21 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
     >
       <div
         style={{
-          height: "clamp(52px, 7.8vw, 60px)",
+          minHeight: "clamp(52px, 7.8vw, 60px)",
           borderRadius: 12,
           border: `1px solid ${borderColor}`,
           background: "rgba(10, 10, 10, 0.92)",
-          boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
+          boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          padding: "0 12px",
+          padding: "8px 12px",
           backdropFilter: "blur(8px)",
+          gap: 10,
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px" }}>Coach Mode</span>
+          <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px", lineHeight: 1.1 }}>Coach Mode</span>
           {avatar}
         </div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
@@ -46,8 +47,8 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
             border: `1px solid ${borderColor}`,
             borderRadius: 10,
             color: "var(--text-secondary)",
-            width: 32,
-            height: 32,
+            width: 36,
+            height: 36,
             cursor: "pointer",
             fontFamily: FB,
             fontSize: 12,
