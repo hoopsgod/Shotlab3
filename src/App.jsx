@@ -1854,6 +1854,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       };
       const weekConfirmedCount=upcomingWeekEvents.filter(ev=>rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes")).length;
       const weekMissingCount=upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length;
+      const unresolvedBadgeLabel=weekMissingCount>0?`${weekMissingCount} unresolved RSVP${weekMissingCount===1?"":"s"}`:"All RSVPs set";
+      const playerPriorityStyle={critical:{color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.28)",label:"CRITICAL"},important:{color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)",label:"IMPORTANT"},passive:{color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)",label:"PASSIVE"}};
+      const playerBriefingQueue=[
+        nextEvent?{priority:(dayLabel(nextEvent.date)==="TODAY"||dayLabel(nextEvent.date)==="TOMORROW")?"important":"passive",title:"Upcoming event",detail:`${nextEvent.title} · ${dayLabel(nextEvent.date)} ${nextEvent.time||"TBD"}`,cta:"Open events",onClick:()=>switchTab("program")}:null,
+        weekMissingCount>0?{priority:weekMissingCount>=2?"critical":"important",title:"Unresolved RSVPs",detail:`${unresolvedBadgeLabel} in the next 7 days.`,cta:"Resolve now",onClick:()=>switchTab("program")}:null,
+        scSessions?.length?{priority:"passive",title:"Upcoming workout",detail:`${scSessions[0]?.sport||scSessions[0]?.title||"Session"} · ${scSessions[0]?.date||"TBD"}`,cta:"Open S&C",onClick:()=>switchTab("sc")}:null,
+        streak<=1?{priority:"important",title:"Streak continuity",detail:"Log activity today to keep your momentum uninterrupted.",cta:"Log activity",onClick:()=>switchTab("log-drill")}:{priority:"passive",title:"Streak continuity",detail:`${streak}-day streak is active — protect the standard.`,cta:"View progress",onClick:()=>switchTab("profile")},
+      ].filter(Boolean).slice(0,4);
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
         <section aria-label="Next 7 days events intelligence" style={{padding:isNarrow?"13px":"15px",borderRadius:18,background:"linear-gradient(150deg, rgba(200,255,0,0.14), rgba(200,255,0,0.03) 40%, rgba(0,0,0,0.25))",border:"1px solid rgba(200,255,0,0.3)",boxShadow:"0 16px 34px rgba(0,0,0,0.24)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:9}}>
@@ -1882,6 +1890,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
               </button>;
             })}
           </div>
+        </section>
+        <section aria-label="Player notification briefing" style={{padding:isNarrow?"12px":"14px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+            <div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"0.04em"}}>PLAYER NOTIFICATION BRIEFING</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Premium, low-noise priorities for events, workouts, and consistency.</div></div>
+            <span style={{fontFamily:FB,fontSize:10,color:weekMissingCount>0?"#FFB86B":VOLT,border:`1px solid ${weekMissingCount>0?"rgba(255,184,107,0.42)":"rgba(200,255,0,0.45)"}`,borderRadius:999,padding:"3px 8px"}}>{unresolvedBadgeLabel}</span>
+          </div>
+          <div style={{display:"grid",gap:7,marginTop:9}}>{playerBriefingQueue.map((note)=>{const tone=playerPriorityStyle[note.priority]||playerPriorityStyle.passive;return <button key={note.title} type="button" onClick={note.onClick} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",alignItems:"center",gap:8,textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${tone.border}`,background:"rgba(12,14,18,0.56)",cursor:"pointer"}}><span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.border}`,background:tone.bg,borderRadius:999,padding:"3px 7px"}}>{tone.label}</span><span><span style={{display:"block",fontFamily:FB,fontWeight:700,fontSize:11,color:LIGHT}}>{note.title}</span><span style={{display:"block",fontFamily:FB,fontSize:10,color:T.SUB,marginTop:2}}>{note.detail}</span></span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{note.cta} ›</span></button>;})}</div>
         </section>
         <section aria-label="Today's focus" style={{padding:isNarrow?"16px":"18px",borderRadius:18,background:"linear-gradient(155deg, rgba(200,255,0,0.16), rgba(200,255,0,0.04) 46%, rgba(0,0,0,0.24))",boxShadow:"0 14px 34px rgba(0,0,0,0.30)",border:"1px solid rgba(200,255,0,0.24)"}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S FOCUS</div>
@@ -3169,6 +3184,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       const unresolvedNext7Count=next7Events.reduce((acc,ev)=>acc+Math.max(0,ups.length-rsvps.filter(r=>r.eventId===ev.id).length),0);
       const criticalNext7Count=next7Events.filter((ev)=>dayBadge(ev.date)==="TODAY"||dayBadge(ev.date)==="TOMORROW").length;
       const unresolvedGapsLabel=unresolvedNext7Count===0?"No open gaps":`${unresolvedNext7Count} unresolved RSVPs`;
+      const coachPriorityStyle={critical:{label:"CRITICAL",color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.26)"},important:{label:"IMPORTANT",color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)"},passive:{label:"PASSIVE",color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)"}};
+      const readinessRisk=session&&rsvpPct<60;
+      const scheduleGap=next7Events.length<2;
+      const coachAlerts=[
+        unresolvedNext7Count>0?{priority:unresolvedNext7Count>=Math.max(3,ups.length)?"critical":"important",title:"Unresolved RSVPs",detail:`${unresolvedNext7Count} unresolved RSVP slots in the next 7 days.`,cta:"Open events",onClick:()=>setTab("events")}:null,
+        inactivePlayers.length>0?{priority:inactivePlayers.length>=Math.max(2,Math.ceil(ups.length*0.4))?"important":"passive",title:"Inactive players",detail:`${inactivePlayers.length} player${inactivePlayers.length===1?"":"s"} need follow-up this week.`,cta:"Open players",onClick:()=>setTab("players")}:null,
+        {priority:readinessRisk?"critical":"passive",title:"Session readiness",detail:session?`${rsvpPct}% RSVP for ${session.title}.`:"No active session is scheduled.",cta:"Review session",onClick:()=>setTab("events")},
+        {priority:scheduleGap?"important":"passive",title:"Schedule stability",detail:scheduleGap?"Add at least one more session to stabilize the 7-day calendar.":"7-day schedule cadence is stable.",cta:"Manage schedule",onClick:()=>setTab("events")},
+      ].filter(Boolean).slice(0,4);
       return <>
         <section className="accent-card" style={{background:"linear-gradient(155deg, color-mix(in srgb,var(--accent) 13%, transparent), rgba(11,13,16,0.96) 68%)",border:`1px solid color-mix(in srgb,var(--accent) 30%, transparent)`,borderRadius:22,padding:isDesktop?"24px":"20px",marginBottom:14,boxShadow:"0 18px 40px rgba(0,0,0,0.24)"}}>
           <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"flex-start",marginBottom:12}}>
@@ -3208,6 +3232,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
               </button>;
             })}
           </div>
+        </section>
+        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>COACH OPERATIONAL ALERTS</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Prioritized alerts for RSVP closure, readiness, activity, and schedule reliability.</div></div><button className="pageHeaderPill" onClick={()=>setTab("events")}>Open events</button></div>
+          <div style={{display:"grid",gap:7,marginTop:9}}>{coachAlerts.map((alert)=>{const tone=coachPriorityStyle[alert.priority]||coachPriorityStyle.passive;return <button key={alert.title} type="button" onClick={alert.onClick} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${tone.border}`,background:"rgba(255,255,255,0.015)",cursor:"pointer"}}><span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.border}`,borderRadius:999,padding:"3px 7px",background:tone.bg}}>{tone.label}</span><span><span style={{display:"block",fontFamily:FB,fontSize:11,color:"var(--text-1)",fontWeight:700}}>{alert.title}</span><span style={{display:"block",fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:2}}>{alert.detail}</span></span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{alert.cta} ›</span></button>;})}</div>
         </section>
 
         <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
