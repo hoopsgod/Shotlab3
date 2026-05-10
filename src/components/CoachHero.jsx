@@ -12,7 +12,11 @@ export default function CoachHero({
         variant="branded"
         eyebrow="Coach mode"
         title={(userName || "Demo Coach").toUpperCase()}
-        subtitle="Lead the squad. Track momentum. Build consistency."
+        subtitle="Command today's performance rhythm with a premium sideline view."
+        notes={[
+          { label: "Focus", value: "Today-first execution" },
+          { label: "Mode", value: "Program Command" },
+        ]}
         brandLockup={(
           <div style={{ display: "grid", gap: 6, minWidth: 0, justifyItems: "end" }}>
             <span
