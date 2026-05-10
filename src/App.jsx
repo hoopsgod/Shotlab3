@@ -1621,7 +1621,8 @@ const[isDesktop,setIsDesktop]=useState(typeof window!=="undefined"?window.innerW
 const slideClass="screen-fade-in";
 const switchTab=(k)=>{setTab(k);setActive(null);setShowShotStats(false);
 const nextPath=PLAYER_TAB_PATHS[k]||"/";
-if(window.location.pathname!==nextPath)window.history.pushState({},"",nextPath);}
+if(window.location.pathname!==nextPath)window.history.pushState({},"",nextPath);
+window.scrollTo({top:0,left:0,behavior:"auto"});}
 useEffect(()=>{const onResize=()=>{setIsNarrow(window.innerWidth<768);setIsDesktop(window.innerWidth>=1024)};window.addEventListener("resize",onResize);return()=>window.removeEventListener("resize",onResize);},[]);
 useEffect(()=>{
   const onPop=()=>{setTab(tabFromPath(window.location.pathname));setActive(null);setShowShotStats(false)};
