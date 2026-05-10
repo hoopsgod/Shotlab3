@@ -3144,7 +3144,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {label:"Attendance trend",value:attendancePct>=70?`${attendancePct}% in rhythm`:`${attendancePct}% this week`,tone:attendancePct>=70?"good":"warn"},
       ];
       const teamCommitmentLabel=attendancePct>=75&&rsvpPct>=75?"High standard":attendancePct>=60?"Building standard":"Addressing standards";
-      const unresolvedGapsLabel=unresolvedNext7Count===0?"No open gaps":`${unresolvedNext7Count} unresolved RSVPs`;
       const readinessLabel=session?`${rsvpPct}% session readiness`:"Session not set";
       const cultureMomentum=participationMomentum>=8?"Rising":participationMomentum<=-8?"Slipping":"Steady";
       const nextActions=[
@@ -3169,6 +3168,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       };
       const unresolvedNext7Count=next7Events.reduce((acc,ev)=>acc+Math.max(0,ups.length-rsvps.filter(r=>r.eventId===ev.id).length),0);
       const criticalNext7Count=next7Events.filter((ev)=>dayBadge(ev.date)==="TODAY"||dayBadge(ev.date)==="TOMORROW").length;
+      const unresolvedGapsLabel=unresolvedNext7Count===0?"No open gaps":`${unresolvedNext7Count} unresolved RSVPs`;
       return <>
         <section className="accent-card" style={{background:"linear-gradient(155deg, color-mix(in srgb,var(--accent) 13%, transparent), rgba(11,13,16,0.96) 68%)",border:`1px solid color-mix(in srgb,var(--accent) 30%, transparent)`,borderRadius:22,padding:isDesktop?"24px":"20px",marginBottom:14,boxShadow:"0 18px 40px rgba(0,0,0,0.24)"}}>
           <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"flex-start",marginBottom:12}}>
