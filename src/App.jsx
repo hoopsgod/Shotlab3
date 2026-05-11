@@ -38,6 +38,17 @@ import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePe
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
 import {
+  normalizePlayerActivity,
+  normalizeWorkoutAndLogs,
+  normalizeEventsAndRsvps,
+  deriveCompletionRatio,
+  deriveMomentumLabel,
+  deriveNextFocusLabel,
+  derivePlayerNotificationBriefing,
+  deriveFirstWeekActivationMilestones,
+  deriveTrainingIdentityLabels,
+} from "./lib/playerDashboardSelectors.js";
+import {
   normalizeCoachRoster,
   normalizeCoachEvents,
   normalizeCoachRsvps,
@@ -1788,15 +1799,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {tab==="home"&&!active&&<div className={slideClass} key="home">
 
     {(()=>{
-      const sorted=[...events].sort((a,b)=>a.date.localeCompare(b.date));
+      const { sortedEvents: sorted, upcomingEvents, attendanceRows }=normalizeEventsAndRsvps({events,rsvps,userEmail:u?.email,today});
       const nextWeekEnd=new Date(`${today}T00:00:00`);
       nextWeekEnd.setDate(nextWeekEnd.getDate()+6);
       const nextWeekEndStr=`${nextWeekEnd.getFullYear()}-${String(nextWeekEnd.getMonth()+1).padStart(2,"0")}-${String(nextWeekEnd.getDate()).padStart(2,"0")}`;
-      const upcomingEvents=sorted.filter(e=>e.date>=today);
       const upcomingWeekEvents=upcomingEvents.filter(e=>e.date<=nextWeekEndStr).slice(0,isNarrow?3:4);
       const nextEvent=upcomingEvents[0]||null;
       const upcomingEventsCount=upcomingEvents.length||0;
-      const attendanceRows=rsvps.filter(r=>r.email===u.email);
       const eventsAttended=attendanceRows.length;
       const attendancePct=upcomingEventsCount>0&&attendanceRows.length>0?`${Math.min(100,Math.round((attendanceRows.length/upcomingEventsCount)*100))}%`:"—";
       const nextEventLabel=nextEvent?
@@ -1811,9 +1820,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         const diffDays=Math.floor((todayDate-shotDate)/86400000);
         return diffDays>=0&&diffDays<=6;
       };
-      const weeklyMakes=shotLogs.filter(s=>s.email===u.email&&isWithinLastSevenDays(s.date)).reduce((a,s)=>a+s.made,0);
-      const todaysMakes=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
-      const hasAnyShots=shotLogs.some(s=>s.email===u.email&&s.made>0);
+      const normalizedActivity=normalizePlayerActivity({shotLogs,scLogs,scores,userEmail:u?.email,teamId:u?.teamId});
+      const { shotLogs: normalizedShotLogs, scLogs: normalizedScLogs } = normalizeWorkoutAndLogs(normalizedActivity);
+      // regression guard: const weeklyMakes=shotLogs.filter(s=>s.email===u.email&&isWithinLastSevenDays(s.date)).reduce((a,s)=>a+s.made,0);
+      const weeklyMakes=normalizedShotLogs.filter(s=>isWithinLastSevenDays(s.date)).reduce((a,s)=>a+s.made,0);
+      const todaysMakes=normalizedShotLogs.filter(s=>s.date===today).reduce((a,s)=>a+s.made,0);
+      const hasAnyShots=normalizedShotLogs.some(s=>s.made>0);
       const leaderboardRank=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows.findIndex((row)=>normalizeEmail(row?.email||"")===normalizeEmail(u.email))+1:0;
       const missionCtaLabel=hasAnyShots?"Start Training":"Log Shots";
       const missionStatus=hasAnyShots?`You're ${weeklyMakes>0?"building momentum":"ready to build momentum"} this week.`:"Log your first shots to start building your week.";
@@ -1828,18 +1840,17 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       ];
       const dailyGoal=PLAYER_DAILY_SHOT_TARGET;
       const weeklyGoal=PLAYER_WEEKLY_SHOT_TARGET;
-      const dailyPct=Math.min(100,Math.round((todaysMakes/dailyGoal)*100));
-      const weeklyPct=Math.min(100,Math.round((weeklyMakes/weeklyGoal)*100));
+      const dailyPct=deriveCompletionRatio({todayMakes:todaysMakes,dailyGoal});
+      const weeklyPct=deriveCompletionRatio({todayMakes:weeklyMakes,dailyGoal:weeklyGoal});
       const seasonProgressPct=Math.min(100,Math.round(((weeklyPct*0.45)+(dailyPct*0.2)+Math.min(streak*6,100)*0.35)));
-      const commitmentLevel=weeklyPct>=90&&streak>=5?"Elite discipline":weeklyPct>=70?"Reliable builder":weeklyPct>=45?"Work in progress":"Needs consistency";
-      const momentumLabel=weeklyMakes>=weeklyGoal?"Rising fast":weeklyMakes>=Math.round(weeklyGoal*0.65)?"Building":"Early in cycle";
-      const trainingIdentity=eventsAttended>=3&&weeklyMakes>=Math.round(weeklyGoal*0.75)?"Two-way standard":weeklyMakes>=Math.round(weeklyGoal*0.75)?"Skill-volume specialist":eventsAttended>=3?"Team-first competitor":"Foundation phase";
-      const currentFocus=todaysMakes<dailyGoal?"Daily shot volume + attendance":"Sustain form and quality reps";
+      const momentumLabel=deriveMomentumLabel({weeklyMakes,weeklyGoal});
+      const { trainingIdentity, commitmentLevel }=deriveTrainingIdentityLabels({eventsAttended,weeklyMakes,weeklyGoal,weeklyPct,streak});
+      const currentFocus=deriveNextFocusLabel({todaysMakes,dailyGoal});
       const playerHasTeam=Boolean(u?.teamId);
       const hasUpcomingEvents=upcomingEventsCount>0;
       const hasRsvped=rsvps.some(r=>normalizeEmail(r.email)===normalizeEmail(u.email)&&r.teamId===u?.teamId);
-      const hasShotLogs=shotLogs.some(s=>normalizeEmail(s.email)===normalizeEmail(u.email)&&s.teamId===u?.teamId&&Number(s.made)>0);
-      const firstWorkoutComplete=hasShotLogs||scLogs.some(log=>normalizeEmail(log?.email||"")===normalizeEmail(u.email));
+      const hasShotLogs=normalizedShotLogs.some(s=>Number(s.made)>0);
+      const firstWorkoutComplete=hasShotLogs||normalizedScLogs.length>0;
       const firstEventInteraction=hasUpcomingEvents||rsvps.some(r=>normalizeEmail(r?.email||"")===normalizeEmail(u.email));
       const playerChecklist=[
         {label:"Join team",done:playerHasTeam},
@@ -1848,11 +1859,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         {label:"Log At Home Shots",done:hasShotLogs,onClick:()=>switchTab("log-drill"),ariaLabel:"Go to Log Drill to log At Home Shots"},
         {label:"Check progress",done:false,info:true,onClick:()=>switchTab("profile"),ariaLabel:"Go to profile progress"},
       ];
-      const firstWeekActivation=[
-        {label:"First RSVP",done:hasRsvped,onClick:()=>switchTab("program")},
-        {label:"First completed workout",done:firstWorkoutComplete,onClick:()=>switchTab("sc")},
-        {label:"First event interaction",done:firstEventInteraction,onClick:()=>switchTab("program")},
-      ];
+      const firstWeekActivation=deriveFirstWeekActivationMilestones({hasRsvped,firstWorkoutComplete,firstEventInteraction}).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
       const recentPlayerActivity=deriveActivityFeedItems({view:"player",user:u,events,rsvps,shotLogs,players,scores,today});
       const eventTypeTone=(type)=>{
         const key=String(type||"event").toLowerCase();
@@ -1874,12 +1881,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const weekMissingCount=upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length;
       const unresolvedBadgeLabel=weekMissingCount>0?`${weekMissingCount} unresolved RSVP${weekMissingCount===1?"":"s"}`:"All RSVPs set";
       const playerPriorityStyle={critical:{color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.28)",label:"CRITICAL"},important:{color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)",label:"IMPORTANT"},passive:{color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)",label:"PASSIVE"}};
-      const playerBriefingQueue=[
-        nextEvent?{priority:(dayLabel(nextEvent.date)==="TODAY"||dayLabel(nextEvent.date)==="TOMORROW")?"important":"passive",title:"Upcoming event",detail:`${nextEvent.title} · ${dayLabel(nextEvent.date)} ${nextEvent.time||"TBD"}`,cta:"Open events",onClick:()=>switchTab("program")}:null,
-        weekMissingCount>0?{priority:weekMissingCount>=2?"critical":"important",title:"Unresolved RSVPs",detail:`${unresolvedBadgeLabel} in the next 7 days.`,cta:"Resolve now",onClick:()=>switchTab("program")}:null,
-        scSessions?.length?{priority:"passive",title:"Upcoming workout",detail:`${scSessions[0]?.sport||scSessions[0]?.title||"Session"} · ${scSessions[0]?.date||"TBD"}`,cta:"Open S&C",onClick:()=>switchTab("sc")}:null,
-        streak<=1?{priority:"important",title:"Streak continuity",detail:"Log activity today to keep your momentum uninterrupted.",cta:"Log activity",onClick:()=>switchTab("log-drill")}:{priority:"passive",title:"Streak continuity",detail:`${streak}-day streak is active — protect the standard.`,cta:"View progress",onClick:()=>switchTab("profile")},
-      ].filter(Boolean).slice(0,4);
+      const playerBriefingQueue=derivePlayerNotificationBriefing({nextEvent,dayLabel,weekMissingCount,unresolvedBadgeLabel,scSessions,streak}).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
         <section aria-label="Next 7 days events intelligence" style={{padding:isNarrow?"13px":"15px",borderRadius:18,background:"linear-gradient(150deg, rgba(200,255,0,0.14), rgba(200,255,0,0.03) 40%, rgba(0,0,0,0.25))",border:"1px solid rgba(200,255,0,0.3)",boxShadow:"0 16px 34px rgba(0,0,0,0.24)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:9}}>
