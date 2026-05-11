@@ -37,6 +37,17 @@ import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./li
 import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
+import {
+  normalizeCoachRoster,
+  normalizeCoachEvents,
+  normalizeCoachRsvps,
+  normalizeCoachScores,
+  calcCoachAttendanceReadiness,
+  getUnresolvedRsvpCount,
+  getNext7DayEventSummary,
+  deriveCoachAlerts,
+  deriveCultureReadinessLabels,
+} from "./lib/coachDashboardSelectors.js";
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
 const CYAN = TOKENS.SECONDARY;
@@ -2923,6 +2934,10 @@ const safeEvents=useMemo(()=>Array.isArray(events)?events:[],[events]);
 const safeRsvps=useMemo(()=>Array.isArray(rsvps)?rsvps:[],[rsvps]);
 const safeScores=useMemo(()=>Array.isArray(scores)?scores:[],[scores]);
 const safeRoster=useMemo(()=>Array.isArray(ups)?ups:[],[ups]);
+const normalizedCoachRoster=useMemo(()=>normalizeCoachRoster(safeRoster),[safeRoster]);
+const normalizedCoachEvents=useMemo(()=>normalizeCoachEvents(safeEvents),[safeEvents]);
+const normalizedCoachRsvps=useMemo(()=>normalizeCoachRsvps(safeRsvps),[safeRsvps]);
+const normalizedCoachScores=useMemo(()=>normalizeCoachScores(safeScores),[safeScores]);
 const coachAttendancePct=useMemo(()=>{
   if(safeRoster.length===0)return 0;
   const weekStartDate=new Date();
