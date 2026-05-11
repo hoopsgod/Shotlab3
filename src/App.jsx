@@ -3093,6 +3093,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 <CoachHero
   heroRef={heroRef}
   userName={u.name}
+  teamName={myTeam?.name}
   onOpenTeamBranding={openTeamBranding}
   accentColor={ORANGE}
   borderColor={BORDER_CLR}
