@@ -4,48 +4,54 @@ export default function CoachHero({
   heroRef,
   userName,
   wordmark,
+  onOpenTeamBranding,
   onLogout,
 }) {
   return (
     <div ref={heroRef}>
       <AppHeader
-        variant="branded"
-        eyebrow="Coach mode"
+        variant="utility"
+        eyebrow={(
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              border: "1px solid var(--team-brand-badge-border)",
+              background: "var(--team-brand-badge-bg)",
+              color: "var(--team-brand-badge-text)",
+              borderRadius: 999,
+              padding: "4px 9px",
+            }}
+          >
+            Coach mode
+          </span>
+        )}
         title={(userName || "Demo Coach").toUpperCase()}
-        subtitle="Command today's performance rhythm with a premium sideline view."
-        notes={[
-          { label: "Focus", value: "Today-first execution" },
-          { label: "Mode", value: "Program Command" },
-        ]}
+        subtitle="Coach identity"
         brandLockup={(
-          <div style={{ display: "grid", gap: 6, minWidth: 0, justifyItems: "end" }}>
-            <span
-              style={{
-                fontSize: 9,
-                color: "var(--text-3)",
-                letterSpacing: "var(--tracking-tight)",
-                textTransform: "uppercase",
-                fontWeight: 700,
-              }}
-            >
-              Team identity
-            </span>
-            <div
-              style={{
-                border: "1px solid color-mix(in srgb, var(--team-brand-border, var(--stroke-2)) 24%, transparent)",
-                borderRadius: 16,
-                background: "linear-gradient(135deg, color-mix(in srgb, var(--team-brand-surface, var(--surface-1)) 88%, transparent), color-mix(in srgb, var(--team-brand-surface-soft, var(--surface-2)) 76%, transparent))",
-                padding: "5px 8px",
-                minHeight: 64,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                boxShadow: "inset 0 0 0 1px color-mix(in srgb, var(--team-brand-accent, var(--accent)) 8%, transparent)",
-                maxWidth: "min(320px, 78vw)",
-              }}
-            >
-              {wordmark}
+          <div style={{ display: "grid", gap: 10, minWidth: 0, justifyItems: "end" }}>
+            <div style={{ maxWidth: "min(320px, 78vw)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 56 }}>
+                {wordmark}
+              </div>
             </div>
+            <button
+              type="button"
+              onClick={onOpenTeamBranding}
+              style={{
+                padding: "8px 12px",
+                borderRadius: 10,
+                border: "1px solid var(--team-brand-badge-border)",
+                background: "var(--team-brand-badge-bg)",
+                color: "var(--team-brand-badge-text)",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Team Branding Settings
+            </button>
           </div>
         )}
         action={{ label: "", icon: "✕", onClick: onLogout, ariaLabel: "Log out" }}
