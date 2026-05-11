@@ -16,7 +16,7 @@ import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 import PageHeader from "./components/PageHeader";
 import AppHeader from "./components/AppHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
-import CoachHero from "./components/CoachHero";
+import CoachSimpleHeader from "./components/CoachSimpleHeader";
 import CoachMiniHeader from "./components/CoachMiniHeader";
 import ShotLabCharts from "./components/ShotLabCharts";
 import HomeShotsLeaderboardCard from "./components/HomeShotsLeaderboardCard";
@@ -3090,7 +3090,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   onLogout={logout}
 />
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
-<CoachHero
+<CoachSimpleHeader
   heroRef={heroRef}
   userName={u.name}
   onOpenTeamBranding={openTeamBranding}
