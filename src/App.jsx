@@ -17,6 +17,7 @@ import PageHeader from "./components/PageHeader";
 import AppHeader from "./components/AppHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
 import CoachHero from "./components/CoachHero";
+import CoachDashboardHeaderMobile from "./components/CoachDashboardHeaderMobile";
 import CoachMiniHeader from "./components/CoachMiniHeader";
 import ShotLabCharts from "./components/ShotLabCharts";
 import HomeShotsLeaderboardCard from "./components/HomeShotsLeaderboardCard";
@@ -3090,16 +3091,24 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   onLogout={logout}
 />
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
-<CoachHero
+{isDesktop?<CoachHero
   heroRef={heroRef}
   userName={u.name}
+  teamName={team?.name ?? "Titans Program"}
   onOpenTeamBranding={openTeamBranding}
   accentColor={ORANGE}
   borderColor={BORDER_CLR}
   mutedColor={MUTED}
   wordmark={<BrandWordmark size={isOverviewTab?20:18} small/>}
   onLogout={logout}
-/>
+/>:<CoachDashboardHeaderMobile
+  heroRef={heroRef}
+  userName={u.name}
+  teamName={team?.name ?? "Titans Program"}
+  onOpenTeamBranding={openTeamBranding}
+  wordmark={<BrandWordmark size={22} small/>}
+  onLogout={logout}
+/>}
 {isCoachTab&&<CoachCommandCenter
   variant={showFullCommandCenter?"full":"compact"}
   totalPlayers={totalPlayers}
