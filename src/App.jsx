@@ -3090,10 +3090,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   onLogout={logout}
 />
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
-{u?.isCoach&&<div style={{display:"flex",justifyContent:"flex-end",marginBottom:10}}><button onClick={openTeamBranding} style={{padding:"8px 12px",borderRadius:10,border:"1px solid var(--team-brand-badge-border)",background:"var(--team-brand-badge-bg)",color:"var(--team-brand-badge-text)",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>Team Branding Settings</button></div>}
 <CoachHero
   heroRef={heroRef}
   userName={u.name}
+  onOpenTeamBranding={openTeamBranding}
   accentColor={ORANGE}
   borderColor={BORDER_CLR}
   mutedColor={MUTED}
