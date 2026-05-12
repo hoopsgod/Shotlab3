@@ -1,5 +1,8 @@
 import { TeamBrandingProvider, useTeamBranding } from "../../context/TeamBrandingContext";
 
+const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
+const FALLBACK_MARK = "/branding/titans-default-mark.svg";
+
 function LogoStack() {
   const { branding, theme } = useTeamBranding();
 
@@ -28,11 +31,7 @@ function LogoStack() {
           padding: "6px 10px",
         }}
       >
-        {branding.logoUrl ? (
-          <img src={branding.logoUrl} alt="Team logo" style={{ maxWidth: "100%", maxHeight: 30, objectFit: "contain" }} />
-        ) : (
-          <span style={{ color: "rgba(229,231,235,0.68)", fontSize: 11, letterSpacing: 0.4 }}>Full Logo</span>
-        )}
+        <img src={branding.logoUrl || FALLBACK_LOGO} alt="Team logo" style={{ maxWidth: "100%", maxHeight: 30, objectFit: "contain" }} />
       </div>
       <div
         style={{
@@ -47,11 +46,7 @@ function LogoStack() {
           padding: 8,
         }}
       >
-        {branding.logoMarkUrl ? (
-          <img src={branding.logoMarkUrl} alt="Team logo mark" style={{ maxWidth: "100%", maxHeight: 24, objectFit: "contain" }} />
-        ) : (
-          <span style={{ color: theme.colors.badgeText, fontSize: 11, fontWeight: 600 }}>Mark</span>
-        )}
+        <img src={branding.logoMarkUrl || FALLBACK_MARK} alt="Team logo mark" style={{ maxWidth: "100%", maxHeight: 24, objectFit: "contain" }} />
       </div>
     </div>
   );
