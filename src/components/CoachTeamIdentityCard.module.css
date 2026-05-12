@@ -1,0 +1,5 @@
+.card { margin: 2px 0 10px; padding: 8px 10px; border-radius: 12px; background: linear-gradient(165deg, rgba(15,23,18,.92), rgba(7,10,8,.96)); border: 1px solid rgba(255,255,255,0.07); display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.meta { min-width: 0; display:flex; flex-direction:column; gap:2px; }
+.label { color: var(--text-3); font-size: 9px; letter-spacing: .10em; text-transform: uppercase; }
+.teamName { color: var(--text-1); font-family: 'Bebas Neue','Impact','Arial Black',sans-serif; letter-spacing: .06em; font-size: 19px; text-transform: uppercase; line-height: .95; }
+.logo { width: clamp(124px, 38vw, 156px); height:auto; object-fit: contain; background: transparent; border: 0; box-shadow: none; }
