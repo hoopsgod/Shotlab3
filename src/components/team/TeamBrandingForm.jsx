@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_BRANDING } from "../../theme/brandingDefaults";
 
+const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
+const FALLBACK_MARK = "/branding/titans-default-mark.svg";
+
 const APPROVED_BRAND_PALETTES = [
   { key: "blue", label: "Blue", primaryColor: "#3B82F6", secondaryColor: "#93C5FD", accentColor: "#2563EB", textOnPrimary: "#EAF2FF" },
   { key: "red", label: "Red", primaryColor: "#EF4444", secondaryColor: "#FCA5A5", accentColor: "#DC2626", textOnPrimary: "#FFECEC" },
@@ -270,18 +273,10 @@ export default function TeamBrandingForm({ branding, onSave, onCancel, onChange,
         {uploadError && <div style={{ color: "#FF8E8E", fontSize: 12 }}>{uploadError}</div>}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 90px", gap: 8 }}>
           <div style={{ minHeight: 44, borderRadius: 10, border: "1px solid rgba(255,255,255,0.1)", background: "#0D1118", display: "flex", alignItems: "center", justifyContent: "center", padding: "6px 10px", overflow: "hidden" }}>
-            {values.logoUrl ? (
-              <img src={values.logoUrl} alt="Logo preview" style={{ maxWidth: "100%", maxHeight: 28, objectFit: "contain" }} />
-            ) : (
-              <span style={{ fontSize: 11, color: "#6B7280" }}>Full logo preview</span>
-            )}
+            <img src={values.logoUrl || FALLBACK_LOGO} alt="Logo preview" style={{ maxWidth: "100%", maxHeight: 28, objectFit: "contain" }} />
           </div>
           <div style={{ minHeight: 44, borderRadius: 10, border: "1px solid rgba(255,255,255,0.1)", background: "#0D1118", display: "flex", alignItems: "center", justifyContent: "center", padding: 8, overflow: "hidden" }}>
-            {values.logoMarkUrl ? (
-              <img src={values.logoMarkUrl} alt="Logo mark preview" style={{ maxWidth: "100%", maxHeight: 22, objectFit: "contain" }} />
-            ) : (
-              <span style={{ fontSize: 11, color: "#6B7280" }}>Mark</span>
-            )}
+            <img src={values.logoMarkUrl || FALLBACK_MARK} alt="Logo mark preview" style={{ maxWidth: "100%", maxHeight: 22, objectFit: "contain" }} />
           </div>
         </div>
       </section>
