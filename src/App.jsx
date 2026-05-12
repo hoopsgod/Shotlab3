@@ -16,7 +16,7 @@ import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 import PageHeader from "./components/PageHeader";
 import AppHeader from "./components/AppHeader";
 import CoachCommandCenter from "./components/CoachCommandCenter";
-import CoachHero from "./components/CoachHero";
+import CoachDashboardHeader from "./components/CoachDashboardHeader";
 import CoachMiniHeader from "./components/CoachMiniHeader";
 import ShotLabCharts from "./components/ShotLabCharts";
 import HomeShotsLeaderboardCard from "./components/HomeShotsLeaderboardCard";
@@ -3090,14 +3090,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   onLogout={logout}
 />
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
-<CoachHero
+<CoachDashboardHeader
   heroRef={heroRef}
   userName={u.name}
   onOpenTeamBranding={openTeamBranding}
-  accentColor={ORANGE}
-  borderColor={BORDER_CLR}
-  mutedColor={MUTED}
-  wordmark={<BrandWordmark size={isOverviewTab?20:18} small/>}
   onLogout={logout}
 />
 {isCoachTab&&<CoachCommandCenter
@@ -3125,6 +3121,27 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 <div style={{flex:1,padding:`${showMiniHeader?"88px":"16px"} 20px 110px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="COACH HOME" subtitle="Today-first command surface for your program" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
+    <section style={{marginBottom:12,padding:"14px 14px 12px",borderRadius:16,border:"1px solid rgba(200,255,26,0.22)",background:"linear-gradient(155deg, rgba(200,255,26,0.15), rgba(8,15,11,0.88) 48%, rgba(6,10,8,0.96))"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
+        <div>
+          <div style={{fontFamily:FB,color:"rgba(200,255,26,0.9)",fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Today&apos;s Practice</div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:1.4,lineHeight:1,marginTop:3,textTransform:"uppercase"}}>Run your top priorities first</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:5}}>Lead warmup flow, confirm event readiness, and push first actions before sessions begin.</div>
+        </div>
+        <button type="button" onClick={()=>jumpToSection("events","coach-events-management")} style={{minHeight:40,padding:"0 12px",borderRadius:11,border:"1px solid rgba(200,255,26,0.35)",background:"rgba(200,255,26,0.12)",color:VOLT,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.09em",textTransform:"uppercase",cursor:"pointer"}}>Open Practice Plan</button>
+      </div>
+      <div style={{marginTop:10,display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8}}>
+        <button type="button" onClick={()=>jumpToSection("players","coach-add-player-form")} style={{textAlign:"left",padding:"9px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontSize:10,cursor:"pointer"}}><div style={{color:VOLT,fontWeight:700,fontSize:9,letterSpacing:"0.08em",textTransform:"uppercase"}}>Quick Action</div><div>Add player</div></button>
+        <button type="button" onClick={()=>jumpToSection("drills","coach-drills-management")} style={{textAlign:"left",padding:"9px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontSize:10,cursor:"pointer"}}><div style={{color:VOLT,fontWeight:700,fontSize:9,letterSpacing:"0.08em",textTransform:"uppercase"}}>Quick Action</div><div>Assign drill</div></button>
+        <button type="button" onClick={()=>jumpToSection("events","coach-events-management")} style={{textAlign:"left",padding:"9px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontSize:10,cursor:"pointer"}}><div style={{color:VOLT,fontWeight:700,fontSize:9,letterSpacing:"0.08em",textTransform:"uppercase"}}>Quick Action</div><div>Check events</div></button>
+      </div>
+    </section>
+    <section style={{marginBottom:10,padding:"8px 10px",borderRadius:12,border:"1px solid rgba(200,255,26,0.16)",background:"rgba(8,12,10,0.68)",display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
+      <div style={{fontFamily:FB,fontSize:10,color:T.SUB,textTransform:"uppercase",letterSpacing:"0.07em"}}>Roster<div style={{color:LIGHT,fontWeight:700,fontSize:13,marginTop:2}}>{totalPlayers}</div></div>
+      <div style={{fontFamily:FB,fontSize:10,color:T.SUB,textTransform:"uppercase",letterSpacing:"0.07em"}}>Active Today<div style={{color:LIGHT,fontWeight:700,fontSize:13,marginTop:2}}>{activeTodayCount}</div></div>
+      <div style={{fontFamily:FB,fontSize:10,color:T.SUB,textTransform:"uppercase",letterSpacing:"0.07em"}}>Attention<div style={{color:LIGHT,fontWeight:700,fontSize:13,marginTop:2}}>{highlightPlayersAttention.length}</div></div>
+      <div style={{fontFamily:FB,fontSize:10,color:T.SUB,textTransform:"uppercase",letterSpacing:"0.07em"}}>Next Event<div style={{color:LIGHT,fontWeight:700,fontSize:13,marginTop:2,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{nextEventDateFormatted||"—"}</div></div>
+    </section>
     {(()=>{const coachChecklist=[
         {label:"Create or restore team",done:Boolean(u?.teamId)},
         {label:"Invite or add players",done:ups.length>0,onClick:()=>setTab("players"),ariaLabel:"Go to Players tab"},
