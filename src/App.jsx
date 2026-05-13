@@ -306,7 +306,7 @@ const HOME_SHOTS_LEADERBOARD_SCOPES = [
 // These do not affect persistence, leaderboard queries, or backend behavior.
 const PLAYER_DAILY_SHOT_TARGET = 100;
 const PLAYER_WEEKLY_SHOT_TARGET = 500;
-const COACH_PRIORITIES_STORAGE_KEY = "sl:coach-priorities";
+const PLAYER_PRIORITIES_STORAGE_KEY = "shotlab.playerPriorities.v1";
 const COACH_PRIORITIES_INIT = {
   todayFocusText: "Daily shot volume + clean mechanics",
   focusEmphasis: "Volume",
@@ -327,6 +327,27 @@ const sanitizeCoachPriorities = (value = {}) => {
     weeklyMakesTarget: Number.isFinite(weeklyMakesTarget) ? weeklyMakesTarget : COACH_PRIORITIES_INIT.weeklyMakesTarget,
     weeklyCheckinsTarget: Number.isFinite(weeklyCheckinsTarget) ? weeklyCheckinsTarget : COACH_PRIORITIES_INIT.weeklyCheckinsTarget,
   };
+};
+
+const getDefaultPlayerPriorities=()=>sanitizeCoachPriorities(COACH_PRIORITIES_INIT);
+const loadPlayerPriorities=()=>{
+  try{
+    const raw=window.localStorage?.getItem(PLAYER_PRIORITIES_STORAGE_KEY)||"";
+    const parsed=raw?JSON.parse(raw):null;
+    const next=parsed?sanitizeCoachPriorities(parsed):null;
+    console.log("[priorities] loaded on refresh",next);
+    return next;
+  }catch(error){
+    return null;
+  }
+};
+const savePlayerPriorities=(nextPriorities)=>{
+  const clean=sanitizeCoachPriorities(nextPriorities);
+  console.log("[priorities] before save",clean);
+  window.localStorage?.setItem(PLAYER_PRIORITIES_STORAGE_KEY,JSON.stringify(clean));
+  const written=loadPlayerPriorities();
+  console.log("[priorities] written to localStorage",written);
+  return written;
 };
 
 const HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE = {
@@ -818,20 +839,18 @@ const dataDebugLocalHost=typeof window!=="undefined"&&["localhost","127.0.0.1","
 const dataDebugSafeMode=Boolean(import.meta.env.DEV||dataDebugLocalHost||(dataDebugEnvEnabled&&user?.role==="coach"));
 const dataDebugEnabled=dataDebugRequested&&dataDebugSafeMode;
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
-const loadCoachPrioritiesForTeam = useCallback(async (teamId) => {
-  if (!teamId) return;
-  const saved = await DB.get(COACH_PRIORITIES_STORAGE_KEY);
-  const scoped = saved?.[teamId];
-  if (scoped) setCoachPriorities(sanitizeCoachPriorities(scoped));
-  else setCoachPriorities(COACH_PRIORITIES_INIT);
+const loadCoachPrioritiesForTeam = useCallback(async () => {
+  const saved=loadPlayerPriorities();
+  if(saved){setCoachPriorities(saved);return;}
+  setCoachPriorities(getDefaultPlayerPriorities());
 }, []);
-const saveCoachPrioritiesForTeam = useCallback(async (teamId, nextPriorities) => {
-  if (!teamId) return { ok: false, message: "Missing team id." };
-  const saved = await DB.get(COACH_PRIORITIES_STORAGE_KEY);
-  const next = { ...(saved || {}), [teamId]: sanitizeCoachPriorities(nextPriorities) };
-  await DB.set(COACH_PRIORITIES_STORAGE_KEY, next);
-  setCoachPriorities(next[teamId]);
-  return { ok: true, message: "Priorities saved. Player dashboard updated." };
+const saveCoachPrioritiesForTeam = useCallback(async (_teamId, nextPriorities) => {
+  const saved=savePlayerPriorities(nextPriorities);
+  if(!saved)return { ok:false, message:"Could not save priorities."};
+  const verify=loadPlayerPriorities();
+  if(!verify||JSON.stringify(verify)!==JSON.stringify(saved))return {ok:false,message:"Saved values could not be verified."};
+  setCoachPriorities(verify);
+  return { ok: true, message: "Priorities saved." };
 }, []);
 const mapConsumeDiagnostic=(errorCode,status)=>{
 const code=String(errorCode||"").toLowerCase();
@@ -1527,7 +1546,7 @@ useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.locat
 useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);
 useEffect(()=>{
 if(!ready||!user?.teamId)return;
-loadCoachPrioritiesForTeam(user.teamId);
+loadCoachPrioritiesForTeam();
 },[ready,user?.teamId,loadCoachPrioritiesForTeam]);
 useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.message||"unknown"});const onRej=(e)=>trackEvent("app_error",{kind:"unhandledrejection",message:e?.reason?.message||String(e?.reason||"unknown")});window.addEventListener("error",onErr);window.addEventListener("unhandledrejection",onRej);return()=>{window.removeEventListener("error",onErr);window.removeEventListener("unhandledrejection",onRej);};},[trackEvent]);
 useEffect(()=>{
@@ -1666,6 +1685,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
 function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,leaderboardScope,onLeaderboardScopeChange,refreshHomeShotsLeaderboard,statSyncError=""}){
+console.log("[priorities] values passed to Player Dashboard",coachPriorities);
 const canAccessTab=useCallback((nextTab)=>{
   if(nextTab==="players")return u.isCoach;
   if(nextTab==="duels")return !u.isCoach;
@@ -3008,7 +3028,9 @@ const[eventFilter,setEventFilter]=useState("all"),[eventSaveError,setEventSaveEr
 const[coachPriorityDraft,setCoachPriorityDraft]=useState(sanitizeCoachPriorities(coachPriorities));
 const[coachPrioritiesMessage,setCoachPrioritiesMessage]=useState("");
 const[coachPrioritiesError,setCoachPrioritiesError]=useState("");
-useEffect(()=>{setCoachPriorityDraft(sanitizeCoachPriorities(coachPriorities));},[coachPriorities]);
+const[coachPrioritySaveState,setCoachPrioritySaveState]=useState("idle");
+const persistedCoachPriorities=useMemo(()=>sanitizeCoachPriorities(coachPriorities),[coachPriorities]);
+useEffect(()=>{setCoachPriorityDraft(persistedCoachPriorities);},[persistedCoachPriorities]);
 const customProgramDrillCount=countCustomProgramDrills(programDrills);
 const[nudged,setNudged]=useState([]);
 const[confirmDelete,setConfirmDelete]=useState(null);const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
@@ -3038,21 +3060,22 @@ const handleAddProgramDrill=async()=>{if(!newProgramDrill.name)return;const m=pa
 const handleRemoveDrill=(id)=>{setConfirmDelete(id)};
 const confirmDrillDelete=()=>{if(confirmDelete)removeDrill(confirmDelete);setConfirmDelete(null)};
 const handleAddEvent=async()=>{if(!ne.title||!ne.date)return;setEventSaveError("");try{await addEvent({...ne,title:san(ne.title),desc:san(ne.desc),location:san(ne.location)});setNe({title:"",date:"",time:"",location:"",desc:"",type:"run"});setShowAdd(false);}catch(_error){setEventSaveError("Event could not be saved. Please try again.");}};
+const coachPrioritiesDirty=useMemo(()=>{
+  const current=sanitizeCoachPriorities(coachPriorityDraft);
+  return JSON.stringify(current)!==JSON.stringify(persistedCoachPriorities);
+},[coachPriorityDraft,persistedCoachPriorities]);
+
 const handleSaveCoachPriorities=async()=>{
-  const next={...coachPriorityDraft};
-  if(String(next.weeklyCheckinsTarget).trim()===""){
-    setCoachPrioritiesError("Weekly Check-ins is required.");
-    return;
-  }
-  next.weeklyCheckinsTarget=Math.max(1,Number(next.weeklyCheckinsTarget)||1);
-  next.weeklyMakesTarget=Math.max(0,Number(next.weeklyMakesTarget)||0);
-  const result=await onSaveCoachPriorities?.(u?.teamId,next);
+  setCoachPrioritySaveState("saving");
+  const result=await onSaveCoachPriorities?.(u?.teamId,{...coachPriorityDraft});
   if(result?.ok){
     setCoachPrioritiesError("");
-    setCoachPrioritiesMessage(result.message||"Priorities saved.");
+    setCoachPrioritiesMessage("Priorities saved");
+    setCoachPrioritySaveState("saved");
     setTimeout(()=>setCoachPrioritiesMessage(""),2200);
     return;
   }
+  setCoachPrioritySaveState("error");
   setCoachPrioritiesError(result?.message||"Could not save priorities.");
 };
 
@@ -3390,19 +3413,21 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         </section>
         <section className="accent-card" style={{borderRadius:16,padding:isDesktop?"14px":"12px",marginBottom:12,background:"linear-gradient(152deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015))",border:"1px solid rgba(255,255,255,0.16)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:10}}>
-            <div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>PLAYER PRIORITIES</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Control what players see on Today’s Focus, Priority Drill, Coach Challenge, and Weekly Goal.</div></div>
+            <div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>COACH PRIORITY EDITOR</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Set the exact priorities players see across the dashboard and check-ins.</div></div>
           </div>
           <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(2,minmax(0,1fr))":"1fr",gap:8}}>
-            <FF l="Today's Focus" v={coachPriorityDraft?.todayFocusText||""} set={v=>setCoachPriorityDraft(prev=>({...prev,todayFocusText:v}))} ph="Set today’s top coaching focus." />
-            <FF l="Focus Emphasis" v={coachPriorityDraft?.focusEmphasis||"Volume"} set={v=>setCoachPriorityDraft(prev=>({...prev,focusEmphasis:v}))} opts={["Volume","Technique","Consistency","Recovery","Readiness"]} />
-            <FF l="Priority Drill" v={coachPriorityDraft?.priorityDrillText||""} set={v=>setCoachPriorityDraft(prev=>({...prev,priorityDrillText:v}))} ph="Name the drill players should prioritize." />
-            <FF l="Coach Challenge" v={coachPriorityDraft?.challengeText||""} set={v=>setCoachPriorityDraft(prev=>({...prev,challengeText:v}))} ta ph="Set challenge language players will see today." />
-            <FF l="Weekly Makes Target" v={coachPriorityDraft?.weeklyMakesTarget??""} set={v=>setCoachPriorityDraft(prev=>({...prev,weeklyMakesTarget:v}))} tp="number" ph="500" />
-            <FF l="Weekly Check-ins" v={coachPriorityDraft?.weeklyCheckinsTarget??""} set={v=>setCoachPriorityDraft(prev=>({...prev,weeklyCheckinsTarget:v}))} tp="number" ph="2" />
+            <FF l="Today's Focus" v={coachPriorityDraft?.todayFocusText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,todayFocusText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ph="Set today’s top coaching focus." />
+            <FF l="Today's Focus Theme" v={coachPriorityDraft?.focusEmphasis||"Volume"} set={v=>{setCoachPriorityDraft(prev=>({...prev,focusEmphasis:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} opts={["Volume","Technique","Consistency","Recovery","Readiness"]} />
+            <FF l="Priority Drill" v={coachPriorityDraft?.priorityDrillText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,priorityDrillText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ph="Name the drill players should prioritize." />
+            <FF l="Coach Challenge" v={coachPriorityDraft?.challengeText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,challengeText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ta ph="Set challenge language players will see today." />
+            <FF l="Weekly Goal" v={coachPriorityDraft?.weeklyMakesTarget??""} set={v=>{setCoachPriorityDraft(prev=>({...prev,weeklyMakesTarget:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} tp="number" ph="500" />
+            <FF l="Check-In Target" v={coachPriorityDraft?.weeklyCheckinsTarget??""} set={v=>{setCoachPriorityDraft(prev=>({...prev,weeklyCheckinsTarget:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} tp="number" ph="2" />
           </div>
           {coachPrioritiesError&&<div style={{fontFamily:FB,fontSize:11,color:"#FF8D8D",marginTop:8}}>{coachPrioritiesError}</div>}
           {coachPrioritiesMessage&&<div style={{fontFamily:FB,fontSize:11,color:VOLT,marginTop:8}}>{coachPrioritiesMessage}</div>}
-          <button className="btn-v cta-primary" type="button" onClick={handleSaveCoachPriorities} style={{marginTop:10,width:"100%"}}>SAVE PRIORITIES</button>
+          <div style={{fontFamily:FB,fontSize:10,color:coachPrioritiesError?"#FF8D8D":coachPrioritySaveState==="saved"?VOLT:"var(--text-3)",letterSpacing:"0.03em",marginTop:10}}>{coachPrioritySaveState==="saving"?"Saving priorities...":coachPrioritiesError?"Save failed. Review fields and retry.":coachPrioritiesDirty?"Unsaved changes":"All changes saved"}</div>
+          <button className="btn-v cta-primary" type="button" onClick={handleSaveCoachPriorities} style={{marginTop:10,width:"100%"}}>{coachPrioritySaveState==="saving"?"Saving priorities...":"SAVE PRIORITIES"}</button>
+          <div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:6}}>Saved at: {coachPrioritiesMessage?new Date().toLocaleTimeString():"--"} · Storage key: {PLAYER_PRIORITIES_STORAGE_KEY}</div>
         </section>
 
         <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
