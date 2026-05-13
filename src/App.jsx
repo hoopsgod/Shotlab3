@@ -1882,6 +1882,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const weekConfirmedCount=upcomingWeekEvents.filter(ev=>rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes")).length;
       const weekMissingCount=upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length;
       const unresolvedBadgeLabel=weekMissingCount>0?`${weekMissingCount} unresolved RSVP${weekMissingCount===1?"":"s"}`:"All RSVPs set";
+      const coachName=players.find(p=>p.role==="coach"&&p.teamId===u?.teamId)?.name||"Your coach";
+      const coachTodayFocus=todaysMakes>=dailyGoal?"Recovery + shot quality":"Daily shot volume + clean mechanics";
+      const coachPriorityDrill=drills.find(d=>!todayS.some(s=>s.drillId===d.id))?.name||drills[0]?.name||"At-home drill block";
+      const coachChallengeText=streak>=5?"Protect your streak with one completed drill before day ends.":"Build momentum: complete one drill and log shots today.";
+      const weeklyGoalLabel=`${weeklyGoal} makes + ${Math.min(3,Math.max(1,upcomingWeekEvents.length||2))} team check-ins`;
+      const consistencyExpectation=weeklyPct>=80?"Consistency is on track — maintain pace through weekend.":"Target one focused session daily to keep weekly pace.";
       const playerPriorityStyle={critical:{color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.28)",label:"CRITICAL"},important:{color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)",label:"IMPORTANT"},passive:{color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)",label:"PASSIVE"}};
       const playerBriefingQueue=derivePlayerNotificationBriefing({nextEvent,dayLabel,weekMissingCount,unresolvedBadgeLabel,scSessions,streak}).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
@@ -1902,6 +1908,19 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
             {[`Streak · ${formatStreakDays(streak)}`,`Weekly · ${weeklyMakes}/${weeklyGoal}`,`Momentum · ${momentumLabel}`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.52)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
           </div>
           <button className="btn-v cta-primary" style={{marginTop:14,minHeight:48,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel==="Start Training"?"LOG SHOTS":"LOG SHOTS"}</button>
+        </section>
+        <section aria-label="Coach guidance and accountability" style={{padding:isNarrow?"12px":"14px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+            <div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"0.04em"}}>COACH GUIDANCE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{coachName} has active priorities tied to your weekly progression.</div></div>
+            <span style={{fontFamily:FB,fontSize:10,color:streak>=3?VOLT:"#FFCE73",border:`1px solid ${streak>=3?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"3px 8px"}}>{streak} day visibility</span>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:7,marginTop:9}}>
+            {[{k:"Today's focus",v:coachTodayFocus},{k:"Priority drill",v:coachPriorityDrill},{k:"Coach challenge",v:coachChallengeText},{k:"Weekly goal",v:weeklyGoalLabel}].map(item=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 9px",background:"rgba(12,14,18,0.5)"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:11,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.35}}>{item.v}</div></div>)}
+          </div>
+          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}}>
+            {[`Coach can view progress`, `Streak: ${formatStreakDays(streak)}`, `Weekly completion: ${weeklyPct}%`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"3px 8px",borderRadius:999,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
+          </div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:8}}>{consistencyExpectation}</div>
         </section>
         <section aria-label="Next 7 days events intelligence" style={{padding:isNarrow?"13px":"15px",borderRadius:18,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)",boxShadow:"0 8px 22px rgba(0,0,0,0.18)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:9}}>
