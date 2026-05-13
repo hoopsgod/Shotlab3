@@ -25,7 +25,7 @@ test('player dashboard selectors safely handle empty/new player state', () => {
   assert.deepEqual(events.attendanceRows, []);
 
   assert.equal(deriveCompletionRatio({ todayMakes: 0, dailyGoal: 0 }), 0);
-  assert.equal(deriveMomentumLabel({ weeklyMakes: 0, weeklyGoal: 300 }), 'Early in cycle');
+  assert.equal(deriveMomentumLabel({ weeklyMakes: 0, weeklyGoal: 300 }), 'Foundation build');
   assert.equal(deriveNextFocusLabel({ todaysMakes: 0, dailyGoal: 75 }), 'Daily shot volume + attendance');
 
   const briefing = derivePlayerNotificationBriefing({ nextEvent: null, weekMissingCount: 0, scSessions: [], streak: 0 });
@@ -38,5 +38,5 @@ test('player dashboard selectors safely handle empty/new player state', () => {
 
   const identity = deriveTrainingIdentityLabels({ eventsAttended: 0, weeklyMakes: 0, weeklyGoal: 300, weeklyPct: 0, streak: 0 });
   assert.equal(identity.trainingIdentity, 'Foundation phase');
-  assert.equal(identity.commitmentLevel, 'Early in cycle');
+  assert.equal(identity.commitmentLevel, 'Foundation build');
 });

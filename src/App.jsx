@@ -1830,7 +1830,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const hasAnyShots=normalizedShotLogs.some(s=>s.made>0);
       const leaderboardRank=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows.findIndex((row)=>normalizeEmail(row?.email||"")===normalizeEmail(u.email))+1:0;
       const missionCtaLabel=hasAnyShots?"Start Training":"Log Shots";
-      const missionStatus=hasAnyShots?`You're ${weeklyMakes>0?"building momentum":"ready to build momentum"} this week.`:"Log your first shots to start building your week.";
+      const missionStatus=hasAnyShots?`Momentum is live — ${weeklyMakes>0?"stack your next quality reps":"start your first quality reps"} and keep the cycle moving.`:"Momentum begins today. Log your first reps to establish rhythm and build your foundation.";
       const homeStats=[{label:"Makes Today",value:<AnimNum v={todaysMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Training Streak",value:formatStreakDays(streak),color:CYAN},{label:"Drills Completed",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Next Team Event",value:nextEventLabel,color:LIGHT},{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance Rate",value:attendancePct,color:CYAN}];
       const quickStats=[
@@ -1917,7 +1917,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
             <span style={{fontFamily:FB,fontSize:10,color:"#FFB86B",padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,184,107,0.45)"}}>Unresolved {weekMissingCount}</span>
           </div>
           <div style={{display:"grid",gap:7}}>
-            {upcomingWeekEvents.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:11}}>No events in the next 7 days. Tap Events to plan your week.</div>:upcomingWeekEvents.map((ev)=>{
+            {upcomingWeekEvents.length===0?<div style={{padding:"11px 12px",borderRadius:11,border:"1px dashed rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.015)"}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>Schedule window is clear.</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>Use this opening to recover, prep, and start your cycle strong before the next team block.</div></div>:upcomingWeekEvents.map((ev)=>{
               const tone=eventTypeTone(ev.type);
               const isConfirmed=rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes");
               const isMissing=!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email));
@@ -1943,15 +1943,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         </section>
         <section aria-label="Next session" style={{padding:"12px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:`1px solid ${BORDER_CLR}77`}}>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>NEXT SESSION</div>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:20,marginTop:4}}>{nextEvent?nextEvent.title:"No upcoming events"}</div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"Check Program for schedule updates."}</div>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:20,marginTop:4}}>{nextEvent?nextEvent.title:"Build your next session plan"}</div>
+          <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"No event locked yet — open Program and set the next rep target for your week."}</div>
         </section>
         <section aria-label="Quick actions" style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
           {[{label:"Log Shots",onClick:()=>switchTab("log-drill")},{label:"Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:58,borderRadius:12,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer",transition:"transform .18s ease, opacity .2s ease, box-shadow .2s ease"}}>{action.label}</button>)}
         </section>
         <section style={{padding:"11px",borderRadius:12,background:"rgba(255,255,255,0.015)"}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>Progress Plan</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{firstWorkoutComplete?"Keep stacking quality reps. Protect your momentum with one focused action today.":"Your dashboard starts fast: log your first session to unlock weekly momentum signals."}</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{firstWorkoutComplete?"Keep stacking quality reps. Protect momentum with one intentional action today.":"Start your cycle strong: first reps create your rhythm and unlock performance tracking."}</div>
           <div style={{display:"grid",gap:6,marginTop:7}}>{playerChecklist.slice(0,4).map(item=><div key={item.label} style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11}}>{item.done?"✓":"•"} {item.label}</div>)}</div>
         </section>
         <section aria-label="First week activation for players" style={{padding:"11px",borderRadius:12,background:"linear-gradient(150deg, rgba(255,255,255,0.03), rgba(200,255,0,0.03))",border:"1px solid rgba(255,255,255,0.12)"}}>
@@ -1960,7 +1960,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
             <span style={{fontFamily:FB,color:VOLT,fontSize:10}}>{firstWeekActivation.filter(item=>item.done).length}/{firstWeekActivation.length}</span>
           </div>
           <div style={{display:"grid",gap:6,marginTop:7}}>
-            {firstWeekActivation.map((item)=><button key={item.label} type="button" onClick={item.onClick} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"8px 9px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(12,14,18,0.45)",color:LIGHT,fontFamily:FB,fontSize:11,textAlign:"left",cursor:"pointer"}}><span>{item.done?"✓":"•"} {item.label}</span><span style={{color:item.done?VOLT:T.SUB,fontSize:10}}>{item.done?"Momentum locked":"Start now"}</span></button>)}
+            {firstWeekActivation.map((item)=><button key={item.label} type="button" onClick={item.onClick} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"8px 9px",borderRadius:10,border:`1px solid ${item.done?"rgba(200,255,0,0.28)":"rgba(255,255,255,0.12)"}`,background:item.done?"rgba(200,255,0,0.06)":"rgba(12,14,18,0.45)",color:LIGHT,fontFamily:FB,fontSize:11,textAlign:"left",cursor:"pointer",opacity:item.done?0.95:0.85}}><span>{item.done?"✓":"•"} {item.label}</span><span style={{color:item.done?VOLT:T.SUB,fontSize:10}}>{item.done?"Momentum locked":"Begin phase"}</span></button>)}
           </div>
         </section>
         <section aria-label="Training identity" style={{padding:"12px",borderRadius:14,background:"linear-gradient(150deg, rgba(200,255,0,0.10), rgba(255,255,255,0.03) 36%, rgba(11,13,16,0.92))",border:"1px solid rgba(200,255,0,0.28)"}}>

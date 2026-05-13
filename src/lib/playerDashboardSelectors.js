@@ -72,7 +72,7 @@ export const deriveMomentumLabel = ({ weeklyMakes = 0, weeklyGoal = 1, streak = 
   if (pct >= 85 && streakDays >= 5) return "Hot streak";
   if (pct >= 70 && streakDays >= 3) return "Locked in";
   if (pct >= 40 || streakDays >= 2) return "Building rhythm";
-  return "Early in cycle";
+  return "Foundation build";
 };
 
 export const deriveNextFocusLabel = ({ todaysMakes = 0, dailyGoal = 1 } = {}) => (safeNumber(todaysMakes) < Math.max(1, safeNumber(dailyGoal))
@@ -83,7 +83,7 @@ export const derivePlayerNotificationBriefing = ({ nextEvent = null, dayLabel = 
   nextEvent ? { priority: (dayLabel(nextEvent.date) === "TODAY" || dayLabel(nextEvent.date) === "TOMORROW") ? "important" : "passive", title: "Upcoming event", detail: `${nextEvent.title} · ${dayLabel(nextEvent.date)} ${nextEvent.time || "TBD"}`, cta: "Open events", target: "program" } : null,
   weekMissingCount > 0 ? { priority: weekMissingCount >= 2 ? "critical" : "important", title: "Unresolved RSVPs", detail: `${unresolvedBadgeLabel} in the next 7 days.`, cta: "Resolve now", target: "program" } : null,
   safeArray(scSessions).length ? { priority: "passive", title: "Upcoming workout", detail: `${scSessions[0]?.sport || scSessions[0]?.title || "Session"} · ${scSessions[0]?.date || "TBD"}`, cta: "Open S&C", target: "sc" } : null,
-  streak <= 1 ? { priority: "important", title: "Streak continuity", detail: "Log activity today to keep your momentum uninterrupted.", cta: "Log activity", target: "log-drill" } : { priority: "passive", title: "Streak continuity", detail: `${streak}-day streak is active — protect the standard.`, cta: "View progress", target: "profile" },
+  streak <= 1 ? { priority: "important", title: "Streak continuity", detail: "First reps today establish rhythm and start your momentum cycle.", cta: "Log activity", target: "log-drill" } : { priority: "passive", title: "Streak continuity", detail: `${streak}-day streak is active — protect the standard.`, cta: "View progress", target: "profile" },
 ].filter(Boolean).slice(0, 4);
 
 export const deriveFirstWeekActivationMilestones = ({ hasRsvped = false, firstWorkoutComplete = false, firstEventInteraction = false } = {}) => ([
@@ -96,6 +96,6 @@ export const deriveTrainingIdentityLabels = ({ eventsAttended = 0, weeklyMakes =
   const goal = Math.max(1, safeNumber(weeklyGoal));
   return {
     trainingIdentity: weeklyPct >= 85 && streak >= 5 ? "Rhythm scorer" : weeklyMakes >= Math.round(goal * 0.8) ? "Shot creator" : weeklyPct >= 55 ? "Volume builder" : streak >= 2 || eventsAttended >= 2 ? "Consistency focus" : "Foundation phase",
-    commitmentLevel: weeklyPct >= 95 && streak >= 7 ? "Elite consistency" : weeklyPct >= 75 ? "Locked in" : weeklyPct >= 45 ? "Building rhythm" : "Early in cycle",
+    commitmentLevel: weeklyPct >= 95 && streak >= 7 ? "Elite consistency" : weeklyPct >= 75 ? "Locked in" : weeklyPct >= 45 ? "Building rhythm" : "Foundation build",
   };
 };
