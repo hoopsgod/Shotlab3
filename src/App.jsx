@@ -1845,7 +1845,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const dailyPct=deriveCompletionRatio({todayMakes:todaysMakes,dailyGoal});
       const weeklyPct=deriveCompletionRatio({todayMakes:weeklyMakes,dailyGoal:weeklyGoal});
       const seasonProgressPct=Math.min(100,Math.round(((weeklyPct*0.45)+(dailyPct*0.2)+Math.min(streak*6,100)*0.35)));
-      const momentumLabel=deriveMomentumLabel({weeklyMakes,weeklyGoal});
+      const momentumLabel=deriveMomentumLabel({weeklyMakes,weeklyGoal,streak,weeklyPct});
       const { trainingIdentity, commitmentLevel }=deriveTrainingIdentityLabels({eventsAttended,weeklyMakes,weeklyGoal,weeklyPct,streak});
       const currentFocus=deriveNextFocusLabel({todaysMakes,dailyGoal});
       const playerHasTeam=Boolean(u?.teamId);
@@ -1891,9 +1891,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
               <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S FOCUS</div>
               <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?30:35,lineHeight:1.02,letterSpacing:1.2,marginTop:8}}>{todaysMakes>0?`Add ${Math.max(0,dailyGoal-todaysMakes)} makes`:"Form Shooting Start"}</div>
             </div>
-            <span style={{fontFamily:FB,fontSize:10,color:dailyPct>=100?VOLT:"#FFCE73",border:`1px solid ${dailyPct>=100?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"4px 9px"}}>{dailyPct>=100?"Goal hit":"In progress"}</span>
+            <span style={{fontFamily:FB,fontSize:10,color:dailyPct>=100?VOLT:"#FFCE73",border:`1px solid ${dailyPct>=100?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"4px 9px"}}>{dailyPct>=100?"Goal hit":momentumLabel}</span>
           </div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.45,marginTop:8}}>{missionStatus}</div>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:8,gap:8}}><span style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,letterSpacing:"0.06em"}}>WEEKLY MOMENTUM</span><span style={{fontFamily:FB,color:weeklyPct>=80?VOLT:"#FFCE73",fontSize:10}}>{weeklyMakes}/{weeklyGoal} makes · {weeklyPct}%</span></div>
+          <div style={{marginTop:6,height:5,borderRadius:999,background:"rgba(255,255,255,0.08)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(5,weeklyPct)}%`,background:"linear-gradient(90deg, rgba(200,255,26,0.66), rgba(94,208,255,0.72))"}}/></div>
           <div style={{marginTop:12,height:8,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"linear-gradient(90deg, #C8FF1A, #E6FF7A)",boxShadow:"0 0 20px rgba(200,255,26,0.44)"}}/></div>
           <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:10,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:11}}>
@@ -1937,7 +1939,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <div style={{display:"grid",gap:7,marginTop:9}}>{playerBriefingQueue.map((note)=>{const tone=playerPriorityStyle[note.priority]||playerPriorityStyle.passive;return <button key={note.title} type="button" onClick={note.onClick} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",alignItems:"center",gap:8,textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${tone.border}`,background:"rgba(12,14,18,0.56)",cursor:"pointer"}}><span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.border}`,background:tone.bg,borderRadius:999,padding:"3px 7px"}}>{tone.label}</span><span><span style={{display:"block",fontFamily:FB,fontWeight:700,fontSize:11,color:LIGHT}}>{note.title}</span><span style={{display:"block",fontFamily:FB,fontSize:10,color:T.SUB,marginTop:2}}>{note.detail}</span></span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{note.cta} ›</span></button>;})}</div>
         </section>
         <section aria-label="Performance snapshot" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:8}}>
-          {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly",value:weeklyMakes,color:LIGHT},{label:"Completion",value:`${dailyPct}%`,color:VOLT},{label:"Trend",value:weeklyMakes>=PLAYER_WEEKLY_SHOT_TARGET/2?"↑ On track":"→ Build",color:ORANGE}].map(item=><div key={item.label} style={{padding:"10px 10px",borderRadius:12,background:"rgba(255,255,255,0.03)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:21,marginTop:3,lineHeight:1.1}}>{item.value}</div></div>)}
+          {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly",value:weeklyMakes,color:LIGHT},{label:"Daily Completion",value:`${dailyPct}%`,color:VOLT},{label:"Weekly Completion",value:`${weeklyPct}%`,color:ORANGE}].map(item=><div key={item.label} style={{padding:"10px 10px",borderRadius:12,background:"rgba(255,255,255,0.03)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:21,marginTop:3,lineHeight:1.1}}>{item.value}</div></div>)}
         </section>
         <section aria-label="Next session" style={{padding:"12px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:`1px solid ${BORDER_CLR}77`}}>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>NEXT SESSION</div>
@@ -1948,8 +1950,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           {[{label:"Log Shots",onClick:()=>switchTab("log-drill")},{label:"Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:58,borderRadius:12,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer",transition:"transform .18s ease, opacity .2s ease, box-shadow .2s ease"}}>{action.label}</button>)}
         </section>
         <section style={{padding:"11px",borderRadius:12,background:"rgba(255,255,255,0.015)"}}>
-          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>Getting Started</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>Understand what matters now: events, RSVP accountability, and progress momentum.</div>
+          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>Progress Plan</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{firstWorkoutComplete?"Keep stacking quality reps. Protect your momentum with one focused action today.":"Your dashboard starts fast: log your first session to unlock weekly momentum signals."}</div>
           <div style={{display:"grid",gap:6,marginTop:7}}>{playerChecklist.slice(0,4).map(item=><div key={item.label} style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11}}>{item.done?"✓":"•"} {item.label}</div>)}</div>
         </section>
         <section aria-label="First week activation for players" style={{padding:"11px",borderRadius:12,background:"linear-gradient(150deg, rgba(255,255,255,0.03), rgba(200,255,0,0.03))",border:"1px solid rgba(255,255,255,0.12)"}}>
