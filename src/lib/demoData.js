@@ -28,13 +28,13 @@ const basePlayerProfiles = [
 ];
 
 const baseEvents = [
-  { id: "event-demo-january-open-gym", teamId: DEMO_TEAM_ID, title: "January Open Gym", date: "2026-01-18", time: "5:30 PM", location: "Main Gym", desc: "Team shooting and finishing reps.", type: "workout" },
-  { id: "event-demo-february-skills-clinic", teamId: DEMO_TEAM_ID, title: "February Skills Clinic", date: "2026-02-07", time: "9:00 AM", location: "Aux Gym", desc: "Ball-screen reads and finishing counters.", type: "clinic" },
-  { id: "event-demo-february-recovery-lab", teamId: DEMO_TEAM_ID, title: "Recovery Lab", date: "2026-02-21", time: "11:15 AM", location: "Training Room", desc: "Recovery-focused mobility session.", type: "recovery" },
-  { id: "evt-upcoming-1", teamId: DEMO_TEAM_ID, title: "Gym Session", date: "2026-03-25", time: "10:00 AM", location: "Main Gym", type: "workout" },
-  { id: "event-demo-skill-lab", teamId: DEMO_TEAM_ID, title: "Skill Lab: Finishing Reads", date: "2026-03-27", time: "6:15 PM", location: "Main Gym Court 2", desc: "Guard-footwork and rim-finishing session.", type: "workout" },
-  { id: "event-demo-shooting-club", teamId: DEMO_TEAM_ID, title: "Morning Shooting Club", date: "2026-03-29", time: "6:30 AM", location: "Aux Gym", desc: "High-volume catch-and-shoot reps.", type: "shooting" },
-  { id: "event-demo-film-room", teamId: DEMO_TEAM_ID, title: "Film Room + Recovery", date: "2026-04-01", time: "4:45 PM", location: "Team Room", desc: "Scout-film review and mobility work.", type: "recovery" },
+  { id: "event-demo-january-open-gym", teamId: DEMO_TEAM_ID, title: "Foundation Shooting Block", date: "2026-01-18", time: "5:30 PM", location: "Main Gym", desc: "Footwork prep, paint finishes, and game-speed catch-and-shoot volume.", type: "workout" },
+  { id: "event-demo-february-skills-clinic", teamId: DEMO_TEAM_ID, title: "Advantage Reads Lab", date: "2026-02-07", time: "9:00 AM", location: "Aux Gym", desc: "Ball-screen reads, two-dribble counters, and weak-side decision reps.", type: "clinic" },
+  { id: "event-demo-february-recovery-lab", teamId: DEMO_TEAM_ID, title: "Reset + Mobility Session", date: "2026-02-21", time: "11:15 AM", location: "Training Room", desc: "Hip/ankle mobility and soft-tissue recovery between training blocks.", type: "recovery" },
+  { id: "evt-upcoming-1", teamId: DEMO_TEAM_ID, title: "Team Shooting Standards", date: "2026-03-25", time: "10:00 AM", location: "Main Gym", type: "workout" },
+  { id: "event-demo-skill-lab", teamId: DEMO_TEAM_ID, title: "Skill Lab: Rim Pressure Finishes", date: "2026-03-27", time: "6:15 PM", location: "Main Gym Court 2", desc: "Paint touch creation, contact finishes, and late-clock reads.", type: "workout" },
+  { id: "event-demo-shooting-club", teamId: DEMO_TEAM_ID, title: "Early Work 300", date: "2026-03-29", time: "6:30 AM", location: "Aux Gym", desc: "High-volume catch-and-shoot and relocation threes before school.", type: "shooting" },
+  { id: "event-demo-film-room", teamId: DEMO_TEAM_ID, title: "Film + Recovery Reset", date: "2026-04-01", time: "4:45 PM", location: "Team Room", desc: "Possession review, spacing corrections, and recovery circuit.", type: "recovery" },
 ];
 
 const baseRsvps = baseEvents.slice(0, 6).map((event, index) => ({
@@ -61,7 +61,7 @@ const demoShotLogs = [
 ];
 
 const demoProgressSnapshots = [
-  { id: "progress-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, label: "Weekly shots", value: 125, date: "2026-03-20", ts: Date.parse("2026-03-20T19:10:00.000Z") },
+  { id: "progress-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, label: "7-day makes", value: 125, date: "2026-03-20", ts: Date.parse("2026-03-20T19:10:00.000Z") },
 ];
 
 function clone(value) {
