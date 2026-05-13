@@ -31,7 +31,7 @@ export function deriveActivityFeedItems({ view = "player", user = null, events =
   shotGroups.forEach((shotSummary) => {
     const isSelf = user && shotSummary.email === user.email;
     const actor = isSelf ? "You" : formatActor(shotSummary);
-    items.push({ text: `${actor} logged ${shotSummary.made} At Home Shots`, date: shotSummary.date, ts: shotSummary.ts, type: "shots" });
+    items.push({ text: `${actor} logged ${shotSummary.made} makes at home`, date: shotSummary.date, ts: shotSummary.ts, type: "shots" });
   });
 
   scopedRsvps.forEach((rsvp) => {
@@ -39,23 +39,23 @@ export function deriveActivityFeedItems({ view = "player", user = null, events =
     const eventName = (ev?.title || "Team event").toUpperCase();
     const isSelf = user && rsvp.email === user.email;
     const actor = isSelf ? "You" : formatActor(rsvp);
-    items.push({ text: `${actor} RSVP’d YES to ${eventName}`, date: rsvp.date || ev?.date || today, ts: Number(rsvp.ts) || normalizeDateValue(rsvp.date || ev?.date), type: "rsvp" });
+    items.push({ text: `${actor} confirmed attendance for ${eventName}`, date: rsvp.date || ev?.date || today, ts: Number(rsvp.ts) || normalizeDateValue(rsvp.date || ev?.date), type: "rsvp" });
   });
 
   scopedEvents.forEach((event) => {
-    items.push({ text: `Coach added ${(event.title || "Team event").toUpperCase()}`, date: event.date || today, ts: Number(event.ts) || normalizeDateValue(event.date), type: "event" });
+    items.push({ text: `Coach scheduled ${(event.title || "Team event").toUpperCase()}`, date: event.date || today, ts: Number(event.ts) || normalizeDateValue(event.date), type: "event" });
   });
 
   if (view === "coach") {
     teamPlayers.forEach((player) => {
-      items.push({ text: `${formatActor(player)} joined the team`, date: player.joinedAt || today, ts: normalizeDateValue(player.joinedAt, Number(player.ts) || 0), type: "join" });
+      items.push({ text: `${formatActor(player)} joined the training group`, date: player.joinedAt || today, ts: normalizeDateValue(player.joinedAt, Number(player.ts) || 0), type: "join" });
     });
     const activeToday = new Set(scopedScores.filter((score) => score.date === today).map((score) => score.email)).size;
-    if (activeToday > 0) items.push({ text: `${activeToday} players logged activity today`, date: today, ts: normalizeDateValue(today), type: "summary" });
+    if (activeToday > 0) items.push({ text: `${activeToday} players logged work today`, date: today, ts: normalizeDateValue(today), type: "summary" });
   } else {
     const ownScores = scopedScores.filter((score) => user && score.email === user.email);
-    if (ownScores.length >= 3) items.push({ text: "New workout available", date: today, ts: normalizeDateValue(today) - 1, type: "workout" });
-    if (scopedShots.filter((log) => user && log.email === user.email).length >= 3) items.push({ text: "You reached a streak milestone", date: today, ts: normalizeDateValue(today) - 2, type: "streak" });
+    if (ownScores.length >= 3) items.push({ text: "New skill block is ready", date: today, ts: normalizeDateValue(today) - 1, type: "workout" });
+    if (scopedShots.filter((log) => user && log.email === user.email).length >= 3) items.push({ text: "Consistency milestone reached", date: today, ts: normalizeDateValue(today) - 2, type: "streak" });
   }
 
   return items.sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, RECENT_ACTIVITY_LIMIT);

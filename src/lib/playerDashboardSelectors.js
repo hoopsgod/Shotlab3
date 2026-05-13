@@ -68,27 +68,27 @@ export const deriveMomentumLabel = ({ weeklyMakes = 0, weeklyGoal = 1, streak = 
   const pct = safeNumber(weeklyPct) || Math.round((makes / goal) * 100);
   const streakDays = safeNumber(streak);
 
-  if (pct >= 100 && streakDays >= 8) return "Elite consistency";
-  if (pct >= 85 && streakDays >= 5) return "Hot streak";
+  if (pct >= 100 && streakDays >= 8) return "Championship standard";
+  if (pct >= 85 && streakDays >= 5) return "Game-speed rhythm";
   if (pct >= 70 && streakDays >= 3) return "Locked in";
-  if (pct >= 40 || streakDays >= 2) return "Building rhythm";
-  return "Foundation build";
+  if (pct >= 40 || streakDays >= 2) return "Stacking quality reps";
+  return "Building base volume";
 };
 
 export const deriveNextFocusLabel = ({ todaysMakes = 0, dailyGoal = 1 } = {}) => (safeNumber(todaysMakes) < Math.max(1, safeNumber(dailyGoal))
-  ? "Daily shot volume + attendance"
-  : "Sustain form and quality reps");
+  ? "Close daily make target + confirm attendance"
+  : "Sustain shot quality under fatigue");
 
 export const derivePlayerNotificationBriefing = ({ nextEvent = null, dayLabel = () => "UPCOMING", weekMissingCount = 0, unresolvedBadgeLabel = "All RSVPs set", scSessions = [], streak = 0 } = {}) => [
-  nextEvent ? { priority: (dayLabel(nextEvent.date) === "TODAY" || dayLabel(nextEvent.date) === "TOMORROW") ? "important" : "passive", title: "Upcoming event", detail: `${nextEvent.title} · ${dayLabel(nextEvent.date)} ${nextEvent.time || "TBD"}`, cta: "Open events", target: "program" } : null,
+  nextEvent ? { priority: (dayLabel(nextEvent.date) === "TODAY" || dayLabel(nextEvent.date) === "TOMORROW") ? "important" : "passive", title: "Upcoming team session", detail: `${nextEvent.title} · ${dayLabel(nextEvent.date)} ${nextEvent.time || "TBD"}`, cta: "Open schedule", target: "program" } : null,
   weekMissingCount > 0 ? { priority: weekMissingCount >= 2 ? "critical" : "important", title: "Unresolved RSVPs", detail: `${unresolvedBadgeLabel} in the next 7 days.`, cta: "Resolve now", target: "program" } : null,
-  safeArray(scSessions).length ? { priority: "passive", title: "Upcoming workout", detail: `${scSessions[0]?.sport || scSessions[0]?.title || "Session"} · ${scSessions[0]?.date || "TBD"}`, cta: "Open S&C", target: "sc" } : null,
-  streak <= 1 ? { priority: "important", title: "Streak continuity", detail: "First reps today establish rhythm and start your momentum cycle.", cta: "Log activity", target: "log-drill" } : { priority: "passive", title: "Streak continuity", detail: `${streak}-day streak is active — protect the standard.`, cta: "View progress", target: "profile" },
+  safeArray(scSessions).length ? { priority: "passive", title: "Upcoming lift / recovery", detail: `${scSessions[0]?.sport || scSessions[0]?.title || "Session"} · ${scSessions[0]?.date || "TBD"}`, cta: "Open S&C", target: "sc" } : null,
+  streak <= 1 ? { priority: "important", title: "Consistency chain", detail: "Get first makes in early to set rhythm for tonight's work.", cta: "Log activity", target: "log-drill" } : { priority: "passive", title: "Consistency chain", detail: `${streak}-day run is active — defend the standard.`, cta: "View progress", target: "profile" },
 ].filter(Boolean).slice(0, 4);
 
 export const deriveFirstWeekActivationMilestones = ({ hasRsvped = false, firstWorkoutComplete = false, firstEventInteraction = false } = {}) => ([
   { label: "First RSVP", done: Boolean(hasRsvped), target: "program" },
-  { label: "First completed workout", done: Boolean(firstWorkoutComplete), target: "sc" },
+  { label: "First completed training block", done: Boolean(firstWorkoutComplete), target: "sc" },
   { label: "First event interaction", done: Boolean(firstEventInteraction), target: "program" },
 ]);
 
@@ -96,6 +96,6 @@ export const deriveTrainingIdentityLabels = ({ eventsAttended = 0, weeklyMakes =
   const goal = Math.max(1, safeNumber(weeklyGoal));
   return {
     trainingIdentity: weeklyPct >= 85 && streak >= 5 ? "Rhythm scorer" : weeklyMakes >= Math.round(goal * 0.8) ? "Shot creator" : weeklyPct >= 55 ? "Volume builder" : streak >= 2 || eventsAttended >= 2 ? "Consistency focus" : "Foundation phase",
-    commitmentLevel: weeklyPct >= 95 && streak >= 7 ? "Elite consistency" : weeklyPct >= 75 ? "Locked in" : weeklyPct >= 45 ? "Building rhythm" : "Foundation build",
+    commitmentLevel: weeklyPct >= 95 && streak >= 7 ? "Championship standard" : weeklyPct >= 75 ? "Locked in" : weeklyPct >= 45 ? "Stacking reps" : "Building base volume",
   };
 };

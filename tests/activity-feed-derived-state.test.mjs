@@ -17,11 +17,11 @@ test('activity feed derives only from events/rsvps/shotLogs/players/scores and s
     scores: [{ email: 'jd@team.com', date: '2026-05-10' }, { email: 'sarah@team.com', date: '2026-05-10' }, { email: 'marcus@team.com', date: '2026-05-10' }],
   });
   assert.ok(items.length <= RECENT_ACTIVITY_LIMIT);
-  const jdShotRows = items.filter((item) => item.text === 'JD logged 250 At Home Shots');
+  const jdShotRows = items.filter((item) => item.text === 'JD logged 250 makes at home');
   assert.equal(jdShotRows.length, 1);
-  assert.ok(items.some((item) => item.text.includes('Sarah RSVP’d YES to OPEN GYM RUN')));
-  assert.ok(items.some((item) => item.text.includes('Marcus joined the team')));
-  assert.ok(items.some((item) => item.text.includes('Coach added OPEN GYM RUN')));
-  assert.ok(items.some((item) => item.text.includes('3 players logged activity today')));
+  assert.ok(items.some((item) => item.text.includes('Sarah confirmed attendance for OPEN GYM RUN')));
+  assert.ok(items.some((item) => item.text.includes('Marcus joined the training group')));
+  assert.ok(items.some((item) => item.text.includes('Coach scheduled OPEN GYM RUN')));
+  assert.ok(items.some((item) => item.text.includes('3 players logged work today')));
   for (let i = 1; i < items.length; i += 1) assert.ok(items[i - 1].ts >= items[i].ts);
 });
