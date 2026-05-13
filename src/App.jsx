@@ -1762,8 +1762,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>}
 
 {/* Header — Glassmorphism */}
-<div style={{position:"sticky",top:0,zIndex:10,height:64,padding:isDesktop?"max(0px,env(safe-area-inset-top)) 16px 0":"max(0px,env(safe-area-inset-top)) 20px 0",background:TOKENS.BG_BASE,borderBottom:`1px solid ${TOKENS.BG_SUBTLE}`}}>
-  <div style={{height:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+<div style={{position:"sticky",top:0,zIndex:10,padding:isDesktop?"max(0px,env(safe-area-inset-top)) 16px 10px":"max(0px,env(safe-area-inset-top)) 20px 10px",background:"linear-gradient(180deg, rgba(11,13,16,0.96), rgba(11,13,16,0.88))",borderBottom:`1px solid ${TOKENS.BG_SUBTLE}`}}>
+  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
     <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
       <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:36,height:36,borderRadius:"50%",background:"#1E1E1E",border:"1.5px solid #C8FF00",boxShadow:u.isCoach?"0 0 0 4px rgba(200, 255, 0, 0.15)":"none",color:"#FFFFFF",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0}}>{(u.name||"?")[0].toUpperCase()}</button>
       <div style={{minWidth:0}}><div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:"0.15em",fontWeight:700,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(()=>{
@@ -1771,10 +1771,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         if(allDone&&shotsToday>0)return <span style={{color:VOLT}}>ALL DRILLS COMPLETE · {streak}D STREAK 🔥</span>;
         if(todayS.length>0)return <span>{todayS.length}/{drills.length} DRILLS · {shotsToday>0?shotsToday+" SHOTS · ":""}{streak}D STREAK</span>;
         return u.isCoach?"YOUR PROGRAM AWAITS":"TODAY'S MISSION AWAITS";
-      })()}</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:1}}><div style={{fontFamily:FD,color:TOKENS.TEXT_PRIMARY,fontSize:20,fontWeight:900,letterSpacing:1.5,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{u.name.toUpperCase()}</div>{u.isCoach&&<span style={{background:"rgba(200, 255, 0, 0.12)",border:"1px solid #C8FF00",borderRadius:20,padding:"2px 8px",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.10em",color:"#C8FF00",display:"inline-flex",alignItems:"center",gap:4}}><WhistleIcon size={9} color="#C8FF00"/>COACH</span>}</div></div>
+      })()}</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:1}}><div style={{fontFamily:FD,color:TOKENS.TEXT_PRIMARY,fontSize:20,fontWeight:900,letterSpacing:1.5,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{u.name.toUpperCase()}</div>{u.isCoach&&<span style={{background:"rgba(200, 255, 0, 0.12)",border:"1px solid #C8FF00",borderRadius:20,padding:"2px 8px",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.10em",color:"#C8FF00",display:"inline-flex",alignItems:"center",gap:4}}><WhistleIcon size={9} color="#C8FF00"/>COACH</span>}</div>
+      {!u.isCoach&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Personal training dashboard · own your rep quality today.</div>}
+      </div>
     </div>
     <div style={{display:"flex",gap:6,alignItems:"center"}}>
-      <BrandWordmark size={20} small/>
+      <div style={{padding:"5px 8px",borderRadius:12,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.02)"}}><BrandWordmark size={20} small/></div>
       <button aria-label="Toggle theme" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .3s"}}>
         {theme==="dark"?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         :<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>}
@@ -1883,7 +1885,23 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const playerPriorityStyle={critical:{color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.28)",label:"CRITICAL"},important:{color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)",label:"IMPORTANT"},passive:{color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)",label:"PASSIVE"}};
       const playerBriefingQueue=derivePlayerNotificationBriefing({nextEvent,dayLabel,weekMissingCount,unresolvedBadgeLabel,scSessions,streak}).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
-        <section aria-label="Next 7 days events intelligence" style={{padding:isNarrow?"13px":"15px",borderRadius:18,background:"linear-gradient(150deg, rgba(200,255,0,0.14), rgba(200,255,0,0.03) 40%, rgba(0,0,0,0.25))",border:"1px solid rgba(200,255,0,0.3)",boxShadow:"0 16px 34px rgba(0,0,0,0.24)"}}>
+        <section aria-label="Today's focus" style={{padding:isNarrow?"18px":"20px",borderRadius:20,background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
+            <div>
+              <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S FOCUS</div>
+              <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?30:35,lineHeight:1.02,letterSpacing:1.2,marginTop:8}}>{todaysMakes>0?`Add ${Math.max(0,dailyGoal-todaysMakes)} makes`:"Form Shooting Start"}</div>
+            </div>
+            <span style={{fontFamily:FB,fontSize:10,color:dailyPct>=100?VOLT:"#FFCE73",border:`1px solid ${dailyPct>=100?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"4px 9px"}}>{dailyPct>=100?"Goal hit":"In progress"}</span>
+          </div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.45,marginTop:8}}>{missionStatus}</div>
+          <div style={{marginTop:12,height:8,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"linear-gradient(90deg, #C8FF1A, #E6FF7A)",boxShadow:"0 0 20px rgba(200,255,26,0.44)"}}/></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:10,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:11}}>
+            {[`Streak · ${formatStreakDays(streak)}`,`Weekly · ${weeklyMakes}/${weeklyGoal}`,`Momentum · ${momentumLabel}`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.52)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
+          </div>
+          <button className="btn-v cta-primary" style={{marginTop:14,minHeight:48,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel==="Start Training"?"LOG SHOTS":"LOG SHOTS"}</button>
+        </section>
+        <section aria-label="Next 7 days events intelligence" style={{padding:isNarrow?"13px":"15px",borderRadius:18,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)",boxShadow:"0 8px 22px rgba(0,0,0,0.18)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:9}}>
             <div>
               <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em"}}>NEXT 7 DAYS</div>
@@ -1917,15 +1935,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
             <span style={{fontFamily:FB,fontSize:10,color:weekMissingCount>0?"#FFB86B":VOLT,border:`1px solid ${weekMissingCount>0?"rgba(255,184,107,0.42)":"rgba(200,255,0,0.45)"}`,borderRadius:999,padding:"3px 8px"}}>{unresolvedBadgeLabel}</span>
           </div>
           <div style={{display:"grid",gap:7,marginTop:9}}>{playerBriefingQueue.map((note)=>{const tone=playerPriorityStyle[note.priority]||playerPriorityStyle.passive;return <button key={note.title} type="button" onClick={note.onClick} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",alignItems:"center",gap:8,textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${tone.border}`,background:"rgba(12,14,18,0.56)",cursor:"pointer"}}><span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.border}`,background:tone.bg,borderRadius:999,padding:"3px 7px"}}>{tone.label}</span><span><span style={{display:"block",fontFamily:FB,fontWeight:700,fontSize:11,color:LIGHT}}>{note.title}</span><span style={{display:"block",fontFamily:FB,fontSize:10,color:T.SUB,marginTop:2}}>{note.detail}</span></span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{note.cta} ›</span></button>;})}</div>
-        </section>
-        <section aria-label="Today's focus" style={{padding:isNarrow?"16px":"18px",borderRadius:18,background:"linear-gradient(155deg, rgba(200,255,0,0.16), rgba(200,255,0,0.04) 46%, rgba(0,0,0,0.24))",boxShadow:"0 14px 34px rgba(0,0,0,0.30)",border:"1px solid rgba(200,255,0,0.24)"}}>
-          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S FOCUS</div>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?28:32,lineHeight:1.05,letterSpacing:1.2,marginTop:8}}>{todaysMakes>0?`Add ${Math.max(0,dailyGoal-todaysMakes)} makes`:"Form Shooting Start"}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.45,marginTop:6}}>{missionStatus}</div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
-            {[`Intensity · ${todaysMakes>=dailyGoal?"High":"Build"}`,`Duration · 30 min`,`Progress · ${dailyPct}%`,`Category · Shooting`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.45)",border:"1px solid rgba(255,255,255,0.12)"}}>{tag}</span>)}
-          </div>
-          <button className="btn-v cta-primary" style={{marginTop:14,minHeight:46,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel}</button>
         </section>
         <section aria-label="Performance snapshot" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:8}}>
           {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly",value:weeklyMakes,color:LIGHT},{label:"Completion",value:`${dailyPct}%`,color:VOLT},{label:"Trend",value:weeklyMakes>=PLAYER_WEEKLY_SHOT_TARGET/2?"↑ On track":"→ Build",color:ORANGE}].map(item=><div key={item.label} style={{padding:"10px 10px",borderRadius:12,background:"rgba(255,255,255,0.03)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:21,marginTop:3,lineHeight:1.1}}>{item.value}</div></div>)}
