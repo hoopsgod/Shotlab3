@@ -62,10 +62,16 @@ export const deriveCompletionRatio = ({ todayMakes = 0, dailyGoal = 1 } = {}) =>
   return Math.min(100, Math.round((safeNumber(todayMakes) / goal) * 100));
 };
 
-export const deriveMomentumLabel = ({ weeklyMakes = 0, weeklyGoal = 1 } = {}) => {
+export const deriveMomentumLabel = ({ weeklyMakes = 0, weeklyGoal = 1, streak = 0, weeklyPct = 0 } = {}) => {
   const goal = Math.max(1, safeNumber(weeklyGoal));
-  if (safeNumber(weeklyMakes) >= goal) return "Rising fast";
-  if (safeNumber(weeklyMakes) >= Math.round(goal * 0.65)) return "Building";
+  const makes = safeNumber(weeklyMakes);
+  const pct = safeNumber(weeklyPct) || Math.round((makes / goal) * 100);
+  const streakDays = safeNumber(streak);
+
+  if (pct >= 100 && streakDays >= 8) return "Elite consistency";
+  if (pct >= 85 && streakDays >= 5) return "Hot streak";
+  if (pct >= 70 && streakDays >= 3) return "Locked in";
+  if (pct >= 40 || streakDays >= 2) return "Building rhythm";
   return "Early in cycle";
 };
 
@@ -89,7 +95,7 @@ export const deriveFirstWeekActivationMilestones = ({ hasRsvped = false, firstWo
 export const deriveTrainingIdentityLabels = ({ eventsAttended = 0, weeklyMakes = 0, weeklyGoal = 1, weeklyPct = 0, streak = 0 } = {}) => {
   const goal = Math.max(1, safeNumber(weeklyGoal));
   return {
-    trainingIdentity: eventsAttended >= 3 && weeklyMakes >= Math.round(goal * 0.75) ? "Two-way standard" : weeklyMakes >= Math.round(goal * 0.75) ? "Skill-volume specialist" : eventsAttended >= 3 ? "Team-first competitor" : "Foundation phase",
-    commitmentLevel: weeklyPct >= 90 && streak >= 5 ? "Elite discipline" : weeklyPct >= 70 ? "Reliable builder" : weeklyPct >= 45 ? "Work in progress" : "Needs consistency",
+    trainingIdentity: weeklyPct >= 85 && streak >= 5 ? "Rhythm scorer" : weeklyMakes >= Math.round(goal * 0.8) ? "Shot creator" : weeklyPct >= 55 ? "Volume builder" : streak >= 2 || eventsAttended >= 2 ? "Consistency focus" : "Foundation phase",
+    commitmentLevel: weeklyPct >= 95 && streak >= 7 ? "Elite consistency" : weeklyPct >= 75 ? "Locked in" : weeklyPct >= 45 ? "Building rhythm" : "Early in cycle",
   };
 };

@@ -38,5 +38,5 @@ test('player dashboard selectors safely handle empty/new player state', () => {
 
   const identity = deriveTrainingIdentityLabels({ eventsAttended: 0, weeklyMakes: 0, weeklyGoal: 300, weeklyPct: 0, streak: 0 });
   assert.equal(identity.trainingIdentity, 'Foundation phase');
-  assert.equal(identity.commitmentLevel, 'Needs consistency');
+  assert.equal(identity.commitmentLevel, 'Early in cycle');
 });
