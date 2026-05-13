@@ -306,6 +306,14 @@ const HOME_SHOTS_LEADERBOARD_SCOPES = [
 // These do not affect persistence, leaderboard queries, or backend behavior.
 const PLAYER_DAILY_SHOT_TARGET = 100;
 const PLAYER_WEEKLY_SHOT_TARGET = 500;
+const COACH_PRIORITIES_INIT = {
+  todayFocusText: "Daily shot volume + clean mechanics",
+  focusEmphasis: "Volume",
+  priorityDrillText: "At-home drill block",
+  challengeText: "Build momentum: complete one drill and log shots today.",
+  weeklyMakesTarget: PLAYER_WEEKLY_SHOT_TARGET,
+  weeklyCheckinsTarget: 2,
+};
 
 const HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE = {
   borderRadius: 999,
@@ -772,7 +780,7 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
+const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[coachPriorities,setCoachPriorities]=useState(COACH_PRIORITIES_INIT),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
 const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
 const[startupError,setStartupError]=useState("");
 const [homeShotsLeaderboard,setHomeShotsLeaderboard]=useState({status:"idle",rows:[],error:""});
@@ -1499,8 +1507,8 @@ const dataDebugPanel=dataDebugEnabled?<div style={{position:"fixed",right:12,bot
 return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)} isJoinConsumeActive={isJoinConsumeActive}/></div>}
-{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} leaderboardScope={homeShotsLeaderboardScope} onLeaderboardScopeChange={setHomeShotsLeaderboardScope} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,homeShotsLeaderboardScope)} statSyncError={statSyncError}/></div>}
-{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} leaderboardScope={homeShotsLeaderboardScope} onLeaderboardScopeChange={setHomeShotsLeaderboardScope} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,homeShotsLeaderboardScope)}/></div>}
+{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} leaderboardScope={homeShotsLeaderboardScope} onLeaderboardScopeChange={setHomeShotsLeaderboardScope} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,homeShotsLeaderboardScope)} statSyncError={statSyncError}/></div>}
+{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} coachPriorities={coachPriorities} setCoachPriorities={setCoachPriorities} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} leaderboardScope={homeShotsLeaderboardScope} onLeaderboardScopeChange={setHomeShotsLeaderboardScope} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,homeShotsLeaderboardScope)}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 {dataDebugPanel}
 </TeamBrandingProvider>;
@@ -1621,7 +1629,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 // ═══════════════════════════════════════
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
-function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,leaderboardScope,onLeaderboardScopeChange,refreshHomeShotsLeaderboard,statSyncError=""}){
+function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,leaderboardScope,onLeaderboardScopeChange,refreshHomeShotsLeaderboard,statSyncError=""}){
 const canAccessTab=useCallback((nextTab)=>{
   if(nextTab==="players")return u.isCoach;
   if(nextTab==="duels")return !u.isCoach;
@@ -1883,10 +1891,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const weekMissingCount=upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length;
       const unresolvedBadgeLabel=weekMissingCount>0?`${weekMissingCount} unresolved RSVP${weekMissingCount===1?"":"s"}`:"All RSVPs set";
       const coachName=players.find(p=>p.role==="coach"&&p.teamId===u?.teamId)?.name||"Your coach";
-      const coachTodayFocus=todaysMakes>=dailyGoal?"Recovery + shot quality":"Daily shot volume + clean mechanics";
-      const coachPriorityDrill=drills.find(d=>!todayS.some(s=>s.drillId===d.id))?.name||drills[0]?.name||"At-home drill block";
-      const coachChallengeText=streak>=5?"Protect your streak with one completed drill before day ends.":"Build momentum: complete one drill and log shots today.";
-      const weeklyGoalLabel=`${weeklyGoal} makes + ${Math.min(3,Math.max(1,upcomingWeekEvents.length||2))} team check-ins`;
+      const emphasisLabel=String(coachPriorities?.focusEmphasis||"Volume").trim();
+      const coachTodayFocus=String(coachPriorities?.todayFocusText||"Daily shot volume + clean mechanics").trim();
+      const coachPriorityDrill=String(coachPriorities?.priorityDrillText||drills.find(d=>!todayS.some(s=>s.drillId===d.id))?.name||drills[0]?.name||"At-home drill block").trim();
+      const coachChallengeText=String(coachPriorities?.challengeText||"Build momentum: complete one drill and log shots today.").trim();
+      const coachWeeklyMakesTarget=Math.max(0,Number(coachPriorities?.weeklyMakesTarget)||weeklyGoal);
+      const coachWeeklyCheckinsTarget=Math.max(1,Number(coachPriorities?.weeklyCheckinsTarget)||Math.min(3,Math.max(1,upcomingWeekEvents.length||2)));
+      const weeklyGoalLabel=`${coachWeeklyMakesTarget} makes + ${coachWeeklyCheckinsTarget} team check-ins`;
       const consistencyExpectation=weeklyPct>=80?"Consistency is on track — maintain pace through weekend.":"Target one focused session daily to keep weekly pace.";
       const playerPriorityStyle={critical:{color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.28)",label:"CRITICAL"},important:{color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)",label:"IMPORTANT"},passive:{color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)",label:"PASSIVE"}};
       const playerBriefingQueue=derivePlayerNotificationBriefing({nextEvent,dayLabel,weekMissingCount,unresolvedBadgeLabel,scSessions,streak}).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
@@ -1895,7 +1906,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
             <div>
               <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S FOCUS</div>
-              <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?30:35,lineHeight:1.02,letterSpacing:1.2,marginTop:8}}>{todaysMakes>0?`Add ${Math.max(0,dailyGoal-todaysMakes)} makes`:"Form Shooting Start"}</div>
+              <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?30:35,lineHeight:1.02,letterSpacing:1.2,marginTop:8}}>{coachTodayFocus}</div>
             </div>
             <span style={{fontFamily:FB,fontSize:10,color:dailyPct>=100?VOLT:"#FFCE73",border:`1px solid ${dailyPct>=100?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"4px 9px"}}>{dailyPct>=100?"Goal hit":momentumLabel}</span>
           </div>
@@ -1905,7 +1916,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <div style={{marginTop:12,height:8,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"linear-gradient(90deg, #C8FF1A, #E6FF7A)",boxShadow:"0 0 20px rgba(200,255,26,0.44)"}}/></div>
           <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:10,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:11}}>
-            {[`Streak · ${formatStreakDays(streak)}`,`Weekly · ${weeklyMakes}/${weeklyGoal}`,`Momentum · ${momentumLabel}`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.52)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
+            {[`Emphasis · ${emphasisLabel}`,`Weekly · ${weeklyMakes}/${coachWeeklyMakesTarget}`,`Momentum · ${momentumLabel}`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.52)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
           </div>
           <button className="btn-v cta-primary" style={{marginTop:14,minHeight:48,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel==="Start Training"?"LOG SHOTS":"LOG SHOTS"}</button>
         </section>
@@ -2954,7 +2965,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 const toSafeNumber=(value)=>{const parsed=Number(value);return Number.isFinite(parsed)?parsed:0;};
 const getPlayerHomeShotMakes=(playerEmail,logs,teamId)=>{const targetEmail=normalizeEmail(playerEmail);if(!targetEmail)return 0;return (Array.isArray(logs)?logs:[]).reduce((total,log)=>{if(normalizeEmail(log?.email)!==targetEmail)return total;const logTeamId=log?.teamId||null;if(teamId&&logTeamId&&logTeamId!==teamId)return total;return total+toSafeNumber(log?.made||0);},0);};
-function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,leaderboardScope,onLeaderboardScopeChange,refreshHomeShotsLeaderboard}){
+function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachPriorities,setCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,leaderboardScope,onLeaderboardScopeChange,refreshHomeShotsLeaderboard}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all"),[eventSaveError,setEventSaveError]=useState("");
@@ -3319,6 +3330,19 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>COACH OPERATIONAL ALERTS</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Prioritized alerts for RSVP closure, readiness, activity, and schedule reliability.</div></div><button className="pageHeaderPill" onClick={()=>setTab("events")}>Open events</button></div>
           <div style={{display:"grid",gap:7,marginTop:9}}>{coachAlerts.map((alert)=>{const tone=coachPriorityStyle[alert.priority]||coachPriorityStyle.passive;return <button key={alert.title} type="button" onClick={alert.onClick} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${tone.border}`,background:"rgba(255,255,255,0.015)",cursor:"pointer"}}><span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.border}`,borderRadius:999,padding:"3px 7px",background:tone.bg}}>{tone.label}</span><span><span style={{display:"block",fontFamily:FB,fontSize:11,color:"var(--text-1)",fontWeight:700}}>{alert.title}</span><span style={{display:"block",fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:2}}>{alert.detail}</span></span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{alert.cta} ›</span></button>;})}</div>
+        </section>
+        <section className="accent-card" style={{borderRadius:16,padding:isDesktop?"14px":"12px",marginBottom:12,background:"linear-gradient(152deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015))",border:"1px solid rgba(255,255,255,0.16)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:10}}>
+            <div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>PLAYER PRIORITIES</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Control what players see on Today’s Focus, Priority Drill, Coach Challenge, and Weekly Goal.</div></div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(2,minmax(0,1fr))":"1fr",gap:8}}>
+            <FF l="Today's Focus" v={coachPriorities?.todayFocusText||""} set={v=>setCoachPriorities(prev=>({...prev,todayFocusText:v}))} ph="Set today’s top coaching focus." />
+            <FF l="Focus Emphasis" v={coachPriorities?.focusEmphasis||"Volume"} set={v=>setCoachPriorities(prev=>({...prev,focusEmphasis:v}))} opts={["Volume","Technique","Consistency","Recovery","Readiness"]} />
+            <FF l="Priority Drill" v={coachPriorities?.priorityDrillText||""} set={v=>setCoachPriorities(prev=>({...prev,priorityDrillText:v}))} ph="Name the drill players should prioritize." />
+            <FF l="Coach Challenge" v={coachPriorities?.challengeText||""} set={v=>setCoachPriorities(prev=>({...prev,challengeText:v}))} ta ph="Set challenge language players will see today." />
+            <FF l="Weekly Makes Target" v={coachPriorities?.weeklyMakesTarget||0} set={v=>setCoachPriorities(prev=>({...prev,weeklyMakesTarget:Number(v)||0}))} tp="number" ph="500" />
+            <FF l="Weekly Check-ins" v={coachPriorities?.weeklyCheckinsTarget||1} set={v=>setCoachPriorities(prev=>({...prev,weeklyCheckinsTarget:Math.max(1,Number(v)||1)}))} tp="number" ph="2" />
+          </div>
         </section>
 
         <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
