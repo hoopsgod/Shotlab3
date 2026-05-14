@@ -2618,160 +2618,65 @@ return <button type="button" onClick={onClick} className="mode-card" style={{"--
 // ═══════════════════════════════════════
 // DASHBOARD LEADERBOARD — The hero section
 // ═══════════════════════════════════════
-function DashboardLeaderboard({scores,drills,programDrills,user,scRsvps,rsvps,shotLogs,players}){
-const[mode,setMode]=useState("home");
-const[sub,setSub]=useState("total");
+function DashboardLeaderboard({scores,drills,programDrills,user,shotLogs,players}){
+const [mode,setMode]=useState("playerShots");
+const [selectedDrillId,setSelectedDrillId]=useState(null);
 const medals=[VOLT,"#A0A0A0","#A0A0A0"];
-const homeScores=useMemo(()=>scores.filter(s=>s.src==="home"||!s.src),[scores]);
-const progScores=useMemo(()=>scores.filter(s=>s.src==="program"),[scores]);
 
 const leaderboardEligible=useMemo(()=>new Set(players.filter(p=>p.role!=="coach"&&isLeaderboardEligible(players,p.email)).map(p=>p.email)),[players]);
-const board=useMemo(()=>{
-if(mode==="home"){
-if(sub==="shots"){
-const m={};shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-}
-if(sub==="total"){
-// Combine drill scores + shot logs
-const m={};
-homeScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
-shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});
-return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-}
-// Per-drill
-const did=parseInt(sub);const m={};
-homeScores.filter(s=>s.drillId===did).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
-return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-}
-// Program
-if(sub==="events"){
-const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-}
-if(sub==="sc"){
-const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-}
-if(sub.startsWith("prog-")){const did=parseInt(sub.slice(5));const m={};progScores.filter(s=>s.drillId===did).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);}
-const m={};progScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
-return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-},[homeScores,progScores,mode,sub,scores,scRsvps,rsvps,shotLogs,programDrills,leaderboardEligible]);
 
-const isHome=mode==="home";
-const accentColor=isHome?VOLT:CYAN;
-const unit=sub==="shots"?"makes":sub==="events"?"events":sub==="sc"?"sessions":"makes";
-const title=isHome?"AT HOME":"PROGRAM";
-const modeStyles={
-home:{accent:VOLT,bg:"rgba(200, 255, 0, 0.14)",glow:"0 0 18px rgba(200, 255, 0, 0.28)",label:"🏠"},
-prog:{accent:CYAN,bg:"rgba(0, 229, 255, 0.14)",glow:"0 0 18px rgba(0, 229, 255, 0.28)",label:"📅"}
-};
+const playerShotsBoard=useMemo(()=>{
+  const m={};
+  shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=Number(s.made)||0});
+  return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
+},[shotLogs,leaderboardEligible]);
 
-// Swap sub when switching modes
-const switchMode=(m)=>{setMode(m);setSub(m==="home"?"total":"events")};
+const drillOptions=useMemo(()=>{
+  const byId=new Map();
+  [...(Array.isArray(drills)?drills:[]),...(Array.isArray(programDrills)?programDrills:[])].forEach(d=>{if(d?.id!=null)byId.set(String(d.id),d)});
+  const scoredIds=new Set((Array.isArray(scores)?scores:[]).map(s=>String(s?.drillId)).filter(Boolean));
+  const prioritized=[...byId.values()].filter(d=>scoredIds.has(String(d.id))||d?.priority===true||d?.isPriority===true);
+  return prioritized.length?prioritized:[...byId.values()];
+},[drills,programDrills,scores]);
 
-return <div>
-{/* Mode toggle */}
-<div style={{display:"flex",gap:8,background:"#121212",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(200, 255, 0, 0.24)"}}>
-{[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=>{
-const active=mode===m.k;
-const thisMode=modeStyles[m.k];
-return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid ${active?thisMode.accent+"AA":"#353535"}`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,transition:"all 180ms ease",background:active?`linear-gradient(180deg, ${thisMode.bg}, #131313 85%)`:"#171717",color:active?thisMode.accent:"#7A7A7A",boxShadow:active?thisMode.glow:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:8,textShadow:active?`0 0 8px ${thisMode.accent}55`:"none"}}><span aria-hidden="true" style={{fontSize:12,lineHeight:1,opacity:active?1:.65}}>{thisMode.label}</span>{m.l}</button>
-})}
-</div>
+useEffect(()=>{
+  if(!drillOptions.length){setSelectedDrillId(null);return;}
+  if(!selectedDrillId||!drillOptions.some(d=>String(d.id)===String(selectedDrillId)))setSelectedDrillId(drillOptions[0].id);
+},[drillOptions,selectedDrillId]);
 
-{/* Sub-tabs */}
-<div style={{overflowX:"auto",marginBottom:16,paddingBottom:4,paddingLeft:16,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none"}}>
-  <div style={{display:"flex",gap:8,minWidth:"max-content"}}>
-    {isHome?
-      [{k:"total",l:"ALL"},{k:"shots",l:"SHOTS"},...drills.map(d=>({k:String(d.id),l:d.name}))].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"#C8FF00":"#1E1E1E",color:sub===t.k?"#000000":"#555555",transition:"all .2s"}}>{t.l}</button>)
-    :[{k:"events",l:"ATTENDANCE"},{k:"sc",l:"S&C"},{k:"prog-total",l:"DRILL SCORES"},...programDrills.map(d=>({k:`prog-${d.id}`,l:d.name}))].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?CYAN:"#1E1E1E",color:sub===t.k?"#041014":"#555555",transition:"all .2s",boxShadow:sub===t.k?"0 0 14px rgba(0, 229, 255, 0.35)":"none"}}>{t.l}</button>)}
+const selectedDrill=useMemo(()=>drillOptions.find(d=>String(d.id)===String(selectedDrillId))||null,[drillOptions,selectedDrillId]);
+
+const drillBoard=useMemo(()=>{
+  if(!selectedDrill)return [];
+  const entries=(Array.isArray(scores)?scores:[]).filter(s=>String(s?.drillId)===String(selectedDrill.id)&&leaderboardEligible.has(s.email));
+  const m={};
+  entries.forEach(s=>{
+    const key=s.email;
+    const scoreVal=Number(s.score)||0;
+    const ts=new Date(s.ts||s.createdAt||s.updatedAt||s.date||0).getTime()||0;
+    if(!m[key]||scoreVal>m[key].score||(scoreVal===m[key].score&&ts>m[key].ts))m[key]={email:key,name:s.name||s.email,score:scoreVal,date:s.date||null,ts};
+  });
+  return Object.values(m).sort((a,b)=>b.score-a.score||b.ts-a.ts);
+},[scores,selectedDrill,leaderboardEligible]);
+
+return <div className="fade-up">
+  <div style={{display:"flex",gap:8,background:"#121212",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(200, 255, 0, 0.24)"}}>
+    {[{k:"playerShots",l:"PLAYER SHOTS",accent:VOLT},{k:"drillScores",l:"DRILL SCORES",accent:CYAN}].map(t=>{const active=mode===t.k;return <button key={t.k} onClick={()=>setMode(t.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid ${active?t.accent+"AA":"#353535"}`,cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:"0.08em",background:active?`${t.accent}22`:"#171717",color:active?t.accent:"#7A7A7A"}}>{t.l}</button>})}
   </div>
-</div>
 
-{/* Title */}
-<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-  <div style={{width:4,height:22,borderRadius:2,background:accentColor}}/>
-  <div style={{fontFamily:FD,color:accentColor,fontSize:18,letterSpacing:3,flex:1}}>{title} LEADERBOARD</div>
-  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{board.length}</div>
-</div>
+  {mode==="playerShots"&&<>
+    <SH isCoach t="PLAYER SHOTS LEADERBOARD" s={`${playerShotsBoard.length} ranked`} />
+    {playerShotsBoard.length===0?<Empty t="No player shots logged yet" action="Players appear here after they log made shots."/>:playerShotsBoard.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:8,border:`1px solid ${p.email===user?.email?VOLT+"44":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,letterSpacing:"0.04em"}}>{(p.name||"Player").toUpperCase()}</div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:VOLT,fontSize:19}}>{p.total}</div><div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:"0.08em"}}>MAKES</div></div></div>)}
+  </>}
 
-{/* Board */}
-<div key={mode+sub} className="slide-r">
-{board.length===0&&<Empty t={`No ${unit} logged yet`} action="Log a drill score to get on the board!" onTap={null}/>}
-
-{/* YOUR POSITION — sticky anchor */}
-{(()=>{const myIdx=board.findIndex(p=>p.email===user.email);const myEntry=board[myIdx];
-  if(myIdx<0)return null;
-  return <div style={{background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:14,padding:"12px 16px",marginBottom:14,border:`2px solid ${accentColor}44`,display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
-    <div style={{width:4,height:28,borderRadius:2,background:accentColor,flexShrink:0}}/>
-    <div style={{fontFamily:FD,color:accentColor,fontSize:24}}>#{myIdx+1}</div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,letterSpacing:1}}>YOUR POSITION</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{myEntry.total} {unit}</div>
-    </div>
-    {myIdx>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:600,letterSpacing:1}}>{board[myIdx-1].total-myEntry.total} to #{myIdx}</div>}
-  </div>})()}
-
-{board.map((p,i)=>{
-  const isMe=p.email===user.email;
-  const isLeader=i===0&&board.length>1;
-  const isTop3=i<3;
-  const leaderTotal=board[0]?.total||1;
-  const pct=Math.round((p.total/leaderTotal)*100);
-  const rowBg=i%2===0?CARD_BG:T.SURFACE;
-
-  if(isLeader) return <div key={p.email} className="podium-glow" style={{"--pod-c":accentColor,display:"flex",alignItems:"center",gap:14,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:16,padding:"20px 18px",marginBottom:12,border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
-    <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
-    <div style={{width:32,height:32,borderRadius:9,background:`${accentColor}18`,border:`2px solid ${accentColor}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:14,color:accentColor,flexShrink:0}}>👑</div>
-    <div className="playersAvatarRing"><Av n={p.name} sz={40} email={p.email}/></div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:LIGHT,fontSize:15,fontWeight:700,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
-      <div style={{fontFamily:FB,color:accentColor,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1</div>
-    </div>
-    <div style={{textAlign:"right",flexShrink:0}}>
-      <div style={{fontFamily:FD,fontSize:28,color:accentColor}}>{p.total}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:600}}>{unit.toUpperCase()}</div>
-    </div>
-  </div>;
-
-  return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",borderRadius:12,padding:"14px 14px",marginBottom:isTop3?10:8,border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
-    {isTop3&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
-    {isMe&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
-    <RB r={i+1} m={medals}/>
-    <Av n={p.name} sz={32} email={p.email}/>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:isMe?LIGHT:LIGHT,fontSize:13,fontWeight:isMe?700:600,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
-      <div style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
-        <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:2,transition:"width .4s ease"}}/>
-      </div>
-    </div>
-
-    <DividerDot/>
-
-    {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
-    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
-    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done&&hasDrillMax(d)?Math.round(done.score/d.max*100):0;
-      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
-        <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
-        </div>
-        {done?<div style={{textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}{hasDrillMax(d)&&<span style={{color:MUTED,fontSize:11}}>/{d.max}</span>}</div>
-          {hasDrillMax(d)&&<div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>}
-        </div>
-        :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
-      </button>})}
-    <div style={{textAlign:"right",flexShrink:0}}>
-      <div style={{fontFamily:FD,color:isMe?accentColor:isTop3?accentColor:LIGHT,fontSize:20}}>{p.total}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:500}}>{unit.toUpperCase()}</div>
-    </div>
-  </div>;
-})}
-</div>
-
-  </div>;
+  {mode==="drillScores"&&<>
+    <SH isCoach t="DRILL SCORES" s={selectedDrill?selectedDrill.name:"Select a drill"} />
+    {drillOptions.length===0?<Empty t="No drills available yet" action="Create drills first, then player scores will populate this leaderboard."/>:<>
+      <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:8,marginBottom:12}}>{drillOptions.map(d=>{const active=String(d.id)===String(selectedDrillId);return <button key={d.id} onClick={()=>setSelectedDrillId(d.id)} style={{padding:"8px 12px",borderRadius:999,border:`1px solid ${active?CYAN+"66":BORDER_CLR}`,background:active?`${CYAN}22`:CARD_BG,color:active?CYAN:T.SUB,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",whiteSpace:"nowrap"}}>{d.name}</button>})}</div>
+      {drillBoard.length===0?<Empty t="No drill scores yet" action={selectedDrill?`No players have logged ${selectedDrill.name} scores yet. Ask players to submit an attempt to activate rankings.`:"Select a drill to view rankings."}/>:drillBoard.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:8,border:`1px solid ${p.email===user?.email?CYAN+"44":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,letterSpacing:"0.04em",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(p.name||"Player").toUpperCase()}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:2}}>{p.date?`Latest: ${p.date}`:"Latest attempt recorded"}</div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:CYAN,fontSize:19}}>{p.score}</div><div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:"0.08em"}}>BEST SCORE</div></div></div>)}
+    </>}
+  </>}
+</div>;
 }
 
 // ═══════════════════════════════════════
