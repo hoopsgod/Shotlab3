@@ -1887,25 +1887,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const todaysMakes=normalizedShotLogs.filter(s=>s.date===today).reduce((a,s)=>a+s.made,0);
       const hasAnyShots=normalizedShotLogs.some(s=>s.made>0);
       const leaderboardRank=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows.findIndex((row)=>normalizeEmail(row?.email||"")===normalizeEmail(u.email))+1:0;
-      const missionCtaLabel=hasAnyShots?"Start Training":"Log Shots";
+      const missionCtaLabel=hasAnyShots?"Log Shots":"Log Shots";
       const missionStatus=hasAnyShots?`Momentum is live — ${weeklyMakes>0?"stack your next quality reps":"start your first quality reps"} and keep the cycle moving.`:"Momentum begins today. Log your first reps to establish rhythm and build your foundation.";
-      const homeStats=[{label:"Makes Today",value:<AnimNum v={todaysMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Training Streak",value:formatStreakDays(streak),color:CYAN},{label:"Drills Completed",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
-      const programStats=[{label:"Next Team Event",value:nextEventLabel,color:LIGHT},{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance Rate",value:attendancePct,color:CYAN}];
-      const quickStats=[
-        {label:"Today's Makes",value:todaysMakes,color:VOLT},
-        {label:"Weekly Total",value:weeklyMakes,color:LIGHT},
-        {label:"Streak",value:formatStreakDays(streak),color:CYAN},
-        {label:"Rank",value:leaderboardRank>0?`#${leaderboardRank}`:"—",color:ORANGE},
-        {label:"Events Attended",value:eventsAttended,color:LIGHT},
-      ];
       const dailyGoal=PLAYER_DAILY_SHOT_TARGET;
       const weeklyGoal=PLAYER_WEEKLY_SHOT_TARGET;
       const dailyPct=deriveCompletionRatio({todayMakes:todaysMakes,dailyGoal});
       const weeklyPct=deriveCompletionRatio({todayMakes:weeklyMakes,dailyGoal:weeklyGoal});
-      const seasonProgressPct=Math.min(100,Math.round(((weeklyPct*0.45)+(dailyPct*0.2)+Math.min(streak*6,100)*0.35)));
       const momentumLabel=deriveMomentumLabel({weeklyMakes,weeklyGoal,streak,weeklyPct});
-      const { trainingIdentity, commitmentLevel }=deriveTrainingIdentityLabels({eventsAttended,weeklyMakes,weeklyGoal,weeklyPct,streak});
-      const currentFocus=deriveNextFocusLabel({todaysMakes,dailyGoal});
       const playerHasTeam=Boolean(u?.teamId);
       const hasUpcomingEvents=upcomingEventsCount>0;
       const hasRsvped=rsvps.some(r=>normalizeEmail(r.email)===normalizeEmail(u.email)&&r.teamId===u?.teamId);
@@ -1948,9 +1936,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const coachWeeklyMakesTarget=Math.max(0,Number(coachPriorities?.weeklyMakesTarget)||weeklyGoal);
       const coachWeeklyCheckinsTarget=Math.max(1,Number(coachPriorities?.weeklyCheckinsTarget)||Math.min(3,Math.max(1,upcomingWeekEvents.length||2)));
       const weeklyGoalLabel=`${coachWeeklyMakesTarget} makes + ${coachWeeklyCheckinsTarget} team check-ins`;
-      const consistencyExpectation=weeklyPct>=80?"Consistency is on track — maintain pace through weekend.":"Target one focused session daily to keep weekly pace.";
-      const playerPriorityStyle={critical:{color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.28)",label:"CRITICAL"},important:{color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)",label:"IMPORTANT"},passive:{color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)",label:"PASSIVE"}};
-      const playerBriefingQueue=derivePlayerNotificationBriefing({nextEvent,dayLabel,weekMissingCount,unresolvedBadgeLabel,scSessions,streak}).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
+      const playerBriefingQueue=derivePlayerNotificationBriefing({nextEvent,dayLabel,weekMissingCount,unresolvedBadgeLabel,scSessions,streak}).slice(0,1).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
         <section aria-label="Today's focus" style={{padding:isNarrow?"18px":"20px",borderRadius:20,background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
@@ -1966,60 +1952,17 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <div style={{marginTop:12,height:8,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"linear-gradient(90deg, #C8FF1A, #E6FF7A)",boxShadow:"0 0 20px rgba(200,255,26,0.44)"}}/></div>
           <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:10,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:11}}>
-            {[`Emphasis · ${emphasisLabel}`,`Weekly · ${weeklyMakes}/${coachWeeklyMakesTarget}`,`Momentum · ${momentumLabel}`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.52)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
+            {[`Emphasis · ${emphasisLabel}`,`Priority drill · ${coachPriorityDrill}`,`Coach challenge · ${coachChallengeText}`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.52)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
           </div>
-          <button className="btn-v cta-primary" style={{marginTop:14,minHeight:48,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel==="Start Training"?"LOG SHOTS":"LOG SHOTS"}</button>
+          <button className="btn-v cta-primary" style={{marginTop:14,minHeight:48,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel.toUpperCase()}</button>
         </section>
-        <section aria-label="Coach guidance and accountability" style={{padding:isNarrow?"12px":"14px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-            <div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"0.04em"}}>COACH GUIDANCE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{coachName} has active priorities tied to your weekly progression.</div></div>
-            <span style={{fontFamily:FB,fontSize:10,color:streak>=3?VOLT:"#FFCE73",border:`1px solid ${streak>=3?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"3px 8px"}}>{streak} day visibility</span>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:7,marginTop:9}}>
-            {[{k:"Today's focus",v:coachTodayFocus},{k:"Priority drill",v:coachPriorityDrill},{k:"Coach challenge",v:coachChallengeText},{k:"Weekly goal",v:weeklyGoalLabel}].map(item=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 9px",background:"rgba(12,14,18,0.5)"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:11,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.35}}>{item.v}</div></div>)}
-          </div>
-          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginTop:8}}>
-            {[`Coach can view progress`, `Streak: ${formatStreakDays(streak)}`, `Weekly completion: ${weeklyPct}%`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"3px 8px",borderRadius:999,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
-          </div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:8}}>{consistencyExpectation}</div>
+        <section aria-label="Performance snapshot" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(3,minmax(0,1fr))":"repeat(3,minmax(0,1fr))",gap:8}}>
+          {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly Completion",value:`${weeklyPct}%`,color:ORANGE},{label:"Momentum",value:momentumLabel,color:VOLT}].map(item=><div key={item.label} style={{padding:"10px 10px",borderRadius:12,background:"rgba(255,255,255,0.03)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:18,marginTop:3,lineHeight:1.1}}>{item.value}</div></div>)}
         </section>
-        <section aria-label="Next 7 days events intelligence" style={{padding:isNarrow?"13px":"15px",borderRadius:18,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)",boxShadow:"0 8px 22px rgba(0,0,0,0.18)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:9}}>
-            <div>
-              <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em"}}>NEXT 7 DAYS</div>
-              <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:2}}>Your practices, games, workouts, and RSVP priorities.</div>
-            </div>
-            <button className="pageHeaderPill" onClick={()=>switchTab("program")}>Open Events</button>
-          </div>
-          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:9}}>
-            <span style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,255,255,0.24)"}}>Upcoming {upcomingWeekEvents.length}</span>
-            <span style={{fontFamily:FB,fontSize:10,color:VOLT,padding:"3px 8px",borderRadius:999,border:"1px solid rgba(200,255,0,0.45)"}}>Confirmed {weekConfirmedCount}</span>
-            <span style={{fontFamily:FB,fontSize:10,color:"#FFB86B",padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,184,107,0.45)"}}>Unresolved {weekMissingCount}</span>
-          </div>
-          <div style={{display:"grid",gap:7}}>
-            {upcomingWeekEvents.length===0?<div style={{padding:"11px 12px",borderRadius:11,border:"1px dashed rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.015)"}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>Schedule window is clear.</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>Use this opening to recover, prep, and start your cycle strong before the next team block.</div></div>:upcomingWeekEvents.map((ev)=>{
-              const tone=eventTypeTone(ev.type);
-              const isConfirmed=rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes");
-              const isMissing=!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email));
-              const day=dayLabel(ev.date);
-              const isUrgent=day==="TODAY"||day==="TOMORROW";
-              return <button key={ev.id} type="button" onClick={()=>switchTab("program")} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",textAlign:"left",padding:isNarrow?"9px 9px":"9px 10px",borderRadius:11,border:`1px solid ${isUrgent?"rgba(200,255,0,0.32)":"rgba(255,255,255,0.12)"}`,background:isUrgent?"rgba(200,255,0,0.08)":"rgba(12,14,18,0.58)",cursor:"pointer"}}>
-                <span style={{fontFamily:FB,fontSize:9,color:tone.color,background:tone.bg,padding:"3px 7px",borderRadius:999,border:`1px solid ${tone.color}33`}}>{tone.label}</span>
-                <div style={{minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{day} · {ev.time||"TBD"}</div></div>
-                <span style={{fontFamily:FB,fontSize:9,color:isConfirmed?VOLT:isMissing?"#FFB86B":"#D2C6FF",border:`1px solid ${isConfirmed?"rgba(200,255,0,0.45)":isMissing?"rgba(255,184,107,0.42)":"rgba(210,198,255,0.42)"}`,borderRadius:999,padding:"3px 7px"}}>{isConfirmed?"CONFIRMED":isMissing?"MISSING RSVP":"PENDING"}</span>
-              </button>;
-            })}
-          </div>
-        </section>
-        <section aria-label="Player notification briefing" style={{padding:isNarrow?"12px":"14px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-            <div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"0.04em"}}>PLAYER NOTIFICATION BRIEFING</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Premium, low-noise priorities for events, workouts, and consistency.</div></div>
-            <span style={{fontFamily:FB,fontSize:10,color:weekMissingCount>0?"#FFB86B":VOLT,border:`1px solid ${weekMissingCount>0?"rgba(255,184,107,0.42)":"rgba(200,255,0,0.45)"}`,borderRadius:999,padding:"3px 8px"}}>{unresolvedBadgeLabel}</span>
-          </div>
-          <div style={{display:"grid",gap:7,marginTop:9}}>{playerBriefingQueue.map((note)=>{const tone=playerPriorityStyle[note.priority]||playerPriorityStyle.passive;return <button key={note.title} type="button" onClick={note.onClick} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",alignItems:"center",gap:8,textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${tone.border}`,background:"rgba(12,14,18,0.56)",cursor:"pointer"}}><span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.border}`,background:tone.bg,borderRadius:999,padding:"3px 7px"}}>{tone.label}</span><span><span style={{display:"block",fontFamily:FB,fontWeight:700,fontSize:11,color:LIGHT}}>{note.title}</span><span style={{display:"block",fontFamily:FB,fontSize:10,color:T.SUB,marginTop:2}}>{note.detail}</span></span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{note.cta} ›</span></button>;})}</div>
-        </section>
-        <section aria-label="Performance snapshot" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:8}}>
-          {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly",value:weeklyMakes,color:LIGHT},{label:"Daily Completion",value:`${dailyPct}%`,color:VOLT},{label:"Weekly Completion",value:`${weeklyPct}%`,color:ORANGE}].map(item=><div key={item.label} style={{padding:"10px 10px",borderRadius:12,background:"rgba(255,255,255,0.03)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:21,marginTop:3,lineHeight:1.1}}>{item.value}</div></div>)}
+        <section aria-label="Coach and notifications" style={{padding:"12px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:`1px solid ${BORDER_CLR}77`}}>
+          <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"0.04em"}}>COACH + ACCOUNTABILITY</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>{coachName} priorities are active. {weeklyGoalLabel}.</div>
+          {playerBriefingQueue.map((note)=><button key={note.title} type="button" onClick={note.onClick} style={{marginTop:8,width:"100%",display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(12,14,18,0.56)",color:LIGHT,fontFamily:FB,cursor:"pointer"}}><span>{note.title}</span><span style={{fontSize:10,color:T.SUB}}>{note.cta} ›</span></button>)}
         </section>
         <section aria-label="Next session" style={{padding:"12px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:`1px solid ${BORDER_CLR}77`}}>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>NEXT SESSION</div>
@@ -2034,25 +1977,9 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{firstWorkoutComplete?"Keep stacking quality reps. Protect momentum with one intentional action today.":"Start your cycle strong: first reps create your rhythm and unlock performance tracking."}</div>
           <div style={{display:"grid",gap:6,marginTop:7}}>{playerChecklist.slice(0,4).map(item=><div key={item.label} style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11}}>{item.done?"✓":"•"} {item.label}</div>)}</div>
         </section>
-        <section aria-label="First week activation for players" style={{padding:"11px",borderRadius:12,background:"linear-gradient(150deg, rgba(255,255,255,0.03), rgba(200,255,0,0.03))",border:"1px solid rgba(255,255,255,0.12)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-            <div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,letterSpacing:"0.05em"}}>FIRST-WEEK ACTIVATION</div>
-            <span style={{fontFamily:FB,color:VOLT,fontSize:10}}>{firstWeekActivation.filter(item=>item.done).length}/{firstWeekActivation.length}</span>
-          </div>
-          <div style={{display:"grid",gap:6,marginTop:7}}>
-            {firstWeekActivation.map((item)=><button key={item.label} type="button" onClick={item.onClick} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"8px 9px",borderRadius:10,border:`1px solid ${item.done?"rgba(200,255,0,0.28)":"rgba(255,255,255,0.12)"}`,background:item.done?"rgba(200,255,0,0.06)":"rgba(12,14,18,0.45)",color:LIGHT,fontFamily:FB,fontSize:11,textAlign:"left",cursor:"pointer",opacity:item.done?0.95:0.85}}><span>{item.done?"✓":"•"} {item.label}</span><span style={{color:item.done?VOLT:T.SUB,fontSize:10}}>{item.done?"Momentum locked":"Begin phase"}</span></button>)}
-          </div>
+        <section aria-label="Go deeper" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:8}}>
+          {[{label:"Program",sub:"Drills + leaderboards",onClick:()=>switchTab("duels")},{label:"Progress",sub:"Analytics + history",onClick:()=>switchTab("profile")},{label:"Events",sub:"Schedule + RSVP",onClick:()=>switchTab("program")},{label:"At Home Log",sub:"Shot logging",onClick:()=>switchTab("log-drill")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:64,borderRadius:12,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer"}}><div>{action.label}</div><div style={{fontSize:10,color:T.SUB,marginTop:3,fontWeight:500}}>{action.sub}</div></button>)}
         </section>
-        <section aria-label="Training identity" style={{padding:"12px",borderRadius:14,background:"linear-gradient(150deg, rgba(200,255,0,0.10), rgba(255,255,255,0.03) 36%, rgba(11,13,16,0.92))",border:"1px solid rgba(200,255,0,0.28)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-            <div style={{fontFamily:FD,fontSize:14,color:LIGHT,letterSpacing:"0.04em"}}>TRAINING IDENTITY</div>
-            <span style={{fontFamily:FB,fontSize:10,color:VOLT,border:"1px solid rgba(200,255,0,0.45)",borderRadius:999,padding:"3px 8px"}}>{momentumLabel}</span>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:7,marginTop:8}}>
-            {[{k:"Current Focus",v:currentFocus},{k:"Season Progress",v:`${seasonProgressPct}%`},{k:"Training Identity",v:trainingIdentity},{k:"Commitment Level",v:commitmentLevel}].map((item)=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 9px",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k}</div><div style={{fontFamily:FB,fontSize:11,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.4}}>{item.v}</div></div>)}
-          </div>
-        </section>
-        <RecentActivityCard title="Recent Activity" items={recentPlayerActivity}/>
       </div>
     })()}
 
