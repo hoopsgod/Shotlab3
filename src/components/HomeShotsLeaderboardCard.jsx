@@ -1,5 +1,7 @@
 import React from "react";
 
+const rhythm = { card: 14, sectionGap: 10, rowGap: 8 };
+
 export default function HomeShotsLeaderboardCard({
   title = "TOP 10 HOME SHOTS",
   status = "idle",
@@ -8,42 +10,16 @@ export default function HomeShotsLeaderboardCard({
   onRetry,
 }) {
   const renderLoading = () => (
-    <div style={{ display: "grid", gap: 8 }}>
-      {Array.from({ length: 5 }).map((_, index) => (
-        <div
-          key={`leaderboard-skeleton-${index}`}
-          style={{
-            display: "grid",
-            gridTemplateColumns: "40px 1fr auto",
-            alignItems: "center",
-            gap: 10,
-            padding: "10px 12px",
-            borderRadius: 12,
-            border: "1px solid var(--stroke-1)",
-            background: "var(--surface-2)",
-            opacity: 0.7,
-          }}
-        >
-          <div style={{ height: 16, borderRadius: 8, background: "var(--surface-3)" }} />
-          <div style={{ height: 16, borderRadius: 8, background: "var(--surface-3)" }} />
-          <div style={{ width: 42, height: 16, borderRadius: 8, background: "var(--surface-3)" }} />
-        </div>
-      ))}
+    <div role="status" aria-live="polite" style={{ borderRadius: 12, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", padding: "14px" }}>
+      <div style={{ color: "var(--text-2)", fontSize: 11, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 10 }}>Loading leaderboard…</div>
+      <div style={{ display: "grid", gap: rhythm.rowGap }}>
+        {Array.from({ length: 5 }).map((_, index) => <div key={index} className="tb" style={{ height: 10, borderRadius: 999, width: `${index === 4 ? 72 : 100}%`, background: "linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.13), rgba(255,255,255,0.03))" }} />)}
+      </div>
     </div>
   );
 
   const renderEmpty = () => (
-    <div
-      style={{
-        borderRadius: 12,
-        border: "1px solid var(--stroke-1)",
-        background: "var(--surface-2)",
-        color: "var(--text-2)",
-        fontSize: 13,
-        padding: "16px 14px",
-        fontWeight: 600,
-      }}
-    >
+    <div style={{ borderRadius: 12, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", color: "var(--text-2)", fontSize: 13, lineHeight: 1.45, padding: "14px 12px", fontWeight: 600 }}>
       <div style={{ color: "var(--text-1)", fontWeight: 700, marginBottom: 4 }}>No shots logged yet — once players log At Home Shots, leaders will appear here.</div>
       <div style={{ color: "var(--text-2)" }}>Nothing to show yet — once your team starts using ShotLab, this section will fill in.</div>
     </div>
@@ -65,19 +41,7 @@ export default function HomeShotsLeaderboardCard({
       {typeof onRetry === "function" && (
         <button
           onClick={onRetry}
-          style={{
-            marginTop: 10,
-            borderRadius: 8,
-            border: "1px solid rgba(255,139,139,0.45)",
-            background: "transparent",
-            color: "#FFE2E2",
-            cursor: "pointer",
-            padding: "6px 10px",
-            fontSize: 12,
-            textTransform: "uppercase",
-            letterSpacing: "0.03em",
-            fontWeight: 700,
-          }}
+          style={{ marginTop: 10, borderRadius: 10, border: "1px solid rgba(255,139,139,0.45)", background: "transparent", color: "#FFE2E2", cursor: "pointer", minHeight: 36, padding: "6px 10px", fontSize: 11, letterSpacing: "0.04em", textTransform: "uppercase", fontWeight: 700 }}
         >
           Retry
         </button>
@@ -122,20 +86,10 @@ export default function HomeShotsLeaderboardCard({
   );
 
   return (
-    <section
-      style={{
-        background: "var(--surface-1)",
-        border: "1px solid var(--stroke-1)",
-        borderRadius: 16,
-        padding: 14,
-      }}
-      aria-live="polite"
-    >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 10 }}>
-        <div style={{ color: "var(--text-1)", fontSize: 12, fontWeight: 800, letterSpacing: "0.07em", textTransform: "uppercase" }}>{title}</div>
-        <div style={{ color: "var(--text-3)", fontSize: 10, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase" }}>
-          Rank 1–10
-        </div>
+    <section style={{ background: "var(--surface-1)", border: "1px solid var(--stroke-1)", borderRadius: 16, padding: rhythm.card }} aria-live="polite">
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: rhythm.rowGap, marginBottom: rhythm.sectionGap }}>
+        <div style={{ color: "var(--text-1)", fontSize: 12, fontWeight: 800, letterSpacing: "0.07em", textTransform: "uppercase", lineHeight: 1.2 }}>{title}</div>
+        <div style={{ color: "var(--text-3)", fontSize: 11, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", lineHeight: 1.2 }}>Rank 1–10</div>
       </div>
 
       {status === "loading" || status === "idle"
