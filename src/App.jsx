@@ -1517,6 +1517,19 @@ return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 // ═══════════════════════════════════════
 function Auth({onLogin,onRegister,onDemo,onCreateJoinContext}){
 const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[inviteCode,setInviteCode]=useState(""),[err,setErr]=useState("");
+const roleTracks={
+  player:{
+    label:"Player onboarding",
+    subtitle:"Link with your coach and carry your progress history forward.",
+    steps:["Create player identity","Enter team code","Unlock daily progression + momentum"],
+  },
+  coach:{
+    label:"Coach onboarding",
+    subtitle:"Create your team identity, own roster standards, and guide every player path.",
+    steps:["Create coach identity","Launch team HQ","Invite and manage player memberships"],
+  },
+};
+const activeTrack=roleTracks[role]||roleTracks.player;
 const doLogin=async()=>{
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!password){setErr("Enter your password");return}
@@ -1564,7 +1577,14 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 
     {mode==="register"&&<>
       <h2 style={{fontFamily:FD,color:LIGHT,fontSize:24,textAlign:"center",margin:"0 0 4px",letterSpacing:2}}>CREATE ACCOUNT</h2>
-      <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 22px"}}>Join your team's offseason program</p>
+      <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,margin:"0 0 22px"}}>Start a persistent ShotLab identity for your team</p>
+      <div style={{marginBottom:18,padding:"12px 12px 10px",borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.02)"}}>
+        <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.1em",textTransform:"uppercase"}}>{activeTrack.label}</div>
+        <div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.4,marginTop:5}}>{activeTrack.subtitle}</div>
+        <div style={{marginTop:8,display:"grid",gap:4}}>
+          {activeTrack.steps.map((step,index)=><div key={step} style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,display:"flex",gap:6}}><span style={{color:VOLT,fontWeight:700}}>{index+1}.</span><span>{step}</span></div>)}
+        </div>
+      </div>
       {/* Role selector */}
       <div style={{display:"flex",background:BG,borderRadius:10,padding:3,marginBottom:20,border:`1px solid ${BORDER_CLR}`}}>
         {["player","coach"].map(r=><button key={r} onClick={()=>setRole(r)} style={{flex:1,padding:"10px 0",borderRadius:8,border:"none",cursor:"pointer",fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:2,textTransform:"uppercase",transition:"all .25s",background:role===r?VOLT+"15":"transparent",color:role===r?VOLT:"#555555"}}>{r}</button>)}
@@ -1572,14 +1592,14 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>YOUR NAME</label>
       <input type="text" value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="First Last" style={{...inp,marginBottom:14}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
       {role==="player"&&<>
-        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>TEAM CODE</label>
-        <input type="text" value={inviteCode} onChange={e=>{setInviteCode(e.target.value.toUpperCase());setErr("")}} placeholder="ENTER COACH CODE" style={{...inp,marginBottom:14,textTransform:"uppercase",letterSpacing:2}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
+        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>TEAM JOIN CODE</label>
+        <input type="text" value={inviteCode} onChange={e=>{setInviteCode(e.target.value.toUpperCase());setErr("")}} placeholder="ENTER COACH INVITE CODE" style={{...inp,marginBottom:14,textTransform:"uppercase",letterSpacing:2}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
       </>}
     </>}
 
     {mode==="login"&&<>
       <h2 style={{fontFamily:FB,color:LIGHT,fontSize:28,fontWeight:900,textAlign:"center",margin:"0 0 4px",letterSpacing:1.5,textTransform:"uppercase"}}>WELCOME BACK</h2>
-      <p style={{fontFamily:FB,color:"#A0A0A0",textAlign:"center",fontSize:13,fontWeight:400,margin:"0 0 22px"}}>Sign in to access your dashboard</p>
+      <p style={{fontFamily:FB,color:"#A0A0A0",textAlign:"center",fontSize:13,fontWeight:400,margin:"0 0 22px"}}>Return to your team command center and player progression</p>
     </>}
 
     <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>EMAIL</label>
@@ -1612,7 +1632,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 function CreateTeam({u,onCreate}){
 const[name,setName]=useState("");const[school,setSchool]=useState("");const[level,setLevel]=useState("");const[err,setErr]=useState("");
 const submit=async()=>{if(!name.trim())return setErr("Enter a team name");const r=await onCreate(name.trim(),{school,level});if(!r.ok)setErr(r.err||"Could not create team")}
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Welcome {u?.name}. Create your team to continue.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>CREATE TEAM</button></div></div>;
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Welcome {u?.name}. Establish your team identity, ownership, and player lane structure.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level / group (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>CREATE TEAM</button><div style={{marginTop:10,fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>Team identity is persistent: branding, roster membership, and coach ownership sync across player + coach surfaces.</div></div></div>;
 }
 
 function JoinTeam({u,onJoin,pendingJoinContext,onClearPendingJoinContext,isJoinConsumeActive=false}){
@@ -1622,7 +1642,7 @@ if(isJoinConsumeActive)return;
 const r=await onJoin(code);
 if(!r.ok&&!r.retryable)setErr(r.err||"Could not join team");
 };
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, enter your coach's team code.</p>{pendingJoinContext?.token&&<div style={{border:`1px solid ${BORDER_CLR}`,background:BG,borderRadius:10,padding:10,marginBottom:10,fontFamily:FB,fontSize:11,color:T.SUB}}>Validated invite context is saved for {pendingJoinContext.subjectKey}. <button type="button" onClick={onClearPendingJoinContext} style={{marginLeft:8,background:"transparent",border:"none",color:VOLT,cursor:"pointer",fontWeight:700}}>Clear</button></div>}<input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button type="button" onClick={submit} disabled={isJoinConsumeActive} className="btn-v cta-primary" style={{opacity:isJoinConsumeActive?0.75:1,cursor:isJoinConsumeActive?"not-allowed":"pointer"}}>{isJoinConsumeActive?"JOINING...":"JOIN TEAM"}</button></div></div>;
+return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, join your coach's team to activate your progression, momentum, and membership history.</p>{pendingJoinContext?.token&&<div style={{border:`1px solid ${BORDER_CLR}`,background:BG,borderRadius:10,padding:10,marginBottom:10,fontFamily:FB,fontSize:11,color:T.SUB}}>Validated invite context is saved for {pendingJoinContext.subjectKey}. <button type="button" onClick={onClearPendingJoinContext} style={{marginLeft:8,background:"transparent",border:"none",color:VOLT,cursor:"pointer",fontWeight:700}}>Clear</button></div>}<input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM JOIN CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button type="button" onClick={submit} disabled={isJoinConsumeActive} className="btn-v cta-primary" style={{opacity:isJoinConsumeActive?0.75:1,cursor:isJoinConsumeActive?"not-allowed":"pointer"}}>{isJoinConsumeActive?"JOINING...":"JOIN TEAM"}</button><div style={{marginTop:10,fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.45}}>Joining links your player identity to team branding, coach guidance, and persistent drill progression.</div></div></div>;
 }
 
 // ═══════════════════════════════════════
