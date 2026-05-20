@@ -1982,6 +1982,22 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const coachWeeklyCheckinsTarget=Math.max(1,Number(coachPriorities?.weeklyCheckinsTarget)||Math.min(3,Math.max(1,upcomingWeekEvents.length||2)));
       const weeklyGoalLabel=`${coachWeeklyMakesTarget} makes + ${coachWeeklyCheckinsTarget} team check-ins`;
       const consistencyExpectation=weeklyPct>=80?"Consistency is on track — maintain pace through weekend.":"Target one focused session daily to keep weekly pace.";
+      const teamPlayers=players.filter((p)=>p.teamId===u?.teamId&&p.role!=="coach");
+      const completionsTodayCount=teamPlayers.filter((player)=>scores.some((score)=>normalizeEmail(score?.email||score?.playerId||"")===normalizeEmail(player?.email||"")&&score?.date===today)).length;
+      const sevenDayScores=scores.filter((score)=>score?.teamId===u?.teamId&&isWithinLastSevenDays(score?.date));
+      const activeTeamPlayersCount=new Set(sevenDayScores.map((score)=>normalizeEmail(score?.email||score?.playerId||"")).filter(Boolean)).size;
+      const recentTeamCompletions=scores
+        .filter((score)=>score?.teamId===u?.teamId)
+        .sort((a,b)=>new Date(`${b.date||"1970-01-01"}T00:00:00`).getTime()-new Date(`${a.date||"1970-01-01"}T00:00:00`).getTime())
+        .slice(0,3)
+        .map((score)=>`${score?.name||score?.playerId||"Team player"} completed ${score?.drillName||"a drill"} · ${score?.date===today?"Today":score?.date||"Recent"}`);
+      const teamMomentumLabel=activeTeamPlayersCount>=Math.max(2,Math.ceil(teamPlayers.length*0.5))?"Team streak building":"Momentum ramping";
+      const coachPresenceUpdates=[
+        `${coachName} updated priorities: ${coachTodayFocus}`,
+        `${coachName} emphasized: ${coachPriorityDrill}`,
+        `Challenge active: ${coachChallengeText}`,
+      ];
+      const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
       const playerPriorityStyle={critical:{color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.28)",label:"CRITICAL"},important:{color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)",label:"IMPORTANT"},passive:{color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)",label:"PASSIVE"}};
       const playerBriefingQueue=derivePlayerNotificationBriefing({nextEvent,dayLabel,weekMissingCount,unresolvedBadgeLabel,scSessions,streak}).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
       const primaryActionItems=[
@@ -2029,6 +2045,27 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
             {[`Coach can view progress`, `Streak: ${formatStreakDays(streak)}`, `Weekly completion: ${weeklyPct}%`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"3px 8px",borderRadius:999,background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
           </div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:8}}>{consistencyExpectation}</div>
+        </section>
+        <section aria-label="Team activity pulse" style={{padding:isNarrow?"12px":"14px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+            <div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"0.04em"}}>TEAM ACTIVITY PULSE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Low-noise visibility into collective progress and training momentum.</div></div>
+            <span style={{fontFamily:FB,fontSize:10,color:VOLT,border:"1px solid rgba(200,255,0,0.45)",borderRadius:999,padding:"3px 8px"}}>{teamMomentumLabel}</span>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:7,marginTop:9}}>
+            {[{k:"Completed today",v:`${completionsTodayCount} players`},{k:"Active this week",v:`${activeTeamPlayersCount} players`},{k:"Team streak",v:teamMomentumLabel},{k:"Recent completions",v:recentTeamCompletions.length||0}].map((item)=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 9px",background:"rgba(12,14,18,0.5)"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:11,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.35}}>{item.v}</div></div>)}
+          </div>
+          <div style={{display:"grid",gap:6,marginTop:8}}>
+            {recentTeamCompletions.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10,padding:"8px 10px",borderRadius:9,border:"1px dashed rgba(255,255,255,0.2)"}}>Recent completions will appear as teammates close out drills.</div>:recentTeamCompletions.map((item)=><div key={item} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"8px 10px",borderRadius:9,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(12,14,18,0.56)"}}>{item}</div>)}
+          </div>
+        </section>
+        <section aria-label="Coach presence signals" style={{padding:isNarrow?"12px":"14px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
+            <div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"0.04em"}}>COACH PRESENCE SIGNALS</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>Guidance is active, current, and tied to team execution standards.</div></div>
+            <span style={{fontFamily:FB,fontSize:10,color:LIGHT,border:"1px solid rgba(255,255,255,0.22)",borderRadius:999,padding:"3px 8px"}}>{coachPresenceTimestamp}</span>
+          </div>
+          <div style={{display:"grid",gap:6,marginTop:9}}>
+            {coachPresenceUpdates.map((item)=><div key={item} style={{fontFamily:FB,fontSize:11,color:LIGHT,padding:"9px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(12,14,18,0.56)"}}>{item}</div>)}
+          </div>
         </section>
         <section aria-label="Next 7 days events intelligence" style={{padding:isNarrow?"13px":"15px",borderRadius:18,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)",boxShadow:"0 8px 22px rgba(0,0,0,0.18)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10,marginBottom:9}}>
