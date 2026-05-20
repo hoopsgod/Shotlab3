@@ -1732,6 +1732,39 @@ const programScores=useMemo(()=>my.filter(s=>s.src==="program"),[my]);
 const today=todayStr();
 const todayS=useMemo(()=>homeScores.filter(s=>s.date===today),[homeScores,today]);
 const todayProgramScores=useMemo(()=>programScores.filter(s=>s.date===today),[programScores,today]);
+const categorizeProgramDrill=useCallback((drillName="")=>{
+  const normalized=String(drillName).toLowerCase();
+  if(/warm|prep|activation|mobility/.test(normalized))return "Warm-Up";
+  if(/form|footwork|balance|one hand/.test(normalized))return "Form Work";
+  if(/volume|spot|around|arc|catch|shoot|3pt|three/.test(normalized))return "Volume Shooting";
+  if(/game|transition|decision|closeout|read/.test(normalized))return "Game-Speed Work";
+  if(/finish|rim|layup|floater|paint/.test(normalized))return "Finishing";
+  if(/condition|stamina|sprint|burst|endurance/.test(normalized))return "Conditioning";
+  return "Volume Shooting";
+},[]);
+const programSessionBlocks=useMemo(()=>{
+  const phaseOrder=["Warm-Up","Form Work","Volume Shooting","Game-Speed Work","Finishing","Conditioning"];
+  const phaseMeta={
+    "Warm-Up":"Prime feet and rhythm before live reps.",
+    "Form Work":"Lock mechanics and clean shot prep.",
+    "Volume Shooting":"Build repeatable make volume.",
+    "Game-Speed Work":"Transfer skill at pace and pressure.",
+    "Finishing":"Complete at the rim through contact reads.",
+    "Conditioning":"Close with fatigue-resilient execution."
+  };
+  const completedSet=new Set(todayProgramScores.map(s=>s.drillId));
+  const grouped=phaseOrder.map((phase)=>({
+    phase,
+    emphasis:phaseMeta[phase],
+    drills:programDrills.filter(d=>categorizeProgramDrill(d?.name)===phase)
+  })).filter(group=>group.drills.length>0).map(group=>{
+    const doneCount=group.drills.filter(d=>completedSet.has(d.id)).length;
+    const status=doneCount===group.drills.length?"completed":doneCount>0?"in-progress":"upcoming";
+    return {...group,doneCount,status};
+  });
+  const nextPriority=grouped.find(g=>g.status!=="completed")?.drills?.find(d=>!completedSet.has(d.id))?.id||null;
+  return {grouped,nextPriority};
+},[programDrills,todayProgramScores,categorizeProgramDrill]);
 const streak=useMemo(()=>calcStreak(homeScores),[homeScores]);
 const earnedBadges=useMemo(()=>getEarnedBadges(streak),[streak]);
 const myRsvps=useMemo(()=>rsvps.filter(r=>r.email===u.email).length,[rsvps,u]);
@@ -2247,16 +2280,27 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 
     <div style={{fontFamily:FB,color:CYAN,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8,textShadow:`0 0 16px ${CYAN}18`}}>PROGRAM DRILLS · {todayProgramScores.length}/{programDrills.length} DONE</div>
     <div style={{width:"100%",height:4,background:"#242424",borderRadius:2,overflow:"hidden",marginBottom:12}}><div style={{width:`${programDrills.length>0?Math.min(100,Math.round(todayProgramScores.length/programDrills.length*100)):0}%`,height:"100%",background:CYAN,borderRadius:2,transition:"width .25s ease"}}/></div>
-    {programDrills.map(d=>{const done=todayProgramScores.find(s=>s.drillId===d.id);
-      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?CYAN+"20":BORDER_CLR}`,borderRadius:16,padding:"16px",marginBottom:12,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.6:1}}>
-        <div style={{width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",borderRadius:12,flexShrink:0}}><DrillIcon type={d.icon} size={22} color={done?CYAN+"99":CYAN}/></div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:CYAN,fontSize:14,fontWeight:700,letterSpacing:1,textShadow:`0 0 16px ${CYAN}16`}}>{d.name}</div>
-          <div style={{color:CYAN,fontSize:11,marginTop:2,fontWeight:500,textShadow:`0 0 14px ${CYAN}12`}}>{d.desc}</div>
+    {programSessionBlocks.grouped.map((block,blockIndex)=><div key={block.phase} style={{marginBottom:14,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"12px 12px 4px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}>
+        <div>
+          <div style={{fontFamily:FD,color:CYAN,fontSize:13,letterSpacing:2}}>{`SESSION ${blockIndex+1} · ${block.phase.toUpperCase()}`}</div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{block.emphasis}</div>
         </div>
-        {done?<div style={{width:36,height:36,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={CYAN} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-         :<div style={{width:36,height:36,borderRadius:10,background:"rgba(0, 229, 255, 0.10)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .1s ease"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
-      </button>})}
+        <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1.2,color:block.status==="completed"?VOLT:block.status==="in-progress"?CYAN:MUTED,border:`1px solid ${block.status==="completed"?VOLT+"55":block.status==="in-progress"?CYAN+"44":BORDER_CLR}`,borderRadius:999,padding:"4px 8px"}}>{block.status==="completed"?"COMPLETED":block.status==="in-progress"?"IN PROGRESS":"UPCOMING"}</div>
+      </div>
+      {block.drills.map(d=>{const done=todayProgramScores.find(s=>s.drillId===d.id);const isPriority=programSessionBlocks.nextPriority===d.id;
+        const leaderboardRows=Object.entries(scores.filter(s=>s.src==="program"&&s.drillId===d.id&&isLeaderboardEligible(players,s.email)).reduce((acc,s)=>{acc[s.email]=(acc[s.email]||0)+s.score;return acc;},{})).sort((a,b)=>b[1]-a[1]).slice(0,3);
+        return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:"#131821",border:`1px solid ${isPriority&&!done?CYAN+"66":done?CYAN+"20":BORDER_CLR}`,borderRadius:14,padding:"12px",marginBottom:8,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.6:1}}>
+          <div style={{width:44,height:44,display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",borderRadius:10,flexShrink:0}}><DrillIcon type={d.icon} size={20} color={done?CYAN+"99":CYAN}/></div>
+          <div style={{flex:1,minWidth:0}}>
+            <div style={{fontFamily:FB,color:CYAN,fontSize:13,fontWeight:700,letterSpacing:1,display:"flex",alignItems:"center",gap:6,textShadow:`0 0 16px ${CYAN}16`}}>{d.name}{isPriority&&!done&&<span style={{fontSize:8,color:"#0B0D10",background:VOLT,borderRadius:999,padding:"2px 6px"}}>PRIORITY</span>}</div>
+            <div style={{color:CYAN,fontSize:10,marginTop:2,fontWeight:500,textShadow:`0 0 14px ${CYAN}12`}}>{d.desc}</div>
+            <div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:4}}>Drill leaderboard: {leaderboardRows.length===0?"No scores yet":leaderboardRows.map(([email,total],idx)=>`#${idx+1} ${(players.find(p=>p.email===email)?.name||email.split("@")[0])} ${total}`).join(" · ")}</div>
+          </div>
+          {done?<div style={{width:36,height:36,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={CYAN} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+          :<div style={{width:36,height:36,borderRadius:10,background:"rgba(0, 229, 255, 0.10)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .1s ease"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
+        </button>})}
+    </div>)}
   </div>}
 
   {/* ═════════════ CHALLENGES ═════════════ */}
