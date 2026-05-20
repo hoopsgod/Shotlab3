@@ -1887,7 +1887,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const todaysMakes=normalizedShotLogs.filter(s=>s.date===today).reduce((a,s)=>a+s.made,0);
       const hasAnyShots=normalizedShotLogs.some(s=>s.made>0);
       const leaderboardRank=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows.findIndex((row)=>normalizeEmail(row?.email||"")===normalizeEmail(u.email))+1:0;
-      const missionCtaLabel=hasAnyShots?"Start Training":"Log Shots";
+      const missionCtaLabel=hasAnyShots?"Start Workout":"Log Shots";
       const missionStatus=hasAnyShots?`Momentum is live — ${weeklyMakes>0?"stack your next quality reps":"start your first quality reps"} and keep the cycle moving.`:"Momentum begins today. Log your first reps to establish rhythm and build your foundation.";
       const homeStats=[{label:"Makes Today",value:<AnimNum v={todaysMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Training Streak",value:formatStreakDays(streak),color:CYAN},{label:"Drills Completed",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
       const programStats=[{label:"Next Team Event",value:nextEventLabel,color:LIGHT},{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance Rate",value:attendancePct,color:CYAN}];
@@ -1951,6 +1951,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const consistencyExpectation=weeklyPct>=80?"Consistency is on track — maintain pace through weekend.":"Target one focused session daily to keep weekly pace.";
       const playerPriorityStyle={critical:{color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.28)",label:"CRITICAL"},important:{color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)",label:"IMPORTANT"},passive:{color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)",label:"PASSIVE"}};
       const playerBriefingQueue=derivePlayerNotificationBriefing({nextEvent,dayLabel,weekMissingCount,unresolvedBadgeLabel,scSessions,streak}).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
+      const primaryActionItems=[
+        {label:"Start Workout",detail:"Open At Home Log",onClick:()=>switchTab("log-drill"),variant:"primary"},
+        {label:"Log Shots",detail:"Track makes now",onClick:()=>switchTab("log-drill"),variant:"solid"},
+        {label:"View Program",detail:"See drills + events",onClick:()=>switchTab("duels"),variant:"secondary"},
+        {label:"Complete Today's Focus",detail:"Follow coach priority",onClick:()=>switchTab("log-drill"),variant:"secondary"},
+      ];
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
         <section aria-label="Today's focus" style={{padding:isNarrow?"18px":"20px",borderRadius:20,background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
@@ -1968,7 +1974,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:11}}>
             {[`Emphasis · ${emphasisLabel}`,`Weekly · ${weeklyMakes}/${coachWeeklyMakesTarget}`,`Momentum · ${momentumLabel}`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.52)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
           </div>
-          <button className="btn-v cta-primary" style={{marginTop:14,minHeight:48,padding:"0 18px"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel==="Start Training"?"LOG SHOTS":"LOG SHOTS"}</button>
+          <button className="btn-v cta-primary" style={{marginTop:14,minHeight:52,padding:"0 18px",fontSize:13}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel.toUpperCase()}</button>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
+            {primaryActionItems.map((action)=>(
+              <button key={action.label} type="button" onClick={action.onClick} style={{textAlign:"left",padding:"11px 12px",minHeight:62,borderRadius:12,border:action.variant==="primary"?"1px solid rgba(200,255,0,0.45)":"1px solid rgba(255,255,255,0.16)",background:action.variant==="primary"?"linear-gradient(140deg, rgba(200,255,0,0.2), rgba(200,255,0,0.07) 62%, rgba(16,18,22,0.9))":action.variant==="solid"?"rgba(255,255,255,0.08)":"rgba(12,14,18,0.62)",color:LIGHT,cursor:"pointer"}}>
+                <div style={{fontFamily:FB,fontSize:12,fontWeight:700}}>{action.label}</div>
+                <div style={{fontFamily:FB,fontSize:10,color:T.SUB,marginTop:3}}>{action.detail}</div>
+              </button>
+            ))}
+          </div>
         </section>
         <section aria-label="Coach guidance and accountability" style={{padding:isNarrow?"12px":"14px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
@@ -2026,11 +2040,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:20,marginTop:4}}>{nextEvent?nextEvent.title:"Build your next session plan"}</div>
           <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"No event locked yet — open Program and set the next rep target for your week."}</div>
         </section>
-        <section aria-label="Quick actions" style={{display:"grid",gridTemplateColumns:"repeat(4,minmax(0,1fr))",gap:8}}>
-          {[{label:"Log Shots",onClick:()=>switchTab("log-drill")},{label:"Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:58,borderRadius:12,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer",transition:"transform .18s ease, opacity .2s ease, box-shadow .2s ease"}}>{action.label}</button>)}
+        <section aria-label="Secondary navigation actions" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:8}}>
+          {[{label:"At Home Log",onClick:()=>switchTab("log-drill")},{label:"Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:56,borderRadius:12,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer"}}>{action.label}</button>)}
         </section>
         <section style={{padding:"11px",borderRadius:12,background:"rgba(255,255,255,0.015)"}}>
-          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>Progress Plan</div>
+          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>Getting Started · Progress Plan</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:3}}>{firstWorkoutComplete?"Keep stacking quality reps. Protect momentum with one intentional action today.":"Start your cycle strong: first reps create your rhythm and unlock performance tracking."}</div>
           <div style={{display:"grid",gap:6,marginTop:7}}>{playerChecklist.slice(0,4).map(item=><div key={item.label} style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11}}>{item.done?"✓":"•"} {item.label}</div>)}</div>
         </section>
