@@ -286,6 +286,10 @@ if(!existing.includes(code))return code;
 }
 return Math.random().toString(36).slice(2,2+length).toUpperCase();
 }
+const PENDING_JOIN_CONTEXT_KEY = "sl:pending-join-context";
+const HOME_SHOTS_LEADERBOARD_LIMIT = 10;
+const INVITE_CONTEXT_STORAGE_KEY = "sl:invite-context";
+const SUPABASE_AUTH_ENABLED = String(import.meta.env.VITE_ENABLE_SUPABASE_AUTH || "").trim() === "true";
 const HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE = {
   borderRadius: 999,
   padding: "7px 12px",
