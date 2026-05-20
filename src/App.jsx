@@ -36,6 +36,8 @@ import { supabase } from "./lib/supabase.js";
 import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
 import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
+import { createAppPersistenceService } from "./lib/appPersistenceService";
+import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, HOME_SHOTS_LEADERBOARD_SCOPES, STORAGE_KEYS } from "./lib/appDataModels";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
 import {
   normalizePlayerActivity,
@@ -284,65 +286,10 @@ if(!existing.includes(code))return code;
 }
 return Math.random().toString(36).slice(2,2+length).toUpperCase();
 }
-const TABLE_MAP = {
-  "sl:scores": "scores",
-  "sl:players": "players",
-  "sl:player-profiles": "player_profiles",
-  "sl:events": "events",
-  "sl:rsvps": "rsvps",
-  "sl:shotlogs": "shot_logs",
-  "sl:teams": "teams",
-  "sl:session": "sessions",
-};
 const PENDING_JOIN_CONTEXT_KEY = "sl:pending-join-context";
 const HOME_SHOTS_LEADERBOARD_LIMIT = 10;
 const INVITE_CONTEXT_STORAGE_KEY = "sl:invite-context";
 const SUPABASE_AUTH_ENABLED = String(import.meta.env.VITE_ENABLE_SUPABASE_AUTH || "").trim() === "true";
-const HOME_SHOTS_LEADERBOARD_SCOPES = [
-  { key: "players", label: "PLAYERS" },
-  { key: "coaches", label: "COACHES" },
-];
-// UI-only motivational targets for Player Home progress bars/mission copy.
-// These do not affect persistence, leaderboard queries, or backend behavior.
-const PLAYER_DAILY_SHOT_TARGET = 100;
-const PLAYER_WEEKLY_SHOT_TARGET = 500;
-const COACH_PRIORITIES_STORAGE_KEY = "sl:coach-priorities";
-const COACH_PRIORITIES_INIT = {
-  todayFocusText: "Daily shot volume + clean mechanics",
-  focusEmphasis: "Volume",
-  priorityDrillText: "At-home drill block",
-  challengeText: "Build momentum: complete one drill and log shots today.",
-  weeklyMakesTarget: PLAYER_WEEKLY_SHOT_TARGET,
-  weeklyCheckinsTarget: 2,
-};
-const sanitizeCoachPriorities = (value = {}) => {
-  const weeklyMakesTarget = Number(value?.weeklyMakesTarget);
-  const weeklyCheckinsTargetRaw = value?.weeklyCheckinsTarget;
-  const weeklyCheckinsTarget = weeklyCheckinsTargetRaw === "" ? "" : Number(weeklyCheckinsTargetRaw);
-  return {
-    todayFocusText: String(value?.todayFocusText || COACH_PRIORITIES_INIT.todayFocusText),
-    focusEmphasis: String(value?.focusEmphasis || COACH_PRIORITIES_INIT.focusEmphasis),
-    priorityDrillText: String(value?.priorityDrillText || COACH_PRIORITIES_INIT.priorityDrillText),
-    challengeText: String(value?.challengeText || COACH_PRIORITIES_INIT.challengeText),
-    weeklyMakesTarget: Number.isFinite(weeklyMakesTarget) ? weeklyMakesTarget : COACH_PRIORITIES_INIT.weeklyMakesTarget,
-    weeklyCheckinsTarget: Number.isFinite(weeklyCheckinsTarget) ? weeklyCheckinsTarget : COACH_PRIORITIES_INIT.weeklyCheckinsTarget,
-  };
-};
-
-const buildCoachPrioritiesSavePayload=(draft={})=>{
-  const next={...draft};
-  if(String(next.weeklyCheckinsTarget).trim()==="")return {ok:false,error:"Weekly Check-ins is required."};
-  next.weeklyCheckinsTarget=Math.max(1,Number(next.weeklyCheckinsTarget)||1);
-  next.weeklyMakesTarget=Math.max(0,Number(next.weeklyMakesTarget)||0);
-  return {ok:true,payload:next};
-};
-
-const savePlayerPriorities=async({teamId,draft,onSaveCoachPriorities})=>{
-  const prepared=buildCoachPrioritiesSavePayload(draft);
-  if(!prepared.ok)return {ok:false,message:prepared.error};
-  return await onSaveCoachPriorities?.(teamId,prepared.payload);
-};
-
 const HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE = {
   borderRadius: 999,
   padding: "7px 12px",
@@ -438,6 +385,8 @@ const DB = {
     }
   }
 };
+
+const persistenceService=createAppPersistenceService({db:DB,fetchImpl:fetch});
 
 const parseLeaderboardErrorMessage = (errorCode = "", status = 0, parseMode = "json") => {
   if (parseMode === "non_json") return "Leaderboard endpoint unavailable (invalid response format).";
@@ -834,16 +783,16 @@ const dataDebugEnabled=dataDebugRequested&&dataDebugSafeMode;
 const normalizeJoin=v=>String(v||"").trim().toUpperCase();
 const loadCoachPrioritiesForTeam = useCallback(async (teamId) => {
   if (!teamId) return;
-  const saved = await DB.get(COACH_PRIORITIES_STORAGE_KEY);
+  const saved = await persistenceService.getPlayerPriorities();
   const scoped = saved?.[teamId];
   if (scoped) setCoachPriorities(sanitizeCoachPriorities(scoped));
   else setCoachPriorities(COACH_PRIORITIES_INIT);
 }, []);
 const saveCoachPrioritiesForTeam = useCallback(async (teamId, nextPriorities) => {
   if (!teamId) return { ok: false, message: "Missing team id." };
-  const saved = await DB.get(COACH_PRIORITIES_STORAGE_KEY);
+  const saved = await persistenceService.getPlayerPriorities();
   const next = { ...(saved || {}), [teamId]: sanitizeCoachPriorities(nextPriorities) };
-  await DB.set(COACH_PRIORITIES_STORAGE_KEY, next);
+  await persistenceService.savePlayerPriorities(next);
   setCoachPriorities(next[teamId]);
   return { ok: true, message: "Priorities saved. Player dashboard updated." };
 }, []);
@@ -1436,8 +1385,8 @@ trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unkno
 const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
 const addDrill=async(drill)=>{if(user?.role!=="coach")return;await P("sl:drills",[...drills,{...drill,id:Date.now()}],setDrills)};
 const removeDrill=async(id)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.filter(d=>d.id!==id),setDrills)};
-const addProgramDrill=async(drill)=>{if(user?.role!=="coach")return{ok:false,err:"Not authorized"};if(countCustomProgramDrills(programDrills)>=7)return{ok:false,err:"Program drill limit reached (7 custom drills)."};await P("sl:program-drills",[...programDrills,{...drill,id:Date.now()}],setProgramDrills);return{ok:true}};
-const removeProgramDrill=async(id)=>{if(user?.role!=="coach")return;await P("sl:program-drills",programDrills.filter(d=>d.id!==id),setProgramDrills)};
+const addProgramDrill=async(drill)=>{if(user?.role!=="coach")return{ok:false,err:"Not authorized"};if(countCustomProgramDrills(programDrills)>=7)return{ok:false,err:"Program drill limit reached (7 custom drills)."};await persistenceService.setCollection(STORAGE_KEYS.programDrills,[...programDrills,{...drill,id:Date.now()}],setProgramDrills);return{ok:true}};
+const removeProgramDrill=async(id)=>{if(user?.role!=="coach")return;await persistenceService.setCollection(STORAGE_KEYS.programDrills,programDrills.filter(d=>d.id!==id),setProgramDrills)};
 const toggleRsvp=async(eid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=rsvps.find(r=>r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId)),setRsvps);trackEvent("event_rsvp_removed",{eventId:eid});}else{await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setRsvps);trackEvent("event_rsvp_added",{eventId:eid});}};
 const addEvent=async ev=>{if(user?.role!=="coach"||!user.teamId)return{ok:false};const eventPayload={...ev,id:genId("event"),teamId:user.teamId,ownerCoachId:user.email};
 try{await P("sl:events",[...events,eventPayload],setEvents,{strictRemote:true});trackEvent("event_created",{eventType:ev.type||"run"});return{ok:true};}catch(error){console.error("event_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),eventTitle:String(ev?.title||"")});trackEvent("event_create_failed",{eventType:ev?.type||"run",error:String(error?.message||"unknown")});throw error;}};
