@@ -9,7 +9,7 @@ export default function CoachDashboardHeader({ heroRef, userName, onOpenTeamBran
     <section ref={heroRef} className={styles.header}>
       <div className={styles.inner}>
         <div className={styles.identity}>
-          <span className={styles.badge}>Coach Mode</span>
+          <span className={styles.badge}>Coach Dashboard</span>
           <h1 className={styles.name}>{(userName || "Demo Coach").toUpperCase()}</h1>
           <p className={styles.tagline}>Lead. Develop. Dominate.</p>
           <div className={styles.meta}><span className={styles.dot} aria-hidden="true" />Coach identity · Team control</div>
