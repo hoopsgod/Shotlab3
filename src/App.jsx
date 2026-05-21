@@ -531,6 +531,15 @@ const _PAGE_SIGNATURE_CSS=`
 .coachEventsSlimHeaderLabel{font-family:${FD};font-size:calc(16px * var(--coach-text-scale-display));letter-spacing:var(--tracking-default);color:#fff;line-height:1;white-space:nowrap;}
 .heroModule{position:relative;overflow:hidden;border:1px solid var(--surface-border-strong);border-radius:var(--surface-radius);padding:var(--card-pad);margin-bottom:var(--stack-gap);background:var(--surface-panel-strong);box-shadow:var(--surface-shadow-strong);}
 .heroModule::before{content:'';position:absolute;left:0;top:0;width:54px;height:4px;background:var(--pageAccent);}
+.premiumSummaryPanel{position:relative;overflow:hidden;border-radius:18px;padding:16px;border:1px solid color-mix(in srgb,var(--pageAccent) 20%, var(--surface-border));background:linear-gradient(145deg,color-mix(in srgb,var(--surface-panel-strong) 92%, #080b10) 0%,color-mix(in srgb,var(--surface-panel) 86%, #111723) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 8px 18px rgba(0,0,0,.24);}
+.premiumSummaryTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:relative;z-index:1;}
+.premiumSummaryBadge{width:38px;height:38px;border-radius:11px;border:1px solid color-mix(in srgb,var(--pageAccent) 28%, transparent);background:color-mix(in srgb,var(--pageAccent) 8%, var(--surface-panel));display:flex;align-items:center;justify-content:center;color:var(--pageAccent);}
+.premiumSummaryMeta{font-family:${FB};font-size:10px;color:var(--text-2);margin-top:4px;letter-spacing:0.04em;}
+.premiumSummaryActions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;position:relative;z-index:1;}
+.premiumStatGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px;position:relative;z-index:1;}
+.premiumStatTile{padding:12px 10px;border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012));text-align:left;}
+.premiumStatTile .heroStatVal{color:var(--pageAccent);font-size:22px;}
+.premiumStatTile .heroStatLbl{color:var(--text-2);margin-top:6px;}
 .heroStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px;}
 .heroStat{background:color-mix(in srgb,var(--surface-panel) 86%, #0A0C10);border:1px solid var(--surface-border);border-radius:12px;padding:8px;text-align:center;}
 .heroStatVal{font-family:${FD};color:var(--pageAccent);font-size:20px;line-height:1;}
@@ -546,6 +555,7 @@ const _PAGE_SIGNATURE_CSS=`
 .accent-card{background:var(--surface-panel)!important;border:1px solid var(--surface-border)!important;border-radius:var(--surface-radius)!important;box-shadow:var(--surface-shadow)!important;}
 .accent-card::before{width:2px!important;top:14px!important;bottom:14px!important;background:color-mix(in srgb,var(--page-accent) 62%, transparent)!important;opacity:.55!important;}
 @media(min-width:768px){.pageHeaderBadge{width:56px;height:56px;}.drillsMetrics{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:767px){.premiumStatGrid{grid-template-columns:repeat(2,minmax(0,1fr));}.premiumSummaryActions .pageHeaderPill{flex:1;justify-content:center;}}
 @media(max-width:767px){.coachEventsHeaderCard{display:none;}.coachEventsSlimHeader{display:flex;}}
 
 
@@ -1670,6 +1680,7 @@ const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
 const[isNarrow,setIsNarrow]=useState(typeof window!=="undefined"?window.innerWidth<768:false);
 const[isDesktop,setIsDesktop]=useState(typeof window!=="undefined"?window.innerWidth>=1024:false);
+const playerScrollRef=useRef(null);
 const slideClass="screen-fade-in";
 const switchTab=useCallback((requestedTab)=>{
   const nextTab=canAccessTab(requestedTab)?requestedTab:"home";
@@ -1696,8 +1707,9 @@ useEffect(()=>{
   }
 },[tab,canAccessTab,switchTab]);
 useEffect(()=>{
+  playerScrollRef.current?.scrollTo?.({top:0,left:0,behavior:"auto"});
   window.scrollTo({top:0,left:0,behavior:"auto"});
-},[tab]);
+},[tab,active]);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const programScores=useMemo(()=>my.filter(s=>s.src==="program"),[my]);
@@ -1851,14 +1863,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>
 {u.isCoach&&<div style={{height:28,background:"linear-gradient(90deg, rgba(200, 255, 0, 0.08) 0%, transparent 100%)",borderBottom:"1px solid rgba(200, 255, 0, 0.12)",display:"flex",alignItems:"center",padding:"0 16px",gap:8}}><WhistleIcon size={12} color="#C8FF00"/><span style={{fontFamily:FB,fontSize:9,textTransform:"uppercase",letterSpacing:"var(--tracking-tight)",color:"rgba(200, 255, 0, 0.84)"}}>COACH VIEW — FULL ACCESS</span></div>}
 
-<div style={{flex:1,padding:isDesktop?"14px 20px 36px":"16px 20px 124px",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
+<div ref={playerScrollRef} style={{flex:1,padding:isDesktop?"14px 20px 36px":"16px 20px 124px",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
   {/* Pull-to-refresh basketball */}
   {pullY>5&&<div style={{position:"absolute",top:-44,left:"50%",transform:"translateX(-50%)",textAlign:"center",opacity:Math.min(pullY/30,1)}}>
     <svg width="24" height="24" viewBox="0 0 40 40" fill="none" style={{animation:pullY>40?"bbBounce .5s ease infinite":"none"}}><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="2.5"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="1.5"/><path d="M20 3v34" stroke={ORANGE} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/></svg>
     <div style={{fontFamily:FB,color:ORANGE,fontSize:8,letterSpacing:2,marginTop:2}}>{pullY>40?"REFRESHING":"PULL"}</div>
   </div>}
 
-  {tab!=="home"&&!active&&<button onClick={()=>switchTab("home")} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:16,padding:0}}>&#8592; DASHBOARD</button>}
+  {tab!=="home"&&!active&&<DashboardReturnButton onClick={()=>switchTab("home")} label="Back to Dashboard" />}
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
@@ -2378,6 +2390,32 @@ return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderR
 </div>
 
   </div>;
+}
+
+function DashboardReturnButton({onClick,label="Dashboard"}){
+  return <button
+    type="button"
+    onClick={onClick}
+    style={{
+      display:"inline-flex",
+      alignItems:"center",
+      gap:8,
+      border:"1px solid var(--team-brand-border, var(--stroke-1))",
+      background:"linear-gradient(135deg, color-mix(in srgb, var(--surface-1) 90%, transparent), color-mix(in srgb, var(--surface-2) 88%, transparent))",
+      color:"var(--text-2)",
+      padding:"9px 14px",
+      borderRadius:999,
+      fontFamily:FB,
+      fontSize:11,
+      letterSpacing:"0.07em",
+      fontWeight:700,
+      textTransform:"uppercase",
+      cursor:"pointer",
+      marginBottom:12
+    }}
+  >
+    <span aria-hidden="true">←</span>{label}
+  </button>;
 }
 
 // ═══════════════════════════════════════
@@ -3198,6 +3236,7 @@ const handleNavChange=(k)=>{
 const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
 const [showMiniHeader,setShowMiniHeader]=useState(false);
 const heroRef=useRef(null);
+const coachScrollRef=useRef(null);
 const isOverviewTab=tab==="feed";
 const coachTabs=["feed","drills","events","sc","players"];
 const isCoachTab=u.isCoach&&coachTabs.includes(tab);
@@ -3247,10 +3286,14 @@ useEffect(()=>{
   window.addEventListener("resize",onScroll);
   return()=>{window.removeEventListener("scroll",onScroll);window.removeEventListener("resize",onScroll);};
 },[tab]);
+useEffect(()=>{
+  coachScrollRef.current?.scrollTo?.({top:0,left:0,behavior:"auto"});
+  window.scrollTo({top:0,left:0,behavior:"auto"});
+},[tab,selP]);
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-text-scale={coachTextScale}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"var(--bottom-nav-content-padding, calc(132px + env(safe-area-inset-bottom, 0px)))"}}><BrandBackdrop/>
+<main className="shell-main"><div ref={coachScrollRef} className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"var(--bottom-nav-content-padding, calc(132px + env(safe-area-inset-bottom, 0px)))"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
 <div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
@@ -3550,7 +3593,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     })()}
   </div>}
   {/** DRILLS */}
-  {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><PageHeader title="DRILLS" subtitle="Skill plans, assignments, and drill library" accent="cyan" icon={<DrillIcon type="ft" size={22} color={PAGE_ACCENTS.drills.accent}/>} actionLabel="Add" onAction={()=>setShowNewDrill(true)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.drills.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>QUICK START DRILL</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{drills.length} total drills ready to start</div></div><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowNewDrill(true)}>Start</button></div><div className="drillsMetrics"><div className="heroStat drillsMetricTile"><div className="heroStatVal">{drills.length}</div><div className="heroStatLbl">ACTIVE</div></div><div className="heroStat drillsMetricTile"><div className="heroStatVal">{programDrills.length}</div><div className="heroStatLbl">PROGRAM</div></div></div><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth"})}>Manage Drills</button></div>
+  {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><DashboardReturnButton onClick={()=>setTab("feed")} /><PageHeader title="DRILLS" subtitle="Elite skill development library, structured assignments, and execution standards" accent="cyan" icon={<DrillIcon type="ft" size={22} color={PAGE_ACCENTS.drills.accent}/>} actionLabel="Add" onAction={()=>setShowNewDrill(true)} /><div className="premiumSummaryPanel"><div className="premiumSummaryTop"><div style={{display:"flex",gap:10,alignItems:"flex-start"}}><div className="premiumSummaryBadge"><DrillIcon type="3p" size={16} color={PAGE_ACCENTS.drills.accent}/></div><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.drills.accent,fontSize:13,letterSpacing:"var(--tracking-default)"}}>QUICK START DRILL COMMAND</div><div className="premiumSummaryMeta">{drills.length} drill standards primed for player execution</div></div></div></div><div className="premiumStatGrid"><div className="premiumStatTile"><div className="heroStatVal">{drills.length}</div><div className="heroStatLbl">ACTIVE LIBRARY</div></div><div className="premiumStatTile"><div className="heroStatVal">{programDrills.length}</div><div className="heroStatLbl">PROGRAM SET</div></div><div className="premiumStatTile"><div className="heroStatVal">{drills.length+programDrills.length}</div><div className="heroStatLbl">TOTAL OPTIONS</div></div></div><div className="premiumSummaryActions"><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowNewDrill(true)}>Start</button><button className="pageHeaderPill" onClick={()=>document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth"})}>Manage Drills</button></div></div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Drill Management" s={`${drills.length} active`} identity/>
     <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
     <div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:16}}>
@@ -3844,7 +3887,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {getPlayerHomeShotMakes(selP.email,shotLogs,u?.teamId)}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div><div style={{marginTop:10,fontFamily:FB,fontSize:10,color:MUTED}}>{(()=>{const snap=derivePlayerProgressProfile({playerEmail:selP.email,shotLogs,scores,rsvps,events,players});return `${snap.coachSnapshot.consistency} · ${snap.coachSnapshot.engagement} · ${snap.coachSnapshot.developmentSignal}`;})()}</div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills} programDr={programDrills}/></div>}
 
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
-  {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><PageHeader title="S&C" subtitle="Strength blocks, readiness, and recovery" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>TODAY'S LIFT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled"}</div></div><button className="pageHeaderPill" onClick={()=>setShowAddSC(true)}>Add Session</button></div><div className="heroStats"><div className="heroStat"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">SESSIONS</div></div><div className="heroStat"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">RSVPS</div></div><div className="heroStat"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">LOGS</div></div></div></div>
+  {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><DashboardReturnButton onClick={()=>setTab("feed")} /><PageHeader title="S&C" subtitle="Athletic performance blocks, readiness tracking, and recovery accountability" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="premiumSummaryPanel"><div className="premiumSummaryTop"><div style={{display:"flex",gap:10,alignItems:"flex-start"}}><div className="premiumSummaryBadge"><LiftIcon size={16} color={PAGE_ACCENTS.sc.accent}/></div><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:13,letterSpacing:"var(--tracking-default)"}}>TODAY'S PERFORMANCE BLOCK</div><div className="premiumSummaryMeta">{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled — set the next session cadence."}</div></div></div></div><div className="premiumStatGrid"><div className="premiumStatTile"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">PERFORMANCE SESSIONS</div></div><div className="premiumStatTile"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">READINESS RSVPS</div></div><div className="premiumStatTile"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">WORKLOAD LOGS</div></div></div><div className="premiumSummaryActions"><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowAddSC(true)}>Add Session</button></div></div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="S&C SESSIONS" s={`${scSessions.length} TOTAL`} identity/>
     <div className="accent-card" style={{marginBottom:16,paddingLeft:10,paddingRight:10,paddingTop:10,paddingBottom:10}}>
       <div style={{display:"flex",justifyContent:"flex-end"}}>
@@ -3858,7 +3901,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             letterSpacing:2,
             borderColor:"color-mix(in srgb,var(--page-accent) 60%, transparent)",
             background:"color-mix(in srgb,var(--page-accent) 16%, #111826)",
-            boxShadow:"0 10px 24px color-mix(in srgb,var(--page-accent) 12%, transparent)",
+            boxShadow:"none",
             gap:6
           }}
         >
