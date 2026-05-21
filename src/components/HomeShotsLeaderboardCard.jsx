@@ -5,7 +5,7 @@ export default function HomeShotsLeaderboardCard({
   status = "idle",
   error = "",
   rows = [],
-  onRetry,
+  onRefresh,
 }) {
   const renderLoading = () => (
     <div style={{ display: "grid", gap: 8 }}>
@@ -62,9 +62,9 @@ export default function HomeShotsLeaderboardCard({
     >
       <div style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.04em" }}>Could not load leaderboard</div>
       <div style={{ marginTop: 6, color: "#FFB5B5" }}>{error || "Please try again."}</div>
-      {typeof onRetry === "function" && (
+      {typeof onRefresh === "function" && (
         <button
-          onClick={onRetry}
+          onClick={onRefresh}
           style={{
             marginTop: 10,
             borderRadius: 8,
@@ -79,7 +79,7 @@ export default function HomeShotsLeaderboardCard({
             fontWeight: 700,
           }}
         >
-          Retry
+          Refresh
         </button>
       )}
     </div>
@@ -138,8 +138,10 @@ export default function HomeShotsLeaderboardCard({
         </div>
       </div>
 
-      {status === "loading" || status === "idle"
+      {status === "loading"
         ? renderLoading()
+        : status === "idle"
+          ? renderEmpty()
         : status === "error"
           ? renderError()
           : rows.length === 0
