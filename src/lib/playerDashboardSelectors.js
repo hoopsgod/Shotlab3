@@ -92,6 +92,28 @@ export const deriveFirstWeekActivationMilestones = ({ hasRsvped = false, firstWo
   { label: "First event interaction", done: Boolean(firstEventInteraction), target: "program" },
 ]);
 
+
+export const deriveInterpretedPerformanceTrends = ({ shotLogs = [], scores = [], drills = [], today = new Date().toISOString().slice(0,10) } = {}) => {
+  const logs = safeArray(shotLogs);
+  const allScores = safeArray(scores);
+  const last14Start = new Date(`${today}T00:00:00`);
+  if (!Number.isNaN(last14Start.getTime())) last14Start.setDate(last14Start.getDate() - 13);
+  const startStr = `${last14Start.getFullYear()}-${String(last14Start.getMonth()+1).padStart(2,"0")}-${String(last14Start.getDate()).padStart(2,"0")}`;
+  const last14 = logs.filter((l)=>String(l?.date||"") >= startStr);
+  const first7 = last14.filter((l)=>String(l?.date||"") < today).slice(0, Math.max(0, last14.length - 7));
+  const last7 = last14.slice(-7);
+  const sum = (rows)=>rows.reduce((acc,row)=>acc+safeNumber(row?.made),0);
+  const earlyMakes = sum(first7);
+  const recentMakes = sum(last7);
+  const momentum = recentMakes >= earlyMakes * 1.1 ? "rising" : recentMakes <= Math.max(1, earlyMakes) * 0.9 ? "cooling" : "steady";
+  const volume = recentMakes > earlyMakes ? "increasing" : recentMakes < earlyMakes ? "decreasing" : "stable";
+  const consistency = deriveStreakDays(allScores) >= 4 ? "improving" : "building";
+  const byDrill = new Map();
+  allScores.forEach((s)=>{const k=String(s?.drillName||s?.drillId||"Drill"); byDrill.set(k,(byDrill.get(k)||0)+1);});
+  const strongestDrill = [...byDrill.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0] || "Not enough data yet";
+  const weakArea = momentum === "cooling" ? "Recent output dipped — schedule one extra focused session." : (volume === "decreasing" ? "Training volume is trending down — protect your daily reps." : "Keep reinforcing consistency under fatigue.");
+  return { consistency, momentum, volume, strongestDrill, weakArea };
+};
 export const deriveTrainingIdentityLabels = ({ eventsAttended = 0, weeklyMakes = 0, weeklyGoal = 1, weeklyPct = 0, streak = 0 } = {}) => {
   const goal = Math.max(1, safeNumber(weeklyGoal));
   return {

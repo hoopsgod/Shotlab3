@@ -49,6 +49,7 @@ import {
   derivePlayerNotificationBriefing,
   deriveFirstWeekActivationMilestones,
   deriveTrainingIdentityLabels,
+  deriveInterpretedPerformanceTrends,
 } from "./lib/playerDashboardSelectors.js";
 import {
   normalizeCoachRoster,
@@ -60,6 +61,7 @@ import {
   getNext7DayEventSummary,
   deriveCoachAlerts,
   deriveCultureReadinessLabels,
+  deriveCoachInsightSummary,
 } from "./lib/coachDashboardSelectors.js";
 const VOLT = TOKENS.PRIMARY;
 const ORANGE = TOKENS.PRIMARY;
@@ -172,6 +174,7 @@ getTileStyle:(index,total)=>total>=3&&index===0?{gridRow:"1 / span 2"}: {},
 },
 };
 const COACH_TEXT_SIZES=["standard","large","xl"];
+const LEADERBOARD_SCOPE_COACHES_LABEL="COACHES";
 
 const DEFAULT_DEMO_DRILL_CATALOG=[
 {key:"warm-up-shooting-4-minute",name:"4 MINUTE WARM UP SHOOTING",desc:"4-minute weighted shooting circuit.",icon:"mr",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
@@ -3926,6 +3929,7 @@ const challWon=challenges.filter(c=>(c.from===u.email&&c.status==="lost")||(c.to
 const challTotal=challenges.filter(c=>c.from===u.email||c.to===u.email).length;
 const hasReportCardData=(totalMakes+totalProgramMakes+totalShots+sessionsLogged+programSessionsLogged+eventsAttended+scCount+challTotal)>0;
 const progress=useMemo(()=>derivePlayerProgressProfile({playerEmail:u.email,shotLogs,scores,rsvps,events,players}),[u.email,shotLogs,scores,rsvps,events,players]);
+const interpretedTrends=useMemo(()=>deriveInterpretedPerformanceTrends({shotLogs:shotLogs.filter(s=>s.email===u.email),scores:my,drills:[...drills,...programDrills]}),[shotLogs,my,drills,programDrills,u.email]);
 
 const bestStreak=useMemo(()=>{const ds=[...new Set(homeScores.map(s=>s.date))].sort();let max=0,cur=0,prev=null;
 ds.forEach(d=>{const dt=new Date(d);if(prev){const diff=(dt-prev)/(1000*60*60*24);cur=diff<=1?cur+1:1}else cur=1;max=Math.max(max,cur);prev=dt});return max},[homeScores]);
@@ -4019,9 +4023,17 @@ return <div className="fade-up">
   </div>
 </div>}
 
-{
 <div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>PLAYER PROGRESS PROFILE</div>{progress.isEmpty?<div style={{fontFamily:FB,color:MUTED,fontSize:11,lineHeight:1.5}}>No progress data yet. Log your first at-home session and RSVP to upcoming events to build your profile.</div>:<><div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:10}}>{[{l:"TOTAL AT HOME SHOTS",v:progress.totalAtHomeShots,c:VOLT},{l:"CURRENT STREAK",v:progress.currentStreak,c:ORANGE},{l:"WEEKLY ACTIVITY",v:progress.weeklyActivityCount,c:LIGHT},{l:"EVENTS",v:progress.eventsAttended,c:CYAN},{l:"RSVP RATE",v:`${progress.rsvpParticipationRate}%`,c:VOLT}].map(item=><div key={item.l} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}><div style={{fontFamily:FD,color:item.c,fontSize:18}}>{item.v}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:1.4,fontWeight:700}}>{item.l}</div></div>)}</div><div style={{marginBottom:8}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:2,fontWeight:700,marginBottom:6}}>7-DAY TREND</div><div style={{display:"flex",alignItems:"flex-end",gap:4,height:44}}>{progress.sevenDayTrend.map(d=>{const max=Math.max(1,...progress.sevenDayTrend.map(x=>x.made));const h=Math.max(4,Math.round((d.made/max)*40));return <div key={d.day} title={`${d.day}: ${d.made}`} style={{flex:1,height:h,borderRadius:4,background:d.made>0?VOLT+"66":BORDER_CLR}}/>;})}</div></div><div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5}}>{progress.recentActivitySummary.join(" · ")}</div></>}</div>
-/* Overall stats */}
+
+<div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>INTERPRETED PERFORMANCE TRENDS</div>
+  <div style={{display:"grid",gap:7}}>
+    {[`Consistency is ${interpretedTrends.consistency}.`,`Momentum is ${interpretedTrends.momentum}.`,`Training volume is ${interpretedTrends.volume}.`,`Strongest drill pattern: ${interpretedTrends.strongestDrill}.`,`Focus area: ${interpretedTrends.weakArea}`].map((line)=>
+      <div key={line} style={{fontFamily:FB,fontSize:11,color:LIGHT,padding:"8px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.02)"}}>{line}</div>
+    )}
+  </div>
+</div>
+{/* Overall stats */}
 <div style={{background:CARD_BG,borderRadius:16,padding:"4px 20px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
   <StatRow label="At Home Drill Makes" value={totalMakes}/><StatRow label="Program Drill Makes" value={totalProgramMakes} color={CYAN}/>
   <StatRow label="Shot Tracker Makes" value={totalShots} color={ORANGE}/>
@@ -4132,6 +4144,8 @@ function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged,onRemovePl
     return `${days} days ago`;
   };
 
+  const coachInsights=useMemo(()=>deriveCoachInsightSummary({roster:players,scores,shotLogs,today:todayStr()}),[players,scores,shotLogs]);
+
   const roster=useMemo(()=>{
     const enriched=players.filter(p=>p.role!=="coach").map(p=>{
       const playerScores=scores.filter(s=>s.email===p.email);
@@ -4169,6 +4183,9 @@ function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged,onRemovePl
 
 return <div className="fade-up">
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PLAYER ROSTER" s={`${roster.length} PLAYERS`} identity/>
+<div style={{display:"grid",gap:8,marginBottom:14}}>
+  {[`Most engaged: ${coachInsights.engagedAthletes.slice(0,2).join(", ")||"No activity yet"}`,`Losing momentum: ${coachInsights.playersLosingMomentum.slice(0,2).join(", ")||"None"}`,`Team completion trend: ${coachInsights.teamCompletionTrend}`,`Priority completion rate: ${coachInsights.priorityCompletionRate}%`].map((line)=><div key={line} style={{fontFamily:FB,fontSize:11,color:LIGHT,padding:"8px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.02)"}}>{line}</div>)}
+</div>
 <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:18,lineHeight:1.5}}>Track who's putting in work today. Tap "NUDGE" to flag inactive players for follow-up.</div>
 
 <div style={{display:"flex",justifyContent:"flex-end",marginBottom:12}}>
