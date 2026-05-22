@@ -49,6 +49,32 @@ if (typeof window !== 'undefined') {
   window.__shotlabBootMark = markBoot
 }
 
+
+function syncViewportHeightVar() {
+  if (typeof document === 'undefined' || typeof window === 'undefined') return
+  const nextHeightPx = window.innerHeight * 0.01
+  const prevRaw = document.documentElement.style.getPropertyValue('--app-vh')
+  const prevHeightPx = Number.parseFloat(prevRaw)
+  if (Number.isFinite(prevHeightPx) && Math.abs(prevHeightPx - nextHeightPx) < 0.5) return
+  const nextValue = `${nextHeightPx}px`
+  document.documentElement.style.setProperty('--app-vh', nextValue)
+}
+
+function registerRuntimeListeners() {
+  let rafId = null
+  const scheduleSyncViewportHeight = () => {
+    if (rafId != null) return
+    rafId = window.requestAnimationFrame(() => {
+      rafId = null
+      syncViewportHeightVar()
+    })
+  }
+
+  syncViewportHeightVar()
+  window.addEventListener('resize', scheduleSyncViewportHeight, { passive: true })
+  window.visualViewport?.addEventListener('resize', scheduleSyncViewportHeight, { passive: true })
+}
+
 function renderStartupError(message) {
   if (startupErrorShown) return
   startupErrorShown = true
@@ -70,6 +96,7 @@ function renderStartupError(message) {
 
 markBoot('index_loaded')
 markBoot('main_executed')
+registerRuntimeListeners()
 
 window.addEventListener('error', (event) => {
   const msg = event?.error?.message || event?.message || 'Unexpected runtime error before app mount.'
