@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { demoBootstrap } from './lib/demoBootstrap.ts'
+import { checkBackendHealth, logBackendHealth } from './lib/backendHealth.js'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
 const BOOT_TIMEOUT_MS = 10000
@@ -127,6 +128,12 @@ window.addEventListener('unhandledrejection', (event) => {
 
       try {
         demoBootstrap()
+        checkBackendHealth().then((status) => {
+          logBackendHealth(status)
+          markBoot('backend_health', status.status)
+        }).catch(() => {
+          markBoot('backend_health', 'health_check_failed')
+        })
       } catch {
         renderStartupError('Startup bootstrap failed before app mount.')
         return

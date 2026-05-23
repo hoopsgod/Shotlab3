@@ -15,6 +15,53 @@
 
 > `.env` is intentionally gitignored, so each environment (local machine, CI, Cloudflare Pages) must provide these values.
 
+
+## Supabase setup readiness (demo-safe)
+
+ShotLab currently supports **dual runtime**:
+- **Demo/local mode fallback** (no backend required)
+- **Supabase-connected mode** (env vars present)
+
+### Required environment variables
+Add these in the repo root `.env` file for local dev:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+Example:
+```bash
+VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
+VITE_SUPABASE_ANON_KEY=YOUR_PUBLIC_ANON_KEY
+```
+
+### Local development behavior
+- If both vars are present, ShotLab enables backend requests.
+- If either var is missing, ShotLab **automatically stays in demo mode** and still boots.
+- No login wall is forced in this phase.
+
+### Cloudflare Pages environment setup
+In Cloudflare Pages project settings:
+1. Go to **Settings → Environment variables**.
+2. Add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` for:
+   - **Preview** environment
+   - **Production** environment
+3. Redeploy after saving.
+
+If vars are missing in Cloudflare Preview, the site still loads in demo-safe mode.
+
+### Backend health check and fallback states
+A lightweight runtime health utility reports one of:
+- `demo_mode_active` (env vars missing)
+- `supabase_configured` (env vars present and probe succeeds)
+- `supabase_unavailable` (env vars present but backend request fails)
+
+In all three states, the app remains boot-safe and does not crash startup.
+
+### Developer-only backend status logging
+In development builds, ShotLab logs backend status to the browser console as:
+- `[ShotLab backend] { status, ok, detail }`
+
+This is diagnostic-only and avoids showing raw technical errors to normal users.
+
 ## Why the app may appear to “not open”
 
 Most startup issues in this project come from one of these:
