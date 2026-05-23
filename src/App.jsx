@@ -1766,8 +1766,12 @@ const[showCoachGuidanceDetails,setShowCoachGuidanceDetails]=useState(false);
 const playerLeaderboardState=useMemo(()=>{
   const rows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
   const requestedStatus=typeof homeShotsLeaderboard?.status==="string"?homeShotsLeaderboard.status:"idle";
-  const status=rows.length>0&&requestedStatus==="error"?"success":requestedStatus;
-  return {rows,status,error:"",hasData:rows.length>0};
+  const rawError=String(homeShotsLeaderboard?.error||"").toLowerCase();
+  const hasData=rows.length>0;
+  const emptyStateSafeError=requestedStatus==="error"&&(rawError.includes("not allowed for this team")||rawError.includes("team id is required")||rawError.includes("sign in required")||rawError.includes("invalid_scope")||rawError.includes("endpoint missing"));
+  const status=hasData?"success":emptyStateSafeError?"idle":requestedStatus;
+  const error=status==="error"?String(homeShotsLeaderboard?.error||""):"";
+  return {rows,status,error,hasData};
 },[homeShotsLeaderboard]);
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
 const activeMode=tab==="duels"?"program":"home";

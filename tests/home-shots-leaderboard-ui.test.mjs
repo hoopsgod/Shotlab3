@@ -47,7 +47,7 @@ test("leaderboard card renders loading, empty, and error states", () => {
   const errorHtml = renderToStaticMarkup(React.createElement(HomeShotsLeaderboardCard, { status: "error", rows: [], error: "boom" }));
 
   assert.match(loadingHtml, /Rank 1–10/);
-  assert.match(emptyHtml, /No shots logged yet — once players log At Home Shots, leaders will appear here\./);
+  assert.match(emptyHtml, /No leaderboard data yet\. Log shots to enter the rankings\./);
   assert.match(errorHtml, /Could not load leaderboard/);
   assert.match(errorHtml, /boom/);
 });
