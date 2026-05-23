@@ -1,6 +1,7 @@
 import { resolveExpiresAt } from "./authFlow.js";
-const baseUrl = import.meta.env.VITE_SUPABASE_URL;
-const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const viteEnv = (typeof import.meta !== "undefined" && import.meta?.env) ? import.meta.env : {};
+const baseUrl = viteEnv.VITE_SUPABASE_URL;
+const anonKey = viteEnv.VITE_SUPABASE_ANON_KEY;
 const hasConfig = Boolean(baseUrl && anonKey);
 const SESSION_KEY = "sl:supabase-session";
 const LEGACY_TOKEN_KEY = "sl:supabase-access-token";
