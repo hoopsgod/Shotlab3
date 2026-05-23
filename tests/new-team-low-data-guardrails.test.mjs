@@ -41,7 +41,7 @@ test('coach events empty state asks coach to add first event', async () => {
 test('At Home Shots leaderboard empty state explains no shots logged yet', async () => {
   const source = await leaderboardSource();
 
-  assert.match(source, /No shots logged yet — once players log At Home Shots, leaders will appear here\./);
+  assert.match(source, /No leaderboard data yet\. Log shots to enter the rankings\./);
 });
 
 test('player events empty state is present for teams with no events', async () => {

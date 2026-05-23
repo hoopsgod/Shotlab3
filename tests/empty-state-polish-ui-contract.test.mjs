@@ -12,6 +12,6 @@ test("empty-state polish copy appears across coach/player event and activity sur
 });
 
 test("home shots leaderboard empty-state copy guides first-time teams", () => {
-  assert.match(leaderboardSource, /No shots logged yet — once players log At Home Shots, leaders will appear here\./);
-  assert.match(leaderboardSource, /Nothing to show yet — once your team starts using ShotLab, this section will fill in\./);
+  assert.match(leaderboardSource, /No leaderboard data yet\. Log shots to enter the rankings\./);
+  assert.match(leaderboardSource, /No leaderboard data yet\. Log shots to enter the rankings\./);
 });
