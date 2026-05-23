@@ -1763,6 +1763,10 @@ const[pbReveal,setPbReveal]=useState(null);
 const[submitting,setSubmitting]=useState(false);
 const[drillBarW,setDrillBarW]=useState(0);
 const[showCoachGuidanceDetails,setShowCoachGuidanceDetails]=useState(false);
+const playerLeaderboardRows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
+const hasPlayerLeaderboardData=playerLeaderboardRows.length>0;
+const playerLeaderboardStatus=typeof homeShotsLeaderboard?.status==="string"?homeShotsLeaderboard.status:"idle";
+const playerLeaderboardError=hasPlayerLeaderboardData?"":("" );
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
 const activeMode=tab==="duels"?"program":"home";
 const activeScores=activeMode==="program"?programScores:homeScores;
@@ -1984,10 +1988,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         `Challenge active: ${coachChallengeText}`,
       ];
       const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
-      const leaderboardRows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
-      const leaderboardBlocked=String(homeShotsLeaderboard?.error||"").toLowerCase().includes("not allowed");
-      const leaderboardStatusForPlayer=leaderboardBlocked?"idle":(homeShotsLeaderboard?.status||"idle");
-      const leaderboardErrorForPlayer=leaderboardBlocked?"":(homeShotsLeaderboard?.error||"");
       const primaryActionItems=[
         {label:"Start Workout",detail:"Open At Home Log",onClick:()=>switchTab("log-drill"),variant:"primary"},
         {label:"Log Shots",detail:"Track makes now",onClick:()=>switchTab("log-drill"),variant:"solid"},
@@ -2054,9 +2054,9 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     <div style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.45,marginBottom:10}}>Team home-shots rankings update as players log makes.</div>
     <HomeShotsLeaderboardCard
       title="TOP 10 PLAYER HOME SHOTS"
-      status={leaderboardStatusForPlayer}
-      rows={leaderboardRows}
-      error={leaderboardErrorForPlayer}
+      status={playerLeaderboardStatus}
+      rows={playerLeaderboardRows}
+      error={playerLeaderboardError}
       onRefresh={refreshHomeShotsLeaderboard}
     />
   </div>}
