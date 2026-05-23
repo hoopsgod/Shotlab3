@@ -6,6 +6,13 @@ const hasConfig = Boolean(baseUrl && anonKey);
 const SESSION_KEY = "sl:supabase-session";
 const LEGACY_TOKEN_KEY = "sl:supabase-access-token";
 
+const authStateListeners = new Set();
+const notifyAuthStateChange = (event, session = null) => {
+  for (const listener of authStateListeners) {
+    try { listener(event, session); } catch {}
+  }
+};
+
 const readStoredSession = () => {
   try {
     const raw = window.localStorage?.getItem(SESSION_KEY);
@@ -148,7 +155,10 @@ export const supabase = {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) return { data: null, error: sanitizeAuthError(payload, "auth_signup_failed", "Signup failed", response.status) };
-      if (payload?.access_token || payload?.refresh_token) storeSession(payload);
+      if (payload?.access_token || payload?.refresh_token) {
+        storeSession(payload);
+        notifyAuthStateChange('SIGNED_UP', payload);
+      }
       return { data: payload, error: null };
     },
     async signInWithPassword({ email, password }) {
@@ -160,7 +170,10 @@ export const supabase = {
       });
       const payload = await response.json().catch(() => ({}));
       if (!response.ok) return { data: null, error: sanitizeAuthError(payload, "auth_login_failed", "Login failed", response.status) };
-      if (payload?.access_token || payload?.refresh_token) storeSession(payload);
+      if (payload?.access_token || payload?.refresh_token) {
+        storeSession(payload);
+        notifyAuthStateChange('SIGNED_UP', payload);
+      }
       return { data: payload, error: null };
     },
     async getSession() {
@@ -214,7 +227,24 @@ export const supabase = {
         await fetch(`${baseUrl}/auth/v1/logout`, { method: "POST", headers: { apikey: anonKey, Authorization: `Bearer ${token}` } }).catch(() => null);
       }
       try { clearSession(); } catch {}
+      notifyAuthStateChange('SIGNED_OUT', null);
       return { error: null };
+    },
+
+    onAuthStateChange(callback) {
+      if (typeof callback !== 'function') {
+        return { data: { subscription: { unsubscribe() {} } } };
+      }
+      authStateListeners.add(callback);
+      return {
+        data: {
+          subscription: {
+            unsubscribe() {
+              authStateListeners.delete(callback);
+            },
+          },
+        },
+      };
     },
   },
   from(table) {
