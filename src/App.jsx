@@ -1390,7 +1390,7 @@ const nextScores=[...scores,{id:genId("score"),email:user.email,playerId:user.em
 await P("sl:scores",nextScores,setScores,{strictRemote:true});
 setStatSyncError("");
 trackEvent("score_logged",{drillId,score,src});
-await fetchHomeShotsLeaderboard(user.teamId,homeShotsLeaderboardScope);
+await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
 }catch(e){
 setStatSyncError("Could not save score to team dashboard. Please try again.");
 trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unknown")});
@@ -1419,7 +1419,7 @@ const localLog={id:saved.id||genId("shotlog"),email:saved.email||user.email,play
 setShotLogs(prev=>[...prev,localLog]);
 setStatSyncError("");
 trackEvent("shot_log_added",{made,date});
-await fetchHomeShotsLeaderboard(user.teamId,homeShotsLeaderboardScope);
+await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
 }catch(e){
 const backendErrorCode=String(e?.message||"home_shot_log_failed");
 console.error("home_shots_save_failed",{errorCode:backendErrorCode,status:"failed",userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made,date});
@@ -1509,7 +1509,7 @@ loadCoachPrioritiesForTeam(user.teamId);
 useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.message||"unknown"});const onRej=(e)=>trackEvent("app_error",{kind:"unhandledrejection",message:e?.reason?.message||String(e?.reason||"unknown")});window.addEventListener("error",onErr);window.addEventListener("unhandledrejection",onRej);return()=>{window.removeEventListener("error",onErr);window.removeEventListener("unhandledrejection",onRej);};},[trackEvent]);
 useEffect(()=>{
 if(!ready||!user?.teamId||!["coach","player"].includes(view))return;
-fetchHomeShotsLeaderboard(user.teamId,homeShotsLeaderboardScope);
+fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
 },[ready,user?.teamId,view,homeShotsLeaderboardScope,fetchHomeShotsLeaderboard]);
 
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
@@ -1520,7 +1520,7 @@ const dataDebugPanel=dataDebugEnabled?<div style={{position:"fixed",right:12,bot
 return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)} isJoinConsumeActive={isJoinConsumeActive}/></div>}
-{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} leaderboardScope={homeShotsLeaderboardScope} onLeaderboardScopeChange={setHomeShotsLeaderboardScope} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,homeShotsLeaderboardScope)} statSyncError={statSyncError}/></div>}
+{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")} statSyncError={statSyncError}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} leaderboardScope={homeShotsLeaderboardScope} onLeaderboardScopeChange={setHomeShotsLeaderboardScope} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,homeShotsLeaderboardScope)}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 {dataDebugPanel}
@@ -1662,7 +1662,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 // ═══════════════════════════════════════
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
-function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,leaderboardScope,onLeaderboardScopeChange,refreshHomeShotsLeaderboard,statSyncError=""}){
+function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,refreshHomeShotsLeaderboard,statSyncError=""}){
 const canAccessTab=useCallback((nextTab)=>{
   if(nextTab==="players")return u.isCoach;
   if(nextTab==="duels")return !u.isCoach;
@@ -1763,10 +1763,12 @@ const[pbReveal,setPbReveal]=useState(null);
 const[submitting,setSubmitting]=useState(false);
 const[drillBarW,setDrillBarW]=useState(0);
 const[showCoachGuidanceDetails,setShowCoachGuidanceDetails]=useState(false);
-const playerLeaderboardRows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
-const hasPlayerLeaderboardData=playerLeaderboardRows.length>0;
-const playerLeaderboardStatus=typeof homeShotsLeaderboard?.status==="string"?homeShotsLeaderboard.status:"idle";
-const playerLeaderboardError=hasPlayerLeaderboardData?"":("" );
+const playerLeaderboardState=useMemo(()=>{
+  const rows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
+  const requestedStatus=typeof homeShotsLeaderboard?.status==="string"?homeShotsLeaderboard.status:"idle";
+  const status=rows.length>0&&requestedStatus==="error"?"success":requestedStatus;
+  return {rows,status,error:"",hasData:rows.length>0};
+},[homeShotsLeaderboard]);
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
 const activeMode=tab==="duels"?"program":"home";
 const activeScores=activeMode==="program"?programScores:homeScores;
@@ -2054,9 +2056,9 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     <div style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.45,marginBottom:10}}>Team home-shots rankings update as players log makes.</div>
     <HomeShotsLeaderboardCard
       title="TOP 10 PLAYER HOME SHOTS"
-      status={playerLeaderboardStatus}
-      rows={playerLeaderboardRows}
-      error={playerLeaderboardError}
+      status={playerLeaderboardState.status}
+      rows={playerLeaderboardState.rows}
+      error={playerLeaderboardState.error}
       onRefresh={refreshHomeShotsLeaderboard}
     />
   </div>}
