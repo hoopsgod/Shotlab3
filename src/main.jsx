@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { demoBootstrap } from './lib/demoBootstrap.ts'
 import { checkBackendHealth, getBackendStatusLabel, logBackendHealth } from './lib/backendHealth.js'
+import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
 const BOOT_TIMEOUT_MS = 10000
@@ -57,6 +58,9 @@ if (typeof window !== 'undefined') {
         ok: status.ok,
       }
     }
+  if (DEV) {
+    window.__shotlabSupabaseSchemaStatus = async () => verifySupabaseSchema()
+  }
   }
 }
 
@@ -145,6 +149,13 @@ window.addEventListener('unhandledrejection', (event) => {
         }).catch(() => {
           markBoot('backend_health', 'health_check_failed')
         })
+        if (DEV) {
+          verifySupabaseSchema().then((status) => {
+            markBoot('schema_verify', status.status)
+          }).catch(() => {
+            markBoot('schema_verify', 'schema_check_failed')
+          })
+        }
       } catch {
         renderStartupError('Startup bootstrap failed before app mount.')
         return
