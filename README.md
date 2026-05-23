@@ -58,3 +58,5 @@ Use `npm run doctor` to check all of the above quickly.
 - **Build output directory:** `dist`
 
 These settings match the current Vite config (`build.outDir = "dist"`) and package scripts.
+
+> Deployment provider note: Cloudflare Pages is the only supported deployment target for this repo; legacy Vercel status checks should be removed/disabled to avoid PR check noise.
