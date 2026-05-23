@@ -1,12 +1,13 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { demoBootstrap } from './lib/demoBootstrap.ts'
-import { checkBackendHealth, logBackendHealth } from './lib/backendHealth.js'
+import { checkBackendHealth, getBackendStatusLabel, logBackendHealth } from './lib/backendHealth.js'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
 const BOOT_TIMEOUT_MS = 10000
 const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams('')
 const bootDebugEnabled = params.get('bootDebug') === '1'
+const DEV = Boolean(typeof import.meta !== 'undefined' && import.meta?.env?.DEV)
 
 let startupErrorShown = false
 let bootPanelEl = null
@@ -47,6 +48,16 @@ function markBoot(stage, detail = '') {
 
 if (typeof window !== 'undefined') {
   window.__shotlabBootMark = markBoot
+  if (DEV) {
+    window.__shotlabBackendStatus = async () => {
+      const status = await checkBackendHealth()
+      return {
+        code: status.status,
+        label: getBackendStatusLabel(status.status),
+        ok: status.ok,
+      }
+    }
+  }
 }
 
 
