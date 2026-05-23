@@ -1986,7 +1986,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
       const leaderboardRows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
       const leaderboardBlocked=String(homeShotsLeaderboard?.error||"").toLowerCase().includes("not allowed");
-      const leaderboardStatusForPlayer=leaderboardBlocked?"idle":(homeShotsLeaderboard?.status||"idle");
       const leaderboardErrorForPlayer=leaderboardBlocked?"":(homeShotsLeaderboard?.error||"");
       const primaryActionItems=[
         {label:"Start Workout",detail:"Open At Home Log",onClick:()=>switchTab("log-drill"),variant:"primary"},
@@ -2054,7 +2053,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
     <div style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.45,marginBottom:10}}>Team home-shots rankings update as players log makes.</div>
     <HomeShotsLeaderboardCard
       title="TOP 10 PLAYER HOME SHOTS"
-      status={leaderboardStatusForPlayer}
+      status={leaderboardBlocked?"idle":(homeShotsLeaderboard?.status||"idle")}
       rows={leaderboardRows}
       error={leaderboardErrorForPlayer}
       onRefresh={refreshHomeShotsLeaderboard}

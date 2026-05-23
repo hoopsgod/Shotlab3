@@ -154,3 +154,7 @@ Below are current demo or local-only behaviors that must be gated or removed fro
 5. Capacitor bootstrap and device QA.
 6. Internal beta release (TestFlight + Play Internal).
 
+
+## Related documents
+- [MVP Production Scope + Backend Readiness](docs/mvp-production-scope-backend-readiness.md)
+- [Production Readiness Checklist](docs/production-readiness-checklist.md)
