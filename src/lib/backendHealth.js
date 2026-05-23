@@ -3,6 +3,7 @@ import { supabase } from './supabase.js'
 export const BACKEND_HEALTH = {
   DEMO_MODE_ACTIVE: 'demo_mode_active',
   SUPABASE_CONFIGURED: 'supabase_configured',
+  SUPABASE_REACHABLE: 'supabase_reachable',
   SUPABASE_UNAVAILABLE: 'supabase_unavailable',
 }
 
@@ -46,7 +47,12 @@ export async function checkBackendHealth({ timeoutMs = 3500 } = {}) {
       }
     }
 
-    return snapshot
+    return {
+      ...snapshot,
+      status: BACKEND_HEALTH.SUPABASE_REACHABLE,
+      message: 'Supabase is configured and reachable.',
+      detail: 'probe_ok',
+    }
   } catch (error) {
     return {
       status: BACKEND_HEALTH.SUPABASE_UNAVAILABLE,
@@ -66,4 +72,19 @@ export function logBackendHealth(status) {
   }
   const method = status.ok ? 'info' : 'warn'
   console[method]('[ShotLab backend]', payload)
+}
+
+export function getBackendStatusLabel(statusCode) {
+  switch (statusCode) {
+    case BACKEND_HEALTH.DEMO_MODE_ACTIVE:
+      return 'demo mode active'
+    case BACKEND_HEALTH.SUPABASE_CONFIGURED:
+      return 'Supabase configured'
+    case BACKEND_HEALTH.SUPABASE_REACHABLE:
+      return 'Supabase reachable'
+    case BACKEND_HEALTH.SUPABASE_UNAVAILABLE:
+      return 'Supabase unavailable'
+    default:
+      return 'backend status unknown'
+  }
 }
