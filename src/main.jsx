@@ -1,7 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { demoBootstrap } from './lib/demoBootstrap.ts'
-import { supabase } from './lib/supabase.js'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
 const BOOT_TIMEOUT_MS = 10000
@@ -109,9 +108,7 @@ window.addEventListener('unhandledrejection', (event) => {
   renderStartupError(msg)
 })
 
-if (!supabase.isConfigured) {
-  renderStartupError('Missing Supabase configuration for this deployment.')
-} else {
+{
   let bootTimeoutId = null
   const onAppReady = () => {
     markBoot('hydration_completed')
