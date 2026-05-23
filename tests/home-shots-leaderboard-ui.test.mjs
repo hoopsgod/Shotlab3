@@ -34,10 +34,14 @@ test("player landing page includes shared HomeShotsLeaderboardCard", () => {
   assert.match(appSource, /tab===\"home\"[\s\S]*?<HomeShotsLeaderboardCard/);
 });
 
-test("home shots leaderboard includes players/coaches scope toggle", () => {
-  assert.match(appSource, /HOME_SHOTS_LEADERBOARD_SCOPES/);
-  assert.match(appSource, /scopeOption\.label/);
-  assert.match(appSource, /COACHES/);
+test("player home leaderboard does not render players/coaches scope toggle", () => {
+  assert.match(appSource, /TOP 10 PLAYER HOME SHOTS/);
+  assert.doesNotMatch(appSource, /TOP 10 COACH HOME SHOTS/);
+});
+
+test("regression guard: player leaderboard status is locally derived before render usage", () => {
+  assert.match(appSource, /const playerLeaderboardStatus=/);
+  assert.match(appSource, /status=\{playerLeaderboardStatus\}/);
 });
 
 test("leaderboard card renders loading, empty, and error states", () => {
@@ -47,7 +51,7 @@ test("leaderboard card renders loading, empty, and error states", () => {
   const errorHtml = renderToStaticMarkup(React.createElement(HomeShotsLeaderboardCard, { status: "error", rows: [], error: "boom" }));
 
   assert.match(loadingHtml, /Rank 1–10/);
-  assert.match(emptyHtml, /No shots logged yet — once players log At Home Shots, leaders will appear here\./);
+  assert.match(emptyHtml, /No leaderboard data yet\. Log shots to enter the rankings\./);
   assert.match(errorHtml, /Could not load leaderboard/);
   assert.match(errorHtml, /boom/);
 });

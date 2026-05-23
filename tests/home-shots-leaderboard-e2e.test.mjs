@@ -244,7 +244,7 @@ test("e2e regression: coach home-shots route + leaderboard card include same-tea
     const emptyHtml = renderToStaticMarkup(
       React.createElement(HomeShotsLeaderboardCard, { status: "success", rows: [], title: "TOP 10 HOME SHOTS" }),
     );
-    assert.match(emptyHtml, /No shots logged yet — once players log At Home Shots, leaders will appear here\./);
+    assert.match(emptyHtml, /No leaderboard data yet\. Log shots to enter the rankings\./);
   } finally {
     global.fetch = originalFetch;
   }
