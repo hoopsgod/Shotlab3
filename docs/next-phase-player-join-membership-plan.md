@@ -1,25 +1,25 @@
-# Next Phase Plan (Post Team Foundation PR)
+# Next Phase Plan (Post Player Join-Code Foundation PR)
 
-This PR establishes coach team creation + join-code foundations only.
+This PR establishes the **player join-code + team-membership foundation** with demo-safe fallbacks.
 
 ## Next PR scope
 
-1. **Player join-code flow**
-   - Build a player-facing join-code entry flow using the new team service primitives.
-   - Validate code state and provide clear success/failure UX.
+1. **Persistent player identity**
+   - Introduce durable identity linkage for players so team membership survives refresh, logout/login, and device changes.
+   - Keep demo/local mode non-blocking while identity persistence rolls out.
 
-2. **Player team membership**
-   - Persist player-to-team membership in Supabase for authenticated and legacy-safe paths.
-   - Ensure safe fallback behavior in demo/local mode.
+2. **Persistent shot logs**
+   - Move shot logs from transient/demo-first behavior to durable per-player storage.
+   - Preserve backwards-safe fallback behavior when backend services are unavailable.
 
-3. **Persistent player identity**
-   - Introduce durable player identity linkage so joins survive refresh/re-login.
-   - Keep coach and player dashboard compatibility while identity persistence is rolled out.
+3. **Real leaderboard entries**
+   - Wire leaderboard rows to persistent player identities + shot logs.
+   - Ensure leaderboard rendering remains safe in missing-data and backend-unavailable states.
 
 ## Explicitly deferred from this PR
 
-- Full player account migration
-- Shot log migration
-- Leaderboard migration
+- Forced login
+- Full onboarding redesign
+- Shot-log migration execution details
 - Subscription/social features
 - Dashboard redesign
