@@ -4,15 +4,12 @@ This PR establishes the **player join-code + team-membership foundation** with d
 
 ## Next PR scope
 
-1. **Persistent player identity**
-   - Introduce durable identity linkage for players so team membership survives refresh, logout/login, and device changes.
-   - Keep demo/local mode non-blocking while identity persistence rolls out.
-
-2. **Persistent shot logs**
+1. **Persistent shot logs tied to player/team membership**
    - Move shot logs from transient/demo-first behavior to durable per-player storage.
+   - Tie writes/reads to hydrated player identity + team context from this phase.
    - Preserve backwards-safe fallback behavior when backend services are unavailable.
 
-3. **Real leaderboard entries**
+2. **Real leaderboard entries**
    - Wire leaderboard rows to persistent player identities + shot logs.
    - Ensure leaderboard rendering remains safe in missing-data and backend-unavailable states.
 
