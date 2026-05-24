@@ -39,6 +39,7 @@ test('valid shot logs produce ranked entries', () => {
   assert.equal(rows[1].player_id, 'a')
   assert.equal(rows[1].rank, 2)
   assert.equal(rows[0].total_makes, 12)
+  assert.equal(rows[0].total_home_shots, 12)
 })
 
 test('backend unavailable = safe fallback', async () => {
