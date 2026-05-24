@@ -1695,6 +1695,12 @@ const switchTab=useCallback((requestedTab)=>{
   setTab(nextTab);
   setActive(null);
   setShowShotStats(false);
+  if(typeof window!=="undefined"){
+    requestAnimationFrame(()=>{
+      playerScrollRef.current?.scrollTo?.({top:0,left:0,behavior:"auto"});
+      window.scrollTo({top:0,left:0,behavior:"auto"});
+    });
+  }
 },[canAccessTab]);
 useEffect(()=>{const onResize=()=>{setIsNarrow(window.innerWidth<768);setIsDesktop(window.innerWidth>=1024)};window.addEventListener("resize",onResize);return()=>window.removeEventListener("resize",onResize);},[]);
 useEffect(()=>{
@@ -1999,49 +2005,49 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       ];
       const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
-        <section aria-label="Today's focus" style={{padding:isNarrow?"18px":"20px",borderRadius:20,background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
+        <section aria-label="Today's mission" style={{padding:isNarrow?"18px":"20px",borderRadius:20,background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
             <div>
-              <div style={{fontFamily:FB,color:VOLT,fontSize:12,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S FOCUS</div>
-              <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?30:35,lineHeight:1.02,letterSpacing:1.2,marginTop:8}}>{coachTodayFocus}</div>
+              <div style={{fontFamily:FB,color:VOLT,fontSize:13,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S MISSION</div>
+              <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?28:32,lineHeight:1.05,letterSpacing:1.1,marginTop:8}}>{coachTodayFocus}</div>
             </div>
             <span style={{fontFamily:FB,fontSize:12,color:dailyPct>=100?VOLT:"#FFCE73",border:`1px solid ${dailyPct>=100?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"5px 10px"}}>{dailyPct>=100?"Goal hit":momentumLabel}</span>
           </div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:14,lineHeight:1.55,marginTop:10}}>{missionStatus}</div>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:10,gap:8}}><span style={{fontFamily:FB,color:"var(--text-3)",fontSize:12,letterSpacing:"0.06em"}}>WEEKLY MOMENTUM</span><span style={{fontFamily:FB,color:weeklyPct>=80?VOLT:"#FFCE73",fontSize:12}}>{weeklyMakes}/{weeklyGoal} makes · {weeklyPct}%</span></div>
-          <div style={{marginTop:6,height:5,borderRadius:999,background:"rgba(255,255,255,0.08)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(5,weeklyPct)}%`,background:"linear-gradient(90deg, rgba(200,255,26,0.66), rgba(94,208,255,0.72))"}}/></div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:15,lineHeight:1.6,marginTop:10}}>{missionStatus}</div>
           <div style={{marginTop:12,height:8,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"linear-gradient(90deg, #C8FF1A, #E6FF7A)",boxShadow:"0 0 20px rgba(200,255,26,0.44)"}}/></div>
-          <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:12,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:13,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
           <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:11}}>
             {[`Emphasis · ${emphasisLabel}`,`Weekly · ${weeklyMakes}/${coachWeeklyMakesTarget}`,`Momentum · ${momentumLabel}`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:11,color:LIGHT,padding:"5px 9px",borderRadius:999,background:"rgba(12,14,18,0.52)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
           </div>
           <button className="btn-v cta-primary" style={{marginTop:14,minHeight:56,padding:"0 20px",fontSize:15}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel.toUpperCase()}</button>
         </section>
-        <section aria-label="Coach guidance and accountability" style={{padding:isNarrow?"14px":"16px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
+        <section aria-label="Coach guidance summary" style={{padding:isNarrow?"16px":"18px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
             <div><div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:"0.04em"}}>COACH GUIDANCE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:3,lineHeight:1.45}}>{coachName} has active priorities tied to your weekly progression.</div></div>
             <span style={{fontFamily:FB,fontSize:11,color:streak>=3?VOLT:"#FFCE73",border:`1px solid ${streak>=3?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"4px 9px"}}>{streak} day visibility</span>
           </div>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,lineHeight:1.55,marginTop:10}}>Coach focus: {coachTodayFocus}</div>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:15,lineHeight:1.55,marginTop:10}}>Coach focus: {coachTodayFocus}</div>
           <div style={{display:"flex",gap:8,alignItems:"center",marginTop:10,flexWrap:"wrap"}}>
             <button type="button" onClick={()=>setShowCoachGuidanceDetails(v=>!v)} style={{border:"1px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.04)",color:LIGHT,borderRadius:999,padding:"6px 12px",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>
               {showCoachGuidanceDetails?"Hide details":"View details"}
             </button>
-            <span style={{fontFamily:FB,fontSize:12,color:T.SUB,lineHeight:1.45}}>Full priorities are in Program.</span>
+            <button type="button" onClick={()=>switchTab("duels")} style={{border:"1px solid rgba(200,255,0,0.34)",background:"rgba(200,255,0,0.08)",color:VOLT,borderRadius:999,padding:"6px 12px",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>
+              Open Program
+            </button>
           </div>
           {showCoachGuidanceDetails&&<div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
             {[{k:"Priority drill",v:coachPriorityDrill},{k:"Coach challenge",v:coachChallengeText},{k:"Weekly goal",v:weeklyGoalLabel},{k:"Consistency",v:consistencyExpectation}].map(item=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"9px 10px",background:"rgba(12,14,18,0.5)"}}><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:12,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.45}}>{item.v}</div></div>)}
           </div>}
         </section>
-        <section aria-label="Performance snapshot" style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(3,minmax(0,1fr))",gap:10}}>
-          {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly",value:weeklyMakes,color:LIGHT},{label:"Daily Completion",value:`${dailyPct}%`,color:VOLT},{label:"Weekly Completion",value:`${weeklyPct}%`,color:ORANGE}].map(item=><div key={item.label} style={{padding:"10px 10px",borderRadius:12,background:"rgba(255,255,255,0.03)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:21,marginTop:3,lineHeight:1.1}}>{item.value}</div></div>)}
+        <section aria-label="Progress snapshot" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:12}}>
+          {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly",value:weeklyMakes,color:LIGHT},{label:"Daily",value:`${dailyPct}%`,color:VOLT},{label:"Weekly",value:`${weeklyPct}%`,color:ORANGE}].map(item=><div key={item.label+item.value} style={{padding:"12px",borderRadius:12,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:22,marginTop:4,lineHeight:1.1}}>{item.value}</div></div>)}
         </section>
-        <section aria-label="Next session" style={{padding:"12px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:`1px solid ${BORDER_CLR}77`}}>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>NEXT SESSION</div>
+        <section aria-label="Next step" style={{padding:"14px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:`1px solid ${BORDER_CLR}77`}}>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:700,letterSpacing:"0.08em"}}>NEXT STEP</div>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:20,marginTop:4}}>{nextEvent?nextEvent.title:"Build your next session plan"}</div>
           <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"No event locked yet — open Program and set the next rep target for your week."}</div>
         </section>
-        <section aria-label="Secondary navigation actions" style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(3,minmax(0,1fr))",gap:8}}>
+        <section aria-label="Secondary navigation actions" style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(3,minmax(0,1fr))",gap:10}}>
           {[{label:"View Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:56,borderRadius:12,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer"}}>{action.label}</button>)}
         </section>
         
@@ -2084,11 +2090,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
       </div>
-      <button className="btn-v cta-primary" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);pushCompletionCue({title:"Shot activity logged",detail:`${v} makes added for ${shotDate}`,momentum:`${streak}-day momentum`,next:"Check your shot trend or continue drills"});setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?.7:1}}>
+      <button className="btn-v cta-primary" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);pushCompletionCue({title:"Shot activity logged",detail:`${v} makes added for ${shotDate}`,momentum:`${streak}-day momentum`,next:"Check your shot trend or continue drills"});setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?0.7:1}}>
         {shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
       {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
-      <button onClick={()=>setShowShotStats(true)} className="cta-secondary-link" style={{width:"100%",textAlign:"center",opacity:.85}}>VIEW SHOT STATS →</button>
+      <button onClick={()=>setShowShotStats(true)} className="cta-secondary-link" style={{width:"100%",textAlign:"center",opacity:.85}}>SHOT STATS →</button>
     </div>
 
     <DividerDot/>
@@ -3569,7 +3575,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   </div>}
 
   {/* EVENTS */}
-  {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}>
+  {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><DashboardReturnButton onClick={()=>setTab("feed")} />
     {isDesktop?<>
       <div className="coachEventsHeaderCard"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} /></div>
       {nextEvent&&(()=>{const nextRows=coachEventRsvpRows(nextEvent.id);const rosterCount=allKnown.length;const missingCount=Math.max(rosterCount-nextRows.length,0);return <div className="heroModule" style={{background:"linear-gradient(145deg, rgba(200,255,26,0.16), rgba(15,20,28,0.94) 60%)",border:`1px solid ${VOLT}55`,boxShadow:"0 20px 45px rgba(0,0,0,0.38)",padding:16}}>
@@ -3745,7 +3751,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       </div>})}
   </div>}
 
-  {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><PageHeader title="PLAYERS" subtitle="Roster insights, development, and availability" accent="purple" icon={<UsersIcon size={20} color={PAGE_ACCENTS.players.accent}/>} actionLabel="Add" onAction={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.players.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>ROSTER SNAPSHOT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{ups.length} players on roster</div></div></div></div>
+  {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><DashboardReturnButton onClick={()=>setTab("feed")} /><PageHeader title="PLAYERS" subtitle="Roster insights, development, and availability" accent="purple" icon={<UsersIcon size={20} color={PAGE_ACCENTS.players.accent}/>} actionLabel="Add" onAction={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.players.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>ROSTER SNAPSHOT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{ups.length} players on roster</div></div></div></div>
     <div id="coach-add-player-form" className="accent-card" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:12}}>
       <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:8}}>ADD PLAYER TO ROSTER</div>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
