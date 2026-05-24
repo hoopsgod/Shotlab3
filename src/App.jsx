@@ -37,6 +37,7 @@ import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./li
 import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 import { createAppPersistenceService } from "./lib/appPersistenceService";
+import { createShotLogService } from "./lib/shotLogService.js";
 import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
 import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, HOME_SHOTS_LEADERBOARD_SCOPES, STORAGE_KEYS } from "./lib/appDataModels";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
@@ -391,6 +392,7 @@ const DB = {
 };
 
 const persistenceService=createAppPersistenceService({db:DB,fetchImpl:fetch});
+const shotLogService=createShotLogService({supabaseClient:supabase});
 
 const parseLeaderboardErrorMessage = (errorCode = "", status = 0, parseMode = "json") => {
   if (parseMode === "non_json") return "Leaderboard endpoint unavailable (invalid response format).";
@@ -1414,22 +1416,32 @@ const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)retu
 const addShotLog=async(made,date)=>{
 if(!requirePlayer(user,user?.teamId,user?.email))return;
 const homeShotDebugMode=window.location.search.includes("homeShotDebug=1");
+const localLog={id:genId("shotlog"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,made:Number(made||0),date,ts:Date.now()};
 try{
+const created=await shotLogService.createShotLog({
+shotLog:{made,date},
+player:{id:user.email,email:user.email,name:user.name},
+team:{id:user.teamId},
+});
+const backendAvailable=created?.mode==="supabase"&&!created?.reason;
+if(backendAvailable){
 const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({team_id:user.teamId,player_id:user.email,email:user.email,name:user.name,made,date})});
 const body=await res.json().catch(()=>({}));
 if(!res.ok)throw new Error(String(body?.error||"home_shot_log_failed"));
 const saved=body?.shot_log||{};
-const localLog={id:saved.id||genId("shotlog"),email:saved.email||user.email,playerId:saved.player_id||saved.playerId||user.email,teamId:saved.team_id||saved.teamId||user.teamId,name:saved.name||user.name,made:Number(saved.made??made),date:saved.date||date,ts:saved.ts||Date.now()};
+setShotLogs(prev=>[...prev,{id:saved.id||localLog.id,email:saved.email||localLog.email,playerId:saved.player_id||saved.playerId||localLog.playerId,teamId:saved.team_id||saved.teamId||localLog.teamId,name:saved.name||localLog.name,made:Number(saved.made??localLog.made),date:saved.date||localLog.date,ts:saved.ts||localLog.ts}]);
+}else{
 setShotLogs(prev=>[...prev,localLog]);
+}
 setStatSyncError("");
-trackEvent("shot_log_added",{made,date});
+trackEvent("shot_log_added",{made,date,mode:created?.mode||"demo"});
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
 }catch(e){
-const backendErrorCode=String(e?.message||"home_shot_log_failed");
-console.error("home_shots_save_failed",{errorCode:backendErrorCode,status:"failed",userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made,date});
+console.error("home_shots_save_failed",{status:"failed",userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made,date});
+setShotLogs(prev=>[...prev,localLog]);
 const baseError="Could not save home shots to team dashboard. Please try again.";
-setStatSyncError(homeShotDebugMode?`${baseError} Error: ${backendErrorCode}`:baseError);
-trackEvent("shot_log_failed",{made,date,error:backendErrorCode});
+setStatSyncError(homeShotDebugMode?`${baseError} Error: ${String(e?.message||"sync_failed")}`:baseError);
+trackEvent("shot_log_failed",{made,date,error:String(e?.message||"sync_failed")});
 }
 };
 const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",[...challenges,{...ch,id:Date.now(),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges);trackEvent("challenge_created",{to:ch.to||null})};
