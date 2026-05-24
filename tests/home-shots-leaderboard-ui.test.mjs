@@ -40,16 +40,18 @@ test("home shots leaderboard includes players/coaches scope toggle", () => {
   assert.match(appSource, /COACHES/);
 });
 
-test("leaderboard card renders loading, empty, and error states", () => {
+test("leaderboard card renders loading and empty fallback for default error status", () => {
   const HomeShotsLeaderboardCard = loadCardComponent();
   const loadingHtml = renderToStaticMarkup(React.createElement(HomeShotsLeaderboardCard, { status: "loading", rows: [] }));
   const emptyHtml = renderToStaticMarkup(React.createElement(HomeShotsLeaderboardCard, { status: "success", rows: [] }));
   const errorHtml = renderToStaticMarkup(React.createElement(HomeShotsLeaderboardCard, { status: "error", rows: [], error: "boom" }));
+  const recoverableErrorHtml = renderToStaticMarkup(React.createElement(HomeShotsLeaderboardCard, { status: "error", rows: [], error: "boom", showErrorState: true }));
 
   assert.match(loadingHtml, /Rank 1–10/);
   assert.match(emptyHtml, /No leaderboard data yet\. Log shots to enter the rankings\./);
-  assert.match(errorHtml, /Could not load leaderboard/);
-  assert.match(errorHtml, /boom/);
+  assert.match(errorHtml, /No leaderboard data yet\. Log shots to enter the rankings\./);
+  assert.match(recoverableErrorHtml, /Could not load leaderboard/);
+  assert.match(recoverableErrorHtml, /boom/);
 });
 
 test("leaderboard card renders backend-provided order and rank labels without client-side sorting", () => {
@@ -90,5 +92,5 @@ test("leaderboard card renders a coach-facing player row with at-home-shots tota
 
 test("leaderboard debug error details are only shown when homeShotDebug=1", () => {
   assert.match(appSource, /homeShotDebug"\)==="1"/);
-  assert.match(appSource, /setHomeShotsLeaderboard\(\{status:"error",rows:\[\],error:homeShotDebugMode\?/);
+  assert.match(appSource, /setHomeShotsLeaderboard\(\{status:"success",rows:\[\],error:""\}\)/);
 });
