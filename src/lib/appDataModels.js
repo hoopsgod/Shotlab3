@@ -52,7 +52,3 @@ export const sanitizeCoachPriorities = (value = {}) => {
   };
 };
 
-export const HOME_SHOTS_LEADERBOARD_SCOPES = [
-  { key: "players", label: "PLAYERS" },
-  { key: "coaches", label: "COACHES" },
-];

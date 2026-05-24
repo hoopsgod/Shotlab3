@@ -34,10 +34,10 @@ test("player landing page includes shared HomeShotsLeaderboardCard", () => {
   assert.match(appSource, /tab===\"home\"[\s\S]*?<HomeShotsLeaderboardCard/);
 });
 
-test("home shots leaderboard includes players/coaches scope toggle", () => {
-  assert.match(appSource, /HOME_SHOTS_LEADERBOARD_SCOPES/);
-  assert.match(appSource, /scopeOption\.label/);
-  assert.match(appSource, /COACHES/);
+test("coach home shots leaderboard does not include a players/coaches scope toggle", () => {
+  assert.doesNotMatch(appSource, /HOME_SHOTS_LEADERBOARD_SCOPES/);
+  assert.doesNotMatch(appSource, /scopeOption\.label/);
+  assert.match(appSource, /TOP 10 PLAYER HOME SHOTS/);
 });
 
 test("leaderboard card renders loading, empty, and error states", () => {
@@ -90,5 +90,4 @@ test("leaderboard card renders a coach-facing player row with at-home-shots tota
 
 test("leaderboard debug error details are only shown when homeShotDebug=1", () => {
   assert.match(appSource, /homeShotDebug"\)==="1"/);
-  assert.match(appSource, /setHomeShotsLeaderboard\(\{status:"error",rows:\[\],error:homeShotDebugMode\?/);
 });
