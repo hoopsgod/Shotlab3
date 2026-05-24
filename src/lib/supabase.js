@@ -247,6 +247,17 @@ export const supabase = {
       };
     },
   },
+  profiles: {
+    async upsertCoach(row) {
+      if (!hasConfig) return { data: null, error: { code: "config_missing", message: "Supabase is not configured." } };
+      return request("users", {
+        method: "POST",
+        body: [row],
+        upsert: true,
+        onConflict: "auth_user_id",
+      });
+    },
+  },
   from(table) {
     return {
       select() {
