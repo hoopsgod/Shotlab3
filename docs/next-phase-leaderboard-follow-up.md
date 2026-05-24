@@ -1,17 +1,21 @@
-# Next Phase: Leaderboard Expansion Follow-up
+# Next phase: leaderboard rollout order
 
-This PR establishes a safe leaderboard read model sourced from shot logs and keeps demo/local mode resilient when Supabase, shot logs, identity, or team context are unavailable.
+This foundation PR intentionally limits scope to architecture/service-level support and safe empty-state behavior.
 
-## Planned next PR scope
+## Required follow-up PR order
 
-1. Coach-visible team leaderboard enhancements.
-2. Drill-specific leaderboard views.
-3. Leaderboard refresh/error/empty-state polish.
+1. Build the **real drill-name leaderboard UI** backed by `leaderboard_type=drill_shots`.
+2. Build the **real event participation leaderboard** backed by durable attendance participation records.
+3. Build the **real strength and conditioning participation leaderboard** backed by durable S&C completion records.
 
-## Guardrails that remain in place
+## Data requirements for participation leaderboards
 
-- No forced login.
-- No social feed additions.
-- No subscription work.
-- No dashboard redesign.
-- No exposure of raw technical Supabase errors to end users.
+Before phases 2 and 3 can render live rankings, the app needs stable team-scoped participation tables with at least:
+
+- `team_id`
+- `player_id`
+- participation/completion timestamp
+- source type (`event` or `strength_conditioning`)
+- a reliable "completed/attended" state
+
+Until those records are available, the leaderboard service should continue returning safe empty results without startup crashes, forced login, or raw backend errors in UI.
