@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTeamBranding } from "../branding/TeamBrandingProvider";
+import { joinCurrentPlayerToTeam, loadCurrentPlayerMembership } from "../lib/playerJoinCodeClient.js";
 
 interface NavItem {
   href: string;
@@ -26,6 +27,42 @@ export default function PlayerSidebar() {
   const { teamName, teamWordmark, tokens } = useTeamBranding();
   const activePath = typeof window !== "undefined" ? window.location.pathname.replace(/\/$/, "") : "";
   const teamInitial = useMemo(() => (teamName || "S").trim().charAt(0).toUpperCase(), [teamName]);
+  const [joinCode, setJoinCode] = useState("");
+  const [joinMessage, setJoinMessage] = useState("");
+  const [joinState, setJoinState] = useState<"idle"|"loading"|"success"|"error">("idle");
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const membership = await loadCurrentPlayerMembership();
+      if (!mounted) return;
+      if (membership?.ok && membership?.data?.team_id) {
+        setJoinMessage(`Connected to team ${membership.data.team_id}.`);
+        setJoinState("success");
+      }
+    })().catch(() => null);
+    return () => { mounted = false; };
+  }, []);
+
+  const submitJoinCode = async () => {
+    setJoinState("loading");
+    setJoinMessage("");
+    const result = await joinCurrentPlayerToTeam(joinCode);
+    if (!result?.ok) {
+      setJoinState("error");
+      setJoinMessage(result?.error?.message || "Unable to join team right now.");
+      return;
+    }
+    if (result.mode === "demo") {
+      setJoinState("success");
+      setJoinMessage("Demo mode active. Join code saved for later when you sign in.");
+      return;
+    }
+    setJoinState("success");
+    const teamName = result?.data?.team?.name || "team";
+    setJoinMessage(`Joined ${teamName}.`);
+  };
+
 
   return (
     <aside
@@ -82,6 +119,21 @@ export default function PlayerSidebar() {
           );
         })}
       </nav>
+
+      <div style={{ padding: "8px 14px 14px", borderTop: "1px solid var(--stroke-1)" }}>
+        <div style={{ fontSize: "0.68rem", color: tokens.muted, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 6 }}>Join Team</div>
+        <input
+          value={joinCode}
+          onChange={(e) => { setJoinCode(String(e.target.value || "").toUpperCase()); setJoinState("idle"); }}
+          placeholder="TEAM CODE"
+          style={{ width: "100%", minHeight: 34, borderRadius: 8, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", color: tokens.text, padding: "0 10px", fontSize: "0.78rem", letterSpacing: "0.08em", textTransform: "uppercase" }}
+        />
+        <button type="button" onClick={submitJoinCode} disabled={joinState === "loading"} style={{ marginTop: 8, width: "100%", minHeight: 34, borderRadius: 8, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", color: tokens.text, fontWeight: 700, cursor: "pointer" }}>
+          {joinState === "loading" ? "Joining..." : "Join Team"}
+        </button>
+        {joinMessage ? <div style={{ marginTop: 6, fontSize: "0.72rem", color: joinState === "error" ? "#f87171" : tokens.muted }}>{joinMessage}</div> : null}
+      </div>
+
     </aside>
   );
 }
