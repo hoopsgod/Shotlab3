@@ -6,6 +6,7 @@ export default function HomeShotsLeaderboardCard({
   error = "",
   rows = [],
   onRefresh,
+  showErrorState = false,
 }) {
   const renderLoading = () => (
     <div style={{ display: "grid", gap: 8 }}>
@@ -142,7 +143,7 @@ export default function HomeShotsLeaderboardCard({
         : status === "idle"
           ? renderEmpty()
         : status === "error"
-          ? renderError()
+          ? (showErrorState ? renderError() : renderEmpty())
           : rows.length === 0
             ? renderEmpty()
             : renderRows()}

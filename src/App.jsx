@@ -2017,6 +2017,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       ];
       const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
+        <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>Getting Started</div>
         <section aria-label="Today's mission" style={{padding:isNarrow?"18px":"20px",borderRadius:20,background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
             <div>
