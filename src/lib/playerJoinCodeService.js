@@ -8,8 +8,10 @@ const safeRows = (value) => (Array.isArray(value) ? value : [])
 
 const buildDemoResult = (data, reason) => ({ ok: true, data, mode: 'demo', reason })
 
+const getTeamJoinCode = (team) => team?.joinCode || team?.join_code || ''
+
 const isCodeExpired = (team) => {
-  const raw = team?.joinCodeExpiresAt
+  const raw = team?.joinCodeExpiresAt ?? team?.join_code_expires_at
   if (raw == null) return false
   const expiresAt = Number(raw)
   if (!Number.isFinite(expiresAt) || expiresAt <= 0) return false
@@ -45,7 +47,7 @@ export function createPlayerJoinCodeService({ supabaseClient } = {}) {
       return safeCall(async () => {
         const res = await supabaseClient.from(TEAM_TABLE).select()
         if (res?.error) return { ok: false, data: null, mode: 'supabase', error: { code: 'team_lookup_failed', message: 'Unable to validate this code right now.' } }
-        const team = safeRows(res?.data).find((item) => normalizeJoinCode(item?.joinCode) === normalizedCode)
+        const team = safeRows(res?.data).find((item) => normalizeJoinCode(getTeamJoinCode(item)) === normalizedCode)
         if (!team) return { ok: false, data: null, mode: 'supabase', error: { code: 'invalid_join_code', message: 'That join code is invalid. Check with your coach.' } }
         if (isCodeExpired(team)) return { ok: false, data: null, mode: 'supabase', error: { code: 'expired_join_code', message: 'This join code has expired. Ask your coach for a new code.' } }
         return { ok: true, data: team, mode: 'supabase' }
@@ -73,7 +75,11 @@ export function createPlayerJoinCodeService({ supabaseClient } = {}) {
         const res = await supabaseClient.from(TEAM_MEMBERS_TABLE).select()
         if (res?.error) return { ok: false, data: null, mode: 'supabase', error: { code: 'membership_load_failed', message: 'Unable to load team membership.' } }
         const userId = String(playerUser.id || playerUser.email)
-        const membership = safeRows(res?.data).find((row) => String(row?.user_id) === userId && String(row?.status || 'active') !== 'disabled') || null
+        const membership = safeRows(res?.data).find((row) => {
+          const rowUser = String(row?.user_id || row?.userId || '')
+          const status = String(row?.status || 'active')
+          return rowUser === userId && status !== 'disabled'
+        }) || null
         return { ok: true, data: membership, mode: 'supabase' }
       }, null)
     },
@@ -82,7 +88,7 @@ export function createPlayerJoinCodeService({ supabaseClient } = {}) {
       if (!validated.ok) return validated
       const team = validated?.data?.team
       const existing = await this.loadPlayerMembership({ playerUser })
-      if (existing.ok && existing.data && String(existing.data.team_id) === String(team.id)) return { ok: true, data: { team, membership: existing.data }, mode: existing.mode }
+      if (existing.ok && existing.data && String(existing.data.team_id || existing.data.teamId) === String(team?.id)) return { ok: true, data: { team, membership: existing.data }, mode: existing.mode }
       const created = await this.createTeamMembership({ teamId: team?.id, playerUser })
       if (!created.ok) return created
       return { ok: true, data: { team, membership: created.data }, mode: created.mode }
