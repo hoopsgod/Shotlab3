@@ -39,6 +39,16 @@ test('valid shot logs produce ranked entries', () => {
   assert.equal(rows[1].player_id, 'a')
   assert.equal(rows[1].rank, 2)
   assert.equal(rows[0].total_makes, 12)
+  assert.equal(rows[0].total_home_shots, 12)
+  assert.equal(rows[0].team_id, 'team-1')
+})
+
+test('missing player context = no crash', async () => {
+  const service = createLeaderboardService({ supabaseClient: makeClient(async () => ({ data: [] })) })
+  const result = await service.loadPlayerShotLeaderboard({ teamId: 'team-1' })
+  assert.equal(result.ok, true)
+  assert.equal(result.reason, 'missing_player_context')
+  assert.deepEqual(result.data, [])
 })
 
 test('backend unavailable = safe fallback', async () => {

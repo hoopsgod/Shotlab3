@@ -45,7 +45,12 @@ export function calculateLeaderboardFromShotLogs({ shotLogs = [], teamId = '', p
     })
 
   const rows = [...grouped.values()].sort((a, b) => b.total_makes - a.total_makes || String(a.player_id).localeCompare(String(b.player_id)))
-  return rows.map((row, index) => ({ ...row, rank: index + 1, player_display_name: asText(playerContext?.nameById?.[row.player_id]) || row.player_id }))
+  return rows.map((row, index) => ({
+    ...row,
+    rank: index + 1,
+    total_home_shots: row.total_makes,
+    player_display_name: asText(playerContext?.nameById?.[row.player_id]) || row.player_id,
+  }))
 }
 
 export function createLeaderboardService({ supabaseClient } = {}) {
