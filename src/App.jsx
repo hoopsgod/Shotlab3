@@ -449,12 +449,14 @@ default:
 return"Could not create team.";
 }
 };
+const isTechnicalBackendMessage=value=>{const raw=String(value||"").toLowerCase();if(!raw)return false;return["supabase","postgres","sql","relation","schema","jwt","rpc","function","column"].some(token=>raw.includes(token));};
 const parseStartupErrorMessage=(error)=>{
 const raw=String(error?.message||error||"").toLowerCase();
 if(raw.includes("supabase")&&raw.includes("missing"))return"We could not start ShotLab because team data is temporarily unavailable.";
 if(raw.includes("config_missing")||raw.includes("config_invalid"))return"ShotLab is still warming up. Please refresh in a moment.";
 if(raw.includes("unauthorized")||raw.includes("forbidden"))return"Your session needs to be refreshed. Please sign in again.";
 if(raw.includes("network")||raw.includes("failed to fetch"))return"Connection was interrupted while loading your team data. Please retry.";
+if(isTechnicalBackendMessage(raw))return"ShotLab is temporarily unavailable. Please try again shortly.";
 return"ShotLab ran into a loading issue. Please refresh and try again.";
 };
 // Password hashing (simple but not plaintext)
@@ -836,6 +838,7 @@ if(code.includes("weak_password")||message.includes("password")&&message.include
 if(code.includes("user_already_exists")||message.includes("already registered")||message.includes("already been registered"))return"Account already exists. Please sign in.";
 if(code.includes("email_provider_disabled")||message.includes("email provider is disabled"))return"Email login is not enabled in Supabase Auth settings.";
 if(code.includes("over_request_rate_limit")||message.includes("rate limit"))return"Too many attempts. Wait and try again.";
+if(!dataDebugRequested&&isTechnicalBackendMessage(getAuthErrorMessage(error)))return"Unable to register right now. Please try again in a moment.";
 return dataDebugRequested?`Unable to register. Please try again.${authDebugSuffix(error)}`:"Unable to register. Please try again.";
 };
 const mapLoginErrorMessage=(error,dataDebugRequested)=>{
@@ -844,6 +847,7 @@ const message=getAuthErrorMessage(error).toLowerCase();
 if(code.includes("invalid_credentials")||message.includes("invalid login credentials"))return"Invalid email or password.";
 if(code.includes("email_not_confirmed")||message.includes("email not confirmed"))return"Please confirm your email before signing in.";
 if(code.includes("user_not_found")||message.includes("user not found"))return"No Supabase Auth account found for this email.";
+if(!dataDebugRequested&&isTechnicalBackendMessage(getAuthErrorMessage(error)))return"Unable to sign in right now. Please try again in a moment.";
 return dataDebugRequested?`Login failed.${authDebugSuffix(error)}`:"Unable to sign in. Please try again.";
 };
 const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
