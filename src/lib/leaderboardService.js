@@ -1,0 +1,84 @@
+import { getBackendRuntime } from './backendConfig.js'
+
+const SHOT_LOGS_TABLE = 'shot_logs'
+
+const asText = (value) => String(value ?? '').trim()
+const toNum = (value) => {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : 0
+}
+
+const safeArray = (value) => (Array.isArray(value) ? value : [])
+
+const toDemo = (data, reason, extra = {}) => ({ ok: true, data, mode: 'demo', reason, ...extra })
+
+export function calculateLeaderboardFromShotLogs({ shotLogs = [], teamId = '', playerContext = {} } = {}) {
+  const team = asText(teamId || playerContext?.teamId)
+  if (!team) return []
+
+  const grouped = new Map()
+  safeArray(shotLogs)
+    .filter((row) => asText(row?.team_id || row?.teamId) === team)
+    .forEach((row) => {
+      const playerId = asText(row?.player_id || row?.playerId || row?.email)
+      if (!playerId) return
+      const current = grouped.get(playerId) || {
+        player_id: playerId,
+        team_id: team,
+        total_makes: 0,
+        total_attempts: 0,
+        total_reps: 0,
+        drill_id: asText(row?.drill_id || row?.drillId),
+        session_id: asText(row?.session_id || row?.sessionId),
+        updated_at: row?.updated_at || row?.created_at || new Date(0).toISOString(),
+      }
+      current.total_makes += toNum(row?.made)
+      const attempts = toNum(row?.attempted_shots ?? row?.attemptedShots)
+      const reps = toNum(row?.total_reps ?? row?.totalReps)
+      current.total_attempts += attempts
+      current.total_reps += reps
+      const updatedAt = row?.updated_at || row?.created_at
+      if (updatedAt && String(updatedAt) > String(current.updated_at)) current.updated_at = updatedAt
+      if (!current.drill_id) current.drill_id = asText(row?.drill_id || row?.drillId)
+      if (!current.session_id) current.session_id = asText(row?.session_id || row?.sessionId)
+      grouped.set(playerId, current)
+    })
+
+  const rows = [...grouped.values()].sort((a, b) => b.total_makes - a.total_makes || String(a.player_id).localeCompare(String(b.player_id)))
+  return rows.map((row, index) => ({ ...row, rank: index + 1, player_display_name: asText(playerContext?.nameById?.[row.player_id]) || row.player_id }))
+}
+
+export function createLeaderboardService({ supabaseClient } = {}) {
+  const runtime = getBackendRuntime()
+  const configured = Boolean(supabaseClient?.isConfigured)
+
+  const loadTeamLogsSafe = async ({ teamId, fallbackShotLogs = [] } = {}) => {
+    if (!asText(teamId)) return toDemo([], 'missing_team_context')
+    if (!configured) return toDemo(calculateLeaderboardFromShotLogs({ shotLogs: fallbackShotLogs, teamId }), 'missing_supabase_env')
+    try {
+      const res = await supabaseClient.from(SHOT_LOGS_TABLE).select()
+      if (res?.error) return toDemo(calculateLeaderboardFromShotLogs({ shotLogs: fallbackShotLogs, teamId }), 'backend_load_failed')
+      const rows = calculateLeaderboardFromShotLogs({ shotLogs: res?.data, teamId })
+      return { ok: true, data: rows, mode: 'supabase' }
+    } catch {
+      return toDemo(calculateLeaderboardFromShotLogs({ shotLogs: fallbackShotLogs, teamId }), 'backend_unavailable')
+    }
+  }
+
+  return {
+    runtime,
+    calculateRank({ shotLogs = [], teamId, playerId } = {}) {
+      const rows = calculateLeaderboardFromShotLogs({ shotLogs, teamId })
+      const idx = rows.findIndex((row) => asText(row.player_id) === asText(playerId))
+      return idx >= 0 ? idx + 1 : null
+    },
+    async loadPlayerShotLeaderboard({ teamId, playerId, fallbackShotLogs = [] } = {}) {
+      if (!asText(playerId)) return toDemo([], 'missing_player_context')
+      const loaded = await loadTeamLogsSafe({ teamId, fallbackShotLogs })
+      return { ...loaded, data: safeArray(loaded?.data).filter((row) => asText(row.player_id) === asText(playerId)) }
+    },
+    async loadTeamLeaderboard({ teamId, fallbackShotLogs = [] } = {}) {
+      return loadTeamLogsSafe({ teamId, fallbackShotLogs })
+    },
+  }
+}

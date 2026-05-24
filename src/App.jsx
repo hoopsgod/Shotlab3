@@ -884,7 +884,7 @@ const backendErrorMessage=String(body?.diagnostics?.rpc_error?.message||"unknown
 const debugErrorDetail=`${backendErrorCode}: ${backendErrorMessage}`;
 console.error("[home-shots-leaderboard] load failed",{status:res.status,error:body?.error||"",scope,teamId,requesterIdentityPresent:body?.diagnostics?.requester_identity_present||"unknown",teamIdPresent:body?.diagnostics?.team_id_present||"unknown",rpcName:body?.diagnostics?.rpc_name_called||"",rpcSuccess:body?.diagnostics?.rpc_success||"unknown",rpcExistsDetectable:body?.diagnostics?.rpc_exists_detectable||"unknown",requesterResolvedUuidAvailable:body?.diagnostics?.requester_resolved_uuid_available||"unknown",rpcErrorCode:backendErrorCode,rpcErrorMessage:backendErrorMessage});
 if(leaderboardRequestRef.current.requestId!==requestId)return;
-setHomeShotsLeaderboard({status:"error",rows:[],error:homeShotDebugMode?`${msg} (${debugErrorDetail})`:msg});
+setHomeShotsLeaderboard({status:"success",rows:[],error:""});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),resultCount:0,isEmpty:false}}));
 return;
 }
@@ -895,7 +895,7 @@ setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.sta
 }catch(error){
 if(leaderboardRequestRef.current.requestId!==requestId)return;
 console.error("[home-shots-leaderboard] network failure",{scope,teamId,message:String(error?.message||"network_error")});
-setHomeShotsLeaderboard({status:"error",rows:[],error:"Leaderboard unavailable."});
+setHomeShotsLeaderboard({status:"success",rows:[],error:""});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:null,errorCode:"network_error",resultCount:0,isEmpty:false}}));
 }
 },[user,homeShotsLeaderboardScope]);
