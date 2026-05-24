@@ -37,6 +37,7 @@ import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./li
 import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 import { createAppPersistenceService } from "./lib/appPersistenceService";
+import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
 import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, HOME_SHOTS_LEADERBOARD_SCOPES, STORAGE_KEYS } from "./lib/appDataModels";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
 import {
@@ -1154,6 +1155,7 @@ P("sl:players",np,setPlayers),
 P("sl:drills",seededDrills,setDrills),
 P("sl:program-drills",seededProgramDrills,setProgramDrills),
 ]);
+if(SUPABASE_AUTH_ENABLED&&role==="coach")await bootstrapCoachProfile({supabaseClient:supabase,authUser:authRes.data?.user,displayName:name,email:normalizedEmail});
 if(SUPABASE_AUTH_ENABLED&&isPendingConfirmation(authRes.data))return{ok:true,pendingConfirmation:true,message:"Account created. Check your email to confirm your account, then log in."};
 setUser({email:normalizedEmail,role,isCoach:role==="coach",name,teamId:null,hideFromLeaderboards:false});setView(role==="coach"?"create-team":"join-team");
 DB.set("sl:session",{email:normalizedEmail});
@@ -1185,6 +1187,8 @@ console.error("[auth] login failed",{status:authRes.error?.status??null,code:aut
 return{ok:false,err:mapLoginErrorMessage(authRes.error,dataDebugRequested)};
 }
 setDataDebug(prev=>({...prev,auth:{...prev.auth,loginHttpStatus:200,loginCode:"success",loginMessage:"",providerHint:"",sessionPresent:"yes"}}));
+const activeSession=await supabase.auth.getSession();
+await bootstrapCoachProfile({supabaseClient:supabase,authUser:activeSession?.data?.session?.user,email:normalizedEmail});
 }else{
 const auth=await legacyAuthFetch("/v1/legacy-auth/login",{email:normalizedEmail,password});
 if(!auth.ok){setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthLoginStatus:"failed",loginHttpStatus:auth.status,loginCode:String(auth.body?.error||"invalid_credentials"),loginMessage:"Invalid email or password",providerHint:"legacy_backend"}}));return{ok:false,err:"Invalid email or password"};}
