@@ -56,6 +56,18 @@ test('valid join code can resolve a team', async () => {
   assert.equal(res.data.id, 't_1')
 })
 
+test('expired join code = safe user-facing failure', async () => {
+  const { createPlayerJoinCodeService } = await loadModule({ url: 'https://example.supabase.co', key: 'anon' })
+  const service = createPlayerJoinCodeService({
+    supabaseClient: makeSupabaseStub({
+      teams: [{ id: 't_1', joinCode: 'ABC123', name: 'Titans', joinCodeExpiresAt: Date.now() - 10_000 }],
+    }),
+  })
+  const res = await service.findTeamByJoinCode({ joinCode: 'ABC123' })
+  assert.equal(res.ok, false)
+  assert.equal(res.error.code, 'expired_join_code')
+})
+
 test('player membership creation is safe', async () => {
   const { createPlayerJoinCodeService } = await loadModule({ url: 'https://example.supabase.co', key: 'anon' })
   const service = createPlayerJoinCodeService({ supabaseClient: makeSupabaseStub() })
