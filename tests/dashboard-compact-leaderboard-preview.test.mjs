@@ -21,7 +21,7 @@ test('coach dashboard mounts compact leaderboard preview with top-5 rows and cle
   assert.match(appSource, /categoryLabel="Home Shots"/);
   assert.match(appSource, /maxRows=\{5\}/);
   assert.match(compactCardSource, /No team leaderboard data yet\. Players will appear here after they log shots\./);
-  assert.match(appSource, /PageHeader title="COACH HOME"[\s\S]*<CompactLeaderboardPreviewCard[\s\S]*Coach setup checklist/);
+  assert.match(appSource, /PageHeader title="COACH DASHBOARD"[\s\S]*<CompactLeaderboardPreviewCard[\s\S]*Coach setup checklist/);
   assert.equal(appSource.includes("COACH VIEW — FULL ACCESS"), false);
 });
 
@@ -51,12 +51,21 @@ test('events pages are not the primary home-shots leaderboard location', () => {
 
 test('dashboards do not duplicate compact preview with legacy top-10 blocks', () => {
   assert.equal(appSource.includes("TOP 10 PLAYER HOME SHOTS"), false);
+  assert.equal(appSource.includes("Top 10 Player Home Shots"), false);
   const usageMentions = (appSource.match(/<CompactLeaderboardPreviewCard/g) || []).length;
   assert.equal(usageMentions >= 2, true);
 });
 
+test('leaderboard previews keep safe links and no redundant coach workspace/home section copy', () => {
+  assert.match(appSource, /onViewAll=\{\(\)=>switchTab\("leaderboards"\)\}/);
+  assert.match(appSource, /onViewAll=\{\(\)=>setTab\("leaderboards"\)\}/);
+  assert.equal(appSource.includes("Coach Workspace"), false);
+  assert.equal(appSource.includes("COACH HOME"), false);
+});
+
 test('full leaderboards destination exists and includes all final categories with data-required copy', () => {
   assert.match(appSource, /tab==="leaderboards"/);
+  assert.match(appSource, /const \[activeLeaderboardCategory,setActiveLeaderboardCategory\]=useState\("home_shots"\)/);
   assert.match(appSource, /At-Home Shots/);
   assert.match(appSource, /Events Attended/);
   assert.match(appSource, /Strength & Conditioning/);
@@ -68,8 +77,17 @@ test('full leaderboards destination exists and includes all final categories wit
   assert.match(appSource, /Drill leaders will appear after players log coach-assigned drills\./);
   assert.match(appSource, /No rankings yet/);
   assert.match(appSource, /aria-selected=\{active\}/);
-  assert.match(appSource, /onClick=\{\(\)=>setLeaderboardCategory\(item.key\)\}/);
-  assert.match(appSource, /leaderboardCategory==="event_participation"/);
-  assert.match(appSource, /leaderboardCategory==="strength_conditioning_participation"/);
+  assert.match(appSource, /onClick=\{\(\)=>setActiveLeaderboardCategory\(item.key\)\}/);
+  assert.match(appSource, /activeLeaderboardCategory==="event_participation"/);
+  assert.match(appSource, /activeLeaderboardCategory==="strength_conditioning_participation"/);
   assert.match(appSource, /Coach Custom Drills/);
+});
+
+test('leaderboard category state is safe and legacy symbol is removed', () => {
+  const legacyToken = ['leaderboard', 'Category'].join('');
+  assert.equal(appSource.includes(legacyToken), false);
+  assert.match(appSource, /activeLeaderboardCategory==="home_shots"/);
+  assert.match(appSource, /activeLeaderboardCategory==="event_participation"/);
+  assert.match(appSource, /activeLeaderboardCategory==="strength_conditioning_participation"/);
+  assert.match(appSource, /Coach Drills/);
 });
