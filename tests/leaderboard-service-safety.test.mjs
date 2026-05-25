@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createLeaderboardService, calculateLeaderboardFromShotLogs } from '../src/lib/leaderboardService.js'
+import { createLeaderboardService, calculateLeaderboardFromShotLogs, calculateDrillLeaderboardFromShotLogs, LEADERBOARD_TYPES } from '../src/lib/leaderboardService.js'
 
 const makeClient = (impl, configured = true) => ({
   isConfigured: configured,
@@ -68,4 +68,29 @@ test('app startup does not depend on leaderboard data (safe defaults)', async ()
   const player = await service.loadPlayerShotLeaderboard({ teamId: 'team-1', playerId: '' })
   assert.equal(player.ok, true)
   assert.equal(player.reason, 'missing_player_context')
+})
+
+test('drill leaderboard supports dynamic drill_id without hardcoded names', () => {
+  const rows = calculateDrillLeaderboardFromShotLogs({
+    teamId: 'team-1',
+    drillId: 'dr-1',
+    shotLogs: [
+      { team_id: 'team-1', player_id: 'a', drill_id: 'dr-1', drill_name: 'Pull Ups', made: 11 },
+      { team_id: 'team-1', player_id: 'b', drill_id: 'dr-2', drill_name: 'Corner 3s', made: 20 },
+      { team_id: 'team-1', player_id: 'c', drill_id: 'dr-1', drill_name: 'Pull Ups', made: 14 },
+    ],
+  })
+  assert.equal(rows.length, 2)
+  assert.equal(rows[0].leaderboard_type, LEADERBOARD_TYPES.drill_shots)
+  assert.equal(rows[0].drill_id, 'dr-1')
+})
+
+test('unsupported durable categories return safe empty responses until persistence exists', async () => {
+  const service = createLeaderboardService({ supabaseClient: makeClient(async () => ({ data: [] })) })
+  const eventRows = await service.loadLeaderboardByType({ leaderboardType: LEADERBOARD_TYPES.event_participation, teamId: 'team-1' })
+  const scRows = await service.loadLeaderboardByType({ leaderboardType: LEADERBOARD_TYPES.strength_conditioning_participation, teamId: 'team-1' })
+  assert.equal(eventRows.reason, 'missing_durable_participation_records')
+  assert.equal(scRows.reason, 'missing_durable_participation_records')
+  assert.deepEqual(eventRows.data, [])
+  assert.deepEqual(scRows.data, [])
 })
