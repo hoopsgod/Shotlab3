@@ -10,12 +10,14 @@ test('coach and player leaderboards use safe shared category state and render wi
 
   const leaderboardsSections = (appSource.match(/tab==="leaderboards"/g) || []).length;
   assert.equal(leaderboardsSections >= 2, true);
+  assert.match(appSource, /renderPremiumLeaderboardsHub\(\{mode:"player"/);
+  assert.match(appSource, /renderPremiumLeaderboardsHub\(\{mode:"coach"/);
 
   const buttonBindings = (appSource.match(/onClick=\{\(\)=>setActiveLeaderboardCategory\(item\.key\)\}/g) || []).length;
-  assert.equal(buttonBindings >= 2, true);
+  assert.equal(buttonBindings >= 1, true);
 
   const homeCategoryChecks = (appSource.match(/activeLeaderboardCategory==="home_shots"/g) || []).length;
-  assert.equal(homeCategoryChecks >= 2, true);
+  assert.equal(homeCategoryChecks >= 1, true);
 });
 
 test('leaderboards categories and content states are stable for coach and player', () => {
@@ -30,5 +32,7 @@ test('leaderboards categories and content states are stable for coach and player
   assert.match(appSource, /No leaderboard data yet\. Log shots to enter the rankings\./);
   assert.match(appSource, /No team leaderboard data yet\. Players will appear here after they log shots\./);
   assert.match(appSource, /No rankings yet/);
+  assert.match(appSource, /rows=\{homeShotsLeaderboard\?\.rows\|\|\[\]\}/);
+  assert.doesNotMatch(appSource, /<CompactLeaderboardPreviewCard[^>]*rows=\{\[/);
 
 });
