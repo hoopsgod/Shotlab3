@@ -1,6 +1,12 @@
 import { getBackendRuntime } from './backendConfig.js'
 
 const SHOT_LOGS_TABLE = 'shot_logs'
+export const LEADERBOARD_TYPES = {
+  home_shots: 'home_shots',
+  drill_shots: 'drill_shots',
+  event_participation: 'event_participation',
+  strength_conditioning_participation: 'strength_conditioning_participation',
+}
 
 const asText = (value) => String(value ?? '').trim()
 const toNum = (value) => {
@@ -53,6 +59,27 @@ export function calculateLeaderboardFromShotLogs({ shotLogs = [], teamId = '', p
   }))
 }
 
+export function calculateDrillLeaderboardFromShotLogs({ shotLogs = [], teamId = '', drillId = '', drillName = '', playerContext = {} } = {}) {
+  const team = asText(teamId || playerContext?.teamId)
+  if (!team) return []
+  const normalizedDrillId = asText(drillId)
+  const normalizedDrillName = asText(drillName).toLowerCase()
+  const filtered = safeArray(shotLogs).filter((row) => {
+    if (asText(row?.team_id || row?.teamId) !== team) return false
+    const rowDrillId = asText(row?.drill_id || row?.drillId)
+    const rowDrillName = asText(row?.drill_name || row?.drillName).toLowerCase()
+    if (normalizedDrillId) return rowDrillId === normalizedDrillId
+    if (normalizedDrillName) return rowDrillName === normalizedDrillName
+    return false
+  })
+  return calculateLeaderboardFromShotLogs({ shotLogs: filtered, teamId: team, playerContext }).map((row) => ({
+    ...row,
+    leaderboard_type: LEADERBOARD_TYPES.drill_shots,
+    drill_id: normalizedDrillId || asText(row?.drill_id),
+    drill_name: asText(drillName),
+  }))
+}
+
 export function createLeaderboardService({ supabaseClient } = {}) {
   const runtime = getBackendRuntime()
   const configured = Boolean(supabaseClient?.isConfigured)
@@ -72,6 +99,7 @@ export function createLeaderboardService({ supabaseClient } = {}) {
 
   return {
     runtime,
+    LEADERBOARD_TYPES,
     calculateRank({ shotLogs = [], teamId, playerId } = {}) {
       const rows = calculateLeaderboardFromShotLogs({ shotLogs, teamId })
       const idx = rows.findIndex((row) => asText(row.player_id) === asText(playerId))
@@ -84,6 +112,19 @@ export function createLeaderboardService({ supabaseClient } = {}) {
     },
     async loadTeamLeaderboard({ teamId, fallbackShotLogs = [] } = {}) {
       return loadTeamLogsSafe({ teamId, fallbackShotLogs })
+    },
+    async loadLeaderboardByType({ leaderboardType = LEADERBOARD_TYPES.home_shots, teamId, fallbackShotLogs = [], drillId = '', drillName = '' } = {}) {
+      const type = asText(leaderboardType)
+      if (type === LEADERBOARD_TYPES.home_shots) return loadTeamLogsSafe({ teamId, fallbackShotLogs })
+      if (type === LEADERBOARD_TYPES.drill_shots) {
+        const loaded = await loadTeamLogsSafe({ teamId, fallbackShotLogs })
+        const drillRows = calculateDrillLeaderboardFromShotLogs({ shotLogs: loaded?.data, teamId, drillId, drillName })
+        return { ...loaded, data: drillRows }
+      }
+      if (type === LEADERBOARD_TYPES.event_participation || type === LEADERBOARD_TYPES.strength_conditioning_participation) {
+        return toDemo([], 'missing_durable_participation_records', { leaderboard_type: type })
+      }
+      return toDemo([], 'unsupported_leaderboard_type', { leaderboard_type: type || 'unknown' })
     },
   }
 }

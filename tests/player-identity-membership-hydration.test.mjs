@@ -87,6 +87,6 @@ test('startup does not depend on membership data', async () => {
 test('Player Dashboard and Coach Dashboard still render', () => {
   const appSource = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8')
   assert.match(appSource, /CoachCommandCenter/)
-  assert.match(appSource, /HomeShotsLeaderboardCard/)
+  assert.match(appSource, /CompactLeaderboardPreviewCard/)
   assert.match(appSource, /switchTab\("profile"\)/)
 })

@@ -6,7 +6,7 @@ const appSource = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8
 const leaderboardSource = readFileSync(new URL('../src/components/HomeShotsLeaderboardCard.jsx', import.meta.url), 'utf8');
 
 test('smoke: dashboard and required surfaces exist in runtime source', () => {
-  ['playerLeaderboardState','HomeShotsLeaderboardCard','PROGRAM SHOOTING DRILLS','LOAD DEMO DATA','switchTab("program")','switchTab("profile")'].forEach((token)=> assert.equal(appSource.includes(token), true));
+  ['playerLeaderboardState','CompactLeaderboardPreviewCard','PROGRAM SHOOTING DRILLS','LOAD DEMO DATA','switchTab("program")','switchTab("profile")'].forEach((token)=> assert.equal(appSource.includes(token), true));
 });
 
 test('fallback contracts: missing leaderboard/team/progress/demo data are handled defensively', () => {
