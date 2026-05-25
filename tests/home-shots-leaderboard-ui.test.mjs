@@ -26,18 +26,18 @@ function loadCardComponent() {
   return module.exports.default || module.exports;
 }
 
-test("coach landing page includes shared HomeShotsLeaderboardCard", () => {
-  assert.match(appSource, /tab===\"feed\"[\s\S]*?<HomeShotsLeaderboardCard/);
+test("coach landing page includes compact leaderboard preview", () => {
+  assert.match(appSource, /tab===\"feed\"[\s\S]*?<CompactLeaderboardPreviewCard/);
 });
 
-test("player landing page includes shared HomeShotsLeaderboardCard", () => {
-  assert.match(appSource, /tab===\"home\"[\s\S]*?<HomeShotsLeaderboardCard/);
+test("player landing page includes compact leaderboard preview", () => {
+  assert.match(appSource, /tab===\"home\"[\s\S]*?<CompactLeaderboardPreviewCard/);
 });
 
 test("coach home shots leaderboard does not include a players/coaches scope toggle", () => {
   assert.doesNotMatch(appSource, /HOME_SHOTS_LEADERBOARD_SCOPES/);
   assert.doesNotMatch(appSource, /scopeOption\.label/);
-  assert.match(appSource, /TOP 10 PLAYER HOME SHOTS/);
+  assert.match(appSource, /categoryLabel="Home Shots"/);
 });
 
 test("leaderboard card renders loading, empty, and error states", () => {
