@@ -68,8 +68,8 @@ test('full leaderboards destination exists and includes all final categories wit
   assert.match(appSource, /Drill leaders will appear after players log coach-assigned drills\./);
   assert.match(appSource, /No rankings yet/);
   assert.match(appSource, /aria-selected=\{active\}/);
-  assert.match(appSource, /onClick=\{\(\)=>setLeaderboardCategory\(item.key\)\}/);
-  assert.match(appSource, /leaderboardCategory==="event_participation"/);
-  assert.match(appSource, /leaderboardCategory==="strength_conditioning_participation"/);
+  assert.match(appSource, /onClick=\{\(\)=>setActiveLeaderboardCategory\(item.key\)\}/);
+  assert.match(appSource, /activeLeaderboardCategory==="event_participation"/);
+  assert.match(appSource, /activeLeaderboardCategory==="strength_conditioning_participation"/);
   assert.match(appSource, /Coach Custom Drills/);
 });
