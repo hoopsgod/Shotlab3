@@ -9,7 +9,7 @@ test('coach leaderboard entry is stabilized (no clickable crashing route) and pl
   assert.doesNotMatch(appSource, /title="Home Shot Leaders"[\s\S]*onViewAll=\{\(\)=>setTab\("leaderboards"\)\}/);
 
   assert.match(appSource, /title="Team Leaders"[\s\S]*mode="player"[\s\S]*onViewAll=\{\(\)=>switchTab\("leaderboards"\)\}/);
-  assert.match(appSource, /tab==="leaderboards"[\s\S]*COMPETITION HUB/);
+  assert.match(appSource, /renderPremiumLeaderboardsHub[\s\S]*COMPETITION HUB/);
   assert.match(appSource, /At-Home Shots/);
   assert.match(appSource, /Events Attended/);
   assert.match(appSource, /Strength & Conditioning/);
