@@ -20,6 +20,7 @@ import CoachDashboardHeader from "./components/CoachDashboardHeader";
 import CoachMiniHeader from "./components/CoachMiniHeader";
 import ShotLabCharts from "./components/ShotLabCharts";
 import HomeShotsLeaderboardCard from "./components/HomeShotsLeaderboardCard";
+import CompactLeaderboardPreviewCard from "./components/CompactLeaderboardPreviewCard";
 
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 
@@ -1912,6 +1913,19 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
+    <div style={{marginBottom:12}}>
+      <CompactLeaderboardPreviewCard
+        title="Team Leaders"
+        areaTitle="Leaderboards"
+        categoryLabel="Home Shots"
+        mode="player"
+        userEmail={u?.email||""}
+        status={homeShotsLeaderboard?.status||"idle"}
+        rows={homeShotsLeaderboard?.rows||[]}
+        emptyMessage="No leaderboard data yet. Log shots to enter the rankings."
+        maxRows={3}
+      />
+    </div>
 
     {(()=>{
       const { sortedEvents: sorted, upcomingEvents, attendanceRows }=normalizeEventsAndRsvps({events,rsvps,userEmail:u?.email,today});
@@ -3271,6 +3285,18 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 <div style={{flex:1,padding:`${showMiniHeader?"88px":"16px"} 20px 110px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="COACH HOME" subtitle="Today-first command surface for your program" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
+    <div style={{marginBottom:10}}>
+      <CompactLeaderboardPreviewCard
+        title="Home Shot Leaders"
+        areaTitle="Leaderboards"
+        categoryLabel="Home Shots"
+        mode="coach"
+        status={homeShotsLeaderboard?.status||"idle"}
+        rows={homeShotsLeaderboard?.rows||[]}
+        emptyMessage="No team leaderboard data yet. Players will appear here after they log shots."
+        maxRows={5}
+      />
+    </div>
     {(()=>{const coachChecklist=[
         {label:"Create or restore team",done:Boolean(u?.teamId)},
         {label:"Invite or add players",done:ups.length>0,onClick:()=>setTab("players"),ariaLabel:"Go to Players tab"},
