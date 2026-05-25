@@ -21,7 +21,7 @@ test('coach dashboard mounts compact leaderboard preview with top-5 rows and cle
   assert.match(appSource, /categoryLabel="Home Shots"/);
   assert.match(appSource, /maxRows=\{5\}/);
   assert.match(compactCardSource, /No team leaderboard data yet\. Players will appear here after they log shots\./);
-  assert.match(appSource, /PageHeader title="COACH HOME"[\s\S]*<CompactLeaderboardPreviewCard[\s\S]*Coach setup checklist/);
+  assert.match(appSource, /PageHeader title="COACH DASHBOARD"[\s\S]*<CompactLeaderboardPreviewCard[\s\S]*Coach setup checklist/);
   assert.equal(appSource.includes("COACH VIEW — FULL ACCESS"), false);
 });
 
@@ -51,8 +51,16 @@ test('events pages are not the primary home-shots leaderboard location', () => {
 
 test('dashboards do not duplicate compact preview with legacy top-10 blocks', () => {
   assert.equal(appSource.includes("TOP 10 PLAYER HOME SHOTS"), false);
+  assert.equal(appSource.includes("Top 10 Player Home Shots"), false);
   const usageMentions = (appSource.match(/<CompactLeaderboardPreviewCard/g) || []).length;
   assert.equal(usageMentions >= 2, true);
+});
+
+test('leaderboard previews keep safe links and no redundant coach workspace/home section copy', () => {
+  assert.match(appSource, /onViewAll=\{\(\)=>switchTab\("leaderboards"\)\}/);
+  assert.match(appSource, /onViewAll=\{\(\)=>setTab\("leaderboards"\)\}/);
+  assert.equal(appSource.includes("Coach Workspace"), false);
+  assert.equal(appSource.includes("COACH HOME"), false);
 });
 
 test('full leaderboards destination exists and includes all final categories with data-required copy', () => {

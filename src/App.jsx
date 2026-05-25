@@ -3288,7 +3288,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 </div>
 <div style={{flex:1,padding:`${showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
-  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="COACH HOME" subtitle="Today-first command surface for your program" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
+  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="COACH DASHBOARD" subtitle="Today-first command surface for your program" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
     <div style={{marginBottom:10}}>
       <CompactLeaderboardPreviewCard
         title="Home Shot Leaders"
@@ -3314,7 +3314,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {label:"First team-management action",done:ups.length>0||events.length>0,onClick:()=>setTab("players")},
         {label:"First RSVP tracking pass",done:rsvps.length>0,onClick:()=>setTab("events")},
       ];
-      return <section style={{...CHECKLIST_CARD_STYLE,padding:"10px 11px",marginBottom:10}} aria-label="Coach setup checklist">
+      return <section style={{...CHECKLIST_CARD_STYLE,padding:"10px 11px",marginBottom:8}} aria-label="Coach setup checklist">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Coach Setup</div>
           <span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{coachChecklist.filter(item=>item.done).length}/{coachChecklist.length}</span>
