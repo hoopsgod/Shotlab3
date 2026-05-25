@@ -20,6 +20,7 @@ import CoachDashboardHeader from "./components/CoachDashboardHeader";
 import CoachMiniHeader from "./components/CoachMiniHeader";
 import ShotLabCharts from "./components/ShotLabCharts";
 import HomeShotsLeaderboardCard from "./components/HomeShotsLeaderboardCard";
+import CompactLeaderboardPreviewCard from "./components/CompactLeaderboardPreviewCard";
 
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 
@@ -1912,7 +1913,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 
   {/* ═════════════ HOME — DASHBOARD ═════════════ */}
   {tab==="home"&&!active&&<div className={slideClass} key="home">
-
     {(()=>{
       const { sortedEvents: sorted, upcomingEvents, attendanceRows }=normalizeEventsAndRsvps({events,rsvps,userEmail:u?.email,today});
       const nextWeekEnd=new Date(`${today}T00:00:00`);
@@ -2037,6 +2037,18 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           </div>
           <button className="btn-v cta-primary" style={{marginTop:14,minHeight:56,padding:"0 20px",fontSize:15}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel.toUpperCase()}</button>
         </section>
+        <CompactLeaderboardPreviewCard
+          title="Team Leaders"
+          areaTitle="Leaderboards"
+          categoryLabel="Home Shots"
+          mode="player"
+          userEmail={u?.email||""}
+          status={homeShotsLeaderboard?.status||"idle"}
+          rows={homeShotsLeaderboard?.rows||[]}
+          emptyMessage="No leaderboard data yet. Log shots to enter the rankings."
+          maxRows={3}
+          fullLeaderboardHref="#player-home-shots-leaderboard"
+        />
         <section aria-label="Coach guidance summary" style={{padding:isNarrow?"16px":"18px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
             <div><div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:"0.04em"}}>COACH GUIDANCE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:3,lineHeight:1.45}}>{coachName} has active priorities tied to your weekly progression.</div></div>
@@ -2072,13 +2084,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 
     {/* ══════ HOME SHOTS LEADERBOARD ══════ */}
     <div style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.45,marginBottom:10}}>Team home-shots rankings update as players log makes.</div>
-    <HomeShotsLeaderboardCard
+    <div id="player-home-shots-leaderboard"><HomeShotsLeaderboardCard
       title="TOP 10 PLAYER HOME SHOTS"
       status={playerLeaderboardState.status}
       rows={playerLeaderboardState.rows}
       error={playerLeaderboardState.error}
       onRefresh={refreshHomeShotsLeaderboard}
-    />
+    /></div>
   </div>}
 
   {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
@@ -3271,6 +3283,19 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 <div style={{flex:1,padding:`${showMiniHeader?"88px":"16px"} 20px 110px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="COACH HOME" subtitle="Today-first command surface for your program" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
+    <div style={{marginBottom:10}}>
+      <CompactLeaderboardPreviewCard
+        title="Home Shot Leaders"
+        areaTitle="Leaderboards"
+        categoryLabel="Home Shots"
+        mode="coach"
+        status={homeShotsLeaderboard?.status||"idle"}
+        rows={homeShotsLeaderboard?.rows||[]}
+        emptyMessage="No team leaderboard data yet. Players will appear here after they log shots."
+        maxRows={5}
+        fullLeaderboardHref="#coach-home-shots-leaderboard"
+      />
+    </div>
     {(()=>{const coachChecklist=[
         {label:"Create or restore team",done:Boolean(u?.teamId)},
         {label:"Invite or add players",done:ups.length>0,onClick:()=>setTab("players"),ariaLabel:"Go to Players tab"},
@@ -3308,7 +3333,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           {coachActivation.map(item=><button key={item.label} type="button" onClick={item.onClick} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"7px 8px",borderRadius:9,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.015)",color:LIGHT,fontFamily:FB,fontSize:11,cursor:"pointer"}}><span>{item.done?"✓":"•"} {item.label}</span><span style={{fontSize:9,color:item.done?VOLT:T.SUB}}>{item.done?"Completed":"Next best action"}</span></button>)}
         </div>
       </section>;})()}
-    <HomeShotsLeaderboardCard title="TOP 10 PLAYER HOME SHOTS" status={homeShotsLeaderboard?.status||"idle"} rows={homeShotsLeaderboard?.rows||[]} error={homeShotsLeaderboard?.error||""} onRetry={refreshHomeShotsLeaderboard} />
+    <div id="coach-home-shots-leaderboard"><HomeShotsLeaderboardCard title="TOP 10 PLAYER HOME SHOTS" status={homeShotsLeaderboard?.status||"idle"} rows={homeShotsLeaderboard?.rows||[]} error={homeShotsLeaderboard?.error||""} onRetry={refreshHomeShotsLeaderboard} /></div>
     {(()=>{
       const todayDate=today;
       const nextWeekEndDate=new Date(`${todayDate}T00:00:00`);
