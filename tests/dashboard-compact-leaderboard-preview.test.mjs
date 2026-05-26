@@ -4,6 +4,7 @@ import fs from 'node:fs';
 
 const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 const compactCardSource = fs.readFileSync(new URL('../src/components/CompactLeaderboardPreviewCard.jsx', import.meta.url), 'utf8');
+const hubSource = fs.readFileSync(new URL('../src/components/LeaderboardsHub.jsx', import.meta.url), 'utf8');
 
 test('player dashboard mounts compact leaderboard preview with rank and top-3 rows', () => {
   assert.match(appSource, /<CompactLeaderboardPreviewCard\s+title="Team Leaders"/);
@@ -35,7 +36,7 @@ test('compact preview supports safe empty fallback states', () => {
   assert.match(compactCardSource, /status === "success" && previewRows.length > 0/);
   assert.match(compactCardSource, /categoryLabel = "Home Shots"/);
   assert.match(compactCardSource, /areaTitle = "Leaderboards"/);
-  assert.match(compactCardSource, /View all leaderboards/);
+  assert.match(compactCardSource, /View Leaderboards/);
 });
 
 test('events pages are not the primary home-shots leaderboard location', () => {
@@ -56,20 +57,21 @@ test('dashboards do not duplicate compact preview with legacy top-10 blocks', ()
 });
 
 test('full leaderboards destination exists and includes all final categories with data-required copy', () => {
-  assert.match(appSource, /tab==="leaderboards"/);
-  assert.match(appSource, /At-Home Shots/);
-  assert.match(appSource, /Events Attended/);
-  assert.match(appSource, /Strength & Conditioning/);
-  assert.match(appSource, /Coach Drills/);
-  assert.match(appSource, /COMPETITION HUB/);
-  assert.match(appSource, /Track team effort across shots, events, strength work, and coach-assigned drills\./);
-  assert.match(appSource, /Event leaders will appear after players check into team events\./);
-  assert.match(appSource, /Strength leaders will appear after players complete assigned S&C work\./);
-  assert.match(appSource, /Drill leaders will appear after players log coach-assigned drills\./);
-  assert.match(appSource, /No rankings yet/);
-  assert.match(appSource, /aria-selected=\{active\}/);
-  assert.match(appSource, /onClick=\{\(\)=>setActiveLeaderboardCategory\(item.key\)\}/);
-  assert.match(appSource, /activeLeaderboardCategory==="event_participation"/);
-  assert.match(appSource, /activeLeaderboardCategory==="strength_conditioning_participation"/);
-  assert.match(appSource, /Coach Custom Drills/);
+  assert.match(appSource, /tab===\"leaderboards\"/);
+  assert.match(appSource, /<LeaderboardsHub viewerRole=\"player\"/);
+  assert.match(appSource, /<LeaderboardsHub viewerRole=\"coach\"/);
+  assert.match(hubSource, /At-Home Shots/);
+  assert.match(hubSource, /Events Attended/);
+  assert.match(hubSource, /Strength & Conditioning/);
+  assert.match(hubSource, /Coach Custom Drills/);
+  assert.match(hubSource, /COMPETITION HUB/);
+  assert.match(hubSource, /Track team effort across shots, events, strength work, and coach-assigned drills\./);
+  assert.match(hubSource, /Event leaders will appear after players check into team events\./);
+  assert.match(hubSource, /Strength leaders will appear after players complete assigned S&C work\./);
+  assert.match(hubSource, /Drill leaders will appear after players log coach-assigned drills\./);
+  assert.match(hubSource, /No rankings yet/);
+  assert.match(hubSource, /aria-selected=\{active\}/);
+  assert.match(hubSource, /onClick=\{\(\) => setActiveLeaderboardCategory\(item.key\)\}/);
+  assert.match(hubSource, /activeLeaderboardCategory === 'event_participation'/);
+  assert.match(hubSource, /activeLeaderboardCategory === 'strength_conditioning_participation'/);
 });

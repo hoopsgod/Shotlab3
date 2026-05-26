@@ -22,6 +22,9 @@ export default function CompactLeaderboardPreviewCard({
   categoryLabel = "Home Shots",
   fullLeaderboardHref = "",
   onViewAll,
+  viewAllLabel,
+  ctaTestId = "open-leaderboards-hub",
+  previewTestId = "compact-leaderboard-preview",
 }) {
   const safeRows = Array.isArray(rows) ? rows : [];
   const isCoachMode = mode === "coach";
@@ -36,7 +39,7 @@ export default function CompactLeaderboardPreviewCard({
   const hasRows = status === "success" && previewRows.length > 0;
 
   return (
-    <section style={{...compactCardStyle,boxShadow:"0 10px 24px rgba(0,0,0,0.22)",border:"1px solid color-mix(in srgb,var(--accent) 24%, var(--stroke-1))"}} aria-live="polite">
+    <section data-testid={previewTestId} style={{...compactCardStyle,boxShadow:"0 10px 24px rgba(0,0,0,0.22)",border:"1px solid color-mix(in srgb,var(--accent) 24%, var(--stroke-1))"}} aria-live="polite">
       <div style={{ color: "var(--accent)", fontSize: 10, fontWeight: 800, letterSpacing: "0.10em", textTransform: "uppercase", marginBottom: 8 }}>{areaTitle}</div>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
         <div style={{ color: "var(--text-1)", fontSize: 13, fontWeight: 900, letterSpacing: "0.06em", textTransform: "uppercase" }}>{title}</div>
@@ -65,14 +68,14 @@ export default function CompactLeaderboardPreviewCard({
       )}
       {typeof onViewAll === "function" ? (
         <div style={{ marginTop: 8 }}>
-          <button type="button" onClick={onViewAll} style={{ border:"none", background:"transparent", color:"var(--accent)", fontSize:11, fontWeight:800, letterSpacing:"0.03em", padding:0, cursor:"pointer" }}>
-            View all leaderboards
+          <button data-testid={ctaTestId} type="button" onClick={onViewAll} style={{ border:"none", background:"transparent", color:"var(--accent)", fontSize:11, fontWeight:800, letterSpacing:"0.03em", padding:0, cursor:"pointer" }}>
+            {viewAllLabel || "View Leaderboards"}
           </button>
         </div>
       ) : fullLeaderboardHref ? (
         <div style={{ marginTop: 8 }}>
           <a href={fullLeaderboardHref} style={{ color: "var(--accent)", fontSize: 11, fontWeight: 700, textDecoration: "none" }}>
-            View all leaderboards
+            {viewAllLabel || "View Leaderboards"}
           </a>
         </div>
       ) : null}
