@@ -20,6 +20,7 @@ import CoachDashboardHeader from "./components/CoachDashboardHeader";
 import CoachMiniHeader from "./components/CoachMiniHeader";
 import ShotLabCharts from "./components/ShotLabCharts";
 import CompactLeaderboardPreviewCard from "./components/CompactLeaderboardPreviewCard";
+import PremiumLeaderboardsHub from "./components/PremiumLeaderboardsHub";
 
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 
@@ -2132,23 +2133,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       </button>})}
   </div>}
 
-  {tab==="leaderboards"&&!active&&<div className={slideClass} key="leaderboards">
-    <section style={{padding:"18px",borderRadius:18,border:"1px solid rgba(200,255,0,0.38)",background:"linear-gradient(156deg, rgba(200,255,0,0.2), rgba(255,255,255,0.03) 36%, rgba(8,10,14,0.92))",boxShadow:"0 18px 42px rgba(0,0,0,0.34), inset 0 0 0 1px rgba(200,255,0,0.12)",marginBottom:12}}>
-      <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:"0.12em",fontWeight:900}}>COMPETITION HUB</div>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:"0.06em",marginTop:5}}>LEADERBOARDS</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.5,marginTop:6}}>Track team effort across shots, events, strength work, and coach-assigned drills.</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8,marginTop:10}}>
-        {[["Active","At-Home Shots"],["Tracked","4 categories"],["Team Rank",Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0?"Live":"—"]].map(([k,v])=><div key={k} style={{padding:"8px 9px",borderRadius:10,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(0,0,0,0.22)"}}><div style={{fontFamily:FB,fontSize:9,color:T.SUB,letterSpacing:"0.08em"}}>{k.toUpperCase()}</div><div style={{fontFamily:FD,fontSize:14,color:LIGHT,marginTop:3}}>{v}</div></div>)}
-      </div>
-    </section>
-    <section style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:10}}>
-      {[{key:"home_shots",label:"At-Home Shots"},{key:"event_participation",label:"Events Attended"},{key:"strength_conditioning_participation",label:"Strength & Conditioning"},{key:"drill_shots",label:"Coach Custom Drills"}].map(item=>{const active=activeLeaderboardCategory===item.key;return <button type="button" aria-selected={active} key={item.label} onClick={()=>setActiveLeaderboardCategory(item.key)} style={{minHeight:42,padding:"9px 10px",borderRadius:999,border:active?"1px solid rgba(200,255,0,0.52)":"1px solid rgba(255,255,255,0.16)",background:active?"rgba(200,255,0,0.12)":"rgba(255,255,255,0.03)",boxShadow:active?"0 0 18px rgba(200,255,0,0.2)":"none",fontFamily:FB,fontSize:11,fontWeight:800,color:active?VOLT:LIGHT,textAlign:"center",cursor:"pointer"}}>{item.label}</button>;})}
-    </section>
-    {activeLeaderboardCategory==="home_shots" ? <>
-      <CompactLeaderboardPreviewCard title="At-Home Shots" areaTitle="At-Home Shots" categoryLabel="Active" mode="player" userEmail={u?.email||""} status={homeShotsLeaderboard?.status||"idle"} rows={homeShotsLeaderboard?.rows||[]} emptyMessage="No leaderboard data yet. Log shots to enter the rankings." maxRows={10} />
-      {(!Array.isArray(homeShotsLeaderboard?.rows)||homeShotsLeaderboard.rows.length===0)&&<section style={{marginTop:10,padding:"14px",borderRadius:14,border:"1px solid rgba(200,255,0,0.24)",background:"linear-gradient(160deg, rgba(200,255,0,0.08), rgba(255,255,255,0.02))"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:16}}>No rankings yet</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:4}}>Log shots to activate the Home Shots leaderboard.</div></section>}
-    </> : activeLeaderboardCategory==="event_participation" ? <section style={{marginTop:10,padding:"12px",borderRadius:12,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:15}}>Events Attended</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:4}}>Event leaders will appear after players check into team events.</div></section> : activeLeaderboardCategory==="strength_conditioning_participation" ? <section style={{marginTop:10,padding:"12px",borderRadius:12,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:15}}>Strength & Conditioning</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:4}}>Strength leaders will appear after players complete assigned S&C work.</div></section> : <section style={{marginTop:10,padding:"12px",borderRadius:12,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:15}}>Coach Drills</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:4}}>Drill leaders will appear after players log coach-assigned drills.</div></section>}
-  </div>}
+  {tab==="leaderboards"&&!active&&<PremiumLeaderboardsHub viewerRole="player" containerClassName={slideClass} showReturnButton={false} activeLeaderboardCategory={activeLeaderboardCategory} setActiveLeaderboardCategory={setActiveLeaderboardCategory} homeShotsLeaderboard={homeShotsLeaderboard} userEmail={u?.email||""} isNarrow={isNarrow} DashboardReturnButton={DashboardReturnButton} FB={FB} FD={FD} VOLT={VOLT} LIGHT={LIGHT} T={T} />}
 
   {/* ═════ SHOT STATS sub-screen ═════ */}
   {tab==="log-drill"&&showShotStats&&!active&&<div className="fade-up">
@@ -3299,6 +3284,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         rows={homeShotsLeaderboard?.rows||[]}
         emptyMessage="No team leaderboard data yet. Players will appear here after they log shots."
         maxRows={5}
+        onViewAll={()=>setTab("leaderboards")}
       />
     </div>
     {(()=>{const coachChecklist=[
@@ -3790,23 +3776,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       </div>})}
   </div>}
 
-  {tab==="leaderboards"&&<div className="page pageShell fade-up" data-accent="feed" style={shellVars("feed")}><DashboardReturnButton onClick={()=>setTab("feed")} />
-    <section style={{padding:"18px",borderRadius:18,border:"1px solid rgba(200,255,0,0.38)",background:"linear-gradient(156deg, rgba(200,255,0,0.2), rgba(255,255,255,0.03) 36%, rgba(8,10,14,0.92))",boxShadow:"0 18px 42px rgba(0,0,0,0.34), inset 0 0 0 1px rgba(200,255,0,0.12)",marginBottom:12}}>
-      <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:"0.12em",fontWeight:900}}>COMPETITION HUB</div>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:"0.06em",marginTop:5}}>LEADERBOARDS</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.5,marginTop:6}}>Track team effort across shots, events, strength work, and coach-assigned drills.</div>
-      <div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8,marginTop:10}}>
-        {[["Active","At-Home Shots"],["Tracked","4 categories"],["Team Rank",Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0?"Live":"—"]].map(([k,v])=><div key={k} style={{padding:"8px 9px",borderRadius:10,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(0,0,0,0.22)"}}><div style={{fontFamily:FB,fontSize:9,color:T.SUB,letterSpacing:"0.08em"}}>{k.toUpperCase()}</div><div style={{fontFamily:FD,fontSize:14,color:LIGHT,marginTop:3}}>{v}</div></div>)}
-      </div>
-    </section>
-    <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(2,minmax(0,1fr))":"1fr",gap:8,marginBottom:10}}>
-      {[{key:"home_shots",label:"At-Home Shots"},{key:"event_participation",label:"Events Attended"},{key:"strength_conditioning_participation",label:"Strength & Conditioning"},{key:"drill_shots",label:"Coach Custom Drills"}].map(item=>{const active=activeLeaderboardCategory===item.key;return <button type="button" aria-selected={active} key={item.label} onClick={()=>setActiveLeaderboardCategory(item.key)} style={{minHeight:42,padding:"9px 10px",borderRadius:999,border:active?"1px solid rgba(200,255,0,0.52)":"1px solid rgba(255,255,255,0.16)",background:active?"rgba(200,255,0,0.12)":"rgba(255,255,255,0.03)",boxShadow:active?"0 0 18px rgba(200,255,0,0.2)":"none",fontFamily:FB,fontSize:11,fontWeight:800,color:active?VOLT:LIGHT,textAlign:"center",cursor:"pointer"}}>{item.label}</button>;})}
-    </section>
-    {activeLeaderboardCategory==="home_shots" ? <>
-      <CompactLeaderboardPreviewCard title="At-Home Shots" areaTitle="At-Home Shots" categoryLabel="Active" mode="coach" status={homeShotsLeaderboard?.status||"idle"} rows={homeShotsLeaderboard?.rows||[]} emptyMessage="No team leaderboard data yet. Players will appear here after they log shots." maxRows={10} />
-      {(!Array.isArray(homeShotsLeaderboard?.rows)||homeShotsLeaderboard.rows.length===0)&&<section style={{marginTop:10,padding:"14px",borderRadius:14,border:"1px solid rgba(200,255,0,0.24)",background:"linear-gradient(160deg, rgba(200,255,0,0.08), rgba(255,255,255,0.02))"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:16}}>No rankings yet</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:4}}>Log shots to activate the Home Shots leaderboard.</div></section>}
-    </> : activeLeaderboardCategory==="event_participation" ? <section style={{marginTop:10,padding:"12px",borderRadius:12,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:15}}>Events Attended</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:4}}>Event leaders will appear after players check into team events.</div></section> : activeLeaderboardCategory==="strength_conditioning_participation" ? <section style={{marginTop:10,padding:"12px",borderRadius:12,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:15}}>Strength & Conditioning</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:4}}>Strength leaders will appear after players complete assigned S&C work.</div></section> : <section style={{marginTop:10,padding:"12px",borderRadius:12,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:15}}>Coach Drills</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:4}}>Drill leaders will appear after players log coach-assigned drills.</div></section>}
-  </div>}
+  {tab==="leaderboards"&&<PremiumLeaderboardsHub viewerRole="coach" containerClassName="page pageShell fade-up" showReturnButton={true} onReturn={()=>setTab("feed")} activeLeaderboardCategory={activeLeaderboardCategory} setActiveLeaderboardCategory={setActiveLeaderboardCategory} homeShotsLeaderboard={homeShotsLeaderboard} isNarrow={isNarrow} DashboardReturnButton={DashboardReturnButton} FB={FB} FD={FD} VOLT={VOLT} LIGHT={LIGHT} T={T} />}
 
   {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><DashboardReturnButton onClick={()=>setTab("feed")} /><PageHeader title="PLAYERS" subtitle="Roster insights, development, and availability" accent="purple" icon={<UsersIcon size={20} color={PAGE_ACCENTS.players.accent}/>} actionLabel="Add" onAction={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.players.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>ROSTER SNAPSHOT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{ups.length} players on roster</div></div></div></div>
     <div id="coach-add-player-form" className="accent-card" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:12}}>
