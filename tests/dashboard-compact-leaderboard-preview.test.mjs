@@ -55,21 +55,8 @@ test('dashboards do not duplicate compact preview with legacy top-10 blocks', ()
   assert.equal(usageMentions >= 2, true);
 });
 
-test('full leaderboards destination exists and includes all final categories with data-required copy', () => {
-  assert.match(appSource, /tab==="leaderboards"/);
-  assert.match(appSource, /At-Home Shots/);
-  assert.match(appSource, /Events Attended/);
-  assert.match(appSource, /Strength & Conditioning/);
-  assert.match(appSource, /Coach Drills/);
-  assert.match(appSource, /COMPETITION HUB/);
-  assert.match(appSource, /Track team effort across shots, events, strength work, and coach-assigned drills\./);
-  assert.match(appSource, /Event leaders will appear after players check into team events\./);
-  assert.match(appSource, /Strength leaders will appear after players complete assigned S&C work\./);
-  assert.match(appSource, /Drill leaders will appear after players log coach-assigned drills\./);
-  assert.match(appSource, /No rankings yet/);
-  assert.match(appSource, /aria-selected=\{active\}/);
-  assert.match(appSource, /onClick=\{\(\)=>setActiveLeaderboardCategory\(item.key\)\}/);
-  assert.match(appSource, /activeLeaderboardCategory==="event_participation"/);
-  assert.match(appSource, /activeLeaderboardCategory==="strength_conditioning_participation"/);
-  assert.match(appSource, /Coach Custom Drills/);
+test('full leaderboards destination uses shared premium hub component', () => {
+  assert.match(appSource, /import PremiumLeaderboardsHub from "\.\/components\/PremiumLeaderboardsHub"/);
+  assert.match(appSource, /tab==="leaderboards"[\s\S]*<PremiumLeaderboardsHub viewerRole="player"/);
+  assert.match(appSource, /tab==="leaderboards"[\s\S]*<PremiumLeaderboardsHub viewerRole="coach"/);
 });

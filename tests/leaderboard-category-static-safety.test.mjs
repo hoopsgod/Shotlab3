@@ -21,7 +21,7 @@ function getJsLikeFiles(dirPath) {
   return files;
 }
 
-test('runtime source contains no unsafe legacy leaderboardCategory identifier', () => {
+test('runtime source contains no unsafe legacy leaderboard helpers or identifiers', () => {
   const files = getJsLikeFiles(SRC_DIR.pathname);
   const offenders = [];
 
@@ -31,7 +31,7 @@ test('runtime source contains no unsafe legacy leaderboardCategory identifier', 
       .replace(/\/\*[\s\S]*?\*\//g, ' ')
       .replace(/\/\/.*$/gm, ' ')
       .replace(/(['"`])(?:\\.|(?!\1)[^\\])*\1/g, ' ');
-    if (/\bleaderboardCategory\b/.test(normalized)) {
+    if (/\bleaderboardCategory\b/.test(normalized) || /\brenderPremiumLeaderboardsHub\b/.test(normalized)) {
       offenders.push(path.relative(process.cwd(), file));
     }
   }
