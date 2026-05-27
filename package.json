@@ -12,7 +12,8 @@
     "deploy:cloudflare": "npm run build && npx wrangler pages deploy dist --project-name shotlab3",
     "dev:agent": "npm run dev",
     "preview:agent": "vite preview --host 0.0.0.0 --port 4173",
-    "doctor": "node scripts/doctor.mjs"
+    "doctor": "node scripts/doctor.mjs",
+    "verify:leaderboards:supabase": "node --test tests/live-supabase-leaderboard-smoke.test.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",
