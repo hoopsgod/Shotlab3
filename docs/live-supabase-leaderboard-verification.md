@@ -1,6 +1,6 @@
 # Live Supabase At-Home Leaderboard Verification
 
-This repo contains **two layers** of persistence verification for At-Home Shots leaderboards:
+This repo uses **two layers** of persistence verification for At-Home Shots leaderboards:
 
 1. **Mock/service verification** (`tests/supabase-leaderboard-persistence-verification.test.mjs`)
    - Proves service-layer save/read/aggregation behavior deterministically.
@@ -8,55 +8,75 @@ This repo contains **two layers** of persistence verification for At-Home Shots 
 2. **Live Supabase smoke test** (`tests/live-supabase-leaderboard-smoke.test.mjs`)
    - Proves real Supabase write -> read -> leaderboard ranking through the app service layer.
 
-## Required environment variables for live smoke test
+## Required secrets/env for live smoke
+
+Required:
 
 - `SUPABASE_URL`
 - `SUPABASE_ANON_KEY` **or** `SUPABASE_SERVICE_ROLE_KEY`
-- `TEST_TEAM_ID` (optional; generated test team id is used if omitted)
-- `TEST_PLAYER_ID` or `TEST_PLAYER_A_ID` (optional; generated player id is used if omitted)
-- `TEST_PLAYER_B_ID` (optional; generated second player id is used if omitted)
 
-Only Supabase credentials are strictly required. If `SUPABASE_URL` or key is missing, the live smoke test is **skipped** (not failed), so CI stays green.
+Optional:
 
-## Run commands
+- `TEST_TEAM_ID`
+- `TEST_PLAYER_A_ID` (or legacy `TEST_PLAYER_ID` for local usage)
+- `TEST_PLAYER_B_ID`
+
+## Local smoke test workflow
+
+Run these commands locally:
 
 ```bash
+npm ci
+npm run build
+node --test tests/supabase-leaderboard-persistence-verification.test.mjs
 npm run verify:leaderboards:supabase
 ```
 
-Equivalent:
+### Local skipped behavior
 
-```bash
-node --test tests/live-supabase-leaderboard-smoke.test.mjs
-```
+- If local `SUPABASE_URL` or key env vars are missing, the live smoke test is **skipped** (not failed).
+- This is expected for local/dev environments where Supabase credentials are intentionally not configured.
 
-## What a passing live result means
+## GitHub Actions smoke test workflow
 
-A passing run confirms all of the following against your configured Supabase project:
+Manual workflow file: `.github/workflows/live-supabase-leaderboard-verification.yml`
+
+- Workflow name: **Live Supabase Leaderboard Verification**
+- Trigger: `workflow_dispatch` only (manual run)
+- It does **not** run automatically on every PR or push.
+
+### How to run in GitHub
+
+1. Add repository secrets in `Settings > Secrets and variables > Actions`:
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY` or `SUPABASE_SERVICE_ROLE_KEY`
+   - Optional: `TEST_TEAM_ID`, `TEST_PLAYER_A_ID`, `TEST_PLAYER_B_ID`
+2. Open **Actions** in GitHub.
+3. Select **Live Supabase Leaderboard Verification**.
+4. Click **Run workflow**.
+
+### Missing-secrets behavior in GitHub Actions
+
+- The workflow runs a preflight validation step.
+- If required secrets are missing, the workflow **fails fast** with a clean message listing the required missing secrets.
+- No secret values are printed; only missing secret names are reported.
+
+## What passing proves
+
+A passing full run confirms all of the following against the configured Supabase project:
 
 - shot logs are inserted through `createShotLogService()` into `shot_logs`
 - saved records can be read back from Supabase
 - `createLeaderboardService()` builds leaderboard rows from persisted shot logs
-- when generated isolated player ids are used, the player with higher saved total ranks above the lower total player
+- when isolated player ids are used, the player with higher saved total ranks above the lower total player
 - test rows are cleanup-targeted by `session_id` after the test (best effort)
 
 ## Scope clarity: mock vs live
 
-- **Mock tests prove**: deterministic service behavior, edge cases, empty/error fallback behavior, and static anti-hardcode guard.
-- **Live smoke proves**: actual Supabase persistence and retrieval path correctness in an integrated environment.
+- **Mock tests prove** deterministic service behavior, edge cases, empty/error fallback behavior, and static anti-hardcode guard.
+- **Live smoke proves** actual Supabase persistence and retrieval correctness in an integrated environment.
 
 ## Cloudflare deployment relevance
 
-- This verification PR targets Supabase persistence tests and does not change Cloudflare runtime code or UI.
+- This verification workflow targets Supabase persistence tests and does not change Cloudflare runtime code or UI.
 - Current production deploy command in this repo is Pages (`npm run deploy:cloudflare`).
-- If a separate Cloudflare Workers deploy fails, treat it as unrelated to this PR unless Workers is part of your active production path.
-
-
-## Current verification status in this environment
-
-- `npm run build`: passed.
-- `npm test`: failed due to unrelated pre-existing contract/e2e failures in this branch.
-- Targeted new test run directly: `node --test tests/supabase-leaderboard-persistence-verification.test.mjs` (passed).
-- `npm run verify:leaderboards:supabase`: skipped because `SUPABASE_URL` / Supabase key env vars were not provided.
-- Live Supabase was **not** verified in this environment.
-- This PR adds the live verification harness only.

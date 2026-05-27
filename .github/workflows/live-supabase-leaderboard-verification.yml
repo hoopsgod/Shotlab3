@@ -1,0 +1,56 @@
+name: Live Supabase Leaderboard Verification
+
+on:
+  workflow_dispatch:
+
+jobs:
+  verify-live-supabase-leaderboards:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+      TEST_TEAM_ID: ${{ secrets.TEST_TEAM_ID }}
+      TEST_PLAYER_A_ID: ${{ secrets.TEST_PLAYER_A_ID }}
+      TEST_PLAYER_B_ID: ${{ secrets.TEST_PLAYER_B_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Validate required Supabase secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          missing=()
+
+          if [ -z "${SUPABASE_URL:-}" ]; then
+            missing+=("SUPABASE_URL")
+          fi
+
+          if [ -z "${SUPABASE_ANON_KEY:-}" ] && [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            missing+=("SUPABASE_ANON_KEY or SUPABASE_SERVICE_ROLE_KEY")
+          fi
+
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "Missing required GitHub repository secrets: ${missing[*]}"
+            echo "Add these in Settings > Secrets and variables > Actions, then re-run this workflow."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Run targeted persistence verification
+        run: node --test tests/supabase-leaderboard-persistence-verification.test.mjs
+
+      - name: Run live Supabase leaderboard smoke verification
+        run: npm run verify:leaderboards:supabase
