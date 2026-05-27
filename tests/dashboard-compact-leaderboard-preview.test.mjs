@@ -56,6 +56,13 @@ test('dashboards do not duplicate compact preview with legacy top-10 blocks', ()
   assert.equal(usageMentions >= 2, true);
 });
 
+
+
+test('coach dashboard compact leaderboard includes visible CTA to open shared competition hub', () => {
+  assert.match(appSource, /title="Home Shot Leaders"[\s\S]*onViewAll=\{\(\)=>setTab\("leaderboards"\)\}/);
+  assert.match(compactCardSource, /View all leaderboards/);
+  assert.match(appSource, /tab==="leaderboards"[\s\S]*<PremiumLeaderboardsHub viewerRole="coach"/);
+});
 test('full leaderboards destination exists and includes all final categories with data-required copy', () => {
   assert.match(appSource, /tab===\"leaderboards\"/);
   assert.match(appSource, /<PremiumLeaderboardsHub viewerRole=\"player\"/);
