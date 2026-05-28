@@ -1423,29 +1423,20 @@ if(!requirePlayer(user,user?.teamId,user?.email))return;
 const homeShotDebugMode=window.location.search.includes("homeShotDebug=1");
 const localLog={id:genId("shotlog"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,made:Number(made||0),date,ts:Date.now()};
 try{
-const created=await shotLogService.createShotLog({
-shotLog:{made,date},
-player:{id:user.email,email:user.email,name:user.name},
-team:{id:user.teamId},
-});
-const backendAvailable=created?.mode==="supabase"&&!created?.reason;
-if(backendAvailable){
-const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({team_id:user.teamId,player_id:user.email,email:user.email,name:user.name,made,date})});
+const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({id:localLog.id,team_id:user.teamId,player_id:user.email,email:user.email,name:user.name,made,date,ts:localLog.ts})});
 const body=await res.json().catch(()=>({}));
 if(!res.ok)throw new Error(String(body?.error||"home_shot_log_failed"));
 const saved=body?.shot_log||{};
 setShotLogs(prev=>[...prev,{id:saved.id||localLog.id,email:saved.email||localLog.email,playerId:saved.player_id||saved.playerId||localLog.playerId,teamId:saved.team_id||saved.teamId||localLog.teamId,name:saved.name||localLog.name,made:Number(saved.made??localLog.made),date:saved.date||localLog.date,ts:saved.ts||localLog.ts}]);
-}else{
-setShotLogs(prev=>[...prev,localLog]);
-}
 setStatSyncError("");
-trackEvent("shot_log_added",{made,date,mode:created?.mode||"demo"});
+trackEvent("shot_log_added",{made,date,mode:"supabase"});
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
 }catch(e){
 console.error("home_shots_save_failed",{status:"failed",userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made,date});
 setShotLogs(prev=>[...prev,localLog]);
+const fallback=await shotLogService.createShotLog({shotLog:localLog,player:{id:user.email,email:user.email,name:user.name},team:{id:user.teamId}});
 const baseError="Could not save home shots to team dashboard. Please try again.";
-setStatSyncError(homeShotDebugMode?`${baseError} Error: ${String(e?.message||"sync_failed")}`:baseError);
+setStatSyncError(fallback?.mode==="supabase"&&!fallback?.reason?"":homeShotDebugMode?`${baseError} Error: ${String(e?.message||"sync_failed")}`:baseError);
 trackEvent("shot_log_failed",{made,date,error:String(e?.message||"sync_failed")});
 }
 };
@@ -2069,6 +2060,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         <section aria-label="Progress snapshot" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:12}}>
           {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly",value:weeklyMakes,color:LIGHT},{label:"Daily",value:`${dailyPct}%`,color:VOLT},{label:"Weekly",value:`${weeklyPct}%`,color:ORANGE}].map(item=><div key={item.label+item.value} style={{padding:"12px",borderRadius:12,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:22,marginTop:4,lineHeight:1.1}}>{item.value}</div></div>)}
         </section>
+        <RecentActivityCard title="Recent Activity" items={recentPlayerActivity}/>
         <section aria-label="Next step" style={{padding:"14px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:`1px solid ${BORDER_CLR}77`}}>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:700,letterSpacing:"0.08em"}}>NEXT STEP</div>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:20,marginTop:4}}>{nextEvent?nextEvent.title:"Build your next session plan"}</div>

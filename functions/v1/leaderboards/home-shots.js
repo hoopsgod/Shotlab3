@@ -103,11 +103,13 @@ export async function onRequestGet(context) {
   try {
     const rows = await callRpc(env, rpcName, rpcArgs);
 
-    const leaderboard = (Array.isArray(rows) ? rows : []).map((row) => ({
+    const leaderboard = (Array.isArray(rows) ? rows : []).map((row) => Object.fromEntries(Object.entries({
       rank: row.rank,
+      player_id: row.player_id || row.playerId || row.email || undefined,
+      email: row.email || row.player_email || row.player_id || row.playerId || undefined,
       player_display_name: row.player_display_name,
       total_home_shots: row.total_home_shots,
-    }));
+    }).filter(([, value]) => value !== undefined && value !== null && value !== "")));
 
     const event = leaderboard.length === 0 ? LEADERBOARD_EVENTS.QUERY_EMPTY : LEADERBOARD_EVENTS.QUERY_SUCCESS;
     recordLeaderboardEvent(event, {
