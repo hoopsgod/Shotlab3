@@ -3285,6 +3285,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         rows={homeShotsLeaderboard?.rows||[]}
         emptyMessage="No team leaderboard data yet. Players will appear here after they log shots."
         maxRows={5}
+        onViewAll={()=>switchTab("leaderboards")}
       />
     </div>
     {(()=>{const coachChecklist=[
