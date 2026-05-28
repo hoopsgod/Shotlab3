@@ -5,7 +5,7 @@ import { checkBackendHealth, getBackendStatusLabel, logBackendHealth } from './l
 import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
-const BOOT_TIMEOUT_MS = 10000
+const BOOT_TIMEOUT_MS = 30000
 const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams('')
 const bootDebugEnabled = params.get('bootDebug') === '1'
 const DEV = Boolean(typeof import.meta !== 'undefined' && import.meta?.env?.DEV)
