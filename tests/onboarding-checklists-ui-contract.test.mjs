@@ -18,9 +18,9 @@ test('coach setup checklist copy exists on coach feed', async () => {
   assert.match(source, /Check At Home Shots leaderboard/);
 });
 
-test('player getting started checklist copy exists on player home', async () => {
+test('player activation checklist data remains available to player home', async () => {
   const source = await appSource();
-  assert.match(source, /Getting Started/);
+  assert.match(source, /const playerChecklist=\[/);
   assert.match(source, /Join team/);
   assert.match(source, /View upcoming event/);
   assert.match(source, /RSVP to an event/);

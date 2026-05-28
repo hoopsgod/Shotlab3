@@ -18,7 +18,7 @@ test('coach/team scoped data path filters shot logs by active team id', () => {
 test('coach dashboard pulls home shots leaderboard for the same team id', () => {
   assert.match(source, /const fetchHomeShotsLeaderboard=useCallback\(async\(teamId,scope=homeShotsLeaderboardScope\)=>\{/);
   assert.match(source, /\/v1\/leaderboards\/home-shots\?team_id=\$\{encodeURIComponent\(teamId\)\}/);
-  assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,homeShotsLeaderboardScope\)\}/);
+  assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,"players"\)\}/);
 });
 
 test('coach/player home shots cards handle empty stats without crashing', () => {
