@@ -55,8 +55,8 @@ export function createShotLogService({ supabaseClient } = {}) {
     if (!configured) return toDemo(fallbackData, 'missing_supabase_env')
     try {
       return await fn()
-    } catch {
-      return toDemo(fallbackData, reason)
+    } catch (error) {
+      return toDemo(fallbackData, reason, { backendError: error })
     }
   }
 
@@ -67,7 +67,7 @@ export function createShotLogService({ supabaseClient } = {}) {
       if (!payload) return toDemo(null, 'missing_player_or_team_context', { skipped: true })
       return safeCall(async () => {
         const res = await supabaseClient.from(SHOT_LOGS_TABLE).upsert(payload)
-        if (res?.error) return toDemo(payload, 'backend_save_failed', { skipped: false })
+        if (res?.error) return toDemo(payload, 'backend_save_failed', { skipped: false, backendError: res.error })
         return { ok: true, data: safeRows(res?.data)[0] || payload, mode: 'supabase' }
       }, payload, 'backend_save_failed')
     },
@@ -75,7 +75,7 @@ export function createShotLogService({ supabaseClient } = {}) {
       if (!asText(playerId) || !asText(teamId)) return toDemo([], 'missing_player_or_team_context')
       return safeCall(async () => {
         const res = await supabaseClient.from(SHOT_LOGS_TABLE).select()
-        if (res?.error) return toDemo([], 'backend_load_failed')
+        if (res?.error) return toDemo([], 'backend_load_failed', { backendError: res.error })
         const rows = safeRows(res?.data).filter((r) => asText(r?.player_id || r?.playerId) === asText(playerId) && asText(r?.team_id || r?.teamId) === asText(teamId))
         return { ok: true, data: rows, mode: 'supabase' }
       }, [], 'backend_load_failed')
@@ -84,7 +84,7 @@ export function createShotLogService({ supabaseClient } = {}) {
       if (!asText(teamId)) return toDemo([], 'missing_team_context')
       return safeCall(async () => {
         const res = await supabaseClient.from(SHOT_LOGS_TABLE).select()
-        if (res?.error) return toDemo([], 'backend_load_failed')
+        if (res?.error) return toDemo([], 'backend_load_failed', { backendError: res.error })
         const rows = safeRows(res?.data).filter((r) => asText(r?.team_id || r?.teamId) === asText(teamId))
         return { ok: true, data: rows, mode: 'supabase' }
       }, [], 'backend_load_failed')
