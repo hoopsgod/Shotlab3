@@ -38,7 +38,13 @@ import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./li
 import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 import { createAppPersistenceService } from "./lib/appPersistenceService";
-import { createShotLogService } from "./lib/shotLogService.js";
+import {
+  buildLocalHomeShotLog,
+  normalizeSavedHomeShotLog,
+  shouldUseQuietHomeShotFallback,
+  upsertHomeShotsLeaderboardRow,
+  validateHomeShotLogInput,
+} from "./lib/homeShotLogging.js";
 import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
 import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, STORAGE_KEYS } from "./lib/appDataModels";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
@@ -393,7 +399,6 @@ const DB = {
 };
 
 const persistenceService=createAppPersistenceService({db:DB,fetchImpl:fetch});
-const shotLogService=createShotLogService({supabaseClient:supabase});
 
 const parseLeaderboardErrorMessage = (errorCode = "", status = 0, parseMode = "json") => {
   if (parseMode === "non_json") return "Leaderboard endpoint unavailable (invalid response format).";
@@ -1418,35 +1423,48 @@ try{await P("sl:events",[...events,eventPayload],setEvents,{strictRemote:true});
 const removeEvent=async id=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:events",events.filter(e=>!(e.id===id&&e.teamId===user.teamId)),setEvents);await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===id&&r.teamId===user.teamId)),setRsvps)};
 const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps)};
 const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)return;if(rsvps.find(r=>r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId))return;await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email,playerId:email,teamId:user.teamId,name,ts:Date.now()}],setRsvps)};
+const persistLocalShotLogs=(nextLogs)=>{try{window.storage?.set("sl:shotlogs",JSON.stringify(nextLogs),true);}catch(e){}};
 const addShotLog=async(made,date)=>{
-if(!requirePlayer(user,user?.teamId,user?.email))return;
+if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required."};
+const validation=validateHomeShotLogInput({made,date});
+if(!validation.ok){setStatSyncError(validation.error);return{ok:false,error:validation.error,validation:true};}
 const homeShotDebugMode=window.location.search.includes("homeShotDebug=1");
-const localLog={id:genId("shotlog"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,made:Number(made||0),date,ts:Date.now()};
+const localLog=buildLocalHomeShotLog({id:genId("shotlog"),user,made:validation.made,date:validation.date});
+if(!localLog){setStatSyncError("Player team context is required before logging shots.");return{ok:false,error:"missing_player_or_team_context"};}
+const appendLoggedShot=(log)=>{
+setShotLogs(prev=>{const next=[...prev,log];persistLocalShotLogs(next);return next;});
+setHomeShotsLeaderboard(prev=>({...prev,status:"success",error:"",rows:upsertHomeShotsLeaderboardRow(prev?.rows,{user,made:log.made,limit:HOME_SHOTS_LEADERBOARD_LIMIT})}));
+};
 try{
-const created=await shotLogService.createShotLog({
-shotLog:{made,date},
-player:{id:user.email,email:user.email,name:user.name},
-team:{id:user.teamId},
-});
-const backendAvailable=created?.mode==="supabase"&&!created?.reason;
-if(backendAvailable){
-const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({team_id:user.teamId,player_id:user.email,email:user.email,name:user.name,made,date})});
+const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({id:localLog.id,ts:localLog.ts,team_id:user.teamId,player_id:user.email,email:user.email,name:user.name,made:validation.made,date:validation.date})});
 const body=await res.json().catch(()=>({}));
-if(!res.ok)throw new Error(String(body?.error||"home_shot_log_failed"));
-const saved=body?.shot_log||{};
-setShotLogs(prev=>[...prev,{id:saved.id||localLog.id,email:saved.email||localLog.email,playerId:saved.player_id||saved.playerId||localLog.playerId,teamId:saved.team_id||saved.teamId||localLog.teamId,name:saved.name||localLog.name,made:Number(saved.made??localLog.made),date:saved.date||localLog.date,ts:saved.ts||localLog.ts}]);
-}else{
-setShotLogs(prev=>[...prev,localLog]);
+if(!res.ok){
+const error=new Error(String(body?.error||"home_shot_log_failed"));
+error.status=res.status;
+error.body=body;
+throw error;
 }
+appendLoggedShot(normalizeSavedHomeShotLog(body?.shot_log||{},localLog));
 setStatSyncError("");
-trackEvent("shot_log_added",{made,date,mode:created?.mode||"demo"});
+trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"team_dashboard"});
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+return{ok:true,mode:"team_dashboard"};
 }catch(e){
-console.error("home_shots_save_failed",{status:"failed",userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made,date});
-setShotLogs(prev=>[...prev,localLog]);
+const backendErrorCode=String(e?.body?.error||e?.message||"sync_failed");
+const diagnosticMessage=String(e?.body?.diagnostic?.message||"");
+const quietFallback=shouldUseQuietHomeShotFallback({status:e?.status,errorCode:backendErrorCode,message:diagnosticMessage});
+appendLoggedShot(localLog);
+if(quietFallback){
+setStatSyncError("");
+console.warn("home_shots_remote_fallback",{errorCode:backendErrorCode,status:e?.status||null,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
+trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"local_fallback",fallbackReason:backendErrorCode});
+return{ok:true,mode:"local_fallback",fallbackReason:backendErrorCode};
+}
+console.error("home_shots_save_failed",{errorCode:backendErrorCode,status:e?.status||null,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
 const baseError="Could not save home shots to team dashboard. Please try again.";
-setStatSyncError(homeShotDebugMode?`${baseError} Error: ${String(e?.message||"sync_failed")}`:baseError);
-trackEvent("shot_log_failed",{made,date,error:String(e?.message||"sync_failed")});
+setStatSyncError(homeShotDebugMode?`${baseError} Error: ${backendErrorCode}`:baseError);
+trackEvent("shot_log_failed",{made:validation.made,date:validation.date,error:backendErrorCode});
+return{ok:false,error:backendErrorCode};
 }
 };
 const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",[...challenges,{...ch,id:Date.now(),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges);trackEvent("challenge_created",{to:ch.to||null})};
@@ -1696,7 +1714,7 @@ const tabFromPath=useCallback((path)=>{
 },[canAccessTab]);
 const initialTab = tabFromPath(window.location.pathname);
 const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
-const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false);
+const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false),[shotInputError,setShotInputError]=useState("");
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
@@ -2108,7 +2126,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
       </div>
-      <button className="btn-v cta-primary" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);pushCompletionCue({title:"Shot activity logged",detail:`${v} makes added for ${shotDate}`,momentum:`${streak}-day momentum`,next:"Check your shot trend or continue drills"});setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?0.7:1}}>
+      {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
+      <button className="btn-v cta-primary" onClick={()=>{const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);return;}setShotInputError("");addShotLog(validation.made,shotDate);setShotSaved(true);pushCompletionCue({title:"Shot activity logged",detail:`${validation.made} makes added for ${shotDate}`,momentum:`${streak}-day momentum`,next:"Check your shot trend or continue drills"});setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?0.7:1}}>
         {shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
       {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
@@ -2817,10 +2836,12 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 function ShotTracker({u,shotLogs,addShotLog,shotMade,setShotMade,shotDate,setShotDate,shotSaved,setShotSaved}){
 const my=useMemo(()=>shotLogs.filter(s=>s.email===u.email),[shotLogs,u]);
 const today=todayStr();
+const[shotInputError,setShotInputError]=useState("");
 
 const handleLog=()=>{
-const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;
-addShotLog(v,shotDate);setShotSaved(true);setShotMade("");
+const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);return;}
+setShotInputError("");
+addShotLog(validation.made,shotDate);setShotSaved(true);setShotMade("");
 setTimeout(()=>setShotSaved(false),1800);
 };
 
@@ -2883,6 +2904,7 @@ return <div className="fade-up">
         <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
       </div>
     </div>
+    {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
     <button className="btn-v cta-primary" onClick={handleLog} style={{}}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
       LOG SHOTS

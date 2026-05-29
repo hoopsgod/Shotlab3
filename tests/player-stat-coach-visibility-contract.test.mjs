@@ -4,10 +4,11 @@ import fs from 'node:fs';
 
 const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 
-test('player at-home shots save uses backend endpoint and updates local state only after success', () => {
+test('player at-home shots save uses backend endpoint and safely updates local state/fallbacks', () => {
   assert.match(source, /const addShotLog=async\(made,date\)=>\{[\s\S]*fetch\("\/v1\/home-shots\/log"/);
-  assert.match(source, /if\(!res\.ok\)throw new Error/);
-  assert.match(source, /setShotLogs\(prev=>\[\.\.\.prev,localLog\]\)/);
+  assert.match(source, /if\(!res\.ok\)\{/);
+  assert.match(source, /appendLoggedShot\(normalizeSavedHomeShotLog\(body\?\.shot_log\|\|\{\},localLog\)\)/);
+  assert.match(source, /shouldUseQuietHomeShotFallback\(\{status:e\?\.status,errorCode:backendErrorCode,message:diagnosticMessage\}\)/);
 });
 
 test('coach/team scoped data path filters shot logs by active team id', () => {
@@ -18,7 +19,7 @@ test('coach/team scoped data path filters shot logs by active team id', () => {
 test('coach dashboard pulls home shots leaderboard for the same team id', () => {
   assert.match(source, /const fetchHomeShotsLeaderboard=useCallback\(async\(teamId,scope=homeShotsLeaderboardScope\)=>\{/);
   assert.match(source, /\/v1\/leaderboards\/home-shots\?team_id=\$\{encodeURIComponent\(teamId\)\}/);
-  assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,homeShotsLeaderboardScope\)\}/);
+  assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,"players"\)\}/);
 });
 
 test('coach/player home shots cards handle empty stats without crashing', () => {

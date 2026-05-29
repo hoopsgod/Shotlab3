@@ -117,8 +117,8 @@ test("e2e: seed shot data -> fetch leaderboard -> verify order and values on bot
     assert.match(playerHtml, /ZOE/);
 
     const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
-    assert.match(appSource, /tab===\"feed\"[\s\S]*?<HomeShotsLeaderboardCard/);
-    assert.match(appSource, /tab===\"home\"[\s\S]*?<HomeShotsLeaderboardCard/);
+    assert.match(appSource, /tab===\"feed\"[\s\S]*?<CompactLeaderboardPreviewCard/);
+    assert.match(appSource, /tab===\"home\"[\s\S]*?<CompactLeaderboardPreviewCard/);
   } finally {
     global.fetch = originalFetch;
   }
