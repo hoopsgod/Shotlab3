@@ -3165,6 +3165,7 @@ const handleNavChange=(k)=>{
   }
   setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)
 };
+const openCoachLeaderboards=()=>handleNavChange("leaderboards");
 const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
 const [showMiniHeader,setShowMiniHeader]=useState(false);
 const heroRef=useRef(null);
@@ -3285,7 +3286,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         rows={homeShotsLeaderboard?.rows||[]}
         emptyMessage="No team leaderboard data yet. Players will appear here after they log shots."
         maxRows={5}
-        onViewAll={()=>switchTab("leaderboards")}
+        onViewAll={openCoachLeaderboards}
       />
     </div>
     {(()=>{const coachChecklist=[
