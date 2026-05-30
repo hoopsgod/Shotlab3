@@ -61,7 +61,7 @@ export async function onRequestPost({ request, env }) {
   const submittedIdentity = normalizeIdentity(playerId || email);
   diagnostic.submitted_player_identity_matches_requester = submittedIdentity === requester ? "yes" : "no";
   if (submittedIdentity !== requester) return diagnosticError("identity_mismatch", 403, "request_validation", "Submitted identity did not match requester.", diagnostic);
-  if (!Number.isFinite(made) || made < 0) return diagnosticError("invalid_made", 400, "request_validation", "made must be a non-negative number.", diagnostic);
+  if (!Number.isFinite(made) || made <= 0) return diagnosticError("invalid_made", 400, "request_validation", "made must be greater than zero.", diagnostic);
   if (!date) return diagnosticError("date_required", 400, "request_validation", "date is required.", diagnostic);
 
   let resolvedUserUuid = "";
