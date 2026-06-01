@@ -1,5 +1,13 @@
 import { callRpc, readUserId, selectRows, upsertRows } from "../../_utils/supabase.js";
 
+function parsePositiveInteger(value) {
+  const raw = String(value ?? "").trim();
+  if (!/^[0-9]+$/.test(raw)) return null;
+  const numericValue = Number(raw);
+  if (!Number.isInteger(numericValue) || !Number.isSafeInteger(numericValue) || numericValue <= 0) return null;
+  return numericValue;
+}
+
 function normalizeIdentity(value) {
   return String(value || "").trim().toLowerCase();
 }
@@ -8,7 +16,7 @@ function normalizePayload(body = {}) {
   const teamId = String(body.team_id ?? body.teamId ?? "").trim();
   const playerId = normalizeIdentity(body.player_id ?? body.playerId ?? body.email);
   const email = normalizeIdentity(body.email ?? body.player_id ?? body.playerId);
-  const made = Number(body.made);
+  const made = parsePositiveInteger(body.made);
   const date = String(body.date || "").trim();
   return { teamId, playerId, email, made, date };
 }
@@ -61,7 +69,7 @@ export async function onRequestPost({ request, env }) {
   const submittedIdentity = normalizeIdentity(playerId || email);
   diagnostic.submitted_player_identity_matches_requester = submittedIdentity === requester ? "yes" : "no";
   if (submittedIdentity !== requester) return diagnosticError("identity_mismatch", 403, "request_validation", "Submitted identity did not match requester.", diagnostic);
-  if (!Number.isFinite(made) || made <= 0) return diagnosticError("invalid_made", 400, "request_validation", "made must be greater than zero.", diagnostic);
+  if (made == null) return diagnosticError("invalid_made", 400, "request_validation", "made must be a positive integer.", diagnostic);
   if (!date) return diagnosticError("date_required", 400, "request_validation", "date is required.", diagnostic);
 
   let resolvedUserUuid = "";
