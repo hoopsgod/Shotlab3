@@ -1,11 +1,21 @@
 const asText = (value) => String(value ?? '').trim();
 const normalizeEmail = (value) => asText(value).toLowerCase();
 
-export const HOME_SHOT_VALIDATION_MESSAGE = 'Enter at least 1 made shot before logging.';
+export const HOME_SHOT_MAX_MADE = 10000;
+export const HOME_SHOT_VALIDATION_MESSAGE = 'Enter a whole number from 1 to 10,000 before logging shots.';
+export const HOME_SHOT_SYNC_ERROR_MESSAGE = 'Could not save home shots to team dashboard. Please try again.';
+
+export function parsePositiveInteger(value) {
+  const raw = String(value ?? '').trim();
+  if (!/^[0-9]+$/.test(raw)) return null;
+  const numericValue = Number(raw);
+  if (!Number.isInteger(numericValue) || !Number.isSafeInteger(numericValue) || numericValue <= 0 || numericValue > HOME_SHOT_MAX_MADE) return null;
+  return numericValue;
+}
 
 export function validateHomeShotLogInput({ made, date } = {}) {
-  const numericMade = Number.parseInt(String(made ?? ''), 10);
-  if (!Number.isFinite(numericMade) || numericMade <= 0) {
+  const numericMade = parsePositiveInteger(made);
+  if (numericMade == null) {
     return { ok: false, error: HOME_SHOT_VALIDATION_MESSAGE };
   }
   if (!asText(date)) {
@@ -27,6 +37,8 @@ export function buildLocalHomeShotLog({ id, user, made, date, ts = Date.now() } 
     made: Number(made) || 0,
     date: asText(date),
     ts,
+    syncState: 'local_pending',
+    syncSource: 'local',
   };
 }
 
@@ -40,25 +52,49 @@ export function normalizeSavedHomeShotLog(saved = {}, fallback = {}) {
     made: Number(saved.made ?? fallback.made) || 0,
     date: asText(saved.date || fallback.date),
     ts: Number.isFinite(Number(saved.ts)) ? Number(saved.ts) : fallback.ts,
+    syncState: 'remote_saved',
+    syncSource: 'remote',
+    syncError: '',
   };
 }
 
-export function shouldUseQuietHomeShotFallback({ status, errorCode, message } = {}) {
+export function shouldUseQuietHomeShotFallback({ status, errorCode, message, isExplicitDemoOrLocal = false, isOffline = false, isMembershipPending = false } = {}) {
   const normalizedCode = asText(errorCode).toLowerCase();
   const normalizedMessage = asText(message).toLowerCase();
-  const quietCodes = new Set([
+  const explicitLocalOnlyCodes = new Set([
     'missing_user_identity',
     'team_id_required',
     'player_identity_required',
     'identity_mismatch',
-    'forbidden',
     'unauthorized',
     'not_found',
   ]);
-  if (quietCodes.has(normalizedCode)) return true;
-  if ([401, 403, 404].includes(Number(status))) return true;
-  if (normalizedMessage.includes('no active membership') || normalizedMessage.includes('missing durable membership')) return true;
+  if (isOffline || normalizedCode === 'network_error') return true;
+  if (isExplicitDemoOrLocal && explicitLocalOnlyCodes.has(normalizedCode)) return true;
+  if (isExplicitDemoOrLocal && [401, 404].includes(Number(status))) return true;
+  const membershipMissing = normalizedCode === 'forbidden' || normalizedMessage.includes('no active membership') || normalizedMessage.includes('missing durable membership');
+  if (membershipMissing) return Boolean(isExplicitDemoOrLocal || isMembershipPending);
   return false;
+}
+
+
+
+export function normalizeHomeShotRemoteException(error) {
+  if (error?.status || error?.body) return error;
+  const normalized = new Error('network_error');
+  normalized.cause = error;
+  return normalized;
+}
+
+export function resolveHomeShotRetryFailure({ quietFallback = false, errorCode = 'sync_failed' } = {}) {
+  const syncState = quietFallback ? 'local_pending' : 'failed_sync';
+  return {
+    ok: false,
+    mode: syncState,
+    syncState,
+    error: asText(errorCode) || 'sync_failed',
+    statSyncError: quietFallback ? '' : HOME_SHOT_SYNC_ERROR_MESSAGE,
+  };
 }
 
 export function upsertHomeShotsLeaderboardRow(rows = [], { user, made, limit = 10 } = {}) {
