@@ -58,6 +58,43 @@ export const normalizeShotLogRowForDb = (row = {}) => {
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== "" && value !== undefined));
 };
 
+export const normalizeShotLogRowForApp = (row = {}, options = {}) => {
+  const id = cleanText(row.id);
+  const email = cleanText(row.email || row.player_email || row.playerId || row.player_id).toLowerCase();
+  const playerId = cleanText(row.player_id || row.playerId || email).toLowerCase();
+  const teamId = cleanText(row.team_id || row.teamId);
+  if (!id || !email || !playerId || !teamId) return null;
+
+  const explicitSyncState = cleanText(row.syncState || row.sync_state);
+  const allowedSyncStates = new Set(["remote_saved", "local_pending", "failed_sync"]);
+  const syncState = allowedSyncStates.has(explicitSyncState)
+    ? explicitSyncState
+    : options?.source === "remote"
+      ? "remote_saved"
+      : "local_pending";
+
+  const payload = {
+    id,
+    email,
+    playerId,
+    teamId,
+    name: cleanText(row.name) || email,
+    made: toFiniteNumber(row.made) || 0,
+    date: cleanText(row.date),
+    ts: toFiniteNumber(row.ts),
+    hideFromLeaderboards:
+      typeof row.hideFromLeaderboards === "boolean"
+        ? row.hideFromLeaderboards
+        : typeof row.hide_from_leaderboards === "boolean"
+          ? row.hide_from_leaderboards
+          : undefined,
+    syncState,
+    syncError: cleanText(row.syncError || row.sync_error) || (syncState === "local_pending" && !allowedSyncStates.has(explicitSyncState) ? "legacy_missing_sync_state" : ""),
+  };
+
+  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== "" && value !== undefined));
+};
+
 
 export const normalizeEventRowForDb = (row = {}) => {
   const id = cleanText(row.id);
@@ -208,6 +245,19 @@ export const mergeHydratedRows = (key, localRows, remoteRows) => {
     }
     return merged;
   }
+
+  if (key === "sl:shotlogs") {
+    const merged = [];
+    const idx = new Map();
+    for (const row of local.map((item) => normalizeShotLogRowForApp(item, { source: "local" })).filter(Boolean)) {
+      idx.set(row.id, merged.push(row) - 1);
+    }
+    for (const row of remote.map((item) => normalizeShotLogRowForApp(item, { source: "remote" })).filter(Boolean)) {
+      if (idx.has(row.id)) merged[idx.get(row.id)] = row;
+      else idx.set(row.id, merged.push(row) - 1);
+    }
+    return merged;
+  }
   return [];
 };
 
@@ -253,12 +303,13 @@ export const normalizeRsvpRowForApp = (row = {}) => {
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
 };
 
-export const buildAppRows = (key, rows) => {
+export const buildAppRows = (key, rows, options = {}) => {
   if (!Array.isArray(rows) || rows.length === 0) return [];
   if (key === "sl:events") return rows.map(normalizeEventRowForApp).filter(Boolean);
   if (key === "sl:players") return rows.map(normalizePlayerRowForApp).filter(Boolean);
   if (key === "sl:player-profiles") return rows.map(normalizePlayerProfileRowForApp).filter(Boolean);
   if (key === "sl:rsvps") return rows.map(normalizeRsvpRowForApp).filter(Boolean);
+  if (key === "sl:shotlogs") return rows.map((row) => normalizeShotLogRowForApp(row, options)).filter(Boolean);
   return rows;
 };
 
@@ -267,7 +318,7 @@ export const buildRemoteRows = (key, rows, options = {}) => {
   if (!Array.isArray(sourceRows) || sourceRows.length === 0) return [];
 
   if (key === "sl:scores") return sourceRows.map(normalizeScoreRowForDb).filter(Boolean);
-  if (key === "sl:shotlogs") return sourceRows.map(normalizeShotLogRowForDb).filter(Boolean);
+  if (key === "sl:shotlogs") return sourceRows.filter((row) => row?.syncState === "remote_saved").map(normalizeShotLogRowForDb).filter(Boolean);
   if (key === "sl:events") return sourceRows.map(normalizeEventRowForDb).filter(Boolean);
   if (key === "sl:players") return sourceRows.map(normalizePlayerRowForDb).filter(Boolean);
   if (key === "sl:player-profiles") return sourceRows.map(normalizePlayerProfileRowForDb).filter(Boolean);

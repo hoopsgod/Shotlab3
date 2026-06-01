@@ -92,11 +92,25 @@ test('player home shots save shape includes consistent identity fields', () => {
     playerId: 'player@one.com',
     teamId: 'team-2',
     made: 137,
+    syncState: 'remote_saved',
   }]);
 
   assert.equal(row.team_id, 'team-2');
   assert.equal(row.player_id, 'player@one.com');
   assert.equal(row.email, 'player@one.com');
+});
+
+
+test('buildRemoteRows only writes server-confirmed shot logs back to the remote shot log table', () => {
+  const rows = buildRemoteRows('sl:shotlogs', [
+    { id: 'remote', email: 'player@one.com', playerId: 'player@one.com', teamId: 'team-2', made: 10, syncState: 'remote_saved' },
+    { id: 'pending', email: 'player@one.com', playerId: 'player@one.com', teamId: 'team-2', made: 11, syncState: 'local_pending' },
+    { id: 'failed', email: 'player@one.com', playerId: 'player@one.com', teamId: 'team-2', made: 12, syncState: 'failed_sync' },
+    { id: 'legacy', email: 'player@one.com', playerId: 'player@one.com', teamId: 'team-2', made: 13 },
+  ]);
+
+  assert.deepEqual(rows.map((row) => row.id), ['remote']);
+  assert.equal(rows[0].made, 10);
 });
 
 test('buildRemoteRows strips unsupported camelCase fields before upsert payload', () => {
