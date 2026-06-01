@@ -15,20 +15,22 @@ test('player-entered stats require durable ids, strict remote persistence, sync 
   assert.match(source, /id:genId\("score"\),email:user\.email,playerId:user\.email,teamId:user\.teamId/);
   assert.match(source, /await P\("sl:scores",nextScores,setScores,\{strictRemote:true\}\)/);
   assert.match(source, /setStatSyncError\("Could not save score to team dashboard\. Please try again\."\)/);
-  assert.match(source, /await fetchHomeShotsLeaderboard\(user\.teamId,homeShotsLeaderboardScope\)/);
+  assert.match(source, /await fetchHomeShotsLeaderboard\(user\.teamId,view==="player"\?"players":homeShotsLeaderboardScope\)/);
 
   assert.match(source, /const addShotLog=async\(made,date\)=>\{/);
+  assert.match(source, /validateHomeShotLogInput\(\{made,date\}\)/);
   assert.match(source, /fetch\("\/v1\/home-shots\/log"/);
-  assert.match(source, /if\(!res\.ok\)throw new Error/);
-  assert.match(source, /setShotLogs\(prev=>\[\.\.\.prev,localLog\]\)/);
-  assert.match(source, /const homeShotDebugMode=window\.location\.search\.includes\("homeShotDebug=1"\);/);
+  assert.match(source, /if\(!res\.ok\)\{/);
+  assert.match(source, /appendOptimisticShot\(localLog\)/);
+  assert.match(source, /replaceOptimisticShot\(normalizeSavedHomeShotLog\(body\?\.shot_log\|\|\{\},localLog\)\)/);
+  assert.match(source, /shouldUseQuietHomeShotFallback\(\{errorCode:backendErrorCode,message:diagnosticMessage,userEmail:user\?\.email,teamId:user\?\.teamId,playerName:user\?\.name\}\)/);
+  assert.match(source, /console\.warn\("home_shots_remote_fallback",\{mode:"local_fallback",quiet:true,errorCode:backendErrorCode/);
   assert.match(source, /const baseError="Could not save home shots to team dashboard\. Please try again\.";/);
   assert.match(source, /setStatSyncError\(homeShotDebugMode\?`\$\{baseError\} Error: \$\{backendErrorCode\}`:baseError\)/);
-  assert.match(source, /console\.error\("home_shots_save_failed",\{errorCode:backendErrorCode/);
-  assert.match(source, /setStatSyncError\(homeShotDebugMode\?/);
+  assert.match(source, /console\.error\("home_shots_save_failed",\{mode:"failed_sync",errorCode:backendErrorCode/);
 
   assert.match(source, /const \[statSyncError,setStatSyncError\]=useState\(""\)/);
-  assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,homeShotsLeaderboardScope\)\} statSyncError=\{statSyncError\}/);
+  assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,"players"\)\} statSyncError=\{statSyncError\}/);
   assert.match(source, /\{statSyncError&&<div[^>]*>\{statSyncError\}<\/div>\}/);
   assert.match(source, /const toggleRsvp=async\(eid\)=>\{if\(!requirePlayer\(user,user\?\.teamId,user\?\.email\)\)return;/);
 });
@@ -195,5 +197,5 @@ test('coach and player dashboards both consume shared leaderboard state and fetc
   const source = await appSource();
 
   assert.match(source, /homeShotsLeaderboard=\{homeShotsLeaderboard\}/);
-  assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,homeShotsLeaderboardScope\)\}/);
+  assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,"players"\)\}/);
 });

@@ -38,7 +38,13 @@ import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./li
 import { buildAppRows, buildRemoteRows, mergeHydratedRows } from "./lib/remotePersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 import { createAppPersistenceService } from "./lib/appPersistenceService";
-import { createShotLogService } from "./lib/shotLogService.js";
+import {
+  buildLocalHomeShotLog,
+  normalizeSavedHomeShotLog,
+  shouldUseQuietHomeShotFallback,
+  upsertHomeShotsLeaderboardRow,
+  validateHomeShotLogInput,
+} from "./lib/homeShotLogging.js";
 import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
 import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, STORAGE_KEYS } from "./lib/appDataModels";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
@@ -393,7 +399,6 @@ const DB = {
 };
 
 const persistenceService=createAppPersistenceService({db:DB,fetchImpl:fetch});
-const shotLogService=createShotLogService({supabaseClient:supabase});
 
 const parseLeaderboardErrorMessage = (errorCode = "", status = 0, parseMode = "json") => {
   if (parseMode === "non_json") return "Leaderboard endpoint unavailable (invalid response format).";
@@ -1418,35 +1423,57 @@ try{await P("sl:events",[...events,eventPayload],setEvents,{strictRemote:true});
 const removeEvent=async id=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:events",events.filter(e=>!(e.id===id&&e.teamId===user.teamId)),setEvents);await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===id&&r.teamId===user.teamId)),setRsvps)};
 const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps)};
 const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)return;if(rsvps.find(r=>r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId))return;await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email,playerId:email,teamId:user.teamId,name,ts:Date.now()}],setRsvps)};
+const persistLocalShotLogs=(nextLogs)=>{try{window.storage?.set("sl:shotlogs",JSON.stringify(nextLogs),true);}catch(e){}};
 const addShotLog=async(made,date)=>{
-if(!requirePlayer(user,user?.teamId,user?.email))return;
+if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required.",mode:"failed_sync"};
+const validation=validateHomeShotLogInput({made,date});
+if(!validation.ok){setStatSyncError(validation.error);return{ok:false,error:validation.error,validation:true,mode:"failed_sync"};}
 const homeShotDebugMode=window.location.search.includes("homeShotDebug=1");
-const localLog={id:genId("shotlog"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,made:Number(made||0),date,ts:Date.now()};
+const localLog=buildLocalHomeShotLog({id:genId("shotlog"),user,made:validation.made,date:validation.date});
+if(!localLog){setStatSyncError("Player team context is required before logging shots.");return{ok:false,error:"missing_player_or_team_context",mode:"failed_sync"};}
+const previousHomeShotsLeaderboard={...homeShotsLeaderboard,rows:Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows.map(row=>({...row})):[]};
+const appendOptimisticShot=(log)=>{
+setShotLogs(prev=>{const next=[...prev,log];persistLocalShotLogs(next);return next;});
+setHomeShotsLeaderboard(prev=>({...prev,status:"success",error:"",rows:upsertHomeShotsLeaderboardRow(prev?.rows,{user,made:log.made,limit:HOME_SHOTS_LEADERBOARD_LIMIT})}));
+};
+const replaceOptimisticShot=(savedLog)=>{
+setShotLogs(prev=>{const next=prev.map(log=>log.id===localLog.id?savedLog:log);persistLocalShotLogs(next);return next;});
+};
+const rollbackOptimisticShot=()=>{
+setShotLogs(prev=>{const next=prev.filter(log=>log.id!==localLog.id);persistLocalShotLogs(next);return next;});
+setHomeShotsLeaderboard(previousHomeShotsLeaderboard);
+};
+appendOptimisticShot(localLog);
 try{
-const created=await shotLogService.createShotLog({
-shotLog:{made,date},
-player:{id:user.email,email:user.email,name:user.name},
-team:{id:user.teamId},
-});
-const backendAvailable=created?.mode==="supabase"&&!created?.reason;
-if(backendAvailable){
-const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({team_id:user.teamId,player_id:user.email,email:user.email,name:user.name,made,date})});
+const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({id:localLog.id,ts:localLog.ts,team_id:user.teamId,player_id:user.email,email:user.email,name:user.name,made:validation.made,date:validation.date})});
 const body=await res.json().catch(()=>({}));
-if(!res.ok)throw new Error(String(body?.error||"home_shot_log_failed"));
-const saved=body?.shot_log||{};
-setShotLogs(prev=>[...prev,{id:saved.id||localLog.id,email:saved.email||localLog.email,playerId:saved.player_id||saved.playerId||localLog.playerId,teamId:saved.team_id||saved.teamId||localLog.teamId,name:saved.name||localLog.name,made:Number(saved.made??localLog.made),date:saved.date||localLog.date,ts:saved.ts||localLog.ts}]);
-}else{
-setShotLogs(prev=>[...prev,localLog]);
+if(!res.ok){
+const error=new Error(String(body?.error||"home_shot_log_failed"));
+error.status=res.status;
+error.body=body;
+throw error;
 }
+replaceOptimisticShot(normalizeSavedHomeShotLog(body?.shot_log||{},localLog));
 setStatSyncError("");
-trackEvent("shot_log_added",{made,date,mode:created?.mode||"demo"});
+trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"remote_saved"});
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+return{ok:true,mode:"remote_saved"};
 }catch(e){
-console.error("home_shots_save_failed",{status:"failed",userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made,date});
-setShotLogs(prev=>[...prev,localLog]);
+const backendErrorCode=String(e?.body?.error||e?.message||"sync_failed");
+const diagnosticMessage=String(e?.body?.diagnostic?.message||"");
+const quietFallback=shouldUseQuietHomeShotFallback({errorCode:backendErrorCode,message:diagnosticMessage,userEmail:user?.email,teamId:user?.teamId,playerName:user?.name});
+if(quietFallback){
+setStatSyncError("");
+console.warn("home_shots_remote_fallback",{mode:"local_fallback",quiet:true,errorCode:backendErrorCode,status:e?.status||null,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
+trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"local_fallback",quiet:true,fallbackReason:backendErrorCode});
+return{ok:true,mode:"local_fallback",fallbackReason:backendErrorCode};
+}
+rollbackOptimisticShot();
+console.error("home_shots_save_failed",{mode:"failed_sync",errorCode:backendErrorCode,status:e?.status||null,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
 const baseError="Could not save home shots to team dashboard. Please try again.";
-setStatSyncError(homeShotDebugMode?`${baseError} Error: ${String(e?.message||"sync_failed")}`:baseError);
-trackEvent("shot_log_failed",{made,date,error:String(e?.message||"sync_failed")});
+setStatSyncError(homeShotDebugMode?`${baseError} Error: ${backendErrorCode}`:baseError);
+trackEvent("shot_log_failed",{made:validation.made,date:validation.date,mode:"failed_sync",error:backendErrorCode});
+return{ok:false,mode:"failed_sync",error:backendErrorCode};
 }
 };
 const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",[...challenges,{...ch,id:Date.now(),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges);trackEvent("challenge_created",{to:ch.to||null})};
@@ -1696,7 +1723,7 @@ const tabFromPath=useCallback((path)=>{
 },[canAccessTab]);
 const initialTab = tabFromPath(window.location.pathname);
 const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
-const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false);
+const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false),[shotSaving,setShotSaving]=useState(false),[shotInputError,setShotInputError]=useState(""),[shotSaveNotice,setShotSaveNotice]=useState("");
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
@@ -2101,16 +2128,18 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       <div style={{display:"flex",gap:10,marginBottom:12}}>
         <div style={{flex:1}}>
           <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>MAKES</label>
-          <input type="number" min="0" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0" style={{width:"100%",padding:"12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:VOLT,fontFamily:FD,fontSize:24,textAlign:"center",outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
+          <input type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0" style={{width:"100%",padding:"12px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:VOLT,fontFamily:FD,fontSize:24,textAlign:"center",outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
         <div style={{flex:1}}>
           <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:2,display:"block",marginBottom:6}}>DATE</label>
           <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
       </div>
-      <button className="btn-v cta-primary" onClick={()=>{const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;addShotLog(v,shotDate);setShotSaved(true);pushCompletionCue({title:"Shot activity logged",detail:`${v} makes added for ${shotDate}`,momentum:`${streak}-day momentum`,next:"Check your shot trend or continue drills"});setShotMade("");setTimeout(()=>setShotSaved(false),1800)}} style={{opacity:shotSaved?0.7:1}}>
-        {shotSaved?"✓ SAVED":"LOG SHOTS"}
+      {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
+      <button className="btn-v cta-primary" disabled={shotSaving} onClick={async()=>{if(shotSaving)return;const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}setShotInputError("");setShotSaveNotice("");setShotSaving(true);try{const result=await addShotLog(validation.made,shotDate);if(result?.ok){if(result.mode==="local_fallback"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}}finally{setShotSaving(false);}}} style={{opacity:shotSaving||shotSaved?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
+        {shotSaving?"SAVING…":shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
+      {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,textAlign:"center",marginTop:8,letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
       {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
       <button onClick={()=>setShowShotStats(true)} className="cta-secondary-link" style={{width:"100%",textAlign:"center",opacity:.85}}>SHOT STATS →</button>
     </div>
@@ -2139,7 +2168,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {/* ═════ SHOT STATS sub-screen ═════ */}
   {tab==="log-drill"&&showShotStats&&!active&&<div className="fade-up">
     <button onClick={()=>setShowShotStats(false)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20,padding:0}}>&#8592; BACK TO DRILLS</button>
-    <ShotTracker u={u} shotLogs={shotLogs} addShotLog={addShotLog} shotMade={shotMade} setShotMade={setShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} setShotSaved={setShotSaved}/>
+    <ShotTracker u={u} shotLogs={shotLogs} addShotLog={addShotLog} shotMade={shotMade} setShotMade={setShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} setShotSaved={setShotSaved} shotSaving={shotSaving} setShotSaving={setShotSaving} shotSaveNotice={shotSaveNotice} setShotSaveNotice={setShotSaveNotice}/>
   </div>}
 
 
@@ -2208,7 +2237,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       {/* Score input with reactive color */}
       {(()=>{const v=parseInt(input)||0;const pct=hasDrillMax(active)&&active.max>0?v/active.max:0;const glowColor=hasDrillMax(active)?(pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#FF4545":VOLT):VOLT;const borderColor=v>0?glowColor:VOLT;
         return <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8,marginBottom:40}}>
-        <input autoFocus type="number" min="0" max={hasDrillMax(active)?active.max:undefined} value={input} onChange={e=>{setInput(e.target.value);playTick()}} onKeyDown={e=>e.key==="Enter"&&handleLog()} placeholder="0" style={{width:120,padding:"24px 8px",background:BG,border:`2px solid ${borderColor}`,borderRadius:20,color:borderColor,fontFamily:FD,fontSize:64,textAlign:"center",outline:"none",letterSpacing:2,boxShadow:v>0?`0 0 30px ${glowColor}20,0 0 60px ${glowColor}08`:`0 0 20px ${VOLT}15`,transition:"border-color .3s,color .3s,box-shadow .3s"}}/>
+        <input autoFocus type="number" min="0" max={hasDrillMax(active)?active.max:undefined} value={input} onChange={e=>{setInput(e.target.value);playTick()}} onKeyDown={e=>{if(e.key==="Enter")handleLog();}} placeholder="0" style={{width:120,padding:"24px 8px",background:BG,border:`2px solid ${borderColor}`,borderRadius:20,color:borderColor,fontFamily:FD,fontSize:64,textAlign:"center",outline:"none",letterSpacing:2,boxShadow:v>0?`0 0 30px ${glowColor}20,0 0 60px ${glowColor}08`:`0 0 20px ${VOLT}15`,transition:"border-color .3s,color .3s,box-shadow .3s"}}/>
         {hasDrillMax(active)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:32}}>/{active.max}</div>}
       </div>})()}
       {/* Score quality indicator */}
@@ -2814,14 +2843,23 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 // ═══════════════════════════════════════
 // SHOT TRACKER — Log makes by date with running totals
 // ═══════════════════════════════════════
-function ShotTracker({u,shotLogs,addShotLog,shotMade,setShotMade,shotDate,setShotDate,shotSaved,setShotSaved}){
+function ShotTracker({u,shotLogs,addShotLog,shotMade,setShotMade,shotDate,setShotDate,shotSaved,setShotSaved,shotSaving,setShotSaving,shotSaveNotice,setShotSaveNotice}){
 const my=useMemo(()=>shotLogs.filter(s=>s.email===u.email),[shotLogs,u]);
 const today=todayStr();
+const[shotInputError,setShotInputError]=useState("");
 
-const handleLog=()=>{
-const v=parseInt(shotMade);if(isNaN(v)||v<=0)return;
-addShotLog(v,shotDate);setShotSaved(true);setShotMade("");
-setTimeout(()=>setShotSaved(false),1800);
+const handleLog=async()=>{
+if(shotSaving)return;
+const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}
+setShotInputError("");
+setShotSaveNotice("");
+setShotSaving(true);
+try{
+const result=await addShotLog(validation.made,shotDate);
+if(result?.ok){if(result.mode==="local_fallback"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800);}
+}finally{
+setShotSaving(false);
+}
 };
 
 // Running totals
@@ -2871,21 +2909,24 @@ return <div className="fade-up">
   {shotSaved?<div style={{textAlign:"center",padding:"24px 0"}}>
     <div style={{width:60,height:60,borderRadius:"50%",background:VOLT+"15",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}><svg width="28" height="28" viewBox="0 0 40 40"><path d="M10 20l8 8 12-14" stroke={VOLT} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
     <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:4}}>SHOTS LOGGED</div>
+    {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,marginTop:8,letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
   </div>
   :<>
     <div style={{display:"flex",gap:10,marginBottom:16}}>
       <div style={{flex:1}}>
         <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>SHOTS MADE</label>
-        <input type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleLog()} placeholder="0" style={{width:"100%",padding:"16px 14px",background:BG,border:`2px solid ${ORANGE}66`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none",letterSpacing:2}} onFocus={e=>e.target.style.borderColor=ORANGE} onBlur={e=>e.target.style.borderColor=ORANGE+"66"}/>
+        <input type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")handleLog();}} placeholder="0" style={{width:"100%",padding:"16px 14px",background:BG,border:`2px solid ${ORANGE}66`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none",letterSpacing:2}} onFocus={e=>e.target.style.borderColor=ORANGE} onBlur={e=>e.target.style.borderColor=ORANGE+"66"}/>
       </div>
       <div style={{flex:1}}>
         <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>DATE</label>
         <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
       </div>
     </div>
-    <button className="btn-v cta-primary" onClick={handleLog} style={{}}>
+    {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
+    {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
+    <button className="btn-v cta-primary" disabled={shotSaving} onClick={handleLog} style={{opacity:shotSaving?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      LOG SHOTS
+      {shotSaving?"SAVING…":"LOG SHOTS"}
     </button>
   </>}
 </div>
