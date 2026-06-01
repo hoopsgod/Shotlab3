@@ -56,3 +56,73 @@ test('remote wins on exact id/email conflict for players/profiles', () => {
   const profileMerged = mergeHydratedRows('sl:player-profiles', [{ id: 'pp1', teamId: 't1', email: 'a@x.com', firstName: 'Local' }], [{ id: 'pp1', team_id: 't1', email: 'a@x.com', first_name: 'Remote' }]);
   assert.equal(profileMerged[0].firstName, 'Remote');
 });
+
+test('sl:shotlogs remote hydration marks missing syncState rows remote_saved for coach visibility', () => {
+  const [remote] = buildAppRows('sl:shotlogs', [{
+    id: 'shot-remote-1',
+    email: 'Player@One.com',
+    player_id: 'Player@One.com',
+    team_id: 'team-1',
+    name: 'Player One',
+    made: '22',
+    date: '2026-05-30',
+    ts: 123,
+  }], { source: 'remote' });
+
+  assert.equal(remote.email, 'player@one.com');
+  assert.equal(remote.playerId, 'player@one.com');
+  assert.equal(remote.teamId, 'team-1');
+  assert.equal(remote.syncState, 'remote_saved');
+});
+
+test('sl:shotlogs local pending/failed survive hydration and stay distinct from remote_saved', () => {
+  const rows = buildAppRows('sl:shotlogs', [
+    { id: 'pending', email: 'p@x.com', playerId: 'p@x.com', teamId: 't1', made: 7, syncState: 'local_pending', syncError: 'offline' },
+    { id: 'failed', email: 'p@x.com', playerId: 'p@x.com', teamId: 't1', made: 9, syncState: 'failed_sync', syncError: 'persist_failed' },
+    { id: 'legacy', email: 'p@x.com', playerId: 'p@x.com', teamId: 't1', made: 11 },
+  ], { source: 'local' });
+
+  assert.deepEqual(rows.map((row) => [row.id, row.syncState]), [
+    ['pending', 'local_pending'],
+    ['failed', 'failed_sync'],
+    ['legacy', 'local_pending'],
+  ]);
+  assert.equal(rows.find((row) => row.id === 'legacy').syncError, 'legacy_missing_sync_state');
+});
+
+test('sl:shotlogs hydration merge keeps local retry rows and lets remote rows become coach-visible', () => {
+  const local = [
+    { id: 'pending', email: 'p@x.com', playerId: 'p@x.com', teamId: 't1', made: 7, syncState: 'local_pending' },
+    { id: 'same-id', email: 'p@x.com', playerId: 'p@x.com', teamId: 't1', made: 1, syncState: 'failed_sync' },
+  ];
+  const remote = [
+    { id: 'same-id', email: 'p@x.com', player_id: 'p@x.com', team_id: 't1', made: 15 },
+    { id: 'remote-only', email: 'p@x.com', player_id: 'p@x.com', team_id: 't1', made: 20 },
+  ];
+  const merged = mergeHydratedRows('sl:shotlogs', local, remote);
+
+  assert.deepEqual(merged.map((row) => [row.id, row.syncState, row.made]), [
+    ['pending', 'local_pending', 7],
+    ['same-id', 'remote_saved', 15],
+    ['remote-only', 'remote_saved', 20],
+  ]);
+  assert.deepEqual(merged.filter((row) => row.syncState === 'remote_saved').map((row) => row.id), ['same-id', 'remote-only']);
+});
+
+
+test('sl:shotlogs legacy missing syncState only becomes coach-visible with remote confirmation', () => {
+  const localLegacy = [
+    { id: 'legacy-confirmed', email: 'p@x.com', playerId: 'p@x.com', teamId: 't1', made: 8 },
+    { id: 'legacy-local-only', email: 'p@x.com', playerId: 'p@x.com', teamId: 't1', made: 6 },
+  ];
+  const remoteLegacy = [
+    { id: 'legacy-confirmed', email: 'p@x.com', player_id: 'p@x.com', team_id: 't1', made: 8 },
+  ];
+
+  const merged = mergeHydratedRows('sl:shotlogs', localLegacy, remoteLegacy);
+  const coachVisible = merged.filter((row) => row.syncState === 'remote_saved');
+  const retryVisible = merged.filter((row) => row.syncState === 'local_pending' || row.syncState === 'failed_sync');
+
+  assert.deepEqual(coachVisible.map((row) => row.id), ['legacy-confirmed']);
+  assert.deepEqual(retryVisible.map((row) => [row.id, row.syncError]), [['legacy-local-only', 'legacy_missing_sync_state']]);
+});

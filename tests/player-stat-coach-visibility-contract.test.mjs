@@ -5,16 +5,29 @@ import fs from 'node:fs';
 const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 
 test('player at-home shots save uses backend endpoint and safely updates local state/fallbacks', () => {
-  assert.match(source, /const addShotLog=async\(made,date\)=>\{[\s\S]*fetch\("\/v1\/home-shots\/log"/);
+  assert.match(source, /const saveHomeShotLogRemote=async\(log\)=>\{[\s\S]*fetch\("\/v1\/home-shots\/log"/);
+  assert.match(source, /const addShotLog=async\(made,date\)=>\{/);
   assert.match(source, /if\(!res\.ok\)\{/);
   assert.match(source, /appendOptimisticShot\(localLog\)/);
-  assert.match(source, /replaceOptimisticShot\(normalizeSavedHomeShotLog\(body\?\.shot_log\|\|\{\},localLog\)\)/);
-  assert.match(source, /shouldUseQuietHomeShotFallback\(\{status:e\?\.status,errorCode:backendErrorCode,message:diagnosticMessage\}\)/);
+  assert.match(source, /const savedLog=await saveHomeShotLogRemote\(localLog\)/);
+  assert.match(source, /replaceShotLog\(localLog\.id,savedLog\)/);
+  assert.match(source, /shouldUseQuietHomeShotFallback\(\{status:e\?\.status,errorCode:backendErrorCode,message:diagnosticMessage,\.\.\.buildHomeShotQuietContext\(\)\}\)/);
+});
+
+test('failed_sync/local_pending retry UI is available in At Home and ShotTracker views', () => {
+  assert.match(source, /function HomeShotSyncRetryPanel\(\{syncIssueShots=\[\],retryHomeShotLog,setShotSaveNotice\}\)\{/);
+  assert.match(source, /TEAM SYNC NEEDS ATTENTION/);
+  assert.match(source, /RETRY SYNC/);
+  assert.match(source, /disabled=\{isRetrying\}/);
+  assert.match(source, /SYNCING…/);
+  assert.equal((source.match(/<HomeShotSyncRetryPanel syncIssueShots=\{syncIssueShots\}/g)||[]).length, 2);
 });
 
 test('coach/team scoped data path filters shot logs by active team id', () => {
   assert.match(source, /const scopedShotLogs=shotLogs\.filter\(l=>l\.teamId===user\?\.teamId\);/);
   assert.match(source, /shotLogs=\{scopedShotLogs\}/);
+  assert.match(source, /const coachVisibleShotLogs=scopedShotLogs\.filter\(l=>l\.syncState==="remote_saved"\)/);
+  assert.match(source, /shotLogs=\{coachVisibleShotLogs\}/);
 });
 
 test('coach dashboard pulls home shots leaderboard for the same team id', () => {
