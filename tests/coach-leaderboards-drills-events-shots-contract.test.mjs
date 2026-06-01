@@ -19,18 +19,20 @@ test('player-entered stats require durable ids, strict remote persistence, sync 
 
   assert.match(source, /const addShotLog=async\(made,date\)=>\{/);
   assert.match(source, /validateHomeShotLogInput\(\{made,date\}\)/);
+  assert.match(source, /const saveHomeShotLogRemote=async\(log\)=>\{/);
   assert.match(source, /fetch\("\/v1\/home-shots\/log"/);
   assert.match(source, /if\(!res\.ok\)\{/);
   assert.match(source, /appendOptimisticShot\(localLog\)/);
-  assert.match(source, /replaceOptimisticShot\(normalizeSavedHomeShotLog\(body\?\.shot_log\|\|\{\},localLog\)\)/);
-  assert.match(source, /shouldUseQuietHomeShotFallback\(\{status:e\?\.status,errorCode:backendErrorCode,message:diagnosticMessage\}\)/);
-  assert.match(source, /console\.warn\("home_shots_remote_fallback",\{mode:"local_fallback",quiet:true,errorCode:backendErrorCode/);
+  assert.match(source, /const savedLog=await saveHomeShotLogRemote\(localLog\)/);
+  assert.match(source, /replaceShotLog\(localLog\.id,savedLog\)/);
+  assert.match(source, /shouldUseQuietHomeShotFallback\(\{status:e\?\.status,errorCode:backendErrorCode,message:diagnosticMessage,\.\.\.buildHomeShotQuietContext\(\)\}\)/);
+  assert.match(source, /console\.warn\("home_shots_remote_fallback",\{mode:"local_pending",syncState:"local_pending",quiet:true,errorCode:backendErrorCode/);
   assert.match(source, /const baseError="Could not save home shots to team dashboard\. Please try again\.";/);
   assert.match(source, /setStatSyncError\(homeShotDebugMode\?`\$\{baseError\} Error: \$\{backendErrorCode\}`:baseError\)/);
-  assert.match(source, /console\.error\("home_shots_save_failed",\{mode:"failed_sync",errorCode:backendErrorCode/);
+  assert.match(source, /console\.error\("home_shots_save_failed",\{mode:"failed_sync",syncState:"failed_sync",errorCode:backendErrorCode/);
 
   assert.match(source, /const \[statSyncError,setStatSyncError\]=useState\(""\)/);
-  assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,"players"\)\} statSyncError=\{statSyncError\}/);
+  assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,"players"\)\} statSyncError=\{statSyncError\} retryHomeShotLog=\{retryHomeShotLog\}/);
   assert.match(source, /\{statSyncError&&<div[^>]*>\{statSyncError\}<\/div>\}/);
   assert.match(source, /const toggleRsvp=async\(eid\)=>\{if\(!requirePlayer\(user,user\?\.teamId,user\?\.email\)\)return;/);
 });
