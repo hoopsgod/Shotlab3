@@ -1424,6 +1424,23 @@ const removeEvent=async id=>{if(user?.role!=="coach"||!user.teamId)return;await 
 const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps)};
 const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)return;if(rsvps.find(r=>r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId))return;await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email,playerId:email,teamId:user.teamId,name,ts:Date.now()}],setRsvps)};
 const persistLocalShotLogs=(nextLogs)=>{try{window.storage?.set("sl:shotlogs",JSON.stringify(nextLogs),true);}catch(e){}};
+const saveHomeShotLogRemote=async(log)=>{
+const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({id:log.id,ts:log.ts,team_id:log.teamId,player_id:log.playerId||log.email,email:log.email,name:log.name,made:log.made,date:log.date})});
+const body=await res.json().catch(()=>({}));
+if(!res.ok){const error=new Error(String(body?.error||"home_shot_log_failed"));error.status=res.status;error.body=body;throw error;}
+return normalizeSavedHomeShotLog(body?.shot_log||{},log);
+};
+const markShotSyncState=(shotId,syncState,syncError="")=>{
+setShotLogs(prev=>{const next=prev.map(log=>log.id===shotId?{...log,syncState,syncError}:log);persistLocalShotLogs(next);return next;});
+};
+const replaceShotLog=(shotId,savedLog)=>{
+setShotLogs(prev=>{const next=prev.map(log=>log.id===shotId?savedLog:log);persistLocalShotLogs(next);return next;});
+};
+const buildHomeShotQuietContext=()=>({
+isExplicitDemoOrLocal:isDemoMode(),
+isOffline:typeof navigator!=="undefined"&&navigator.onLine===false,
+isMembershipPending:Boolean(pendingJoinContext),
+});
 const addShotLog=async(made,date)=>{
 if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required.",mode:"failed_sync"};
 const validation=validateHomeShotLogInput({made,date});
@@ -1435,39 +1452,51 @@ const appendOptimisticShot=(log)=>{
 setShotLogs(prev=>{const next=[...prev,log];persistLocalShotLogs(next);return next;});
 setHomeShotsLeaderboard(prev=>({...prev,status:"success",error:"",rows:upsertHomeShotsLeaderboardRow(prev?.rows,{user,made:log.made,limit:HOME_SHOTS_LEADERBOARD_LIMIT})}));
 };
-const replaceOptimisticShot=(savedLog)=>{
-setShotLogs(prev=>{const next=prev.map(log=>log.id===localLog.id?savedLog:log);persistLocalShotLogs(next);return next;});
-};
 appendOptimisticShot(localLog);
 try{
-const res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({id:localLog.id,ts:localLog.ts,team_id:user.teamId,player_id:user.email,email:user.email,name:user.name,made:validation.made,date:validation.date})});
-const body=await res.json().catch(()=>({}));
-if(!res.ok){
-const error=new Error(String(body?.error||"home_shot_log_failed"));
-error.status=res.status;
-error.body=body;
-throw error;
-}
-replaceOptimisticShot(normalizeSavedHomeShotLog(body?.shot_log||{},localLog));
+const savedLog=await saveHomeShotLogRemote(localLog);
+replaceShotLog(localLog.id,savedLog);
 setStatSyncError("");
-trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"remote_saved"});
+trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"remote_saved",syncState:"remote_saved"});
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
-return{ok:true,mode:"remote_saved"};
+return{ok:true,mode:"remote_saved",syncState:"remote_saved"};
 }catch(e){
 const backendErrorCode=String(e?.body?.error||e?.message||"sync_failed");
 const diagnosticMessage=String(e?.body?.diagnostic?.message||"");
-const quietFallback=shouldUseQuietHomeShotFallback({status:e?.status,errorCode:backendErrorCode,message:diagnosticMessage});
+const quietFallback=shouldUseQuietHomeShotFallback({status:e?.status,errorCode:backendErrorCode,message:diagnosticMessage,...buildHomeShotQuietContext()});
 if(quietFallback){
+markShotSyncState(localLog.id,"local_pending",backendErrorCode);
 setStatSyncError("");
-console.warn("home_shots_remote_fallback",{mode:"local_fallback",quiet:true,errorCode:backendErrorCode,status:e?.status||null,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
-trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"local_fallback",quiet:true,fallbackReason:backendErrorCode});
-return{ok:true,mode:"local_fallback",fallbackReason:backendErrorCode};
+console.warn("home_shots_remote_fallback",{mode:"local_pending",syncState:"local_pending",quiet:true,errorCode:backendErrorCode,status:e?.status||null,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
+trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"local_pending",syncState:"local_pending",quiet:true,fallbackReason:backendErrorCode});
+return{ok:true,mode:"local_pending",syncState:"local_pending",fallbackReason:backendErrorCode};
 }
-console.error("home_shots_save_failed",{mode:"failed_sync",errorCode:backendErrorCode,status:e?.status||null,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
+markShotSyncState(localLog.id,"failed_sync",backendErrorCode);
+await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+console.error("home_shots_save_failed",{mode:"failed_sync",syncState:"failed_sync",errorCode:backendErrorCode,status:e?.status||null,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
 const baseError="Could not save home shots to team dashboard. Please try again.";
 setStatSyncError(homeShotDebugMode?`${baseError} Error: ${backendErrorCode}`:baseError);
-trackEvent("shot_log_failed",{made:validation.made,date:validation.date,mode:"failed_sync",error:backendErrorCode});
-return{ok:false,mode:"failed_sync",error:backendErrorCode};
+trackEvent("shot_log_failed",{made:validation.made,date:validation.date,mode:"failed_sync",syncState:"failed_sync",error:backendErrorCode});
+return{ok:false,mode:"failed_sync",syncState:"failed_sync",error:backendErrorCode};
+}
+};
+const retryHomeShotLog=async(log)=>{
+if(!requirePlayer(user,user?.teamId,user?.email)||!log?.id)return{ok:false,mode:"failed_sync",error:"Player team context is required."};
+markShotSyncState(log.id,"local_pending","");
+try{
+const savedLog=await saveHomeShotLogRemote({...log,syncState:"local_pending"});
+replaceShotLog(log.id,savedLog);
+setStatSyncError("");
+trackEvent("shot_log_retry_succeeded",{made:savedLog.made,date:savedLog.date,mode:"remote_saved",syncState:"remote_saved"});
+await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+return{ok:true,mode:"remote_saved",syncState:"remote_saved"};
+}catch(e){
+const backendErrorCode=String(e?.body?.error||e?.message||"sync_failed");
+const quietFallback=shouldUseQuietHomeShotFallback({status:e?.status,errorCode:backendErrorCode,message:String(e?.body?.diagnostic?.message||""),...buildHomeShotQuietContext()});
+markShotSyncState(log.id,quietFallback?"local_pending":"failed_sync",backendErrorCode);
+if(!quietFallback)setStatSyncError("Could not save home shots to team dashboard. Please try again.");
+trackEvent("shot_log_retry_failed",{made:log.made,date:log.date,mode:quietFallback?"local_pending":"failed_sync",syncState:quietFallback?"local_pending":"failed_sync",error:backendErrorCode});
+return{ok:false,mode:quietFallback?"local_pending":"failed_sync",syncState:quietFallback?"local_pending":"failed_sync",error:backendErrorCode};
 }
 };
 const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",[...challenges,{...ch,id:Date.now(),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges);trackEvent("challenge_created",{to:ch.to||null})};
@@ -1534,6 +1563,7 @@ const scopedScores=scores.filter(s=>s.teamId===user?.teamId);
 const scopedEvents=events.filter(e=>e.teamId===user?.teamId);
 const scopedRsvps=rsvps.filter(r=>r.teamId===user?.teamId);
 const scopedShotLogs=shotLogs.filter(l=>l.teamId===user?.teamId);
+const coachVisibleShotLogs=scopedShotLogs.filter(l=>!l.syncState||l.syncState==="remote_saved");
 const scopedChallenges=challenges.filter(c=>c.teamId===user?.teamId);
 const scopedScSessions=scSessions.filter(s=>s.teamId===user?.teamId);
 const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
@@ -1562,8 +1592,8 @@ const dataDebugPanel=dataDebugEnabled?<div style={{position:"fixed",right:12,bot
 return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)} isJoinConsumeActive={isJoinConsumeActive}/></div>}
-{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")} statSyncError={statSyncError}/></div>}
-{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={scopedShotLogs} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
+{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} setTheme={setTheme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")} statSyncError={statSyncError} retryHomeShotLog={retryHomeShotLog}/></div>}
+{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={coachVisibleShotLogs} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 {dataDebugPanel}
 </TeamBrandingProvider>;
@@ -1704,7 +1734,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 // ═══════════════════════════════════════
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
-function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,refreshHomeShotsLeaderboard,statSyncError=""}){
+function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,retryHomeShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,setTheme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,refreshHomeShotsLeaderboard,statSyncError=""}){
 const canAccessTab=useCallback((nextTab)=>{
   if(nextTab==="players")return u.isCoach;
   if(nextTab==="duels")return !u.isCoach;
@@ -1718,6 +1748,7 @@ const tabFromPath=useCallback((path)=>{
 const initialTab = tabFromPath(window.location.pathname);
 const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
 const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false),[shotSaving,setShotSaving]=useState(false),[shotInputError,setShotInputError]=useState(""),[shotSaveNotice,setShotSaveNotice]=useState("");
+const syncIssueShots=useMemo(()=>shotLogs.filter(s=>s.email===u.email&&(s.syncState==="local_pending"||s.syncState==="failed_sync")),[shotLogs,u.email]);
 const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
@@ -2129,8 +2160,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} style={{width:"100%",padding:"12px 8px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,color:LIGHT,fontFamily:FB,fontSize:16,outline:"none"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>
         </div>
       </div>
-      {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
-      <button className="btn-v cta-primary" disabled={shotSaving} onClick={async()=>{if(shotSaving)return;const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}setShotInputError("");setShotSaveNotice("");setShotSaving(true);try{const result=await addShotLog(validation.made,shotDate);if(result?.ok){if(result.mode==="local_fallback"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}}finally{setShotSaving(false);}}} style={{opacity:shotSaving||shotSaved?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
+
+    <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice}/>
+    {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
+      <button className="btn-v cta-primary" disabled={shotSaving} onClick={async()=>{if(shotSaving)return;const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}setShotInputError("");setShotSaveNotice("");setShotSaving(true);try{const result=await addShotLog(validation.made,shotDate);if(result?.ok){if(result.mode==="local_pending"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}}finally{setShotSaving(false);}}} style={{opacity:shotSaving||shotSaved?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
         {shotSaving?"SAVING…":shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
       {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,textAlign:"center",marginTop:8,letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
@@ -2162,7 +2195,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {/* ═════ SHOT STATS sub-screen ═════ */}
   {tab==="log-drill"&&showShotStats&&!active&&<div className="fade-up">
     <button onClick={()=>setShowShotStats(false)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20,padding:0}}>&#8592; BACK TO DRILLS</button>
-    <ShotTracker u={u} shotLogs={shotLogs} addShotLog={addShotLog} shotMade={shotMade} setShotMade={setShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} setShotSaved={setShotSaved} shotSaving={shotSaving} setShotSaving={setShotSaving} shotSaveNotice={shotSaveNotice} setShotSaveNotice={setShotSaveNotice}/>
+    <ShotTracker u={u} shotLogs={shotLogs} addShotLog={addShotLog} retryHomeShotLog={retryHomeShotLog} shotMade={shotMade} setShotMade={setShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} setShotSaved={setShotSaved} shotSaving={shotSaving} setShotSaving={setShotSaving} shotSaveNotice={shotSaveNotice} setShotSaveNotice={setShotSaveNotice}/>
   </div>}
 
 
@@ -2834,11 +2867,24 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
   </div>;
 }
 
+
+function HomeShotSyncRetryPanel({syncIssueShots=[],retryHomeShotLog,setShotSaveNotice}){
+if(!syncIssueShots.length)return null;
+return <div style={{border:"1px solid rgba(255,181,71,0.34)",background:"rgba(255,181,71,0.07)",borderRadius:12,padding:"10px 12px",margin:"0 0 12px"}}>
+  <div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:800,letterSpacing:"0.08em",marginBottom:6}}>TEAM SYNC NEEDS ATTENTION</div>
+  {syncIssueShots.slice(0,3).map(log=><div key={log.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"6px 0",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+    <div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.35}}>{log.made} makes on {log.date}<div style={{color:log.syncState==="failed_sync"?"#FF8B8B":CYAN,fontSize:10,fontWeight:700}}>{log.syncState==="failed_sync"?"Not synced to coach dashboard":"Saved locally — sync pending"}</div></div>
+    <button type="button" onClick={async()=>{setShotSaveNotice("Retrying team sync…");const result=await retryHomeShotLog?.(log);setShotSaveNotice(result?.ok?"Team sync complete":"Could not sync yet — try again");setTimeout(()=>setShotSaveNotice(""),4200);}} style={{border:`1px solid ${ORANGE}66`,background:ORANGE+"12",color:ORANGE,borderRadius:999,padding:"6px 10px",fontFamily:FB,fontSize:11,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap"}}>RETRY SYNC</button>
+  </div>)}
+</div>;
+}
+
 // ═══════════════════════════════════════
 // SHOT TRACKER — Log makes by date with running totals
 // ═══════════════════════════════════════
-function ShotTracker({u,shotLogs,addShotLog,shotMade,setShotMade,shotDate,setShotDate,shotSaved,setShotSaved,shotSaving,setShotSaving,shotSaveNotice,setShotSaveNotice}){
+function ShotTracker({u,shotLogs,addShotLog,retryHomeShotLog,shotMade,setShotMade,shotDate,setShotDate,shotSaved,setShotSaved,shotSaving,setShotSaving,shotSaveNotice,setShotSaveNotice}){
 const my=useMemo(()=>shotLogs.filter(s=>s.email===u.email),[shotLogs,u]);
+const syncIssueShots=useMemo(()=>my.filter(s=>s.syncState==="local_pending"||s.syncState==="failed_sync"),[my]);
 const today=todayStr();
 const[shotInputError,setShotInputError]=useState("");
 
@@ -2850,7 +2896,7 @@ setShotSaveNotice("");
 setShotSaving(true);
 try{
 const result=await addShotLog(validation.made,shotDate);
-if(result?.ok){if(result.mode==="local_fallback"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800);}
+if(result?.ok){if(result.mode==="local_pending"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800);}
 }finally{
 setShotSaving(false);
 }
@@ -2916,6 +2962,7 @@ return <div className="fade-up">
         <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
       </div>
     </div>
+    <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice}/>
     {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
     {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
     <button className="btn-v cta-primary" disabled={shotSaving} onClick={handleLog} style={{opacity:shotSaving?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
