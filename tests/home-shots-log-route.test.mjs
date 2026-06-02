@@ -96,11 +96,18 @@ test("raw email membership still authorizes when table stores email values", asy
   } finally { global.fetch = originalFetch; }
 });
 
-test("shot_logs insert failure returns persist_failed with safe diagnostic", async () => {
+test("shot_logs insert failure returns persist_failed with safe PostgREST diagnostic details", async () => {
   const originalFetch = global.fetch;
   global.fetch = async (url) => {
     if (String(url).includes("/team_memberships")) return new Response(JSON.stringify([{ id: "m2", status: "active" }]), { status: 200 });
-    if (String(url).includes("/shot_logs")) return new Response(JSON.stringify({ message: "insert error" }), { status: 500 });
+    if (String(url).includes("/shot_logs")) {
+      return new Response(JSON.stringify({
+        code: "23502",
+        message: "null value in column \"player_id\" of relation \"shot_logs\" violates not-null constraint",
+        details: "Failing row contains a redacted shot log",
+        hint: "Check migration 029 durable shot_logs schema repair",
+      }), { status: 400 });
+    }
     return new Response(JSON.stringify(""), { status: 200 });
   };
   try {
@@ -109,6 +116,11 @@ test("shot_logs insert failure returns persist_failed with safe diagnostic", asy
     const body = await res.json();
     assert.equal(body.error, "persist_failed");
     assert.equal(body.diagnostic.stage, "shot_logs_insert");
+    assert.equal(body.diagnostic.shot_logs_insert_safe_error_code, "persist_failed");
+    assert.equal(body.diagnostic.shot_logs_insert_postgrest_error.status, 400);
+    assert.equal(body.diagnostic.shot_logs_insert_postgrest_error.code, "23502");
+    assert.match(body.diagnostic.shot_logs_insert_postgrest_error.message, /player_id/);
+    assert.match(body.diagnostic.shot_logs_insert_postgrest_error.hint, /migration 029/);
   } finally { global.fetch = originalFetch; }
 });
 

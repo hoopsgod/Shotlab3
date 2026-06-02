@@ -23,9 +23,27 @@ function normalizePayload(body = {}) {
   return { teamId, playerId, email, made, date };
 }
 
+function safeDiagnosticText(value, maxLength = 160) {
+  return String(value || "")
+    .replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]")
+    .replace(/service_role|apikey|authorization|password|secret|token/gi, "[redacted]")
+    .trim()
+    .slice(0, maxLength);
+}
+
 function safeErrorMessage(error) {
-  const message = String(error?.message || "unknown_error").trim();
-  return message.slice(0, 120) || "unknown_error";
+  return safeDiagnosticText(error?.message || "unknown_error", 120) || "unknown_error";
+}
+
+function safePostgrestInsertError(error) {
+  const details = error?.details || {};
+  return {
+    status: Number(error?.status || 0) || null,
+    code: safeDiagnosticText(details.code, 40),
+    message: safeErrorMessage(error),
+    details: safeDiagnosticText(details.details, 180),
+    hint: safeDiagnosticText(details.hint, 180),
+  };
 }
 
 function diagnosticError(error, status, stage, message, diagnostic, extra = {}) {
@@ -159,6 +177,7 @@ export async function onRequestPost({ request, env }) {
     return diagnosticError("persist_failed", 500, "shot_logs_insert", "Failed to persist home shots log.", diagnostic, {
       shot_logs_insert_safe_error_code: "persist_failed",
       shot_logs_insert_safe_error_message: safeErrorMessage(error),
+      shot_logs_insert_postgrest_error: safePostgrestInsertError(error),
     });
   }
 }
