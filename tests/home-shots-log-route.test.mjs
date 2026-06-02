@@ -79,6 +79,31 @@ test("uuid membership query is attempted before email query when uuid exists", a
   } finally { global.fetch = originalFetch; }
 });
 
+
+test("resolved UUID RPC object response authorizes team_memberships save", async () => {
+  const originalFetch = global.fetch;
+  let insertedRow;
+  global.fetch = async (url, init) => {
+    const href = String(url);
+    if (href.includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify([{ resolve_app_user_uuid: "uuid-from-rpc-object" }]), { status: 200 });
+    if (href.includes("/team_memberships") && href.includes("user_id=eq.uuid-from-rpc-object")) return new Response(JSON.stringify([{ id: "m-uuid-object", status: "active" }]), { status: 200 });
+    if (href.includes("/team_memberships")) return new Response(JSON.stringify([]), { status: 200 });
+    if (href.includes("/shot_logs")) {
+      insertedRow = JSON.parse(init.body)[0];
+      return new Response(JSON.stringify([insertedRow]), { status: 201 });
+    }
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", email: "p@x.com", made: 7, date: "2026-05-01" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.diagnostic.authorized_by, "uuid");
+    assert.match(body.diagnostic.uuid_membership_query_result, /match:team_id\/user_id/);
+    assert.equal(insertedRow.player_id, "p@x.com");
+  } finally { global.fetch = originalFetch; }
+});
+
 test("raw email membership still authorizes when table stores email values", async () => {
   const originalFetch = global.fetch;
   global.fetch = async (url, init) => {
@@ -93,6 +118,95 @@ test("raw email membership still authorizes when table stores email values", asy
     const body = await res.json();
     assert.equal(body.diagnostic.authorized_by, "email");
     assert.equal(body.diagnostic.shot_logs_insert_success, "yes");
+  } finally { global.fetch = originalFetch; }
+});
+
+
+test("camelCase team_memberships authorizes save", async () => {
+  const originalFetch = global.fetch;
+  let insertedRow;
+  global.fetch = async (url, init) => {
+    const href = String(url);
+    if (href.includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify(""), { status: 200 });
+    if (href.includes("/team_memberships") && href.includes("teamId=eq.team-a") && href.includes("userId=eq.p%40x.com")) return new Response(JSON.stringify([{ id: "m-camel", status: "active" }]), { status: 200 });
+    if (href.includes("/team_memberships")) return new Response(JSON.stringify([]), { status: 200 });
+    if (href.includes("/shot_logs")) {
+      insertedRow = JSON.parse(init.body)[0];
+      return new Response(JSON.stringify([insertedRow]), { status: 201 });
+    }
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ teamId: "team-a", playerId: "p@x.com", made: 4, date: "2026-05-01" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.diagnostic.authorized_by, "email");
+    assert.match(body.diagnostic.email_membership_query_result, /match:teamId\/userId/);
+    assert.equal(insertedRow.team_id, "team-a");
+  } finally { global.fetch = originalFetch; }
+});
+
+test("players table fallback authorizes same requester on the same team", async () => {
+  const originalFetch = global.fetch;
+  let insertedRow;
+  global.fetch = async (url, init) => {
+    const href = String(url);
+    if (href.includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify(""), { status: 200 });
+    if (href.includes("/team_memberships")) return new Response(JSON.stringify([]), { status: 200 });
+    if (href.includes("/players") && href.includes("teamId=eq.team-a") && href.includes("email=eq.p%40x.com")) return new Response(JSON.stringify([{ id: "player-1", teamId: "team-a", email: "p@x.com", role: "player", status: "active" }]), { status: 200 });
+    if (href.includes("/players")) return new Response(JSON.stringify([]), { status: 200 });
+    if (href.includes("/shot_logs")) {
+      insertedRow = JSON.parse(init.body)[0];
+      return new Response(JSON.stringify([insertedRow]), { status: 201 });
+    }
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ teamId: "team-a", playerId: "p@x.com", made: 6, date: "2026-05-01" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.diagnostic.authorized_by, "player_record");
+    assert.match(body.diagnostic.player_record_query_result, /match:teamId\/email/);
+    assert.equal(insertedRow.email, "p@x.com");
+  } finally { global.fetch = originalFetch; }
+});
+
+test("wrong team returns forbidden even with flexible membership and player lookup", async () => {
+  const originalFetch = global.fetch;
+  let insertCalled = false;
+  global.fetch = async (url, init) => {
+    const href = String(url);
+    if (href.includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify(""), { status: 200 });
+    if (href.includes("/team_memberships") && href.includes("teamId=eq.team-a") && href.includes("userId=eq.p%40x.com")) return new Response(JSON.stringify([{ id: "m-camel", status: "active" }]), { status: 200 });
+    if (href.includes("/players") && href.includes("teamId=eq.team-a") && href.includes("email=eq.p%40x.com")) return new Response(JSON.stringify([{ id: "player-1", teamId: "team-a", email: "p@x.com", role: "player" }]), { status: 200 });
+    if (href.includes("/shot_logs")) {
+      insertCalled = true;
+      return new Response(JSON.stringify([JSON.parse(init.body)[0]]), { status: 201 });
+    }
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ teamId: "team-b", playerId: "p@x.com", made: 6, date: "2026-05-01" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 403);
+    const body = await res.json();
+    assert.equal(body.error, "forbidden");
+    assert.equal(insertCalled, false);
+  } finally { global.fetch = originalFetch; }
+});
+
+test("different submitted player identity returns identity_mismatch before authorization lookup", async () => {
+  const originalFetch = global.fetch;
+  let remoteCalled = false;
+  global.fetch = async () => {
+    remoteCalled = true;
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ teamId: "team-a", playerId: "other@x.com", email: "other@x.com", made: 6, date: "2026-05-01" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 403);
+    const body = await res.json();
+    assert.equal(body.error, "identity_mismatch");
+    assert.equal(remoteCalled, false);
   } finally { global.fetch = originalFetch; }
 });
 
@@ -113,7 +227,7 @@ test("shot_logs insert failure returns persist_failed with safe diagnostic", asy
 });
 
 
-test("insert includes non-empty text id and numeric ts fallback", async () => {
+test("insert includes non-empty text id and ISO timestamptz fallback", async () => {
   const originalFetch = global.fetch;
   let insertedRow;
   global.fetch = async (url, init) => {
@@ -131,15 +245,15 @@ test("insert includes non-empty text id and numeric ts fallback", async () => {
     assert.equal(res.status, 200);
     assert.equal(typeof insertedRow.id, "string");
     assert.equal(insertedRow.id.length > 0, true);
-    assert.equal(typeof insertedRow.ts, "number");
-    assert.equal(insertedRow.ts, 1777777777777);
+    assert.equal(typeof insertedRow.ts, "string");
+    assert.equal(Number.isNaN(Date.parse(insertedRow.ts)), false);
   } finally {
     Date.now = realNow;
     global.fetch = originalFetch;
   }
 });
 
-test("numeric body.ts is preserved as number", async () => {
+test("numeric body.ts is converted to ISO timestamptz string", async () => {
   const originalFetch = global.fetch;
   let insertedRow;
   global.fetch = async (url, init) => {
@@ -153,14 +267,14 @@ test("numeric body.ts is preserved as number", async () => {
   try {
     const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 3, date: "2026-05-01", ts: 1234567890 }, { "x-user-id": "p@x.com" }));
     assert.equal(res.status, 200);
-    assert.equal(insertedRow.ts, 1234567890);
-    assert.equal(typeof insertedRow.ts, "number");
+    assert.equal(insertedRow.ts, new Date(1234567890).toISOString());
+    assert.equal(typeof insertedRow.ts, "string");
   } finally {
     global.fetch = originalFetch;
   }
 });
 
-test("persist_failed is not caused by missing id or invalid ts in route payload", async () => {
+test("persist_failed is not caused by missing id or invalid timestamptz route payload", async () => {
   const originalFetch = global.fetch;
   let insertedRow;
   global.fetch = async (url, init) => {
@@ -175,7 +289,8 @@ test("persist_failed is not caused by missing id or invalid ts in route payload"
     const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 3, date: "2026-05-01", ts: "2026-05-01T00:00:00.000Z" }, { "x-user-id": "p@x.com" }));
     assert.equal(res.status, 200);
     assert.equal(typeof insertedRow.id, "string");
-    assert.equal(typeof insertedRow.ts, "number");
+    assert.equal(insertedRow.ts, "2026-05-01T00:00:00.000Z");
+    assert.equal(typeof insertedRow.ts, "string");
     const body = await res.json();
     assert.equal(body.diagnostic.shot_logs_insert_success, "yes");
   } finally {
