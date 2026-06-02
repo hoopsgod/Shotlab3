@@ -1,9 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  HOME_SHOT_LOCAL_ONLY_MESSAGE,
+  HOME_SHOT_SYNC_DIAGNOSTIC_CODES,
   HOME_SHOT_SYNC_ERROR_MESSAGE,
   HOME_SHOT_VALIDATION_MESSAGE,
   buildLocalHomeShotLog,
+  isDemoLocalHomeShotUser,
   normalizeSavedHomeShotLog,
   resolveHomeShotRetryFailure,
   resolveHomeShotSaveFailure,
@@ -40,7 +43,7 @@ async function simulateHomeShotAdd({ made = 25, remoteSave, quietContext = {} } 
     return { result: { ok: true, mode: 'remote_saved', syncState: 'remote_saved' }, shotLogs, statSyncError };
   } catch (error) {
     const saveFailure = resolveHomeShotSaveFailure({ error, quietContext });
-    shotLogs = shotLogs.map((log) => (log.id === localLog.id ? { ...log, syncState: saveFailure.syncState, syncSource: 'local', syncError: saveFailure.errorCode } : log));
+    shotLogs = shotLogs.map((log) => (log.id === localLog.id ? { ...log, syncState: saveFailure.syncState, syncSource: 'local', syncError: saveFailure.syncState === 'local_only' ? '' : saveFailure.errorCode } : log));
     statSyncError = saveFailure.statSyncError;
     return { result: saveFailure, shotLogs, statSyncError };
   }
@@ -101,6 +104,31 @@ test('Demo Player or missing durable membership uses quiet local fallback instea
   assert.deepEqual(local, { id: 'shotlog-demo', email: 'demo@shotlab.app', playerId: 'demo@shotlab.app', teamId: 'demo-team', name: 'Demo Player', made: 25, date: '2026-05-29', ts: 123, syncState: 'local_pending', syncSource: 'local' });
 });
 
+
+test('demo/local player logs shots locally without retry warning', async () => {
+  const user = { email: 'demo@shotlab.app', teamId: 'team-demo-titans', name: 'Demo Player' };
+  assert.equal(isDemoLocalHomeShotUser(user), true);
+
+  const localLog = {
+    ...buildLocalHomeShotLog({ id: 'shotlog-demo-local', user, made: 25, date: '2026-06-02', ts: 123 }),
+    syncState: 'local_only',
+    syncSource: 'local',
+    syncError: '',
+  };
+  const shotLogs = [localLog];
+  const syncIssueShots = shotLogs.filter((log) => log.syncState === 'local_pending' || log.syncState === 'failed_sync');
+  const coachVisible = shotLogs.filter((log) => log.syncState === 'remote_saved' && log.syncSource === 'remote');
+
+  assert.deepEqual(syncIssueShots, []);
+  assert.deepEqual(coachVisible, []);
+  assert.equal(HOME_SHOT_LOCAL_ONLY_MESSAGE, 'Demo shots are saved locally only.');
+
+  const source = await readFile(APP_PATH, 'utf8');
+  assert.match(source, /localOnlyHomeShotSave=isDemoMode\(\)\|\|isDemoLocalHomeShotUser\(user\)/);
+  assert.match(source, /return\{ok:true,mode:"local_only",syncState:"local_only",message:HOME_SHOT_LOCAL_ONLY_MESSAGE\}/);
+  assert.match(source, /result\.mode==="local_only"/);
+});
+
 test('home-shots Pages Function keeps positive-integer parser backend-local for Cloudflare deploy safety', async () => {
   const routeSource = await readFile(new URL('../functions/v1/home-shots/log.js', import.meta.url), 'utf8');
   assert.doesNotMatch(routeSource, /\.\.\/\.\.\/\.\.\/src\/lib\/homeShotLogging\.js/);
@@ -157,7 +185,7 @@ test('home shot sync behavior handles success, network fallback, server failure,
     remoteSave: async () => { throw rejectionError; },
   });
   assert.deepEqual(rejected.shotLogs.map((log) => [log.syncState, log.syncSource, log.syncError]), [['failed_sync', 'local', 'identity_mismatch']]);
-  assert.equal(rejected.statSyncError, HOME_SHOT_SYNC_ERROR_MESSAGE);
+  assert.equal(rejected.statSyncError, `${HOME_SHOT_SYNC_ERROR_MESSAGE} Sync error: identity_mismatch`);
 
   const retried = await simulateRetrySync({ shotLogs: network.shotLogs, remoteSave });
   assert.deepEqual(retried.map((log) => [log.syncState, log.syncSource]), [['remote_saved', 'remote']]);
@@ -223,6 +251,39 @@ test('coach shot-log visibility requires explicit remote_saved syncState and rem
 });
 
 
+
+test('home shot failed sync diagnostics expose safe backend error codes in state, UI source, and console source', async () => {
+  assert.deepEqual([...HOME_SHOT_SYNC_DIAGNOSTIC_CODES], [
+    'missing_user_identity',
+    'identity_mismatch',
+    'forbidden',
+    'membership_uuid_query_failed',
+    'persist_failed',
+    'network_error',
+  ]);
+
+  const forbiddenError = new Error('forbidden');
+  forbiddenError.status = 403;
+  forbiddenError.body = { error: 'forbidden', diagnostic: { message: 'No active membership found.' } };
+  const forbidden = resolveHomeShotSaveFailure({ error: forbiddenError });
+  assert.equal(forbidden.syncState, 'failed_sync');
+  assert.equal(forbidden.errorCode, 'forbidden');
+  assert.equal(forbidden.statSyncError, `${HOME_SHOT_SYNC_ERROR_MESSAGE} Sync error: forbidden`);
+
+  const persistError = new Error('persist_failed');
+  persistError.status = 500;
+  persistError.body = { error: 'persist_failed', diagnostic: { message: 'Failed to persist home shots log.' } };
+  const persist = resolveHomeShotSaveFailure({ error: persistError });
+  assert.equal(persist.syncState, 'failed_sync');
+  assert.equal(persist.errorCode, 'persist_failed');
+  assert.equal(persist.statSyncError, `${HOME_SHOT_SYNC_ERROR_MESSAGE} Sync error: persist_failed`);
+
+  const source = await readFile(APP_PATH, 'utf8');
+  assert.match(source, /Sync error: \{log\.syncError\}/);
+  assert.match(source, /console\.error\("home_shots_save_failed",\{[\s\S]*errorCode:saveFailure\.errorCode/);
+  assert.match(source, /console\.error\("home_shots_retry_failed",\{[\s\S]*errorCode:backendErrorCode/);
+});
+
 test('coach-facing home-shot leaderboard data is server-confirmed only', async () => {
   const source = await readFile(APP_PATH, 'utf8');
   assert.doesNotMatch(source, /upsertHomeShotsLeaderboardRow/);
@@ -230,7 +291,7 @@ test('coach-facing home-shot leaderboard data is server-confirmed only', async (
   assert.match(source, /const rows=Array\.isArray\(body\?\.leaderboard\)\?body\.leaderboard:\[\];/);
   assert.match(source, /setHomeShotsLeaderboard\(\{status:"success",rows,error:""\}\)/);
   assert.match(source, /const savedLog=await saveHomeShotLogRemote\(localLog\);[\s\S]*await fetchHomeShotsLeaderboard\(user\.teamId,view==="player"\?"players":homeShotsLeaderboardScope\);[\s\S]*return\{ok:true,mode:"remote_saved",syncState:"remote_saved"\}/);
-  assert.match(source, /markShotSyncState\(localLog\.id,"local_pending",saveFailure\.errorCode\);[\s\S]*return\{ok:true,mode:"local_pending",syncState:"local_pending"/);
+  assert.match(source, /markShotSyncState\(localLog\.id,saveFailure\.syncState,saveFailure\.syncState==="local_only"\?"":saveFailure\.errorCode\);[\s\S]*return\{ok:true,mode:saveFailure\.mode,syncState:saveFailure\.syncState/);
   assert.match(source, /markShotSyncState\(localLog\.id,"failed_sync",saveFailure\.errorCode\);[\s\S]*await fetchHomeShotsLeaderboard\(user\.teamId,view==="player"\?"players":homeShotsLeaderboardScope\);/);
   assert.match(source, /const savedLog=await saveHomeShotLogRemote\(\{\.\.\.log,syncState:"local_pending"\}\);[\s\S]*return\{ok:true,mode:"remote_saved",syncState:"remote_saved"\}/);
 });
@@ -241,7 +302,7 @@ test('Player At Home shot logging relies on inline Saved state instead of the la
   assert.match(source, /shotSaving\?"SAVING…":shotSaved\?"✓ SAVED":"LOG SHOTS"/);
   assert.match(source, /disabled=\{shotSaving\}/);
   assert.match(source, /const result=await addShotLog\(validation\.made,shotDate\)/);
-  assert.match(source, /if\(result\?\.ok\)\{if\(result\.mode==="local_pending"\)/);
+  assert.match(source, /if\(result\?\.ok\)\{if\(result\.mode==="local_only"\)/);
   assert.match(source, /setShotSaved\(true\);setShotMade\(""\)/);
   assert.match(source, /<input type="number" min="1" value=\{shotMade\}/);
   assert.doesNotMatch(source, /Shot activity logged/);
@@ -251,8 +312,10 @@ test('Player At Home shot logging relies on inline Saved state instead of the la
 test('home shot save modes are explicit for remote, quiet fallback, and failed sync', async () => {
   const source = await readFile(APP_PATH, 'utf8');
   assert.match(source, /mode:"remote_saved"/);
-  assert.match(source, /mode:"local_pending"/);
+  assert.match(source, /mode:saveFailure\.mode/);
+  assert.match(source, /mode:"local_only"/);
   assert.match(source, /Saved locally — team sync pending/);
+  assert.match(source, /HOME_SHOT_LOCAL_ONLY_MESSAGE/);
   assert.match(source, /mode:"failed_sync"/);
   assert.match(source, /console\.error\("home_shots_save_failed",\{mode:"failed_sync"/);
 });
@@ -274,12 +337,57 @@ test('retry failure state clears stale visible error when retry falls back to lo
   const firstFailure = resolveHomeShotRetryFailure({ quietFallback: false, errorCode: 'persist_failed' });
   assert.equal(firstFailure.syncState, 'failed_sync');
   statSyncError = firstFailure.statSyncError;
-  assert.equal(statSyncError, HOME_SHOT_SYNC_ERROR_MESSAGE);
+  assert.equal(statSyncError, `${HOME_SHOT_SYNC_ERROR_MESSAGE} Sync error: persist_failed`);
 
   const retryQuietFallback = resolveHomeShotRetryFailure({ quietFallback: true, errorCode: 'network_error' });
   assert.equal(retryQuietFallback.syncState, 'local_pending');
   statSyncError = retryQuietFallback.statSyncError;
   assert.equal(statSyncError, '');
+});
+
+
+test('valid live-style player/team save via player record fallback becomes remote_saved and clears retry panel state', async () => {
+  const originalFetch = global.fetch;
+  const user = { email: 'player@team.com', teamId: 'team-live', name: 'Live Player' };
+  const localLog = {
+    ...buildLocalHomeShotLog({ id: 'shotlog-live', user, made: 21, date: '2026-06-02', ts: 1777777777777 }),
+    syncState: 'failed_sync',
+    syncError: 'forbidden',
+  };
+  let shotLogs = [localLog];
+
+  global.fetch = async (url, init) => {
+    const href = String(url);
+    if (href.includes('/rpc/resolve_app_user_uuid')) return new Response(JSON.stringify(''), { status: 200 });
+    if (href.includes('/team_memberships')) return new Response(JSON.stringify([]), { status: 200 });
+    if (href.includes('/players') && href.includes('teamId=eq.team-live') && href.includes('email=eq.player%40team.com')) {
+      return new Response(JSON.stringify([{ id: 'player-live', teamId: 'team-live', email: 'player@team.com', role: 'player', status: 'active' }]), { status: 200 });
+    }
+    if (href.includes('/players')) return new Response(JSON.stringify([]), { status: 200 });
+    if (href.includes('/shot_logs')) {
+      const [row] = JSON.parse(init.body);
+      return new Response(JSON.stringify([{ ...row, id: 'remote-live' }]), { status: 201 });
+    }
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+
+  try {
+    const res = await onRequestPost(ctx({ id: localLog.id, ts: localLog.ts, teamId: localLog.teamId, playerId: localLog.playerId, email: localLog.email, name: localLog.name, made: localLog.made, date: localLog.date }, { 'x-user-id': user.email }));
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.ok, true);
+    assert.equal(body.diagnostic.authorized_by, 'player_record');
+
+    const savedLog = normalizeSavedHomeShotLog(body.shot_log, localLog);
+    shotLogs = shotLogs.map((log) => (log.id === localLog.id ? savedLog : log));
+
+    assert.equal(savedLog.syncState, 'remote_saved');
+    assert.equal(savedLog.syncSource, 'remote');
+    assert.equal(savedLog.syncError, '');
+    assert.deepEqual(shotLogs.filter((log) => log.syncState === 'local_pending' || log.syncState === 'failed_sync'), []);
+  } finally {
+    global.fetch = originalFetch;
+  }
 });
 
 test('retry path promotes local_pending or failed_sync shots to remote_saved', async () => {

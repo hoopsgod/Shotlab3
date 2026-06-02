@@ -8,7 +8,7 @@ test('player at-home shots save uses backend endpoint and safely updates local s
   assert.match(source, /const saveHomeShotLogRemote=async\(log\)=>\{[\s\S]*fetch\("\/v1\/home-shots\/log"/);
   assert.match(source, /const addShotLog=async\(made,date\)=>\{/);
   assert.match(source, /if\(!res\.ok\)\{/);
-  assert.match(source, /appendOptimisticShot\(localLog\)/);
+  assert.match(source, /appendOptimisticShot\(localOnlyHomeShotSave\?\{\.\.\.localLog,syncState:"local_only",syncSource:"local",syncError:""\}:localLog\)/);
   assert.match(source, /const savedLog=await saveHomeShotLogRemote\(localLog\)/);
   assert.match(source, /replaceShotLog\(localLog\.id,savedLog\)/);
   assert.match(source, /catch\(error\)\{throw normalizeHomeShotRemoteException\(error\);\}/);

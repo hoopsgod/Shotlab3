@@ -23,9 +23,110 @@ function normalizePayload(body = {}) {
   return { teamId, playerId, email, made, date };
 }
 
+
+function rpcScalar(json, key) {
+  if (typeof json === "string") return json;
+  if (Array.isArray(json)) {
+    const first = json[0];
+    if (typeof first === "string") return first;
+    return String(first?.[key] || first?.resolved_user_uuid || first?.user_id || "").trim();
+  }
+  return String(json?.[key] || json?.resolved_user_uuid || json?.user_id || "").trim();
+}
+
+function normalizeTimestamp(value) {
+  if (value == null || value === "") return new Date().toISOString();
+  if (typeof value === "number" && Number.isFinite(value)) return new Date(value).toISOString();
+  const raw = String(value).trim();
+  if (/^[0-9]+$/.test(raw)) {
+    const numericValue = Number(raw);
+    if (Number.isFinite(numericValue)) return new Date(numericValue).toISOString();
+  }
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
+  return new Date().toISOString();
+}
+
 function safeErrorMessage(error) {
   const message = String(error?.message || "unknown_error").trim();
   return message.slice(0, 120) || "unknown_error";
+}
+
+
+function uniqueNormalized(values = []) {
+  return [...new Set(values.map((value) => normalizeIdentity(value)).filter(Boolean))];
+}
+
+function isActiveRow(row = {}) {
+  const status = normalizeIdentity(row.status ?? row.membership_status ?? row.membershipStatus ?? row.state ?? "active");
+  return !status || status === "active" || status === "joined";
+}
+
+function isActivePlayerRow(row = {}) {
+  if (!isActiveRow(row)) return false;
+  const role = normalizeIdentity(row.role ?? row.player_role ?? row.playerRole ?? "player");
+  return !role || role === "player" || role === "athlete";
+}
+
+function shouldTreatLookupErrorAsSchemaMiss(error) {
+  const status = Number(error?.status || error?.details?.code || 0);
+  const message = safeErrorMessage(error).toLowerCase();
+  return status === 400 || status === 404 || message.includes("column") || message.includes("schema cache") || message.includes("could not find");
+}
+
+async function findActiveRowByFlexibleColumns(env, { tableName, teamColumns, identityColumns, teamId, identities, activeRowPredicate, onQueryError }) {
+  const normalizedIdentities = uniqueNormalized(identities);
+  const errors = [];
+  let attempts = 0;
+  for (const teamColumn of teamColumns) {
+    for (const identityColumn of identityColumns) {
+      for (const identity of normalizedIdentities) {
+        attempts += 1;
+        try {
+          const rows = await selectRows(
+            env,
+            tableName,
+            `select=*&${teamColumn}=eq.${encodeURIComponent(teamId)}&${identityColumn}=eq.${encodeURIComponent(identity)}&limit=1`,
+          );
+          const activeRow = Array.isArray(rows) ? rows.find((row) => activeRowPredicate(row)) : null;
+          if (activeRow) return { found: true, attempts, result: `match:${teamColumn}/${identityColumn}` };
+        } catch (error) {
+          const safeMessage = safeErrorMessage(error);
+          errors.push(`${teamColumn}/${identityColumn}:${safeMessage}`);
+          if (onQueryError && !shouldTreatLookupErrorAsSchemaMiss(error)) {
+            const fatal = onQueryError(error);
+            if (fatal) return { found: false, fatal, attempts, errors };
+          }
+        }
+      }
+    }
+  }
+  return { found: false, attempts, errors, result: errors.length ? `0;errors=${errors.slice(0, 3).join("|")}` : "0" };
+}
+
+
+function safePostgrestDetails(error) {
+  const details = error?.details || {};
+  const safe = {
+    status: error?.status || null,
+    code: String(details.code || "").slice(0, 40),
+    message: safeErrorMessage(error),
+    details: String(details.details || "").replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]").slice(0, 160),
+    hint: String(details.hint || "").replace(/Bearer\s+[^\s]+/gi, "Bearer [redacted]").slice(0, 160),
+  };
+  return Object.fromEntries(Object.entries(safe).filter(([, value]) => value !== "" && value !== null));
+}
+
+function shouldRetryShotLogInsertWithoutClientId(error) {
+  const details = error?.details || {};
+  const haystack = [error?.message, details.message, details.details, details.hint, details.code].map((value) => String(value || "").toLowerCase()).join(" ");
+  return haystack.includes("id") && (
+    haystack.includes("invalid input syntax") ||
+    haystack.includes("bigint") ||
+    haystack.includes("uuid") ||
+    haystack.includes("identity") ||
+    haystack.includes('column "id"')
+  );
 }
 
 function diagnosticError(error, status, stage, message, diagnostic, extra = {}) {
@@ -52,9 +153,12 @@ export async function onRequestPost({ request, env }) {
     uuid_membership_query_attempted: "no",
     uuid_membership_query_result: "not_attempted",
     authorized_by: "none",
+    player_record_query_attempted: "no",
+    player_record_query_result: "not_attempted",
     shot_logs_insert_attempted: "no",
     shot_logs_insert_success: "no",
     shot_logs_insert_error: "none",
+    shot_logs_insert_retry_without_client_id: "no",
   };
 
   if (!requester) {
@@ -76,7 +180,7 @@ export async function onRequestPost({ request, env }) {
 
   let resolvedUserUuid = "";
   try {
-    resolvedUserUuid = normalizeIdentity(await callRpc(env, "resolve_app_user_uuid", { p_identifier: requester }));
+    resolvedUserUuid = normalizeIdentity(rpcScalar(await callRpc(env, "resolve_app_user_uuid", { p_identifier: requester }), "resolve_app_user_uuid"));
     diagnostic.resolved_app_user_uuid_success = "yes";
     diagnostic.resolved_uuid_present = resolvedUserUuid ? "yes" : "no";
   } catch (error) {
@@ -84,57 +188,79 @@ export async function onRequestPost({ request, env }) {
     diagnostic.resolved_uuid_present = "no";
   }
 
-  let membershipsByEmail = [];
+  const membershipTeamColumns = ["team_id", "teamId"];
+  const membershipUserColumns = ["user_id", "userId"];
+  const playerTeamColumns = ["team_id", "teamId"];
+  const playerIdentityColumns = ["email", "player_id", "playerId", "user_id", "userId"];
+
   let hasEmailMembership = false;
   let hasUuidMembership = false;
+  let hasPlayerRecord = false;
+
   if (resolvedUserUuid) {
     diagnostic.uuid_membership_query_attempted = "yes";
-    try {
-      const membershipsByUuid = await selectRows(
-        env,
-        "team_memberships",
-        `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&user_id=eq.${encodeURIComponent(resolvedUserUuid)}&status=eq.active&limit=1`,
-      );
-      hasUuidMembership = Array.isArray(membershipsByUuid) && membershipsByUuid.length > 0;
-      diagnostic.uuid_membership_query_result = String(Array.isArray(membershipsByUuid) ? membershipsByUuid.length : 0);
-    } catch (error) {
-      diagnostic.uuid_membership_query_result = `error:${safeErrorMessage(error)}`;
-      return diagnosticError("membership_uuid_query_failed", 500, "uuid_membership_lookup", "Failed to check uuid membership.", diagnostic);
-    }
+    const uuidMembership = await findActiveRowByFlexibleColumns(env, {
+      tableName: "team_memberships",
+      teamColumns: membershipTeamColumns,
+      identityColumns: membershipUserColumns,
+      teamId,
+      identities: [resolvedUserUuid],
+      activeRowPredicate: isActiveRow,
+      onQueryError: (error) => {
+        if (Number(error?.status || 0) >= 500) {
+          diagnostic.uuid_membership_query_result = `error:${safeErrorMessage(error)}`;
+          return diagnosticError("membership_uuid_query_failed", 500, "uuid_membership_lookup", "Failed to check uuid membership.", diagnostic);
+        }
+        return null;
+      },
+    });
+    if (uuidMembership.fatal) return uuidMembership.fatal;
+    hasUuidMembership = uuidMembership.found;
+    diagnostic.uuid_membership_query_result = uuidMembership.result || (hasUuidMembership ? "match" : "0");
   }
   if (!resolvedUserUuid) diagnostic.uuid_membership_query_result = "skipped_missing_resolved_uuid";
 
   if (!hasUuidMembership) {
     diagnostic.email_membership_query_attempted = "yes";
-    try {
-      membershipsByEmail = await selectRows(
-        env,
-        "team_memberships",
-        `select=id,status&team_id=eq.${encodeURIComponent(teamId)}&user_id=eq.${encodeURIComponent(requester)}&status=eq.active&limit=1`,
-      );
-      hasEmailMembership = Array.isArray(membershipsByEmail) && membershipsByEmail.length > 0;
-      diagnostic.email_membership_query_result = String(Array.isArray(membershipsByEmail) ? membershipsByEmail.length : 0);
-    } catch (error) {
-      const safeMessage = safeErrorMessage(error);
-      if (safeMessage) {
-        diagnostic.email_membership_query_result = `error_treated_as_no_match:${safeMessage}`;
-      } else {
-        diagnostic.email_membership_query_result = "error_treated_as_no_match";
-      }
-      hasEmailMembership = false;
-    }
+    const emailMembership = await findActiveRowByFlexibleColumns(env, {
+      tableName: "team_memberships",
+      teamColumns: membershipTeamColumns,
+      identityColumns: membershipUserColumns,
+      teamId,
+      identities: [requester],
+      activeRowPredicate: isActiveRow,
+    });
+    hasEmailMembership = emailMembership.found;
+    diagnostic.email_membership_query_result = !hasEmailMembership && emailMembership.errors?.length
+      ? `error_treated_as_no_match:${emailMembership.errors.slice(0, 3).join("|")}`
+      : emailMembership.result || (hasEmailMembership ? "match" : "0");
+  }
+
+  if (!hasUuidMembership && !hasEmailMembership) {
+    diagnostic.player_record_query_attempted = "yes";
+    const playerRecord = await findActiveRowByFlexibleColumns(env, {
+      tableName: "players",
+      teamColumns: playerTeamColumns,
+      identityColumns: playerIdentityColumns,
+      teamId,
+      identities: [requester, resolvedUserUuid],
+      activeRowPredicate: isActivePlayerRow,
+    });
+    hasPlayerRecord = playerRecord.found;
+    diagnostic.player_record_query_result = playerRecord.result || (hasPlayerRecord ? "match" : "0");
   }
 
   if (hasEmailMembership) diagnostic.authorized_by = "email";
   if (!hasEmailMembership && hasUuidMembership) diagnostic.authorized_by = "uuid";
+  if (!hasEmailMembership && !hasUuidMembership && hasPlayerRecord) diagnostic.authorized_by = "player_record";
 
-  if (!hasEmailMembership && !hasUuidMembership) {
-    return diagnosticError("forbidden", 403, "authorization", "No active membership found.", diagnostic);
+  if (!hasEmailMembership && !hasUuidMembership && !hasPlayerRecord) {
+    return diagnosticError("forbidden", 403, "authorization", "No active membership or player record found.", diagnostic);
   }
 
   const randomSuffix = Math.random().toString(36).slice(2, 10);
   const rowId = String(body.id || "").trim() || `shotlog_${Date.now()}_${randomSuffix}`;
-  const ts = Number.isFinite(body.ts) ? body.ts : Date.now();
+  const ts = normalizeTimestamp(body.ts);
 
   const row = {
     id: rowId,
@@ -154,11 +280,41 @@ export async function onRequestPost({ request, env }) {
     diagnostic.shot_logs_insert_error = "none";
     return Response.json({ ok: true, shot_log: Array.isArray(inserted) ? inserted[0] || row : row, diagnostic }, { status: 200 });
   } catch (error) {
-    diagnostic.shot_logs_insert_success = "no";
+    const firstInsertDetails = safePostgrestDetails(error);
     diagnostic.shot_logs_insert_error = safeErrorMessage(error);
+
+    if (shouldRetryShotLogInsertWithoutClientId(error)) {
+      diagnostic.shot_logs_insert_retry_without_client_id = "yes";
+      const rowWithoutClientId = { ...row };
+      delete rowWithoutClientId.id;
+      try {
+        const inserted = await upsertRows(env, "shot_logs", rowWithoutClientId);
+        diagnostic.shot_logs_insert_success = "yes";
+        diagnostic.shot_logs_insert_error = "none";
+        return Response.json({
+          ok: true,
+          shot_log: Array.isArray(inserted) ? inserted[0] || { ...row, id: row.id } : row,
+          diagnostic: {
+            ...diagnostic,
+            shot_logs_insert_first_attempt_error: firstInsertDetails,
+          },
+        }, { status: 200 });
+      } catch (retryError) {
+        diagnostic.shot_logs_insert_error = safeErrorMessage(retryError);
+        return diagnosticError("persist_failed", 500, "shot_logs_insert", "Failed to persist home shots log.", diagnostic, {
+          shot_logs_insert_safe_error_code: "persist_failed",
+          shot_logs_insert_safe_error_message: safeErrorMessage(retryError),
+          shot_logs_insert_first_attempt_error: firstInsertDetails,
+          shot_logs_insert_retry_error: safePostgrestDetails(retryError),
+        });
+      }
+    }
+
+    diagnostic.shot_logs_insert_success = "no";
     return diagnosticError("persist_failed", 500, "shot_logs_insert", "Failed to persist home shots log.", diagnostic, {
       shot_logs_insert_safe_error_code: "persist_failed",
       shot_logs_insert_safe_error_message: safeErrorMessage(error),
+      shot_logs_insert_postgrest_error: firstInsertDetails,
     });
   }
 }

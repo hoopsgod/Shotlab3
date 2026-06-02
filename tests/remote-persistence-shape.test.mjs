@@ -115,6 +115,17 @@ test('buildRemoteRows only writes server-confirmed shot logs back to the remote 
   assert.equal(rows[0].made, 10);
 });
 
+
+test('sl:shotlogs local_only rows remain local-only and are never written remotely', () => {
+  const localOnly = { id: 'demo-local', email: 'demo@shotlab.app', playerId: 'demo@shotlab.app', teamId: 'team-demo', made: 22, syncState: 'local_only', syncSource: 'local' };
+  const [appRow] = buildAppRows('sl:shotlogs', [localOnly], { source: 'local' });
+  const remoteRows = buildRemoteRows('sl:shotlogs', [appRow]);
+
+  assert.equal(appRow.syncState, 'local_only');
+  assert.equal(appRow.syncSource, 'local');
+  assert.deepEqual(remoteRows, []);
+});
+
 test('buildRemoteRows strips unsupported camelCase fields before upsert payload', () => {
   const [scoreRow] = buildRemoteRows('sl:scores', [{
     id: 'score-3',
