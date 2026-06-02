@@ -106,4 +106,4 @@ Use `npm run doctor` to check all of the above quickly.
 
 These settings match the current Vite config (`build.outDir = "dist"`) and package scripts.
 
-> Deployment provider note: Cloudflare Pages is the only supported deployment target for this repo; legacy Vercel status checks should be removed/disabled to avoid PR check noise.
+> Deployment provider note: Cloudflare Pages is the only supported deployment target for this repo; legacy Vercel status checks should be removed/disabled to avoid PR check noise. The `functions/` directory is deployed as Cloudflare Pages Functions with the Pages build, not as a standalone Workers project; this repo intentionally does not define a `wrangler.toml` Worker entrypoint.
