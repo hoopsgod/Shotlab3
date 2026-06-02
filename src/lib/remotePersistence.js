@@ -8,7 +8,7 @@ const cleanText = (value) => {
   return String(value).trim();
 };
 
-const SHOT_LOG_SYNC_STATES = new Set(["remote_saved", "local_pending", "failed_sync"]);
+const SHOT_LOG_SYNC_STATES = new Set(["remote_saved", "local_pending", "failed_sync", "local_only"]);
 const LEGACY_LOCAL_SHOT_SYNC_ERROR = "legacy_missing_sync_state";
 const UNCONFIRMED_REMOTE_SAVED_SHOT_SYNC_ERROR = "remote_saved_unconfirmed";
 const SHOT_LOG_SYNC_SOURCES = new Set(["remote", "local"]);

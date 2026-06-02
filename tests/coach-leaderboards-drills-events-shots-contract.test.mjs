@@ -22,11 +22,11 @@ test('player-entered stats require durable ids, strict remote persistence, sync 
   assert.match(source, /const saveHomeShotLogRemote=async\(log\)=>\{/);
   assert.match(source, /fetch\("\/v1\/home-shots\/log"/);
   assert.match(source, /if\(!res\.ok\)\{/);
-  assert.match(source, /appendOptimisticShot\(localLog\)/);
+  assert.match(source, /appendOptimisticShot\(localOnlyHomeShotSave\?\{\.\.\.localLog,syncState:"local_only",syncSource:"local",syncError:""\}:localLog\)/);
   assert.match(source, /const savedLog=await saveHomeShotLogRemote\(localLog\)/);
   assert.match(source, /replaceShotLog\(localLog\.id,savedLog\)/);
   assert.match(source, /const saveFailure=resolveHomeShotSaveFailure\(\{error:e,quietContext:buildHomeShotQuietContext\(\),debug:homeShotDebugMode\}\)/);
-  assert.match(source, /console\.warn\("home_shots_remote_fallback",\{mode:"local_pending",syncState:"local_pending",quiet:true,errorCode:saveFailure\.errorCode/);
+  assert.match(source, /console\.warn\("home_shots_remote_fallback",\{mode:saveFailure\.mode,syncState:saveFailure\.syncState,quiet:true,errorCode:saveFailure\.errorCode/);
   assert.match(source, /setStatSyncError\(saveFailure\.statSyncError\)/);
   assert.match(source, /console\.error\("home_shots_save_failed",\{mode:"failed_sync",syncState:"failed_sync",errorCode:saveFailure\.errorCode/);
 

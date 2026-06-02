@@ -4,6 +4,15 @@ const normalizeEmail = (value) => asText(value).toLowerCase();
 export const HOME_SHOT_MAX_MADE = 10000;
 export const HOME_SHOT_VALIDATION_MESSAGE = 'Enter a whole number from 1 to 10,000 before logging shots.';
 export const HOME_SHOT_SYNC_ERROR_MESSAGE = 'Could not save home shots to team dashboard. Please try again.';
+export const HOME_SHOT_LOCAL_ONLY_MESSAGE = 'Demo shots are saved locally only.';
+export const HOME_SHOT_SYNC_DIAGNOSTIC_CODES = new Set([
+  'missing_user_identity',
+  'identity_mismatch',
+  'forbidden',
+  'membership_uuid_query_failed',
+  'persist_failed',
+  'network_error',
+]);
 
 export function parsePositiveInteger(value) {
   const raw = String(value ?? '').trim();
@@ -22,6 +31,22 @@ export function validateHomeShotLogInput({ made, date } = {}) {
     return { ok: false, error: 'Choose a date before logging shots.' };
   }
   return { ok: true, made: numericMade, date: asText(date) };
+}
+
+export function isDemoLocalHomeShotUser(user = {}) {
+  const email = normalizeEmail(user?.email);
+  const teamId = asText(user?.teamId || user?.team_id).toLowerCase();
+  return Boolean(
+    user?.isDemo ||
+    user?.demo ||
+    user?.localOnly ||
+    email === 'demo@shotlab.app' ||
+    email.endsWith('@demo.shotlab.app') ||
+    teamId === 'demo-team' ||
+    teamId.startsWith('team-demo') ||
+    teamId === 'local-team' ||
+    teamId.startsWith('team-local')
+  );
 }
 
 export function buildLocalHomeShotLog({ id, user, made, date, ts = Date.now() } = {}) {
@@ -87,6 +112,11 @@ export function normalizeHomeShotRemoteException(error) {
 }
 
 
+export function formatHomeShotSyncDiagnostic(errorCode) {
+  const code = asText(errorCode) || 'sync_failed';
+  return `${HOME_SHOT_SYNC_ERROR_MESSAGE} Sync error: ${code}`;
+}
+
 export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = false } = {}) {
   const normalizedError = normalizeHomeShotRemoteException(error);
   const errorCode = asText(normalizedError?.body?.error || normalizedError?.message || 'sync_failed') || 'sync_failed';
@@ -97,8 +127,8 @@ export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = f
     message: diagnosticMessage,
     ...quietContext,
   });
-  const syncState = quietFallback ? 'local_pending' : 'failed_sync';
-  const baseError = HOME_SHOT_SYNC_ERROR_MESSAGE;
+  const localOnlyFallback = quietFallback && Boolean(quietContext?.isExplicitDemoOrLocal);
+  const syncState = localOnlyFallback ? 'local_only' : quietFallback ? 'local_pending' : 'failed_sync';
   return {
     ok: quietFallback,
     mode: syncState,
@@ -108,7 +138,7 @@ export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = f
     diagnosticMessage,
     quietFallback,
     status: normalizedError?.status || null,
-    statSyncError: quietFallback ? '' : debug ? `${baseError} Error: ${errorCode}` : baseError,
+    statSyncError: quietFallback ? '' : formatHomeShotSyncDiagnostic(errorCode),
   };
 }
 
@@ -119,7 +149,7 @@ export function resolveHomeShotRetryFailure({ quietFallback = false, errorCode =
     mode: syncState,
     syncState,
     error: asText(errorCode) || 'sync_failed',
-    statSyncError: quietFallback ? '' : HOME_SHOT_SYNC_ERROR_MESSAGE,
+    statSyncError: quietFallback ? '' : formatHomeShotSyncDiagnostic(errorCode),
   };
 }
 
