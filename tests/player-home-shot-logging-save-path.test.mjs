@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
+  HOME_SHOT_SYNC_DIAGNOSTIC_CODES,
   HOME_SHOT_SYNC_ERROR_MESSAGE,
   HOME_SHOT_VALIDATION_MESSAGE,
   buildLocalHomeShotLog,
@@ -157,7 +158,7 @@ test('home shot sync behavior handles success, network fallback, server failure,
     remoteSave: async () => { throw rejectionError; },
   });
   assert.deepEqual(rejected.shotLogs.map((log) => [log.syncState, log.syncSource, log.syncError]), [['failed_sync', 'local', 'identity_mismatch']]);
-  assert.equal(rejected.statSyncError, HOME_SHOT_SYNC_ERROR_MESSAGE);
+  assert.equal(rejected.statSyncError, `${HOME_SHOT_SYNC_ERROR_MESSAGE} Sync error: identity_mismatch`);
 
   const retried = await simulateRetrySync({ shotLogs: network.shotLogs, remoteSave });
   assert.deepEqual(retried.map((log) => [log.syncState, log.syncSource]), [['remote_saved', 'remote']]);
@@ -223,6 +224,39 @@ test('coach shot-log visibility requires explicit remote_saved syncState and rem
 });
 
 
+
+test('home shot failed sync diagnostics expose safe backend error codes in state, UI source, and console source', async () => {
+  assert.deepEqual([...HOME_SHOT_SYNC_DIAGNOSTIC_CODES], [
+    'missing_user_identity',
+    'identity_mismatch',
+    'forbidden',
+    'membership_uuid_query_failed',
+    'persist_failed',
+    'network_error',
+  ]);
+
+  const forbiddenError = new Error('forbidden');
+  forbiddenError.status = 403;
+  forbiddenError.body = { error: 'forbidden', diagnostic: { message: 'No active membership found.' } };
+  const forbidden = resolveHomeShotSaveFailure({ error: forbiddenError });
+  assert.equal(forbidden.syncState, 'failed_sync');
+  assert.equal(forbidden.errorCode, 'forbidden');
+  assert.equal(forbidden.statSyncError, `${HOME_SHOT_SYNC_ERROR_MESSAGE} Sync error: forbidden`);
+
+  const persistError = new Error('persist_failed');
+  persistError.status = 500;
+  persistError.body = { error: 'persist_failed', diagnostic: { message: 'Failed to persist home shots log.' } };
+  const persist = resolveHomeShotSaveFailure({ error: persistError });
+  assert.equal(persist.syncState, 'failed_sync');
+  assert.equal(persist.errorCode, 'persist_failed');
+  assert.equal(persist.statSyncError, `${HOME_SHOT_SYNC_ERROR_MESSAGE} Sync error: persist_failed`);
+
+  const source = await readFile(APP_PATH, 'utf8');
+  assert.match(source, /Sync error: \{log\.syncError\}/);
+  assert.match(source, /console\.error\("home_shots_save_failed",\{[\s\S]*errorCode:saveFailure\.errorCode/);
+  assert.match(source, /console\.error\("home_shots_retry_failed",\{[\s\S]*errorCode:backendErrorCode/);
+});
+
 test('coach-facing home-shot leaderboard data is server-confirmed only', async () => {
   const source = await readFile(APP_PATH, 'utf8');
   assert.doesNotMatch(source, /upsertHomeShotsLeaderboardRow/);
@@ -274,7 +308,7 @@ test('retry failure state clears stale visible error when retry falls back to lo
   const firstFailure = resolveHomeShotRetryFailure({ quietFallback: false, errorCode: 'persist_failed' });
   assert.equal(firstFailure.syncState, 'failed_sync');
   statSyncError = firstFailure.statSyncError;
-  assert.equal(statSyncError, HOME_SHOT_SYNC_ERROR_MESSAGE);
+  assert.equal(statSyncError, `${HOME_SHOT_SYNC_ERROR_MESSAGE} Sync error: persist_failed`);
 
   const retryQuietFallback = resolveHomeShotRetryFailure({ quietFallback: true, errorCode: 'network_error' });
   assert.equal(retryQuietFallback.syncState, 'local_pending');

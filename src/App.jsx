@@ -1475,7 +1475,7 @@ return{ok:true,mode:"local_pending",syncState:"local_pending",fallbackReason:sav
 }
 markShotSyncState(localLog.id,"failed_sync",saveFailure.errorCode);
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
-console.error("home_shots_save_failed",{mode:"failed_sync",syncState:"failed_sync",errorCode:saveFailure.errorCode,status:saveFailure.status,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
+console.error("home_shots_save_failed",{mode:"failed_sync",syncState:"failed_sync",errorCode:saveFailure.errorCode,status:saveFailure.status,diagnostic:saveFailure.diagnosticMessage,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
 setStatSyncError(saveFailure.statSyncError);
 trackEvent("shot_log_failed",{made:validation.made,date:validation.date,mode:"failed_sync",syncState:"failed_sync",error:saveFailure.errorCode});
 return{ok:false,mode:"failed_sync",syncState:"failed_sync",error:saveFailure.errorCode};
@@ -1498,6 +1498,7 @@ const retryFailure=resolveHomeShotRetryFailure({quietFallback,errorCode:backendE
 markShotSyncState(log.id,retryFailure.syncState,backendErrorCode);
 if(quietFallback)setStatSyncError("");
 else setStatSyncError(retryFailure.statSyncError);
+console.error("home_shots_retry_failed",{mode:retryFailure.mode,syncState:retryFailure.syncState,errorCode:backendErrorCode,status:e?.status||null,diagnostic:String(e?.body?.diagnostic?.message||""),userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:log.made,date:log.date});
 trackEvent("shot_log_retry_failed",{made:log.made,date:log.date,mode:retryFailure.mode,syncState:retryFailure.syncState,error:backendErrorCode});
 return retryFailure;
 }
@@ -2877,7 +2878,7 @@ if(!syncIssueShots.length)return null;
 return <div style={{border:"1px solid rgba(255,181,71,0.34)",background:"rgba(255,181,71,0.07)",borderRadius:12,padding:"10px 12px",margin:"0 0 12px"}}>
   <div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:800,letterSpacing:"0.08em",marginBottom:6}}>TEAM SYNC NEEDS ATTENTION</div>
   {syncIssueShots.slice(0,3).map(log=>{const isRetrying=retryingShotId===log.id;return <div key={log.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"6px 0",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-    <div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.35}}>{log.made} makes on {log.date}<div style={{color:log.syncState==="failed_sync"?"#FF8B8B":CYAN,fontSize:10,fontWeight:700}}>{log.syncState==="failed_sync"?"Not synced to coach dashboard":"Saved locally — sync pending"}</div></div>
+    <div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.35}}>{log.made} makes on {log.date}<div style={{color:log.syncState==="failed_sync"?"#FF8B8B":CYAN,fontSize:10,fontWeight:700}}>{log.syncState==="failed_sync"?"Not synced to coach dashboard":"Saved locally — sync pending"}</div>{log.syncError&&<div style={{color:MUTED,fontSize:9,fontWeight:700,letterSpacing:"0.04em",marginTop:2}}>Sync error: {log.syncError}</div>}</div>
     <button type="button" disabled={isRetrying} onClick={async()=>{if(isRetrying)return;setRetryingShotId(log.id);setShotSaveNotice("Retrying team sync…");try{const result=await retryHomeShotLog?.(log);setShotSaveNotice(result?.ok?"Team sync complete":"Could not sync yet — try again");setTimeout(()=>setShotSaveNotice(""),4200);}finally{setRetryingShotId("");}}} style={{border:`1px solid ${ORANGE}66`,background:ORANGE+"12",color:ORANGE,borderRadius:999,padding:"6px 10px",fontFamily:FB,fontSize:11,fontWeight:800,cursor:isRetrying?"not-allowed":"pointer",whiteSpace:"nowrap",opacity:isRetrying?0.7:1}}>{isRetrying?"SYNCING…":"RETRY SYNC"}</button>
   </div>})}
 </div>;
