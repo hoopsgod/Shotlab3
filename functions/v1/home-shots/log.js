@@ -23,6 +23,20 @@ function normalizePayload(body = {}) {
   return { teamId, playerId, email, made, date };
 }
 
+
+function normalizeTimestamp(value) {
+  if (value == null || value === "") return new Date().toISOString();
+  if (typeof value === "number" && Number.isFinite(value)) return new Date(value).toISOString();
+  const raw = String(value).trim();
+  if (/^[0-9]+$/.test(raw)) {
+    const numericValue = Number(raw);
+    if (Number.isFinite(numericValue)) return new Date(numericValue).toISOString();
+  }
+  const parsed = new Date(raw);
+  if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
+  return new Date().toISOString();
+}
+
 function safeErrorMessage(error) {
   const message = String(error?.message || "unknown_error").trim();
   return message.slice(0, 120) || "unknown_error";
@@ -134,7 +148,7 @@ export async function onRequestPost({ request, env }) {
 
   const randomSuffix = Math.random().toString(36).slice(2, 10);
   const rowId = String(body.id || "").trim() || `shotlog_${Date.now()}_${randomSuffix}`;
-  const ts = Number.isFinite(body.ts) ? body.ts : Date.now();
+  const ts = normalizeTimestamp(body.ts);
 
   const row = {
     id: rowId,

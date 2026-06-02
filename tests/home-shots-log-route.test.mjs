@@ -113,7 +113,7 @@ test("shot_logs insert failure returns persist_failed with safe diagnostic", asy
 });
 
 
-test("insert includes non-empty text id and numeric ts fallback", async () => {
+test("insert includes non-empty text id and ISO timestamptz fallback", async () => {
   const originalFetch = global.fetch;
   let insertedRow;
   global.fetch = async (url, init) => {
@@ -131,15 +131,15 @@ test("insert includes non-empty text id and numeric ts fallback", async () => {
     assert.equal(res.status, 200);
     assert.equal(typeof insertedRow.id, "string");
     assert.equal(insertedRow.id.length > 0, true);
-    assert.equal(typeof insertedRow.ts, "number");
-    assert.equal(insertedRow.ts, 1777777777777);
+    assert.equal(typeof insertedRow.ts, "string");
+    assert.equal(Number.isNaN(Date.parse(insertedRow.ts)), false);
   } finally {
     Date.now = realNow;
     global.fetch = originalFetch;
   }
 });
 
-test("numeric body.ts is preserved as number", async () => {
+test("numeric body.ts is converted to ISO timestamptz string", async () => {
   const originalFetch = global.fetch;
   let insertedRow;
   global.fetch = async (url, init) => {
@@ -153,14 +153,14 @@ test("numeric body.ts is preserved as number", async () => {
   try {
     const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 3, date: "2026-05-01", ts: 1234567890 }, { "x-user-id": "p@x.com" }));
     assert.equal(res.status, 200);
-    assert.equal(insertedRow.ts, 1234567890);
-    assert.equal(typeof insertedRow.ts, "number");
+    assert.equal(insertedRow.ts, new Date(1234567890).toISOString());
+    assert.equal(typeof insertedRow.ts, "string");
   } finally {
     global.fetch = originalFetch;
   }
 });
 
-test("persist_failed is not caused by missing id or invalid ts in route payload", async () => {
+test("persist_failed is not caused by missing id or invalid timestamptz route payload", async () => {
   const originalFetch = global.fetch;
   let insertedRow;
   global.fetch = async (url, init) => {
@@ -175,7 +175,8 @@ test("persist_failed is not caused by missing id or invalid ts in route payload"
     const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 3, date: "2026-05-01", ts: "2026-05-01T00:00:00.000Z" }, { "x-user-id": "p@x.com" }));
     assert.equal(res.status, 200);
     assert.equal(typeof insertedRow.id, "string");
-    assert.equal(typeof insertedRow.ts, "number");
+    assert.equal(insertedRow.ts, "2026-05-01T00:00:00.000Z");
+    assert.equal(typeof insertedRow.ts, "string");
     const body = await res.json();
     assert.equal(body.diagnostic.shot_logs_insert_success, "yes");
   } finally {
