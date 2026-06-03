@@ -895,7 +895,7 @@ const msg=parseLeaderboardErrorMessage(body?.error,res.status,parseMode==="non_j
 const backendErrorCode=String(body?.diagnostics?.rpc_error?.code||body?.error||"unknown");
 const backendErrorMessage=String(body?.diagnostics?.rpc_error?.message||"unknown_error");
 const debugErrorDetail=`${backendErrorCode}: ${backendErrorMessage}`;
-console.error("[home-shots-leaderboard] load failed",{status:res.status,error:body?.error||"",scope,teamId,requesterIdentityPresent:body?.diagnostics?.requester_identity_present||"unknown",teamIdPresent:body?.diagnostics?.team_id_present||"unknown",rpcName:body?.diagnostics?.rpc_name_called||"",rpcSuccess:body?.diagnostics?.rpc_success||"unknown",rpcExistsDetectable:body?.diagnostics?.rpc_exists_detectable||"unknown",requesterResolvedUuidAvailable:body?.diagnostics?.requester_resolved_uuid_available||"unknown",rpcErrorCode:backendErrorCode,rpcErrorMessage:backendErrorMessage});
+console.warn("[home-shots-leaderboard] refresh failed",{status:res.status,error:body?.error||"",scope,teamId,requesterIdentityPresent:body?.diagnostics?.requester_identity_present||"unknown",teamIdPresent:body?.diagnostics?.team_id_present||"unknown",rpcName:body?.diagnostics?.rpc_name_called||"",rpcSuccess:body?.diagnostics?.rpc_success||"unknown",rpcExistsDetectable:body?.diagnostics?.rpc_exists_detectable||"unknown",requesterResolvedUuidAvailable:body?.diagnostics?.requester_resolved_uuid_available||"unknown",rpcErrorCode:backendErrorCode,rpcErrorMessage:backendErrorMessage});
 if(leaderboardRequestRef.current.requestId!==requestId)return;
 setHomeShotsLeaderboard({status:"success",rows:[],error:""});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),resultCount:0,isEmpty:false}}));
@@ -907,7 +907,7 @@ setHomeShotsLeaderboard({status:"success",rows,error:""});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:"",resultCount:rows.length,isEmpty:rows.length===0}}));
 }catch(error){
 if(leaderboardRequestRef.current.requestId!==requestId)return;
-console.error("[home-shots-leaderboard] network failure",{scope,teamId,message:String(error?.message||"network_error")});
+console.warn("[home-shots-leaderboard] refresh network failure",{scope,teamId,message:String(error?.message||"network_error")});
 setHomeShotsLeaderboard({status:"success",rows:[],error:""});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:null,errorCode:"network_error",resultCount:0,isEmpty:false}}));
 }
@@ -1446,6 +1446,15 @@ isExplicitDemoOrLocal:isDemoMode(),
 isOffline:typeof navigator!=="undefined"&&navigator.onLine===false,
 isMembershipPending:Boolean(pendingJoinContext),
 });
+const refreshHomeShotsLeaderboardAfterSave=async({made,date,mode="remote_saved"}={})=>{
+try{
+await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+return{ok:true};
+}catch(error){
+console.warn("home_shots_leaderboard_refresh_failed",{mode,nonBlocking:true,error:String(error?.message||"network_error"),userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made,date});
+return{ok:false,error:"leaderboard_refresh_failed"};
+}
+};
 const addShotLog=async(made,date)=>{
 if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required.",mode:"failed_sync"};
 const validation=validateHomeShotLogInput({made,date});
@@ -1462,7 +1471,7 @@ const savedLog=await saveHomeShotLogRemote(localLog);
 replaceShotLog(localLog.id,savedLog);
 setStatSyncError("");
 trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"remote_saved",syncState:"remote_saved"});
-await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+await refreshHomeShotsLeaderboardAfterSave({made:validation.made,date:validation.date,mode:"remote_saved"});
 return{ok:true,mode:"remote_saved",syncState:"remote_saved"};
 }catch(e){
 const saveFailure=resolveHomeShotSaveFailure({error:e,quietContext:buildHomeShotQuietContext(),debug:homeShotDebugMode});
@@ -1489,7 +1498,7 @@ const savedLog=await saveHomeShotLogRemote({...log,syncState:"local_pending"});
 replaceShotLog(log.id,savedLog);
 setStatSyncError("");
 trackEvent("shot_log_retry_succeeded",{made:savedLog.made,date:savedLog.date,mode:"remote_saved",syncState:"remote_saved"});
-await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+await refreshHomeShotsLeaderboardAfterSave({made:savedLog.made,date:savedLog.date,mode:"remote_saved"});
 return{ok:true,mode:"remote_saved",syncState:"remote_saved"};
 }catch(e){
 const backendErrorCode=String(e?.body?.error||e?.message||"sync_failed");
