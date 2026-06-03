@@ -25,7 +25,7 @@ const ctx = (body, headers = {}) => ({
   env: ENV,
 });
 
-async function simulateHomeShotAdd({ made = 25, remoteSave, quietContext = {} } = {}) {
+async function simulateHomeShotAdd({ made = 25, remoteSave, leaderboardRefresh = async () => {}, quietContext = {} } = {}) {
   const user = { email: 'player@team.com', teamId: 'team-a', name: 'Player One' };
   const validation = validateHomeShotLogInput({ made, date: '2026-05-30' });
   if (!validation.ok) return { result: { ok: false, error: validation.error, validation: true }, shotLogs: [], statSyncError: validation.error };
@@ -37,6 +37,11 @@ async function simulateHomeShotAdd({ made = 25, remoteSave, quietContext = {} } 
   try {
     const savedLog = await remoteSave(localLog);
     shotLogs = shotLogs.map((log) => (log.id === localLog.id ? savedLog : log));
+    try {
+      await leaderboardRefresh();
+    } catch (_error) {
+      // Leaderboard refresh is non-blocking after a confirmed remote save.
+    }
     return { result: { ok: true, mode: 'remote_saved', syncState: 'remote_saved' }, shotLogs, statSyncError };
   } catch (error) {
     const saveFailure = resolveHomeShotSaveFailure({ error, quietContext });
@@ -144,6 +149,15 @@ test('home shot sync behavior handles success, network fallback, server failure,
   assert.equal(successful.result.syncState, 'remote_saved');
   assert.deepEqual(successful.shotLogs.map((log) => [log.syncState, log.syncSource]), [['remote_saved', 'remote']]);
 
+  const leaderboardRefreshFailed = await simulateHomeShotAdd({
+    remoteSave,
+    leaderboardRefresh: async () => { throw new Error('leaderboard_refresh_failed'); },
+  });
+  assert.equal(leaderboardRefreshFailed.result.syncState, 'remote_saved');
+  assert.deepEqual(leaderboardRefreshFailed.shotLogs.map((log) => [log.syncState, log.syncSource, log.syncError || '']), [['remote_saved', 'remote', '']]);
+  assert.deepEqual(leaderboardRefreshFailed.shotLogs.filter((log) => log.syncState === 'local_pending' || log.syncState === 'failed_sync'), []);
+  assert.equal(leaderboardRefreshFailed.statSyncError, '');
+
   const network = await simulateHomeShotAdd({
     remoteSave: async () => { throw new TypeError('Failed to fetch'); },
   });
@@ -229,10 +243,12 @@ test('coach-facing home-shot leaderboard data is server-confirmed only', async (
   assert.doesNotMatch(source, /setHomeShotsLeaderboard\(prev=>\(\{\.\.\.prev,status:"success",error:"",rows:/);
   assert.match(source, /const rows=Array\.isArray\(body\?\.leaderboard\)\?body\.leaderboard:\[\];/);
   assert.match(source, /setHomeShotsLeaderboard\(\{status:"success",rows,error:""\}\)/);
-  assert.match(source, /const savedLog=await saveHomeShotLogRemote\(localLog\);[\s\S]*await fetchHomeShotsLeaderboard\(user\.teamId,view==="player"\?"players":homeShotsLeaderboardScope\);[\s\S]*return\{ok:true,mode:"remote_saved",syncState:"remote_saved"\}/);
+  assert.match(source, /const refreshHomeShotsLeaderboardAfterSave=async\(\{made,date,mode="remote_saved"\}=\{\}\)=>\{/);
+  assert.match(source, /console\.warn\("home_shots_leaderboard_refresh_failed",\{mode,nonBlocking:true/);
+  assert.match(source, /const savedLog=await saveHomeShotLogRemote\(localLog\);[\s\S]*await refreshHomeShotsLeaderboardAfterSave\(\{made:validation\.made,date:validation\.date,mode:"remote_saved"\}\);[\s\S]*return\{ok:true,mode:"remote_saved",syncState:"remote_saved"\}/);
   assert.match(source, /markShotSyncState\(localLog\.id,"local_pending",saveFailure\.errorCode\);[\s\S]*return\{ok:true,mode:"local_pending",syncState:"local_pending"/);
   assert.match(source, /markShotSyncState\(localLog\.id,"failed_sync",saveFailure\.errorCode\);[\s\S]*await fetchHomeShotsLeaderboard\(user\.teamId,view==="player"\?"players":homeShotsLeaderboardScope\);/);
-  assert.match(source, /const savedLog=await saveHomeShotLogRemote\(\{\.\.\.log,syncState:"local_pending"\}\);[\s\S]*return\{ok:true,mode:"remote_saved",syncState:"remote_saved"\}/);
+  assert.match(source, /const savedLog=await saveHomeShotLogRemote\(\{\.\.\.log,syncState:"local_pending"\}\);[\s\S]*await refreshHomeShotsLeaderboardAfterSave\(\{made:savedLog\.made,date:savedLog\.date,mode:"remote_saved"\}\);[\s\S]*return\{ok:true,mode:"remote_saved",syncState:"remote_saved"\}/);
 });
 
 
