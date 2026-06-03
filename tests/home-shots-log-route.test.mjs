@@ -53,7 +53,7 @@ test("email membership query type mismatch is treated as no match when uuid is a
     const body = await res.json();
     assert.equal(body.error, "forbidden");
     assert.equal(body.diagnostic.stage, "authorization");
-    assert.match(body.diagnostic.email_membership_query_result, /^error_treated_as_no_match:/);
+    assert.match(body.diagnostic.email_membership_query_result, /errors=.*boom/);
   } finally { global.fetch = originalFetch; }
 });
 
@@ -96,11 +96,18 @@ test("raw email membership still authorizes when table stores email values", asy
   } finally { global.fetch = originalFetch; }
 });
 
-test("shot_logs insert failure returns persist_failed with safe diagnostic", async () => {
+test("shot_logs insert failure returns persist_failed with safe PostgREST diagnostic details", async () => {
   const originalFetch = global.fetch;
   global.fetch = async (url) => {
     if (String(url).includes("/team_memberships")) return new Response(JSON.stringify([{ id: "m2", status: "active" }]), { status: 200 });
-    if (String(url).includes("/shot_logs")) return new Response(JSON.stringify({ message: "insert error" }), { status: 500 });
+    if (String(url).includes("/shot_logs")) {
+      return new Response(JSON.stringify({
+        code: "23502",
+        message: "null value in column \"player_id\" of relation \"shot_logs\" violates not-null constraint",
+        details: "Failing row contains a redacted shot log",
+        hint: "Check migration 029 durable shot_logs schema repair",
+      }), { status: 400 });
+    }
     return new Response(JSON.stringify(""), { status: 200 });
   };
   try {
@@ -109,6 +116,11 @@ test("shot_logs insert failure returns persist_failed with safe diagnostic", asy
     const body = await res.json();
     assert.equal(body.error, "persist_failed");
     assert.equal(body.diagnostic.stage, "shot_logs_insert");
+    assert.equal(body.diagnostic.shot_logs_insert_safe_error_code, "persist_failed");
+    assert.equal(body.diagnostic.shot_logs_insert_postgrest_error.status, 400);
+    assert.equal(body.diagnostic.shot_logs_insert_postgrest_error.code, "23502");
+    assert.match(body.diagnostic.shot_logs_insert_postgrest_error.message, /player_id/);
+    assert.match(body.diagnostic.shot_logs_insert_postgrest_error.hint, /migration 029/);
   } finally { global.fetch = originalFetch; }
 });
 
@@ -131,15 +143,15 @@ test("insert includes non-empty text id and numeric ts fallback", async () => {
     assert.equal(res.status, 200);
     assert.equal(typeof insertedRow.id, "string");
     assert.equal(insertedRow.id.length > 0, true);
-    assert.equal(typeof insertedRow.ts, "number");
-    assert.equal(insertedRow.ts, 1777777777777);
+    assert.equal(typeof insertedRow.ts, "string");
+    assert.equal(insertedRow.ts, new Date(1777777777777).toISOString());
   } finally {
     Date.now = realNow;
     global.fetch = originalFetch;
   }
 });
 
-test("numeric body.ts is preserved as number", async () => {
+test("numeric body.ts is normalized to ISO timestamptz string", async () => {
   const originalFetch = global.fetch;
   let insertedRow;
   global.fetch = async (url, init) => {
@@ -153,8 +165,8 @@ test("numeric body.ts is preserved as number", async () => {
   try {
     const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 3, date: "2026-05-01", ts: 1234567890 }, { "x-user-id": "p@x.com" }));
     assert.equal(res.status, 200);
-    assert.equal(insertedRow.ts, 1234567890);
-    assert.equal(typeof insertedRow.ts, "number");
+    assert.equal(insertedRow.ts, new Date(1234567890).toISOString());
+    assert.equal(typeof insertedRow.ts, "string");
   } finally {
     global.fetch = originalFetch;
   }
@@ -175,7 +187,7 @@ test("persist_failed is not caused by missing id or invalid ts in route payload"
     const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 3, date: "2026-05-01", ts: "2026-05-01T00:00:00.000Z" }, { "x-user-id": "p@x.com" }));
     assert.equal(res.status, 200);
     assert.equal(typeof insertedRow.id, "string");
-    assert.equal(typeof insertedRow.ts, "number");
+    assert.equal(typeof insertedRow.ts, "string");
     const body = await res.json();
     assert.equal(body.diagnostic.shot_logs_insert_success, "yes");
   } finally {
@@ -198,5 +210,79 @@ test("coach leaderboard reads inserted row and excludes other team", async () =>
     const bodyA = await resA.json();
     assert.equal(bodyA.leaderboard[0].player_display_name, "Player A");
     assert.equal(bodyA.leaderboard.some((r) => r.player_display_name === "Other"), false);
+  } finally { global.fetch = originalFetch; }
+});
+
+test("camelCase team_memberships authorizes save", async () => {
+  const originalFetch = global.fetch;
+  let insertedRow;
+  global.fetch = async (url, init) => {
+    const href = String(url);
+    if (href.includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("uuid-camel"), { status: 200 });
+    if (href.includes("/team_memberships") && href.includes("team_id=")) return new Response(JSON.stringify({ message: "column team_id does not exist" }), { status: 400 });
+    if (href.includes("/team_memberships") && href.includes("teamId=eq.team-a") && href.includes("userId=eq.uuid-camel")) return new Response(JSON.stringify([{ id: "m-camel", status: "active" }]), { status: 200 });
+    if (href.includes("/team_memberships")) return new Response(JSON.stringify([]), { status: 200 });
+    if (href.includes("/shot_logs")) {
+      insertedRow = JSON.parse(init.body)[0];
+      return new Response(JSON.stringify([insertedRow]), { status: 201 });
+    }
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ teamId: "team-a", playerId: "p@x.com", made: 7, date: "2026-05-02" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.diagnostic.authorized_by, "uuid");
+    assert.match(body.diagnostic.uuid_membership_query_result, /teamId\/userId/);
+    assert.equal(insertedRow.team_id, "team-a");
+  } finally { global.fetch = originalFetch; }
+});
+
+test("players table fallback authorizes same requester on the same team", async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async (url, init) => {
+    const href = String(url);
+    if (href.includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("uuid-player"), { status: 200 });
+    if (href.includes("/team_memberships")) return new Response(JSON.stringify([]), { status: 200 });
+    if (href.includes("/players") && href.includes("team_id=eq.team-a") && href.includes("email=eq.p%40x.com")) return new Response(JSON.stringify([{ id: "player-1", email: "p@x.com", team_id: "team-a", role: "player", status: "active" }]), { status: 200 });
+    if (href.includes("/players")) return new Response(JSON.stringify([]), { status: 200 });
+    if (href.includes("/shot_logs")) return new Response(JSON.stringify([{ id: "remote-shot", ...JSON.parse(init.body)[0] }]), { status: 201 });
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ team_id: "team-a", player_id: "p@x.com", made: 8, date: "2026-05-02" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.diagnostic.authorized_by, "player_record");
+    assert.equal(body.shot_log.syncState, undefined);
+  } finally { global.fetch = originalFetch; }
+});
+
+test("shot_logs insert retries without client id when live schema still generates id", async () => {
+  const originalFetch = global.fetch;
+  const insertBodies = [];
+  global.fetch = async (url, init) => {
+    const href = String(url);
+    if (href.includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("uuid-1"), { status: 200 });
+    if (href.includes("/team_memberships") && href.includes("user_id=eq.uuid-1")) return new Response(JSON.stringify([{ id: "m1", status: "active" }]), { status: 200 });
+    if (href.includes("/shot_logs")) {
+      insertBodies.push(JSON.parse(init.body)[0]);
+      if (insertBodies.length === 1) {
+        return new Response(JSON.stringify({ code: "22P02", message: "invalid input syntax for type bigint", details: "column id rejected shotlog_abc" }), { status: 400 });
+      }
+      return new Response(JSON.stringify([{ id: 42, ...insertBodies[1] }]), { status: 201 });
+    }
+    return new Response(JSON.stringify([]), { status: 200 });
+  };
+  try {
+    const res = await onRequestPost(ctx({ id: "shotlog_abc", team_id: "team-a", player_id: "p@x.com", made: 9, date: "2026-05-02" }, { "x-user-id": "p@x.com" }));
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.ok, true);
+    assert.equal(body.shot_log.id, 42);
+    assert.equal(insertBodies[0].id, "shotlog_abc");
+    assert.equal(Object.hasOwn(insertBodies[1], "id"), false);
+    assert.equal(body.diagnostic.shot_logs_insert_retry_without_client_id, "yes");
+    assert.equal(body.diagnostic.shot_logs_insert_first_attempt_error.code, "22P02");
   } finally { global.fetch = originalFetch; }
 });
