@@ -72,11 +72,41 @@ export function shouldUseQuietHomeShotFallback({ status, errorCode, message, isE
   if (isOffline || normalizedCode === 'network_error') return true;
   if (isExplicitDemoOrLocal && explicitLocalOnlyCodes.has(normalizedCode)) return true;
   if (isExplicitDemoOrLocal && [401, 404].includes(Number(status))) return true;
-  const membershipMissing = normalizedCode === 'forbidden' || normalizedMessage.includes('no active membership') || normalizedMessage.includes('missing durable membership');
-  if (membershipMissing) return Boolean(isExplicitDemoOrLocal || isMembershipPending);
+  const membershipMissing = normalizedCode === 'forbidden' || normalizedCode === 'missing_durable_team_binding' || normalizedMessage.includes('no active membership') || normalizedMessage.includes('missing durable membership');
+  if (membershipMissing) return Boolean(isExplicitDemoOrLocal);
+  if (isMembershipPending && isExplicitDemoOrLocal) return true;
   return false;
 }
 
+
+
+export function extractHomeShotSyncDiagnostic(error) {
+  const diagnostic = error?.body?.diagnostic || {};
+  const pick = (key) => asText(diagnostic?.[key]);
+  return {
+    status: Number(error?.status || diagnostic?.status || 0) || null,
+    error: asText(error?.body?.error || error?.message || 'sync_failed') || 'sync_failed',
+    stage: pick('stage'),
+    message: pick('message'),
+    authorized_by: pick('authorized_by'),
+    uuid_membership_query_result: pick('uuid_membership_query_result'),
+    email_membership_query_result: pick('email_membership_query_result'),
+    player_record_query_result: pick('player_record_query_result'),
+    team_binding_repair_attempted: pick('team_binding_repair_attempted'),
+    team_binding_repair_account_probe: pick('team_binding_repair_account_probe'),
+    team_binding_repair_players_result: pick('team_binding_repair_players_result'),
+    team_binding_repair_memberships_result: pick('team_binding_repair_memberships_result'),
+    team_binding_repair_result: pick('team_binding_repair_result'),
+  };
+}
+
+export function formatHomeShotSyncIssueMessage({ errorCode, diagnosticMessage } = {}) {
+  const normalizedCode = asText(errorCode).toLowerCase();
+  if (normalizedCode === 'missing_durable_team_binding' || normalizedCode === 'forbidden') {
+    return 'Your player account is not durably linked to this team yet.';
+  }
+  return asText(diagnosticMessage) || HOME_SHOT_SYNC_ERROR_MESSAGE;
+}
 
 
 export function normalizeHomeShotRemoteException(error) {
@@ -91,6 +121,7 @@ export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = f
   const normalizedError = normalizeHomeShotRemoteException(error);
   const errorCode = asText(normalizedError?.body?.error || normalizedError?.message || 'sync_failed') || 'sync_failed';
   const diagnosticMessage = asText(normalizedError?.body?.diagnostic?.message);
+  const diagnostic = extractHomeShotSyncDiagnostic(normalizedError);
   const quietFallback = shouldUseQuietHomeShotFallback({
     status: normalizedError?.status,
     errorCode,
@@ -106,6 +137,8 @@ export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = f
     error: errorCode,
     errorCode,
     diagnosticMessage,
+    diagnostic,
+    issueMessage: formatHomeShotSyncIssueMessage({ errorCode, diagnosticMessage }),
     quietFallback,
     status: normalizedError?.status || null,
     statSyncError: quietFallback ? '' : debug ? `${baseError} Error: ${errorCode}` : baseError,
