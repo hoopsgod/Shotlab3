@@ -64,6 +64,54 @@ if (typeof window !== 'undefined') {
   }
 }
 
+function parseStoredJsonPossiblyDoubleEncoded(raw) {
+  let value = raw
+  for (let i = 0; i < 2; i += 1) {
+    if (typeof value !== 'string') break
+    try {
+      value = JSON.parse(value)
+    } catch {
+      return null
+    }
+  }
+  return value
+}
+
+function serializeLikeStoredJson(raw, value) {
+  try {
+    const once = JSON.parse(raw)
+    if (typeof once === 'string') return JSON.stringify(JSON.stringify(value))
+  } catch {}
+  return JSON.stringify(value)
+}
+
+function pruneStaleLocalHomeShotQueue() {
+  if (typeof window === 'undefined') return
+  try {
+    const storage = window.localStorage
+    if (!storage) return
+    const candidateKeys = ['sl:shotlogs']
+    for (let i = 0; i < storage.length; i += 1) {
+      const key = storage.key(i)
+      if (key && key.includes('sl:shotlogs') && !candidateKeys.includes(key)) candidateKeys.push(key)
+    }
+    let totalPruned = 0
+    for (const key of candidateKeys) {
+      const raw = storage.getItem(key)
+      if (!raw) continue
+      const parsed = parseStoredJsonPossiblyDoubleEncoded(raw)
+      if (!Array.isArray(parsed)) continue
+      const next = parsed.filter((row) => String(row?.syncState || '') !== 'local_pending')
+      const removed = parsed.length - next.length
+      if (removed <= 0) continue
+      storage.setItem(key, serializeLikeStoredJson(raw, next))
+      totalPruned += removed
+    }
+    if (totalPruned > 0) markBoot('home_shot_local_pending_pruned', String(totalPruned))
+  } catch (error) {
+    markBoot('home_shot_local_pending_prune_failed', error?.message || 'unknown')
+  }
+}
 
 function syncViewportHeightVar() {
   if (typeof document === 'undefined' || typeof window === 'undefined') return
@@ -111,6 +159,7 @@ function renderStartupError(message) {
 
 markBoot('index_loaded')
 markBoot('main_executed')
+pruneStaleLocalHomeShotQueue()
 registerRuntimeListeners()
 
 window.addEventListener('error', (event) => {
