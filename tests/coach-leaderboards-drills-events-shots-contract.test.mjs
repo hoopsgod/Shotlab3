@@ -27,7 +27,7 @@ test('player-entered stats require durable ids, strict remote persistence, sync 
   assert.match(source, /replaceShotLog\(localLog\.id,savedLog\)/);
   assert.match(source, /const saveFailure=resolveHomeShotSaveFailure\(\{error:e,quietContext:buildHomeShotQuietContext\(\),debug:homeShotDebugMode\}\)/);
   assert.match(source, /console\.warn\("home_shots_remote_fallback",\{mode:"local_pending",syncState:"local_pending",quiet:true,errorCode:saveFailure\.errorCode/);
-  assert.match(source, /setStatSyncError\(saveFailure\.statSyncError\)/);
+  assert.match(source, /setStatSyncError\(saveFailure\.issueMessage\|\|saveFailure\.statSyncError\)/);
   assert.match(source, /console\.error\("home_shots_save_failed",\{mode:"failed_sync",syncState:"failed_sync",errorCode:saveFailure\.errorCode/);
 
   assert.match(source, /const \[statSyncError,setStatSyncError\]=useState\(""\)/);
