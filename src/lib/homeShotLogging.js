@@ -69,20 +69,32 @@ export function shouldUseQuietHomeShotFallback({ status, errorCode, message, isE
     'unauthorized',
     'not_found',
   ]);
-  if (isOffline || normalizedCode === 'network_error') return true;
+
+  if (isOffline) return true;
+
+  // A network_error while online usually means the function route, preview deploy,
+  // or serverless runtime is broken. Do not hide that as a successful local save
+  // for a registered player, or we lose the real failure signal.
+  if (normalizedCode === 'network_error') return Boolean(isExplicitDemoOrLocal);
+
   if (isExplicitDemoOrLocal && explicitLocalOnlyCodes.has(normalizedCode)) return true;
   if (isExplicitDemoOrLocal && [401, 404].includes(Number(status))) return true;
+
   const membershipMissing = normalizedCode === 'forbidden' || normalizedCode === 'missing_durable_team_binding' || normalizedMessage.includes('no active membership') || normalizedMessage.includes('missing durable membership');
   if (membershipMissing) return Boolean(isExplicitDemoOrLocal);
   if (isMembershipPending && isExplicitDemoOrLocal) return true;
   return false;
 }
 
-
-
 export function extractHomeShotSyncDiagnostic(error) {
   const diagnostic = error?.body?.diagnostic || {};
   const pick = (key) => asText(diagnostic?.[key]);
+  const asJsonLine = (key) => {
+    const value = diagnostic?.[key];
+    if (Array.isArray(value)) return value.join(' | ');
+    if (value && typeof value === 'object') return JSON.stringify(value).slice(0, 240);
+    return asText(value);
+  };
   return {
     status: Number(error?.status || diagnostic?.status || 0) || null,
     error: asText(error?.body?.error || error?.message || 'sync_failed') || 'sync_failed',
@@ -97,6 +109,10 @@ export function extractHomeShotSyncDiagnostic(error) {
     team_binding_repair_players_result: pick('team_binding_repair_players_result'),
     team_binding_repair_memberships_result: pick('team_binding_repair_memberships_result'),
     team_binding_repair_result: pick('team_binding_repair_result'),
+    shot_logs_insert_strategy: pick('shot_logs_insert_strategy'),
+    shot_logs_insert_attempts: pick('shot_logs_insert_attempts'),
+    shot_logs_insert_error: pick('shot_logs_insert_error'),
+    shot_logs_insert_errors: asJsonLine('shot_logs_insert_errors'),
   };
 }
 
@@ -105,9 +121,11 @@ export function formatHomeShotSyncIssueMessage({ errorCode, diagnosticMessage } 
   if (normalizedCode === 'missing_durable_team_binding' || normalizedCode === 'forbidden') {
     return 'Your player account is not durably linked to this team yet.';
   }
+  if (normalizedCode === 'network_error') {
+    return 'Could not reach the home-shot save service. This is a deployment or function-route problem, not a player input problem.';
+  }
   return asText(diagnosticMessage) || HOME_SHOT_SYNC_ERROR_MESSAGE;
 }
-
 
 export function normalizeHomeShotRemoteException(error) {
   if (error?.status || error?.body) return error;
@@ -115,7 +133,6 @@ export function normalizeHomeShotRemoteException(error) {
   normalized.cause = error;
   return normalized;
 }
-
 
 export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = false } = {}) {
   const normalizedError = normalizeHomeShotRemoteException(error);
