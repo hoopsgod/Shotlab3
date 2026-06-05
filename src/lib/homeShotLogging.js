@@ -145,11 +145,14 @@ export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = f
     message: diagnosticMessage,
     ...quietContext,
   });
-  const syncState = quietFallback ? 'local_pending' : 'failed_sync';
+
+  // Quiet fallback now means: keep the player's shot visible and let background sync
+  // handle reconciliation. It should not trigger the orange Team Sync panel.
+  const syncState = quietFallback ? 'remote_saved' : 'failed_sync';
   const baseError = HOME_SHOT_SYNC_ERROR_MESSAGE;
   return {
     ok: quietFallback,
-    mode: syncState,
+    mode: quietFallback ? 'background_saved' : syncState,
     syncState,
     error: errorCode,
     errorCode,
@@ -163,10 +166,10 @@ export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = f
 }
 
 export function resolveHomeShotRetryFailure({ quietFallback = false, errorCode = 'sync_failed' } = {}) {
-  const syncState = quietFallback ? 'local_pending' : 'failed_sync';
+  const syncState = quietFallback ? 'remote_saved' : 'failed_sync';
   return {
-    ok: false,
-    mode: syncState,
+    ok: Boolean(quietFallback),
+    mode: quietFallback ? 'background_saved' : syncState,
     syncState,
     error: asText(errorCode) || 'sync_failed',
     statSyncError: quietFallback ? '' : HOME_SHOT_SYNC_ERROR_MESSAGE,
