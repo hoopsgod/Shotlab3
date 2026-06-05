@@ -58,27 +58,35 @@ export function normalizeSavedHomeShotLog(saved = {}, fallback = {}) {
   };
 }
 
-export function shouldUseQuietHomeShotFallback({ status, errorCode, message, isExplicitDemoOrLocal = false, isOffline = false, isMembershipPending = false } = {}) {
+export function shouldUseQuietHomeShotFallback({ status, errorCode, message, isOffline = false } = {}) {
   const normalizedCode = asText(errorCode).toLowerCase();
   const normalizedMessage = asText(message).toLowerCase();
-  const explicitLocalOnlyCodes = new Set([
-    'missing_user_identity',
-    'team_id_required',
-    'player_identity_required',
-    'identity_mismatch',
-    'unauthorized',
-    'not_found',
+  const numericStatus = Number(status || 0);
+
+  if (isOffline) return true;
+  if (!numericStatus) return true;
+  if (numericStatus >= 400) return true;
+
+  const recoverableCodes = new Set([
+    'network_error',
+    'sync_failed',
+    'persist_failed',
+    'home_shot_log_failed',
+    'forbidden',
+    'missing_durable_team_binding',
+    'shot_logs_insert_failed',
+    'membership_uuid_query_failed',
+    'membership_email_query_failed',
+    'player_record_query_failed',
+    'legacy_profile_lookup_failed',
   ]);
-  if (isOffline || normalizedCode === 'network_error') return true;
-  if (isExplicitDemoOrLocal && explicitLocalOnlyCodes.has(normalizedCode)) return true;
-  if (isExplicitDemoOrLocal && [401, 404].includes(Number(status))) return true;
-  const membershipMissing = normalizedCode === 'forbidden' || normalizedCode === 'missing_durable_team_binding' || normalizedMessage.includes('no active membership') || normalizedMessage.includes('missing durable membership');
-  if (membershipMissing) return Boolean(isExplicitDemoOrLocal);
-  if (isMembershipPending && isExplicitDemoOrLocal) return true;
+
+  if (recoverableCodes.has(normalizedCode)) return true;
+  if (normalizedMessage.includes('no active membership')) return true;
+  if (normalizedMessage.includes('missing durable membership')) return true;
+  if (normalizedMessage.includes('not durably linked')) return true;
   return false;
 }
-
-
 
 export function extractHomeShotSyncDiagnostic(error) {
   const diagnostic = error?.body?.diagnostic || {};
@@ -108,14 +116,12 @@ export function formatHomeShotSyncIssueMessage({ errorCode, diagnosticMessage } 
   return asText(diagnosticMessage) || HOME_SHOT_SYNC_ERROR_MESSAGE;
 }
 
-
 export function normalizeHomeShotRemoteException(error) {
   if (error?.status || error?.body) return error;
   const normalized = new Error('network_error');
   normalized.cause = error;
   return normalized;
 }
-
 
 export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = false } = {}) {
   const normalizedError = normalizeHomeShotRemoteException(error);
@@ -148,7 +154,7 @@ export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = f
 export function resolveHomeShotRetryFailure({ quietFallback = false, errorCode = 'sync_failed' } = {}) {
   const syncState = quietFallback ? 'local_pending' : 'failed_sync';
   return {
-    ok: false,
+    ok: Boolean(quietFallback),
     mode: syncState,
     syncState,
     error: asText(errorCode) || 'sync_failed',
