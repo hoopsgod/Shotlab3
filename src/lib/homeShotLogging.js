@@ -37,7 +37,7 @@ export function buildLocalHomeShotLog({ id, user, made, date, ts = Date.now() } 
     made: Number(made) || 0,
     date: asText(date),
     ts,
-    syncState: 'local_pending',
+    syncState: 'syncing',
     syncSource: 'local',
   };
 }
