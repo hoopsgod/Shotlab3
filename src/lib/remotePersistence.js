@@ -74,7 +74,7 @@ export const normalizeShotLogRowForApp = (row = {}, options = {}) => {
   const source = SHOT_LOG_SYNC_SOURCES.has(options?.source) ? options.source : "local";
   // Treat a backend table read as the reliable confirmation signal for legacy rows
   // that predate syncState. Local-only legacy rows cannot prove remote persistence,
-  // so keep them retryable/player-visible instead of exposing them to coaches.
+  // so keep real failures retryable while dropping stale pending placeholders on boot.
   const localUnconfirmedRemoteSaved = source === "local" && explicitSyncState === "remote_saved";
   const syncState = localUnconfirmedRemoteSaved
     ? "local_pending"
@@ -83,6 +83,12 @@ export const normalizeShotLogRowForApp = (row = {}, options = {}) => {
       : source === "remote"
         ? "remote_saved"
         : "local_pending";
+
+  // A local_pending home-shot row is only useful during the active session where the
+  // save is still in progress. Once we are hydrating from storage, it is stale by
+  // definition and causes the yellow retry panel to reappear after refresh/login.
+  // Keep failed_sync rows because those represent real retryable failures.
+  if (source === "local" && syncState === "local_pending") return null;
 
   const payload = {
     id,
