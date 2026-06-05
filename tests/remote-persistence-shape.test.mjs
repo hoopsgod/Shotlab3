@@ -102,6 +102,31 @@ test('player home shots save shape includes consistent identity fields', () => {
 });
 
 
+
+
+test('syncing shot logs remain local-only and do not persist to remote shot_logs', () => {
+  const rows = buildRemoteRows('sl:shotlogs', [
+    { id: 'syncing', email: 'player@one.com', playerId: 'player@one.com', teamId: 'team-2', made: 11, syncState: 'syncing', syncSource: 'local' },
+  ]);
+  assert.deepEqual(rows, []);
+
+  const appRow = buildAppRows('sl:shotlogs', [{ id: 'syncing', email: 'player@one.com', player_id: 'player@one.com', team_id: 'team-2', made: 11, syncState: 'syncing' }], { source: 'local' })[0];
+  assert.equal(appRow.syncState, 'syncing');
+  assert.equal(appRow.syncSource, 'local');
+});
+
+
+test('background_saved shot logs remain local-only and do not persist to remote shot_logs', () => {
+  const rows = buildRemoteRows('sl:shotlogs', [
+    { id: 'background', email: 'player@one.com', playerId: 'player@one.com', teamId: 'team-2', made: 11, syncState: 'background_saved', syncSource: 'local' },
+  ]);
+  assert.deepEqual(rows, []);
+
+  const appRow = buildAppRows('sl:shotlogs', [{ id: 'old-pending', email: 'player@one.com', player_id: 'player@one.com', team_id: 'team-2', made: 11, syncState: 'local_pending' }], { source: 'local' })[0];
+  assert.equal(appRow.syncState, 'background_saved');
+  assert.equal(appRow.syncSource, 'local');
+});
+
 test('buildRemoteRows only writes server-confirmed shot logs back to the remote shot log table', () => {
   const rows = buildRemoteRows('sl:shotlogs', [
     { id: 'remote', email: 'player@one.com', playerId: 'player@one.com', teamId: 'team-2', made: 10, syncState: 'remote_saved', syncSource: 'remote' },
