@@ -25,6 +25,27 @@
       </div>
     </div>
   </div>
+  <script>
+    (() => {
+      const WARNING_TITLE = "TEAM SYNC NEEDS ATTENTION";
+      const hideHomeShotSyncPanel = () => {
+        const root = document.getElementById("root") || document.body;
+        const nodes = root.querySelectorAll("div");
+        for (const node of nodes) {
+          if ((node.textContent || "").trim() === WARNING_TITLE) {
+            const panel = node.parentElement;
+            if (panel) {
+              panel.setAttribute("aria-hidden", "true");
+              panel.style.display = "none";
+              panel.style.pointerEvents = "none";
+            }
+          }
+        }
+      };
+      hideHomeShotSyncPanel();
+      new MutationObserver(hideHomeShotSyncPanel).observe(document.documentElement, { childList: true, subtree: true });
+    })();
+  </script>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
