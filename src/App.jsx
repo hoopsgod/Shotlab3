@@ -41,6 +41,8 @@ import { createAppPersistenceService } from "./lib/appPersistenceService";
 import {
   HOME_SHOT_SYNC_ERROR_MESSAGE,
   buildLocalHomeShotLog,
+  extractHomeShotSyncDiagnostic,
+  formatHomeShotSyncIssueMessage,
   normalizeHomeShotRemoteException,
   normalizeSavedHomeShotLog,
   resolveHomeShotRetryFailure,
@@ -895,7 +897,7 @@ const msg=parseLeaderboardErrorMessage(body?.error,res.status,parseMode==="non_j
 const backendErrorCode=String(body?.diagnostics?.rpc_error?.code||body?.error||"unknown");
 const backendErrorMessage=String(body?.diagnostics?.rpc_error?.message||"unknown_error");
 const debugErrorDetail=`${backendErrorCode}: ${backendErrorMessage}`;
-console.error("[home-shots-leaderboard] load failed",{status:res.status,error:body?.error||"",scope,teamId,requesterIdentityPresent:body?.diagnostics?.requester_identity_present||"unknown",teamIdPresent:body?.diagnostics?.team_id_present||"unknown",rpcName:body?.diagnostics?.rpc_name_called||"",rpcSuccess:body?.diagnostics?.rpc_success||"unknown",rpcExistsDetectable:body?.diagnostics?.rpc_exists_detectable||"unknown",requesterResolvedUuidAvailable:body?.diagnostics?.requester_resolved_uuid_available||"unknown",rpcErrorCode:backendErrorCode,rpcErrorMessage:backendErrorMessage});
+console.warn("[home-shots-leaderboard] refresh failed",{status:res.status,error:body?.error||"",scope,teamId,requesterIdentityPresent:body?.diagnostics?.requester_identity_present||"unknown",teamIdPresent:body?.diagnostics?.team_id_present||"unknown",rpcName:body?.diagnostics?.rpc_name_called||"",rpcSuccess:body?.diagnostics?.rpc_success||"unknown",rpcExistsDetectable:body?.diagnostics?.rpc_exists_detectable||"unknown",requesterResolvedUuidAvailable:body?.diagnostics?.requester_resolved_uuid_available||"unknown",rpcErrorCode:backendErrorCode,rpcErrorMessage:backendErrorMessage});
 if(leaderboardRequestRef.current.requestId!==requestId)return;
 setHomeShotsLeaderboard({status:"success",rows:[],error:""});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),resultCount:0,isEmpty:false}}));
@@ -907,7 +909,7 @@ setHomeShotsLeaderboard({status:"success",rows,error:""});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:"",resultCount:rows.length,isEmpty:rows.length===0}}));
 }catch(error){
 if(leaderboardRequestRef.current.requestId!==requestId)return;
-console.error("[home-shots-leaderboard] network failure",{scope,teamId,message:String(error?.message||"network_error")});
+console.warn("[home-shots-leaderboard] refresh network failure",{scope,teamId,message:String(error?.message||"network_error")});
 setHomeShotsLeaderboard({status:"success",rows:[],error:""});
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:null,errorCode:"network_error",resultCount:0,isEmpty:false}}));
 }
@@ -1435,17 +1437,28 @@ const body=await res.json().catch(()=>({}));
 if(!res.ok){const error=new Error(String(body?.error||"home_shot_log_failed"));error.status=res.status;error.body=body;throw error;}
 return normalizeSavedHomeShotLog(body?.shot_log||{},log);
 };
-const markShotSyncState=(shotId,syncState,syncError="")=>{
-setShotLogs(prev=>{const next=prev.map(log=>log.id===shotId?{...log,syncState,syncSource:syncState==="remote_saved"?"remote":"local",syncError}:log);persistLocalShotLogs(next);return next;});
+const isUnconfirmedHomeShot=(log)=>log?.syncState==="local_pending"||log?.syncState==="failed_sync"||log?.syncState==="syncing";
+const isSameHomeShotEntry=(a,b)=>String(a?.email||"").toLowerCase()===String(b?.email||"").toLowerCase()&&String(a?.teamId||a?.team_id||"")===String(b?.teamId||b?.team_id||"")&&String(a?.date||"")===String(b?.date||"")&&Number(a?.made||0)===Number(b?.made||0);
+const markShotSyncState=(shotId,syncState,syncError="",syncDiagnostic=null)=>{
+setShotLogs(prev=>{const next=prev.map(log=>log.id===shotId?{...log,syncState,syncSource:syncState==="remote_saved"?"remote":"local",syncError,syncDiagnostic:syncDiagnostic||log.syncDiagnostic||null}:log);persistLocalShotLogs(next);return next;});
 };
 const replaceShotLog=(shotId,savedLog)=>{
-setShotLogs(prev=>{const next=prev.map(log=>log.id===shotId?savedLog:log);persistLocalShotLogs(next);return next;});
+setShotLogs(prev=>{const next=prev.flatMap(log=>{if(log.id===shotId)return[savedLog];if(isUnconfirmedHomeShot(log)&&isSameHomeShotEntry(log,savedLog))return[];return[log];});persistLocalShotLogs(next);return next;});
 };
 const buildHomeShotQuietContext=()=>({
 isExplicitDemoOrLocal:isDemoMode(),
 isOffline:typeof navigator!=="undefined"&&navigator.onLine===false,
 isMembershipPending:Boolean(pendingJoinContext),
 });
+const refreshHomeShotsLeaderboardAfterSave=async({made,date,mode="remote_saved"}={})=>{
+try{
+await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+return{ok:true};
+}catch(error){
+console.warn("home_shots_leaderboard_refresh_failed",{mode,nonBlocking:true,error:String(error?.message||"network_error"),userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made,date});
+return{ok:false,error:"leaderboard_refresh_failed"};
+}
+};
 const addShotLog=async(made,date)=>{
 if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required.",mode:"failed_sync"};
 const validation=validateHomeShotLogInput({made,date});
@@ -1454,7 +1467,7 @@ const homeShotDebugMode=window.location.search.includes("homeShotDebug=1");
 const localLog=buildLocalHomeShotLog({id:genId("shotlog"),user,made:validation.made,date:validation.date});
 if(!localLog){setStatSyncError("Player team context is required before logging shots.");return{ok:false,error:"missing_player_or_team_context",mode:"failed_sync"};}
 const appendOptimisticShot=(log)=>{
-setShotLogs(prev=>{const next=[...prev,log];persistLocalShotLogs(next);return next;});
+setShotLogs(prev=>{const next=[...prev.filter(existing=>!(isUnconfirmedHomeShot(existing)&&isSameHomeShotEntry(existing,log))),log];persistLocalShotLogs(next);return next;});
 };
 appendOptimisticShot(localLog);
 try{
@@ -1462,21 +1475,21 @@ const savedLog=await saveHomeShotLogRemote(localLog);
 replaceShotLog(localLog.id,savedLog);
 setStatSyncError("");
 trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"remote_saved",syncState:"remote_saved"});
-await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+void refreshHomeShotsLeaderboardAfterSave({made:validation.made,date:validation.date,mode:"remote_saved"});
 return{ok:true,mode:"remote_saved",syncState:"remote_saved"};
 }catch(e){
 const saveFailure=resolveHomeShotSaveFailure({error:e,quietContext:buildHomeShotQuietContext(),debug:homeShotDebugMode});
 if(saveFailure.quietFallback){
-markShotSyncState(localLog.id,"local_pending",saveFailure.errorCode);
+markShotSyncState(localLog.id,"local_pending",saveFailure.errorCode,saveFailure.diagnostic);
 setStatSyncError("");
 console.warn("home_shots_remote_fallback",{mode:"local_pending",syncState:"local_pending",quiet:true,errorCode:saveFailure.errorCode,status:saveFailure.status,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
 trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"local_pending",syncState:"local_pending",quiet:true,fallbackReason:saveFailure.errorCode});
 return{ok:true,mode:"local_pending",syncState:"local_pending",fallbackReason:saveFailure.errorCode};
 }
-markShotSyncState(localLog.id,"failed_sync",saveFailure.errorCode);
+markShotSyncState(localLog.id,"failed_sync",saveFailure.errorCode,saveFailure.diagnostic);
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
 console.error("home_shots_save_failed",{mode:"failed_sync",syncState:"failed_sync",errorCode:saveFailure.errorCode,status:saveFailure.status,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
-setStatSyncError(saveFailure.statSyncError);
+setStatSyncError(saveFailure.issueMessage||saveFailure.statSyncError);
 trackEvent("shot_log_failed",{made:validation.made,date:validation.date,mode:"failed_sync",syncState:"failed_sync",error:saveFailure.errorCode});
 return{ok:false,mode:"failed_sync",syncState:"failed_sync",error:saveFailure.errorCode};
 }
@@ -1489,15 +1502,16 @@ const savedLog=await saveHomeShotLogRemote({...log,syncState:"local_pending"});
 replaceShotLog(log.id,savedLog);
 setStatSyncError("");
 trackEvent("shot_log_retry_succeeded",{made:savedLog.made,date:savedLog.date,mode:"remote_saved",syncState:"remote_saved"});
-await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+void refreshHomeShotsLeaderboardAfterSave({made:savedLog.made,date:savedLog.date,mode:"remote_saved"});
 return{ok:true,mode:"remote_saved",syncState:"remote_saved"};
 }catch(e){
 const backendErrorCode=String(e?.body?.error||e?.message||"sync_failed");
+const retryDiagnostic=extractHomeShotSyncDiagnostic(e);
 const quietFallback=shouldUseQuietHomeShotFallback({status:e?.status,errorCode:backendErrorCode,message:String(e?.body?.diagnostic?.message||""),...buildHomeShotQuietContext()});
 const retryFailure=resolveHomeShotRetryFailure({quietFallback,errorCode:backendErrorCode});
-markShotSyncState(log.id,retryFailure.syncState,backendErrorCode);
+markShotSyncState(log.id,retryFailure.syncState,backendErrorCode,retryDiagnostic);
 if(quietFallback)setStatSyncError("");
-else setStatSyncError(retryFailure.statSyncError);
+else setStatSyncError(formatHomeShotSyncIssueMessage({errorCode:backendErrorCode,diagnosticMessage:String(e?.body?.diagnostic?.message||"")})||retryFailure.statSyncError);
 trackEvent("shot_log_retry_failed",{made:log.made,date:log.date,mode:retryFailure.mode,syncState:retryFailure.syncState,error:backendErrorCode});
 return retryFailure;
 }
@@ -2873,12 +2887,14 @@ return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"1
 
 function HomeShotSyncRetryPanel({syncIssueShots=[],retryHomeShotLog,setShotSaveNotice}){
 const[retryingShotId,setRetryingShotId]=useState("");
+const debugMode=typeof window!=="undefined"&&window.location.search.includes("homeShotDebug=1");
 if(!syncIssueShots.length)return null;
+const diagnosticLines=(diag={})=>["status","error","stage","message","authorized_by","uuid_membership_query_result","email_membership_query_result","player_record_query_result","team_binding_repair_attempted","team_binding_repair_account_probe","team_binding_repair_players_result","team_binding_repair_memberships_result","team_binding_repair_result"].map(key=>diag?.[key]?`${key}: ${diag[key]}`:"").filter(Boolean);
 return <div style={{border:"1px solid rgba(255,181,71,0.34)",background:"rgba(255,181,71,0.07)",borderRadius:12,padding:"10px 12px",margin:"0 0 12px"}}>
   <div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:800,letterSpacing:"0.08em",marginBottom:6}}>TEAM SYNC NEEDS ATTENTION</div>
-  {syncIssueShots.slice(0,3).map(log=>{const isRetrying=retryingShotId===log.id;return <div key={log.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"6px 0",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-    <div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.35}}>{log.made} makes on {log.date}<div style={{color:log.syncState==="failed_sync"?"#FF8B8B":CYAN,fontSize:10,fontWeight:700}}>{log.syncState==="failed_sync"?"Not synced to coach dashboard":"Saved locally — sync pending"}</div></div>
-    <button type="button" disabled={isRetrying} onClick={async()=>{if(isRetrying)return;setRetryingShotId(log.id);setShotSaveNotice("Retrying team sync…");try{const result=await retryHomeShotLog?.(log);setShotSaveNotice(result?.ok?"Team sync complete":"Could not sync yet — try again");setTimeout(()=>setShotSaveNotice(""),4200);}finally{setRetryingShotId("");}}} style={{border:`1px solid ${ORANGE}66`,background:ORANGE+"12",color:ORANGE,borderRadius:999,padding:"6px 10px",fontFamily:FB,fontSize:11,fontWeight:800,cursor:isRetrying?"not-allowed":"pointer",whiteSpace:"nowrap",opacity:isRetrying?0.7:1}}>{isRetrying?"SYNCING…":"RETRY SYNC"}</button>
+  {syncIssueShots.slice(0,3).map(log=>{const isRetrying=retryingShotId===log.id;const needsRepair=log.syncError==="missing_durable_team_binding"||log.syncError==="forbidden";const lines=debugMode?diagnosticLines(log.syncDiagnostic):[];return <div key={log.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"6px 0",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+    <div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.35}}>{log.made} makes on {log.date}<div style={{color:log.syncState==="failed_sync"?"#FF8B8B":CYAN,fontSize:10,fontWeight:700}}>{needsRepair?"Your player account is not durably linked to this team yet. Ask your coach to review your team link.":log.syncState==="failed_sync"?"Not synced to coach dashboard":"Saved locally — sync pending"}</div>{debugMode&&lines.length>0&&<pre style={{whiteSpace:"pre-wrap",margin:"6px 0 0",color:MUTED,fontSize:9,lineHeight:1.35,fontFamily:"monospace"}}>{lines.join("\n")}</pre>}</div>
+    <button type="button" disabled={isRetrying} onClick={async()=>{if(isRetrying)return;setRetryingShotId(log.id);setShotSaveNotice(needsRepair?"Team link needs coach review — retrying sync…":"Retrying team sync…");try{const result=await retryHomeShotLog?.(log);setShotSaveNotice(result?.ok?"Team sync complete":needsRepair?"Team link still needs attention":"Could not sync yet — try again");setTimeout(()=>setShotSaveNotice(""),4200);}finally{setRetryingShotId("");}}} style={{border:`1px solid ${ORANGE}66`,background:ORANGE+"12",color:ORANGE,borderRadius:999,padding:"6px 10px",fontFamily:FB,fontSize:11,fontWeight:800,cursor:isRetrying?"not-allowed":"pointer",whiteSpace:"nowrap",opacity:isRetrying?0.7:1}}>{isRetrying?"SYNCING…":"RETRY SYNC"}</button>
   </div>})}
 </div>;
 }
