@@ -32,10 +32,10 @@ test("succeeds when x-user-id email resolves to UUID membership", async () => {
     assert.equal(payload.diagnostic.authorized_by, "uuid");
     assert.equal(payload.diagnostic.uuid_membership_query_attempted, "yes");
     assert.equal(payload.diagnostic.email_membership_query_attempted, "no");
-    assert.equal(payload.diagnostic.shot_logs_player_id_source, "resolved_uuid");
-    assert.equal(insertedRow.player_id, "uuid-1");
+    assert.equal(payload.diagnostic.shot_logs_player_id_source, "requester_email");
+    assert.equal(insertedRow.player_id, "p@x.com");
     assert.equal(insertedRow.email, "p@x.com");
-    assert.equal(calls.length, 3);
+    assert.equal(calls.some((call) => call.url.includes("/players")), true);
   } finally { global.fetch = originalFetch; }
 });
 
@@ -73,6 +73,7 @@ test("uuid membership query is attempted before email query when uuid exists", a
     if (String(url).includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("uuid-1"), { status: 200 });
     if (String(url).includes("user_id=eq.p%40x.com")) return new Response(JSON.stringify([]), { status: 200 });
     if (String(url).includes("user_id=eq.uuid-1")) return new Response(JSON.stringify([{ id: "m1", status: "active" }]), { status: 200 });
+    if (String(url).includes("/players")) return new Response(JSON.stringify([]), { status: 200 });
     return new Response(JSON.stringify([{ id: 13, ...JSON.parse(init.body)[0] }]), { status: 201 });
   };
   try {
@@ -93,6 +94,7 @@ test("raw email membership still authorizes when table stores email values", asy
     if (String(url).includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("uuid-miss"), { status: 200 });
     if (String(url).includes("/team_memberships") && String(url).includes("uuid-miss")) return new Response(JSON.stringify([]), { status: 200 });
     if (String(url).includes("/team_memberships") && String(url).includes("user_id=eq.p%40x.com")) return new Response(JSON.stringify([{ id: "m-email", status: "active" }]), { status: 200 });
+    if (String(url).includes("/players")) return new Response(JSON.stringify([]), { status: 200 });
     return new Response(JSON.stringify([{ id: 22, ...JSON.parse(init.body)[0] }]), { status: 201 });
   };
   try {
@@ -344,12 +346,12 @@ test("shot_logs insert retries without client id when generic type error names t
     assert.equal(res.status, 200);
     const body = await res.json();
     assert.equal(body.ok, true);
-    assert.equal(body.diagnostic.shot_logs_player_id_source, "resolved_uuid");
+    assert.equal(body.diagnostic.shot_logs_player_id_source, "requester_email");
     assert.equal(body.diagnostic.shot_logs_insert_retry_without_client_id, "yes");
     assert.equal(insertBodies[0].id, "shotlog_live_uuid_mismatch");
-    assert.equal(insertBodies[0].player_id, "uuid-live-player");
+    assert.equal(insertBodies[0].player_id, "p@x.com");
     assert.equal(Object.hasOwn(insertBodies[1], "id"), false);
-    assert.equal(insertBodies[1].player_id, "uuid-live-player");
+    assert.equal(insertBodies[1].player_id, "p@x.com");
     assert.equal(body.shot_log.id, "generated-live-id");
   } finally { global.fetch = originalFetch; }
 });
@@ -722,18 +724,16 @@ test("shot_logs user_id uuid insert error does not retry without client id or al
   } finally { global.fetch = originalFetch; }
 });
 
-test("registered player shot_logs insert uses resolved UUID player_id for live UUID schema", async () => {
+test("registered player shot_logs insert uses matched roster player key instead of resolved UUID", async () => {
   const originalFetch = global.fetch;
   let insertedRow;
   global.fetch = async (url, init = {}) => {
     const href = String(url);
     if (href.includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("uuid-live-player"), { status: 200 });
     if (href.includes("/team_memberships") && href.includes("user_id=eq.uuid-live-player")) return new Response(JSON.stringify([{ id: "m-live", status: "active" }]), { status: 200 });
+    if (href.includes("/players")) return new Response(JSON.stringify([{ id: "player:team-a_p", player_id: "player:team-a_p", team_id: "team-a", email: "p@x.com", role: "player", status: "active" }]), { status: 200 });
     if (href.includes("/shot_logs")) {
       insertedRow = JSON.parse(init.body)[0];
-      if (insertedRow.player_id !== "uuid-live-player") {
-        return new Response(JSON.stringify({ code: "22P02", message: "invalid input syntax for type uuid", details: `column \"player_id\" rejected ${insertedRow.player_id}` }), { status: 400 });
-      }
       return new Response(JSON.stringify([{ id: "remote-live", ...insertedRow }]), { status: 201 });
     }
     return new Response(JSON.stringify([]), { status: 200 });
@@ -744,26 +744,25 @@ test("registered player shot_logs insert uses resolved UUID player_id for live U
     const body = await res.json();
     assert.equal(body.ok, true);
     assert.equal(body.diagnostic.authorized_by, "uuid");
-    assert.equal(body.diagnostic.shot_logs_player_id_source, "resolved_uuid");
+    assert.equal(body.diagnostic.shot_logs_player_id_source, "matched_player_roster_key");
     assert.equal(body.diagnostic.shot_logs_insert_retry_with_alternate_player_id, "no");
-    assert.equal(insertedRow.player_id, "uuid-live-player");
+    assert.equal(insertedRow.player_id, "player:team-a_p");
+    assert.notEqual(insertedRow.player_id, "uuid-live-player");
     assert.equal(insertedRow.email, "p@x.com");
   } finally { global.fetch = originalFetch; }
 });
 
-test("shot_logs player_id type error retries with alternate email payload when UUID is rejected", async () => {
+test("shot_logs player_id does not use resolved UUID or alternate retry when no players row exists", async () => {
   const originalFetch = global.fetch;
   const insertedRows = [];
   global.fetch = async (url, init = {}) => {
     const href = String(url);
     if (href.includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("uuid-text-schema"), { status: 200 });
     if (href.includes("/team_memberships") && href.includes("user_id=eq.uuid-text-schema")) return new Response(JSON.stringify([{ id: "m-text", status: "active" }]), { status: 200 });
+    if (href.includes("/players")) return new Response(JSON.stringify([]), { status: 200 });
     if (href.includes("/shot_logs")) {
       const row = JSON.parse(init.body)[0];
       insertedRows.push(row);
-      if (row.player_id === "uuid-text-schema") {
-        return new Response(JSON.stringify({ code: "22P02", message: "invalid input syntax for text schema", details: "column \"player_id\" rejected uuid-text-schema" }), { status: 400 });
-      }
       return new Response(JSON.stringify([{ id: "remote-text", ...row }]), { status: 201 });
     }
     return new Response(JSON.stringify([]), { status: 200 });
@@ -773,9 +772,9 @@ test("shot_logs player_id type error retries with alternate email payload when U
     assert.equal(res.status, 200);
     const body = await res.json();
     assert.equal(body.ok, true);
-    assert.equal(body.diagnostic.shot_logs_insert_retry_with_alternate_player_id, "yes");
+    assert.equal(body.diagnostic.shot_logs_insert_retry_with_alternate_player_id, "no");
     assert.equal(body.diagnostic.shot_logs_insert_success, "yes");
-    assert.deepEqual(insertedRows.map((row) => row.player_id), ["uuid-text-schema", "p@x.com"]);
+    assert.deepEqual(insertedRows.map((row) => row.player_id), ["p@x.com"]);
     assert.equal(body.shot_log.player_id, "p@x.com");
   } finally { global.fetch = originalFetch; }
 });
@@ -787,6 +786,7 @@ test("registered player saved shot remains server-confirmed for coach leaderboar
     const href = String(url);
     if (href.includes("/rpc/resolve_app_user_uuid")) return new Response(JSON.stringify("uuid-coach-visible"), { status: 200 });
     if (href.includes("/team_memberships") && href.includes("user_id=eq.uuid-coach-visible")) return new Response(JSON.stringify([{ id: "m-coach", status: "active" }]), { status: 200 });
+    if (href.includes("/players")) return new Response(JSON.stringify([{ id: "player:team-a_p", player_id: "player:team-a_p", team_id: "team-a", email: "p@x.com", role: "player", status: "active" }]), { status: 200 });
     if (href.includes("/shot_logs")) {
       const row = JSON.parse(init.body)[0];
       shotLogs.push({ ...row, syncState: "remote_saved", syncSource: "remote" });
@@ -810,7 +810,7 @@ test("registered player saved shot remains server-confirmed for coach leaderboar
     assert.equal(coachRes.status, 200);
     const coachBody = await coachRes.json();
     assert.equal(coachBody.leaderboard[0].total_home_shots, 123);
-    assert.equal(shotLogs[0].player_id, "uuid-coach-visible");
+    assert.equal(shotLogs[0].player_id, "player:team-a_p");
     assert.equal(shotLogs[0].email, "p@x.com");
   } finally { global.fetch = originalFetch; }
 });

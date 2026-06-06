@@ -137,15 +137,13 @@ export default function HomeShotsLeaderboardCard({
         </div>
       </div>
 
-      {status === "loading"
+      {status === "loading" && rows.length === 0
         ? renderLoading()
-        : status === "idle"
-          ? renderEmpty()
-        : status === "error"
-          ? renderError()
-          : rows.length === 0
-            ? renderEmpty()
-            : renderRows()}
+        : rows.length > 0
+          ? renderRows()
+          : status === "error"
+            ? renderError()
+            : renderEmpty()}
     </section>
   );
 }

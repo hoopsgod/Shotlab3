@@ -8,9 +8,10 @@ test('player home leaderboard render uses safe derived values and avoids undefin
   assert.equal(appSource.includes('leaderboardStatusForPlayer'), false, 'legacy undefined leaderboardStatusForPlayer should not exist');
   assert.equal(appSource.includes('leaderboardBlocked'), false, 'legacy undefined leaderboardBlocked should not exist');
   assert.equal(appSource.includes('const playerLeaderboardState=useMemo(()=>{'), true);
-  assert.equal(appSource.includes('const rows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];'), true);
-  assert.equal(appSource.includes('status={homeShotsLeaderboard?.status||"idle"}'), true);
-  assert.equal(appSource.includes('rows={homeShotsLeaderboard?.rows||[]}'), true);
+  assert.equal(appSource.includes('const remoteRows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];'), true);
+  assert.equal(appSource.includes('status={playerLeaderboardState.status}'), true);
+  assert.equal(appSource.includes('rows={playerLeaderboardState.rows}'), true);
   assert.equal(appSource.includes('emptyMessage="No leaderboard data yet. Log shots to enter the rankings."'), true);
   assert.equal(appSource.includes('refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}'), true, 'player refresh should always use players scope');
+  assert.equal(appSource.includes('calculateLeaderboardFromShotLogs({shotLogs,teamId:u?.teamId,playerContext:{players,scope:"players"}})'), true, 'player card should fall back to local shot log aggregation');
 });

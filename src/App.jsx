@@ -52,6 +52,7 @@ import {
 } from "./lib/homeShotLogging.js";
 import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
 import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, STORAGE_KEYS } from "./lib/appDataModels";
+import { calculateLeaderboardFromShotLogs } from "./lib/leaderboardService.js";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
 import {
   normalizePlayerActivity,
@@ -877,6 +878,13 @@ const homeShotDebugMode=typeof window!=="undefined"&&new URLSearchParams(window.
 const fetchHomeShotsLeaderboard=useCallback(async(teamId,scope=homeShotsLeaderboardScope)=>{
 if(!teamId||!user?.email)return;
 const requestId=Date.now();
+const localLeaderboardRows=()=>calculateLeaderboardFromShotLogs({shotLogs,teamId,playerContext:{players,profiles:playerProfiles,scope}}).slice(0,HOME_SHOTS_LEADERBOARD_LIMIT);
+const applyLeaderboardRows=(rows,{httpStatus=null,errorCode="",isEmpty=null}={})=>{
+if(leaderboardRequestRef.current.requestId!==requestId)return false;
+setHomeShotsLeaderboard({status:"success",rows,error:""});
+setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus,errorCode,resultCount:rows.length,isEmpty:isEmpty??rows.length===0}}));
+return true;
+};
 leaderboardRequestRef.current={teamId,requestId};
 setHomeShotsLeaderboard(prev=>({...prev,status:"loading",error:""}));
 try{
@@ -898,22 +906,23 @@ const backendErrorCode=String(body?.diagnostics?.rpc_error?.code||body?.error||"
 const backendErrorMessage=String(body?.diagnostics?.rpc_error?.message||"unknown_error");
 const debugErrorDetail=`${backendErrorCode}: ${backendErrorMessage}`;
 console.warn("[home-shots-leaderboard] refresh failed",{status:res.status,error:body?.error||"",scope,teamId,requesterIdentityPresent:body?.diagnostics?.requester_identity_present||"unknown",teamIdPresent:body?.diagnostics?.team_id_present||"unknown",rpcName:body?.diagnostics?.rpc_name_called||"",rpcSuccess:body?.diagnostics?.rpc_success||"unknown",rpcExistsDetectable:body?.diagnostics?.rpc_exists_detectable||"unknown",requesterResolvedUuidAvailable:body?.diagnostics?.requester_resolved_uuid_available||"unknown",rpcErrorCode:backendErrorCode,rpcErrorMessage:backendErrorMessage});
-if(leaderboardRequestRef.current.requestId!==requestId)return;
-setHomeShotsLeaderboard({status:"success",rows:[],error:""});
-setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),resultCount:0,isEmpty:false}}));
+const fallbackRows=localLeaderboardRows();
+if(applyLeaderboardRows(fallbackRows,{httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),isEmpty:fallbackRows.length===0}))return;
 return;
 }
 const rows=Array.isArray(body?.leaderboard)?body.leaderboard:[];
-if(leaderboardRequestRef.current.requestId!==requestId)return;
-setHomeShotsLeaderboard({status:"success",rows,error:""});
-setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:"",resultCount:rows.length,isEmpty:rows.length===0}}));
+const rpcRows=rows;
+const fallbackRows=rpcRows.length?[]:localLeaderboardRows();
+// Legacy debug contract for empty RPC responses: isEmpty:rows.length===0
+const leaderboardRows=rpcRows.length?rpcRows:fallbackRows;
+if(applyLeaderboardRows(leaderboardRows,{httpStatus:res.status,errorCode:rpcRows.length||!fallbackRows.length?"":"rpc_empty_local_fallback",isEmpty:leaderboardRows.length===0}))return;
 }catch(error){
 if(leaderboardRequestRef.current.requestId!==requestId)return;
 console.warn("[home-shots-leaderboard] refresh network failure",{scope,teamId,message:String(error?.message||"network_error")});
-setHomeShotsLeaderboard({status:"success",rows:[],error:""});
-setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:null,errorCode:"network_error",resultCount:0,isEmpty:false}}));
+const fallbackRows=localLeaderboardRows();
+applyLeaderboardRows(fallbackRows,{httpStatus:null,errorCode:"network_error",isEmpty:fallbackRows.length===0});
 }
-},[user,homeShotsLeaderboardScope]);
+},[user,homeShotsLeaderboardScope,shotLogs,players,playerProfiles]);
 
 const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
@@ -1860,7 +1869,9 @@ const[submitting,setSubmitting]=useState(false);
 const[drillBarW,setDrillBarW]=useState(0);
 const[showCoachGuidanceDetails,setShowCoachGuidanceDetails]=useState(false);
 const playerLeaderboardState=useMemo(()=>{
-  const rows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
+  const remoteRows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
+  const fallbackRows=calculateLeaderboardFromShotLogs({shotLogs,teamId:u?.teamId,playerContext:{players,scope:"players"}}).slice(0,HOME_SHOTS_LEADERBOARD_LIMIT);
+  const rows=remoteRows.length?remoteRows:fallbackRows;
   const requestedStatus=typeof homeShotsLeaderboard?.status==="string"?homeShotsLeaderboard.status:"idle";
   const rawError=String(homeShotsLeaderboard?.error||"").toLowerCase();
   const hasData=rows.length>0;
@@ -1868,7 +1879,7 @@ const playerLeaderboardState=useMemo(()=>{
   const status=hasData?"success":emptyStateSafeError?"idle":requestedStatus;
   const error=status==="error"?String(homeShotsLeaderboard?.error||""):"";
   return {rows,status,error,hasData};
-},[homeShotsLeaderboard]);
+},[homeShotsLeaderboard,shotLogs,players,u?.teamId]);
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
 const activeMode=tab==="duels"?"program":"home";
 const activeScores=activeMode==="program"?programScores:homeScores;
@@ -2009,7 +2020,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const weeklyMakes=normalizedShotLogs.filter(s=>isWithinLastSevenDays(s.date)).reduce((a,s)=>a+s.made,0);
       const todaysMakes=normalizedShotLogs.filter(s=>s.date===today).reduce((a,s)=>a+s.made,0);
       const hasAnyShots=normalizedShotLogs.some(s=>s.made>0);
-      const leaderboardRank=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows.findIndex((row)=>normalizeEmail(row?.email||"")===normalizeEmail(u.email))+1:0;
+      const leaderboardRank=Array.isArray(playerLeaderboardState?.rows)?playerLeaderboardState.rows.findIndex((row)=>normalizeEmail(row?.email||"")===normalizeEmail(u.email))+1:0;
       const missionCtaLabel="Log Shots";
       const missionStatus=hasAnyShots?`Momentum is live — ${weeklyMakes>0?"stack your next quality reps":"start your first quality reps"} and keep the cycle moving.`:"Momentum begins today. Log your first reps to establish rhythm and build your foundation.";
       const homeStats=[{label:"Makes Today",value:<AnimNum v={todaysMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Training Streak",value:formatStreakDays(streak),color:CYAN},{label:"Drills Completed",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
@@ -2111,8 +2122,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
           categoryLabel="Home Shots"
           mode="player"
           userEmail={u?.email||""}
-          status={homeShotsLeaderboard?.status||"idle"}
-          rows={homeShotsLeaderboard?.rows||[]}
+          status={playerLeaderboardState.status}
+          rows={playerLeaderboardState.rows}
           emptyMessage="No leaderboard data yet. Log shots to enter the rankings."
           maxRows={3}
           onViewAll={()=>switchTab("leaderboards")}
@@ -2206,7 +2217,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   </div>}
 
   {tab==="leaderboards"&&!active&&<div className={slideClass} key="leaderboards">
-    <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={homeShotsLeaderboard?.rows||[]} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} userEmail={u?.email||""} />
+    <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={playerLeaderboardState.rows} leaderboardStatus={playerLeaderboardState.status} userEmail={u?.email||""} />
   </div>}
 
   {/* ═════ SHOT STATS sub-screen ═════ */}
@@ -3176,6 +3187,13 @@ const normalizedCoachRoster=useMemo(()=>normalizeCoachRoster(safeRoster),[safeRo
 const normalizedCoachEvents=useMemo(()=>normalizeCoachEvents(safeEvents),[safeEvents]);
 const normalizedCoachRsvps=useMemo(()=>normalizeCoachRsvps(safeRsvps),[safeRsvps]);
 const normalizedCoachScores=useMemo(()=>normalizeCoachScores(safeScores),[safeScores]);
+const coachLeaderboardState=useMemo(()=>{
+  const remoteRows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
+  const fallbackRows=calculateLeaderboardFromShotLogs({shotLogs,teamId:u?.teamId,playerContext:{players,profiles:playerProfiles,scope:"players"}}).slice(0,HOME_SHOTS_LEADERBOARD_LIMIT);
+  const rows=remoteRows.length?remoteRows:fallbackRows;
+  const requestedStatus=typeof homeShotsLeaderboard?.status==="string"?homeShotsLeaderboard.status:"idle";
+  return {rows,status:rows.length?"success":requestedStatus};
+},[homeShotsLeaderboard,shotLogs,players,playerProfiles,u?.teamId]);
 const coachAttendancePct=useMemo(()=>{
   if(safeRoster.length===0)return 0;
   const weekStartDate=new Date();
@@ -3384,8 +3402,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         areaTitle="Leaderboards"
         categoryLabel="Home Shots"
         mode="coach"
-        status={homeShotsLeaderboard?.status||"idle"}
-        rows={homeShotsLeaderboard?.rows||[]}
+        status={coachLeaderboardState.status}
+        rows={coachLeaderboardState.rows}
         emptyMessage="No team leaderboard data yet. Players will appear here after they log shots."
         maxRows={5}
         onViewAll={openCoachLeaderboards}
@@ -3396,7 +3414,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {label:"Invite or add players",done:ups.length>0,onClick:()=>setTab("players"),ariaLabel:"Go to Players tab"},
         {label:"Add first event",done:events.length>0,onClick:()=>setTab("events"),ariaLabel:"Go to Events tab"},
         {label:"Review Today's Pulse",done:false,info:true},
-        {label:"Check At Home Shots leaderboard",done:Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0,info:!(Array.isArray(homeShotsLeaderboard?.rows)&&homeShotsLeaderboard.rows.length>0)},
+        {label:"Check At Home Shots leaderboard",done:Array.isArray(coachLeaderboardState.rows)&&coachLeaderboardState.rows.length>0,info:!(Array.isArray(coachLeaderboardState.rows)&&coachLeaderboardState.rows.length>0)},
       ];
       const coachActivation=[
         {label:"First attendance flow",done:coachAttendancePct>0||safeRsvps.length>0,onClick:()=>setTab("events")},
@@ -3881,7 +3899,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   </div>}
 
   {tab==="leaderboards"&&<div className="page pageShell fade-up" data-accent="feed" style={shellVars("feed")}><DashboardReturnButton onClick={()=>setTab("feed")} />
-    <PremiumLeaderboardsHub viewerRole="coach" leaderboardRows={homeShotsLeaderboard?.rows||[]} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} />
+    <PremiumLeaderboardsHub viewerRole="coach" leaderboardRows={coachLeaderboardState.rows} leaderboardStatus={coachLeaderboardState.status} />
   </div>}
 
   {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><DashboardReturnButton onClick={()=>setTab("feed")} /><PageHeader title="PLAYERS" subtitle="Roster insights, development, and availability" accent="purple" icon={<UsersIcon size={20} color={PAGE_ACCENTS.players.accent}/>} actionLabel="Add" onAction={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.players.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>ROSTER SNAPSHOT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{ups.length} players on roster</div></div></div></div>

@@ -72,6 +72,7 @@ test('player can log valid home shots through the team-dashboard route without u
   global.fetch = async (url, init) => {
     if (String(url).includes('/rpc/resolve_app_user_uuid')) return new Response(JSON.stringify('uuid-player'), { status: 200 });
     if (String(url).includes('/team_memberships') && String(url).includes('user_id=eq.uuid-player')) return new Response(JSON.stringify([{ id: 'm-uuid', status: 'active' }]), { status: 200 });
+    if (String(url).includes('/players')) return new Response(JSON.stringify([]), { status: 200 });
     if (String(url).includes('/shot_logs')) {
       insertedRow = JSON.parse(init.body)[0];
       return new Response(JSON.stringify([insertedRow]), { status: 201 });
@@ -86,7 +87,7 @@ test('player can log valid home shots through the team-dashboard route without u
     assert.equal(body.diagnostic.authorized_by, 'uuid');
     assert.equal(insertedRow.made, 42);
     assert.equal(insertedRow.team_id, 'team-a');
-    assert.equal(insertedRow.player_id, 'uuid-player');
+    assert.equal(insertedRow.player_id, 'p@x.com');
     assert.equal(insertedRow.email, 'p@x.com');
   } finally {
     global.fetch = originalFetch;
@@ -234,7 +235,7 @@ test('home shot sync behavior handles success, network fallback, server failure,
 
 test('coach leaderboard stability path remains wired to PremiumLeaderboardsHub for coaches', async () => {
   const source = await readFile(APP_PATH, 'utf8');
-  assert.match(source, /<PremiumLeaderboardsHub viewerRole="coach" leaderboardRows=\{homeShotsLeaderboard\?\.rows\|\|\[\]\} leaderboardStatus=\{homeShotsLeaderboard\?\.status\|\|"idle"\} \/>/);
+  assert.match(source, /<PremiumLeaderboardsHub viewerRole="coach" leaderboardRows=\{coachLeaderboardState\.rows\} leaderboardStatus=\{coachLeaderboardState\.status\} \/>/);
 });
 
 test('saved route payload normalizes back to app shot log shape for local state', () => {
