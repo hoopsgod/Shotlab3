@@ -112,7 +112,9 @@ begin
       and totals.player_id in (
         coalesce(nullif(profiles.rec->>'email', ''), '__no_match__'),
         coalesce(nullif(profiles.rec->>'player_id', ''), '__no_match__'),
-        coalesce(nullif(profiles.rec->>'playerId', ''), '__no_match__')
+        coalesce(nullif(profiles.rec->>'playerId', ''), '__no_match__'),
+        coalesce(nullif(profiles.rec->>'id', ''), '__no_match__'),
+        coalesce(nullif(profiles.rec->>'user_id', ''), '__no_match__')
       )
     left join latest_shot_names
       on latest_shot_names.team_id = totals.team_id
