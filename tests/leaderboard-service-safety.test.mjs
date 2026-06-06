@@ -94,3 +94,25 @@ test('unsupported durable categories return safe empty responses until persisten
   assert.deepEqual(eventRows.data, [])
   assert.deepEqual(scRows.data, [])
 })
+
+
+test('coach and player leaderboards aggregate roster-keyed home shots for registered players', async () => {
+  const shotLogs = [
+    { team_id: 'team_roster', player_id: 'player:team_roster_aahna', email: 'aahna@gmail.com', made: 12 },
+    { team_id: 'team_roster', player_id: 'player:team_roster_aahna', email: 'aahna@gmail.com', made: 8 },
+    { team_id: 'team_roster', player_id: 'player:team_roster_bina', email: 'bina@gmail.com', made: 5 },
+  ]
+  const teamRows = calculateLeaderboardFromShotLogs({
+    shotLogs,
+    teamId: 'team_roster',
+    playerContext: { nameById: { 'player:team_roster_aahna': 'Aahna' } },
+  })
+  assert.equal(teamRows[0].player_id, 'player:team_roster_aahna')
+  assert.equal(teamRows[0].total_home_shots, 20)
+  assert.equal(teamRows[0].player_display_name, 'Aahna')
+
+  const service = createLeaderboardService({ supabaseClient: makeClient(async () => ({ data: shotLogs })) })
+  const playerRows = await service.loadPlayerShotLeaderboard({ teamId: 'team_roster', playerId: 'player:team_roster_aahna' })
+  assert.equal(playerRows.data.length, 1)
+  assert.equal(playerRows.data[0].total_home_shots, 20)
+})

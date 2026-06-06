@@ -25,6 +25,13 @@ test("SQL contract: uses latest_shot_names from shot_logs.name", () => {
   assert.match(migration, /nullif\(trim\(coalesce\(sl\.name, ''\)\), ''\) as submitted_name/);
 });
 
+test("SQL contract: profile join supports roster player keys", () => {
+  assert.match(migration, /profiles\.rec->>'player_id'/);
+  assert.match(migration, /profiles\.rec->>'playerId'/);
+  assert.match(migration, /profiles\.rec->>'id'/);
+  assert.match(migration, /profiles\.rec->>'user_id'/);
+});
+
 test("SQL contract: display-name priority prefers profile name, then shot log name, then email/local-part", () => {
   assert.match(migration, /nullif\(trim\(coalesce\(profiles\.rec->>'name', ''\)\), ''\),\s*latest_shot_names\.submitted_name/s);
   assert.match(migration, /latest_shot_names\.submitted_name,\s*nullif\(trim\(coalesce\(profiles\.rec->>'email', ''\)\), ''\)/s);
