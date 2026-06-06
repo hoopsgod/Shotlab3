@@ -8,9 +8,7 @@ const cleanText = (value) => {
   return String(value).trim();
 };
 
-const SHOT_LOG_SYNC_STATES = new Set(["remote_saved", "local_pending", "failed_sync"]);
-const LEGACY_LOCAL_SHOT_SYNC_ERROR = "legacy_missing_sync_state";
-const UNCONFIRMED_REMOTE_SAVED_SHOT_SYNC_ERROR = "remote_saved_unconfirmed";
+const SHOT_LOG_SYNC_STATES = new Set(["remote_saved", "background_saved", "syncing", "local_pending", "failed_sync"]);
 const SHOT_LOG_SYNC_SOURCES = new Set(["remote", "local"]);
 
 export const normalizeScoreRowForDb = (row = {}) => {
@@ -72,17 +70,19 @@ export const normalizeShotLogRowForApp = (row = {}, options = {}) => {
 
   const explicitSyncState = cleanText(row.syncState || row.sync_state);
   const source = SHOT_LOG_SYNC_SOURCES.has(options?.source) ? options.source : "local";
-  // Treat a backend table read as the reliable confirmation signal for legacy rows
-  // that predate syncState. Local-only legacy rows cannot prove remote persistence,
-  // so keep them retryable/player-visible instead of exposing them to coaches.
-  const localUnconfirmedRemoteSaved = source === "local" && explicitSyncState === "remote_saved";
-  const syncState = localUnconfirmedRemoteSaved
-    ? "local_pending"
-    : SHOT_LOG_SYNC_STATES.has(explicitSyncState)
-      ? explicitSyncState
-      : source === "remote"
-        ? "remote_saved"
-        : "local_pending";
+  // Treat backend table reads as the reliable confirmation signal for coach-visible
+  // rows. Local-only stale/pending rows are background-saved so hydration does not
+  // flash the Team Sync panel unless they carry an explicit failed_sync state.
+  const localBackgroundSaved = source === "local" && (!explicitSyncState || explicitSyncState === "remote_saved" || explicitSyncState === "local_pending");
+  const syncState = source === "remote"
+    ? "remote_saved"
+    : explicitSyncState === "failed_sync"
+      ? "failed_sync"
+      : localBackgroundSaved
+        ? "background_saved"
+        : SHOT_LOG_SYNC_STATES.has(explicitSyncState)
+          ? explicitSyncState
+          : "background_saved";
 
   const payload = {
     id,
@@ -101,7 +101,7 @@ export const normalizeShotLogRowForApp = (row = {}, options = {}) => {
           : undefined,
     syncState,
     syncSource: source,
-    syncError: cleanText(row.syncError || row.sync_error) || (localUnconfirmedRemoteSaved ? UNCONFIRMED_REMOTE_SAVED_SHOT_SYNC_ERROR : syncState === "local_pending" && !SHOT_LOG_SYNC_STATES.has(explicitSyncState) ? LEGACY_LOCAL_SHOT_SYNC_ERROR : ""),
+    syncError: syncState === "failed_sync" ? cleanText(row.syncError || row.sync_error) : "",
   };
 
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== "" && value !== undefined));
