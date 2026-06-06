@@ -15,6 +15,26 @@ function normalizeIdentity(value) {
   return String(value || "").trim().toLowerCase();
 }
 
+function cleanKey(value) {
+  return String(value ?? "").trim();
+}
+
+function firstPresentKey(row = {}, keys = []) {
+  for (const key of keys) {
+    const value = cleanKey(row?.[key]);
+    if (value) return value;
+  }
+  return "";
+}
+
+function deriveRosterPlayerKey(playerRow = null) {
+  return firstPresentKey(playerRow || {}, ["player_id", "playerId", "id", "user_id"]);
+}
+
+function deriveRosterTeamKey(playerRow = null, fallbackTeamId = "") {
+  return firstPresentKey(playerRow || {}, ["team_id", "teamId"]) || cleanKey(fallbackTeamId);
+}
+
 function normalizePayload(body = {}) {
   const teamId = String(body.team_id ?? body.teamId ?? "").trim();
   const playerId = normalizeIdentity(body.player_id ?? body.playerId ?? body.email);
@@ -220,13 +240,14 @@ function compactRepairError(error) {
 function repairPayloadVariants({ tableName, requester, resolvedUserUuid, teamId, name }) {
   const displayName = String(name || requester || "Player").trim();
   if (tableName === "players") {
+    const userIdentity = resolvedUserUuid || requester;
     return [
-      { row: { email: requester, player_id: requester, team_id: teamId, name: displayName, role: "player", status: "active" }, onConflict: "team_id,email" },
-      { row: { email: requester, player_id: requester, team_id: teamId, name: displayName }, onConflict: "team_id,email" },
-      { row: { email: requester, playerId: requester, teamId, name: displayName, role: "player", status: "active" }, onConflict: "teamId,email" },
-      { row: { email: requester, playerId: requester, teamId, name: displayName }, onConflict: "teamId,email" },
-      { row: { email: requester, user_id: resolvedUserUuid || requester, team_id: teamId, name: displayName, role: "player", status: "active" }, onConflict: "team_id,email" },
-      { row: { email: requester, userId: resolvedUserUuid || requester, teamId, name: displayName, role: "player", status: "active" }, onConflict: "teamId,email" },
+      { row: { email: requester, team_id: teamId, name: displayName, role: "player", status: "active" }, onConflict: "team_id,email" },
+      { row: { email: requester, team_id: teamId, name: displayName }, onConflict: "team_id,email" },
+      { row: { email: requester, teamId, name: displayName, role: "player", status: "active" }, onConflict: "teamId,email" },
+      { row: { email: requester, teamId, name: displayName }, onConflict: "teamId,email" },
+      { row: { email: requester, user_id: userIdentity, team_id: teamId, name: displayName, role: "player", status: "active" }, onConflict: "team_id,email" },
+      { row: { email: requester, userId: userIdentity, teamId, name: displayName, role: "player", status: "active" }, onConflict: "teamId,email" },
     ];
   }
   const identityVariants = uniqueNormalized([resolvedUserUuid, requester]);
@@ -277,6 +298,7 @@ async function probeHomeShotPlayerBinding(env, { requester, resolvedUserUuid, te
   let hasEmailMembership = false;
   let hasUuidMembership = false;
   let hasPlayerRecord = false;
+  let matchedPlayerRow = null;
   const membershipTeamColumns = ["team_id", "teamId"];
   const membershipIdentityColumns = ["user_id", "userId", "email"];
 
@@ -304,23 +326,22 @@ async function probeHomeShotPlayerBinding(env, { requester, resolvedUserUuid, te
     diagnostic.email_membership_query_result = membershipByEmail.result || (hasEmailMembership ? "match" : "0");
   }
 
-  if (!hasEmailMembership && !hasUuidMembership) {
-    diagnostic.player_record_query_attempted = "yes";
-    const playerRecord = await findActiveRowByFlexibleColumns(env, { tableName: "players", teamColumns: ["team_id", "teamId"], identityColumns: ["email", "user_id", "userId", "player_id", "playerId", "id"], teamId, identities: [requester, resolvedUserUuid], activeRowPredicate: isActivePlayerRow });
-    if (playerRecord.fatal) {
-      diagnostic.player_record_query_result = `error:${safeErrorMessage(playerRecord.fatal)}`;
-      return { ok: false, fatal: playerRecord.fatal, error: "player_record_query_failed", stage: "player_record_lookup", message: "Failed to check player record." };
-    }
-    hasPlayerRecord = playerRecord.found;
-    diagnostic.player_record_query_result = playerRecord.result || (hasPlayerRecord ? "match" : "0");
+  diagnostic.player_record_query_attempted = "yes";
+  const playerRecord = await findActiveRowByFlexibleColumns(env, { tableName: "players", teamColumns: ["team_id", "teamId"], identityColumns: ["email", "user_id", "userId", "player_id", "playerId", "id"], teamId, identities: [requester, resolvedUserUuid], activeRowPredicate: isActivePlayerRow });
+  if (playerRecord.fatal) {
+    diagnostic.player_record_query_result = `error:${safeErrorMessage(playerRecord.fatal)}`;
+    return { ok: false, fatal: playerRecord.fatal, error: "player_record_query_failed", stage: "player_record_lookup", message: "Failed to check player record." };
   }
+  hasPlayerRecord = playerRecord.found;
+  matchedPlayerRow = hasPlayerRecord ? playerRecord.row || null : null;
+  diagnostic.player_record_query_result = playerRecord.result || (hasPlayerRecord ? "match" : "0");
 
   let authorizedBy = "none";
   if (hasEmailMembership) authorizedBy = "email";
   if (!hasEmailMembership && hasUuidMembership) authorizedBy = "uuid";
   if (!hasEmailMembership && !hasUuidMembership && hasPlayerRecord) authorizedBy = "player_record";
   diagnostic.authorized_by = authorizedBy;
-  return { ok: authorizedBy !== "none", authorizedBy };
+  return { ok: authorizedBy !== "none", authorizedBy, playerRow: matchedPlayerRow };
 }
 
 async function resolveOrRepairHomeShotPlayerBinding(env, { request, requester, resolvedUserUuid, teamId, name, legacyProfileFallback }, diagnostic) {
@@ -329,7 +350,7 @@ async function resolveOrRepairHomeShotPlayerBinding(env, { request, requester, r
   if (legacyProfileFallback?.verified) {
     diagnostic.legacy_profile_fallback_result = legacyProfileFallback.result || "verified";
     diagnostic.authorized_by = "legacy_profile";
-    return { ok: true, authorizedBy: "legacy_profile" };
+    return { ok: true, authorizedBy: "legacy_profile", playerRow: null };
   }
   diagnostic.team_binding_repair_attempted = "yes";
   const repairAllowed = await verifyRepairIsAllowed(env, { requester, teamId }, diagnostic);
@@ -462,16 +483,19 @@ export async function onRequestPost({ request, env, data = {} }) {
   const rowId = String(body.id || "").trim() || `shotlog_${Date.now()}_${randomSuffix}`;
   const ts = normalizeTimestamp(body.ts);
 
-  const preferredPlayerId = resolvedUserUuid || requester;
-  const alternatePlayerId = resolvedUserUuid ? requester : "";
-  diagnostic.shot_logs_player_id_source = resolvedUserUuid ? "resolved_uuid" : "requester_email";
+  const hasMatchedPlayerRow = Boolean(binding.playerRow);
+  const rosterPlayerKey = deriveRosterPlayerKey(binding.playerRow);
+  const rosterTeamKey = deriveRosterTeamKey(binding.playerRow, teamId);
+  const preferredPlayerId = hasMatchedPlayerRow ? rosterPlayerKey : requester;
+  const alternatePlayerId = "";
+  diagnostic.shot_logs_player_id_source = rosterPlayerKey ? "matched_player_roster_key" : hasMatchedPlayerRow ? "matched_player_missing_roster_key" : "requester_email";
 
   const row = {
     id: rowId,
     email: requester,
     name: String(body.name || "").trim() || requester,
     player_id: preferredPlayerId,
-    team_id: teamId,
+    team_id: rosterTeamKey,
     made,
     date,
     ts,

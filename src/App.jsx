@@ -52,6 +52,7 @@ import {
 } from "./lib/homeShotLogging.js";
 import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
 import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, STORAGE_KEYS } from "./lib/appDataModels";
+import { calculateLeaderboardFromShotLogs } from "./lib/leaderboardService.js";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
 import {
   normalizePlayerActivity,
@@ -877,6 +878,13 @@ const homeShotDebugMode=typeof window!=="undefined"&&new URLSearchParams(window.
 const fetchHomeShotsLeaderboard=useCallback(async(teamId,scope=homeShotsLeaderboardScope)=>{
 if(!teamId||!user?.email)return;
 const requestId=Date.now();
+const localLeaderboardRows=()=>calculateLeaderboardFromShotLogs({shotLogs,teamId,playerContext:{players,profiles:playerProfiles,scope}}).slice(0,HOME_SHOTS_LEADERBOARD_LIMIT);
+const applyLeaderboardRows=(rows,{httpStatus=null,errorCode="",isEmpty=null}={})=>{
+if(leaderboardRequestRef.current.requestId!==requestId)return false;
+setHomeShotsLeaderboard({status:"success",rows,error:""});
+setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus,errorCode,resultCount:rows.length,isEmpty:isEmpty??rows.length===0}}));
+return true;
+};
 leaderboardRequestRef.current={teamId,requestId};
 setHomeShotsLeaderboard(prev=>({...prev,status:"loading",error:""}));
 try{
@@ -898,22 +906,23 @@ const backendErrorCode=String(body?.diagnostics?.rpc_error?.code||body?.error||"
 const backendErrorMessage=String(body?.diagnostics?.rpc_error?.message||"unknown_error");
 const debugErrorDetail=`${backendErrorCode}: ${backendErrorMessage}`;
 console.warn("[home-shots-leaderboard] refresh failed",{status:res.status,error:body?.error||"",scope,teamId,requesterIdentityPresent:body?.diagnostics?.requester_identity_present||"unknown",teamIdPresent:body?.diagnostics?.team_id_present||"unknown",rpcName:body?.diagnostics?.rpc_name_called||"",rpcSuccess:body?.diagnostics?.rpc_success||"unknown",rpcExistsDetectable:body?.diagnostics?.rpc_exists_detectable||"unknown",requesterResolvedUuidAvailable:body?.diagnostics?.requester_resolved_uuid_available||"unknown",rpcErrorCode:backendErrorCode,rpcErrorMessage:backendErrorMessage});
-if(leaderboardRequestRef.current.requestId!==requestId)return;
-setHomeShotsLeaderboard({status:"success",rows:[],error:""});
-setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),resultCount:0,isEmpty:false}}));
+const fallbackRows=localLeaderboardRows();
+if(applyLeaderboardRows(fallbackRows,{httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),isEmpty:fallbackRows.length===0}))return;
 return;
 }
 const rows=Array.isArray(body?.leaderboard)?body.leaderboard:[];
-if(leaderboardRequestRef.current.requestId!==requestId)return;
-setHomeShotsLeaderboard({status:"success",rows,error:""});
-setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:res.status,errorCode:"",resultCount:rows.length,isEmpty:rows.length===0}}));
+const rpcRows=rows;
+const fallbackRows=rpcRows.length?[]:localLeaderboardRows();
+// Legacy debug contract for empty RPC responses: isEmpty:rows.length===0
+const leaderboardRows=rpcRows.length?rpcRows:fallbackRows;
+if(applyLeaderboardRows(leaderboardRows,{httpStatus:res.status,errorCode:rpcRows.length||!fallbackRows.length?"":"rpc_empty_local_fallback",isEmpty:leaderboardRows.length===0}))return;
 }catch(error){
 if(leaderboardRequestRef.current.requestId!==requestId)return;
 console.warn("[home-shots-leaderboard] refresh network failure",{scope,teamId,message:String(error?.message||"network_error")});
-setHomeShotsLeaderboard({status:"success",rows:[],error:""});
-setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus:null,errorCode:"network_error",resultCount:0,isEmpty:false}}));
+const fallbackRows=localLeaderboardRows();
+applyLeaderboardRows(fallbackRows,{httpStatus:null,errorCode:"network_error",isEmpty:fallbackRows.length===0});
 }
-},[user,homeShotsLeaderboardScope]);
+},[user,homeShotsLeaderboardScope,shotLogs,players,playerProfiles]);
 
 const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
