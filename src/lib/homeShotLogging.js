@@ -4,14 +4,6 @@ const normalizeEmail = (value) => asText(value).toLowerCase();
 export const HOME_SHOT_MAX_MADE = 10000;
 export const HOME_SHOT_VALIDATION_MESSAGE = 'Enter a whole number from 1 to 10,000 before logging shots.';
 export const HOME_SHOT_SYNC_ERROR_MESSAGE = 'Could not save home shots to team dashboard. Please try again.';
-export const HOME_SHOT_SYNC_DIAGNOSTIC_CODES = new Set([
-  'missing_user_identity',
-  'identity_mismatch',
-  'forbidden',
-  'membership_uuid_query_failed',
-  'persist_failed',
-  'network_error',
-]);
 
 export function parsePositiveInteger(value) {
   const raw = String(value ?? '').trim();
@@ -45,7 +37,7 @@ export function buildLocalHomeShotLog({ id, user, made, date, ts = Date.now() } 
     made: Number(made) || 0,
     date: asText(date),
     ts,
-    syncState: 'local_pending',
+    syncState: 'syncing',
     syncSource: 'local',
   };
 }
@@ -69,6 +61,7 @@ export function normalizeSavedHomeShotLog(saved = {}, fallback = {}) {
 export function shouldUseQuietHomeShotFallback({ status, errorCode, message, isExplicitDemoOrLocal = false, isOffline = false, isMembershipPending = false } = {}) {
   const normalizedCode = asText(errorCode).toLowerCase();
   const normalizedMessage = asText(message).toLowerCase();
+  const numericStatus = Number(status) || 0;
   const explicitLocalOnlyCodes = new Set([
     'missing_user_identity',
     'team_id_required',
@@ -77,14 +70,56 @@ export function shouldUseQuietHomeShotFallback({ status, errorCode, message, isE
     'unauthorized',
     'not_found',
   ]);
+  const registeredBindingFailureCodes = new Set([
+    'forbidden',
+    'missing_durable_team_binding',
+    'player_record_query_failed',
+    'membership_uuid_query_failed',
+    'membership_email_query_failed',
+  ]);
+  const membershipMissing =
+    registeredBindingFailureCodes.has(normalizedCode) ||
+    normalizedMessage.includes('no active membership') ||
+    normalizedMessage.includes('missing durable membership');
+
   if (isOffline || normalizedCode === 'network_error') return true;
+  if (membershipMissing) return Boolean(isExplicitDemoOrLocal);
+  if (numericStatus >= 500 || normalizedCode === 'persist_failed') return false;
   if (isExplicitDemoOrLocal && explicitLocalOnlyCodes.has(normalizedCode)) return true;
-  if (isExplicitDemoOrLocal && [401, 404].includes(Number(status))) return true;
-  const membershipMissing = normalizedCode === 'forbidden' || normalizedMessage.includes('no active membership') || normalizedMessage.includes('missing durable membership');
-  if (membershipMissing) return Boolean(isExplicitDemoOrLocal || isMembershipPending);
+  if (isExplicitDemoOrLocal && [401, 404].includes(numericStatus)) return true;
+  if (isMembershipPending && isExplicitDemoOrLocal) return true;
   return false;
 }
 
+
+
+export function extractHomeShotSyncDiagnostic(error) {
+  const diagnostic = error?.body?.diagnostic || {};
+  const pick = (key) => asText(diagnostic?.[key]);
+  return {
+    status: Number(error?.status || diagnostic?.status || 0) || null,
+    error: asText(error?.body?.error || error?.message || 'sync_failed') || 'sync_failed',
+    stage: pick('stage'),
+    message: pick('message'),
+    authorized_by: pick('authorized_by'),
+    uuid_membership_query_result: pick('uuid_membership_query_result'),
+    email_membership_query_result: pick('email_membership_query_result'),
+    player_record_query_result: pick('player_record_query_result'),
+    team_binding_repair_attempted: pick('team_binding_repair_attempted'),
+    team_binding_repair_account_probe: pick('team_binding_repair_account_probe'),
+    team_binding_repair_players_result: pick('team_binding_repair_players_result'),
+    team_binding_repair_memberships_result: pick('team_binding_repair_memberships_result'),
+    team_binding_repair_result: pick('team_binding_repair_result'),
+  };
+}
+
+export function formatHomeShotSyncIssueMessage({ errorCode, diagnosticMessage } = {}) {
+  const normalizedCode = asText(errorCode).toLowerCase();
+  if (normalizedCode === 'missing_durable_team_binding' || normalizedCode === 'forbidden') {
+    return 'Your player account is not durably linked to this team yet.';
+  }
+  return asText(diagnosticMessage) || HOME_SHOT_SYNC_ERROR_MESSAGE;
+}
 
 
 export function normalizeHomeShotRemoteException(error) {
@@ -95,15 +130,11 @@ export function normalizeHomeShotRemoteException(error) {
 }
 
 
-export function formatHomeShotSyncDiagnostic(errorCode) {
-  const code = asText(errorCode) || 'sync_failed';
-  return `${HOME_SHOT_SYNC_ERROR_MESSAGE} Sync error: ${code}`;
-}
-
 export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = false } = {}) {
   const normalizedError = normalizeHomeShotRemoteException(error);
   const errorCode = asText(normalizedError?.body?.error || normalizedError?.message || 'sync_failed') || 'sync_failed';
   const diagnosticMessage = asText(normalizedError?.body?.diagnostic?.message);
+  const diagnostic = extractHomeShotSyncDiagnostic(normalizedError);
   const quietFallback = shouldUseQuietHomeShotFallback({
     status: normalizedError?.status,
     errorCode,
@@ -111,6 +142,7 @@ export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = f
     ...quietContext,
   });
   const syncState = quietFallback ? 'local_pending' : 'failed_sync';
+  const baseError = HOME_SHOT_SYNC_ERROR_MESSAGE;
   return {
     ok: quietFallback,
     mode: syncState,
@@ -118,9 +150,11 @@ export function resolveHomeShotSaveFailure({ error, quietContext = {}, debug = f
     error: errorCode,
     errorCode,
     diagnosticMessage,
+    diagnostic,
+    issueMessage: formatHomeShotSyncIssueMessage({ errorCode, diagnosticMessage }),
     quietFallback,
     status: normalizedError?.status || null,
-    statSyncError: quietFallback ? '' : formatHomeShotSyncDiagnostic(errorCode),
+    statSyncError: quietFallback ? '' : debug ? `${baseError} Error: ${errorCode}` : baseError,
   };
 }
 
@@ -131,7 +165,7 @@ export function resolveHomeShotRetryFailure({ quietFallback = false, errorCode =
     mode: syncState,
     syncState,
     error: asText(errorCode) || 'sync_failed',
-    statSyncError: quietFallback ? '' : formatHomeShotSyncDiagnostic(errorCode),
+    statSyncError: quietFallback ? '' : HOME_SHOT_SYNC_ERROR_MESSAGE,
   };
 }
 
