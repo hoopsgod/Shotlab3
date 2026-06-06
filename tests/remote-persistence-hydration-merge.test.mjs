@@ -77,7 +77,7 @@ test('sl:shotlogs remote hydration marks missing syncState rows remote_saved for
 });
 
 
-test('sl:shotlogs local storage remote_saved rows become retry-visible until remote hydration confirms them', () => {
+test('sl:shotlogs local storage remote_saved rows become background_saved until remote hydration confirms them', () => {
   const [localStale] = buildAppRows('sl:shotlogs', [{
     id: 'shot-local-stale',
     email: 'player@one.com',
@@ -87,11 +87,11 @@ test('sl:shotlogs local storage remote_saved rows become retry-visible until rem
     syncState: 'remote_saved',
   }], { source: 'local' });
 
-  assert.equal(localStale.syncState, 'local_pending');
+  assert.equal(localStale.syncState, 'background_saved');
   assert.equal(localStale.syncSource, 'local');
-  assert.equal(localStale.syncError, 'remote_saved_unconfirmed');
+  assert.equal(localStale.syncError || '', '');
   assert.equal(localStale.syncState === 'remote_saved' && localStale.syncSource === 'remote', false);
-  assert.equal(localStale.syncState === 'local_pending' || localStale.syncState === 'failed_sync', true);
+  assert.equal(localStale.syncState === 'failed_sync', false);
 });
 
 
@@ -107,7 +107,7 @@ test('sl:shotlogs local remote_saved row with matching remote row becomes remote
   ]);
 });
 
-test('sl:shotlogs local pending/failed survive hydration and stay distinct from remote_saved', () => {
+test('sl:shotlogs stale local_pending rows hydrate to background_saved while failed_sync survives', () => {
   const rows = buildAppRows('sl:shotlogs', [
     { id: 'pending', email: 'p@x.com', playerId: 'p@x.com', teamId: 't1', made: 7, syncState: 'local_pending', syncError: 'offline' },
     { id: 'failed', email: 'p@x.com', playerId: 'p@x.com', teamId: 't1', made: 9, syncState: 'failed_sync', syncError: 'persist_failed' },
@@ -115,11 +115,11 @@ test('sl:shotlogs local pending/failed survive hydration and stay distinct from 
   ], { source: 'local' });
 
   assert.deepEqual(rows.map((row) => [row.id, row.syncState, row.syncSource]), [
-    ['pending', 'local_pending', 'local'],
+    ['pending', 'background_saved', 'local'],
     ['failed', 'failed_sync', 'local'],
-    ['legacy', 'local_pending', 'local'],
+    ['legacy', 'background_saved', 'local'],
   ]);
-  assert.equal(rows.find((row) => row.id === 'legacy').syncError, 'legacy_missing_sync_state');
+  assert.equal(rows.find((row) => row.id === 'legacy').syncError || '', '');
 });
 
 test('sl:shotlogs hydration merge keeps local retry rows and lets remote rows become coach-visible', () => {
@@ -134,7 +134,7 @@ test('sl:shotlogs hydration merge keeps local retry rows and lets remote rows be
   const merged = mergeHydratedRows('sl:shotlogs', local, remote);
 
   assert.deepEqual(merged.map((row) => [row.id, row.syncState, row.syncSource, row.made]), [
-    ['pending', 'local_pending', 'local', 7],
+    ['pending', 'background_saved', 'local', 7],
     ['same-id', 'remote_saved', 'remote', 15],
     ['remote-only', 'remote_saved', 'remote', 20],
   ]);
@@ -153,8 +153,9 @@ test('sl:shotlogs legacy missing syncState only becomes coach-visible with remot
 
   const merged = mergeHydratedRows('sl:shotlogs', localLegacy, remoteLegacy);
   const coachVisible = merged.filter((row) => row.syncState === 'remote_saved' && row.syncSource === 'remote');
-  const retryVisible = merged.filter((row) => row.syncState === 'local_pending' || row.syncState === 'failed_sync');
+  const retryVisible = merged.filter((row) => row.syncState === 'failed_sync');
 
   assert.deepEqual(coachVisible.map((row) => row.id), ['legacy-confirmed']);
-  assert.deepEqual(retryVisible.map((row) => [row.id, row.syncError]), [['legacy-local-only', 'legacy_missing_sync_state']]);
+  assert.deepEqual(retryVisible.map((row) => [row.id, row.syncError]), []);
+  assert.equal(merged.find((row) => row.id === 'legacy-local-only').syncState, 'background_saved');
 });

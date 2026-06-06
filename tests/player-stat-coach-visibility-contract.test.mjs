@@ -15,13 +15,15 @@ test('player at-home shots save uses backend endpoint and safely updates local s
   assert.match(source, /const saveFailure=resolveHomeShotSaveFailure\(\{error:e,quietContext:buildHomeShotQuietContext\(\),debug:homeShotDebugMode\}\)/);
 });
 
-test('failed_sync/local_pending retry UI is available in At Home and ShotTracker views', () => {
+test('failed_sync retry UI is available in At Home and ShotTracker views while local_pending stays hidden', () => {
   assert.match(source, /function HomeShotSyncRetryPanel\(\{syncIssueShots=\[\],retryHomeShotLog,setShotSaveNotice\}\)\{/);
   assert.match(source, /TEAM SYNC NEEDS ATTENTION/);
   assert.match(source, /RETRY SYNC/);
   assert.match(source, /disabled=\{isRetrying\}/);
   assert.match(source, /SYNCING…/);
   assert.equal((source.match(/<HomeShotSyncRetryPanel syncIssueShots=\{syncIssueShots\}/g)||[]).length, 2);
+  assert.match(source, /s\.syncState==="failed_sync"/);
+  assert.doesNotMatch(source, /s\.syncState==="local_pending"\|\|s\.syncState==="failed_sync"/);
 });
 
 test('coach/team scoped data path filters shot logs by active team id', () => {
