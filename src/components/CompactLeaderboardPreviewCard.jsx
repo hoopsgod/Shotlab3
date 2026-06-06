@@ -33,7 +33,7 @@ export default function CompactLeaderboardPreviewCard({
 
   const previewRows = safeRows.slice(0, Math.max(1, limit));
   const message = emptyMessage || (isCoachMode ? DEFAULT_COACH_EMPTY : DEFAULT_PLAYER_EMPTY);
-  const hasRows = status === "success" && previewRows.length > 0;
+  const hasRows = previewRows.length > 0;
 
   return (
     <section style={{...compactCardStyle,boxShadow:"0 10px 24px rgba(0,0,0,0.22)",border:"1px solid color-mix(in srgb,var(--accent) 24%, var(--stroke-1))"}} aria-live="polite">

@@ -10,7 +10,7 @@ test('smoke: dashboard and required surfaces exist in runtime source', () => {
 });
 
 test('fallback contracts: missing leaderboard/team/progress/demo data are handled defensively', () => {
-  ['homeShotsLeaderboard?.status||"idle"','homeShotsLeaderboard?.rows||[]','homeShotsLeaderboard?.error||""','Array.isArray(events)?events:[]','derivePlayerProgressProfile({playerEmail:u.email,shotLogs,scores,rsvps,events,players})'].forEach((token)=> assert.equal(appSource.includes(token), true));
+  ['requestedStatus=typeof homeShotsLeaderboard?.status==="string"?homeShotsLeaderboard.status:"idle"','playerLeaderboardState.rows','homeShotsLeaderboard?.error||""','Array.isArray(events)?events:[]','derivePlayerProgressProfile({playerEmail:u.email,shotLogs,scores,rsvps,events,players})'].forEach((token)=> assert.equal(appSource.includes(token), true));
 });
 
 test('leaderboard card has empty and error fallbacks', () => {

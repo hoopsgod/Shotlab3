@@ -33,7 +33,7 @@ test('dashboard source keeps coach tabs without reintroducing Coaches tab', () =
 
 test('compact preview supports safe empty fallback states', () => {
   assert.match(compactCardSource, /No leaderboard data yet\. Log shots to enter the rankings\./);
-  assert.match(compactCardSource, /status === "success" && previewRows.length > 0/);
+  assert.match(compactCardSource, /const hasRows = previewRows.length > 0/);
   assert.match(compactCardSource, /categoryLabel = "Home Shots"/);
   assert.match(compactCardSource, /areaTitle = "Leaderboards"/);
   assert.match(compactCardSource, /View all leaderboards/);
