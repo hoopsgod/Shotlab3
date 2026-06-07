@@ -1,3 +1,10 @@
+const DEMO_ACCOUNT_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
+
+export function isDemoAccount(userOrEmail) {
+  const email = typeof userOrEmail === "string" ? userOrEmail : userOrEmail?.email;
+  return DEMO_ACCOUNT_EMAILS.has(String(email || "").trim().toLowerCase());
+}
+
 export function isDemoMode() {
   if (typeof window === "undefined") return false;
   const search = window.location.search;

@@ -11,6 +11,7 @@ import {
   upsertHomeShotsLeaderboardRow,
   validateHomeShotLogInput,
 } from '../src/lib/homeShotLogging.js';
+import { isDemoAccount } from '../src/lib/demoMode.js';
 import { onRequestPost } from '../functions/v1/home-shots/log.js';
 import { readFile } from 'node:fs/promises';
 
@@ -316,8 +317,9 @@ test('index.html does not use a MutationObserver workaround to hide Team Sync pa
 
 test('stale local_pending or background_saved rows do not show the orange retry panel, but failed_sync rows do', async () => {
   const source = await readFile(APP_PATH, 'utf8');
-  assert.match(source, /const syncIssueShots=useMemo\(\(\)=>shotLogs\.filter\(s=>s\.email===u\.email&&\(s\.syncState==="failed_sync"\)\),\[shotLogs,u\.email\]\)/);
-  assert.match(source, /const syncIssueShots=useMemo\(\(\)=>my\.filter\(s=>s\.syncState==="failed_sync"\),\[my\]\)/);
+  assert.match(source, /const isDemoHomeShotSession=isDemoMode\(\)\|\|isDemoAccount\(u\)/);
+  assert.match(source, /const syncIssueShots=useMemo\(\(\)=>isDemoHomeShotSession\?\[\]:shotLogs\.filter\(s=>s\.email===u\.email&&\(s\.syncState==="failed_sync"\)\),\[isDemoHomeShotSession,shotLogs,u\.email\]\)/);
+  assert.match(source, /const syncIssueShots=useMemo\(\(\)=>isDemoHomeShotSession\?\[\]:my\.filter\(s=>s\.syncState==="failed_sync"\),\[isDemoHomeShotSession,my\]\)/);
   assert.doesNotMatch(source, /syncState==="local_pending"\|\|s\.syncState==="failed_sync"/);
   assert.doesNotMatch(source, /syncState==="background_saved"\|\|s\.syncState==="failed_sync"/);
   assert.match(source, /TEAM SYNC NEEDS ATTENTION/);
@@ -415,6 +417,35 @@ test('registered server failures stay failed_sync while offline and demo expecte
   assert.equal(shouldUseQuietHomeShotFallback({ status: 500, errorCode: 'player_record_query_failed', isExplicitDemoOrLocal: false }), false);
   assert.equal(shouldUseQuietHomeShotFallback({ status: 500, errorCode: 'membership_uuid_query_failed', isExplicitDemoOrLocal: false }), false);
   assert.equal(shouldUseQuietHomeShotFallback({ status: 500, errorCode: 'membership_email_query_failed', isExplicitDemoOrLocal: false }), false);
+});
+
+
+test('Demo Player logs 123 shots locally without Team Sync warning or retry repair', async () => {
+  const source = await readFile(APP_PATH, 'utf8');
+  const demoUser = { email: 'demo@shotlab.app', teamId: 'demo-team', name: 'Demo Player' };
+  const demoLog = buildLocalHomeShotLog({ id: 'shotlog-demo-123', user: demoUser, made: 123, date: '2026-06-07', ts: 123 });
+  const demoSavedLog = { ...demoLog, syncState: 'local_pending', syncSource: 'local', syncError: '', syncDiagnostic: null };
+  const visibleTodayTotal = [demoSavedLog].filter((s) => s.email === demoUser.email && s.date === '2026-06-07').reduce((sum, row) => sum + row.made, 0);
+  const syncIssueShots = isDemoAccount(demoUser) ? [] : [demoSavedLog].filter((s) => s.syncState === 'failed_sync');
+
+  assert.equal(visibleTodayTotal, 123);
+  assert.equal(syncIssueShots.length, 0);
+  assert.match(source, new RegExp('if\\(isDemoMode\\(\\)\\|\\|isDemoAccount\\(user\\)\\)\\{[\\s\\S]*return\\{ok:true,mode:"demo_saved",syncState:"local_pending",demo:true\\};[\\s\\S]*try\\{\\nconst savedLog=await saveHomeShotLogRemote\\(localLog\\);'));
+  assert.match(source, /isDemoSession\|\|!syncIssueShots\.length\)return null/);
+  assert.match(source, /isDemoHomeShotSession\?\[\]:shotLogs\.filter/);
+  assert.match(source, /isDemoHomeShotSession\?\[\]:my\.filter/);
+});
+
+test('registered player with missing durable team link still sees Team Sync warning path', async () => {
+  const source = await readFile(APP_PATH, 'utf8');
+  const registeredUser = { email: 'player@team.com', teamId: 'team-a', name: 'Registered Player' };
+  const failedLog = { id: 'failed-shot', email: registeredUser.email, teamId: registeredUser.teamId, made: 20, date: '2026-06-07', syncState: 'failed_sync', syncError: 'missing_durable_team_binding' };
+  const syncIssueShots = isDemoAccount(registeredUser) ? [] : [failedLog].filter((s) => s.syncState === 'failed_sync');
+
+  assert.equal(syncIssueShots.length, 1);
+  assert.match(source, /TEAM SYNC NEEDS ATTENTION/);
+  assert.match(source, /RETRY SYNC/);
+  assert.match(source, /Your player account is not durably linked to this team yet\. Ask your coach to review your team link\./);
 });
 
 test('registered missing durable team binding is not a quiet fallback and keeps debug diagnostics', () => {
