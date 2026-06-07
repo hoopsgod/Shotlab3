@@ -1,3 +1,4 @@
+import { isDemoPlayerSessionShotLog } from "./demoMode.js";
 const STORAGE_KEYS = Object.freeze({
   teams: "sl:teams",
   players: "sl:players",
@@ -154,6 +155,17 @@ export async function clearDemoData() {
   });
   for (const key of keys) {
     if (typeof window !== "undefined") {
+      if (key === "sl:shotlogs") {
+        const stored = window.localStorage?.getItem(key);
+        const rows = stored ? JSON.parse(stored) : [];
+        const preserved = Array.isArray(rows) ? rows.filter((row) => !isDemoPlayerSessionShotLog(row)) : [];
+        const json = JSON.stringify(preserved);
+        if (window.localStorage) window.localStorage.setItem(key, json);
+        if (window.storage && typeof window.storage.set === "function") {
+          await window.storage.set(key, json, true);
+        }
+        continue;
+      }
       if (window.localStorage) window.localStorage.removeItem(key);
       if (window.storage && typeof window.storage.set === "function") {
         await window.storage.set(key, JSON.stringify([]), true);

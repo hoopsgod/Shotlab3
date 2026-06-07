@@ -16,7 +16,9 @@ test('player at-home shots save uses backend endpoint and safely updates local s
 });
 
 test('failed_sync retry UI is available in At Home and ShotTracker views while local_pending stays hidden', () => {
-  assert.match(source, /function HomeShotSyncRetryPanel\(\{syncIssueShots=\[\],retryHomeShotLog,setShotSaveNotice\}\)\{/);
+  assert.match(source, /function HomeShotSyncRetryPanel\(\{syncIssueShots=\[\],retryHomeShotLog,setShotSaveNotice,isDemoSession=false\}\)\{/);
+  assert.match(source, /const visibleSyncIssueShots=syncIssueShots\.filter\(log=>!isDemoAccount\(log\)\)/);
+  assert.match(source, /if\(isDemoSession\|\|!visibleSyncIssueShots\.length\)return null/);
   assert.match(source, /TEAM SYNC NEEDS ATTENTION/);
   assert.match(source, /RETRY SYNC/);
   assert.match(source, /disabled=\{isRetrying\}/);
