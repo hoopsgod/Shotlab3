@@ -171,7 +171,8 @@ export function createLeaderboardService({ supabaseClient } = {}) {
         teamId,
         playerContext: { players: playerRows.length ? playerRows : fallbackPlayers, profiles: profileRows.length ? profileRows : fallbackProfiles, scope },
       })
-      return { ok: true, data: rows, mode: 'supabase' }
+      const localFallbackRows = rows.length ? [] : fallbackRows()
+      return { ok: true, data: rows.length ? rows : localFallbackRows, mode: 'supabase', rpcResultCount: rows.length, fallbackResultCount: localFallbackRows.length }
     } catch {
       return toDemo(fallbackRows(), 'backend_unavailable')
     }
