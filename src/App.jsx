@@ -773,6 +773,109 @@ const _PAGE_SIGNATURE_CSS=`
 const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);} .team-brand .pageHeaderBadge,.team-brand .pageAccentBar{background:var(--team-brand-header-accent)!important;box-shadow:0 0 16px color-mix(in srgb,var(--team-brand-header-accent) 44%, transparent)!important;}.team-brand .pageHeaderPill{border-color:var(--team-brand-badge-border)!important;background:var(--team-brand-badge-bg)!important;color:var(--team-brand-badge-text)!important;}.team-brand .cta-primary,.team-brand .cta-primary-accent{background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 100%),var(--team-brand-primary)!important;color:var(--team-brand-primary-text)!important;box-shadow:0 4px 24px color-mix(in srgb,var(--team-brand-primary) 30%, transparent)!important;}.team-brand .bottom-nav .tab.is-active,.team-brand .bottom-nav .tab.active{color:var(--team-brand-nav-active)!important;}.team-brand .bottom-nav .tab.is-active::before,.team-brand .bottom-nav .tab.active::before{background:var(--team-brand-nav-active)!important;}.team-brand .chip,.team-brand .badge,[class*="chip"],[class*="badge"]{background:var(--team-brand-badge-bg)!important;border-color:var(--team-brand-badge-border)!important;color:var(--team-brand-badge-text)!important;}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
 const Styles=()=><><style>{_STYLES_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style></>;
 
+// TODO before App Store submission: replace these with final ShotLab support/privacy emails.
+const SUPPORT_EMAIL = "YOUR_REAL_SUPPORT_EMAIL_HERE";
+const PRIVACY_EMAIL = "YOUR_REAL_PRIVACY_EMAIL_HERE";
+const LEGAL_ROUTES={
+  "/privacy":{
+    title:"Privacy Policy",
+    eyebrow:"Legal",
+    updated:"Last updated: June 7, 2026",
+    intro:"This placeholder launch policy explains the basic data practices for ShotLab while the production legal copy is finalized.",
+    sections:[
+      {heading:"Information we collect",body:"ShotLab may collect account details such as name, email address, role, team membership, coach invite status, and app activity needed to provide player and coach experiences."},
+      {heading:"Training and team data",body:"The app stores basketball development information such as drill progress, event RSVPs, score history, home shot activity, and profile settings so players and coaches can use the app."},
+      {heading:"How we use information",body:"We use information to authenticate users, connect players with teams, show progress in the app, maintain app reliability, and respond to support or privacy requests."},
+      {heading:"Sharing",body:"We do not sell personal information. Team information may be visible to the relevant player, coach, or team surfaces inside ShotLab based on role and membership."},
+      {heading:"Retention and deletion",body:`You can request account or data deletion from the Delete Account / Data Request page or by emailing ${PRIVACY_EMAIL}.`},
+      {heading:"Contact",body:`Privacy questions can be sent to ${PRIVACY_EMAIL}.`},
+    ],
+  },
+  "/terms":{
+    title:"Terms of Use",
+    eyebrow:"Legal",
+    updated:"Last updated: June 7, 2026",
+    intro:"These placeholder launch terms describe the basic expectations for using ShotLab until final legal terms are published.",
+    sections:[
+      {heading:"Use of ShotLab",body:"ShotLab is provided to help basketball players and coaches organize offseason development, team membership, training activity, and app-based progress tracking."},
+      {heading:"Accounts",body:"You are responsible for keeping your login information accurate and secure. Coaches and players should only access teams and data they are authorized to use."},
+      {heading:"Acceptable use",body:"Do not misuse the app, attempt to access accounts or teams without permission, disrupt the service, or upload content that violates applicable laws or team policies."},
+      {heading:"No professional advice",body:"ShotLab is a software tool and does not provide medical, legal, or professional training advice. Users and teams are responsible for safe training decisions."},
+      {heading:"Changes",body:"We may update these terms as the app evolves. Continued use of ShotLab means you accept the latest terms available in the app."},
+      {heading:"Contact",body:`Questions about these terms can be sent to ${SUPPORT_EMAIL}.`},
+    ],
+  },
+  "/support":{
+    title:"Support",
+    eyebrow:"Help",
+    updated:"Launch support",
+    intro:"Need help with ShotLab? Use the contact details below and include enough context for the team to investigate.",
+    sections:[
+      {heading:"Email support",body:`Contact ${SUPPORT_EMAIL} for app access, team invite, account, or general support questions.`},
+      {heading:"What to include",body:"Please include your name, email address, whether you are a player or coach, your team name or join code if relevant, the page where the issue happened, and screenshots if available."},
+      {heading:"App reviewer notes",body:"App reviewers can access Privacy Policy, Terms of Use, Support, and Delete Account / Data Request pages from the sign-in screen before logging in."},
+      {heading:"Privacy requests",body:`For privacy-specific questions, contact ${PRIVACY_EMAIL}.`},
+    ],
+  },
+  "/delete-account":{
+    title:"Delete Account / Data Request",
+    eyebrow:"Privacy request",
+    updated:"Launch request process",
+    intro:"Use this page to request account deletion, data deletion, or access to your ShotLab data.",
+    sections:[
+      {heading:"How to request deletion",body:`Email ${PRIVACY_EMAIL} with the subject “ShotLab Delete Account Request” and include the email address on your ShotLab account.`},
+      {heading:"Data requests",body:`For access, correction, export, or other data requests, email ${PRIVACY_EMAIL} with the request type and the account email address.`},
+      {heading:"Verification",body:"We may need to verify account ownership before deleting or sharing account information. This helps protect players, coaches, and teams from unauthorized requests."},
+      {heading:"In-app deletion",body:"Signed-in users may also use available Profile settings to delete local account data where supported by the app."},
+      {heading:"Support",body:`If you cannot access your account, contact ${SUPPORT_EMAIL}.`},
+    ],
+  },
+};
+const LEGAL_LINKS=[
+  {href:"/privacy",label:"Privacy"},
+  {href:"/terms",label:"Terms"},
+  {href:"/support",label:"Support"},
+  {href:"/delete-account",label:"Delete Account / Data Request"},
+];
+const LEGAL_ROUTE_ALIASES={
+  "/privacy-policy":"/privacy",
+  "/terms-of-use":"/terms",
+  "/data-request":"/delete-account",
+  "/delete-account-data-request":"/delete-account",
+};
+const getLegalRoute=()=>{
+  if(typeof window==="undefined")return null;
+  const path=window.location.pathname.replace(/\/$/,"")||"/";
+  return LEGAL_ROUTES[path]||LEGAL_ROUTES[LEGAL_ROUTE_ALIASES[path]]||null;
+};
+const markLegalStartupReady=()=>{
+  if(typeof window==="undefined")return;
+  window.__shotlabBootMark?.("legal_route_ready",window.location.pathname);
+  window.dispatchEvent(new CustomEvent("shotlab:app-ready"));
+};
+const navigateToHref=href=>event=>{
+  if(typeof window==="undefined")return;
+  if(event.metaKey||event.ctrlKey||event.shiftKey||event.altKey||event.defaultPrevented)return;
+  event.preventDefault();
+  window.location.assign(href);
+};
+function LegalTextLink({link,style}){
+return <a key={link.href} href={link.href} onClick={navigateToHref(link.href)} style={style}>{link.label}</a>;
+}
+function LegalSupportSection({compact=false}){
+const linkStyle={fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:compact?10:12,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",border:`1px solid ${BORDER_CLR}`,borderRadius:999,padding:compact?"7px 9px":"9px 12px",background:"rgba(255,255,255,0.03)",touchAction:"manipulation"};
+return <section aria-label="Legal and support" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:compact?"12px 14px":"14px 16px",marginBottom:16}}>
+  <div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>LEGAL & SUPPORT</div>
+  <nav aria-label="Logged-in legal and support pages" style={{display:"flex",flexWrap:"wrap",gap:8}}>
+    {LEGAL_LINKS.map(link=><LegalTextLink key={link.href} link={link} style={linkStyle}/>)}
+  </nav>
+</section>;
+}
+function LegalPage({page}){
+useEffect(()=>{markLegalStartupReady();},[]);
+return <><Styles/><main style={{minHeight:"100dvh",background:BG,color:LIGHT,position:"relative",overflow:"hidden",padding:"40px 20px"}}><CourtBG opacity={.018}/><GlowOrb color={VOLT} top="8%" left="78%" size={340}/><section className="fade-up" style={{position:"relative",zIndex:1,width:"100%",maxWidth:760,margin:"0 auto"}}><a href="/" onClick={navigateToHref("/")} style={{display:"inline-flex",alignItems:"center",gap:10,color:VOLT,textDecoration:"none",fontFamily:FB,fontSize:12,fontWeight:800,letterSpacing:"0.1em",textTransform:"uppercase",marginBottom:24,touchAction:"manipulation"}}>← Back to sign in</a><article style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:24,padding:"clamp(24px, 5vw, 44px)",boxShadow:"0 18px 60px rgba(0,0,0,0.32)"}}><div style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:800,letterSpacing:"0.14em",textTransform:"uppercase",marginBottom:10}}>{page.eyebrow}</div><h1 style={{fontFamily:FD,fontSize:"clamp(42px, 9vw, 72px)",lineHeight:.9,letterSpacing:3,margin:"0 0 10px"}}>{page.title}</h1><p style={{fontFamily:FB,color:MUTED,fontSize:12,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",margin:"0 0 22px"}}>{page.updated}</p><p style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:16,lineHeight:1.65,margin:"0 0 28px"}}>{page.intro}</p><div style={{display:"grid",gap:18}}>{page.sections.map(section=><section key={section.heading} style={{borderTop:`1px solid ${BORDER_CLR}`,paddingTop:18}}><h2 style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2,margin:"0 0 8px"}}>{section.heading}</h2><p style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:15,lineHeight:1.65,margin:0}}>{section.body}</p></section>)}</div></article><nav aria-label="Legal and support pages" style={{display:"flex",flexWrap:"wrap",gap:10,justifyContent:"center",marginTop:20}}>{LEGAL_LINKS.map(link=><LegalTextLink key={link.href} link={link} style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:12,fontWeight:700,textDecoration:"none",letterSpacing:"0.08em",textTransform:"uppercase",border:`1px solid ${BORDER_CLR}`,borderRadius:999,padding:"9px 12px",background:"rgba(255,255,255,0.03)",touchAction:"manipulation"}}/>)}</nav></section></main></>;
+}
+
 // ═══════════════════════════════════════
 // APP ROOT
 // ═══════════════════════════════════════
@@ -787,6 +890,8 @@ function ErrorFallback(){return <div style={{minHeight:"100dvh",background:BG,di
 
 export default function App(){
 const[appErr,setAppErr]=useState(false);
+const legalRoute=getLegalRoute();
+if(legalRoute)return <LegalPage page={legalRoute}/>;
 if(appErr)return <><Styles/><ErrorFallback/></>;
 try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
@@ -1766,6 +1871,9 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       <span style={{color:VOLT,fontWeight:700}}>{mode==="login"?"Register":"Sign In"}</span>
     </p>
     {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:12,lineHeight:1.5}}>By creating an account, you agree to our data practices. All data is stored locally on your device. You can delete your account and all data at any time from your Profile settings.</p>}
+    <nav aria-label="Legal and support pages" style={{display:"flex",flexWrap:"wrap",gap:"8px 10px",justifyContent:"center",marginTop:16,paddingTop:14,borderTop:`1px solid ${BORDER_CLR}`}}>
+      {LEGAL_LINKS.map(link=><LegalTextLink key={link.href} link={link} style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",touchAction:"manipulation"}}/>)}
+    </nav>
   </div>
 </div>
 
@@ -3966,6 +4074,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           <button onClick={onClearDemoData} disabled={demoSettingsBusy} className="btn-v cta-danger" style={{width:"100%",margin:0,minHeight:42,height:42,borderRadius:10,opacity:demoSettingsBusy?0.5:1}}>CLEAR DEMO DATA</button>
         </div>
       </div>
+      <LegalSupportSection compact/>
       <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#FF4545",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
       <p style={{fontFamily:FB,color:MUTED,fontSize:9,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
     </div>
@@ -4222,6 +4331,8 @@ return <div className="fade-up">
   </div>
   <div style={{fontFamily:FB,color:MUTED,fontSize:10}}>{u.hideFromLeaderboards?"You are hidden from public leaderboard rankings.":"You are visible in team leaderboards."}</div>
 </div>
+
+<LegalSupportSection/>
 
 {/* ══════ ACCOUNT MANAGEMENT ══════ */}
 <div style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${BORDER_CLR}44`}}>
