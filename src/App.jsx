@@ -785,8 +785,61 @@ function ErrorFallback(){return <div style={{minHeight:"100dvh",background:BG,di
   <button onClick={()=>window.location.reload()} style={{padding:"12px 32px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:10,cursor:"pointer"}}>RELOAD</button>
 </div>}
 
+const LEGAL_ROUTES={
+"/privacy":"privacy",
+"/privacy-policy":"privacy",
+"/terms":"terms",
+"/terms-of-use":"terms",
+"/support":"support",
+"/delete-account":"delete-account",
+"/data-request":"data-request",
+"/delete-account-data-request":"data-request",
+};
+const LEGAL_PAGE_COPY={
+privacy:{eyebrow:"Privacy",title:"Privacy Policy",updated:"Updated June 8, 2026",summary:"ShotLab collects only the account, team, training, RSVP, and support information needed to operate basketball development workflows.",sections:[
+{h:"Information we use",p:"We use account identifiers, team membership details, workout scores, shot logs, event RSVPs, and support messages to provide the app experience."},
+{h:"How we use it",p:"Data powers player progress, coach roster views, team analytics, support responses, safety diagnostics, and account administration."},
+{h:"Your choices",p:"You can request access, correction, export, or deletion using the data request and delete-account links on this page."},
+]},
+terms:{eyebrow:"Terms",title:"Terms of Use",updated:"Updated June 8, 2026",summary:"Use ShotLab for lawful team training, player development, and coach/player coordination.",sections:[
+{h:"Accounts",p:"Keep your sign-in details accurate and secure. Coaches are responsible for managing team access and roster membership."},
+{h:"Training content",p:"ShotLab helps organize drills, events, and performance data, but it does not replace professional medical, safety, or coaching judgment."},
+{h:"Acceptable use",p:"Do not misuse the service, attempt unauthorized access, or upload content that violates others' rights or safety."},
+]},
+support:{eyebrow:"Support",title:"Support",updated:"We aim to respond as quickly as possible.",summary:"Need help with sign-in, team access, app data, or billing/admin questions? Contact ShotLab support.",sections:[
+{h:"Email support",p:"Send a message to support@shotlab.app with your account email, team name, device, browser, and a short description of the issue."},
+{h:"Account help",p:"If you cannot access a team, include any invite code or coach contact so support can troubleshoot membership status."},
+{h:"Privacy requests",p:"Use the data request or delete-account request pages for formal privacy and account data requests."},
+]},
+"delete-account":{eyebrow:"Account deletion",title:"Delete Account",updated:"Requests are reviewed for account safety.",summary:"You can request deletion of your ShotLab account and associated personal training data.",sections:[
+{h:"How to request deletion",p:"Email support@shotlab.app from the account email and include 'Delete my ShotLab account' in the subject."},
+{h:"What deletion includes",p:"We will remove or de-identify personal account details, player scores, shot logs, RSVPs, and support records unless retention is legally required."},
+{h:"Coach/team data",p:"Team-level program content may remain for other authorized members unless it directly identifies the deleted account."},
+]},
+"data-request":{eyebrow:"Data request",title:"Account Data Request",updated:"Requests are verified before fulfillment.",summary:"Request access to, export of, correction of, or deletion of personal ShotLab data.",sections:[
+{h:"Submit a request",p:"Email support@shotlab.app from your account email and include whether you need access, export, correction, or deletion."},
+{h:"Verification",p:"We may ask for information needed to confirm account ownership before sharing or deleting data."},
+{h:"Response",p:"ShotLab will respond according to applicable privacy law and the scope of data associated with your account."},
+]},
+};
+const LEGAL_SUPPORT_LINKS=[
+{href:"/privacy",label:"Privacy"},
+{href:"/terms",label:"Terms"},
+{href:"/support",label:"Support"},
+{href:"/delete-account",label:"Delete Account"},
+{href:"/data-request",label:"Data Request"},
+];
+const getLegalRouteKey=(path)=>LEGAL_ROUTES[String(path||"").replace(/\/$/,"")||"/"]||null;
+function LegalSupportLinks({compact=false}){return <div aria-label="Legal and support links" style={{display:"flex",flexWrap:"wrap",justifyContent:compact?"flex-start":"center",gap:compact?8:12,marginTop:compact?10:18}}>{LEGAL_SUPPORT_LINKS.map(link=><a key={link.href} href={link.href} style={{fontFamily:FB,color:compact?VOLT:MUTED,fontSize:compact?10:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",border:`1px solid ${compact?VOLT+"33":"transparent"}`,borderRadius:999,padding:compact?"6px 9px":"2px 0"}}>{link.label}</a>)}</div>}
+function StaticLegalPage({pageKey}){
+const page=LEGAL_PAGE_COPY[pageKey]||LEGAL_PAGE_COPY.support;
+useEffect(()=>{try{window.__shotlabBootMark?.("legal_route_ready",pageKey);window.dispatchEvent(new CustomEvent("shotlab:legal-route-ready",{detail:{route:pageKey}}));}catch(error){}},[pageKey]);
+return <><Styles/><main data-testid="static-legal-page" style={{minHeight:"100dvh",background:BG,color:LIGHT,padding:"40px 20px",fontFamily:FB}}><div style={{maxWidth:760,margin:"0 auto"}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:8,color:VOLT,textDecoration:"none",fontFamily:FD,fontSize:16,letterSpacing:2,marginBottom:26}}><SLLogo size={24}/> SHOTLAB</a><section style={{background:`linear-gradient(145deg,${CARD_BG},#111111)`,border:`1px solid ${BORDER_CLR}`,borderRadius:24,padding:"28px 24px",boxShadow:"0 18px 46px rgba(0,0,0,0.38)"}}><div style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:800,letterSpacing:"0.16em",textTransform:"uppercase",marginBottom:10}}>{page.eyebrow}</div><h1 style={{fontFamily:FD,color:LIGHT,fontSize:42,letterSpacing:3,lineHeight:1,marginBottom:8}}>{page.title}</h1><div style={{color:MUTED,fontSize:12,letterSpacing:"0.06em",marginBottom:18}}>{page.updated}</div><p style={{fontSize:17,lineHeight:1.55,color:LIGHT,marginBottom:24}}>{page.summary}</p><div style={{display:"grid",gap:14}}>{page.sections.map(section=><article key={section.h} style={{background:"rgba(255,255,255,0.035)",border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"16px 18px"}}><h2 style={{fontFamily:FD,color:VOLT,fontSize:20,letterSpacing:2,marginBottom:6}}>{section.h}</h2><p style={{color:MUTED,fontSize:14,lineHeight:1.6}}>{section.p}</p></article>)}</div><LegalSupportLinks compact/></section><p style={{textAlign:"center",color:MUTED,fontSize:11,lineHeight:1.5,marginTop:18}}>For urgent account or safety concerns, contact support@shotlab.app.</p></div></main></>;
+}
+
 export default function App(){
 const[appErr,setAppErr]=useState(false);
+const legalRouteKey=typeof window!=="undefined"?getLegalRouteKey(window.location.pathname):null;
 useEffect(()=>{
 try{
 window.__shotlabBootMark?.("app_ready_dispatched");
@@ -794,6 +847,7 @@ window.dispatchEvent(new Event("shotlab:app-ready"));
 }catch(error){}
 },[]);
 if(appErr)return <><Styles/><ErrorFallback/></>;
+if(legalRouteKey)return <StaticLegalPage pageKey={legalRouteKey}/>;
 try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
@@ -1771,6 +1825,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
       <span style={{color:VOLT,fontWeight:700}}>{mode==="login"?"Register":"Sign In"}</span>
     </p>
     {mode==="register"&&<p style={{fontFamily:FB,color:MUTED+"88",textAlign:"center",fontSize:10,marginTop:12,lineHeight:1.5}}>By creating an account, you agree to our data practices. All data is stored locally on your device. You can delete your account and all data at any time from your Profile settings.</p>}
+    <LegalSupportLinks/>
   </div>
 </div>
 
@@ -3971,6 +4026,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           <button onClick={onClearDemoData} disabled={demoSettingsBusy} className="btn-v cta-danger" style={{width:"100%",margin:0,minHeight:42,height:42,borderRadius:10,opacity:demoSettingsBusy?0.5:1}}>CLEAR DEMO DATA</button>
         </div>
       </div>
+      <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px",marginBottom:14}}>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:6}}>LEGAL & SUPPORT</div>
+        <p style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.5}}>Privacy, terms, support, account deletion, and data requests.</p>
+        <LegalSupportLinks compact/>
+      </div>
       <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#FF4545",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
       <p style={{fontFamily:FB,color:MUTED,fontSize:9,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
     </div>
@@ -4226,6 +4286,12 @@ return <div className="fade-up">
     <button onClick={onToggleLeaderboardVisibility} style={{minWidth:88,height:34,borderRadius:999,border:`1px solid ${u.hideFromLeaderboards?BORDER_CLR:VOLT+"66"}`,background:u.hideFromLeaderboards?"transparent":VOLT+"16",color:u.hideFromLeaderboards?MUTED:VOLT,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>{u.hideFromLeaderboards?"OFF":"ON"}</button>
   </div>
   <div style={{fontFamily:FB,color:MUTED,fontSize:10}}>{u.hideFromLeaderboards?"You are hidden from public leaderboard rankings.":"You are visible in team leaderboards."}</div>
+</div>
+
+<div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8}}>LEGAL & SUPPORT</div>
+  <div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5}}>Privacy, terms, support, account deletion, and data request resources.</div>
+  <LegalSupportLinks compact/>
 </div>
 
 {/* ══════ ACCOUNT MANAGEMENT ══════ */}
