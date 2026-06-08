@@ -787,6 +787,12 @@ function ErrorFallback(){return <div style={{minHeight:"100dvh",background:BG,di
 
 export default function App(){
 const[appErr,setAppErr]=useState(false);
+useEffect(()=>{
+try{
+window.__shotlabBootMark?.("app_ready_dispatched");
+window.dispatchEvent(new Event("shotlab:app-ready"));
+}catch(error){}
+},[]);
 if(appErr)return <><Styles/><ErrorFallback/></>;
 try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
@@ -1130,8 +1136,7 @@ return()=>{canceled=true;};
 },[hydratePersistedData]);
 useEffect(()=>{
 if(ready){
-bootMark("app_ready");
-window.dispatchEvent(new CustomEvent("shotlab:app-ready"));
+bootMark("hydration_completed");
 }
 },[ready]);
 useEffect(()=>{

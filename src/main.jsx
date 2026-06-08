@@ -11,6 +11,7 @@ const bootDebugEnabled = params.get('bootDebug') === '1'
 const DEV = Boolean(typeof import.meta !== 'undefined' && import.meta?.env?.DEV)
 
 let startupErrorShown = false
+let appHasCommitted = false
 let bootPanelEl = null
 let bootPanelListEl = null
 const bootMarks = []
@@ -115,19 +116,28 @@ registerRuntimeListeners()
 
 window.addEventListener('error', (event) => {
   const msg = event?.error?.message || event?.message || 'Unexpected runtime error before app mount.'
+  if (appHasCommitted) {
+    markBoot('runtime_error_after_mount', msg)
+    return
+  }
   renderStartupError(msg)
 })
 
 window.addEventListener('unhandledrejection', (event) => {
   const reason = event?.reason
   const msg = typeof reason === 'string' ? reason : reason?.message || 'Unhandled async startup error.'
+  if (appHasCommitted) {
+    markBoot('unhandled_rejection_after_mount', msg)
+    return
+  }
   renderStartupError(msg)
 })
 
 {
   let bootTimeoutId = null
   const onAppReady = () => {
-    markBoot('hydration_completed')
+    appHasCommitted = true
+    markBoot('app_ready_received')
     if (bootTimeoutId) {
       clearTimeout(bootTimeoutId)
       bootTimeoutId = null
@@ -178,9 +188,7 @@ window.addEventListener('unhandledrejection', (event) => {
       markBoot('hydration_started')
 
       bootTimeoutId = window.setTimeout(() => {
-        if (!startupErrorShown) {
-          renderStartupError('Startup timeout while loading app state. Open with ?bootDebug=1 for boot phases.')
-        }
+        markBoot('boot_timeout', appHasCommitted ? 'app_already_committed' : 'waiting_for_app_ready')
       }, BOOT_TIMEOUT_MS)
     } catch (error) {
       const msg = error?.message || 'App module failed to load before mount.'
