@@ -348,9 +348,15 @@ const DB = {
 
     let local = null;
     try {
-      const r = await window.storage.get(k, true);
+      const r = await window.storage?.get(k, true);
       local = r?.value ? JSON.parse(r.value) : null;
     } catch (e) {}
+    if (local === null) {
+      try {
+        const raw = window.localStorage?.getItem(k);
+        local = raw ? JSON.parse(raw) : null;
+      } catch (e) {}
+    }
 
     const table = TABLE_MAP[k];
     if (table) {
@@ -358,7 +364,7 @@ const DB = {
         const { data } = await supabase.from(table).select("*");
         const localRows = hasData(local) ? buildAppRows(k, local, { source: "local" }) : [];
         const remoteRows = hasData(data) ? buildAppRows(k, data, { source: "remote" }) : [];
-        if (k === "sl:events" || k === "sl:players" || k === "sl:player-profiles" || k === "sl:shotlogs") {
+        if (k === "sl:events" || k === "sl:rsvps" || k === "sl:players" || k === "sl:player-profiles" || k === "sl:shotlogs") {
           const merged = mergeHydratedRows(k, localRows, remoteRows);
           if (hasData(merged)) return merged;
         }
@@ -373,9 +379,21 @@ const DB = {
   },
   async set(k, v, options = {}) {
     const strictRemote = options?.strictRemote === true;
+    const strictLocal = options?.strictLocal === true;
+    const serialized = JSON.stringify(v);
+    let localPersisted = false;
+    let localError = null;
     try {
-      await window.storage.set(k, JSON.stringify(v), true);
-    } catch (e) {}
+      if (typeof window.storage?.set === "function") {
+        await window.storage.set(k, serialized, true);
+        localPersisted = true;
+      }
+    } catch (e) { localError = e; }
+    try {
+      window.localStorage?.setItem(k, serialized);
+      localPersisted = true;
+    } catch (e) { localError = localError || e; }
+    if (strictLocal && !localPersisted) throw (localError || new Error("local_persist_failed"));
     const table = TABLE_MAP[k];
     const remoteRows = buildRemoteRows(k, v, options);
     if ((k === "sl:events" || k === "sl:players" || k === "sl:player-profiles") && Array.isArray(v) && v.length > 0 && remoteRows.length === 0) {
@@ -1509,7 +1527,7 @@ const addProgramDrill=async(drill)=>{if(user?.role!=="coach")return{ok:false,err
 const removeProgramDrill=async(id)=>{if(user?.role!=="coach")return;await persistenceService.setCollection(STORAGE_KEYS.programDrills,programDrills.filter(d=>d.id!==id),setProgramDrills)};
 const toggleRsvp=async(eid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=rsvps.find(r=>r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId)),setRsvps);trackEvent("event_rsvp_removed",{eventId:eid});}else{await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setRsvps);trackEvent("event_rsvp_added",{eventId:eid});}};
 const addEvent=async ev=>{if(user?.role!=="coach"||!user.teamId)return{ok:false};const eventPayload={...ev,id:genId("event"),teamId:user.teamId,ownerCoachId:user.email};
-try{await P("sl:events",[...events,eventPayload],setEvents,{strictRemote:true});trackEvent("event_created",{eventType:ev.type||"run"});return{ok:true};}catch(error){console.error("event_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),eventTitle:String(ev?.title||"")});trackEvent("event_create_failed",{eventType:ev?.type||"run",error:String(error?.message||"unknown")});throw error;}};
+try{await P("sl:events",[...events,eventPayload],setEvents,{strictLocal:true});trackEvent("event_created",{eventType:ev.type||"run"});return{ok:true};}catch(error){console.error("event_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),eventTitle:String(ev?.title||"")});trackEvent("event_create_failed",{eventType:ev?.type||"run",error:String(error?.message||"unknown")});throw error;}};
 const removeEvent=async id=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:events",events.filter(e=>!(e.id===id&&e.teamId===user.teamId)),setEvents);await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===id&&r.teamId===user.teamId)),setRsvps)};
 const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps)};
 const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)return;if(rsvps.find(r=>r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId))return;await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email,playerId:email,teamId:user.teamId,name,ts:Date.now()}],setRsvps)};
@@ -3341,7 +3359,7 @@ const rsvpsByEvent=useMemo(()=>{const buckets=new Map();for(const rsvp of safeRs
 const attendanceCountByEmail=useMemo(()=>{const counts=new Map();for(const rsvp of safeRsvps){counts.set(rsvp.email,(counts.get(rsvp.email)||0)+1);}return counts;},[safeRsvps]);
 const availableWalkInByEvent=useMemo(()=>{const byEvent=new Map();for(const ev of sortedEvents){const attendees=new Set((rsvpsByEvent.get(ev.id)||[]).map(r=>r.email));byEvent.set(ev.id,allKnown.filter(p=>!attendees.has(p.email)));}return byEvent;},[allKnown,sortedEvents,rsvpsByEvent]);
 const rosterNameByEmail=useMemo(()=>{const map=new Map();for(const p of players){const email=String(p?.email||'').toLowerCase();if(email&&!map.has(email))map.set(email,p?.name||'');}for(const p of allKnown){const email=String(p?.email||'').toLowerCase();if(email&&!map.has(email))map.set(email,p?.name||'');}return map;},[players,allKnown]);
-const coachEventRsvpRows=useCallback((eventId)=>rsvps.filter(r=>r.eventId===eventId&&r.teamId===u?.teamId),[rsvps,u?.teamId]);
+const coachEventRsvpRows=useCallback((eventId)=>safeRsvps.filter(r=>String(r?.eventId||"")===String(eventId||"")&&String(r?.teamId||"")===String(u?.teamId||"")),[safeRsvps,u?.teamId]);
 const coachRsvpLabel=useCallback((r)=>{const directName=String(r?.name||'').trim();if(directName)return directName;const fallbackEmail=String(r?.email||r?.playerId||'').toLowerCase();const rosterName=rosterNameByEmail.get(fallbackEmail);if(rosterName&&String(rosterName).trim())return rosterName;return String(r?.email||r?.playerId||'Unknown player');},[rosterNameByEmail]);
 const highlightAddPlayer=totalPlayers===0;
 const highlightAddDrill=drills.length===0;
@@ -3812,9 +3830,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 
   {/* EVENTS */}
   {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><DashboardReturnButton onClick={()=>setTab("feed")} />
-    <div data-testid="coach-events-top-create-event" style={{display:"flex",justifyContent:isDesktop?"flex-end":"stretch",margin:"0 0 12px",position:"relative",zIndex:2}}>
-      <button onClick={openEventCreateFlow} className="btn-v cta-primary" style={{width:isDesktop?"auto":"100%",minHeight:48,height:48,padding:"0 18px",borderRadius:12,fontSize:12,whiteSpace:"nowrap"}}>+ CREATE EVENT</button>
-    </div>
     {isDesktop?<>
       <div className="coachEventsHeaderCard"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} actionLabel="+ Create Event" onAction={handleToggleAddEvent} /></div>
       {nextEvent&&(()=>{const nextRows=coachEventRsvpRows(nextEvent.id);const rosterCount=allKnown.length;const missingCount=Math.max(rosterCount-nextRows.length,0);return <div className="heroModule" style={{background:"linear-gradient(145deg, rgba(200,255,26,0.16), rgba(15,20,28,0.94) 60%)",border:`1px solid ${VOLT}55`,boxShadow:"0 20px 45px rgba(0,0,0,0.38)",padding:16}}>
@@ -3835,14 +3850,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"var(--tracking-tight)"}}>EVENT MANAGEMENT</div>
             <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>{events.length} total scheduled</div>
           </div>
-          <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:0,minHeight:42,height:42,padding:"0 14px",borderRadius:12,whiteSpace:"nowrap"}}>+ CREATE EVENT</button>
         </div>
         {eventSaveError&&<div role="alert" style={{marginTop:8,marginBottom:8,padding:"10px 12px",borderRadius:10,background:"rgba(255,69,69,0.12)",border:"1px solid rgba(255,69,69,0.45)",color:"#FFD2D2",fontFamily:FB,fontSize:12,fontWeight:700}}>Event could not be saved. Please try again.</div>}
       {events.length===0&&<div style={{marginTop:6,padding:"14px 12px",textAlign:"center",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14}}>
           <div style={{width:44,height:44,borderRadius:12,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={20} color={VOLT}/></div>
           <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events yet — add your first event to get the team moving.</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.45,maxWidth:360,marginLeft:"auto",marginRight:"auto"}}>Create your first event to organize practices, games, camps, or meetings.</div>
-          <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:"12px 0 0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}}>+ CREATE EVENT</button>
         </div>}
       </div>
       {events.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",paddingBottom:4,marginBottom:14}}>
@@ -3851,14 +3864,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     </>:<>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"6px 2px 10px",borderBottom:`1px solid ${BORDER_CLR}`,marginBottom:12}}>
         <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><EventIcon type="event" size={14} color={VOLT}/><span style={{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1}}>EVENTS</span></div>
-        <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:0,minHeight:44,height:44,padding:"0 12px",borderRadius:12,fontSize:11,whiteSpace:"nowrap"}}>+ CREATE EVENT</button>
       </div>
-      <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:"0 0 14px",width:"100%",minHeight:48,height:48,borderRadius:12,fontSize:12}}>+ CREATE EVENT</button>
+      <button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} className="btn-v cta-primary" style={{margin:"0 0 14px",width:"100%",minHeight:48,height:48,borderRadius:12,fontSize:12}}>+ CREATE EVENT</button>
       {events.length===0?<div style={{display:"inline-block",maxWidth:"100%",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 12px",marginBottom:12,textAlign:"center"}}>
         <div style={{width:40,height:40,borderRadius:11,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={18} color={VOLT}/></div>
         <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events yet — add your first event to get the team moving.</div>
         <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.4}}>Create your first event to organize practices, games, camps, or meetings.</div>
-        <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:"12px 0 0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}}>+ CREATE EVENT</button>
       </div>:<div style={{display:"grid",gap:10,marginBottom:14}}>
         {(() => {
           const parseTime=(time="")=>{const m=String(time).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);if(!m)return Number.MAX_SAFE_INTEGER;let hour=Number(m[1]);const minute=Number(m[2]||"0");const meridiem=(m[3]||"").toUpperCase();if(meridiem==="PM"&&hour<12)hour+=12;if(meridiem==="AM"&&hour===12)hour=0;return hour*60+minute;};
@@ -3880,7 +3891,10 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
                 <span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.05)",fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700}}>{`${missing} missing`}</span>
                 {eventIdx===0&&<span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:`${VOLT}1A`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700}}>UP NEXT</span>}
               </div>
-              {evCoachRsvpNames.length>0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35,wordBreak:"break-word"}}>{evCoachRsvpNames.join(", ")}</div>:<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35}}>No RSVPs yet — players can RSVP from their Events page.</div>}
+              <div style={{border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.035)",borderRadius:12,padding:"9px 10px",display:"grid",gap:5}}>
+                <div style={{fontFamily:FB,color:VOLT,fontSize:9,fontWeight:800,letterSpacing:".1em",textTransform:"uppercase"}}>RSVPs</div>
+                {evCoachRsvpNames.length>0?<div style={{fontFamily:FB,color:LIGHT,fontSize:11,lineHeight:1.4,wordBreak:"break-word"}}>{evCoachRsvpNames.join(", ")}</div>:<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35}}>No RSVPs yet — players can RSVP from their Events page.</div>}
+              </div>
             </div>})})
           </div>});
         })()}

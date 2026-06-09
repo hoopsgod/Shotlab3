@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   buildAppRows,
   buildRemoteRows,
+  mergeHydratedRows,
   normalizeRsvpRowForApp,
   normalizeRsvpRowForDb,
 } from '../src/lib/remotePersistence.js';
@@ -97,6 +98,22 @@ test('Player event RSVP state works with rows loaded from remote snake_case sour
 
   const dbRows = buildRemoteRows('sl:rsvps', appRows);
   assert.equal(dbRows[0].event_id, 'event-z');
+});
+
+
+test('RSVP hydration merges local rows with remote rows for cross-device coach visibility', () => {
+  const localRows = [
+    { id: 'local-rsvp', eventId: 'event-1', teamId: 'team-1', playerId: 'local@example.com', email: 'local@example.com', name: 'Local Player', ts: 1 },
+  ];
+  const remoteRows = [
+    { id: 'remote-rsvp', event_id: 'event-1', team_id: 'team-1', player_id: 'remote@example.com', email: 'Remote@Example.com', name: 'Remote Player', ts: 2 },
+  ];
+
+  const merged = mergeHydratedRows('sl:rsvps', localRows, remoteRows);
+
+  assert.deepEqual(merged.map((row) => row.name).sort(), ['Local Player', 'Remote Player']);
+  assert.equal(merged.find((row) => row.id === 'remote-rsvp').eventId, 'event-1');
+  assert.equal(merged.find((row) => row.id === 'remote-rsvp').teamId, 'team-1');
 });
 
 test('missing id RSVP rows are intentionally dropped for DB upsert payloads', () => {

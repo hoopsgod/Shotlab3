@@ -8,13 +8,23 @@ async function appSource() {
   return readFile(APP_PATH, 'utf8');
 }
 
-test('coach-created events are team-scoped', async () => {
+test('coach-created events are team-scoped and saved local-first', async () => {
   const source = await appSource();
 
   assert.match(
     source,
-    /const addEvent=async ev=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return\{ok:false\};const eventPayload=\{\.\.\.ev,id:genId\("event"\),teamId:user\.teamId,ownerCoachId:user\.email\};\s*try\{await P\("sl:events",\[\.\.\.events,eventPayload\],setEvents,\{strictRemote:true\}\);trackEvent\("event_created",\{eventType:ev\.type\|\|"run"\}\);return\{ok:true\};\}catch\(error\)\{/,
+    /const addEvent=async ev=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return\{ok:false\};const eventPayload=\{\.\.\.ev,id:genId\("event"\),teamId:user\.teamId,ownerCoachId:user\.email\};\s*try\{await P\("sl:events",\[\.\.\.events,eventPayload\],setEvents,\{strictLocal:true\}\);trackEvent\("event_created",\{eventType:ev\.type\|\|"run"\}\);return\{ok:true\};\}catch\(error\)\{/,
   );
+  assert.doesNotMatch(source, /P\("sl:events",\[\.\.\.events,eventPayload\],setEvents,\{strictRemote:true\}\)/);
+});
+
+
+test('event persistence has localStorage refresh fallback for local-first saves', async () => {
+  const source = await appSource();
+
+  assert.match(source, /const raw = window\.localStorage\?\.getItem\(k\);\s*local = raw \? JSON\.parse\(raw\) : null;/);
+  assert.match(source, /window\.localStorage\?\.setItem\(k, serialized\);\s*localPersisted = true;/);
+  assert.match(source, /if \(strictLocal && !localPersisted\) throw \(localError \|\| new Error\("local_persist_failed"\)\);/);
 });
 
 test('players only receive events and RSVPs for their registered team', async () => {
@@ -37,16 +47,26 @@ test('coach events page filters RSVP display by eventId and teamId', async () =>
 
   assert.match(
     source,
-    /const coachEventRsvpRows=useCallback\(\(eventId\)=>rsvps\.filter\(r=>r\.eventId===eventId&&r\.teamId===u\?\.teamId\),\[rsvps,u\?\.teamId\]\);/,
+    /const coachEventRsvpRows=useCallback\(\(eventId\)=>safeRsvps\.filter\(r=>String\(r\?\.eventId\|\|""\)===String\(eventId\|\|""\)&&String\(r\?\.teamId\|\|""\)===String\(u\?\.teamId\|\|""\)\),\[safeRsvps,u\?\.teamId\]\);/,
   );
 });
 
-test('coach events cards display RSVP count and attendee labels', async () => {
+test('coach events cards display RSVP counts and a clear RSVP names section', async () => {
   const source = await appSource();
 
   assert.match(source, /\{`\$\{evCoachRsvps\.length\} going`\}/);
-  assert.match(source, /\{evCoachRsvpNames\.join\(", "\)\}/);
+  assert.match(source, /\{`\$\{evCoachRsvps\.length\} confirmed`\}/);
+  assert.match(source, /\{`\$\{missing\} missing`\}/);
+  assert.match(source, />RSVPs<\/div>/);
+  assert.match(source, /evCoachRsvpNames\.length>0\?<div[^>]*>\{evCoachRsvpNames\.join\(", "\)\}<\/div>/);
   assert.match(source, /No RSVPs yet — players can RSVP from their Events page\./);
+});
+
+test('coach event card derives RSVP names from rows tied to that event', async () => {
+  const source = await appSource();
+
+  assert.match(source, /dateEvents\.map\(\(ev,eventIdx\)=>\{const evCoachRsvps=coachEventRsvpRows\(ev\.id\);const evCoachRsvpNames=evCoachRsvps\.map\(coachRsvpLabel\);/);
+  assert.match(source, /const directName=String\(r\?\.name\|\|''\)\.trim\(\);if\(directName\)return directName;/);
 });
 
 test('coach events RSVP label prefers RSVP name, then roster lookup, then email', async () => {
