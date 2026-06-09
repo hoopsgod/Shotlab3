@@ -25,22 +25,41 @@ test('coach Create Event quick action opens the events tab and renders the creat
   assert.match(source, /role="dialog" aria-modal="true" aria-label="Create event"/);
 });
 
-test('coach Events screen always renders primary Create Event CTAs above the event list', async () => {
+test('coach Events mobile screen renders exactly one primary Create Event CTA above the event list', async () => {
   const source = await appSource();
+  const mobileEventsMarkup = source.slice(
+    source.indexOf('    </>:<>'),
+    source.indexOf('    {showAdd&&<div className="fade-up"'),
+  );
 
-  assert.match(source, /<DashboardReturnButton onClick=\{\(\)=>setTab\("feed"\)\} \/>\n    <div data-testid="coach-events-top-create-event"[\s\S]*?<button onClick=\{openEventCreateFlow\} className="btn-v cta-primary"[\s\S]*?>\+ CREATE EVENT<\/button>\n    <\/div>\n    \{isDesktop\?<>/);
   assert.match(source, /<PageHeader title="EVENTS"[\s\S]*?actionLabel="\+ Create Event" onAction=\{handleToggleAddEvent\}/);
-  assert.match(source, /<button onClick=\{\(\)=>\{setEventSaveError\(""\);handleToggleAddEvent\(\);\}\} className="btn-v cta-primary" style=\{\{margin:0,minHeight:44,height:44,padding:"0 12px"/);
-  assert.doesNotMatch(source, /\{events\.length>0&&<button onClick=\{\(\)=>\{setEventSaveError\(""\);handleToggleAddEvent\(\);\}\} className="btn-v cta-primary"/);
+  assert.match(mobileEventsMarkup, /<span style=\{\{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1\}\}>EVENTS<\/span>[\s\S]*?<button data-testid="coach-events-mobile-create-event" onClick=\{openEventCreateFlow\} className="btn-v cta-primary"[\s\S]*?>\+ CREATE EVENT<\/button>[\s\S]*?\{events\.length===0\?/);
+  assert.equal((mobileEventsMarkup.match(/>\+ CREATE EVENT<\/button>/g) || []).length, 1);
+  assert.doesNotMatch(source, /coach-events-top-create-event/);
 });
 
-test('coach Events screen keeps secondary and empty-state Create Event buttons tappable', async () => {
+test('coach Events screen keeps the remaining mobile Create Event CTA wired to the working handler', async () => {
   const source = await appSource();
 
-  assert.match(source, /<button onClick=\{\(\)=>\{setEventSaveError\(""\);handleToggleAddEvent\(\);\}\} className="btn-v cta-primary" style=\{\{margin:0,minHeight:42,height:42/);
-  assert.match(source, /<button onClick=\{\(\)=>\{setEventSaveError\(""\);handleToggleAddEvent\(\);\}\} className="btn-v cta-primary" style=\{\{margin:"12px 0 0",width:"100%",minHeight:46,height:46/);
-  assert.match(source, /<button onClick=\{\(\)=>\{setEventSaveError\(""\);handleToggleAddEvent\(\);\}\} className="btn-v cta-primary" style=\{\{margin:"0 0 14px",width:"100%",minHeight:48,height:48/);
-  assert.match(source, />\+ CREATE EVENT<\/button>/);
+  assert.match(source, /const openEventCreateFlow=useCallback\(\(\)=>\{setEventSaveError\(""\);setTab\("events"\);setSelP\(null\);setExpEv\(null\);setShowAddSC\(false\);setShowAdd\(true\);/);
+  assert.match(source, /const handleToggleAddEvent=openEventCreateFlow;/);
+  assert.match(source, /<button data-testid="coach-events-mobile-create-event" onClick=\{openEventCreateFlow\} className="btn-v cta-primary"[\s\S]*?>\+ CREATE EVENT<\/button>/);
+  assert.doesNotMatch(source, /<button onClick=\{\(\)=>\{setEventSaveError\(""\);handleToggleAddEvent\(\);\}\} className="btn-v cta-primary"[\s\S]*?>\+ CREATE EVENT<\/button>/);
+});
+
+
+test('coach event save persists a valid event locally and adds it to the Events list', async () => {
+  const source = await appSource();
+
+  assert.match(source, /const addEvent=async ev=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return\{ok:false\};const eventPayload=\{\.\.\.ev,id:genId\("event"\),teamId:user\.teamId,ownerCoachId:user\.email\};/);
+  assert.match(source, /await P\("sl:events",\[\.\.\.events,eventPayload\],setEvents,\{strictLocal:true\}\);trackEvent\("event_created",\{eventType:ev\.type\|\|"run"\}\);return\{ok:true\};/);
+  assert.doesNotMatch(source, /await P\("sl:events",\[\.\.\.events,eventPayload\],setEvents,\{strictRemote:true\}\)/);
+});
+
+test('valid coach event form submission clears stale save errors before saving', async () => {
+  const source = await appSource();
+
+  assert.match(source, /const handleAddEvent=async\(\)=>\{const title=san\(ne\.title\)\.trim\(\),date=String\(ne\.date\|\|""\)\.trim\(\);if\(!title\|\|!date\)\{setEventSaveError\("Event title and date are required\."\);return;\}setEventSaveError\(""\);try\{const result=await addEvent/);
 });
 
 test('coach event save validates required fields and keeps visible error feedback in the form', async () => {
