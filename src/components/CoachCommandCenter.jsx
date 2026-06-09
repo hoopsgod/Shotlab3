@@ -29,7 +29,7 @@ export default function CoachCommandCenter({
   const quickActions=useMemo(()=>[
     { key:"addPlayer", label:"+ Add Player", short:"+ Player", onClick:onAddPlayer },
     { key:"addDrill", label:"+ Add Drill", short:"+ Drill", onClick:onAddDrill },
-    { key:"scheduleEvent", label:"+ Schedule Event", short:"+ Event", onClick:onScheduleEvent },
+    { key:"scheduleEvent", label:"+ Create Event", short:"+ Event", onClick:onScheduleEvent },
     { key:"logScore", label:"+ Log Score", short:"+ Score", onClick:onLogScore },
   ],[onAddDrill,onAddPlayer,onLogScore,onScheduleEvent]);
   const primaryAction=quickActions.find((action)=>action.key===primaryQuickAction) || quickActions[0];
