@@ -3261,9 +3261,9 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 const toSafeNumber=(value)=>{const parsed=Number(value);return Number.isFinite(parsed)?parsed:0;};
 const getPlayerHomeShotMakes=(playerEmail,logs,teamId)=>{const targetEmail=normalizeEmail(playerEmail);if(!targetEmail)return 0;return (Array.isArray(logs)?logs:[]).reduce((total,log)=>{if(normalizeEmail(log?.email)!==targetEmail)return total;const logTeamId=log?.teamId||null;if(teamId&&logTeamId&&logTeamId!==teamId)return total;return total+toSafeNumber(log?.made||0);},0);};
 function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachPriorities,onSaveCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
-const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
+const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"",icon:"ft"});
-const[eventFilter,setEventFilter]=useState("all"),[eventSaveError,setEventSaveError]=useState("");
+const[eventFilter,setEventFilter]=useState("all"),[eventSaveError,setEventSaveError]=useState(""),[eventValidationError,setEventValidationError]=useState("");
 const[coachPriorityDraft,setCoachPriorityDraft]=useState(sanitizeCoachPriorities(coachPriorities));
 const[coachPrioritiesMessage,setCoachPrioritiesMessage]=useState("");
 const[coachPrioritiesError,setCoachPrioritiesError]=useState("");
@@ -3298,7 +3298,7 @@ const handleAddDrill=()=>{if(!nd.name)return;const m=parseInt(nd.max);addDrill({
 const handleAddProgramDrill=async()=>{if(!newProgramDrill.name)return;const m=parseInt(newProgramDrill.max);const r=await addProgramDrill({name:san(newProgramDrill.name).toUpperCase(),desc:san(newProgramDrill.desc),max:m>0?m:null,icon:newProgramDrill.icon,instructions:""});if(!r.ok){setProgramErr(r.err||"Could not add drill");return;}setProgramErr("");setNewProgramDrill({name:"",desc:"",max:"",icon:"ft"});};
 const handleRemoveDrill=(id)=>{setConfirmDelete(id)};
 const confirmDrillDelete=()=>{if(confirmDelete)removeDrill(confirmDelete);setConfirmDelete(null)};
-const handleAddEvent=async()=>{if(!ne.title||!ne.date)return;setEventSaveError("");try{await addEvent({...ne,title:san(ne.title),desc:san(ne.desc),location:san(ne.location)});setNe({title:"",date:"",time:"",location:"",desc:"",type:"run"});setShowAdd(false);}catch(_error){setEventSaveError("Event could not be saved. Please try again.");}};
+const handleAddEvent=async()=>{const eventTitle=san(ne.title);const eventDate=String(ne.date||"").trim();if(!eventTitle||!eventDate){setEventValidationError("Event title and date are required.");setEventSaveError("");return;}setEventValidationError("");setEventSaveError("");try{const result=await addEvent({...ne,title:eventTitle,date:eventDate,desc:san(ne.desc),location:san(ne.location)});if(result?.ok===false)throw new Error("event_save_rejected");setNe({title:"",date:"",time:"",location:"",desc:"",type:"run"});}catch(_error){setEventSaveError("Event could not be saved. Please try again.");}};
 const coachPrioritiesDirty=useMemo(()=>{
   const current=sanitizeCoachPriorities(coachPriorityDraft);
   return JSON.stringify(current)!==JSON.stringify(persistedCoachPriorities);
@@ -3324,6 +3324,25 @@ const known=allKnown.find(p=>p.email===e);
 const name=known?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
 addRsvp(evId,e,name);setAddEmail("")};
 const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,sport:san(nsc.sport),sessionType:san(nsc.sessionType||"School")});setNsc({sport:"",date:"",time:"",sessionType:"School"});setShowAddSC(false)};
+const inlineCreateEventCard=<section data-coach-events-inline-create-card aria-label="Create event" style={{background:"linear-gradient(160deg, rgba(200,255,26,0.10), rgba(22,22,22,0.96) 58%)",border:`1px solid ${VOLT}55`,borderRadius:16,padding:isDesktop?18:14,marginBottom:14,boxShadow:"0 16px 34px rgba(0,0,0,0.30)",scrollMarginTop:12}}>
+  <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:10,marginBottom:14,flexWrap:"wrap"}}>
+    <div>
+      <div style={{fontFamily:FD,color:VOLT,fontSize:isDesktop?18:16,letterSpacing:2}}>CREATE EVENT</div>
+      <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4,lineHeight:1.45}}>Add the next team session here. This form is always available on the Events screen.</div>
+    </div>
+    <span style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",border:`1px solid ${VOLT}44`,borderRadius:999,padding:"5px 9px",background:`${VOLT}18`}}>Always visible</span>
+  </div>
+  {eventValidationError&&<div role="alert" style={{marginBottom:12,padding:"10px 12px",borderRadius:10,background:"rgba(255,181,71,0.14)",border:"1px solid rgba(255,181,71,0.48)",color:"#FFE0A8",fontFamily:FB,fontSize:12,fontWeight:700}}>Event title and date are required.</div>}
+  {eventSaveError&&<div role="alert" style={{marginBottom:12,padding:"10px 12px",borderRadius:10,background:"rgba(255,69,69,0.12)",border:"1px solid rgba(255,69,69,0.45)",color:"#FFD2D2",fontFamily:FB,fontSize:12,fontWeight:700}}>Event could not be saved. Please try again.</div>}
+  <FF l="EVENT TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="Open Gym Run"/>
+  <div style={{display:isDesktop?"grid":"block",gridTemplateColumns:"1fr 1fr",gap:8}}>
+    <FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} tp="date"/>
+    <FF l="TIME" v={ne.time} set={v=>setNe({...ne,time:v})} ph="6:00 PM"/>
+  </div>
+  <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym — Court 1"/>
+  <FF l="DETAILS / DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ta ph="Details, what to bring, and arrival notes"/>
+  <button className="btn-v cta-primary" onClick={handleAddEvent} style={{width:"100%",margin:0,minHeight:48,height:48,borderRadius:12}}>SAVE EVENT</button>
+</section>;
 const totalPlayers=ups.length;
 const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
 const sortedEvents=useMemo(()=>[...safeEvents].sort((a,b)=>String(a?.date||"").localeCompare(String(b?.date||""))),[safeEvents]);
@@ -3371,7 +3390,7 @@ const handleNavChange=(k)=>{
     openTeamBranding();
     return;
   }
-  setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)
+  setTab(k);setEditD(null);setSelP(null);setExpEv(null);setShowAddSC(false)
 };
 const openCoachLeaderboards=()=>handleNavChange("leaderboards");
 const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
@@ -3383,7 +3402,7 @@ const coachTabs=["feed","drills","events","sc","players"];
 const isCoachTab=u.isCoach&&coachTabs.includes(tab);
 const showFullCommandCenter=isCoachTab&&tab==="feed";
 const handleManageEventsScroll=useCallback(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth"}),[]);
-const handleToggleAddEvent=useCallback(()=>setShowAdd(true),[]);
+
 const coachTextScale=COACH_TEXT_SIZES.includes(coachTextSize)?coachTextSize:"standard";
 
 useEffect(()=>{
@@ -3481,7 +3500,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   codeErr={codeErr}
 />}
 </div>
-<div style={{flex:1,padding:`${showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
+<div style={{flex:1,padding:`${showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="COACH HOME" subtitle="Today-first command surface for your program" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
     <div style={{marginBottom:10}}>
@@ -3813,6 +3832,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><DashboardReturnButton onClick={()=>setTab("feed")} />
     {isDesktop?<>
       <div className="coachEventsHeaderCard"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} /></div>
+      {inlineCreateEventCard}
       {nextEvent&&(()=>{const nextRows=coachEventRsvpRows(nextEvent.id);const rosterCount=allKnown.length;const missingCount=Math.max(rosterCount-nextRows.length,0);return <div className="heroModule" style={{background:"linear-gradient(145deg, rgba(200,255,26,0.16), rgba(15,20,28,0.94) 60%)",border:`1px solid ${VOLT}55`,boxShadow:"0 20px 45px rgba(0,0,0,0.38)",padding:16}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,flexWrap:"wrap"}}>
           <div style={{fontFamily:FD,color:PAGE_ACCENTS.events.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>UPCOMING TEAM SESSION</div>
@@ -3831,14 +3851,11 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"var(--tracking-tight)"}}>EVENT MANAGEMENT</div>
             <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>{events.length} total scheduled</div>
           </div>
-          {events.length>0&&<button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:0,minHeight:42,height:42,padding:"0 14px",borderRadius:12,whiteSpace:"nowrap"}}>+ ADD EVENT</button>}
         </div>
-        {eventSaveError&&<div role="alert" style={{marginTop:8,marginBottom:8,padding:"10px 12px",borderRadius:10,background:"rgba(255,69,69,0.12)",border:"1px solid rgba(255,69,69,0.45)",color:"#FFD2D2",fontFamily:FB,fontSize:12,fontWeight:700}}>Event could not be saved. Please try again.</div>}
       {events.length===0&&<div style={{marginTop:6,padding:"14px 12px",textAlign:"center",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14}}>
           <div style={{width:44,height:44,borderRadius:12,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={20} color={VOLT}/></div>
           <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events yet — add your first event to get the team moving.</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.45,maxWidth:360,marginLeft:"auto",marginRight:"auto"}}>Create your first event to organize practices, games, camps, or meetings.</div>
-          <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:"12px 0 0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
         </div>}
       </div>
       {events.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",paddingBottom:4,marginBottom:14}}>
@@ -3849,7 +3866,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><EventIcon type="event" size={14} color={VOLT}/><span style={{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1}}>EVENTS</span></div>
         <div style={{fontFamily:FB,fontSize:10,color:T.SUB,fontWeight:700,textTransform:"uppercase",letterSpacing:".08em",whiteSpace:"nowrap"}}>{events.length} total</div>
       </div>
-      <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:"0 0 14px",width:"100%",minHeight:48,height:48,borderRadius:12,fontSize:12}}>+ ADD EVENT</button>
+      {inlineCreateEventCard}
       {events.length===0?<div style={{display:"inline-block",maxWidth:"100%",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 12px",marginBottom:12,textAlign:"center"}}>
         <div style={{width:40,height:40,borderRadius:11,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={18} color={VOLT}/></div>
         <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events yet — add your first event to get the team moving.</div>
@@ -3882,56 +3899,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       </div>}
     </>}
 
-    {showAdd&&<div className="fade-up" style={{position:"fixed",inset:0,zIndex:90,display:"flex",alignItems:isDesktop?"flex-end":"stretch",paddingTop:0,overscrollBehavior:"none"}}>
-      {isDesktop&&<button aria-label="Close create event form" onClick={()=>setShowAdd(false)} style={{position:"absolute",inset:0,border:"none",background:"rgba(0,0,0,0.70)",cursor:"pointer"}}/>}
-      {isDesktop?<>
-      <button aria-label="Close create event form" onClick={()=>setShowAdd(false)} style={{position:"absolute",inset:0,border:"none",background:"rgba(0,0,0,0.70)",cursor:"pointer"}}/>
-      <div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"relative",zIndex:1,width:"100%",maxWidth:"100vw",height:isDesktop?"auto":"100dvh",maxHeight:isDesktop?"88dvh":"100dvh",borderRadius:isDesktop?"20px 20px 0 0":"0",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderBottom:"none",boxShadow:isDesktop?"0 -14px 30px rgba(0,0,0,0.45)":"none",display:"flex",flexDirection:"column",overflow:"hidden",minHeight:0,touchAction:"pan-y",paddingBottom:isDesktop?0:"max(10px, env(safe-area-inset-bottom, 0px))"}}>
-        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:isDesktop?"16px 18px":"12px 14px",borderBottom:`1px solid ${BORDER_CLR}`,flexShrink:0,gap:10}}>
-          {isDesktop?<div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:2,textAlign:"left",paddingRight:34}}>CREATE EVENT</div>:<><button onClick={()=>setShowAdd(false)} style={{background:"none",border:"none",color:T.SUB,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",cursor:"pointer",padding:"4px 0"}}>Cancel</button><div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:".04em",textAlign:"center",flex:1}}>New Event</div><button aria-label="Close" onClick={()=>setShowAdd(false)} style={{background:"none",border:`1px solid ${BORDER_CLR}`,color:T.SUB,borderRadius:8,width:28,height:28,display:"grid",placeItems:"center",cursor:"pointer",fontSize:16,lineHeight:1}}>×</button></>}
-          {isDesktop&&<button aria-label="Close" onClick={()=>setShowAdd(false)} style={{background:"none",border:`1px solid ${BORDER_CLR}`,color:T.SUB,borderRadius:8,width:32,height:32,display:"grid",placeItems:"center",cursor:"pointer",fontSize:18,lineHeight:1}}>×</button>}
-        </div>
-        <div style={{padding:isDesktop?"16px 18px":"12px 12px",overflowY:"auto",flex:1,minHeight:0,paddingBottom:isDesktop?18:90}}>
-          <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="Open Gym Run"/>
-          <div style={{display:isDesktop?"grid":"block",gridTemplateColumns:"1fr 1fr",gap:8}}>
-            <FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} tp="date"/>
-            <FF l="TIME" v={ne.time} set={v=>setNe({...ne,time:v})} ph="6:00 PM"/>
-          </div>
-          <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym — Court 1"/>
-          <FF l="DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ta ph="Details, what to bring, and arrival notes"/>
-          <div style={{marginBottom:14}}>
-            <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
-            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"8px 12px",borderRadius:999,border:`1px solid ${ne.type===t?VOLT:BORDER_CLR}`,background:ne.type===t?VOLT+"22":BG,color:ne.type===t?VOLT:T.SUB,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer"}}>{t}</button>)}</div>
-          </div>
-        </div>
-        <div style={{padding:isDesktop?"12px 18px 16px":"10px 12px",borderTop:`1px solid ${BORDER_CLR}`,background:SURFACE,position:isDesktop?"static":"sticky",bottom:0,zIndex:2}}>
-          <button className="btn-v cta-primary" onClick={handleAddEvent} style={{width:"100%",margin:0,minHeight:44,height:44,borderRadius:10}}>CREATE EVENT</button>
-        </div>
-      </div>
-      </>:<div role="dialog" aria-modal="true" aria-label="Create event" style={{position:"relative",zIndex:100,width:"100%",height:"100%",maxHeight:"100%",background:BG,display:"flex",flexDirection:"column",overflow:"hidden",minHeight:0,paddingBottom:"max(10px, env(safe-area-inset-bottom, 0px))"}}>
-        <div style={{position:"sticky",top:0,zIndex:2,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"max(12px, env(safe-area-inset-top, 0px)) 14px 12px",borderBottom:`1px solid ${BORDER_CLR}`,background:BG,gap:10,flexShrink:0}}>
-          <button onClick={()=>setShowAdd(false)} style={{background:"none",border:"none",color:T.SUB,fontFamily:FB,fontSize:12,fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",cursor:"pointer",padding:0}}>Cancel</button>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.5,textAlign:"center",flex:1}}>CREATE EVENT</div>
-          <button aria-label="Close" onClick={()=>setShowAdd(false)} style={{background:"none",border:`1px solid ${BORDER_CLR}`,color:T.SUB,borderRadius:8,width:28,height:28,display:"grid",placeItems:"center",cursor:"pointer",fontSize:16,lineHeight:1}}>×</button>
-        </div>
-        <div style={{padding:"12px 12px 132px",overflowY:"auto",flex:1,minHeight:0,WebkitOverflowScrolling:"touch"}}>
-          <FF l="TITLE" v={ne.title} set={v=>setNe({...ne,title:v})} ph="Open Gym Run"/>
-          <div style={{display:"block"}}>
-            <FF l="DATE" v={ne.date} set={v=>setNe({...ne,date:v})} tp="date"/>
-            <FF l="TIME" v={ne.time} set={v=>setNe({...ne,time:v})} ph="6:00 PM"/>
-          </div>
-          <FF l="LOCATION" v={ne.location} set={v=>setNe({...ne,location:v})} ph="Main Gym — Court 1"/>
-          <FF l="DESCRIPTION" v={ne.desc} set={v=>setNe({...ne,desc:v})} ta ph="Details, what to bring, and arrival notes"/>
-          <div style={{marginBottom:14}}>
-            <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>TYPE</label>
-            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{["run","clinic","game","challenge","recovery"].map(t=><button key={t} onClick={()=>setNe({...ne,type:t})} style={{padding:"8px 12px",borderRadius:999,border:`1px solid ${ne.type===t?VOLT:BORDER_CLR}`,background:ne.type===t?VOLT+"22":BG,color:ne.type===t?VOLT:T.SUB,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,textTransform:"uppercase",cursor:"pointer"}}>{t}</button>)}</div>
-          </div>
-        </div>
-        <div style={{position:"sticky",bottom:0,zIndex:2,padding:"10px 12px max(10px, env(safe-area-inset-bottom, 0px))",borderTop:`1px solid ${BORDER_CLR}`,background:BG,flexShrink:0}}>
-          <button className="btn-v cta-primary" onClick={handleAddEvent} style={{width:"100%",margin:0,minHeight:44,height:44,borderRadius:10}}>CREATE EVENT</button>
-        </div>
-      </div>}
-    </div>}
+
 
     {isDesktop&&filteredEvents.map(ev=>{const evR=coachEventRsvpRows(ev.id);const evRsvpPreview=evR.slice(0,3).map(coachRsvpLabel);const isExp=expEv===ev.id;const quickAddPlayers=availableWalkInByEvent.get(ev.id)||[];
       const missingResponses=Math.max(allKnown.length-evR.length,0);
