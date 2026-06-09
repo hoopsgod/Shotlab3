@@ -2792,7 +2792,7 @@ return <div className="fade-up">
     {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
       <button className="btn-v cta-primary" onClick={()=>toggleScRsvp(s.id)} style={{}}>
-        {going?<>&#10003; YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
+        {going?<>✓ YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
       </button>
       {sr.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>{sr.map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:4,background:CARD_BG,borderRadius:8,padding:"4px 8px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={20} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:600}}>{r.name}</span></div>)}</div>}
     </div>}
@@ -3151,7 +3151,7 @@ return <div className="fade-up">
 // EVENTS PANEL (Player Program View)
 // ═══════════════════════════════════════
 function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue}){
-const[expanded,setExpanded]=useState(null),[showBoard,setShowBoard]=useState(false),[lbMode,setLbMode]=useState("attend"),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null);
+const[expanded,setExpanded]=useState(null),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null);
 const sorted=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
 const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
 const nextEvent=upcoming[0]||null;
@@ -3165,8 +3165,6 @@ const eventTypeLabel=(type="event")=>{
 };
 const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);useEffect(()=>{if(lastRank===null){setLastRank(myTier.name);return;}if(lastRank!==myTier.name){setRankFx(true);setLastRank(myTier.name);const t=setTimeout(()=>setRankFx(false),650);return ()=>clearTimeout(t);}},[myTier.name,lastRank]);
 
-const attendBoard=useMemo(()=>{const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[rsvps]);
-const medals=[VOLT,"#A0A0A0","#A0A0A0"];
 const handleEventRsvp=(event)=>{const going=rsvps.some(r=>r.eventId===event.id&&r.email===user.email);toggleRsvp(event.id);if(!going){onCompletionCue?.({title:"Event participation confirmed",detail:`You're in for ${event.title}`,momentum:"Attendance momentum building",next:"Show up and log post-session activity"});}};
 
 return <div className="fade-up">
@@ -3223,19 +3221,6 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
   {(()=>{const nx=[...TIERS].find(t=>t.min>myRsvps);if(!nx)return <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,marginTop:8}}>MAX RANK ACHIEVED</div>;const p=Math.round(myRsvps/nx.min*100);return <div style={{marginTop:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span style={{fontFamily:FB,color:"#A0A0A0",fontSize:12}}>{nx.min-myRsvps} more to <span style={{color:LIGHT,fontWeight:700}}>{nx.name}</span></span><span style={{fontFamily:FB,color:"#555555",fontSize:11}}>{p}%</span></div><div style={{height:4,background:"#242424",borderRadius:2,overflow:"hidden"}}><div style={{width:`${p}%`,height:"100%",background:"#C8FF00",borderRadius:2}}/></div><div style={{fontFamily:FB,color:"#555555",fontSize:10,letterSpacing:"0.10em",marginTop:6}}>NEXT RANK: {nx.name}</div></div>})()}
 </div>
 
-{/* Leaderboard toggle */}
-<button onClick={()=>setShowBoard(!showBoard)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
-  <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:ORANGE+"15",display:"flex",alignItems:"center",justifyContent:"center",fontSize:18}}>&#128293;</div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LEADERBOARD</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Attendance, scores & streaks</div></div></div>
-  <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
-</button>
-
-{showBoard&&<div className="fade-up" style={{marginBottom:20}}>
-  <div style={{display:"flex",gap:4,marginBottom:14}}>{[{k:"attend",l:"ATTENDANCE"},{k:"overall",l:"DRILL SCORES"},{k:"streaks",l:"STREAKS"}].map(t=><button key={t.k} onClick={()=>setLbMode(t.k)} style={{flex:1,padding:"9px 4px",borderRadius:10,border:lbMode===t.k?"none":`1px solid ${BORDER_CLR}`,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:1,background:lbMode===t.k?CYAN:CARD_BG,color:lbMode===t.k?BG:MUTED}}>{t.l}</button>)}</div>
-  {lbMode==="attend"&&<>{attendBoard.length===0&&<Empty t="No RSVPs yet"/>}{attendBoard.map((p,i)=>{const t=getTier(p.count);return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,display:"flex",alignItems:"center",gap:6}}><span style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</span><span className="tb" style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:3,color:t.color,background:`linear-gradient(90deg,${t.bg},${t.color}18,${t.bg})`}}>{t.name}</span></div><div style={{fontFamily:FD,color:t.color,fontSize:18}}>{p.count}</div></div>})}</>}
-  {lbMode==="overall"&&<>{(()=>{const m={};scores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});const a=Object.values(m).sort((a,b)=>b.total-a.total);return a.length===0?<Empty t="No activity yet"/>:a.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{p.email===user.email?" (YOU)":""}</div><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{p.total}</div></div>)})()}</>}
-  {lbMode==="streaks"&&<>{(()=>{const es=[...new Set(scores.map(s=>s.email))];const st=es.map(e=>({email:e,name:scores.find(s=>s.email===e)?.name||e,streak:calcStreak(scores.filter(s=>s.email===e))})).sort((a,b)=>b.streak-a.streak);return st.length===0?<Empty t="No streaks yet"/>:st.map((p,i)=><div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${p.email===user.email?VOLT+"33":BORDER_CLR}`}}><RB r={i+1} m={medals}/><Av n={p.name} sz={30} email={p.email}/><div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}</div><div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{p.streak} &#128293;</div></div>)})()}</>}
-</div>}
-
 {/* Upcoming */}
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING EVENTS" s={`${upcoming.length} SCHEDULED`}/>
 {upcoming.length===0&&<Empty t="NO EVENTS SCHEDULED" action="Your coach will post workouts and events here" cta="NOTIFY MY COACH" ctaVariant="secondary" icon={<EventIcon type="clinic" size={48} color="#555555"/>}/>}
@@ -3246,9 +3231,6 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
       <div style={{display:"flex",alignItems:"flex-start",gap:14,cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
         <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><EventIcon type={ev.type} size={24} color={going?CYAN:MUTED}/></div>
         <div style={{flex:1,minWidth:0}}><div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1.6}}>{ev.title}</div>{index===0&&<span style={{fontFamily:FB,fontSize:8,padding:"2px 7px",borderRadius:999,color:"#0b0d10",background:VOLT,fontWeight:700,letterSpacing:"0.07em"}}>UP NEXT</span>}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:5}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span> &#183; {ev.time||"TBD"} &#183; {eventTypeLabel(ev.type)}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{ev.location||"Location TBD"}</div></div>
-        <div style={{display:"flex",flexDirection:"column",alignItems:"flex-end",gap:8,flexShrink:0}}>
-          <div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:evR.length>0?VOLT:MUTED,fontSize:20}}>{evR.length}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>GOING</div></div>
-        </div>
       </div>
       {/* Inline quick-RSVP pill */}
       <button onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:14,padding:"11px 0",width:"100%",borderRadius:12,border:going?`1px solid ${VOLT}66`:"none",background:going?`${VOLT}24`:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:2,color:going?VOLT:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
@@ -3258,16 +3240,13 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
     {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{ev.desc}</p>
       <button className="btn-v cta-primary" onClick={()=>handleEventRsvp(ev)} style={{marginBottom:14}}>
-        {going?"&#10003; I'M GOING":"RSVP NOW &#8594;"}
+        {going?"✓ I'M GOING":"RSVP NOW →"}
       </button>
-      {evR.length>0&&<div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,marginBottom:8,fontWeight:600}}>WHO'S GOING</div><div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-        {evR.map((r,i)=>{const tr=getTier(rsvps.filter(rr=>rr.email===r.email).length);return <div key={i} style={{display:"flex",alignItems:"center",gap:6,background:CARD_BG,borderRadius:8,padding:"6px 10px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={22} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:600}}>{r.name}</span>{tr.min>=2&&<span style={{fontFamily:FB,fontSize:7,fontWeight:700,letterSpacing:1,padding:"1px 4px",borderRadius:3,color:tr.color,background:tr.bg}}>{tr.name}</span>}</div>})}
-      </div></div>}
     </div>}
   </div>})}
 
 {past.length>0&&<><div style={{marginTop:8}}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PAST EVENTS" s={`${past.length} COMPLETED`}/></div>
-  {past.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const was=evR.some(r=>r.email===user.email);return <div key={ev.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.5}}><EventIcon type={ev.type} size={20} color={MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:MUTED,fontSize:13,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ev.date}</div></div>{was&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"3px 7px",borderRadius:5,color:VOLT,background:VOLT+"15",letterSpacing:1}}>ATTENDED</span>}<span style={{fontFamily:FD,color:MUTED,fontSize:13}}>{evR.length}</span></div>})}</>}
+  {past.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const was=evR.some(r=>r.email===user.email);return <div key={ev.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.5}}><EventIcon type={ev.type} size={20} color={MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:MUTED,fontSize:13,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ev.date}</div></div>{was&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"3px 7px",borderRadius:5,color:VOLT,background:VOLT+"15",letterSpacing:1}}>ATTENDED</span>}</div>})}</>}
 
   </div>;
 }
