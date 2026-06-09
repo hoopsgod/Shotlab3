@@ -8,6 +8,14 @@ async function appSource() {
   return readFile(APP_PATH, 'utf8');
 }
 
+function playerEventsPanelSource(source) {
+  const start = source.indexOf('function EventsPanel(');
+  const end = source.indexOf('// ═══════════════════════════════════════\n// COACH SCREEN', start);
+  assert.notEqual(start, -1, 'EventsPanel function should exist');
+  assert.notEqual(end, -1, 'Coach screen boundary should exist after EventsPanel');
+  return source.slice(start, end);
+}
+
 test('coach-created events are team-scoped and saved local-first', async () => {
   const source = await appSource();
 
@@ -33,6 +41,33 @@ test('players only receive events and RSVPs for their registered team', async ()
   assert.match(source, /const scopedEvents=events\.filter\(e=>e\.teamId===user\?\.teamId\);/);
   assert.match(source, /const scopedRsvps=rsvps\.filter\(r=>r\.teamId===user\?\.teamId\);/);
   assert.match(source, /<Player[^>]*events=\{scopedEvents\}[^>]*rsvps=\{scopedRsvps\}/s);
+});
+
+
+test("player Events panel does not render a WHO'S GOING attendee section", async () => {
+  const source = await appSource();
+  const panel = playerEventsPanelSource(source);
+
+  assert.doesNotMatch(panel, /WHO['’]S GOING/);
+});
+
+test('player Events panel does not render RSVP attendee names or avatar cards', async () => {
+  const source = await appSource();
+  const panel = playerEventsPanelSource(source);
+
+  assert.doesNotMatch(panel, /attendBoard/);
+  assert.doesNotMatch(panel, /evR\.map\(\(r,i\)=>/);
+  assert.doesNotMatch(panel, /<Av n=\{r\.name\}[^>]*email=\{r\.email\}/);
+});
+
+test('RSVP buttons do not render raw HTML entity text', async () => {
+  const source = await appSource();
+
+  assert.doesNotMatch(source, /&#10003; I\'M GOING/);
+  assert.doesNotMatch(source, /RSVP NOW &#8594;/);
+  assert.doesNotMatch(source, /&#10003; YOU\'RE IN/);
+  assert.match(source, /\{going\?"✓ I\'M GOING":"RSVP NOW →"\}/);
+  assert.match(source, /\{going\?<>✓ YOU\'RE IN — TAP TO CANCEL<\/>:<><LiftIcon size=\{16\} color=\{BG\}\/> RSVP NOW<\/>\}/);
 });
 
 test('only registered players on the team can RSVP and RSVP rows are team-scoped', async () => {
