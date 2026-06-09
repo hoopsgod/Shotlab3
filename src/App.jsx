@@ -1642,7 +1642,7 @@ const respondChallenge=async(id,score)=>{if(!requirePlayer(user,user?.teamId,use
 const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setScSessions);trackEvent("sc_session_created",{sport:s.sport||""})};
 const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:sc-sessions",scSessions.filter(s=>!(s.id===id&&s.teamId===user.teamId)),setScSessions);await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===id&&r.teamId===user.teamId)),setScRsvps)};
 const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)),setScRsvps);trackEvent("sc_rsvp_removed",{sessionId:sid});}else{await P("sl:sc-rsvps",[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setScRsvps);trackEvent("sc_rsvp_added",{sessionId:sid});}};
-const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:sc-logs",[{...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name},...scLogs],setScLogs)};
+const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,err:"Player team context is required to log S&C sessions."};const nextLog={...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name};const nextLogs=[nextLog,...scLogs];try{await DB.set("sl:sc-logs",nextLogs,{strictLocal:true});setScLogs(nextLogs);return{ok:true};}catch(error){console.error("sc_log_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),sport:String(log?.sport||"")});return{ok:false,err:"Session could not be saved. Please try again."};}};
 const toggleLeaderboardVisibility=async()=>{if(!user||user.role!=="player")return;const np=players.map(p=>p.email===user.email?{...p,hideFromLeaderboards:!(p.hideFromLeaderboards===true)}:p);await P("sl:players",np,setPlayers);const updated=np.find(p=>p.email===user.email);if(updated){if(!SUPABASE_AUTH_ENABLED)await legacyAuthFetch("/v1/legacy-auth/update-profile",{email:user.email,password:legacyAuthSecretRef.current?.password||"",hide_from_leaderboards:updated.hideFromLeaderboards===true});setUser(prev=>prev?{...prev,hideFromLeaderboards:updated.hideFromLeaderboards===true}:prev)}};
 useEffect(()=>{
 if(view!=="coach"||!user?.teamId)return;
@@ -2679,16 +2679,18 @@ const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!isLeaderboardEligibl
 const LiftIcon=({size=24,color="#A0A0A0"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
 const SC_COLOR="#A0A0A0";
 const myScLogs=useMemo(()=>scLogs.filter(l=>l.email===user.email),[scLogs,user]);
-const handleAddScLog=()=>{
+const handleAddScLog=async()=>{
   const date=newLog.date?.trim();
   const time=newLog.time?.trim();
   const place=newLog.place?.trim();
   const sport=newLog.sport?.trim();
-  if(!date||!time||!place||!sport){setLogErr("Please complete date, time, place, and sport.");return}
-  addScLog({date,time,place,sport,ts:Date.now()});
+  if(!date||!time||!place||!sport){setLogSaved(false);setLogErr("Please complete date, time, place, and sport.");return}
+  setLogErr("");
+  setLogSaved(false);
+  const result=await addScLog({date,time,place,sport,ts:Date.now()});
+  if(!result?.ok){setLogErr(result?.err||"Session could not be saved. Please try again.");return}
   onCompletionCue?.({title:"S&C activity logged",detail:`${sport} · ${place} · ${time}`,momentum:"Consistency compounds",next:"RSVP to your next session"});
   setNewLog({date:todayStr(),time:"",place:"School",sport:""});
-  setLogErr("");
   setLogSaved(true);
   setTimeout(()=>setLogSaved(false),1800);
 };
