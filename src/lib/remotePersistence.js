@@ -258,6 +258,18 @@ export const mergeHydratedRows = (key, localRows, remoteRows) => {
     return merged;
   }
 
+  if (key === "sl:rsvps") {
+    const merged = [];
+    const idx = new Map();
+    const keyFor = (row) => row.id || `${row.eventId}::${row.teamId}::${row.playerId || row.email}`;
+    for (const row of local.map(normalizeRsvpRowForApp).filter(Boolean)) idx.set(keyFor(row), merged.push(row) - 1);
+    for (const row of remote.map(normalizeRsvpRowForApp).filter(Boolean)) {
+      const k = keyFor(row);
+      if (idx.has(k)) merged[idx.get(k)] = row; else idx.set(k, merged.push(row) - 1);
+    }
+    return merged;
+  }
+
   if (key === "sl:shotlogs") {
     const merged = [];
     const idx = new Map();
