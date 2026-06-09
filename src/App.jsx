@@ -3812,9 +3812,6 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 
   {/* EVENTS */}
   {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><DashboardReturnButton onClick={()=>setTab("feed")} />
-    <div data-testid="coach-events-top-create-event" style={{display:"flex",justifyContent:isDesktop?"flex-end":"stretch",margin:"0 0 12px",position:"relative",zIndex:2}}>
-      <button onClick={openEventCreateFlow} className="btn-v cta-primary" style={{width:isDesktop?"auto":"100%",minHeight:48,height:48,padding:"0 18px",borderRadius:12,fontSize:12,whiteSpace:"nowrap"}}>+ CREATE EVENT</button>
-    </div>
     {isDesktop?<>
       <div className="coachEventsHeaderCard"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} actionLabel="+ Create Event" onAction={handleToggleAddEvent} /></div>
       {nextEvent&&(()=>{const nextRows=coachEventRsvpRows(nextEvent.id);const rosterCount=allKnown.length;const missingCount=Math.max(rosterCount-nextRows.length,0);return <div className="heroModule" style={{background:"linear-gradient(145deg, rgba(200,255,26,0.16), rgba(15,20,28,0.94) 60%)",border:`1px solid ${VOLT}55`,boxShadow:"0 20px 45px rgba(0,0,0,0.38)",padding:16}}>
@@ -3835,14 +3832,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"var(--tracking-tight)"}}>EVENT MANAGEMENT</div>
             <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>{events.length} total scheduled</div>
           </div>
-          <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:0,minHeight:42,height:42,padding:"0 14px",borderRadius:12,whiteSpace:"nowrap"}}>+ CREATE EVENT</button>
         </div>
         {eventSaveError&&<div role="alert" style={{marginTop:8,marginBottom:8,padding:"10px 12px",borderRadius:10,background:"rgba(255,69,69,0.12)",border:"1px solid rgba(255,69,69,0.45)",color:"#FFD2D2",fontFamily:FB,fontSize:12,fontWeight:700}}>Event could not be saved. Please try again.</div>}
       {events.length===0&&<div style={{marginTop:6,padding:"14px 12px",textAlign:"center",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14}}>
           <div style={{width:44,height:44,borderRadius:12,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={20} color={VOLT}/></div>
           <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events yet — add your first event to get the team moving.</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.45,maxWidth:360,marginLeft:"auto",marginRight:"auto"}}>Create your first event to organize practices, games, camps, or meetings.</div>
-          <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:"12px 0 0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}}>+ CREATE EVENT</button>
         </div>}
       </div>
       {events.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",paddingBottom:4,marginBottom:14}}>
@@ -3851,14 +3846,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
     </>:<>
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"6px 2px 10px",borderBottom:`1px solid ${BORDER_CLR}`,marginBottom:12}}>
         <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><EventIcon type="event" size={14} color={VOLT}/><span style={{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1}}>EVENTS</span></div>
-        <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:0,minHeight:44,height:44,padding:"0 12px",borderRadius:12,fontSize:11,whiteSpace:"nowrap"}}>+ CREATE EVENT</button>
       </div>
-      <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:"0 0 14px",width:"100%",minHeight:48,height:48,borderRadius:12,fontSize:12}}>+ CREATE EVENT</button>
+      <button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} className="btn-v cta-primary" style={{margin:"0 0 14px",width:"100%",minHeight:48,height:48,borderRadius:12,fontSize:12}}>+ CREATE EVENT</button>
       {events.length===0?<div style={{display:"inline-block",maxWidth:"100%",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 12px",marginBottom:12,textAlign:"center"}}>
         <div style={{width:40,height:40,borderRadius:11,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={18} color={VOLT}/></div>
         <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events yet — add your first event to get the team moving.</div>
         <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.4}}>Create your first event to organize practices, games, camps, or meetings.</div>
-        <button onClick={()=>{setEventSaveError("");handleToggleAddEvent();}} className="btn-v cta-primary" style={{margin:"12px 0 0",width:"100%",minHeight:46,height:46,borderRadius:12,fontSize:12}}>+ CREATE EVENT</button>
       </div>:<div style={{display:"grid",gap:10,marginBottom:14}}>
         {(() => {
           const parseTime=(time="")=>{const m=String(time).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);if(!m)return Number.MAX_SAFE_INTEGER;let hour=Number(m[1]);const minute=Number(m[2]||"0");const meridiem=(m[3]||"").toUpperCase();if(meridiem==="PM"&&hour<12)hour+=12;if(meridiem==="AM"&&hour===12)hour=0;return hour*60+minute;};
