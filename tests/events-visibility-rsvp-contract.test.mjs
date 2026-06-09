@@ -79,3 +79,53 @@ test('regression: addScSession still uses Date.now() id generation', async () =>
     /const addScSession=async\(s\)=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return;await P\("sl:sc-sessions",\[\.\.\.scSessions,\{\.\.\.s,id:Date\.now\(\),teamId:user\.teamId,ownerCoachId:user\.email\}\],setScSessions\);/,
   );
 });
+
+test('coach Events screen has an always-visible inline Create Event form', async () => {
+  const source = await appSource();
+
+  assert.match(source, /const inlineCreateEventCard=<section data-coach-events-inline-create-card aria-label="Create event"/);
+  assert.match(source, /<div className="coachEventsHeaderCard">[\s\S]*?\{inlineCreateEventCard\}[\s\S]*?\{nextEvent&&/);
+  assert.match(source, /<span style=\{\{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1\}\}>EVENTS<\/span>[\s\S]*?\{inlineCreateEventCard\}[\s\S]*?\{events\.length===0\?/);
+});
+
+test('coach inline Create Event form exposes all required fields', async () => {
+  const source = await appSource();
+
+  assert.match(source, /<FF l="EVENT TITLE" v=\{ne\.title\}/);
+  assert.match(source, /<FF l="DATE" v=\{ne\.date\}[\s\S]*?tp="date"/);
+  assert.match(source, /<FF l="TIME" v=\{ne\.time\}/);
+  assert.match(source, /<FF l="LOCATION" v=\{ne\.location\}/);
+  assert.match(source, /<FF l="DETAILS \/ DESCRIPTION" v=\{ne\.desc\}[\s\S]*?ta/);
+});
+
+test('coach inline Save Event button is wired to handleAddEvent', async () => {
+  const source = await appSource();
+
+  assert.match(source, /<button className="btn-v cta-primary" onClick=\{handleAddEvent\}[^>]*>SAVE EVENT<\/button>/);
+});
+
+test('coach inline Create Event form renders validation and save errors visibly in the card', async () => {
+  const source = await appSource();
+
+  assert.match(source, /setEventValidationError\("Event title and date are required\."\);/);
+  assert.match(source, /\{eventValidationError&&<div role="alert"[^>]*>Event title and date are required\.<\/div>\}/);
+  assert.match(source, /\{eventSaveError&&<div role="alert"[^>]*>Event could not be saved\. Please try again\.<\/div>\}/);
+});
+
+test('coach create event flow is not hidden in PageHeader, event list, empty state, or modal-only UI', async () => {
+  const source = await appSource();
+  const eventsStart = source.indexOf('{tab==="events"&&');
+  const eventsEnd = source.indexOf('{tab==="sc"&&', eventsStart);
+  const eventsSource = source.slice(eventsStart, eventsEnd);
+  const formIndex = eventsSource.indexOf('{inlineCreateEventCard}');
+  const firstEventsLengthIndex = eventsSource.indexOf('events.length');
+  const emptyStateIndex = eventsSource.indexOf('{events.length===0');
+
+  assert.doesNotMatch(eventsSource, /PageHeader[^>]*(actionLabel|onAction)/);
+  assert.equal(eventsSource.includes('role="dialog" aria-modal="true" aria-label="Create event"'), false);
+  assert.ok(formIndex !== -1, 'inline create form renders in the Events tab');
+  assert.ok(firstEventsLengthIndex !== -1, 'Events tab still references events.length for list UI');
+  assert.ok(formIndex < firstEventsLengthIndex, 'inline create form renders before event-count gated UI');
+  assert.ok(emptyStateIndex !== -1, 'Events tab still has an empty state');
+  assert.ok(formIndex < emptyStateIndex, 'inline create form renders before the empty state');
+});
