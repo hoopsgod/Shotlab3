@@ -1642,7 +1642,7 @@ const respondChallenge=async(id,score)=>{if(!requirePlayer(user,user?.teamId,use
 const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setScSessions);trackEvent("sc_session_created",{sport:s.sport||""})};
 const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:sc-sessions",scSessions.filter(s=>!(s.id===id&&s.teamId===user.teamId)),setScSessions);await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===id&&r.teamId===user.teamId)),setScRsvps)};
 const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)),setScRsvps);trackEvent("sc_rsvp_removed",{sessionId:sid});}else{await P("sl:sc-rsvps",[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setScRsvps);trackEvent("sc_rsvp_added",{sessionId:sid});}};
-const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:sc-logs",[{...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name},...scLogs],setScLogs)};
+const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,err:"Player team context is required to log S&C sessions."};const nextLog={...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name};const nextLogs=[nextLog,...scLogs];try{await DB.set("sl:sc-logs",nextLogs,{strictLocal:true});setScLogs(nextLogs);return{ok:true};}catch(error){console.error("sc_log_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),sport:String(log?.sport||"")});return{ok:false,err:"Session could not be saved. Please try again."};}};
 const toggleLeaderboardVisibility=async()=>{if(!user||user.role!=="player")return;const np=players.map(p=>p.email===user.email?{...p,hideFromLeaderboards:!(p.hideFromLeaderboards===true)}:p);await P("sl:players",np,setPlayers);const updated=np.find(p=>p.email===user.email);if(updated){if(!SUPABASE_AUTH_ENABLED)await legacyAuthFetch("/v1/legacy-auth/update-profile",{email:user.email,password:legacyAuthSecretRef.current?.password||"",hide_from_leaderboards:updated.hideFromLeaderboards===true});setUser(prev=>prev?{...prev,hideFromLeaderboards:updated.hideFromLeaderboards===true}:prev)}};
 useEffect(()=>{
 if(view!=="coach"||!user?.teamId)return;
@@ -2679,16 +2679,18 @@ const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!isLeaderboardEligibl
 const LiftIcon=({size=24,color="#A0A0A0"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
 const SC_COLOR="#A0A0A0";
 const myScLogs=useMemo(()=>scLogs.filter(l=>l.email===user.email),[scLogs,user]);
-const handleAddScLog=()=>{
+const handleAddScLog=async()=>{
   const date=newLog.date?.trim();
   const time=newLog.time?.trim();
   const place=newLog.place?.trim();
   const sport=newLog.sport?.trim();
-  if(!date||!time||!place||!sport){setLogErr("Please complete date, time, place, and sport.");return}
-  addScLog({date,time,place,sport,ts:Date.now()});
+  if(!date||!time||!place||!sport){setLogSaved(false);setLogErr("Please complete date, time, place, and sport.");return}
+  setLogErr("");
+  setLogSaved(false);
+  const result=await addScLog({date,time,place,sport,ts:Date.now()});
+  if(!result?.ok){setLogErr(result?.err||"Session could not be saved. Please try again.");return}
   onCompletionCue?.({title:"S&C activity logged",detail:`${sport} · ${place} · ${time}`,momentum:"Consistency compounds",next:"RSVP to your next session"});
   setNewLog({date:todayStr(),time:"",place:"School",sport:""});
-  setLogErr("");
   setLogSaved(true);
   setTimeout(()=>setLogSaved(false),1800);
 };
@@ -3321,6 +3323,9 @@ const e=addEmail.trim().toLowerCase();if(!e)return;
 const known=allKnown.find(p=>p.email===e);
 const name=known?.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
 addRsvp(evId,e,name);setAddEmail("")};
+const focusCoachScSessionForm=()=>setTimeout(()=>{const form=document.getElementById("coach-sc-session-form");form?.scrollIntoView({behavior:"smooth",block:"start"});form?.querySelector("input,select,textarea")?.focus?.({preventScroll:true});},120);
+const openCoachScSessionForm=()=>{setShowAddSC(true);focusCoachScSessionForm();};
+const toggleCoachScSessionForm=()=>{if(showAddSC){setShowAddSC(false);return;}openCoachScSessionForm();};
 const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,sport:san(nsc.sport),sessionType:san(nsc.sessionType||"School")});setNsc({sport:"",date:"",time:"",sessionType:"School"});setShowAddSC(false)};
 const totalPlayers=ups.length;
 const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
@@ -4041,13 +4046,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {getPlayerHomeShotMakes(selP.email,shotLogs,u?.teamId)}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div><div style={{marginTop:10,fontFamily:FB,fontSize:10,color:MUTED}}>{(()=>{const snap=derivePlayerProgressProfile({playerEmail:selP.email,shotLogs,scores,rsvps,events,players});return `${snap.coachSnapshot.consistency} · ${snap.coachSnapshot.engagement} · ${snap.coachSnapshot.developmentSignal}`;})()}</div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills} programDr={programDrills}/></div>}
 
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
-  {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><DashboardReturnButton onClick={()=>setTab("feed")} /><PageHeader title="S&C" subtitle="Athletic performance blocks, readiness tracking, and recovery accountability" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add"} onAction={()=>setShowAddSC(!showAddSC)} /><div className="premiumSummaryPanel"><div className="premiumSummaryTop"><div style={{display:"flex",gap:10,alignItems:"flex-start"}}><div className="premiumSummaryBadge"><LiftIcon size={16} color={PAGE_ACCENTS.sc.accent}/></div><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:13,letterSpacing:"var(--tracking-default)"}}>TODAY'S PERFORMANCE BLOCK</div><div className="premiumSummaryMeta">{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled — set the next session cadence."}</div></div></div></div><div className="premiumStatGrid"><div className="premiumStatTile"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">PERFORMANCE SESSIONS</div></div><div className="premiumStatTile"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">READINESS RSVPS</div></div><div className="premiumStatTile"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">WORKLOAD LOGS</div></div></div><div className="premiumSummaryActions"><button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setShowAddSC(true)}>Add Session</button></div></div>
+  {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><DashboardReturnButton onClick={()=>setTab("feed")} /><PageHeader title="S&C" subtitle="Athletic performance blocks, readiness tracking, and recovery accountability" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add Session"} onAction={toggleCoachScSessionForm} /><div className="premiumSummaryPanel"><div className="premiumSummaryTop"><div style={{display:"flex",gap:10,alignItems:"flex-start"}}><div className="premiumSummaryBadge"><LiftIcon size={16} color={PAGE_ACCENTS.sc.accent}/></div><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:13,letterSpacing:"var(--tracking-default)"}}>TODAY'S PERFORMANCE BLOCK</div><div className="premiumSummaryMeta">{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled — set the next session cadence."}</div></div></div></div><div className="premiumStatGrid"><div className="premiumStatTile"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">PERFORMANCE SESSIONS</div></div><div className="premiumStatTile"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">READINESS RSVPS</div></div><div className="premiumStatTile"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">WORKLOAD LOGS</div></div></div><div className="premiumSummaryActions"><button className="pageHeaderPill pageHeaderPillBrand" onClick={openCoachScSessionForm}>Add Session</button></div></div>
     <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="S&C SESSIONS" s={`${scSessions.length} TOTAL`} identity/>
     <div className="accent-card" style={{marginBottom:16,paddingLeft:10,paddingRight:10,paddingTop:10,paddingBottom:10}}>
       <div style={{display:"flex",justifyContent:"flex-end"}}>
         <button
           className="pageHeaderPill btn-v"
-          onClick={()=>setShowAddSC(!showAddSC)}
+          onClick={toggleCoachScSessionForm}
           style={{
             minHeight:40,
             padding:"0 18px",
@@ -4062,7 +4067,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           {showAddSC?"CANCEL":"+ ADD SESSION"}
         </button>
       </div>
-    {showAddSC&&<div className="fade-up" style={{background:CARD_BG,borderRadius:16,padding:"20px 18px",marginTop:12,border:`1px solid ${BORDER_CLR}`}}>
+    {showAddSC&&<div id="coach-sc-session-form" className="fade-up" style={{background:CARD_BG,borderRadius:16,padding:"20px 18px",marginTop:12,border:`1px solid ${BORDER_CLR}`}}>
       <FF l="SPORT" v={nsc.sport} set={v=>setNsc({...nsc,sport:v})} ph="e.g. Basketball"/>
       <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:"calc(11px * var(--coach-text-scale-medium))",fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>PLACE</label>
       <select value={nsc.sessionType||"School"} onChange={e=>setNsc({...nsc,sessionType:e.target.value})} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14}}>
