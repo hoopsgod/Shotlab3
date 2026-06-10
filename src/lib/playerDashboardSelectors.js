@@ -79,6 +79,24 @@ export const deriveNextFocusLabel = ({ todaysMakes = 0, dailyGoal = 1 } = {}) =>
   ? "Close daily make target + confirm attendance"
   : "Sustain shot quality under fatigue");
 
+
+export const deriveUpcomingSchedule = ({ events = [], rsvps = [], scSessions = [], scRsvps = [], userEmail = "", today = "" } = {}) => {
+  const normalizedEmail = normalizeEmail(userEmail || "");
+  const day = today || new Date().toISOString().slice(0, 10);
+  const nextEvent = safeArray(events)
+    .filter((event) => event?.date && String(event.date) >= day)
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.time || "").localeCompare(String(b.time || "")))[0] || null;
+  const nextScSession = safeArray(scSessions)
+    .filter((session) => session?.date && String(session.date) >= day)
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)) || String(a.time || "").localeCompare(String(b.time || "")))[0] || null;
+  const eventRsvp = nextEvent ? safeArray(rsvps).find((row) => row?.eventId === nextEvent.id && normalizeEmail(row?.email || row?.playerId || "") === normalizedEmail) : null;
+  const scRsvp = nextScSession ? safeArray(scRsvps).find((row) => row?.sessionId === nextScSession.id && normalizeEmail(row?.email || row?.playerId || "") === normalizedEmail) : null;
+  return [
+    nextEvent ? { kind: "event", label: "Next Event", item: nextEvent, title: nextEvent.title || "Team event", date: nextEvent.date, time: nextEvent.time || "TBD", location: nextEvent.location || "Location TBD", rsvpStatus: eventRsvp ? "Going" : "Not RSVP’d", target: "program", cta: "Open Events" } : null,
+    nextScSession ? { kind: "sc", label: "Next S&C", item: nextScSession, title: nextScSession.sport || nextScSession.title || "Strength & Conditioning", date: nextScSession.date, time: nextScSession.time || "TBD", location: nextScSession.location || nextScSession.sessionType || "Location TBD", rsvpStatus: scRsvp ? "Going" : "Not RSVP’d", target: "sc", cta: "Open S&C" } : null,
+  ].filter(Boolean);
+};
+
 export const derivePlayerNotificationBriefing = ({ nextEvent = null, dayLabel = () => "UPCOMING", weekMissingCount = 0, unresolvedBadgeLabel = "All RSVPs set", scSessions = [], streak = 0 } = {}) => [
   nextEvent ? { priority: (dayLabel(nextEvent.date) === "TODAY" || dayLabel(nextEvent.date) === "TOMORROW") ? "important" : "passive", title: "Upcoming team session", detail: `${nextEvent.title} · ${dayLabel(nextEvent.date)} ${nextEvent.time || "TBD"}`, cta: "Open schedule", target: "program" } : null,
   weekMissingCount > 0 ? { priority: weekMissingCount >= 2 ? "critical" : "important", title: "Unresolved RSVPs", detail: `${unresolvedBadgeLabel} in the next 7 days.`, cta: "Resolve now", target: "program" } : null,

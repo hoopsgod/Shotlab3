@@ -64,6 +64,7 @@ import {
   deriveMomentumLabel,
   deriveNextFocusLabel,
   derivePlayerNotificationBriefing,
+  deriveUpcomingSchedule,
   deriveFirstWeekActivationMilestones,
   deriveTrainingIdentityLabels,
   deriveInterpretedPerformanceTrends,
@@ -2186,6 +2187,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const weekConfirmedCount=upcomingWeekEvents.filter(ev=>rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes")).length;
       const weekMissingCount=upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length;
       const unresolvedBadgeLabel=weekMissingCount>0?`${weekMissingCount} unresolved RSVP${weekMissingCount===1?"":"s"}`:"All RSVPs set";
+      const upcomingScheduleItems=deriveUpcomingSchedule({events,rsvps,scSessions,scRsvps,userEmail:u?.email,today});
       const coachName=players.find(p=>p.role==="coach"&&p.teamId===u?.teamId)?.name||"Your coach";
       const emphasisLabel=String(coachPriorities?.focusEmphasis||"Volume").trim();
       const coachTodayFocus=String(coachPriorities?.todayFocusText||"Daily shot volume + clean mechanics").trim();
@@ -2227,6 +2229,20 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
             {[`Emphasis · ${emphasisLabel}`,`Weekly · ${weeklyMakes}/${coachWeeklyMakesTarget}`,`Momentum · ${momentumLabel}`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:11,color:LIGHT,padding:"5px 9px",borderRadius:999,background:"rgba(12,14,18,0.52)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
           </div>
           <button className="btn-v cta-primary" style={{marginTop:14,minHeight:56,padding:"0 20px",fontSize:15}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel.toUpperCase()}</button>
+        </section>
+        <section aria-label="Upcoming Schedule" data-testid="player-upcoming-schedule" style={{padding:isNarrow?"16px":"18px",borderRadius:18,background:"linear-gradient(150deg, rgba(94,208,255,0.18), rgba(200,255,0,0.08) 48%, rgba(9,12,16,0.86))",border:"1px solid rgba(255,255,255,0.18)",boxShadow:"0 18px 36px rgba(0,0,0,0.28)"}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:12}}>
+            <div><div style={{fontFamily:FB,color:CYAN,fontSize:12,fontWeight:800,letterSpacing:"0.12em"}}>NEXT UP</div><div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?22:26,letterSpacing:1,marginTop:4}}>UPCOMING SCHEDULE</div></div>
+            <span style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:700,border:"1px solid rgba(200,255,0,0.38)",borderRadius:999,padding:"5px 9px",whiteSpace:"nowrap"}}>{upcomingScheduleItems.length} scheduled</span>
+          </div>
+          {upcomingScheduleItems.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:13,lineHeight:1.5}}>No upcoming event or S&C session is scheduled yet.</div>:<div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
+            {upcomingScheduleItems.map(item=><div key={item.kind} style={{border:"1px solid rgba(255,255,255,0.14)",borderRadius:14,padding:"13px",background:"rgba(7,10,14,0.58)",minWidth:0}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}><span style={{fontFamily:FB,color:item.kind==="sc"?"#A0A0A0":VOLT,fontSize:10,fontWeight:800,letterSpacing:"0.1em"}}>{item.label}</span><span style={{fontFamily:FB,color:item.rsvpStatus==="Going"?VOLT:"#FFCE73",fontSize:10,border:"1px solid rgba(255,255,255,0.16)",borderRadius:999,padding:"3px 7px"}}>{item.rsvpStatus}</span></div>
+              <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.title}</div>
+              <div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:6,lineHeight:1.5}}><span style={{color:CYAN,fontWeight:700}}>{item.date}</span> · {item.time}<br/>{item.location}</div>
+              <button className="pageHeaderPill" onClick={()=>switchTab(item.target)} style={{marginTop:10}}>{item.cta}</button>
+            </div>)}
+          </div>}
         </section>
         <CompactLeaderboardPreviewCard
           title="Team Leaders"
@@ -2652,7 +2668,7 @@ return <div className="fade-up">
 // STRENGTH & CONDITIONING PANEL
 // ═══════════════════════════════════════
 function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog,players,onCompletionCue}){
-const[showBoard,setShowBoard]=useState(false),[expanded,setExpanded]=useState(null);
+const[expanded,setExpanded]=useState(null);
 const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"School",sport:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false);
 const sorted=useMemo(()=>[...sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
 const upcoming=sorted.filter(s=>s.date>=todayStr()),past=sorted.filter(s=>s.date<todayStr());
@@ -2741,20 +2757,7 @@ return <div className="fade-up">
     </div>}
 </div></div>
 
-{/* Leaderboard toggle */}
-<button onClick={()=>setShowBoard(!showBoard)} className="ch" style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 18px",marginBottom:16,cursor:"pointer",textAlign:"left"}}>
-  <div style={{display:"flex",alignItems:"center",gap:10}}><div style={{width:36,height:36,borderRadius:10,background:SC_COLOR+"15",display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={18} color={SC_COLOR}/></div><div><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>LIFTING LEADERBOARD</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Ranked by sessions attended</div></div></div>
-  <svg width="14" height="14" viewBox="0 0 16 16" style={{transform:showBoard?"rotate(90deg)":"none",transition:"transform .2s"}}><path d="M6 3l5 5-5 5" stroke={SC_COLOR} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
-</button>
-{showBoard&&<div className="fade-up" style={{marginBottom:20}}>
-  {board.length===0&&<Empty t="No attendance yet"/>}
-  {board.map((p,i)=>{const isMe=p.email===user.email;return <div key={p.email} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 14px",marginBottom:6,border:`1px solid ${isMe?SC_COLOR+"33":BORDER_CLR}`}}>
-    <RB r={i+1} m={medals}/>
-    <Av n={p.name} sz={30} email={p.email}/>
-    <div style={{flex:1,fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{p.name.toUpperCase()}{isMe?" (YOU)":""}</div>
-    <div style={{fontFamily:FD,color:SC_COLOR,fontSize:18}}>{p.count}</div>
-  </div>})}
-</div>}
+<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.5,margin:"-2px 0 16px",padding:"10px 12px",borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.02)"}}>RSVP privacy is protected for players. You can see your own status; coaches can manage the full attendance list.</div>
 
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SESSION LOG"/>
 <div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"16px"}}>
@@ -2788,7 +2791,7 @@ return <div className="fade-up">
           <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}><span style={{color:SC_COLOR,fontWeight:700}}>{s.date}</span> &#183; {s.time}</div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{s.location}</div>
         </div>
-        <div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:sr.length>0?SC_COLOR:MUTED,fontSize:20}}>{sr.length}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>GOING</div></div>
+        <div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:going?SC_COLOR:MUTED,fontSize:14}}>{going?"GOING":"OPEN"}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>YOUR RSVP</div></div>
       </div>
     </button>
     {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
@@ -2796,7 +2799,7 @@ return <div className="fade-up">
       <button className="btn-v cta-primary" onClick={()=>toggleScRsvp(s.id)} style={{}}>
         {going?<>✓ YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
       </button>
-      {sr.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:12}}>{sr.map((r,i)=><div key={i} style={{display:"flex",alignItems:"center",gap:4,background:CARD_BG,borderRadius:8,padding:"4px 8px",border:`1px solid ${BORDER_CLR}`}}><Av n={r.name} sz={20} email={r.email}/><span style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:600}}>{r.name}</span></div>)}</div>}
+      <div style={{fontFamily:FB,color:going?SC_COLOR:MUTED,fontSize:11,marginTop:10,fontWeight:700}}>Your RSVP status: {going?"Going":"Not RSVP’d"}</div>
     </div>}
   </div>;
 })}
@@ -4080,14 +4083,15 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       <button className="btn-v cta-primary" onClick={handleAddSC} style={{}}>CREATE SESSION</button>
     </div>}
     </div>
-    {scSessions.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);
+    {scSessions.sort((a,b)=>a.date.localeCompare(b.date)).map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const srNames=sr.map(r=>r.name||players.find(p=>p.email===r.email)?.name||r.email).filter(Boolean);const missing=Math.max(0,ups.length-sr.length);
       return <div key={s.id} className="scSection" style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"14px 16px",marginBottom:8,border:`1px solid ${BORDER_CLR}`}}>
         <div style={{width:40,height:40,borderRadius:10,background:"#A0A0A012",border:"1px solid #A0A0A033",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A0A0A0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>
         </div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{s.sport||s.title}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{s.date} &#183; {s.time} &#183; {s.sessionType||"School"} &#183; <span style={{color:"#A0A0A0"}}>{sr.length} RSVPs</span></div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{s.date} · {s.time||"TBD"} · {s.location||s.sessionType||"School"} · <span style={{color:"#A0A0A0"}}>{sr.length} confirmed</span> · <span style={{color:missing>0?"#FFB86B":VOLT}}>{missing} missing</span></div>
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:10,marginTop:6}}>{srNames.length>0?srNames.join(", "):"No S&C RSVPs yet"}</div>
         </div>
         <button onClick={()=>removeScSession(s.id)} style={{background:"none",border:"none",color:"#FF4545",cursor:"pointer",fontSize:16,padding:4}}>&#10005;</button>
       </div>;
