@@ -791,7 +791,36 @@ const _PAGE_SIGNATURE_CSS=`
 }
 `;
 const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);} .team-brand .pageHeaderBadge,.team-brand .pageAccentBar{background:var(--team-brand-header-accent)!important;box-shadow:0 0 16px color-mix(in srgb,var(--team-brand-header-accent) 44%, transparent)!important;}.team-brand .pageHeaderPill{border-color:var(--team-brand-badge-border)!important;background:var(--team-brand-badge-bg)!important;color:var(--team-brand-badge-text)!important;}.team-brand .cta-primary,.team-brand .cta-primary-accent{background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 100%),var(--team-brand-primary)!important;color:var(--team-brand-primary-text)!important;box-shadow:0 4px 24px color-mix(in srgb,var(--team-brand-primary) 30%, transparent)!important;}.team-brand .bottom-nav .tab.is-active,.team-brand .bottom-nav .tab.active{color:var(--team-brand-nav-active)!important;}.team-brand .bottom-nav .tab.is-active::before,.team-brand .bottom-nav .tab.active::before{background:var(--team-brand-nav-active)!important;}.team-brand .chip,.team-brand .badge,[class*="chip"],[class*="badge"]{background:var(--team-brand-badge-bg)!important;border-color:var(--team-brand-badge-border)!important;color:var(--team-brand-badge-text)!important;}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
-const Styles=()=><><style>{_STYLES_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style></>;
+const _PLAYER_COMPACT_DASHBOARD_CSS=`
+.player-home-compact-dashboard{--player-dashboard-gap:14px;--player-dashboard-card-pad:18px;--player-dashboard-card-pad-compact:16px;--player-dashboard-chip-pad:4px 8px;--player-dashboard-chip-font:10px;--player-dashboard-section-title:22px;--player-dashboard-logo-size:20px;gap:var(--player-dashboard-gap);}
+.player-dashboard-chip{display:inline-flex;align-items:center;max-width:100%;}
+@media (max-width:767px){
+  .player-mobile-header{padding:max(0px,env(safe-area-inset-top)) 14px 7px!important;background:linear-gradient(180deg,rgba(11,13,16,0.96),rgba(11,13,16,0.82))!important;}
+  .player-mobile-headerAvatar{width:32px!important;height:32px!important;font-size:12px!important;}
+  .player-mobile-headerKicker{font-size:9px!important;letter-spacing:0.12em!important;}
+  .player-mobile-headerName{font-size:17px!important;letter-spacing:1.1px!important;}
+  .player-mobile-headerSubtitle{font-size:9px!important;color:rgba(156,163,175,0.72)!important;margin-top:0!important;}
+  .player-mobile-headerLogo{padding:3px 6px!important;border-color:rgba(255,255,255,0.08)!important;background:rgba(255,255,255,0.015)!important;}
+  .player-mobile-headerLogo svg,.player-mobile-headerLogo img{max-width:18px!important;max-height:18px!important;}
+  .player-mobile-headerAction{width:38px!important;height:38px!important;border-radius:10px!important;color:rgba(229,231,235,0.72)!important;background:rgba(255,255,255,0.025)!important;}
+  .player-mobile-scroll{padding:12px 14px 118px!important;}
+  .player-home-compact-dashboard{gap:10px!important;margin-bottom:18px!important;}
+  .player-dashboard-card{padding:var(--player-dashboard-card-pad)!important;border-radius:18px!important;}
+  .player-dashboard-cardCompact{padding:var(--player-dashboard-card-pad-compact)!important;border-radius:16px!important;box-shadow:0 12px 26px rgba(0,0,0,0.24)!important;background:linear-gradient(155deg,rgba(14,18,24,0.88),rgba(8,10,14,0.86))!important;}
+  .player-dashboard-title{font-size:var(--player-dashboard-section-title)!important;line-height:1!important;margin-top:3px!important;}
+  .player-dashboard-kicker{font-size:10px!important;letter-spacing:0.10em!important;}
+  .player-dashboard-chip{font-size:var(--player-dashboard-chip-font)!important;line-height:1.05!important;padding:var(--player-dashboard-chip-pad)!important;border-radius:999px!important;background:rgba(8,10,14,0.78)!important;border:1px solid rgba(255,255,255,0.14)!important;color:rgba(229,231,235,0.9)!important;white-space:nowrap!important;}
+  .player-dashboard-chipAccent{border-color:rgba(200,255,26,0.38)!important;color:#C8FF1A!important;}
+  .player-dashboard-chipRow{gap:6px!important;flex-wrap:nowrap!important;overflow:hidden!important;}
+  .player-dashboard-primaryCta{min-height:50px!important;margin-top:12px!important;font-size:14px!important;}
+  .player-dashboard-scheduleHeader{margin-bottom:9px!important;gap:8px!important;}
+  .player-dashboard-scheduleGrid{gap:8px!important;}
+  .player-dashboard-scheduleItem{padding:11px!important;border-radius:12px!important;}
+  .player-dashboard-scheduleMeta{font-size:11px!important;line-height:1.35!important;margin-top:4px!important;}
+  .player-dashboard-scheduleCta{min-height:34px!important;padding:5px 10px!important;font-size:10px!important;background:rgba(255,255,255,0.025)!important;border-color:rgba(255,255,255,0.16)!important;color:rgba(229,231,235,0.86)!important;}
+}
+`;
+const Styles=()=><><style>{_STYLES_CSS}</style><style>{_PLAYER_COMPACT_DASHBOARD_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style></>;
 
 // ═══════════════════════════════════════
 // APP ROOT
@@ -2069,32 +2098,32 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 </div>}
 
 {/* Header — Glassmorphism */}
-<div style={{position:"sticky",top:0,zIndex:10,padding:isDesktop?"max(0px,env(safe-area-inset-top)) 16px 10px":"max(0px,env(safe-area-inset-top)) 20px 10px",background:"linear-gradient(180deg, rgba(11,13,16,0.96), rgba(11,13,16,0.88))",borderBottom:`1px solid ${TOKENS.BG_SUBTLE}`}}>
+<div className="player-mobile-header" style={{position:"sticky",top:0,zIndex:10,padding:isDesktop?"max(0px,env(safe-area-inset-top)) 16px 10px":"max(0px,env(safe-area-inset-top)) 20px 10px",background:"linear-gradient(180deg, rgba(11,13,16,0.96), rgba(11,13,16,0.88))",borderBottom:`1px solid ${TOKENS.BG_SUBTLE}`}}>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
     <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-      <button aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:36,height:36,borderRadius:"50%",background:"#1E1E1E",border:"1.5px solid #C8FF00",boxShadow:u.isCoach?"0 0 0 4px rgba(200, 255, 0, 0.15)":"none",color:"#FFFFFF",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0}}>{(u.name||"?")[0].toUpperCase()}</button>
-      <div style={{minWidth:0}}><div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:"0.15em",fontWeight:700,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(()=>{
+      <button className="player-mobile-headerAvatar" aria-label="Open profile" onClick={()=>switchTab("profile")} style={{width:36,height:36,borderRadius:"50%",background:"#1E1E1E",border:"1.5px solid #C8FF00",boxShadow:u.isCoach?"0 0 0 4px rgba(200, 255, 0, 0.15)":"none",color:"#FFFFFF",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center",padding:0,cursor:"pointer",fontFamily:FB,flexShrink:0}}>{(u.name||"?")[0].toUpperCase()}</button>
+      <div style={{minWidth:0}}><div className="player-mobile-headerKicker" style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:"0.15em",fontWeight:700,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{(()=>{
         const allDone=todayS.length>=drills.length;const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
         if(allDone&&shotsToday>0)return <span style={{color:VOLT}}>ALL DRILLS COMPLETE · {streak}D STREAK 🔥</span>;
         if(todayS.length>0)return <span>{todayS.length}/{drills.length} DRILLS · {shotsToday>0?shotsToday+" SHOTS · ":""}{streak}D STREAK</span>;
         return u.isCoach?"YOUR PROGRAM AWAITS":"TODAY'S MISSION AWAITS";
-      })()}</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:1}}><div style={{fontFamily:FD,color:TOKENS.TEXT_PRIMARY,fontSize:20,fontWeight:900,letterSpacing:1.5,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{u.name.toUpperCase()}</div>{u.isCoach&&<span style={{background:"rgba(200, 255, 0, 0.12)",border:"1px solid #C8FF00",borderRadius:20,padding:"2px 8px",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.10em",color:"#C8FF00",display:"inline-flex",alignItems:"center",gap:4}}><WhistleIcon size={9} color="#C8FF00"/>COACH</span>}</div>
-      {!u.isCoach&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Personal training dashboard · own your rep quality today.</div>}
+      })()}</div><div style={{display:"flex",alignItems:"center",gap:8,marginTop:1}}><div className="player-mobile-headerName" style={{fontFamily:FD,color:TOKENS.TEXT_PRIMARY,fontSize:20,fontWeight:900,letterSpacing:1.5,textTransform:"uppercase",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{u.name.toUpperCase()}</div>{u.isCoach&&<span style={{background:"rgba(200, 255, 0, 0.12)",border:"1px solid #C8FF00",borderRadius:20,padding:"2px 8px",fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.10em",color:"#C8FF00",display:"inline-flex",alignItems:"center",gap:4}}><WhistleIcon size={9} color="#C8FF00"/>COACH</span>}</div>
+      {!u.isCoach&&<div className="player-mobile-headerSubtitle" style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>Personal training dashboard · own your rep quality today.</div>}
       </div>
     </div>
     <div style={{display:"flex",gap:6,alignItems:"center"}}>
-      <div style={{padding:"5px 8px",borderRadius:12,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.02)"}}><BrandWordmark size={20} small/></div>
-      <button aria-label="Toggle theme" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .3s"}}>
+      <div className="player-mobile-headerLogo" style={{padding:"5px 8px",borderRadius:12,border:"1px solid rgba(255,255,255,0.10)",background:"rgba(255,255,255,0.02)"}}><BrandWordmark size={20} small/></div>
+      <button className="player-mobile-headerAction" aria-label="Toggle theme" onClick={()=>setTheme(t=>t==="dark"?"light":"dark")} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",transition:"all .3s"}}>
         {theme==="dark"?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
         :<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>}
       </button>
-      <button aria-label="Log out" onClick={logout} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>&#10005;</button>
+      <button className="player-mobile-headerAction" aria-label="Log out" onClick={logout} style={{background:T.SURFACE,border:`1px solid ${T.BORDER}`,borderRadius:12,color:T.MUT,width:44,height:44,cursor:"pointer",fontSize:14,fontWeight:700,display:"flex",alignItems:"center",justifyContent:"center"}}>&#10005;</button>
     </div>
   </div>
 
 </div>
 
-<div ref={playerScrollRef} style={{flex:1,padding:isDesktop?"14px 20px 36px":"16px 20px 124px",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
+<div className="player-mobile-scroll" ref={playerScrollRef} style={{flex:1,padding:isDesktop?"14px 20px 36px":"16px 20px 124px",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
   {/* Pull-to-refresh basketball */}
   {pullY>5&&<div style={{position:"absolute",top:-44,left:"50%",transform:"translateX(-50%)",textAlign:"center",opacity:Math.min(pullY/30,1)}}>
     <svg width="24" height="24" viewBox="0 0 40 40" fill="none" style={{animation:pullY>40?"bbBounce .5s ease infinite":"none"}}><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="2.5"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="1.5"/><path d="M20 3v34" stroke={ORANGE} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/></svg>
@@ -2214,35 +2243,35 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         `Challenge active: ${coachChallengeText}`,
       ];
       const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
-      return <div style={{marginBottom:24,display:"grid",gap:14}}>
-        <section aria-label="Today's mission" style={{padding:isNarrow?"18px":"20px",borderRadius:20,background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
+      return <div className="player-home-compact-dashboard" style={{marginBottom:24,display:"grid",gap:14}}>
+        <section className="player-dashboard-card player-dashboard-missionHero" aria-label="Today's mission" style={{padding:isNarrow?"18px":"20px",borderRadius:20,background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
           <div>
-            <div style={{fontFamily:FB,color:VOLT,fontSize:13,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S MISSION</div>
-            <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?28:32,lineHeight:1.05,letterSpacing:1.1,marginTop:8,textTransform:"uppercase"}}>{coachTodayFocus}</div>
+            <div className="player-dashboard-kicker" style={{fontFamily:FB,color:VOLT,fontSize:13,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S MISSION</div>
+            <div className="player-dashboard-title" style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?28:32,lineHeight:1.05,letterSpacing:1.1,marginTop:8,textTransform:"uppercase"}}>{coachTodayFocus}</div>
           </div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:15,lineHeight:1.6,marginTop:10}}>{missionStatus}</div>
           <div style={{marginTop:12,height:8,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"linear-gradient(90deg, #C8FF1A, #E6FF7A)",boxShadow:"0 0 20px rgba(200,255,26,0.44)"}}/></div>
           <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:13,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginTop:11}}>
+          <div className="player-dashboard-chipRow" style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginTop:11}}>
             {[
               {tag:`Emphasis · ${emphasisLabel}`},
               {tag:`Weekly · ${weeklyMakes}/${coachWeeklyMakesTarget}`},
               {tag:`Momentum · ${missionMomentumBadge}`,accent:true},
-            ].map(({tag,accent})=><span key={tag} style={{fontFamily:FB,fontSize:10,color:accent?VOLT:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.62)",border:`1px solid ${accent?"rgba(200,255,0,0.48)":"rgba(255,255,255,0.16)"}`,whiteSpace:"nowrap",lineHeight:1.15}}>{tag}</span>)}
+            ].map(({tag,accent})=><span key={tag} className={`player-dashboard-chip ${accent?"player-dashboard-chipAccent":""}`} style={{fontFamily:FB,fontSize:10,color:accent?VOLT:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.62)",border:`1px solid ${accent?"rgba(200,255,0,0.48)":"rgba(255,255,255,0.16)"}`,whiteSpace:"nowrap",lineHeight:1.15}}>{tag}</span>)}
           </div>
-          <button className="btn-v cta-primary" style={{marginTop:14,minHeight:56,padding:"0 20px",fontSize:15}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel.toUpperCase()}</button>
+          <button className="btn-v cta-primary player-dashboard-primaryCta" style={{marginTop:14,minHeight:56,padding:"0 20px",fontSize:15}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel.toUpperCase()}</button>
         </section>
-        <section aria-label="Upcoming Schedule" data-testid="player-upcoming-schedule" style={{padding:isNarrow?"16px":"18px",borderRadius:18,background:"linear-gradient(150deg, rgba(94,208,255,0.18), rgba(200,255,0,0.08) 48%, rgba(9,12,16,0.86))",border:"1px solid rgba(255,255,255,0.18)",boxShadow:"0 18px 36px rgba(0,0,0,0.28)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:12}}>
-            <div><div style={{fontFamily:FB,color:CYAN,fontSize:12,fontWeight:800,letterSpacing:"0.12em"}}>NEXT UP</div><div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?22:26,letterSpacing:1,marginTop:4}}>UPCOMING SCHEDULE</div></div>
-            <span style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:700,border:"1px solid rgba(200,255,0,0.38)",borderRadius:999,padding:"5px 9px",whiteSpace:"nowrap"}}>{upcomingScheduleItems.length} scheduled</span>
+        <section className="player-dashboard-card player-dashboard-cardCompact" aria-label="Upcoming Schedule" data-testid="player-upcoming-schedule" style={{padding:isNarrow?"16px":"18px",borderRadius:18,background:"linear-gradient(150deg, rgba(94,208,255,0.18), rgba(200,255,0,0.08) 48%, rgba(9,12,16,0.86))",border:"1px solid rgba(255,255,255,0.18)",boxShadow:"0 18px 36px rgba(0,0,0,0.28)"}}>
+          <div className="player-dashboard-scheduleHeader" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:12}}>
+            <div><div className="player-dashboard-kicker" style={{fontFamily:FB,color:CYAN,fontSize:12,fontWeight:800,letterSpacing:"0.12em"}}>NEXT UP</div><div className="player-dashboard-title" style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?22:26,letterSpacing:1,marginTop:4}}>UPCOMING SCHEDULE</div></div>
+            <span className="player-dashboard-chip player-dashboard-chipAccent" style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:700,border:"1px solid rgba(200,255,0,0.38)",borderRadius:999,padding:"5px 9px",whiteSpace:"nowrap"}}>{upcomingScheduleItems.length} scheduled</span>
           </div>
-          {upcomingScheduleItems.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:13,lineHeight:1.5}}>No upcoming event or S&C session is scheduled yet.</div>:<div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
-            {upcomingScheduleItems.map(item=><div key={item.kind} style={{border:"1px solid rgba(255,255,255,0.14)",borderRadius:14,padding:"13px",background:"rgba(7,10,14,0.58)",minWidth:0}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}><span style={{fontFamily:FB,color:item.kind==="sc"?"#A0A0A0":VOLT,fontSize:10,fontWeight:800,letterSpacing:"0.1em"}}>{item.label}</span><span style={{fontFamily:FB,color:item.rsvpStatus==="Going"?VOLT:"#FFCE73",fontSize:10,border:"1px solid rgba(255,255,255,0.16)",borderRadius:999,padding:"3px 7px"}}>{item.rsvpStatus}</span></div>
+          {upcomingScheduleItems.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:13,lineHeight:1.5}}>No upcoming event or S&C session is scheduled yet.</div>:<div className="player-dashboard-scheduleGrid" style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
+            {upcomingScheduleItems.map(item=><div className="player-dashboard-scheduleItem" key={item.kind} style={{border:"1px solid rgba(255,255,255,0.14)",borderRadius:14,padding:"13px",background:"rgba(7,10,14,0.58)",minWidth:0}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}><span style={{fontFamily:FB,color:item.kind==="sc"?"#A0A0A0":VOLT,fontSize:10,fontWeight:800,letterSpacing:"0.1em"}}>{item.label}</span><span className="player-dashboard-chip" style={{fontFamily:FB,color:item.rsvpStatus==="Going"?VOLT:"#FFCE73",fontSize:10,border:"1px solid rgba(255,255,255,0.16)",borderRadius:999,padding:"3px 7px"}}>{item.rsvpStatus}</span></div>
               <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.title}</div>
-              <div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:6,lineHeight:1.5}}><span style={{color:CYAN,fontWeight:700}}>{item.date}</span> · {item.time}<br/>{item.location}</div>
-              <button className="pageHeaderPill" onClick={()=>switchTab(item.target)} style={{marginTop:10}}>{item.cta}</button>
+              <div className="player-dashboard-scheduleMeta" style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:6,lineHeight:1.5}}><span style={{color:CYAN,fontWeight:700}}>{item.date}</span> · {item.time}<br/>{item.location}</div>
+              <button className="pageHeaderPill player-dashboard-scheduleCta" onClick={()=>switchTab(item.target)} style={{marginTop:10}}>{item.cta}</button>
             </div>)}
           </div>}
         </section>
