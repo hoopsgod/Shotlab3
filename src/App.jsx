@@ -2151,6 +2151,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const weeklyPct=deriveCompletionRatio({todayMakes:weeklyMakes,dailyGoal:weeklyGoal});
       const seasonProgressPct=Math.min(100,Math.round(((weeklyPct*0.45)+(dailyPct*0.2)+Math.min(streak*6,100)*0.35)));
       const momentumLabel=deriveMomentumLabel({weeklyMakes,weeklyGoal,streak,weeklyPct});
+      const missionMomentumBadge=momentumLabel==="Building base volume"?"Building Base":momentumLabel;
       const { trainingIdentity, commitmentLevel }=deriveTrainingIdentityLabels({eventsAttended,weeklyMakes,weeklyGoal,weeklyPct,streak});
       const currentFocus=deriveNextFocusLabel({todaysMakes,dailyGoal});
       const playerHasTeam=Boolean(u?.teamId);
@@ -2215,18 +2216,19 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
       return <div style={{marginBottom:24,display:"grid",gap:14}}>
         <section aria-label="Today's mission" style={{padding:isNarrow?"18px":"20px",borderRadius:20,background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10}}>
-            <div>
-              <div style={{fontFamily:FB,color:VOLT,fontSize:13,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S MISSION</div>
-              <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?28:32,lineHeight:1.05,letterSpacing:1.1,marginTop:8}}>{coachTodayFocus}</div>
-            </div>
-            <span style={{fontFamily:FB,fontSize:12,color:dailyPct>=100?VOLT:"#FFCE73",border:`1px solid ${dailyPct>=100?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"5px 10px"}}>{dailyPct>=100?"Goal hit":momentumLabel}</span>
+          <div>
+            <div style={{fontFamily:FB,color:VOLT,fontSize:13,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S MISSION</div>
+            <div style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?28:32,lineHeight:1.05,letterSpacing:1.1,marginTop:8,textTransform:"uppercase"}}>{coachTodayFocus}</div>
           </div>
           <div style={{fontFamily:FB,color:T.SUB,fontSize:15,lineHeight:1.6,marginTop:10}}>{missionStatus}</div>
           <div style={{marginTop:12,height:8,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"linear-gradient(90deg, #C8FF1A, #E6FF7A)",boxShadow:"0 0 20px rgba(200,255,26,0.44)"}}/></div>
           <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:13,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
-          <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:11}}>
-            {[`Emphasis · ${emphasisLabel}`,`Weekly · ${weeklyMakes}/${coachWeeklyMakesTarget}`,`Momentum · ${momentumLabel}`].map(tag=><span key={tag} style={{fontFamily:FB,fontSize:11,color:LIGHT,padding:"5px 9px",borderRadius:999,background:"rgba(12,14,18,0.52)",border:"1px solid rgba(255,255,255,0.16)"}}>{tag}</span>)}
+          <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center",marginTop:11}}>
+            {[
+              {tag:`Emphasis · ${emphasisLabel}`},
+              {tag:`Weekly · ${weeklyMakes}/${coachWeeklyMakesTarget}`},
+              {tag:`Momentum · ${missionMomentumBadge}`,accent:true},
+            ].map(({tag,accent})=><span key={tag} style={{fontFamily:FB,fontSize:10,color:accent?VOLT:LIGHT,padding:"4px 8px",borderRadius:999,background:"rgba(12,14,18,0.62)",border:`1px solid ${accent?"rgba(200,255,0,0.48)":"rgba(255,255,255,0.16)"}`,whiteSpace:"nowrap",lineHeight:1.15}}>{tag}</span>)}
           </div>
           <button className="btn-v cta-primary" style={{marginTop:14,minHeight:56,padding:"0 20px",fontSize:15}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel.toUpperCase()}</button>
         </section>
