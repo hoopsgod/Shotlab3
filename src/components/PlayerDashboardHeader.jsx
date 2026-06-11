@@ -1,32 +1,24 @@
+import { useTeamBranding } from "../context/TeamBrandingContext";
 import styles from "./CoachDashboardHeader.module.css";
 
 export default function PlayerDashboardHeader({
   userName,
   subtitle = "Train. Track. Improve.",
   mission = "Today's mission awaits",
-  wordmark,
-  onOpenProfile,
-  profileInitial = "?",
-  actions,
 }) {
+  const { branding } = useTeamBranding();
+  const logoSrc = branding?.logoUrl || branding?.logoMarkUrl || "/branding/titans-exact-logo.png.PNG";
+
   return (
     <section className={`${styles.header} ${styles.playerHeader}`} data-dashboard-header="player-premium">
-      <div className={`${styles.inner} ${styles.playerInner}`}>
-        <div className={styles.identityRow}>
-          <button type="button" aria-label="Open profile" onClick={onOpenProfile} className={styles.avatarButton}>
-            {profileInitial}
-          </button>
-          <div className={styles.identity}>
-            <span className={styles.badge}>Player Mode</span>
-            <h1 className={styles.name}>{(userName || "Demo Player").toUpperCase()}</h1>
-            <p className={styles.tagline}>{subtitle}</p>
-            <div className={styles.meta}><span className={styles.dot} aria-hidden="true" />{mission}</div>
-          </div>
+      <div className={styles.inner}>
+        <div className={styles.identity}>
+          <span className={styles.badge}>Player Mode</span>
+          <h1 className={styles.name}>{(userName || "Demo Player").toUpperCase()}</h1>
+          <p className={styles.tagline}>{subtitle}</p>
+          <div className={styles.meta}><span className={styles.dot} aria-hidden="true" />{mission}</div>
         </div>
-        <div className={styles.playerActions}>
-          <div className={styles.wordmarkPanel}>{wordmark}</div>
-          <div className={styles.iconActions}>{actions}</div>
-        </div>
+        <img className={styles.brandMark} src={logoSrc} alt="" aria-hidden="true" />
       </div>
     </section>
   );
