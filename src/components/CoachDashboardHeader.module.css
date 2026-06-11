@@ -93,3 +93,98 @@
   .inner { gap: 10px; }
   .brandMark { margin-right: 2px; }
 }
+
+.playerHeader {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin-bottom: 0;
+  padding: max(0px, env(safe-area-inset-top)) 20px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--stroke-1) 72%, transparent);
+  backdrop-filter: blur(18px);
+}
+
+.playerInner {
+  align-items: center;
+}
+
+.identityRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.avatarButton {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  border: 1.5px solid var(--team-brand-badge-border);
+  background: color-mix(in srgb, var(--surface-2) 72%, rgba(255, 255, 255, 0.04));
+  color: var(--text-1);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--team-brand-badge-bg) 34%, transparent);
+  font-size: 14px;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+
+.playerActions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wordmarkPanel {
+  min-width: 74px;
+  padding: 5px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.025);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.iconActions button {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--stroke-1);
+  background: color-mix(in srgb, var(--surface-2) 86%, transparent);
+  color: var(--text-3);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .2s ease, color .2s ease, background .2s ease;
+}
+
+.iconActions button:hover,
+.iconActions button:focus-visible {
+  color: var(--text-1);
+  border-color: color-mix(in srgb, var(--team-brand-badge-border) 58%, var(--stroke-1));
+  background: color-mix(in srgb, var(--team-brand-badge-bg) 28%, var(--surface-2));
+}
+
+@media (min-width: 1024px){
+  .playerHeader { padding-right: 16px; padding-left: 16px; }
+}
+
+@media (max-width: 560px){
+  .playerInner { gap: 8px; }
+  .identityRow { gap: 10px; }
+  .wordmarkPanel { display: none; }
+  .name { font-size: clamp(24px, 8vw, 34px); }
+}
