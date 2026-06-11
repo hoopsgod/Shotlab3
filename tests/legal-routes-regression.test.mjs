@@ -24,17 +24,18 @@ test('all static legal/support routes are registered', () => {
   assert.match(appSource, /const getLegalRouteKey=\(path\)=>LEGAL_ROUTES/);
 });
 
-test('legal pages render from the top-level App before AppInner can hydrate', () => {
+test('legal pages render from the top-level App before AppInner can hydrate except signed-in delete-account flow', () => {
   const legalRouteIndex = appSource.indexOf('const legalRouteKey=typeof window!=="undefined"?getLegalRouteKey(window.location.pathname):null;');
-  const legalReturnIndex = appSource.indexOf('if(legalRouteKey)return <StaticLegalPage pageKey={legalRouteKey}/>;');
+  const legalReturnIndex = appSource.indexOf('if(legalRouteKey&&legalRouteKey!=="delete-account")return <StaticLegalPage pageKey={legalRouteKey}/>;');
   const appInnerReturnIndex = appSource.indexOf('try{return <AppInner/>}');
 
   assert.notEqual(legalRouteIndex, -1);
   assert.notEqual(legalReturnIndex, -1);
   assert.notEqual(appInnerReturnIndex, -1);
   assert.ok(legalRouteIndex < legalReturnIndex, 'legal route must be resolved before the legal page return');
-  assert.ok(legalReturnIndex < appInnerReturnIndex, 'legal page return must happen before AppInner render');
+  assert.ok(legalReturnIndex < appInnerReturnIndex, 'non-delete legal page return must happen before AppInner render');
   assert.match(appSource, /data-testid="static-legal-page"/);
+  assert.match(appSource, /data-testid="signed-in-delete-account-route"/);
 });
 
 test('legal readiness is additive and does not replace the normal app-ready dispatch', () => {
