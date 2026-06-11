@@ -4,6 +4,8 @@ import { test } from 'node:test';
 
 const source = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 
+const playerHeaderSource = readFileSync(new URL('../src/components/PlayerDashboardHeader.jsx', import.meta.url), 'utf8');
+
 test('player home mobile dashboard keeps mission, schedule, primary shot CTA, and schedule CTAs', () => {
   assert.match(source, /className="player-home-compact-dashboard"/);
   assert.match(source, /aria-label="Today's mission"/);
@@ -47,4 +49,42 @@ test('presentation-only dashboard PR leaves shot logging, event RSVP, and S&C ha
   assert.match(source, /const toggleScRsvp=async\(sid\)=>/);
   assert.match(source, /const addScLog=async\(log\)=>/);
   assert.match(source, /const handleAddScLog=async\(\)=>/);
+});
+
+test('player dashboard uses iOS safe-area bottom spacing in its mobile scroll container', () => {
+  assert.match(source, /\.player-scroll-container\{--player-scroll-bottom-padding:calc\(var\(--bottom-nav-content-padding, 132px\) \+ 28px \+ env\(safe-area-inset-bottom, 0px\)\)/);
+  assert.match(source, /@media \(max-width:767px\)\{[\s\S]*\.player-scroll-container\{--player-scroll-bottom-padding:calc\(var\(--bottom-nav-content-padding, 156px\) \+ 40px \+ env\(safe-area-inset-bottom, 0px\)\)/);
+  assert.match(source, /className="player-scroll-container"/);
+  assert.match(source, /padding:isDesktop\?"14px 20px 36px":"16px 20px var\(--player-scroll-bottom-padding\)"/);
+  assert.match(source, /scroll-padding-bottom:var\(--player-scroll-bottom-padding\)/);
+  assert.match(source, /-webkit-overflow-scrolling:touch/);
+});
+
+test('bottom nav and floating mobile controls reserve enough content padding to avoid overlap', () => {
+  assert.match(source, /const navHeight=82;/);
+  assert.match(source, /const baseBottom=isLikelyMobileSafari\?32:18;/);
+  assert.match(source, /root\.style\.setProperty\("--bottom-nav-offset",`calc\(\$\{baseBottom\}px \+ env\(safe-area-inset-bottom, 0px\) \+ \$\{Math\.round\(visualOffset\)\}px\)`\);/);
+  assert.match(source, /root\.style\.setProperty\("--bottom-nav-content-padding",`calc\(\$\{navHeight\+baseBottom\+36\}px \+ env\(safe-area-inset-bottom, 0px\) \+ \$\{Math\.round\(keyboardInset\)\}px\)`\);/);
+  assert.match(source, /className="bottom-nav"[\s\S]*left:"max\(12px, env\(safe-area-inset-left, 0px\)\)"/);
+  assert.match(source, /className="bottom-nav"[\s\S]*right:"max\(12px, env\(safe-area-inset-right, 0px\)\)"/);
+  assert.match(source, /className="bottom-nav"[\s\S]*bottom:"var\(--bottom-nav-offset, max\(28px, calc\(env\(safe-area-inset-bottom, 0px\) \+ 18px\)\)\)"/);
+  assert.match(source, /className="bottom-nav"[\s\S]*borderRadius:22/);
+});
+
+test('player dashboard header still renders the large team brand mark and keeps player theme out', () => {
+  assert.match(source, /<PlayerDashboardHeader[\s\S]*userName=\{u\.name\}/);
+  assert.match(playerHeaderSource, /useTeamBranding/);
+  assert.match(playerHeaderSource, /<img className=\{styles\.brandMark\}/);
+  assert.doesNotMatch(source, /aria-label="Player Theme"|>Player Theme<|Toggle theme/);
+});
+
+test('log shots and dashboard navigation handlers remain wired from the player home shell', () => {
+  assert.match(source, /const missionCtaLabel="Log Shots";/);
+  assert.match(source, /onClick=\{\(\)=>switchTab\("log-drill"\)\}>\{missionCtaLabel\.toUpperCase\(\)\}<\/button>/);
+  assert.match(source, /onViewAll=\{\(\)=>switchTab\("leaderboards"\)\}/);
+  assert.match(source, /onClick=\{\(\)=>switchTab\(item\.target\)\}/);
+  assert.match(source, /<NavBar items=\{playerNavItems\} active=\{tab\} onChange=\{switchTab\}\/>/);
+  ['addShotLog', 'toggleRsvp', 'toggleScRsvp', 'homeShotsLeaderboard', 'refreshHomeShotsLeaderboard'].forEach((handlerName) => {
+    assert.equal(source.includes(handlerName), true, `${handlerName} should remain present`);
+  });
 });
