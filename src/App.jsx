@@ -844,7 +844,8 @@ support:{eyebrow:"Support",title:"Support",updated:"We aim to respond as quickly
 {h:"Privacy requests",p:"Use the data request or delete-account request pages for formal privacy and account data requests."},
 ]},
 "delete-account":{eyebrow:"Account deletion",title:"Delete Account",updated:"Requests are reviewed for account safety.",summary:"You can request deletion of your ShotLab account and associated personal training data.",sections:[
-{h:"How to request deletion",p:"Email support@shotlab.app from the account email and include 'Delete my ShotLab account' in the subject."},
+{h:"In-app deletion",p:"Signed-in users should go to Profile → Account & Data → Delete Account & Data to start and confirm deletion inside ShotLab."},
+{h:"Support fallback",p:"Email support is only for help or special requests, such as when you cannot sign in to use the in-app deletion flow."},
 {h:"What deletion includes",p:"We will remove or de-identify personal account details, player scores, shot logs, RSVPs, and support records unless retention is legally required."},
 {h:"Coach/team data",p:"Team-level program content may remain for other authorized members unless it directly identifies the deleted account."},
 ]},
@@ -863,6 +864,37 @@ const LEGAL_SUPPORT_LINKS=[
 ];
 const getLegalRouteKey=(path)=>LEGAL_ROUTES[String(path||"").replace(/\/$/,"")||"/"]||null;
 function LegalSupportLinks({compact=false}){return <div aria-label="Legal and support links" style={{display:"flex",flexWrap:"wrap",justifyContent:compact?"flex-start":"center",gap:compact?8:12,marginTop:compact?10:18}}>{LEGAL_SUPPORT_LINKS.map(link=><a key={link.href} href={link.href} style={{fontFamily:FB,color:compact?VOLT:MUTED,fontSize:compact?10:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",border:`1px solid ${compact?VOLT+"33":"transparent"}`,borderRadius:999,padding:compact?"6px 10px":"4px 8px",minHeight:36,display:"inline-flex",alignItems:"center",justifyContent:"center",touchAction:"manipulation"}}>{link.label}</a>)}</div>}
+function AccountTrustActions({deleteAccount,preserveTeamData=false}){
+const[confirming,setConfirming]=useState(false);
+const[busy,setBusy]=useState(false);
+const[message,setMessage]=useState("");
+const[dataRequestSent,setDataRequestSent]=useState(false);
+const requestHref=buildLegalContactHref("ShotLab account data request");
+const deleteHref=buildLegalContactHref("Delete my ShotLab account");
+return <div data-testid="account-data-request-entry" style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${BORDER_CLR}44`}}>
+  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>ACCOUNT & DATA</div>
+  <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 16px",marginBottom:12}}>
+    <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:800,letterSpacing:1,marginBottom:4}}>Data Request</div>
+    <div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5,marginBottom:10}}>Request access, export, correction, or deletion help from ShotLab support.</div>
+    <div style={{display:"grid",gridTemplateColumns:"1fr",gap:8}}>
+      <a href={requestHref} onClick={()=>setDataRequestSent(true)} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minHeight:42,borderRadius:10,background:VOLT,color:"#000",fontFamily:FD,fontSize:14,letterSpacing:2,textDecoration:"none",touchAction:"manipulation"}}>REQUEST DATA</a>
+      {dataRequestSent&&<div role="status" style={{fontFamily:FB,color:VOLT,fontSize:10,lineHeight:1.4}}>Request email opened. Send it from your account email so support can verify you.</div>}
+    </div>
+  </div>
+  {!confirming?<button onClick={()=>{setConfirming(true);setMessage("");}} style={{width:"100%",padding:"14px",background:"transparent",border:`1px solid #FF454544`,borderRadius:12,cursor:"pointer",fontFamily:FB,fontSize:13,color:"#FF6969",fontWeight:700,letterSpacing:1}}>Delete Account & Data</button>
+  :<div className="fade-up" style={{background:"#FF454508",borderRadius:16,padding:"18px",border:`1px solid #FF454533`}}>
+    <div style={{fontFamily:FD,color:"#FF6969",fontSize:18,letterSpacing:3,marginBottom:8}}>CONFIRM ACCOUNT REQUEST</div>
+    <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:12}}>{preserveTeamData?"This removes your coach account from this device. Player roster, team drills, and other users are preserved.":"This removes only your account, scores, shot logs, RSVPs, and personal activity from this device. Other users stay untouched."}</p>
+    {message&&<div role="status" style={{fontFamily:FB,color:message.startsWith("Could not")?"#FFB5B5":VOLT,fontSize:11,lineHeight:1.45,marginBottom:12}}>{message}</div>}
+    <div style={{display:"flex",gap:8}}>
+      <button onClick={()=>{setConfirming(false);setMessage("");}} disabled={busy} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
+      <button onClick={async()=>{if(busy)return;setBusy(true);setMessage("");const result=await deleteAccount();if(!result?.ok){setMessage(result?.error||"Could not complete that request. Please try again or contact support.");setBusy(false);return;}setMessage("Account request complete. You have been signed out safely.");}} disabled={busy} className="btn-v cta-danger" style={{opacity:busy?0.65:1}}>CONFIRM DELETE ACCOUNT</button>
+    </div>
+    <a href={deleteHref} style={{display:"inline-flex",alignItems:"center",minHeight:36,color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,textDecoration:"none",marginTop:10}}>Need help? Email support</a>
+  </div>}
+  <p style={{fontFamily:FB,color:T.SUB,fontSize:10,textAlign:"center",marginTop:12,lineHeight:1.5}}>Account and data requests are available here and in Legal & Support. We verify requests before fulfilling server-side data changes.</p>
+</div>
+}
 function StaticLegalPage({pageKey}){
 const page=LEGAL_PAGE_COPY[pageKey]||LEGAL_PAGE_COPY.support;
 const contactHref=buildLegalContactHref(page.title||"ShotLab support");
@@ -880,13 +912,14 @@ window.dispatchEvent(new Event("shotlab:app-ready"));
 }catch(error){}
 },[]);
 if(appErr)return <><Styles/><ErrorFallback/></>;
-if(legalRouteKey)return <StaticLegalPage pageKey={legalRouteKey}/>;
+if(legalRouteKey&&legalRouteKey!=="delete-account")return <StaticLegalPage pageKey={legalRouteKey}/>;
 try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
 const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[coachPriorities,setCoachPriorities]=useState(COACH_PRIORITIES_INIT),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
 const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
+const[accountNotice,setAccountNotice]=useState("");
 const[startupError,setStartupError]=useState("");
 const [homeShotsLeaderboard,setHomeShotsLeaderboard]=useState({status:"idle",rows:[],error:""});
 const [homeShotsLeaderboardScope,setHomeShotsLeaderboardScope]=useState("players");
@@ -1386,16 +1419,25 @@ setHomeShotsLeaderboard(prev=>({...prev,rows:(Array.isArray(prev?.rows)?prev.row
 },[P,shotLogs,user]);
 const logout=async()=>{const exitingUser=user;trackEvent("auth_logout");if(isDemoMode()||isDemoAccount(exitingUser))await cleanupDemoPlayerSessionData(exitingUser);if(SUPABASE_AUTH_ENABLED)await supabase.auth.signOut();legacyAuthSecretRef.current={email:"",password:""};setUser(null);setView("auth");DB.set("sl:session",null)};
 const deleteAccount=async()=>{
-if(!user)return;
-const e=user.email;
-await P("sl:players",players.filter(p=>p.email!==e),setPlayers);
-await P("sl:scores",scores.filter(s=>s.playerId!==e),setScores);
-await P("sl:rsvps",rsvps.filter(r=>r.playerId!==e),setRsvps);
-await P("sl:shotlogs",shotLogs.filter(s=>s.playerId!==e),setShotLogs);
-await P("sl:challenges",challenges.filter(c=>c.from!==e&&c.to!==e),setChallenges);
-await P("sl:sc-rsvps",scRsvps.filter(r=>r.playerId!==e),setScRsvps);
-await P("sl:sc-logs",scLogs.filter(l=>l.playerId!==e),setScLogs);
+if(!user)return{ok:false,error:"No active account."};
+const e=String(user.email||"").trim().toLowerCase();
+const isSelf=(row={})=>String(row?.playerId||row?.player_id||row?.email||row?.userId||row?.user_id||"").trim().toLowerCase()===e;
+try{
+if(isDemoMode()||isDemoAccount(user))await cleanupDemoPlayerSessionData(user);
+await P("sl:players",players.filter(p=>String(p?.email||"").trim().toLowerCase()!==e),setPlayers);
+await P("sl:scores",scores.filter(s=>!isSelf(s)),setScores);
+await P("sl:rsvps",rsvps.filter(r=>!isSelf(r)),setRsvps);
+await P("sl:shotlogs",shotLogs.filter(s=>!isSelf(s)),setShotLogs);
+await P("sl:challenges",challenges.filter(c=>String(c?.from||"").trim().toLowerCase()!==e&&String(c?.to||"").trim().toLowerCase()!==e),setChallenges);
+await P("sl:sc-rsvps",scRsvps.filter(r=>!isSelf(r)),setScRsvps);
+await P("sl:sc-logs",scLogs.filter(l=>!isSelf(l)),setScLogs);
+setAccountNotice("Your account deletion request is complete on this device. Contact support if you need anything else removed from ShotLab.");
 DB.set("sl:session",null);legacyAuthSecretRef.current={email:"",password:""};setUser(null);setView("auth");
+return{ok:true};
+}catch(error){
+console.warn("account_delete_failed",{error:String(error?.message||error||"unknown")});
+return{ok:false,error:"Could not complete that request. Please try again or contact support."};
+}
 };
 const createTeam=async(name,meta={})=>{
 if(!user||user.role!=="coach")return{ok:false,err:"Not authorized"};
@@ -1736,10 +1778,15 @@ fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderb
 if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
 if(startupError)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:520,background:CARD_BG,border:`1px solid rgba(255,69,69,0.45)`,borderRadius:16,padding:20}}><div style={{fontFamily:FD,color:"#FF8B8B",fontSize:20,letterSpacing:2,marginBottom:8}}>STARTUP ERROR</div><div style={{fontFamily:FB,color:"#FFB5B5",fontSize:13,lineHeight:1.55}}>{startupError}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:12}}>Check deployment environment variables and network access, then reload.</div><button onClick={()=>window.location.reload()} className="btn-v cta-primary" style={{marginTop:14}}>RELOAD</button></div></div></>;
 
+const isDeleteAccountRoute=typeof window!=="undefined"&&getLegalRouteKey(window.location.pathname)==="delete-account";
 const dataDebugPanel=dataDebugEnabled?<div style={{position:"fixed",right:12,bottom:12,zIndex:60,width:"min(360px, calc(100vw - 24px))",maxHeight:"45vh",overflow:"auto",background:"rgba(8,8,8,0.94)",border:"1px solid rgba(255,255,255,0.18)",borderRadius:10,padding:10,fontFamily:"system-ui,-apple-system,Segoe UI,Roboto,sans-serif",fontSize:11,color:"#E5E7EB"}}><div style={{fontWeight:700,letterSpacing:"0.06em",marginBottom:6,color:"#C8FF1A"}}>DATA DEBUG (?dataDebug=1)</div><div>User: {user?.email||"none"}</div><div>Role: {user?.role||"none"}</div><div>Team ID: {user?.teamId||"none"}</div><div>Team Code: {myTeam?.joinCode||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Auth mode: {dataDebug.auth.mode||"legacy"}</div><div>Supabase auth enabled: {dataDebug.auth.supabaseEnabled||"no"}</div><div>Profile persist status: {dataDebug.auth.profilePersistStatus||"idle"}</div><div>Profile restore status: {dataDebug.auth.profileRestoreStatus||"idle"}</div><div>Legacy register status: {dataDebug.auth.legacyAuthRegisterStatus||"idle"}</div><div>Legacy login status: {dataDebug.auth.legacyAuthLoginStatus||"idle"}</div><div>Legacy update status: {dataDebug.auth.legacyAuthUpdateStatus||"idle"}</div><div>Profile teamId: {dataDebug.auth.profileTeamId||"none"}</div><div>Auth signup HTTP status: {dataDebug.auth.signupHttpStatus==null?"n/a":dataDebug.auth.signupHttpStatus}</div><div>Auth signup code: {dataDebug.auth.signupCode||"none"}</div><div>Auth signup stage: {dataDebug.auth.signupStage||"none"}</div><div>Auth signup message: {dataDebug.auth.signupMessage||"none"}</div><div>Auth login HTTP status: {dataDebug.auth.loginHttpStatus==null?"n/a":dataDebug.auth.loginHttpStatus}</div><div>Auth login code: {dataDebug.auth.loginCode||"none"}</div><div>Auth login message: {dataDebug.auth.loginMessage||"none"}</div><div>Auth provider hint: {dataDebug.auth.providerHint||"none"}</div><div>Register endpoint: {dataDebug.auth.registerEndpoint||"none"}</div><div>Register parse mode: {dataDebug.auth.registerParseMode||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Create team name: {dataDebug.createTeam.teamName||"none"}</div><div>Create endpoint: {dataDebug.createTeam.endpoint||"none"}</div><div>Create status: {dataDebug.createTeam.status||"none"}</div><div>Create HTTP status: {dataDebug.createTeam.httpStatus==null?"n/a":dataDebug.createTeam.httpStatus}</div><div>Create error code: {dataDebug.createTeam.errorCode||"none"}</div><div>Create response summary: {dataDebug.createTeam.responseSummary||"none"}</div><div>Returned teamId: {dataDebug.createTeam.teamId||"none"}</div><div>Returned joinCode: {dataDebug.createTeam.joinCode||"none"}</div><div>Coach state updated: {dataDebug.createTeam.stateUpdated?"yes":"no"}</div><div>Remote persisted: {dataDebug.createTeam.remotePersisted?"yes":"no"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Join code entered: {dataDebug.join.enteredCode||"none"}</div><div>Normalized code: {dataDebug.join.normalizedCode||"none"}</div><div>Lookup source: {dataDebug.join.lookupSource}</div><div>Lookup field: {dataDebug.join.lookupField}</div><div>Lookup hash prefix: {dataDebug.join.lookupHashPrefix||"none"}</div><div>Lookup hash source: {dataDebug.join.lookupHashSource||"none"}</div><div>Join status: {dataDebug.join.status}</div><div>Lookup count: {dataDebug.join.lookupCount==null?"n/a":dataDebug.join.lookupCount}</div><div>Matched teamId: {dataDebug.join.matchedTeamId||"none"}</div><div>Invite state: {dataDebug.join.inviteState||"none"}</div><div>Invite expiresAt: {dataDebug.join.expiresAt||"none"}</div><div>Invite context saved: {dataDebug.join.inviteContextSaved||"no"}</div><div>Invite context storage key: {dataDebug.join.inviteContextStorageKey||"none"}</div><div>Invite context token present: {dataDebug.join.inviteContextTokenPresent||"no"}</div><div>Invite context teamId: {dataDebug.join.inviteContextTeamId||"none"}</div><div>Invite context subject: {dataDebug.join.inviteContextSubject||"none"}</div><div>Current user email: {dataDebug.join.currentUserEmail||"none"}</div><div>Context subject matches user: {dataDebug.join.contextSubjectMatchesUser||"no"}</div><div>Consume attempt started: {dataDebug.join.consumeAttemptStarted||"no"}</div><div>Consume attempt blocked: {dataDebug.join.consumeAttemptBlocked||"no"}</div><div>Consume blocked reason: {dataDebug.join.consumeAttemptBlockedReason||"none"}</div><div>Consume in-flight key: {dataDebug.join.consumeInFlightKey||"none"}</div><div>Consume in-flight age ms: {dataDebug.join.consumeInFlightAgeMs==null?"n/a":dataDebug.join.consumeInFlightAgeMs}</div><div>Consume timeout ms: {dataDebug.join.consumeTimeoutMs==null?"n/a":dataDebug.join.consumeTimeoutMs}</div><div>Consume guard cleared: {dataDebug.join.consumeGuardCleared||"no"}</div><div>Consume guard clear reason: {dataDebug.join.consumeGuardClearReason||"none"}</div><div>Consume fetch started: {dataDebug.join.consumeFetchStarted||"no"}</div><div>Consume fetch finished: {dataDebug.join.consumeFetchFinished||"no"}</div><div>Consume endpoint: {dataDebug.join.consumeEndpoint||"none"}</div><div>Consume HTTP status: {dataDebug.join.consumeHttpStatus==null?"n/a":dataDebug.join.consumeHttpStatus}</div><div>Consume diagnostic code: {dataDebug.join.consumeDiagnosticCode||"none"}</div><div>Consume diagnostic message: {dataDebug.join.consumeDiagnosticMessage||"none"}</div><div>Consume token present: {dataDebug.join.consumeTokenPresent||"no"}</div><div>Consume teamId used: {dataDebug.join.consumeTeamIdUsed||"none"}</div><div>Consume user email: {dataDebug.join.consumeUserEmail||"none"}</div><div>Consume resolved user UUID: {dataDebug.join.consumeResolvedUserUuid||"none"}</div><div>Membership insert status: {dataDebug.join.membershipInsertStatus||"none"}</div><div>Membership insert error: {dataDebug.join.membershipInsertError||"none"}</div><div>Profile update status: {dataDebug.join.profileUpdateStatus||"none"}</div><div>Final route decision: {dataDebug.join.finalRouteDecision||"none"}</div><div>Profile update: {dataDebug.join.update}</div><div>Join error: {dataDebug.join.error||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Leaderboard endpoint: {dataDebug.leaderboard.endpoint||"none"}</div><div>HTTP status: {dataDebug.leaderboard.httpStatus==null?"n/a":dataDebug.leaderboard.httpStatus}</div><div>Error code: {dataDebug.leaderboard.errorCode||"none"}</div><div>Result count: {dataDebug.leaderboard.resultCount==null?"n/a":dataDebug.leaderboard.resultCount}</div><div>Empty data: {dataDebug.leaderboard.isEmpty?"yes":"no"}</div></div>:null;
 
+if(isDeleteAccountRoute){
+if(!user)return <StaticLegalPage pageKey="delete-account"/>;
+return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/><main data-testid="signed-in-delete-account-route" style={{minHeight:"100dvh",background:BG,color:LIGHT,padding:"40px 20px",fontFamily:FB}}><div style={{maxWidth:560,margin:"0 auto"}}><a href={user?.role==="coach"?"/coach/profile":"/player/profile"} style={{display:"inline-flex",alignItems:"center",gap:8,color:VOLT,textDecoration:"none",fontFamily:FD,fontSize:16,letterSpacing:2,marginBottom:22,minHeight:44,touchAction:"manipulation"}}><SLLogo size={24}/> SHOTLAB</a><section style={{background:`linear-gradient(145deg,${CARD_BG},#111111)`,border:`1px solid ${BORDER_CLR}`,borderRadius:24,padding:"22px 20px",boxShadow:"0 18px 46px rgba(0,0,0,0.38)"}}><div style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:800,letterSpacing:"0.16em",textTransform:"uppercase",marginBottom:8}}>Signed-in account deletion</div><h1 style={{fontFamily:FD,color:LIGHT,fontSize:34,letterSpacing:2,lineHeight:1,marginBottom:8}}>Account & Data</h1><p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.55,marginBottom:12}}>You are signed in. Delete your account in-app below instead of using the static support fallback.</p><AccountTrustActions deleteAccount={deleteAccount} preserveTeamData={user?.role==="coach"||user?.isCoach}/></section></div></main>{dataDebugPanel}</TeamBrandingProvider>;
+}
 return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
-{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
+{view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext} accountNotice={accountNotice} onClearAccountNotice={()=>setAccountNotice("")}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)} isJoinConsumeActive={isJoinConsumeActive}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")} statSyncError={statSyncError} retryHomeShotLog={retryHomeShotLog}/></div>}
 {view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={coachVisibleShotLogs} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
@@ -1750,7 +1797,7 @@ return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 // ═══════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════
-function Auth({onLogin,onRegister,onDemo,onCreateJoinContext}){
+function Auth({onLogin,onRegister,onDemo,onCreateJoinContext,accountNotice="",onClearAccountNotice=()=>{}}){
 const[mode,setMode]=useState("login"),[role,setRole]=useState("player"),[email,setEmail]=useState(""),[password,setPassword]=useState(""),[name,setName]=useState(""),[inviteCode,setInviteCode]=useState(""),[err,setErr]=useState("");
 const roleTracks={
   player:{
@@ -1766,6 +1813,7 @@ const roleTracks={
 };
 const activeTrack=roleTracks[role]||roleTracks.player;
 const doLogin=async()=>{
+onClearAccountNotice();
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!password){setErr("Enter your password");return}
 const id=e.includes("@")?e:e+"@shotlab.app";
@@ -1773,6 +1821,7 @@ const r=await onLogin(id,password);
 if(!r.ok)setErr(r.err);
 };
 const doRegister=async()=>{
+onClearAccountNotice();
 const e=email.trim().toLowerCase();if(!e){setErr("Enter your email");return}
 if(!name.trim()){setErr("Enter your name");return}
 if(!password||password.length<4){setErr("Password must be at least 4 characters");return}
@@ -1786,6 +1835,7 @@ if(!r.ok)setErr(r.err);
 if(r?.pendingConfirmation){setMode("login");setPassword("");setErr(r.message||"Account created. Check your email to confirm your account, then log in.");}
 };
 const doDemo=async(kind="player")=>{
+onClearAccountNotice();
 const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
 setErr("");
 setEmail(acct.email);
@@ -1805,6 +1855,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 <p style={{fontFamily:FB,color:MUTED,textAlign:"center",fontSize:13,letterSpacing:5,margin:"8px 0 0",fontWeight:500}}>OFFSEASON DEVELOPMENT PROGRAM</p>
 <div style={{display:"flex",alignItems:"center",gap:12,margin:"32px auto",maxWidth:200}}><div style={{flex:1,height:1,background:`linear-gradient(to right,transparent,${VOLT}44)`}}/><div style={{width:6,height:6,borderRadius:"50%",background:VOLT,opacity:.6}}/><div style={{flex:1,height:1,background:`linear-gradient(to left,transparent,${VOLT}44)`}}/></div>
 <div className="auth-card-enter" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:24,padding:"36px 28px",border:`1px solid ${BORDER_CLR}`}}>
+{accountNotice&&<div role="status" style={{background:"rgba(200,255,0,0.10)",border:`1px solid ${VOLT}44`,borderRadius:12,padding:"12px 14px",fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.45,marginBottom:16}}>{accountNotice}</div>}
 {/* Login / Register toggle */}
 <div style={{display:"flex",background:"#1E1E1E",borderRadius:12,padding:2,marginBottom:24,border:"1px solid #242424"}}>
 {["login","register"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={{flex:1,height:44,borderRadius:10,border:"none",cursor:"pointer",fontFamily:FD,fontSize:16,letterSpacing:3,textTransform:"uppercase",transition:"all .15s ease",background:mode===m?VOLT:"transparent",color:mode===m?"#000000":"#555555",fontWeight:mode===m?700:600}}>{m==="login"?"SIGN IN":"REGISTER"}</button>)}
@@ -4045,8 +4096,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         <p style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.5}}>Privacy, terms, support, account deletion, and data requests.</p>
         <LegalSupportLinks compact/>
       </div>
-      <button onClick={deleteAccount} style={{width:"100%",padding:"12px",background:"transparent",border:`1px solid #FF454533`,borderRadius:10,cursor:"pointer",fontFamily:FB,fontSize:12,color:"#FF4545",fontWeight:600,letterSpacing:1}}>Delete My Coach Account & Data</button>
-      <p style={{fontFamily:FB,color:MUTED,fontSize:9,textAlign:"center",marginTop:8}}>Removes your account. Player data and drills are preserved.</p>
+      <AccountTrustActions deleteAccount={deleteAccount} preserveTeamData/>
     </div>
   </div>}
   {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {getPlayerHomeShotMakes(selP.email,shotLogs,u?.teamId)}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div><div style={{marginTop:10,fontFamily:FB,fontSize:10,color:MUTED}}>{(()=>{const snap=derivePlayerProgressProfile({playerEmail:selP.email,shotLogs,scores,rsvps,events,players});return `${snap.coachSnapshot.consistency} · ${snap.coachSnapshot.engagement} · ${snap.coachSnapshot.developmentSignal}`;})()}</div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills} programDr={programDrills}/></div>}
@@ -4123,7 +4173,6 @@ return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
 function ProfilePage({u,scores,shotLogs,drills,programDrills=[],rsvps,events=[],players=[],scRsvps,challenges,streak,earnedBadges,T,deleteAccount,onToggleLeaderboardVisibility}){
-const[confirmDel,setConfirmDel]=useState(false);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
 const programScores=useMemo(()=>my.filter(s=>s.src==="program"),[my]);
@@ -4310,21 +4359,7 @@ return <div className="fade-up">
 </div>
 
 {/* ══════ ACCOUNT MANAGEMENT ══════ */}
-<div style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${BORDER_CLR}44`}}>
-  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>ACCOUNT</div>
-  {!confirmDel?<button onClick={()=>setConfirmDel(true)} style={{width:"100%",padding:"14px",background:"transparent",border:`1px solid #FF454544`,borderRadius:12,cursor:"pointer",fontFamily:FB,fontSize:13,color:"#FF4545",fontWeight:600,letterSpacing:1}}>
-    Delete Account & All Data
-  </button>
-  :<div className="fade-up" style={{background:"#FF454508",borderRadius:16,padding:"20px",border:`1px solid #FF454533`}}>
-    <div style={{fontFamily:FD,color:"#FF4545",fontSize:18,letterSpacing:3,marginBottom:8}}>DELETE ACCOUNT?</div>
-    <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:16}}>This will permanently delete your account, scores, shot logs, RSVPs, and all associated data. This cannot be undone.</p>
-    <div style={{display:"flex",gap:8}}>
-      <button onClick={()=>setConfirmDel(false)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-      <button onClick={deleteAccount} className="btn-v cta-danger" style={{}}>DELETE</button>
-    </div>
-  </div>}
-  <p style={{fontFamily:FB,color:T.SUB,fontSize:10,textAlign:"center",marginTop:12,lineHeight:1.5}}>Your data is stored locally on this device. Deleting your account removes all your personal information and scores.</p>
-</div>
+<AccountTrustActions deleteAccount={deleteAccount}/>
 
   </div>;
 }
