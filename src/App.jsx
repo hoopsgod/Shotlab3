@@ -54,6 +54,7 @@ import {
 import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
 import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, STORAGE_KEYS } from "./lib/appDataModels";
 import { calculateLeaderboardFromShotLogs } from "./lib/leaderboardService.js";
+import { archivePlayerForTeam, deleteTeamLocalPlayerData, isActiveRosterPlayer, isPlayerHiddenFromActiveLeaderboards, removePlayerFromTeam } from "./lib/playerDataManagement.js";
 import { emitReleaseDiagnostic, isShotLabDebugMode } from "./lib/releaseDiagnostics.js";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
 import { getCoachEventRsvpRows, getCoachRsvpLabel } from "./lib/coachEventRsvpVisibility.js";
@@ -518,7 +519,7 @@ const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#A0A0A0"},{days
 const getEarnedBadges=s=>STREAK_BADGES.filter(b=>s>=b.days);
 const DRILL_ACCENTS={"FORM SHOOTING":VOLT,"FREE THROWS":VOLT,"CATCH & SHOOT":VOLT,"BALL HANDLING":VOLT,"MID-RANGE":VOLT,"FLOATERS":VOLT};
 const getDrillAccentColor=name=>DRILL_ACCENTS[name]||"#C8FF00";
-const isLeaderboardEligible=(players,email)=>players.find(p=>p.email===email)?.hideFromLeaderboards!==true;
+const isLeaderboardEligible=(players,email)=>{const p=players.find(p=>normalizeEmail(p.email)===normalizeEmail(email));return !!p&&!isPlayerHiddenFromActiveLeaderboards(p);};
 function Sparkline({data,color=VOLT,w=44,h=16}){if(!data||data.length<2)return null;const max=Math.max(...data,1);const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v/max)*h*.8+h*.1)}`).join(" ");return <svg width={w} height={h} style={{display:"block",opacity:.6}}><polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
 
 const EventIcon=({type,size=24,color=VOLT})=>{const s={width:size,height:size,display:"block"};
@@ -1533,23 +1534,36 @@ const profile={id:genId("pp"),userId:null,teamId:user.teamId,firstName,lastName,
 await P("sl:player-profiles",[...playerProfiles,profile],setPlayerProfiles);
 return{ok:true};
 };
+const archiveRosterPlayer=async(playerEmail)=>{
+if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
+if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
+const result=archivePlayerForTeam({players,coach:user,playerEmail});
+if(!result.ok)return result;
+await P("sl:players",result.players,setPlayers);
+return{ok:true};
+};
 const removeRosterPlayer=async(playerEmail)=>{
 if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
 if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
-const email=String(playerEmail||"").trim().toLowerCase();
-if(!email)return{ok:false,err:"Player email is required"};
-const target=players.find(p=>String(p.email||"").toLowerCase()===email);
-if(!target||target.role==="coach"||target.teamId!==user.teamId)return{ok:false,err:"Player not found on roster"};
-const nextPlayers=players.map(p=>String(p.email||"").toLowerCase()===email?{...p,teamId:null}:p);
+const result=removePlayerFromTeam({players,coach:user,playerEmail});
+if(!result.ok)return result;
+await P("sl:players",result.players,setPlayers);
+return{ok:true};
+};
+const deleteTeamLocalRosterPlayerData=async(playerEmail,confirmationText)=>{
+if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
+if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
+const result=deleteTeamLocalPlayerData({players,playerProfiles,scores,shotLogs,rsvps,scRsvps,scLogs,challenges,coach:user,playerEmail,confirmationText});
+if(!result.ok)return result;
 await Promise.all([
-P("sl:players",nextPlayers,setPlayers),
-P("sl:scores",scores.filter(s=>String(s.playerId||s.email||"").toLowerCase()!==email),setScores),
-P("sl:rsvps",rsvps.filter(r=>String(r.playerId||r.email||"").toLowerCase()!==email),setRsvps),
-P("sl:shotlogs",shotLogs.filter(l=>String(l.playerId||l.email||"").toLowerCase()!==email),setShotLogs),
-P("sl:challenges",challenges.filter(c=>String(c.playerId||"").toLowerCase()!==email&&String(c.from||"").toLowerCase()!==email&&String(c.to||"").toLowerCase()!==email),setChallenges),
-P("sl:sc-rsvps",scRsvps.filter(r=>String(r.playerId||r.email||"").toLowerCase()!==email),setScRsvps),
-P("sl:sc-logs",scLogs.filter(l=>String(l.playerId||l.email||"").toLowerCase()!==email),setScLogs),
-P("sl:player-profiles",playerProfiles.filter(pp=>!(String(pp.userId||"").toLowerCase()===email&&pp.teamId===user.teamId)),setPlayerProfiles),
+P("sl:players",result.players,setPlayers),
+P("sl:scores",result.scores,setScores),
+P("sl:rsvps",result.rsvps,setRsvps),
+P("sl:shotlogs",result.shotLogs,setShotLogs),
+P("sl:challenges",result.challenges,setChallenges),
+P("sl:sc-rsvps",result.scRsvps,setScRsvps),
+P("sl:sc-logs",result.scLogs,setScLogs),
+P("sl:player-profiles",result.playerProfiles,setPlayerProfiles),
 ]);
 return{ok:true};
 };
@@ -1749,7 +1763,7 @@ await hydratePersistedData();
 setDemoSettingsBusy(false);
 }
 };
-const scopedPlayers=players.filter(p=>p.teamId===user?.teamId);
+const scopedPlayers=players.filter(p=>isActiveRosterPlayer(p,user?.teamId));
 const scopedScores=scores.filter(s=>s.teamId===user?.teamId);
 const scopedEvents=events.filter(e=>e.teamId===user?.teamId);
 const scopedRsvps=rsvps.filter(r=>r.teamId===user?.teamId);
@@ -1789,7 +1803,7 @@ return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext} accountNotice={accountNotice} onClearAccountNotice={()=>setAccountNotice("")}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)} isJoinConsumeActive={isJoinConsumeActive}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")} statSyncError={statSyncError} retryHomeShotLog={retryHomeShotLog}/></div>}
-{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={coachVisibleShotLogs} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
+{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} archiveRosterPlayer={archiveRosterPlayer} deleteTeamLocalRosterPlayerData={deleteTeamLocalRosterPlayerData} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={coachVisibleShotLogs} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={homeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 {dataDebugPanel}
 </TeamBrandingProvider>;
@@ -3317,7 +3331,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 const toSafeNumber=(value)=>{const parsed=Number(value);return Number.isFinite(parsed)?parsed:0;};
 const getPlayerHomeShotMakes=(playerEmail,logs,teamId)=>{const targetEmail=normalizeEmail(playerEmail);if(!targetEmail)return 0;return (Array.isArray(logs)?logs:[]).reduce((total,log)=>{if(normalizeEmail(log?.email)!==targetEmail)return total;const logTeamId=log?.teamId||null;if(teamId&&logTeamId&&logTeamId!==teamId)return total;return total+toSafeNumber(log?.made||0);},0);};
-function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachPriorities,onSaveCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
+function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,archiveRosterPlayer,deleteTeamLocalRosterPlayerData,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachPriorities,onSaveCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all"),[eventSaveError,setEventSaveError]=useState("");
@@ -3329,7 +3343,7 @@ const persistedCoachPriorities=useMemo(()=>sanitizeCoachPriorities(coachPrioriti
 useEffect(()=>{setCoachPriorityDraft(persistedCoachPriorities);},[persistedCoachPriorities]);
 const customProgramDrillCount=countCustomProgramDrills(programDrills);
 const[nudged,setNudged]=useState([]);
-const[confirmDelete,setConfirmDelete]=useState(null);const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
+const[confirmDelete,setConfirmDelete]=useState(null);const[playerDataConfirm,setPlayerDataConfirm]=useState(null);const[playerDataConfirmText,setPlayerDataConfirmText]=useState("");const[playerDataMessage,setPlayerDataMessage]=useState("");const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
 const ups=useMemo(()=>players.filter(p=>p.role!=="coach"&&p.teamId===u?.teamId).map(p=>({email:p.email,name:p.name||String(p.email||"").split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase())})),[players,u?.teamId]);
 const safeEvents=useMemo(()=>Array.isArray(events)?events:[],[events]);
 const safeRsvps=useMemo(()=>Array.isArray(rsvps)?rsvps:[],[rsvps]);
@@ -4066,7 +4080,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         <button onClick={async()=>{const r=await addRosterPlayer(newProfile);if(!r.ok)setProfileErr(r.err||"Could not add player");else setNewProfile({firstName:"",lastName:"",jerseyNumber:""});}} style={{padding:"8px 12px",background:"var(--page-accent)",color:"#000000",border:"none",borderRadius:8,fontFamily:FD,letterSpacing:1,cursor:"pointer"}}>ADD</button>
       </div>
     </div>
-    <CoachRoster players={players} scores={scores} shotLogs={shotLogs} drills={drills} nudged={nudged} setNudged={setNudged} onRemovePlayer={removeRosterPlayer}/>
+    <CoachRoster players={players.filter(p=>isActiveRosterPlayer(p,u?.teamId))} scores={scores} shotLogs={shotLogs} drills={drills} nudged={nudged} setNudged={setNudged} onRemovePlayer={removeRosterPlayer}/>
     {/* Tap any player in roster for detail */}
     <div style={{marginTop:16}}>
       <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PLAYER DETAILS" s="TAP TO VIEW"/>
@@ -4077,7 +4091,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
             <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>{p.name.toUpperCase()}</div>
             <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{tot} makes · {rsvps.filter(r=>normalizeEmail(r.email)===normalizeEmail(p.email)).length} events</div>
           </div>
-          <button onClick={async(e)=>{e.stopPropagation();await removeRosterPlayer(p.email);if(selP?.email===p.email)setSelP(null);}} style={{background:"#FF454512",border:"1px solid #FF454533",borderRadius:8,color:"#FF4545",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",padding:"6px 10px",cursor:"pointer"}}>REMOVE</button>
+          <button onClick={async(e)=>{e.stopPropagation();const r=await archiveRosterPlayer(p.email);setPlayerDataMessage(r.ok?"Player archived and hidden from active views.":r.err||"Could not archive player");if(selP?.email===p.email)setSelP(null);}} style={{background:VOLT+"12",border:`1px solid ${VOLT}44`,borderRadius:8,color:VOLT,fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",padding:"6px 10px",cursor:"pointer"}}>ARCHIVE</button>
           <svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg>
         </div>})}
     </div>
@@ -4099,7 +4113,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       <AccountTrustActions deleteAccount={deleteAccount} preserveTeamData/>
     </div>
   </div>}
-  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>setSelP(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {getPlayerHomeShotMakes(selP.email,shotLogs,u?.teamId)}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div><div style={{marginTop:10,fontFamily:FB,fontSize:10,color:MUTED}}>{(()=>{const snap=derivePlayerProgressProfile({playerEmail:selP.email,shotLogs,scores,rsvps,events,players});return `${snap.coachSnapshot.consistency} · ${snap.coachSnapshot.engagement} · ${snap.coachSnapshot.developmentSignal}`;})()}</div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills} programDr={programDrills}/></div>}
+  {tab==="players"&&selP&&<div className="fade-up"><button onClick={()=>{setSelP(null);setPlayerDataConfirm(null);setPlayerDataConfirmText("");setPlayerDataMessage("");}} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20}}>&#8592; BACK</button><div style={{textAlign:"center",marginBottom:24}}><Av n={selP.name} sz={64} email={selP.email} style={{margin:"0 auto 14px"}}/><div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:2}}>{selP.name.toUpperCase()}</div><div style={{color:MUTED,fontSize:12,marginTop:4}}>{selP.email}</div><div style={{display:"flex",gap:8,justifyContent:"center",marginTop:12,flexWrap:"wrap"}}><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:VOLT,background:VOLT+"15"}}>HOME: {getPlayerHomeShotMakes(selP.email,shotLogs,u?.teamId)}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:LIGHT,background:LIGHT+"10"}}>PROGRAM: {scores.filter(s=>s.email===selP.email&&s.src==="program").length}</span><span style={{fontFamily:FB,fontSize:10,fontWeight:700,padding:"3px 8px",borderRadius:5,color:ORANGE,background:ORANGE+"15"}}>{rsvps.filter(r=>r.email===selP.email).length} EVENTS</span></div><div style={{marginTop:10,fontFamily:FB,fontSize:10,color:MUTED}}>{(()=>{const snap=derivePlayerProgressProfile({playerEmail:selP.email,shotLogs,scores,rsvps,events,players});return `${snap.coachSnapshot.consistency} · ${snap.coachSnapshot.engagement} · ${snap.coachSnapshot.developmentSignal}`;})()}</div></div><div data-testid="coach-player-data-management" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:16,marginBottom:18}}><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:6}}>PLAYER DATA MANAGEMENT</div><p style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.55,marginBottom:12}}>Coach-only team-local controls. These actions do not delete {selP.name}&apos;s personal account.</p>{playerDataMessage&&<div role="status" style={{fontFamily:FB,color:VOLT,fontSize:11,marginBottom:10}}>{playerDataMessage}</div>}<div style={{display:"grid",gap:8}}><button onClick={async()=>{const r=await archiveRosterPlayer(selP.email);setPlayerDataMessage(r.ok?"Archive Player complete — hidden from active roster and leaderboards.":r.err||"Could not archive player");if(r.ok)setSelP(null);}} style={{minHeight:44,borderRadius:10,border:`1px solid ${VOLT}55`,background:VOLT+"14",color:VOLT,fontFamily:FD,letterSpacing:1,cursor:"pointer"}}>ARCHIVE PLAYER</button><button onClick={async()=>{const r=await removeRosterPlayer(selP.email);setPlayerDataMessage(r.ok?"Removed from team roster. Personal account was not deleted.":r.err||"Could not remove player");if(r.ok)setSelP(null);}} style={{minHeight:42,borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:"transparent",color:LIGHT,fontFamily:FB,fontWeight:800,letterSpacing:1,cursor:"pointer"}}>REMOVE FROM TEAM</button></div><div style={{marginTop:16,paddingTop:14,borderTop:"1px solid #FF454533"}}><div style={{fontFamily:FD,color:"#FF6969",fontSize:12,letterSpacing:1,marginBottom:6}}>DELETE TEAM-LOCAL PLAYER DATA</div><p style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5,marginBottom:10}}>Deletes only roster entry, team-linked scores, shot logs, RSVPs, S&amp;C RSVP/log data, and challenge records for {selP.name} ({selP.email}) on this team. It does not delete accounts, team branding, drills, events, or other players.</p>{playerDataConfirm!==selP.email?<button onClick={()=>{setPlayerDataConfirm(selP.email);setPlayerDataConfirmText("");setPlayerDataMessage("");}} style={{minHeight:42,width:"100%",borderRadius:10,border:"1px solid #FF454555",background:"#FF454510",color:"#FF6969",fontFamily:FB,fontWeight:800,letterSpacing:1,cursor:"pointer"}}>OPEN CONFIRMATION</button>:<div style={{background:BG,border:"1px solid #FF454555",borderRadius:12,padding:12}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,lineHeight:1.5,marginBottom:8}}>Type both player name and email to confirm: <strong>{selP.name}</strong> / <strong>{selP.email}</strong></div><input value={playerDataConfirmText} onChange={e=>setPlayerDataConfirmText(e.target.value)} placeholder={`${selP.name} ${selP.email}`} style={{width:"100%",padding:10,background:CARD_BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:8,marginBottom:8}}/><div style={{display:"flex",gap:8}}><button onClick={()=>{setPlayerDataConfirm(null);setPlayerDataConfirmText("");}} style={{flex:1,minHeight:40,borderRadius:8,border:`1px solid ${BORDER_CLR}`,background:"transparent",color:LIGHT,fontFamily:FB,fontWeight:800,cursor:"pointer"}}>CANCEL</button><button onClick={async()=>{const r=await deleteTeamLocalRosterPlayerData(selP.email,playerDataConfirmText);setPlayerDataMessage(r.ok?"Team-local player data deleted for the selected player only.":r.err||"Could not delete team-local player data");if(r.ok){setSelP(null);setPlayerDataConfirm(null);setPlayerDataConfirmText("");}}} style={{flex:1,minHeight:40,borderRadius:8,border:"1px solid #FF454577",background:"#FF454522",color:"#FF6969",fontFamily:FB,fontWeight:900,cursor:"pointer"}}>CONFIRM TEAM-LOCAL DELETE</button></div></div>}</div></div><HistPanel sc={scores.filter(s=>s.email===selP.email)} dr={drills} programDr={programDrills}/></div>}
 
   {/* ═════════════ S&C MANAGEMENT ═════════════ */}
   {tab==="sc"&&<div className="page pageShell fade-up" data-accent="sc" style={shellVars("sc")}><DashboardReturnButton onClick={()=>setTab("feed")} /><PageHeader title="S&C" subtitle="Athletic performance blocks, readiness tracking, and recovery accountability" accent="blue" icon={<LiftIcon size={22} color={PAGE_ACCENTS.sc.accent}/>} actionLabel={showAddSC?"Close":"Add Session"} onAction={toggleCoachScSessionForm} /><div className="premiumSummaryPanel"><div className="premiumSummaryTop"><div style={{display:"flex",gap:10,alignItems:"flex-start"}}><div className="premiumSummaryBadge"><LiftIcon size={16} color={PAGE_ACCENTS.sc.accent}/></div><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.sc.accent,fontSize:13,letterSpacing:"var(--tracking-default)"}}>TODAY'S PERFORMANCE BLOCK</div><div className="premiumSummaryMeta">{scSessions[0]?`${scSessions[0].sport||scSessions[0].title} · ${scSessions[0].date}`:"No lift scheduled — set the next session cadence."}</div></div></div></div><div className="premiumStatGrid"><div className="premiumStatTile"><div className="heroStatVal">{scSessions.length}</div><div className="heroStatLbl">PERFORMANCE SESSIONS</div></div><div className="premiumStatTile"><div className="heroStatVal">{scRsvps.length}</div><div className="heroStatLbl">READINESS RSVPS</div></div><div className="premiumStatTile"><div className="heroStatVal">{scLogs.length}</div><div className="heroStatLbl">WORKLOAD LOGS</div></div></div><div className="premiumSummaryActions"><button className="pageHeaderPill pageHeaderPillBrand" onClick={openCoachScSessionForm}>Add Session</button></div></div>
