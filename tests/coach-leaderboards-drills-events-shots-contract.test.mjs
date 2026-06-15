@@ -197,6 +197,6 @@ test('leaderboard fetch differentiates empty results, endpoint failures, and par
 test('coach and player dashboards both consume shared leaderboard state and fetch helper', async () => {
   const source = await appSource();
 
-  assert.match(source, /homeShotsLeaderboard=\{homeShotsLeaderboard\}/);
+  assert.match(source, /homeShotsLeaderboard=\{activeHomeShotsLeaderboard\}/);
   assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,"players"\)\}/);
 });
