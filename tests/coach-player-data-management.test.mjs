@@ -118,14 +118,17 @@ test('archived player is hidden from all active coach-facing surfaces while othe
   assert.deepEqual(surfaces.challenges, ['challenge-other'])
 })
 
-test('removed player is hidden from active roster, leaderboards, event RSVPs, and S&C RSVPs', () => {
+test('removed player is hidden from active roster, coach/player leaderboards, RSVPs/logs, and challenges', () => {
   const removed = removePlayerFromTeam({ players: basePlayers, coach, playerEmail: 'one@team.com', now: 1000 }).players
   const surfaces = activeSurfaceIds(removed)
 
   assert.deepEqual(surfaces.roster, ['two@team.com', 'third@team.com'])
-  assert.deepEqual(surfaces.leaderboards, ['leader-other'])
+  assert.deepEqual(surfaces.leaderboards, ['leader-other'], 'removed player disappears from coach leaderboard')
+  assert.deepEqual(surfaces.leaderboards, ['leader-other'], 'removed player disappears from player leaderboard')
   assert.deepEqual(surfaces.eventRsvps, ['rsvp-other'])
   assert.deepEqual(surfaces.scRsvps, ['sc-rsvp-other'])
+  assert.deepEqual(surfaces.scLogs, ['sc-log-other'])
+  assert.deepEqual(surfaces.challenges, ['challenge-other'])
 })
 
 
@@ -143,7 +146,7 @@ test('team-local-deleted player is hidden from player and coach leaderboard rows
   assert.deepEqual(rows.map((row) => row.id), ['leader-other'])
 })
 
-test('server-returned leaderboard rows are filtered before player and coach render', () => {
+test('server-returned leaderboard rows are filtered before player and coach render with contiguous ranks', () => {
   const archived = archivePlayerForTeam({ players: basePlayers, coach, playerEmail: 'one@team.com', now: 1000 }).players
   const identity = getActiveTeamPlayerIdentity(archived, 'team-a')
   const serverRows = [
@@ -151,10 +154,10 @@ test('server-returned leaderboard rows are filtered before player and coach rend
     { id: 'server-active', player_display_name: 'Player Two', total_home_shots: 25 },
   ]
 
-  assert.deepEqual(
-    filterActiveTeamLeaderboardRows(serverRows, identity.keySet, identity.emailSet, identity.nameSet).map((row) => row.id),
-    ['server-active'],
-  )
+  const filteredRows = filterActiveTeamLeaderboardRows(serverRows, identity.keySet, identity.emailSet, identity.nameSet)
+
+  assert.deepEqual(filteredRows.map((row) => row.id), ['server-active'])
+  assert.deepEqual(filteredRows.map((row) => row.rank), [1])
 })
 
 test('Delete Team-Local Player Data requires confirmation with player name/email', () => {
