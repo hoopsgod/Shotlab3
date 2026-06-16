@@ -55,6 +55,7 @@ import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
 import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, STORAGE_KEYS } from "./lib/appDataModels";
 import { calculateLeaderboardFromShotLogs } from "./lib/leaderboardService.js";
 import { archivePlayerForTeam, deleteTeamLocalPlayerData, filterActiveTeamChallengeRows, filterActiveTeamLeaderboardRows, filterActiveTeamPlayerRows, getActiveTeamPlayerIdentity, isActiveRosterPlayer, isPlayerHiddenFromActiveLeaderboards, removePlayerFromTeam } from "./lib/playerDataManagement.js";
+import { buildProgramDrillLeaderboardRows, buildProgramScoreRow, isValidProgramScoreInput } from "./lib/programDrillScoring.js";
 import { emitReleaseDiagnostic, isShotLabDebugMode } from "./lib/releaseDiagnostics.js";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
 import { getCoachEventRsvpRows, getCoachRsvpLabel } from "./lib/coachEventRsvpVisibility.js";
@@ -1575,17 +1576,23 @@ const code=generateJoinCode(teams.filter(x=>x.id!==teamId).map(x=>x.joinCode));
 await P("sl:teams",teams.map(tm=>tm.id===teamId?{...tm,joinCode:code,joinCodeUpdatedAt:Date.now()}:tm),setTeams);
 return{ok:true,joinCode:code};
 };
-const addScore=async(drillId,score,src="home")=>{
-if(!requirePlayer(user,user?.teamId,user?.email))return;
+const addScore=async(drillId,score,src="home",drill=null)=>{
+if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,err:"Not authorized"};
 try{
-const nextScores=[...scores,{id:genId("score"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,drillId,score,date:todayStr(),ts:Date.now(),src}];
+const scoreRow=src==="program"
+?buildProgramScoreRow({id:genId("score"),user,players,drill:drill||programDrills.find(d=>String(d.id)===String(drillId))||{id:drillId},score,date:todayStr(),ts:Date.now()})
+:{id:genId("score"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,drillId,score,date:todayStr(),ts:Date.now(),src};
+if(!scoreRow)return{ok:false,err:"Invalid score"};
+const nextScores=[...scores,scoreRow];
 await P("sl:scores",nextScores,setScores,{strictRemote:true});
 setStatSyncError("");
-trackEvent("score_logged",{drillId,score,src});
+trackEvent("score_logged",{drillId:scoreRow.drillId,score,src});
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+return{ok:true,score:scoreRow};
 }catch(e){
 setStatSyncError("Could not save score to team dashboard. Please try again.");
 trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unknown")});
+return{ok:false,err:String(e?.message||"Could not save score")};
 }
 };
 const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
@@ -2037,17 +2044,17 @@ const programSessionBlocks=useMemo(()=>{
     "Finishing":"Complete at the rim through contact reads.",
     "Conditioning":"Close with fatigue-resilient execution."
   };
-  const completedSet=new Set(todayProgramScores.map(s=>s.drillId));
+  const completedSet=new Set(todayProgramScores.map(s=>String(s.drillId)));
   const grouped=phaseOrder.map((phase)=>({
     phase,
     emphasis:phaseMeta[phase],
     drills:programDrills.filter(d=>categorizeProgramDrill(d?.name)===phase)
   })).filter(group=>group.drills.length>0).map(group=>{
-    const doneCount=group.drills.filter(d=>completedSet.has(d.id)).length;
+    const doneCount=group.drills.filter(d=>completedSet.has(String(d.id))).length;
     const status=doneCount===group.drills.length?"completed":doneCount>0?"in-progress":"upcoming";
     return {...group,doneCount,status};
   });
-  const nextPriority=grouped.find(g=>g.status!=="completed")?.drills?.find(d=>!completedSet.has(d.id))?.id||null;
+  const nextPriority=grouped.find(g=>g.status!=="completed")?.drills?.find(d=>!completedSet.has(String(d.id)))?.id||null;
   return {grouped,nextPriority};
 },[programDrills,todayProgramScores,categorizeProgramDrill]);
 const streak=useMemo(()=>calcStreak(homeScores),[homeScores]);
@@ -2081,10 +2088,11 @@ const pushCompletionCue=useCallback((cue)=>{
   setCompletionCue({...cue,id:Date.now()});
   setTimeout(()=>setCompletionCue(null),3200);
 },[]);
-const handleLog=()=>{if(submitting||!active)return;const v=parseInt(input);if(isNaN(v)||v<0||(hasDrillMax(active)&&v>active.max))return;setSubmitting(true);const oldStreak=streak;
-const prevBest=activeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
+const isScoreInputValid=activeMode==="program"?isValidProgramScoreInput(input,active):(()=>{const v=Number(input);return String(input).trim()!==""&&Number.isInteger(v)&&v>=0&&!(hasDrillMax(active)&&v>active.max)})();
+const handleLog=async()=>{if(submitting||!active)return;const v=Number(input);if(activeMode==="program"?!isValidProgramScoreInput(input,active):(String(input).trim()===""||!Number.isInteger(v)||v<0||(hasDrillMax(active)&&v>active.max)))return;setSubmitting(true);const oldStreak=streak;
+const prevBest=activeScores.filter(s=>String(s.drillId)===String(active.id)).reduce((m,s)=>Math.max(m,s.score),0);
 const isPB=v>prevBest&&prevBest>0;
-addScore(active.id,v,activeMode);playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
+const saveResult=await addScore(active.id,v,activeMode,active);if(!saveResult?.ok){setSubmitting(false);return;}playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
 pushCompletionCue({title:activeMode==="program"?"Program drill completed":"Drill completed",detail:`${active.name} · ${v}${hasDrillMax(active)?`/${active.max}`:""} logged`,momentum:`${Math.max(1,streak+(activeMode==="program"?0:1))}-day momentum`,next:activeMode==="program"?"Review Program leaderboard":"Log shots or complete your next drill"});
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 if(activeMode!=="program"){setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)}
@@ -2465,7 +2473,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       <h2 style={{fontFamily:FD,color:activeMode==="program"?CYAN:LIGHT,fontSize:36,letterSpacing:4,margin:"0 0 8px"}}>{active.name}</h2>
       <p style={{fontFamily:FB,color:activeMode==="program"?CYAN: MUTED,fontSize:14,margin:"0 auto 6px",maxWidth:280,lineHeight:1.6,textShadow:activeMode==="program"?`0 0 18px ${CYAN}22`:"none"}}>{active.desc}</p>
       {/* Personal Best + Average */}
-      {(()=>{const ds=activeScores.filter(s=>s.drillId===active.id);const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;const statAccent=activeMode==="program"?CYAN:ORANGE;
+      {(()=>{const ds=activeScores.filter(s=>String(s.drillId)===String(active.id));const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;const statAccent=activeMode==="program"?CYAN:ORANGE;
         return ds.length>0?<div style={{display:"flex",gap:8,justifyContent:"center",margin:"12px 0 6px"}}>
           <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${statAccent}33`,textAlign:"center"}}>
             <div style={{fontFamily:FD,color:statAccent,fontSize:18}}>{pb}</div>
@@ -2493,13 +2501,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       {/* Score input with reactive color */}
       {(()=>{const v=parseInt(input)||0;const pct=hasDrillMax(active)&&active.max>0?v/active.max:0;const glowColor=hasDrillMax(active)?(pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#FF4545":VOLT):VOLT;const borderColor=v>0?glowColor:VOLT;
         return <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8,marginBottom:40}}>
-        <input autoFocus type="number" min="0" max={hasDrillMax(active)?active.max:undefined} value={input} onChange={e=>{setInput(e.target.value);playTick()}} onKeyDown={e=>{if(e.key==="Enter")handleLog();}} placeholder="0" style={{width:120,padding:"24px 8px",background:BG,border:`2px solid ${borderColor}`,borderRadius:20,color:borderColor,fontFamily:FD,fontSize:64,textAlign:"center",outline:"none",letterSpacing:2,boxShadow:v>0?`0 0 30px ${glowColor}20,0 0 60px ${glowColor}08`:`0 0 20px ${VOLT}15`,transition:"border-color .3s,color .3s,box-shadow .3s"}}/>
+        <input autoFocus inputMode="numeric" pattern="[0-9]*" type="text" min="0" max={hasDrillMax(active)?active.max:undefined} value={input} onChange={e=>{setInput(e.target.value.replace(/[^0-9]/g,""));playTick()}} onKeyDown={e=>{if(e.key==="Enter")handleLog();}} placeholder="0" style={{width:120,padding:"24px 8px",background:BG,border:`2px solid ${borderColor}`,borderRadius:20,color:borderColor,fontFamily:FD,fontSize:64,textAlign:"center",outline:"none",letterSpacing:2,boxShadow:v>0?`0 0 30px ${glowColor}20,0 0 60px ${glowColor}08`:`0 0 20px ${VOLT}15`,transition:"border-color .3s,color .3s,box-shadow .3s"}}/>
         {hasDrillMax(active)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:32}}>/{active.max}</div>}
       </div>})()}
       {/* Score quality indicator */}
       {(()=>{const v=parseInt(input)||0;if(v<=0||!hasDrillMax(active))return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?VOLT:pct>=75?VOLT:pct>=50?ORANGE:"#FF4545";
         return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
-      <button className="btn-v cta-primary" onClick={handleLog} style={{maxWidth:300,margin:"0 auto"}}>LOG SCORE &#8594;</button>
+      <button className="btn-v cta-primary" disabled={submitting||!isScoreInputValid} onClick={handleLog} style={{maxWidth:300,margin:"0 auto",opacity:submitting||!isScoreInputValid?0.55:1,cursor:submitting||!isScoreInputValid?"not-allowed":"pointer"}}>{submitting?"SAVING...":"LOG SCORE →"}</button>
     </>}
   </div>}
 
@@ -2526,14 +2534,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         </div>
         <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1.2,color:block.status==="completed"?VOLT:block.status==="in-progress"?CYAN:MUTED,border:`1px solid ${block.status==="completed"?VOLT+"55":block.status==="in-progress"?CYAN+"44":BORDER_CLR}`,borderRadius:999,padding:"4px 8px"}}>{block.status==="completed"?"COMPLETED":block.status==="in-progress"?"IN PROGRESS":"UPCOMING"}</div>
       </div>
-      {block.drills.map(d=>{const done=todayProgramScores.find(s=>s.drillId===d.id);const isPriority=programSessionBlocks.nextPriority===d.id;
-        const leaderboardRows=Object.entries(scores.filter(s=>s.src==="program"&&s.drillId===d.id&&isLeaderboardEligible(players,s.email)).reduce((acc,s)=>{acc[s.email]=(acc[s.email]||0)+s.score;return acc;},{})).sort((a,b)=>b[1]-a[1]).slice(0,3);
+      {block.drills.map(d=>{const done=todayProgramScores.find(s=>String(s.drillId)===String(d.id));const isPriority=String(programSessionBlocks.nextPriority)===String(d.id);
+        const leaderboardRows=buildProgramDrillLeaderboardRows({scores,drills:programDrills,players,teamId:u.teamId,drill:d}).slice(0,3);
         return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:"#131821",border:`1px solid ${isPriority&&!done?CYAN+"66":done?CYAN+"20":BORDER_CLR}`,borderRadius:14,padding:"12px",marginBottom:8,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.6:1}}>
           <div style={{width:44,height:44,display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",borderRadius:10,flexShrink:0}}><DrillIcon type={d.icon} size={20} color={done?CYAN+"99":CYAN}/></div>
           <div style={{flex:1,minWidth:0}}>
             <div style={{fontFamily:FB,color:CYAN,fontSize:13,fontWeight:700,letterSpacing:1,display:"flex",alignItems:"center",gap:6,textShadow:`0 0 16px ${CYAN}16`}}>{d.name}{isPriority&&!done&&<span style={{fontSize:8,color:"#0B0D10",background:VOLT,borderRadius:999,padding:"2px 6px"}}>PRIORITY</span>}</div>
             <div style={{color:CYAN,fontSize:10,marginTop:2,fontWeight:500,textShadow:`0 0 14px ${CYAN}12`}}>{d.desc}</div>
-            <div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:4}}>Drill leaderboard: {leaderboardRows.length===0?"No scores yet":leaderboardRows.map(([email,total],idx)=>`#${idx+1} ${(players.find(p=>p.email===email)?.name||email.split("@")[0])} ${total}`).join(" · ")}</div>
+            <div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:4}}>Drill leaderboard: {leaderboardRows.length===0?"No scores yet":leaderboardRows.map((row)=>`#${row.rank} ${row.name||row.email.split("@")[0]} ${row.total}`).join(" · ")}</div>
           </div>
           {done?<div style={{width:36,height:36,borderRadius:10,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={CYAN} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
           :<div style={{width:36,height:36,borderRadius:10,background:"rgba(0, 229, 255, 0.10)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all .1s ease"}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
@@ -2961,7 +2969,7 @@ const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.nam
 if(sub==="sc"){
 const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
 }
-if(sub.startsWith("prog-")){const did=parseInt(sub.slice(5));const m={};progScores.filter(s=>s.drillId===did).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);}
+if(sub.startsWith("prog-")){const did=sub.slice(5);return buildProgramDrillLeaderboardRows({scores:progScores,drills:programDrills,players,teamId:user?.teamId,drill:programDrills.find(d=>String(d.id)===String(did))||{id:did}});}
 const m={};progScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
 return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
 },[homeScores,progScores,mode,sub,scores,scRsvps,rsvps,shotLogs,programDrills,leaderboardEligible]);

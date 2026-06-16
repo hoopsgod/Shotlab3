@@ -11,8 +11,9 @@ async function appSource() {
 test('player-entered stats require durable ids, strict remote persistence, sync error handling, and coach-data refresh', async () => {
   const source = await appSource();
 
-  assert.match(source, /const addScore=async\(drillId,score,src="home"\)=>\{/);
-  assert.match(source, /id:genId\("score"\),email:user\.email,playerId:user\.email,teamId:user\.teamId/);
+  assert.match(source, /const addScore=async\(drillId,score,src="home",drill=null\)=>\{/);
+  assert.match(source, /buildProgramScoreRow\(\{id:genId\("score"\),user,players,drill/);
+  assert.match(source, /\{id:genId\("score"\),email:user\.email,playerId:user\.email,teamId:user\.teamId/);
   assert.match(source, /await P\("sl:scores",nextScores,setScores,\{strictRemote:true\}\)/);
   assert.match(source, /setStatSyncError\("Could not save score to team dashboard\. Please try again\."\)/);
   assert.match(source, /await fetchHomeShotsLeaderboard\(user\.teamId,view==="player"\?"players":homeShotsLeaderboardScope\)/);
