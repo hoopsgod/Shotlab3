@@ -71,3 +71,29 @@ test('program drill leaderboard is drill-specific, filters inactive players, and
   const calipariRows = buildProgramDrillLeaderboardRows({ scores, drill: calipari, players });
   assert.deepEqual(calipariRows.map((r) => [r.rank, r.player_id, r.total]), [[1, 'player:team_active', 99]]);
 });
+
+test('program score DB normalization strips app-only fields while preserving stable string drill_id', () => {
+  const appRow = buildProgramScoreRow({
+    drill: { id: 'demo-program-calipari-shooting', name: 'CALIPARI SHOOTING' },
+    score: 22,
+    user: { email: 'active@team.test', teamId: 'team-a', name: 'Active Player' },
+    players,
+    id: 'score-program-safe',
+    now: 987,
+    date: '2026-06-17',
+  });
+  const dbRow = normalizeScoreRowForDb({ ...appRow, drillName: 'CALIPARI SHOOTING', hideFromLeaderboards: true });
+  assert.deepEqual(Object.keys(dbRow).sort(), ['date', 'drill_id', 'email', 'id', 'name', 'player_id', 'score', 'src', 'team_id', 'ts'].sort());
+  assert.equal(dbRow.drill_id, 'demo-program-calipari-shooting');
+  assert.equal(Object.hasOwn(dbRow, 'drillId'), false);
+  assert.equal(Object.hasOwn(dbRow, 'drillName'), false);
+});
+
+test('program drill completion waits for successful save result', () => {
+  const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(source, /const handleLog=async\(\)=>/);
+  assert.match(source, /const saveResult=await addScore\(active\.id,v,activeMode\);/);
+  assert.match(source, /remoteRows:\[scoreRow\]/);
+  assert.match(source, /if\(!saveResult\?\.ok\)\{setSubmitting\(false\);return;\}/);
+  assert.match(source, /setSaved\(true\)/);
+});
