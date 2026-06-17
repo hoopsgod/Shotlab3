@@ -34,6 +34,12 @@ export const normalizeScoreRowForDb = (row = {}) => {
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
 };
 
+export const formatRemotePersistErrorForDebug = (error) => {
+  const base = error?.message || "remote_persist_failed";
+  const parts = [error?.code, error?.details, error?.hint].map(cleanText).filter(Boolean);
+  return parts.length ? `${base} (${parts.join(" · ")})` : base;
+};
+
 export const normalizeShotLogRowForDb = (row = {}) => {
   const id = cleanText(row.id);
   const email = cleanText(row.email).toLowerCase();
