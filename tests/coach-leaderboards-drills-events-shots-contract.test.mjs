@@ -13,7 +13,7 @@ test('player-entered stats require durable ids, strict remote persistence, sync 
 
   assert.match(source, /const addScore=async\(drillId,score,src="home"\)=>\{/);
   assert.match(source, /id:genId\("score"\),email:user\.email,playerId:user\.email,teamId:user\.teamId/);
-  assert.match(source, /await P\("sl:scores",nextScores,setScores,\{strictRemote:true\}\)/);
+  assert.match(source, /await P\("sl:scores",nextScores,setScores,\{strictRemote:true,remoteRows:\[scoreRow\]\}\)/);
   assert.match(source, /setStatSyncError\("Could not save score to team dashboard\. Please try again\."\)/);
   assert.match(source, /await fetchHomeShotsLeaderboard\(user\.teamId,view==="player"\?"players":homeShotsLeaderboardScope\)/);
 
