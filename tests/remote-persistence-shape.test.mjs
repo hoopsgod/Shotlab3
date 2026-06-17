@@ -18,7 +18,6 @@ test('score rows normalize to db-compatible snake_case fields', () => {
     name: 'Player One',
     playerId: 'player-1',
     teamId: 'team-1',
-    drillId: 'drill-7',
     score: '73',
     date: '2026-04-27',
     ts: 123,
@@ -31,7 +30,6 @@ test('score rows normalize to db-compatible snake_case fields', () => {
     name: 'Player One',
     player_id: 'player-1',
     team_id: 'team-1',
-    drill_id: 'drill-7',
     score: 73,
     date: '2026-04-27',
     ts: 123,
@@ -77,7 +75,7 @@ test('player score save shape includes consistent identity fields', () => {
     playerId: 'player@one.com',
     teamId: 'team-2',
     score: 73,
-    drillId: 'drill-2',
+    drillId: '42',
   }]);
 
   assert.equal(row.team_id, 'team-2');

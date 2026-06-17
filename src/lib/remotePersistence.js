@@ -11,6 +11,16 @@ const cleanText = (value) => {
 const SHOT_LOG_SYNC_STATES = new Set(["remote_saved", "background_saved", "syncing", "local_pending", "failed_sync"]);
 const SHOT_LOG_SYNC_SOURCES = new Set(["remote", "local"]);
 
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const toDbCompatibleDrillId = (value) => {
+  const text = cleanText(value);
+  if (!text) return "";
+  if (/^\d+$/.test(text)) return text;
+  if (UUID_RE.test(text)) return text;
+  return "";
+};
+
 export const normalizeScoreRowForDb = (row = {}) => {
   const id = cleanText(row.id);
   const email = cleanText(row.email).toLowerCase();
@@ -24,7 +34,7 @@ export const normalizeScoreRowForDb = (row = {}) => {
     name: cleanText(row.name),
     player_id: playerId,
     team_id: teamId,
-    drill_id: cleanText(row.drill_id || row.drillId),
+    drill_id: toDbCompatibleDrillId(row.drill_id || row.drillId),
     score: toFiniteNumber(row.score),
     date: cleanText(row.date),
     ts: toFiniteNumber(row.ts),
@@ -32,6 +42,33 @@ export const normalizeScoreRowForDb = (row = {}) => {
   };
 
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
+};
+
+const isDebugRemotePersistence = () => {
+  try {
+    return Boolean(import.meta?.env?.DEV || window?.localStorage?.getItem("shotlab:debugRemotePersistence") === "1");
+  } catch (e) {
+    return false;
+  }
+};
+
+const createRemotePersistError = ({ error, key, table, rowCount }) => {
+  const message = error?.message || "remote_persist_failed";
+  const err = new Error(message);
+  err.name = "RemotePersistError";
+  err.code = error?.code || "";
+  err.details = error?.details || "";
+  err.hint = error?.hint || "";
+  err.key = key;
+  err.table = table;
+  err.rowCount = rowCount;
+  return err;
+};
+
+export const formatRemotePersistErrorForDebug = (error) => {
+  const base = error?.message || "remote_persist_failed";
+  const parts = [error?.code, error?.details, error?.hint].map(cleanText).filter(Boolean);
+  return parts.length ? `${base} (${parts.join(" · ")})` : base;
 };
 
 export const normalizeShotLogRowForDb = (row = {}) => {

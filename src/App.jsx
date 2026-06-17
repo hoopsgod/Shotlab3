@@ -36,7 +36,7 @@ import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard 
 
 import { supabase } from "./lib/supabase.js";
 import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
-import { buildAppRows, buildRemoteRows, mergeHydratedRows, normalizeShotLogRowForApp } from "./lib/remotePersistence.js";
+import { buildAppRows, buildRemoteRows, formatRemotePersistErrorForDebug, mergeHydratedRows, normalizeShotLogRowForApp } from "./lib/remotePersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 import { createAppPersistenceService } from "./lib/appPersistenceService";
 import {
@@ -418,7 +418,16 @@ const DB = {
             rowCount: remoteRows.length,
           });
           if (strictRemote) {
-            throw new Error(error?.message || "remote_persist_failed");
+            const remoteError = new Error(error?.message || "remote_persist_failed");
+            remoteError.name = "RemotePersistError";
+            remoteError.code = error?.code || "";
+            remoteError.details = error?.details || "";
+            remoteError.hint = error?.hint || "";
+            remoteError.key = k;
+            remoteError.table = table;
+            remoteError.rowCount = remoteRows.length;
+            if (isShotLabDebugMode()) console.error("[remote-persist] strict remote error", remoteError);
+            throw remoteError;
           }
         }
       } catch (e) {
@@ -1590,9 +1599,13 @@ await P("sl:scores",nextScores,setScores,{strictRemote:true});
 setStatSyncError("");
 trackEvent("score_logged",{drillId,score,src});
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+return {ok:true,row:scoreRow};
 }catch(e){
+const debugDetail=isShotLabDebugMode()?` ${formatRemotePersistErrorForDebug(e)}`:"";
 setStatSyncError("Could not save score to team dashboard. Please try again.");
-trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unknown")});
+if(debugDetail)setStatSyncError(`Could not save score to team dashboard. Please try again.${debugDetail}`);
+trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unknown"),code:String(e?.code||"")});
+return {ok:false,err:e};
 }
 };
 const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
@@ -2090,10 +2103,12 @@ const pushCompletionCue=useCallback((cue)=>{
   setCompletionCue({...cue,id:Date.now()});
   setTimeout(()=>setCompletionCue(null),3200);
 },[]);
-const handleLog=()=>{if(submitting||!active)return;const validation=activeScoreValidation;if(!validation.ok)return;const v=validation.score;setSubmitting(true);const oldStreak=streak;
+const handleLog=async()=>{if(submitting||!active)return;const validation=activeScoreValidation;if(!validation.ok)return;const v=validation.score;setSubmitting(true);const oldStreak=streak;
 const prevBest=activeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
 const isPB=v>prevBest&&prevBest>0;
-addScore(active.id,v,activeMode);playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
+const saveResult=await addScore(active.id,v,activeMode);
+if(!saveResult?.ok){setSubmitting(false);return;}
+playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
 pushCompletionCue({title:activeMode==="program"?"Program drill completed":"Drill completed",detail:`${active.name} · ${v}${hasDrillMax(active)?`/${active.max}`:""} logged`,momentum:`${Math.max(1,streak+(activeMode==="program"?0:1))}-day momentum`,next:activeMode==="program"?"Review Program leaderboard":"Log shots or complete your next drill"});
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 if(activeMode!=="program"){setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)}
