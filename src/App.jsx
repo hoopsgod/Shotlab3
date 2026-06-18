@@ -3759,21 +3759,58 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           <div style={{display:"grid",gap:7,marginTop:9}}>{coachAlerts.map((alert)=>{const tone=coachPriorityStyle[alert.priority]||coachPriorityStyle.passive;return <button key={alert.title} type="button" onClick={alert.onClick} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${tone.border}`,background:"rgba(255,255,255,0.015)",cursor:"pointer"}}><span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.border}`,borderRadius:999,padding:"3px 7px",background:tone.bg}}>{tone.label}</span><span><span style={{display:"block",fontFamily:FB,fontSize:11,color:"var(--text-1)",fontWeight:700}}>{alert.title}</span><span style={{display:"block",fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:2}}>{alert.detail}</span></span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{alert.cta} ›</span></button>;})}</div>
         </section>
         <section className="accent-card" style={{borderRadius:16,padding:isDesktop?"14px":"12px",marginBottom:12,background:"linear-gradient(152deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015))",border:"1px solid rgba(255,255,255,0.16)"}}>
+          {(()=>{
+            const coachPriorityPresets=[
+              {name:"Form Shooting",focus:"Form shooting + foot alignment",theme:"Technique",drill:"One-hand form series (close range)",challenge:"Complete 5 perfect-form rounds before adding range.",weeklyMakes:200,checkins:3},
+              {name:"Weak-Hand Finishing",focus:"Weak-hand finishing discipline",theme:"Technique",drill:"Off-hand rim touch + extension finishes",challenge:"No strong-hand finishes in today’s paint work.",weeklyMakes:180,checkins:3},
+              {name:"Catch-and-Shoot Volume",focus:"Catch-and-shoot volume under fatigue",theme:"Volume",drill:"5-spot catch-and-shoot sprint sets",challenge:"Hit 10 makes at each spot with game-speed feet.",weeklyMakes:300,checkins:4},
+              {name:"Transition Pull-Ups",focus:"Transition pull-up decision speed",theme:"Readiness",drill:"Full-court push to pull-up series",challenge:"Make reads in two dribbles or fewer every rep.",weeklyMakes:220,checkins:3},
+              {name:"200 Makes Challenge",focus:"Daily makes accountability",theme:"Consistency",drill:"200 makes ladder",challenge:"Log all makes and finish all segments before checkout.",weeklyMakes:800,checkins:5},
+              {name:"Consistency Week",focus:"Daily rhythm and repeatable mechanics",theme:"Consistency",drill:"Baseline rhythm progression block",challenge:"No zero days — complete at least one focused shooting block daily.",weeklyMakes:500,checkins:5},
+            ];
+            const applyPreset=(preset)=>{
+              setCoachPriorityDraft(prev=>({
+                ...prev,
+                todayFocusText:preset.focus,
+                focusEmphasis:preset.theme,
+                priorityDrillText:preset.drill,
+                challengeText:preset.challenge,
+                weeklyMakesTarget:preset.weeklyMakes,
+                weeklyCheckinsTarget:preset.checkins,
+              }));
+              setCoachPrioritySaveState("dirty");
+              setCoachPrioritiesMessage(`Preset applied: ${preset.name}`);
+            };
+            return <>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:10}}>
             <div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>COACH PRIORITY EDITOR</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Set the exact priorities players see across the dashboard and check-ins.</div></div>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(2,minmax(0,1fr))":"1fr",gap:8}}>
-            <FF l="Today's Focus" v={coachPriorityDraft?.todayFocusText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,todayFocusText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ph="Set today’s top coaching focus." />
-            <FF l="Today's Focus Theme" v={coachPriorityDraft?.focusEmphasis||"Volume"} set={v=>{setCoachPriorityDraft(prev=>({...prev,focusEmphasis:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} opts={["Volume","Technique","Consistency","Recovery","Readiness"]} />
+          <div style={{display:"grid",gridTemplateColumns:isDesktop?"1.35fr 1fr":"1fr",gap:12,alignItems:"start"}}>
+            <div style={{border:"1px solid rgba(200,255,0,0.24)",borderRadius:14,padding:"11px 10px",background:"linear-gradient(158deg, rgba(200,255,0,0.08), rgba(255,255,255,0.015) 45%, rgba(8,10,14,0.7))"}}>
+              <div style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",fontWeight:700,letterSpacing:"0.06em",marginBottom:8}}>SMART PRESETS</div>
+              <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(2,minmax(0,1fr))":"1fr",gap:6}}>
+                {coachPriorityPresets.map((preset)=><button key={preset.name} type="button" onClick={()=>applyPreset(preset)} style={{textAlign:"left",padding:"8px 9px",borderRadius:10,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(7,8,10,0.66)",cursor:"pointer"}}><div style={{fontFamily:FB,fontSize:11,color:LIGHT,fontWeight:700}}>{preset.name}</div><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",marginTop:3}}>{preset.focus}</div></button>)}
+              </div>
+            </div>
+            <div style={{display:"grid",gap:6}}>
+              <div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",letterSpacing:"0.06em"}}>PRIORITY HIERARCHY</div>
+              {[{k:"1 · Today’s Focus",v:"Primary",tone:"rgba(200,255,0,0.34)"},{k:"2 · Coach Challenge",v:"Secondary",tone:"rgba(255,184,107,0.3)"},{k:"3 · Weekly Goal",v:"Long-term",tone:"rgba(132,178,255,0.28)"}].map((item)=><div key={item.k} style={{border:`1px solid ${item.tone}`,borderRadius:10,padding:"8px 9px",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FB,fontSize:10,color:LIGHT,fontWeight:700}}>{item.k}</div><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",marginTop:2}}>{item.v}</div></div>)}
+            </div>
+          </div>
+          <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(2,minmax(0,1fr))":"1fr",gap:8,marginTop:12}}>
+            <FF l="Today’s Focus" v={coachPriorityDraft?.todayFocusText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,todayFocusText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ph="Set today’s top coaching focus." tone="primary" />
+            <FF l="Focus Theme" v={coachPriorityDraft?.focusEmphasis||"Volume"} set={v=>{setCoachPriorityDraft(prev=>({...prev,focusEmphasis:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} opts={["Volume","Technique","Consistency","Recovery","Readiness"]} tone="primary" />
             <FF l="Priority Drill" v={coachPriorityDraft?.priorityDrillText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,priorityDrillText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ph="Name the drill players should prioritize." />
-            <FF l="Coach Challenge" v={coachPriorityDraft?.challengeText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,challengeText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ta ph="Set challenge language players will see today." />
-            <FF l="Weekly Goal" v={coachPriorityDraft?.weeklyMakesTarget??""} set={v=>{setCoachPriorityDraft(prev=>({...prev,weeklyMakesTarget:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} tp="number" ph="500" />
+            <FF l="Coach Challenge" v={coachPriorityDraft?.challengeText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,challengeText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ta ph="Set challenge language players will see today." tone="secondary" />
+            <FF l="Weekly Goal (Makes)" v={coachPriorityDraft?.weeklyMakesTarget??""} set={v=>{setCoachPriorityDraft(prev=>({...prev,weeklyMakesTarget:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} tp="number" ph="500" tone="tertiary" />
             <FF l="Check-In Target" v={coachPriorityDraft?.weeklyCheckinsTarget??""} set={v=>{setCoachPriorityDraft(prev=>({...prev,weeklyCheckinsTarget:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} tp="number" ph="2" />
           </div>
           {coachPrioritiesError&&<div style={{fontFamily:FB,fontSize:11,color:"#FF8D8D",marginTop:8}}>{coachPrioritiesError}</div>}
           {coachPrioritiesMessage&&<div style={{fontFamily:FB,fontSize:11,color:VOLT,marginTop:8}}>{coachPrioritiesMessage}</div>}
           <div style={{fontFamily:FB,fontSize:10,color:coachPrioritiesError?"#FF8D8D":coachPrioritySaveState==="saved"?VOLT:"var(--text-3)",letterSpacing:"0.03em",marginTop:10}}>{coachPrioritySaveState==="saving"?"Saving priorities...":coachPrioritiesError?"Save failed. Review fields and retry.":coachPrioritiesDirty?"Unsaved changes":"All changes saved"}</div>
-          <button className="btn-v cta-primary" type="button" onClick={handleSaveCoachPriorities} style={{marginTop:10,width:"100%"}}>{coachPrioritySaveState==="saving"?"Saving priorities...":"SAVE PRIORITIES"}</button>
+          <button className="btn-v cta-primary" type="button" onClick={handleSaveCoachPriorities} style={{marginTop:10,width:"100%"}}>{coachPrioritySaveState==="saving"?"Saving priorities...":"Save Coach Priorities"}</button>
+          </>;
+          })()}
         </section>
 
         <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
@@ -4567,7 +4604,13 @@ function DividerDot(){return <div style={{display:"flex",alignItems:"center",gap
 function RB({r,m,small}){const t=r<=3;return <div style={{width:small?22:28,height:small?22:28,borderRadius:small?5:7,background:t?m[r-1]+"18":"transparent",border:t?`1.5px solid ${m[r-1]}44`:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:small?11:14,color:t?m[r-1]:"#555555",flexShrink:0}}>{r}</div>}
 function Empty({t,action,onTap,cta="GET STARTED",ctaVariant="primary",icon=<DrillIcon type="sb" size={48} color="#555555"/>,hint="Next best action: complete one session to activate this panel"}){const hasAction=typeof onTap==="function";return <div className="state-fade" style={{textAlign:"center",padding:"40px 20px",borderRadius:16,border:`1px solid ${BORDER_CLR}`,background:"linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01))",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.08)"}}><div style={{opacity:.9,display:"inline-flex",alignItems:"center",justifyContent:"center",color:"#777777"}}>{icon}</div><p className="u-allcaps-long" style={{fontFamily:FD,color:LIGHT,fontSize:18,marginTop:14,lineHeight:1.2}}>{t}</p>{action&&<p className="u-secondary-text" style={{fontFamily:FB,fontSize:13,margin:"8px auto 0",lineHeight:1.5,fontWeight:500,maxWidth:320}}>{action}</p>}{hasAction?<button onClick={onTap} className={`btn-v ${ctaVariant==="secondary"?"cta-secondary":"cta-primary"}`} style={{marginTop:14}}>{cta}</button>:<div style={{marginTop:12,fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,letterSpacing:"0.06em",textTransform:"uppercase"}}>{hint}</div>}</div>}
 function LiftIcon({size=24,color="#A0A0A0"}){return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>}
-function FF({l,v,set,ph,tp,ta,opts}){return <><label style={{fontFamily:FB,color:"#A0A0A0",fontSize:"calc(11px * var(--coach-text-scale-medium))",fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",padding:"13px 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,outline:"none",minHeight:70,resize:"vertical",lineHeight:1.6,marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>:opts?<select value={v} onChange={e=>set(e.target.value)} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}>{opts.map(o=><option key={o} value={o}>{o}</option>)}</select>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"}} onFocus={e=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow="0 0 0 3px rgba(200,255,0,0.08)"}} onBlur={e=>{e.target.style.borderColor="#333333";e.target.style.boxShadow="none"}}/>}</>}
+function FF({l,v,set,ph,tp,ta,opts,tone}){
+  const toneStyle=tone==="primary"?{label:"#D8EE9A",border:"rgba(200,255,0,0.42)",ring:"0 0 0 3px rgba(200,255,0,0.15)"}:tone==="secondary"?{label:"#FFD9A3",border:"rgba(255,184,107,0.36)",ring:"0 0 0 3px rgba(255,184,107,0.13)"}:tone==="tertiary"?{label:"#B6CCFF",border:"rgba(132,178,255,0.34)",ring:"0 0 0 3px rgba(132,178,255,0.12)"}:{label:"#A0A0A0",border:"#333333",ring:"0 0 0 3px rgba(200,255,0,0.08)"};
+  const baseInputStyle={width:"100%",background:"#141414",border:`1px solid ${toneStyle.border}`,borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,outline:"none",marginBottom:14,transition:"border-color .15s ease, box-shadow .15s ease"};
+  const focusIn=(e)=>{e.target.style.borderColor=VOLT;e.target.style.boxShadow=toneStyle.ring;};
+  const focusOut=(e)=>{e.target.style.borderColor=toneStyle.border;e.target.style.boxShadow="none";};
+  return <><label style={{fontFamily:FB,color:toneStyle.label,fontSize:"calc(11px * var(--coach-text-scale-medium))",fontWeight:700,letterSpacing:2,display:"block",marginBottom:8}}>{l}</label>{ta?<textarea value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{...baseInputStyle,padding:"13px 16px",minHeight:70,resize:"vertical",lineHeight:1.6}} onFocus={focusIn} onBlur={focusOut}/>:opts?<select value={v} onChange={e=>set(e.target.value)} style={{...baseInputStyle,height:52,padding:"0 16px",fontWeight:500}} onFocus={focusIn} onBlur={focusOut}>{opts.map(o=><option key={o} value={o}>{o}</option>)}</select>:<input type={tp||"text"} value={v} onChange={e=>set(e.target.value)} placeholder={ph} style={{...baseInputStyle,height:52,padding:"0 16px",fontWeight:500}} onFocus={focusIn} onBlur={focusOut}/>}</>
+}
 function NavBar({items,active,onChange}){
 const navAccent=PAGE_ACCENTS[active]?.accent||PAGE_ACCENTS.feed.accent;
 useEffect(()=>{
