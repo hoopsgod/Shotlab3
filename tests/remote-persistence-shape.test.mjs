@@ -8,6 +8,7 @@ import {
   normalizeShotLogRowForDb,
   normalizeEventRowForDb,
   normalizeEventRowForApp,
+  formatRemotePersistErrorForDebug,
   buildAppRows,
 } from '../src/lib/remotePersistence.js';
 
@@ -242,4 +243,17 @@ test('event/rsvp ids remain compatible through normalization', () => {
 
   assert.equal(eventRow.id, 'event-4');
   assert.equal(rsvpRow.event_id, eventRow.id);
+});
+
+
+test('formats full remote persistence debug errors with message code details and hint labels', () => {
+  const formatted = formatRemotePersistErrorForDebug({
+    message: 'new row violates row-level security policy',
+    code: '42501',
+    details: 'Failing row contains program score',
+    hint: 'Check scores insert policy',
+    remoteRows: [{ id: 'score-program-safe', team_id: 'team-a', player_id: 'player:team_active', drill_id: 'demo-program-calipari-shooting', src: 'program' }],
+  });
+
+  assert.equal(formatted, 'message: new row violates row-level security policy | code: 42501 | details: Failing row contains program score | hint: Check scores insert policy | payload: [{\"id\":\"score-program-safe\",\"team_id\":\"team-a\",\"player_id\":\"player:team_active\",\"drill_id\":\"demo-program-calipari-shooting\",\"src\":\"program\"}]');
 });
