@@ -36,7 +36,7 @@ import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard 
 
 import { supabase } from "./lib/supabase.js";
 import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
-import { buildAppRows, buildRemoteRows, mergeHydratedRows, normalizeShotLogRowForApp } from "./lib/remotePersistence.js";
+import { buildAppRows, buildRemoteRows, formatRemotePersistErrorForDebug, mergeHydratedRows, normalizeShotLogRowForApp } from "./lib/remotePersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 import { createAppPersistenceService } from "./lib/appPersistenceService";
 import {
@@ -406,6 +406,15 @@ const DB = {
     }
     if (table && remoteRows.length > 0) {
       try {
+        if (strictRemote && isShotLabDebugMode()) {
+          console.info("[remote-persist] strict remote payload", {
+            key: k,
+            table,
+            supabaseUrl: supabase.url || "",
+            projectRef: supabase.projectRef || "",
+            remoteRows,
+          });
+        }
         const { error } = await supabase.from(table).upsert(remoteRows, { onConflict: "id" });
         if (error) {
           console.error("[remote-persist] upsert failed", {
@@ -418,7 +427,19 @@ const DB = {
             rowCount: remoteRows.length,
           });
           if (strictRemote) {
-            throw new Error(error?.message || "remote_persist_failed");
+            const remoteError = new Error(error?.message || "remote_persist_failed");
+            remoteError.name = "RemotePersistError";
+            remoteError.code = error?.code || "";
+            remoteError.details = error?.details || "";
+            remoteError.hint = error?.hint || "";
+            remoteError.key = k;
+            remoteError.table = table;
+            remoteError.rowCount = remoteRows.length;
+            remoteError.remoteRows = remoteRows;
+            remoteError.supabaseUrl = supabase.url || "";
+            remoteError.projectRef = supabase.projectRef || "";
+            if (isShotLabDebugMode()) console.error("[remote-persist] strict remote error", { error: remoteError, remoteRows });
+            throw remoteError;
           }
         }
       } catch (e) {
@@ -919,7 +940,7 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[coachPriorities,setCoachPriorities]=useState(COACH_PRIORITIES_INIT),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
+const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[programScores,setProgramScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[coachPriorities,setCoachPriorities]=useState(COACH_PRIORITIES_INIT),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
 const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
 const[accountNotice,setAccountNotice]=useState("");
 const[startupError,setStartupError]=useState("");
@@ -1057,7 +1078,7 @@ applyLeaderboardRows(fallbackRows,{httpStatus:null,errorCode:"network_error",isE
 }
 },[user,homeShotsLeaderboardScope,shotLogs,players,playerProfiles]);
 
-const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
+const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,programScores:rawProgramScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
 const existingTeams=rawTeams||[];
 const coaches=ps.filter(p=>p.role==="coach");
@@ -1082,7 +1103,8 @@ const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithB
 const profilesExisting=rawPlayerProfiles||[];
 const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null}));
 const teamForEmail=e=>playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null;
-const scoresM=(rawScores||[]).map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||teamForEmail(s.email),drillId:s.drillId||s.drill_id,src:s.src||"home"}));
+const scoresM=(rawScores||[]).filter(s=>(s.src||"home")!=="program").map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||teamForEmail(s.email),drillId:s.drillId||s.drill_id,src:s.src||"home"}));
+const programScoresM=[...(rawProgramScores||[]),...(rawScores||[]).filter(s=>s.src==="program")].map(s=>({...s,email:s.email||s.player_email,playerId:s.playerId||s.player_id||s.email||s.player_email,player_id:s.player_id||s.playerId||s.email||s.player_email,teamId:s.teamId||s.team_id||teamForEmail(s.email||s.player_email),team_id:s.team_id||s.teamId||teamForEmail(s.email||s.player_email),drillId:s.drillId||s.drill_id,drill_id:s.drill_id||s.drillId,drillName:s.drillName||s.drill_name||"Program Drill",score:Number(s.score||0),date:s.date||s.session_date||todayStr(),src:"program"}));
 const eventsM=(rawEvents||[]).map(e=>({...e,teamId:e.teamId||teamForEmail(e.ownerCoachId)}));
 const rsvpsM=(rawRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
 const shotM=(rawShotLogs||[]).map(l=>normalizeShotLogRowForApp({...l,teamId:l.teamId||l.team_id||teamForEmail(l.email)},{source:"local"})).filter(Boolean);
@@ -1090,7 +1112,7 @@ const chM=(rawChallenges||[]).map(c=>({...c,teamId:c.teamId||teamForEmail(c.from
 const scSM=(rawScSessions||[]).map(s=>({...s,teamId:s.teamId||teamForEmail(s.ownerCoachId)}));
 const scRM=(rawScRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
 const scLM=(rawScLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:l.teamId||teamForEmail(l.email)}));
-return {playersMigrated,profilesMigrated,teamsMigrated:teamsWithBranding,scoresM,eventsM,rsvpsM,shotM,chM,scSM,scRM,scLM};
+return {playersMigrated,profilesMigrated,teamsMigrated:teamsWithBranding,scoresM,programScoresM,eventsM,rsvpsM,shotM,chM,scSM,scRM,scLM};
 },[]);
 
 const navigateToPlayerHome=useCallback(()=>{
@@ -1135,10 +1157,10 @@ setPendingJoinContext(normalized||null);
 writeInviteContextToStorage(normalized||null);
 await DB.set(PENDING_JOIN_CONTEXT_KEY,normalized||null);
 },[normalizeStoredInviteContext,writeInviteContextToStorage]);
-const hydratePersistedData=useCallback(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
-const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
-setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
-await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
+const hydratePersistedData=useCallback(async()=>{const[d,pd,s,ps,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:program-scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
+const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const normalizedProgramScores=normalizeScoresForDefaultDrills(ps,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,programScores:normalizedProgramScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
+setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setProgramScores(m.programScoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
+await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:program-scores",m.programScoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
 const authSession=SUPABASE_AUTH_ENABLED?await supabase.auth.getSession():null; const authEmail=normalizeEmail((SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:"")||sess?.email||""); setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:authEmail?"yes":"no"}})); if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail}); if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.teamId)await restoreLegacyTeamContext(rp).catch(()=>null);setUser(rp);setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"success",profileLoad:"success",profileTeamId:rp.teamId||""}}));if(rp.role==="coach"&&!rp.teamId)setView("create-team");else if(rp.role==="player"&&!rp.teamId)setView("join-team");else{if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}else{setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"failed",profileLoad:"failed"}}));}} else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no"}}));if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}} else {setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));}}
 setPendingJoinContext(normalizeStoredInviteContext(pendingCtx)||readInviteContextFromStorage()||null);
 return {teams:m.teamsMigrated,players:m.playersMigrated};
@@ -1428,6 +1450,7 @@ try{
 if(isDemoMode()||isDemoAccount(user))await cleanupDemoPlayerSessionData(user);
 await P("sl:players",players.filter(p=>String(p?.email||"").trim().toLowerCase()!==e),setPlayers);
 await P("sl:scores",scores.filter(s=>!isSelf(s)),setScores);
+await P("sl:program-scores",programScores.filter(s=>!isSelf(s)),setProgramScores);
 await P("sl:rsvps",rsvps.filter(r=>!isSelf(r)),setRsvps);
 await P("sl:shotlogs",shotLogs.filter(s=>!isSelf(s)),setShotLogs);
 await P("sl:challenges",challenges.filter(c=>String(c?.from||"").trim().toLowerCase()!==e&&String(c?.to||"").trim().toLowerCase()!==e),setChallenges);
@@ -1554,11 +1577,12 @@ return{ok:true};
 const deleteTeamLocalRosterPlayerData=async(playerEmail,confirmationText)=>{
 if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
 if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
-const result=deleteTeamLocalPlayerData({players,playerProfiles,scores,shotLogs,rsvps,scRsvps,scLogs,challenges,coach:user,playerEmail,confirmationText});
+const result=deleteTeamLocalPlayerData({players,playerProfiles,scores:[...scores,...programScores],shotLogs,rsvps,scRsvps,scLogs,challenges,coach:user,playerEmail,confirmationText});
 if(!result.ok)return result;
 await Promise.all([
 P("sl:players",result.players,setPlayers),
-P("sl:scores",result.scores,setScores),
+P("sl:scores",result.scores.filter(s=>(s.src||"home")!=="program"),setScores),
+P("sl:program-scores",result.scores.filter(s=>s.src==="program"),setProgramScores),
 P("sl:rsvps",result.rsvps,setRsvps),
 P("sl:shotlogs",result.shotLogs,setShotLogs),
 P("sl:challenges",result.challenges,setChallenges),
@@ -1585,14 +1609,23 @@ const scoreRow=src==="program"
 ?buildProgramScoreRow({id:genId("score"),drill:selectedDrill||{id:drillId},score,user,players,now,date:todayStr()})
 :{id:genId("score"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,drillId,score,date:todayStr(),ts:now,src};
 if(!scoreRow)throw new Error("score_row_invalid");
+if(src==="program"){
+const nextProgramScores=[...programScores,scoreRow];
+await P("sl:program-scores",nextProgramScores,setProgramScores,{strictRemote:true,remoteRows:[scoreRow]});
+}else{
 const nextScores=[...scores,scoreRow];
-await P("sl:scores",nextScores,setScores,{strictRemote:true});
+await P("sl:scores",nextScores,setScores,{strictRemote:true,remoteRows:[scoreRow]});
+}
 setStatSyncError("");
 trackEvent("score_logged",{drillId,score,src});
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+return {ok:true,row:scoreRow};
 }catch(e){
+const debugDetail=isShotLabDebugMode()?` ${formatRemotePersistErrorForDebug(e)}`:"";
 setStatSyncError("Could not save score to team dashboard. Please try again.");
-trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unknown")});
+if(debugDetail)setStatSyncError(`Could not save score to team dashboard. Please try again.${debugDetail}`);
+trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unknown"),code:String(e?.code||"")});
+return {ok:false,err:e};
 }
 };
 const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
@@ -1723,8 +1756,10 @@ if(view!=="coach"||!user?.teamId)return;
 let cancelled=false;
 const refreshScores=async()=>{
 const latest=await DB.get("sl:scores");
-if(cancelled||!Array.isArray(latest))return;
-setScores(latest.map(s=>({...s,playerId:s.playerId||s.email,teamId:s.teamId||null,src:s.src||"home"})));
+const latestProgram=await DB.get("sl:program-scores");
+if(cancelled)return;
+if(Array.isArray(latest))setScores(latest.map(s=>({...s,playerId:s.playerId||s.email,teamId:s.teamId||null,src:s.src||"home"})));
+if(Array.isArray(latestProgram))setProgramScores(latestProgram.map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||null,src:"program"})));
 };
 refreshScores();
 const pollId=setInterval(refreshScores,15000);
@@ -1772,7 +1807,7 @@ setDemoSettingsBusy(false);
 };
 const appActiveTeamPlayerIdentity=useMemo(()=>getActiveTeamPlayerIdentity(players,user?.teamId),[players,user?.teamId]);
 const scopedPlayers=appActiveTeamPlayerIdentity.players;
-const scopedScores=scores.filter(s=>s.teamId===user?.teamId);
+const scopedScores=[...scores,...programScores].filter(s=>s.teamId===user?.teamId);
 const scopedEvents=events.filter(e=>e.teamId===user?.teamId);
 const scopedRsvps=rsvps.filter(r=>r.teamId===user?.teamId);
 const scopedShotLogs=shotLogs.filter(l=>l.teamId===user?.teamId);
@@ -2090,10 +2125,12 @@ const pushCompletionCue=useCallback((cue)=>{
   setCompletionCue({...cue,id:Date.now()});
   setTimeout(()=>setCompletionCue(null),3200);
 },[]);
-const handleLog=()=>{if(submitting||!active)return;const validation=activeScoreValidation;if(!validation.ok)return;const v=validation.score;setSubmitting(true);const oldStreak=streak;
+const handleLog=async()=>{if(submitting||!active)return;const validation=activeScoreValidation;if(!validation.ok)return;const v=validation.score;setSubmitting(true);const oldStreak=streak;
 const prevBest=activeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
 const isPB=v>prevBest&&prevBest>0;
-addScore(active.id,v,activeMode);playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
+const saveResult=await addScore(active.id,v,activeMode);
+if(!saveResult?.ok){setSubmitting(false);return;}
+playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
 pushCompletionCue({title:activeMode==="program"?"Program drill completed":"Drill completed",detail:`${active.name} · ${v}${hasDrillMax(active)?`/${active.max}`:""} logged`,momentum:`${Math.max(1,streak+(activeMode==="program"?0:1))}-day momentum`,next:activeMode==="program"?"Review Program leaderboard":"Log shots or complete your next drill"});
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 if(activeMode!=="program"){setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)}
