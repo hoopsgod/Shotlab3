@@ -13,7 +13,7 @@ test('player-entered stats require durable ids, strict remote persistence, sync 
 
   assert.match(source, /const addScore=async\(drillId,score,src="home"\)=>\{/);
   assert.match(source, /id:genId\("score"\),email:user\.email,playerId:user\.email,teamId:user\.teamId/);
-  assert.match(source, /await P\("sl:scores",nextScores,setScores,\{strictRemote:true\}\)/);
+  assert.match(source, /await P\("sl:scores",nextScores,setScores,\{strictRemote:true,remoteRows:\[scoreRow\]\}\)/);
   assert.match(source, /setStatSyncError\("Could not save score to team dashboard\. Please try again\."\)/);
   assert.match(source, /await fetchHomeShotsLeaderboard\(user\.teamId,view==="player"\?"players":homeShotsLeaderboardScope\)/);
 
@@ -39,7 +39,7 @@ test('player-entered stats require durable ids, strict remote persistence, sync 
 test('coach roster receives team-scoped persisted score/shot data and maps it by player email', async () => {
   const source = await appSource();
 
-  assert.match(source, /const scopedScores=scores\.filter\(s=>s\.teamId===user\?\.teamId\)/);
+  assert.match(source, /const scopedScores=\[\.\.\.scopedHomeScores,\.\.\.scopedProgramScores\]/);
   assert.match(source, /const scopedShotLogs=shotLogs\.filter\(l=>l\.teamId===user\?\.teamId\)/);
   assert.match(source, /shotLogs=\{scopedShotLogs\}/);
   assert.match(source, /scores=\{scopedScores\}/);
@@ -199,4 +199,22 @@ test('coach and player dashboards both consume shared leaderboard state and fetc
 
   assert.match(source, /homeShotsLeaderboard=\{activeHomeShotsLeaderboard\}/);
   assert.match(source, /refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,"players"\)\}/);
+});
+
+
+
+
+test('program score persistence targets dedicated program_scores table while home scores still target scores', async () => {
+  const source = await appSource();
+  assert.match(source, /await P\("sl:program-scores",nextProgramScores,setProgramScores,\{strictRemote:true,remoteRows:\[scoreRow\]\}\)/);
+  assert.match(source, /await P\("sl:scores",nextScores,setScores,\{strictRemote:true,remoteRows:\[scoreRow\]\}\)/);
+  assert.match(source, /const scopedScores=\[\.\.\.scopedHomeScores,\.\.\.scopedProgramScores\]/);
+});
+
+test('strict score persistence logs payload and Supabase project in debug mode', async () => {
+  const source = await appSource();
+  assert.match(source, /console\.info\("\[remote-persist\] strict remote payload"/);
+  assert.match(source, /supabaseUrl: supabase\.url \|\| ""/);
+  assert.match(source, /projectRef: supabase\.projectRef \|\| ""/);
+  assert.match(source, /remoteError\.remoteRows = remoteRows/);
 });
