@@ -34,6 +34,81 @@ export const normalizeScoreRowForDb = (row = {}) => {
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
 };
 
+
+export const normalizeProgramScoreRowForDb = (row = {}) => {
+  const id = cleanText(row.id);
+  const teamId = cleanText(row.team_id || row.teamId);
+  const playerId = cleanText(row.player_id || row.playerId);
+  const playerEmail = cleanText(row.player_email || row.playerEmail || row.email).toLowerCase();
+  const drillId = cleanText(row.drill_id || row.drillId);
+  const drillName = cleanText(row.drill_name || row.drillName || row.name || row.drillTitle);
+  const score = toFiniteNumber(row.score);
+  if (!id || !teamId || !playerId || !playerEmail || !drillId || !drillName || score === null) return null;
+
+  const payload = {
+    id,
+    team_id: teamId,
+    player_id: playerId,
+    player_email: playerEmail,
+    player_name: cleanText(row.player_name || row.playerName || row.name),
+    drill_id: drillId,
+    drill_name: drillName,
+    score,
+    session_date: cleanText(row.session_date || row.sessionDate || row.date),
+    logged_at: cleanText(row.logged_at || row.loggedAt),
+    src: "program",
+  };
+
+  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
+};
+
+export const normalizeProgramScoreRowForApp = (row = {}) => {
+  const id = cleanText(row.id);
+  const teamId = cleanText(row.team_id || row.teamId);
+  const playerId = cleanText(row.player_id || row.playerId);
+  const email = cleanText(row.player_email || row.playerEmail || row.email).toLowerCase();
+  const drillId = cleanText(row.drill_id || row.drillId);
+  const drillName = cleanText(row.drill_name || row.drillName);
+  const score = toFiniteNumber(row.score);
+  if (!id || !teamId || !playerId || !email || !drillId || score === null) return null;
+  const loggedAt = cleanText(row.logged_at || row.loggedAt);
+  return {
+    id,
+    email,
+    playerId,
+    player_id: playerId,
+    teamId,
+    team_id: teamId,
+    name: cleanText(row.player_name || row.playerName || row.name),
+    drillId,
+    drill_id: drillId,
+    drillName,
+    drill_name: drillName,
+    score,
+    date: cleanText(row.session_date || row.sessionDate || row.date),
+    ts: toFiniteNumber(row.ts) || (loggedAt ? Date.parse(loggedAt) : null),
+    src: "program",
+  };
+};
+
+export const formatRemotePersistErrorForDebug = (error) => {
+  const payload = Array.isArray(error?.remoteRows)
+    ? JSON.stringify(error.remoteRows)
+    : error?.remoteRows && typeof error.remoteRows === "object"
+      ? JSON.stringify(error.remoteRows)
+      : "";
+  const parts = [
+    ["message", error?.message || "remote_persist_failed"],
+    ["code", error?.code],
+    ["details", error?.details],
+    ["hint", error?.hint],
+    ["payload", payload],
+  ]
+    .map(([label, value]) => [label, cleanText(value)])
+    .filter(([, value]) => value);
+  return parts.map(([label, value]) => `${label}: ${value}`).join(" | ");
+};
+
 export const normalizeShotLogRowForDb = (row = {}) => {
   const id = cleanText(row.id);
   const email = cleanText(row.email).toLowerCase();
@@ -334,6 +409,7 @@ export const buildAppRows = (key, rows, options = {}) => {
   if (key === "sl:player-profiles") return rows.map(normalizePlayerProfileRowForApp).filter(Boolean);
   if (key === "sl:rsvps") return rows.map(normalizeRsvpRowForApp).filter(Boolean);
   if (key === "sl:shotlogs") return rows.map((row) => normalizeShotLogRowForApp(row, options)).filter(Boolean);
+  if (key === "sl:program-scores") return rows.map(normalizeProgramScoreRowForApp).filter(Boolean);
   return rows;
 };
 
@@ -342,6 +418,7 @@ export const buildRemoteRows = (key, rows, options = {}) => {
   if (!Array.isArray(sourceRows) || sourceRows.length === 0) return [];
 
   if (key === "sl:scores") return sourceRows.map(normalizeScoreRowForDb).filter(Boolean);
+  if (key === "sl:program-scores") return sourceRows.map(normalizeProgramScoreRowForDb).filter(Boolean);
   if (key === "sl:shotlogs") return sourceRows.filter((row) => row?.syncState === "remote_saved" && row?.syncSource === "remote").map(normalizeShotLogRowForDb).filter(Boolean);
   if (key === "sl:events") return sourceRows.map(normalizeEventRowForDb).filter(Boolean);
   if (key === "sl:players") return sourceRows.map(normalizePlayerRowForDb).filter(Boolean);
