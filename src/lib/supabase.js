@@ -3,6 +3,9 @@ const viteEnv = (typeof import.meta !== "undefined" && import.meta?.env) ? impor
 const baseUrl = viteEnv.VITE_SUPABASE_URL;
 const anonKey = viteEnv.VITE_SUPABASE_ANON_KEY;
 const hasConfig = Boolean(baseUrl && anonKey);
+const projectRef = (() => {
+  try { return baseUrl ? new URL(baseUrl).hostname.split(".")[0] : ""; } catch { return ""; }
+})();
 const SESSION_KEY = "sl:supabase-session";
 const LEGACY_TOKEN_KEY = "sl:supabase-access-token";
 
@@ -145,6 +148,8 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
 
 export const supabase = {
   isConfigured: hasConfig,
+  url: baseUrl || "",
+  projectRef,
   auth: {
     async signUp({ email, password }) {
       if (!hasConfig) return { data: null, error: { code: "config_missing", message: "Supabase is not configured." } };
