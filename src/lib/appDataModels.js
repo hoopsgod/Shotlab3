@@ -1,5 +1,6 @@
 export const STORAGE_KEYS = {
   scores: "sl:scores",
+  programScores: "sl:program-scores",
   players: "sl:players",
   playerProfiles: "sl:player-profiles",
   events: "sl:events",
@@ -17,6 +18,7 @@ export const STORAGE_KEYS = {
 
 export const TABLE_MAP = {
   [STORAGE_KEYS.scores]: "scores",
+  [STORAGE_KEYS.programScores]: "program_scores",
   [STORAGE_KEYS.players]: "players",
   [STORAGE_KEYS.playerProfiles]: "player_profiles",
   [STORAGE_KEYS.events]: "events",
