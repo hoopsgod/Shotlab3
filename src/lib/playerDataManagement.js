@@ -11,6 +11,41 @@ const getRowIdentityKeys = (row = {}, fields = PLAYER_IDENTITY_FIELDS) => fields
 const toIdentitySet = (values = []) => values instanceof Set ? values : new Set(Array.isArray(values) ? values : []);
 
 
+const isGenericPlayerName = (value = "") => {
+  const normalized = String(value || "").trim().toLowerCase();
+  return !normalized || normalized === "player" || normalized === "unknown player";
+};
+
+const profileFullName = (profile = {}) => [profile?.firstName, profile?.lastName]
+  .map((part) => String(part || "").trim())
+  .filter(Boolean)
+  .join(" ");
+
+export const resolvePlayerDisplayName = (player = {}, profiles = []) => {
+  const playerEmail = normalizePlayerDataEmail(player?.email || player?.player_email);
+  const playerIds = getRowIdentityKeys(player, ["player_id", "playerId", "id", "user_id", "userId"]);
+  const profile = (Array.isArray(profiles) ? profiles : []).find((candidate) => {
+    const profileEmail = normalizePlayerDataEmail(candidate?.email || candidate?.player_email || candidate?.userId || candidate?.user_id);
+    if (playerEmail && profileEmail === playerEmail) return true;
+    const profileIds = getRowIdentityKeys(candidate, ["player_id", "playerId", "id", "user_id", "userId"]);
+    return playerIds.some((id) => profileIds.includes(id));
+  }) || {};
+  const candidates = [
+    player?.name,
+    player?.displayName,
+    player?.fullName,
+    profile?.name,
+    profile?.displayName,
+    profile?.fullName,
+    profileFullName(profile),
+  ].map((value) => String(value || "").trim()).filter((value) => !isGenericPlayerName(value));
+  if (candidates.length) return candidates[0];
+  const email = playerEmail || normalizePlayerDataEmail(profile?.email || profile?.player_email || profile?.userId || profile?.user_id);
+  if (email) return email.split("@")[0];
+  return "Unknown Player";
+};
+
+
 export const getPlayerDisplayIdentity = (player = {}) => {
   const name = String(player?.name || "").trim();
   const email = normalizePlayerDataEmail(player?.email || player?.playerId || "");
