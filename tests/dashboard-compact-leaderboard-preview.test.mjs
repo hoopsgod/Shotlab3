@@ -11,6 +11,8 @@ test('player dashboard mounts compact leaderboard preview with rank and top-3 ro
   assert.match(appSource, /mode="player"/);
   assert.match(appSource, /areaTitle="Leaderboards"/);
   assert.match(appSource, /categoryLabel="Home Shots"/);
+  assert.match(appSource, /const playerDashboardHomeLeaderboardRows=useMemo\(\(\)=>buildAtHomeLeaderboardRows\(\{scores,shotLogs,programDrills,limit:3\}\)/);
+  assert.match(appSource, /rows=\{playerDashboardLeaderboardRows\}/);
   assert.match(appSource, /maxRows=\{3\}/);
   assert.match(compactCardSource, /Your rank: #\$\{playerRank\}/);
   assert.match(appSource, /Today's mission[\s\S]*<CompactLeaderboardPreviewCard[\s\S]*aria-label="Coach guidance summary"/);
@@ -20,6 +22,8 @@ test('coach dashboard mounts compact leaderboard preview with top-5 rows and cle
   assert.match(appSource, /<CompactLeaderboardPreviewCard\s+title="Home Shot Leaders"/);
   assert.match(appSource, /mode="coach"/);
   assert.match(appSource, /categoryLabel="Home Shots"/);
+  assert.match(appSource, /const coachDashboardHomeLeaderboardRows=useMemo\(\(\)=>buildAtHomeLeaderboardRows\(\{scores:safeScores,shotLogs,programDrills,limit:5\}\)/);
+  assert.match(appSource, /rows=\{coachDashboardLeaderboardRows\}/);
   assert.match(appSource, /maxRows=\{5\}/);
   assert.match(compactCardSource, /No team leaderboard data yet\. Players will appear here after they log shots\./);
   assert.match(appSource, /PageHeader title="COACH HOME"[\s\S]*<CompactLeaderboardPreviewCard[\s\S]*Coach setup checklist/);
@@ -63,12 +67,12 @@ test('full leaderboards destination exists and includes all final categories wit
   assert.match(hubSource, /At-Home Shots/);
   assert.match(hubSource, /Events Attended/);
   assert.match(hubSource, /Strength & Conditioning/);
-  assert.match(hubSource, /Coach Custom Drills/);
+  assert.match(hubSource, /Program Drills/);
   assert.match(hubSource, /COMPETITION HUB/);
   assert.match(hubSource, /Track team effort across shots, events, strength work, and coach-assigned drills\./);
   assert.match(hubSource, /Event leaders will appear after players check into team events\./);
   assert.match(hubSource, /Strength leaders will appear after players complete assigned S&C work\./);
-  assert.match(hubSource, /Drill leaders will appear after players log coach-assigned drills\./);
+  assert.match(hubSource, /Program drill leaders will appear after players log coach-assigned drills\./);
   assert.match(hubSource, /No rankings yet/);
   assert.match(hubSource, /aria-selected=\{active\}/);
   assert.match(hubSource, /onClick=\{\(\) => setActiveLeaderboardCategory\(item.key\)\}/);
