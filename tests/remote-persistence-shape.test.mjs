@@ -5,9 +5,11 @@ import fs from 'node:fs';
 import {
   buildRemoteRows,
   normalizeScoreRowForDb,
+  normalizeProgramScoreRowForDb,
   normalizeShotLogRowForDb,
   normalizeEventRowForDb,
   normalizeEventRowForApp,
+  formatRemotePersistErrorForDebug,
   buildAppRows,
 } from '../src/lib/remotePersistence.js';
 
@@ -39,6 +41,38 @@ test('score rows normalize to db-compatible snake_case fields', () => {
   });
   assert.equal(Object.hasOwn(row, 'playerId'), false);
   assert.equal(Object.hasOwn(row, 'teamId'), false);
+  assert.equal(Object.hasOwn(row, 'drillId'), false);
+});
+
+
+
+test('program score rows normalize to dedicated program_scores columns', () => {
+  const [row] = buildRemoteRows('sl:program-scores', [{
+    id: 'program-score-1',
+    email: 'Player@One.com',
+    name: 'Player One',
+    playerId: 'player-1',
+    teamId: 'team-1',
+    drillId: 'demo-program-calipari-shooting',
+    drillName: 'CALIPARI SHOOTING',
+    score: '22',
+    date: '2026-06-20',
+    src: 'program',
+  }]);
+
+  assert.deepEqual(row, {
+    id: 'program-score-1',
+    team_id: 'team-1',
+    player_id: 'player-1',
+    player_email: 'player@one.com',
+    player_name: 'Player One',
+    drill_id: 'demo-program-calipari-shooting',
+    drill_name: 'CALIPARI SHOOTING',
+    score: 22,
+    session_date: '2026-06-20',
+    src: 'program',
+  });
+  assert.equal(Object.hasOwn(row, 'email'), false);
   assert.equal(Object.hasOwn(row, 'drillId'), false);
 });
 
@@ -158,7 +192,7 @@ test('buildRemoteRows strips unsupported camelCase fields before upsert payload'
 
 test('coach/team read path remains team-scoped for saved rows', () => {
   const source = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
-  assert.match(source, /const scopedScores=scores\.filter\(s=>s\.teamId===user\?\.teamId\)/);
+  assert.match(source, /const scopedScores=\[\.\.\.scopedHomeScores,\.\.\.scopedProgramScores\]/);
   assert.match(source, /const scopedShotLogs=shotLogs\.filter\(l=>l\.teamId===user\?\.teamId\);/);
 });
 
@@ -242,4 +276,17 @@ test('event/rsvp ids remain compatible through normalization', () => {
 
   assert.equal(eventRow.id, 'event-4');
   assert.equal(rsvpRow.event_id, eventRow.id);
+});
+
+
+test('formats full remote persistence debug errors with message code details and hint labels', () => {
+  const formatted = formatRemotePersistErrorForDebug({
+    message: 'new row violates row-level security policy',
+    code: '42501',
+    details: 'Failing row contains program score',
+    hint: 'Check scores insert policy',
+    remoteRows: [{ id: 'score-program-safe', team_id: 'team-a', player_id: 'player:team_active', drill_id: 'demo-program-calipari-shooting', src: 'program' }],
+  });
+
+  assert.equal(formatted, 'message: new row violates row-level security policy | code: 42501 | details: Failing row contains program score | hint: Check scores insert policy | payload: [{\"id\":\"score-program-safe\",\"team_id\":\"team-a\",\"player_id\":\"player:team_active\",\"drill_id\":\"demo-program-calipari-shooting\",\"src\":\"program\"}]');
 });
