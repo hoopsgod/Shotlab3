@@ -63,12 +63,12 @@ test('full leaderboards destination exists and includes all final categories wit
   assert.match(hubSource, /At-Home Shots/);
   assert.match(hubSource, /Events Attended/);
   assert.match(hubSource, /Strength & Conditioning/);
-  assert.match(hubSource, /Coach Custom Drills/);
+  assert.match(hubSource, /Program Drills/);
   assert.match(hubSource, /COMPETITION HUB/);
   assert.match(hubSource, /Track team effort across shots, events, strength work, and coach-assigned drills\./);
   assert.match(hubSource, /Event leaders will appear after players check into team events\./);
   assert.match(hubSource, /Strength leaders will appear after players complete assigned S&C work\./);
-  assert.match(hubSource, /Drill leaders will appear after players log coach-assigned drills\./);
+  assert.match(hubSource, /Program drill leaders will appear after players log coach-assigned drills\./);
   assert.match(hubSource, /No rankings yet/);
   assert.match(hubSource, /aria-selected=\{active\}/);
   assert.match(hubSource, /onClick=\{\(\) => setActiveLeaderboardCategory\(item.key\)\}/);

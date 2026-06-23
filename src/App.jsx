@@ -36,7 +36,7 @@ import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard 
 
 import { supabase } from "./lib/supabase.js";
 import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
-import { buildAppRows, buildRemoteRows, mergeHydratedRows, normalizeShotLogRowForApp } from "./lib/remotePersistence.js";
+import { buildAppRows, buildRemoteRows, formatRemotePersistErrorForDebug, mergeHydratedRows, normalizeShotLogRowForApp } from "./lib/remotePersistence.js";
 import { deriveActivityFeedItems } from "./lib/activityFeed.js";
 import { createAppPersistenceService } from "./lib/appPersistenceService";
 import {
@@ -54,7 +54,7 @@ import {
 import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
 import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, STORAGE_KEYS } from "./lib/appDataModels";
 import { calculateLeaderboardFromShotLogs } from "./lib/leaderboardService.js";
-import { buildProgramDrillLeaderboardRows, buildProgramScoreRow, validateProgramDrillScore } from "./lib/programDrillScoring.js";
+import { buildProgramScoreRow, getAllProgramScoreRows, getProgramDrillBreakdownRows, getProgramLeaderboardRows, getProgramScoresForPlayer, validateProgramDrillScore } from "./lib/programDrillScoring.js";
 import { archivePlayerForTeam, deleteTeamLocalPlayerData, filterActiveTeamChallengeRows, filterActiveTeamLeaderboardRows, filterActiveTeamPlayerRows, getActiveTeamPlayerIdentity, isActiveRosterPlayer, isPlayerHiddenFromActiveLeaderboards, removePlayerFromTeam } from "./lib/playerDataManagement.js";
 import { emitReleaseDiagnostic, isShotLabDebugMode } from "./lib/releaseDiagnostics.js";
 import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
@@ -406,6 +406,15 @@ const DB = {
     }
     if (table && remoteRows.length > 0) {
       try {
+        if (strictRemote && isShotLabDebugMode()) {
+          console.info("[remote-persist] strict remote payload", {
+            key: k,
+            table,
+            supabaseUrl: supabase.url || "",
+            projectRef: supabase.projectRef || "",
+            remoteRows,
+          });
+        }
         const { error } = await supabase.from(table).upsert(remoteRows, { onConflict: "id" });
         if (error) {
           console.error("[remote-persist] upsert failed", {
@@ -418,7 +427,19 @@ const DB = {
             rowCount: remoteRows.length,
           });
           if (strictRemote) {
-            throw new Error(error?.message || "remote_persist_failed");
+            const remoteError = new Error(error?.message || "remote_persist_failed");
+            remoteError.name = "RemotePersistError";
+            remoteError.code = error?.code || "";
+            remoteError.details = error?.details || "";
+            remoteError.hint = error?.hint || "";
+            remoteError.key = k;
+            remoteError.table = table;
+            remoteError.rowCount = remoteRows.length;
+            remoteError.remoteRows = remoteRows;
+            remoteError.supabaseUrl = supabase.url || "";
+            remoteError.projectRef = supabase.projectRef || "";
+            if (isShotLabDebugMode()) console.error("[remote-persist] strict remote error", { error: remoteError, remoteRows });
+            throw remoteError;
           }
         }
       } catch (e) {
@@ -919,7 +940,7 @@ try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
 function AppInner(){
-const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[coachPriorities,setCoachPriorities]=useState(COACH_PRIORITIES_INIT),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
+const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[programScores,setProgramScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[coachPriorities,setCoachPriorities]=useState(COACH_PRIORITIES_INIT),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
 const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
 const[accountNotice,setAccountNotice]=useState("");
 const[startupError,setStartupError]=useState("");
@@ -1057,7 +1078,7 @@ applyLeaderboardRows(fallbackRows,{httpStatus:null,errorCode:"network_error",isE
 }
 },[user,homeShotsLeaderboardScope,shotLogs,players,playerProfiles]);
 
-const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
+const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,programScores:rawProgramScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
 const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
 const existingTeams=rawTeams||[];
 const coaches=ps.filter(p=>p.role==="coach");
@@ -1082,7 +1103,8 @@ const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithB
 const profilesExisting=rawPlayerProfiles||[];
 const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null}));
 const teamForEmail=e=>playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null;
-const scoresM=(rawScores||[]).map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||teamForEmail(s.email),drillId:s.drillId||s.drill_id,src:s.src||"home"}));
+const scoresM=(rawScores||[]).filter(s=>(s.src||"home")!=="program").map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||teamForEmail(s.email),drillId:s.drillId||s.drill_id,src:s.src||"home"}));
+const programScoresM=[...(rawProgramScores||[]),...(rawScores||[]).filter(s=>s.src==="program")].map(s=>({...s,email:s.email||s.player_email,playerId:s.playerId||s.player_id||s.email||s.player_email,player_id:s.player_id||s.playerId||s.email||s.player_email,teamId:s.teamId||s.team_id||teamForEmail(s.email||s.player_email),team_id:s.team_id||s.teamId||teamForEmail(s.email||s.player_email),drillId:s.drillId||s.drill_id,drill_id:s.drill_id||s.drillId,drillName:s.drillName||s.drill_name||"Program Drill",score:Number(s.score||0),date:s.date||s.session_date||todayStr(),src:"program"}));
 const eventsM=(rawEvents||[]).map(e=>({...e,teamId:e.teamId||teamForEmail(e.ownerCoachId)}));
 const rsvpsM=(rawRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
 const shotM=(rawShotLogs||[]).map(l=>normalizeShotLogRowForApp({...l,teamId:l.teamId||l.team_id||teamForEmail(l.email)},{source:"local"})).filter(Boolean);
@@ -1090,7 +1112,7 @@ const chM=(rawChallenges||[]).map(c=>({...c,teamId:c.teamId||teamForEmail(c.from
 const scSM=(rawScSessions||[]).map(s=>({...s,teamId:s.teamId||teamForEmail(s.ownerCoachId)}));
 const scRM=(rawScRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
 const scLM=(rawScLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:l.teamId||teamForEmail(l.email)}));
-return {playersMigrated,profilesMigrated,teamsMigrated:teamsWithBranding,scoresM,eventsM,rsvpsM,shotM,chM,scSM,scRM,scLM};
+return {playersMigrated,profilesMigrated,teamsMigrated:teamsWithBranding,scoresM,programScoresM,eventsM,rsvpsM,shotM,chM,scSM,scRM,scLM};
 },[]);
 
 const navigateToPlayerHome=useCallback(()=>{
@@ -1135,10 +1157,10 @@ setPendingJoinContext(normalized||null);
 writeInviteContextToStorage(normalized||null);
 await DB.set(PENDING_JOIN_CONTEXT_KEY,normalized||null);
 },[normalizeStoredInviteContext,writeInviteContextToStorage]);
-const hydratePersistedData=useCallback(async()=>{const[d,pd,s,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
-const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
-setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
-await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
+const hydratePersistedData=useCallback(async()=>{const[d,pd,s,ps,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:program-scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
+const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const normalizedProgramScores=normalizeScoresForDefaultDrills(ps,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,programScores:normalizedProgramScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
+setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setScores(m.scoresM);setProgramScores(m.programScoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
+await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:program-scores",m.programScoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
 const authSession=SUPABASE_AUTH_ENABLED?await supabase.auth.getSession():null; const authEmail=normalizeEmail((SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:"")||sess?.email||""); setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:authEmail?"yes":"no"}})); if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail}); if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.teamId)await restoreLegacyTeamContext(rp).catch(()=>null);setUser(rp);setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"success",profileLoad:"success",profileTeamId:rp.teamId||""}}));if(rp.role==="coach"&&!rp.teamId)setView("create-team");else if(rp.role==="player"&&!rp.teamId)setView("join-team");else{if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}else{setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"failed",profileLoad:"failed"}}));}} else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no"}}));if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}} else {setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));}}
 setPendingJoinContext(normalizeStoredInviteContext(pendingCtx)||readInviteContextFromStorage()||null);
 return {teams:m.teamsMigrated,players:m.playersMigrated};
@@ -1428,6 +1450,7 @@ try{
 if(isDemoMode()||isDemoAccount(user))await cleanupDemoPlayerSessionData(user);
 await P("sl:players",players.filter(p=>String(p?.email||"").trim().toLowerCase()!==e),setPlayers);
 await P("sl:scores",scores.filter(s=>!isSelf(s)),setScores);
+await P("sl:program-scores",programScores.filter(s=>!isSelf(s)),setProgramScores);
 await P("sl:rsvps",rsvps.filter(r=>!isSelf(r)),setRsvps);
 await P("sl:shotlogs",shotLogs.filter(s=>!isSelf(s)),setShotLogs);
 await P("sl:challenges",challenges.filter(c=>String(c?.from||"").trim().toLowerCase()!==e&&String(c?.to||"").trim().toLowerCase()!==e),setChallenges);
@@ -1554,11 +1577,12 @@ return{ok:true};
 const deleteTeamLocalRosterPlayerData=async(playerEmail,confirmationText)=>{
 if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
 if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
-const result=deleteTeamLocalPlayerData({players,playerProfiles,scores,shotLogs,rsvps,scRsvps,scLogs,challenges,coach:user,playerEmail,confirmationText});
+const result=deleteTeamLocalPlayerData({players,playerProfiles,scores:[...scores,...programScores],shotLogs,rsvps,scRsvps,scLogs,challenges,coach:user,playerEmail,confirmationText});
 if(!result.ok)return result;
 await Promise.all([
 P("sl:players",result.players,setPlayers),
-P("sl:scores",result.scores,setScores),
+P("sl:scores",result.scores.filter(s=>(s.src||"home")!=="program"),setScores),
+P("sl:program-scores",result.scores.filter(s=>s.src==="program"),setProgramScores),
 P("sl:rsvps",result.rsvps,setRsvps),
 P("sl:shotlogs",result.shotLogs,setShotLogs),
 P("sl:challenges",result.challenges,setChallenges),
@@ -1585,14 +1609,23 @@ const scoreRow=src==="program"
 ?buildProgramScoreRow({id:genId("score"),drill:selectedDrill||{id:drillId},score,user,players,now,date:todayStr()})
 :{id:genId("score"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,drillId,score,date:todayStr(),ts:now,src};
 if(!scoreRow)throw new Error("score_row_invalid");
+if(src==="program"){
+const nextProgramScores=[...programScores,scoreRow];
+await P("sl:program-scores",nextProgramScores,setProgramScores,{strictRemote:true,remoteRows:[scoreRow]});
+}else{
 const nextScores=[...scores,scoreRow];
-await P("sl:scores",nextScores,setScores,{strictRemote:true});
+await P("sl:scores",nextScores,setScores,{strictRemote:true,remoteRows:[scoreRow]});
+}
 setStatSyncError("");
 trackEvent("score_logged",{drillId,score,src});
 await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
+return {ok:true,row:scoreRow};
 }catch(e){
+const debugDetail=isShotLabDebugMode()?` ${formatRemotePersistErrorForDebug(e)}`:"";
 setStatSyncError("Could not save score to team dashboard. Please try again.");
-trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unknown")});
+if(debugDetail)setStatSyncError(`Could not save score to team dashboard. Please try again.${debugDetail}`);
+trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unknown"),code:String(e?.code||"")});
+return {ok:false,err:e};
 }
 };
 const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
@@ -1723,8 +1756,10 @@ if(view!=="coach"||!user?.teamId)return;
 let cancelled=false;
 const refreshScores=async()=>{
 const latest=await DB.get("sl:scores");
-if(cancelled||!Array.isArray(latest))return;
-setScores(latest.map(s=>({...s,playerId:s.playerId||s.email,teamId:s.teamId||null,src:s.src||"home"})));
+const latestProgram=await DB.get("sl:program-scores");
+if(cancelled)return;
+if(Array.isArray(latest))setScores(latest.map(s=>({...s,playerId:s.playerId||s.email,teamId:s.teamId||null,src:s.src||"home"})));
+if(Array.isArray(latestProgram))setProgramScores(latestProgram.map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||null,src:"program"})));
 };
 refreshScores();
 const pollId=setInterval(refreshScores,15000);
@@ -1772,7 +1807,9 @@ setDemoSettingsBusy(false);
 };
 const appActiveTeamPlayerIdentity=useMemo(()=>getActiveTeamPlayerIdentity(players,user?.teamId),[players,user?.teamId]);
 const scopedPlayers=appActiveTeamPlayerIdentity.players;
-const scopedScores=scores.filter(s=>s.teamId===user?.teamId);
+const scopedHomeScores=scores.filter(s=>s.teamId===user?.teamId);
+const scopedProgramScores=getAllProgramScoreRows(programScores).filter(s=>s.teamId===user?.teamId);
+const scopedScores=[...scopedHomeScores,...scopedProgramScores];
 const scopedEvents=events.filter(e=>e.teamId===user?.teamId);
 const scopedRsvps=rsvps.filter(r=>r.teamId===user?.teamId);
 const scopedShotLogs=shotLogs.filter(l=>l.teamId===user?.teamId);
@@ -1814,8 +1851,8 @@ return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/><main data
 return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext} accountNotice={accountNotice} onClearAccountNotice={()=>setAccountNotice("")}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)} isJoinConsumeActive={isJoinConsumeActive}/></div>}
-{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")} statSyncError={statSyncError} retryHomeShotLog={retryHomeShotLog}/></div>}
-{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} archiveRosterPlayer={archiveRosterPlayer} deleteTeamLocalRosterPlayerData={deleteTeamLocalRosterPlayerData} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={coachVisibleShotLogs} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
+{view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} programScores={scopedProgramScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")} statSyncError={statSyncError} retryHomeShotLog={retryHomeShotLog}/></div>}
+{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} archiveRosterPlayer={archiveRosterPlayer} deleteTeamLocalRosterPlayerData={deleteTeamLocalRosterPlayerData} playerProfiles={playerProfiles.filter(pp=>pp.teamId===user?.teamId)} drills={drills} programDrills={programDrills} scores={scopedScores} programScores={scopedProgramScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={coachVisibleShotLogs} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 {dataDebugPanel}
 </TeamBrandingProvider>;
@@ -1961,7 +1998,7 @@ return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"
 // ═══════════════════════════════════════
 // PLAYER SCREEN — Dual Dashboard
 // ═══════════════════════════════════════
-function Player({u,drills,programDrills,scores,addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,retryHomeShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,refreshHomeShotsLeaderboard,statSyncError=""}){
+function Player({u,drills,programDrills,scores,programScores:programScoresFromDb=[],addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,retryHomeShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,refreshHomeShotsLeaderboard,statSyncError=""}){
 const canAccessTab=useCallback((nextTab)=>{
   if(nextTab==="players")return u.isCoach;
   if(nextTab==="duels")return !u.isCoach;
@@ -2020,7 +2057,8 @@ useEffect(()=>{
 },[tab,active]);
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
-const programScores=useMemo(()=>my.filter(s=>s.src==="program"),[my]);
+const teamProgramScores=useMemo(()=>getAllProgramScoreRows(programScoresFromDb),[programScoresFromDb]);
+const programScores=useMemo(()=>getProgramScoresForPlayer(teamProgramScores,u.email,u.teamId),[teamProgramScores,u.email,u.teamId]);
 const today=todayStr();
 const todayS=useMemo(()=>homeScores.filter(s=>s.date===today),[homeScores,today]);
 const todayProgramScores=useMemo(()=>programScores.filter(s=>s.date===today),[programScores,today]);
@@ -2090,10 +2128,12 @@ const pushCompletionCue=useCallback((cue)=>{
   setCompletionCue({...cue,id:Date.now()});
   setTimeout(()=>setCompletionCue(null),3200);
 },[]);
-const handleLog=()=>{if(submitting||!active)return;const validation=activeScoreValidation;if(!validation.ok)return;const v=validation.score;setSubmitting(true);const oldStreak=streak;
+const handleLog=async()=>{if(submitting||!active)return;const validation=activeScoreValidation;if(!validation.ok)return;const v=validation.score;setSubmitting(true);const oldStreak=streak;
 const prevBest=activeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
 const isPB=v>prevBest&&prevBest>0;
-addScore(active.id,v,activeMode);playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
+const saveResult=await addScore(active.id,v,activeMode);
+if(!saveResult?.ok){setSubmitting(false);return;}
+playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
 pushCompletionCue({title:activeMode==="program"?"Program drill completed":"Drill completed",detail:`${active.name} · ${v}${hasDrillMax(active)?`/${active.max}`:""} logged`,momentum:`${Math.max(1,streak+(activeMode==="program"?0:1))}-day momentum`,next:activeMode==="program"?"Review Program leaderboard":"Log shots or complete your next drill"});
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 if(activeMode!=="program"){setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)}
@@ -2427,7 +2467,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   </div>}
 
   {tab==="leaderboards"&&!active&&<div className={slideClass} key="leaderboards">
-    <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={homeShotsLeaderboard?.rows||[]} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} userEmail={u?.email||""} />
+    <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={homeShotsLeaderboard?.rows||[]} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} userEmail={u?.email||""} programScores={teamProgramScores} programDrills={programDrills} players={players} teamId={u?.teamId||""} />
   </div>}
 
   {/* ═════ SHOT STATS sub-screen ═════ */}
@@ -2536,7 +2576,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         <div style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1.2,color:block.status==="completed"?VOLT:block.status==="in-progress"?CYAN:MUTED,border:`1px solid ${block.status==="completed"?VOLT+"55":block.status==="in-progress"?CYAN+"44":BORDER_CLR}`,borderRadius:999,padding:"4px 8px"}}>{block.status==="completed"?"COMPLETED":block.status==="in-progress"?"IN PROGRESS":"UPCOMING"}</div>
       </div>
       {block.drills.map(d=>{const done=todayProgramScores.find(s=>s.drillId===d.id);const isPriority=programSessionBlocks.nextPriority===d.id;
-        const leaderboardRows=buildProgramDrillLeaderboardRows({scores,drill:d,players,limit:3});
+        const leaderboardRows=getProgramLeaderboardRows(teamProgramScores,d,players,3);
         return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:"#131821",border:`1px solid ${isPriority&&!done?CYAN+"66":done?CYAN+"20":BORDER_CLR}`,borderRadius:14,padding:"12px",marginBottom:8,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.6:1}}>
           <div style={{width:44,height:44,display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",borderRadius:10,flexShrink:0}}><DrillIcon type={d.icon} size={20} color={done?CYAN+"99":CYAN}/></div>
           <div style={{flex:1,minWidth:0}}>
@@ -2557,7 +2597,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} rsvps={rsvps} events={events} players={players} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
+  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
 </div>
 
 {!isDesktop&&<NavBar items={playerNavItems} active={tab} onChange={switchTab}/>} 
@@ -3345,7 +3385,7 @@ return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
 
 const toSafeNumber=(value)=>{const parsed=Number(value);return Number.isFinite(parsed)?parsed:0;};
 const getPlayerHomeShotMakes=(playerEmail,logs,teamId)=>{const targetEmail=normalizeEmail(playerEmail);if(!targetEmail)return 0;return (Array.isArray(logs)?logs:[]).reduce((total,log)=>{if(normalizeEmail(log?.email)!==targetEmail)return total;const logTeamId=log?.teamId||null;if(teamId&&logTeamId&&logTeamId!==teamId)return total;return total+toSafeNumber(log?.made||0);},0);};
-function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,archiveRosterPlayer,deleteTeamLocalRosterPlayerData,playerProfiles,drills,programDrills,scores,players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachPriorities,onSaveCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
+function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,archiveRosterPlayer,deleteTeamLocalRosterPlayerData,playerProfiles,drills,programDrills,scores,programScores=[],players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachPriorities,onSaveCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all"),[eventSaveError,setEventSaveError]=useState("");
@@ -3367,9 +3407,11 @@ const activeTeamPlayerKeySet=activeTeamPlayerIdentity.keySet;
 const safeEvents=useMemo(()=>Array.isArray(events)?events:[],[events]);
 const safeRsvps=useMemo(()=>filterActiveTeamPlayerRows(rsvps,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[rsvps,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
 const safeScores=useMemo(()=>filterActiveTeamPlayerRows(scores,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[scores,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
+const safeProgramScores=useMemo(()=>filterActiveTeamPlayerRows(programScores,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[programScores,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
 const safeScRsvps=useMemo(()=>filterActiveTeamPlayerRows(scRsvps,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[scRsvps,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
 const safeScLogs=useMemo(()=>filterActiveTeamPlayerRows(scLogs,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[scLogs,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
 const activeLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboardRows(homeShotsLeaderboard?.rows||[],activeTeamPlayerKeySet,activeTeamPlayerEmailSet,activeTeamPlayerNameSet),[homeShotsLeaderboard?.rows,activeTeamPlayerKeySet,activeTeamPlayerEmailSet,activeTeamPlayerNameSet]);
+const leaderboardPlayers=useMemo(()=>[...(Array.isArray(players)?players:[]),...(Array.isArray(playerProfiles)?playerProfiles:[])],[players,playerProfiles]);
 const safeRoster=useMemo(()=>Array.isArray(ups)?ups:[],[ups]);
 const normalizedCoachRoster=useMemo(()=>normalizeCoachRoster(safeRoster),[safeRoster]);
 const normalizedCoachEvents=useMemo(()=>normalizeCoachEvents(safeEvents),[safeEvents]);
@@ -3850,7 +3892,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       <div style={{display:"flex",gap:5,marginBottom:8}}>{ICONS.map(ic=><button key={`prog-${ic}`} onClick={()=>setNewProgramDrill({...newProgramDrill,icon:ic})} style={{width:34,height:34,borderRadius:8,border:`1px solid ${newProgramDrill.icon===ic?PAGE_ACCENTS.drills.accent+"55":BORDER_CLR}`,background:newProgramDrill.icon===ic?PAGE_ACCENTS.drills.glow:BG,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={14} color={newProgramDrill.icon===ic?PAGE_ACCENTS.drills.accent:MUTED}/></button>)}</div>
       <button onClick={handleAddProgramDrill} disabled={customProgramDrillCount>=7} className="btn-v cta-primary" style={{opacity:customProgramDrillCount>=7?.6:1}}>+ ADD PROGRAM DRILL</button>
       {programErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:10,marginTop:6}}>{programErr}</div>}
-      <div style={{marginTop:12}}>{programDrills.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>No program drills yet.</div>:programDrills.map(pd=>{const lead=buildProgramDrillLeaderboardRows({scores:safeScores,drill:pd,players,limit:3});return <div key={pd.id} style={{display:"flex",alignItems:"center",gap:10,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px 12px",marginBottom:8}}><div style={{width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:8,background:BG,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><DrillIcon type={pd.icon} size={14}/></div><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>{pd.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:1}}>Leaderboard: {lead.length===0?"No scores":lead.map(row=>`#${row.rank} ${row.name||row.email?.split("@")[0]} ${row.total}`).join(" · ")}</div></div>{pd.isDefaultDemo?<span style={{background:"transparent",border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:MUTED,padding:"5px 8px",fontSize:9,fontWeight:700,letterSpacing:".04em"}}>DEMO DEFAULT</span>:<button onClick={()=>removeProgramDrill(pd.id)} style={{background:"transparent",border:"1px solid #FF454544",borderRadius:8,color:"#FF6A6A",padding:"5px 8px",fontSize:9,fontWeight:700,cursor:"pointer",letterSpacing:".04em"}}>DELETE</button>}</div>})}</div>
+      <div style={{marginTop:12}}>{programDrills.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>No program drills yet.</div>:programDrills.map(pd=>{const lead=getProgramLeaderboardRows(safeProgramScores,pd,players,3);return <div key={pd.id} style={{display:"flex",alignItems:"center",gap:10,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px 12px",marginBottom:8}}><div style={{width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:8,background:BG,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><DrillIcon type={pd.icon} size={14}/></div><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>{pd.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:1}}>Leaderboard: {lead.length===0?"No scores":lead.map(row=>`#${row.rank} ${row.name||row.email?.split("@")[0]} ${row.total}`).join(" · ")}</div></div>{pd.isDefaultDemo?<span style={{background:"transparent",border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:MUTED,padding:"5px 8px",fontSize:9,fontWeight:700,letterSpacing:".04em"}}>DEMO DEFAULT</span>:<button onClick={()=>removeProgramDrill(pd.id)} style={{background:"transparent",border:"1px solid #FF454544",borderRadius:8,color:"#FF6A6A",padding:"5px 8px",fontSize:9,fontWeight:700,cursor:"pointer",letterSpacing:".04em"}}>DELETE</button>}</div>})}</div>
     </div>
 
     {drills.map(d=>{const dS=safeScores.filter(s=>s.drillId===d.id);const avg=dS.length?Math.round(dS.reduce((a,s)=>a+s.score,0)/dS.length*10)/10:0;return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 14px 12px",marginBottom:10}}>
@@ -4086,7 +4128,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   </div>}
 
   {tab==="leaderboards"&&<div className="page pageShell fade-up" data-accent="feed" style={shellVars("feed")}><DashboardReturnButton onClick={()=>setTab("feed")} />
-    <PremiumLeaderboardsHub viewerRole="coach" leaderboardRows={activeLeaderboardRows} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} />
+    <PremiumLeaderboardsHub viewerRole="coach" leaderboardRows={activeLeaderboardRows} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} programScores={safeProgramScores} programDrills={programDrills} players={leaderboardPlayers} teamId={u?.teamId||""} />
   </div>}
 
   {tab==="players"&&!selP&&<div className="page pageShell" data-accent="players" style={shellVars("players")}><DashboardReturnButton onClick={()=>setTab("feed")} /><PageHeader title="PLAYERS" subtitle="Roster insights, development, and availability" accent="purple" icon={<UsersIcon size={20} color={PAGE_ACCENTS.players.accent}/>} actionLabel="Add" onAction={()=>document.getElementById("coach-add-player-form")?.scrollIntoView({behavior:"smooth"})} /><div className="heroModule"><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,color:PAGE_ACCENTS.players.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>ROSTER SNAPSHOT</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>{ups.length} players on roster</div></div></div></div>
@@ -4209,10 +4251,11 @@ return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s
 // ═══════════════════════════════════════
 // PLAYER PROFILE — Offseason Resume
 // ═══════════════════════════════════════
-function ProfilePage({u,scores,shotLogs,drills,programDrills=[],rsvps,events=[],players=[],scRsvps,challenges,streak,earnedBadges,T,deleteAccount,onToggleLeaderboardVisibility}){
+function ProfilePage({u,scores,shotLogs,drills,programDrills=[],programScores:programScoresFromDb=[],rsvps,events=[],players=[],scRsvps,challenges,streak,earnedBadges,T,deleteAccount,onToggleLeaderboardVisibility}){
 const my=useMemo(()=>scores.filter(s=>s.email===u.email),[scores,u]);
 const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
-const programScores=useMemo(()=>my.filter(s=>s.src==="program"),[my]);
+const normalizedProgramScores=useMemo(()=>getAllProgramScoreRows(programScoresFromDb),[programScoresFromDb]);
+const programScores=useMemo(()=>getProgramScoresForPlayer(normalizedProgramScores,u.email,u.teamId),[normalizedProgramScores,u.email,u.teamId]);
 const totalMakes=homeScores.reduce((a,s)=>a+s.score,0);
 const totalProgramMakes=programScores.reduce((a,s)=>a+s.score,0);
 const totalShots=shotLogs.filter(s=>s.email===u.email).reduce((a,s)=>a+s.made,0);
@@ -4230,17 +4273,26 @@ const bestStreak=useMemo(()=>{const ds=[...new Set(homeScores.map(s=>s.date))].s
 ds.forEach(d=>{const dt=new Date(d);if(prev){const diff=(dt-prev)/(1000*60*60*24);cur=diff<=1?cur+1:1}else cur=1;max=Math.max(max,cur);prev=dt});return max},[homeScores]);
 
 // Per-drill stats with personal bests, averages, trends
-const drillStats=useMemo(()=>[...drills.map(d=>({...d,src:"home"})),...programDrills.map(d=>({...d,src:"program"}))].map(d=>{
-const sourceScores=d.src==="program"?programScores:homeScores;
-const ds=sourceScores.filter(s=>s.drillId===d.id).sort((a,b)=>(a.ts||0)-(b.ts||0));
+const drillStats=useMemo(()=>{
+const homeDrillStats=drills.map(d=>{
+const ds=homeScores.filter(s=>s.drillId===d.id).sort((a,b)=>(a.ts||0)-(b.ts||0));
 const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);
 const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;
 const last10=ds.slice(-10).map(s=>s.score);
-// Trend: compare first half avg vs second half avg of last 10
 let trend="flat";
 if(last10.length>=4){const mid=Math.floor(last10.length/2);const first=last10.slice(0,mid).reduce((a,v)=>a+v,0)/mid;const second=last10.slice(mid).reduce((a,v)=>a+v,0)/(last10.length-mid);if(second>first*1.05)trend="up";else if(second<first*0.95)trend="down"}
-return{...d,pb,avg,count:ds.length,last10,trend};
-}),[drills,programDrills,homeScores,programScores]);
+return{...d,src:"home",pb,avg,count:ds.length,last10,trend};
+});
+const programDrillStats=getProgramDrillBreakdownRows(programDrills,normalizedProgramScores,u.email,u.teamId);
+return[...homeDrillStats,...programDrillStats];
+},[drills,programDrills,homeScores,normalizedProgramScores,u.email,u.teamId]);
+useEffect(()=>{
+if(!isShotLabDebugMode())return;
+const programBreakdownRows=drillStats.filter(d=>d.src==="program");
+if(normalizedProgramScores.length>0&&programDrills.length>0&&programBreakdownRows.every(d=>d.count===0)){
+console.warn("[program-scores] Program Drill Breakdown has no matched Program rows",{programScoresCount:normalizedProgramScores.length,programDrillsCount:programDrills.length,normalizedDrillIds:normalizedProgramScores.map(s=>s.drillId).filter(Boolean),normalizedPlayerEmail:u.email,normalizedTeamId:u.teamId});
+}
+},[drillStats,normalizedProgramScores,programDrills,u.email,u.teamId]);
 
 const StatRow=({label,value,color=VOLT,sub})=><div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 0",borderBottom:`1px solid ${BORDER_CLR}44`}}>
 <div><div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:600}}>{label}</div>{sub&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{sub}</div>}</div>
