@@ -9,6 +9,7 @@ import {
   filterActiveTeamLeaderboardRows,
   filterActiveTeamPlayerRows,
   getActiveTeamPlayerIdentity,
+  getCoachRosterPlayers,
   isActiveRosterPlayer,
   isPlayerHiddenFromActiveLeaderboards,
   removePlayerFromTeam,
@@ -74,6 +75,28 @@ test('active team identity centralizes active roster emails and names', () => {
   assert.equal(identity.emailSet.has('one@team.com'), true)
   assert.equal(identity.nameSet.has('player one'), true)
   assert.equal(identity.keySet.has('one@team.com'), true)
+})
+
+test('coach roster merges registered players and profile-only roster entries', () => {
+  const roster = getCoachRosterPlayers({
+    players: [
+      { id: 'player-1', email: 'one@team.com', name: 'Registered One', role: 'player', teamId: 'team-a' },
+      { id: 'coach-1', email: 'coach@team.com', name: 'Coach', role: 'coach', teamId: 'team-a' },
+      { id: 'archived', email: 'archived@team.com', name: 'Archived', role: 'player', teamId: 'team-a', rosterStatus: 'archived' },
+    ],
+    playerProfiles: [
+      { id: 'profile-one', userId: 'one@team.com', teamId: 'team-a', firstName: 'Profile', lastName: 'One', jerseyNumber: '1' },
+      { id: 'profile-only', userId: null, teamId: 'team-a', firstName: 'Coach', lastName: 'Added', jerseyNumber: '23' },
+      { id: 'profile-removed', userId: null, teamId: 'team-a', firstName: 'Removed', rosterStatus: 'removed' },
+      { id: 'profile-other-team', userId: null, teamId: 'team-b', firstName: 'Other' },
+    ],
+    teamId: 'team-a',
+  })
+
+  assert.deepEqual(roster.map((row) => [row.name, row.source, row.email, row.profileId, row.jerseyNumber]), [
+    ['Coach Added', 'profile', '', 'profile-only', '23'],
+    ['Registered One', 'merged', 'one@team.com', 'profile-one', '1'],
+  ])
 })
 
 test('coach can archive one player and hide them from active roster/leaderboards', () => {
@@ -307,7 +330,8 @@ test('coach player data management UI is separate from account deletion and labe
   assert.match(appSource, /CONFIRM TEAM-LOCAL DELETE/)
   assert.match(appSource, /does not delete accounts, team branding, drills, events, or other players/)
   assert.match(appSource, /deleteTeamLocalRosterPlayerData=\{deleteTeamLocalRosterPlayerData\}/)
-  assert.match(appSource, /const activeTeamPlayerIdentity=useMemo\(\(\)=>getActiveTeamPlayerIdentity\(players,u\?\.teamId\)/)
+  assert.match(appSource, /const coachRosterPlayers=useMemo\(\(\)=>getCoachRosterPlayers\(\{players,playerProfiles,teamId:u\?\.teamId\}\)/)
+  assert.match(appSource, /const activeTeamPlayerIdentity=useMemo\(\(\)=>getActiveTeamPlayerIdentity\(coachRosterPlayers,u\?\.teamId\)/)
   assert.match(appSource, /const activeHomeShotsLeaderboard=useMemo\(\(\)=>\(\{/)
   assert.match(appSource, /homeShotsLeaderboard=\{activeHomeShotsLeaderboard\} refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,"players"\)\} statSyncError=\{statSyncError\}/)
   assert.match(appSource, /homeShotsLeaderboard=\{activeHomeShotsLeaderboard\} refreshHomeShotsLeaderboard=\{\(\)=>fetchHomeShotsLeaderboard\(user\?\.teamId,"players"\)\}\/>/)
