@@ -11,6 +11,131 @@ const getRowIdentityKeys = (row = {}, fields = PLAYER_IDENTITY_FIELDS) => fields
 const toIdentitySet = (values = []) => values instanceof Set ? values : new Set(Array.isArray(values) ? values : []);
 
 
+const isGenericPlayerName = (value = "") => {
+  const normalized = String(value || "").trim().toLowerCase();
+  return !normalized || normalized === "player" || normalized === "unknown player";
+};
+
+const profileFullName = (profile = {}) => [profile?.firstName, profile?.lastName]
+  .map((part) => String(part || "").trim())
+  .filter(Boolean)
+  .join(" ");
+
+export const resolvePlayerDisplayName = (player = {}, profiles = []) => {
+  const playerEmail = normalizePlayerDataEmail(player?.email || player?.player_email);
+  const playerIds = getRowIdentityKeys(player, ["player_id", "playerId", "id", "user_id", "userId"]);
+  const profile = (Array.isArray(profiles) ? profiles : []).find((candidate) => {
+    const profileEmail = normalizePlayerDataEmail(candidate?.email || candidate?.player_email || candidate?.userId || candidate?.user_id);
+    if (playerEmail && profileEmail === playerEmail) return true;
+    const profileIds = getRowIdentityKeys(candidate, ["player_id", "playerId", "id", "user_id", "userId"]);
+    return playerIds.some((id) => profileIds.includes(id));
+  }) || {};
+  const candidates = [
+    player?.name,
+    player?.displayName,
+    player?.fullName,
+    profile?.name,
+    profile?.displayName,
+    profile?.fullName,
+    profileFullName(profile),
+  ].map((value) => String(value || "").trim()).filter((value) => !isGenericPlayerName(value));
+  if (candidates.length) return candidates[0];
+  const email = playerEmail || normalizePlayerDataEmail(profile?.email || profile?.player_email || profile?.userId || profile?.user_id);
+  if (email) return email.split("@")[0];
+  return "Unknown Player";
+};
+
+const profileEmail = (profile = {}) => {
+  const explicitEmail = normalizePlayerDataEmail(profile?.email || profile?.player_email);
+  if (explicitEmail) return explicitEmail;
+  const userId = normalizePlayerDataEmail(profile?.userId || profile?.user_id);
+  return userId.includes("@") ? userId : "";
+};
+
+const rowTeamId = (row = {}) => String(row?.teamId || row?.team_id || "");
+const isHiddenRosterRecord = (row = {}) => (
+  row?.role === "coach" ||
+  row?.archived === true ||
+  row?.hideFromLeaderboards === true ||
+  ["archived", "removed", "team_local_data_deleted"].includes(String(row?.rosterStatus || row?.roster_status || "").toLowerCase())
+);
+
+const rosterMergeKeys = (row = {}) => {
+  const keys = getRowIdentityKeys(row, ["email", "player_email", "player_id", "playerId", "user_id", "userId"]);
+  const id = normalizePlayerDataKey(row?.id);
+  if (id) keys.push(`id:${id}`);
+  return [...new Set(keys)];
+};
+
+export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamId = "" } = {}) => {
+  const rosterByKey = new Map();
+  const remember = (row, keys) => keys.filter(Boolean).forEach((key) => rosterByKey.set(key, row));
+  const makeProfileRow = (profile = {}) => {
+    const email = profileEmail(profile);
+    const profileId = String(profile?.id || "").trim();
+    const playerId = String(profile?.playerId || profile?.player_id || profile?.userId || profile?.user_id || "").trim();
+    const name = resolvePlayerDisplayName({ ...profile, email, playerId, id: profileId }, [profile]);
+    return {
+      ...profile,
+      id: profileId || playerId || email,
+      profileId: profileId || undefined,
+      email,
+      playerId,
+      name,
+      firstName: String(profile?.firstName || profile?.first_name || "").trim(),
+      lastName: String(profile?.lastName || profile?.last_name || "").trim(),
+      jerseyNumber: String(profile?.jerseyNumber || profile?.jersey_number || "").trim(),
+      teamId: rowTeamId(profile),
+      source: "profile",
+    };
+  };
+  const makePlayerRow = (player = {}, profile = {}) => {
+    const email = normalizePlayerDataEmail(player?.email || player?.player_email) || profileEmail(profile);
+    const playerId = String(player?.playerId || player?.player_id || player?.id || player?.userId || player?.user_id || "").trim();
+    const profileId = String(profile?.id || "").trim();
+    const firstName = String(profile?.firstName || profile?.first_name || "").trim();
+    const lastName = String(profile?.lastName || profile?.last_name || "").trim();
+    return {
+      ...player,
+      profileId: profileId || undefined,
+      email,
+      playerId,
+      name: resolvePlayerDisplayName({ ...player, email, playerId }, profileId ? [profile] : []),
+      firstName,
+      lastName,
+      jerseyNumber: String(profile?.jerseyNumber || profile?.jersey_number || player?.jerseyNumber || player?.jersey_number || "").trim(),
+      teamId: rowTeamId(player) || rowTeamId(profile),
+      source: profileId ? "merged" : "player",
+    };
+  };
+
+  (Array.isArray(players) ? players : [])
+    .filter((player) => rowTeamId(player) === String(teamId || "") && !isHiddenRosterRecord(player))
+    .forEach((player) => {
+      const matchingProfile = (Array.isArray(playerProfiles) ? playerProfiles : []).find((profile) => {
+        if (rowTeamId(profile) !== String(teamId || "") || isHiddenRosterRecord(profile)) return false;
+        const playerEmail = normalizePlayerDataEmail(player?.email || player?.player_email);
+        const pEmail = profileEmail(profile);
+        if (playerEmail && pEmail && playerEmail === pEmail) return true;
+        const playerKeys = rosterMergeKeys(player);
+        return rosterMergeKeys(profile).some((key) => playerKeys.includes(key));
+      }) || {};
+      const row = makePlayerRow(player, matchingProfile);
+      remember(row, rosterMergeKeys(row));
+    });
+
+  (Array.isArray(playerProfiles) ? playerProfiles : [])
+    .filter((profile) => rowTeamId(profile) === String(teamId || "") && !isHiddenRosterRecord(profile))
+    .forEach((profile) => {
+      const row = makeProfileRow(profile);
+      const keys = rosterMergeKeys(row);
+      if (!keys.some((key) => rosterByKey.has(key))) remember(row, keys.length ? keys : [`profile:${row.profileId || row.id}`]);
+    });
+
+  return [...new Set(rosterByKey.values())].sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+};
+
+
 export const getPlayerDisplayIdentity = (player = {}) => {
   const name = String(player?.name || "").trim();
   const email = normalizePlayerDataEmail(player?.email || player?.playerId || "");
