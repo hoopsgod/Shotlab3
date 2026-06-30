@@ -50,13 +50,15 @@ export default function CompactLeaderboardPreviewCard({
 
       {hasRows ? (
         <div style={{ display: "grid", gap: 7, marginTop: 9 }}>
-          {previewRows.map((entry) => (
-            <div key={`${entry.rank}-${entry.player_display_name}`} style={{ display: "grid", gridTemplateColumns: "40px 1fr auto", alignItems: "center", gap: 9, borderRadius: 10, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", padding: "7px 10px" }}>
+          {previewRows.map((entry) => {
+            const displayName = entry.player_display_name || entry.displayName || entry.name || (entry.email ? String(entry.email).split("@")[0] : "Player");
+            const scoreValue = entry.total_home_shots ?? entry.score ?? entry.total ?? "";
+            return <div key={`${entry.rank}-${displayName}`} style={{ display: "grid", gridTemplateColumns: "40px 1fr auto", alignItems: "center", gap: 9, borderRadius: 10, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", padding: "7px 10px" }}>
               <div style={{ color: "var(--accent)", fontSize: 12, fontWeight: 800 }}>#{entry.rank}</div>
-              <div style={{ color: "var(--text-1)", fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{entry.player_display_name || "Player"}</div>
-              <div style={{ color: "var(--text-2)", fontSize: 12, fontWeight: 700 }}>{entry.total_home_shots}</div>
-            </div>
-          ))}
+              <div style={{ color: "var(--text-1)", fontSize: 12, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayName}</div>
+              <div style={{ color: "var(--text-2)", fontSize: 12, fontWeight: 700 }}>{scoreValue}</div>
+            </div>;
+          })}
         </div>
       ) : (
         <div style={{ marginTop: 9, borderRadius: 10, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", color: "var(--text-2)", fontSize: 12, lineHeight: 1.45, padding: "10px 11px", fontWeight: 600 }}>

@@ -236,7 +236,7 @@ test('home shot sync behavior handles success, network fallback, server failure,
 
 test('coach leaderboard stability path remains wired to PremiumLeaderboardsHub for coaches', async () => {
   const source = await readFile(APP_PATH, 'utf8');
-  assert.match(source, /<PremiumLeaderboardsHub viewerRole="coach" leaderboardRows=\{activeLeaderboardRows\} leaderboardStatus=\{homeShotsLeaderboard\?\.status\|\|"idle"\} \/>/);
+  assert.match(source, /<PremiumLeaderboardsHub viewerRole="coach" leaderboardRows=\{canonicalCoachHomeLeaderboardRows\} leaderboardStatus=\{coachDashboardLeaderboardStatus\}[\s\S]*programScores=\{safeProgramScores\}/);
 });
 
 test('saved route payload normalizes back to app shot log shape for local state', () => {
