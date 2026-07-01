@@ -331,7 +331,7 @@ test('coach player data management UI is separate from account deletion and labe
   assert.match(appSource, /does not delete accounts, team branding, drills, events, or other players/)
   assert.match(appSource, /deleteTeamLocalRosterPlayerData=\{deleteTeamLocalRosterPlayerData\}/)
   assert.match(appSource, /playerProfiles=\{playerProfiles\.filter\(pp=>String\(pp\.teamId\|\|pp\.team_id\|\|""\)===String\(user\?\.teamId\|\|""\)\)\}/)
-  assert.match(appSource, /const coachRosterPlayers=useMemo\(\(\)=>getCoachRosterPlayers\(\{players,playerProfiles,teamId:u\?\.teamId\}\)/)
+  assert.match(appSource, /const coachRosterPlayers=useMemo\(\(\)=>getCoachRosterPlayers\(\{players,playerProfiles,scores,shotLogs,programScores,teamId:u\?\.teamId\}\)/)
   assert.match(appSource, /const activeTeamPlayerIdentity=useMemo\(\(\)=>getActiveTeamPlayerIdentity\(coachRosterPlayers,u\?\.teamId\)/)
   assert.match(appSource, /\{ups\.length\} players on roster/)
   assert.match(appSource, /const allKnown=useMemo\(\(\)=>ups\.map\(p=>\(\{email:normalizeEmail\(p\.email\),name:p\.name\}\)\),\[ups\]\)/)
