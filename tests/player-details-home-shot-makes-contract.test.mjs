@@ -23,6 +23,7 @@ test('events count remains RSVP-based while summary displays makes from shotLogs
   assert.match(source, /\{tot\} makes · \{rsvps\.filter\(r=>normalizeEmail\(r\.email\)===normalizeEmail\(p\.email\)\)\.length\} events/);
 });
 
-test('player details summary shows home makes from shotLogs helper', () => {
-  assert.match(source, />HOME: \{getPlayerHomeShotMakes\(selP\.email,shotLogs,u\?\.teamId\)\}<\/span>/);
+test('coach development profile displays At Home makes from shotLogs helper data', () => {
+  assert.match(source, /statCard\("At Home Makes",profile\.totalAtHomeMakes,VOLT\)/);
+  assert.match(source, /shotLogs=\{shotLogs\}/);
 });

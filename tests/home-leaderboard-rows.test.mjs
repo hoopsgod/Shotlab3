@@ -45,3 +45,29 @@ test('At Home leaderboard resolves player names from roster/profile data when ro
 
   assert.deepEqual(rows.map((row) => [row.rank, row.name, row.total_home_shots]), [[1, 'Roster Name', 12]]);
 });
+
+
+test('Player View At Home leaderboard does not require a coach roster row', () => {
+  const rows = buildAtHomeLeaderboardRows({
+    scores: [
+      { email: 'player@team.test', score: 9 },
+      { email: 'player@team.test', score: 12, src: 'home' },
+      { email: 'player@team.test', score: 99, src: 'program', drillId: 'program-drill-a' },
+    ],
+    shotLogs: [{ email: 'player@team.test', total_home_shots: 4 }],
+    programDrills,
+    players: [],
+  });
+
+  assert.deepEqual(rows.map((row) => [row.email, row.total_home_shots]), [['player@team.test', 25]]);
+});
+
+test('Player View Program Drills leaderboard does not require a coach roster row and excludes At Home rows', () => {
+  const rows = getProgramLeaderboardRows([
+    { email: 'player@team.test', drillId: 'program-drill-a', teamId: 'team-a', src: 'program', score: 18 },
+    { email: 'player@team.test', drillId: 'program-drill-a', teamId: 'team-a', src: 'program', score: 22 },
+    { email: 'player@team.test', drillId: 'home-drill', teamId: 'team-a', src: 'home', score: 100 },
+  ], programDrills[0], []);
+
+  assert.deepEqual(rows.map((row) => [row.email, row.score, row.attempts]), [['player@team.test', 22, 2]]);
+});
