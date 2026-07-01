@@ -11,7 +11,7 @@ test('player dashboard mounts compact leaderboard preview with rank and top-3 ro
   assert.match(appSource, /mode="player"/);
   assert.match(appSource, /areaTitle="Leaderboards"/);
   assert.match(appSource, /categoryLabel="Home Shots"/);
-  assert.match(appSource, /const playerDashboardHomeLeaderboardRows=useMemo\(\(\)=>buildAtHomeLeaderboardRows\(\{scores,shotLogs,programDrills,players,limit:3\}\)/);
+  assert.match(appSource, /const playerDashboardHomeLeaderboardRows=useMemo\(\(\)=>buildAtHomeLeaderboardRows\(\{scores,shotLogs,programDrills,players:playerLeaderboardPlayers,limit:3\}\)/);
   assert.match(appSource, /rows=\{playerDashboardLeaderboardRows\}/);
   assert.match(appSource, /maxRows=\{3\}/);
   assert.match(compactCardSource, /Your rank: #\$\{playerRank\}/);
@@ -22,7 +22,7 @@ test('coach dashboard mounts compact leaderboard preview with top-5 rows and cle
   assert.match(appSource, /<CompactLeaderboardPreviewCard\s+title="Home Shot Leaders"/);
   assert.match(appSource, /mode="coach"/);
   assert.match(appSource, /categoryLabel="Home Shots"/);
-  assert.match(appSource, /const coachHomeLeaderboardRows=useMemo\(\(\)=>buildAtHomeLeaderboardRows\(\{scores:scopedHomeScores,shotLogs:scopedShotLogs,programDrills,players:appLeaderboardPlayers,limit:HOME_SHOTS_LEADERBOARD_LIMIT\}\)/);
+  assert.match(appSource, /const rawCoachHomeLeaderboardRows=useMemo\(\(\)=>buildAtHomeLeaderboardRows\(\{scores:scopedHomeScores,shotLogs:scopedShotLogs,programDrills,players:appLeaderboardPlayers,limit:HOME_SHOTS_LEADERBOARD_LIMIT\}\)/);
   assert.match(appSource, /const canonicalCoachHomeLeaderboardRows=useMemo\(\(\)=>Array\.isArray\(coachHomeLeaderboardRows\)\?coachHomeLeaderboardRows:\[\]/);
   assert.match(appSource, /rows=\{coachDashboardLeaderboardRows\}/);
   assert.match(appSource, /maxRows=\{5\}/);
@@ -80,4 +80,20 @@ test('full leaderboards destination exists and includes all final categories wit
   assert.match(hubSource, /onClick=\{\(\) => setActiveLeaderboardCategory\(item.key\)\}/);
   assert.match(hubSource, /activeLeaderboardCategory === 'event_participation'/);
   assert.match(hubSource, /activeLeaderboardCategory === 'strength_conditioning_participation'/);
+});
+
+
+test('player leaderboard hub has a debug guard for filtered player rows', () => {
+  assert.match(hubSource, /\[player-leaderboard\] Player leaderboard rows empty despite raw scores/);
+  assert.match(hubSource, /rawHomeScoreCount/);
+  assert.match(hubSource, /playerScopedProgramRowCount/);
+  assert.match(hubSource, /activeLeaderboardCategory/);
+});
+
+
+test('coach leaderboard rows are roster-scoped after raw generation', () => {
+  assert.match(appSource, /const rawCoachHomeLeaderboardRows=useMemo\(\(\)=>buildAtHomeLeaderboardRows/);
+  assert.match(appSource, /const coachHomeLeaderboardRows=useMemo\(\(\)=>filterActiveTeamLeaderboardRows\(rawCoachHomeLeaderboardRows/);
+  assert.match(hubSource, /viewerRole === 'coach' \? rawProgramDrillLeaderboardRows\.filter\(rowMatchesCoachRoster\) : rawProgramDrillLeaderboardRows/);
+  assert.match(hubSource, /\[coach-leaderboard\] filtered non-roster program row/);
 });
