@@ -13,7 +13,7 @@ const CATEGORY_ITEMS = [
 
 const FALLBACK_FONT = '"Barlow Condensed", "Bebas Neue", var(--font-body, Inter), sans-serif';
 
-export default function PremiumLeaderboardsHub({ viewerRole, leaderboardRows = [], leaderboardStatus = 'idle', userEmail = '', programScores = [], programDrills = [], players = [], teamId = '', homeScores = [], shotLogs = [], testId = 'premium-leaderboards-hub' }) {
+export default function PremiumLeaderboardsHub({ viewerRole, leaderboardRows = [], leaderboardStatus = 'idle', userEmail = '', currentUser = {}, programScores = [], programDrills = [], players = [], teamId = '', homeScores = [], shotLogs = [], testId = 'premium-leaderboards-hub' }) {
   const VOLT = '#C8FF00';
   const LIGHT = '#F5F7FA';
   const SUB = '#9AA4B2';
@@ -41,9 +41,36 @@ export default function PremiumLeaderboardsHub({ viewerRole, leaderboardRows = [
     }
   }, [activeLeaderboardCategory, normalizedProgramScores, selectedProgramDrill, programDrillLeaderboardRows, teamId, userEmail]);
   const fallbackHomeLeaderboardRows = useMemo(() => buildAtHomeLeaderboardRows({ scores: homeScores, shotLogs, programDrills, players, limit: 10 }), [homeScores, shotLogs, programDrills, players]);
+  const playerIdentityKeys = useMemo(() => new Set([userEmail, currentUser?.email, currentUser?.playerId, currentUser?.player_id, currentUser?.userId, currentUser?.user_id, currentUser?.profileId, currentUser?.profile_id, currentUser?.id].map((value) => String(value || '').trim().toLowerCase()).filter(Boolean)), [userEmail, currentUser]);
+  const matchesCurrentPlayer = (row = {}) => [row?.email, row?.player_email, row?.playerId, row?.player_id, row?.userId, row?.user_id, row?.profileId, row?.profile_id, row?.id].map((value) => String(value || '').trim().toLowerCase()).some((key) => key && playerIdentityKeys.has(key));
+  const playerScopedHomeRows = useMemo(() => [...(Array.isArray(homeScores) ? homeScores : []), ...(Array.isArray(shotLogs) ? shotLogs : [])].filter(matchesCurrentPlayer), [homeScores, shotLogs, playerIdentityKeys]);
+  const playerScopedProgramRows = useMemo(() => normalizedProgramScores.filter(matchesCurrentPlayer), [normalizedProgramScores, playerIdentityKeys]);
   const atHomeLeaderboardRows = Array.isArray(leaderboardRows) && leaderboardRows.length > 0 ? leaderboardRows : fallbackHomeLeaderboardRows;
   const atHomeLeaderboardStatus = leaderboardStatus === 'success' || fallbackHomeLeaderboardRows.length > 0 ? 'success' : leaderboardStatus;
   const hasRows = Array.isArray(atHomeLeaderboardRows) && atHomeLeaderboardRows.length > 0;
+  useEffect(() => {
+    if (viewerRole !== 'player') return;
+    const activeRows = activeLeaderboardCategory === 'drill_shots' ? programDrillLeaderboardRows : atHomeLeaderboardRows;
+    const rawHomeScoreCount = (Array.isArray(homeScores) ? homeScores : []).length + (Array.isArray(shotLogs) ? shotLogs : []).length;
+    const rawProgramScoreCount = normalizedProgramScores.length;
+    const playerScopedHomeRowCount = playerScopedHomeRows.length;
+    const playerScopedProgramRowCount = playerScopedProgramRows.length;
+    const rawRelevantCount = activeLeaderboardCategory === 'drill_shots' ? rawProgramScoreCount : rawHomeScoreCount;
+    if (rawRelevantCount > 0 && activeRows.length === 0) {
+      console.warn('[player-leaderboard] Player leaderboard rows empty despite raw scores', {
+        currentUserEmail: userEmail || currentUser?.email || '',
+        normalizedCurrentUserEmail: String(userEmail || currentUser?.email || '').trim().toLowerCase(),
+        currentUserIdentity: { playerId: currentUser?.playerId || currentUser?.player_id || '', profileId: currentUser?.profileId || currentUser?.profile_id || '', userId: currentUser?.userId || currentUser?.user_id || '', id: currentUser?.id || '' },
+        rawHomeScoreCount,
+        rawProgramScoreCount,
+        playerScopedHomeRowCount,
+        playerScopedProgramRowCount,
+        generatedLeaderboardRowCount: activeRows.length,
+        activeLeaderboardCategory,
+        filteredOutReason: activeLeaderboardCategory === 'drill_shots' ? 'No Program Drill leaderboard rows matched the selected drill/current player identities.' : 'No At Home leaderboard rows matched current player/team identities.',
+      });
+    }
+  }, [viewerRole, activeLeaderboardCategory, atHomeLeaderboardRows, programDrillLeaderboardRows, homeScores, shotLogs, normalizedProgramScores, playerScopedHomeRows, playerScopedProgramRows, userEmail, currentUser]);
   const rankLabel = viewerRole === 'coach' ? 'Team Rank' : 'Your Rank';
 
   return <div data-testid={testId}>

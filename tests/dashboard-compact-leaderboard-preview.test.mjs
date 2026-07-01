@@ -11,7 +11,7 @@ test('player dashboard mounts compact leaderboard preview with rank and top-3 ro
   assert.match(appSource, /mode="player"/);
   assert.match(appSource, /areaTitle="Leaderboards"/);
   assert.match(appSource, /categoryLabel="Home Shots"/);
-  assert.match(appSource, /const playerDashboardHomeLeaderboardRows=useMemo\(\(\)=>buildAtHomeLeaderboardRows\(\{scores,shotLogs,programDrills,players,limit:3\}\)/);
+  assert.match(appSource, /const playerDashboardHomeLeaderboardRows=useMemo\(\(\)=>buildAtHomeLeaderboardRows\(\{scores,shotLogs,programDrills,players:playerLeaderboardPlayers,limit:3\}\)/);
   assert.match(appSource, /rows=\{playerDashboardLeaderboardRows\}/);
   assert.match(appSource, /maxRows=\{3\}/);
   assert.match(compactCardSource, /Your rank: #\$\{playerRank\}/);
@@ -80,4 +80,12 @@ test('full leaderboards destination exists and includes all final categories wit
   assert.match(hubSource, /onClick=\{\(\) => setActiveLeaderboardCategory\(item.key\)\}/);
   assert.match(hubSource, /activeLeaderboardCategory === 'event_participation'/);
   assert.match(hubSource, /activeLeaderboardCategory === 'strength_conditioning_participation'/);
+});
+
+
+test('player leaderboard hub has a debug guard for filtered player rows', () => {
+  assert.match(hubSource, /\[player-leaderboard\] Player leaderboard rows empty despite raw scores/);
+  assert.match(hubSource, /rawHomeScoreCount/);
+  assert.match(hubSource, /playerScopedProgramRowCount/);
+  assert.match(hubSource, /activeLeaderboardCategory/);
 });
