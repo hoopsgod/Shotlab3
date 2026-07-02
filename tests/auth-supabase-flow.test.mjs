@@ -88,7 +88,7 @@ test('login maps invalid credentials and email-not-confirmed messages', async ()
   const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
   assert.match(src, /Invalid email or password\./);
   assert.match(src, /Please confirm your email before signing in\./);
-  assert.match(src, /No Supabase Auth account found for this email\./);
+  assert.match(src, /No account found\. Create an account first\./);
 });
 
 test('auth diagnostics expose signup/login status and messages in data debug panel', async () => {
@@ -130,4 +130,11 @@ test('auth debug includes mode and supabaseEnabled state fields', async () => {
   assert.match(src, /auth:\{mode:SUPABASE_AUTH_ENABLED\?"supabase":"legacy",supabaseEnabled:SUPABASE_AUTH_ENABLED\?"yes":"no"/);
   assert.match(src, /Auth mode:/);
   assert.match(src, /Supabase auth enabled:/);
+});
+
+
+test('supabase create account does not let stale app rows block Auth recreation', async () => {
+  const src = await readFile(new URL('../src/App.jsx', import.meta.url), 'utf8');
+  assert.match(src, /const existing=!SUPABASE_AUTH_ENABLED\?players\.find\(p=>normalizeEmail\(p\.email\)===normalizedEmail\):null;/);
+  assert.match(src, /if\(SUPABASE_AUTH_ENABLED\)\{\nconst authRes=await supabase\.auth\.signUp\(\{email:normalizedEmail,password\}\)/);
 });

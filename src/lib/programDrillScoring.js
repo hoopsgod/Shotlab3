@@ -56,7 +56,7 @@ export const buildProgramScoreRow = ({ id, drill = {}, score, user = {}, players
 };
 
 const rowDrillKey = (row = {}) => clean(row?.drillId || row?.drill_id || row?.drillKey || row?.drill_key);
-const rowPlayerKey = (row = {}) => normalizePlayerDataEmail(row?.playerId || row?.player_id || row?.email || row?.player_email);
+const rowPlayerKey = (row = {}) => normalizePlayerDataEmail(row?.playerId || row?.player_id || row?.userId || row?.user_id || row?.profileId || row?.profile_id || row?.email || row?.player_email || row?.id);
 const rowEmail = (row = {}) => normalizePlayerDataEmail(row?.email || row?.player_email);
 const rowTeamId = (row = {}) => clean(row?.teamId || row?.team_id);
 
@@ -152,14 +152,14 @@ export const getProgramLeaderboardRows = (programScores = [], programDrillId, pl
   const selectedDrillId = clean(programDrillId?.id || programDrillId?.drill_id || programDrillId?.key || programDrillId?.slug || programDrillId);
   const selectedDrillName = clean(programDrillId?.name || programDrillId?.drillName || programDrillId?.drill_name);
   const rosterPlayers = (Array.isArray(players) ? players : []).filter((p) => p?.role !== "coach");
-  const hiddenKeys = new Set(rosterPlayers.filter(isPlayerHiddenFromActiveLeaderboards).flatMap((p) => [p?.email, p?.player_email, p?.player_id, p?.playerId, p?.id, p?.user_id, p?.userId].map(normalizePlayerDataEmail).filter(Boolean)));
+  const hiddenKeys = new Set(rosterPlayers.filter(isPlayerHiddenFromActiveLeaderboards).flatMap((p) => [p?.email, p?.player_email, p?.player_id, p?.playerId, p?.user_id, p?.userId, p?.profile_id, p?.profileId, p?.id].map(normalizePlayerDataEmail).filter(Boolean)));
   const activePlayers = rosterPlayers.filter((p) => !isPlayerHiddenFromActiveLeaderboards(p));
   const byPlayer = new Map();
   drillScores.forEach((score) => {
     const key = rowPlayerKey(score);
     if (!key || hiddenKeys.has(key)) return;
-    const player = activePlayers.find((p) => [p?.email, p?.player_email, p?.player_id, p?.playerId, p?.id, p?.user_id, p?.userId].map(normalizePlayerDataEmail).includes(key));
-    const email = rowEmail(score) || normalizePlayerDataEmail(player?.email);
+    const player = activePlayers.find((p) => [p?.email, p?.player_email, p?.player_id, p?.playerId, p?.user_id, p?.userId, p?.profile_id, p?.profileId, p?.id].map(normalizePlayerDataEmail).includes(key));
+    const email = normalizePlayerDataEmail(player?.email) || rowEmail(score);
     const scoreName = clean(score?.name || score?.playerName || score?.player_name);
     const fallbackName = email ? email.split("@")[0] : key;
     const displayName = clean(player?.name || (scoreName.toLowerCase() === "player" ? "" : scoreName) || fallbackName);
