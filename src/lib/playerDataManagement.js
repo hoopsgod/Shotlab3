@@ -1,7 +1,8 @@
+import { buildAtHomeLeaderboardRows } from "./homeLeaderboardRows.js";
 export const normalizePlayerDataEmail = (value = "") => String(value || "").trim().toLowerCase();
 const normalizePlayerDataKey = normalizePlayerDataEmail;
 
-const PLAYER_IDENTITY_FIELDS = ["email", "player_email", "player_id", "playerId", "id", "user_id", "userId"];
+const PLAYER_IDENTITY_FIELDS = ["email", "player_email", "player_id", "playerId", "id", "user_id", "userId", "profile_id", "profileId"];
 const CHALLENGE_IDENTITY_FIELDS = ["email", "player_email", "player_id", "playerId", "user_id", "userId", "from", "to", "challengerEmail", "opponentEmail"];
 
 const getRowIdentityKeys = (row = {}, fields = PLAYER_IDENTITY_FIELDS) => fields
@@ -61,7 +62,7 @@ const isHiddenRosterRecord = (row = {}) => (
 );
 
 const rosterMergeKeys = (row = {}) => {
-  const keys = getRowIdentityKeys(row, ["email", "player_email", "player_id", "playerId", "user_id", "userId"]);
+  const keys = getRowIdentityKeys(row, ["email", "player_email", "player_id", "playerId", "user_id", "userId", "profile_id", "profileId"]);
   const id = normalizePlayerDataKey(row?.id);
   if (id) keys.push(`id:${id}`);
   return [...new Set(keys)];
@@ -69,6 +70,8 @@ const rosterMergeKeys = (row = {}) => {
 
 export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamId = "" } = {}) => {
   const rosterByKey = new Map();
+  const allPlayers = Array.isArray(players) ? players : [];
+  const allProfiles = Array.isArray(playerProfiles) ? playerProfiles : [];
   const remember = (row, keys) => keys.filter(Boolean).forEach((key) => rosterByKey.set(key, row));
   const makeProfileRow = (profile = {}) => {
     const email = profileEmail(profile);
@@ -109,10 +112,10 @@ export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamI
     };
   };
 
-  (Array.isArray(players) ? players : [])
+  allPlayers
     .filter((player) => rowTeamId(player) === String(teamId || "") && !isHiddenRosterRecord(player))
     .forEach((player) => {
-      const matchingProfile = (Array.isArray(playerProfiles) ? playerProfiles : []).find((profile) => {
+      const matchingProfile = allProfiles.find((profile) => {
         if (rowTeamId(profile) !== String(teamId || "") || isHiddenRosterRecord(profile)) return false;
         const playerEmail = normalizePlayerDataEmail(player?.email || player?.player_email);
         const pEmail = profileEmail(profile);
@@ -124,7 +127,7 @@ export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamI
       remember(row, rosterMergeKeys(row));
     });
 
-  (Array.isArray(playerProfiles) ? playerProfiles : [])
+  allProfiles
     .filter((profile) => rowTeamId(profile) === String(teamId || "") && !isHiddenRosterRecord(profile))
     .forEach((profile) => {
       const row = makeProfileRow(profile);
@@ -132,7 +135,55 @@ export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamI
       if (!keys.some((key) => rosterByKey.has(key))) remember(row, keys.length ? keys : [`profile:${row.profileId || row.id}`]);
     });
 
+
   return [...new Set(rosterByKey.values())].sort((a, b) => String(a.name || "").localeCompare(String(b.name || "")));
+};
+
+export const buildCoachPlayerDevelopmentProfile = ({ player = {}, programDrills = [], programScores = [], scores = [], shotLogs = [], homeLeaderboardRows = [], rsvps = [], events = [], scRsvps = [], scLogs = [], teamId = "", today = new Date().toISOString().slice(0, 10) } = {}) => {
+  const clean = (value) => String(value ?? "").trim();
+  const key = (value) => normalizePlayerDataEmail(value);
+  const playerKeys = new Set([player?.email, player?.player_email, player?.userId, player?.user_id, player?.playerId, player?.player_id, player?.profileId, player?.profile_id, player?.id].map(key).filter(Boolean));
+  const teamMatches = (row = {}) => !teamId || !clean(row?.teamId || row?.team_id) || clean(row?.teamId || row?.team_id) === clean(teamId);
+  const rowMatches = (row = {}) => [row?.email, row?.player_email, row?.userId, row?.user_id, row?.playerId, row?.player_id, row?.profileId, row?.profile_id, row?.id].map(key).some((candidate) => candidate && playerKeys.has(candidate));
+  const toNumber = (value) => { const num = Number(value); return Number.isFinite(num) ? num : 0; };
+  const parseDate = (row = {}) => clean(row?.date || row?.session_date || row?.created_at || row?.logged_at || (row?.ts ? new Date(row.ts).toISOString().slice(0, 10) : ""));
+  const homeScores = (Array.isArray(scores) ? scores : []).filter((row) => teamMatches(row));
+  const homeShotLogs = (Array.isArray(shotLogs) ? shotLogs : []).filter((row) => teamMatches(row));
+  const homeLeaderboardMatchKeys = playerKeys;
+  const matchesHomeLeaderboardPlayer = (row = {}) => [row?.email, row?.player_email, row?.playerId, row?.player_id, row?.id, row?.userId, row?.user_id, row?.profileId, row?.profile_id].map(key).some((candidate) => candidate && homeLeaderboardMatchKeys.has(candidate));
+  const providedHomeLeaderboardTotal = (Array.isArray(homeLeaderboardRows) ? homeLeaderboardRows : [])
+    .filter(matchesHomeLeaderboardPlayer)
+    .reduce((sum, row) => sum + toNumber(row?.total_home_shots ?? row?.total ?? row?.score), 0);
+  const computedHomeLeaderboardTotal = buildAtHomeLeaderboardRows({ scores: homeScores, shotLogs: homeShotLogs, programDrills, players: [player], profiles: [player] })
+    .filter(matchesHomeLeaderboardPlayer)
+    .reduce((sum, row) => sum + toNumber(row?.total_home_shots ?? row?.total ?? row?.score), 0);
+  const homeLeaderboardTotal = providedHomeLeaderboardTotal || computedHomeLeaderboardTotal;
+  const homeActivityRows = [...homeScores, ...homeShotLogs].filter((row) => rowMatches(row) && clean(row?.src || row?.source || "home").toLowerCase() !== "program");
+  const programRows = (Array.isArray(programScores) ? programScores : []).filter((row) => teamMatches(row) && rowMatches(row));
+  const drills = (Array.isArray(programDrills) ? programDrills : []);
+  const programByDrill = drills.map((drill) => {
+    const drillId = clean(drill?.id || drill?.drill_id || drill?.key || drill?.slug || drill?.name);
+    const drillName = clean(drill?.name || drill?.drillName || drill?.drill_name);
+    const attempts = programRows.filter((row) => clean(row?.drillId || row?.drill_id || row?.drillKey || row?.drill_key) === drillId || (drillName && clean(row?.drillName || row?.drill_name) === drillName)).sort((a, b) => (Number(a?.ts || Date.parse(parseDate(a)) || 0) - Number(b?.ts || Date.parse(parseDate(b)) || 0)));
+    return { id: drillId, name: drillName || "Program Drill", attempts: attempts.length, bestScore: attempts.reduce((best, row) => Math.max(best, toNumber(row?.score)), 0), recentScores: attempts.slice(-3).reverse().map((row) => ({ score: toNumber(row?.score), date: parseDate(row) })) };
+  }).filter((row) => row.attempts > 0);
+  const eventRows = (Array.isArray(rsvps) ? rsvps : []).filter((row) => teamMatches(row) && rowMatches(row));
+  const scRsvpRows = (Array.isArray(scRsvps) ? scRsvps : []).filter((row) => teamMatches(row) && rowMatches(row));
+  const scLogRows = (Array.isArray(scLogs) ? scLogs : []).filter((row) => teamMatches(row) && rowMatches(row));
+  const activityDates = [...homeActivityRows, ...programRows, ...eventRows, ...scRsvpRows, ...scLogRows].map(parseDate).filter(Boolean).sort();
+  const lastActivityDate = activityDates.at(-1) || "";
+  const daysSince = lastActivityDate ? Math.floor((Date.parse(`${today}T00:00:00Z`) - Date.parse(`${lastActivityDate}T00:00:00Z`)) / 86400000) : Infinity;
+  return {
+    identity: { name: clean(player?.name) || clean(player?.displayName) || clean(player?.email) || "Roster Player", email: key(player?.email || player?.player_email), playerId: clean(player?.playerId || player?.player_id || player?.id || player?.userId || player?.user_id || player?.profileId) },
+    totalAtHomeMakes: homeLeaderboardTotal,
+    totalProgramAttempts: programRows.length,
+    programByDrill,
+    eventSummary: { rsvps: eventRows.length, attended: eventRows.filter((row) => ["going", "attended", "yes", "confirmed"].includes(clean(row?.status || row?.response || "going").toLowerCase())).length, totalEvents: (Array.isArray(events) ? events : []).filter(teamMatches).length },
+    scSummary: { rsvps: scRsvpRows.length, logs: scLogRows.length },
+    lastActivityDate,
+    statusLabel: !lastActivityDate || daysSince > 30 ? "No Recent Activity" : daysSince > 10 ? "Needs Follow-Up" : "Active",
+    hasActivity: homeActivityRows.length > 0 || programRows.length > 0 || eventRows.length > 0 || scRsvpRows.length > 0 || scLogRows.length > 0,
+  };
 };
 
 
@@ -145,13 +196,14 @@ export const getPlayerDisplayIdentity = (player = {}) => {
 export const isActiveRosterPlayer = (player = {}, teamId = "") => {
   if (!player || player.role === "coach") return false;
   if (!teamId || player.teamId !== teamId) return false;
-  return player.archived !== true && player.rosterStatus !== "archived";
+  const rosterStatus = String(player?.rosterStatus || player?.roster_status || "").toLowerCase();
+  return player.archived !== true && player.hideFromLeaderboards !== true && !["archived", "removed", "team_local_data_deleted", "deleted"].includes(rosterStatus);
 };
 
 export const isPlayerHiddenFromActiveLeaderboards = (player = {}) => (
   player?.hideFromLeaderboards === true ||
   player?.archived === true ||
-  player?.rosterStatus === "archived" ||
+  ["archived", "removed", "team_local_data_deleted", "deleted"].includes(String(player?.rosterStatus || player?.roster_status || "").toLowerCase()) ||
   player?.teamId == null
 );
 
@@ -168,7 +220,7 @@ export const getActiveTeamPlayerIdentity = (players = [], teamId = "") => {
     .map((player) => String(player?.name || "").trim().toLowerCase())
     .filter(Boolean);
   const keys = activePlayers
-    .flatMap((player) => getRowIdentityKeys(player, ["email", "player_id", "playerId", "id", "user_id", "userId"]))
+    .flatMap((player) => getRowIdentityKeys(player, ["email", "player_id", "playerId", "id", "user_id", "userId", "profile_id", "profileId"]))
     .filter(Boolean);
   return {
     players: activePlayers,

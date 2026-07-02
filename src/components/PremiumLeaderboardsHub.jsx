@@ -3,6 +3,7 @@ import CompactLeaderboardPreviewCard from './CompactLeaderboardPreviewCard';
 import { buildAtHomeLeaderboardRows } from '../lib/homeLeaderboardRows.js';
 import { getAllProgramScoreRows, getProgramLeaderboardRows } from '../lib/programDrillScoring.js';
 import { isShotLabDebugMode } from '../lib/releaseDiagnostics.js';
+import { filterActiveTeamLeaderboardRows, getActiveTeamPlayerIdentity } from '../lib/playerDataManagement.js';
 
 const CATEGORY_ITEMS = [
   { key: 'home_shots', label: 'At-Home Shots' },
@@ -13,7 +14,7 @@ const CATEGORY_ITEMS = [
 
 const FALLBACK_FONT = '"Barlow Condensed", "Bebas Neue", var(--font-body, Inter), sans-serif';
 
-export default function PremiumLeaderboardsHub({ viewerRole, leaderboardRows = [], leaderboardStatus = 'idle', userEmail = '', programScores = [], programDrills = [], players = [], teamId = '', homeScores = [], shotLogs = [], testId = 'premium-leaderboards-hub' }) {
+export default function PremiumLeaderboardsHub({ viewerRole, leaderboardRows = [], leaderboardStatus = 'idle', userEmail = '', currentUser = {}, programScores = [], programDrills = [], players = [], teamId = '', homeScores = [], shotLogs = [], testId = 'premium-leaderboards-hub' }) {
   const VOLT = '#C8FF00';
   const LIGHT = '#F5F7FA';
   const SUB = '#9AA4B2';
@@ -22,7 +23,19 @@ export default function PremiumLeaderboardsHub({ viewerRole, leaderboardRows = [
   const [activeProgramDrillId, setActiveProgramDrillId] = useState('');
   const normalizedProgramScores = useMemo(() => getAllProgramScoreRows(programScores).filter((score) => !teamId || score.teamId === teamId), [programScores, teamId]);
   const selectedProgramDrill = useMemo(() => (programDrills || []).find((drill) => String(drill?.id) === String(activeProgramDrillId)) || (programDrills || [])[0] || null, [programDrills, activeProgramDrillId]);
-  const programDrillLeaderboardRows = useMemo(() => selectedProgramDrill ? getProgramLeaderboardRows(normalizedProgramScores, selectedProgramDrill, players, 10) : [], [normalizedProgramScores, selectedProgramDrill, players]);
+  const activeRosterIdentity = useMemo(() => getActiveTeamPlayerIdentity(players, teamId), [players, teamId]);
+  const activeRosterKeySet = activeRosterIdentity.keySet;
+  const activeRosterEmailSet = activeRosterIdentity.emailSet;
+  const activeRosterNameSet = activeRosterIdentity.nameSet;
+  const rawProgramDrillLeaderboardRows = useMemo(() => selectedProgramDrill ? getProgramLeaderboardRows(normalizedProgramScores, selectedProgramDrill, players, 10) : [], [normalizedProgramScores, selectedProgramDrill, players]);
+  const programDrillLeaderboardRows = useMemo(() => filterActiveTeamLeaderboardRows(rawProgramDrillLeaderboardRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet), [rawProgramDrillLeaderboardRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet]);
+  useEffect(() => {
+    if (!isShotLabDebugMode()) return;
+    rawProgramDrillLeaderboardRows.forEach((row) => {
+      const kept = programDrillLeaderboardRows.some((allowed) => String(allowed?.email || allowed?.player_email || allowed?.playerId || allowed?.player_id || allowed?.id || '') === String(row?.email || row?.player_email || row?.playerId || row?.player_id || row?.id || ''));
+      if (!kept) console.warn('[leaderboard] filtered non-roster program row', { normalizedRowEmail: String(row?.email || row?.player_email || '').trim().toLowerCase(), rowIdentity: { playerId: row?.playerId, player_id: row?.player_id, userId: row?.userId, user_id: row?.user_id, profileId: row?.profileId, profile_id: row?.profile_id, id: row?.id }, teamId, activeRosterCount: activeRosterIdentity.players.length, rosterMatchFound: false, reason: 'excluded_not_active_roster_member' });
+    });
+  }, [rawProgramDrillLeaderboardRows, programDrillLeaderboardRows, activeRosterIdentity.players.length, teamId]);
   useEffect(() => {
     if (!selectedProgramDrill && programDrills?.[0]?.id) setActiveProgramDrillId(programDrills[0].id);
   }, [selectedProgramDrill, programDrills]);
@@ -40,10 +53,38 @@ export default function PremiumLeaderboardsHub({ viewerRole, leaderboardRows = [
       });
     }
   }, [activeLeaderboardCategory, normalizedProgramScores, selectedProgramDrill, programDrillLeaderboardRows, teamId, userEmail]);
-  const fallbackHomeLeaderboardRows = useMemo(() => buildAtHomeLeaderboardRows({ scores: homeScores, shotLogs, programDrills, players, limit: 10 }), [homeScores, shotLogs, programDrills, players]);
-  const atHomeLeaderboardRows = Array.isArray(leaderboardRows) && leaderboardRows.length > 0 ? leaderboardRows : fallbackHomeLeaderboardRows;
+  const rawFallbackHomeLeaderboardRows = useMemo(() => buildAtHomeLeaderboardRows({ scores: homeScores, shotLogs, programDrills, players, limit: 10 }), [homeScores, shotLogs, programDrills, players]);
+  const fallbackHomeLeaderboardRows = useMemo(() => filterActiveTeamLeaderboardRows(rawFallbackHomeLeaderboardRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet), [rawFallbackHomeLeaderboardRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet]);
+  const playerIdentityKeys = useMemo(() => new Set([userEmail, currentUser?.email, currentUser?.playerId, currentUser?.player_id, currentUser?.userId, currentUser?.user_id, currentUser?.profileId, currentUser?.profile_id, currentUser?.id].map((value) => String(value || '').trim().toLowerCase()).filter(Boolean)), [userEmail, currentUser]);
+  const matchesCurrentPlayer = (row = {}) => [row?.email, row?.player_email, row?.playerId, row?.player_id, row?.userId, row?.user_id, row?.profileId, row?.profile_id, row?.id].map((value) => String(value || '').trim().toLowerCase()).some((key) => key && playerIdentityKeys.has(key));
+  const playerScopedHomeRows = useMemo(() => [...(Array.isArray(homeScores) ? homeScores : []), ...(Array.isArray(shotLogs) ? shotLogs : [])].filter(matchesCurrentPlayer), [homeScores, shotLogs, playerIdentityKeys]);
+  const playerScopedProgramRows = useMemo(() => normalizedProgramScores.filter(matchesCurrentPlayer), [normalizedProgramScores, playerIdentityKeys]);
+  const atHomeLeaderboardRows = useMemo(() => filterActiveTeamLeaderboardRows(Array.isArray(leaderboardRows) && leaderboardRows.length > 0 ? leaderboardRows : fallbackHomeLeaderboardRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet), [leaderboardRows, fallbackHomeLeaderboardRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet]);
   const atHomeLeaderboardStatus = leaderboardStatus === 'success' || fallbackHomeLeaderboardRows.length > 0 ? 'success' : leaderboardStatus;
   const hasRows = Array.isArray(atHomeLeaderboardRows) && atHomeLeaderboardRows.length > 0;
+  useEffect(() => {
+    if (viewerRole !== 'player' || !isShotLabDebugMode()) return;
+    const activeRows = activeLeaderboardCategory === 'drill_shots' ? programDrillLeaderboardRows : atHomeLeaderboardRows;
+    const rawHomeScoreCount = (Array.isArray(homeScores) ? homeScores : []).length + (Array.isArray(shotLogs) ? shotLogs : []).length;
+    const rawProgramScoreCount = normalizedProgramScores.length;
+    const playerScopedHomeRowCount = playerScopedHomeRows.length;
+    const playerScopedProgramRowCount = playerScopedProgramRows.length;
+    const rawRelevantCount = activeLeaderboardCategory === 'drill_shots' ? rawProgramScoreCount : rawHomeScoreCount;
+    if (rawRelevantCount > 0 && activeRows.length === 0) {
+      console.warn('[player-leaderboard] Player leaderboard rows empty despite raw scores', {
+        currentUserEmail: userEmail || currentUser?.email || '',
+        normalizedCurrentUserEmail: String(userEmail || currentUser?.email || '').trim().toLowerCase(),
+        currentUserIdentity: { playerId: currentUser?.playerId || currentUser?.player_id || '', profileId: currentUser?.profileId || currentUser?.profile_id || '', userId: currentUser?.userId || currentUser?.user_id || '', id: currentUser?.id || '' },
+        rawHomeScoreCount,
+        rawProgramScoreCount,
+        playerScopedHomeRowCount,
+        playerScopedProgramRowCount,
+        generatedLeaderboardRowCount: activeRows.length,
+        activeLeaderboardCategory,
+        filteredOutReason: activeLeaderboardCategory === 'drill_shots' ? 'No Program Drill leaderboard rows matched the selected drill/current player identities.' : 'No At Home leaderboard rows matched current player/team identities.',
+      });
+    }
+  }, [viewerRole, activeLeaderboardCategory, atHomeLeaderboardRows, programDrillLeaderboardRows, homeScores, shotLogs, normalizedProgramScores, playerScopedHomeRows, playerScopedProgramRows, userEmail, currentUser]);
   const rankLabel = viewerRole === 'coach' ? 'Team Rank' : 'Your Rank';
 
   return <div data-testid={testId}>
