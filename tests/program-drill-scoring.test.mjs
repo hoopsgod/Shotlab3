@@ -198,9 +198,9 @@ test('leaderboards hub Program Drills path uses program score selectors while At
   const hubSource = fs.readFileSync(new URL('../src/components/PremiumLeaderboardsHub.jsx', import.meta.url), 'utf8');
   const compactCardSource = fs.readFileSync(new URL('../src/components/CompactLeaderboardPreviewCard.jsx', import.meta.url), 'utf8');
 
-  assert.match(appSource, /programScores=\{teamProgramScores\}/);
+  assert.match(appSource, /programScores=\{teamFacingProgramScores\}/);
   assert.match(appSource, /programScores=\{safeProgramScores\}/);
-  assert.match(appSource, /const safeProgramScores=useMemo\(\(\)=>getAllProgramScoreRows\(programScores\)\.filter\(score=>!u\?\.teamId\|\|score\.teamId===u\.teamId\)/);
+  assert.match(appSource, /const safeProgramScores=useMemo\(\(\)=>filterActiveTeamPlayerRows\(getAllProgramScoreRows\(programScores\)\.filter\(score=>!u\?\.teamId\|\|score\.teamId===u\.teamId\),activeTeamPlayerEmailSet,activeTeamPlayerKeySet\)/);
   assert.match(appSource, /const leaderboardPlayers=useMemo\(\(\)=>\[\.\.\.\(Array\.isArray\(players\)\?players:\[\]\),\.\.\.\(Array\.isArray\(playerProfiles\)\?playerProfiles:\[\]\)\]/);
   assert.match(appSource, /viewerRole="coach"[\s\S]*players=\{leaderboardPlayers\}/);
   assert.match(appSource, /const coachRosterPlayers=useMemo\(\(\)=>getCoachRosterPlayers\(\{players,playerProfiles,teamId:u\?\.teamId\}\)/);
