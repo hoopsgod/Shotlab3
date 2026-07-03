@@ -1,3 +1,5 @@
+import { filterActiveTeamPlayerRows } from "./playerDataManagement.js";
+
 const RECENT_ACTIVITY_LIMIT = 5;
 
 const normalizeDateValue = (dateValue, fallbackTs = 0) => {
@@ -9,13 +11,18 @@ const normalizeDateValue = (dateValue, fallbackTs = 0) => {
 
 const formatActor = (entry = {}, fallback = "Player") => entry.name || (entry.email ? entry.email.split("@")[0] : fallback);
 
-export function deriveActivityFeedItems({ view = "player", user = null, events = [], rsvps = [], shotLogs = [], players = [], scores = [], today = "" }) {
+export function deriveActivityFeedItems({ view = "player", user = null, events = [], rsvps = [], shotLogs = [], players = [], scores = [], today = "", activeTeamPlayerEmails = [], activeTeamPlayerKeys = [] }) {
   const items = [];
-  const teamPlayers = Array.isArray(players) ? players : [];
+  const rawPlayers = Array.isArray(players) ? players : [];
   const scopedEvents = Array.isArray(events) ? events : [];
-  const scopedRsvps = Array.isArray(rsvps) ? rsvps : [];
-  const scopedShots = Array.isArray(shotLogs) ? shotLogs : [];
-  const scopedScores = Array.isArray(scores) ? scores : [];
+  const rosterGateEnabled = (activeTeamPlayerEmails instanceof Set ? activeTeamPlayerEmails.size > 0 : Array.isArray(activeTeamPlayerEmails) && activeTeamPlayerEmails.length > 0) || (activeTeamPlayerKeys instanceof Set ? activeTeamPlayerKeys.size > 0 : Array.isArray(activeTeamPlayerKeys) && activeTeamPlayerKeys.length > 0);
+  const rawRsvps = Array.isArray(rsvps) ? rsvps : [];
+  const rawShots = Array.isArray(shotLogs) ? shotLogs : [];
+  const rawScores = Array.isArray(scores) ? scores : [];
+  const scopedRsvps = rosterGateEnabled ? filterActiveTeamPlayerRows(rawRsvps, activeTeamPlayerEmails, activeTeamPlayerKeys) : rawRsvps;
+  const scopedShots = rosterGateEnabled ? filterActiveTeamPlayerRows(rawShots, activeTeamPlayerEmails, activeTeamPlayerKeys) : rawShots;
+  const scopedScores = rosterGateEnabled ? filterActiveTeamPlayerRows(rawScores, activeTeamPlayerEmails, activeTeamPlayerKeys) : rawScores;
+  const teamPlayers = rosterGateEnabled ? filterActiveTeamPlayerRows(rawPlayers, activeTeamPlayerEmails, activeTeamPlayerKeys) : rawPlayers;
 
   const shotGroups = new Map();
   scopedShots.forEach((log) => {

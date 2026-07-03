@@ -8,7 +8,7 @@ async function appSource() { return readFile(APP_PATH, 'utf8'); }
 
 test('legacy registration uses backend source of truth and emits required diagnostics', async () => {
   const source = await appSource();
-  assert.match(source, /const existing=SUPABASE_AUTH_ENABLED\?players\.find\(p=>normalizeEmail\(p\.email\)===normalizedEmail\):null;/);
+  assert.match(source, /const existing=!SUPABASE_AUTH_ENABLED\?players\.find\(p=>normalizeEmail\(p\.email\)===normalizedEmail\):null;/);
   assert.match(source, /const registerEndpoint="\/v1\/legacy-auth\/register";/);
   assert.match(source, /const reg=await legacyAuthFetch\(registerEndpoint,\{email:normalizedEmail,password,name,role\}\);/);
   assert.match(source, /reg\.errorCode==="account_exists"\?"Account already exists\. Please sign in\."/);
