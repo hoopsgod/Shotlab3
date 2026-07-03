@@ -11,7 +11,9 @@ test('player home leaderboard render uses safe derived values and avoids undefin
   assert.equal(appSource.includes('const rows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];'), true);
   assert.equal(appSource.includes('status={playerDashboardLeaderboardStatus}'), true);
   assert.equal(appSource.includes('rows={playerDashboardLeaderboardRows}'), true);
-  assert.equal(appSource.includes('const playerDashboardHomeLeaderboardRows=useMemo(()=>buildAtHomeLeaderboardRows({scores,shotLogs,programDrills,players,limit:3})'), true);
+  assert.equal(appSource.includes('const playerDashboardHomeLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboardRows(buildAtHomeLeaderboardRows({scores,shotLogs,programDrills,players:playerLeaderboardPlayers,limit:3})'), true);
   assert.equal(appSource.includes('emptyMessage="No leaderboard data yet. Log shots to enter the rankings."'), true);
+  assert.equal(appSource.includes('currentUser={u}'), true, 'player leaderboard hub should receive current user identity');
+  assert.equal(appSource.includes('playerLeaderboardPlayers=useMemo(()=>playerActiveTeamIdentity.players'), true, 'player leaderboard should use active roster identities');
   assert.equal(appSource.includes('refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}'), true, 'player refresh should always use players scope');
 });
