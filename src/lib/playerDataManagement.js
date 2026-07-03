@@ -1,4 +1,5 @@
 import { buildAtHomeLeaderboardRows } from "./homeLeaderboardRows.js";
+import { buildActiveRosterIdentity, filterActiveRosterLeaderboardRows, filterActiveRosterRows, isActiveRosterPlayerForTeam, isActiveRosterRow, isInactiveRosterRecord } from "./rosterIdentity.js";
 export const normalizePlayerDataEmail = (value = "") => String(value || "").trim().toLowerCase();
 const normalizePlayerDataKey = normalizePlayerDataEmail;
 
@@ -54,12 +55,7 @@ const profileEmail = (profile = {}) => {
 };
 
 const rowTeamId = (row = {}) => String(row?.teamId || row?.team_id || "");
-const isHiddenRosterRecord = (row = {}) => (
-  row?.role === "coach" ||
-  row?.archived === true ||
-  row?.hideFromLeaderboards === true ||
-  ["archived", "removed", "team_local_data_deleted"].includes(String(row?.rosterStatus || row?.roster_status || "").toLowerCase())
-);
+const isHiddenRosterRecord = isInactiveRosterRecord;
 
 const rosterMergeKeys = (row = {}) => {
   const keys = getRowIdentityKeys(row, ["email", "player_email", "player_id", "playerId", "user_id", "userId", "profile_id", "profileId"]);
@@ -193,70 +189,26 @@ export const getPlayerDisplayIdentity = (player = {}) => {
   return { name: name || email || "Selected player", email };
 };
 
-export const isActiveRosterPlayer = (player = {}, teamId = "") => {
-  if (!player || player.role === "coach") return false;
-  if (!teamId || player.teamId !== teamId) return false;
-  const rosterStatus = String(player?.rosterStatus || player?.roster_status || "").toLowerCase();
-  return player.archived !== true && player.hideFromLeaderboards !== true && !["archived", "removed", "team_local_data_deleted", "deleted"].includes(rosterStatus);
-};
+export const isActiveRosterPlayer = (player = {}, teamId = "") => isActiveRosterPlayerForTeam(player, teamId);
 
-export const isPlayerHiddenFromActiveLeaderboards = (player = {}) => (
-  player?.hideFromLeaderboards === true ||
-  player?.archived === true ||
-  ["archived", "removed", "team_local_data_deleted", "deleted"].includes(String(player?.rosterStatus || player?.roster_status || "").toLowerCase()) ||
-  player?.teamId == null
-);
+export const isPlayerHiddenFromActiveLeaderboards = (player = {}) => isInactiveRosterRecord(player) || player?.teamId == null;
 
 
-export const getActiveTeamPlayers = (players = [], teamId = "") => (Array.isArray(players) ? players : [])
-  .filter((player) => isActiveRosterPlayer(player, teamId));
+export const getActiveTeamPlayers = (players = [], teamId = "") => buildActiveRosterIdentity(players, teamId).players;
 
-export const getActiveTeamPlayerIdentity = (players = [], teamId = "") => {
-  const activePlayers = getActiveTeamPlayers(players, teamId);
-  const emails = activePlayers
-    .map((player) => normalizePlayerDataEmail(player?.email))
-    .filter(Boolean);
-  const names = activePlayers
-    .map((player) => String(player?.name || "").trim().toLowerCase())
-    .filter(Boolean);
-  const keys = activePlayers
-    .flatMap((player) => getRowIdentityKeys(player, ["email", "player_id", "playerId", "id", "user_id", "userId", "profile_id", "profileId"]))
-    .filter(Boolean);
-  return {
-    players: activePlayers,
-    emails,
-    names,
-    keys,
-    emailSet: new Set(emails),
-    nameSet: new Set(names),
-    keySet: new Set(keys),
-  };
-};
+export const getActiveTeamPlayerIdentity = (players = [], teamId = "") => buildActiveRosterIdentity(players, teamId);
 
 export const getActiveTeamPlayerEmails = (players = [], teamId = "") => getActiveTeamPlayerIdentity(players, teamId).emails;
 
 export const getActiveTeamPlayerNames = (players = [], teamId = "") => getActiveTeamPlayerIdentity(players, teamId).names;
 
-export const isActiveTeamPlayerRow = (row = {}, activeTeamPlayerEmails = [], activeTeamPlayerKeys = activeTeamPlayerEmails) => {
-  const activeEmailSet = toIdentitySet(activeTeamPlayerEmails);
-  const activeKeySet = toIdentitySet(activeTeamPlayerKeys);
-  const rowKeys = getRowIdentityKeys(row);
-  return rowKeys.some((key) => activeKeySet.has(key) || activeEmailSet.has(key));
-};
+export const isActiveTeamPlayerRow = (row = {}, activeTeamPlayerEmails = [], activeTeamPlayerKeys = activeTeamPlayerEmails) => isActiveRosterRow(row, activeTeamPlayerEmails, activeTeamPlayerKeys);
 
-export const filterActiveTeamPlayerRows = (rows = [], activeTeamPlayerEmails = [], activeTeamPlayerKeys = activeTeamPlayerEmails) => (Array.isArray(rows) ? rows : [])
-  .filter((row) => isActiveTeamPlayerRow(row, activeTeamPlayerEmails, activeTeamPlayerKeys));
+export const filterActiveTeamPlayerRows = (rows = [], activeTeamPlayerEmails = [], activeTeamPlayerKeys = activeTeamPlayerEmails) => filterActiveRosterRows(rows, activeTeamPlayerEmails, activeTeamPlayerKeys);
 
-export const isActiveTeamLeaderboardRow = (row = {}, activeTeamPlayerKeys = [], activeTeamPlayerEmails = [], activeTeamPlayerNames = []) => {
-  if (isActiveTeamPlayerRow(row, activeTeamPlayerEmails, activeTeamPlayerKeys)) return true;
-  const activeNameSet = toIdentitySet(activeTeamPlayerNames);
-  const displayName = String(row?.player_display_name || row?.name || row?.playerName || "").trim().toLowerCase();
-  return Boolean(displayName && activeNameSet.has(displayName));
-};
+export const isActiveTeamLeaderboardRow = (row = {}, activeTeamPlayerKeys = [], activeTeamPlayerEmails = [], activeTeamPlayerNames = []) => filterActiveRosterLeaderboardRows([row], activeTeamPlayerKeys, activeTeamPlayerEmails, activeTeamPlayerNames).length > 0;
 
-export const filterActiveTeamLeaderboardRows = (rows = [], activeTeamPlayerKeys = [], activeTeamPlayerEmails = [], activeTeamPlayerNames = []) => (Array.isArray(rows) ? rows : [])
-  .filter((row) => isActiveTeamLeaderboardRow(row, activeTeamPlayerKeys, activeTeamPlayerEmails, activeTeamPlayerNames))
-  .map((row, index) => ({ ...row, rank: index + 1 }));
+export const filterActiveTeamLeaderboardRows = (rows = [], activeTeamPlayerKeys = [], activeTeamPlayerEmails = [], activeTeamPlayerNames = []) => filterActiveRosterLeaderboardRows(rows, activeTeamPlayerKeys, activeTeamPlayerEmails, activeTeamPlayerNames);
 
 export const filterActiveTeamChallengeRows = (rows = [], activeTeamPlayerKeys = [], activeTeamPlayerEmails = activeTeamPlayerKeys) => {
   const activeKeySet = toIdentitySet(activeTeamPlayerKeys);
