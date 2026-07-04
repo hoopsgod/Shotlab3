@@ -328,7 +328,7 @@ test('coach player data management UI is separate from account deletion and labe
   assert.match(appSource, />REMOVE FROM TEAM</)
   assert.match(appSource, />DELETE TEAM-LOCAL PLAYER DATA</)
   assert.match(appSource, /CONFIRM TEAM-LOCAL DELETE/)
-  assert.match(appSource, /does not delete accounts, team branding, drills, events, or other players/)
+  assert.match(appSource, /It does not delete Supabase Auth users, app account rows, team branding, drills, events, or other players/)
   assert.match(appSource, /deleteTeamLocalRosterPlayerData=\{deleteTeamLocalRosterPlayerData\}/)
   assert.match(appSource, /playerProfiles=\{playerProfiles\.filter\(pp=>String\(pp\.teamId\|\|pp\.team_id\|\|""\)===String\(user\?\.teamId\|\|""\)\)\}/)
   assert.match(appSource, /const coachRosterPlayers=useMemo\(\(\)=>getCoachRosterPlayers\(\{players,playerProfiles,teamId:u\?\.teamId\}\)/)
@@ -347,4 +347,68 @@ test('coach player data management UI is separate from account deletion and labe
   assert.match(appSource, /<AccountTrustActions deleteAccount=\{deleteAccount\} preserveTeamData\/>/)
   assert.match(appSource, /const cleanupDemoPlayerSessionData=useCallback/)
   assert.match(appSource, /const addScore=async\(drillId,score,src="home"\)=>/)
+})
+
+test('stabilization: remove, archive, and team-local delete are explicitly not Supabase Auth deletion paths', () => {
+  const removed = removePlayerFromTeam({ players: basePlayers, coach, playerEmail: 'one@team.com', now: 1000 }).players.find((player) => player.email === 'one@team.com')
+  const archived = archivePlayerForTeam({ players: basePlayers, coach, playerEmail: 'one@team.com', now: 1000 }).players.find((player) => player.email === 'one@team.com')
+  const deleted = deleteTeamLocalPlayerData({ players: basePlayers, coach, playerEmail: 'one@team.com', confirmationText: 'Player One one@team.com', now: 1000 }).players.find((player) => player.email === 'one@team.com')
+
+  assert.equal(removed.rosterAction, 'coach_remove_from_team')
+  assert.equal(removed.accountDeletion, false)
+  assert.equal(removed.supabaseAuthUserDeleted, false)
+  assert.equal(archived.rosterAction, 'coach_archive_player')
+  assert.equal(archived.accountDeletion, false)
+  assert.equal(archived.supabaseAuthUserDeleted, false)
+  assert.equal(deleted.rosterAction, 'coach_delete_team_local_player_data')
+  assert.equal(deleted.accountDeletion, false)
+  assert.equal(deleted.supabaseAuthUserDeleted, false)
+})
+
+test('stabilization: deleting team-local data preserves external auth/user account assumptions and AQ coach account', () => {
+  const authAccounts = [
+    { id: 'auth-player-one', email: 'one@team.com', provider: 'supabase' },
+    { id: 'aq-coach-auth', email: 'coach@team.com', label: 'AQ coach' },
+  ]
+  const result = deleteTeamLocalPlayerData({
+    players: basePlayers,
+    authAccounts,
+    coach,
+    playerEmail: 'one@team.com',
+    confirmationText: 'Player One one@team.com',
+    now: 1000,
+  })
+
+  assert.equal(result.ok, true)
+  assert.equal(result.accountDeletion, false)
+  assert.equal(result.supabaseAuthUserDeleted, false)
+  assert.deepEqual(result.authAccounts, authAccounts)
+  assert.deepEqual(result.authAccounts.map((account) => account.email), ['one@team.com', 'coach@team.com'])
+  assert.equal(result.players.some((player) => player.email === 'coach@team.com' && player.role === 'coach'), true, 'AQ coach app account row is preserved')
+})
+
+test('stabilization: removed player cannot reappear from a profile row without current join-code flow creating active membership', () => {
+  const removedPlayers = removePlayerFromTeam({ players: basePlayers, coach, playerEmail: 'one@team.com', now: 1000 }).players
+  const roster = getCoachRosterPlayers({
+    players: removedPlayers,
+    playerProfiles: [
+      { id: 'stale-profile-one', userId: 'one@team.com', teamId: 'team-a', firstName: 'Player', lastName: 'One' },
+      { id: 'active-profile-two', userId: 'two@team.com', teamId: 'team-a', firstName: 'Player', lastName: 'Two' },
+    ],
+    teamId: 'team-a',
+  })
+
+  assert.deepEqual(roster.map((player) => player.email).sort(), ['third@team.com', 'two@team.com'].sort())
+  assert.equal(removedPlayers.find((player) => player.email === 'one@team.com').removedFromTeamId, 'team-a')
+  assert.match(appSource, /const joinTeam=async\(code\)=>/)
+  assert.match(appSource, /startJoinContext\(normalizedCode,user\.email\)/)
+  assert.match(appSource, /consumeJoinContext\(user,null,activeContext\)/)
+})
+
+test('stabilization: coach-facing labels never imply coach can delete a Supabase Auth user', () => {
+  assert.match(appSource, /Remove from Team removes roster membership only/)
+  assert.match(appSource, /does not delete .*Supabase Auth account or app account row/)
+  assert.match(appSource, /Supabase Auth account and app account row were not deleted/)
+  assert.match(appSource, /It does not delete Supabase Auth users, app account rows, team branding, drills, events, or other players/)
+  assert.doesNotMatch(appSource, /coach can delete .*Supabase Auth/i)
 })
