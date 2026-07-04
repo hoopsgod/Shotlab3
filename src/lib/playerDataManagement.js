@@ -1,6 +1,13 @@
 import { buildAtHomeLeaderboardRows } from "./homeLeaderboardRows.js";
 import { buildActiveRosterIdentity, filterActiveRosterLeaderboardRows, filterActiveRosterRows, isActiveRosterPlayerForTeam, isActiveRosterRow, isInactiveRosterRecord } from "./rosterIdentity.js";
 export const normalizePlayerDataEmail = (value = "") => String(value || "").trim().toLowerCase();
+
+export const PLAYER_ACCOUNT_DELETION_FLOW = "player_account_deletion";
+export const COACH_REMOVE_FROM_TEAM_FLOW = "coach_remove_from_team";
+export const COACH_ARCHIVE_PLAYER_FLOW = "coach_archive_player";
+export const COACH_DELETE_TEAM_LOCAL_PLAYER_DATA_FLOW = "coach_delete_team_local_player_data";
+
+export const TEAM_LOCAL_PLAYER_DATA_NOTICE = "Coach team-local player data actions never delete Supabase Auth users or app account rows.";
 const normalizePlayerDataKey = normalizePlayerDataEmail;
 
 const PLAYER_IDENTITY_FIELDS = ["email", "player_email", "player_id", "playerId", "id", "user_id", "userId", "profile_id", "profileId"];
@@ -246,7 +253,7 @@ export const archivePlayerForTeam = ({ players = [], coach, playerEmail, now = D
   return {
     ok: true,
     players: players.map((player) => playerMatchesIdentity(player, playerEmail)
-      ? { ...player, archived: true, rosterStatus: "archived", archivedAt: now, archivedBy: coach.email, hideFromLeaderboards: true }
+      ? { ...player, archived: true, rosterStatus: "archived", rosterAction: COACH_ARCHIVE_PLAYER_FLOW, accountDeletion: false, supabaseAuthUserDeleted: false, archivedAt: now, archivedBy: coach.email, hideFromLeaderboards: true }
       : player),
   };
 };
@@ -258,7 +265,7 @@ export const removePlayerFromTeam = ({ players = [], coach, playerEmail, now = D
   return {
     ok: true,
     players: players.map((player) => playerMatchesIdentity(player, playerEmail)
-      ? { ...player, teamId: null, rosterStatus: "removed", removedFromTeamId: guard.teamId, removedAt: now, removedBy: coach.email, hideFromLeaderboards: true }
+      ? { ...player, teamId: null, rosterStatus: "removed", rosterAction: COACH_REMOVE_FROM_TEAM_FLOW, accountDeletion: false, supabaseAuthUserDeleted: false, removedFromTeamId: guard.teamId, removedAt: now, removedBy: coach.email, hideFromLeaderboards: true }
       : player),
   };
 };
@@ -276,6 +283,7 @@ export const deleteTeamLocalPlayerData = ({
   scRsvps = [],
   scLogs = [],
   challenges = [],
+  authAccounts = [],
   coach,
   playerEmail,
   confirmationText = "",
@@ -294,7 +302,7 @@ export const deleteTeamLocalPlayerData = ({
   return {
     ok: true,
     players: players.map((player) => playerMatchesIdentity(player, playerEmail)
-      ? { ...player, teamId: null, rosterStatus: "team_local_data_deleted", removedFromTeamId: teamId, teamLocalDataDeletedAt: now, teamLocalDataDeletedBy: coach.email, hideFromLeaderboards: true }
+      ? { ...player, teamId: null, rosterStatus: "team_local_data_deleted", rosterAction: COACH_DELETE_TEAM_LOCAL_PLAYER_DATA_FLOW, accountDeletion: false, supabaseAuthUserDeleted: false, removedFromTeamId: teamId, teamLocalDataDeletedFromTeamId: teamId, teamLocalDataDeletedAt: now, teamLocalDataDeletedBy: coach.email, hideFromLeaderboards: true }
       : player),
     playerProfiles: playerProfiles.filter((profile) => !(rowTeamMatches(profile, teamId) && rowPlayerMatchesAny(profile, targetIdentityKeys))),
     scores: scores.filter((row) => !isSelectedTeamRow(row)),
@@ -303,5 +311,10 @@ export const deleteTeamLocalPlayerData = ({
     scRsvps: scRsvps.filter((row) => !isSelectedTeamRow(row)),
     scLogs: scLogs.filter((row) => !isSelectedTeamRow(row)),
     challenges: challenges.filter((row) => !(rowTeamMatches(row, teamId) && challengeInvolvesAnyPlayerKey(row, targetIdentityKeys))),
+    authAccounts,
+    accountDeletion: false,
+    supabaseAuthUserDeleted: false,
+    flow: COACH_DELETE_TEAM_LOCAL_PLAYER_DATA_FLOW,
+    notice: TEAM_LOCAL_PLAYER_DATA_NOTICE,
   };
 };
