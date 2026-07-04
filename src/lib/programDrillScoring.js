@@ -1,4 +1,5 @@
 import { normalizePlayerDataEmail, isPlayerHiddenFromActiveLeaderboards } from "./playerDataManagement.js";
+import { getRosterIdentityKeys, isActiveRosterPlayerForTeam } from "./rosterIdentity.js";
 
 const clean = (value) => String(value ?? "").trim();
 let programScoreRowSequence = 0;
@@ -152,13 +153,16 @@ export const getProgramLeaderboardRows = (programScores = [], programDrillId, pl
   const selectedDrillId = clean(programDrillId?.id || programDrillId?.drill_id || programDrillId?.key || programDrillId?.slug || programDrillId);
   const selectedDrillName = clean(programDrillId?.name || programDrillId?.drillName || programDrillId?.drill_name);
   const rosterPlayers = (Array.isArray(players) ? players : []).filter((p) => p?.role !== "coach");
-  const hiddenKeys = new Set(rosterPlayers.filter(isPlayerHiddenFromActiveLeaderboards).flatMap((p) => [p?.email, p?.player_email, p?.player_id, p?.playerId, p?.user_id, p?.userId, p?.profile_id, p?.profileId, p?.id].map(normalizePlayerDataEmail).filter(Boolean)));
-  const activePlayers = rosterPlayers.filter((p) => !isPlayerHiddenFromActiveLeaderboards(p));
+  const rosterTeamId = clean(programDrillId?.teamId || programDrillId?.team_id || rosterPlayers.find((p) => clean(p?.teamId || p?.team_id))?.teamId || rosterPlayers.find((p) => clean(p?.teamId || p?.team_id))?.team_id);
+  const hiddenKeys = new Set(rosterPlayers.filter(isPlayerHiddenFromActiveLeaderboards).flatMap((p) => getRosterIdentityKeys(p)));
+  const activePlayers = rosterPlayers.filter((p) => rosterTeamId ? isActiveRosterPlayerForTeam(p, rosterTeamId) : !isPlayerHiddenFromActiveLeaderboards(p));
+  const requireRosterMatch = activePlayers.length > 0;
   const byPlayer = new Map();
   drillScores.forEach((score) => {
     const key = rowPlayerKey(score);
     if (!key || hiddenKeys.has(key)) return;
-    const player = activePlayers.find((p) => [p?.email, p?.player_email, p?.player_id, p?.playerId, p?.user_id, p?.userId, p?.profile_id, p?.profileId, p?.id].map(normalizePlayerDataEmail).includes(key));
+    const player = activePlayers.find((p) => getRosterIdentityKeys(p).includes(key));
+    if (requireRosterMatch && !player) return;
     const email = normalizePlayerDataEmail(player?.email) || rowEmail(score);
     const scoreName = clean(score?.name || score?.playerName || score?.player_name);
     const fallbackName = email ? email.split("@")[0] : key;
