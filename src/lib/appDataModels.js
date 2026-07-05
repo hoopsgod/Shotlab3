@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   scSessions: "sl:sc-sessions",
   scRsvps: "sl:sc-rsvps",
   scLogs: "sl:sc-logs",
+  seasonArchives: "sl:season-archives",
 };
 
 export const TABLE_MAP = {
