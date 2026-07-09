@@ -96,3 +96,42 @@ test('Player View Program Drills leaderboard excludes non-roster players and kee
     ['active@team.test', 'Active Email', 18, 1],
   ]);
 });
+
+test('coach and player home leaderboards keep active roster players ranked without gaps while excluding inactive and coach rows', () => {
+  const roster = [
+    { id: 'active-one', playerId: 'active-one', teamId: 'team-a', role: 'player', name: 'Active One', email: 'one@team.test' },
+    { id: 'active-two', playerId: 'active-two', teamId: 'team-a', role: 'player', name: 'Active Two', email: 'two@team.test' },
+    { id: 'removed', playerId: 'removed', teamId: 'team-a', role: 'player', name: 'Removed', email: 'removed@team.test', rosterStatus: 'removed' },
+    { id: 'archived', playerId: 'archived', teamId: 'team-a', role: 'player', name: 'Archived', email: 'archived@team.test', archived: true },
+    { id: 'hidden', playerId: 'hidden', teamId: 'team-a', role: 'player', name: 'Hidden', email: 'hidden@team.test', hideFromLeaderboards: true },
+    { id: 'local-deleted', playerId: 'local-deleted', teamId: 'team-a', role: 'player', name: 'Local Deleted', email: 'local-deleted@team.test', rosterStatus: 'team_local_data_deleted' },
+    { id: 'aq-coach', playerId: 'aq-coach', teamId: 'team-a', role: 'coach', name: 'AQ Coach', email: 'AQ@gmail.com' },
+  ];
+  const identity = getActiveTeamPlayerIdentity(roster, 'team-a');
+  const rawRows = buildAtHomeLeaderboardRows({
+    scores: [
+      { teamId: 'team-a', playerId: 'active-one', email: 'one@team.test', score: 12, src: 'home' },
+      { teamId: 'team-a', playerId: 'active-two', email: 'two@team.test', score: 20, src: 'home' },
+      { teamId: 'team-a', playerId: 'removed', email: 'removed@team.test', score: 99, src: 'home' },
+      { teamId: 'team-a', playerId: 'archived', email: 'archived@team.test', score: 88, src: 'home' },
+      { teamId: 'team-a', playerId: 'hidden', email: 'hidden@team.test', score: 77, src: 'home' },
+      { teamId: 'team-a', playerId: 'local-deleted', email: 'local-deleted@team.test', score: 66, src: 'home' },
+      { teamId: 'team-a', playerId: 'aq-coach', email: 'AQ@gmail.com', score: 55, src: 'home' },
+    ],
+    players: roster,
+    programDrills,
+  });
+  const coachRows = filterActiveTeamLeaderboardRows(rawRows, identity.keySet, identity.emailSet, identity.nameSet);
+  const playerRows = filterActiveTeamLeaderboardRows(rawRows, identity.keySet, identity.emailSet, identity.nameSet);
+
+  assert.deepEqual(coachRows.map((row) => [row.rank, row.email, row.total_home_shots]), [
+    [1, 'two@team.test', 20],
+    [2, 'one@team.test', 12],
+  ]);
+  assert.deepEqual(playerRows.map((row) => [row.rank, row.email, row.total_home_shots]), [
+    [1, 'two@team.test', 20],
+    [2, 'one@team.test', 12],
+  ]);
+  assert.deepEqual(coachRows.map((row) => row.rank), [1, 2]);
+  assert.ok(!coachRows.some((row) => ['removed@team.test', 'archived@team.test', 'hidden@team.test', 'local-deleted@team.test', 'aq@gmail.com'].includes(String(row.email || '').toLowerCase())));
+});
