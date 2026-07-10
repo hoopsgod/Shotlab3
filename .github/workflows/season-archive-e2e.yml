@@ -25,6 +25,9 @@ jobs:
       - name: Install application dependencies
         run: npm ci
 
+      - name: Run season archive service tests
+        run: node --test tests/season-archive.test.mjs tests/season-archives-route.test.mjs
+
       - name: Install Playwright test runner
         run: npm install --no-save @playwright/test@1.55.1
 
