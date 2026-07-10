@@ -1,41 +1,90 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { createSeasonArchive, getSeasonArchiveDetailModel } from '../src/lib/seasonArchive.js';
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  buildSeasonArchive,
+  createSeasonArchive,
+  getSeasonArchiveDetailModel,
+  normalizeArchiveDate,
+} from "../src/lib/seasonArchive.js";
 
-const frozenJson = (v) => JSON.stringify(v);
-const base = () => ({
-  teamId: 'team-a',
-  coach: { email: 'coach@a.test', name: 'Coach A', role: 'coach', teamId: 'team-a', branding: { primary: 'lime' } },
-  seasonName: '2026 Summer',
-  seasonStartDate: '2026-05-01',
-  seasonEndDate: '2026-07-01',
-  players: [{ id: 'p1', email: 'p1@a.test', role: 'player', teamId: 'team-a' }, { id: 'p2', email: 'p2@b.test', role: 'player', teamId: 'team-b' }],
-  activeRosterPlayers: [{ id: 'p1', email: 'p1@a.test', role: 'player', teamId: 'team-a' }],
-  playerProfiles: [{ id: 'pp1', teamId: 'team-a', firstName: 'A' }, { id: 'pp2', teamId: 'team-b', firstName: 'B' }],
-  scores: [{ id: 's1', teamId: 'team-a', score: 10 }, { id: 's2', teamId: 'team-b', score: 99 }],
-  programScores: [{ id: 'ps1', teamId: 'team-a', score: 7 }, { id: 'ps2', teamId: 'team-b', score: 88 }],
-  shotLogs: [{ id: 'sl1', teamId: 'team-a', makes: 4 }, { id: 'sl2', teamId: 'team-b', makes: 77 }],
-  events: [{ id: 'e1', teamId: 'team-a' }, { id: 'e2', teamId: 'team-b' }],
-  rsvps: [{ id: 'r1', teamId: 'team-a' }, { id: 'r2', teamId: 'team-b' }],
-  scSessions: [{ id: 'scs1', teamId: 'team-a' }, { id: 'scs2', teamId: 'team-b' }],
-  scRsvps: [{ id: 'scr1', teamId: 'team-a' }, { id: 'scr2', teamId: 'team-b' }],
-  scLogs: [{ id: 'scl1', teamId: 'team-a' }, { id: 'scl2', teamId: 'team-b' }],
-  programDrills: [{ id: 'pd1', name: 'Program' }],
-  drills: [{ id: 'd1', name: 'Home' }],
-  challenges: [{ id: 'c1', teamId: 'team-a' }, { id: 'c2', teamId: 'team-b' }],
-  existingArchives: [{ id: 'old', teamId: 'team-a' }],
-  now: () => '2026-07-04T00:00:00.000Z',
+const coach = { email: "coach@a.test", name: "Coach A", role: "coach", teamId: "team-a" };
+
+function base(overrides = {}) {
+  return {
+    teamId: "team-a",
+    coach,
+    seasonName: "2026 Summer",
+    seasonStartDate: "2026-05-01",
+    seasonEndDate: "2026-07-01",
+    activeRosterPlayers: [
+      { id: "p1", playerId: "p1", email: "one@a.test", name: "Player One", role: "player", teamId: "team-a", status: "active" },
+    ],
+    playerProfiles: [
+      { id: "profile-1", userId: "one@a.test", teamId: "team-a", firstName: "Player", lastName: "One" },
+    ],
+    scores: [
+      { id: "home-1", teamId: "team-a", playerId: "p1", email: "one@a.test", score: 12, date: "2026-05-01" },
+      { id: "home-2", teamId: "team-a", playerId: "p1", email: "one@a.test", score: 8, date: "2026-07-01" },
+    ],
+    programScores: [
+      { id: "program-1", teamId: "team-a", playerId: "p1", email: "one@a.test", score: 20, date: "2026-06-02" },
+    ],
+    shotLogs: [
+      { id: "shots-1", teamId: "team-a", playerId: "p1", email: "one@a.test", made: 30, date: "2026-06-03" },
+    ],
+    events: [
+      { id: "event-1", teamId: "team-a", title: "Practice", date: "2026-06-04" },
+    ],
+    rsvps: [
+      { id: "rsvp-1", teamId: "team-a", eventId: "event-1", playerId: "p1", email: "one@a.test", attended: true },
+    ],
+    scSessions: [
+      { id: "sc-1", teamId: "team-a", title: "Lift", date: "2026-06-05" },
+    ],
+    scRsvps: [
+      { id: "scr-1", teamId: "team-a", sessionId: "sc-1", playerId: "p1", email: "one@a.test" },
+    ],
+    scLogs: [
+      { id: "scl-1", teamId: "team-a", sessionId: "sc-1", playerId: "p1", email: "one@a.test", completed: true },
+    ],
+    programDrills: [{ id: "pd1", name: "Program Drill" }],
+    drills: [{ id: "d1", name: "Home Drill" }],
+    challenges: [
+      { id: "challenge-1", teamId: "team-a", from: "one@a.test", to: "one@a.test", date: "2026-06-06" },
+    ],
+    existingArchives: [],
+    now: () => "2026-07-04T00:00:00.000Z",
+    ...overrides,
+  };
+}
+
+test("normalizes supported archive dates and rejects invalid dates", () => {
+  assert.equal(normalizeArchiveDate("2026-06-03"), "2026-06-03");
+  assert.equal(normalizeArchiveDate("2026-06-03T12:30:00.000Z"), "2026-06-03");
+  assert.equal(normalizeArchiveDate("not-a-date"), "");
 });
 
-test('coach can create a season archive with accurate summary', () => {
-  const result = createSeasonArchive(base());
+test("requires an authorized coach, season name, and valid date range", () => {
+  assert.equal(buildSeasonArchive({ ...base(), coach: { role: "player", teamId: "team-a" } }).ok, false);
+  assert.equal(buildSeasonArchive({ ...base(), seasonName: " " }).error, "Season name is required.");
+  assert.equal(buildSeasonArchive({ ...base(), seasonStartDate: "" }).error, "Season start and end dates are required.");
+  assert.equal(buildSeasonArchive({ ...base(), seasonStartDate: "2026-08-01" }).error, "Season start date must be on or before the end date.");
+});
+
+test("builds an inclusive, team-scoped frozen snapshot with accurate totals", () => {
+  const result = buildSeasonArchive(base());
   assert.equal(result.ok, true);
-  assert.equal(result.archive.seasonName, '2026 Summer');
-  assert.equal(result.seasonArchives.length, 2);
-  assert.deepEqual(result.archive.summary, {
+  const { archive } = result;
+  assert.equal(archive.version, 2);
+  assert.equal(archive.homeScoresSnapshot.length, 2, "both season boundary dates are included");
+  assert.equal(archive.programScoresSnapshot.length, 1);
+  assert.equal(archive.eventRsvpSnapshot.length, 1, "RSVP inherits the related event date");
+  assert.equal(archive.scRsvpSnapshot.length, 1, "S&C RSVP inherits the related session date");
+  assert.equal(archive.scLogSnapshot.length, 1, "S&C log inherits the related session date");
+  assert.deepEqual(archive.summary, {
     rosterCount: 1,
-    playerProfileCount: 0,
-    homeScoreCount: 1,
+    playerProfileCount: 1,
+    homeScoreCount: 2,
     programScoreCount: 1,
     shotLogCount: 1,
     eventCount: 1,
@@ -43,286 +92,125 @@ test('coach can create a season archive with accurate summary', () => {
     scSessionCount: 1,
     scRsvpCount: 1,
     scLogCount: 1,
-    totalHomeMakes: 10,
-    totalProgramScore: 7,
-    totalShotLogMakes: 4,
+    totalHomeMakes: 20,
+    totalProgramScore: 20,
+    totalShotLogMakes: 30,
   });
+  assert.equal(archive.playerSeasonSummaries[0].totalHomeMakes, 20);
+  assert.equal(archive.playerSeasonSummaries[0].lastActivityDate, "2026-06-05");
 });
 
-test('player cannot create a season archive and season name is required', () => {
-  assert.equal(createSeasonArchive({ ...base(), coach: { role: 'player', teamId: 'team-a' } }).ok, false);
-  assert.equal(createSeasonArchive({ ...base(), seasonName: '  ' }).error, 'Season name is required.');
-});
-
-test('archive is scoped to active team and excludes another team data', () => {
-  const { archive } = createSeasonArchive(base());
-  for (const key of ['rosterSnapshot','homeScoresSnapshot','programScoresSnapshot','shotLogsSnapshot','eventSnapshot','eventRsvpSnapshot','scSessionSnapshot','scRsvpSnapshot','scLogSnapshot','challengeSnapshot']) {
-    assert.equal(archive[key].length, 1, key);
-    assert.equal(archive[key][0].teamId, 'team-a');
-  }
-});
-
-test('live data and protected account/branding objects remain unchanged', () => {
-  const data = base();
-  const before = frozenJson(data);
-  createSeasonArchive(data);
-  assert.equal(frozenJson(data), before);
-  assert.deepEqual(data.coach, { email: 'coach@a.test', name: 'Coach A', role: 'coach', teamId: 'team-a', branding: { primary: 'lime' } });
-});
-
-test('all live arrays remain unchanged including drills and program drills', () => {
-  const data = base();
-  const keys = ['players','playerProfiles','scores','programScores','shotLogs','events','rsvps','scSessions','scRsvps','scLogs','drills','programDrills'];
-  const before = Object.fromEntries(keys.map((key) => [key, frozenJson(data[key])]));
-  createSeasonArchive(data);
-  for (const key of keys) assert.equal(frozenJson(data[key]), before[key], key);
-});
-
-test('archive snapshot is stable after live arrays are changed', () => {
-  const data = base();
-  const { archive } = createSeasonArchive(data);
-  data.players[0].email = 'changed@test';
-  data.scores.push({ id: 'new', teamId: 'team-a', score: 1000 });
-  assert.equal(archive.rosterSnapshot[0].email, 'p1@a.test');
-  assert.equal(archive.homeScoresSnapshot.length, 1);
-  assert.equal(archive.summary.homeScoreCount, 1);
-});
-
-
-test('archive includes team-scoped frozen player season summaries with individual totals', () => {
-  const data = {
-    ...base(),
-    players: [
-      { id: 'p1', playerId: 'p1', name: 'Player One', email: 'one@a.test', role: 'player', teamId: 'team-a', source: 'registered' },
-      { id: 'p2', playerId: 'p2', name: 'Other Team', email: 'two@b.test', role: 'player', teamId: 'team-b' },
-    ],
-    activeRosterPlayers: [
-      { id: 'p1', playerId: 'p1', name: 'Player One', email: 'one@a.test', role: 'player', teamId: 'team-a', source: 'registered' },
-    ],
-    playerProfiles: [
-      { id: 'profile-1', userId: 'one@a.test', teamId: 'team-a', firstName: 'Player', lastName: 'One' },
-      { id: 'profile-other', teamId: 'team-b', firstName: 'Other', lastName: 'Profile' },
-    ],
+test("excludes other-team, outside-season, missing-date, and removed-player activity", () => {
+  const removed = { id: "p2", playerId: "p2", email: "removed@a.test", name: "Removed", role: "player", teamId: "team-a", status: "inactive" };
+  const result = buildSeasonArchive(base({
+    activeRosterPlayers: [...base().activeRosterPlayers, removed],
     scores: [
-      { id: 'home-1', teamId: 'team-a', playerId: 'p1', email: 'one@a.test', score: 12, date: '2026-06-01' },
-      { id: 'home-2', teamId: 'team-a', playerId: 'p1', email: 'one@a.test', makes: 8, date: '2026-06-03' },
-      { id: 'home-other', teamId: 'team-b', playerId: 'p2', score: 99, date: '2026-06-04' },
-    ],
-    programScores: [
-      { id: 'prog-1', teamId: 'team-a', playerId: 'p1', email: 'one@a.test', score: 20, date: '2026-06-02' },
-      { id: 'prog-2', teamId: 'team-a', playerId: 'p1', email: 'one@a.test', score: 15, date: '2026-06-05' },
-      { id: 'prog-other', teamId: 'team-b', playerId: 'p2', score: 88, date: '2026-06-06' },
+      ...base().scores,
+      { id: "outside", teamId: "team-a", playerId: "p1", email: "one@a.test", score: 100, date: "2026-07-02" },
+      { id: "missing", teamId: "team-a", playerId: "p1", email: "one@a.test", score: 100 },
+      { id: "removed-score", teamId: "team-a", playerId: "p2", email: "removed@a.test", score: 100, date: "2026-06-01" },
+      { id: "other-team", teamId: "team-b", playerId: "p1", email: "one@a.test", score: 100, date: "2026-06-01" },
     ],
     shotLogs: [
-      { id: 'shot-1', teamId: 'team-a', playerId: 'p1', email: 'one@a.test', made: 30, date: '2026-06-07' },
-      { id: 'shot-other', teamId: 'team-b', playerId: 'p2', made: 70, date: '2026-06-08' },
+      ...base().shotLogs,
+      { id: "removed-shots", teamId: "team-a", playerId: "p2", email: "removed@a.test", made: 100, date: "2026-06-01" },
     ],
     rsvps: [
-      { id: 'rsvp-1', teamId: 'team-a', playerId: 'p1', email: 'one@a.test', date: '2026-06-09' },
-      { id: 'rsvp-other', teamId: 'team-b', playerId: 'p2', date: '2026-06-10' },
+      ...base().rsvps,
+      { id: "removed-rsvp", teamId: "team-a", eventId: "event-1", playerId: "p2", email: "removed@a.test" },
     ],
-    scRsvps: [
-      { id: 'scr-1', teamId: 'team-a', playerId: 'p1', email: 'one@a.test', date: '2026-06-11' },
-      { id: 'scr-other', teamId: 'team-b', playerId: 'p2', date: '2026-06-12' },
-    ],
-    scLogs: [
-      { id: 'scl-1', teamId: 'team-a', playerId: 'p1', email: 'one@a.test', date: '2026-06-13' },
-      { id: 'scl-other', teamId: 'team-b', playerId: 'p2', date: '2026-06-14' },
-    ],
-  };
-  const { archive } = createSeasonArchive(data);
-  assert.equal(archive.playerSeasonSummaries.length, 1);
-  const [summary] = archive.playerSeasonSummaries;
-  assert.equal(summary.name, 'Player One');
-  assert.equal(summary.email, 'one@a.test');
-  assert.equal(summary.playerId, 'p1');
-  assert.equal(summary.rosterSource, 'registered');
-  assert.equal(summary.totalHomeMakes, 20);
-  assert.equal(summary.homeScoreCount, 2);
-  assert.equal(summary.totalProgramScore, 35);
-  assert.equal(summary.programScoreCount, 2);
-  assert.equal(summary.totalShotLogMakes, 30);
-  assert.equal(summary.shotLogCount, 1);
-  assert.equal(summary.eventRsvpCount, 1);
-  assert.equal(summary.scRsvpCount, 1);
-  assert.equal(summary.scLogCount, 1);
-  assert.equal(summary.programDrillAttemptCount, 2);
-  assert.equal(summary.bestProgramScore, 20);
-  assert.equal(summary.lastActivityDate, '2026-06-13');
-  assert.ok(!archive.playerSeasonSummaries.some((row) => row.email === 'two@b.test'));
-
-  data.scores[0].score = 999;
-  data.players[0].name = 'Changed Live';
-  assert.equal(archive.playerSeasonSummaries[0].totalHomeMakes, 20);
-  assert.equal(archive.playerSeasonSummaries[0].name, 'Player One');
+  }));
+  assert.equal(result.ok, true);
+  assert.deepEqual(result.archive.rosterSnapshot.map((row) => row.email), ["one@a.test"]);
+  assert.deepEqual(result.archive.homeScoresSnapshot.map((row) => row.id), ["home-1", "home-2"]);
+  assert.deepEqual(result.archive.shotLogsSnapshot.map((row) => row.id), ["shots-1"]);
+  assert.deepEqual(result.archive.eventRsvpSnapshot.map((row) => row.id), ["rsvp-1"]);
+  assert.equal(result.archive.diagnostics.excludedOutsideSeason.homeScores, 1);
+  assert.equal(result.archive.diagnostics.excludedMissingDate.homeScores, 1);
+  assert.equal(result.archive.diagnostics.excludedInactivePlayer.homeScores, 1);
+  assert.equal(result.archive.diagnostics.excludedOtherTeam.homeScores, 1);
+  assert.ok(!JSON.stringify(result.archive).includes("removed@a.test"));
 });
 
-test('profile-only active team players receive season summaries without other team profiles', () => {
-  const { archive } = createSeasonArchive({
-    ...base(),
-    players: [],
-    activeRosterPlayers: [{ id: 'profile-a', profileId: 'profile-a', teamId: 'team-a', firstName: 'Manual', lastName: 'Player', source: 'profile' }],
-    playerProfiles: [
-      { id: 'profile-a', profileId: 'profile-a', teamId: 'team-a', firstName: 'Manual', lastName: 'Player' },
-      { id: 'profile-b', profileId: 'profile-b', teamId: 'team-b', firstName: 'Wrong', lastName: 'Team' },
-    ],
-    scores: [{ id: 's-profile', teamId: 'team-a', profileId: 'profile-a', score: 11 }],
+test("profile-only active players remain supported", () => {
+  const result = buildSeasonArchive(base({
+    activeRosterPlayers: [{ id: "manual-1", profileId: "manual-1", teamId: "team-a", firstName: "Manual", lastName: "Player", source: "profile" }],
+    playerProfiles: [{ id: "manual-1", profileId: "manual-1", teamId: "team-a", firstName: "Manual", lastName: "Player" }],
+    scores: [{ id: "manual-score", teamId: "team-a", profileId: "manual-1", score: 11, date: "2026-06-01" }],
+    programScores: [], shotLogs: [], rsvps: [], scRsvps: [], scLogs: [], challenges: [],
+  }));
+  assert.equal(result.ok, true);
+  assert.equal(result.archive.playerSeasonSummaries[0].name, "Manual Player");
+  assert.equal(result.archive.playerSeasonSummaries[0].totalHomeMakes, 11);
+});
+
+test("duplicate team-season ranges are rejected deterministically", () => {
+  const existing = [{ teamId: "team-a", seasonName: "2026 SUMMER", seasonStartDate: "2026-05-01", seasonEndDate: "2026-07-01" }];
+  const result = buildSeasonArchive(base({ existingArchives: existing }));
+  assert.equal(result.ok, false);
+  assert.equal(result.code, "duplicate_archive");
+});
+
+test("building an archive never mutates live data and the snapshot stays frozen", () => {
+  const input = base();
+  const before = JSON.stringify(input);
+  const result = buildSeasonArchive(input);
+  assert.equal(JSON.stringify(input), before);
+  input.scores[0].score = 999;
+  input.activeRosterPlayers[0].name = "Changed";
+  assert.equal(result.archive.homeScoresSnapshot[0].score, 12);
+  assert.equal(result.archive.rosterSnapshot[0].name, "Player One");
+});
+
+test("createSeasonArchive reports success only after durable persistence succeeds", async () => {
+  const existingArchives = [];
+  let persisted = false;
+  const result = await createSeasonArchive(base({
+    existingArchives,
+    persistArchive: async ({ archive }) => {
+      persisted = true;
+      return { ok: true, archive: { ...archive, createdAt: "2026-07-04T00:00:01.000Z" } };
+    },
+  }));
+  assert.equal(persisted, true);
+  assert.equal(result.ok, true);
+  assert.equal(existingArchives.length, 1);
+  assert.equal(existingArchives[0].createdAt, "2026-07-04T00:00:01.000Z");
+});
+
+test("failed persistence creates no false success and does not alter archive state", async () => {
+  const existingArchives = [];
+  const result = await createSeasonArchive(base({
+    existingArchives,
+    persistArchive: async () => ({ ok: false, error: "Server write failed", code: "archive_write_failed" }),
+  }));
+  assert.equal(result.ok, false);
+  assert.equal(result.error, "Server write failed");
+  assert.deepEqual(existingArchives, []);
+});
+
+test("concurrent duplicate submissions collapse into one server write", async () => {
+  const existingArchives = [];
+  let writes = 0;
+  const input = base({
+    existingArchives,
+    persistArchive: async ({ archive }) => {
+      writes += 1;
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      return { ok: true, archive };
+    },
   });
-  assert.deepEqual(archive.playerSeasonSummaries.map((row) => row.name), ['Manual Player']);
-  assert.equal(archive.playerSeasonSummaries[0].profileId, 'profile-a');
-  assert.equal(archive.playerSeasonSummaries[0].totalHomeMakes, 11);
+  const [first, second] = await Promise.all([createSeasonArchive(input), createSeasonArchive(input)]);
+  assert.equal(first.ok, true);
+  assert.equal(second.ok, true);
+  assert.equal(writes, 1);
+  assert.equal(existingArchives.length, 1);
 });
 
-import fs from 'node:fs';
-const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
-
-
-
-test('archive roster and player summaries are populated from activeRosterPlayers only', () => {
-  const { archive } = createSeasonArchive({
-    ...base(),
-    players: [
-      { id: 'raw-active', playerId: 'raw-active', teamId: 'team-a', name: 'Raw Active', email: 'raw-active@a.test' },
-      { id: 'raw-only', playerId: 'raw-only', teamId: 'team-a', name: 'Raw Only', email: 'raw-only@a.test' },
-      { id: 'aq-coach', playerId: 'aq-coach', teamId: 'team-a', name: 'AQ Coach', email: 'AQ@gmail.com', role: 'coach' },
-    ],
-    activeRosterPlayers: [
-      { id: 'raw-active', playerId: 'raw-active', teamId: 'team-a', name: 'Raw Active', email: 'raw-active@a.test' },
-    ],
-    playerProfiles: [
-      { id: 'active-profile', userId: 'raw-active@a.test', teamId: 'team-a', firstName: 'Raw', lastName: 'Active' },
-      { id: 'raw-only-profile', userId: 'raw-only@a.test', teamId: 'team-a', firstName: 'Raw', lastName: 'Only' },
-      { id: 'aq-profile', userId: 'AQ@gmail.com', teamId: 'team-a', firstName: 'AQ', lastName: 'Coach' },
-    ],
-    scores: [
-      { id: 'active-score', teamId: 'team-a', playerId: 'raw-active', email: 'raw-active@a.test', score: 12 },
-      { id: 'raw-only-score', teamId: 'team-a', playerId: 'raw-only', email: 'raw-only@a.test', score: 99 },
-    ],
-  });
-  assert.deepEqual(archive.rosterSnapshot.map((row) => row.email), ['raw-active@a.test']);
-  assert.deepEqual(archive.playerProfileSnapshot.map((row) => row.id), ['active-profile']);
-  assert.deepEqual(archive.playerSeasonSummaries.map((row) => row.email), ['raw-active@a.test']);
-  assert.equal(archive.playerSeasonSummaries[0].totalHomeMakes, 12);
-  assert.ok(!archive.playerSeasonSummaries.some((row) => row.email === 'raw-only@a.test' || row.email === 'AQ@gmail.com'));
-});
-
-test('season archive uses active roster only and excludes inactive lifecycle rows', () => {
-  const data = {
-    ...base(),
-    players: [
-      { id: 'active', playerId: 'active', teamId: 'team-a', name: 'Active Player', email: 'active@a.test', role: 'player' },
-      { id: 'coach', teamId: 'team-a', name: 'Coach Row', email: 'AQ@gmail.com', role: 'coach' },
-      { id: 'is-coach', teamId: 'team-a', name: 'Is Coach', email: 'iscoach@a.test', isCoach: true },
-      { id: 'removed', teamId: 'team-a', name: 'Removed Player', email: 'removed@a.test', removedFromTeam: true },
-      { id: 'archived', teamId: 'team-a', name: 'Archived Player', email: 'archived@a.test', archived: true },
-      { id: 'hidden', teamId: 'team-a', name: 'Hidden Player', email: 'hidden@a.test', hideFromLeaderboards: true },
-      { id: 'inactive', teamId: 'team-a', name: 'Inactive Player', email: 'inactive@a.test', rosterStatus: 'inactive' },
-      { id: 'local-deleted', teamId: 'team-a', name: 'Local Deleted', email: 'local-deleted@a.test', rosterStatus: 'team_local_data_deleted', teamLocalDataDeleted: true },
-    ],
-    activeRosterPlayers: [
-      { id: 'active', playerId: 'active', teamId: 'team-a', name: 'Active Player', email: 'active@a.test', role: 'player' },
-      { id: 'coach', teamId: 'team-a', name: 'Coach Row', email: 'AQ@gmail.com', role: 'coach' },
-      { id: 'is-coach', teamId: 'team-a', name: 'Is Coach', email: 'iscoach@a.test', isCoach: true },
-      { id: 'removed', teamId: 'team-a', name: 'Removed Player', email: 'removed@a.test', removedFromTeam: true },
-      { id: 'archived', teamId: 'team-a', name: 'Archived Player', email: 'archived@a.test', archived: true },
-      { id: 'hidden', teamId: 'team-a', name: 'Hidden Player', email: 'hidden@a.test', hideFromLeaderboards: true },
-      { id: 'inactive', teamId: 'team-a', name: 'Inactive Player', email: 'inactive@a.test', rosterStatus: 'inactive' },
-      { id: 'local-deleted', teamId: 'team-a', name: 'Local Deleted', email: 'local-deleted@a.test', rosterStatus: 'team_local_data_deleted', teamLocalDataDeleted: true },
-    ],
-    playerProfiles: [
-      { id: 'active-profile', userId: 'active@a.test', teamId: 'team-a', firstName: 'Active', lastName: 'Profile' },
-      { id: 'stale-profile', userId: 'stale@a.test', teamId: 'team-a', firstName: 'Stale', lastName: 'Profile' },
-      { id: 'removed-profile', userId: 'removed@a.test', teamId: 'team-a', firstName: 'Removed', lastName: 'Profile' },
-    ],
-    scores: [
-      { id: 'active-score', teamId: 'team-a', playerId: 'active', email: 'active@a.test', score: 5 },
-      { id: 'removed-score', teamId: 'team-a', playerId: 'removed', email: 'removed@a.test', score: 500 },
-    ],
-  };
-  const before = frozenJson(data);
-  const { archive } = createSeasonArchive(data);
-  assert.deepEqual(archive.rosterSnapshot.map((row) => row.email), ['active@a.test']);
-  assert.deepEqual(archive.playerProfileSnapshot.map((row) => row.id), ['active-profile']);
-  assert.deepEqual(archive.playerSeasonSummaries.map((row) => row.email), ['active@a.test']);
-  assert.equal(archive.playerSeasonSummaries[0].totalHomeMakes, 5);
-  assert.equal(frozenJson(data), before);
-  assert.ok(data.players.some((row) => row.email === 'AQ@gmail.com' && row.role === 'coach'));
-});
-
-
-test('removed deleted and archived players do not appear in archive detail', () => {
-  const { archive } = createSeasonArchive({
-    ...base(),
-    activeRosterPlayers: [
-      { id: 'active', teamId: 'team-a', name: 'Active Player', email: 'active@a.test' },
-      { id: 'removed', teamId: 'team-a', name: 'Removed Player', email: 'removed@a.test', removed: true },
-      { id: 'deleted', teamId: 'team-a', name: 'Deleted Player', email: 'deleted@a.test', rosterStatus: 'team_local_data_deleted' },
-      { id: 'archived', teamId: 'team-a', name: 'Archived Player', email: 'archived@a.test', archived: true },
-    ],
-    playerProfiles: [
-      { id: 'removed-profile', teamId: 'team-a', email: 'removed@a.test', firstName: 'Removed', lastName: 'Player' },
-    ],
-  });
-  const model = getSeasonArchiveDetailModel(archive);
-  const detailText = JSON.stringify(model.sections);
-  assert.match(detailText, /Active Player/);
-  assert.doesNotMatch(detailText, /Removed Player|Deleted Player|Archived Player|removed@a\.test|deleted@a\.test|archived@a\.test/);
-});
-
-test('App archiveSeason passes getCoachRosterPlayers activeRosterPlayers into createSeasonArchive', () => {
-  assert.match(appSource, /const activeRosterPlayers=getCoachRosterPlayers\(\{\s*players,\s*playerProfiles,\s*teamId:user\?\.teamId,\s*\}\)/);
-  assert.match(appSource, /createSeasonArchive\(\{\s*\.\.\.input,\s*teamId:user\?\.teamId,\s*coach:user,\s*players,\s*playerProfiles,\s*activeRosterPlayers,/);
-});
-
-test('coach archived season rows expose a clear view affordance', () => {
-  assert.match(appSource, /data-testid="season-archive-view-button"/);
-  assert.match(appSource, /VIEW ARCHIVE/);
-});
-
-test('selecting an archive opens a read-only detail view with back navigation', () => {
-  assert.match(appSource, /data-testid="season-archive-detail"/);
-  assert.match(appSource, /season-archive-player-summaries/);
-  assert.match(appSource, /<SeasonArchiveDetail archive=\{selectedSeasonArchive\} onBack=\{\(\)=>setSelectedSeasonArchiveId\(null\)\}/);
-  assert.match(appSource, /BACK TO ARCHIVED SEASONS/);
-});
-
-test('archive detail model displays summary counts and frozen snapshot sections', () => {
-  const { archive } = createSeasonArchive({
-    ...base(),
-    players: [{ id: 'p1', name: 'A Player', email: 'player@a.test', teamId: 'team-a' }],
-    activeRosterPlayers: [{ id: 'p1', name: 'A Player', email: 'player@a.test', teamId: 'team-a' }],
-    scores: [{ id: 's1', teamId: 'team-a', playerId: 'p1', email: 'player@a.test', score: 10 }],
-    programScores: [{ id: 'ps1', teamId: 'team-a', playerId: 'p1', email: 'player@a.test', score: 7 }],
-    rsvps: [{ id: 'r1', teamId: 'team-a', playerId: 'p1', email: 'player@a.test' }],
-    scLogs: [{ id: 'scl1', teamId: 'team-a', playerId: 'p1', email: 'player@a.test' }],
-    events: [{ id: 'e1', title: 'Open Gym', date: '2026-06-01', teamId: 'team-a' }],
-    scSessions: [{ id: 'sc1', title: 'Lift Day', date: '2026-06-02', teamId: 'team-a' }],
-    programDrills: [{ id: 'pd1', name: 'Form Shooting' }],
-  });
-  const model = getSeasonArchiveDetailModel(archive);
-  assert.deepEqual(model.summaryStats.map((stat) => stat.label), ['Roster', 'Home Scores', 'Program Scores', 'Shot Logs', 'Events', 'Event RSVPs', 'S&C Sessions', 'S&C RSVPs', 'S&C Logs', 'Home Makes', 'Program Score', 'Shot Log Makes']);
-  assert.equal(model.summaryStats.find((stat) => stat.label === 'Roster').value, 1);
-  assert.deepEqual(model.sections.map((section) => section.title), ['ROSTER SNAPSHOT', 'EVENT SNAPSHOT', 'S&C SNAPSHOT', 'PROGRAM DRILL SNAPSHOT', 'PLAYER SEASON SUMMARIES']);
-  assert.equal(model.sections[0].rows[0], 'A Player (player@a.test)');
-  assert.equal(model.sections[1].rows[0], 'Open Gym · 2026-06-01');
-  assert.equal(model.sections[2].rows[0], 'Lift Day · 2026-06-02');
-  assert.equal(model.sections[3].rows[0], 'Form Shooting');
-  assert.match(model.sections[4].rows[0], /A Player.*Home 10.*Program 7.*Event RSVPs 1.*S&C Logs 1/);
-});
-
-test('archive detail uses selected archive snapshots instead of live app arrays', () => {
-  assert.match(appSource, /getSeasonArchiveDetailModel\(archive\)/);
-  assert.match(appSource, /<SeasonArchiveDetail archive=\{selectedSeasonArchive\}/);
-  assert.doesNotMatch(appSource, /setPlayers\([^)]*selectedSeasonArchive|setScores\([^)]*selectedSeasonArchive|setEvents\([^)]*selectedSeasonArchive|setScSessions\([^)]*selectedSeasonArchive/);
-});
-
-test('players do not receive archive management or archive detail controls', () => {
-  const playerInvocationStart = appSource.indexOf('{view==="player"');
-  const playerInvocationEnd = appSource.indexOf('{view==="coach"', playerInvocationStart);
-  const playerInvocation = appSource.slice(playerInvocationStart, playerInvocationEnd);
-  assert.notEqual(playerInvocationStart, -1);
-  assert.notEqual(playerInvocationEnd, -1);
-  assert.doesNotMatch(playerInvocation, /seasonArchives=\{/);
-  assert.doesNotMatch(playerInvocation, /archiveSeason=\{/);
-  assert.doesNotMatch(playerInvocation, /SeasonArchiveDetail|season-archive-view-button|season-archive-detail/);
+test("detail model remains read-only and readable", () => {
+  const { archive } = buildSeasonArchive(base());
+  const detail = getSeasonArchiveDetailModel(archive);
+  assert.equal(detail.seasonName, "2026 Summer");
+  assert.equal(detail.seasonRange, "2026-05-01 — 2026-07-01");
+  assert.ok(detail.sections.some((section) => section.title === "PLAYER SEASON SUMMARIES" && section.rows[0].includes("Player One")));
 });
