@@ -26,7 +26,12 @@ jobs:
         run: npm ci
 
       - name: Run season archive service tests
-        run: node --test tests/season-archive.test.mjs tests/season-archives-route.test.mjs
+        run: |
+          set +e
+          node --test tests/season-archive.test.mjs tests/season-archives-route.test.mjs > season-archive-service-tests.txt 2>&1
+          status=$?
+          cat season-archive-service-tests.txt
+          exit $status
 
       - name: Install Playwright test runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -40,12 +45,13 @@ jobs:
       - name: Run season archive browser test
         run: npm run test:e2e:season-archive
 
-      - name: Upload Playwright failure artifacts
+      - name: Upload archive failure artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: season-archive-playwright-artifacts
+          name: season-archive-failure-artifacts
           path: |
+            season-archive-service-tests.txt
             playwright-report/
             test-results/
           if-no-files-found: ignore
