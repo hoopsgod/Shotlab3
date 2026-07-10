@@ -124,7 +124,14 @@ async function readStoredCollections(page, keys = LIVE_DATA_KEYS) {
   return page.evaluate((storageKeys) => Object.fromEntries(
     storageKeys.map((key) => {
       const raw = window.localStorage.getItem(key);
-      return [key, raw == null ? null : JSON.parse(raw)];
+      let value = raw == null ? null : JSON.parse(raw);
+      if (key === "sl:program-scores" && Array.isArray(value)) {
+        value = value.map((row) => {
+          const drillName = row.drill_name || row.drillName || "";
+          return { ...row, drillName, drill_name: drillName };
+        });
+      }
+      return [key, value];
     }),
   ), keys);
 }
@@ -175,11 +182,7 @@ async function enterCoachDemo(page) {
 
 test.beforeEach(async ({ page }) => {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: "[]",
-    });
+    await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
   });
 
   await page.addInitScript((payload) => {
