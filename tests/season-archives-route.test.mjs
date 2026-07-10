@@ -49,7 +49,7 @@ function installFetch({ role = "coach", duplicate = false, storedRows = [] } = {
       return jsonResponse(role === "coach" ? [{ team_id: "team-a", role: "coach" }] : []);
     }
     if (href.includes("/rest/v1/team_memberships")) {
-      return jsonResponse(role === "coach" ? [{ team_id: "team-a", role: "coach", status: "active" }] : [{ team_id: "team-a", role: "player", status: "active" }]);
+      return jsonResponse(role === "coach" ? [{ team_id: "team-a", role: "coach", status: "active" }] : []);
     }
     if (href.includes("/rest/v1/teams")) return jsonResponse(role === "coach" ? [{ id: "team-a", coach_user_id: coachUuid }] : []);
     if (href.includes("/rest/v1/season_archives")) {
