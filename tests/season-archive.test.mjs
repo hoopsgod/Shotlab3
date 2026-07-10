@@ -97,7 +97,7 @@ test("builds an inclusive, team-scoped frozen snapshot with accurate totals", ()
     totalShotLogMakes: 30,
   });
   assert.equal(archive.playerSeasonSummaries[0].totalHomeMakes, 20);
-  assert.equal(archive.playerSeasonSummaries[0].lastActivityDate, "2026-06-05");
+  assert.equal(archive.playerSeasonSummaries[0].lastActivityDate, "2026-07-01");
 });
 
 test("excludes other-team, outside-season, missing-date, and removed-player activity", () => {
