@@ -164,15 +164,41 @@ async function readStoredCollections(page, keys = LIVE_DATA_KEYS) {
   keys);
 }
 
+async function waitForHydration(page) {
+  await expect.poll(
+    () => page.evaluate(({ teamId, coachEmail, playerEmail }) => {
+      const parse = (key) => {
+        try {
+          return JSON.parse(window.localStorage.getItem(key) || "[]");
+        } catch {
+          return [];
+        }
+      };
+      const teams = parse("sl:teams");
+      const players = parse("sl:players");
+      const profiles = parse("sl:player-profiles");
+      return teams.some((team) => team.id === teamId && team.branding)
+        && players.some((player) => player.email === coachEmail && player.teamId === teamId)
+        && players.some((player) => player.email === playerEmail && player.teamId === teamId)
+        && profiles.some((profile) => profile.userId === playerEmail && profile.teamId === teamId);
+    }, { teamId: TEAM_ID, coachEmail: COACH_EMAIL, playerEmail: PLAYER_EMAIL }),
+    { timeout: 20_000, message: "Seeded team data should finish hydrating before demo sign-in" },
+  ).toBe(true);
+
+  await page.evaluate(() => new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  }));
+}
+
 async function enterCoachDemo(page) {
   const demoCoachButton = page.getByRole("button", { name: "Demo Coach", exact: true });
   const playersButton = page.getByRole("button", { name: "Players", exact: true });
 
-  await expect(
-    page.getByRole("button", { name: /^(Demo Coach|Players)$/ }).first(),
-  ).toBeVisible({ timeout: 15_000 });
+  if (await demoCoachButton.isVisible()) {
+    await waitForHydration(page);
+    await demoCoachButton.click();
+  }
 
-  if (await demoCoachButton.isVisible()) await demoCoachButton.click();
   await expect(playersButton).toBeVisible({ timeout: 15_000 });
   return playersButton;
 }
