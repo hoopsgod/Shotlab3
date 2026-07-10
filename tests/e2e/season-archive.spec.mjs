@@ -19,165 +19,131 @@ const LIVE_DATA_KEYS = [
 ];
 
 const seedData = {
-  "sl:teams": [
-    {
-      id: TEAM_ID,
-      name: "E2E Archive Team",
-      ownerCoachId: COACH_EMAIL,
-      joinCode: "E2E26",
-      createdAt: 1_750_000_000_000,
-    },
-  ],
+  "sl:teams": [{
+    id: TEAM_ID,
+    name: "E2E Archive Team",
+    ownerCoachId: COACH_EMAIL,
+    joinCode: "E2E26",
+    createdAt: 1_750_000_000_000,
+  }],
   "sl:players": [
-    {
-      id: "coach-e2e",
-      email: COACH_EMAIL,
-      name: "Demo Coach",
-      role: "coach",
-      teamId: TEAM_ID,
-    },
-    {
-      id: "player-demo-primary",
-      playerId: "player-demo-primary",
-      email: PLAYER_EMAIL,
-      name: "Demo Player",
-      role: "player",
-      teamId: TEAM_ID,
-    },
+    { id: "coach-e2e", email: COACH_EMAIL, name: "Demo Coach", role: "coach", teamId: TEAM_ID },
+    { id: "player-demo-primary", playerId: "player-demo-primary", email: PLAYER_EMAIL, name: "Demo Player", role: "player", teamId: TEAM_ID },
   ],
-  "sl:player-profiles": [
-    {
-      id: "profile-demo-primary",
-      userId: PLAYER_EMAIL,
-      teamId: TEAM_ID,
-      firstName: "Demo",
-      lastName: "Player",
-    },
-  ],
-  "sl:scores": [
-    {
-      id: "score-e2e-home-1",
-      playerId: "player-demo-primary",
-      email: PLAYER_EMAIL,
-      name: "Demo Player",
-      teamId: TEAM_ID,
-      drillId: "form-shooting",
-      score: 18,
-      makes: 18,
-      date: "2026-02-10",
-      src: "home",
-    },
-  ],
-  "sl:program-scores": [
-    {
-      id: "score-e2e-program-1",
-      playerId: "player-demo-primary",
-      email: PLAYER_EMAIL,
-      name: "Demo Player",
-      teamId: TEAM_ID,
-      drillId: "program-form-shooting",
-      score: 21,
-      date: "2026-02-12",
-      src: "program",
-    },
-  ],
-  "sl:shotlogs": [
-    {
-      id: "shotlog-e2e-1",
-      playerId: "player-demo-primary",
-      email: PLAYER_EMAIL,
-      name: "Demo Player",
-      teamId: TEAM_ID,
-      made: 125,
-      date: "2026-02-13",
-    },
-  ],
-  "sl:events": [
-    {
-      id: "event-e2e-1",
-      teamId: TEAM_ID,
-      title: "Archive Test Practice",
-      date: "2026-02-15",
-      time: "5:00 PM",
-      location: "Main Gym",
-      type: "run",
-    },
-  ],
-  "sl:rsvps": [
-    {
-      id: "rsvp-e2e-1",
-      eventId: "event-e2e-1",
-      playerId: "player-demo-primary",
-      email: PLAYER_EMAIL,
-      name: "Demo Player",
-      teamId: TEAM_ID,
-      status: "yes",
-      attended: true,
-      date: "2026-02-15",
-    },
-  ],
-  "sl:sc-sessions": [
-    {
-      id: "sc-session-e2e-1",
-      teamId: TEAM_ID,
-      sport: "Strength Circuit",
-      sessionType: "School",
-      date: "2026-02-16",
-      time: "3:30 PM",
-    },
-  ],
-  "sl:sc-rsvps": [
-    {
-      id: "sc-rsvp-e2e-1",
-      sessionId: "sc-session-e2e-1",
-      playerId: "player-demo-primary",
-      email: PLAYER_EMAIL,
-      name: "Demo Player",
-      teamId: TEAM_ID,
-      status: "yes",
-      date: "2026-02-16",
-    },
-  ],
-  "sl:sc-logs": [
-    {
-      id: "sc-log-e2e-1",
-      sessionId: "sc-session-e2e-1",
-      playerId: "player-demo-primary",
-      email: PLAYER_EMAIL,
-      name: "Demo Player",
-      teamId: TEAM_ID,
-      date: "2026-02-16",
-      completed: true,
-    },
-  ],
+  "sl:player-profiles": [{
+    id: "profile-demo-primary",
+    userId: PLAYER_EMAIL,
+    teamId: TEAM_ID,
+    firstName: "Demo",
+    lastName: "Player",
+  }],
+  "sl:scores": [{
+    id: "score-e2e-home-1",
+    playerId: "player-demo-primary",
+    email: PLAYER_EMAIL,
+    name: "Demo Player",
+    teamId: TEAM_ID,
+    drillId: "form-shooting",
+    score: 18,
+    makes: 18,
+    date: "2026-02-10",
+    src: "home",
+  }],
+  "sl:program-scores": [{
+    id: "score-e2e-program-1",
+    playerId: "player-demo-primary",
+    email: PLAYER_EMAIL,
+    name: "Demo Player",
+    teamId: TEAM_ID,
+    drillId: "program-form-shooting",
+    score: 21,
+    date: "2026-02-12",
+    src: "program",
+  }],
+  "sl:shotlogs": [{
+    id: "shotlog-e2e-1",
+    playerId: "player-demo-primary",
+    email: PLAYER_EMAIL,
+    name: "Demo Player",
+    teamId: TEAM_ID,
+    made: 125,
+    date: "2026-02-13",
+  }],
+  "sl:events": [{
+    id: "event-e2e-1",
+    teamId: TEAM_ID,
+    title: "Archive Test Practice",
+    date: "2026-02-15",
+    time: "5:00 PM",
+    location: "Main Gym",
+    type: "run",
+  }],
+  "sl:rsvps": [{
+    id: "rsvp-e2e-1",
+    eventId: "event-e2e-1",
+    playerId: "player-demo-primary",
+    email: PLAYER_EMAIL,
+    name: "Demo Player",
+    teamId: TEAM_ID,
+    status: "yes",
+    attended: true,
+    date: "2026-02-15",
+  }],
+  "sl:sc-sessions": [{
+    id: "sc-session-e2e-1",
+    teamId: TEAM_ID,
+    sport: "Strength Circuit",
+    sessionType: "School",
+    date: "2026-02-16",
+    time: "3:30 PM",
+  }],
+  "sl:sc-rsvps": [{
+    id: "sc-rsvp-e2e-1",
+    sessionId: "sc-session-e2e-1",
+    playerId: "player-demo-primary",
+    email: PLAYER_EMAIL,
+    name: "Demo Player",
+    teamId: TEAM_ID,
+    status: "yes",
+    date: "2026-02-16",
+  }],
+  "sl:sc-logs": [{
+    id: "sc-log-e2e-1",
+    sessionId: "sc-session-e2e-1",
+    playerId: "player-demo-primary",
+    email: PLAYER_EMAIL,
+    name: "Demo Player",
+    teamId: TEAM_ID,
+    date: "2026-02-16",
+    completed: true,
+  }],
   "sl:season-archives": [],
 };
 
 async function readStoredCollections(page, keys = LIVE_DATA_KEYS) {
-  return page.evaluate((storageKeys) =>
-    Object.fromEntries(
-      storageKeys.map((key) => {
-        const raw = window.localStorage.getItem(key);
-        return [key, raw == null ? null : JSON.parse(raw)];
-      }),
-    ),
-  keys);
+  return page.evaluate((storageKeys) => Object.fromEntries(
+    storageKeys.map((key) => {
+      const raw = window.localStorage.getItem(key);
+      return [key, raw == null ? null : JSON.parse(raw)];
+    }),
+  ), keys);
 }
 
 async function waitForHydration(page) {
   await expect.poll(
     () => page.evaluate(({ teamId, coachEmail, playerEmail }) => {
       const parse = (key) => {
-        try {
-          return JSON.parse(window.localStorage.getItem(key) || "[]");
-        } catch {
-          return [];
-        }
+        try { return JSON.parse(window.localStorage.getItem(key) || "[]"); }
+        catch { return []; }
       };
       const teams = parse("sl:teams");
       const players = parse("sl:players");
       const profiles = parse("sl:player-profiles");
-      return teams.some((team) => team.id === teamId && team.branding)
+      const drills = parse("sl:drills");
+      const programDrills = parse("sl:program-drills");
+      return drills.length > 0
+        && programDrills.length > 0
+        && teams.some((team) => team.id === teamId)
         && players.some((player) => player.email === coachEmail && player.teamId === teamId)
         && players.some((player) => player.email === playerEmail && player.teamId === teamId)
         && profiles.some((profile) => profile.userId === playerEmail && profile.teamId === teamId);
@@ -194,6 +160,10 @@ async function enterCoachDemo(page) {
   const demoCoachButton = page.getByRole("button", { name: "Demo Coach", exact: true });
   const playersButton = page.getByRole("button", { name: "Players", exact: true });
 
+  await expect(
+    page.getByRole("button", { name: /^(Demo Coach|Players)$/ }).first(),
+  ).toBeVisible({ timeout: 15_000 });
+
   if (await demoCoachButton.isVisible()) {
     await waitForHydration(page);
     await demoCoachButton.click();
@@ -206,7 +176,6 @@ async function enterCoachDemo(page) {
 test.beforeEach(async ({ page }) => {
   await page.addInitScript((payload) => {
     if (window.localStorage.getItem("sl:e2e-season-archive-seeded") === "true") return;
-
     window.localStorage.clear();
     for (const [key, value] of Object.entries(payload)) {
       window.localStorage.setItem(key, JSON.stringify(value));
@@ -232,7 +201,6 @@ test("coach can archive, reopen, refresh, and preserve all live team data", asyn
   await expect(dateFields).toHaveCount(2);
   await dateFields.nth(0).fill("2026-01-01");
   await dateFields.nth(1).fill("2026-12-31");
-
   await archivePanel.getByRole("button", { name: "Archive Season", exact: true }).click();
   await archivePanel.getByRole("button", { name: /^confirm archive$/i }).click();
 
