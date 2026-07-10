@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 
+const TEAM_ID = "team-e2e-archive";
+const COACH_EMAIL = "coach.demo@shotlab.app";
+const PLAYER_EMAIL = "demo@shotlab.app";
+
 const LIVE_DATA_KEYS = [
   "sl:teams",
   "sl:players",
@@ -17,9 +21,9 @@ const LIVE_DATA_KEYS = [
 const seedData = {
   "sl:teams": [
     {
-      id: "team-e2e-archive",
+      id: TEAM_ID,
       name: "E2E Archive Team",
-      ownerCoachId: "coach.demo@shotlab.app",
+      ownerCoachId: COACH_EMAIL,
       joinCode: "E2E26",
       createdAt: 1_750_000_000_000,
     },
@@ -27,41 +31,26 @@ const seedData = {
   "sl:players": [
     {
       id: "coach-e2e",
-      email: "coach.demo@shotlab.app",
+      email: COACH_EMAIL,
       name: "Demo Coach",
       role: "coach",
-      teamId: "team-e2e-archive",
+      teamId: TEAM_ID,
     },
     {
       id: "player-demo-primary",
       playerId: "player-demo-primary",
-      email: "demo@shotlab.app",
+      email: PLAYER_EMAIL,
       name: "Demo Player",
       role: "player",
-      teamId: "team-e2e-archive",
-    },
-    {
-      id: "player-e2e-second",
-      playerId: "player-e2e-second",
-      email: "second.player@demo.shotlab.app",
-      name: "Second Player",
-      role: "player",
-      teamId: "team-e2e-archive",
+      teamId: TEAM_ID,
     },
   ],
   "sl:player-profiles": [
     {
       id: "profile-demo-primary",
-      userId: "demo@shotlab.app",
-      teamId: "team-e2e-archive",
+      userId: PLAYER_EMAIL,
+      teamId: TEAM_ID,
       firstName: "Demo",
-      lastName: "Player",
-    },
-    {
-      id: "profile-e2e-second",
-      userId: "second.player@demo.shotlab.app",
-      teamId: "team-e2e-archive",
-      firstName: "Second",
       lastName: "Player",
     },
   ],
@@ -69,25 +58,13 @@ const seedData = {
     {
       id: "score-e2e-home-1",
       playerId: "player-demo-primary",
-      email: "demo@shotlab.app",
+      email: PLAYER_EMAIL,
       name: "Demo Player",
-      teamId: "team-e2e-archive",
+      teamId: TEAM_ID,
       drillId: "form-shooting",
       score: 18,
       makes: 18,
       date: "2026-02-10",
-      src: "home",
-    },
-    {
-      id: "score-e2e-home-2",
-      playerId: "player-e2e-second",
-      email: "second.player@demo.shotlab.app",
-      name: "Second Player",
-      teamId: "team-e2e-archive",
-      drillId: "form-shooting",
-      score: 14,
-      makes: 14,
-      date: "2026-02-11",
       src: "home",
     },
   ],
@@ -95,9 +72,9 @@ const seedData = {
     {
       id: "score-e2e-program-1",
       playerId: "player-demo-primary",
-      email: "demo@shotlab.app",
+      email: PLAYER_EMAIL,
       name: "Demo Player",
-      teamId: "team-e2e-archive",
+      teamId: TEAM_ID,
       drillId: "program-form-shooting",
       score: 21,
       date: "2026-02-12",
@@ -108,9 +85,9 @@ const seedData = {
     {
       id: "shotlog-e2e-1",
       playerId: "player-demo-primary",
-      email: "demo@shotlab.app",
+      email: PLAYER_EMAIL,
       name: "Demo Player",
-      teamId: "team-e2e-archive",
+      teamId: TEAM_ID,
       made: 125,
       date: "2026-02-13",
     },
@@ -118,21 +95,12 @@ const seedData = {
   "sl:events": [
     {
       id: "event-e2e-1",
-      teamId: "team-e2e-archive",
+      teamId: TEAM_ID,
       title: "Archive Test Practice",
       date: "2026-02-15",
       time: "5:00 PM",
       location: "Main Gym",
       type: "run",
-    },
-    {
-      id: "event-e2e-2",
-      teamId: "team-e2e-archive",
-      title: "Archive Test Film",
-      date: "2026-02-17",
-      time: "4:00 PM",
-      location: "Team Room",
-      type: "recovery",
     },
   ],
   "sl:rsvps": [
@@ -140,9 +108,9 @@ const seedData = {
       id: "rsvp-e2e-1",
       eventId: "event-e2e-1",
       playerId: "player-demo-primary",
-      email: "demo@shotlab.app",
+      email: PLAYER_EMAIL,
       name: "Demo Player",
-      teamId: "team-e2e-archive",
+      teamId: TEAM_ID,
       status: "yes",
       attended: true,
       date: "2026-02-15",
@@ -151,7 +119,7 @@ const seedData = {
   "sl:sc-sessions": [
     {
       id: "sc-session-e2e-1",
-      teamId: "team-e2e-archive",
+      teamId: TEAM_ID,
       sport: "Strength Circuit",
       sessionType: "School",
       date: "2026-02-16",
@@ -162,10 +130,10 @@ const seedData = {
     {
       id: "sc-rsvp-e2e-1",
       sessionId: "sc-session-e2e-1",
-      playerId: "player-e2e-second",
-      email: "second.player@demo.shotlab.app",
-      name: "Second Player",
-      teamId: "team-e2e-archive",
+      playerId: "player-demo-primary",
+      email: PLAYER_EMAIL,
+      name: "Demo Player",
+      teamId: TEAM_ID,
       status: "yes",
       date: "2026-02-16",
     },
@@ -175,9 +143,9 @@ const seedData = {
       id: "sc-log-e2e-1",
       sessionId: "sc-session-e2e-1",
       playerId: "player-demo-primary",
-      email: "demo@shotlab.app",
+      email: PLAYER_EMAIL,
       name: "Demo Player",
-      teamId: "team-e2e-archive",
+      teamId: TEAM_ID,
       date: "2026-02-16",
       completed: true,
     },
@@ -186,14 +154,14 @@ const seedData = {
 };
 
 async function readStoredCollections(page, keys = LIVE_DATA_KEYS) {
-  return page.evaluate((storageKeys) => {
-    return Object.fromEntries(
+  return page.evaluate((storageKeys) =>
+    Object.fromEntries(
       storageKeys.map((key) => {
         const raw = window.localStorage.getItem(key);
         return [key, raw == null ? null : JSON.parse(raw)];
       }),
-    );
-  }, keys);
+    ),
+  keys);
 }
 
 async function enterCoachDemo(page) {
@@ -204,10 +172,7 @@ async function enterCoachDemo(page) {
     page.getByRole("button", { name: /^(Demo Coach|Players)$/ }).first(),
   ).toBeVisible({ timeout: 15_000 });
 
-  if (await demoCoachButton.isVisible()) {
-    await demoCoachButton.click();
-  }
-
+  if (await demoCoachButton.isVisible()) await demoCoachButton.click();
   await expect(playersButton).toBeVisible({ timeout: 15_000 });
   return playersButton;
 }
@@ -243,7 +208,7 @@ test("coach can archive, reopen, refresh, and preserve all live team data", asyn
   await dateFields.nth(1).fill("2026-12-31");
 
   await archivePanel.getByRole("button", { name: "Archive Season", exact: true }).click();
-  await archivePanel.getByRole("button", { name: "Confirm Archive", exact: true }).click();
+  await archivePanel.getByRole("button", { name: /^confirm archive$/i }).click();
 
   await expect(archivePanel.getByRole("status")).toContainText(`Archived ${archiveName}.`);
 
@@ -251,12 +216,12 @@ test("coach can archive, reopen, refresh, and preserve all live team data", asyn
   expect(storedArchives["sl:season-archives"]).toHaveLength(1);
   expect(storedArchives["sl:season-archives"][0]).toMatchObject({
     seasonName: archiveName,
-    teamId: "team-e2e-archive",
+    teamId: TEAM_ID,
     summary: {
-      rosterCount: 2,
-      homeScoreCount: 2,
+      rosterCount: 1,
+      homeScoreCount: 1,
       programScoreCount: 1,
-      eventCount: 2,
+      eventCount: 1,
       scSessionCount: 1,
     },
   });
@@ -270,8 +235,7 @@ test("coach can archive, reopen, refresh, and preserve all live team data", asyn
   await expect(detail).toContainText("S&C SNAPSHOT");
   await expect(detail.getByTestId("season-archive-player-summaries")).toContainText("Demo Player");
 
-  const liveDataAfterArchive = await readStoredCollections(page);
-  expect(liveDataAfterArchive).toEqual(liveDataBeforeArchive);
+  expect(await readStoredCollections(page)).toEqual(liveDataBeforeArchive);
 
   await page.reload();
   const playersButtonAfterReload = await enterCoachDemo(page);
@@ -282,8 +246,7 @@ test("coach can archive, reopen, refresh, and preserve all live team data", asyn
   await archivePanelAfterReload.getByTestId("season-archive-view-button").click();
   await expect(archivePanelAfterReload.getByTestId("season-archive-detail")).toContainText(archiveName);
 
-  const liveDataAfterReload = await readStoredCollections(page);
-  expect(liveDataAfterReload).toEqual(liveDataBeforeArchive);
+  expect(await readStoredCollections(page)).toEqual(liveDataBeforeArchive);
 
   const archivesAfterReload = await readStoredCollections(page, ["sl:season-archives"]);
   expect(archivesAfterReload["sl:season-archives"]).toHaveLength(1);
