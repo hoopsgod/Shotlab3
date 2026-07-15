@@ -1,0 +1,47 @@
+name: One-time Archive Await Fix
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  patch-app-callback:
+    if: github.head_ref == 'codex/add-season-archive-functionality-for-shotlab-0b4b9f'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/add-season-archive-functionality-for-shotlab-0b4b9f
+          fetch-depth: 0
+
+      - name: Add missing await to archive callback
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          path = Path('src/App.jsx')
+          text = path.read_text()
+          old = 'const result=createSeasonArchive({\n...input,'
+          new = 'const result=await createSeasonArchive({\n...input,'
+          if new in text:
+              print('Archive callback is already awaited.')
+          elif old in text:
+              path.write_text(text.replace(old, new, 1))
+              print('Patched archive callback.')
+          else:
+              raise SystemExit('Expected archive callback was not found.')
+          PY
+
+      - name: Commit callback fix
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx
+          git commit -m "fix(archives): await durable archive before updating state"
+          git push origin HEAD:codex/add-season-archive-functionality-for-shotlab-0b4b9f
