@@ -34,7 +34,12 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Run deployed preview smoke test
-        run: npx playwright test tests/e2e/season-archive-live-preview.spec.mjs --project=chromium --reporter=line
+        run: |
+          set +e
+          npx playwright test tests/e2e/season-archive-live-preview.spec.mjs --project=chromium --reporter=line > live-preview-smoke.txt 2>&1
+          status=$?
+          cat live-preview-smoke.txt
+          exit $status
 
       - name: Upload live smoke failure artifacts
         if: failure()
@@ -42,6 +47,7 @@ jobs:
         with:
           name: season-archive-live-preview-artifacts
           path: |
+            live-preview-smoke.txt
             playwright-report/
             test-results/
           if-no-files-found: ignore
