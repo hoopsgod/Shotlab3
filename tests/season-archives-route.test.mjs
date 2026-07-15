@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { onRequestGet, onRequestPost } from "../functions/v1/season-archives/index.js";
+import { normalizeRestWriteBody, __testUtils as supabaseTestUtils } from "../src/lib/supabase.js";
 
 const env = { SUPABASE_URL: "https://db.test", SUPABASE_SERVICE_ROLE_KEY: "service-key" };
 const coachEmail = "coach@a.test";
@@ -108,6 +109,46 @@ test("player or cross-team requester cannot create an archive", async () => {
   }
 });
 
+test("demo coach archive is validated but never written to production", async () => {
+  const mock = installFetch();
+  try {
+    const demoArchive = {
+      ...archive,
+      id: "season_demo_team_2026-summer_20260704000000000",
+      archivedBy: { email: "coach.demo@shotlab.app", name: "Demo Coach", role: "coach" },
+    };
+    const request = new Request("https://app.test/v1/season-archives", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-user-id": "coach.demo@shotlab.app" },
+      body: JSON.stringify({ team_id: "team-a", archive: demoArchive }),
+    });
+    const response = await onRequestPost({ request, env });
+    const body = await response.json();
+    assert.equal(response.status, 201);
+    assert.equal(body.ok, true);
+    assert.equal(body.archive.storageMode, "demo_local");
+    assert.equal(body.archive.demoLocalOnly, true);
+    assert.equal(mock.calls.length, 0, "demo archive must not access Supabase");
+  } finally {
+    mock.restore();
+  }
+});
+
+test("demo coach GET preserves browser cache by returning demo-local-only", async () => {
+  const mock = installFetch();
+  try {
+    const request = new Request("https://app.test/v1/season-archives", { headers: { "x-user-id": "coach.demo@shotlab.app" } });
+    const response = await onRequestGet({ request, env });
+    const body = await response.json();
+    assert.equal(response.status, 409);
+    assert.equal(body.error, "demo_local_only");
+    assert.equal(body.local_only, true);
+    assert.equal(mock.calls.length, 0);
+  } finally {
+    mock.restore();
+  }
+});
+
 test("duplicate archive returns conflict rather than replacing history", async () => {
   const mock = installFetch({ duplicate: true });
   try {
@@ -165,6 +206,55 @@ test("malformed or mismatched snapshots are rejected before database access", as
     assert.equal(mock.calls.length, 0);
   } finally {
     mock.restore();
+  }
+});
+
+test("Supabase write normalization strips unsupported schema fields and aligns bulk keys", () => {
+  const rows = normalizeRestWriteBody("teams", [
+    {
+      id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+      name: "Varsity",
+      branding: { primary: "lime" },
+      joinCode: "ABC123",
+      school: "Thomas",
+    },
+    {
+      id: "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      name: "JV",
+      level: "JV",
+    },
+  ]);
+  assert.equal(rows.length, 2);
+  assert.deepEqual(Object.keys(rows[0]), Object.keys(rows[1]));
+  assert.ok(!("branding" in rows[0]));
+  assert.ok(!("joinCode" in rows[0]));
+  assert.equal(rows[1].school, null);
+
+  const profiles = normalizeRestWriteBody("player_profiles", [{
+    id: "profile-1",
+    team_id: "team-a",
+    email: "p@a.test",
+    first_name: "Player",
+    updated_at: 123,
+    created_at: 100,
+  }]);
+  assert.equal(profiles.length, 1);
+  assert.ok(!("updated_at" in profiles[0]));
+  assert.ok(!("created_at" in profiles[0]));
+});
+
+test("demo persistence session is detected without touching production", () => {
+  const originalWindow = globalThis.window;
+  const values = new Map([
+    ["sl:session", JSON.stringify({ email: "coach.demo@shotlab.app" })],
+    ["sl:demoMode", "true"],
+  ]);
+  globalThis.window = { localStorage: { getItem: (key) => values.get(key) ?? null } };
+  try {
+    assert.equal(supabaseTestUtils.isDemoPersistenceSession(), true);
+  } finally {
+    if (originalWindow === undefined) delete globalThis.window;
+    else globalThis.window = originalWindow;
   }
 });
 
