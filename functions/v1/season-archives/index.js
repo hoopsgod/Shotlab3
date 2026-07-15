@@ -5,6 +5,11 @@ const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const cleanText = (value) => String(value ?? "").trim();
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_SNAPSHOT_BYTES = 2_500_000;
+const DEMO_COACH_EMAIL = "coach.demo@shotlab.app";
+
+function isDemoCoach(requester) {
+  return normalizeIdentity(requester) === DEMO_COACH_EMAIL;
+}
 
 function rpcScalar(json, key) {
   if (typeof json === "string") return json.trim();
@@ -169,6 +174,12 @@ export async function onRequestGet({ request, env }) {
     return Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
   }
 
+  // Demo archives intentionally live only in browser storage. A non-2xx response
+  // makes the client retain its local cache instead of replacing it with server data.
+  if (isDemoCoach(requester)) {
+    return Response.json({ error: "demo_local_only", local_only: true }, { status: 409 });
+  }
+
   try {
     const { teamIds } = await collectAuthorizedCoachTeams(env, requester);
     const archives = [];
@@ -204,6 +215,19 @@ export async function onRequestPost({ request, env }) {
   const body = await request.json().catch(() => null);
   const validated = validateArchiveInput(body || {}, requester);
   if (!validated.ok) return Response.json({ error: validated.error }, { status: 400 });
+
+  // Demo Coach has no production membership. Return the validated snapshot without
+  // writing it server-side; createSeasonArchive will cache it locally and mark it read-only.
+  if (isDemoCoach(requester)) {
+    return Response.json({
+      ok: true,
+      archive: {
+        ...validated.archive,
+        storageMode: "demo_local",
+        demoLocalOnly: true,
+      },
+    }, { status: 201 });
+  }
 
   try {
     const { teamIds, resolvedUuid } = await collectAuthorizedCoachTeams(env, requester);
