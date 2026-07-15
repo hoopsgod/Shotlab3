@@ -28,7 +28,7 @@ jobs:
       - name: Run season archive service tests
         run: |
           set +e
-          node --test tests/season-archive.test.mjs tests/season-archives-route.test.mjs > season-archive-service-tests.txt 2>&1
+          node --test tests/season-archive.test.mjs tests/season-archive-react-compat.test.mjs tests/season-archives-route.test.mjs > season-archive-service-tests.txt 2>&1
           status=$?
           cat season-archive-service-tests.txt
           exit $status
