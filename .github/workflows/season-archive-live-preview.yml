@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      LIVE_PREVIEW_URL: https://ec72db52.shotlab3.pages.dev
+      LIVE_PREVIEW_URL: https://224cfaf9.shotlab3.pages.dev
 
     steps:
       - name: Check out repository
