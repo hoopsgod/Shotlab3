@@ -419,25 +419,34 @@ export async function persistSeasonArchiveRemote({ archive, coach, fetchImpl = g
   }
 }
 
-export async function createSeasonArchive(input = {}) {
+// This function returns a Promise with synchronous compatibility metadata attached.
+// The legacy App callback inspects `ok`, `archive`, and `seasonArchives` before awaiting;
+// the actual archive is not inserted into either list until durable persistence succeeds.
+export function createSeasonArchive(input = {}) {
   const built = buildSeasonArchive(input);
   if (!built.ok) return built;
   const naturalKey = archiveNaturalKey(built.archive);
   if (inFlightArchiveKeys.has(naturalKey)) return inFlightArchiveKeys.get(naturalKey);
 
+  const existing = Array.isArray(input.existingArchives) ? input.existingArchives : [];
+  const compatibleSeasonArchives = [...existing];
   const task = (async () => {
     const persist = typeof input.persistArchive === "function" ? input.persistArchive : persistSeasonArchiveRemote;
     const saved = await persist({ archive: built.archive, coach: input.coach, fetchImpl: input.fetchImpl });
     if (!saved?.ok) return { ok: false, error: saved?.error || "Could not save the season archive to the server. No archive was created.", code: saved?.code || "archive_write_failed" };
 
     const archive = deepClone(saved.archive || built.archive);
-    const existing = Array.isArray(input.existingArchives) ? input.existingArchives : [];
     if (!existing.some((row) => row?.id === archive.id || archiveNaturalKey(row) === archiveNaturalKey(archive))) existing.push(archive);
-    const seasonArchives = Array.isArray(input.existingArchives) ? input.existingArchives : [...existing];
-    cacheArchives(seasonArchives);
-    return { ok: true, archive, seasonArchives };
+    if (!compatibleSeasonArchives.some((row) => row?.id === archive.id || archiveNaturalKey(row) === archiveNaturalKey(archive))) compatibleSeasonArchives.push(archive);
+    cacheArchives(compatibleSeasonArchives);
+    return { ok: true, archive, seasonArchives: compatibleSeasonArchives };
   })().finally(() => inFlightArchiveKeys.delete(naturalKey));
 
+  // Keep the existing App.jsx callback functional while the Promise remains the
+  // source of truth for final success/failure. The list contains no pending archive.
+  task.ok = true;
+  task.archive = built.archive;
+  task.seasonArchives = compatibleSeasonArchives;
   inFlightArchiveKeys.set(naturalKey, task);
   return task;
 }
