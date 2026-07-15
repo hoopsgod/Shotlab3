@@ -1175,7 +1175,7 @@ players,
 playerProfiles,
 teamId:user?.teamId,
 });
-const result=createSeasonArchive({
+const result=await createSeasonArchive({
 ...input,
 teamId:user?.teamId,
 coach:user,
