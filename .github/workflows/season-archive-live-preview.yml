@@ -36,7 +36,7 @@ jobs:
       - name: Run deployed preview smoke test
         run: |
           set +e
-          npx playwright test tests/e2e/season-archive-live-preview.spec.mjs --project=chromium --reporter=line > live-preview-smoke.txt 2>&1
+          npx playwright test tests/e2e/season-archive-live-preview.spec.mjs --project=chromium-desktop --reporter=line > live-preview-smoke.txt 2>&1
           status=$?
           cat live-preview-smoke.txt
           exit $status
