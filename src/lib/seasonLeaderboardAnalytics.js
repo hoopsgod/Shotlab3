@@ -1,6 +1,7 @@
 import { buildAtHomeLeaderboardRows } from "./homeLeaderboardRows.js";
 import { getAllProgramScoreRows, getProgramLeaderboardRows } from "./programDrillScoring.js";
 import { normalizeArchiveDate } from "./seasonArchive.js";
+import { filterActiveTeamLeaderboardRows, getActiveTeamPlayerIdentity } from "./playerDataManagement.js";
 
 export const LEADERBOARD_TIME_SCOPES = Object.freeze({
   CURRENT: "current",
@@ -69,9 +70,23 @@ const archiveTeamMatches = (archive = {}, teamId = "") => {
   return !requestedTeamId || teamIdOf(archive) === requestedTeamId;
 };
 
+const teamArchives = (seasonArchives = [], teamId = "") =>
+  toArray(seasonArchives).filter((archive) => archiveTeamMatches(archive, teamId));
+
+const activeIdentityFor = ({ players = [], profiles = [], teamId = "" } = {}) => {
+  const combined = [...toArray(players), ...toArray(profiles)];
+  if (!clean(teamId)) return { players: combined, keySet: new Set(), emailSet: new Set(), nameSet: new Set() };
+  return getActiveTeamPlayerIdentity(combined, teamId);
+};
+
+const rowMatchesIdentity = (row = {}, identity = {}) => {
+  const allowed = new Set([...(identity?.keySet || []), ...(identity?.emailSet || [])]);
+  if (!allowed.size) return true;
+  return identityTokens(row).some((token) => allowed.has(token));
+};
+
 export function getArchivedSeasonRanges({ seasonArchives = [], teamId = "" } = {}) {
-  const ranges = toArray(seasonArchives)
-    .filter((archive) => archiveTeamMatches(archive, teamId))
+  const ranges = teamArchives(seasonArchives, teamId)
     .map((archive) => ({
       archiveId: clean(archive?.id),
       seasonName: clean(archive?.seasonName ?? archive?.season_name),
@@ -85,7 +100,11 @@ export function getArchivedSeasonRanges({ seasonArchives = [], teamId = "" } = {
   for (const range of ranges) {
     const previous = merged[merged.length - 1];
     if (!previous || range.start > previous.end) {
-      merged.push({ ...range, archiveIds: range.archiveId ? [range.archiveId] : [], seasonNames: range.seasonName ? [range.seasonName] : [] });
+      merged.push({
+        ...range,
+        archiveIds: range.archiveId ? [range.archiveId] : [],
+        seasonNames: range.seasonName ? [range.seasonName] : [],
+      });
       continue;
     }
     previous.end = previous.end > range.end ? previous.end : range.end;
@@ -196,8 +215,6 @@ const buildIdentityAccumulator = () => {
   return { add, rows };
 };
 
-const teamArchives = (seasonArchives = [], teamId = "") => toArray(seasonArchives).filter((archive) => archiveTeamMatches(archive, teamId));
-
 export function buildCurrentOffseasonHomeLeaderboardRows({
   seasonArchives = [],
   teamId = "",
@@ -210,8 +227,19 @@ export function buildCurrentOffseasonHomeLeaderboardRows({
 } = {}) {
   const currentScores = filterLiveRowsOutsideArchivedSeasons(homeScores, { seasonArchives, teamId });
   const currentShotLogs = filterLiveRowsOutsideArchivedSeasons(shotLogs, { seasonArchives, teamId });
-  return buildAtHomeLeaderboardRows({ scores: currentScores, shotLogs: currentShotLogs, programDrills, players, profiles, limit })
-    .map((row) => ({ ...row, timeScope: LEADERBOARD_TIME_SCOPES.CURRENT }));
+  const rawRows = buildAtHomeLeaderboardRows({
+    scores: currentScores,
+    shotLogs: currentShotLogs,
+    programDrills,
+    players,
+    profiles,
+  });
+  const activeIdentity = activeIdentityFor({ players, profiles, teamId });
+  const activeRows = activeIdentity.players.length > 0
+    ? filterActiveTeamLeaderboardRows(rawRows, activeIdentity.keySet, activeIdentity.emailSet, activeIdentity.nameSet)
+    : rawRows;
+  const rows = activeRows.map((row) => ({ ...row, timeScope: LEADERBOARD_TIME_SCOPES.CURRENT }));
+  return Number.isFinite(limit) ? rows.slice(0, limit) : rows;
 }
 
 export function buildAllTimeHomeLeaderboardRows({
@@ -267,23 +295,60 @@ export function getAllTimeProgramDrills({ seasonArchives = [], teamId = "", prog
 
 export function getAllTimeLeaderboardPlayers({ seasonArchives = [], teamId = "", players = [] } = {}) {
   const output = [];
-  const seen = new Set();
+  const aliasToIndex = new Map();
   const remember = (player = {}) => {
     const tokens = identityTokens(player);
-    const key = tokens.find((token) => seen.has(token)) || tokens[0] || `name:${lower(playerName(player))}`;
-    if (!key || seen.has(key)) return;
-    tokens.forEach((token) => seen.add(token));
-    output.push({
+    const fallbackToken = `name:${lower(playerName(player))}`;
+    if (!tokens.length && fallbackToken === "name:") return;
+    const existingIndex = tokens.map((token) => aliasToIndex.get(token)).find((index) => Number.isInteger(index));
+    const archivedIdentity = player?.archivedLeaderboardIdentity === true;
+    const normalizedEmail = lower(player?.email ?? player?.player_email);
+    const normalizedPlayerId = clean(player?.playerId ?? player?.player_id ?? player?.userId ?? player?.user_id ?? player?.profileId ?? player?.profile_id ?? normalizedEmail);
+    const normalized = {
       ...player,
       teamId: clean(player?.teamId ?? player?.team_id ?? teamId),
       role: player?.role === "coach" ? "player" : (player?.role || "player"),
-      name: playerName(player) || player?.email || "Archived player",
-      email: lower(player?.email ?? player?.player_email),
-      playerId: clean(player?.playerId ?? player?.player_id ?? player?.userId ?? player?.user_id ?? player?.profileId ?? player?.profile_id ?? player?.email),
-      archivedLeaderboardIdentity: player?.archivedLeaderboardIdentity === true,
-    });
+      name: playerName(player) || normalizedEmail || "Archived player",
+      email: normalizedEmail,
+      playerId: normalizedPlayerId,
+      archivedLeaderboardIdentity: archivedIdentity,
+      ...(archivedIdentity ? {
+        archived: false,
+        removed: false,
+        deleted: false,
+        hidden: false,
+        hideFromLeaderboards: false,
+        hide_from_leaderboards: false,
+        rosterStatus: "active",
+        roster_status: "active",
+      } : {}),
+    };
+
+    const index = Number.isInteger(existingIndex) ? existingIndex : output.length;
+    if (!Number.isInteger(existingIndex)) output.push(normalized);
+    else {
+      const existing = output[index];
+      const preferredPlayerId = normalized.playerId && normalized.playerId !== normalized.email
+        ? normalized.playerId
+        : existing.playerId || normalized.playerId;
+      output[index] = {
+        ...existing,
+        ...(archivedIdentity ? normalized : {}),
+        email: existing.email || normalized.email,
+        playerId: preferredPlayerId,
+        name: existing.name || normalized.name,
+        archivedLeaderboardIdentity: existing.archivedLeaderboardIdentity || archivedIdentity,
+      };
+    }
+
+    [...tokens, fallbackToken, normalized.email, normalized.playerId]
+      .filter((token) => token && token !== "name:")
+      .forEach((token) => aliasToIndex.set(lower(token), index));
   };
-  toArray(players).forEach(remember);
+
+  const activeIdentity = activeIdentityFor({ players, teamId });
+  const currentPlayers = clean(teamId) ? activeIdentity.players : toArray(players);
+  currentPlayers.forEach(remember);
   for (const archive of teamArchives(seasonArchives, teamId)) {
     toArray(archive?.rosterSnapshot).forEach((player) => remember({ ...player, archivedLeaderboardIdentity: true }));
     toArray(archive?.playerSeasonSummaries).forEach((player) => remember({ ...player, archivedLeaderboardIdentity: true }));
@@ -291,8 +356,10 @@ export function getAllTimeLeaderboardPlayers({ seasonArchives = [], teamId = "",
   return output;
 }
 
-export function getAllTimeProgramScores({ seasonArchives = [], teamId = "", programScores = [] } = {}) {
-  const current = filterLiveRowsOutsideArchivedSeasons(getAllProgramScoreRows(programScores), { seasonArchives, teamId });
+export function getAllTimeProgramScores({ seasonArchives = [], teamId = "", programScores = [], players = [] } = {}) {
+  const activeIdentity = activeIdentityFor({ players, teamId });
+  const current = filterLiveRowsOutsideArchivedSeasons(getAllProgramScoreRows(programScores), { seasonArchives, teamId })
+    .filter((row) => activeIdentity.players.length === 0 || rowMatchesIdentity(row, activeIdentity));
   const archived = teamArchives(seasonArchives, teamId).flatMap((archive) => toArray(archive?.programScoresSnapshot));
   return getAllProgramScoreRows([...archived, ...current]);
 }
@@ -318,7 +385,7 @@ export function buildAllTimeProgramLeaderboardRows({
   players = [],
   limit,
 } = {}) {
-  const allTimeScores = getAllTimeProgramScores({ seasonArchives, teamId, programScores });
+  const allTimeScores = getAllTimeProgramScores({ seasonArchives, teamId, programScores, players });
   const allTimePlayers = getAllTimeLeaderboardPlayers({ seasonArchives, teamId, players });
   return getProgramLeaderboardRows(allTimeScores, drill, allTimePlayers, limit)
     .map((row) => ({ ...row, timeScope: LEADERBOARD_TIME_SCOPES.ALL_TIME }));
