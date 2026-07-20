@@ -9,6 +9,7 @@ const BOOT_TIMEOUT_MS = 10000
 const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams('')
 const bootDebugEnabled = params.get('bootDebug') === '1'
 const DEV = Boolean(typeof import.meta !== 'undefined' && import.meta?.env?.DEV)
+const DEMO_MODE_STORAGE_KEY = 'sl:demoMode'
 
 let startupErrorShown = false
 let appHasCommitted = false
@@ -65,6 +66,33 @@ if (typeof window !== 'undefined') {
   }
 }
 
+function installDemoStorageWriteGuard() {
+  if (typeof window === 'undefined') return false
+  const storage = window.storage
+  if (!storage || typeof storage.set !== 'function' || storage.__shotlabDemoWriteGuard === true) return false
+
+  const originalSet = storage.set.bind(storage)
+  try {
+    storage.set = async (key, value, strict) => {
+      const demoLocalOnly = window.localStorage?.getItem(DEMO_MODE_STORAGE_KEY) === 'true'
+      if (!demoLocalOnly) return originalSet(key, value, strict)
+
+      const serialized = String(value ?? 'null')
+      try {
+        window.localStorage?.setItem(key, serialized)
+      } catch (error) {
+        if (strict) throw error
+      }
+      return { value: serialized, skipped: 'demo_local_only' }
+    }
+    storage.__shotlabDemoWriteGuard = true
+    markBoot('demo_storage_write_guard_installed')
+    return true
+  } catch (error) {
+    markBoot('demo_storage_write_guard_failed', error?.message || 'unknown')
+    return false
+  }
+}
 
 function syncViewportHeightVar() {
   if (typeof document === 'undefined' || typeof window === 'undefined') return
@@ -113,6 +141,7 @@ function renderStartupError(message) {
 markBoot('index_loaded')
 markBoot('main_executed')
 registerRuntimeListeners()
+installDemoStorageWriteGuard()
 
 window.addEventListener('error', (event) => {
   const msg = event?.error?.message || event?.message || 'Unexpected runtime error before app mount.'
@@ -148,11 +177,13 @@ window.addEventListener('unhandledrejection', (event) => {
   ;(async () => {
     try {
       markBoot('app_import_started')
+      installDemoStorageWriteGuard()
       const { default: App } = await import('./App.jsx')
       markBoot('app_import_succeeded')
 
       try {
         demoBootstrap()
+        installDemoStorageWriteGuard()
         checkBackendHealth().then((status) => {
           logBackendHealth(status)
           markBoot('backend_health', status.status)

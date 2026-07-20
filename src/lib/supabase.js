@@ -8,6 +8,71 @@ const projectRef = (() => {
 })();
 const SESSION_KEY = "sl:supabase-session";
 const LEGACY_TOKEN_KEY = "sl:supabase-access-token";
+const APP_SESSION_KEY = "sl:session";
+const DEMO_MODE_KEY = "sl:demoMode";
+const DEMO_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
+const APP_PERSISTENCE_TABLES = new Set(["teams", "players", "player_profiles", "scores", "program_scores", "shot_logs", "events", "rsvps", "sessions"]);
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const compactObject = (value = {}) => Object.fromEntries(
+  Object.entries(value).filter(([, field]) => field !== undefined && field !== ""),
+);
+
+const readJsonStorage = (key) => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.localStorage?.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+const isDemoPersistenceSession = () => {
+  if (typeof window === "undefined") return false;
+  const session = readJsonStorage(APP_SESSION_KEY);
+  const email = String(session?.email || "").trim().toLowerCase();
+  return DEMO_EMAILS.has(email) || window.localStorage?.getItem(DEMO_MODE_KEY) === "true";
+};
+
+const normalizeTeamWriteRow = (row = {}) => {
+  const id = String(row.id || row.team_id || row.teamId || "").trim();
+  if (!UUID_RE.test(id)) return null;
+  const coachUserId = String(row.coach_user_id || row.coachUserId || row.ownerCoachId || "").trim();
+  return compactObject({
+    id,
+    name: String(row.name || row.teamName || "Team").trim() || "Team",
+    coach_user_id: UUID_RE.test(coachUserId) ? coachUserId : undefined,
+    school: row.school == null ? undefined : String(row.school).trim(),
+    level: row.level == null ? undefined : String(row.level).trim(),
+  });
+};
+
+const normalizePlayerProfileWriteRow = (row = {}) => compactObject({
+  id: row.id,
+  team_id: row.team_id ?? row.teamId,
+  user_id: row.user_id ?? row.userId ?? null,
+  email: row.email,
+  first_name: row.first_name ?? row.firstName,
+  last_name: row.last_name ?? row.lastName,
+});
+
+const alignBulkObjectKeys = (rows = []) => {
+  const safeRows = rows.filter((row) => row && typeof row === "object" && !Array.isArray(row));
+  if (safeRows.length <= 1) return safeRows;
+  const keys = [...new Set(safeRows.flatMap((row) => Object.keys(row)))];
+  return safeRows.map((row) => Object.fromEntries(
+    keys.map((key) => [key, Object.prototype.hasOwnProperty.call(row, key) ? row[key] : null]),
+  ));
+};
+
+export const normalizeRestWriteBody = (table, body) => {
+  const sourceRows = Array.isArray(body) ? body : body && typeof body === "object" ? [body] : [];
+  let rows = sourceRows;
+  if (table === "teams") rows = rows.map(normalizeTeamWriteRow).filter(Boolean);
+  if (table === "player_profiles") rows = rows.map(normalizePlayerProfileWriteRow).filter(Boolean);
+  return alignBulkObjectKeys(rows);
+};
 
 const authStateListeners = new Set();
 const notifyAuthStateChange = (event, session = null) => {
@@ -84,6 +149,15 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
     };
   }
 
+  if (method !== "GET" && APP_PERSISTENCE_TABLES.has(table) && isDemoPersistenceSession()) {
+    return { data: Array.isArray(body) ? body : body ? [body] : [], error: null, skipped: "demo_local_only" };
+  }
+
+  const normalizedBody = method === "GET" ? body : normalizeRestWriteBody(table, body);
+  if (method !== "GET" && body && Array.isArray(normalizedBody) && normalizedBody.length === 0) {
+    return { data: [], error: null, skipped: "no_compatible_rows" };
+  }
+
   let url;
   try {
     url = new URL(`${baseUrl}/rest/v1/${table}`);
@@ -108,7 +182,7 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
   const response = await fetch(url, {
     method,
     headers: buildHeaders({ upsert, onConflict }),
-    body: body ? JSON.stringify(body) : undefined,
+    body: normalizedBody ? JSON.stringify(normalizedBody) : undefined,
   });
 
   const text = await response.text();
@@ -280,4 +354,9 @@ export const supabase = {
   },
 };
 
-export const __testUtils = { resolveExpiresAt };
+export const __testUtils = {
+  resolveExpiresAt,
+  normalizeRestWriteBody,
+  alignBulkObjectKeys,
+  isDemoPersistenceSession,
+};

@@ -64,6 +64,14 @@ export async function selectRows(env, tableName, query) {
   return callRest(env, tableName, { method: "GET", query, prefer: "return=representation" });
 }
 
+export async function insertRows(env, tableName, rows) {
+  return callRest(env, tableName, {
+    method: "POST",
+    body: Array.isArray(rows) ? rows : [rows],
+    prefer: "return=representation",
+  });
+}
+
 export async function upsertRows(env, tableName, rows, onConflict = "") {
   const query = onConflict ? `on_conflict=${encodeURIComponent(onConflict)}` : "";
   return callRest(env, tableName, {
