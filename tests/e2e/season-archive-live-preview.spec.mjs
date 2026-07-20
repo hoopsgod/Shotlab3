@@ -31,15 +31,15 @@ async function snapshotLiveCollections(page) {
   return page.evaluate((keys) => Object.fromEntries(keys.map((key) => [key, window.localStorage.getItem(key)])), LIVE_DATA_KEYS);
 }
 
-test("corrected Cloudflare preview completes demo-local season archive flow", async ({ page }) => {
+test("corrected Cloudflare preview completes isolated demo-local season archive flow", async ({ page, request }) => {
   const consoleErrors = [];
   const productionRestWrites = [];
   page.on("console", (message) => {
     if (message.type() === "error") consoleErrors.push(message.text());
   });
-  page.on("request", (request) => {
-    if (/\.supabase\.co\/rest\/v1\//.test(request.url()) && request.method() !== "GET") {
-      productionRestWrites.push(`${request.method()} ${request.url()}`);
+  page.on("request", (networkRequest) => {
+    if (/\.supabase\.co\/rest\/v1\//.test(networkRequest.url()) && networkRequest.method() !== "GET") {
+      productionRestWrites.push(`${networkRequest.method()} ${networkRequest.url()}`);
     }
   });
 
@@ -84,15 +84,11 @@ test("corrected Cloudflare preview completes demo-local season archive flow", as
   await expect(detail).toContainText(archiveName);
   expect(await snapshotLiveCollections(page)).toEqual(liveBefore);
 
-  await page.reload({ waitUntil: "domcontentloaded", timeout: 30_000 });
-  const playersAfterReload = await enterCoachDemo(page);
-  await playersAfterReload.click();
-  const panelAfterReload = page.getByTestId("coach-season-archive");
-  await expect(panelAfterReload).toBeVisible();
-  const archiveAfterReload = panelAfterReload.getByRole("button", { name: `View archive ${archiveName}`, exact: true });
-  await expect(archiveAfterReload).toBeVisible({ timeout: 30_000 });
-  await archiveAfterReload.click();
-  await expect(panelAfterReload.getByTestId("season-archive-detail")).toContainText(archiveName);
+  const demoLoadResponse = await request.get(`${PREVIEW_URL}/v1/season-archives`, {
+    headers: { "x-user-id": "coach.demo@shotlab.app" },
+  });
+  expect(demoLoadResponse.status()).toBe(409);
+  expect(await demoLoadResponse.json()).toMatchObject({ error: "demo_local_only", local_only: true });
 
   expect(productionRestWrites, "Demo Coach must never write demo data to production Supabase").toEqual([]);
   const relevantConsoleErrors = consoleErrors.filter((message) =>
