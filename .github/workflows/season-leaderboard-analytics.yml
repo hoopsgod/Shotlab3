@@ -28,6 +28,7 @@ jobs:
         run: |
           node --test \
             tests/season-leaderboard-analytics.test.mjs \
+            tests/season-leaderboard-roster-boundary.test.mjs \
             tests/season-leaderboard-ui-contract.test.mjs \
             tests/premium-leaderboards-hub-regression.test.mjs \
             tests/leaderboard-category-static-safety.test.mjs
