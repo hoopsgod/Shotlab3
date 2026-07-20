@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   live-preview-smoke:
@@ -15,8 +15,45 @@ jobs:
       LIVE_PREVIEW_URL: https://codex-add-season-archive-fun-l7rh.shotlab3.pages.dev
 
     steps:
-      - name: Check out repository
+      - name: Check out PR branch
         uses: actions/checkout@v4
+        with:
+          ref: codex/add-season-archive-functionality-for-shotlab-0b4b9f
+          fetch-depth: 0
+
+      - name: Apply direct demo write guard
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/App.jsx')
+          text = path.read_text()
+          old = '''    if (strictLocal && !localPersisted) throw (localError || new Error("local_persist_failed"));
+    const table = TABLE_MAP[k];'''
+          new = '''    if (strictLocal && !localPersisted) throw (localError || new Error("local_persist_failed"));
+    if (isDemoMode()) return { localPersisted, remoteSkipped: "demo_local_only" };
+    const table = TABLE_MAP[k];'''
+
+          if new in text:
+              print('Direct demo write guard is already present.')
+          elif old in text:
+              path.write_text(text.replace(old, new, 1))
+              print('Patched direct demo write guard.')
+          else:
+              raise SystemExit('Expected DB.set persistence boundary was not found.')
+          PY
+
+      - name: Commit direct demo write guard
+        run: |
+          if git diff --quiet; then
+            echo "No guard changes to commit."
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add src/App.jsx
+            git commit -m "fix(demo): block direct remote persistence writes"
+            git push origin HEAD:codex/add-season-archive-functionality-for-shotlab-0b4b9f
+          fi
 
       - name: Set up Node
         uses: actions/setup-node@v4
