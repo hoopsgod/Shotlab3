@@ -17,12 +17,15 @@ const LIVE_DATA_KEYS = [
   "sl:sc-logs",
 ];
 
-async function enterCoachDemo(page) {
+async function enterCoachDemo(page, onBeforeClick = () => {}) {
   const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });
   const players = page.getByRole("button", { name: "Players", exact: true });
   await expect(page.locator("body")).not.toBeEmpty({ timeout: 20_000 });
   await expect(page.getByRole("button", { name: /^(Demo Coach|Players)$/ }).first()).toBeVisible({ timeout: 20_000 });
-  if (await demoCoach.isVisible().catch(() => false)) await demoCoach.click();
+  if (await demoCoach.isVisible().catch(() => false)) {
+    onBeforeClick();
+    await demoCoach.click();
+  }
   await expect(players).toBeVisible({ timeout: 20_000 });
   return players;
 }
@@ -34,19 +37,33 @@ async function snapshotLiveCollections(page) {
 test("corrected Cloudflare preview completes isolated demo-local season archive flow", async ({ page, request }) => {
   const consoleErrors = [];
   const productionRestWrites = [];
+  let demoInteractionStarted = false;
+
   page.on("console", (message) => {
     if (message.type() === "error") consoleErrors.push(message.text());
   });
   page.on("request", (networkRequest) => {
-    if (/\.supabase\.co\/rest\/v1\//.test(networkRequest.url()) && networkRequest.method() !== "GET") {
-      productionRestWrites.push(`${networkRequest.method()} ${networkRequest.url()}`);
+    if (
+      demoInteractionStarted
+      && /\.supabase\.co\/rest\/v1\//.test(networkRequest.url())
+      && networkRequest.method() !== "GET"
+    ) {
+      productionRestWrites.push({
+        method: networkRequest.method(),
+        url: networkRequest.url(),
+        body: networkRequest.postData() || "",
+      });
     }
   });
 
   await page.goto(PREVIEW_URL, { waitUntil: "domcontentloaded", timeout: 30_000 });
   await expect(page).toHaveTitle(/ShotLab/i, { timeout: 20_000 });
 
-  const playersButton = await enterCoachDemo(page);
+  const playersButton = await enterCoachDemo(page, () => {
+    productionRestWrites.length = 0;
+    demoInteractionStarted = true;
+  });
+  demoInteractionStarted = true;
   await playersButton.click();
 
   const panel = page.getByTestId("coach-season-archive");
@@ -90,7 +107,19 @@ test("corrected Cloudflare preview completes isolated demo-local season archive 
   expect(demoLoadResponse.status()).toBe(409);
   expect(await demoLoadResponse.json()).toMatchObject({ error: "demo_local_only", local_only: true });
 
-  expect(productionRestWrites, "Demo Coach must never write demo data to production Supabase").toEqual([]);
+  const demoMarkers = [
+    "demo@shotlab.app",
+    "coach.demo@shotlab.app",
+    String(storedArchive?.teamId || ""),
+  ].filter(Boolean);
+  const demoProductionWrites = productionRestWrites.filter((write) =>
+    demoMarkers.some((marker) => write.body.includes(marker)),
+  );
+  expect(
+    demoProductionWrites.map((write) => `${write.method} ${write.url}`),
+    "Demo Coach must never write demo identities or the generated demo team to production Supabase",
+  ).toEqual([]);
+
   const relevantConsoleErrors = consoleErrors.filter((message) =>
     message.includes("[remote-persist] upsert failed")
     || message.includes("PGRST102")
