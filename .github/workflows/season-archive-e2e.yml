@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   season-archive-browser-flow:
@@ -13,136 +13,8 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - name: Check out feature branch
+      - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: codex/add-all-time-offseason-leaderboards
-          fetch-depth: 0
-
-      - name: Harden current and historical leaderboard rosters
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import re
-
-          analytics_path = Path('src/lib/seasonLeaderboardAnalytics.js')
-          analytics = analytics_path.read_text()
-          changed = False
-
-          import_line = 'import { filterActiveTeamLeaderboardRows, getActiveTeamPlayerIdentity } from "./playerDataManagement.js";'
-          if import_line not in analytics:
-              marker = 'import { normalizeArchiveDate } from "./seasonArchive.js";'
-              if analytics.count(marker) != 1:
-                  raise SystemExit('Could not locate season archive import.')
-              analytics = analytics.replace(marker, marker + '\n' + import_line, 1)
-              changed = True
-
-          old_current = '''  const currentScores = filterLiveRowsOutsideArchivedSeasons(homeScores, { seasonArchives, teamId });
-          const currentShotLogs = filterLiveRowsOutsideArchivedSeasons(shotLogs, { seasonArchives, teamId });
-          return buildAtHomeLeaderboardRows({ scores: currentScores, shotLogs: currentShotLogs, programDrills, players, profiles, limit })
-            .map((row) => ({ ...row, timeScope: LEADERBOARD_TIME_SCOPES.CURRENT }));'''.replace('          ', '  ')
-          new_current = '''  const currentScores = filterLiveRowsOutsideArchivedSeasons(homeScores, { seasonArchives, teamId });
-          const currentShotLogs = filterLiveRowsOutsideArchivedSeasons(shotLogs, { seasonArchives, teamId });
-          const rawRows = buildAtHomeLeaderboardRows({ scores: currentScores, shotLogs: currentShotLogs, programDrills, players, profiles });
-          const activeIdentity = getActiveTeamPlayerIdentity([...toArray(players), ...toArray(profiles)], teamId);
-          const activeRows = activeIdentity.players.length > 0
-            ? filterActiveTeamLeaderboardRows(rawRows, activeIdentity.keySet, activeIdentity.emailSet, activeIdentity.nameSet)
-            : rawRows;
-          const rows = activeRows.map((row) => ({ ...row, timeScope: LEADERBOARD_TIME_SCOPES.CURRENT }));
-          return Number.isFinite(limit) ? rows.slice(0, limit) : rows;'''.replace('          ', '  ')
-          if new_current not in analytics:
-              if analytics.count(old_current) != 1:
-                  raise SystemExit('Could not locate current/offseason home aggregation block.')
-              analytics = analytics.replace(old_current, new_current, 1)
-              changed = True
-
-          new_players = '''export function getAllTimeLeaderboardPlayers({ seasonArchives = [], teamId = "", players = [] } = {}) {
-            const output = [];
-            const aliasToIndex = new Map();
-            const remember = (player = {}) => {
-              const tokens = identityTokens(player);
-              const fallbackToken = `name:${lower(playerName(player))}`;
-              if (!tokens.length && fallbackToken === "name:") return;
-              const existingIndex = tokens.map((token) => aliasToIndex.get(token)).find((index) => Number.isInteger(index));
-              const archivedIdentity = player?.archivedLeaderboardIdentity === true;
-              const normalized = {
-                ...player,
-                teamId: clean(player?.teamId ?? player?.team_id ?? teamId),
-                role: player?.role === "coach" ? "player" : (player?.role || "player"),
-                name: playerName(player) || player?.email || "Archived player",
-                email: lower(player?.email ?? player?.player_email),
-                playerId: clean(player?.playerId ?? player?.player_id ?? player?.userId ?? player?.user_id ?? player?.profileId ?? player?.profile_id ?? player?.email),
-                archivedLeaderboardIdentity: archivedIdentity,
-                ...(archivedIdentity ? {
-                  archived: false,
-                  removed: false,
-                  deleted: false,
-                  hidden: false,
-                  hideFromLeaderboards: false,
-                  hide_from_leaderboards: false,
-                  rosterStatus: "active",
-                  roster_status: "active",
-                } : {}),
-              };
-              const index = Number.isInteger(existingIndex) ? existingIndex : output.length;
-              if (!Number.isInteger(existingIndex)) output.push(normalized);
-              else {
-                const existing = output[index];
-                output[index] = {
-                  ...existing,
-                  ...(archivedIdentity ? normalized : {}),
-                  email: existing.email || normalized.email,
-                  playerId: existing.playerId || normalized.playerId,
-                  name: existing.name || normalized.name,
-                  archivedLeaderboardIdentity: existing.archivedLeaderboardIdentity || archivedIdentity,
-                };
-              }
-              [...tokens, fallbackToken]
-                .filter((token) => token && token !== "name:")
-                .forEach((token) => aliasToIndex.set(token, index));
-            };
-            toArray(players).forEach(remember);
-            for (const archive of teamArchives(seasonArchives, teamId)) {
-              toArray(archive?.rosterSnapshot).forEach((player) => remember({ ...player, archivedLeaderboardIdentity: true }));
-              toArray(archive?.playerSeasonSummaries).forEach((player) => remember({ ...player, archivedLeaderboardIdentity: true }));
-            }
-            return output;
-          }
-          '''.replace('          ', '')
-          if 'const aliasToIndex = new Map();' not in analytics:
-              pattern = r'export function getAllTimeLeaderboardPlayers\([\s\S]*?\n}\n\n(?=export function getAllTimeProgramScores)'
-              analytics, count = re.subn(pattern, new_players + '\n', analytics, count=1)
-              if count != 1:
-                  raise SystemExit('Could not replace historical player identity function.')
-              changed = True
-
-          if changed:
-              analytics_path.write_text(analytics)
-
-          app_path = Path('src/App.jsx')
-          app = app_path.read_text()
-          old_app = 'programDrills={programDrills} players={leaderboardPlayers} teamId={u?.teamId||""} homeScores={scores}'
-          new_app = 'programDrills={programDrills} players={coachRosterPlayers} teamId={u?.teamId||""} homeScores={scores}'
-          if new_app not in app:
-              if app.count(old_app) != 1:
-                  raise SystemExit('Could not locate coach leaderboard player source.')
-              app_path.write_text(app.replace(old_app, new_app, 1))
-              changed = True
-
-          print('Leaderboard roster hardening applied.' if changed else 'Leaderboard roster hardening already present.')
-          PY
-
-      - name: Commit leaderboard hardening
-        run: |
-          if git diff --quiet; then
-            echo "No leaderboard hardening changes to commit."
-          else
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add src/App.jsx src/lib/seasonLeaderboardAnalytics.js
-            git commit -m "fix(leaderboards): separate active live rows from frozen history"
-            git push origin HEAD:codex/add-all-time-offseason-leaderboards
-          fi
 
       - name: Set up Node
         uses: actions/setup-node@v4
