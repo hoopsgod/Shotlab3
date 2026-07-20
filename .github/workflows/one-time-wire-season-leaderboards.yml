@@ -1,0 +1,78 @@
+name: One-time Wire Season Leaderboards
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+
+jobs:
+  wire-season-leaderboards:
+    if: github.head_ref == 'codex/add-all-time-offseason-leaderboards'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/add-all-time-offseason-leaderboards
+          fetch-depth: 0
+
+      - name: Pass archived seasons into both leaderboard hubs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/App.jsx')
+          text = path.read_text()
+          replacements = [
+              (
+                  'function Player({u,drills,programDrills,scores,programScores:programScoresFromDb=[],addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,retryHomeShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,refreshHomeShotsLeaderboard,statSyncError=""}){',
+                  'function Player({u,drills,programDrills,scores,programScores:programScoresFromDb=[],addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,retryHomeShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,refreshHomeShotsLeaderboard,statSyncError="",seasonArchives=[]}){',
+              ),
+              (
+                  'statSyncError={statSyncError} retryHomeShotLog={retryHomeShotLog}/></div>}',
+                  'statSyncError={statSyncError} retryHomeShotLog={retryHomeShotLog} seasonArchives={seasonArchives.filter(a=>String(a?.teamId||a?.team_id||"")===String(user?.teamId||""))}/></div>}',
+              ),
+              (
+                  'teamId={u?.teamId||""} homeScores={homeScores} shotLogs={shotLogs} />',
+                  'teamId={u?.teamId||""} homeScores={homeScores} shotLogs={shotLogs} seasonArchives={seasonArchives} />',
+              ),
+              (
+                  'teamId={u?.teamId||""} homeScores={scores} shotLogs={shotLogs} />',
+                  'teamId={u?.teamId||""} homeScores={scores} shotLogs={shotLogs} seasonArchives={seasonArchives} />',
+              ),
+          ]
+
+          changed = False
+          for old, new in replacements:
+              if new in text:
+                  continue
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'Expected exactly one App wiring fragment, found {count}: {old[:100]}')
+              text = text.replace(old, new, 1)
+              changed = True
+
+          if text.count('PremiumLeaderboardsHub viewerRole=') != 2:
+              raise SystemExit('Expected exactly two PremiumLeaderboardsHub render sites.')
+          if text.count('seasonArchives={seasonArchives} />') != 2:
+              raise SystemExit('Both PremiumLeaderboardsHub render sites must receive seasonArchives.')
+
+          if changed:
+              path.write_text(text)
+              print('Wired season archives into player and coach leaderboard hubs.')
+          else:
+              print('Season leaderboard wiring already present.')
+          PY
+
+      - name: Commit App wiring
+        run: |
+          if git diff --quiet; then
+            echo "No App wiring changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx
+          git commit -m "feat(leaderboards): wire season archives into shared hub"
+          git push origin HEAD:codex/add-all-time-offseason-leaderboards
