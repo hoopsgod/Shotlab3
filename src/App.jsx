@@ -2543,7 +2543,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   </div>}
 
   {tab==="leaderboards"&&!active&&<div className={slideClass} key="leaderboards">
-    <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={playerLeaderboardRows} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} userEmail={u?.email||""} currentUser={u} programScores={teamProgramScores} programDrills={programDrills} players={playerLeaderboardPlayers} teamId={u?.teamId||""} homeScores={homeScores} shotLogs={shotLogs} seasonArchives={seasonArchives} />
+    <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={playerLeaderboardRows} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} userEmail={u?.email||""} currentUser={u} programScores={teamProgramScores} programDrills={programDrills} players={playerLeaderboardPlayers} teamId={u?.teamId||""} homeScores={scores} shotLogs={shotLogs} seasonArchives={seasonArchives} />
   </div>}
 
   {/* ═════ SHOT STATS sub-screen ═════ */}
