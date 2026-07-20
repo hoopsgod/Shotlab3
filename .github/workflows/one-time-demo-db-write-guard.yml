@@ -2,6 +2,7 @@ name: One-time Demo DB Write Guard
 
 on:
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: write
