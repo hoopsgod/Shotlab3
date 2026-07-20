@@ -31,7 +31,7 @@ import TOKENS from "./theme/appTokens";
 
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import { buildDemoDataBundle, applyDemoData, clearDemoData } from "./lib/demoData";
-import { isDemoAccount, isDemoMode, isDemoPlayerSessionShotLog } from "./lib/demoMode.js";
+import { isDemoAccount, isDemoMode, isDemoPlayerSessionShotLog, setDemoMode } from "./lib/demoMode.js";
 import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard } from "./lib/joinConsumeGuard.js";
 
 import { supabase } from "./lib/supabase.js";
@@ -1345,6 +1345,7 @@ return restoredTeam;
 };
 // Auth with backend legacy persistence
 const register=async(email,password,name,role)=>{
+setDemoMode(false);
 const normalizedEmail=normalizeEmail(email);
 const existing=!SUPABASE_AUTH_ENABLED?players.find(p=>normalizeEmail(p.email)===normalizedEmail):null;
 if(existing)return{ok:false,err:"Account already exists. Please sign in."};
@@ -1387,6 +1388,7 @@ await P("sl:players",np,setPlayers);
 setUser(profile);legacyAuthSecretRef.current={email:profile.email,password};setView(profile.role==="coach"?"create-team":"join-team");DB.set("sl:session",{email:profile.email});trackEvent("auth_register",{targetRole:profile.role,userEmail:profile.email,userRole:profile.role},{email:profile.email,role:profile.role,teamId:profile.teamId||null});return{ok:true};
 };
 const login=async(email,password)=>{
+setDemoMode(false);
 const normalizedEmail=normalizeEmail(email);
 let remoteProfile=null;
 if(SUPABASE_AUTH_ENABLED){
@@ -1419,6 +1421,7 @@ trackEvent("auth_login",{method:"password"},{email:normalizeEmail(p.email),role:
 return{ok:true};
 };
 const demoSignIn=async(kind="player")=>{
+setDemoMode(true);
 const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
 let np=[...players];
 let nts=[...teams];
@@ -1472,13 +1475,14 @@ const nextShotLogs=sourceShotLogs.filter(log=>!isDemoPlayerSessionShotLog(log,{t
 await P("sl:shotlogs",nextShotLogs,setShotLogs);
 setHomeShotsLeaderboard(prev=>({...prev,rows:(Array.isArray(prev?.rows)?prev.rows:[]).filter(row=>!isDemoPlayerSessionShotLog(row,{teamId:demoTeamId}))}));
 },[P,shotLogs,user]);
-const logout=async()=>{const exitingUser=user;trackEvent("auth_logout");if(isDemoMode()||isDemoAccount(exitingUser))await cleanupDemoPlayerSessionData(exitingUser);if(SUPABASE_AUTH_ENABLED)await supabase.auth.signOut();legacyAuthSecretRef.current={email:"",password:""};setUser(null);setView("auth");DB.set("sl:session",null)};
+const logout=async()=>{const exitingUser=user;trackEvent("auth_logout");if(isDemoMode()||isDemoAccount(exitingUser))await cleanupDemoPlayerSessionData(exitingUser);setDemoMode(false);if(SUPABASE_AUTH_ENABLED)await supabase.auth.signOut();legacyAuthSecretRef.current={email:"",password:""};setUser(null);setView("auth");DB.set("sl:session",null)};
 const deleteAccount=async()=>{
 if(!user)return{ok:false,error:"No active account."};
 const e=String(user.email||"").trim().toLowerCase();
 const isSelf=(row={})=>String(row?.playerId||row?.player_id||row?.email||row?.userId||row?.user_id||"").trim().toLowerCase()===e;
 try{
 if(isDemoMode()||isDemoAccount(user))await cleanupDemoPlayerSessionData(user);
+setDemoMode(false);
 await P("sl:players",players.filter(p=>String(p?.email||"").trim().toLowerCase()!==e),setPlayers);
 await P("sl:scores",scores.filter(s=>!isSelf(s)),setScores);
 await P("sl:program-scores",programScores.filter(s=>!isSelf(s)),setProgramScores);
