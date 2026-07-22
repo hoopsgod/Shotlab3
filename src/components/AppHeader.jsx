@@ -1,28 +1,32 @@
 const VARIANT_STYLES = {
   standard: {
-    padding: "16px",
-    border: "1px solid var(--stroke-1)",
-    background: "var(--surface-2)",
-    shadow: "var(--shadow-1)",
+    padding: "10px 2px 14px",
+    border: "none",
+    borderBottom: "1px solid var(--stroke-1)",
+    background: "transparent",
+    shadow: "none",
+    radius: 0,
   },
   branded: {
     padding: "16px",
     border: "1px solid var(--stroke-2)",
     background: "var(--surface-3)",
     shadow: "var(--shadow-2)",
+    radius: "var(--radius-card)",
   },
   utility: {
     padding: "10px 0 8px",
     border: "none",
     background: "transparent",
     shadow: "none",
+    radius: 0,
   },
 };
 
 const ACTION_BASE = {
   borderRadius: 999,
   border: "1px solid var(--team-brand-border, var(--stroke-1))",
-  background: "var(--team-brand-action-bg, color-mix(in srgb, var(--surface-1) 88%, transparent))",
+  background: "transparent",
   color: "var(--team-brand-action-text, var(--text-2))",
   minHeight: 38,
   minWidth: 36,
@@ -72,7 +76,8 @@ export default function AppHeader({
         marginBottom: variant === "utility" ? 12 : "var(--stack-gap)",
         padding: stylePreset.padding,
         border: stylePreset.border,
-        borderRadius: variant === "utility" ? 0 : "var(--radius-card)",
+        borderBottom: stylePreset.borderBottom,
+        borderRadius: stylePreset.radius,
         background: stylePreset.background,
         boxShadow: stylePreset.shadow,
       }}
@@ -90,15 +95,15 @@ export default function AppHeader({
           {leading ? <div style={{ marginTop: 1, color: "var(--text-2)", flexShrink: 0 }}>{leading}</div> : null}
           <div style={{ minWidth: 0 }}>
             {eyebrow ? (
-              <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", color: "var(--text-3)", fontWeight: 700, marginBottom: 6, lineHeight: 1.2 }}>
+              <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", color: "var(--accent)", fontWeight: 800, marginBottom: 5, lineHeight: 1.2 }}>
                 {eyebrow}
               </div>
             ) : null}
-            <h1 style={{ fontSize: variant === "utility" ? 18 : 28, lineHeight: 1.08, margin: 0, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "var(--tracking-default)", textTransform: "uppercase" }}>
+            <h1 style={{ fontSize: variant === "utility" ? 18 : 30, lineHeight: 1, margin: 0, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "var(--tracking-default)", textTransform: "uppercase" }}>
               {title}
             </h1>
             {subtitle ? (
-              <p style={{ marginTop: 8, marginBottom: 0, color: "var(--text-2)", fontSize: 13, letterSpacing: "0.01em", lineHeight: 1.5, overflowWrap: "anywhere", maxWidth: 560 }}>
+              <p style={{ marginTop: 6, marginBottom: 0, color: "var(--text-2)", fontSize: 13, letterSpacing: "0.01em", lineHeight: 1.45, overflowWrap: "anywhere", maxWidth: 560 }}>
                 {subtitle}
               </p>
             ) : null}
@@ -109,7 +114,7 @@ export default function AppHeader({
           <div style={{ display: "flex", alignItems: "flex-start", gap: 6, marginLeft: "auto", maxWidth: "100%", flexWrap: "wrap" }}>
             {brandLockup ? <div style={{ minWidth: 0 }}>{brandLockup}</div> : null}
             {action ? (
-              <button type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, opacity: 0.9, ...(quietBrandedActionStyle || {}) }}>
+              <button type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, opacity: 0.88, ...(quietBrandedActionStyle || {}) }}>
                 {action.icon}
                 {action.label ? <span>{action.label}</span> : null}
               </button>
