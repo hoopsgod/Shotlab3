@@ -12,6 +12,7 @@
     "test:e2e:season-archive": "playwright test tests/e2e/season-archive.spec.mjs",
     "test:e2e:visual-hierarchy": "playwright test tests/e2e/visual-hierarchy.spec.mjs",
     "test:e2e:mobile-navigation": "playwright test tests/e2e/mobile-navigation.spec.mjs",
+    "test:e2e:semantic-colors": "playwright test tests/e2e/semantic-color-system.spec.mjs",
     "preview": "vite preview",
     "deploy:cloudflare": "npm run build && npx wrangler pages deploy dist --project-name shotlab3",
     "dev:agent": "npm run dev",
