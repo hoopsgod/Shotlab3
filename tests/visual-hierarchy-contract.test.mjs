@@ -26,6 +26,7 @@ test("player dashboard exposes one dominant objective and only three primary met
   assert.match(appSource, /testId="player-coach-guidance"/);
   assert.match(appSource, /testId="player-secondary-intelligence"/);
   assert.doesNotMatch(appSource, /aria-label="Progress snapshot"/);
+  assert.match(appSource, /className="player-quick-actions"[\s\S]*?border:0,background:"transparent"/);
 });
 
 test("coach dashboard exposes one command objective, three metrics, and collapsed operations", () => {
