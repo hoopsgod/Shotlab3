@@ -16,7 +16,7 @@ def replace_once(old: str, new: str, label: str) -> None:
     print(f"{label}: applied")
 
 
-def insert_after(start_marker: str, end_marker: str, insertion: str, label: str) -> None:
+def insert_before_after(start_marker: str, before_marker: str, insertion: str, label: str) -> None:
     global text
     if insertion.strip() in text:
         print(f"{label}: already applied")
@@ -24,11 +24,10 @@ def insert_after(start_marker: str, end_marker: str, insertion: str, label: str)
     start = text.find(start_marker)
     if start < 0:
         raise SystemExit(f"{label}: start marker missing")
-    end = text.find(end_marker, start)
-    if end < 0:
-        raise SystemExit(f"{label}: end marker missing")
-    insert_at = end + len(end_marker)
-    text = text[:insert_at] + insertion + text[insert_at:]
+    before = text.find(before_marker, start)
+    if before < 0:
+        raise SystemExit(f"{label}: insertion marker missing")
+    text = text[:before] + insertion + text[before:]
     print(f"{label}: applied")
 
 
@@ -63,17 +62,11 @@ const playerMobileSecondaryItems=[
   getPlayerNavItem("profile",{mobileLabel:"Profile",description:"Progress, settings, and account"}),
 ].filter(Boolean);
 '''
-insert_after(
+insert_before_after(
     "const playerNavItems=[",
-    "];\n\nreturn <div className={`app-shell ${isDesktop?\"is-desktop\":\"is-mobile\"}`}>",
-    player_mobile_definitions + '\nreturn <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>',
+    '\n\nreturn <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>',
+    player_mobile_definitions,
     "player mobile navigation model",
-)
-# The insertion helper includes the return marker so remove the duplicated original marker.
-text = text.replace(
-    '\nreturn <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>\nreturn <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>',
-    '\nreturn <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>',
-    1,
 )
 
 replace_once(
@@ -101,13 +94,12 @@ const coachMobileSecondaryItems=[
   getCoachNavItem("branding",{mobileLabel:"Brand",description:"Team identity and visual settings"}),
 ].filter(Boolean);
 '''
-insert_after(
+insert_before_after(
     "const navItems=[",
-    "];\nconst handleNavChange=(k)=>",
-    coach_mobile_definitions + "\nconst handleNavChange=(k)=>",
+    "\nconst handleNavChange=(k)=>",
+    coach_mobile_definitions,
     "coach mobile navigation model",
 )
-text = text.replace("\nconst handleNavChange=(k)=>\nconst handleNavChange=(k)=>", "\nconst handleNavChange=(k)=>", 1)
 
 replace_once(
     '{!isDesktop&&<NavBar items={navItems} active={tab} onChange={handleNavChange}/>}\n',
