@@ -5,35 +5,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   archive-aware-leaderboards:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
-      - name: Check out semantic color branch
+      - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: codex/semantic-color-system-stabilization
-          fetch-depth: 0
-
-      - name: Apply semantic color wiring
-        run: |
-          set +e
-          python scripts/apply_semantic_color_patch.py > semantic-color-patch.log 2>&1
-          status=$?
-          cat semantic-color-patch.log
-          exit $status
-
-      - name: Upload patch diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: semantic-color-patch-diagnostics
-          path: semantic-color-patch.log
-          if-no-files-found: error
-          retention-days: 3
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -58,15 +38,3 @@ jobs:
 
       - name: Build application
         run: npm run build
-
-      - name: Commit semantic color wiring
-        run: |
-          if git diff --quiet; then
-            echo "No semantic color changes to commit."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/App.jsx src/components/MobileNavigation.module.css
-          git commit -m "refactor(ui): restore semantic color roles"
-          git push origin HEAD:codex/semantic-color-system-stabilization
