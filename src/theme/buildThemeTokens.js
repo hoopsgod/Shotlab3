@@ -1,6 +1,7 @@
 import resolveTeamBranding from "./resolveTeamBranding";
 import DEFAULT_BRANDING from "./brandingDefaults";
 import { balanceBrandColor, mixHex, normalizeHexColor, resolveOnColor, rgba } from "./brandColorUtils";
+import { SEMANTIC_COLORS, SEMANTIC_TONES } from "./semanticColors";
 
 export default function buildThemeTokens(teamBranding = {}) {
   const branding = resolveTeamBranding(teamBranding);
@@ -14,7 +15,7 @@ export default function buildThemeTokens(teamBranding = {}) {
   const rawPrimary = normalizeHexColor(branding.primaryColor, DEFAULT_BRANDING.primaryColor);
   const rawSecondary = normalizeHexColor(branding.secondaryColor, rawPrimary);
 
-  // Derive a controlled accent system so approved team colors never repaint the full dark shell.
+  // Team colors control identity and primary actions only. Semantic state colors stay fixed.
   const darkSurfaceBase = "#0F1115";
   const darkSurfaceElevated = "#171D28";
   const neutralText = "#E5E7EB";
@@ -67,6 +68,11 @@ export default function buildThemeTokens(teamBranding = {}) {
       accentSoft: brandPrimarySoft,
       accentBg: brandTintSurface,
       secondary: brandSecondary,
+      semanticSuccess: SEMANTIC_COLORS.SUCCESS,
+      semanticInfo: SEMANTIC_COLORS.INFO,
+      semanticWarning: SEMANTIC_COLORS.WARNING,
+      semanticDanger: SEMANTIC_COLORS.DANGER,
+      semanticNeutral: SEMANTIC_COLORS.NEUTRAL,
     },
     cssVariables: {
       "--team-brand-primary": brandPrimary,
@@ -98,6 +104,21 @@ export default function buildThemeTokens(teamBranding = {}) {
       "--nav-active-text": brandNavActive,
       "--nav-active-glow": rgba(brandNavActive, 0.22),
       "--page-accent": brandAccentText,
+      "--semantic-success": SEMANTIC_COLORS.SUCCESS,
+      "--semantic-success-surface": SEMANTIC_TONES.success.surface,
+      "--semantic-success-border": SEMANTIC_TONES.success.border,
+      "--semantic-info": SEMANTIC_COLORS.INFO,
+      "--semantic-info-surface": SEMANTIC_TONES.info.surface,
+      "--semantic-info-border": SEMANTIC_TONES.info.border,
+      "--semantic-warning": SEMANTIC_COLORS.WARNING,
+      "--semantic-warning-surface": SEMANTIC_TONES.warning.surface,
+      "--semantic-warning-border": SEMANTIC_TONES.warning.border,
+      "--semantic-danger": SEMANTIC_COLORS.DANGER,
+      "--semantic-danger-surface": SEMANTIC_TONES.danger.surface,
+      "--semantic-danger-border": SEMANTIC_TONES.danger.border,
+      "--semantic-neutral": SEMANTIC_COLORS.NEUTRAL,
+      "--semantic-neutral-surface": SEMANTIC_TONES.neutral.surface,
+      "--semantic-neutral-border": SEMANTIC_TONES.neutral.border,
       "--coach-text-scale-small": String(textScaleTokens.small),
       "--coach-text-scale-medium": String(textScaleTokens.medium),
       "--coach-text-scale-display": String(textScaleTokens.display),
