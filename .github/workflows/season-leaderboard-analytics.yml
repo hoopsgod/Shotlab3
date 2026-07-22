@@ -46,6 +46,7 @@ jobs:
 
       - name: Run archive-aware leaderboard, hierarchy, navigation, and semantic tests
         run: |
+          set +e
           node --test \
             tests/season-leaderboard-analytics.test.mjs \
             tests/season-leaderboard-roster-boundary.test.mjs \
@@ -54,7 +55,19 @@ jobs:
             tests/leaderboard-category-static-safety.test.mjs \
             tests/visual-hierarchy-contract.test.mjs \
             tests/mobile-navigation-contract.test.mjs \
-            tests/semantic-color-system-contract.test.mjs
+            tests/semantic-color-system-contract.test.mjs > coach-formatting-tests.log 2>&1
+          status=$?
+          cat coach-formatting-tests.log
+          exit $status
+
+      - name: Upload test diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coach-formatting-test-diagnostics
+          path: coach-formatting-tests.log
+          if-no-files-found: error
+          retention-days: 3
 
       - name: Build application
         run: npm run build
