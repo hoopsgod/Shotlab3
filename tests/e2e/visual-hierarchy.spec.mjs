@@ -1,42 +1,5 @@
 import { test, expect } from "@playwright/test";
 
-const TEAM_ID = "team-e2e-hierarchy";
-const COACH_EMAIL = "coach.hierarchy@shotlab.app";
-const PLAYER_EMAIL = "player.hierarchy@shotlab.app";
-
-function todayString() {
-  return new Date().toISOString().slice(0, 10);
-}
-
-function futureDate(days = 2) {
-  const date = new Date();
-  date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
-}
-
-function buildSeedData() {
-  const today = todayString();
-  return {
-    "sl:teams": [{ id: TEAM_ID, name: "Hierarchy Test Team", ownerCoachId: COACH_EMAIL, joinCode: "HIER26", createdAt: Date.now() }],
-    "sl:players": [
-      { id: "coach-hierarchy", email: COACH_EMAIL, name: "Hierarchy Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
-      { id: "player-hierarchy", playerId: "player-hierarchy", email: PLAYER_EMAIL, name: "Hierarchy Player", role: "player", teamId: TEAM_ID },
-    ],
-    "sl:player-profiles": [{ id: "profile-hierarchy", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Hierarchy", lastName: "Player" }],
-    "sl:scores": [
-      { id: "home-score-hierarchy", playerId: "player-hierarchy", email: PLAYER_EMAIL, name: "Hierarchy Player", teamId: TEAM_ID, drillId: "form-shooting", score: 18, makes: 18, date: today, src: "home" },
-    ],
-    "sl:program-scores": [],
-    "sl:shotlogs": [{ id: "shotlog-hierarchy", playerId: "player-hierarchy", email: PLAYER_EMAIL, name: "Hierarchy Player", teamId: TEAM_ID, made: 75, date: today, src: "home" }],
-    "sl:events": [{ id: "event-hierarchy", teamId: TEAM_ID, title: "Team Workout", date: futureDate(2), time: "5:00 PM", location: "Main Gym", type: "run", desc: "Skill development" }],
-    "sl:rsvps": [],
-    "sl:sc-sessions": [],
-    "sl:sc-rsvps": [],
-    "sl:sc-logs": [],
-    "sl:season-archives": [],
-  };
-}
-
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", async (route) => {
     await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) });
@@ -46,20 +9,18 @@ async function installRoutes(page) {
   });
 }
 
-async function seedSession(page, email) {
-  const payload = buildSeedData();
-  await page.addInitScript(({ data, sessionEmail }) => {
-    window.localStorage.clear();
-    for (const [key, value] of Object.entries(data)) window.localStorage.setItem(key, JSON.stringify(value));
-    window.localStorage.setItem("sl:session", JSON.stringify({ email: sessionEmail }));
-    window.localStorage.setItem("sl:e2e-hierarchy-seeded", "true");
-  }, { data: payload, sessionEmail: email });
+async function startClean(page) {
+  await page.addInitScript(() => window.localStorage.clear());
+}
+
+async function enterDemo(page, role) {
+  await page.goto("/");
+  const button = page.getByRole("button", { name: role === "coach" ? "Demo Coach" : "Demo Player", exact: true });
+  await expect(button).toBeVisible({ timeout: 20_000 });
+  await button.click();
 }
 
 async function expectNoHorizontalOverflow(page) {
-  await expect.poll(() => page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, innerWidth: window.innerWidth }))).toMatchObject({
-    innerWidth: await page.evaluate(() => window.innerWidth),
-  });
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 }
@@ -69,11 +30,14 @@ async function expectThreeMetrics(locator) {
   await expect(locator.locator(":scope > div")).toHaveCount(3);
 }
 
+test.beforeEach(async ({ page }) => {
+  await installRoutes(page);
+  await startClean(page);
+});
+
 test("player mobile home prioritizes one mission, three metrics, and collapsed support", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await installRoutes(page);
-  await seedSession(page, PLAYER_EMAIL);
-  await page.goto("/");
+  await enterDemo(page, "player");
 
   const objective = page.getByTestId("player-primary-objective");
   const metrics = page.getByTestId("player-primary-metrics");
@@ -106,9 +70,7 @@ test("player mobile home prioritizes one mission, three metrics, and collapsed s
 
 test("coach desktop home prioritizes one command, three metrics, and collapsed operations", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });
-  await installRoutes(page);
-  await seedSession(page, COACH_EMAIL);
-  await page.goto("/");
+  await enterDemo(page, "coach");
 
   const objective = page.getByTestId("coach-primary-objective");
   const metrics = page.getByTestId("coach-primary-metrics");
