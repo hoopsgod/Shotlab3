@@ -6,6 +6,7 @@ const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "u
 const hierarchySource = fs.readFileSync(new URL("../src/components/VisualHierarchy.jsx", import.meta.url), "utf8");
 const hierarchyCss = fs.readFileSync(new URL("../src/components/VisualHierarchy.module.css", import.meta.url), "utf8");
 const commandCenterSource = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
+const leaderboardSource = fs.readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx", import.meta.url), "utf8");
 
 test("shared hierarchy primitives define objective, three-metric, disclosure, and quiet-section layers", () => {
   assert.match(hierarchySource, /function DominantObjectiveCard/);
@@ -39,6 +40,17 @@ test("coach dashboard exposes one command objective, three metrics, and collapse
   assert.match(appSource, /testId="coach-priority-editor"/);
   assert.match(appSource, /testId="coach-program-intelligence"/);
   assert.doesNotMatch(appSource, /title="COACH HOME" subtitle="Today-first command surface/);
+});
+
+test("leaderboards place rankings ahead of optional archive and participation context", () => {
+  assert.match(leaderboardSource, /data-testid="leaderboard-status-line"/);
+  assert.match(leaderboardSource, /aria-label="Primary leaderboard categories"/);
+  assert.match(leaderboardSource, /testId="leaderboard-participation-categories"/);
+  assert.match(leaderboardSource, /testId="all-time-coverage-note"/);
+  assert.match(leaderboardSource, /PRIMARY_CATEGORY_ITEMS/);
+  assert.match(leaderboardSource, /PARTICIPATION_CATEGORY_ITEMS/);
+  assert.doesNotMatch(leaderboardSource, /gridTemplateColumns: 'repeat\(3,minmax\(0,1fr\)\)'/);
+  assert.doesNotMatch(leaderboardSource, /boxShadow: '0 10px 26px/);
 });
 
 test("secondary hierarchy uses progressive disclosure instead of adding another dominant card", () => {
