@@ -160,9 +160,18 @@
 }
 
 :global(.coach-home-dashboard) > * {
+  order: 5;
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+
+:global(.coach-home-dashboard) > [data-testid="coach-today-practice"] { order: 1; }
+:global(.coach-home-dashboard) > [data-testid="coach-next-seven-days"] { order: 2; }
+:global(.coach-home-dashboard) > [data-testid="coach-operational-alerts"] { order: 3; }
+:global(.coach-home-dashboard) > [data-testid="coach-team-standings"] { order: 4; }
+:global(.coach-home-dashboard) > [data-testid="coach-setup-checklist"] { order: 7; }
+:global(.coach-home-dashboard) > [data-testid="coach-priority-editor"] { order: 8; }
+:global(.coach-home-dashboard) > [data-testid="coach-program-intelligence"] { order: 9; }
 
 @media (max-width: 640px) {
   .objectiveContent { grid-template-columns: 1fr; align-items: start; padding: 18px; }

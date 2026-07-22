@@ -3793,7 +3793,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 </div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
 <CoachMiniHeader
-  visible={showMiniHeader}
+  visible={!isOverviewTab||showMiniHeader}
   avatar={<Av n={u.name} sz={24} email={u.email} isCoach={u.isCoach}/>}
   wordmark={<BrandWordmark size={16} small/>}
   borderColor={BORDER_CLR}
@@ -3801,13 +3801,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   onLogout={logout}
 />
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
+{isOverviewTab&&<>
 <CoachDashboardHeader
   heroRef={heroRef}
   userName={u.name}
   onOpenTeamBranding={openTeamBranding}
 />
-{isCoachTab&&<CoachCommandCenter
-  variant={showFullCommandCenter?"full":"compact"}
+<CoachCommandCenter
+  variant="full"
   totalPlayers={totalPlayers}
   activeTodayCount={activeTodayCount}
   nextEventDateFormatted={nextEventDateFormatted}
@@ -3824,11 +3825,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   onCopyJoinCode={()=>navigator.clipboard?.writeText(team?.joinCode||"")}
   onRegenerateJoinCode={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}}
   codeErr={codeErr}
-/>}
+/>
+</>}
 </div>
-<div style={{flex:1,padding:`${showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
+<div style={{flex:1,padding:`${(!isOverviewTab||showMiniHeader)?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
-  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}>
+  {tab==="feed"&&<div className="page pageShell page-feed coach-home-dashboard fade-up" data-accent="feed" style={shellVars("feed")}>
     <ProgressiveDisclosure title="Team standings" summary="Home-shot leaders and roster position" testId="coach-team-standings">
       <CompactLeaderboardPreviewCard
         title="Home Shot Leaders"
@@ -3970,11 +3972,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           testId="coach-today-practice"
         >
           <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:13,lineHeight:1.45}}>{session?`Focus area: ${session.desc||"Team development"}`:"Set the team agenda and publish today’s focus."}</div>
-          <MetricStrip items={[
-            {label:"Readiness",value:readinessCopy,detail:"Athletes active"},
-            {label:"Time",value:session?.time||"TBD",detail:"Session start"},
-            {label:"RSVP",value:session?`${rsvpPct}%`:"—",detail:"Participation"},
-          ]}/>
+          <div data-testid="coach-practice-status-row" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:0,marginTop:9,borderTop:"1px solid var(--stroke-1)",borderBottom:"1px solid var(--stroke-1)"}}>
+            {[
+              {label:"Readiness",value:readinessCopy},
+              {label:"Time",value:session?.time||"TBD"},
+              {label:"RSVP",value:session?`${rsvpPct}%`:"—"},
+            ].map((item,index)=><div key={item.label} style={{minWidth:0,padding:"9px 7px",textAlign:"center",borderLeft:index?"1px solid var(--stroke-1)":"none"}}><div style={{fontFamily:FD,color:"var(--text-1)",fontSize:16,lineHeight:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.value}</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:9,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",marginTop:4}}>{item.label}</div></div>)}
+          </div>
         </QuietSection>
         <ProgressiveDisclosure title="Next 7 days" summary={`${next7Events.length} sessions · ${unresolvedNext7Count} unresolved`} testId="coach-next-seven-days">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}>
