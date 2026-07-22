@@ -49,7 +49,7 @@ test("player mobile dock keeps three frequent destinations and moves secondary a
   await sheet.locator('[data-nav-key="program"]').click();
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
   await expect(page).toHaveURL(/\/events$/);
-  await expect(page.getByText("PROGRAM EVENTS", { exact: true })).toBeVisible();
+  await expect(page.getByText("PROGRAM EVENTS", { exact: true }).first()).toBeVisible();
 
   sheet = await openMore(page);
   await sheet.locator('[data-nav-key="leaderboards"]').click();
