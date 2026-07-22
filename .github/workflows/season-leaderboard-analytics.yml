@@ -5,35 +5,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   archive-aware-leaderboards:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
-      - name: Check out mobile navigation branch
+      - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: codex/mobile-navigation-stabilization
-          fetch-depth: 0
-
-      - name: Apply mobile navigation wiring
-        run: |
-          set +e
-          python scripts/apply_mobile_navigation_patch.py > mobile-navigation-patch.log 2>&1
-          status=$?
-          cat mobile-navigation-patch.log
-          exit $status
-
-      - name: Upload patch diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mobile-navigation-patch-diagnostics
-          path: mobile-navigation-patch.log
-          if-no-files-found: error
-          retention-days: 3
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -44,7 +24,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run leaderboard, hierarchy, and navigation tests
+      - name: Run archive-aware leaderboard, hierarchy, and navigation tests
         run: |
           node --test \
             tests/season-leaderboard-analytics.test.mjs \
@@ -57,15 +37,3 @@ jobs:
 
       - name: Build application
         run: npm run build
-
-      - name: Commit mobile navigation wiring
-        run: |
-          if git diff --quiet; then
-            echo "No navigation changes to commit."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/App.jsx
-          git commit -m "refactor(ui): simplify mobile navigation"
-          git push origin HEAD:codex/mobile-navigation-stabilization
