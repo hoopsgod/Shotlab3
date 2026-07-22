@@ -21,20 +21,7 @@ jobs:
       - name: Apply mobile navigation wiring
         run: |
           set +e
-          {
-            python scripts/apply_mobile_navigation_patch.py
-            first_status=$?
-            if [ "$first_status" -eq 0 ]; then
-              python scripts/fix_mobile_navigation_padding.py
-              second_status=$?
-            else
-              second_status=0
-            fi
-            exit_code=$((first_status || second_status))
-            echo "first_status=$first_status"
-            echo "second_status=$second_status"
-            exit "$exit_code"
-          } > mobile-navigation-patch.log 2>&1
+          python scripts/apply_mobile_navigation_patch.py > mobile-navigation-patch.log 2>&1
           status=$?
           cat mobile-navigation-patch.log
           exit $status
