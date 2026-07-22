@@ -73,9 +73,16 @@ test("coach roster statuses and event metadata render with semantic roles", asyn
   expect(actualStatusColor).toBe(expectedStatusColor);
 
   await dock.getByRole("button", { name: "Events", exact: true }).click();
-  const datePill = page.locator(".eventsDatePill").first();
-  await expect(datePill).toBeVisible({ timeout: 20_000 });
+  const eventsPage = page.locator('.pageShell[data-accent="events"]').first();
+  await expect(eventsPage).toBeVisible({ timeout: 20_000 });
   const expectedInfoColor = await computedColorForVariable(page, "--semantic-info");
-  const actualDateColor = await datePill.evaluate((node) => getComputedStyle(node).color);
-  expect(actualDateColor).toBe(expectedInfoColor);
+  const actualEventAccent = await eventsPage.evaluate((node) => {
+    const probe = document.createElement("span");
+    probe.style.color = "var(--pageAccent)";
+    node.appendChild(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  });
+  expect(actualEventAccent).toBe(expectedInfoColor);
 });
