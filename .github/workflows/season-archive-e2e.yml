@@ -48,11 +48,14 @@ jobs:
       - name: Run visual hierarchy browser test
         run: npm run test:e2e:visual-hierarchy
 
+      - name: Run mobile navigation browser test
+        run: npm run test:e2e:mobile-navigation
+
       - name: Upload browser failure artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: season-archive-hierarchy-failure-artifacts
+          name: season-archive-hierarchy-navigation-failure-artifacts
           path: |
             season-archive-service-tests.txt
             playwright-report/

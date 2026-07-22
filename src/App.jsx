@@ -23,6 +23,7 @@ import ShotLabCharts from "./components/ShotLabCharts";
 import CompactLeaderboardPreviewCard from "./components/CompactLeaderboardPreviewCard";
 import PremiumLeaderboardsHub from "./components/PremiumLeaderboardsHub";
 import { DominantObjectiveCard, MetricStrip, ProgressiveDisclosure, QuietSection } from "./components/VisualHierarchy.jsx";
+import MobileNavigation from "./components/MobileNavigation.jsx";
 
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 
@@ -289,8 +290,8 @@ const SC_INIT=[
 {id:104,title:"OLYMPIC LIFTS",date:"2026-03-11",time:"6:00 AM",location:"Weight Room — Platform Area",desc:"Clean & jerk, snatch progressions. Coached session."},
 {id:105,title:"CORE & CONDITIONING",date:"2026-03-18",time:"6:30 AM",location:"Training Facility — Turf",desc:"Core stability, sled pushes, agility ladder. Game-day conditioning."},
 ];
-const PLAYER_TAB_PATHS={home:"/",duels:"/program-log","log-drill":"/quick-menu",sc:"/lifting",program:"/events",profile:"/profile",players:"/players"};
-const PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/profile":"profile","/players":"players"};
+const PLAYER_TAB_PATHS={home:"/",duels:"/program-log","log-drill":"/quick-menu",sc:"/lifting",program:"/events",leaderboards:"/leaderboards",profile:"/profile",players:"/players"};
+const PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/leaderboards":"leaderboards","/profile":"profile","/players":"players"};
 const TIERS=[
 {min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},
 {min:3,name:"STARTER",color:"#7D7D7D",bg:"#7D7D7D15"},
@@ -820,11 +821,11 @@ const _PAGE_SIGNATURE_CSS=`
 `;
 const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);} .team-brand .pageHeaderBadge,.team-brand .pageAccentBar{background:var(--team-brand-header-accent)!important;box-shadow:0 0 16px color-mix(in srgb,var(--team-brand-header-accent) 44%, transparent)!important;}.team-brand .pageHeaderPill{border-color:var(--team-brand-badge-border)!important;background:var(--team-brand-badge-bg)!important;color:var(--team-brand-badge-text)!important;}.team-brand .cta-primary,.team-brand .cta-primary-accent{background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 100%),var(--team-brand-primary)!important;color:var(--team-brand-primary-text)!important;box-shadow:0 4px 24px color-mix(in srgb,var(--team-brand-primary) 30%, transparent)!important;}.team-brand .bottom-nav .tab.is-active,.team-brand .bottom-nav .tab.active{color:var(--team-brand-nav-active)!important;}.team-brand .bottom-nav .tab.is-active::before,.team-brand .bottom-nav .tab.active::before{background:var(--team-brand-nav-active)!important;}.team-brand .chip,.team-brand .badge,[class*="chip"],[class*="badge"]{background:var(--team-brand-badge-bg)!important;border-color:var(--team-brand-badge-border)!important;color:var(--team-brand-badge-text)!important;}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
 const _PLAYER_COMPACT_DASHBOARD_CSS=`
-.player-scroll-container{--player-scroll-bottom-padding:calc(var(--bottom-nav-content-padding, 132px) + 28px + env(safe-area-inset-bottom, 0px));-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-padding-bottom:var(--player-scroll-bottom-padding);}
+.player-scroll-container{--player-scroll-bottom-padding:calc(var(--bottom-nav-content-padding, 88px) + 24px + env(safe-area-inset-bottom, 0px));-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-padding-bottom:var(--player-scroll-bottom-padding);}
 .player-home-compact-dashboard{--player-dashboard-gap:14px;--player-dashboard-card-pad:18px;--player-dashboard-card-pad-compact:16px;--player-dashboard-chip-pad:4px 8px;--player-dashboard-chip-font:10px;--player-dashboard-section-title:22px;--player-dashboard-title-tight:1;--player-dashboard-chip-bg:rgba(8,10,14,0.78);--player-dashboard-chip-border:rgba(255,255,255,0.14);gap:var(--player-dashboard-gap);}
 .player-dashboard-chip{display:inline-flex;align-items:center;max-width:100%;}
 @media (max-width:767px){
-  .player-scroll-container{--player-scroll-bottom-padding:calc(var(--bottom-nav-content-padding, 156px) + 40px + env(safe-area-inset-bottom, 0px));}
+  .player-scroll-container{--player-scroll-bottom-padding:calc(var(--bottom-nav-content-padding, 88px) + 24px + env(safe-area-inset-bottom, 0px));}
   .player-home-compact-dashboard{--player-dashboard-gap:10px;--player-dashboard-card-pad:18px;--player-dashboard-card-pad-compact:16px;--player-dashboard-section-title:22px;--player-dashboard-chip-font:10px;--player-dashboard-chip-pad:4px 8px;--player-dashboard-card-radius:18px;--player-dashboard-card-compact-radius:16px;--player-dashboard-card-compact-bg:linear-gradient(155deg,rgba(14,18,24,0.88),rgba(8,10,14,0.86));--player-dashboard-card-compact-shadow:0 12px 26px rgba(0,0,0,0.24);--player-dashboard-chip-row-gap:6px;--player-dashboard-primary-cta-min-h:50px;--player-dashboard-primary-cta-font:14px;--player-dashboard-schedule-header-mb:9px;--player-dashboard-schedule-grid-gap:8px;--player-dashboard-schedule-item-pad:11px;--player-dashboard-schedule-item-radius:12px;--player-dashboard-schedule-meta-font:11px;--player-dashboard-schedule-meta-leading:1.35;--player-dashboard-schedule-cta-min-h:34px;--player-dashboard-schedule-cta-pad:5px 10px;--player-dashboard-schedule-cta-font:10px;--player-dashboard-schedule-cta-bg:rgba(255,255,255,0.025);--player-dashboard-schedule-cta-border:rgba(255,255,255,0.16);--player-dashboard-schedule-cta-color:rgba(229,231,235,0.86);margin-bottom:22px;}
 }
 `;
@@ -2233,10 +2234,23 @@ const playerNavItems=[
   {k:"program",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
   {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
 ];
+const getPlayerNavItem=(key,overrides={})=>{const item=playerNavItems.find(candidate=>candidate.k===key);return item?{...item,...overrides}:null;};
+const playerMobilePrimaryItems=[
+  getPlayerNavItem("home",{mobileLabel:"Home"}),
+  getPlayerNavItem("log-drill",{mobileLabel:"At Home"}),
+  getPlayerNavItem("duels",{mobileLabel:"Program"}),
+].filter(Boolean);
+const playerMobileSecondaryItems=[
+  getPlayerNavItem("program",{mobileLabel:"Events",description:"Team schedule and RSVPs"}),
+  getPlayerNavItem("sc",{mobileLabel:"Lifting",description:"Strength and conditioning"}),
+  {k:"leaderboards",l:"Leaderboards",mobileLabel:"Rankings",description:"Current and all-time team rankings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>},
+  getPlayerNavItem("profile",{mobileLabel:"Profile",description:"Progress, settings, and account"}),
+].filter(Boolean);
+
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Player navigation"><div className="nav-title">PLAYER DASHBOARD</div>{playerNavItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>switchTab(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:"var(--bottom-nav-content-padding, calc(132px + env(safe-area-inset-bottom, 0px)))"}}>
+<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}>
 <BrandBackdrop/>
 {completionCue&&<div className="fade-up" style={{position:"sticky",top:70,zIndex:18,margin:"8px 12px 0",padding:"12px 14px",borderRadius:14,background:"linear-gradient(155deg, rgba(200,255,26,0.14), rgba(94,208,255,0.08))",border:"1px solid rgba(200,255,26,0.34)",boxShadow:"0 12px 24px rgba(0,0,0,0.25)"}}>
   <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>COMPLETED</div>
@@ -2287,7 +2301,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 />
 
 <div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
-  <button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>
+  {isDesktop&&<button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>}
   <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.MUT,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
 </div>
 
@@ -2683,7 +2697,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
 </div>
 
-{!isDesktop&&<NavBar items={playerNavItems} active={tab} onChange={switchTab}/>} 
+{!isDesktop&&<MobileNavigation primaryItems={playerMobilePrimaryItems} secondaryItems={playerMobileSecondaryItems} activeKey={tab} onChange={switchTab} ariaLabel="Player navigation"/>} 
 
   </div></div></main>
 {isDesktop&&<aside className="insights-panel"><div className="panel-title">PLAYER INSIGHTS</div><div className="placeholder">Add widgets here later (goals, reminders, coach notes, and progress snapshots).</div></aside>}
@@ -3662,6 +3676,19 @@ const navItems=[
   {k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
   {k:"branding",l:"Brand",accentVar:"--accent",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l8 4v6c0 4.5-3 7.7-8 8-5-.3-8-3.5-8-8V7l8-4z"/><path d="M9.5 12.5l1.8 1.8 3.2-3.2"/></svg>},
 ];
+const getCoachNavItem=(key,overrides={})=>{const item=navItems.find(candidate=>candidate.k===key);return item?{...item,...overrides}:null;};
+const coachMobilePrimaryItems=[
+  getCoachNavItem("feed",{mobileLabel:"Home"}),
+  getCoachNavItem("players",{mobileLabel:"Players"}),
+  getCoachNavItem("events",{mobileLabel:"Events"}),
+].filter(Boolean);
+const coachMobileSecondaryItems=[
+  getCoachNavItem("drills",{mobileLabel:"Drills",description:"Drill library and assignments"}),
+  getCoachNavItem("sc",{mobileLabel:"S&C",description:"Strength sessions and compliance"}),
+  {k:"leaderboards",l:"Leaderboards",mobileLabel:"Rankings",description:"Current and all-time team rankings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>},
+  getCoachNavItem("branding",{mobileLabel:"Brand",description:"Team identity and visual settings"}),
+].filter(Boolean);
+
 const handleNavChange=(k)=>{
   if(k==="branding"){
     openTeamBranding();
@@ -3730,7 +3757,7 @@ useEffect(()=>{
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-text-scale={coachTextScale}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div ref={coachScrollRef} className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"var(--bottom-nav-content-padding, calc(132px + env(safe-area-inset-bottom, 0px)))"}}><BrandBackdrop/>
+<main className="shell-main"><div ref={coachScrollRef} className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
 <div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
@@ -4393,7 +4420,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   </div>}
 </div>
 
-{!isDesktop&&<NavBar items={navItems} active={tab} onChange={handleNavChange}/>}
+{!isDesktop&&<MobileNavigation primaryItems={coachMobilePrimaryItems} secondaryItems={coachMobileSecondaryItems} activeKey={tab} onChange={handleNavChange} ariaLabel="Coach navigation"/>}
 
   </div></div></main>
 {isDesktop&&<aside className="insights-panel"><div className="panel-title">COACH INSIGHTS</div><div className="placeholder">Add widgets here later (activity, upcoming events, roster changes, lifting compliance).</div></aside>}
