@@ -5,15 +5,35 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   archive-aware-leaderboards:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Check out repository
+      - name: Check out coach formatting branch
         uses: actions/checkout@v4
+        with:
+          ref: codex/semantic-color-system-stabilization
+          fetch-depth: 0
+
+      - name: Apply coach formatting revision
+        run: |
+          set +e
+          python scripts/apply_coach_formatting_patch.py > coach-formatting-patch.log 2>&1
+          status=$?
+          cat coach-formatting-patch.log
+          exit $status
+
+      - name: Upload patch diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coach-formatting-patch-diagnostics
+          path: coach-formatting-patch.log
+          if-no-files-found: error
+          retention-days: 3
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -38,3 +58,15 @@ jobs:
 
       - name: Build application
         run: npm run build
+
+      - name: Commit coach formatting revision
+        run: |
+          if git diff --quiet; then
+            echo "No coach formatting changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx src/components/VisualHierarchy.module.css
+          git commit -m "fix(ui): tighten coach dashboard formatting"
+          git push origin HEAD:codex/semantic-color-system-stabilization
