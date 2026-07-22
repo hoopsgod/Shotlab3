@@ -22,6 +22,7 @@ import CoachMiniHeader from "./components/CoachMiniHeader";
 import ShotLabCharts from "./components/ShotLabCharts";
 import CompactLeaderboardPreviewCard from "./components/CompactLeaderboardPreviewCard";
 import PremiumLeaderboardsHub from "./components/PremiumLeaderboardsHub";
+import { DominantObjectiveCard, MetricStrip, ProgressiveDisclosure, QuietSection } from "./components/VisualHierarchy.jsx";
 
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 
@@ -2285,9 +2286,9 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   })()}
 />
 
-<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:8,justifyContent:"flex-end",alignItems:"center",padding:"8px 20px 0",position:"relative",zIndex:2}}>
-  <button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:38,padding:"0 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:CARD_BG,color:LIGHT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>
-  <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:38,padding:"0 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:CARD_BG,color:LIGHT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
+<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
+  <button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>
+  <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.MUT,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
 </div>
 
 <div ref={playerScrollRef} className="player-scroll-container" style={{flex:1,padding:isDesktop?"14px 20px 36px":"16px 20px var(--player-scroll-bottom-padding)",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
@@ -2411,78 +2412,84 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       ];
       const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
       return <div className="player-home-compact-dashboard" style={{marginBottom:24,display:"grid",gap:"var(--player-dashboard-gap, 14px)"}}>
-        <section className="player-dashboard-card player-dashboard-missionHero" aria-label="Today's mission" style={{padding:isNarrow?"var(--player-dashboard-card-pad, 18px)":"20px",borderRadius:"var(--player-dashboard-card-radius, 20px)",background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
-          <div>
-            <div className="player-dashboard-kicker" style={{fontFamily:FB,color:VOLT,fontSize:13,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S MISSION</div>
-            <div className="player-dashboard-title" style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?"var(--player-dashboard-mission-title, 28px)":32,lineHeight:1.05,letterSpacing:1.1,marginTop:8,textTransform:"uppercase"}}>{coachTodayFocus}</div>
-          </div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:15,lineHeight:1.6,marginTop:10}}>{missionStatus}</div>
-          <div style={{marginTop:12,height:8,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"linear-gradient(90deg, #C8FF1A, #E6FF7A)",boxShadow:"0 0 20px rgba(200,255,26,0.44)"}}/></div>
-          <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:13,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
-          <div className="player-dashboard-chipRow" style={{display:"flex",gap:"var(--player-dashboard-chip-row-gap, 8px)",flexWrap:"wrap",alignItems:"center",marginTop:11}}>
-            {[
-              {tag:`Emphasis · ${emphasisLabel}`},
-              {tag:`Weekly · ${weeklyMakes}/${coachWeeklyMakesTarget}`},
-              {tag:`Momentum · ${missionMomentumBadge}`,accent:true},
-            ].map(({tag,accent})=><span key={tag} className={`player-dashboard-chip ${accent?"player-dashboard-chipAccent":""}`} style={{fontFamily:FB,fontSize:"var(--player-dashboard-chip-font, 10px)",color:accent?VOLT:LIGHT,padding:"var(--player-dashboard-chip-pad, 4px 8px)",borderRadius:999,background:"var(--player-dashboard-chip-bg, rgba(12,14,18,0.62))",border:`1px solid ${accent?"rgba(200,255,0,0.48)":"var(--player-dashboard-chip-border, rgba(255,255,255,0.16))"}`,whiteSpace:"nowrap",lineHeight:1.15}}>{tag}</span>)}
-          </div>
-          <button className="btn-v cta-primary player-dashboard-primaryCta" style={{marginTop:14,minHeight:"var(--player-dashboard-primary-cta-min-h, 56px)",padding:"0 20px",fontSize:"var(--player-dashboard-primary-cta-font, 15px)"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel.toUpperCase()}</button>
-        </section>
-        <section className="player-dashboard-card player-dashboard-cardCompact" aria-label="Upcoming Schedule" data-testid="player-upcoming-schedule" style={{padding:isNarrow?"var(--player-dashboard-card-pad-compact, 16px)":"18px",borderRadius:"var(--player-dashboard-card-compact-radius, 18px)",background:"var(--player-dashboard-card-compact-bg, linear-gradient(150deg, rgba(94,208,255,0.18), rgba(200,255,0,0.08) 48%, rgba(9,12,16,0.86)))",border:"1px solid rgba(255,255,255,0.18)",boxShadow:"var(--player-dashboard-card-compact-shadow, 0 18px 36px rgba(0,0,0,0.28))"}}>
-          <div className="player-dashboard-scheduleHeader" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:"var(--player-dashboard-schedule-header-mb, 12px)"}}>
-            <div><div className="player-dashboard-kicker" style={{fontFamily:FB,color:CYAN,fontSize:12,fontWeight:800,letterSpacing:"0.12em"}}>NEXT UP</div><div className="player-dashboard-title" style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?"var(--player-dashboard-section-title, 22px)":26,letterSpacing:1,marginTop:4}}>UPCOMING SCHEDULE</div></div>
-            <span className="player-dashboard-chip player-dashboard-chipAccent" style={{fontFamily:FB,color:VOLT,fontSize:"var(--player-dashboard-chip-font, 11px)",fontWeight:700,border:"1px solid rgba(200,255,0,0.38)",borderRadius:999,padding:"var(--player-dashboard-chip-pad, 5px 9px)",whiteSpace:"nowrap"}}>{upcomingScheduleItems.length} scheduled</span>
-          </div>
-          {upcomingScheduleItems.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:13,lineHeight:1.5}}>No upcoming event or S&C session is scheduled yet.</div>:<div className="player-dashboard-scheduleGrid" style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:"var(--player-dashboard-schedule-grid-gap, 10px)"}}>
-            {upcomingScheduleItems.map(item=><div className="player-dashboard-scheduleItem" key={item.kind} style={{border:"1px solid rgba(255,255,255,0.14)",borderRadius:"var(--player-dashboard-schedule-item-radius, 14px)",padding:"var(--player-dashboard-schedule-item-pad, 13px)",background:"rgba(7,10,14,0.58)",minWidth:0}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}><span style={{fontFamily:FB,color:item.kind==="sc"?"#A0A0A0":VOLT,fontSize:10,fontWeight:800,letterSpacing:"0.1em"}}>{item.label}</span><span className="player-dashboard-chip" style={{fontFamily:FB,color:item.rsvpStatus==="Going"?VOLT:"#FFCE73",fontSize:"var(--player-dashboard-chip-font, 10px)",border:"1px solid var(--player-dashboard-chip-border, rgba(255,255,255,0.16))",borderRadius:999,padding:"var(--player-dashboard-chip-pad, 3px 7px)"}}>{item.rsvpStatus}</span></div>
-              <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.title}</div>
-              <div className="player-dashboard-scheduleMeta" style={{fontFamily:FB,color:T.SUB,fontSize:"var(--player-dashboard-schedule-meta-font, 12px)",marginTop:6,lineHeight:"var(--player-dashboard-schedule-meta-leading, 1.5)"}}><span style={{color:CYAN,fontWeight:700}}>{item.date}</span> · {item.time}<br/>{item.location}</div>
-              <button className="pageHeaderPill player-dashboard-scheduleCta" onClick={()=>switchTab(item.target)} style={{marginTop:10,minHeight:"var(--player-dashboard-schedule-cta-min-h, 40px)",padding:"var(--player-dashboard-schedule-cta-pad, 6px 12px)",fontSize:"var(--player-dashboard-schedule-cta-font, 11px)",background:"var(--player-dashboard-schedule-cta-bg, rgba(255,255,255,0.04))",borderColor:"var(--player-dashboard-schedule-cta-border, rgba(255,255,255,0.2))",color:"var(--player-dashboard-schedule-cta-color, currentColor)"}}>{item.cta}</button>
+        <DominantObjectiveCard
+          eyebrow="Today’s mission"
+          title={coachTodayFocus}
+          description={missionStatus}
+          actionLabel={missionCtaLabel}
+          onAction={()=>switchTab("log-drill")}
+          badge={missionMomentumBadge}
+          testId="player-primary-objective"
+        >
+          <div style={{height:7,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"var(--accent)",transition:"width .2s ease"}}/></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:12,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
+        </DominantObjectiveCard>
+        <MetricStrip
+          testId="player-primary-metrics"
+          items={[
+            {label:"Today",value:todaysMakes,detail:`${dailyPct}% of daily goal`},
+            {label:"This Week",value:weeklyMakes,detail:`${weeklyPct}% of weekly goal`},
+            {label:"Streak",value:formatStreakDays(streak),detail:`${todayS.length}/${drills.length} drills`},
+          ]}
+        />
+        <ProgressiveDisclosure
+          title="Upcoming schedule"
+          summary={upcomingScheduleItems.length?`${upcomingScheduleItems.length} scheduled · ${unresolvedBadgeLabel}`:"No sessions scheduled"}
+          testId="player-upcoming-schedule"
+        >
+          {upcomingScheduleItems.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:13,lineHeight:1.5}}>No upcoming event or S&amp;C session is scheduled yet.</div>:<div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
+            {upcomingScheduleItems.map(item=><div key={item.kind} style={{borderTop:"1px solid var(--stroke-1)",padding:"11px 2px",minWidth:0}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><span style={{fontFamily:FB,color:item.kind==="sc"?"#A0A0A0":VOLT,fontSize:10,fontWeight:800,letterSpacing:"0.08em"}}>{item.label}</span><span style={{fontFamily:FB,color:item.rsvpStatus==="Going"?VOLT:"#FFCE73",fontSize:10}}>{item.rsvpStatus}</span></div>
+              <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1,marginTop:6,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.title}</div>
+              <div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:5,lineHeight:1.45}}><span style={{color:CYAN,fontWeight:700}}>{item.date}</span> · {item.time}<br/>{item.location}</div>
+              <button type="button" onClick={()=>switchTab(item.target)} style={{marginTop:8,minHeight:38,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>{item.cta} →</button>
             </div>)}
           </div>}
-        </section>
-        <CompactLeaderboardPreviewCard
-          title="Team Leaders"
-          areaTitle="Leaderboards"
-          categoryLabel="Home Shots"
-          mode="player"
-          userEmail={u?.email||""}
-          status={playerDashboardLeaderboardStatus}
-          rows={playerDashboardLeaderboardRows}
-          emptyMessage="No leaderboard data yet. Log shots to enter the rankings."
-          maxRows={3}
-          onViewAll={()=>switchTab("leaderboards")}
-        />
-        <section aria-label="Coach guidance summary" style={{padding:isNarrow?"16px":"18px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-            <div><div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:"0.04em"}}>COACH GUIDANCE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:3,lineHeight:1.45}}>{coachName} has active priorities tied to your weekly progression.</div></div>
-            <span style={{fontFamily:FB,fontSize:11,color:streak>=3?VOLT:"#FFCE73",border:`1px solid ${streak>=3?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"4px 9px"}}>{streak} day visibility</span>
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure title="Team standings" summary="Home-shot rankings and your position" testId="player-team-standings">
+          <CompactLeaderboardPreviewCard
+            title="Team Leaders"
+            areaTitle="Leaderboards"
+            categoryLabel="Home Shots"
+            mode="player"
+            userEmail={u?.email||""}
+            status={playerDashboardLeaderboardStatus}
+            rows={playerDashboardLeaderboardRows}
+            emptyMessage="No leaderboard data yet. Log shots to enter the rankings."
+            maxRows={3}
+            onViewAll={()=>switchTab("leaderboards")}
+          />
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure
+          title="Coach guidance"
+          summary={`${coachName} · ${coachPriorityDrill}`}
+          testId="player-coach-guidance"
+        >
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,lineHeight:1.5}}>Coach focus: {coachTodayFocus}</div>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
+            {[{k:"Priority drill",v:coachPriorityDrill},{k:"Coach challenge",v:coachChallengeText},{k:"Weekly goal",v:weeklyGoalLabel},{k:"Consistency",v:consistencyExpectation}].map(item=><div key={item.k} style={{borderTop:"1px solid var(--stroke-1)",padding:"9px 2px"}}><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:12,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.45}}>{item.v}</div></div>)}
           </div>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:15,lineHeight:1.55,marginTop:10}}>Coach focus: {coachTodayFocus}</div>
-          <div style={{display:"flex",gap:8,alignItems:"center",marginTop:10,flexWrap:"wrap"}}>
-            <button type="button" onClick={()=>setShowCoachGuidanceDetails(v=>!v)} style={{border:"1px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.04)",color:LIGHT,borderRadius:999,padding:"6px 12px",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>
-              {showCoachGuidanceDetails?"Hide details":"View details"}
-            </button>
-            <button type="button" onClick={()=>switchTab("duels")} style={{border:"1px solid rgba(200,255,0,0.34)",background:"rgba(200,255,0,0.08)",color:VOLT,borderRadius:999,padding:"6px 12px",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>
-              Open Program
-            </button>
+          <button type="button" onClick={()=>switchTab("duels")} style={{marginTop:9,minHeight:40,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>Open Program →</button>
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure
+          title="More progress"
+          summary="Rank, attendance, season progress, and shortcuts"
+          testId="player-secondary-intelligence"
+        >
+          <MetricStrip items={[
+            {label:"Team Rank",value:leaderboardRank>0?`#${leaderboardRank}`:"—",detail:"Home shots"},
+            {label:"Events",value:eventsAttended,detail:"Attended"},
+            {label:"Season",value:`${seasonProgressPct}%`,detail:trainingIdentity},
+          ]}/>
+          <QuietSection title="Next step" eyebrow="Recommended">
+            <div style={{fontFamily:FD,color:LIGHT,fontSize:20}}>{nextEvent?nextEvent.title:"Build your next session plan"}</div>
+            <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:4,lineHeight:1.45}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"No event locked yet — open Program and set the next rep target for your week."}</div>
+          </QuietSection>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(3,minmax(0,1fr))",gap:8,marginTop:12}}>
+            {[{label:"View Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:44,borderRadius:10,border:"1px solid var(--stroke-1)",background:"transparent",color:LIGHT,fontFamily:FB,fontWeight:800,fontSize:11,cursor:"pointer"}}>{action.label}</button>)}
           </div>
-          {showCoachGuidanceDetails&&<div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
-            {[{k:"Priority drill",v:coachPriorityDrill},{k:"Coach challenge",v:coachChallengeText},{k:"Weekly goal",v:weeklyGoalLabel},{k:"Consistency",v:consistencyExpectation}].map(item=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"9px 10px",background:"rgba(12,14,18,0.5)"}}><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:12,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.45}}>{item.v}</div></div>)}
-          </div>}
-        </section>
-        <section aria-label="Progress snapshot" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:12}}>
-          {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly",value:weeklyMakes,color:LIGHT},{label:"Daily",value:`${dailyPct}%`,color:VOLT},{label:"Weekly",value:`${weeklyPct}%`,color:ORANGE}].map(item=><div key={item.label+item.value} style={{padding:"12px",borderRadius:12,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:22,marginTop:4,lineHeight:1.1}}>{item.value}</div></div>)}
-        </section>
-        <section aria-label="Next step" style={{padding:"14px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:`1px solid ${BORDER_CLR}77`}}>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:700,letterSpacing:"0.08em"}}>NEXT STEP</div>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:20,marginTop:4}}>{nextEvent?nextEvent.title:"Build your next session plan"}</div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"No event locked yet — open Program and set the next rep target for your week."}</div>
-        </section>
-        <section aria-label="Secondary navigation actions" style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(3,minmax(0,1fr))",gap:10}}>
-          {[{label:"View Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:56,borderRadius:12,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer"}}>{action.label}</button>)}
-        </section>
+        </ProgressiveDisclosure>
+        
         
       </div>
     })()}
@@ -3772,8 +3779,8 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 </div>
 <div style={{flex:1,padding:`${showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
-  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="COACH HOME" subtitle="Today-first command surface for your program" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
-    <div style={{marginBottom:10}}>
+  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}>
+    <ProgressiveDisclosure title="Team standings" summary="Home-shot leaders and roster position" testId="coach-team-standings">
       <CompactLeaderboardPreviewCard
         title="Home Shot Leaders"
         areaTitle="Leaderboards"
@@ -3785,7 +3792,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         maxRows={5}
         onViewAll={openCoachLeaderboards}
       />
-    </div>
+    </ProgressiveDisclosure>
     {(()=>{const coachChecklist=[
         {label:"Create or restore team",done:Boolean(u?.teamId)},
         {label:"Invite or add players",done:ups.length>0,onClick:()=>setTab("players"),ariaLabel:"Go to Players tab"},
@@ -3798,7 +3805,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {label:"First team-management action",done:ups.length>0||events.length>0,onClick:()=>setTab("players")},
         {label:"First RSVP tracking pass",done:rsvps.length>0,onClick:()=>setTab("events")},
       ];
-      return <section style={{...CHECKLIST_CARD_STYLE,padding:"10px 11px",marginBottom:10}} aria-label="Coach setup checklist">
+      return <ProgressiveDisclosure title="Coach setup" summary={`${coachChecklist.filter(item=>item.done).length}/${coachChecklist.length} complete`} testId="coach-setup-checklist">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Coach Setup</div>
           <span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{coachChecklist.filter(item=>item.done).length}/{coachChecklist.length}</span>
@@ -3822,7 +3829,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           <div style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>FIRST-WEEK ACTIVATION</div>
           {coachActivation.map(item=><button key={item.label} type="button" onClick={item.onClick} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"7px 8px",borderRadius:9,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.015)",color:LIGHT,fontFamily:FB,fontSize:11,cursor:"pointer"}}><span>{item.done?"✓":"•"} {item.label}</span><span style={{fontSize:9,color:item.done?VOLT:T.SUB}}>{item.done?"Completed":"Next best action"}</span></button>)}
         </div>
-      </section>;})()}
+      </ProgressiveDisclosure>;})()}
     {(()=>{
       const todayDate=today;
       const nextWeekEndDate=new Date(`${todayDate}T00:00:00`);
@@ -3906,20 +3913,21 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {priority:scheduleGap?"important":"passive",title:"Schedule stability",detail:scheduleGap?"Add at least one more session to stabilize the 7-day calendar.":"7-day schedule cadence is stable.",cta:"Manage schedule",onClick:()=>setTab("events")},
       ].filter(Boolean).slice(0,4);
       return <>
-        <section className="accent-card" style={{background:"linear-gradient(155deg, color-mix(in srgb,var(--accent) 13%, transparent), rgba(11,13,16,0.96) 68%)",border:`1px solid color-mix(in srgb,var(--accent) 30%, transparent)`,borderRadius:22,padding:isDesktop?"24px":"20px",marginBottom:14,boxShadow:"0 18px 40px rgba(0,0,0,0.24)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"flex-start",marginBottom:12}}>
-            <div>
-              <div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,fontWeight:700,letterSpacing:"0.06em"}}>TODAY'S PRACTICE</div>
-              <div style={{fontFamily:FD,color:"var(--text-1)",fontSize:isDesktop?28:24,lineHeight:1,marginTop:6}}>{session?.title||"No session scheduled"}</div>
-              <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:12,marginTop:8}}>{session?`Focus area: ${session.desc||"Team development"}`:"Set the team agenda and publish today's focus."}</div>
-            </div>
-            <button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setTab("events")}>{session?"Open Session":"Add Session"}</button>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8}}>
-            {[{k:"Readiness",v:readinessCopy},{k:"Time",v:session?.time||"TBD"},{k:"Intensity",v:session?.intensity||"Game-speed"},{k:"Participation",v:session?`${rsvpPct}% RSVP`:"No RSVPs"}].map(item=><div key={item.k} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"10px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{item.k}</div><div style={{fontFamily:FB,fontSize:12,color:"var(--text-1)",marginTop:3,fontWeight:600}}>{item.v}</div></div>)}
-          </div>
-        </section>
-        <section className="accent-card" style={{borderRadius:18,padding:isDesktop?"14px 14px":"12px 12px",marginBottom:12,background:"linear-gradient(152deg, rgba(200,255,0,0.12), rgba(255,255,255,0.03) 32%, rgba(8,10,14,0.82))",border:"1px solid rgba(200,255,0,0.3)",boxShadow:"0 14px 30px rgba(0,0,0,0.2)"}}>
+        <QuietSection
+          eyebrow="Today’s practice"
+          title={session?.title||"No session scheduled"}
+          actionLabel={session?"Open session":"Add session"}
+          onAction={()=>setTab("events")}
+          testId="coach-today-practice"
+        >
+          <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:13,lineHeight:1.45}}>{session?`Focus area: ${session.desc||"Team development"}`:"Set the team agenda and publish today’s focus."}</div>
+          <MetricStrip items={[
+            {label:"Readiness",value:readinessCopy,detail:"Athletes active"},
+            {label:"Time",value:session?.time||"TBD",detail:"Session start"},
+            {label:"RSVP",value:session?`${rsvpPct}%`:"—",detail:"Participation"},
+          ]}/>
+        </QuietSection>
+        <ProgressiveDisclosure title="Next 7 days" summary={`${next7Events.length} sessions · ${unresolvedNext7Count} unresolved`} testId="coach-next-seven-days">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}>
             <div><div style={{fontFamily:FD,fontSize:15,color:LIGHT,letterSpacing:"0.04em"}}>NEXT 7 DAYS</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Critical sessions, unresolved RSVP risk, and readiness.</div></div>
             <button className="pageHeaderPill" onClick={()=>setTab("events")}>Open Events</button>
@@ -3944,12 +3952,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
               </button>;
             })}
           </div>
-        </section>
-        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure title="Operational alerts" summary={`${coachAlerts.filter(alert=>alert.priority!=="passive").length} items need review`} testId="coach-operational-alerts">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>COACH OPERATIONAL ALERTS</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Prioritized alerts for RSVP closure, readiness, activity, and schedule reliability.</div></div><button className="pageHeaderPill" onClick={()=>setTab("events")}>Open events</button></div>
           <div style={{display:"grid",gap:7,marginTop:9}}>{coachAlerts.map((alert)=>{const tone=coachPriorityStyle[alert.priority]||coachPriorityStyle.passive;return <button key={alert.title} type="button" onClick={alert.onClick} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${tone.border}`,background:"rgba(255,255,255,0.015)",cursor:"pointer"}}><span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.border}`,borderRadius:999,padding:"3px 7px",background:tone.bg}}>{tone.label}</span><span><span style={{display:"block",fontFamily:FB,fontSize:11,color:"var(--text-1)",fontWeight:700}}>{alert.title}</span><span style={{display:"block",fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:2}}>{alert.detail}</span></span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{alert.cta} ›</span></button>;})}</div>
-        </section>
-        <section className="accent-card" style={{borderRadius:16,padding:isDesktop?"14px":"12px",marginBottom:12,background:"linear-gradient(152deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015))",border:"1px solid rgba(255,255,255,0.16)"}}>
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure title="Coach priority editor" summary={coachPrioritiesDirty?"Unsaved changes":"Player-facing focus and weekly targets"} testId="coach-priority-editor">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:10}}>
             <div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>COACH PRIORITY EDITOR</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Set the exact priorities players see across the dashboard and check-ins.</div></div>
           </div>
@@ -3965,12 +3973,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           {coachPrioritiesMessage&&<div style={{fontFamily:FB,fontSize:11,color:VOLT,marginTop:8}}>{coachPrioritiesMessage}</div>}
           <div style={{fontFamily:FB,fontSize:10,color:coachPrioritiesError?"#FF8D8D":coachPrioritySaveState==="saved"?VOLT:"var(--text-3)",letterSpacing:"0.03em",marginTop:10}}>{coachPrioritySaveState==="saving"?"Saving priorities...":coachPrioritiesError?"Save failed. Review fields and retry.":coachPrioritiesDirty?"Unsaved changes":"All changes saved"}</div>
           <button className="btn-v cta-primary" type="button" onClick={handleSaveCoachPriorities} style={{marginTop:10,width:"100%"}}>{coachPrioritySaveState==="saving"?"Saving priorities...":"SAVE PRIORITIES"}</button>
-        </section>
+        </ProgressiveDisclosure>
 
-        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
-          {[{l:"Active today",v:activeTodaySet.size,sub:`${safeRoster.length?Math.round((activeTodaySet.size/safeRoster.length)*100):0}% of roster`},{l:"Attendance",v:`${attendance}%`,sub:"7-day participation rate"},{l:"Consistency",v:avgStreak,sub:"Avg logs from top streaks"},{l:"Weekly activity",v:weekScores.length,sub:"Total workouts logged"}].map(stat=><div key={stat.l} style={{border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{stat.l}</div><div style={{fontFamily:FD,fontSize:21,color:"var(--text-1)",lineHeight:1,marginTop:4}}>{stat.v}</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:4}}>{stat.sub}</div></div>)}
-        </section>
-
+        <MetricStrip testId="coach-primary-metrics-feed" items={[
+          {label:"Active Today",value:activeTodaySet.size,detail:`${safeRoster.length?Math.round((activeTodaySet.size/safeRoster.length)*100):0}% of roster`},
+          {label:"Attendance",value:`${attendance}%`,detail:"7-day participation"},
+          {label:"Weekly Activity",value:weekScores.length,detail:"Workouts logged"},
+        ]}/>
+        <ProgressiveDisclosure title="Program intelligence" summary="Trends, athlete attention, engagement, and activity" testId="coach-program-intelligence">
         <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(3,minmax(0,1fr))":"1fr",gap:8,marginBottom:12}}>
           {trendCards.map((trend)=><div key={trend.label} style={{border:"1px solid var(--stroke-1)",background:"linear-gradient(160deg, rgba(255,255,255,0.035), rgba(0,0,0,0.18))",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{trend.label}</div><div style={{fontFamily:FB,fontSize:13,color:trend.tone==="good"?"var(--accent)":trend.tone==="warn"?"#FFB86B":"var(--text-1)",fontWeight:700,marginTop:5}}>{trend.value}</div></div>)}
         </section>
@@ -4023,6 +4033,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 
         {(()=>{const recentCoachActivity=deriveActivityFeedItems({view:"coach",user:u,events:safeEvents,rsvps:safeRsvps,shotLogs,players:ups,scores:safeScores,today,activeTeamPlayerEmails:activeTeamPlayerEmailSet,activeTeamPlayerKeys:activeTeamPlayerKeySet});return <RecentActivityCard title="Activity" items={recentCoachActivity}/>;})()}
         <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/><div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"6px 14px",marginTop:12}}>{safeScores.length===0&&<Empty t="No activity yet" action="No activity yet — invite players or have them log their first workout." cta="Invite Players" onTap={()=>setTab("players")} icon={<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>}/>}{safeScores.slice(-20).reverse().map((s,i)=>{const drillList=(s.src==="program"?programDrills:drills);const dr=drillList.find(d=>d.id===s.drillId);const pct=dr&&hasDrillMax(dr)?Math.round(s.score/dr.max*100):null;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 10px",borderBottom:`1px solid ${BORDER_CLR}33`,borderRadius:12,background:i%2===0?"rgba(255,255,255,0.01)":"transparent"}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:999,color:isHome?"#0B0D10":LIGHT,background:isHome?"var(--accent)":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}{hasDrillMax(dr)&&<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontSize:10,fontWeight:700,color:pct>=70?"var(--accent)":T.SUB}}>{pct}%</div>}</div></div>})}</div>
+        </ProgressiveDisclosure>
       </>;
     })()}
   </div>}
