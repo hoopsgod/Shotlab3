@@ -5,15 +5,21 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   archive-aware-leaderboards:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Check out repository
+      - name: Check out feature branch
         uses: actions/checkout@v4
+        with:
+          ref: codex/visual-hierarchy-stabilization
+          fetch-depth: 0
+
+      - name: Apply visual hierarchy patch
+        run: python scripts/apply_visual_hierarchy_patch.py
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -24,14 +30,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run archive-aware leaderboard tests
+      - name: Run archive-aware leaderboard and hierarchy tests
         run: |
           node --test \
             tests/season-leaderboard-analytics.test.mjs \
             tests/season-leaderboard-roster-boundary.test.mjs \
             tests/season-leaderboard-ui-contract.test.mjs \
             tests/premium-leaderboards-hub-regression.test.mjs \
-            tests/leaderboard-category-static-safety.test.mjs
+            tests/leaderboard-category-static-safety.test.mjs \
+            tests/visual-hierarchy-contract.test.mjs
 
       - name: Build application
         run: npm run build
+
+      - name: Commit hierarchy wiring
+        run: |
+          if git diff --quiet; then
+            echo "No hierarchy changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx
+          git commit -m "refactor(ui): establish dashboard visual hierarchy"
+          git push origin HEAD:codex/visual-hierarchy-stabilization
