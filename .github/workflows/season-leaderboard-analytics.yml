@@ -20,8 +20,33 @@ jobs:
 
       - name: Apply mobile navigation wiring
         run: |
-          python scripts/apply_mobile_navigation_patch.py
-          python scripts/fix_mobile_navigation_padding.py
+          set +e
+          {
+            python scripts/apply_mobile_navigation_patch.py
+            first_status=$?
+            if [ "$first_status" -eq 0 ]; then
+              python scripts/fix_mobile_navigation_padding.py
+              second_status=$?
+            else
+              second_status=0
+            fi
+            exit_code=$((first_status || second_status))
+            echo "first_status=$first_status"
+            echo "second_status=$second_status"
+            exit "$exit_code"
+          } > mobile-navigation-patch.log 2>&1
+          status=$?
+          cat mobile-navigation-patch.log
+          exit $status
+
+      - name: Upload patch diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mobile-navigation-patch-diagnostics
+          path: mobile-navigation-patch.log
+          if-no-files-found: error
+          retention-days: 3
 
       - name: Set up Node
         uses: actions/setup-node@v4
