@@ -24,6 +24,7 @@ import CompactLeaderboardPreviewCard from "./components/CompactLeaderboardPrevie
 import PremiumLeaderboardsHub from "./components/PremiumLeaderboardsHub";
 import { DominantObjectiveCard, MetricStrip, ProgressiveDisclosure, QuietSection } from "./components/VisualHierarchy.jsx";
 import MobileNavigation from "./components/MobileNavigation.jsx";
+import SemanticStatus from "./components/SemanticStatus.jsx";
 
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 
@@ -90,8 +91,13 @@ import {
   deriveCoachInsightSummary,
 } from "./lib/coachDashboardSelectors.js";
 const VOLT = TOKENS.PRIMARY;
-const ORANGE = TOKENS.PRIMARY;
-const CYAN = TOKENS.SECONDARY;
+const SUCCESS = TOKENS.SUCCESS;
+const INFO = TOKENS.INFO;
+const WARNING = TOKENS.WARNING;
+const DANGER = TOKENS.DANGER;
+const NEUTRAL = TOKENS.NEUTRAL;
+const ORANGE = WARNING;
+const CYAN = INFO;
 const BG = TOKENS.BG_BASE;
 const SURFACE = TOKENS.BG_CARD;
 const CARD_BG = TOKENS.BG_CARD;
@@ -100,10 +106,10 @@ const MUTED=TOKENS.TEXT_MUTED,LIGHT=TOKENS.TEXT_PRIMARY;
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 const PAGE_ACCENTS={
 feed:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
-drills:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
-events:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
-sc:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
-players:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
+drills:{accent:"var(--team-brand-primary, var(--accent))",glow:"var(--team-brand-primary-soft, var(--accent-soft))",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
+events:{accent:"var(--semantic-info)",glow:"var(--semantic-info-border)",bg:"var(--semantic-info-surface)"},
+sc:{accent:"var(--semantic-neutral)",glow:"var(--semantic-neutral-border)",bg:"var(--semantic-neutral-surface)"},
+players:{accent:"var(--team-brand-secondary, var(--accent))",glow:"color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 34%, transparent)",bg:"color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 10%, transparent)"},
 };
 const MODE_CARD_TOKENS={
 BASE_BG:"linear-gradient(160deg, rgba(30, 30, 30, 0.96) 0%, rgba(15, 15, 15, 0.94) 100%)",
@@ -589,9 +595,9 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeaderPill:hover{background:color-mix(in srgb,var(--pageAccent) 24%, #1A1A1A);border-color:color-mix(in srgb,var(--pageAccent) 62%, transparent);}
 .pageHeaderPill:active{transform:translateY(1px);}
 .pageHeaderPill:focus-visible{outline:2px solid var(--page-accent);outline-offset:2px;}
-.pageHeaderPillBrand{border-color:rgba(200,255,0,.5);background:color-mix(in srgb,#C8FF00 18%, #1A1A1A);color:#C8FF00;}
-.pageHeaderPillBrand:hover{background:color-mix(in srgb,#C8FF00 26%, #1A1A1A);border-color:rgba(200,255,0,.68);}
-.pageHeaderPillBrand:focus-visible{outline-color:#C8FF00;}
+.pageHeaderPillBrand{border-color:color-mix(in srgb,var(--team-brand-primary) 50%, transparent);background:color-mix(in srgb,var(--team-brand-primary) 18%, #1A1A1A);color:var(--team-brand-accent-text);}
+.pageHeaderPillBrand:hover{background:color-mix(in srgb,var(--team-brand-primary) 26%, #1A1A1A);border-color:color-mix(in srgb,var(--team-brand-primary) 68%, transparent);}
+.pageHeaderPillBrand:focus-visible{outline-color:var(--team-brand-nav-active);}
 .pageAccentBar{height:3px;width:42%;border-radius:999px;background:color-mix(in srgb,var(--headerAccent) 70%, transparent);box-shadow:none;margin-top:12px;}
 .coachEventsSlimHeader{display:none;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--surface-border);background:var(--surface-panel-strong);margin:0 0 12px;min-width:0;box-shadow:var(--surface-shadow);}
 .coachEventsSlimHeaderLeft{display:flex;align-items:center;gap:8px;min-width:0;}
@@ -615,10 +621,10 @@ const _PAGE_SIGNATURE_CSS=`
 .feedListItem{position:relative;padding-left:14px;}
 .feedListItem::before{content:'';position:absolute;left:0;top:17px;width:6px;height:6px;border-radius:50%;background:var(--pageAccent);box-shadow:0 0 8px var(--pageAccentGlow);}
 .drillsMetrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--stack-gap);margin-bottom:var(--stack-gap);}
-.drillsMetricTile{border-left:2px solid rgba(56,232,255,.65);}
-.eventsDatePill{display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:6px 8px;border-radius:999px;background:rgba(255,196,0,.16);border:1px solid rgba(255,196,0,.45);color:#FFC400;font-size:calc(10px * var(--coach-text-scale-medium));font-family:${FB};font-weight:700;letter-spacing:.08em;}
-.scSection{border-top:1px solid rgba(91,124,255,.35);padding-top:10px;margin-top:10px;}
-.playersAvatarRing{outline:2px solid rgba(184,108,255,.65);outline-offset:1px;border-radius:50%;}
+.drillsMetricTile{border-left:2px solid color-mix(in srgb,var(--pageAccent) 65%, transparent);}
+.eventsDatePill{display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:6px 8px;border-radius:999px;background:var(--semantic-info-surface);border:1px solid var(--semantic-info-border);color:var(--semantic-info);font-size:calc(10px * var(--coach-text-scale-medium));font-family:${FB};font-weight:700;letter-spacing:.08em;}
+.scSection{border-top:1px solid var(--semantic-neutral-border);padding-top:10px;margin-top:10px;}
+.playersAvatarRing{outline:2px solid color-mix(in srgb,var(--team-brand-secondary) 65%, transparent);outline-offset:1px;border-radius:50%;}
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{display:none;}
 .accent-card{background:var(--surface-panel)!important;border:1px solid var(--surface-border)!important;border-radius:var(--surface-radius)!important;box-shadow:var(--surface-shadow)!important;}
 .accent-card::before{width:2px!important;top:14px!important;bottom:14px!important;background:color-mix(in srgb,var(--page-accent) 62%, transparent)!important;opacity:.55!important;}
@@ -677,6 +683,22 @@ const _PAGE_SIGNATURE_CSS=`
 
   --stroke-1:rgba(255,255,255,0.08);
   --stroke-2:rgba(255,255,255,0.12);
+
+  --semantic-success:#4ADE80;
+  --semantic-success-surface:rgba(74,222,128,0.10);
+  --semantic-success-border:rgba(74,222,128,0.34);
+  --semantic-info:#38BDF8;
+  --semantic-info-surface:rgba(56,189,248,0.10);
+  --semantic-info-border:rgba(56,189,248,0.34);
+  --semantic-warning:#F59E0B;
+  --semantic-warning-surface:rgba(245,158,11,0.10);
+  --semantic-warning-border:rgba(245,158,11,0.34);
+  --semantic-danger:#F87171;
+  --semantic-danger-surface:rgba(248,113,113,0.10);
+  --semantic-danger-border:rgba(248,113,113,0.34);
+  --semantic-neutral:#94A3B8;
+  --semantic-neutral-surface:rgba(148,163,184,0.09);
+  --semantic-neutral-border:rgba(148,163,184,0.28);
 
   --shadow-0:none;
   --shadow-1:0 2px 10px rgba(0,0,0,0.35);
@@ -819,7 +841,7 @@ const _PAGE_SIGNATURE_CSS=`
   }
 }
 `;
-const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);} .team-brand .pageHeaderBadge,.team-brand .pageAccentBar{background:var(--team-brand-header-accent)!important;box-shadow:0 0 16px color-mix(in srgb,var(--team-brand-header-accent) 44%, transparent)!important;}.team-brand .pageHeaderPill{border-color:var(--team-brand-badge-border)!important;background:var(--team-brand-badge-bg)!important;color:var(--team-brand-badge-text)!important;}.team-brand .cta-primary,.team-brand .cta-primary-accent{background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 100%),var(--team-brand-primary)!important;color:var(--team-brand-primary-text)!important;box-shadow:0 4px 24px color-mix(in srgb,var(--team-brand-primary) 30%, transparent)!important;}.team-brand .bottom-nav .tab.is-active,.team-brand .bottom-nav .tab.active{color:var(--team-brand-nav-active)!important;}.team-brand .bottom-nav .tab.is-active::before,.team-brand .bottom-nav .tab.active::before{background:var(--team-brand-nav-active)!important;}.team-brand .chip,.team-brand .badge,[class*="chip"],[class*="badge"]{background:var(--team-brand-badge-bg)!important;border-color:var(--team-brand-badge-border)!important;color:var(--team-brand-badge-text)!important;}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
+const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);} .team-brand .pageHeaderBadge,.team-brand .pageAccentBar{background:var(--team-brand-header-accent)!important;box-shadow:0 0 16px color-mix(in srgb,var(--team-brand-header-accent) 44%, transparent)!important;}.team-brand .pageHeaderPill{border-color:var(--team-brand-badge-border)!important;background:var(--team-brand-badge-bg)!important;color:var(--team-brand-badge-text)!important;}.team-brand .cta-primary,.team-brand .cta-primary-accent{background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 100%),var(--team-brand-primary)!important;color:var(--team-brand-primary-text)!important;box-shadow:0 4px 24px color-mix(in srgb,var(--team-brand-primary) 30%, transparent)!important;}.team-brand .bottom-nav .tab.is-active,.team-brand .bottom-nav .tab.active{color:var(--team-brand-nav-active)!important;}.team-brand .bottom-nav .tab.is-active::before,.team-brand .bottom-nav .tab.active::before{background:var(--team-brand-nav-active)!important;}.team-brand .chip:not([data-tone]),.team-brand .badge:not([data-tone]),.team-brand [class*="chip"]:not([data-tone]),.team-brand [class*="badge"]:not([data-tone]){background:var(--team-brand-badge-bg)!important;border-color:var(--team-brand-badge-border)!important;color:var(--team-brand-badge-text)!important;}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:color-mix(in srgb,var(--team-brand-nav-active) 10%, transparent);border-color:color-mix(in srgb,var(--team-brand-nav-active) 22%, transparent);color:var(--team-brand-nav-active);}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
 const _PLAYER_COMPACT_DASHBOARD_CSS=`
 .player-scroll-container{--player-scroll-bottom-padding:calc(var(--bottom-nav-content-padding, 88px) + 24px + env(safe-area-inset-bottom, 0px));-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-padding-bottom:var(--player-scroll-bottom-padding);}
 .player-home-compact-dashboard{--player-dashboard-gap:14px;--player-dashboard-card-pad:18px;--player-dashboard-card-pad-compact:16px;--player-dashboard-chip-pad:4px 8px;--player-dashboard-chip-font:10px;--player-dashboard-section-title:22px;--player-dashboard-title-tight:1;--player-dashboard-chip-bg:rgba(8,10,14,0.78);--player-dashboard-chip-border:rgba(255,255,255,0.14);gap:var(--player-dashboard-gap);}
@@ -2643,7 +2665,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         {hasDrillMax(active)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:32}}>/{active.max}</div>}
       </div>})()}
       {/* Score quality indicator */}
-      {(()=>{const v=parseInt(input)||0;if(v<=0||!hasDrillMax(active))return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?VOLT:pct>=75?VOLT:pct>=50?ORANGE:"#FF4545";
+      {(()=>{const v=parseInt(input)||0;if(v<=0||!hasDrillMax(active))return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?SUCCESS:pct>=75?SUCCESS:pct>=50?WARNING:DANGER;
         return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
       <button className="btn-v cta-primary" onClick={handleLog} disabled={submitting||activeScoreInvalid} style={{maxWidth:300,margin:"0 auto",opacity:(submitting||activeScoreInvalid)?0.55:1,cursor:submitting||activeScoreInvalid?"not-allowed":"pointer"}}>LOG SCORE &#8594;</button>
     </>}
@@ -2708,7 +2730,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 // SHAREABLE WORKOUT CARD
 // ═══════════════════════════════════════
 function ShareCard({data}){
-const pct=data.pct||0;const pcol=pct>=80?VOLT:pct>=50?ORANGE:"#FF4545";
+const pct=data.pct||0;const pcol=pct>=80?SUCCESS:pct>=50?WARNING:DANGER;
 return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",maxWidth:340,margin:"0 auto"}}>
 {/* Corner accents */}
 <div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
@@ -2858,7 +2880,7 @@ return <div className="fade-up">
   const won=isMine?(ch.status==="lost"):(ch.status==="won");const tied=ch.status==="tied";const isPending=ch.status==="pending";
   const oppName=isMine?ch.toName:ch.fromName;
   const myScore=isMine?ch.score:ch.respScore;const oppScore=isMine?ch.respScore:ch.score;
-  const resultColor=isPending?MUTED:won?VOLT:tied?"#C8FF00":"#FF4545";
+  const resultColor=isPending?WARNING:won?SUCCESS:tied?INFO:DANGER;
   const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
 
   return <div key={ch.id+"-"+ch.ts} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"14px 16px",marginBottom:6,border:`1px solid ${isPending?ORANGE+"22":BORDER_CLR}`}}>
@@ -4411,7 +4433,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         </div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{s.sport||s.title}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{s.date} · {s.time||"TBD"} · {s.location||s.sessionType||"School"} · <span style={{color:"#A0A0A0"}}>{sr.length} confirmed</span> · <span style={{color:missing>0?"#FFB86B":VOLT}}>{missing} missing</span></div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{s.date} · {s.time||"TBD"} · {s.location||s.sessionType||"School"} · <span style={{color:"#A0A0A0"}}>{sr.length} confirmed</span> · <span style={{color:missing>0?WARNING:SUCCESS}}>{missing} missing</span></div>
           <div style={{fontFamily:FB,color:LIGHT,fontSize:10,marginTop:6}}>{srNames.length>0?srNames.join(", "):"No S&C RSVPs yet"}</div>
         </div>
         <button onClick={()=>{if(window.confirm("Delete this S&C session from the team schedule and remove linked RSVP/log records? Player accounts and other team data will not be deleted."))removeScSession(s.id)}} className="btn-v cta-danger" style={{minHeight:36,height:36,padding:"0 12px",fontSize:10,letterSpacing:1.2,whiteSpace:"nowrap"}}>DELETE S&amp;C SESSION</button>
@@ -4434,7 +4456,7 @@ function HistPanel({sc,dr,programDr=[]}){
 const sorted=useMemo(()=>[...sc].sort((a,b)=>(b.ts||0)-(a.ts||0)),[sc]);
 const grouped=useMemo(()=>{const m={};sorted.forEach(s=>{if(!m[s.date])m[s.date]=[];m[s.date].push(s)});return Object.entries(m)},[sorted]);
 const findDrillForScore=score=>((score?.src||"home")==="program"?programDr:dr).find(d=>d.id===score.drillId);
-return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No activity yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=findDrillForScore(s);const pct=d&&hasDrillMax(d)?Math.round(s.score/d.max*100):null;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:CYAN,background:isH?VOLT+"15":CYAN+"15"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:isH?VOLT:CYAN,fontSize:16}}>{s.score}{hasDrillMax(d)&&<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div>}</div></div>})}</div>)}</div>;
+return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No activity yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=findDrillForScore(s);const pct=d&&hasDrillMax(d)?Math.round(s.score/d.max*100):null;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:CYAN,background:isH?VOLT+"15":CYAN+"15"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:isH?VOLT:CYAN,fontSize:16}}>{s.score}{hasDrillMax(d)&&<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?SUCCESS:pct>=50?WARNING:DANGER}}>{pct}%</div>}</div></div>})}</div>)}</div>;
 }
 
 // ═══════════════════════════════════════
@@ -4663,9 +4685,9 @@ function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged,onRemovePl
     return Math.max(0,Math.floor((now-date.getTime())/dayMs));
   };
   const getStatusMeta=(days)=>{
-    if(days===null||days>=5)return {pill:"INACTIVE",color:TOKENS.DANGER,rank:0};
-    if(days<=2)return {pill:"ACTIVE",color:VOLT,rank:2};
-    return {pill:"AT RISK",color:TOKENS.WARNING,rank:1};
+    if(days===null||days>=5)return {pill:"INACTIVE",color:DANGER,tone:"danger",rank:0};
+    if(days<=2)return {pill:"ACTIVE",color:SUCCESS,tone:"success",rank:2};
+    return {pill:"AT RISK",color:WARNING,tone:"warning",rank:1};
   };
   const formatLastActive=(days)=>{
     if(days===null)return "Never";
@@ -4732,7 +4754,7 @@ return <div className="fade-up">
 {roster.map(p=>{const rosterIdentity=p.email||p.profileId||p.playerId||p.id;const c=p.statusMeta.color;const isNudged=nudged.includes(rosterIdentity);
   const circumference=2*Math.PI*12;
   const ringOffset=p.weeklyCompletionPct===null?circumference:circumference-((p.weeklyCompletionPct/100)*circumference);
-  return <div key={rosterIdentity} role="button" tabIndex={0} onClick={()=>onSelectPlayer?.(p)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")onSelectPlayer?.(p);}} style={{display:"flex",background:CARD_BG,borderRadius:14,marginBottom:10,border:`1px solid ${p.statusMeta.pill==="INACTIVE"?"#FF454533":BORDER_CLR}`,overflow:"hidden",cursor:onSelectPlayer?"pointer":"default"}}>
+  return <div key={rosterIdentity} role="button" tabIndex={0} onClick={()=>onSelectPlayer?.(p)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")onSelectPlayer?.(p);}} style={{display:"flex",background:CARD_BG,borderRadius:14,marginBottom:10,border:`1px solid ${p.statusMeta.pill==="INACTIVE"?"var(--semantic-danger-border)":BORDER_CLR}`,overflow:"hidden",cursor:onSelectPlayer?"pointer":"default"}}>
     <div style={{width:5,background:c,flexShrink:0}}/>
     <div style={{display:"flex",alignItems:"stretch",gap:12,padding:"14px 12px",flex:1}}>
       <div style={{position:"relative",alignSelf:"center"}}>
@@ -4744,10 +4766,10 @@ return <div className="fade-up">
             <span style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:800,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.name}</span>
             {p.weeklyCompletionPct!==null&&<svg width="28" height="28" viewBox="0 0 28 28" aria-label={`Weekly completion ${p.weeklyCompletionPct}%`}>
               <circle cx="14" cy="14" r="12" stroke="#333333" strokeWidth="3" fill="none"/>
-              <circle cx="14" cy="14" r="12" stroke={VOLT} strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={ringOffset} transform="rotate(-90 14 14)"/>
+              <circle cx="14" cy="14" r="12" stroke={SUCCESS} strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={ringOffset} transform="rotate(-90 14 14)"/>
             </svg>}
           </div>
-          <span style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"3px 7px",borderRadius:999,color:c,background:c+"15",whiteSpace:"nowrap"}}>{p.statusMeta.pill}</span>
+          <SemanticStatus tone={p.statusMeta.tone} compact testId="semantic-roster-status">{p.statusMeta.pill}</SemanticStatus>
         </div>
         <div style={{fontFamily:FB,color:"#FFFFFFB3",fontSize:11,lineHeight:1.55}}>
           <div>Last Active: <span style={{color:VOLT,fontWeight:700}}>{formatLastActive(p.daysAgo)}</span></div>
@@ -4756,7 +4778,7 @@ return <div className="fade-up">
         </div>
       </div>
       <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-end",gap:8,minWidth:94}}>
-    {p.statusMeta.pill==="INACTIVE"&&<button onClick={(e)=>{e.stopPropagation();if(!isNudged)setNudged(n=>[...n,rosterIdentity])}} style={{minHeight:40,padding:"0 12px",borderRadius:8,border:`1px solid ${isNudged?VOLT+"44":"#FF454544"}`,background:isNudged?VOLT+"12":"#FF454512",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,color:isNudged?VOLT:"#FF4545",whiteSpace:"nowrap",width:"100%"}}>
+    {p.statusMeta.pill==="INACTIVE"&&<button onClick={(e)=>{e.stopPropagation();if(!isNudged)setNudged(n=>[...n,rosterIdentity])}} style={{minHeight:40,padding:"0 12px",borderRadius:8,border:`1px solid ${isNudged?INFO+"55":DANGER+"55"}`,background:isNudged?"var(--semantic-info-surface)":"var(--semantic-danger-surface)",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,color:isNudged?INFO:DANGER,whiteSpace:"nowrap",width:"100%"}}>
       {isNudged?"✓ NUDGED":"NUDGE"}
     </button>}
     <button onClick={(e)=>{e.stopPropagation();onRemovePlayer?.(rosterIdentity)}} style={{minHeight:34,padding:"0 12px",borderRadius:8,border:"1px solid #FF454533",background:"#FF454510",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",color:"#FF4545",whiteSpace:"nowrap",width:"100%"}}>

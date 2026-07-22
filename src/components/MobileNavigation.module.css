@@ -108,7 +108,7 @@
   width: 7px;
   height: 7px;
   border-radius: 999px;
-  background: var(--accent, #c8ff1a);
+  background: var(--semantic-warning, #f59e0b);
   box-shadow: 0 0 0 2px rgba(15, 18, 24, 0.96);
 }
 
