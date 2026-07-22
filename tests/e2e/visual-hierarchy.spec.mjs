@@ -68,31 +68,46 @@ test("player mobile home prioritizes one mission, three metrics, and collapsed s
   await expectNoHorizontalOverflow(page);
 });
 
-test("coach desktop home prioritizes one command, three metrics, and collapsed operations", async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
+test("coach mobile home is compact and non-home pages lead with their purpose", async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "coach");
 
+  const identityHeader = page.getByTestId("coach-dashboard-identity-header");
+  const commandCenter = page.getByTestId("coach-command-center-full");
   const objective = page.getByTestId("coach-primary-objective");
   const metrics = page.getByTestId("coach-primary-metrics");
   const secondaryTools = page.getByTestId("coach-secondary-tools");
+  const practice = page.getByTestId("coach-today-practice");
   const standings = page.getByTestId("coach-team-standings");
-  const setup = page.getByTestId("coach-setup-checklist");
 
-  await expect(objective).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId("coach-primary-objective")).toHaveCount(1);
+  await expect(identityHeader).toBeVisible({ timeout: 20_000 });
+  await expect(commandCenter).toBeVisible();
+  await expect(objective).toBeVisible();
   await expectThreeMetrics(metrics);
-  for (const disclosure of [secondaryTools, standings, setup]) {
-    await expect(disclosure).toBeVisible();
-    expect(await disclosure.evaluate((element) => element.open)).toBe(false);
-  }
+  await expect(secondaryTools).toBeVisible();
+  await expect(practice).toBeVisible();
+  await expect(standings).toBeVisible();
+  expect(await standings.evaluate((element) => element.open)).toBe(false);
 
-  const objectiveBox = await objective.boundingBox();
-  const metricBox = await metrics.boundingBox();
-  expect(objectiveBox).not.toBeNull();
-  expect(metricBox).not.toBeNull();
-  expect(objectiveBox.y).toBeLessThan(metricBox.y);
+  const commandBox = await commandCenter.boundingBox();
+  const practiceBox = await practice.boundingBox();
+  const standingsBox = await standings.boundingBox();
+  expect(commandBox).not.toBeNull();
+  expect(practiceBox).not.toBeNull();
+  expect(standingsBox).not.toBeNull();
+  expect(commandBox.height).toBeLessThan(340);
+  expect(standingsBox.height).toBeLessThan(72);
+  expect(practiceBox.y).toBeLessThan(standingsBox.y);
+  await expectNoHorizontalOverflow(page);
 
-  await secondaryTools.locator("summary").click();
-  expect(await secondaryTools.evaluate((element) => element.open)).toBe(true);
+  const dock = page.getByTestId("mobile-navigation-dock");
+  await dock.getByRole("button", { name: "Events", exact: true }).click();
+  await expect(page.getByTestId("coach-dashboard-identity-header")).toHaveCount(0);
+  await expect(page.getByTestId("coach-command-center-full")).toHaveCount(0);
+  const createEvent = page.getByRole("button", { name: /CREATE EVENT/i }).first();
+  await expect(createEvent).toBeVisible({ timeout: 20_000 });
+  const createEventBox = await createEvent.boundingBox();
+  expect(createEventBox).not.toBeNull();
+  expect(createEventBox.y).toBeLessThan(500);
   await expectNoHorizontalOverflow(page);
 });
