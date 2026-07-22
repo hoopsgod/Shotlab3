@@ -51,11 +51,14 @@ jobs:
       - name: Run mobile navigation browser test
         run: npm run test:e2e:mobile-navigation
 
+      - name: Run semantic color browser test
+        run: npm run test:e2e:semantic-colors
+
       - name: Upload browser failure artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: season-archive-hierarchy-navigation-failure-artifacts
+          name: season-archive-hierarchy-navigation-semantic-failure-artifacts
           path: |
             season-archive-service-tests.txt
             playwright-report/
