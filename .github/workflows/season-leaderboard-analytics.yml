@@ -5,35 +5,15 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   archive-aware-leaderboards:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
     steps:
-      - name: Check out coach formatting branch
+      - name: Check out repository
         uses: actions/checkout@v4
-        with:
-          ref: codex/semantic-color-system-stabilization
-          fetch-depth: 0
-
-      - name: Apply coach formatting revision
-        run: |
-          set +e
-          python scripts/apply_coach_formatting_patch.py > coach-formatting-patch.log 2>&1
-          status=$?
-          cat coach-formatting-patch.log
-          exit $status
-
-      - name: Upload patch diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coach-formatting-patch-diagnostics
-          path: coach-formatting-patch.log
-          if-no-files-found: error
-          retention-days: 3
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -46,7 +26,6 @@ jobs:
 
       - name: Run archive-aware leaderboard, hierarchy, navigation, and semantic tests
         run: |
-          set +e
           node --test \
             tests/season-leaderboard-analytics.test.mjs \
             tests/season-leaderboard-roster-boundary.test.mjs \
@@ -55,31 +34,7 @@ jobs:
             tests/leaderboard-category-static-safety.test.mjs \
             tests/visual-hierarchy-contract.test.mjs \
             tests/mobile-navigation-contract.test.mjs \
-            tests/semantic-color-system-contract.test.mjs > coach-formatting-tests.log 2>&1
-          status=$?
-          cat coach-formatting-tests.log
-          exit $status
-
-      - name: Upload test diagnostics
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: coach-formatting-test-diagnostics
-          path: coach-formatting-tests.log
-          if-no-files-found: error
-          retention-days: 3
+            tests/semantic-color-system-contract.test.mjs
 
       - name: Build application
         run: npm run build
-
-      - name: Commit coach formatting revision
-        run: |
-          if git diff --quiet; then
-            echo "No coach formatting changes to commit."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/App.jsx src/components/VisualHierarchy.module.css
-          git commit -m "fix(ui): tighten coach dashboard formatting"
-          git push origin HEAD:codex/semantic-color-system-stabilization
