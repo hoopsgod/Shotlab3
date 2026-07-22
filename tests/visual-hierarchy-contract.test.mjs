@@ -34,15 +34,15 @@ test("player dashboard exposes one dominant objective and only three primary met
 
 
 test("coach home uses a compact command toolbar, one metric strip, and tight operations", () => {
-  assert.match(commandCenterSource, /testId="coach-primary-objective"/);
+  assert.match(commandCenterSource, /data-testid="coach-primary-objective"/);
   assert.match(commandCenterSource, /testId="coach-primary-metrics"/);
-  assert.match(commandCenterSource, /testId="coach-secondary-tools"/);
-  assert.match(commandCenterSource, /testId="coach-team-code-bar"/);
+  assert.match(commandCenterSource, /data-testid="coach-secondary-tools"/);
+  assert.match(commandCenterSource, /data-testid="coach-team-code-bar"/);
   assert.doesNotMatch(commandCenterSource, /DominantObjectiveCard/);
   assert.doesNotMatch(commandCenterSource, /ProgressiveDisclosure/);
   assert.match(appSource, /coach-home-dashboard/);
   assert.match(appSource, /testId="coach-today-practice"/);
-  assert.match(appSource, /testId="coach-practice-status-row"/);
+  assert.match(appSource, /data-testid="coach-practice-status-row"/);
   assert.match(appSource, /testId="coach-next-seven-days"/);
   assert.match(appSource, /testId="coach-operational-alerts"/);
   assert.match(appSource, /testId="coach-priority-editor"/);
@@ -68,7 +68,7 @@ test("secondary hierarchy remains progressively disclosed without oversized summ
   const progressiveDisclosureCount = (appSource.match(/<ProgressiveDisclosure/g) || []).length;
   assert.ok(progressiveDisclosureCount >= 8, `expected at least 8 disclosures, found ${progressiveDisclosureCount}`);
   assert.equal((appSource.match(/testId="player-primary-objective"/g) || []).length, 1);
-  assert.equal((commandCenterSource.match(/testId="coach-primary-objective"/g) || []).length, 1);
+  assert.equal((commandCenterSource.match(/data-testid="coach-primary-objective"/g) || []).length, 1);
   assert.match(hierarchyCss, /background:\s*transparent !important/);
   assert.match(hierarchyCss, /min-height:\s*48px/);
   assert.match(hierarchyCss, /coach-home-dashboard/);
