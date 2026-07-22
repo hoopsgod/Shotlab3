@@ -1,7 +1,9 @@
 from pathlib import Path
 
 app_path = Path("src/App.jsx")
+css_path = Path("src/components/VisualHierarchy.module.css")
 app = app_path.read_text()
+css = css_path.read_text()
 
 
 def replace_once(text: str, old: str, new: str, label: str) -> str:
@@ -106,5 +108,25 @@ new_practice_metrics = '''          <div data-testid="coach-practice-status-row"
 
 app = replace_once(app, old_practice_metrics, new_practice_metrics, "compact practice status")
 
+old_order_rules = ''':global(.coach-home-dashboard) > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}'''
+new_order_rules = ''':global(.coach-home-dashboard) > * {
+  order: 5;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+:global(.coach-home-dashboard) > [data-testid="coach-today-practice"] { order: 1; }
+:global(.coach-home-dashboard) > [data-testid="coach-next-seven-days"] { order: 2; }
+:global(.coach-home-dashboard) > [data-testid="coach-operational-alerts"] { order: 3; }
+:global(.coach-home-dashboard) > [data-testid="coach-team-standings"] { order: 4; }
+:global(.coach-home-dashboard) > [data-testid="coach-setup-checklist"] { order: 7; }
+:global(.coach-home-dashboard) > [data-testid="coach-priority-editor"] { order: 8; }
+:global(.coach-home-dashboard) > [data-testid="coach-program-intelligence"] { order: 9; }'''
+css = replace_once(css, old_order_rules, new_order_rules, "coach home information order")
+
 app_path.write_text(app)
+css_path.write_text(css)
 print("coach formatting patch complete")
