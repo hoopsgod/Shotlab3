@@ -3793,7 +3793,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 </div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
 <CoachMiniHeader
-  visible={showMiniHeader}
+  visible={isOverviewTab&&showMiniHeader}
   avatar={<Av n={u.name} sz={24} email={u.email} isCoach={u.isCoach}/>}
   wordmark={<BrandWordmark size={16} small/>}
   borderColor={BORDER_CLR}
@@ -3828,7 +3828,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 />
 </>}
 </div>
-<div style={{flex:1,padding:`${showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
+<div style={{flex:1,padding:`${isOverviewTab&&showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed coach-home-dashboard fade-up" data-accent="feed" style={shellVars("feed")}>
     <ProgressiveDisclosure title="Team standings" summary="Home-shot leaders and roster position" testId="coach-team-standings">
