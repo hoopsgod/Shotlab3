@@ -3793,7 +3793,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 </div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
 <CoachMiniHeader
-  visible={!isOverviewTab||showMiniHeader}
+  visible={showMiniHeader}
   avatar={<Av n={u.name} sz={24} email={u.email} isCoach={u.isCoach}/>}
   wordmark={<BrandWordmark size={16} small/>}
   borderColor={BORDER_CLR}
@@ -3828,7 +3828,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 />
 </>}
 </div>
-<div style={{flex:1,padding:`${(!isOverviewTab||showMiniHeader)?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
+<div style={{flex:1,padding:`${showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
   {tab==="feed"&&<div className="page pageShell page-feed coach-home-dashboard fade-up" data-accent="feed" style={shellVars("feed")}>
     <ProgressiveDisclosure title="Team standings" summary="Home-shot leaders and roster position" testId="coach-team-standings">
@@ -4163,7 +4163,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   </div>}
 
   {/* EVENTS */}
-  {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><DashboardReturnButton onClick={()=>setTab("feed")} />
+  {tab==="events"&&<div className={`page pageShell fade-up ${isDesktop?"accent-card":"coach-events-mobile-surface"}`} data-accent="events" id="coach-events-management" style={isDesktop?shellVars("events"):{...shellVars("events"),padding:0,border:0,background:"transparent",boxShadow:"none"}}>{isDesktop&&<DashboardReturnButton onClick={()=>setTab("feed")} />}
     {isDesktop?<>
       <div className="coachEventsHeaderCard"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} actionLabel="+ Create Event" onAction={handleToggleAddEvent} /></div>
       {nextEvent&&(()=>{const nextRows=coachEventRsvpRows(nextEvent.id);const rosterCount=allKnown.length;const missingCount=Math.max(rosterCount-nextRows.length,0);return <div className="heroModule" style={{background:"linear-gradient(145deg, rgba(200,255,26,0.16), rgba(15,20,28,0.94) 60%)",border:`1px solid ${VOLT}55`,boxShadow:"0 20px 45px rgba(0,0,0,0.38)",padding:16}}>
@@ -4195,42 +4195,41 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       {events.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",paddingBottom:4,marginBottom:14}}>
         {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"8px 14px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?VOLT:SURFACE,color:active?"#111827":(T.SUB||LIGHT),fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"var(--tracking-tight)",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
       </div>}
-    </>:<div data-testid="coach-events-mobile-page">
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"6px 2px 10px",borderBottom:`1px solid ${BORDER_CLR}`,marginBottom:12}}>
-        <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><EventIcon type="event" size={14} color={VOLT}/><span style={{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1}}>EVENTS</span></div>
-      </div>
-      <button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} className="btn-v cta-primary" style={{margin:"0 0 14px",width:"100%",minHeight:48,height:48,borderRadius:12,fontSize:12}}>+ CREATE EVENT</button>
-      {events.length===0?<div style={{display:"inline-block",maxWidth:"100%",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 12px",marginBottom:12,textAlign:"center"}}>
-        <div style={{width:40,height:40,borderRadius:11,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={18} color={VOLT}/></div>
-        <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events yet — add your first event to get the team moving.</div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.4}}>Create your first event to organize practices, games, camps, or meetings.</div>
-      </div>:<div style={{display:"grid",gap:10,marginBottom:14}}>
+    </>:<div data-testid="coach-events-mobile-page" style={{maxWidth:560,margin:"0 auto",padding:"0 2px"}}>
+      <header data-testid="coach-events-mobile-header" style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:14,padding:"4px 2px 14px",borderBottom:`1px solid ${BORDER_CLR}`}}>
+        <div style={{minWidth:0}}>
+          <div style={{fontFamily:FB,color:"var(--semantic-info)",fontSize:9,fontWeight:800,letterSpacing:".12em",textTransform:"uppercase"}}>Team schedule</div>
+          <h1 style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:.95,letterSpacing:1.2,margin:"6px 0 0"}}>EVENTS</h1>
+          <p style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4,margin:"7px 0 0"}}>{events.length?`${events.length} scheduled team ${events.length===1?"event":"events"}. Manage timing, location, and attendance.`:"Plan practices, games, camps, and team meetings in one place."}</p>
+        </div>
+        {events.length>0&&<button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} type="button" style={{flexShrink:0,minHeight:40,borderRadius:10,border:`1px solid ${VOLT}`,background:VOLT,color:"#0b0d10",fontFamily:FB,fontSize:10,fontWeight:900,letterSpacing:".04em",textTransform:"uppercase",padding:"0 14px",cursor:"pointer"}}>+ ADD</button>}
+      </header>
+      {eventSaveError&&<div role="alert" style={{marginTop:12,padding:"10px 12px",borderRadius:10,background:"rgba(255,69,69,0.12)",border:"1px solid rgba(255,69,69,0.45)",color:"#FFD2D2",fontFamily:FB,fontSize:12,fontWeight:700}}>Event could not be saved. Please try again.</div>}
+      {events.length===0?<section data-testid="coach-events-mobile-empty-state" style={{minHeight:"calc(100dvh - 330px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"44px 20px 54px"}}>
+        <div style={{width:62,height:62,borderRadius:18,border:"1px solid color-mix(in srgb,var(--semantic-info) 42%, transparent)",background:"color-mix(in srgb,var(--semantic-info) 10%, transparent)",display:"grid",placeItems:"center",marginBottom:18}}><EventIcon type="event" size={27} color="var(--semantic-info)"/></div>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:25,letterSpacing:1.1,lineHeight:1}}>NO EVENTS SCHEDULED</div>
+        <p style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.55,maxWidth:310,margin:"10px auto 0"}}>Create the first team event, then players can RSVP and you can track attendance from this screen.</p>
+        <button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} type="button" className="btn-v cta-primary" style={{width:"auto",minWidth:190,minHeight:46,height:46,borderRadius:12,margin:"22px 0 0",padding:"0 20px",fontSize:11}}>CREATE FIRST EVENT</button>
+        <div style={{fontFamily:FB,color:T.MUT,fontSize:9,fontWeight:800,letterSpacing:".1em",textTransform:"uppercase",marginTop:18}}>Practices · Games · Camps · Meetings</div>
+      </section>:<div style={{display:"grid",gap:16,paddingTop:14,paddingBottom:18}}>
         {(() => {
           const parseTime=(time="")=>{const m=String(time).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);if(!m)return Number.MAX_SAFE_INTEGER;let hour=Number(m[1]);const minute=Number(m[2]||"0");const meridiem=(m[3]||"").toUpperCase();if(meridiem==="PM"&&hour<12)hour+=12;if(meridiem==="AM"&&hour===12)hour=0;return hour*60+minute;};
           const grouped=[...events].sort((a,b)=>a.date.localeCompare(b.date)||parseTime(a.time)-parseTime(b.time)).reduce((acc,ev)=>{(acc[ev.date]=acc[ev.date]||[]).push(ev);return acc;},{});
           return Object.entries(grouped).map(([dateKey,dateEvents])=>{const d=new Date(`${dateKey}T00:00:00`);const weekday=d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();const monthDay=d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();
-          return <div key={dateKey} style={{display:"grid",gap:6}}>
-            <div style={{display:"flex",alignItems:"baseline",gap:7,padding:"2px 2px 0"}}><span style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:".1em"}}>{weekday}</span><span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{monthDay}</span></div>
-            {dateEvents.map((ev,eventIdx)=>{const evCoachRsvps=coachEventRsvpRows(ev.id);const evCoachRsvpNames=evCoachRsvps.map(coachRsvpLabel);const missing=Math.max(allKnown.length-evCoachRsvps.length,0);return <div key={ev.id} style={{background:eventIdx===0?"linear-gradient(154deg, rgba(200,255,26,0.18), rgba(16,22,32,0.95) 60%)":"linear-gradient(154deg, rgba(255,255,255,0.05), rgba(16,20,30,0.9) 72%)",border:`1px solid ${eventIdx===0?VOLT+"55":BORDER_CLR}`,boxShadow:eventIdx===0?"0 14px 34px rgba(0,0,0,0.34)":"0 10px 24px rgba(0,0,0,0.24)",borderRadius:16,padding:"14px 14px",display:"grid",gap:8,maxWidth:"100%"}}>
-              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8}}>
-                <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,lineHeight:1.25,minWidth:0,wordBreak:"break-word"}}>{ev.title}</div>
-                <span style={{padding:"2px 7px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}55`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase",flexShrink:0}}>{ev.type||"event"}</span>
+          return <section key={dateKey} style={{display:"grid",gap:8}}>
+            <div style={{display:"flex",alignItems:"baseline",gap:7,padding:"0 2px"}}><span style={{fontFamily:FB,color:"var(--semantic-info)",fontSize:9,fontWeight:800,letterSpacing:".1em"}}>{weekday}</span><span style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:1}}>{monthDay}</span></div>
+            {dateEvents.map((ev,eventIdx)=>{const evCoachRsvps=coachEventRsvpRows(ev.id);const evCoachRsvpNames=evCoachRsvps.map(coachRsvpLabel);const missing=Math.max(allKnown.length-evCoachRsvps.length,0);return <article key={ev.id} style={{background:"rgba(255,255,255,0.025)",border:`1px solid ${eventIdx===0?"color-mix(in srgb,var(--semantic-info) 38%, var(--stroke-1))":BORDER_CLR}`,borderRadius:14,padding:"13px 14px",display:"grid",gap:9,maxWidth:"100%"}}>
+              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:10}}>
+                <div style={{minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:800,lineHeight:1.2,wordBreak:"break-word"}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35,marginTop:4}}>{ev.time||"TBD"} · {ev.location||"Location TBD"}</div></div>
+                <span style={{padding:"3px 8px",borderRadius:999,background:"color-mix(in srgb,var(--semantic-info) 10%, transparent)",border:"1px solid color-mix(in srgb,var(--semantic-info) 34%, transparent)",fontFamily:FB,color:"var(--semantic-info)",fontSize:9,fontWeight:800,textTransform:"uppercase",flexShrink:0}}>{ev.type||"event"}</span>
               </div>
-              <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>{ev.date}</div>
-              <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>{ev.time||"TBD"}</div>
-              <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25,wordBreak:"break-word"}}>📍 {ev.location||"Location TBD"}</div>
-              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                <span style={{display:"none"}}>{`${evCoachRsvps.length} going`}</span>
-                <span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:"rgba(200,255,26,0.14)",fontFamily:FB,color:LIGHT,fontSize:9,fontWeight:700}}>{`${evCoachRsvps.length} confirmed`}</span>
-                <span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.05)",fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700}}>{`${missing} missing`}</span>
-                {eventIdx===0&&<span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:`${VOLT}1A`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700}}>UP NEXT</span>}
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,paddingTop:8,borderTop:`1px solid ${BORDER_CLR}`}}>
+                <div style={{display:"flex",gap:7,flexWrap:"wrap"}}><span style={{fontFamily:FB,color:SUCCESS,fontSize:10,fontWeight:800}}>{evCoachRsvps.length} confirmed</span><span style={{fontFamily:FB,color:missing>0?WARNING:T.SUB,fontSize:10,fontWeight:800}}>{missing} missing</span></div>
+                <button type="button" onClick={()=>setExpEv(ev.id)} style={{border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:10,fontWeight:900,padding:"4px 0",cursor:"pointer"}}>MANAGE →</button>
               </div>
-              <div style={{border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.035)",borderRadius:12,padding:"9px 10px",display:"grid",gap:5}}>
-                <div style={{fontFamily:FB,color:VOLT,fontSize:9,fontWeight:800,letterSpacing:".1em",textTransform:"uppercase"}}>RSVPs</div>
-                {evCoachRsvpNames.length>0?<div style={{fontFamily:FB,color:LIGHT,fontSize:11,lineHeight:1.4,wordBreak:"break-word"}}>{evCoachRsvpNames.join(", ")}</div>:<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35}}>No RSVPs yet — players can RSVP from their Events page.</div>}
-              </div>
-            </div>})})
-          </div>});
+              {evCoachRsvpNames.length>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.4,wordBreak:"break-word"}}>{evCoachRsvpNames.join(", ")}</div>}
+            </article>})}
+          </section>});
         })()}
       </div>}
     </div>}
