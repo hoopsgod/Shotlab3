@@ -5,15 +5,21 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   archive-aware-leaderboards:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Check out repository
+      - name: Check out mobile events branch
         uses: actions/checkout@v4
+        with:
+          ref: codex/semantic-color-system-stabilization
+          fetch-depth: 0
+
+      - name: Apply mobile events redesign
+        run: python scripts/apply_mobile_events_redesign.py
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -24,7 +30,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run archive-aware leaderboard, hierarchy, navigation, and semantic tests
+      - name: Run archive-aware leaderboard, hierarchy, navigation, semantic, and mobile events tests
         run: |
           node --test \
             tests/season-leaderboard-analytics.test.mjs \
@@ -34,7 +40,20 @@ jobs:
             tests/leaderboard-category-static-safety.test.mjs \
             tests/visual-hierarchy-contract.test.mjs \
             tests/mobile-navigation-contract.test.mjs \
-            tests/semantic-color-system-contract.test.mjs
+            tests/semantic-color-system-contract.test.mjs \
+            tests/mobile-events-layout-contract.test.mjs
 
       - name: Build application
         run: npm run build
+
+      - name: Commit mobile events redesign
+        run: |
+          if git diff --quiet; then
+            echo "No mobile events changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx
+          git commit -m "fix(ui): rebuild mobile coach events page"
+          git push origin HEAD:codex/semantic-color-system-stabilization
