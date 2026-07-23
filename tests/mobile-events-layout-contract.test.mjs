@@ -10,8 +10,8 @@ const mobileEventsSource = start >= 0 && end > start ? appSource.slice(start, en
 test("mobile events uses a purpose-led page rather than the old nested accent card", () => {
   assert.match(appSource, /coach-events-mobile-surface/);
   assert.match(appSource, /\{isDesktop&&<DashboardReturnButton/);
-  assert.match(appSource, /visible=\{showMiniHeader\}/);
-  assert.match(appSource, /padding:`\$\{showMiniHeader\?"74px":"12px"\}/);
+  assert.match(appSource, /visible=\{isOverviewTab&&showMiniHeader\}/);
+  assert.match(appSource, /padding:`\$\{isOverviewTab&&showMiniHeader\?"74px":"12px"\}/);
   assert.match(mobileEventsSource, /data-testid="coach-events-mobile-header"/);
   assert.match(mobileEventsSource, /data-testid="coach-events-mobile-empty-state"/);
   assert.match(mobileEventsSource, /NO EVENTS SCHEDULED/);
