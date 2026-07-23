@@ -47,8 +47,8 @@ test("coach home uses a compact command toolbar while non-home pages stand alone
   assert.match(appSource, /testId="coach-operational-alerts"/);
   assert.match(appSource, /testId="coach-priority-editor"/);
   assert.match(appSource, /testId="coach-program-intelligence"/);
-  assert.match(appSource, /visible=\{showMiniHeader\}/);
-  assert.match(appSource, /padding:`\$\{showMiniHeader\?"74px":"12px"\}/);
+  assert.match(appSource, /visible=\{isOverviewTab&&showMiniHeader\}/);
+  assert.match(appSource, /padding:`\$\{isOverviewTab&&showMiniHeader\?"74px":"12px"\}/);
   assert.match(appSource, /\{isOverviewTab&&<>/);
 });
 
