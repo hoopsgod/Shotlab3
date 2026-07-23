@@ -68,7 +68,7 @@ test("player mobile home prioritizes one mission, three metrics, and collapsed s
   await expectNoHorizontalOverflow(page);
 });
 
-test("coach mobile home is compact and non-home pages lead with their purpose", async ({ page }) => {
+test("coach mobile home is compact and Events becomes a clean standalone schedule page", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "coach");
 
@@ -102,12 +102,30 @@ test("coach mobile home is compact and non-home pages lead with their purpose", 
 
   const dock = page.getByTestId("mobile-navigation-dock");
   await dock.getByRole("button", { name: "Events", exact: true }).click();
+
+  const eventsPage = page.getByTestId("coach-events-mobile-page");
+  const eventsHeader = page.getByTestId("coach-events-mobile-header");
+  const emptyState = page.getByTestId("coach-events-mobile-empty-state");
+  const createEvent = page.getByTestId("coach-events-mobile-create-event");
+
+  await expect(eventsPage).toBeVisible({ timeout: 20_000 });
+  await expect(eventsHeader).toBeVisible();
+  await expect(emptyState).toBeVisible();
+  await expect(createEvent).toBeVisible();
   await expect(page.getByTestId("coach-dashboard-identity-header")).toHaveCount(0);
   await expect(page.getByTestId("coach-command-center-full")).toHaveCount(0);
-  const createEvent = page.getByRole("button", { name: /CREATE EVENT/i }).first();
-  await expect(createEvent).toBeVisible({ timeout: 20_000 });
-  const createEventBox = await createEvent.boundingBox();
-  expect(createEventBox).not.toBeNull();
-  expect(createEventBox.y).toBeLessThan(500);
+  await expect(page.getByRole("button", { name: "Log out", exact: true })).not.toBeVisible();
+
+  expect(await eventsPage.evaluate((node) => node.closest(".accent-card") !== null)).toBe(false);
+  const headerBox = await eventsHeader.boundingBox();
+  const emptyBox = await emptyState.boundingBox();
+  const createBox = await createEvent.boundingBox();
+  expect(headerBox).not.toBeNull();
+  expect(emptyBox).not.toBeNull();
+  expect(createBox).not.toBeNull();
+  expect(headerBox.y).toBeLessThan(150);
+  expect(createBox.width).toBeLessThan(260);
+  expect(createBox.y).toBeGreaterThan(headerBox.y + headerBox.height);
+  expect(emptyBox.width).toBeLessThanOrEqual(390);
   await expectNoHorizontalOverflow(page);
 });
