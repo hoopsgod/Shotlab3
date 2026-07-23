@@ -5,15 +5,21 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   archive-aware-leaderboards:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
-      - name: Check out repository
+      - name: Check out Events branch
         uses: actions/checkout@v4
+        with:
+          ref: codex/semantic-color-system-stabilization
+          fetch-depth: 0
+
+      - name: Finalize Events header visibility
+        run: python scripts/finalize_events_header_visibility.py
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -39,3 +45,15 @@ jobs:
 
       - name: Build application
         run: npm run build
+
+      - name: Commit Events header visibility
+        run: |
+          if git diff --quiet; then
+            echo "No Events header changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx
+          git commit -m "fix(ui): remove coach mini header from Events"
+          git push origin HEAD:codex/semantic-color-system-stabilization
