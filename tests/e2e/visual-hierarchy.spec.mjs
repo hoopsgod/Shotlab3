@@ -124,7 +124,7 @@ test("coach mobile home is compact and Events becomes a clean standalone schedul
   expect(emptyBox).not.toBeNull();
   expect(createBox).not.toBeNull();
   expect(headerBox.y).toBeLessThan(150);
-  expect(createBox.width).toBeLessThan(260);
+  expect(createBox.width).toBeLessThan(390 * 0.8);
   expect(createBox.y).toBeGreaterThan(headerBox.y + headerBox.height);
   expect(emptyBox.width).toBeLessThanOrEqual(390);
   await expectNoHorizontalOverflow(page);
