@@ -2,8 +2,11 @@ const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
 const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 
 export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, onLogout }) {
+  if (!visible) return null;
+
   return (
     <div
+      data-testid="coach-mini-header"
       style={{
         position: "fixed",
         top: 0,
@@ -13,10 +16,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         paddingTop: "max(env(safe-area-inset-top), 6px)",
         paddingLeft: 12,
         paddingRight: 12,
-        pointerEvents: visible ? "auto" : "none",
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(-12px)",
-        transition: "opacity 200ms ease, transform 200ms ease",
+        animation: "coachMiniHeaderIn 180ms ease-out",
       }}
     >
       <div
@@ -46,7 +46,7 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
             background: "rgba(20,20,20,0.95)",
             border: `1px solid ${borderColor}`,
             borderRadius: 10,
-            color: "var(--text-secondary)",
+            color: mutedColor || "var(--text-secondary)",
             width: 36,
             height: 36,
             cursor: "pointer",
