@@ -33,7 +33,7 @@ test("player dashboard exposes one dominant objective and only three primary met
 });
 
 
-test("coach home uses a compact command toolbar, one metric strip, and tight operations", () => {
+test("coach home uses a compact command toolbar while non-home pages stand alone", () => {
   assert.match(commandCenterSource, /data-testid="coach-primary-objective"/);
   assert.match(commandCenterSource, /testId="coach-primary-metrics"/);
   assert.match(commandCenterSource, /data-testid="coach-secondary-tools"/);
@@ -47,7 +47,8 @@ test("coach home uses a compact command toolbar, one metric strip, and tight ope
   assert.match(appSource, /testId="coach-operational-alerts"/);
   assert.match(appSource, /testId="coach-priority-editor"/);
   assert.match(appSource, /testId="coach-program-intelligence"/);
-  assert.match(appSource, /visible=\{!isOverviewTab\|\|showMiniHeader\}/);
+  assert.match(appSource, /visible=\{showMiniHeader\}/);
+  assert.match(appSource, /padding:`\$\{showMiniHeader\?"74px":"12px"\}/);
   assert.match(appSource, /\{isOverviewTab&&<>/);
 });
 
