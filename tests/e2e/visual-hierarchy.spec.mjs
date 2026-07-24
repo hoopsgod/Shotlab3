@@ -155,8 +155,7 @@ test("coach can open, close, save, and revisit a mobile event without breaking n
 
   await expect(reopenedDialog).toHaveCount(0);
   await expect(page.getByText("E2E Team Practice", { exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("Thomas Gym", { exact: false })).toBeVisible();
-  await expect(page.getByText("6:30 PM", { exact: true })).toBeVisible();
+  await expect(page.getByText("6:30 PM · Thomas Gym", { exact: true })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
   await dock.getByRole("button", { name: "Home", exact: true }).click();
