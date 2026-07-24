@@ -1,0 +1,34 @@
+name: Season Rollover
+
+on:
+  pull_request:
+    paths:
+      - "src/lib/seasonRollover.js"
+      - "src/lib/seasonRolloverService.js"
+      - "src/components/NewSeasonWizard.jsx"
+      - "functions/v1/seasons/**"
+      - "migrations/034_active_seasons_and_rollover.sql"
+      - "tests/season-rollover*.test.mjs"
+      - ".github/workflows/season-rollover.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Rollover domain and safety contracts
+        run: node --test tests/season-rollover.test.mjs tests/season-rollover-contract.test.mjs
+      - name: Archive and leaderboard regressions
+        run: node --test tests/season-archive.test.mjs tests/season-archives-route.test.mjs tests/season-leaderboard-analytics.test.mjs tests/season-leaderboard-roster-boundary.test.mjs tests/season-leaderboard-ui-contract.test.mjs
+      - name: Production build
+        run: npm run build
