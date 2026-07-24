@@ -22,6 +22,9 @@ import CoachMiniHeader from "./components/CoachMiniHeader";
 import ShotLabCharts from "./components/ShotLabCharts";
 import CompactLeaderboardPreviewCard from "./components/CompactLeaderboardPreviewCard";
 import PremiumLeaderboardsHub from "./components/PremiumLeaderboardsHub";
+import { DominantObjectiveCard, MetricStrip, ProgressiveDisclosure, QuietSection } from "./components/VisualHierarchy.jsx";
+import MobileNavigation from "./components/MobileNavigation.jsx";
+import SemanticStatus from "./components/SemanticStatus.jsx";
 
 import { TeamBrandingProvider, useTeamBranding } from "./context/TeamBrandingContext";
 
@@ -88,8 +91,13 @@ import {
   deriveCoachInsightSummary,
 } from "./lib/coachDashboardSelectors.js";
 const VOLT = TOKENS.PRIMARY;
-const ORANGE = TOKENS.PRIMARY;
-const CYAN = TOKENS.SECONDARY;
+const SUCCESS = TOKENS.SUCCESS;
+const INFO = TOKENS.INFO;
+const WARNING = TOKENS.WARNING;
+const DANGER = TOKENS.DANGER;
+const NEUTRAL = TOKENS.NEUTRAL;
+const ORANGE = WARNING;
+const CYAN = INFO;
 const BG = TOKENS.BG_BASE;
 const SURFACE = TOKENS.BG_CARD;
 const CARD_BG = TOKENS.BG_CARD;
@@ -98,10 +106,10 @@ const MUTED=TOKENS.TEXT_MUTED,LIGHT=TOKENS.TEXT_PRIMARY;
 const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
 const PAGE_ACCENTS={
 feed:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
-drills:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
-events:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
-sc:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
-players:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
+drills:{accent:"var(--team-brand-primary, var(--accent))",glow:"var(--team-brand-primary-soft, var(--accent-soft))",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
+events:{accent:"var(--semantic-info)",glow:"var(--semantic-info-border)",bg:"var(--semantic-info-surface)"},
+sc:{accent:"var(--semantic-neutral)",glow:"var(--semantic-neutral-border)",bg:"var(--semantic-neutral-surface)"},
+players:{accent:"var(--team-brand-secondary, var(--accent))",glow:"color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 34%, transparent)",bg:"color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 10%, transparent)"},
 };
 const MODE_CARD_TOKENS={
 BASE_BG:"linear-gradient(160deg, rgba(30, 30, 30, 0.96) 0%, rgba(15, 15, 15, 0.94) 100%)",
@@ -288,8 +296,8 @@ const SC_INIT=[
 {id:104,title:"OLYMPIC LIFTS",date:"2026-03-11",time:"6:00 AM",location:"Weight Room — Platform Area",desc:"Clean & jerk, snatch progressions. Coached session."},
 {id:105,title:"CORE & CONDITIONING",date:"2026-03-18",time:"6:30 AM",location:"Training Facility — Turf",desc:"Core stability, sled pushes, agility ladder. Game-day conditioning."},
 ];
-const PLAYER_TAB_PATHS={home:"/",duels:"/program-log","log-drill":"/quick-menu",sc:"/lifting",program:"/events",profile:"/profile",players:"/players"};
-const PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/profile":"profile","/players":"players"};
+const PLAYER_TAB_PATHS={home:"/",duels:"/program-log","log-drill":"/quick-menu",sc:"/lifting",program:"/events",leaderboards:"/leaderboards",profile:"/profile",players:"/players"};
+const PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/leaderboards":"leaderboards","/profile":"profile","/players":"players"};
 const TIERS=[
 {min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},
 {min:3,name:"STARTER",color:"#7D7D7D",bg:"#7D7D7D15"},
@@ -587,9 +595,9 @@ const _PAGE_SIGNATURE_CSS=`
 .pageHeaderPill:hover{background:color-mix(in srgb,var(--pageAccent) 24%, #1A1A1A);border-color:color-mix(in srgb,var(--pageAccent) 62%, transparent);}
 .pageHeaderPill:active{transform:translateY(1px);}
 .pageHeaderPill:focus-visible{outline:2px solid var(--page-accent);outline-offset:2px;}
-.pageHeaderPillBrand{border-color:rgba(200,255,0,.5);background:color-mix(in srgb,#C8FF00 18%, #1A1A1A);color:#C8FF00;}
-.pageHeaderPillBrand:hover{background:color-mix(in srgb,#C8FF00 26%, #1A1A1A);border-color:rgba(200,255,0,.68);}
-.pageHeaderPillBrand:focus-visible{outline-color:#C8FF00;}
+.pageHeaderPillBrand{border-color:color-mix(in srgb,var(--team-brand-primary) 50%, transparent);background:color-mix(in srgb,var(--team-brand-primary) 18%, #1A1A1A);color:var(--team-brand-accent-text);}
+.pageHeaderPillBrand:hover{background:color-mix(in srgb,var(--team-brand-primary) 26%, #1A1A1A);border-color:color-mix(in srgb,var(--team-brand-primary) 68%, transparent);}
+.pageHeaderPillBrand:focus-visible{outline-color:var(--team-brand-nav-active);}
 .pageAccentBar{height:3px;width:42%;border-radius:999px;background:color-mix(in srgb,var(--headerAccent) 70%, transparent);box-shadow:none;margin-top:12px;}
 .coachEventsSlimHeader{display:none;align-items:center;justify-content:space-between;gap:8px;padding:10px 12px;border-radius:12px;border:1px solid var(--surface-border);background:var(--surface-panel-strong);margin:0 0 12px;min-width:0;box-shadow:var(--surface-shadow);}
 .coachEventsSlimHeaderLeft{display:flex;align-items:center;gap:8px;min-width:0;}
@@ -613,10 +621,10 @@ const _PAGE_SIGNATURE_CSS=`
 .feedListItem{position:relative;padding-left:14px;}
 .feedListItem::before{content:'';position:absolute;left:0;top:17px;width:6px;height:6px;border-radius:50%;background:var(--pageAccent);box-shadow:0 0 8px var(--pageAccentGlow);}
 .drillsMetrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--stack-gap);margin-bottom:var(--stack-gap);}
-.drillsMetricTile{border-left:2px solid rgba(56,232,255,.65);}
-.eventsDatePill{display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:6px 8px;border-radius:999px;background:rgba(255,196,0,.16);border:1px solid rgba(255,196,0,.45);color:#FFC400;font-size:calc(10px * var(--coach-text-scale-medium));font-family:${FB};font-weight:700;letter-spacing:.08em;}
-.scSection{border-top:1px solid rgba(91,124,255,.35);padding-top:10px;margin-top:10px;}
-.playersAvatarRing{outline:2px solid rgba(184,108,255,.65);outline-offset:1px;border-radius:50%;}
+.drillsMetricTile{border-left:2px solid color-mix(in srgb,var(--pageAccent) 65%, transparent);}
+.eventsDatePill{display:inline-flex;align-items:center;justify-content:center;min-width:56px;padding:6px 8px;border-radius:999px;background:var(--semantic-info-surface);border:1px solid var(--semantic-info-border);color:var(--semantic-info);font-size:calc(10px * var(--coach-text-scale-medium));font-family:${FB};font-weight:700;letter-spacing:.08em;}
+.scSection{border-top:1px solid var(--semantic-neutral-border);padding-top:10px;margin-top:10px;}
+.playersAvatarRing{outline:2px solid color-mix(in srgb,var(--team-brand-secondary) 65%, transparent);outline-offset:1px;border-radius:50%;}
 .bottom-nav .tab.is-active::before,.bottom-nav .tab.active::before{display:none;}
 .accent-card{background:var(--surface-panel)!important;border:1px solid var(--surface-border)!important;border-radius:var(--surface-radius)!important;box-shadow:var(--surface-shadow)!important;}
 .accent-card::before{width:2px!important;top:14px!important;bottom:14px!important;background:color-mix(in srgb,var(--page-accent) 62%, transparent)!important;opacity:.55!important;}
@@ -675,6 +683,22 @@ const _PAGE_SIGNATURE_CSS=`
 
   --stroke-1:rgba(255,255,255,0.08);
   --stroke-2:rgba(255,255,255,0.12);
+
+  --semantic-success:#4ADE80;
+  --semantic-success-surface:rgba(74,222,128,0.10);
+  --semantic-success-border:rgba(74,222,128,0.34);
+  --semantic-info:#38BDF8;
+  --semantic-info-surface:rgba(56,189,248,0.10);
+  --semantic-info-border:rgba(56,189,248,0.34);
+  --semantic-warning:#F59E0B;
+  --semantic-warning-surface:rgba(245,158,11,0.10);
+  --semantic-warning-border:rgba(245,158,11,0.34);
+  --semantic-danger:#F87171;
+  --semantic-danger-surface:rgba(248,113,113,0.10);
+  --semantic-danger-border:rgba(248,113,113,0.34);
+  --semantic-neutral:#94A3B8;
+  --semantic-neutral-surface:rgba(148,163,184,0.09);
+  --semantic-neutral-border:rgba(148,163,184,0.28);
 
   --shadow-0:none;
   --shadow-1:0 2px 10px rgba(0,0,0,0.35);
@@ -817,13 +841,13 @@ const _PAGE_SIGNATURE_CSS=`
   }
 }
 `;
-const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);} .team-brand .pageHeaderBadge,.team-brand .pageAccentBar{background:var(--team-brand-header-accent)!important;box-shadow:0 0 16px color-mix(in srgb,var(--team-brand-header-accent) 44%, transparent)!important;}.team-brand .pageHeaderPill{border-color:var(--team-brand-badge-border)!important;background:var(--team-brand-badge-bg)!important;color:var(--team-brand-badge-text)!important;}.team-brand .cta-primary,.team-brand .cta-primary-accent{background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 100%),var(--team-brand-primary)!important;color:var(--team-brand-primary-text)!important;box-shadow:0 4px 24px color-mix(in srgb,var(--team-brand-primary) 30%, transparent)!important;}.team-brand .bottom-nav .tab.is-active,.team-brand .bottom-nav .tab.active{color:var(--team-brand-nav-active)!important;}.team-brand .bottom-nav .tab.is-active::before,.team-brand .bottom-nav .tab.active::before{background:var(--team-brand-nav-active)!important;}.team-brand .chip,.team-brand .badge,[class*="chip"],[class*="badge"]{background:var(--team-brand-badge-bg)!important;border-color:var(--team-brand-badge-border)!important;color:var(--team-brand-badge-text)!important;}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:rgba(198,255,0,0.10);border-color:rgba(198,255,0,0.22);color:#C6FF00;}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
+const _DESKTOP_SHELL_CSS=`:root{--shell-bg:#070707;--panel-bg:rgba(255,255,255,0.04);--panel-border:rgba(255,255,255,0.08);--text-dim:rgba(255,255,255,0.62);} .team-brand .pageHeaderBadge,.team-brand .pageAccentBar{background:var(--team-brand-header-accent)!important;box-shadow:0 0 16px color-mix(in srgb,var(--team-brand-header-accent) 44%, transparent)!important;}.team-brand .pageHeaderPill{border-color:var(--team-brand-badge-border)!important;background:var(--team-brand-badge-bg)!important;color:var(--team-brand-badge-text)!important;}.team-brand .cta-primary,.team-brand .cta-primary-accent{background:linear-gradient(180deg,rgba(255,255,255,.08) 0%,rgba(255,255,255,0) 100%),var(--team-brand-primary)!important;color:var(--team-brand-primary-text)!important;box-shadow:0 4px 24px color-mix(in srgb,var(--team-brand-primary) 30%, transparent)!important;}.team-brand .bottom-nav .tab.is-active,.team-brand .bottom-nav .tab.active{color:var(--team-brand-nav-active)!important;}.team-brand .bottom-nav .tab.is-active::before,.team-brand .bottom-nav .tab.active::before{background:var(--team-brand-nav-active)!important;}.team-brand .chip:not([data-tone]),.team-brand .badge:not([data-tone]),.team-brand [class*="chip"]:not([data-tone]),.team-brand [class*="badge"]:not([data-tone]){background:var(--team-brand-badge-bg)!important;border-color:var(--team-brand-badge-border)!important;color:var(--team-brand-badge-text)!important;}.app-shell{min-height:100vh;background:var(--shell-bg);}@media (min-width:1024px){.app-shell.is-desktop{display:grid;grid-template-columns:240px minmax(640px,1fr) 320px;gap:var(--stack-gap);padding:var(--stack-gap);align-items:start;}.sidebar-nav{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.sidebar-nav .nav-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.sidebar-nav .nav-item{display:flex;align-items:center;gap:10px;padding:12px 12px;border-radius:14px;color:rgba(255,255,255,0.70);cursor:pointer;user-select:none;border:1px solid transparent;transition:background 140ms ease,border-color 140ms ease,transform 120ms ease;width:100%;background:transparent;text-align:left;}.sidebar-nav .nav-item:hover{background:rgba(255,255,255,0.05);transform:translateY(-1px);}.sidebar-nav .nav-item.is-active{background:color-mix(in srgb,var(--team-brand-nav-active) 10%, transparent);border-color:color-mix(in srgb,var(--team-brand-nav-active) 22%, transparent);color:var(--team-brand-nav-active);}.shell-main{min-width:0;}.content-wrap{background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--card-pad);}.insights-panel{position:sticky;top:18px;height:calc(100vh - 36px);background:var(--surface-1);border:1px solid var(--stroke-1);border-radius:var(--radius-card);box-shadow:var(--shadow-0);padding:var(--mini-card-pad);overflow:auto;}.insights-panel .panel-title{font-size:12px;letter-spacing:0.26em;text-transform:uppercase;color:var(--text-dim);margin:6px 10px 14px;}.insights-panel .placeholder{background:rgba(0,0,0,0.35);border:1px dashed rgba(255,255,255,0.14);border-radius:14px;padding:14px;color:rgba(255,255,255,0.55);font-size:13px;line-height:1.35;}}`;
 const _PLAYER_COMPACT_DASHBOARD_CSS=`
-.player-scroll-container{--player-scroll-bottom-padding:calc(var(--bottom-nav-content-padding, 132px) + 28px + env(safe-area-inset-bottom, 0px));-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-padding-bottom:var(--player-scroll-bottom-padding);}
+.player-scroll-container{--player-scroll-bottom-padding:calc(var(--bottom-nav-content-padding, 88px) + 24px + env(safe-area-inset-bottom, 0px));-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;scroll-padding-bottom:var(--player-scroll-bottom-padding);}
 .player-home-compact-dashboard{--player-dashboard-gap:14px;--player-dashboard-card-pad:18px;--player-dashboard-card-pad-compact:16px;--player-dashboard-chip-pad:4px 8px;--player-dashboard-chip-font:10px;--player-dashboard-section-title:22px;--player-dashboard-title-tight:1;--player-dashboard-chip-bg:rgba(8,10,14,0.78);--player-dashboard-chip-border:rgba(255,255,255,0.14);gap:var(--player-dashboard-gap);}
 .player-dashboard-chip{display:inline-flex;align-items:center;max-width:100%;}
 @media (max-width:767px){
-  .player-scroll-container{--player-scroll-bottom-padding:calc(var(--bottom-nav-content-padding, 156px) + 40px + env(safe-area-inset-bottom, 0px));}
+  .player-scroll-container{--player-scroll-bottom-padding:calc(var(--bottom-nav-content-padding, 88px) + 24px + env(safe-area-inset-bottom, 0px));}
   .player-home-compact-dashboard{--player-dashboard-gap:10px;--player-dashboard-card-pad:18px;--player-dashboard-card-pad-compact:16px;--player-dashboard-section-title:22px;--player-dashboard-chip-font:10px;--player-dashboard-chip-pad:4px 8px;--player-dashboard-card-radius:18px;--player-dashboard-card-compact-radius:16px;--player-dashboard-card-compact-bg:linear-gradient(155deg,rgba(14,18,24,0.88),rgba(8,10,14,0.86));--player-dashboard-card-compact-shadow:0 12px 26px rgba(0,0,0,0.24);--player-dashboard-chip-row-gap:6px;--player-dashboard-primary-cta-min-h:50px;--player-dashboard-primary-cta-font:14px;--player-dashboard-schedule-header-mb:9px;--player-dashboard-schedule-grid-gap:8px;--player-dashboard-schedule-item-pad:11px;--player-dashboard-schedule-item-radius:12px;--player-dashboard-schedule-meta-font:11px;--player-dashboard-schedule-meta-leading:1.35;--player-dashboard-schedule-cta-min-h:34px;--player-dashboard-schedule-cta-pad:5px 10px;--player-dashboard-schedule-cta-font:10px;--player-dashboard-schedule-cta-bg:rgba(255,255,255,0.025);--player-dashboard-schedule-cta-border:rgba(255,255,255,0.16);--player-dashboard-schedule-cta-color:rgba(229,231,235,0.86);margin-bottom:22px;}
 }
 `;
@@ -2232,10 +2256,23 @@ const playerNavItems=[
   {k:"program",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
   {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
 ];
+const getPlayerNavItem=(key,overrides={})=>{const item=playerNavItems.find(candidate=>candidate.k===key);return item?{...item,...overrides}:null;};
+const playerMobilePrimaryItems=[
+  getPlayerNavItem("home",{mobileLabel:"Home"}),
+  getPlayerNavItem("log-drill",{mobileLabel:"At Home"}),
+  getPlayerNavItem("duels",{mobileLabel:"Program"}),
+].filter(Boolean);
+const playerMobileSecondaryItems=[
+  getPlayerNavItem("program",{mobileLabel:"Events",description:"Team schedule and RSVPs"}),
+  getPlayerNavItem("sc",{mobileLabel:"Lifting",description:"Strength and conditioning"}),
+  {k:"leaderboards",l:"Leaderboards",mobileLabel:"Rankings",description:"Current and all-time team rankings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>},
+  getPlayerNavItem("profile",{mobileLabel:"Profile",description:"Progress, settings, and account"}),
+].filter(Boolean);
+
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Player navigation"><div className="nav-title">PLAYER DASHBOARD</div>{playerNavItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>switchTab(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:"var(--bottom-nav-content-padding, calc(132px + env(safe-area-inset-bottom, 0px)))"}}>
+<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}>
 <BrandBackdrop/>
 {completionCue&&<div className="fade-up" style={{position:"sticky",top:70,zIndex:18,margin:"8px 12px 0",padding:"12px 14px",borderRadius:14,background:"linear-gradient(155deg, rgba(200,255,26,0.14), rgba(94,208,255,0.08))",border:"1px solid rgba(200,255,26,0.34)",boxShadow:"0 12px 24px rgba(0,0,0,0.25)"}}>
   <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>COMPLETED</div>
@@ -2285,9 +2322,9 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   })()}
 />
 
-<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:8,justifyContent:"flex-end",alignItems:"center",padding:"8px 20px 0",position:"relative",zIndex:2}}>
-  <button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:38,padding:"0 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:CARD_BG,color:LIGHT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>
-  <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:38,padding:"0 12px",borderRadius:10,border:`1px solid ${BORDER_CLR}`,background:CARD_BG,color:LIGHT,fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
+<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
+  {isDesktop&&<button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>}
+  <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.MUT,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
 </div>
 
 <div ref={playerScrollRef} className="player-scroll-container" style={{flex:1,padding:isDesktop?"14px 20px 36px":"16px 20px var(--player-scroll-bottom-padding)",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
@@ -2411,78 +2448,84 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
       ];
       const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
       return <div className="player-home-compact-dashboard" style={{marginBottom:24,display:"grid",gap:"var(--player-dashboard-gap, 14px)"}}>
-        <section className="player-dashboard-card player-dashboard-missionHero" aria-label="Today's mission" style={{padding:isNarrow?"var(--player-dashboard-card-pad, 18px)":"20px",borderRadius:"var(--player-dashboard-card-radius, 20px)",background:"linear-gradient(148deg, rgba(200,255,0,0.22), rgba(200,255,0,0.07) 36%, rgba(9,12,16,0.82))",boxShadow:"0 22px 44px rgba(0,0,0,0.38)",border:"1px solid rgba(200,255,0,0.34)"}}>
-          <div>
-            <div className="player-dashboard-kicker" style={{fontFamily:FB,color:VOLT,fontSize:13,fontWeight:700,letterSpacing:"0.1em"}}>TODAY'S MISSION</div>
-            <div className="player-dashboard-title" style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?"var(--player-dashboard-mission-title, 28px)":32,lineHeight:1.05,letterSpacing:1.1,marginTop:8,textTransform:"uppercase"}}>{coachTodayFocus}</div>
-          </div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:15,lineHeight:1.6,marginTop:10}}>{missionStatus}</div>
-          <div style={{marginTop:12,height:8,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"linear-gradient(90deg, #C8FF1A, #E6FF7A)",boxShadow:"0 0 20px rgba(200,255,26,0.44)"}}/></div>
-          <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:13,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
-          <div className="player-dashboard-chipRow" style={{display:"flex",gap:"var(--player-dashboard-chip-row-gap, 8px)",flexWrap:"wrap",alignItems:"center",marginTop:11}}>
-            {[
-              {tag:`Emphasis · ${emphasisLabel}`},
-              {tag:`Weekly · ${weeklyMakes}/${coachWeeklyMakesTarget}`},
-              {tag:`Momentum · ${missionMomentumBadge}`,accent:true},
-            ].map(({tag,accent})=><span key={tag} className={`player-dashboard-chip ${accent?"player-dashboard-chipAccent":""}`} style={{fontFamily:FB,fontSize:"var(--player-dashboard-chip-font, 10px)",color:accent?VOLT:LIGHT,padding:"var(--player-dashboard-chip-pad, 4px 8px)",borderRadius:999,background:"var(--player-dashboard-chip-bg, rgba(12,14,18,0.62))",border:`1px solid ${accent?"rgba(200,255,0,0.48)":"var(--player-dashboard-chip-border, rgba(255,255,255,0.16))"}`,whiteSpace:"nowrap",lineHeight:1.15}}>{tag}</span>)}
-          </div>
-          <button className="btn-v cta-primary player-dashboard-primaryCta" style={{marginTop:14,minHeight:"var(--player-dashboard-primary-cta-min-h, 56px)",padding:"0 20px",fontSize:"var(--player-dashboard-primary-cta-font, 15px)"}} onClick={()=>switchTab("log-drill")}>{missionCtaLabel.toUpperCase()}</button>
-        </section>
-        <section className="player-dashboard-card player-dashboard-cardCompact" aria-label="Upcoming Schedule" data-testid="player-upcoming-schedule" style={{padding:isNarrow?"var(--player-dashboard-card-pad-compact, 16px)":"18px",borderRadius:"var(--player-dashboard-card-compact-radius, 18px)",background:"var(--player-dashboard-card-compact-bg, linear-gradient(150deg, rgba(94,208,255,0.18), rgba(200,255,0,0.08) 48%, rgba(9,12,16,0.86)))",border:"1px solid rgba(255,255,255,0.18)",boxShadow:"var(--player-dashboard-card-compact-shadow, 0 18px 36px rgba(0,0,0,0.28))"}}>
-          <div className="player-dashboard-scheduleHeader" style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:12,marginBottom:"var(--player-dashboard-schedule-header-mb, 12px)"}}>
-            <div><div className="player-dashboard-kicker" style={{fontFamily:FB,color:CYAN,fontSize:12,fontWeight:800,letterSpacing:"0.12em"}}>NEXT UP</div><div className="player-dashboard-title" style={{fontFamily:FD,color:LIGHT,fontSize:isNarrow?"var(--player-dashboard-section-title, 22px)":26,letterSpacing:1,marginTop:4}}>UPCOMING SCHEDULE</div></div>
-            <span className="player-dashboard-chip player-dashboard-chipAccent" style={{fontFamily:FB,color:VOLT,fontSize:"var(--player-dashboard-chip-font, 11px)",fontWeight:700,border:"1px solid rgba(200,255,0,0.38)",borderRadius:999,padding:"var(--player-dashboard-chip-pad, 5px 9px)",whiteSpace:"nowrap"}}>{upcomingScheduleItems.length} scheduled</span>
-          </div>
-          {upcomingScheduleItems.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:13,lineHeight:1.5}}>No upcoming event or S&C session is scheduled yet.</div>:<div className="player-dashboard-scheduleGrid" style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:"var(--player-dashboard-schedule-grid-gap, 10px)"}}>
-            {upcomingScheduleItems.map(item=><div className="player-dashboard-scheduleItem" key={item.kind} style={{border:"1px solid rgba(255,255,255,0.14)",borderRadius:"var(--player-dashboard-schedule-item-radius, 14px)",padding:"var(--player-dashboard-schedule-item-pad, 13px)",background:"rgba(7,10,14,0.58)",minWidth:0}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}><span style={{fontFamily:FB,color:item.kind==="sc"?"#A0A0A0":VOLT,fontSize:10,fontWeight:800,letterSpacing:"0.1em"}}>{item.label}</span><span className="player-dashboard-chip" style={{fontFamily:FB,color:item.rsvpStatus==="Going"?VOLT:"#FFCE73",fontSize:"var(--player-dashboard-chip-font, 10px)",border:"1px solid var(--player-dashboard-chip-border, rgba(255,255,255,0.16))",borderRadius:999,padding:"var(--player-dashboard-chip-pad, 3px 7px)"}}>{item.rsvpStatus}</span></div>
-              <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.title}</div>
-              <div className="player-dashboard-scheduleMeta" style={{fontFamily:FB,color:T.SUB,fontSize:"var(--player-dashboard-schedule-meta-font, 12px)",marginTop:6,lineHeight:"var(--player-dashboard-schedule-meta-leading, 1.5)"}}><span style={{color:CYAN,fontWeight:700}}>{item.date}</span> · {item.time}<br/>{item.location}</div>
-              <button className="pageHeaderPill player-dashboard-scheduleCta" onClick={()=>switchTab(item.target)} style={{marginTop:10,minHeight:"var(--player-dashboard-schedule-cta-min-h, 40px)",padding:"var(--player-dashboard-schedule-cta-pad, 6px 12px)",fontSize:"var(--player-dashboard-schedule-cta-font, 11px)",background:"var(--player-dashboard-schedule-cta-bg, rgba(255,255,255,0.04))",borderColor:"var(--player-dashboard-schedule-cta-border, rgba(255,255,255,0.2))",color:"var(--player-dashboard-schedule-cta-color, currentColor)"}}>{item.cta}</button>
+        <DominantObjectiveCard
+          eyebrow="Today’s mission"
+          title={coachTodayFocus}
+          description={missionStatus}
+          actionLabel={missionCtaLabel}
+          onAction={()=>switchTab("log-drill")}
+          badge={missionMomentumBadge}
+          testId="player-primary-objective"
+        >
+          <div style={{height:7,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"var(--accent)",transition:"width .2s ease"}}/></div>
+          <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:12,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
+        </DominantObjectiveCard>
+        <MetricStrip
+          testId="player-primary-metrics"
+          items={[
+            {label:"Today",value:todaysMakes,detail:`${dailyPct}% of daily goal`},
+            {label:"This Week",value:weeklyMakes,detail:`${weeklyPct}% of weekly goal`},
+            {label:"Streak",value:formatStreakDays(streak),detail:`${todayS.length}/${drills.length} drills`},
+          ]}
+        />
+        <ProgressiveDisclosure
+          title="Upcoming schedule"
+          summary={upcomingScheduleItems.length?`${upcomingScheduleItems.length} scheduled · ${unresolvedBadgeLabel}`:"No sessions scheduled"}
+          testId="player-upcoming-schedule"
+        >
+          {upcomingScheduleItems.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:13,lineHeight:1.5}}>No upcoming event or S&amp;C session is scheduled yet.</div>:<div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
+            {upcomingScheduleItems.map(item=><div key={item.kind} style={{borderTop:"1px solid var(--stroke-1)",padding:"11px 2px",minWidth:0}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><span style={{fontFamily:FB,color:item.kind==="sc"?"#A0A0A0":VOLT,fontSize:10,fontWeight:800,letterSpacing:"0.08em"}}>{item.label}</span><span style={{fontFamily:FB,color:item.rsvpStatus==="Going"?VOLT:"#FFCE73",fontSize:10}}>{item.rsvpStatus}</span></div>
+              <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1,marginTop:6,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.title}</div>
+              <div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:5,lineHeight:1.45}}><span style={{color:CYAN,fontWeight:700}}>{item.date}</span> · {item.time}<br/>{item.location}</div>
+              <button type="button" onClick={()=>switchTab(item.target)} style={{marginTop:8,minHeight:38,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>{item.cta} →</button>
             </div>)}
           </div>}
-        </section>
-        <CompactLeaderboardPreviewCard
-          title="Team Leaders"
-          areaTitle="Leaderboards"
-          categoryLabel="Home Shots"
-          mode="player"
-          userEmail={u?.email||""}
-          status={playerDashboardLeaderboardStatus}
-          rows={playerDashboardLeaderboardRows}
-          emptyMessage="No leaderboard data yet. Log shots to enter the rankings."
-          maxRows={3}
-          onViewAll={()=>switchTab("leaderboards")}
-        />
-        <section aria-label="Coach guidance summary" style={{padding:isNarrow?"16px":"18px",borderRadius:16,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-            <div><div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:"0.04em"}}>COACH GUIDANCE</div><div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:3,lineHeight:1.45}}>{coachName} has active priorities tied to your weekly progression.</div></div>
-            <span style={{fontFamily:FB,fontSize:11,color:streak>=3?VOLT:"#FFCE73",border:`1px solid ${streak>=3?"rgba(200,255,0,0.45)":"rgba(255,206,115,0.45)"}`,borderRadius:999,padding:"4px 9px"}}>{streak} day visibility</span>
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure title="Team standings" summary="Home-shot rankings and your position" testId="player-team-standings">
+          <CompactLeaderboardPreviewCard
+            title="Team Leaders"
+            areaTitle="Leaderboards"
+            categoryLabel="Home Shots"
+            mode="player"
+            userEmail={u?.email||""}
+            status={playerDashboardLeaderboardStatus}
+            rows={playerDashboardLeaderboardRows}
+            emptyMessage="No leaderboard data yet. Log shots to enter the rankings."
+            maxRows={3}
+            onViewAll={()=>switchTab("leaderboards")}
+          />
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure
+          title="Coach guidance"
+          summary={`${coachName} · ${coachPriorityDrill}`}
+          testId="player-coach-guidance"
+        >
+          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,lineHeight:1.5}}>Coach focus: {coachTodayFocus}</div>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
+            {[{k:"Priority drill",v:coachPriorityDrill},{k:"Coach challenge",v:coachChallengeText},{k:"Weekly goal",v:weeklyGoalLabel},{k:"Consistency",v:consistencyExpectation}].map(item=><div key={item.k} style={{borderTop:"1px solid var(--stroke-1)",padding:"9px 2px"}}><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:12,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.45}}>{item.v}</div></div>)}
           </div>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:15,lineHeight:1.55,marginTop:10}}>Coach focus: {coachTodayFocus}</div>
-          <div style={{display:"flex",gap:8,alignItems:"center",marginTop:10,flexWrap:"wrap"}}>
-            <button type="button" onClick={()=>setShowCoachGuidanceDetails(v=>!v)} style={{border:"1px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.04)",color:LIGHT,borderRadius:999,padding:"6px 12px",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>
-              {showCoachGuidanceDetails?"Hide details":"View details"}
-            </button>
-            <button type="button" onClick={()=>switchTab("duels")} style={{border:"1px solid rgba(200,255,0,0.34)",background:"rgba(200,255,0,0.08)",color:VOLT,borderRadius:999,padding:"6px 12px",fontFamily:FB,fontSize:12,fontWeight:700,cursor:"pointer"}}>
-              Open Program
-            </button>
+          <button type="button" onClick={()=>switchTab("duels")} style={{marginTop:9,minHeight:40,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>Open Program →</button>
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure
+          title="More progress"
+          summary="Rank, attendance, season progress, and shortcuts"
+          testId="player-secondary-intelligence"
+        >
+          <MetricStrip items={[
+            {label:"Team Rank",value:leaderboardRank>0?`#${leaderboardRank}`:"—",detail:"Home shots"},
+            {label:"Events",value:eventsAttended,detail:"Attended"},
+            {label:"Season",value:`${seasonProgressPct}%`,detail:trainingIdentity},
+          ]}/>
+          <QuietSection title="Next step" eyebrow="Recommended">
+            <div style={{fontFamily:FD,color:LIGHT,fontSize:20}}>{nextEvent?nextEvent.title:"Build your next session plan"}</div>
+            <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:4,lineHeight:1.45}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"No event locked yet — open Program and set the next rep target for your week."}</div>
+          </QuietSection>
+          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(3,minmax(0,1fr))",gap:8,marginTop:12}}>
+            {[{label:"View Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:44,borderRadius:10,border:"1px solid var(--stroke-1)",background:"transparent",color:LIGHT,fontFamily:FB,fontWeight:800,fontSize:11,cursor:"pointer"}}>{action.label}</button>)}
           </div>
-          {showCoachGuidanceDetails&&<div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
-            {[{k:"Priority drill",v:coachPriorityDrill},{k:"Coach challenge",v:coachChallengeText},{k:"Weekly goal",v:weeklyGoalLabel},{k:"Consistency",v:consistencyExpectation}].map(item=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"9px 10px",background:"rgba(12,14,18,0.5)"}}><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:12,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.45}}>{item.v}</div></div>)}
-          </div>}
-        </section>
-        <section aria-label="Progress snapshot" style={{display:"grid",gridTemplateColumns:isNarrow?"repeat(2,minmax(0,1fr))":"repeat(4,minmax(0,1fr))",gap:12}}>
-          {[{label:"Streak",value:formatStreakDays(streak),color:CYAN},{label:"Weekly",value:weeklyMakes,color:LIGHT},{label:"Daily",value:`${dailyPct}%`,color:VOLT},{label:"Weekly",value:`${weeklyPct}%`,color:ORANGE}].map(item=><div key={item.label+item.value} style={{padding:"12px",borderRadius:12,background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:700}}>{item.label}</div><div style={{fontFamily:FD,color:item.color,fontSize:22,marginTop:4,lineHeight:1.1}}>{item.value}</div></div>)}
-        </section>
-        <section aria-label="Next step" style={{padding:"14px",borderRadius:14,background:"rgba(255,255,255,0.02)",border:`1px solid ${BORDER_CLR}77`}}>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,fontWeight:700,letterSpacing:"0.08em"}}>NEXT STEP</div>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:20,marginTop:4}}>{nextEvent?nextEvent.title:"Build your next session plan"}</div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}>{nextEvent?`${nextEvent.date} · ${nextEvent.time} · ${nextEvent.location}`:"No event locked yet — open Program and set the next rep target for your week."}</div>
-        </section>
-        <section aria-label="Secondary navigation actions" style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(3,minmax(0,1fr))",gap:10}}>
-          {[{label:"View Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:56,borderRadius:12,border:"1px solid rgba(255,255,255,0.14)",background:"rgba(255,255,255,0.03)",color:LIGHT,fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer"}}>{action.label}</button>)}
-        </section>
+        </ProgressiveDisclosure>
+        
         
       </div>
     })()}
@@ -2622,7 +2665,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
         {hasDrillMax(active)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:32}}>/{active.max}</div>}
       </div>})()}
       {/* Score quality indicator */}
-      {(()=>{const v=parseInt(input)||0;if(v<=0||!hasDrillMax(active))return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?VOLT:pct>=75?VOLT:pct>=50?ORANGE:"#FF4545";
+      {(()=>{const v=parseInt(input)||0;if(v<=0||!hasDrillMax(active))return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?SUCCESS:pct>=75?SUCCESS:pct>=50?WARNING:DANGER;
         return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
       <button className="btn-v cta-primary" onClick={handleLog} disabled={submitting||activeScoreInvalid} style={{maxWidth:300,margin:"0 auto",opacity:(submitting||activeScoreInvalid)?0.55:1,cursor:submitting||activeScoreInvalid?"not-allowed":"pointer"}}>LOG SCORE &#8594;</button>
     </>}
@@ -2676,7 +2719,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
   {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
 </div>
 
-{!isDesktop&&<NavBar items={playerNavItems} active={tab} onChange={switchTab}/>} 
+{!isDesktop&&<MobileNavigation primaryItems={playerMobilePrimaryItems} secondaryItems={playerMobileSecondaryItems} activeKey={tab} onChange={switchTab} ariaLabel="Player navigation"/>} 
 
   </div></div></main>
 {isDesktop&&<aside className="insights-panel"><div className="panel-title">PLAYER INSIGHTS</div><div className="placeholder">Add widgets here later (goals, reminders, coach notes, and progress snapshots).</div></aside>}
@@ -2687,7 +2730,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`}>
 // SHAREABLE WORKOUT CARD
 // ═══════════════════════════════════════
 function ShareCard({data}){
-const pct=data.pct||0;const pcol=pct>=80?VOLT:pct>=50?ORANGE:"#FF4545";
+const pct=data.pct||0;const pcol=pct>=80?SUCCESS:pct>=50?WARNING:DANGER;
 return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",maxWidth:340,margin:"0 auto"}}>
 {/* Corner accents */}
 <div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
@@ -2837,7 +2880,7 @@ return <div className="fade-up">
   const won=isMine?(ch.status==="lost"):(ch.status==="won");const tied=ch.status==="tied";const isPending=ch.status==="pending";
   const oppName=isMine?ch.toName:ch.fromName;
   const myScore=isMine?ch.score:ch.respScore;const oppScore=isMine?ch.respScore:ch.score;
-  const resultColor=isPending?MUTED:won?VOLT:tied?"#C8FF00":"#FF4545";
+  const resultColor=isPending?WARNING:won?SUCCESS:tied?INFO:DANGER;
   const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
 
   return <div key={ch.id+"-"+ch.ts} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"14px 16px",marginBottom:6,border:`1px solid ${isPending?ORANGE+"22":BORDER_CLR}`}}>
@@ -3655,6 +3698,19 @@ const navItems=[
   {k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
   {k:"branding",l:"Brand",accentVar:"--accent",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l8 4v6c0 4.5-3 7.7-8 8-5-.3-8-3.5-8-8V7l8-4z"/><path d="M9.5 12.5l1.8 1.8 3.2-3.2"/></svg>},
 ];
+const getCoachNavItem=(key,overrides={})=>{const item=navItems.find(candidate=>candidate.k===key);return item?{...item,...overrides}:null;};
+const coachMobilePrimaryItems=[
+  getCoachNavItem("feed",{mobileLabel:"Home"}),
+  getCoachNavItem("players",{mobileLabel:"Players"}),
+  getCoachNavItem("events",{mobileLabel:"Events"}),
+].filter(Boolean);
+const coachMobileSecondaryItems=[
+  getCoachNavItem("drills",{mobileLabel:"Drills",description:"Drill library and assignments"}),
+  getCoachNavItem("sc",{mobileLabel:"S&C",description:"Strength sessions and compliance"}),
+  {k:"leaderboards",l:"Leaderboards",mobileLabel:"Rankings",description:"Current and all-time team rankings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>},
+  getCoachNavItem("branding",{mobileLabel:"Brand",description:"Team identity and visual settings"}),
+].filter(Boolean);
+
 const handleNavChange=(k)=>{
   if(k==="branding"){
     openTeamBranding();
@@ -3723,7 +3779,7 @@ useEffect(()=>{
 
 return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-text-scale={coachTextScale}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div ref={coachScrollRef} className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"var(--bottom-nav-content-padding, calc(132px + env(safe-area-inset-bottom, 0px)))"}}><BrandBackdrop/>
+<main className="shell-main"><div ref={coachScrollRef} className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page`} data-accent={u.isCoach&&["feed","drills","events","sc","players"].includes(tab)?tab:"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}><BrandBackdrop/>
 {/* Delete confirmation dialog */}
 {confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
 <div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
@@ -3737,7 +3793,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 </div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
 <CoachMiniHeader
-  visible={showMiniHeader}
+  visible={isOverviewTab&&showMiniHeader}
   avatar={<Av n={u.name} sz={24} email={u.email} isCoach={u.isCoach}/>}
   wordmark={<BrandWordmark size={16} small/>}
   borderColor={BORDER_CLR}
@@ -3745,13 +3801,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   onLogout={logout}
 />
 <div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
+{isOverviewTab&&<>
 <CoachDashboardHeader
   heroRef={heroRef}
   userName={u.name}
   onOpenTeamBranding={openTeamBranding}
 />
-{isCoachTab&&<CoachCommandCenter
-  variant={showFullCommandCenter?"full":"compact"}
+<CoachCommandCenter
+  variant="full"
   totalPlayers={totalPlayers}
   activeTodayCount={activeTodayCount}
   nextEventDateFormatted={nextEventDateFormatted}
@@ -3768,12 +3825,13 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   onCopyJoinCode={()=>navigator.clipboard?.writeText(team?.joinCode||"")}
   onRegenerateJoinCode={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}}
   codeErr={codeErr}
-/>}
+/>
+</>}
 </div>
-<div style={{flex:1,padding:`${showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
+<div style={{flex:1,padding:`${isOverviewTab&&showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
   {/* FEED */}
-  {tab==="feed"&&<div className="page pageShell page-feed fade-up" data-accent="feed" style={shellVars("feed")}><PageHeader title="COACH HOME" subtitle="Today-first command surface for your program" accent="lime" icon={<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>} actionLabel="Coach Mode" />
-    <div style={{marginBottom:10}}>
+  {tab==="feed"&&<div className="page pageShell page-feed coach-home-dashboard fade-up" data-accent="feed" style={shellVars("feed")}>
+    <ProgressiveDisclosure title="Team standings" summary="Home-shot leaders and roster position" testId="coach-team-standings">
       <CompactLeaderboardPreviewCard
         title="Home Shot Leaders"
         areaTitle="Leaderboards"
@@ -3785,7 +3843,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         maxRows={5}
         onViewAll={openCoachLeaderboards}
       />
-    </div>
+    </ProgressiveDisclosure>
     {(()=>{const coachChecklist=[
         {label:"Create or restore team",done:Boolean(u?.teamId)},
         {label:"Invite or add players",done:ups.length>0,onClick:()=>setTab("players"),ariaLabel:"Go to Players tab"},
@@ -3798,7 +3856,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {label:"First team-management action",done:ups.length>0||events.length>0,onClick:()=>setTab("players")},
         {label:"First RSVP tracking pass",done:rsvps.length>0,onClick:()=>setTab("events")},
       ];
-      return <section style={{...CHECKLIST_CARD_STYLE,padding:"10px 11px",marginBottom:10}} aria-label="Coach setup checklist">
+      return <ProgressiveDisclosure title="Coach setup" summary={`${coachChecklist.filter(item=>item.done).length}/${coachChecklist.length} complete`} testId="coach-setup-checklist">
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
           <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Coach Setup</div>
           <span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{coachChecklist.filter(item=>item.done).length}/{coachChecklist.length}</span>
@@ -3822,7 +3880,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           <div style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>FIRST-WEEK ACTIVATION</div>
           {coachActivation.map(item=><button key={item.label} type="button" onClick={item.onClick} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"7px 8px",borderRadius:9,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.015)",color:LIGHT,fontFamily:FB,fontSize:11,cursor:"pointer"}}><span>{item.done?"✓":"•"} {item.label}</span><span style={{fontSize:9,color:item.done?VOLT:T.SUB}}>{item.done?"Completed":"Next best action"}</span></button>)}
         </div>
-      </section>;})()}
+      </ProgressiveDisclosure>;})()}
     {(()=>{
       const todayDate=today;
       const nextWeekEndDate=new Date(`${todayDate}T00:00:00`);
@@ -3906,20 +3964,23 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         {priority:scheduleGap?"important":"passive",title:"Schedule stability",detail:scheduleGap?"Add at least one more session to stabilize the 7-day calendar.":"7-day schedule cadence is stable.",cta:"Manage schedule",onClick:()=>setTab("events")},
       ].filter(Boolean).slice(0,4);
       return <>
-        <section className="accent-card" style={{background:"linear-gradient(155deg, color-mix(in srgb,var(--accent) 13%, transparent), rgba(11,13,16,0.96) 68%)",border:`1px solid color-mix(in srgb,var(--accent) 30%, transparent)`,borderRadius:22,padding:isDesktop?"24px":"20px",marginBottom:14,boxShadow:"0 18px 40px rgba(0,0,0,0.24)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",gap:12,alignItems:"flex-start",marginBottom:12}}>
-            <div>
-              <div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,fontWeight:700,letterSpacing:"0.06em"}}>TODAY'S PRACTICE</div>
-              <div style={{fontFamily:FD,color:"var(--text-1)",fontSize:isDesktop?28:24,lineHeight:1,marginTop:6}}>{session?.title||"No session scheduled"}</div>
-              <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:12,marginTop:8}}>{session?`Focus area: ${session.desc||"Team development"}`:"Set the team agenda and publish today's focus."}</div>
-            </div>
-            <button className="pageHeaderPill pageHeaderPillBrand" onClick={()=>setTab("events")}>{session?"Open Session":"Add Session"}</button>
+        <QuietSection
+          eyebrow="Today’s practice"
+          title={session?.title||"No session scheduled"}
+          actionLabel={session?"Open session":"Add session"}
+          onAction={()=>setTab("events")}
+          testId="coach-today-practice"
+        >
+          <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:13,lineHeight:1.45}}>{session?`Focus area: ${session.desc||"Team development"}`:"Set the team agenda and publish today’s focus."}</div>
+          <div data-testid="coach-practice-status-row" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:0,marginTop:9,borderTop:"1px solid var(--stroke-1)",borderBottom:"1px solid var(--stroke-1)"}}>
+            {[
+              {label:"Readiness",value:readinessCopy},
+              {label:"Time",value:session?.time||"TBD"},
+              {label:"RSVP",value:session?`${rsvpPct}%`:"—"},
+            ].map((item,index)=><div key={item.label} style={{minWidth:0,padding:"9px 7px",textAlign:"center",borderLeft:index?"1px solid var(--stroke-1)":"none"}}><div style={{fontFamily:FD,color:"var(--text-1)",fontSize:16,lineHeight:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.value}</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:9,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",marginTop:4}}>{item.label}</div></div>)}
           </div>
-          <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8}}>
-            {[{k:"Readiness",v:readinessCopy},{k:"Time",v:session?.time||"TBD"},{k:"Intensity",v:session?.intensity||"Game-speed"},{k:"Participation",v:session?`${rsvpPct}% RSVP`:"No RSVPs"}].map(item=><div key={item.k} style={{background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"10px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{item.k}</div><div style={{fontFamily:FB,fontSize:12,color:"var(--text-1)",marginTop:3,fontWeight:600}}>{item.v}</div></div>)}
-          </div>
-        </section>
-        <section className="accent-card" style={{borderRadius:18,padding:isDesktop?"14px 14px":"12px 12px",marginBottom:12,background:"linear-gradient(152deg, rgba(200,255,0,0.12), rgba(255,255,255,0.03) 32%, rgba(8,10,14,0.82))",border:"1px solid rgba(200,255,0,0.3)",boxShadow:"0 14px 30px rgba(0,0,0,0.2)"}}>
+        </QuietSection>
+        <ProgressiveDisclosure title="Next 7 days" summary={`${next7Events.length} sessions · ${unresolvedNext7Count} unresolved`} testId="coach-next-seven-days">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}>
             <div><div style={{fontFamily:FD,fontSize:15,color:LIGHT,letterSpacing:"0.04em"}}>NEXT 7 DAYS</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Critical sessions, unresolved RSVP risk, and readiness.</div></div>
             <button className="pageHeaderPill" onClick={()=>setTab("events")}>Open Events</button>
@@ -3944,12 +4005,12 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
               </button>;
             })}
           </div>
-        </section>
-        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.12)"}}>
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure title="Operational alerts" summary={`${coachAlerts.filter(alert=>alert.priority!=="passive").length} items need review`} testId="coach-operational-alerts">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>COACH OPERATIONAL ALERTS</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Prioritized alerts for RSVP closure, readiness, activity, and schedule reliability.</div></div><button className="pageHeaderPill" onClick={()=>setTab("events")}>Open events</button></div>
           <div style={{display:"grid",gap:7,marginTop:9}}>{coachAlerts.map((alert)=>{const tone=coachPriorityStyle[alert.priority]||coachPriorityStyle.passive;return <button key={alert.title} type="button" onClick={alert.onClick} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${tone.border}`,background:"rgba(255,255,255,0.015)",cursor:"pointer"}}><span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.border}`,borderRadius:999,padding:"3px 7px",background:tone.bg}}>{tone.label}</span><span><span style={{display:"block",fontFamily:FB,fontSize:11,color:"var(--text-1)",fontWeight:700}}>{alert.title}</span><span style={{display:"block",fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:2}}>{alert.detail}</span></span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{alert.cta} ›</span></button>;})}</div>
-        </section>
-        <section className="accent-card" style={{borderRadius:16,padding:isDesktop?"14px":"12px",marginBottom:12,background:"linear-gradient(152deg, rgba(255,255,255,0.05), rgba(255,255,255,0.015))",border:"1px solid rgba(255,255,255,0.16)"}}>
+        </ProgressiveDisclosure>
+        <ProgressiveDisclosure title="Coach priority editor" summary={coachPrioritiesDirty?"Unsaved changes":"Player-facing focus and weekly targets"} testId="coach-priority-editor">
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:10}}>
             <div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>COACH PRIORITY EDITOR</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Set the exact priorities players see across the dashboard and check-ins.</div></div>
           </div>
@@ -3965,12 +4026,14 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
           {coachPrioritiesMessage&&<div style={{fontFamily:FB,fontSize:11,color:VOLT,marginTop:8}}>{coachPrioritiesMessage}</div>}
           <div style={{fontFamily:FB,fontSize:10,color:coachPrioritiesError?"#FF8D8D":coachPrioritySaveState==="saved"?VOLT:"var(--text-3)",letterSpacing:"0.03em",marginTop:10}}>{coachPrioritySaveState==="saving"?"Saving priorities...":coachPrioritiesError?"Save failed. Review fields and retry.":coachPrioritiesDirty?"Unsaved changes":"All changes saved"}</div>
           <button className="btn-v cta-primary" type="button" onClick={handleSaveCoachPriorities} style={{marginTop:10,width:"100%"}}>{coachPrioritySaveState==="saving"?"Saving priorities...":"SAVE PRIORITIES"}</button>
-        </section>
+        </ProgressiveDisclosure>
 
-        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(4,minmax(0,1fr))":"repeat(2,minmax(0,1fr))",gap:8,marginBottom:8}}>
-          {[{l:"Active today",v:activeTodaySet.size,sub:`${safeRoster.length?Math.round((activeTodaySet.size/safeRoster.length)*100):0}% of roster`},{l:"Attendance",v:`${attendance}%`,sub:"7-day participation rate"},{l:"Consistency",v:avgStreak,sub:"Avg logs from top streaks"},{l:"Weekly activity",v:weekScores.length,sub:"Total workouts logged"}].map(stat=><div key={stat.l} style={{border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{stat.l}</div><div style={{fontFamily:FD,fontSize:21,color:"var(--text-1)",lineHeight:1,marginTop:4}}>{stat.v}</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:4}}>{stat.sub}</div></div>)}
-        </section>
-
+        <MetricStrip testId="coach-primary-metrics-feed" items={[
+          {label:"Active Today",value:activeTodaySet.size,detail:`${safeRoster.length?Math.round((activeTodaySet.size/safeRoster.length)*100):0}% of roster`},
+          {label:"Attendance",value:`${attendance}%`,detail:"7-day participation"},
+          {label:"Weekly Activity",value:weekScores.length,detail:"Workouts logged"},
+        ]}/>
+        <ProgressiveDisclosure title="Program intelligence" summary="Trends, athlete attention, engagement, and activity" testId="coach-program-intelligence">
         <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(3,minmax(0,1fr))":"1fr",gap:8,marginBottom:12}}>
           {trendCards.map((trend)=><div key={trend.label} style={{border:"1px solid var(--stroke-1)",background:"linear-gradient(160deg, rgba(255,255,255,0.035), rgba(0,0,0,0.18))",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{trend.label}</div><div style={{fontFamily:FB,fontSize:13,color:trend.tone==="good"?"var(--accent)":trend.tone==="warn"?"#FFB86B":"var(--text-1)",fontWeight:700,marginTop:5}}>{trend.value}</div></div>)}
         </section>
@@ -4023,6 +4086,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
 
         {(()=>{const recentCoachActivity=deriveActivityFeedItems({view:"coach",user:u,events:safeEvents,rsvps:safeRsvps,shotLogs,players:ups,scores:safeScores,today,activeTeamPlayerEmails:activeTeamPlayerEmailSet,activeTeamPlayerKeys:activeTeamPlayerKeySet});return <RecentActivityCard title="Activity" items={recentCoachActivity}/>;})()}
         <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/><div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"6px 14px",marginTop:12}}>{safeScores.length===0&&<Empty t="No activity yet" action="No activity yet — invite players or have them log their first workout." cta="Invite Players" onTap={()=>setTab("players")} icon={<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>}/>}{safeScores.slice(-20).reverse().map((s,i)=>{const drillList=(s.src==="program"?programDrills:drills);const dr=drillList.find(d=>d.id===s.drillId);const pct=dr&&hasDrillMax(dr)?Math.round(s.score/dr.max*100):null;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 10px",borderBottom:`1px solid ${BORDER_CLR}33`,borderRadius:12,background:i%2===0?"rgba(255,255,255,0.01)":"transparent"}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:999,color:isHome?"#0B0D10":LIGHT,background:isHome?"var(--accent)":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}{hasDrillMax(dr)&&<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontSize:10,fontWeight:700,color:pct>=70?"var(--accent)":T.SUB}}>{pct}%</div>}</div></div>})}</div>
+        </ProgressiveDisclosure>
       </>;
     })()}
   </div>}
@@ -4099,7 +4163,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   </div>}
 
   {/* EVENTS */}
-  {tab==="events"&&<div className="page pageShell fade-up accent-card" data-accent="events" id="coach-events-management" style={shellVars("events")}><DashboardReturnButton onClick={()=>setTab("feed")} />
+  {tab==="events"&&<div className={`page pageShell fade-up ${isDesktop?"accent-card":"coach-events-mobile-surface"}`} data-accent="events" id="coach-events-management" style={isDesktop?shellVars("events"):{...shellVars("events"),padding:0,border:0,background:"transparent",boxShadow:"none"}}>{isDesktop&&<DashboardReturnButton onClick={()=>setTab("feed")} />}
     {isDesktop?<>
       <div className="coachEventsHeaderCard"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} actionLabel="+ Create Event" onAction={handleToggleAddEvent} /></div>
       {nextEvent&&(()=>{const nextRows=coachEventRsvpRows(nextEvent.id);const rosterCount=allKnown.length;const missingCount=Math.max(rosterCount-nextRows.length,0);return <div className="heroModule" style={{background:"linear-gradient(145deg, rgba(200,255,26,0.16), rgba(15,20,28,0.94) 60%)",border:`1px solid ${VOLT}55`,boxShadow:"0 20px 45px rgba(0,0,0,0.38)",padding:16}}>
@@ -4131,42 +4195,41 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
       {events.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",paddingBottom:4,marginBottom:14}}>
         {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"8px 14px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?VOLT:SURFACE,color:active?"#111827":(T.SUB||LIGHT),fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"var(--tracking-tight)",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
       </div>}
-    </>:<div data-testid="coach-events-mobile-page">
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,padding:"6px 2px 10px",borderBottom:`1px solid ${BORDER_CLR}`,marginBottom:12}}>
-        <div style={{display:"flex",alignItems:"center",gap:6,minWidth:0}}><EventIcon type="event" size={14} color={VOLT}/><span style={{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1}}>EVENTS</span></div>
-      </div>
-      <button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} className="btn-v cta-primary" style={{margin:"0 0 14px",width:"100%",minHeight:48,height:48,borderRadius:12,fontSize:12}}>+ CREATE EVENT</button>
-      {events.length===0?<div style={{display:"inline-block",maxWidth:"100%",background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"14px 12px",marginBottom:12,textAlign:"center"}}>
-        <div style={{width:40,height:40,borderRadius:11,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={18} color={VOLT}/></div>
-        <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events yet — add your first event to get the team moving.</div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.4}}>Create your first event to organize practices, games, camps, or meetings.</div>
-      </div>:<div style={{display:"grid",gap:10,marginBottom:14}}>
+    </>:<div data-testid="coach-events-mobile-page" style={{maxWidth:560,margin:"0 auto",padding:"0 2px"}}>
+      <header data-testid="coach-events-mobile-header" style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:14,padding:"4px 2px 14px",borderBottom:`1px solid ${BORDER_CLR}`}}>
+        <div style={{minWidth:0}}>
+          <div style={{fontFamily:FB,color:"var(--semantic-info)",fontSize:9,fontWeight:800,letterSpacing:".12em",textTransform:"uppercase"}}>Team schedule</div>
+          <h1 style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:.95,letterSpacing:1.2,margin:"6px 0 0"}}>EVENTS</h1>
+          <p style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4,margin:"7px 0 0"}}>{events.length?`${events.length} scheduled team ${events.length===1?"event":"events"}. Manage timing, location, and attendance.`:"Plan practices, games, camps, and team meetings in one place."}</p>
+        </div>
+        {events.length>0&&<button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} type="button" style={{flexShrink:0,minHeight:40,borderRadius:10,border:`1px solid ${VOLT}`,background:VOLT,color:"#0b0d10",fontFamily:FB,fontSize:10,fontWeight:900,letterSpacing:".04em",textTransform:"uppercase",padding:"0 14px",cursor:"pointer"}}>+ ADD</button>}
+      </header>
+      {eventSaveError&&<div role="alert" style={{marginTop:12,padding:"10px 12px",borderRadius:10,background:"rgba(255,69,69,0.12)",border:"1px solid rgba(255,69,69,0.45)",color:"#FFD2D2",fontFamily:FB,fontSize:12,fontWeight:700}}>Event could not be saved. Please try again.</div>}
+      {events.length===0?<section data-testid="coach-events-mobile-empty-state" style={{minHeight:"calc(100dvh - 330px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"44px 20px 54px"}}>
+        <div style={{width:62,height:62,borderRadius:18,border:"1px solid color-mix(in srgb,var(--semantic-info) 42%, transparent)",background:"color-mix(in srgb,var(--semantic-info) 10%, transparent)",display:"grid",placeItems:"center",marginBottom:18}}><EventIcon type="event" size={27} color="var(--semantic-info)"/></div>
+        <div style={{fontFamily:FD,color:LIGHT,fontSize:25,letterSpacing:1.1,lineHeight:1}}>NO EVENTS SCHEDULED</div>
+        <p style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.55,maxWidth:310,margin:"10px auto 0"}}>Create the first team event, then players can RSVP and you can track attendance from this screen.</p>
+        <button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} type="button" className="btn-v cta-primary" style={{width:"auto",minWidth:190,minHeight:46,height:46,borderRadius:12,margin:"22px 0 0",padding:"0 20px",fontSize:11}}>CREATE FIRST EVENT</button>
+        <div style={{fontFamily:FB,color:T.MUT,fontSize:9,fontWeight:800,letterSpacing:".1em",textTransform:"uppercase",marginTop:18}}>Practices · Games · Camps · Meetings</div>
+      </section>:<div style={{display:"grid",gap:16,paddingTop:14,paddingBottom:18}}>
         {(() => {
           const parseTime=(time="")=>{const m=String(time).trim().match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?$/i);if(!m)return Number.MAX_SAFE_INTEGER;let hour=Number(m[1]);const minute=Number(m[2]||"0");const meridiem=(m[3]||"").toUpperCase();if(meridiem==="PM"&&hour<12)hour+=12;if(meridiem==="AM"&&hour===12)hour=0;return hour*60+minute;};
           const grouped=[...events].sort((a,b)=>a.date.localeCompare(b.date)||parseTime(a.time)-parseTime(b.time)).reduce((acc,ev)=>{(acc[ev.date]=acc[ev.date]||[]).push(ev);return acc;},{});
           return Object.entries(grouped).map(([dateKey,dateEvents])=>{const d=new Date(`${dateKey}T00:00:00`);const weekday=d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();const monthDay=d.toLocaleDateString(undefined,{month:"short",day:"numeric"}).toUpperCase();
-          return <div key={dateKey} style={{display:"grid",gap:6}}>
-            <div style={{display:"flex",alignItems:"baseline",gap:7,padding:"2px 2px 0"}}><span style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700,letterSpacing:".1em"}}>{weekday}</span><span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{monthDay}</span></div>
-            {dateEvents.map((ev,eventIdx)=>{const evCoachRsvps=coachEventRsvpRows(ev.id);const evCoachRsvpNames=evCoachRsvps.map(coachRsvpLabel);const missing=Math.max(allKnown.length-evCoachRsvps.length,0);return <div key={ev.id} style={{background:eventIdx===0?"linear-gradient(154deg, rgba(200,255,26,0.18), rgba(16,22,32,0.95) 60%)":"linear-gradient(154deg, rgba(255,255,255,0.05), rgba(16,20,30,0.9) 72%)",border:`1px solid ${eventIdx===0?VOLT+"55":BORDER_CLR}`,boxShadow:eventIdx===0?"0 14px 34px rgba(0,0,0,0.34)":"0 10px 24px rgba(0,0,0,0.24)",borderRadius:16,padding:"14px 14px",display:"grid",gap:8,maxWidth:"100%"}}>
-              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:8}}>
-                <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700,lineHeight:1.25,minWidth:0,wordBreak:"break-word"}}>{ev.title}</div>
-                <span style={{padding:"2px 7px",borderRadius:999,background:`${VOLT}1A`,border:`1px solid ${VOLT}55`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase",flexShrink:0}}>{ev.type||"event"}</span>
+          return <section key={dateKey} style={{display:"grid",gap:8}}>
+            <div style={{display:"flex",alignItems:"baseline",gap:7,padding:"0 2px"}}><span style={{fontFamily:FB,color:"var(--semantic-info)",fontSize:9,fontWeight:800,letterSpacing:".1em"}}>{weekday}</span><span style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:1}}>{monthDay}</span></div>
+            {dateEvents.map((ev,eventIdx)=>{const evCoachRsvps=coachEventRsvpRows(ev.id);const evCoachRsvpNames=evCoachRsvps.map(coachRsvpLabel);const missing=Math.max(allKnown.length-evCoachRsvps.length,0);return <article key={ev.id} style={{background:"rgba(255,255,255,0.025)",border:`1px solid ${eventIdx===0?"color-mix(in srgb,var(--semantic-info) 38%, var(--stroke-1))":BORDER_CLR}`,borderRadius:14,padding:"13px 14px",display:"grid",gap:9,maxWidth:"100%"}}>
+              <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:10}}>
+                <div style={{minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:800,lineHeight:1.2,wordBreak:"break-word"}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35,marginTop:4}}>{ev.time||"TBD"} · {ev.location||"Location TBD"}</div></div>
+                <span style={{padding:"3px 8px",borderRadius:999,background:"color-mix(in srgb,var(--semantic-info) 10%, transparent)",border:"1px solid color-mix(in srgb,var(--semantic-info) 34%, transparent)",fontFamily:FB,color:"var(--semantic-info)",fontSize:9,fontWeight:800,textTransform:"uppercase",flexShrink:0}}>{ev.type||"event"}</span>
               </div>
-              <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>{ev.date}</div>
-              <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25}}>{ev.time||"TBD"}</div>
-              <div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.25,wordBreak:"break-word"}}>📍 {ev.location||"Location TBD"}</div>
-              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
-                <span style={{display:"none"}}>{`${evCoachRsvps.length} going`}</span>
-                <span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:"rgba(200,255,26,0.14)",fontFamily:FB,color:LIGHT,fontSize:9,fontWeight:700}}>{`${evCoachRsvps.length} confirmed`}</span>
-                <span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.05)",fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:700}}>{`${missing} missing`}</span>
-                {eventIdx===0&&<span style={{padding:"3px 8px",borderRadius:999,border:`1px solid ${VOLT}55`,background:`${VOLT}1A`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700}}>UP NEXT</span>}
+              <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,paddingTop:8,borderTop:`1px solid ${BORDER_CLR}`}}>
+                <div style={{display:"flex",gap:7,flexWrap:"wrap"}}><span style={{fontFamily:FB,color:SUCCESS,fontSize:10,fontWeight:800}}>{evCoachRsvps.length} confirmed</span><span style={{fontFamily:FB,color:missing>0?WARNING:T.SUB,fontSize:10,fontWeight:800}}>{missing} missing</span></div>
+                <button type="button" onClick={()=>setExpEv(ev.id)} style={{border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:10,fontWeight:900,padding:"4px 0",cursor:"pointer"}}>MANAGE →</button>
               </div>
-              <div style={{border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.035)",borderRadius:12,padding:"9px 10px",display:"grid",gap:5}}>
-                <div style={{fontFamily:FB,color:VOLT,fontSize:9,fontWeight:800,letterSpacing:".1em",textTransform:"uppercase"}}>RSVPs</div>
-                {evCoachRsvpNames.length>0?<div style={{fontFamily:FB,color:LIGHT,fontSize:11,lineHeight:1.4,wordBreak:"break-word"}}>{evCoachRsvpNames.join(", ")}</div>:<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.35}}>No RSVPs yet — players can RSVP from their Events page.</div>}
-              </div>
-            </div>})})
-          </div>});
+              {evCoachRsvpNames.length>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:10,lineHeight:1.4,wordBreak:"break-word"}}>{evCoachRsvpNames.join(", ")}</div>}
+            </article>})}
+          </section>});
         })()}
       </div>}
     </div>}
@@ -4373,7 +4436,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
         </div>
         <div style={{flex:1,minWidth:0}}>
           <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:1}}>{s.sport||s.title}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{s.date} · {s.time||"TBD"} · {s.location||s.sessionType||"School"} · <span style={{color:"#A0A0A0"}}>{sr.length} confirmed</span> · <span style={{color:missing>0?"#FFB86B":VOLT}}>{missing} missing</span></div>
+          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{s.date} · {s.time||"TBD"} · {s.location||s.sessionType||"School"} · <span style={{color:"#A0A0A0"}}>{sr.length} confirmed</span> · <span style={{color:missing>0?WARNING:SUCCESS}}>{missing} missing</span></div>
           <div style={{fontFamily:FB,color:LIGHT,fontSize:10,marginTop:6}}>{srNames.length>0?srNames.join(", "):"No S&C RSVPs yet"}</div>
         </div>
         <button onClick={()=>{if(window.confirm("Delete this S&C session from the team schedule and remove linked RSVP/log records? Player accounts and other team data will not be deleted."))removeScSession(s.id)}} className="btn-v cta-danger" style={{minHeight:36,height:36,padding:"0 12px",fontSize:10,letterSpacing:1.2,whiteSpace:"nowrap"}}>DELETE S&amp;C SESSION</button>
@@ -4382,7 +4445,7 @@ return <div className={`app-shell ${isDesktop?"is-desktop":"is-mobile"}`} data-t
   </div>}
 </div>
 
-{!isDesktop&&<NavBar items={navItems} active={tab} onChange={handleNavChange}/>}
+{!isDesktop&&<MobileNavigation primaryItems={coachMobilePrimaryItems} secondaryItems={coachMobileSecondaryItems} activeKey={tab} onChange={handleNavChange} ariaLabel="Coach navigation"/>}
 
   </div></div></main>
 {isDesktop&&<aside className="insights-panel"><div className="panel-title">COACH INSIGHTS</div><div className="placeholder">Add widgets here later (activity, upcoming events, roster changes, lifting compliance).</div></aside>}
@@ -4396,7 +4459,7 @@ function HistPanel({sc,dr,programDr=[]}){
 const sorted=useMemo(()=>[...sc].sort((a,b)=>(b.ts||0)-(a.ts||0)),[sc]);
 const grouped=useMemo(()=>{const m={};sorted.forEach(s=>{if(!m[s.date])m[s.date]=[];m[s.date].push(s)});return Object.entries(m)},[sorted]);
 const findDrillForScore=score=>((score?.src||"home")==="program"?programDr:dr).find(d=>d.id===score.drillId);
-return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No activity yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=findDrillForScore(s);const pct=d&&hasDrillMax(d)?Math.round(s.score/d.max*100):null;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:CYAN,background:isH?VOLT+"15":CYAN+"15"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:isH?VOLT:CYAN,fontSize:16}}>{s.score}{hasDrillMax(d)&&<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?"#C8FF00":pct>=50?"#FFA500":"#FF4545"}}>{pct}%</div>}</div></div>})}</div>)}</div>;
+return <div><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SCORE HISTORY" s="ALL SOURCES"/>{grouped.length===0&&<Empty t="No activity yet"/>}{grouped.map(([date,entries])=><div key={date} style={{marginBottom:24}}><div style={{fontFamily:FD,color:T.SUB,fontSize:12,letterSpacing:4,marginBottom:8}}>{date}</div>{entries.map((s,i)=>{const d=findDrillForScore(s);const pct=d&&hasDrillMax(d)?Math.round(s.score/d.max*100):null;const isH=s.src==="home"||!s.src;return <div key={i} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:5,border:`1px solid ${BORDER_CLR}`}}><div style={{width:32,height:32,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:8,flexShrink:0}}><DrillIcon type={d?.icon} size={18}/></div><div style={{flex:1}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:2,display:"flex",alignItems:"center",gap:6}}>{d?.name}<span style={{fontFamily:FB,fontSize:7,fontWeight:700,padding:"1px 4px",borderRadius:3,color:isH?VOLT:CYAN,background:isH?VOLT+"15":CYAN+"15"}}>{isH?"HOME":"PROG"}</span></div></div><div style={{textAlign:"right"}}><div style={{fontFamily:FD,color:isH?VOLT:CYAN,fontSize:16}}>{s.score}{hasDrillMax(d)&&<span style={{color:MUTED,fontSize:11}}>/{d?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontFamily:FB,fontSize:9,fontWeight:700,color:pct>=80?SUCCESS:pct>=50?WARNING:DANGER}}>{pct}%</div>}</div></div>})}</div>)}</div>;
 }
 
 // ═══════════════════════════════════════
@@ -4625,9 +4688,9 @@ function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged,onRemovePl
     return Math.max(0,Math.floor((now-date.getTime())/dayMs));
   };
   const getStatusMeta=(days)=>{
-    if(days===null||days>=5)return {pill:"INACTIVE",color:TOKENS.DANGER,rank:0};
-    if(days<=2)return {pill:"ACTIVE",color:VOLT,rank:2};
-    return {pill:"AT RISK",color:TOKENS.WARNING,rank:1};
+    if(days===null||days>=5)return {pill:"INACTIVE",color:DANGER,tone:"danger",rank:0};
+    if(days<=2)return {pill:"ACTIVE",color:SUCCESS,tone:"success",rank:2};
+    return {pill:"AT RISK",color:WARNING,tone:"warning",rank:1};
   };
   const formatLastActive=(days)=>{
     if(days===null)return "Never";
@@ -4694,7 +4757,7 @@ return <div className="fade-up">
 {roster.map(p=>{const rosterIdentity=p.email||p.profileId||p.playerId||p.id;const c=p.statusMeta.color;const isNudged=nudged.includes(rosterIdentity);
   const circumference=2*Math.PI*12;
   const ringOffset=p.weeklyCompletionPct===null?circumference:circumference-((p.weeklyCompletionPct/100)*circumference);
-  return <div key={rosterIdentity} role="button" tabIndex={0} onClick={()=>onSelectPlayer?.(p)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")onSelectPlayer?.(p);}} style={{display:"flex",background:CARD_BG,borderRadius:14,marginBottom:10,border:`1px solid ${p.statusMeta.pill==="INACTIVE"?"#FF454533":BORDER_CLR}`,overflow:"hidden",cursor:onSelectPlayer?"pointer":"default"}}>
+  return <div key={rosterIdentity} role="button" tabIndex={0} onClick={()=>onSelectPlayer?.(p)} onKeyDown={e=>{if(e.key==="Enter"||e.key===" ")onSelectPlayer?.(p);}} style={{display:"flex",background:CARD_BG,borderRadius:14,marginBottom:10,border:`1px solid ${p.statusMeta.pill==="INACTIVE"?"var(--semantic-danger-border)":BORDER_CLR}`,overflow:"hidden",cursor:onSelectPlayer?"pointer":"default"}}>
     <div style={{width:5,background:c,flexShrink:0}}/>
     <div style={{display:"flex",alignItems:"stretch",gap:12,padding:"14px 12px",flex:1}}>
       <div style={{position:"relative",alignSelf:"center"}}>
@@ -4706,10 +4769,10 @@ return <div className="fade-up">
             <span style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:800,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{p.name}</span>
             {p.weeklyCompletionPct!==null&&<svg width="28" height="28" viewBox="0 0 28 28" aria-label={`Weekly completion ${p.weeklyCompletionPct}%`}>
               <circle cx="14" cy="14" r="12" stroke="#333333" strokeWidth="3" fill="none"/>
-              <circle cx="14" cy="14" r="12" stroke={VOLT} strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={ringOffset} transform="rotate(-90 14 14)"/>
+              <circle cx="14" cy="14" r="12" stroke={SUCCESS} strokeWidth="3" fill="none" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={ringOffset} transform="rotate(-90 14 14)"/>
             </svg>}
           </div>
-          <span style={{fontFamily:FB,fontSize:9,fontWeight:700,letterSpacing:1,padding:"3px 7px",borderRadius:999,color:c,background:c+"15",whiteSpace:"nowrap"}}>{p.statusMeta.pill}</span>
+          <SemanticStatus tone={p.statusMeta.tone} compact testId="semantic-roster-status">{p.statusMeta.pill}</SemanticStatus>
         </div>
         <div style={{fontFamily:FB,color:"#FFFFFFB3",fontSize:11,lineHeight:1.55}}>
           <div>Last Active: <span style={{color:VOLT,fontWeight:700}}>{formatLastActive(p.daysAgo)}</span></div>
@@ -4718,7 +4781,7 @@ return <div className="fade-up">
         </div>
       </div>
       <div style={{display:"flex",flexDirection:"column",justifyContent:"center",alignItems:"flex-end",gap:8,minWidth:94}}>
-    {p.statusMeta.pill==="INACTIVE"&&<button onClick={(e)=>{e.stopPropagation();if(!isNudged)setNudged(n=>[...n,rosterIdentity])}} style={{minHeight:40,padding:"0 12px",borderRadius:8,border:`1px solid ${isNudged?VOLT+"44":"#FF454544"}`,background:isNudged?VOLT+"12":"#FF454512",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,color:isNudged?VOLT:"#FF4545",whiteSpace:"nowrap",width:"100%"}}>
+    {p.statusMeta.pill==="INACTIVE"&&<button onClick={(e)=>{e.stopPropagation();if(!isNudged)setNudged(n=>[...n,rosterIdentity])}} style={{minHeight:40,padding:"0 12px",borderRadius:8,border:`1px solid ${isNudged?INFO+"55":DANGER+"55"}`,background:isNudged?"var(--semantic-info-surface)":"var(--semantic-danger-surface)",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:1,color:isNudged?INFO:DANGER,whiteSpace:"nowrap",width:"100%"}}>
       {isNudged?"✓ NUDGED":"NUDGE"}
     </button>}
     <button onClick={(e)=>{e.stopPropagation();onRemovePlayer?.(rosterIdentity)}} style={{minHeight:34,padding:"0 12px",borderRadius:8,border:"1px solid #FF454533",background:"#FF454510",cursor:"pointer",fontFamily:FB,fontSize:10,fontWeight:700,letterSpacing:"0.06em",color:"#FF4545",whiteSpace:"nowrap",width:"100%"}}>

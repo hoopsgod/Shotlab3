@@ -24,14 +24,18 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run archive-aware leaderboard tests
+      - name: Run archive-aware leaderboard, hierarchy, navigation, semantic, and mobile events tests
         run: |
           node --test \
             tests/season-leaderboard-analytics.test.mjs \
             tests/season-leaderboard-roster-boundary.test.mjs \
             tests/season-leaderboard-ui-contract.test.mjs \
             tests/premium-leaderboards-hub-regression.test.mjs \
-            tests/leaderboard-category-static-safety.test.mjs
+            tests/leaderboard-category-static-safety.test.mjs \
+            tests/visual-hierarchy-contract.test.mjs \
+            tests/mobile-navigation-contract.test.mjs \
+            tests/semantic-color-system-contract.test.mjs \
+            tests/mobile-events-layout-contract.test.mjs
 
       - name: Build application
         run: npm run build

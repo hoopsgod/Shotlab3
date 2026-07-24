@@ -1,5 +1,6 @@
 import DEFAULT_BRANDING from "./brandingDefaults";
 import resolveTeamBranding from "./resolveTeamBranding";
+import { SEMANTIC_COLORS } from "./semanticColors";
 
 const BASE_THEME_COLORS = Object.freeze({
   BG_BASE: "#0B0D10",
@@ -8,8 +9,7 @@ const BASE_THEME_COLORS = Object.freeze({
   TEXT_PRIMARY: "#F5F7FA",
   TEXT_SECONDARY: "#A6B0BF",
   TEXT_MUTED: "#7E8794",
-  WARNING: "#F59E0B",
-  DANGER: "#EF4444",
+  ...SEMANTIC_COLORS,
 });
 
 export function buildAppTokens(teamBranding = DEFAULT_BRANDING) {

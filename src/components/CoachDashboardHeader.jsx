@@ -6,7 +6,7 @@ export default function CoachDashboardHeader({ heroRef, userName, onOpenTeamBran
   const logoSrc = branding?.logoUrl || branding?.logoMarkUrl || "/branding/titans-exact-logo.png.PNG";
 
   return (
-    <section ref={heroRef} className={styles.header}>
+    <section ref={heroRef} className={styles.header} data-testid="coach-dashboard-identity-header">
       <div className={styles.inner}>
         <div className={styles.identity}>
           <span className={styles.badge}>Coach Mode</span>

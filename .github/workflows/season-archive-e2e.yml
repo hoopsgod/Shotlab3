@@ -10,7 +10,7 @@ permissions:
 jobs:
   season-archive-browser-flow:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
 
     steps:
       - name: Check out repository
@@ -45,11 +45,20 @@ jobs:
       - name: Run season archive browser test
         run: npm run test:e2e:season-archive
 
-      - name: Upload archive failure artifacts
+      - name: Run visual hierarchy browser test
+        run: npm run test:e2e:visual-hierarchy
+
+      - name: Run mobile navigation browser test
+        run: npm run test:e2e:mobile-navigation
+
+      - name: Run semantic color browser test
+        run: npm run test:e2e:semantic-colors
+
+      - name: Upload browser failure artifacts
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: season-archive-failure-artifacts
+          name: season-archive-hierarchy-navigation-semantic-failure-artifacts
           path: |
             season-archive-service-tests.txt
             playwright-report/
