@@ -1,0 +1,35 @@
+name: Mount Coach Player Invite
+
+on:
+  push:
+    branches:
+      - codex/coach-player-invitations
+    paths:
+      - scripts/mount-coach-player-invite.mjs
+      - .github/workflows/mount-coach-player-invite.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/coach-player-invitations
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: node scripts/mount-coach-player-invite.mjs
+      - run: npm ci
+      - run: npm run build
+      - name: Commit integration and remove one-time patcher
+        run: |
+          rm scripts/mount-coach-player-invite.mjs
+          rm .github/workflows/mount-coach-player-invite.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx scripts/mount-coach-player-invite.mjs .github/workflows/mount-coach-player-invite.yml
+          git commit -m "feat: mount coach-created player invitation flow"
+          git push origin HEAD:codex/coach-player-invitations
