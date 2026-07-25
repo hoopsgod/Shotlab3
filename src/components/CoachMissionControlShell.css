@@ -1,0 +1,58 @@
+/* Mission Control owns the coach home surface while mounted.
+   Target only the legacy app-shell chrome, never Mission Control's internal rail. */
+body.mission-control-active .app-shell.is-desktop > .sidebar-nav,
+body.mission-control-active .app-shell.is-desktop > .insights-panel {
+  display: none !important;
+}
+
+body.mission-control-active .app-shell.is-desktop {
+  display: block !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.mission-control-active .app-shell.is-desktop > .shell-main,
+body.mission-control-active .app-shell.is-desktop > .shell-main > .content-wrap {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.mission-control-active .app-shell.is-desktop .team-brand.coach-mode.page {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.mission-control-active .app-shell.is-desktop .mcShellV3 {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+/* The global mobile nav duplicates Mission Control's navigation and can cover
+   the floating action control. It returns automatically when Mission Control
+   unmounts and the body class is removed. */
+body.mission-control-active [data-testid="mobile-navigation"],
+body.mission-control-active .mobile-navigation,
+body.mission-control-active .mobile-nav {
+  display: none !important;
+}
+
+@media (max-width: 980px) {
+  body.mission-control-active .app-shell,
+  body.mission-control-active .shell-main,
+  body.mission-control-active .content-wrap,
+  body.mission-control-active .team-brand.coach-mode.page {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
