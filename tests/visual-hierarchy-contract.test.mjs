@@ -36,10 +36,10 @@ test("player dashboard exposes one dominant objective and only three primary met
 test("coach home uses a premium command center while non-home pages stand alone", () => {
   assert.match(commandCenterSource, /data-testid="coach-team-health"/);
   assert.match(commandCenterSource, /data-testid="coach-command-grid"/);
-  assert.match(commandCenterSource, /data-testid="coach-needs-attention"/);
-  assert.match(commandCenterSource, /data-testid="coach-team-momentum"/);
-  assert.match(commandCenterSource, /data-testid="coach-live-activity"/);
-  assert.match(commandCenterSource, /data-testid="coach-upcoming"/);
+  assert.match(commandCenterSource, /testId="coach-needs-attention"/);
+  assert.match(commandCenterSource, /testId="coach-team-momentum"/);
+  assert.match(commandCenterSource, /testId="coach-live-activity"/);
+  assert.match(commandCenterSource, /testId="coach-upcoming"/);
   assert.match(commandCenterSource, /data-testid="coach-secondary-tools"/);
   assert.match(commandCenterSource, /data-testid="coach-team-code-bar"/);
   assert.doesNotMatch(commandCenterSource, /DominantObjectiveCard/);
