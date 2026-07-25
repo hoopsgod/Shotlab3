@@ -25,9 +25,7 @@ jobs:
         run: npm ci
 
       - name: Run archive-aware leaderboard, hierarchy, navigation, semantic, and mobile events tests
-        shell: bash
         run: |
-          set +e
           node --test \
             tests/season-leaderboard-analytics.test.mjs \
             tests/season-leaderboard-roster-boundary.test.mjs \
@@ -37,20 +35,7 @@ jobs:
             tests/visual-hierarchy-contract.test.mjs \
             tests/mobile-navigation-contract.test.mjs \
             tests/semantic-color-system-contract.test.mjs \
-            tests/mobile-events-layout-contract.test.mjs \
-            > mission-control-test-output.log 2>&1
-          status=$?
-          cat mission-control-test-output.log
-          exit $status
-
-      - name: Upload validation output
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: mission-control-test-output
-          path: mission-control-test-output.log
-          if-no-files-found: ignore
-          retention-days: 1
+            tests/mobile-events-layout-contract.test.mjs
 
       - name: Build application
         run: npm run build
