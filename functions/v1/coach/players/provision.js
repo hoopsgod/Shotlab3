@@ -84,9 +84,10 @@ export async function onRequestPost({ request, env }) {
   if (account) {
     if (account.role !== "player") return Response.json({ error: "account_role_conflict" }, { status: 409 });
     if (account.team_id && clean(account.team_id) !== teamId) return Response.json({ error: "account_on_other_team" }, { status: 409 });
-    if (!account.team_id) await updateRows(env, "legacy_auth_profiles", `email=eq.${encodeURIComponent(email)}`, { team_id: teamId, updated_at: new Date().toISOString() });
-    const profile = await ensurePlayerProfile(env, { teamId, email, firstName, lastName, jerseyNumber, active: true });
-    return Response.json({ ok: true, status: "account_active", email_delivery_status: "not_needed", profile }, { status: 200 });
+    if (clean(account.team_id) === teamId) {
+      const profile = await ensurePlayerProfile(env, { teamId, email, firstName, lastName, jerseyNumber, active: true });
+      return Response.json({ ok: true, status: "account_active", email_delivery_status: "not_needed", profile }, { status: 200 });
+    }
   }
 
   const profile = await ensurePlayerProfile(env, { teamId, email, firstName, lastName, jerseyNumber });
