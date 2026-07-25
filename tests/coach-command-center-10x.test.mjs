@@ -7,6 +7,7 @@ const css=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",
 const headerCss=fs.readFileSync(new URL("../src/components/CoachMissionControlHeader.css",import.meta.url),"utf8");
 const polishCss=fs.readFileSync(new URL("../src/components/CoachMissionControlPolish.css",import.meta.url),"utf8");
 const premiumCss=fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css",import.meta.url),"utf8");
+const shellCss=fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css",import.meta.url),"utf8");
 const logoSource=fs.readFileSync(new URL("../src/components/useCleanTeamLogo.js",import.meta.url),"utf8");
 const brandingForm=fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx",import.meta.url),"utf8");
 
@@ -46,6 +47,7 @@ test("cinematic hero prefers a custom transparent mark and integrates it into th
   assert.match(premiumCss,/mix-blend-mode:screen/);
   assert.match(premiumCss,/mask-image:radial-gradient/);
   assert.match(premiumCss,/@keyframes mcArenaBreath/);
+  assert.match(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]*display:\s*none\s*!important/);
 });
 
 test("custom team logos are cleaned, persisted, and previewed on light and dark surfaces",()=>{
@@ -58,16 +60,19 @@ test("custom team logos are cleaned, persisted, and previewed on light and dark 
   assert.match(brandingForm,/transparent PNG or SVG/);
 });
 
-test("one adaptive onboarding state replaces repeated empty modules",()=>{
+test("one truthful Today panel replaces the generic onboarding stepper and repeated empty modules",()=>{
   assert.match(source,/onboardingMode/);
   assert.match(source,/data-testid="coach-onboarding-state"/);
-  assert.match(source,/Set the team in motion/);
-  assert.match(source,/Create today’s practice/);
-  assert.match(source,/Players connected/);
-  assert.match(source,/Practice plan/);
-  assert.match(source,/Live activity/);
+  assert.match(source,/function TodayPlan/);
+  assert.match(source,/No practice scheduled/);
+  assert.match(source,/Create the focus your players should see next/);
+  assert.match(source,/Build your roster/);
+  assert.match(source,/Create practice/);
+  assert.doesNotMatch(source,/Set the team in motion/);
+  assert.doesNotMatch(source,/Players connected/);
+  assert.doesNotMatch(source,/Practice plan/);
   assert.match(source,/!hasTeamActivity && !hasLiveActivity && !hasScheduledSession/);
-  assert.match(premiumCss,/\.mcTodayLaunch/);
+  assert.match(shellCss,/\.mcTodayPlan/);
 });
 
 test("coach tools remain available without permanent dashboard clutter",()=>{
@@ -90,8 +95,8 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(css,/env\(safe-area-inset-bottom\)/);
   assert.match(headerCss,/min-height:62px/);
   assert.match(polishCss,/\.mcSectionHead\{/);
-  assert.match(premiumCss,/min-height:300px/);
-  assert.match(premiumCss,/padding-bottom:calc\(88px \+ env\(safe-area-inset-bottom\)\)/);
+  assert.match(shellCss,/min-height:\s*286px\s*!important/);
+  assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
   assert.match(premiumCss,/backdrop-filter:blur\(24px\)/);
 });
