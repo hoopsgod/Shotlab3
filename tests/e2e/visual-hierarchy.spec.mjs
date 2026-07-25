@@ -85,7 +85,7 @@ test("coach mobile home answers the 30-second workflow and Events remains a stan
   await expect(needsAttention).toBeVisible();
   await expect(teamActivity).toBeVisible();
   await expect(nextSession).toBeVisible();
-  await expect(page.getByTestId("coach-dashboard-identity-header")).toHaveCount(0);
+  await expect(page.getByTestId("coach-dashboard-identity-header")).not.toBeVisible();
   await expect(page.locator(".coach-home-dashboard")).not.toBeVisible();
 
   const objectiveBox = await objective.boundingBox();
