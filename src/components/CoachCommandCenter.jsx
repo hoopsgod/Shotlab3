@@ -13,6 +13,7 @@ function Avatar({item,size=38}){
 
 function CourtScene(){
   return <div className="mcCourtScene" aria-hidden="true">
+    <div className="mcCourtGlow"/>
     <div className="mcCourtLights"><span/><span/><span/><span/></div>
     <div className="mcBackboard"><i/><b/></div>
     <div className="mcFloor"><div className="mcArc"/><div className="mcLane"/><img src={LOGO} alt=""/></div>
@@ -38,7 +39,7 @@ export default function CoachCommandCenter({
   const readiness=clamp(hasScheduledSession?Math.round((activeRate+70)/2):activeRate,0,100);
   const confirmed=Math.max(0,rosterSize-resolvedAttention.length);
   const statusTitle=hasScheduledSession?`Practice ${nextEventDateFormatted}`:"No practice scheduled";
-  const actionLabel=hasScheduledSession?"View practice":"Create practice";
+  const actionLabel=hasScheduledSession?"Start practice":"Create practice";
   const action=hasScheduledSession?onNextEventClick:onScheduleEvent;
   const dateLabel=new Date().toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric",year:"numeric"});
   const timeLabel=new Date().toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"});
@@ -63,7 +64,8 @@ export default function CoachCommandCenter({
 
     <main className="missionControl">
       <header className="mcHeader">
-        <div><h1>Mission <em>Control</em></h1><span className="mcHeaderSub">Coach Dashboard</span></div>
+        <button className="mcMobileMenu" type="button" aria-label="Open navigation"><span/><span/><span/></button>
+        <div className="mcTitle"><h1>Mission <em>Control</em></h1><span className="mcHeaderSub">Coach Dashboard</span></div>
         <div className="mcHeaderRight"><button type="button" className="mcTeamSelect">Thomas Titans <span>⌄</span></button><button type="button" className="mcBell" aria-label={`${resolvedAttention.length} notifications`}>♢<b>{resolvedAttention.length}</b></button><small>{dateLabel} &nbsp;•&nbsp; {timeLabel}</small></div>
       </header>
 
