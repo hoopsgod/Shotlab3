@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { buildPlayerCareerHistory, getArchivedPlayerSeasons } from "../src/lib/playerCareerHistory.js";
+import { buildPlayerCareerHistory, getArchivedPlayerSeasons, playerCareerRowMatches, getPlayerCareerIdentity } from "../src/lib/playerCareerHistory.js";
 
-const player = { email: "ari@example.com", profileId: "profile-ari", name: "Ari Player" };
+const player = { id: "player-ari", email: "ari@example.com", profileId: "profile-ari", name: "Ari Player" };
 
 const archives = [
   {
@@ -11,7 +11,7 @@ const archives = [
     seasonName: "2025 Season",
     seasonStartDate: "2025-01-01",
     seasonEndDate: "2025-03-01",
-    playerSeasonSummaries: [{ profileId: "profile-ari", name: "Ari Player", totalHomeMakes: 100, totalProgramScore: 40, totalShotLogMakes: 60, eventRsvpCount: 8, scRsvpCount: 3, scLogCount: 2, bestProgramScore: 24 }],
+    playerSeasonSummaries: [{ profileId: "profile-ari", name: "Ari Player", totalHomeMakes: 100, homeScoreCount: 4, totalProgramScore: 40, programScoreCount: 2, totalShotLogMakes: 60, shotLogCount: 3, eventRsvpCount: 8, scRsvpCount: 3, scLogCount: 2, bestProgramScore: 24 }],
   },
   {
     id: "archive-other-team",
@@ -26,11 +26,11 @@ const archives = [
     seasonName: "2026 Season",
     seasonStartDate: "2026-01-01",
     seasonEndDate: "2026-03-01",
-    playerSeasonSummaries: [{ email: "ARI@example.com", name: "Ari Player", totalHomeMakes: 140, totalProgramScore: 50, totalShotLogMakes: 70, eventRsvpCount: 10, scRsvpCount: 4, scLogCount: 3, bestProgramScore: 31 }],
+    playerSeasonSummaries: [{ email: "ARI@example.com", name: "Ari Player", totalHomeMakes: 140, homeScoreCount: 5, totalProgramScore: 50, programScoreCount: 3, totalShotLogMakes: 70, shotLogCount: 4, eventRsvpCount: 10, scRsvpCount: 4, scLogCount: 3, bestProgramScore: 31 }],
   },
 ];
 
-test("builds chronological career history across stable player identities", () => {
+test("builds chronological career history using comparable shooting and activity units", () => {
   const history = buildPlayerCareerHistory({
     player,
     teamId: "team-1",
@@ -45,13 +45,13 @@ test("builds chronological career history across stable player identities", () =
   assert.deepEqual(history.seasons.map((season) => season.seasonName), ["2025 Season", "2026 Season", "Current Season"]);
   assert.equal(history.career.seasons, 3);
   assert.equal(history.career.totalHomeMakes, 400);
-  assert.equal(history.career.totalProgramScore, 145);
   assert.equal(history.career.totalShotLogMakes, 210);
-  assert.equal(history.career.trainingTotal, 755);
-  assert.equal(history.records.bestTrainingSeason.seasonName, "Current Season");
-  assert.equal(history.records.bestProgramScore, 55);
+  assert.equal(history.career.totalShootingMakes, 610);
+  assert.equal(history.career.programEntryCount, 6);
+  assert.equal(history.records.bestShootingSeason.seasonName, "Current Season");
+  assert.equal(history.records.mostProgramEntries.seasonName, "2026 Season");
   assert.equal(history.improvement.comparedTo, "2026 Season");
-  assert.equal(history.improvement.delta, 35);
+  assert.equal(history.improvement.delta, 30);
 });
 
 test("strictly excludes other-team and teamless current rows", () => {
@@ -86,7 +86,8 @@ test("falls back to immutable archive snapshots when summaries are absent", () =
   const before = JSON.stringify(legacyArchive);
   const seasons = getArchivedPlayerSeasons({ player, teamId: "team-1", seasonArchives: [legacyArchive] });
   assert.equal(seasons.length, 1);
-  assert.equal(seasons[0].trainingTotal, 47);
+  assert.equal(seasons[0].shootingMakes, 35);
+  assert.equal(seasons[0].programScoreCount, 1);
   assert.equal(JSON.stringify(legacyArchive), before, "career calculations must never mutate immutable archives");
 });
 
@@ -99,4 +100,9 @@ test("does not match a different stable identity by name alone", () => {
   };
   const seasons = getArchivedPlayerSeasons({ player, teamId: "team-1", seasonArchives: [archive] });
   assert.equal(seasons.length, 0);
+});
+
+test("does not confuse a generic activity row id with the player id", () => {
+  const identity = getPlayerCareerIdentity(player);
+  assert.equal(playerCareerRowMatches({ id: "player-ari", email: "different@example.com" }, identity), false);
 });
