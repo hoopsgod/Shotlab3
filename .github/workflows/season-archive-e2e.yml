@@ -45,6 +45,9 @@ jobs:
       - name: Run season archive browser test
         run: npm run test:e2e:season-archive
 
+      - name: Run complete new season wizard flow
+        run: npx playwright test tests/e2e/new-season-wizard.spec.mjs
+
       - name: Run visual hierarchy browser test
         run: npm run test:e2e:visual-hierarchy
 
