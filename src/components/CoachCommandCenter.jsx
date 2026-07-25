@@ -3,10 +3,12 @@ import "./CoachMissionControlV2.css";
 import "./CoachMissionControlShell.css";
 import "./CoachMissionControlHeader.css";
 import "./CoachMissionControlPolish.css";
+import "./CoachMissionControl2026.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
+const DEFAULT_MARK = "/branding/titans-default-mark.svg";
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
 const initials = (value = "") => String(value).trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "SL";
 
@@ -63,13 +65,50 @@ function AttentionRow({ item, onFallback }) {
   );
 }
 
-function IntentionalEmpty({ icon, title, detail, actionLabel, onAction, tone = "neutral" }) {
+function TeamActivityPanel({ activeCount, inactiveCount, rosterSize, activeRate, onOpen }) {
   return (
-    <div className={`mcIntentionalEmpty is-${tone}`}>
-      <span className="mcIntentionalEmptyIcon"><Icon name={icon} /></span>
-      <span className="mcIntentionalEmptyCopy"><strong>{title}</strong><small>{detail}</small></span>
-      {actionLabel ? <button type="button" onClick={onAction}>{actionLabel}<Icon name="arrow" size={15} /></button> : null}
-    </div>
+    <article className="mcSection mcTeamHealth" aria-labelledby="mc-health-heading">
+      <div className="mcSectionHead"><span><small>Team pulse</small><h2 id="mc-health-heading">Activity today</h2></span><strong className="mcHealthScore">{activeRate}%</strong></div>
+      <div className="mcHealthBar"><span style={{ width: `${activeRate}%` }} /></div>
+      <div className="mcHealthFacts"><div><strong>{activeCount}</strong><small>Active</small></div><div><strong>{inactiveCount}</strong><small>Not active</small></div><div><strong>{rosterSize}</strong><small>Rostered</small></div></div>
+      <button type="button" className="mcTextLink" onClick={onOpen}>Review activity <Icon name="arrow" size={15} /></button>
+    </article>
+  );
+}
+
+function LiveActivityPanel({ items }) {
+  return (
+    <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading">
+      <div className="mcSectionHead"><span><small>Live team feed</small><h2 id="mc-activity-heading">Recent activity</h2></span></div>
+      <div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div>
+    </article>
+  );
+}
+
+function NextSessionPanel({ date, onOpen }) {
+  return (
+    <article className="mcSection mcNextSession" aria-labelledby="mc-session-heading">
+      <div className="mcSectionHead"><span><small>Coming up</small><h2 id="mc-session-heading">Next session</h2></span></div>
+      <div className="mcSessionSummary"><span className="mcSessionIcon is-ready"><Icon name="calendar" /></span><div><strong>Team session ready</strong><small>{String(date)}</small></div></div>
+      <button type="button" className="mcSecondaryAction" onClick={onOpen}>Open session<Icon name="arrow" size={17} /></button>
+    </article>
+  );
+}
+
+function TodayLaunch({ rosterSize, onCreatePractice, onPlayersClick }) {
+  return (
+    <article className="mcTodayLaunch" data-testid="coach-onboarding-state">
+      <div className="mcTodayLaunchGlow" aria-hidden="true" />
+      <span className="mcTodayLaunchEyebrow">Today</span>
+      <h2>Set the team in motion</h2>
+      <p>Create the plan, connect your roster, and ShotLab will turn every rep into a live coaching signal.</p>
+      <div className="mcLaunchPath" aria-label="Team setup progress">
+        <span className={rosterSize > 0 ? "is-complete" : "is-next"}><b>{rosterSize > 0 ? <Icon name="check" size={14} /> : "1"}</b><em>Players connected</em></span>
+        <span className="is-next"><b>2</b><em>Practice plan</em></span>
+        <span><b>3</b><em>Live activity</em></span>
+      </div>
+      <div className="mcLaunchActions"><button type="button" className="mcLaunchPrimary" onClick={onCreatePractice}>Create today’s practice <Icon name="arrow" size={17} /></button><button type="button" className="mcLaunchSecondary" onClick={onPlayersClick}>Manage players</button></div>
+    </article>
   );
 }
 
@@ -94,8 +133,10 @@ export default function CoachCommandCenter({
   activityItems = [],
 }) {
   const { branding } = useTeamBranding();
-  const logoUrl = branding?.logoUrl || branding?.logoMarkUrl || FALLBACK_LOGO;
-  const cleanLogoUrl = useCleanTeamLogo(logoUrl);
+  const fullLogoSource = branding?.logoUrl || FALLBACK_LOGO;
+  const markSource = branding?.logoMarkUrl && branding.logoMarkUrl !== DEFAULT_MARK ? branding.logoMarkUrl : fullLogoSource;
+  const cleanFullLogoUrl = useCleanTeamLogo(fullLogoSource);
+  const cleanMarkLogoUrl = useCleanTeamLogo(markSource);
   const teamName = branding?.teamName || branding?.name || "Thomas Titans";
   const accent = branding?.accentColor || branding?.primaryColor || "#C8FF1A";
   const secondary = branding?.secondaryColor || "#9CA3AF";
@@ -114,6 +155,12 @@ export default function CoachCommandCenter({
     existingBrandingControl?.click();
   };
 
+  const openTeamTools = () => {
+    setActionsOpen(false);
+    setToolsOpen(true);
+    window.setTimeout(() => document.querySelector('[data-testid="coach-secondary-tools"]')?.scrollIntoView({ behavior: "smooth", block: "center" }), 40);
+  };
+
   const rosterSize = Math.max(0, Number(totalPlayers) || 0);
   const activeCount = Math.max(0, Number(activeTodayCount) || 0);
   const inactiveCount = Math.max(rosterSize - activeCount, 0);
@@ -122,6 +169,9 @@ export default function CoachCommandCenter({
   const hasScheduledSession = Boolean(nextEventDateFormatted && String(nextEventDateFormatted).trim() && !/^(none|—|not set)$/i.test(String(nextEventDateFormatted).trim()));
   const resolvedAttention = attentionItems.length ? attentionItems : highlightPlayersAttention ? [{ name: "Roster follow-up", detail: "Inactive or unresolved player items", tone: "danger", onClick: onPlayersClick }] : [];
   const attentionCount = resolvedAttention.length;
+  const resolvedActivity = activityItems.length ? activityItems : [activeCount ? { name: `${activeCount} athlete${activeCount === 1 ? "" : "s"} active`, detail: "Training activity recorded today", meta: "Today" } : null].filter(Boolean);
+  const hasLiveActivity = resolvedActivity.length > 0;
+  const onboardingMode = !hasTeamActivity && !hasLiveActivity && !hasScheduledSession;
 
   const primaryCommand = attentionCount > 0
     ? { eyebrow: "Priority action", title: `${attentionCount} player${attentionCount === 1 ? "" : "s"} need your attention`, detail: "Resolve the highest-impact player issue before moving on.", label: `Review ${attentionCount} player${attentionCount === 1 ? "" : "s"}`, onClick: onPlayersClick }
@@ -129,19 +179,14 @@ export default function CoachCommandCenter({
       ? { eyebrow: "Today is under control", title: "Your next session is ready", detail: `The next scheduled team session is ${nextEventDateFormatted}.`, label: "Open next session", onClick: onNextEventClick }
       : { eyebrow: "Today needs a plan", title: "Create today’s practice", detail: "Set the team focus so every athlete knows what matters next.", label: "Create practice", onClick: onScheduleEvent };
 
-  const resolvedActivity = activityItems.length ? activityItems : [
-    activeCount ? { name: `${activeCount} athlete${activeCount === 1 ? "" : "s"} active`, detail: "Training activity recorded today", meta: "Today" } : null,
-    hasScheduledSession ? { name: "Next team session", detail: String(nextEventDateFormatted), meta: "Scheduled" } : null,
-  ].filter(Boolean);
-
   const quickActions = useMemo(() => [
     { label: "Add Player", icon: "users", onClick: onAddPlayer },
     { label: "Create Practice", icon: "calendar", onClick: onScheduleEvent },
     { label: "Build Mission", icon: "target", onClick: onAddDrill },
     { label: "Log Score", icon: "score", onClick: onLogScore },
     { label: "Message Team", icon: "message", onClick: onPlayersClick },
-    { label: "View Analytics", icon: "chart", onClick: onActiveTodayClick },
-  ], [onActiveTodayClick, onAddDrill, onAddPlayer, onLogScore, onPlayersClick, onScheduleEvent]);
+    { label: "Team Code", icon: "settings", onClick: openTeamTools },
+  ], [onAddDrill, onAddPlayer, onLogScore, onPlayersClick, onScheduleEvent]);
 
   const navigation = [
     { label: "Mission Control", icon: "home", active: true },
@@ -149,16 +194,33 @@ export default function CoachCommandCenter({
     { label: "Sessions", icon: "calendar", onClick: onNextEventClick },
     { label: "Drills", icon: "target", onClick: onAddDrill },
     { label: "Analytics", icon: "chart", onClick: onActiveTodayClick },
+    { label: "Coach Tools", icon: "plus", onClick: () => setActionsOpen(true) },
   ];
+
+  const attentionPanel = (
+    <article className="mcSection mcAttention" aria-labelledby="mc-attention-heading">
+      <div className="mcSectionHead"><span><small>Player follow-up</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div>
+      {attentionCount > 0
+        ? <div className="mcAttentionList">{resolvedAttention.slice(0, 3).map((item, index) => <AttentionRow key={`${item.name || item.title}-${index}`} item={item} onFallback={onPlayersClick} />)}</div>
+        : <div className="mcAllClear"><span><Icon name="check" /></span><div><strong>All clear</strong><small>No urgent player follow-up right now.</small></div></div>}
+      <button type="button" className="mcTextLink" onClick={onPlayersClick}>Open player workspace <Icon name="arrow" size={15} /></button>
+    </article>
+  );
+
+  const livePanel = hasLiveActivity ? <LiveActivityPanel items={resolvedActivity} /> : null;
+  const sessionPanel = hasScheduledSession ? <NextSessionPanel date={nextEventDateFormatted} onOpen={onNextEventClick} /> : null;
+  const teamPanel = hasTeamActivity ? <TeamActivityPanel activeCount={activeCount} inactiveCount={inactiveCount} rosterSize={rosterSize} activeRate={activeRate} onOpen={onActiveTodayClick} /> : null;
+  const priorityPanel = sessionPanel || teamPanel || livePanel;
+  const lowerPanels = [sessionPanel ? teamPanel : null, sessionPanel || teamPanel ? livePanel : null].filter(Boolean);
 
   if (variant === "compact") {
     return <section className="missionControlCompact" data-testid="coach-command-center-compact"><div><span>Next action</span><strong>{primaryCommand.title}</strong></div><button type="button" onClick={primaryCommand.onClick}>{primaryCommand.label}</button></section>;
   }
 
   return (
-    <div className="mcShell mcShellV3" data-testid="coach-command-center-full" style={{ "--mc": accent, "--mc-secondary": secondary }}>
+    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" style={{ "--mc": accent, "--mc-secondary": secondary }}>
       <aside className="mcRail" aria-label="Coach navigation">
-        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img className="mcRailLogo" src={cleanLogoUrl} alt={`${teamName} logo`} /></button>
+        <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img className="mcRailLogo" src={cleanFullLogoUrl} alt={`${teamName} logo`} /></button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
         <div className="mcCoachIdentity"><Avatar item={{ name: "Coach" }} size={42} /><span><small>Coach</small><strong>Mission Control</strong></span></div>
       </aside>
@@ -171,9 +233,9 @@ export default function CoachCommandCenter({
         </header>
 
         <section className="mcHero" data-testid="coach-primary-objective">
-          <CourtArtwork logoUrl={cleanLogoUrl} />
+          <CourtArtwork logoUrl={cleanMarkLogoUrl} />
           <div className="mcHeroScrim" />
-          <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img src={cleanLogoUrl} alt={`${teamName} logo`} /></button>
+          <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img src={cleanMarkLogoUrl} alt={`${teamName} logo`} /></button>
           <div className="mcHeroContent">
             <span className="mcEyebrow">{primaryCommand.eyebrow}</span>
             <h1>{primaryCommand.title}</h1>
@@ -187,62 +249,24 @@ export default function CoachCommandCenter({
           </div>
         </section>
 
-        <section className="mcFocusGrid">
-          <article className="mcSection mcAttention" aria-labelledby="mc-attention-heading">
-            <div className="mcSectionHead"><span><small>Who needs you</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div>
-            {attentionCount > 0
-              ? <div className="mcAttentionList">{resolvedAttention.slice(0, 3).map((item, index) => <AttentionRow key={`${item.name || item.title}-${index}`} item={item} onFallback={onPlayersClick} />)}</div>
-              : <IntentionalEmpty icon="check" title="Your roster is clear" detail="No urgent player follow-up is waiting for you." actionLabel="Open players" onAction={onPlayersClick} tone="success" />}
-            <button type="button" className="mcTextLink" onClick={onPlayersClick}>Open player workspace <Icon name="arrow" size={15} /></button>
-          </article>
-
-          <article className="mcSection mcTeamHealth" aria-labelledby="mc-health-heading">
-            <div className="mcSectionHead"><span><small>Is the team moving</small><h2 id="mc-health-heading">Team activity</h2></span>{hasTeamActivity ? <strong className="mcHealthScore">{activeRate}%</strong> : null}</div>
-            {hasTeamActivity ? (
-              <>
-                <div className="mcHealthBar"><span style={{ width: `${activeRate}%` }} /></div>
-                <div className="mcHealthFacts"><div><strong>{activeCount}</strong><small>Active today</small></div><div><strong>{inactiveCount}</strong><small>Not active today</small></div><div><strong>{rosterSize}</strong><small>Rostered</small></div></div>
-                <button type="button" className="mcTextLink" onClick={onActiveTodayClick}>Review team activity <Icon name="arrow" size={15} /></button>
-              </>
-            ) : <IntentionalEmpty icon="users" title="No team activity yet" detail="Activity will appear after players log workouts, shots, or lifts." actionLabel="Open players" onAction={onPlayersClick} />}
-          </article>
+        <section className={`mcFocusGrid ${onboardingMode ? "is-onboarding-grid" : ""}`}>
+          {attentionPanel}
+          {onboardingMode ? <TodayLaunch rosterSize={rosterSize} onCreatePractice={onScheduleEvent} onPlayersClick={onPlayersClick} /> : priorityPanel}
         </section>
 
-        <section className="mcLowerGrid">
-          <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading">
-            <div className="mcSectionHead"><span><small>What happened today</small><h2 id="mc-activity-heading">Live activity</h2></span></div>
-            {resolvedActivity.length > 0
-              ? <div className="mcTimeline">{resolvedActivity.slice(0, 5).map((item, index) => <div key={`${item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div>
-              : <IntentionalEmpty icon="spark" title="The live feed starts with the first rep" detail="Workouts, RSVPs, scores, and personal records will surface here as they happen." actionLabel="Create practice" onAction={onScheduleEvent} />}
-          </article>
+        {!onboardingMode && lowerPanels.length > 0 ? <section className={`mcLowerGrid has-${lowerPanels.length}-panels`}>{lowerPanels}</section> : null}
 
-          <article className="mcSection mcNextSession" aria-labelledby="mc-session-heading">
-            <div className="mcSectionHead"><span><small>What is next</small><h2 id="mc-session-heading">Next session</h2></span></div>
-            {hasScheduledSession ? (
-              <>
-                <div className="mcSessionSummary"><span className="mcSessionIcon is-ready"><Icon name="calendar" /></span><div><strong>Team session scheduled</strong><small>{String(nextEventDateFormatted)}</small></div></div>
-                <button type="button" className="mcSecondaryAction" onClick={onNextEventClick}>Open session<Icon name="arrow" size={17} /></button>
-              </>
-            ) : <IntentionalEmpty icon="calendar" title="No session scheduled" detail="Create the plan your players should see next." actionLabel="Create practice" onAction={onScheduleEvent} tone="warning" />}
-          </article>
-        </section>
-
-        <div className="mcUtilityBar">
-          <button type="button" onClick={() => setActionsOpen(true)}><Icon name="plus" size={17} />Quick actions</button>
-          <button type="button" onClick={() => setToolsOpen((value) => !value)} aria-expanded={toolsOpen}>Team tools <span>{toolsOpen ? "−" : "+"}</span></button>
-        </div>
-
-        {toolsOpen ? <section className="mcSection mcTools" data-testid="coach-secondary-tools"><div><small>Team code</small><strong>{joinCode || "—"}</strong>{codeErr ? <span>{codeErr}</span> : null}</div><div><button type="button" onClick={() => { onCopyJoinCode?.(); setCopied(true); setTimeout(() => setCopied(false), 1600); }}>{copied ? "Copied" : "Copy code"}</button><button type="button" onClick={onRegenerateJoinCode}>New code</button></div><span data-testid="coach-team-code-bar" /></section> : null}
+        {toolsOpen ? <section className="mcSection mcTools" data-testid="coach-secondary-tools"><div><small>Team code</small><strong>{joinCode || "—"}</strong>{codeErr ? <span>{codeErr}</span> : null}</div><div><button type="button" onClick={() => { onCopyJoinCode?.(); setCopied(true); setTimeout(() => setCopied(false), 1600); }}>{copied ? "Copied" : "Copy code"}</button><button type="button" onClick={onRegenerateJoinCode}>New code</button><button type="button" onClick={() => setToolsOpen(false)}>Close</button></div><span data-testid="coach-team-code-bar" /></section> : null}
       </main>
 
       <div className={`mcActionLayer ${actionsOpen ? "is-open" : ""}`} aria-hidden={!actionsOpen}>
         <button type="button" className="mcActionBackdrop" aria-label="Close quick actions" onClick={() => setActionsOpen(false)} />
-        <section className="mcActionSheet" aria-label="Coach quick actions"><div className="mcActionSheetHead"><span><small>Coach tools</small><strong>Quick actions</strong></span><button type="button" aria-label="Close quick actions" onClick={() => setActionsOpen(false)}><Icon name="close" /></button></div><div className="mcActionGrid">{quickActions.map((item) => <button type="button" key={item.label} onClick={() => { setActionsOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</div></section>
+        <section className="mcActionSheet" aria-label="Coach quick actions"><div className="mcActionSheetHead"><span><small>Coach command menu</small><strong>Quick actions</strong></span><button type="button" aria-label="Close quick actions" onClick={() => setActionsOpen(false)}><Icon name="close" /></button></div><div className="mcActionGrid">{quickActions.map((item) => <button type="button" key={item.label} onClick={() => { setActionsOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</div></section>
       </div>
 
       <div className={`mcNavLayer ${navOpen ? "is-open" : ""}`} aria-hidden={!navOpen}>
         <button type="button" className="mcNavBackdrop" aria-label="Close navigation" onClick={() => setNavOpen(false)} />
-        <aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}><img src={cleanLogoUrl} alt={`${teamName} logo`} /></button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside>
+        <aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}><img src={cleanFullLogoUrl} alt={`${teamName} logo`} /></button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside>
       </div>
     </div>
   );
