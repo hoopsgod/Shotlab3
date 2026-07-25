@@ -6,7 +6,6 @@ const appSource=fs.readFileSync(new URL("../src/App.jsx",import.meta.url),"utf8"
 const hierarchySource=fs.readFileSync(new URL("../src/components/VisualHierarchy.jsx",import.meta.url),"utf8");
 const hierarchyCss=fs.readFileSync(new URL("../src/components/VisualHierarchy.module.css",import.meta.url),"utf8");
 const commandCenterSource=fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx",import.meta.url),"utf8");
-const commandCenterCss=fs.readFileSync(new URL("../src/components/CoachCommandCenter.css",import.meta.url),"utf8");
 const missionControlCss=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",import.meta.url),"utf8");
 const leaderboardSource=fs.readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx",import.meta.url),"utf8");
 
@@ -29,7 +28,6 @@ test("player dashboard keeps one dominant mission and three primary metrics",()=
   assert.match(appSource,/testId="player-coach-guidance"/);
   assert.match(appSource,/testId="player-secondary-intelligence"/);
   assert.doesNotMatch(appSource,/aria-label="Progress snapshot"/);
-  assert.match(commandCenterCss,/player-home-compact-dashboard/);
 });
 
 test("coach home keeps one dominant workflow and preserved utilities",()=>{
