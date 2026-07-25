@@ -95,19 +95,17 @@ function NextSessionPanel({ date, onOpen }) {
   );
 }
 
-function TodayLaunch({ rosterSize, onCreatePractice, onPlayersClick }) {
+function TodayPlan({ rosterSize, onCreatePractice, onPlayersClick }) {
+  const hasRoster = rosterSize > 0;
   return (
-    <article className="mcTodayLaunch" data-testid="coach-onboarding-state">
-      <div className="mcTodayLaunchGlow" aria-hidden="true" />
-      <span className="mcTodayLaunchEyebrow">Today</span>
-      <h2>Set the team in motion</h2>
-      <p>Create the plan, connect your roster, and ShotLab will turn every rep into a live coaching signal.</p>
-      <div className="mcLaunchPath" aria-label="Team setup progress">
-        <span className={rosterSize > 0 ? "is-complete" : "is-next"}><b>{rosterSize > 0 ? <Icon name="check" size={14} /> : "1"}</b><em>Players connected</em></span>
-        <span className="is-next"><b>2</b><em>Practice plan</em></span>
-        <span><b>3</b><em>Live activity</em></span>
-      </div>
-      <div className="mcLaunchActions"><button type="button" className="mcLaunchPrimary" onClick={onCreatePractice}>Create today’s practice <Icon name="arrow" size={17} /></button><button type="button" className="mcLaunchSecondary" onClick={onPlayersClick}>Manage players</button></div>
+    <article className="mcTodayPlan" data-testid="coach-onboarding-state">
+      <span className="mcTodayPlanIcon"><Icon name={hasRoster ? "calendar" : "users"} size={21} /></span>
+      <span className="mcTodayPlanCopy">
+        <small>Today</small>
+        <strong>{hasRoster ? "No practice scheduled" : "Build your roster"}</strong>
+        <em>{hasRoster ? "Create the focus your players should see next." : "Add your first player to begin building the team."}</em>
+      </span>
+      <button type="button" onClick={hasRoster ? onCreatePractice : onPlayersClick}>{hasRoster ? "Create practice" : "Add player"}<Icon name="arrow" size={16} /></button>
     </article>
   );
 }
@@ -251,7 +249,7 @@ export default function CoachCommandCenter({
 
         <section className={`mcFocusGrid ${onboardingMode ? "is-onboarding-grid" : ""}`}>
           {attentionPanel}
-          {onboardingMode ? <TodayLaunch rosterSize={rosterSize} onCreatePractice={onScheduleEvent} onPlayersClick={onPlayersClick} /> : priorityPanel}
+          {onboardingMode ? <TodayPlan rosterSize={rosterSize} onCreatePractice={onScheduleEvent} onPlayersClick={onPlayersClick} /> : priorityPanel}
         </section>
 
         {!onboardingMode && lowerPanels.length > 0 ? <section className={`mcLowerGrid has-${lowerPanels.length}-panels`}>{lowerPanels}</section> : null}
