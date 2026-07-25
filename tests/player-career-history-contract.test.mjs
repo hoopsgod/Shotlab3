@@ -20,12 +20,23 @@ test("career model preserves stable identity and strict team boundaries", () => 
   assert.match(model, /playerId/);
   assert.match(model, /return teamIdOf\(row\) === normalizedTeamId/);
   assert.match(model, /identity\.hasStableIdentity/);
+  assert.match(model, /Generic activity-row IDs are deliberately excluded/);
+});
+
+test("career calculations never combine unlike drill scores with shooting makes", () => {
+  assert.match(model, /totalShootingMakes/);
+  assert.match(model, /programEntryCount/);
+  assert.match(model, /shootingMakes: homeMakes \+ shotLogMakes/);
+  assert.doesNotMatch(model, /trainingTotal: homeMakes \+ programScore \+ shotLogMakes/);
+  assert.doesNotMatch(component, /Career Training/);
+  assert.match(component, /Career Shooting Makes/);
+  assert.match(component, /Program Entries/);
 });
 
 test("shared UI exposes career totals, improvement, records, and season rows", () => {
   assert.match(component, /data-testid="player-career-history"/);
   assert.match(component, /CAREER HISTORY/);
-  assert.match(component, /Season-over-season/);
+  assert.match(component, /Season-over-season shooting/);
   assert.match(component, /Personal records/);
   assert.match(component, /Season by season/);
   assert.match(component, /VIEW ARCHIVE/);
