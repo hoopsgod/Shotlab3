@@ -9,7 +9,7 @@ test("coach dashboard matches the approved Mission Control architecture",()=>{
   ["Mission Control","Today’s status","Team Pulse","Needs Attention","Mission Progress","Upcoming Session","Recent Activity","Coach Quick Actions"].forEach(label=>assert.match(source,new RegExp(label)));
   assert.match(source,/data-testid="coach-primary-objective"/);
   assert.match(source,/data-testid="coach-primary-metrics"/);
-  assert.match(source,/CourtArtwork/);
+  assert.match(source,/CourtScene/);
   assert.match(source,/mcRail/);
   assert.match(source,/mcTeamSelect/);
   assert.match(source,/mcCourtScene/);
@@ -22,19 +22,21 @@ test("Mission Control preserves coach actions and team code controls",()=>{
   assert.match(source,/data-testid="coach-team-code-bar"/);
 });
 
-test("headshot-ready player and coach rows use image URLs with initials fallback",()=>{
+test("headshot-ready rows use image URLs with initials fallback",()=>{
   assert.match(source,/avatarUrl/);
   assert.match(source,/photoUrl/);
-  assert.match(source,/coachAvatarUrl/);
+  assert.match(source,/imageUrl/);
   assert.match(source,/headshot placeholder/);
   assert.match(source,/mcAvatar--fallback/);
 });
 
-test("responsive CSS supports reference desktop shell and phone layout",()=>{
-  assert.match(css,/grid-template-columns:118px minmax\(0,1fr\)/);
+test("responsive CSS supports the reference desktop shell and compact phone layout",()=>{
+  assert.match(css,/grid-template-columns:116px minmax\(0,1fr\)/);
   assert.match(css,/grid-template-columns:1\.05fr 1\.05fr \.95fr/);
-  assert.match(css,/@media\(max-width:980px\)/);
-  assert.match(css,/@media\(max-width:700px\)/);
+  assert.match(css,/@media\(max-width:900px\)/);
+  assert.match(css,/@media\(max-width:640px\)/);
   assert.match(css,/\.mcTopGrid,\.mcBottomGrid\{grid-template-columns:1fr\}/);
   assert.match(css,/\.mcQuickGrid\{grid-template-columns:repeat\(2,1fr\)\}/);
+  assert.match(css,/coach-dashboard-identity-header/);
+  assert.match(css,/coach-home-dashboard\{display:none!important\}/);
 });
