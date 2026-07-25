@@ -3,10 +3,11 @@ import { ROLLOVER_PLAYER_STATUSES, stablePlayerIdentity } from "../lib/seasonRol
 import { createNewSeason } from "../lib/seasonRolloverService.js";
 
 const toArray = (value) => (Array.isArray(value) ? value : []);
-const archiveRoster = (archive = {}) => toArray(archive.rosterSnapshot || archive.roster_snapshot || archive.snapshot?.roster);
-const archiveDrills = (archive = {}) => toArray(archive.programDrillSnapshot || archive.program_drill_snapshot || archive.snapshot?.programDrills);
-const archiveEvents = (archive = {}) => toArray(archive.eventSnapshot || archive.event_snapshot || archive.snapshot?.events);
-const archiveStrength = (archive = {}) => toArray(archive.scSessionSnapshot || archive.sc_session_snapshot || archive.snapshot?.scSessions);
+const archiveValue = (archive) => (archive && typeof archive === "object" ? archive : {});
+const archiveRoster = (archive) => { const value = archiveValue(archive); return toArray(value.rosterSnapshot || value.roster_snapshot || value.snapshot?.roster); };
+const archiveDrills = (archive) => { const value = archiveValue(archive); return toArray(value.programDrillSnapshot || value.program_drill_snapshot || value.snapshot?.programDrills); };
+const archiveEvents = (archive) => { const value = archiveValue(archive); return toArray(value.eventSnapshot || value.event_snapshot || value.snapshot?.events); };
+const archiveStrength = (archive) => { const value = archiveValue(archive); return toArray(value.scSessionSnapshot || value.sc_session_snapshot || value.snapshot?.scSessions); };
 const rowId = (row = {}) => String(row.id || row.drillId || row.drill_id || row.templateId || row.template_id || "").trim();
 const rowLabel = (row = {}, fallback = "Item") => row.name || row.title || row.drillName || row.sessionType || fallback;
 const makeTransitionId = () => globalThis.crypto?.randomUUID?.() || `rollover-${Date.now()}-${Math.random().toString(36).slice(2)}`;
