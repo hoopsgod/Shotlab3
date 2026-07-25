@@ -64,7 +64,7 @@
         }
         form.classList.add('hidden');
         status.className = 'status';
-        status.textContent = body.existingAccount ? 'Your existing ShotLab account is now connected to the team. Sign in with your current password.' : 'Your account is active. Sign in using your email and the password you just created.';
+        status.textContent = body.existingAccount ? 'Your existing ShotLab account is now connected to the team. Sign in using the password you just created.' : 'Your account is active. Sign in using your email and the password you just created.';
         loginLink.classList.remove('hidden');
         history.replaceState({}, document.title, '/player-setup.html');
       } catch (error) {
