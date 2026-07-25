@@ -7,7 +7,10 @@ const hierarchySource=fs.readFileSync(new URL("../src/components/VisualHierarchy
 const hierarchyCss=fs.readFileSync(new URL("../src/components/VisualHierarchy.module.css",import.meta.url),"utf8");
 const commandCenterSource=fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx",import.meta.url),"utf8");
 const commandCenterCss=fs.readFileSync(new URL("../src/components/CoachCommandCenter.css",import.meta.url),"utf8");
+const missionControlCss=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",import.meta.url),"utf8");
 const leaderboardSource=fs.readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx",import.meta.url),"utf8");
+
+const combinedMissionCss=`${commandCenterCss}\n${missionControlCss}`;
 
 test("shared hierarchy primitives remain available",()=>{
   assert.match(hierarchySource,/function DominantObjectiveCard/);
@@ -31,17 +34,17 @@ test("player dashboard keeps one dominant mission and three primary metrics",()=
   assert.match(commandCenterCss,/player-home-compact-dashboard/);
 });
 
-test("coach home uses responsive Mission Control with preserved utilities",()=>{
+test("coach home uses Mission Control v2 with dynamic branding and preserved utilities",()=>{
   assert.match(commandCenterSource,/Mission Control/);
-  assert.match(commandCenterSource,/CourtArtwork/);
+  assert.match(commandCenterSource,/CourtScene/);
+  assert.match(commandCenterSource,/useTeamBranding/);
+  assert.match(commandCenterSource,/branding\?\.logoUrl/);
   assert.match(commandCenterSource,/data-testid="coach-primary-objective"/);
   assert.match(commandCenterSource,/data-testid="coach-primary-metrics"/);
   assert.match(commandCenterSource,/data-testid="coach-secondary-tools"/);
   assert.match(commandCenterSource,/data-testid="coach-team-code-bar"/);
   assert.match(commandCenterSource,/aria-expanded=\{toolsOpen\}/);
   assert.match(appSource,/coach-home-dashboard/);
-  assert.match(appSource,/visible=\{isOverviewTab&&showMiniHeader\}/);
-  assert.match(appSource,/\{isOverviewTab&&<>/);
 });
 
 test("leaderboards keep rankings ahead of archive context",()=>{
@@ -53,10 +56,11 @@ test("leaderboards keep rankings ahead of archive context",()=>{
   assert.match(leaderboardSource,/PARTICIPATION_CATEGORY_ITEMS/);
 });
 
-test("desktop and phone layouts are explicitly defined",()=>{
-  assert.match(commandCenterCss,/grid-template-columns:1\.08fr 1\.08fr \.92fr/);
-  assert.match(commandCenterCss,/@media\(max-width:900px\)/);
-  assert.match(commandCenterCss,/@media\(max-width:640px\)/);
+test("desktop, tablet, and phone Mission Control layouts are explicit",()=>{
+  assert.match(combinedMissionCss,/grid-template-columns:1\.05fr 1\.05fr \.95fr/);
+  assert.match(combinedMissionCss,/@media\(max-width:900px\)/);
+  assert.match(combinedMissionCss,/@media\(max-width:640px\)/);
+  assert.match(missionControlCss,/body:has\(\.mcShellV2\) \[data-testid="coach-mini-header"\]/);
   assert.equal((commandCenterSource.match(/data-testid="coach-primary-objective"/g)||[]).length,1);
   assert.equal((appSource.match(/testId="player-primary-objective"/g)||[]).length,1);
 });
