@@ -1,0 +1,39 @@
+name: Apply Player Career History Integration
+
+on:
+  push:
+    branches:
+      - codex/player-career-history
+    paths:
+      - scripts/apply-player-career-history-integration.mjs
+      - .github/workflows/apply-player-career-history-integration.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/player-career-history
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply exact App integration
+        run: node scripts/apply-player-career-history-integration.mjs
+      - name: Verify only intended integration changed
+        run: |
+          git diff --check
+          grep -q 'PlayerCareerHistory' src/App.jsx
+          test ! -f scripts/apply-player-career-history-integration.mjs
+          test ! -f .github/workflows/apply-player-career-history-integration.yml
+      - name: Commit integration and remove temporary files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx scripts/apply-player-career-history-integration.mjs .github/workflows/apply-player-career-history-integration.yml
+          git commit -m "Mount player career history in coach and player views"
+          git push origin HEAD:codex/player-career-history
