@@ -9,6 +9,7 @@ const commandCenterSource = fs.readFileSync(new URL("../src/components/CoachComm
 const commandCenterCss = fs.readFileSync(new URL("../src/components/CoachCommandCenter.css", import.meta.url), "utf8");
 const leaderboardSource = fs.readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx", import.meta.url), "utf8");
 
+
 test("shared hierarchy primitives define objective, three-metric, disclosure, and quiet-section layers", () => {
   assert.match(hierarchySource, /function DominantObjectiveCard/);
   assert.match(hierarchySource, /function MetricStrip/);
@@ -20,6 +21,7 @@ test("shared hierarchy primitives define objective, three-metric, disclosure, an
   assert.match(hierarchyCss, /\.disclosure\s*\{/);
 });
 
+
 test("player dashboard exposes one dominant objective and only three primary metrics", () => {
   assert.match(appSource, /testId="player-primary-objective"/);
   assert.match(appSource, /testId="player-primary-metrics"/);
@@ -30,12 +32,15 @@ test("player dashboard exposes one dominant objective and only three primary met
   assert.doesNotMatch(appSource, /aria-label="Progress snapshot"/);
   assert.match(appSource, /className="player-quick-actions"[\s\S]*?border:0,background:"transparent"/);
   assert.match(commandCenterCss,/player-home-compact-dashboard/);
+  assert.match(commandCenterCss,/player-primary-objective/);
 });
 
-test("coach home uses one daily brief with three metrics and progressive tools", () => {
+
+test("coach home uses one daily command hero with three metrics and progressive tools", () => {
   assert.match(commandCenterSource, /data-testid="coach-primary-objective"/);
   assert.match(commandCenterSource, /data-testid="coach-primary-metrics"/);
-  assert.match(commandCenterSource, /Today’s coaching brief/);
+  assert.match(commandCenterSource, /Coach command/);
+  assert.match(commandCenterSource, /coachTodayBrief__signal/);
   assert.match(commandCenterSource, /aria-expanded=\{toolsOpen\}/);
   assert.match(commandCenterSource, /data-testid="coach-secondary-tools"/);
   assert.match(commandCenterSource, /data-testid="coach-team-code-bar"/);
@@ -46,6 +51,7 @@ test("coach home uses one daily brief with three metrics and progressive tools",
   assert.match(appSource, /padding:`\$\{isOverviewTab&&showMiniHeader\?"74px":"12px"\}/);
   assert.match(appSource, /\{isOverviewTab&&<>/);
 });
+
 
 test("leaderboards place rankings ahead of optional archive and participation context", () => {
   assert.match(leaderboardSource, /data-testid="leaderboard-status-line"/);
@@ -58,6 +64,7 @@ test("leaderboards place rankings ahead of optional archive and participation co
   assert.doesNotMatch(leaderboardSource, /boxShadow: '0 10px 26px/);
 });
 
+
 test("secondary hierarchy remains progressively disclosed without oversized summary cards", () => {
   const progressiveDisclosureCount = (appSource.match(/<ProgressiveDisclosure/g) || []).length;
   assert.ok(progressiveDisclosureCount >= 8, `expected at least 8 disclosures, found ${progressiveDisclosureCount}`);
@@ -67,4 +74,5 @@ test("secondary hierarchy remains progressively disclosed without oversized summ
   assert.match(hierarchyCss, /min-height:\s*48px/);
   assert.match(hierarchyCss, /coach-home-dashboard/);
   assert.match(commandCenterCss,/coach-setup-checklist/);
+  assert.match(commandCenterCss,/details summary/);
 });
