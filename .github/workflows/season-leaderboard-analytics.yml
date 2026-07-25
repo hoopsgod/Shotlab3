@@ -27,6 +27,7 @@ jobs:
       - name: Run archive-aware leaderboard, hierarchy, navigation, semantic, and mobile events tests
         run: |
           node --test \
+            tests/home-shots-leaderboard-timestamp-ordering.test.mjs \
             tests/season-leaderboard-analytics.test.mjs \
             tests/season-leaderboard-roster-boundary.test.mjs \
             tests/season-leaderboard-ui-contract.test.mjs \
