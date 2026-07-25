@@ -11,6 +11,11 @@ const styles = {
 };
 
 const statusLabel = (status) => ({ sent: "Invite Sent", pending: "Invite Pending", claimed: "Account Active", expired: "Invite Expired", revoked: "Invite Revoked" }[status] || "Invite Pending");
+const formatExpiry = (value) => {
+  if (!value) return "24 hours";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "24 hours" : date.toLocaleString();
+};
 
 export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", jerseyNumber: "" });
@@ -18,6 +23,9 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [setupUrl, setSetupUrl] = useState("");
+  const [setupRecipient, setSetupRecipient] = useState("");
+  const [setupPlayerName, setSetupPlayerName] = useState("");
+  const [setupExpiresAt, setSetupExpiresAt] = useState("");
   const [invitations, setInvitations] = useState([]);
 
   const refresh = async () => {
@@ -30,20 +38,28 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
   const update = (key) => (event) => setForm((current) => ({ ...current, [key]: event.target.value }));
   const submit = async () => {
     if (busy) return;
+    const invitationEmail = form.email.trim().toLowerCase();
+    const invitationName = `${form.firstName.trim()} ${form.lastName.trim()}`.trim() || "Player";
     setBusy(true);
     setMessage("");
     setError("");
     setSetupUrl("");
+    setSetupRecipient("");
+    setSetupPlayerName("");
+    setSetupExpiresAt("");
     const result = await provisionCoachPlayer({ coach, teamId, ...form });
     setBusy(false);
     if (!result.ok) { setError(result.error); return; }
     if (result.status === "account_active") {
       setMessage("This player already had a ShotLab login. The roster profile is now connected to that account.");
     } else if (result.email_delivery_status === "sent") {
-      setMessage(`Invitation emailed to ${form.email.trim().toLowerCase()}. The player will choose their own password.`);
+      setMessage(`Invitation emailed to ${invitationEmail}. The player will choose their own password.`);
     } else {
-      setMessage("The roster account was prepared, but email delivery is not configured. Copy the secure setup link below.");
+      setMessage("The roster account is ready. Email delivery is not configured, so copy the secure link or open your email app below.");
       setSetupUrl(result.setup_url || "");
+      setSetupRecipient(invitationEmail);
+      setSetupPlayerName(invitationName);
+      setSetupExpiresAt(result.expires_at || "");
     }
     setForm({ firstName: "", lastName: "", email: "", jerseyNumber: "" });
     onProvisioned?.(result);
@@ -52,7 +68,22 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
   const copySetupLink = async () => {
     if (!setupUrl) return;
     try { await navigator.clipboard.writeText(setupUrl); setMessage("Secure setup link copied. Send it directly to the player."); }
-    catch { setMessage(setupUrl); }
+    catch { setMessage("Copy failed. Use Open Email App to send the secure invitation."); }
+  };
+  const openEmailApp = () => {
+    if (!setupUrl || !setupRecipient) return;
+    const subject = "You’ve been added to ShotLab";
+    const body = [
+      `Hi ${setupPlayerName || "Player"},`,
+      "",
+      "Your coach added you to the team on ShotLab.",
+      "Use this one-time link to choose your private password and activate your account:",
+      setupUrl,
+      "",
+      `This link expires ${formatExpiry(setupExpiresAt)} and can only be used once.`,
+      "If you were not expecting this invitation, ignore this email.",
+    ].join("\n");
+    window.location.href = `mailto:${encodeURIComponent(setupRecipient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   return <section data-testid="coach-player-invite-form" style={styles.shell}>
@@ -67,7 +98,10 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
     <button type="button" disabled={busy} onClick={submit} style={{ ...styles.button, opacity: busy ? .55 : 1 }}>{busy ? "SENDING…" : "ADD PLAYER & SEND INVITE"}</button>
     {message && <div role="status" style={{ color: "var(--accent, #c8ff00)", fontSize: 11, lineHeight: 1.5, marginTop: 10 }}>{message}</div>}
     {error && <div role="alert" style={{ color: "#ff8f8f", fontSize: 11, lineHeight: 1.5, marginTop: 10 }}>{error}</div>}
-    {setupUrl && <button type="button" onClick={copySetupLink} style={{ ...styles.button, background: "transparent", color: "var(--text-1, #fff)", border: "1px solid var(--stroke-1, #333)" }}>COPY SECURE SETUP LINK</button>}
+    {setupUrl && <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 8 }}>
+      <button type="button" onClick={copySetupLink} style={{ ...styles.button, background: "transparent", color: "var(--text-1, #fff)", border: "1px solid var(--stroke-1, #333)" }}>COPY SECURE LINK</button>
+      <button type="button" onClick={openEmailApp} style={{ ...styles.button, background: "transparent", color: "var(--accent, #c8ff00)", border: "1px solid rgba(200,255,0,.45)" }}>OPEN EMAIL APP</button>
+    </div>}
     {recent.length > 0 && <div style={{ marginTop: 16, paddingTop: 12, borderTop: "1px solid var(--stroke-1, #333)" }}>
       <div style={{ ...styles.title, fontSize: 12, color: "var(--text-3, #aaa)" }}>Recent Player Invitations</div>
       {recent.map((invite) => <div key={invite.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10, padding: "9px 0", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
