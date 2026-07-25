@@ -39,8 +39,9 @@ export function playerCareerRowMatches(row = {}, identity = getPlayerCareerIdent
 }
 
 const rowBelongsToTeam = (row, teamId) => {
-  const rowTeamId = teamIdOf(row);
-  return !rowTeamId || rowTeamId === clean(teamId);
+  const normalizedTeamId = clean(teamId);
+  if (!normalizedTeamId) return true;
+  return teamIdOf(row) === normalizedTeamId;
 };
 
 const numberFrom = (row = {}, fields = []) => {
@@ -88,12 +89,13 @@ function normalizeSeasonSummary(summary = {}, archive = {}) {
 }
 
 function deriveArchiveSummary(archive, identity) {
-  const homeRows = rowsForPlayer(archive.homeScoresSnapshot, identity, archiveTeamId(archive));
-  const programRows = rowsForPlayer(archive.programScoresSnapshot, identity, archiveTeamId(archive));
-  const shotRows = rowsForPlayer(archive.shotLogsSnapshot, identity, archiveTeamId(archive));
-  const eventRows = rowsForPlayer(archive.eventRsvpSnapshot, identity, archiveTeamId(archive));
-  const scRsvpRows = rowsForPlayer(archive.scRsvpSnapshot, identity, archiveTeamId(archive));
-  const scLogRows = rowsForPlayer(archive.scLogSnapshot, identity, archiveTeamId(archive));
+  const teamId = archiveTeamId(archive);
+  const homeRows = rowsForPlayer(archive.homeScoresSnapshot, identity, teamId);
+  const programRows = rowsForPlayer(archive.programScoresSnapshot, identity, teamId);
+  const shotRows = rowsForPlayer(archive.shotLogsSnapshot, identity, teamId);
+  const eventRows = rowsForPlayer(archive.eventRsvpSnapshot, identity, teamId);
+  const scRsvpRows = rowsForPlayer(archive.scRsvpSnapshot, identity, teamId);
+  const scLogRows = rowsForPlayer(archive.scLogSnapshot, identity, teamId);
   const programValues = programRows.map((row) => numberFrom(row, ["score", "makes", "made"]));
   if (![homeRows, programRows, shotRows, eventRows, scRsvpRows, scLogRows].some((rows) => rows.length)) return null;
   return {
