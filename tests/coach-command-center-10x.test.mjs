@@ -9,7 +9,7 @@ test("coach command center renders one focused daily brief",()=>{
   assert.match(source,/Today’s coaching brief/);
   assert.match(source,/coach-primary-objective/);
   assert.match(source,/coach-primary-metrics/);
-  assert.doesNotMatch(source,/Team health/);
+  assert.doesNotMatch(source,/Team health/i);
   assert.doesNotMatch(source,/coach-command-grid/);
 });
 
@@ -30,4 +30,5 @@ test("dashboard CSS removes repeated above-the-fold modules and tightens player 
   assert.match(css,/coach-setup-checklist/);
   assert.match(css,/coach-primary-metrics-feed/);
   assert.match(css,/player-home-compact-dashboard/);
+  assert.match(css,/@media\(max-width:520px\)/);
 });
