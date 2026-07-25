@@ -14,6 +14,7 @@ on:
       - "migrations/037_player_invitation_existing_account_claim.sql"
       - "tests/coach-player-invitation*.test.mjs"
       - "tests/e2e/coach-player-invitation.spec.mjs"
+      - "scripts/verify-coach-player-invitation-live.mjs"
       - ".github/workflows/coach-player-invitations.yml"
   workflow_dispatch:
 
@@ -23,7 +24,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -43,3 +44,9 @@ jobs:
         run: npm run build
       - name: Coach-to-player invitation browser flow
         run: npx playwright test tests/e2e/coach-player-invitation.spec.mjs
+      - name: Live provision, claim, login, replay, and cleanup verification
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_COACH_EMAIL: aq@gmail.com
+        run: node scripts/verify-coach-player-invitation-live.mjs
