@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080808" />
+  <title>Set Up Your ShotLab Account</title>
+  <style>
+    :root{font-family:Arial,sans-serif;color-scheme:dark;background:#080808;color:#fff}*{box-sizing:border-box}body{margin:0;min-height:100dvh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at top right,rgba(200,255,0,.08),transparent 34%),#080808}.card{width:min(100%,480px);background:#151515;border:1px solid #333;border-radius:18px;padding:24px;box-shadow:0 24px 60px rgba(0,0,0,.5)}.brand{color:#c8ff00;font-weight:900;letter-spacing:.18em;font-size:12px}.eyebrow{color:#aaa;text-transform:uppercase;letter-spacing:.1em;font-size:11px;margin-top:18px}h1{font-size:30px;line-height:1.05;margin:7px 0 10px}.copy{color:#b8b8b8;font-size:14px;line-height:1.5;margin-bottom:20px}label{display:block;font-size:12px;font-weight:800;letter-spacing:.06em;margin:14px 0 7px}input{width:100%;min-height:48px;border:1px solid #3a3a3a;border-radius:11px;background:#0b0b0b;color:#fff;padding:0 13px;font-size:16px}button,.link{width:100%;min-height:48px;border:0;border-radius:11px;background:#c8ff00;color:#080808;font-weight:900;font-size:15px;margin-top:18px;display:grid;place-items:center;text-decoration:none;cursor:pointer}.status{min-height:22px;margin-top:14px;color:#c8ff00;font-size:13px;line-height:1.4}.error{color:#ff8f8f}.hidden{display:none}.note{color:#777;font-size:11px;line-height:1.5;margin-top:16px}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <div class="brand">SHOTLAB</div>
+    <div class="eyebrow">Player invitation</div>
+    <h1>Set up your account</h1>
+    <p class="copy">Choose your private password. Your coach cannot see it, and the setup link can only be used once.</p>
+    <form id="setup-form">
+      <label for="password">NEW PASSWORD</label>
+      <input id="password" type="password" minlength="8" autocomplete="new-password" required placeholder="At least 8 characters" />
+      <label for="confirm">CONFIRM PASSWORD</label>
+      <input id="confirm" type="password" minlength="8" autocomplete="new-password" required placeholder="Enter it again" />
+      <button id="submit" type="submit">ACTIVATE ACCOUNT</button>
+    </form>
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <a id="login-link" class="link hidden" href="/">GO TO SHOTLAB LOGIN</a>
+    <p class="note">If this invitation was not meant for you, close this page. Do not forward the link.</p>
+  </main>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const token = params.get('token') || '';
+    const form = document.getElementById('setup-form');
+    const status = document.getElementById('status');
+    const submit = document.getElementById('submit');
+    const loginLink = document.getElementById('login-link');
+    if (!token) {
+      form.classList.add('hidden');
+      status.className = 'status error';
+      status.textContent = 'This setup link is incomplete. Ask your coach to resend the invitation.';
+    }
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+      status.className = 'status';
+      if (password.length < 8) { status.className = 'status error'; status.textContent = 'Use at least 8 characters.'; return; }
+      if (password !== confirm) { status.className = 'status error'; status.textContent = 'The passwords do not match.'; return; }
+      submit.disabled = true;
+      submit.textContent = 'ACTIVATING…';
+      status.textContent = 'Creating your secure login…';
+      try {
+        const response = await fetch('/v1/player-auth/claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ setup_token: token, new_password: password }),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          const message = body.error === 'invitation_expired' ? 'This invitation expired. Ask your coach to resend it.'
+            : body.error === 'invitation_not_active' ? 'This invitation was already used or revoked.'
+            : body.error === 'account_on_other_team' ? 'This email is already connected to another team account.'
+            : 'The account could not be activated. Ask your coach to resend the invitation.';
+          throw new Error(message);
+        }
+        form.classList.add('hidden');
+        status.className = 'status';
+        status.textContent = body.existingAccount ? 'Your existing ShotLab account is now connected to the team. Sign in with your current password.' : 'Your account is active. Sign in using your email and the password you just created.';
+        loginLink.classList.remove('hidden');
+        history.replaceState({}, document.title, '/player-setup.html');
+      } catch (error) {
+        status.className = 'status error';
+        status.textContent = error.message || 'The account could not be activated.';
+        submit.disabled = false;
+        submit.textContent = 'ACTIVATE ACCOUNT';
+      }
+    });
+  </script>
+</body>
+</html>
