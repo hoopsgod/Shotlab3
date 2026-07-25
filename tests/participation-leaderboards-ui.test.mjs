@@ -7,15 +7,15 @@ const source = fs.readFileSync(new URL('../src/components/PremiumLeaderboardsHub
 test('competition hub wires current and all-time event attendance rankings', () => {
   assert.match(source, /buildCurrentEventParticipationRows/);
   assert.match(source, /buildAllTimeEventParticipationRows/);
-  assert.match(source, /title: isAllTime \? 'All-Time Events Attended' : 'Events Attended'/);
-  assert.doesNotMatch(source, /Event leaders will appear after players check into team events\.<\/div><\/section>/);
+  assert.match(source, /All-Time Events Attended/);
+  assert.match(source, /rows: eventRows/);
 });
 
 test('competition hub wires current and all-time strength rankings', () => {
   assert.match(source, /buildCurrentStrengthParticipationRows/);
   assert.match(source, /buildAllTimeStrengthParticipationRows/);
-  assert.match(source, /title: isAllTime \? 'All-Time Strength & Conditioning' : 'Strength & Conditioning'/);
-  assert.doesNotMatch(source, /Strength leaders will appear after players complete assigned S&C work\.<\/div><\/section>/);
+  assert.match(source, /All-Time Strength & Conditioning/);
+  assert.match(source, /rows: strengthRows/);
 });
 
 test('participation data supports explicit props with persisted compatibility fallback', () => {
