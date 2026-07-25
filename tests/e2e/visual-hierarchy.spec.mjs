@@ -68,7 +68,7 @@ test("player mobile home prioritizes one mission, three metrics, and collapsed s
   await expectNoHorizontalOverflow(page);
 });
 
-test("coach mobile home answers the 30-second workflow with one adaptive onboarding state", async ({ page }) => {
+test("coach mobile home answers the 30-second workflow with one compact truthful Today panel", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "coach");
 
@@ -83,8 +83,9 @@ test("coach mobile home answers the 30-second workflow with one adaptive onboard
   await expectThreeMetrics(metrics);
   await expect(needsAttention).toBeVisible();
   await expect(onboarding).toBeVisible();
-  await expect(onboarding.getByRole("heading", { name: "Set the team in motion", exact: true })).toBeVisible();
-  await expect(onboarding.getByRole("button", { name: /Create today’s practice/i })).toBeVisible();
+  await expect(onboarding.getByText("No practice scheduled", { exact: true })).toBeVisible();
+  await expect(onboarding.getByRole("button", { name: /Create practice/i })).toBeVisible();
+  await expect(onboarding.getByText("Set the team in motion", { exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Activity today", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Recent activity", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Next session", exact: true })).toHaveCount(0);
@@ -108,9 +109,10 @@ test("coach mobile home answers the 30-second workflow with one adaptive onboard
   expect(leftGutter).toBeLessThanOrEqual(16);
   expect(rightGutter).toBeLessThanOrEqual(16);
   expect(Math.abs(leftGutter - rightGutter)).toBeLessThanOrEqual(2);
-  expect(objectiveBox.height).toBeLessThan(350);
+  expect(objectiveBox.height).toBeLessThan(330);
   expect(attentionBox.y).toBeLessThan(844);
   expect(onboardingBox.y).toBeGreaterThan(attentionBox.y);
+  expect(onboardingBox.height).toBeLessThan(150);
   await expectNoHorizontalOverflow(page);
 
   const dock = page.getByTestId("mobile-navigation-dock");
