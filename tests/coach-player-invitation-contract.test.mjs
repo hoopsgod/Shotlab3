@@ -3,6 +3,7 @@ import fs from "node:fs";
 import test from "node:test";
 
 const migration = fs.readFileSync("migrations/036_coach_player_invitations.sql", "utf8");
+const claimRepairMigration = fs.readFileSync("migrations/037_player_invitation_existing_account_claim.sql", "utf8");
 const provisionRoute = fs.readFileSync("functions/v1/coach/players/provision.js", "utf8");
 const claimRoute = fs.readFileSync("functions/v1/player-auth/claim.js", "utf8");
 const component = fs.readFileSync("src/components/CoachPlayerInviteForm.jsx", "utf8");
@@ -19,12 +20,14 @@ test("migration stores only a setup token hash and protects direct access", () =
   assert.match(migration, /status = 'claimed'/i);
 });
 
-test("provisioning is coach-authorized and never creates an emailed password", () => {
+test("provisioning is coach-authorized and never silently attaches an unclaimed account", () => {
   assert.match(provisionRoute, /authorizeCoach/);
   assert.match(provisionRoute, /x-user-id|readUserId/);
   assert.match(provisionRoute, /randomToken\(\)/);
   assert.match(provisionRoute, /sha256Hex\(token\)/);
   assert.match(provisionRoute, /sendPlayerSetupEmail/);
+  assert.match(provisionRoute, /if \(clean\(account\.team_id\) === teamId\)/);
+  assert.doesNotMatch(provisionRoute, /if \(!account\.team_id\) await updateRows/);
   assert.doesNotMatch(provisionRoute, /temporary_password/i);
   assert.doesNotMatch(provisionRoute, /password\s*:/i);
 });
@@ -34,6 +37,13 @@ test("claim route requires a user-selected password and hashes it server-side", 
   assert.match(claimRoute, /hashLegacyPassword\(password, saltHex\)/);
   assert.match(claimRoute, /claim_coach_player_invitation/);
   assert.doesNotMatch(claimRoute, /return Response\.json\([^\n]*password/i);
+});
+
+test("existing unattached accounts explicitly claim the team and selected password", () => {
+  assert.match(claimRepairMigration, /password_hash = p_password_hash/i);
+  assert.match(claimRepairMigration, /password_salt = p_password_salt/i);
+  assert.match(claimRepairMigration, /team_id = v_invite\.team_id/i);
+  assert.match(claimRepairMigration, /ACCOUNT_TEAM_CONFLICT/i);
 });
 
 test("coach UI replaces profile-only add flow with invitation flow", () => {
@@ -51,4 +61,5 @@ test("setup page uses a single-use token and does not expose it after claim", ()
   assert.match(setupPage, /new_password/);
   assert.match(setupPage, /history\.replaceState/);
   assert.match(setupPage, /Your coach cannot see it/i);
+  assert.match(setupPage, /password you just created/i);
 });
