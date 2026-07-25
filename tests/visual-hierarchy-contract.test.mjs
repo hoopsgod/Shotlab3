@@ -7,6 +7,7 @@ const hierarchySource=fs.readFileSync(new URL("../src/components/VisualHierarchy
 const hierarchyCss=fs.readFileSync(new URL("../src/components/VisualHierarchy.module.css",import.meta.url),"utf8");
 const commandCenterSource=fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx",import.meta.url),"utf8");
 const missionControlCss=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",import.meta.url),"utf8");
+const premiumMissionControlCss=fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css",import.meta.url),"utf8");
 const leaderboardSource=fs.readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx",import.meta.url),"utf8");
 
 test("shared hierarchy primitives remain available",()=>{
@@ -30,7 +31,7 @@ test("player dashboard keeps one dominant mission and three primary metrics",()=
   assert.doesNotMatch(appSource,/aria-label="Progress snapshot"/);
 });
 
-test("coach home keeps one dominant workflow and preserved utilities",()=>{
+test("coach home keeps one dominant workflow and moves utilities into command surfaces",()=>{
   [
     /Mission Control/,
     /primaryCommand/,
@@ -40,8 +41,12 @@ test("coach home keeps one dominant workflow and preserved utilities",()=>{
     /data-testid="coach-primary-metrics"/,
     /data-testid="coach-secondary-tools"/,
     /data-testid="coach-team-code-bar"/,
-    /aria-expanded=\{toolsOpen\}/,
+    /mcActionSheet/,
+    /Coach Tools/,
+    /onboardingMode/,
+    /data-testid="coach-onboarding-state"/,
   ].forEach((pattern)=>assert.match(commandCenterSource,pattern));
+  assert.doesNotMatch(commandCenterSource,/mcUtilityBar/);
   assert.equal((commandCenterSource.match(/data-testid="coach-primary-objective"/g)||[]).length,1);
   assert.match(appSource,/coach-home-dashboard/);
 });
@@ -61,6 +66,7 @@ test("Mission Control declares desktop and mobile layout boundaries",()=>{
   assert.match(missionControlCss,/@media\(max-width:700px\)/);
   assert.match(missionControlCss,/mission-control-active/);
   assert.match(missionControlCss,/safe-area-inset-bottom/);
-  assert.match(missionControlCss,/\.mcFab/);
+  assert.match(premiumMissionControlCss,/mobile-navigation-dock/);
+  assert.match(premiumMissionControlCss,/min-height:300px/);
   assert.equal((appSource.match(/testId="player-primary-objective"/g)||[]).length,1);
 });
