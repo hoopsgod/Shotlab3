@@ -5,34 +5,32 @@ import fs from "node:fs";
 const source=fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx",import.meta.url),"utf8");
 const css=fs.readFileSync(new URL("../src/components/CoachCommandCenter.css",import.meta.url),"utf8");
 
-test("coach command center renders one cinematic daily brief",()=>{
-  assert.match(source,/Coach command/);
-  assert.match(source,/coach-primary-objective/);
-  assert.match(source,/coach-primary-metrics/);
-  assert.match(source,/coachTodayBrief__signal/);
-  assert.doesNotMatch(source,/Team health/i);
-  assert.doesNotMatch(source,/coach-command-grid/);
+test("coach dashboard renders the Mission Control information architecture",()=>{
+  ["Mission Control","Today’s status","Team Pulse","Needs Attention","Mission Progress","Upcoming Session","Recent Activity","Coach Quick Actions"].forEach(label=>assert.match(source,new RegExp(label)));
+  assert.match(source,/data-testid="coach-primary-objective"/);
+  assert.match(source,/data-testid="coach-primary-metrics"/);
+  assert.match(source,/CourtArtwork/);
 });
 
-test("coach command center keeps core coach actions behind progressive tools",()=>{
-  ["Add Player","Add Drill","Create Event","Log Score","Team code","New code"].forEach((label)=>assert.match(source,new RegExp(label)));
+test("Mission Control preserves coach actions and team code controls",()=>{
+  ["Add Player","Create Session","Build Mission","Log Score","View Players","Open Events","Team code","New code"].forEach(label=>assert.match(source,new RegExp(label)));
   assert.match(source,/aria-expanded=\{toolsOpen\}/);
-  assert.match(source,/Coach tools/);
+  assert.match(source,/data-testid="coach-secondary-tools"/);
+  assert.match(source,/data-testid="coach-team-code-bar"/);
 });
 
-test("coach brief uses real roster, activity, schedule, and attention signals",()=>{
-  ["attentionItems","nextEventDateFormatted","highlightPlayersAttention","activeTodayCount","totalPlayers"].forEach((prop)=>assert.match(source,new RegExp(prop)));
-  assert.match(source,/Review priorities/);
-  assert.match(source,/Schedule session/);
+test("headshot-ready player rows use image URLs with initials fallback",()=>{
+  assert.match(source,/avatarUrl/);
+  assert.match(source,/photoUrl/);
+  assert.match(source,/headshot placeholder/);
+  assert.match(source,/mcAvatar--fallback/);
 });
 
-test("home v2 CSS replaces stacked cards with a cinematic and editorial hierarchy",()=>{
-  assert.match(css,/radial-gradient/);
-  assert.match(css,/coachTodayBrief__signal/);
-  assert.match(css,/coach-team-standings/);
-  assert.match(css,/coach-setup-checklist/);
+test("responsive CSS supports full desktop grid and single-column phone layout",()=>{
+  assert.match(css,/grid-template-columns:1\.08fr 1\.08fr \.92fr/);
+  assert.match(css,/@media\(max-width:900px\)/);
+  assert.match(css,/@media\(max-width:640px\)/);
+  assert.match(css,/\.mcGrid\{grid-template-columns:1fr\}/);
+  assert.match(css,/\.mcQuickGrid\{grid-template-columns:repeat\(2,1fr\)\}/);
   assert.match(css,/player-home-compact-dashboard/);
-  assert.match(css,/player-primary-objective/);
-  assert.match(css,/details summary/);
-  assert.match(css,/@media\(max-width:520px\)/);
 });
