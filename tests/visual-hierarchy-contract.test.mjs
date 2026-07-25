@@ -33,9 +33,13 @@ test("player dashboard exposes one dominant objective and only three primary met
 });
 
 
-test("coach home uses a compact command toolbar while non-home pages stand alone", () => {
-  assert.match(commandCenterSource, /data-testid="coach-primary-objective"/);
-  assert.match(commandCenterSource, /testId="coach-primary-metrics"/);
+test("coach home uses a premium command center while non-home pages stand alone", () => {
+  assert.match(commandCenterSource, /data-testid="coach-team-health"/);
+  assert.match(commandCenterSource, /data-testid="coach-command-grid"/);
+  assert.match(commandCenterSource, /data-testid="coach-needs-attention"/);
+  assert.match(commandCenterSource, /data-testid="coach-team-momentum"/);
+  assert.match(commandCenterSource, /data-testid="coach-live-activity"/);
+  assert.match(commandCenterSource, /data-testid="coach-upcoming"/);
   assert.match(commandCenterSource, /data-testid="coach-secondary-tools"/);
   assert.match(commandCenterSource, /data-testid="coach-team-code-bar"/);
   assert.doesNotMatch(commandCenterSource, /DominantObjectiveCard/);
@@ -69,7 +73,7 @@ test("secondary hierarchy remains progressively disclosed without oversized summ
   const progressiveDisclosureCount = (appSource.match(/<ProgressiveDisclosure/g) || []).length;
   assert.ok(progressiveDisclosureCount >= 8, `expected at least 8 disclosures, found ${progressiveDisclosureCount}`);
   assert.equal((appSource.match(/testId="player-primary-objective"/g) || []).length, 1);
-  assert.equal((commandCenterSource.match(/data-testid="coach-primary-objective"/g) || []).length, 1);
+  assert.equal((commandCenterSource.match(/data-testid="coach-team-health"/g) || []).length, 1);
   assert.match(hierarchyCss, /background:\s*transparent !important/);
   assert.match(hierarchyCss, /min-height:\s*48px/);
   assert.match(hierarchyCss, /coach-home-dashboard/);
