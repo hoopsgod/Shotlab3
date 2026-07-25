@@ -11,6 +11,31 @@ const errorMessage = (code, status = 0) => {
   return "The player invitation could not be created. No password was generated or exposed.";
 };
 
+const formatExpiry = (value) => {
+  if (!value) return "within 24 hours";
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "within 24 hours" : `on ${date.toLocaleString()}`;
+};
+
+export function buildCoachPlayerInviteEmailLink({ recipient, playerName, setupUrl, expiresAt } = {}) {
+  const email = emailKey(recipient);
+  const secureUrl = clean(setupUrl);
+  if (!email || !secureUrl) return "";
+  const subject = "You've been added to ShotLab";
+  const body = [
+    `Hi ${clean(playerName) || "Player"},`,
+    "",
+    "Your coach added you to the team on ShotLab.",
+    "Use this one-time link to choose your private password and activate your account:",
+    secureUrl,
+    "",
+    `This link expires ${formatExpiry(expiresAt)} and can only be used once.`,
+    "Your coach cannot see the password you choose.",
+    "If you were not expecting this invitation, ignore this email.",
+  ].join("\n");
+  return `mailto:${encodeURIComponent(email)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+}
+
 export async function provisionCoachPlayer({ coach, teamId, firstName, lastName, email, jerseyNumber, fetchImpl = globalThis.fetch } = {}) {
   const requester = emailKey(coach?.email);
   if (!requester || clean(coach?.role) !== "coach" || !clean(teamId) || typeof fetchImpl !== "function") {
