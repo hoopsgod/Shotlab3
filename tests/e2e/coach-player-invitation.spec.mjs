@@ -36,7 +36,7 @@ async function enterCoachPlayers(page) {
   await players.click();
 }
 
-test("coach adds a player and receives a secure setup-link fallback", async ({ page }) => {
+test("coach adds a player and receives secure copy and email-app fallbacks", async ({ page }) => {
   let postBody = null;
   const invitation = { id: "invite-1", player_name: "Ari Player", player_email: "ari@example.com", status: "pending" };
   await page.route("**/v1/coach/players/provision**", async (route) => {
@@ -46,7 +46,7 @@ test("coach adds a player and receives a secure setup-link fallback", async ({ p
       return;
     }
     postBody = request.postDataJSON();
-    await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true, status: "pending", email_delivery_status: "not_configured", setup_url: "https://example.test/player-setup.html?token=single-use", profile: { id: "pp-1", team_id: TEAM_ID, invited_email: "ari@example.com" } }) });
+    await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true, status: "pending", email_delivery_status: "not_configured", setup_url: "https://example.test/player-setup.html?token=single-use", expires_at: "2026-07-26T12:00:00.000Z", profile: { id: "pp-1", team_id: TEAM_ID, invited_email: "ari@example.com" } }) });
   });
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
   await seedCoach(page);
@@ -61,7 +61,8 @@ test("coach adds a player and receives a secure setup-link fallback", async ({ p
   await form.getByRole("button", { name: "ADD PLAYER & SEND INVITE" }).click();
 
   await expect(form.getByRole("status")).toContainText("email delivery is not configured");
-  await expect(form.getByRole("button", { name: "COPY SECURE SETUP LINK" })).toBeVisible();
+  await expect(form.getByRole("button", { name: "COPY SECURE LINK" })).toBeVisible();
+  await expect(form.getByRole("button", { name: "OPEN EMAIL APP" })).toBeVisible();
   expect(postBody).toEqual({ team_id: TEAM_ID, first_name: "Ari", last_name: "Player", email: "ari@example.com", jersey_number: "22" });
   expect("password" in postBody).toBe(false);
 });
