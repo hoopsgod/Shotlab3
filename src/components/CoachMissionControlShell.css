@@ -36,14 +36,9 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3 {
   width: 100% !important;
 }
 
-/* The global mobile nav duplicates Mission Control's navigation and can cover
-   the floating action control. It returns automatically when Mission Control
-   unmounts and the body class is removed. */
-body.mission-control-active [data-testid="mobile-navigation"],
-body.mission-control-active .mobile-navigation,
-body.mission-control-active .mobile-nav {
-  display: none !important;
-}
+/* The shared mobile dock is now intentionally retained and polished by
+   CoachMissionControl2026.css. Mission Control's own drawer handles the
+   extended coach navigation without creating a second permanent rail. */
 
 @media (max-width: 980px) {
   body.mission-control-active .app-shell,
@@ -54,5 +49,17 @@ body.mission-control-active .mobile-nav {
     max-width: none !important;
     margin: 0 !important;
     padding: 0 !important;
+  }
+}
+
+@media (max-width: 700px) {
+  /* Older Mission Control CSS pushed the urgent panel below secondary content.
+     The 2026 workflow keeps player follow-up immediately after the hero. */
+  .mcShellV3 .mcFocusGrid > .mcAttention {
+    order: 0 !important;
+  }
+
+  .mcShellV3 .mcFocusGrid > .mcTodayLaunch {
+    order: 1 !important;
   }
 }
