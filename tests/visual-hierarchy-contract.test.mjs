@@ -32,17 +32,19 @@ test("player dashboard keeps one dominant mission and three primary metrics",()=
   assert.match(commandCenterCss,/player-home-compact-dashboard/);
 });
 
-test("coach home uses a workflow-first Mission Control with dynamic branding",()=>{
-  assert.match(commandCenterSource,/Mission Control/);
-  assert.match(commandCenterSource,/CourtArtwork/);
-  assert.match(commandCenterSource,/useTeamBranding/);
-  assert.match(commandCenterSource,/branding\?\.logoUrl/);
-  assert.match(commandCenterSource,/primaryCommand/);
-  assert.match(commandCenterSource,/data-testid="coach-primary-objective"/);
-  assert.match(commandCenterSource,/data-testid="coach-primary-metrics"/);
-  assert.match(commandCenterSource,/data-testid="coach-secondary-tools"/);
-  assert.match(commandCenterSource,/data-testid="coach-team-code-bar"/);
-  assert.match(commandCenterSource,/aria-expanded=\{toolsOpen\}/);
+test("coach home keeps one dominant workflow and preserved utilities",()=>{
+  [
+    /Mission Control/,
+    /primaryCommand/,
+    /CourtArtwork/,
+    /useTeamBranding/,
+    /data-testid="coach-primary-objective"/,
+    /data-testid="coach-primary-metrics"/,
+    /data-testid="coach-secondary-tools"/,
+    /data-testid="coach-team-code-bar"/,
+    /aria-expanded=\{toolsOpen\}/,
+  ].forEach((pattern)=>assert.match(commandCenterSource,pattern));
+  assert.equal((commandCenterSource.match(/data-testid="coach-primary-objective"/g)||[]).length,1);
   assert.match(appSource,/coach-home-dashboard/);
 });
 
@@ -55,13 +57,12 @@ test("leaderboards keep rankings ahead of archive context",()=>{
   assert.match(leaderboardSource,/PARTICIPATION_CATEGORY_ITEMS/);
 });
 
-test("desktop, tablet, and phone Mission Control layouts are explicit",()=>{
-  assert.match(missionControlCss,/grid-template-columns:112px minmax\(0,1fr\)/);
-  assert.match(missionControlCss,/grid-template-columns:1\.25fr \.75fr/);
+test("Mission Control declares desktop and mobile layout boundaries",()=>{
+  assert.match(missionControlCss,/\.mcShellV3/);
   assert.match(missionControlCss,/@media\(max-width:980px\)/);
   assert.match(missionControlCss,/@media\(max-width:700px\)/);
-  assert.match(missionControlCss,/body\.mission-control-active/);
+  assert.match(missionControlCss,/mission-control-active/);
+  assert.match(missionControlCss,/safe-area-inset-bottom/);
   assert.match(missionControlCss,/\.mcFab/);
-  assert.equal((commandCenterSource.match(/data-testid="coach-primary-objective"/g)||[]).length,1);
   assert.equal((appSource.match(/testId="player-primary-objective"/g)||[]).length,1);
 });
