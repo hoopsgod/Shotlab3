@@ -60,7 +60,7 @@ test("coach adds a player and receives secure copy and email-app fallbacks", asy
   await form.getByLabel("Jersey number").fill("22");
   await form.getByRole("button", { name: "ADD PLAYER & SEND INVITE" }).click();
 
-  await expect(form.getByRole("status")).toContainText("email delivery is not configured");
+  await expect(form.getByRole("status")).toContainText("Email delivery is not configured");
   await expect(form.getByRole("button", { name: "COPY SECURE LINK" })).toBeVisible();
   await expect(form.getByRole("button", { name: "OPEN EMAIL APP" })).toBeVisible();
   expect(postBody).toEqual({ team_id: TEAM_ID, first_name: "Ari", last_name: "Player", email: "ari@example.com", jersey_number: "22" });
