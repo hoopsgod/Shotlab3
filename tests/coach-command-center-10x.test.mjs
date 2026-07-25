@@ -11,6 +11,7 @@ test("coach dashboard matches the approved Mission Control architecture",()=>{
   assert.match(source,/data-testid="coach-primary-metrics"/);
   assert.match(source,/CourtScene/);
   assert.match(source,/mcRail/);
+  assert.match(source,/mcMobileMenu/);
   assert.match(source,/mcTeamSelect/);
   assert.match(source,/mcCourtScene/);
 });
@@ -30,13 +31,14 @@ test("headshot-ready rows use image URLs with initials fallback",()=>{
   assert.match(source,/mcAvatar--fallback/);
 });
 
-test("responsive CSS supports the reference desktop shell and compact phone layout",()=>{
+test("responsive CSS preserves the approved dense phone composition",()=>{
   assert.match(css,/grid-template-columns:116px minmax\(0,1fr\)/);
   assert.match(css,/grid-template-columns:1\.05fr 1\.05fr \.95fr/);
-  assert.match(css,/@media\(max-width:900px\)/);
-  assert.match(css,/@media\(max-width:640px\)/);
-  assert.match(css,/\.mcTopGrid,\.mcBottomGrid\{grid-template-columns:1fr\}/);
-  assert.match(css,/\.mcQuickGrid\{grid-template-columns:repeat\(2,1fr\)\}/);
+  assert.match(css,/@media\(max-width:980px\)/);
+  assert.match(css,/@media\(max-width:700px\)/);
+  assert.match(css,/\.mcTopGrid\{grid-template-columns:1fr 1fr 1fr/);
+  assert.match(css,/\.mcBottomGrid\{grid-template-columns:1fr 1fr/);
+  assert.match(css,/\.mcQuickGrid\{grid-template-columns:repeat\(6,1fr\)/);
   assert.match(css,/coach-dashboard-identity-header/);
   assert.match(css,/coach-home-dashboard\{display:none!important\}/);
 });
