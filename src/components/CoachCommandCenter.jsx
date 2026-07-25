@@ -3,6 +3,7 @@ import "./CoachMissionControlV2.css";
 import "./CoachMissionControlShell.css";
 import "./CoachMissionControlHeader.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
+import useCleanTeamLogo from "./useCleanTeamLogo";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
@@ -46,6 +47,7 @@ function AttentionRow({ item, onFallback }) {
 export default function CoachCommandCenter({ variant = "full", totalPlayers, activeTodayCount, nextEventDateFormatted, highlightPlayersAttention, onPlayersClick, onActiveTodayClick, onNextEventClick, onAddPlayer, onAddDrill, onScheduleEvent, onLogScore, joinCode, onCopyJoinCode, onRegenerateJoinCode, codeErr, attentionItems = [], activityItems = [] }) {
   const { branding } = useTeamBranding();
   const logoUrl = branding?.logoUrl || branding?.logoMarkUrl || FALLBACK_LOGO;
+  const cleanLogoUrl = useCleanTeamLogo(logoUrl);
   const teamName = branding?.teamName || branding?.name || "Thomas Titans";
   const accent = branding?.accentColor || branding?.primaryColor || "#C8FF1A";
   const secondary = branding?.secondaryColor || "#9CA3AF";
@@ -79,14 +81,14 @@ export default function CoachCommandCenter({ variant = "full", totalPlayers, act
   if (variant === "compact") return <section className="missionControlCompact" data-testid="coach-command-center-compact"><div><span>Next action</span><strong>{primaryCommand.title}</strong></div><button type="button" onClick={primaryCommand.onClick}>{primaryCommand.label}</button></section>;
 
   return <div className="mcShell mcShellV3" data-testid="coach-command-center-full" style={{ "--mc": accent, "--mc-secondary": secondary }}>
-    <aside className="mcRail" aria-label="Coach navigation"><button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img className="mcRailLogo" src={logoUrl} alt={`${teamName} logo`} /></button><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav><div className="mcCoachIdentity"><Avatar item={{ name: "Coach" }} size={42} /><span><small>Coach</small><strong>Mission Control</strong></span></div></aside>
+    <aside className="mcRail" aria-label="Coach navigation"><button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img className="mcRailLogo" src={cleanLogoUrl} alt={`${teamName} logo`} /></button><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav><div className="mcCoachIdentity"><Avatar item={{ name: "Coach" }} size={42} /><span><small>Coach</small><strong>Mission Control</strong></span></div></aside>
 
     <main className="missionControl">
       <header className="mcHeader" data-testid="mission-control-team-header"><button className="mcMobileMenu" type="button" aria-label="Open navigation" onClick={() => setNavOpen(true)}><Icon name="menu" /></button><div className="mcBrandLockup"><span className="mcBrandCopy"><small>{teamName}</small><strong>Mission Control</strong></span></div><div className="mcHeaderActions"><button type="button" className="mcTeamSelect" onClick={openBrandingSettings}>{teamName}<span>⌄</span></button><button type="button" className="mcBell" aria-label={`${attentionCount} notifications`}><Icon name="bell" /><b>{attentionCount}</b></button></div></header>
 
       <section className="mcHero" data-testid="coach-primary-objective">
-        <CourtArtwork logoUrl={logoUrl} /><div className="mcHeroScrim" />
-        <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img src={logoUrl} alt={`${teamName} logo`} /><span><Icon name="settings" size={13} /></span></button>
+        <CourtArtwork logoUrl={cleanLogoUrl} /><div className="mcHeroScrim" />
+        <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img src={cleanLogoUrl} alt={`${teamName} logo`} /><span><Icon name="settings" size={13} /></span></button>
         <div className="mcHeroContent"><span className="mcEyebrow">{primaryCommand.eyebrow}</span><h1>{primaryCommand.title}</h1><p>{primaryCommand.detail}</p><div className="mcRealityStrip" data-testid="coach-primary-metrics"><button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active today</small></button><button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Need follow-up</small></button><button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "None"}</strong><small>Next session</small></button></div><button type="button" className="mcPrimary" onClick={primaryCommand.onClick}>{primaryCommand.label}<Icon name="arrow" /></button></div>
       </section>
 
@@ -99,6 +101,6 @@ export default function CoachCommandCenter({ variant = "full", totalPlayers, act
 
     <button type="button" className="mcFab" aria-label="Open quick actions" onClick={() => setActionsOpen(true)}><Icon name="plus" size={28} /></button><div className={`mcActionLayer ${actionsOpen ? "is-open" : ""}`} aria-hidden={!actionsOpen}><button type="button" className="mcActionBackdrop" aria-label="Close quick actions" onClick={() => setActionsOpen(false)} /><section className="mcActionSheet" aria-label="Coach quick actions"><div className="mcActionSheetHead"><span><small>Coach tools</small><strong>Quick actions</strong></span><button type="button" aria-label="Close quick actions" onClick={() => setActionsOpen(false)}><Icon name="close" /></button></div><div className="mcActionGrid">{quickActions.map((item) => <button type="button" key={item.label} onClick={() => { setActionsOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</div></section></div>
 
-    <div className={`mcNavLayer ${navOpen ? "is-open" : ""}`} aria-hidden={!navOpen}><button type="button" className="mcNavBackdrop" aria-label="Close navigation" onClick={() => setNavOpen(false)} /><aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}><img src={logoUrl} alt={`${teamName} logo`} /></button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside></div>
+    <div className={`mcNavLayer ${navOpen ? "is-open" : ""}`} aria-hidden={!navOpen}><button type="button" className="mcNavBackdrop" aria-label="Close navigation" onClick={() => setNavOpen(false)} /><aside className="mcMobileDrawer"><div className="mcDrawerBrand"><button type="button" className="mcDrawerLogo" onClick={() => { setNavOpen(false); openBrandingSettings(); }}><img src={cleanLogoUrl} alt={`${teamName} logo`} /></button><span><small>{teamName}</small><strong>Mission Control</strong></span><button type="button" aria-label="Close navigation" onClick={() => setNavOpen(false)}><Icon name="close" /></button></div><nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={() => { setNavOpen(false); item.onClick?.(); }}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav></aside></div>
   </div>;
 }
