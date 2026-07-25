@@ -24,8 +24,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Participation leaderboard domain tests
-        run: node --test tests/participation-leaderboards.test.mjs
+      - name: Participation leaderboard domain and UI tests
+        run: node --test tests/participation-leaderboards.test.mjs tests/participation-leaderboards-ui.test.mjs
       - name: Existing leaderboard and roster regressions
         run: node --test tests/season-leaderboard-analytics.test.mjs tests/season-leaderboard-roster-boundary.test.mjs tests/player-removal-lifecycle-stabilization.test.mjs
       - name: Production build
