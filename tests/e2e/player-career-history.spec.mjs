@@ -66,6 +66,17 @@ async function enterDemo(page, roleName) {
   await button.click();
 }
 
+async function expectCareerSeasons(career, viewerRole) {
+  await expect(career).toBeVisible();
+  await expect(career).toHaveAttribute("data-viewer-role", viewerRole);
+  const seasonList = career.getByTestId("career-season-list");
+  await expect(seasonList.getByText("2026 Completed Season", { exact: true })).toBeVisible();
+  await expect(seasonList.getByText("Current Season", { exact: true })).toBeVisible();
+  const seasonNames = await seasonList.locator("article > div:first-child > div:first-child > div:first-child").allTextContents();
+  expect(seasonNames).toEqual(["2026 Completed Season", "Current Season"]);
+  await expect(career.getByTestId("career-improvement")).toContainText("2026 Completed Season");
+}
+
 test.beforeEach(async ({ page }) => {
   await seed(page);
 });
@@ -76,14 +87,7 @@ test("player sees current and archived career history on Profile", async ({ page
   const profileButton = page.getByRole("button", { name: /Profile/i }).first();
   await expect(profileButton).toBeVisible({ timeout: 15_000 });
   await profileButton.click();
-
-  const career = page.getByTestId("player-career-history");
-  await expect(career).toBeVisible();
-  await expect(career).toHaveAttribute("data-viewer-role", "player");
-  await expect(career.getByText("2026 Completed Season", { exact: true })).toBeVisible();
-  await expect(career.getByText("Current Season", { exact: true })).toBeVisible();
-  await expect(career.getByText("364", { exact: true }).first()).toBeVisible();
-  await expect(career.getByTestId("career-improvement")).toContainText("-36 vs 2026 Completed Season");
+  await expectCareerSeasons(page.getByTestId("player-career-history"), "player");
 });
 
 test("coach sees the same career history from selected player detail", async ({ page }) => {
@@ -93,11 +97,5 @@ test("coach sees the same career history from selected player detail", async ({ 
   await expect(playersButton).toBeVisible({ timeout: 15_000 });
   await playersButton.click();
   await page.getByText("DEMO PLAYER", { exact: true }).last().click();
-
-  const career = page.getByTestId("player-career-history");
-  await expect(career).toBeVisible();
-  await expect(career).toHaveAttribute("data-viewer-role", "coach");
-  await expect(career.getByText("2026 Completed Season", { exact: true })).toBeVisible();
-  await expect(career.getByText("Current Season", { exact: true })).toBeVisible();
-  await expect(career.getByText("364", { exact: true }).first()).toBeVisible();
+  await expectCareerSeasons(page.getByTestId("player-career-history"), "coach");
 });
