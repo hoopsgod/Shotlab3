@@ -6,8 +6,8 @@ const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "u
 const hierarchySource = fs.readFileSync(new URL("../src/components/VisualHierarchy.jsx", import.meta.url), "utf8");
 const hierarchyCss = fs.readFileSync(new URL("../src/components/VisualHierarchy.module.css", import.meta.url), "utf8");
 const commandCenterSource = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
+const commandCenterCss = fs.readFileSync(new URL("../src/components/CoachCommandCenter.css", import.meta.url), "utf8");
 const leaderboardSource = fs.readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx", import.meta.url), "utf8");
-
 
 test("shared hierarchy primitives define objective, three-metric, disclosure, and quiet-section layers", () => {
   assert.match(hierarchySource, /function DominantObjectiveCard/);
@@ -20,7 +20,6 @@ test("shared hierarchy primitives define objective, three-metric, disclosure, an
   assert.match(hierarchyCss, /\.disclosure\s*\{/);
 });
 
-
 test("player dashboard exposes one dominant objective and only three primary metrics", () => {
   assert.match(appSource, /testId="player-primary-objective"/);
   assert.match(appSource, /testId="player-primary-metrics"/);
@@ -30,32 +29,23 @@ test("player dashboard exposes one dominant objective and only three primary met
   assert.match(appSource, /testId="player-secondary-intelligence"/);
   assert.doesNotMatch(appSource, /aria-label="Progress snapshot"/);
   assert.match(appSource, /className="player-quick-actions"[\s\S]*?border:0,background:"transparent"/);
+  assert.match(commandCenterCss,/player-home-compact-dashboard/);
 });
 
-
-test("coach home uses a premium command center while non-home pages stand alone", () => {
-  assert.match(commandCenterSource, /data-testid="coach-team-health"/);
-  assert.match(commandCenterSource, /data-testid="coach-command-grid"/);
-  assert.match(commandCenterSource, /testId="coach-needs-attention"/);
-  assert.match(commandCenterSource, /testId="coach-team-momentum"/);
-  assert.match(commandCenterSource, /testId="coach-live-activity"/);
-  assert.match(commandCenterSource, /testId="coach-upcoming"/);
+test("coach home uses one daily brief with three metrics and progressive tools", () => {
+  assert.match(commandCenterSource, /data-testid="coach-primary-objective"/);
+  assert.match(commandCenterSource, /data-testid="coach-primary-metrics"/);
+  assert.match(commandCenterSource, /Today’s coaching brief/);
+  assert.match(commandCenterSource, /aria-expanded=\{toolsOpen\}/);
   assert.match(commandCenterSource, /data-testid="coach-secondary-tools"/);
   assert.match(commandCenterSource, /data-testid="coach-team-code-bar"/);
-  assert.doesNotMatch(commandCenterSource, /DominantObjectiveCard/);
-  assert.doesNotMatch(commandCenterSource, /ProgressiveDisclosure/);
+  assert.doesNotMatch(commandCenterSource, /Team health/);
+  assert.doesNotMatch(commandCenterSource, /coach-command-grid/);
   assert.match(appSource, /coach-home-dashboard/);
-  assert.match(appSource, /testId="coach-today-practice"/);
-  assert.match(appSource, /data-testid="coach-practice-status-row"/);
-  assert.match(appSource, /testId="coach-next-seven-days"/);
-  assert.match(appSource, /testId="coach-operational-alerts"/);
-  assert.match(appSource, /testId="coach-priority-editor"/);
-  assert.match(appSource, /testId="coach-program-intelligence"/);
   assert.match(appSource, /visible=\{isOverviewTab&&showMiniHeader\}/);
   assert.match(appSource, /padding:`\$\{isOverviewTab&&showMiniHeader\?"74px":"12px"\}/);
   assert.match(appSource, /\{isOverviewTab&&<>/);
 });
-
 
 test("leaderboards place rankings ahead of optional archive and participation context", () => {
   assert.match(leaderboardSource, /data-testid="leaderboard-status-line"/);
@@ -68,13 +58,13 @@ test("leaderboards place rankings ahead of optional archive and participation co
   assert.doesNotMatch(leaderboardSource, /boxShadow: '0 10px 26px/);
 });
 
-
 test("secondary hierarchy remains progressively disclosed without oversized summary cards", () => {
   const progressiveDisclosureCount = (appSource.match(/<ProgressiveDisclosure/g) || []).length;
   assert.ok(progressiveDisclosureCount >= 8, `expected at least 8 disclosures, found ${progressiveDisclosureCount}`);
   assert.equal((appSource.match(/testId="player-primary-objective"/g) || []).length, 1);
-  assert.equal((commandCenterSource.match(/data-testid="coach-team-health"/g) || []).length, 1);
+  assert.equal((commandCenterSource.match(/data-testid="coach-primary-objective"/g) || []).length, 1);
   assert.match(hierarchyCss, /background:\s*transparent !important/);
   assert.match(hierarchyCss, /min-height:\s*48px/);
   assert.match(hierarchyCss, /coach-home-dashboard/);
+  assert.match(commandCenterCss,/coach-setup-checklist/);
 });
