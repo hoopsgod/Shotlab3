@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import "./CoachMissionControlV2.css";
+import "./CoachMissionControlShell.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
