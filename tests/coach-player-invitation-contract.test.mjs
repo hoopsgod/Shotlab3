@@ -51,7 +51,10 @@ test("coach UI replaces profile-only add flow with invitation flow", () => {
   assert.match(app, /id="coach-add-player-form"/);
   assert.match(component, /ADD PLAYER & SEND INVITE/);
   assert.match(component, /Player email/);
-  assert.match(component, /COPY SECURE SETUP LINK/);
+  assert.match(component, /COPY SECURE LINK/);
+  assert.match(component, /OPEN EMAIL APP/);
+  assert.match(component, /mailto:/);
+  assert.match(component, /This link expires/);
   assert.match(component, /Invite Sent/);
   assert.match(component, /Account Active/);
 });
