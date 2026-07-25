@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { loadCoachPlayerInvitations, provisionCoachPlayer } from "../lib/coachPlayerInvitationService.js";
+import { buildCoachPlayerInviteEmailLink, loadCoachPlayerInvitations, provisionCoachPlayer } from "../lib/coachPlayerInvitationService.js";
 
 const styles = {
   shell: { background: "var(--surface-1, #151515)", border: "1px solid var(--stroke-1, #333)", borderRadius: 14, padding: 14, marginBottom: 12 },
@@ -11,11 +11,6 @@ const styles = {
 };
 
 const statusLabel = (status) => ({ sent: "Invite Sent", pending: "Invite Pending", claimed: "Account Active", expired: "Invite Expired", revoked: "Invite Revoked" }[status] || "Invite Pending");
-const formatExpiry = (value) => {
-  if (!value) return "24 hours";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? "24 hours" : date.toLocaleString();
-};
 
 export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) {
   const [form, setForm] = useState({ firstName: "", lastName: "", email: "", jerseyNumber: "" });
@@ -71,19 +66,9 @@ export default function CoachPlayerInviteForm({ coach, teamId, onProvisioned }) 
     catch { setMessage("Copy failed. Use Open Email App to send the secure invitation."); }
   };
   const openEmailApp = () => {
-    if (!setupUrl || !setupRecipient) return;
-    const subject = "You’ve been added to ShotLab";
-    const body = [
-      `Hi ${setupPlayerName || "Player"},`,
-      "",
-      "Your coach added you to the team on ShotLab.",
-      "Use this one-time link to choose your private password and activate your account:",
-      setupUrl,
-      "",
-      `This link expires ${formatExpiry(setupExpiresAt)} and can only be used once.`,
-      "If you were not expecting this invitation, ignore this email.",
-    ].join("\n");
-    window.location.href = `mailto:${encodeURIComponent(setupRecipient)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    const mailto = buildCoachPlayerInviteEmailLink({ recipient: setupRecipient, playerName: setupPlayerName, setupUrl, expiresAt: setupExpiresAt });
+    if (!mailto) return;
+    window.location.href = mailto;
   };
 
   return <section data-testid="coach-player-invite-form" style={styles.shell}>
