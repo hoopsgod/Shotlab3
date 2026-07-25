@@ -11,6 +11,7 @@ on:
       - "functions/v1/player-auth/claim.js"
       - "functions/_utils/transactionalEmail.js"
       - "migrations/036_coach_player_invitations.sql"
+      - "migrations/037_player_invitation_existing_account_claim.sql"
       - "tests/coach-player-invitation*.test.mjs"
       - "tests/e2e/coach-player-invitation.spec.mjs"
       - ".github/workflows/coach-player-invitations.yml"
