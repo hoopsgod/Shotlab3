@@ -12,6 +12,7 @@ on:
       - "functions/_utils/transactionalEmail.js"
       - "migrations/036_coach_player_invitations.sql"
       - "tests/coach-player-invitation*.test.mjs"
+      - "tests/e2e/coach-player-invitation.spec.mjs"
       - ".github/workflows/coach-player-invitations.yml"
   workflow_dispatch:
 
@@ -21,7 +22,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -33,5 +34,11 @@ jobs:
         run: node --test tests/coach-player-invitation-service.test.mjs tests/coach-player-invitation-contract.test.mjs
       - name: Existing authentication and roster regressions
         run: node --test tests/legacy-auth-persistence.test.mjs tests/team-memberships-confirm-context-route.test.mjs tests/release-candidate-stability.test.mjs
+      - name: Install Playwright
+        run: npm install --no-save @playwright/test@1.55.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
       - name: Production build
         run: npm run build
+      - name: Coach-to-player invitation browser flow
+        run: npx playwright test tests/e2e/coach-player-invitation.spec.mjs
