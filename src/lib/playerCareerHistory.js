@@ -8,7 +8,7 @@ const finite = (value) => {
 const teamIdOf = (row = {}) => clean(row.teamId ?? row.team_id);
 const nameOf = (row = {}) => clean(row.name || [row.firstName, row.lastName].filter(Boolean).join(" ") || [row.first_name, row.last_name].filter(Boolean).join(" "));
 
-const identityValues = (row = {}, includeId = true) => [
+const identityValues = (row = {}, includeGenericId = false) => [
   row.email,
   row.player_email,
   row.playerEmail,
@@ -18,11 +18,11 @@ const identityValues = (row = {}, includeId = true) => [
   row.profile_id,
   row.userId,
   row.user_id,
-  ...(includeId ? [row.id] : []),
+  ...(includeGenericId ? [row.id] : []),
 ].map(key).filter(Boolean);
 
 export function getPlayerCareerIdentity(player = {}) {
-  const tokens = new Set(identityValues(player));
+  const tokens = new Set(identityValues(player, true));
   return {
     tokens,
     name: key(nameOf(player)),
@@ -31,7 +31,9 @@ export function getPlayerCareerIdentity(player = {}) {
 }
 
 export function playerCareerRowMatches(row = {}, identity = getPlayerCareerIdentity()) {
-  const rowTokens = identityValues(row);
+  // Generic activity-row IDs are deliberately excluded. A score/log ID must
+  // never be treated as a player ID merely because the strings happen to match.
+  const rowTokens = identityValues(row, false);
   if (rowTokens.some((token) => identity.tokens.has(token))) return true;
   if (identity.hasStableIdentity || rowTokens.length > 0) return false;
   const rowName = key(nameOf(row));
@@ -59,8 +61,11 @@ const archiveTeamId = (archive = {}) => clean(archive.teamId || archive.team_id)
 
 function normalizeSeasonSummary(summary = {}, archive = {}) {
   const homeMakes = finite(summary.totalHomeMakes);
+  const homeScoreCount = finite(summary.homeScoreCount);
   const programScore = finite(summary.totalProgramScore);
+  const programScoreCount = finite(summary.programScoreCount);
   const shotLogMakes = finite(summary.totalShotLogMakes);
+  const shotLogCount = finite(summary.shotLogCount);
   const eventRsvps = finite(summary.eventRsvpCount);
   const scRsvps = finite(summary.scRsvpCount);
   const scLogs = finite(summary.scLogCount);
@@ -73,17 +78,18 @@ function normalizeSeasonSummary(summary = {}, archive = {}) {
     seasonEndDate: clean(archive.seasonEndDate || archive.season_end_date),
     createdAt: clean(archive.createdAt || archive.created_at),
     totalHomeMakes: homeMakes,
-    homeScoreCount: finite(summary.homeScoreCount),
+    homeScoreCount,
     totalProgramScore: programScore,
-    programScoreCount: finite(summary.programScoreCount),
+    programScoreCount,
+    programEntries: programScoreCount,
     totalShotLogMakes: shotLogMakes,
-    shotLogCount: finite(summary.shotLogCount),
+    shotLogCount,
     eventRsvpCount: eventRsvps,
     scRsvpCount: scRsvps,
     scLogCount: scLogs,
     bestProgramScore: Number.isFinite(Number(summary.bestProgramScore)) ? Number(summary.bestProgramScore) : null,
     lastActivityDate: clean(summary.lastActivityDate),
-    trainingTotal: homeMakes + programScore + shotLogMakes,
+    shootingMakes: homeMakes + shotLogMakes,
     participationTotal: eventRsvps + scRsvps + scLogs,
   };
 }
@@ -162,7 +168,11 @@ export function buildCurrentPlayerSeason({
 }
 
 const sum = (rows, field) => rows.reduce((total, row) => total + finite(row[field]), 0);
-const bestSeasonBy = (rows, field) => rows.reduce((best, row) => !best || finite(row[field]) > finite(best[field]) ? row : best, null);
+const bestPositiveSeasonBy = (rows, field) => rows.reduce((best, row) => {
+  const value = finite(row[field]);
+  if (value <= 0) return best;
+  return !best || value > finite(best[field]) ? row : best;
+}, null);
 
 export function buildPlayerCareerHistory({
   player,
@@ -185,24 +195,24 @@ export function buildPlayerCareerHistory({
   const career = {
     seasons: seasons.length,
     archivedSeasons: archived.length,
+    totalShootingMakes: sum(seasons, "shootingMakes"),
     totalHomeMakes: sum(seasons, "totalHomeMakes"),
-    totalProgramScore: sum(seasons, "totalProgramScore"),
     totalShotLogMakes: sum(seasons, "totalShotLogMakes"),
-    trainingTotal: sum(seasons, "trainingTotal"),
+    programEntryCount: sum(seasons, "programScoreCount"),
     eventRsvpCount: sum(seasons, "eventRsvpCount"),
     scRsvpCount: sum(seasons, "scRsvpCount"),
     scLogCount: sum(seasons, "scLogCount"),
   };
-  const bestTrainingSeason = bestSeasonBy(seasons, "trainingTotal");
-  const bestHomeSeason = bestSeasonBy(seasons, "totalHomeMakes");
-  const bestProgramScore = seasons.reduce((best, season) => season.bestProgramScore == null ? best : Math.max(best, season.bestProgramScore), 0);
+  const bestShootingSeason = bestPositiveSeasonBy(seasons, "shootingMakes");
+  const bestHomeSeason = bestPositiveSeasonBy(seasons, "totalHomeMakes");
+  const mostProgramEntries = bestPositiveSeasonBy(seasons, "programScoreCount");
   const previous = archived.at(-1) || null;
   const improvement = previous ? {
     comparedTo: previous.seasonName,
-    previousValue: previous.trainingTotal,
-    currentValue: current.trainingTotal,
-    delta: current.trainingTotal - previous.trainingTotal,
-    percent: previous.trainingTotal > 0 ? Math.round(((current.trainingTotal - previous.trainingTotal) / previous.trainingTotal) * 100) : null,
+    previousValue: previous.shootingMakes,
+    currentValue: current.shootingMakes,
+    delta: current.shootingMakes - previous.shootingMakes,
+    percent: previous.shootingMakes > 0 ? Math.round(((current.shootingMakes - previous.shootingMakes) / previous.shootingMakes) * 100) : null,
   } : null;
   return {
     player: {
@@ -212,11 +222,11 @@ export function buildPlayerCareerHistory({
     seasons,
     career,
     records: {
-      bestTrainingSeason,
+      bestShootingSeason,
       bestHomeSeason,
-      bestProgramScore,
+      mostProgramEntries,
     },
     improvement,
-    hasHistory: seasons.some((season) => season.trainingTotal > 0 || season.participationTotal > 0),
+    hasHistory: seasons.some((season) => season.shootingMakes > 0 || season.programScoreCount > 0 || season.participationTotal > 0),
   };
 }
