@@ -36,10 +36,8 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3 {
   width: 100% !important;
 }
 
-/* The shared mobile dock is now intentionally retained and polished by
-   CoachMissionControl2026.css. Mission Control's own drawer handles the
-   extended coach navigation without creating a second permanent rail. */
-
+/* The shared mobile dock is intentionally retained. Mission Control's own
+   drawer handles extended coach navigation without adding a second rail. */
 @media (max-width: 980px) {
   body.mission-control-active .app-shell,
   body.mission-control-active .shell-main,
@@ -53,13 +51,197 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3 {
 }
 
 @media (max-width: 700px) {
-  /* Older Mission Control CSS pushed the urgent panel below secondary content.
-     The 2026 workflow keeps player follow-up immediately after the hero. */
+  /* Urgent player follow-up always stays directly below the primary mission. */
   .mcShellV3 .mcFocusGrid > .mcAttention {
     order: 0 !important;
   }
 
   .mcShellV3 .mcFocusGrid > .mcTodayLaunch {
     order: 1 !important;
+  }
+
+  /* Rebalance the signature hero. The team mark belongs on the court, not in
+     a pasted image tile competing with the mission copy. */
+  body.mission-control-active .mcShellV3 .mcHero {
+    min-height: 286px !important;
+    border-radius: 19px !important;
+    background: #020405 !important;
+    box-shadow: 0 22px 58px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.028) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroTeamMark {
+    display: none !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroContent {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 18px 16px 15px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHero h1 {
+    max-width: 278px !important;
+    font-size: 30px !important;
+    line-height: .95 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroContent > p {
+    max-width: 278px !important;
+    margin-top: 9px !important;
+    font-size: 11px !important;
+    line-height: 1.38 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcCourtArtwork {
+    background:
+      radial-gradient(ellipse at 81% 20%, color-mix(in srgb,var(--mc) 26%,transparent), transparent 28%),
+      radial-gradient(ellipse at 72% 77%, color-mix(in srgb,var(--mc) 11%,transparent), transparent 39%),
+      linear-gradient(180deg,#091114 0%,#020405 93%) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroScrim {
+    background:
+      linear-gradient(90deg,rgba(2,5,6,.995) 0%,rgba(2,5,6,.94) 47%,rgba(2,5,6,.42) 72%,rgba(2,5,6,.04) 100%),
+      linear-gradient(180deg,transparent 50%,rgba(2,5,6,.88) 100%) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcArenaLights {
+    right: -7% !important;
+    top: 9px !important;
+    width: 78% !important;
+    opacity: .92 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHoop {
+    right: -1% !important;
+    top: 58px !important;
+    opacity: .84 !important;
+    transform: scale(.62) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcCourtFloor {
+    right: -20% !important;
+    bottom: -13% !important;
+    width: 116% !important;
+    height: 74% !important;
+    opacity: .98 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcCourtFloor img {
+    left: 42% !important;
+    bottom: 8% !important;
+    width: 39% !important;
+    height: 39% !important;
+    opacity: .52 !important;
+    mix-blend-mode: screen !important;
+    -webkit-mask-image: radial-gradient(ellipse at center,#000 43%,rgba(0,0,0,.9) 62%,transparent 82%) !important;
+    mask-image: radial-gradient(ellipse at center,#000 43%,rgba(0,0,0,.9) 62%,transparent 82%) !important;
+  }
+
+  /* Replace the oversized onboarding stepper with one compact Today action. */
+  body.mission-control-active .mcShellV3 .mcTodayLaunch {
+    min-height: 0 !important;
+    margin-top: 8px !important;
+    padding: 17px 16px 16px !important;
+    border: 1px solid rgba(217,228,235,.1) !important;
+    border-radius: 16px !important;
+    background:
+      radial-gradient(circle at 96% 8%,color-mix(in srgb,var(--mc) 8%,transparent),transparent 34%),
+      linear-gradient(145deg,rgba(10,17,20,.92),rgba(4,8,10,.88)) !important;
+    box-shadow: 0 16px 36px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.02) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayLaunchGlow {
+    width: 150px !important;
+    height: 150px !important;
+    right: -70px !important;
+    bottom: -88px !important;
+    opacity: .7 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayLaunchEyebrow {
+    color: #89949b !important;
+    font-size: 8px !important;
+    letter-spacing: .13em !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayLaunch h2 {
+    max-width: none !important;
+    margin-top: 7px !important;
+    font-size: 26px !important;
+    line-height: .98 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayLaunch > p {
+    max-width: 315px !important;
+    margin-top: 8px !important;
+    color: #8f9aa2 !important;
+    font-size: 10.5px !important;
+    line-height: 1.42 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcLaunchPath,
+  body.mission-control-active .mcShellV3 .mcLaunchSecondary {
+    display: none !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcLaunchActions {
+    display: block !important;
+    margin-top: 13px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcLaunchPrimary {
+    width: 100% !important;
+    min-height: 43px !important;
+    padding: 0 15px !important;
+    justify-content: space-between !important;
+    border-radius: 11px !important;
+  }
+
+  /* Refine the player follow-up surface so it reads as a native row rather
+     than another dashboard card. */
+  body.mission-control-active .mcShellV3 .mcAttention {
+    padding-bottom: 2px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcAttentionRow {
+    min-height: 62px !important;
+    border-radius: 14px !important;
+    background: rgba(5,9,11,.76) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcAttentionCopy strong {
+    font-size: 13px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcAttentionCopy small {
+    font-size: 10px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .missionControl {
+    padding-bottom: calc(78px + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* A faint branded court watermark makes short states feel intentional
+     without adding another empty module or fake metric. */
+  body.mission-control-active .mcShellV3.is-onboarding::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    right: -88px;
+    bottom: 76px;
+    width: 310px;
+    height: 190px;
+    border: 1px solid color-mix(in srgb,var(--mc) 8%,transparent);
+    border-radius: 50% 50% 0 0;
+    box-shadow: inset 0 0 70px color-mix(in srgb,var(--mc) 2%,transparent);
+    opacity: .5;
+    pointer-events: none;
+  }
+
+  body.mission-control-active .mcShellV3 .missionControl,
+  body.mission-control-active .mcShellV3 [data-testid="mobile-navigation-dock"] {
+    position: relative;
+    z-index: 1;
   }
 }
