@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { loadCoachPlayerInvitations, provisionCoachPlayer } from "../src/lib/coachPlayerInvitationService.js";
+import { buildCoachPlayerInviteEmailLink, loadCoachPlayerInvitations, provisionCoachPlayer } from "../src/lib/coachPlayerInvitationService.js";
 
 test("provision sends coach identity and player fields without a password", async () => {
   let request;
@@ -50,4 +50,28 @@ test("invitation list uses coach-scoped team query", async () => {
   assert.equal(result.invitations.length, 1);
   assert.equal(request.url, "/v1/coach/players/provision?team_id=team%201");
   assert.equal(request.init.headers["x-user-id"], "coach@example.com");
+});
+
+test("manual email fallback is pre-addressed and contains only the one-time setup link", () => {
+  const link = buildCoachPlayerInviteEmailLink({
+    recipient: "ARI@example.com",
+    playerName: "Ari Player",
+    setupUrl: "https://shotlab3.pages.dev/player-setup.html?token=one-time-token",
+    expiresAt: "2026-07-26T12:00:00.000Z",
+  });
+  assert.match(link, /^mailto:ari%40example\.com\?/);
+  const query = new URL(link).searchParams;
+  assert.equal(query.get("subject"), "You've been added to ShotLab");
+  const body = query.get("body");
+  assert.match(body, /Hi Ari Player/);
+  assert.match(body, /one-time link/i);
+  assert.match(body, /https:\/\/shotlab3\.pages\.dev\/player-setup\.html\?token=one-time-token/);
+  assert.match(body, /can only be used once/i);
+  assert.match(body, /coach cannot see the password/i);
+  assert.doesNotMatch(body, /temporary password/i);
+});
+
+test("manual email fallback is disabled without a recipient or secure URL", () => {
+  assert.equal(buildCoachPlayerInviteEmailLink({ recipient: "", setupUrl: "https://example.test/setup" }), "");
+  assert.equal(buildCoachPlayerInviteEmailLink({ recipient: "ari@example.com", setupUrl: "" }), "");
 });
