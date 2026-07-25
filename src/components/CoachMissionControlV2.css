@@ -1,0 +1,90 @@
+body:has(.mcShellV2) [data-testid="coach-mini-header"]{display:none!important}
+body:has(.mcShellV2) [data-testid="coach-dashboard-identity-header"],body:has(.mcShellV2) .coach-home-dashboard{display:none!important}
+.mcShellV2{--mc:#c8ff1a;--mc-secondary:#9ca3af;background:radial-gradient(circle at 72% 0,color-mix(in srgb,var(--mc) 7%,transparent),transparent 28%),#020506}
+.mcShellV2 .mcRailLogo,.mcShellV2 .mcFloor img{filter:drop-shadow(0 0 14px color-mix(in srgb,var(--mc) 28%,transparent))}
+.mcShellV2 .mcFloor img{opacity:.82;filter:drop-shadow(0 0 16px color-mix(in srgb,var(--mc) 30%,transparent))}
+.mcShellV2 .mcHero{isolation:isolate}
+.mcShellV2 .mcCourtScene{background:linear-gradient(180deg,#0b1114 0%,#030607 100%)}
+.mcShellV2 .mcCourtGlow{background:radial-gradient(circle at 73% 34%,color-mix(in srgb,var(--mc) 18%,transparent),transparent 24%),linear-gradient(120deg,transparent 34%,color-mix(in srgb,var(--mc) 5%,transparent) 60%,transparent)}
+.mcShellV2 .mcCourtLights span{background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--mc) 70%,white),transparent);box-shadow:0 0 16px color-mix(in srgb,var(--mc) 72%,transparent)}
+.mcShellV2 .mcBackboard,.mcShellV2 .mcBackboard i,.mcShellV2 .mcBackboard b,.mcShellV2 .mcFloor,.mcShellV2 .mcFloor:before,.mcShellV2 .mcFloor:after,.mcShellV2 .mcArc,.mcShellV2 .mcLane{border-color:color-mix(in srgb,var(--mc) 52%,transparent)}
+.mcShellV2 .mcSpark path{stroke:var(--mc);filter:drop-shadow(0 0 6px color-mix(in srgb,var(--mc) 50%,transparent))}
+.mcShellV2 .mcRing{background:conic-gradient(var(--mc) var(--progress),rgba(255,255,255,.08) 0);box-shadow:0 0 28px color-mix(in srgb,var(--mc) 18%,transparent)}
+.mcShellV2 .mcPanel{overflow:hidden}
+.mcShellV2 .mcList button,.mcShellV2 .mcTimeline>div{min-width:0}
+.mcShellV2 .mcList span,.mcShellV2 .mcTimeline span{min-width:0}
+.mcShellV2 .mcList strong,.mcShellV2 .mcList small,.mcShellV2 .mcTimeline strong,.mcShellV2 .mcTimeline small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mcShellV2 .mcSessionMeta span{min-width:0}
+.mcShellV2 .mcSessionMeta b,.mcShellV2 .mcSessionMeta small{overflow-wrap:anywhere}
+@media(max-width:900px){
+  .mcShellV2{display:block!important;margin:0!important;width:100%!important;min-height:100vh;padding-bottom:calc(112px + env(safe-area-inset-bottom))}
+  .mcShellV2 .mcRail{display:none!important}
+  .mcShellV2 .missionControl{max-width:none!important;padding:18px 18px 38px!important;gap:14px!important}
+  .mcShellV2 .mcHeader{display:grid!important;grid-template-columns:32px minmax(0,1fr) auto!important;align-items:start!important;gap:12px!important}
+  .mcShellV2 .mcMobileMenu{display:block!important;margin-top:4px}
+  .mcShellV2 .mcHeader h1{font-size:44px!important;line-height:.9!important;white-space:nowrap}
+  .mcShellV2 .mcHeaderSub{font-size:13px!important;margin-top:7px!important}
+  .mcShellV2 .mcHeaderRight{grid-template-columns:minmax(135px,1fr) 44px!important;gap:7px!important}
+  .mcShellV2 .mcHeaderRight small{display:none!important}
+  .mcShellV2 .mcTeamSelect{min-width:0!important;width:100%!important;height:42px!important;padding:0 12px!important}
+  .mcShellV2 .mcBell{width:44px!important;height:42px!important}
+  .mcShellV2 .mcHero{min-height:420px!important;border-radius:16px!important}
+  .mcShellV2 .mcHeroContent{width:58%!important;padding:28px 24px!important}
+  .mcShellV2 .mcHeroContent h2{font-size:40px!important;max-width:350px}
+  .mcShellV2 .mcCourtLights{left:48%!important;right:0!important}
+  .mcShellV2 .mcBackboard{right:10%!important;top:66px!important;transform:scale(.92)}
+  .mcShellV2 .mcFloor{right:-8%!important;bottom:-7%!important;width:68%!important;height:70%!important}
+  .mcShellV2 .mcHeroShade{background:linear-gradient(90deg,#040708 0%,rgba(4,7,8,.96) 40%,rgba(4,7,8,.52) 62%,rgba(4,7,8,.08) 100%)!important}
+  .mcShellV2 .mcTopGrid{grid-template-columns:1.05fr 1.05fr .95fr!important;gap:12px!important}
+  .mcShellV2 .mcBottomGrid{grid-template-columns:1.05fr .95fr!important;gap:12px!important}
+  .mcShellV2 .mcQuickGrid{grid-template-columns:repeat(6,1fr)!important}
+}
+@media(max-width:640px){
+  .mcShellV2 .missionControl{padding:14px 14px 126px!important;gap:12px!important}
+  .mcShellV2 .mcHeader{grid-template-columns:28px minmax(0,1fr) 42px!important;position:relative;align-items:start!important}
+  .mcShellV2 .mcTitle{min-width:0}
+  .mcShellV2 .mcHeader h1{font-size:34px!important;white-space:normal!important;line-height:.88!important}
+  .mcShellV2 .mcHeaderSub{font-size:11px!important;margin-top:6px!important}
+  .mcShellV2 .mcHeaderRight{display:contents!important}
+  .mcShellV2 .mcTeamSelect{grid-column:2/3!important;grid-row:2!important;width:100%!important;height:38px!important;margin-top:3px!important;font-size:11px!important}
+  .mcShellV2 .mcBell{grid-column:3!important;grid-row:1!important;width:40px!important;height:40px!important}
+  .mcShellV2 .mcHero{min-height:360px!important}
+  .mcShellV2 .mcHeroContent{width:62%!important;padding:24px 18px!important}
+  .mcShellV2 .mcEyebrow{font-size:9px!important}
+  .mcShellV2 .mcHeroContent h2{font-size:32px!important;line-height:.95!important;margin-top:9px!important}
+  .mcShellV2 .mcHeroContent p{font-size:13px!important;margin-top:10px!important}
+  .mcShellV2 .mcHeroContent p strong{font-size:22px!important}
+  .mcShellV2 .mcHeroStats{gap:8px!important;margin-top:15px!important}
+  .mcShellV2 .mcHeroStats button{grid-template-columns:22px minmax(0,1fr)!important;padding:10px!important;gap:0 7px!important}
+  .mcShellV2 .mcHeroStats i{font-size:20px!important}
+  .mcShellV2 .mcHeroStats strong{font-size:21px!important}
+  .mcShellV2 .mcHeroStats span{font-size:8px!important;white-space:normal!important}
+  .mcShellV2 .mcHeroContent>.mcPrimary{width:100%!important;min-height:48px!important;margin-top:15px!important;gap:22px!important}
+  .mcShellV2 .mcCourtLights{left:50%!important;transform:skewX(-18deg) scale(.78)!important;transform-origin:top left}
+  .mcShellV2 .mcBackboard{right:5%!important;top:66px!important;transform:scale(.72)!important;transform-origin:top right}
+  .mcShellV2 .mcFloor{right:-14%!important;bottom:-5%!important;width:72%!important;height:68%!important}
+  .mcShellV2 .mcFloor img{left:23%!important;bottom:12%!important;width:48%!important;height:48%!important}
+  .mcShellV2 .mcTopGrid{grid-template-columns:1fr!important;gap:12px!important}
+  .mcShellV2 .mcBottomGrid{grid-template-columns:1fr!important;gap:12px!important}
+  .mcShellV2 .mcQuickGrid{grid-template-columns:repeat(3,1fr)!important;gap:8px!important}
+  .mcShellV2 .mcQuickGrid button{min-height:84px!important}
+  .mcShellV2 .mcPanelHead{padding:13px 13px 0!important}
+  .mcShellV2 .mcSpark{height:72px!important}
+  .mcShellV2 .mcPulseStats{margin:0 7px!important}
+  .mcShellV2 .mcPulseStats strong{font-size:24px!important}
+  .mcShellV2 .mcPulseStats span{font-size:8px!important}
+  .mcShellV2 .mcList{padding:10px 10px 0!important}
+  .mcShellV2 .mcList button{padding:9px!important}
+  .mcShellV2 .mcRing{width:132px!important;height:132px!important}
+  .mcShellV2 .mcRing:before{width:102px!important;height:102px!important}
+  .mcShellV2 .mcSessionMeta{grid-template-columns:1.4fr .8fr .8fr!important;gap:6px!important;margin:12px!important}
+  .mcShellV2 .mcSessionMeta span{grid-template-columns:18px minmax(0,1fr)!important;font-size:16px!important}
+  .mcShellV2 .mcSessionMeta b{font-size:10px!important}
+  .mcShellV2 .mcSessionMeta small{font-size:8px!important}
+  .mcShellV2 .mcUpcoming h3{font-size:26px!important;margin:15px 13px 0!important}
+  .mcShellV2 .mcSessionFocus{margin:13px!important;padding-top:13px!important}
+  .mcShellV2 .mcDualActions{margin:0 13px!important;gap:8px!important}
+  .mcShellV2 .mcDualActions .mcPrimary{min-width:0!important;flex:1}
+  .mcShellV2 .mcTimeline{padding:8px 10px 12px!important}
+  .mcShellV2 .mcTools{margin-bottom:20px}
+}
