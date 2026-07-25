@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
 import "./CoachCommandCenter.css";
+import "./CoachMissionControlV2.css";
+import { useTeamBranding } from "../context/TeamBrandingContext";
 
-const LOGO="/branding/titans-exact-logo.png.PNG";
+const FALLBACK_LOGO="/branding/titans-exact-logo.png.PNG";
 const initials=(value="")=>String(value).trim().split(/\s+/).filter(Boolean).slice(0,2).map(part=>part[0]).join("").toUpperCase()||"SL";
 const clamp=(value,min,max)=>Math.min(max,Math.max(min,Number(value)||0));
 
@@ -11,12 +13,12 @@ function Avatar({item,size=38}){
   return src?<img className="mcAvatar" src={src} alt={`${label} headshot`} style={{width:size,height:size}}/>:<span className="mcAvatar mcAvatar--fallback" aria-label={`${label} headshot placeholder`} style={{width:size,height:size}}>{initials(label)}</span>;
 }
 
-function CourtScene(){
+function CourtScene({logoUrl}){
   return <div className="mcCourtScene" aria-hidden="true">
     <div className="mcCourtGlow"/>
     <div className="mcCourtLights"><span/><span/><span/><span/></div>
     <div className="mcBackboard"><i/><b/></div>
-    <div className="mcFloor"><div className="mcArc"/><div className="mcLane"/><img src={LOGO} alt=""/></div>
+    <div className="mcFloor"><div className="mcArc"/><div className="mcLane"/><img src={logoUrl||FALLBACK_LOGO} alt=""/></div>
   </div>;
 }
 
@@ -29,6 +31,11 @@ export default function CoachCommandCenter({
   onPlayersClick,onActiveTodayClick,onNextEventClick,onAddPlayer,onAddDrill,onScheduleEvent,onLogScore,
   joinCode,onCopyJoinCode,onRegenerateJoinCode,codeErr,attentionItems=[],activityItems=[],
 }){
+  const {branding}=useTeamBranding();
+  const logoUrl=branding?.logoUrl||FALLBACK_LOGO;
+  const teamName=branding?.teamName||branding?.name||"Thomas Titans";
+  const accent=branding?.accentColor||branding?.primaryColor||"#C8FF1A";
+  const secondary=branding?.secondaryColor||"#9CA3AF";
   const [copied,setCopied]=useState(false);
   const [toolsOpen,setToolsOpen]=useState(false);
   const rosterSize=Math.max(0,Number(totalPlayers)||0);
@@ -55,9 +62,9 @@ export default function CoachCommandCenter({
 
   if(variant==="compact")return <section className="missionControlCompact" data-testid="coach-command-center-compact"><div><span>Mission Control</span><strong>{statusTitle}</strong></div><button type="button" onClick={action}>{hasScheduledSession?"Open":"Schedule"}</button></section>;
 
-  return <div className="mcShell" data-testid="coach-command-center-full">
+  return <div className="mcShell mcShellV2" data-testid="coach-command-center-full" style={{"--mc":accent,"--mc-secondary":secondary}}>
     <aside className="mcRail" aria-label="Coach navigation">
-      <img className="mcRailLogo" src={LOGO} alt="Thomas Titans"/>
+      <img className="mcRailLogo" src={logoUrl} alt={`${teamName} logo`}/>
       <nav>{railItems.map(([label,icon],index)=><button key={label} type="button" className={index===0?"is-active":""} onClick={index===1?onPlayersClick:index===2||index===5?onNextEventClick:undefined}><i>{icon}</i><span>{label}</span></button>)}</nav>
       <div className="mcCoachIdentity"><span>Coach</span><strong>Demo Coach</strong><Avatar item={{name:"Demo Coach"}} size={40}/></div>
     </aside>
@@ -66,11 +73,11 @@ export default function CoachCommandCenter({
       <header className="mcHeader">
         <button className="mcMobileMenu" type="button" aria-label="Open navigation"><span/><span/><span/></button>
         <div className="mcTitle"><h1>Mission <em>Control</em></h1><span className="mcHeaderSub">Coach Dashboard</span></div>
-        <div className="mcHeaderRight"><button type="button" className="mcTeamSelect">Thomas Titans <span>⌄</span></button><button type="button" className="mcBell" aria-label={`${resolvedAttention.length} notifications`}>♢<b>{resolvedAttention.length}</b></button><small>{dateLabel} &nbsp;•&nbsp; {timeLabel}</small></div>
+        <div className="mcHeaderRight"><button type="button" className="mcTeamSelect">{teamName} <span>⌄</span></button><button type="button" className="mcBell" aria-label={`${resolvedAttention.length} notifications`}>♢<b>{resolvedAttention.length}</b></button><small>{dateLabel} &nbsp;•&nbsp; {timeLabel}</small></div>
       </header>
 
       <section className="mcHero" data-testid="coach-primary-objective">
-        <CourtScene/><div className="mcHeroShade"/>
+        <CourtScene logoUrl={logoUrl}/><div className="mcHeroShade"/>
         <div className="mcHeroContent"><span className="mcEyebrow">Today’s status</span><h2>{statusTitle}</h2><p><strong>{confirmed}</strong> / {rosterSize||0} players confirmed</p><div className="mcHeroStats"><button type="button" onClick={onPlayersClick}><i>♙</i><strong>{resolvedAttention.length}</strong><span>Need attention</span></button><button type="button" onClick={onActiveTodayClick}><i>✓</i><strong>{readiness}%</strong><span>Mission readiness</span></button></div><button type="button" className="mcPrimary" onClick={action}>{actionLabel}<span>→</span></button></div>
       </section>
 
