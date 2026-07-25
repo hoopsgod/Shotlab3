@@ -1,137 +1,133 @@
-# Coach → Player Registration Audit (Recommended Path)
+# Coach → Player Registration Audit (Implemented Path)
 
-## Problem to Solve
-Coaches need to register players directly from the **Players** page so players can sign in immediately without self-registering. After coach registration, each player should receive an email containing:
+## Problem Solved
+Coaches need to register players directly from the **Players** page so players can activate a real ShotLab login without independently creating a second roster identity.
 
-- Team Code
-- Sign-in credential bootstrap (temporary password or secure sign-in link)
+The implemented flow provides:
 
-## Current State (in this repo)
+- Coach-created roster profile
+- Player email capture
+- Single-use setup link
+- Player-selected private password
+- Automatic email when transactional delivery is configured
+- Secure **Open Email App** and **Copy Secure Link** fallbacks when it is not
 
-### 1) Coach-side “Add Player” only creates a profile shell
-The current `addRosterPlayer` flow only writes a `player_profiles` record (`userId: null`) and does **not** create a real player account or credentials. Players then still need to self-register to appear as full users. This is why the roster card says players need to create an account first.  
+## Implemented End-to-End Flow
 
-### 2) Authentication is local-storage based in the app runtime
-`register`/`login` operate on the local `players` array with hashed password values saved in `sl:players`. This model does not support production-grade email onboarding by itself, since there is no durable server-side identity issuance in this path.  
+1. Coach opens **Players** and selects **Add Player & Send Login Invite**.
+2. Coach enters first name, last name, email, and optional jersey number.
+3. ShotLab verifies that the requester is authorized for the team.
+4. ShotLab creates or links the roster profile without duplicating an existing player identity.
+5. ShotLab generates a cryptographically random, single-use setup token.
+6. Only the SHA-256 token hash is stored in the database.
+7. The setup link expires after 24 hours.
+8. When transactional email is configured, ShotLab sends the invitation automatically.
+9. Otherwise the coach can:
+   - open a pre-addressed email containing the secure setup link; or
+   - copy the secure setup link and send it directly.
+10. The player opens the link and chooses a private password.
+11. The claim transaction activates or updates the player login and links it to the existing roster profile.
+12. The setup token is marked claimed and cannot be reused.
 
-### 3) Team invite infrastructure already exists server-side
-The project already has backend invite confirmation/context APIs and SQL RPC support for team membership (`/v1/team-invites/context/start`, `/v1/team-memberships/confirm-context`, and corresponding invite-flow helpers). This is the strongest foundation for a coach-driven registration flow.  
+## Security Boundaries
 
-## Recommendation: Use “Provisioned Invite + One-Time Password Set” (Best Practice)
+- Permanent passwords are never generated for coaches.
+- Permanent passwords are never emailed, displayed, logged, or returned by the API.
+- Setup tokens are single-use and expire after 24 hours.
+- Only token hashes are stored.
+- Direct browser access to invitation rows is revoked.
+- Claim persistence occurs through a service-role-only atomic RPC.
+- A coach cannot silently attach an existing unattached account; the player must claim the invitation.
+- Accounts already attached to another team are rejected.
+- Coach-role accounts cannot be provisioned as players.
+- Existing self-registration and team-code joining remain supported.
 
-### Why this is the best fit
-- Reuses existing invite/team-membership primitives already present in the codebase.
-- Avoids storing or emailing permanent passwords in plaintext.
-- Supports “coach does the setup” while preserving secure player-controlled credentials.
-- Easier to audit and revoke than direct password assignment.
+## Coach Experience
 
-## Proposed End-to-End Flow
+The coach form shows invitation state:
 
-1. Coach opens Players page and clicks **Add Player**.
-2. Coach enters at minimum: first name, last name, email (optional jersey #).
-3. Frontend calls a new endpoint (example: `POST /v1/coach/players/provision`).
-4. Backend validates coach authorization for the team.
-5. Backend creates/updates a player identity record and pending membership invite state.
-6. Backend generates a **single-use setup token** (short TTL, e.g., 24h).
-7. Backend sends email with:
-   - Team name + Team Code
-   - “Set your password” link containing the one-time token
-   - Expiry + fallback instructions
-8. Player opens link, sets password once, and account is activated on team.
-9. Player signs in directly from then on.
+- `Invite Pending`
+- `Invite Sent`
+- `Account Active`
+- `Invite Expired`
+- `Invite Revoked`
 
-## Email Content Requirements
-Use clear transactional copy:
+When automatic delivery is unavailable, ShotLab shows:
 
-- Subject: `You’ve been added to {Team Name} on Shotlab`
-- Body essentials:
-  - Team Code: `{TEAM_CODE}`
-  - Setup button: `Set your password`
-  - Link expiration timestamp
-  - Security note: “If you weren’t expecting this, ignore this email.”
+- **COPY SECURE LINK**
+- **OPEN EMAIL APP**
 
-## Security Decisions (Non-negotiable)
+The email-app action prepares:
 
-- **Do not email permanent passwords.**
-- If product requires a “password in email,” send only a **temporary one-time credential** that is forced to rotate at first login.
-- Store only hashed secrets server-side.
-- Token must be single-use + short TTL + auditable.
-- Rate-limit coach provisioning and setup attempts.
-- Record telemetry/events for invite creation, email delivery attempt, token redemption, and failures.
+- the player email address;
+- subject: `You’ve been added to ShotLab`;
+- player greeting;
+- single-use setup link;
+- expiration notice;
+- unexpected-invitation security notice.
 
-## Minimal Data Model Additions
+## Existing Account Handling
 
-Add a coach-provisioning table (or extend existing invite tables) with fields like:
+- **No existing account:** create a claimable login through the setup flow.
+- **Existing player account already on this team:** link the roster profile and report `Account Active`.
+- **Existing unattached player account:** require explicit invitation claim and replace the active password with the player-selected password.
+- **Existing player account on another team:** return a conflict.
+- **Existing coach account:** return a role conflict.
 
-- `team_id`
-- `player_email`
-- `player_name`
-- `setup_token_hash`
-- `setup_expires_at`
-- `invited_by_coach_user_id`
-- `email_sent_at`
-- `claimed_at`
-- `status` (`pending`, `sent`, `claimed`, `expired`, `revoked`)
+## Database Changes
 
-This can be layered on top of existing invite flow objects rather than replacing them.
+### Migration 036
 
-## API Surface to Add
+- `coach_player_invitations`
+- invitation metadata on `player_profiles`
+- RLS and privilege restrictions
+- initial atomic invitation claim RPC
 
+### Migration 037
+
+- explicit claim handling for existing unattached accounts
+- player-selected password becomes the active login password
+- team-conflict enforcement
+
+## API Surface
+
+- `GET /v1/coach/players/provision`
+  - coach-only invitation status list
 - `POST /v1/coach/players/provision`
-  - Auth: coach only
-  - Input: `{ team_id, first_name, last_name, email, jersey_number? }`
-  - Output: `{ player_id, status, email_delivery_status }`
+  - create or link roster profile and issue invitation
 - `POST /v1/player-auth/claim`
-  - Input: `{ setup_token, new_password }`
-  - Output: `{ ok, player_id, team_id }`
+  - validate one-time token and activate account with player-selected password
 
-Optional:
-- `POST /v1/coach/players/:id/resend-invite`
-- `POST /v1/coach/players/:id/revoke-invite`
+## Transactional Email Configuration
 
-## Frontend Changes (Players Page)
+Automatic email uses Resend when these Cloudflare Pages variables are configured:
 
-1. Expand current add-player form to require email.
-2. Replace local-only `addRosterPlayer` behavior with API-backed provisioning.
-3. Show per-player invite state badge:
-   - `Invite Sent`
-   - `Claimed`
-   - `Expired`
-4. Add coach actions: `Resend Email`, `Copy Team Code`, `Revoke`.
+- `RESEND_API_KEY`
+- `SHOTLAB_FROM_EMAIL`
+- `APP_BASE_URL=https://shotlab3.pages.dev`
 
-## Migration Strategy
+Automatic delivery is an operational enhancement. The secure manual email fallback keeps the feature usable without exposing a password or requiring those variables before launch.
 
-1. Keep existing self-register path for backward compatibility.
-2. Add new coach-provision path behind a feature flag.
-3. Track completion funnel:
-   - coach_provision_started
-   - invite_email_sent
-   - invite_claimed
-   - first_successful_login
-4. After adoption, make coach provisioning default in Players page.
+## Verification Completed
 
-## Practical Rollout Plan
+- Invitation domain and safety contracts
+- Existing authentication and roster regressions
+- Production build
+- Coach-to-player Playwright flow
+- Player password-claim Playwright flow
+- Live Supabase RLS and privilege audit
+- Rollback-only live claim transaction with no retained test rows
+- Season archive, leaderboard, mobile, and preview regressions
 
-### Phase 1 (Fastest secure win)
-- Add provisioning endpoint + email send + claim endpoint.
-- UI: add email field and “Invite sent” state.
+## Merge Gate
 
-### Phase 2
-- Resend/revoke flows, better error states, analytics dashboards.
+Before merge, run one real registered-coach smoke test:
 
-### Phase 3
-- Harden anti-abuse (cooldowns, deliverability controls, bounce handling).
-
-## Key Risks and Mitigations
-
-- **Risk:** Deliverability issues.  
-  **Mitigation:** Use transactional provider with domain authentication + retries + resend action.
-
-- **Risk:** Coach typos wrong email.  
-  **Mitigation:** Confirm email entry + revoke/reissue tooling.
-
-- **Risk:** Token leakage.  
-  **Mitigation:** One-time tokens, short TTL, forced password set, device/IP logs.
-
-## Bottom Line
-The best implementation for Shotlab is **coach-initiated player provisioning using your existing team invite backbone plus one-time password setup email**. It gives coaches the frictionless workflow they want while keeping account security and auditability production-safe.
+1. Add a test player using an email the tester can access.
+2. Use automatic email, **Open Email App**, or **Copy Secure Link**.
+3. Open the setup link as the player.
+4. Choose a password.
+5. Sign in with the player email and new password.
+6. Confirm the player appears once on the correct roster.
+7. Confirm player dashboard, leaderboards, events, S&C, and shot logging load normally.
+8. Confirm the setup link cannot be reused.

@@ -1,0 +1,52 @@
+name: Coach Player Invitations
+
+on:
+  pull_request:
+    paths:
+      - "src/components/CoachPlayerInviteForm.jsx"
+      - "src/lib/coachPlayerInvitationService.js"
+      - "src/App.jsx"
+      - "public/player-setup.html"
+      - "functions/v1/coach/players/provision.js"
+      - "functions/v1/player-auth/claim.js"
+      - "functions/_utils/transactionalEmail.js"
+      - "migrations/036_coach_player_invitations.sql"
+      - "migrations/037_player_invitation_existing_account_claim.sql"
+      - "tests/coach-player-invitation*.test.mjs"
+      - "tests/e2e/coach-player-invitation.spec.mjs"
+      - "scripts/verify-coach-player-invitation-live.mjs"
+      - ".github/workflows/coach-player-invitations.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Invitation domain and safety tests
+        run: node --test tests/coach-player-invitation-service.test.mjs tests/coach-player-invitation-contract.test.mjs
+      - name: Existing authentication and roster regressions
+        run: node --test tests/legacy-auth-persistence.test.mjs tests/team-memberships-confirm-context-route.test.mjs tests/release-candidate-stability.test.mjs
+      - name: Install Playwright
+        run: npm install --no-save @playwright/test@1.55.1
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Production build
+        run: npm run build
+      - name: Coach-to-player invitation browser flow
+        run: npx playwright test tests/e2e/coach-player-invitation.spec.mjs
+      - name: Live provision, claim, login, replay, and cleanup verification
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          TEST_COACH_EMAIL: aq@gmail.com
+        run: node scripts/verify-coach-player-invitation-live.mjs
