@@ -1637,6 +1637,7 @@ if(!profile)return result;
 await P("sl:player-profiles",playerProfiles.map(pp=>pp.id===profile.id?{...pp,archived:true,rosterStatus:"archived",rosterAction:"coach_archive_player",accountDeletion:false,supabaseAuthUserDeleted:false,hideFromLeaderboards:true,archivedAt:Date.now(),archivedBy:user.email}:pp),setPlayerProfiles);
 return{ok:true};
 }
+setPlayers(result.players);
 await P("sl:players",result.players,setPlayers);
 return{ok:true};
 };
@@ -1647,7 +1648,9 @@ const result=removePlayerFromTeam({players,coach:user,playerEmail});
 if(!result.ok){
 const profile=findRosterProfile(playerEmail);
 if(!profile)return result;
-await P("sl:player-profiles",playerProfiles.map(pp=>pp.id===profile.id?{...pp,teamId:null,rosterStatus:"removed",rosterAction:"coach_remove_from_team",accountDeletion:false,supabaseAuthUserDeleted:false,removedFromTeamId:user.teamId,removedAt:Date.now(),removedBy:user.email,hideFromLeaderboards:true}:pp),setPlayerProfiles);
+const nextProfiles=playerProfiles.map(pp=>pp.id===profile.id?{...pp,teamId:null,rosterStatus:"removed",rosterAction:"coach_remove_from_team",accountDeletion:false,supabaseAuthUserDeleted:false,removedFromTeamId:user.teamId,removedAt:Date.now(),removedBy:user.email,hideFromLeaderboards:true}:pp);
+setPlayerProfiles(nextProfiles);
+await P("sl:player-profiles",nextProfiles,setPlayerProfiles);
 return{ok:true};
 }
 await P("sl:players",result.players,setPlayers);

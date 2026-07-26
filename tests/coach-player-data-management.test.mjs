@@ -412,3 +412,9 @@ test('stabilization: coach-facing labels never imply coach can delete a Supabase
   assert.match(appSource, /It does not delete Supabase Auth users, app account rows, team branding, drills, events, or other players/)
   assert.doesNotMatch(appSource, /coach can delete .*Supabase Auth/i)
 })
+
+
+test('coach removal updates roster state before awaiting persistence', () => {
+  assert.match(appSource, /setPlayers\(result\.players\);\s*await P\("sl:players",result\.players,setPlayers\);/);
+  assert.match(appSource, /setPlayerProfiles\(nextProfiles\);\s*await P\("sl:player-profiles",nextProfiles,setPlayerProfiles\);/);
+});
