@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 const TEAM_ID = "team-e2e-production-acceptance";
 const COACH_EMAIL = "coach.demo@shotlab.app";
 const PLAYER_EMAIL = "acceptance.player@example.com";
-const REMOVED_EMAIL = "removed.acceptance@example.com";
+const REMOVAL_EMAIL = "removal.candidate@example.com";
 const FULL_LOGO_URL = "https://example.test/shotlab-acceptance-full.svg";
 const MARK_LOGO_URL = "https://example.test/shotlab-acceptance-mark.svg";
 
@@ -31,39 +31,17 @@ const seedData = {
   "sl:players": [
     { id: "coach-acceptance", email: COACH_EMAIL, name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
     { id: "player-acceptance", playerId: "player-acceptance", email: PLAYER_EMAIL, name: "Acceptance Player", role: "player", teamId: TEAM_ID },
-    {
-      id: "player-removed",
-      playerId: "player-removed",
-      email: REMOVED_EMAIL,
-      name: "Removed Acceptance",
-      role: "player",
-      teamId: null,
-      hideFromLeaderboards: true,
-      removedFromTeamId: TEAM_ID,
-      removed: true,
-      rosterStatus: "removed",
-      removedAt: "2026-07-25T12:00:00.000Z",
-    },
+    { id: "player-removal", playerId: "player-removal", email: REMOVAL_EMAIL, name: "Removal Candidate", role: "player", teamId: TEAM_ID },
   ],
   "sl:player-profiles": [
     { id: "profile-acceptance", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Acceptance", lastName: "Player" },
-    {
-      id: "profile-removed",
-      userId: REMOVED_EMAIL,
-      email: REMOVED_EMAIL,
-      teamId: TEAM_ID,
-      firstName: "Removed",
-      lastName: "Acceptance",
-      removed: true,
-      rosterStatus: "removed",
-      removedAt: "2026-07-25T12:00:00.000Z",
-    },
+    { id: "profile-removal", userId: REMOVAL_EMAIL, email: REMOVAL_EMAIL, teamId: TEAM_ID, firstName: "Removal", lastName: "Candidate" },
   ],
   "sl:scores": [],
   "sl:program-scores": [],
   "sl:shotlogs": [
     { id: "shot-acceptance", playerId: "player-acceptance", email: PLAYER_EMAIL, name: "Acceptance Player", teamId: TEAM_ID, made: 87, attempted_shots: 120, date: "2026-07-25", sessionId: "acceptance-session" },
-    { id: "shot-removed", playerId: "player-removed", email: REMOVED_EMAIL, name: "Removed Acceptance", teamId: TEAM_ID, made: 999, attempted_shots: 1000, date: "2026-07-25", sessionId: "removed-session" },
+    { id: "shot-removal", playerId: "player-removal", email: REMOVAL_EMAIL, name: "Removal Candidate", teamId: TEAM_ID, made: 999, attempted_shots: 1000, date: "2026-07-25", sessionId: "removal-session" },
   ],
   "sl:events": [],
   "sl:rsvps": [],
@@ -130,7 +108,7 @@ test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
 
-test("coach branding save persists cleaned logos across refresh", async ({ page }) => {
+test("coach branding save persists and renders a cleaned prominent logo", async ({ page }) => {
   await enterSeededDemoCoach(page);
   await openCoachDestination(page, "branding");
 
@@ -144,19 +122,34 @@ test("coach branding save persists cleaned logos across refresh", async ({ page 
   const savedBranding = await readTeamBranding(page);
   expect(stripCacheBuster(savedBranding?.logoUrl)).toBe(FULL_LOGO_URL);
   expect(stripCacheBuster(savedBranding?.logoMarkUrl)).toBe(MARK_LOGO_URL);
-  expect(stripCacheBuster(await heroLogo.getAttribute("src"))).toBe(MARK_LOGO_URL);
+  expect(await heroLogo.getAttribute("src")).toMatch(/^data:image\/png;base64,/);
 
   await page.reload();
   await expect(page.getByRole("button", { name: "Demo Coach", exact: true })).toBeVisible({ timeout: 20_000 });
   expect(await readTeamBranding(page)).toEqual(savedBranding);
 });
 
-test("active roster player appears in coach roster and leaderboards while removed player stays excluded", async ({ page }) => {
+test("coach removal creates a hidden tombstone and excludes the player from roster and leaderboards", async ({ page }) => {
   await enterSeededDemoCoach(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
   await expect(page.getByText("Acceptance Player", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("Removed Acceptance", { exact: true })).toHaveCount(0);
+  const candidateName = page.getByText("Removal Candidate", { exact: true }).first();
+  await expect(candidateName).toBeVisible();
+
+  const candidateRow = candidateName.locator("xpath=ancestor::button[1]");
+  page.once("dialog", async (dialog) => dialog.accept());
+  await candidateRow.getByRole("button", { name: "REMOVE", exact: true }).click();
+  await expect(page.getByText("Removal Candidate", { exact: true })).toHaveCount(0);
+
+  await expect.poll(() => page.evaluate((email) => {
+    const rows = JSON.parse(window.localStorage.getItem("sl:players") || "[]");
+    const row = rows.find((player) => String(player.email || "").toLowerCase() === email);
+    return {
+      teamId: row?.teamId ?? null,
+      hidden: row?.hideFromLeaderboards === true,
+    };
+  }, REMOVAL_EMAIL)).toEqual({ teamId: null, hidden: true });
 
   await openCoachDestination(page, "leaderboards");
   const hub = page.getByTestId("premium-leaderboards-hub");
@@ -164,7 +157,7 @@ test("active roster player appears in coach roster and leaderboards while remove
   const playerName = hub.getByText("Acceptance Player", { exact: true }).first();
   await expect(playerName).toBeVisible();
   await expect(playerName.locator("xpath=ancestor::*[self::div or self::li or self::tr][1]")).toContainText("87");
-  await expect(hub.getByText("Removed Acceptance", { exact: true })).toHaveCount(0);
+  await expect(hub.getByText("Removal Candidate", { exact: true })).toHaveCount(0);
 });
 
 test("coach-created strength session remains stored across refresh", async ({ page }) => {
