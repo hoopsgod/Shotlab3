@@ -1,0 +1,38 @@
+name: Apply Production Acceptance Fix
+
+on:
+  push:
+    branches:
+      - codex/production-acceptance-e2e
+    paths:
+      - scripts/apply-production-acceptance-fix.mjs
+      - .github/workflows/apply-production-acceptance-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/production-acceptance-e2e
+          fetch-depth: 0
+
+      - name: Apply targeted persistence patch
+        run: node scripts/apply-production-acceptance-fix.mjs
+
+      - name: Verify targeted unit tests
+        run: node --test tests/remote-persistence-shape.test.mjs tests/player-removal-lifecycle-stabilization.test.mjs
+
+      - name: Commit patched files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/lib/remotePersistence.js src/lib/playerDataManagement.js tests/remote-persistence-shape.test.mjs tests/player-removal-lifecycle-stabilization.test.mjs tests/e2e/production-acceptance.spec.mjs
+          git commit -m "fix: persist removed-player tombstones across hydration"
+          git push origin HEAD:codex/production-acceptance-e2e
