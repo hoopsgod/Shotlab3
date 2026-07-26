@@ -54,3 +54,11 @@ test("coach-only filter variables never leak into the Player component", () => {
   assert.match(playerBlock, /\{drills\.map\(d=>/);
   assert.match(coachBlock, /\{visibleHomeDrills\.map\(d=>/);
 });
+
+
+test("activity intelligence is a reachable coach workspace", () => {
+  assert.match(appSource, /k:"activity",l:"Activity"/);
+  assert.match(appSource, /testId="coach-page-dashboard-activity"/);
+  assert.match(appSource, /tab==="activity"/);
+  assert.match(appSource, /setTab\("activity"\)/);
+});
