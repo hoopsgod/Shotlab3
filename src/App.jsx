@@ -1640,20 +1640,27 @@ return{ok:true};
 await P("sl:players",result.players,setPlayers);
 return{ok:true};
 };
-const removeRosterPlayer=async(playerEmail)=>{
+const removeRosterPlayer=async(playerIdentity)=>{
 if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
 if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
-const result=removePlayerFromTeam({players,coach:user,playerEmail});
-if(!result.ok){
-const profile=findRosterProfile(playerEmail);
-if(!profile)return result;
-const nextProfiles=playerProfiles.map(pp=>pp.id===profile.id?{...pp,teamId:null,rosterStatus:"removed",rosterAction:"coach_remove_from_team",accountDeletion:false,supabaseAuthUserDeleted:false,removedFromTeamId:user.teamId,removedAt:Date.now(),removedBy:user.email,hideFromLeaderboards:true}:pp);
-setPlayerProfiles(nextProfiles);
-await P("sl:player-profiles",nextProfiles,setPlayerProfiles);
-return{ok:true};
-}
-setPlayers(result.players);
-await P("sl:players",result.players,setPlayers);
+const profile=findRosterProfile(playerIdentity);
+const canonicalIdentity=normalizeEmail(profile?.email||profile?.userId||profile?.user_id||playerIdentity);
+const identityKeys=new Set([playerIdentity,canonicalIdentity,profile?.id,profile?.profileId,profile?.userId,profile?.user_id,profile?.email,profile?.player_email,profile?.playerId,profile?.player_id].map(v=>normalizeEmail(v)).filter(Boolean));
+const matchesRosterIdentity=(row={})=>[row.id,row.profileId,row.profile_id,row.userId,row.user_id,row.email,row.player_email,row.playerId,row.player_id].map(v=>normalizeEmail(v)).some(key=>key&&identityKeys.has(key));
+const removedAt=Date.now();
+const buildRemovedRow=(row)=>({...row,teamId:null,rosterStatus:"removed",rosterAction:"coach_remove_from_team",accountDeletion:false,supabaseAuthUserDeleted:false,removedFromTeamId:user.teamId,removedAt,removedBy:user.email,hideFromLeaderboards:true});
+const result=removePlayerFromTeam({players,coach:user,playerEmail:canonicalIdentity||playerIdentity,now:removedAt});
+const nextPlayers=result.ok?result.players:players.map(player=>player.role!=="coach"&&String(player.teamId||player.team_id||"")===String(user.teamId)&&matchesRosterIdentity(player)?buildRemovedRow(player):player);
+const nextProfiles=playerProfiles.map(playerProfile=>String(playerProfile.teamId||playerProfile.team_id||"")===String(user.teamId)&&matchesRosterIdentity(playerProfile)?buildRemovedRow(playerProfile):playerProfile);
+const playersChanged=nextPlayers.length!==players.length||nextPlayers.some((row,index)=>row!==players[index]);
+const profilesChanged=nextProfiles.length!==playerProfiles.length||nextProfiles.some((row,index)=>row!==playerProfiles[index]);
+if(!playersChanged&&!profilesChanged)return result;
+if(playersChanged)setPlayers(nextPlayers);
+if(profilesChanged)setPlayerProfiles(nextProfiles);
+const writes=[];
+if(playersChanged)writes.push(P("sl:players",nextPlayers,setPlayers));
+if(profilesChanged)writes.push(P("sl:player-profiles",nextProfiles,setPlayerProfiles));
+await Promise.all(writes);
 return{ok:true};
 };
 const deleteTeamLocalRosterPlayerData=async(playerEmail,confirmationText)=>{

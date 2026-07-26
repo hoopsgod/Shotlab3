@@ -414,10 +414,12 @@ test('stabilization: coach-facing labels never imply coach can delete a Supabase
 })
 
 
-test('coach removal updates roster state before awaiting persistence', () => {
+test('coach removal atomically tombstones matching player and profile layers', () => {
   const removeBlock = appSource.match(/const removeRosterPlayer=async[\s\S]*?const deleteTeamLocalRosterPlayerData=async/)?.[0] || '';
-  const archiveBlock = appSource.match(/const archiveRosterPlayer=async[\s\S]*?const removeRosterPlayer=async/)?.[0] || '';
-  assert.match(removeBlock, /setPlayers\(result\.players\);\s*await P\("sl:players",result\.players,setPlayers\);/);
-  assert.match(removeBlock, /setPlayerProfiles\(nextProfiles\);\s*await P\("sl:player-profiles",nextProfiles,setPlayerProfiles\);/);
-  assert.doesNotMatch(archiveBlock, /setPlayers\(result\.players\);\s*await P\("sl:players",result\.players,setPlayers\);/);
+  assert.match(removeBlock, /const identityKeys=new Set/);
+  assert.match(removeBlock, /const nextPlayers=result\.ok\?result\.players:players\.map/);
+  assert.match(removeBlock, /const nextProfiles=playerProfiles\.map/);
+  assert.match(removeBlock, /if\(playersChanged\)setPlayers\(nextPlayers\)/);
+  assert.match(removeBlock, /if\(profilesChanged\)setPlayerProfiles\(nextProfiles\)/);
+  assert.match(removeBlock, /await Promise\.all\(writes\)/);
 });
