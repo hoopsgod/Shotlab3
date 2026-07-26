@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import AppHeader from "../components/AppHeader";
-import { DSButton, DSCard, DSChip, DSEmptyState, DSInput, DSLoadingState, DSMetricCard, DSSectionHeader } from "../components/ui/designSystem";
+import { DominantObjectiveCard, MetricStrip, QuietSection } from "../components/VisualHierarchy.jsx";
+import { DSButton, DSCard, DSChip, DSEmptyState, DSInput, DSLoadingState, DSSectionHeader } from "../components/ui/designSystem";
 
 const Users = ({ size = 24, color = "currentColor" }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -57,60 +58,81 @@ export default function PlayersScreen() {
   }, []);
 
   return (
-    <div style={{ background: "var(--bg-0)", minHeight: "100vh", padding: "14px 14px 28px", display: "grid", gap: 12 }}>
-      <AppHeader title="PLAYERS" subtitle="Manage your roster and track player engagement" leading={<Users size={22} color="var(--text-2)" />} />
-
-      <DSInput
-        type="text"
-        placeholder="Search players"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        style={{ minHeight: 46, width: "100%", fontSize: 14 }}
+    <div className="premium-roster-workspace" style={{ minHeight: "100%", padding: "4px 0 28px", display: "grid", gap: 12 }}>
+      <AppHeader
+        eyebrow="Athlete operations"
+        title="PLAYERS"
+        subtitle="Manage roster identity, engagement, account readiness, and player development from one workspace."
+        leading={<Users size={22} color="var(--pw-accent, var(--accent))" />}
+        action={{ label: copied ? "Copied" : "Invite", onClick: shareInviteLink }}
       />
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-        {["ALL PLAYERS", "ACTIVE", "INACTIVE"].map((filter) => (
-          <DSChip key={filter} active={activeFilter === filter} onClick={() => setActiveFilter(filter)} style={{ borderRadius: 999, minHeight: 34 }}>
-            {filter}
-          </DSChip>
-        ))}
-      </div>
+      <DominantObjectiveCard
+        eyebrow="Roster command"
+        title={totalPlayers ? `${activePlayers} athletes building momentum` : "Build the roster foundation"}
+        description={totalPlayers ? "Identify who is active, who needs a follow-up touch, and where the next coaching action belongs." : "Invite players before the next session to unlock attendance trends, drill momentum, and development profiles."}
+        actionLabel={copied ? "Invite link copied" : "Invite players"}
+        onAction={shareInviteLink}
+        badge={totalPlayers ? `${inactivePlayers} follow-up` : "First setup"}
+        testId="coach-players-primary-objective"
+      />
 
-      <DSCard style={{ padding: 10 }}>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3,minmax(0,1fr))", gap: 8 }}>
-          {[[totalPlayers, "Total", "var(--text-1)"], [activePlayers, "Active", "var(--accent)"], [inactivePlayers, "Inactive", "var(--text-2)"]].map(([count, label, color]) => (
-            <DSMetricCard key={label} label={label} value={count} style={{ minHeight: 80, border: "1px solid var(--stroke-1)", background: "var(--surface-2)", boxShadow: "none" }} valueStyle={{ color, fontSize: 22 }} />
-          ))}
+      <MetricStrip
+        testId="coach-players-metrics"
+        items={[
+          { label: "Roster", value: totalPlayers, detail: "Connected athletes" },
+          { label: "Active", value: activePlayers, detail: "Current momentum" },
+          { label: "Follow-up", value: inactivePlayers, detail: "Needs attention" },
+        ]}
+      />
+
+      <QuietSection title="Roster controls" eyebrow="Find and segment">
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 10, alignItems: "center" }} className="roster-control-grid">
+          <DSInput
+            type="text"
+            placeholder="Search players"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            style={{ minHeight: 48, width: "100%", fontSize: 14 }}
+          />
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {["ALL PLAYERS", "ACTIVE", "INACTIVE"].map((filter) => (
+              <DSChip key={filter} active={activeFilter === filter} onClick={() => setActiveFilter(filter)} style={{ borderRadius: 999, minHeight: 38 }}>
+                {filter}
+              </DSChip>
+            ))}
+          </div>
         </div>
-      </DSCard>
+      </QuietSection>
 
       {isBootstrapping ? (
         <DSLoadingState
-          label="Preparing your coaching command center"
+          label="Preparing your player workspace"
           lines={4}
-          style={{ minHeight: 140, display: "grid", alignContent: "center" }}
+          style={{ minHeight: 170, display: "grid", alignContent: "center", borderRadius: 18 }}
         />
       ) : null}
 
       {!isBootstrapping && players.length === 0 ? (
-        <DSCard style={{ padding: 14 }}>
-          <div style={{ minHeight: 240, display: "grid", alignContent: "center", justifyItems: "center", gap: 12 }}>
-            <Users size={44} color="var(--accent)" />
-            <div style={{ color: "var(--text-3)", fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", textAlign: "center" }}>First session setup</div>
+        <DSCard style={{ padding: 18, borderRadius: 20, background: "var(--pw-surface)", border: "1px solid var(--pw-border)", boxShadow: "var(--pw-shadow)" }}>
+          <div style={{ minHeight: 260, display: "grid", alignContent: "center", justifyItems: "center", gap: 14 }}>
+            <div style={{ width: 70, height: 70, borderRadius: 20, display: "grid", placeItems: "center", border: "1px solid color-mix(in srgb,var(--pw-accent) 28%,var(--pw-border))", background: "var(--pw-accent-faint)", boxShadow: "0 18px 40px rgba(0,0,0,.28)" }}>
+              <Users size={34} color="var(--pw-accent, var(--accent))" />
+            </div>
             <DSEmptyState
-              title="Build your roster foundation"
-              message="Invite your first players to unlock attendance trends, drill momentum, and habit streak tracking from day one."
-              style={{ maxWidth: 380, textAlign: "center", background: "transparent", border: "1px dashed var(--stroke-2)" }}
+              title="No athletes connected yet"
+              message="Create the roster before the next session so every player can receive priorities, log work, and appear in team intelligence."
+              style={{ maxWidth: 420, textAlign: "center", background: "transparent", border: 0 }}
             />
-            <div style={{ display: "grid", gap: 6, width: "100%", maxWidth: 360 }}>
-              {["Share your invite link", "Ask players to join before the next session", "Use Events to schedule your first team workout"].map((step, index) => (
-                <div key={step} style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid var(--stroke-1)", background: "var(--surface-1)", borderRadius: 10, padding: "8px 10px" }}>
-                  <span style={{ width: 18, height: 18, borderRadius: 999, display: "grid", placeItems: "center", fontSize: 10, fontWeight: 700, color: "#0B0D10", background: "var(--accent)" }}>{index + 1}</span>
+            <div style={{ display: "grid", gap: 7, width: "100%", maxWidth: 420 }}>
+              {["Share the team invite link", "Confirm players create their accounts", "Use Events to publish the first team session"].map((step, index) => (
+                <div key={step} style={{ display: "flex", alignItems: "center", gap: 10, border: "1px solid var(--pw-border)", background: "rgba(255,255,255,.018)", borderRadius: 12, padding: "10px 12px" }}>
+                  <span style={{ width: 22, height: 22, borderRadius: 999, display: "grid", placeItems: "center", fontSize: 10, fontWeight: 800, color: "#071012", background: "var(--pw-accent, var(--accent))" }}>{index + 1}</span>
                   <span style={{ color: "var(--text-2)", fontSize: 12, fontWeight: 600 }}>{step}</span>
                 </div>
               ))}
             </div>
-            <DSButton onClick={shareInviteLink} variant="primary" style={{ minHeight: 44, paddingInline: 18 }}>
+            <DSButton onClick={shareInviteLink} variant="primary" style={{ minHeight: 46, paddingInline: 20 }}>
               {copied ? "Invite Link Copied" : "Invite Players"}
             </DSButton>
           </div>
@@ -118,17 +140,24 @@ export default function PlayersScreen() {
       ) : !isBootstrapping ? (
         <>
           <DSSectionHeader title="Roster" meta={`${filteredPlayers.length} shown`} />
-          {filteredPlayers.map((player) => (
-            <DSCard key={player.id} style={{ padding: 14, display: "flex", alignItems: "center", gap: 12, cursor: "pointer", background: "var(--surface-2)" }}>
-              <div style={{ width: "42px", height: "42px", background: "var(--surface-1)", borderRadius: "50%", display: "grid", placeItems: "center", fontSize: "16px", fontWeight: 700, color: "var(--text-1)", border: player.active ? "2px solid var(--accent-soft)" : "2px solid var(--stroke-1)" }}>
-                {player.name?.[0] || "?"}
-              </div>
-              <div style={{ flex: 1, fontSize: "14px", fontWeight: 700, textTransform: "uppercase", color: "var(--text-1)", letterSpacing: ".04em" }}>{player.name}</div>
-              <ChevronRight size={16} color="var(--text-3)" />
-            </DSCard>
-          ))}
+          <div style={{ display: "grid", gap: 9 }}>
+            {filteredPlayers.map((player) => (
+              <DSCard key={player.id} className="ch" style={{ padding: 14, display: "flex", alignItems: "center", gap: 12, cursor: "pointer" }}>
+                <div style={{ width: 44, height: 44, background: "var(--surface-1)", borderRadius: 14, display: "grid", placeItems: "center", fontSize: 16, fontWeight: 700, color: "var(--text-1)", border: player.active ? "1px solid var(--pw-accent)" : "1px solid var(--pw-border)" }}>
+                  {player.name?.[0] || "?"}
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 14, fontWeight: 750, color: "var(--text-1)", letterSpacing: ".01em", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{player.name}</div>
+                  <div style={{ marginTop: 3, color: "var(--text-3)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em" }}>{player.active ? "Active" : "Needs follow-up"}</div>
+                </div>
+                <ChevronRight size={17} color="var(--text-3)" />
+              </DSCard>
+            ))}
+          </div>
         </>
       ) : null}
+
+      <style>{`@media (max-width:760px){.roster-control-grid{grid-template-columns:1fr!important}}`}</style>
     </div>
   );
 }
