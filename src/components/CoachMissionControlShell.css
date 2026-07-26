@@ -1,0 +1,382 @@
+/* Mission Control owns the coach home surface while mounted.
+   Target only the legacy app-shell chrome, never Mission Control's internal rail. */
+body.mission-control-active .app-shell.is-desktop > .sidebar-nav,
+body.mission-control-active .app-shell.is-desktop > .insights-panel {
+  display: none !important;
+}
+
+body.mission-control-active .app-shell.is-desktop {
+  display: block !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: 100% !important;
+  max-width: none !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.mission-control-active .app-shell.is-desktop > .shell-main,
+body.mission-control-active .app-shell.is-desktop > .shell-main > .content-wrap {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.mission-control-active .app-shell.is-desktop .team-brand.coach-mode.page {
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+body.mission-control-active .app-shell.is-desktop .mcShellV3 {
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+/* The shared mobile dock is intentionally retained. Mission Control's own
+   drawer handles extended coach navigation without adding a second rail. */
+@media (max-width: 980px) {
+  body.mission-control-active .app-shell,
+  body.mission-control-active .shell-main,
+  body.mission-control-active .content-wrap,
+  body.mission-control-active .team-brand.coach-mode.page {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+}
+
+@media (max-width: 700px) {
+  /* Urgent player follow-up always stays directly below the primary mission. */
+  .mcShellV3 .mcFocusGrid > .mcAttention {
+    order: 0 !important;
+  }
+
+  .mcShellV3 .mcFocusGrid > .mcTodayLaunch,
+  .mcShellV3 .mcFocusGrid > .mcTodayPlan {
+    order: 1 !important;
+  }
+
+  /* Rebalance the signature hero. The coach-controlled team mark remains
+     visible, free-standing, tappable, and integrated with the court. */
+  body.mission-control-active .mcShellV3 .mcHero {
+    min-height: 292px !important;
+    border-radius: 19px !important;
+    background: #020405 !important;
+    box-shadow: 0 22px 58px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.028) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroTeamMark {
+    display: grid !important;
+    right: 11px !important;
+    top: 12px !important;
+    width: 74px !important;
+    height: 74px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    place-items: center !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    isolation: isolate !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroTeamMark::before {
+    inset: 19% !important;
+    background: color-mix(in srgb,var(--mc) 12%,transparent) !important;
+    filter: blur(16px) !important;
+    opacity: .72 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroTeamMark img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    opacity: .98 !important;
+    mix-blend-mode: screen !important;
+    filter: drop-shadow(0 9px 16px rgba(0,0,0,.46)) drop-shadow(0 0 10px color-mix(in srgb,var(--mc) 20%,transparent)) !important;
+    -webkit-mask-image: radial-gradient(ellipse at center,#000 40%,rgba(0,0,0,.97) 57%,rgba(0,0,0,.7) 70%,transparent 86%) !important;
+    mask-image: radial-gradient(ellipse at center,#000 40%,rgba(0,0,0,.97) 57%,rgba(0,0,0,.7) 70%,transparent 86%) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroTeamMark::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 1px;
+    width: 18px;
+    height: 18px;
+    border: 1px solid color-mix(in srgb,var(--mc) 58%,white);
+    border-radius: 50%;
+    background: #07100b;
+    box-shadow: 0 5px 12px rgba(0,0,0,.42),0 0 10px color-mix(in srgb,var(--mc) 24%,transparent);
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroContent {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 18px 16px 15px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHero h1 {
+    max-width: 248px !important;
+    font-size: 30px !important;
+    line-height: .95 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroContent > p {
+    max-width: 252px !important;
+    margin-top: 9px !important;
+    font-size: 11px !important;
+    line-height: 1.38 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcCourtArtwork {
+    background:
+      radial-gradient(ellipse at 81% 20%, color-mix(in srgb,var(--mc) 26%,transparent), transparent 28%),
+      radial-gradient(ellipse at 72% 77%, color-mix(in srgb,var(--mc) 11%,transparent), transparent 39%),
+      linear-gradient(180deg,#091114 0%,#020405 93%) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroScrim {
+    background:
+      linear-gradient(90deg,rgba(2,5,6,.995) 0%,rgba(2,5,6,.94) 47%,rgba(2,5,6,.42) 72%,rgba(2,5,6,.04) 100%),
+      linear-gradient(180deg,transparent 50%,rgba(2,5,6,.88) 100%) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcArenaLights {
+    right: -7% !important;
+    top: 9px !important;
+    width: 78% !important;
+    opacity: .92 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHoop {
+    right: -1% !important;
+    top: 58px !important;
+    opacity: .84 !important;
+    transform: scale(.62) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcCourtFloor {
+    right: -20% !important;
+    bottom: -13% !important;
+    width: 116% !important;
+    height: 74% !important;
+    opacity: .98 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcCourtFloor img {
+    left: 42% !important;
+    bottom: 8% !important;
+    width: 39% !important;
+    height: 39% !important;
+    opacity: .52 !important;
+    mix-blend-mode: screen !important;
+    -webkit-mask-image: radial-gradient(ellipse at center,#000 43%,rgba(0,0,0,.9) 62%,transparent 82%) !important;
+    mask-image: radial-gradient(ellipse at center,#000 43%,rgba(0,0,0,.9) 62%,transparent 82%) !important;
+  }
+
+  /* Legacy launch treatment is kept compact for any cached component state. */
+  body.mission-control-active .mcShellV3 .mcTodayLaunch {
+    min-height: 0 !important;
+    margin-top: 8px !important;
+    padding: 17px 16px 16px !important;
+    border: 1px solid rgba(217,228,235,.1) !important;
+    border-radius: 16px !important;
+    background:
+      radial-gradient(circle at 96% 8%,color-mix(in srgb,var(--mc) 8%,transparent),transparent 34%),
+      linear-gradient(145deg,rgba(10,17,20,.92),rgba(4,8,10,.88)) !important;
+    box-shadow: 0 16px 36px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.02) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayLaunchGlow {
+    width: 150px !important;
+    height: 150px !important;
+    right: -70px !important;
+    bottom: -88px !important;
+    opacity: .7 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayLaunchEyebrow {
+    color: #89949b !important;
+    font-size: 8px !important;
+    letter-spacing: .13em !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayLaunch h2 {
+    max-width: none !important;
+    margin-top: 7px !important;
+    font-size: 26px !important;
+    line-height: .98 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayLaunch > p {
+    max-width: 315px !important;
+    margin-top: 8px !important;
+    color: #8f9aa2 !important;
+    font-size: 10.5px !important;
+    line-height: 1.42 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcLaunchPath,
+  body.mission-control-active .mcShellV3 .mcLaunchSecondary {
+    display: none !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcLaunchActions {
+    display: block !important;
+    margin-top: 13px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcLaunchPrimary {
+    width: 100% !important;
+    min-height: 43px !important;
+    padding: 0 15px !important;
+    justify-content: space-between !important;
+    border-radius: 11px !important;
+  }
+
+  /* Truthful native-feeling Today row replaces the generic setup stepper. */
+  body.mission-control-active .mcShellV3 .mcTodayPlan {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    min-height: 112px;
+    margin-top: 8px;
+    padding: 15px;
+    border: 1px solid rgba(217,228,235,.1);
+    border-radius: 16px;
+    display: grid;
+    grid-template-columns: 44px minmax(0,1fr);
+    align-items: center;
+    gap: 12px;
+    background:
+      radial-gradient(circle at 96% 4%,color-mix(in srgb,var(--mc) 8%,transparent),transparent 35%),
+      linear-gradient(145deg,rgba(10,17,20,.94),rgba(4,8,10,.9));
+    box-shadow: 0 16px 36px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.02);
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayPlan::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    right: -52px;
+    bottom: -76px;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: color-mix(in srgb,var(--mc) 7%,transparent);
+    filter: blur(28px);
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayPlanIcon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border: 1px solid color-mix(in srgb,var(--mc) 24%,transparent);
+    border-radius: 13px;
+    color: var(--mc);
+    background: color-mix(in srgb,var(--mc) 5%,rgba(255,255,255,.01));
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayPlanCopy {
+    min-width: 0;
+    display: block;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayPlanCopy small,
+  body.mission-control-active .mcShellV3 .mcTodayPlanCopy strong,
+  body.mission-control-active .mcShellV3 .mcTodayPlanCopy em {
+    display: block;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayPlanCopy small {
+    color: #87929a;
+    font: 760 8px/1 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayPlanCopy strong {
+    margin-top: 6px;
+    color: #eff3f5;
+    font: 720 15px/1.14 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    letter-spacing: -.015em;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayPlanCopy em {
+    margin-top: 5px;
+    color: #87929a;
+    font: 520 10.5px/1.38 Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    font-style: normal;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTodayPlan > button {
+    grid-column: 2;
+    justify-self: start;
+    min-height: 34px;
+    margin-top: -1px;
+    padding: 0;
+    border: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: transparent;
+    color: var(--mc);
+    font: 720 10px Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    cursor: pointer;
+  }
+
+  /* Refine the player follow-up surface so it reads as a native row rather
+     than another dashboard card. */
+  body.mission-control-active .mcShellV3 .mcAttention {
+    padding-bottom: 2px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcAttentionRow {
+    min-height: 62px !important;
+    border-radius: 14px !important;
+    background: rgba(5,9,11,.76) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcAttentionCopy strong {
+    font-size: 13px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcAttentionCopy small {
+    font-size: 10px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .missionControl {
+    padding-bottom: calc(78px + env(safe-area-inset-bottom)) !important;
+  }
+
+  /* A faint branded court watermark makes short states feel intentional
+     without adding another empty module or fake metric. */
+  body.mission-control-active .mcShellV3.is-onboarding::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    right: -88px;
+    bottom: 76px;
+    width: 310px;
+    height: 190px;
+    border: 1px solid color-mix(in srgb,var(--mc) 8%,transparent);
+    border-radius: 50% 50% 0 0;
+    box-shadow: inset 0 0 70px color-mix(in srgb,var(--mc) 2%,transparent);
+    opacity: .5;
+    pointer-events: none;
+  }
+
+  body.mission-control-active .mcShellV3 .missionControl,
+  body.mission-control-active .mcShellV3 [data-testid="mobile-navigation-dock"] {
+    position: relative;
+    z-index: 1;
+  }
+}

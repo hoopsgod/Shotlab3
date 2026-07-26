@@ -27,7 +27,7 @@ async function expectNoHorizontalOverflow(page) {
 
 async function expectThreeMetrics(locator) {
   await expect(locator).toBeVisible();
-  await expect(locator.locator(":scope > div")).toHaveCount(3);
+  await expect(locator.locator(":scope > *")).toHaveCount(3);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -68,39 +68,55 @@ test("player mobile home prioritizes one mission, three metrics, and collapsed s
   await expectNoHorizontalOverflow(page);
 });
 
-test("coach mobile home is compact and Events becomes a clean standalone schedule page", async ({ page }) => {
+test("coach mobile home answers the 30-second workflow with one compact truthful Today panel", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "coach");
 
-  const identityHeader = page.getByTestId("coach-dashboard-identity-header");
   const commandCenter = page.getByTestId("coach-command-center-full");
   const objective = page.getByTestId("coach-primary-objective");
   const metrics = page.getByTestId("coach-primary-metrics");
-  const secondaryTools = page.getByTestId("coach-secondary-tools");
-  const practice = page.getByTestId("coach-today-practice");
-  const standings = page.getByTestId("coach-team-standings");
+  const needsAttention = page.getByRole("heading", { name: "Needs attention", exact: true });
+  const onboarding = page.getByTestId("coach-onboarding-state");
 
-  await expect(identityHeader).toBeVisible({ timeout: 20_000 });
-  await expect(commandCenter).toBeVisible();
+  await expect(commandCenter).toBeVisible({ timeout: 20_000 });
   await expect(objective).toBeVisible();
   await expectThreeMetrics(metrics);
-  await expect(secondaryTools).toBeVisible();
-  await expect(practice).toBeVisible();
-  await expect(standings).toBeVisible();
-  expect(await standings.evaluate((element) => element.open)).toBe(false);
+  await expect(needsAttention).toBeVisible();
+  await expect(onboarding).toBeVisible();
+  await expect(onboarding.getByText("No practice scheduled", { exact: true })).toBeVisible();
+  await expect(onboarding.getByRole("button", { name: /Create practice/i })).toBeVisible();
+  await expect(onboarding.getByText("Set the team in motion", { exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Activity today", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Recent activity", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "Next session", exact: true })).toHaveCount(0);
+  await expect(page.getByTestId("coach-dashboard-identity-header")).not.toBeVisible();
+  await expect(page.locator(".coach-home-dashboard")).not.toBeVisible();
 
-  const commandBox = await commandCenter.boundingBox();
-  const practiceBox = await practice.boundingBox();
-  const standingsBox = await standings.boundingBox();
-  expect(commandBox).not.toBeNull();
-  expect(practiceBox).not.toBeNull();
-  expect(standingsBox).not.toBeNull();
-  expect(commandBox.height).toBeLessThan(340);
-  expect(standingsBox.height).toBeLessThan(72);
-  expect(practiceBox.y).toBeLessThan(standingsBox.y);
+  const shellBox = await commandCenter.boundingBox();
+  const objectiveBox = await objective.boundingBox();
+  const attentionBox = await needsAttention.boundingBox();
+  const onboardingBox = await onboarding.boundingBox();
+  expect(shellBox).not.toBeNull();
+  expect(objectiveBox).not.toBeNull();
+  expect(attentionBox).not.toBeNull();
+  expect(onboardingBox).not.toBeNull();
+  expect(shellBox.x).toBeLessThanOrEqual(1);
+  expect(shellBox.width).toBeGreaterThanOrEqual(388);
+  const leftGutter = objectiveBox.x;
+  const rightGutter = 390 - (objectiveBox.x + objectiveBox.width);
+  expect(leftGutter).toBeGreaterThanOrEqual(8);
+  expect(rightGutter).toBeGreaterThanOrEqual(8);
+  expect(leftGutter).toBeLessThanOrEqual(16);
+  expect(rightGutter).toBeLessThanOrEqual(16);
+  expect(Math.abs(leftGutter - rightGutter)).toBeLessThanOrEqual(2);
+  expect(objectiveBox.height).toBeLessThan(330);
+  expect(attentionBox.y).toBeLessThan(844);
+  expect(onboardingBox.y).toBeGreaterThan(attentionBox.y);
+  expect(onboardingBox.height).toBeLessThan(150);
   await expectNoHorizontalOverflow(page);
 
   const dock = page.getByTestId("mobile-navigation-dock");
+  await expect(dock).toBeVisible();
   await dock.getByRole("button", { name: "Events", exact: true }).click();
 
   const eventsPage = page.getByTestId("coach-events-mobile-page");
@@ -112,7 +128,6 @@ test("coach mobile home is compact and Events becomes a clean standalone schedul
   await expect(eventsHeader).toBeVisible();
   await expect(emptyState).toBeVisible();
   await expect(createEvent).toBeVisible();
-  await expect(page.getByTestId("coach-dashboard-identity-header")).toHaveCount(0);
   await expect(page.getByTestId("coach-command-center-full")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Log out", exact: true })).not.toBeVisible();
 
