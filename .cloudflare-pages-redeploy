@@ -1,0 +1,5 @@
+Cloudflare Pages production redeploy trigger
+
+PR: #1239
+Merge commit: faeced4b83a983b8ff57c093661cfa4ccd6247b0
+Purpose: Trigger a clean production deployment after the successful Mission Control merge.
