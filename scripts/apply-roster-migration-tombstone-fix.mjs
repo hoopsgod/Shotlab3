@@ -8,8 +8,8 @@ function replaceExact(path, before, after) {
 
 replaceExact(
   "src/lib/playerDataManagement.js",
-  `export const isPlayerHiddenFromActiveLeaderboards = (player) => isHiddenRosterRecord(player);`,
-  `export const isPlayerHiddenFromActiveLeaderboards = (player) => isHiddenRosterRecord(player);\n\nexport const resolveMigratedRosterTeamId = ({ row = {}, mappedTeamId = null, fallbackTeamId = null } = {}) => {\n  const explicitTeamId = row?.teamId ?? row?.team_id ?? null;\n  if (isPlayerHiddenFromActiveLeaderboards(row)) return explicitTeamId;\n  return explicitTeamId || mappedTeamId || fallbackTeamId || null;\n};`
+  `export const isPlayerHiddenFromActiveLeaderboards = (player = {}) => isInactiveRosterRecord(player) || player?.teamId == null;`,
+  `export const isPlayerHiddenFromActiveLeaderboards = (player = {}) => isInactiveRosterRecord(player) || player?.teamId == null;\n\nexport const resolveMigratedRosterTeamId = ({ row = {}, mappedTeamId = null, fallbackTeamId = null } = {}) => {\n  const hasExplicitTeamField = Object.prototype.hasOwnProperty.call(row, "teamId") || Object.prototype.hasOwnProperty.call(row, "team_id");\n  const explicitTeamId = row?.teamId ?? row?.team_id ?? null;\n  if (hasExplicitTeamField && explicitTeamId == null && isInactiveRosterRecord(row)) return null;\n  return explicitTeamId || mappedTeamId || fallbackTeamId || null;\n};`
 );
 
 replaceExact(
@@ -21,7 +21,7 @@ replaceExact(
 replaceExact(
   "src/App.jsx",
   `const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithBranding[0]?.id||null,hideFromLeaderboards:p.hideFromLeaderboards===true}));`,
-  `const playersMigrated=ps.map(p=>({...p,teamId:resolveMigratedRosterTeamId({row:p,mappedTeamId:map[p.email],fallbackTeamId:teamsWithBranding[0]?.id}),hideFromLeaderboards:p.hideFromLeaderboards===true}));`
+  `const playersMigrated=ps.map(p=>({...p,teamId:resolveMigratedRosterTeamId({row:p,mappedTeamId:map[p.email],fallbackTeamId:teamsWithBranding[0]?.id}),hideFromLeaderboards:p.hideFromLeaderboards===true||p.hide_from_leaderboards===true}));`
 );
 
 replaceExact(
@@ -36,7 +36,12 @@ replaceExact(
   `  removePlayerFromTeam,\n  resolveMigratedRosterTeamId,`
 );
 
-fs.appendFileSync("tests/player-removal-lifecycle-stabilization.test.mjs", `\n\ntest("migration preserves removed tombstone null team ids instead of reassigning the first team", () => {\n  assert.equal(resolveMigratedRosterTeamId({\n    row: { email: "removed@team.test", teamId: null, hideFromLeaderboards: true, rosterStatus: "removed" },\n    mappedTeamId: "team-a",\n    fallbackTeamId: "team-fallback",\n  }), null);\n\n  assert.equal(resolveMigratedRosterTeamId({\n    row: { email: "active@team.test", role: "player" },\n    mappedTeamId: "team-a",\n    fallbackTeamId: "team-fallback",\n  }), "team-a");\n\n  assert.equal(resolveMigratedRosterTeamId({\n    row: { email: "archived@team.test", teamId: "team-a", hideFromLeaderboards: true, rosterStatus: "archived" },\n    mappedTeamId: "team-b",\n    fallbackTeamId: "team-fallback",\n  }), "team-a");\n});\n`);
+fs.appendFileSync("tests/player-removal-lifecycle-stabilization.test.mjs", `\n\ntest("migration preserves removed tombstone null team ids instead of reassigning the first team", () => {\n  assert.equal(resolveMigratedRosterTeamId({\n    row: { email: "removed@team.test", teamId: null, hideFromLeaderboards: true, rosterStatus: "removed" },\n    mappedTeamId: "team-a",\n    fallbackTeamId: "team-fallback",\n  }), null);\n\n  assert.equal(resolveMigratedRosterTeamId({\n    row: { email: "unassigned@team.test", role: "player" },\n    mappedTeamId: "team-a",\n    fallbackTeamId: "team-fallback",\n  }), "team-a");\n\n  assert.equal(resolveMigratedRosterTeamId({\n    row: { email: "archived@team.test", teamId: "team-a", hideFromLeaderboards: true, rosterStatus: "archived" },\n    mappedTeamId: "team-b",\n    fallbackTeamId: "team-fallback",\n  }), "team-a");\n});\n`);
+
+replaceExact(
+  "tests/e2e/production-acceptance.spec.mjs",
+  `  page.once("dialog", async (dialog) => dialog.accept());\n  await page.getByRole("button", { name: "REMOVE", exact: true }).last().click();`,
+  `  const candidateRosterRow = page.locator('[role="button"]').filter({ hasText: "Removal Candidate" }).filter({ has: page.getByRole("button", { name: "REMOVE", exact: true }) }).first();\n  page.once("dialog", async (dialog) => dialog.accept());\n  await candidateRosterRow.getByRole("button", { name: "REMOVE", exact: true }).click();`
+);
 
 console.log("Applied roster migration tombstone fix.");
-// Workflow trigger: the workflow now exists on the branch and can apply this patch safely.
