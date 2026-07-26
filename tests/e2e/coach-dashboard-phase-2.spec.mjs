@@ -243,6 +243,6 @@ test("leaderboard, activity, and season comparison use the shared intelligence l
   const comparison = page.getByTestId("coach-season-comparison-panel");
   await comparison.scrollIntoViewIfNeeded();
   await expect(comparison).toBeVisible({ timeout: 20_000 });
-  await expect(comparison.getByText("2025-26", { exact: true }).first()).toBeVisible();
+  await expect(comparison.locator("select")).toHaveValue("archive-phase-two");
   await expectNoHorizontalOverflow(page);
 });
