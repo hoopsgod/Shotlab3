@@ -58,7 +58,7 @@ fs.writeFileSync(appPath, app);
 const contractPath = "tests/coach-dashboard-phase-2-contract.test.mjs";
 let contract = fs.readFileSync(contractPath, "utf8");
 if (!contract.includes("activity intelligence is a reachable coach workspace")) {
-  contract += `\n\ntest("activity intelligence is a reachable coach workspace", () => {\n  assert.match(appSource, /k:\"activity\",l:\"Activity\"/);\n  assert.match(appSource, /testId=\"coach-page-dashboard-activity\"/);\n  assert.match(appSource, /tab===\"activity\"/);\n  assert.match(appSource, /setTab\(\"activity\"\)/);\n});\n`;
+  contract += `\n\ntest("activity intelligence is a reachable coach workspace", () => {\n  assert.match(appSource, /k:\"activity\",l:\"Activity\"/);\n  assert.match(appSource, /testId=\"coach-page-dashboard-activity\"/);\n  assert.match(appSource, /tab===\"activity\"/);\n  assert.match(appSource, /setTab\\(\"activity\"\\)/);\n});\n`;
 }
 fs.writeFileSync(contractPath, contract);
 
