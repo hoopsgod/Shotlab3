@@ -1,0 +1,58 @@
+name: Apply Coach Interactive Dashboard Phase
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apply-coach-interactive-dashboard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  apply-dashboard-phase:
+    if: github.actor != 'github-actions[bot]' && github.head_ref == 'agent/coach-interactive-dashboards'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/coach-interactive-dashboards
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Apply dashboard integration
+        run: node scripts/apply-coach-interactive-dashboard-phase.mjs
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify dashboard selectors and integration contracts
+        run: node --test tests/coach-operational-dashboard.test.mjs tests/coach-interactive-dashboard-contract.test.mjs
+
+      - name: Build application
+        run: npm run build
+
+      - name: Commit verified integration
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx
+          if git diff --cached --quiet; then
+            echo "Dashboard integration is already committed."
+            exit 0
+          fi
+          git commit -m "feat: wire interactive dashboards into coach routes"
+          git fetch origin agent/coach-interactive-dashboards
+          git rebase origin/agent/coach-interactive-dashboards
+          git push --force-with-lease origin HEAD:agent/coach-interactive-dashboards
