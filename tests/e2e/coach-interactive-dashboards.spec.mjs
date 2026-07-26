@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+test.use({ viewport: { width: 390, height: 844 } });
+
 const TEAM_ID = "team-dashboard-e2e";
 const COACH_EMAIL = "coach.demo@shotlab.app";
 
