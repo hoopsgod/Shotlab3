@@ -1,0 +1,57 @@
+name: Premium Workspace E2E
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: premium-workspace-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  premium-workspace:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Verify premium workspace architecture
+        run: node --test tests/premium-workspace-system.test.mjs
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run coach and player premium workspace flows
+        run: npx playwright test tests/e2e/premium-workspace.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: premium-workspace-e2e-artifacts
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
