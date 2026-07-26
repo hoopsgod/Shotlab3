@@ -39,5 +39,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add src/App.jsx
+          if git diff --cached --quiet; then
+            echo "Premium workspace scopes are already committed."
+            exit 0
+          fi
           git commit -m "feat: apply premium workspace scopes across coach and player shells"
-          git push origin HEAD:codex/high-end-workspace-system
+          git fetch origin codex/high-end-workspace-system
+          git rebase origin/codex/high-end-workspace-system
+          git push --force-with-lease origin HEAD:codex/high-end-workspace-system
