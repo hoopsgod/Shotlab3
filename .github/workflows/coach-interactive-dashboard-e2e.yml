@@ -33,9 +33,6 @@ jobs:
       - name: Verify selectors and source contracts
         run: node --test tests/coach-operational-dashboard.test.mjs tests/coach-interactive-dashboard-contract.test.mjs
 
-      - name: Install Playwright test runner
-        run: npm install --no-save @playwright/test@1.55.1
-
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
