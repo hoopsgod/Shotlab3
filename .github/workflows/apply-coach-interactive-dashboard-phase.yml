@@ -52,7 +52,18 @@ jobs:
         run: node --test tests/coach-operational-dashboard.test.mjs tests/coach-interactive-dashboard-contract.test.mjs
 
       - name: Build application
-        run: npm run build
+        run: |
+          set -o pipefail
+          npm run build 2>&1 | tee coach-dashboard-build.log
+
+      - name: Upload build diagnostic
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coach-dashboard-build-diagnostic
+          path: coach-dashboard-build.log
+          if-no-files-found: error
+          retention-days: 2
 
       - name: Commit verified integration
         run: |
