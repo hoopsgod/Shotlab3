@@ -31,7 +31,7 @@ test("Mission Control uses real roster and schedule signals instead of placehold
   assert.doesNotMatch(source,/Game Speed Shooting/);
 });
 
-test("cinematic hero prefers a custom transparent mark and integrates it into the gym",()=>{
+test("cinematic hero preserves a visible coach-controlled logo and integrates it into the gym",()=>{
   assert.match(source,/useTeamBranding/);
   assert.match(source,/useCleanTeamLogo/);
   assert.match(source,/cleanFullLogoUrl/);
@@ -47,7 +47,9 @@ test("cinematic hero prefers a custom transparent mark and integrates it into th
   assert.match(premiumCss,/mix-blend-mode:screen/);
   assert.match(premiumCss,/mask-image:radial-gradient/);
   assert.match(premiumCss,/@keyframes mcArenaBreath/);
-  assert.match(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]*display:\s*none\s*!important/);
+  assert.match(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]*display:\s*grid\s*!important/);
+  assert.match(shellCss,/\.mcHeroTeamMark img\s*\{[\s\S]*mix-blend-mode:\s*screen\s*!important/);
+  assert.doesNotMatch(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]{0,220}display:\s*none\s*!important/);
 });
 
 test("custom team logos are cleaned, persisted, and previewed on light and dark surfaces",()=>{
@@ -95,7 +97,7 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(css,/env\(safe-area-inset-bottom\)/);
   assert.match(headerCss,/min-height:62px/);
   assert.match(polishCss,/\.mcSectionHead\{/);
-  assert.match(shellCss,/min-height:\s*286px\s*!important/);
+  assert.match(shellCss,/min-height:\s*292px\s*!important/);
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
   assert.match(premiumCss,/backdrop-filter:blur\(24px\)/);
