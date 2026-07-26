@@ -8,17 +8,20 @@ const headerCss=fs.readFileSync(new URL("../src/components/CoachMissionControlHe
 const polishCss=fs.readFileSync(new URL("../src/components/CoachMissionControlPolish.css",import.meta.url),"utf8");
 const premiumCss=fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css",import.meta.url),"utf8");
 const shellCss=fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css",import.meta.url),"utf8");
+const finalCss=fs.readFileSync(new URL("../src/components/CoachMissionControlFinal.css",import.meta.url),"utf8");
 const logoSource=fs.readFileSync(new URL("../src/components/useCleanTeamLogo.js",import.meta.url),"utf8");
 const brandingForm=fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx",import.meta.url),"utf8");
 
-test("coach dashboard answers the 30-second workflow questions",()=>{
-  ["Mission Control","Priority action","Needs attention","Activity today","Recent activity","Next session"].forEach(label=>assert.match(source,new RegExp(label)));
+test("coach dashboard answers the 30-second workflow questions without repeating the attention headline",()=>{
+  ["Mission Control","Today at a glance","Needs attention","Activity today","Recent activity","Next session"].forEach(label=>assert.match(source,new RegExp(label)));
   assert.match(source,/data-testid="coach-primary-objective"/);
   assert.match(source,/data-testid="coach-primary-metrics"/);
   assert.match(source,/primaryCommand/);
   assert.match(source,/attentionCount > 0/);
   assert.match(source,/hasScheduledSession/);
   assert.match(source,/CourtArtwork/);
+  assert.match(source,/decision\$\{attentionCount === 1 \? "" : "s"\} before practice/);
+  assert.doesNotMatch(source,/title: `\$\{attentionCount\} player/);
 });
 
 test("Mission Control uses real roster and schedule signals instead of placeholder analytics",()=>{
@@ -26,9 +29,21 @@ test("Mission Control uses real roster and schedule signals instead of placehold
   assert.match(source,/totalPlayers/);
   assert.match(source,/nextEventDateFormatted/);
   assert.match(source,/activeRate/);
+  assert.match(source,/<small>Active<\/small>/);
+  assert.match(source,/<small>Follow-up<\/small>/);
+  assert.match(source,/<small>Next<\/small>/);
+  assert.match(source,/hasScheduledSession \? "Set" : "—"/);
   assert.doesNotMatch(source,/92%/);
   assert.doesNotMatch(source,/85%/);
   assert.doesNotMatch(source,/Game Speed Shooting/);
+});
+
+test("attention rows explain the issue instead of using unresolved placeholder copy",()=>{
+  assert.match(source,/Roster activity gap/);
+  assert.match(source,/No training activity has been logged this week/);
+  assert.match(source,/Review training status and account connection/);
+  assert.match(source,/mcAttentionMeta/);
+  assert.doesNotMatch(source,/Inactive or unresolved player items/);
 });
 
 test("cinematic hero preserves a visible coach-controlled logo and integrates it into the gym",()=>{
@@ -48,7 +63,9 @@ test("cinematic hero preserves a visible coach-controlled logo and integrates it
   assert.match(premiumCss,/mask-image:radial-gradient/);
   assert.match(premiumCss,/@keyframes mcArenaBreath/);
   assert.match(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]*display:\s*grid\s*!important/);
-  assert.match(shellCss,/\.mcHeroTeamMark img\s*\{[\s\S]*mix-blend-mode:\s*screen\s*!important/);
+  assert.match(finalCss,/width:\s*84px\s*!important/);
+  assert.match(finalCss,/@keyframes mcFinalArenaPulse/);
+  assert.match(finalCss,/\.mcRealityStrip\s*\{[\s\S]*border:\s*0/);
   assert.doesNotMatch(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]{0,220}display:\s*none\s*!important/);
 });
 
@@ -97,8 +114,10 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(css,/env\(safe-area-inset-bottom\)/);
   assert.match(headerCss,/min-height:62px/);
   assert.match(polishCss,/\.mcSectionHead\{/);
-  assert.match(shellCss,/min-height:\s*292px\s*!important/);
+  assert.match(finalCss,/min-height:\s*286px\s*!important/);
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
   assert.match(premiumCss,/backdrop-filter:blur\(24px\)/);
+  assert.match(finalCss,/\.mcPrimary:active/);
+  assert.match(finalCss,/@media \(prefers-reduced-motion: reduce\)/);
 });
