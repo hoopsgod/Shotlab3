@@ -1,7 +1,7 @@
 import { test, expect } from "@playwright/test";
 
 const TEAM_ID = "team-e2e-production-acceptance";
-const COACH_EMAIL = "coach.acceptance@example.com";
+const COACH_EMAIL = "coach.demo@shotlab.app";
 const PLAYER_EMAIL = "acceptance.player@example.com";
 const REMOVED_EMAIL = "removed.acceptance@example.com";
 const FULL_LOGO_URL = "https://example.test/shotlab-acceptance-full.svg";
@@ -29,7 +29,7 @@ const seedData = {
     },
   }],
   "sl:players": [
-    { id: "coach-acceptance", email: COACH_EMAIL, name: "Acceptance Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
+    { id: "coach-acceptance", email: COACH_EMAIL, name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
     { id: "player-acceptance", playerId: "player-acceptance", email: PLAYER_EMAIL, name: "Acceptance Player", role: "player", teamId: TEAM_ID },
     {
       id: "player-removed",
@@ -81,13 +81,16 @@ async function installSafeRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
-async function seedRegisteredCoach(page) {
+async function seedDemoCoach(page) {
   await page.goto("/");
-  await page.evaluate(({ payload, coachEmail }) => {
-    window.localStorage.clear();
+  const demoButton = page.getByRole("button", { name: "Demo Coach", exact: true });
+  await expect(demoButton).toBeVisible({ timeout: 20_000 });
+  await demoButton.click();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+
+  await page.evaluate((payload) => {
     for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
-    window.localStorage.setItem("sl:session", JSON.stringify({ email: coachEmail }));
-  }, { payload: seedData, coachEmail: COACH_EMAIL });
+  }, seedData);
   await page.reload();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
@@ -124,7 +127,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("coach branding save survives refresh and remains prominent in Mission Control", async ({ page }) => {
-  await seedRegisteredCoach(page);
+  await seedDemoCoach(page);
   await openCoachDestination(page, "branding");
 
   await page.getByLabel("Full logo URL").fill(FULL_LOGO_URL);
@@ -142,7 +145,7 @@ test("coach branding save survives refresh and remains prominent in Mission Cont
 });
 
 test("active roster player appears in coach roster and leaderboards while removed player stays excluded", async ({ page }) => {
-  await seedRegisteredCoach(page);
+  await seedDemoCoach(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
   await expect(page.getByText("Acceptance Player", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
@@ -158,7 +161,7 @@ test("active roster player appears in coach roster and leaderboards while remove
 });
 
 test("coach-created strength session persists after refresh", async ({ page }) => {
-  await seedRegisteredCoach(page);
+  await seedDemoCoach(page);
   await openCoachDestination(page, "sc");
 
   await page.getByRole("button", { name: /ADD SESSION/i }).first().click();
