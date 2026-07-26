@@ -34,7 +34,7 @@ jobs:
       - name: Apply dashboard integration
         run: |
           set -o pipefail
-          node scripts/apply-coach-interactive-dashboard-phase.mjs 2>&1 | tee coach-dashboard-patch.log
+          node scripts/run-coach-interactive-dashboard-patch.mjs 2>&1 | tee coach-dashboard-patch.log
 
       - name: Upload patch diagnostic
         if: failure()
