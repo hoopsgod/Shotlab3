@@ -10,9 +10,34 @@ on:
         default: https://shotlab3.pages.dev
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
+  apply-optimistic-roster-removal-fix:
+    if: github.actor != 'github-actions[bot]' && github.head_ref == 'codex/production-acceptance-e2e'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/production-acceptance-e2e
+          fetch-depth: 0
+
+      - name: Apply optimistic removal patch
+        run: node scripts/apply-optimistic-roster-removal-fix.mjs
+
+      - name: Verify player lifecycle contracts
+        run: node --test tests/coach-player-data-management.test.mjs tests/player-removal-lifecycle-stabilization.test.mjs tests/remote-persistence-shape.test.mjs
+
+      - name: Commit verified patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx tests/coach-player-data-management.test.mjs
+          git commit -m "fix: update roster immediately when a coach removes a player"
+          git push origin HEAD:codex/production-acceptance-e2e
+
   production-acceptance:
     runs-on: ubuntu-latest
     timeout-minutes: 25
