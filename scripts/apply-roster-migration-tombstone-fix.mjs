@@ -31,7 +31,9 @@ write(appPath, app);
 const lifecyclePath = "tests/player-removal-lifecycle-stabilization.test.mjs";
 let lifecycle = read(lifecyclePath);
 if (!lifecycle.includes("resolveMigratedRosterTeamId,")) {
-  lifecycle = lifecycle.replace("  removePlayerFromTeam,", "  removePlayerFromTeam,\n  resolveMigratedRosterTeamId,");
+  const importAnchor = "  getCoachRosterPlayers,";
+  if (!lifecycle.includes(importAnchor)) throw new Error("Lifecycle import anchor missing");
+  lifecycle = lifecycle.replace(importAnchor, `${importAnchor}\n  resolveMigratedRosterTeamId,`);
 }
 if (!lifecycle.includes("migration preserves removed tombstone null team ids")) {
   lifecycle += `\n\ntest("migration preserves removed tombstone null team ids instead of reassigning the first team", () => {\n  assert.equal(resolveMigratedRosterTeamId({\n    row: { email: "removed@team.test", teamId: null, hideFromLeaderboards: true, rosterStatus: "removed" },\n    mappedTeamId: "team-a",\n    fallbackTeamId: "team-fallback",\n  }), null);\n  assert.equal(resolveMigratedRosterTeamId({\n    row: { email: "unassigned@team.test", role: "player" },\n    mappedTeamId: "team-a",\n    fallbackTeamId: "team-fallback",\n  }), "team-a");\n});\n`;
