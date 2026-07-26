@@ -214,9 +214,9 @@ export function filterLeaderboardIntelligenceRows(rows = [], { scope = "all", qu
 
 export function buildActivityIntelligenceRows({ scores = [], shotLogs = [], scLogs = [], events = [], today = "" } = {}) {
   const rows = [
-    ...safeArray(scores).map((row) => ({ id: `score-${row.id || Math.random()}`, date: dateOf(row), type: "score", player: nameOf(row), title: row.name || row.email || "Player", detail: `${numberFrom(row, ["score", "made", "makes"])} logged`, priority: "normal", source: row })),
-    ...safeArray(shotLogs).map((row) => ({ id: `shot-${row.id || Math.random()}`, date: dateOf(row), type: "shooting", player: nameOf(row), title: row.name || row.email || "Player", detail: `${numberFrom(row, ["made", "makes", "score"])} makes`, priority: "positive", source: row })),
-    ...safeArray(scLogs).map((row) => ({ id: `sc-${row.id || Math.random()}`, date: dateOf(row), type: "strength", player: nameOf(row), title: row.name || row.email || "Player", detail: "S&C completed", priority: "positive", source: row })),
+    ...safeArray(scores).map((row, index) => ({ id: `score-${row.id || `${dateOf(row)}-${index}`}`, date: dateOf(row), type: "score", player: nameOf(row), title: row.name || row.email || "Player", detail: `${numberFrom(row, ["score", "made", "makes"])} logged`, priority: "normal", source: row })),
+    ...safeArray(shotLogs).map((row, index) => ({ id: `shot-${row.id || `${dateOf(row)}-${index}`}`, date: dateOf(row), type: "shooting", player: nameOf(row), title: row.name || row.email || "Player", detail: `${numberFrom(row, ["made", "makes", "score"])} makes`, priority: "positive", source: row })),
+    ...safeArray(scLogs).map((row, index) => ({ id: `sc-${row.id || `${dateOf(row)}-${index}`}`, date: dateOf(row), type: "strength", player: nameOf(row), title: row.name || row.email || "Player", detail: "S&C completed", priority: "positive", source: row })),
     ...safeArray(events).filter((event) => !today || String(event.date || "") >= today).map((event) => ({ id: `event-${event.id}`, date: String(event.date || ""), type: "event", player: "Team", title: event.title || "Team Event", detail: `${event.time || "TBD"} · ${event.location || "Location TBD"}`, priority: "info", source: event })),
   ];
   return rows.filter((row) => row.date).sort((a, b) => b.date.localeCompare(a.date));
