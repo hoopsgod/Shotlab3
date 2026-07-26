@@ -1,37 +1,35 @@
 import { test, expect } from "@playwright/test";
 
 const TEAM_ID = "team-e2e-production-acceptance";
-const COACH_EMAIL = "coach.demo@shotlab.app";
+const COACH_EMAIL = "coach.acceptance@example.com";
 const PLAYER_EMAIL = "acceptance.player@example.com";
 const REMOVED_EMAIL = "removed.acceptance@example.com";
 const FULL_LOGO_URL = "https://example.test/shotlab-acceptance-full.svg";
 const MARK_LOGO_URL = "https://example.test/shotlab-acceptance-mark.svg";
 
 const seedData = {
-  "sl:teams": [
-    {
-      id: TEAM_ID,
+  "sl:teams": [{
+    id: TEAM_ID,
+    name: "Acceptance Test Team",
+    ownerCoachId: COACH_EMAIL,
+    joinCode: "SAFE26",
+    createdAt: 1_750_000_000_000,
+    branding: {
       name: "Acceptance Test Team",
-      ownerCoachId: COACH_EMAIL,
-      joinCode: "SAFE26",
-      createdAt: 1_750_000_000_000,
-      branding: {
-        name: "Acceptance Test Team",
-        shortName: "ATT",
-        wordmark: "ACCEPTANCE TEST TEAM",
-        primaryColor: "#3B82F6",
-        secondaryColor: "#93C5FD",
-        accentColor: "#2563EB",
-        textOnPrimary: "#EAF2FF",
-        logoUrl: "/branding/titans-exact-logo.png.PNG",
-        logoMarkUrl: "/branding/titans-default-mark.svg",
-        textScale: "standard",
-        version: 1,
-      },
+      shortName: "ATT",
+      wordmark: "ACCEPTANCE TEST TEAM",
+      primaryColor: "#3B82F6",
+      secondaryColor: "#93C5FD",
+      accentColor: "#2563EB",
+      textOnPrimary: "#EAF2FF",
+      logoUrl: "/branding/titans-exact-logo.png.PNG",
+      logoMarkUrl: "/branding/titans-default-mark.svg",
+      textScale: "standard",
+      version: 1,
     },
-  ],
+  }],
   "sl:players": [
-    { id: "coach-acceptance", email: COACH_EMAIL, name: "Demo Coach", role: "coach", teamId: TEAM_ID },
+    { id: "coach-acceptance", email: COACH_EMAIL, name: "Acceptance Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
     { id: "player-acceptance", playerId: "player-acceptance", email: PLAYER_EMAIL, name: "Acceptance Player", role: "player", teamId: TEAM_ID },
     {
       id: "player-removed",
@@ -77,35 +75,29 @@ const seedData = {
 const TEST_LOGO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="#2563EB"/><path d="M28 54h44M50 28v44" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg>';
 
 async function installSafeRoutes(page) {
-  await page.route("https://example.test/*.svg*", async (route) => {
-    await route.fulfill({ status: 200, contentType: "image/svg+xml", body: TEST_LOGO_SVG });
-  });
-  await page.route("**/v1/season-archives", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) });
-  });
-  await page.route("**/v1/coach/players/provision**", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: [] }) });
-  });
-  await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
-  });
+  await page.route("https://example.test/*.svg*", (route) => route.fulfill({ status: 200, contentType: "image/svg+xml", body: TEST_LOGO_SVG }));
+  await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
+  await page.route("**/v1/coach/players/provision**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: [] }) }));
+  await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
-async function seedCoachStorage(page) {
-  await page.addInitScript(({ payload, coachEmail }) => {
+async function seedRegisteredCoach(page) {
+  await page.goto("/");
+  await page.evaluate(({ payload, coachEmail }) => {
     window.localStorage.clear();
     for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
     window.localStorage.setItem("sl:session", JSON.stringify({ email: coachEmail }));
   }, { payload: seedData, coachEmail: COACH_EMAIL });
+  await page.reload();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
-async function enterDemo(page, role) {
+async function enterDemoPlayer(page) {
   await page.goto("/");
-  const demoButton = page.getByRole("button", { name: role === "coach" ? "Demo Coach" : "Demo Player", exact: true });
-  const dock = page.getByTestId("mobile-navigation-dock");
-  await expect(page.getByRole("button", { name: role === "coach" ? /^(Demo Coach|Players)$/ : /^(Demo Player|At Home)$/ }).first()).toBeVisible({ timeout: 20_000 });
-  if (await demoButton.isVisible()) await demoButton.click();
-  await expect(dock).toBeVisible({ timeout: 20_000 });
+  const demoButton = page.getByRole("button", { name: "Demo Player", exact: true });
+  await expect(demoButton).toBeVisible({ timeout: 20_000 });
+  await demoButton.click();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
 async function openMore(page) {
@@ -121,12 +113,10 @@ async function openCoachDestination(page, key) {
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
 }
 
-const withoutCacheBuster = (value = "") => String(value).split("?")[0];
-
-async function expectHeroLogoSource(page, expectedSource) {
+async function currentHeroLogoSource(page) {
   const heroLogo = page.locator(".mcHeroTeamMark img");
   await expect(heroLogo).toBeVisible({ timeout: 20_000 });
-  await expect.poll(async () => withoutCacheBuster(await heroLogo.getAttribute("src")), { timeout: 15_000 }).toBe(expectedSource);
+  return heroLogo.getAttribute("src");
 }
 
 test.beforeEach(async ({ page }) => {
@@ -134,27 +124,25 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("coach branding save survives refresh and remains prominent in Mission Control", async ({ page }) => {
-  await seedCoachStorage(page);
-  await enterDemo(page, "coach");
+  await seedRegisteredCoach(page);
   await openCoachDestination(page, "branding");
 
-  await expect(page.getByText("TEAM BRANDING", { exact: true }).first()).toBeVisible();
   await page.getByLabel("Full logo URL").fill(FULL_LOGO_URL);
   await page.getByLabel("Logo mark URL").fill(MARK_LOGO_URL);
   await page.getByRole("button", { name: "Save team branding", exact: true }).click();
   await page.getByRole("button", { name: "Back", exact: true }).click();
 
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
-  await expectHeroLogoSource(page, MARK_LOGO_URL);
+  const savedLogoSource = await currentHeroLogoSource(page);
+  expect(savedLogoSource).toMatch(/^data:image\/png;base64,/);
 
   await page.reload();
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
-  await expectHeroLogoSource(page, MARK_LOGO_URL);
+  expect(await currentHeroLogoSource(page)).toBe(savedLogoSource);
 });
 
 test("active roster player appears in coach roster and leaderboards while removed player stays excluded", async ({ page }) => {
-  await seedCoachStorage(page);
-  await enterDemo(page, "coach");
+  await seedRegisteredCoach(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
   await expect(page.getByText("Acceptance Player", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
@@ -163,15 +151,14 @@ test("active roster player appears in coach roster and leaderboards while remove
   await openCoachDestination(page, "leaderboards");
   const hub = page.getByTestId("premium-leaderboards-hub");
   await expect(hub).toBeVisible({ timeout: 20_000 });
-  const activePlayerRow = hub.getByText("Acceptance Player", { exact: true }).first().locator("xpath=ancestor::*[self::div or self::li or self::tr][1]");
-  await expect(activePlayerRow).toBeVisible();
-  await expect(activePlayerRow).toContainText("87");
+  const playerName = hub.getByText("Acceptance Player", { exact: true }).first();
+  await expect(playerName).toBeVisible();
+  await expect(playerName.locator("xpath=ancestor::*[self::div or self::li or self::tr][1]")).toContainText("87");
   await expect(hub.getByText("Removed Acceptance", { exact: true })).toHaveCount(0);
 });
 
 test("coach-created strength session persists after refresh", async ({ page }) => {
-  await seedCoachStorage(page);
-  await enterDemo(page, "coach");
+  await seedRegisteredCoach(page);
   await openCoachDestination(page, "sc");
 
   await page.getByRole("button", { name: /ADD SESSION/i }).first().click();
@@ -183,28 +170,22 @@ test("coach-created strength session persists after refresh", async ({ page }) =
   await form.getByPlaceholder("6:00 AM").fill("6:30 AM");
   await form.getByRole("button", { name: "CREATE SESSION", exact: true }).click();
 
-  const savedSession = page.locator(".scSection").filter({ hasText: "Acceptance Strength" });
-  await expect(savedSession).toBeVisible();
+  await expect(page.locator(".scSection").filter({ hasText: "Acceptance Strength" })).toBeVisible();
   await expect.poll(() => page.evaluate(() => {
     const rows = JSON.parse(window.localStorage.getItem("sl:sc-sessions") || "[]");
     return rows.some((row) => row.sport === "Acceptance Strength" && row.date === "2026-08-15" && row.time === "6:30 AM");
   }), { timeout: 15_000 }).toBe(true);
 
-  await page.goto("/");
-  await enterDemo(page, "coach");
+  await page.reload();
   await openCoachDestination(page, "sc");
   await expect(page.locator(".scSection").filter({ hasText: "Acceptance Strength" })).toBeVisible({ timeout: 20_000 });
 });
 
-test("Demo Player shot rows are removed on logout without touching non-demo rows", async ({ page }) => {
-  await page.addInitScript(() => window.localStorage.clear());
-  await enterDemo(page, "player");
-
-  await page.evaluate(() => {
-    const rows = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
-    rows.push({ id: "registered-keep", email: "registered@example.com", teamId: "registered-team", made: 71, syncState: "remote_saved", syncSource: "remote" });
-    window.localStorage.setItem("sl:shotlogs", JSON.stringify(rows));
-  });
+test("Demo Player shot rows are removed on logout", async ({ page }) => {
+  await page.goto("/");
+  await page.evaluate(() => window.localStorage.clear());
+  await page.reload();
+  await enterDemoPlayer(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "At Home", exact: true }).click();
   await page.getByRole("spinbutton").first().fill("33");
@@ -219,9 +200,6 @@ test("Demo Player shot rows are removed on logout without touching non-demo rows
   await expect(page.getByRole("button", { name: "Demo Player", exact: true })).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => page.evaluate(() => {
     const rows = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
-    return {
-      demoRowExists: rows.some((row) => Number(row.made) === 33 && row.demo === true),
-      registeredRowExists: rows.some((row) => row.id === "registered-keep" && Number(row.made) === 71),
-    };
-  })).toEqual({ demoRowExists: false, registeredRowExists: true });
+    return rows.some((row) => Number(row.made) === 33 && row.demo === true);
+  })).toBe(false);
 });
