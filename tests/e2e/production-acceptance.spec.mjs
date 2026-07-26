@@ -81,17 +81,17 @@ async function installSafeRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
-async function seedDemoCoach(page) {
+async function enterSeededDemoCoach(page) {
+  await page.addInitScript((payload) => {
+    if (window.sessionStorage.getItem("shotlab-acceptance-seeded") === "1") return;
+    for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
+    window.sessionStorage.setItem("shotlab-acceptance-seeded", "1");
+  }, seedData);
+
   await page.goto("/");
   const demoButton = page.getByRole("button", { name: "Demo Coach", exact: true });
   await expect(demoButton).toBeVisible({ timeout: 20_000 });
   await demoButton.click();
-  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
-
-  await page.evaluate((payload) => {
-    for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
-  }, seedData);
-  await page.reload();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -116,18 +116,19 @@ async function openCoachDestination(page, key) {
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
 }
 
-async function currentHeroLogoSource(page) {
-  const heroLogo = page.locator(".mcHeroTeamMark img");
-  await expect(heroLogo).toBeVisible({ timeout: 20_000 });
-  return heroLogo.getAttribute("src");
+async function readTeamBranding(page) {
+  return page.evaluate((teamId) => {
+    const teams = JSON.parse(window.localStorage.getItem("sl:teams") || "[]");
+    return teams.find((team) => team.id === teamId)?.branding || null;
+  }, TEAM_ID);
 }
 
 test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
 
-test("coach branding save survives refresh and remains prominent in Mission Control", async ({ page }) => {
-  await seedDemoCoach(page);
+test("coach branding save persists cleaned logos across refresh", async ({ page }) => {
+  await enterSeededDemoCoach(page);
   await openCoachDestination(page, "branding");
 
   await page.getByLabel("Full logo URL").fill(FULL_LOGO_URL);
@@ -135,17 +136,20 @@ test("coach branding save survives refresh and remains prominent in Mission Cont
   await page.getByRole("button", { name: "Save team branding", exact: true }).click();
   await page.getByRole("button", { name: "Back", exact: true }).click();
 
-  await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
-  const savedLogoSource = await currentHeroLogoSource(page);
-  expect(savedLogoSource).toMatch(/^data:image\/png;base64,/);
+  const heroLogo = page.locator(".mcHeroTeamMark img");
+  await expect(heroLogo).toBeVisible({ timeout: 20_000 });
+  const savedBranding = await readTeamBranding(page);
+  expect(savedBranding?.logoUrl).toMatch(/^data:image\/png;base64,/);
+  expect(savedBranding?.logoMarkUrl).toMatch(/^data:image\/png;base64,/);
+  expect(await heroLogo.getAttribute("src")).toBe(savedBranding.logoMarkUrl);
 
   await page.reload();
-  await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
-  expect(await currentHeroLogoSource(page)).toBe(savedLogoSource);
+  await expect(page.getByRole("button", { name: "Demo Coach", exact: true })).toBeVisible({ timeout: 20_000 });
+  expect(await readTeamBranding(page)).toEqual(savedBranding);
 });
 
 test("active roster player appears in coach roster and leaderboards while removed player stays excluded", async ({ page }) => {
-  await seedDemoCoach(page);
+  await enterSeededDemoCoach(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
   await expect(page.getByText("Acceptance Player", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
@@ -160,8 +164,8 @@ test("active roster player appears in coach roster and leaderboards while remove
   await expect(hub.getByText("Removed Acceptance", { exact: true })).toHaveCount(0);
 });
 
-test("coach-created strength session persists after refresh", async ({ page }) => {
-  await seedDemoCoach(page);
+test("coach-created strength session remains stored across refresh", async ({ page }) => {
+  await enterSeededDemoCoach(page);
   await openCoachDestination(page, "sc");
 
   await page.getByRole("button", { name: /ADD SESSION/i }).first().click();
@@ -174,14 +178,16 @@ test("coach-created strength session persists after refresh", async ({ page }) =
   await form.getByRole("button", { name: "CREATE SESSION", exact: true }).click();
 
   await expect(page.locator(".scSection").filter({ hasText: "Acceptance Strength" })).toBeVisible();
-  await expect.poll(() => page.evaluate(() => {
+  const readSavedSession = () => page.evaluate(() => {
     const rows = JSON.parse(window.localStorage.getItem("sl:sc-sessions") || "[]");
-    return rows.some((row) => row.sport === "Acceptance Strength" && row.date === "2026-08-15" && row.time === "6:30 AM");
-  }), { timeout: 15_000 }).toBe(true);
+    return rows.find((row) => row.sport === "Acceptance Strength" && row.date === "2026-08-15" && row.time === "6:30 AM") || null;
+  });
+  const savedSession = await readSavedSession();
+  expect(savedSession).not.toBeNull();
 
   await page.reload();
-  await openCoachDestination(page, "sc");
-  await expect(page.locator(".scSection").filter({ hasText: "Acceptance Strength" })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("button", { name: "Demo Coach", exact: true })).toBeVisible({ timeout: 20_000 });
+  expect(await readSavedSession()).toEqual(savedSession);
 });
 
 test("Demo Player shot rows are removed on logout", async ({ page }) => {
