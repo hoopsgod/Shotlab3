@@ -14,6 +14,12 @@ const identityKeys = (row = {}) => new Set([
   row.id,
 ].map(normalize).filter(Boolean));
 
+const isCoachIdentity = (row = {}) => (
+  normalize(row.role) === "coach" ||
+  row.isCoach === true ||
+  row.is_coach === true
+);
+
 const rowsMatchPlayer = (row, playerKeys) => {
   const rowKeys = identityKeys(row);
   for (const key of rowKeys) if (playerKeys.has(key)) return true;
@@ -32,38 +38,41 @@ export function buildCoachPlayerDashboardRows({
   scLogs = [],
   weekStart = "",
 } = {}) {
-  return safeArray(players).map((player) => {
-    const keys = identityKeys(player);
-    const playerScores = safeArray(scores).filter((row) => rowsMatchPlayer(row, keys));
-    const playerShots = safeArray(shotLogs).filter((row) => rowsMatchPlayer(row, keys));
-    const playerRsvps = safeArray(rsvps).filter((row) => rowsMatchPlayer(row, keys));
-    const playerScLogs = safeArray(scLogs).filter((row) => rowsMatchPlayer(row, keys));
-    const activityRows = [...playerScores, ...playerShots, ...playerScLogs];
-    const weeklyRows = weekStart ? activityRows.filter((row) => rowDate(row) >= weekStart) : activityRows;
-    const weeklyMakes = playerShots
-      .filter((row) => !weekStart || rowDate(row) >= weekStart)
-      .reduce((total, row) => total + safeNumber(row.made), 0);
-    const totalMakes = playerShots.reduce((total, row) => total + safeNumber(row.made), 0);
-    const lastActivityDate = latestDate(activityRows);
-    const statusKey = weeklyRows.length > 0 ? "active" : activityRows.length > 0 ? "attention" : "new";
-    const statusLabel = statusKey === "active" ? "Active this week" : statusKey === "attention" ? "Needs follow-up" : "No activity yet";
-    const name = player.name || player.displayName || player.email || "Player";
-    return {
-      key: normalize(player.email || player.playerId || player.player_id || player.id || name),
-      player,
-      name,
-      email: player.email || player.player_email || "",
-      weeklyActivityCount: weeklyRows.length,
-      weeklyMakes,
-      totalMakes,
-      lastActivityDate,
-      eventRsvpCount: playerRsvps.length,
-      scLogCount: playerScLogs.length,
-      statusKey,
-      statusLabel,
-      engagementScore: weeklyRows.length * 12 + weeklyMakes + playerRsvps.length * 4 + playerScLogs.length * 6,
-    };
-  }).sort((a, b) => b.engagementScore - a.engagementScore || a.name.localeCompare(b.name));
+  return safeArray(players)
+    .filter((player) => !isCoachIdentity(player))
+    .map((player) => {
+      const keys = identityKeys(player);
+      const playerScores = safeArray(scores).filter((row) => rowsMatchPlayer(row, keys));
+      const playerShots = safeArray(shotLogs).filter((row) => rowsMatchPlayer(row, keys));
+      const playerRsvps = safeArray(rsvps).filter((row) => rowsMatchPlayer(row, keys));
+      const playerScLogs = safeArray(scLogs).filter((row) => rowsMatchPlayer(row, keys));
+      const activityRows = [...playerScores, ...playerShots, ...playerScLogs];
+      const weeklyRows = weekStart ? activityRows.filter((row) => rowDate(row) >= weekStart) : activityRows;
+      const weeklyMakes = playerShots
+        .filter((row) => !weekStart || rowDate(row) >= weekStart)
+        .reduce((total, row) => total + safeNumber(row.made), 0);
+      const totalMakes = playerShots.reduce((total, row) => total + safeNumber(row.made), 0);
+      const lastActivityDate = latestDate(activityRows);
+      const statusKey = weeklyRows.length > 0 ? "active" : activityRows.length > 0 ? "attention" : "new";
+      const statusLabel = statusKey === "active" ? "Active this week" : statusKey === "attention" ? "Needs follow-up" : "No activity yet";
+      const name = player.name || player.displayName || player.email || "Player";
+      return {
+        key: normalize(player.email || player.playerId || player.player_id || player.id || name),
+        player,
+        name,
+        email: player.email || player.player_email || "",
+        weeklyActivityCount: weeklyRows.length,
+        weeklyMakes,
+        totalMakes,
+        lastActivityDate,
+        eventRsvpCount: playerRsvps.length,
+        scLogCount: playerScLogs.length,
+        statusKey,
+        statusLabel,
+        engagementScore: weeklyRows.length * 12 + weeklyMakes + playerRsvps.length * 4 + playerScLogs.length * 6,
+      };
+    })
+    .sort((a, b) => b.engagementScore - a.engagementScore || a.name.localeCompare(b.name));
 }
 
 export function filterCoachPlayerDashboardRows(rows = [], { filter = "all", query = "" } = {}) {
@@ -89,7 +98,7 @@ export function buildCoachPlayerDashboardMetrics(rows = []) {
 }
 
 export function buildCoachEventDashboardRows({ events = [], rsvps = [], roster = [], today = "" } = {}) {
-  const rosterCount = safeArray(roster).length;
+  const rosterCount = safeArray(roster).filter((player) => !isCoachIdentity(player)).length;
   return safeArray(events).map((event) => {
     const eventRsvps = safeArray(rsvps).filter((row) => String(row.eventId || row.event_id || "") === String(event.id || ""));
     const confirmed = eventRsvps.length;
