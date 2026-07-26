@@ -32,7 +32,18 @@ jobs:
           cache: npm
 
       - name: Apply dashboard integration
-        run: node scripts/apply-coach-interactive-dashboard-phase.mjs
+        run: |
+          set -o pipefail
+          node scripts/apply-coach-interactive-dashboard-phase.mjs 2>&1 | tee coach-dashboard-patch.log
+
+      - name: Upload patch diagnostic
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coach-dashboard-patch-diagnostic
+          path: coach-dashboard-patch.log
+          if-no-files-found: error
+          retention-days: 2
 
       - name: Install dependencies
         run: npm ci
