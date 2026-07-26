@@ -80,7 +80,7 @@ export default function AppHeader({
         borderBottom: stylePreset.borderBottom,
         borderRadius: stylePreset.radius,
         background: stylePreset.background,
-        boxShadow: stylePreset.shadow,
+        boxShadow: `var(--pw-shadow, ${stylePreset.shadow})`,
       }}
     >
       <div
