@@ -61,17 +61,59 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3 {
     order: 1 !important;
   }
 
-  /* Rebalance the signature hero. The team mark belongs on the court, not in
-     a pasted image tile competing with the mission copy. */
+  /* Rebalance the signature hero. The coach-controlled team mark remains
+     visible, free-standing, tappable, and integrated with the court. */
   body.mission-control-active .mcShellV3 .mcHero {
-    min-height: 286px !important;
+    min-height: 292px !important;
     border-radius: 19px !important;
     background: #020405 !important;
     box-shadow: 0 22px 58px rgba(0,0,0,.42), inset 0 1px rgba(255,255,255,.028) !important;
   }
 
   body.mission-control-active .mcShellV3 .mcHeroTeamMark {
-    display: none !important;
+    display: grid !important;
+    right: 11px !important;
+    top: 12px !important;
+    width: 74px !important;
+    height: 74px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    place-items: center !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    isolation: isolate !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroTeamMark::before {
+    inset: 19% !important;
+    background: color-mix(in srgb,var(--mc) 12%,transparent) !important;
+    filter: blur(16px) !important;
+    opacity: .72 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroTeamMark img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    opacity: .98 !important;
+    mix-blend-mode: screen !important;
+    filter: drop-shadow(0 9px 16px rgba(0,0,0,.46)) drop-shadow(0 0 10px color-mix(in srgb,var(--mc) 20%,transparent)) !important;
+    -webkit-mask-image: radial-gradient(ellipse at center,#000 40%,rgba(0,0,0,.97) 57%,rgba(0,0,0,.7) 70%,transparent 86%) !important;
+    mask-image: radial-gradient(ellipse at center,#000 40%,rgba(0,0,0,.97) 57%,rgba(0,0,0,.7) 70%,transparent 86%) !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroTeamMark::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 1px;
+    width: 18px;
+    height: 18px;
+    border: 1px solid color-mix(in srgb,var(--mc) 58%,white);
+    border-radius: 50%;
+    background: #07100b;
+    box-shadow: 0 5px 12px rgba(0,0,0,.42),0 0 10px color-mix(in srgb,var(--mc) 24%,transparent);
   }
 
   body.mission-control-active .mcShellV3 .mcHeroContent {
@@ -81,13 +123,13 @@ body.mission-control-active .app-shell.is-desktop .mcShellV3 {
   }
 
   body.mission-control-active .mcShellV3 .mcHero h1 {
-    max-width: 278px !important;
+    max-width: 248px !important;
     font-size: 30px !important;
     line-height: .95 !important;
   }
 
   body.mission-control-active .mcShellV3 .mcHeroContent > p {
-    max-width: 278px !important;
+    max-width: 252px !important;
     margin-top: 9px !important;
     font-size: 11px !important;
     line-height: 1.38 !important;
