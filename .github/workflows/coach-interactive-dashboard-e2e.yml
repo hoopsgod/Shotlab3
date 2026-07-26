@@ -1,0 +1,57 @@
+name: Coach Interactive Dashboard E2E
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coach-interactive-dashboard-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  coach-dashboard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install application dependencies
+        run: npm ci
+
+      - name: Verify selectors and source contracts
+        run: node --test tests/coach-operational-dashboard.test.mjs tests/coach-interactive-dashboard-contract.test.mjs
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build application
+        run: npm run build
+
+      - name: Run interactive coach dashboard flows
+        run: npx playwright test tests/e2e/coach-interactive-dashboards.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload browser failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coach-interactive-dashboard-e2e-artifacts
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
