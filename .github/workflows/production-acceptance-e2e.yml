@@ -2,6 +2,9 @@ name: Production Acceptance E2E
 
 on:
   pull_request:
+  push:
+    branches:
+      - march-3-reset-85393dd
   workflow_dispatch:
     inputs:
       target_url:
@@ -12,12 +15,16 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: production-acceptance-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   production-acceptance:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:
-      ACCEPTANCE_BASE_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.target_url || '' }}
+      ACCEPTANCE_BASE_URL: ${{ github.event_name == 'workflow_dispatch' && inputs.target_url || github.event_name == 'push' && 'https://shotlab3.pages.dev' || '' }}
 
     steps:
       - name: Check out repository
@@ -44,8 +51,26 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Run isolated production acceptance flow
+      - name: Run isolated acceptance flow
+        if: github.event_name != 'push'
         run: npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Run post-deployment production acceptance
+        if: github.event_name == 'push'
+        shell: bash
+        run: |
+          for attempt in $(seq 1 10); do
+            echo "Production acceptance attempt ${attempt}/10 against ${ACCEPTANCE_BASE_URL}"
+            if npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line; then
+              exit 0
+            fi
+            if [ "${attempt}" -lt 10 ]; then
+              echo "Cloudflare deployment may still be propagating; retrying in 30 seconds."
+              sleep 30
+            fi
+          done
+          echo "Production acceptance failed after 10 attempts."
+          exit 1
 
       - name: Upload failure artifacts
         if: failure()
