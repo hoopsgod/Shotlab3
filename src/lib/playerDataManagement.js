@@ -206,6 +206,13 @@ export const isActiveRosterPlayer = (player = {}, teamId = "") => isActiveRoster
 
 export const isPlayerHiddenFromActiveLeaderboards = (player = {}) => isInactiveRosterRecord(player) || player?.teamId == null;
 
+export const resolveMigratedRosterTeamId = ({ row = {}, mappedTeamId = null, fallbackTeamId = null } = {}) => {
+  const hasExplicitTeamField = Object.prototype.hasOwnProperty.call(row, "teamId") || Object.prototype.hasOwnProperty.call(row, "team_id");
+  const explicitTeamId = row?.teamId ?? row?.team_id ?? null;
+  if (hasExplicitTeamField && explicitTeamId == null && isInactiveRosterRecord(row)) return null;
+  return explicitTeamId || mappedTeamId || fallbackTeamId || null;
+};
+
 
 export const getActiveTeamPlayers = (players = [], teamId = "") => buildActiveRosterIdentity(players, teamId).players;
 

@@ -61,7 +61,7 @@ import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY
 import { calculateLeaderboardFromShotLogs } from "./lib/leaderboardService.js";
 import { buildAtHomeLeaderboardRows, isHomeLeaderboardScoreRow } from "./lib/homeLeaderboardRows.js";
 import { buildProgramScoreRow, getAllProgramScoreRows, getProgramDrillBreakdownRows, getProgramLeaderboardRows, getProgramScoresForDrill, getProgramScoresForPlayer, validateProgramDrillScore } from "./lib/programDrillScoring.js";
-import { archivePlayerForTeam, deleteTeamLocalPlayerData, filterActiveTeamChallengeRows, filterActiveTeamLeaderboardRows, filterActiveTeamPlayerRows, getActiveTeamPlayerIdentity, getCoachRosterPlayers, isPlayerHiddenFromActiveLeaderboards, removePlayerFromTeam, resolvePlayerDisplayName, buildCoachPlayerDevelopmentProfile } from "./lib/playerDataManagement.js";
+import { archivePlayerForTeam, deleteTeamLocalPlayerData, filterActiveTeamChallengeRows, filterActiveTeamLeaderboardRows, filterActiveTeamPlayerRows, getActiveTeamPlayerIdentity, getCoachRosterPlayers, isPlayerHiddenFromActiveLeaderboards, removePlayerFromTeam, resolveMigratedRosterTeamId, resolvePlayerDisplayName, buildCoachPlayerDevelopmentProfile } from "./lib/playerDataManagement.js";
 import { deleteTeamEvent, deleteTeamScSession } from "./lib/teamScheduleDeletion.js";
 import { createSeasonArchive, getSeasonArchiveDetailModel } from "./lib/seasonArchive.js";
 import { emitReleaseDiagnostic, isShotLabDebugMode } from "./lib/releaseDiagnostics.js";
@@ -1128,7 +1128,7 @@ ps.forEach(p=>{if(p.role!=="coach"){const firstCoach=coaches[0];if(firstCoach)ma
 ts.forEach(t=>{if(t.ownerCoachId)map[t.ownerCoachId]=t.id;});
 }
 const teamsWithBranding=ts.map(t=>({...t,branding:resolveTeamBranding(t.branding||DEFAULT_BRANDING)}));
-const playersMigrated=ps.map(p=>({...p,teamId:p.teamId||map[p.email]||teamsWithBranding[0]?.id||null,hideFromLeaderboards:p.hideFromLeaderboards===true}));
+const playersMigrated=ps.map(p=>({...p,teamId:resolveMigratedRosterTeamId({row:p,mappedTeamId:map[p.email],fallbackTeamId:teamsWithBranding[0]?.id}),hideFromLeaderboards:p.hideFromLeaderboards===true||p.hide_from_leaderboards===true}));
 const profilesExisting=rawPlayerProfiles||[];
 const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null}));
 const teamForEmail=e=>playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null;

@@ -8,6 +8,7 @@ import {
   filterActiveTeamPlayerRows,
   getActiveTeamPlayerIdentity,
   getCoachRosterPlayers,
+  resolveMigratedRosterTeamId,
 } from '../src/lib/playerDataManagement.js';
 import { getProgramLeaderboardRows } from '../src/lib/programDrillScoring.js';
 
@@ -136,4 +137,18 @@ test('hidden unassigned account row suppresses a stale team profile after hydrat
   });
 
   assert.deepEqual(roster.map((player) => player.email), ['active@team.test']);
+});
+
+
+test("migration preserves removed tombstone null team ids instead of reassigning the first team", () => {
+  assert.equal(resolveMigratedRosterTeamId({
+    row: { email: "removed@team.test", teamId: null, hideFromLeaderboards: true, rosterStatus: "removed" },
+    mappedTeamId: "team-a",
+    fallbackTeamId: "team-fallback",
+  }), null);
+  assert.equal(resolveMigratedRosterTeamId({
+    row: { email: "unassigned@team.test", role: "player" },
+    mappedTeamId: "team-a",
+    fallbackTeamId: "team-fallback",
+  }), "team-a");
 });
