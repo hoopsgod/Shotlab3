@@ -82,8 +82,9 @@ test("coach secondary workspaces share the Mission Control visual system", async
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
   await expectWorkspace(page, "coach", "players");
   await expectPremiumHeader(page);
-  await expect(page.getByTestId("coach-players-primary-objective")).toBeVisible();
-  await expect(page.getByTestId("coach-players-metrics")).toBeVisible();
+  await expect(page.getByText("ROSTER SNAPSHOT", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "PLAYER ROSTER", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /ADD PLAYER & SEND INVITE/i })).toBeVisible();
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Events", exact: true }).click();
   await expectWorkspace(page, "coach", "events");
