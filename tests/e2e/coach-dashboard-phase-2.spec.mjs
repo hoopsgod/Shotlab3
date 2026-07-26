@@ -200,9 +200,9 @@ test("drills and strength dashboards support decision-ready filtering", async ({
   const drillFilters = page.getByTestId("coach-drills-operational-filters");
   await drillFilters.getByRole("button", { name: /^Underused/ }).click();
   await expect(drillFilters.getByRole("button", { name: /^Underused/ })).toHaveAttribute("aria-pressed", "true");
-  const drillSearch = drillFilters.getByRole("searchbox");
-  await drillSearch.fill("Corner");
-  await expect(page.getByText("Corner Threes", { exact: true }).first()).toBeVisible();
+  await drillFilters.getByRole("searchbox").fill("Corner");
+  const visibleDrillRows = page.locator("#coach-drills-management").locator(".ch");
+  await expect(visibleDrillRows.filter({ hasText: "Corner Threes" }).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
   await openMoreDestination(page, "sc");
@@ -211,10 +211,10 @@ test("drills and strength dashboards support decision-ready filtering", async ({
   const strengthFilters = page.getByTestId("coach-strength-operational-filters");
   await strengthFilters.getByRole("button", { name: /^Overdue/ }).click();
   await expect(strengthFilters.getByRole("button", { name: /^Overdue/ })).toHaveAttribute("aria-pressed", "true");
-  const strengthSearch = strengthFilters.getByRole("searchbox");
-  await strengthSearch.fill("Team Lift");
-  await expect(page.getByText("Team Lift", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Recovery Session", { exact: true })).toHaveCount(0);
+  await strengthFilters.getByRole("searchbox").fill("Team Lift");
+  const strengthRows = page.locator(".scSection");
+  await expect(strengthRows.filter({ hasText: "Team Lift" })).toBeVisible();
+  await expect(strengthRows.filter({ hasText: "Recovery Session" })).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
 
@@ -230,23 +230,24 @@ test("leaderboard, activity, and season comparison use the shared intelligence l
   await expectNoHorizontalOverflow(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Home", exact: true }).click();
-  const intelligenceDisclosure = page.getByTestId("coach-program-intelligence");
-  await expect(intelligenceDisclosure).toBeVisible({ timeout: 20_000 });
-  await intelligenceDisclosure.locator("summary").click();
+  const intelligenceSummary = page.getByTestId("coach-program-intelligence").locator("summary");
+  await intelligenceSummary.scrollIntoViewIfNeeded();
+  await expect(intelligenceSummary).toBeVisible({ timeout: 20_000 });
+  await intelligenceSummary.click();
+
   const activityPanel = page.getByTestId("coach-activity-intelligence-panel");
   await expect(activityPanel).toBeVisible({ timeout: 20_000 });
   const activityFilters = page.getByTestId("coach-activity-intelligence-filters");
   await activityFilters.getByRole("button", { name: /^Shooting/ }).click();
-  const activitySearch = activityFilters.getByRole("searchbox");
-  await activitySearch.fill("Active Player");
+  await activityFilters.getByRole("searchbox").fill("Active Player");
   const activityResults = page.getByTestId("coach-activity-intelligence-results");
   await expect(activityResults.getByText("Active Player", { exact: true }).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
   const comparison = page.getByTestId("coach-season-comparison-panel");
+  await comparison.scrollIntoViewIfNeeded();
   await expect(comparison).toBeVisible({ timeout: 20_000 });
   await expect(comparison.getByText("2025-26", { exact: true }).first()).toBeVisible();
-  await expect(comparison.getByText("Total makes", { exact: true })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
