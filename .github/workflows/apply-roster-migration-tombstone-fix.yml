@@ -1,0 +1,38 @@
+name: Apply Roster Migration Tombstone Fix
+
+on:
+  push:
+    branches:
+      - codex/production-acceptance-e2e
+    paths:
+      - scripts/apply-roster-migration-tombstone-fix.mjs
+      - .github/workflows/apply-roster-migration-tombstone-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply-fix:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: codex/production-acceptance-e2e
+          fetch-depth: 0
+
+      - name: Apply migration fix
+        run: node scripts/apply-roster-migration-tombstone-fix.mjs
+
+      - name: Verify roster migration and persistence tests
+        run: node --test tests/player-removal-lifecycle-stabilization.test.mjs tests/remote-persistence-shape.test.mjs tests/coach-player-data-management.test.mjs
+
+      - name: Commit patched files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx src/lib/playerDataManagement.js tests/player-removal-lifecycle-stabilization.test.mjs
+          git commit -m "fix: preserve removed roster tombstones during migration"
+          git push origin HEAD:codex/production-acceptance-e2e
