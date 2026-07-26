@@ -120,9 +120,9 @@ test("coach mobile home answers the 30-second workflow with one compact truthful
   await dock.getByRole("button", { name: "Events", exact: true }).click();
 
   const eventsPage = page.getByTestId("coach-events-mobile-page");
-  const eventsHeader = page.getByTestId("coach-events-mobile-header");
+  const eventsHeader = page.getByTestId("coach-events-command-bar");
   const emptyState = page.getByTestId("coach-events-mobile-empty-state");
-  const createEvent = page.getByTestId("coach-events-mobile-create-event");
+  const createEvent = emptyState.getByTestId("coach-events-mobile-create-event");
 
   await expect(eventsPage).toBeVisible({ timeout: 20_000 });
   await expect(eventsHeader).toBeVisible();
@@ -151,7 +151,8 @@ test("coach can open, close, save, and revisit a mobile event without breaking n
 
   const dock = page.getByTestId("mobile-navigation-dock");
   await dock.getByRole("button", { name: "Events", exact: true }).click();
-  const createEvent = page.getByTestId("coach-events-mobile-create-event");
+  const eventsPage = page.getByTestId("coach-events-mobile-page");
+  const createEvent = page.getByTestId("coach-events-mobile-empty-state").getByTestId("coach-events-mobile-create-event");
   await expect(createEvent).toBeVisible({ timeout: 20_000 });
 
   await createEvent.click();
@@ -160,7 +161,7 @@ test("coach can open, close, save, and revisit a mobile event without breaking n
   await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(dialog).toHaveCount(0);
 
-  await page.getByTestId("coach-events-mobile-create-event").click();
+  await page.getByTestId("coach-events-mobile-empty-state").getByTestId("coach-events-mobile-create-event").click();
   const reopenedDialog = page.getByRole("dialog", { name: "Create event" });
   await reopenedDialog.getByPlaceholder("Open Gym Run").fill("E2E Team Practice");
   await reopenedDialog.locator('input[type="date"]').fill("2026-08-15");
@@ -169,16 +170,16 @@ test("coach can open, close, save, and revisit a mobile event without breaking n
   await reopenedDialog.getByRole("button", { name: "SAVE EVENT", exact: true }).click();
 
   await expect(reopenedDialog).toHaveCount(0);
-  await expect(page.getByText("E2E Team Practice", { exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("6:30 PM · Thomas Gym", { exact: true })).toBeVisible();
+  await expect(eventsPage.getByText("E2E Team Practice", { exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(eventsPage.getByText("6:30 PM · Thomas Gym", { exact: true })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
   await dock.getByRole("button", { name: "Home", exact: true }).click();
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible();
   await dock.getByRole("button", { name: "Players", exact: true }).click();
-  await expect(page.getByText("PLAYERS", { exact: true }).first()).toBeVisible();
+  await expect(page.getByTestId("coach-players-command-bar")).toBeVisible();
   await dock.getByRole("button", { name: "Events", exact: true }).click();
-  await expect(page.getByText("E2E Team Practice", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("coach-events-mobile-page").getByText("E2E Team Practice", { exact: true })).toBeVisible();
   await dock.getByRole("button", { name: "More", exact: true }).click();
   await expect(page.getByRole("dialog", { name: /More/i })).toBeVisible();
 });
