@@ -9,6 +9,7 @@ on:
 permissions:
   contents: read
 
+# This gate is intentionally read-only and exercises the final PR head at a mobile viewport.
 concurrency:
   group: coach-dashboard-phase-two-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
