@@ -32,7 +32,7 @@ test("shared workspace system uses semantic team-aware tokens and scoped selecto
 test("premium workspace preserves mobile usability and reduced-motion support", () => {
   assert.match(workspaceCss, /@media \(max-width: 767px\)/);
   assert.match(workspaceCss, /min-height: 48px/);
-  assert.match(workspaceCss, /env\(safe-area-inset-bottom/);
+  assert.match(appSource, /env\(safe-area-inset-bottom/);
   assert.match(workspaceCss, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(workspaceCss, /-webkit-tap-highlight-color: transparent/);
 });
