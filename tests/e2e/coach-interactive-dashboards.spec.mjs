@@ -103,22 +103,23 @@ test("Coach Players behaves as an interactive operational dashboard", async ({ p
   await enterSeededDemoCoach(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
 
+  const rosterResults = page.locator("#coach-roster-operations");
   await expect(page.getByTestId("coach-players-command-bar")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("coach-players-metric-strip")).toBeVisible();
   await expect(page.getByTestId("coach-players-filter-rail")).toBeVisible();
-  await expect(page.getByText("Active Player", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
+  await expect(rosterResults.getByText("Active Player", { exact: true }).first()).toBeVisible();
+  await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
 
   await page.getByTestId("coach-players-metric-strip").getByRole("button", { name: /Needs Attention/i }).click();
   await expect(page.getByTestId("coach-players-metric-strip").getByRole("button", { name: /Needs Attention/i })).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByText("Active Player", { exact: true })).toHaveCount(0);
-  await expect(page.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("New Player", { exact: true }).first()).toBeVisible();
+  await expect(rosterResults.getByText("Active Player", { exact: true })).toHaveCount(0);
+  await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
+  await expect(rosterResults.getByText("New Player", { exact: true }).first()).toBeVisible();
 
   const search = page.getByTestId("coach-players-filter-rail").getByRole("searchbox");
   await search.fill("Quiet");
-  await expect(page.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("New Player", { exact: true })).toHaveCount(0);
+  await expect(rosterResults.getByText("Quiet Player", { exact: true }).first()).toBeVisible();
+  await expect(rosterResults.getByText("New Player", { exact: true })).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
 
@@ -126,18 +127,19 @@ test("Coach Events exposes RSVP gaps and searchable schedule controls", async ({
   await enterSeededDemoCoach(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Events", exact: true }).click();
 
+  const scheduleResults = page.getByTestId("coach-events-mobile-page");
   await expect(page.getByTestId("coach-events-command-bar")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("coach-events-metric-strip")).toBeVisible();
   await expect(page.getByTestId("coach-events-filter-rail")).toBeVisible();
-  await expect(page.getByText("Team Practice", { exact: true }).first()).toBeVisible();
+  await expect(scheduleResults.getByText("Team Practice", { exact: true }).first()).toBeVisible();
 
   await page.getByTestId("coach-events-metric-strip").getByRole("button", { name: /Missing RSVPs/i }).click();
   await expect(page.getByTestId("coach-events-metric-strip").getByRole("button", { name: /Missing RSVPs/i })).toHaveAttribute("aria-pressed", "true");
 
   const search = page.getByTestId("coach-events-filter-rail").getByRole("searchbox");
   await search.fill("Summer Game");
-  await expect(page.getByText("Summer Game", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Team Practice", { exact: true })).toHaveCount(0);
+  await expect(scheduleResults.getByText("Summer Game", { exact: true }).first()).toBeVisible();
+  await expect(scheduleResults.getByText("Team Practice", { exact: true })).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
 
