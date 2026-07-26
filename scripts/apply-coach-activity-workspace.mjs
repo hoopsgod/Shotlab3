@@ -64,15 +64,16 @@ fs.writeFileSync(contractPath, contract);
 
 const e2ePath = "tests/e2e/coach-dashboard-phase-2.spec.mjs";
 let e2e = fs.readFileSync(e2ePath, "utf8");
-e2e = e2e.replace(
-  '  await expect(page.getByText("Team Lift", { exact: true }).first()).toBeVisible();\n  await expect(page.getByText("Recovery Session", { exact: true })).toHaveCount(0);',
-  '  const strengthSessions = page.locator(\'[data-accent="sc"] .scSection\');\n  await expect(strengthSessions.filter({ hasText: "Team Lift" })).toBeVisible();\n  await expect(strengthSessions.filter({ hasText: "Recovery Session" })).toHaveCount(0);',
-);
-e2e = e2e.replace(
-  '  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Home", exact: true }).click();\n  const intelligenceDisclosure = page.getByTestId("coach-program-intelligence");\n  await expect(intelligenceDisclosure).toBeVisible({ timeout: 20_000 });\n  await intelligenceDisclosure.locator("summary").click();\n  const activityPanel = page.getByTestId("coach-activity-intelligence-panel");',
-  '  await openMoreDestination(page, "activity");\n  await expect(page.getByTestId("coach-page-dashboard-activity")).toBeVisible({ timeout: 20_000 });\n  const activityPanel = page.getByTestId("coach-activity-intelligence-panel");',
-);
-if (!e2e.includes('openMoreDestination(page, "activity")')) throw new Error("Activity E2E route was not updated");
+if (!e2e.includes('page.locator(\'[data-accent="sc"] .scSection\')')) {
+  const strengthAnchor = '  const strengthRows = page.locator(".scSection");';
+  if (!e2e.includes(strengthAnchor)) throw new Error("Current S&C browser anchor missing");
+  e2e = e2e.replace(strengthAnchor, '  const strengthRows = page.locator(\'[data-accent="sc"] .scSection\');');
+}
+if (!e2e.includes('openMoreDestination(page, "activity")')) {
+  const activityAnchor = '  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Home", exact: true }).click();\n  const intelligenceSummary = page.getByTestId("coach-program-intelligence").locator("summary");\n  await intelligenceSummary.scrollIntoViewIfNeeded();\n  await expect(intelligenceSummary).toBeVisible({ timeout: 20_000 });\n  await intelligenceSummary.click();\n\n  const activityPanel = page.getByTestId("coach-activity-intelligence-panel");';
+  if (!e2e.includes(activityAnchor)) throw new Error("Current Activity browser anchor missing");
+  e2e = e2e.replace(activityAnchor, '  await openMoreDestination(page, "activity");\n  await expect(page.getByTestId("coach-page-dashboard-activity")).toBeVisible({ timeout: 20_000 });\n  const activityPanel = page.getByTestId("coach-activity-intelligence-panel");');
+}
 fs.writeFileSync(e2ePath, e2e);
 
 console.log("Applied dedicated Coach Activity workspace and browser coverage.");
