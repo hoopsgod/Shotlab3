@@ -11,9 +11,10 @@ import {
 } from "../src/lib/coachOperationalDashboard.js";
 
 const players = [
-  { id: "p1", email: "active@example.com", name: "Active Player" },
-  { id: "p2", email: "quiet@example.com", name: "Quiet Player" },
-  { id: "p3", email: "new@example.com", name: "New Player" },
+  { id: "coach", email: "coach@example.com", name: "Demo Coach", role: "coach", isCoach: true },
+  { id: "p1", email: "active@example.com", name: "Active Player", role: "player" },
+  { id: "p2", email: "quiet@example.com", name: "Quiet Player", role: "player" },
+  { id: "p3", email: "new@example.com", name: "New Player", role: "player" },
 ];
 
 const scores = [
@@ -33,9 +34,10 @@ const rsvps = [
 
 const scLogs = [{ id: "l1", email: "active@example.com", date: "2026-07-25" }];
 
-test("player dashboard rows derive active, attention, and new states", () => {
+test("player dashboard rows derive active, attention, and new states without coach identities", () => {
   const rows = buildCoachPlayerDashboardRows({ players, scores, shotLogs, rsvps, scLogs, weekStart: "2026-07-20" });
   assert.equal(rows.length, 3);
+  assert.equal(rows.some((row) => row.email === "coach@example.com"), false);
   assert.equal(rows.find((row) => row.email === "active@example.com")?.statusKey, "active");
   assert.equal(rows.find((row) => row.email === "quiet@example.com")?.statusKey, "attention");
   assert.equal(rows.find((row) => row.email === "new@example.com")?.statusKey, "new");
@@ -51,7 +53,7 @@ test("player metrics and filters drive interactive roster views", () => {
   assert.equal(filterCoachPlayerDashboardRows(rows, { filter: "leaders" })[0]?.email, "active@example.com");
 });
 
-test("event dashboard rows expose RSVP gaps and time scopes", () => {
+test("event dashboard rows expose RSVP gaps and ignore coach identities in roster capacity", () => {
   const events = [
     { id: "e1", title: "Practice", type: "run", date: "2026-07-27", time: "6:00 PM" },
     { id: "e2", title: "Film", type: "recovery", date: "2026-07-10", time: "4:00 PM" },
