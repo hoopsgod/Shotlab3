@@ -32,6 +32,9 @@ jobs:
       - name: Install application dependencies
         run: npm ci
 
+      - name: Verify demo cleanup preserves registered rows
+        run: node --test tests/demo-mode-cleanup.test.mjs
+
       - name: Install Playwright test runner
         run: npm install --no-save @playwright/test@1.55.1
 
