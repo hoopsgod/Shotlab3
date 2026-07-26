@@ -162,9 +162,9 @@ test("player intelligence drawer summarizes development and hands off to the ful
   const drawer = page.getByTestId("coach-player-intelligence-drawer");
   await expect(drawer).toBeVisible();
   await expect(drawer.getByRole("heading", { name: "Active Player", exact: true })).toBeVisible();
-  await expect(drawer.getByText("Weekly makes", { exact: true })).toBeVisible();
-  await expect(drawer.getByText("Event readiness", { exact: true })).toBeVisible();
-  await expect(drawer.getByText("S&C completion", { exact: true })).toBeVisible();
+  await expect(drawer.getByText("Weekly makes", { exact: true }).first()).toBeVisible();
+  await expect(drawer.getByText("Event readiness", { exact: true }).first()).toBeVisible();
+  await expect(drawer.getByText("S&C completion", { exact: true }).first()).toBeVisible();
   await expect(drawer.getByText("Activity timeline", { exact: true })).toBeVisible();
 
   await drawer.getByRole("button", { name: "Open Full Profile", exact: true }).click();
@@ -177,7 +177,7 @@ test("event intelligence drawer identifies missing responses and returns to atte
   await enterSeededDemoCoach(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Events", exact: true }).click();
 
-  await page.getByTestId("coach-events-command-bar").getByRole("button", { name: /Manage Attendance/i }).click();
+  await page.getByRole("button", { name: "Manage Attendance", exact: true }).click();
   const drawer = page.getByTestId("coach-event-intelligence-drawer");
   await expect(drawer).toBeVisible({ timeout: 20_000 });
   await expect(drawer.getByRole("heading", { name: "Team Practice", exact: true })).toBeVisible();
@@ -197,9 +197,10 @@ test("drills and strength dashboards support decision-ready filtering", async ({
   await openMoreDestination(page, "drills");
   const drillPanel = page.getByTestId("coach-drills-operational-panel");
   await expect(drillPanel).toBeVisible({ timeout: 20_000 });
-  await drillPanel.getByRole("button", { name: /Underused/i }).click();
-  await expect(drillPanel.getByRole("button", { name: /Underused/i })).toHaveAttribute("aria-pressed", "true");
-  const drillSearch = page.getByTestId("coach-drills-operational-filters").getByRole("searchbox");
+  const drillFilters = page.getByTestId("coach-drills-operational-filters");
+  await drillFilters.getByRole("button", { name: /^Underused/ }).click();
+  await expect(drillFilters.getByRole("button", { name: /^Underused/ })).toHaveAttribute("aria-pressed", "true");
+  const drillSearch = drillFilters.getByRole("searchbox");
   await drillSearch.fill("Corner");
   await expect(page.getByText("Corner Threes", { exact: true }).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);
@@ -207,9 +208,10 @@ test("drills and strength dashboards support decision-ready filtering", async ({
   await openMoreDestination(page, "sc");
   const strengthPanel = page.getByTestId("coach-strength-operational-panel");
   await expect(strengthPanel).toBeVisible({ timeout: 20_000 });
-  await strengthPanel.getByRole("button", { name: /Overdue/i }).click();
-  await expect(strengthPanel.getByRole("button", { name: /Overdue/i })).toHaveAttribute("aria-pressed", "true");
-  const strengthSearch = page.getByTestId("coach-strength-operational-filters").getByRole("searchbox");
+  const strengthFilters = page.getByTestId("coach-strength-operational-filters");
+  await strengthFilters.getByRole("button", { name: /^Overdue/ }).click();
+  await expect(strengthFilters.getByRole("button", { name: /^Overdue/ })).toHaveAttribute("aria-pressed", "true");
+  const strengthSearch = strengthFilters.getByRole("searchbox");
   await strengthSearch.fill("Team Lift");
   await expect(page.getByText("Team Lift", { exact: true }).first()).toBeVisible();
   await expect(page.getByText("Recovery Session", { exact: true })).toHaveCount(0);
@@ -222,15 +224,20 @@ test("leaderboard, activity, and season comparison use the shared intelligence l
   await openMoreDestination(page, "leaderboards");
   const leaderboardPanel = page.getByTestId("coach-leaderboard-operational-panel");
   await expect(leaderboardPanel).toBeVisible({ timeout: 20_000 });
-  await leaderboardPanel.getByRole("button", { name: /Most Improved/i }).click();
-  await expect(leaderboardPanel.getByRole("button", { name: /Most Improved/i })).toHaveAttribute("aria-pressed", "true");
+  const leaderboardFilters = page.getByTestId("coach-leaderboard-operational-filters");
+  await leaderboardFilters.getByRole("button", { name: /^Most Improved/ }).click();
+  await expect(leaderboardFilters.getByRole("button", { name: /^Most Improved/ })).toHaveAttribute("aria-pressed", "true");
   await expectNoHorizontalOverflow(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Home", exact: true }).click();
+  const intelligenceDisclosure = page.getByTestId("coach-program-intelligence");
+  await expect(intelligenceDisclosure).toBeVisible({ timeout: 20_000 });
+  await intelligenceDisclosure.locator("summary").click();
   const activityPanel = page.getByTestId("coach-activity-intelligence-panel");
   await expect(activityPanel).toBeVisible({ timeout: 20_000 });
-  await activityPanel.getByRole("button", { name: /Shooting/i }).click();
-  const activitySearch = page.getByTestId("coach-activity-intelligence-filters").getByRole("searchbox");
+  const activityFilters = page.getByTestId("coach-activity-intelligence-filters");
+  await activityFilters.getByRole("button", { name: /^Shooting/ }).click();
+  const activitySearch = activityFilters.getByRole("searchbox");
   await activitySearch.fill("Active Player");
   const activityResults = page.getByTestId("coach-activity-intelligence-results");
   await expect(activityResults.getByText("Active Player", { exact: true }).first()).toBeVisible();
