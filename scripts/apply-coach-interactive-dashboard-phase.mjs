@@ -86,9 +86,9 @@ replacePattern(
   "drills dashboard header",
 );
 
-const leaderboardsAnchor = '<DashboardReturnButton onClick={()=>setTab("feed")} />\n     <PremiumLeaderboardsHub';
-replaceExact(
-  leaderboardsAnchor,
+const leaderboardsPattern = /<DashboardReturnButton onClick=\{\(\)=>setTab\("feed"\)\} \/>\s*<PremiumLeaderboardsHub/;
+replacePattern(
+  leaderboardsPattern,
   '<DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPageDashboardHeader eyebrow="Competitive intelligence" title="Leaderboards Dashboard" summary="Track ranking movement, participation depth, and the players setting the current standard." status={coachPageDashboardSummary.leaderboards.leader?`Leader: ${coachPageDashboardSummary.leaderboards.leader.name||coachPageDashboardSummary.leaderboards.leader.email||"Player"}`:"No ranked players"} metrics={[{key:"ranked",label:"Ranked Players",value:coachPageDashboardSummary.leaderboards.ranked,detail:"Active roster entries"},{key:"leader",label:"Current Leader",value:coachPageDashboardSummary.leaderboards.leader?.total||coachPageDashboardSummary.leaderboards.leader?.makes||0,detail:coachPageDashboardSummary.leaderboards.leader?.name||"No leader yet",tone:"positive"},{key:"archives",label:"Archived Seasons",value:coachPageDashboardSummary.archives.total,detail:"Historical comparisons",tone:"info"},{key:"scope",label:"View",value:"LIVE",detail:"Current team scope"}]} activeMetric={coachPageMetric} onMetricSelect={(key)=>setCoachPageMetric(key)} testId="coach-page-dashboard-leaderboards"/><PremiumLeaderboardsHub',
   "leaderboards dashboard header",
 );
