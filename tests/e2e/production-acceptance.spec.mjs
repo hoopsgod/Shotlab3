@@ -37,7 +37,8 @@ const seedData = {
       email: REMOVED_EMAIL,
       name: "Removed Acceptance",
       role: "player",
-      teamId: TEAM_ID,
+      teamId: null,
+      hideFromLeaderboards: true,
       removedFromTeamId: TEAM_ID,
       removed: true,
       rosterStatus: "removed",
@@ -116,6 +117,8 @@ async function openCoachDestination(page, key) {
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
 }
 
+const stripCacheBuster = (value = "") => String(value).split("?")[0];
+
 async function readTeamBranding(page) {
   return page.evaluate((teamId) => {
     const teams = JSON.parse(window.localStorage.getItem("sl:teams") || "[]");
@@ -139,9 +142,9 @@ test("coach branding save persists cleaned logos across refresh", async ({ page 
   const heroLogo = page.locator(".mcHeroTeamMark img");
   await expect(heroLogo).toBeVisible({ timeout: 20_000 });
   const savedBranding = await readTeamBranding(page);
-  expect(savedBranding?.logoUrl).toMatch(/^data:image\/png;base64,/);
-  expect(savedBranding?.logoMarkUrl).toMatch(/^data:image\/png;base64,/);
-  expect(await heroLogo.getAttribute("src")).toBe(savedBranding.logoMarkUrl);
+  expect(stripCacheBuster(savedBranding?.logoUrl)).toBe(FULL_LOGO_URL);
+  expect(stripCacheBuster(savedBranding?.logoMarkUrl)).toBe(MARK_LOGO_URL);
+  expect(stripCacheBuster(await heroLogo.getAttribute("src"))).toBe(MARK_LOGO_URL);
 
   await page.reload();
   await expect(page.getByRole("button", { name: "Demo Coach", exact: true })).toBeVisible({ timeout: 20_000 });

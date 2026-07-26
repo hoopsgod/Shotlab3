@@ -9,6 +9,8 @@ import {
   normalizeShotLogRowForDb,
   normalizeEventRowForDb,
   normalizeEventRowForApp,
+  normalizePlayerRowForApp,
+  normalizePlayerRowForDb,
   formatRemotePersistErrorForDebug,
   buildAppRows,
 } from '../src/lib/remotePersistence.js';
@@ -289,4 +291,30 @@ test('formats full remote persistence debug errors with message code details and
   });
 
   assert.equal(formatted, 'message: new row violates row-level security policy | code: 42501 | details: Failing row contains program score | hint: Check scores insert policy | payload: [{\"id\":\"score-program-safe\",\"team_id\":\"team-a\",\"player_id\":\"player:team_active\",\"drill_id\":\"demo-program-calipari-shooting\",\"src\":\"program\"}]');
+});
+
+
+test('removed player persistence keeps a nullable team assignment and hidden tombstone', () => {
+  const dbRow = normalizePlayerRowForDb({
+    id: 'player-removed',
+    email: 'removed@team.test',
+    name: 'Removed Player',
+    role: 'player',
+    teamId: null,
+    hideFromLeaderboards: true,
+  });
+
+  assert.deepEqual(dbRow, {
+    id: 'player-removed',
+    team_id: null,
+    email: 'removed@team.test',
+    name: 'Removed Player',
+    role: 'player',
+    hide_from_leaderboards: true,
+  });
+
+  const appRow = normalizePlayerRowForApp(dbRow);
+  assert.equal(appRow.teamId, null);
+  assert.equal(appRow.hideFromLeaderboards, true);
+  assert.equal(appRow.email, 'removed@team.test');
 });

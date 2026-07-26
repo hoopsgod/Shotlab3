@@ -116,3 +116,24 @@ test('removed player is excluded from all team-facing surfaces while active play
   assert.doesNotMatch(feed.map((item) => item.text).join(' | '), /Removed Player/);
   assert.deepEqual(developmentProfiles.map((profile) => profile.identity.email), ['active@team.test']);
 });
+
+
+test('hidden unassigned account row suppresses a stale team profile after hydration', () => {
+  const roster = getCoachRosterPlayers({
+    teamId,
+    players: [
+      activePlayer,
+      {
+        id: 'player-removed',
+        email: 'removed@team.test',
+        name: 'Removed Player',
+        role: 'player',
+        teamId: null,
+        hideFromLeaderboards: true,
+      },
+    ],
+    playerProfiles: [activeProfile, removedProfile],
+  });
+
+  assert.deepEqual(roster.map((player) => player.email), ['active@team.test']);
+});
