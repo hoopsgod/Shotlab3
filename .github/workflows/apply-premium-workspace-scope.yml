@@ -4,13 +4,16 @@ on:
   push:
     branches:
       - codex/high-end-workspace-system
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
 
 permissions:
   contents: write
 
 jobs:
   apply-scope:
-    if: github.actor != 'github-actions[bot]'
+    if: github.actor != 'github-actions[bot]' && github.head_ref == 'codex/high-end-workspace-system'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
