@@ -225,13 +225,13 @@ export const normalizeEventRowForApp = (row = {}) => {
 };
 
 export const normalizePlayerRowForApp = (row = {}) => {
-  const teamId = cleanText(row.team_id || row.teamId);
+  const teamId = cleanText(row.team_id ?? row.teamId);
   const email = cleanText(row.email).toLowerCase();
-  const id = cleanText(row.id || (teamId && email ? `player:${teamId}:${email}` : ""));
-  if (!id || !teamId || !email) return null;
+  const id = cleanText(row.id || (teamId && email ? `player:${teamId}:${email}` : email ? `player:unassigned:${email}` : ""));
+  if (!id || !email) return null;
   const payload = {
     id,
-    teamId,
+    teamId: teamId || null,
     email,
     name: cleanText(row.name),
     role: cleanText(row.role),
@@ -244,7 +244,7 @@ export const normalizePlayerRowForApp = (row = {}) => {
           ? row.hide_from_leaderboards
           : undefined,
   };
-  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== "" && value !== undefined));
+  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== "" && value !== undefined));
 };
 
 export const normalizePlayerRowForDb = (row = {}) => {
@@ -252,7 +252,7 @@ export const normalizePlayerRowForDb = (row = {}) => {
   if (!app) return null;
   const payload = {
     id: app.id,
-    team_id: app.teamId,
+    team_id: app.teamId || null,
     email: app.email,
     name: app.name,
     role: app.role,
@@ -260,7 +260,7 @@ export const normalizePlayerRowForDb = (row = {}) => {
     updated_at: app.updatedAt,
     hide_from_leaderboards: app.hideFromLeaderboards,
   };
-  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== "" && value !== undefined));
+  return Object.fromEntries(Object.entries(payload).filter(([key, value]) => key === "team_id" || (value !== null && value !== "" && value !== undefined)));
 };
 
 export const normalizePlayerProfileRowForApp = (row = {}) => {

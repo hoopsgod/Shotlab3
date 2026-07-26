@@ -8,6 +8,7 @@ import {
   filterActiveTeamPlayerRows,
   getActiveTeamPlayerIdentity,
   getCoachRosterPlayers,
+  resolveMigratedRosterTeamId,
 } from '../src/lib/playerDataManagement.js';
 import { getProgramLeaderboardRows } from '../src/lib/programDrillScoring.js';
 
@@ -115,4 +116,39 @@ test('removed player is excluded from all team-facing surfaces while active play
   assert.match(feed.map((item) => item.text).join(' | '), /Active Player/);
   assert.doesNotMatch(feed.map((item) => item.text).join(' | '), /Removed Player/);
   assert.deepEqual(developmentProfiles.map((profile) => profile.identity.email), ['active@team.test']);
+});
+
+
+test('hidden unassigned account row suppresses a stale team profile after hydration', () => {
+  const roster = getCoachRosterPlayers({
+    teamId,
+    players: [
+      activePlayer,
+      {
+        id: 'player-removed',
+        email: 'removed@team.test',
+        name: 'Removed Player',
+        role: 'player',
+        teamId: null,
+        hideFromLeaderboards: true,
+      },
+    ],
+    playerProfiles: [activeProfile, removedProfile],
+  });
+
+  assert.deepEqual(roster.map((player) => player.email), ['active@team.test']);
+});
+
+
+test("migration preserves removed tombstone null team ids instead of reassigning the first team", () => {
+  assert.equal(resolveMigratedRosterTeamId({
+    row: { email: "removed@team.test", teamId: null, hideFromLeaderboards: true, rosterStatus: "removed" },
+    mappedTeamId: "team-a",
+    fallbackTeamId: "team-fallback",
+  }), null);
+  assert.equal(resolveMigratedRosterTeamId({
+    row: { email: "unassigned@team.test", role: "player" },
+    mappedTeamId: "team-a",
+    fallbackTeamId: "team-fallback",
+  }), "team-a");
 });

@@ -78,7 +78,7 @@ export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamI
   const allProfiles = Array.isArray(playerProfiles) ? playerProfiles : [];
   const targetTeamId = String(teamId || "");
   const inactivePlayerKeys = new Set(allPlayers
-    .filter((player) => isHiddenRosterRecord(player) && (rowTeamId(player) === targetTeamId || rowRemovedFromTeamId(player) === targetTeamId))
+    .filter((player) => isHiddenRosterRecord(player) && (!rowTeamId(player) || rowTeamId(player) === targetTeamId || rowRemovedFromTeamId(player) === targetTeamId))
     .flatMap((player) => rosterMergeKeys(player)));
   const isSuppressedByInactivePlayer = (profile = {}) => rosterMergeKeys(profile).some((key) => inactivePlayerKeys.has(key));
   const remember = (row, keys) => keys.filter(Boolean).forEach((key) => rosterByKey.set(key, row));
@@ -205,6 +205,13 @@ export const getPlayerDisplayIdentity = (player = {}) => {
 export const isActiveRosterPlayer = (player = {}, teamId = "") => isActiveRosterPlayerForTeam(player, teamId);
 
 export const isPlayerHiddenFromActiveLeaderboards = (player = {}) => isInactiveRosterRecord(player) || player?.teamId == null;
+
+export const resolveMigratedRosterTeamId = ({ row = {}, mappedTeamId = null, fallbackTeamId = null } = {}) => {
+  const hasExplicitTeamField = Object.prototype.hasOwnProperty.call(row, "teamId") || Object.prototype.hasOwnProperty.call(row, "team_id");
+  const explicitTeamId = row?.teamId ?? row?.team_id ?? null;
+  if (hasExplicitTeamField && explicitTeamId == null && isInactiveRosterRecord(row)) return null;
+  return explicitTeamId || mappedTeamId || fallbackTeamId || null;
+};
 
 
 export const getActiveTeamPlayers = (players = [], teamId = "") => buildActiveRosterIdentity(players, teamId).players;

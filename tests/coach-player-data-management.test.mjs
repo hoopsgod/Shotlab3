@@ -412,3 +412,14 @@ test('stabilization: coach-facing labels never imply coach can delete a Supabase
   assert.match(appSource, /It does not delete Supabase Auth users, app account rows, team branding, drills, events, or other players/)
   assert.doesNotMatch(appSource, /coach can delete .*Supabase Auth/i)
 })
+
+
+test('coach removal atomically tombstones matching player and profile layers', () => {
+  const removeBlock = appSource.match(/const removeRosterPlayer=async[\s\S]*?const deleteTeamLocalRosterPlayerData=async/)?.[0] || '';
+  assert.match(removeBlock, /const identityKeys=new Set/);
+  assert.match(removeBlock, /const nextPlayers=result\.ok\?result\.players:players\.map/);
+  assert.match(removeBlock, /const nextProfiles=playerProfiles\.map/);
+  assert.match(removeBlock, /if\(playersChanged\)setPlayers\(nextPlayers\)/);
+  assert.match(removeBlock, /if\(profilesChanged\)setPlayerProfiles\(nextProfiles\)/);
+  assert.match(removeBlock, /await Promise\.all\(writes\)/);
+});
