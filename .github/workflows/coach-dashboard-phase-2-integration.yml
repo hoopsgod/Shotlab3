@@ -28,7 +28,9 @@ jobs:
           cache: npm
 
       - name: Apply Phase 2 route integration
-        run: node scripts/apply-coach-dashboard-phase-2.mjs
+        run: |
+          node scripts/apply-coach-dashboard-phase-2.mjs
+          node scripts/fix-coach-dashboard-phase-2-scope.mjs
 
       - name: Run operational intelligence tests
         run: node --test tests/coach-operational-intelligence.test.mjs tests/coach-dashboard-phase-2-contract.test.mjs
@@ -43,7 +45,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/App.jsx
-          git commit -m "feat: wire coach dashboard phase two operations"
+          git add src/App.jsx src/lib/coachOperationalIntelligence.js tests/coach-dashboard-phase-2-contract.test.mjs
+          git commit -m "fix: isolate coach dashboard phase two route scope"
           git pull --rebase origin agent/coach-dashboard-phase-2
           git push origin HEAD:agent/coach-dashboard-phase-2
