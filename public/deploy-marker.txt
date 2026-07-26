@@ -1,0 +1,4 @@
+ShotLab production deployment marker
+PR 1239 merged successfully.
+Merge commit: faeced4b83a983b8ff57c093661cfa4ccd6247b0
+Redeploy trigger commit follows this file creation.
