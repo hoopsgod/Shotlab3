@@ -88,14 +88,16 @@ test("coach secondary workspaces share the Mission Control visual system", async
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Events", exact: true }).click();
   await expectWorkspace(page, "coach", "events");
-  await expectPremiumHeader(page);
+  await expect(page.getByRole("heading", { name: "EVENTS", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /CREATE FIRST EVENT|ADD EVENT/i }).first()).toBeVisible();
 
   await openMoreDestination(page, "drills");
   await expectWorkspace(page, "coach", "drills");
-  await expectPremiumHeader(page);
+  await expect(page.getByRole("heading", { name: "DRILLS", exact: true })).toBeVisible();
 
   await openMoreDestination(page, "sc");
   await expectWorkspace(page, "coach", "sc");
+  await expect(page.getByRole("heading", { name: /STRENGTH|S&C/i }).first()).toBeVisible();
 
   await openMoreDestination(page, "leaderboards");
   await expectWorkspace(page, "coach", "leaderboards");
