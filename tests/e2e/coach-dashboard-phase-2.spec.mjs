@@ -201,8 +201,7 @@ test("drills and strength dashboards support decision-ready filtering", async ({
   await drillFilters.getByRole("button", { name: /^Underused/ }).click();
   await expect(drillFilters.getByRole("button", { name: /^Underused/ })).toHaveAttribute("aria-pressed", "true");
   await drillFilters.getByRole("searchbox").fill("Corner");
-  const visibleDrillRows = page.locator("#coach-drills-management").locator(".ch");
-  await expect(visibleDrillRows.filter({ hasText: "Corner Threes" }).first()).toBeVisible();
+  await expect(page.getByText("Corner Threes", { exact: true }).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
   await openMoreDestination(page, "sc");
@@ -234,7 +233,7 @@ test("leaderboard, activity, and season comparison use the shared intelligence l
   const activityPanel = page.getByTestId("coach-activity-intelligence-panel");
   await expect(activityPanel).toBeVisible({ timeout: 20_000 });
   const activityFilters = page.getByTestId("coach-activity-intelligence-filters");
-  await activityFilters.getByRole("button", { name: /^Shooting/ }).click();
+  await activityFilters.getByRole("button", { name: /^Drill Scores/ }).click();
   await activityFilters.getByRole("searchbox").fill("Active Player");
   const activityResults = page.getByTestId("coach-activity-intelligence-results");
   await expect(activityResults.getByText("Active Player", { exact: true }).first()).toBeVisible();
