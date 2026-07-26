@@ -1637,7 +1637,6 @@ if(!profile)return result;
 await P("sl:player-profiles",playerProfiles.map(pp=>pp.id===profile.id?{...pp,archived:true,rosterStatus:"archived",rosterAction:"coach_archive_player",accountDeletion:false,supabaseAuthUserDeleted:false,hideFromLeaderboards:true,archivedAt:Date.now(),archivedBy:user.email}:pp),setPlayerProfiles);
 return{ok:true};
 }
-setPlayers(result.players);
 await P("sl:players",result.players,setPlayers);
 return{ok:true};
 };
@@ -1653,6 +1652,7 @@ setPlayerProfiles(nextProfiles);
 await P("sl:player-profiles",nextProfiles,setPlayerProfiles);
 return{ok:true};
 }
+setPlayers(result.players);
 await P("sl:players",result.players,setPlayers);
 return{ok:true};
 };
