@@ -4,6 +4,7 @@ import "./CoachMissionControlShell.css";
 import "./CoachMissionControlHeader.css";
 import "./CoachMissionControlPolish.css";
 import "./CoachMissionControl2026.css";
+import "./CoachMissionControlFinal.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 
@@ -59,8 +60,12 @@ function AttentionRow({ item, onFallback }) {
     <button type="button" className="mcAttentionRow" onClick={item?.onClick || onFallback}>
       <span className={`mcStatusDot is-${tone}`} />
       <Avatar item={item} />
-      <span className="mcAttentionCopy"><strong>{item?.name || item?.title || "Player follow-up"}</strong><small>{item?.detail || "Review player status"}</small></span>
-      <span className="mcRowAction">Review <Icon name="arrow" size={16} /></span>
+      <span className="mcAttentionCopy">
+        <strong>{item?.name || item?.title || "Player follow-up"}</strong>
+        <small>{item?.detail || "Review player status"}</small>
+        {item?.meta ? <span className="mcAttentionMeta">{item.meta}</span> : null}
+      </span>
+      <span className="mcRowAction">{item?.actionLabel || "Review"} <Icon name="arrow" size={16} /></span>
     </button>
   );
 }
@@ -165,17 +170,25 @@ export default function CoachCommandCenter({
   const activeRate = rosterSize ? clamp(Math.round((activeCount / rosterSize) * 100), 0, 100) : 0;
   const hasTeamActivity = activeCount > 0;
   const hasScheduledSession = Boolean(nextEventDateFormatted && String(nextEventDateFormatted).trim() && !/^(none|—|not set)$/i.test(String(nextEventDateFormatted).trim()));
-  const resolvedAttention = attentionItems.length ? attentionItems : highlightPlayersAttention ? [{ name: "Roster follow-up", detail: "Inactive or unresolved player items", tone: "danger", onClick: onPlayersClick }] : [];
+  const fallbackAttention = highlightPlayersAttention ? [{
+    name: "Roster activity gap",
+    detail: rosterSize === 1 ? "No training activity has been logged this week." : "At least one player has no logged activity this week.",
+    meta: "Review training status and account connection",
+    tone: "danger",
+    actionLabel: "Open",
+    onClick: onPlayersClick,
+  }] : [];
+  const resolvedAttention = attentionItems.length ? attentionItems : fallbackAttention;
   const attentionCount = resolvedAttention.length;
   const resolvedActivity = activityItems.length ? activityItems : [activeCount ? { name: `${activeCount} athlete${activeCount === 1 ? "" : "s"} active`, detail: "Training activity recorded today", meta: "Today" } : null].filter(Boolean);
   const hasLiveActivity = resolvedActivity.length > 0;
   const onboardingMode = !hasTeamActivity && !hasLiveActivity && !hasScheduledSession;
 
   const primaryCommand = attentionCount > 0
-    ? { eyebrow: "Priority action", title: `${attentionCount} player${attentionCount === 1 ? "" : "s"} need your attention`, detail: "Resolve the highest-impact player issue before moving on.", label: `Review ${attentionCount} player${attentionCount === 1 ? "" : "s"}`, onClick: onPlayersClick }
+    ? { eyebrow: "Today at a glance", title: `${attentionCount} decision${attentionCount === 1 ? "" : "s"} before practice`, detail: "Clear the priority, then set today’s plan.", label: "Review priority", onClick: onPlayersClick, state: "attention" }
     : hasScheduledSession
-      ? { eyebrow: "Today is under control", title: "Your next session is ready", detail: `The next scheduled team session is ${nextEventDateFormatted}.`, label: "Open next session", onClick: onNextEventClick }
-      : { eyebrow: "Today needs a plan", title: "Create today’s practice", detail: "Set the team focus so every athlete knows what matters next.", label: "Create practice", onClick: onScheduleEvent };
+      ? { eyebrow: "Practice ready", title: "Today is under control", detail: `Your next team session is ${nextEventDateFormatted}.`, label: "Open session", onClick: onNextEventClick, state: "ready" }
+      : { eyebrow: "Today’s next move", title: "Build today’s practice", detail: "Set the focus every athlete should see next.", label: "Create practice", onClick: onScheduleEvent, state: "planning" };
 
   const quickActions = useMemo(() => [
     { label: "Add Player", icon: "users", onClick: onAddPlayer },
@@ -197,7 +210,7 @@ export default function CoachCommandCenter({
 
   const attentionPanel = (
     <article className="mcSection mcAttention" aria-labelledby="mc-attention-heading">
-      <div className="mcSectionHead"><span><small>Player follow-up</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div>
+      <div className="mcSectionHead"><span><small>Priority queue</small><h2 id="mc-attention-heading">Needs attention</h2></span>{attentionCount > 0 ? <b>{attentionCount}</b> : null}</div>
       {attentionCount > 0
         ? <div className="mcAttentionList">{resolvedAttention.slice(0, 3).map((item, index) => <AttentionRow key={`${item.name || item.title}-${index}`} item={item} onFallback={onPlayersClick} />)}</div>
         : <div className="mcAllClear"><span><Icon name="check" /></span><div><strong>All clear</strong><small>No urgent player follow-up right now.</small></div></div>}
@@ -230,7 +243,7 @@ export default function CoachCommandCenter({
           <div className="mcHeaderActions"><button type="button" className="mcTeamSelect" onClick={openBrandingSettings}>{teamName}<span>⌄</span></button><button type="button" className="mcBell" aria-label={`${attentionCount} notifications`}><Icon name="bell" />{attentionCount > 0 ? <b>{attentionCount}</b> : null}</button></div>
         </header>
 
-        <section className="mcHero" data-testid="coach-primary-objective">
+        <section className={`mcHero is-${primaryCommand.state}`} data-testid="coach-primary-objective">
           <CourtArtwork logoUrl={cleanMarkLogoUrl} />
           <div className="mcHeroScrim" />
           <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img src={cleanMarkLogoUrl} alt={`${teamName} logo`} /></button>
@@ -239,9 +252,9 @@ export default function CoachCommandCenter({
             <h1>{primaryCommand.title}</h1>
             <p>{primaryCommand.detail}</p>
             <div className="mcRealityStrip" data-testid="coach-primary-metrics">
-              <button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active today</small></button>
-              <button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Need follow-up</small></button>
-              <button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "None"}</strong><small>Next session</small></button>
+              <button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active</small></button>
+              <button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Follow-up</small></button>
+              <button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "—"}</strong><small>Next</small></button>
             </div>
             <button type="button" className="mcPrimary" onClick={primaryCommand.onClick}>{primaryCommand.label}<Icon name="arrow" /></button>
           </div>
