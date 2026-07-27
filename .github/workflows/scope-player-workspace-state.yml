@@ -51,3 +51,5 @@ jobs:
           git add src/App.jsx
           git commit -m "scope player operational workspace state"
           git push origin HEAD:agent/player-experience-phase-2
+
+# Trigger: explicit Player and Coach state boundary validation
