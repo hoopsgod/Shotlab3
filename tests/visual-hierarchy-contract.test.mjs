@@ -6,6 +6,7 @@ const appSource=fs.readFileSync(new URL("../src/App.jsx",import.meta.url),"utf8"
 const hierarchySource=fs.readFileSync(new URL("../src/components/VisualHierarchy.jsx",import.meta.url),"utf8");
 const hierarchyCss=fs.readFileSync(new URL("../src/components/VisualHierarchy.module.css",import.meta.url),"utf8");
 const commandCenterSource=fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx",import.meta.url),"utf8");
+const playerCommandCenterSource=fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx",import.meta.url),"utf8");
 const missionControlCss=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",import.meta.url),"utf8");
 const premiumMissionControlCss=fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css",import.meta.url),"utf8");
 const leaderboardSource=fs.readFileSync(new URL("../src/components/PremiumLeaderboardsHub.jsx",import.meta.url),"utf8");
@@ -21,14 +22,18 @@ test("shared hierarchy primitives remain available",()=>{
   assert.match(hierarchyCss,/\.disclosure\s*\{/);
 });
 
-test("player dashboard keeps one dominant mission and three primary metrics",()=>{
-  assert.match(appSource,/testId="player-primary-objective"/);
-  assert.match(appSource,/testId="player-primary-metrics"/);
+test("player dashboard keeps one dominant daily command center with supporting intelligence",()=>{
+  assert.match(appSource,/<PlayerDailyCommandCenter model=\{dailyCommandModel\} onAction=\{handleDailyCommandAction\}\/>/);
+  assert.match(playerCommandCenterSource,/data-testid="player-daily-command-center"/);
+  assert.match(playerCommandCenterSource,/data-testid="player-daily-primary-action"/);
+  assert.match(playerCommandCenterSource,/data-testid="player-daily-task-queue"/);
+  assert.match(playerCommandCenterSource,/data-testid="player-activation-loop"/);
   assert.match(appSource,/title="Upcoming schedule"/);
   assert.match(appSource,/testId="player-team-standings"/);
   assert.match(appSource,/testId="player-coach-guidance"/);
   assert.match(appSource,/testId="player-secondary-intelligence"/);
   assert.doesNotMatch(appSource,/aria-label="Progress snapshot"/);
+  assert.equal((appSource.match(/<PlayerDailyCommandCenter/g)||[]).length,1);
 });
 
 test("coach home keeps one dominant workflow and moves utilities into command surfaces",()=>{
@@ -68,5 +73,5 @@ test("Mission Control declares desktop and mobile layout boundaries",()=>{
   assert.match(missionControlCss,/safe-area-inset-bottom/);
   assert.match(premiumMissionControlCss,/mobile-navigation-dock/);
   assert.match(premiumMissionControlCss,/min-height:300px/);
-  assert.equal((appSource.match(/testId="player-primary-objective"/g)||[]).length,1);
+  assert.equal((playerCommandCenterSource.match(/data-testid="player-daily-command-center"/g)||[]).length,1);
 });

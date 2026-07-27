@@ -115,7 +115,9 @@ test("player workspaces share premium surfaces and preserve mobile geometry", as
   await enterDemo(page, "player");
   await expectWorkspace(page, "player", "home");
   await expectDockTouchTargets(page);
-  await expect(page.getByTestId("player-primary-objective")).toBeVisible({ timeout: 20_000 });
+  const commandCenter = page.getByTestId("player-daily-command-center");
+  await expect(commandCenter).toBeVisible({ timeout: 20_000 });
+  await expect(commandCenter.getByTestId("player-daily-primary-action")).toBeVisible();
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "At Home", exact: true }).click();
   await expectWorkspace(page, "player", "log-drill");
