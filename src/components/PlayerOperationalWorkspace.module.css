@@ -145,7 +145,7 @@
   justify-content:center;
   gap:7px;
   flex:0 0 auto;
-  min-height:42px;
+  min-height:44px;
   padding:0 13px;
   border:1px solid var(--stroke-1);
   border-radius:999px;
@@ -186,7 +186,7 @@
   line-height:1.45;
 }
 .emptyState button{
-  min-height:42px;
+  min-height:44px;
   padding:0;
   border:0;
   background:transparent;
