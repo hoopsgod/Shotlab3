@@ -46,15 +46,14 @@ test("phase two does not add schema or authentication behavior", () => {
   assert.doesNotMatch(selectorSource, /ALTER TABLE|CREATE TABLE|policy|rls/i);
 });
 
-
 test("coach-only filter variables never leak into the Player component", () => {
   const playerBlock = appSource.match(/function Player\([\s\S]*?function Coach\(/)?.[0] || "";
   const coachBlock = appSource.match(/function Coach\([\s\S]*/)?.[0] || "";
-  assert.doesNotMatch(playerBlock, /visibleHomeDrills|visibleProgramDrills|filteredCoachStrengthRows|filteredCoachLeaderboardIntelligenceRows/);
-  assert.match(playerBlock, /\{drills\.map\(d=>/);
+  assert.doesNotMatch(playerBlock, /\bvisibleHomeDrills\b|\bvisibleProgramDrills\b|filteredCoachStrengthRows|filteredCoachLeaderboardIntelligenceRows/);
+  assert.match(playerBlock, /\{visiblePlayerHomeDrills\.map\(d=>/);
+  assert.match(playerBlock, /\{visiblePlayerProgramSessionBlocks\.map\(\(block,blockIndex\)=>/);
   assert.match(coachBlock, /\{visibleHomeDrills\.map\(d=>/);
 });
-
 
 test("activity intelligence is a reachable coach workspace", () => {
   assert.match(appSource, /k:"activity",l:"Activity"/);
