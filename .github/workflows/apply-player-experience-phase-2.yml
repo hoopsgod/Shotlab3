@@ -51,3 +51,5 @@ jobs:
           git add src/App.jsx
           git commit -m "integrate player operational workspaces"
           git push origin HEAD:agent/player-experience-phase-2
+
+# Gate trigger: 2026-07-27 player workspace integration
