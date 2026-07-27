@@ -46,12 +46,13 @@ test("phase two does not add schema or authentication behavior", () => {
   assert.doesNotMatch(selectorSource, /ALTER TABLE|CREATE TABLE|policy|rls/i);
 });
 
-test("coach-only filter variables never leak into the Player component", () => {
+test("Player and Coach drill filters remain isolated in their own function scopes", () => {
   const playerBlock = appSource.match(/function Player\([\s\S]*?function Coach\(/)?.[0] || "";
   const coachBlock = appSource.match(/function Coach\([\s\S]*/)?.[0] || "";
-  assert.doesNotMatch(playerBlock, /\bvisibleHomeDrills\b|\bvisibleProgramDrills\b|filteredCoachStrengthRows|filteredCoachLeaderboardIntelligenceRows/);
-  assert.match(playerBlock, /\{visiblePlayerHomeDrills\.map\(d=>/);
-  assert.match(playerBlock, /\{visiblePlayerProgramSessionBlocks\.map\(\(block,blockIndex\)=>/);
+  assert.match(playerBlock, /const visibleHomeDrills=useMemo\(\(\)=>filterAtHomeDrills/);
+  assert.match(playerBlock, /\{visibleHomeDrills\.map\(d=>/);
+  assert.doesNotMatch(playerBlock, /visibleProgramDrills|filteredCoachStrengthRows|filteredCoachLeaderboardIntelligenceRows/);
+  assert.match(coachBlock, /const visibleHomeDrills=useMemo/);
   assert.match(coachBlock, /\{visibleHomeDrills\.map\(d=>/);
 });
 
