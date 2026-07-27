@@ -81,7 +81,7 @@ async function expectWorkspaceTouchTargets(page, testId) {
   for (let index = 0; index < count; index += 1) {
     const box = await buttons.nth(index).boundingBox();
     expect(box).not.toBeNull();
-    expect(box.height).toBeGreaterThanOrEqual(42);
+    expect(box.height).toBeGreaterThanOrEqual(44);
   }
 }
 
