@@ -26,20 +26,23 @@ replaceOnce(
   'const[homeDrillFilter,setHomeDrillFilter]=useState("all");\nconst[programDrillFilter,setProgramDrillFilter]=useState("all");\nconst[pbReveal,setPbReveal]=useState(null);\n'
 );
 
+const workspaceModels = [
+  'const playerDashboardLeaderboardStatus=playerLeaderboardState.status==="success"||playerDashboardHomeLeaderboardRows.length>0?"success":playerLeaderboardState.status;',
+  'const playerWeeklyMakes=useMemo(()=>{const cutoff=new Date(`${today}T00:00:00`);cutoff.setDate(cutoff.getDate()-6);const start=`${cutoff.getFullYear()}-${String(cutoff.getMonth()+1).padStart(2,"0")}-${String(cutoff.getDate()).padStart(2,"0")}`;return shotLogs.filter((row)=>rowMatchesPlayerIdentity(row)&&(!u?.teamId||!String(row?.teamId||row?.team_id||"")||String(row?.teamId||row?.team_id)===String(u.teamId))&&String(row?.date||"")>=start).reduce((sum,row)=>sum+Number(row?.made||0),0);},[shotLogs,rowMatchesPlayerIdentity,u?.teamId,today]);',
+  'const atHomeWorkspaceModel=useMemo(()=>buildAtHomeWorkspaceModel({today,userEmail:u?.email,teamId:u?.teamId,drills,todayScores:todayS,shotLogs,streak,dailyGoal:PLAYER_DAILY_SHOT_TARGET}),[today,u?.email,u?.teamId,drills,todayS,shotLogs,streak]);',
+  'const programWorkspaceModel=useMemo(()=>buildProgramWorkspaceModel({programDrills,todayScores:todayProgramScores,allScores:programScores,coachPriorities}),[programDrills,todayProgramScores,programScores,coachPriorities]);',
+  'const eventsWorkspaceModel=useMemo(()=>buildEventsWorkspaceModel({events,rsvps,userEmail:u?.email,teamId:u?.teamId,today}),[events,rsvps,u?.email,u?.teamId,today]);',
+  'const strengthWorkspaceModel=useMemo(()=>buildStrengthWorkspaceModel({sessions:scSessions,rsvps:scRsvps,logs:scLogs,userEmail:u?.email,teamId:u?.teamId,today}),[scSessions,scRsvps,scLogs,u?.email,u?.teamId,today]);',
+  'const leaderboardWorkspaceModel=useMemo(()=>buildLeaderboardWorkspaceModel({rows:playerDashboardLeaderboardRows,userEmail:u?.email,weeklyMakes:playerWeeklyMakes,streak}),[playerDashboardLeaderboardRows,u?.email,playerWeeklyMakes,streak]);',
+  'const profileWorkspaceModel=useMemo(()=>buildProfileWorkspaceModel({shotLogs,scores,rsvps,scLogs,userEmail:u?.email,teamId:u?.teamId,streak}),[shotLogs,scores,rsvps,scLogs,u?.email,u?.teamId,streak]);',
+  'const visibleHomeDrills=useMemo(()=>filterAtHomeDrills({drills,todayScores:todayS,filter:homeDrillFilter}),[drills,todayS,homeDrillFilter]);',
+  'const visibleProgramSessionBlocks=useMemo(()=>filterProgramSessionBlocks({blocks:programSessionBlocks.grouped,todayScores:todayProgramScores,filter:programDrillFilter}),[programSessionBlocks.grouped,todayProgramScores,programDrillFilter]);',
+].join("\n") + "\n";
+
 replaceOnce(
   "workspace models",
   'const playerDashboardLeaderboardStatus=playerLeaderboardState.status==="success"||playerDashboardHomeLeaderboardRows.length>0?"success":playerLeaderboardState.status;\n',
-  `const playerDashboardLeaderboardStatus=playerLeaderboardState.status==="success"||playerDashboardHomeLeaderboardRows.length>0?"success":playerLeaderboardState.status;
-const playerWeeklyMakes=useMemo(()=>{const cutoff=new Date(\`${today}T00:00:00\`);cutoff.setDate(cutoff.getDate()-6);const start=\`${cutoff.getFullYear()}-${String(cutoff.getMonth()+1).padStart(2,"0")}-${String(cutoff.getDate()).padStart(2,"0")}\`;return shotLogs.filter((row)=>rowMatchesPlayerIdentity(row)&&(!u?.teamId||!String(row?.teamId||row?.team_id||"")||String(row?.teamId||row?.team_id)===String(u.teamId))&&String(row?.date||"")>=start).reduce((sum,row)=>sum+Number(row?.made||0),0);},[shotLogs,rowMatchesPlayerIdentity,u?.teamId,today]);
-const atHomeWorkspaceModel=useMemo(()=>buildAtHomeWorkspaceModel({today,userEmail:u?.email,teamId:u?.teamId,drills,todayScores:todayS,shotLogs,streak,dailyGoal:PLAYER_DAILY_SHOT_TARGET}),[today,u?.email,u?.teamId,drills,todayS,shotLogs,streak]);
-const programWorkspaceModel=useMemo(()=>buildProgramWorkspaceModel({programDrills,todayScores:todayProgramScores,allScores:programScores,coachPriorities}),[programDrills,todayProgramScores,programScores,coachPriorities]);
-const eventsWorkspaceModel=useMemo(()=>buildEventsWorkspaceModel({events,rsvps,userEmail:u?.email,teamId:u?.teamId,today}),[events,rsvps,u?.email,u?.teamId,today]);
-const strengthWorkspaceModel=useMemo(()=>buildStrengthWorkspaceModel({sessions:scSessions,rsvps:scRsvps,logs:scLogs,userEmail:u?.email,teamId:u?.teamId,today}),[scSessions,scRsvps,scLogs,u?.email,u?.teamId,today]);
-const leaderboardWorkspaceModel=useMemo(()=>buildLeaderboardWorkspaceModel({rows:playerDashboardLeaderboardRows,userEmail:u?.email,weeklyMakes:playerWeeklyMakes,streak}),[playerDashboardLeaderboardRows,u?.email,playerWeeklyMakes,streak]);
-const profileWorkspaceModel=useMemo(()=>buildProfileWorkspaceModel({shotLogs,scores,rsvps,scLogs,userEmail:u?.email,teamId:u?.teamId,streak}),[shotLogs,scores,rsvps,scLogs,u?.email,u?.teamId,streak]);
-const visibleHomeDrills=useMemo(()=>filterAtHomeDrills({drills,todayScores:todayS,filter:homeDrillFilter}),[drills,todayS,homeDrillFilter]);
-const visibleProgramSessionBlocks=useMemo(()=>filterProgramSessionBlocks({blocks:programSessionBlocks.grouped,todayScores:todayProgramScores,filter:programDrillFilter}),[programSessionBlocks.grouped,todayProgramScores,programDrillFilter]);
-`
+  workspaceModels
 );
 
 replaceOnce(
