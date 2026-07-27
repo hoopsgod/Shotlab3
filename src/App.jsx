@@ -30,6 +30,7 @@ import SemanticStatus from "./components/SemanticStatus.jsx";
 import { DashboardSection } from "./components/CoachDashboardPrimitives.jsx";
 import { CoachEventsInteractiveDashboard, CoachPageDashboardHeader, CoachPlayersInteractiveDashboard } from "./components/CoachInteractiveDashboards.jsx";
 import { CoachActivityIntelligencePanel, CoachDrillsOperationalPanel, CoachEventIntelligenceDrawer, CoachLeaderboardOperationalPanel, CoachPlayerIntelligenceDrawer, CoachSeasonComparisonPanel, CoachStrengthOperationalPanel } from "./components/CoachDashboardPhase2.jsx";
+import PlayerDailyCommandCenter from "./components/PlayerDailyCommandCenter.jsx";
 import "./styles/PremiumWorkspace.css";
 import "./styles/CoachInteractiveDashboard.css";
 
@@ -99,6 +100,7 @@ import {
 } from "./lib/coachDashboardSelectors.js";
 import { buildCoachEventDashboardMetrics, buildCoachEventDashboardRows, buildCoachPageDashboardSummary, buildCoachPlayerDashboardMetrics, buildCoachPlayerDashboardRows, filterCoachEventDashboardRows, filterCoachPlayerDashboardRows } from "./lib/coachOperationalDashboard.js";
 import { buildActivityIntelligenceRows, buildDrillIntelligenceRows, buildEventIntelligenceModel, buildLeaderboardIntelligenceRows, buildPlayerIntelligenceModel, buildSeasonComparisonModel, buildStrengthIntelligenceRows, filterActivityIntelligenceRows, filterDrillIntelligenceRows, filterLeaderboardIntelligenceRows, filterStrengthIntelligenceRows } from "./lib/coachOperationalIntelligence.js";
+import { derivePlayerDailyCommandCenter } from "./lib/playerDailyCommandCenter.js";
 const VOLT = TOKENS.PRIMARY;
 const SUCCESS = TOKENS.SUCCESS;
 const INFO = TOKENS.INFO;
@@ -2253,7 +2255,7 @@ const isPB=v>prevBest&&prevBest>0;
 const saveResult=await addScore(active.id,v,activeMode);
 if(!saveResult?.ok){setSubmitting(false);return;}
 playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
-pushCompletionCue({title:activeMode==="program"?"Program drill completed":"Drill completed",detail:`${active.name} · ${v}${hasDrillMax(active)?`/${active.max}`:""} logged`,momentum:`${Math.max(1,streak+(activeMode==="program"?0:1))}-day momentum`,next:activeMode==="program"?"Review Program leaderboard":"Log shots or complete your next drill"});
+pushCompletionCue({title:activeMode==="program"?"Program drill completed":"Drill completed",detail:`${active.name} · ${v}${hasDrillMax(active)?`/${active.max}`:""} logged`,momentum:`${Math.max(1,streak+(activeMode==="program"?0:1))}-day momentum`,next:activeMode==="program"?"Review Program leaderboard":"Continue today’s plan",nextAction:{target:activeMode==="program"?"duels":"home"}});
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 if(activeMode!=="program"){setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)}
 };
@@ -2287,13 +2289,19 @@ const playerMobileSecondaryItems=[
   {k:"leaderboards",l:"Leaderboards",mobileLabel:"Rankings",description:"Current and all-time team rankings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>},
   getPlayerNavItem("profile",{mobileLabel:"Profile",description:"Progress, settings, and account"}),
 ].filter(Boolean);
-
+const handleDailyCommandAction=useCallback((action={})=>{
+  const target=action?.target||"home";
+  const candidateDrills=target==="duels"?programDrills:drills;
+  const actionDrill=action?.drillId?candidateDrills.find((drill)=>String(drill?.id||drill?.drillId||drill?.drill_id||"")===String(action.drillId)):null;
+  switchTab(target);
+  if(actionDrill)window.setTimeout(()=>setActive(actionDrill),0);
+},[drills,programDrills,switchTab]);
 
 return <div className={`app-shell performance-shell performance-shell--player ${isDesktop?"is-desktop":"is-mobile"}`} data-workspace-tab={tab}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Player navigation"><div className="nav-title">PLAYER DASHBOARD</div>{playerNavItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>switchTab(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
 <main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}>
 <BrandBackdrop/>
-{completionCue&&<div className="fade-up" style={{position:"sticky",top:70,zIndex:18,margin:"8px 12px 0",padding:"12px 14px",borderRadius:14,background:"linear-gradient(155deg, rgba(200,255,26,0.14), rgba(94,208,255,0.08))",border:"1px solid rgba(200,255,26,0.34)",boxShadow:"0 12px 24px rgba(0,0,0,0.25)"}}>
+{completionCue&&<div className="fade-up" data-testid="player-completion-cue" style={{position:"sticky",top:70,zIndex:18,margin:"8px 12px 0",padding:"12px 14px",borderRadius:14,background:"linear-gradient(155deg, rgba(200,255,26,0.14), rgba(94,208,255,0.08))",border:"1px solid rgba(200,255,26,0.34)",boxShadow:"0 12px 24px rgba(0,0,0,0.25)"}}>
   <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>COMPLETED</div>
   <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1.2,marginTop:2}}>{completionCue.title}</div>
   <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:2}}>{completionCue.detail}</div>
@@ -2301,6 +2309,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
     <span style={{fontFamily:FB,fontSize:10,color:CYAN,border:"1px solid rgba(94,208,255,0.28)",borderRadius:999,padding:"3px 8px"}}>{completionCue.momentum}</span>
     <span style={{fontFamily:FB,fontSize:10,color:LIGHT,border:"1px solid rgba(255,255,255,0.16)",borderRadius:999,padding:"3px 8px"}}>Next: {completionCue.next}</span>
   </div>
+  {completionCue.nextAction&&<button type="button" onClick={()=>{handleDailyCommandAction(completionCue.nextAction);setCompletionCue(null);}} style={{marginTop:10,minHeight:44,width:"100%",border:0,borderRadius:10,background:VOLT,color:"#071007",fontFamily:FB,fontSize:11,fontWeight:800,letterSpacing:"0.08em",cursor:"pointer"}}>CONTINUE →</button>}
 </div>}
 {statSyncError&&<div style={{position:"relative",zIndex:2,margin:"10px 12px 0",padding:"10px 12px",borderRadius:10,border:"1px solid rgba(255,69,69,0.45)",background:"rgba(255,69,69,0.10)",color:"#FFB5B5",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.02em"}}>{statSyncError}</div>}
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
@@ -2466,27 +2475,9 @@ return <div className={`app-shell performance-shell performance-shell--player ${
         `Challenge active: ${coachChallengeText}`,
       ];
       const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
+      const dailyCommandModel=derivePlayerDailyCommandCenter({today,userEmail:u?.email,teamId:u?.teamId,todayMakes:todaysMakes,weeklyMakes,dailyGoal,weeklyGoal:coachWeeklyMakesTarget,streak,leaderboardRank,drills,programDrills,todayHomeScores:todayS,todayProgramScores,events,rsvps,scSessions,scRsvps,shotLogs:normalizedShotLogs,scLogs:normalizedScLogs,coachPriorities});
       return <div className="player-home-compact-dashboard" style={{marginBottom:24,display:"grid",gap:"var(--player-dashboard-gap, 14px)"}}>
-        <DominantObjectiveCard
-          eyebrow="Today’s mission"
-          title={coachTodayFocus}
-          description={missionStatus}
-          actionLabel={missionCtaLabel}
-          onAction={()=>switchTab("log-drill")}
-          badge={missionMomentumBadge}
-          testId="player-primary-objective"
-        >
-          <div style={{height:7,borderRadius:999,background:"rgba(255,255,255,0.1)",overflow:"hidden"}}><div style={{height:"100%",width:`${Math.max(6,dailyPct)}%`,background:"var(--accent)",transition:"width .2s ease"}}/></div>
-          <div style={{display:"flex",justifyContent:"space-between",fontFamily:FB,fontSize:12,color:T.SUB,marginTop:6}}><span>{todaysMakes}/{dailyGoal} makes</span><span>{dailyPct}% complete</span></div>
-        </DominantObjectiveCard>
-        <MetricStrip
-          testId="player-primary-metrics"
-          items={[
-            {label:"Today",value:todaysMakes,detail:`${dailyPct}% of daily goal`},
-            {label:"This Week",value:weeklyMakes,detail:`${weeklyPct}% of weekly goal`},
-            {label:"Streak",value:formatStreakDays(streak),detail:`${todayS.length}/${drills.length} drills`},
-          ]}
-        />
+        <PlayerDailyCommandCenter model={dailyCommandModel} onAction={handleDailyCommandAction}/>
         <ProgressiveDisclosure
           title="Upcoming schedule"
           summary={upcomingScheduleItems.length?`${upcomingScheduleItems.length} scheduled · ${unresolvedBadgeLabel}`:"No sessions scheduled"}
@@ -2579,7 +2570,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
 
     <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice} isDemoSession={isDemoHomeShotSession}/>
     {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
-      <button className="btn-v cta-primary" disabled={shotSaving} onClick={async()=>{if(shotSaving)return;const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}setShotInputError("");setShotSaveNotice("");setShotSaving(true);try{const result=await addShotLog(validation.made,shotDate);if(result?.ok){if(result.mode==="local_pending"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}}finally{setShotSaving(false);}}} style={{opacity:shotSaving||shotSaved?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
+      <button className="btn-v cta-primary" disabled={shotSaving} onClick={async()=>{if(shotSaving)return;const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}setShotInputError("");setShotSaveNotice("");setShotSaving(true);try{const result=await addShotLog(validation.made,shotDate);if(result?.ok){pushCompletionCue({title:"Shots logged",detail:`${validation.made} makes added to today’s total`,momentum:"Daily progress updated",next:"Return to the command center",nextAction:{target:"home"}});if(result.mode==="local_pending"){setShotSaveNotice("Saved locally — team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}}finally{setShotSaving(false);}}} style={{opacity:shotSaving||shotSaved?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
         {shotSaving?"SAVING…":shotSaved?"✓ SAVED":"LOG SHOTS"}
       </button>
       {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,textAlign:"center",marginTop:8,letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
