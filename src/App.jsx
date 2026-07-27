@@ -31,6 +31,7 @@ import { DashboardSection } from "./components/CoachDashboardPrimitives.jsx";
 import { CoachEventsInteractiveDashboard, CoachPageDashboardHeader, CoachPlayersInteractiveDashboard } from "./components/CoachInteractiveDashboards.jsx";
 import { CoachActivityIntelligencePanel, CoachDrillsOperationalPanel, CoachEventIntelligenceDrawer, CoachLeaderboardOperationalPanel, CoachPlayerIntelligenceDrawer, CoachSeasonComparisonPanel, CoachStrengthOperationalPanel } from "./components/CoachDashboardPhase2.jsx";
 import PlayerDailyCommandCenter from "./components/PlayerDailyCommandCenter.jsx";
+import { PlayerWorkspaceCommandBar, PlayerWorkspaceEmptyState, PlayerWorkspaceFilterRail } from "./components/PlayerOperationalWorkspace.jsx";
 import "./styles/PremiumWorkspace.css";
 import "./styles/CoachInteractiveDashboard.css";
 
@@ -101,6 +102,7 @@ import {
 import { buildCoachEventDashboardMetrics, buildCoachEventDashboardRows, buildCoachPageDashboardSummary, buildCoachPlayerDashboardMetrics, buildCoachPlayerDashboardRows, filterCoachEventDashboardRows, filterCoachPlayerDashboardRows } from "./lib/coachOperationalDashboard.js";
 import { buildActivityIntelligenceRows, buildDrillIntelligenceRows, buildEventIntelligenceModel, buildLeaderboardIntelligenceRows, buildPlayerIntelligenceModel, buildSeasonComparisonModel, buildStrengthIntelligenceRows, filterActivityIntelligenceRows, filterDrillIntelligenceRows, filterLeaderboardIntelligenceRows, filterStrengthIntelligenceRows } from "./lib/coachOperationalIntelligence.js";
 import { derivePlayerDailyCommandCenter } from "./lib/playerDailyCommandCenter.js";
+import { buildAtHomeWorkspaceModel, buildEventsWorkspaceModel, buildLeaderboardWorkspaceModel, buildProfileWorkspaceModel, buildProgramWorkspaceModel, buildStrengthWorkspaceModel, filterAtHomeDrills, filterProgramSessionBlocks } from "./lib/playerOperationalWorkspaces.js";
 const VOLT = TOKENS.PRIMARY;
 const SUCCESS = TOKENS.SUCCESS;
 const INFO = TOKENS.INFO;
@@ -2216,6 +2218,8 @@ const tier=useMemo(()=>getTier(myRsvps),[myRsvps]);
 const unrsvpEvents=useMemo(()=>{const up=events.filter(e=>e.date>=today);return up.filter(e=>!rsvps.some(r=>r.eventId===e.id&&r.email===u.email)).length},[events,rsvps,u,today]);
 const soonSC=useMemo(()=>{const d2=new Date();d2.setDate(d2.getDate()+2);const cut=`${d2.getFullYear()}-${String(d2.getMonth()+1).padStart(2,"0")}-${String(d2.getDate()).padStart(2,"0")}`;return scSessions.filter(s=>s.date>=today&&s.date<=cut&&!scRsvps.some(r=>r.sessionId===s.id&&r.email===u.email)).length},[scSessions,scRsvps,u,today]);
 
+const[homeDrillFilter,setHomeDrillFilter]=useState("all");
+const[programDrillFilter,setProgramDrillFilter]=useState("all");
 const[pbReveal,setPbReveal]=useState(null);
 const[submitting,setSubmitting]=useState(false);
 const[drillBarW,setDrillBarW]=useState(0);
@@ -2239,6 +2243,15 @@ const playerDashboardHomeLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboard
 const playerLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboardRows(playerLeaderboardState.rows,playerActiveTeamKeySet,playerActiveTeamEmailSet,playerActiveTeamNameSet),[playerLeaderboardState.rows,playerActiveTeamKeySet,playerActiveTeamEmailSet,playerActiveTeamNameSet]);
 const playerDashboardLeaderboardRows=playerLeaderboardRows.length?playerLeaderboardRows:playerDashboardHomeLeaderboardRows;
 const playerDashboardLeaderboardStatus=playerLeaderboardState.status==="success"||playerDashboardHomeLeaderboardRows.length>0?"success":playerLeaderboardState.status;
+const playerWeeklyMakes=useMemo(()=>{const cutoff=new Date(`${today}T00:00:00`);cutoff.setDate(cutoff.getDate()-6);const start=`${cutoff.getFullYear()}-${String(cutoff.getMonth()+1).padStart(2,"0")}-${String(cutoff.getDate()).padStart(2,"0")}`;return shotLogs.filter((row)=>rowMatchesPlayerIdentity(row)&&(!u?.teamId||!String(row?.teamId||row?.team_id||"")||String(row?.teamId||row?.team_id)===String(u.teamId))&&String(row?.date||"")>=start).reduce((sum,row)=>sum+Number(row?.made||0),0);},[shotLogs,rowMatchesPlayerIdentity,u?.teamId,today]);
+const atHomeWorkspaceModel=useMemo(()=>buildAtHomeWorkspaceModel({today,userEmail:u?.email,teamId:u?.teamId,drills,todayScores:todayS,shotLogs,streak,dailyGoal:PLAYER_DAILY_SHOT_TARGET}),[today,u?.email,u?.teamId,drills,todayS,shotLogs,streak]);
+const programWorkspaceModel=useMemo(()=>buildProgramWorkspaceModel({programDrills,todayScores:todayProgramScores,allScores:programScores,coachPriorities}),[programDrills,todayProgramScores,programScores,coachPriorities]);
+const eventsWorkspaceModel=useMemo(()=>buildEventsWorkspaceModel({events,rsvps,userEmail:u?.email,teamId:u?.teamId,today}),[events,rsvps,u?.email,u?.teamId,today]);
+const strengthWorkspaceModel=useMemo(()=>buildStrengthWorkspaceModel({sessions:scSessions,rsvps:scRsvps,logs:scLogs,userEmail:u?.email,teamId:u?.teamId,today}),[scSessions,scRsvps,scLogs,u?.email,u?.teamId,today]);
+const leaderboardWorkspaceModel=useMemo(()=>buildLeaderboardWorkspaceModel({rows:playerDashboardLeaderboardRows,userEmail:u?.email,weeklyMakes:playerWeeklyMakes,streak}),[playerDashboardLeaderboardRows,u?.email,playerWeeklyMakes,streak]);
+const profileWorkspaceModel=useMemo(()=>buildProfileWorkspaceModel({shotLogs,scores,rsvps,scLogs,userEmail:u?.email,teamId:u?.teamId,streak}),[shotLogs,scores,rsvps,scLogs,u?.email,u?.teamId,streak]);
+const visibleHomeDrills=useMemo(()=>filterAtHomeDrills({drills,todayScores:todayS,filter:homeDrillFilter}),[drills,todayS,homeDrillFilter]);
+const visibleProgramSessionBlocks=useMemo(()=>filterProgramSessionBlocks({blocks:programSessionBlocks.grouped,todayScores:todayProgramScores,filter:programDrillFilter}),[programSessionBlocks.grouped,todayProgramScores,programDrillFilter]);
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
 const activeMode=tab==="duels"?"program":"home";
 const activeScores=activeMode==="program"?programScores:homeScores;
@@ -2296,6 +2309,12 @@ const handleDailyCommandAction=useCallback((action={})=>{
   switchTab(target);
   if(actionDrill)window.setTimeout(()=>setActive(actionDrill),0);
 },[drills,programDrills,switchTab]);
+const handlePlayerWorkspaceAction=useCallback((action={})=>{
+  if(action?.focus==="shot-stats"){switchTab("log-drill");setShowShotStats(true);return;}
+  handleDailyCommandAction(action);
+},[handleDailyCommandAction,switchTab]);
+const handleAtHomeMetric=useCallback((metric)=>{if(metric?.filter){setHomeDrillFilter(metric.filter);return;}handlePlayerWorkspaceAction(metric?.action||atHomeWorkspaceModel.primaryAction);},[atHomeWorkspaceModel.primaryAction,handlePlayerWorkspaceAction]);
+const handleProgramMetric=useCallback((metric)=>{if(metric?.filter){setProgramDrillFilter(metric.filter);return;}handlePlayerWorkspaceAction(metric?.action||programWorkspaceModel.primaryAction);},[programWorkspaceModel.primaryAction,handlePlayerWorkspaceAction]);
 
 return <div className={`app-shell performance-shell performance-shell--player ${isDesktop?"is-desktop":"is-mobile"}`} data-workspace-tab={tab}>
 {isDesktop&&<aside className="sidebar-nav" aria-label="Player navigation"><div className="nav-title">PLAYER DASHBOARD</div>{playerNavItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>switchTab(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
@@ -2545,11 +2564,8 @@ return <div className={`app-shell performance-shell performance-shell--player ${
   {/* ═════════════ AT HOME (sub-screen) ═════════════ */}
   {(tab==="log-drill")&&!active&&!showShotStats&&<div className="fade-up">
     
-    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9.5L12 3l9 6.5"/><path d="M19 13v6a1 1 0 01-1 1H6a1 1 0 01-1-1v-6"/></svg>
-      <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:3}}>AT HOME</div>
-    </div>
-    <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginBottom:24,fontWeight:500}}>Log your daily drills and track shots — all on the honor system.</div>
+    <PlayerWorkspaceCommandBar model={atHomeWorkspaceModel} activeMetric={homeDrillFilter==="open"?"open":homeDrillFilter==="completed"?"complete":""} onAction={handlePlayerWorkspaceAction} onMetric={handleAtHomeMetric} testId="player-at-home-workspace"/>
+    <PlayerWorkspaceFilterRail value={homeDrillFilter} onChange={setHomeDrillFilter} ariaLabel="At Home drill filters" testId="player-at-home-filter-rail" options={[{value:"all",label:"All drills",count:drills.length},{value:"open",label:"Open",count:atHomeWorkspaceModel.metrics.find(metric=>metric.id==="open")?.value||0},{value:"completed",label:"Completed",count:atHomeWorkspaceModel.metrics.find(metric=>metric.id==="complete")?.value||0}]}/>
 
     {/* ── SHOT TRACKER ── */}
     <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10,display:"flex",alignItems:"center",gap:6}}>
@@ -2583,7 +2599,8 @@ return <div className={`app-shell performance-shell performance-shell--player ${
     {/* ── DAILY DRILLS (PRIMARY ACTION) ── */}
     <div style={{fontFamily:FB,color:todayS.length>=drills.length&&drills.length>0?"#FFFFFF":VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8}}>DAILY DRILLS · {todayS.length}/{drills.length} DONE</div>
     <div style={{width:"100%",height:4,background:"#242424",borderRadius:2,overflow:"hidden",marginBottom:12}}><div style={{width:`${drills.length>0?Math.min(100,Math.round(todayS.length/drills.length*100)):0}%`,height:"100%",background:VOLT,borderRadius:2,transition:"width .25s ease"}}/></div>
-    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);
+    {visibleHomeDrills.length===0&&<PlayerWorkspaceEmptyState title={homeDrillFilter==="open"?"All assigned drills are complete":"No completed drills yet"} detail={homeDrillFilter==="open"?"Your daily drill block is finished. Add quality makes or review your stats.":"Complete a drill and it will appear here."} actionLabel={homeDrillFilter==="open"?"Review shot stats":"Show open drills"} onAction={()=>homeDrillFilter==="open"?setShowShotStats(true):setHomeDrillFilter("open")}/>}
+    {visibleHomeDrills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);
       return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?"rgba(200, 255, 0, 0.20)":BORDER_CLR}`,borderRadius:16,padding:"16px",marginBottom:12,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.6:1}}>
         <div style={{width:48,height:48,display:"flex",alignItems:"center",justifyContent:"center",background:"#1E1E1E",borderRadius:12,flexShrink:0}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"99":VOLT}/></div>
         <div style={{flex:1,minWidth:0}}>
@@ -2596,6 +2613,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
   </div>}
 
   {tab==="leaderboards"&&!active&&<div className={slideClass} key="leaderboards">
+    <PlayerWorkspaceCommandBar model={leaderboardWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"leaderboards"})} testId="player-leaderboards-workspace"/>
     <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={playerLeaderboardRows} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} userEmail={u?.email||""} currentUser={u} programScores={teamProgramScores} programDrills={programDrills} players={playerLeaderboardPlayers} teamId={u?.teamId||""} homeScores={scores} shotLogs={shotLogs} seasonArchives={seasonArchives} />
   </div>}
 
@@ -2682,21 +2700,19 @@ return <div className={`app-shell performance-shell performance-shell--player ${
   </div>}
 
   {/* ═════════════ PROGRAM (Coach-Verified) ═════════════ */}
-  {tab==="program"&&<div className={slideClass} key="program"><SectionHero icon={<EventIcon type="star" size={28} color={VOLT}/>} title="PROGRAM EVENTS" subtitle="Official workouts and attendance" accent={VOLT} deco={<EventIcon type="run" size={16} color={VOLT}/>} isCoach={u.isCoach}/><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div>}
+  {tab==="program"&&<div className={slideClass} key="program"><PlayerWorkspaceCommandBar model={eventsWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={()=>document.querySelector("[data-testid=player-events-operational-list]")?.scrollIntoView({behavior:"smooth",block:"start"})} testId="player-events-workspace"/><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></div>}
 
 
 
   {/* ═════════════ PROGRAM LOG ═════════════ */}
   {tab==="duels"&&!active&&<div className="fade-up">
-    <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>
-      <div style={{fontFamily:FD,color:CYAN,fontSize:22,letterSpacing:3}}>PROGRAM LOG</div>
-    </div>
-    <div style={{fontFamily:FB,color:CYAN,fontSize:12,marginBottom:24,fontWeight:500,textShadow:`0 0 18px ${CYAN}18`}}>Log your coach-assigned program drills and keep the team leaderboard moving.</div>
+    <PlayerWorkspaceCommandBar model={programWorkspaceModel} activeMetric={programDrillFilter==="open"?"open":programDrillFilter==="completed"?"complete":""} onAction={handlePlayerWorkspaceAction} onMetric={handleProgramMetric} testId="player-program-workspace"/>
+    <PlayerWorkspaceFilterRail value={programDrillFilter} onChange={setProgramDrillFilter} ariaLabel="Program drill filters" testId="player-program-filter-rail" options={[{value:"all",label:"Full plan",count:programDrills.length},{value:"open",label:"Open",count:programWorkspaceModel.metrics.find(metric=>metric.id==="open")?.value||0},{value:"completed",label:"Completed",count:programWorkspaceModel.metrics.find(metric=>metric.id==="complete")?.value||0}]}/>
 
     <div style={{fontFamily:FB,color:CYAN,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8,textShadow:`0 0 16px ${CYAN}18`}}>PROGRAM DRILLS · {todayProgramScores.length}/{programDrills.length} DONE</div>
     <div style={{width:"100%",height:4,background:"#242424",borderRadius:2,overflow:"hidden",marginBottom:12}}><div style={{width:`${programDrills.length>0?Math.min(100,Math.round(todayProgramScores.length/programDrills.length*100)):0}%`,height:"100%",background:CYAN,borderRadius:2,transition:"width .25s ease"}}/></div>
-    {programSessionBlocks.grouped.map((block,blockIndex)=><div key={block.phase} style={{marginBottom:14,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"12px 12px 4px"}}>
+    {visibleProgramSessionBlocks.length===0&&<PlayerWorkspaceEmptyState title={programDrillFilter==="open"?"Program plan complete":"No completed Program drills yet"} detail={programDrillFilter==="open"?"Every coach-assigned drill is complete for today.":"Complete a Program drill and it will appear here."} actionLabel={programDrillFilter==="open"?"Review rankings":"Show open drills"} onAction={()=>programDrillFilter==="open"?switchTab("leaderboards"):setProgramDrillFilter("open")}/>}
+    {visibleProgramSessionBlocks.map((block,blockIndex)=><div key={block.phase} style={{marginBottom:14,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"12px 12px 4px"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}>
         <div>
           <div style={{fontFamily:FD,color:CYAN,fontSize:13,letterSpacing:2}}>{`SESSION ${blockIndex+1} · ${block.phase.toUpperCase()}`}</div>
@@ -2723,10 +2739,10 @@ return <div className={`app-shell performance-shell performance-shell--player ${
   {u.isCoach&&tab==="players"&&<div className={slideClass} key="players"><PlayersScreen/></div>}
 
   {/* ═════════════ STRENGTH & CONDITIONING ═════════════ */}
-  {tab==="sc"&&<div className={slideClass} key="sc"><SectionHero icon={<LiftIcon size={28} color="#A0A0A0"/>} title="STRENGTH & CONDITIONING" subtitle="Log sessions and build consistency" accent="#A0A0A0" deco={<LiftIcon size={16} color="#A0A0A0"/>} isCoach={u.isCoach}/><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div>}
+  {tab==="sc"&&<div className={slideClass} key="sc"><PlayerWorkspaceCommandBar model={strengthWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={()=>document.querySelector("[data-testid=player-strength-operational-panel]")?.scrollIntoView({behavior:"smooth",block:"start"})} testId="player-strength-workspace"/><div data-testid="player-strength-operational-panel"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
+  {tab==="profile"&&<div className={slideClass} key="profile"><PlayerWorkspaceCommandBar model={profileWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"profile"})} testId="player-profile-workspace"/><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scRsvps={scRsvps} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
 </div>
 
 {!isDesktop&&<MobileNavigation primaryItems={playerMobilePrimaryItems} secondaryItems={playerMobileSecondaryItems} activeKey={tab} onChange={switchTab} ariaLabel="Player navigation"/>} 
