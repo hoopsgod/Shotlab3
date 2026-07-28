@@ -32,7 +32,7 @@ jobs:
         run: npm ci
 
       - name: Verify Phase 2 selectors and source contracts
-        run: node --test tests/coach-operational-intelligence.test.mjs tests/coach-dashboard-phase-2-contract.test.mjs
+        run: node --test tests/coach-operational-intelligence.test.mjs tests/coach-dashboard-phase-2-contract.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-activation-path.test.mjs
 
       - name: Install pinned Playwright test runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -44,7 +44,7 @@ jobs:
         run: npm run build
 
       - name: Run Coach Dashboard Phase 2 mobile flows
-        run: npx playwright test tests/e2e/coach-dashboard-phase-2.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+        run: npx playwright test tests/e2e/coach-dashboard-phase-2.spec.mjs tests/e2e/coach-activation-phase-1.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
       - name: Upload browser failure artifacts
         if: failure()
