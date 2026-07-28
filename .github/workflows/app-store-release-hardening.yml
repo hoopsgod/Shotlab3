@@ -28,12 +28,13 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Release hardening contracts
-        run: >-
-          node --test
-          tests/app-store-release-hardening.test.mjs
-          tests/app-store-mobile-shell.test.mjs
-          tests/phase-4-native-ios-foundation.test.mjs
-          tests/phase-4-signed-device-layer.test.mjs
+      - name: Offline and session recovery contracts
+        run: node --test tests/app-store-release-hardening.test.mjs
+      - name: App Store mobile shell contracts
+        run: node --test tests/app-store-mobile-shell.test.mjs
+      - name: Native iOS foundation contracts
+        run: node --test tests/phase-4-native-ios-foundation.test.mjs
+      - name: Signed-device source contracts
+        run: node --test tests/phase-4-signed-device-layer.test.mjs
       - name: Production build
         run: npm run build
