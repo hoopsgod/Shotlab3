@@ -11,6 +11,7 @@ import {
   filterAtHomeDrills,
   filterProgramSessionBlocks,
 } from "../src/lib/playerOperationalWorkspaces.js";
+import { hasWorkspaceRevealIntent } from "../src/lib/playerWorkspaceActionRouting.js";
 
 const today = "2026-07-27";
 const email = "player@example.com";
@@ -38,6 +39,14 @@ test("At Home completion ignores scores from unrelated drill collections", () =>
   assert.equal(model.metrics.find((metric) => metric.id === "open").value, 1);
 });
 
+test("At Home shot actions focus the actual shot entry control", () => {
+  const model = buildAtHomeWorkspaceModel({ today, userEmail: email, teamId, drills: [], dailyGoal: 100 });
+  assert.equal(model.primaryAction.focus, "shot-tracker");
+  assert.equal(model.primaryAction.reveal.focusLabel, "SHOTS MADE");
+  assert.equal(hasWorkspaceRevealIntent(model.primaryAction), true);
+  assert.equal(model.metrics.find((metric) => metric.id === "today").action.reveal.focusLabel, "SHOTS MADE");
+});
+
 test("Program workspace identifies coach priority and preserves phase filtering", () => {
   const drills = [{ id: "p1", name: "Form Shooting" }, { id: "p2", name: "Game Speed Reads" }];
   const scores = [{ drillId: "p1", score: 18 }];
@@ -60,28 +69,42 @@ test("Program workspace never reopens a completed coach priority", () => {
   assert.equal(model.metrics.find((metric) => metric.id === "pb").value, 18);
 });
 
-test("Events workspace prioritizes unresolved attendance", () => {
+test("Events workspace prioritizes and reveals the exact unresolved attendance card", () => {
   const events = [
     { id: "e1", teamId, date: "2026-07-28", time: "6:00 PM", title: "Practice" },
     { id: "e2", teamId, date: "2026-07-30", time: "7:00 PM", title: "Open Gym" },
   ];
-  const model = buildEventsWorkspaceModel({ events, rsvps: [{ eventId: "e2", email, teamId }], userEmail: email, teamId, today });
-  assert.equal(model.primaryAction.eventId, "e1");
+  const model = buildEventsWorkspaceModel({ events, rsvps: [{ eventId: "e1", email, teamId }], userEmail: email, teamId, today });
+  assert.equal(model.primaryAction.eventId, "e2");
+  assert.equal(model.primaryAction.reveal.containerTestId, "player-events-operational-list");
+  assert.equal(model.primaryAction.reveal.matchText, "Open Gym");
+  assert.equal(model.primaryAction.reveal.focusButtonText, "RSVP NOW");
   assert.equal(model.metrics.find((metric) => metric.id === "missing").value, 1);
   assert.equal(model.metrics.find((metric) => metric.id === "confirmed").value, 1);
 });
 
-test("Strength workspace separates commitments and logged work", () => {
-  const sessions = [{ id: "s1", teamId, date: "2026-07-28", time: "8:00 AM", sport: "Lift" }];
-  const model = buildStrengthWorkspaceModel({ sessions, rsvps: [], logs: [{ email, teamId, date: today, sport: "Basketball" }], userEmail: email, teamId, today });
-  assert.equal(model.primaryAction.sessionId, "s1");
+test("Strength workspace reveals the exact open commitment and preserves log routing", () => {
+  const sessions = [
+    { id: "s1", teamId, date: "2026-07-28", time: "8:00 AM", sport: "Team Lift" },
+    { id: "s2", teamId, date: "2026-07-29", time: "9:00 AM", sport: "Speed Session" },
+  ];
+  const model = buildStrengthWorkspaceModel({ sessions, rsvps: [{ sessionId: "s1", email, teamId }], logs: [{ email, teamId, date: today, sport: "Basketball" }], userEmail: email, teamId, today });
+  assert.equal(model.primaryAction.sessionId, "s2");
+  assert.equal(model.primaryAction.reveal.matchText, "Speed Session");
+  assert.equal(model.primaryAction.reveal.activate, "expand");
+  assert.equal(model.primaryAction.reveal.focusButtonText, "RSVP NOW");
   assert.equal(model.metrics.find((metric) => metric.id === "logged").value, 1);
+
+  const committed = buildStrengthWorkspaceModel({ sessions, rsvps: sessions.map((session) => ({ sessionId: session.id, email, teamId })), userEmail: email, teamId, today });
+  assert.equal(committed.primaryAction.focus, "sc-log");
+  assert.equal(committed.primaryAction.reveal.focusLabel, "TIME");
 });
 
 test("Leaderboard workspace calculates rank gap", () => {
   const model = buildLeaderboardWorkspaceModel({ rows: [{ email: "leader@example.com", total: 140 }, { email, total: 110 }], userEmail: email, weeklyMakes: 75, streak: 4 });
   assert.equal(model.metrics.find((metric) => metric.id === "rank").value, "#2");
   assert.equal(model.metrics.find((metric) => metric.id === "gap").value, 30);
+  assert.equal(model.primaryAction.reveal.containerTestId, "premium-leaderboards-hub");
 });
 
 test("Profile workspace scopes activity to the active player and team", () => {
@@ -102,9 +125,15 @@ test("Profile workspace scopes activity to the active player and team", () => {
 test("Workspace metrics expose click affordances only when they perform an action", async () => {
   const component = await read("src/components/PlayerOperationalWorkspace.jsx");
   const styles = await read("src/components/PlayerOperationalWorkspace.module.css");
+  const routing = await read("src/lib/playerWorkspaceActionRouting.js");
   assert.match(component, /Boolean\(metric\?\.filter \|\| metric\?\.action\)/);
+  assert.match(component, /scheduleWorkspaceActionReveal\(action\)/);
+  assert.match(component, /scheduleWorkspaceActionReveal\(metric\.action\)/);
   assert.match(component, /data-interactive="false"/);
   assert.match(component, /data-interactive="true"/);
+  assert.match(routing, /prefers-reduced-motion: reduce/);
+  assert.match(routing, /scrollIntoView/);
+  assert.match(routing, /focusButtonText/);
   assert.match(styles, /\.metricInteractive\{cursor:pointer\}/);
   assert.match(styles, /\.metricStatic\{/);
   assert.match(styles, /prefers-reduced-motion/);

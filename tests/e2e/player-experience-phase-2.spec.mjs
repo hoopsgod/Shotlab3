@@ -31,10 +31,16 @@ const seedData = {
   "sl:scores": [],
   "sl:program-scores": [],
   "sl:shotlogs": [],
-  "sl:events": [{ id: "team-practice", teamId: TEAM_ID, title: "Team Practice", type: "practice", date: isoOffset(1), time: "6:00 PM", location: "Main Gym", desc: "Team practice" }],
-  "sl:rsvps": [],
-  "sl:sc-sessions": [{ id: "team-lift", teamId: TEAM_ID, sport: "Team Lift", date: isoOffset(2), time: "8:00 AM", sessionType: "School" }],
-  "sl:sc-rsvps": [],
+  "sl:events": [
+    { id: "team-practice", teamId: TEAM_ID, title: "Team Practice", type: "practice", date: isoOffset(1), time: "6:00 PM", location: "Main Gym", desc: "Team practice" },
+    { id: "film-session", teamId: TEAM_ID, title: "Film Session", type: "meeting", date: isoOffset(2), time: "5:00 PM", location: "Film Room", desc: "Prepare for the next opponent" },
+  ],
+  "sl:rsvps": [{ id: "practice-rsvp", eventId: "team-practice", email: PLAYER_EMAIL, name: "Demo Player", teamId: TEAM_ID }],
+  "sl:sc-sessions": [
+    { id: "team-lift", teamId: TEAM_ID, sport: "Team Lift", date: isoOffset(2), time: "8:00 AM", sessionType: "School" },
+    { id: "speed-session", teamId: TEAM_ID, sport: "Speed Session", date: isoOffset(3), time: "9:00 AM", sessionType: "School" },
+  ],
+  "sl:sc-rsvps": [{ id: "lift-rsvp", sessionId: "team-lift", email: PLAYER_EMAIL, name: "Demo Player", teamId: TEAM_ID }],
   "sl:sc-logs": [],
   "sl:season-archives": [],
   "sl:coach-priorities": { [TEAM_ID]: { todayFocusText: "Clean mechanics before volume", priorityDrillText: "Game Speed Reads", weeklyMakesTarget: 500, weeklyCheckinsTarget: 2 } },
@@ -93,7 +99,7 @@ test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
 
-test("At Home workspace filters open and completed drills without breaking shot logging", async ({ page }) => {
+test("At Home workspace filters drills and routes the Today metric to shot entry", async ({ page }) => {
   await enterSeededDemoPlayer(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "At Home", exact: true }).click();
 
@@ -106,6 +112,10 @@ test("At Home workspace filters open and completed drills without breaking shot 
   await expect(page.getByText("Form Shooting", { exact: true })).toBeVisible();
   await expect(page.getByText("Corner Threes", { exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "LOG SHOTS", exact: true })).toBeVisible();
+
+  await page.getByTestId("player-at-home-workspace").getByRole("button", { name: /Today/i }).click();
+  const shotInput = page.getByText("SHOTS MADE", { exact: true }).locator("..").locator("input");
+  await expect(shotInput).toBeFocused({ timeout: 3_000 });
   await expectNoHorizontalOverflow(page);
 });
 
@@ -126,16 +136,27 @@ test("Program workspace filters the plan and launches the exact coach-priority d
   await expectNoHorizontalOverflow(page);
 });
 
-test("Events, S&C, Leaderboards, and Profile share the operational workspace system", async ({ page }) => {
+test("Events and S&C command bars reveal the exact unresolved commitment", async ({ page }) => {
   await enterSeededDemoPlayer(page);
 
   await openMoreDestination(page, "program");
   await expectWorkspaceTouchTargets(page, "player-events-workspace");
   await expect(page.getByText("Team Practice", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Film Session", { exact: true }).first()).toBeVisible();
+  await page.getByTestId("player-events-workspace").getByRole("button", { name: /Resolve next RSVP/i }).click();
+  await expect(page.getByRole("button", { name: "RSVP NOW →", exact: true })).toBeFocused({ timeout: 3_000 });
 
   await openMoreDestination(page, "sc");
   await expectWorkspaceTouchTargets(page, "player-strength-workspace");
   await expect(page.getByText("Team Lift", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Speed Session", { exact: true }).first()).toBeVisible();
+  await page.getByTestId("player-strength-workspace").getByRole("button", { name: /Open next session/i }).click();
+  await expect(page.getByRole("button", { name: /RSVP NOW/i })).toBeFocused({ timeout: 3_000 });
+  await expectNoHorizontalOverflow(page);
+});
+
+test("Leaderboards and Profile retain the operational workspace system", async ({ page }) => {
+  await enterSeededDemoPlayer(page);
 
   await openMoreDestination(page, "leaderboards");
   await expectWorkspaceTouchTargets(page, "player-leaderboards-workspace");
