@@ -2,27 +2,40 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover,maximum-scale=1,user-scalable=no" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ShotLab" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="theme-color" content="#080808" />
+  <meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#050708" />
   <title>ShotLab</title>
   <style>
-    html,body{margin:0;padding:0;background:#080808;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-    #root{min-height:100vh}
-    .boot-auth-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 50% 22%,rgba(200,255,26,.2) 0,rgba(200,255,26,0) 45%),#080808}
-    .boot-auth-card{width:min(420px,100%);border:1px solid rgba(255,255,255,.12);background:linear-gradient(180deg,#15171B,#111317);border-radius:22px;padding:32px 24px;display:flex;flex-direction:column;align-items:center;gap:14px;box-sizing:border-box}
-    .boot-auth-logo{width:min(220px,65vw);height:auto;display:block}
-    .boot-auth-copy{font:600 12px/1.4 "Barlow Condensed",system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:rgba(229,231,235,.8)}
+    html,body{margin:0;padding:0;background:#050708;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    #root{min-height:100dvh}
+    .boot-auth-shell{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:calc(28px + env(safe-area-inset-top,0px)) 24px calc(28px + env(safe-area-inset-bottom,0px));box-sizing:border-box;background:radial-gradient(circle at 50% 28%,rgba(200,255,26,.11),transparent 28rem),#050708}
+    .boot-auth-card{width:min(360px,100%);display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+    .boot-wordmark{display:flex;align-items:baseline;gap:3px;color:#f4f7f8;font:900 clamp(42px,13vw,58px)/.9 "Arial Narrow",Impact,sans-serif;letter-spacing:.035em}
+    .boot-wordmark strong{color:#c8ff1a;font:inherit}
+    .boot-tagline{font:700 10px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(225,233,237,.62)}
+    .boot-progress{width:124px;height:3px;margin-top:18px;overflow:hidden;border-radius:999px;background:rgba(255,255,255,.08)}
+    .boot-progress span{display:block;width:44%;height:100%;border-radius:inherit;background:#c8ff1a;box-shadow:0 0 16px rgba(200,255,26,.32);animation:boot-progress 1.15s cubic-bezier(.22,.78,.22,1) infinite alternate}
+    .boot-auth-copy{margin-top:4px;font:600 11px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:rgba(202,212,217,.68)}
+    @keyframes boot-progress{from{transform:translateX(-95%)}to{transform:translateX(225%)}}
+    @media(prefers-reduced-motion:reduce){.boot-progress span{width:100%;animation:none;opacity:.75}}
   </style>
+  <link rel="stylesheet" href="/src/styles/AppStoreExperience.css" />
   <link rel="stylesheet" href="/mission-control-logo-lock.css" />
 </head>
 <body>
   <div id="root">
-    <div class="boot-auth-shell" aria-label="Loading ShotLab">
+    <div class="boot-auth-shell" aria-label="Loading ShotLab" role="status">
       <div class="boot-auth-card">
-        <img class="boot-auth-logo" src="/branding/titans-exact-logo.png.PNG" alt="ShotLab" width="220" height="53" />
-        <div class="boot-auth-copy">Preparing your training dashboard…</div>
+        <div class="boot-wordmark" aria-label="ShotLab"><span>SHOT</span><strong>LAB</strong></div>
+        <div class="boot-tagline">Train with intent</div>
+        <div class="boot-progress" aria-hidden="true"><span></span></div>
+        <div class="boot-auth-copy">Loading your workspace</div>
       </div>
     </div>
   </div>
