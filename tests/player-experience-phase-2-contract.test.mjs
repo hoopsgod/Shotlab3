@@ -1,10 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import { applyPlayerExperiencePhase2 } from "../scripts/playerExperiencePhase2VitePlugin.mjs";
 
 const appSource=fs.readFileSync(new URL("../src/App.jsx",import.meta.url),"utf8");
+const transformedAppSource=applyPlayerExperiencePhase2(appSource);
 const surfaceSource=fs.readFileSync(new URL("../src/components/PlayerExperiencePhase2.jsx",import.meta.url),"utf8");
 const surfaceCss=fs.readFileSync(new URL("../src/components/PlayerExperiencePhase2.css",import.meta.url),"utf8");
+const viteConfig=fs.readFileSync(new URL("../vite.config.js",import.meta.url),"utf8");
 
 const surfaces=["at-home","program","events","strength","leaderboards","profile"];
 
@@ -17,7 +20,7 @@ test("player phase 2 exposes one reusable dashboard system across every player s
   assert.match(surfaceSource,/function MetricCard/);
 });
 
-test("App integrates all six player phase 2 surfaces",()=>{
+test("Vite deterministically integrates all six player phase 2 surfaces",()=>{
   for(const component of [
     "PlayerAtHomeDashboard",
     "PlayerProgramDashboard",
@@ -26,9 +29,14 @@ test("App integrates all six player phase 2 surfaces",()=>{
     "PlayerLeaderboardsDashboard",
     "PlayerProfileDashboard",
   ]){
-    assert.match(appSource,new RegExp(`<${component}`));
+    assert.match(transformedAppSource,new RegExp(`<${component}`));
   }
-  assert.match(appSource,/from "\.\/components\/PlayerExperiencePhase2\.jsx"/);
+  assert.match(transformedAppSource,/from "\.\/components\/PlayerExperiencePhase2\.jsx"/);
+  assert.match(viteConfig,/playerExperiencePhase2Plugin\(\)/);
+});
+
+test("the build transform fails closed when an integration anchor drifts",()=>{
+  assert.throws(()=>applyPlayerExperiencePhase2(appSource.replace("PROGRAM EVENTS","PROGRAM CALENDAR")),/missing events surface/);
 });
 
 test("player phase 2 remains presentation-only and preserves persistence boundaries",()=>{
