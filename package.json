@@ -18,6 +18,12 @@
     "dev:agent": "npm run dev",
     "preview:agent": "vite preview --host 0.0.0.0 --port 4173",
     "doctor": "node scripts/doctor.mjs",
+    "native:doctor": "node scripts/native-release-doctor.mjs",
+    "native:install:toolchain": "node scripts/native-ios.mjs install",
+    "native:prepare:ios": "node scripts/native-ios.mjs prepare",
+    "native:sync:ios": "node scripts/native-ios.mjs sync",
+    "native:verify:ios": "node scripts/native-ios.mjs verify",
+    "native:open:ios": "node scripts/native-ios.mjs open",
     "verify:leaderboards:supabase": "node --test tests/live-supabase-leaderboard-smoke.test.mjs"
   },
   "dependencies": {
