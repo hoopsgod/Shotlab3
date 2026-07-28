@@ -9,8 +9,10 @@ const polishCss=fs.readFileSync(new URL("../src/components/CoachMissionControlPo
 const premiumCss=fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css",import.meta.url),"utf8");
 const shellCss=fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css",import.meta.url),"utf8");
 const finalCss=fs.readFileSync(new URL("../src/components/CoachMissionControlFinal.css",import.meta.url),"utf8");
+const activationCss=fs.readFileSync(new URL("../src/components/CoachActivationPath.css",import.meta.url),"utf8");
 const logoSource=fs.readFileSync(new URL("../src/components/useCleanTeamLogo.js",import.meta.url),"utf8");
 const brandingForm=fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx",import.meta.url),"utf8");
+
 
 test("coach dashboard answers the 30-second workflow questions without repeating the attention headline",()=>{
   ["Mission Control","Today at a glance","Needs attention","Activity today","Recent activity","Next session"].forEach(label=>assert.match(source,new RegExp(label)));
@@ -23,6 +25,7 @@ test("coach dashboard answers the 30-second workflow questions without repeating
   assert.match(source,/decision\$\{attentionCount === 1 \? "" : "s"\} before practice/);
   assert.doesNotMatch(source,/title: `\$\{attentionCount\} player/);
 });
+
 
 test("Mission Control uses real roster and schedule signals instead of placeholder analytics",()=>{
   assert.match(source,/activeTodayCount/);
@@ -38,6 +41,7 @@ test("Mission Control uses real roster and schedule signals instead of placehold
   assert.doesNotMatch(source,/Game Speed Shooting/);
 });
 
+
 test("attention rows explain the issue instead of using unresolved placeholder copy",()=>{
   assert.match(source,/Roster activity gap/);
   assert.match(source,/No training activity has been logged this week/);
@@ -45,6 +49,7 @@ test("attention rows explain the issue instead of using unresolved placeholder c
   assert.match(source,/mcAttentionMeta/);
   assert.doesNotMatch(source,/Inactive or unresolved player items/);
 });
+
 
 test("cinematic hero preserves a visible coach-controlled logo and integrates it into the gym",()=>{
   assert.match(source,/useTeamBranding/);
@@ -69,6 +74,7 @@ test("cinematic hero preserves a visible coach-controlled logo and integrates it
   assert.doesNotMatch(shellCss,/\.mcHeroTeamMark\s*\{[\s\S]{0,220}display:\s*none\s*!important/);
 });
 
+
 test("custom team logos are cleaned, persisted, and previewed on light and dark surfaces",()=>{
   assert.match(logoSource,/export const cleanTeamLogoSource/);
   assert.match(logoSource,/removeLikelyRectangularFrame/);
@@ -79,20 +85,26 @@ test("custom team logos are cleaned, persisted, and previewed on light and dark 
   assert.match(brandingForm,/transparent PNG or SVG/);
 });
 
-test("one truthful Today panel replaces the generic onboarding stepper and repeated empty modules",()=>{
-  assert.match(source,/onboardingMode/);
+
+test("one truthful activation path replaces generic onboarding and exposes only the next milestone",()=>{
+  assert.match(source,/deriveCoachActivationPath/);
   assert.match(source,/data-testid="coach-onboarding-state"/);
   assert.match(source,/function TodayPlan/);
-  assert.match(source,/No practice scheduled/);
-  assert.match(source,/Create the focus your players should see next/);
-  assert.match(source,/Build your roster/);
-  assert.match(source,/Create practice/);
+  assert.match(source,/Coach activation/);
+  assert.match(source,/activation\.completed/);
+  assert.match(source,/activation\.next/);
+  assert.match(source,/runActivationAction/);
+  assert.match(source,/!activationPath\.complete/);
+  assert.doesNotMatch(source,/No practice scheduled/);
+  assert.doesNotMatch(source,/Build your roster/);
   assert.doesNotMatch(source,/Set the team in motion/);
   assert.doesNotMatch(source,/Players connected/);
   assert.doesNotMatch(source,/Practice plan/);
-  assert.match(source,/!hasTeamActivity && !hasLiveActivity && !hasScheduledSession/);
-  assert.match(shellCss,/\.mcTodayPlan/);
+  assert.match(activationCss,/\.mcActivationPlan/);
+  assert.match(activationCss,/\.mcActivationProgressTrack/);
+  assert.match(activationCss,/@media\(max-width:700px\)/);
 });
+
 
 test("coach tools remain available without permanent dashboard clutter",()=>{
   ["Add Player","Create Practice","Build Mission","Log Score","Message Team","Team Code","New code","Coach Tools"].forEach(label=>assert.match(source,new RegExp(label)));
@@ -105,6 +117,7 @@ test("coach tools remain available without permanent dashboard clutter",()=>{
   assert.match(source,/avatarUrl/);
   assert.match(source,/headshot placeholder/);
 });
+
 
 test("responsive CSS creates a compact native-feeling mobile operating system",()=>{
   assert.match(css,/grid-template-columns:112px minmax\(0,1fr\)/);
@@ -120,4 +133,5 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(premiumCss,/backdrop-filter:blur\(24px\)/);
   assert.match(finalCss,/\.mcPrimary:active/);
   assert.match(finalCss,/@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(activationCss,/@media\(prefers-reduced-motion:reduce\)/);
 });
