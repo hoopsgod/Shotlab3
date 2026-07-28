@@ -16,24 +16,13 @@ function createStorage(initial = {}) {
   return {
     values,
     storage: {
-      async get(key) {
-        return { value: values.has(key) ? values.get(key) : null };
-      },
-      async set(key, value) {
-        values.set(key, value);
-        return { value };
-      },
+      async get(key) { return { value: values.has(key) ? values.get(key) : null }; },
+      async set(key, value) { values.set(key, value); return { value }; },
     },
     localStorage: {
-      getItem(key) {
-        return values.has(key) ? values.get(key) : null;
-      },
-      setItem(key, value) {
-        values.set(key, value);
-      },
-      removeItem(key) {
-        values.delete(key);
-      },
+      getItem(key) { return values.has(key) ? values.get(key) : null; },
+      setItem(key, value) { values.set(key, value); },
+      removeItem(key) { values.delete(key); },
     },
   };
 }
@@ -51,10 +40,13 @@ const pendingLog = {
   syncSource: "local",
 };
 
-test("production demo access is opt-in and remains available for local development", () => {
+test("production demo access is isolated to approved sales previews, explicit opt-in, and local development", () => {
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab.app" } }), false);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false, VITE_ENABLE_DEMO_MODE: "true" }, location: { hostname: "shotlab.app" } }), true);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "localhost" } }), true);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab3.pages.dev" } }), true);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "8a15c60d.shotlab3.pages.dev" } }), true);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "unrelated.pages.dev" } }), false);
 });
 
 test("stale demo sessions are removed from a production runtime", async () => {
@@ -64,14 +56,12 @@ test("stale demo sessions are removed from a production runtime", async () => {
     "sl:supabase-session": JSON.stringify({ access_token: "secret" }),
     "sl:supabase-access-token": "secret",
   });
-
   const cleared = await clearStaleDemoSession({
     env: { DEV: false, VITE_ENABLE_DEMO_MODE: "false" },
     location: { hostname: "shotlab.app" },
     storage: state.storage,
     localStorage: state.localStorage,
   });
-
   assert.equal(cleared, true);
   assert.equal(JSON.parse(state.values.get(RUNTIME_STORAGE_KEYS.appSession)), null);
   assert.equal(state.values.has(RUNTIME_STORAGE_KEYS.demoMode), false);
@@ -87,14 +77,11 @@ test("automatic shot recovery only selects safe pending rows for the authenticat
     { ...pendingLog, id: "shot-4", demo: true },
     { ...pendingLog, id: "shot-5", syncState: "remote_saved" },
   ];
-
   assert.deepEqual(getAutoSyncShotLogs(rows, "player@example.com").map((row) => row.id), ["shot-1"]);
 });
 
 test("pending home shots sync to the team endpoint and become remote-confirmed", async () => {
-  const state = createStorage({
-    [RUNTIME_STORAGE_KEYS.shotLogs]: JSON.stringify([pendingLog]),
-  });
+  const state = createStorage({ [RUNTIME_STORAGE_KEYS.shotLogs]: JSON.stringify([pendingLog]) });
   const requests = [];
   const fetchImpl = async (url, options) => {
     requests.push({ url, options, body: JSON.parse(options.body) });
@@ -106,14 +93,7 @@ test("pending home shots sync to the team endpoint and become remote-confirmed",
       },
     };
   };
-
-  const result = await syncPendingHomeShotLogs({
-    authEmail: "player@example.com",
-    fetchImpl,
-    storage: state.storage,
-    localStorage: state.localStorage,
-  });
-
+  const result = await syncPendingHomeShotLogs({ authEmail: "player@example.com", fetchImpl, storage: state.storage, localStorage: state.localStorage });
   assert.equal(result.ok, true);
   assert.equal(result.synced, 1);
   assert.equal(result.pending, 0);
@@ -127,16 +107,13 @@ test("pending home shots sync to the team endpoint and become remote-confirmed",
 });
 
 test("authentication failures preserve pending data and request session recovery", async () => {
-  const state = createStorage({
-    [RUNTIME_STORAGE_KEYS.shotLogs]: JSON.stringify([pendingLog]),
-  });
+  const state = createStorage({ [RUNTIME_STORAGE_KEYS.shotLogs]: JSON.stringify([pendingLog]) });
   const result = await syncPendingHomeShotLogs({
     authEmail: "player@example.com",
     storage: state.storage,
     localStorage: state.localStorage,
     fetchImpl: async () => ({ ok: false, status: 401, async json() { return { error: "unauthorized" }; } }),
   });
-
   assert.equal(result.requiresAuth, true);
   assert.equal(result.synced, 0);
   assert.equal(result.pending, 1);
