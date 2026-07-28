@@ -18,7 +18,6 @@ function fail(message) {
 function requireFile(filePath) {
   if (!fs.existsSync(filePath)) fail(`Missing required file: ${path.relative(root, filePath)}`);
 }
-}
 
 function insertOnce(source, anchor, insertion, label) {
   if (!source.includes(anchor)) fail(`Could not find ${label} anchor.`);
