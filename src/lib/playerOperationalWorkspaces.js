@@ -66,10 +66,11 @@ export const buildAtHomeWorkspaceModel = ({
   const myShots = scopedRows(shotLogs, userEmail, teamId);
   const todayMakes = myShots.filter((row) => rowDate(row) === today).reduce((sum, row) => sum + safeNumber(row?.made), 0);
   const openDrills = safeArray(drills).filter((drill) => !completed.has(rowDrillId(drill)));
+  const shotTrackerAction = { target: "log-drill", focus: "shot-tracker", reveal: { focusLabel: "SHOTS MADE" } };
   const primaryAction = openDrills[0]
     ? { label: "Start next drill", target: "log-drill", drillId: rowDrillId(openDrills[0]) }
     : todayMakes < Math.max(1, safeNumber(dailyGoal))
-      ? { label: "Log shots", target: "log-drill", focus: "shot-tracker" }
+      ? { label: "Log shots", ...shotTrackerAction }
       : { label: "Review shot stats", target: "log-drill", focus: "shot-stats" };
   return {
     id: "at-home",
@@ -79,7 +80,7 @@ export const buildAtHomeWorkspaceModel = ({
     status: openDrills.length ? "Training active" : "Block complete",
     primaryAction,
     metrics: [
-      { id: "today", label: "Today", value: todayMakes, detail: `${pct(todayMakes, dailyGoal)}% of make goal`, action: { target: "log-drill", focus: "shot-tracker" } },
+      { id: "today", label: "Today", value: todayMakes, detail: `${pct(todayMakes, dailyGoal)}% of make goal`, action: shotTrackerAction },
       { id: "open", label: "Open drills", value: openDrills.length, detail: "Ready to complete", filter: "open" },
       { id: "complete", label: "Completed", value: completed.size, detail: `${safeArray(drills).length} assigned`, filter: "completed" },
       { id: "streak", label: "Streak", value: `${safeNumber(streak)}D`, detail: "Training days", action: { target: "profile" } },
@@ -105,18 +106,19 @@ export const buildProgramWorkspaceModel = ({
   const personalBest = safeArray(allScores)
     .filter((row) => programIds.has(rowDrillId(row)))
     .reduce((best, row) => Math.max(best, safeNumber(row?.score)), 0);
+  const rankingsAction = { target: "leaderboards", reveal: { containerTestId: "premium-leaderboards-hub" } };
   return {
     id: "program",
     eyebrow: "Coach-directed work",
     title: "Program Training",
     subtitle: priorityDrill ? `Next priority: ${clean(priorityDrill?.name || priorityDrill?.drillName)}` : "All coach-assigned work is complete for today.",
     status: openDrills.length ? "Coach plan active" : "Program complete",
-    primaryAction: priorityDrill ? { label: "Start coach priority", target: "duels", drillId: rowDrillId(priorityDrill) } : { label: "Review rankings", target: "leaderboards" },
+    primaryAction: priorityDrill ? { label: "Start coach priority", target: "duels", drillId: rowDrillId(priorityDrill) } : { label: "Review rankings", ...rankingsAction },
     metrics: [
       { id: "progress", label: "Today", value: `${completed.size}/${safeArray(programDrills).length}`, detail: `${pct(completed.size, safeArray(programDrills).length)}% complete` },
       { id: "open", label: "Open drills", value: openDrills.length, detail: "Remaining today", filter: "open" },
       { id: "complete", label: "Completed", value: completed.size, detail: "Logged today", filter: "completed" },
-      { id: "pb", label: "Best score", value: personalBest || "—", detail: "Program PB", action: { target: "leaderboards" } },
+      { id: "pb", label: "Best score", value: personalBest || "—", detail: "Program PB", action: rankingsAction },
     ],
   };
 };
@@ -128,13 +130,17 @@ export const buildEventsWorkspaceModel = ({ events = [], rsvps = [], userEmail =
   const missing = upcoming.filter((event) => !hasRsvp(event));
   const confirmed = upcoming.filter(hasRsvp);
   const next = upcoming[0] || null;
+  const nextMissing = missing[0] || null;
+  const scheduleReveal = { containerTestId: "player-events-operational-list" };
   return {
     id: "events",
     eyebrow: "Team commitments",
     title: "Events & Attendance",
     subtitle: next ? `${clean(next?.title) || "Next event"} · ${rowDate(next)} · ${clean(next?.time) || "TBD"}` : "No upcoming team events are scheduled.",
     status: missing.length ? `${missing.length} response${missing.length === 1 ? "" : "s"} needed` : "Attendance current",
-    primaryAction: missing[0] ? { label: "Resolve next RSVP", target: "program", eventId: clean(missing[0]?.id) } : { label: "Review schedule", target: "program" },
+    primaryAction: nextMissing
+      ? { label: "Resolve next RSVP", target: "program", eventId: clean(nextMissing?.id), reveal: { ...scheduleReveal, matchText: clean(nextMissing?.title), focusButtonText: "RSVP NOW" } }
+      : { label: "Review schedule", target: "program", reveal: scheduleReveal },
     metrics: [
       { id: "upcoming", label: "Upcoming", value: upcoming.length, detail: "Team events" },
       { id: "missing", label: "Need RSVP", value: missing.length, detail: "Action required" },
@@ -151,13 +157,17 @@ export const buildStrengthWorkspaceModel = ({ sessions = [], rsvps = [], logs = 
   const hasRsvp = (session) => myRsvps.some((row) => clean(row?.sessionId || row?.session_id) === clean(session?.id));
   const missing = upcoming.filter((session) => !hasRsvp(session));
   const next = upcoming[0] || null;
+  const nextMissing = missing[0] || null;
+  const strengthContainer = "player-strength-operational-panel";
   return {
     id: "strength",
     eyebrow: "Physical development",
     title: "Strength & Conditioning",
     subtitle: next ? `${clean(next?.sport || next?.title) || "Next session"} · ${rowDate(next)} · ${clean(next?.time) || "TBD"}` : "No upcoming strength session is scheduled.",
     status: missing.length ? `${missing.length} commitment${missing.length === 1 ? "" : "s"} open` : "Commitments current",
-    primaryAction: missing[0] ? { label: "Open next session", target: "sc", sessionId: clean(missing[0]?.id) } : { label: "Log S&C work", target: "sc", focus: "sc-log" },
+    primaryAction: nextMissing
+      ? { label: "Open next session", target: "sc", sessionId: clean(nextMissing?.id), reveal: { containerTestId: strengthContainer, matchText: clean(nextMissing?.sport || nextMissing?.title), focusButtonText: "RSVP NOW", activate: "expand" } }
+      : { label: "Log S&C work", target: "sc", focus: "sc-log", reveal: { containerTestId: strengthContainer, focusLabel: "TIME" } },
     metrics: [
       { id: "upcoming", label: "Upcoming", value: upcoming.length, detail: "Scheduled sessions" },
       { id: "commitments", label: "Committed", value: myRsvps.length, detail: "RSVP total" },
@@ -173,13 +183,14 @@ export const buildLeaderboardWorkspaceModel = ({ rows = [], userEmail = "", week
   const currentTotal = index >= 0 ? safeNumber(rows[index]?.total || rows[index]?.makes || rows[index]?.value) : 0;
   const nextTotal = index > 0 ? safeNumber(rows[index - 1]?.total || rows[index - 1]?.makes || rows[index - 1]?.value) : currentTotal;
   const gap = rank > 1 ? Math.max(0, nextTotal - currentTotal) : 0;
+  const reviewRankingsAction = { target: "leaderboards", reveal: { containerTestId: "premium-leaderboards-hub" } };
   return {
     id: "leaderboards",
     eyebrow: "Competitive progress",
     title: "Leaderboards",
     subtitle: rank ? `You are ranked #${rank}. ${gap ? `${gap} makes separate you from the next position.` : "You own the top spot."}` : "Log verified work to enter the rankings.",
     status: rank ? "Ranking active" : "Awaiting first result",
-    primaryAction: { label: rank ? "Review rankings" : "Log qualifying work", target: rank ? "leaderboards" : "log-drill" },
+    primaryAction: rank ? { label: "Review rankings", ...reviewRankingsAction } : { label: "Log qualifying work", target: "log-drill", focus: "shot-tracker", reveal: { focusLabel: "SHOTS MADE" } },
     metrics: [
       { id: "rank", label: "Your rank", value: rank ? `#${rank}` : "—", detail: "Home shots" },
       { id: "gap", label: "Gap", value: rank > 1 ? gap : "—", detail: rank === 1 ? "Top position" : "Makes to advance" },
