@@ -24,7 +24,13 @@
     "native:sync:ios": "node scripts/native-ios.mjs sync",
     "native:verify:ios": "node scripts/native-ios.mjs verify",
     "native:open:ios": "node scripts/native-ios.mjs open",
-    "verify:leaderboards:supabase": "node --test tests/live-supabase-leaderboard-smoke.test.mjs"
+    "ios:configure-signing": "node scripts/configure-ios-signing.mjs",
+    "ios:validate": "node scripts/ios-release.mjs validate",
+    "ios:simulator-build": "node scripts/ios-release.mjs simulator",
+    "ios:device-build": "node scripts/ios-release.mjs device",
+    "ios:archive": "node scripts/ios-release.mjs archive",
+    "verify:leaderboards:supabase": "node --test tests/live-supabase-leaderboard-smoke.test.mjs",
+    "ios:generate-assets": "node scripts/generate-ios-assets.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",

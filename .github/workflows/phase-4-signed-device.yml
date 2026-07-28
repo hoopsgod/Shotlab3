@@ -1,0 +1,53 @@
+name: Phase 4 Signed Device Layer
+
+on:
+  pull_request:
+    paths:
+      - "ios/**"
+      - "native/assets/**"
+      - "scripts/configure-ios-signing.mjs"
+      - "scripts/generate-ios-assets.mjs"
+      - "scripts/native-ios.mjs"
+      - "scripts/ios-release.mjs"
+      - "docs/signed-device-release-runbook.md"
+      - "tests/phase-4-signed-device-layer.test.mjs"
+      - "package.json"
+      - ".github/workflows/phase-4-signed-device.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-4-signed-device-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run native:install:toolchain
+      - run: node --test tests/phase-4-signed-device-layer.test.mjs tests/phase-4-native-ios-foundation.test.mjs
+      - run: npm run build
+      - run: npm run native:verify:ios -- --require-build --require-ios --require-assets
+
+  xcode-simulator-build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run native:install:toolchain
+      - run: npm run native:sync:ios
+      - name: Compile the committed Xcode project without signing
+        run: npm run ios:simulator-build

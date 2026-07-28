@@ -3,14 +3,17 @@ import { spawnSync } from "node:child_process";
 import process from "node:process";
 
 const CAPACITOR_VERSION = "8.4.2";
-const CAPACITOR_PACKAGES = [
+const RESVG_VERSION = "2.6.2";
+const NATIVE_PACKAGES = [
   `@capacitor/core@${CAPACITOR_VERSION}`,
   `@capacitor/cli@${CAPACITOR_VERSION}`,
   `@capacitor/ios@${CAPACITOR_VERSION}`,
+  `@resvg/resvg-js@${RESVG_VERSION}`,
 ];
 const command = process.argv[2] || "verify";
 const npmCommand = process.platform === "win32" ? "npm.cmd" : "npm";
 const npxCommand = process.platform === "win32" ? "npx.cmd" : "npx";
+const nodeCommand = process.execPath;
 
 function fail(message) {
   console.error(`\n[ShotLab native] ${message}`);
@@ -38,7 +41,7 @@ function readJson(path) {
   }
 }
 
-function verifyConfig({ requireBuild = false, requireIos = false } = {}) {
+function verifyConfig({ requireBuild = false, requireIos = false, requireAssets = false } = {}) {
   const config = readJson("capacitor.config.json");
   const profile = readJson("native/ios-release-profile.json");
 
@@ -54,6 +57,12 @@ function verifyConfig({ requireBuild = false, requireIos = false } = {}) {
       if (!existsSync(path)) fail(`Generated iOS workspace is incomplete: ${path}`);
     }
   }
+  if (requireAssets) {
+    for (const path of [
+      "ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png",
+      "ios/App/App/Assets.xcassets/Splash.imageset/splash-2732x2732.png",
+    ]) if (!existsSync(path)) fail(`Generated iOS asset is missing: ${path}`);
+  }
 
   console.log(`[ShotLab native] Configuration verified for ${config.appId}.`);
 }
@@ -67,7 +76,7 @@ function installToolchain() {
     "--package-lock=false",
     "--fund=false",
     "--audit=false",
-    ...CAPACITOR_PACKAGES,
+    ...NATIVE_PACKAGES,
   ]);
 }
 
@@ -78,6 +87,10 @@ function buildWeb() {
 
 function cap(args) {
   run(npxCommand, ["--no-install", "cap", ...args]);
+}
+
+function generateAssets() {
+  run(nodeCommand, ["scripts/generate-ios-assets.mjs"]);
 }
 
 if (command === "install") {
@@ -92,7 +105,8 @@ if (command === "prepare") {
   buildWeb();
   if (existsSync("ios/App/App.xcodeproj/project.pbxproj")) cap(["sync", "ios"]);
   else cap(["add", "ios"]);
-  verifyConfig({ requireBuild: true, requireIos: true });
+  generateAssets();
+  verifyConfig({ requireBuild: true, requireIos: true, requireAssets: true });
   process.exit(0);
 }
 
@@ -102,7 +116,8 @@ if (command === "sync") {
   buildWeb();
   if (!existsSync("ios/App/App.xcodeproj/project.pbxproj")) fail("The iOS project has not been generated. Run npm run native:prepare:ios first.");
   cap(["sync", "ios"]);
-  verifyConfig({ requireBuild: true, requireIos: true });
+  generateAssets();
+  verifyConfig({ requireBuild: true, requireIos: true, requireAssets: true });
   process.exit(0);
 }
 
@@ -118,6 +133,7 @@ if (command === "verify") {
   verifyConfig({
     requireBuild: process.argv.includes("--require-build"),
     requireIos: process.argv.includes("--require-ios"),
+    requireAssets: process.argv.includes("--require-assets"),
   });
   process.exit(0);
 }
