@@ -6,8 +6,10 @@ import {
   DashboardProgress,
   InteractiveMetricStrip,
 } from "./CoachDashboardPrimitives.jsx";
+import { ExperienceSignal, ExperienceSparkline } from "./ExperiencePrimitives.jsx";
 
 const firstNames = (rows = [], limit = 3) => rows.slice(0, limit).map((row) => String(row.name || "Player").split(" ")[0]).join(", ");
+const pluralize = (count, singular, plural = `${singular}s`) => `${count} ${count === 1 ? singular : plural}`;
 
 export function CoachPlayersInteractiveDashboard({
   metrics,
@@ -20,20 +22,31 @@ export function CoachPlayersInteractiveDashboard({
   onOpenArchives,
 }) {
   const attentionRows = rows.filter((row) => row.statusKey !== "active");
+  const noActivityRows = rows.filter((row) => row.statusKey === "new");
+  const followUpRows = rows.filter((row) => row.statusKey === "attention");
+  const activeRows = rows.filter((row) => row.statusKey === "active");
   const activeRate = metrics.total ? Math.round((metrics.active / metrics.total) * 100) : 0;
   const leader = metrics.leader;
+  const engagementDistribution = rows.slice(0, 7).map((row) => row.engagementScore || 0);
+  const decisionTitle = attentionRows.length
+    ? `${pluralize(attentionRows.length, "player")} need a coaching touchpoint`
+    : "Roster engagement is current";
+  const decisionDetail = attentionRows.length
+    ? `${pluralize(noActivityRows.length, "player")} have no recorded activity and ${pluralize(followUpRows.length, "player")} were active previously but not this week.`
+    : `${pluralize(activeRows.length, "player")} have current-week activity. Protect the standard with direct recognition and a clear next assignment.`;
   const metricItems = [
     { key: "all", label: "Roster", value: metrics.total, detail: "Active team players" },
     { key: "active", label: "Active This Week", value: metrics.active, detail: `${activeRate}% of roster`, tone: "positive" },
-    { key: "attention", label: "Needs Attention", value: metrics.attention, detail: "No current-week activity", tone: "attention" },
+    { key: "attention", label: "Needs Attention", value: metrics.attention, detail: noActivityRows.length ? `${noActivityRows.length} with no activity` : "No current-week activity", tone: "attention" },
     { key: "leaders", label: "Weekly Makes", value: metrics.weeklyMakes, detail: `${metrics.weeklyActions} logged actions`, tone: "info" },
   ];
+
   return (
     <div data-testid="coach-players-interactive-dashboard">
       <DashboardCommandBar
         eyebrow="Roster intelligence"
         title="Players Dashboard"
-        summary="Search, segment, and act on player engagement without leaving the roster workspace."
+        summary="See who is progressing, why engagement is slipping, and what coaching action should happen next."
         status={`${metrics.active}/${metrics.total || 0} active`}
         actions={[
           { key: "add", label: "Add Player", onClick: onAddPlayer },
@@ -50,33 +63,52 @@ export function CoachPlayersInteractiveDashboard({
           { key: "all", label: "All", count: metrics.total },
           { key: "active", label: "Active", count: metrics.active },
           { key: "attention", label: "Attention", count: metrics.attention },
-          { key: "new", label: "No Activity", count: rows.filter((row) => row.statusKey === "new").length },
+          { key: "new", label: "No Activity", count: noActivityRows.length },
           { key: "leaders", label: "Top Engagement", count: Math.min(metrics.total, 5) },
         ]}
         activeFilter={filter}
         onFilterChange={onFilterChange}
         testId="coach-players-filter-rail"
       />
+
+      <div style={{ marginBottom: 12 }}>
+        <ExperienceSignal
+          eyebrow="Decision brief"
+          title={decisionTitle}
+          detail={decisionDetail}
+          tone={attentionRows.length ? "attention" : "positive"}
+          action={{ label: attentionRows.length ? "Open attention queue" : "Recognize active players", onClick: () => onFilterChange(attentionRows.length ? "attention" : "active") }}
+          testId="coach-players-decision-brief"
+        >
+          <ExperienceSparkline
+            values={engagementDistribution}
+            label="Engagement spread"
+            tone={attentionRows.length ? "attention" : "positive"}
+            testId="coach-players-engagement-sparkline"
+          />
+        </ExperienceSignal>
+      </div>
+
       <DashboardInsightGrid testId="coach-players-insight-grid">
         <DashboardInsightCard
           eyebrow="Immediate follow-up"
           title={attentionRows.length ? `${attentionRows.length} players need a touchpoint` : "Roster engagement is current"}
-          body={attentionRows.length ? `${firstNames(attentionRows)}${attentionRows.length > 3 ? ` and ${attentionRows.length - 3} more` : ""} have no activity recorded this week.` : "Every rostered player has current-week activity."}
+          body={attentionRows.length ? `${firstNames(attentionRows)}${attentionRows.length > 3 ? ` and ${attentionRows.length - 3} more` : ""} need a direct next step, not another generic reminder.` : "Every rostered player has current-week activity."}
           tone={attentionRows.length ? "attention" : "positive"}
           action={{ label: attentionRows.length ? "Show Players" : "View Active", onClick: () => onFilterChange(attentionRows.length ? "attention" : "active") }}
         />
         <DashboardInsightCard
           eyebrow="Engagement leader"
           title={leader ? leader.name : "No leader yet"}
-          body={leader ? `${leader.weeklyMakes} weekly makes and ${leader.weeklyActivityCount} logged actions currently set the pace.` : "Player activity will surface here after the first workout is logged."}
+          body={leader ? `${leader.weeklyMakes} weekly makes and ${leader.weeklyActivityCount} logged actions currently set the pace. Use the result as recognition, not only a ranking.` : "Player activity will surface here after the first workout is logged."}
           tone="positive"
           action={leader ? { label: "Open Top Five", onClick: () => onFilterChange("leaders") } : undefined}
         />
         <DashboardInsightCard
           eyebrow="Team pulse"
           title={`${activeRate}% active this week`}
-          body="Use this as the primary roster health signal. A falling rate should trigger individual follow-up before adding more programming."
-          tone="info"
+          body={activeRate >= 80 ? "Engagement is strong. Reinforce the behavior and keep the next assignment specific." : "Roster activation is below a premium operating standard. Resolve individual blockers before adding more programming."}
+          tone={activeRate >= 80 ? "positive" : activeRate >= 55 ? "info" : "attention"}
         >
           <DashboardProgress value={metrics.active} max={metrics.total || 1} label="Weekly roster activation" detail={`${metrics.active} of ${metrics.total}`} />
         </DashboardInsightCard>
