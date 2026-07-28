@@ -60,3 +60,49 @@ jobs:
 
       - name: Verify production build
         run: npm run build
+
+  xcode-privacy-bundle:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and sync native assets
+        run: |
+          npm run build
+          npm run native:install:toolchain
+          npm run native:sync:ios
+
+      - name: Validate native property lists
+        run: |
+          plutil -lint ios/App/App/Info.plist
+          plutil -lint ios/App/App/PrivacyInfo.xcprivacy
+
+      - name: Compile simulator app with explicit derived data
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/PrivacyDerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Verify privacy manifest is bundled
+        run: |
+          APP_BUNDLE="build/PrivacyDerivedData/Build/Products/Debug-iphonesimulator/App.app"
+          test -d "$APP_BUNDLE"
+          test -f "$APP_BUNDLE/PrivacyInfo.xcprivacy"
+          plutil -lint "$APP_BUNDLE/PrivacyInfo.xcprivacy"
