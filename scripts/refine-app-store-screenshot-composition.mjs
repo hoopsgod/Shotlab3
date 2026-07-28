@@ -1,5 +1,6 @@
 import fs from "node:fs";
 
+// Branch-only refinement. The workflow removes this file before review readiness.
 const file = "tests/e2e/app-store-screenshots.spec.mjs";
 let source = fs.readFileSync(file, "utf8");
 
