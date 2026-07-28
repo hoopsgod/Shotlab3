@@ -5,7 +5,9 @@ import "./CoachMissionControlHeader.css";
 import "./CoachMissionControlPolish.css";
 import "./CoachMissionControl2026.css";
 import "./CoachMissionControlFinal.css";
+import "./CoachActivationPath.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
+import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
@@ -100,17 +102,22 @@ function NextSessionPanel({ date, onOpen }) {
   );
 }
 
-function TodayPlan({ rosterSize, onCreatePractice, onPlayersClick }) {
-  const hasRoster = rosterSize > 0;
+function TodayPlan({ activation, onAction }) {
+  const next = activation?.next;
+  if (!next) return null;
   return (
-    <article className="mcTodayPlan" data-testid="coach-onboarding-state">
-      <span className="mcTodayPlanIcon"><Icon name={hasRoster ? "calendar" : "users"} size={21} /></span>
+    <article className="mcTodayPlan mcActivationPlan" data-testid="coach-onboarding-state">
+      <span className="mcTodayPlanIcon"><Icon name={next.icon || "spark"} size={21} /></span>
       <span className="mcTodayPlanCopy">
-        <small>Today</small>
-        <strong>{hasRoster ? "No practice scheduled" : "Build your roster"}</strong>
-        <em>{hasRoster ? "Create the focus your players should see next." : "Add your first player to begin building the team."}</em>
+        <small>Coach activation · {activation.completed}/{activation.total}</small>
+        <strong>{next.title}</strong>
+        <em>{next.detail}</em>
+        <span className="mcActivationProgress" aria-label={`${activation.completed} of ${activation.total} activation milestones complete`}>
+          <span className="mcActivationProgressTrack"><span style={{ width: `${activation.progress}%` }} /></span>
+          <strong>{activation.progress}% ready</strong>
+        </span>
       </span>
-      <button type="button" onClick={hasRoster ? onCreatePractice : onPlayersClick}>{hasRoster ? "Create practice" : "Add player"}<Icon name="arrow" size={16} /></button>
+      <button type="button" onClick={() => onAction?.(next.action)}>{next.label}<Icon name="arrow" size={16} /></button>
     </article>
   );
 }
@@ -182,13 +189,35 @@ export default function CoachCommandCenter({
   const attentionCount = resolvedAttention.length;
   const resolvedActivity = activityItems.length ? activityItems : [activeCount ? { name: `${activeCount} athlete${activeCount === 1 ? "" : "s"} active`, detail: "Training activity recorded today", meta: "Today" } : null].filter(Boolean);
   const hasLiveActivity = resolvedActivity.length > 0;
-  const onboardingMode = !hasTeamActivity && !hasLiveActivity && !hasScheduledSession;
+  const activationPath = useMemo(() => deriveCoachActivationPath({
+    teamCode: joinCode,
+    teamName,
+    logoUrl: fullLogoSource,
+    fallbackLogo: FALLBACK_LOGO,
+    rosterSize,
+    hasScheduledSession,
+    activeTodayCount: activeCount,
+    hasLiveActivity,
+  }), [activeCount, fullLogoSource, hasLiveActivity, hasScheduledSession, joinCode, rosterSize, teamName]);
+  const onboardingMode = !activationPath.complete;
+  const sparseOnboardingMode = onboardingMode && !hasTeamActivity && !hasLiveActivity && !hasScheduledSession;
 
+  const runActivationAction = (action) => {
+    if (action === "team-tools") { openTeamTools(); return; }
+    if (action === "branding") { openBrandingSettings(); return; }
+    if (action === "add-player") { onAddPlayer?.(); return; }
+    if (action === "schedule-session") { onScheduleEvent?.(); return; }
+    if (action === "review-engagement") onPlayersClick?.();
+  };
+
+  const activationCommand = onboardingMode && activationPath.next
+    ? { eyebrow: `Coach activation · ${activationPath.completed}/${activationPath.total}`, title: activationPath.next.title, detail: activationPath.next.detail, label: activationPath.next.label, onClick: () => runActivationAction(activationPath.next.action), state: "planning" }
+    : null;
   const primaryCommand = attentionCount > 0
     ? { eyebrow: "Today at a glance", title: `${attentionCount} decision${attentionCount === 1 ? "" : "s"} before practice`, detail: "Clear the priority, then set today’s plan.", label: "Review priority", onClick: onPlayersClick, state: "attention" }
-    : hasScheduledSession
+    : activationCommand || (hasScheduledSession
       ? { eyebrow: "Practice ready", title: "Today is under control", detail: `Your next team session is ${nextEventDateFormatted}.`, label: "Open session", onClick: onNextEventClick, state: "ready" }
-      : { eyebrow: "Today’s next move", title: "Build today’s practice", detail: "Set the focus every athlete should see next.", label: "Create practice", onClick: onScheduleEvent, state: "planning" };
+      : { eyebrow: "Today’s next move", title: "Build today’s practice", detail: "Set the focus every athlete should see next.", label: "Create practice", onClick: onScheduleEvent, state: "planning" });
 
   const quickActions = useMemo(() => [
     { label: "Add Player", icon: "users", onClick: onAddPlayer },
@@ -262,10 +291,10 @@ export default function CoachCommandCenter({
 
         <section className={`mcFocusGrid ${onboardingMode ? "is-onboarding-grid" : ""}`}>
           {attentionPanel}
-          {onboardingMode ? <TodayPlan rosterSize={rosterSize} onCreatePractice={onScheduleEvent} onPlayersClick={onPlayersClick} /> : priorityPanel}
+          {onboardingMode ? <TodayPlan activation={activationPath} onAction={runActivationAction} /> : priorityPanel}
         </section>
 
-        {!onboardingMode && lowerPanels.length > 0 ? <section className={`mcLowerGrid has-${lowerPanels.length}-panels`}>{lowerPanels}</section> : null}
+        {!sparseOnboardingMode && lowerPanels.length > 0 ? <section className={`mcLowerGrid has-${lowerPanels.length}-panels`}>{lowerPanels}</section> : null}
 
         {toolsOpen ? <section className="mcSection mcTools" data-testid="coach-secondary-tools"><div><small>Team code</small><strong>{joinCode || "—"}</strong>{codeErr ? <span>{codeErr}</span> : null}</div><div><button type="button" onClick={() => { onCopyJoinCode?.(); setCopied(true); setTimeout(() => setCopied(false), 1600); }}>{copied ? "Copied" : "Copy code"}</button><button type="button" onClick={onRegenerateJoinCode}>New code</button><button type="button" onClick={() => setToolsOpen(false)}>Close</button></div><span data-testid="coach-team-code-bar" /></section> : null}
       </main>
