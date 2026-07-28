@@ -35,7 +35,7 @@
       "field": "accountDeletionUrl",
       "path": "/delete-account",
       "candidateUrl": "https://shotlab3.pages.dev/delete-account",
-      "expectedHeading": "Delete Account & Data",
+      "expectedHeading": "Delete Account",
       "sourceImplemented": true,
       "directRouteTestedLocally": true,
       "liveHttpsVerified": false
@@ -44,7 +44,7 @@
       "field": "dataRequestUrl",
       "path": "/data-request",
       "candidateUrl": "https://shotlab3.pages.dev/data-request",
-      "expectedHeading": "Data Request",
+      "expectedHeading": "Account Data Request",
       "sourceImplemented": true,
       "directRouteTestedLocally": true,
       "liveHttpsVerified": false
