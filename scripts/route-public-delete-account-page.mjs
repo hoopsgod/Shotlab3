@@ -1,5 +1,6 @@
 import fs from "node:fs";
 
+// Branch-only deterministic integration. Removed before review readiness.
 const path = "src/App.jsx";
 let source = fs.readFileSync(path, "utf8");
 
