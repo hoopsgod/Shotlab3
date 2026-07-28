@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "locale": "en-US",
+  "platform": "ios",
+  "productName": "ShotLab",
+  "name": "ShotLab",
+  "subtitle": "Basketball Training, Connected",
+  "promotionalText": "Turn daily basketball work into visible progress with coach priorities, shot logging, team events, strength sessions, leaderboards, and season insight.",
+  "description": "ShotLab connects coaches and players around the daily work that builds better basketball teams.\n\nFOR PLAYERS\n• Open a personalized Daily Training Command Center with one clear next action.\n• Log at-home shots and coach-assigned program drills.\n• Track weekly makes, streaks, personal bests, and team ranking.\n• Confirm event and strength-session attendance.\n• Review progress across training, team commitments, and the season.\n\nFOR COACHES\n• Run a complete basketball development program from one dashboard.\n• Invite players and manage the active roster.\n• Set training priorities and organize drill plans.\n• Create events and strength and conditioning sessions.\n• Monitor attendance, activity, leaderboards, and player development.\n• Archive seasons and compare results over time.\n\nShotLab is built for structured offseason development, in-season accountability, and long-term program growth. Some features require a coach-created team or invitation.",
+  "keywords": "basketball,shooting,training,coach,team,drills,shots,leaderboard,workout,player",
+  "primaryCategory": "Sports",
+  "secondaryCategory": null,
+  "copyright": "pending_owner_legal_name",
+  "pricing": "pending_owner_decision",
+  "ageRating": "pending_app_store_questionnaire",
+  "urls": {
+    "privacyPolicy": {
+      "routePath": "/privacy",
+      "publicUrl": "pending_owner_verified_url"
+    },
+    "terms": {
+      "routePath": "/terms",
+      "publicUrl": "pending_owner_verified_url"
+    },
+    "support": {
+      "routePath": "/support",
+      "publicUrl": "pending_owner_verified_url"
+    }
+  },
+  "review": {
+    "coachAccount": "pending_owner_review_account",
+    "playerAccount": "pending_owner_review_account",
+    "notes": "ShotLab has separate Coach and Player experiences. Use the owner-provided Coach account to review Players, Events, Drills, Strength and Conditioning, Leaderboards, Activity, and Season Archive. Use the owner-provided Player account to review the Daily Training Command Center, At Home, Program, Events, Strength and Conditioning, Leaderboards, Profile, and in-app account deletion. Production demo access is disabled by default."
+  },
+  "screenshots": {
+    "display": "iPhone 6.9-inch",
+    "width": 1290,
+    "height": 2796,
+    "format": "jpeg",
+    "count": 6,
+    "items": [
+      {
+        "order": 1,
+        "role": "player",
+        "surface": "home",
+        "file": "01-player-daily-command-center.jpg",
+        "headline": "Know exactly what matters today",
+        "subheadline": "One clear next action, shaped by your coach and your progress."
+      },
+      {
+        "order": 2,
+        "role": "player",
+        "surface": "at-home",
+        "file": "02-player-at-home-training.jpg",
+        "headline": "Log the work. See the progress.",
+        "subheadline": "Shots, daily drills, streaks, and personal growth in one place."
+      },
+      {
+        "order": 3,
+        "role": "player",
+        "surface": "program",
+        "file": "03-player-program-plan.jpg",
+        "headline": "Stay connected to the team plan",
+        "subheadline": "Coach priorities and program work remain clear every day."
+      },
+      {
+        "order": 4,
+        "role": "coach",
+        "surface": "home",
+        "file": "04-coach-mission-control.jpg",
+        "headline": "Run your program from one place",
+        "subheadline": "Roster, training, events, attendance, and momentum at a glance."
+      },
+      {
+        "order": 5,
+        "role": "coach",
+        "surface": "players",
+        "file": "05-coach-player-intelligence.jpg",
+        "headline": "See who needs attention—fast",
+        "subheadline": "Turn player activity into clear coaching decisions."
+      },
+      {
+        "order": 6,
+        "role": "coach",
+        "surface": "events",
+        "file": "06-coach-event-readiness.jpg",
+        "headline": "Event readiness without the chasing",
+        "subheadline": "Know who responded, what is next, and where action is needed."
+      }
+    ]
+  }
+}
