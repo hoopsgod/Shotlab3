@@ -1,0 +1,42 @@
+name: Player Experience Phase 2
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - src/App.jsx
+      - src/components/PlayerExperiencePhase2.jsx
+      - src/components/PlayerExperiencePhase2.css
+      - tests/player-experience-phase-2-contract.test.mjs
+      - .github/workflows/player-experience-phase-2.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: player-experience-phase-2-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  player-command-surfaces:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify player phase 2 contracts
+        run: node --test tests/player-experience-phase-2-contract.test.mjs tests/player-daily-command-center.test.mjs tests/player-experience-phase-1-contract.test.mjs
+
+      - name: Build production bundle
+        run: npm run build
