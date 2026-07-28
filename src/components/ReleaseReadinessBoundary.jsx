@@ -105,14 +105,19 @@ export default function ReleaseReadinessBoundary({ children }) {
 
   const validateSession = useCallback(async () => {
     if (!supabaseAuthEnabled || !isOnline) return { ok: true, skipped: true };
-    const persisted = await readRuntimeJson(RUNTIME_STORAGE_KEYS.appSession);
-    if (!persisted?.email) return { ok: true, skipped: true };
-    const result = await supabase.auth.getSession();
-    if (isSessionAuthError(result?.error) || !result?.data?.session?.user?.email) {
-      await expireSession(result?.error?.code || "session_missing");
-      return { ok: false };
+    try {
+      const persisted = await readRuntimeJson(RUNTIME_STORAGE_KEYS.appSession);
+      if (!persisted?.email) return { ok: true, skipped: true };
+      const result = await supabase.auth.getSession();
+      if (isSessionAuthError(result?.error) || !result?.data?.session?.user?.email) {
+        await expireSession(result?.error?.code || "session_missing");
+        return { ok: false };
+      }
+      return { ok: true, email: result.data.session.user.email };
+    } catch (error) {
+      console.warn("[release-readiness] session validation deferred", { message: String(error?.message || "network_unavailable") });
+      return { ok: true, deferred: true };
     }
-    return { ok: true, email: result.data.session.user.email };
   }, [expireSession, isOnline, supabaseAuthEnabled]);
 
   const runPendingSync = useCallback(async (reason = "online") => {
@@ -125,7 +130,14 @@ export default function ReleaseReadinessBoundary({ children }) {
       const persisted = await readRuntimeJson(RUNTIME_STORAGE_KEYS.appSession);
       let authEmail = String(persisted?.email || "").trim().toLowerCase();
       if (supabaseAuthEnabled && authEmail) {
-        const sessionResult = await supabase.auth.getSession();
+        let sessionResult;
+        try {
+          sessionResult = await supabase.auth.getSession();
+        } catch (error) {
+          console.warn("[release-readiness] pending sync deferred during session check", { message: String(error?.message || "network_unavailable") });
+          setSyncState("idle");
+          return;
+        }
         if (isSessionAuthError(sessionResult?.error) || !sessionResult?.data?.session?.user?.email) {
           await expireSession(sessionResult?.error?.code || "session_missing_during_sync");
           setSyncState("idle");
@@ -155,6 +167,9 @@ export default function ReleaseReadinessBoundary({ children }) {
       if (result.synced > 0 && !result.failed && !result.pending) {
         clearStatusTimerRef.current = window.setTimeout(() => setSyncState("idle"), 4200);
       }
+    } catch (error) {
+      console.warn("[release-readiness] pending sync deferred", { message: String(error?.message || "network_unavailable") });
+      setSyncState("idle");
     } finally {
       syncInFlightRef.current = false;
     }
@@ -163,7 +178,7 @@ export default function ReleaseReadinessBoundary({ children }) {
   useEffect(() => {
     clearStaleDemoSession().then((cleared) => {
       if (cleared) setAppMountVersion((value) => value + 1);
-    });
+    }).catch(() => false);
   }, []);
 
   useEffect(() => {
@@ -187,7 +202,7 @@ export default function ReleaseReadinessBoundary({ children }) {
 
   useEffect(() => {
     if (!supabaseAuthEnabled) return undefined;
-    const validate = () => validateSession();
+    const validate = () => { void validateSession(); };
     const onVisibility = () => {
       if (document.visibilityState === "visible") validate();
     };
