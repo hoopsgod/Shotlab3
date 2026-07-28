@@ -1,7 +1,9 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import ReleaseReadinessBoundary from './components/ReleaseReadinessBoundary.jsx'
 import { demoBootstrap } from './lib/demoBootstrap.ts'
 import { checkBackendHealth, getBackendStatusLabel, logBackendHealth } from './lib/backendHealth.js'
+import { isDemoRuntimeEnabled } from './lib/runtimeReleaseReadiness.js'
 import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
@@ -10,6 +12,7 @@ const params = typeof window !== 'undefined' ? new URLSearchParams(window.locati
 const bootDebugEnabled = params.get('bootDebug') === '1'
 const DEV = Boolean(typeof import.meta !== 'undefined' && import.meta?.env?.DEV)
 const DEMO_MODE_STORAGE_KEY = 'sl:demoMode'
+const DEMO_RUNTIME_ENABLED = isDemoRuntimeEnabled()
 
 let startupErrorShown = false
 let appHasCommitted = false
@@ -60,14 +63,12 @@ if (typeof window !== 'undefined') {
         ok: status.ok,
       }
     }
-  if (DEV) {
     window.__shotlabSupabaseSchemaStatus = async () => verifySupabaseSchema()
-  }
   }
 }
 
 function installDemoStorageWriteGuard() {
-  if (typeof window === 'undefined') return false
+  if (!DEMO_RUNTIME_ENABLED || typeof window === 'undefined') return false
   const storage = window.storage
   if (!storage || typeof storage.set !== 'function' || storage.__shotlabDemoWriteGuard === true) return false
 
@@ -140,6 +141,7 @@ function renderStartupError(message) {
 
 markBoot('index_loaded')
 markBoot('main_executed')
+markBoot('demo_runtime', DEMO_RUNTIME_ENABLED ? 'enabled' : 'disabled')
 registerRuntimeListeners()
 installDemoStorageWriteGuard()
 
@@ -182,8 +184,13 @@ window.addEventListener('unhandledrejection', (event) => {
       markBoot('app_import_succeeded')
 
       try {
-        demoBootstrap()
-        installDemoStorageWriteGuard()
+        if (DEMO_RUNTIME_ENABLED) {
+          demoBootstrap()
+          installDemoStorageWriteGuard()
+          markBoot('demo_bootstrap', 'completed')
+        } else {
+          markBoot('demo_bootstrap', 'skipped')
+        }
         checkBackendHealth().then((status) => {
           logBackendHealth(status)
           markBoot('backend_health', status.status)
@@ -212,7 +219,9 @@ window.addEventListener('unhandledrejection', (event) => {
       markBoot('react_render_started')
       ReactDOM.createRoot(rootEl).render(
         <React.StrictMode>
-          <App />
+          <ReleaseReadinessBoundary>
+            <App />
+          </ReleaseReadinessBoundary>
         </React.StrictMode>
       )
       markBoot('react_render_completed')

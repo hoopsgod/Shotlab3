@@ -1,0 +1,42 @@
+name: App Store Release Hardening
+
+on:
+  pull_request:
+    paths:
+      - "src/main.jsx"
+      - "src/components/ReleaseReadinessBoundary.jsx"
+      - "src/lib/runtimeReleaseReadiness.js"
+      - "tests/app-store-release-hardening.test.mjs"
+      - "docs/app-store-release-hardening.md"
+      - ".github/workflows/app-store-release-hardening.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-store-release-hardening-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install pinned native asset toolchain
+        run: npm run native:install:toolchain
+      - name: Offline and session recovery contracts
+        run: node --test tests/app-store-release-hardening.test.mjs
+      - name: App Store mobile shell contracts
+        run: node --test tests/app-store-mobile-shell.test.mjs
+      - name: Native iOS foundation contracts
+        run: node --test tests/phase-4-native-ios-foundation.test.mjs
+      - name: Signed-device source contracts
+        run: node --test tests/phase-4-signed-device-layer.test.mjs
+      - name: Production build
+        run: npm run build
