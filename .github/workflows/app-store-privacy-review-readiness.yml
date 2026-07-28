@@ -1,0 +1,111 @@
+name: App Store Privacy and Review Readiness
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "ios/App/App/PrivacyInfo.xcprivacy"
+      - "ios/App/App/Info.plist"
+      - "ios/App/App.xcodeproj/project.pbxproj"
+      - "ios/App/App/capacitor.config.json"
+      - "native/app-store-connect-privacy.json"
+      - "native/ios-release-profile.json"
+      - "scripts/configure-ios-privacy-readiness.mjs"
+      - "docs/app-store-review-package.md"
+      - "tests/app-store-privacy-review-readiness.test.mjs"
+      - ".github/workflows/app-store-privacy-review-readiness.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-store-privacy-review-readiness-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pinned native asset toolchain
+        run: npm run native:install:toolchain
+
+      - name: Verify deterministic privacy configuration
+        run: |
+          node scripts/configure-ios-privacy-readiness.mjs
+          git diff --exit-code -- ios/App/App.xcodeproj/project.pbxproj ios/App/App/Info.plist
+
+      - name: Verify privacy and review contracts
+        run: node --test tests/app-store-privacy-review-readiness.test.mjs
+
+      - name: Verify release hardening contracts
+        run: node --test tests/app-store-release-hardening.test.mjs
+
+      - name: Verify native iOS foundation
+        run: node --test tests/phase-4-native-ios-foundation.test.mjs
+
+      - name: Verify signed-device layer
+        run: node --test tests/phase-4-signed-device-layer.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+  xcode-privacy-bundle:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and sync native assets
+        run: |
+          npm run build
+          npm run native:install:toolchain
+          npm run native:sync:ios
+
+      - name: Validate native property lists
+        run: |
+          plutil -lint ios/App/App/Info.plist
+          plutil -lint ios/App/App/PrivacyInfo.xcprivacy
+
+      - name: Compile simulator app with explicit derived data
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build/PrivacyDerivedData \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Verify privacy manifest is bundled
+        run: |
+          APP_BUNDLE="build/PrivacyDerivedData/Build/Products/Debug-iphonesimulator/App.app"
+          test -d "$APP_BUNDLE"
+          test -f "$APP_BUNDLE/PrivacyInfo.xcprivacy"
+          plutil -lint "$APP_BUNDLE/PrivacyInfo.xcprivacy"
