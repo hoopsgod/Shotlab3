@@ -57,7 +57,18 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Verify direct public routes
-        run: npx playwright test tests/e2e/public-submission-routes.spec.mjs --config=playwright.acceptance.config.mjs --project=chromium-desktop
+        run: npx playwright test tests/e2e/public-submission-routes.spec.mjs --config=playwright.acceptance.config.mjs --project=chromium-desktop --reporter=json > public-route-results.json
+
+      - name: Upload route diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: public-delete-route-diagnostics
+          path: |
+            public-route-results.json
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Commit verified App integration
         run: |
