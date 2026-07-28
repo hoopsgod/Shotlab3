@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "productName": "ShotLab",
+  "platform": "ios",
+  "tracking": false,
+  "trackingDomains": [],
+  "collectedData": [
+    {
+      "type": "Name",
+      "manifestValue": "NSPrivacyCollectedDataTypeName",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": ["App Functionality"],
+      "examples": ["coach name", "player name"]
+    },
+    {
+      "type": "Email Address",
+      "manifestValue": "NSPrivacyCollectedDataTypeEmailAddress",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": ["App Functionality"],
+      "examples": ["account authentication", "coach-created player invitation"]
+    },
+    {
+      "type": "User ID",
+      "manifestValue": "NSPrivacyCollectedDataTypeUserID",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": ["App Functionality"],
+      "examples": ["Supabase account ID", "player profile ID", "team membership identity"]
+    },
+    {
+      "type": "Fitness",
+      "manifestValue": "NSPrivacyCollectedDataTypeFitness",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": ["App Functionality"],
+      "examples": ["shot makes", "drill scores", "strength and conditioning activity", "attendance and training progress"]
+    },
+    {
+      "type": "Other User Content",
+      "manifestValue": "NSPrivacyCollectedDataTypeOtherUserContent",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": ["App Functionality"],
+      "examples": ["coach-created drills", "coach notes", "events", "team branding settings"]
+    },
+    {
+      "type": "Device ID",
+      "manifestValue": "NSPrivacyCollectedDataTypeDeviceID",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": ["Analytics"],
+      "conditional": "Collected only when VITE_ANALYTICS_ENDPOINT is configured for the submitted production build.",
+      "examples": ["ShotLab-generated analytics device identifier"]
+    },
+    {
+      "type": "Product Interaction",
+      "manifestValue": "NSPrivacyCollectedDataTypeProductInteraction",
+      "linkedToUser": true,
+      "usedForTracking": false,
+      "purposes": ["Analytics"],
+      "conditional": "Collected only when VITE_ANALYTICS_ENDPOINT is configured for the submitted production build.",
+      "examples": ["feature and backend workflow events"]
+    }
+  ],
+  "notCollected": [
+    "Precise Location",
+    "Coarse Location",
+    "Contacts",
+    "Photos or Videos",
+    "Audio Data",
+    "Payment Information",
+    "Purchases",
+    "Browsing History",
+    "Advertising Data"
+  ],
+  "requiredReasonApisDeclaredByApp": [],
+  "releaseAssertions": {
+    "usesAdvertisingTracking": false,
+    "usesThirdPartyAdvertising": false,
+    "usesHealthKit": false,
+    "usesMotionAndFitnessFramework": false,
+    "usesLocationServices": false,
+    "usesCamera": false,
+    "usesPhotoLibrary": false,
+    "usesMicrophone": false,
+    "allowsArbitraryNetworkLoads": false,
+    "supportsInAppAccountDeletion": true
+  },
+  "ownerInputRequired": {
+    "privacyPolicyUrl": "pending",
+    "termsUrl": "pending",
+    "supportUrl": "pending",
+    "coachReviewAccount": "pending",
+    "playerReviewAccount": "pending",
+    "productionAnalyticsEndpointEnabled": "verify before submission"
+  }
+}
