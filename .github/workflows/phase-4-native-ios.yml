@@ -1,0 +1,49 @@
+name: Phase 4 Native iOS Foundation
+
+on:
+  pull_request:
+    paths:
+      - "capacitor.config.json"
+      - "native/**"
+      - "scripts/native-ios.mjs"
+      - "scripts/native-release-doctor.mjs"
+      - "docs/testflight-release-runbook.md"
+      - "package.json"
+      - "tests/phase-4-native-ios-foundation.test.mjs"
+      - ".github/workflows/phase-4-native-ios.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-4-native-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate-ios-workspace:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Native foundation contracts
+        run: node --test tests/phase-4-native-ios-foundation.test.mjs
+      - name: Production web build
+        run: npm run build
+      - name: Verify native configuration
+        run: npm run native:verify:ios -- --require-build
+      - name: Generate and sync iOS workspace
+        run: npm run native:prepare:ios
+      - name: Verify generated iOS workspace
+        run: npm run native:verify:ios -- --require-build --require-ios
+      - name: Publish generated iOS workspace
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-ios-workspace
+          path: ios
+          if-no-files-found: error
+          retention-days: 14

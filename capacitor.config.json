@@ -1,0 +1,8 @@
+{
+  "appId": "com.shotlab.training",
+  "appName": "ShotLab",
+  "webDir": "dist",
+  "server": {
+    "iosScheme": "https"
+  }
+}

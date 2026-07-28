@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "platform": "ios",
+  "productName": "ShotLab",
+  "bundleIdentifier": "com.shotlab.training",
+  "marketingVersion": "1.0.0",
+  "buildNumber": 1,
+  "primaryCategory": "Sports",
+  "deviceFamily": "iPhone",
+  "orientation": "portrait",
+  "appearance": "dark",
+  "capacitorVersion": "8.4.2",
+  "nativePackageManager": "Swift Package Manager",
+  "capabilities": [],
+  "privacyUsageDescriptions": {},
+  "releaseRequirements": {
+    "privacyPolicyUrl": "pending",
+    "termsUrl": "pending",
+    "supportUrl": "pending",
+    "coachReviewAccount": "pending",
+    "playerReviewAccount": "pending"
+  }
+}
