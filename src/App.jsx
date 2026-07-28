@@ -926,6 +926,15 @@ const LEGAL_SUPPORT_LINKS=[
 {href:"/data-request",label:"Data Request"},
 ];
 const getLegalRouteKey=(path)=>LEGAL_ROUTES[String(path||"").replace(/\/$/,"")||"/"]||null;
+const hasStoredShotLabSession=()=>{
+if(typeof window==="undefined")return false;
+try{
+const raw=window.localStorage?.getItem("sl:session");
+if(!raw)return false;
+const session=JSON.parse(raw);
+return Boolean(session?.email&&session?.role);
+}catch(error){return false;}
+};
 function LegalSupportLinks({compact=false}){return <div aria-label="Legal and support links" style={{display:"flex",flexWrap:"wrap",justifyContent:compact?"flex-start":"center",gap:compact?8:12,marginTop:compact?10:18}}>{LEGAL_SUPPORT_LINKS.map(link=><a key={link.href} href={link.href} style={{fontFamily:FB,color:compact?VOLT:MUTED,fontSize:compact?10:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",border:`1px solid ${compact?VOLT+"33":"transparent"}`,borderRadius:999,padding:compact?"6px 10px":"4px 8px",minHeight:36,display:"inline-flex",alignItems:"center",justifyContent:"center",touchAction:"manipulation"}}>{link.label}</a>)}</div>}
 function AccountTrustActions({deleteAccount,preserveTeamData=false}){
 const[confirming,setConfirming]=useState(false);
@@ -968,6 +977,7 @@ return <><Styles/><main data-testid="static-legal-page" style={{minHeight:"100dv
 export default function App(){
 const[appErr,setAppErr]=useState(false);
 const legalRouteKey=typeof window!=="undefined"?getLegalRouteKey(window.location.pathname):null;
+const shouldRenderPublicLegalPage=Boolean(legalRouteKey&&(legalRouteKey!=="delete-account"||!hasStoredShotLabSession()));
 useEffect(()=>{
 try{
 window.__shotlabBootMark?.("app_ready_dispatched");
@@ -975,7 +985,7 @@ window.dispatchEvent(new Event("shotlab:app-ready"));
 }catch(error){}
 },[]);
 if(appErr)return <><Styles/><ErrorFallback/></>;
-if(legalRouteKey&&legalRouteKey!=="delete-account")return <StaticLegalPage pageKey={legalRouteKey}/>;
+if(shouldRenderPublicLegalPage)return <StaticLegalPage pageKey={legalRouteKey}/>;
 try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
 }
 
