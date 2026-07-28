@@ -1,3 +1,4 @@
+import { scheduleWorkspaceActionReveal } from "../lib/playerWorkspaceActionRouting.js";
 import styles from "./PlayerOperationalWorkspace.module.css";
 
 function MetricContent({ metric }) {
@@ -12,6 +13,14 @@ function MetricContent({ metric }) {
 
 export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", testId }) {
   if (!model) return null;
+  const runAction = (action) => {
+    onAction?.(action);
+    scheduleWorkspaceActionReveal(action);
+  };
+  const runMetric = (metric) => {
+    onMetric?.(metric);
+    if (metric?.action) scheduleWorkspaceActionReveal(metric.action);
+  };
   return (
     <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`}>
       <div className={styles.commandBar}>
@@ -24,7 +33,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
           <p className={styles.subtitle}>{model.subtitle}</p>
         </div>
         {model.primaryAction && (
-          <button type="button" className={styles.primaryAction} onClick={() => onAction?.(model.primaryAction)}>
+          <button type="button" className={styles.primaryAction} onClick={() => runAction(model.primaryAction)}>
             {model.primaryAction.label} →
           </button>
         )}
@@ -45,7 +54,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
               type="button"
               key={metric.id}
               className={metricClassName}
-              onClick={() => onMetric?.(metric)}
+              onClick={() => runMetric(metric)}
               aria-pressed={activeMetric === metric.id}
               data-interactive="true"
             >
