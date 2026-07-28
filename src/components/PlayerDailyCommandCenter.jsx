@@ -85,7 +85,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
             value={model.daily.makes}
             max={model.daily.goal || 1}
             label="Today"
-            detail={`${model.daily.makes}/${model.daily.goal}`}
+            detail={`${model.daily.makes} of ${model.daily.goal} makes`}
             size={88}
             testId="player-daily-progress-ring"
           />
