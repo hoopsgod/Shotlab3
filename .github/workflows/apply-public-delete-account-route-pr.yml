@@ -57,7 +57,12 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Verify direct public routes
-        run: npx playwright test tests/e2e/public-submission-routes.spec.mjs --config=playwright.acceptance.config.mjs --project=chromium-desktop --reporter=json > public-route-results.json
+        run: |
+          set +e
+          npx playwright test tests/e2e/public-submission-routes.spec.mjs --config=playwright.acceptance.config.mjs --project=chromium-desktop --reporter=line > public-route-results.log 2>&1
+          status=$?
+          cat public-route-results.log
+          exit $status
 
       - name: Upload route diagnostics
         if: always()
@@ -65,7 +70,7 @@ jobs:
         with:
           name: public-delete-route-diagnostics
           path: |
-            public-route-results.json
+            public-route-results.log
             test-results/
           if-no-files-found: ignore
           retention-days: 7
