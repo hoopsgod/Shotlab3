@@ -75,9 +75,13 @@ async function expectNoHorizontalOverflow(page) {
 async function expectWorkspaceTouchTargets(page, testId) {
   const workspace = page.getByTestId(testId);
   await expect(workspace).toBeVisible({ timeout: 20_000 });
+
+  const metrics = workspace.locator("[data-interactive]");
+  await expect(metrics).toHaveCount(4);
+
   const buttons = workspace.getByRole("button");
   const count = await buttons.count();
-  expect(count).toBeGreaterThanOrEqual(5);
+  expect(count).toBeGreaterThanOrEqual(1);
   for (let index = 0; index < count; index += 1) {
     const box = await buttons.nth(index).boundingBox();
     expect(box).not.toBeNull();
