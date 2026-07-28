@@ -7,6 +7,7 @@ on:
     paths:
       - "scripts/configure-ios-privacy-readiness.mjs"
       - ".github/workflows/apply-ios-privacy-readiness.yml"
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -55,7 +56,7 @@ jobs:
             exit 0
           fi
           git config user.name "github-actions[bot]"
-          git config user.email "4189826+github-actions[bot]@users.noreply.github.com"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add ios/App/App.xcodeproj/project.pbxproj ios/App/App/Info.plist
           git commit -m "integrate native privacy manifest and network security"
           git push origin HEAD:agent/app-store-privacy-review-readiness
