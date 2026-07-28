@@ -59,7 +59,7 @@ jobs:
       - name: Verify direct public routes
         run: |
           set +e
-          npx playwright test tests/e2e/public-submission-routes.spec.mjs --config=playwright.acceptance.config.mjs --project=chromium-desktop --reporter=line > public-route-results.log 2>&1
+          npx playwright test tests/e2e/public-submission-routes.spec.mjs --config=playwright.acceptance.config.mjs --project=mobile-chromium --reporter=line > public-route-results.log 2>&1
           status=$?
           cat public-route-results.log
           exit $status
