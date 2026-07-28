@@ -1,0 +1,54 @@
+name: Scope Player Workspace State
+
+on:
+  push:
+    branches:
+      - agent/player-experience-phase-2
+    paths:
+      - scripts/rename-player-workspace-state.mjs
+      - .github/workflows/scope-player-workspace-state.yml
+
+permissions:
+  contents: write
+
+# Temporary gated rename workflow. Removed after the verified commit lands.
+jobs:
+  scope:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/player-experience-phase-2
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply scoped Player workspace names
+        run: node scripts/rename-player-workspace-state.mjs
+
+      - name: Verify Player and Coach source contracts
+        run: node --test tests/player-experience-phase-2-contract.test.mjs tests/coach-dashboard-phase-2-contract.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Commit verified rename
+        run: |
+          if git diff --quiet -- src/App.jsx; then
+            echo "No App.jsx changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/App.jsx
+          git commit -m "scope player operational workspace state"
+          git push origin HEAD:agent/player-experience-phase-2
