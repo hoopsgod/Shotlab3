@@ -26,9 +26,14 @@ const teamMatches = (row = {}, teamId = "") => {
 const scopedRows = (rows, userEmail, teamId) => safeArray(rows).filter((row) => identityMatches(row, userEmail) && teamMatches(row, teamId));
 const scopedTeamRows = (rows, teamId) => safeArray(rows).filter((row) => teamMatches(row, teamId));
 const pct = (value, total) => Math.min(100, Math.round((safeNumber(value) / Math.max(1, safeNumber(total))) * 100));
+const drillIds = (drills = []) => new Set(safeArray(drills).map(rowDrillId).filter(Boolean));
+const completedIdsForDrills = (drills = [], scores = []) => {
+  const allowed = drillIds(drills);
+  return new Set(safeArray(scores).map(rowDrillId).filter((id) => id && allowed.has(id)));
+};
 
 export const filterAtHomeDrills = ({ drills = [], todayScores = [], filter = "all" } = {}) => {
-  const completed = new Set(safeArray(todayScores).map(rowDrillId).filter(Boolean));
+  const completed = completedIdsForDrills(drills, todayScores);
   const rows = safeArray(drills);
   if (filter === "open") return rows.filter((drill) => !completed.has(rowDrillId(drill)));
   if (filter === "completed") return rows.filter((drill) => completed.has(rowDrillId(drill)));
@@ -37,7 +42,8 @@ export const filterAtHomeDrills = ({ drills = [], todayScores = [], filter = "al
 
 export const filterProgramSessionBlocks = ({ blocks = [], todayScores = [], filter = "all" } = {}) => {
   if (filter === "all") return safeArray(blocks);
-  const completed = new Set(safeArray(todayScores).map(rowDrillId).filter(Boolean));
+  const allDrills = safeArray(blocks).flatMap((block) => safeArray(block?.drills));
+  const completed = completedIdsForDrills(allDrills, todayScores);
   return safeArray(blocks)
     .map((block) => ({
       ...block,
@@ -56,7 +62,7 @@ export const buildAtHomeWorkspaceModel = ({
   streak = 0,
   dailyGoal = 100,
 } = {}) => {
-  const completed = new Set(safeArray(todayScores).map(rowDrillId).filter(Boolean));
+  const completed = completedIdsForDrills(drills, todayScores);
   const myShots = scopedRows(shotLogs, userEmail, teamId);
   const todayMakes = myShots.filter((row) => rowDate(row) === today).reduce((sum, row) => sum + safeNumber(row?.made), 0);
   const openDrills = safeArray(drills).filter((drill) => !completed.has(rowDrillId(drill)));
@@ -87,15 +93,18 @@ export const buildProgramWorkspaceModel = ({
   allScores = [],
   coachPriorities = {},
 } = {}) => {
-  const completed = new Set(safeArray(todayScores).map(rowDrillId).filter(Boolean));
+  const completed = completedIdsForDrills(programDrills, todayScores);
   const openDrills = safeArray(programDrills).filter((drill) => !completed.has(rowDrillId(drill)));
   const priorityText = clean(coachPriorities?.priorityDrillText);
-  const priorityDrill = safeArray(programDrills).find((drill) => {
+  const priorityDrill = openDrills.find((drill) => {
     const name = key(drill?.name || drill?.drillName);
     const wanted = key(priorityText);
     return wanted && (name === wanted || name.includes(wanted) || wanted.includes(name));
   }) || openDrills[0] || null;
-  const personalBest = safeArray(allScores).reduce((best, row) => Math.max(best, safeNumber(row?.score)), 0);
+  const programIds = drillIds(programDrills);
+  const personalBest = safeArray(allScores)
+    .filter((row) => programIds.has(rowDrillId(row)))
+    .reduce((best, row) => Math.max(best, safeNumber(row?.score)), 0);
   return {
     id: "program",
     eyebrow: "Coach-directed work",
