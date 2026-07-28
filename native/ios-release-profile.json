@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "platform": "ios",
   "productName": "ShotLab",
   "bundleIdentifier": "com.shotlab.training",
@@ -13,6 +13,16 @@
   "nativePackageManager": "Swift Package Manager",
   "capabilities": [],
   "privacyUsageDescriptions": {},
+  "privacyManifest": "ios/App/App/PrivacyInfo.xcprivacy",
+  "appStorePrivacyProfile": "native/app-store-connect-privacy.json",
+  "networkSecurity": {
+    "allowsArbitraryLoads": false,
+    "allowsArbitraryLoadsInWebContent": false,
+    "allowsLocalNetworking": false,
+    "remoteServerUrl": false,
+    "allowNavigationDomains": []
+  },
+  "releaseStatus": "prepared_owner_input_pending",
   "releaseRequirements": {
     "privacyPolicyUrl": "pending",
     "termsUrl": "pending",
