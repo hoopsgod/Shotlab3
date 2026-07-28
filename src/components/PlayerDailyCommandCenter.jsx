@@ -1,3 +1,5 @@
+import { useEffect, useRef, useState } from "react";
+import { ExperiencePill, ExperienceProgressRing, ExperienceSignal } from "./ExperiencePrimitives.jsx";
 import styles from "./PlayerDailyCommandCenter.module.css";
 
 const urgencyLabel = (urgency = "normal") => {
@@ -8,11 +10,41 @@ const urgencyLabel = (urgency = "normal") => {
 };
 
 const rankLabel = (rank = 0) => (Number(rank) > 0 ? `#${Number(rank)}` : "—");
+const actionKey = (action = {}) => String(action.id || action.kind || action.target || action.title || "action");
 
 export default function PlayerDailyCommandCenter({ model, onAction }) {
+  const [activeAction, setActiveAction] = useState("");
+  const feedbackTimer = useRef(null);
+
+  useEffect(() => () => {
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+  }, []);
+
   if (!model?.primaryAction) return null;
   const primary = model.primaryAction;
   const queue = Array.isArray(model.queue) ? model.queue.slice(1, 4) : [];
+  const dailyRemaining = Math.max((Number(model.daily?.goal) || 0) - (Number(model.daily?.makes) || 0), 0);
+  const dailyComplete = Number(model.daily?.pct) >= 100 || primary.urgency === "complete";
+  const weeklyComplete = Number(model.weekly?.pct) >= 100;
+  const momentumTone = dailyComplete ? "positive" : primary.urgency === "urgent" ? "attention" : "info";
+  const momentumTitle = dailyComplete
+    ? "Daily target complete"
+    : dailyRemaining > 0
+      ? `${dailyRemaining} makes from today’s target`
+      : "Your next action is ready";
+  const momentumDetail = dailyComplete
+    ? weeklyComplete
+      ? "Today and this week are complete. Review progress or protect the streak with optional work."
+      : `${model.weekly.makes}/${model.weekly.goal} makes this week. The next action should build on the work already completed.`
+    : `${model.streak || 0}-day streak · ${rankLabel(model.leaderboardRank)} team rank · ${model.actionableCount} open ${model.actionableCount === 1 ? "action" : "actions"}.`;
+
+  const runAction = (action) => {
+    const key = actionKey(action);
+    setActiveAction(key);
+    onAction?.(action);
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+    feedbackTimer.current = setTimeout(() => setActiveAction(""), 900);
+  };
 
   return (
     <section className={styles.root} data-testid="player-daily-command-center" aria-label="Daily training command center">
@@ -21,21 +53,43 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         <div className={styles.status}>{urgencyLabel(primary.urgency)}</div>
       </div>
 
-      <div className={styles.hero}>
+      <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`}>
         <div className={styles.heroTop}>
-          <div className={styles.meta}>{primary.source === "coach" ? "Coach directed" : primary.source === "team" ? "Team commitment" : "Personal development"}</div>
+          <ExperiencePill tone={primary.source === "coach" ? "info" : primary.source === "team" ? "attention" : "positive"}>
+            {primary.source === "coach" ? "Coach directed" : primary.source === "team" ? "Team commitment" : "Personal development"}
+          </ExperiencePill>
           <div className={styles.meta}>About {primary.estimatedMinutes || 1} min</div>
         </div>
-        <h1 className={styles.title}>{primary.title}</h1>
-        <p className={styles.description}>{primary.detail}</p>
+        <h1 className={styles.title}>{dailyComplete ? "Work banked. Keep building." : primary.title}</h1>
+        <p className={styles.description}>{dailyComplete ? "Your daily standard is complete. Use the next action to extend the week, review progress, or handle a team commitment." : primary.detail}</p>
         <button
           type="button"
           className={styles.primaryButton}
           data-testid="player-daily-primary-action"
-          onClick={() => onAction?.(primary)}
+          data-state={activeAction === actionKey(primary) ? "working" : "idle"}
+          onClick={() => runAction(primary)}
         >
-          {primary.actionLabel} →
+          {activeAction === actionKey(primary) ? "Opening…" : `${primary.actionLabel} →`}
         </button>
+      </div>
+
+      <div className={styles.momentumSignal}>
+        <ExperienceSignal
+          eyebrow="Momentum"
+          title={momentumTitle}
+          detail={momentumDetail}
+          tone={momentumTone}
+          testId="player-daily-momentum-signal"
+        >
+          <ExperienceProgressRing
+            value={model.daily.makes}
+            max={model.daily.goal || 1}
+            label="Today"
+            detail={`${model.daily.makes}/${model.daily.goal}`}
+            size={88}
+            testId="player-daily-progress-ring"
+          />
+        </ExperienceSignal>
       </div>
 
       <div className={styles.progressGrid}>
@@ -61,15 +115,29 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
 
       {queue.length > 0 && (
         <div className={styles.section}>
-          <div className={styles.sectionLabel}>After this</div>
+          <div className={styles.sectionHeading}>
+            <div>
+              <div className={styles.sectionLabel}>After this</div>
+              <div className={styles.sectionTitle}>Your next moves</div>
+            </div>
+            <div className={styles.meta}>{queue.length} queued</div>
+          </div>
           <div className={styles.tasks} data-testid="player-daily-task-queue">
-            {queue.map((task) => (
+            {queue.map((task, index) => (
               <div className={styles.taskRow} key={task.id}>
+                <div className={styles.taskIndex}>{index + 2}</div>
                 <div className={styles.taskCopy}>
                   <div className={styles.taskTitle}>{task.title}</div>
                   <div className={styles.taskMeta}>{task.detail} · {task.estimatedMinutes || 1} min</div>
                 </div>
-                <button type="button" className={styles.taskButton} onClick={() => onAction?.(task)}>{task.actionLabel}</button>
+                <button
+                  type="button"
+                  className={styles.taskButton}
+                  data-state={activeAction === actionKey(task) ? "working" : "idle"}
+                  onClick={() => runAction(task)}
+                >
+                  {activeAction === actionKey(task) ? "Opening…" : task.actionLabel}
+                </button>
               </div>
             ))}
           </div>
@@ -84,7 +152,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
               <div className={styles.activationRow} key={step.id}>
                 <span className={`${styles.activationDot} ${step.done ? styles.activationDotDone : ""}`} aria-hidden="true">{step.done ? "✓" : "·"}</span>
                 <span className={styles.activationText}>{step.label}</span>
-                {!step.done && step.target !== "home" && <button type="button" className={styles.activationButton} onClick={() => onAction?.({ target: step.target, kind: `activation-${step.id}` })}>Do now</button>}
+                {!step.done && step.target !== "home" && <button type="button" className={styles.activationButton} onClick={() => runAction({ target: step.target, kind: `activation-${step.id}` })}>Do now</button>}
               </div>
             ))}
           </div>
