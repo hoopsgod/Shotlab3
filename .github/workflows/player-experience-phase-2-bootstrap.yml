@@ -6,12 +6,21 @@ on:
       - agent/player-experience-phase-2-command-surfaces
     paths:
       - .github/workflows/player-experience-phase-2-bootstrap.yml
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - .github/workflows/player-experience-phase-2-bootstrap.yml
+      - scripts/patch-player-experience-phase-2.mjs
+      - src/components/PlayerExperiencePhase2.jsx
+      - src/components/PlayerExperiencePhase2.css
 
 permissions:
   contents: write
 
 jobs:
   integrate-and-verify:
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Check out phase branch
