@@ -9,6 +9,15 @@ const MoreIcon = () => (
   </svg>
 );
 
+const FOCUSABLE_SELECTOR = [
+  "button:not([disabled])",
+  "a[href]",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  "[tabindex]:not([tabindex='-1'])",
+].join(",");
+
 function NavigationItem({ item, active, onSelect, compact = false }) {
   const label = item.mobileLabel || item.l || item.label || item.k;
   return (
@@ -17,17 +26,20 @@ function NavigationItem({ item, active, onSelect, compact = false }) {
       className={`${compact ? styles.dockItem : styles.sheetItem} ${active ? styles.active : ""}`}
       aria-current={active ? "page" : undefined}
       aria-label={label}
+      data-active={active ? "true" : "false"}
       data-nav-key={item.k}
       onClick={() => onSelect(item.k)}
     >
       <span className={compact ? styles.dockIcon : styles.sheetIcon} aria-hidden="true">
         {item.svg}
+        {compact && active && <span className={styles.activeIndicator} />}
         {item.dot && <span className={styles.notificationDot} />}
       </span>
       <span className={compact ? styles.dockLabel : styles.sheetText}>
         <span className={compact ? styles.dockLabelText : styles.sheetLabel}>{label}</span>
         {!compact && item.description && <span className={styles.sheetDescription}>{item.description}</span>}
       </span>
+      {!compact && <span className={styles.sheetChevron} aria-hidden="true">›</span>}
     </button>
   );
 }
@@ -41,6 +53,9 @@ export default function MobileNavigation({
 }) {
   const [open, setOpen] = useState(false);
   const closeButtonRef = useRef(null);
+  const moreButtonRef = useRef(null);
+  const sheetRef = useRef(null);
+  const previousFocusRef = useRef(null);
   const visiblePrimaryItems = useMemo(() => primaryItems.filter(Boolean).slice(0, 3), [primaryItems]);
   const visibleSecondaryItems = useMemo(() => secondaryItems.filter(Boolean), [secondaryItems]);
   const secondaryActive = visibleSecondaryItems.some((item) => item.k === activeKey);
@@ -53,15 +68,38 @@ export default function MobileNavigation({
   useEffect(() => {
     if (!open) return undefined;
     const previousOverflow = document.body.style.overflow;
+    previousFocusRef.current = document.activeElement;
     document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
+    document.body.dataset.navigationSheetOpen = "true";
+
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
     const handleKeyDown = (event) => {
-      if (event.key === "Escape") setOpen(false);
+      if (event.key === "Escape") {
+        setOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const focusable = Array.from(sheetRef.current?.querySelectorAll(FOCUSABLE_SELECTOR) || []);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
+
     window.addEventListener("keydown", handleKeyDown);
     return () => {
+      window.cancelAnimationFrame(focusFrame);
       document.body.style.overflow = previousOverflow;
+      delete document.body.dataset.navigationSheetOpen;
       window.removeEventListener("keydown", handleKeyDown);
+      const restoreTarget = previousFocusRef.current;
+      if (restoreTarget instanceof HTMLElement) restoreTarget.focus();
     };
   }, [open]);
 
@@ -78,16 +116,19 @@ export default function MobileNavigation({
             <NavigationItem key={item.k} item={item} active={item.k === activeKey} onSelect={handleSelect} compact />
           ))}
           <button
+            ref={moreButtonRef}
             type="button"
             className={`${styles.dockItem} ${secondaryActive || open ? styles.active : ""}`}
             aria-expanded={open}
             aria-controls="mobile-navigation-more-sheet"
             aria-label="More"
             data-testid="mobile-navigation-more"
+            data-active={secondaryActive || open ? "true" : "false"}
             onClick={() => setOpen((value) => !value)}
           >
             <span className={styles.dockIcon} aria-hidden="true">
               <MoreIcon />
+              {(secondaryActive || open) && <span className={styles.activeIndicator} />}
               {secondaryHasNotification && <span className={styles.notificationDot} />}
             </span>
             <span className={styles.dockLabelText}>More</span>
@@ -98,6 +139,7 @@ export default function MobileNavigation({
       {open && (
         <div className={styles.overlay} data-testid="mobile-navigation-overlay" onMouseDown={() => setOpen(false)}>
           <section
+            ref={sheetRef}
             id="mobile-navigation-more-sheet"
             className={styles.sheet}
             role="dialog"
@@ -109,8 +151,9 @@ export default function MobileNavigation({
             <div className={styles.sheetHandle} aria-hidden="true" />
             <div className={styles.sheetHeader}>
               <div>
-                <div className={styles.sheetEyebrow}>More</div>
-                <h2 className={styles.sheetTitle}>All areas</h2>
+                <div className={styles.sheetEyebrow}>Navigate</div>
+                <h2 className={styles.sheetTitle}>More areas</h2>
+                <p className={styles.sheetSummary}>Your current tab stays in place when you return.</p>
               </div>
               <button ref={closeButtonRef} type="button" className={styles.closeButton} aria-label="Close more navigation" onClick={() => setOpen(false)}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg>
