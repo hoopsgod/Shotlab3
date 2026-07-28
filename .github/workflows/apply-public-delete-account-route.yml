@@ -7,6 +7,7 @@ on:
     paths:
       - "scripts/route-public-delete-account-page.mjs"
       - ".github/workflows/apply-public-delete-account-route.yml"
+  workflow_dispatch:
 
 permissions:
   contents: write
