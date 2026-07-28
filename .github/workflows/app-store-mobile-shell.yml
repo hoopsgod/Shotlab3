@@ -1,0 +1,34 @@
+name: App Store Mobile Shell
+
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "src/components/MobileNavigation.jsx"
+      - "src/components/MobileNavigation.module.css"
+      - "src/styles/AppStoreExperience.css"
+      - "tests/app-store-mobile-shell.test.mjs"
+      - ".github/workflows/app-store-mobile-shell.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-store-mobile-shell-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: App Store mobile shell contracts
+        run: node --test tests/app-store-mobile-shell.test.mjs tests/mobile-navigation-contract.test.mjs
+      - name: Production build
+        run: npm run build
