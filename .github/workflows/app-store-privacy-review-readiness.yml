@@ -41,6 +41,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Install pinned native asset toolchain
+        run: npm run native:install:toolchain
+
       - name: Verify deterministic privacy configuration
         run: |
           node scripts/configure-ios-privacy-readiness.mjs
