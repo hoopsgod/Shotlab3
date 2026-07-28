@@ -4,5 +4,16 @@ playwright-report/
 test-results/
 .DS_Store
 *.log
-
 .env
+
+# Native signing and local Xcode state
+build/
+DerivedData/
+*.xcarchive
+*.ipa
+*.mobileprovision
+*.provisionprofile
+*.p12
+*.cer
+*.xcuserstate
+**/xcuserdata/

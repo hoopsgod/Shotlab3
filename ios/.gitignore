@@ -1,0 +1,8 @@
+App/App.xcodeproj/project.xcworkspace/xcuserdata/
+App/App.xcodeproj/xcuserdata/
+App/DerivedData/
+*.xcuserstate
+*.mobileprovision
+*.p12
+*.cer
+*.provisionprofile
