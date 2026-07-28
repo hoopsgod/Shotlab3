@@ -1,0 +1,182 @@
+.sparkline {
+  display: grid;
+  gap: 6px;
+  min-width: 112px;
+  color: var(--text-2, #9ca7ad);
+}
+
+.sparklineHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: currentColor;
+  font: 800 9px/1 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.sparklineHeader strong {
+  color: var(--text-1, #f5f7f8);
+  font-size: 13px;
+}
+
+.sparkline svg {
+  width: 100%;
+  height: 38px;
+  overflow: visible;
+}
+
+.sparkline polyline {
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 4px 8px color-mix(in srgb, currentColor 24%, transparent));
+}
+
+.progressRing {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--ring-size, 92px);
+  min-width: var(--ring-size, 92px);
+}
+
+.progressRing svg {
+  width: var(--ring-size, 92px);
+  height: var(--ring-size, 92px);
+  transform: rotate(-90deg);
+}
+
+.progressRingTrack,
+.progressRingValue {
+  fill: none;
+  stroke-width: 7;
+}
+
+.progressRingTrack { stroke: rgba(255, 255, 255, .07); }
+.progressRingValue {
+  stroke: var(--page-accent, var(--team-brand-primary, var(--accent)));
+  stroke-linecap: round;
+  transition: stroke-dashoffset 260ms cubic-bezier(.2, .74, .22, 1);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--page-accent, var(--accent)) 32%, transparent));
+}
+
+.progressRingCopy {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+}
+
+.progressRingCopy strong {
+  color: var(--text-1, #f5f7f8);
+  font: 400 24px/.9 'Bebas Neue', Impact, sans-serif;
+  letter-spacing: .03em;
+}
+
+.progressRingCopy span,
+.progressRingDetail {
+  color: var(--text-3, #7d888e);
+  font: 800 8px/1.1 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.progressRingDetail {
+  margin-top: 6px;
+  text-align: center;
+}
+
+.signal {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+  padding: 14px 15px;
+  border: 1px solid rgba(220, 231, 236, .1);
+  border-radius: 16px;
+  background: linear-gradient(150deg, rgba(14, 18, 21, .92), rgba(5, 8, 10, .97));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .02);
+}
+
+.signalCopy { min-width: 0; }
+.signalEyebrow,
+.signalDetail {
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}
+
+.signalEyebrow {
+  color: currentColor;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.signalTitle {
+  margin-top: 5px;
+  color: var(--text-1, #f5f7f8);
+  font: 400 21px/.98 'Bebas Neue', Impact, sans-serif;
+  letter-spacing: .035em;
+  text-transform: uppercase;
+}
+
+.signalDetail {
+  margin-top: 5px;
+  color: var(--text-2, #9ca7ad);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.signalVisual { min-width: 112px; }
+.signalAction {
+  min-height: 42px;
+  padding: 0 13px;
+  border: 1px solid color-mix(in srgb, currentColor 38%, transparent);
+  border-radius: 11px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: currentColor;
+  font: 800 10px/1 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.signalAction:hover,
+.signalAction:focus-visible { transform: translateY(-1px); background: color-mix(in srgb, currentColor 12%, transparent); }
+.signalAction:active { transform: scale(.985); }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid color-mix(in srgb, currentColor 32%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: var(--text-2, #9ca7ad);
+  font: 800 8px/1 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.tone_positive { color: var(--team-brand-primary, var(--accent)); }
+.tone_attention { color: var(--semantic-warning, #ffb547); }
+.tone_info { color: var(--semantic-info, #77d7ff); }
+.tone_neutral { color: var(--text-2, #9ca7ad); }
+
+@media (max-width: 700px) {
+  .signal { grid-template-columns: minmax(0, 1fr) auto; }
+  .signalAction { grid-column: 1 / -1; width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressRingValue,
+  .signalAction { transition: none; }
+}

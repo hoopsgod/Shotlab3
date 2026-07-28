@@ -1,13 +1,11 @@
 .root {
   position: relative;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 28%, var(--stroke-1));
-  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 20%, var(--stroke-1));
+  border-radius: 24px;
   padding: 18px;
-  background:
-    radial-gradient(circle at 92% 4%, color-mix(in srgb, var(--team-brand-primary, var(--accent)) 18%, transparent), transparent 38%),
-    linear-gradient(155deg, color-mix(in srgb, var(--surface-2) 94%, transparent), color-mix(in srgb, var(--surface-1) 92%, #000 8%));
-  box-shadow: 0 22px 46px rgba(0, 0, 0, 0.34);
+  background: linear-gradient(158deg, rgba(13, 17, 20, .985), rgba(4, 7, 9, .995));
+  box-shadow: 0 24px 54px rgba(0, 0, 0, .36), inset 0 1px rgba(255, 255, 255, .025);
 }
 
 .root::before {
@@ -15,8 +13,8 @@
   position: absolute;
   inset: 0 auto auto 0;
   width: 100%;
-  height: 3px;
-  background: linear-gradient(90deg, var(--team-brand-primary, var(--accent)), color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 68%, transparent), transparent);
+  height: 2px;
+  background: linear-gradient(90deg, var(--team-brand-primary, var(--accent)), color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 54%, transparent), transparent 82%);
 }
 
 .header,
@@ -24,7 +22,8 @@
 .progressHeader,
 .taskRow,
 .activationRow,
-.metrics {
+.metrics,
+.sectionHeading {
   display: flex;
   align-items: center;
 }
@@ -32,7 +31,8 @@
 .header,
 .heroTop,
 .progressHeader,
-.taskRow {
+.taskRow,
+.sectionHeading {
   justify-content: space-between;
 }
 
@@ -41,11 +41,10 @@
 .meta,
 .metricLabel,
 .sectionLabel,
-.taskMeta,
-.activationMeta {
+.taskMeta {
   font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: .1em;
 }
 
 .eyebrow {
@@ -55,38 +54,63 @@
 }
 
 .status {
-  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 38%, transparent);
+  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 34%, transparent);
   border-radius: 999px;
   padding: 5px 9px;
   color: var(--team-brand-primary, var(--accent));
-  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 10%, transparent);
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 8%, transparent);
   font-size: 9px;
   font-weight: 800;
 }
 
 .hero {
+  position: relative;
   margin-top: 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  background: rgba(3, 5, 8, 0.34);
-  padding: 16px;
+  overflow: hidden;
+  border-radius: 19px;
+  border: 1px solid rgba(255, 255, 255, .085);
+  background: linear-gradient(150deg, rgba(255, 255, 255, .025), rgba(0, 0, 0, .18));
+  padding: 17px;
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  bottom: -90px;
+  width: 190px;
+  height: 190px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 8%, transparent);
+  filter: blur(30px);
+  pointer-events: none;
+}
+
+.hero > * { position: relative; z-index: 1; }
+.heroComplete {
+  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 30%, rgba(255, 255, 255, .08));
+  background: linear-gradient(150deg, color-mix(in srgb, var(--team-brand-primary, var(--accent)) 7%, rgba(255, 255, 255, .02)), rgba(0, 0, 0, .2));
 }
 
 .title {
-  margin: 9px 0 0;
+  max-width: 720px;
+  margin: 10px 0 0;
   color: var(--text-1);
   font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: clamp(26px, 8vw, 38px);
-  line-height: 0.98;
-  letter-spacing: 0.035em;
+  font-size: clamp(31px, 8vw, 45px);
+  line-height: .94;
+  letter-spacing: .035em;
+  text-wrap: balance;
 }
 
 .description {
-  margin: 8px 0 0;
+  max-width: 680px;
+  margin: 9px 0 0;
   color: var(--text-2);
   font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
   font-size: 13px;
   line-height: 1.5;
+  text-wrap: pretty;
 }
 
 .meta {
@@ -102,21 +126,36 @@
   border-radius: 12px;
   font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
   font-weight: 800;
-  letter-spacing: 0.07em;
+  letter-spacing: .07em;
   cursor: pointer;
   touch-action: manipulation;
+  transition: transform 150ms ease, filter 160ms ease, border-color 160ms ease, background 160ms ease;
 }
 
 .primaryButton {
   width: 100%;
-  margin-top: 14px;
+  margin-top: 15px;
   border: 0;
   background: var(--team-brand-primary, var(--accent));
   color: var(--team-brand-primary-text, #071007);
-  box-shadow: 0 12px 24px color-mix(in srgb, var(--team-brand-primary, var(--accent)) 20%, transparent);
+  box-shadow: 0 12px 24px color-mix(in srgb, var(--team-brand-primary, var(--accent)) 17%, transparent);
   font-size: 13px;
   text-transform: uppercase;
 }
+
+.primaryButton:hover,
+.primaryButton:focus-visible,
+.taskButton:hover,
+.taskButton:focus-visible,
+.activationButton:hover,
+.activationButton:focus-visible { transform: translateY(-1px); filter: brightness(1.03); }
+.primaryButton:active,
+.taskButton:active,
+.activationButton:active { transform: scale(.985); }
+.primaryButton[data-state="working"],
+.taskButton[data-state="working"] { opacity: .72; cursor: progress; }
+
+.momentumSignal { margin-top: 12px; }
 
 .progressGrid {
   display: grid;
@@ -127,17 +166,18 @@
 
 .progressCard {
   min-width: 0;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.025);
-  padding: 11px;
+  border: 1px solid rgba(255, 255, 255, .075);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, .018);
+  padding: 12px;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .015);
 }
 
 .progressValue {
   color: var(--text-1);
   font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 21px;
-  letter-spacing: 0.04em;
+  font-size: 23px;
+  letter-spacing: .04em;
 }
 
 .progressTrack {
@@ -145,32 +185,37 @@
   margin-top: 8px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, .07);
 }
 
 .progressFill {
   height: 100%;
   border-radius: inherit;
   background: linear-gradient(90deg, var(--team-brand-primary, var(--accent)), var(--team-brand-secondary, var(--accent)));
-  transition: width 220ms ease;
+  transition: width 260ms cubic-bezier(.2, .74, .22, 1);
 }
 
 .metrics {
-  gap: 8px;
+  gap: 0;
   margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .07);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .012);
 }
 
 .metric {
   flex: 1;
   min-width: 0;
-  padding: 9px 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 11px 9px;
+  border-right: 1px solid rgba(255, 255, 255, .07);
 }
+.metric:last-child { border-right: 0; }
 
 .metricValue {
   color: var(--text-1);
   font-family: 'Bebas Neue', Impact, sans-serif;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .metricLabel {
@@ -181,37 +226,54 @@
 }
 
 .section {
-  margin-top: 15px;
-  padding-top: 14px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  margin-top: 16px;
+  padding-top: 15px;
+  border-top: 1px solid rgba(255, 255, 255, .075);
 }
 
+.sectionHeading { gap: 12px; }
 .sectionLabel {
   color: var(--text-3);
   font-size: 9px;
   font-weight: 800;
 }
+.sectionTitle {
+  margin-top: 4px;
+  color: var(--text-1);
+  font: 400 21px/1 'Bebas Neue', Impact, sans-serif;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
 
 .tasks {
   display: grid;
   gap: 8px;
-  margin-top: 9px;
+  margin-top: 10px;
 }
 
 .taskRow {
-  gap: 10px;
+  gap: 11px;
   min-width: 0;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, .075);
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.022);
+  background: rgba(255, 255, 255, .018);
   padding: 11px 12px;
 }
 
-.taskCopy {
-  min-width: 0;
-  flex: 1;
+.taskIndex {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 24%, rgba(255, 255, 255, .08));
+  border-radius: 10px;
+  color: var(--team-brand-primary, var(--accent));
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 6%, transparent);
+  font: 400 16px/1 'Bebas Neue', Impact, sans-serif;
 }
 
+.taskCopy { min-width: 0; flex: 1; }
 .taskTitle {
   overflow: hidden;
   color: var(--text-1);
@@ -232,18 +294,18 @@
 .taskButton,
 .activationButton {
   flex: 0 0 auto;
-  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 32%, rgba(255, 255, 255, 0.1));
-  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 7%, transparent);
+  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 28%, rgba(255, 255, 255, .08));
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 6%, transparent);
   color: var(--team-brand-primary, var(--accent));
   padding: 0 12px;
   font-size: 10px;
 }
 
 .activation {
-  margin-top: 14px;
+  margin-top: 15px;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, .075);
+  background: rgba(255, 255, 255, .015);
   padding: 12px;
 }
 
@@ -255,21 +317,14 @@
   font-weight: 800;
   list-style: none;
 }
-
-.activation summary::-webkit-details-marker {
-  display: none;
-}
+.activation summary::-webkit-details-marker { display: none; }
 
 .activationRows {
   display: grid;
   gap: 8px;
   margin-top: 10px;
 }
-
-.activationRow {
-  gap: 9px;
-  justify-content: flex-start;
-}
+.activationRow { gap: 9px; justify-content: flex-start; }
 
 .activationDot {
   width: 20px;
@@ -279,14 +334,14 @@
   justify-content: center;
   flex: 0 0 auto;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, .14);
   color: var(--text-3);
   font-size: 11px;
 }
 
 .activationDotDone {
-  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 62%, transparent);
-  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 13%, transparent);
+  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 56%, transparent);
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 11%, transparent);
   color: var(--team-brand-primary, var(--accent));
 }
 
@@ -298,28 +353,18 @@
   font-weight: 700;
 }
 
-@media (max-width: 430px) {
-  .root {
-    padding: 15px;
-    border-radius: 20px;
-  }
-
-  .hero {
-    padding: 14px;
-  }
-
-  .taskRow {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .taskButton {
-    width: 100%;
-  }
+@media (max-width: 520px) {
+  .root { padding: 15px; border-radius: 21px; }
+  .hero { padding: 15px; }
+  .title { font-size: clamp(30px, 10vw, 40px); }
+  .taskRow { align-items: stretch; flex-wrap: wrap; }
+  .taskCopy { flex-basis: calc(100% - 42px); }
+  .taskButton { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .progressFill {
-    transition: none;
-  }
+  .progressFill,
+  .primaryButton,
+  .taskButton,
+  .activationButton { transition: none; }
 }

@@ -1,0 +1,35 @@
+name: Phase 3 Unified Experience
+
+on:
+  pull_request:
+    paths:
+      - "src/components/ExperiencePrimitives.jsx"
+      - "src/components/ExperiencePrimitives.module.css"
+      - "src/components/CoachInteractiveDashboards.jsx"
+      - "src/components/PlayerDailyCommandCenter.jsx"
+      - "src/components/PlayerDailyCommandCenter.module.css"
+      - "tests/phase-3-unified-experience.test.mjs"
+      - ".github/workflows/phase-3-unified-experience.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-3-unified-experience-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Phase 3 contracts
+        run: node --test tests/phase-3-unified-experience.test.mjs
+      - name: Production build
+        run: npm run build
