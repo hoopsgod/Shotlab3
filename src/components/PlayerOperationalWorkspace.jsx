@@ -1,5 +1,15 @@
 import styles from "./PlayerOperationalWorkspace.module.css";
 
+function MetricContent({ metric }) {
+  return (
+    <>
+      <span className={styles.metricLabel}>{metric.label}</span>
+      <span className={styles.metricValue}>{metric.value}</span>
+      <span className={styles.metricDetail}>{metric.detail}</span>
+    </>
+  );
+}
+
 export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", testId }) {
   if (!model) return null;
   return (
@@ -20,19 +30,29 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
         )}
       </div>
       <div className={styles.metrics} aria-label={`${model.title} metrics`}>
-        {(model.metrics || []).map((metric) => (
-          <button
-            type="button"
-            key={metric.id}
-            className={`${styles.metric} ${activeMetric === metric.id ? styles.metricActive : ""}`}
-            onClick={() => onMetric?.(metric)}
-            aria-pressed={activeMetric === metric.id}
-          >
-            <span className={styles.metricLabel}>{metric.label}</span>
-            <span className={styles.metricValue}>{metric.value}</span>
-            <span className={styles.metricDetail}>{metric.detail}</span>
-          </button>
-        ))}
+        {(model.metrics || []).map((metric) => {
+          const interactive = Boolean(metric?.filter || metric?.action);
+          const metricClassName = `${styles.metric} ${interactive ? styles.metricInteractive : styles.metricStatic} ${activeMetric === metric.id ? styles.metricActive : ""}`;
+          if (!interactive) {
+            return (
+              <div key={metric.id} className={metricClassName} data-interactive="false">
+                <MetricContent metric={metric} />
+              </div>
+            );
+          }
+          return (
+            <button
+              type="button"
+              key={metric.id}
+              className={metricClassName}
+              onClick={() => onMetric?.(metric)}
+              aria-pressed={activeMetric === metric.id}
+              data-interactive="true"
+            >
+              <MetricContent metric={metric} />
+            </button>
+          );
+        })}
       </div>
     </section>
   );
