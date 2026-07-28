@@ -51,10 +51,13 @@ const pendingLog = {
   syncSource: "local",
 };
 
-test("production demo access is opt-in and remains available for local development", () => {
+test("production demo access is isolated to approved sales previews, explicit opt-in, and local development", () => {
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab.app" } }), false);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false, VITE_ENABLE_DEMO_MODE: "true" }, location: { hostname: "shotlab.app" } }), true);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "localhost" } }), true);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab3.pages.dev" } }), true);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "8a15c60d.shotlab3.pages.dev" } }), true);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "unrelated.pages.dev" } }), false);
 });
 
 test("stale demo sessions are removed from a production runtime", async () => {
