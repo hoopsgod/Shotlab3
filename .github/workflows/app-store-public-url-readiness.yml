@@ -63,7 +63,7 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Open every submission route directly
-        run: npx playwright test tests/e2e/public-submission-routes.spec.mjs --config=playwright.acceptance.config.mjs --project=chromium-desktop
+        run: npx playwright test tests/e2e/public-submission-routes.spec.mjs --config=playwright.acceptance.config.mjs --project=mobile-chromium
 
       - name: Upload public URL readiness report
         uses: actions/upload-artifact@v4
