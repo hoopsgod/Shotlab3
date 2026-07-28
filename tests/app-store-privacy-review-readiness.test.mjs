@@ -23,7 +23,9 @@ const reviewPackage = read(reviewPackagePath);
 const analyticsSource = read("src/lib/analytics.js");
 const configuratorSource = read("scripts/configure-ios-privacy-readiness.mjs");
 
-const manifestDataTypes = [...manifest.matchAll(/<string>(NSPrivacyCollectedDataType[^<]+)<\/string>/g)].map((match) => match[1]);
+const manifestDataTypes = [...manifest.matchAll(/<string>(NSPrivacyCollectedDataType[^<]+)<\/string>/g)]
+  .map((match) => match[1])
+  .filter((value) => !value.startsWith("NSPrivacyCollectedDataTypePurpose"));
 
 test("native privacy manifest is validly shaped and explicitly disables tracking", () => {
   assert.match(manifest, /<key>NSPrivacyTracking<\/key>\s*<false\/>/);
