@@ -15,7 +15,8 @@ export function isDemoRuntimeEnabled({ env, location } = {}) {
   const resolvedLocation = location || (typeof window !== "undefined" ? window.location : null);
   const hostname = String(resolvedLocation?.hostname || "").toLowerCase();
   const localHost = ["localhost", "127.0.0.1", "::1"].includes(hostname);
-  return Boolean(resolvedEnv?.DEV || localHost || boolValue(resolvedEnv?.VITE_ENABLE_DEMO_MODE));
+  const cloudflarePreview = hostname === "shotlab3.pages.dev" || hostname.endsWith(".shotlab3.pages.dev");
+  return Boolean(resolvedEnv?.DEV || localHost || cloudflarePreview || boolValue(resolvedEnv?.VITE_ENABLE_DEMO_MODE));
 }
 
 export function isSupabaseAuthEnabled(env) {
