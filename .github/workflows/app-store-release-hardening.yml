@@ -28,6 +28,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: Install pinned native asset toolchain
+        run: npm run native:install:toolchain
       - name: Offline and session recovery contracts
         run: node --test tests/app-store-release-hardening.test.mjs
       - name: App Store mobile shell contracts
