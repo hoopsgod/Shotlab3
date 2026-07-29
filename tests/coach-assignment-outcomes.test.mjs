@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
   deriveCoachAssignmentOutcomes,
+  derivePriorityFreshness,
   readCoachAssignmentOutcomesFromStorage,
 } from "../src/lib/coachAssignmentOutcomes.js";
 
@@ -28,6 +29,7 @@ const base = {
   players,
   drills,
   weekStart: "2026-07-26",
+  now: new Date("2026-07-29T12:00:00.000Z"),
 };
 
 test("current priority outcomes are derived from real roster-scoped completions", () => {
@@ -48,11 +50,41 @@ test("current priority outcomes are derived from real roster-scoped completions"
   assert.equal(result.activeOtherCount, 1);
   assert.equal(result.notStartedCount, 1);
   assert.equal(result.completionRate, 33);
+  assert.equal(result.freshness, "unknown");
   assert.equal(result.rows.find((row) => row.name === "One Player")?.status, "completed");
   assert.equal(result.rows.find((row) => row.name === "Two Player")?.status, "active-other");
   assert.equal(result.rows.find((row) => row.name === "Three Player")?.status, "not-started");
   assert.equal(result.rows.some((row) => row.name === "Removed Player"), false);
   assert.equal(result.rows.some((row) => row.name === "Other Team"), false);
+});
+
+test("priority freshness distinguishes current stale and legacy guidance", () => {
+  const now = new Date("2026-07-29T12:00:00.000Z");
+  assert.deepEqual(
+    derivePriorityFreshness({ priority: { updatedAt: "2026-07-29T02:00:00.000Z" }, now }),
+    { freshness: "current", updatedAt: "2026-07-29T02:00:00.000Z", ageDays: 0, stale: false },
+  );
+  assert.deepEqual(
+    derivePriorityFreshness({ priority: { updatedAt: "2026-07-21T02:00:00.000Z" }, now }),
+    { freshness: "stale", updatedAt: "2026-07-21T02:00:00.000Z", ageDays: 8, stale: true },
+  );
+  assert.deepEqual(
+    derivePriorityFreshness({ priority: {}, now }),
+    { freshness: "unknown", updatedAt: "", ageDays: null, stale: false },
+  );
+});
+
+test("stale priority outcomes remain derived but are explicitly marked unsafe for current reporting", () => {
+  const result = deriveCoachAssignmentOutcomes({
+    ...base,
+    prioritiesByTeam: { "team-a": { ...PRIORITY, updatedAt: "2026-07-18T12:00:00.000Z" } },
+    scores: [{ email: "one@example.com", teamId: "team-a", drillId: "form-shooting", date: "2026-07-28", score: 42 }],
+  });
+  assert.equal(result.trackable, true);
+  assert.equal(result.stale, true);
+  assert.equal(result.freshness, "stale");
+  assert.equal(result.ageDays, 11);
+  assert.equal(result.completedCount, 1);
 });
 
 test("program priority completion matches normalized drill identities", () => {
@@ -90,7 +122,7 @@ test("free-text priorities that do not match a ShotLab drill do not produce fake
 test("storage reader resolves the active coach team and persisted stores", () => {
   const values = new Map(Object.entries({
     "sl:session": JSON.stringify({ email: "coach@example.com", teamId: "team-a" }),
-    "sl:coach-priorities": JSON.stringify({ "team-a": PRIORITY }),
+    "sl:coach-priorities": JSON.stringify({ "team-a": { ...PRIORITY, updatedAt: "2026-07-29T02:00:00.000Z" } }),
     "sl:players": JSON.stringify(players),
     "sl:player-profiles": JSON.stringify([]),
     "sl:drills": JSON.stringify(drills),
@@ -105,12 +137,15 @@ test("storage reader resolves the active coach team and persisted stores", () =>
   const result = readCoachAssignmentOutcomesFromStorage({ storage, now: new Date("2026-07-29T12:00:00") });
   assert.equal(result.teamId, "team-a");
   assert.equal(result.completedCount, 1);
+  assert.equal(result.freshness, "current");
 });
 
 test("enhancer reports outcomes only and never fabricates view receipts", () => {
   const source = fs.readFileSync(new URL("../src/lib/coachAssignmentOutcomeEnhancer.js", import.meta.url), "utf8");
   assert.match(source, /completed this week/i);
   assert.match(source, /priority still open/i);
+  assert.match(source, /withholding the completion percentage/i);
+  assert.match(source, /Refresh team focus/i);
   assert.doesNotMatch(source, /viewed assignment|seen by|read receipt/i);
   assert.match(source, /coach-assignment-outcome/);
 });
