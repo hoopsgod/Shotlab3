@@ -1,4 +1,4 @@
-import { STORAGE_KEYS, sanitizeCoachPriorities } from "./appDataModels";
+import { STORAGE_KEYS, sanitizeCoachPriorities } from "./appDataModels.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const asPriorityMap = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
