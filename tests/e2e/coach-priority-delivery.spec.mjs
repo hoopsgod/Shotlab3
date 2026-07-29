@@ -99,14 +99,23 @@ async function enterSeededCoach(page) {
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
 }
 
-test("coach can publish player-facing priorities through the team delivery API", async ({ page }) => {
+test("coach can publish player-facing priorities through the visible Mission Control flow", async ({ page }) => {
   const published = [];
   await installRoutes(page, published);
   await enterSeededCoach(page);
 
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  const drawer = page.locator(".mcMobileDrawer");
+  await expect(drawer).toBeVisible();
+  await drawer.getByRole("button", { name: "Coach Tools", exact: true }).click();
+
+  const actions = page.locator('[aria-label="Coach quick actions"]');
+  await expect(actions).toBeVisible();
+  await actions.getByRole("button", { name: "Set Team Focus", exact: true }).click();
+
   const editor = page.getByTestId("coach-priority-editor");
   await expect(editor).toBeVisible({ timeout: 20_000 });
-  await editor.locator("summary").click();
+  await expect(page.getByTestId("coach-priority-overlay")).toBeVisible();
 
   const focusInput = editor.locator('input[type="text"]').first();
   await expect(focusInput).toBeVisible();
@@ -124,4 +133,8 @@ test("coach can publish player-facing priorities through the team delivery API",
     document: document.documentElement.scrollWidth,
   }));
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
+
+  await page.getByRole("button", { name: "Close team focus editor", exact: true }).last().click();
+  await expect(editor).toBeHidden();
+  await expect(page.getByTestId("coach-priority-overlay")).toHaveCount(0);
 });
