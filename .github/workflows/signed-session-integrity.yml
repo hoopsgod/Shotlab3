@@ -1,0 +1,70 @@
+name: Signed Session Integrity
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "functions/_utils/legacySession.js"
+      - "functions/v1/legacy-auth/**"
+      - "functions/v1/team-priorities/index.js"
+      - "functions/v1/coach-follow-ups/index.js"
+      - "src/lib/apiIdentityHeaders.js"
+      - "src/lib/analytics.js"
+      - "src/lib/appPersistenceService.js"
+      - "src/lib/coachFollowUpService.js"
+      - "src/lib/coachFollowUpQueue.js"
+      - "migrations/038_legacy_auth_sessions.sql"
+      - "tests/signed-session-integrity.test.mjs"
+      - "tests/legacy-auth-persistence.test.mjs"
+      - "tests/legacy-auth-post-error-contract.test.mjs"
+      - "tests/coach-priority-delivery-integrity.test.mjs"
+      - "tests/coach-follow-up-integrity.test.mjs"
+      - "tests/coach-follow-up-queue.test.mjs"
+      - "docs/signed-session-integrity.md"
+      - ".github/workflows/signed-session-integrity.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signed-session-integrity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-session-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify signed session and protected coach APIs
+        run: |
+          node --test tests/signed-session-integrity.test.mjs
+          node --test tests/legacy-auth-persistence.test.mjs tests/legacy-auth-post-error-contract.test.mjs
+          node --test tests/coach-priority-delivery-integrity.test.mjs tests/coach-follow-up-integrity.test.mjs tests/coach-follow-up-queue.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-session-integrity-failure
+          path: |
+            npm-debug.log
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
