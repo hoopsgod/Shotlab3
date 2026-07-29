@@ -162,7 +162,7 @@ test("server sanitization bounds coach-controlled content and numeric targets", 
   assert.equal(result.weeklyCheckinsTarget, 0);
 });
 
-test("team priority storage is private and service-role mediated", () => {
+test("team priority storage is private and validated by the server identity boundary", () => {
   const migration = fs.readFileSync(new URL("../migrations/036_team_priorities.sql", import.meta.url), "utf8");
   const endpoint = fs.readFileSync(new URL("../functions/v1/team-priorities/index.js", import.meta.url), "utf8");
   assert.match(migration, /enable row level security/i);
@@ -170,7 +170,8 @@ test("team priority storage is private and service-role mediated", () => {
   assert.doesNotMatch(migration, /grant\s+(select|insert|update|delete)/i);
   assert.match(endpoint, /writableTeamIds\.has\(teamId\)/);
   assert.match(endpoint, /readableTeamIds/);
-  assert.match(endpoint, /x-user-id|readUserId/);
+  assert.match(endpoint, /readAuthenticatedIdentity/);
+  assert.doesNotMatch(endpoint, /readUserId/);
   assert.match(endpoint, /metadata_by_team/);
   assert.match(endpoint, /updated_at/);
 });
