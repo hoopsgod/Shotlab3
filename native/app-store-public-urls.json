@@ -1,0 +1,67 @@
+{
+  "schemaVersion": 1,
+  "productName": "ShotLab",
+  "productionOrigin": "https://shotlab3.pages.dev",
+  "status": "deployment_contract_ready_live_verification_pending",
+  "routes": [
+    {
+      "field": "privacyPolicyUrl",
+      "path": "/privacy",
+      "candidateUrl": "https://shotlab3.pages.dev/privacy",
+      "expectedHeading": "Privacy Policy",
+      "sourceImplemented": true,
+      "directRouteTestedLocally": true,
+      "liveHttpsVerified": false
+    },
+    {
+      "field": "termsUrl",
+      "path": "/terms",
+      "candidateUrl": "https://shotlab3.pages.dev/terms",
+      "expectedHeading": "Terms of Use",
+      "sourceImplemented": true,
+      "directRouteTestedLocally": true,
+      "liveHttpsVerified": false
+    },
+    {
+      "field": "supportUrl",
+      "path": "/support",
+      "candidateUrl": "https://shotlab3.pages.dev/support",
+      "expectedHeading": "Support",
+      "sourceImplemented": true,
+      "directRouteTestedLocally": true,
+      "liveHttpsVerified": false
+    },
+    {
+      "field": "accountDeletionUrl",
+      "path": "/delete-account",
+      "candidateUrl": "https://shotlab3.pages.dev/delete-account",
+      "expectedHeading": "Delete Account",
+      "sourceImplemented": true,
+      "directRouteTestedLocally": true,
+      "liveHttpsVerified": false
+    },
+    {
+      "field": "dataRequestUrl",
+      "path": "/data-request",
+      "candidateUrl": "https://shotlab3.pages.dev/data-request",
+      "expectedHeading": "Account Data Request",
+      "sourceImplemented": true,
+      "directRouteTestedLocally": true,
+      "liveHttpsVerified": false
+    }
+  ],
+  "supportMailbox": {
+    "addressInApp": "support@shotlab.app",
+    "ownershipVerified": false,
+    "deliverabilityVerified": false,
+    "status": "owner_verification_pending"
+  },
+  "deploymentContract": {
+    "provider": "Cloudflare Pages",
+    "spaFallbackFile": "public/_redirects",
+    "securityHeadersFile": "public/_headers",
+    "fallbackRule": "/* /index.html 200",
+    "publicRoutesRequireAuthentication": false
+  },
+  "promotionRule": "Do not copy candidateUrl values into App Store Connect until the live verifier passes against the deployed production origin and the support mailbox is owner-verified."
+}
