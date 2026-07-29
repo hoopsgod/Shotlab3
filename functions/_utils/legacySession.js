@@ -163,6 +163,32 @@ export async function revokeLegacySession({ env, request, now = new Date() }) {
   return { revoked: true, tokenHash, cookie: buildLegacySessionClearCookie(request) };
 }
 
+function bearerToken(request) {
+  const header = String(request?.headers?.get?.("authorization") || "").trim();
+  const match = header.match(/^Bearer\s+(.+)$/i);
+  return cleanText(match?.[1], 8192);
+}
+
+export async function readSupabaseBearerIdentity({ env, request, fetchImpl = fetch }) {
+  const token = bearerToken(request);
+  const supabaseUrl = cleanText(env?.SUPABASE_URL || env?.VITE_SUPABASE_URL, 1000).replace(/\/$/, "");
+  const anonKey = cleanText(env?.SUPABASE_ANON_KEY || env?.VITE_SUPABASE_ANON_KEY, 8192);
+  if (!token || !supabaseUrl || !anonKey || typeof fetchImpl !== "function") return null;
+  try {
+    const response = await fetchImpl(`${supabaseUrl}/auth/v1/user`, {
+      method: "GET",
+      headers: { apikey: anonKey, Authorization: `Bearer ${token}` },
+    });
+    if (!response.ok) return null;
+    const user = await response.json().catch(() => null);
+    const email = normalizeIdentity(user?.email);
+    if (!email) return null;
+    return { userEmail: email, userId: cleanText(user?.id, 160), role: "authenticated" };
+  } catch {
+    return null;
+  }
+}
+
 function headerIdentity(request) {
   return normalizeIdentity(request?.headers?.get?.("x-user-id") || request?.headers?.get?.("x-user-email"));
 }
@@ -170,6 +196,9 @@ function headerIdentity(request) {
 export async function readAuthenticatedIdentity({ env, request, allowDemo = false }) {
   const session = await readLegacySession({ env, request }).catch(() => null);
   if (session?.userEmail) return { identity: session.userEmail, source: "legacy_session", session };
+
+  const supabaseUser = await readSupabaseBearerIdentity({ env, request });
+  if (supabaseUser?.userEmail) return { identity: supabaseUser.userEmail, source: "supabase_bearer", session: supabaseUser };
 
   const header = headerIdentity(request);
   if (allowDemo && DEMO_IDENTITIES.has(header) && isShotLabDemoHost(request)) {
