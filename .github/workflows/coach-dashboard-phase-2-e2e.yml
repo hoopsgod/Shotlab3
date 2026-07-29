@@ -44,7 +44,7 @@ jobs:
         run: npm run build
 
       - name: Run Coach Dashboard Phase 2 mobile flows
-        run: npx playwright test tests/e2e/coach-dashboard-phase-2.spec.mjs tests/e2e/coach-activation-phase-1.spec.mjs tests/e2e/coach-priority-delivery.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+        run: npx playwright test tests/e2e/coach-dashboard-phase-2.spec.mjs tests/e2e/coach-activation-phase-1.spec.mjs tests/e2e/coach-priority-delivery.spec.mjs tests/e2e/coach-player-priority-handoff.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
       - name: Upload browser failure artifacts
         if: failure()
