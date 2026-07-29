@@ -15,9 +15,17 @@ export async function onRequestPost({ request, env }) {
     return Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
   }
 
-  const result = await revokeLegacySession({ env, request }).catch(() => ({ revoked: false }));
-  return Response.json(
-    { ok: true, revoked: result.revoked === true },
-    { headers: { "Set-Cookie": result.cookie || buildLegacySessionClearCookie(request), "Cache-Control": "no-store" } },
-  );
+  try {
+    const result = await revokeLegacySession({ env, request });
+    return Response.json(
+      { ok: true, revoked: result.revoked === true },
+      { headers: { "Set-Cookie": result.cookie, "Cache-Control": "no-store" } },
+    );
+  } catch (error) {
+    console.error("legacy_session_revoke_failed", { message: String(error?.message || "revocation failed").slice(0, 120) });
+    return Response.json(
+      { ok: false, error: "session_revoke_failed" },
+      { status: 503, headers: { "Set-Cookie": buildLegacySessionClearCookie(request), "Cache-Control": "no-store" } },
+    );
+  }
 }
