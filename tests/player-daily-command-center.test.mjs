@@ -5,6 +5,7 @@ import { derivePlayerDailyCommandCenter } from "../src/lib/playerDailyCommandCen
 const TODAY = "2026-07-27";
 const base = {
   today: TODAY,
+  now: new Date("2026-07-27T12:00:00Z"),
   userEmail: "player@example.com",
   teamId: "team-1",
   dailyGoal: 100,
@@ -22,10 +23,15 @@ const base = {
   scRsvps: [],
   shotLogs: [],
   scLogs: [],
-  coachPriorities: { priorityDrillText: "Form Shooting", todayFocusText: "Clean mechanics" },
+  coachPriorities: {
+    priorityDrillText: "Form Shooting",
+    todayFocusText: "Clean mechanics",
+    challengeText: "Complete Form Shooting before adding volume.",
+    updatedAt: "2026-07-27T08:00:00Z",
+  },
 };
 
-test("urgent event RSVP outranks coach-priority drill", () => {
+test("urgent event RSVP outranks current coach-priority drill", () => {
   const model = derivePlayerDailyCommandCenter({
     ...base,
     events: [{ id: "practice", teamId: "team-1", title: "Team Practice", date: "2026-07-28", time: "6:00 PM" }],
@@ -33,13 +39,38 @@ test("urgent event RSVP outranks coach-priority drill", () => {
   assert.equal(model.primaryAction.kind, "event-rsvp");
   assert.equal(model.primaryAction.target, "program");
   assert.equal(model.queue[1].kind, "home-drill");
+  assert.equal(model.queue[1].source, "coach");
 });
 
-test("coach-priority drill outranks daily volume when no urgent commitment exists", () => {
+test("current coach-priority drill outranks daily volume when no urgent commitment exists", () => {
   const model = derivePlayerDailyCommandCenter({ ...base, todayMakes: 20, weeklyMakes: 80 });
   assert.equal(model.primaryAction.kind, "home-drill");
   assert.equal(model.primaryAction.drillId, "form");
   assert.equal(model.primaryAction.source, "coach");
+  assert.equal(model.coachSignal.freshness, "current");
+  assert.equal(model.coachSignal.stale, false);
+});
+
+test("stale coach guidance is excluded from the player task queue", () => {
+  const model = derivePlayerDailyCommandCenter({
+    ...base,
+    now: new Date("2026-07-29T12:00:00Z"),
+    todayMakes: 20,
+    weeklyMakes: 80,
+    coachPriorities: {
+      ...base.coachPriorities,
+      updatedAt: "2026-07-19T08:00:00Z",
+    },
+  });
+
+  assert.equal(model.coachSignal.freshness, "stale");
+  assert.equal(model.coachSignal.stale, true);
+  assert.equal(model.coachSignal.ageDays, 10);
+  assert.equal(model.coachSignal.focus, "");
+  assert.equal(model.coachSignal.priorityDrill, "");
+  assert.equal(model.coachSignal.challenge, "");
+  assert.equal(model.primaryAction.kind, "shots");
+  assert.equal(model.queue.some((task) => task.source === "coach"), false);
 });
 
 test("daily shot target becomes primary after coach drill is complete", () => {
