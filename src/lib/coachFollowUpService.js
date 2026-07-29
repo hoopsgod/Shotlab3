@@ -1,3 +1,5 @@
+import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
+
 export const COACH_FOLLOW_UP_STORAGE_KEY = "sl:coach-follow-ups";
 export const COACH_FOLLOW_UP_STATES = new Set(["planned", "completed", "dismissed"]);
 export const COACH_FOLLOW_UP_CHANGE_EVENT = "shotlab:coach-follow-ups-changed";
@@ -94,7 +96,7 @@ export async function loadCoachFollowUp({
   try {
     const response = await fetchImpl(`/v1/coach-follow-ups?team_id=${encodeURIComponent(clean(teamId, 160))}`, {
       method: "GET",
-      headers: { "x-user-id": requester },
+      headers: buildApiIdentityHeaders({ requester, storage }),
     });
     const body = await readJson(response);
     if (!response?.ok || body?.error) return { ok: false, storageMode: "local_fallback", record: local, error: body?.error || "follow_up_load_failed" };
@@ -141,7 +143,11 @@ export async function saveCoachFollowUp({
   try {
     const response = await fetchImpl("/v1/coach-follow-ups", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-user-id": requester },
+      headers: buildApiIdentityHeaders({
+        requester,
+        storage,
+        headers: { "Content-Type": "application/json" },
+      }),
       body: JSON.stringify({
         team_id: draft.teamId,
         player_identity: draft.playerIdentity,
