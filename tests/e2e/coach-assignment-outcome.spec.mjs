@@ -2,8 +2,9 @@ import { test, expect } from "@playwright/test";
 
 const TEAM_ID = "team-assignment-outcome";
 const today = new Date().toISOString().slice(0, 10);
+const DAY_MS = 24 * 60 * 60 * 1000;
 
-const seed = {
+const makeSeed = (updatedAt) => ({
   "sl:teams": [{ id: TEAM_ID, name: "Assignment Outcome Team", ownerCoachId: "coach.demo@shotlab.app", joinCode: "OUTCOME" }],
   "sl:players": [
     { id: "coach", email: "coach.demo@shotlab.app", name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
@@ -14,7 +15,7 @@ const seed = {
   "sl:player-profiles": [],
   "sl:drills": [{ id: "form-shooting", name: "Form Shooting" }, { id: "corner-threes", name: "Corner Threes" }],
   "sl:program-drills": [],
-  "sl:coach-priorities": { [TEAM_ID]: { todayFocusText: "Own the first three steps", priorityDrillText: "Form Shooting", challengeText: "Complete the priority first.", weeklyMakesTarget: 500, weeklyCheckinsTarget: 2 } },
+  "sl:coach-priorities": { [TEAM_ID]: { todayFocusText: "Own the first three steps", priorityDrillText: "Form Shooting", challengeText: "Complete the priority first.", weeklyMakesTarget: 500, weeklyCheckinsTarget: 2, updatedAt } },
   "sl:scores": [
     { id: "complete", email: "one@example.test", teamId: TEAM_ID, drillId: "form-shooting", drillName: "Form Shooting", date: today, score: 45 },
     { id: "other", email: "two@example.test", teamId: TEAM_ID, drillId: "corner-threes", drillName: "Corner Threes", date: today, score: 24 },
@@ -27,9 +28,9 @@ const seed = {
   "sl:sc-sessions": [],
   "sl:sc-rsvps": [],
   "sl:season-archives": [],
-};
+});
 
-test("Mission Control reports current priority completion", async ({ page }) => {
+async function openCoachWithSeed(page, seed) {
   await page.route("**/v1/team-priorities", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "demo_local", priorities_by_team: seed["sl:coach-priorities"] }) }));
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
@@ -38,9 +39,15 @@ test("Mission Control reports current priority completion", async ({ page }) => 
   }, seed);
   await page.goto("/");
   await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
+}
+
+test("Mission Control reports current priority completion", async ({ page }) => {
+  const seed = makeSeed(new Date().toISOString());
+  await openCoachWithSeed(page, seed);
 
   const panel = page.getByTestId("coach-assignment-outcome");
   await expect(panel).toBeVisible({ timeout: 20_000 });
+  await expect(panel).toHaveAttribute("data-freshness", "current");
   await expect(panel.getByRole("heading", { name: "Form Shooting", exact: true })).toBeVisible();
 
   // Coach Demo adds its own active Demo Player to the three seeded players.
@@ -57,6 +64,28 @@ test("Mission Control reports current priority completion", async ({ page }) => 
   await expect(panel.getByText("Open Player", { exact: true })).toBeVisible();
   await expect(panel.getByText("Complete Player", { exact: true })).not.toBeVisible();
   await expect(panel).not.toContainText(/viewed|read receipt/i);
+
+  const widths = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth }));
+  expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
+});
+
+test("Mission Control withholds stale assignment completion and opens the existing focus editor", async ({ page }) => {
+  const staleUpdatedAt = new Date(Date.now() - (10 * DAY_MS)).toISOString();
+  const seed = makeSeed(staleUpdatedAt);
+  await openCoachWithSeed(page, seed);
+
+  const panel = page.getByTestId("coach-assignment-outcome");
+  await expect(panel).toBeVisible({ timeout: 20_000 });
+  await expect(panel).toHaveAttribute("data-freshness", "stale");
+  await expect(panel.getByText("Assignment needs refresh", { exact: true })).toBeVisible();
+  await expect(panel.getByText("STALE", { exact: true })).toBeVisible();
+  await expect(panel.getByText(/Last published 10 days ago/i)).toBeVisible();
+  await expect(panel.getByLabel(/assignment completion/i)).toHaveCount(0);
+  await expect(panel.getByLabel("Assignment response summary")).toHaveCount(0);
+  await expect(panel).not.toContainText(/\d+ of \d+ completed this week/i);
+
+  await panel.getByRole("button", { name: "Refresh team focus", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Set team focus" })).toBeVisible();
 
   const widths = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth }));
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
