@@ -1,4 +1,5 @@
-import { readUserId, selectRows, upsertRows } from "../../_utils/supabase.js";
+import { readAuthenticatedIdentity } from "../../_utils/legacySession.js";
+import { selectRows, upsertRows } from "../../_utils/supabase.js";
 import { enforceRateLimit, getClientKey } from "../../_utils/security.js";
 import { collectTeamPriorityAccess } from "../team-priorities/index.js";
 
@@ -35,8 +36,14 @@ function demoResponse(followUps = []) {
   });
 }
 
+async function resolveRequester(request, env) {
+  const auth = await readAuthenticatedIdentity({ env, request, allowDemo: true });
+  return { ...auth, identity: normalizeIdentity(auth.identity) };
+}
+
 export async function onRequestGet({ request, env }) {
-  const requester = normalizeIdentity(readUserId(request));
+  const auth = await resolveRequester(request, env);
+  const requester = auth.identity;
   if (!requester) return Response.json({ error: "unauthorized" }, { status: 401 });
 
   const rate = enforceRateLimit({
@@ -48,7 +55,7 @@ export async function onRequestGet({ request, env }) {
     return Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
   }
 
-  if (DEMO_IDENTITIES.has(requester)) return demoResponse();
+  if (auth.source === "demo_header" && DEMO_IDENTITIES.has(requester)) return demoResponse();
 
   try {
     const { writableTeamIds } = await collectTeamPriorityAccess(env, requester);
@@ -82,7 +89,8 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const requester = normalizeIdentity(readUserId(request));
+  const auth = await resolveRequester(request, env);
+  const requester = auth.identity;
   if (!requester) return Response.json({ error: "unauthorized" }, { status: 401 });
 
   const rate = enforceRateLimit({
@@ -108,7 +116,7 @@ export async function onRequestPost({ request, env }) {
     updatedBy: requester,
   };
 
-  if (DEMO_IDENTITIES.has(requester)) return demoResponse([saved]);
+  if (auth.source === "demo_header" && DEMO_IDENTITIES.has(requester)) return demoResponse([saved]);
 
   try {
     const { writableTeamIds } = await collectTeamPriorityAccess(env, requester);
