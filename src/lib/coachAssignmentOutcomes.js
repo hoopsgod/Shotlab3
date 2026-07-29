@@ -4,6 +4,7 @@ const clean = (value) => String(value ?? "").trim();
 const key = (value) => clean(value).toLowerCase();
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 const normalizeWords = (value) => key(value).replace(/[^a-z0-9]+/g, " ").trim();
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const parseStored = (storage, storageKey, fallback) => {
   try {
@@ -80,6 +81,18 @@ const scoreMatchesDrill = (row = {}, drill = {}) => {
 
 const newestDate = (rows = []) => safeArray(rows).map(rowDate).filter(Boolean).sort().at(-1) || "";
 
+export const derivePriorityFreshness = ({ priority = {}, now = new Date(), staleAfterDays = 7 } = {}) => {
+  const updatedAt = clean(priority?.updatedAt || priority?.updated_at);
+  const updatedMs = Date.parse(updatedAt);
+  const nowMs = now instanceof Date ? now.getTime() : Date.parse(now);
+  if (!updatedAt || !Number.isFinite(updatedMs) || !Number.isFinite(nowMs)) {
+    return { freshness: "unknown", updatedAt, ageDays: null, stale: false };
+  }
+  const ageDays = Math.max(0, Math.floor((nowMs - updatedMs) / DAY_MS));
+  const stale = ageDays >= Math.max(1, Number(staleAfterDays) || 7);
+  return { freshness: stale ? "stale" : "current", updatedAt, ageDays, stale };
+};
+
 export const deriveCoachAssignmentOutcomes = ({
   teamId = "",
   prioritiesByTeam = {},
@@ -92,13 +105,16 @@ export const deriveCoachAssignmentOutcomes = ({
   shotLogs = [],
   scLogs = [],
   weekStart = "",
+  now = new Date(),
+  staleAfterDays = 7,
 } = {}) => {
   const scopedTeamId = clean(teamId);
   const priority = prioritiesByTeam?.[scopedTeamId] || null;
   const priorityText = clean(priority?.priorityDrillText);
   const drill = findTrackableDrill({ priorityText, drills, programDrills });
+  const freshness = derivePriorityFreshness({ priority: priority || {}, now, staleAfterDays });
   if (!scopedTeamId || !priority || !priorityText || !drill) {
-    return { trackable: false, teamId: scopedTeamId, priorityDrill: priorityText, rows: [], total: 0, completedCount: 0, activeOtherCount: 0, notStartedCount: 0, completionRate: 0 };
+    return { trackable: false, teamId: scopedTeamId, priorityDrill: priorityText, rows: [], total: 0, completedCount: 0, activeOtherCount: 0, notStartedCount: 0, completionRate: 0, ...freshness };
   }
 
   const profilesByIdentity = new Map();
@@ -174,11 +190,12 @@ export const deriveCoachAssignmentOutcomes = ({
     activeOtherCount,
     notStartedCount,
     completionRate,
+    ...freshness,
   };
 };
 
 export const readCoachAssignmentOutcomesFromStorage = ({ storage, joinCode = "", teamName = "", now = new Date() } = {}) => {
-  if (!storage) return deriveCoachAssignmentOutcomes();
+  if (!storage) return deriveCoachAssignmentOutcomes({ now });
   const session = parseStored(storage, "sl:session", {});
   const teams = parseStored(storage, "sl:teams", []);
   const players = parseStored(storage, "sl:players", []);
@@ -200,6 +217,7 @@ export const readCoachAssignmentOutcomesFromStorage = ({ storage, joinCode = "",
     shotLogs: parseStored(storage, "sl:shotlogs", []),
     scLogs: parseStored(storage, "sl:sc-logs", []),
     weekStart,
+    now,
   });
 };
 
