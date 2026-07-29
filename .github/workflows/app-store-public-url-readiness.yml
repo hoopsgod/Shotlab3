@@ -1,0 +1,136 @@
+name: App Store Public URL Readiness
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "public/_redirects"
+      - "public/_headers"
+      - "native/app-store-public-urls.json"
+      - "docs/app-store-public-url-readiness.md"
+      - "playwright.public-live.config.mjs"
+      - "tests/e2e/public-submission-routes.spec.mjs"
+      - "tests/app-store-public-url-readiness.test.mjs"
+      - "scripts/validate-public-submission-build.mjs"
+      - ".github/workflows/app-store-public-url-readiness.yml"
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Deployed HTTPS origin to verify"
+        required: true
+        default: "https://shotlab3.pages.dev"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: app-store-public-url-readiness-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-route-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify URL and routing contracts
+        run: |
+          node --test tests/app-store-public-url-readiness.test.mjs
+          node --test tests/legal-routes-regression.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Validate Cloudflare Pages build output
+        run: node scripts/validate-public-submission-build.mjs
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Open every submission route directly
+        run: npx playwright test tests/e2e/public-submission-routes.spec.mjs --config=playwright.acceptance.config.mjs --project=mobile-chromium
+
+      - name: Upload public URL readiness report
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-public-url-readiness
+          path: |
+            artifacts/app-store/public-url-readiness.json
+            native/app-store-public-urls.json
+            docs/app-store-public-url-readiness.md
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload local route failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-public-route-failure
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  live-https-browser-verification:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Require HTTPS input
+        env:
+          SHOTLAB_PUBLIC_BASE_URL: ${{ inputs.base_url }}
+        run: |
+          case "$SHOTLAB_PUBLIC_BASE_URL" in
+            https://*) ;;
+            *) echo "base_url must use HTTPS" >&2; exit 1 ;;
+          esac
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify deployed public pages in Chromium
+        env:
+          SHOTLAB_PUBLIC_BASE_URL: ${{ inputs.base_url }}
+        run: npx playwright test --config=playwright.public-live.config.mjs
+
+      - name: Upload live verification diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-public-url-live-verification
+          path: |
+            playwright-report-public-live/
+            test-results/public-live-routes/
+          if-no-files-found: ignore
+          retention-days: 14
