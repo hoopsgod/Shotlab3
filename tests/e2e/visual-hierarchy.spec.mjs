@@ -73,7 +73,7 @@ test("player mobile home prioritizes one daily command center, three momentum me
   await expectNoHorizontalOverflow(page);
 });
 
-test("coach mobile home answers the 30-second workflow without re-onboarding an established demo team", async ({ page }) => {
+test("coach mobile home gives the fresh one-player demo one compact truthful activation step", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "coach");
 
@@ -87,7 +87,10 @@ test("coach mobile home answers the 30-second workflow without re-onboarding an 
   await expect(objective).toBeVisible();
   await expectThreeMetrics(metrics);
   await expect(needsAttention).toBeVisible();
-  await expect(onboarding).toHaveCount(0);
+  await expect(onboarding).toBeVisible();
+  await expect(onboarding.getByText("Schedule the first team session", { exact: true })).toBeVisible();
+  await expect(onboarding.getByText("2/4", { exact: false })).toBeVisible();
+  await expect(onboarding.getByRole("button", { name: /Create session/i })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Activity today", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Recent activity", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Next session", exact: true })).toHaveCount(0);
@@ -97,9 +100,11 @@ test("coach mobile home answers the 30-second workflow without re-onboarding an 
   const shellBox = await commandCenter.boundingBox();
   const objectiveBox = await objective.boundingBox();
   const attentionBox = await needsAttention.boundingBox();
+  const onboardingBox = await onboarding.boundingBox();
   expect(shellBox).not.toBeNull();
   expect(objectiveBox).not.toBeNull();
   expect(attentionBox).not.toBeNull();
+  expect(onboardingBox).not.toBeNull();
   expect(shellBox.x).toBeLessThanOrEqual(1);
   expect(shellBox.width).toBeGreaterThanOrEqual(388);
   const leftGutter = objectiveBox.x;
@@ -111,6 +116,8 @@ test("coach mobile home answers the 30-second workflow without re-onboarding an 
   expect(Math.abs(leftGutter - rightGutter)).toBeLessThanOrEqual(2);
   expect(objectiveBox.height).toBeLessThan(330);
   expect(attentionBox.y).toBeLessThan(844);
+  expect(onboardingBox.y).toBeGreaterThan(attentionBox.y);
+  expect(onboardingBox.height).toBeLessThan(180);
   await expectNoHorizontalOverflow(page);
 
   const dock = page.getByTestId("mobile-navigation-dock");
