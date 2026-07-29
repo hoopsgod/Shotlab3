@@ -155,6 +155,96 @@
 .primaryButton[data-state="working"],
 .taskButton[data-state="working"] { opacity: .72; cursor: progress; }
 
+.coachSignal {
+  position: relative;
+  margin-top: 12px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 22%, rgba(255, 255, 255, .08));
+  border-radius: 17px;
+  padding: 14px;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 8%, rgba(255, 255, 255, .018)), rgba(0, 0, 0, .16));
+  box-shadow: inset 0 1px rgba(255, 255, 255, .02);
+}
+
+.coachSignal::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--team-brand-secondary, var(--accent)), var(--team-brand-primary, var(--accent)));
+}
+
+.coachSignalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.coachSignalEyebrow,
+.coachSignalLabel,
+.coachSignalStatus {
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.coachSignalEyebrow {
+  color: var(--team-brand-secondary, var(--accent));
+  font-size: 9px;
+}
+
+.coachSignalTitle {
+  max-width: 560px;
+  margin: 5px 0 0;
+  color: var(--text-1);
+  font-family: 'Bebas Neue', Impact, sans-serif;
+  font-size: clamp(21px, 5.8vw, 28px);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: .035em;
+  text-wrap: balance;
+}
+
+.coachSignalStatus {
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 30%, transparent);
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: var(--team-brand-secondary, var(--accent));
+  background: color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 7%, transparent);
+  font-size: 8px;
+}
+
+.coachSignalGrid {
+  display: grid;
+  grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.coachSignalItem {
+  min-width: 0;
+  border-top: 1px solid rgba(255, 255, 255, .075);
+  padding-top: 9px;
+}
+
+.coachSignalLabel {
+  color: var(--text-3);
+  font-size: 8px;
+}
+
+.coachSignalValue {
+  margin-top: 4px;
+  overflow-wrap: anywhere;
+  color: var(--text-2);
+  font-family: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
 .momentumSignal { margin-top: 12px; }
 
 .progressGrid {
@@ -357,6 +447,9 @@
   .root { padding: 15px; border-radius: 21px; }
   .hero { padding: 15px; }
   .title { font-size: clamp(30px, 10vw, 40px); }
+  .coachSignal { padding: 13px; }
+  .coachSignalHeader { align-items: flex-start; }
+  .coachSignalGrid { grid-template-columns: 1fr; gap: 7px; }
   .taskRow { align-items: stretch; flex-wrap: wrap; }
   .taskCopy { flex-basis: calc(100% - 42px); }
   .taskButton { width: 100%; }
