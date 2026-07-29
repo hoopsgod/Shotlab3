@@ -3,6 +3,7 @@ import { test, expect } from "@playwright/test";
 const TEAM_ID = "team-assignment-outcome";
 const today = new Date().toISOString().slice(0, 10);
 const DAY_MS = 24 * 60 * 60 * 1000;
+const dateOffset = (days) => new Date(Date.now() + (days * DAY_MS)).toISOString().slice(0, 10);
 
 const makeSeed = (updatedAt) => ({
   "sl:teams": [{ id: TEAM_ID, name: "Assignment Outcome Team", ownerCoachId: "coach.demo@shotlab.app", joinCode: "OUTCOME" }],
@@ -41,19 +42,21 @@ async function openCoachWithSeed(page, seed) {
   await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
 }
 
-test("Mission Control reports current priority completion and opens exact player intelligence", async ({ page }) => {
+test("Mission Control reports post-publication completion and opens exact player intelligence", async ({ page }) => {
   const seed = makeSeed(new Date().toISOString());
   await openCoachWithSeed(page, seed);
 
   const panel = page.getByTestId("coach-assignment-outcome");
   await expect(panel).toBeVisible({ timeout: 20_000 });
   await expect(panel).toHaveAttribute("data-freshness", "current");
+  await expect(panel).toHaveAttribute("data-measurement-mode", "published");
   await expect(panel.getByRole("heading", { name: "Form Shooting", exact: true })).toBeVisible();
 
   // Coach Demo adds its own active Demo Player to the three seeded players.
   // The truthful team result is therefore one completion across four rostered players.
   await expect(panel.getByLabel("25% assignment completion")).toBeVisible();
-  await expect(panel.getByText("1 of 4 completed this week", { exact: true })).toBeVisible();
+  await expect(panel.getByText("1 of 4 completed since published", { exact: true })).toBeVisible();
+  await expect(panel.getByText(/counting results from \d{4}-\d{2}-\d{2}/i)).toBeVisible();
   await expect(panel.getByLabel("Assignment response summary")).toContainText("1Completed");
   await expect(panel.getByLabel("Assignment response summary")).toContainText("1Other work");
   await expect(panel.getByLabel("Assignment response summary")).toContainText("2Not started");
@@ -91,6 +94,29 @@ test("Mission Control reports current priority completion and opens exact player
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
 });
 
+test("Mission Control excludes a matching completion logged before publication", async ({ page }) => {
+  const publishedAt = new Date(Date.now() - DAY_MS).toISOString();
+  const seed = makeSeed(publishedAt);
+  seed["sl:scores"] = [
+    { id: "before-publish", email: "one@example.test", teamId: TEAM_ID, drillId: "form-shooting", drillName: "Form Shooting", date: dateOffset(-2), score: 48 },
+    { id: "after-publish-other", email: "two@example.test", teamId: TEAM_ID, drillId: "corner-threes", drillName: "Corner Threes", date: today, score: 24 },
+  ];
+  await openCoachWithSeed(page, seed);
+
+  const panel = page.getByTestId("coach-assignment-outcome");
+  await expect(panel).toBeVisible({ timeout: 20_000 });
+  await expect(panel).toHaveAttribute("data-measurement-mode", "published");
+  await expect(panel.getByLabel("0% assignment completion")).toBeVisible();
+  await expect(panel.getByText("0 of 4 completed since published", { exact: true })).toBeVisible();
+  await expect(panel.getByLabel("Assignment response summary")).toContainText("0Completed");
+  await expect(panel.getByLabel("Assignment response summary")).toContainText("1Other work");
+  await expect(panel.getByLabel("Assignment response summary")).toContainText("3Not started");
+
+  const priorCompletionRow = panel.getByRole("button", { name: "Open Complete Player player intelligence", exact: true });
+  await expect(priorCompletionRow).toBeVisible();
+  await expect(priorCompletionRow).toContainText("No matching completion since published");
+});
+
 test("Mission Control withholds stale assignment completion and opens the existing focus editor", async ({ page }) => {
   const staleUpdatedAt = new Date(Date.now() - (10 * DAY_MS)).toISOString();
   const seed = makeSeed(staleUpdatedAt);
@@ -99,12 +125,13 @@ test("Mission Control withholds stale assignment completion and opens the existi
   const panel = page.getByTestId("coach-assignment-outcome");
   await expect(panel).toBeVisible({ timeout: 20_000 });
   await expect(panel).toHaveAttribute("data-freshness", "stale");
+  await expect(panel).toHaveAttribute("data-measurement-mode", "published");
   await expect(panel.getByText("Assignment needs refresh", { exact: true })).toBeVisible();
   await expect(panel.getByText("STALE", { exact: true })).toBeVisible();
   await expect(panel.getByText(/Last published 10 days ago/i)).toBeVisible();
   await expect(panel.getByLabel(/assignment completion/i)).toHaveCount(0);
   await expect(panel.getByLabel("Assignment response summary")).toHaveCount(0);
-  await expect(panel).not.toContainText(/\d+ of \d+ completed this week/i);
+  await expect(panel).not.toContainText(/\d+ of \d+ completed/i);
 
   await panel.getByRole("button", { name: "Refresh team focus", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Set team focus" })).toBeVisible();

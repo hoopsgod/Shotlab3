@@ -21,6 +21,11 @@ const rowDrillId = (row = {}) => clean(row?.drillId || row?.drill_id || row?.dri
 const rowDrillName = (row = {}) => clean(row?.drillName || row?.drill_name || row?.name || row?.title);
 const playerName = (row = {}) => clean(row?.name || row?.displayName || row?.playerName || row?.player_name || [row?.firstName, row?.lastName].filter(Boolean).join(" ")) || "Player";
 const playerEmail = (row = {}) => clean(row?.email || row?.player_email);
+const localDate = (value = new Date()) => {
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+};
 
 const identityKeys = (row = {}) => [
   row?.email,
@@ -94,6 +99,20 @@ export const derivePriorityFreshness = ({ priority = {}, now = new Date(), stale
   return { freshness: stale ? "stale" : "current", updatedAt, ageDays, stale };
 };
 
+export const deriveAssignmentMeasurementWindow = ({ priority = {}, weekStart = "", now = new Date() } = {}) => {
+  const updatedAt = clean(priority?.updatedAt || priority?.updated_at);
+  const publishedDate = Number.isFinite(Date.parse(updatedAt)) ? updatedAt.slice(0, 10) : "";
+  const candidates = [clean(weekStart), publishedDate].filter(Boolean).sort();
+  const measurementMode = publishedDate ? "published" : "weekly-fallback";
+  return {
+    measurementMode,
+    measurementStartDate: candidates.at(-1) || "",
+    measurementEndDate: localDate(now),
+    measurementLabel: measurementMode === "published" ? "since published" : "this week",
+    publishedDate,
+  };
+};
+
 export const deriveCoachAssignmentOutcomes = ({
   teamId = "",
   prioritiesByTeam = {},
@@ -114,8 +133,9 @@ export const deriveCoachAssignmentOutcomes = ({
   const priorityText = clean(priority?.priorityDrillText);
   const drill = findTrackableDrill({ priorityText, drills, programDrills });
   const freshness = derivePriorityFreshness({ priority: priority || {}, now, staleAfterDays });
+  const measurement = deriveAssignmentMeasurementWindow({ priority: priority || {}, weekStart, now });
   if (!scopedTeamId || !priority || !priorityText || !drill) {
-    return { trackable: false, teamId: scopedTeamId, priorityDrill: priorityText, rows: [], total: 0, completedCount: 0, activeOtherCount: 0, notStartedCount: 0, completionRate: 0, ...freshness };
+    return { trackable: false, teamId: scopedTeamId, priorityDrill: priorityText, rows: [], total: 0, completedCount: 0, activeOtherCount: 0, notStartedCount: 0, completionRate: 0, ...measurement, ...freshness };
   }
 
   const profilesByIdentity = new Map();
@@ -140,15 +160,21 @@ export const deriveCoachAssignmentOutcomes = ({
     rosterMap.set(canonical, { ...profile, _identities: new Set(identities) });
   });
 
+  const withinMeasurementWindow = (row = {}) => {
+    const date = rowDate(row);
+    if (!date) return measurement.measurementMode === "weekly-fallback";
+    if (measurement.measurementStartDate && date < measurement.measurementStartDate) return false;
+    if (measurement.measurementEndDate && date > measurement.measurementEndDate) return false;
+    return true;
+  };
+
   const scoreRows = [...safeArray(scores), ...safeArray(programScores)].filter((row) => {
     const rowTeam = rowTeamId(row);
-    const date = rowDate(row);
-    return (!rowTeam || rowTeam === scopedTeamId) && (!weekStart || !date || date >= weekStart);
+    return (!rowTeam || rowTeam === scopedTeamId) && withinMeasurementWindow(row);
   });
   const activityRows = [...scoreRows, ...safeArray(shotLogs), ...safeArray(scLogs)].filter((row) => {
     const rowTeam = rowTeamId(row);
-    const date = rowDate(row);
-    return (!rowTeam || rowTeam === scopedTeamId) && (!weekStart || !date || date >= weekStart);
+    return (!rowTeam || rowTeam === scopedTeamId) && withinMeasurementWindow(row);
   });
 
   const rows = [...rosterMap.values()].map((player) => {
@@ -194,6 +220,7 @@ export const deriveCoachAssignmentOutcomes = ({
     activeOtherCount,
     notStartedCount,
     completionRate,
+    ...measurement,
     ...freshness,
   };
 };
@@ -208,7 +235,7 @@ export const readCoachAssignmentOutcomesFromStorage = ({ storage, joinCode = "",
   const start = new Date(now);
   start.setHours(0, 0, 0, 0);
   start.setDate(start.getDate() - start.getDay());
-  const weekStart = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, "0")}-${String(start.getDate()).padStart(2, "0")}`;
+  const weekStart = localDate(start);
   return deriveCoachAssignmentOutcomes({
     teamId,
     prioritiesByTeam: parseStored(storage, "sl:coach-priorities", {}),

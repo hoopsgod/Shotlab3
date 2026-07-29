@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import {
+  deriveAssignmentMeasurementWindow,
   deriveCoachAssignmentOutcomes,
   derivePriorityFreshness,
   readCoachAssignmentOutcomesFromStorage,
@@ -32,7 +33,7 @@ const base = {
   now: new Date("2026-07-29T12:00:00.000Z"),
 };
 
-test("current priority outcomes are derived from real roster-scoped completions", () => {
+test("legacy priority outcomes use the explicit weekly fallback", () => {
   const result = deriveCoachAssignmentOutcomes({
     ...base,
     scores: [
@@ -51,6 +52,9 @@ test("current priority outcomes are derived from real roster-scoped completions"
   assert.equal(result.notStartedCount, 1);
   assert.equal(result.completionRate, 33);
   assert.equal(result.freshness, "unknown");
+  assert.equal(result.measurementMode, "weekly-fallback");
+  assert.equal(result.measurementStartDate, "2026-07-26");
+  assert.equal(result.measurementLabel, "this week");
   assert.equal(result.rows.find((row) => row.name === "One Player")?.status, "completed");
   assert.equal(result.rows.find((row) => row.name === "Two Player")?.status, "active-other");
   assert.equal(result.rows.find((row) => row.name === "Three Player")?.status, "not-started");
@@ -58,6 +62,59 @@ test("current priority outcomes are derived from real roster-scoped completions"
   assert.equal(result.rows.find((row) => row.name === "Three Player")?.searchIdentity, "three@example.com");
   assert.equal(result.rows.some((row) => row.name === "Removed Player"), false);
   assert.equal(result.rows.some((row) => row.name === "Other Team"), false);
+});
+
+test("timestamped assignment counts only activity on or after publication date", () => {
+  const result = deriveCoachAssignmentOutcomes({
+    ...base,
+    prioritiesByTeam: { "team-a": { ...PRIORITY, updatedAt: "2026-07-28T15:30:00.000Z" } },
+    scores: [
+      { email: "one@example.com", teamId: "team-a", drillId: "form-shooting", date: "2026-07-27", score: 46 },
+      { email: "two@example.com", teamId: "team-a", drillId: "corner-threes", date: "2026-07-29", score: 20 },
+      { email: "three@example.com", teamId: "team-a", drillId: "form-shooting", date: "2026-07-29", score: 41 },
+    ],
+  });
+
+  assert.equal(result.measurementMode, "published");
+  assert.equal(result.measurementStartDate, "2026-07-28");
+  assert.equal(result.measurementEndDate, "2026-07-29");
+  assert.equal(result.measurementLabel, "since published");
+  assert.equal(result.completedCount, 1);
+  assert.equal(result.activeOtherCount, 1);
+  assert.equal(result.notStartedCount, 1);
+  assert.equal(result.rows.find((row) => row.name === "One Player")?.status, "not-started");
+  assert.equal(result.rows.find((row) => row.name === "Two Player")?.status, "active-other");
+  assert.equal(result.rows.find((row) => row.name === "Three Player")?.status, "completed");
+});
+
+test("timestamped assignment excludes undated and future records from compliance", () => {
+  const result = deriveCoachAssignmentOutcomes({
+    ...base,
+    prioritiesByTeam: { "team-a": { ...PRIORITY, updatedAt: "2026-07-28T15:30:00.000Z" } },
+    scores: [
+      { email: "one@example.com", teamId: "team-a", drillId: "form-shooting", score: 46 },
+      { email: "two@example.com", teamId: "team-a", drillId: "form-shooting", date: "2026-07-30", score: 45 },
+    ],
+  });
+  assert.equal(result.completedCount, 0);
+  assert.equal(result.notStartedCount, 3);
+});
+
+test("measurement window selects the later of week start and publication date", () => {
+  assert.deepEqual(
+    deriveAssignmentMeasurementWindow({
+      priority: { updatedAt: "2026-07-24T08:00:00.000Z" },
+      weekStart: "2026-07-26",
+      now: new Date("2026-07-29T12:00:00.000Z"),
+    }),
+    {
+      measurementMode: "published",
+      measurementStartDate: "2026-07-26",
+      measurementEndDate: "2026-07-29",
+      measurementLabel: "since published",
+      publishedDate: "2026-07-24",
+    },
+  );
 });
 
 test("priority freshness distinguishes current stale and legacy guidance", () => {
@@ -86,6 +143,7 @@ test("stale priority outcomes remain derived but are explicitly marked unsafe fo
   assert.equal(result.stale, true);
   assert.equal(result.freshness, "stale");
   assert.equal(result.ageDays, 11);
+  assert.equal(result.measurementStartDate, "2026-07-26");
   assert.equal(result.completedCount, 1);
 });
 
@@ -129,7 +187,7 @@ test("storage reader resolves the active coach team and persisted stores", () =>
     "sl:player-profiles": JSON.stringify([]),
     "sl:drills": JSON.stringify(drills),
     "sl:program-drills": JSON.stringify([]),
-    "sl:scores": JSON.stringify([{ email: "one@example.com", teamId: "team-a", drillId: "form-shooting", date: "2026-07-27", score: 42 }]),
+    "sl:scores": JSON.stringify([{ email: "one@example.com", teamId: "team-a", drillId: "form-shooting", date: "2026-07-29", score: 42 }]),
     "sl:program-scores": JSON.stringify([]),
     "sl:shotlogs": JSON.stringify([]),
     "sl:sc-logs": JSON.stringify([]),
@@ -140,15 +198,20 @@ test("storage reader resolves the active coach team and persisted stores", () =>
   assert.equal(result.teamId, "team-a");
   assert.equal(result.completedCount, 1);
   assert.equal(result.freshness, "current");
+  assert.equal(result.measurementMode, "published");
+  assert.equal(result.measurementStartDate, "2026-07-29");
 });
 
-test("enhancer reports outcomes only and routes exact player follow-up through stable dashboard contracts", () => {
+test("enhancer reports only measured outcomes and routes exact player follow-up", () => {
   const source = fs.readFileSync(new URL("../src/lib/coachAssignmentOutcomeEnhancer.js", import.meta.url), "utf8");
-  assert.match(source, /completed this week/i);
+  assert.match(source, /measurementLabel/);
+  assert.match(source, /data-measurement-mode/);
+  assert.match(source, /counting results from/i);
   assert.match(source, /priority still open/i);
-  assert.match(source, /withholding the completion percentage/i);
+  assert.match(source, /withholding the percentage/i);
   assert.match(source, /Refresh team focus/i);
   assert.doesNotMatch(source, /viewed assignment|seen by|read receipt/i);
+  assert.doesNotMatch(source, /completed this week/);
   assert.match(source, /coach-assignment-outcome/);
   assert.match(source, /coach-players-filter-rail/);
   assert.match(source, /coach-roster-operations/);
