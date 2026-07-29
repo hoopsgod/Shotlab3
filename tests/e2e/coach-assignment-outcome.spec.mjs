@@ -32,7 +32,27 @@ const makeSeed = (updatedAt) => ({
 });
 
 async function openCoachWithSeed(page, seed) {
+  let followUpRecord = null;
   await page.route("**/v1/team-priorities", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "demo_local", priorities_by_team: seed["sl:coach-priorities"] }) }));
+  await page.route("**/v1/coach-follow-ups*", async (route) => {
+    if (route.request().method() === "GET") {
+      return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "team_remote", follow_ups: followUpRecord ? [followUpRecord] : [] }) });
+    }
+    const body = route.request().postDataJSON();
+    const now = new Date().toISOString();
+    followUpRecord = {
+      team_id: body.team_id,
+      player_identity: body.player_identity,
+      player_name: body.player_name,
+      state: body.state,
+      note: body.note,
+      created_at: body.created_at || now,
+      updated_at: now,
+      completed_at: body.state === "completed" ? now : null,
+      updated_by: "coach.demo@shotlab.app",
+    };
+    return route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, storage_mode: "team_remote", follow_up: followUpRecord }) });
+  });
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
   await page.addInitScript((payload) => {
@@ -40,11 +60,12 @@ async function openCoachWithSeed(page, seed) {
   }, seed);
   await page.goto("/");
   await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
+  return { getFollowUpRecord: () => followUpRecord };
 }
 
-test("Mission Control reports post-publication completion and opens exact player intelligence", async ({ page }) => {
+test("Mission Control reports post-publication completion, opens exact player intelligence, and records follow-up", async ({ page }) => {
   const seed = makeSeed(new Date().toISOString());
-  await openCoachWithSeed(page, seed);
+  const followUpApi = await openCoachWithSeed(page, seed);
 
   const panel = page.getByTestId("coach-assignment-outcome");
   await expect(panel).toBeVisible({ timeout: 20_000 });
@@ -89,6 +110,28 @@ test("Mission Control reports post-publication completion and opens exact player
   await expect(drawer).toBeVisible({ timeout: 20_000 });
   await expect(page.getByRole("dialog", { name: "Open Player", exact: true })).toBeVisible();
   await expect(drawer.getByRole("button", { name: "Open Full Profile", exact: true })).toBeVisible();
+
+  const ledger = page.getByTestId("coach-follow-up-ledger");
+  await expect(ledger).toBeVisible({ timeout: 20_000 });
+  await expect(ledger).toHaveAttribute("data-follow-up-state", "none");
+  await expect(ledger).toContainText("ShotLab does not send a message or notify the player");
+  await ledger.getByLabel("Private coach note").fill("Check in after practice about the priority drill.");
+  await ledger.getByRole("button", { name: "Mark for follow-up", exact: true }).click();
+  await expect(ledger).toHaveAttribute("data-follow-up-state", "planned");
+  await expect(ledger.getByText("Planned", { exact: true })).toBeVisible();
+  expect(followUpApi.getFollowUpRecord()).toMatchObject({
+    team_id: TEAM_ID,
+    player_identity: "three@example.test",
+    player_name: "Open Player",
+    state: "planned",
+    note: "Check in after practice about the priority drill.",
+  });
+
+  await ledger.getByRole("button", { name: "Mark follow-up complete", exact: true }).click();
+  await expect(ledger).toHaveAttribute("data-follow-up-state", "completed");
+  await expect(ledger.getByText("Completed", { exact: true })).toBeVisible();
+  expect(followUpApi.getFollowUpRecord()?.state).toBe("completed");
+  await expect(ledger).not.toContainText(/message sent|player notified|notification delivered/i);
 
   const widths = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth }));
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
