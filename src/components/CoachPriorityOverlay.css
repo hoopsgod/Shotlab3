@@ -3,6 +3,13 @@ body.mission-control-priority-open {
   overscroll-behavior: none;
 }
 
+body.mission-control-priority-open [data-testid="mobile-navigation-dock"],
+body.mission-control-priority-open [data-testid="mobile-navigation-overlay"] {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
 .mcPriorityOverlayLayer {
   position: fixed;
   inset: 0;
