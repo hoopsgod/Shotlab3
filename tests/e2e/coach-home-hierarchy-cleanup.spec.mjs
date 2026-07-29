@@ -10,7 +10,11 @@ test("Mission Control removes duplicate setup while preserving operational secti
 
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("coach-setup-checklist")).toBeHidden();
-  await expect(page.getByTestId("coach-team-standings")).toBeVisible();
+
+  // Team Standings is intentionally collapsed by ProgressiveDisclosure, but its
+  // disclosure control and content mount must remain present and untargeted.
+  await expect(page.getByTestId("coach-team-standings")).toHaveCount(1);
+  await expect(page.getByText("Team standings", { exact: true })).toBeVisible();
   await expect(page.getByTestId("coach-today-practice")).toBeVisible();
 
   const cleanupStyle = page.locator("#shotlab-coach-home-hierarchy-cleanup");
