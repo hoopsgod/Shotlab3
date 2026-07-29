@@ -16,11 +16,22 @@ const readJson = async (response) => {
   }
 };
 
+const readBrowserValue = (key) => {
+  try {
+    if (typeof globalThis?.localStorage?.getItem !== "function") return null;
+    const raw = globalThis.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
 export const installCoachPrioritySaveBridge = (target = globalThis) => {
   if (!target || typeof target !== "object") return null;
   if (typeof target.savePlayerPriorities === "function" && !target.savePlayerPriorities.__shotlabPriorityBridge) {
     return target.savePlayerPriorities;
   }
+  if (target.savePlayerPriorities?.__shotlabPriorityBridge) return target.savePlayerPriorities;
 
   const bridge = async ({ teamId, draft, onSaveCoachPriorities } = {}) => {
     if (!teamId || typeof onSaveCoachPriorities !== "function") {
@@ -58,14 +69,22 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     return nextValue;
   };
 
-  const getRequesterIdentity = async () => {
-    const session = await db.get(STORAGE_KEYS.sessions);
-    return normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
+  const getRequesterContext = async () => {
+    const browserSession = readBrowserValue(STORAGE_KEYS.sessions);
+    const storedSession = browserSession || await db.get(STORAGE_KEYS.sessions);
+    const session = Array.isArray(storedSession) ? storedSession[0] : storedSession;
+    const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
+
+    const browserPlayers = readBrowserValue(STORAGE_KEYS.players);
+    const storedPlayers = Array.isArray(browserPlayers) ? browserPlayers : await getCollection(STORAGE_KEYS.players);
+    const actor = (Array.isArray(storedPlayers) ? storedPlayers : []).find((player) => normalizeIdentity(player?.email) === requester);
+    const teamId = String(actor?.teamId || actor?.team_id || "").trim();
+    return { requester, teamId };
   };
 
   const getPlayerPriorities = async () => {
     const localPriorities = sanitizePriorityMap(await db.get(STORAGE_KEYS.coachPriorities));
-    const requester = await getRequesterIdentity();
+    const { requester } = await getRequesterContext();
     if (!requester) return localPriorities;
 
     try {
@@ -88,8 +107,13 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     const nextPriorities = sanitizePriorityMap(priorities);
     await db.set(STORAGE_KEYS.coachPriorities, nextPriorities, { strictLocal: true });
 
-    const requester = await getRequesterIdentity();
-    const entries = Object.entries(nextPriorities);
+    const { requester, teamId: activeTeamId } = await getRequesterContext();
+    const allEntries = Object.entries(nextPriorities);
+    const entries = activeTeamId && nextPriorities[activeTeamId]
+      ? [[activeTeamId, nextPriorities[activeTeamId]]]
+      : allEntries.length === 1
+        ? allEntries
+        : [];
     if (!requester || entries.length === 0) {
       return { ok: true, storageMode: "local_only", deliveredTeamIds: [] };
     }
