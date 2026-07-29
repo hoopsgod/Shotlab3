@@ -1,3 +1,5 @@
+import { derivePriorityFreshness } from "./coachAssignmentOutcomes.js";
+
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 const safeNumber = (value) => {
   const number = Number(value);
@@ -72,6 +74,7 @@ const dedupeTasks = (tasks = []) => {
 
 export const derivePlayerDailyCommandCenter = ({
   today = new Date().toISOString().slice(0, 10),
+  now = new Date(),
   userEmail = "",
   teamId = "",
   todayMakes = 0,
@@ -117,8 +120,11 @@ export const derivePlayerDailyCommandCenter = ({
   const incompleteHome = homeDrills.filter((drill) => !homeCompleted.has(drillId(drill)));
   const incompleteProgram = teamProgramDrills.filter((drill) => !programCompleted.has(drillId(drill)));
 
+  const priorityFreshness = derivePriorityFreshness({ priority: coachPriorities, now });
   const coachPriorityText = clean(coachPriorities?.priorityDrillText);
-  const coachPriorityDrill = findCoachPriorityDrill({ coachPriority: coachPriorityText, drills: homeDrills, programDrills: teamProgramDrills });
+  const coachPriorityDrill = priorityFreshness.stale
+    ? null
+    : findCoachPriorityDrill({ coachPriority: coachPriorityText, drills: homeDrills, programDrills: teamProgramDrills });
   const coachPriorityComplete = coachPriorityDrill
     ? (coachPriorityDrill.lane === "program" ? programCompleted : homeCompleted).has(drillId(coachPriorityDrill))
     : false;
@@ -241,9 +247,13 @@ export const derivePlayerDailyCommandCenter = ({
       complete: activationCompleteCount === activationSteps.length,
     },
     coachSignal: {
-      focus: clean(coachPriorities?.todayFocusText) || "Build quality reps today",
-      priorityDrill: coachPriorityText || drillName(coachPriorityDrill) || "Next unfinished training block",
-      challenge: clean(coachPriorities?.challengeText) || "Complete one focused block and log the result.",
+      focus: priorityFreshness.stale ? "" : clean(coachPriorities?.todayFocusText) || "Build quality reps today",
+      priorityDrill: priorityFreshness.stale ? "" : coachPriorityText || drillName(coachPriorityDrill) || "Next unfinished training block",
+      challenge: priorityFreshness.stale ? "" : clean(coachPriorities?.challengeText) || "Complete one focused block and log the result.",
+      freshness: priorityFreshness.freshness,
+      stale: priorityFreshness.stale,
+      ageDays: priorityFreshness.ageDays,
+      updatedAt: priorityFreshness.updatedAt,
     },
     nextAfterPrimary: queue[1] || reviewTask,
   };
