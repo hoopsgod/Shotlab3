@@ -45,7 +45,7 @@ test("queue context uses canonical roster rules and active coach team", () => {
     "sl:players": [
       { email: "coach@example.test", role: "coach", teamId: "team-a" },
       { email: "one@example.test", name: "One", role: "player", teamId: "team-a" },
-      { email: "removed@example.test", name: "Removed", role: "player", teamId: "team-a", rosterStatus: "removed" },
+      { email: "removed@example.test", name: "Removed", role: "player", teamId: null, removedFromTeamId: "team-a", rosterStatus: "removed", rosterAction: "coach_remove_from_team", hideFromLeaderboards: true },
     ],
     "sl:player-profiles": [],
   });
