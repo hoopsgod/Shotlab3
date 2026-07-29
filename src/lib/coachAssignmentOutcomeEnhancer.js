@@ -85,7 +85,7 @@ export function openExactPlayerFollowUp(row = {}) {
     const input = rail?.querySelector?.("input");
     if (!rail || !input) return false;
 
-    const allButton = [...rail.querySelectorAll("button")].find((button) => clean(button.textContent).toLowerCase() === "all");
+    const allButton = rail.querySelector("button");
     allButton?.click?.();
     setNativeInputValue(input, query);
 
