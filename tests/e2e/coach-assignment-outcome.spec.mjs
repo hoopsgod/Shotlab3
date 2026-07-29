@@ -42,11 +42,20 @@ test("Mission Control reports current priority completion", async ({ page }) => 
   const panel = page.getByTestId("coach-assignment-outcome");
   await expect(panel).toBeVisible({ timeout: 20_000 });
   await expect(panel.getByRole("heading", { name: "Form Shooting", exact: true })).toBeVisible();
-  await expect(panel.getByLabel("33% assignment completion")).toBeVisible();
-  await expect(panel.getByText("1 of 3 completed this week", { exact: true })).toBeVisible();
-  await expect(panel.getByText("Complete Player", { exact: true })).toBeVisible();
+
+  // Coach Demo adds its own active Demo Player to the three seeded players.
+  // The truthful team result is therefore one completion across four rostered players.
+  await expect(panel.getByLabel("25% assignment completion")).toBeVisible();
+  await expect(panel.getByText("1 of 4 completed this week", { exact: true })).toBeVisible();
+  await expect(panel.getByLabel("Assignment response summary")).toContainText("1Completed");
+  await expect(panel.getByLabel("Assignment response summary")).toContainText("1Other work");
+  await expect(panel.getByLabel("Assignment response summary")).toContainText("2Not started");
+
+  // The three-row preview intentionally prioritizes players who still need action.
+  await expect(panel.getByText("Demo Player", { exact: true })).toBeVisible();
   await expect(panel.getByText("Other Work", { exact: true })).toBeVisible();
   await expect(panel.getByText("Open Player", { exact: true })).toBeVisible();
+  await expect(panel.getByText("Complete Player", { exact: true })).not.toBeVisible();
   await expect(panel).not.toContainText(/viewed|read receipt/i);
 
   const widths = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth }));
