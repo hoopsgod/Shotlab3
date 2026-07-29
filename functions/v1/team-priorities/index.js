@@ -1,4 +1,5 @@
-import { callRpc, readUserId, selectRows, upsertRows } from "../../_utils/supabase.js";
+import { readAuthenticatedIdentity } from "../../_utils/legacySession.js";
+import { callRpc, selectRows, upsertRows } from "../../_utils/supabase.js";
 import { enforceRateLimit, getClientKey } from "../../_utils/security.js";
 
 const DEMO_IDENTITIES = new Set(["coach.demo@shotlab.app", "demo@shotlab.app"]);
@@ -116,8 +117,14 @@ function localDemoResponse(prioritiesByTeam = {}) {
   });
 }
 
+async function resolveRequester(request, env) {
+  const auth = await readAuthenticatedIdentity({ env, request, allowDemo: true });
+  return { ...auth, identity: normalizeIdentity(auth.identity) };
+}
+
 export async function onRequestGet({ request, env }) {
-  const requester = normalizeIdentity(readUserId(request));
+  const auth = await resolveRequester(request, env);
+  const requester = auth.identity;
   if (!requester) return Response.json({ error: "unauthorized" }, { status: 401 });
 
   const rate = enforceRateLimit({
@@ -129,7 +136,7 @@ export async function onRequestGet({ request, env }) {
     return Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
   }
 
-  if (DEMO_IDENTITIES.has(requester)) return localDemoResponse();
+  if (auth.source === "demo_header" && DEMO_IDENTITIES.has(requester)) return localDemoResponse();
 
   try {
     const { readableTeamIds } = await collectTeamPriorityAccess(env, requester);
@@ -163,7 +170,8 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const requester = normalizeIdentity(readUserId(request));
+  const auth = await resolveRequester(request, env);
+  const requester = auth.identity;
   if (!requester) return Response.json({ error: "unauthorized" }, { status: 401 });
 
   const rate = enforceRateLimit({
@@ -183,7 +191,7 @@ export async function onRequestPost({ request, env }) {
   }
 
   const priorities = sanitizeTeamPriorities(body.priorities);
-  if (DEMO_IDENTITIES.has(requester)) return localDemoResponse({ [teamId]: priorities });
+  if (auth.source === "demo_header" && DEMO_IDENTITIES.has(requester)) return localDemoResponse({ [teamId]: priorities });
 
   try {
     const { writableTeamIds } = await collectTeamPriorityAccess(env, requester);
