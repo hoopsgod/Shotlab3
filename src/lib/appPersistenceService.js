@@ -1,4 +1,5 @@
 import { STORAGE_KEYS, sanitizeCoachPriorities } from "./appDataModels.js";
+import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const asPriorityMap = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
@@ -93,7 +94,7 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     try {
       const response = await fetchImpl("/v1/team-priorities", {
         method: "GET",
-        headers: { "x-user-id": requester },
+        headers: buildApiIdentityHeaders({ requester }),
       });
       if (!response?.ok) return localPriorities;
       const body = await readJson(response);
@@ -140,10 +141,10 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     for (const [teamId, teamPriorities] of entries) {
       const response = await fetchImpl("/v1/team-priorities", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-user-id": requester,
-        },
+        headers: buildApiIdentityHeaders({
+          requester,
+          headers: { "Content-Type": "application/json" },
+        }),
         body: JSON.stringify({ team_id: teamId, priorities: teamPriorities }),
       });
       const body = await readJson(response);
