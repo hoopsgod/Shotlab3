@@ -32,7 +32,7 @@ jobs:
         run: npm ci
 
       - name: Verify Phase 2 selectors and source contracts
-        run: node --test tests/coach-operational-intelligence.test.mjs tests/coach-dashboard-phase-2-contract.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-activation-path.test.mjs tests/coach-priority-delivery-integrity.test.mjs tests/coach-assignment-outcomes.test.mjs tests/coach-home-hierarchy-cleanup.test.mjs tests/player-daily-command-center.test.mjs
+        run: node --test tests/coach-operational-intelligence.test.mjs tests/coach-dashboard-phase-2-contract.test.mjs tests/coach-command-center-10x.test.mjs tests/coach-activation-path.test.mjs tests/coach-priority-delivery-integrity.test.mjs tests/coach-assignment-outcomes.test.mjs tests/coach-follow-up-integrity.test.mjs tests/coach-home-hierarchy-cleanup.test.mjs tests/player-daily-command-center.test.mjs
 
       - name: Install pinned Playwright test runner
         run: npm install --no-save @playwright/test@1.55.1
