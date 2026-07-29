@@ -41,6 +41,17 @@ function headers() {
   };
 }
 
+export function clearLegacyServerSession(fetchImpl = globalThis?.fetch) {
+  if (typeof fetchImpl !== "function") return false;
+  try {
+    const pending = fetchImpl("/v1/legacy-auth/logout", { method: "POST", keepalive: true });
+    pending?.catch?.(() => {});
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function postEvents(events, preferBeacon = false) {
   if (!ENDPOINT || events.length === 0) return false;
 
@@ -93,6 +104,8 @@ export function initAnalytics() {
 
 export async function trackBackendEvent(type, payload = {}) {
   if (typeof window === "undefined") return;
+
+  if (type === "auth_logout") clearLegacyServerSession();
 
   const event = {
     id: `evt-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
