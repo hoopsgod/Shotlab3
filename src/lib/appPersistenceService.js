@@ -37,16 +37,19 @@ export const installCoachPrioritySaveBridge = (target = globalThis) => {
     if (!teamId || typeof onSaveCoachPriorities !== "function") {
       return { ok: false, message: "Team priority delivery is unavailable." };
     }
+    const publishedAt = new Date().toISOString();
+    const stampedDraft = { ...draft, updatedAt: publishedAt };
     try {
-      const result = await onSaveCoachPriorities(teamId, draft);
+      const result = await onSaveCoachPriorities(teamId, stampedDraft);
       return result?.ok
-        ? result
+        ? { ...result, publishedAt: result?.publishedAt || publishedAt }
         : { ok: false, message: result?.message || "Could not save priorities." };
     } catch (error) {
       return {
         ok: false,
         message: "Priorities were saved on this device but could not be delivered to the team. Check your connection and retry.",
         errorCode: String(error?.code || error?.message || "priority_delivery_failed"),
+        publishedAt,
       };
     }
   };
@@ -94,7 +97,20 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
       });
       if (!response?.ok) return localPriorities;
       const body = await readJson(response);
-      const remotePriorities = sanitizePriorityMap(body?.priorities_by_team);
+      const metadataByTeam = asPriorityMap(body?.metadata_by_team);
+      const remoteWithMetadata = Object.fromEntries(
+        Object.entries(asPriorityMap(body?.priorities_by_team)).map(([teamId, priorities]) => [teamId, {
+          ...priorities,
+          updatedAt: String(
+            metadataByTeam?.[teamId]?.updatedAt
+            || metadataByTeam?.[teamId]?.updated_at
+            || priorities?.updatedAt
+            || priorities?.updated_at
+            || "",
+          ).trim(),
+        }]),
+      );
+      const remotePriorities = sanitizePriorityMap(remoteWithMetadata);
       const merged = { ...localPriorities, ...remotePriorities };
       await db.set(STORAGE_KEYS.coachPriorities, merged, { strictLocal: true });
       return merged;
@@ -120,6 +136,7 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
 
     const deliveredTeamIds = [];
     let storageMode = "team_remote";
+    let authoritativeLocalWrite = false;
     for (const [teamId, teamPriorities] of entries) {
       const response = await fetchImpl("/v1/team-priorities", {
         method: "POST",
@@ -137,7 +154,19 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
         throw error;
       }
       storageMode = body?.storage_mode || storageMode;
+      const authoritativeUpdatedAt = String(body?.updated_at || body?.updatedAt || "").trim();
+      if (authoritativeUpdatedAt) {
+        nextPriorities[teamId] = sanitizeCoachPriorities({
+          ...(body?.priorities && typeof body.priorities === "object" ? body.priorities : teamPriorities),
+          updatedAt: authoritativeUpdatedAt,
+        });
+        authoritativeLocalWrite = true;
+      }
       deliveredTeamIds.push(teamId);
+    }
+
+    if (authoritativeLocalWrite) {
+      await db.set(STORAGE_KEYS.coachPriorities, nextPriorities, { strictLocal: true });
     }
 
     return { ok: true, storageMode, deliveredTeamIds };

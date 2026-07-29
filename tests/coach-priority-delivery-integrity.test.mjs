@@ -43,6 +43,8 @@ const REMOTE_PRIORITY = {
   weeklyCheckinsTarget: 3,
 };
 
+const SERVER_UPDATED_AT = "2026-07-29T03:10:00.000Z";
+
 test("team priorities hydrate from the remote team source and override stale local values", async () => {
   const db = makeDb({
     "sl:session": { email: "player@example.com" },
@@ -57,6 +59,7 @@ test("team priorities hydrate from the remote team source and override stale loc
         ok: true,
         storage_mode: "team_remote",
         priorities_by_team: { "team-a": REMOTE_PRIORITY },
+        metadata_by_team: { "team-a": { updatedAt: SERVER_UPDATED_AT, updatedBy: "coach@example.com" } },
       });
     },
   });
@@ -64,6 +67,7 @@ test("team priorities hydrate from the remote team source and override stale loc
   const result = await service.getPlayerPriorities();
   assert.equal(result["team-a"].todayFocusText, "Remote team focus");
   assert.equal(result["team-a"].weeklyMakesTarget, 650);
+  assert.equal(result["team-a"].updatedAt, SERVER_UPDATED_AT);
   assert.equal(calls.length, 1);
   assert.equal(calls[0].options.headers["x-user-id"], "player@example.com");
   assert.deepEqual(db.values.get("sl:coach-priorities"), result);
@@ -77,7 +81,7 @@ test("coach priority publishing writes local fallback and posts team-scoped guid
     db,
     fetchImpl: async (url, options) => {
       calls.push({ url, options, body: JSON.parse(options.body) });
-      return makeResponse(200, { ok: true, storage_mode: "team_remote" });
+      return makeResponse(200, { ok: true, storage_mode: "team_remote", priorities: REMOTE_PRIORITY, updated_at: SERVER_UPDATED_AT });
     },
   });
 
@@ -92,6 +96,8 @@ test("coach priority publishing writes local fallback and posts team-scoped guid
   assert.equal(calls[0].body.team_id, "team-a");
   assert.equal(calls[0].body.priorities.priorityDrillText, "Remote drill");
   assert.equal(db.values.get("sl:coach-priorities")["team-a"].todayFocusText, "Remote team focus");
+  assert.equal(db.values.get("sl:coach-priorities")["team-a"].updatedAt, SERVER_UPDATED_AT);
+  assert.equal(db.writes.at(-1).options.strictLocal, true);
 });
 
 test("failed remote delivery preserves the local draft and rejects the publish attempt", async () => {
@@ -108,18 +114,25 @@ test("failed remote delivery preserves the local draft and rejects the publish a
   assert.equal(db.values.get("sl:coach-priorities")["team-a"].todayFocusText, "Remote team focus");
 });
 
-test("the compatibility bridge makes the existing coach save button operational and truthful", async () => {
+test("the compatibility bridge stamps the existing coach save flow and reports delivery truthfully", async () => {
   const target = {};
   const bridge = installCoachPrioritySaveBridge(target);
   assert.equal(typeof bridge, "function");
   assert.equal(target.savePlayerPriorities.__shotlabPriorityBridge, true);
 
+  let deliveredDraft = null;
   const success = await target.savePlayerPriorities({
     teamId: "team-a",
     draft: REMOTE_PRIORITY,
-    onSaveCoachPriorities: async (teamId, draft) => ({ ok: teamId === "team-a" && draft === REMOTE_PRIORITY }),
+    onSaveCoachPriorities: async (teamId, draft) => {
+      deliveredDraft = draft;
+      return { ok: teamId === "team-a" && draft.priorityDrillText === REMOTE_PRIORITY.priorityDrillText };
+    },
   });
   assert.equal(success.ok, true);
+  assert.equal(deliveredDraft.todayFocusText, REMOTE_PRIORITY.todayFocusText);
+  assert.equal(Number.isNaN(Date.parse(deliveredDraft.updatedAt)), false);
+  assert.equal(success.publishedAt, deliveredDraft.updatedAt);
 
   const failure = await target.savePlayerPriorities({
     teamId: "team-a",
@@ -129,6 +142,7 @@ test("the compatibility bridge makes the existing coach save button operational 
   assert.equal(failure.ok, false);
   assert.match(failure.message, /saved on this device/i);
   assert.match(failure.message, /could not be delivered/i);
+  assert.equal(Number.isNaN(Date.parse(failure.publishedAt)), false);
 });
 
 test("server sanitization bounds coach-controlled content and numeric targets", () => {
@@ -157,4 +171,6 @@ test("team priority storage is private and service-role mediated", () => {
   assert.match(endpoint, /writableTeamIds\.has\(teamId\)/);
   assert.match(endpoint, /readableTeamIds/);
   assert.match(endpoint, /x-user-id|readUserId/);
+  assert.match(endpoint, /metadata_by_team/);
+  assert.match(endpoint, /updated_at/);
 });
