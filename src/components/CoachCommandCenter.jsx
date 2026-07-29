@@ -6,6 +6,7 @@ import "./CoachMissionControlPolish.css";
 import "./CoachMissionControl2026.css";
 import "./CoachMissionControlFinal.css";
 import "./CoachActivationPath.css";
+import "./CoachPriorityOverlay.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";
 import useCleanTeamLogo from "./useCleanTeamLogo";
@@ -154,10 +155,14 @@ export default function CoachCommandCenter({
   const [toolsOpen, setToolsOpen] = useState(false);
   const [actionsOpen, setActionsOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
+  const [prioritiesOpen, setPrioritiesOpen] = useState(false);
 
   useEffect(() => {
     document.body.classList.add("mission-control-active");
-    return () => document.body.classList.remove("mission-control-active");
+    return () => {
+      document.body.classList.remove("mission-control-active");
+      document.body.classList.remove("mission-control-priority-open");
+    };
   }, []);
 
   const openBrandingSettings = () => {
@@ -170,6 +175,41 @@ export default function CoachCommandCenter({
     setToolsOpen(true);
     window.setTimeout(() => document.querySelector('[data-testid="coach-secondary-tools"]')?.scrollIntoView({ behavior: "smooth", block: "center" }), 40);
   };
+
+  const closePriorityEditor = () => {
+    const editor = document.querySelector('[data-testid="coach-priority-editor"]');
+    if (editor) {
+      editor.open = false;
+      editor.removeAttribute("role");
+      editor.removeAttribute("aria-modal");
+      editor.removeAttribute("aria-label");
+    }
+    document.body.classList.remove("mission-control-priority-open");
+    setPrioritiesOpen(false);
+  };
+
+  const openPriorityEditor = () => {
+    const editor = document.querySelector('[data-testid="coach-priority-editor"]');
+    if (!editor) return;
+    setActionsOpen(false);
+    setNavOpen(false);
+    editor.open = true;
+    editor.setAttribute("role", "dialog");
+    editor.setAttribute("aria-modal", "true");
+    editor.setAttribute("aria-label", "Set team focus");
+    document.body.classList.add("mission-control-priority-open");
+    setPrioritiesOpen(true);
+    window.setTimeout(() => editor.querySelector("input, select, textarea, button")?.focus?.({ preventScroll: true }), 60);
+  };
+
+  useEffect(() => {
+    if (!prioritiesOpen) return undefined;
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") closePriorityEditor();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [prioritiesOpen]);
 
   const rosterSize = Math.max(0, Number(totalPlayers) || 0);
   const activeCount = Math.max(0, Number(activeTodayCount) || 0);
@@ -222,6 +262,7 @@ export default function CoachCommandCenter({
   const quickActions = useMemo(() => [
     { label: "Add Player", icon: "users", onClick: onAddPlayer },
     { label: "Create Practice", icon: "calendar", onClick: onScheduleEvent },
+    { label: "Set Team Focus", icon: "spark", onClick: openPriorityEditor },
     { label: "Build Mission", icon: "target", onClick: onAddDrill },
     { label: "Log Score", icon: "score", onClick: onLogScore },
     { label: "Message Team", icon: "message", onClick: onPlayersClick },
@@ -298,6 +339,8 @@ export default function CoachCommandCenter({
 
         {toolsOpen ? <section className="mcSection mcTools" data-testid="coach-secondary-tools"><div><small>Team code</small><strong>{joinCode || "—"}</strong>{codeErr ? <span>{codeErr}</span> : null}</div><div><button type="button" onClick={() => { onCopyJoinCode?.(); setCopied(true); setTimeout(() => setCopied(false), 1600); }}>{copied ? "Copied" : "Copy code"}</button><button type="button" onClick={onRegenerateJoinCode}>New code</button><button type="button" onClick={() => setToolsOpen(false)}>Close</button></div><span data-testid="coach-team-code-bar" /></section> : null}
       </main>
+
+      {prioritiesOpen ? <div className="mcPriorityOverlayLayer" data-testid="coach-priority-overlay"><button type="button" className="mcPriorityOverlayBackdrop" aria-label="Close team focus editor" onClick={closePriorityEditor} /><button type="button" className="mcPriorityOverlayClose" aria-label="Close team focus editor" onClick={closePriorityEditor}><Icon name="close" size={20} /></button></div> : null}
 
       <div className={`mcActionLayer ${actionsOpen ? "is-open" : ""}`} aria-hidden={!actionsOpen}>
         <button type="button" className="mcActionBackdrop" aria-label="Close quick actions" onClick={() => setActionsOpen(false)} />

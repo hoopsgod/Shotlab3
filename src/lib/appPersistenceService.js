@@ -1,4 +1,61 @@
-import { STORAGE_KEYS } from "./appDataModels";
+import { STORAGE_KEYS, sanitizeCoachPriorities } from "./appDataModels.js";
+
+const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
+const asPriorityMap = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
+const sanitizePriorityMap = (value) => Object.fromEntries(
+  Object.entries(asPriorityMap(value))
+    .map(([teamId, priorities]) => [String(teamId || "").trim(), sanitizeCoachPriorities(priorities)])
+    .filter(([teamId]) => Boolean(teamId)),
+);
+
+const readJson = async (response) => {
+  try {
+    return await response.json();
+  } catch {
+    return {};
+  }
+};
+
+const readBrowserValue = (key) => {
+  try {
+    if (typeof globalThis?.localStorage?.getItem !== "function") return null;
+    const raw = globalThis.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+};
+
+export const installCoachPrioritySaveBridge = (target = globalThis) => {
+  if (!target || typeof target !== "object") return null;
+  if (typeof target.savePlayerPriorities === "function" && !target.savePlayerPriorities.__shotlabPriorityBridge) {
+    return target.savePlayerPriorities;
+  }
+  if (target.savePlayerPriorities?.__shotlabPriorityBridge) return target.savePlayerPriorities;
+
+  const bridge = async ({ teamId, draft, onSaveCoachPriorities } = {}) => {
+    if (!teamId || typeof onSaveCoachPriorities !== "function") {
+      return { ok: false, message: "Team priority delivery is unavailable." };
+    }
+    try {
+      const result = await onSaveCoachPriorities(teamId, draft);
+      return result?.ok
+        ? result
+        : { ok: false, message: result?.message || "Could not save priorities." };
+    } catch (error) {
+      return {
+        ok: false,
+        message: "Priorities were saved on this device but could not be delivered to the team. Check your connection and retry.",
+        errorCode: String(error?.code || error?.message || "priority_delivery_failed"),
+      };
+    }
+  };
+  bridge.__shotlabPriorityBridge = true;
+  target.savePlayerPriorities = bridge;
+  return bridge;
+};
+
+installCoachPrioritySaveBridge();
 
 export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
   const getCollection = async (key, fallback = []) => {
@@ -12,8 +69,79 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     return nextValue;
   };
 
-  const getPlayerPriorities = async () => db.get(STORAGE_KEYS.coachPriorities);
-  const savePlayerPriorities = async (priorities) => db.set(STORAGE_KEYS.coachPriorities, priorities);
+  const getRequesterContext = async () => {
+    const browserSession = readBrowserValue(STORAGE_KEYS.sessions);
+    const storedSession = browserSession || await db.get(STORAGE_KEYS.sessions);
+    const session = Array.isArray(storedSession) ? storedSession[0] : storedSession;
+    const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
+
+    const browserPlayers = readBrowserValue(STORAGE_KEYS.players);
+    const storedPlayers = Array.isArray(browserPlayers) ? browserPlayers : await getCollection(STORAGE_KEYS.players);
+    const actor = (Array.isArray(storedPlayers) ? storedPlayers : []).find((player) => normalizeIdentity(player?.email) === requester);
+    const teamId = String(actor?.teamId || actor?.team_id || "").trim();
+    return { requester, teamId };
+  };
+
+  const getPlayerPriorities = async () => {
+    const localPriorities = sanitizePriorityMap(await db.get(STORAGE_KEYS.coachPriorities));
+    const { requester } = await getRequesterContext();
+    if (!requester) return localPriorities;
+
+    try {
+      const response = await fetchImpl("/v1/team-priorities", {
+        method: "GET",
+        headers: { "x-user-id": requester },
+      });
+      if (!response?.ok) return localPriorities;
+      const body = await readJson(response);
+      const remotePriorities = sanitizePriorityMap(body?.priorities_by_team);
+      const merged = { ...localPriorities, ...remotePriorities };
+      await db.set(STORAGE_KEYS.coachPriorities, merged, { strictLocal: true });
+      return merged;
+    } catch {
+      return localPriorities;
+    }
+  };
+
+  const savePlayerPriorities = async (priorities) => {
+    const nextPriorities = sanitizePriorityMap(priorities);
+    await db.set(STORAGE_KEYS.coachPriorities, nextPriorities, { strictLocal: true });
+
+    const { requester, teamId: activeTeamId } = await getRequesterContext();
+    const allEntries = Object.entries(nextPriorities);
+    const entries = activeTeamId && nextPriorities[activeTeamId]
+      ? [[activeTeamId, nextPriorities[activeTeamId]]]
+      : allEntries.length === 1
+        ? allEntries
+        : [];
+    if (!requester || entries.length === 0) {
+      return { ok: true, storageMode: "local_only", deliveredTeamIds: [] };
+    }
+
+    const deliveredTeamIds = [];
+    let storageMode = "team_remote";
+    for (const [teamId, teamPriorities] of entries) {
+      const response = await fetchImpl("/v1/team-priorities", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-user-id": requester,
+        },
+        body: JSON.stringify({ team_id: teamId, priorities: teamPriorities }),
+      });
+      const body = await readJson(response);
+      if (!response?.ok || body?.ok === false || body?.error) {
+        const error = new Error(String(body?.error || `priority_delivery_http_${response?.status || 0}`));
+        error.code = String(body?.error || "priority_delivery_failed");
+        error.status = response?.status || 0;
+        throw error;
+      }
+      storageMode = body?.storage_mode || storageMode;
+      deliveredTeamIds.push(teamId);
+    }
+
+    return { ok: true, storageMode, deliveredTeamIds };
+  };
 
   const getProgramDrills = async () => getCollection(STORAGE_KEYS.programDrills);
 
