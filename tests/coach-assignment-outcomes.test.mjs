@@ -54,6 +54,8 @@ test("current priority outcomes are derived from real roster-scoped completions"
   assert.equal(result.rows.find((row) => row.name === "One Player")?.status, "completed");
   assert.equal(result.rows.find((row) => row.name === "Two Player")?.status, "active-other");
   assert.equal(result.rows.find((row) => row.name === "Three Player")?.status, "not-started");
+  assert.equal(result.rows.find((row) => row.name === "Three Player")?.email, "three@example.com");
+  assert.equal(result.rows.find((row) => row.name === "Three Player")?.searchIdentity, "three@example.com");
   assert.equal(result.rows.some((row) => row.name === "Removed Player"), false);
   assert.equal(result.rows.some((row) => row.name === "Other Team"), false);
 });
@@ -140,7 +142,7 @@ test("storage reader resolves the active coach team and persisted stores", () =>
   assert.equal(result.freshness, "current");
 });
 
-test("enhancer reports outcomes only and never fabricates view receipts", () => {
+test("enhancer reports outcomes only and routes exact player follow-up through stable dashboard contracts", () => {
   const source = fs.readFileSync(new URL("../src/lib/coachAssignmentOutcomeEnhancer.js", import.meta.url), "utf8");
   assert.match(source, /completed this week/i);
   assert.match(source, /priority still open/i);
@@ -148,4 +150,9 @@ test("enhancer reports outcomes only and never fabricates view receipts", () => 
   assert.match(source, /Refresh team focus/i);
   assert.doesNotMatch(source, /viewed assignment|seen by|read receipt/i);
   assert.match(source, /coach-assignment-outcome/);
+  assert.match(source, /coach-players-filter-rail/);
+  assert.match(source, /coach-roster-operations/);
+  assert.match(source, /data-player-email/);
+  assert.match(source, /Open \$\{row\.name\} player intelligence/);
+  assert.match(source, /min-height:44px/);
 });
