@@ -1,9 +1,11 @@
 import { installCoachAssignmentOutcomeEnhancer } from "./coachAssignmentOutcomeEnhancer.js";
 import { installCoachFollowUpEnhancer } from "./coachFollowUpEnhancer.js";
+import { installCoachFollowUpQueueEnhancer } from "./coachFollowUpQueueEnhancer.js";
 import { installCoachHomeHierarchyEnhancer } from "./coachHomeHierarchyEnhancer.js";
 
 installCoachAssignmentOutcomeEnhancer();
 installCoachFollowUpEnhancer();
+installCoachFollowUpQueueEnhancer();
 installCoachHomeHierarchyEnhancer();
 
 const clean = (value) => String(value ?? "").trim();
