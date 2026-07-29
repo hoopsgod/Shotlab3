@@ -134,6 +134,11 @@ test("Mission Control closes the exact player follow-up loop", async ({ page }) 
   await expect(ledger).toHaveAttribute("data-follow-up-state", "completed");
   await expect(ledger.getByRole("status")).toContainText("Follow-up record synced");
 
+  // The player drawer is modal and correctly blocks the mobile dock. Close it
+  // through the existing drawer control before returning to Mission Control.
+  await drawer.getByRole("button", { name: "Close details", exact: true }).last().click();
+  await expect(drawer).toHaveCount(0);
+
   const dock = page.getByTestId("mobile-navigation-dock");
   await dock.getByRole("button", { name: "Home", exact: true }).click();
 
