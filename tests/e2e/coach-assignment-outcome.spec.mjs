@@ -41,7 +41,7 @@ async function openCoachWithSeed(page, seed) {
   await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
 }
 
-test("Mission Control reports current priority completion", async ({ page }) => {
+test("Mission Control reports current priority completion and opens exact player intelligence", async ({ page }) => {
   const seed = makeSeed(new Date().toISOString());
   await openCoachWithSeed(page, seed);
 
@@ -64,6 +64,28 @@ test("Mission Control reports current priority completion", async ({ page }) => 
   await expect(panel.getByText("Open Player", { exact: true })).toBeVisible();
   await expect(panel.getByText("Complete Player", { exact: true })).not.toBeVisible();
   await expect(panel).not.toContainText(/viewed|read receipt/i);
+
+  const followUpButtons = panel.locator("button.mcAssignmentOutcomeRow");
+  await expect(followUpButtons).toHaveCount(3);
+  for (let index = 0; index < 3; index += 1) {
+    const box = await followUpButtons.nth(index).boundingBox();
+    expect(box).not.toBeNull();
+    expect(box.height).toBeGreaterThanOrEqual(44);
+  }
+
+  const openPlayerButton = panel.getByRole("button", { name: "Open Open Player player intelligence", exact: true });
+  await expect(openPlayerButton).toHaveAttribute("data-player-email", "three@example.test");
+  await openPlayerButton.click();
+
+  const filterRail = page.getByTestId("coach-players-filter-rail");
+  await expect(filterRail).toBeVisible({ timeout: 20_000 });
+  await expect(filterRail.locator('input[type="search"]')).toHaveValue("three@example.test");
+  await expect(page.locator('#coach-roster-operations [role="button"]')).toHaveCount(1);
+
+  const drawer = page.getByTestId("coach-player-intelligence-drawer");
+  await expect(drawer).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("dialog", { name: "Open Player", exact: true })).toBeVisible();
+  await expect(drawer.getByRole("button", { name: "Open Full Profile", exact: true })).toBeVisible();
 
   const widths = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth }));
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
