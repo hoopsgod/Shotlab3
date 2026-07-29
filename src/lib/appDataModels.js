@@ -39,6 +39,7 @@ export const COACH_PRIORITIES_INIT = {
   challengeText: "Build momentum: complete one drill and log shots today.",
   weeklyMakesTarget: PLAYER_WEEKLY_SHOT_TARGET,
   weeklyCheckinsTarget: 2,
+  updatedAt: "",
 };
 
 export const sanitizeCoachPriorities = (value = {}) => {
@@ -52,6 +53,6 @@ export const sanitizeCoachPriorities = (value = {}) => {
     challengeText: String(value?.challengeText || COACH_PRIORITIES_INIT.challengeText),
     weeklyMakesTarget: Number.isFinite(weeklyMakesTarget) ? weeklyMakesTarget : COACH_PRIORITIES_INIT.weeklyMakesTarget,
     weeklyCheckinsTarget: Number.isFinite(weeklyCheckinsTarget) ? weeklyCheckinsTarget : COACH_PRIORITIES_INIT.weeklyCheckinsTarget,
+    updatedAt: String(value?.updatedAt || value?.updated_at || "").trim(),
   };
 };
-
