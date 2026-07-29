@@ -1,3 +1,7 @@
+import { installCoachAssignmentOutcomeEnhancer } from "./coachAssignmentOutcomeEnhancer.js";
+
+installCoachAssignmentOutcomeEnhancer();
+
 const clean = (value) => String(value ?? "").trim();
 const safeCount = (value) => Math.max(0, Number(value) || 0);
 
