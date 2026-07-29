@@ -1,3 +1,4 @@
+import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 import { getCoachRosterPlayers } from "./playerDataManagement.js";
 import {
   readCoachFollowUpStore,
@@ -97,7 +98,7 @@ export async function loadCoachFollowUpQueue({
   try {
     const response = await fetchImpl(`/v1/coach-follow-ups?team_id=${encodeURIComponent(context.teamId)}`, {
       method: "GET",
-      headers: { "x-user-id": context.requester },
+      headers: buildApiIdentityHeaders({ requester: context.requester, storage }),
     });
     const body = await readJson(response);
     if (!response?.ok || body?.error) {
