@@ -159,7 +159,7 @@ export async function revokeLegacySession({ env, request, now = new Date() }) {
     "legacy_auth_sessions",
     `token_hash=eq.${encodeURIComponent(tokenHash)}&revoked_at=is.null`,
     { revoked_at: revokedAt, last_seen_at: revokedAt },
-  ).catch(() => []);
+  );
   return { revoked: true, tokenHash, cookie: buildLegacySessionClearCookie(request) };
 }
 
