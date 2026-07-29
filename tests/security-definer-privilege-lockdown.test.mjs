@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 const migration = fs.readFileSync(new URL("../migrations/039_security_definer_privilege_lockdown.sql", import.meta.url), "utf8");
 const leaderboardRoute = fs.readFileSync(new URL("../functions/v1/leaderboards/home-shots.js", import.meta.url), "utf8");
@@ -44,7 +45,7 @@ test("leaderboard RPC is mediated by the Cloudflare service-role route", () => {
 });
 
 test("browser application source does not call locked RPCs directly", () => {
-  const srcRoot = new URL("../src", import.meta.url);
+  const srcRoot = fileURLToPath(new URL("../src", import.meta.url));
   const source = collectSourceFiles(srcRoot).map((file) => fs.readFileSync(file, "utf8")).join("\n");
   assert.doesNotMatch(source, /resolve_app_user_uuid/);
   assert.doesNotMatch(source, /get_team_home_shots_leaderboard/);
