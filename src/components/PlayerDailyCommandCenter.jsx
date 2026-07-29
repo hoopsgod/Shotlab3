@@ -23,6 +23,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   if (!model?.primaryAction) return null;
   const primary = model.primaryAction;
   const queue = Array.isArray(model.queue) ? model.queue.slice(1, 4) : [];
+  const coachSignal = model.coachSignal || {};
   const dailyRemaining = Math.max((Number(model.daily?.goal) || 0) - (Number(model.daily?.makes) || 0), 0);
   const dailyComplete = Number(model.daily?.pct) >= 100 || primary.urgency === "complete";
   const weeklyComplete = Number(model.weekly?.pct) >= 100;
@@ -72,6 +73,26 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
           {activeAction === actionKey(primary) ? "Opening…" : `${primary.actionLabel} →`}
         </button>
       </div>
+
+      <section className={styles.coachSignal} data-testid="player-coach-priority-signal" aria-label="Coach assignment">
+        <div className={styles.coachSignalHeader}>
+          <div>
+            <div className={styles.coachSignalEyebrow}>Coach assignment</div>
+            <h2 className={styles.coachSignalTitle}>{coachSignal.focus || "Build quality reps today"}</h2>
+          </div>
+          <span className={styles.coachSignalStatus}>Team focus</span>
+        </div>
+        <div className={styles.coachSignalGrid}>
+          <div className={styles.coachSignalItem}>
+            <div className={styles.coachSignalLabel}>Priority drill</div>
+            <div className={styles.coachSignalValue}>{coachSignal.priorityDrill || "Next unfinished training block"}</div>
+          </div>
+          <div className={styles.coachSignalItem}>
+            <div className={styles.coachSignalLabel}>Challenge</div>
+            <div className={styles.coachSignalValue}>{coachSignal.challenge || "Complete one focused block and log the result."}</div>
+          </div>
+        </div>
+      </section>
 
       <div className={styles.momentumSignal}>
         <ExperienceSignal
