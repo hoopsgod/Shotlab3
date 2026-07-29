@@ -20,6 +20,7 @@ const rowDate = (row = {}) => clean(row?.date || row?.session_date || row?.creat
 const rowDrillId = (row = {}) => clean(row?.drillId || row?.drill_id || row?.drillKey || row?.drill_key || row?.id);
 const rowDrillName = (row = {}) => clean(row?.drillName || row?.drill_name || row?.name || row?.title);
 const playerName = (row = {}) => clean(row?.name || row?.displayName || row?.playerName || row?.player_name || [row?.firstName, row?.lastName].filter(Boolean).join(" ")) || "Player";
+const playerEmail = (row = {}) => clean(row?.email || row?.player_email);
 
 const identityKeys = (row = {}) => [
   row?.email,
@@ -158,8 +159,11 @@ export const deriveCoachAssignmentOutcomes = ({
     const completed = matchingScores.length > 0;
     const activeOther = !completed && playerActivity.length > 0;
     const status = completed ? "completed" : activeOther ? "active-other" : "not-started";
+    const email = playerEmail(player);
     return {
       key: [...identities][0],
+      email,
+      searchIdentity: email || playerName(player),
       name: playerName(player),
       status,
       completed,
