@@ -18,9 +18,10 @@ test("Mission Control removes duplicate setup while preserving operational secti
 
   const cleanupStyle = page.locator("#shotlab-coach-home-hierarchy-cleanup");
   await expect(cleanupStyle).toHaveCount(1);
-  await expect(cleanupStyle).toContainText('[data-testid="coach-setup-checklist"]');
-  await expect(cleanupStyle).not.toContainText("coach-team-standings");
-  await expect(cleanupStyle).not.toContainText("coach-today-practice");
+  const cleanupCss = await cleanupStyle.evaluate((node) => node.textContent || "");
+  expect(cleanupCss).toContain('[data-testid="coach-setup-checklist"]');
+  expect(cleanupCss).not.toContain("coach-team-standings");
+  expect(cleanupCss).not.toContain("coach-today-practice");
 
   const widths = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth }));
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
