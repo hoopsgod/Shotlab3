@@ -11,6 +11,11 @@ const urgencyLabel = (urgency = "normal") => {
 
 const rankLabel = (rank = 0) => (Number(rank) > 0 ? `#${Number(rank)}` : "—");
 const actionKey = (action = {}) => String(action.id || action.kind || action.target || action.title || "action");
+const coachSignalStatus = (signal = {}) => {
+  if (signal.stale) return "Stale";
+  if (signal.freshness === "current") return signal.ageDays === 0 ? "Published today" : `${signal.ageDays}d old`;
+  return "Unverified";
+};
 
 export default function PlayerDailyCommandCenter({ model, onAction }) {
   const [activeAction, setActiveAction] = useState("");
@@ -74,23 +79,60 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </button>
       </div>
 
-      <section className={styles.coachSignal} data-testid="player-coach-priority-signal" aria-label="Coach assignment">
+      <section
+        className={styles.coachSignal}
+        data-testid="player-coach-priority-signal"
+        data-freshness={coachSignal.freshness || "unknown"}
+        aria-label="Coach assignment"
+        style={coachSignal.stale ? {
+          borderColor: "rgba(255,181,71,.42)",
+          background: "linear-gradient(145deg, rgba(255,181,71,.075), rgba(0,0,0,.16))",
+        } : undefined}
+      >
         <div className={styles.coachSignalHeader}>
           <div>
-            <div className={styles.coachSignalEyebrow}>Coach assignment</div>
-            <h2 className={styles.coachSignalTitle}>{coachSignal.focus || "Build quality reps today"}</h2>
+            <div className={styles.coachSignalEyebrow} style={coachSignal.stale ? { color: "#ffca76" } : undefined}>
+              {coachSignal.stale ? "Coach assignment needs refresh" : "Coach assignment"}
+            </div>
+            <h2 className={styles.coachSignalTitle}>
+              {coachSignal.stale ? "Waiting for an updated team focus" : coachSignal.focus || "Build quality reps today"}
+            </h2>
           </div>
-          <span className={styles.coachSignalStatus}>Team focus</span>
+          <span
+            className={styles.coachSignalStatus}
+            style={coachSignal.stale ? {
+              borderColor: "rgba(255,181,71,.48)",
+              background: "rgba(255,181,71,.12)",
+              color: "#ffd18a",
+            } : undefined}
+          >
+            {coachSignalStatus(coachSignal)}
+          </span>
         </div>
         <div className={styles.coachSignalGrid}>
-          <div className={styles.coachSignalItem}>
-            <div className={styles.coachSignalLabel}>Priority drill</div>
-            <div className={styles.coachSignalValue}>{coachSignal.priorityDrill || "Next unfinished training block"}</div>
-          </div>
-          <div className={styles.coachSignalItem}>
-            <div className={styles.coachSignalLabel}>Challenge</div>
-            <div className={styles.coachSignalValue}>{coachSignal.challenge || "Complete one focused block and log the result."}</div>
-          </div>
+          {coachSignal.stale ? (
+            <>
+              <div className={styles.coachSignalItem}>
+                <div className={styles.coachSignalLabel}>Last published</div>
+                <div className={styles.coachSignalValue}>{coachSignal.ageDays} days ago</div>
+              </div>
+              <div className={styles.coachSignalItem}>
+                <div className={styles.coachSignalLabel}>What to do</div>
+                <div className={styles.coachSignalValue}>Continue your current training plan until your coach republishes Team Focus.</div>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.coachSignalItem}>
+                <div className={styles.coachSignalLabel}>Priority drill</div>
+                <div className={styles.coachSignalValue}>{coachSignal.priorityDrill || "Next unfinished training block"}</div>
+              </div>
+              <div className={styles.coachSignalItem}>
+                <div className={styles.coachSignalLabel}>Challenge</div>
+                <div className={styles.coachSignalValue}>{coachSignal.challenge || "Complete one focused block and log the result."}</div>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
