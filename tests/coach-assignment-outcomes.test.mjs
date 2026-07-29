@@ -205,7 +205,8 @@ test("storage reader resolves the active coach team and persisted stores", () =>
 test("enhancer reports only measured outcomes and routes exact player follow-up", () => {
   const source = fs.readFileSync(new URL("../src/lib/coachAssignmentOutcomeEnhancer.js", import.meta.url), "utf8");
   assert.match(source, /measurementLabel/);
-  assert.match(source, /since published/i);
+  assert.match(source, /data-measurement-mode/);
+  assert.match(source, /counting results from/i);
   assert.match(source, /priority still open/i);
   assert.match(source, /withholding the percentage/i);
   assert.match(source, /Refresh team focus/i);
