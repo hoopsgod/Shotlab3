@@ -10,7 +10,7 @@ const seed = {
     { id: "coach", email: "coach.demo@shotlab.app", name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
     { id: "open", email: "open@example.test", name: "Open Player", role: "player", teamId: TEAM_ID },
     { id: "complete", email: "complete@example.test", name: "Complete Player", role: "player", teamId: TEAM_ID },
-    { id: "removed", email: "removed@example.test", name: "Removed Player", role: "player", teamId: TEAM_ID, rosterStatus: "removed" },
+    { id: "removed", email: "removed@example.test", name: "Removed Player", role: "player", teamId: null, removedFromTeamId: TEAM_ID, rosterStatus: "removed", rosterAction: "coach_remove_from_team", hideFromLeaderboards: true },
   ],
   "sl:player-profiles": [],
   "sl:drills": [{ id: "form", name: "Form Shooting" }],
