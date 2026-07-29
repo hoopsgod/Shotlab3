@@ -1,6 +1,8 @@
 import { installCoachAssignmentOutcomeEnhancer } from "./coachAssignmentOutcomeEnhancer.js";
+import { installCoachHomeHierarchyEnhancer } from "./coachHomeHierarchyEnhancer.js";
 
 installCoachAssignmentOutcomeEnhancer();
+installCoachHomeHierarchyEnhancer();
 
 const clean = (value) => String(value ?? "").trim();
 const safeCount = (value) => Math.max(0, Number(value) || 0);
