@@ -1,5 +1,6 @@
 export const COACH_FOLLOW_UP_STORAGE_KEY = "sl:coach-follow-ups";
 export const COACH_FOLLOW_UP_STATES = new Set(["planned", "completed", "dismissed"]);
+export const COACH_FOLLOW_UP_CHANGE_EVENT = "shotlab:coach-follow-ups-changed";
 
 const clean = (value, max = 500) => String(value ?? "").trim().slice(0, max);
 const identity = (value) => clean(value, 320).toLowerCase();
@@ -51,12 +52,26 @@ export function getCoachFollowUpFromStore({ storage = globalThis?.localStorage, 
   return raw ? sanitizeCoachFollowUp(raw) : null;
 }
 
+function announceFollowUpChange(record) {
+  try {
+    if (typeof globalThis?.dispatchEvent !== "function" || typeof globalThis?.CustomEvent !== "function") return;
+    globalThis.dispatchEvent(new CustomEvent(COACH_FOLLOW_UP_CHANGE_EVENT, {
+      detail: {
+        teamId: record?.teamId || "",
+        playerIdentity: record?.playerIdentity || "",
+        state: record?.state || "",
+      },
+    }));
+  } catch {}
+}
+
 function saveLocalRecord(storage, value) {
   const record = sanitizeCoachFollowUp(value);
   if (!record.teamId || !record.playerIdentity) return null;
   const store = readCoachFollowUpStore(storage);
   store[recordKey(record.teamId, record.playerIdentity)] = record;
   writeCoachFollowUpStore(storage, store);
+  announceFollowUpChange(record);
   return record;
 }
 
