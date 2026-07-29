@@ -1,0 +1,60 @@
+name: Security Definer Privilege Lockdown
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "migrations/039_security_definer_privilege_lockdown.sql"
+      - "tests/security-definer-privilege-lockdown.test.mjs"
+      - "tests/home-shots-leaderboard-route.integration.test.mjs"
+      - "tests/home-shots-leaderboard-sql-contract.test.mjs"
+      - "tests/season-rollover-contract.test.mjs"
+      - "tests/season-rollover-route-contract.test.mjs"
+      - "docs/security-definer-privilege-lockdown.md"
+      - ".github/workflows/security-definer-privilege-lockdown.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-definer-lockdown-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security-definer-lockdown:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify privilege and route contracts
+        run: |
+          node --test tests/security-definer-privilege-lockdown.test.mjs
+          node --test tests/home-shots-leaderboard-route.integration.test.mjs tests/home-shots-leaderboard-sql-contract.test.mjs
+          node --test tests/season-rollover-contract.test.mjs tests/season-rollover-route-contract.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-definer-lockdown-failure
+          path: |
+            npm-debug.log
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
