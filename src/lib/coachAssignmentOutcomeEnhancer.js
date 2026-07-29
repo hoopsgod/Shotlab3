@@ -37,14 +37,17 @@ const styles = `
 @media(prefers-reduced-motion:reduce){.mcAssignmentOutcomeTrack span,.mcAssignmentOutcomeRow{transition:none}.mcAssignmentOutcomeRow:hover,.mcAssignmentOutcomeRow:focus-visible,.mcAssignmentOutcomeRow:active{transform:none}}
 `;
 
-const statusCopy = (row = {}) => {
-  if (row.status === "completed") return row.attempts > 1 ? `${row.attempts} completions this week` : "Priority completed this week";
-  if (row.status === "active-other") return "Active this week · priority still open";
-  return "No matching completion this week";
+const clean = (value) => String(value ?? "").trim();
+const measurementLabel = (model = {}) => clean(model.measurementLabel) || "this week";
+
+const statusCopy = (row = {}, model = {}) => {
+  const period = measurementLabel(model);
+  if (row.status === "completed") return row.attempts > 1 ? `${row.attempts} completions ${period}` : `Priority completed ${period}`;
+  if (row.status === "active-other") return `Active ${period} · priority still open`;
+  return `No matching completion ${period}`;
 };
 
 const statusLabel = (row = {}) => row.status === "completed" ? "Done" : row.status === "active-other" ? "Other work" : "Open";
-const clean = (value) => String(value ?? "").trim();
 
 function openPlayerWorkspace() {
   const root = document.querySelector('[data-testid="coach-command-center-full"]');
@@ -101,8 +104,12 @@ export function openExactPlayerFollowUp(row = {}) {
 }
 
 function freshnessCopy(model = {}) {
-  if (model.freshness === "current") return model.ageDays === 0 ? "Published today" : `Published ${model.ageDays} day${model.ageDays === 1 ? "" : "s"} ago`;
-  if (model.freshness === "unknown") return "Freshness not verified · republish to start timestamp tracking";
+  const windowStart = clean(model.measurementStartDate);
+  if (model.freshness === "current") {
+    const age = model.ageDays === 0 ? "Published today" : `Published ${model.ageDays} day${model.ageDays === 1 ? "" : "s"} ago`;
+    return windowStart ? `${age} · counting results from ${windowStart}` : age;
+  }
+  if (model.freshness === "unknown") return windowStart ? `Freshness not verified · weekly fallback from ${windowStart}` : "Freshness not verified · republish to start timestamp tracking";
   return "";
 }
 
@@ -113,28 +120,29 @@ function CoachAssignmentOutcomePanel() {
   if (model.stale) {
     return React.createElement(
       "article",
-      { className: "mcSection mcAssignmentOutcome is-stale", "aria-labelledby": "mc-assignment-outcome-heading", "data-testid": "coach-assignment-outcome", "data-freshness": "stale" },
+      { className: "mcSection mcAssignmentOutcome is-stale", "aria-labelledby": "mc-assignment-outcome-heading", "data-testid": "coach-assignment-outcome", "data-freshness": "stale", "data-measurement-mode": model.measurementMode || "weekly-fallback" },
       React.createElement("div", { className: "mcAssignmentOutcomeHead" },
         React.createElement("span", null,
           React.createElement("small", null, "Assignment needs refresh"),
           React.createElement("h2", { id: "mc-assignment-outcome-heading" }, model.priorityDrill)),
         React.createElement("strong", { className: "mcAssignmentOutcomeStaleBadge" }, "STALE")),
       React.createElement("div", { className: "mcAssignmentOutcomeMeta" }, `Last published ${model.ageDays} day${model.ageDays === 1 ? "" : "s"} ago`),
-      React.createElement("p", { className: "mcAssignmentOutcomeStaleCopy" }, "Republish the team focus before using this week’s completion data. ShotLab is withholding the completion percentage so old guidance is not presented as current."),
+      React.createElement("p", { className: "mcAssignmentOutcomeStaleCopy" }, "Republish the team focus before using assignment completion data. ShotLab is withholding the percentage so old guidance is not presented as current."),
       React.createElement("button", { type: "button", className: "mcAssignmentOutcomeRefresh", onClick: openTeamFocusEditor }, "Refresh team focus"),
     );
   }
 
+  const period = measurementLabel(model);
   const visibleRows = model.rows.slice(0, 3);
   return React.createElement(
     "article",
-    { className: "mcSection mcAssignmentOutcome", "aria-labelledby": "mc-assignment-outcome-heading", "data-testid": "coach-assignment-outcome", "data-freshness": model.freshness || "unknown" },
+    { className: "mcSection mcAssignmentOutcome", "aria-labelledby": "mc-assignment-outcome-heading", "data-testid": "coach-assignment-outcome", "data-freshness": model.freshness || "unknown", "data-measurement-mode": model.measurementMode || "weekly-fallback" },
     React.createElement("div", { className: "mcAssignmentOutcomeHead" },
       React.createElement("span", null,
         React.createElement("small", null, "Current assignment"),
         React.createElement("h2", { id: "mc-assignment-outcome-heading" }, model.priorityDrill)),
       React.createElement("strong", { className: "mcAssignmentOutcomeRate", "aria-label": `${model.completionRate}% assignment completion` }, `${model.completionRate}%`)),
-    React.createElement("div", { className: "mcAssignmentOutcomeMeta" }, `${model.completedCount} of ${model.total} completed this week`),
+    React.createElement("div", { className: "mcAssignmentOutcomeMeta" }, `${model.completedCount} of ${model.total} completed ${period}`),
     React.createElement("div", { className: "mcAssignmentOutcomeFreshness" }, freshnessCopy(model)),
     React.createElement("div", { className: "mcAssignmentOutcomeTrack", "aria-hidden": "true" }, React.createElement("span", { style: { width: `${model.completionRate}%` } })),
     React.createElement("div", { className: "mcAssignmentOutcomeFacts", "aria-label": "Assignment response summary" },
@@ -152,7 +160,7 @@ function CoachAssignmentOutcomePanel() {
         "data-player-email": row.email || undefined,
       },
       React.createElement("i", { className: "mcAssignmentOutcomeDot", "aria-hidden": "true" }),
-      React.createElement("span", null, React.createElement("strong", null, row.name), React.createElement("small", null, statusCopy(row))),
+      React.createElement("span", null, React.createElement("strong", null, row.name), React.createElement("small", null, statusCopy(row, model))),
       React.createElement("em", { "aria-hidden": "true" }, `${statusLabel(row)} ›`)))),
     React.createElement("button", { type: "button", className: "mcTextLink", onClick: openPlayerWorkspace }, "Review player workspace →"));
 }
