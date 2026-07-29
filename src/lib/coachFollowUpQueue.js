@@ -35,9 +35,14 @@ const rosterIdentityKeys = (row = {}) => [
   row?.id,
 ].map(identity).filter(Boolean);
 
+const isCoachRosterRow = (row = {}) => {
+  const role = identity(row?.role);
+  return row?.isCoach === true || role === "coach" || role === "assistant_coach";
+};
+
 export function deriveCoachFollowUpQueue({ records = [], roster = [], teamId = "" } = {}) {
   const targetTeamId = clean(teamId);
-  const activeIdentities = new Set(safeArray(roster).flatMap(rosterIdentityKeys));
+  const activeIdentities = new Set(safeArray(roster).filter((row) => !isCoachRosterRow(row)).flatMap(rosterIdentityKeys));
   const activeRecords = safeArray(records)
     .map(sanitizeCoachFollowUp)
     .filter((record) => (
@@ -73,7 +78,7 @@ export function readCoachFollowUpQueueContext(storage = globalThis?.localStorage
   const profiles = parse(storage?.getItem?.("sl:player-profiles"), []);
   const actor = safeArray(players).find((player) => identity(player?.email) === requester);
   const teamId = clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id);
-  const roster = getCoachRosterPlayers({ players, playerProfiles: profiles, teamId });
+  const roster = getCoachRosterPlayers({ players, playerProfiles: profiles, teamId }).filter((row) => !isCoachRosterRow(row));
   return { requester, teamId, roster };
 }
 
