@@ -150,12 +150,13 @@ test("database and API contracts keep follow-up notes behind the coach API", () 
   assert.match(migration, /create table if not exists public\.coach_follow_ups/i);
   assert.match(migration, /enable row level security/i);
   assert.match(migration, /revoke all on table public\.coach_follow_ups from public, anon, authenticated/i);
-  assert.match(migration, /does not imply that a message was sent or a player was notified/i);
+  assert.match(migration, /do(?:es)? not imply that a message was sent or a player was notified/i);
   assert.match(api, /writableTeamIds/);
   assert.match(api, /coach_follow_ups_post/);
   assert.match(api, /team_id,player_identity/);
   assert.match(enhancer, /coach-follow-up-ledger/);
   assert.match(enhancer, /ShotLab does not send a message or notify the player/i);
+  assert.match(enhancer, /shotlabLegacyNudgeRetired/);
   assert.match(enhancer, /min-height:44px/);
   assert.doesNotMatch(enhancer, /message sent|notification delivered|player was notified/i);
 });
