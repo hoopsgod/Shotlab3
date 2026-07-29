@@ -4,6 +4,7 @@ import { useCoachAssignmentOutcomes } from "./coachAssignmentOutcomes.js";
 
 const STYLE_ID = "shotlab-coach-assignment-outcome-styles";
 const HOST_TEST_ID = "coach-assignment-outcome-host";
+const FOLLOW_UP_ATTEMPTS = 80;
 
 const styles = `
 .mcAssignmentOutcomePortalHost{grid-column:1/-1;min-width:0}
@@ -26,12 +27,14 @@ const styles = `
 .mcAssignmentOutcomeFacts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:12px;overflow:hidden;border:1px solid rgba(255,255,255,.07);border-radius:14px;background:rgba(255,255,255,.014)}
 .mcAssignmentOutcomeFacts div{min-width:0;padding:10px 8px;text-align:center;border-right:1px solid rgba(255,255,255,.07)}
 .mcAssignmentOutcomeFacts div:last-child{border-right:0}.mcAssignmentOutcomeFacts strong{display:block;color:var(--text-1,#f4f7f8);font-family:'Bebas Neue',Impact,sans-serif;font-size:20px;font-weight:400}.mcAssignmentOutcomeFacts small{display:block;margin-top:3px;color:var(--text-3,#7d898f);font-size:8px;font-weight:800}
-.mcAssignmentOutcomeRows{display:grid;gap:7px;margin-top:12px}.mcAssignmentOutcomeRow{display:grid;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;gap:9px;min-width:0;padding:8px 9px;border:1px solid rgba(255,255,255,.065);border-radius:12px;background:rgba(255,255,255,.012)}
+.mcAssignmentOutcomeRows{display:grid;gap:7px;margin-top:12px}.mcAssignmentOutcomeRow{display:grid;grid-template-columns:10px minmax(0,1fr) auto;align-items:center;gap:9px;width:100%;min-width:0;min-height:44px;padding:8px 9px;border:1px solid rgba(255,255,255,.065);border-radius:12px;background:rgba(255,255,255,.012);color:inherit;text-align:left;cursor:pointer;touch-action:manipulation;transition:border-color 150ms ease,background 150ms ease,transform 150ms ease}
+.mcAssignmentOutcomeRow:hover,.mcAssignmentOutcomeRow:focus-visible{border-color:color-mix(in srgb,var(--mc-secondary,#77d7ff) 38%,rgba(255,255,255,.08));background:color-mix(in srgb,var(--mc-secondary,#77d7ff) 5%,rgba(255,255,255,.015));outline:none;transform:translateY(-1px)}
+.mcAssignmentOutcomeRow:active{transform:scale(.992)}
 .mcAssignmentOutcomeDot{width:8px;height:8px;border-radius:50%;background:#ffb547;box-shadow:0 0 0 3px rgba(255,181,71,.09)}.mcAssignmentOutcomeRow.is-active-other .mcAssignmentOutcomeDot{background:var(--mc-secondary,#77d7ff);box-shadow:0 0 0 3px color-mix(in srgb,var(--mc-secondary,#77d7ff) 12%,transparent)}.mcAssignmentOutcomeRow.is-completed .mcAssignmentOutcomeDot{background:var(--mc,#c8ff1a);box-shadow:0 0 0 3px color-mix(in srgb,var(--mc,#c8ff1a) 12%,transparent)}
 .mcAssignmentOutcomeRow span{min-width:0}.mcAssignmentOutcomeRow strong{display:block;overflow:hidden;color:var(--text-1,#f4f7f8);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:12px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}.mcAssignmentOutcomeRow small{display:block;margin-top:2px;color:var(--text-3,#7d898f);font-size:8px;font-weight:700}.mcAssignmentOutcomeRow em{color:var(--text-2,#aab3b8);font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:10px;font-style:normal;font-weight:700}
 .mcAssignmentOutcome .mcTextLink{margin-top:11px}.mcAssignmentOutcomeRefresh{width:100%;min-height:44px;margin-top:14px;border:1px solid rgba(255,181,71,.42);border-radius:12px;background:rgba(255,181,71,.12);color:#ffd18a;font-family:'Barlow Condensed','Arial Narrow',sans-serif;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
 @media(max-width:420px){.mcAssignmentOutcomeHead h2{font-size:21px}.mcAssignmentOutcomeRate{width:52px;height:52px;border-radius:16px;font-size:22px}.mcAssignmentOutcomeFacts small{font-size:7px}}
-@media(prefers-reduced-motion:reduce){.mcAssignmentOutcomeTrack span{transition:none}}
+@media(prefers-reduced-motion:reduce){.mcAssignmentOutcomeTrack span,.mcAssignmentOutcomeRow{transition:none}.mcAssignmentOutcomeRow:hover,.mcAssignmentOutcomeRow:focus-visible,.mcAssignmentOutcomeRow:active{transform:none}}
 `;
 
 const statusCopy = (row = {}) => {
@@ -41,6 +44,7 @@ const statusCopy = (row = {}) => {
 };
 
 const statusLabel = (row = {}) => row.status === "completed" ? "Done" : row.status === "active-other" ? "Other work" : "Open";
+const clean = (value) => String(value ?? "").trim();
 
 function openPlayerWorkspace() {
   const root = document.querySelector('[data-testid="coach-command-center-full"]');
@@ -54,6 +58,46 @@ function openTeamFocusEditor() {
   const buttons = [...(root?.querySelectorAll?.("button") || [])];
   const target = buttons.find((button) => String(button.textContent || "").trim() === "Set Team Focus");
   target?.click?.();
+}
+
+function setNativeInputValue(input, value) {
+  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")?.set;
+  if (setter) setter.call(input, value);
+  else input.value = value;
+  input.dispatchEvent(new Event("input", { bubbles: true }));
+  input.dispatchEvent(new Event("change", { bubbles: true }));
+}
+
+function retryUntil(callback, attempt = 0) {
+  if (callback() || attempt >= FOLLOW_UP_ATTEMPTS) return;
+  window.requestAnimationFrame(() => retryUntil(callback, attempt + 1));
+}
+
+export const buildPlayerFollowUpQuery = (row = {}) => clean(row.email || row.searchIdentity || "");
+
+export function openExactPlayerFollowUp(row = {}) {
+  const query = buildPlayerFollowUpQuery(row);
+  openPlayerWorkspace();
+  if (!query) return false;
+
+  retryUntil(() => {
+    const rail = document.querySelector('[data-testid="coach-players-filter-rail"]');
+    const input = rail?.querySelector?.("input");
+    if (!rail || !input) return false;
+
+    const allButton = [...rail.querySelectorAll("button")].find((button) => clean(button.textContent).toLowerCase() === "all");
+    allButton?.click?.();
+    setNativeInputValue(input, query);
+
+    retryUntil(() => {
+      const rows = [...document.querySelectorAll('#coach-roster-operations [role="button"]')];
+      if (rows.length !== 1) return false;
+      rows[0].click();
+      return true;
+    });
+    return true;
+  });
+  return true;
 }
 
 function freshnessCopy(model = {}) {
@@ -98,11 +142,18 @@ function CoachAssignmentOutcomePanel() {
       React.createElement("div", null, React.createElement("strong", null, model.activeOtherCount), React.createElement("small", null, "Other work")),
       React.createElement("div", null, React.createElement("strong", null, model.notStartedCount), React.createElement("small", null, "Not started"))),
     React.createElement("div", { className: "mcAssignmentOutcomeRows" }, visibleRows.map((row) => React.createElement(
-      "div",
-      { className: `mcAssignmentOutcomeRow is-${row.status}`, key: row.key },
+      "button",
+      {
+        type: "button",
+        className: `mcAssignmentOutcomeRow is-${row.status}`,
+        key: row.key,
+        onClick: () => openExactPlayerFollowUp(row),
+        "aria-label": `Open ${row.name} player intelligence`,
+        "data-player-email": row.email || undefined,
+      },
       React.createElement("i", { className: "mcAssignmentOutcomeDot", "aria-hidden": "true" }),
       React.createElement("span", null, React.createElement("strong", null, row.name), React.createElement("small", null, statusCopy(row))),
-      React.createElement("em", null, statusLabel(row))))),
+      React.createElement("em", { "aria-hidden": "true" }, `${statusLabel(row)} ›`)))),
     React.createElement("button", { type: "button", className: "mcTextLink", onClick: openPlayerWorkspace }, "Review player workspace →"));
 }
 
