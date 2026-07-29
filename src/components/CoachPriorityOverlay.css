@@ -1,0 +1,128 @@
+body.mission-control-priority-open {
+  overflow: hidden !important;
+  overscroll-behavior: none;
+}
+
+.mcPriorityOverlayLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 1098;
+  pointer-events: none;
+}
+
+.mcPriorityOverlayBackdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.78);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  pointer-events: auto;
+  cursor: default;
+}
+
+.mcPriorityOverlayClose {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  right: max(18px, env(safe-area-inset-right));
+  z-index: 1102;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(17, 18, 20, 0.96);
+  color: #f4f6f8;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.48);
+  pointer-events: auto;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+body.mission-control-priority-open .coach-home-dashboard {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: static !important;
+  width: 0 !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  pointer-events: none !important;
+  transform: none !important;
+}
+
+body.mission-control-priority-open .coach-home-dashboard > *:not([data-testid="coach-priority-editor"]) {
+  display: none !important;
+}
+
+body.mission-control-priority-open [data-testid="coach-priority-editor"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  position: fixed !important;
+  z-index: 1100 !important;
+  top: max(72px, calc(env(safe-area-inset-top) + 58px)) !important;
+  left: 50% !important;
+  width: min(620px, calc(100vw - 28px)) !important;
+  max-height: calc(100dvh - max(94px, calc(env(safe-area-inset-top) + 80px)) - env(safe-area-inset-bottom)) !important;
+  margin: 0 !important;
+  padding: 20px !important;
+  overflow: auto !important;
+  overscroll-behavior: contain;
+  transform: translateX(-50%) !important;
+  border: 1px solid color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 34%, rgba(255, 255, 255, 0.14)) !important;
+  border-radius: 22px !important;
+  background: linear-gradient(155deg, rgba(24, 25, 27, 0.99), rgba(8, 9, 11, 0.99)) !important;
+  box-shadow: 0 28px 90px rgba(0, 0, 0, 0.68), 0 0 44px color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 10%, transparent) !important;
+  pointer-events: auto !important;
+  color: #f4f6f8;
+  -webkit-overflow-scrolling: touch;
+}
+
+body.mission-control-priority-open [data-testid="coach-priority-editor"] > summary {
+  display: none !important;
+}
+
+body.mission-control-priority-open [data-testid="coach-priority-editor"] input,
+body.mission-control-priority-open [data-testid="coach-priority-editor"] select,
+body.mission-control-priority-open [data-testid="coach-priority-editor"] textarea,
+body.mission-control-priority-open [data-testid="coach-priority-editor"] button {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+body.mission-control-priority-open [data-testid="coach-priority-editor"] textarea {
+  min-height: 104px;
+}
+
+@media (max-width: 700px) {
+  body.mission-control-priority-open [data-testid="coach-priority-editor"] {
+    top: max(66px, calc(env(safe-area-inset-top) + 52px)) !important;
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - max(82px, calc(env(safe-area-inset-top) + 68px)) - env(safe-area-inset-bottom)) !important;
+    padding: 18px 16px calc(18px + env(safe-area-inset-bottom)) !important;
+    border-radius: 20px !important;
+  }
+
+  .mcPriorityOverlayClose {
+    top: max(12px, env(safe-area-inset-top));
+    right: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mcPriorityOverlayBackdrop,
+  .mcPriorityOverlayClose,
+  body.mission-control-priority-open [data-testid="coach-priority-editor"] {
+    scroll-behavior: auto !important;
+    animation: none !important;
+    transition: none !important;
+  }
+}
