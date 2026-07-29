@@ -33,7 +33,7 @@ function resolveContext(playerIdentity = "", playerName = "") {
     targetIdentity && [player?.email, player?.player_email, player?.playerId, player?.player_id, player?.id].map(normalize).includes(targetIdentity)
   )) || (Array.isArray(players) ? players : []).filter((player) => normalize(player?.name || player?.displayName) === targetName).at(0);
   return {
-    teamId: clean(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id || target?.teamId || target?.team_id),
+    teamId: clean(target?.teamId || target?.team_id || session?.teamId || session?.team_id || actor?.teamId || actor?.team_id),
     playerIdentity: targetIdentity || normalize(target?.email || target?.playerId || target?.id),
     playerName: clean(playerName || target?.name || target?.displayName || target?.email || "Player"),
   };
@@ -45,6 +45,18 @@ function inferContextFromDrawer(drawer) {
   const searchValue = clean(document.querySelector('[data-testid="coach-players-filter-rail"] input[type="search"]')?.value);
   const playerName = clean(drawer?.querySelector?.('[role="dialog"]')?.getAttribute?.("aria-label"));
   return resolveContext(searchValue, playerName);
+}
+
+function neutralizeLegacyNudges() {
+  const buttons = document.querySelectorAll('#coach-roster-operations button');
+  for (const button of buttons) {
+    const label = clean(button.textContent).replace(/^✓\s*/, "").toUpperCase();
+    if (label !== "NUDGE") continue;
+    button.hidden = true;
+    button.disabled = true;
+    button.dataset.shotlabLegacyNudgeRetired = "true";
+    button.setAttribute("aria-hidden", "true");
+  }
 }
 
 const stateLabel = (state) => state === "completed" ? "Completed" : state === "planned" ? "Planned" : "Not recorded";
@@ -144,6 +156,7 @@ export function installCoachFollowUpEnhancer() {
 
   const reconcile = () => {
     frame = null;
+    neutralizeLegacyNudges();
     const nextDrawer = document.querySelector('[data-testid="coach-player-intelligence-drawer"]');
     if (!nextDrawer) {
       root?.unmount?.();
