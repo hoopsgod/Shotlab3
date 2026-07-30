@@ -1,0 +1,301 @@
+.shell {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin: 0 0 22px;
+  padding: clamp(18px, 4vw, 26px);
+  border: 1px solid rgba(200, 255, 0, 0.26);
+  border: 1px solid color-mix(in srgb, var(--accent, #c8ff00) 26%, transparent);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 92% 4%, color-mix(in srgb, var(--accent, #c8ff00) 15%, transparent), transparent 34%),
+    linear-gradient(150deg, rgba(22, 25, 25, 0.98), rgba(8, 10, 10, 0.99));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.22);
+}
+
+.shell::after {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+  background-size: 100% 22px;
+  content: "";
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent 62%);
+  mask-image: linear-gradient(to bottom, black, transparent 62%);
+  pointer-events: none;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.eyebrow,
+.sectionLabel,
+.metricLabel,
+.seasonMetricLabel {
+  color: var(--text-3, #a4abad);
+  font: 800 10px/1.25 "Barlow Condensed", "Arial Narrow", sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  color: var(--accent, #c8ff00);
+}
+
+.title {
+  margin: 6px 0 0;
+  color: var(--text-1, #fff);
+  font: 400 clamp(28px, 7vw, 38px)/0.95 "Bebas Neue", Impact, sans-serif;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+}
+
+.copy {
+  max-width: 570px;
+  margin: 10px 0 0;
+  color: var(--text-2, #c1c7c8);
+  font: 500 13px/1.55 "Barlow Condensed", "Arial Narrow", sans-serif;
+}
+
+.seasonCount {
+  flex: 0 0 auto;
+  min-width: 72px;
+  padding: 10px 12px;
+  border-radius: 15px;
+  background: rgba(200, 255, 0, 0.1);
+  background: color-mix(in srgb, var(--accent, #c8ff00) 10%, transparent);
+  text-align: center;
+}
+
+.seasonCount strong {
+  display: block;
+  color: var(--text-1, #fff);
+  font: 400 28px/1 "Bebas Neue", Impact, sans-serif;
+}
+
+.seasonCount span {
+  color: var(--accent, #c8ff00);
+  font: 800 9px/1.2 "Barlow Condensed", sans-serif;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.metric {
+  min-width: 0;
+  padding: 13px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.metricPrimary {
+  background: rgba(200, 255, 0, 0.1);
+  background: color-mix(in srgb, var(--accent, #c8ff00) 11%, rgba(255, 255, 255, 0.03));
+}
+
+.metricValue {
+  margin-top: 5px;
+  color: var(--text-1, #fff);
+  font: 400 clamp(22px, 6vw, 31px)/1 "Bebas Neue", Impact, sans-serif;
+  letter-spacing: 0.025em;
+}
+
+.metricPrimary .metricValue {
+  color: var(--accent, #c8ff00);
+}
+
+.comparison {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 11px;
+  align-items: center;
+  margin-top: 10px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.comparisonIcon {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 11px;
+  background: rgba(200, 255, 0, 0.13);
+  background: color-mix(in srgb, var(--accent, #c8ff00) 13%, transparent);
+  color: var(--accent, #c8ff00);
+  font-size: 17px;
+}
+
+.comparison strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-1, #fff);
+  font: 700 13px/1.4 "Barlow Condensed", "Arial Narrow", sans-serif;
+}
+
+.records {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.record {
+  min-width: 0;
+  padding: 12px 13px;
+  border-left: 2px solid rgba(200, 255, 0, 0.58);
+  border-left: 2px solid color-mix(in srgb, var(--accent, #c8ff00) 58%, transparent);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.035), transparent);
+}
+
+.record strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 5px;
+  color: var(--text-1, #fff);
+  font: 700 13px/1.35 "Barlow Condensed", "Arial Narrow", sans-serif;
+  text-overflow: ellipsis;
+}
+
+.seasonSection {
+  margin-top: 22px;
+}
+
+.seasonList {
+  display: grid;
+  gap: 9px;
+  margin-top: 10px;
+}
+
+.season {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(230px, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  min-width: 0;
+  padding: 14px 15px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.seasonIdentity {
+  min-width: 0;
+}
+
+.seasonName {
+  overflow: hidden;
+  color: var(--text-1, #fff);
+  font: 800 14px/1.3 "Barlow Condensed", "Arial Narrow", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.seasonRange {
+  margin-top: 3px;
+  color: var(--text-3, #a4abad);
+  font: 500 11px/1.35 "Barlow Condensed", "Arial Narrow", sans-serif;
+}
+
+.seasonMetrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.seasonMetricValue {
+  color: var(--text-1, #fff);
+  font: 400 20px/1 "Bebas Neue", Impact, sans-serif;
+}
+
+.status {
+  justify-self: end;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  color: var(--text-3, #a4abad);
+  font: 800 9px/1 "Barlow Condensed", sans-serif;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.statusCurrent {
+  border-color: rgba(200, 255, 0, 0.38);
+  border-color: color-mix(in srgb, var(--accent, #c8ff00) 38%, transparent);
+  color: var(--accent, #c8ff00);
+}
+
+.archiveButton {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(200, 255, 0, 0.11);
+  background: color-mix(in srgb, var(--accent, #c8ff00) 11%, transparent);
+  color: var(--accent, #c8ff00);
+  font: 800 10px/1 "Barlow Condensed", sans-serif;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  text-transform: uppercase;
+}
+
+.archiveButton:focus-visible {
+  outline: 2px solid var(--accent, #c8ff00);
+  outline-offset: 2px;
+}
+
+.empty {
+  margin-top: 14px;
+  padding: 13px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text-2, #c1c7c8);
+  font: 500 13px/1.5 "Barlow Condensed", "Arial Narrow", sans-serif;
+}
+
+@media (max-width: 720px) {
+  .header {
+    gap: 12px;
+  }
+
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .records {
+    grid-template-columns: 1fr;
+  }
+
+  .season {
+    grid-template-columns: 1fr;
+    gap: 11px;
+  }
+
+  .status {
+    justify-self: start;
+  }
+
+  .archiveButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 390px) {
+  .seasonCount {
+    display: none;
+  }
+
+  .copy {
+    font-size: 12px;
+  }
+}

@@ -45,6 +45,9 @@ jobs:
       - name: Run season archive browser test
         run: npm run test:e2e:season-archive
 
+      - name: Run player career history browser test
+        run: npx playwright test tests/e2e/player-career-history.spec.mjs --config=playwright.acceptance.config.mjs
+
       - name: Run complete new season wizard flow
         run: npx playwright test tests/e2e/new-season-wizard.spec.mjs
 
