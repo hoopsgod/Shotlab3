@@ -1,0 +1,69 @@
+name: Signed Shot Log Persistence
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "functions/v1/home-shots/_middleware.js"
+      - "functions/v1/home-shots/log.js"
+      - "functions/v1/shot-logs/**"
+      - "src/lib/apiFetchBridge.js"
+      - "src/lib/apiIdentityHeaders.js"
+      - "src/lib/scorePersistenceService.js"
+      - "src/lib/shotLogPersistenceService.js"
+      - "src/lib/supabase.js"
+      - "migrations/042_shot_logs_signed_api_boundary.sql"
+      - "tests/signed-shot-log-persistence.test.mjs"
+      - "tests/home-shots-legacy-profile-fallback-middleware.test.mjs"
+      - "tests/home-shots-log-route.test.mjs"
+      - "tests/home-shots-roster-identity.test.mjs"
+      - "tests/player-home-shot-logging-save-path.test.mjs"
+      - "docs/signed-shot-log-persistence.md"
+      - ".github/workflows/signed-shot-log-persistence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signed-shot-log-persistence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-shot-log-persistence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify signed shot-log authorization and persistence contracts
+        run: |
+          node --test tests/signed-shot-log-persistence.test.mjs
+          node --test tests/home-shots-legacy-profile-fallback-middleware.test.mjs
+          node --test tests/home-shots-log-route.test.mjs tests/home-shots-roster-identity.test.mjs
+          node --test tests/player-home-shot-logging-save-path.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-shot-log-persistence-failure
+          path: |
+            npm-debug.log
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

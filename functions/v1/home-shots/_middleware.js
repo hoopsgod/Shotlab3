@@ -1,4 +1,5 @@
 import { readUserId, selectRows } from "../../_utils/supabase.js";
+import { readAuthenticatedIdentity } from "../../_utils/legacySession.js";
 
 const LEGACY_PROFILE_TEAM_COLUMNS = ["team_id", "teamId"];
 
@@ -60,15 +61,36 @@ async function findLegacyPlayerProfile(env, { requester, teamId }) {
   return { ok: false, result: foundAnyProfile ? `team_mismatch:${teamIds.slice(0, 3).join(",") || "none"}` : "0" };
 }
 
+function authError(error, status, message) {
+  return Response.json({
+    ok: false,
+    error,
+    diagnostic: { stage: "request_identity", status, message },
+  }, { status });
+}
+
 export async function onRequest(context) {
   const { request, env } = context;
   if (request.method !== "POST") return context.next();
 
-  const requester = normalizeIdentity(readUserId(request));
+  const auth = await readAuthenticatedIdentity({ env, request, allowDemo: true });
+  const requester = normalizeIdentity(auth?.identity);
+  if (!requester) return authError("missing_user_identity", 401, "Verified request identity missing.");
+
+  const headerIdentity = normalizeIdentity(readUserId(request));
   const body = await request.clone().json().catch(() => ({}));
   const { teamId, submittedIdentity } = normalizePayload(body);
+  if (!headerIdentity || headerIdentity !== requester || !submittedIdentity || submittedIdentity !== requester) {
+    return authError("identity_mismatch", 403, "Submitted identity did not match the verified session.");
+  }
 
-  if (requester && teamId && submittedIdentity === requester) {
+  context.data = {
+    ...(context.data || {}),
+    verifiedRequester: requester,
+    verifiedRequesterSource: String(auth?.source || "authenticated"),
+  };
+
+  if (teamId) {
     const fallback = await findLegacyPlayerProfile(env, { requester, teamId });
     if (fallback.ok) {
       context.data = {

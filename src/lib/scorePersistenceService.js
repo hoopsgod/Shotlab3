@@ -1,4 +1,7 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
+import { installApiIdentityFetchBridge } from "./apiFetchBridge.js";
+
+if (typeof window !== "undefined") installApiIdentityFetchBridge(window);
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 
