@@ -177,7 +177,8 @@ test.beforeEach(async ({ page }) => {
 test("player sees current and archived career history on Profile without horizontal overflow", async ({ page }) => {
   await page.goto("/");
   await enterDemo(page, "Demo Player");
-  await page.getByRole("button", { name: /Profile/i }).first().click();
+  await page.getByTestId("mobile-navigation-more").click();
+  await page.getByTestId("mobile-navigation-sheet").getByRole("button", { name: "Profile", exact: true }).click();
   const career = page.getByTestId("player-career-history");
   await expectCareerSeasons(career, "player");
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -189,6 +190,7 @@ test("coach sees the shared career record and can open its immutable archive", a
   await enterDemo(page, "Demo Coach");
   await page.getByRole("button", { name: "Players", exact: true }).first().click();
   await page.getByText("DEMO PLAYER", { exact: true }).last().click();
+  await page.getByRole("button", { name: "Open Full Profile", exact: true }).click();
   const career = page.getByTestId("player-career-history");
   await expectCareerSeasons(career, "coach");
   await career.getByRole("button", { name: "View archive 2026 Completed Season" }).click();
