@@ -26,11 +26,11 @@ ShotLab now has three distinct session concerns:
 ## Deployment order
 
 1. Pass Session Table Lockdown and full regression workflows.
-2. Apply `migrations/040_session_table_lockdown.sql` to production Supabase.
+2. Apply `migrations/044_session_table_lockdown.sql` to production Supabase.
 3. Verify no `anon` or `authenticated` grants remain and no permissive policy exists.
 4. Verify local login, refresh, logout, demo entry, and registered-user restore flows.
 5. Merge only after database verification.
 
 ## Scope boundaries
 
-This phase does not modify teams, players, profiles, events, RSVPs, shot logs, scores, season archives, or product UI. Those legacy permissive tables require separate table-by-table migrations.
+This phase does not modify teams, players, profiles, events, RSVPs, shot logs, scores, season archives, or product UI. Those remaining permissive tables require separate table-by-table migrations.
