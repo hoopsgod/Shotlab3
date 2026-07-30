@@ -13,6 +13,7 @@ import {
 import PlayersScreen from "./screens/PlayersScreen";
 import NewSeasonWizard from "./components/NewSeasonWizard.jsx";
 import CoachPlayerInviteForm from "./components/CoachPlayerInviteForm.jsx";
+import CoachProgramScoreDrawer from "./components/CoachProgramScoreDrawer.jsx";
 import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
 
 import PageHeader from "./components/PageHeader";
@@ -106,6 +107,7 @@ import { buildActivityIntelligenceRows, buildDrillIntelligenceRows, buildEventIn
 import { derivePlayerDailyCommandCenter } from "./lib/playerDailyCommandCenter.js";
 import { buildAtHomeWorkspaceModel, buildEventsWorkspaceModel, buildLeaderboardWorkspaceModel, buildProfileWorkspaceModel, buildProgramWorkspaceModel, buildStrengthWorkspaceModel, filterAtHomeDrills, filterProgramSessionBlocks } from "./lib/playerOperationalWorkspaces.js";
 import { buildCoachOperationalInsightRail, buildPlayerOperationalInsightRail } from "./lib/operationalInsightRails.js";
+import { buildCoachVerifiedProgramScoreRow } from "./lib/coachProgramScoreEntry.js";
 import { scheduleWorkspaceActionReveal } from "./lib/playerWorkspaceActionRouting.js";
 const VOLT = TOKENS.PRIMARY;
 const SUCCESS = TOKENS.SUCCESS;
@@ -1740,6 +1742,21 @@ trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unkno
 return {ok:false,err:e};
 }
 };
+const addCoachProgramScore=async({player,drillId,score,date})=>{
+if(!requireCoach(user,user?.teamId))return{ok:false,error:"Coach authorization required."};
+try{
+const drill=programDrills.find(candidate=>String(candidate?.id||candidate?.drill_id||"")===String(drillId||""));
+const scoreRow=buildCoachVerifiedProgramScoreRow({id:genId("coach-program-score"),player,drill,score,date,teamId:user.teamId,now:Date.now()});
+if(!scoreRow)return{ok:false,error:"Choose an active player, Program drill, valid score, and session date."};
+const nextProgramScores=[...programScores,scoreRow];
+await P("sl:program-scores",nextProgramScores,setProgramScores,{strictRemote:true,remoteRows:[scoreRow]});
+trackEvent("coach_program_score_logged",{drillId:scoreRow.drillId,playerEmail:scoreRow.email,score:scoreRow.score});
+return{ok:true,row:scoreRow};
+}catch(error){
+trackEvent("coach_program_score_log_failed",{drillId,error:String(error?.message||"unknown"),code:String(error?.code||"")});
+return{ok:false,error:"Could not save the verified Program result. Check the connection and try again.",err:error};
+}
+};
 const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
 const addDrill=async(drill)=>{if(user?.role!=="coach")return;await P("sl:drills",[...drills,{...drill,id:Date.now()}],setDrills)};
 const removeDrill=async(id)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.filter(d=>d.id!==id),setDrills)};
@@ -1968,7 +1985,7 @@ return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
 {view==="auth"&&<div className="screen-fade-in"><Auth onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext} accountNotice={accountNotice} onClearAccountNotice={()=>setAccountNotice("")}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
 {view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)} isJoinConsumeActive={isJoinConsumeActive}/></div>}
 {view==="player"&&<div className="screen-fade-in"><Player u={user} drills={drills} programDrills={programDrills} scores={scopedScores} programScores={scopedProgramScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")} statSyncError={statSyncError} retryHomeShotLog={retryHomeShotLog} seasonArchives={seasonArchives.filter(a=>String(a?.teamId||a?.team_id||"")===String(user?.teamId||""))}/></div>}
-{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} archiveRosterPlayer={archiveRosterPlayer} deleteTeamLocalRosterPlayerData={deleteTeamLocalRosterPlayerData} archiveSeason={archiveSeason} seasonArchives={seasonArchives.filter(a=>String(a.teamId||"")===String(user?.teamId||""))} playerProfiles={playerProfiles.filter(pp=>String(pp.teamId||pp.team_id||"")===String(user?.teamId||""))} drills={drills} programDrills={programDrills} scores={scopedScores} programScores={scopedProgramScores} players={scopedPlayers} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={coachVisibleShotLogs} coachHomeLeaderboardRows={coachHomeLeaderboardRows} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
+{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} archiveRosterPlayer={archiveRosterPlayer} deleteTeamLocalRosterPlayerData={deleteTeamLocalRosterPlayerData} archiveSeason={archiveSeason} seasonArchives={seasonArchives.filter(a=>String(a.teamId||"")===String(user?.teamId||""))} playerProfiles={playerProfiles.filter(pp=>String(pp.teamId||pp.team_id||"")===String(user?.teamId||""))} drills={drills} programDrills={programDrills} scores={scopedScores} programScores={scopedProgramScores} players={scopedPlayers} addCoachProgramScore={addCoachProgramScore} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={coachVisibleShotLogs} coachHomeLeaderboardRows={coachHomeLeaderboardRows} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
 {view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
 {dataDebugPanel}
 </TeamBrandingProvider>;
@@ -3580,12 +3597,13 @@ function SeasonArchiveDetail({ archive, onBack }){
   return <div data-testid="season-archive-detail" style={{background:BG,border:`1px solid ${VOLT}55`,borderRadius:14,padding:14,marginTop:14}}><button type="button" aria-label="Back to archived seasons list" onClick={onBack} style={{minHeight:40,borderRadius:9,border:`1px solid ${BORDER_CLR}`,background:"transparent",color:VOLT,fontFamily:FB,fontWeight:900,letterSpacing:1,cursor:"pointer",marginBottom:12}}>BACK TO ARCHIVED SEASONS</button><div style={{fontFamily:FD,color:LIGHT,fontSize:18,letterSpacing:2}}>{detail.seasonName}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,lineHeight:1.5,marginTop:4}}>Created {archiveDate} · Archived by {detail.archivedBy}{detail.seasonRange?` · ${detail.seasonRange}`:""}</div><div style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(120px,1fr))",gap:8,marginTop:12}}>{detail.summaryStats.map(stat=><ArchiveDetailStat key={stat.label} label={stat.label} value={stat.value}/>)}</div><div style={{display:"grid",gap:10,marginTop:12}}>{detail.sections.map(section=><div key={section.title} data-testid={section.title==="PLAYER SEASON SUMMARIES"?"season-archive-player-summaries":undefined} style={{border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12,background:BG}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1.5,marginBottom:8}}>{section.title}</div>{section.rows.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:11}}>{section.empty}</div>:<div style={{display:"grid",gap:6}}>{section.rows.map((row,index)=><div key={`${section.title}-${index}`} style={{fontFamily:FB,color:LIGHT,fontSize:11,lineHeight:1.35,borderTop:index===0?"none":`1px solid ${BORDER_CLR}66`,paddingTop:index===0?0:6}}>{row}</div>)}</div>}</div>)}</div></div>;
 }
 
-function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,archiveRosterPlayer,deleteTeamLocalRosterPlayerData,archiveSeason,seasonArchives=[],playerProfiles,drills,programDrills,scores,programScores=[],players,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachHomeLeaderboardRows=[],coachPriorities,onSaveCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
+function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,archiveRosterPlayer,deleteTeamLocalRosterPlayerData,archiveSeason,seasonArchives=[],playerProfiles,drills,programDrills,scores,programScores=[],players,addCoachProgramScore,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachHomeLeaderboardRows=[],coachPriorities,onSaveCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
 const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
 const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"",icon:"ft"});
 const[eventFilter,setEventFilter]=useState("all"),[eventSaveError,setEventSaveError]=useState(""),[playerDashboardFilter,setPlayerDashboardFilter]=useState("all"),[playerDashboardQuery,setPlayerDashboardQuery]=useState(""),[eventDashboardStatus,setEventDashboardStatus]=useState("upcoming"),[eventDashboardQuery,setEventDashboardQuery]=useState(""),[coachPageMetric,setCoachPageMetric]=useState("active");
 const[playerDrawerKey,setPlayerDrawerKey]=useState(""),[eventDrawerId,setEventDrawerId]=useState(""),[drillIntelligenceScope,setDrillIntelligenceScope]=useState("all"),[drillIntelligenceQuery,setDrillIntelligenceQuery]=useState(""),[strengthIntelligenceScope,setStrengthIntelligenceScope]=useState("all"),[strengthIntelligenceQuery,setStrengthIntelligenceQuery]=useState(""),[leaderboardIntelligenceScope,setLeaderboardIntelligenceScope]=useState("all"),[leaderboardIntelligenceQuery,setLeaderboardIntelligenceQuery]=useState(""),[activityIntelligenceScope,setActivityIntelligenceScope]=useState("all"),[activityIntelligenceQuery,setActivityIntelligenceQuery]=useState("");
 const[coachPriorityDraft,setCoachPriorityDraft]=useState(sanitizeCoachPriorities(coachPriorities));
+const[showProgramScoreEntry,setShowProgramScoreEntry]=useState(false);
 const[coachPrioritiesMessage,setCoachPrioritiesMessage]=useState("");
 const[coachPrioritiesError,setCoachPrioritiesError]=useState("");
 const[coachPrioritySaveState,setCoachPrioritySaveState]=useState("idle");
@@ -3748,8 +3766,7 @@ const openPlayerIntelligence=useCallback((player={})=>{const candidates=[player.
 const jumpToSection=(targetTab,sectionId)=>{setTab(targetTab);setSelP(null);setTimeout(()=>document.getElementById(sectionId)?.scrollIntoView({behavior:"smooth",block:"start"}),120)};
 const openEventCreateFlow=useCallback(()=>{setEventSaveError("");setTab("events");setSelP(null);setExpEv(null);setShowAddSC(false);setShowAdd(true);setTimeout(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth",block:"start"}),120);},[]);
 const handleLogScoreAction=()=>{
-  // TODO: Route to dedicated coach score logging flow when implemented.
-  setTab("feed");
+  setShowProgramScoreEntry(true);
 };
 const shellVars=(k)=>({"--pageAccent":PAGE_ACCENTS[k].accent,"--pageAccentGlow":PAGE_ACCENTS[k].glow,"--pageAccentBg":PAGE_ACCENTS[k].bg,"--page-accent":PAGE_ACCENTS[k].accent,"--page-accent-soft":PAGE_ACCENTS[k].bg,"--page-accent-border":PAGE_ACCENTS[k].glow});
 const navItems=[
@@ -4521,6 +4538,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
   </div>}
 </div>
 
+<CoachProgramScoreDrawer open={showProgramScoreEntry} players={coachRosterPlayers} drills={programDrills} onClose={()=>setShowProgramScoreEntry(false)} onSubmit={addCoachProgramScore}/>
 <CoachPlayerIntelligenceDrawer model={selectedPlayerIntelligence} onClose={()=>setPlayerDrawerKey("")} onOpenFullProfile={()=>{if(selectedPlayerDashboardRow?.player){setSelP(selectedPlayerDashboardRow.player);setPlayerDrawerKey("");}}} onShowActivity={()=>{setActivityIntelligenceQuery(selectedPlayerIntelligence?.name||selectedPlayerIntelligence?.email||"");setActivityIntelligenceScope("all");setTab("activity");setPlayerDrawerKey("");}}/><CoachEventIntelligenceDrawer model={selectedEventIntelligence} onClose={()=>setEventDrawerId("")} onManageAttendance={()=>{if(selectedEventIntelligence?.id){setExpEv(selectedEventIntelligence.id);setTab("events");setEventDrawerId("");}}} onOpenSchedule={()=>{setTab("events");setEventDrawerId("");}}/>{!isDesktop&&<MobileNavigation primaryItems={coachMobilePrimaryItems} secondaryItems={coachMobileSecondaryItems} activeKey={tab} onChange={handleNavChange} ariaLabel="Coach navigation"/>}
 
   </div></div></main>

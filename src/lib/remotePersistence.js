@@ -56,6 +56,8 @@ export const normalizeProgramScoreRowForDb = (row = {}) => {
     score,
     session_date: cleanText(row.session_date || row.sessionDate || row.date),
     logged_at: cleanText(row.logged_at || row.loggedAt),
+    recorded_by: cleanText(row.recorded_by || row.recordedBy).toLowerCase(),
+    recorded_by_role: cleanText(row.recorded_by_role || row.recordedByRole),
     src: "program",
   };
 
@@ -87,6 +89,8 @@ export const normalizeProgramScoreRowForApp = (row = {}) => {
     score,
     date: cleanText(row.session_date || row.sessionDate || row.date),
     ts: toFiniteNumber(row.ts) || (loggedAt ? Date.parse(loggedAt) : null),
+    recordedBy: cleanText(row.recorded_by || row.recordedBy).toLowerCase(),
+    recordedByRole: cleanText(row.recorded_by_role || row.recordedByRole),
     src: "program",
   };
 };
