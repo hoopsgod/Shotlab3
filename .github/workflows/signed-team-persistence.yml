@@ -1,0 +1,74 @@
+name: Signed Team Persistence
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "functions/v1/teams/index.js"
+      - "src/lib/teamPersistenceService.js"
+      - "src/lib/apiFetchBridge.js"
+      - "migrations/047_teams_signed_api_boundary.sql"
+      - "tests/signed-team-persistence.test.mjs"
+      - "tests/team-memberships-confirm-context-route.test.mjs"
+      - "tests/teams-restore-context-route.test.mjs"
+      - "tests/coach-signup-bootstrap-route.test.mjs"
+      - "tests/invite-membership-flow.test.mjs"
+      - "tests/e2e/production-acceptance.spec.mjs"
+      - "docs/signed-team-persistence.md"
+      - ".github/workflows/signed-team-persistence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signed-team-persistence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-team-persistence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify signed team authorization contracts
+        run: |
+          node --test tests/signed-team-persistence.test.mjs
+          node --test tests/team-memberships-confirm-context-route.test.mjs tests/teams-restore-context-route.test.mjs
+          node --test tests/coach-signup-bootstrap-route.test.mjs tests/invite-membership-flow.test.mjs
+
+      - name: Install pinned Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Run isolated production acceptance flow
+        run: npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-team-persistence-failure
+          path: |
+            npm-debug.log
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
