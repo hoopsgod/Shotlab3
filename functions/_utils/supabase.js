@@ -86,6 +86,10 @@ export async function updateRows(env, tableName, query, patch) {
   return callRest(env, tableName, { method: "PATCH", query, body: patch, prefer: "return=representation" });
 }
 
+export async function deleteRows(env, tableName, query) {
+  return callRest(env, tableName, { method: "DELETE", query, prefer: "return=representation" });
+}
+
 export function readUserId(request) {
   const userId = request.headers.get("x-user-id") || request.headers.get("x-user-email");
   return userId ? userId.trim() : "";
