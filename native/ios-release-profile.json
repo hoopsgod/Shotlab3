@@ -3,7 +3,7 @@
   "platform": "ios",
   "productName": "ShotLab",
   "bundleIdentifier": "com.shotlab.training",
-  "marketingVersion": "1.0.0",
+  "marketingVersion": "1.0",
   "buildNumber": 1,
   "primaryCategory": "Sports",
   "deviceFamily": "iPhone",
@@ -22,7 +22,7 @@
     "remoteServerUrl": false,
     "allowNavigationDomains": []
   },
-  "releaseStatus": "prepared_owner_input_pending",
+  "releaseStatus": "technical_ready_owner_input_pending",
   "releaseRequirements": {
     "privacyPolicyUrl": "pending",
     "termsUrl": "pending",
