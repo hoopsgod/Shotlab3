@@ -194,6 +194,7 @@ test("coach sees the shared career record and can open its immutable archive", a
   const career = page.getByTestId("player-career-history");
   await expectCareerSeasons(career, "coach");
   await career.getByRole("button", { name: "View archive 2026 Completed Season" }).click();
-  await expect(page.getByTestId("season-archive-detail")).toBeVisible();
-  await expect(page.getByText("2026 Completed Season", { exact: true })).toBeVisible();
+  const archiveDetail = page.getByTestId("season-archive-detail");
+  await expect(archiveDetail).toBeVisible();
+  await expect(archiveDetail.getByText("2026 Completed Season", { exact: true })).toBeVisible();
 });
