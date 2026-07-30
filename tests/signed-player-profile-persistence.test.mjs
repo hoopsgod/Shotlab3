@@ -259,10 +259,10 @@ test("profile cache pruning removes cross-player and cross-team rows before hydr
   assert.deepEqual(bridgeUtils.prunePlayerProfileCache(coachStorage).map((row) => row.id), ["a"]);
 });
 
-test("fetch bridge reroutes only Supabase player_profiles REST requests", async () => {
+test("fetch bridge routes both player profiles and player identities through signed APIs", async () => {
   const storage = memoryStorage([
     ["sl:session", JSON.stringify({ email: "coach@example.com", teamId: "team-a", role: "coach" })],
-    ["sl:players", JSON.stringify([{ email: "coach@example.com", teamId: "team-a", role: "coach" }])],
+    ["sl:players", JSON.stringify([{ id: "coach-row", email: "coach@example.com", teamId: "team-a", role: "coach" }])],
     ["sl:player-profiles", JSON.stringify([])],
   ]);
   const calls = [];
@@ -277,6 +277,9 @@ test("fetch bridge reroutes only Supabase player_profiles REST requests", async 
           return Response.json({ ok: true, profiles: JSON.parse(init.body).profiles });
         }
         return Response.json({ ok: true, profiles: [SELF_PROFILE] });
+      }
+      if (String(input).startsWith("/v1/players")) {
+        return Response.json({ ok: true, players: [{ id: "coach-row", email: "coach@example.com", team_id: "team-a", role: "coach" }] });
       }
       return Response.json([{ passthrough: true }]);
     },
@@ -296,9 +299,10 @@ test("fetch bridge reroutes only Supabase player_profiles REST requests", async 
   assert.equal(calls[1].input, "/v1/player-profiles");
 
   await target.fetch("https://example.supabase.co/rest/v1/players");
-  assert.equal(calls[2].input, "https://example.supabase.co/rest/v1/players");
+  assert.match(calls[2].input, /^\/v1\/players\?team_id=team-a$/);
   assert.equal(bridgeUtils.signedPlayerProfileResourceFor("https://example.supabase.co/rest/v1/player_profiles", target), true);
   assert.equal(bridgeUtils.signedPlayerProfileResourceFor("https://example.supabase.co/rest/v1/players", target), false);
+  assert.equal(bridgeUtils.signedPlayerResourceFor("https://example.supabase.co/rest/v1/players", target), true);
 });
 
 test("migration removes direct browser access without deleting profile rows", () => {

@@ -254,22 +254,26 @@ test("players see and synchronize only their own RSVP rows while coaches see the
   }
 });
 
-test("fetch bridge reroutes only Supabase events and RSVP REST requests to signed APIs", async () => {
+test("fetch bridge routes schedules and player identities through signed APIs", async () => {
   const storageValues = new Map([
-    ["sl:session", JSON.stringify({ email: "coach@example.com", teamId: "team-a" })],
-    ["sl:players", JSON.stringify([{ email: "coach@example.com", teamId: "team-a", role: "coach" }])],
+    ["sl:session", JSON.stringify({ email: "coach@example.com", teamId: "team-a", role: "coach" })],
+    ["sl:players", JSON.stringify([{ id: "coach-row", email: "coach@example.com", teamId: "team-a", role: "coach" }])],
     ["sl:supabase-session", JSON.stringify({ access_token: "user-token" })],
   ]);
   const calls = [];
   const target = {
     location: { origin: "https://app.shotlab.com" },
-    localStorage: { getItem(key) { return storageValues.get(key) || null; } },
+    localStorage: {
+      getItem(key) { return storageValues.get(key) || null; },
+      setItem(key, value) { storageValues.set(key, String(value)); },
+    },
     Headers,
     Response,
     fetch: async (input, init = {}) => {
       calls.push({ url: String(input), init });
       if (String(input).startsWith("/v1/events")) return Response.json({ ok: true, storage_mode: "signed_api", events: [EVENT_A] });
       if (String(input).startsWith("/v1/rsvps")) return Response.json({ ok: true, storage_mode: "signed_api", rsvps: [SELF_RSVP] });
+      if (String(input).startsWith("/v1/players")) return Response.json({ ok: true, storage_mode: "signed_api", players: [{ id: "coach-row", email: "coach@example.com", team_id: "team-a", role: "coach" }] });
       return Response.json({ untouched: true });
     },
   };
@@ -284,12 +288,12 @@ test("fetch bridge reroutes only Supabase events and RSVP REST requests to signe
   });
   assert.deepEqual((await rsvpPost.json()).map((row) => row.id), ["rsvp-self"]);
 
-  const untouched = await target.fetch("https://example.supabase.co/rest/v1/players?select=*");
-  assert.deepEqual(await untouched.json(), { untouched: true });
+  const playersGet = await target.fetch("https://example.supabase.co/rest/v1/players?select=*");
+  assert.deepEqual((await playersGet.json()).map((row) => row.id), ["coach-row"]);
 
   assert.equal(calls.some((call) => call.url.includes("/rest/v1/events")), false);
   assert.equal(calls.some((call) => call.url.includes("/rest/v1/rsvps")), false);
-  assert.equal(calls.some((call) => call.url.includes("/rest/v1/players")), true);
+  assert.equal(calls.some((call) => call.url.includes("/rest/v1/players")), false);
   const signedCall = calls.find((call) => call.url.startsWith("/v1/events"));
   assert.equal(new Headers(signedCall.init.headers).get("authorization"), "Bearer user-token");
   assert.equal(new Headers(signedCall.init.headers).get("x-user-id"), "coach@example.com");
@@ -300,6 +304,7 @@ test("bridge resource detection is narrow and migration removes browser table ac
   assert.equal(bridgeUtils.signedScheduleResourceFor("https://example.supabase.co/rest/v1/events?select=*", target), "events");
   assert.equal(bridgeUtils.signedScheduleResourceFor("https://example.supabase.co/rest/v1/rsvps", target), "rsvps");
   assert.equal(bridgeUtils.signedScheduleResourceFor("https://example.supabase.co/rest/v1/players", target), "");
+  assert.equal(bridgeUtils.signedPlayerResourceFor("https://example.supabase.co/rest/v1/players", target), true);
   assert.equal(bridgeUtils.signedScheduleResourceFor("https://evil.example/rest/v1/events", target), "");
 
   const migration = fs.readFileSync(new URL("../migrations/043_events_rsvps_signed_api_boundary.sql", import.meta.url), "utf8");

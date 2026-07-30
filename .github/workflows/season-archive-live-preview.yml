@@ -1,18 +1,24 @@
 name: Season Archive Live Preview Smoke
 
 on:
-  pull_request:
+  push:
+    branches:
+      - march-3-reset-85393dd
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: season-archive-production-smoke-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   live-preview-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      LIVE_PREVIEW_URL: https://codex-add-season-archive-fun-l7rh.shotlab3.pages.dev
+      LIVE_PREVIEW_URL: https://shotlab3.pages.dev
 
     steps:
       - name: Check out repository
@@ -33,7 +39,7 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run deployed preview smoke test
+      - name: Run deployed production smoke test
         run: |
           set +e
           npx playwright test tests/e2e/season-archive-live-preview.spec.mjs --project=chromium-desktop --reporter=line > live-preview-smoke.txt 2>&1
@@ -45,7 +51,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: season-archive-live-preview-artifacts
+          name: season-archive-production-smoke-artifacts
           path: |
             live-preview-smoke.txt
             playwright-report/
