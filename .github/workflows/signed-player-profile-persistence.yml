@@ -10,6 +10,8 @@ on:
       - "src/lib/apiFetchBridge.js"
       - "migrations/045_player_profiles_signed_api_boundary.sql"
       - "tests/signed-player-profile-persistence.test.mjs"
+      - "tests/coach-player-invitation-contract.test.mjs"
+      - "tests/coach-player-invitation-service.test.mjs"
       - "tests/e2e/coach-player-invitation.spec.mjs"
       - "docs/signed-player-profile-persistence.md"
       - ".github/workflows/signed-player-profile-persistence.yml"
@@ -43,7 +45,7 @@ jobs:
         run: |
           node --test tests/signed-player-profile-persistence.test.mjs
           node --test tests/team-memberships-confirm-context-route.test.mjs tests/teams-restore-context-route.test.mjs
-          node --test tests/coach-player-invitation-route.test.mjs tests/coach-player-invitation-service.test.mjs
+          node --test tests/coach-player-invitation-contract.test.mjs tests/coach-player-invitation-service.test.mjs
 
       - name: Install pinned Playwright test runner
         run: npm install --no-save @playwright/test@1.55.1
