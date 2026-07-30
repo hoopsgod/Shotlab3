@@ -177,12 +177,14 @@ test("replacement without the requester row deletes only the requester's own ide
   } finally { backend.restore(); }
 });
 
-test("cache pruning and fetch routing keep only authorized player rows", async () => {
+test("cache pruning and fetch routing keep only authorized player and team rows", async () => {
   const storage = memoryStorage([
     ["sl:session", JSON.stringify({ email: "player@example.com", teamId: "team-a", role: "player" })],
     ["sl:players", JSON.stringify([PLAYER, OTHER])],
+    ["sl:teams", JSON.stringify([{ id: "team-a", name: "Alpha" }, { id: "team-b", name: "Beta" }])],
   ]);
   assert.deepEqual(bridgeUtils.prunePlayerCache(storage).map((row) => row.id), ["player-id"]);
+  assert.deepEqual(bridgeUtils.pruneTeamCache(storage).map((row) => row.id), ["team-a"]);
 
   const calls = [];
   const target = {
@@ -195,6 +197,7 @@ test("cache pruning and fetch routing keep only authorized player rows", async (
         if (String(init.method || "GET").toUpperCase() === "POST") return Response.json({ ok: true, players: JSON.parse(init.body).players });
         return Response.json({ ok: true, players: [PLAYER] });
       }
+      if (String(input).startsWith("/v1/teams")) return Response.json({ ok: true, teams: [{ id: "team-a", name: "Alpha" }] });
       return Response.json([{ passthrough: true }]);
     },
   };
@@ -203,10 +206,13 @@ test("cache pruning and fetch routing keep only authorized player rows", async (
   assert.deepEqual((await read.json()).map((row) => row.id), ["player-id"]);
   assert.match(calls[0].input, /^\/v1\/players\?team_id=team-a$/);
   assert.deepEqual(JSON.parse(storage.snapshot("sl:players")).map((row) => row.id), ["player-id"]);
-  await target.fetch("https://example.supabase.co/rest/v1/teams");
-  assert.equal(calls[1].input, "https://example.supabase.co/rest/v1/teams");
+
+  const teamRead = await target.fetch("https://example.supabase.co/rest/v1/teams");
+  assert.deepEqual((await teamRead.json()).map((row) => row.id), ["team-a"]);
+  assert.match(calls[1].input, /^\/v1\/teams\?team_id=team-a$/);
   assert.equal(bridgeUtils.signedPlayerResourceFor("https://example.supabase.co/rest/v1/players", target), true);
   assert.equal(bridgeUtils.signedPlayerResourceFor("https://example.supabase.co/rest/v1/teams", target), false);
+  assert.equal(bridgeUtils.signedTeamResourceFor("https://example.supabase.co/rest/v1/teams", target), true);
 });
 
 test("migration removes direct browser access without deleting player rows", () => {
