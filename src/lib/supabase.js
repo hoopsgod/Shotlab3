@@ -1,5 +1,6 @@
 import { resolveExpiresAt } from "./authFlow.js";
 import { createScorePersistenceService } from "./scorePersistenceService.js";
+import { createShotLogPersistenceService } from "./shotLogPersistenceService.js";
 
 const viteEnv = (typeof import.meta !== "undefined" && import.meta?.env) ? import.meta.env : {};
 const baseUrl = viteEnv.VITE_SUPABASE_URL;
@@ -16,6 +17,10 @@ const DEMO_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
 const APP_PERSISTENCE_TABLES = new Set(["teams", "players", "player_profiles", "scores", "program_scores", "shot_logs", "events", "rsvps", "sessions"]);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const scorePersistence = createScorePersistenceService({
+  fetchImpl: (...args) => globalThis.fetch(...args),
+  storage: globalThis?.localStorage,
+});
+const shotLogPersistence = createShotLogPersistenceService({
   fetchImpl: (...args) => globalThis.fetch(...args),
   storage: globalThis?.localStorage,
 });
@@ -160,6 +165,30 @@ const scoreApiRequest = async ({ method = "GET", body } = {}) => {
   }
 };
 
+const shotLogApiRequest = async ({ method = "GET", body } = {}) => {
+  if (method !== "GET") {
+    return {
+      data: Array.isArray(body) ? body : body ? [body] : [],
+      error: null,
+      skipped: "dedicated_home_shot_api",
+    };
+  }
+  try {
+    const result = await shotLogPersistence.loadShotLogs();
+    return { data: result.shotLogs, error: null };
+  } catch (error) {
+    return {
+      data: null,
+      error: {
+        code: String(error?.code || "shot_log_api_failed"),
+        message: String(error?.message || "shot_log_api_failed"),
+        status: Number(error?.status || 0),
+        details: error?.body || null,
+      },
+    };
+  }
+};
+
 const request = async (table, { method = "GET", body, upsert = false, onConflict } = {}) => {
   if (method !== "GET" && APP_PERSISTENCE_TABLES.has(table) && isDemoPersistenceSession()) {
     return { data: Array.isArray(body) ? body : body ? [body] : [], error: null, skipped: "demo_local_only" };
@@ -171,6 +200,7 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
   }
 
   if (table === "scores") return scoreApiRequest({ method, body: normalizedBody });
+  if (table === "shot_logs") return shotLogApiRequest({ method, body: normalizedBody });
 
   if (!hasConfig) {
     return {
@@ -358,4 +388,5 @@ export const __testUtils = {
   alignBulkObjectKeys,
   isDemoPersistenceSession,
   scoreApiRequest,
+  shotLogApiRequest,
 };
