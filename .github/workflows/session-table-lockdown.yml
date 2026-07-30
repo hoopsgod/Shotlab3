@@ -1,0 +1,73 @@
+name: Session Table Lockdown
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "src/lib/appDataModels.js"
+      - "migrations/044_session_table_lockdown.sql"
+      - "tests/session-table-lockdown.test.mjs"
+      - "tests/signed-session-integrity.test.mjs"
+      - "tests/legacy-registration-session.test.mjs"
+      - "tests/session-revocation-failure.test.mjs"
+      - "tests/demo-mode-cleanup.test.mjs"
+      - "tests/e2e/production-acceptance.spec.mjs"
+      - "playwright.acceptance.config.mjs"
+      - "docs/session-table-lockdown.md"
+      - ".github/workflows/session-table-lockdown.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: session-table-lockdown-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  session-table-lockdown:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify local session and database lockdown contracts
+        run: |
+          node --test tests/session-table-lockdown.test.mjs
+          node --test tests/signed-session-integrity.test.mjs tests/legacy-registration-session.test.mjs tests/session-revocation-failure.test.mjs
+          node --test tests/demo-mode-cleanup.test.mjs
+
+      - name: Install pinned Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Run isolated production acceptance flow
+        run: npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: session-table-lockdown-failure
+          path: |
+            npm-debug.log
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

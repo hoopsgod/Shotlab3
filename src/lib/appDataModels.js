@@ -26,7 +26,6 @@ export const TABLE_MAP = {
   [STORAGE_KEYS.rsvps]: "rsvps",
   [STORAGE_KEYS.shotLogs]: "shot_logs",
   [STORAGE_KEYS.teams]: "teams",
-  [STORAGE_KEYS.sessions]: "sessions",
 };
 
 export const PLAYER_DAILY_SHOT_TARGET = 100;
