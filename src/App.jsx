@@ -33,6 +33,7 @@ import { CoachActivityIntelligencePanel, CoachDrillsOperationalPanel, CoachEvent
 import PlayerDailyCommandCenter from "./components/PlayerDailyCommandCenter.jsx";
 import PlayerCareerHistory from "./components/PlayerCareerHistory.jsx";
 import { PlayerWorkspaceCommandBar, PlayerWorkspaceEmptyState, PlayerWorkspaceFilterRail } from "./components/PlayerOperationalWorkspace.jsx";
+import OperationalInsightRail from "./components/OperationalInsightRail.jsx";
 import "./styles/PremiumWorkspace.css";
 import "./styles/CoachInteractiveDashboard.css";
 
@@ -104,6 +105,8 @@ import { buildCoachEventDashboardMetrics, buildCoachEventDashboardRows, buildCoa
 import { buildActivityIntelligenceRows, buildDrillIntelligenceRows, buildEventIntelligenceModel, buildLeaderboardIntelligenceRows, buildPlayerIntelligenceModel, buildSeasonComparisonModel, buildStrengthIntelligenceRows, filterActivityIntelligenceRows, filterDrillIntelligenceRows, filterLeaderboardIntelligenceRows, filterStrengthIntelligenceRows } from "./lib/coachOperationalIntelligence.js";
 import { derivePlayerDailyCommandCenter } from "./lib/playerDailyCommandCenter.js";
 import { buildAtHomeWorkspaceModel, buildEventsWorkspaceModel, buildLeaderboardWorkspaceModel, buildProfileWorkspaceModel, buildProgramWorkspaceModel, buildStrengthWorkspaceModel, filterAtHomeDrills, filterProgramSessionBlocks } from "./lib/playerOperationalWorkspaces.js";
+import { buildCoachOperationalInsightRail, buildPlayerOperationalInsightRail } from "./lib/operationalInsightRails.js";
+import { scheduleWorkspaceActionReveal } from "./lib/playerWorkspaceActionRouting.js";
 const VOLT = TOKENS.PRIMARY;
 const SUCCESS = TOKENS.SUCCESS;
 const INFO = TOKENS.INFO;
@@ -2251,6 +2254,7 @@ const eventsWorkspaceModel=useMemo(()=>buildEventsWorkspaceModel({events,rsvps,u
 const strengthWorkspaceModel=useMemo(()=>buildStrengthWorkspaceModel({sessions:scSessions,rsvps:scRsvps,logs:scLogs,userEmail:u?.email,teamId:u?.teamId,today}),[scSessions,scRsvps,scLogs,u?.email,u?.teamId,today]);
 const leaderboardWorkspaceModel=useMemo(()=>buildLeaderboardWorkspaceModel({rows:playerDashboardLeaderboardRows,userEmail:u?.email,weeklyMakes:playerWeeklyMakes,streak}),[playerDashboardLeaderboardRows,u?.email,playerWeeklyMakes,streak]);
 const profileWorkspaceModel=useMemo(()=>buildProfileWorkspaceModel({shotLogs,scores,rsvps,scLogs,userEmail:u?.email,teamId:u?.teamId,streak}),[shotLogs,scores,rsvps,scLogs,u?.email,u?.teamId,streak]);
+const playerInsightRailModel=useMemo(()=>buildPlayerOperationalInsightRail({activeTab:tab,atHome:atHomeWorkspaceModel,program:programWorkspaceModel,events:eventsWorkspaceModel,strength:strengthWorkspaceModel,leaderboard:leaderboardWorkspaceModel,profile:profileWorkspaceModel}),[tab,atHomeWorkspaceModel,programWorkspaceModel,eventsWorkspaceModel,strengthWorkspaceModel,leaderboardWorkspaceModel,profileWorkspaceModel]);
 const visibleHomeDrills=useMemo(()=>filterAtHomeDrills({drills,todayScores:todayS,filter:homeDrillFilter}),[drills,todayS,homeDrillFilter]);
 const visibleProgramSessionBlocks=useMemo(()=>filterProgramSessionBlocks({blocks:programSessionBlocks.grouped,todayScores:todayProgramScores,filter:programDrillFilter}),[programSessionBlocks.grouped,todayProgramScores,programDrillFilter]);
 useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
@@ -2314,6 +2318,10 @@ const handlePlayerWorkspaceAction=useCallback((action={})=>{
   if(action?.focus==="shot-stats"){switchTab("log-drill");setShowShotStats(true);return;}
   handleDailyCommandAction(action);
 },[handleDailyCommandAction,switchTab]);
+const handlePlayerInsightAction=useCallback((action={})=>{
+  handlePlayerWorkspaceAction(action);
+  scheduleWorkspaceActionReveal(action);
+},[handlePlayerWorkspaceAction]);
 const handleAtHomeMetric=useCallback((metric)=>{if(metric?.filter){setHomeDrillFilter(metric.filter);return;}handlePlayerWorkspaceAction(metric?.action||atHomeWorkspaceModel.primaryAction);},[atHomeWorkspaceModel.primaryAction,handlePlayerWorkspaceAction]);
 const handleProgramMetric=useCallback((metric)=>{if(metric?.filter){setProgramDrillFilter(metric.filter);return;}handlePlayerWorkspaceAction(metric?.action||programWorkspaceModel.primaryAction);},[programWorkspaceModel.primaryAction,handlePlayerWorkspaceAction]);
 
@@ -2749,7 +2757,7 @@ return <div className={`app-shell performance-shell performance-shell--player ${
 {!isDesktop&&<MobileNavigation primaryItems={playerMobilePrimaryItems} secondaryItems={playerMobileSecondaryItems} activeKey={tab} onChange={switchTab} ariaLabel="Player navigation"/>} 
 
   </div></div></main>
-{isDesktop&&<aside className="insights-panel"><div className="panel-title">PLAYER INSIGHTS</div><div className="placeholder">Add widgets here later (goals, reminders, coach notes, and progress snapshots).</div></aside>}
+{isDesktop&&<aside className="insights-panel"><OperationalInsightRail model={playerInsightRailModel} onAction={handlePlayerInsightAction} testId="player-operational-insight-rail"/></aside>}
   </div>;
 }
 
@@ -3774,6 +3782,21 @@ const handleNavChange=(k)=>{
   }
   setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)
 };
+const coachInsightRailModel=useMemo(()=>buildCoachOperationalInsightRail({activeTab:tab,rosterCount:totalPlayers,activeTodayCount,activeThisWeekCount:activeThisWeek.size,inactivePlayersCount,eventMetrics:coachEventDashboardMetrics,strengthRows:coachStrengthIntelligenceRows,pageSummary:coachPageDashboardSummary}),[tab,totalPlayers,activeTodayCount,activeThisWeek,inactivePlayersCount,coachEventDashboardMetrics,coachStrengthIntelligenceRows,coachPageDashboardSummary]);
+const handleCoachInsightAction=(action={})=>{
+  const target=action?.target||"feed";
+  if(target==="events"&&action?.intent==="add"){openEventCreateFlow();return;}
+  if(target==="players"){
+    setPlayerDashboardFilter(action?.filter||"all");
+    handleNavChange("players");
+    if(action?.intent==="add")setTimeout(()=>setShowAdd(true),0);
+    if(action?.intent==="archive")setTimeout(()=>document.getElementById("coach-season-tools")?.scrollIntoView({behavior:"smooth",block:"start"}),120);
+    return;
+  }
+  if(target==="events"&&action?.filter)setEventDashboardStatus(action.filter);
+  if(target==="sc"&&action?.filter)setStrengthIntelligenceScope(action.filter);
+  handleNavChange(target);
+};
 const openCoachLeaderboards=()=>handleNavChange("leaderboards");
 const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
 const [showMiniHeader,setShowMiniHeader]=useState(false);
@@ -4501,7 +4524,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
 <CoachPlayerIntelligenceDrawer model={selectedPlayerIntelligence} onClose={()=>setPlayerDrawerKey("")} onOpenFullProfile={()=>{if(selectedPlayerDashboardRow?.player){setSelP(selectedPlayerDashboardRow.player);setPlayerDrawerKey("");}}} onShowActivity={()=>{setActivityIntelligenceQuery(selectedPlayerIntelligence?.name||selectedPlayerIntelligence?.email||"");setActivityIntelligenceScope("all");setTab("activity");setPlayerDrawerKey("");}}/><CoachEventIntelligenceDrawer model={selectedEventIntelligence} onClose={()=>setEventDrawerId("")} onManageAttendance={()=>{if(selectedEventIntelligence?.id){setExpEv(selectedEventIntelligence.id);setTab("events");setEventDrawerId("");}}} onOpenSchedule={()=>{setTab("events");setEventDrawerId("");}}/>{!isDesktop&&<MobileNavigation primaryItems={coachMobilePrimaryItems} secondaryItems={coachMobileSecondaryItems} activeKey={tab} onChange={handleNavChange} ariaLabel="Coach navigation"/>}
 
   </div></div></main>
-{isDesktop&&<aside className="insights-panel"><div className="panel-title">COACH INSIGHTS</div><div className="placeholder">Add widgets here later (activity, upcoming events, roster changes, lifting compliance).</div></aside>}
+{isDesktop&&<aside className="insights-panel"><OperationalInsightRail model={coachInsightRailModel} onAction={handleCoachInsightAction} testId="coach-operational-insight-rail"/></aside>}
   </div>;
 }
 
