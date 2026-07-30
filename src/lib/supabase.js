@@ -1,4 +1,6 @@
 import { resolveExpiresAt } from "./authFlow.js";
+import { createScorePersistenceService } from "./scorePersistenceService.js";
+
 const viteEnv = (typeof import.meta !== "undefined" && import.meta?.env) ? import.meta.env : {};
 const baseUrl = viteEnv.VITE_SUPABASE_URL;
 const anonKey = viteEnv.VITE_SUPABASE_ANON_KEY;
@@ -13,6 +15,10 @@ const DEMO_MODE_KEY = "sl:demoMode";
 const DEMO_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
 const APP_PERSISTENCE_TABLES = new Set(["teams", "players", "player_profiles", "scores", "program_scores", "shot_logs", "events", "rsvps", "sessions"]);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const scorePersistence = createScorePersistenceService({
+  fetchImpl: (...args) => globalThis.fetch(...args),
+  storage: globalThis?.localStorage,
+});
 
 const compactObject = (value = {}) => Object.fromEntries(
   Object.entries(value).filter(([, field]) => field !== undefined && field !== ""),
@@ -70,7 +76,7 @@ export const normalizeRestWriteBody = (table, body) => {
   const sourceRows = Array.isArray(body) ? body : body && typeof body === "object" ? [body] : [];
   let rows = sourceRows;
   if (table === "teams") rows = rows.map(normalizeTeamWriteRow).filter(Boolean);
-  if (table === "player_profiles") rows = rows.map(normalizePlayerProfileWriteRow).filter(Boolean);
+  if (table === "player_profiles") rows = rows.map(normalizePlayerProfileWriteRow);
   return alignBulkObjectKeys(rows);
 };
 
@@ -123,32 +129,38 @@ const sanitizeAuthError = (payload, fallbackCode, fallbackMessage, status) => {
   return safe;
 };
 
-const buildHeaders = ({ upsert = false, onConflict } = {}) => {
+const buildHeaders = ({ upsert = false } = {}) => {
   const headers = {
     apikey: anonKey,
     Authorization: `Bearer ${anonKey}`,
     "Content-Type": "application/json",
   };
-
-  if (upsert) {
-    headers.Prefer = "resolution=merge-duplicates,return=representation";
-  }
-
+  if (upsert) headers.Prefer = "resolution=merge-duplicates,return=representation";
   return headers;
 };
 
-const request = async (table, { method = "GET", body, upsert = false, onConflict } = {}) => {
-  if (!hasConfig) {
+const scoreApiRequest = async ({ method = "GET", body } = {}) => {
+  try {
+    if (method === "GET") {
+      const result = await scorePersistence.loadScores();
+      return { data: result.scores, error: null };
+    }
+    const result = await scorePersistence.upsertScores(Array.isArray(body) ? body : body ? [body] : []);
+    return { data: result.scores, error: null };
+  } catch (error) {
     return {
       data: null,
       error: {
-        code: "config_missing",
-        message:
-          "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.",
+        code: String(error?.code || "score_api_failed"),
+        message: String(error?.message || "score_api_failed"),
+        status: Number(error?.status || 0),
+        details: error?.body || null,
       },
     };
   }
+};
 
+const request = async (table, { method = "GET", body, upsert = false, onConflict } = {}) => {
   if (method !== "GET" && APP_PERSISTENCE_TABLES.has(table) && isDemoPersistenceSession()) {
     return { data: Array.isArray(body) ? body : body ? [body] : [], error: null, skipped: "demo_local_only" };
   }
@@ -158,10 +170,22 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
     return { data: [], error: null, skipped: "no_compatible_rows" };
   }
 
+  if (table === "scores") return scoreApiRequest({ method, body: normalizedBody });
+
+  if (!hasConfig) {
+    return {
+      data: null,
+      error: {
+        code: "config_missing",
+        message: "Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.",
+      },
+    };
+  }
+
   let url;
   try {
     url = new URL(`${baseUrl}/rest/v1/${table}`);
-  } catch (error) {
+  } catch {
     return {
       data: null,
       error: {
@@ -171,13 +195,8 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
     };
   }
 
-  if (method === "GET") {
-    url.searchParams.set("select", "*");
-  }
-
-  if (onConflict) {
-    url.searchParams.set("on_conflict", onConflict);
-  }
+  if (method === "GET") url.searchParams.set("select", "*");
+  if (onConflict) url.searchParams.set("on_conflict", onConflict);
 
   const response = await fetch(url, {
     method,
@@ -194,27 +213,18 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
       if (!response.ok) {
         return {
           data: null,
-          error: {
-            code: "invalid_json_error_response",
-            message: "Supabase returned an invalid error payload.",
-          },
+          error: { code: "invalid_json_error_response", message: "Supabase returned an invalid error payload." },
         };
       }
       return {
         data: null,
-        error: {
-          code: "invalid_json_success_response",
-          message: "Supabase returned an invalid success payload.",
-        },
+        error: { code: "invalid_json_success_response", message: "Supabase returned an invalid success payload." },
       };
     }
   }
 
   if (!response.ok) {
-    return {
-      data: null,
-      error: data ?? { message: `Request failed with status ${response.status}` },
-    };
+    return { data: null, error: data ?? { message: `Request failed with status ${response.status}` } };
   }
 
   return { data, error: null };
@@ -236,7 +246,7 @@ export const supabase = {
       if (!response.ok) return { data: null, error: sanitizeAuthError(payload, "auth_signup_failed", "Signup failed", response.status) };
       if (payload?.access_token || payload?.refresh_token) {
         storeSession(payload);
-        notifyAuthStateChange('SIGNED_UP', payload);
+        notifyAuthStateChange("SIGNED_UP", payload);
       }
       return { data: payload, error: null };
     },
@@ -251,7 +261,7 @@ export const supabase = {
       if (!response.ok) return { data: null, error: sanitizeAuthError(payload, "auth_login_failed", "Login failed", response.status) };
       if (payload?.access_token || payload?.refresh_token) {
         storeSession(payload);
-        notifyAuthStateChange('SIGNED_UP', payload);
+        notifyAuthStateChange("SIGNED_UP", payload);
       }
       return { data: payload, error: null };
     },
@@ -301,26 +311,21 @@ export const supabase = {
       return { data: { session }, error: null };
     },
     async signOut() {
-      const token = window.localStorage?.getItem("sl:supabase-access-token") || "";
+      const token = window.localStorage?.getItem(LEGACY_TOKEN_KEY) || "";
       if (hasConfig && token) {
         await fetch(`${baseUrl}/auth/v1/logout`, { method: "POST", headers: { apikey: anonKey, Authorization: `Bearer ${token}` } }).catch(() => null);
       }
       try { clearSession(); } catch {}
-      notifyAuthStateChange('SIGNED_OUT', null);
+      notifyAuthStateChange("SIGNED_OUT", null);
       return { error: null };
     },
-
     onAuthStateChange(callback) {
-      if (typeof callback !== 'function') {
-        return { data: { subscription: { unsubscribe() {} } } };
-      }
+      if (typeof callback !== "function") return { data: { subscription: { unsubscribe() {} } } };
       authStateListeners.add(callback);
       return {
         data: {
           subscription: {
-            unsubscribe() {
-              authStateListeners.delete(callback);
-            },
+            unsubscribe() { authStateListeners.delete(callback); },
           },
         },
       };
@@ -329,19 +334,12 @@ export const supabase = {
   profiles: {
     async upsertCoach(row) {
       if (!hasConfig) return { data: null, error: { code: "config_missing", message: "Supabase is not configured." } };
-      return request("users", {
-        method: "POST",
-        body: [row],
-        upsert: true,
-        onConflict: "auth_user_id",
-      });
+      return request("users", { method: "POST", body: [row], upsert: true, onConflict: "auth_user_id" });
     },
   },
   from(table) {
     return {
-      select() {
-        return request(table);
-      },
+      select() { return request(table); },
       upsert(values, options = {}) {
         return request(table, {
           method: "POST",
@@ -359,4 +357,5 @@ export const __testUtils = {
   normalizeRestWriteBody,
   alignBulkObjectKeys,
   isDemoPersistenceSession,
+  scoreApiRequest,
 };
