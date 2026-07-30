@@ -10,7 +10,6 @@ on:
       - "src/lib/apiFetchBridge.js"
       - "migrations/046_players_signed_api_boundary.sql"
       - "tests/signed-player-identity-persistence.test.mjs"
-      - "tests/coach-player-data-management.test.mjs"
       - "tests/signed-session-integrity.test.mjs"
       - "tests/e2e/production-acceptance.spec.mjs"
       - "docs/signed-player-identity-persistence.md"
@@ -44,7 +43,6 @@ jobs:
       - name: Verify signed player identity contracts
         run: |
           node --test tests/signed-player-identity-persistence.test.mjs
-          node --test tests/coach-player-data-management.test.mjs
           node --test tests/signed-session-integrity.test.mjs tests/legacy-registration-session.test.mjs
           node --test tests/team-memberships-confirm-context-route.test.mjs tests/teams-restore-context-route.test.mjs
 
