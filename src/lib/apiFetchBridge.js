@@ -2,6 +2,7 @@ import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 import { createSchedulePersistenceService } from "./schedulePersistenceService.js";
 import { createPlayerProfilePersistenceService } from "./playerProfilePersistenceService.js";
 import { createPlayerIdentityPersistenceService } from "./playerIdentityPersistenceService.js";
+import { createTeamPersistenceService } from "./teamPersistenceService.js";
 
 const BRIDGE_MARKER = Symbol.for("shotlab.apiIdentityFetchBridge");
 const SIGNED_SCHEDULE_RESOURCES = new Set(["events", "rsvps"]);
@@ -33,17 +34,35 @@ function isDemoRequester(requester) {
   return requester === "coach.demo@shotlab.app" || requester === "demo@shotlab.app";
 }
 
-function prunePlayerCache(storage = globalThis?.localStorage) {
+function readActorContext(storage = globalThis?.localStorage) {
   const session = readSession(storage);
   const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
-  if (!requester || isDemoRequester(requester)) return [];
+  const players = parseStored(storage, "sl:players", []);
+  const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
+  return {
+    requester,
+    role: normalizeIdentity(session?.role || actor?.role),
+    teamId: String(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id || "").trim(),
+  };
+}
 
+function pruneTeamCache(storage = globalThis?.localStorage) {
+  const { requester, teamId } = readActorContext(storage);
+  if (!requester || isDemoRequester(requester)) return [];
+  const teams = parseStored(storage, "sl:teams", []);
+  if (!Array.isArray(teams) || !teams.length || !teamId) return Array.isArray(teams) ? teams : [];
+  const filtered = teams.filter((row) => String(row?.id || row?.teamId || row?.team_id || "").trim() === teamId);
+  if (filtered.length !== teams.length) {
+    try { storage?.setItem?.("sl:teams", JSON.stringify(filtered)); } catch {}
+  }
+  return filtered;
+}
+
+function prunePlayerCache(storage = globalThis?.localStorage) {
+  const { requester, role, teamId } = readActorContext(storage);
+  if (!requester || isDemoRequester(requester)) return [];
   const players = parseStored(storage, "sl:players", []);
   if (!Array.isArray(players) || !players.length) return [];
-  const actor = players.find((row) => normalizeIdentity(row?.email) === requester);
-  const role = normalizeIdentity(session?.role || actor?.role);
-  const teamId = String(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id || "").trim();
-
   const filtered = players.filter((row) => {
     if (normalizeIdentity(row?.email) === requester) return true;
     if ((role === "coach" || role === "assistant_coach") && teamId) {
@@ -58,17 +77,10 @@ function prunePlayerCache(storage = globalThis?.localStorage) {
 }
 
 function prunePlayerProfileCache(storage = globalThis?.localStorage) {
-  const session = readSession(storage);
-  const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
+  const { requester, role, teamId } = readActorContext(storage);
   if (!requester || isDemoRequester(requester)) return [];
-
-  const players = parseStored(storage, "sl:players", []);
-  const actor = (Array.isArray(players) ? players : []).find((row) => normalizeIdentity(row?.email) === requester);
-  const role = normalizeIdentity(session?.role || actor?.role);
-  const teamId = String(session?.teamId || session?.team_id || actor?.teamId || actor?.team_id || "").trim();
   const profiles = parseStored(storage, "sl:player-profiles", []);
   if (!Array.isArray(profiles) || !profiles.length) return [];
-
   let filtered = profiles;
   if (role === "player") {
     filtered = profiles.filter((row) => normalizeIdentity(row?.userId || row?.user_id || row?.email || row?.player_email) === requester);
@@ -77,7 +89,6 @@ function prunePlayerProfileCache(storage = globalThis?.localStorage) {
   } else {
     return profiles;
   }
-
   if (filtered.length !== profiles.length) {
     try { storage?.setItem?.("sl:player-profiles", JSON.stringify(filtered)); } catch {}
   }
@@ -109,7 +120,7 @@ function signedSupabaseResourceFor(input, target = globalThis) {
     const base = target?.location?.origin || "https://shotlab.invalid";
     const url = new URL(raw, base);
     if (!/(^|\.)supabase\.co$/i.test(url.hostname) && url.hostname !== "example.supabase.co") return "";
-    const match = url.pathname.match(/\/rest\/v1\/(events|rsvps|player_profiles|players)\/?$/i);
+    const match = url.pathname.match(/\/rest\/v1\/(events|rsvps|player_profiles|players|teams)\/?$/i);
     return String(match?.[1] || "").toLowerCase();
   } catch {
     return "";
@@ -127,6 +138,10 @@ function signedPlayerProfileResourceFor(input, target = globalThis) {
 
 function signedPlayerResourceFor(input, target = globalThis) {
   return signedSupabaseResourceFor(input, target) === "players";
+}
+
+function signedTeamResourceFor(input, target = globalThis) {
+  return signedSupabaseResourceFor(input, target) === "teams";
 }
 
 function methodFor(input, init = {}) {
@@ -164,14 +179,34 @@ export function installApiIdentityFetchBridge(target = globalThis) {
   if (!target || typeof target.fetch !== "function") return null;
   if (target.fetch?.[BRIDGE_MARKER]) return target.fetch;
 
+  pruneTeamCache(target?.localStorage);
   prunePlayerCache(target?.localStorage);
   prunePlayerProfileCache(target?.localStorage);
   const originalFetch = target.fetch.bind(target);
   const schedulePersistence = createSchedulePersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
   const playerProfilePersistence = createPlayerProfilePersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
   const playerIdentityPersistence = createPlayerIdentityPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
+  const teamPersistence = createTeamPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
 
   const wrappedFetch = async (input, init = {}) => {
+    if (signedTeamResourceFor(input, target)) {
+      try {
+        const method = methodFor(input, init);
+        if (method === "GET") {
+          const result = await teamPersistence.loadTeams();
+          try { target?.localStorage?.setItem?.("sl:teams", JSON.stringify(result.rows)); } catch {}
+          return jsonResponse(target, result.rows, 200);
+        }
+        if (method === "POST") {
+          const result = await teamPersistence.syncTeams(parseRows(init?.body));
+          return jsonResponse(target, result.rows, 200);
+        }
+        return jsonResponse(target, { error: "method_not_allowed" }, 405);
+      } catch (error) {
+        return errorResponse(target, error, "team_api_failed");
+      }
+    }
+
     if (signedPlayerResourceFor(input, target)) {
       try {
         const method = methodFor(input, init);
@@ -244,12 +279,14 @@ export function installApiIdentityFetchBridge(target = globalThis) {
 export const __testUtils = {
   apiPathFor,
   readRequester,
+  pruneTeamCache,
   prunePlayerCache,
   prunePlayerProfileCache,
   signedSupabaseResourceFor,
   signedScheduleResourceFor,
   signedPlayerProfileResourceFor,
   signedPlayerResourceFor,
+  signedTeamResourceFor,
   methodFor,
   parseRows,
   BRIDGE_MARKER,
