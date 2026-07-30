@@ -6,7 +6,7 @@ on:
       - march-3-reset-85393dd
     paths:
       - "src/lib/appDataModels.js"
-      - "migrations/040_session_table_lockdown.sql"
+      - "migrations/044_session_table_lockdown.sql"
       - "tests/session-table-lockdown.test.mjs"
       - "tests/signed-session-integrity.test.mjs"
       - "tests/legacy-registration-session.test.mjs"
