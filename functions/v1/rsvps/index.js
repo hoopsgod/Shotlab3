@@ -145,17 +145,25 @@ export async function onRequestPost({ request, env }) {
     const isCoach = writableTeamIds.has(teamId);
     const identities = new Set([requester, normalizeIdentity(resolvedUuid)].filter(Boolean));
 
-    if (!isCoach) {
+    const scopedRsvps = [];
+    if (isCoach) {
+      scopedRsvps.push(...rsvps);
+    } else {
       for (const row of rsvps) {
-        if (row.email !== requester || !identities.has(row.playerId)) return Response.json({ error: "identity_mismatch" }, { status: 403 });
+        const referencesRequester = row.email === requester || identities.has(row.playerId);
+        if (!referencesRequester) continue;
+        if (row.email !== requester || !identities.has(row.playerId)) {
+          return Response.json({ error: "identity_mismatch" }, { status: 403 });
+        }
+        scopedRsvps.push(row);
       }
     }
 
     const eventRows = await selectRows(env, "events", `select=id&team_id=eq.${encodeURIComponent(teamId)}&limit=500`);
     const validEventIds = new Set((Array.isArray(eventRows) ? eventRows : []).map((row) => cleanText(row?.id, 160)).filter(Boolean));
-    for (const row of rsvps) if (!validEventIds.has(row.eventId)) return Response.json({ error: "event_not_found" }, { status: 400 });
+    for (const row of scopedRsvps) if (!validEventIds.has(row.eventId)) return Response.json({ error: "event_not_found" }, { status: 400 });
 
-    for (const row of rsvps) {
+    for (const row of scopedRsvps) {
       const collisions = await selectRows(env, "rsvps", `select=id,email,player_id,team_id&id=eq.${encodeURIComponent(row.id)}&limit=1`);
       const prior = Array.isArray(collisions) ? collisions[0] : null;
       if (!prior) continue;
@@ -165,10 +173,10 @@ export async function onRequestPost({ request, env }) {
 
     const existingRows = await readTeamRsvps(env, teamId);
     const scopedExisting = isCoach ? existingRows : existingRows.filter((row) => isOwnedBy(row, identities));
-    const incomingIds = new Set(rsvps.map((row) => row.id));
+    const incomingIds = new Set(scopedRsvps.map((row) => row.id));
     const removedIds = scopedExisting.map((row) => row.id).filter((id) => id && !incomingIds.has(id));
 
-    if (rsvps.length) await upsertRows(env, "rsvps", rsvps.map(toDatabase), "id");
+    if (scopedRsvps.length) await upsertRows(env, "rsvps", scopedRsvps.map(toDatabase), "id");
     for (const id of removedIds) await deleteRows(env, "rsvps", `team_id=eq.${encodeURIComponent(teamId)}&id=eq.${encodeURIComponent(id)}`);
 
     const visibleRows = await readTeamRsvps(env, teamId);
