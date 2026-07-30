@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { STORAGE_KEYS, TABLE_MAP } from "../src/lib/appDataModels.js";
 
-const migration = await readFile(new URL("../migrations/040_session_table_lockdown.sql", import.meta.url), "utf8");
+const migration = await readFile(new URL("../migrations/044_session_table_lockdown.sql", import.meta.url), "utf8");
 const supabaseClient = await readFile(new URL("../src/lib/supabase.js", import.meta.url), "utf8");
 const legacySession = await readFile(new URL("../functions/_utils/legacySession.js", import.meta.url), "utf8");
 
