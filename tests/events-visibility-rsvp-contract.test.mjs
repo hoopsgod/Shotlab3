@@ -87,18 +87,17 @@ test('coach events page filters RSVP display by eventId and teamId', async () =>
 test('coach events cards display RSVP counts and a clear RSVP names section', async () => {
   const source = await appSource();
 
-  assert.match(source, /\{`\$\{evCoachRsvps\.length\} going`\}/);
-  assert.match(source, /\{`\$\{evCoachRsvps\.length\} confirmed`\}/);
-  assert.match(source, /\{`\$\{missing\} missing`\}/);
-  assert.match(source, />RSVPs<\/div>/);
-  assert.match(source, /evCoachRsvpNames\.length>0\?<div[^>]*>\{evCoachRsvpNames\.join\(", "\)\}<\/div>/);
-  assert.match(source, /No RSVPs yet — players can RSVP from their Events page\./);
+  assert.match(source, /\{`\$\{evR\.length\} confirmed`\}/);
+  assert.match(source, /\{evR\.length\} CONFIRMED/);
+  assert.match(source, /\{missingResponses\} NO RESPONSE/);
+  assert.match(source, /ATTENDEES \(\{evR\.length\}\)/);
+  assert.match(source, /evRsvpPreview\.length>0\?evRsvpPreview\.join\(", "\):"No RSVPs yet — players can RSVP from their Events page\."/);
 });
 
 test('coach event card derives RSVP names from rows tied to that event', async () => {
   const source = await appSource();
 
-  assert.match(source, /dateEvents\.map\(\(ev,eventIdx\)=>\{const evCoachRsvps=coachEventRsvpRows\(ev\.id\);const evCoachRsvpNames=evCoachRsvps\.map\(coachRsvpLabel\);/);
+  assert.match(source, /filteredEvents\.map\(ev=>\{const evR=coachEventRsvpRows\(ev\.id\);const evRsvpPreview=evR\.slice\(0,3\)\.map\(coachRsvpLabel\);/);
   assert.match(source, /const coachRsvpLabel=useCallback\(\(r\)=>getCoachRsvpLabel\(r,rosterNameByEmail\),\[rosterNameByEmail\]\);/);
 });
 
@@ -107,7 +106,7 @@ test('coach events RSVP labels use the shared RSVP visibility helper', async () 
 
   assert.match(source, /import \{ getCoachEventRsvpRows, getCoachRsvpLabel \} from "\.\/lib\/coachEventRsvpVisibility\.js";/);
   assert.match(source, /const coachRsvpLabel=useCallback\(\(r\)=>getCoachRsvpLabel\(r,rosterNameByEmail\),\[rosterNameByEmail\]\);/);
-  assert.match(source, /evCoachRsvpNames=evCoachRsvps\.map\(coachRsvpLabel\)/);
+  assert.match(source, /evRsvpPreview=evR\.slice\(0,3\)\.map\(coachRsvpLabel\)/);
 });
 
 test('event save failures show a visible non-technical coach error', async () => {
