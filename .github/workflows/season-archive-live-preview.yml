@@ -1,11 +1,17 @@
 name: Season Archive Live Preview Smoke
 
 on:
-  pull_request:
+  push:
+    branches:
+      - march-3-reset-85393dd
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: season-archive-production-smoke-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   live-preview-smoke:
@@ -45,7 +51,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: season-archive-live-preview-artifacts
+          name: season-archive-production-smoke-artifacts
           path: |
             live-preview-smoke.txt
             playwright-report/
