@@ -1,4 +1,5 @@
 import { resolveExpiresAt } from "./authFlow.js";
+import { createProgramScorePersistenceService } from "./programScorePersistenceService.js";
 import { createScorePersistenceService } from "./scorePersistenceService.js";
 import { createShotLogPersistenceService } from "./shotLogPersistenceService.js";
 
@@ -17,6 +18,10 @@ const DEMO_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
 const APP_PERSISTENCE_TABLES = new Set(["teams", "players", "player_profiles", "scores", "program_scores", "shot_logs", "events", "rsvps", "sessions"]);
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const scorePersistence = createScorePersistenceService({
+  fetchImpl: (...args) => globalThis.fetch(...args),
+  storage: globalThis?.localStorage,
+});
+const programScorePersistence = createProgramScorePersistenceService({
   fetchImpl: (...args) => globalThis.fetch(...args),
   storage: globalThis?.localStorage,
 });
@@ -165,6 +170,27 @@ const scoreApiRequest = async ({ method = "GET", body } = {}) => {
   }
 };
 
+const programScoreApiRequest = async ({ method = "GET", body } = {}) => {
+  try {
+    if (method === "GET") {
+      const result = await programScorePersistence.loadProgramScores();
+      return { data: result.programScores, error: null };
+    }
+    const result = await programScorePersistence.upsertProgramScores(Array.isArray(body) ? body : body ? [body] : []);
+    return { data: result.programScores, error: null };
+  } catch (error) {
+    return {
+      data: null,
+      error: {
+        code: String(error?.code || "program_score_api_failed"),
+        message: String(error?.message || "program_score_api_failed"),
+        status: Number(error?.status || 0),
+        details: error?.body || null,
+      },
+    };
+  }
+};
+
 const shotLogApiRequest = async ({ method = "GET", body } = {}) => {
   if (method !== "GET") {
     return {
@@ -200,6 +226,7 @@ const request = async (table, { method = "GET", body, upsert = false, onConflict
   }
 
   if (table === "scores") return scoreApiRequest({ method, body: normalizedBody });
+  if (table === "program_scores") return programScoreApiRequest({ method, body: normalizedBody });
   if (table === "shot_logs") return shotLogApiRequest({ method, body: normalizedBody });
 
   if (!hasConfig) {
@@ -388,5 +415,6 @@ export const __testUtils = {
   alignBulkObjectKeys,
   isDemoPersistenceSession,
   scoreApiRequest,
+  programScoreApiRequest,
   shotLogApiRequest,
 };

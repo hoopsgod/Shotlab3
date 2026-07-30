@@ -16,8 +16,9 @@ export const validateProgramDrillScore = (value, drill = {}) => {
   if (score === null) return { ok: false, error: "Score is required." };
   if (score < 0) return { ok: false, error: "Score cannot be negative." };
   if (score === 0 && !drillAllowsZeroScore(drill)) return { ok: false, error: "Score must be greater than 0." };
-  const max = Number(drill?.max);
-  if (Number.isFinite(max) && score > max) return { ok: false, error: `Score cannot exceed ${max}.` };
+  const rawMax = drill?.max;
+  const max = rawMax === null || rawMax === undefined || rawMax === "" ? null : Number(rawMax);
+  if (max !== null && Number.isFinite(max) && score > max) return { ok: false, error: `Score cannot exceed ${max}.` };
   return { ok: true, score };
 };
 

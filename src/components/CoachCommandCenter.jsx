@@ -264,7 +264,7 @@ export default function CoachCommandCenter({
     { label: "Create Practice", icon: "calendar", onClick: onScheduleEvent },
     { label: "Set Team Focus", icon: "spark", onClick: openPriorityEditor },
     { label: "Build Mission", icon: "target", onClick: onAddDrill },
-    { label: "Log Score", icon: "score", onClick: onLogScore },
+    { label: "Record Result", icon: "score", onClick: onLogScore },
     { label: "Message Team", icon: "message", onClick: onPlayersClick },
     { label: "Team Code", icon: "settings", onClick: openTeamTools },
   ], [onAddDrill, onAddPlayer, onLogScore, onPlayersClick, onScheduleEvent]);
