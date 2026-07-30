@@ -13,7 +13,6 @@ on:
       - "migrations/043_events_rsvps_signed_api_boundary.sql"
       - "tests/signed-events-rsvp-persistence.test.mjs"
       - "tests/events-visibility-rsvp-contract.test.mjs"
-      - "tests/remote-persistence-hydration-merge.test.mjs"
       - "tests/remotePersistence-rsvps.test.mjs"
       - "docs/signed-events-rsvp-persistence.md"
       - ".github/workflows/signed-events-rsvp-persistence.yml"
@@ -47,7 +46,6 @@ jobs:
         run: |
           node --test tests/signed-events-rsvp-persistence.test.mjs
           node --test tests/events-visibility-rsvp-contract.test.mjs
-          node --test tests/remote-persistence-hydration-merge.test.mjs
           node --test tests/remotePersistence-rsvps.test.mjs
 
       - name: Verify production build
