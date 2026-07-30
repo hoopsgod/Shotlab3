@@ -1,5 +1,6 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 import { createSchedulePersistenceService } from "./schedulePersistenceService.js";
+import { createPlayerProfilePersistenceService } from "./playerProfilePersistenceService.js";
 
 const BRIDGE_MARKER = Symbol.for("shotlab.apiIdentityFetchBridge");
 const SIGNED_SCHEDULE_RESOURCES = new Set(["events", "rsvps"]);
@@ -49,6 +50,19 @@ function signedScheduleResourceFor(input, target = globalThis) {
   }
 }
 
+function signedPlayerProfileResourceFor(input, target = globalThis) {
+  try {
+    const raw = rawUrlFor(input);
+    if (!raw) return false;
+    const base = target?.location?.origin || "https://shotlab.invalid";
+    const url = new URL(raw, base);
+    if (!/(^|\.)supabase\.co$/i.test(url.hostname) && url.hostname !== "example.supabase.co") return false;
+    return /\/rest\/v1\/player_profiles\/?$/i.test(url.pathname);
+  } catch {
+    return false;
+  }
+}
+
 function methodFor(input, init = {}) {
   return String(init?.method || (typeof input === "object" ? input?.method : "") || "GET").toUpperCase();
 }
@@ -81,8 +95,34 @@ export function installApiIdentityFetchBridge(target = globalThis) {
     fetchImpl: originalFetch,
     storage: target?.localStorage,
   });
+  const playerProfilePersistence = createPlayerProfilePersistenceService({
+    fetchImpl: originalFetch,
+    storage: target?.localStorage,
+  });
 
   const wrappedFetch = async (input, init = {}) => {
+    if (signedPlayerProfileResourceFor(input, target)) {
+      try {
+        const method = methodFor(input, init);
+        if (method === "GET") {
+          const result = await playerProfilePersistence.loadProfiles();
+          return jsonResponse(target, result.rows, 200);
+        }
+        if (method === "POST") {
+          const rows = parseRows(init?.body);
+          const result = await playerProfilePersistence.syncProfiles(rows);
+          return jsonResponse(target, result.rows, 200);
+        }
+        return jsonResponse(target, { error: "method_not_allowed" }, 405);
+      } catch (error) {
+        return jsonResponse(
+          target,
+          error?.body && typeof error.body === "object" ? error.body : { error: String(error?.code || error?.message || "profile_api_failed") },
+          Number(error?.status || 500) || 500,
+        );
+      }
+    }
+
     const scheduleResource = signedScheduleResourceFor(input, target);
     if (scheduleResource) {
       try {
@@ -134,6 +174,7 @@ export const __testUtils = {
   apiPathFor,
   readRequester,
   signedScheduleResourceFor,
+  signedPlayerProfileResourceFor,
   methodFor,
   parseRows,
   BRIDGE_MARKER,
