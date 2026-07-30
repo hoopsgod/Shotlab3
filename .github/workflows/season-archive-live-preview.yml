@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      LIVE_PREVIEW_URL: https://codex-add-season-archive-fun-l7rh.shotlab3.pages.dev
+      LIVE_PREVIEW_URL: https://shotlab3.pages.dev
 
     steps:
       - name: Check out repository
@@ -33,7 +33,7 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Run deployed preview smoke test
+      - name: Run deployed production smoke test
         run: |
           set +e
           npx playwright test tests/e2e/season-archive-live-preview.spec.mjs --project=chromium-desktop --reporter=line > live-preview-smoke.txt 2>&1
