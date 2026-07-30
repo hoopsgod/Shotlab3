@@ -1,0 +1,70 @@
+name: Signed Player Profile Persistence
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "functions/v1/player-profiles/**"
+      - "src/lib/playerProfilePersistenceService.js"
+      - "src/lib/apiFetchBridge.js"
+      - "migrations/045_player_profiles_signed_api_boundary.sql"
+      - "tests/signed-player-profile-persistence.test.mjs"
+      - "tests/e2e/coach-player-invitation.spec.mjs"
+      - "docs/signed-player-profile-persistence.md"
+      - ".github/workflows/signed-player-profile-persistence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signed-player-profile-persistence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-player-profile-persistence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify signed profile authorization contracts
+        run: |
+          node --test tests/signed-player-profile-persistence.test.mjs
+          node --test tests/team-memberships-confirm-context-route.test.mjs tests/teams-restore-context-route.test.mjs
+          node --test tests/coach-player-invitation-route.test.mjs tests/coach-player-invitation-service.test.mjs
+
+      - name: Install pinned Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Run coach player invitation browser flow
+        run: npx playwright test tests/e2e/coach-player-invitation.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-player-profile-persistence-failure
+          path: |
+            npm-debug.log
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
