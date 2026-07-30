@@ -1,0 +1,65 @@
+name: Signed Score Persistence
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "functions/_utils/supabase.js"
+      - "functions/v1/scores/**"
+      - "src/lib/apiIdentityHeaders.js"
+      - "src/lib/scorePersistenceService.js"
+      - "src/lib/supabase.js"
+      - "migrations/041_scores_signed_api_boundary.sql"
+      - "tests/signed-score-persistence.test.mjs"
+      - "tests/remote-persistence-shape.test.mjs"
+      - "tests/player-home-shot-logging-save-path.test.mjs"
+      - "tests/coach-leaderboards-drills-events-shots-contract.test.mjs"
+      - "docs/signed-score-persistence.md"
+      - ".github/workflows/signed-score-persistence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signed-score-persistence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-score-persistence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify signed score authorization and persistence contracts
+        run: |
+          node --test tests/signed-score-persistence.test.mjs
+          node --test tests/remote-persistence-shape.test.mjs
+          node --test tests/player-home-shot-logging-save-path.test.mjs
+          node --test tests/coach-leaderboards-drills-events-shots-contract.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-score-persistence-failure
+          path: |
+            npm-debug.log
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
