@@ -284,107 +284,101 @@ async function tryFlexibleRepairUpsert(env, tableName, options, diagnosticKey, d
   return { ok: false, attempts };
 }
 
-async function verifyRepairIsAllowed(env, { request, requester, resolvedUserUuid, teamId, legacyProfileFallback }, diagnostic) {
-  if (legacyProfileFallback?.verified === true) {
-    diagnostic.team_binding_repair_auth = "legacy_profile";
-    diagnostic.legacy_profile_fallback_result = safeDiagnosticText(legacyProfileFallback.result || "verified", 120);
-    return { allowed: true, authorizedBy: "legacy_profile" };
-  }
-
-  const legacyProfile = await findLegacyPlayerProfileEvidence(env, { requester, teamId });
-  diagnostic.team_binding_repair_account_probe = legacyProfile.result || "0";
-  if (legacyProfile.ok) {
-    diagnostic.team_binding_repair_auth = "legacy_profile";
-    diagnostic.legacy_profile_fallback_result = legacyProfile.result || "match";
-    return { allowed: true, authorizedBy: "legacy_profile" };
-  }
-  if (legacyProfile.fatal) return { allowed: false, fatal: legacyProfile.fatal, reason: legacyProfile.reason || "registered_profile_probe_failed" };
-
-  const tokenAuth = requireRepairToken(request, env);
-  diagnostic.team_binding_repair_auth = tokenAuth.ok ? "internal_api_token" : tokenAuth.error || "repair_token_required";
-  if (!tokenAuth.ok) return { allowed: false, reason: "repair_not_authorized" };
-  if (!resolvedUserUuid) return { allowed: false, reason: "resolved_user_uuid_missing" };
-  return { allowed: true, authorizedBy: "internal_api_token" };
+async function verifyRepairIsAllowed(env, { requester, teamId }, diagnostic) {
+  diagnostic.team_binding_repair_account_probe = "not_attempted";
+  const profileEvidence = await findLegacyPlayerProfileEvidence(env, { requester, teamId });
+  diagnostic.team_binding_repair_account_probe = profileEvidence.result || "0";
+  if (profileEvidence.ok) return { ok: true, profile: profileEvidence.profile };
+  if (profileEvidence.fatal) return { ok: false, fatal: profileEvidence.fatal, reason: profileEvidence.reason || "registered_profile_probe_failed" };
+  return { ok: false, reason: profileEvidence.reason || "registered_profile_not_found" };
 }
 
-async function resolveOrRepairHomeShotPlayerBinding(env, options, diagnostic) {
-  const { request, requester, resolvedUserUuid, teamId, name, legacyProfileFallback } = options;
-  const identities = uniqueNormalized([requester, resolvedUserUuid]);
-  const membershipLookup = await findActiveRowByFlexibleColumns(env, {
-    tableName: "team_memberships",
-    teamColumns: ["team_id", "teamId"],
-    identityColumns: ["user_id", "userId", "email"],
-    teamId,
-    identities,
-    activeRowPredicate: isActiveRow,
-  });
-  diagnostic.uuid_membership_query_attempted = resolvedUserUuid ? "yes" : "no";
-  diagnostic.uuid_membership_query_result = membershipLookup.result || "0";
-  diagnostic.email_membership_query_attempted = requester ? "yes" : "no";
-  diagnostic.email_membership_query_result = membershipLookup.result || "0";
-  if (membershipLookup.fatal) return { ok: false, fatal: membershipLookup.fatal, error: "membership_query_failed", stage: "membership_query", message: "Failed to verify player membership." };
 
-  const playerLookup = await findActiveRowByFlexibleColumns(env, {
-    tableName: "players",
-    teamColumns: ["team_id", "teamId"],
-    identityColumns: ["email", "player_id", "playerId", "user_id", "userId", "id"],
-    teamId,
-    identities,
-    activeRowPredicate: isActivePlayerRow,
-  });
+async function probeHomeShotPlayerBinding(env, { requester, resolvedUserUuid, teamId }, diagnostic) {
+  let hasEmailMembership = false;
+  let hasUuidMembership = false;
+  let hasPlayerRecord = false;
+  let matchedPlayerRow = null;
+  const membershipTeamColumns = ["team_id", "teamId"];
+  const membershipIdentityColumns = ["user_id", "userId", "email"];
+
+  if (resolvedUserUuid) {
+    diagnostic.uuid_membership_query_attempted = "yes";
+    const membershipByUuid = await findActiveRowByFlexibleColumns(env, { tableName: "team_memberships", teamColumns: membershipTeamColumns, identityColumns: membershipIdentityColumns, teamId, identities: [resolvedUserUuid], activeRowPredicate: isActiveRow });
+    if (membershipByUuid.fatal) {
+      diagnostic.uuid_membership_query_result = `error:${safeErrorMessage(membershipByUuid.fatal)}`;
+      return { ok: false, fatal: membershipByUuid.fatal, error: "membership_uuid_query_failed", stage: "uuid_membership_lookup", message: "Failed to check uuid membership." };
+    }
+    hasUuidMembership = membershipByUuid.found;
+    diagnostic.uuid_membership_query_result = membershipByUuid.result || (hasUuidMembership ? "match" : "0");
+  } else {
+    diagnostic.uuid_membership_query_result = "skipped_missing_resolved_uuid";
+  }
+
+  if (!hasUuidMembership) {
+    diagnostic.email_membership_query_attempted = "yes";
+    const membershipByEmail = await findActiveRowByFlexibleColumns(env, { tableName: "team_memberships", teamColumns: membershipTeamColumns, identityColumns: membershipIdentityColumns, teamId, identities: [requester], activeRowPredicate: isActiveRow });
+    if (membershipByEmail.fatal) {
+      diagnostic.email_membership_query_result = `error:${safeErrorMessage(membershipByEmail.fatal)}`;
+      return { ok: false, fatal: membershipByEmail.fatal, error: "membership_email_query_failed", stage: "email_membership_lookup", message: "Failed to check email membership." };
+    }
+    hasEmailMembership = membershipByEmail.found;
+    diagnostic.email_membership_query_result = membershipByEmail.result || (hasEmailMembership ? "match" : "0");
+  }
+
   diagnostic.player_record_query_attempted = "yes";
-  diagnostic.player_record_query_result = playerLookup.result || "0";
-  if (playerLookup.fatal) return { ok: false, fatal: playerLookup.fatal, error: "player_query_failed", stage: "player_query", message: "Failed to verify player roster record." };
-
-  if (membershipLookup.found || playerLookup.found) {
-    diagnostic.authorized_by = membershipLookup.found ? "membership" : "player_roster";
-    return { ok: true, membershipRow: membershipLookup.row || null, playerRow: playerLookup.row || null };
+  const playerRecord = await findActiveRowByFlexibleColumns(env, { tableName: "players", teamColumns: ["team_id", "teamId"], identityColumns: ["email", "user_id", "userId", "player_id", "playerId", "id"], teamId, identities: [requester, resolvedUserUuid], activeRowPredicate: isActivePlayerRow });
+  if (playerRecord.fatal) {
+    diagnostic.player_record_query_result = `error:${safeErrorMessage(playerRecord.fatal)}`;
+    return { ok: false, fatal: playerRecord.fatal, error: "player_record_query_failed", stage: "player_record_lookup", message: "Failed to check player record." };
   }
+  hasPlayerRecord = playerRecord.found;
+  matchedPlayerRow = hasPlayerRecord ? playerRecord.row || null : null;
+  diagnostic.player_record_query_result = playerRecord.result || (hasPlayerRecord ? "match" : "0");
 
-  const repairAuth = await verifyRepairIsAllowed(env, { request, requester, resolvedUserUuid, teamId, legacyProfileFallback }, diagnostic);
-  if (!repairAuth.allowed) {
-    if (repairAuth.fatal) return { ok: false, fatal: repairAuth.fatal, error: "repair_authorization_failed", stage: "team_binding_repair", message: "Failed to verify registered player profile." };
-    return { ok: false, repairReason: repairAuth.reason || "missing_durable_binding" };
-  }
+  let authorizedBy = "none";
+  if (hasEmailMembership) authorizedBy = "email";
+  if (!hasEmailMembership && hasUuidMembership) authorizedBy = "uuid";
+  if (!hasEmailMembership && !hasUuidMembership && hasPlayerRecord) authorizedBy = "player_record";
+  diagnostic.authorized_by = authorizedBy;
+  return { ok: authorizedBy !== "none", authorizedBy, playerRow: matchedPlayerRow };
+}
 
-  if (repairAuth.authorizedBy === "legacy_profile") {
+async function resolveOrRepairHomeShotPlayerBinding(env, { request, requester, resolvedUserUuid, teamId, name, legacyProfileFallback }, diagnostic) {
+  const initial = await probeHomeShotPlayerBinding(env, { requester, resolvedUserUuid, teamId }, diagnostic);
+  if (initial.ok || initial.fatal) return initial;
+  if (legacyProfileFallback?.verified) {
+    diagnostic.legacy_profile_fallback_result = legacyProfileFallback.result || "verified";
     diagnostic.authorized_by = "legacy_profile";
-    return { ok: true, membershipRow: null, playerRow: null };
+    return { ok: true, authorizedBy: "legacy_profile", playerRow: null };
   }
-
   diagnostic.team_binding_repair_attempted = "yes";
-  const repairOptions = { requester, resolvedUserUuid, teamId, name };
+  const repairAllowed = await verifyRepairIsAllowed(env, { requester, teamId }, diagnostic);
+  if (!repairAllowed.ok) return { ok: false, repairFailed: true, repairReason: repairAllowed.reason || "repair_not_allowed", fatal: repairAllowed.fatal || null };
+  const repairAuth = requireRepairToken(request, env);
+  if (!repairAuth.ok) {
+    diagnostic.team_binding_repair_auth = "required";
+    return { ok: false, repairFailed: true, repairReason: "repair_auth_required" };
+  }
+  diagnostic.team_binding_repair_auth = "ok";
+
+  const repairOptions = { requester, resolvedUserUuid, teamId, name: name || repairAllowed.profile?.name || requester };
   const playerRepair = await tryFlexibleRepairUpsert(env, "players", repairOptions, "team_binding_repair_players_result", diagnostic);
-  const membershipRepair = await tryFlexibleRepairUpsert(env, "team_memberships", repairOptions, "team_binding_repair_memberships_result", diagnostic);
-
-  const afterMembershipRepair = await findActiveRowByFlexibleColumns(env, {
-    tableName: "team_memberships",
-    teamColumns: ["team_id", "teamId"],
-    identityColumns: ["user_id", "userId", "email"],
-    teamId,
-    identities,
-    activeRowPredicate: isActiveRow,
-  });
-  const afterPlayerRepair = await findActiveRowByFlexibleColumns(env, {
-    tableName: "players",
-    teamColumns: ["team_id", "teamId"],
-    identityColumns: ["email", "player_id", "playerId", "user_id", "userId", "id"],
-    teamId,
-    identities,
-    activeRowPredicate: isActivePlayerRow,
-  });
-  diagnostic.team_binding_repair_reread = "yes";
-  diagnostic.uuid_membership_query_result = afterMembershipRepair.result || diagnostic.uuid_membership_query_result;
-  diagnostic.email_membership_query_result = afterMembershipRepair.result || diagnostic.email_membership_query_result;
-  diagnostic.player_record_query_result = afterPlayerRepair.result || diagnostic.player_record_query_result;
-
-  if (afterMembershipRepair.found || afterPlayerRepair.found) {
-    diagnostic.authorized_by = afterMembershipRepair.found ? "membership_repaired" : "player_roster_repaired";
-    diagnostic.team_binding_repair_result = "success";
-    return { ok: true, membershipRow: afterMembershipRepair.row || null, playerRow: afterPlayerRepair.row || null };
+  diagnostic.team_binding_repair_reread = "after_players";
+  const afterPlayerRepair = await probeHomeShotPlayerBinding(env, { requester, resolvedUserUuid, teamId }, diagnostic);
+  if (afterPlayerRepair.ok) {
+    diagnostic.team_binding_repair_result = afterPlayerRepair.authorizedBy === "player_record" ? "repaired_player_record" : "repaired";
+    return afterPlayerRepair;
   }
 
-  const repaired = playerRepair.ok || membershipRepair.ok;
+  const membershipRepair = await tryFlexibleRepairUpsert(env, "team_memberships", repairOptions, "team_binding_repair_memberships_result", diagnostic);
+  diagnostic.team_binding_repair_reread = "after_membership";
+  const repaired = await probeHomeShotPlayerBinding(env, { requester, resolvedUserUuid, teamId }, diagnostic);
+  if (repaired.ok) {
+    diagnostic.team_binding_repair_result = repaired.authorizedBy === "player_record" && !membershipRepair.ok ? "repaired_player_record" : "repaired";
+    return repaired;
+  }
+
   const fatal = repaired.fatal || afterPlayerRepair.fatal || playerRepair.fatal || membershipRepair.fatal || null;
   const repairReason = !playerRepair.ok && !membershipRepair.ok ? "repair_upsert_failed" : "repair_reread_no_binding";
   return { ok: false, repairFailed: true, repairReason, fatal };
@@ -402,10 +396,9 @@ function diagnosticError(error, status, stage, message, diagnostic, extra = {}) 
 }
 
 export async function onRequestPost({ request, env, data = {} }) {
-  const requester = normalizeIdentity(data?.verifiedRequester || readUserId(request));
+  const requester = normalizeIdentity(readUserId(request));
   const diagnostic = {
     requester_present: requester ? "yes" : "no",
-    requester_source: safeDiagnosticText(data?.verifiedRequesterSource || "direct_route_test", 80),
     submitted_team_id_present: "no",
     submitted_player_identity_matches_requester: "no",
     resolved_app_user_uuid_success: "no",
