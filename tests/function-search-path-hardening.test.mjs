@@ -60,6 +60,6 @@ test("migration covers invite, leaderboard, archive, and shot-log function group
     shotLogs: ["shot_logs_use_roster_player_key"],
   };
   for (const [group, names] of Object.entries(groups)) {
-    for (const name of names) assert.match(migration, new RegExp(`public\\.${name.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}`, "i"), group);
+    for (const name of names) assert.match(migration, new RegExp(`public\\.${name}\\b`, "i"), group);
   }
 });
