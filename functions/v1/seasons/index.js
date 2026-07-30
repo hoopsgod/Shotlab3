@@ -1,5 +1,7 @@
-import { callRpc, readUserId, selectRows } from "../../_utils/supabase.js";
+import { readAuthenticatedIdentity } from "../../_utils/legacySession.js";
+import { callRpc, selectRows } from "../../_utils/supabase.js";
 import { enforceRateLimit, getClientKey } from "../../_utils/security.js";
+import { collectTeamPriorityAccess } from "../team-priorities/index.js";
 
 const clean = (value) => String(value ?? "").trim();
 const normalizeIdentity = (value) => clean(value).toLowerCase();
@@ -39,33 +41,23 @@ function validatePlan(plan) {
   return { ok: true, teamId, plan: JSON.parse(serialized) };
 }
 
-async function resolveAuthorizedTeamIds(env, requester) {
-  const ids = new Set();
-  try {
-    const profiles = await selectRows(env, "legacy_auth_profiles", `select=team_id,role&email=eq.${encodeURIComponent(requester)}&role=eq.coach`);
-    for (const row of Array.isArray(profiles) ? profiles : []) if (clean(row?.team_id)) ids.add(clean(row.team_id));
-  } catch {}
-  try {
-    const resolved = await callRpc(env, "resolve_app_user_uuid", { p_identifier: requester });
-    const userId = clean(Array.isArray(resolved) ? resolved[0]?.resolve_app_user_uuid || resolved[0]?.resolved_user_uuid : resolved?.resolve_app_user_uuid || resolved?.resolved_user_uuid || resolved);
-    if (userId) {
-      const rows = await selectRows(env, "team_memberships", `select=team_id,role,status&user_id=eq.${encodeURIComponent(userId)}&status=eq.active&role=in.(coach,assistant_coach)`);
-      for (const row of Array.isArray(rows) ? rows : []) if (clean(row?.team_id)) ids.add(clean(row.team_id));
-    }
-  } catch {}
-  return ids;
+async function authenticate(request, env) {
+  return readAuthenticatedIdentity({ env, request, allowDemo: true });
 }
 
 export async function onRequestGet({ request, env }) {
-  const requester = normalizeIdentity(readUserId(request));
+  const auth = await authenticate(request, env);
+  const requester = normalizeIdentity(auth?.identity);
   if (!requester) return Response.json({ error: "unauthorized" }, { status: 401 });
   const rate = enforceRateLimit({ key: `seasons_get:${getClientKey(request, requester)}`, max: 60, windowMs: 60_000 });
   if (!rate.allowed) return Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
-  if (requester === DEMO_COACH_EMAIL) return Response.json({ ok: true, seasons: [], demoLocalOnly: true });
+  if (auth.source === "demo_header" && requester === DEMO_COACH_EMAIL) {
+    return Response.json({ ok: true, seasons: [], demoLocalOnly: true });
+  }
   try {
-    const teamIds = await resolveAuthorizedTeamIds(env, requester);
+    const { readableTeamIds } = await collectTeamPriorityAccess(env, requester);
     const seasons = [];
-    for (const teamId of teamIds) {
+    for (const teamId of readableTeamIds) {
       const rows = await selectRows(env, "active_seasons", `select=id,team_id,name,start_date,projected_end_date,source_archive_id,lifecycle_status,reusable_structure,created_at&team_id=eq.${encodeURIComponent(teamId)}&order=created_at.desc`);
       seasons.push(...(Array.isArray(rows) ? rows : []));
     }
@@ -77,7 +69,8 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const requester = normalizeIdentity(readUserId(request));
+  const auth = await authenticate(request, env);
+  const requester = normalizeIdentity(auth?.identity);
   if (!requester) return Response.json({ error: "unauthorized" }, { status: 401 });
   const rate = enforceRateLimit({ key: `seasons_post:${getClientKey(request, requester)}`, max: 6, windowMs: 60_000 });
   if (!rate.allowed) return Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": String(rate.retryAfterSeconds) } });
@@ -85,12 +78,17 @@ export async function onRequestPost({ request, env }) {
   const validated = validatePlan(body?.plan);
   if (!validated.ok) return Response.json({ error: validated.error }, { status: 400 });
 
-  if (requester === DEMO_COACH_EMAIL) {
+  if (auth.source === "demo_header" && requester === DEMO_COACH_EMAIL) {
     return Response.json({ ok: true, idempotent: false, demoLocalOnly: true, seasonId: `demo-season-${validated.plan.transitionId}`, transitionId: validated.plan.transitionId }, { status: 201 });
   }
 
   try {
-    const result = await callRpc(env, "start_new_season", { p_plan: validated.plan });
+    const { writableTeamIds } = await collectTeamPriorityAccess(env, requester);
+    if (!writableTeamIds.has(validated.teamId)) return Response.json({ error: "forbidden" }, { status: 403 });
+    const result = await callRpc(env, "start_new_season", {
+      p_plan: validated.plan,
+      p_requester_user_id: requester,
+    });
     const payload = Array.isArray(result) ? result[0] : result;
     return Response.json(payload && typeof payload === "object" ? payload : { ok: true, result: payload }, { status: 201 });
   } catch (error) {

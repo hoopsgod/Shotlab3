@@ -5,8 +5,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const migration = fs.readFileSync(new URL("../migrations/039_security_definer_privilege_lockdown.sql", import.meta.url), "utf8");
+const seasonPreparation = fs.readFileSync(new URL("../migrations/049_season_rollover_signed_api_boundary.sql", import.meta.url), "utf8");
+const seasonLockdown = fs.readFileSync(new URL("../migrations/050_season_rollover_signed_api_lockdown.sql", import.meta.url), "utf8");
 const leaderboardRoute = fs.readFileSync(new URL("../functions/v1/leaderboards/home-shots.js", import.meta.url), "utf8");
-const seasonPrivileges = fs.readFileSync(new URL("../migrations/035_tighten_season_rollover_privileges.sql", import.meta.url), "utf8");
 
 function collectSourceFiles(root) {
   const files = [];
@@ -30,12 +31,20 @@ test("service-mediated security definer functions revoke public client execution
   assert.match(migration, /notify pgrst, 'reload schema'/i);
 });
 
-test("authenticated season rollover RPCs remain intentionally available", () => {
+test("legacy authenticated season rollover RPCs are replaced by a service-only signature", () => {
   assert.doesNotMatch(migration, /revoke execute on function public\.is_active_team_coach/i);
   assert.doesNotMatch(migration, /revoke execute on function public\.start_new_season/i);
-  assert.match(seasonPrivileges, /grant execute on function public\.is_active_team_coach\(text\) to authenticated/i);
-  assert.match(seasonPrivileges, /grant execute on function public\.start_new_season\(jsonb\) to authenticated/i);
-  assert.match(seasonPrivileges, /revoke execute on function public\.start_new_season\(jsonb\) from public, anon/i);
+  assert.match(seasonPreparation, /create or replace function public\.start_new_season\(\s*p_plan jsonb,\s*p_requester_user_id text\s*\)/i);
+  assert.match(seasonPreparation, /revoke all on function public\.start_new_season\(jsonb, text\)\s+from public, anon, authenticated/i);
+  assert.match(seasonPreparation, /grant execute on function public\.start_new_season\(jsonb, text\)\s+to service_role/i);
+  assert.match(seasonPreparation, /set search_path = ''/i);
+  assert.doesNotMatch(seasonPreparation, /drop function public\.start_new_season\(jsonb\)/i);
+  assert.match(seasonLockdown, /drop function public\.is_active_team_coach\(text\)/i);
+  assert.match(seasonLockdown, /drop function public\.start_new_season\(jsonb\)/i);
+  assert.match(seasonLockdown, /revoke all privileges on table public\.active_seasons\s+from public, anon, authenticated/i);
+  assert.match(seasonLockdown, /revoke all privileges on table public\.season_player_memberships\s+from public, anon, authenticated/i);
+  assert.match(seasonLockdown, /revoke all privileges on table public\.season_rollovers\s+from public, anon, authenticated/i);
+  assert.doesNotMatch(seasonLockdown, /delete\s+from|update\s+public\.|insert\s+into/i);
 });
 
 test("leaderboard RPC is mediated by the Cloudflare service-role route", () => {
