@@ -47,10 +47,10 @@ function installFetch({ role = "coach", duplicate = false, storedRows = [] } = {
 
     if (href.includes("/rest/v1/rpc/resolve_app_user_uuid")) return jsonResponse(coachUuid);
     if (href.includes("/rest/v1/legacy_auth_profiles")) {
-      return jsonResponse(role === "coach" ? [{ team_id: "team-a", role: "coach" }] : []);
+      return jsonResponse(role === "none" ? [] : [{ team_id: "team-a", role }]);
     }
     if (href.includes("/rest/v1/team_memberships")) {
-      return jsonResponse(role === "coach" ? [{ team_id: "team-a", role: "coach", status: "active" }] : []);
+      return jsonResponse(role === "none" ? [] : [{ team_id: "team-a", role, status: "active" }]);
     }
     if (href.includes("/rest/v1/teams")) return jsonResponse(role === "coach" ? [{ id: "team-a", coach_user_id: coachUuid }] : []);
     if (href.includes("/rest/v1/season_archives")) {
@@ -165,7 +165,7 @@ test("duplicate archive returns conflict rather than replacing history", async (
   }
 });
 
-test("GET returns only archives from coach-authorized teams", async () => {
+test("GET returns full archives only from coach-authorized teams", async () => {
   const storedRow = {
     id: archive.id,
     team_id: "team-a",
@@ -190,6 +190,65 @@ test("GET returns only archives from coach-authorized teams", async () => {
   } finally {
     mock.restore();
   }
+});
+
+test("registered player can read only their own career projection", async () => {
+  const playerEmail = "player@a.test";
+  const otherPlayerEmail = "other@a.test";
+  const storedArchive = {
+    ...archive,
+    rosterSnapshot: [
+      { email: playerEmail, teamId: "team-a", name: "Player A" },
+      { email: otherPlayerEmail, teamId: "team-a", name: "Player B" },
+    ],
+    eventSnapshot: [{ id: "event-private", teamId: "team-a", title: "Coach-only archive detail" }],
+    playerSeasonSummaries: [
+      { email: playerEmail, totalHomeMakes: 25, totalShotLogMakes: 30 },
+      { email: otherPlayerEmail, totalHomeMakes: 900, totalShotLogMakes: 900 },
+    ],
+    homeScoresSnapshot: [
+      { email: playerEmail, teamId: "team-a", score: 25 },
+      { email: otherPlayerEmail, teamId: "team-a", score: 900 },
+    ],
+  };
+  const storedRow = {
+    id: archive.id,
+    team_id: "team-a",
+    season_name: archive.seasonName,
+    season_start_date: archive.seasonStartDate,
+    season_end_date: archive.seasonEndDate,
+    created_at: archive.createdAt,
+    archive_version: 2,
+    snapshot: storedArchive,
+  };
+  const mock = installFetch({ role: "player", storedRows: [storedRow] });
+  try {
+    const request = new Request("https://app.test/v1/season-archives?team_id=team-a", {
+      headers: { "x-user-id": playerEmail },
+    });
+    const response = await onRequestGet({ request, env });
+    const body = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(body.archives.length, 1);
+    assert.equal(body.archives[0].accessMode, "player_self");
+    assert.deepEqual(body.archives[0].playerSeasonSummaries.map((row) => row.email), [playerEmail]);
+    assert.deepEqual(body.archives[0].homeScoresSnapshot.map((row) => row.email), [playerEmail]);
+    assert.equal("rosterSnapshot" in body.archives[0], false);
+    assert.equal("eventSnapshot" in body.archives[0], false);
+    assert.equal(JSON.stringify(body).includes(otherPlayerEmail), false);
+    assert.equal(JSON.stringify(body).includes("Coach-only archive detail"), false);
+  } finally {
+    mock.restore();
+  }
+});
+
+test("production archive API rejects a spoofed identity header", async () => {
+  const request = new Request("https://shotlab3.pages.dev/v1/season-archives", {
+    headers: { "x-user-id": coachEmail },
+  });
+  const response = await onRequestGet({ request, env });
+  assert.equal(response.status, 401);
+  assert.equal((await response.json()).error, "unauthorized");
 });
 
 test("malformed or mismatched snapshots are rejected before database access", async () => {

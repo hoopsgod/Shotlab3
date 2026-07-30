@@ -1,24 +1,17 @@
-import { callRpc, insertRows, readUserId, selectRows } from "../../_utils/supabase.js";
+import { insertRows, selectRows } from "../../_utils/supabase.js";
+import { readAuthenticatedIdentity } from "../../_utils/legacySession.js";
 import { enforceRateLimit, getClientKey } from "../../_utils/security.js";
+import { collectTeamPriorityAccess } from "../team-priorities/index.js";
 
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const cleanText = (value) => String(value ?? "").trim();
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_SNAPSHOT_BYTES = 2_500_000;
 const DEMO_COACH_EMAIL = "coach.demo@shotlab.app";
+const DEMO_IDENTITIES = new Set([DEMO_COACH_EMAIL, "demo@shotlab.app"]);
 
 function isDemoCoach(requester) {
   return normalizeIdentity(requester) === DEMO_COACH_EMAIL;
-}
-
-function rpcScalar(json, key) {
-  if (typeof json === "string") return json.trim();
-  if (Array.isArray(json)) {
-    const first = json[0];
-    if (typeof first === "string") return first.trim();
-    return cleanText(first?.[key] || first?.resolved_user_uuid || first?.user_id);
-  }
-  return cleanText(json?.[key] || json?.resolved_user_uuid || json?.user_id);
 }
 
 function safeErrorCode(error) {
@@ -43,63 +36,6 @@ async function sha256(value) {
   const bytes = new TextEncoder().encode(value);
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
-}
-
-async function resolveRequesterUuid(env, requester) {
-  try {
-    return rpcScalar(
-      await callRpc(env, "resolve_app_user_uuid", { p_identifier: requester }),
-      "resolve_app_user_uuid",
-    );
-  } catch {
-    return "";
-  }
-}
-
-async function collectAuthorizedCoachTeams(env, requester) {
-  const normalizedRequester = normalizeIdentity(requester);
-  const resolvedUuid = await resolveRequesterUuid(env, normalizedRequester);
-  const teamIds = new Set();
-
-  try {
-    const profiles = await selectRows(
-      env,
-      "legacy_auth_profiles",
-      `select=team_id,role&email=eq.${encodeURIComponent(normalizedRequester)}&role=eq.coach`,
-    );
-    for (const row of Array.isArray(profiles) ? profiles : []) {
-      const teamId = cleanText(row?.team_id || row?.teamId);
-      if (teamId) teamIds.add(teamId);
-    }
-  } catch {}
-
-  if (resolvedUuid) {
-    try {
-      const memberships = await selectRows(
-        env,
-        "team_memberships",
-        `select=team_id,role,status&user_id=eq.${encodeURIComponent(resolvedUuid)}&status=eq.active&role=in.(coach,assistant_coach)`,
-      );
-      for (const row of Array.isArray(memberships) ? memberships : []) {
-        const teamId = cleanText(row?.team_id || row?.teamId);
-        if (teamId) teamIds.add(teamId);
-      }
-    } catch {}
-
-    try {
-      const ownedTeams = await selectRows(
-        env,
-        "teams",
-        `select=id,coach_user_id&coach_user_id=eq.${encodeURIComponent(resolvedUuid)}`,
-      );
-      for (const row of Array.isArray(ownedTeams) ? ownedTeams : []) {
-        const teamId = cleanText(row?.id);
-        if (teamId) teamIds.add(teamId);
-      }
-    } catch {}
-  }
-
-  return { teamIds, resolvedUuid };
 }
 
 function validateArchiveInput(body = {}, requester = "") {
@@ -161,8 +97,70 @@ function rowToArchive(row = {}) {
   };
 }
 
+function archiveIdentityTokens(row = {}) {
+  return [
+    row.email,
+    row.player_email,
+    row.playerEmail,
+    row.userId,
+    row.user_id,
+    row.playerId,
+    row.player_id,
+  ].map(normalizeIdentity).filter(Boolean);
+}
+
+function rowBelongsToPlayer(row = {}, requester = "", resolvedUuid = "") {
+  const allowed = new Set([normalizeIdentity(requester), normalizeIdentity(resolvedUuid)].filter(Boolean));
+  return archiveIdentityTokens(row).some((token) => allowed.has(token));
+}
+
+function playerArchiveProjection(archive = {}, requester = "", resolvedUuid = "") {
+  const ownRows = (rows) => (Array.isArray(rows) ? rows : [])
+    .filter((row) => rowBelongsToPlayer(row, requester, resolvedUuid))
+    .map((row) => JSON.parse(JSON.stringify(row)));
+  const playerSeasonSummaries = ownRows(archive.playerSeasonSummaries);
+  const homeScoresSnapshot = ownRows(archive.homeScoresSnapshot);
+  const programScoresSnapshot = ownRows(archive.programScoresSnapshot);
+  const shotLogsSnapshot = ownRows(archive.shotLogsSnapshot);
+  const eventRsvpSnapshot = ownRows(archive.eventRsvpSnapshot);
+  const scRsvpSnapshot = ownRows(archive.scRsvpSnapshot);
+  const scLogSnapshot = ownRows(archive.scLogSnapshot);
+  const hasPlayerHistory = [
+    playerSeasonSummaries,
+    homeScoresSnapshot,
+    programScoresSnapshot,
+    shotLogsSnapshot,
+    eventRsvpSnapshot,
+    scRsvpSnapshot,
+    scLogSnapshot,
+  ].some((rows) => rows.length);
+  if (!hasPlayerHistory) return null;
+  return {
+    id: cleanText(archive.id),
+    teamId: cleanText(archive.teamId),
+    seasonName: cleanText(archive.seasonName),
+    seasonStartDate: cleanText(archive.seasonStartDate),
+    seasonEndDate: cleanText(archive.seasonEndDate),
+    createdAt: cleanText(archive.createdAt),
+    version: Number(archive.version || 2),
+    accessMode: "player_self",
+    playerSeasonSummaries,
+    homeScoresSnapshot,
+    programScoresSnapshot,
+    shotLogsSnapshot,
+    eventRsvpSnapshot,
+    scRsvpSnapshot,
+    scLogSnapshot,
+  };
+}
+
+async function authenticate(request, env) {
+  return readAuthenticatedIdentity({ env, request, allowDemo: true });
+}
+
 export async function onRequestGet({ request, env }) {
-  const requester = normalizeIdentity(readUserId(request));
+  const auth = await authenticate(request, env);
+  const requester = normalizeIdentity(auth?.identity);
   if (!requester) return Response.json({ error: "unauthorized" }, { status: 401 });
 
   const rate = enforceRateLimit({
@@ -176,12 +174,18 @@ export async function onRequestGet({ request, env }) {
 
   // Demo archives intentionally live only in browser storage. A non-2xx response
   // makes the client retain its local cache instead of replacing it with server data.
-  if (isDemoCoach(requester)) {
+  if (auth.source === "demo_header" && DEMO_IDENTITIES.has(requester)) {
     return Response.json({ error: "demo_local_only", local_only: true }, { status: 409 });
   }
 
   try {
-    const { teamIds } = await collectAuthorizedCoachTeams(env, requester);
+    const { readableTeamIds, writableTeamIds, resolvedUuid } = await collectTeamPriorityAccess(env, requester);
+    if (!readableTeamIds.size) return Response.json({ error: "forbidden" }, { status: 403 });
+    const requestedTeamId = cleanText(new URL(request.url).searchParams.get("team_id"));
+    const teamIds = requestedTeamId
+      ? (readableTeamIds.has(requestedTeamId) ? [requestedTeamId] : [])
+      : [...readableTeamIds];
+    if (requestedTeamId && !teamIds.length) return Response.json({ error: "forbidden" }, { status: 403 });
     const archives = [];
     for (const teamId of teamIds) {
       const rows = await selectRows(
@@ -189,7 +193,15 @@ export async function onRequestGet({ request, env }) {
         "season_archives",
         `select=id,team_id,season_name,season_start_date,season_end_date,created_at,archive_version,snapshot&team_id=eq.${encodeURIComponent(teamId)}&order=created_at.asc`,
       );
-      archives.push(...(Array.isArray(rows) ? rows.map(rowToArchive) : []));
+      for (const row of Array.isArray(rows) ? rows : []) {
+        const archive = rowToArchive(row);
+        if (writableTeamIds.has(teamId)) {
+          archives.push(archive);
+          continue;
+        }
+        const projection = playerArchiveProjection(archive, requester, resolvedUuid);
+        if (projection) archives.push(projection);
+      }
     }
     archives.sort((a, b) => String(a.createdAt || "").localeCompare(String(b.createdAt || "")));
     return Response.json({ ok: true, archives });
@@ -200,7 +212,8 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const requester = normalizeIdentity(readUserId(request));
+  const auth = await authenticate(request, env);
+  const requester = normalizeIdentity(auth?.identity);
   if (!requester) return Response.json({ error: "unauthorized" }, { status: 401 });
 
   const rate = enforceRateLimit({
@@ -218,7 +231,7 @@ export async function onRequestPost({ request, env }) {
 
   // Demo Coach has no production membership. Return the validated snapshot without
   // writing it server-side; createSeasonArchive will cache it locally and mark it read-only.
-  if (isDemoCoach(requester)) {
+  if (auth.source === "demo_header" && isDemoCoach(requester)) {
     return Response.json({
       ok: true,
       archive: {
@@ -230,8 +243,8 @@ export async function onRequestPost({ request, env }) {
   }
 
   try {
-    const { teamIds, resolvedUuid } = await collectAuthorizedCoachTeams(env, requester);
-    if (!teamIds.has(validated.teamId)) return Response.json({ error: "forbidden" }, { status: 403 });
+    const { writableTeamIds, resolvedUuid } = await collectTeamPriorityAccess(env, requester);
+    if (!writableTeamIds.has(validated.teamId)) return Response.json({ error: "forbidden" }, { status: 403 });
 
     const row = {
       id: validated.archive.id,
