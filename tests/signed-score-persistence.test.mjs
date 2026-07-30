@@ -15,6 +15,8 @@ const ENV = {
   SUPABASE_ANON_KEY: "anon-key",
 };
 
+const filterValue = (value) => String(value || "").replace(/^eq\./, "");
+
 function requestContext({ method = "GET", path = "/v1/scores", body, headers = {}, host = "shotlab.test" } = {}) {
   return {
     request: new Request(`https://${host}${path}`, {
@@ -54,13 +56,14 @@ function installBackendMock({
     if (url.pathname.endsWith("/scores")) {
       if ((init.method || "GET") === "POST") return Response.json(init.body ? JSON.parse(init.body) : [], { status: 201 });
       if ((init.method || "GET") === "DELETE") {
-        const identity = url.searchParams.get("email") || url.searchParams.get("player_id");
-        const deleted = scores.filter((row) => row.team_id === url.searchParams.get("team_id") && (row.email === identity || row.player_id === identity));
+        const identity = filterValue(url.searchParams.get("email") || url.searchParams.get("player_id"));
+        const requestedTeam = filterValue(url.searchParams.get("team_id"));
+        const deleted = scores.filter((row) => row.team_id === requestedTeam && (row.email === identity || row.player_id === identity));
         return Response.json(deleted);
       }
-      const id = url.searchParams.get("id");
+      const id = filterValue(url.searchParams.get("id"));
       if (id) return Response.json(existingById[id] ? [existingById[id]] : []);
-      const requestedTeam = url.searchParams.get("team_id");
+      const requestedTeam = filterValue(url.searchParams.get("team_id"));
       return Response.json(scores.filter((row) => !requestedTeam || row.team_id === requestedTeam));
     }
     return Response.json([]);
