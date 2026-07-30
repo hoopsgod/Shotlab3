@@ -15,7 +15,7 @@ The route-specific middleware now requires a verified identity from the signed s
 3. approved demo identity on the ShotLab demo host;
 4. development-only identity headers on local or test hosts.
 
-The verified identity must match both the compatibility `x-user-id` header and the submitted player identity before the write handler runs. The handler prefers the verified middleware identity when available.
+The verified identity must match both the compatibility `x-user-id` header and the submitted player identity before the unchanged write handler runs. The existing handler's membership, roster, repair, validation, and persistence behavior is preserved.
 
 ## Read boundary
 
