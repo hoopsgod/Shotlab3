@@ -1,0 +1,57 @@
+name: Function Search Path Hardening
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "migrations/040_function_search_path_hardening.sql"
+      - "tests/function-search-path-hardening.test.mjs"
+      - "docs/function-search-path-hardening.md"
+      - ".github/workflows/function-search-path-hardening.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: function-search-path-hardening-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  function-search-path-hardening:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify fixed search paths and affected database flows
+        run: |
+          node --test tests/function-search-path-hardening.test.mjs
+          node --test tests/invite-membership-flow.test.mjs tests/coach-signup-bootstrap-route.test.mjs tests/team-memberships-confirm-context-route.test.mjs
+          node --test tests/home-shots-leaderboard-sql-contract.test.mjs tests/home-shots-log-route.test.mjs
+          node --test tests/season-rollover-contract.test.mjs tests/season-archives-route.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: function-search-path-hardening-failure
+          path: |
+            npm-debug.log
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
