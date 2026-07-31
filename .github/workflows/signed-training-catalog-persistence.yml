@@ -1,0 +1,56 @@
+name: Signed Training Catalog Persistence
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "functions/v1/training-catalog/**"
+      - "src/lib/trainingCatalogPersistenceService.js"
+      - "src/App.jsx"
+      - "migrations/051_training_catalog_signed_api.sql"
+      - "tests/signed-training-catalog-persistence.test.mjs"
+      - "docs/signed-training-catalog-persistence.md"
+      - ".github/workflows/signed-training-catalog-persistence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signed-training-catalog-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-training-catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify signed catalog authorization and promotion contracts
+        run: node --test tests/signed-training-catalog-persistence.test.mjs tests/coach-leaderboards-drills-events-shots-contract.test.mjs tests/program-drill-scoring.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-training-catalog-failure
+          path: |
+            npm-debug.log
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
