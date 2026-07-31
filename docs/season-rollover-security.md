@@ -14,6 +14,9 @@ Direct `anon` and `authenticated` access to the season tables and rollover RPC
 is removed after the signed Cloudflare route is deployed. Demo rollover remains
 local-only and does not write to Supabase.
 
-Direct table writes are not granted to authenticated clients. Tables are read-only through RLS for authorized coaches. The transactional RPC is the only supported write path.
+Direct table reads and writes are not granted to browser roles. Season data is
+accessed only through authenticated Cloudflare endpoints backed by
+service-role database calls. The transactional RPC is the only supported write
+path.
 
 The immutable `season_archives` table is referenced but never updated or deleted.
