@@ -109,6 +109,7 @@ import { buildAtHomeWorkspaceModel, buildEventsWorkspaceModel, buildLeaderboardW
 import { buildCoachOperationalInsightRail, buildPlayerOperationalInsightRail } from "./lib/operationalInsightRails.js";
 import { buildCoachVerifiedProgramScoreRow } from "./lib/coachProgramScoreEntry.js";
 import { scheduleWorkspaceActionReveal } from "./lib/playerWorkspaceActionRouting.js";
+import { createTrainingCatalogPersistenceService } from "./lib/trainingCatalogPersistenceService.js";
 const VOLT = TOKENS.PRIMARY;
 const SUCCESS = TOKENS.SUCCESS;
 const INFO = TOKENS.INFO;
@@ -480,6 +481,10 @@ const DB = {
 };
 
 const persistenceService=createAppPersistenceService({db:DB,fetchImpl:fetch});
+const trainingCatalogPersistence=createTrainingCatalogPersistenceService({
+fetchImpl:(...args)=>globalThis.fetch(...args),
+storage:globalThis?.localStorage,
+});
 
 const parseLeaderboardErrorMessage = (errorCode = "", status = 0, parseMode = "json") => {
   if (parseMode === "non_json") return "Leaderboard endpoint unavailable (invalid response format).";
@@ -1203,7 +1208,7 @@ setPendingJoinContext(normalized||null);
 writeInviteContextToStorage(normalized||null);
 await DB.set(PENDING_JOIN_CONTEXT_KEY,normalized||null);
 },[normalizeStoredInviteContext,writeInviteContextToStorage]);
-const hydratePersistedData=useCallback(async()=>{const[d,pd,s,ps,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sa,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:program-scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:season-archives"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const seededDrills=mergeDefaultDrills(d,DRILLS_INIT);const seededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);setDrills(seededDrills);setProgramDrills(seededProgramDrills);
+const hydratePersistedData=useCallback(async()=>{const[d,pd,s,ps,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sa,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:program-scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:season-archives"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const localSeededDrills=mergeDefaultDrills(d,DRILLS_INIT);const localSeededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);let catalog=null;try{catalog=await trainingCatalogPersistence.hydrateCatalog({localHomeDrills:localSeededDrills,localProgramDrills:localSeededProgramDrills});}catch(error){emitReleaseDiagnostic("training_catalog_hydration_failed",{message:String(error?.message||"unknown")});}const seededDrills=catalog?.useRemote?mergeDefaultDrills(catalog.homeDrills,DRILLS_INIT):localSeededDrills;const seededProgramDrills=catalog?.useRemote?mergeDefaultDrills(catalog.programDrills,PROGRAM_DRILLS_INIT):localSeededProgramDrills;setDrills(seededDrills);setProgramDrills(seededProgramDrills);
 const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const normalizedProgramScores=normalizeScoresForDefaultDrills(ps,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,programScores:normalizedProgramScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setSeasonArchives(Array.isArray(sa)?sa:[]);setScores(m.scoresM);setProgramScores(m.programScoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
 await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:program-scores",m.programScoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
@@ -1212,6 +1217,13 @@ setPendingJoinContext(normalizeStoredInviteContext(pendingCtx)||readInviteContex
 return {teams:m.teamsMigrated,players:m.playersMigrated};
 },[migrateData,navigateToPlayerHome,normalizeStoredInviteContext,readInviteContextFromStorage]);
 const P=useCallback(async(k,v,set,options)=>{set(v);await DB.set(k,v,options)},[]);
+const persistTrainingCatalog=useCallback(async(nextHomeDrills,nextProgramDrills)=>{
+setDrills(nextHomeDrills);setProgramDrills(nextProgramDrills);
+await Promise.all([DB.set("sl:drills",nextHomeDrills,{strictLocal:true}),DB.set("sl:program-drills",nextProgramDrills,{strictLocal:true})]);
+if(!user?.teamId)return{ok:true,storageMode:"local_pending"};
+try{const result=await trainingCatalogPersistence.syncCatalog({teamId:user.teamId,homeDrills:nextHomeDrills,programDrills:nextProgramDrills});return{ok:true,storageMode:result.storageMode,remoteRows:result.rows};}
+catch(error){emitReleaseDiagnostic("training_catalog_sync_pending",{teamId:user.teamId,message:String(error?.message||"unknown")});return{ok:true,storageMode:"local_pending",remotePending:true};}
+},[user?.teamId]);
 const archiveSeason=useCallback(async(input={})=>{
 const activeRosterPlayers=getCoachRosterPlayers({
 players,
@@ -1757,11 +1769,11 @@ trackEvent("coach_program_score_log_failed",{drillId,error:String(error?.message
 return{ok:false,error:"Could not save the verified Program result. Check the connection and try again.",err:error};
 }
 };
-const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.map(d=>d.id===id?{...d,...up}:d),setDrills)};
-const addDrill=async(drill)=>{if(user?.role!=="coach")return;await P("sl:drills",[...drills,{...drill,id:Date.now()}],setDrills)};
-const removeDrill=async(id)=>{if(user?.role!=="coach")return;await P("sl:drills",drills.filter(d=>d.id!==id),setDrills)};
-const addProgramDrill=async(drill)=>{if(user?.role!=="coach")return{ok:false,err:"Not authorized"};if(countCustomProgramDrills(programDrills)>=7)return{ok:false,err:"Program drill limit reached (7 custom drills)."};await persistenceService.setCollection(STORAGE_KEYS.programDrills,[...programDrills,{...drill,id:Date.now()}],setProgramDrills);return{ok:true}};
-const removeProgramDrill=async(id)=>{if(user?.role!=="coach")return;await persistenceService.setCollection(STORAGE_KEYS.programDrills,programDrills.filter(d=>d.id!==id),setProgramDrills)};
+const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;return persistTrainingCatalog(drills.map(d=>d.id===id?{...d,...up}:d),programDrills)};
+const addDrill=async(drill)=>{if(user?.role!=="coach")return;return persistTrainingCatalog([...drills,{...drill,id:Date.now()}],programDrills)};
+const removeDrill=async(id)=>{if(user?.role!=="coach")return;return persistTrainingCatalog(drills.filter(d=>d.id!==id),programDrills)};
+const addProgramDrill=async(drill)=>{if(user?.role!=="coach")return{ok:false,err:"Not authorized"};if(countCustomProgramDrills(programDrills)>=7)return{ok:false,err:"Program drill limit reached (7 custom drills)."};return persistTrainingCatalog(drills,[...programDrills,{...drill,id:Date.now()}])};
+const removeProgramDrill=async(id)=>{if(user?.role!=="coach")return;return persistTrainingCatalog(drills,programDrills.filter(d=>d.id!==id))};
 const toggleRsvp=async(eid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=rsvps.find(r=>r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId)),setRsvps);trackEvent("event_rsvp_removed",{eventId:eid});}else{await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setRsvps);trackEvent("event_rsvp_added",{eventId:eid});}};
 const addEvent=async ev=>{if(user?.role!=="coach"||!user.teamId)return{ok:false};const eventPayload={...ev,id:genId("event"),teamId:user.teamId,ownerCoachId:user.email};
 try{await P("sl:events",[...events,eventPayload],setEvents,{strictLocal:true});trackEvent("event_created",{eventType:ev.type||"run"});return{ok:true};}catch(error){console.error("event_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),eventTitle:String(ev?.title||"")});trackEvent("event_create_failed",{eventType:ev?.type||"run",error:String(error?.message||"unknown")});throw error;}};
