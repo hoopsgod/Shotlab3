@@ -275,6 +275,207 @@ export function buildAllTimeHomeLeaderboardRows({
   return accumulator.rows(limit);
 }
 
+const relatedId = (row = {}, fields = []) => {
+  for (const field of fields) {
+    const value = clean(row?.[field]);
+    if (value) return value;
+  }
+  return "";
+};
+
+const withRelatedDates = (rows = [], schedules = [], relationFields = []) => {
+  const scheduleDates = new Map(
+    toArray(schedules)
+      .map((schedule) => [clean(schedule?.id), rowDate(schedule)])
+      .filter(([id, date]) => id && date),
+  );
+  return toArray(rows).map((row) => {
+    if (rowDate(row)) return row;
+    const date = scheduleDates.get(relatedId(row, relationFields)) || "";
+    return date ? { ...row, date } : row;
+  });
+};
+
+const participationKey = (row = {}, relationFields = [], kind = "record") => {
+  const identity = identityTokens(row).sort()[0] || `name:${lower(playerName(row))}`;
+  if (!identity || identity === "name:") return "";
+  if (kind === "event") {
+    const eventId = relatedId(row, relationFields);
+    return eventId ? `${identity}::event::${eventId}` : "";
+  }
+  const id = clean(row?.id);
+  if (id) return `${identity}::log::${id}`;
+  const fallback = [rowDate(row), clean(row?.sport), clean(row?.place), clean(row?.time), clean(row?.ts)].join("::");
+  return fallback.replaceAll(":", "") ? `${identity}::log::${fallback}` : "";
+};
+
+function buildCurrentParticipationLeaderboardRows({
+  seasonArchives = [],
+  teamId = "",
+  participationRows = [],
+  scheduleRows = [],
+  relationFields = [],
+  players = [],
+  profiles = [],
+  kind = "record",
+  metric = "participation",
+  limit,
+} = {}) {
+  const datedRows = withRelatedDates(participationRows, scheduleRows, relationFields);
+  const currentRows = filterLiveRowsOutsideArchivedSeasons(datedRows, { seasonArchives, teamId });
+  const activeIdentity = activeIdentityFor({ players, profiles, teamId });
+  const eligibleRows = activeIdentity.players.length > 0
+    ? currentRows.filter((row) => rowMatchesIdentity(row, activeIdentity))
+    : currentRows;
+  const accumulator = buildIdentityAccumulator();
+  const seen = new Set();
+  for (const row of eligibleRows) {
+    const key = participationKey(row, relationFields, kind);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    accumulator.add(row, 1, { source: "current", lastActivityDate: rowDate(row) });
+  }
+  return accumulator.rows(limit).map((row) => ({
+    ...row,
+    total_home_shots: undefined,
+    metricValue: row.total,
+    metric,
+    timeScope: LEADERBOARD_TIME_SCOPES.CURRENT,
+  }));
+}
+
+function buildAllTimeParticipationLeaderboardRows({
+  seasonArchives = [],
+  teamId = "",
+  summaryField,
+  currentRows = [],
+  metric = "participation",
+  limit,
+} = {}) {
+  const accumulator = buildIdentityAccumulator();
+  for (const archive of teamArchives(seasonArchives, teamId)) {
+    for (const summary of toArray(archive?.playerSeasonSummaries)) {
+      accumulator.add(
+        summary,
+        finiteNumber(summary?.[summaryField]),
+        { source: "archive", archiveId: clean(archive?.id), lastActivityDate: summary?.lastActivityDate },
+      );
+    }
+  }
+  currentRows.forEach((row) => accumulator.add(
+    row,
+    row?.metricValue ?? row?.total ?? row?.score,
+    { source: "current", lastActivityDate: row?.lastActivityDate },
+  ));
+  return accumulator.rows(limit).map((row) => ({
+    ...row,
+    total_home_shots: undefined,
+    metricValue: row.total,
+    metric,
+    timeScope: LEADERBOARD_TIME_SCOPES.ALL_TIME,
+  }));
+}
+
+export function buildCurrentEventParticipationLeaderboardRows({
+  seasonArchives = [],
+  teamId = "",
+  events = [],
+  rsvps = [],
+  players = [],
+  profiles = [],
+  limit,
+} = {}) {
+  return buildCurrentParticipationLeaderboardRows({
+    seasonArchives,
+    teamId,
+    participationRows: rsvps,
+    scheduleRows: events,
+    relationFields: ["eventId", "event_id"],
+    players,
+    profiles,
+    kind: "event",
+    metric: "events_attended",
+    limit,
+  });
+}
+
+export function buildAllTimeEventParticipationLeaderboardRows({
+  seasonArchives = [],
+  teamId = "",
+  events = [],
+  rsvps = [],
+  players = [],
+  profiles = [],
+  limit,
+} = {}) {
+  const currentRows = buildCurrentEventParticipationLeaderboardRows({
+    seasonArchives,
+    teamId,
+    events,
+    rsvps,
+    players,
+    profiles,
+  });
+  return buildAllTimeParticipationLeaderboardRows({
+    seasonArchives,
+    teamId,
+    summaryField: "eventRsvpCount",
+    currentRows,
+    metric: "events_attended",
+    limit,
+  });
+}
+
+export function buildCurrentStrengthParticipationLeaderboardRows({
+  seasonArchives = [],
+  teamId = "",
+  scSessions = [],
+  scLogs = [],
+  players = [],
+  profiles = [],
+  limit,
+} = {}) {
+  return buildCurrentParticipationLeaderboardRows({
+    seasonArchives,
+    teamId,
+    participationRows: scLogs,
+    scheduleRows: scSessions,
+    relationFields: ["sessionId", "session_id"],
+    players,
+    profiles,
+    kind: "log",
+    metric: "strength_sessions_completed",
+    limit,
+  });
+}
+
+export function buildAllTimeStrengthParticipationLeaderboardRows({
+  seasonArchives = [],
+  teamId = "",
+  scSessions = [],
+  scLogs = [],
+  players = [],
+  profiles = [],
+  limit,
+} = {}) {
+  const currentRows = buildCurrentStrengthParticipationLeaderboardRows({
+    seasonArchives,
+    teamId,
+    scSessions,
+    scLogs,
+    players,
+    profiles,
+  });
+  return buildAllTimeParticipationLeaderboardRows({
+    seasonArchives,
+    teamId,
+    summaryField: "scLogCount",
+    currentRows,
+    metric: "strength_sessions_completed",
+    limit,
+  });
+}
+
 export function getAllTimeProgramDrills({ seasonArchives = [], teamId = "", programDrills = [] } = {}) {
   const drills = [];
   const seen = new Set();

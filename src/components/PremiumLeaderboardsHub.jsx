@@ -7,13 +7,18 @@ import { isShotLabDebugMode } from '../lib/releaseDiagnostics.js';
 import { filterActiveTeamLeaderboardRows, getActiveTeamPlayerIdentity } from '../lib/playerDataManagement.js';
 import {
   LEADERBOARD_TIME_SCOPES,
+  buildAllTimeEventParticipationLeaderboardRows,
   buildAllTimeHomeLeaderboardRows,
   buildAllTimeProgramLeaderboardRows,
+  buildAllTimeStrengthParticipationLeaderboardRows,
+  buildCurrentEventParticipationLeaderboardRows,
   buildCurrentOffseasonHomeLeaderboardRows,
   buildCurrentOffseasonProgramLeaderboardRows,
+  buildCurrentStrengthParticipationLeaderboardRows,
   getAllTimeProgramDrills,
   getSeasonLeaderboardCoverage,
 } from '../lib/seasonLeaderboardAnalytics.js';
+import { loadParticipationLeaderboards } from '../lib/participationLeaderboardService.js';
 
 const PRIMARY_CATEGORY_ITEMS = [
   { key: 'home_shots', label: 'At-Home Shots' },
@@ -63,6 +68,10 @@ export default function PremiumLeaderboardsHub({
   teamId = '',
   homeScores = [],
   shotLogs = [],
+  events = [],
+  rsvps = [],
+  scSessions = [],
+  scLogs = [],
   seasonArchives = [],
   testId = 'premium-leaderboards-hub',
 }) {
@@ -72,6 +81,8 @@ export default function PremiumLeaderboardsHub({
   const [activeLeaderboardCategory, setActiveLeaderboardCategory] = useState('home_shots');
   const [activeTimeScope, setActiveTimeScope] = useState(LEADERBOARD_TIME_SCOPES.CURRENT);
   const [activeProgramDrillId, setActiveProgramDrillId] = useState('');
+  const [remoteParticipationLeaderboards, setRemoteParticipationLeaderboards] = useState(null);
+  const [participationLoadMode, setParticipationLoadMode] = useState('loading');
 
   const teamArchives = useMemo(
     () => (Array.isArray(seasonArchives) ? seasonArchives : []).filter((archive) => !teamId || String(archive?.teamId || archive?.team_id || '') === String(teamId)),
@@ -187,6 +198,81 @@ export default function PremiumLeaderboardsHub({
   );
   const programDrillLeaderboardRows = isAllTime ? allTimeProgramRows : currentProgramRows;
 
+  const localCurrentEventRows = useMemo(
+    () => buildCurrentEventParticipationLeaderboardRows({
+      seasonArchives: teamArchives,
+      teamId,
+      events,
+      rsvps,
+      players,
+      limit: 10,
+    }),
+    [teamArchives, teamId, events, rsvps, players],
+  );
+  const localAllTimeEventRows = useMemo(
+    () => buildAllTimeEventParticipationLeaderboardRows({
+      seasonArchives: teamArchives,
+      teamId,
+      events,
+      rsvps,
+      players,
+      limit: 10,
+    }),
+    [teamArchives, teamId, events, rsvps, players],
+  );
+  const localCurrentStrengthRows = useMemo(
+    () => buildCurrentStrengthParticipationLeaderboardRows({
+      seasonArchives: teamArchives,
+      teamId,
+      scSessions,
+      scLogs,
+      players,
+      limit: 10,
+    }),
+    [teamArchives, teamId, scSessions, scLogs, players],
+  );
+  const localAllTimeStrengthRows = useMemo(
+    () => buildAllTimeStrengthParticipationLeaderboardRows({
+      seasonArchives: teamArchives,
+      teamId,
+      scSessions,
+      scLogs,
+      players,
+      limit: 10,
+    }),
+    [teamArchives, teamId, scSessions, scLogs, players],
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    setRemoteParticipationLeaderboards(null);
+    if (!teamId) {
+      setParticipationLoadMode('missing_context');
+      return () => { cancelled = true; };
+    }
+    setParticipationLoadMode('loading');
+    void loadParticipationLeaderboards({ teamId, userEmail }).then((result) => {
+      if (cancelled) return;
+      if (!result.ok) {
+        setParticipationLoadMode('error');
+        return;
+      }
+      setRemoteParticipationLeaderboards(result.leaderboards);
+      setParticipationLoadMode(result.mode || 'signed_api');
+    });
+    return () => { cancelled = true; };
+  }, [teamId, userEmail]);
+
+  const allowLocalParticipation = viewerRole === 'coach' || participationLoadMode === 'demo_local';
+  const participationScopeKey = isAllTime ? 'all_time' : 'current';
+  const eventParticipationRows = remoteParticipationLeaderboards?.event_participation?.[participationScopeKey]
+    ?? (allowLocalParticipation ? (isAllTime ? localAllTimeEventRows : localCurrentEventRows) : []);
+  const strengthParticipationRows = remoteParticipationLeaderboards?.strength_conditioning_participation?.[participationScopeKey]
+    ?? (allowLocalParticipation ? (isAllTime ? localAllTimeStrengthRows : localCurrentStrengthRows) : []);
+  const participationUnavailable = viewerRole === 'player'
+    && !remoteParticipationLeaderboards
+    && participationLoadMode !== 'demo_local';
+
   useEffect(() => {
     if (!isShotLabDebugMode()) return;
     rawCurrentProgramRows.forEach((row) => {
@@ -250,7 +336,9 @@ export default function PremiumLeaderboardsHub({
     ? atHomeLeaderboardRows.length
     : activeLeaderboardCategory === 'drill_shots'
       ? programDrillLeaderboardRows.length
-      : 0;
+      : activeLeaderboardCategory === 'event_participation'
+        ? eventParticipationRows.length
+        : strengthParticipationRows.length;
   const allTimeEmptyMessage = hasFrozenHistory
     ? 'No qualifying archived or current training results are available yet.'
     : 'Archive a completed season to begin building all-time rankings.';
@@ -327,9 +415,29 @@ export default function PremiumLeaderboardsHub({
         />
       </section>
     ) : activeLeaderboardCategory === 'event_participation' ? (
-      <section style={{ padding: '14px 2px', borderBottom: '1px solid var(--stroke-1)' }}><div style={{ fontFamily: FALLBACK_FONT, color: LIGHT, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: 14 }}>Events Attended</div><div style={{ fontFamily: 'var(--font-body, Inter)', color: SUB, fontSize: 12, marginTop: 5, lineHeight: 1.45 }}>Event leaders will appear after players check into team events.</div></section>
+      <CompactLeaderboardPreviewCard
+        title={isAllTime ? 'All-Time Events Attended' : 'Events Attended'}
+        areaTitle="Team Participation"
+        categoryLabel={scopeLabel}
+        mode={viewerRole}
+        userEmail={userEmail}
+        status={participationUnavailable ? 'error' : 'success'}
+        rows={eventParticipationRows}
+        emptyMessage={participationUnavailable ? 'Team participation rankings are temporarily unavailable. Your private RSVP records remain protected.' : (isAllTime ? allTimeEmptyMessage : 'Event rankings activate when players confirm attendance for team events.')}
+        maxRows={10}
+      />
     ) : (
-      <section style={{ padding: '14px 2px', borderBottom: '1px solid var(--stroke-1)' }}><div style={{ fontFamily: FALLBACK_FONT, color: LIGHT, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.04em', fontSize: 14 }}>Strength & Conditioning</div><div style={{ fontFamily: 'var(--font-body, Inter)', color: SUB, fontSize: 12, marginTop: 5, lineHeight: 1.45 }}>Strength leaders will appear after players complete assigned S&C work.</div></section>
+      <CompactLeaderboardPreviewCard
+        title={isAllTime ? 'All-Time S&C Completions' : 'S&C Completions'}
+        areaTitle="Strength & Conditioning"
+        categoryLabel={scopeLabel}
+        mode={viewerRole}
+        userEmail={userEmail}
+        status={participationUnavailable ? 'error' : 'success'}
+        rows={strengthParticipationRows}
+        emptyMessage={participationUnavailable ? 'Team participation rankings are temporarily unavailable. Your private workout records remain protected.' : (isAllTime ? allTimeEmptyMessage : 'S&C rankings activate after players log completed strength work.')}
+        maxRows={10}
+      />
     )}
 
     <ProgressiveDisclosure
