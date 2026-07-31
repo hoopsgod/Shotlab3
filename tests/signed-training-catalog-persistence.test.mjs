@@ -214,6 +214,26 @@ test("client promotion preserves existing local custom drills and never uploads 
   assert.equal(new Headers(requests[1].init.headers).get("authorization"), "Bearer user-token");
 });
 
+test("malformed successful responses never replace the local training catalog", async () => {
+  const service = createTrainingCatalogPersistenceService({
+    storage: memoryStorage([
+      ["sl:session", JSON.stringify({ email: "player@example.com", teamId: "team-a", role: "player" })],
+    ]),
+    fetchImpl: async () => new Response("<!doctype html><title>ShotLab</title>", {
+      status: 200,
+      headers: { "content-type": "text/html" },
+    }),
+  });
+
+  await assert.rejects(
+    service.hydrateCatalog({
+      localHomeDrills: [CUSTOM_HOME],
+      localProgramDrills: [CUSTOM_PROGRAM],
+    }),
+    (error) => error?.code === "training_catalog_load_failed",
+  );
+});
+
 test("catalog helpers partition modes and filter default definitions", () => {
   assert.deepEqual(splitTrainingCatalog([CUSTOM_HOME, CUSTOM_PROGRAM]), {
     homeDrills: [CUSTOM_HOME],

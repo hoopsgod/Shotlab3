@@ -78,8 +78,10 @@ export function createTrainingCatalogPersistenceService({
       headers: headers(),
     });
     const body = await readJson(response);
-    if (!response?.ok || body?.error) throw requestError(body, response, "training_catalog_load_failed");
-    const rows = Array.isArray(body?.drills) ? body.drills : [];
+    if (!response?.ok || body?.ok !== true || !Array.isArray(body?.drills) || body?.error) {
+      throw requestError(body, response, "training_catalog_load_failed");
+    }
+    const rows = body.drills;
     return {
       ok: true,
       storageMode: String(body?.storage_mode || "signed_api"),
@@ -102,8 +104,10 @@ export function createTrainingCatalogPersistenceService({
       body: JSON.stringify({ team_id: activeTeamId, drills }),
     });
     const body = await readJson(response);
-    if (!response?.ok || body?.error) throw requestError(body, response, "training_catalog_sync_failed");
-    const rows = Array.isArray(body?.drills) ? body.drills : [];
+    if (!response?.ok || body?.ok !== true || !Array.isArray(body?.drills) || body?.error) {
+      throw requestError(body, response, "training_catalog_sync_failed");
+    }
+    const rows = body.drills;
     return {
       ok: true,
       storageMode: String(body?.storage_mode || "signed_api"),
