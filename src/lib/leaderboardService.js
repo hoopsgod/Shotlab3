@@ -1,4 +1,11 @@
 import { getBackendRuntime } from './backendConfig.js'
+import {
+  LEADERBOARD_TIME_SCOPES,
+  buildAllTimeEventParticipationLeaderboardRows,
+  buildAllTimeStrengthParticipationLeaderboardRows,
+  buildCurrentEventParticipationLeaderboardRows,
+  buildCurrentStrengthParticipationLeaderboardRows,
+} from './seasonLeaderboardAnalytics.js'
 
 const SHOT_LOGS_TABLE = 'shot_logs'
 const PLAYERS_TABLE = 'players'
@@ -196,7 +203,22 @@ export function createLeaderboardService({ supabaseClient } = {}) {
     async loadTeamLeaderboard({ teamId, fallbackShotLogs = [], fallbackPlayers = [], fallbackProfiles = [], scope = 'players' } = {}) {
       return loadTeamLogsSafe({ teamId, fallbackShotLogs, fallbackPlayers, fallbackProfiles, scope })
     },
-    async loadLeaderboardByType({ leaderboardType = LEADERBOARD_TYPES.home_shots, teamId, fallbackShotLogs = [], fallbackPlayers = [], fallbackProfiles = [], drillId = '', drillName = '', scope = 'players' } = {}) {
+    async loadLeaderboardByType({
+      leaderboardType = LEADERBOARD_TYPES.home_shots,
+      teamId,
+      fallbackShotLogs = [],
+      fallbackPlayers = [],
+      fallbackProfiles = [],
+      fallbackEvents = [],
+      fallbackRsvps = [],
+      fallbackScSessions = [],
+      fallbackScLogs = [],
+      fallbackSeasonArchives = [],
+      drillId = '',
+      drillName = '',
+      scope = 'players',
+      timeScope = LEADERBOARD_TIME_SCOPES.CURRENT,
+    } = {}) {
       const type = asText(leaderboardType)
       if (type === LEADERBOARD_TYPES.home_shots) return loadTeamLogsSafe({ teamId, fallbackShotLogs, fallbackPlayers, fallbackProfiles, scope })
       if (type === LEADERBOARD_TYPES.drill_shots) {
@@ -204,8 +226,33 @@ export function createLeaderboardService({ supabaseClient } = {}) {
         const drillRows = calculateDrillLeaderboardFromShotLogs({ shotLogs: loaded?.data, teamId, drillId, drillName, playerContext: { players: fallbackPlayers, profiles: fallbackProfiles, scope } })
         return { ...loaded, data: drillRows }
       }
-      if (type === LEADERBOARD_TYPES.event_participation || type === LEADERBOARD_TYPES.strength_conditioning_participation) {
-        return toDemo([], 'missing_durable_participation_records', { leaderboard_type: type })
+      if (type === LEADERBOARD_TYPES.event_participation) {
+        const builder = timeScope === LEADERBOARD_TIME_SCOPES.ALL_TIME
+          ? buildAllTimeEventParticipationLeaderboardRows
+          : buildCurrentEventParticipationLeaderboardRows
+        const rows = builder({
+          teamId,
+          seasonArchives: fallbackSeasonArchives,
+          events: fallbackEvents,
+          rsvps: fallbackRsvps,
+          players: fallbackPlayers,
+          profiles: fallbackProfiles,
+        })
+        return toDemo(rows, rows.length ? 'local_participation_projection' : 'no_participation_records', { leaderboard_type: type })
+      }
+      if (type === LEADERBOARD_TYPES.strength_conditioning_participation) {
+        const builder = timeScope === LEADERBOARD_TIME_SCOPES.ALL_TIME
+          ? buildAllTimeStrengthParticipationLeaderboardRows
+          : buildCurrentStrengthParticipationLeaderboardRows
+        const rows = builder({
+          teamId,
+          seasonArchives: fallbackSeasonArchives,
+          scSessions: fallbackScSessions,
+          scLogs: fallbackScLogs,
+          players: fallbackPlayers,
+          profiles: fallbackProfiles,
+        })
+        return toDemo(rows, rows.length ? 'local_participation_projection' : 'no_participation_records', { leaderboard_type: type })
       }
       return toDemo([], 'unsupported_leaderboard_type', { leaderboard_type: type || 'unknown' })
     },

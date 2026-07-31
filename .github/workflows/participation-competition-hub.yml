@@ -1,0 +1,58 @@
+name: Participation Competition Hub
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "functions/v1/leaderboards/participation.js"
+      - "src/components/CompactLeaderboardPreviewCard.jsx"
+      - "src/components/PremiumLeaderboardsHub.jsx"
+      - "src/lib/leaderboardService.js"
+      - "src/lib/participationLeaderboardService.js"
+      - "src/lib/seasonLeaderboardAnalytics.js"
+      - "src/App.jsx"
+      - "tests/leaderboard-service-safety.test.mjs"
+      - "tests/participation-competition-hub.test.mjs"
+      - "tests/season-leaderboard-analytics.test.mjs"
+      - "tests/season-leaderboard-integration-contract.test.mjs"
+      - ".github/workflows/participation-competition-hub.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: participation-competition-hub-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  participation-competition-hub:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Verify aggregate privacy, archive safety, and ranked UI
+        run: node --test tests/participation-competition-hub.test.mjs tests/season-leaderboard-analytics.test.mjs tests/leaderboard-service-safety.test.mjs tests/season-leaderboard-integration-contract.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: participation-competition-hub-failure
+          path: |
+            npm-debug.log
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

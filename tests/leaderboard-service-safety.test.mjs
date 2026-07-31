@@ -85,14 +85,26 @@ test('drill leaderboard supports dynamic drill_id without hardcoded names', () =
   assert.equal(rows[0].drill_id, 'dr-1')
 })
 
-test('unsupported durable categories return safe empty responses until persistence exists', async () => {
+test('durable participation categories build safe local projections', async () => {
   const service = createLeaderboardService({ supabaseClient: makeClient(async () => ({ data: [] })) })
-  const eventRows = await service.loadLeaderboardByType({ leaderboardType: LEADERBOARD_TYPES.event_participation, teamId: 'team-1' })
-  const scRows = await service.loadLeaderboardByType({ leaderboardType: LEADERBOARD_TYPES.strength_conditioning_participation, teamId: 'team-1' })
-  assert.equal(eventRows.reason, 'missing_durable_participation_records')
-  assert.equal(scRows.reason, 'missing_durable_participation_records')
-  assert.deepEqual(eventRows.data, [])
-  assert.deepEqual(scRows.data, [])
+  const player = { id: 'p1', playerId: 'p1', email: 'player@example.com', name: 'Player', teamId: 'team-1', role: 'player' }
+  const eventRows = await service.loadLeaderboardByType({
+    leaderboardType: LEADERBOARD_TYPES.event_participation,
+    teamId: 'team-1',
+    fallbackPlayers: [player],
+    fallbackEvents: [{ id: 'event-1', teamId: 'team-1', date: '2026-07-01' }],
+    fallbackRsvps: [{ id: 'rsvp-1', eventId: 'event-1', playerId: 'p1', email: 'player@example.com', teamId: 'team-1' }],
+  })
+  const scRows = await service.loadLeaderboardByType({
+    leaderboardType: LEADERBOARD_TYPES.strength_conditioning_participation,
+    teamId: 'team-1',
+    fallbackPlayers: [player],
+    fallbackScLogs: [{ id: 'log-1', playerId: 'p1', email: 'player@example.com', teamId: 'team-1', date: '2026-07-02' }],
+  })
+  assert.equal(eventRows.reason, 'local_participation_projection')
+  assert.equal(scRows.reason, 'local_participation_projection')
+  assert.equal(eventRows.data[0].metricValue, 1)
+  assert.equal(scRows.data[0].metricValue, 1)
 })
 
 
