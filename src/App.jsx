@@ -435,7 +435,8 @@ const DB = {
     if ((k === "sl:events" || k === "sl:players" || k === "sl:player-profiles") && Array.isArray(v) && v.length > 0 && remoteRows.length === 0) {
       console.warn("[remote-persist] buildRemoteRows dropped all rows", { key: k, inputCount: v.length });
     }
-    if (table && remoteRows.length > 0) {
+    const signedReplacementCollection = k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";
+    if (table && (remoteRows.length > 0 || signedReplacementCollection)) {
       try {
         if (strictRemote && isShotLabDebugMode()) {
           console.info("[remote-persist] strict remote payload", {
@@ -1211,7 +1212,8 @@ await DB.set(PENDING_JOIN_CONTEXT_KEY,normalized||null);
 const hydratePersistedData=useCallback(async()=>{const[d,pd,s,ps,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sa,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:program-scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:season-archives"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const localSeededDrills=mergeDefaultDrills(d,DRILLS_INIT);const localSeededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);let catalog=null;try{catalog=await trainingCatalogPersistence.hydrateCatalog({localHomeDrills:localSeededDrills,localProgramDrills:localSeededProgramDrills});}catch(error){emitReleaseDiagnostic("training_catalog_hydration_failed",{message:String(error?.message||"unknown")});}const seededDrills=catalog?.useRemote?mergeDefaultDrills(catalog.homeDrills,DRILLS_INIT):localSeededDrills;const seededProgramDrills=catalog?.useRemote?mergeDefaultDrills(catalog.programDrills,PROGRAM_DRILLS_INIT):localSeededProgramDrills;setDrills(seededDrills);setProgramDrills(seededProgramDrills);
 const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const normalizedProgramScores=normalizeScoresForDefaultDrills(ps,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,programScores:normalizedProgramScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setSeasonArchives(Array.isArray(sa)?sa:[]);setScores(m.scoresM);setProgramScores(m.programScoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
-await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:program-scores",m.programScoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-sessions",m.scSM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
+await DB.set("sl:sc-sessions",m.scSM);
+await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:program-scores",m.programScoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
 const authSession=SUPABASE_AUTH_ENABLED?await supabase.auth.getSession():null; const authEmail=normalizeEmail((SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:"")||sess?.email||""); setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:authEmail?"yes":"no"}})); if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail}); if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.teamId)await restoreLegacyTeamContext(rp).catch(()=>null);setUser(rp);setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"success",profileLoad:"success",profileTeamId:rp.teamId||""}}));if(rp.role==="coach"&&!rp.teamId)setView("create-team");else if(rp.role==="player"&&!rp.teamId)setView("join-team");else{if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}else{setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"failed",profileLoad:"failed"}}));}} else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no"}}));if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}} else {setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));}}
 setPendingJoinContext(normalizeStoredInviteContext(pendingCtx)||readInviteContextFromStorage()||null);
 return {teams:m.teamsMigrated,players:m.playersMigrated};
@@ -1887,10 +1889,10 @@ return retryFailure;
 };
 const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",[...challenges,{...ch,id:Date.now(),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges);trackEvent("challenge_created",{to:ch.to||null})};
 const respondChallenge=async(id,score)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",challenges.map(c=>c.id===id&&c.teamId===user.teamId&&c.to===user.email?{...c,respScore:score,respTs:Date.now(),status:score>c.score?"won":score===c.score?"tied":"lost"}:c),setChallenges)};
-const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setScSessions);trackEvent("sc_session_created",{sport:s.sport||""})};
-const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};const deletion=deleteTeamScSession({scSessions,scRsvps,scLogs,sessionId:id,teamId:user.teamId,user});if(!deletion.ok)return deletion;await P("sl:sc-sessions",deletion.scSessions,setScSessions);await P("sl:sc-rsvps",deletion.scRsvps,setScRsvps);await P("sl:sc-logs",deletion.scLogs,setScLogs,{strictLocal:true});return deletion};
-const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:sc-rsvps",scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)),setScRsvps);trackEvent("sc_rsvp_removed",{sessionId:sid});}else{await P("sl:sc-rsvps",[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setScRsvps);trackEvent("sc_rsvp_added",{sessionId:sid});}};
-const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,err:"Player team context is required to log S&C sessions."};const nextLog={...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name};const nextLogs=[nextLog,...scLogs];try{await DB.set("sl:sc-logs",nextLogs,{strictLocal:true});setScLogs(nextLogs);return{ok:true};}catch(error){console.error("sc_log_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),sport:String(log?.sport||"")});return{ok:false,err:"Session could not be saved. Please try again."};}};
+const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};try{await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setScSessions,{strictRemote:true});trackEvent("sc_session_created",{sport:s.sport||""});return{ok:true}}catch(error){console.error("sc_session_save_failed",{error,teamId:user.teamId,sport:String(s?.sport||"")});return{ok:false,error:"Session could not be saved. Please try again."}}};
+const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};const deletion=deleteTeamScSession({scSessions,scRsvps,scLogs,sessionId:id,teamId:user.teamId,user});if(!deletion.ok)return deletion;try{await P("sl:sc-sessions",deletion.scSessions,setScSessions,{strictRemote:true});await P("sl:sc-rsvps",deletion.scRsvps,setScRsvps,{strictRemote:true});await P("sl:sc-logs",deletion.scLogs,setScLogs,{strictLocal:true,strictRemote:true});return deletion}catch(error){console.error("sc_session_delete_failed",{error,teamId:user.teamId,sessionId:id});return{ok:false,error:"Session could not be deleted. Please try again."}}};
+const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false};const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);const nextRsvps=ex?scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)):[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}];try{await P("sl:sc-rsvps",nextRsvps,setScRsvps,{strictRemote:true});trackEvent(ex?"sc_rsvp_removed":"sc_rsvp_added",{sessionId:sid});return{ok:true}}catch(error){console.error("sc_rsvp_save_failed",{error,teamId:user.teamId,sessionId:sid});return{ok:false,error:"RSVP could not be saved. Please try again."}}};
+const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,err:"Player team context is required to log S&C sessions."};const nextLog={...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name};const nextLogs=[nextLog,...scLogs];try{await DB.set("sl:sc-logs",nextLogs,{strictLocal:true,strictRemote:true});setScLogs(nextLogs);return{ok:true};}catch(error){console.error("sc_log_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),sport:String(log?.sport||"")});return{ok:false,err:"Session could not be saved. Please try again."};}};
 const toggleLeaderboardVisibility=async()=>{if(!user||user.role!=="player")return;const np=players.map(p=>p.email===user.email?{...p,hideFromLeaderboards:!(p.hideFromLeaderboards===true)}:p);await P("sl:players",np,setPlayers);const updated=np.find(p=>p.email===user.email);if(updated){if(!SUPABASE_AUTH_ENABLED)await legacyAuthFetch("/v1/legacy-auth/update-profile",{email:user.email,password:legacyAuthSecretRef.current?.password||"",hide_from_leaderboards:updated.hideFromLeaderboards===true});setUser(prev=>prev?{...prev,hideFromLeaderboards:updated.hideFromLeaderboards===true}:prev)}};
 useEffect(()=>{
 if(view!=="coach"||!user?.teamId)return;
@@ -2974,7 +2976,7 @@ return <div className="fade-up">
 // ═══════════════════════════════════════
 function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog,players,onCompletionCue}){
 const[expanded,setExpanded]=useState(null);
-const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"School",sport:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false);
+const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"School",sport:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false),[rsvpError,setRsvpError]=useState("");
 const sorted=useMemo(()=>[...sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
 const upcoming=sorted.filter(s=>s.date>=todayStr()),past=sorted.filter(s=>s.date<todayStr());
 const myCount=scRsvps.filter(r=>r.email===user.email).length;
@@ -3014,6 +3016,11 @@ const handleAddScLog=async()=>{
   setNewLog({date:todayStr(),time:"",place:"School",sport:""});
   setLogSaved(true);
   setTimeout(()=>setLogSaved(false),1800);
+};
+const handleScRsvp=async(sessionId)=>{
+  setRsvpError("");
+  const result=await toggleScRsvp(sessionId);
+  if(!result?.ok)setRsvpError(result?.error||"RSVP could not be saved. Please try again.");
 };
 
 return <div className="fade-up">
@@ -3101,9 +3108,10 @@ return <div className="fade-up">
     </button>
     {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
       {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
-      <button className="btn-v cta-primary" onClick={()=>toggleScRsvp(s.id)} style={{}}>
+      <button className="btn-v cta-primary" onClick={()=>handleScRsvp(s.id)} style={{}}>
         {going?<>✓ YOU'RE IN — TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
       </button>
+      {rsvpError&&<div role="alert" style={{fontFamily:FB,color:"#FF6969",fontSize:11,marginTop:10,fontWeight:700}}>{rsvpError}</div>}
       <div style={{fontFamily:FB,color:going?SC_COLOR:MUTED,fontSize:11,marginTop:10,fontWeight:700}}>Your RSVP status: {going?"Going":"Not RSVP’d"}</div>
     </div>}
   </div>;
@@ -3619,6 +3627,7 @@ const[showProgramScoreEntry,setShowProgramScoreEntry]=useState(false);
 const[coachPrioritiesMessage,setCoachPrioritiesMessage]=useState("");
 const[coachPrioritiesError,setCoachPrioritiesError]=useState("");
 const[coachPrioritySaveState,setCoachPrioritySaveState]=useState("idle");
+const[scSaveError,setScSaveError]=useState("");
 const persistedCoachPriorities=useMemo(()=>sanitizeCoachPriorities(coachPriorities),[coachPriorities]);
 useEffect(()=>{setCoachPriorityDraft(persistedCoachPriorities);},[persistedCoachPriorities]);
 const customProgramDrillCount=countCustomProgramDrills(programDrills);
@@ -3721,7 +3730,7 @@ addRsvp(evId,e,name);setAddEmail("")};
 const focusCoachScSessionForm=()=>setTimeout(()=>{const form=document.getElementById("coach-sc-session-form");form?.scrollIntoView({behavior:"smooth",block:"start"});form?.querySelector("input,select,textarea")?.focus?.({preventScroll:true});},120);
 const openCoachScSessionForm=()=>{setShowAddSC(true);focusCoachScSessionForm();};
 const toggleCoachScSessionForm=()=>{if(showAddSC){setShowAddSC(false);return;}openCoachScSessionForm();};
-const handleAddSC=()=>{if(!nsc.sport||!nsc.date)return;addScSession({...nsc,sport:san(nsc.sport),sessionType:san(nsc.sessionType||"School")});setNsc({sport:"",date:"",time:"",sessionType:"School"});setShowAddSC(false)};
+const handleAddSC=async()=>{if(!nsc.sport||!nsc.date)return;setScSaveError("");const result=await addScSession({...nsc,sport:san(nsc.sport),sessionType:san(nsc.sessionType||"School")});if(!result?.ok){setScSaveError(result?.error||"Session could not be saved. Please try again.");return}setNsc({sport:"",date:"",time:"",sessionType:"School"});setShowAddSC(false)};
 const totalPlayers=ups.length;
 const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
 const sortedEvents=useMemo(()=>[...safeEvents].sort((a,b)=>String(a?.date||"").localeCompare(String(b?.date||""))),[safeEvents]);
@@ -4522,6 +4531,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
         </button>
       </div>
     {showAddSC&&<div id="coach-sc-session-form" className="fade-up" style={{background:CARD_BG,borderRadius:16,padding:"20px 18px",marginTop:12,border:`1px solid ${BORDER_CLR}`}}>
+      {scSaveError&&<div role="alert" style={{marginBottom:12,padding:"10px 12px",borderRadius:10,background:"rgba(255,69,69,0.12)",border:"1px solid rgba(255,69,69,0.45)",color:"#FFD2D2",fontFamily:FB,fontSize:12,fontWeight:700}}>{scSaveError}</div>}
       <FF l="SPORT" v={nsc.sport} set={v=>setNsc({...nsc,sport:v})} ph="e.g. Basketball"/>
       <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:"calc(11px * var(--coach-text-scale-medium))",fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>PLACE</label>
       <select value={nsc.sessionType||"School"} onChange={e=>setNsc({...nsc,sessionType:e.target.value})} style={{width:"100%",height:52,padding:"0 16px",background:"#141414",border:"1px solid #333333",borderRadius:12,color:LIGHT,fontSize:"calc(14px * var(--coach-text-scale-medium))",fontFamily:FB,fontWeight:500,outline:"none",marginBottom:14}}>

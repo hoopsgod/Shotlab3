@@ -3,6 +3,11 @@ const toFiniteNumber = (value) => {
   return Number.isFinite(numeric) ? numeric : null;
 };
 
+const toOptionalFiniteNumber = (value) => {
+  if (value === null || value === undefined || value === "") return null;
+  return toFiniteNumber(value);
+};
+
 const cleanText = (value) => {
   if (value === null || value === undefined) return "";
   return String(value).trim();
@@ -406,14 +411,122 @@ export const normalizeRsvpRowForApp = (row = {}) => {
   return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== null && value !== ""));
 };
 
+export const normalizeScSessionRowForDb = (row = {}) => {
+  const id = cleanText(row.id);
+  const teamId = cleanText(row.team_id || row.teamId);
+  const sport = cleanText(row.sport);
+  if (!id || !teamId || !sport) return null;
+  return {
+    id,
+    team_id: teamId,
+    sport,
+    date: cleanText(row.date),
+    time: cleanText(row.time),
+    session_type: cleanText(row.session_type || row.sessionType),
+    owner_coach_id: cleanText(row.owner_coach_id || row.ownerCoachId).toLowerCase(),
+  };
+};
+
+export const normalizeScSessionRowForApp = (row = {}) => {
+  const db = normalizeScSessionRowForDb(row);
+  if (!db) return null;
+  return {
+    id: db.id,
+    teamId: db.team_id,
+    sport: db.sport,
+    date: db.date,
+    time: db.time,
+    sessionType: db.session_type,
+    ownerCoachId: db.owner_coach_id,
+  };
+};
+
+export const normalizeScRsvpRowForDb = (row = {}) => {
+  const teamId = cleanText(row.team_id || row.teamId);
+  const sessionId = cleanText(row.session_id || row.sessionId);
+  const email = cleanText(row.email).toLowerCase();
+  const playerId = cleanText(row.player_id || row.playerId || email).toLowerCase();
+  if (!teamId || !sessionId || !email || !playerId) return null;
+  return {
+    team_id: teamId,
+    session_id: sessionId,
+    email,
+    player_id: playerId,
+    name: cleanText(row.name),
+    ts: toOptionalFiniteNumber(row.ts),
+  };
+};
+
+export const normalizeScRsvpRowForApp = (row = {}) => {
+  const db = normalizeScRsvpRowForDb(row);
+  if (!db) return null;
+  return {
+    id: cleanText(row.id) || `${db.team_id}:${db.session_id}:${db.player_id}`,
+    teamId: db.team_id,
+    sessionId: db.session_id,
+    email: db.email,
+    playerId: db.player_id,
+    name: db.name,
+    ts: db.ts,
+  };
+};
+
+export const normalizeScLogRowForDb = (row = {}) => {
+  const id = cleanText(row.id);
+  const teamId = cleanText(row.team_id || row.teamId);
+  const email = cleanText(row.email).toLowerCase();
+  const playerId = cleanText(row.player_id || row.playerId || email).toLowerCase();
+  if (!id || !teamId || !email || !playerId) return null;
+  return {
+    id,
+    team_id: teamId,
+    session_id: cleanText(row.session_id || row.sessionId),
+    email,
+    player_id: playerId,
+    name: cleanText(row.name),
+    date: cleanText(row.date),
+    time: cleanText(row.time),
+    place: cleanText(row.place),
+    sport: cleanText(row.sport),
+    ts: toOptionalFiniteNumber(row.ts),
+  };
+};
+
+export const normalizeScLogRowForApp = (row = {}) => {
+  const db = normalizeScLogRowForDb(row);
+  if (!db) return null;
+  return {
+    id: db.id,
+    teamId: db.team_id,
+    sessionId: db.session_id,
+    email: db.email,
+    playerId: db.player_id,
+    name: db.name,
+    date: db.date,
+    time: db.time,
+    place: db.place,
+    sport: db.sport,
+    ts: db.ts,
+  };
+};
+
 export const buildAppRows = (key, rows, options = {}) => {
   if (!Array.isArray(rows) || rows.length === 0) return [];
+  if (
+    options?.source === "local"
+    && (key === "sl:sc-sessions" || key === "sl:sc-rsvps" || key === "sl:sc-logs")
+  ) {
+    return rows.map((row) => ({ ...row }));
+  }
   if (key === "sl:events") return rows.map(normalizeEventRowForApp).filter(Boolean);
   if (key === "sl:players") return rows.map(normalizePlayerRowForApp).filter(Boolean);
   if (key === "sl:player-profiles") return rows.map(normalizePlayerProfileRowForApp).filter(Boolean);
   if (key === "sl:rsvps") return rows.map(normalizeRsvpRowForApp).filter(Boolean);
   if (key === "sl:shotlogs") return rows.map((row) => normalizeShotLogRowForApp(row, options)).filter(Boolean);
   if (key === "sl:program-scores") return rows.map(normalizeProgramScoreRowForApp).filter(Boolean);
+  if (key === "sl:sc-sessions") return rows.map(normalizeScSessionRowForApp).filter(Boolean);
+  if (key === "sl:sc-rsvps") return rows.map(normalizeScRsvpRowForApp).filter(Boolean);
+  if (key === "sl:sc-logs") return rows.map(normalizeScLogRowForApp).filter(Boolean);
   return rows;
 };
 
@@ -428,5 +541,8 @@ export const buildRemoteRows = (key, rows, options = {}) => {
   if (key === "sl:players") return sourceRows.map(normalizePlayerRowForDb).filter(Boolean);
   if (key === "sl:player-profiles") return sourceRows.map(normalizePlayerProfileRowForDb).filter(Boolean);
   if (key === "sl:rsvps") return sourceRows.map(normalizeRsvpRowForDb).filter(Boolean);
+  if (key === "sl:sc-sessions") return sourceRows.map(normalizeScSessionRowForDb).filter(Boolean);
+  if (key === "sl:sc-rsvps") return sourceRows.map(normalizeScRsvpRowForDb).filter(Boolean);
+  if (key === "sl:sc-logs") return sourceRows.map(normalizeScLogRowForDb).filter(Boolean);
   return sourceRows;
 };

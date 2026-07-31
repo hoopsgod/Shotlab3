@@ -3,6 +3,7 @@ import { createSchedulePersistenceService } from "./schedulePersistenceService.j
 import { createPlayerProfilePersistenceService } from "./playerProfilePersistenceService.js";
 import { createPlayerIdentityPersistenceService } from "./playerIdentityPersistenceService.js";
 import { createTeamPersistenceService } from "./teamPersistenceService.js";
+import { createStrengthConditioningPersistenceService } from "./strengthConditioningPersistenceService.js";
 
 const BRIDGE_MARKER = Symbol.for("shotlab.apiIdentityFetchBridge");
 const SIGNED_SCHEDULE_RESOURCES = new Set(["events", "rsvps"]);
@@ -120,7 +121,7 @@ function signedSupabaseResourceFor(input, target = globalThis) {
     const base = target?.location?.origin || "https://shotlab.invalid";
     const url = new URL(raw, base);
     if (!/(^|\.)supabase\.co$/i.test(url.hostname) && url.hostname !== "example.supabase.co") return "";
-    const match = url.pathname.match(/\/rest\/v1\/(events|rsvps|player_profiles|players|teams)\/?$/i);
+    const match = url.pathname.match(/\/rest\/v1\/(events|rsvps|player_profiles|players|teams|sc_sessions|sc_rsvps|sc_logs)\/?$/i);
     return String(match?.[1] || "").toLowerCase();
   } catch {
     return "";
@@ -142,6 +143,14 @@ function signedPlayerResourceFor(input, target = globalThis) {
 
 function signedTeamResourceFor(input, target = globalThis) {
   return signedSupabaseResourceFor(input, target) === "teams";
+}
+
+function signedStrengthResourceFor(input, target = globalThis) {
+  const resource = signedSupabaseResourceFor(input, target);
+  if (resource === "sc_sessions") return "sessions";
+  if (resource === "sc_rsvps") return "rsvps";
+  if (resource === "sc_logs") return "logs";
+  return "";
 }
 
 function methodFor(input, init = {}) {
@@ -187,8 +196,29 @@ export function installApiIdentityFetchBridge(target = globalThis) {
   const playerProfilePersistence = createPlayerProfilePersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
   const playerIdentityPersistence = createPlayerIdentityPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
   const teamPersistence = createTeamPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
+  const strengthPersistence = createStrengthConditioningPersistenceService({ fetchImpl: originalFetch, storage: target?.localStorage });
 
   const wrappedFetch = async (input, init = {}) => {
+    const strengthResource = signedStrengthResourceFor(input, target);
+    if (strengthResource) {
+      try {
+        const method = methodFor(input, init);
+        if (method === "GET") {
+          const result = await strengthPersistence.loadState();
+          return jsonResponse(target, result[strengthResource], 200);
+        }
+        if (method === "POST") {
+          const rows = parseRows(init?.body);
+          const methodName = `sync${strengthResource[0].toUpperCase()}${strengthResource.slice(1)}`;
+          const result = await strengthPersistence[methodName](rows);
+          return jsonResponse(target, result.rows, 200);
+        }
+        return jsonResponse(target, { error: "method_not_allowed" }, 405);
+      } catch (error) {
+        return errorResponse(target, error, "strength_conditioning_api_failed");
+      }
+    }
+
     if (signedTeamResourceFor(input, target)) {
       try {
         const method = methodFor(input, init);
@@ -287,6 +317,7 @@ export const __testUtils = {
   signedPlayerProfileResourceFor,
   signedPlayerResourceFor,
   signedTeamResourceFor,
+  signedStrengthResourceFor,
   methodFor,
   parseRows,
   BRIDGE_MARKER,

@@ -1,0 +1,61 @@
+name: Signed Strength Conditioning Persistence
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "functions/v1/strength-conditioning/**"
+      - "src/lib/strengthConditioningPersistenceService.js"
+      - "src/lib/apiFetchBridge.js"
+      - "src/lib/appDataModels.js"
+      - "src/lib/remotePersistence.js"
+      - "src/App.jsx"
+      - "migrations/052_strength_conditioning_signed_api.sql"
+      - "tests/signed-strength-conditioning-persistence.test.mjs"
+      - "tests/sc-session-log-contract.test.mjs"
+      - "tests/events-visibility-rsvp-contract.test.mjs"
+      - "docs/signed-strength-conditioning-persistence.md"
+      - ".github/workflows/signed-strength-conditioning-persistence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signed-strength-conditioning-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-strength-conditioning:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify S&C authorization, privacy, and persistence contracts
+        run: node --test tests/signed-strength-conditioning-persistence.test.mjs tests/sc-session-log-contract.test.mjs tests/events-visibility-rsvp-contract.test.mjs tests/remote-persistence-shape.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-strength-conditioning-failure
+          path: |
+            npm-debug.log
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
