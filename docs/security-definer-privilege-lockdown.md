@@ -25,14 +25,26 @@ ShotLab browser source does not invoke these RPCs directly. They are called thro
 
 Removing direct REST/RPC execution blocks callers from bypassing those API controls while preserving the existing server paths.
 
-## Intentionally unchanged
+## Season rollover follow-up
 
-The following authenticated season-rollover helpers are not part of this lockdown:
+Migration `039` intentionally left these authenticated season-rollover helpers unchanged:
 
 - `public.is_active_team_coach(text)`
 - `public.start_new_season(jsonb)`
 
-Migration `035_tighten_season_rollover_privileges.sql` already revokes anonymous execution while preserving the intentional authenticated RPC flow. They require a separate redesign before authenticated execution could be removed.
+That temporary exception is removed by the staged season boundary:
+
+1. `049_season_rollover_signed_api_boundary.sql` adds
+   `public.start_new_season(jsonb, text)` with a fixed empty search path and
+   `service_role`-only execution.
+2. The Cloudflare `/v1/seasons` route validates a signed session, verifies team
+   write access, and supplies the server-verified requester to that RPC.
+3. `050_season_rollover_signed_api_lockdown.sql` removes direct browser access
+   to the season tables and drops both legacy authenticated functions.
+
+The split avoids an outage: old production code remains usable while the new
+signature is prepared, and the legacy surface is removed only after the new
+route is live.
 
 ## Deployment sequence
 

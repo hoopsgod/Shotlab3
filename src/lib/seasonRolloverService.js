@@ -1,4 +1,5 @@
 import { buildSeasonRolloverPlan } from "./seasonRollover.js";
+import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
 
 const SESSION_STORAGE_KEY = "sl:session";
 const ACTIVE_SEASONS_CACHE_KEY = "sl:active-seasons";
@@ -36,11 +37,17 @@ const errorMessage = (code, status = 0) => {
   return "The new season could not be created. No roster or results were changed.";
 };
 
-export async function loadActiveSeasons({ requesterEmail = currentSessionEmail(), fetchImpl = globalThis.fetch } = {}) {
+export async function loadActiveSeasons({
+  requesterEmail = currentSessionEmail(),
+  fetchImpl = globalThis.fetch,
+  storage = globalThis?.localStorage,
+} = {}) {
   const requester = normalizeKey(requesterEmail);
   if (!requester || typeof fetchImpl !== "function") return { ok: false, error: "unauthorized", seasons: cachedSeasons() };
   try {
-    const response = await fetchImpl("/v1/seasons", { headers: { "x-user-id": requester } });
+    const response = await fetchImpl("/v1/seasons", {
+      headers: buildApiIdentityHeaders({ requester, storage }),
+    });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) return { ok: false, error: body?.error || "season_load_failed", seasons: cachedSeasons() };
     const seasons = toArray(body?.seasons);
@@ -51,13 +58,22 @@ export async function loadActiveSeasons({ requesterEmail = currentSessionEmail()
   }
 }
 
-export async function persistSeasonRolloverPlan({ plan, coach, fetchImpl = globalThis.fetch } = {}) {
+export async function persistSeasonRolloverPlan({
+  plan,
+  coach,
+  fetchImpl = globalThis.fetch,
+  storage = globalThis?.localStorage,
+} = {}) {
   const requester = normalizeKey(coach?.email || currentSessionEmail());
   if (!requester || typeof fetchImpl !== "function") return { ok: false, code: "unauthorized", error: errorMessage("unauthorized", 401) };
   try {
     const response = await fetchImpl("/v1/seasons", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "x-user-id": requester },
+      headers: buildApiIdentityHeaders({
+        requester,
+        storage,
+        headers: { "Content-Type": "application/json" },
+      }),
       body: JSON.stringify({ plan }),
     });
     const body = await response.json().catch(() => ({}));

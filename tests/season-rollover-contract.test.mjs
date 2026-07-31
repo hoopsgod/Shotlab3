@@ -23,9 +23,19 @@ test("API validates plans and delegates persistence to the transactional RPC", a
   assert.match(source, /MAX_PLAN_BYTES/);
   assert.match(source, /returningMemberships\.length > 500/);
   assert.match(source, /callRpc\(env, "start_new_season"/);
+  assert.match(source, /p_requester_user_id: requester/);
   assert.match(source, /enforceRateLimit/);
-  assert.match(source, /x-user-id|readUserId/);
+  assert.match(source, /readAuthenticatedIdentity/);
+  assert.match(source, /collectTeamPriorityAccess/);
+  assert.doesNotMatch(source, /readUserId/);
   assert.doesNotMatch(source, /season_archives.*(?:update|delete)/i);
+});
+
+test("season client carries the signed identity context", async () => {
+  const source = await read("src/lib/seasonRolloverService.js");
+  assert.match(source, /buildApiIdentityHeaders/);
+  assert.match(source, /storage = globalThis\?\.localStorage/);
+  assert.doesNotMatch(source, /headers:\s*\{\s*"Content-Type": "application\/json",\s*"x-user-id": requester\s*\}/);
 });
 
 test("wizard is mobile-first, reviewable, and explicitly prevents history carryover", async () => {
