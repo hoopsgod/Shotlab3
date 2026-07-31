@@ -14,6 +14,7 @@
   <style>
     html,body{margin:0;padding:0;background:#050708;overflow-x:hidden;-webkit-font-smoothing:antialiased}
     #root{min-height:100dvh}
+    #team-store-root{position:relative;z-index:0}
     .boot-auth-shell{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:calc(28px + env(safe-area-inset-top,0px)) 24px calc(28px + env(safe-area-inset-bottom,0px));box-sizing:border-box;background:radial-gradient(circle at 50% 28%,rgba(200,255,26,.11),transparent 28rem),#050708}
     .boot-auth-card{width:min(360px,100%);display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
     .boot-wordmark{display:flex;align-items:baseline;gap:3px;color:#f4f7f8;font:900 clamp(42px,13vw,58px)/.9 "Arial Narrow",Impact,sans-serif;letter-spacing:.035em}
@@ -39,6 +40,8 @@
       </div>
     </div>
   </div>
+  <div id="team-store-root"></div>
   <script type="module" src="/src/main.jsx"></script>
+  <script type="module" src="/src/teamStoreEntry.jsx"></script>
 </body>
 </html>
