@@ -1,0 +1,57 @@
+name: Signed Player Challenge Persistence
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "functions/v1/player-challenges/**"
+      - "src/lib/playerChallengePersistenceService.js"
+      - "src/lib/appDataModels.js"
+      - "src/App.jsx"
+      - "migrations/053_player_challenges_signed_api.sql"
+      - "tests/signed-player-challenge-persistence.test.mjs"
+      - "docs/signed-player-challenge-persistence.md"
+      - ".github/workflows/signed-player-challenge-persistence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signed-player-challenges-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  signed-player-challenges:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify challenge authorization, privacy, promotion, and delivery contracts
+        run: node --test tests/signed-player-challenge-persistence.test.mjs tests/season-archive.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signed-player-challenge-failure
+          path: |
+            npm-debug.log
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

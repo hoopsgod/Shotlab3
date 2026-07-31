@@ -110,6 +110,7 @@ import { buildCoachOperationalInsightRail, buildPlayerOperationalInsightRail } f
 import { buildCoachVerifiedProgramScoreRow } from "./lib/coachProgramScoreEntry.js";
 import { scheduleWorkspaceActionReveal } from "./lib/playerWorkspaceActionRouting.js";
 import { createTrainingCatalogPersistenceService } from "./lib/trainingCatalogPersistenceService.js";
+import { createPlayerChallengePersistenceService, mergePlayerChallenges } from "./lib/playerChallengePersistenceService.js";
 const VOLT = TOKENS.PRIMARY;
 const SUCCESS = TOKENS.SUCCESS;
 const INFO = TOKENS.INFO;
@@ -483,6 +484,10 @@ const DB = {
 
 const persistenceService=createAppPersistenceService({db:DB,fetchImpl:fetch});
 const trainingCatalogPersistence=createTrainingCatalogPersistenceService({
+fetchImpl:(...args)=>globalThis.fetch(...args),
+storage:globalThis?.localStorage,
+});
+const playerChallengePersistence=createPlayerChallengePersistenceService({
 fetchImpl:(...args)=>globalThis.fetch(...args),
 storage:globalThis?.localStorage,
 });
@@ -1219,6 +1224,18 @@ setPendingJoinContext(normalizeStoredInviteContext(pendingCtx)||readInviteContex
 return {teams:m.teamsMigrated,players:m.playersMigrated};
 },[migrateData,navigateToPlayerHome,normalizeStoredInviteContext,readInviteContextFromStorage]);
 const P=useCallback(async(k,v,set,options)=>{set(v);await DB.set(k,v,options)},[]);
+useEffect(()=>{
+if(!ready||user?.role!=="player"||!user?.teamId||!user?.email)return undefined;
+let cancelled=false;
+const localSnapshot=challenges;
+playerChallengePersistence.hydrateChallenges({teamId:user.teamId,localChallenges:localSnapshot}).then(async(result)=>{
+if(cancelled||!result?.ok)return;
+const rows=Array.isArray(result.rows)?result.rows:localSnapshot;
+setChallenges(rows);
+await DB.set("sl:challenges",rows,{strictLocal:true});
+}).catch(error=>emitReleaseDiagnostic("player_challenge_hydration_failed",{teamId:user.teamId,message:String(error?.message||"unknown")}));
+return()=>{cancelled=true};
+},[ready,user?.email,user?.role,user?.teamId]);
 const persistTrainingCatalog=useCallback(async(nextHomeDrills,nextProgramDrills)=>{
 setDrills(nextHomeDrills);setProgramDrills(nextProgramDrills);
 await Promise.all([DB.set("sl:drills",nextHomeDrills,{strictLocal:true}),DB.set("sl:program-drills",nextProgramDrills,{strictLocal:true})]);
@@ -1887,8 +1904,8 @@ trackEvent("shot_log_retry_failed",{made:log.made,date:log.date,mode:retryFailur
 return retryFailure;
 }
 };
-const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",[...challenges,{...ch,id:Date.now(),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()}],setChallenges);trackEvent("challenge_created",{to:ch.to||null})};
-const respondChallenge=async(id,score)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;await P("sl:challenges",challenges.map(c=>c.id===id&&c.teamId===user.teamId&&c.to===user.email?{...c,respScore:score,respTs:Date.now(),status:score>c.score?"won":score===c.score?"tied":"lost"}:c),setChallenges)};
+const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required."};const draft={...ch,id:genId("challenge"),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()};if(isDemoMode()||isDemoAccount(user)){await P("sl:challenges",mergePlayerChallenges(challenges,[draft]),setChallenges);trackEvent("challenge_created",{to:ch.to||null});return{ok:true,challenge:draft,storageMode:"demo_local"}}try{const result=await playerChallengePersistence.createChallenge(draft,{teamId:user.teamId});const next=mergePlayerChallenges(challenges,[result.challenge]);await DB.set("sl:challenges",next,{strictLocal:true});setChallenges(next);trackEvent("challenge_created",{to:ch.to||null});return{ok:true,challenge:result.challenge,storageMode:result.storageMode}}catch(error){emitReleaseDiagnostic("player_challenge_create_failed",{teamId:user.teamId,to:ch.to||"",message:String(error?.message||"unknown")});return{ok:false,error:"Challenge could not be delivered. Please try again."}}};
+const respondChallenge=async(id,score)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required."};const localChallenge=challenges.find(c=>String(c.id)===String(id)&&c.teamId===user.teamId&&c.to===user.email);if(!localChallenge)return{ok:false,error:"Challenge is no longer available."};if(isDemoMode()||isDemoAccount(user)){const updated={...localChallenge,respScore:score,respTs:Date.now(),status:score>localChallenge.score?"won":score===localChallenge.score?"tied":"lost"};const next=mergePlayerChallenges(challenges,[updated]);await P("sl:challenges",next,setChallenges);return{ok:true,challenge:updated,storageMode:"demo_local"}}try{const result=await playerChallengePersistence.respondChallenge({id:String(id),score,teamId:user.teamId});const next=mergePlayerChallenges(challenges,[result.challenge]);await DB.set("sl:challenges",next,{strictLocal:true});setChallenges(next);trackEvent("challenge_responded",{challengeId:String(id),status:result.challenge.status});return{ok:true,challenge:result.challenge,storageMode:result.storageMode}}catch(error){emitReleaseDiagnostic("player_challenge_response_failed",{teamId:user.teamId,challengeId:String(id),message:String(error?.message||"unknown")});return{ok:false,error:"Response could not be saved. Please try again."}}};
 const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};try{await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setScSessions,{strictRemote:true});trackEvent("sc_session_created",{sport:s.sport||""});return{ok:true}}catch(error){console.error("sc_session_save_failed",{error,teamId:user.teamId,sport:String(s?.sport||"")});return{ok:false,error:"Session could not be saved. Please try again."}}};
 const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};const deletion=deleteTeamScSession({scSessions,scRsvps,scLogs,sessionId:id,teamId:user.teamId,user});if(!deletion.ok)return deletion;try{await P("sl:sc-sessions",deletion.scSessions,setScSessions,{strictRemote:true});await P("sl:sc-rsvps",deletion.scRsvps,setScRsvps,{strictRemote:true});await P("sl:sc-logs",deletion.scLogs,setScLogs,{strictLocal:true,strictRemote:true});return deletion}catch(error){console.error("sc_session_delete_failed",{error,teamId:user.teamId,sessionId:id});return{ok:false,error:"Session could not be deleted. Please try again."}}};
 const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false};const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);const nextRsvps=ex?scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)):[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}];try{await P("sl:sc-rsvps",nextRsvps,setScRsvps,{strictRemote:true});trackEvent(ex?"sc_rsvp_removed":"sc_rsvp_added",{sessionId:sid});return{ok:true}}catch(error){console.error("sc_rsvp_save_failed",{error,teamId:user.teamId,sessionId:sid});return{ok:false,error:"RSVP could not be saved. Please try again."}}};
@@ -2161,7 +2178,7 @@ const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,
 const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false),[shotSaving,setShotSaving]=useState(false),[shotInputError,setShotInputError]=useState(""),[shotSaveNotice,setShotSaveNotice]=useState("");
 const isDemoHomeShotSession=isDemoMode()||isDemoAccount(u);
 const syncIssueShots=useMemo(()=>isDemoHomeShotSession?[]:shotLogs.filter(s=>s.email===u.email&&!isDemoAccount(s)&&(s.syncState==="failed_sync")),[isDemoHomeShotSession,shotLogs,u.email]);
-const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false);
+const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false),[challengeSending,setChallengeSending]=useState(false),[challengeSaveError,setChallengeSaveError]=useState("");
 const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
 const[showShotStats,setShowShotStats]=useState(false);
 const[isNarrow,setIsNarrow]=useState(typeof window!=="undefined"?window.innerWidth<768:false);
@@ -2308,8 +2325,8 @@ pushCompletionCue({title:activeMode==="program"?"Program drill completed":"Drill
 if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
 if(activeMode!=="program"){setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)}
 };
-const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setSubmitting(false);switchTab(activeMode==="program"?"duels":"home")};
-const sendChallenge=()=>{if(!challTarget)return;addChallenge({to:challTarget,toName:players.find(p=>p.email===challTarget)?.name||challTarget.split("@")[0],drillId:shareData.drillId,drillName:shareData.drill,score:shareData.score,max:shareData.max});setShowChallForm(false);setChallTarget("");closeShare()};
+const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setChallengeSaveError("");setSubmitting(false);switchTab(activeMode==="program"?"duels":"home")};
+const sendChallenge=async()=>{if(!challTarget||challengeSending)return;setChallengeSending(true);setChallengeSaveError("");const result=await addChallenge({to:challTarget,toName:players.find(p=>p.email===challTarget)?.name||challTarget.split("@")[0],drillId:shareData.drillId,drillName:shareData.drill,score:shareData.score,max:shareData.max});setChallengeSending(false);if(!result?.ok){setChallengeSaveError(result?.error||"Challenge could not be delivered. Please try again.");return}setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setSubmitting(false);switchTab("duels")};
 
 // Pull-to-refresh
 const[tStart,setTStart]=useState(0);
@@ -2683,14 +2700,15 @@ return <div className={`app-shell performance-shell performance-shell--player ${
         {shareData?.src==="program"?<div style={{fontFamily:FB,color:T.SUB,fontSize:11}}>Program scores save directly to the team program leaderboard.</div>:players.filter(p=>p.email!==u.email).length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:12,textAlign:"center",padding:16}}>No other players yet. They need to log in first.</div>
         :<><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PICK YOUR OPPONENT</div>
           <div style={{display:"flex",flexDirection:"column",gap:4,marginBottom:14}}>{players.filter(p=>p.email!==u.email).map(p=>
-            <button key={p.email} onClick={()=>setChallTarget(p.email)} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:challTarget===p.email?ORANGE+"15":BG,border:`1px solid ${challTarget===p.email?ORANGE:BORDER_CLR}`,borderRadius:10,cursor:"pointer",textAlign:"left"}}>
+            <button key={p.email} onClick={()=>{setChallTarget(p.email);setChallengeSaveError("")}} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:challTarget===p.email?ORANGE+"15":BG,border:`1px solid ${challTarget===p.email?ORANGE:BORDER_CLR}`,borderRadius:10,cursor:"pointer",textAlign:"left"}}>
               <Av n={p.name} sz={28} email={p.email}/><span style={{fontFamily:FB,color:challTarget===p.email?ORANGE:LIGHT,fontSize:13,fontWeight:600,flex:1}}>{p.name}</span>
               {challTarget===p.email&&<svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={ORANGE} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>}
             </button>)}
           </div>
+          {challengeSaveError&&<div role="alert" style={{fontFamily:FB,color:DANGER,fontSize:11,lineHeight:1.45,marginBottom:10}}>{challengeSaveError}</div>}
           <div style={{display:"flex",gap:8}}>
-            <button onClick={()=>{setShowChallForm(false);setChallTarget("")}} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-            <button className="btn-v cta-primary" onClick={sendChallenge} disabled={!challTarget} style={{width:"100%",opacity:challTarget?1:.5}}>SEND IT</button>
+            <button onClick={()=>{setShowChallForm(false);setChallTarget("");setChallengeSaveError("")}} disabled={challengeSending} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:challengeSending?"not-allowed":"pointer"}}>CANCEL</button>
+            <button className="btn-v cta-primary" onClick={sendChallenge} disabled={!challTarget||challengeSending} style={{width:"100%",opacity:challTarget&&!challengeSending?1:.5}}>{challengeSending?"SENDING...":"SEND IT"}</button>
           </div>
         </>}
       </div>}
@@ -2748,6 +2766,9 @@ return <div className={`app-shell performance-shell performance-shell--player ${
   {tab==="duels"&&!active&&<div className="fade-up">
     <PlayerWorkspaceCommandBar model={programWorkspaceModel} activeMetric={programDrillFilter==="open"?"open":programDrillFilter==="completed"?"complete":""} onAction={handlePlayerWorkspaceAction} onMetric={handleProgramMetric} testId="player-program-workspace"/>
     <PlayerWorkspaceFilterRail value={programDrillFilter} onChange={setProgramDrillFilter} ariaLabel="Program drill filters" testId="player-program-filter-rail" options={[{value:"all",label:"Full plan",count:programDrills.length},{value:"open",label:"Open",count:programWorkspaceModel.metrics.find(metric=>metric.id==="open")?.value||0},{value:"completed",label:"Completed",count:programWorkspaceModel.metrics.find(metric=>metric.id==="complete")?.value||0}]}/>
+
+    <DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players}/>
+    <CourtDivider color={CYAN} my={18}/>
 
     <div style={{fontFamily:FB,color:CYAN,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8,textShadow:`0 0 16px ${CYAN}18`}}>PROGRAM DRILLS · {todayProgramScores.length}/{programDrills.length} DONE</div>
     <div style={{width:"100%",height:4,background:"#242424",borderRadius:2,overflow:"hidden",marginBottom:12}}><div style={{width:`${programDrills.length>0?Math.min(100,Math.round(todayProgramScores.length/programDrills.length*100)):0}%`,height:"100%",background:CYAN,borderRadius:2,transition:"width .25s ease"}}/></div>
@@ -2873,15 +2894,15 @@ function DashboardReturnButton({onClick,label="Dashboard"}){
 // HEAD-TO-HEAD DUELS
 // ═══════════════════════════════════════
 function DuelsPanel({u,challenges,drills,respondChallenge,players}){
-const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(""),[respSaved,setRespSaved]=useState(null);
+const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(""),[respSaved,setRespSaved]=useState(null),[respSaving,setRespSaving]=useState(false),[respError,setRespError]=useState("");
 const incoming=useMemo(()=>challenges.filter(c=>c.to===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
 const outgoing=useMemo(()=>challenges.filter(c=>c.from===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
 const pending=incoming.filter(c=>c.status==="pending");
 const resolved=[...incoming.filter(c=>c.status!=="pending"),...outgoing].sort((a,b)=>(b.respTs||b.ts)-(a.respTs||a.ts));
 
-const handleRespond=(ch)=>{
+const handleRespond=async(ch)=>{
 const v=parseInt(respInput);if(isNaN(v)||v<0||(hasDrillMax(ch)&&v>ch.max))return;
-respondChallenge(ch.id,v);setRespSaved(ch.id);setRespId(null);setRespInput("");
+if(respSaving)return;setRespSaving(true);setRespError("");const result=await respondChallenge(ch.id,v);setRespSaving(false);if(!result?.ok){setRespError(result?.error||"Response could not be saved. Please try again.");return}setRespSaved(ch.id);setRespId(null);setRespInput("");
 setTimeout(()=>setRespSaved(null),2000);
 };
 
@@ -2922,13 +2943,14 @@ return <div className="fade-up">
       :isResp?<div className="fade-up">
         <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
           <div style={{flex:1}}><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:6}}>YOUR SCORE</div>
-            <input autoFocus type="number" min="0" max={hasDrillMax(ch)?ch.max:undefined} value={respInput} onChange={e=>setRespInput(e.target.value)} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"14px 8px",background:BG,border:`2px solid ${ORANGE}`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none"}}/>
+            <input autoFocus type="number" min="0" max={hasDrillMax(ch)?ch.max:undefined} value={respInput} onChange={e=>{setRespInput(e.target.value);setRespError("")}} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"14px 8px",background:BG,border:`2px solid ${ORANGE}`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none"}}/>
           </div>
           {hasDrillMax(ch)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:24,paddingTop:20}}>/{ch.max}</div>}
         </div>
+        {respError&&<div role="alert" style={{fontFamily:FB,color:DANGER,fontSize:11,lineHeight:1.45,marginBottom:10}}>{respError}</div>}
         <div style={{display:"flex",gap:8}}>
-          <button onClick={()=>{setRespId(null);setRespInput("")}} style={{flex:1,padding:"11px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-          <button className="btn-v cta-primary" onClick={()=>handleRespond(ch)} style={{width:"100%"}}>SUBMIT</button>
+          <button onClick={()=>{setRespId(null);setRespInput("");setRespError("")}} disabled={respSaving} style={{flex:1,padding:"11px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:respSaving?"not-allowed":"pointer"}}>CANCEL</button>
+          <button className="btn-v cta-primary" onClick={()=>handleRespond(ch)} disabled={respSaving} style={{width:"100%",opacity:respSaving?0.65:1}}>{respSaving?"SAVING...":"SUBMIT"}</button>
         </div>
       </div>
       :<button className="btn-v cta-primary" onClick={()=>setRespId(ch.id)} style={{}}>
@@ -2962,7 +2984,7 @@ return <div className="fade-up">
     </div>
     <div style={{textAlign:"right",flexShrink:0}}>
       {isPending?<div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{ch.score}{hasDrillMax(ch)&&<span style={{color:MUTED,fontSize:11}}>/{ch.max}</span>}</div>
-      :<><div style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:16}}>{myScore||"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore}</span></div>
+      :<><div style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:16}}>{myScore??"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore??"-"}</span></div>
         {hasDrillMax(ch)&&<div style={{fontFamily:FB,color:MUTED,fontSize:8}}>/{ch.max}</div>}</>}
     </div>
   </div>;

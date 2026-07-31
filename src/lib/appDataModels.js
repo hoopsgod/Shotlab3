@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   scSessions: "sl:sc-sessions",
   scRsvps: "sl:sc-rsvps",
   scLogs: "sl:sc-logs",
+  challenges: "sl:challenges",
   seasonArchives: "sl:season-archives",
 };
 
