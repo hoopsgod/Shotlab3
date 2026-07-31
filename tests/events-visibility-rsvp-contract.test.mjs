@@ -123,11 +123,11 @@ test('event save failures keep detailed logging in console', async () => {
 });
 
 
-test('regression: addScSession still uses Date.now() id generation', async () => {
+test('S&C session creation keeps Date.now() ids and requires signed remote persistence', async () => {
   const source = await appSource();
 
   assert.match(
     source,
-    /const addScSession=async\(s\)=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return;await P\("sl:sc-sessions",\[\.\.\.scSessions,\{\.\.\.s,id:Date\.now\(\),teamId:user\.teamId,ownerCoachId:user\.email\}\],setScSessions\);/,
+    /const addScSession=async\(s\)=>\{if\(user\?\.role!=="coach"\|\|!user\.teamId\)return\{ok:false,error:"Not authorized"\};try\{await P\("sl:sc-sessions",\[\.\.\.scSessions,\{\.\.\.s,id:Date\.now\(\),teamId:user\.teamId,ownerCoachId:user\.email\}\],setScSessions,\{strictRemote:true\}\);/,
   );
 });

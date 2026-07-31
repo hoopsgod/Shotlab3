@@ -13,8 +13,8 @@ test('S&C top add controls open and focus the coach S&C session form instead of 
   assert.doesNotMatch(source, /<PageHeader title="S&C"[\s\S]*actionLabel=\{showAddSC\?"Close":"Add"\} onAction=\{\(\)=>setShowAddSC\(!showAddSC\)\}/);
   assert.match(source, /const focusCoachScSessionForm=\(\)=>setTimeout\(\(\)=>\{const form=document\.getElementById\("coach-sc-session-form"\);form\?\.scrollIntoView\(\{behavior:"smooth",block:"start"\}\);form\?\.querySelector\("input,select,textarea"\)\?\.focus\?\.\(\{preventScroll:true\}\);\},120\);/);
   assert.match(source, /const openCoachScSessionForm=\(\)=>\{setShowAddSC\(true\);focusCoachScSessionForm\(\);\};/);
-  assert.match(source, /<PageHeader title="S&C"[\s\S]*actionLabel=\{showAddSC\?"Close":"Add Session"\} onAction=\{toggleCoachScSessionForm\}/);
-  assert.match(source, /<button className="pageHeaderPill pageHeaderPillBrand" onClick=\{openCoachScSessionForm\}>Add Session<\/button>/);
+  assert.match(source, /<CoachPageDashboardHeader[\s\S]*title="Strength & Conditioning Dashboard"[\s\S]*actions=\{\[\{key:"add",label:"Add Session",onClick:openCoachScSessionForm\}\]\}/);
+  assert.match(source, /<button[\s\S]*className="pageHeaderPill btn-v"[\s\S]*onClick=\{toggleCoachScSessionForm\}/);
   assert.match(source, /\{showAddSC&&<div id="coach-sc-session-form" className="fade-up"/);
 });
 
@@ -32,7 +32,7 @@ test('S&C session handler keeps required field validation before saving', () => 
 
 test('successful S&C log persists a row to sl:sc-logs and updates scLogs state', () => {
   assert.match(source, /const addScLog=async\(log\)=>\{[\s\S]*const nextLog=\{\.\.\.log,id:Date\.now\(\),email:user\.email,playerId:user\.email,teamId:user\.teamId,name:user\.name\};/);
-  assert.match(source, /const nextLogs=\[nextLog,\.\.\.scLogs\];try\{await DB\.set\("sl:sc-logs",nextLogs,\{strictLocal:true\}\);setScLogs\(nextLogs\);return\{ok:true\};\}/);
+  assert.match(source, /const nextLogs=\[nextLog,\.\.\.scLogs\];try\{await DB\.set\("sl:sc-logs",nextLogs,\{strictLocal:true,strictRemote:true\}\);setScLogs\(nextLogs\);return\{ok:true\};\}/);
 });
 
 test('missing player/team context returns a visible S&C panel error instead of silently failing', () => {
