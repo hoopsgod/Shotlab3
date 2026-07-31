@@ -39,7 +39,7 @@ jobs:
         run: npm ci
 
       - name: Verify signed catalog authorization and promotion contracts
-        run: node --test tests/signed-training-catalog-persistence.test.mjs tests/coach-leaderboards-drills-events-shots-contract.test.mjs tests/program-drill-scoring.test.mjs
+        run: node --test tests/signed-training-catalog-persistence.test.mjs tests/coach-leaderboards-drills-events-shots-contract.test.mjs tests/remote-persistence-shape.test.mjs
 
       - name: Verify production build
         run: npm run build
