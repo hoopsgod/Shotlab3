@@ -3,6 +3,11 @@ const toFiniteNumber = (value) => {
   return Number.isFinite(numeric) ? numeric : null;
 };
 
+const toOptionalFiniteNumber = (value) => {
+  if (value === null || value === undefined || value === "") return null;
+  return toFiniteNumber(value);
+};
+
 const cleanText = (value) => {
   if (value === null || value === undefined) return "";
   return String(value).trim();
@@ -448,7 +453,7 @@ export const normalizeScRsvpRowForDb = (row = {}) => {
     email,
     player_id: playerId,
     name: cleanText(row.name),
-    ts: toFiniteNumber(row.ts),
+    ts: toOptionalFiniteNumber(row.ts),
   };
 };
 
@@ -483,7 +488,7 @@ export const normalizeScLogRowForDb = (row = {}) => {
     time: cleanText(row.time),
     place: cleanText(row.place),
     sport: cleanText(row.sport),
-    ts: toFiniteNumber(row.ts),
+    ts: toOptionalFiniteNumber(row.ts),
   };
 };
 
@@ -507,6 +512,12 @@ export const normalizeScLogRowForApp = (row = {}) => {
 
 export const buildAppRows = (key, rows, options = {}) => {
   if (!Array.isArray(rows) || rows.length === 0) return [];
+  if (
+    options?.source === "local"
+    && (key === "sl:sc-sessions" || key === "sl:sc-rsvps" || key === "sl:sc-logs")
+  ) {
+    return rows.map((row) => ({ ...row }));
+  }
   if (key === "sl:events") return rows.map(normalizeEventRowForApp).filter(Boolean);
   if (key === "sl:players") return rows.map(normalizePlayerRowForApp).filter(Boolean);
   if (key === "sl:player-profiles") return rows.map(normalizePlayerProfileRowForApp).filter(Boolean);

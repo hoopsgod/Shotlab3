@@ -11,6 +11,7 @@ const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const cleanText = (value, max = 500) => String(value ?? "").trim().slice(0, max);
 
 function safeTimestamp(value) {
+  if (value === null || value === undefined || value === "") return null;
   const numeric = Number(value);
   return Number.isFinite(numeric) ? Math.trunc(Math.min(Number.MAX_SAFE_INTEGER, Math.max(0, numeric))) : null;
 }

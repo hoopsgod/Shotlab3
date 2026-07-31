@@ -5,9 +5,11 @@ import fs from "node:fs";
 import {
   onRequestGet as getStrengthState,
   onRequestPost as syncStrengthState,
+  sanitizeScRsvp,
 } from "../functions/v1/strength-conditioning/index.js";
 import { createStrengthConditioningPersistenceService } from "../src/lib/strengthConditioningPersistenceService.js";
 import { __testUtils as bridgeUtils } from "../src/lib/apiFetchBridge.js";
+import { buildAppRows, normalizeScRsvpRowForApp } from "../src/lib/remotePersistence.js";
 
 const ENV = {
   SUPABASE_URL: "https://example.supabase.co",
@@ -258,6 +260,19 @@ test("client rejects malformed successful responses and bridge recognizes all S&
       resource,
     );
   }
+});
+
+test("local S&C fallback preserves legacy IDs and absent timestamps exactly", () => {
+  const localSessions = [{ id: 1785462812819, teamId: "team-a", sport: "Strength" }];
+  const localRsvps = [{ id: "rsvp-a", teamId: "team-a", sessionId: "lift-a", email: "player@example.com" }];
+  const localLogs = [{ id: "log-a", teamId: "team-a", playerId: "player@example.com", completed: true }];
+
+  assert.deepEqual(buildAppRows("sl:sc-sessions", localSessions, { source: "local" }), localSessions);
+  assert.deepEqual(buildAppRows("sl:sc-rsvps", localRsvps, { source: "local" }), localRsvps);
+  assert.deepEqual(buildAppRows("sl:sc-logs", localLogs, { source: "local" }), localLogs);
+  assert.equal(Object.hasOwn(buildAppRows("sl:sc-rsvps", localRsvps, { source: "local" })[0], "ts"), false);
+  assert.equal(sanitizeScRsvp({ ...localRsvps[0], ts: null }).ts, null);
+  assert.equal(normalizeScRsvpRowForApp({ ...localRsvps[0], playerId: "player@example.com", ts: null }).ts, null);
 });
 
 test("migration and application integration enforce a service-only signed boundary", () => {
