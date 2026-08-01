@@ -13,6 +13,15 @@ const cleanText = (value) => {
   return String(value).trim();
 };
 
+const readAliasedField = (row, ...keys) => {
+  for (const key of keys) {
+    if (Object.prototype.hasOwnProperty.call(row, key)) {
+      return { present: true, value: row[key] };
+    }
+  }
+  return { present: false, value: undefined };
+};
+
 const SHOT_LOG_SYNC_STATES = new Set(["remote_saved", "background_saved", "syncing", "local_pending", "failed_sync"]);
 const SHOT_LOG_SYNC_SOURCES = new Set(["remote", "local"]);
 
@@ -272,24 +281,29 @@ export const normalizePlayerRowForDb = (row = {}) => {
   return Object.fromEntries(Object.entries(payload).filter(([key, value]) => key === "team_id" || (value !== null && value !== "" && value !== undefined)));
 };
 
-export const normalizePlayerProfileRowForApp = (row = {}) => {
+export const normalizePlayerProfileRowForApp = (row = {}, { preserveExplicitClears = false } = {}) => {
   const teamId = cleanText(row.team_id || row.teamId);
   const userIdRaw = row.user_id ?? row.userId;
   const userId = userIdRaw === null ? null : cleanText(userIdRaw).toLowerCase();
   const email = cleanText(row.email).toLowerCase();
   const id = cleanText(row.id || (teamId && email ? `pp-shell:${teamId}:${email}` : ""));
   if (!id || !teamId) return null;
+  const firstName = readAliasedField(row, "firstName", "first_name");
+  const lastName = readAliasedField(row, "lastName", "last_name");
   const payload = {
     id,
     teamId,
     userId,
     email: email || undefined,
-    firstName: cleanText(row.firstName || row.first_name),
-    lastName: cleanText(row.lastName || row.last_name),
+    firstName: firstName.present ? cleanText(firstName.value) : undefined,
+    lastName: lastName.present ? cleanText(lastName.value) : undefined,
     createdAt: toFiniteNumber(row.createdAt ?? row.created_at),
     updatedAt: toFiniteNumber(row.updatedAt ?? row.updated_at),
   };
-  return Object.fromEntries(Object.entries(payload).filter(([, value]) => value !== "" && value !== undefined));
+  return Object.fromEntries(Object.entries(payload).filter(([key, value]) => (
+    value !== undefined
+    && (value !== "" || (preserveExplicitClears && (key === "firstName" || key === "lastName")))
+  )));
 };
 
 export const normalizePlayerProfileRowForDb = (row = {}) => {
@@ -340,7 +354,7 @@ export const mergeHydratedRows = (key, localRows, remoteRows) => {
     const idx = new Map();
     const keyFor = (row) => row.id || (row.email ? `${row.email}::${row.teamId}` : `${row.userId}::${row.teamId}`);
     for (const row of local.map(normalizePlayerProfileRowForApp).filter(Boolean)) idx.set(keyFor(row), merged.push(row) - 1);
-    for (const row of remote.map(normalizePlayerProfileRowForApp).filter(Boolean)) {
+    for (const row of remote.map((item) => normalizePlayerProfileRowForApp(item, { preserveExplicitClears: true })).filter(Boolean)) {
       const k = keyFor(row);
       if (idx.has(k)) merged[idx.get(k)] = { ...merged[idx.get(k)], ...row };
       else idx.set(k, merged.push(row) - 1);
@@ -526,7 +540,10 @@ export const buildAppRows = (key, rows, options = {}) => {
   }
   if (key === "sl:events") return rows.map(normalizeEventRowForApp).filter(Boolean);
   if (key === "sl:players") return rows.map(normalizePlayerRowForApp).filter(Boolean);
-  if (key === "sl:player-profiles") return rows.map(normalizePlayerProfileRowForApp).filter(Boolean);
+  if (key === "sl:player-profiles") {
+    const preserveExplicitClears = options?.source === "remote";
+    return rows.map((row) => normalizePlayerProfileRowForApp(row, { preserveExplicitClears })).filter(Boolean);
+  }
   if (key === "sl:rsvps") return rows.map(normalizeRsvpRowForApp).filter(Boolean);
   if (key === "sl:shotlogs") return rows.map((row) => normalizeShotLogRowForApp(row, options)).filter(Boolean);
   if (key === "sl:program-scores") return rows.map(normalizeProgramScoreRowForApp).filter(Boolean);
