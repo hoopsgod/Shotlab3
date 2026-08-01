@@ -49,11 +49,13 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
   });
 
   await page.addInitScript(({ identity }) => {
+    if (window.localStorage.getItem("sl:release-gate-initialized") === "true") return;
     window.localStorage.setItem("sl:session", JSON.stringify(identity.session));
     window.localStorage.setItem("sl:players", JSON.stringify(identity.players));
     window.localStorage.setItem("sl:teams", JSON.stringify(identity.teams));
     window.localStorage.setItem("sl:team-stores", "[]");
     window.localStorage.setItem("sl:team-store-clicks", "[]");
+    window.localStorage.setItem("sl:release-gate-initialized", "true");
   }, { identity: seedIdentity });
 
   await page.goto("/", { waitUntil: "domcontentloaded", timeout: 30_000 });
