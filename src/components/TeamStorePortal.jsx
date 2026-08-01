@@ -3,12 +3,17 @@ import {
   AFFILIATE_DISCLOSURE,
   TEAM_STORE_CLICKS_KEY,
   TEAM_STORE_PROVIDERS,
+  TEAM_STORE_REFERRALS_KEY,
   TEAM_STORE_STORAGE_KEY,
   appendTeamStoreClick,
+  buildSquadLockerCreationUrl,
   buildTeamStoreClick,
+  buildTeamStoreReferralStart,
+  getTeamStoreReferralStart,
   getStoreVisitMetrics,
   getTeamStoreForTeam,
   normalizeTeamStore,
+  upsertTeamStoreReferralStart,
   upsertTeamStore,
   validateTeamStoreInput,
 } from "../lib/teamStore.js";
@@ -79,7 +84,7 @@ function CheckIcon() {
 
 function SetupProgress({ published = false }) {
   const steps = [
-    ["1", "Connect", "Add your store link"],
+    ["1", "Create or connect", "Start or add your store"],
     ["2", "Preview", "Check the player view"],
     ["3", "Publish", "Make it available"],
   ];
@@ -99,6 +104,25 @@ function SetupProgress({ published = false }) {
       })}
     </ol>
   </div>;
+}
+
+function SquadLockerPartnerStart({ opened = false, onStart }) {
+  return <section className={`ts-partner-start ${opened ? "is-opened" : ""}`} aria-labelledby="squadlocker-partner-title">
+    <div className="ts-partner-start-copy">
+      <div className="ts-partner-badge"><span aria-hidden="true" /> SHOTLAB PARTNER PATH</div>
+      <h4 id="squadlocker-partner-title">{opened ? "Continue your SquadLocker setup" : "Need a SquadLocker store?"}</h4>
+      <p>{opened
+        ? "Your SquadLocker setup was opened from ShotLab. Finish there, then return here with the public link for your completed store."
+        : "Start here so SquadLocker can record ShotLab as the source of the introduction. Keep ShotLab open, then return with your finished store link."}</p>
+    </div>
+    <button type="button" onClick={onStart} className="ts-button ts-button-partner">
+      {opened ? "RETURN TO SQUADLOCKER SETUP" : "CREATE SQUADLOCKER STORE"} <ArrowIcon />
+    </button>
+    <div className="ts-partner-footnote">
+      {opened && <span className="ts-partner-recorded"><CheckIcon /> Partner path opened</span>}
+      <small>The ShotLab partner link is built in—nothing to copy. SquadLocker determines qualification and referral compensation under its partner terms.</small>
+    </div>
+  </section>;
 }
 
 function PlayerStorePreview({ teamName, storeName, providerLabel, onOpen, live = false }) {
@@ -129,6 +153,7 @@ export default function TeamStorePortal() {
   const [navigationIdentity, setNavigationIdentity] = useState(null);
   const [stores, setStores] = useState([]);
   const [clicks, setClicks] = useState([]);
+  const [referralStarts, setReferralStarts] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -139,18 +164,20 @@ export default function TeamStorePortal() {
   useEffect(() => {
     let cancelled = false;
     const hydrate = async () => {
-      const [session, players, teams, storedStores, storedClicks] = await Promise.all([
+      const [session, players, teams, storedStores, storedClicks, storedReferralStarts] = await Promise.all([
         storageGet(STORAGE_SESSION, null),
         storageGet(STORAGE_PLAYERS, []),
         storageGet(STORAGE_TEAMS, []),
         storageGet(TEAM_STORE_STORAGE_KEY, []),
         storageGet(TEAM_STORE_CLICKS_KEY, []),
+        storageGet(TEAM_STORE_REFERRALS_KEY, []),
       ]);
       if (cancelled) return;
       const nextIdentity = resolveIdentity(session, players, teams);
       setIdentity(nextIdentity);
       setStores(Array.isArray(storedStores) ? storedStores.map(normalizeTeamStore) : []);
       setClicks(Array.isArray(storedClicks) ? storedClicks : []);
+      setReferralStarts(Array.isArray(storedReferralStarts) ? storedReferralStarts : []);
     };
     hydrate();
     const interval = window.setInterval(hydrate, 2500);
@@ -192,6 +219,10 @@ export default function TeamStorePortal() {
   const activeIdentity = navigationIdentity || identity;
   const store = useMemo(() => getTeamStoreForTeam(stores, activeIdentity?.teamId), [stores, activeIdentity?.teamId]);
   const metrics = useMemo(() => getStoreVisitMetrics(clicks, activeIdentity?.teamId), [clicks, activeIdentity?.teamId]);
+  const referralStart = useMemo(
+    () => getTeamStoreReferralStart(referralStarts, activeIdentity?.teamId),
+    [referralStarts, activeIdentity?.teamId],
+  );
 
   useEffect(() => {
     if (editing) return;
@@ -237,6 +268,20 @@ export default function TeamStorePortal() {
     window.open(store.storeUrl, "_blank", "noopener,noreferrer");
   };
 
+  const openSquadLockerCreation = () => {
+    const partnerUrl = buildSquadLockerCreationUrl();
+    if (!partnerUrl) {
+      setError("The SquadLocker partner link is temporarily unavailable. Try again later.");
+      return;
+    }
+    const start = buildTeamStoreReferralStart({ teamId: activeIdentity.teamId });
+    const next = upsertTeamStoreReferralStart(referralStarts, start);
+    setReferralStarts(next);
+    setNotice("SquadLocker setup opened. Return here when your public store link is ready.");
+    storageSet(TEAM_STORE_REFERRALS_KEY, next).catch(() => null);
+    window.open(partnerUrl, "_blank", "noopener,noreferrer");
+  };
+
   const providerLabel = getProviderLabel((!store || editing) ? draft.provider : store.provider);
   const previewName = String(draft.storeName || "").trim() || "Official Team Store";
   const isSetup = activeIdentity.isCoach && (!store || editing);
@@ -271,9 +316,9 @@ export default function TeamStorePortal() {
             <SetupProgress />
             <div className="ts-setup-grid">
               <div className="ts-form-card">
-                <div className="ts-section-kicker">{store ? "STORE SETTINGS" : "STEP 1 · CONNECT"}</div>
-                <h3>{store ? "Update your store details" : "Connect your apparel store"}</h3>
-                <p className="ts-section-copy">Already have a SquadLocker or other team shop? Add its public link here. Players will open that store from ShotLab.</p>
+                <div className="ts-section-kicker">{store ? "STORE SETTINGS" : "STEP 1 · CREATE OR CONNECT"}</div>
+                <h3>{store ? "Update your store details" : "Create or connect your apparel store"}</h3>
+                <p className="ts-section-copy">New to SquadLocker? Use the ShotLab partner path below. Already have a team shop? Add its public storefront link.</p>
 
                 <div className="ts-fulfillment-note">
                   <div className="ts-note-icon"><StoreIcon /></div>
@@ -288,6 +333,7 @@ export default function TeamStorePortal() {
                     </select>
                     <small>Choose the company that runs your online store.</small>
                   </label>
+                  {draft.provider === "squadlocker" && !store && <SquadLockerPartnerStart opened={Boolean(referralStart)} onStart={openSquadLockerCreation} />}
                   <label className="ts-field">
                     <span>Name players will see</span>
                     <input value={draft.storeName} placeholder={`${activeIdentity.teamName} Team Store`} onChange={(event) => updateDraft("storeName", event.target.value)} />
@@ -296,7 +342,7 @@ export default function TeamStorePortal() {
                   <label className="ts-field">
                     <span>Public store link</span>
                     <input type="url" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck="false" placeholder="https://teamlocker.squadlocker.com/..." value={draft.storeUrl} onChange={(event) => updateDraft("storeUrl", event.target.value)} aria-invalid={hasUrlError} aria-describedby={hasUrlError ? "team-store-url-help team-store-error" : "team-store-url-help"} />
-                    <small id="team-store-url-help">Paste the full secure link that opens your public storefront.</small>
+                    <small id="team-store-url-help">Paste the finished customer-facing storefront link—not the ShotLab partner link.</small>
                   </label>
                 </div>
 
@@ -355,6 +401,12 @@ export default function TeamStorePortal() {
                   <strong>How orders work</strong>
                   <p>Players shop and check out with {providerLabel}. That partner handles payment, fulfillment, returns, and customer support.</p>
                 </div>
+                {store.provider === "squadlocker" && <div className={`ts-referral-status ${referralStart ? "is-recorded" : ""}`}>
+                  <div>{referralStart ? <CheckIcon /> : <span aria-hidden="true">!</span>}</div>
+                  <p><strong>{referralStart ? "ShotLab partner path recorded" : "Referral origin not verified"}</strong><span>{referralStart
+                    ? "This device opened SquadLocker through ShotLab. SquadLocker confirms final program eligibility and compensation."
+                    : "This store was connected without a ShotLab referral record on this device, so compensation cannot be assumed."}</span></p>
+                </div>}
               </section>
             </div>
           </>}
