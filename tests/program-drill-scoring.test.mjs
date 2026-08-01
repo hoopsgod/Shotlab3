@@ -204,7 +204,7 @@ test('leaderboards hub Program Drills path uses program score selectors while At
   assert.match(appSource, /const leaderboardPlayers=useMemo\(\(\)=>\[\.\.\.\(Array\.isArray\(players\)\?players:\[\]\),\.\.\.\(Array\.isArray\(playerProfiles\)\?playerProfiles:\[\]\)\]/);
   assert.match(appSource, /viewerRole="coach"[\s\S]*players=\{leaderboardPlayers\}/);
   assert.match(appSource, /const coachRosterPlayers=useMemo\(\(\)=>getCoachRosterPlayers\(\{players,playerProfiles,teamId:u\?\.teamId\}\)/);
-  assert.match(appSource, /<CoachRoster players=\{coachRosterPlayers\}[\s\S]*onSelectPlayer=\{setSelP\}/);
+  assert.match(appSource, /<CoachRoster players=\{filteredCoachRosterPlayers\}[\s\S]*onSelectPlayer=\{openPlayerIntelligence\}/);
   assert.match(appSource, /function CoachRoster\(\{players,scores,shotLogs,drills,nudged,setNudged,onRemovePlayer,onSelectPlayer\}\)/);
   assert.match(appSource, /onClick=\{\(\)=>onSelectPlayer\?\.\(p\)\}/);
   assert.match(appSource, /function CoachPlayerProgramAttemptDetails/);
@@ -216,14 +216,15 @@ test('leaderboards hub Program Drills path uses program score selectors while At
   assert.match(appSource, /\{l:"PB",v:row\.pb\}/);
   assert.match(appSource, /\{l:"AVG",v:row\.avg\}/);
   assert.match(appSource, /Score \{attempt\.score\}/);
-  assert.match(hubSource, /const normalizedProgramScores = useMemo\(\(\) => getAllProgramScoreRows\(programScores\)/);
-  assert.match(hubSource, /getProgramLeaderboardRows\(normalizedProgramScores, selectedProgramDrill, players, 10\)/);
+  assert.match(hubSource, /const normalizedProgramScores = useMemo\([\s\S]*?getAllProgramScoreRows\(programScores\)\.filter\(\(score\) => !teamId \|\| score\.teamId === teamId\)/);
+  assert.match(hubSource, /buildCurrentOffseasonProgramLeaderboardRows\(\{[\s\S]*programScores: normalizedProgramScores,[\s\S]*drill: selectedProgramDrill/);
+  assert.match(hubSource, /filterActiveTeamLeaderboardRows\(rawCurrentProgramRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet\)/);
   assert.match(hubSource, /activeLeaderboardCategory === 'home_shots'[\s\S]*rows=\{atHomeLeaderboardRows\}/);
   assert.match(hubSource, /buildAtHomeLeaderboardRows\(\{ scores: homeScores, shotLogs, programDrills, players, limit: 10 \}\)/);
-  assert.match(hubSource, /filterActiveTeamLeaderboardRows\(rawFallbackHomeLeaderboardRows/);
+  assert.match(hubSource, /filterActiveTeamLeaderboardRows\(currentHomeSourceRows, activeRosterKeySet, activeRosterEmailSet, activeRosterNameSet\)/);
   assert.match(hubSource, /Program Drill leaderboard has no rows/);
   assert.match(hubSource, /selectedLeaderboardDrillName: selectedProgramDrill\.name/);
   assert.match(hubSource, /availablePlayerIdentities:/);
   assert.match(compactCardSource, /const displayName = entry\.player_display_name \|\| entry\.displayName \|\| entry\.name/);
-  assert.match(compactCardSource, /const scoreValue = entry\.total_home_shots \?\? entry\.score \?\? entry\.total/);
+  assert.match(compactCardSource, /const scoreValue = entry\.metricValue \?\? entry\.total_home_shots \?\? entry\.score \?\? entry\.total/);
 });

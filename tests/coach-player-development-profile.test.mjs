@@ -11,7 +11,8 @@ const programDrills = [{ id: 'form', name: 'Form Shooting' }, { id: 'arc', name:
 test('coach can open player detail for a registered player from normalized roster', () => {
   const [player] = getCoachRosterPlayers({ teamId, players: [{ id: 'p1', userId: 'u1', email: 'reg@test.com', name: 'Registered Player', role: 'player', teamId }], playerProfiles: [] });
   assert.equal(player.name, 'Registered Player');
-  assert.match(source, /onClick=\{\(\)=>setSelP\(p\)\}/);
+  assert.match(source, /onClick=\{\(\)=>onSelectPlayer\?\.\(p\)\}/);
+  assert.match(source, /onOpenFullProfile=\{\(\)=>\{if\(selectedPlayerDashboardRow\?\.player\)\{setSelP\(selectedPlayerDashboardRow\.player\)/);
   assert.match(source, /data-testid="coach-player-development-profile"/);
 });
 

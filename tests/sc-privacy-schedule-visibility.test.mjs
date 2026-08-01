@@ -19,7 +19,7 @@ function scPanelSource(source) {
 
 function coachScSource(source) {
   const start = source.indexOf('{/* ═════════════ S&C MANAGEMENT ═════════════ */}');
-  const end = source.indexOf('{!isDesktop&&<NavBar', start);
+  const end = source.indexOf('<CoachProgramScoreDrawer', start);
   assert.notEqual(start, -1, 'Coach S&C management section should exist');
   assert.notEqual(end, -1, 'Coach S&C management boundary should exist');
   return source.slice(start, end);
@@ -49,8 +49,8 @@ test('coach S&C view still renders RSVP attendee names with counts and missing c
 test('player dashboard includes prominent Upcoming Schedule / Next Up section', async () => {
   const source = await appSource();
 
-  assert.match(source, /aria-label="Upcoming Schedule" data-testid="player-upcoming-schedule"/);
-  assert.match(source, />NEXT UP<\/div><div[^>]*>UPCOMING SCHEDULE<\/div>/);
+  assert.match(source, /title="Upcoming schedule"[\s\S]*testId="player-upcoming-schedule"/);
+  assert.match(source, /summary=\{upcomingScheduleItems\.length\?`\$\{upcomingScheduleItems\.length\} scheduled/);
   assert.match(source, /upcomingScheduleItems=deriveUpcomingSchedule\(\{events,rsvps,scSessions,scRsvps,userEmail:u\?\.email,today\}\);/);
 });
 
@@ -79,5 +79,6 @@ test('RSVP buttons do not render raw HTML entity text and no dead top Add button
   assert.doesNotMatch(source, /RSVP NOW &#8594;/);
   assert.doesNotMatch(source, /&#10003; YOU\'RE IN/);
   assert.doesNotMatch(source, /coach-events-top-create-event/);
-  assert.match(source, /<PageHeader title="S&C"[\s\S]*?actionLabel=\{showAddSC\?"Close":"Add Session"\} onAction=\{toggleCoachScSessionForm\}/);
+  assert.match(source, /<CoachPageDashboardHeader eyebrow="Performance operations" title="Strength & Conditioning Dashboard"[\s\S]*actions=\{\[\{key:"add",label:"Add Session",onClick:openCoachScSessionForm\}\]\}/);
+  assert.match(source, /onClick=\{toggleCoachScSessionForm\}[\s\S]*\{showAddSC\?"CANCEL":"\+ ADD SESSION"\}/);
 });

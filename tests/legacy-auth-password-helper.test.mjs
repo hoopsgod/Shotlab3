@@ -30,7 +30,7 @@ test('register, login, and update-profile use shared password helper', async () 
   assert.match(register, /import \{ hashLegacyPassword \} from "\.\.\/_password\.js";/);
   assert.match(register, /hashLegacyPassword\(password, saltHex\)/);
   assert.match(login, /import \{ verifyLegacyPassword \} from "\.\.\/_password\.js";/);
-  assert.match(login, /verifyLegacyPassword\(password,row\.password_salt\|\|"",row\.password_hash\|\|""\)/);
+  assert.match(login, /verifyLegacyPassword\(password,\s*row\.password_salt\s*\|\|\s*"",\s*row\.password_hash\s*\|\|\s*""\)/);
   assert.match(update, /import \{ verifyLegacyPassword \} from "\.\.\/_password\.js";/);
   assert.match(update, /verifyLegacyPassword\(password,row\.password_salt\|\|"",row\.password_hash\|\|""\)/);
 });

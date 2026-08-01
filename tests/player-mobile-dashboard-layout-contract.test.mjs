@@ -8,13 +8,10 @@ const playerHeaderSource = readFileSync(new URL('../src/components/PlayerDashboa
 
 test('player home mobile dashboard keeps mission, schedule, primary shot CTA, and schedule CTAs', () => {
   assert.match(source, /className="player-home-compact-dashboard"/);
-  assert.match(source, /aria-label="Today's mission"/);
-  assert.match(source, /TODAY'S MISSION/);
+  assert.match(source, /<PlayerDailyCommandCenter model=\{dailyCommandModel\} onAction=\{handleDailyCommandAction\}\/>/);
   assert.match(source, /const missionCtaLabel="Log Shots";/);
-  assert.match(source, /\{missionCtaLabel\.toUpperCase\(\)\}/);
-  assert.match(source, /aria-label="Upcoming Schedule" data-testid="player-upcoming-schedule"/);
-  assert.match(source, /UPCOMING SCHEDULE/);
-  assert.match(source, /className="pageHeaderPill player-dashboard-scheduleCta" onClick=\{\(\)=>switchTab\(item\.target\)\}/);
+  assert.match(source, /title="Upcoming schedule"[\s\S]*testId="player-upcoming-schedule"/);
+  assert.match(source, /onClick=\{\(\)=>switchTab\(item\.target\)\}/);
 });
 
 test('player home compact mobile layer is scoped to dashboard presentation tokens', () => {
@@ -37,7 +34,7 @@ test('player home schedule section is not removed and still derives event plus S
   assert.match(source, /const upcomingScheduleItems=deriveUpcomingSchedule\(\{events,rsvps,scSessions,scRsvps,userEmail:u\?\.email,today\}\);/);
   assert.match(source, /upcomingScheduleItems\.length===0\?/);
   assert.match(source, /upcomingScheduleItems\.map\(item=>/);
-  assert.match(source, /No upcoming event or S&C session is scheduled yet\./);
+  assert.match(source, /No upcoming event or S&amp;C session is scheduled yet\./);
 });
 
 test('presentation-only dashboard PR leaves shot logging, event RSVP, and S&C handler names intact', () => {
@@ -52,8 +49,8 @@ test('presentation-only dashboard PR leaves shot logging, event RSVP, and S&C ha
 });
 
 test('player dashboard uses iOS safe-area bottom spacing in its mobile scroll container', () => {
-  assert.match(source, /\.player-scroll-container\{--player-scroll-bottom-padding:calc\(var\(--bottom-nav-content-padding, 132px\) \+ 28px \+ env\(safe-area-inset-bottom, 0px\)\)/);
-  assert.match(source, /@media \(max-width:767px\)\{[\s\S]*\.player-scroll-container\{--player-scroll-bottom-padding:calc\(var\(--bottom-nav-content-padding, 156px\) \+ 40px \+ env\(safe-area-inset-bottom, 0px\)\)/);
+  assert.match(source, /\.player-scroll-container\{--player-scroll-bottom-padding:calc\(var\(--bottom-nav-content-padding, 88px\) \+ 24px \+ env\(safe-area-inset-bottom, 0px\)\)/);
+  assert.match(source, /@media \(max-width:767px\)\{[\s\S]*\.player-scroll-container\{--player-scroll-bottom-padding:calc\(var\(--bottom-nav-content-padding, 88px\) \+ 24px \+ env\(safe-area-inset-bottom, 0px\)\)/);
   assert.match(source, /className="player-scroll-container"/);
   assert.match(source, /padding:isDesktop\?"14px 20px 36px":"16px 20px var\(--player-scroll-bottom-padding\)"/);
   assert.match(source, /scroll-padding-bottom:var\(--player-scroll-bottom-padding\)/);
@@ -80,10 +77,11 @@ test('player dashboard header still renders the large team brand mark and keeps 
 
 test('log shots and dashboard navigation handlers remain wired from the player home shell', () => {
   assert.match(source, /const missionCtaLabel="Log Shots";/);
-  assert.match(source, /onClick=\{\(\)=>switchTab\("log-drill"\)\}>\{missionCtaLabel\.toUpperCase\(\)\}<\/button>/);
+  assert.match(source, /const handleDailyCommandAction=useCallback\(\(action=\{\}\)=>\{[\s\S]*switchTab\(target\)/);
+  assert.match(source, /<PlayerDailyCommandCenter model=\{dailyCommandModel\} onAction=\{handleDailyCommandAction\}\/>/);
   assert.match(source, /onViewAll=\{\(\)=>switchTab\("leaderboards"\)\}/);
   assert.match(source, /onClick=\{\(\)=>switchTab\(item\.target\)\}/);
-  assert.match(source, /<NavBar items=\{playerNavItems\} active=\{tab\} onChange=\{switchTab\}\/>/);
+  assert.match(source, /<MobileNavigation primaryItems=\{playerMobilePrimaryItems\} secondaryItems=\{playerMobileSecondaryItems\} activeKey=\{tab\} onChange=\{switchTab\}/);
   ['addShotLog', 'toggleRsvp', 'toggleScRsvp', 'homeShotsLeaderboard', 'refreshHomeShotsLeaderboard'].forEach((handlerName) => {
     assert.equal(source.includes(handlerName), true, `${handlerName} should remain present`);
   });

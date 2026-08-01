@@ -326,7 +326,12 @@ export const mergeHydratedRows = (key, localRows, remoteRows) => {
     }
     for (const row of remote.map(normalizePlayerRowForApp).filter(Boolean)) {
       const k = keyFor(row);
-      if (idx.has(k)) merged[idx.get(k)] = row; else idx.set(k, merged.push(row) - 1);
+      if (idx.has(k)) {
+        // Remote membership fields are authoritative, including an explicit
+        // null teamId used for roster removal. Preserve populated local profile
+        // fields when an older or partial API response omits them.
+        merged[idx.get(k)] = { ...merged[idx.get(k)], ...row };
+      } else idx.set(k, merged.push(row) - 1);
     }
     return merged;
   }
@@ -337,7 +342,8 @@ export const mergeHydratedRows = (key, localRows, remoteRows) => {
     for (const row of local.map(normalizePlayerProfileRowForApp).filter(Boolean)) idx.set(keyFor(row), merged.push(row) - 1);
     for (const row of remote.map(normalizePlayerProfileRowForApp).filter(Boolean)) {
       const k = keyFor(row);
-      if (idx.has(k)) merged[idx.get(k)] = row; else idx.set(k, merged.push(row) - 1);
+      if (idx.has(k)) merged[idx.get(k)] = { ...merged[idx.get(k)], ...row };
+      else idx.set(k, merged.push(row) - 1);
     }
     return merged;
   }

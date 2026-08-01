@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 import { BACKEND_MODE, getBackendRuntime } from '../src/lib/backendConfig.js';
 import { TEAM_AUTH_TABLES, TEAM_ROLE, TEAM_MEMBERSHIP_STATUS, createTeamAuthService } from '../src/lib/teamAuthFoundation.js';
+import { createReleaseAuthService } from '../src/lib/releaseAuthService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -70,4 +71,27 @@ test('UI components/screens do not directly depend on Supabase client', () => {
       assert.doesNotMatch(src, /from\s+['\"]\.\.\/lib\/supabase\.js['\"]/);
     }
   }
+});
+
+test('release readiness uses a testable auth service boundary', async () => {
+  const events = [];
+  const service = createReleaseAuthService({
+    async getSession() {
+      return { data: { session: { user: { email: 'player@example.com' } } }, error: null };
+    },
+    onAuthStateChange(callback) {
+      events.push(callback);
+      return { data: { subscription: { unsubscribe() {} } } };
+    },
+  });
+
+  const session = await service.getSession();
+  const subscription = service.onAuthStateChange(() => {});
+  assert.equal(session.data.session.user.email, 'player@example.com');
+  assert.equal(events.length, 1);
+  assert.equal(typeof subscription.data.subscription.unsubscribe, 'function');
+
+  const boundarySource = fs.readFileSync(path.join(repoRoot, 'src/components/ReleaseReadinessBoundary.jsx'), 'utf8');
+  assert.match(boundarySource, /from "\.\.\/lib\/releaseAuthService\.js"/);
+  assert.doesNotMatch(boundarySource, /from\s+['"]\.\.\/lib\/supabase\.js['"]/);
 });
