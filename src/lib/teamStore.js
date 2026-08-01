@@ -1,7 +1,6 @@
 export const TEAM_STORE_STORAGE_KEY = "sl:team-stores";
 export const TEAM_STORE_CLICKS_KEY = "sl:team-store-clicks";
 export const TEAM_STORE_REFERRALS_KEY = "sl:team-store-referrals";
-export const SQUADLOCKER_PARTNER_SIGNUP_URL = "https://www.squadlocker.com/partner/form";
 
 export const TEAM_STORE_PROVIDERS = [
   { key: "squadlocker", label: "SquadLocker" },
@@ -14,15 +13,20 @@ export const AFFILIATE_DISCLOSURE =
 
 const clean = (value) => String(value ?? "").trim();
 
-export function buildSquadLockerCreationUrl({ baseUrl, source = "coach_team_store" } = {}) {
+export function getSquadLockerPartnerReadiness({ baseUrl, source = "coach_team_store" } = {}) {
   const configuredUrl = clean(baseUrl) || clean(import.meta.env?.VITE_SQUADLOCKER_PARTNER_URL);
+  if (!configuredUrl) {
+    return { ready: false, reason: "missing_partner_url", url: "" };
+  }
   let parsed;
   try {
-    parsed = new URL(configuredUrl || SQUADLOCKER_PARTNER_SIGNUP_URL);
+    parsed = new URL(configuredUrl);
   } catch {
-    return "";
+    return { ready: false, reason: "invalid_partner_url", url: "" };
   }
-  if (parsed.protocol !== "https:") return "";
+  if (parsed.protocol !== "https:") {
+    return { ready: false, reason: "invalid_partner_url", url: "" };
+  }
   parsed.searchParams.set("utm_source", "shotlab");
   parsed.searchParams.set("utm_medium", "partner_referral");
   parsed.searchParams.set("utm_campaign", "team_store_creation");
@@ -30,7 +34,11 @@ export function buildSquadLockerCreationUrl({ baseUrl, source = "coach_team_stor
   if (!parsed.searchParams.has("referral_partner_master")) {
     parsed.searchParams.set("referral_partner_master", "ShotLab");
   }
-  return parsed.toString();
+  return { ready: true, reason: "configured", url: parsed.toString() };
+}
+
+export function buildSquadLockerCreationUrl(options = {}) {
+  return getSquadLockerPartnerReadiness(options).url;
 }
 
 function normalizeTeamStoreReferralStart(value = {}) {
@@ -39,17 +47,19 @@ function normalizeTeamStoreReferralStart(value = {}) {
     teamId: clean(value.teamId || value.team_id),
     provider: value.provider === "squadlocker" ? "squadlocker" : "other",
     source: clean(value.source) || "shotlab_partner_link",
+    attribution: value.attribution === "official_partner_url" ? "official_partner_url" : "unverified",
     startedAt: clean(value.startedAt || value.started_at),
   };
 }
 
-export function buildTeamStoreReferralStart({ teamId, provider = "squadlocker" } = {}) {
+export function buildTeamStoreReferralStart({ teamId, provider = "squadlocker", attribution = "unverified" } = {}) {
   const normalizedTeamId = clean(teamId);
   return normalizeTeamStoreReferralStart({
     id: `store-referral-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
     teamId: normalizedTeamId,
     provider,
     source: "shotlab_partner_link",
+    attribution,
     startedAt: new Date().toISOString(),
   });
 }

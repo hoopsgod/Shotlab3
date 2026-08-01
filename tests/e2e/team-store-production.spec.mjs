@@ -107,14 +107,23 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
   await expect(dialog).toContainText("What players will see");
   await expect(dialog.getByRole("button", { name: "PUBLISH STORE" })).toBeVisible();
 
-  await dialog.getByRole("button", { name: "CREATE SQUADLOCKER STORE" }).click();
-  await expect(dialog).toContainText("Partner path opened");
-  const partnerUrl = await page.evaluate(() => window.__shotlabOpenedUrls.at(-1));
-  const partnerDestination = new URL(partnerUrl);
-  expect(partnerDestination.protocol).toBe("https:");
-  expect(partnerDestination.searchParams.get("utm_source")).toBe("shotlab");
-  expect(partnerDestination.searchParams.get("utm_medium")).toBe("partner_referral");
-  expect(partnerDestination.searchParams.get("referral_partner_master")).toBe("ShotLab");
+  const createStoreButton = dialog.getByRole("button", { name: "CREATE SQUADLOCKER STORE" });
+  const partnerReady = await createStoreButton.count() > 0;
+  if (partnerReady) {
+    await createStoreButton.click();
+    await expect(dialog).toContainText("Partner path opened");
+    const partnerUrl = await page.evaluate(() => window.__shotlabOpenedUrls.at(-1));
+    const partnerDestination = new URL(partnerUrl);
+    expect(partnerDestination.protocol).toBe("https:");
+    expect(partnerDestination.searchParams.get("utm_source")).toBe("shotlab");
+    expect(partnerDestination.searchParams.get("utm_medium")).toBe("partner_referral");
+    expect(partnerDestination.searchParams.get("referral_partner_master")).toBe("ShotLab");
+  } else {
+    const pendingButton = dialog.getByRole("button", { name: "PARTNER SETUP PENDING" });
+    await expect(pendingButton).toBeVisible();
+    await expect(pendingButton).toBeDisabled();
+    await expect(dialog).toContainText("unverified signup link");
+  }
 
   const urlInput = dialog.getByLabel("Public store link");
   await urlInput.fill("http://example.com/insecure");
@@ -140,13 +149,16 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
     status: "active",
   });
   expect(coachState.clicks).toEqual([]);
-  expect(coachState.referrals).toHaveLength(1);
-  expect(coachState.referrals[0]).toMatchObject({
-    teamId: "release-gate-team",
-    provider: "squadlocker",
-    source: "shotlab_partner_link",
-  });
-  expect(coachState.referrals[0]).not.toHaveProperty("email");
+  expect(coachState.referrals).toHaveLength(partnerReady ? 1 : 0);
+  if (partnerReady) {
+    expect(coachState.referrals[0]).toMatchObject({
+      teamId: "release-gate-team",
+      provider: "squadlocker",
+      source: "shotlab_partner_link",
+      attribution: "official_partner_url",
+    });
+    expect(coachState.referrals[0]).not.toHaveProperty("email");
+  }
 
   await page.evaluate(({ playerEmail }) => {
     const session = JSON.parse(window.localStorage.getItem("sl:session") || "{}");

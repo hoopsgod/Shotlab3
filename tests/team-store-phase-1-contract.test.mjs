@@ -10,6 +10,7 @@ import {
   buildSquadLockerCreationUrl,
   buildTeamStoreClick,
   buildTeamStoreReferralStart,
+  getSquadLockerPartnerReadiness,
   getTeamStoreReferralStart,
   getStoreVisitMetrics,
   getTeamStoreForTeam,
@@ -53,21 +54,33 @@ test("click analytics are team scoped and contain no shopper identity", () => {
   assert.equal(metrics.today, 1);
 });
 
-test("SquadLocker creation always starts through ShotLab attribution", () => {
-  const url = new URL(buildSquadLockerCreationUrl());
+test("SquadLocker creation requires an official partner destination", () => {
+  assert.deepEqual(getSquadLockerPartnerReadiness(), {
+    ready: false,
+    reason: "missing_partner_url",
+    url: "",
+  });
+  assert.equal(buildSquadLockerCreationUrl(), "");
+
+  const configured = getSquadLockerPartnerReadiness({
+    baseUrl: "https://partner.example/shotlab?affiliate_id=abc123",
+  });
+  assert.equal(configured.ready, true);
+  assert.equal(configured.reason, "configured");
+  const url = new URL(configured.url);
   assert.equal(url.protocol, "https:");
-  assert.equal(url.hostname, "www.squadlocker.com");
-  assert.equal(url.pathname, "/partner/form");
+  assert.equal(url.hostname, "partner.example");
+  assert.equal(url.searchParams.get("affiliate_id"), "abc123");
   assert.equal(url.searchParams.get("utm_source"), "shotlab");
   assert.equal(url.searchParams.get("utm_medium"), "partner_referral");
   assert.equal(url.searchParams.get("utm_campaign"), "team_store_creation");
   assert.equal(url.searchParams.get("referral_partner_master"), "ShotLab");
 
-  const configured = new URL(buildSquadLockerCreationUrl({
-    baseUrl: "https://partner.example/shotlab?affiliate_id=abc123",
-  }));
-  assert.equal(configured.searchParams.get("affiliate_id"), "abc123");
-  assert.equal(configured.searchParams.get("utm_source"), "shotlab");
+  assert.deepEqual(getSquadLockerPartnerReadiness({ baseUrl: "http://example.com" }), {
+    ready: false,
+    reason: "invalid_partner_url",
+    url: "",
+  });
   assert.equal(buildSquadLockerCreationUrl({ baseUrl: "http://example.com" }), "");
 });
 
@@ -77,12 +90,19 @@ test("referral starts are team scoped and contain no coach identity", () => {
   assert.equal(start.teamId, "team-1");
   assert.equal(start.provider, "squadlocker");
   assert.equal(start.source, "shotlab_partner_link");
+  assert.equal(start.attribution, "unverified");
   assert.equal("email" in start, false);
   assert.equal("name" in start, false);
 
   const rows = upsertTeamStoreReferralStart([], start);
   assert.equal(getTeamStoreReferralStart(rows, "team-1")?.id, start.id);
   assert.equal(getTeamStoreReferralStart(rows, "team-2"), null);
+
+  const verified = buildTeamStoreReferralStart({
+    teamId: "team-1",
+    attribution: "official_partner_url",
+  });
+  assert.equal(verified.attribution, "official_partner_url");
 });
 
 test("portal exposes coach setup and player shopping with clear affiliate disclosure", () => {
@@ -93,7 +113,9 @@ test("portal exposes coach setup and player shopping with clear affiliate disclo
   assert.match(portalSource, /Name players will see/);
   assert.match(portalSource, /Public store link/);
   assert.match(portalSource, /CREATE SQUADLOCKER STORE/);
-  assert.match(portalSource, /partner link is built in/i);
+  assert.match(portalSource, /PARTNER SETUP PENDING/);
+  assert.match(portalSource, /unverified signup link/i);
+  assert.match(portalSource, /official partner link is applied automatically/i);
   assert.match(portalSource, /STORE VISITS/);
   assert.match(portalSource, /Store link opens/);
   assert.match(portalSource, /ShotLab does not process orders, payments, shipping, returns, or sales tax/);

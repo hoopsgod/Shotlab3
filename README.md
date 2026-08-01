@@ -50,13 +50,15 @@ If vars are missing in Cloudflare Preview, the site still loads in demo-safe mod
 
 ### SquadLocker partner attribution
 
-Team Store creation always opens SquadLocker with ShotLab referral and UTM attribution. When SquadLocker issues ShotLab an official partner or affiliate URL, configure it as:
+Team Store creation opens only through a configured official SquadLocker partner destination. When SquadLocker issues ShotLab its partner or referral URL, configure it as:
 
 ```bash
 VITE_SQUADLOCKER_PARTNER_URL=https://YOUR_OFFICIAL_SQUADLOCKER_PARTNER_LINK
 ```
 
-Set the variable in both Cloudflare Preview and Production, then redeploy. ShotLab preserves the partner link's affiliate parameters and adds its source tags. Until an official URL is configured, the app uses SquadLocker's public partner form with ShotLab attribution; vendor-side eligibility and compensation still depend on SquadLocker's partner agreement.
+Set the variable in both Cloudflare Preview and Production, then redeploy. ShotLab preserves the partner link's vendor parameters and adds its source tags. Run `npm run verify:team-store-partner` with the same variable before release.
+
+Until an official URL is configured, ShotLab blocks new SquadLocker signup handoffs instead of sending coaches through an unverified public form. Coaches can still connect an existing public storefront. A configured link proves which destination ShotLab opens; vendor-side qualification and compensation still depend on SquadLocker's written partner agreement and reporting.
 
 ### Backend health check and fallback states
 A lightweight runtime health utility reports one of:

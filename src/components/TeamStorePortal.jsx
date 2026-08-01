@@ -6,9 +6,9 @@ import {
   TEAM_STORE_REFERRALS_KEY,
   TEAM_STORE_STORAGE_KEY,
   appendTeamStoreClick,
-  buildSquadLockerCreationUrl,
   buildTeamStoreClick,
   buildTeamStoreReferralStart,
+  getSquadLockerPartnerReadiness,
   getTeamStoreReferralStart,
   getStoreVisitMetrics,
   getTeamStoreForTeam,
@@ -106,10 +106,24 @@ function SetupProgress({ published = false }) {
   </div>;
 }
 
-function SquadLockerPartnerStart({ opened = false, onStart }) {
+function SquadLockerPartnerStart({ opened = false, onStart, ready = false }) {
+  if (!ready) {
+    return <section className="ts-partner-start is-pending" aria-labelledby="squadlocker-partner-title">
+      <div className="ts-partner-start-copy">
+        <div className="ts-partner-badge"><span aria-hidden="true" /> SHOTLAB PARTNER SETUP</div>
+        <h4 id="squadlocker-partner-title">Store creation is temporarily unavailable</h4>
+        <p>ShotLab is waiting for its official SquadLocker partner link. To protect referral credit, we will not send you through an unverified signup link.</p>
+      </div>
+      <button type="button" disabled className="ts-button ts-button-partner">PARTNER SETUP PENDING</button>
+      <div className="ts-partner-footnote">
+        <small>Already have a SquadLocker store? Paste its public storefront link below to make it available to your team.</small>
+      </div>
+    </section>;
+  }
+
   return <section className={`ts-partner-start ${opened ? "is-opened" : ""}`} aria-labelledby="squadlocker-partner-title">
     <div className="ts-partner-start-copy">
-      <div className="ts-partner-badge"><span aria-hidden="true" /> SHOTLAB PARTNER PATH</div>
+      <div className="ts-partner-badge"><span aria-hidden="true" /> VERIFIED SHOTLAB PARTNER PATH</div>
       <h4 id="squadlocker-partner-title">{opened ? "Continue your SquadLocker setup" : "Need a SquadLocker store?"}</h4>
       <p>{opened
         ? "Your SquadLocker setup was opened from ShotLab. Finish there, then return here with the public link for your completed store."
@@ -120,7 +134,7 @@ function SquadLockerPartnerStart({ opened = false, onStart }) {
     </button>
     <div className="ts-partner-footnote">
       {opened && <span className="ts-partner-recorded"><CheckIcon /> Partner path opened</span>}
-      <small>The ShotLab partner link is built in—nothing to copy. SquadLocker determines qualification and referral compensation under its partner terms.</small>
+      <small>Your official partner link is applied automatically—nothing to copy. SquadLocker determines qualification and referral compensation under its partner terms.</small>
     </div>
   </section>;
 }
@@ -223,6 +237,8 @@ export default function TeamStorePortal() {
     () => getTeamStoreReferralStart(referralStarts, activeIdentity?.teamId),
     [referralStarts, activeIdentity?.teamId],
   );
+  const partnerReadiness = useMemo(() => getSquadLockerPartnerReadiness(), []);
+  const verifiedReferralStart = referralStart?.attribution === "official_partner_url";
 
   useEffect(() => {
     if (editing) return;
@@ -269,12 +285,15 @@ export default function TeamStorePortal() {
   };
 
   const openSquadLockerCreation = () => {
-    const partnerUrl = buildSquadLockerCreationUrl();
+    const partnerUrl = partnerReadiness.url;
     if (!partnerUrl) {
-      setError("The SquadLocker partner link is temporarily unavailable. Try again later.");
+      setError("SquadLocker store creation is unavailable until ShotLab's official partner link is configured.");
       return;
     }
-    const start = buildTeamStoreReferralStart({ teamId: activeIdentity.teamId });
+    const start = buildTeamStoreReferralStart({
+      teamId: activeIdentity.teamId,
+      attribution: "official_partner_url",
+    });
     const next = upsertTeamStoreReferralStart(referralStarts, start);
     setReferralStarts(next);
     setNotice("SquadLocker setup opened. Return here when your public store link is ready.");
@@ -333,7 +352,7 @@ export default function TeamStorePortal() {
                     </select>
                     <small>Choose the company that runs your online store.</small>
                   </label>
-                  {draft.provider === "squadlocker" && !store && <SquadLockerPartnerStart opened={Boolean(referralStart)} onStart={openSquadLockerCreation} />}
+                  {draft.provider === "squadlocker" && !store && <SquadLockerPartnerStart opened={verifiedReferralStart} onStart={openSquadLockerCreation} ready={partnerReadiness.ready} />}
                   <label className="ts-field">
                     <span>Name players will see</span>
                     <input value={draft.storeName} placeholder={`${activeIdentity.teamName} Team Store`} onChange={(event) => updateDraft("storeName", event.target.value)} />
@@ -401,10 +420,10 @@ export default function TeamStorePortal() {
                   <strong>How orders work</strong>
                   <p>Players shop and check out with {providerLabel}. That partner handles payment, fulfillment, returns, and customer support.</p>
                 </div>
-                {store.provider === "squadlocker" && <div className={`ts-referral-status ${referralStart ? "is-recorded" : ""}`}>
-                  <div>{referralStart ? <CheckIcon /> : <span aria-hidden="true">!</span>}</div>
-                  <p><strong>{referralStart ? "ShotLab partner path recorded" : "Referral origin not verified"}</strong><span>{referralStart
-                    ? "This device opened SquadLocker through ShotLab. SquadLocker confirms final program eligibility and compensation."
+                {store.provider === "squadlocker" && <div className={`ts-referral-status ${verifiedReferralStart ? "is-recorded" : ""}`}>
+                  <div>{verifiedReferralStart ? <CheckIcon /> : <span aria-hidden="true">!</span>}</div>
+                  <p><strong>{verifiedReferralStart ? "Official ShotLab partner path recorded" : "Referral origin not verified"}</strong><span>{verifiedReferralStart
+                    ? "This device opened SquadLocker through ShotLab's configured partner destination. SquadLocker confirms final program eligibility and compensation."
                     : "This store was connected without a ShotLab referral record on this device, so compensation cannot be assumed."}</span></p>
                 </div>}
               </section>
