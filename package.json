@@ -30,6 +30,7 @@
     "ios:device-build": "node scripts/ios-release.mjs device",
     "ios:archive": "node scripts/ios-release.mjs archive",
     "verify:leaderboards:supabase": "node --test tests/live-supabase-leaderboard-smoke.test.mjs",
+    "verify:team-store-partner": "node scripts/verify-team-store-partner.mjs",
     "ios:generate-assets": "node scripts/generate-ios-assets.mjs"
   },
   "dependencies": {

@@ -305,6 +305,30 @@
     linear-gradient(145deg, rgba(104, 225, 159, 0.07), rgba(255, 255, 255, 0.025));
 }
 
+.ts-partner-start.is-pending {
+  border-color: rgba(255, 184, 76, 0.28);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(255, 184, 76, 0.12), transparent 44%),
+    linear-gradient(145deg, rgba(255, 184, 76, 0.06), rgba(255, 255, 255, 0.025));
+}
+
+.ts-partner-start.is-pending .ts-partner-badge {
+  color: #ffbf61;
+}
+
+.ts-partner-start.is-pending .ts-partner-badge > span {
+  box-shadow: 0 0 12px rgba(255, 184, 76, 0.58);
+}
+
+.ts-partner-start.is-pending .ts-button-partner:disabled {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #9aa4b1;
+  cursor: not-allowed;
+  opacity: 1;
+  box-shadow: none;
+}
+
 .ts-partner-start-copy {
   display: grid;
   gap: 7px;

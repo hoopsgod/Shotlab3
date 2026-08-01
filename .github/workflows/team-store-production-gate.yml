@@ -54,6 +54,8 @@ jobs:
 
       - name: Verify Team Store before merge
         if: github.event_name == 'pull_request'
+        env:
+          VITE_SQUADLOCKER_PARTNER_URL: https://partner.example/shotlab?affiliate_id=ci-fixture
         run: |
           set -o pipefail
           npx playwright test tests/e2e/team-store-production.spec.mjs \
