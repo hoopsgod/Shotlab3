@@ -1,12 +1,38 @@
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 const clean = (value) => String(value ?? "").trim();
+const count = (value) => Math.max(0, Math.floor(Number(value) || 0));
+const percent = (value, fallback = 0) => {
+  const parsed = Number(value);
+  return Math.min(100, Math.max(0, Math.round(Number.isFinite(parsed) ? parsed : fallback)));
+};
 
 export function buildCoachInboxModel({
   attentionItems = [],
   activationPath = null,
   hasScheduledSession = false,
   nextEventDateFormatted = "",
+  eventReadiness = null,
 } = {}) {
+  const eventId = clean(eventReadiness?.eventId || eventReadiness?.key || eventReadiness?.event?.id);
+  const confirmed = count(eventReadiness?.confirmed);
+  const missing = count(eventReadiness?.missing);
+  const rosterSize = confirmed + missing;
+  const calculatedRate = rosterSize ? (confirmed / rosterSize) * 100 : 0;
+  const responseRate = percent(eventReadiness?.responseRate, calculatedRate);
+  const dateLabel = clean(eventReadiness?.dateLabel) || [clean(eventReadiness?.date), clean(eventReadiness?.time)].filter(Boolean).join(" at ");
+  const readiness = eventId && dateLabel && missing > 0 && rosterSize > 0
+    ? [{
+        kind: "event-readiness",
+        title: clean(eventReadiness?.title) || "Next team event",
+        detail: `${missing} of ${rosterSize} ${rosterSize === 1 ? "player" : "players"} still ${missing === 1 ? "needs" : "need"} to RSVP.`,
+        meta: [`${responseRate}% confirmed`, dateLabel].filter(Boolean).join(" · "),
+        label: "Review RSVPs",
+        action: "open-event-readiness",
+        eventId,
+        tone: "warning",
+      }]
+    : [];
+
   const attention = safeArray(attentionItems).map((item, sourceIndex) => ({
     kind: "attention",
     title: clean(item?.name || item?.title) || "Player follow-up",
@@ -30,7 +56,7 @@ export function buildCoachInboxModel({
       }]
     : [];
 
-  const items = [...attention, ...activation];
+  const items = [...readiness, ...attention, ...activation];
   const sessionDate = clean(nextEventDateFormatted);
   const validSession = Boolean(hasScheduledSession && sessionDate && !/^(none|—|not set)$/i.test(sessionDate));
 

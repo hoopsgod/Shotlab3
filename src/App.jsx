@@ -3975,6 +3975,8 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
   codeErr={codeErr}
   attentionItems={coachCommandAttentionItems}
   activityItems={coachCommandActivityItems}
+  eventReadiness={coachEventDashboardMetrics.next}
+  onEventReadinessClick={(eventId)=>setEventDrawerId(eventId)}
 />
 </>}
 </div>

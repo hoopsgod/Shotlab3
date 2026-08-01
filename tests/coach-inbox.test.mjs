@@ -43,6 +43,64 @@ test("coach inbox shows the upcoming session as context once activation is compl
   });
 });
 
+test("coach inbox promotes the next event RSVP gap into an exact attendance action", () => {
+  const model = buildCoachInboxModel({
+    attentionItems: [],
+    activationPath: { complete: true, next: null },
+    hasScheduledSession: true,
+    nextEventDateFormatted: "Aug 3",
+    eventReadiness: {
+      eventId: "practice-aug-3",
+      title: "Team Practice",
+      dateLabel: "Aug 3 at 6:00 PM",
+      confirmed: 4,
+      missing: 2,
+      responseRate: 67,
+    },
+  });
+
+  assert.equal(model.actionableCount, 1);
+  assert.equal(model.allClear, false);
+  assert.deepEqual(model.items[0], {
+    kind: "event-readiness",
+    title: "Team Practice",
+    detail: "2 of 6 players still need to RSVP.",
+    meta: "67% confirmed · Aug 3 at 6:00 PM",
+    label: "Review RSVPs",
+    action: "open-event-readiness",
+    eventId: "practice-aug-3",
+    tone: "warning",
+  });
+});
+
+test("coach inbox does not create false readiness alerts for complete or malformed event data", () => {
+  const complete = buildCoachInboxModel({
+    attentionItems: [],
+    activationPath: { complete: true, next: null },
+    eventReadiness: {
+      eventId: "complete-event",
+      title: "Team Practice",
+      confirmed: 6,
+      missing: 0,
+      responseRate: 100,
+    },
+  });
+  const malformed = buildCoachInboxModel({
+    attentionItems: [],
+    activationPath: { complete: true, next: null },
+    eventReadiness: {
+      eventId: "undated-event",
+      title: "Unknown event",
+      confirmed: 0,
+      missing: 4,
+      responseRate: 0,
+    },
+  });
+
+  assert.equal(complete.actionableCount, 0);
+  assert.equal(malformed.actionableCount, 0);
+});
+
 test("coach inbox omits false session context and handles malformed collections safely", () => {
   const model = buildCoachInboxModel({
     attentionItems: null,

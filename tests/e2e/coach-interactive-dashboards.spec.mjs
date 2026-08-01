@@ -143,6 +143,30 @@ test("Coach Events exposes RSVP gaps and searchable schedule controls", async ({
   await expectNoHorizontalOverflow(page);
 });
 
+test("Coach Inbox routes the next-event RSVP risk into exact attendance management", async ({ page }) => {
+  await enterSeededDemoCoach(page);
+
+  const bell = page.getByRole("button", { name: /Open Coach Inbox/i });
+  await expect(bell).toBeVisible({ timeout: 20_000 });
+  await bell.click();
+
+  const inbox = page.getByRole("dialog", { name: "Coach Inbox" });
+  const readiness = inbox.getByRole("button", { name: /Event readiness Team Practice/i });
+  await expect(readiness).toContainText("2 of 3 players still need to RSVP.");
+  await expect(readiness).toContainText("33% confirmed");
+  await readiness.click();
+
+  const eventDrawer = page.getByTestId("coach-event-intelligence-drawer");
+  await expect(eventDrawer).toBeVisible();
+  await expect(eventDrawer.getByText("Team Practice", { exact: true })).toBeVisible();
+  await expect(eventDrawer.getByText("Missing responses", { exact: true })).toBeVisible();
+  await eventDrawer.getByRole("button", { name: "Manage Attendance", exact: true }).click();
+
+  await expect(page.getByTestId("coach-events-mobile-page")).toBeVisible();
+  await expect(page.getByText("ATTENDEES (1)", { exact: true })).toBeVisible();
+  await expectNoHorizontalOverflow(page);
+});
+
 test("remaining coach pages inherit the reusable dashboard control layer", async ({ page }) => {
   await enterSeededDemoCoach(page);
 
