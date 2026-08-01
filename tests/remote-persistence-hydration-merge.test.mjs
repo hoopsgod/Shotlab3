@@ -57,6 +57,39 @@ test('remote wins on exact id/email conflict for players/profiles', () => {
   assert.equal(profileMerged[0].firstName, 'Remote');
 });
 
+test('sl:player-profiles hydration distinguishes omitted fields from explicit clears', () => {
+  const local = [{
+    id: 'pp1',
+    teamId: 't1',
+    email: 'a@x.com',
+    firstName: 'Local',
+    lastName: 'Player',
+  }];
+
+  const omittedRemote = buildAppRows('sl:player-profiles', [{
+    id: 'pp1',
+    team_id: 't1',
+    email: 'a@x.com',
+  }], { source: 'remote' });
+  const preserved = mergeHydratedRows('sl:player-profiles', local, omittedRemote);
+  assert.equal(preserved[0].firstName, 'Local');
+  assert.equal(preserved[0].lastName, 'Player');
+
+  const clearedRemote = buildAppRows('sl:player-profiles', [{
+    id: 'pp1',
+    team_id: 't1',
+    email: 'a@x.com',
+    first_name: '',
+    last_name: null,
+  }], { source: 'remote' });
+  assert.equal(Object.hasOwn(clearedRemote[0], 'firstName'), true);
+  assert.equal(Object.hasOwn(clearedRemote[0], 'lastName'), true);
+
+  const cleared = mergeHydratedRows('sl:player-profiles', local, clearedRemote);
+  assert.equal(cleared[0].firstName, '');
+  assert.equal(cleared[0].lastName, '');
+});
+
 test('sl:shotlogs remote hydration marks missing syncState rows remote_saved for coach visibility', () => {
   const [remote] = buildAppRows('sl:shotlogs', [{
     id: 'shot-remote-1',
