@@ -49,6 +49,28 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
   });
 
   await page.addInitScript(({ identity }) => {
+    const isolatedStorage = {
+      async get(key) {
+        const value = window.localStorage.getItem(key);
+        return value == null ? null : { value };
+      },
+      async set(key, value) {
+        const serialized = String(value ?? "null");
+        window.localStorage.setItem(key, serialized);
+        return { value: serialized };
+      },
+      async delete(key) {
+        window.localStorage.removeItem(key);
+        return { deleted: true };
+      },
+    };
+    Object.defineProperty(window, "storage", {
+      value: isolatedStorage,
+      configurable: false,
+      enumerable: false,
+      writable: false,
+    });
+
     if (window.localStorage.getItem("sl:release-gate-initialized") === "true") return;
     window.localStorage.setItem("sl:session", JSON.stringify(identity.session));
     window.localStorage.setItem("sl:players", JSON.stringify(identity.players));
