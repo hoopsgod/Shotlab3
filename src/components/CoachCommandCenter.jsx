@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./CoachMissionControlV2.css";
 import "./CoachMissionControlShell.css";
 import "./CoachMissionControlHeader.css";
@@ -9,6 +9,7 @@ import "./CoachActivationPath.css";
 import "./CoachPriorityOverlay.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";
+import { buildCoachInboxModel } from "../lib/coachInbox.js";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
@@ -156,6 +157,9 @@ export default function CoachCommandCenter({
   const [actionsOpen, setActionsOpen] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const [prioritiesOpen, setPrioritiesOpen] = useState(false);
+  const [inboxOpen, setInboxOpen] = useState(false);
+  const inboxRef = useRef(null);
+  const restoreInboxFocusRef = useRef(true);
 
   useEffect(() => {
     document.body.classList.add("mission-control-active");
@@ -211,6 +215,41 @@ export default function CoachCommandCenter({
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [prioritiesOpen]);
 
+  useEffect(() => {
+    if (!inboxOpen) return undefined;
+    const previousActiveElement = document.activeElement;
+    const onKeyDown = (event) => {
+      if (event.key === "Escape") {
+        restoreInboxFocusRef.current = true;
+        setInboxOpen(false);
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const controls = [...(inboxRef.current?.querySelectorAll("button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex='-1'])") || [])];
+      if (!controls.length) return;
+      const first = controls[0];
+      const last = controls.at(-1);
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    window.setTimeout(() => inboxRef.current?.querySelector("button")?.focus?.({ preventScroll: true }), 40);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      if (restoreInboxFocusRef.current) previousActiveElement?.focus?.({ preventScroll: true });
+    };
+  }, [inboxOpen]);
+
+  const openInbox = () => {
+    restoreInboxFocusRef.current = true;
+    setInboxOpen(true);
+  };
+
+  const closeInbox = () => {
+    restoreInboxFocusRef.current = true;
+    setInboxOpen(false);
+  };
+
   const rosterSize = Math.max(0, Number(totalPlayers) || 0);
   const activeCount = Math.max(0, Number(activeTodayCount) || 0);
   const inactiveCount = Math.max(rosterSize - activeCount, 0);
@@ -239,6 +278,12 @@ export default function CoachCommandCenter({
     activeTodayCount: activeCount,
     hasLiveActivity,
   }), [activeCount, fullLogoSource, hasLiveActivity, hasScheduledSession, joinCode, rosterSize, teamName]);
+  const inboxModel = useMemo(() => buildCoachInboxModel({
+    attentionItems: resolvedAttention,
+    activationPath,
+    hasScheduledSession,
+    nextEventDateFormatted,
+  }), [activationPath, hasScheduledSession, nextEventDateFormatted, resolvedAttention]);
   const onboardingMode = !activationPath.complete;
   const sparseOnboardingMode = onboardingMode && !hasTeamActivity && !hasLiveActivity && !hasScheduledSession;
 
@@ -248,6 +293,21 @@ export default function CoachCommandCenter({
     if (action === "add-player") { onAddPlayer?.(); return; }
     if (action === "schedule-session") { onScheduleEvent?.(); return; }
     if (action === "review-engagement") onPlayersClick?.();
+  };
+
+  const runInboxAction = (item) => {
+    restoreInboxFocusRef.current = false;
+    setInboxOpen(false);
+    if (item?.action === "open-attention") {
+      const source = resolvedAttention[item.sourceIndex];
+      (source?.onClick || onPlayersClick)?.();
+      return;
+    }
+    if (item?.action === "open-session") {
+      onNextEventClick?.();
+      return;
+    }
+    runActivationAction(item?.action);
   };
 
   const activationCommand = onboardingMode && activationPath.next
@@ -265,7 +325,7 @@ export default function CoachCommandCenter({
     { label: "Set Team Focus", icon: "spark", onClick: openPriorityEditor },
     { label: "Build Mission", icon: "target", onClick: onAddDrill },
     { label: "Record Result", icon: "score", onClick: onLogScore },
-    { label: "Message Team", icon: "message", onClick: onPlayersClick },
+    { label: "Review Players", icon: "message", onClick: onPlayersClick },
     { label: "Team Code", icon: "settings", onClick: openTeamTools },
   ], [onAddDrill, onAddPlayer, onLogScore, onPlayersClick, onScheduleEvent]);
 
@@ -310,7 +370,7 @@ export default function CoachCommandCenter({
         <header className="mcHeader" data-testid="mission-control-team-header">
           <button className="mcMobileMenu" type="button" aria-label="Open navigation" onClick={() => setNavOpen(true)}><Icon name="menu" /></button>
           <div className="mcBrandLockup"><span className="mcBrandCopy"><small>{teamName}</small><strong>Mission Control</strong></span></div>
-          <div className="mcHeaderActions"><button type="button" className="mcTeamSelect" onClick={openBrandingSettings}>{teamName}<span>⌄</span></button><button type="button" className="mcBell" aria-label={`${attentionCount} notifications`}><Icon name="bell" />{attentionCount > 0 ? <b>{attentionCount}</b> : null}</button></div>
+          <div className="mcHeaderActions"><button type="button" className="mcTeamSelect" onClick={openBrandingSettings}>{teamName}<span>⌄</span></button><button type="button" className="mcBell" aria-label={`Open Coach Inbox, ${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "item" : "items"}`} aria-expanded={inboxOpen} aria-controls="coach-inbox-panel" onClick={openInbox}><Icon name="bell" />{inboxModel.actionableCount > 0 ? <b>{inboxModel.actionableCount}</b> : null}</button></div>
         </header>
 
         <section className={`mcHero is-${primaryCommand.state}`} data-testid="coach-primary-objective">
@@ -341,6 +401,17 @@ export default function CoachCommandCenter({
       </main>
 
       {prioritiesOpen ? <div className="mcPriorityOverlayLayer" data-testid="coach-priority-overlay"><button type="button" className="mcPriorityOverlayBackdrop" aria-label="Close team focus editor" onClick={closePriorityEditor} /><button type="button" className="mcPriorityOverlayClose" aria-label="Close team focus editor" onClick={closePriorityEditor}><Icon name="close" size={20} /></button></div> : null}
+
+      {inboxOpen ? <div className="mcInboxLayer" data-testid="coach-inbox-layer">
+        <button type="button" className="mcInboxBackdrop" aria-label="Close Coach Inbox" onClick={closeInbox} />
+        <section ref={inboxRef} id="coach-inbox-panel" className="mcInboxPanel" role="dialog" aria-modal="true" aria-labelledby="coach-inbox-title" data-testid="coach-inbox">
+          <header className="mcInboxHead"><span><small>Live team signals</small><strong id="coach-inbox-title">Coach Inbox</strong></span><button type="button" aria-label="Close Coach Inbox" onClick={closeInbox}><Icon name="close" /></button></header>
+          <div className="mcInboxSummary"><strong>{inboxModel.actionableCount > 0 ? `${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "move" : "moves"} to make` : "You’re caught up"}</strong><span>Only current team actions appear here.</span></div>
+          {inboxModel.items.length > 0 ? <div className="mcInboxList">{inboxModel.items.map((item, index) => <button type="button" key={`${item.kind}-${item.title}-${index}`} className={`mcInboxItem is-${item.tone || item.kind}`} onClick={() => runInboxAction(item)}><span className="mcInboxItemIcon"><Icon name={item.kind === "attention" ? "users" : "spark"} size={19} /></span><span className="mcInboxItemCopy"><small>{item.kind === "attention" ? "Player follow-up" : "Team launch"}</small><strong>{item.title}</strong><em>{item.detail}</em>{item.meta ? <b>{item.meta}</b> : null}</span><span className="mcInboxItemAction">{item.label}<Icon name="arrow" size={15} /></span></button>)}</div> : <div className="mcInboxAllClear"><span><Icon name="check" /></span><div><strong>No follow-up needed</strong><small>No player or team-launch tasks need attention right now.</small></div></div>}
+          {inboxModel.context ? <button type="button" className="mcInboxContext" onClick={() => runInboxAction(inboxModel.context)}><span className="mcInboxItemIcon"><Icon name="calendar" size={19} /></span><span><small>Coming up</small><strong>{inboxModel.context.title}</strong><em>{inboxModel.context.detail}</em></span><b>{inboxModel.context.label}<Icon name="arrow" size={15} /></b></button> : null}
+          <footer>Built from live roster, activation, and schedule data.</footer>
+        </section>
+      </div> : null}
 
       <div className={`mcActionLayer ${actionsOpen ? "is-open" : ""}`} aria-hidden={!actionsOpen}>
         <button type="button" className="mcActionBackdrop" aria-label="Close quick actions" onClick={() => setActionsOpen(false)} />

@@ -3807,6 +3807,8 @@ const coachActivityIntelligenceRows=useMemo(()=>buildActivityIntelligenceRows({s
 const filteredCoachActivityIntelligenceRows=useMemo(()=>filterActivityIntelligenceRows(coachActivityIntelligenceRows,{scope:activityIntelligenceScope,query:activityIntelligenceQuery}),[coachActivityIntelligenceRows,activityIntelligenceScope,activityIntelligenceQuery]);
 const coachSeasonComparisonModel=useMemo(()=>buildSeasonComparisonModel({currentRoster:coachRosterPlayers,currentScores:safeScores,currentShotLogs:safeShotLogs,currentEvents:safeEvents,currentRsvps:safeRsvps,currentScSessions:scSessions,currentScLogs:safeScLogs,archives:seasonArchives,selectedArchiveId:selectedSeasonArchiveId}),[coachRosterPlayers,safeScores,safeShotLogs,safeEvents,safeRsvps,scSessions,safeScLogs,seasonArchives,selectedSeasonArchiveId]);
 const openPlayerIntelligence=useCallback((player={})=>{const candidates=[player.email,player.player_email,player.playerId,player.player_id,player.userId,player.user_id,player.profileId,player.profile_id,player.id].map(normalizeEmail).filter(Boolean);const normalizedName=normalizeEmail(player.name||player.displayName);const row=coachPlayerDashboardRows.find(candidate=>candidates.includes(candidate.key)||candidates.includes(normalizeEmail(candidate.email))||candidates.some(key=>[candidate.player?.email,candidate.player?.player_email,candidate.player?.playerId,candidate.player?.player_id,candidate.player?.userId,candidate.player?.user_id,candidate.player?.profileId,candidate.player?.profile_id,candidate.player?.id].map(normalizeEmail).includes(key))||(normalizedName&&normalizeEmail(candidate.name)===normalizedName));setPlayerDrawerKey(row?.key||candidates[0]||"");},[coachPlayerDashboardRows]);
+const coachCommandAttentionItems=useMemo(()=>coachPlayerDashboardRows.filter(row=>row.statusKey!=="active").map(row=>({name:row.name,detail:row.statusKey==="new"?"No training activity has been logged yet.":"No training activity was logged this week.",meta:row.lastActivityDate?`Last active ${new Date(`${row.lastActivityDate}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"})}`:"New roster member",tone:row.statusKey==="attention"?"danger":"warning",actionLabel:"Open profile",onClick:()=>{setPlayerDashboardFilter("attention");openPlayerIntelligence(row.player);setTab("players");}})),[coachPlayerDashboardRows,openPlayerIntelligence]);
+const coachCommandActivityItems=useMemo(()=>coachActivityIntelligenceRows.slice(0,5).map(row=>({name:row.player||row.title,detail:row.type==="event"?`${row.title} · ${row.detail}`:`${row.type} · ${row.detail}`,meta:row.date})),[coachActivityIntelligenceRows]);
 const jumpToSection=(targetTab,sectionId)=>{setTab(targetTab);setSelP(null);setTimeout(()=>document.getElementById(sectionId)?.scrollIntoView({behavior:"smooth",block:"start"}),120)};
 const openEventCreateFlow=useCallback(()=>{setEventSaveError("");setTab("events");setSelP(null);setExpEv(null);setShowAddSC(false);setShowAdd(true);setTimeout(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth",block:"start"}),120);},[]);
 const handleLogScoreAction=()=>{
@@ -3971,6 +3973,8 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
   onCopyJoinCode={()=>navigator.clipboard?.writeText(team?.joinCode||"")}
   onRegenerateJoinCode={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}}
   codeErr={codeErr}
+  attentionItems={coachCommandAttentionItems}
+  activityItems={coachCommandActivityItems}
 />
 </>}
 </div>
