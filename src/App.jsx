@@ -111,6 +111,7 @@ import { buildCoachVerifiedProgramScoreRow } from "./lib/coachProgramScoreEntry.
 import { scheduleWorkspaceActionReveal } from "./lib/playerWorkspaceActionRouting.js";
 import { createTrainingCatalogPersistenceService } from "./lib/trainingCatalogPersistenceService.js";
 import { createPlayerChallengePersistenceService, mergePlayerChallenges } from "./lib/playerChallengePersistenceService.js";
+import { openTeamStorePortal } from "./lib/teamStorePortalBridge.js";
 const VOLT = TOKENS.PRIMARY;
 const SUCCESS = TOKENS.SUCCESS;
 const INFO = TOKENS.INFO;
@@ -3819,6 +3820,7 @@ const navItems=[
   {k:"sc",l:"S&C",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>},
   {k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
   {k:"activity",l:"Activity",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/><path d="M4 6l5-3 6 4 5-3"/></svg>},
+  {k:"team-store",l:"Team Store",accentVar:"--accent",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10h16l-1-5H5l-1 5Z"/><path d="M6 10v9h12v-9"/><path d="M9 19v-5h6v5"/><path d="M4 10c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2"/></svg>},
   {k:"branding",l:"Brand",accentVar:"--accent",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l8 4v6c0 4.5-3 7.7-8 8-5-.3-8-3.5-8-8V7l8-4z"/><path d="M9.5 12.5l1.8 1.8 3.2-3.2"/></svg>},
 ];
 const getCoachNavItem=(key,overrides={})=>{const item=navItems.find(candidate=>candidate.k===key);return item?{...item,...overrides}:null;};
@@ -3832,10 +3834,15 @@ const coachMobileSecondaryItems=[
   getCoachNavItem("sc",{mobileLabel:"S&C",description:"Strength sessions and compliance"}),
   getCoachNavItem("activity",{mobileLabel:"Activity",description:"Filtered team signals and follow-up"}),
   {k:"leaderboards",l:"Leaderboards",mobileLabel:"Rankings",description:"Current and all-time team rankings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>},
+  getCoachNavItem("team-store",{mobileLabel:"Team Store",description:"Connect SquadLocker or another apparel partner"}),
   getCoachNavItem("branding",{mobileLabel:"Brand",description:"Team identity and visual settings"}),
 ].filter(Boolean);
 
 const handleNavChange=(k)=>{
+  if(k==="team-store"){
+    openTeamStorePortal({email:u?.email,role:"coach",isCoach:true,teamId:u?.teamId||team?.id,teamName:team?.name||team?.teamName||"Your Team"});
+    return;
+  }
   if(k==="branding"){
     openTeamBranding();
     return;

@@ -74,11 +74,20 @@ test("coach mobile dock keeps home, roster, and schedule direct while preserving
   await expect(dock.getByRole("button", { name: "S&C", exact: true })).toHaveCount(0);
 
   const sheet = await openMore(page);
-  for (const key of ["drills", "sc", "leaderboards", "branding"]) {
+  for (const key of ["drills", "sc", "leaderboards", "team-store", "branding"]) {
     await expect(sheet.locator(`[data-nav-key="${key}"]`)).toBeVisible();
   }
 
-  await sheet.locator('[data-nav-key="drills"]').click();
+  await sheet.locator('[data-nav-key="team-store"]').click();
+  await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
+  const teamStoreDialog = page.getByRole("dialog", { name: "Team Store" });
+  await expect(teamStoreDialog).toBeVisible();
+  await expect(teamStoreDialog.getByLabel("Provider")).toHaveValue("squadlocker");
+  await expect(teamStoreDialog.getByRole("button", { name: "PUBLISH STORE" })).toBeVisible();
+  await teamStoreDialog.getByRole("button", { name: "Close team store" }).click();
+
+  const reopenedSheet = await openMore(page);
+  await reopenedSheet.locator('[data-nav-key="drills"]').click();
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
   await expect(page.locator("#coach-drills-management")).toBeVisible();
   await expectNoHorizontalOverflow(page);

@@ -12,9 +12,15 @@ import {
   upsertTeamStore,
   validateTeamStoreInput,
 } from "../src/lib/teamStore.js";
+import {
+  TEAM_STORE_OPEN_EVENT,
+  normalizeTeamStorePortalIdentity,
+  openTeamStorePortal,
+} from "../src/lib/teamStorePortalBridge.js";
 
 const portalSource = fs.readFileSync(new URL("../src/components/TeamStorePortal.jsx", import.meta.url), "utf8");
 const indexSource = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 
 test("team store model stays provider-neutral and requires secure URLs", () => {
   assert.deepEqual(TEAM_STORE_PROVIDERS.map((item) => item.key), ["squadlocker", "bsn", "other"]);
@@ -55,4 +61,47 @@ test("team store portal is mounted independently from the large App shell", () =
   assert.match(indexSource, /id="team-store-root"/);
   assert.match(indexSource, /src="\/src\/teamStoreEntry\.jsx"/);
   assert.match(portalSource, /window\.open\(store\.storeUrl, "_blank", "noopener,noreferrer"\)/);
+});
+
+test("authenticated app navigation can open the portal with authoritative coach identity", () => {
+  const events = [];
+  class FakeCustomEvent {
+    constructor(type, init) {
+      this.type = type;
+      this.detail = init.detail;
+    }
+  }
+  const target = {
+    CustomEvent: FakeCustomEvent,
+    dispatchEvent(event) {
+      events.push(event);
+      return true;
+    },
+  };
+
+  const identity = normalizeTeamStorePortalIdentity({
+    email: " COACH@EXAMPLE.COM ",
+    role: "coach",
+    teamId: " team-1 ",
+    teamName: " Varsity ",
+  });
+
+  assert.deepEqual(identity, {
+    email: "coach@example.com",
+    role: "coach",
+    isCoach: true,
+    teamId: "team-1",
+    teamName: "Varsity",
+  });
+  assert.equal(openTeamStorePortal(identity, target), true);
+  assert.equal(events.length, 1);
+  assert.equal(events[0].type, TEAM_STORE_OPEN_EVENT);
+  assert.deepEqual(events[0].detail, identity);
+  assert.equal(normalizeTeamStorePortalIdentity({ email: "coach@example.com", role: "coach" }), null);
+  assert.equal(openTeamStorePortal({ email: "coach@example.com", role: "coach" }, target), false);
+  assert.equal(events.length, 1);
+  assert.match(appSource, /getCoachNavItem\("team-store"/);
+  assert.match(appSource, /if\(k==="team-store"\)/);
+  assert.match(appSource, /openTeamStorePortal\(\{email:u\?\.email,role:"coach",isCoach:true/);
+  assert.match(portalSource, /window\.addEventListener\(TEAM_STORE_OPEN_EVENT, handleNavigationOpen\)/);
 });
