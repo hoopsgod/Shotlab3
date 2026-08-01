@@ -57,3 +57,34 @@ test("fresh Coach Demo receives one truthful next action and lands on the sessio
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 });
+
+test("Coach Inbox turns the notification bell into an actionable mobile workflow", async ({ page }) => {
+  await enterFreshCoachDemo(page);
+
+  const bell = page.getByRole("button", { name: /Open Coach Inbox/i });
+  await expect(bell).toBeVisible({ timeout: 20_000 });
+  await expect(bell).toHaveAttribute("aria-expanded", "false");
+  await bell.click();
+
+  const inbox = page.getByRole("dialog", { name: "Coach Inbox" });
+  await expect(inbox).toBeVisible();
+  await expect(bell).toHaveAttribute("aria-expanded", "true");
+  await expect(inbox.getByText("Schedule the first team session", { exact: true })).toBeVisible();
+  await expect(inbox.getByText("Only current team actions appear here.", { exact: true })).toBeVisible();
+
+  await page.keyboard.press("Escape");
+  await expect(inbox).toBeHidden();
+  await expect(bell).toHaveAttribute("aria-expanded", "false");
+
+  await bell.click();
+  await inbox.getByRole("button", { name: /Schedule the first team session/i }).click();
+  await expect(page.getByRole("dialog", { name: "Create event" })).toBeVisible({ timeout: 20_000 });
+
+  const widths = await page.evaluate(() => ({
+    viewport: window.innerWidth,
+    document: document.documentElement.scrollWidth,
+    body: document.body.scrollWidth,
+  }));
+  expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
+  expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
+});

@@ -100,7 +100,8 @@ test("one truthful activation path replaces generic onboarding and exposes only 
 });
 
 test("coach tools remain available without permanent dashboard clutter",()=>{
-  ["Add Player","Create Practice","Build Mission","Record Result","Message Team","Team Code","New code","Coach Tools"].forEach(label=>assert.match(source,new RegExp(label)));
+  ["Add Player","Create Practice","Build Mission","Record Result","Review Players","Team Code","New code","Coach Tools"].forEach(label=>assert.match(source,new RegExp(label)));
+  assert.doesNotMatch(source,/Message Team/);
   assert.match(source,/mcActionSheet/);
   assert.doesNotMatch(source,/mcUtilityBar/);
   assert.doesNotMatch(source,/className="mcFab"/);
