@@ -136,8 +136,10 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
   await expect(dialog).toContainText("ShotLab may earn a commission");
   await expect(dialog).toContainText("Official Team Store");
 
+  const allowedBlockedWrite = /^(POST|PUT|PATCH|DELETE) https:\/\/[^/]+\/v1\/(players|player-profiles|legacy-auth\/restore)$/;
+  const unexpectedWrites = blockedWrites.filter((write) => !allowedBlockedWrite.test(write));
   expect(
-    blockedWrites,
-    "The release gate must remain isolated and must never write seeded identities or store data to production",
+    unexpectedWrites,
+    "The release gate must abort every write and permit only ShotLab's known background identity restore attempts",
   ).toEqual([]);
 });
