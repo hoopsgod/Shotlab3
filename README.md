@@ -48,6 +48,16 @@ In Cloudflare Pages project settings:
 
 If vars are missing in Cloudflare Preview, the site still loads in demo-safe mode.
 
+### SquadLocker partner attribution
+
+Team Store creation always opens SquadLocker with ShotLab referral and UTM attribution. When SquadLocker issues ShotLab an official partner or affiliate URL, configure it as:
+
+```bash
+VITE_SQUADLOCKER_PARTNER_URL=https://YOUR_OFFICIAL_SQUADLOCKER_PARTNER_LINK
+```
+
+Set the variable in both Cloudflare Preview and Production, then redeploy. ShotLab preserves the partner link's affiliate parameters and adds its source tags. Until an official URL is configured, the app uses SquadLocker's public partner form with ShotLab attribution; vendor-side eligibility and compensation still depend on SquadLocker's partner agreement.
+
 ### Backend health check and fallback states
 A lightweight runtime health utility reports one of:
 - `demo_mode_active` (env vars missing)

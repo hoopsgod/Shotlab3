@@ -5,10 +5,15 @@ import fs from "node:fs";
 import {
   AFFILIATE_DISCLOSURE,
   TEAM_STORE_PROVIDERS,
+  TEAM_STORE_REFERRALS_KEY,
   appendTeamStoreClick,
+  buildSquadLockerCreationUrl,
   buildTeamStoreClick,
+  buildTeamStoreReferralStart,
+  getTeamStoreReferralStart,
   getStoreVisitMetrics,
   getTeamStoreForTeam,
+  upsertTeamStoreReferralStart,
   upsertTeamStore,
   validateTeamStoreInput,
 } from "../src/lib/teamStore.js";
@@ -48,6 +53,38 @@ test("click analytics are team scoped and contain no shopper identity", () => {
   assert.equal(metrics.today, 1);
 });
 
+test("SquadLocker creation always starts through ShotLab attribution", () => {
+  const url = new URL(buildSquadLockerCreationUrl());
+  assert.equal(url.protocol, "https:");
+  assert.equal(url.hostname, "www.squadlocker.com");
+  assert.equal(url.pathname, "/partner/form");
+  assert.equal(url.searchParams.get("utm_source"), "shotlab");
+  assert.equal(url.searchParams.get("utm_medium"), "partner_referral");
+  assert.equal(url.searchParams.get("utm_campaign"), "team_store_creation");
+  assert.equal(url.searchParams.get("referral_partner_master"), "ShotLab");
+
+  const configured = new URL(buildSquadLockerCreationUrl({
+    baseUrl: "https://partner.example/shotlab?affiliate_id=abc123",
+  }));
+  assert.equal(configured.searchParams.get("affiliate_id"), "abc123");
+  assert.equal(configured.searchParams.get("utm_source"), "shotlab");
+  assert.equal(buildSquadLockerCreationUrl({ baseUrl: "http://example.com" }), "");
+});
+
+test("referral starts are team scoped and contain no coach identity", () => {
+  assert.equal(TEAM_STORE_REFERRALS_KEY, "sl:team-store-referrals");
+  const start = buildTeamStoreReferralStart({ teamId: "team-1" });
+  assert.equal(start.teamId, "team-1");
+  assert.equal(start.provider, "squadlocker");
+  assert.equal(start.source, "shotlab_partner_link");
+  assert.equal("email" in start, false);
+  assert.equal("name" in start, false);
+
+  const rows = upsertTeamStoreReferralStart([], start);
+  assert.equal(getTeamStoreReferralStart(rows, "team-1")?.id, start.id);
+  assert.equal(getTeamStoreReferralStart(rows, "team-2"), null);
+});
+
 test("portal exposes coach setup and player shopping with clear affiliate disclosure", () => {
   assert.match(portalSource, /PUBLISH STORE/);
   assert.match(portalSource, /SHOP TEAM STORE/);
@@ -55,13 +92,15 @@ test("portal exposes coach setup and player shopping with clear affiliate disclo
   assert.match(portalSource, /What players will see/);
   assert.match(portalSource, /Name players will see/);
   assert.match(portalSource, /Public store link/);
+  assert.match(portalSource, /CREATE SQUADLOCKER STORE/);
+  assert.match(portalSource, /partner link is built in/i);
   assert.match(portalSource, /STORE VISITS/);
   assert.match(portalSource, /Store link opens/);
   assert.match(portalSource, /ShotLab does not process orders, payments, shipping, returns, or sales tax/);
   assert.match(portalSource, /handles products, payments, shipping, returns, and support/);
   assert.match(portalSource, /required school or club approvals/);
   assert.match(portalSource, /AFFILIATE_DISCLOSURE/);
-  assert.match(AFFILIATE_DISCLOSURE, /ShotLab may earn a commission/);
+  assert.match(AFFILIATE_DISCLOSURE, /ShotLab may receive referral compensation/);
 });
 
 test("team store portal is mounted independently from the large App shell", () => {

@@ -49,6 +49,17 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
   });
 
   await page.addInitScript(({ identity }) => {
+    const openedUrls = [];
+    Object.defineProperty(window, "__shotlabOpenedUrls", {
+      value: openedUrls,
+      configurable: false,
+      enumerable: false,
+      writable: false,
+    });
+    window.open = (url) => {
+      openedUrls.push(String(url));
+      return null;
+    };
     const isolatedStorage = {
       async get(key) {
         const value = window.localStorage.getItem(key);
@@ -77,6 +88,7 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
     window.localStorage.setItem("sl:teams", JSON.stringify(identity.teams));
     window.localStorage.setItem("sl:team-stores", "[]");
     window.localStorage.setItem("sl:team-store-clicks", "[]");
+    window.localStorage.setItem("sl:team-store-referrals", "[]");
     window.localStorage.setItem("sl:release-gate-initialized", "true");
   }, { identity: seedIdentity });
 
@@ -95,6 +107,15 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
   await expect(dialog).toContainText("What players will see");
   await expect(dialog.getByRole("button", { name: "PUBLISH STORE" })).toBeVisible();
 
+  await dialog.getByRole("button", { name: "CREATE SQUADLOCKER STORE" }).click();
+  await expect(dialog).toContainText("Partner path opened");
+  const partnerUrl = await page.evaluate(() => window.__shotlabOpenedUrls.at(-1));
+  const partnerDestination = new URL(partnerUrl);
+  expect(partnerDestination.protocol).toBe("https:");
+  expect(partnerDestination.searchParams.get("utm_source")).toBe("shotlab");
+  expect(partnerDestination.searchParams.get("utm_medium")).toBe("partner_referral");
+  expect(partnerDestination.searchParams.get("referral_partner_master")).toBe("ShotLab");
+
   const urlInput = dialog.getByLabel("Public store link");
   await urlInput.fill("http://example.com/insecure");
   await dialog.getByRole("button", { name: "PUBLISH STORE" }).click();
@@ -109,6 +130,7 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
   const coachState = await page.evaluate(() => ({
     stores: JSON.parse(window.localStorage.getItem("sl:team-stores") || "[]"),
     clicks: JSON.parse(window.localStorage.getItem("sl:team-store-clicks") || "[]"),
+    referrals: JSON.parse(window.localStorage.getItem("sl:team-store-referrals") || "[]"),
   }));
   expect(coachState.stores).toHaveLength(1);
   expect(coachState.stores[0]).toMatchObject({
@@ -118,6 +140,13 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
     status: "active",
   });
   expect(coachState.clicks).toEqual([]);
+  expect(coachState.referrals).toHaveLength(1);
+  expect(coachState.referrals[0]).toMatchObject({
+    teamId: "release-gate-team",
+    provider: "squadlocker",
+    source: "shotlab_partner_link",
+  });
+  expect(coachState.referrals[0]).not.toHaveProperty("email");
 
   await page.evaluate(({ playerEmail }) => {
     const session = JSON.parse(window.localStorage.getItem("sl:session") || "{}");
@@ -136,7 +165,7 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
 
   dialog = page.getByRole("dialog", { name: "Team Store" });
   await expect(dialog.getByRole("button", { name: "SHOP TEAM STORE" })).toBeVisible();
-  await expect(dialog).toContainText("ShotLab may earn a commission");
+  await expect(dialog).toContainText("ShotLab may receive referral compensation");
   await expect(dialog).toContainText("Official Team Store");
 
   const allowedBlockedWrite = /^(POST|PUT|PATCH|DELETE) https:\/\/[^/]+\/v1\/(players|player-profiles|legacy-auth\/restore)$/;

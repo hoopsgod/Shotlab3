@@ -1,5 +1,7 @@
 export const TEAM_STORE_STORAGE_KEY = "sl:team-stores";
 export const TEAM_STORE_CLICKS_KEY = "sl:team-store-clicks";
+export const TEAM_STORE_REFERRALS_KEY = "sl:team-store-referrals";
+export const SQUADLOCKER_PARTNER_SIGNUP_URL = "https://www.squadlocker.com/partner/form";
 
 export const TEAM_STORE_PROVIDERS = [
   { key: "squadlocker", label: "SquadLocker" },
@@ -8,9 +10,67 @@ export const TEAM_STORE_PROVIDERS = [
 ];
 
 export const AFFILIATE_DISCLOSURE =
-  "ShotLab may earn a commission from purchases made through this store link. Your team may also receive fundraising proceeds.";
+  "ShotLab may receive referral compensation when a qualifying organization starts with an apparel partner through our partner link.";
 
 const clean = (value) => String(value ?? "").trim();
+
+export function buildSquadLockerCreationUrl({ baseUrl, source = "coach_team_store" } = {}) {
+  const configuredUrl = clean(baseUrl) || clean(import.meta.env?.VITE_SQUADLOCKER_PARTNER_URL);
+  let parsed;
+  try {
+    parsed = new URL(configuredUrl || SQUADLOCKER_PARTNER_SIGNUP_URL);
+  } catch {
+    return "";
+  }
+  if (parsed.protocol !== "https:") return "";
+  parsed.searchParams.set("utm_source", "shotlab");
+  parsed.searchParams.set("utm_medium", "partner_referral");
+  parsed.searchParams.set("utm_campaign", "team_store_creation");
+  parsed.searchParams.set("utm_content", clean(source) || "coach_team_store");
+  if (!parsed.searchParams.has("referral_partner_master")) {
+    parsed.searchParams.set("referral_partner_master", "ShotLab");
+  }
+  return parsed.toString();
+}
+
+function normalizeTeamStoreReferralStart(value = {}) {
+  return {
+    id: clean(value.id),
+    teamId: clean(value.teamId || value.team_id),
+    provider: value.provider === "squadlocker" ? "squadlocker" : "other",
+    source: clean(value.source) || "shotlab_partner_link",
+    startedAt: clean(value.startedAt || value.started_at),
+  };
+}
+
+export function buildTeamStoreReferralStart({ teamId, provider = "squadlocker" } = {}) {
+  const normalizedTeamId = clean(teamId);
+  return normalizeTeamStoreReferralStart({
+    id: `store-referral-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+    teamId: normalizedTeamId,
+    provider,
+    source: "shotlab_partner_link",
+    startedAt: new Date().toISOString(),
+  });
+}
+
+export function upsertTeamStoreReferralStart(rows = [], value = {}) {
+  const next = normalizeTeamStoreReferralStart(value);
+  if (!next.teamId || !next.startedAt) return Array.isArray(rows) ? rows : [];
+  const list = (Array.isArray(rows) ? rows : [])
+    .map(normalizeTeamStoreReferralStart)
+    .filter((row) => row.teamId && row.teamId !== next.teamId);
+  return [...list, next].slice(-500);
+}
+
+export function getTeamStoreReferralStart(rows = [], teamId = "") {
+  const key = clean(teamId);
+  if (!key) return null;
+  return [...(Array.isArray(rows) ? rows : [])]
+    .reverse()
+    .map(normalizeTeamStoreReferralStart)
+    .find((row) => row.teamId === key) || null;
+}
 
 export function normalizeTeamStore(value = {}) {
   const provider = TEAM_STORE_PROVIDERS.some((item) => item.key === value.provider)
