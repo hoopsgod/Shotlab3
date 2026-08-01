@@ -34,7 +34,7 @@ test("player mobile navigation keeps frequent training actions direct and moves 
 
 test("coach mobile navigation keeps home, roster, and schedule direct while preserving all management areas", () => {
   assert.match(appSource, /const coachMobilePrimaryItems=\[[\s\S]*?"feed"[\s\S]*?"players"[\s\S]*?"events"/);
-  assert.match(appSource, /const coachMobileSecondaryItems=\[[\s\S]*?"drills"[\s\S]*?"sc"[\s\S]*?k:"leaderboards"[\s\S]*?"branding"/);
+  assert.match(appSource, /const coachMobileSecondaryItems=\[[\s\S]*?"drills"[\s\S]*?"sc"[\s\S]*?k:"leaderboards"[\s\S]*?"team-store"[\s\S]*?"branding"/);
   assert.match(appSource, /ariaLabel="Coach navigation"/);
   assert.doesNotMatch(appSource, /!isDesktop&&<NavBar/);
 });

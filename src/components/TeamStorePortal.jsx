@@ -12,10 +12,15 @@ import {
   upsertTeamStore,
   validateTeamStoreInput,
 } from "../lib/teamStore.js";
+import {
+  TEAM_STORE_OPEN_EVENT,
+  normalizeTeamStorePortalIdentity,
+} from "../lib/teamStorePortalBridge.js";
 
 const STORAGE_SESSION = "sl:session";
 const STORAGE_PLAYERS = "sl:players";
 const STORAGE_TEAMS = "sl:teams";
+const DEFAULT_TEAM_STORE_DRAFT = { provider: "squadlocker", storeName: "Official Team Store", storeUrl: "" };
 
 function parseStored(value, fallback) {
   if (value == null) return fallback;
@@ -50,13 +55,13 @@ function resolveIdentity(session, players, teams) {
   );
   if (!player?.teamId) return null;
   const team = (Array.isArray(teams) ? teams : []).find((row) => String(row?.id || "") === String(player.teamId));
-  return {
+  return normalizeTeamStorePortalIdentity({
     email,
     role: player.role || (player.isCoach ? "coach" : "player"),
     isCoach: player.role === "coach" || player.isCoach === true,
     teamId: String(player.teamId),
     teamName: String(team?.name || team?.teamName || "Your Team"),
-  };
+  });
 }
 
 function StoreIcon() {
@@ -65,6 +70,7 @@ function StoreIcon() {
 
 export default function TeamStorePortal() {
   const [identity, setIdentity] = useState(null);
+  const [navigationIdentity, setNavigationIdentity] = useState(null);
   const [stores, setStores] = useState([]);
   const [clicks, setClicks] = useState([]);
   const [open, setOpen] = useState(false);
@@ -72,7 +78,7 @@ export default function TeamStorePortal() {
   const [saving, setSaving] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
-  const [draft, setDraft] = useState({ provider: "squadlocker", storeName: "Official Team Store", storeUrl: "" });
+  const [draft, setDraft] = useState(DEFAULT_TEAM_STORE_DRAFT);
 
   useEffect(() => {
     let cancelled = false;
@@ -95,20 +101,44 @@ export default function TeamStorePortal() {
     return () => { cancelled = true; window.clearInterval(interval); };
   }, []);
 
-  const store = useMemo(() => getTeamStoreForTeam(stores, identity?.teamId), [stores, identity?.teamId]);
-  const metrics = useMemo(() => getStoreVisitMetrics(clicks, identity?.teamId), [clicks, identity?.teamId]);
+  useEffect(() => {
+    const handleNavigationOpen = (event) => {
+      const nextIdentity = normalizeTeamStorePortalIdentity(event?.detail);
+      if (!nextIdentity) return;
+      setNavigationIdentity(nextIdentity);
+      setError("");
+      setNotice("");
+      setEditing(false);
+      setOpen(true);
+    };
+    window.addEventListener(TEAM_STORE_OPEN_EVENT, handleNavigationOpen);
+    return () => window.removeEventListener(TEAM_STORE_OPEN_EVENT, handleNavigationOpen);
+  }, []);
+
+  const activeIdentity = navigationIdentity || identity;
+  const closePortal = () => {
+    setOpen(false);
+    setNavigationIdentity(null);
+    setEditing(false);
+    setError("");
+  };
+
+  const store = useMemo(() => getTeamStoreForTeam(stores, activeIdentity?.teamId), [stores, activeIdentity?.teamId]);
+  const metrics = useMemo(() => getStoreVisitMetrics(clicks, activeIdentity?.teamId), [clicks, activeIdentity?.teamId]);
 
   useEffect(() => {
-    if (!store || editing) return;
-    setDraft({ provider: store.provider, storeName: store.storeName, storeUrl: store.storeUrl });
-  }, [store, editing]);
+    if (editing) return;
+    setDraft(store
+      ? { provider: store.provider, storeName: store.storeName, storeUrl: store.storeUrl }
+      : DEFAULT_TEAM_STORE_DRAFT);
+  }, [store, editing, activeIdentity?.teamId]);
 
-  if (!identity) return null;
+  if (!activeIdentity) return null;
 
   const saveStore = async () => {
     setError("");
     setNotice("");
-    const validation = validateTeamStoreInput({ ...draft, id: store?.id, teamId: identity.teamId, createdAt: store?.createdAt });
+    const validation = validateTeamStoreInput({ ...draft, id: store?.id, teamId: activeIdentity.teamId, createdAt: store?.createdAt });
     if (!validation.ok) { setError(validation.error); return; }
     setSaving(true);
     try {
@@ -126,7 +156,7 @@ export default function TeamStorePortal() {
 
   const openStore = async (source) => {
     if (!store?.storeUrl) return;
-    const click = buildTeamStoreClick({ store, userRole: identity.role, source });
+    const click = buildTeamStoreClick({ store, userRole: activeIdentity.role, source });
     const next = appendTeamStoreClick(clicks, click);
     setClicks(next);
     await storageSet(TEAM_STORE_CLICKS_KEY, next).catch(() => null);
@@ -144,14 +174,14 @@ export default function TeamStorePortal() {
 
   return <>
     <button type="button" aria-label="Open team store" onClick={() => setOpen(true)} style={{ position: "fixed", right: "max(16px,env(safe-area-inset-right))", bottom: "calc(108px + env(safe-area-inset-bottom,0px))", zIndex: 70, minWidth: 54, height: 54, borderRadius: 18, border: "1px solid rgba(200,255,26,.45)", background: "linear-gradient(145deg,#1b2112,#10130d)", color: "#c8ff1a", display: "grid", placeItems: "center", boxShadow: "0 14px 30px rgba(0,0,0,.4)", cursor: "pointer" }}><StoreIcon /></button>
-    {open && <div role="dialog" aria-modal="true" aria-label="Team Store" style={shell} onMouseDown={(event) => { if (event.target === event.currentTarget) setOpen(false); }}>
+    {open && <div role="dialog" aria-modal="true" aria-label="Team Store" style={shell} onMouseDown={(event) => { if (event.target === event.currentTarget) closePortal(); }}>
       <section style={panel}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
-          <div><div style={{ color: "#c8ff1a", fontSize: 12, fontWeight: 900, letterSpacing: ".14em" }}>SHOTLAB COMMERCE</div><h2 style={{ margin: "5px 0 0", fontSize: 30, lineHeight: 1 }}>TEAM STORE</h2><p style={{ margin: "8px 0 0", color: "#aeb5c0", lineHeight: 1.45 }}>{identity.teamName}</p></div>
-          <button type="button" onClick={() => setOpen(false)} style={{ ...secondary, minWidth: 44, padding: 0 }} aria-label="Close team store">×</button>
+          <div><div style={{ color: "#c8ff1a", fontSize: 12, fontWeight: 900, letterSpacing: ".14em" }}>SHOTLAB COMMERCE</div><h2 style={{ margin: "5px 0 0", fontSize: 30, lineHeight: 1 }}>TEAM STORE</h2><p style={{ margin: "8px 0 0", color: "#aeb5c0", lineHeight: 1.45 }}>{activeIdentity.teamName}</p></div>
+          <button type="button" onClick={closePortal} style={{ ...secondary, minWidth: 44, padding: 0 }} aria-label="Close team store">×</button>
         </div>
 
-        {identity.isCoach ? <>
+        {activeIdentity.isCoach ? <>
           {!store || editing ? <div style={{ marginTop: 20, display: "grid", gap: 12 }}>
             <div style={{ padding: 14, borderRadius: 14, background: "rgba(200,255,26,.07)", border: "1px solid rgba(200,255,26,.2)", color: "#dce6bd", lineHeight: 1.45 }}>Connect an existing apparel store. ShotLab does not process orders, payments, shipping, returns, or sales tax.</div>
             <label style={{ display: "grid", gap: 6, fontWeight: 800 }}>Provider<select value={draft.provider} onChange={(event) => setDraft((current) => ({ ...current, provider: event.target.value }))} style={input}>{TEAM_STORE_PROVIDERS.map((provider) => <option key={provider.key} value={provider.key}>{provider.label}</option>)}</select></label>
