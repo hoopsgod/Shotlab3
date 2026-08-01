@@ -91,9 +91,11 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
   let dialog = page.getByRole("dialog", { name: "Team Store" });
   await expect(dialog).toBeVisible();
   await expect(dialog).toContainText(TEAM_NAME);
+  await expect(dialog).toContainText("Connect. Preview. Publish.");
+  await expect(dialog).toContainText("What players will see");
   await expect(dialog.getByRole("button", { name: "PUBLISH STORE" })).toBeVisible();
 
-  const urlInput = dialog.getByLabel("Secure store URL");
+  const urlInput = dialog.getByLabel("Public store link");
   await urlInput.fill("http://example.com/insecure");
   await dialog.getByRole("button", { name: "PUBLISH STORE" }).click();
   await expect(dialog.getByRole("alert")).toContainText("must use https");
@@ -102,6 +104,7 @@ test("production Team Store supports the isolated coach-to-player journey", asyn
   await dialog.getByRole("button", { name: "PUBLISH STORE" }).click();
   await expect(dialog.getByText("LIVE", { exact: true })).toBeVisible();
   await expect(dialog.getByRole("button", { name: "OPEN STORE" })).toBeVisible();
+  await expect(dialog).toContainText("Store link opens");
 
   const coachState = await page.evaluate(() => ({
     stores: JSON.parse(window.localStorage.getItem("sl:team-stores") || "[]"),
