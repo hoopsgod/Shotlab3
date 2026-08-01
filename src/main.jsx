@@ -1,6 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import ReleaseReadinessBoundary from './components/ReleaseReadinessBoundary.jsx'
+import RuntimeErrorBoundary from './components/RuntimeErrorBoundary.jsx'
 import { demoBootstrap } from './lib/demoBootstrap.ts'
 import { checkBackendHealth, getBackendStatusLabel, logBackendHealth } from './lib/backendHealth.js'
 import { isDemoRuntimeEnabled } from './lib/runtimeReleaseReadiness.js'
@@ -219,9 +220,11 @@ window.addEventListener('unhandledrejection', (event) => {
       markBoot('react_render_started')
       ReactDOM.createRoot(rootEl).render(
         <React.StrictMode>
-          <ReleaseReadinessBoundary>
-            <App />
-          </ReleaseReadinessBoundary>
+          <RuntimeErrorBoundary>
+            <ReleaseReadinessBoundary>
+              <App />
+            </ReleaseReadinessBoundary>
+          </RuntimeErrorBoundary>
         </React.StrictMode>
       )
       markBoot('react_render_completed')
