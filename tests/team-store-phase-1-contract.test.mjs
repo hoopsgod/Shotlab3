@@ -51,7 +51,14 @@ test("click analytics are team scoped and contain no shopper identity", () => {
 test("portal exposes coach setup and player shopping with clear affiliate disclosure", () => {
   assert.match(portalSource, /PUBLISH STORE/);
   assert.match(portalSource, /SHOP TEAM STORE/);
+  assert.match(portalSource, /Connect\. Preview\. Publish\./);
+  assert.match(portalSource, /What players will see/);
+  assert.match(portalSource, /Name players will see/);
+  assert.match(portalSource, /Public store link/);
+  assert.match(portalSource, /STORE VISITS/);
+  assert.match(portalSource, /Store link opens/);
   assert.match(portalSource, /ShotLab does not process orders, payments, shipping, returns, or sales tax/);
+  assert.match(portalSource, /handles products, payments, shipping, returns, and support/);
   assert.match(portalSource, /required school or club approvals/);
   assert.match(portalSource, /AFFILIATE_DISCLOSURE/);
   assert.match(AFFILIATE_DISCLOSURE, /ShotLab may earn a commission/);

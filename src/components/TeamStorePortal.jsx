@@ -16,6 +16,7 @@ import {
   TEAM_STORE_OPEN_EVENT,
   normalizeTeamStorePortalIdentity,
 } from "../lib/teamStorePortalBridge.js";
+import "./TeamStorePortal.css";
 
 const STORAGE_SESSION = "sl:session";
 const STORAGE_PLAYERS = "sl:players";
@@ -64,8 +65,63 @@ function resolveIdentity(session, players, teams) {
   });
 }
 
-function StoreIcon() {
-  return <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 10h16l-1-5H5l-1 5Z"/><path d="M6 10v9h12v-9"/><path d="M9 19v-5h6v5"/><path d="M4 10c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2"/></svg>;
+function StoreIcon({ size = 22 } = {}) {
+  return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 10h16l-1-5H5l-1 5Z"/><path d="M6 10v9h12v-9"/><path d="M9 19v-5h6v5"/><path d="M4 10c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2"/></svg>;
+}
+
+function ArrowIcon() {
+  return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>;
+}
+
+function CheckIcon() {
+  return <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>;
+}
+
+function SetupProgress({ published = false }) {
+  const steps = [
+    ["1", "Connect", "Add your store link"],
+    ["2", "Preview", "Check the player view"],
+    ["3", "Publish", "Make it available"],
+  ];
+  return <div className="ts-progress-wrap">
+    <div className="ts-progress-intro">
+      <span>QUICK SETUP</span>
+      <strong>Connect. Preview. Publish.</strong>
+    </div>
+    <ol className="ts-progress" aria-label="Team store setup progress">
+      {steps.map(([number, title, detail], index) => {
+        const complete = published;
+        const current = !published && index === 0;
+        return <li key={title} className={`${complete ? "is-complete" : ""} ${current ? "is-current" : ""}`} aria-current={current ? "step" : undefined}>
+          <span className="ts-step-number">{complete && published ? <CheckIcon /> : number}</span>
+          <span><strong>{title}</strong><small>{detail}</small></span>
+        </li>;
+      })}
+    </ol>
+  </div>;
+}
+
+function PlayerStorePreview({ teamName, storeName, providerLabel, onOpen, live = false }) {
+  return <div className="ts-preview-panel">
+    <div className="ts-preview-label"><span>{live ? "PLAYER VIEW" : "LIVE PREVIEW"}</span><span className="ts-preview-dot" /></div>
+    <div className="ts-storefront-art" aria-hidden="true">
+      <span className="ts-art-line" />
+      <StoreIcon size={30} />
+    </div>
+    <div className="ts-preview-team">{teamName}</div>
+    <h4>{storeName || "Official Team Store"}</h4>
+    <p>Official apparel and fan gear selected by your program.</p>
+    {live && onOpen ? <button type="button" className="ts-button ts-button-primary ts-preview-button" onClick={onOpen}>SHOP TEAM STORE <ArrowIcon /></button> : <div className="ts-preview-button ts-preview-button-disabled" aria-hidden="true">SHOP TEAM STORE <ArrowIcon /></div>}
+    <div className="ts-preview-partner">Opens securely with {providerLabel}</div>
+  </div>;
+}
+
+function getProviderLabel(providerKey) {
+  return TEAM_STORE_PROVIDERS.find((item) => item.key === providerKey)?.label || "Apparel partner";
+}
+
+function getStoreHost(storeUrl) {
+  try { return new URL(storeUrl).hostname.replace(/^www\./, ""); } catch { return "Secure external store"; }
 }
 
 export default function TeamStorePortal() {
@@ -115,14 +171,25 @@ export default function TeamStorePortal() {
     return () => window.removeEventListener(TEAM_STORE_OPEN_EVENT, handleNavigationOpen);
   }, []);
 
-  const activeIdentity = navigationIdentity || identity;
-  const closePortal = () => {
-    setOpen(false);
-    setNavigationIdentity(null);
-    setEditing(false);
-    setError("");
-  };
+  useEffect(() => {
+    if (!open) return undefined;
+    const previousOverflow = document.body.style.overflow;
+    const handleKeyDown = (event) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      setNavigationIdentity(null);
+      setEditing(false);
+      setError("");
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [open]);
 
+  const activeIdentity = navigationIdentity || identity;
   const store = useMemo(() => getTeamStoreForTeam(stores, activeIdentity?.teamId), [stores, activeIdentity?.teamId]);
   const metrics = useMemo(() => getStoreVisitMetrics(clicks, activeIdentity?.teamId), [clicks, activeIdentity?.teamId]);
 
@@ -135,6 +202,13 @@ export default function TeamStorePortal() {
 
   if (!activeIdentity) return null;
 
+  const closePortal = () => {
+    setOpen(false);
+    setNavigationIdentity(null);
+    setEditing(false);
+    setError("");
+  };
+
   const saveStore = async () => {
     setError("");
     setNotice("");
@@ -146,7 +220,7 @@ export default function TeamStorePortal() {
       await storageSet(TEAM_STORE_STORAGE_KEY, next);
       setStores(next);
       setEditing(false);
-      setNotice("Team store is live for players and families.");
+      setNotice(store ? "Team store changes saved." : "Team store is live for players and families.");
     } catch {
       setError("Could not save the team store. Try again.");
     } finally {
@@ -163,43 +237,133 @@ export default function TeamStorePortal() {
     window.open(store.storeUrl, "_blank", "noopener,noreferrer");
   };
 
-  const shell = {
-    position: "fixed", inset: 0, zIndex: 120, background: "rgba(4,5,7,.86)", backdropFilter: "blur(14px)",
-    display: "flex", alignItems: "flex-end", justifyContent: "center", padding: "20px max(14px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))",
+  const providerLabel = getProviderLabel((!store || editing) ? draft.provider : store.provider);
+  const previewName = String(draft.storeName || "").trim() || "Official Team Store";
+  const isSetup = activeIdentity.isCoach && (!store || editing);
+  const submitLabel = saving ? "SAVING…" : store ? "SAVE CHANGES" : "PUBLISH STORE";
+  const hasUrlError = /https|url|link/i.test(error);
+  const updateDraft = (field, value) => {
+    setDraft((current) => ({ ...current, [field]: value }));
+    if (error) setError("");
   };
-  const panel = { width: "min(620px,100%)", maxHeight: "84vh", overflow: "auto", borderRadius: 24, padding: 20, background: "linear-gradient(155deg,#17191e,#0d0f13)", border: "1px solid rgba(255,255,255,.14)", boxShadow: "0 30px 80px rgba(0,0,0,.55)", color: "#f7f8fa" };
-  const input = { width: "100%", boxSizing: "border-box", minHeight: 46, borderRadius: 12, border: "1px solid rgba(255,255,255,.16)", background: "#090b0e", color: "#fff", padding: "0 12px", fontSize: 14 };
-  const primary = { minHeight: 46, border: 0, borderRadius: 12, background: "#c8ff1a", color: "#0b0d10", fontWeight: 900, letterSpacing: ".04em", padding: "0 16px", cursor: "pointer" };
-  const secondary = { minHeight: 44, borderRadius: 12, border: "1px solid rgba(255,255,255,.17)", background: "rgba(255,255,255,.04)", color: "#fff", fontWeight: 800, padding: "0 14px", cursor: "pointer" };
+  const visitMetrics = [
+    ["Today", metrics.today],
+    ["Last 7 days", metrics.week],
+    ["Last 30 days", metrics.month],
+    ["All time", metrics.total],
+  ];
 
   return <>
-    <button type="button" aria-label="Open team store" onClick={() => setOpen(true)} style={{ position: "fixed", right: "max(16px,env(safe-area-inset-right))", bottom: "calc(108px + env(safe-area-inset-bottom,0px))", zIndex: 70, minWidth: 54, height: 54, borderRadius: 18, border: "1px solid rgba(200,255,26,.45)", background: "linear-gradient(145deg,#1b2112,#10130d)", color: "#c8ff1a", display: "grid", placeItems: "center", boxShadow: "0 14px 30px rgba(0,0,0,.4)", cursor: "pointer" }}><StoreIcon /></button>
-    {open && <div role="dialog" aria-modal="true" aria-label="Team Store" style={shell} onMouseDown={(event) => { if (event.target === event.currentTarget) closePortal(); }}>
-      <section style={panel}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "flex-start" }}>
-          <div><div style={{ color: "#c8ff1a", fontSize: 12, fontWeight: 900, letterSpacing: ".14em" }}>SHOTLAB COMMERCE</div><h2 style={{ margin: "5px 0 0", fontSize: 30, lineHeight: 1 }}>TEAM STORE</h2><p style={{ margin: "8px 0 0", color: "#aeb5c0", lineHeight: 1.45 }}>{activeIdentity.teamName}</p></div>
-          <button type="button" onClick={closePortal} style={{ ...secondary, minWidth: 44, padding: 0 }} aria-label="Close team store">×</button>
-        </div>
+    <button type="button" aria-label="Open team store" onClick={() => setOpen(true)} className="ts-launcher"><StoreIcon /></button>
+    {open && <div role="dialog" aria-modal="true" aria-label="Team Store" className="ts-overlay" onMouseDown={(event) => { if (event.target === event.currentTarget) closePortal(); }}>
+      <section className="ts-panel">
+        <header className="ts-header">
+          <div className="ts-header-copy">
+            <div className="ts-eyebrow">{activeIdentity.isCoach ? "COACH WORKSPACE" : "TEAM GEAR"}</div>
+            <h2>Team Store</h2>
+            <p>{activeIdentity.isCoach ? `Connect and manage ${activeIdentity.teamName}'s apparel store.` : activeIdentity.teamName}</p>
+          </div>
+          <button type="button" onClick={closePortal} className="ts-close" aria-label="Close team store"><span aria-hidden="true">×</span></button>
+        </header>
 
-        {activeIdentity.isCoach ? <>
-          {!store || editing ? <div style={{ marginTop: 20, display: "grid", gap: 12 }}>
-            <div style={{ padding: 14, borderRadius: 14, background: "rgba(200,255,26,.07)", border: "1px solid rgba(200,255,26,.2)", color: "#dce6bd", lineHeight: 1.45 }}>Connect an existing apparel store. ShotLab does not process orders, payments, shipping, returns, or sales tax.</div>
-            <label style={{ display: "grid", gap: 6, fontWeight: 800 }}>Provider<select value={draft.provider} onChange={(event) => setDraft((current) => ({ ...current, provider: event.target.value }))} style={input}>{TEAM_STORE_PROVIDERS.map((provider) => <option key={provider.key} value={provider.key}>{provider.label}</option>)}</select></label>
-            <label style={{ display: "grid", gap: 6, fontWeight: 800 }}>Store name<input value={draft.storeName} onChange={(event) => setDraft((current) => ({ ...current, storeName: event.target.value }))} style={input} /></label>
-            <label style={{ display: "grid", gap: 6, fontWeight: 800 }}>Secure store URL<input type="url" inputMode="url" placeholder="https://..." value={draft.storeUrl} onChange={(event) => setDraft((current) => ({ ...current, storeUrl: event.target.value }))} style={input} /></label>
-            <div style={{ fontSize: 12, color: "#9ca5b2", lineHeight: 1.45 }}>By publishing, you confirm that your program is authorized to use its team name, marks, and logos and that required school or club approvals have been obtained.</div>
-            {error && <div role="alert" style={{ color: "#ff9a9a", fontWeight: 800 }}>{error}</div>}
-            <div style={{ display: "flex", gap: 10 }}><button type="button" disabled={saving} onClick={saveStore} style={{ ...primary, flex: 1, opacity: saving ? .6 : 1 }}>{saving ? "SAVING…" : "PUBLISH STORE"}</button>{store && <button type="button" onClick={() => setEditing(false)} style={secondary}>CANCEL</button>}</div>
-          </div> : <div style={{ marginTop: 20 }}>
-            <div style={{ padding: 18, borderRadius: 18, background: "linear-gradient(145deg,rgba(200,255,26,.12),rgba(255,255,255,.025))", border: "1px solid rgba(200,255,26,.25)" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}><div><div style={{ color: "#c8ff1a", fontWeight: 900 }}>LIVE</div><div style={{ fontSize: 22, fontWeight: 900, marginTop: 4 }}>{store.storeName}</div><div style={{ color: "#aeb5c0", marginTop: 4 }}>{TEAM_STORE_PROVIDERS.find((item) => item.key === store.provider)?.label || "Apparel partner"}</div></div><StoreIcon /></div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginTop: 16 }}>{[["TODAY",metrics.today],["7 DAYS",metrics.week],["30 DAYS",metrics.month],["TOTAL",metrics.total]].map(([label,value]) => <div key={label} style={{ padding: "10px 6px", borderRadius: 12, background: "rgba(0,0,0,.24)", textAlign: "center" }}><div style={{ fontSize: 20, fontWeight: 900 }}>{value}</div><div style={{ color: "#8f98a6", fontSize: 9, fontWeight: 900, letterSpacing: ".08em" }}>{label}</div></div>)}</div>
+        {activeIdentity.isCoach ? <div className="ts-coach-content">
+          {isSetup ? <>
+            <SetupProgress />
+            <div className="ts-setup-grid">
+              <div className="ts-form-card">
+                <div className="ts-section-kicker">{store ? "STORE SETTINGS" : "STEP 1 · CONNECT"}</div>
+                <h3>{store ? "Update your store details" : "Connect your apparel store"}</h3>
+                <p className="ts-section-copy">Already have a SquadLocker or other team shop? Add its public link here. Players will open that store from ShotLab.</p>
+
+                <div className="ts-fulfillment-note">
+                  <div className="ts-note-icon"><StoreIcon /></div>
+                  <div><strong>Your apparel partner handles products, payments, shipping, returns, and support.</strong><span>ShotLab provides one easy place for your team to find the link.</span></div>
+                </div>
+
+                <div className="ts-fields">
+                  <label className="ts-field">
+                    <span>Apparel partner</span>
+                    <select value={draft.provider} onChange={(event) => updateDraft("provider", event.target.value)}>
+                      {TEAM_STORE_PROVIDERS.map((provider) => <option key={provider.key} value={provider.key}>{provider.label}</option>)}
+                    </select>
+                    <small>Choose the company that runs your online store.</small>
+                  </label>
+                  <label className="ts-field">
+                    <span>Name players will see</span>
+                    <input value={draft.storeName} placeholder={`${activeIdentity.teamName} Team Store`} onChange={(event) => updateDraft("storeName", event.target.value)} />
+                    <small>Keep it familiar, such as “Thomas Titans Team Store.”</small>
+                  </label>
+                  <label className="ts-field">
+                    <span>Public store link</span>
+                    <input type="url" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck="false" placeholder="https://teamlocker.squadlocker.com/..." value={draft.storeUrl} onChange={(event) => updateDraft("storeUrl", event.target.value)} aria-invalid={hasUrlError} aria-describedby={hasUrlError ? "team-store-url-help team-store-error" : "team-store-url-help"} />
+                    <small id="team-store-url-help">Paste the full secure link that opens your public storefront.</small>
+                  </label>
+                </div>
+
+                <div className="ts-mobile-preview">
+                  <div className="ts-preview-heading"><span>STEP 2 · PREVIEW</span><h3>What players will see</h3><p>Check the store name and partner before you publish.</p></div>
+                  <PlayerStorePreview teamName={activeIdentity.teamName} storeName={previewName} providerLabel={providerLabel} />
+                </div>
+
+                <div className="ts-approval-note"><CheckIcon /><span>By publishing, you confirm that your program is authorized to use its team name, marks, and logos and that required school or club approvals have been obtained.</span></div>
+                <p className="ts-processing-note">ShotLab does not process orders, payments, shipping, returns, or sales tax.</p>
+                {error && <div id="team-store-error" role="alert" className="ts-alert ts-alert-error">{error}</div>}
+                <div className="ts-form-actions">
+                  <button type="button" disabled={saving} onClick={saveStore} className="ts-button ts-button-primary">{submitLabel} <ArrowIcon /></button>
+                  {store && <button type="button" onClick={() => { setEditing(false); setError(""); }} className="ts-button ts-button-secondary">CANCEL</button>}
+                </div>
+              </div>
+
+              <aside className="ts-preview-column" aria-label="Player store preview">
+                <div className="ts-preview-heading"><span>STEP 2 · PREVIEW</span><h3>What players will see</h3><p>This card updates as you type. Review it, then publish when it looks right.</p></div>
+                <PlayerStorePreview teamName={activeIdentity.teamName} storeName={previewName} providerLabel={providerLabel} />
+              </aside>
             </div>
-            {notice && <div style={{ marginTop: 12, color: "#c8ff1a", fontWeight: 800 }}>{notice}</div>}
-            <div style={{ display: "flex", gap: 10, marginTop: 14 }}><button type="button" onClick={() => openStore("coach_portal")} style={{ ...primary, flex: 1 }}>OPEN STORE</button><button type="button" onClick={() => setEditing(true)} style={secondary}>EDIT</button></div>
-          </div>}
-        </> : <div style={{ marginTop: 20 }}>
-          {store ? <><div style={{ padding: 20, borderRadius: 20, background: "linear-gradient(145deg,rgba(200,255,26,.13),rgba(255,255,255,.02))", border: "1px solid rgba(200,255,26,.25)" }}><div style={{ color: "#c8ff1a", fontWeight: 900, letterSpacing: ".1em", fontSize: 11 }}>REP YOUR PROGRAM</div><div style={{ fontSize: 28, fontWeight: 900, marginTop: 7 }}>{store.storeName}</div><p style={{ color: "#b8c0ca", lineHeight: 1.5, marginBottom: 0 }}>Official team apparel and fan gear from your program’s selected apparel partner.</p></div><button type="button" onClick={() => openStore("player_portal")} style={{ ...primary, width: "100%", marginTop: 14 }}>SHOP TEAM STORE</button><p style={{ color: "#8f98a6", fontSize: 11, lineHeight: 1.5, marginBottom: 0 }}>{AFFILIATE_DISCLOSURE}</p></> : <div style={{ padding: 20, borderRadius: 18, border: "1px solid rgba(255,255,255,.12)", background: "rgba(255,255,255,.03)", color: "#aeb5c0", lineHeight: 1.5 }}>Your coach has not published a team store yet.</div>}
+          </> : <>
+            {notice && <div role="status" className="ts-alert ts-alert-success"><CheckIcon />{notice}</div>}
+            <div className="ts-live-hero">
+              <div className="ts-live-icon"><StoreIcon size={30} /></div>
+              <div className="ts-live-copy">
+                <div className="ts-live-status"><span className="ts-live-dot" /> <span>LIVE</span> <small>Available to players</small></div>
+                <h3>{store.storeName}</h3>
+                <p>{providerLabel} · {getStoreHost(store.storeUrl)}</p>
+              </div>
+              <div className="ts-live-actions">
+                <button type="button" onClick={() => openStore("coach_portal")} className="ts-button ts-button-primary">OPEN STORE <ArrowIcon /></button>
+                <button type="button" onClick={() => { setNotice(""); setEditing(true); }} className="ts-button ts-button-secondary">EDIT SETUP</button>
+              </div>
+            </div>
+
+            <SetupProgress published />
+
+            <div className="ts-live-grid">
+              <section className="ts-player-view-card">
+                <div className="ts-section-kicker">PLAYER EXPERIENCE</div>
+                <h3>What players see</h3>
+                <p className="ts-section-copy">Use this preview to confirm the store name and shopping destination.</p>
+                <PlayerStorePreview teamName={activeIdentity.teamName} storeName={store.storeName} providerLabel={providerLabel} onOpen={() => openStore("coach_preview")} live />
+              </section>
+
+              <section className="ts-metrics-card">
+                <div className="ts-section-kicker">STORE VISITS</div>
+                <h3>Store link opens</h3>
+                <p className="ts-section-copy">A simple count of how often your team opens the store from ShotLab. No shopper identity is collected.</p>
+                <div className="ts-metrics-grid">
+                  {visitMetrics.map(([label, value]) => <div key={label} className="ts-metric"><strong>{value}</strong><span>{label}</span></div>)}
+                </div>
+                <div className="ts-how-it-works">
+                  <strong>How orders work</strong>
+                  <p>Players shop and check out with {providerLabel}. That partner handles payment, fulfillment, returns, and customer support.</p>
+                </div>
+              </section>
+            </div>
+          </>}
+        </div> : <div className="ts-player-content">
+          {store ? <>
+            <div className="ts-player-intro"><span>OFFICIAL TEAM GEAR</span><h3>Rep your program.</h3><p>Shop apparel and fan gear selected by your coach.</p></div>
+            <PlayerStorePreview teamName={activeIdentity.teamName} storeName={store.storeName} providerLabel={getProviderLabel(store.provider)} onOpen={() => openStore("player_portal")} live />
+            <p className="ts-disclosure">{AFFILIATE_DISCLOSURE}</p>
+          </> : <div className="ts-empty-state"><div className="ts-empty-icon"><StoreIcon size={28} /></div><h3>Your team store is not open yet</h3><p>Your coach has not published a store link. Check back after your program announces it.</p><button type="button" onClick={closePortal} className="ts-button ts-button-secondary">GOT IT</button></div>}
         </div>}
       </section>
     </div>}
