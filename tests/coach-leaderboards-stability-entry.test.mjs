@@ -16,7 +16,8 @@ const playerSource = getFunctionSource('Player', 'ShareCard');
 const coachSource = getFunctionSource('Coach', 'CoachRoster');
 
 test('coach home can render with a stable leaderboard CTA handler in scope', () => {
-  assert.match(coachSource, /tab==="feed"[\s\S]*PageHeader title="COACH HOME"/);
+  assert.match(coachSource, /isOverviewTab&&<>[\s\S]*<CoachCommandCenter/);
+  assert.match(coachSource, /tab==="feed"[\s\S]*testId="coach-team-standings"/);
   assert.match(coachSource, /<CompactLeaderboardPreviewCard\s+title="Home Shot Leaders"[\s\S]*mode="coach"/);
   assert.match(coachSource, /const handleNavChange=\(k\)=>\{/);
   assert.match(coachSource, /const openCoachLeaderboards=\(\)=>handleNavChange\("leaderboards"\);/);
@@ -63,4 +64,3 @@ test('player View Leaderboard remains wired through player switchTab', () => {
   assert.match(playerSource, /tab==="leaderboards"[\s\S]*<PremiumLeaderboardsHub viewerRole="player"/);
   assert.match(appSource, /tab==="leaderboards"[\s\S]*<PremiumLeaderboardsHub viewerRole="coach"/);
 });
-

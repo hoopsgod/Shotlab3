@@ -77,7 +77,7 @@ test('player and coach compact home-shots cards show Aahna instead of empty afte
 
   assert.match(playerHtml, /Aahna/)
   assert.match(playerHtml, /927/)
-  assert.match(playerHtml, /Your rank: #1/)
+  assert.match(playerHtml, /Your rank #1/)
   assert.doesNotMatch(playerHtml, /No leaderboard data yet\. Log shots to enter the rankings\./)
   assert.match(coachHtml, /Aahna/)
   assert.match(coachHtml, /927/)

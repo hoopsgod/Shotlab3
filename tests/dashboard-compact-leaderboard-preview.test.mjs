@@ -14,8 +14,8 @@ test('player dashboard mounts compact leaderboard preview with rank and top-3 ro
   assert.match(appSource, /const playerDashboardHomeLeaderboardRows=useMemo\(\(\)=>filterActiveTeamLeaderboardRows\(buildAtHomeLeaderboardRows\(\{scores,shotLogs,programDrills,players:playerLeaderboardPlayers,limit:3\}\)/);
   assert.match(appSource, /rows=\{playerDashboardLeaderboardRows\}/);
   assert.match(appSource, /maxRows=\{3\}/);
-  assert.match(compactCardSource, /Your rank: #\$\{playerRank\}/);
-  assert.match(appSource, /Today's mission[\s\S]*<CompactLeaderboardPreviewCard[\s\S]*aria-label="Coach guidance summary"/);
+  assert.match(compactCardSource, /Your rank #\$\{playerRank\}/);
+  assert.match(appSource, /<PlayerDailyCommandCenter[\s\S]*testId="player-team-standings"[\s\S]*testId="player-coach-guidance"/);
 });
 
 test('coach dashboard mounts compact leaderboard preview with top-5 rows and clean empty state', () => {
@@ -27,12 +27,12 @@ test('coach dashboard mounts compact leaderboard preview with top-5 rows and cle
   assert.match(appSource, /rows=\{coachDashboardLeaderboardRows\}/);
   assert.match(appSource, /maxRows=\{5\}/);
   assert.match(compactCardSource, /No team leaderboard data yet\. Players will appear here after they log shots\./);
-  assert.match(appSource, /PageHeader title="COACH HOME"[\s\S]*<CompactLeaderboardPreviewCard[\s\S]*Coach setup checklist/);
+  assert.match(appSource, /tab==="feed"[\s\S]*testId="coach-team-standings"[\s\S]*testId="coach-setup-checklist"/);
   assert.equal(appSource.includes("COACH VIEW — FULL ACCESS"), false);
 });
 
 test('dashboard source keeps coach tabs without reintroducing Coaches tab', () => {
-  assert.match(appSource, /const coachTabs=\["feed","drills","events","sc","players"\]/);
+  assert.match(appSource, /const coachTabs=\["feed","drills","events","sc","players","activity"\]/);
   assert.equal(appSource.includes('k:"coaches"'), false);
 });
 
@@ -71,15 +71,15 @@ test('full leaderboards destination exists and includes all final categories wit
   assert.match(hubSource, /Strength & Conditioning/);
   assert.match(hubSource, /Program Drills/);
   assert.match(hubSource, /COMPETITION HUB/);
-  assert.match(hubSource, /Track team effort across shots, events, strength work, and coach-assigned drills\./);
-  assert.match(hubSource, /Event leaders will appear after players check into team events\./);
-  assert.match(hubSource, /Strength leaders will appear after players complete assigned S&C work\./);
+  assert.match(hubSource, /Compare the team’s most important training results\./);
+  assert.match(hubSource, /Event rankings activate when players confirm attendance for team events\./);
+  assert.match(hubSource, /S&C rankings activate after players log completed strength work\./);
   assert.match(hubSource, /Program drill leaders will appear after players log coach-assigned drills\./);
   assert.match(hubSource, /No rankings yet/);
   assert.match(hubSource, /aria-selected=\{active\}/);
   assert.match(hubSource, /onClick=\{\(\) => setActiveLeaderboardCategory\(item.key\)\}/);
   assert.match(hubSource, /activeLeaderboardCategory === 'event_participation'/);
-  assert.match(hubSource, /activeLeaderboardCategory === 'strength_conditioning_participation'/);
+  assert.match(hubSource, /\{ key: 'strength_conditioning_participation', label: 'Strength & Conditioning' \}/);
 });
 
 
@@ -94,6 +94,6 @@ test('player leaderboard hub has a debug guard for filtered player rows', () => 
 test('coach leaderboard rows are roster-scoped after raw generation', () => {
   assert.match(appSource, /const rawCoachHomeLeaderboardRows=useMemo\(\(\)=>buildAtHomeLeaderboardRows/);
   assert.match(appSource, /const coachHomeLeaderboardRows=useMemo\(\(\)=>filterActiveTeamLeaderboardRows\(rawCoachHomeLeaderboardRows/);
-  assert.match(hubSource, /const programDrillLeaderboardRows = useMemo\(\(\) => filterActiveTeamLeaderboardRows\(rawProgramDrillLeaderboardRows/);
+  assert.match(hubSource, /const currentProgramRows = useMemo\([\s\S]*filterActiveTeamLeaderboardRows\(rawCurrentProgramRows/);
   assert.match(hubSource, /\[leaderboard\] filtered non-roster program row/);
 });

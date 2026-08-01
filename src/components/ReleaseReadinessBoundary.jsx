@@ -1,5 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "../lib/supabase.js";
+import { releaseAuthService } from "../lib/releaseAuthService.js";
 import {
   RUNTIME_STORAGE_KEYS,
   clearPersistedAuthSession,
@@ -108,7 +108,7 @@ export default function ReleaseReadinessBoundary({ children }) {
     try {
       const persisted = await readRuntimeJson(RUNTIME_STORAGE_KEYS.appSession);
       if (!persisted?.email) return { ok: true, skipped: true };
-      const result = await supabase.auth.getSession();
+      const result = await releaseAuthService.getSession();
       if (isSessionAuthError(result?.error) || !result?.data?.session?.user?.email) {
         await expireSession(result?.error?.code || "session_missing");
         return { ok: false };
@@ -132,7 +132,7 @@ export default function ReleaseReadinessBoundary({ children }) {
       if (supabaseAuthEnabled && authEmail) {
         let sessionResult;
         try {
-          sessionResult = await supabase.auth.getSession();
+          sessionResult = await releaseAuthService.getSession();
         } catch (error) {
           console.warn("[release-readiness] pending sync deferred during session check", { message: String(error?.message || "network_unavailable") });
           setSyncState("idle");
@@ -209,7 +209,7 @@ export default function ReleaseReadinessBoundary({ children }) {
     const intervalId = window.setInterval(validate, 5 * 60 * 1000);
     window.addEventListener("focus", validate);
     document.addEventListener("visibilitychange", onVisibility);
-    const { data } = supabase.auth.onAuthStateChange((event) => {
+    const { data } = releaseAuthService.onAuthStateChange((event) => {
       if (event !== "SIGNED_OUT") return;
       window.setTimeout(async () => {
         const persisted = await readRuntimeJson(RUNTIME_STORAGE_KEYS.appSession);

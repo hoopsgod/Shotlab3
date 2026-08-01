@@ -14,8 +14,8 @@ async function commandCenterSource() {
 }
 
 function coachEventsMobileMarkup(source) {
-  const start = source.indexOf('<div data-testid="coach-events-mobile-page">');
-  const end = source.indexOf('    {showAdd&&<div className="fade-up"', start);
+  const start = source.indexOf('<div data-testid="coach-events-mobile-page"');
+  const end = source.indexOf('{showAdd&&<div className="fade-up"', start);
   assert.notEqual(start, -1, 'Coach Events mobile section marker is missing');
   assert.notEqual(end, -1, 'Coach Events modal boundary is missing');
   return source.slice(start, end);
@@ -25,7 +25,7 @@ test('coach Create Event quick action opens the events tab and renders the creat
   const source = await appSource();
   const commandCenter = await commandCenterSource();
 
-  assert.match(commandCenter, /\{ key:"scheduleEvent", label:"\+ Create Event", short:"\+ Event", onClick:onScheduleEvent \}/);
+  assert.match(commandCenter, /\{ label: "Create Practice", icon: "calendar", onClick: onScheduleEvent \}/);
   assert.match(source, /const openEventCreateFlow=useCallback\(\(\)=>\{setEventSaveError\(""\);setTab\("events"\);setSelP\(null\);setExpEv\(null\);setShowAddSC\(false\);setShowAdd\(true\);/);
   assert.match(source, /onScheduleEvent=\{openEventCreateFlow\}/);
   assert.match(source, /const handleToggleAddEvent=openEventCreateFlow;/);
@@ -38,9 +38,11 @@ test('coach Events mobile screen renders exactly one visible Create Event CTA ab
   const mobileEventsMarkup = coachEventsMobileMarkup(source);
 
   assert.match(source, /<PageHeader title="EVENTS"[\s\S]*?actionLabel="\+ Create Event" onAction=\{handleToggleAddEvent\}/);
-  assert.match(mobileEventsMarkup, /<span style=\{\{fontFamily:FD,fontSize:13,color:LIGHT,letterSpacing:1\}\}>EVENTS<\/span>[\s\S]*?<button data-testid="coach-events-mobile-create-event" onClick=\{openEventCreateFlow\} className="btn-v cta-primary"[\s\S]*?>\+ CREATE EVENT<\/button>[\s\S]*?\{events\.length===0\?/);
-  assert.equal((mobileEventsMarkup.match(/\+ CREATE EVENT/g) || []).length, 1);
-  assert.equal((mobileEventsMarkup.match(/<button[^>]*>[\s\S]*?\+ CREATE EVENT<\/button>/g) || []).length, 1);
+  assert.match(mobileEventsMarkup, /events\.length>0&&<button data-testid="coach-events-mobile-create-event" onClick=\{openEventCreateFlow\}[\s\S]*?>\+ ADD<\/button>/);
+  assert.match(mobileEventsMarkup, /events\.length===0\?<section data-testid="coach-events-mobile-empty-state"[\s\S]*?<button data-testid="coach-events-mobile-create-event" onClick=\{openEventCreateFlow\}[\s\S]*?>CREATE FIRST EVENT<\/button>/);
+  assert.equal((mobileEventsMarkup.match(/data-testid="coach-events-mobile-create-event"/g) || []).length, 2);
+  assert.match(mobileEventsMarkup, /events\.length>0&&<button/);
+  assert.match(mobileEventsMarkup, /events\.length===0\?<section/);
   assert.doesNotMatch(mobileEventsMarkup, /handleToggleAddEvent/);
   assert.doesNotMatch(source, /coach-events-top-create-event/);
 });
@@ -50,7 +52,8 @@ test('coach Events screen keeps the remaining mobile Create Event CTA wired to t
 
   assert.match(source, /const openEventCreateFlow=useCallback\(\(\)=>\{setEventSaveError\(""\);setTab\("events"\);setSelP\(null\);setExpEv\(null\);setShowAddSC\(false\);setShowAdd\(true\);/);
   assert.match(source, /const handleToggleAddEvent=openEventCreateFlow;/);
-  assert.match(source, /<button data-testid="coach-events-mobile-create-event" onClick=\{openEventCreateFlow\} className="btn-v cta-primary"[\s\S]*?>\+ CREATE EVENT<\/button>/);
+  assert.match(source, /<button data-testid="coach-events-mobile-create-event" onClick=\{openEventCreateFlow\} type="button"[\s\S]*?>\+ ADD<\/button>/);
+  assert.match(source, /<button data-testid="coach-events-mobile-create-event" onClick=\{openEventCreateFlow\} type="button" className="btn-v cta-primary"[\s\S]*?>CREATE FIRST EVENT<\/button>/);
   assert.doesNotMatch(source, /<button onClick=\{\(\)=>\{setEventSaveError\(""\);handleToggleAddEvent\(\);\}\} className="btn-v cta-primary"[\s\S]*?>\+ CREATE EVENT<\/button>/);
 });
 

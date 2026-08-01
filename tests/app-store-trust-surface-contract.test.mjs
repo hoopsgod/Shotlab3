@@ -107,7 +107,7 @@ test('demo logout cleanup behavior remains wired to local demo shot cleanup', ()
 
 test('player and coach account profile surfaces use AccountTrustActions', () => {
   assert.match(appSource, /function ProfilePage\(\{u,scores,shotLogs/)
-  assert.match(appSource, /tab==="profile"&&<div className=\{slideClass\} key="profile"><ProfilePage/)
+  assert.match(appSource, /tab==="profile"&&<div className=\{slideClass\} key="profile">[\s\S]*?<ProfilePage/)
   assert.match(appSource, /<AccountTrustActions deleteAccount=\{deleteAccount\}\/>/)
   assert.match(appSource, /function Coach\(\{u,team,regenerateJoinCode/)
   assert.match(appSource, /DEMO SETTINGS/)
