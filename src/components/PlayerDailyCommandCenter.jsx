@@ -29,6 +29,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   const primary = model.primaryAction;
   const queue = Array.isArray(model.queue) ? model.queue.slice(1, 4) : [];
   const coachSignal = model.coachSignal || {};
+  const firstSession = model.firstSession || {};
   const dailyRemaining = Math.max((Number(model.daily?.goal) || 0) - (Number(model.daily?.makes) || 0), 0);
   const dailyComplete = Number(model.daily?.pct) >= 100 || primary.urgency === "complete";
   const weeklyComplete = Number(model.weekly?.pct) >= 100;
@@ -55,14 +56,14 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   return (
     <section className={styles.root} data-testid="player-daily-command-center" aria-label="Daily training command center">
       <div className={styles.header}>
-        <div className={styles.eyebrow}>Today · Daily Command Center</div>
-        <div className={styles.status}>{urgencyLabel(primary.urgency)}</div>
+        <div className={styles.eyebrow}>{firstSession.pending ? "First session · Create your baseline" : "Today · Daily Command Center"}</div>
+        <div className={styles.status}>{firstSession.pending ? "Activation" : urgencyLabel(primary.urgency)}</div>
       </div>
 
       <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`}>
         <div className={styles.heroTop}>
           <ExperiencePill tone={primary.source === "coach" ? "info" : primary.source === "team" ? "attention" : "positive"}>
-            {primary.source === "coach" ? "Coach directed" : primary.source === "team" ? "Team commitment" : "Personal development"}
+            {primary.source === "activation" ? "First result" : primary.source === "coach" ? "Coach directed" : primary.source === "team" ? "Team commitment" : "Personal development"}
           </ExperiencePill>
           <div className={styles.meta}>About {primary.estimatedMinutes || 1} min</div>
         </div>
@@ -78,6 +79,17 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
           {activeAction === actionKey(primary) ? "Opening…" : `${primary.actionLabel} →`}
         </button>
       </div>
+
+      {firstSession.complete && !model.activation.complete && (
+        <div className={styles.momentumSignal} data-testid="player-first-result-confirmation">
+          <ExperienceSignal
+            eyebrow="First session complete"
+            title={firstSession.title || "First result banked"}
+            detail={firstSession.detail || "Your training baseline is active. Every result from here builds your progress history."}
+            tone="positive"
+          />
+        </div>
+      )}
 
       <section
         className={styles.coachSignal}
@@ -215,7 +227,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
               <div className={styles.activationRow} key={step.id}>
                 <span className={`${styles.activationDot} ${step.done ? styles.activationDotDone : ""}`} aria-hidden="true">{step.done ? "✓" : "·"}</span>
                 <span className={styles.activationText}>{step.label}</span>
-                {!step.done && step.target !== "home" && <button type="button" className={styles.activationButton} onClick={() => runAction({ target: step.target, kind: `activation-${step.id}` })}>Do now</button>}
+                {!step.done && step.target !== "home" && <button type="button" className={styles.activationButton} onClick={() => runAction({ target: step.target, kind: `activation-${step.id}` })}>{step.actionLabel || "Do now"}</button>}
               </div>
             ))}
           </div>
