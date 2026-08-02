@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { loadCoachFollowUp, saveCoachFollowUp } from "./coachFollowUpService.js";
+import { loadPlayerAssignment, savePlayerAssignment } from "./playerAssignmentService.js";
 import {
   COACH_FOLLOW_UP_CONTEXT_KEY,
   buildNextAssignmentSuggestion,
@@ -17,9 +18,10 @@ const styles = `
 .coachFollowUpLedger{margin:16px 0 0;padding:16px;border:1px solid rgba(255,255,255,.11);border-radius:16px;background:linear-gradient(145deg,rgba(255,255,255,.045),rgba(255,255,255,.015));color:#f4f7f8}
 .coachFollowUpHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}.coachFollowUpEyebrow{font:800 9px/1.1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#7d898f}.coachFollowUpTitle{margin:5px 0 0;font:400 22px/1 'Bebas Neue',Impact,sans-serif;letter-spacing:.035em}.coachFollowUpBadge{display:inline-flex;align-items:center;min-height:28px;padding:0 10px;border:1px solid rgba(255,181,71,.38);border-radius:999px;background:rgba(255,181,71,.09);color:#ffca76;font:900 9px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.1em;text-transform:uppercase}.coachFollowUpBadge.is-completed{border-color:color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 38%,transparent);background:color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 9%,transparent);color:var(--team-brand-primary,#c8ff1a)}
 .coachResponseEvidence{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;margin-top:12px;padding:12px;border:1px solid color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 24%,rgba(255,255,255,.08));border-radius:13px;background:color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 6%,rgba(255,255,255,.016))}.coachResponseEvidence small{display:block;color:#7d898f;font:800 8px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.11em;text-transform:uppercase}.coachResponseEvidence strong{display:block;margin-top:5px;color:#f4f7f8;font:800 13px/1.25 'Barlow Condensed','Arial Narrow',sans-serif}.coachResponseEvidence time{color:var(--team-brand-primary,#c8ff1a);font:900 9px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.07em;text-transform:uppercase;white-space:nowrap}
+.coachDeliveryStatus{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:10px;padding:10px 12px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.018)}.coachDeliveryStatus span{color:#8d989d;font:800 8px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.1em;text-transform:uppercase}.coachDeliveryStatus strong{color:var(--team-brand-primary,#c8ff1a);font:900 10px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.08em;text-transform:uppercase}
 .coachFollowUpCopy{margin:10px 0 0;color:#aab3b8;font:600 12px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.coachFollowUpWarning{margin:8px 0 0;color:#7d898f;font:600 10px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.coachFollowUpField{display:grid;gap:7px;margin-top:13px}.coachFollowUpField span{font:800 9px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.09em;text-transform:uppercase;color:#8d989d}.coachFollowUpField textarea{width:100%;min-height:84px;resize:vertical;padding:11px 12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0d1113;color:#f4f7f8;font:600 13px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;box-sizing:border-box}.coachFollowUpField textarea:focus{outline:2px solid color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 65%,white);outline-offset:2px}.coachFollowUpField.is-assignment textarea{min-height:96px;border-color:color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 22%,rgba(255,255,255,.12))}.coachAssignmentSave{min-height:44px;margin-top:9px;padding:0 13px;border:1px solid color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 42%,transparent);border-radius:11px;background:var(--team-brand-primary,#c8ff1a);color:#080a08;font:900 10px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.08em;text-transform:uppercase;cursor:pointer}.coachAssignmentSave:disabled{opacity:.55;cursor:wait}
 .coachFollowUpActions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.coachFollowUpActions button{min-height:44px;padding:0 12px;border-radius:11px;border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.045);color:#f4f7f8;font:900 10px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}.coachFollowUpActions button:first-child{border-color:color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 40%,transparent);background:color-mix(in srgb,var(--team-brand-primary,#c8ff1a) 10%,rgba(255,255,255,.02));color:var(--team-brand-primary,#c8ff1a)}.coachFollowUpActions button:disabled{opacity:.55;cursor:wait}.coachFollowUpStatus{min-height:18px;margin-top:9px;color:#9aa5aa;font:600 10px/1.4 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}.coachFollowUpStatus.is-error{color:#ff9b9b}.coachFollowUpMeta{margin-top:7px;color:#6f7b80;font:700 9px/1.35 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.06em;text-transform:uppercase}
-@media(max-width:420px){.coachFollowUpActions{grid-template-columns:1fr}.coachFollowUpTitle{font-size:20px}.coachResponseEvidence{grid-template-columns:1fr}.coachResponseEvidence time{white-space:normal}}
+@media(max-width:420px){.coachFollowUpActions{grid-template-columns:1fr}.coachFollowUpTitle{font-size:20px}.coachResponseEvidence{grid-template-columns:1fr}.coachResponseEvidence time{white-space:normal}.coachDeliveryStatus{align-items:flex-start;flex-direction:column}}
 @media(prefers-reduced-motion:reduce){.coachFollowUpActions button,.coachAssignmentSave{transition:none}}
 `;
 
@@ -71,6 +73,7 @@ function neutralizeLegacyNudges() {
 }
 
 const stateLabel = (state) => state === "completed" ? "Completed" : state === "planned" ? "Planned" : "Not recorded";
+const deliveryLabel = (state) => state === "completed" ? "Player completed" : state === "started" ? "Player started" : state === "acknowledged" ? "Player acknowledged" : state === "assigned" ? "Delivered" : "Not delivered";
 const formatDate = (value) => {
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? "" : date.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
@@ -82,6 +85,7 @@ function CoachFollowUpPanel({ context }) {
     playerName: context.playerName,
   }), [context.playerIdentity, context.playerName]);
   const [record, setRecord] = useState(null);
+  const [delivery, setDelivery] = useState(null);
   const [assignment, setAssignment] = useState("");
   const [note, setNote] = useState("");
   const [status, setStatus] = useState("Loading follow-up record…");
@@ -90,14 +94,24 @@ function CoachFollowUpPanel({ context }) {
 
   useEffect(() => {
     let cancelled = false;
-    loadCoachFollowUp(context).then((result) => {
+    Promise.all([
+      loadCoachFollowUp(context),
+      loadPlayerAssignment(context),
+    ]).then(([result, deliveryResult]) => {
       if (cancelled) return;
       const parsedNote = parseCoachResponseNote(result.record?.note || "");
       setRecord(result.record || null);
-      setAssignment(parsedNote.assignment || (responseContext ? buildNextAssignmentSuggestion(responseContext) : ""));
+      setDelivery(deliveryResult.assignment || null);
+      setAssignment(deliveryResult.assignment?.assignmentText || parsedNote.assignment || (responseContext ? buildNextAssignmentSuggestion(responseContext) : ""));
       setNote(parsedNote.privateNote);
-      setError(!result.ok && Boolean(result.error));
-      setStatus(result.record ? "Existing follow-up record loaded." : responseContext ? "Result loaded. Confirm the next assignment before recording it." : "No follow-up has been recorded.");
+      setError((!result.ok && Boolean(result.error)) || (!deliveryResult.ok && Boolean(deliveryResult.error)));
+      setStatus(deliveryResult.assignment
+        ? `Player delivery status: ${deliveryLabel(deliveryResult.assignment.state)}.`
+        : result.record
+          ? "Existing follow-up record loaded."
+          : responseContext
+            ? "Result loaded. Confirm the next assignment before recording it."
+            : "No follow-up has been recorded.");
     });
     return () => { cancelled = true; };
   }, [context.teamId, context.playerIdentity, responseContext?.openedAt]);
@@ -110,19 +124,35 @@ function CoachFollowUpPanel({ context }) {
     }
     setSaving(true);
     setError(false);
-    setStatus("Saving…");
-    const result = await saveCoachFollowUp({
+    setStatus(requireAssignment ? "Saving private context and delivering assignment…" : "Saving…");
+    const followUpPromise = saveCoachFollowUp({
       ...context,
       state: nextState,
       note: serializeCoachResponseNote({ assignment, privateNote: note }),
     });
+    const deliveryPromise = requireAssignment
+      ? savePlayerAssignment({
+          ...context,
+          assignmentText: assignment,
+          resultDetail: responseContext?.resultDetail || "",
+        })
+      : Promise.resolve(null);
+    const [result, deliveryResult] = await Promise.all([followUpPromise, deliveryPromise]);
     setSaving(false);
     setRecord(result.record || record);
+    if (deliveryResult?.assignment) setDelivery(deliveryResult.assignment);
     const parsedNote = parseCoachResponseNote(result.record?.note ?? serializeCoachResponseNote({ assignment, privateNote: note }));
-    setAssignment(parsedNote.assignment);
+    setAssignment(deliveryResult?.assignment?.assignmentText || parsedNote.assignment);
     setNote(parsedNote.privateNote);
-    setError(!result.ok);
-    setStatus(result.message || (result.ok ? "Follow-up record saved." : "Follow-up could not be synced."));
+    const failed = !result.ok || (requireAssignment && !deliveryResult?.ok);
+    setError(failed);
+    if (requireAssignment) {
+      setStatus(deliveryResult?.ok
+        ? deliveryResult.message || "Assignment delivered to the player."
+        : deliveryResult?.message || "Private follow-up saved, but player delivery failed.");
+    } else {
+      setStatus(result.message || (result.ok ? "Follow-up record saved." : "Follow-up could not be synced."));
+    }
   };
 
   const state = record?.state === "dismissed" ? "" : record?.state || "";
@@ -142,6 +172,9 @@ function CoachFollowUpPanel({ context }) {
         React.createElement("small", null, "Latest player result"),
         React.createElement("strong", null, responseContext.resultDetail || "Training result recorded")),
       React.createElement("time", null, responseContext.resultMeta || "Recent")) : null,
+    delivery ? React.createElement("div", { className: "coachDeliveryStatus", "data-testid": "coach-player-assignment-status", "data-assignment-state": delivery.state },
+      React.createElement("span", null, "Player delivery"),
+      React.createElement("strong", null, deliveryLabel(delivery.state))) : null,
     React.createElement("p", { className: "coachFollowUpCopy" }, state === "completed"
       ? "You confirmed that this follow-up was completed outside ShotLab."
       : state === "planned"
@@ -149,11 +182,11 @@ function CoachFollowUpPanel({ context }) {
         : responseContext
           ? "Review the result, adjust the suggested next assignment, and record the decision before leaving the player."
           : "Create a private follow-up task for this player."),
-    React.createElement("p", { className: "coachFollowUpWarning" }, "ShotLab does not send a message or notify the player when this record changes."),
+    React.createElement("p", { className: "coachFollowUpWarning" }, "The player receives only the assignment text and result context. Private coach notes remain coach-only."),
     React.createElement("label", { className: "coachFollowUpField is-assignment" },
       React.createElement("span", null, "Next assignment to deliver"),
       React.createElement("textarea", { value: assignment, maxLength: 2000, placeholder: "Example: Repeat the form shooting block and match today’s makes with balanced footwork.", onChange: (event) => setAssignment(event.target.value), disabled: saving, "data-testid": "coach-next-assignment-input" })),
-    React.createElement("button", { type: "button", className: "coachAssignmentSave", onClick: () => save("planned", { requireAssignment: true }), disabled: saving }, "Record next assignment"),
+    React.createElement("button", { type: "button", className: "coachAssignmentSave", onClick: () => save("planned", { requireAssignment: true }), disabled: saving }, "Deliver next assignment"),
     React.createElement("label", { className: "coachFollowUpField" },
       React.createElement("span", null, "Private coach note"),
       React.createElement("textarea", { value: note, maxLength: 2000, placeholder: "Example: Check in after practice about completing the priority drill.", onChange: (event) => setNote(event.target.value), disabled: saving })),
