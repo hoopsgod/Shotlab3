@@ -73,13 +73,13 @@ const rosterMergeKeys = (row = {}) => {
   return [...new Set(keys)];
 };
 
-export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamId = "" } = {}) => {
+export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamId = "", coach = null } = {}) => {
   const rosterByKey = new Map();
   const allPlayers = Array.isArray(players) ? players : [];
   const allProfiles = Array.isArray(playerProfiles) ? playerProfiles : [];
   const targetTeamId = String(teamId || "");
-  const coachIdentityKeys = new Set([...allPlayers, ...allProfiles]
-    .filter(isCoachRosterIdentity)
+  const coachIdentityKeys = new Set([...allPlayers, ...allProfiles, coach]
+    .filter((row) => row && (row === coach || isCoachRosterIdentity(row)))
     .flatMap((row) => rosterMergeKeys(row)));
   const isCoachRosterRecord = (row = {}) => isCoachRosterIdentity(row) || rosterMergeKeys(row).some((key) => coachIdentityKeys.has(key));
   const inactivePlayerKeys = new Set(allPlayers
