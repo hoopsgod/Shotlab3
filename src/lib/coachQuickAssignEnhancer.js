@@ -83,29 +83,11 @@ function QuickAssignComposer({ row, onClose }) {
     setStatus("Enter the exact assignment the player should receive.");
     setError(false);
 
-    let cancelled = false;
-    let attempt = 0;
     let timer = null;
-    const focusInput = () => {
-      if (cancelled) return;
-      const input = textareaRef.current;
-      if (!input) {
-        if (attempt < 5) {
-          attempt += 1;
-          timer = window.setTimeout(focusInput, 40);
-        }
-        return;
-      }
-      input.focus({ preventScroll: true });
-      if (document.activeElement !== input && attempt < 5) {
-        attempt += 1;
-        timer = window.setTimeout(focusInput, 60);
-      }
-    };
-    const frame = window.requestAnimationFrame(focusInput);
-    timer = window.setTimeout(focusInput, 120);
+    const frame = window.requestAnimationFrame(() => {
+      timer = window.setTimeout(() => textareaRef.current?.focus?.({ preventScroll: true }), 0);
+    });
     return () => {
-      cancelled = true;
       window.cancelAnimationFrame(frame);
       if (timer != null) window.clearTimeout(timer);
     };
@@ -176,6 +158,7 @@ function QuickAssignComposer({ row, onClose }) {
       React.createElement("span", null, "Assignment to deliver"),
       React.createElement("textarea", {
         ref: textareaRef,
+        autoFocus: true,
         value: draft,
         maxLength: QUICK_ASSIGN_MAX_LENGTH,
         placeholder: "Example: Complete the form shooting ladder and record your makes.",
@@ -248,6 +231,11 @@ export function installCoachQuickAssignEnhancer() {
   if (window.__shotlabCoachQuickAssignEnhancer) return true;
   window.__shotlabCoachQuickAssignEnhancer = true;
   ensureStyles();
+
+  document.addEventListener("mousedown", (event) => {
+    const row = event.target?.closest?.('[data-testid="coach-assignment-accountability"] .mcAssignmentAccountabilityRow[data-assignment-state="unassigned"]');
+    if (row) event.preventDefault();
+  }, true);
 
   document.addEventListener("click", (event) => {
     const row = event.target?.closest?.('[data-testid="coach-assignment-accountability"] .mcAssignmentAccountabilityRow[data-assignment-state="unassigned"]');
