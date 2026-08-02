@@ -4,6 +4,18 @@ test.use({ viewport: { width: 390, height: 844 } });
 
 const TEAM_ID = "team-dashboard-e2e";
 const COACH_EMAIL = "coach.demo@shotlab.app";
+const dateOffset = (days) => {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+};
+const ACTIVE_DATE = dateOffset(0);
+const QUIET_ACTIVITY_DATE = dateOffset(-30);
+const NEXT_EVENT_DATE = dateOffset(1);
+const SECOND_EVENT_DATE = dateOffset(5);
+const PAST_EVENT_DATE = dateOffset(-10);
+const UPCOMING_SC_DATE = dateOffset(2);
 
 const seedData = {
   "sl:teams": [{
@@ -38,25 +50,25 @@ const seedData = {
     { id: "profile-new", userId: "new@example.com", email: "new@example.com", teamId: TEAM_ID, firstName: "New", lastName: "Player" },
   ],
   "sl:scores": [
-    { id: "score-active", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, drillId: "demo-home-form-shooting", score: 40, src: "home", date: "2026-07-26" },
-    { id: "score-quiet", email: "quiet@example.com", name: "Quiet Player", teamId: TEAM_ID, drillId: "demo-home-form-shooting", score: 20, src: "home", date: "2026-07-01" },
+    { id: "score-active", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, drillId: "demo-home-form-shooting", score: 40, src: "home", date: ACTIVE_DATE },
+    { id: "score-quiet", email: "quiet@example.com", name: "Quiet Player", teamId: TEAM_ID, drillId: "demo-home-form-shooting", score: 20, src: "home", date: QUIET_ACTIVITY_DATE },
   ],
   "sl:program-scores": [],
   "sl:shotlogs": [
-    { id: "shot-active", playerId: "active-player", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, made: 85, attempted_shots: 120, date: "2026-07-26", sessionId: "active-session" },
-    { id: "shot-quiet", playerId: "quiet-player", email: "quiet@example.com", name: "Quiet Player", teamId: TEAM_ID, made: 25, attempted_shots: 50, date: "2026-07-01", sessionId: "quiet-session" },
+    { id: "shot-active", playerId: "active-player", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, made: 85, attempted_shots: 120, date: ACTIVE_DATE, sessionId: "active-session" },
+    { id: "shot-quiet", playerId: "quiet-player", email: "quiet@example.com", name: "Quiet Player", teamId: TEAM_ID, made: 25, attempted_shots: 50, date: QUIET_ACTIVITY_DATE, sessionId: "quiet-session" },
   ],
   "sl:events": [
-    { id: "event-practice", teamId: TEAM_ID, title: "Team Practice", type: "run", date: "2026-08-01", time: "6:00 PM", location: "Main Gym", desc: "Team practice" },
-    { id: "event-game", teamId: TEAM_ID, title: "Summer Game", type: "game", date: "2026-08-05", time: "7:00 PM", location: "Field House", desc: "Summer game" },
-    { id: "event-past", teamId: TEAM_ID, title: "Film Review", type: "recovery", date: "2026-07-10", time: "4:00 PM", location: "Team Room", desc: "Film" },
+    { id: "event-practice", teamId: TEAM_ID, title: "Team Practice", type: "run", date: NEXT_EVENT_DATE, time: "6:00 PM", location: "Main Gym", desc: "Team practice" },
+    { id: "event-game", teamId: TEAM_ID, title: "Summer Game", type: "game", date: SECOND_EVENT_DATE, time: "7:00 PM", location: "Field House", desc: "Summer game" },
+    { id: "event-past", teamId: TEAM_ID, title: "Film Review", type: "recovery", date: PAST_EVENT_DATE, time: "4:00 PM", location: "Team Room", desc: "Film" },
   ],
   "sl:rsvps": [
     { id: "rsvp-active", eventId: "event-practice", email: "active@example.com", name: "Active Player", teamId: TEAM_ID },
   ],
-  "sl:sc-sessions": [{ id: "sc-one", teamId: TEAM_ID, sport: "Team Lift", date: "2026-08-02", time: "8:00 AM", sessionType: "School" }],
+  "sl:sc-sessions": [{ id: "sc-one", teamId: TEAM_ID, sport: "Team Lift", date: UPCOMING_SC_DATE, time: "8:00 AM", sessionType: "School" }],
   "sl:sc-rsvps": [{ id: "sc-rsvp", sessionId: "sc-one", email: "active@example.com", teamId: TEAM_ID }],
-  "sl:sc-logs": [{ id: "sc-log", sessionId: "sc-one", email: "active@example.com", teamId: TEAM_ID, date: "2026-07-26" }],
+  "sl:sc-logs": [{ id: "sc-log", sessionId: "sc-one", email: "active@example.com", teamId: TEAM_ID, date: ACTIVE_DATE }],
   "sl:season-archives": [],
 };
 
