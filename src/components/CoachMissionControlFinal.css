@@ -802,10 +802,11 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] > div {
   }
 
   body.mission-control-active .mcShellV3 .mcTodayPlan {
-    min-height: 148px;
-    padding: 14px;
-    grid-template-columns: 40px minmax(0, 1fr) auto;
-    gap: 10px;
+    min-height: 0;
+    padding: 12px 14px;
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: 10px;
+    row-gap: 8px;
     border-radius: var(--mc-radius-card);
   }
 
@@ -828,13 +829,14 @@ body.mission-control-active [data-testid="mobile-navigation-dock"] > div {
   }
 
   body.mission-control-active .mcShellV3 .mcTodayPlan > button {
-    grid-column: 3;
-    grid-row: 1;
-    align-self: center;
+    grid-column: 2;
+    grid-row: auto;
+    justify-self: start;
     width: auto;
-    min-height: 40px;
-    padding: 0 12px;
-    border: 1px solid color-mix(in srgb, var(--mc) 32%, transparent);
-    background: color-mix(in srgb, var(--mc) 8%, transparent);
+    min-height: 34px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--mc);
   }
 }

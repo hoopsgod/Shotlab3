@@ -220,7 +220,7 @@ test("Mission Control Analytics opens rankings instead of duplicating Players", 
   await expect(page.getByTestId("coach-page-dashboard-leaderboards")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible();
   await expect(page.getByTestId("leaderboard-time-scope-current")).toBeVisible();
-  await expect(page.getByTestId("leaderboard-time-scope-all-time")).toBeVisible();
+  await expect(page.getByTestId("leaderboard-time-scope-all_time")).toBeVisible();
   await expect(page.getByRole("heading", { name: "Players Dashboard", exact: true })).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
