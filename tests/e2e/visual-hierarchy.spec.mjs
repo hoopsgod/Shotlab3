@@ -88,9 +88,9 @@ test("coach mobile home gives the fresh one-player demo one compact truthful act
   await expectThreeMetrics(metrics);
   await expect(needsAttention).toBeVisible();
   await expect(onboarding).toBeVisible();
-  await expect(onboarding.getByText("Schedule the first team session", { exact: true })).toBeVisible();
-  await expect(onboarding.getByText("2/4", { exact: false })).toBeVisible();
-  await expect(onboarding.getByRole("button", { name: /Create session/i })).toBeVisible();
+  await expect(onboarding.getByText("Set your team identity", { exact: true })).toBeVisible();
+  await expect(onboarding.getByText("2/5", { exact: false })).toBeVisible();
+  await expect(onboarding.getByRole("button", { name: /Open team branding/i })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Activity today", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Recent activity", exact: true })).toHaveCount(0);
   await expect(page.getByRole("heading", { name: "Next session", exact: true })).toHaveCount(0);
