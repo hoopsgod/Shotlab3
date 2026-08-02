@@ -1,0 +1,34 @@
+name: ShotLab Color System Quality
+
+on:
+  pull_request:
+    paths:
+      - "public/shotlab-color-system.css"
+      - "index.html"
+      - "tests/shotlab-color-system.test.mjs"
+      - "src/components/CoachCommandCenter.css"
+      - "src/components/PlayerDailyCommandCenter.module.css"
+      - ".github/workflows/shotlab-color-system.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-color-system:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify palette, contrast, hierarchy, and compatibility
+        run: node --test tests/shotlab-color-system.test.mjs tests/coach-command-center-10x.test.mjs tests/player-daily-command-center.test.mjs tests/coach-dashboard-phase-2-contract.test.mjs
+      - name: Verify production build
+        run: npm run build
