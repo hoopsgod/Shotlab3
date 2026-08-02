@@ -3656,7 +3656,7 @@ useEffect(()=>{setCoachPriorityDraft(persistedCoachPriorities);},[persistedCoach
 const customProgramDrillCount=countCustomProgramDrills(programDrills);
 const[nudged,setNudged]=useState([]);
 const[confirmDelete,setConfirmDelete]=useState(null);const[playerDataConfirm,setPlayerDataConfirm]=useState(null);const[playerDataConfirmText,setPlayerDataConfirmText]=useState("");const[playerDataMessage,setPlayerDataMessage]=useState("");const[seasonArchiveForm,setSeasonArchiveForm]=useState({seasonName:"",seasonStartDate:"",seasonEndDate:""});const[seasonArchiveConfirm,setSeasonArchiveConfirm]=useState(false);const[seasonArchiveMessage,setSeasonArchiveMessage]=useState("");const[selectedSeasonArchiveId,setSelectedSeasonArchiveId]=useState(null);const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
-const coachRosterPlayers=useMemo(()=>getCoachRosterPlayers({players,playerProfiles,teamId:u?.teamId,coach:u}),[players,playerProfiles,u]);
+const coachRosterPlayers=useMemo(()=>getCoachRosterPlayers({players,playerProfiles,teamId:u?.teamId}),[players,playerProfiles,u?.teamId]);
 const ups=useMemo(()=>coachRosterPlayers.map(p=>({email:p.email||"",name:p.name||resolvePlayerDisplayName(p,playerProfiles),playerId:p.playerId||p.player_id||p.id||p.userId||p.user_id||p.profileId,player_id:p.player_id||p.playerId||p.id,userId:p.userId||p.user_id,user_id:p.user_id||p.userId,id:p.id,profileId:p.profileId,source:p.source})),[coachRosterPlayers,playerProfiles]);
 const activeTeamPlayerIdentity=useMemo(()=>getActiveTeamPlayerIdentity(coachRosterPlayers,u?.teamId),[coachRosterPlayers,u?.teamId]);
 const activeTeamPlayerEmails=activeTeamPlayerIdentity.emails;
