@@ -42,10 +42,20 @@ test("player mobile dock keeps three frequent destinations and moves secondary a
   await expect(dock.getByRole("button", { name: "Profile", exact: true })).toHaveCount(0);
 
   let sheet = await openMore(page);
-  for (const key of ["program", "sc", "leaderboards", "profile"]) {
+  for (const key of ["program", "sc", "leaderboards", "team-store", "profile"]) {
     await expect(sheet.locator(`[data-nav-key="${key}"]`)).toBeVisible();
   }
 
+  await sheet.locator('[data-nav-key="team-store"]').click();
+  await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
+  const teamStoreDialog = page.getByRole("dialog", { name: "Team Store" });
+  await expect(teamStoreDialog).toBeVisible();
+  await expect(teamStoreDialog.getByText("DEMO STOREFRONT", { exact: true })).toBeVisible();
+  await expect(teamStoreDialog.getByText("Your team store is not open yet", { exact: true })).toHaveCount(0);
+  await expect(teamStoreDialog.getByRole("button", { name: "SHOP TEAM STORE" })).toHaveCount(0);
+  await teamStoreDialog.getByRole("button", { name: "Close team store" }).click();
+
+  sheet = await openMore(page);
   await sheet.locator('[data-nav-key="program"]').click();
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
   await expect(page).toHaveURL(/\/events$/);

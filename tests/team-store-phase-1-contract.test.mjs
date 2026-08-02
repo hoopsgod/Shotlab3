@@ -131,7 +131,7 @@ test("team store portal is mounted independently from the large App shell", () =
   assert.match(portalSource, /window\.open\(store\.storeUrl, "_blank", "noopener,noreferrer"\)/);
 });
 
-test("authenticated app navigation can open the portal with authoritative coach identity", () => {
+test("authenticated app navigation can open the portal with authoritative role identity", () => {
   const events = [];
   class FakeCustomEvent {
     constructor(type, init) {
@@ -171,5 +171,14 @@ test("authenticated app navigation can open the portal with authoritative coach 
   assert.match(appSource, /getCoachNavItem\("team-store"/);
   assert.match(appSource, /if\(k==="team-store"\)/);
   assert.match(appSource, /openTeamStorePortal\(\{email:u\?\.email,role:"coach",isCoach:true/);
+  assert.match(appSource, /getPlayerNavItem\("team-store"/);
+  assert.match(appSource, /requestedTab==="team-store"/);
+  assert.match(appSource, /openTeamStorePortal\(\{email:u\?\.email,role:"player",isCoach:false/);
   assert.match(portalSource, /window\.addEventListener\(TEAM_STORE_OPEN_EVENT, handleNavigationOpen\)/);
+});
+
+test("player demo shows a truthful storefront preview without a fabricated shopping destination", () => {
+  assert.match(portalSource, /isDemoAccount\(activeIdentity\?\.email\)/);
+  assert.match(portalSource, /DEMO STOREFRONT/);
+  assert.match(portalSource, /A real team store will open only after the coach publishes a verified storefront link\./);
 });
