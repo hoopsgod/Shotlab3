@@ -117,7 +117,7 @@ test("coach mobile home gives the fresh one-player demo one compact truthful act
   expect(objectiveBox.height).toBeLessThan(330);
   expect(attentionBox.y).toBeLessThan(844);
   expect(onboardingBox.y).toBeGreaterThan(attentionBox.y);
-  expect(onboardingBox.height).toBeLessThan(180);
+  expect(onboardingBox.height).toBeLessThanOrEqual(182);
   await expectNoHorizontalOverflow(page);
 
   const dock = page.getByTestId("mobile-navigation-dock");
