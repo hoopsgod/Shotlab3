@@ -174,8 +174,15 @@ test("Coach Inbox routes the next-event RSVP risk into exact attendance manageme
   await expect(eventDrawer.getByText("Missing responses", { exact: true })).toBeVisible();
   await eventDrawer.getByRole("button", { name: "Manage Attendance", exact: true }).click();
 
-  await expect(page.getByTestId("coach-events-mobile-page")).toBeVisible();
-  await expect(page.getByText("ATTENDEES (1)", { exact: true })).toBeVisible();
+  const eventsPage = page.getByTestId("coach-events-mobile-page");
+  await expect(eventsPage).toBeVisible();
+  const expandedPractice = eventsPage
+    .locator("article")
+    .filter({ hasText: "Team Practice" })
+    .filter({ hasText: "Active Player" });
+  await expect(expandedPractice).toHaveCount(1);
+  await expect(expandedPractice.getByText("1 confirmed", { exact: true })).toBeVisible();
+  await expect(expandedPractice.getByText("Active Player", { exact: true })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 
