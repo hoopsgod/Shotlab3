@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const source=fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx",import.meta.url),"utf8");
+const appSource=fs.readFileSync(new URL("../src/App.jsx",import.meta.url),"utf8");
 const css=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",import.meta.url),"utf8");
 const headerCss=fs.readFileSync(new URL("../src/components/CoachMissionControlHeader.css",import.meta.url),"utf8");
 const polishCss=fs.readFileSync(new URL("../src/components/CoachMissionControlPolish.css",import.meta.url),"utf8");
@@ -112,6 +113,15 @@ test("coach tools remain available without permanent dashboard clutter",()=>{
   assert.match(source,/headshot placeholder/);
 });
 
+test("Mission Control keeps Players and Analytics as distinct destinations",()=>{
+  assert.match(source,/onAnalyticsClick/);
+  assert.match(source,/label: "Players", icon: "users", onClick: onPlayersClick/);
+  assert.match(source,/label: "Analytics", icon: "chart", onClick: onAnalyticsClick/);
+  assert.match(appSource,/onAnalyticsClick=\{openCoachLeaderboards\}/);
+  assert.match(appSource,/const openCoachLeaderboards=\(\)=>handleNavChange\("leaderboards"\)/);
+  assert.doesNotMatch(source,/label: "Analytics", icon: "chart", onClick: onActiveTodayClick/);
+});
+
 test("responsive CSS creates a compact native-feeling mobile operating system",()=>{
   assert.match(css,/grid-template-columns:112px minmax\(0,1fr\)/);
   assert.match(css,/@media\(max-width:980px\)/);
@@ -127,4 +137,17 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(finalCss,/\.mcPrimary:active/);
   assert.match(finalCss,/@media \(prefers-reduced-motion: reduce\)/);
   assert.match(activationCss,/@media\(prefers-reduced-motion:reduce\)/);
+});
+
+test("Mission Control uses the modern native visual system instead of tiny condensed dashboard UI",()=>{
+  assert.match(finalCss,/--mc-native:/);
+  assert.match(finalCss,/--mc-title-size:/);
+  assert.match(finalCss,/--mc-radius-hero:/);
+  assert.match(finalCss,/font-family:\s*var\(--mc-native\)/);
+  assert.match(finalCss,/\.mcHero h1\s*\{[\s\S]*font-family:\s*var\(--mc-native\)/);
+  assert.match(finalCss,/\.mcSectionHead h2\s*\{[\s\S]*font-family:\s*var\(--mc-native\)/);
+  assert.match(finalCss,/\.mcHeader\s*\{[\s\S]*backdrop-filter:\s*blur\(24px\)/);
+  assert.match(finalCss,/\.mcSection\s*\{[\s\S]*border-radius:\s*var\(--mc-radius-card\)/);
+  assert.match(finalCss,/@media \(max-width: 700px\)\s*\{[\s\S]*font-size:\s*34px\s*!important/);
+  assert.match(finalCss,/@media \(max-width: 700px\)\s*\{[\s\S]*font-size:\s*13px\s*!important/);
 });

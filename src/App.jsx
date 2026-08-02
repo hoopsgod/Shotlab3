@@ -3970,6 +3970,7 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
   primaryQuickAction={primaryQuickAction}
   onPlayersClick={()=>setTab("players")}
   onActiveTodayClick={()=>setTab("players")}
+  onAnalyticsClick={openCoachLeaderboards}
   onNextEventClick={()=>setTab("events")}
   onAddPlayer={()=>jumpToSection("players","coach-add-player-form")}
   onAddDrill={()=>jumpToSection("drills","coach-drills-management")}
