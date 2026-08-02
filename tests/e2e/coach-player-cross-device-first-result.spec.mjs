@@ -159,7 +159,7 @@ test("player activation and first result become visible in a separate coach sess
   const authInputs = playerPage.locator("input");
   await authInputs.nth(0).fill(PLAYER_EMAIL);
   await authInputs.nth(1).fill(PLAYER_PASSWORD);
-  await playerPage.getByRole("button", { name: /SIGN IN/ }).click();
+  await playerPage.getByRole("button", { name: "SIGN IN →", exact: true }).click();
   await expect(playerPage.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
 
   await expect(playerPage.getByTestId("player-daily-primary-action")).toContainText("Confirm attendance");
