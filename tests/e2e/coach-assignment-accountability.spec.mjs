@@ -104,7 +104,7 @@ test("Mission Control shows team-wide assignment accountability and opens the ex
   await expect(panel).toContainText("4/5 assigned · 75% responded · 25% completed");
   await expect(panel).not.toContainText("NEVER DISPLAY THIS PRIVATE COACH NOTE");
 
-  const actionRows = panel.locator("button.mcAssignmentAccountabilityRow");
+  const actionRows = panel.getByLabel("Players needing assignment action").locator("button.mcAssignmentAccountabilityRow");
   await expect(actionRows).toHaveCount(4);
   await expect(actionRows.nth(0)).toContainText("Unassigned Player");
   await expect(actionRows.nth(1)).toContainText("Assigned Player");
