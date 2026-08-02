@@ -159,8 +159,16 @@ test("player activation and first result become visible in a separate coach sess
   const authInputs = playerPage.locator("input");
   await authInputs.nth(0).fill(PLAYER_EMAIL);
   await authInputs.nth(1).fill(PLAYER_PASSWORD);
-  await playerPage.getByRole("button", { name: /SIGN IN →/ }).click();
+  await playerPage.getByRole("button", { name: /SIGN IN/ }).click();
   await expect(playerPage.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
+
+  await expect(playerPage.getByTestId("player-daily-primary-action")).toContainText("Confirm attendance");
+  await playerPage.getByTestId("player-daily-primary-action").click();
+  await expect(playerPage.getByText("UPCOMING EVENTS", { exact: true })).toBeVisible({ timeout: 20_000 });
+  await playerPage.getByRole("button", { name: /RSVP NOW/ }).first().click();
+  await expect(playerPage.getByTestId("player-completion-cue")).toContainText("Event participation confirmed");
+  await playerPage.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Home", exact: true }).click();
+
   await expect(playerPage.getByTestId("player-daily-primary-action")).toContainText("Log first result");
   await playerPage.getByTestId("player-daily-primary-action").click();
   await playerPage.getByRole("spinbutton").first().fill("33");
@@ -175,7 +183,8 @@ test("player activation and first result become visible in a separate coach sess
   await expect(activity).toContainText("Ari Cross");
   await expect(activity).toContainText("Home shots · 33 makes");
   await expect(coachPage.getByTestId("coach-primary-metrics")).toContainText("1/1");
-  await expect(coachPage.getByTestId("coach-primary-metrics")).toContainText("0Follow-up");
+  await expect(coachPage.getByTestId("coach-primary-metrics")).toContainText("Follow-up");
+  await expect(coachPage.getByTestId("coach-primary-metrics")).toContainText("0");
   await expect(coachPage.getByTestId("coach-onboarding-state")).toHaveCount(0);
 
   const replayPage = await playerContext.newPage();
