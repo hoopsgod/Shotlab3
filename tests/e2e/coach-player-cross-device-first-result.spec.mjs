@@ -115,6 +115,31 @@ async function installRoutes(context, state) {
     await fulfillJson(route, { ok: true, team_id: TEAM_ID, count: results.length, results });
   });
 
+  await context.route("**/v1/player-assignments**", async (route) => {
+    const request = route.request();
+    if (request.method() === "GET") {
+      await fulfillJson(route, { ok: true, storage_mode: "team_remote", team_id: TEAM_ID, assignments: state.assignment ? [state.assignment] : [] });
+      return;
+    }
+    const payload = request.postDataJSON();
+    const updatedAt = new Date().toISOString();
+    state.assignment = {
+      teamId: TEAM_ID,
+      playerIdentity: payload.assignment.player_identity,
+      playerName: payload.assignment.player_name,
+      assignmentText: payload.assignment.assignment_text,
+      resultDetail: payload.assignment.result_detail,
+      state: "assigned",
+      assignedBy: COACH_EMAIL,
+      createdAt: updatedAt,
+      updatedAt,
+      acknowledgedAt: "",
+      startedAt: "",
+      completedAt: "",
+    };
+    await fulfillJson(route, { ok: true, storage_mode: "team_remote", team_id: TEAM_ID, assignment: state.assignment });
+  });
+
   await context.route("**/v1/coach-follow-ups**", async (route) => {
     if (route.request().method() === "POST") {
       const body = route.request().postDataJSON();
@@ -156,7 +181,7 @@ async function seed(context, payload) {
 }
 
 test("player activation, first result, and coach response loop work across separate sessions", async ({ browser }) => {
-  const state = { claimed: false, results: [], followUps: [] };
+  const state = { claimed: false, results: [], followUps: [], assignment: null };
   const coachContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const playerContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await installRoutes(coachContext, state);
@@ -223,9 +248,9 @@ test("player activation, first result, and coach response loop work across separ
   await assignmentInput.fill("Repeat Form Shooting and match or improve 33 makes with balanced footwork.");
   const ledger = coachPage.getByTestId("coach-follow-up-ledger");
   await ledger.getByRole("textbox", { name: "Private coach note" }).fill("Review balance at the next practice.");
-  await ledger.getByRole("button", { name: "Record next assignment", exact: true }).click();
+  await ledger.getByRole("button", { name: "Deliver next assignment", exact: true }).click();
   await expect(ledger).toHaveAttribute("data-follow-up-state", "planned");
-  await expect(ledger.getByRole("status")).toContainText("Follow-up record synced");
+  await expect(ledger.getByRole("status")).toContainText("Assignment delivered to the player");
   await expect.poll(() => state.followUps.length).toBe(1);
   expect(state.followUps[0].teamId).toBe(TEAM_ID);
   expect(state.followUps[0].playerIdentity).toBe(PLAYER_EMAIL);
@@ -233,7 +258,16 @@ test("player activation, first result, and coach response loop work across separ
   expect(state.followUps[0].note).toContain("Repeat Form Shooting and match or improve 33 makes");
   expect(state.followUps[0].note).toContain("[SHOTLAB PRIVATE NOTE]");
   expect(state.followUps[0].note).toContain("Review balance at the next practice.");
-  await expect(ledger).toContainText("does not send a message or notify the player");
+  expect(state.assignment).toMatchObject({
+    teamId: TEAM_ID,
+    playerIdentity: PLAYER_EMAIL,
+    assignmentText: "Repeat Form Shooting and match or improve 33 makes with balanced footwork.",
+    resultDetail: "Home shots · 33 makes",
+    state: "assigned",
+  });
+  expect(state.assignment).not.toHaveProperty("note");
+  await expect(ledger).toContainText("The player receives only the assignment text and result context. Private coach notes remain coach-only.");
+  await expect(ledger).not.toContainText(/message sent|notification delivered|player was notified/i);
 
   const replayPage = await playerContext.newPage();
   await replayPage.goto(`/player-setup.html?token=${SETUP_TOKEN}`);
