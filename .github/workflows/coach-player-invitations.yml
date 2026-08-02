@@ -7,6 +7,11 @@ on:
       - "src/components/CoachCommandCenter.jsx"
       - "src/lib/coachPlayerInvitationService.js"
       - "src/lib/coachCrossDeviceActivity.js"
+      - "src/lib/coachPlayerResponseLoop.js"
+      - "src/lib/coachResponseLoopEnhancer.js"
+      - "src/lib/coachFollowUpEnhancer.js"
+      - "src/lib/coachFollowUpService.js"
+      - "src/lib/coachActivationPath.js"
       - "src/App.jsx"
       - "public/player-setup.html"
       - "functions/v1/coach/players/provision.js"
@@ -17,6 +22,8 @@ on:
       - "migrations/037_player_invitation_existing_account_claim.sql"
       - "tests/coach-player-invitation*.test.mjs"
       - "tests/coach-cross-device-activity.test.mjs"
+      - "tests/coach-player-response-loop.test.mjs"
+      - "tests/coach-follow-up-integrity.test.mjs"
       - "tests/e2e/coach-player-invitation.spec.mjs"
       - "tests/e2e/coach-player-cross-device-first-result.spec.mjs"
       - "scripts/verify-coach-player-invitation-live.mjs"
@@ -37,8 +44,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Invitation domain, cross-device activity, and safety tests
-        run: node --test tests/coach-player-invitation-service.test.mjs tests/coach-player-invitation-contract.test.mjs tests/coach-cross-device-activity.test.mjs
+      - name: Invitation, cross-device response, and safety tests
+        run: node --test tests/coach-player-invitation-service.test.mjs tests/coach-player-invitation-contract.test.mjs tests/coach-cross-device-activity.test.mjs tests/coach-player-response-loop.test.mjs tests/coach-follow-up-integrity.test.mjs
       - name: Existing authentication and roster regressions
         run: node --test tests/legacy-auth-persistence.test.mjs tests/team-memberships-confirm-context-route.test.mjs tests/release-candidate-stability.test.mjs
       - name: Install Playwright
@@ -47,7 +54,7 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Production build
         run: npm run build
-      - name: Coach-to-player invitation browser flow
+      - name: Coach-to-player invitation and response browser flow
         run: npx playwright test tests/e2e/coach-player-invitation.spec.mjs tests/e2e/coach-player-cross-device-first-result.spec.mjs
       - name: Live provision, claim, login, replay, and cleanup verification
         env:
