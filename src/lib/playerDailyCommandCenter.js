@@ -62,6 +62,25 @@ const buildDrillTask = (drill, { source = "plan", urgency = "normal" } = {}) => 
   source,
 });
 
+const buildFirstResultTask = (drill = null) => {
+  const recommendation = drill ? drillName(drill) : "";
+  return {
+    id: "first-result:shots",
+    kind: "first-training",
+    title: "Log your first shooting result",
+    detail: recommendation
+      ? `Use ${recommendation} as your focus, then log the makes from one completed set to create your baseline.`
+      : "Log the makes from one completed shooting set to create your baseline and activate progress tracking.",
+    target: "log-drill",
+    actionLabel: "Log first result",
+    estimatedMinutes: 5,
+    urgency: "priority",
+    source: "activation",
+    milestone: "first-training-result",
+    recommendedDrill: recommendation,
+  };
+};
+
 const dedupeTasks = (tasks = []) => {
   const seen = new Set();
   return tasks.filter((task) => {
@@ -129,6 +148,14 @@ export const derivePlayerDailyCommandCenter = ({
     ? (coachPriorityDrill.lane === "program" ? programCompleted : homeCompleted).has(drillId(coachPriorityDrill))
     : false;
 
+  const hasTraining = safeArray(shotLogs).some((row) => identityMatches(row, normalizedEmail) && teamMatches(row, teamId) && safeNumber(row?.made) > 0)
+    || safeArray(todayHomeScores).length > 0
+    || safeArray(todayProgramScores).length > 0
+    || safeArray(scLogs).some((row) => identityMatches(row, normalizedEmail) && teamMatches(row, teamId));
+  const firstResultPending = Boolean(clean(teamId)) && !hasTraining;
+  const firstResultDrill = coachPriorityDrill || incompleteHome[0] || incompleteProgram[0] || null;
+  const firstResultTask = firstResultPending ? buildFirstResultTask(firstResultDrill) : null;
+
   const tasks = [];
   if (urgentEvent) {
     tasks.push({
@@ -143,21 +170,27 @@ export const derivePlayerDailyCommandCenter = ({
       source: "team",
     });
   }
-  if (coachPriorityDrill && !coachPriorityComplete) tasks.push(buildDrillTask(coachPriorityDrill, { source: "coach", urgency: "priority" }));
-  if (safeNumber(todayMakes) < Math.max(1, safeNumber(dailyGoal))) {
-    const remaining = Math.max(0, Math.max(1, safeNumber(dailyGoal)) - safeNumber(todayMakes));
-    tasks.push({
-      id: "daily-shot-target",
-      kind: "shots",
-      title: `${remaining} makes to close today’s target`,
-      detail: `${safeNumber(todayMakes)} of ${Math.max(1, safeNumber(dailyGoal))} makes logged`,
-      target: "log-drill",
-      actionLabel: safeNumber(todayMakes) > 0 ? "Continue shooting" : "Log first makes",
-      estimatedMinutes: Math.max(5, Math.ceil(remaining / 10)),
-      urgency: "priority",
-      source: "daily-goal",
-    });
+
+  if (firstResultTask) {
+    tasks.push(firstResultTask);
+  } else {
+    if (coachPriorityDrill && !coachPriorityComplete) tasks.push(buildDrillTask(coachPriorityDrill, { source: "coach", urgency: "priority" }));
+    if (safeNumber(todayMakes) < Math.max(1, safeNumber(dailyGoal))) {
+      const remaining = Math.max(0, Math.max(1, safeNumber(dailyGoal)) - safeNumber(todayMakes));
+      tasks.push({
+        id: "daily-shot-target",
+        kind: "shots",
+        title: `${remaining} makes to close today’s target`,
+        detail: `${safeNumber(todayMakes)} of ${Math.max(1, safeNumber(dailyGoal))} makes logged`,
+        target: "log-drill",
+        actionLabel: safeNumber(todayMakes) > 0 ? "Continue shooting" : "Log first makes",
+        estimatedMinutes: Math.max(5, Math.ceil(remaining / 10)),
+        urgency: "priority",
+        source: "daily-goal",
+      });
+    }
   }
+
   if (urgentSc) {
     tasks.push({
       id: `sc-rsvp:${urgentSc.id}`,
@@ -171,8 +204,11 @@ export const derivePlayerDailyCommandCenter = ({
       source: "team",
     });
   }
-  if (incompleteHome[0]) tasks.push(buildDrillTask(incompleteHome[0]));
-  if (incompleteProgram[0]) tasks.push(buildDrillTask(incompleteProgram[0]));
+
+  if (!firstResultPending) {
+    if (incompleteHome[0]) tasks.push(buildDrillTask(incompleteHome[0]));
+    if (incompleteProgram[0]) tasks.push(buildDrillTask(incompleteProgram[0]));
+  }
   if (missingEvents[0]) {
     tasks.push({
       id: `event-rsvp:${missingEvents[0].id}`,
@@ -216,14 +252,10 @@ export const derivePlayerDailyCommandCenter = ({
   const queue = [...actionableTasks, reviewTask];
   const primaryAction = queue[0];
 
-  const hasTraining = safeArray(shotLogs).some((row) => identityMatches(row, normalizedEmail) && teamMatches(row, teamId) && safeNumber(row?.made) > 0)
-    || safeArray(todayHomeScores).length > 0
-    || safeArray(todayProgramScores).length > 0
-    || safeArray(scLogs).some((row) => identityMatches(row, normalizedEmail) && teamMatches(row, teamId));
   const hasTeamCommitment = eventRsvpRows.length > 0 || scRsvpRows.length > 0;
   const activationSteps = [
     { id: "team", label: "Team connected", done: Boolean(teamId), target: "home" },
-    { id: "training", label: "First training result", done: hasTraining, target: "log-drill" },
+    { id: "training", label: hasTraining ? "First training result banked" : "First training result", done: hasTraining, target: "log-drill", actionLabel: "Log first result" },
     { id: "commitment", label: "First team commitment", done: hasTeamCommitment, target: missingEvents.length ? "program" : "sc" },
   ];
   const activationCompleteCount = activationSteps.filter((step) => step.done).length;
@@ -245,6 +277,15 @@ export const derivePlayerDailyCommandCenter = ({
       total: activationSteps.length,
       pct: clampPct((activationCompleteCount / activationSteps.length) * 100),
       complete: activationCompleteCount === activationSteps.length,
+    },
+    firstSession: {
+      pending: firstResultPending,
+      complete: hasTraining,
+      task: firstResultTask,
+      title: firstResultPending ? "One saved result starts your ShotLab progress" : "First result banked",
+      detail: firstResultPending
+        ? "Log one completed shooting set. ShotLab will save it as your baseline instead of asking you to finish the full daily goal first."
+        : "Your training baseline is active. Every result from here builds your progress history.",
     },
     coachSignal: {
       focus: priorityFreshness.stale ? "" : clean(coachPriorities?.todayFocusText) || "Build quality reps today",

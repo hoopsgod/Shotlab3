@@ -32,6 +32,17 @@ test("daily action routing supports direct home and program drill launch", () =>
   assert.match(component, /data-testid="player-activation-loop"/);
 });
 
+test("first-result conversion is a single bounded player path", () => {
+  assert.match(selector, /const buildFirstResultTask/);
+  assert.match(selector, /kind: "first-training"/);
+  assert.match(selector, /milestone: "first-training-result"/);
+  assert.match(selector, /firstResultPending/);
+  assert.match(selector, /firstSession:/);
+  assert.match(component, /First session · Create your baseline/);
+  assert.match(component, /data-testid="player-first-result-confirmation"/);
+  assert.match(component, /First session complete/);
+});
+
 test("decision engine is pure and does not write auth, schema, or persistence", () => {
   assert.match(selector, /export const derivePlayerDailyCommandCenter/);
   for (const forbidden of ["supabase", ".insert(", ".update(", ".delete(", "localStorage", "sessionStorage", "fetch("]) {

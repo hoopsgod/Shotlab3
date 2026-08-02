@@ -94,7 +94,7 @@ test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
 
-test("daily command center resolves urgent team commitment then launches coach-priority work", async ({ page }) => {
+test("daily command center resolves urgent commitment then launches one bounded first result", async ({ page }) => {
   await enterSeededDemoPlayer(page);
 
   const commandCenter = page.getByTestId("player-daily-command-center");
@@ -111,14 +111,19 @@ test("daily command center resolves urgent team commitment then launches coach-p
   await expect(cue).toContainText("Event participation confirmed");
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Home", exact: true }).click();
-  await expect(page.getByTestId("player-daily-primary-action")).toHaveText(/Start coach priority/i);
+  await expect(page.getByText("First session · Create your baseline", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("player-daily-primary-action")).toHaveText(/Log first result/i);
+  await expect(commandCenter.getByText("Log your first shooting result", { exact: true })).toBeVisible();
+  await expect(commandCenter).toContainText("Use Form Shooting as your focus");
   await page.getByTestId("player-daily-primary-action").click();
-  await expect(page.getByRole("heading", { name: "Form Shooting", exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByRole("spinbutton").first()).toBeVisible();
+
+  await expect(page.getByRole("spinbutton").first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("button", { name: "LOG SHOTS", exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Form Shooting", exact: true })).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
 
-test("logging shots produces an immediate completion-to-next-action loop", async ({ page }) => {
+test("logging the first result activates progress and confirms the baseline", async ({ page }) => {
   await enterSeededDemoPlayer(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "At Home", exact: true }).click();
@@ -129,7 +134,12 @@ test("logging shots produces an immediate completion-to-next-action loop", async
   await expect(cue).toBeVisible({ timeout: 20_000 });
   await expect(cue).toContainText("33 makes added to today’s total");
   await cue.getByRole("button", { name: /CONTINUE/ }).click();
-  await expect(page.getByTestId("player-daily-command-center")).toBeVisible();
+
+  const commandCenter = page.getByTestId("player-daily-command-center");
+  await expect(commandCenter).toBeVisible();
+  await expect(page.getByTestId("player-first-result-confirmation")).toBeVisible();
+  await expect(page.getByTestId("player-first-result-confirmation")).toContainText("First result banked");
+  await expect(commandCenter.getByText(/First-week activation/)).toContainText("2/3 complete");
   await expect(page.getByText("33/100", { exact: true })).toBeVisible();
   await expect.poll(() => page.evaluate(() => {
     const rows = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");

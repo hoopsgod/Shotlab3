@@ -74,8 +74,10 @@ test("stale coach guidance is not presented as today's player assignment", async
   await expect(signal).not.toContainText(OLD_FOCUS);
   await expect(signal).not.toContainText(OLD_CHALLENGE);
 
-  await expect(commandCenter).toContainText("Personal development");
+  await expect(commandCenter).toContainText("First result");
+  await expect(commandCenter).toContainText("Log your first shooting result");
   await expect(commandCenter).not.toContainText("Coach directed");
+  await expect(page.getByTestId("player-daily-primary-action")).toContainText("Log first result");
   await expect(page.getByTestId("player-daily-primary-action")).not.toContainText("Start coach priority");
 
   const widths = await page.evaluate(() => ({
