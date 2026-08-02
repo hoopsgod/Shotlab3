@@ -62,7 +62,6 @@ const profileEmail = (profile = {}) => {
 };
 
 const rowTeamId = (row = {}) => String(row?.teamId || row?.team_id || "");
-const isCoachRosterIdentity = (row = {}) => normalizePlayerDataEmail(row?.role) === "coach" || row?.isCoach === true || row?.is_coach === true;
 const rowRemovedFromTeamId = (row = {}) => String(row?.removedFromTeamId || row?.removed_from_team_id || row?.deletedFromTeamId || row?.deleted_from_team_id || row?.teamLocalDataDeletedFromTeamId || row?.team_local_data_deleted_from_team_id || "");
 const isHiddenRosterRecord = isInactiveRosterRecord;
 
@@ -73,15 +72,11 @@ const rosterMergeKeys = (row = {}) => {
   return [...new Set(keys)];
 };
 
-export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamId = "", coach = null } = {}) => {
+export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamId = "" } = {}) => {
   const rosterByKey = new Map();
   const allPlayers = Array.isArray(players) ? players : [];
   const allProfiles = Array.isArray(playerProfiles) ? playerProfiles : [];
   const targetTeamId = String(teamId || "");
-  const coachIdentityKeys = new Set([...allPlayers, ...allProfiles, coach]
-    .filter((row) => row && (row === coach || isCoachRosterIdentity(row)))
-    .flatMap((row) => rosterMergeKeys(row)));
-  const isCoachRosterRecord = (row = {}) => isCoachRosterIdentity(row) || rosterMergeKeys(row).some((key) => coachIdentityKeys.has(key));
   const inactivePlayerKeys = new Set(allPlayers
     .filter((player) => isHiddenRosterRecord(player) && (!rowTeamId(player) || rowTeamId(player) === targetTeamId || rowRemovedFromTeamId(player) === targetTeamId))
     .flatMap((player) => rosterMergeKeys(player)));
@@ -127,7 +122,7 @@ export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamI
   };
 
   allPlayers
-    .filter((player) => rowTeamId(player) === targetTeamId && !isHiddenRosterRecord(player) && !isCoachRosterRecord(player))
+    .filter((player) => rowTeamId(player) === targetTeamId && !isHiddenRosterRecord(player))
     .forEach((player) => {
       const matchingProfile = allProfiles.find((profile) => {
         if (rowTeamId(profile) !== targetTeamId || isHiddenRosterRecord(profile) || isSuppressedByInactivePlayer(profile)) return false;
@@ -142,7 +137,7 @@ export const getCoachRosterPlayers = ({ players = [], playerProfiles = [], teamI
     });
 
   allProfiles
-    .filter((profile) => rowTeamId(profile) === targetTeamId && !isHiddenRosterRecord(profile) && !isSuppressedByInactivePlayer(profile) && !isCoachRosterRecord(profile))
+    .filter((profile) => rowTeamId(profile) === targetTeamId && !isHiddenRosterRecord(profile) && !isSuppressedByInactivePlayer(profile))
     .forEach((profile) => {
       const row = makeProfileRow(profile);
       const keys = rosterMergeKeys(row);
