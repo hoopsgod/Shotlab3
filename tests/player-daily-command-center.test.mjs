@@ -39,23 +39,25 @@ test("urgent event RSVP outranks first-result activation", () => {
   assert.equal(model.primaryAction.kind, "event-rsvp");
   assert.equal(model.primaryAction.target, "program");
   assert.equal(model.queue[1].kind, "first-training");
-  assert.equal(model.queue[1].drillId, "form");
+  assert.equal(model.queue[1].target, "log-drill");
+  assert.equal(model.queue[1].recommendedDrill, "Form Shooting");
 });
 
-test("connected player without training receives one bounded first-result task", () => {
+test("connected player without training receives one bounded saved-result task", () => {
   const model = derivePlayerDailyCommandCenter({ ...base, todayMakes: 0, weeklyMakes: 0 });
   assert.equal(model.primaryAction.kind, "first-training");
   assert.equal(model.primaryAction.source, "activation");
-  assert.equal(model.primaryAction.drillId, "form");
   assert.equal(model.primaryAction.target, "log-drill");
-  assert.equal(model.primaryAction.actionLabel, "Start first result");
-  assert.match(model.primaryAction.title, /Log your first Form Shooting result/);
+  assert.equal(model.primaryAction.actionLabel, "Log first result");
+  assert.equal(model.primaryAction.recommendedDrill, "Form Shooting");
+  assert.equal(Object.hasOwn(model.primaryAction, "drillId"), false);
+  assert.match(model.primaryAction.title, /Log your first shooting result/);
   assert.equal(model.queue.some((task) => task.id === "daily-shot-target"), false);
   assert.equal(model.firstSession.pending, true);
   assert.equal(model.firstSession.complete, false);
 });
 
-test("first-result activation falls back to shot logging when no drills exist", () => {
+test("first-result activation works when no drill recommendation exists", () => {
   const model = derivePlayerDailyCommandCenter({
     ...base,
     drills: [],
@@ -65,6 +67,22 @@ test("first-result activation falls back to shot logging when no drills exist", 
   assert.equal(model.primaryAction.id, "first-result:shots");
   assert.equal(model.primaryAction.target, "log-drill");
   assert.equal(model.primaryAction.actionLabel, "Log first result");
+  assert.equal(model.primaryAction.recommendedDrill, "");
+});
+
+test("historical shot result keeps activation complete on a later day", () => {
+  const model = derivePlayerDailyCommandCenter({
+    ...base,
+    today: "2026-07-30",
+    now: new Date("2026-07-30T12:00:00Z"),
+    todayMakes: 0,
+    weeklyMakes: 20,
+    shotLogs: [{ id: "first", email: "player@example.com", teamId: "team-1", made: 20, date: TODAY }],
+  });
+  assert.equal(model.firstSession.pending, false);
+  assert.equal(model.firstSession.complete, true);
+  assert.notEqual(model.primaryAction.kind, "first-training");
+  assert.equal(model.activation.steps[1].done, true);
 });
 
 test("current coach-priority drill resumes after first result exists", () => {
