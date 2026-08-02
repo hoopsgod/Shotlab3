@@ -72,7 +72,7 @@ function QuickAssignComposer({ row, onClose }) {
   const [saving, setSaving] = useState(false);
   const [deliveryState, setDeliveryState] = useState("idle");
   const [retryable, setRetryable] = useState(false);
-  const [status, setStatus] = useState("Enter the exact assignment the player should receive.");
+  const [status, setStatus] = useState("Tap the field and enter the exact assignment the player should receive.");
   const [error, setError] = useState(false);
 
   useEffect(() => {
@@ -80,17 +80,8 @@ function QuickAssignComposer({ row, onClose }) {
     setSaving(false);
     setDeliveryState("idle");
     setRetryable(false);
-    setStatus("Enter the exact assignment the player should receive.");
+    setStatus("Tap the field and enter the exact assignment the player should receive.");
     setError(false);
-
-    let timer = null;
-    const frame = window.requestAnimationFrame(() => {
-      timer = window.setTimeout(() => textareaRef.current?.focus?.({ preventScroll: true }), 0);
-    });
-    return () => {
-      window.cancelAnimationFrame(frame);
-      if (timer != null) window.clearTimeout(timer);
-    };
   }, [row.teamId, row.playerIdentity]);
 
   const locked = deliveryState === "delivered" || deliveryState === "local";
@@ -99,7 +90,7 @@ function QuickAssignComposer({ row, onClose }) {
     if (!assignmentText) {
       setError(true);
       setStatus("Add an assignment before delivering it.");
-      textareaRef.current?.focus?.();
+      textareaRef.current?.focus?.({ preventScroll: true });
       return;
     }
 
@@ -158,7 +149,6 @@ function QuickAssignComposer({ row, onClose }) {
       React.createElement("span", null, "Assignment to deliver"),
       React.createElement("textarea", {
         ref: textareaRef,
-        autoFocus: true,
         value: draft,
         maxLength: QUICK_ASSIGN_MAX_LENGTH,
         placeholder: "Example: Complete the form shooting ladder and record your makes.",
@@ -231,11 +221,6 @@ export function installCoachQuickAssignEnhancer() {
   if (window.__shotlabCoachQuickAssignEnhancer) return true;
   window.__shotlabCoachQuickAssignEnhancer = true;
   ensureStyles();
-
-  document.addEventListener("mousedown", (event) => {
-    const row = event.target?.closest?.('[data-testid="coach-assignment-accountability"] .mcAssignmentAccountabilityRow[data-assignment-state="unassigned"]');
-    if (row) event.preventDefault();
-  }, true);
 
   document.addEventListener("click", (event) => {
     const row = event.target?.closest?.('[data-testid="coach-assignment-accountability"] .mcAssignmentAccountabilityRow[data-assignment-state="unassigned"]');
