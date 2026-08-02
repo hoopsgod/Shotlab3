@@ -115,10 +115,14 @@ test("coach quick assigns an unassigned player without overwriting active work",
   await expect(composer).toBeVisible();
   await expect(composer).toHaveAttribute("data-player-email", PLAYER_EMAIL);
   const input = page.getByTestId("coach-quick-assign-input");
+  await expect(input).toBeVisible();
+  await expect(input).toBeEnabled();
+  await input.click();
   await expect(input).toBeFocused();
 
   await composer.getByRole("button", { name: "Deliver assignment", exact: true }).click();
   await expect(composer.getByRole("status")).toContainText("Add an assignment before delivering it.");
+  await expect(input).toBeFocused();
   expect(state.requests).toHaveLength(0);
 
   const assignmentText = "Complete the form shooting ladder and record makes from all five spots.";
