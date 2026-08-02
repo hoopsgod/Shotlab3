@@ -1,7 +1,3 @@
-body.mission-control-active [data-testid="coach-setup-checklist"]{
-  display:none !important;
-}
-
 .mcActivationPlan{
   position:relative;
   display:grid;
