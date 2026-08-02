@@ -49,6 +49,10 @@ export function readPlayerAssignmentStore(storage = globalThis?.localStorage) {
   return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
 }
 
+function writePlayerAssignmentStore(store, storage = globalThis?.localStorage) {
+  storage?.setItem?.(PLAYER_ASSIGNMENT_STORAGE_KEY, JSON.stringify(store || {}));
+}
+
 function announce(record) {
   try {
     globalThis?.dispatchEvent?.(new CustomEvent(PLAYER_ASSIGNMENT_CHANGE_EVENT, { detail: record }));
@@ -60,7 +64,7 @@ export function savePlayerAssignmentLocal(record, storage = globalThis?.localSto
   if (!normalized) return null;
   const store = readPlayerAssignmentStore(storage);
   store[keyFor(normalized.teamId, normalized.playerIdentity)] = normalized;
-  storage?.setItem?.(PLAYER_ASSIGNMENT_STORAGE_KEY, JSON.stringify(store));
+  writePlayerAssignmentStore(store, storage);
   announce(normalized);
   return normalized;
 }
@@ -69,9 +73,62 @@ export function getPlayerAssignmentLocal({ teamId = "", playerIdentity = "", sto
   return normalizePlayerAssignment(readPlayerAssignmentStore(storage)?.[keyFor(teamId, playerIdentity)] || {});
 }
 
+export function listPlayerAssignmentsLocal({ teamId = "", storage = globalThis?.localStorage } = {}) {
+  const activeTeamId = clean(teamId, 180);
+  return Object.values(readPlayerAssignmentStore(storage))
+    .map(normalizePlayerAssignment)
+    .filter((row) => row && (!activeTeamId || row.teamId === activeTeamId))
+    .sort((left, right) => String(right.updatedAt || right.createdAt).localeCompare(String(left.updatedAt || left.createdAt)));
+}
+
+export function replaceTeamPlayerAssignmentsLocal(assignments = [], { teamId = "", storage = globalThis?.localStorage } = {}) {
+  const activeTeamId = clean(teamId, 180);
+  if (!activeTeamId) return [];
+  const store = readPlayerAssignmentStore(storage);
+  for (const [key, value] of Object.entries(store)) {
+    const normalized = normalizePlayerAssignment(value);
+    if (normalized?.teamId === activeTeamId || key.startsWith(`${activeTeamId}::`)) delete store[key];
+  }
+  const normalizedAssignments = assignments
+    .map(normalizePlayerAssignment)
+    .filter((row) => row?.teamId === activeTeamId);
+  for (const row of normalizedAssignments) store[keyFor(row.teamId, row.playerIdentity)] = row;
+  writePlayerAssignmentStore(store, storage);
+  return normalizedAssignments;
+}
+
 function headers(storage, extra = {}) {
   const { requester } = readSession(storage);
   return buildApiIdentityHeaders({ requester, storage, headers: extra });
+}
+
+export async function loadTeamPlayerAssignments({
+  teamId = "",
+  storage = globalThis?.localStorage,
+  fetchImpl = globalThis?.fetch,
+} = {}) {
+  const session = readSession(storage);
+  const activeTeamId = clean(teamId || session.teamId, 180);
+  const local = listPlayerAssignmentsLocal({ teamId: activeTeamId, storage });
+  if (session.role && session.role !== "coach") {
+    return { ok: false, storageMode: "forbidden", assignments: [], error: "coach_required" };
+  }
+  if (!session.requester || !activeTeamId || typeof fetchImpl !== "function") {
+    return { ok: true, storageMode: "local_only", assignments: local };
+  }
+
+  const query = new URLSearchParams({ team_id: activeTeamId });
+  try {
+    const response = await fetchImpl(`/v1/player-assignments?${query.toString()}`, { method: "GET", headers: headers(storage) });
+    const body = await readJson(response);
+    if (!response?.ok || body?.error) {
+      return { ok: false, storageMode: "local_fallback", assignments: local, error: body?.error || "assignment_load_failed" };
+    }
+    const remote = replaceTeamPlayerAssignmentsLocal(Array.isArray(body?.assignments) ? body.assignments : [], { teamId: activeTeamId, storage });
+    return { ok: true, storageMode: body?.storage_mode || "team_remote", assignments: remote };
+  } catch (error) {
+    return { ok: false, storageMode: "local_fallback", assignments: local, error: String(error?.message || "assignment_load_failed") };
+  }
 }
 
 export async function loadPlayerAssignment({
