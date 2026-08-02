@@ -3,12 +3,14 @@ import { installCoachFollowUpEnhancer } from "./coachFollowUpEnhancer.js";
 import { installCoachFollowUpQueueEnhancer } from "./coachFollowUpQueueEnhancer.js";
 import { installCoachHomeHierarchyEnhancer } from "./coachHomeHierarchyEnhancer.js";
 import { installCoachResponseLoopEnhancer } from "./coachResponseLoopEnhancer.js";
+import { installPlayerAssignmentEnhancer } from "./playerAssignmentEnhancer.js";
 
 installCoachAssignmentOutcomeEnhancer();
 installCoachFollowUpEnhancer();
 installCoachFollowUpQueueEnhancer();
 installCoachHomeHierarchyEnhancer();
 installCoachResponseLoopEnhancer();
+installPlayerAssignmentEnhancer();
 
 const clean = (value) => String(value ?? "").trim();
 const safeCount = (value) => Math.max(0, Number(value) || 0);
