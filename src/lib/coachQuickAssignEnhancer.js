@@ -4,13 +4,17 @@ import { openExactPlayerFollowUp } from "./coachAssignmentOutcomeEnhancer.js";
 import { savePlayerAssignment } from "./playerAssignmentService.js";
 
 const STYLE_ID = "shotlab-coach-quick-assign-styles";
+const HOST_ID = "shotlab-coach-quick-assign-host";
 const HOST_TEST_ID = "coach-quick-assign-host";
 const OPEN_EVENT = "shotlab:coach-quick-assign-open";
 const QUICK_ASSIGN_MAX_LENGTH = 4000;
 
 const styles = `
-.mcQuickAssignHost{grid-column:1/-1;min-width:0}
-.mcQuickAssign{position:relative;overflow:hidden}
+.mcQuickAssignPortalHost{position:fixed;inset:0;z-index:2147481000;pointer-events:none}
+.mcQuickAssignPortalHost:empty{display:none}
+.mcQuickAssignLayer{position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom));pointer-events:auto}
+.mcQuickAssignBackdrop{position:absolute;inset:0;border:0;background:rgba(2,4,6,.76);backdrop-filter:blur(8px);cursor:pointer}
+.mcQuickAssign{position:relative;box-sizing:border-box;width:min(560px,100%);max-height:calc(100dvh - 24px);overflow:auto;overscroll-behavior:contain;box-shadow:0 22px 80px rgba(0,0,0,.58)}
 .mcQuickAssign::after{content:"";position:absolute;right:-58px;top:-68px;width:170px;height:170px;border-radius:50%;background:color-mix(in srgb,var(--mc,#c8ff1a) 8%,transparent);filter:blur(34px);pointer-events:none}
 .mcQuickAssign>*{position:relative;z-index:1}
 .mcQuickAssignHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
@@ -32,7 +36,8 @@ const styles = `
 .mcQuickAssignStatus.is-error{color:#ffb8a8}
 .mcQuickAssign[data-delivery-state="delivered"]{border-color:color-mix(in srgb,var(--mc,#c8ff1a) 42%,rgba(255,255,255,.08))}
 .mcQuickAssign[data-delivery-state="local"],.mcQuickAssign[data-delivery-state="error"]{border-color:rgba(255,181,71,.34)}
-@media(max-width:420px){.mcQuickAssignActions{grid-template-columns:1fr}.mcQuickAssignHead h2{font-size:20px}}
+@media(max-width:420px){.mcQuickAssignLayer{padding:8px;padding-bottom:max(8px,env(safe-area-inset-bottom))}.mcQuickAssign{max-height:calc(100dvh - 16px)}.mcQuickAssignActions{grid-template-columns:1fr}.mcQuickAssignHead h2{font-size:20px}}
+@media(prefers-reduced-motion:reduce){.mcQuickAssignLayer,.mcQuickAssign{scroll-behavior:auto}}
 `;
 
 const clean = (value) => String(value ?? "").trim();
@@ -40,13 +45,10 @@ const parse = (value, fallback) => {
   try { return value ? JSON.parse(value) : fallback; } catch { return fallback; }
 };
 
-const focusAfterReconciliation = (input) => {
-  if (!input) return;
-  window.requestAnimationFrame(() => {
-    window.setTimeout(() => {
-      if (input.isConnected && !input.disabled) input.focus({ preventScroll: true });
-    }, 0);
-  });
+const focusField = (input) => {
+  window.setTimeout(() => {
+    if (input?.isConnected && !input.disabled) input.focus({ preventScroll: true });
+  }, 0);
 };
 
 export function classifyQuickAssignResult(result = {}) {
@@ -99,7 +101,7 @@ function QuickAssignComposer({ row, onClose }) {
     if (!assignmentText) {
       setError(true);
       setStatus("Add an assignment before delivering it.");
-      focusAfterReconciliation(textareaRef.current);
+      focusField(textareaRef.current);
       return;
     }
 
@@ -122,15 +124,18 @@ function QuickAssignComposer({ row, onClose }) {
     if (result.assignment?.assignmentText) setDraft(result.assignment.assignmentText);
   };
 
-  const openPlayer = () => openExactPlayerFollowUp({
-    email: row.playerIdentity,
-    name: row.playerName,
-  });
+  const openPlayer = () => {
+    const target = { email: row.playerIdentity, name: row.playerName };
+    onClose();
+    window.requestAnimationFrame(() => openExactPlayerFollowUp(target));
+  };
 
   return React.createElement(
     "section",
     {
       className: "mcSection mcQuickAssign",
+      role: "dialog",
+      "aria-modal": "true",
       "data-testid": "coach-quick-assign",
       "data-player-email": row.playerIdentity,
       "data-delivery-state": deliveryState,
@@ -161,7 +166,6 @@ function QuickAssignComposer({ row, onClose }) {
         value: draft,
         maxLength: QUICK_ASSIGN_MAX_LENGTH,
         placeholder: "Example: Complete the form shooting ladder and record your makes.",
-        onClick: (event) => focusAfterReconciliation(event.currentTarget),
         onChange: (event) => setDraft(event.target.value),
         disabled: saving || locked || (deliveryState === "error" && retryable),
         "data-testid": "coach-quick-assign-input",
@@ -196,13 +200,26 @@ function QuickAssignPortal() {
     return () => window.removeEventListener(OPEN_EVENT, open);
   }, []);
 
-  return selected
-    ? React.createElement(QuickAssignComposer, {
-        key: `${selected.teamId}:${selected.playerIdentity}`,
-        row: selected,
-        onClose: () => setSelected(null),
-      })
-    : null;
+  useEffect(() => {
+    if (!selected) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setSelected(null);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [selected]);
+
+  if (!selected) return null;
+  return React.createElement(
+    "div",
+    { className: "mcQuickAssignLayer", "data-testid": "coach-quick-assign-layer" },
+    React.createElement("button", { type: "button", className: "mcQuickAssignBackdrop", onClick: () => setSelected(null), "aria-label": "Close quick assign" }),
+    React.createElement(QuickAssignComposer, {
+      key: `${selected.teamId}:${selected.playerIdentity}`,
+      row: selected,
+      onClose: () => setSelected(null),
+    }),
+  );
 }
 
 function ensureStyles() {
@@ -226,6 +243,17 @@ function rowContext(row) {
   };
 }
 
+function mountPortal() {
+  if (!document.body || document.getElementById(HOST_ID)) return;
+  const host = document.createElement("div");
+  host.id = HOST_ID;
+  host.className = "mcQuickAssignPortalHost";
+  host.dataset.testid = HOST_TEST_ID;
+  document.body.appendChild(host);
+  const root = createRoot(host);
+  root.render(React.createElement(QuickAssignPortal));
+}
+
 export function installCoachQuickAssignEnhancer() {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
   if (window.__shotlabCoachQuickAssignEnhancer) return true;
@@ -243,58 +271,8 @@ export function installCoachQuickAssignEnhancer() {
     window.dispatchEvent(new CustomEvent(OPEN_EVENT, { detail: context }));
   }, true);
 
-  let host = null;
-  let root = null;
-  let target = null;
-  let frame = null;
-
-  const positionHost = () => {
-    if (!target || !host) return;
-    const accountabilityHost = target.querySelector('[data-testid="coach-assignment-accountability-host"]');
-    const followUpHost = target.querySelector('[data-testid="coach-follow-up-queue-host"]');
-    if (accountabilityHost) {
-      const reference = accountabilityHost.nextSibling;
-      if (reference !== host) target.insertBefore(host, reference);
-    } else if (followUpHost && host.nextSibling !== followUpHost) {
-      target.insertBefore(host, followUpHost);
-    } else if (!host.isConnected) {
-      target.appendChild(host);
-    }
-  };
-
-  const reconcile = () => {
-    frame = null;
-    const nextTarget = document.querySelector('[data-testid="coach-command-center-full"] .mcFocusGrid');
-    if (nextTarget === target && host?.isConnected) {
-      positionHost();
-      return;
-    }
-    root?.unmount?.();
-    host?.remove?.();
-    host = null;
-    root = null;
-    target = nextTarget;
-    if (!target) return;
-    host = document.createElement("div");
-    host.className = "mcQuickAssignHost";
-    host.dataset.testid = HOST_TEST_ID;
-    target.appendChild(host);
-    positionHost();
-    root = createRoot(host);
-    root.render(React.createElement(QuickAssignPortal));
-  };
-
-  const schedule = () => {
-    if (frame != null) return;
-    frame = window.requestAnimationFrame(reconcile);
-  };
-  const observer = new MutationObserver(schedule);
-  const start = () => {
-    observer.observe(document.body, { childList: true, subtree: true });
-    schedule();
-  };
-  if (document.body) start();
-  else window.addEventListener("DOMContentLoaded", start, { once: true });
+  if (document.body) mountPortal();
+  else window.addEventListener("DOMContentLoaded", mountPortal, { once: true });
   return true;
 }
 
