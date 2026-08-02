@@ -10,17 +10,19 @@ export function buildCoachResponseContext({
   playerIdentity = "",
   playerName = "",
   detail = "",
+  resultDetail: storedResultDetail = "",
   meta = "",
+  resultMeta: storedResultMeta = "",
   source = "live-activity",
   openedAt = new Date().toISOString(),
 } = {}) {
-  const resultDetail = clean(detail, 600);
+  const resultDetail = clean(detail || storedResultDetail, 600);
   const makesMatch = resultDetail.match(/(?:^|\D)(\d{1,5})\s+make(?:s)?\b/i);
   return {
     playerIdentity: normalize(playerIdentity),
     playerName: clean(playerName, 320),
     resultDetail,
-    resultMeta: clean(meta, 160),
+    resultMeta: clean(meta || storedResultMeta, 160),
     made: makesMatch ? Math.max(0, Number(makesMatch[1]) || 0) : 0,
     source: clean(source, 80) || "live-activity",
     openedAt: clean(openedAt, 120),
