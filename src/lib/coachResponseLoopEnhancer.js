@@ -3,6 +3,9 @@ import { buildCoachResponseContext, setCoachResponseContext } from "./coachPlaye
 
 const STYLE_ID = "shotlab-coach-response-loop-styles";
 const ROW_SELECTOR = '[data-testid="coach-live-activity"] .mcTimeline > div';
+const PLAYER_DRAWER_SELECTOR = '[data-testid="coach-player-intelligence-drawer"]';
+const PLAYER_STATS_ROW_SELECTOR = '#coach-roster-operations [role="button"]';
+const PLAYER_DRAWER_RECOVERY_DELAYS = [650, 1500, 2800, 4500];
 
 const styles = `
 .mcActivity .mcTimeline>div[data-shotlab-response-row="true"]{position:relative;cursor:pointer;touch-action:manipulation;transition:border-color 150ms ease,background 150ms ease,transform 150ms ease}
@@ -36,6 +39,48 @@ export function readLiveResultRow(row) {
   return { actionable, playerName, detail, meta };
 }
 
+export function findPlayerStatsRow(root, playerName) {
+  const targetName = normalize(playerName);
+  if (!root?.querySelectorAll || !targetName) return null;
+  const rows = [...root.querySelectorAll(PLAYER_STATS_ROW_SELECTOR)];
+  return rows.find((row) => {
+    const heading = normalize(row?.querySelector?.("strong")?.textContent);
+    if (heading) return heading === targetName;
+    return normalize(row?.textContent).includes(targetName);
+  }) || null;
+}
+
+export function ensurePlayerStatsDrawerOpens(playerName, target = window, root = document) {
+  if (!target?.setTimeout || !root?.querySelector || !root?.body) return false;
+  if (root.querySelector(PLAYER_DRAWER_SELECTOR)) return true;
+
+  let complete = false;
+  const timers = [];
+  const finish = () => {
+    if (complete) return;
+    complete = true;
+    for (const timer of timers) target.clearTimeout?.(timer);
+    observer?.disconnect?.();
+  };
+  const observer = target.MutationObserver ? new target.MutationObserver(() => {
+    if (root.querySelector(PLAYER_DRAWER_SELECTOR)) finish();
+  }) : null;
+  observer?.observe?.(root.body, { childList: true, subtree: true });
+
+  const recover = () => {
+    if (complete) return;
+    if (root.querySelector(PLAYER_DRAWER_SELECTOR)) {
+      finish();
+      return;
+    }
+    findPlayerStatsRow(root, playerName)?.click?.();
+  };
+
+  for (const delay of PLAYER_DRAWER_RECOVERY_DELAYS) timers.push(target.setTimeout(recover, delay));
+  timers.push(target.setTimeout(finish, PLAYER_DRAWER_RECOVERY_DELAYS.at(-1) + 1800));
+  return true;
+}
+
 export function openLiveResultResponse(row) {
   const result = readLiveResultRow(row);
   if (!result.actionable) return false;
@@ -46,7 +91,9 @@ export function openLiveResultResponse(row) {
     meta: result.meta,
   }));
   if (!context) return false;
-  return openExactPlayerFollowUp({ searchIdentity: result.playerName, name: result.playerName });
+  const opened = openExactPlayerFollowUp({ searchIdentity: result.playerName, name: result.playerName });
+  ensurePlayerStatsDrawerOpens(result.playerName);
+  return opened;
 }
 
 function markRows() {

@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import styles from "./CoachDashboardPrimitives.module.css";
 
 const cx = (...values) => values.filter(Boolean).join(" ");
@@ -173,7 +174,7 @@ export function DashboardProgress({ value = 0, max = 100, label, detail }) {
 
 export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, children, testId }) {
   if (!open) return null;
-  return (
+  const drawer = (
     <div className={styles.drawerLayer} data-testid={testId}>
       <button type="button" className={styles.drawerBackdrop} aria-label="Close details" onClick={onClose} />
       <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label={title}>
@@ -189,4 +190,7 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
       </aside>
     </div>
   );
+  return typeof document !== "undefined" && document.body
+    ? createPortal(drawer, document.body)
+    : drawer;
 }
