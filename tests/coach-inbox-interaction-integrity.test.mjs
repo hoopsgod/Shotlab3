@@ -26,6 +26,7 @@ test("coach inbox exposes honest destinations and closes before routing", () => 
   assert.match(source, /setInboxOpen\(false\)/);
   assert.match(source, /source\?\.onClick \|\| onPlayersClick/);
   assert.match(source, /onNextEventClick\?\.\(\)/);
+  assert.match(source, /onEventReadinessClick\?\.\(item\.eventId\)/);
   assert.match(source, /runActivationAction\(item\?\.action\)/);
   assert.match(source, /Review Players/);
   assert.doesNotMatch(source, /Message Team/);
@@ -39,6 +40,8 @@ test("Mission Control feeds the inbox normalized player and activity intelligenc
   assert.match(appSource, /const coachCommandActivityItems=useMemo/);
   assert.match(appSource, /attentionItems=\{coachCommandAttentionItems\}/);
   assert.match(appSource, /activityItems=\{coachCommandActivityItems\}/);
+  assert.match(appSource, /eventReadiness=\{coachEventDashboardMetrics\.next\}/);
+  assert.match(appSource, /onEventReadinessClick=\{\(eventId\)=>setEventDrawerId\(eventId\)\}/);
 });
 
 test("coach inbox is responsive and respects reduced motion", () => {

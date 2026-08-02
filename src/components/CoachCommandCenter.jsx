@@ -143,6 +143,8 @@ export default function CoachCommandCenter({
   codeErr,
   attentionItems = [],
   activityItems = [],
+  eventReadiness = null,
+  onEventReadinessClick,
 }) {
   const { branding } = useTeamBranding();
   const fullLogoSource = branding?.logoUrl || FALLBACK_LOGO;
@@ -283,7 +285,8 @@ export default function CoachCommandCenter({
     activationPath,
     hasScheduledSession,
     nextEventDateFormatted,
-  }), [activationPath, hasScheduledSession, nextEventDateFormatted, resolvedAttention]);
+    eventReadiness,
+  }), [activationPath, eventReadiness, hasScheduledSession, nextEventDateFormatted, resolvedAttention]);
   const onboardingMode = !activationPath.complete;
   const sparseOnboardingMode = onboardingMode && !hasTeamActivity && !hasLiveActivity && !hasScheduledSession;
 
@@ -305,6 +308,10 @@ export default function CoachCommandCenter({
     }
     if (item?.action === "open-session") {
       onNextEventClick?.();
+      return;
+    }
+    if (item?.action === "open-event-readiness") {
+      onEventReadinessClick?.(item.eventId);
       return;
     }
     runActivationAction(item?.action);
@@ -407,9 +414,9 @@ export default function CoachCommandCenter({
         <section ref={inboxRef} id="coach-inbox-panel" className="mcInboxPanel" role="dialog" aria-modal="true" aria-labelledby="coach-inbox-title" data-testid="coach-inbox">
           <header className="mcInboxHead"><span><small>Live team signals</small><strong id="coach-inbox-title">Coach Inbox</strong></span><button type="button" aria-label="Close Coach Inbox" onClick={closeInbox}><Icon name="close" /></button></header>
           <div className="mcInboxSummary"><strong>{inboxModel.actionableCount > 0 ? `${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "move" : "moves"} to make` : "You’re caught up"}</strong><span>Only current team actions appear here.</span></div>
-          {inboxModel.items.length > 0 ? <div className="mcInboxList">{inboxModel.items.map((item, index) => <button type="button" key={`${item.kind}-${item.title}-${index}`} className={`mcInboxItem is-${item.tone || item.kind}`} onClick={() => runInboxAction(item)}><span className="mcInboxItemIcon"><Icon name={item.kind === "attention" ? "users" : "spark"} size={19} /></span><span className="mcInboxItemCopy"><small>{item.kind === "attention" ? "Player follow-up" : "Team launch"}</small><strong>{item.title}</strong><em>{item.detail}</em>{item.meta ? <b>{item.meta}</b> : null}</span><span className="mcInboxItemAction">{item.label}<Icon name="arrow" size={15} /></span></button>)}</div> : <div className="mcInboxAllClear"><span><Icon name="check" /></span><div><strong>No follow-up needed</strong><small>No player or team-launch tasks need attention right now.</small></div></div>}
+          {inboxModel.items.length > 0 ? <div className="mcInboxList">{inboxModel.items.map((item, index) => <button type="button" key={`${item.kind}-${item.title}-${index}`} className={`mcInboxItem is-${item.tone || item.kind}`} onClick={() => runInboxAction(item)}><span className="mcInboxItemIcon"><Icon name={item.kind === "attention" ? "users" : item.kind === "event-readiness" ? "calendar" : "spark"} size={19} /></span><span className="mcInboxItemCopy"><small>{item.kind === "attention" ? "Player follow-up" : item.kind === "event-readiness" ? "Event readiness" : "Team launch"}</small><strong>{item.title}</strong><em>{item.detail}</em>{item.meta ? <b>{item.meta}</b> : null}</span><span className="mcInboxItemAction">{item.label}<Icon name="arrow" size={15} /></span></button>)}</div> : <div className="mcInboxAllClear"><span><Icon name="check" /></span><div><strong>No follow-up needed</strong><small>No player, RSVP, or team-launch tasks need attention right now.</small></div></div>}
           {inboxModel.context ? <button type="button" className="mcInboxContext" onClick={() => runInboxAction(inboxModel.context)}><span className="mcInboxItemIcon"><Icon name="calendar" size={19} /></span><span><small>Coming up</small><strong>{inboxModel.context.title}</strong><em>{inboxModel.context.detail}</em></span><b>{inboxModel.context.label}<Icon name="arrow" size={15} /></b></button> : null}
-          <footer>Built from live roster, activation, and schedule data.</footer>
+          <footer>Built from live roster, RSVP, activation, and schedule data.</footer>
         </section>
       </div> : null}
 

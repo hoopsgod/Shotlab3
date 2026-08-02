@@ -4,6 +4,21 @@ test.use({ viewport: { width: 390, height: 844 } });
 
 const TEAM_ID = "team-phase-two-e2e";
 const COACH_EMAIL = "coach.demo@shotlab.app";
+const dateOffset = (days) => {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
+};
+const ACTIVE_DATE = dateOffset(0);
+const PRIOR_ACTIVITY_DATE = dateOffset(-14);
+const QUIET_ACTIVITY_DATE = dateOffset(-30);
+const NEXT_EVENT_DATE = dateOffset(1);
+const SECOND_EVENT_DATE = dateOffset(5);
+const PAST_EVENT_DATE = dateOffset(-10);
+const OVERDUE_SC_DATE = dateOffset(-2);
+const UPCOMING_SC_DATE = dateOffset(2);
+
 const ARCHIVE = {
   id: "archive-phase-two",
   teamId: TEAM_ID,
@@ -65,37 +80,37 @@ const seedData = {
     { id: "program-active", name: "Program Finishing", desc: "Team finishing standard", max: 30, icon: "layup" },
   ],
   "sl:scores": [
-    { id: "score-active-1", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, drillId: "home-active", score: 40, src: "home", date: "2026-07-25" },
-    { id: "score-active-2", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, drillId: "home-active", score: 42, src: "home", date: "2026-07-26" },
-    { id: "score-active-3", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, drillId: "home-active", score: 44, src: "home", date: "2026-07-26" },
-    { id: "score-quiet", email: "quiet@example.com", name: "Quiet Player", teamId: TEAM_ID, drillId: "home-unused", score: 20, src: "home", date: "2026-07-15" },
+    { id: "score-active-1", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, drillId: "home-active", score: 40, src: "home", date: ACTIVE_DATE },
+    { id: "score-active-2", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, drillId: "home-active", score: 42, src: "home", date: ACTIVE_DATE },
+    { id: "score-active-3", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, drillId: "home-active", score: 44, src: "home", date: ACTIVE_DATE },
+    { id: "score-quiet", email: "quiet@example.com", name: "Quiet Player", teamId: TEAM_ID, drillId: "home-unused", score: 20, src: "home", date: PRIOR_ACTIVITY_DATE },
   ],
   "sl:program-scores": [
-    { id: "program-score", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, drillId: "program-active", score: 25, src: "program", date: "2026-07-26" },
+    { id: "program-score", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, drillId: "program-active", score: 25, src: "program", date: ACTIVE_DATE },
   ],
   "sl:shotlogs": [
-    { id: "shot-active-current", playerId: "active-player", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, made: 85, attempted_shots: 120, date: "2026-07-26", sessionId: "active-current" },
-    { id: "shot-active-prior", playerId: "active-player", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, made: 25, attempted_shots: 50, date: "2026-07-15", sessionId: "active-prior" },
-    { id: "shot-quiet", playerId: "quiet-player", email: "quiet@example.com", name: "Quiet Player", teamId: TEAM_ID, made: 20, attempted_shots: 50, date: "2026-07-01", sessionId: "quiet-session" },
+    { id: "shot-active-current", playerId: "active-player", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, made: 85, attempted_shots: 120, date: ACTIVE_DATE, sessionId: "active-current" },
+    { id: "shot-active-prior", playerId: "active-player", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, made: 25, attempted_shots: 50, date: PRIOR_ACTIVITY_DATE, sessionId: "active-prior" },
+    { id: "shot-quiet", playerId: "quiet-player", email: "quiet@example.com", name: "Quiet Player", teamId: TEAM_ID, made: 20, attempted_shots: 50, date: QUIET_ACTIVITY_DATE, sessionId: "quiet-session" },
   ],
   "sl:events": [
-    { id: "event-practice", teamId: TEAM_ID, title: "Team Practice", type: "run", date: "2026-08-01", time: "6:00 PM", location: "Main Gym", desc: "Team practice" },
-    { id: "event-game", teamId: TEAM_ID, title: "Summer Game", type: "game", date: "2026-08-05", time: "7:00 PM", location: "Field House", desc: "Summer game" },
-    { id: "event-past", teamId: TEAM_ID, title: "Film Review", type: "recovery", date: "2026-07-10", time: "4:00 PM", location: "Team Room", desc: "Film" },
+    { id: "event-practice", teamId: TEAM_ID, title: "Team Practice", type: "run", date: NEXT_EVENT_DATE, time: "6:00 PM", location: "Main Gym", desc: "Team practice" },
+    { id: "event-game", teamId: TEAM_ID, title: "Summer Game", type: "game", date: SECOND_EVENT_DATE, time: "7:00 PM", location: "Field House", desc: "Summer game" },
+    { id: "event-past", teamId: TEAM_ID, title: "Film Review", type: "recovery", date: PAST_EVENT_DATE, time: "4:00 PM", location: "Team Room", desc: "Film" },
   ],
   "sl:rsvps": [
     { id: "rsvp-active", eventId: "event-practice", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, status: "yes" },
   ],
   "sl:sc-sessions": [
-    { id: "sc-overdue", teamId: TEAM_ID, sport: "Team Lift", date: "2026-07-20", time: "8:00 AM", sessionType: "School" },
-    { id: "sc-upcoming", teamId: TEAM_ID, sport: "Recovery Session", date: "2026-08-02", time: "9:00 AM", sessionType: "School" },
+    { id: "sc-overdue", teamId: TEAM_ID, sport: "Team Lift", date: OVERDUE_SC_DATE, time: "8:00 AM", sessionType: "School" },
+    { id: "sc-upcoming", teamId: TEAM_ID, sport: "Recovery Session", date: UPCOMING_SC_DATE, time: "9:00 AM", sessionType: "School" },
   ],
   "sl:sc-rsvps": [
     { id: "sc-rsvp-one", sessionId: "sc-overdue", email: "active@example.com", teamId: TEAM_ID },
     { id: "sc-rsvp-two", sessionId: "sc-overdue", email: "quiet@example.com", teamId: TEAM_ID },
   ],
   "sl:sc-logs": [
-    { id: "sc-log-one", sessionId: "sc-overdue", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, date: "2026-07-20" },
+    { id: "sc-log-one", sessionId: "sc-overdue", email: "active@example.com", name: "Active Player", teamId: TEAM_ID, date: OVERDUE_SC_DATE },
   ],
   "sl:season-archives": [ARCHIVE],
 };
