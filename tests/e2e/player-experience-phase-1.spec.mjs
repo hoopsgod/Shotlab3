@@ -112,11 +112,14 @@ test("daily command center resolves urgent commitment then launches one bounded 
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Home", exact: true }).click();
   await expect(page.getByText("First session · Create your baseline", { exact: true })).toBeVisible();
-  await expect(page.getByTestId("player-daily-primary-action")).toHaveText(/Start first result/i);
-  await expect(commandCenter.getByText("Log your first Form Shooting result", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("player-daily-primary-action")).toHaveText(/Log first result/i);
+  await expect(commandCenter.getByText("Log your first shooting result", { exact: true })).toBeVisible();
+  await expect(commandCenter).toContainText("Use Form Shooting as your focus");
   await page.getByTestId("player-daily-primary-action").click();
-  await expect(page.getByRole("heading", { name: "Form Shooting", exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByRole("spinbutton").first()).toBeVisible();
+
+  await expect(page.getByRole("spinbutton").first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("button", { name: "LOG SHOTS", exact: true }).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Form Shooting", exact: true })).toHaveCount(0);
   await expectNoHorizontalOverflow(page);
 });
 
