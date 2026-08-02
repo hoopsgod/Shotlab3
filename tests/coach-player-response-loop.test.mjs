@@ -68,8 +68,9 @@ test("response-loop source contracts keep the workflow one-tap and honest", () =
   assert.match(enhancer, /openExactPlayerFollowUp/);
   assert.match(followUp, /coach-result-response-context/);
   assert.match(followUp, /Next assignment to deliver/);
-  assert.match(followUp, /Record next assignment/);
-  assert.match(followUp, /ShotLab does not send a message or notify the player/);
+  assert.match(followUp, /Deliver next assignment/);
+  assert.match(followUp, /player receives only the assignment text and result context/i);
+  assert.match(followUp, /Private coach notes remain coach-only/i);
   assert.match(activation, /installCoachResponseLoopEnhancer\(\)/);
   assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);
 });
