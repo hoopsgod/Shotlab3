@@ -100,6 +100,7 @@ test("database, API, and UI contracts preserve role boundaries and acknowledgmen
   assert.match(migration, /create table if not exists public\.player_assignments/i);
   assert.match(migration, /enable row level security/i);
   assert.match(migration, /revoke all on table public\.player_assignments from public, anon, authenticated/i);
+  assert.match(migration, /grant select, insert, update, delete on table public\.player_assignments to service_role/i);
   assert.match(migration, /Private coach notes are never stored here/i);
   assert.match(api, /writableTeamIds\.has\(teamId\)/);
   assert.match(api, /active_player_required/);
