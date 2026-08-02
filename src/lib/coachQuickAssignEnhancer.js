@@ -40,6 +40,15 @@ const parse = (value, fallback) => {
   try { return value ? JSON.parse(value) : fallback; } catch { return fallback; }
 };
 
+const focusAfterReconciliation = (input) => {
+  if (!input) return;
+  window.requestAnimationFrame(() => {
+    window.setTimeout(() => {
+      if (input.isConnected && !input.disabled) input.focus({ preventScroll: true });
+    }, 0);
+  });
+};
+
 export function classifyQuickAssignResult(result = {}) {
   const storageMode = clean(result.storageMode || result.storage_mode);
   if (result.ok && storageMode === "team_remote") {
@@ -90,7 +99,7 @@ function QuickAssignComposer({ row, onClose }) {
     if (!assignmentText) {
       setError(true);
       setStatus("Add an assignment before delivering it.");
-      textareaRef.current?.focus?.({ preventScroll: true });
+      focusAfterReconciliation(textareaRef.current);
       return;
     }
 
@@ -152,6 +161,7 @@ function QuickAssignComposer({ row, onClose }) {
         value: draft,
         maxLength: QUICK_ASSIGN_MAX_LENGTH,
         placeholder: "Example: Complete the form shooting ladder and record your makes.",
+        onClick: (event) => focusAfterReconciliation(event.currentTarget),
         onChange: (event) => setDraft(event.target.value),
         disabled: saving || locked || (deliveryState === "error" && retryable),
         "data-testid": "coach-quick-assign-input",
