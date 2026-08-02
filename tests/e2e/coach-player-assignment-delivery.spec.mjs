@@ -194,7 +194,10 @@ test("coach assignment reaches the exact player and completion returns to the co
 
   await coachPage.bringToFront();
   await coachPage.evaluate(() => window.dispatchEvent(new Event("focus")));
-  await activity.getByRole("button", { name: /Review Ari Delivery result and record next assignment/ }).click();
+  const roster = coachPage.locator("#coach-roster-operations");
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  await roster.locator('[role="button"]').filter({ hasText: "Ari Delivery" }).first().click();
+  await expect(coachPage.getByTestId("coach-player-intelligence-drawer")).toBeVisible({ timeout: 20_000 });
   await expect(coachPage.getByTestId("coach-player-assignment-status")).toHaveAttribute("data-assignment-state", "completed");
   await expect(coachPage.getByTestId("coach-player-assignment-status")).toContainText("Player completed");
 
