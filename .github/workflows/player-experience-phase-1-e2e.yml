@@ -11,6 +11,7 @@ on:
       - src/lib/playerDailyCommandCenter.js
       - tests/player-daily-command-center.test.mjs
       - tests/player-experience-phase-1-contract.test.mjs
+      - tests/player-first-result-release-quality.test.mjs
       - tests/e2e/player-experience-phase-1.spec.mjs
       - .github/workflows/player-experience-phase-1-e2e.yml
   workflow_dispatch:
@@ -39,7 +40,7 @@ jobs:
         run: npm ci
 
       - name: Verify command-center decisions and source contracts
-        run: node --test tests/player-daily-command-center.test.mjs tests/player-experience-phase-1-contract.test.mjs
+        run: node --test tests/player-daily-command-center.test.mjs tests/player-experience-phase-1-contract.test.mjs tests/player-first-result-release-quality.test.mjs
 
       - name: Install pinned Playwright test runner
         run: npm install --no-save --ignore-scripts @playwright/test@1.55.1
