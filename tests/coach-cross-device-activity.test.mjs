@@ -28,12 +28,24 @@ test("remote results normalize, sort, dedupe, and identify today's active player
   const remote = normalizeCoachRemoteResult({ id: "result-1", player_email: "ari@example.com", player_name: "Ari Player", made: 33, date: today, observed_at: `${today}T14:00:00Z` });
   assert.equal(remote.detail, "Home shots · 33 makes");
   const merged = mergeCoachActivityItems({
-    localItems: [{ id: "local-old", name: "Older Player", detail: "home · 10 makes", date: "2026-07-01", observedAt: "2026-07-01T12:00:00Z" }],
+    localItems: [
+      { id: "upcoming-event", type: "event", name: "Team", detail: "Team Practice · 6:00 PM", date: today },
+      { id: "local-old", type: "shooting", name: "Older Player", detail: "home · 10 makes", date: "2026-07-01", observedAt: "2026-07-01T12:00:00Z" },
+    ],
     remoteItems: [remote, remote],
   });
   assert.equal(merged.length, 2);
   assert.equal(merged[0].name, "Ari Player");
+  assert.equal(merged.some((item) => item.type === "event" || item.name === "Team"), false);
   assert.deepEqual([...getRemoteActiveNamesToday(merged, today)], ["ari player"]);
+});
+
+test("upcoming team events alone never count as player engagement", () => {
+  const merged = mergeCoachActivityItems({
+    localItems: [{ id: "event-1", type: "event", name: "Team", title: "Team Practice", detail: "Tomorrow · Main Gym", date: "2026-08-03" }],
+    remoteItems: [],
+  });
+  assert.deepEqual(merged, []);
 });
 
 test("coach activity client sends only team-scoped identity and maps results", async () => {
@@ -87,6 +99,25 @@ test("coach-only endpoint returns minimal authorized team evidence", { concurren
     assert.equal(body.results[0].player_name, "Ari Player");
     assert.equal(response.headers.get("Cache-Control"), "private, no-store");
     assert.ok(calls.some((url) => url.includes("team_id=eq.team-1")));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("coach-only endpoint rejects a requester outside the team", { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("legacy_auth_profiles")) return new Response(JSON.stringify([{ email: "outsider@example.com", role: "coach", team_id: "team-2" }]), { status: 200 });
+    if (String(url).includes("teams")) return new Response(JSON.stringify([{ id: "team-1", owner_coach_id: "coach@example.com" }]), { status: 200 });
+    throw new Error(`Unexpected URL ${url}`);
+  };
+  try {
+    const response = await onRequestGet({
+      request: new Request("https://shotlab.test/v1/coach/activity/first-results?team_id=team-1", { headers: { "x-user-id": "outsider@example.com" } }),
+      env: { SUPABASE_URL: "https://db.test", SUPABASE_SERVICE_ROLE_KEY: "service-role" },
+    });
+    assert.equal(response.status, 403);
+    assert.deepEqual(await response.json(), { error: "forbidden" });
   } finally {
     globalThis.fetch = originalFetch;
   }
