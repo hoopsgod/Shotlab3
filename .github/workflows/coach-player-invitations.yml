@@ -13,6 +13,8 @@ on:
       - "src/lib/coachResponseLoopEnhancer.js"
       - "src/lib/coachFollowUpEnhancer.js"
       - "src/lib/coachFollowUpService.js"
+      - "src/lib/coachAssignmentAccountability.js"
+      - "src/lib/coachAssignmentAccountabilityEnhancer.js"
       - "src/lib/playerAssignmentService.js"
       - "src/lib/playerAssignmentEnhancer.js"
       - "src/lib/coachActivationPath.js"
@@ -30,10 +32,12 @@ on:
       - "tests/coach-cross-device-activity.test.mjs"
       - "tests/coach-player-response-loop.test.mjs"
       - "tests/coach-follow-up-integrity.test.mjs"
+      - "tests/coach-assignment-accountability.test.mjs"
       - "tests/player-assignment-delivery.test.mjs"
       - "tests/e2e/coach-player-invitation.spec.mjs"
       - "tests/e2e/coach-player-cross-device-first-result.spec.mjs"
       - "tests/e2e/coach-player-assignment-delivery.spec.mjs"
+      - "tests/e2e/coach-assignment-accountability.spec.mjs"
       - "scripts/verify-coach-player-invitation-live.mjs"
       - ".github/workflows/coach-player-invitations.yml"
   workflow_dispatch:
@@ -52,8 +56,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Invitation, cross-device response, assignment delivery, and safety tests
-        run: node --test tests/coach-player-invitation-service.test.mjs tests/coach-player-invitation-contract.test.mjs tests/coach-cross-device-activity.test.mjs tests/coach-player-response-loop.test.mjs tests/coach-follow-up-integrity.test.mjs tests/player-assignment-delivery.test.mjs
+      - name: Invitation, cross-device response, assignment delivery, accountability, and safety tests
+        run: node --test tests/coach-player-invitation-service.test.mjs tests/coach-player-invitation-contract.test.mjs tests/coach-cross-device-activity.test.mjs tests/coach-player-response-loop.test.mjs tests/coach-follow-up-integrity.test.mjs tests/player-assignment-delivery.test.mjs tests/coach-assignment-accountability.test.mjs
       - name: Existing authentication and roster regressions
         run: node --test tests/legacy-auth-persistence.test.mjs tests/team-memberships-confirm-context-route.test.mjs tests/release-candidate-stability.test.mjs
       - name: Install Playwright
@@ -62,8 +66,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Production build
         run: npm run build
-      - name: Coach-to-player invitation, response, and assignment browser flows
-        run: npx playwright test tests/e2e/coach-player-invitation.spec.mjs tests/e2e/coach-player-cross-device-first-result.spec.mjs tests/e2e/coach-player-assignment-delivery.spec.mjs
+      - name: Coach-to-player invitation, response, assignment, and accountability browser flows
+        run: npx playwright test tests/e2e/coach-player-invitation.spec.mjs tests/e2e/coach-player-cross-device-first-result.spec.mjs tests/e2e/coach-player-assignment-delivery.spec.mjs tests/e2e/coach-assignment-accountability.spec.mjs
       - name: Live provision, claim, login, replay, and cleanup verification
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
