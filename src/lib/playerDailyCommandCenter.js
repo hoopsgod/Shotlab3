@@ -63,29 +63,21 @@ const buildDrillTask = (drill, { source = "plan", urgency = "normal" } = {}) => 
 });
 
 const buildFirstResultTask = (drill = null) => {
-  if (!drill) {
-    return {
-      id: "first-result:shots",
-      kind: "first-training",
-      title: "Log your first makes",
-      detail: "One shooting result creates your baseline and activates progress tracking.",
-      target: "log-drill",
-      actionLabel: "Log first result",
-      estimatedMinutes: 5,
-      urgency: "priority",
-      source: "activation",
-      milestone: "first-training-result",
-    };
-  }
+  const recommendation = drill ? drillName(drill) : "";
   return {
-    ...buildDrillTask(drill, { source: "activation", urgency: "priority" }),
-    id: `first-result:${drillId(drill) || normalizeDrillName(drillName(drill))}`,
+    id: "first-result:shots",
     kind: "first-training",
-    title: `Log your first ${drillName(drill)} result`,
-    detail: "Complete one result to create your training baseline and activate progress tracking.",
-    actionLabel: "Start first result",
+    title: "Log your first shooting result",
+    detail: recommendation
+      ? `Use ${recommendation} as your focus, then log the makes from one completed set to create your baseline.`
+      : "Log the makes from one completed shooting set to create your baseline and activate progress tracking.",
+    target: "log-drill",
+    actionLabel: "Log first result",
+    estimatedMinutes: 5,
+    urgency: "priority",
     source: "activation",
     milestone: "first-training-result",
+    recommendedDrill: recommendation,
   };
 };
 
@@ -263,7 +255,7 @@ export const derivePlayerDailyCommandCenter = ({
   const hasTeamCommitment = eventRsvpRows.length > 0 || scRsvpRows.length > 0;
   const activationSteps = [
     { id: "team", label: "Team connected", done: Boolean(teamId), target: "home" },
-    { id: "training", label: hasTraining ? "First training result banked" : "First training result", done: hasTraining, target: firstResultTask?.target || "log-drill", actionLabel: firstResultTask?.actionLabel || "Start first result" },
+    { id: "training", label: hasTraining ? "First training result banked" : "First training result", done: hasTraining, target: "log-drill", actionLabel: "Log first result" },
     { id: "commitment", label: "First team commitment", done: hasTeamCommitment, target: missingEvents.length ? "program" : "sc" },
   ];
   const activationCompleteCount = activationSteps.filter((step) => step.done).length;
@@ -290,9 +282,9 @@ export const derivePlayerDailyCommandCenter = ({
       pending: firstResultPending,
       complete: hasTraining,
       task: firstResultTask,
-      title: firstResultPending ? "One result starts your ShotLab progress" : "First result banked",
+      title: firstResultPending ? "One saved result starts your ShotLab progress" : "First result banked",
       detail: firstResultPending
-        ? "Complete one bounded training result. ShotLab will use it as your baseline instead of asking you to finish the full daily goal first."
+        ? "Log one completed shooting set. ShotLab will save it as your baseline instead of asking you to finish the full daily goal first."
         : "Your training baseline is active. Every result from here builds your progress history.",
     },
     coachSignal: {
