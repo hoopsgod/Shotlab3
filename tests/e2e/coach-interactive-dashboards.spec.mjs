@@ -164,8 +164,8 @@ test("Coach Inbox routes the next-event RSVP risk into exact attendance manageme
 
   const inbox = page.getByRole("dialog", { name: "Coach Inbox" });
   const readiness = inbox.getByRole("button", { name: /Event readiness Team Practice/i });
-  await expect(readiness).toContainText("2 of 3 players still need to RSVP.");
-  await expect(readiness).toContainText("33% confirmed");
+  await expect(readiness).toContainText("3 of 4 players still need to RSVP.");
+  await expect(readiness).toContainText("25% confirmed");
   await readiness.click();
 
   const eventDrawer = page.getByTestId("coach-event-intelligence-drawer");
