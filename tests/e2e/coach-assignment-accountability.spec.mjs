@@ -47,6 +47,19 @@ const makeAssignment = (email, name, state, offsetMinutes) => ({
 });
 
 async function installRoutes(page, state) {
+  await page.route("**/v1/legacy-auth/restore", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      ok: true,
+      profile: {
+        email: COACH_EMAIL,
+        name: "Accountability Coach",
+        role: "coach",
+        team_id: TEAM_ID,
+      },
+    }),
+  }));
   await page.route("**/v1/player-assignments**", (route) => route.fulfill({
     status: 200,
     contentType: "application/json",
