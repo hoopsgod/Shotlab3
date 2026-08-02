@@ -25,6 +25,7 @@ create index if not exists player_assignments_team_updated_idx
 alter table public.player_assignments enable row level security;
 
 revoke all on table public.player_assignments from public, anon, authenticated;
+grant select, insert, update, delete on table public.player_assignments to service_role;
 
 comment on table public.player_assignments is
   'Current coach-directed assignment for one active team player. Written and read only through authenticated ShotLab APIs. Private coach notes are never stored here.';
