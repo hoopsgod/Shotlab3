@@ -155,7 +155,8 @@ test("database and API contracts keep follow-up notes behind the coach API", () 
   assert.match(api, /coach_follow_ups_post/);
   assert.match(api, /team_id,player_identity/);
   assert.match(enhancer, /coach-follow-up-ledger/);
-  assert.match(enhancer, /ShotLab does not send a message or notify the player/i);
+  assert.match(enhancer, /player receives only the assignment text and result context/i);
+  assert.match(enhancer, /Private coach notes remain coach-only/i);
   assert.match(enhancer, /shotlabLegacyNudgeRetired/);
   assert.match(enhancer, /min-height:44px/);
   assert.doesNotMatch(enhancer, /message sent|notification delivered|player was notified/i);
