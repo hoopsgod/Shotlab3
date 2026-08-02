@@ -10,9 +10,9 @@ const app = fs.readFileSync("src/App.jsx", "utf8");
 test("Mission Control is the single visible coach onboarding system", () => {
   assert.equal(commandCenter.includes('data-testid="coach-onboarding-state"'), true);
   assert.equal(commandCenter.includes("deriveCoachActivationPath"), true);
-  assert.equal(app.includes('data-testid="coach-setup-checklist"'), true);
-  assert.equal(css.includes('body.mission-control-active [data-testid="coach-setup-checklist"]'), true);
-  assert.equal(css.includes("display:none !important"), true);
+  assert.equal(app.includes('data-testid="coach-setup-checklist"'), false);
+  assert.equal(css.includes('body.mission-control-active [data-testid="coach-setup-checklist"]'), false);
+  assert.equal(css.includes("display:none !important"), false);
 });
 
 test("activation readiness is based on actual identity, roster, schedule, and engagement state", () => {
