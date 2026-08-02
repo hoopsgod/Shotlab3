@@ -31,32 +31,66 @@ const base = {
   },
 };
 
-test("urgent event RSVP outranks current coach-priority drill", () => {
+test("urgent event RSVP outranks first-result activation", () => {
   const model = derivePlayerDailyCommandCenter({
     ...base,
     events: [{ id: "practice", teamId: "team-1", title: "Team Practice", date: "2026-07-28", time: "6:00 PM" }],
   });
   assert.equal(model.primaryAction.kind, "event-rsvp");
   assert.equal(model.primaryAction.target, "program");
-  assert.equal(model.queue[1].kind, "home-drill");
-  assert.equal(model.queue[1].source, "coach");
+  assert.equal(model.queue[1].kind, "first-training");
+  assert.equal(model.queue[1].drillId, "form");
 });
 
-test("current coach-priority drill outranks daily volume when no urgent commitment exists", () => {
-  const model = derivePlayerDailyCommandCenter({ ...base, todayMakes: 20, weeklyMakes: 80 });
+test("connected player without training receives one bounded first-result task", () => {
+  const model = derivePlayerDailyCommandCenter({ ...base, todayMakes: 0, weeklyMakes: 0 });
+  assert.equal(model.primaryAction.kind, "first-training");
+  assert.equal(model.primaryAction.source, "activation");
+  assert.equal(model.primaryAction.drillId, "form");
+  assert.equal(model.primaryAction.target, "log-drill");
+  assert.equal(model.primaryAction.actionLabel, "Start first result");
+  assert.match(model.primaryAction.title, /Log your first Form Shooting result/);
+  assert.equal(model.queue.some((task) => task.id === "daily-shot-target"), false);
+  assert.equal(model.firstSession.pending, true);
+  assert.equal(model.firstSession.complete, false);
+});
+
+test("first-result activation falls back to shot logging when no drills exist", () => {
+  const model = derivePlayerDailyCommandCenter({
+    ...base,
+    drills: [],
+    programDrills: [],
+    coachPriorities: {},
+  });
+  assert.equal(model.primaryAction.id, "first-result:shots");
+  assert.equal(model.primaryAction.target, "log-drill");
+  assert.equal(model.primaryAction.actionLabel, "Log first result");
+});
+
+test("current coach-priority drill resumes after first result exists", () => {
+  const model = derivePlayerDailyCommandCenter({
+    ...base,
+    todayMakes: 20,
+    weeklyMakes: 80,
+    shotLogs: [{ id: "first", email: "player@example.com", teamId: "team-1", made: 20, date: TODAY }],
+  });
   assert.equal(model.primaryAction.kind, "home-drill");
   assert.equal(model.primaryAction.drillId, "form");
   assert.equal(model.primaryAction.source, "coach");
   assert.equal(model.coachSignal.freshness, "current");
   assert.equal(model.coachSignal.stale, false);
+  assert.equal(model.firstSession.pending, false);
+  assert.equal(model.firstSession.complete, true);
+  assert.equal(model.firstSession.title, "First result banked");
 });
 
-test("stale coach guidance is excluded from the player task queue", () => {
+test("stale coach guidance is excluded after the first result", () => {
   const model = derivePlayerDailyCommandCenter({
     ...base,
     now: new Date("2026-07-29T12:00:00Z"),
     todayMakes: 20,
     weeklyMakes: 80,
+    shotLogs: [{ id: "first", email: "player@example.com", teamId: "team-1", made: 20, date: TODAY }],
     coachPriorities: {
       ...base.coachPriorities,
       updatedAt: "2026-07-19T08:00:00Z",
@@ -97,7 +131,7 @@ test("urgent S&C commitment is surfaced after the daily target is complete", () 
   assert.equal(model.primaryAction.target, "sc");
 });
 
-test("activation loop tracks team, training result, and team commitment", () => {
+test("activation loop tracks team, first result, and team commitment", () => {
   const model = derivePlayerDailyCommandCenter({
     ...base,
     shotLogs: [{ id: "shot", email: "player@example.com", teamId: "team-1", made: 40, date: TODAY }],
@@ -106,6 +140,7 @@ test("activation loop tracks team, training result, and team commitment", () => 
   assert.equal(model.activation.complete, true);
   assert.equal(model.activation.completeCount, 3);
   assert.equal(model.activation.pct, 100);
+  assert.equal(model.activation.steps[1].label, "First training result banked");
 });
 
 test("completed day resolves to progress review rather than a dead end", () => {
