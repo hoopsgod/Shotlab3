@@ -32,6 +32,20 @@ const normalizeObservedAt = (row = {}) => {
   return Number.isFinite(parsed) ? new Date(parsed).toISOString() : "";
 };
 
+const activityTimestamp = (item = {}) => {
+  const parsed = Date.parse(clean(item?.observedAt));
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+const isPlayerDrivenActivity = (item = {}) => {
+  const source = key(item?.source);
+  const type = key(item?.type);
+  const actor = key(item?.identity || item?.name || item?.player || item?.title);
+  if (source === "remote-first-result") return true;
+  if (type === "event" || actor === "team") return false;
+  return Boolean(actor);
+};
+
 export function normalizeCoachRemoteResult(row = {}) {
   const made = Math.max(0, Number(row?.made) || 0);
   const name = clean(row?.player_name || row?.name) || "Player";
@@ -54,7 +68,9 @@ export function normalizeCoachRemoteResult(row = {}) {
 export function mergeCoachActivityItems({ localItems = [], remoteItems = [] } = {}) {
   const combined = [
     ...safeArray(remoteItems).map((item) => ({ ...item, observedAt: item?.observedAt || normalizeObservedAt(item) })),
-    ...safeArray(localItems).map((item) => ({ ...item, observedAt: item?.observedAt || normalizeObservedAt(item) })),
+    ...safeArray(localItems)
+      .filter(isPlayerDrivenActivity)
+      .map((item) => ({ ...item, observedAt: item?.observedAt || normalizeObservedAt(item) })),
   ];
   const seen = new Set();
   return combined
@@ -64,7 +80,7 @@ export function mergeCoachActivityItems({ localItems = [], remoteItems = [] } = 
       seen.add(signature);
       return true;
     })
-    .sort((a, b) => Date.parse(b?.observedAt || 0) - Date.parse(a?.observedAt || 0));
+    .sort((a, b) => activityTimestamp(b) - activityTimestamp(a));
 }
 
 export function getRemoteActiveNamesToday(items = [], today = new Date().toISOString().slice(0, 10)) {
