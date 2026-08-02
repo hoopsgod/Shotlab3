@@ -10,12 +10,14 @@ import "./CoachPriorityOverlay.css";
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";
 import { buildCoachInboxModel } from "../lib/coachInbox.js";
+import { getRemoteActiveNamesToday, loadCoachCrossDeviceActivity, mergeCoachActivityItems } from "../lib/coachCrossDeviceActivity.js";
 import useCleanTeamLogo from "./useCleanTeamLogo";
 
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
 const DEFAULT_MARK = "/branding/titans-default-mark.svg";
 const clamp = (value, min, max) => Math.min(max, Math.max(min, Number(value) || 0));
 const initials = (value = "") => String(value).trim().split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "SL";
+const normalizedName = (value = "") => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 
 function Icon({ name, size = 22 }) {
   const paths = {
@@ -87,9 +89,9 @@ function TeamActivityPanel({ activeCount, inactiveCount, rosterSize, activeRate,
 
 function LiveActivityPanel({ items }) {
   return (
-    <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading">
+    <article className="mcSection mcActivity" aria-labelledby="mc-activity-heading" data-testid="coach-live-activity">
       <div className="mcSectionHead"><span><small>Live team feed</small><h2 id="mc-activity-heading">Recent activity</h2></span></div>
-      <div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div>
+      <div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.id || item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div>
     </article>
   );
 }
@@ -161,6 +163,7 @@ export default function CoachCommandCenter({
   const [navOpen, setNavOpen] = useState(false);
   const [prioritiesOpen, setPrioritiesOpen] = useState(false);
   const [inboxOpen, setInboxOpen] = useState(false);
+  const [remoteActivityItems, setRemoteActivityItems] = useState([]);
   const inboxRef = useRef(null);
   const restoreInboxFocusRef = useRef(true);
 
@@ -171,6 +174,30 @@ export default function CoachCommandCenter({
       document.body.classList.remove("mission-control-priority-open");
     };
   }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    let requestActive = false;
+    const refresh = async () => {
+      if (requestActive) return;
+      requestActive = true;
+      const result = await loadCoachCrossDeviceActivity({ joinCode });
+      requestActive = false;
+      if (!cancelled && result.ok) setRemoteActivityItems(result.items);
+    };
+    const onFocus = () => void refresh();
+    const onVisibility = () => { if (document.visibilityState === "visible") void refresh(); };
+    void refresh();
+    const timer = window.setInterval(refresh, 15_000);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [joinCode]);
 
   const openBrandingSettings = () => {
     const existingBrandingControl = document.querySelector('[data-testid="coach-dashboard-identity-header"] button');
@@ -253,8 +280,11 @@ export default function CoachCommandCenter({
     setInboxOpen(false);
   };
 
+  const mergedActivityItems = useMemo(() => mergeCoachActivityItems({ localItems: activityItems, remoteItems: remoteActivityItems }), [activityItems, remoteActivityItems]);
+  const remoteActiveNames = useMemo(() => getRemoteActiveNamesToday(remoteActivityItems), [remoteActivityItems]);
   const rosterSize = Math.max(0, Number(totalPlayers) || 0);
-  const activeCount = Math.max(0, Number(activeTodayCount) || 0);
+  const localActiveCount = Math.max(0, Number(activeTodayCount) || 0);
+  const activeCount = Math.min(rosterSize || remoteActiveNames.size, Math.max(localActiveCount, remoteActiveNames.size));
   const inactiveCount = Math.max(rosterSize - activeCount, 0);
   const activeRate = rosterSize ? clamp(Math.round((activeCount / rosterSize) * 100), 0, 100) : 0;
   const hasTeamActivity = activeCount > 0;
@@ -267,9 +297,10 @@ export default function CoachCommandCenter({
     actionLabel: "Open",
     onClick: onPlayersClick,
   }] : [];
-  const resolvedAttention = attentionItems.length ? attentionItems : fallbackAttention;
+  const attentionSource = attentionItems.length ? attentionItems : fallbackAttention;
+  const resolvedAttention = attentionSource.filter((item) => !remoteActiveNames.has(normalizedName(item?.name || item?.title)));
   const attentionCount = resolvedAttention.length;
-  const resolvedActivity = activityItems.length ? activityItems : [activeCount ? { name: `${activeCount} athlete${activeCount === 1 ? "" : "s"} active`, detail: "Training activity recorded today", meta: "Today" } : null].filter(Boolean);
+  const resolvedActivity = mergedActivityItems.length ? mergedActivityItems : [activeCount ? { name: `${activeCount} athlete${activeCount === 1 ? "" : "s"} active`, detail: "Training activity recorded today", meta: "Today" } : null].filter(Boolean);
   const hasLiveActivity = resolvedActivity.length > 0;
   const activationPath = useMemo(() => deriveCoachActivationPath({
     teamCode: joinCode,
