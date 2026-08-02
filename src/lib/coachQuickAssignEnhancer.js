@@ -82,7 +82,33 @@ function QuickAssignComposer({ row, onClose }) {
     setRetryable(false);
     setStatus("Enter the exact assignment the player should receive.");
     setError(false);
-    window.requestAnimationFrame(() => textareaRef.current?.focus?.());
+
+    let cancelled = false;
+    let attempt = 0;
+    let timer = null;
+    const focusInput = () => {
+      if (cancelled) return;
+      const input = textareaRef.current;
+      if (!input) {
+        if (attempt < 5) {
+          attempt += 1;
+          timer = window.setTimeout(focusInput, 40);
+        }
+        return;
+      }
+      input.focus({ preventScroll: true });
+      if (document.activeElement !== input && attempt < 5) {
+        attempt += 1;
+        timer = window.setTimeout(focusInput, 60);
+      }
+    };
+    const frame = window.requestAnimationFrame(focusInput);
+    timer = window.setTimeout(focusInput, 120);
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
+      if (timer != null) window.clearTimeout(timer);
+    };
   }, [row.teamId, row.playerIdentity]);
 
   const locked = deliveryState === "delivered" || deliveryState === "local";
