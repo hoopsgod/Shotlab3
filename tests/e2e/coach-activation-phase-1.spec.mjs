@@ -30,25 +30,14 @@ async function enterFreshCoachDemo(page) {
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
-test.beforeEach(async ({ page }) => {
-  await installSafeRoutes(page);
-});
+async function expectTeamBrandingWorkspace(page) {
+  await expect(page.getByText("TEAM BRANDING", { exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText("Brand system", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Save team branding", exact: true })).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Create event" })).toHaveCount(0);
+}
 
-test("fresh Coach Demo receives one truthful next action and lands on the session form", async ({ page }) => {
-  await enterFreshCoachDemo(page);
-
-  const activation = page.getByTestId("coach-onboarding-state");
-  await expect(activation).toBeVisible({ timeout: 20_000 });
-  await expect(activation.getByText("Schedule the first team session", { exact: true })).toBeVisible();
-  await expect(activation.getByText("2/4", { exact: false })).toBeVisible();
-
-  await activation.getByRole("button", { name: /Create session/i }).click();
-
-  const createEventDialog = page.getByRole("dialog", { name: "Create event" });
-  await expect(createEventDialog).toBeVisible({ timeout: 20_000 });
-  await expect(createEventDialog.getByPlaceholder("Open Gym Run")).toBeVisible();
-  await expect(createEventDialog.locator('input[type="date"]')).toBeVisible();
-
+async function expectNoHorizontalOverflow(page) {
   const widths = await page.evaluate(() => ({
     viewport: window.innerWidth,
     document: document.documentElement.scrollWidth,
@@ -56,6 +45,24 @@ test("fresh Coach Demo receives one truthful next action and lands on the sessio
   }));
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
+}
+
+test.beforeEach(async ({ page }) => {
+  await installSafeRoutes(page);
+});
+
+test("fresh Coach Demo receives one truthful next action and lands in team branding", async ({ page }) => {
+  await enterFreshCoachDemo(page);
+
+  const activation = page.getByTestId("coach-onboarding-state");
+  await expect(activation).toBeVisible({ timeout: 20_000 });
+  await expect(activation.getByText("Set your team identity", { exact: true })).toBeVisible();
+  await expect(activation.getByText("2/5", { exact: false })).toBeVisible();
+
+  await activation.getByRole("button", { name: /Open team branding/i }).click();
+
+  await expectTeamBrandingWorkspace(page);
+  await expectNoHorizontalOverflow(page);
 });
 
 test("Coach Inbox turns the notification bell into an actionable mobile workflow", async ({ page }) => {
@@ -69,7 +76,7 @@ test("Coach Inbox turns the notification bell into an actionable mobile workflow
   const inbox = page.getByRole("dialog", { name: "Coach Inbox" });
   await expect(inbox).toBeVisible();
   await expect(bell).toHaveAttribute("aria-expanded", "true");
-  await expect(inbox.getByText("Schedule the first team session", { exact: true })).toBeVisible();
+  await expect(inbox.getByText("Set your team identity", { exact: true })).toBeVisible();
   await expect(inbox.getByText("Only current team actions appear here.", { exact: true })).toBeVisible();
 
   await page.keyboard.press("Escape");
@@ -77,14 +84,8 @@ test("Coach Inbox turns the notification bell into an actionable mobile workflow
   await expect(bell).toHaveAttribute("aria-expanded", "false");
 
   await bell.click();
-  await inbox.getByRole("button", { name: /Schedule the first team session/i }).click();
-  await expect(page.getByRole("dialog", { name: "Create event" })).toBeVisible({ timeout: 20_000 });
+  await inbox.getByRole("button", { name: /Set your team identity/i }).click();
 
-  const widths = await page.evaluate(() => ({
-    viewport: window.innerWidth,
-    document: document.documentElement.scrollWidth,
-    body: document.body.scrollWidth,
-  }));
-  expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
-  expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
+  await expectTeamBrandingWorkspace(page);
+  await expectNoHorizontalOverflow(page);
 });
