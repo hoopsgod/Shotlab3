@@ -115,6 +115,28 @@ async function installRoutes(context, state) {
     await fulfillJson(route, { ok: true, team_id: TEAM_ID, count: results.length, results });
   });
 
+  await context.route("**/v1/coach-follow-ups**", async (route) => {
+    if (route.request().method() === "POST") {
+      const body = route.request().postDataJSON();
+      const updatedAt = new Date().toISOString();
+      const record = {
+        teamId: body.team_id,
+        playerIdentity: body.player_identity,
+        playerName: body.player_name,
+        state: body.state,
+        note: body.note,
+        createdAt: body.created_at || updatedAt,
+        updatedAt,
+        completedAt: body.state === "completed" ? updatedAt : "",
+        updatedBy: COACH_EMAIL,
+      };
+      state.followUps = [record];
+      await fulfillJson(route, { ok: true, storage_mode: "team_remote", follow_up: record });
+      return;
+    }
+    await fulfillJson(route, { ok: true, storage_mode: "team_remote", follow_ups: state.followUps });
+  });
+
   await context.route("**/v1/leaderboards/home-shots**", async (route) => {
     const total = state.results.reduce((sum, row) => sum + Number(row.made || 0), 0);
     await fulfillJson(route, { team_id: TEAM_ID, scope: "players", count: total ? 1 : 0, leaderboard: total ? [{ rank: 1, player_display_name: "Ari Cross", total_home_shots: total }] : [] });
@@ -133,8 +155,8 @@ async function seed(context, payload) {
   }, { data: payload });
 }
 
-test("player activation and first result become visible in a separate coach session", async ({ browser }) => {
-  const state = { claimed: false, results: [] };
+test("player activation, first result, and coach response loop work across separate sessions", async ({ browser }) => {
+  const state = { claimed: false, results: [], followUps: [] };
   const coachContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const playerContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   await installRoutes(coachContext, state);
@@ -186,6 +208,32 @@ test("player activation and first result become visible in a separate coach sess
   await expect(coachPage.getByTestId("coach-primary-metrics")).toContainText("Follow-up");
   await expect(coachPage.getByTestId("coach-primary-metrics")).toContainText("0");
   await expect(coachPage.getByTestId("coach-onboarding-state")).toHaveCount(0);
+
+  const resultRow = activity.getByRole("button", { name: "Review Ari Cross result and record next assignment", exact: true });
+  await expect(resultRow).toBeVisible();
+  await resultRow.click();
+
+  const drawer = coachPage.getByTestId("coach-player-intelligence-drawer");
+  await expect(drawer).toBeVisible({ timeout: 20_000 });
+  await expect(coachPage.getByRole("dialog", { name: "Ari Cross", exact: true })).toBeVisible();
+  const responseContext = coachPage.getByTestId("coach-result-response-context");
+  await expect(responseContext).toContainText("Home shots · 33 makes");
+  const assignmentInput = coachPage.getByTestId("coach-next-assignment-input");
+  await expect(assignmentInput).toHaveValue(/match or improve 33 makes/i);
+  await assignmentInput.fill("Repeat Form Shooting and match or improve 33 makes with balanced footwork.");
+  const ledger = coachPage.getByTestId("coach-follow-up-ledger");
+  await ledger.getByRole("textbox", { name: "Private coach note" }).fill("Review balance at the next practice.");
+  await ledger.getByRole("button", { name: "Record next assignment", exact: true }).click();
+  await expect(ledger).toHaveAttribute("data-follow-up-state", "planned");
+  await expect(ledger.getByRole("status")).toContainText("Follow-up record synced");
+  await expect.poll(() => state.followUps.length).toBe(1);
+  expect(state.followUps[0].teamId).toBe(TEAM_ID);
+  expect(state.followUps[0].playerIdentity).toBe(PLAYER_EMAIL);
+  expect(state.followUps[0].note).toContain("[SHOTLAB NEXT ASSIGNMENT]");
+  expect(state.followUps[0].note).toContain("Repeat Form Shooting and match or improve 33 makes");
+  expect(state.followUps[0].note).toContain("[SHOTLAB PRIVATE NOTE]");
+  expect(state.followUps[0].note).toContain("Review balance at the next practice.");
+  await expect(ledger).toContainText("does not send a message or notify the player");
 
   const replayPage = await playerContext.newPage();
   await replayPage.goto(`/player-setup.html?token=${SETUP_TOKEN}`);
