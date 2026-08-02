@@ -23,11 +23,20 @@ test("live result context captures player, result, and makes without inventing e
   assert.match(buildNextAssignmentSuggestion(context), /match or improve 33 makes/i);
 });
 
-test("response context is scoped to the exact player and expires", () => {
+test("response context round-trips exact evidence, scopes to the player, and expires", () => {
   const target = {};
   const openedAt = "2026-08-02T18:00:00.000Z";
-  setCoachResponseContext({ playerName: "Ari Cross", detail: "33 makes", openedAt }, target);
-  assert.ok(getCoachResponseContext({ target, playerName: "Ari Cross", now: Date.parse(openedAt) + 60_000 }));
+  setCoachResponseContext({
+    playerName: "Ari Cross",
+    detail: "Home shots · 33 makes",
+    meta: "Aug 2",
+    openedAt,
+  }, target);
+  const retrieved = getCoachResponseContext({ target, playerName: "Ari Cross", now: Date.parse(openedAt) + 60_000 });
+  assert.ok(retrieved);
+  assert.equal(retrieved.resultDetail, "Home shots · 33 makes");
+  assert.equal(retrieved.resultMeta, "Aug 2");
+  assert.equal(retrieved.made, 33);
   assert.equal(getCoachResponseContext({ target, playerName: "Other Player", now: Date.parse(openedAt) + 60_000 }), null);
   assert.equal(getCoachResponseContext({ target, playerName: "Ari Cross", now: Date.parse(openedAt) + 11 * 60_000 }), null);
 });
