@@ -208,3 +208,19 @@ test("remaining coach pages inherit the reusable dashboard control layer", async
     expect(box?.height || 0).toBeGreaterThanOrEqual(44);
   }
 });
+
+test("Mission Control Analytics opens rankings instead of duplicating Players", async ({ page }) => {
+  await enterSeededDemoCoach(page);
+
+  await page.getByRole("button", { name: "Open navigation", exact: true }).click();
+  const drawer = page.locator(".mcMobileDrawer");
+  await expect(drawer).toBeVisible();
+  await drawer.getByRole("button", { name: "Analytics", exact: true }).click();
+
+  await expect(page.getByTestId("coach-page-dashboard-leaderboards")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible();
+  await expect(page.getByTestId("leaderboard-time-scope-current")).toBeVisible();
+  await expect(page.getByTestId("leaderboard-time-scope-all-time")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Players Dashboard", exact: true })).toHaveCount(0);
+  await expectNoHorizontalOverflow(page);
+});

@@ -132,6 +132,7 @@ export default function CoachCommandCenter({
   highlightPlayersAttention,
   onPlayersClick,
   onActiveTodayClick,
+  onAnalyticsClick,
   onNextEventClick,
   onAddPlayer,
   onAddDrill,
@@ -341,7 +342,7 @@ export default function CoachCommandCenter({
     { label: "Players", icon: "users", onClick: onPlayersClick },
     { label: "Sessions", icon: "calendar", onClick: onNextEventClick },
     { label: "Drills", icon: "target", onClick: onAddDrill },
-    { label: "Analytics", icon: "chart", onClick: onActiveTodayClick },
+    { label: "Analytics", icon: "chart", onClick: onAnalyticsClick },
     { label: "Coach Tools", icon: "plus", onClick: () => setActionsOpen(true) },
   ];
 
