@@ -128,7 +128,8 @@ test("Mission Control closes the exact player follow-up loop", async ({ page }) 
   await expect(ledger).toBeVisible();
   await expect(ledger).toHaveAttribute("data-follow-up-state", "planned");
   await expect(ledger.getByRole("textbox", { name: "Private coach note" })).toHaveValue("Check in after practice.");
-  await expect(ledger).toContainText("does not send a message or notify the player");
+  await expect(ledger).toContainText("The player receives only the assignment text and result context. Private coach notes remain coach-only.");
+  await expect(ledger).not.toContainText(/message sent|notification delivered|player was notified/i);
 
   await ledger.getByRole("button", { name: "Mark follow-up complete", exact: true }).click();
   await expect(ledger).toHaveAttribute("data-follow-up-state", "completed");

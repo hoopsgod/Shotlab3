@@ -114,7 +114,8 @@ test("Mission Control reports post-publication completion, opens exact player in
   const ledger = page.getByTestId("coach-follow-up-ledger");
   await expect(ledger).toBeVisible({ timeout: 20_000 });
   await expect(ledger).toHaveAttribute("data-follow-up-state", "none");
-  await expect(ledger).toContainText("ShotLab does not send a message or notify the player");
+  await expect(ledger).toContainText("The player receives only the assignment text and result context. Private coach notes remain coach-only.");
+  await expect(ledger).not.toContainText(/message sent|notification delivered|player was notified/i);
   await ledger.getByLabel("Private coach note").fill("Check in after practice about the priority drill.");
   await ledger.getByRole("button", { name: "Mark for follow-up", exact: true }).click();
   await expect(ledger).toHaveAttribute("data-follow-up-state", "planned");
