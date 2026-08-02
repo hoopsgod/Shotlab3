@@ -1,0 +1,387 @@
+:root {
+  --sl-canvas: #07090c;
+  --sl-canvas-elevated: #0a0e12;
+  --sl-surface-1: #0d1217;
+  --sl-surface-2: #11171d;
+  --sl-surface-3: #171e25;
+  --sl-line-soft: rgba(190, 205, 214, .10);
+  --sl-line-strong: rgba(190, 205, 214, .17);
+  --sl-text-1: #f4f7f8;
+  --sl-text-2: #b6c0c6;
+  --sl-text-3: #7f8991;
+  --sl-accent: #c8ff1a;
+  --sl-accent-faint: rgba(200, 255, 26, .035);
+  --sl-accent-soft: rgba(200, 255, 26, .08);
+  --sl-accent-line: rgba(200, 255, 26, .24);
+  --sl-danger: #ff5f70;
+  --sl-warning: #ffb347;
+}
+
+html,
+body,
+#root {
+  background: var(--sl-canvas) !important;
+}
+
+/* Coach Mission Control — dark sport-luxury hierarchy */
+body .mcShell {
+  --mc: var(--sl-accent) !important;
+  --bg: var(--sl-canvas) !important;
+  --panel: var(--sl-surface-1) !important;
+  --panel2: var(--sl-canvas-elevated) !important;
+  --line: var(--sl-line-strong) !important;
+  --muted: var(--sl-text-3) !important;
+  background:
+    radial-gradient(circle at 72% 4%, var(--sl-accent-faint), transparent 26%),
+    linear-gradient(180deg, #080b0f 0%, var(--sl-canvas) 42%, #06080b 100%) !important;
+  color: var(--sl-text-1) !important;
+}
+
+body .mcRail {
+  border-right-color: var(--sl-line-soft) !important;
+  background: linear-gradient(180deg, #0c1115 0%, #080b0e 58%, #06080a 100%) !important;
+  box-shadow: 12px 0 36px rgba(0, 0, 0, .14) !important;
+}
+
+body .mcRailLogo {
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, .34)) drop-shadow(0 0 7px rgba(200, 255, 26, .08)) !important;
+}
+
+body .mcRail nav button {
+  color: #929da5 !important;
+}
+
+body .mcRail nav button.is-active {
+  color: var(--sl-text-1) !important;
+  border-left-color: var(--sl-accent) !important;
+  background: linear-gradient(90deg, rgba(200, 255, 26, .085), rgba(200, 255, 26, .018) 72%, transparent) !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .018) !important;
+}
+
+body .mcCoachIdentity {
+  border-top-color: var(--sl-line-soft) !important;
+}
+
+body .mcCoachIdentity > span {
+  color: #9aa5ac !important;
+}
+
+body .mcCoachIdentity > strong,
+body .mcHeaderSub,
+body .mcHeaderRight small {
+  color: var(--sl-text-3) !important;
+}
+
+body .mcHeader h1 em {
+  color: var(--sl-accent) !important;
+}
+
+body .mcTeamSelect,
+body .mcBell {
+  border-color: var(--sl-line-strong) !important;
+  background: linear-gradient(180deg, var(--sl-surface-2), var(--sl-surface-1)) !important;
+  color: var(--sl-text-1) !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .028), 0 8px 22px rgba(0, 0, 0, .12) !important;
+}
+
+body .mcBell b {
+  background: var(--sl-accent) !important;
+  color: #071007 !important;
+  box-shadow: 0 0 0 3px var(--sl-canvas) !important;
+}
+
+body .mcHero {
+  border-color: var(--sl-line-strong) !important;
+  background: var(--sl-canvas-elevated) !important;
+  box-shadow: 0 24px 54px rgba(0, 0, 0, .30), inset 0 1px rgba(255, 255, 255, .025) !important;
+}
+
+body .mcCourtScene {
+  background: linear-gradient(155deg, #10161b 0%, #0b0f13 44%, #07090c 100%) !important;
+}
+
+body .mcCourtGlow {
+  background:
+    radial-gradient(circle at 76% 34%, rgba(200, 255, 26, .05), transparent 24%),
+    linear-gradient(120deg, transparent 36%, rgba(173, 190, 201, .025) 60%, transparent) !important;
+}
+
+body .mcCourtLights span {
+  background: linear-gradient(90deg, transparent, rgba(226, 234, 238, .72), transparent) !important;
+  box-shadow: 0 0 12px rgba(222, 232, 238, .22) !important;
+}
+
+body .mcBackboard,
+body .mcBackboard i {
+  border-color: rgba(190, 205, 214, .42) !important;
+  box-shadow: none !important;
+}
+
+body .mcBackboard b {
+  border-color: rgba(200, 255, 26, .62) !important;
+  box-shadow: 0 0 10px rgba(200, 255, 26, .08) !important;
+}
+
+body .mcFloor {
+  background: linear-gradient(120deg, rgba(174, 190, 200, .025), rgba(174, 190, 200, .065)) !important;
+  border-color: rgba(174, 190, 200, .16) !important;
+}
+
+body .mcFloor::before,
+body .mcFloor::after,
+body .mcArc,
+body .mcLane {
+  border-color: rgba(174, 190, 200, .27) !important;
+}
+
+body .mcFloor img {
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, .42)) !important;
+  opacity: .76 !important;
+}
+
+body .mcHeroShade {
+  background: linear-gradient(90deg, #080b0e 0%, rgba(8, 11, 14, .97) 38%, rgba(8, 11, 14, .42) 69%, rgba(8, 11, 14, .05) 100%) !important;
+}
+
+body .mcEyebrow,
+body .mcHeroContent p strong {
+  color: var(--sl-accent) !important;
+}
+
+body .mcPanelHead > span,
+body .mcSessionFocus small {
+  color: #9ca7ae !important;
+}
+
+body .mcHeroContent p,
+body .mcHeroStats span {
+  color: var(--sl-text-2) !important;
+}
+
+body .mcHeroStats button,
+body .mcList button,
+body .mcDualActions > button:not(.mcPrimary),
+body .mcQuickGrid button,
+body .mcTools button {
+  border-color: var(--sl-line-soft) !important;
+  background: linear-gradient(180deg, var(--sl-surface-2), var(--sl-surface-1)) !important;
+  color: var(--sl-text-1) !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .02) !important;
+}
+
+body .mcHeroStats i,
+body .mcQuickGrid i,
+body .mcSessionMeta span {
+  color: #b8c2c8 !important;
+}
+
+body .mcPrimary,
+body .missionControlCompact button {
+  border: 1px solid rgba(230, 255, 152, .55) !important;
+  background: linear-gradient(135deg, #dbff63, var(--sl-accent)) !important;
+  color: #071007 !important;
+  box-shadow: 0 10px 24px rgba(200, 255, 26, .12), inset 0 1px rgba(255, 255, 255, .28) !important;
+}
+
+body .mcPanel {
+  border-color: var(--sl-line-soft) !important;
+  background: linear-gradient(150deg, var(--sl-surface-2) 0%, var(--sl-surface-1) 58%, #0a0e12 100%) !important;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, .18), inset 0 1px rgba(255, 255, 255, .022) !important;
+}
+
+body .mcPanelHead small,
+body .mcPulseStats span,
+body .mcList small,
+body .mcList em,
+body .mcEmpty,
+body .mcRing span,
+body .mcProgress p small,
+body .mcSessionMeta small,
+body .mcSessionFocus p,
+body .mcTimeline small,
+body .mcToolsRow button {
+  color: var(--sl-text-3) !important;
+}
+
+body .mcSpark path {
+  stroke: var(--sl-accent) !important;
+  filter: drop-shadow(0 0 3px rgba(200, 255, 26, .18)) !important;
+}
+
+body .mcPulseStats strong {
+  color: var(--sl-text-1) !important;
+}
+
+body .mcPulseStats div:first-child strong {
+  color: var(--sl-accent) !important;
+}
+
+body .mcPanelHead b {
+  background: var(--sl-danger) !important;
+}
+
+body .mcDot {
+  background: var(--sl-warning) !important;
+}
+
+body .mcDot.danger {
+  background: var(--sl-danger) !important;
+}
+
+body .mcAvatar {
+  border-color: rgba(208, 220, 226, .22) !important;
+  background: var(--sl-surface-3) !important;
+}
+
+body .mcRing {
+  background: conic-gradient(var(--sl-accent) var(--progress), rgba(190, 205, 214, .09) 0) !important;
+  box-shadow: 0 18px 34px rgba(0, 0, 0, .20) !important;
+}
+
+body .mcRing::before {
+  background: var(--sl-surface-1) !important;
+}
+
+body .mcTimeline > div {
+  border-top-color: var(--sl-line-soft) !important;
+}
+
+body .mcTimeline > div > i {
+  background: var(--sl-accent) !important;
+  box-shadow: 0 0 0 3px rgba(200, 255, 26, .055) !important;
+}
+
+body .mcTimeline b {
+  color: var(--sl-text-1) !important;
+}
+
+body .mcQuickGrid button:hover,
+body .mcQuickGrid button:focus-visible {
+  border-color: var(--sl-accent-line) !important;
+  background: linear-gradient(180deg, #141b20, #0e1318) !important;
+}
+
+body .mcQuickGrid button:hover i,
+body .mcQuickGrid button:focus-visible i {
+  color: var(--sl-accent) !important;
+}
+
+body .mcTools,
+body .missionControlCompact {
+  background: var(--sl-canvas-elevated) !important;
+}
+
+body .missionControlCompact span {
+  color: #9ca7ae !important;
+}
+
+body .mcShell button:focus-visible {
+  outline: 3px solid rgba(200, 255, 26, .28) !important;
+  outline-offset: 2px !important;
+}
+
+/* Player Daily Command Center — quieter graphite depth, one decisive accent */
+body [data-testid="player-daily-command-center"] {
+  --text-1: var(--sl-text-1);
+  --text-2: var(--sl-text-2);
+  --text-3: var(--sl-text-3);
+  border-color: var(--sl-line-soft) !important;
+  background:
+    radial-gradient(circle at 92% 0%, rgba(200, 255, 26, .045), transparent 36%),
+    linear-gradient(155deg, rgba(20, 26, 31, .96), rgba(9, 13, 17, .985)) !important;
+  box-shadow: 0 28px 66px rgba(0, 0, 0, .27), inset 0 1px rgba(255, 255, 255, .026) !important;
+  backdrop-filter: blur(22px) saturate(108%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(108%) !important;
+}
+
+body [data-testid="player-daily-command-center"]::before {
+  background: linear-gradient(112deg, rgba(255, 255, 255, .018), transparent 31%, transparent 80%, rgba(255, 255, 255, .01)) !important;
+}
+
+body [data-testid="player-daily-command-center"] > div:nth-child(2) {
+  border-color: var(--sl-line-soft) !important;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, .022), transparent 42%),
+    linear-gradient(160deg, #12181d, #0d1216) !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .02), 0 18px 38px rgba(0, 0, 0, .15) !important;
+}
+
+body [data-testid="player-daily-primary-action"] {
+  border-color: rgba(230, 255, 152, .58) !important;
+  background: linear-gradient(135deg, #dbff63, var(--sl-accent)) !important;
+  color: #071007 !important;
+  box-shadow: 0 13px 28px rgba(200, 255, 26, .13), inset 0 1px rgba(255, 255, 255, .28) !important;
+}
+
+body [data-testid="player-coach-priority-signal"] {
+  border-color: var(--sl-line-soft) !important;
+  background:
+    linear-gradient(145deg, rgba(200, 255, 26, .025), transparent 54%),
+    linear-gradient(160deg, #11171c, #0c1115) !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .018) !important;
+}
+
+body [data-testid="player-coach-priority-signal"] > div:first-child > span {
+  border-color: var(--sl-line-strong) !important;
+  background: var(--sl-surface-3) !important;
+  color: var(--sl-text-2) !important;
+}
+
+body [data-testid="player-coach-priority-signal"] > div:last-child > div,
+body [data-testid="player-daily-command-center"] [class*="progressCard"],
+body [data-testid="player-daily-command-center"] [class*="metrics"],
+body [data-testid="player-daily-command-center"] [class*="taskRow"],
+body [data-testid="player-activation-loop"] {
+  border-color: var(--sl-line-soft) !important;
+  background: rgba(255, 255, 255, .018) !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .014) !important;
+}
+
+body [data-testid="player-daily-command-center"] [class*="status"] {
+  border-color: var(--sl-line-strong) !important;
+  background: var(--sl-surface-3) !important;
+  color: var(--sl-text-2) !important;
+}
+
+body [data-testid="player-daily-command-center"] [class*="taskIndex"] {
+  border-color: var(--sl-line-soft) !important;
+  background: var(--sl-surface-3) !important;
+  color: var(--sl-text-2) !important;
+}
+
+body [data-testid="player-daily-command-center"] [class*="taskButton"],
+body [data-testid="player-daily-command-center"] [class*="activationButton"] {
+  border-color: var(--sl-accent-line) !important;
+  background: rgba(200, 255, 26, .045) !important;
+  color: color-mix(in srgb, var(--sl-accent) 74%, white 26%) !important;
+  box-shadow: none !important;
+}
+
+body [data-testid="player-daily-command-center"] [class*="progressFill"] {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--sl-accent) 86%, white 14%), var(--sl-accent)) !important;
+  box-shadow: 0 0 8px rgba(200, 255, 26, .12) !important;
+}
+
+body [data-testid="player-daily-command-center"] [class*="progressTrack"] {
+  background: rgba(190, 205, 214, .08) !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .24) !important;
+}
+
+body [data-testid="player-daily-command-center"] [class*="activationDotDone"] {
+  border-color: var(--sl-accent-line) !important;
+  background: rgba(200, 255, 26, .07) !important;
+  color: var(--sl-accent) !important;
+}
+
+body [data-testid="player-daily-command-center"] button:focus-visible,
+body [data-testid="player-daily-command-center"] summary:focus-visible {
+  outline: 3px solid rgba(200, 255, 26, .28) !important;
+  outline-offset: 2px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body [data-testid="player-daily-command-center"] {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
