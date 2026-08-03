@@ -131,7 +131,7 @@ test("coach assignment becomes the player next action and collapses after comple
 
   await action.click();
   await expect(card).toHaveAttribute("data-assignment-state", "started");
-  await expect(card).toContainText("Finish what you started");
+  await expect(card).toContainText("Finish the work and mark it complete");
   await expect(page.getByTestId("player-assignment-step-start")).toHaveAttribute("data-state", "done");
   await expect(page.getByTestId("player-assignment-step-complete")).toHaveAttribute("data-state", "active");
 
