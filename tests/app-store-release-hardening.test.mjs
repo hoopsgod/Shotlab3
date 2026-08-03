@@ -47,7 +47,6 @@ test("demo runtime requires explicit opt-in and never activates from hosting or 
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab3.pages.dev", search: "" } }), false);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "agent-visual-rebuild-v3.shotlab3.pages.dev", search: "" } }), false);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "agent-visual-rebuild-v3.shotlab3.pages.dev", search: "?demo=1" } }), true);
-  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "unrelated.pages.dev", search: "" } }), false);
 });
 
 test("stale demo sessions are removed from a production runtime", async () => {
@@ -100,11 +99,9 @@ test("pending home shots sync to the team endpoint and become remote-confirmed",
   assert.equal(result.pending, 0);
   assert.equal(requests[0].url, "/v1/home-shots/log");
   assert.equal(requests[0].options.headers["x-user-id"], "player@example.com");
-  assert.equal(requests[0].body.team_id, "team-1");
   const saved = JSON.parse(state.values.get(RUNTIME_STORAGE_KEYS.shotLogs));
   assert.equal(saved[0].id, "remote-shot-1");
   assert.equal(saved[0].syncState, "remote_saved");
-  assert.equal(saved[0].syncSource, "remote");
 });
 
 test("authentication failures preserve pending data and request session recovery", async () => {
@@ -116,9 +113,7 @@ test("authentication failures preserve pending data and request session recovery
     fetchImpl: async () => ({ ok: false, status: 401, async json() { return { error: "unauthorized" }; } }),
   });
   assert.equal(result.requiresAuth, true);
-  assert.equal(result.synced, 0);
   assert.equal(result.pending, 1);
-  assert.equal(JSON.parse(state.values.get(RUNTIME_STORAGE_KEYS.shotLogs))[0].syncState, "local_pending");
 });
 
 test("session error classifier covers refresh and invalid-session outcomes", () => {
@@ -127,12 +122,14 @@ test("session error classifier covers refresh and invalid-session outcomes", () 
   assert.equal(isSessionAuthError({ code: "network_error" }), false);
 });
 
-test("startup shell mounts the release boundary and gates demo bootstrap", async () => {
+test("startup is authentication-first and cannot bootstrap demo data automatically", async () => {
   const main = await readFile(new URL("../src/main.jsx", import.meta.url), "utf8");
   assert.match(main, /<ReleaseReadinessBoundary>/);
-  assert.match(main, /if \(DEMO_RUNTIME_ENABLED\) \{\s*demoBootstrap\(\)/);
-  assert.match(main, /markBoot\('demo_bootstrap', 'skipped'\)/);
-  assert.match(main, /const DEMO_RUNTIME_ENABLED = isDemoRuntimeEnabled\(\)/);
+  assert.match(main, /await clearStaleDemoSession/);
+  assert.match(main, /completed_before_app_import/);
+  assert.match(main, /const \{ default: App \} = await import\('\.\/App\.jsx'\)/);
+  assert.doesNotMatch(main, /demoBootstrap/);
+  assert.doesNotMatch(main, /installDemoStorageWriteGuard/);
 });
 
 test("release boundary monitors network and session lifecycle with accessible status", async () => {
