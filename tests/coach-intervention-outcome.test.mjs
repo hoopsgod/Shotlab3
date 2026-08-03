@@ -30,7 +30,7 @@ test("source labels comparison as association and installs from coach activation
   const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
   assert.match(source, /not proof that an intervention caused/i);
   assert.match(source, /Device-local baselines/i);
-  assert.match(source, /data-state=\\"delivered\\"/);
+  assert.match(source, /data-state="delivered"/);
   assert.match(bootstrap, /installCoachInterventionOutcomeEnhancer\(\)/);
   assert.doesNotMatch(source, /private_note|coach_note/i);
 });
