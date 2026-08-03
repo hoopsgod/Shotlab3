@@ -3,140 +3,60 @@ import { TeamBrandingProvider, useTeamBranding } from "../../context/TeamBrandin
 const FALLBACK_LOGO = "/branding/titans-exact-logo.png.PNG";
 const FALLBACK_MARK = "/branding/titans-default-mark.svg";
 
-function LogoStack() {
+function ProductSurface({ role, title, subtitle }) {
   const { branding, theme } = useTeamBranding();
+  const primary = branding.primaryColor || theme.colors.primary;
 
   return (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "1fr 88px",
-        gap: 12,
-        padding: 12,
-        borderRadius: 12,
-        border: "1px solid rgba(255,255,255,0.12)",
-        background: "linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))",
-      }}
-    >
-      <div
-        style={{
-          minHeight: 48,
-          borderRadius: 10,
-          background: "rgba(11,13,16,0.72)",
-          border: "1px solid rgba(255,255,255,0.1)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          padding: "6px 10px",
-        }}
-      >
-        <img src={branding.logoUrl || FALLBACK_LOGO} alt="Team logo" style={{ maxWidth: "100%", maxHeight: 30, objectFit: "contain" }} />
-      </div>
-      <div
-        style={{
-          height: 48,
-          borderRadius: 10,
-          background: "rgba(11,13,16,0.86)",
-          border: `1px solid ${theme.colors.badgeBorder}`,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          overflow: "hidden",
-          padding: 8,
-        }}
-      >
-        <img src={branding.logoMarkUrl || FALLBACK_MARK} alt="Team logo mark" style={{ maxWidth: "100%", maxHeight: 24, objectFit: "contain" }} />
-      </div>
-    </div>
-  );
-}
-
-function PreviewCard({ title, subtitle, chip }) {
-  const { theme } = useTeamBranding();
-
-  return (
-    <div
-      style={{
-        borderRadius: 14,
-        border: "1px solid rgba(255,255,255,0.14)",
-        overflow: "hidden",
-        background: "linear-gradient(180deg, #131824 0%, #0F131D 100%)",
-      }}
-    >
-      <div
-        style={{
-          background: `linear-gradient(90deg, ${theme.colors.primarySoft}, rgba(11,13,16,0.75))`,
-          borderBottom: "1px solid rgba(255,255,255,0.12)",
-          color: "#E5E7EB",
-          padding: "11px 14px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          gap: 10,
-        }}
-      >
-        <div style={{ display: "grid", gap: 2, minWidth: 0, flex: "1 1 auto" }}>
-          <div style={{ fontSize: 13, fontWeight: 700, letterSpacing: 0.4 }}>{title}</div>
-          <div style={{ color: "rgba(229,231,235,0.64)", fontSize: 11, lineHeight: 1.35, overflowWrap: "anywhere" }}>{subtitle}</div>
+    <article style={{ overflow: "hidden", border: "1px solid rgba(24,32,31,.1)", borderRadius: 20, background: "#fff", boxShadow: "0 14px 34px rgba(31,37,35,.07)" }}>
+      <div style={{ height: 7, background: primary }} />
+      <div style={{ padding: 18, display: "grid", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 14 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+            <div style={{ width: 48, height: 48, flex: "0 0 auto", display: "grid", placeItems: "center", borderRadius: 15, background: `color-mix(in srgb, ${primary} 10%, white)`, border: `1px solid color-mix(in srgb, ${primary} 22%, transparent)`, padding: 8 }}>
+              <img src={branding.logoMarkUrl || FALLBACK_MARK} alt="Team logo mark" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+            </div>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ color: "#17201e", fontSize: 16, fontWeight: 800, letterSpacing: "-.02em" }}>{title}</div>
+              <div style={{ marginTop: 3, color: "#747d77", fontSize: 12, lineHeight: 1.4 }}>{subtitle}</div>
+            </div>
+          </div>
+          <span style={{ flex: "0 0 auto", padding: "6px 9px", borderRadius: 999, background: `color-mix(in srgb, ${primary} 9%, white)`, color: "#26312e", fontSize: 10, fontWeight: 800, letterSpacing: ".08em", textTransform: "uppercase" }}>{role}</span>
         </div>
-        <span
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            background: theme.colors.badgeBg,
-            border: `1px solid ${theme.colors.badgeBorder}`,
-            color: theme.colors.badgeText,
-            minHeight: 22,
-            padding: "4px 8px",
-            borderRadius: 999,
-            fontSize: 10,
-            fontWeight: 600,
-            whiteSpace: "nowrap",
-          }}
-        >
-          {chip}
-        </span>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1.25fr .75fr", gap: 10 }}>
+          <div style={{ minHeight: 94, display: "grid", alignContent: "space-between", padding: 14, borderRadius: 16, background: "#f7f5f0" }}>
+            <img src={branding.logoUrl || FALLBACK_LOGO} alt="Team logo" style={{ width: "100%", height: 44, objectFit: "contain", objectPosition: "left center" }} />
+            <div style={{ width: "68%", height: 7, borderRadius: 999, background: `color-mix(in srgb, ${primary} 28%, #e8e5de)` }} />
+          </div>
+          <div style={{ minHeight: 94, display: "grid", alignContent: "space-between", padding: 14, borderRadius: 16, background: `linear-gradient(145deg, color-mix(in srgb, ${primary} 12%, white), #fff)` }}>
+            <div style={{ color: "#66706a", fontSize: 10, fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase" }}>Primary action</div>
+            <div style={{ height: 38, display: "grid", placeItems: "center", borderRadius: 12, background: primary, color: branding.textOnPrimary || "#fff", fontSize: 11, fontWeight: 850 }}>Continue</div>
+          </div>
+        </div>
       </div>
-      <div style={{ padding: 14 }}>
-        <LogoStack />
-      </div>
-    </div>
+    </article>
   );
 }
 
 function TeamBrandingPreviewContent() {
   const { branding } = useTeamBranding();
-  const currentTextScale = branding?.textScale || "standard";
+  const scale = branding?.textScale || "standard";
+  const label = scale === "xl" ? "Extra Large" : scale === "large" ? "Large" : "Default";
 
   return (
-    <div style={{ display: "grid", gap: 12 }}>
-      <div style={{ display: "grid", gap: 4 }}>
-        <div style={{ color: "#E5E7EB", fontSize: 13, fontWeight: 700, letterSpacing: 0.4 }}>App Preview Surfaces</div>
-        <div style={{ color: "#9CA3AF", fontSize: 12 }}>Branding applied consistently across coach and player experiences.</div>
-      </div>
-      <div style={{ display: "grid", gap: 10 }}>
-        <PreviewCard title="Coach App Preview" subtitle="Command center header and branded UI" chip="Coach" />
-        <PreviewCard title="Player App Preview" subtitle="Training and feed views with shared identity" chip="Player" />
-      </div>
-      <div style={{ borderRadius: 12, border: "1px solid rgba(255,255,255,0.12)", background: "#10151F", padding: "12px 14px", display: "grid", gap: 8 }}>
-        <div style={{ color: "#E5E7EB", fontSize: 12, fontWeight: 700, letterSpacing: 0.4 }}>Typography Preview · {currentTextScale === "xl" ? "Extra Large" : currentTextScale === "large" ? "Large" : "Default"}</div>
-        <div style={{ color: "#E5E7EB", fontSize: "calc(13px * var(--coach-text-scale-medium))", fontWeight: 600 }}>Button and section labels stay crisp.</div>
-        <div style={{ color: "#9CA3AF", fontSize: "calc(11px * var(--coach-text-scale-medium))", lineHeight: 1.5 }}>Helper and supporting copy scale more for readability while display-sized headers remain visually stable.</div>
-        <div style={{ color: "#E5E7EB", fontSize: "calc(22px * var(--coach-text-scale-display))", fontWeight: 700, lineHeight: 1.05, letterSpacing: 0.4 }}>Display header keeps hierarchy without overgrowing.</div>
-      </div>
+    <div style={{ display: "grid", gap: 14 }} data-testid="branding-live-preview">
+      <ProductSurface role="Coach" title="Mission Control" subtitle="Team identity supports decisions without overpowering content." />
+      <ProductSurface role="Player" title="Today’s Training" subtitle="The same program identity carries into the athlete experience." />
+      <section style={{ padding: 16, border: "1px solid rgba(24,32,31,.1)", borderRadius: 18, background: "#f8f7f3" }}>
+        <div style={{ color: "#747d77", fontSize: 10, fontWeight: 800, letterSpacing: ".1em", textTransform: "uppercase" }}>Typography · {label}</div>
+        <div style={{ marginTop: 9, color: "#17201e", fontSize: "calc(23px * var(--coach-text-scale-display))", fontWeight: 800, lineHeight: 1.08, letterSpacing: "-.035em" }}>Clear hierarchy at every size.</div>
+        <div style={{ marginTop: 7, color: "#68716c", fontSize: "calc(12px * var(--coach-text-scale-medium))", lineHeight: 1.55 }}>Body, helper, button, input, and navigation text scale together while display headings remain controlled.</div>
+      </section>
     </div>
   );
 }
 
 export default function TeamBrandingPreview({ branding }) {
-  if (branding) {
-    return (
-      <TeamBrandingProvider branding={branding}>
-        <TeamBrandingPreviewContent />
-      </TeamBrandingProvider>
-    );
-  }
-
-  return <TeamBrandingPreviewContent />;
+  return branding ? <TeamBrandingProvider branding={branding}><TeamBrandingPreviewContent /></TeamBrandingProvider> : <TeamBrandingPreviewContent />;
 }
