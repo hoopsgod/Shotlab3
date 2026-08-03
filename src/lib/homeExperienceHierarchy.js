@@ -154,6 +154,10 @@ body.mission-control-active .mcSectionHead h2 {
   body.mission-control-active .mcHeroContent { padding: 28px 20px 24px; }
   body.mission-control-active .mcHeroContent h1 { font-size: clamp(40px, 12vw, 58px); }
   body.mission-control-active .mcFocusGrid { grid-template-columns: 1fr; margin-top: 24px; }
+  body.mission-control-active .mcFocusGrid > .mcTodayPlan {
+    min-height: auto;
+    padding-block: 12px;
+  }
   body.mission-control-active .mcLowerGrid { grid-template-columns: 1fr; }
   body.mission-control-active .mcLowerGrid > .mcSection + .mcSection {
     border-left: 0 !important;
