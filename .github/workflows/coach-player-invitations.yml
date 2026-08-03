@@ -14,6 +14,7 @@ on:
       - "src/lib/coachAssignNextReadyEnhancer.js"
       - "src/lib/coachAssignmentEffectiveness.js"
       - "src/lib/coachAssignmentEffectivenessEnhancer.js"
+      - "src/lib/coachAssignmentActionPromptsEnhancer.js"
       - "src/lib/coachPlayerInvitationService.js"
       - "src/lib/coachCrossDeviceActivity.js"
       - "src/lib/coachPlayerResponseLoop.js"
@@ -44,6 +45,7 @@ on:
       - "tests/player-assignment-next-action.test.mjs"
       - "tests/player-assignment-history.test.mjs"
       - "tests/coach-assignment-effectiveness.test.mjs"
+      - "tests/coach-assignment-action-prompts.test.mjs"
       - "tests/coach-player-invitation*.test.mjs"
       - "tests/coach-cross-device-activity.test.mjs"
       - "tests/coach-player-response-loop.test.mjs"
@@ -78,8 +80,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Invitation, response, assignment delivery, deadlines, player priority, history, effectiveness, accountability, quick assign, and safety tests
-        run: node --test tests/coach-player-invitation-service.test.mjs tests/coach-player-invitation-contract.test.mjs tests/coach-cross-device-activity.test.mjs tests/coach-player-response-loop.test.mjs tests/coach-follow-up-integrity.test.mjs tests/player-assignment-delivery.test.mjs tests/assignment-deadline.test.mjs tests/player-assignment-next-action.test.mjs tests/player-assignment-history.test.mjs tests/coach-assignment-effectiveness.test.mjs tests/coach-assignment-accountability.test.mjs tests/coach-quick-assign.test.mjs
+      - name: Invitation, response, assignment delivery, deadlines, player priority, history, effectiveness, action prompts, accountability, quick assign, and safety tests
+        run: node --test tests/coach-player-invitation-service.test.mjs tests/coach-player-invitation-contract.test.mjs tests/coach-cross-device-activity.test.mjs tests/coach-player-response-loop.test.mjs tests/coach-follow-up-integrity.test.mjs tests/player-assignment-delivery.test.mjs tests/assignment-deadline.test.mjs tests/player-assignment-next-action.test.mjs tests/player-assignment-history.test.mjs tests/coach-assignment-effectiveness.test.mjs tests/coach-assignment-action-prompts.test.mjs tests/coach-assignment-accountability.test.mjs tests/coach-quick-assign.test.mjs
       - name: Existing authentication and roster regressions
         run: node --test tests/legacy-auth-persistence.test.mjs tests/team-memberships-confirm-context-route.test.mjs tests/release-candidate-stability.test.mjs
       - name: Install Playwright
