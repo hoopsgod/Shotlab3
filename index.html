@@ -9,26 +9,27 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no" />
   <meta name="color-scheme" content="light" />
-  <meta name="theme-color" content="#F2F1ED" />
+  <meta name="theme-color" content="#F4F3EF" />
   <title>ShotLab</title>
   <style>
-    html,body{margin:0;padding:0;background:#F2F1ED;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    html,body{margin:0;padding:0;background:#F4F3EF;overflow-x:hidden;-webkit-font-smoothing:antialiased}
     #root{min-height:100dvh}
     #team-store-root{position:relative;z-index:0}
-    .boot-auth-shell{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:calc(28px + env(safe-area-inset-top,0px)) 24px calc(28px + env(safe-area-inset-bottom,0px));box-sizing:border-box;background:#F2F1ED}
+    .boot-auth-shell{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:calc(28px + env(safe-area-inset-top,0px)) 24px calc(28px + env(safe-area-inset-bottom,0px));box-sizing:border-box;background:#F4F3EF}
     .boot-auth-card{width:min(360px,100%);display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
-    .boot-wordmark{display:flex;align-items:baseline;gap:3px;color:#121513;font:800 clamp(42px,13vw,58px)/.9 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;letter-spacing:-.05em}
-    .boot-wordmark strong{color:#6F8427;font:inherit}
-    .boot-tagline{font:700 10px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6D756F}
-    .boot-progress{width:124px;height:3px;margin-top:18px;overflow:hidden;border-radius:999px;background:rgba(18,21,19,.10)}
-    .boot-progress span{display:block;width:44%;height:100%;border-radius:inherit;background:#6F8427;animation:boot-progress 1.15s cubic-bezier(.22,.78,.22,1) infinite alternate}
-    .boot-auth-copy{margin-top:4px;font:600 11px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#6D756F}
+    .boot-wordmark{display:flex;align-items:baseline;gap:3px;color:#101310;font:800 clamp(42px,13vw,58px)/.9 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;letter-spacing:-.05em}
+    .boot-wordmark strong{color:#7F9E1E;font:inherit}
+    .boot-tagline{font:700 10px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6D746F}
+    .boot-progress{width:124px;height:3px;margin-top:18px;overflow:hidden;border-radius:999px;background:rgba(16,19,16,.10)}
+    .boot-progress span{display:block;width:44%;height:100%;border-radius:inherit;background:#7F9E1E;animation:boot-progress 1.15s cubic-bezier(.22,.78,.22,1) infinite alternate}
+    .boot-auth-copy{margin-top:4px;font:600 11px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#6D746F}
     @keyframes boot-progress{from{transform:translateX(-95%)}to{transform:translateX(225%)}}
     @media(prefers-reduced-motion:reduce){.boot-progress span{width:100%;animation:none;opacity:.75}}
   </style>
   <link id="shotlab-v3-authority" rel="stylesheet" href="/shotlab-v3-foundation.css" />
   <link id="shotlab-v3-mobile-corrections" rel="stylesheet" href="/shotlab-v3-mobile-corrections.css" />
   <link id="shotlab-v4-reference" rel="stylesheet" href="/shotlab-v4-reference.css" />
+  <link id="shotlab-v5-coach-integrity" rel="stylesheet" href="/shotlab-v5-coach-integrity.css" />
 </head>
 <body>
   <div id="root">
@@ -46,7 +47,7 @@
   <script type="module" src="/src/teamStoreEntry.jsx"></script>
   <script>
     window.addEventListener('load', function () {
-      ['shotlab-v3-authority','shotlab-v3-mobile-corrections','shotlab-v4-reference'].forEach(function (id) {
+      ['shotlab-v3-authority','shotlab-v3-mobile-corrections','shotlab-v4-reference','shotlab-v5-coach-integrity'].forEach(function (id) {
         var sheet = document.getElementById(id);
         if (sheet) document.head.appendChild(sheet);
       });
