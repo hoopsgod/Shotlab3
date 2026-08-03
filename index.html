@@ -30,6 +30,7 @@
   <link id="shotlab-v3-mobile-corrections" rel="stylesheet" href="/shotlab-v3-mobile-corrections.css" />
   <link id="shotlab-v4-reference" rel="stylesheet" href="/shotlab-v4-reference.css" />
   <link id="shotlab-v5-coach-integrity" rel="stylesheet" href="/shotlab-v5-coach-integrity.css" />
+  <link id="shotlab-v6-decision-workspaces" rel="stylesheet" href="/shotlab-v6-decision-workspaces.css" />
 </head>
 <body>
   <div id="root">
@@ -47,7 +48,7 @@
   <script type="module" src="/src/teamStoreEntry.jsx"></script>
   <script>
     window.addEventListener('load', function () {
-      ['shotlab-v3-authority','shotlab-v3-mobile-corrections','shotlab-v4-reference','shotlab-v5-coach-integrity'].forEach(function (id) {
+      ['shotlab-v3-authority','shotlab-v3-mobile-corrections','shotlab-v4-reference','shotlab-v5-coach-integrity','shotlab-v6-decision-workspaces'].forEach(function (id) {
         var sheet = document.getElementById(id);
         if (sheet) document.head.appendChild(sheet);
       });
