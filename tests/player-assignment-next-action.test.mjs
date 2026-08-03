@@ -59,5 +59,6 @@ test("source contracts promote the existing assignment card without introducing 
   assert.match(card, /updatePlayerAssignmentState/);
   assert.doesNotMatch(card, /private_note|coach_follow_ups/);
   assert.doesNotMatch(enhancer, /fetch\s*=|XMLHttpRequest|\/v1\/player-assignments/);
-  assert.match(service, /invalid_state_transition|updatePlayerAssignmentState/);
+  assert.match(service, /action === "acknowledge"[\s\S]*action === "start"[\s\S]*"completed"/);
+  assert.match(service, /savePlayerAssignmentLocal\(current, storage\)/);
 });
