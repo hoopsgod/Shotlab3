@@ -71,9 +71,10 @@ const CSS = `
 .performance-shell .appHeader,
 .premium-screen .appHeader {
   padding:clamp(22px,4vw,38px) !important;
-  border:0 !important;
+  border:1px solid rgba(21,23,25,.075) !important;
   border-radius:26px !important;
-  background:#fff !important;
+  background:
+    linear-gradient(125deg, color-mix(in srgb, var(--pw-accent) 5%, #fff), #fff 42%, #fdfcf9) !important;
   box-shadow:var(--pw-shadow) !important;
 }
 .performance-shell .appHeader::before,
