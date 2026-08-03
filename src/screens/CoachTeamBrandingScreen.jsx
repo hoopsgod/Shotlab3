@@ -3,11 +3,8 @@ import { DEFAULT_BRANDING } from "../theme/brandingDefaults";
 import TeamBrandingForm from "../components/team/TeamBrandingForm";
 import TeamBrandingPreview from "../components/team/TeamBrandingPreview";
 import AppHeader from "../components/AppHeader";
-import { DSCard, DSSectionHeader } from "../components/ui/designSystem";
 import "../styles/PremiumWorkspace.css";
-
-const LIGHT = "#E5E7EB";
-const FB = "'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
+import "./CoachTeamBrandingScreen.css";
 
 export default function CoachTeamBrandingScreen({ branding, onSave, onBack, teamName }) {
   const [saving, setSaving] = useState(false);
@@ -24,27 +21,42 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
   };
 
   return (
-    <div className="team-brand premium-screen premium-screen--branding" style={{ color: LIGHT, padding: 20, fontFamily: FB }}>
-      <div style={{ maxWidth: 1040, margin: "0 auto", display: "grid", gap: 16 }}>
+    <main className="team-brand premium-screen premium-screen--branding branding-industrial">
+      <div className="branding-industrial__inner">
         <AppHeader
           variant="standard"
-          eyebrow="Team identity system"
-          title="TEAM BRANDING"
-          subtitle={`${teamName} branding is shared across Coach Mission Control, player workspaces, leaderboards, events, and training surfaces.`}
+          eyebrow="Team identity"
+          title="Branding"
+          subtitle={`${teamName} branding flows through coach, player, training, event, leaderboard, and storefront experiences.`}
           action={{ label: "Back", onClick: onBack }}
         />
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0,1.1fr) minmax(300px,.9fr)", gap: 16, alignItems: "start" }} className="branding-workspace-grid">
-          <DSCard style={{ padding: 18, background: "var(--pw-surface)", border: "1px solid var(--pw-border)", boxShadow: "var(--pw-shadow)" }}>
-            <DSSectionHeader title="Brand system" meta={saving ? "Saving…" : "Live preview enabled"} />
+
+        <div className="branding-industrial__workspace" data-testid="branding-identity-workspace">
+          <section className="branding-industrial__panel" aria-labelledby="branding-controls-title">
+            <header className="branding-industrial__panel-header">
+              <div>
+                <div className="branding-industrial__kicker">Identity controls</div>
+                <h2 id="branding-controls-title">Build one recognizable team system</h2>
+                <p>Choose an approved palette, set readable typography, and prepare transparent logos without exposing technical setup to players.</p>
+              </div>
+              <span className="branding-industrial__status">{saving ? "Saving…" : "Live preview"}</span>
+            </header>
             <TeamBrandingForm branding={branding} onChange={setDraftBranding} onSave={handleSave} onCancel={onBack} saving={saving} />
-          </DSCard>
-          <DSCard style={{ padding: 18, background: "var(--pw-surface)", border: "1px solid var(--pw-border)", boxShadow: "var(--pw-shadow)", position: "sticky", top: 18 }}>
-            <DSSectionHeader title="Shared preview" meta="Coach + Player" />
+          </section>
+
+          <aside className="branding-industrial__panel branding-industrial__preview" aria-labelledby="branding-preview-title">
+            <header className="branding-industrial__panel-header">
+              <div>
+                <div className="branding-industrial__kicker">Shared preview</div>
+                <h2 id="branding-preview-title">See the identity in context</h2>
+                <p>Coach and player surfaces update together so the program feels consistent before anything is saved.</p>
+              </div>
+              <span className="branding-industrial__status">Coach + Player</span>
+            </header>
             <TeamBrandingPreview branding={draftBranding} />
-          </DSCard>
+          </aside>
         </div>
       </div>
-      <style>{`@media (max-width: 820px){.branding-workspace-grid{grid-template-columns:1fr!important}.branding-workspace-grid>div:last-child{position:static!important}}`}</style>
-    </div>
+    </main>
   );
 }
