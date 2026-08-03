@@ -14,6 +14,7 @@ on:
       - "public/shotlab-v3-foundation.css"
       - "public/shotlab-v3-mobile-corrections.css"
       - "public/shotlab-v4-reference.css"
+      - "public/shotlab-v5-coach-integrity.css"
       - "src/components/CoachCommandCenter.jsx"
       - "src/components/CoachCommandCenter.module.css"
       - "src/components/SecondaryPageShell.jsx"
