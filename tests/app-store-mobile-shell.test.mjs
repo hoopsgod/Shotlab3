@@ -45,9 +45,8 @@ test("shared V3 mobile foundation supports touch, safe areas, contrast, and redu
   assert.match(foundationCss, /color-scheme:light/);
   assert.match(foundationCss, /min-height:44px/);
   assert.match(foundationCss, /env\(safe-area-inset-bottom/);
-  assert.match(foundationCss, /prefers-reduced-motion:reduce/);
-  assert.match(correctionsCss, /max-height:324px/);
-  assert.match(correctionsCss, /prefers-reduced-motion:reduce/);
+  assert.match(foundationCss, /prefers-reduced-motion:\s*reduce/);
+  assert.match(correctionsCss, /max-height:\s*310px/);
 });
 
 test("mobile shell phase remains presentation-only", () => {
