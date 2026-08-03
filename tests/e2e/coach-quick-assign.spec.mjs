@@ -94,7 +94,7 @@ async function installRoutes(page, state) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
-test("coach quick assigns an unassigned player without overwriting active work", async ({ page }) => {
+test("coach reuses recent assignment text for an unassigned player without overwriting active work", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   const state = { assignments: [existingAssignment], requests: [] };
   await installRoutes(page, state);
@@ -114,24 +114,32 @@ test("coach quick assigns an unassigned player without overwriting active work",
   const composer = page.getByTestId("coach-quick-assign");
   await expect(composer).toBeVisible();
   await expect(composer).toHaveAttribute("data-player-email", PLAYER_EMAIL);
+  await expect(composer).toHaveAttribute("data-recent-count", "1");
   const input = page.getByTestId("coach-quick-assign-input");
   await expect(input).toBeVisible();
   await expect(input).toBeEnabled();
-  await input.click();
-  await expect(input).toBeFocused();
+
+  const recent = page.getByTestId("coach-quick-assign-recent");
+  await expect(recent).toBeVisible();
+  await expect(recent).toContainText(existingAssignment.assignment_text);
+  await expect(recent).not.toContainText(existingAssignment.result_detail);
 
   await composer.getByRole("button", { name: "Deliver assignment", exact: true }).click();
   await expect(composer.getByRole("status")).toContainText("Add an assignment before delivering it.");
   await expect(input).toBeFocused();
   expect(state.requests).toHaveLength(0);
 
-  const assignmentText = "Complete the form shooting ladder and record makes from all five spots.";
-  await input.fill(assignmentText);
+  await page.getByTestId("coach-quick-assign-recent-0").click();
+  await expect(input).toHaveValue(existingAssignment.assignment_text);
+  await expect(input).toBeFocused();
+  await expect(composer.getByRole("status")).toContainText("Recent assignment loaded. Review it before delivery.");
+
   await composer.getByRole("button", { name: "Deliver assignment", exact: true }).click();
 
   await expect(composer).toHaveAttribute("data-delivery-state", "delivered");
   await expect(composer.getByRole("status")).toContainText("Assignment delivered to the player.");
   await expect(input).toBeDisabled();
+  await expect(recent).toHaveCount(0);
   await expect(panel).toHaveAttribute("data-unassigned-count", "0");
   await expect(panel).toHaveAttribute("data-assigned-count", "1");
   await expect(panel).toHaveAttribute("data-started-count", "1");
@@ -144,14 +152,14 @@ test("coach quick assigns an unassigned player without overwriting active work",
     assignment: {
       player_identity: PLAYER_EMAIL,
       player_name: PLAYER_NAME,
-      assignment_text: assignmentText,
+      assignment_text: existingAssignment.assignment_text,
       result_detail: "",
     },
   });
   expect("note" in state.requests[0].assignment).toBe(false);
   expect("private_note" in state.requests[0].assignment).toBe(false);
   expect(state.assignments.find((row) => row.player_identity === "active.assignment@example.test")?.assignment_text)
-    .toBe("Existing assignment must not be overwritten.");
+    .toBe(existingAssignment.assignment_text);
 
   for (const button of await composer.locator("button").all()) {
     const box = await button.boundingBox();
