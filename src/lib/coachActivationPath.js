@@ -4,6 +4,7 @@ import { installCoachAssignmentAccountabilityEnhancer } from "./coachAssignmentA
 import { installCoachAssignmentActionPromptsEnhancer } from "./coachAssignmentActionPromptsEnhancer.js";
 import { installCoachAssignmentDeadlineEnhancer } from "./coachAssignmentDeadlineEnhancer.js";
 import { installCoachAssignmentEffectivenessEnhancer } from "./coachAssignmentEffectivenessEnhancer.js";
+import { installCoachAssignmentInterventionEnhancer } from "./coachAssignmentInterventionEnhancer.js";
 import { installCoachAssignmentOutcomeEnhancer } from "./coachAssignmentOutcomeEnhancer.js";
 import { installCoachFollowUpEnhancer } from "./coachFollowUpEnhancer.js";
 import { installCoachFollowUpQueueEnhancer } from "./coachFollowUpQueueEnhancer.js";
@@ -22,6 +23,7 @@ installCoachAssignNextEnhancer();
 installCoachAssignNextReadyEnhancer();
 installCoachAssignmentEffectivenessEnhancer();
 installCoachAssignmentActionPromptsEnhancer();
+installCoachAssignmentInterventionEnhancer();
 installCoachHomeHierarchyEnhancer();
 installCoachResponseLoopEnhancer();
 installPlayerAssignmentEnhancer();
