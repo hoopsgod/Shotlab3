@@ -1,0 +1,112 @@
+/* ShotLab V4 reference system. Final visual authority for the coach experience. */
+:root{
+  --sl-canvas:#f2f1ed;
+  --sl-surface:#fbfaf7;
+  --sl-surface-strong:#ffffff;
+  --sl-inset:#ecebe6;
+  --sl-ink:#121513;
+  --sl-ink-soft:#4f5752;
+  --sl-muted:#6d756f;
+  --sl-line:rgba(18,21,19,.11);
+  --sl-accent:#6f8427;
+  --sl-accent-soft:#edf1df;
+  --sl-danger:#c43b47;
+  --sl-shadow:0 18px 46px rgba(23,27,24,.10);
+  --sl-radius:24px;
+  color-scheme:light;
+}
+html,body,#root{background:var(--sl-canvas)!important;color:var(--sl-ink)!important}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important}
+body::before,body::after{display:none!important}
+
+/* Eliminate the rejected split dark/light canvas. */
+.mcShell,.mcShellV3,.missionControl,.secondaryPageShell,[class*="coachPage"],[class*="dashboardPage"],[class*="playersPage"],[class*="eventsPage"]{background:var(--sl-canvas)!important;color:var(--sl-ink)!important;background-image:none!important}
+.mcShellV3{min-height:100dvh!important}
+.mcRail{background:#151916!important;border-color:rgba(255,255,255,.08)!important}
+
+/* Mission Control: compact, editorial, action-led. */
+body.mission-control-active .missionControl{width:min(100%,760px)!important;margin:0 auto!important;padding:12px 16px calc(104px + env(safe-area-inset-bottom,0px))!important;gap:14px!important}
+body.mission-control-active .mcHeader{min-height:68px!important;padding:10px 12px!important;border:1px solid var(--sl-line)!important;border-radius:20px!important;background:rgba(251,250,247,.94)!important;box-shadow:0 8px 26px rgba(23,27,24,.07)!important;backdrop-filter:blur(18px)!important}
+body.mission-control-active .mcBrandCopy small{font-size:12px!important;font-weight:650!important;color:var(--sl-muted)!important}
+body.mission-control-active .mcBrandCopy strong{font-size:26px!important;line-height:.98!important;color:var(--sl-ink)!important;letter-spacing:-.045em!important}
+body.mission-control-active .mcMobileMenu,body.mission-control-active .mcBell,body.mission-control-active .mcTeamSelect{min-width:44px!important;min-height:44px!important;border:1px solid var(--sl-line)!important;border-radius:14px!important;background:var(--sl-surface-strong)!important;color:var(--sl-ink)!important;box-shadow:none!important}
+body.mission-control-active .mcTeamSelect{display:none!important}
+body.mission-control-active .mcHero{position:relative!important;overflow:hidden!important;border:0!important;border-radius:28px!important;background:#171b18!important;color:#fff!important;box-shadow:var(--sl-shadow)!important}
+body.mission-control-active .mcHero::after{content:""!important;position:absolute!important;inset:auto -10% -48% 35%!important;height:240px!important;border-radius:50%!important;background:radial-gradient(circle,rgba(142,164,57,.24),transparent 66%)!important;pointer-events:none!important}
+body.mission-control-active .mcHeroContent{position:relative!important;z-index:2!important;display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:8px!important;padding:22px!important;padding-right:104px!important;background:transparent!important}
+body.mission-control-active .mcHero>.mcHeroTeamMark{position:absolute!important;top:20px!important;right:18px!important;width:74px!important;height:74px!important;min-width:74px!important;min-height:74px!important;z-index:3!important}
+body.mission-control-active .mcHero>.mcHeroTeamMark img{width:74px!important;height:74px!important;object-fit:contain!important}
+body.mission-control-active .mcEyebrow{margin:0!important;color:#c5d56d!important;font-size:12px!important;font-weight:760!important;letter-spacing:.01em!important;text-transform:none!important}
+body.mission-control-active .mcHero h1{max-width:10ch!important;margin:4px 0 0!important;color:#fff!important;font-size:40px!important;line-height:.96!important;letter-spacing:-.055em!important;text-wrap:balance!important}
+body.mission-control-active .mcHeroContent>p{max-width:28ch!important;margin:4px 0 2px!important;color:rgba(255,255,255,.72)!important;font-size:15px!important;line-height:1.45!important}
+body.mission-control-active .mcRealityStrip{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;margin:10px -82px 0 0!important;border:1px solid rgba(255,255,255,.12)!important;border-radius:16px!important;background:rgba(255,255,255,.065)!important;overflow:hidden!important}
+body.mission-control-active .mcRealityStrip>button{min-height:58px!important;padding:8px!important;border:0!important;border-right:1px solid rgba(255,255,255,.1)!important;background:transparent!important;color:#fff!important;box-shadow:none!important}
+body.mission-control-active .mcRealityStrip>button:last-child{border-right:0!important}
+body.mission-control-active .mcRealityStrip strong{color:#fff!important;font-size:22px!important;line-height:1!important}
+body.mission-control-active .mcRealityStrip strong span{color:rgba(255,255,255,.48)!important}
+body.mission-control-active .mcRealityStrip small{margin-top:4px!important;color:rgba(255,255,255,.62)!important;font-size:11px!important;font-weight:650!important}
+body.mission-control-active .mcPrimary{min-height:50px!important;margin:4px -82px 0 0!important;border:0!important;border-radius:15px!important;background:#f4f2ea!important;color:#151815!important;font-size:15px!important;font-weight:760!important;box-shadow:none!important}
+body.mission-control-active .mcFocusGrid{display:grid!important;grid-template-columns:1fr!important;gap:14px!important}
+body.mission-control-active .mcSection,body.mission-control-active .mcTodayPlan{border:1px solid var(--sl-line)!important;border-radius:24px!important;background:var(--sl-surface)!important;color:var(--sl-ink)!important;box-shadow:0 10px 34px rgba(23,27,24,.07)!important}
+body.mission-control-active .mcAttention{padding:18px!important}
+body.mission-control-active .mcSectionHead small{color:var(--sl-muted)!important;font-size:12px!important;font-weight:700!important;letter-spacing:0!important;text-transform:none!important}
+body.mission-control-active .mcSectionHead h2{margin-top:3px!important;color:var(--sl-ink)!important;font-size:30px!important;line-height:1!important;letter-spacing:-.045em!important;text-transform:none!important}
+body.mission-control-active .mcAttentionRow{min-height:0!important;padding:14px!important;border:1px solid var(--sl-line)!important;border-radius:18px!important;background:var(--sl-inset)!important;color:var(--sl-ink)!important;box-shadow:none!important}
+body.mission-control-active .mcAttentionCopy strong{color:var(--sl-ink)!important;font-size:17px!important}
+body.mission-control-active .mcAttentionCopy small,body.mission-control-active .mcAttentionMeta{color:var(--sl-ink-soft)!important;font-size:14px!important;line-height:1.35!important}
+body.mission-control-active .mcTextLink{color:var(--sl-ink-soft)!important;font-size:14px!important;font-weight:700!important}
+body.mission-control-active .mcActivationPlan{display:none!important}
+body.mission-control-active .mcLowerGrid{display:none!important}
+body.mission-control-active [data-testid="coach-primary-objective"]{max-height:none!important}
+
+/* Secondary coach pages: one calm light workspace, no dark regions underneath. */
+.secondaryPageShell{width:min(100%,760px)!important;margin:0 auto!important;padding:16px 16px calc(104px + env(safe-area-inset-bottom,0px))!important;gap:14px!important}
+.secondaryPageShell::before,.secondaryPageShell::after{display:none!important}
+.secondaryPageBack,.secondaryPageBackButton,[class*="backToDashboard"]{display:inline-flex!important;width:auto!important;min-height:42px!important;padding:0 14px!important;border:1px solid var(--sl-line)!important;border-radius:14px!important;background:var(--sl-surface)!important;color:var(--sl-ink-soft)!important;box-shadow:none!important}
+.secondaryPageIntro,.secondaryPageDecision,.secondaryPageToolbar [class*="metricStrip"],.secondaryPageToolbar [class*="filterRail"],.secondaryPageEvidence>*{border:1px solid var(--sl-line)!important;background:var(--sl-surface)!important;color:var(--sl-ink)!important;box-shadow:0 10px 34px rgba(23,27,24,.07)!important}
+.secondaryPageIntro{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;padding:20px!important;border-radius:24px!important;background-image:none!important}
+.secondaryPageIntro__eyebrow,.secondaryPageDecision__eyebrow{color:var(--sl-accent)!important;font-size:12px!important;font-weight:760!important;letter-spacing:.01em!important;text-transform:none!important}
+.secondaryPageIntro__title{margin:0!important;color:var(--sl-ink)!important;font-size:40px!important;line-height:.98!important;letter-spacing:-.05em!important}
+.secondaryPageIntro__summary{max-width:34ch!important;margin:2px 0 4px!important;padding:0!important;border:0!important;background:transparent!important;color:var(--sl-ink-soft)!important;font-size:16px!important;line-height:1.45!important;box-shadow:none!important}
+.secondaryPageIntro__actions,.secondaryPageIntro__buttonRow{display:flex!important;flex-wrap:wrap!important;gap:10px!important}
+.secondaryPageAction{min-height:46px!important;padding:0 18px!important;border-radius:14px!important;font-size:15px!important;font-weight:740!important}
+.secondaryPageAction--primary{background:#171b18!important;color:#fff!important;border-color:#171b18!important}
+.secondaryPageAction--secondary{background:var(--sl-surface-strong)!important;color:var(--sl-ink)!important;border-color:var(--sl-line)!important}
+.secondaryPageToolbar{display:grid!important;gap:12px!important}
+.secondaryPageToolbar [class*="metricStrip"]{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;border-radius:20px!important;overflow:hidden!important}
+.secondaryPageToolbar [class*="metricStrip"]>*{display:block!important;min-width:0!important;padding:18px!important;background:transparent!important;color:var(--sl-ink)!important;opacity:1!important;visibility:visible!important}
+.secondaryPageToolbar [class*="metricStrip"] strong{color:var(--sl-ink)!important;font-size:34px!important;line-height:1!important}
+.secondaryPageToolbar [class*="metricStrip"] small{color:var(--sl-muted)!important;font-size:12px!important}
+.secondaryPageToolbar [class*="filterRail"]{padding:14px!important;border-radius:20px!important;overflow:visible!important}
+.secondaryPageToolbar input{width:100%!important;min-width:0!important;min-height:48px!important;border:1px solid var(--sl-line)!important;border-radius:14px!important;background:var(--sl-surface-strong)!important;color:var(--sl-ink)!important;font-size:16px!important}
+.secondaryPageToolbar button{color:var(--sl-ink-soft)!important;opacity:1!important;visibility:visible!important}
+.secondaryPageDecision{padding:20px!important;border-radius:22px!important}
+.secondaryPageDecision h2{color:var(--sl-ink)!important;font-size:30px!important;line-height:1.05!important}
+.secondaryPageDecision p{color:var(--sl-ink-soft)!important;font-size:16px!important;line-height:1.5!important}
+.secondaryPageEvidence{display:grid!important;grid-template-columns:1fr!important;gap:12px!important}
+.secondaryPageEvidence>*{padding:18px!important;border-radius:20px!important;background:var(--sl-surface)!important;color:var(--sl-ink)!important;opacity:1!important;visibility:visible!important}
+.secondaryPageEvidence h2,.secondaryPageEvidence h3,.secondaryPageEvidence strong{color:var(--sl-ink)!important}
+.secondaryPageEvidence p,.secondaryPageEvidence small{color:var(--sl-ink-soft)!important}
+
+/* Neutralize legacy dark roster and event blocks that can appear below the new shell. */
+[class*="roster" i],[class*="playerDetails" i],[class*="eventList" i],[class*="eventCard" i],[class*="metricCard" i]{color:var(--sl-ink)!important}
+.secondaryPageShell [class*="card" i],.secondaryPageShell [class*="panel" i],.secondaryPageShell [class*="tile" i],.secondaryPageShell [class*="row" i]{border-color:var(--sl-line)!important}
+.secondaryPageShell [style*="background: rgb(8"],.secondaryPageShell [style*="background:#08"],.secondaryPageShell [class*="dark" i]{background:var(--sl-surface)!important;color:var(--sl-ink)!important}
+
+/* Team Store remains in the same sans-serif product language. */
+.ts-overlay{background:rgba(22,26,23,.38)!important;backdrop-filter:blur(14px)!important}
+.ts-panel{background:var(--sl-canvas)!important;color:var(--sl-ink)!important;font-family:inherit!important}
+.ts-header,.ts-form-card,.ts-player-view-card,.ts-metrics-card,.ts-partner-start,.ts-preview-card{background:var(--sl-surface)!important;color:var(--sl-ink)!important;border-color:var(--sl-line)!important;box-shadow:none!important}
+.ts-header h2,.ts-form-card h3,.ts-form-card h4,.ts-player-view-card h3,.ts-metrics-card h3{font-family:inherit!important;color:var(--sl-ink)!important}
+.ts-header p,.ts-section-copy,.ts-field small,.ts-preview-heading p,.ts-player-intro p{color:var(--sl-ink-soft)!important}
+.ts-field input,.ts-field select{background:var(--sl-surface-strong)!important;color:var(--sl-ink)!important;border-color:var(--sl-line)!important}
+
+@media(max-width:700px){
+  .mcRail{display:none!important}
+  body.mission-control-active .mcHeroContent{padding:20px!important;padding-right:98px!important}
+  body.mission-control-active .mcHero h1{font-size:37px!important}
+  body.mission-control-active .mcRealityStrip,body.mission-control-active .mcPrimary{margin-right:-76px!important}
+  .secondaryPageIntro__title{font-size:38px!important}
+  .secondaryPageToolbar [class*="metricStrip"]{grid-template-columns:1fr 1fr!important}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
