@@ -40,13 +40,14 @@ const pendingLog = {
   syncSource: "local",
 };
 
-test("production demo access is isolated to approved sales previews, explicit opt-in, and local development", () => {
-  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab.app" } }), false);
-  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false, VITE_ENABLE_DEMO_MODE: "true" }, location: { hostname: "shotlab.app" } }), true);
-  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "localhost" } }), true);
-  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab3.pages.dev" } }), true);
-  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "8a15c60d.shotlab3.pages.dev" } }), true);
-  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "unrelated.pages.dev" } }), false);
+test("demo runtime requires explicit opt-in and never activates from a Cloudflare hostname alone", () => {
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab.app", search: "" } }), false);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false, VITE_ENABLE_DEMO_MODE: "true" }, location: { hostname: "shotlab.app", search: "" } }), true);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "localhost", search: "" } }), true);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab3.pages.dev", search: "" } }), false);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "agent-visual-rebuild-v3.shotlab3.pages.dev", search: "" } }), false);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "agent-visual-rebuild-v3.shotlab3.pages.dev", search: "?demo=1" } }), true);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "unrelated.pages.dev", search: "" } }), false);
 });
 
 test("stale demo sessions are removed from a production runtime", async () => {
@@ -58,7 +59,7 @@ test("stale demo sessions are removed from a production runtime", async () => {
   });
   const cleared = await clearStaleDemoSession({
     env: { DEV: false, VITE_ENABLE_DEMO_MODE: "false" },
-    location: { hostname: "shotlab.app" },
+    location: { hostname: "shotlab.app", search: "" },
     storage: state.storage,
     localStorage: state.localStorage,
   });
