@@ -11,6 +11,15 @@
   <meta name="color-scheme" content="light" />
   <meta name="theme-color" content="#F4F3EF" />
   <title>ShotLab</title>
+  <script>
+    (function () {
+      try {
+        var queryDemo = new URLSearchParams(window.location.search).get('demo') === '1';
+        var stickyDemo = window.localStorage.getItem('sl:demoMode') === 'true';
+        if (queryDemo || stickyDemo) document.documentElement.classList.add('shotlab-demo');
+      } catch (_) {}
+    })();
+  </script>
   <style>
     html,body{margin:0;padding:0;background:#F4F3EF;overflow-x:hidden;-webkit-font-smoothing:antialiased}
     #root{min-height:100dvh}
@@ -32,6 +41,7 @@
   <link id="shotlab-v5-coach-integrity" rel="stylesheet" href="/shotlab-v5-coach-integrity.css" />
   <link id="shotlab-v6-decision-workspaces" rel="stylesheet" href="/shotlab-v6-decision-workspaces.css" />
   <link id="shotlab-v7-page-authority" rel="stylesheet" href="/shotlab-v7-page-authority.css" />
+  <link id="shotlab-v8-demo-parity" rel="stylesheet" href="/shotlab-v8-demo-parity.css" />
 </head>
 <body>
   <div id="root">
@@ -49,7 +59,7 @@
   <script type="module" src="/src/teamStoreEntry.jsx"></script>
   <script>
     window.addEventListener('load', function () {
-      ['shotlab-v3-authority','shotlab-v3-mobile-corrections','shotlab-v4-reference','shotlab-v5-coach-integrity','shotlab-v6-decision-workspaces','shotlab-v7-page-authority'].forEach(function (id) {
+      ['shotlab-v3-authority','shotlab-v3-mobile-corrections','shotlab-v4-reference','shotlab-v5-coach-integrity','shotlab-v6-decision-workspaces','shotlab-v7-page-authority','shotlab-v8-demo-parity'].forEach(function (id) {
         var sheet = document.getElementById(id);
         if (sheet) document.head.appendChild(sheet);
       });
