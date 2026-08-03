@@ -14,18 +14,14 @@ export function isDemoRuntimeEnabled({ env, location } = {}) {
   const resolvedEnv = env || (typeof import.meta !== "undefined" ? import.meta.env : {});
   const resolvedLocation = location || (typeof window !== "undefined" ? window.location : null);
   const hostname = String(resolvedLocation?.hostname || "").toLowerCase();
+  const search = String(resolvedLocation?.search || "");
   const localHost = ["localhost", "127.0.0.1", "::1"].includes(hostname);
-  const queryDemo = (() => {
-    try {
-      return new URLSearchParams(String(resolvedLocation?.search || "")).get("demo") === "1";
-    } catch {
-      return false;
-    }
-  })();
+  const explicitDemo = new URLSearchParams(search).get("demo") === "1";
 
-  // A Cloudflare preview hostname must never activate demo mode by itself.
-  // Demo runtime is explicit: local development, ?demo=1, or a deliberate env switch.
-  return Boolean(resolvedEnv?.DEV || localHost || queryDemo || boolValue(resolvedEnv?.VITE_ENABLE_DEMO_MODE));
+  // Production must always start at authentication unless the URL explicitly
+  // requests a demo. Environment flags and hosting providers may expose demo
+  // controls, but they must never bootstrap a demo account automatically.
+  return Boolean(explicitDemo || resolvedEnv?.DEV || localHost);
 }
 
 export function isSupabaseAuthEnabled(env) {
