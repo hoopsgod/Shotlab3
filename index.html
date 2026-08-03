@@ -27,6 +27,7 @@
     @media(prefers-reduced-motion:reduce){.boot-progress span{width:100%;animation:none;opacity:.75}}
   </style>
   <link id="shotlab-v3-authority" rel="stylesheet" href="/shotlab-v3-foundation.css" />
+  <link id="shotlab-v3-mobile-corrections" rel="stylesheet" href="/shotlab-v3-mobile-corrections.css" />
 </head>
 <body>
   <div id="root">
@@ -44,8 +45,10 @@
   <script type="module" src="/src/teamStoreEntry.jsx"></script>
   <script>
     window.addEventListener('load', function () {
-      var authority = document.getElementById('shotlab-v3-authority');
-      if (authority) document.head.appendChild(authority);
+      var foundation = document.getElementById('shotlab-v3-authority');
+      var corrections = document.getElementById('shotlab-v3-mobile-corrections');
+      if (foundation) document.head.appendChild(foundation);
+      if (corrections) document.head.appendChild(corrections);
     }, { once: true });
   </script>
 </body>
