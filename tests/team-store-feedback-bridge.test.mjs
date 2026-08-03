@@ -11,9 +11,9 @@ test("Team Store mounts the shared feedback layer and verified persistence bridg
   assert.match(entry, /<TeamStorePortal \/>/);
 });
 
-test("Team Store feedback is emitted only after storage success and preserves failure propagation", async () => {
+test("Team Store feedback is emitted only after managed storage success and preserves failure propagation", async () => {
   const source = await read("src/components/TeamStoreFeedbackBridge.jsx");
-  assert.match(source, /await bridge\.originalWindowStorageSet\.call/);
+  assert.match(source, /await bridge\.originalSet\.call/);
   assert.match(source, /announcePersisted\(key\)/);
   assert.match(source, /announceFailure\(key, error\)/);
   assert.match(source, /throw error/);
@@ -22,13 +22,11 @@ test("Team Store feedback is emitted only after storage success and preserves fa
   assert.match(source, /Nothing has been confirmed/);
 });
 
-test("Team Store feedback bridge avoids duplicate managed writes and restores patched APIs", async () => {
+test("Team Store feedback bridge stays inside ShotLab managed storage and restores it cleanly", async () => {
   const source = await read("src/components/TeamStoreFeedbackBridge.jsx");
-  assert.match(source, /managedWriteDepth/);
   assert.match(source, /references/);
-  assert.match(source, /storageApi\.set = bridge\.wrappedWindowStorageSet/);
-  assert.match(source, /storagePrototype\.setItem = bridge\.wrappedLocalSetItem/);
-  assert.match(source, /window\.storage\.set = bridge\.originalWindowStorageSet/);
-  assert.match(source, /window\.Storage\.prototype\.setItem = bridge\.originalLocalSetItem/);
+  assert.match(source, /storageApi\.set = bridge\.wrappedSet/);
+  assert.match(source, /bridge\.storageApi\.set = bridge\.originalSet/);
+  assert.doesNotMatch(source, /Storage\.prototype|localStorage\.setItem|sessionStorage/);
   assert.doesNotMatch(source, /fetch\(|supabase|XMLHttpRequest/);
 });
