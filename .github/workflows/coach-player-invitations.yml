@@ -11,6 +11,7 @@ on:
       - "src/lib/playerAssignmentPriority.js"
       - "src/lib/playerAssignmentHistoryService.js"
       - "src/lib/coachAssignNextEnhancer.js"
+      - "src/lib/coachAssignNextReadyEnhancer.js"
       - "src/lib/coachPlayerInvitationService.js"
       - "src/lib/coachCrossDeviceActivity.js"
       - "src/lib/coachPlayerResponseLoop.js"
