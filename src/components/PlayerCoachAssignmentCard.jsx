@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { formatAssignmentDueDate, isAssignmentOverdue } from "../lib/assignmentDeadline.js";
 import { loadPlayerAssignment, PLAYER_ASSIGNMENT_CHANGE_EVENT, updatePlayerAssignmentState } from "../lib/playerAssignmentService.js";
 import styles from "./PlayerCoachAssignmentCard.module.css";
 
@@ -54,6 +55,8 @@ export default function PlayerCoachAssignmentCard() {
 
   if (!assignment) return null;
   const next = actionFor(assignment.state);
+  const overdue = isAssignmentOverdue({ dueDate: assignment.dueDate, state: assignment.state });
+  const dueLabel = formatAssignmentDueDate(assignment.dueDate);
 
   const advance = async () => {
     if (!next || busy) return;
@@ -68,15 +71,16 @@ export default function PlayerCoachAssignmentCard() {
   };
 
   return (
-    <section className={styles.root} data-testid="player-coach-assignment" data-assignment-state={assignment.state} aria-label="Coach directed assignment">
+    <section className={styles.root} data-testid="player-coach-assignment" data-assignment-state={assignment.state} data-assignment-overdue={String(overdue)} aria-label="Coach directed assignment">
       <div className={styles.header}>
         <div>
           <div className={styles.eyebrow}>Coach directed · Personal assignment</div>
           <h2 className={styles.title}>Your next assignment</h2>
         </div>
-        <span className={styles.status}>{statusLabel(assignment.state)}</span>
+        <span className={`${styles.status} ${overdue ? styles.statusOverdue : ""}`}>{overdue ? "Overdue" : statusLabel(assignment.state)}</span>
       </div>
       <p className={styles.copy}>{assignment.assignmentText}</p>
+      {dueLabel ? <p className={`${styles.deadline} ${overdue ? styles.deadlineOverdue : ""}`} data-testid="player-assignment-due-date">{overdue ? "Overdue" : "Due"} {dueLabel}</p> : null}
       {assignment.resultDetail ? <p className={styles.context}>Coach response context: {assignment.resultDetail}</p> : null}
       <div className={styles.actions}>
         {next ? <button type="button" className={styles.primary} onClick={advance} disabled={busy} data-testid="player-assignment-action">{busy ? "Saving…" : next.label}</button> : <button type="button" className={styles.primary} disabled data-testid="player-assignment-action">Assignment complete</button>}

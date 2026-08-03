@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { assignmentDueDateFromOffset, normalizeAssignmentDueDate } from "./assignmentDeadline.js";
 import { openExactPlayerFollowUp } from "./coachAssignmentOutcomeEnhancer.js";
 import { loadTeamPlayerAssignments, savePlayerAssignment } from "./playerAssignmentService.js";
 
@@ -19,7 +20,7 @@ const styles = `
 .mcQuickAssign::after{content:"";position:absolute;right:-58px;top:-68px;width:170px;height:170px;border-radius:50%;background:color-mix(in srgb,var(--mc,#c8ff1a) 8%,transparent);filter:blur(34px);pointer-events:none}
 .mcQuickAssign>*{position:relative;z-index:1}
 .mcQuickAssignHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.mcQuickAssignEyebrow,.mcQuickAssignField span,.mcQuickAssignRecentTitle{font-family:'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.08em}
+.mcQuickAssignEyebrow,.mcQuickAssignField span,.mcQuickAssignRecentTitle,.mcQuickAssignDeadline>span{font-family:'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.08em}
 .mcQuickAssignEyebrow{display:block;color:var(--text-3,#7d898f);font-size:8px;font-weight:800}
 .mcQuickAssignHead h2{margin:4px 0 0;color:var(--text-1,#f4f7f8);font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;font-weight:400;line-height:1;letter-spacing:.035em}
 .mcQuickAssignClose{min-width:44px;min-height:44px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:rgba(255,255,255,.025);color:var(--text-2,#aab3b8);font:900 10px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
@@ -31,14 +32,19 @@ const styles = `
 .mcQuickAssignRecent button:hover,.mcQuickAssignRecent button:focus-visible{border-color:color-mix(in srgb,var(--mc,#c8ff1a) 44%,transparent);color:var(--text-1,#f4f7f8)}
 .mcQuickAssignRecent button:disabled{opacity:.55;cursor:wait}
 .mcQuickAssignField{display:grid;gap:7px;margin-top:11px}
-.mcQuickAssignField span{color:var(--text-3,#7d898f);font-size:8px;font-weight:800}
+.mcQuickAssignField span,.mcQuickAssignDeadline>span{color:var(--text-3,#7d898f);font-size:8px;font-weight:800}
 .mcQuickAssignField textarea{box-sizing:border-box;width:100%;min-height:96px;resize:vertical;padding:11px 12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0d1113;color:var(--text-1,#f4f7f8);font:600 13px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-.mcQuickAssignField textarea:focus{outline:2px solid color-mix(in srgb,var(--mc,#c8ff1a) 65%,white);outline-offset:2px}
+.mcQuickAssignField textarea:focus,.mcQuickAssignDeadline input:focus{outline:2px solid color-mix(in srgb,var(--mc,#c8ff1a) 65%,white);outline-offset:2px}
 .mcQuickAssignField textarea:disabled{opacity:.72;resize:none}
+.mcQuickAssignDeadline{display:grid;gap:7px;margin-top:11px}
+.mcQuickAssignDeadline input{box-sizing:border-box;width:100%;min-height:44px;padding:0 11px;border:1px solid rgba(255,255,255,.12);border-radius:11px;background:#0d1113;color:var(--text-1,#f4f7f8);font:700 12px/1 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color-scheme:dark}
+.mcQuickAssignDeadlinePresets{display:flex;flex-wrap:wrap;gap:6px}
+.mcQuickAssignDeadlinePresets button{min-height:44px;padding:0 10px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.03);color:var(--text-2,#aab3b8);font:900 9px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
+.mcQuickAssignDeadlinePresets button.is-active{border-color:color-mix(in srgb,var(--mc,#c8ff1a) 44%,transparent);color:var(--mc,#c8ff1a)}
 .mcQuickAssignActions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:10px}
 .mcQuickAssignActions button{min-height:44px;padding:0 12px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.035);color:var(--text-1,#f4f7f8);font:900 10px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
 .mcQuickAssignActions button.is-primary{border-color:color-mix(in srgb,var(--mc,#c8ff1a) 44%,transparent);background:var(--mc,#c8ff1a);color:#080a08}
-.mcQuickAssignActions button:disabled{opacity:.55;cursor:wait}
+.mcQuickAssignActions button:disabled,.mcQuickAssignDeadlinePresets button:disabled,.mcQuickAssignDeadline input:disabled{opacity:.55;cursor:wait}
 .mcQuickAssignStatus{min-height:18px;margin-top:9px;color:var(--text-2,#aab3b8);font:600 10px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
 .mcQuickAssignStatus.is-error{color:#ffb8a8}
 .mcQuickAssign[data-delivery-state="delivered"]{border-color:color-mix(in srgb,var(--mc,#c8ff1a) 42%,rgba(255,255,255,.08))}
@@ -108,6 +114,7 @@ export function classifyQuickAssignResult(result = {}) {
 function QuickAssignComposer({ row, onClose }) {
   const textareaRef = useRef(null);
   const [draft, setDraft] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [saving, setSaving] = useState(false);
   const [deliveryState, setDeliveryState] = useState("idle");
   const [retryable, setRetryable] = useState(false);
@@ -117,6 +124,7 @@ function QuickAssignComposer({ row, onClose }) {
 
   useEffect(() => {
     setDraft("");
+    setDueDate("");
     setSaving(false);
     setDeliveryState("idle");
     setRetryable(false);
@@ -164,6 +172,7 @@ function QuickAssignComposer({ row, onClose }) {
       playerName: row.playerName,
       assignmentText,
       resultDetail: "",
+      dueDate,
     });
     const outcome = classifyQuickAssignResult(result);
     setSaving(false);
@@ -172,6 +181,7 @@ function QuickAssignComposer({ row, onClose }) {
     setError(outcome.state === "error");
     setStatus(outcome.message);
     if (result.assignment?.assignmentText) setDraft(result.assignment.assignmentText);
+    if (result.assignment?.dueDate) setDueDate(result.assignment.dueDate);
   };
 
   const openPlayer = () => {
@@ -179,6 +189,13 @@ function QuickAssignComposer({ row, onClose }) {
     onClose();
     window.requestAnimationFrame(() => openExactPlayerFollowUp(target));
   };
+
+  const deadlinePresets = [
+    { label: "Tomorrow", testId: "coach-quick-assign-due-1", value: assignmentDueDateFromOffset(1) },
+    { label: "3 days", testId: "coach-quick-assign-due-3", value: assignmentDueDateFromOffset(3) },
+    { label: "7 days", testId: "coach-quick-assign-due-7", value: assignmentDueDateFromOffset(7) },
+    { label: "No date", testId: "coach-quick-assign-due-clear", value: "" },
+  ];
 
   return React.createElement(
     "section",
@@ -190,6 +207,7 @@ function QuickAssignComposer({ row, onClose }) {
       "data-player-email": row.playerIdentity,
       "data-delivery-state": deliveryState,
       "data-recent-count": String(recentAssignments.length),
+      "data-due-date": dueDate,
       "aria-labelledby": "mc-quick-assign-heading",
     },
     React.createElement(
@@ -207,7 +225,7 @@ function QuickAssignComposer({ row, onClose }) {
       ? deliveryState === "delivered"
         ? "The assignment is now in the player’s ShotLab workflow."
         : "The assignment is stored in this session, but remote player delivery was not verified."
-      : "This action sends only the assignment text. It does not include or modify private coach notes."),
+      : "This action sends only the assignment text and optional due date. It does not include or modify private coach notes."),
     !locked && recentAssignments.length
       ? React.createElement(
           "section",
@@ -245,6 +263,38 @@ function QuickAssignComposer({ row, onClose }) {
         "data-testid": "coach-quick-assign-input",
       }),
     ),
+    !locked
+      ? React.createElement(
+          "section",
+          { className: "mcQuickAssignDeadline", "data-testid": "coach-quick-assign-deadline", "aria-label": "Optional assignment due date" },
+          React.createElement("span", null, "Optional due date"),
+          React.createElement("input", {
+            type: "date",
+            min: assignmentDueDateFromOffset(0),
+            value: dueDate,
+            onChange: (event) => setDueDate(normalizeAssignmentDueDate(event.target.value)),
+            disabled: saving,
+            "data-testid": "coach-quick-assign-due-date",
+            "aria-label": "Assignment due date",
+          }),
+          React.createElement(
+            "div",
+            { className: "mcQuickAssignDeadlinePresets", "aria-label": "Due date shortcuts" },
+            ...deadlinePresets.map((preset) => React.createElement(
+              "button",
+              {
+                key: preset.testId,
+                type: "button",
+                className: dueDate === preset.value ? "is-active" : "",
+                disabled: saving,
+                onClick: () => setDueDate(preset.value),
+                "data-testid": preset.testId,
+              },
+              preset.label,
+            )),
+          ),
+        )
+      : null,
     React.createElement(
       "div",
       { className: "mcQuickAssignActions" },

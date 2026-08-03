@@ -161,7 +161,7 @@ test("coach reuses recent assignment text for an unassigned player without overw
   expect(state.assignments.find((row) => row.player_identity === "active.assignment@example.test")?.assignment_text)
     .toBe(existingAssignment.assignment_text);
 
-  for (const button of await composer.locator("button").all()) {
+  for (const button of await composer.locator("button:visible").all()) {
     const box = await button.boundingBox();
     expect(box).not.toBeNull();
     expect(box.height).toBeGreaterThanOrEqual(44);
