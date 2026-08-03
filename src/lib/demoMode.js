@@ -1,4 +1,6 @@
 const DEMO_ACCOUNT_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
+const DEMO_SESSION_KEY = "sl:demoSession";
+const LEGACY_DEMO_KEY = "sl:demoMode";
 
 export function isDemoAccount(userOrEmail) {
   const email = typeof userOrEmail === "string" ? userOrEmail : userOrEmail?.email;
@@ -7,17 +9,21 @@ export function isDemoAccount(userOrEmail) {
 
 export function isDemoMode() {
   if (typeof window === "undefined") return false;
-  const search = window.location.search;
-  // Demo mode is enabled with /?demo=1.
-  const fromQuery = new URLSearchParams(search).get("demo") === "1";
-  const fromStickyFlag = window.localStorage.getItem("sl:demoMode") === "true";
-  return fromQuery || fromStickyFlag;
+  const fromQuery = new URLSearchParams(window.location.search).get("demo") === "1";
+  const fromCurrentSession = window.sessionStorage.getItem(DEMO_SESSION_KEY) === "true";
+
+  // Remove the former persistent flag so a past demo visit can never bypass login.
+  window.localStorage.removeItem(LEGACY_DEMO_KEY);
+
+  if (fromQuery) window.sessionStorage.setItem(DEMO_SESSION_KEY, "true");
+  return fromQuery || fromCurrentSession;
 }
 
 export function setDemoMode(enabled) {
   if (typeof window === "undefined") return;
-  if (enabled) window.localStorage.setItem("sl:demoMode", "true");
-  else window.localStorage.removeItem("sl:demoMode");
+  window.localStorage.removeItem(LEGACY_DEMO_KEY);
+  if (enabled) window.sessionStorage.setItem(DEMO_SESSION_KEY, "true");
+  else window.sessionStorage.removeItem(DEMO_SESSION_KEY);
 }
 
 
