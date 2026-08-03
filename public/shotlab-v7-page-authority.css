@@ -1,0 +1,246 @@
+/* ShotLab V7 — page-state visual authority. */
+:root{
+  --v7-canvas:#f4f3ef;
+  --v7-surface:#fffefa;
+  --v7-ink:#111411;
+  --v7-soft:#505852;
+  --v7-muted:#727a74;
+  --v7-line:rgba(17,20,17,.12);
+  --v7-accent:#7f9e1e;
+  --v7-dark:#171b18;
+}
+
+/* Own the entire application viewport whenever a coach decision workspace is active. */
+html:has([data-testid="coach-players-interactive-dashboard"]),
+body:has([data-testid="coach-players-interactive-dashboard"]),
+#root:has([data-testid="coach-players-interactive-dashboard"]),
+html:has([data-testid="coach-events-interactive-dashboard"]),
+body:has([data-testid="coach-events-interactive-dashboard"]),
+#root:has([data-testid="coach-events-interactive-dashboard"]){
+  min-height:100%!important;
+  background:var(--v7-canvas)!important;
+  background-color:var(--v7-canvas)!important;
+  background-image:none!important;
+  color:var(--v7-ink)!important;
+}
+body:has([data-testid="coach-players-interactive-dashboard"])::before,
+body:has([data-testid="coach-players-interactive-dashboard"])::after,
+body:has([data-testid="coach-events-interactive-dashboard"])::before,
+body:has([data-testid="coach-events-interactive-dashboard"])::after{
+  display:none!important;
+  content:none!important;
+}
+#root:has([data-testid="coach-players-interactive-dashboard"])>*,
+#root:has([data-testid="coach-events-interactive-dashboard"])>*{
+  background-color:var(--v7-canvas)!important;
+  background-image:none!important;
+}
+[data-testid="coach-players-interactive-dashboard"],
+[data-testid="coach-events-interactive-dashboard"]{
+  background:var(--v7-canvas)!important;
+  background-color:var(--v7-canvas)!important;
+  background-image:none!important;
+  color:var(--v7-ink)!important;
+  padding-bottom:calc(150px + env(safe-area-inset-bottom,0px))!important;
+}
+
+/* Eliminate decorative legacy layers and dark court textures inside these pages. */
+[data-testid="coach-players-interactive-dashboard"]::before,
+[data-testid="coach-players-interactive-dashboard"]::after,
+[data-testid="coach-events-interactive-dashboard"]::before,
+[data-testid="coach-events-interactive-dashboard"]::after,
+[data-testid="coach-players-interactive-dashboard"] [class*="court" i],
+[data-testid="coach-events-interactive-dashboard"] [class*="court" i],
+[data-testid="coach-players-interactive-dashboard"] [class*="backdrop" i],
+[data-testid="coach-events-interactive-dashboard"] [class*="backdrop" i]{
+  display:none!important;
+  content:none!important;
+  background:none!important;
+}
+
+/* Compact editorial command bars. */
+[data-testid="coach-players-command-bar"],
+[data-testid="coach-events-command-bar"]{
+  background:var(--v7-surface)!important;
+  background-color:var(--v7-surface)!important;
+  color:var(--v7-ink)!important;
+  border:1px solid var(--v7-line)!important;
+  box-shadow:0 12px 30px rgba(21,25,22,.07)!important;
+}
+[data-testid="coach-players-command-bar"] p,
+[data-testid="coach-events-command-bar"] p{
+  max-width:29ch!important;
+  color:var(--v7-soft)!important;
+  -webkit-text-fill-color:var(--v7-soft)!important;
+}
+
+/* Complete reset of the inherited metric strip. Every metric is a real surface. */
+body [data-testid="coach-players-metric-strip"],
+body [data-testid="coach-events-metric-strip"]{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-auto-flow:row!important;
+  gap:10px!important;
+  width:100%!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+body [data-testid="coach-players-metric-strip"] button,
+body [data-testid="coach-events-metric-strip"] button,
+body [data-testid="coach-players-metric-strip"] button:nth-child(n),
+body [data-testid="coach-events-metric-strip"] button:nth-child(n){
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  position:relative!important;
+  inset:auto!important;
+  display:flex!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  min-height:116px!important;
+  margin:0!important;
+  padding:16px!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:flex-start!important;
+  gap:6px!important;
+  border:1px solid var(--v7-line)!important;
+  border-radius:20px!important;
+  background:var(--v7-surface)!important;
+  background-color:var(--v7-surface)!important;
+  background-image:none!important;
+  color:var(--v7-ink)!important;
+  -webkit-text-fill-color:var(--v7-ink)!important;
+  opacity:1!important;
+  visibility:visible!important;
+  filter:none!important;
+  transform:none!important;
+  mix-blend-mode:normal!important;
+  box-shadow:0 8px 22px rgba(21,25,22,.055)!important;
+  overflow:hidden!important;
+}
+body [data-testid="coach-players-metric-strip"] button[aria-pressed="true"],
+body [data-testid="coach-events-metric-strip"] button[aria-pressed="true"]{
+  border-color:rgba(127,158,30,.55)!important;
+  box-shadow:inset 0 -3px 0 var(--v7-accent),0 8px 22px rgba(21,25,22,.055)!important;
+}
+body [data-testid="coach-players-metric-strip"] button>*:nth-child(n),
+body [data-testid="coach-events-metric-strip"] button>*:nth-child(n){
+  position:static!important;
+  display:block!important;
+  width:auto!important;
+  max-width:100%!important;
+  margin:0!important;
+  color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+  opacity:1!important;
+  visibility:visible!important;
+  filter:none!important;
+  transform:none!important;
+}
+body [data-testid="coach-players-metric-strip"] button>*:nth-child(1),
+body [data-testid="coach-events-metric-strip"] button>*:nth-child(1){
+  color:var(--v7-muted)!important;
+  -webkit-text-fill-color:var(--v7-muted)!important;
+  font-size:11px!important;
+  font-weight:780!important;
+  line-height:1.1!important;
+  letter-spacing:.045em!important;
+  text-transform:uppercase!important;
+}
+body [data-testid="coach-players-metric-strip"] button>*:nth-child(2),
+body [data-testid="coach-events-metric-strip"] button>*:nth-child(2){
+  margin-top:2px!important;
+  color:var(--v7-ink)!important;
+  -webkit-text-fill-color:var(--v7-ink)!important;
+  font-size:38px!important;
+  font-weight:820!important;
+  line-height:.95!important;
+  letter-spacing:-.045em!important;
+}
+body [data-testid="coach-players-metric-strip"] button>*:nth-child(3),
+body [data-testid="coach-events-metric-strip"] button>*:nth-child(3){
+  margin-top:auto!important;
+  color:var(--v7-soft)!important;
+  -webkit-text-fill-color:var(--v7-soft)!important;
+  font-size:13px!important;
+  font-weight:620!important;
+  line-height:1.25!important;
+}
+
+/* Keep tools visually subordinate and prevent horizontal clipping. */
+[data-testid="coach-players-filter-rail"],
+[data-testid="coach-events-filter-rail"]{
+  max-width:100%!important;
+  overflow:hidden!important;
+  background:var(--v7-surface)!important;
+  background-color:var(--v7-surface)!important;
+}
+[data-testid="coach-players-filter-rail"]>*,
+[data-testid="coach-events-filter-rail"]>*{
+  max-width:100%!important;
+}
+[data-testid="coach-players-filter-rail"] [role="group"],
+[data-testid="coach-events-filter-rail"] [role="group"]{
+  overflow-x:auto!important;
+  overscroll-behavior-x:contain!important;
+  scrollbar-width:none!important;
+}
+
+/* Decision cards remain the single dark focal surfaces and clear the tab bar. */
+[data-testid="coach-players-decision-brief"],
+[data-testid="coach-events-decision-brief"]{
+  min-height:210px!important;
+  margin-bottom:4px!important;
+  padding:22px!important;
+  background:var(--v7-dark)!important;
+  background-color:var(--v7-dark)!important;
+  color:#fff!important;
+  border:1px solid rgba(255,255,255,.08)!important;
+  box-shadow:0 16px 36px rgba(20,24,21,.14)!important;
+}
+[data-testid="coach-players-decision-brief"] h2,
+[data-testid="coach-events-decision-brief"] h2{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+[data-testid="coach-players-decision-brief"] p,
+[data-testid="coach-events-decision-brief"] p{
+  color:rgba(255,255,255,.76)!important;
+  -webkit-text-fill-color:rgba(255,255,255,.76)!important;
+}
+
+/* Mission Control contrast must be unequivocal. */
+body [data-testid="coach-primary-objective"] .mcPrimary,
+body [data-testid="coach-primary-objective"] .mcPrimary:nth-child(n){
+  background:#f5f3ec!important;
+  background-color:#f5f3ec!important;
+  color:#111411!important;
+  -webkit-text-fill-color:#111411!important;
+  opacity:1!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+}
+body [data-testid="coach-command-center-full"] .mcAttentionRow,
+body [data-testid="coach-command-center-full"] .mcAttentionRow:nth-child(n){
+  background:#eef0eb!important;
+  background-color:#eef0eb!important;
+  color:#111411!important;
+  -webkit-text-fill-color:#111411!important;
+  opacity:1!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+}
+
+@media(max-width:700px){
+  [data-testid="coach-players-interactive-dashboard"],
+  [data-testid="coach-events-interactive-dashboard"]{
+    padding:12px 14px calc(158px + env(safe-area-inset-bottom,0px))!important;
+  }
+}
