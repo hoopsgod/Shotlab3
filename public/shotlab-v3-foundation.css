@@ -1,0 +1,98 @@
+/* ShotLab V3 visual authority: one readable mobile product language. */
+:root{
+  --v3-canvas:#f5f5f2;
+  --v3-surface:#ffffff;
+  --v3-surface-subtle:#f0f1ed;
+  --v3-ink:#171a18;
+  --v3-muted:#68706a;
+  --v3-line:rgba(23,26,24,.12);
+  --v3-accent:#78951f;
+  --v3-danger:#c83945;
+  --v3-shadow:0 10px 28px rgba(18,24,20,.08);
+  color-scheme:light;
+}
+html,body,#root{background:var(--v3-canvas)!important;color:var(--v3-ink)!important}
+body{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important}
+body *{box-sizing:border-box}
+
+/* Remove decorative legacy layers that create collisions and dark-on-dark failures. */
+.mcCourtArtwork,.mcHeroScrim,.mcArenaGlow,.mcRafters,.mcArenaLights,.mcHoop,.mcCourtFloor{display:none!important}
+
+/* Mission Control */
+body.mission-control-active .mcShellV3,
+body.mission-control-active .missionControl{background:var(--v3-canvas)!important;color:var(--v3-ink)!important}
+body.mission-control-active .missionControl{width:min(100%,760px)!important;margin:0 auto!important;padding:12px 16px calc(104px + env(safe-area-inset-bottom,0px))!important;gap:16px!important}
+body.mission-control-active .mcHeader{min-height:72px!important;padding:12px 14px!important;border:1px solid var(--v3-line)!important;border-radius:20px!important;background:rgba(255,255,255,.96)!important;color:var(--v3-ink)!important;box-shadow:var(--v3-shadow)!important}
+body.mission-control-active .mcBrandCopy small{color:var(--v3-muted)!important;font-size:12px!important;letter-spacing:0!important;text-transform:none!important}
+body.mission-control-active .mcBrandCopy strong{color:var(--v3-ink)!important;font-size:25px!important;line-height:1!important;letter-spacing:-.04em!important}
+body.mission-control-active .mcMobileMenu,body.mission-control-active .mcBell,body.mission-control-active .mcTeamSelect{min-width:44px!important;min-height:44px!important;border:1px solid var(--v3-line)!important;border-radius:14px!important;background:#fff!important;color:var(--v3-ink)!important;box-shadow:none!important}
+body.mission-control-active .mcHero{min-height:0!important;max-height:none!important;overflow:visible!important;padding:0!important;border:1px solid var(--v3-line)!important;border-radius:22px!important;background:var(--v3-surface)!important;color:var(--v3-ink)!important;box-shadow:var(--v3-shadow)!important}
+body.mission-control-active .mcHeroContent{display:grid!important;grid-template-columns:minmax(0,1fr) 72px!important;gap:8px 14px!important;padding:18px!important;align-items:start!important}
+body.mission-control-active .mcHeroTeamMark{position:static!important;grid-column:2!important;grid-row:1/4!important;width:68px!important;height:68px!important;margin:0!important;background:transparent!important;border:0!important;box-shadow:none!important}
+body.mission-control-active .mcHeroTeamMark img{width:100%!important;height:100%!important;object-fit:contain!important;filter:none!important}
+body.mission-control-active .mcEyebrow{grid-column:1!important;margin:0!important;color:var(--v3-accent)!important;font-size:11px!important;font-weight:750!important;letter-spacing:.02em!important;text-transform:none!important}
+body.mission-control-active .mcHero h1{grid-column:1!important;margin:0!important;max-width:12ch!important;color:var(--v3-ink)!important;font-size:34px!important;line-height:1!important;letter-spacing:-.05em!important;text-transform:none!important}
+body.mission-control-active .mcHeroContent>p{grid-column:1!important;margin:2px 0 0!important;color:var(--v3-muted)!important;font-size:14px!important;line-height:1.4!important}
+body.mission-control-active .mcRealityStrip{grid-column:1/-1!important;display:grid!important;grid-template-columns:repeat(3,1fr)!important;margin:8px 0 0!important;border:1px solid var(--v3-line)!important;border-radius:14px!important;background:var(--v3-surface-subtle)!important;overflow:hidden!important}
+body.mission-control-active .mcRealityStrip>button{min-height:52px!important;padding:6px!important;border:0!important;border-right:1px solid var(--v3-line)!important;background:transparent!important;color:var(--v3-ink)!important;box-shadow:none!important}
+body.mission-control-active .mcRealityStrip>button:last-child{border-right:0!important}
+body.mission-control-active .mcRealityStrip strong{color:var(--v3-ink)!important;font-size:20px!important}
+body.mission-control-active .mcRealityStrip small{color:var(--v3-muted)!important;font-size:10px!important;letter-spacing:0!important;text-transform:none!important}
+body.mission-control-active .mcPrimary{grid-column:1/-1!important;min-height:46px!important;margin:0!important;border:0!important;border-radius:14px!important;background:var(--v3-ink)!important;color:#fff!important;box-shadow:none!important}
+body.mission-control-active .mcSection,body.mission-control-active .mcTodayPlan,body.mission-control-active [data-testid="coach-assignment-accountability"]{border:1px solid var(--v3-line)!important;border-radius:20px!important;background:var(--v3-surface)!important;color:var(--v3-ink)!important;box-shadow:var(--v3-shadow)!important;overflow:hidden!important}
+body.mission-control-active .mcSection h2,body.mission-control-active .mcSection h3,body.mission-control-active [data-testid="coach-assignment-accountability"] h2{color:var(--v3-ink)!important;letter-spacing:-.035em!important;text-transform:none!important}
+body.mission-control-active .mcSection p,body.mission-control-active .mcSection small,body.mission-control-active [data-testid="coach-assignment-accountability"] p,body.mission-control-active [data-testid="coach-assignment-accountability"] small{color:var(--v3-muted)!important;letter-spacing:0!important;text-transform:none!important}
+body.mission-control-active .mcAttentionRow,body.mission-control-active .mcAssignmentAccountabilityRow,body.mission-control-active .mcAssignmentAccountabilityEmpty{background:var(--v3-surface-subtle)!important;color:var(--v3-ink)!important;border-color:var(--v3-line)!important;box-shadow:none!important}
+body.mission-control-active .mcAttentionCopy strong,body.mission-control-active .mcAssignmentAccountabilityRow strong{color:var(--v3-ink)!important}
+body.mission-control-active .mcAttentionCopy small,body.mission-control-active .mcAttentionMeta,body.mission-control-active .mcRowAction{color:var(--v3-muted)!important}
+
+/* Coach secondary pages */
+.secondaryPageShell{width:min(100%,760px)!important;margin:0 auto!important;padding:18px 16px calc(104px + env(safe-area-inset-bottom,0px))!important;gap:16px!important;background:transparent!important;color:var(--v3-ink)!important}
+.secondaryPageIntro,.secondaryPageDecision,.secondaryPageToolbar [class*="metricStrip"],.secondaryPageToolbar [class*="filterRail"],.secondaryPageEvidence>*{border:1px solid var(--v3-line)!important;background:var(--v3-surface)!important;color:var(--v3-ink)!important;box-shadow:var(--v3-shadow)!important}
+.secondaryPageIntro{grid-template-columns:1fr!important;gap:14px!important;padding:20px!important;border-radius:22px!important;background-image:none!important}
+.secondaryPageIntro__title{color:var(--v3-ink)!important;font-size:42px!important;line-height:1!important}
+.secondaryPageIntro__summary{max-width:38ch!important;margin-top:8px!important;color:var(--v3-muted)!important;font-size:15px!important;line-height:1.45!important;background:transparent!important;border:0!important;box-shadow:none!important}
+.secondaryPageIntro__eyebrow,.secondaryPageDecision__eyebrow{color:var(--v3-accent)!important;text-transform:none!important;letter-spacing:.02em!important}
+.secondaryPageIntro__actions,.secondaryPageIntro__buttonRow{width:100%!important;justify-content:flex-start!important;justify-items:start!important}
+.secondaryPageAction{min-height:46px!important;border-radius:13px!important}
+.secondaryPageAction--primary{background:var(--v3-ink)!important;color:#fff!important;border-color:var(--v3-ink)!important}
+.secondaryPageAction--secondary{background:#fff!important;color:var(--v3-ink)!important}
+.secondaryPageToolbar{gap:10px!important}
+.secondaryPageToolbar [class*="metricStrip"]{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;overflow:hidden!important;border-radius:18px!important}
+.secondaryPageToolbar [class*="filterRail"]{border-radius:18px!important;overflow:hidden!important}
+.secondaryPageToolbar input{width:100%!important;min-width:0!important;background:#fff!important;color:var(--v3-ink)!important;border-color:var(--v3-line)!important}
+.secondaryPageDecision{padding:20px!important;border-radius:20px!important}
+.secondaryPageDecision h2{color:var(--v3-ink)!important;font-size:30px!important}
+.secondaryPageDecision p{color:var(--v3-muted)!important;font-size:15px!important}
+.secondaryPageEvidence{grid-template-columns:1fr!important;gap:12px!important}
+.secondaryPageEvidence>*{border-radius:18px!important;padding:18px!important}
+.secondaryPageEvidence h2,.secondaryPageEvidence h3,.secondaryPageEvidence strong{color:var(--v3-ink)!important}
+.secondaryPageEvidence p,.secondaryPageEvidence small{color:var(--v3-muted)!important}
+
+/* Team Store: same product, not a separate serif admin panel. */
+.ts-overlay{background:rgba(20,24,21,.42)!important;color:var(--v3-ink)!important;backdrop-filter:blur(12px)!important}
+.ts-panel{width:min(760px,100%)!important;max-height:calc(100dvh - 18px)!important;border:1px solid var(--v3-line)!important;border-radius:24px 24px 0 0!important;background:var(--v3-canvas)!important;color:var(--v3-ink)!important;box-shadow:0 24px 70px rgba(18,24,20,.22)!important;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important}
+.ts-header{padding:18px 18px 16px!important;border-bottom:1px solid var(--v3-line)!important;background:rgba(255,255,255,.96)!important;color:var(--v3-ink)!important}
+.ts-header h2{color:var(--v3-ink)!important;font-family:inherit!important;font-size:32px!important;letter-spacing:-.04em!important}
+.ts-header p{color:var(--v3-muted)!important}
+.ts-eyebrow,.ts-section-kicker,.ts-progress-intro>span,.ts-preview-heading>span,.ts-player-intro>span{color:var(--v3-accent)!important;font-family:inherit!important;letter-spacing:.04em!important}
+.ts-close{background:#fff!important;color:var(--v3-ink)!important;border-color:var(--v3-line)!important}
+.ts-coach-content,.ts-player-content{padding:16px!important}
+.ts-progress-wrap,.ts-form-card,.ts-player-view-card,.ts-metrics-card,.ts-partner-start,.ts-fulfillment-note,.ts-preview-card{border-color:var(--v3-line)!important;background:var(--v3-surface)!important;color:var(--v3-ink)!important;box-shadow:none!important}
+.ts-form-card,.ts-player-view-card,.ts-metrics-card{padding:18px!important;border-radius:18px!important}
+.ts-form-card h3,.ts-form-card h4,.ts-player-view-card h3,.ts-metrics-card h3,.ts-preview-heading h3,.ts-player-intro h3{color:var(--v3-ink)!important;font-family:inherit!important}
+.ts-section-copy,.ts-preview-heading p,.ts-player-intro p,.ts-field small,.ts-partner-start p,.ts-partner-footnote{color:var(--v3-muted)!important}
+.ts-field label{color:var(--v3-ink)!important;font-family:inherit!important}
+.ts-field input,.ts-field select{width:100%!important;min-height:48px!important;border:1px solid var(--v3-line)!important;border-radius:13px!important;background:#fff!important;color:var(--v3-ink)!important;font-family:inherit!important;font-size:16px!important}
+.ts-button{min-height:48px!important;border-radius:13px!important;font-family:inherit!important}
+.ts-button-primary{background:var(--v3-ink)!important;color:#fff!important;border-color:var(--v3-ink)!important}
+
+@media(max-width:700px){
+  .ts-overlay{padding:8px 0 0!important}
+  .ts-panel{max-height:calc(100dvh - 8px)!important}
+  .ts-progress-wrap,.ts-setup-grid,.ts-live-grid{grid-template-columns:1fr!important}
+  .ts-progress{grid-template-columns:1fr!important}
+  .ts-progress li:not(:last-child)::after{display:none!important}
+  .secondaryPageAction{flex:1 1 auto!important}
+}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
