@@ -120,10 +120,11 @@ test("assign-next refuses to overwrite active work", async () => {
   assert.equal(getPlayerAssignmentLocal({ teamId: TEAM_ID, playerIdentity: PLAYER, storage }).state, "started");
 });
 
-test("database, server, and UI contracts keep history immutable and private", () => {
+test("database, server, and UI contracts keep history immutable, visible, and private", () => {
   const migration = fs.readFileSync(new URL("../migrations/040_player_assignment_history.sql", import.meta.url), "utf8");
   const route = fs.readFileSync(new URL("../functions/v1/player-assignment-history/index.js", import.meta.url), "utf8");
   const enhancer = fs.readFileSync(new URL("../src/lib/coachAssignNextEnhancer.js", import.meta.url), "utf8");
+  const readyEnhancer = fs.readFileSync(new URL("../src/lib/coachAssignNextReadyEnhancer.js", import.meta.url), "utf8");
   const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
 
   assert.match(migration, /primary key \(team_id, player_identity, created_at\)/i);
@@ -134,8 +135,12 @@ test("database, server, and UI contracts keep history immutable and private", ()
   assert.match(route, /archived_previous/);
   assert.match(enhancer, /Assign next/);
   assert.match(enhancer, /coach-assignment-history/);
+  assert.match(readyEnhancer, /coach-assign-next-ready/);
+  assert.match(readyEnhancer, /Ready for next assignment/);
   assert.match(bootstrap, /installCoachAssignNextEnhancer\(\)/);
+  assert.match(bootstrap, /installCoachAssignNextReadyEnhancer\(\)/);
   assert.doesNotMatch(migration, /private_note|coach_note/i);
   assert.doesNotMatch(route, /private_note|coach_note/i);
   assert.doesNotMatch(enhancer, /private_note|coach_note/i);
+  assert.doesNotMatch(readyEnhancer, /private_note|coach_note/i);
 });
