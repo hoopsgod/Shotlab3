@@ -6,8 +6,19 @@ import { collectTeamPriorityAccess } from "../team-priorities/index.js";
 const DEMO_IDENTITIES = new Set(["coach.demo@shotlab.app", "demo@shotlab.app"]);
 const STATES = ["assigned", "acknowledged", "started", "completed"];
 const STATE_INDEX = new Map(STATES.map((state, index) => [state, index]));
+const DATE_KEY = /^\d{4}-\d{2}-\d{2}$/;
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const cleanText = (value, max = 500) => String(value ?? "").trim().slice(0, max);
+
+export function sanitizeAssignmentDueDate(value) {
+  const candidate = cleanText(value, 32);
+  if (!candidate) return "";
+  if (!DATE_KEY.test(candidate)) return "";
+  const [year, month, day] = candidate.split("-").map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  if (date.getUTCFullYear() !== year || date.getUTCMonth() !== month - 1 || date.getUTCDate() !== day) return "";
+  return candidate;
+}
 
 export function sanitizePlayerAssignment(value = {}) {
   const state = cleanText(value?.state || "assigned", 32).toLowerCase();
@@ -17,6 +28,7 @@ export function sanitizePlayerAssignment(value = {}) {
     playerName: cleanText(value?.player_name || value?.playerName, 320),
     assignmentText: cleanText(value?.assignment_text || value?.assignmentText, 4000),
     resultDetail: cleanText(value?.result_detail || value?.resultDetail, 1000),
+    dueDate: sanitizeAssignmentDueDate(value?.due_date || value?.dueDate),
     state: STATE_INDEX.has(state) ? state : "assigned",
     assignedBy: normalizeIdentity(value?.assigned_by || value?.assignedBy),
     createdAt: cleanText(value?.created_at || value?.createdAt, 120),
@@ -34,6 +46,7 @@ function toDatabase(row = {}) {
     player_name: row.playerName,
     assignment_text: row.assignmentText,
     result_detail: row.resultDetail,
+    due_date: row.dueDate || null,
     state: row.state,
     assigned_by: row.assignedBy,
     created_at: row.createdAt,
@@ -45,7 +58,7 @@ function toDatabase(row = {}) {
 }
 
 function assignmentSelect() {
-  return "select=team_id,player_identity,player_name,assignment_text,result_detail,state,assigned_by,created_at,updated_at,acknowledged_at,started_at,completed_at";
+  return "select=team_id,player_identity,player_name,assignment_text,result_detail,due_date,state,assigned_by,created_at,updated_at,acknowledged_at,started_at,completed_at";
 }
 
 async function resolveRequester(request, env) {
@@ -145,7 +158,9 @@ export async function onRequestPost({ request, env }) {
   if (!teamId) return Response.json({ error: "team_id_required" }, { status: 400 });
   if (!["assign", "acknowledge", "start", "complete"].includes(action)) return Response.json({ error: "invalid_action" }, { status: 400 });
 
+  const rawDueDate = cleanText(body?.assignment?.due_date || body?.assignment?.dueDate, 32);
   const input = sanitizePlayerAssignment({ ...(body?.assignment || {}), teamId });
+  if (action === "assign" && rawDueDate && !input.dueDate) return Response.json({ error: "invalid_due_date" }, { status: 400 });
   if (auth.source === "demo_header" && DEMO_IDENTITIES.has(requester)) {
     const now = new Date().toISOString();
     if (action === "assign") {
