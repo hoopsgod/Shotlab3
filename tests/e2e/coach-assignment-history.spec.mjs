@@ -109,14 +109,22 @@ test("coach assigns next without erasing the completed assignment", async ({ bro
 
   const panel = page.getByTestId("coach-assignment-accountability");
   await expect(panel).toBeVisible({ timeout: 20_000 });
-  const completedRow = panel.locator(`.mcAssignmentAccountabilityRow[data-player-email="${PLAYER_EMAIL}"][data-assignment-state="completed"]`);
-  await expect(completedRow).toBeVisible();
-  await expect(completedRow.locator("em")).toContainText("Assign next");
+  const ready = page.getByTestId("coach-assign-next-ready");
+  await expect(ready).toBeVisible();
+  await expect(ready).toHaveAttribute("data-ready-count", "1");
+  const readyPlayer = ready.locator(`[data-player-email="${PLAYER_EMAIL}"]`);
+  await expect(readyPlayer).toBeVisible();
+  await expect(readyPlayer).toContainText("Assign next");
 
-  await completedRow.click();
+  await readyPlayer.click();
   const sheet = page.getByTestId("coach-assign-next");
   await expect(sheet).toBeVisible();
   await expect(sheet).toContainText("never overwrites active work");
+  await expect(sheet).toContainText(OLD_ASSIGNMENT);
+  for (const button of await sheet.locator("button:visible").all()) {
+    const box = await button.boundingBox();
+    if (box) expect(box.height).toBeGreaterThanOrEqual(44);
+  }
   await page.getByTestId("coach-assign-next-input").fill(NEW_ASSIGNMENT);
   await page.getByTestId("coach-assign-next-submit").click();
   await expect(sheet).toHaveAttribute("data-state", "delivered");
@@ -131,6 +139,7 @@ test("coach assigns next without erasing the completed assignment", async ({ bro
   expect("coach_note" in state.requests[0].assignment).toBe(false);
 
   await sheet.getByRole("button", { name: "Done", exact: true }).click();
+  await expect(ready).toHaveCount(0);
   await expect(panel.locator(`[data-player-email="${PLAYER_EMAIL}"][data-assignment-state="assigned"]`)).toBeVisible();
 
   const history = page.getByTestId("coach-assignment-history");
@@ -147,10 +156,6 @@ test("coach assigns next without erasing the completed assignment", async ({ bro
   expect(current.assignmentText).toBe(NEW_ASSIGNMENT);
   expect(current.state).toBe("assigned");
 
-  for (const button of await sheet.locator("button:visible").all()) {
-    const box = await button.boundingBox();
-    if (box) expect(box.height).toBeGreaterThanOrEqual(44);
-  }
   const widths = await page.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
