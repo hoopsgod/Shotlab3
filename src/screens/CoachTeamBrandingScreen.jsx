@@ -25,7 +25,7 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
       <div className="branding-industrial__inner">
         <AppHeader
           variant="standard"
-          eyebrow="Team identity"
+          eyebrow="Team identity system"
           title="Branding"
           subtitle={`${teamName} branding flows through coach, player, training, event, leaderboard, and storefront experiences.`}
           action={{ label: "Back", onClick: onBack }}
