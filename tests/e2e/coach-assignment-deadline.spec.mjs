@@ -152,6 +152,12 @@ test("coach deadline reaches the exact player and overdue clears on completion",
   const dueDate = dateKeyFromOffset(3);
   await expect(coachPage.getByTestId("coach-quick-assign-due-date")).toHaveValue(dueDate);
 
+  for (const control of await deadline.locator("input,button").all()) {
+    const box = await control.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box.height).toBeGreaterThanOrEqual(44);
+  }
+
   const assignmentText = "Complete the form shooting ladder and record makes from all five spots.";
   await coachPage.getByTestId("coach-quick-assign-input").fill(assignmentText);
   await composer.getByRole("button", { name: "Deliver assignment", exact: true }).click();
@@ -203,11 +209,6 @@ test("coach deadline reaches the exact player and overdue clears on completion",
   await coachPage.evaluate(() => window.dispatchEvent(new Event("focus")));
   await expect(panel).toHaveAttribute("data-overdue-count", "1");
 
-  for (const control of await deadline.locator("input,button").all()) {
-    const box = await control.boundingBox();
-    expect(box).not.toBeNull();
-    expect(box.height).toBeGreaterThanOrEqual(44);
-  }
   const widths = await playerPage.evaluate(() => ({ viewport: window.innerWidth, document: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
