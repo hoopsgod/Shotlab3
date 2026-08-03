@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import styles from "./MobileNavigation.module.css";
+import "./MobileNavigationArchitecture.css";
 
 const MoreIcon = () => (
   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
