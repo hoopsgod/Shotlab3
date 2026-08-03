@@ -18,6 +18,20 @@ export function installPlayerAssignmentEnhancer() {
     let target = null;
     let frame = null;
 
+    const placeHost = (nextTarget, nextHost) => {
+      const primaryAction = nextTarget.querySelector('[data-testid="player-daily-primary-action"]');
+      const genericHero = primaryAction?.closest?.("div");
+      if (genericHero?.parentElement === nextTarget) {
+        nextHost.dataset.assignmentPlacement = "before-generic-primary";
+        nextTarget.insertBefore(nextHost, genericHero);
+        return;
+      }
+      const coachSignal = nextTarget.querySelector('[data-testid="player-coach-priority-signal"]');
+      nextHost.dataset.assignmentPlacement = coachSignal ? "before-coach-signal" : "command-center-end";
+      if (coachSignal) nextTarget.insertBefore(nextHost, coachSignal);
+      else nextTarget.appendChild(nextHost);
+    };
+
     const reconcile = () => {
       frame = null;
       const nextTarget = document.querySelector('[data-testid="player-daily-command-center"]');
@@ -35,9 +49,7 @@ export function installPlayerAssignmentEnhancer() {
       target = nextTarget;
       host = document.createElement("div");
       host.dataset.testid = HOST_TEST_ID;
-      const coachSignal = nextTarget.querySelector('[data-testid="player-coach-priority-signal"]');
-      if (coachSignal) nextTarget.insertBefore(host, coachSignal);
-      else nextTarget.appendChild(host);
+      placeHost(nextTarget, host);
       root = createRoot(host);
       root.render(React.createElement(PlayerCoachAssignmentCard));
     };
