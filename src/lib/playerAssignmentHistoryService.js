@@ -116,7 +116,7 @@ export async function saveNextPlayerAssignment({
 
   const archived = archivePlayerAssignmentLocal(current, storage);
   const now = new Date().toISOString();
-  const local = savePlayerAssignmentLocal({
+  const draft = normalizePlayerAssignment({
     teamId: activeTeamId,
     playerIdentity: target,
     playerName: clean(playerName || current.playerName, 320),
@@ -127,9 +127,10 @@ export async function saveNextPlayerAssignment({
     assignedBy: session.requester,
     createdAt: now,
     updatedAt: now,
-  }, storage);
+  });
 
   if (!session.requester || typeof fetchImpl !== "function") {
+    const local = savePlayerAssignmentLocal(draft, storage);
     return { ok: true, storageMode: "local_only", assignment: local, archivedAssignment: archived, message: "Next assignment saved on this device. The completed assignment remains in local history." };
   }
 
@@ -141,22 +142,22 @@ export async function saveNextPlayerAssignment({
         team_id: activeTeamId,
         assignment: {
           player_identity: target,
-          player_name: local.playerName,
-          assignment_text: local.assignmentText,
-          due_date: local.dueDate || null,
+          player_name: draft.playerName,
+          assignment_text: draft.assignmentText,
+          due_date: draft.dueDate || null,
         },
       }),
     });
     const body = await response.json().catch(() => ({}));
     if (!response?.ok || body?.error) {
-      return { ok: false, localSaved: true, archivedPrevious: true, storageMode: "local_fallback", assignment: local, archivedAssignment: archived, error: body?.error || "assignment_next_failed", message: "Saved locally with history, but player delivery sync failed." };
+      return { ok: false, retryable: true, historySaved: true, storageMode: "local_fallback", assignment: current, archivedAssignment: archived, error: body?.error || "assignment_next_failed", message: "The completed assignment is preserved, but the next assignment was not delivered. Retry when sync is available." };
     }
-    const remote = normalizePlayerAssignment(body?.assignment) || local;
+    const remote = normalizePlayerAssignment(body?.assignment) || draft;
     savePlayerAssignmentLocal(remote, storage);
     if (body?.archived_assignment) archivePlayerAssignmentLocal(body.archived_assignment, storage);
     return { ok: true, storageMode: body?.storage_mode || "team_remote", assignment: remote, archivedAssignment: normalizePlayerAssignmentHistory(body?.archived_assignment) || archived, message: body?.storage_mode === "demo_local" ? "Next assignment saved in this demo session." : "Next assignment delivered. The completed assignment was preserved in history." };
   } catch (error) {
-    return { ok: false, localSaved: true, archivedPrevious: true, storageMode: "local_fallback", assignment: local, archivedAssignment: archived, error: String(error?.message || "assignment_next_failed"), message: "Saved locally with history, but player delivery sync failed." };
+    return { ok: false, retryable: true, historySaved: true, storageMode: "local_fallback", assignment: current, archivedAssignment: archived, error: String(error?.message || "assignment_next_failed"), message: "The completed assignment is preserved, but the next assignment was not delivered. Retry when sync is available." };
   }
 }
 
