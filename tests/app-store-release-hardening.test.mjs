@@ -40,9 +40,9 @@ const pendingLog = {
   syncSource: "local",
 };
 
-test("demo runtime requires explicit opt-in and never activates from a Cloudflare hostname alone", () => {
+test("demo runtime requires explicit opt-in and never activates from hosting or environment configuration alone", () => {
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab.app", search: "" } }), false);
-  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false, VITE_ENABLE_DEMO_MODE: "true" }, location: { hostname: "shotlab.app", search: "" } }), true);
+  assert.equal(isDemoRuntimeEnabled({ env: { DEV: false, VITE_ENABLE_DEMO_MODE: "true" }, location: { hostname: "shotlab.app", search: "" } }), false);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "localhost", search: "" } }), true);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab3.pages.dev", search: "" } }), false);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "agent-visual-rebuild-v3.shotlab3.pages.dev", search: "" } }), false);
