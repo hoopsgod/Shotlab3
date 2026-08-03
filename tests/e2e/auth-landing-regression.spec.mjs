@@ -25,10 +25,10 @@ test("normal launch clears stale demo authentication and renders the full welcom
   await page.goto("/", { waitUntil: "networkidle" });
 
   await expect(page).not.toHaveURL(/demo=1/);
-  await expect(page.getByText(/sign in/i).first()).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByText(/register/i).first()).toBeVisible();
-  await expect(page.getByText(/coach demo/i).first()).toBeVisible();
-  await expect(page.getByText(/player demo/i).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /^sign in$/i }).first()).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole("button", { name: /^register$/i }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: /^demo coach$/i })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^demo player$/i })).toBeVisible();
   await expect(page.getByText(/mission control/i)).toHaveCount(0);
 
   await page.screenshot({
