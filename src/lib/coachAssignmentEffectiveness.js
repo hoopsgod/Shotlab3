@@ -35,9 +35,10 @@ const median = (values = []) => {
 function normalizeCompletedCycle(value = {}, source = "history") {
   const assignment = normalizePlayerAssignment(value);
   if (!assignment || assignment.state !== "completed" || !assignment.completedAt) return null;
+  const completionMs = durationBetween(assignment.createdAt, assignment.completedAt);
   const completionDate = assignmentDateKey(assignment.completedAt);
   const dueDate = normalizeAssignmentDueDate(assignment.dueDate);
-  const onTime = dueDate && completionDate ? completionDate <= dueDate : null;
+  const onTime = Number.isFinite(completionMs) && dueDate && completionDate ? completionDate <= dueDate : null;
   const dueValue = dateKeyValue(dueDate);
   const completionValue = dateKeyValue(completionDate);
   return {
@@ -46,7 +47,7 @@ function normalizeCompletedCycle(value = {}, source = "history") {
     key: `${assignment.teamId}::${assignment.playerIdentity}::${assignment.createdAt}`,
     acknowledgeMs: durationBetween(assignment.createdAt, assignment.acknowledgedAt),
     startMs: durationBetween(assignment.createdAt, assignment.startedAt),
-    completionMs: durationBetween(assignment.createdAt, assignment.completedAt),
+    completionMs,
     onTime,
     lateDays: onTime === false && dueValue != null && completionValue != null
       ? Math.max(1, Math.round((completionValue - dueValue) / DAY_MS))
