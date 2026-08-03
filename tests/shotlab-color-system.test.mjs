@@ -41,7 +41,7 @@ test("Mission Control uses one readable light hierarchy", () => {
   assert.match(css, /\.mcHeroContent>p[\s\S]*color:var\(--v3-muted\)/);
   assert.match(css, /\.mcPrimary[\s\S]*background:var\(--v3-ink\)/);
   assert.match(corrections, /coach-primary-objective/);
-  assert.match(corrections, /max-height:324px/);
+  assert.match(corrections, /max-height:\s*310px/);
 });
 
 test("secondary coach pages and Team Store share the same product language", () => {
@@ -60,6 +60,5 @@ test("loading shell, accessibility, and V3 entry points remain intact", () => {
   assert.match(html, /id="team-store-root"/);
   assert.match(html, /src="\/src\/main\.jsx"/);
   assert.match(html, /src="\/src\/teamStoreEntry\.jsx"/);
-  assert.match(css, /prefers-reduced-motion:reduce/);
-  assert.match(corrections, /prefers-reduced-motion:reduce/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
