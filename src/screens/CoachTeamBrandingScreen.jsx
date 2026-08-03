@@ -3,6 +3,7 @@ import { DEFAULT_BRANDING } from "../theme/brandingDefaults";
 import TeamBrandingForm from "../components/team/TeamBrandingForm";
 import TeamBrandingPreview from "../components/team/TeamBrandingPreview";
 import AppHeader from "../components/AppHeader";
+import AppFeedbackLayer, { announceFeedback } from "../components/AppFeedbackLayer";
 import "../styles/PremiumWorkspace.css";
 import "./CoachTeamBrandingScreen.css";
 
@@ -16,12 +17,29 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
 
   const handleSave = async (next) => {
     setSaving(true);
-    await onSave?.(next);
-    setSaving(false);
+    try {
+      await onSave?.(next);
+      announceFeedback({
+        tone: "success",
+        title: "Team identity saved",
+        message: "Your updated colors, logos, and typography are now applied across coach and player experiences.",
+      });
+    } catch (error) {
+      announceFeedback({
+        tone: "error",
+        title: "Branding was not saved",
+        message: error?.message || "ShotLab could not save these changes. Your draft remains available so you can try again.",
+        duration: 5200,
+      });
+      throw error;
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
     <main className="team-brand premium-screen premium-screen--branding branding-industrial">
+      <AppFeedbackLayer />
       <div className="branding-industrial__inner">
         <AppHeader
           variant="standard"
@@ -32,14 +50,14 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
         />
 
         <div className="branding-industrial__workspace" data-testid="branding-identity-workspace">
-          <section className="branding-industrial__panel" aria-labelledby="branding-controls-title">
+          <section className="branding-industrial__panel" aria-labelledby="branding-controls-title" aria-busy={saving}>
             <header className="branding-industrial__panel-header">
               <div>
                 <div className="branding-industrial__kicker">Identity controls</div>
                 <h2 id="branding-controls-title">Build one recognizable team system</h2>
                 <p>Choose an approved palette, set readable typography, and prepare transparent logos without exposing technical setup to players.</p>
               </div>
-              <span className="branding-industrial__status">{saving ? "Saving…" : "Live preview"}</span>
+              <span className="branding-industrial__status" role="status" aria-live="polite">{saving ? "Saving changes…" : "Live preview"}</span>
             </header>
             <TeamBrandingForm branding={branding} onChange={setDraftBranding} onSave={handleSave} onCancel={onBack} saving={saving} />
           </section>
