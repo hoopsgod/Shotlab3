@@ -36,9 +36,9 @@ test("canonical secondary page system defines one page, toolbar, decision, and e
   assert.match(pageSystemCss, /\.secondaryPageToolbar/);
   assert.match(pageSystemCss, /\.secondaryPageDecision/);
   assert.match(pageSystemCss, /\.secondaryPageEvidence/);
-  assert.match(pageSystemCss, /min-height:46px/);
-  assert.match(pageSystemCss, /@media\(max-width:760px\)/);
-  assert.match(pageSystemCss, /@media\(prefers-reduced-motion:reduce\)/);
+  assert.match(pageSystemCss, /min-height:\s*46px/);
+  assert.match(pageSystemCss, /@media\s*\(max-width:\s*760px\)/);
+  assert.match(pageSystemCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 });
 
 test("players and events share the canonical page composition without losing selectors", () => {
