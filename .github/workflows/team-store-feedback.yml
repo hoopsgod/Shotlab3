@@ -1,0 +1,28 @@
+name: Team Store Feedback
+
+on:
+  pull_request:
+    paths:
+      - "src/components/AppFeedbackLayer.jsx"
+      - "src/components/TeamStoreFeedbackBridge.jsx"
+      - "src/teamStoreEntry.jsx"
+      - "tests/team-store-feedback-bridge.test.mjs"
+      - ".github/workflows/team-store-feedback.yml"
+
+jobs:
+  verify-team-store-feedback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify Team Store feedback contracts
+        run: node --test tests/team-store-feedback-bridge.test.mjs
+      - name: Build application
+        run: npm run build
