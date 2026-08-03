@@ -9,6 +9,8 @@ on:
       - "src/components/PlayerCoachAssignmentCard.module.css"
       - "src/lib/assignmentDeadline.js"
       - "src/lib/playerAssignmentPriority.js"
+      - "src/lib/playerAssignmentHistoryService.js"
+      - "src/lib/coachAssignNextEnhancer.js"
       - "src/lib/coachPlayerInvitationService.js"
       - "src/lib/coachCrossDeviceActivity.js"
       - "src/lib/coachPlayerResponseLoop.js"
@@ -27,14 +29,17 @@ on:
       - "functions/v1/coach/players/provision.js"
       - "functions/v1/coach/activity/first-results.js"
       - "functions/v1/player-assignments/index.js"
+      - "functions/v1/player-assignment-history/index.js"
       - "functions/v1/player-auth/claim.js"
       - "functions/_utils/transactionalEmail.js"
       - "migrations/036_coach_player_invitations.sql"
       - "migrations/037_player_invitation_existing_account_claim.sql"
       - "migrations/038_player_assignments.sql"
       - "migrations/039_player_assignment_due_dates.sql"
+      - "migrations/040_player_assignment_history.sql"
       - "tests/assignment-deadline.test.mjs"
       - "tests/player-assignment-next-action.test.mjs"
+      - "tests/player-assignment-history.test.mjs"
       - "tests/coach-player-invitation*.test.mjs"
       - "tests/coach-cross-device-activity.test.mjs"
       - "tests/coach-player-response-loop.test.mjs"
@@ -49,6 +54,7 @@ on:
       - "tests/e2e/coach-quick-assign.spec.mjs"
       - "tests/e2e/coach-assignment-deadline.spec.mjs"
       - "tests/e2e/player-assignment-next-action.spec.mjs"
+      - "tests/e2e/coach-assignment-history.spec.mjs"
       - "scripts/verify-coach-player-invitation-live.mjs"
       - ".github/workflows/coach-player-invitations.yml"
   workflow_dispatch:
@@ -67,8 +73,8 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - name: Invitation, response, assignment delivery, deadlines, player priority, accountability, quick assign, and safety tests
-        run: node --test tests/coach-player-invitation-service.test.mjs tests/coach-player-invitation-contract.test.mjs tests/coach-cross-device-activity.test.mjs tests/coach-player-response-loop.test.mjs tests/coach-follow-up-integrity.test.mjs tests/player-assignment-delivery.test.mjs tests/assignment-deadline.test.mjs tests/player-assignment-next-action.test.mjs tests/coach-assignment-accountability.test.mjs tests/coach-quick-assign.test.mjs
+      - name: Invitation, response, assignment delivery, deadlines, player priority, history, accountability, quick assign, and safety tests
+        run: node --test tests/coach-player-invitation-service.test.mjs tests/coach-player-invitation-contract.test.mjs tests/coach-cross-device-activity.test.mjs tests/coach-player-response-loop.test.mjs tests/coach-follow-up-integrity.test.mjs tests/player-assignment-delivery.test.mjs tests/assignment-deadline.test.mjs tests/player-assignment-next-action.test.mjs tests/player-assignment-history.test.mjs tests/coach-assignment-accountability.test.mjs tests/coach-quick-assign.test.mjs
       - name: Existing authentication and roster regressions
         run: node --test tests/legacy-auth-persistence.test.mjs tests/team-memberships-confirm-context-route.test.mjs tests/release-candidate-stability.test.mjs
       - name: Install Playwright
@@ -77,8 +83,8 @@ jobs:
         run: npx playwright install --with-deps chromium
       - name: Production build
         run: npm run build
-      - name: Coach-to-player invitation, response, assignment, deadline, player priority, quick assign, and accountability browser flows
-        run: npx playwright test tests/e2e/coach-player-invitation.spec.mjs tests/e2e/coach-player-cross-device-first-result.spec.mjs tests/e2e/coach-player-assignment-delivery.spec.mjs tests/e2e/coach-assignment-accountability.spec.mjs tests/e2e/coach-quick-assign.spec.mjs tests/e2e/coach-assignment-deadline.spec.mjs tests/e2e/player-assignment-next-action.spec.mjs
+      - name: Coach-to-player invitation, response, assignment, deadline, player priority, history, quick assign, and accountability browser flows
+        run: npx playwright test tests/e2e/coach-player-invitation.spec.mjs tests/e2e/coach-player-cross-device-first-result.spec.mjs tests/e2e/coach-player-assignment-delivery.spec.mjs tests/e2e/coach-assignment-accountability.spec.mjs tests/e2e/coach-quick-assign.spec.mjs tests/e2e/coach-assignment-deadline.spec.mjs tests/e2e/player-assignment-next-action.spec.mjs tests/e2e/coach-assignment-history.spec.mjs
       - name: Live provision, claim, login, replay, and cleanup verification
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
