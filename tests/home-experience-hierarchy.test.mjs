@@ -6,7 +6,7 @@ const source = fs.readFileSync(new URL("../src/lib/homeExperienceHierarchy.js", 
 const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
 
 test("home hierarchy establishes one dominant coach and player action", () => {
-  assert.match(source, /coach-primary-objective/);
+  assert.match(source, /coach-command-center-full/);
   assert.match(source, /player-daily-primary-action/);
   assert.match(source, /single-primary-objective/);
   assert.match(source, /single-primary-action/);
