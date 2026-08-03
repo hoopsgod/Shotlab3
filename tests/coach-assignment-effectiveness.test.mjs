@@ -106,7 +106,7 @@ test("effectiveness model deduplicates current completions and computes truthful
   assert.equal(model.players[1].playerIdentity, PLAYER_B);
 });
 
-test("invalid timestamp intervals remain visible as evidence but never distort pace medians", () => {
+test("invalid timestamp intervals remain visible as evidence but never enter pace or deadline rates", () => {
   const invalid = completed({
     createdAt: "2026-08-04T12:00:00.000Z",
     acknowledgedAt: "2026-08-04T11:00:00.000Z",
@@ -116,7 +116,8 @@ test("invalid timestamp intervals remain visible as evidence but never distort p
   });
   const model = buildCoachAssignmentEffectiveness({ teamId: TEAM_ID, history: [invalid], assignments: [] });
   assert.equal(model.total, 1);
-  assert.equal(model.onTimeRate, 100);
+  assert.equal(model.deadlineCount, 0);
+  assert.equal(model.onTimeRate, null);
   assert.equal(model.responseSampleCount, 0);
   assert.equal(model.completionSampleCount, 0);
   assert.equal(model.medianResponseMs, null);
