@@ -1,0 +1,287 @@
+/* ShotLab V6 — coach decision workspaces. Stable selectors only. */
+:root{
+  --v6-canvas:#f3f2ee;
+  --v6-surface:#fffefa;
+  --v6-ink:#121513;
+  --v6-soft:#4f5752;
+  --v6-muted:#747b76;
+  --v6-line:rgba(18,21,19,.12);
+  --v6-accent:#78951f;
+  --v6-dark:#171b18;
+  --v6-shadow:0 12px 30px rgba(20,24,21,.08);
+}
+
+/* Full-page integrity: no dark gutters or black voids. */
+[data-testid="coach-players-interactive-dashboard"],
+[data-testid="coach-events-interactive-dashboard"]{
+  width:100%!important;
+  max-width:none!important;
+  min-height:100dvh!important;
+  margin:0!important;
+  padding:18px 16px calc(110px + env(safe-area-inset-bottom,0px))!important;
+  box-sizing:border-box!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,760px)!important;
+  justify-content:center!important;
+  align-content:start!important;
+  gap:14px!important;
+  background:var(--v6-canvas)!important;
+  background-image:none!important;
+  color:var(--v6-ink)!important;
+  isolation:isolate!important;
+}
+[data-testid="coach-players-interactive-dashboard"]::before,
+[data-testid="coach-events-interactive-dashboard"]::before{
+  content:""!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:-1!important;
+  background:var(--v6-canvas)!important;
+  pointer-events:none!important;
+}
+[data-testid="coach-players-interactive-dashboard"]>*,
+[data-testid="coach-events-interactive-dashboard"]>*{
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+
+/* Compact page introductions: one thought, no descriptor panel. */
+[data-testid="coach-players-command-bar"],
+[data-testid="coach-events-command-bar"]{
+  padding:20px!important;
+  gap:14px!important;
+  border:1px solid var(--v6-line)!important;
+  border-radius:24px!important;
+  background:var(--v6-surface)!important;
+  background-image:none!important;
+  box-shadow:var(--v6-shadow)!important;
+  color:var(--v6-ink)!important;
+}
+[data-testid="coach-players-command-bar"] h1,
+[data-testid="coach-events-command-bar"] h1{
+  color:var(--v6-ink)!important;
+  -webkit-text-fill-color:var(--v6-ink)!important;
+  font-size:40px!important;
+  line-height:.96!important;
+  letter-spacing:-.052em!important;
+}
+[data-testid="coach-players-command-bar"] p,
+[data-testid="coach-events-command-bar"] p{
+  max-width:31ch!important;
+  margin-top:8px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  color:var(--v6-soft)!important;
+  -webkit-text-fill-color:var(--v6-soft)!important;
+  font-size:16px!important;
+  line-height:1.42!important;
+  box-shadow:none!important;
+}
+[data-testid="coach-players-command-bar"] button,
+[data-testid="coach-events-command-bar"] button{
+  min-height:48px!important;
+  border-radius:14px!important;
+  font-size:15px!important;
+  font-weight:760!important;
+  box-shadow:none!important;
+}
+
+/* Explicit four-card metric systems. */
+[data-testid="coach-players-metric-strip"],
+[data-testid="coach-events-metric-strip"]{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+[data-testid="coach-players-metric-strip"]>button,
+[data-testid="coach-events-metric-strip"]>button{
+  display:flex!important;
+  min-width:0!important;
+  min-height:112px!important;
+  padding:16px!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  justify-content:space-between!important;
+  gap:6px!important;
+  border:1px solid var(--v6-line)!important;
+  border-radius:20px!important;
+  background:var(--v6-surface)!important;
+  background-image:none!important;
+  color:var(--v6-ink)!important;
+  -webkit-text-fill-color:var(--v6-ink)!important;
+  opacity:1!important;
+  visibility:visible!important;
+  filter:none!important;
+  transform:none!important;
+  box-shadow:0 8px 22px rgba(20,24,21,.06)!important;
+  overflow:hidden!important;
+}
+[data-testid="coach-players-metric-strip"]>button[aria-pressed="true"],
+[data-testid="coach-events-metric-strip"]>button[aria-pressed="true"]{
+  border-color:rgba(120,149,31,.48)!important;
+  box-shadow:inset 0 -3px 0 var(--v6-accent),0 8px 22px rgba(20,24,21,.06)!important;
+}
+[data-testid="coach-players-metric-strip"]>button span,
+[data-testid="coach-events-metric-strip"]>button span{
+  color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+  opacity:1!important;
+}
+[data-testid="coach-players-metric-strip"]>button span:nth-child(1),
+[data-testid="coach-events-metric-strip"]>button span:nth-child(1){
+  color:var(--v6-muted)!important;
+  -webkit-text-fill-color:var(--v6-muted)!important;
+  font-size:11px!important;
+  font-weight:760!important;
+  letter-spacing:.045em!important;
+  text-transform:uppercase!important;
+}
+[data-testid="coach-players-metric-strip"]>button span:nth-child(2),
+[data-testid="coach-events-metric-strip"]>button span:nth-child(2){
+  color:var(--v6-ink)!important;
+  -webkit-text-fill-color:var(--v6-ink)!important;
+  font-size:38px!important;
+  font-weight:800!important;
+  line-height:.95!important;
+  letter-spacing:-.045em!important;
+}
+[data-testid="coach-players-metric-strip"]>button span:nth-child(3),
+[data-testid="coach-events-metric-strip"]>button span:nth-child(3){
+  color:var(--v6-soft)!important;
+  -webkit-text-fill-color:var(--v6-soft)!important;
+  font-size:13px!important;
+  font-weight:600!important;
+  line-height:1.25!important;
+}
+
+/* Filter rail stays secondary and compact. */
+[data-testid="coach-players-filter-rail"],
+[data-testid="coach-events-filter-rail"]{
+  padding:14px!important;
+  border:1px solid var(--v6-line)!important;
+  border-radius:20px!important;
+  background:var(--v6-surface)!important;
+  color:var(--v6-ink)!important;
+  box-shadow:var(--v6-shadow)!important;
+}
+[data-testid="coach-players-filter-rail"] input,
+[data-testid="coach-events-filter-rail"] input{
+  min-height:48px!important;
+  background:#fff!important;
+  color:var(--v6-ink)!important;
+  -webkit-text-fill-color:var(--v6-ink)!important;
+  opacity:1!important;
+}
+[data-testid="coach-players-filter-rail"] button,
+[data-testid="coach-events-filter-rail"] button{
+  color:var(--v6-soft)!important;
+  -webkit-text-fill-color:var(--v6-soft)!important;
+  opacity:1!important;
+}
+
+/* Decision brief is the single page focal card below the controls. */
+[data-testid="coach-players-decision-brief"],
+[data-testid="coach-events-decision-brief"]{
+  padding:22px!important;
+  border:1px solid var(--v6-line)!important;
+  border-radius:24px!important;
+  background:var(--v6-dark)!important;
+  color:#fff!important;
+  box-shadow:0 16px 36px rgba(20,24,21,.14)!important;
+}
+[data-testid="coach-players-decision-brief"] *,
+[data-testid="coach-events-decision-brief"] *{
+  color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+  opacity:1!important;
+  filter:none!important;
+}
+[data-testid="coach-players-decision-brief"] h2,
+[data-testid="coach-events-decision-brief"] h2{
+  max-width:15ch!important;
+  font-size:32px!important;
+  line-height:1.02!important;
+  letter-spacing:-.045em!important;
+}
+[data-testid="coach-players-decision-brief"] p,
+[data-testid="coach-events-decision-brief"] p{
+  max-width:35ch!important;
+  color:rgba(255,255,255,.74)!important;
+  -webkit-text-fill-color:rgba(255,255,255,.74)!important;
+  font-size:15px!important;
+  line-height:1.48!important;
+}
+[data-testid="coach-players-decision-brief"] button,
+[data-testid="coach-events-decision-brief"] button{
+  min-height:46px!important;
+  border-color:rgba(255,255,255,.16)!important;
+  background:#f4f2ea!important;
+  color:var(--v6-ink)!important;
+  -webkit-text-fill-color:var(--v6-ink)!important;
+}
+
+/* Supporting evidence stays quiet, readable, and consistent. */
+[data-testid="coach-players-insight-grid"],
+[data-testid="coach-events-insight-grid"]{
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:10px!important;
+}
+[data-testid="coach-players-insight-grid"]>*,
+[data-testid="coach-events-insight-grid"]>*{
+  padding:18px!important;
+  border:1px solid var(--v6-line)!important;
+  border-radius:20px!important;
+  background:var(--v6-surface)!important;
+  color:var(--v6-ink)!important;
+  -webkit-text-fill-color:var(--v6-ink)!important;
+  opacity:1!important;
+  filter:none!important;
+  transform:none!important;
+  box-shadow:none!important;
+}
+
+/* Mission Control: correct the remaining contrast defects. */
+[data-testid="coach-primary-objective"] .mcPrimary{
+  background:#f5f3ec!important;
+  color:#121513!important;
+  -webkit-text-fill-color:#121513!important;
+  opacity:1!important;
+  filter:none!important;
+}
+[data-testid="coach-primary-objective"] .mcPrimary *{
+  color:#121513!important;
+  -webkit-text-fill-color:#121513!important;
+}
+[data-testid="coach-command-center-full"] .mcAttentionRow{
+  background:#edf0ea!important;
+  color:#121513!important;
+  -webkit-text-fill-color:#121513!important;
+  opacity:1!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+}
+[data-testid="coach-command-center-full"] .mcAttentionRow *{
+  color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+  opacity:1!important;
+}
+[data-testid="coach-command-center-full"] .mcAttentionRow small,
+[data-testid="coach-command-center-full"] .mcAttentionMeta{
+  color:#4f5752!important;
+  -webkit-text-fill-color:#4f5752!important;
+}
+
+@media(max-width:700px){
+  [data-testid="coach-players-interactive-dashboard"],
+  [data-testid="coach-events-interactive-dashboard"]{padding-top:12px!important}
+  [data-testid="coach-players-command-bar"] h1,
+  [data-testid="coach-events-command-bar"] h1{font-size:38px!important}
+}
