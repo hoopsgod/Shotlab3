@@ -46,6 +46,7 @@ function sessionTeamId(storage = globalThis?.localStorage) {
 }
 
 export function formatEffectivenessDuration(value) {
+  if (value == null || value === "") return "—";
   const ms = Number(value);
   if (!Number.isFinite(ms) || ms < 0) return "—";
   const minutes = Math.max(1, Math.round(ms / 60000));
