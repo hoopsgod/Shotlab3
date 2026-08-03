@@ -9,23 +9,27 @@ export function isDemoAccount(userOrEmail) {
 
 export function isDemoMode() {
   if (typeof window === "undefined") return false;
-  const fromQuery = new URLSearchParams(window.location.search).get("demo") === "1";
-  const fromCurrentSession = window.sessionStorage.getItem(DEMO_SESSION_KEY) === "true";
 
-  // Remove the former persistent flag so a past demo visit can never bypass login.
+  // Demo mode is explicit and query-only. Stored demo state must never bypass login.
   window.localStorage.removeItem(LEGACY_DEMO_KEY);
-
-  if (fromQuery) window.sessionStorage.setItem(DEMO_SESSION_KEY, "true");
-  return fromQuery || fromCurrentSession;
+  window.sessionStorage.removeItem(DEMO_SESSION_KEY);
+  return new URLSearchParams(window.location.search).get("demo") === "1";
 }
 
 export function setDemoMode(enabled) {
   if (typeof window === "undefined") return;
-  window.localStorage.removeItem(LEGACY_DEMO_KEY);
-  if (enabled) window.sessionStorage.setItem(DEMO_SESSION_KEY, "true");
-  else window.sessionStorage.removeItem(DEMO_SESSION_KEY);
-}
 
+  // Clear all historical demo persistence. Entry into demo mode must happen through
+  // an explicit demo URL or route, never through browser storage.
+  window.localStorage.removeItem(LEGACY_DEMO_KEY);
+  window.sessionStorage.removeItem(DEMO_SESSION_KEY);
+
+  if (!enabled) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("demo");
+    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  }
+}
 
 export function isDemoPlayerSessionShotLog(row = {}, { teamId = '' } = {}) {
   const rowEmail = String(row?.email || row?.player_email || row?.playerId || row?.player_id || '').trim().toLowerCase();
