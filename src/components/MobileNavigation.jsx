@@ -18,6 +18,48 @@ const FOCUSABLE_SELECTOR = [
   "[tabindex]:not([tabindex='-1'])",
 ].join(",");
 
+const GROUP_DEFINITIONS = [
+  {
+    id: "program",
+    title: "Program",
+    description: "Schedule, training, and team operations",
+    keys: new Set(["program", "events", "drills", "sc", "lifting", "attendance"]),
+  },
+  {
+    id: "performance",
+    title: "Performance",
+    description: "Results, progress, and season intelligence",
+    keys: new Set(["leaderboards", "analytics", "progress", "history", "archives"]),
+  },
+  {
+    id: "team",
+    title: "Team & account",
+    description: "Identity, store, profile, and settings",
+    keys: new Set(["team-store", "branding", "profile", "settings", "account"]),
+  },
+];
+
+function resolveNavigationGroup(item) {
+  const explicit = String(item?.group || "").trim().toLowerCase();
+  if (explicit) return explicit;
+  const key = String(item?.k || "").trim().toLowerCase();
+  return GROUP_DEFINITIONS.find((group) => group.keys.has(key))?.id || "other";
+}
+
+export function groupSecondaryNavigation(items = []) {
+  const safeItems = items.filter(Boolean);
+  const groups = GROUP_DEFINITIONS.map((definition) => ({
+    ...definition,
+    items: safeItems.filter((item) => resolveNavigationGroup(item) === definition.id),
+  })).filter((group) => group.items.length > 0);
+  const assigned = new Set(groups.flatMap((group) => group.items));
+  const otherItems = safeItems.filter((item) => !assigned.has(item));
+  if (otherItems.length) {
+    groups.push({ id: "other", title: "More tools", description: "Additional ShotLab areas", items: otherItems });
+  }
+  return groups;
+}
+
 function NavigationItem({ item, active, onSelect, compact = false }) {
   const label = item.mobileLabel || item.l || item.label || item.k;
   return (
@@ -53,11 +95,11 @@ export default function MobileNavigation({
 }) {
   const [open, setOpen] = useState(false);
   const closeButtonRef = useRef(null);
-  const moreButtonRef = useRef(null);
   const sheetRef = useRef(null);
   const previousFocusRef = useRef(null);
   const visiblePrimaryItems = useMemo(() => primaryItems.filter(Boolean).slice(0, 3), [primaryItems]);
   const visibleSecondaryItems = useMemo(() => secondaryItems.filter(Boolean), [secondaryItems]);
+  const groupedSecondaryItems = useMemo(() => groupSecondaryNavigation(visibleSecondaryItems), [visibleSecondaryItems]);
   const secondaryActive = visibleSecondaryItems.some((item) => item.k === activeKey);
   const secondaryHasNotification = visibleSecondaryItems.some((item) => Boolean(item.dot));
 
@@ -116,7 +158,6 @@ export default function MobileNavigation({
             <NavigationItem key={item.k} item={item} active={item.k === activeKey} onSelect={handleSelect} compact />
           ))}
           <button
-            ref={moreButtonRef}
             type="button"
             className={`${styles.dockItem} ${secondaryActive || open ? styles.active : ""}`}
             aria-expanded={open}
@@ -151,17 +192,27 @@ export default function MobileNavigation({
             <div className={styles.sheetHandle} aria-hidden="true" />
             <div className={styles.sheetHeader}>
               <div>
-                <div className={styles.sheetEyebrow}>Navigate</div>
-                <h2 className={styles.sheetTitle}>More areas</h2>
-                <p className={styles.sheetSummary}>Your current tab stays in place when you return.</p>
+                <div className={styles.sheetEyebrow}>ShotLab workspace</div>
+                <h2 className={styles.sheetTitle}>Everything else, organized</h2>
+                <p className={styles.sheetSummary}>Frequent actions stay in the dock. Related tools live together here.</p>
               </div>
               <button ref={closeButtonRef} type="button" className={styles.closeButton} aria-label="Close more navigation" onClick={() => setOpen(false)}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
-            <div className={styles.sheetGrid}>
-              {visibleSecondaryItems.map((item) => (
-                <NavigationItem key={item.k} item={item} active={item.k === activeKey} onSelect={handleSelect} />
+            <div className={styles.sheetGroups} data-testid="mobile-navigation-groups">
+              {groupedSecondaryItems.map((group) => (
+                <section className={styles.sheetGroup} key={group.id} data-navigation-group={group.id} aria-labelledby={`mobile-navigation-${group.id}`}>
+                  <header className={styles.groupHeader}>
+                    <h3 id={`mobile-navigation-${group.id}`}>{group.title}</h3>
+                    <p>{group.description}</p>
+                  </header>
+                  <div className={styles.sheetGrid}>
+                    {group.items.map((item) => (
+                      <NavigationItem key={item.k} item={item} active={item.k === activeKey} onSelect={handleSelect} />
+                    ))}
+                  </div>
+                </section>
               ))}
             </div>
           </section>
