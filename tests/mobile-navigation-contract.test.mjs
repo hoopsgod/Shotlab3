@@ -5,6 +5,7 @@ import fs from "node:fs";
 const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
 const navigationSource = fs.readFileSync(new URL("../src/components/MobileNavigation.jsx", import.meta.url), "utf8");
 const navigationCss = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
+const architectureCss = fs.readFileSync(new URL("../src/components/MobileNavigationArchitecture.css", import.meta.url), "utf8");
 
 test("mobile dock limits persistent navigation to three destinations plus More", () => {
   assert.match(navigationSource, /primaryItems\.filter\(Boolean\)\.slice\(0, 3\)/);
@@ -21,6 +22,26 @@ test("secondary navigation is accessible, dismissible, and does not leave body s
   assert.match(navigationSource, /document\.body\.style\.overflow = "hidden"/);
   assert.match(navigationSource, /document\.body\.style\.overflow = previousOverflow/);
   assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
+});
+
+test("secondary tools are grouped into program, performance, and team areas without removing destinations", () => {
+  assert.match(navigationSource, /export function groupSecondaryNavigation/);
+  assert.match(navigationSource, /id: "program"/);
+  assert.match(navigationSource, /id: "performance"/);
+  assert.match(navigationSource, /id: "team"/);
+  assert.match(navigationSource, /data-navigation-group=\{group\.id\}/);
+  assert.match(navigationSource, /group\.items\.map/);
+  assert.match(navigationSource, /Everything else, organized/);
+  assert.doesNotMatch(navigationSource, /secondaryItems[^\n]*slice\(/);
+});
+
+test("grouped navigation uses the shared light industrial design and retains large touch targets", () => {
+  assert.match(navigationSource, /MobileNavigationArchitecture\.css/);
+  assert.match(architectureCss, /background:\s*rgba\(252, 252, 250/);
+  assert.match(architectureCss, /background:\s*#f8f7f3/);
+  assert.match(navigationCss, /min-height:\s*54px/);
+  assert.match(navigationCss, /min-height:\s*66px/);
+  assert.match(architectureCss, /prefers-reduced-transparency/);
 });
 
 test("player mobile navigation keeps frequent training actions direct and moves support areas into More", () => {
