@@ -15,6 +15,8 @@ import { installCoachResponseLoopEnhancer } from "./coachResponseLoopEnhancer.js
 import { installPlayerAssignmentEnhancer } from "./playerAssignmentEnhancer.js";
 import { installIndustrialDesignFoundation } from "./industrialDesignFoundation.js";
 import { installHomeExperienceHierarchy } from "./homeExperienceHierarchy.js";
+import { installVisualSystemReboot } from "./visualSystemReboot.js";
+import { installVisualSystemRebootReleaseFixes } from "./visualSystemRebootReleaseFixes.js";
 
 installIndustrialDesignFoundation();
 installHomeExperienceHierarchy();
@@ -33,6 +35,8 @@ installCoachInterventionOutcomeEnhancer();
 installCoachHomeHierarchyEnhancer();
 installCoachResponseLoopEnhancer();
 installPlayerAssignmentEnhancer();
+installVisualSystemReboot();
+installVisualSystemRebootReleaseFixes();
 
 const clean = (value) => String(value ?? "").trim();
 const safeCount = (value) => Math.max(0, Number(value) || 0);
