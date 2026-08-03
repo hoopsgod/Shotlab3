@@ -37,57 +37,17 @@ export function CoachPlayersInteractiveDashboard({ metrics, rows = [], filter, q
 
   return (
     <SecondaryPageShell testId="coach-players-interactive-dashboard">
-      <SecondaryPageIntro
-        eyebrow="Roster intelligence"
-        title="Players"
-        summary="See who is progressing, where engagement is slipping, and the coaching action that matters next."
-        status={`${metrics.active}/${metrics.total || 0} active this week`}
-        actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "archives", label: "Season Tools", onClick: onOpenArchives }]}
-        testId="coach-players-command-bar"
-      />
+      <SecondaryPageIntro eyebrow="Roster intelligence" title="Players" summary="See who is progressing, where engagement is slipping, and the coaching action that matters next." status={`${metrics.active}/${metrics.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "archives", label: "Season Tools", onClick: onOpenArchives }]} testId="coach-players-command-bar" />
       <SecondaryPageToolbar testId="coach-players-toolbar">
         <InteractiveMetricStrip items={metricItems} activeKey={filter} onSelect={onFilterChange} testId="coach-players-metric-strip" />
-        <DashboardFilterRail
-          searchValue={query}
-          onSearchChange={onQueryChange}
-          searchPlaceholder="Search player name or email"
-          filters={[
-            { key: "all", label: "All", count: metrics.total },
-            { key: "active", label: "Active", count: metrics.active },
-            { key: "attention", label: "Attention", count: metrics.attention },
-            { key: "new", label: "No Activity", count: noActivityRows.length },
-            { key: "leaders", label: "Top Engagement", count: Math.min(metrics.total, 5) },
-          ]}
-          activeFilter={filter}
-          onFilterChange={onFilterChange}
-          testId="coach-players-filter-rail"
-        />
+        <DashboardFilterRail searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search player name or email" filters={[{ key: "all", label: "All", count: metrics.total }, { key: "active", label: "Active", count: metrics.active }, { key: "attention", label: "Attention", count: metrics.attention }, { key: "new", label: "No Activity", count: noActivityRows.length }, { key: "leaders", label: "Top Engagement", count: Math.min(metrics.total, 5) }]} activeFilter={filter} onFilterChange={onFilterChange} testId="coach-players-filter-rail" />
       </SecondaryPageToolbar>
-      <SecondaryPageDecision
-        eyebrow="Decision brief"
-        title={decisionTitle}
-        detail={decisionDetail}
-        tone={attentionRows.length ? "attention" : "positive"}
-        action={{ label: attentionRows.length ? "Open attention queue" : "Recognize active players", onClick: () => onFilterChange(attentionRows.length ? "attention" : "active") }}
-        testId="coach-players-decision-brief"
-      >
+      <SecondaryPageDecision eyebrow="Decision brief" title={decisionTitle} detail={decisionDetail} tone={attentionRows.length ? "attention" : "positive"} action={{ label: attentionRows.length ? "Open attention queue" : "Recognize active players", onClick: () => onFilterChange(attentionRows.length ? "attention" : "active") }} testId="coach-players-decision-brief">
         <ExperienceSparkline values={engagementDistribution} label="Engagement spread" tone={attentionRows.length ? "attention" : "positive"} testId="coach-players-engagement-sparkline" />
       </SecondaryPageDecision>
       <SecondaryPageEvidence testId="coach-players-insight-grid">
-        <DashboardInsightCard
-          eyebrow="Immediate follow-up"
-          title={attentionRows.length ? `${attentionRows.length} players need a touchpoint` : "Roster engagement is current"}
-          body={attentionRows.length ? `${firstNames(attentionRows)}${attentionRows.length > 3 ? ` and ${attentionRows.length - 3} more` : ""} need a direct next step, not another generic reminder.` : "Every rostered player has current-week activity."}
-          tone={attentionRows.length ? "attention" : "positive"}
-          action={{ label: attentionRows.length ? "Show Players" : "View Active", onClick: () => onFilterChange(attentionRows.length ? "attention" : "active") }}
-        />
-        <DashboardInsightCard
-          eyebrow="Engagement leader"
-          title={leader ? leader.name : "No leader yet"}
-          body={leader ? `${leader.weeklyMakes} weekly makes and ${leader.weeklyActivityCount} logged actions currently set the pace. Use the result as recognition, not only a ranking.` : "Player activity will surface here after the first workout is logged."}
-          tone="positive"
-          action={leader ? { label: "Open Top Five", onClick: () => onFilterChange("leaders") } : undefined}
-        />
+        <DashboardInsightCard eyebrow="Immediate follow-up" title={attentionRows.length ? `${attentionRows.length} players need a touchpoint` : "Roster engagement is current"} body={attentionRows.length ? `${firstNames(attentionRows)}${attentionRows.length > 3 ? ` and ${attentionRows.length - 3} more` : ""} need a direct next step, not another generic reminder.` : "Every rostered player has current-week activity."} tone={attentionRows.length ? "attention" : "positive"} action={{ label: attentionRows.length ? "Show Players" : "View Active", onClick: () => onFilterChange(attentionRows.length ? "attention" : "active") }} />
+        <DashboardInsightCard eyebrow="Engagement leader" title={leader ? leader.name : "No leader yet"} body={leader ? `${leader.weeklyMakes} weekly makes and ${leader.weeklyActivityCount} logged actions currently set the pace. Use the result as recognition, not only a ranking.` : "Player activity will surface here after the first workout is logged."} tone="positive" action={leader ? { label: "Open Top Five", onClick: () => onFilterChange("leaders") } : undefined} />
         <DashboardInsightCard eyebrow="Team pulse" title={`${activeRate}% active this week`} body={activeRate >= 80 ? "Engagement is strong. Reinforce the behavior and keep the next assignment specific." : "Roster activation is below a premium operating standard. Resolve individual blockers before adding more programming."} tone={activeRate >= 80 ? "positive" : activeRate >= 55 ? "info" : "attention"}>
           <DashboardProgress value={metrics.active} max={metrics.total || 1} label="Weekly roster activation" detail={`${metrics.active} of ${metrics.total}`} />
         </DashboardInsightCard>
@@ -110,24 +70,9 @@ export function CoachEventsInteractiveDashboard({ metrics, rows = [], status, ty
       <SecondaryPageIntro eyebrow="Schedule intelligence" title="Events" summary="Run the team agenda, resolve attendance gaps, and move from schedule insight to action." status={next ? `${next.date} · ${next.time}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />
       <SecondaryPageToolbar testId="coach-events-toolbar">
         <InteractiveMetricStrip items={metricItems} activeKey={status} onSelect={onStatusChange} testId="coach-events-metric-strip" />
-        <DashboardFilterRail
-          searchValue={query}
-          onSearchChange={onQueryChange}
-          searchPlaceholder="Search title, location, or type"
-          filters={[{ key: "all", label: "All Types", count: rows.length }, { key: "run", label: "Practice" }, { key: "game", label: "Game" }, { key: "clinic", label: "Camp" }, { key: "recovery", label: "Meeting" }]}
-          activeFilter={type}
-          onFilterChange={onTypeChange}
-          testId="coach-events-filter-rail"
-        />
+        <DashboardFilterRail searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search title, location, or type" filters={[{ key: "all", label: "All Types", count: rows.length }, { key: "run", label: "Practice" }, { key: "game", label: "Game" }, { key: "clinic", label: "Camp" }, { key: "recovery", label: "Meeting" }]} activeFilter={type} onFilterChange={onTypeChange} testId="coach-events-filter-rail" />
       </SecondaryPageToolbar>
-      <SecondaryPageDecision
-        eyebrow="Next team moment"
-        title={next ? next.title : "Calendar is open"}
-        detail={next ? `${next.date} at ${next.time} · ${next.location}. ${next.confirmed} confirmed and ${next.missing} still missing.` : "Create the next event to begin attendance tracking and player communication."}
-        tone={metrics.missing ? "attention" : "info"}
-        action={next ? { label: "Manage attendance", onClick: () => onOpenEvent(next.event.id) } : { label: "Create event", onClick: onCreateEvent }}
-        testId="coach-events-decision-brief"
-      >
+      <SecondaryPageDecision eyebrow="Next team moment" title={next ? next.title : "Calendar is open"} detail={next ? `${next.date} at ${next.time} · ${next.location}. ${next.confirmed} confirmed and ${next.missing} still missing.` : "Create the next event to begin attendance tracking and player communication."} tone={metrics.missing ? "attention" : "info"} action={next ? { label: "Manage Attendance", onClick: () => onOpenEvent(next.event.id) } : { label: "Create Event", onClick: onCreateEvent }} testId="coach-events-decision-brief">
         <DashboardProgress value={metrics.responseRate} max={100} label="Upcoming RSVP completion" />
       </SecondaryPageDecision>
       <SecondaryPageEvidence testId="coach-events-insight-grid">
@@ -140,10 +85,5 @@ export function CoachEventsInteractiveDashboard({ metrics, rows = [], status, ty
 }
 
 export function CoachPageDashboardHeader({ eyebrow, title, summary, status, actions = [], metrics = [], activeMetric, onMetricSelect, testId }) {
-  return (
-    <SecondaryPageShell testId={testId}>
-      <SecondaryPageIntro eyebrow={eyebrow} title={title} summary={summary} status={status} actions={actions} />
-      {metrics.length ? <SecondaryPageToolbar><InteractiveMetricStrip items={metrics} activeKey={activeMetric} onSelect={onMetricSelect} /></SecondaryPageToolbar> : null}
-    </SecondaryPageShell>
-  );
+  return <SecondaryPageShell testId={testId}><SecondaryPageIntro eyebrow={eyebrow} title={title} summary={summary} status={status} actions={actions} />{metrics.length ? <SecondaryPageToolbar><InteractiveMetricStrip items={metrics} activeKey={activeMetric} onSelect={onMetricSelect} /></SecondaryPageToolbar> : null}</SecondaryPageShell>;
 }
