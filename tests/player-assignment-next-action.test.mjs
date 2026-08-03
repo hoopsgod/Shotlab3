@@ -12,6 +12,7 @@ test("assignment priority advances through acknowledge, start, and complete with
   const assigned = derivePlayerAssignmentPriority({ ...base, state: "assigned" }, { now: new Date(2026, 7, 4, 12) });
   assert.equal(assigned.priorityState, "assigned");
   assert.equal(assigned.steps[0].active, true);
+  assert.deepEqual(assigned.steps.map((step) => step.id), ["acknowledge", "start", "complete"]);
   assert.deepEqual(assigned.steps.map((step) => step.done), [false, false, false]);
 
   const acknowledged = derivePlayerAssignmentPriority({ ...base, state: "acknowledged" }, { now: new Date(2026, 7, 4, 12) });
@@ -53,9 +54,7 @@ test("source contracts promote the existing assignment card without introducing 
   assert.match(enhancer, /insertBefore\(nextHost, genericHero\)/);
   assert.match(card, /derivePlayerAssignmentPriority/);
   assert.match(card, /player-assignment-progress/);
-  assert.match(card, /player-assignment-step-acknowledge/);
-  assert.match(card, /player-assignment-step-start/);
-  assert.match(card, /player-assignment-step-complete/);
+  assert.match(card, /player-assignment-step-\$\{step\.id\}/);
   assert.match(card, /updatePlayerAssignmentState/);
   assert.doesNotMatch(card, /private_note|coach_follow_ups/);
   assert.doesNotMatch(enhancer, /fetch\s*=|XMLHttpRequest|\/v1\/player-assignments/);
