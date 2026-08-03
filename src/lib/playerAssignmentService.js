@@ -1,4 +1,5 @@
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
+import { normalizeAssignmentDueDate } from "./assignmentDeadline.js";
 
 export const PLAYER_ASSIGNMENT_STORAGE_KEY = "sl:player-assignments";
 export const PLAYER_ASSIGNMENT_CHANGE_EVENT = "shotlab:player-assignment-changed";
@@ -33,6 +34,7 @@ export function normalizePlayerAssignment(value = {}) {
     playerName: clean(value?.player_name || value?.playerName, 320),
     assignmentText: clean(value?.assignment_text || value?.assignmentText, 4000),
     resultDetail: clean(value?.result_detail || value?.resultDetail, 1000),
+    dueDate: normalizeAssignmentDueDate(value?.due_date || value?.dueDate),
     state: STATES.has(state) ? state : "assigned",
     assignedBy: identity(value?.assigned_by || value?.assignedBy),
     createdAt: clean(value?.created_at || value?.createdAt, 120),
@@ -164,6 +166,7 @@ export async function savePlayerAssignment({
   playerName = "",
   assignmentText = "",
   resultDetail = "",
+  dueDate = "",
   storage = globalThis?.localStorage,
   fetchImpl = globalThis?.fetch,
 } = {}) {
@@ -175,6 +178,7 @@ export async function savePlayerAssignment({
     playerName,
     assignmentText,
     resultDetail,
+    dueDate,
     state: "assigned",
     assignedBy: session.requester,
     createdAt: new Date().toISOString(),
@@ -196,6 +200,7 @@ export async function savePlayerAssignment({
           player_name: draft.playerName,
           assignment_text: draft.assignmentText,
           result_detail: draft.resultDetail,
+          due_date: draft.dueDate || null,
         },
       }),
     });
