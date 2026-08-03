@@ -3,14 +3,21 @@ const BRANDING_MARKER = "shotlab-branding-compatibility-labels";
 
 const CSS = `
 /* Release corrections for the product-light visual system. */
+.appHeader,
+.performance-shell .appHeader,
+.premium-screen .appHeader,
 .secondaryPageIntro {
-  padding: 20px !important;
   border: 1px solid var(--sl-line) !important;
   border-radius: 20px !important;
+  background-color: rgba(255,255,255,.96) !important;
   background-image:
-    linear-gradient(135deg, rgba(255,255,255,.98), rgba(247,248,244,.94)),
+    linear-gradient(135deg, rgba(255,255,255,.99), rgba(247,248,244,.95)),
     linear-gradient(90deg, color-mix(in srgb, var(--sl-accent) 10%, transparent), transparent 58%) !important;
   box-shadow: var(--sl-shadow) !important;
+}
+
+.secondaryPageIntro {
+  padding: 20px !important;
 }
 
 .${BRANDING_MARKER} {
