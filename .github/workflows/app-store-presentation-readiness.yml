@@ -18,6 +18,7 @@ on:
       - "public/shotlab-v6-decision-workspaces.css"
       - "public/shotlab-v7-page-authority.css"
       - "public/shotlab-v8-demo-parity.css"
+      - "public/shotlab-v9-secondary-polish.css"
       - "src/lib/demoMode.js"
       - "src/components/CoachCommandCenter.jsx"
       - "src/components/CoachInteractiveDashboards.jsx"
