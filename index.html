@@ -15,8 +15,10 @@
     (function () {
       try {
         var queryDemo = new URLSearchParams(window.location.search).get('demo') === '1';
-        var stickyDemo = window.localStorage.getItem('sl:demoMode') === 'true';
-        if (queryDemo || stickyDemo) document.documentElement.classList.add('shotlab-demo');
+        var sessionDemo = window.sessionStorage.getItem('sl:demoSession') === 'true';
+        window.localStorage.removeItem('sl:demoMode');
+        if (queryDemo) window.sessionStorage.setItem('sl:demoSession', 'true');
+        if (queryDemo || sessionDemo) document.documentElement.classList.add('shotlab-demo');
       } catch (_) {}
     })();
   </script>
