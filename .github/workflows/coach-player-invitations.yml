@@ -18,7 +18,6 @@ on:
       - "src/lib/coachAssignmentAccountabilityEnhancer.js"
       - "src/lib/coachAssignmentDeadlineEnhancer.js"
       - "src/lib/coachQuickAssignEnhancer.js"
-      - "src/lib/coachQuickAssignDeadlineEnhancer.js"
       - "src/lib/playerAssignmentService.js"
       - "src/lib/playerAssignmentEnhancer.js"
       - "src/lib/coachActivationPath.js"
