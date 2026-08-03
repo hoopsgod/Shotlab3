@@ -11,6 +11,17 @@ on:
       - "tests/e2e/app-store-screenshots.spec.mjs"
       - "tests/app-store-presentation-readiness.test.mjs"
       - "scripts/validate-app-store-screenshots.mjs"
+      - "public/shotlab-v3-foundation.css"
+      - "public/shotlab-v3-mobile-corrections.css"
+      - "src/components/CoachCommandCenter.jsx"
+      - "src/components/CoachCommandCenter.module.css"
+      - "src/components/SecondaryPageShell.jsx"
+      - "src/components/SecondaryPageShell.module.css"
+      - "src/components/MobileNavigation.jsx"
+      - "src/components/MobileNavigation.module.css"
+      - "src/components/TeamStore/**"
+      - "src/styles/**"
+      - "index.html"
       - ".github/workflows/app-store-presentation-readiness.yml"
   workflow_dispatch:
 
