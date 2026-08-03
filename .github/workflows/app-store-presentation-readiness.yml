@@ -13,6 +13,7 @@ on:
       - "scripts/validate-app-store-screenshots.mjs"
       - "public/shotlab-v3-foundation.css"
       - "public/shotlab-v3-mobile-corrections.css"
+      - "public/shotlab-v4-reference.css"
       - "src/components/CoachCommandCenter.jsx"
       - "src/components/CoachCommandCenter.module.css"
       - "src/components/SecondaryPageShell.jsx"
