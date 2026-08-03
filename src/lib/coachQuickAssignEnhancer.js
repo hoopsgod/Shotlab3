@@ -1,13 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { openExactPlayerFollowUp } from "./coachAssignmentOutcomeEnhancer.js";
-import { savePlayerAssignment } from "./playerAssignmentService.js";
+import { loadTeamPlayerAssignments, savePlayerAssignment } from "./playerAssignmentService.js";
 
 const STYLE_ID = "shotlab-coach-quick-assign-styles";
 const HOST_ID = "shotlab-coach-quick-assign-host";
 const HOST_TEST_ID = "coach-quick-assign-host";
 const OPEN_EVENT = "shotlab:coach-quick-assign-open";
 const QUICK_ASSIGN_MAX_LENGTH = 4000;
+const RECENT_ASSIGNMENT_LIMIT = 4;
 
 const styles = `
 .mcQuickAssignPortalHost{position:fixed;inset:0;z-index:2147481000;pointer-events:none}
@@ -18,11 +19,17 @@ const styles = `
 .mcQuickAssign::after{content:"";position:absolute;right:-58px;top:-68px;width:170px;height:170px;border-radius:50%;background:color-mix(in srgb,var(--mc,#c8ff1a) 8%,transparent);filter:blur(34px);pointer-events:none}
 .mcQuickAssign>*{position:relative;z-index:1}
 .mcQuickAssignHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
-.mcQuickAssignEyebrow,.mcQuickAssignField span{font-family:'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.08em}
+.mcQuickAssignEyebrow,.mcQuickAssignField span,.mcQuickAssignRecentTitle{font-family:'Barlow Condensed','Arial Narrow',sans-serif;text-transform:uppercase;letter-spacing:.08em}
 .mcQuickAssignEyebrow{display:block;color:var(--text-3,#7d898f);font-size:8px;font-weight:800}
 .mcQuickAssignHead h2{margin:4px 0 0;color:var(--text-1,#f4f7f8);font-family:'Bebas Neue',Impact,sans-serif;font-size:22px;font-weight:400;line-height:1;letter-spacing:.035em}
 .mcQuickAssignClose{min-width:44px;min-height:44px;border:1px solid rgba(255,255,255,.09);border-radius:11px;background:rgba(255,255,255,.025);color:var(--text-2,#aab3b8);font:900 10px/1 'Barlow Condensed','Arial Narrow',sans-serif;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}
 .mcQuickAssignCopy{margin:9px 0 0;color:var(--text-2,#aab3b8);font:600 11px/1.5 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.mcQuickAssignRecent{display:grid;gap:7px;margin-top:12px}
+.mcQuickAssignRecentTitle{color:var(--text-3,#7d898f);font-size:8px;font-weight:800}
+.mcQuickAssignRecentList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.mcQuickAssignRecent button{box-sizing:border-box;min-width:0;min-height:44px;padding:9px 10px;border:1px solid rgba(255,255,255,.1);border-radius:11px;background:rgba(255,255,255,.03);color:var(--text-2,#aab3b8);font:700 11px/1.35 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;text-align:left;cursor:pointer;overflow-wrap:anywhere}
+.mcQuickAssignRecent button:hover,.mcQuickAssignRecent button:focus-visible{border-color:color-mix(in srgb,var(--mc,#c8ff1a) 44%,transparent);color:var(--text-1,#f4f7f8)}
+.mcQuickAssignRecent button:disabled{opacity:.55;cursor:wait}
 .mcQuickAssignField{display:grid;gap:7px;margin-top:11px}
 .mcQuickAssignField span{color:var(--text-3,#7d898f);font-size:8px;font-weight:800}
 .mcQuickAssignField textarea{box-sizing:border-box;width:100%;min-height:96px;resize:vertical;padding:11px 12px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:#0d1113;color:var(--text-1,#f4f7f8);font:600 13px/1.45 -apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
@@ -36,14 +43,15 @@ const styles = `
 .mcQuickAssignStatus.is-error{color:#ffb8a8}
 .mcQuickAssign[data-delivery-state="delivered"]{border-color:color-mix(in srgb,var(--mc,#c8ff1a) 42%,rgba(255,255,255,.08))}
 .mcQuickAssign[data-delivery-state="local"],.mcQuickAssign[data-delivery-state="error"]{border-color:rgba(255,181,71,.34)}
-@media(max-width:420px){.mcQuickAssignLayer{padding:8px;padding-bottom:max(8px,env(safe-area-inset-bottom))}.mcQuickAssign{max-height:calc(100dvh - 16px)}.mcQuickAssignActions{grid-template-columns:1fr}.mcQuickAssignHead h2{font-size:20px}}
+@media(max-width:420px){.mcQuickAssignLayer{padding:8px;padding-bottom:max(8px,env(safe-area-inset-bottom))}.mcQuickAssign{max-height:calc(100dvh - 16px)}.mcQuickAssignRecentList,.mcQuickAssignActions{grid-template-columns:1fr}.mcQuickAssignHead h2{font-size:20px}}
 @media(prefers-reduced-motion:reduce){.mcQuickAssignLayer,.mcQuickAssign{scroll-behavior:auto}}
 `;
 
-const clean = (value) => String(value ?? "").trim();
+const clean = (value, max = QUICK_ASSIGN_MAX_LENGTH) => String(value ?? "").trim().slice(0, max);
 const parse = (value, fallback) => {
   try { return value ? JSON.parse(value) : fallback; } catch { return fallback; }
 };
+const timestamp = (row) => clean(row?.updatedAt || row?.updated_at || row?.createdAt || row?.created_at, 120);
 
 const focusField = (input) => {
   window.setTimeout(() => {
@@ -51,8 +59,28 @@ const focusField = (input) => {
   }, 0);
 };
 
+export function buildRecentAssignmentOptions(assignments = [], { limit = RECENT_ASSIGNMENT_LIMIT } = {}) {
+  const boundedLimit = Math.max(0, Math.min(6, Number.isFinite(Number(limit)) ? Math.floor(Number(limit)) : RECENT_ASSIGNMENT_LIMIT));
+  if (!boundedLimit) return [];
+  const seen = new Set();
+  const options = [];
+  const ordered = [...(Array.isArray(assignments) ? assignments : [])]
+    .sort((left, right) => timestamp(right).localeCompare(timestamp(left)));
+
+  for (const row of ordered) {
+    const text = clean(row?.assignmentText || row?.assignment_text);
+    if (!text) continue;
+    const key = text.replace(/\s+/g, " ").toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    options.push(text);
+    if (options.length >= boundedLimit) break;
+  }
+  return options;
+}
+
 export function classifyQuickAssignResult(result = {}) {
-  const storageMode = clean(result.storageMode || result.storage_mode);
+  const storageMode = clean(result.storageMode || result.storage_mode, 120);
   if (result.ok && storageMode === "team_remote") {
     return {
       state: "delivered",
@@ -83,6 +111,7 @@ function QuickAssignComposer({ row, onClose }) {
   const [saving, setSaving] = useState(false);
   const [deliveryState, setDeliveryState] = useState("idle");
   const [retryable, setRetryable] = useState(false);
+  const [recentAssignments, setRecentAssignments] = useState([]);
   const [status, setStatus] = useState("Tap the field and enter the exact assignment the player should receive.");
   const [error, setError] = useState(false);
 
@@ -95,7 +124,28 @@ function QuickAssignComposer({ row, onClose }) {
     setError(false);
   }, [row.teamId, row.playerIdentity]);
 
+  useEffect(() => {
+    let active = true;
+    setRecentAssignments([]);
+    loadTeamPlayerAssignments({ teamId: row.teamId })
+      .then((result) => {
+        if (active) setRecentAssignments(buildRecentAssignmentOptions(result?.assignments || []));
+      })
+      .catch(() => {
+        if (active) setRecentAssignments([]);
+      });
+    return () => { active = false; };
+  }, [row.teamId]);
+
   const locked = deliveryState === "delivered" || deliveryState === "local";
+  const applyRecentAssignment = (assignmentText) => {
+    if (saving || locked) return;
+    setDraft(assignmentText);
+    setError(false);
+    setStatus("Recent assignment loaded. Review it before delivery.");
+    focusField(textareaRef.current);
+  };
+
   const submit = async () => {
     const assignmentText = clean(draft);
     if (!assignmentText) {
@@ -139,6 +189,7 @@ function QuickAssignComposer({ row, onClose }) {
       "data-testid": "coach-quick-assign",
       "data-player-email": row.playerIdentity,
       "data-delivery-state": deliveryState,
+      "data-recent-count": String(recentAssignments.length),
       "aria-labelledby": "mc-quick-assign-heading",
     },
     React.createElement(
@@ -157,6 +208,29 @@ function QuickAssignComposer({ row, onClose }) {
         ? "The assignment is now in the player’s ShotLab workflow."
         : "The assignment is stored in this session, but remote player delivery was not verified."
       : "This action sends only the assignment text. It does not include or modify private coach notes."),
+    !locked && recentAssignments.length
+      ? React.createElement(
+          "section",
+          { className: "mcQuickAssignRecent", "data-testid": "coach-quick-assign-recent", "aria-label": "Recent assignments" },
+          React.createElement("span", { className: "mcQuickAssignRecentTitle" }, "Recent assignments"),
+          React.createElement(
+            "div",
+            { className: "mcQuickAssignRecentList" },
+            ...recentAssignments.map((assignmentText, index) => React.createElement(
+              "button",
+              {
+                key: `${index}:${assignmentText}`,
+                type: "button",
+                disabled: saving,
+                onClick: () => applyRecentAssignment(assignmentText),
+                "data-testid": `coach-quick-assign-recent-${index}`,
+                "aria-label": `Use recent assignment: ${assignmentText}`,
+              },
+              assignmentText,
+            )),
+          ),
+        )
+      : null,
     React.createElement(
       "label",
       { className: "mcQuickAssignField" },
@@ -189,11 +263,11 @@ function QuickAssignPortal() {
   useEffect(() => {
     const open = (event) => {
       const detail = event?.detail || {};
-      if (!clean(detail.teamId) || !clean(detail.playerIdentity)) return;
+      if (!clean(detail.teamId, 180) || !clean(detail.playerIdentity, 320)) return;
       setSelected({
-        teamId: clean(detail.teamId),
-        playerIdentity: clean(detail.playerIdentity).toLowerCase(),
-        playerName: clean(detail.playerName || detail.playerIdentity),
+        teamId: clean(detail.teamId, 180),
+        playerIdentity: clean(detail.playerIdentity, 320).toLowerCase(),
+        playerName: clean(detail.playerName || detail.playerIdentity, 320),
       });
     };
     window.addEventListener(OPEN_EVENT, open);
@@ -235,11 +309,9 @@ function rowContext(row) {
   const rawSession = parse(globalThis?.localStorage?.getItem?.("sl:session"), {});
   const session = Array.isArray(rawSession) ? rawSession[0] || {} : rawSession;
   return {
-    teamId: clean(panel?.closest?.('[data-team-id]')?.getAttribute?.("data-team-id")
-      || session?.teamId
-      || session?.team_id),
-    playerIdentity: clean(row?.getAttribute?.("data-player-email")).toLowerCase(),
-    playerName: clean(row?.querySelector?.("strong")?.textContent),
+    teamId: clean(panel?.closest?.('[data-team-id]')?.getAttribute?.("data-team-id") || session?.teamId || session?.team_id, 180),
+    playerIdentity: clean(row?.getAttribute?.("data-player-email"), 320).toLowerCase(),
+    playerName: clean(row?.querySelector?.("strong")?.textContent, 320),
   };
 }
 
