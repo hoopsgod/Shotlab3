@@ -13,7 +13,9 @@ import { installCoachHomeHierarchyEnhancer } from "./coachHomeHierarchyEnhancer.
 import { installCoachQuickAssignEnhancer } from "./coachQuickAssignEnhancer.js";
 import { installCoachResponseLoopEnhancer } from "./coachResponseLoopEnhancer.js";
 import { installPlayerAssignmentEnhancer } from "./playerAssignmentEnhancer.js";
+import { installIndustrialDesignFoundation } from "./industrialDesignFoundation.js";
 
+installIndustrialDesignFoundation();
 installCoachAssignmentOutcomeEnhancer();
 installCoachFollowUpEnhancer();
 installCoachFollowUpQueueEnhancer();
