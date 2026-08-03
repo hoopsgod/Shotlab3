@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { formatAssignmentDueDate, isAssignmentOverdue } from "../lib/assignmentDeadline.js";
+import { formatAssignmentDueDate } from "../lib/assignmentDeadline.js";
+import { derivePlayerAssignmentPriority } from "../lib/playerAssignmentPriority.js";
 import { loadPlayerAssignment, PLAYER_ASSIGNMENT_CHANGE_EVENT, updatePlayerAssignmentState } from "../lib/playerAssignmentService.js";
 import styles from "./PlayerCoachAssignmentCard.module.css";
 
-const statusLabel = (state = "assigned") => state === "completed" ? "Completed" : state === "started" ? "In progress" : state === "acknowledged" ? "Acknowledged" : "New assignment";
 const actionFor = (state = "assigned") => state === "assigned" ? { action: "acknowledge", label: "Acknowledge assignment" } : state === "acknowledged" ? { action: "start", label: "Start assignment" } : state === "started" ? { action: "complete", label: "Mark assignment complete" } : null;
 const formatDate = (value) => {
   const date = new Date(value);
@@ -54,8 +54,8 @@ export default function PlayerCoachAssignmentCard() {
   }, [refresh]);
 
   if (!assignment) return null;
-  const next = actionFor(assignment.state);
-  const overdue = isAssignmentOverdue({ dueDate: assignment.dueDate, state: assignment.state });
+  const priority = derivePlayerAssignmentPriority(assignment);
+  const next = actionFor(priority.state);
   const dueLabel = formatAssignmentDueDate(assignment.dueDate);
 
   const advance = async () => {
@@ -71,17 +71,49 @@ export default function PlayerCoachAssignmentCard() {
   };
 
   return (
-    <section className={styles.root} data-testid="player-coach-assignment" data-assignment-state={assignment.state} data-assignment-overdue={String(overdue)} aria-label="Coach directed assignment">
+    <section
+      className={`${styles.root} ${priority.complete ? styles.rootComplete : styles.rootPriority}`}
+      data-testid="player-coach-assignment"
+      data-assignment-state={priority.state}
+      data-assignment-overdue={String(priority.overdue)}
+      data-assignment-priority={priority.priorityState}
+      aria-label={priority.complete ? "Completed coach assignment" : "Coach assignment next action"}
+    >
       <div className={styles.header}>
         <div>
-          <div className={styles.eyebrow}>Coach directed · Personal assignment</div>
-          <h2 className={styles.title}>Your next assignment</h2>
+          <div className={styles.eyebrow}>{priority.eyebrow}</div>
+          <h2 className={styles.title}>{priority.title}</h2>
         </div>
-        <span className={`${styles.status} ${overdue ? styles.statusOverdue : ""}`}>{overdue ? "Overdue" : statusLabel(assignment.state)}</span>
+        <span className={`${styles.status} ${priority.overdue ? styles.statusOverdue : ""}`}>{priority.status}</span>
       </div>
-      <p className={styles.copy}>{assignment.assignmentText}</p>
-      {dueLabel ? <p className={`${styles.deadline} ${overdue ? styles.deadlineOverdue : ""}`} data-testid="player-assignment-due-date">{overdue ? "Overdue" : "Due"} {dueLabel}</p> : null}
-      {assignment.resultDetail ? <p className={styles.context}>Coach response context: {assignment.resultDetail}</p> : null}
+
+      <p className={styles.summary}>{priority.summary}</p>
+
+      {!priority.complete ? (
+        <>
+          <div className={styles.assignmentBody}>
+            <div className={styles.assignmentLabel}>Assignment</div>
+            <p className={styles.copy}>{priority.assignmentText}</p>
+            {dueLabel ? <p className={`${styles.deadline} ${priority.overdue ? styles.deadlineOverdue : ""}`} data-testid="player-assignment-due-date">{priority.overdue ? "Overdue" : "Due"} {dueLabel}</p> : null}
+            {priority.resultDetail ? <p className={styles.context}>Coach response context: {priority.resultDetail}</p> : null}
+          </div>
+
+          <div className={styles.progress} data-testid="player-assignment-progress" aria-label="Assignment progress">
+            {priority.steps.map((step, index) => {
+              const stepState = step.done ? "done" : step.active ? "active" : "pending";
+              return (
+                <div className={styles.progressStep} data-state={stepState} data-testid={`player-assignment-step-${step.id}`} key={step.id}>
+                  <span className={styles.progressMarker} aria-hidden="true">{step.done ? "✓" : index + 1}</span>
+                  <span className={styles.progressLabel}>{step.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      ) : (
+        <p className={styles.completedAssignment}>{priority.assignmentText}</p>
+      )}
+
       <div className={styles.actions}>
         {next ? <button type="button" className={styles.primary} onClick={advance} disabled={busy} data-testid="player-assignment-action">{busy ? "Saving…" : next.label}</button> : <button type="button" className={styles.primary} disabled data-testid="player-assignment-action">Assignment complete</button>}
         <span className={styles.meta}>{assignment.updatedAt ? `Updated ${formatDate(assignment.updatedAt)}` : "Coach assigned"}</span>
