@@ -1,5 +1,6 @@
 import "./coach-intervention-outcome.test.mjs";
 import "./industrial-design-foundation.test.mjs";
+import "./home-experience-hierarchy.test.mjs";
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
