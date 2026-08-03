@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import { buildAssignmentDeadlineMap } from "../src/lib/coachAssignmentDeadlineEnhancer.js";
-import { applyQuickAssignDueDate } from "../src/lib/coachQuickAssignDeadlineEnhancer.js";
 import {
   assignmentDateKey,
   assignmentDueDateFromOffset,
@@ -55,28 +54,6 @@ test("coach deadline map is identity-scoped and marks only incomplete past-due w
   assert.equal(map.get("b@example.com").overdue, false);
 });
 
-test("Quick Assign augments only the exact matching assignment request", () => {
-  const payload = {
-    team_id: "team-a",
-    action: "assign",
-    assignment: {
-      player_identity: "player@example.com",
-      assignment_text: "Complete the shooting ladder.",
-      result_detail: "",
-    },
-  };
-  const augmented = applyQuickAssignDueDate(payload, {
-    teamId: "team-a",
-    playerIdentity: "PLAYER@EXAMPLE.COM",
-    dueDate: "2026-08-05",
-  });
-  assert.equal(augmented.assignment.due_date, "2026-08-05");
-  assert.equal("note" in augmented.assignment, false);
-  assert.equal("private_note" in augmented.assignment, false);
-  assert.equal(applyQuickAssignDueDate(payload, { teamId: "team-b", playerIdentity: "player@example.com", dueDate: "2026-08-05" }), payload);
-  assert.equal(applyQuickAssignDueDate({ ...payload, action: "start" }, { teamId: "team-a", playerIdentity: "player@example.com", dueDate: "2026-08-05" }).assignment.due_date, undefined);
-});
-
 test("assignment service normalizes and sends an optional due date without private data", async () => {
   const storage = memoryStorage({ "sl:session": { email: "coach@example.com", role: "coach", teamId: "team-a" } });
   let payload = null;
@@ -115,11 +92,11 @@ test("assignment service normalizes and sends an optional due date without priva
   assert.equal("private_note" in payload.assignment, false);
 });
 
-test("database and app contracts keep deadlines optional and date-only", () => {
+test("database and app contracts keep deadlines optional, direct, and date-only", () => {
   const migration = fs.readFileSync(new URL("../migrations/039_player_assignment_due_dates.sql", import.meta.url), "utf8");
   const api = fs.readFileSync(new URL("../functions/v1/player-assignments/index.js", import.meta.url), "utf8");
   const service = fs.readFileSync(new URL("../src/lib/playerAssignmentService.js", import.meta.url), "utf8");
-  const quickAssignDeadline = fs.readFileSync(new URL("../src/lib/coachQuickAssignDeadlineEnhancer.js", import.meta.url), "utf8");
+  const quickAssign = fs.readFileSync(new URL("../src/lib/coachQuickAssignEnhancer.js", import.meta.url), "utf8");
   const playerCard = fs.readFileSync(new URL("../src/components/PlayerCoachAssignmentCard.jsx", import.meta.url), "utf8");
   const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
 
@@ -128,10 +105,12 @@ test("database and app contracts keep deadlines optional and date-only", () => {
   assert.match(api, /due_date/);
   assert.match(api, /invalid_due_date/);
   assert.match(service, /dueDate/);
-  assert.match(quickAssignDeadline, /coach-quick-assign-due-date/);
-  assert.match(quickAssignDeadline, /applyQuickAssignDueDate/);
+  assert.match(quickAssign, /coach-quick-assign-due-date/);
+  assert.match(quickAssign, /setDueDate\(""\)/);
+  assert.match(quickAssign, /savePlayerAssignment\([\s\S]*dueDate/);
+  assert.doesNotMatch(quickAssign, /window\.fetch\s*=/);
   assert.match(playerCard, /player-assignment-due-date/);
   assert.match(bootstrap, /installCoachAssignmentDeadlineEnhancer\(\)/);
-  assert.match(bootstrap, /installCoachQuickAssignDeadlineEnhancer\(\)/);
+  assert.doesNotMatch(bootstrap, /installCoachQuickAssignDeadlineEnhancer/);
   assert.doesNotMatch(migration, /private_note|coach_note/i);
 });
