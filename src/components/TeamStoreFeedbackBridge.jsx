@@ -47,48 +47,27 @@ function installBridge() {
     return existing;
   }
 
+  const storageApi = window.storage;
   const bridge = {
     references: 1,
-    managedWriteDepth: 0,
-    originalWindowStorageSet: null,
-    wrappedWindowStorageSet: null,
-    originalLocalSetItem: null,
-    wrappedLocalSetItem: null,
+    storageApi,
+    originalSet: null,
+    wrappedSet: null,
   };
 
-  const storageApi = window.storage;
   if (storageApi && typeof storageApi.set === "function") {
-    bridge.originalWindowStorageSet = storageApi.set;
-    bridge.wrappedWindowStorageSet = async function wrappedTeamStoreSet(key, value, ...rest) {
-      bridge.managedWriteDepth += 1;
+    bridge.originalSet = storageApi.set;
+    bridge.wrappedSet = async function wrappedTeamStoreSet(key, value, ...rest) {
       try {
-        const result = await bridge.originalWindowStorageSet.call(this, key, value, ...rest);
+        const result = await bridge.originalSet.call(this, key, value, ...rest);
         announcePersisted(key);
         return result;
       } catch (error) {
         announceFailure(key, error);
         throw error;
-      } finally {
-        bridge.managedWriteDepth -= 1;
       }
     };
-    storageApi.set = bridge.wrappedWindowStorageSet;
-  }
-
-  const storagePrototype = window.Storage?.prototype;
-  if (storagePrototype && typeof storagePrototype.setItem === "function") {
-    bridge.originalLocalSetItem = storagePrototype.setItem;
-    bridge.wrappedLocalSetItem = function wrappedTeamStoreLocalSet(key, value) {
-      try {
-        const result = bridge.originalLocalSetItem.call(this, key, value);
-        if (bridge.managedWriteDepth === 0) announcePersisted(key);
-        return result;
-      } catch (error) {
-        if (bridge.managedWriteDepth === 0) announceFailure(key, error);
-        throw error;
-      }
-    };
-    storagePrototype.setItem = bridge.wrappedLocalSetItem;
+    storageApi.set = bridge.wrappedSet;
   }
 
   window[BRIDGE_KEY] = bridge;
@@ -99,11 +78,8 @@ function uninstallBridge(bridge) {
   bridge.references -= 1;
   if (bridge.references > 0) return;
 
-  if (window.storage?.set === bridge.wrappedWindowStorageSet && bridge.originalWindowStorageSet) {
-    window.storage.set = bridge.originalWindowStorageSet;
-  }
-  if (window.Storage?.prototype?.setItem === bridge.wrappedLocalSetItem && bridge.originalLocalSetItem) {
-    window.Storage.prototype.setItem = bridge.originalLocalSetItem;
+  if (bridge.storageApi?.set === bridge.wrappedSet && bridge.originalSet) {
+    bridge.storageApi.set = bridge.originalSet;
   }
   delete window[BRIDGE_KEY];
 }
