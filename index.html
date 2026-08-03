@@ -15,10 +15,28 @@
     (function () {
       try {
         var queryDemo = new URLSearchParams(window.location.search).get('demo') === '1';
-        var sessionDemo = window.sessionStorage.getItem('sl:demoSession') === 'true';
-        window.localStorage.removeItem('sl:demoMode');
-        if (queryDemo) window.sessionStorage.setItem('sl:demoSession', 'true');
-        if (queryDemo || sessionDemo) document.documentElement.classList.add('shotlab-demo');
+        var demoEmails = ['demo@shotlab.app', 'coach.demo@shotlab.app'];
+        var clearStaleDemoAuth = function (storage) {
+          if (!storage) return;
+          storage.removeItem('sl:demoMode');
+          storage.removeItem('sl:demoSession');
+          var keys = [];
+          for (var i = 0; i < storage.length; i += 1) keys.push(storage.key(i));
+          keys.forEach(function (key) {
+            if (!key) return;
+            var normalizedKey = String(key).toLowerCase();
+            var authLikeKey = key === 'sl:session' || normalizedKey.indexOf('auth-token') >= 0 || normalizedKey.indexOf('supabase.auth') >= 0;
+            if (!authLikeKey) return;
+            var raw = String(storage.getItem(key) || '').toLowerCase();
+            var isDemoAuth = demoEmails.some(function (email) { return raw.indexOf(email) >= 0; });
+            if (isDemoAuth) storage.removeItem(key);
+          });
+        };
+
+        clearStaleDemoAuth(window.localStorage);
+        clearStaleDemoAuth(window.sessionStorage);
+        document.documentElement.classList.remove('shotlab-demo');
+        if (queryDemo) document.documentElement.classList.add('shotlab-demo');
       } catch (_) {}
     })();
   </script>
