@@ -122,6 +122,17 @@ async function enterCoachDemo(page) {
   return playersButton;
 }
 
+async function openSeasonArchivePanel(page) {
+  const panel = page.getByTestId("coach-season-archive");
+  if (!(await panel.isVisible().catch(() => false))) {
+    const seasonToolsButton = page.getByRole("button", { name: "Season Tools", exact: true });
+    await expect(seasonToolsButton).toBeVisible({ timeout: 15_000 });
+    await seasonToolsButton.click();
+  }
+  await expect(panel).toBeVisible({ timeout: 15_000 });
+  return panel;
+}
+
 async function installRoutes(target) {
   await target.route("**/v1/season-archives", archiveRouteHandler());
   await target.route(/https:\/\/[^/]+\.supabase\.co\/.*/, async (route) => {
@@ -142,8 +153,7 @@ test("coach archive survives refresh and a second browser while live data stays 
   const playersButton = await enterCoachDemo(page);
   await playersButton.click();
 
-  const archivePanel = page.getByTestId("coach-season-archive");
-  await expect(archivePanel).toBeVisible();
+  const archivePanel = await openSeasonArchivePanel(page);
   const liveDataBeforeArchive = await readStoredCollections(page);
   const archiveName = "Playwright Archive Season";
 
@@ -173,7 +183,7 @@ test("coach archive survives refresh and a second browser while live data stays 
   await page.reload();
   const playersAfterReload = await enterCoachDemo(page);
   await playersAfterReload.click();
-  const reloadedPanel = page.getByTestId("coach-season-archive");
+  const reloadedPanel = await openSeasonArchivePanel(page);
   await reloadedPanel.getByTestId("season-archive-view-button").click();
   await expect(reloadedPanel.getByTestId("season-archive-detail")).toContainText(archiveName);
   expect(await readStoredCollections(page)).toEqual(liveDataBeforeArchive);
@@ -192,7 +202,7 @@ test("coach archive survives refresh and a second browser while live data stays 
   await secondPage.goto("/");
   const secondPlayers = await enterCoachDemo(secondPage);
   await secondPlayers.click();
-  const secondPanel = secondPage.getByTestId("coach-season-archive");
+  const secondPanel = await openSeasonArchivePanel(secondPage);
   await secondPanel.getByTestId("season-archive-view-button").click();
   await expect(secondPanel.getByTestId("season-archive-detail")).toContainText(archiveName);
   await secondContext.close();
@@ -203,7 +213,7 @@ test("server write failure shows an error and creates no local archive", async (
   await page.goto("/");
   const playersButton = await enterCoachDemo(page);
   await playersButton.click();
-  const archivePanel = page.getByTestId("coach-season-archive");
+  const archivePanel = await openSeasonArchivePanel(page);
 
   await archivePanel.getByPlaceholder("2026 Summer").fill("Failed Archive");
   const dateFields = archivePanel.locator('input[type="date"]');
