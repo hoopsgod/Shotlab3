@@ -13,6 +13,10 @@ on:
       - src/components/DeferredCoachDashboardPhase2.jsx
       - src/components/CoachDashboardPhase2.jsx
       - src/components/CoachDashboardPhase2.module.css
+      - src/components/DeferredCoachInteractiveDashboards.jsx
+      - src/components/CoachInteractiveDashboards.jsx
+      - src/components/SecondaryPageSystem.jsx
+      - src/components/ExperiencePrimitives.jsx
       - src/components/DeferredPlayerCareerHistory.jsx
       - src/components/PlayerCareerHistory.jsx
       - src/components/PlayerCareerHistory.module.css

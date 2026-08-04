@@ -7,6 +7,7 @@ const appSource = fs.readFileSync('src/App.jsx', 'utf8')
 const deferredCharts = fs.readFileSync('src/components/DeferredShotLabCharts.jsx', 'utf8')
 const deferredLeaderboards = fs.readFileSync('src/components/DeferredPremiumLeaderboardsHub.jsx', 'utf8')
 const deferredCoachPhase2 = fs.readFileSync('src/components/DeferredCoachDashboardPhase2.jsx', 'utf8')
+const deferredCoachInteractive = fs.readFileSync('src/components/DeferredCoachInteractiveDashboards.jsx', 'utf8')
 const deferredCareerHistory = fs.readFileSync('src/components/DeferredPlayerCareerHistory.jsx', 'utf8')
 const verifierSource = fs.readFileSync('scripts/verify-performance-budget.mjs', 'utf8')
 const performanceBudget = JSON.parse(fs.readFileSync('performance-budget.json', 'utf8'))
@@ -68,6 +69,37 @@ test('the deferred Coach boundary preserves every named export through one lazy 
   assert.doesNotMatch(deferredCoachPhase2, /^import .*CoachDashboardPhase2/m)
 })
 
+test('Coach interactive dashboards are redirected through a deferred boundary', () => {
+  assert.match(appSource, /from ["']\.\/components\/CoachInteractiveDashboards\.jsx["']/)
+  assert.match(viteConfig, /name:\s*["']shotlab-defer-coach-interactive-dashboards["']/)
+  assert.match(viteConfig, /source === STATIC_COACH_INTERACTIVE_IMPORT/)
+  assert.match(viteConfig, /DeferredCoachInteractiveDashboards\.jsx/)
+})
+
+test('the deferred Coach interactive boundary preserves all public exports', () => {
+  assert.match(deferredCoachInteractive, /import\(["']\.\/CoachInteractiveDashboards\.jsx["']\)/)
+  assert.match(deferredCoachInteractive, /lazyNamed/)
+  for (const exportName of [
+    'CoachEventsInteractiveDashboard',
+    'CoachPageDashboardHeader',
+    'CoachPlayersInteractiveDashboard',
+  ]) {
+    assert.match(deferredCoachInteractive, new RegExp(`export function ${exportName}`))
+    assert.match(deferredCoachInteractive, new RegExp(`lazyNamed\\('${exportName}'\\)`))
+  }
+  assert.match(deferredCoachInteractive, /data-testid=["']coach-interactive-dashboard-loading["']/)
+  assert.doesNotMatch(deferredCoachInteractive, /^import .*CoachInteractiveDashboards/m)
+})
+
+test('Coach operational implementations share one deferred request slot', () => {
+  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/CoachDashboardPhase2\.jsx["']\)/)
+  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/CoachInteractiveDashboards\.jsx["']\)/)
+  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/SecondaryPageSystem\.jsx["']\)/)
+  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/ExperiencePrimitives\.jsx["']\)/)
+  assert.match(viteConfig, /return ["']CoachOperationalWorkspaces["']/)
+  assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
+})
+
 test('Player career history is redirected through a deferred boundary', () => {
   assert.match(appSource, /import PlayerCareerHistory from ["']\.\/components\/PlayerCareerHistory\.jsx["']/)
   assert.match(viteConfig, /name:\s*["']shotlab-defer-player-career-history["']/)
@@ -92,8 +124,8 @@ test('shared season analytics stay inside the leaderboard chunk without restorin
 test('the performance verifier locks both startup JavaScript and startup CSS', () => {
   assert.match(verifierSource, /const largestCss = css\[0\]/)
   assert.match(verifierSource, /largestCss\.bytes > budget\.maxLargestCssBytes/)
-  assert.equal(performanceBudget.maxLargestJavaScriptBytes, 910000)
-  assert.equal(performanceBudget.maxLargestCssBytes, 192000)
-  assert.equal(performanceBudget.maxTotalCssGzipBytes, 73500)
+  assert.equal(performanceBudget.maxLargestJavaScriptBytes, 885000)
+  assert.equal(performanceBudget.maxLargestCssBytes, 172000)
+  assert.equal(performanceBudget.maxTotalCssGzipBytes, 74000)
   assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })
