@@ -29,8 +29,10 @@ function ProgressChartsFallback() {
 
 export default function DeferredShotLabCharts(props) {
   return (
-    <Suspense fallback={<ProgressChartsFallback />}>
-      <LazyShotLabCharts {...props} />
-    </Suspense>
+    <div data-testid="progress-charts-workspace">
+      <Suspense fallback={<ProgressChartsFallback />}>
+        <LazyShotLabCharts {...props} />
+      </Suspense>
+    </div>
   )
 }
