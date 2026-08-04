@@ -44,6 +44,86 @@ function buildTarget({ key, label, actual, target }) {
   }
 }
 
+function normalizeRelativePath(value) {
+  return path.posix.normalize(String(value || '').replaceAll('\\', '/')).replace(/^\.\//, '')
+}
+
+function cleanAssetReference(value) {
+  const reference = String(value || '').trim()
+  if (!reference || reference.startsWith('#') || /^(?:data:|https?:|\/\/)/i.test(reference)) return ''
+  const clean = reference.split(/[?#]/, 1)[0]
+  try {
+    return decodeURIComponent(clean)
+  } catch {
+    return clean
+  }
+}
+
+function collectCssReferenceStrings(source) {
+  const references = []
+  const patterns = [
+    /["']([^"']+\.css(?:[?#][^"']*)?)["']/gi,
+    /@import\s+(?:url\(\s*)?["']?([^"')\s;]+\.css(?:[?#][^"')\s;]*)?)/gi,
+  ]
+
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) references.push(match[1])
+  }
+
+  return references
+}
+
+async function resolveCssReference(reference, sourceRelativePath, availableFiles) {
+  const cleanReference = cleanAssetReference(reference)
+  if (!cleanReference) return null
+
+  const rootCandidate = normalizeRelativePath(cleanReference.replace(/^\/+/, ''))
+  const sourceDirectory = path.posix.dirname(sourceRelativePath)
+  const relativeCandidate = normalizeRelativePath(path.posix.join(sourceDirectory, cleanReference))
+  const candidates = cleanReference.startsWith('.')
+    ? [relativeCandidate, rootCandidate]
+    : [rootCandidate, relativeCandidate]
+
+  for (const candidate of candidates) {
+    if (candidate.toLowerCase().endsWith('.css') && availableFiles.has(candidate)) return candidate
+  }
+
+  return null
+}
+
+async function getReachableCssFiles(allFiles) {
+  const relativeFiles = allFiles.map((absolutePath) => normalizeRelativePath(path.relative(distDir, absolutePath)))
+  const availableFiles = new Set(relativeFiles)
+  const sourceFiles = relativeFiles.filter((file) => /\.(?:html|js)$/i.test(file))
+  const reachableCss = new Set()
+  const queue = []
+
+  for (const sourceRelativePath of sourceFiles) {
+    const source = await readFile(path.join(distDir, sourceRelativePath), 'utf8')
+    for (const reference of collectCssReferenceStrings(source)) {
+      const resolved = await resolveCssReference(reference, sourceRelativePath, availableFiles)
+      if (resolved && !reachableCss.has(resolved)) {
+        reachableCss.add(resolved)
+        queue.push(resolved)
+      }
+    }
+  }
+
+  while (queue.length) {
+    const cssRelativePath = queue.shift()
+    const cssSource = await readFile(path.join(distDir, cssRelativePath), 'utf8')
+    for (const reference of collectCssReferenceStrings(cssSource)) {
+      const resolved = await resolveCssReference(reference, cssRelativePath, availableFiles)
+      if (resolved && !reachableCss.has(resolved)) {
+        reachableCss.add(resolved)
+        queue.push(resolved)
+      }
+    }
+  }
+
+  return reachableCss
+}
+
 const budget = JSON.parse(await readFile(budgetPath, 'utf8'))
 const distStats = await stat(distDir).catch(() => null)
 if (!distStats?.isDirectory()) {
@@ -51,15 +131,22 @@ if (!distStats?.isDirectory()) {
 }
 
 const assetPaths = await walk(distDir)
+const reachableCssFiles = await getReachableCssFiles(assetPaths)
+const allCssFiles = assetPaths
+  .map((absolutePath) => normalizeRelativePath(path.relative(distDir, absolutePath)))
+  .filter((file) => file.toLowerCase().endsWith('.css'))
+const ignoredCssFiles = allCssFiles.filter((file) => !reachableCssFiles.has(file)).sort()
 const assets = []
 
 for (const absolutePath of assetPaths) {
+  const relativePath = normalizeRelativePath(path.relative(distDir, absolutePath))
   const extension = path.extname(absolutePath).toLowerCase()
+  if (extension === '.css' && !reachableCssFiles.has(relativePath)) continue
   if (!['.js', '.css'].includes(extension)) continue
 
   const buffer = await readFile(absolutePath)
   assets.push({
-    file: path.relative(distDir, absolutePath).replaceAll('\\', '/'),
+    file: relativePath,
     type: extension.slice(1),
     bytes: buffer.byteLength,
     gzipBytes: gzipSync(buffer, { level: 9 }).byteLength,
@@ -93,7 +180,7 @@ const targets = [
   }),
   buildTarget({
     key: 'totalCssGzip',
-    label: 'Total CSS gzip',
+    label: 'Reachable CSS gzip',
     actual: totals.cssGzipBytes,
     target: budget.targetTotalCssGzipBytes,
   }),
@@ -107,7 +194,7 @@ if (totals.javaScriptGzipBytes > budget.maxTotalJavaScriptGzipBytes) {
   failures.push(`Total JavaScript gzip is ${formatBytes(totals.javaScriptGzipBytes)}; budget is ${formatBytes(budget.maxTotalJavaScriptGzipBytes)}.`)
 }
 if (totals.cssGzipBytes > budget.maxTotalCssGzipBytes) {
-  failures.push(`Total CSS gzip is ${formatBytes(totals.cssGzipBytes)}; budget is ${formatBytes(budget.maxTotalCssGzipBytes)}.`)
+  failures.push(`Reachable CSS gzip is ${formatBytes(totals.cssGzipBytes)}; budget is ${formatBytes(budget.maxTotalCssGzipBytes)}.`)
 }
 if (totals.javaScriptFiles > budget.maxJavaScriptFileCount) {
   failures.push(`JavaScript file count is ${totals.javaScriptFiles}; budget is ${budget.maxJavaScriptFileCount}.`)
@@ -119,6 +206,7 @@ const metrics = {
   totals,
   largestJavaScript,
   targets,
+  ignoredCssFiles,
   failures,
   assets,
 }
@@ -135,7 +223,8 @@ console.table(assets.map((asset) => ({
 })))
 console.log(`Largest JS: ${largestJavaScript.file} (${formatBytes(largestJavaScript.bytes)} raw, ${formatBytes(largestJavaScript.gzipBytes)} gzip)`)
 console.log(`Total JS: ${formatBytes(totals.javaScriptBytes)} raw, ${formatBytes(totals.javaScriptGzipBytes)} gzip`)
-console.log(`Total CSS: ${formatBytes(totals.cssBytes)} raw, ${formatBytes(totals.cssGzipBytes)} gzip`)
+console.log(`Reachable CSS: ${formatBytes(totals.cssBytes)} raw, ${formatBytes(totals.cssGzipBytes)} gzip across ${totals.cssFiles} files`)
+console.log(`Ignored CSS: ${ignoredCssFiles.length ? ignoredCssFiles.join(', ') : 'none'}`)
 
 if (targets.length) {
   console.log('\nImprovement targets')
