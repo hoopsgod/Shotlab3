@@ -62,6 +62,9 @@ test('Player interface wrappers preserve default and named component contracts',
   assert.match(headerWrapper, /<LazyPlayerDashboardHeader \{\.\.\.props\} \/>/)
   assert.match(dailyWrapper, /<LazyPlayerDailyCommandCenter \{\.\.\.props\} \/>/)
   assert.match(workspaceWrapper, /lazyNamed/)
+  assert.match(workspaceWrapper, /fallbackTestId/)
+  assert.match(workspaceWrapper, /<Component \{\.\.\.props\} \/>/)
+  assert.doesNotMatch(workspaceWrapper, /function DeferredPlayerInterface\(\{ Component, label, testId/)
   for (const exportName of ['PlayerWorkspaceCommandBar', 'PlayerWorkspaceEmptyState', 'PlayerWorkspaceFilterRail']) {
     assert.match(workspaceWrapper, new RegExp(`export function ${exportName}`))
     assert.match(workspaceWrapper, new RegExp(`lazyNamed\\("${exportName}"\\)`))
@@ -85,12 +88,13 @@ test('Daily Command Center imports Player-isolated primitives directly', () => {
   assert.doesNotMatch(dailyPrimitives, /ExperiencePrimitives\.jsx/)
 })
 
-test('Player interface and assignment card share one route-aligned request slot', () => {
+test('Player interface stays route-aligned while assignment card joins Player Profile', () => {
   for (const boundary of boundaries) {
     assert.ok(viteConfig.includes(boundary.implementationPath))
   }
   assert.ok(viteConfig.includes('/src/components/PlayerDailyPrimitives.jsx'))
-  assert.ok(viteConfig.includes('/src/components/PlayerCoachAssignmentCard.jsx'))
   assert.match(viteConfig, /return ["']PlayerInterfaceWorkspaces["']/)
+  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/PlayerCoachAssignmentCard\.jsx["']\)/)
+  assert.match(viteConfig, /return ["']PlayerProfileWorkspaces["']/)
   assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })
