@@ -5,7 +5,9 @@ import react from '@vitejs/plugin-react'
 const normalizeModuleId = (id = '') => String(id).replaceAll('\\', '/')
 const APP_MODULE_SUFFIX = '/src/App.jsx'
 const STATIC_CHART_IMPORT = './components/ShotLabCharts'
+const STATIC_LEADERBOARDS_IMPORT = './components/PremiumLeaderboardsHub'
 const DEFERRED_CHART_MODULE = path.resolve(process.cwd(), 'src/components/DeferredShotLabCharts.jsx')
+const DEFERRED_LEADERBOARDS_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPremiumLeaderboardsHub.jsx')
 
 function deferProgressCharts() {
   return {
@@ -15,6 +17,20 @@ function deferProgressCharts() {
       const importerId = normalizeModuleId(importer)
       if (source === STATIC_CHART_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
         return DEFERRED_CHART_MODULE
+      }
+      return null
+    },
+  }
+}
+
+function deferLeaderboardAnalytics() {
+  return {
+    name: 'shotlab-defer-leaderboard-analytics',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (source === STATIC_LEADERBOARDS_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_LEADERBOARDS_MODULE
       }
       return null
     },
@@ -40,7 +56,7 @@ function stableVendorChunk(id) {
 }
 
 export default defineConfig({
-  plugins: [deferProgressCharts(), react()],
+  plugins: [deferProgressCharts(), deferLeaderboardAnalytics(), react()],
   base: './',
   build: {
     outDir: 'dist',
