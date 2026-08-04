@@ -15,6 +15,16 @@ import {
 
 const firstNames = (rows = [], limit = 3) => rows.slice(0, limit).map((row) => String(row.name || "Player").split(" ")[0]).join(", ");
 const pluralize = (count, singular, plural = `${singular}s`) => `${count} ${count === 1 ? singular : plural}`;
+const formatScheduleDate = (value, { weekday = false } = {}) => {
+  const raw = String(value || "").trim();
+  const match = raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return raw || "TBD";
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12, 0, 0);
+  if (Number.isNaN(date.getTime())) return raw;
+  const options = { month: "short", day: "numeric" };
+  if (weekday) options.weekday = "short";
+  return new Intl.DateTimeFormat("en-US", options).format(date);
+};
 
 export function CoachPlayersInteractiveDashboard({ metrics, rows = [], filter, query, onFilterChange, onQueryChange, onAddPlayer, onOpenArchives }) {
   const attentionRows = rows.filter((row) => row.statusKey !== "active");
@@ -60,19 +70,19 @@ export function CoachEventsInteractiveDashboard({ metrics, rows = [], status, ty
   const next = metrics.next;
   const gapEvents = rows.filter((row) => row.needsResponse);
   const metricItems = [
-    { key: "upcoming", label: "Upcoming", value: metrics.upcoming, detail: next ? `Next: ${next.date}` : "No event scheduled", tone: "info" },
+    { key: "upcoming", label: "Upcoming", value: metrics.upcoming, detail: next ? `Next: ${formatScheduleDate(next.date)}` : "No event scheduled", tone: "info" },
     { key: "gaps", label: "Missing RSVPs", value: metrics.missing, detail: `${gapEvents.length} affected events`, tone: "attention" },
     { key: "all", label: "Response Rate", value: `${metrics.responseRate}%`, detail: `${metrics.confirmed} confirmations`, tone: "positive" },
     { key: "past", label: "Completed", value: metrics.past, detail: `${metrics.total} total events` },
   ];
   return (
     <SecondaryPageShell testId="coach-events-interactive-dashboard">
-      <SecondaryPageIntro eyebrow="Schedule intelligence" title="Events" summary="Run the team agenda, resolve attendance gaps, and move from schedule insight to action." status={next ? `${next.date} · ${next.time}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />
+      <SecondaryPageIntro eyebrow="Schedule intelligence" title="Events" summary="Run the team agenda, resolve attendance gaps, and move from schedule insight to action." status={next ? `${formatScheduleDate(next.date, { weekday: true })} · ${next.time}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />
       <SecondaryPageToolbar testId="coach-events-toolbar">
         <InteractiveMetricStrip items={metricItems} activeKey={status} onSelect={onStatusChange} testId="coach-events-metric-strip" />
         <DashboardFilterRail searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search title, location, or type" filters={[{ key: "all", label: "All Types", count: rows.length }, { key: "run", label: "Practice" }, { key: "game", label: "Game" }, { key: "clinic", label: "Camp" }, { key: "recovery", label: "Meeting" }]} activeFilter={type} onFilterChange={onTypeChange} testId="coach-events-filter-rail" />
       </SecondaryPageToolbar>
-      <SecondaryPageDecision eyebrow="Next team moment" title={next ? next.title : "Calendar is open"} detail={next ? `${next.date} at ${next.time} · ${next.location}. ${next.confirmed} confirmed and ${next.missing} still missing.` : "Create the next event to begin attendance tracking and player communication."} tone={metrics.missing ? "attention" : "info"} action={next ? { label: "Manage Attendance", onClick: () => onOpenEvent(next.event.id) } : { label: "Create Event", onClick: onCreateEvent }} testId="coach-events-decision-brief">
+      <SecondaryPageDecision eyebrow="Next team moment" title={next ? next.title : "Calendar is open"} detail={next ? `${formatScheduleDate(next.date, { weekday: true })} at ${next.time} · ${next.location}. ${next.confirmed} confirmed and ${next.missing} still missing.` : "Create the next event to begin attendance tracking and player communication."} tone={metrics.missing ? "attention" : "info"} action={next ? { label: "Manage Attendance", onClick: () => onOpenEvent(next.event.id) } : { label: "Create Event", onClick: onCreateEvent }} testId="coach-events-decision-brief">
         <DashboardProgress value={metrics.responseRate} max={100} label="Upcoming RSVP completion" />
       </SecondaryPageDecision>
       <SecondaryPageEvidence testId="coach-events-insight-grid">
