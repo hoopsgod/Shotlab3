@@ -157,6 +157,7 @@ function stableVendorChunk(id) {
   if (
     moduleId.includes('/src/components/ShotLabCharts.jsx')
     || moduleId.includes('/src/components/PlayerCareerHistory.jsx')
+    || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')
   ) {
     return 'PlayerProfileWorkspaces'
   }
@@ -166,7 +167,6 @@ function stableVendorChunk(id) {
     || moduleId.includes('/src/components/PlayerDailyCommandCenter.jsx')
     || moduleId.includes('/src/components/PlayerDailyPrimitives.jsx')
     || moduleId.includes('/src/components/PlayerOperationalWorkspace.jsx')
-    || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')
   ) {
     return 'PlayerInterfaceWorkspaces'
   }
