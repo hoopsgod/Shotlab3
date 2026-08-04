@@ -114,6 +114,12 @@ const routeChunkLoaded = (page, moduleNames, excludedNames = []) => page.evaluat
   { names: moduleNames, excluded: excludedNames },
 )
 
+const playerInterfaceLoaded = (page) => routeChunkLoaded(
+  page,
+  ['PlayerInterfaceWorkspaces', 'PlayerDashboardHeader', 'PlayerDailyCommandCenter', 'PlayerDailyPrimitives', 'PlayerOperationalWorkspace', 'PlayerCoachAssignmentCard'],
+  ['DeferredPlayerDashboardHeader', 'DeferredPlayerDailyCommandCenter', 'DeferredPlayerOperationalWorkspace', 'PlayerInterfaceFallback'],
+)
+
 const playerProfileLoaded = (page) => routeChunkLoaded(
   page,
   ['PlayerProfileWorkspaces', 'ShotLabCharts', 'PlayerCareerHistory'],
@@ -148,6 +154,11 @@ async function enterPlayer(page) {
   await page.goto('/')
   await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('player-dashboard-identity-header')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('player-daily-command-center')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('player-dashboard-header-loading')).toHaveCount(0)
+  await expect(page.getByTestId('player-daily-command-center-loading')).toHaveCount(0)
+  await expect.poll(() => playerInterfaceLoaded(page)).toBe(true)
 }
 
 async function openMoreDestination(page, key) {
@@ -157,17 +168,30 @@ async function openMoreDestination(page, key) {
   await sheet.locator(`[data-nav-key="${key}"]`).click()
 }
 
-test('Profile workspaces load together only after the player opens Profile', async ({ page }) => {
+test('Player interface stays out of auth and initializes only after Player entry', async ({ page }) => {
   await installSafeRoutes(page)
   await seedStorage(page)
 
   await page.goto('/')
+  await expect.poll(() => playerInterfaceLoaded(page)).toBe(false)
   await expect.poll(() => playerProfileLoaded(page)).toBe(false)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
   await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('player-dashboard-identity-header')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('player-daily-command-center')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('player-dashboard-header-loading')).toHaveCount(0)
+  await expect(page.getByTestId('player-daily-command-center-loading')).toHaveCount(0)
+  await expect.poll(() => playerInterfaceLoaded(page)).toBe(true)
+  await expect.poll(() => playerProfileLoaded(page)).toBe(false)
+  await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
+  await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
+})
+
+test('Profile workspaces load together only after the player opens Profile', async ({ page }) => {
+  await enterPlayer(page)
   await expect.poll(() => playerProfileLoaded(page)).toBe(false)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
@@ -179,6 +203,7 @@ test('Profile workspaces load together only after the player opens Profile', asy
   await expect(page.getByTestId('player-career-history')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('progress-charts-loading')).toHaveCount(0)
   await expect(page.getByTestId('player-career-history-loading')).toHaveCount(0)
+  await expect.poll(() => playerInterfaceLoaded(page)).toBe(true)
   await expect.poll(() => playerProfileLoaded(page)).toBe(true)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
@@ -196,17 +221,19 @@ test('leaderboard analytics load only after the player opens Leaderboards', asyn
   await expect(workspace).toBeVisible({ timeout: 20_000 })
   await expect(workspace.getByTestId('premium-leaderboards-hub')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('leaderboards-loading')).toHaveCount(0)
+  await expect.poll(() => playerInterfaceLoaded(page)).toBe(true)
   await expect.poll(() => implementationLoaded(page, 'PremiumLeaderboardsHub', 'DeferredPremiumLeaderboardsHub')).toBe(true)
   await expect.poll(() => playerProfileLoaded(page)).toBe(false)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 })
 
-test('Coach operational and administration workspaces stay out of auth and Player, then initialize for Coach', async ({ page }) => {
+test('Coach operational and administration workspaces stay out of auth and Player interface stays out of Coach', async ({ page }) => {
   await installSafeRoutes(page)
   await seedStorage(page)
 
   await page.goto('/')
+  await expect.poll(() => playerInterfaceLoaded(page)).toBe(false)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
@@ -218,10 +245,12 @@ test('Coach operational and administration workspaces stay out of auth and Playe
   await expect(page.getByTestId('coach-activity-intelligence-panel')).toHaveCount(1)
   await expect(page.getByTestId('coach-intelligence-loading')).toHaveCount(0)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(true)
+  await expect.poll(() => playerInterfaceLoaded(page)).toBe(false)
 
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Players', exact: true }).click()
   await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('coach-players-command-bar')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('coach-interactive-dashboard-loading')).toHaveCount(0)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(true)
+  await expect.poll(() => playerInterfaceLoaded(page)).toBe(false)
 })
