@@ -6,6 +6,7 @@ const viteConfig = fs.readFileSync('vite.config.js', 'utf8')
 const appSource = fs.readFileSync('src/App.jsx', 'utf8')
 const deferredCharts = fs.readFileSync('src/components/DeferredShotLabCharts.jsx', 'utf8')
 const deferredLeaderboards = fs.readFileSync('src/components/DeferredPremiumLeaderboardsHub.jsx', 'utf8')
+const deferredCoachCommandCenter = fs.readFileSync('src/components/DeferredCoachCommandCenter.jsx', 'utf8')
 const deferredCoachPhase2 = fs.readFileSync('src/components/DeferredCoachDashboardPhase2.jsx', 'utf8')
 const deferredCoachInteractive = fs.readFileSync('src/components/DeferredCoachInteractiveDashboards.jsx', 'utf8')
 const deferredCareerHistory = fs.readFileSync('src/components/DeferredPlayerCareerHistory.jsx', 'utf8')
@@ -41,6 +42,21 @@ test('the deferred leaderboards boundary dynamically imports the implementation'
   assert.match(deferredLeaderboards, /data-testid=["']deferred-leaderboards-workspace["']/)
   assert.match(deferredLeaderboards, /data-testid=["']leaderboards-loading["']/)
   assert.doesNotMatch(deferredLeaderboards, /^import PremiumLeaderboardsHub/m)
+})
+
+test('Coach Mission Control is redirected through a deferred boundary', () => {
+  assert.match(appSource, /import CoachCommandCenter from ["']\.\/components\/CoachCommandCenter["']/)
+  assert.match(viteConfig, /name:\s*["']shotlab-defer-coach-command-center["']/)
+  assert.match(viteConfig, /source === STATIC_COACH_COMMAND_CENTER_IMPORT/)
+  assert.match(viteConfig, /DeferredCoachCommandCenter\.jsx/)
+})
+
+test('the deferred Coach Mission Control boundary preserves the default component contract', () => {
+  assert.match(deferredCoachCommandCenter, /lazy\(\(\) => import\(["']\.\/CoachCommandCenter\.jsx["']\)\)/)
+  assert.match(deferredCoachCommandCenter, /<Suspense fallback=/)
+  assert.match(deferredCoachCommandCenter, /data-testid=["']coach-command-center-loading["']/)
+  assert.match(deferredCoachCommandCenter, /<LazyCoachCommandCenter \{\.\.\.props\} \/>/)
+  assert.doesNotMatch(deferredCoachCommandCenter, /^import CoachCommandCenter/m)
 })
 
 test('Coach Phase 2 intelligence is redirected through a deferred boundary', () => {
@@ -92,6 +108,7 @@ test('the deferred Coach interactive boundary preserves all public exports', () 
 })
 
 test('Coach operational implementations share one deferred request slot', () => {
+  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/CoachCommandCenter\.jsx["']\)/)
   assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/CoachDashboardPhase2\.jsx["']\)/)
   assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/CoachInteractiveDashboards\.jsx["']\)/)
   assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/SecondaryPageSystem\.jsx["']\)/)
