@@ -52,6 +52,8 @@
     .boot-progress{width:124px;height:3px;margin-top:18px;overflow:hidden;border-radius:999px;background:rgba(16,19,16,.10)}
     .boot-progress span{display:block;width:44%;height:100%;border-radius:inherit;background:#7F9E1E;animation:boot-progress 1.15s cubic-bezier(.22,.78,.22,1) infinite alternate}
     .boot-auth-copy{margin-top:4px;font:600 11px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#6D746F}
+    .auth-demo-enter{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+    .auth-demo-enter button{opacity:1!important;visibility:visible!important;pointer-events:auto!important}
     @keyframes boot-progress{from{transform:translateX(-95%)}to{transform:translateX(225%)}}
     @media(prefers-reduced-motion:reduce){.boot-progress span{width:100%;animation:none;opacity:.75}}
   </style>
@@ -86,6 +88,16 @@
         var sheet = document.getElementById(id);
         if (sheet) document.head.appendChild(sheet);
       });
+      var revealDemoActions = function () {
+        document.querySelectorAll('.auth-demo-enter').forEach(function (node) {
+          node.style.setProperty('display','flex','important');
+          node.style.setProperty('opacity','1','important');
+          node.style.setProperty('visibility','visible','important');
+          node.style.setProperty('pointer-events','auto','important');
+        });
+      };
+      revealDemoActions();
+      new MutationObserver(revealDemoActions).observe(document.getElementById('root'), { childList:true, subtree:true });
     }, { once: true });
   </script>
 </body>
