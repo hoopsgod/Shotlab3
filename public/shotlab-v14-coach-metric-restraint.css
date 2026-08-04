@@ -1,22 +1,40 @@
-/* Coach metric restraint: selection is communicated by tone and border, never glow. */
+/* Coach metric restraint: selection is communicated by tone, never neon trim. */
 [data-testid="coach-players-metric-strip"] button::before,
 [data-testid="coach-players-metric-strip"] button::after,
 [data-testid="coach-events-metric-strip"] button::before,
-[data-testid="coach-events-metric-strip"] button::after{
+[data-testid="coach-events-metric-strip"] button::after,
+[data-testid="coach-players-metric-strip"] button *::before,
+[data-testid="coach-players-metric-strip"] button *::after,
+[data-testid="coach-events-metric-strip"] button *::before,
+[data-testid="coach-events-metric-strip"] button *::after{
   display:none!important;
   content:none!important;
   opacity:0!important;
+  background:none!important;
+  border:0!important;
   box-shadow:none!important;
+  filter:none!important;
 }
 [data-testid="coach-players-metric-strip"] button,
 [data-testid="coach-events-metric-strip"] button{
   min-height:118px!important;
+  overflow:hidden!important;
+  isolation:isolate!important;
+  -webkit-appearance:none!important;
+  appearance:none!important;
   border:1px solid rgba(17,20,17,.09)!important;
   outline:0!important;
-  background:linear-gradient(145deg,#fbfcf9,#f4f6f1)!important;
+  background:#f7f8f4!important;
+  background-image:none!important;
   box-shadow:0 8px 22px rgba(17,20,17,.055)!important;
   filter:none!important;
-  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background .16s ease!important;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background-color .16s ease!important;
+}
+[data-testid="coach-players-metric-strip"] button > *,
+[data-testid="coach-events-metric-strip"] button > *{
+  box-shadow:none!important;
+  filter:none!important;
+  border-bottom-color:transparent!important;
 }
 [data-testid="coach-players-metric-strip"] button:hover,
 [data-testid="coach-events-metric-strip"] button:hover{
@@ -34,9 +52,10 @@
 }
 [data-testid="coach-players-metric-strip"] button[aria-pressed="true"],
 [data-testid="coach-events-metric-strip"] button[aria-pressed="true"]{
-  border-color:rgba(126,158,30,.32)!important;
+  border-color:rgba(17,20,17,.16)!important;
   outline:0!important;
-  background:linear-gradient(145deg,#fafbf7,#f0f3e9)!important;
+  background:#f1f3ed!important;
+  background-image:none!important;
   box-shadow:0 9px 23px rgba(17,20,17,.065)!important;
   filter:none!important;
 }
