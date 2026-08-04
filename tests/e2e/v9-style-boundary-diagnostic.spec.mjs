@@ -14,26 +14,6 @@ const selectors = [
   '[data-testid="coach-live-activity"]',
 ];
 
-function snapshotElement(element) {
-  if (!element) return null;
-  const style = getComputedStyle(element);
-  const rect = element.getBoundingClientRect();
-  return {
-    tag: element.tagName,
-    className: element.className,
-    display: style.display,
-    visibility: style.visibility,
-    opacity: style.opacity,
-    position: style.position,
-    overflow: style.overflow,
-    width: rect.width,
-    height: rect.height,
-    top: rect.top,
-    left: rect.left,
-    pointerEvents: style.pointerEvents,
-  };
-}
-
 test("diagnose extracted legacy style geometry", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
@@ -41,6 +21,25 @@ test("diagnose extracted legacy style geometry", async ({ page }) => {
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
 
   const report = await page.evaluate((targets) => {
+    const snapshotElement = (element) => {
+      if (!element) return null;
+      const style = getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return {
+        tag: element.tagName,
+        className: element.className,
+        display: style.display,
+        visibility: style.visibility,
+        opacity: style.opacity,
+        position: style.position,
+        overflow: style.overflow,
+        width: rect.width,
+        height: rect.height,
+        top: rect.top,
+        left: rect.left,
+        pointerEvents: style.pointerEvents,
+      };
+    };
     const styles = [...document.querySelectorAll("style")].map((node, index) => ({
       index,
       length: node.textContent?.length || 0,
