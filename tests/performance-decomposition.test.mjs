@@ -7,6 +7,7 @@ const appSource = fs.readFileSync('src/App.jsx', 'utf8')
 const deferredCharts = fs.readFileSync('src/components/DeferredShotLabCharts.jsx', 'utf8')
 const deferredLeaderboards = fs.readFileSync('src/components/DeferredPremiumLeaderboardsHub.jsx', 'utf8')
 const deferredCoachPhase2 = fs.readFileSync('src/components/DeferredCoachDashboardPhase2.jsx', 'utf8')
+const deferredCareerHistory = fs.readFileSync('src/components/DeferredPlayerCareerHistory.jsx', 'utf8')
 
 test('progress analytics are redirected through a deferred boundary', () => {
   assert.match(appSource, /import ShotLabCharts from ["']\.\/components\/ShotLabCharts["']/)
@@ -63,4 +64,22 @@ test('the deferred Coach boundary preserves every named export through one lazy 
   }
   assert.match(deferredCoachPhase2, /data-testid=["']coach-intelligence-loading["']/)
   assert.doesNotMatch(deferredCoachPhase2, /^import .*CoachDashboardPhase2/m)
+})
+
+test('Player career history is redirected through a deferred boundary', () => {
+  assert.match(appSource, /import PlayerCareerHistory from ["']\.\/components\/PlayerCareerHistory\.jsx["']/)
+  assert.match(viteConfig, /name:\s*["']shotlab-defer-player-career-history["']/)
+  assert.match(viteConfig, /source === STATIC_CAREER_HISTORY_IMPORT/)
+  assert.match(viteConfig, /DeferredPlayerCareerHistory\.jsx/)
+})
+
+test('the deferred career history boundary dynamically imports its implementation', () => {
+  assert.match(deferredCareerHistory, /lazy\(\(\) => import\(["']\.\/PlayerCareerHistory\.jsx["']\)\)/)
+  assert.match(deferredCareerHistory, /<Suspense fallback=/)
+  assert.match(deferredCareerHistory, /data-testid=["']player-career-history-loading["']/)
+  assert.doesNotMatch(deferredCareerHistory, /^import PlayerCareerHistory/m)
+})
+
+test('tiny chart vendor code is co-located instead of consuming a standalone request', () => {
+  assert.doesNotMatch(viteConfig, /return ["']charts-vendor["']/)
 })
