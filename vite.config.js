@@ -80,6 +80,13 @@ function stableVendorChunk(id) {
     return 'react-vendor'
   }
 
+  if (
+    moduleId.includes('/src/components/PremiumLeaderboardsHub.jsx')
+    || moduleId.includes('/src/lib/seasonLeaderboardAnalytics.js')
+  ) {
+    return 'PremiumLeaderboardsHub'
+  }
+
   return undefined
 }
 
