@@ -8,6 +8,8 @@ const deferredCharts = fs.readFileSync('src/components/DeferredShotLabCharts.jsx
 const deferredLeaderboards = fs.readFileSync('src/components/DeferredPremiumLeaderboardsHub.jsx', 'utf8')
 const deferredCoachPhase2 = fs.readFileSync('src/components/DeferredCoachDashboardPhase2.jsx', 'utf8')
 const deferredCareerHistory = fs.readFileSync('src/components/DeferredPlayerCareerHistory.jsx', 'utf8')
+const verifierSource = fs.readFileSync('scripts/verify-performance-budget.mjs', 'utf8')
+const performanceBudget = JSON.parse(fs.readFileSync('performance-budget.json', 'utf8'))
 
 test('progress analytics are redirected through a deferred boundary', () => {
   assert.match(appSource, /import ShotLabCharts from ["']\.\/components\/ShotLabCharts["']/)
@@ -80,6 +82,17 @@ test('the deferred career history boundary dynamically imports its implementatio
   assert.doesNotMatch(deferredCareerHistory, /^import PlayerCareerHistory/m)
 })
 
-test('tiny chart vendor code is co-located instead of consuming a standalone request', () => {
+test('shared season analytics stay inside the leaderboard chunk without restoring a tiny chart-vendor request', () => {
+  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/PremiumLeaderboardsHub\.jsx["']\)/)
+  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/lib\/seasonLeaderboardAnalytics\.js["']\)/)
+  assert.match(viteConfig, /return ["']PremiumLeaderboardsHub["']/)
   assert.doesNotMatch(viteConfig, /return ["']charts-vendor["']/)
+})
+
+test('the performance verifier locks both startup JavaScript and startup CSS', () => {
+  assert.match(verifierSource, /const largestCss = css\[0\]/)
+  assert.match(verifierSource, /largestCss\.bytes > budget\.maxLargestCssBytes/)
+  assert.equal(performanceBudget.maxLargestJavaScriptBytes, 950000)
+  assert.equal(performanceBudget.maxLargestCssBytes, 200000)
+  assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })
