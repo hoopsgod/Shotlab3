@@ -40,6 +40,29 @@ test("diagnose extracted legacy style geometry", async ({ page }) => {
         pointerEvents: style.pointerEvents,
       };
     };
+    const matchingDisplayRules = (element) => {
+      if (!element) return [];
+      const matches = [];
+      const visit = (rules, context = "") => {
+        for (const rule of [...(rules || [])]) {
+          if (rule.cssRules) {
+            const nextContext = rule.conditionText || rule.media?.mediaText || context;
+            visit(rule.cssRules, nextContext);
+            continue;
+          }
+          if (!rule.selectorText || !rule.style?.display) continue;
+          try {
+            if (element.matches(rule.selectorText)) {
+              matches.push({ selector: rule.selectorText, display: rule.style.display, important: rule.style.getPropertyPriority("display"), context });
+            }
+          } catch {}
+        }
+      };
+      for (const sheet of [...document.styleSheets]) {
+        try { visit(sheet.cssRules); } catch {}
+      }
+      return matches;
+    };
     const styles = [...document.querySelectorAll("style")].map((node, index) => ({
       index,
       length: node.textContent?.length || 0,
@@ -48,12 +71,15 @@ test("diagnose extracted legacy style geometry", async ({ page }) => {
       hasTeamBrandBadgeRule: node.textContent?.includes(".team-brand .chip:not([data-tone])") || false,
     }));
     const elements = Object.fromEntries(targets.map((selector) => [selector, snapshotElement(document.querySelector(selector))]));
+    const accountability = document.querySelector('[data-testid="coach-assignment-accountability"]');
     const players = [...document.querySelectorAll("button")].find((button) => button.textContent?.trim() === "Players");
     return {
       viewport: { width: innerWidth, height: innerHeight },
       bodyClasses: document.body.className,
       styles,
       elements,
+      accountabilityDisplayRules: matchingDisplayRules(accountability),
+      playersDisplayRules: matchingDisplayRules(players),
       players: snapshotElement(players),
       elementFromPlayersCenter: players ? (() => {
         const rect = players.getBoundingClientRect();
