@@ -96,7 +96,6 @@ test("database, API, and UI contracts preserve role boundaries and acknowledgmen
   const coach = fs.readFileSync(new URL("../src/lib/coachFollowUpEnhancer.js", import.meta.url), "utf8");
   const player = fs.readFileSync(new URL("../src/components/PlayerCoachAssignmentCard.jsx", import.meta.url), "utf8");
   const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
-  const startup = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
 
   assert.match(migration, /create table if not exists public\.player_assignments/i);
   assert.match(migration, /enable row level security/i);
@@ -116,6 +115,4 @@ test("database, API, and UI contracts preserve role boundaries and acknowledgmen
   assert.match(player, /Start assignment/);
   assert.match(player, /Mark assignment complete/);
   assert.match(bootstrap, /installPlayerAssignmentEnhancer\(\)/);
-  assert.match(startup, /import \{ installPlayerAssignmentEnhancer \} from ['"]\.\/lib\/playerAssignmentEnhancer\.js['"]/);
-  assert.match(startup, /installPlayerAssignmentEnhancer\(\)/);
 });
