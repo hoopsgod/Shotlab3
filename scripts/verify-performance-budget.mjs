@@ -32,6 +32,18 @@ function sum(rows, key) {
   return rows.reduce((total, row) => total + row[key], 0)
 }
 
+function buildTarget({ key, label, actual, target }) {
+  if (!Number.isFinite(target)) return null
+  return {
+    key,
+    label,
+    actual,
+    target,
+    met: actual <= target,
+    deltaBytes: actual - target,
+  }
+}
+
 const budget = JSON.parse(await readFile(budgetPath, 'utf8'))
 const distStats = await stat(distDir).catch(() => null)
 if (!distStats?.isDirectory()) {
@@ -58,38 +70,61 @@ assets.sort((left, right) => right.bytes - left.bytes)
 const javaScript = assets.filter((asset) => asset.type === 'js')
 const css = assets.filter((asset) => asset.type === 'css')
 const largestJavaScript = javaScript[0] || { file: 'none', bytes: 0, gzipBytes: 0 }
-
-const metrics = {
-  generatedAt: new Date().toISOString(),
-  budget,
-  totals: {
-    javaScriptFiles: javaScript.length,
-    javaScriptBytes: sum(javaScript, 'bytes'),
-    javaScriptGzipBytes: sum(javaScript, 'gzipBytes'),
-    cssFiles: css.length,
-    cssBytes: sum(css, 'bytes'),
-    cssGzipBytes: sum(css, 'gzipBytes'),
-  },
-  largestJavaScript,
-  assets,
+const totals = {
+  javaScriptFiles: javaScript.length,
+  javaScriptBytes: sum(javaScript, 'bytes'),
+  javaScriptGzipBytes: sum(javaScript, 'gzipBytes'),
+  cssFiles: css.length,
+  cssBytes: sum(css, 'bytes'),
+  cssGzipBytes: sum(css, 'gzipBytes'),
 }
+const targets = [
+  buildTarget({
+    key: 'largestJavaScript',
+    label: 'Largest JavaScript chunk',
+    actual: largestJavaScript.bytes,
+    target: budget.targetLargestJavaScriptBytes,
+  }),
+  buildTarget({
+    key: 'totalJavaScriptGzip',
+    label: 'Total JavaScript gzip',
+    actual: totals.javaScriptGzipBytes,
+    target: budget.targetTotalJavaScriptGzipBytes,
+  }),
+  buildTarget({
+    key: 'totalCssGzip',
+    label: 'Total CSS gzip',
+    actual: totals.cssGzipBytes,
+    target: budget.targetTotalCssGzipBytes,
+  }),
+].filter(Boolean)
 
 const failures = []
 if (largestJavaScript.bytes > budget.maxLargestJavaScriptBytes) {
   failures.push(`Largest JavaScript chunk ${largestJavaScript.file} is ${formatBytes(largestJavaScript.bytes)}; budget is ${formatBytes(budget.maxLargestJavaScriptBytes)}.`)
 }
-if (metrics.totals.javaScriptGzipBytes > budget.maxTotalJavaScriptGzipBytes) {
-  failures.push(`Total JavaScript gzip is ${formatBytes(metrics.totals.javaScriptGzipBytes)}; budget is ${formatBytes(budget.maxTotalJavaScriptGzipBytes)}.`)
+if (totals.javaScriptGzipBytes > budget.maxTotalJavaScriptGzipBytes) {
+  failures.push(`Total JavaScript gzip is ${formatBytes(totals.javaScriptGzipBytes)}; budget is ${formatBytes(budget.maxTotalJavaScriptGzipBytes)}.`)
 }
-if (metrics.totals.cssGzipBytes > budget.maxTotalCssGzipBytes) {
-  failures.push(`Total CSS gzip is ${formatBytes(metrics.totals.cssGzipBytes)}; budget is ${formatBytes(budget.maxTotalCssGzipBytes)}.`)
+if (totals.cssGzipBytes > budget.maxTotalCssGzipBytes) {
+  failures.push(`Total CSS gzip is ${formatBytes(totals.cssGzipBytes)}; budget is ${formatBytes(budget.maxTotalCssGzipBytes)}.`)
 }
-if (metrics.totals.javaScriptFiles > budget.maxJavaScriptFileCount) {
-  failures.push(`JavaScript file count is ${metrics.totals.javaScriptFiles}; budget is ${budget.maxJavaScriptFileCount}.`)
+if (totals.javaScriptFiles > budget.maxJavaScriptFileCount) {
+  failures.push(`JavaScript file count is ${totals.javaScriptFiles}; budget is ${budget.maxJavaScriptFileCount}.`)
+}
+
+const metrics = {
+  generatedAt: new Date().toISOString(),
+  budget,
+  totals,
+  largestJavaScript,
+  targets,
+  failures,
+  assets,
 }
 
 await mkdir(reportDir, { recursive: true })
-await writeFile(reportPath, `${JSON.stringify({ ...metrics, failures }, null, 2)}\n`)
+await writeFile(reportPath, `${JSON.stringify(metrics, null, 2)}\n`)
 
 console.log('\nShotLab production bundle')
 console.table(assets.map((asset) => ({
@@ -99,8 +134,19 @@ console.table(assets.map((asset) => ({
   gzip: formatBytes(asset.gzipBytes),
 })))
 console.log(`Largest JS: ${largestJavaScript.file} (${formatBytes(largestJavaScript.bytes)} raw, ${formatBytes(largestJavaScript.gzipBytes)} gzip)`)
-console.log(`Total JS: ${formatBytes(metrics.totals.javaScriptBytes)} raw, ${formatBytes(metrics.totals.javaScriptGzipBytes)} gzip`)
-console.log(`Total CSS: ${formatBytes(metrics.totals.cssBytes)} raw, ${formatBytes(metrics.totals.cssGzipBytes)} gzip`)
+console.log(`Total JS: ${formatBytes(totals.javaScriptBytes)} raw, ${formatBytes(totals.javaScriptGzipBytes)} gzip`)
+console.log(`Total CSS: ${formatBytes(totals.cssBytes)} raw, ${formatBytes(totals.cssGzipBytes)} gzip`)
+
+if (targets.length) {
+  console.log('\nImprovement targets')
+  console.table(targets.map((target) => ({
+    metric: target.label,
+    actual: formatBytes(target.actual),
+    target: formatBytes(target.target),
+    status: target.met ? 'met' : `over by ${formatBytes(target.deltaBytes)}`,
+  })))
+}
+
 console.log(`Report: ${path.relative(rootDir, reportPath)}`)
 
 if (failures.length) {
