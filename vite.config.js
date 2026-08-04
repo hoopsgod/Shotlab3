@@ -18,6 +18,26 @@ function stableVendorChunk(id) {
     return 'charts-vendor'
   }
 
+  if (moduleId.includes('/src/components/Coach') || moduleId.includes('/src/screens/PlayersScreen')) {
+    return 'coach-workspaces'
+  }
+
+  if (moduleId.includes('/src/components/Player') || moduleId.includes('/src/lib/player')) {
+    return 'player-workspaces'
+  }
+
+  if (moduleId.includes('/src/components/') || moduleId.includes('/src/screens/')) {
+    return 'shared-workspace-ui'
+  }
+
+  if (moduleId.includes('/src/lib/')) {
+    return 'domain-services'
+  }
+
+  if (moduleId.includes('/src/context/') || moduleId.includes('/src/theme/')) {
+    return 'app-foundation'
+  }
+
   return undefined
 }
 
