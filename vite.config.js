@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 const normalizeModuleId = (id = '') => String(id).replaceAll('\\', '/')
 
-function stableVendorChunk(id) {
+function stableProductionChunk(id) {
   const moduleId = normalizeModuleId(id)
 
   if (
@@ -18,24 +18,8 @@ function stableVendorChunk(id) {
     return 'charts-vendor'
   }
 
-  if (moduleId.includes('/src/components/Coach') || moduleId.includes('/src/screens/PlayersScreen')) {
-    return 'coach-workspaces'
-  }
-
-  if (moduleId.includes('/src/components/Player') || moduleId.includes('/src/lib/player')) {
-    return 'player-workspaces'
-  }
-
-  if (moduleId.includes('/src/components/') || moduleId.includes('/src/screens/')) {
-    return 'shared-workspace-ui'
-  }
-
   if (moduleId.includes('/src/lib/')) {
     return 'domain-services'
-  }
-
-  if (moduleId.includes('/src/context/') || moduleId.includes('/src/theme/')) {
-    return 'app-foundation'
   }
 
   return undefined
@@ -48,10 +32,11 @@ export default defineConfig({
     outDir: 'dist',
     assetsInlineLimit: 1048576,
     reportCompressedSize: true,
-    chunkSizeWarningLimit: 850,
+    chunkSizeWarningLimit: 750,
     rollupOptions: {
       output: {
-        manualChunks: stableVendorChunk,
+        manualChunks: stableProductionChunk,
+        onlyExplicitManualChunks: true,
       },
     },
   },
