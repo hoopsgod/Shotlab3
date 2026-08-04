@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - agent/performance-decomposition-v9
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
   workflow_dispatch:
 
 permissions:
