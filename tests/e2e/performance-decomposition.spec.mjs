@@ -108,6 +108,7 @@ const coachOperationalLoaded = (page) => page.evaluate(() => performance
     const resourceName = String(entry.name)
     const isImplementation = [
       'CoachOperationalWorkspaces',
+      'CoachCommandCenter',
       'CoachDashboardPhase2',
       'CoachInteractiveDashboards',
     ].some((moduleName) => resourceName.includes(moduleName))
@@ -190,6 +191,8 @@ test('Coach operational workspaces stay out of auth and Player, then initialize 
   await page.getByRole('button', { name: 'Demo Coach', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
 
+  await expect(page.getByTestId('coach-command-center-full')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('coach-command-center-loading')).toHaveCount(0)
   await expect(page.getByTestId('coach-activity-intelligence-panel')).toHaveCount(1)
   await expect(page.getByTestId('coach-intelligence-loading')).toHaveCount(0)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(true)
