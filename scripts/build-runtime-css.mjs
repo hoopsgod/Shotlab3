@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto'
 import { mkdir, readFile, rename, writeFile } from 'node:fs/promises'
+import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -130,7 +131,8 @@ export async function buildRuntimeCss() {
   return manifest
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+const invokedPath = process.argv[1] ? path.resolve(process.argv[1]) : ''
+if (invokedPath && fileURLToPath(import.meta.url) === invokedPath) {
   buildRuntimeCss().catch((error) => {
     console.error(error)
     process.exitCode = 1
