@@ -39,7 +39,26 @@
   letter-spacing:.02em;
   text-align:center;
 }
+
+/* The premium auth lockup uses the shared raster SL mark. Constrain the actual
+   image element so the mark remains inside its 56px brand tile. */
+html body:has(.auth-card-enter) div:has(> .auth-ball-enter) > div:first-child img{
+  display:block!important;
+  width:34px!important;
+  height:34px!important;
+  max-width:34px!important;
+  max-height:34px!important;
+  border-radius:8px!important;
+  object-fit:contain!important;
+}
+
 @media(max-width:390px){
   .auth-demo-enter{grid-template-columns:1fr!important}
   .auth-demo-enter::before{grid-column:1!important}
+  html body:has(.auth-card-enter) div:has(> .auth-ball-enter) > div:first-child img{
+    width:30px!important;
+    height:30px!important;
+    max-width:30px!important;
+    max-height:30px!important;
+  }
 }
