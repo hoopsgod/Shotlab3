@@ -16,28 +16,7 @@
       try {
         var requestedDemo = String(new URLSearchParams(window.location.search).get('demo') || '').toLowerCase();
         var queryDemo = requestedDemo === '1' || requestedDemo === 'player' || requestedDemo === 'coach';
-        var demoEmails = ['demo@shotlab.app', 'coach.demo@shotlab.app'];
-        var clearStaleDemoAuth = function (storage) {
-          if (!storage) return;
-          storage.removeItem('sl:demoMode');
-          storage.removeItem('sl:demoSession');
-          var keys = [];
-          for (var i = 0; i < storage.length; i += 1) keys.push(storage.key(i));
-          keys.forEach(function (key) {
-            if (!key) return;
-            var normalizedKey = String(key).toLowerCase();
-            var authLikeKey = key === 'sl:session' || normalizedKey.indexOf('auth-token') >= 0 || normalizedKey.indexOf('supabase.auth') >= 0;
-            if (!authLikeKey) return;
-            var raw = String(storage.getItem(key) || '').toLowerCase();
-            var isDemoAuth = demoEmails.some(function (email) { return raw.indexOf(email) >= 0; });
-            if (isDemoAuth) storage.removeItem(key);
-          });
-        };
-
-        clearStaleDemoAuth(window.localStorage);
-        clearStaleDemoAuth(window.sessionStorage);
-        document.documentElement.classList.remove('shotlab-demo');
-        if (queryDemo) document.documentElement.classList.add('shotlab-demo');
+        document.documentElement.classList.toggle('shotlab-demo', queryDemo);
       } catch (_) {}
     })();
   </script>
@@ -69,6 +48,7 @@
   <link id="shotlab-v11-decision-first" rel="stylesheet" href="/shotlab-v11-decision-first.css?v=8a79ecde" />
   <link id="shotlab-v12-auth-demo-entry" rel="stylesheet" href="/shotlab-v12-auth-demo-entry.css?v=75ba7ae2" />
   <link id="shotlab-v13-visual-hierarchy" rel="stylesheet" href="/shotlab-v13-visual-hierarchy.css?v=2e468314" />
+  <link id="shotlab-v15-session-integrity" rel="stylesheet" href="/shotlab-v15-session-integrity.css?v=c0935ee9" />
 </head>
 <body>
   <div id="root">
@@ -86,7 +66,7 @@
   <script type="module" src="/src/teamStoreEntry.jsx"></script>
   <script>
     window.addEventListener('load', function () {
-      ['shotlab-v3-authority','shotlab-v3-mobile-corrections','shotlab-v4-reference','shotlab-v5-coach-integrity','shotlab-v6-decision-workspaces','shotlab-v7-page-authority','shotlab-v8-demo-parity','shotlab-v9-secondary-polish','shotlab-v11-decision-first','shotlab-v12-auth-demo-entry','shotlab-v13-visual-hierarchy'].forEach(function (id) {
+      ['shotlab-v3-authority','shotlab-v3-mobile-corrections','shotlab-v4-reference','shotlab-v5-coach-integrity','shotlab-v6-decision-workspaces','shotlab-v7-page-authority','shotlab-v8-demo-parity','shotlab-v9-secondary-polish','shotlab-v11-decision-first','shotlab-v12-auth-demo-entry','shotlab-v13-visual-hierarchy','shotlab-v15-session-integrity'].forEach(function (id) {
         var sheet = document.getElementById(id);
         if (sheet) document.head.appendChild(sheet);
       });
