@@ -1,5 +1,6 @@
 import { scheduleWorkspaceActionReveal } from "../lib/playerWorkspaceActionRouting.js";
 import styles from "./PlayerOperationalWorkspace.module.css";
+import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
 function MetricContent({ metric }) {
   return (
@@ -40,10 +41,10 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
           </button>
         )}
       </div>
-      <div className={styles.metrics} aria-label={`${model.title} metrics`}>
+      <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} aria-label={`${model.title} metrics`}>
         {metrics.map((metric, index) => {
           const interactive = Boolean(metric?.filter || metric?.action);
-          const hierarchyClass = index === 0 ? styles.metricPrimary : styles.metricSupporting;
+          const hierarchyClass = index === 0 ? hierarchyStyles.metricPrimary : hierarchyStyles.metricSupporting;
           const metricClassName = `${styles.metric} ${hierarchyClass} ${interactive ? styles.metricInteractive : styles.metricStatic} ${activeMetric === metric.id ? styles.metricActive : ""}`;
           const sharedProps = {
             key: metric.id,
