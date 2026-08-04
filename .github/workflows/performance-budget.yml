@@ -25,6 +25,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Verify runtime CSS consolidation contract
+        run: node --test tests/runtime-css-consolidation.test.mjs
+
       - name: Build and enforce production budget
         run: npm run build:performance
 
