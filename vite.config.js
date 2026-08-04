@@ -4,18 +4,26 @@ import react from '@vitejs/plugin-react'
 
 const normalizeModuleId = (id = '') => String(id).replaceAll('\\', '/')
 const APP_MODULE_SUFFIX = '/src/App.jsx'
+const PLAYER_DAILY_MODULE_SUFFIX = '/src/components/PlayerDailyCommandCenter.jsx'
 const STATIC_CHART_IMPORT = './components/ShotLabCharts'
 const STATIC_LEADERBOARDS_IMPORT = './components/PremiumLeaderboardsHub'
 const STATIC_COACH_COMMAND_CENTER_IMPORT = './components/CoachCommandCenter'
 const STATIC_COACH_PHASE2_IMPORT = './components/CoachDashboardPhase2.jsx'
 const STATIC_COACH_INTERACTIVE_IMPORT = './components/CoachInteractiveDashboards.jsx'
 const STATIC_CAREER_HISTORY_IMPORT = './components/PlayerCareerHistory.jsx'
+const STATIC_PLAYER_DAILY_PRIMITIVES_IMPORT = './ExperiencePrimitives.jsx'
 const DEFERRED_CHART_MODULE = path.resolve(process.cwd(), 'src/components/DeferredShotLabCharts.jsx')
 const DEFERRED_LEADERBOARDS_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPremiumLeaderboardsHub.jsx')
 const DEFERRED_COACH_COMMAND_CENTER_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachCommandCenter.jsx')
 const DEFERRED_COACH_PHASE2_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPhase2.jsx')
 const DEFERRED_COACH_INTERACTIVE_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachInteractiveDashboards.jsx')
 const DEFERRED_CAREER_HISTORY_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPlayerCareerHistory.jsx')
+const PLAYER_DAILY_PRIMITIVES_MODULE = path.resolve(process.cwd(), 'src/components/PlayerDailyPrimitives.jsx')
+const PLAYER_INTERFACE_REDIRECTS = new Map([
+  ['./components/PlayerDashboardHeader', path.resolve(process.cwd(), 'src/components/DeferredPlayerDashboardHeader.jsx')],
+  ['./components/PlayerDailyCommandCenter.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerDailyCommandCenter.jsx')],
+  ['./components/PlayerOperationalWorkspace.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerOperationalWorkspace.jsx')],
+])
 const COACH_ADMIN_REDIRECTS = new Map([
   ['./components/NewSeasonWizard.jsx', path.resolve(process.cwd(), 'src/components/DeferredNewSeasonWizard.jsx')],
   ['./components/CoachPlayerInviteForm.jsx', path.resolve(process.cwd(), 'src/components/DeferredCoachPlayerInviteForm.jsx')],
@@ -107,6 +115,32 @@ function deferPlayerCareerHistory() {
   }
 }
 
+function deferPlayerInterface() {
+  return {
+    name: 'shotlab-defer-player-interface',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (!importerId.endsWith(APP_MODULE_SUFFIX)) return null
+      return PLAYER_INTERFACE_REDIRECTS.get(source) || null
+    },
+  }
+}
+
+function isolatePlayerDailyPrimitives() {
+  return {
+    name: 'shotlab-isolate-player-daily-primitives',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (source === STATIC_PLAYER_DAILY_PRIMITIVES_IMPORT && importerId.endsWith(PLAYER_DAILY_MODULE_SUFFIX)) {
+        return PLAYER_DAILY_PRIMITIVES_MODULE
+      }
+      return null
+    },
+  }
+}
+
 function deferCoachAdministration() {
   return {
     name: 'shotlab-defer-coach-administration',
@@ -145,6 +179,16 @@ function stableVendorChunk(id) {
   }
 
   if (
+    moduleId.includes('/src/components/PlayerDashboardHeader.jsx')
+    || moduleId.includes('/src/components/PlayerDailyCommandCenter.jsx')
+    || moduleId.includes('/src/components/PlayerDailyPrimitives.jsx')
+    || moduleId.includes('/src/components/PlayerOperationalWorkspace.jsx')
+    || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')
+  ) {
+    return 'PlayerInterfaceWorkspaces'
+  }
+
+  if (
     moduleId.includes('/src/components/NewSeasonWizard.jsx')
     || moduleId.includes('/src/components/CoachPlayerInviteForm.jsx')
     || moduleId.includes('/src/components/CoachProgramScoreDrawer.jsx')
@@ -174,6 +218,8 @@ export default defineConfig({
     deferCoachPhase2Intelligence(),
     deferCoachInteractiveDashboards(),
     deferPlayerCareerHistory(),
+    deferPlayerInterface(),
+    isolatePlayerDailyPrimitives(),
     deferCoachAdministration(),
     react(),
   ],
