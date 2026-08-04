@@ -1,0 +1,110 @@
+/* ShotLab V11 — decision-first mobile hierarchy.
+   The coach sees the decision before controls, with compact supporting data below. */
+
+[data-testid="coach-players-interactive-dashboard"],
+[data-testid="coach-events-interactive-dashboard"]{
+  display:grid!important;
+  grid-auto-flow:row!important;
+  gap:12px!important;
+}
+
+[data-testid="coach-players-command-bar"],
+[data-testid="coach-events-command-bar"]{order:1!important}
+[data-testid="coach-players-decision-brief"],
+[data-testid="coach-events-decision-brief"]{order:2!important}
+[data-testid="coach-players-toolbar"],
+[data-testid="coach-events-toolbar"]{order:3!important}
+[data-testid="coach-players-insight-grid"],
+[data-testid="coach-events-insight-grid"]{order:4!important}
+
+/* Make the primary coaching decision feel intentional rather than like another card. */
+[data-testid="coach-players-decision-brief"],
+[data-testid="coach-events-decision-brief"]{
+  min-height:0!important;
+  margin:0!important;
+  padding:20px!important;
+  border-radius:22px!important;
+  box-shadow:0 14px 34px rgba(17,20,17,.13)!important;
+}
+[data-testid="coach-players-decision-brief"] h2,
+[data-testid="coach-events-decision-brief"] h2{
+  max-width:16ch!important;
+  font-size:28px!important;
+  line-height:1.02!important;
+}
+[data-testid="coach-players-decision-brief"] p,
+[data-testid="coach-events-decision-brief"] p{
+  margin-top:8px!important;
+  font-size:14px!important;
+  line-height:1.42!important;
+}
+[data-testid="coach-players-decision-brief"] button,
+[data-testid="coach-events-decision-brief"] button{
+  min-height:44px!important;
+  margin-top:12px!important;
+}
+
+/* Supporting controls should be compact and quiet. */
+[data-testid="coach-players-toolbar"],
+[data-testid="coach-events-toolbar"]{gap:10px!important}
+[data-testid="coach-players-metric-strip"]>button,
+[data-testid="coach-events-metric-strip"]>button{
+  min-height:82px!important;
+  padding:12px!important;
+  border-radius:16px!important;
+  box-shadow:none!important;
+}
+[data-testid="coach-players-filter-rail"],
+[data-testid="coach-events-filter-rail"]{
+  padding:10px!important;
+  border-radius:17px!important;
+}
+[data-testid="coach-players-filter-rail"] input,
+[data-testid="coach-events-filter-rail"] input{min-height:44px!important}
+[data-testid="coach-players-filter-rail"] [role="group"],
+[data-testid="coach-events-filter-rail"] [role="group"]{padding-top:7px!important}
+[data-testid="coach-players-filter-rail"] [role="group"]>button,
+[data-testid="coach-events-filter-rail"] [role="group"]>button{
+  min-height:34px!important;
+  padding-inline:11px!important;
+}
+
+/* Mission Control attention should read as a live coaching item, not a disabled field. */
+[data-testid="coach-command-center-full"] .mcAttentionRow{
+  background:#f7f8f4!important;
+  border-color:rgba(17,20,17,.10)!important;
+}
+[data-testid="coach-command-center-full"] .mcAttentionRow strong,
+[data-testid="coach-command-center-full"] .mcAttentionRow [class*="name"]{
+  color:#111411!important;
+  -webkit-text-fill-color:#111411!important;
+}
+[data-testid="coach-command-center-full"] .mcAttentionRow p,
+[data-testid="coach-command-center-full"] .mcAttentionRow [class*="detail"],
+[data-testid="coach-command-center-full"] .mcAttentionRow [class*="meta"]{
+  color:#5d655f!important;
+  -webkit-text-fill-color:#5d655f!important;
+}
+
+@media(max-width:700px){
+  [data-testid="coach-players-interactive-dashboard"],
+  [data-testid="coach-events-interactive-dashboard"]{
+    gap:11px!important;
+    padding-top:8px!important;
+  }
+  [data-testid="coach-players-command-bar"],
+  [data-testid="coach-events-command-bar"]{
+    padding:15px!important;
+    border-radius:19px!important;
+  }
+  [data-testid="coach-players-command-bar"] h1,
+  [data-testid="coach-events-command-bar"] h1{font-size:33px!important}
+  [data-testid="coach-players-command-bar"] p,
+  [data-testid="coach-events-command-bar"] p{
+    margin-top:5px!important;
+    font-size:14px!important;
+    line-height:1.36!important;
+  }
+  [data-testid="coach-players-command-bar"] button,
+  [data-testid="coach-events-command-bar"] button{min-height:44px!important}
+}
