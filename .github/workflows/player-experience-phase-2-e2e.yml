@@ -10,6 +10,16 @@ on:
       - src/components/ShotLabCharts.jsx
       - src/components/DeferredPremiumLeaderboardsHub.jsx
       - src/components/PremiumLeaderboardsHub.jsx
+      - src/components/DeferredCoachCommandCenter.jsx
+      - src/components/CoachCommandCenter.jsx
+      - src/components/CoachMissionControlV2.css
+      - src/components/CoachMissionControlShell.css
+      - src/components/CoachMissionControlHeader.css
+      - src/components/CoachMissionControlPolish.css
+      - src/components/CoachMissionControl2026.css
+      - src/components/CoachMissionControlFinal.css
+      - src/components/CoachActivationPath.css
+      - src/components/CoachPriorityOverlay.css
       - src/components/DeferredCoachDashboardPhase2.jsx
       - src/components/CoachDashboardPhase2.jsx
       - src/components/CoachDashboardPhase2.module.css

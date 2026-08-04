@@ -32,6 +32,11 @@ function sum(rows, key) {
   return rows.reduce((total, row) => total + row[key], 0)
 }
 
+function findStartupAsset(rows, extension) {
+  return rows.find((asset) => new RegExp(`^assets/App-[^/]+\\.${extension}$`).test(asset.file))
+    || { file: `missing App.${extension}`, bytes: 0, gzipBytes: 0, missing: true }
+}
+
 const budget = JSON.parse(await readFile(budgetPath, 'utf8'))
 const distStats = await stat(distDir).catch(() => null)
 if (!distStats?.isDirectory()) {
@@ -59,6 +64,8 @@ const javaScript = assets.filter((asset) => asset.type === 'js')
 const css = assets.filter((asset) => asset.type === 'css')
 const largestJavaScript = javaScript[0] || { file: 'none', bytes: 0, gzipBytes: 0 }
 const largestCss = css[0] || { file: 'none', bytes: 0, gzipBytes: 0 }
+const startupAppJavaScript = findStartupAsset(javaScript, 'js')
+const startupAppCss = findStartupAsset(css, 'css')
 
 const metrics = {
   generatedAt: new Date().toISOString(),
@@ -71,20 +78,36 @@ const metrics = {
     cssBytes: sum(css, 'bytes'),
     cssGzipBytes: sum(css, 'gzipBytes'),
   },
+  startupAppJavaScript,
+  startupAppCss,
   largestJavaScript,
   largestCss,
   assets,
 }
 
 const failures = []
+if (startupAppJavaScript.missing) failures.push('The startup App JavaScript asset was not found.')
+if (startupAppCss.missing) failures.push('The startup App CSS asset was not found.')
 if (largestJavaScript.bytes > budget.maxLargestJavaScriptBytes) {
   failures.push(`Largest JavaScript chunk ${largestJavaScript.file} is ${formatBytes(largestJavaScript.bytes)}; budget is ${formatBytes(budget.maxLargestJavaScriptBytes)}.`)
+}
+if (startupAppJavaScript.bytes > budget.maxStartupAppJavaScriptBytes) {
+  failures.push(`Startup App JavaScript ${startupAppJavaScript.file} is ${formatBytes(startupAppJavaScript.bytes)}; budget is ${formatBytes(budget.maxStartupAppJavaScriptBytes)}.`)
+}
+if (startupAppJavaScript.gzipBytes > budget.maxStartupAppJavaScriptGzipBytes) {
+  failures.push(`Startup App JavaScript gzip is ${formatBytes(startupAppJavaScript.gzipBytes)}; budget is ${formatBytes(budget.maxStartupAppJavaScriptGzipBytes)}.`)
 }
 if (metrics.totals.javaScriptGzipBytes > budget.maxTotalJavaScriptGzipBytes) {
   failures.push(`Total JavaScript gzip is ${formatBytes(metrics.totals.javaScriptGzipBytes)}; budget is ${formatBytes(budget.maxTotalJavaScriptGzipBytes)}.`)
 }
 if (largestCss.bytes > budget.maxLargestCssBytes) {
   failures.push(`Largest CSS chunk ${largestCss.file} is ${formatBytes(largestCss.bytes)}; budget is ${formatBytes(budget.maxLargestCssBytes)}.`)
+}
+if (startupAppCss.bytes > budget.maxStartupAppCssBytes) {
+  failures.push(`Startup App CSS ${startupAppCss.file} is ${formatBytes(startupAppCss.bytes)}; budget is ${formatBytes(budget.maxStartupAppCssBytes)}.`)
+}
+if (startupAppCss.gzipBytes > budget.maxStartupAppCssGzipBytes) {
+  failures.push(`Startup App CSS gzip is ${formatBytes(startupAppCss.gzipBytes)}; budget is ${formatBytes(budget.maxStartupAppCssGzipBytes)}.`)
 }
 if (metrics.totals.cssGzipBytes > budget.maxTotalCssGzipBytes) {
   failures.push(`Total CSS gzip is ${formatBytes(metrics.totals.cssGzipBytes)}; budget is ${formatBytes(budget.maxTotalCssGzipBytes)}.`)
@@ -103,6 +126,8 @@ console.table(assets.map((asset) => ({
   raw: formatBytes(asset.bytes),
   gzip: formatBytes(asset.gzipBytes),
 })))
+console.log(`Startup App JS: ${startupAppJavaScript.file} (${formatBytes(startupAppJavaScript.bytes)} raw, ${formatBytes(startupAppJavaScript.gzipBytes)} gzip)`)
+console.log(`Startup App CSS: ${startupAppCss.file} (${formatBytes(startupAppCss.bytes)} raw, ${formatBytes(startupAppCss.gzipBytes)} gzip)`)
 console.log(`Largest JS: ${largestJavaScript.file} (${formatBytes(largestJavaScript.bytes)} raw, ${formatBytes(largestJavaScript.gzipBytes)} gzip)`)
 console.log(`Largest CSS: ${largestCss.file} (${formatBytes(largestCss.bytes)} raw, ${formatBytes(largestCss.gzipBytes)} gzip)`)
 console.log(`Total JS: ${formatBytes(metrics.totals.javaScriptBytes)} raw, ${formatBytes(metrics.totals.javaScriptGzipBytes)} gzip`)
