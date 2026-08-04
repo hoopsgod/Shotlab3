@@ -6,8 +6,10 @@ const normalizeModuleId = (id = '') => String(id).replaceAll('\\', '/')
 const APP_MODULE_SUFFIX = '/src/App.jsx'
 const STATIC_CHART_IMPORT = './components/ShotLabCharts'
 const STATIC_LEADERBOARDS_IMPORT = './components/PremiumLeaderboardsHub'
+const STATIC_COACH_PHASE2_IMPORT = './components/CoachDashboardPhase2.jsx'
 const DEFERRED_CHART_MODULE = path.resolve(process.cwd(), 'src/components/DeferredShotLabCharts.jsx')
 const DEFERRED_LEADERBOARDS_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPremiumLeaderboardsHub.jsx')
+const DEFERRED_COACH_PHASE2_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPhase2.jsx')
 
 function deferProgressCharts() {
   return {
@@ -37,6 +39,20 @@ function deferLeaderboardAnalytics() {
   }
 }
 
+function deferCoachPhase2Intelligence() {
+  return {
+    name: 'shotlab-defer-coach-phase2-intelligence',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (source === STATIC_COACH_PHASE2_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_COACH_PHASE2_MODULE
+      }
+      return null
+    },
+  }
+}
+
 function stableVendorChunk(id) {
   const moduleId = normalizeModuleId(id)
 
@@ -56,7 +72,7 @@ function stableVendorChunk(id) {
 }
 
 export default defineConfig({
-  plugins: [deferProgressCharts(), deferLeaderboardAnalytics(), react()],
+  plugins: [deferProgressCharts(), deferLeaderboardAnalytics(), deferCoachPhase2Intelligence(), react()],
   base: './',
   build: {
     outDir: 'dist',
