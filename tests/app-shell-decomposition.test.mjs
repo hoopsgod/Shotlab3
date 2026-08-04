@@ -6,6 +6,8 @@ const appSource = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8
 const authSource = readFileSync(new URL('../src/components/AuthWorkspace.jsx', import.meta.url), 'utf8');
 const brandSource = readFileSync(new URL('../src/components/ShotLabBrand.jsx', import.meta.url), 'utf8');
 const legacyStyleSource = readFileSync(new URL('../src/styles/appLegacyStyles.js', import.meta.url), 'utf8');
+const legacyStyleRuntimeSource = readFileSync(new URL('../src/styles/appLegacyStylesRuntime.js', import.meta.url), 'utf8');
+const viteConfigSource = readFileSync(new URL('../vite.config.js', import.meta.url), 'utf8');
 
 const appBytes = Buffer.byteLength(appSource);
 
@@ -41,5 +43,29 @@ test('embedded brand asset and legacy style payload no longer inflate App source
   ]) {
     assert.match(legacyStyleSource, new RegExp(`export const ${exportName}`));
     assert.match(appSource, new RegExp(exportName));
+  }
+});
+
+test('legacy style payload hydrates every extracted runtime token before browser evaluation', () => {
+  assert.match(viteConfigSource, /STATIC_LEGACY_STYLE_IMPORT = '\.\/styles\/appLegacyStyles\.js'/);
+  assert.match(viteConfigSource, /LEGACY_STYLE_RUNTIME_MODULE/);
+  assert.match(viteConfigSource, /function hydrateLegacyStyles\(\)/);
+  assert.match(viteConfigSource, /hydrateLegacyStyles\(\)/);
+  assert.match(legacyStyleRuntimeSource, /import TOKENS from "\.\.\/theme\/appTokens"/);
+  assert.match(legacyStyleRuntimeSource, /import legacyStyleModuleSource from "\.\/appLegacyStyles\.js\?raw"/);
+  assert.match(legacyStyleRuntimeSource, /unresolvedTokens/);
+
+  const interpolationNames = [...new Set(
+    [...legacyStyleSource.matchAll(/\$\{([A-Z_]+)\}/g)].map(([, name]) => name),
+  )].sort();
+  const expectedRuntimeNames = ['BG', 'BORDER_CLR', 'CYAN', 'FB', 'FD', 'ORANGE', 'VOLT'].sort();
+
+  assert.deepEqual(interpolationNames, expectedRuntimeNames);
+  for (const runtimeName of expectedRuntimeNames) {
+    assert.match(
+      legacyStyleRuntimeSource,
+      new RegExp(`\\b${runtimeName}:`),
+      `Expected ${runtimeName} to be explicitly bound in the legacy style runtime`,
+    );
   }
 });
