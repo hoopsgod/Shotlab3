@@ -103,6 +103,34 @@ html body #root .mcShellV3 .mcAvatar--fallback{
   }
 }
 
+/* One navigation language across every coach workspace. */
+html body #root .coach-mode [data-testid="mobile-navigation-dock"],
+html body #root [data-role="coach"] [data-testid="mobile-navigation-dock"]{
+  border-top:1px solid rgba(255,255,255,.09)!important;
+  background:rgba(7,10,12,.92)!important;
+  box-shadow:0 -12px 34px rgba(0,0,0,.28)!important;
+  -webkit-backdrop-filter:blur(24px) saturate(135%)!important;
+  backdrop-filter:blur(24px) saturate(135%)!important;
+}
+html body #root .coach-mode [data-testid="mobile-navigation-dock"] button,
+html body #root [data-role="coach"] [data-testid="mobile-navigation-dock"] button{
+  background:transparent!important;
+}
+html body #root .coach-mode [data-testid="mobile-navigation-dock"] button:not([data-active="true"]),
+html body #root [data-role="coach"] [data-testid="mobile-navigation-dock"] button:not([data-active="true"]){
+  color:#7d898f!important;
+  -webkit-text-fill-color:#7d898f!important;
+}
+html body #root .coach-mode [data-testid="mobile-navigation-dock"] button[data-active="true"],
+html body #root [data-role="coach"] [data-testid="mobile-navigation-dock"] button[data-active="true"]{
+  color:var(--accent,#c8ff1a)!important;
+  -webkit-text-fill-color:var(--accent,#c8ff1a)!important;
+}
+html body #root .coach-mode .page,
+html body #root [data-role="coach"] .page{
+  padding-bottom:max(104px,calc(82px + env(safe-area-inset-bottom,0px)))!important;
+}
+
 @media(max-width:390px){
   html body #root .mcShellV3 .mcAttentionRow{
     grid-template-columns:7px 42px minmax(0,1fr)!important;
