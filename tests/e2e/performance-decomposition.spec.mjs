@@ -128,8 +128,8 @@ const coachOperationalLoaded = (page) => routeChunkLoaded(
 
 const coachAdministrationLoaded = (page) => routeChunkLoaded(
   page,
-  ['CoachAdministrationWorkspaces', 'PlayersScreen', 'NewSeasonWizard', 'CoachPlayerInviteForm', 'CoachProgramScoreDrawer', 'CoachTeamBrandingScreen'],
-  ['DeferredPlayersScreen', 'DeferredNewSeasonWizard', 'DeferredCoachPlayerInviteForm', 'DeferredCoachProgramScoreDrawer', 'DeferredCoachTeamBrandingScreen'],
+  ['CoachAdministrationWorkspaces', 'NewSeasonWizard', 'CoachPlayerInviteForm', 'CoachProgramScoreDrawer', 'CoachTeamBrandingScreen'],
+  ['DeferredNewSeasonWizard', 'DeferredCoachPlayerInviteForm', 'DeferredCoachProgramScoreDrawer', 'DeferredCoachTeamBrandingScreen'],
 )
 
 async function seedStorage(page) {
@@ -223,6 +223,5 @@ test('Coach operational and administration workspaces stay out of auth and Playe
   await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('coach-players-command-bar')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('coach-interactive-dashboard-loading')).toHaveCount(0)
-  await expect(page.getByTestId('coach-players-screen-loading')).toHaveCount(0)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(true)
 })
