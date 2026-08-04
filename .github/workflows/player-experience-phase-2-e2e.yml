@@ -13,6 +13,9 @@ on:
       - src/components/DeferredCoachDashboardPhase2.jsx
       - src/components/CoachDashboardPhase2.jsx
       - src/components/CoachDashboardPhase2.module.css
+      - src/components/DeferredPlayerCareerHistory.jsx
+      - src/components/PlayerCareerHistory.jsx
+      - src/components/PlayerCareerHistory.module.css
       - src/components/PlayerOperationalWorkspace.jsx
       - src/components/PlayerOperationalWorkspace.module.css
       - src/lib/playerOperationalWorkspaces.js
