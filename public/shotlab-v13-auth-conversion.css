@@ -5,8 +5,8 @@
   grid-template-columns:repeat(2,minmax(0,1fr))!important;
   gap:10px!important;
   width:100%!important;
-  margin:22px 0 0!important;
-  padding:34px 0 0!important;
+  margin:16px 0 0!important;
+  padding:26px 0 0!important;
   opacity:1!important;
   visibility:visible!important;
   pointer-events:auto!important;
@@ -18,9 +18,9 @@
   left:0;
   color:#aeb6bf;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-  font-size:11px;
+  font-size:10px;
   font-weight:700;
-  letter-spacing:.075em;
+  letter-spacing:.07em;
   text-transform:uppercase;
 }
 .auth-demo-enter button{
@@ -29,16 +29,16 @@
   align-items:center!important;
   justify-content:center!important;
   min-width:0!important;
-  min-height:60px!important;
+  min-height:52px!important;
   height:auto!important;
-  padding:12px 16px!important;
+  padding:10px 14px!important;
   border:1px solid rgba(200,255,26,.3)!important;
-  border-radius:15px!important;
+  border-radius:14px!important;
   background:
     linear-gradient(145deg,rgba(200,255,26,.105),rgba(255,255,255,.018) 58%),
     #171b18!important;
   color:#f4f7f1!important;
-  box-shadow:inset 0 1px rgba(255,255,255,.045),0 10px 26px rgba(0,0,0,.2)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.045),0 8px 22px rgba(0,0,0,.18)!important;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
   font-size:13px!important;
   font-weight:750!important;
@@ -61,7 +61,7 @@
 .auth-demo-enter button:focus-visible{
   transform:translateY(-1px)!important;
   border-color:rgba(200,255,26,.55)!important;
-  box-shadow:inset 0 1px rgba(255,255,255,.06),0 14px 30px rgba(0,0,0,.25)!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.06),0 12px 26px rgba(0,0,0,.22)!important;
 }
 .auth-demo-enter button:nth-child(2):hover,
 .auth-demo-enter button:nth-child(2):focus-visible{border-color:rgba(112,216,255,.52)!important}
@@ -69,23 +69,23 @@
 
 /* Keep required legal links available without competing with sign-in or demo conversion. */
 [aria-label="Legal and support links"]{
-  gap:4px 10px!important;
-  margin-top:14px!important;
-  padding-top:4px!important;
-  opacity:.72!important;
+  gap:2px 8px!important;
+  margin-top:9px!important;
+  padding-top:0!important;
+  opacity:.68!important;
 }
 [aria-label="Legal and support links"] a{
-  min-height:30px!important;
-  padding:3px 5px!important;
+  min-height:28px!important;
+  padding:2px 4px!important;
   border:0!important;
-  border-radius:8px!important;
+  border-radius:7px!important;
   color:#818991!important;
   background:transparent!important;
   box-shadow:none!important;
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
   font-size:9px!important;
   font-weight:650!important;
-  letter-spacing:.055em!important;
+  letter-spacing:.05em!important;
   text-transform:uppercase!important;
   transition:color .16s ease,background .16s ease!important;
 }
@@ -98,9 +98,9 @@
 }
 
 @media(max-width:390px){
-  .auth-demo-enter{grid-template-columns:1fr!important}
-  .auth-demo-enter button{min-height:56px!important}
-  [aria-label="Legal and support links"]{gap:2px 7px!important}
+  .auth-demo-enter{grid-template-columns:1fr!important;gap:8px!important}
+  .auth-demo-enter button{min-height:50px!important}
+  [aria-label="Legal and support links"]{gap:1px 6px!important}
 }
 @media(prefers-reduced-motion:reduce){
   .auth-demo-enter button{transition:none!important}
