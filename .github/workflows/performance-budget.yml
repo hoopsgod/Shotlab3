@@ -1,0 +1,53 @@
+name: Production Performance Budget
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "src/**"
+      - "vendor/**"
+      - "index.html"
+      - "vite.config.js"
+      - "package.json"
+      - "package-lock.json"
+      - "performance-budget.json"
+      - "scripts/verify-performance-budget.mjs"
+      - ".github/workflows/performance-budget.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: performance-budget-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-production-bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and enforce performance budget
+        run: npm run build:performance
+
+      - name: Upload bundle metrics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-performance-metrics
+          path: artifacts/performance/build-metrics.json
+          if-no-files-found: error
+          retention-days: 14
