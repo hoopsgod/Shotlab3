@@ -75,6 +75,11 @@ async function installSafeRoutes(page) {
     contentType: 'application/json',
     body: JSON.stringify({ leaderboard: [] }),
   }))
+  await page.route('**/v1/leaderboards/participation**', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ ok: true, leaderboards: {} }),
+  }))
   await page.route('**/v1/coach/players/provision**', (route) => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -87,12 +92,36 @@ async function installSafeRoutes(page) {
   }))
 }
 
-const chartImplementationLoaded = (page) => page.evaluate(() => performance
-  .getEntriesByType('resource')
-  .some((entry) => {
-    const resourceName = String(entry.name)
-    return resourceName.includes('ShotLabCharts') && !resourceName.includes('DeferredShotLabCharts')
-  }))
+const implementationLoaded = (page, moduleName, wrapperName) => page.evaluate(
+  ({ implementation, wrapper }) => performance
+    .getEntriesByType('resource')
+    .some((entry) => {
+      const resourceName = String(entry.name)
+      return resourceName.includes(implementation) && !resourceName.includes(wrapper)
+    }),
+  { implementation: moduleName, wrapper: wrapperName },
+)
+
+async function enterPlayer(page) {
+  await installSafeRoutes(page)
+  await page.addInitScript((payload) => {
+    window.localStorage.clear()
+    window.sessionStorage.clear()
+    for (const [key, value] of Object.entries(payload)) {
+      window.localStorage.setItem(key, JSON.stringify(value))
+    }
+  }, seedData)
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
+  await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
+}
+
+async function openMoreDestination(page, key) {
+  await page.getByTestId('mobile-navigation-more').click()
+  const sheet = page.getByTestId('mobile-navigation-sheet')
+  await expect(sheet).toBeVisible()
+  await sheet.locator(`[data-nav-key="${key}"]`).click()
+}
 
 test('progress analytics load only after the player opens Profile', async ({ page }) => {
   await installSafeRoutes(page)
@@ -105,20 +134,28 @@ test('progress analytics load only after the player opens Profile', async ({ pag
   }, seedData)
 
   await page.goto('/')
-  await expect.poll(() => chartImplementationLoaded(page)).toBe(false)
+  await expect.poll(() => implementationLoaded(page, 'ShotLabCharts', 'DeferredShotLabCharts')).toBe(false)
 
   await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
-  await expect.poll(() => chartImplementationLoaded(page)).toBe(false)
+  await expect.poll(() => implementationLoaded(page, 'ShotLabCharts', 'DeferredShotLabCharts')).toBe(false)
 
-  await page.getByTestId('mobile-navigation-more').click()
-  const sheet = page.getByTestId('mobile-navigation-sheet')
-  await expect(sheet).toBeVisible()
-  await sheet.locator('[data-nav-key="profile"]').click()
-
+  await openMoreDestination(page, 'profile')
   const workspace = page.getByTestId('progress-charts-workspace')
   await expect(workspace).toBeVisible({ timeout: 20_000 })
   await expect(workspace.getByText(/MY\s*PROGRESS/i)).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('progress-charts-loading')).toHaveCount(0)
-  await expect.poll(() => chartImplementationLoaded(page)).toBe(true)
+  await expect.poll(() => implementationLoaded(page, 'ShotLabCharts', 'DeferredShotLabCharts')).toBe(true)
+})
+
+test('leaderboard analytics load only after the player opens Leaderboards', async ({ page }) => {
+  await enterPlayer(page)
+  await expect.poll(() => implementationLoaded(page, 'PremiumLeaderboardsHub', 'DeferredPremiumLeaderboardsHub')).toBe(false)
+
+  await openMoreDestination(page, 'leaderboards')
+  const workspace = page.getByTestId('deferred-leaderboards-workspace')
+  await expect(workspace).toBeVisible({ timeout: 20_000 })
+  await expect(workspace.getByTestId('premium-leaderboards-hub')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('leaderboards-loading')).toHaveCount(0)
+  await expect.poll(() => implementationLoaded(page, 'PremiumLeaderboardsHub', 'DeferredPremiumLeaderboardsHub')).toBe(true)
 })
