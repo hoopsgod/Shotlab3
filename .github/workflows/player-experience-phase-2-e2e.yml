@@ -6,11 +6,16 @@ on:
       - march-3-reset-85393dd
     paths:
       - src/App.jsx
+      - src/components/DeferredShotLabCharts.jsx
+      - src/components/ShotLabCharts.jsx
       - src/components/PlayerOperationalWorkspace.jsx
       - src/components/PlayerOperationalWorkspace.module.css
       - src/lib/playerOperationalWorkspaces.js
+      - vite.config.js
+      - tests/performance-decomposition.test.mjs
       - tests/player-operational-workspaces.test.mjs
       - tests/player-experience-phase-2-contract.test.mjs
+      - tests/e2e/performance-decomposition.spec.mjs
       - tests/e2e/player-experience-phase-2.spec.mjs
       - .github/workflows/player-experience-phase-2-e2e.yml
   workflow_dispatch:
@@ -40,7 +45,7 @@ jobs:
         run: npm ci
 
       - name: Verify workspace selectors and source contracts
-        run: node --test tests/player-operational-workspaces.test.mjs tests/player-experience-phase-2-contract.test.mjs tests/player-daily-command-center.test.mjs tests/player-experience-phase-1-contract.test.mjs
+        run: node --test tests/player-operational-workspaces.test.mjs tests/player-experience-phase-2-contract.test.mjs tests/player-daily-command-center.test.mjs tests/player-experience-phase-1-contract.test.mjs tests/performance-decomposition.test.mjs
 
       - name: Install pinned Playwright test runner
         run: npm install --no-save --ignore-scripts @playwright/test@1.55.1
@@ -51,12 +56,12 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Run Player operational workspace mobile flows
+      - name: Run Player operational and deferred-workspace mobile flows
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: player-experience-phase-2.json
         run: |
           set -o pipefail
-          npx playwright test tests/e2e/player-experience-phase-2.spec.mjs --project=chromium-desktop --reporter=line,json 2>&1 | tee player-experience-phase-2.log
+          npx playwright test tests/e2e/player-experience-phase-2.spec.mjs tests/e2e/performance-decomposition.spec.mjs --project=chromium-desktop --reporter=line,json 2>&1 | tee player-experience-phase-2.log
 
       - name: Upload browser failure artifacts
         if: failure()

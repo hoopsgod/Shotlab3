@@ -6,6 +6,7 @@ on:
       - march-3-reset-85393dd
     paths:
       - "src/**"
+      - "tests/performance-decomposition.test.mjs"
       - "vendor/**"
       - "index.html"
       - "vite.config.js"
@@ -39,6 +40,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Verify performance decomposition contracts
+        run: node --test tests/performance-decomposition.test.mjs
 
       - name: Build and enforce performance budget
         run: npm run build:performance
