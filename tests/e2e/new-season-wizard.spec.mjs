@@ -55,16 +55,42 @@ async function waitForHydration(page) {
   }, { teamId: TEAM_ID, coachEmail: COACH_EMAIL, playerEmail: PLAYER_EMAIL }), { timeout: 20_000 }).toBe(true);
 }
 
+async function firstVisiblePlayersButton(page) {
+  const candidates = page.getByRole("button", { name: "Players", exact: true });
+  await expect.poll(async () => {
+    const count = await candidates.count();
+    for (let index = 0; index < count; index += 1) {
+      if (await candidates.nth(index).isVisible().catch(() => false)) return true;
+    }
+    return false;
+  }, { timeout: 20_000 }).toBe(true);
+
+  const count = await candidates.count();
+  for (let index = 0; index < count; index += 1) {
+    const candidate = candidates.nth(index);
+    if (await candidate.isVisible().catch(() => false)) return candidate;
+  }
+  throw new Error("No visible Players navigation control was found.");
+}
+
 async function enterCoachDemo(page) {
   const demoCoachButton = page.getByRole("button", { name: "Demo Coach", exact: true });
-  const playersButton = page.getByRole("button", { name: "Players", exact: true });
-  await expect(page.getByRole("button", { name: /^(Demo Coach|Players)$/ }).first()).toBeVisible({ timeout: 15_000 });
-  if (await demoCoachButton.isVisible()) {
+  const commandCenter = page.getByTestId("coach-command-center-full");
+
+  await expect.poll(async () => {
+    const demoReady = await demoCoachButton.isVisible().catch(() => false);
+    const coachReady = await commandCenter.isVisible().catch(() => false);
+    return demoReady || coachReady;
+  }, { timeout: 20_000 }).toBe(true);
+
+  if (await demoCoachButton.isVisible().catch(() => false)) {
     await waitForHydration(page);
     await demoCoachButton.click();
   }
-  await expect(playersButton).toBeVisible({ timeout: 15_000 });
-  return playersButton;
+
+  await expect(commandCenter).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("coach-command-center-loading")).toHaveCount(0);
+  return firstVisiblePlayersButton(page);
 }
 
 let postedPlan = null;
