@@ -1,5 +1,6 @@
 const DEMO_ACCOUNT_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
 const DEMO_SESSION_KEY = "sl:demoSession";
+const PENDING_DEMO_SESSION_KEY = "sl:pendingDemoSession";
 const LEGACY_DEMO_KEY = "sl:demoMode";
 const APP_SESSION_KEY = "sl:session";
 
@@ -17,6 +18,23 @@ function parseStoredSession(raw) {
   } catch {
     return null;
   }
+}
+
+function inferPendingDemoEmail() {
+  if (typeof window === "undefined") return "";
+  const requestedDemo = String(new URLSearchParams(window.location.search).get("demo") || "").trim().toLowerCase();
+  if (requestedDemo === "coach") return "coach.demo@shotlab.app";
+  if (requestedDemo === "player") return "demo@shotlab.app";
+
+  const active = document?.activeElement;
+  const activeLabel = String(
+    active?.getAttribute?.("aria-label")
+    || active?.textContent
+    || "",
+  ).trim().toLowerCase();
+  if (activeLabel.includes("demo coach")) return "coach.demo@shotlab.app";
+  if (activeLabel.includes("demo player")) return "demo@shotlab.app";
+  return "";
 }
 
 function clearPersistedDemoAuthSession() {
@@ -60,13 +78,26 @@ export function setDemoMode(enabled) {
   // an explicit demo URL or route, never through browser storage.
   window.localStorage.removeItem(LEGACY_DEMO_KEY);
   window.sessionStorage.removeItem(DEMO_SESSION_KEY);
+  window.sessionStorage.removeItem(PENDING_DEMO_SESSION_KEY);
 
-  if (!enabled) {
-    clearPersistedDemoAuthSession();
-    const url = new URL(window.location.href);
-    url.searchParams.delete("demo");
-    window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+  if (enabled) {
+    // Demo buttons update React state before the durable app session write resolves.
+    // Record only the hard-coded demo identity for that short handoff window so the
+    // first identity-scoped read cannot fall back to another team's stale data.
+    const pendingEmail = inferPendingDemoEmail();
+    if (isDemoAccount(pendingEmail)) {
+      window.sessionStorage.setItem(PENDING_DEMO_SESSION_KEY, JSON.stringify({
+        email: pendingEmail,
+        createdAt: Date.now(),
+      }));
+    }
+    return;
   }
+
+  clearPersistedDemoAuthSession();
+  const url = new URL(window.location.href);
+  url.searchParams.delete("demo");
+  window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
 }
 
 export function isDemoPlayerSessionShotLog(row = {}, { teamId = '' } = {}) {
