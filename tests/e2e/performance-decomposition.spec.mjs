@@ -168,9 +168,7 @@ test('Coach intelligence stays out of auth and Player, then loads on Coach Home'
   await page.getByRole('button', { name: 'Demo Coach', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
 
-  const workspace = page.getByTestId('deferred-coach-activity-intelligence')
-  await expect(workspace).toBeVisible({ timeout: 20_000 })
-  await expect(workspace.getByTestId('coach-activity-intelligence-panel')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('coach-activity-intelligence-panel')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('coach-intelligence-loading')).toHaveCount(0)
   await expect.poll(() => implementationLoaded(page, 'CoachDashboardPhase2', 'DeferredCoachDashboardPhase2')).toBe(true)
 })
