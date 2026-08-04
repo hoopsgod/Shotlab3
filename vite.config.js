@@ -6,11 +6,13 @@ const normalizeModuleId = (id = '') => String(id).replaceAll('\\', '/')
 const APP_MODULE_SUFFIX = '/src/App.jsx'
 const STATIC_CHART_IMPORT = './components/ShotLabCharts'
 const STATIC_LEADERBOARDS_IMPORT = './components/PremiumLeaderboardsHub'
+const STATIC_COACH_COMMAND_CENTER_IMPORT = './components/CoachCommandCenter'
 const STATIC_COACH_PHASE2_IMPORT = './components/CoachDashboardPhase2.jsx'
 const STATIC_COACH_INTERACTIVE_IMPORT = './components/CoachInteractiveDashboards.jsx'
 const STATIC_CAREER_HISTORY_IMPORT = './components/PlayerCareerHistory.jsx'
 const DEFERRED_CHART_MODULE = path.resolve(process.cwd(), 'src/components/DeferredShotLabCharts.jsx')
 const DEFERRED_LEADERBOARDS_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPremiumLeaderboardsHub.jsx')
+const DEFERRED_COACH_COMMAND_CENTER_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachCommandCenter.jsx')
 const DEFERRED_COACH_PHASE2_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPhase2.jsx')
 const DEFERRED_COACH_INTERACTIVE_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachInteractiveDashboards.jsx')
 const DEFERRED_CAREER_HISTORY_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPlayerCareerHistory.jsx')
@@ -37,6 +39,20 @@ function deferLeaderboardAnalytics() {
       const importerId = normalizeModuleId(importer)
       if (source === STATIC_LEADERBOARDS_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
         return DEFERRED_LEADERBOARDS_MODULE
+      }
+      return null
+    },
+  }
+}
+
+function deferCoachCommandCenter() {
+  return {
+    name: 'shotlab-defer-coach-command-center',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (source === STATIC_COACH_COMMAND_CENTER_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_COACH_COMMAND_CENTER_MODULE
       }
       return null
     },
@@ -104,7 +120,8 @@ function stableVendorChunk(id) {
   }
 
   if (
-    moduleId.includes('/src/components/CoachDashboardPhase2.jsx')
+    moduleId.includes('/src/components/CoachCommandCenter.jsx')
+    || moduleId.includes('/src/components/CoachDashboardPhase2.jsx')
     || moduleId.includes('/src/components/CoachInteractiveDashboards.jsx')
     || moduleId.includes('/src/components/SecondaryPageSystem.jsx')
     || moduleId.includes('/src/components/ExperiencePrimitives.jsx')
@@ -119,6 +136,7 @@ export default defineConfig({
   plugins: [
     deferProgressCharts(),
     deferLeaderboardAnalytics(),
+    deferCoachCommandCenter(),
     deferCoachPhase2Intelligence(),
     deferCoachInteractiveDashboards(),
     deferPlayerCareerHistory(),
