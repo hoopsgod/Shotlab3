@@ -1,0 +1,91 @@
+name: V9 Focused Diagnostics
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/v9-focused-diagnostics.yml"
+      - "src/App.jsx"
+      - "src/components/AuthWorkspace.jsx"
+      - "src/components/ShotLabBrand.jsx"
+      - "src/styles/appLegacyStyles.js"
+      - "src/styles/appLegacyStylesRuntime.js"
+      - "tests/app-shell-decomposition.test.mjs"
+      - "tests/launch-readiness-audit-regression.test.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analytics-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Run analytics contracts with captured output
+        shell: bash
+        run: |
+          set -o pipefail
+          node --test \
+            tests/season-leaderboard-analytics.test.mjs \
+            tests/season-leaderboard-roster-boundary.test.mjs \
+            tests/season-leaderboard-ui-contract.test.mjs \
+            tests/premium-leaderboards-hub-regression.test.mjs \
+            tests/leaderboard-category-static-safety.test.mjs \
+            tests/visual-hierarchy-contract.test.mjs \
+            tests/mobile-navigation-contract.test.mjs \
+            tests/semantic-color-system-contract.test.mjs \
+            tests/mobile-events-layout-contract.test.mjs \
+            2>&1 | tee analytics-contracts.log
+      - name: Upload analytics diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v9-analytics-diagnostics
+          path: analytics-contracts.log
+          if-no-files-found: error
+
+  invitation-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm install --no-save @playwright/test@1.55.1
+      - run: npx playwright install --with-deps chromium
+      - run: npm run build
+      - name: Run invitation browser flows with captured output
+        shell: bash
+        run: |
+          set -o pipefail
+          npx playwright test \
+            tests/e2e/coach-player-invitation.spec.mjs \
+            tests/e2e/coach-player-cross-device-first-result.spec.mjs \
+            tests/e2e/coach-player-assignment-delivery.spec.mjs \
+            tests/e2e/coach-assignment-accountability.spec.mjs \
+            tests/e2e/coach-quick-assign.spec.mjs \
+            tests/e2e/coach-assignment-deadline.spec.mjs \
+            tests/e2e/player-assignment-next-action.spec.mjs \
+            tests/e2e/coach-assignment-history.spec.mjs \
+            tests/e2e/coach-assignment-effectiveness.spec.mjs \
+            --reporter=line \
+            2>&1 | tee invitation-browser.log
+      - name: Upload invitation diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v9-invitation-diagnostics
+          path: |
+            invitation-browser.log
+            test-results
+            playwright-report
+          if-no-files-found: warn
