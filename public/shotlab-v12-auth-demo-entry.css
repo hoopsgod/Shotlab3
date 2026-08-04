@@ -52,6 +52,16 @@ html body:has(.auth-card-enter) div:has(> .auth-ball-enter) > div:first-child im
   object-fit:contain!important;
 }
 
+/* Use the native product type system for segmented authentication choices. */
+html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has(> button) > button{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:14px!important;
+  font-weight:750!important;
+  line-height:1!important;
+  letter-spacing:-.01em!important;
+  text-transform:none!important;
+}
+
 @media(max-width:390px){
   .auth-demo-enter{grid-template-columns:1fr!important}
   .auth-demo-enter::before{grid-column:1!important}
