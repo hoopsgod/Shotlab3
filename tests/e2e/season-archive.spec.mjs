@@ -110,14 +110,32 @@ async function waitForHydration(page) {
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
 
+async function firstVisiblePlayersButton(page) {
+  const candidates = page.getByRole("button", { name: "Players", exact: true });
+  await expect.poll(async () => {
+    const count = await candidates.count();
+    for (let index = 0; index < count; index += 1) {
+      if (await candidates.nth(index).isVisible().catch(() => false)) return true;
+    }
+    return false;
+  }, { timeout: 20_000 }).toBe(true);
+
+  const count = await candidates.count();
+  for (let index = 0; index < count; index += 1) {
+    const candidate = candidates.nth(index);
+    if (await candidate.isVisible().catch(() => false)) return candidate;
+  }
+  throw new Error("No visible Players navigation control was found.");
+}
+
 async function enterCoachDemo(page) {
   const demoCoachButton = page.getByRole("button", { name: "Demo Coach", exact: true });
-  const dock = page.getByTestId("mobile-navigation-dock");
+  const commandCenter = page.getByTestId("coach-command-center-full");
 
   await expect.poll(async () => {
     const demoReady = await demoCoachButton.isVisible().catch(() => false);
-    const dockReady = await dock.isVisible().catch(() => false);
-    return demoReady || dockReady;
+    const coachReady = await commandCenter.isVisible().catch(() => false);
+    return demoReady || coachReady;
   }, { timeout: 20_000 }).toBe(true);
 
   if (await demoCoachButton.isVisible().catch(() => false)) {
@@ -125,13 +143,9 @@ async function enterCoachDemo(page) {
     await demoCoachButton.click();
   }
 
-  await expect(dock).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
+  await expect(commandCenter).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("coach-command-center-loading")).toHaveCount(0);
-
-  const playersButton = dock.getByRole("button", { name: "Players", exact: true });
-  await expect(playersButton).toBeVisible({ timeout: 15_000 });
-  return playersButton;
+  return firstVisiblePlayersButton(page);
 }
 
 async function openSeasonArchivePanel(page) {
