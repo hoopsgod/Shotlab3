@@ -8,9 +8,9 @@ const LazyPlayerWorkspaceCommandBar = lazyNamed("PlayerWorkspaceCommandBar");
 const LazyPlayerWorkspaceEmptyState = lazyNamed("PlayerWorkspaceEmptyState");
 const LazyPlayerWorkspaceFilterRail = lazyNamed("PlayerWorkspaceFilterRail");
 
-function DeferredPlayerInterface({ Component, label, testId, variant = "compact", ...props }) {
+function DeferredPlayerInterface({ Component, label, fallbackTestId, variant = "compact", ...props }) {
   return (
-    <Suspense fallback={<PlayerInterfaceFallback label={label} testId={testId} variant={variant} />}>
+    <Suspense fallback={<PlayerInterfaceFallback label={label} testId={fallbackTestId} variant={variant} />}>
       <Component {...props} />
     </Suspense>
   );
@@ -21,7 +21,7 @@ export function PlayerWorkspaceCommandBar(props) {
     <DeferredPlayerInterface
       Component={LazyPlayerWorkspaceCommandBar}
       label="workspace command bar"
-      testId="player-workspace-command-loading"
+      fallbackTestId="player-workspace-command-loading"
       variant="command"
       {...props}
     />
@@ -33,7 +33,7 @@ export function PlayerWorkspaceEmptyState(props) {
     <DeferredPlayerInterface
       Component={LazyPlayerWorkspaceEmptyState}
       label="workspace guidance"
-      testId="player-workspace-empty-loading"
+      fallbackTestId="player-workspace-empty-loading"
       {...props}
     />
   );
@@ -44,7 +44,7 @@ export function PlayerWorkspaceFilterRail(props) {
     <DeferredPlayerInterface
       Component={LazyPlayerWorkspaceFilterRail}
       label="workspace filters"
-      testId="player-workspace-filter-loading"
+      fallbackTestId="player-workspace-filter-loading"
       {...props}
     />
   );
