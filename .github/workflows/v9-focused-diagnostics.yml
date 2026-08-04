@@ -11,6 +11,8 @@ on:
       - "src/styles/appLegacyStylesRuntime.js"
       - "tests/app-shell-decomposition.test.mjs"
       - "tests/launch-readiness-audit-regression.test.mjs"
+      - "tests/semantic-color-system-contract.test.mjs"
+      - "tests/e2e/v9-style-boundary-diagnostic.spec.mjs"
   workflow_dispatch:
 
 permissions:
@@ -50,9 +52,9 @@ jobs:
           path: analytics-contracts.log
           if-no-files-found: error
 
-  invitation-browser:
+  style-boundary:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -63,29 +65,18 @@ jobs:
       - run: npm install --no-save @playwright/test@1.55.1
       - run: npx playwright install --with-deps chromium
       - run: npm run build
-      - name: Run invitation browser flows with captured output
+      - name: Capture extracted style geometry
         shell: bash
         run: |
           set -o pipefail
-          npx playwright test \
-            tests/e2e/coach-player-invitation.spec.mjs \
-            tests/e2e/coach-player-cross-device-first-result.spec.mjs \
-            tests/e2e/coach-player-assignment-delivery.spec.mjs \
-            tests/e2e/coach-assignment-accountability.spec.mjs \
-            tests/e2e/coach-quick-assign.spec.mjs \
-            tests/e2e/coach-assignment-deadline.spec.mjs \
-            tests/e2e/player-assignment-next-action.spec.mjs \
-            tests/e2e/coach-assignment-history.spec.mjs \
-            tests/e2e/coach-assignment-effectiveness.spec.mjs \
-            --reporter=line \
-            2>&1 | tee invitation-browser.log
-      - name: Upload invitation diagnostics
+          npx playwright test tests/e2e/v9-style-boundary-diagnostic.spec.mjs --reporter=line 2>&1 | tee style-boundary.log
+      - name: Upload style diagnostics
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: v9-invitation-diagnostics
+          name: v9-style-boundary-diagnostics
           path: |
-            invitation-browser.log
+            style-boundary.log
             test-results
             playwright-report
           if-no-files-found: warn
