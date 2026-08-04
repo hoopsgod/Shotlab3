@@ -17,7 +17,6 @@ const DEFERRED_COACH_PHASE2_MODULE = path.resolve(process.cwd(), 'src/components
 const DEFERRED_COACH_INTERACTIVE_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachInteractiveDashboards.jsx')
 const DEFERRED_CAREER_HISTORY_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPlayerCareerHistory.jsx')
 const COACH_ADMIN_REDIRECTS = new Map([
-  ['./screens/PlayersScreen', path.resolve(process.cwd(), 'src/components/DeferredPlayersScreen.jsx')],
   ['./components/NewSeasonWizard.jsx', path.resolve(process.cwd(), 'src/components/DeferredNewSeasonWizard.jsx')],
   ['./components/CoachPlayerInviteForm.jsx', path.resolve(process.cwd(), 'src/components/DeferredCoachPlayerInviteForm.jsx')],
   ['./components/CoachProgramScoreDrawer.jsx', path.resolve(process.cwd(), 'src/components/DeferredCoachProgramScoreDrawer.jsx')],
@@ -146,8 +145,7 @@ function stableVendorChunk(id) {
   }
 
   if (
-    moduleId.includes('/src/screens/PlayersScreen.jsx')
-    || moduleId.includes('/src/components/NewSeasonWizard.jsx')
+    moduleId.includes('/src/components/NewSeasonWizard.jsx')
     || moduleId.includes('/src/components/CoachPlayerInviteForm.jsx')
     || moduleId.includes('/src/components/CoachProgramScoreDrawer.jsx')
     || moduleId.includes('/src/screens/CoachTeamBrandingScreen.jsx')
