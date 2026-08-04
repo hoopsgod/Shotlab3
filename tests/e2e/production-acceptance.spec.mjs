@@ -104,6 +104,19 @@ async function readTeamBranding(page) {
   }, TEAM_ID);
 }
 
+async function countDemoPlayerShotRows(page, made) {
+  return page.evaluate((madeCount) => {
+    const rows = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
+    return rows.filter((row) => {
+      const rowEmail = String(row?.email || row?.player_email || row?.playerId || row?.player_id || "").trim().toLowerCase();
+      const syncSource = String(row?.syncSource || row?.sync_source || "").trim().toLowerCase();
+      const syncState = String(row?.syncState || row?.sync_state || "").trim().toLowerCase();
+      const hasDemoSessionMarker = row?.demo === true || syncSource === "demo" || syncSource === "local" || syncState === "local_pending";
+      return Number(row?.made) === Number(madeCount) && rowEmail === "demo@shotlab.app" && hasDemoSessionMarker;
+    }).length;
+  }, made);
+}
+
 test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
@@ -199,15 +212,9 @@ test("Demo Player shot rows are removed on logout", async ({ page }) => {
   await page.getByRole("spinbutton").first().fill("33");
   await page.getByRole("button", { name: "LOG SHOTS", exact: true }).first().click();
 
-  await expect.poll(() => page.evaluate(() => {
-    const rows = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
-    return rows.some((row) => Number(row.made) === 33 && row.demo === true);
-  }), { timeout: 15_000 }).toBe(true);
+  await expect.poll(() => countDemoPlayerShotRows(page, 33), { timeout: 15_000 }).toBe(1);
 
   await page.getByRole("button", { name: /^logout$/i }).click();
   await expect(page.getByRole("button", { name: "Demo Player", exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect.poll(() => page.evaluate(() => {
-    const rows = JSON.parse(window.localStorage.getItem("sl:shotlogs") || "[]");
-    return rows.some((row) => Number(row.made) === 33 && row.demo === true);
-  })).toBe(false);
+  await expect.poll(() => countDemoPlayerShotRows(page, 33)).toBe(0);
 });
