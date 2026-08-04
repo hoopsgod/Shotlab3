@@ -116,13 +116,13 @@ const routeChunkLoaded = (page, moduleNames, excludedNames = []) => page.evaluat
 
 const playerInterfaceLoaded = (page) => routeChunkLoaded(
   page,
-  ['PlayerInterfaceWorkspaces', 'PlayerDashboardHeader', 'PlayerDailyCommandCenter', 'PlayerDailyPrimitives', 'PlayerOperationalWorkspace', 'PlayerCoachAssignmentCard'],
+  ['PlayerInterfaceWorkspaces', 'PlayerDashboardHeader', 'PlayerDailyCommandCenter', 'PlayerDailyPrimitives', 'PlayerOperationalWorkspace'],
   ['DeferredPlayerDashboardHeader', 'DeferredPlayerDailyCommandCenter', 'DeferredPlayerOperationalWorkspace', 'PlayerInterfaceFallback'],
 )
 
 const playerProfileLoaded = (page) => routeChunkLoaded(
   page,
-  ['PlayerProfileWorkspaces', 'ShotLabCharts', 'PlayerCareerHistory'],
+  ['PlayerProfileWorkspaces', 'ShotLabCharts', 'PlayerCareerHistory', 'PlayerCoachAssignmentCard'],
   ['DeferredShotLabCharts', 'DeferredPlayerCareerHistory'],
 )
 
