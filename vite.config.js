@@ -4,21 +4,18 @@ import react from '@vitejs/plugin-react'
 
 const normalizeModuleId = (id = '') => String(id).replaceAll('\\', '/')
 const APP_MODULE_SUFFIX = '/src/App.jsx'
-const PLAYER_DAILY_MODULE_SUFFIX = '/src/components/PlayerDailyCommandCenter.jsx'
 const STATIC_CHART_IMPORT = './components/ShotLabCharts'
 const STATIC_LEADERBOARDS_IMPORT = './components/PremiumLeaderboardsHub'
 const STATIC_COACH_COMMAND_CENTER_IMPORT = './components/CoachCommandCenter'
 const STATIC_COACH_PHASE2_IMPORT = './components/CoachDashboardPhase2.jsx'
 const STATIC_COACH_INTERACTIVE_IMPORT = './components/CoachInteractiveDashboards.jsx'
 const STATIC_CAREER_HISTORY_IMPORT = './components/PlayerCareerHistory.jsx'
-const STATIC_PLAYER_DAILY_PRIMITIVES_IMPORT = './ExperiencePrimitives.jsx'
 const DEFERRED_CHART_MODULE = path.resolve(process.cwd(), 'src/components/DeferredShotLabCharts.jsx')
 const DEFERRED_LEADERBOARDS_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPremiumLeaderboardsHub.jsx')
 const DEFERRED_COACH_COMMAND_CENTER_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachCommandCenter.jsx')
 const DEFERRED_COACH_PHASE2_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPhase2.jsx')
 const DEFERRED_COACH_INTERACTIVE_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachInteractiveDashboards.jsx')
 const DEFERRED_CAREER_HISTORY_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPlayerCareerHistory.jsx')
-const PLAYER_DAILY_PRIMITIVES_MODULE = path.resolve(process.cwd(), 'src/components/PlayerDailyPrimitives.jsx')
 const PLAYER_INTERFACE_REDIRECTS = new Map([
   ['./components/PlayerDashboardHeader', path.resolve(process.cwd(), 'src/components/DeferredPlayerDashboardHeader.jsx')],
   ['./components/PlayerDailyCommandCenter.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerDailyCommandCenter.jsx')],
@@ -127,20 +124,6 @@ function deferPlayerInterface() {
   }
 }
 
-function isolatePlayerDailyPrimitives() {
-  return {
-    name: 'shotlab-isolate-player-daily-primitives',
-    enforce: 'pre',
-    resolveId(source, importer) {
-      const importerId = normalizeModuleId(importer)
-      if (source === STATIC_PLAYER_DAILY_PRIMITIVES_IMPORT && importerId.endsWith(PLAYER_DAILY_MODULE_SUFFIX)) {
-        return PLAYER_DAILY_PRIMITIVES_MODULE
-      }
-      return null
-    },
-  }
-}
-
 function deferCoachAdministration() {
   return {
     name: 'shotlab-defer-coach-administration',
@@ -219,7 +202,6 @@ export default defineConfig({
     deferCoachInteractiveDashboards(),
     deferPlayerCareerHistory(),
     deferPlayerInterface(),
-    isolatePlayerDailyPrimitives(),
     deferCoachAdministration(),
     react(),
   ],
