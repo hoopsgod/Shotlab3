@@ -17,61 +17,71 @@
 [data-testid="coach-players-insight-grid"],
 [data-testid="coach-events-insight-grid"]{order:4!important}
 
-/* Make the primary coaching decision feel intentional rather than like another card. */
-[data-testid="coach-players-decision-brief"],
-[data-testid="coach-events-decision-brief"]{
+/* Canonical light focal decision surface: no mixed-theme exception. */
+html body #root .secondaryPageDecision[data-testid="coach-players-decision-brief"],
+html body #root .secondaryPageDecision[data-testid="coach-events-decision-brief"]{
+  position:relative!important;
   min-height:0!important;
   margin:0!important;
   padding:20px!important;
-  border:1px solid rgba(255,255,255,.07)!important;
+  overflow:hidden!important;
+  border:1px solid rgba(17,20,17,.12)!important;
   border-radius:22px!important;
-  background:linear-gradient(145deg,#191d1a 0%,#111411 100%)!important;
-  background-image:linear-gradient(145deg,#191d1a 0%,#111411 100%)!important;
-  color:#fff!important;
-  -webkit-text-fill-color:#fff!important;
-  box-shadow:0 14px 34px rgba(17,20,17,.13)!important;
+  background:#fffefa!important;
+  background-image:linear-gradient(135deg,rgba(255,255,255,.98),rgba(247,249,239,.98))!important;
+  color:#111411!important;
+  -webkit-text-fill-color:#111411!important;
+  box-shadow:0 14px 34px rgba(17,20,17,.10)!important;
   opacity:1!important;
   filter:none!important;
 }
-[data-testid="coach-players-decision-brief"] *,
-[data-testid="coach-events-decision-brief"] *{
+html body #root .secondaryPageDecision[data-testid="coach-players-decision-brief"]::before,
+html body #root .secondaryPageDecision[data-testid="coach-events-decision-brief"]::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:5px;
+  background:#9fca20;
+}
+html body #root .secondaryPageDecision[data-testid="coach-players-decision-brief"] *,
+html body #root .secondaryPageDecision[data-testid="coach-events-decision-brief"] *{
   opacity:1!important;
   filter:none!important;
 }
-[data-testid="coach-players-decision-brief"] h2,
-[data-testid="coach-events-decision-brief"] h2{
+html body #root .secondaryPageDecision[data-testid="coach-players-decision-brief"] h2,
+html body #root .secondaryPageDecision[data-testid="coach-events-decision-brief"] h2{
   max-width:16ch!important;
   font-size:28px!important;
   line-height:1.02!important;
-  color:#fff!important;
-  -webkit-text-fill-color:#fff!important;
+  color:#111411!important;
+  -webkit-text-fill-color:#111411!important;
 }
-[data-testid="coach-players-decision-brief"] p,
-[data-testid="coach-events-decision-brief"] p{
+html body #root .secondaryPageDecision[data-testid="coach-players-decision-brief"] p,
+html body #root .secondaryPageDecision[data-testid="coach-events-decision-brief"] p{
   margin-top:8px!important;
   font-size:14px!important;
   line-height:1.42!important;
-  color:rgba(255,255,255,.76)!important;
-  -webkit-text-fill-color:rgba(255,255,255,.76)!important;
+  color:#5d655f!important;
+  -webkit-text-fill-color:#5d655f!important;
 }
-[data-testid="coach-players-decision-brief"] [class*="eyebrow"],
-[data-testid="coach-events-decision-brief"] [class*="eyebrow"]{
-  color:#b9df35!important;
-  -webkit-text-fill-color:#b9df35!important;
+html body #root .secondaryPageDecision[data-testid="coach-players-decision-brief"] [class*="eyebrow"],
+html body #root .secondaryPageDecision[data-testid="coach-events-decision-brief"] [class*="eyebrow"]{
+  color:#78951f!important;
+  -webkit-text-fill-color:#78951f!important;
 }
-[data-testid="coach-players-decision-brief"] button,
-[data-testid="coach-events-decision-brief"] button{
+html body #root .secondaryPageDecision[data-testid="coach-players-decision-brief"] button,
+html body #root .secondaryPageDecision[data-testid="coach-events-decision-brief"] button{
   min-height:44px!important;
   margin-top:12px!important;
-  border:1px solid rgba(255,255,255,.14)!important;
-  background:#fff!important;
-  color:#111411!important;
-  -webkit-text-fill-color:#111411!important;
+  border:1px solid #202421!important;
+  background:#202421!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
 }
-[data-testid="coach-players-decision-brief"] button *,
-[data-testid="coach-events-decision-brief"] button *{
-  color:#111411!important;
-  -webkit-text-fill-color:#111411!important;
+html body #root .secondaryPageDecision[data-testid="coach-players-decision-brief"] button *,
+html body #root .secondaryPageDecision[data-testid="coach-events-decision-brief"] button *{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
 }
 
 /* Supporting controls should be compact and quiet. */
