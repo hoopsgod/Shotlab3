@@ -23,7 +23,7 @@ export function ExperienceProgressRing({ value = 0, max = 100, label, detail, si
   );
 }
 
-export function ExperienceSignal({ eyebrow, title, detail, tone = "neutral", action, children, testId }) {
+export function ExperienceSignal({ eyebrow, title, detail, tone = "neutral", children, testId }) {
   return (
     <section className={`${styles.signal} ${styles[`tone_${tone}`] || ""}`} data-testid={testId}>
       <div className={styles.signalCopy}>
@@ -32,7 +32,6 @@ export function ExperienceSignal({ eyebrow, title, detail, tone = "neutral", act
         {detail ? <div className={styles.signalDetail}>{detail}</div> : null}
       </div>
       {children ? <div className={styles.signalVisual}>{children}</div> : null}
-      {action?.label ? <button type="button" className={styles.signalAction} onClick={action.onClick}>{action.label}</button> : null}
     </section>
   );
 }
