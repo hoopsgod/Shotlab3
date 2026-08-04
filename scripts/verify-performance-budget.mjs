@@ -199,6 +199,12 @@ if (totals.cssGzipBytes > budget.maxTotalCssGzipBytes) {
 if (totals.javaScriptFiles > budget.maxJavaScriptFileCount) {
   failures.push(`JavaScript file count is ${totals.javaScriptFiles}; budget is ${budget.maxJavaScriptFileCount}.`)
 }
+if (Number.isFinite(budget.maxCssFileCount) && totals.cssFiles > budget.maxCssFileCount) {
+  failures.push(`Reachable CSS file count is ${totals.cssFiles}; budget is ${budget.maxCssFileCount}.`)
+}
+if (Number.isFinite(budget.maxIgnoredCssFiles) && ignoredCssFiles.length > budget.maxIgnoredCssFiles) {
+  failures.push(`Ignored CSS file count is ${ignoredCssFiles.length}; budget is ${budget.maxIgnoredCssFiles}. Files: ${ignoredCssFiles.join(', ')}`)
+}
 
 const metrics = {
   generatedAt: new Date().toISOString(),
