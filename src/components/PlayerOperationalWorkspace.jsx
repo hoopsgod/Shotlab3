@@ -46,16 +46,16 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
           const interactive = Boolean(metric?.filter || metric?.action);
           const hierarchyClass = index === 0 ? hierarchyStyles.metricPrimary : hierarchyStyles.metricSupporting;
           const metricClassName = `${styles.metric} ${hierarchyClass} ${interactive ? styles.metricInteractive : styles.metricStatic} ${activeMetric === metric.id ? styles.metricActive : ""}`;
-          const sharedProps = {
-            key: metric.id,
-            className: metricClassName,
-            "data-interactive": interactive ? "true" : "false",
-            "data-metric-priority": index === 0 ? "primary" : "supporting",
-          };
+          const metricPriority = index === 0 ? "primary" : "supporting";
 
           if (!interactive) {
             return (
-              <div {...sharedProps}>
+              <div
+                key={metric.id}
+                className={metricClassName}
+                data-interactive="false"
+                data-metric-priority={metricPriority}
+              >
                 <MetricContent metric={metric} />
               </div>
             );
@@ -64,7 +64,10 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
           return (
             <button
               type="button"
-              {...sharedProps}
+              key={metric.id}
+              className={metricClassName}
+              data-interactive="true"
+              data-metric-priority={metricPriority}
               onClick={() => runMetric(metric)}
               aria-pressed={activeMetric === metric.id}
             >
