@@ -102,8 +102,7 @@ const implementationLoaded = (page, moduleName, wrapperName) => page.evaluate(
   { implementation: moduleName, wrapper: wrapperName },
 )
 
-async function enterPlayer(page) {
-  await installSafeRoutes(page)
+async function seedStorage(page) {
   await page.addInitScript((payload) => {
     window.localStorage.clear()
     window.sessionStorage.clear()
@@ -111,6 +110,11 @@ async function enterPlayer(page) {
       window.localStorage.setItem(key, JSON.stringify(value))
     }
   }, seedData)
+}
+
+async function enterPlayer(page) {
+  await installSafeRoutes(page)
+  await seedStorage(page)
   await page.goto('/')
   await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
@@ -125,13 +129,7 @@ async function openMoreDestination(page, key) {
 
 test('progress analytics load only after the player opens Profile', async ({ page }) => {
   await installSafeRoutes(page)
-  await page.addInitScript((payload) => {
-    window.localStorage.clear()
-    window.sessionStorage.clear()
-    for (const [key, value] of Object.entries(payload)) {
-      window.localStorage.setItem(key, JSON.stringify(value))
-    }
-  }, seedData)
+  await seedStorage(page)
 
   await page.goto('/')
   await expect.poll(() => implementationLoaded(page, 'ShotLabCharts', 'DeferredShotLabCharts')).toBe(false)
@@ -158,4 +156,19 @@ test('leaderboard analytics load only after the player opens Leaderboards', asyn
   await expect(workspace.getByTestId('premium-leaderboards-hub')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('leaderboards-loading')).toHaveCount(0)
   await expect.poll(() => implementationLoaded(page, 'PremiumLeaderboardsHub', 'DeferredPremiumLeaderboardsHub')).toBe(true)
+})
+
+test('Coach intelligence stays out of auth and Player, then initializes for Coach', async ({ page }) => {
+  await installSafeRoutes(page)
+  await seedStorage(page)
+
+  await page.goto('/')
+  await expect.poll(() => implementationLoaded(page, 'CoachDashboardPhase2', 'DeferredCoachDashboardPhase2')).toBe(false)
+
+  await page.getByRole('button', { name: 'Demo Coach', exact: true }).click()
+  await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
+
+  await expect(page.getByTestId('coach-activity-intelligence-panel')).toHaveCount(1)
+  await expect(page.getByTestId('coach-intelligence-loading')).toHaveCount(0)
+  await expect.poll(() => implementationLoaded(page, 'CoachDashboardPhase2', 'DeferredCoachDashboardPhase2')).toBe(true)
 })

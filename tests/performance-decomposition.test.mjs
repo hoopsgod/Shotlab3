@@ -6,6 +6,7 @@ const viteConfig = fs.readFileSync('vite.config.js', 'utf8')
 const appSource = fs.readFileSync('src/App.jsx', 'utf8')
 const deferredCharts = fs.readFileSync('src/components/DeferredShotLabCharts.jsx', 'utf8')
 const deferredLeaderboards = fs.readFileSync('src/components/DeferredPremiumLeaderboardsHub.jsx', 'utf8')
+const deferredCoachPhase2 = fs.readFileSync('src/components/DeferredCoachDashboardPhase2.jsx', 'utf8')
 
 test('progress analytics are redirected through a deferred boundary', () => {
   assert.match(appSource, /import ShotLabCharts from ["']\.\/components\/ShotLabCharts["']/)
@@ -36,4 +37,30 @@ test('the deferred leaderboards boundary dynamically imports the implementation'
   assert.match(deferredLeaderboards, /data-testid=["']deferred-leaderboards-workspace["']/)
   assert.match(deferredLeaderboards, /data-testid=["']leaderboards-loading["']/)
   assert.doesNotMatch(deferredLeaderboards, /^import PremiumLeaderboardsHub/m)
+})
+
+test('Coach Phase 2 intelligence is redirected through a deferred boundary', () => {
+  assert.match(appSource, /from ["']\.\/components\/CoachDashboardPhase2\.jsx["']/)
+  assert.match(viteConfig, /name:\s*["']shotlab-defer-coach-phase2-intelligence["']/)
+  assert.match(viteConfig, /source === STATIC_COACH_PHASE2_IMPORT/)
+  assert.match(viteConfig, /DeferredCoachDashboardPhase2\.jsx/)
+})
+
+test('the deferred Coach boundary preserves every named export through one lazy implementation', () => {
+  assert.match(deferredCoachPhase2, /import\(["']\.\/CoachDashboardPhase2\.jsx["']\)/)
+  assert.match(deferredCoachPhase2, /lazyNamed/)
+  for (const exportName of [
+    'CoachActivityIntelligencePanel',
+    'CoachDrillsOperationalPanel',
+    'CoachEventIntelligenceDrawer',
+    'CoachLeaderboardOperationalPanel',
+    'CoachPlayerIntelligenceDrawer',
+    'CoachSeasonComparisonPanel',
+    'CoachStrengthOperationalPanel',
+  ]) {
+    assert.match(deferredCoachPhase2, new RegExp(`export function ${exportName}`))
+    assert.match(deferredCoachPhase2, new RegExp(`lazyNamed\\('${exportName}'\\)`))
+  }
+  assert.match(deferredCoachPhase2, /data-testid=["']coach-intelligence-loading["']/)
+  assert.doesNotMatch(deferredCoachPhase2, /^import .*CoachDashboardPhase2/m)
 })
