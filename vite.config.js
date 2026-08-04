@@ -139,16 +139,28 @@ function stableVendorChunk(id) {
   }
 
   if (
+    moduleId.includes('/src/components/ShotLabCharts.jsx')
+    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')
+  ) {
+    return 'PlayerProfileWorkspaces'
+  }
+
+  if (
+    moduleId.includes('/src/screens/PlayersScreen.jsx')
+    || moduleId.includes('/src/components/NewSeasonWizard.jsx')
+    || moduleId.includes('/src/components/CoachPlayerInviteForm.jsx')
+    || moduleId.includes('/src/components/CoachProgramScoreDrawer.jsx')
+    || moduleId.includes('/src/screens/CoachTeamBrandingScreen.jsx')
+  ) {
+    return 'CoachAdministrationWorkspaces'
+  }
+
+  if (
     moduleId.includes('/src/components/CoachCommandCenter.jsx')
     || moduleId.includes('/src/components/CoachDashboardPhase2.jsx')
     || moduleId.includes('/src/components/CoachInteractiveDashboards.jsx')
     || moduleId.includes('/src/components/SecondaryPageSystem.jsx')
     || moduleId.includes('/src/components/ExperiencePrimitives.jsx')
-    || moduleId.includes('/src/screens/PlayersScreen.jsx')
-    || moduleId.includes('/src/components/NewSeasonWizard.jsx')
-    || moduleId.includes('/src/components/CoachPlayerInviteForm.jsx')
-    || moduleId.includes('/src/components/CoachProgramScoreDrawer.jsx')
-    || moduleId.includes('/src/screens/CoachTeamBrandingScreen.jsx')
   ) {
     return 'CoachOperationalWorkspaces'
   }
