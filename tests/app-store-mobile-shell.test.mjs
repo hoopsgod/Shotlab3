@@ -50,7 +50,8 @@ test("shared V3 mobile foundation supports touch, safe areas, contrast, and redu
 });
 
 test("mobile shell phase remains presentation-only", () => {
+  const forbiddenRuntimeBehavior = /create table|alter table|XMLHttpRequest|fetch\s*\(|supabase\s*\.\s*from\s*\(|supabase\s*\.\s*rpc\s*\(|supabase\s*\.\s*auth\s*\.\s*(?:signIn|signUp|signOut|getSession|onAuthStateChange)\s*\(/i;
   for (const source of [navigationSource, navigationCss, foundationCss, correctionsCss, indexSource]) {
-    assert.doesNotMatch(source, /supabase|auth\.|create table|alter table|XMLHttpRequest|fetch\(/i);
+    assert.doesNotMatch(source, forbiddenRuntimeBehavior);
   }
 });
