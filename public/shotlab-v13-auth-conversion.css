@@ -66,10 +66,43 @@
 .auth-demo-enter button:nth-child(2):hover,
 .auth-demo-enter button:nth-child(2):focus-visible{border-color:rgba(112,216,255,.52)!important}
 .auth-demo-enter button:active{transform:scale(.985)!important}
+
+/* Keep required legal links available without competing with sign-in or demo conversion. */
+[aria-label="Legal and support links"]{
+  gap:4px 10px!important;
+  margin-top:14px!important;
+  padding-top:4px!important;
+  opacity:.72!important;
+}
+[aria-label="Legal and support links"] a{
+  min-height:30px!important;
+  padding:3px 5px!important;
+  border:0!important;
+  border-radius:8px!important;
+  color:#818991!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:9px!important;
+  font-weight:650!important;
+  letter-spacing:.055em!important;
+  text-transform:uppercase!important;
+  transition:color .16s ease,background .16s ease!important;
+}
+[aria-label="Legal and support links"] a:hover,
+[aria-label="Legal and support links"] a:focus-visible{
+  color:#c7cdd2!important;
+  background:rgba(255,255,255,.035)!important;
+  outline:2px solid rgba(200,255,26,.2)!important;
+  outline-offset:1px!important;
+}
+
 @media(max-width:390px){
   .auth-demo-enter{grid-template-columns:1fr!important}
   .auth-demo-enter button{min-height:56px!important}
+  [aria-label="Legal and support links"]{gap:2px 7px!important}
 }
 @media(prefers-reduced-motion:reduce){
   .auth-demo-enter button{transition:none!important}
+  [aria-label="Legal and support links"] a{transition:none!important}
 }
