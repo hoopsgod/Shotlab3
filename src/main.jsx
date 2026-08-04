@@ -18,6 +18,28 @@ let appHasCommitted = false
 let bootPanelEl = null
 let bootPanelListEl = null
 
+function installBrowserStorageFallback() {
+  if (typeof window === 'undefined' || window.storage || !window.localStorage) return
+  const local = window.localStorage
+  window.storage = {
+    async get(key) {
+      return { value: local.getItem(String(key)) }
+    },
+    async set(key, value) {
+      local.setItem(String(key), String(value))
+      return { value: String(value) }
+    },
+    async remove(key) {
+      local.removeItem(String(key))
+      return { value: null }
+    },
+    async delete(key) {
+      local.removeItem(String(key))
+      return { value: null }
+    },
+  }
+}
+
 function renderBootPanel() {
   if (!bootDebugEnabled || bootPanelEl || !document.body) return
   bootPanelEl = document.createElement('aside')
@@ -44,6 +66,7 @@ function markBoot(stage, detail = '') {
 }
 
 if (typeof window !== 'undefined') {
+  installBrowserStorageFallback()
   window.__shotlabBootMark = markBoot
   if (DEV) {
     window.__shotlabBackendStatus = async () => {
