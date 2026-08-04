@@ -55,7 +55,7 @@
 
 .signal {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 14px;
   align-items: center;
   min-width: 0;
@@ -97,23 +97,6 @@
 }
 
 .signalVisual { min-width: 112px; }
-.signalAction {
-  min-height: 42px;
-  padding: 0 13px;
-  border: 1px solid color-mix(in srgb, currentColor 38%, transparent);
-  border-radius: 11px;
-  background: color-mix(in srgb, currentColor 8%, transparent);
-  color: currentColor;
-  font: 800 10px/1 'Barlow Condensed', 'Arial Narrow', sans-serif;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
-}
-
-.signalAction:hover,
-.signalAction:focus-visible { transform: translateY(-1px); background: color-mix(in srgb, currentColor 12%, transparent); }
-.signalAction:active { transform: scale(.985); }
 
 .pill {
   display: inline-flex;
@@ -134,12 +117,6 @@
 .tone_info { color: var(--semantic-info, #77d7ff); }
 .tone_neutral { color: var(--text-2, #9ca7ad); }
 
-@media (max-width: 700px) {
-  .signal { grid-template-columns: minmax(0, 1fr) auto; }
-  .signalAction { grid-column: 1 / -1; width: 100%; }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .progressRingValue,
-  .signalAction { transition: none; }
+  .progressRingValue { transition: none; }
 }
