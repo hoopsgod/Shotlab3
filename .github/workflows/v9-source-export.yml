@@ -18,7 +18,9 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
-      - name: Package source snapshot
+      - name: Install analysis dependencies
+        run: npm ci --ignore-scripts
+      - name: Package source and analysis tooling
         run: |
           tar -czf shotlab-v9-source.tar.gz \
             src \
@@ -30,9 +32,12 @@ jobs:
             package-lock.json \
             performance-budget.json \
             playwright.config.mjs
+          tar -czf shotlab-v9-node-modules.tar.gz node_modules
       - name: Upload source snapshot
         uses: actions/upload-artifact@v4
         with:
           name: shotlab-v9-source
-          path: shotlab-v9-source.tar.gz
+          path: |
+            shotlab-v9-source.tar.gz
+            shotlab-v9-node-modules.tar.gz
           retention-days: 1
