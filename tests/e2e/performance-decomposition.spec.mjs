@@ -87,9 +87,12 @@ async function installSafeRoutes(page) {
   }))
 }
 
-const deferredChunkLoaded = (page) => page.evaluate(() => performance
+const chartImplementationLoaded = (page) => page.evaluate(() => performance
   .getEntriesByType('resource')
-  .some((entry) => String(entry.name).includes('DeferredShotLabCharts')))
+  .some((entry) => {
+    const resourceName = String(entry.name)
+    return resourceName.includes('ShotLabCharts') && !resourceName.includes('DeferredShotLabCharts')
+  }))
 
 test('progress analytics load only after the player opens Profile', async ({ page }) => {
   await installSafeRoutes(page)
@@ -102,11 +105,11 @@ test('progress analytics load only after the player opens Profile', async ({ pag
   }, seedData)
 
   await page.goto('/')
-  await expect.poll(() => deferredChunkLoaded(page)).toBe(false)
+  await expect.poll(() => chartImplementationLoaded(page)).toBe(false)
 
   await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
-  await expect.poll(() => deferredChunkLoaded(page)).toBe(false)
+  await expect.poll(() => chartImplementationLoaded(page)).toBe(false)
 
   await page.getByTestId('mobile-navigation-more').click()
   const sheet = page.getByTestId('mobile-navigation-sheet')
@@ -117,5 +120,5 @@ test('progress analytics load only after the player opens Profile', async ({ pag
   await expect(workspace).toBeVisible({ timeout: 20_000 })
   await expect(workspace.getByText(/MY\s*PROGRESS/i)).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('progress-charts-loading')).toHaveCount(0)
-  await expect.poll(() => deferredChunkLoaded(page)).toBe(true)
+  await expect.poll(() => chartImplementationLoaded(page)).toBe(true)
 })
