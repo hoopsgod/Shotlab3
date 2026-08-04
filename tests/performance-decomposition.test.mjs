@@ -138,11 +138,18 @@ test('shared season analytics stay inside the leaderboard chunk without restorin
   assert.doesNotMatch(viteConfig, /return ["']charts-vendor["']/)
 })
 
-test('the performance verifier locks both startup JavaScript and startup CSS', () => {
-  assert.match(verifierSource, /const largestCss = css\[0\]/)
-  assert.match(verifierSource, /largestCss\.bytes > budget\.maxLargestCssBytes/)
-  assert.equal(performanceBudget.maxLargestJavaScriptBytes, 885000)
-  assert.equal(performanceBudget.maxLargestCssBytes, 172000)
+test('the performance verifier locks startup App assets and total request budgets', () => {
+  assert.match(verifierSource, /const startupAppJavaScript = findStartupAsset\(javaScript, ["']js["']\)/)
+  assert.match(verifierSource, /const startupAppCss = findStartupAsset\(css, ["']css["']\)/)
+  assert.match(verifierSource, /startupAppJavaScript\.bytes > budget\.maxStartupAppJavaScriptBytes/)
+  assert.match(verifierSource, /startupAppCss\.bytes > budget\.maxStartupAppCssBytes/)
+  assert.equal(performanceBudget.maxLargestJavaScriptBytes, 650000)
+  assert.equal(performanceBudget.maxStartupAppJavaScriptBytes, 650000)
+  assert.equal(performanceBudget.maxStartupAppJavaScriptGzipBytes, 190000)
+  assert.equal(performanceBudget.maxTotalJavaScriptGzipBytes, 355000)
+  assert.equal(performanceBudget.maxLargestCssBytes, 132000)
+  assert.equal(performanceBudget.maxStartupAppCssBytes, 72000)
+  assert.equal(performanceBudget.maxStartupAppCssGzipBytes, 13000)
   assert.equal(performanceBudget.maxTotalCssGzipBytes, 74000)
   assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })
