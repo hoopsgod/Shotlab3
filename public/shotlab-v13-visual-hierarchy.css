@@ -1,0 +1,113 @@
+/* ShotLab V13 — verified visual hierarchy refinement.
+   Loaded last so legacy theme layers cannot dilute live coaching actions. */
+
+/* Mission Control: the attention item is an actionable roster row, not a disabled dark field. */
+html body #root .mcShellV3 .mcAttentionRow{
+  min-height:72px!important;
+  border:1px solid rgba(17,20,17,.10)!important;
+  border-radius:18px!important;
+  background:linear-gradient(145deg,#f8f9f5,#f1f3ed)!important;
+  box-shadow:0 8px 22px rgba(17,20,17,.07)!important;
+  color:#111411!important;
+}
+html body #root .mcShellV3 .mcAttentionRow:hover,
+html body #root .mcShellV3 .mcAttentionRow:focus-visible{
+  transform:translateY(-1px)!important;
+  border-color:rgba(126,158,30,.34)!important;
+  background:#fbfcf8!important;
+  box-shadow:0 12px 28px rgba(17,20,17,.10)!important;
+}
+html body #root .mcShellV3 .mcAttentionCopy strong{
+  color:#111411!important;
+  -webkit-text-fill-color:#111411!important;
+  font-weight:750!important;
+}
+html body #root .mcShellV3 .mcAttentionCopy small{
+  color:#606863!important;
+  -webkit-text-fill-color:#606863!important;
+  font-weight:560!important;
+}
+html body #root .mcShellV3 .mcAttentionMeta{
+  color:#7a827d!important;
+  -webkit-text-fill-color:#7a827d!important;
+}
+html body #root .mcShellV3 .mcRowAction{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:5px!important;
+  min-height:34px!important;
+  padding:0 10px!important;
+  border-radius:999px!important;
+  background:#202421!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  font-weight:720!important;
+  white-space:nowrap!important;
+}
+html body #root .mcShellV3 .mcAvatar--fallback{
+  border-color:rgba(126,158,30,.26)!important;
+  background:#171c19!important;
+  color:#b8e52d!important;
+  -webkit-text-fill-color:#b8e52d!important;
+}
+
+/* Player workspaces: promote the outcome metric, then quiet the three supporting metrics. */
+@media(max-width:700px){
+  [data-testid^="player-workspace-"] > div:nth-of-type(2){
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+  [data-testid^="player-workspace-"] > div:nth-of-type(2) > :first-child{
+    grid-column:1 / -1!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:"label value" "detail value"!important;
+    align-items:center!important;
+    min-height:76px!important;
+    padding:13px 15px!important;
+    border-color:color-mix(in srgb,var(--accent) 24%,rgba(255,255,255,.06))!important;
+    background:linear-gradient(145deg,color-mix(in srgb,var(--accent) 8%,#171a18),#111411)!important;
+  }
+  [data-testid^="player-workspace-"] > div:nth-of-type(2) > :first-child > span:nth-child(1){
+    grid-area:label!important;
+    align-self:end!important;
+  }
+  [data-testid^="player-workspace-"] > div:nth-of-type(2) > :first-child > span:nth-child(2){
+    grid-area:value!important;
+    margin:0!important;
+    padding-left:14px!important;
+    font-size:34px!important;
+    color:color-mix(in srgb,var(--accent) 82%,white 18%)!important;
+    -webkit-text-fill-color:color-mix(in srgb,var(--accent) 82%,white 18%)!important;
+  }
+  [data-testid^="player-workspace-"] > div:nth-of-type(2) > :first-child > span:nth-child(3){
+    grid-area:detail!important;
+    align-self:start!important;
+    margin-top:3px!important;
+  }
+  [data-testid^="player-workspace-"] > div:nth-of-type(2) > :not(:first-child){
+    min-height:82px!important;
+    padding:12px 10px!important;
+    border-radius:17px!important;
+    box-shadow:none!important;
+  }
+  [data-testid^="player-workspace-"] > div:nth-of-type(2) > :not(:first-child) > span:nth-child(2){
+    margin-top:6px!important;
+    font-size:25px!important;
+  }
+  [data-testid^="player-workspace-"] > div:nth-of-type(2) > :not(:first-child) > span:nth-child(3){
+    margin-top:5px!important;
+    font-size:9px!important;
+  }
+}
+
+@media(max-width:390px){
+  html body #root .mcShellV3 .mcAttentionRow{
+    grid-template-columns:7px 42px minmax(0,1fr)!important;
+  }
+  html body #root .mcShellV3 .mcRowAction{
+    grid-column:3!important;
+    justify-self:start!important;
+    margin-top:5px!important;
+  }
+}
