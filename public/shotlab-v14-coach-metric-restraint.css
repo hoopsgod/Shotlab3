@@ -1,0 +1,62 @@
+/* Coach metric restraint: remove legacy decorative rails and make selection feel deliberate. */
+[data-testid="coach-players-metric-strip"] button::after,
+[data-testid="coach-events-metric-strip"] button::after{
+  display:none!important;
+  content:none!important;
+}
+[data-testid="coach-players-metric-strip"] button,
+[data-testid="coach-events-metric-strip"] button{
+  min-height:118px!important;
+  border:1px solid rgba(17,20,17,.09)!important;
+  background:linear-gradient(145deg,#fbfcf9,#f4f6f1)!important;
+  box-shadow:0 8px 22px rgba(17,20,17,.055)!important;
+  transition:transform .16s ease,border-color .16s ease,box-shadow .16s ease,background .16s ease!important;
+}
+[data-testid="coach-players-metric-strip"] button:hover,
+[data-testid="coach-players-metric-strip"] button:focus-visible,
+[data-testid="coach-events-metric-strip"] button:hover,
+[data-testid="coach-events-metric-strip"] button:focus-visible{
+  transform:translateY(-1px)!important;
+  border-color:rgba(126,158,30,.24)!important;
+  box-shadow:0 11px 26px rgba(17,20,17,.075)!important;
+}
+[data-testid="coach-players-metric-strip"] button[aria-pressed="true"],
+[data-testid="coach-events-metric-strip"] button[aria-pressed="true"]{
+  border-color:rgba(126,158,30,.48)!important;
+  background:linear-gradient(145deg,#fbfdf6,#eef4df)!important;
+  box-shadow:0 0 0 1px rgba(184,229,45,.14),0 12px 28px rgba(17,20,17,.08)!important;
+}
+[data-testid="coach-players-metric-strip"] button span:first-child,
+[data-testid="coach-events-metric-strip"] button span:first-child{
+  color:#6f7772!important;
+  -webkit-text-fill-color:#6f7772!important;
+  letter-spacing:.045em!important;
+}
+[data-testid="coach-players-metric-strip"] button span:nth-child(2),
+[data-testid="coach-events-metric-strip"] button span:nth-child(2){
+  color:#171b18!important;
+  -webkit-text-fill-color:#171b18!important;
+}
+[data-testid="coach-players-metric-strip"] button span:last-child,
+[data-testid="coach-events-metric-strip"] button span:last-child{
+  color:#666e69!important;
+  -webkit-text-fill-color:#666e69!important;
+}
+@media(max-width:700px){
+  [data-testid="coach-players-metric-strip"],
+  [data-testid="coach-events-metric-strip"]{
+    gap:10px!important;
+  }
+  [data-testid="coach-players-metric-strip"] button,
+  [data-testid="coach-events-metric-strip"] button{
+    min-height:112px!important;
+    border-radius:20px!important;
+    padding:15px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  [data-testid="coach-players-metric-strip"] button,
+  [data-testid="coach-events-metric-strip"] button{
+    transition:none!important;
+  }
+}
