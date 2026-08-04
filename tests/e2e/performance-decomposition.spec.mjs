@@ -127,23 +127,28 @@ async function openMoreDestination(page, key) {
   await sheet.locator(`[data-nav-key="${key}"]`).click()
 }
 
-test('progress analytics load only after the player opens Profile', async ({ page }) => {
+test('profile insights load only after the player opens Profile', async ({ page }) => {
   await installSafeRoutes(page)
   await seedStorage(page)
 
   await page.goto('/')
   await expect.poll(() => implementationLoaded(page, 'ShotLabCharts', 'DeferredShotLabCharts')).toBe(false)
+  await expect.poll(() => implementationLoaded(page, 'PlayerCareerHistory', 'DeferredPlayerCareerHistory')).toBe(false)
 
   await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
   await expect.poll(() => implementationLoaded(page, 'ShotLabCharts', 'DeferredShotLabCharts')).toBe(false)
+  await expect.poll(() => implementationLoaded(page, 'PlayerCareerHistory', 'DeferredPlayerCareerHistory')).toBe(false)
 
   await openMoreDestination(page, 'profile')
   const workspace = page.getByTestId('progress-charts-workspace')
   await expect(workspace).toBeVisible({ timeout: 20_000 })
   await expect(workspace.getByText(/MY\s*PROGRESS/i)).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('player-career-history')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('progress-charts-loading')).toHaveCount(0)
+  await expect(page.getByTestId('player-career-history-loading')).toHaveCount(0)
   await expect.poll(() => implementationLoaded(page, 'ShotLabCharts', 'DeferredShotLabCharts')).toBe(true)
+  await expect.poll(() => implementationLoaded(page, 'PlayerCareerHistory', 'DeferredPlayerCareerHistory')).toBe(true)
 })
 
 test('leaderboard analytics load only after the player opens Leaderboards', async ({ page }) => {

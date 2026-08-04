@@ -7,9 +7,11 @@ const APP_MODULE_SUFFIX = '/src/App.jsx'
 const STATIC_CHART_IMPORT = './components/ShotLabCharts'
 const STATIC_LEADERBOARDS_IMPORT = './components/PremiumLeaderboardsHub'
 const STATIC_COACH_PHASE2_IMPORT = './components/CoachDashboardPhase2.jsx'
+const STATIC_CAREER_HISTORY_IMPORT = './components/PlayerCareerHistory.jsx'
 const DEFERRED_CHART_MODULE = path.resolve(process.cwd(), 'src/components/DeferredShotLabCharts.jsx')
 const DEFERRED_LEADERBOARDS_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPremiumLeaderboardsHub.jsx')
 const DEFERRED_COACH_PHASE2_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPhase2.jsx')
+const DEFERRED_CAREER_HISTORY_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPlayerCareerHistory.jsx')
 
 function deferProgressCharts() {
   return {
@@ -53,6 +55,20 @@ function deferCoachPhase2Intelligence() {
   }
 }
 
+function deferPlayerCareerHistory() {
+  return {
+    name: 'shotlab-defer-player-career-history',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (source === STATIC_CAREER_HISTORY_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_CAREER_HISTORY_MODULE
+      }
+      return null
+    },
+  }
+}
+
 function stableVendorChunk(id) {
   const moduleId = normalizeModuleId(id)
 
@@ -64,15 +80,24 @@ function stableVendorChunk(id) {
     return 'react-vendor'
   }
 
-  if (moduleId.includes('/vendor/recharts/')) {
-    return 'charts-vendor'
+  if (
+    moduleId.includes('/src/components/PremiumLeaderboardsHub.jsx')
+    || moduleId.includes('/src/lib/seasonLeaderboardAnalytics.js')
+  ) {
+    return 'PremiumLeaderboardsHub'
   }
 
   return undefined
 }
 
 export default defineConfig({
-  plugins: [deferProgressCharts(), deferLeaderboardAnalytics(), deferCoachPhase2Intelligence(), react()],
+  plugins: [
+    deferProgressCharts(),
+    deferLeaderboardAnalytics(),
+    deferCoachPhase2Intelligence(),
+    deferPlayerCareerHistory(),
+    react(),
+  ],
   base: './',
   build: {
     outDir: 'dist',

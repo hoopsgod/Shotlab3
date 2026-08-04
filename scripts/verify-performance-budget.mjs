@@ -58,6 +58,7 @@ assets.sort((left, right) => right.bytes - left.bytes)
 const javaScript = assets.filter((asset) => asset.type === 'js')
 const css = assets.filter((asset) => asset.type === 'css')
 const largestJavaScript = javaScript[0] || { file: 'none', bytes: 0, gzipBytes: 0 }
+const largestCss = css[0] || { file: 'none', bytes: 0, gzipBytes: 0 }
 
 const metrics = {
   generatedAt: new Date().toISOString(),
@@ -71,6 +72,7 @@ const metrics = {
     cssGzipBytes: sum(css, 'gzipBytes'),
   },
   largestJavaScript,
+  largestCss,
   assets,
 }
 
@@ -80,6 +82,9 @@ if (largestJavaScript.bytes > budget.maxLargestJavaScriptBytes) {
 }
 if (metrics.totals.javaScriptGzipBytes > budget.maxTotalJavaScriptGzipBytes) {
   failures.push(`Total JavaScript gzip is ${formatBytes(metrics.totals.javaScriptGzipBytes)}; budget is ${formatBytes(budget.maxTotalJavaScriptGzipBytes)}.`)
+}
+if (largestCss.bytes > budget.maxLargestCssBytes) {
+  failures.push(`Largest CSS chunk ${largestCss.file} is ${formatBytes(largestCss.bytes)}; budget is ${formatBytes(budget.maxLargestCssBytes)}.`)
 }
 if (metrics.totals.cssGzipBytes > budget.maxTotalCssGzipBytes) {
   failures.push(`Total CSS gzip is ${formatBytes(metrics.totals.cssGzipBytes)}; budget is ${formatBytes(budget.maxTotalCssGzipBytes)}.`)
@@ -99,6 +104,7 @@ console.table(assets.map((asset) => ({
   gzip: formatBytes(asset.gzipBytes),
 })))
 console.log(`Largest JS: ${largestJavaScript.file} (${formatBytes(largestJavaScript.bytes)} raw, ${formatBytes(largestJavaScript.gzipBytes)} gzip)`)
+console.log(`Largest CSS: ${largestCss.file} (${formatBytes(largestCss.bytes)} raw, ${formatBytes(largestCss.gzipBytes)} gzip)`)
 console.log(`Total JS: ${formatBytes(metrics.totals.javaScriptBytes)} raw, ${formatBytes(metrics.totals.javaScriptGzipBytes)} gzip`)
 console.log(`Total CSS: ${formatBytes(metrics.totals.cssBytes)} raw, ${formatBytes(metrics.totals.cssGzipBytes)} gzip`)
 console.log(`Report: ${path.relative(rootDir, reportPath)}`)
