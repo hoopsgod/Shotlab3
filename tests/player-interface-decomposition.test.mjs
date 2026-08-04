@@ -75,12 +75,10 @@ test('Player interface uses one accessible polished loading system', () => {
   assert.match(fallbackSource, /data-loading-variant=\{variant\}/)
 })
 
-test('Daily Command Center uses Player-isolated primitives rather than Coach operational primitives', () => {
-  assert.match(dailySource, /from ["']\.\/ExperiencePrimitives\.jsx["']/)
-  assert.match(viteConfig, /name:\s*["']shotlab-isolate-player-daily-primitives["']/)
-  assert.match(viteConfig, /source === STATIC_PLAYER_DAILY_PRIMITIVES_IMPORT/)
-  assert.match(viteConfig, /importerId\.endsWith\(PLAYER_DAILY_MODULE_SUFFIX\)/)
-  assert.match(viteConfig, /PlayerDailyPrimitives\.jsx/)
+test('Daily Command Center imports Player-isolated primitives directly', () => {
+  assert.match(dailySource, /from ["']\.\/PlayerDailyPrimitives\.jsx["']/)
+  assert.doesNotMatch(dailySource, /from ["']\.\/ExperiencePrimitives\.jsx["']/)
+  assert.doesNotMatch(viteConfig, /shotlab-isolate-player-daily-primitives/)
   for (const exportName of ['ExperiencePill', 'ExperienceProgressRing', 'ExperienceSignal']) {
     assert.match(dailyPrimitives, new RegExp(`export function ${exportName}`))
   }
