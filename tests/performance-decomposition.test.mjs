@@ -124,8 +124,8 @@ test('shared season analytics stay inside the leaderboard chunk without restorin
 test('the performance verifier locks both startup JavaScript and startup CSS', () => {
   assert.match(verifierSource, /const largestCss = css\[0\]/)
   assert.match(verifierSource, /largestCss\.bytes > budget\.maxLargestCssBytes/)
-  assert.equal(performanceBudget.maxLargestJavaScriptBytes, 910000)
-  assert.equal(performanceBudget.maxLargestCssBytes, 192000)
-  assert.equal(performanceBudget.maxTotalCssGzipBytes, 73500)
+  assert.equal(performanceBudget.maxLargestJavaScriptBytes, 885000)
+  assert.equal(performanceBudget.maxLargestCssBytes, 172000)
+  assert.equal(performanceBudget.maxTotalCssGzipBytes, 74000)
   assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })
