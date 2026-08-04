@@ -91,11 +91,11 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     let context = await readRequesterContext();
     if (context.requester || typeof globalThis?.localStorage?.getItem !== "function") return context;
 
-    // Authentication and demo entry render the workspace before their durable
-    // session write has necessarily settled. Retry briefly so the first player
-    // data request uses the signed-in identity instead of stale local fallback.
-    for (let attempt = 0; attempt < 4 && !context.requester; attempt += 1) {
-      await wait(25);
+    // Authentication and demo entry can commit the workspace before the durable
+    // session write completes. Hold the first identity-dependent request at this
+    // boundary instead of accepting stale local data for the rest of the session.
+    for (let attempt = 0; attempt < 40 && !context.requester; attempt += 1) {
+      await wait(50);
       context = await readRequesterContext();
     }
     return context;
