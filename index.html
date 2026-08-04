@@ -14,7 +14,8 @@
   <script>
     (function () {
       try {
-        var queryDemo = new URLSearchParams(window.location.search).get('demo') === '1';
+        var requestedDemo = String(new URLSearchParams(window.location.search).get('demo') || '').toLowerCase();
+        var queryDemo = requestedDemo === '1' || requestedDemo === 'player' || requestedDemo === 'coach';
         var demoEmails = ['demo@shotlab.app', 'coach.demo@shotlab.app'];
         var clearStaleDemoAuth = function (storage) {
           if (!storage) return;
@@ -89,6 +90,11 @@
         var sheet = document.getElementById(id);
         if (sheet) document.head.appendChild(sheet);
       });
+
+      var requestedDemo = String(new URLSearchParams(window.location.search).get('demo') || '').toLowerCase();
+      var directDemoRequested = requestedDemo === 'player' || requestedDemo === 'coach';
+      var directDemoStarted = false;
+
       var revealDemoActions = function () {
         document.querySelectorAll('.auth-demo-enter').forEach(function (node) {
           node.style.setProperty('display','flex','important');
@@ -97,8 +103,26 @@
           node.style.setProperty('pointer-events','auto','important');
         });
       };
-      revealDemoActions();
-      new MutationObserver(revealDemoActions).observe(document.getElementById('root'), { childList:true, subtree:true });
+
+      var enterRequestedDemo = function () {
+        if (!directDemoRequested || directDemoStarted) return;
+        var buttons = Array.prototype.slice.call(document.querySelectorAll('.auth-demo-enter button'));
+        var expectedLabel = requestedDemo === 'coach' ? 'demo coach' : 'demo player';
+        var target = buttons.find(function (button) {
+          return String(button.textContent || '').trim().toLowerCase() === expectedLabel;
+        });
+        if (!target) return;
+        directDemoStarted = true;
+        target.click();
+      };
+
+      var refreshAuthEntry = function () {
+        revealDemoActions();
+        enterRequestedDemo();
+      };
+
+      refreshAuthEntry();
+      new MutationObserver(refreshAuthEntry).observe(document.getElementById('root'), { childList:true, subtree:true });
     }, { once: true });
   </script>
 </body>
