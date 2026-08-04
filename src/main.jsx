@@ -4,6 +4,7 @@ import ReleaseReadinessBoundary from './components/ReleaseReadinessBoundary.jsx'
 import RuntimeErrorBoundary from './components/RuntimeErrorBoundary.jsx'
 import { checkBackendHealth, getBackendStatusLabel, logBackendHealth } from './lib/backendHealth.js'
 import { clearStaleDemoSession, isDemoRuntimeEnabled } from './lib/runtimeReleaseReadiness.js'
+import { installPlayerAssignmentEnhancer } from './lib/playerAssignmentEnhancer.js'
 import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
@@ -112,6 +113,7 @@ function renderStartupError(message) {
 
 markBoot('main_executed')
 registerRuntimeListeners()
+installPlayerAssignmentEnhancer()
 
 window.addEventListener('error', event => {
   const message = event?.error?.message || event?.message || 'Unexpected runtime error before app mount.'
