@@ -8,6 +8,7 @@ const semanticSource = read("src/theme/semanticColors.js");
 const tokenSource = read("src/theme/appTokens.js");
 const themeSource = read("src/theme/buildThemeTokens.js");
 const appSource = read("src/App.jsx");
+const legacyStylesSource = read("src/styles/appLegacyStyles.js");
 const statusSource = read("src/components/SemanticStatus.jsx");
 const statusCss = read("src/components/SemanticStatus.module.css");
 const mobileCss = read("src/components/MobileNavigation.module.css");
@@ -45,14 +46,14 @@ test("page identity and semantic status colors use separate roles", () => {
   assert.match(appSource, /events:\{accent:"var\(--semantic-info\)"/);
   assert.match(appSource, /sc:\{accent:"var\(--semantic-neutral\)"/);
   assert.match(appSource, /players:\{accent:"var\(--team-brand-secondary/);
-  assert.doesNotMatch(appSource, /eventsDatePill[^\n]+#FFC400/);
-  assert.match(appSource, /eventsDatePill[^\n]+var\(--semantic-info-surface\)/);
+  assert.doesNotMatch(legacyStylesSource, /eventsDatePill[^\n]+#FFC400/);
+  assert.match(legacyStylesSource, /eventsDatePill[^\n]+var\(--semantic-info-surface\)/);
 });
 
 test("team branding cannot repaint semantic badges", () => {
-  assert.match(appSource, /\.team-brand \.chip:not\(\[data-tone\]\)/);
-  assert.match(appSource, /\.team-brand \[class\*="badge"\]:not\(\[data-tone\]\)/);
-  assert.doesNotMatch(appSource, /\.team-brand \.chip,\.team-brand \.badge,\[class\*="chip"\],\[class\*="badge"\]/);
+  assert.match(legacyStylesSource, /\.team-brand \.chip:not\(\[data-tone\]\)/);
+  assert.match(legacyStylesSource, /\.team-brand \[class\*="badge"\]:not\(\[data-tone\]\)/);
+  assert.doesNotMatch(legacyStylesSource, /\.team-brand \.chip,\.team-brand \.badge,\[class\*="chip"\],\[class\*="badge"\]/);
   assert.match(statusSource, /data-tone=\{safeTone\}/);
   assert.match(statusCss, /data-tone="success"/);
   assert.match(statusCss, /data-tone="warning"/);
