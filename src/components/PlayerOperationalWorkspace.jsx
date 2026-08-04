@@ -21,6 +21,8 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
     onMetric?.(metric);
     if (metric?.action) scheduleWorkspaceActionReveal(metric.action);
   };
+  const metrics = model.metrics || [];
+
   return (
     <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`}>
       <div className={styles.commandBar}>
@@ -39,24 +41,31 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
         )}
       </div>
       <div className={styles.metrics} aria-label={`${model.title} metrics`}>
-        {(model.metrics || []).map((metric) => {
+        {metrics.map((metric, index) => {
           const interactive = Boolean(metric?.filter || metric?.action);
-          const metricClassName = `${styles.metric} ${interactive ? styles.metricInteractive : styles.metricStatic} ${activeMetric === metric.id ? styles.metricActive : ""}`;
+          const hierarchyClass = index === 0 ? styles.metricPrimary : styles.metricSupporting;
+          const metricClassName = `${styles.metric} ${hierarchyClass} ${interactive ? styles.metricInteractive : styles.metricStatic} ${activeMetric === metric.id ? styles.metricActive : ""}`;
+          const sharedProps = {
+            key: metric.id,
+            className: metricClassName,
+            "data-interactive": interactive ? "true" : "false",
+            "data-metric-priority": index === 0 ? "primary" : "supporting",
+          };
+
           if (!interactive) {
             return (
-              <div key={metric.id} className={metricClassName} data-interactive="false">
+              <div {...sharedProps}>
                 <MetricContent metric={metric} />
               </div>
             );
           }
+
           return (
             <button
               type="button"
-              key={metric.id}
-              className={metricClassName}
+              {...sharedProps}
               onClick={() => runMetric(metric)}
               aria-pressed={activeMetric === metric.id}
-              data-interactive="true"
             >
               <MetricContent metric={metric} />
             </button>
