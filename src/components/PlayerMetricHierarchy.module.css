@@ -1,0 +1,42 @@
+.metricsHierarchy{
+  grid-template-columns:minmax(0,1.55fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
+  align-items:stretch;
+}
+.metricPrimary{
+  min-height:112px!important;
+  border-color:color-mix(in srgb,var(--accent) 28%,rgba(255,255,255,.07))!important;
+  background:
+    radial-gradient(circle at 100% 0%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 58%),
+    linear-gradient(145deg,rgba(255,255,255,.055),transparent 54%),
+    rgba(17,19,20,.94)!important;
+  box-shadow:0 18px 42px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.04)!important;
+}
+.metricPrimary::after{opacity:1!important}
+.metricPrimary [class*="metricValue"]{font-size:36px!important}
+.metricSupporting{
+  min-height:94px!important;
+  box-shadow:none!important;
+  background:rgba(14,16,17,.72)!important;
+}
+.metricSupporting [class*="metricValue"]{font-size:27px!important}
+@media(max-width:700px){
+  .metricsHierarchy{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+  .metricPrimary{
+    grid-column:1 / -1!important;
+    min-height:104px!important;
+  }
+  .metricSupporting{
+    min-height:84px!important;
+    padding:12px!important;
+  }
+  .metricPrimary [class*="metricValue"]{font-size:34px!important}
+  .metricSupporting [class*="metricValue"]{font-size:24px!important}
+  .metricSupporting [class*="metricDetail"]{white-space:normal!important;line-height:1.2!important}
+}
+@media(max-width:390px){
+  .metricSupporting [class*="metricLabel"]{font-size:8px!important;letter-spacing:.04em!important}
+  .metricSupporting [class*="metricValue"]{font-size:22px!important}
+}
