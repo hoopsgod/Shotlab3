@@ -7,10 +7,12 @@ const APP_MODULE_SUFFIX = '/src/App.jsx'
 const STATIC_CHART_IMPORT = './components/ShotLabCharts'
 const STATIC_LEADERBOARDS_IMPORT = './components/PremiumLeaderboardsHub'
 const STATIC_COACH_PHASE2_IMPORT = './components/CoachDashboardPhase2.jsx'
+const STATIC_COACH_INTERACTIVE_IMPORT = './components/CoachInteractiveDashboards.jsx'
 const STATIC_CAREER_HISTORY_IMPORT = './components/PlayerCareerHistory.jsx'
 const DEFERRED_CHART_MODULE = path.resolve(process.cwd(), 'src/components/DeferredShotLabCharts.jsx')
 const DEFERRED_LEADERBOARDS_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPremiumLeaderboardsHub.jsx')
 const DEFERRED_COACH_PHASE2_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPhase2.jsx')
+const DEFERRED_COACH_INTERACTIVE_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachInteractiveDashboards.jsx')
 const DEFERRED_CAREER_HISTORY_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPlayerCareerHistory.jsx')
 
 function deferProgressCharts() {
@@ -55,6 +57,20 @@ function deferCoachPhase2Intelligence() {
   }
 }
 
+function deferCoachInteractiveDashboards() {
+  return {
+    name: 'shotlab-defer-coach-interactive-dashboards',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (source === STATIC_COACH_INTERACTIVE_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_COACH_INTERACTIVE_MODULE
+      }
+      return null
+    },
+  }
+}
+
 function deferPlayerCareerHistory() {
   return {
     name: 'shotlab-defer-player-career-history',
@@ -87,6 +103,15 @@ function stableVendorChunk(id) {
     return 'PremiumLeaderboardsHub'
   }
 
+  if (
+    moduleId.includes('/src/components/CoachDashboardPhase2.jsx')
+    || moduleId.includes('/src/components/CoachInteractiveDashboards.jsx')
+    || moduleId.includes('/src/components/SecondaryPageSystem.jsx')
+    || moduleId.includes('/src/components/ExperiencePrimitives.jsx')
+  ) {
+    return 'CoachOperationalWorkspaces'
+  }
+
   return undefined
 }
 
@@ -95,6 +120,7 @@ export default defineConfig({
     deferProgressCharts(),
     deferLeaderboardAnalytics(),
     deferCoachPhase2Intelligence(),
+    deferCoachInteractiveDashboards(),
     deferPlayerCareerHistory(),
     react(),
   ],
