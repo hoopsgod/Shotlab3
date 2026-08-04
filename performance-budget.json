@@ -3,7 +3,9 @@
   "targetLargestJavaScriptBytes": 650000,
   "maxTotalJavaScriptGzipBytes": 350000,
   "targetTotalJavaScriptGzipBytes": 348000,
-  "maxTotalCssGzipBytes": 69000,
+  "maxTotalCssGzipBytes": 61000,
   "targetTotalCssGzipBytes": 50000,
-  "maxJavaScriptFileCount": 8
+  "maxJavaScriptFileCount": 8,
+  "maxCssFileCount": 4,
+  "maxIgnoredCssFiles": 0
 }

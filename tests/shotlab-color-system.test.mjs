@@ -52,11 +52,12 @@ test("secondary coach pages and Team Store share the same product language", () 
   assert.match(css, /\.ts-field input,[\s\S]*font-size:16px/);
 });
 
-test("loading shell, accessibility, and V3 entry points remain intact", () => {
+test("loading shell, accessibility, and runtime CSS entry points remain intact", () => {
   assert.match(html, /<meta name="theme-color" content="#F5F5F2"/);
   assert.match(html, /name="color-scheme" content="light"/);
-  assert.match(html, /href="\/shotlab-v3-foundation\.css"/);
-  assert.match(html, /href="\/shotlab-v3-mobile-corrections\.css"/);
+  assert.match(html, /id="shotlab-runtime-authority"[^>]+href="\/shotlab-runtime\.css"/);
+  assert.doesNotMatch(html, /href="\/shotlab-v3-foundation\.css"/);
+  assert.doesNotMatch(html, /href="\/shotlab-v3-mobile-corrections\.css"/);
   assert.match(html, /id="team-store-root"/);
   assert.match(html, /src="\/src\/main\.jsx"/);
   assert.match(html, /src="\/src\/teamStoreEntry\.jsx"/);

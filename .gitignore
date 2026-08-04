@@ -6,6 +6,10 @@ test-results/
 *.log
 .env
 
+# Generated runtime CSS authority
+public/shotlab-runtime.css
+public/shotlab-runtime-manifest.json
+
 # Native signing and local Xcode state
 build/
 DerivedData/
