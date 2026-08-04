@@ -8,6 +8,7 @@ const sanitizePriorityMap = (value) => Object.fromEntries(
     .map(([teamId, priorities]) => [String(teamId || "").trim(), sanitizeCoachPriorities(priorities)])
     .filter(([teamId]) => Boolean(teamId)),
 );
+const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 const readJson = async (response) => {
   try {
@@ -73,7 +74,7 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     return nextValue;
   };
 
-  const getRequesterContext = async () => {
+  const readRequesterContext = async () => {
     const browserSession = readBrowserValue(STORAGE_KEYS.sessions);
     const storedSession = browserSession || await db.get(STORAGE_KEYS.sessions);
     const session = Array.isArray(storedSession) ? storedSession[0] : storedSession;
@@ -84,6 +85,20 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     const actor = (Array.isArray(storedPlayers) ? storedPlayers : []).find((player) => normalizeIdentity(player?.email) === requester);
     const teamId = String(actor?.teamId || actor?.team_id || "").trim();
     return { requester, teamId };
+  };
+
+  const getRequesterContext = async () => {
+    let context = await readRequesterContext();
+    if (context.requester || typeof globalThis?.localStorage?.getItem !== "function") return context;
+
+    // Authentication and demo entry render the workspace before their durable
+    // session write has necessarily settled. Retry briefly so the first player
+    // data request uses the signed-in identity instead of stale local fallback.
+    for (let attempt = 0; attempt < 4 && !context.requester; attempt += 1) {
+      await wait(25);
+      context = await readRequesterContext();
+    }
+    return context;
   };
 
   const getPlayerPriorities = async () => {
