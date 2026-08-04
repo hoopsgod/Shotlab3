@@ -1,5 +1,5 @@
 {
-  "maxLargestJavaScriptBytes": 1025000,
+  "maxLargestJavaScriptBytes": 1000000,
   "maxTotalJavaScriptGzipBytes": 360000,
   "maxTotalCssGzipBytes": 72000,
   "maxJavaScriptFileCount": 8
