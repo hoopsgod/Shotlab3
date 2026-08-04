@@ -16,6 +16,12 @@ const DEFERRED_COACH_COMMAND_CENTER_MODULE = path.resolve(process.cwd(), 'src/co
 const DEFERRED_COACH_PHASE2_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPhase2.jsx')
 const DEFERRED_COACH_INTERACTIVE_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachInteractiveDashboards.jsx')
 const DEFERRED_CAREER_HISTORY_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPlayerCareerHistory.jsx')
+const COACH_ADMIN_REDIRECTS = new Map([
+  ['./components/NewSeasonWizard.jsx', path.resolve(process.cwd(), 'src/components/DeferredNewSeasonWizard.jsx')],
+  ['./components/CoachPlayerInviteForm.jsx', path.resolve(process.cwd(), 'src/components/DeferredCoachPlayerInviteForm.jsx')],
+  ['./components/CoachProgramScoreDrawer.jsx', path.resolve(process.cwd(), 'src/components/DeferredCoachProgramScoreDrawer.jsx')],
+  ['./screens/CoachTeamBrandingScreen', path.resolve(process.cwd(), 'src/components/DeferredCoachTeamBrandingScreen.jsx')],
+])
 
 function deferProgressCharts() {
   return {
@@ -101,6 +107,18 @@ function deferPlayerCareerHistory() {
   }
 }
 
+function deferCoachAdministration() {
+  return {
+    name: 'shotlab-defer-coach-administration',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (!importerId.endsWith(APP_MODULE_SUFFIX)) return null
+      return COACH_ADMIN_REDIRECTS.get(source) || null
+    },
+  }
+}
+
 function stableVendorChunk(id) {
   const moduleId = normalizeModuleId(id)
 
@@ -117,6 +135,22 @@ function stableVendorChunk(id) {
     || moduleId.includes('/src/lib/seasonLeaderboardAnalytics.js')
   ) {
     return 'PremiumLeaderboardsHub'
+  }
+
+  if (
+    moduleId.includes('/src/components/ShotLabCharts.jsx')
+    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')
+  ) {
+    return 'PlayerProfileWorkspaces'
+  }
+
+  if (
+    moduleId.includes('/src/components/NewSeasonWizard.jsx')
+    || moduleId.includes('/src/components/CoachPlayerInviteForm.jsx')
+    || moduleId.includes('/src/components/CoachProgramScoreDrawer.jsx')
+    || moduleId.includes('/src/screens/CoachTeamBrandingScreen.jsx')
+  ) {
+    return 'CoachAdministrationWorkspaces'
   }
 
   if (
@@ -140,6 +174,7 @@ export default defineConfig({
     deferCoachPhase2Intelligence(),
     deferCoachInteractiveDashboards(),
     deferPlayerCareerHistory(),
+    deferCoachAdministration(),
     react(),
   ],
   base: './',

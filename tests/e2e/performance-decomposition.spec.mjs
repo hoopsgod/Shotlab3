@@ -102,18 +102,35 @@ const implementationLoaded = (page, moduleName, wrapperName) => page.evaluate(
   { implementation: moduleName, wrapper: wrapperName },
 )
 
-const coachOperationalLoaded = (page) => page.evaluate(() => performance
-  .getEntriesByType('resource')
-  .some((entry) => {
-    const resourceName = String(entry.name)
-    const isImplementation = [
-      'CoachOperationalWorkspaces',
-      'CoachCommandCenter',
-      'CoachDashboardPhase2',
-      'CoachInteractiveDashboards',
-    ].some((moduleName) => resourceName.includes(moduleName))
-    return isImplementation && !resourceName.includes('DeferredCoach')
-  }))
+const routeChunkLoaded = (page, moduleNames, excludedNames = []) => page.evaluate(
+  ({ names, excluded }) => performance
+    .getEntriesByType('resource')
+    .some((entry) => {
+      const resourceName = String(entry.name)
+      const matches = names.some((moduleName) => resourceName.includes(moduleName))
+      const excludedMatch = excluded.some((moduleName) => resourceName.includes(moduleName))
+      return matches && !excludedMatch
+    }),
+  { names: moduleNames, excluded: excludedNames },
+)
+
+const playerProfileLoaded = (page) => routeChunkLoaded(
+  page,
+  ['PlayerProfileWorkspaces', 'ShotLabCharts', 'PlayerCareerHistory'],
+  ['DeferredShotLabCharts', 'DeferredPlayerCareerHistory'],
+)
+
+const coachOperationalLoaded = (page) => routeChunkLoaded(
+  page,
+  ['CoachOperationalWorkspaces', 'CoachCommandCenter', 'CoachDashboardPhase2', 'CoachInteractiveDashboards'],
+  ['DeferredCoach'],
+)
+
+const coachAdministrationLoaded = (page) => routeChunkLoaded(
+  page,
+  ['CoachAdministrationWorkspaces', 'NewSeasonWizard', 'CoachPlayerInviteForm', 'CoachProgramScoreDrawer', 'CoachTeamBrandingScreen'],
+  ['DeferredNewSeasonWizard', 'DeferredCoachPlayerInviteForm', 'DeferredCoachProgramScoreDrawer', 'DeferredCoachTeamBrandingScreen'],
+)
 
 async function seedStorage(page) {
   await page.addInitScript((payload) => {
@@ -140,20 +157,20 @@ async function openMoreDestination(page, key) {
   await sheet.locator(`[data-nav-key="${key}"]`).click()
 }
 
-test('profile insights load only after the player opens Profile', async ({ page }) => {
+test('Profile workspaces load together only after the player opens Profile', async ({ page }) => {
   await installSafeRoutes(page)
   await seedStorage(page)
 
   await page.goto('/')
-  await expect.poll(() => implementationLoaded(page, 'ShotLabCharts', 'DeferredShotLabCharts')).toBe(false)
-  await expect.poll(() => implementationLoaded(page, 'PlayerCareerHistory', 'DeferredPlayerCareerHistory')).toBe(false)
+  await expect.poll(() => playerProfileLoaded(page)).toBe(false)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
+  await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
   await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
-  await expect.poll(() => implementationLoaded(page, 'ShotLabCharts', 'DeferredShotLabCharts')).toBe(false)
-  await expect.poll(() => implementationLoaded(page, 'PlayerCareerHistory', 'DeferredPlayerCareerHistory')).toBe(false)
+  await expect.poll(() => playerProfileLoaded(page)).toBe(false)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
+  await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
   await openMoreDestination(page, 'profile')
   const workspace = page.getByTestId('progress-charts-workspace')
@@ -162,15 +179,17 @@ test('profile insights load only after the player opens Profile', async ({ page 
   await expect(page.getByTestId('player-career-history')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('progress-charts-loading')).toHaveCount(0)
   await expect(page.getByTestId('player-career-history-loading')).toHaveCount(0)
-  await expect.poll(() => implementationLoaded(page, 'ShotLabCharts', 'DeferredShotLabCharts')).toBe(true)
-  await expect.poll(() => implementationLoaded(page, 'PlayerCareerHistory', 'DeferredPlayerCareerHistory')).toBe(true)
+  await expect.poll(() => playerProfileLoaded(page)).toBe(true)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
+  await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 })
 
 test('leaderboard analytics load only after the player opens Leaderboards', async ({ page }) => {
   await enterPlayer(page)
   await expect.poll(() => implementationLoaded(page, 'PremiumLeaderboardsHub', 'DeferredPremiumLeaderboardsHub')).toBe(false)
+  await expect.poll(() => playerProfileLoaded(page)).toBe(false)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
+  await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
   await openMoreDestination(page, 'leaderboards')
   const workspace = page.getByTestId('deferred-leaderboards-workspace')
@@ -178,15 +197,18 @@ test('leaderboard analytics load only after the player opens Leaderboards', asyn
   await expect(workspace.getByTestId('premium-leaderboards-hub')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('leaderboards-loading')).toHaveCount(0)
   await expect.poll(() => implementationLoaded(page, 'PremiumLeaderboardsHub', 'DeferredPremiumLeaderboardsHub')).toBe(true)
+  await expect.poll(() => playerProfileLoaded(page)).toBe(false)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
+  await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 })
 
-test('Coach operational workspaces stay out of auth and Player, then initialize for Coach', async ({ page }) => {
+test('Coach operational and administration workspaces stay out of auth and Player, then initialize for Coach', async ({ page }) => {
   await installSafeRoutes(page)
   await seedStorage(page)
 
   await page.goto('/')
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
+  await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
   await page.getByRole('button', { name: 'Demo Coach', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
@@ -201,4 +223,5 @@ test('Coach operational workspaces stay out of auth and Player, then initialize 
   await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('coach-players-command-bar')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('coach-interactive-dashboard-loading')).toHaveCount(0)
+  await expect.poll(() => coachAdministrationLoaded(page)).toBe(true)
 })
