@@ -9,14 +9,6 @@ const performanceBudget = JSON.parse(fs.readFileSync('performance-budget.json', 
 
 const boundaries = [
   {
-    appImport: /import PlayersScreen from ["']\.\/screens\/PlayersScreen["']/,
-    wrapperPath: 'src/components/DeferredPlayersScreen.jsx',
-    implementationImport: /import\(["']\.\.\/screens\/PlayersScreen\.jsx["']\)/,
-    redirectSource: "'./screens/PlayersScreen'",
-    implementationPath: '/src/screens/PlayersScreen.jsx',
-    testId: 'coach-players-screen-loading',
-  },
-  {
     appImport: /import NewSeasonWizard from ["']\.\/components\/NewSeasonWizard\.jsx["']/,
     wrapperPath: 'src/components/DeferredNewSeasonWizard.jsx',
     implementationImport: /import\(["']\.\/NewSeasonWizard\.jsx["']\)/,
@@ -54,6 +46,8 @@ test('residual Coach administration imports are redirected only from App', () =>
   assert.match(viteConfig, /name:\s*["']shotlab-defer-coach-administration["']/)
   assert.match(viteConfig, /!importerId\.endsWith\(APP_MODULE_SUFFIX\)/)
   assert.match(viteConfig, /COACH_ADMIN_REDIRECTS\.get\(source\)/)
+  assert.doesNotMatch(viteConfig, /DeferredPlayersScreen/)
+  assert.doesNotMatch(viteConfig, /\/src\/screens\/PlayersScreen\.jsx/)
 
   for (const boundary of boundaries) {
     assert.match(appSource, boundary.appImport)
@@ -70,7 +64,7 @@ test('every Coach administration wrapper preserves the default component contrac
     assert.match(wrapperSource, /<Suspense fallback=/)
     assert.ok(wrapperSource.includes(boundary.testId))
     assert.match(wrapperSource, /\{\.\.\.props\}/)
-    assert.doesNotMatch(wrapperSource, /^import .*PlayersScreen|^import .*NewSeasonWizard|^import .*CoachPlayerInviteForm|^import .*CoachProgramScoreDrawer|^import .*CoachTeamBrandingScreen/m)
+    assert.doesNotMatch(wrapperSource, /^import .*NewSeasonWizard|^import .*CoachPlayerInviteForm|^import .*CoachProgramScoreDrawer|^import .*CoachTeamBrandingScreen/m)
   }
 })
 
