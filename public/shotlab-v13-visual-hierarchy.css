@@ -54,6 +54,61 @@ html body #root .mcShellV3 .mcAvatar--fallback{
   -webkit-text-fill-color:#b8e52d!important;
 }
 
+/* Player Mission Control: use the same light operational canvas as Coach.
+   Dark surfaces are reserved for the primary mission and focused progress modules. */
+html body #root [data-testid="player-daily-command-center"]{
+  overflow:visible!important;
+  border:1px solid rgba(17,20,17,.09)!important;
+  border-radius:28px!important;
+  background:linear-gradient(180deg,#f8f7f3 0%,#f1f2ed 100%)!important;
+  box-shadow:0 22px 54px rgba(17,20,17,.12),inset 0 1px rgba(255,255,255,.82)!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+html body #root [data-testid="player-daily-command-center"]::before{
+  opacity:0!important;
+}
+html body #root [data-testid="player-daily-command-center"] > div:first-child{
+  padding:0 2px!important;
+}
+html body #root [data-testid="player-daily-command-center"] > div:first-child > div:first-child{
+  color:#718b20!important;
+  -webkit-text-fill-color:#718b20!important;
+}
+html body #root [data-testid="player-daily-command-center"] > div:first-child > div:last-child{
+  border-color:rgba(113,139,32,.24)!important;
+  background:rgba(113,139,32,.08)!important;
+  color:#61791b!important;
+  -webkit-text-fill-color:#61791b!important;
+}
+html body #root [data-testid="player-daily-command-center"] > div:nth-child(2){
+  border-color:rgba(17,20,17,.12)!important;
+  background:
+    radial-gradient(circle at 92% 0%,rgba(200,255,26,.10),transparent 36%),
+    linear-gradient(150deg,#171b19,#0d1113)!important;
+  box-shadow:0 20px 44px rgba(17,20,17,.20),inset 0 1px rgba(255,255,255,.05)!important;
+}
+html body #root [data-testid="player-coach-priority-signal"]{
+  border:1px solid rgba(17,20,17,.10)!important;
+  background:#fff!important;
+  box-shadow:0 10px 26px rgba(17,20,17,.08)!important;
+}
+html body #root [data-testid="player-coach-priority-signal"]::before{
+  width:3px!important;
+  inset:15px auto 15px 0!important;
+}
+html body #root [data-testid="player-coach-priority-signal"] h2{
+  color:#171b18!important;
+  -webkit-text-fill-color:#171b18!important;
+}
+html body #root [data-testid="player-coach-priority-signal"] span{
+  box-shadow:none!important;
+}
+html body #root [data-testid="player-daily-command-center"] [data-testid="player-daily-momentum-signal"]{
+  border-radius:22px!important;
+  box-shadow:0 14px 34px rgba(17,20,17,.16)!important;
+}
+
 /* Player workspaces: promote the outcome metric, then quiet the three supporting metrics. */
 @media(max-width:700px){
   [data-testid^="player-workspace-"] > div:nth-of-type(2){
@@ -140,5 +195,8 @@ html body #root [data-role="coach"] .page{
     grid-column:3!important;
     justify-self:start!important;
     margin-top:5px!important;
+  }
+  html body #root [data-testid="player-daily-command-center"]{
+    border-radius:24px!important;
   }
 }
