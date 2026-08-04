@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { ExperiencePill, ExperienceProgressRing, ExperienceSignal } from "./ExperiencePrimitives.jsx";
+import { ExperiencePill, ExperienceProgressRing, ExperienceSignal } from "./PlayerDailyPrimitives.jsx";
 import styles from "./PlayerDailyCommandCenter.module.css";
 
 const urgencyLabel = (urgency = "normal") => {

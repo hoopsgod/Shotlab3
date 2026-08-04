@@ -30,11 +30,25 @@ on:
       - src/components/DeferredPlayerCareerHistory.jsx
       - src/components/PlayerCareerHistory.jsx
       - src/components/PlayerCareerHistory.module.css
+      - src/components/DeferredPlayerDashboardHeader.jsx
+      - src/components/DeferredPlayerDailyCommandCenter.jsx
+      - src/components/DeferredPlayerOperationalWorkspace.jsx
+      - src/components/PlayerInterfaceFallback.jsx
+      - src/components/PlayerInterfaceFallback.module.css
+      - src/components/PlayerDashboardHeader.jsx
+      - src/components/PlayerDashboardHeader.module.css
+      - src/components/PlayerDailyCommandCenter.jsx
+      - src/components/PlayerDailyCommandCenter.module.css
+      - src/components/PlayerDailyPrimitives.jsx
+      - src/components/PlayerDailyPrimitives.module.css
       - src/components/PlayerOperationalWorkspace.jsx
       - src/components/PlayerOperationalWorkspace.module.css
+      - src/components/PlayerCoachAssignmentCard.jsx
+      - src/components/PlayerCoachAssignmentCard.module.css
       - src/lib/playerOperationalWorkspaces.js
       - vite.config.js
       - tests/performance-decomposition.test.mjs
+      - tests/player-interface-decomposition.test.mjs
       - tests/player-operational-workspaces.test.mjs
       - tests/player-experience-phase-2-contract.test.mjs
       - tests/e2e/performance-decomposition.spec.mjs
@@ -67,7 +81,7 @@ jobs:
         run: npm ci
 
       - name: Verify workspace selectors and source contracts
-        run: node --test tests/player-operational-workspaces.test.mjs tests/player-experience-phase-2-contract.test.mjs tests/player-daily-command-center.test.mjs tests/player-experience-phase-1-contract.test.mjs tests/performance-decomposition.test.mjs
+        run: node --test tests/player-operational-workspaces.test.mjs tests/player-experience-phase-2-contract.test.mjs tests/player-daily-command-center.test.mjs tests/player-experience-phase-1-contract.test.mjs tests/performance-decomposition.test.mjs tests/player-interface-decomposition.test.mjs
 
       - name: Install pinned Playwright test runner
         run: npm install --no-save --ignore-scripts @playwright/test@1.55.1

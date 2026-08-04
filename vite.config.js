@@ -16,6 +16,11 @@ const DEFERRED_COACH_COMMAND_CENTER_MODULE = path.resolve(process.cwd(), 'src/co
 const DEFERRED_COACH_PHASE2_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPhase2.jsx')
 const DEFERRED_COACH_INTERACTIVE_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachInteractiveDashboards.jsx')
 const DEFERRED_CAREER_HISTORY_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPlayerCareerHistory.jsx')
+const PLAYER_INTERFACE_REDIRECTS = new Map([
+  ['./components/PlayerDashboardHeader', path.resolve(process.cwd(), 'src/components/DeferredPlayerDashboardHeader.jsx')],
+  ['./components/PlayerDailyCommandCenter.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerDailyCommandCenter.jsx')],
+  ['./components/PlayerOperationalWorkspace.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerOperationalWorkspace.jsx')],
+])
 const COACH_ADMIN_REDIRECTS = new Map([
   ['./components/NewSeasonWizard.jsx', path.resolve(process.cwd(), 'src/components/DeferredNewSeasonWizard.jsx')],
   ['./components/CoachPlayerInviteForm.jsx', path.resolve(process.cwd(), 'src/components/DeferredCoachPlayerInviteForm.jsx')],
@@ -107,6 +112,18 @@ function deferPlayerCareerHistory() {
   }
 }
 
+function deferPlayerInterface() {
+  return {
+    name: 'shotlab-defer-player-interface',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (!importerId.endsWith(APP_MODULE_SUFFIX)) return null
+      return PLAYER_INTERFACE_REDIRECTS.get(source) || null
+    },
+  }
+}
+
 function deferCoachAdministration() {
   return {
     name: 'shotlab-defer-coach-administration',
@@ -140,8 +157,18 @@ function stableVendorChunk(id) {
   if (
     moduleId.includes('/src/components/ShotLabCharts.jsx')
     || moduleId.includes('/src/components/PlayerCareerHistory.jsx')
+    || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')
   ) {
     return 'PlayerProfileWorkspaces'
+  }
+
+  if (
+    moduleId.includes('/src/components/PlayerDashboardHeader.jsx')
+    || moduleId.includes('/src/components/PlayerDailyCommandCenter.jsx')
+    || moduleId.includes('/src/components/PlayerDailyPrimitives.jsx')
+    || moduleId.includes('/src/components/PlayerOperationalWorkspace.jsx')
+  ) {
+    return 'PlayerInterfaceWorkspaces'
   }
 
   if (
@@ -174,6 +201,7 @@ export default defineConfig({
     deferCoachPhase2Intelligence(),
     deferCoachInteractiveDashboards(),
     deferPlayerCareerHistory(),
+    deferPlayerInterface(),
     deferCoachAdministration(),
     react(),
   ],

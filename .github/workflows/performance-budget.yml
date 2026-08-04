@@ -8,6 +8,7 @@ on:
       - "src/**"
       - "tests/performance-decomposition.test.mjs"
       - "tests/coach-administration-decomposition.test.mjs"
+      - "tests/player-interface-decomposition.test.mjs"
       - "vendor/**"
       - "index.html"
       - "vite.config.js"
@@ -43,7 +44,7 @@ jobs:
         run: npm ci
 
       - name: Verify performance decomposition contracts
-        run: node --test tests/performance-decomposition.test.mjs tests/coach-administration-decomposition.test.mjs
+        run: node --test tests/performance-decomposition.test.mjs tests/coach-administration-decomposition.test.mjs tests/player-interface-decomposition.test.mjs
 
       - name: Build and enforce performance budget
         run: npm run build:performance
