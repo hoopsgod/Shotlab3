@@ -31,9 +31,8 @@ test("reboot uses restrained typography controls and responsive behavior", () =>
 });
 
 test("visual reboot installs last without adding product writes", () => {
-  const responseIndex = bootstrap.indexOf("installCoachResponseLoopEnhancer();");
+  const playerIndex = bootstrap.indexOf("installPlayerAssignmentEnhancer();");
   const rebootIndex = bootstrap.indexOf("installVisualSystemReboot();");
-  assert.ok(responseIndex >= 0 && rebootIndex > responseIndex);
-  assert.doesNotMatch(bootstrap, /installPlayerAssignmentEnhancer\(\)/);
+  assert.ok(playerIndex >= 0 && rebootIndex > playerIndex);
   assert.doesNotMatch(source, /fetch\(|localStorage|sessionStorage|supabase|XMLHttpRequest|\.insert\(|\.update\(/);
 });
