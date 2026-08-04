@@ -1,25 +1,104 @@
 const DEMO_ACCOUNT_EMAILS = new Set(["demo@shotlab.app", "coach.demo@shotlab.app"]);
+const DEMO_SESSION_KEY = "sl:demoSession";
+const PENDING_DEMO_SESSION_KEY = "sl:pendingDemoSession";
+const LEGACY_DEMO_KEY = "sl:demoMode";
+const APP_SESSION_KEY = "sl:session";
 
 export function isDemoAccount(userOrEmail) {
   const email = typeof userOrEmail === "string" ? userOrEmail : userOrEmail?.email;
   return DEMO_ACCOUNT_EMAILS.has(String(email || "").trim().toLowerCase());
 }
 
+function parseStoredSession(raw) {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed === "string") return { email: parsed };
+    return parsed && typeof parsed === "object" ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function inferPendingDemoEmail() {
+  if (typeof window === "undefined") return "";
+  const requestedDemo = String(new URLSearchParams(window.location.search).get("demo") || "").trim().toLowerCase();
+  if (requestedDemo === "coach") return "coach.demo@shotlab.app";
+  if (requestedDemo === "player") return "demo@shotlab.app";
+
+  const active = document?.activeElement;
+  const activeLabel = String(
+    active?.getAttribute?.("aria-label")
+    || active?.textContent
+    || "",
+  ).trim().toLowerCase();
+  if (activeLabel.includes("demo coach")) return "coach.demo@shotlab.app";
+  if (activeLabel.includes("demo player")) return "demo@shotlab.app";
+  return "";
+}
+
+function clearPersistedDemoAuthSession() {
+  if (typeof window === "undefined") return;
+
+  const candidates = [
+    window.localStorage?.getItem(APP_SESSION_KEY),
+    window.sessionStorage?.getItem(APP_SESSION_KEY),
+  ];
+  const hasDemoSession = candidates.some((raw) => isDemoAccount(parseStoredSession(raw)?.email));
+  if (!hasDemoSession) return;
+
+  window.localStorage?.removeItem(APP_SESSION_KEY);
+  window.sessionStorage?.removeItem(APP_SESSION_KEY);
+
+  // Some builds expose an async storage bridge used by App hydration. Clear the
+  // same key there before the normal unauthenticated route is evaluated.
+  try {
+    const result = window.storage?.set?.(APP_SESSION_KEY, "null", true);
+    result?.catch?.(() => {});
+  } catch {}
+}
+
 export function isDemoMode() {
   if (typeof window === "undefined") return false;
-  const search = window.location.search;
-  // Demo mode is enabled with /?demo=1.
-  const fromQuery = new URLSearchParams(search).get("demo") === "1";
-  const fromStickyFlag = window.localStorage.getItem("sl:demoMode") === "true";
-  return fromQuery || fromStickyFlag;
+
+  const explicitDemo = new URLSearchParams(window.location.search).get("demo") === "1";
+
+  // Demo mode is explicit and query-only. Stored demo state must never bypass login.
+  window.localStorage.removeItem(LEGACY_DEMO_KEY);
+  window.sessionStorage.removeItem(DEMO_SESSION_KEY);
+
+  if (!explicitDemo) clearPersistedDemoAuthSession();
+  return explicitDemo;
 }
 
 export function setDemoMode(enabled) {
   if (typeof window === "undefined") return;
-  if (enabled) window.localStorage.setItem("sl:demoMode", "true");
-  else window.localStorage.removeItem("sl:demoMode");
-}
 
+  // Clear all historical demo persistence. Entry into demo mode must happen through
+  // an explicit demo URL or route, never through browser storage.
+  window.localStorage.removeItem(LEGACY_DEMO_KEY);
+  window.sessionStorage.removeItem(DEMO_SESSION_KEY);
+  window.sessionStorage.removeItem(PENDING_DEMO_SESSION_KEY);
+
+  if (enabled) {
+    // Demo buttons update React state before the durable app session write resolves.
+    // Record only the hard-coded demo identity for that short handoff window so the
+    // first identity-scoped read cannot fall back to another team's stale data.
+    const pendingEmail = inferPendingDemoEmail();
+    if (isDemoAccount(pendingEmail)) {
+      window.sessionStorage.setItem(PENDING_DEMO_SESSION_KEY, JSON.stringify({
+        email: pendingEmail,
+        createdAt: Date.now(),
+      }));
+    }
+    return;
+  }
+
+  clearPersistedDemoAuthSession();
+  const url = new URL(window.location.href);
+  url.searchParams.delete("demo");
+  window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+}
 
 export function isDemoPlayerSessionShotLog(row = {}, { teamId = '' } = {}) {
   const rowEmail = String(row?.email || row?.player_email || row?.playerId || row?.player_id || '').trim().toLowerCase();

@@ -6,29 +6,49 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="ShotLab" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="format-detection" content="telephone=no,date=no,address=no,email=no,url=no" />
-  <meta name="color-scheme" content="dark" />
-  <meta name="theme-color" content="#080B0E" />
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#F5F5F2" />
   <title>ShotLab</title>
+  <script>
+    (function () {
+      try {
+        var requestedDemo = String(new URLSearchParams(window.location.search).get('demo') || '').toLowerCase();
+        var queryDemo = requestedDemo === '1' || requestedDemo === 'player' || requestedDemo === 'coach';
+        document.documentElement.classList.toggle('shotlab-demo', queryDemo);
+      } catch (_) {}
+    })();
+  </script>
   <style>
-    html,body{margin:0;padding:0;background:#080B0E;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+    html,body{margin:0;padding:0;background:#F5F5F2;overflow-x:hidden;-webkit-font-smoothing:antialiased}
     #root{min-height:100dvh}
     #team-store-root{position:relative;z-index:0}
-    .boot-auth-shell{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:calc(28px + env(safe-area-inset-top,0px)) 24px calc(28px + env(safe-area-inset-bottom,0px));box-sizing:border-box;background:radial-gradient(circle at 50% 28%,rgba(200,255,26,.055),transparent 28rem),linear-gradient(180deg,#0D1217,#080B0E)}
+    .boot-auth-shell{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:calc(28px + env(safe-area-inset-top,0px)) 24px calc(28px + env(safe-area-inset-bottom,0px));box-sizing:border-box;background:#F5F5F2}
     .boot-auth-card{width:min(360px,100%);display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
-    .boot-wordmark{display:flex;align-items:baseline;gap:3px;color:#f4f7f8;font:900 clamp(42px,13vw,58px)/.9 "Arial Narrow",Impact,sans-serif;letter-spacing:.035em}
-    .boot-wordmark strong{color:#c8ff1a;font:inherit}
-    .boot-tagline{font:700 10px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.18em;text-transform:uppercase;color:rgba(225,233,237,.62)}
-    .boot-progress{width:124px;height:3px;margin-top:18px;overflow:hidden;border-radius:999px;background:rgba(190,205,214,.10)}
-    .boot-progress span{display:block;width:44%;height:100%;border-radius:inherit;background:#c8ff1a;box-shadow:0 0 10px rgba(200,255,26,.18);animation:boot-progress 1.15s cubic-bezier(.22,.78,.22,1) infinite alternate}
-    .boot-auth-copy{margin-top:4px;font:600 11px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:rgba(202,212,217,.68)}
+    .boot-wordmark{display:flex;align-items:baseline;gap:3px;color:#101310;font:800 clamp(42px,13vw,58px)/.9 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;letter-spacing:-.05em}
+    .boot-wordmark strong{color:#7F9E1E;font:inherit}
+    .boot-tagline{font:700 10px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#6D746F}
+    .boot-progress{width:124px;height:3px;margin-top:18px;overflow:hidden;border-radius:999px;background:rgba(16,19,16,.10)}
+    .boot-progress span{display:block;width:44%;height:100%;border-radius:inherit;background:#7F9E1E;animation:boot-progress 1.15s cubic-bezier(.22,.78,.22,1) infinite alternate}
+    .boot-auth-copy{margin-top:4px;font:600 11px/1.4 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#6D746F}
+    .auth-demo-enter{display:flex!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important}
+    .auth-demo-enter button{opacity:1!important;visibility:visible!important;pointer-events:auto!important}
     @keyframes boot-progress{from{transform:translateX(-95%)}to{transform:translateX(225%)}}
     @media(prefers-reduced-motion:reduce){.boot-progress span{width:100%;animation:none;opacity:.75}}
   </style>
-  <link rel="stylesheet" href="/src/styles/AppStoreExperience.css" />
-  <link rel="stylesheet" href="/mission-control-logo-lock.css" />
-  <link rel="stylesheet" href="/shotlab-color-system.css" />
+  <link id="shotlab-v3-authority" rel="stylesheet" href="/shotlab-v3-foundation.css" />
+  <link id="shotlab-v3-mobile-corrections" rel="stylesheet" href="/shotlab-v3-mobile-corrections.css" />
+  <link id="shotlab-v4-reference" rel="stylesheet" href="/shotlab-v4-reference.css" />
+  <link id="shotlab-v5-coach-integrity" rel="stylesheet" href="/shotlab-v5-coach-integrity.css" />
+  <link id="shotlab-v6-decision-workspaces" rel="stylesheet" href="/shotlab-v6-decision-workspaces.css" />
+  <link id="shotlab-v7-page-authority" rel="stylesheet" href="/shotlab-v7-page-authority.css" />
+  <link id="shotlab-v8-demo-parity" rel="stylesheet" href="/shotlab-v8-demo-parity.css" />
+  <link id="shotlab-v9-secondary-polish" rel="stylesheet" href="/shotlab-v9-secondary-polish.css" />
+  <link id="shotlab-v11-decision-first" rel="stylesheet" href="/shotlab-v11-decision-first.css?v=8a79ecde" />
+  <link id="shotlab-v12-auth-demo-entry" rel="stylesheet" href="/shotlab-v12-auth-demo-entry.css?v=75ba7ae2" />
+  <link id="shotlab-v13-visual-hierarchy" rel="stylesheet" href="/shotlab-v13-visual-hierarchy.css?v=2e468314" />
+  <link id="shotlab-v15-session-integrity" rel="stylesheet" href="/shotlab-v15-session-integrity.css?v=af442c69" />
 </head>
 <body>
   <div id="root">
@@ -44,5 +64,46 @@
   <div id="team-store-root"></div>
   <script type="module" src="/src/main.jsx"></script>
   <script type="module" src="/src/teamStoreEntry.jsx"></script>
+  <script>
+    window.addEventListener('load', function () {
+      ['shotlab-v3-authority','shotlab-v3-mobile-corrections','shotlab-v4-reference','shotlab-v5-coach-integrity','shotlab-v6-decision-workspaces','shotlab-v7-page-authority','shotlab-v8-demo-parity','shotlab-v9-secondary-polish','shotlab-v11-decision-first','shotlab-v12-auth-demo-entry','shotlab-v13-visual-hierarchy','shotlab-v15-session-integrity'].forEach(function (id) {
+        var sheet = document.getElementById(id);
+        if (sheet) document.head.appendChild(sheet);
+      });
+
+      var requestedDemo = String(new URLSearchParams(window.location.search).get('demo') || '').toLowerCase();
+      var directDemoRequested = requestedDemo === 'player' || requestedDemo === 'coach';
+      var directDemoStarted = false;
+
+      var revealDemoActions = function () {
+        document.querySelectorAll('.auth-demo-enter').forEach(function (node) {
+          node.style.setProperty('display','flex','important');
+          node.style.setProperty('opacity','1','important');
+          node.style.setProperty('visibility','visible','important');
+          node.style.setProperty('pointer-events','auto','important');
+        });
+      };
+
+      var enterRequestedDemo = function () {
+        if (!directDemoRequested || directDemoStarted) return;
+        var buttons = Array.prototype.slice.call(document.querySelectorAll('.auth-demo-enter button'));
+        var expectedLabel = requestedDemo === 'coach' ? 'demo coach' : 'demo player';
+        var target = buttons.find(function (button) {
+          return String(button.textContent || '').trim().toLowerCase() === expectedLabel;
+        });
+        if (!target) return;
+        directDemoStarted = true;
+        target.click();
+      };
+
+      var refreshAuthEntry = function () {
+        revealDemoActions();
+        enterRequestedDemo();
+      };
+
+      refreshAuthEntry();
+      new MutationObserver(refreshAuthEntry).observe(document.getElementById('root'), { childList:true, subtree:true });
+    }, { once: true });
+  </script>
 </body>
 </html>

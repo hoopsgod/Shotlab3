@@ -1,0 +1,145 @@
+/* ShotLab V15 — session-safe final presentation authority. */
+
+/* The activation surface is conditional in React; when it exists, it must never
+   be suppressed by legacy dashboard cleanup rules. Keep it compact and aligned
+   with the current light operational hierarchy. */
+html body #root [data-testid="coach-onboarding-state"]{
+  position:relative!important;
+  display:grid!important;
+  grid-template-columns:48px minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:14px!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  margin:0!important;
+  padding:17px 18px!important;
+  overflow:hidden!important;
+  visibility:visible!important;
+  opacity:1!important;
+  border:1px solid rgba(21,24,22,.13)!important;
+  border-radius:20px!important;
+  background:linear-gradient(145deg,#fffefa,#f5f7ef)!important;
+  color:#151816!important;
+  box-shadow:0 12px 30px rgba(22,28,24,.075)!important;
+  filter:none!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+html body #root [data-testid="coach-onboarding-state"]::before{
+  content:""!important;
+  position:absolute!important;
+  inset:0 auto 0 0!important;
+  width:4px!important;
+  background:#78951f!important;
+  opacity:1!important;
+}
+html body #root [data-testid="coach-onboarding-state"]::after{display:none!important}
+html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanIcon{
+  display:grid!important;
+  width:46px!important;
+  height:46px!important;
+  place-items:center!important;
+  border:1px solid rgba(120,149,31,.20)!important;
+  border-radius:15px!important;
+  background:#eef2e3!important;
+  color:#667d2d!important;
+  box-shadow:none!important;
+}
+html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy small{
+  margin:0 0 4px!important;
+  color:#667d2d!important;
+  font-size:10px!important;
+  font-weight:750!important;
+  letter-spacing:.035em!important;
+  text-transform:none!important;
+}
+html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy strong{
+  color:#151816!important;
+  -webkit-text-fill-color:#151816!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif!important;
+  font-size:20px!important;
+  font-weight:760!important;
+  line-height:1.08!important;
+  letter-spacing:-.025em!important;
+}
+html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy em{
+  margin-top:5px!important;
+  color:#5b635e!important;
+  -webkit-text-fill-color:#5b635e!important;
+  font-size:13px!important;
+  line-height:1.4!important;
+}
+html body #root [data-testid="coach-onboarding-state"] .mcActivationProgress{
+  margin-top:10px!important;
+}
+html body #root [data-testid="coach-onboarding-state"] .mcActivationProgressTrack{
+  height:6px!important;
+  background:rgba(21,24,22,.09)!important;
+  box-shadow:none!important;
+}
+html body #root [data-testid="coach-onboarding-state"] .mcActivationProgressTrack span{
+  background:#78951f!important;
+  box-shadow:none!important;
+}
+html body #root [data-testid="coach-onboarding-state"] .mcActivationProgress>strong{
+  color:#69716c!important;
+  -webkit-text-fill-color:#69716c!important;
+}
+html body #root [data-testid="coach-onboarding-state"]>button{
+  min-height:44px!important;
+  padding:0 14px!important;
+  border:1px solid #202421!important;
+  border-radius:13px!important;
+  background:#202421!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  box-shadow:none!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:13px!important;
+  font-weight:720!important;
+}
+html body #root [data-testid="coach-onboarding-state"]>button *{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+
+@media(max-width:700px){
+  html body #root [data-testid="coach-onboarding-state"]{
+    grid-template-columns:42px minmax(0,1fr)!important;
+    gap:10px!important;
+    padding:13px 15px!important;
+    border-radius:18px!important;
+  }
+  html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanIcon{
+    width:40px!important;
+    height:40px!important;
+    border-radius:13px!important;
+  }
+  html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy small{
+    margin-bottom:3px!important;
+    font-size:9px!important;
+  }
+  html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy strong{
+    font-size:18px!important;
+    line-height:1.05!important;
+  }
+  html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy em{
+    margin-top:4px!important;
+    font-size:12px!important;
+    line-height:1.32!important;
+  }
+  html body #root [data-testid="coach-onboarding-state"] .mcActivationProgress{
+    display:none!important;
+  }
+  html body #root [data-testid="coach-onboarding-state"]>button{
+    grid-column:1/-1!important;
+    width:100%!important;
+    min-height:44px!important;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  html body #root [data-testid="coach-onboarding-state"] *,
+  html body #root [data-testid="coach-onboarding-state"]{transition:none!important}
+}

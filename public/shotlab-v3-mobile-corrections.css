@@ -1,0 +1,353 @@
+/* Rendered-mobile corrections. This file must remain the final visual authority. */
+
+body.mission-control-active .mcHero {
+  position: relative !important;
+  display: block !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  padding: 0 !important;
+  background: #fff !important;
+}
+
+body.mission-control-active .mcHero > .mcHeroTeamMark {
+  position: absolute !important;
+  top: 16px !important;
+  right: 16px !important;
+  z-index: 2 !important;
+  display: grid !important;
+  width: 64px !important;
+  height: 64px !important;
+  min-width: 64px !important;
+  min-height: 64px !important;
+  padding: 0 !important;
+  place-items: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+body.mission-control-active .mcHero > .mcHeroTeamMark img {
+  display: block !important;
+  width: 64px !important;
+  height: 64px !important;
+  object-fit: contain !important;
+  filter: none !important;
+}
+
+body.mission-control-active .mcHeroContent {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 8px !important;
+  min-height: 0 !important;
+  padding: 16px !important;
+  padding-right: 94px !important;
+  background: #fff !important;
+}
+
+body.mission-control-active .mcHeroContent .mcEyebrow,
+body.mission-control-active .mcHeroContent h1,
+body.mission-control-active .mcHeroContent > p {
+  grid-column: 1 !important;
+}
+
+body.mission-control-active .mcHeroContent h1 {
+  max-width: 11ch !important;
+  font-size: 32px !important;
+  line-height: .98 !important;
+}
+
+body.mission-control-active .mcHeroContent > p {
+  max-width: 24ch !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+body.mission-control-active .mcRealityStrip,
+body.mission-control-active .mcPrimary {
+  grid-column: 1 !important;
+  margin-right: -78px !important;
+}
+
+body.mission-control-active .mcRealityStrip {
+  margin-top: 4px !important;
+}
+
+body.mission-control-active .mcRealityStrip > button {
+  min-height: 46px !important;
+}
+
+body.mission-control-active .mcPrimary {
+  min-height: 44px !important;
+}
+
+body.mission-control-active [data-testid="coach-primary-objective"] {
+  max-height: 310px !important;
+}
+
+/* Assignment accountability is a secondary workflow, not home-screen priority. */
+@media (max-width: 700px) {
+  body.mission-control-active [data-testid="coach-assignment-accountability"] {
+    display: none !important;
+  }
+
+  body.mission-control-active .missionControl {
+    gap: 14px !important;
+  }
+
+  body.mission-control-active .mcFocusGrid {
+    gap: 14px !important;
+  }
+
+  body.mission-control-active .mcAttention {
+    padding: 16px !important;
+  }
+
+  body.mission-control-active .mcAttentionRow {
+    min-height: 0 !important;
+    padding: 12px !important;
+  }
+
+  body.mission-control-active .mcAttentionRow .mcRowAction {
+    display: none !important;
+  }
+
+  body.mission-control-active .mcAttentionCopy small,
+  body.mission-control-active .mcAttentionMeta {
+    line-height: 1.3 !important;
+  }
+
+  .secondaryPageIntro {
+    padding: 18px !important;
+  }
+
+  .secondaryPageIntro__title {
+    font-size: 38px !important;
+  }
+
+  .secondaryPageIntro__summary {
+    max-width: 32ch !important;
+  }
+
+  .secondaryPageToolbar [class*="metricStrip"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  .ts-header {
+    align-items: center !important;
+  }
+
+  .ts-header h2 {
+    font-size: 30px !important;
+  }
+
+  .ts-coach-content,
+  .ts-player-content {
+    padding: 14px !important;
+  }
+
+  .ts-form-card,
+  .ts-player-view-card,
+  .ts-metrics-card,
+  .ts-partner-start,
+  .ts-preview-card {
+    border-radius: 16px !important;
+  }
+}
+
+/* Premium neutral depth and coach-readable type scale. */
+:root {
+  --v3-canvas: #f1f2ef;
+  --v3-surface: #fcfcfa;
+  --v3-surface-subtle: #e9ece7;
+  --v3-ink: #151816;
+  --v3-muted: #4f5752;
+  --v3-line: rgba(21, 24, 22, .14);
+  --v3-accent: #667d2d;
+  --v3-accent-soft: #e5ead8;
+  --v3-shadow: 0 12px 30px rgba(22, 28, 24, .075);
+}
+
+html,
+body,
+#root {
+  background: var(--v3-canvas) !important;
+}
+
+body {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body.mission-control-active .mcHeader,
+body.mission-control-active .mcHero,
+body.mission-control-active .mcSection,
+body.mission-control-active .mcTodayPlan,
+.secondaryPageIntro,
+.secondaryPageDecision,
+.secondaryPageToolbar [class*="metricStrip"],
+.secondaryPageToolbar [class*="filterRail"],
+.secondaryPageEvidence > *,
+.ts-progress-wrap,
+.ts-form-card,
+.ts-player-view-card,
+.ts-metrics-card,
+.ts-partner-start,
+.ts-fulfillment-note,
+.ts-preview-card {
+  background: var(--v3-surface) !important;
+  border-color: var(--v3-line) !important;
+  box-shadow: var(--v3-shadow) !important;
+}
+
+body.mission-control-active .mcHeroContent,
+body.mission-control-active .mcMobileMenu,
+body.mission-control-active .mcBell,
+body.mission-control-active .mcTeamSelect,
+.secondaryPageAction--secondary,
+.secondaryPageToolbar input,
+.ts-header,
+.ts-close,
+.ts-field input,
+.ts-field select {
+  background: var(--v3-surface) !important;
+}
+
+body.mission-control-active .mcBrandCopy strong,
+body.mission-control-active .mcHero h1,
+body.mission-control-active .mcSection h2,
+body.mission-control-active .mcSection h3,
+.secondaryPageIntro__title,
+.secondaryPageDecision h2,
+.secondaryPageEvidence h2,
+.secondaryPageEvidence h3,
+.ts-header h2,
+.ts-form-card h3,
+.ts-form-card h4,
+.ts-player-view-card h3,
+.ts-metrics-card h3,
+.ts-preview-heading h3,
+.ts-player-intro h3 {
+  color: var(--v3-ink) !important;
+  font-weight: 700 !important;
+}
+
+body.mission-control-active .mcBrandCopy small,
+body.mission-control-active .mcHeroContent > p,
+body.mission-control-active .mcSection p,
+body.mission-control-active .mcSection small,
+body.mission-control-active .mcAttentionCopy small,
+body.mission-control-active .mcAttentionMeta,
+.secondaryPageIntro__summary,
+.secondaryPageDecision p,
+.secondaryPageEvidence p,
+.secondaryPageEvidence small,
+.ts-header p,
+.ts-section-copy,
+.ts-preview-heading p,
+.ts-player-intro p,
+.ts-field small,
+.ts-partner-start p,
+.ts-partner-footnote {
+  color: var(--v3-muted) !important;
+}
+
+body.mission-control-active .mcHeroContent > p,
+.secondaryPageIntro__summary,
+.secondaryPageDecision p,
+.secondaryPageEvidence p,
+.ts-header p,
+.ts-section-copy,
+.ts-preview-heading p,
+.ts-player-intro p,
+.ts-partner-start p {
+  font-size: 15px !important;
+  line-height: 1.5 !important;
+}
+
+body.mission-control-active .mcAttentionCopy small,
+body.mission-control-active .mcAttentionMeta,
+.secondaryPageEvidence small,
+.ts-field small,
+.ts-partner-footnote {
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+}
+
+body.mission-control-active .mcEyebrow,
+.secondaryPageIntro__eyebrow,
+.secondaryPageDecision__eyebrow,
+.ts-eyebrow,
+.ts-section-kicker,
+.ts-progress-intro > span,
+.ts-preview-heading > span,
+.ts-player-intro > span {
+  color: var(--v3-accent) !important;
+  font-weight: 700 !important;
+}
+
+body.mission-control-active .mcRealityStrip {
+  background: var(--v3-surface-subtle) !important;
+}
+
+body.mission-control-active .mcRealityStrip strong {
+  font-size: 22px !important;
+  font-weight: 750 !important;
+}
+
+body.mission-control-active .mcRealityStrip small {
+  color: var(--v3-muted) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+}
+
+body.mission-control-active .mcAttentionRow,
+body.mission-control-active .mcAssignmentAccountabilityRow,
+body.mission-control-active .mcAssignmentAccountabilityEmpty {
+  background: var(--v3-surface-subtle) !important;
+}
+
+body.mission-control-active .mcPrimary,
+.secondaryPageAction--primary,
+.ts-button-primary {
+  background: var(--v3-ink) !important;
+  color: #fff !important;
+}
+
+@media (max-width: 700px) {
+  body.mission-control-active .mcHeroContent > p {
+    max-width: 26ch !important;
+    font-size: 15px !important;
+    line-height: 1.42 !important;
+  }
+
+  .secondaryPageIntro__title {
+    font-size: 36px !important;
+    line-height: 1.02 !important;
+  }
+
+  .secondaryPageIntro__summary,
+  .secondaryPageDecision p,
+  .secondaryPageEvidence p {
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+  }
+
+  .ts-header h2 {
+    font-size: 29px !important;
+    line-height: 1.05 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

@@ -1,0 +1,228 @@
+/* ShotLab V5 coach integrity layer: one canvas, one readable component system. */
+:root{
+  --v5-canvas:#f4f3ef;
+  --v5-surface:#fffefa;
+  --v5-surface-2:#ecebe5;
+  --v5-ink:#101310;
+  --v5-copy:#4a514c;
+  --v5-muted:#6d746f;
+  --v5-line:rgba(16,19,16,.12);
+  --v5-accent:#a8ca2a;
+  --v5-dark:#151916;
+}
+
+/* A coach page must never inherit a black or transparent page canvas. */
+body:has(.missionControl),
+body:has(.secondaryPageShell),
+body:has(.missionControl) #root,
+body:has(.secondaryPageShell) #root,
+body:has(.missionControl) main,
+body:has(.secondaryPageShell) main{
+  background:var(--v5-canvas)!important;
+  background-image:none!important;
+  color:var(--v5-ink)!important;
+}
+.secondaryPageShell,
+.secondaryPageShell>*{
+  opacity:1!important;
+  visibility:visible!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+}
+.secondaryPageShell{
+  min-height:100dvh!important;
+  background:var(--v5-canvas)!important;
+  background-image:none!important;
+}
+.secondaryPageShell::before,
+.secondaryPageShell::after,
+.secondaryPageShell *::before,
+.secondaryPageShell *::after{
+  background-image:none!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+}
+
+/* Clean page introduction: no dark copy boxes and no duplicated visual chrome. */
+.secondaryPageIntro{
+  background:var(--v5-surface)!important;
+  border:1px solid var(--v5-line)!important;
+  box-shadow:0 14px 36px rgba(21,25,22,.08)!important;
+}
+.secondaryPageIntro__summary,
+.secondaryPageIntro p,
+.secondaryPageIntro__summary *,
+.secondaryPageIntro p *{
+  display:block!important;
+  width:auto!important;
+  max-width:34ch!important;
+  margin:0!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  color:var(--v5-copy)!important;
+  -webkit-text-fill-color:var(--v5-copy)!important;
+  opacity:1!important;
+  filter:none!important;
+}
+.secondaryPageIntro__eyebrow{
+  color:#7f9e1e!important;
+  -webkit-text-fill-color:#7f9e1e!important;
+}
+.secondaryPageIntro__title{
+  color:var(--v5-ink)!important;
+  -webkit-text-fill-color:var(--v5-ink)!important;
+}
+
+/* Metrics are explicit cards, never dim text floating on a dark background. */
+.secondaryPageToolbar [class*="metricStrip"]{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
+}
+.secondaryPageToolbar [class*="metricStrip"]>*{
+  min-height:118px!important;
+  padding:18px!important;
+  border:1px solid var(--v5-line)!important;
+  border-radius:20px!important;
+  background:var(--v5-surface)!important;
+  background-image:none!important;
+  color:var(--v5-ink)!important;
+  -webkit-text-fill-color:var(--v5-ink)!important;
+  box-shadow:0 10px 28px rgba(21,25,22,.06)!important;
+  opacity:1!important;
+  visibility:visible!important;
+  transform:none!important;
+}
+.secondaryPageToolbar [class*="metricStrip"]>* *{
+  color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+  opacity:1!important;
+}
+.secondaryPageToolbar [class*="metricStrip"] small,
+.secondaryPageToolbar [class*="metricStrip"] p,
+.secondaryPageToolbar [class*="metricStrip"] span:not([class*="value"]){
+  color:var(--v5-muted)!important;
+  -webkit-text-fill-color:var(--v5-muted)!important;
+}
+
+/* Search/filter rail uses one compact native control language. */
+.secondaryPageToolbar [class*="filterRail"]{
+  border:1px solid var(--v5-line)!important;
+  border-radius:20px!important;
+  background:var(--v5-surface)!important;
+  box-shadow:0 10px 28px rgba(21,25,22,.06)!important;
+}
+.secondaryPageToolbar input{
+  color:var(--v5-ink)!important;
+  -webkit-text-fill-color:var(--v5-ink)!important;
+  background:#fff!important;
+}
+.secondaryPageToolbar input::placeholder{
+  color:#8a908c!important;
+  -webkit-text-fill-color:#8a908c!important;
+}
+.secondaryPageToolbar button{
+  color:var(--v5-copy)!important;
+  -webkit-text-fill-color:var(--v5-copy)!important;
+  opacity:1!important;
+}
+
+/* Decision and evidence surfaces continue the same light system. */
+.secondaryPageDecision,
+.secondaryPageEvidence>*{
+  background:var(--v5-surface)!important;
+  background-image:none!important;
+  color:var(--v5-ink)!important;
+  -webkit-text-fill-color:var(--v5-ink)!important;
+  border:1px solid var(--v5-line)!important;
+  opacity:1!important;
+  filter:none!important;
+}
+.secondaryPageDecision p,
+.secondaryPageEvidence p,
+.secondaryPageEvidence small{
+  color:var(--v5-copy)!important;
+  -webkit-text-fill-color:var(--v5-copy)!important;
+}
+
+/* Mission Control: retain one intentional dark focus card, fix all contrast. */
+body.mission-control-active .mcHero,
+body.mission-control-active .mcHero *{
+  opacity:1!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+}
+body.mission-control-active .mcHero h1,
+body.mission-control-active .mcHero strong,
+body.mission-control-active .mcHero .mcRealityStrip strong{
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+body.mission-control-active .mcHero p{
+  color:rgba(255,255,255,.78)!important;
+  -webkit-text-fill-color:rgba(255,255,255,.78)!important;
+}
+body.mission-control-active .mcHero .mcEyebrow{
+  color:#cbe765!important;
+  -webkit-text-fill-color:#cbe765!important;
+}
+body.mission-control-active .mcHero .mcRealityStrip small{
+  color:rgba(255,255,255,.68)!important;
+  -webkit-text-fill-color:rgba(255,255,255,.68)!important;
+}
+body.mission-control-active .mcPrimary{
+  background:#f7f5ee!important;
+  color:#121512!important;
+  -webkit-text-fill-color:#121512!important;
+  opacity:1!important;
+}
+body.mission-control-active .mcPrimary *{
+  color:#121512!important;
+  -webkit-text-fill-color:#121512!important;
+}
+body.mission-control-active .mcAttentionRow{
+  background:var(--v5-surface-2)!important;
+  border:1px solid var(--v5-line)!important;
+  color:var(--v5-ink)!important;
+}
+body.mission-control-active .mcAttentionRow,
+body.mission-control-active .mcAttentionRow *{
+  opacity:1!important;
+  filter:none!important;
+  mix-blend-mode:normal!important;
+}
+body.mission-control-active .mcAttentionCopy strong{
+  color:var(--v5-ink)!important;
+  -webkit-text-fill-color:var(--v5-ink)!important;
+}
+body.mission-control-active .mcAttentionCopy small,
+body.mission-control-active .mcAttentionMeta,
+body.mission-control-active .mcRowAction{
+  color:var(--v5-copy)!important;
+  -webkit-text-fill-color:var(--v5-copy)!important;
+}
+
+/* Remove ornamental black-space generators from coach secondary pages. */
+.secondaryPageShell [class*="backdrop" i],
+.secondaryPageShell [class*="glow" i],
+.secondaryPageShell [class*="court" i],
+.secondaryPageShell [class*="arena" i],
+.secondaryPageShell [class*="texture" i]{
+  display:none!important;
+}
+
+@media(max-width:700px){
+  .secondaryPageShell{padding-top:14px!important;gap:14px!important}
+  .secondaryPageToolbar [class*="metricStrip"]>*{min-height:108px!important;padding:16px!important}
+  .secondaryPageIntro{padding:18px!important}
+  .secondaryPageIntro__title{font-size:36px!important}
+}

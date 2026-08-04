@@ -1,0 +1,223 @@
+/* ShotLab V10 — coherent mobile workspaces, restrained elevation, and readable hierarchy. */
+:root{
+  --v9-canvas:#f4f3ef;
+  --v9-surface:#fffefa;
+  --v9-ink:#111411;
+  --v9-soft:#555d58;
+  --v9-muted:#737a75;
+  --v9-line:rgba(17,20,17,.11);
+  --v9-line-strong:rgba(17,20,17,.17);
+  --v9-accent:#78951f;
+  --v9-accent-soft:#eef4da;
+  --v9-shadow:0 8px 24px rgba(20,24,21,.07);
+  --v9-shadow-focus:0 18px 44px rgba(20,24,21,.14);
+}
+
+/* Paint the complete active workspace, including demo routes and legacy outer shells. */
+html:has([data-testid="coach-players-interactive-dashboard"]),
+html:has([data-testid="coach-events-interactive-dashboard"]),
+body:has([data-testid="coach-players-interactive-dashboard"]),
+body:has([data-testid="coach-events-interactive-dashboard"]),
+#root:has([data-testid="coach-players-interactive-dashboard"]),
+#root:has([data-testid="coach-events-interactive-dashboard"]){background:var(--v9-canvas)!important;background-image:none!important;color-scheme:light!important}
+body:has([data-testid="coach-players-interactive-dashboard"]) #root>*,
+body:has([data-testid="coach-events-interactive-dashboard"]) #root>*{background-color:var(--v9-canvas)!important;background-image:none!important}
+
+[data-testid="coach-players-interactive-dashboard"],
+[data-testid="coach-events-interactive-dashboard"]{
+  padding-top:12px!important;
+  padding-bottom:calc(148px + env(safe-area-inset-bottom,0px))!important;
+  gap:14px!important;
+  background:var(--v9-canvas)!important;
+}
+
+/* Concise product headers: one title, one useful sentence, one action row. */
+[data-testid="coach-players-command-bar"],
+[data-testid="coach-events-command-bar"]{
+  padding:20px!important;
+  border:1px solid var(--v9-line)!important;
+  border-radius:22px!important;
+  background:var(--v9-surface)!important;
+  box-shadow:0 5px 18px rgba(20,24,21,.055)!important;
+}
+[data-testid="coach-players-command-bar"] p,
+[data-testid="coach-events-command-bar"] p{
+  max-width:31ch!important;
+  margin-top:7px!important;
+  font-size:15px!important;
+  line-height:1.42!important;
+  color:var(--v9-soft)!important;
+  -webkit-text-fill-color:var(--v9-soft)!important;
+}
+[data-testid="coach-players-command-bar"] h1,
+[data-testid="coach-events-command-bar"] h1{
+  font-size:38px!important;
+  line-height:.98!important;
+  letter-spacing:-.05em!important;
+  color:var(--v9-ink)!important;
+  -webkit-text-fill-color:var(--v9-ink)!important;
+}
+[data-testid="coach-players-command-bar"] button,
+[data-testid="coach-events-command-bar"] button{
+  min-height:48px!important;
+  border-radius:14px!important;
+  font-size:15px!important;
+  letter-spacing:-.01em!important;
+  box-shadow:none!important;
+}
+
+/* Compact, uniform metric cards. The data should scan as one system, not four mini dashboards. */
+[data-testid="coach-players-metric-strip"],
+[data-testid="coach-events-metric-strip"]{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:10px!important;
+  overflow:visible!important;
+}
+[data-testid="coach-players-metric-strip"]>button,
+[data-testid="coach-events-metric-strip"]>button{
+  min-height:102px!important;
+  padding:15px!important;
+  border:1px solid var(--v9-line)!important;
+  border-radius:18px!important;
+  background:var(--v9-surface)!important;
+  background-image:none!important;
+  color:var(--v9-ink)!important;
+  -webkit-text-fill-color:var(--v9-ink)!important;
+  box-shadow:0 4px 14px rgba(20,24,21,.045)!important;
+  opacity:1!important;
+  filter:none!important;
+  transform:none!important;
+  transition:border-color .18s ease,background-color .18s ease,transform .18s ease!important;
+}
+[data-testid="coach-players-metric-strip"]>button:active,
+[data-testid="coach-events-metric-strip"]>button:active{transform:scale(.985)!important}
+[data-testid="coach-players-metric-strip"]>button[aria-pressed="true"],
+[data-testid="coach-events-metric-strip"]>button[aria-pressed="true"]{
+  border-color:rgba(120,149,31,.42)!important;
+  background:linear-gradient(180deg,#fffefa 0%,#f7f9ee 100%)!important;
+  box-shadow:inset 0 -3px 0 var(--v9-accent),0 4px 14px rgba(20,24,21,.045)!important;
+}
+[data-testid="coach-players-metric-strip"]>button span,
+[data-testid="coach-events-metric-strip"]>button span{opacity:1!important;filter:none!important}
+
+/* One calm filter surface instead of a nested panel stack. */
+[data-testid="coach-players-filter-rail"],
+[data-testid="coach-events-filter-rail"]{
+  overflow:hidden!important;
+  padding:14px!important;
+  border:1px solid var(--v9-line)!important;
+  border-radius:19px!important;
+  background:rgba(255,254,250,.82)!important;
+  box-shadow:none!important;
+}
+[data-testid="coach-players-filter-rail"]>*,
+[data-testid="coach-events-filter-rail"]>*{min-width:0!important}
+[data-testid="coach-players-filter-rail"] input,
+[data-testid="coach-events-filter-rail"] input{
+  min-height:48px!important;
+  border:1px solid var(--v9-line-strong)!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  color:var(--v9-ink)!important;
+  -webkit-text-fill-color:var(--v9-ink)!important;
+  box-shadow:none!important;
+}
+[data-testid="coach-players-filter-rail"] [role="group"],
+[data-testid="coach-events-filter-rail"] [role="group"]{
+  display:flex!important;
+  width:100%!important;
+  gap:6px!important;
+  overflow-x:auto!important;
+  overscroll-behavior-x:contain!important;
+  scrollbar-width:none!important;
+  padding:10px 0 1px!important;
+}
+[data-testid="coach-players-filter-rail"] [role="group"]::-webkit-scrollbar,
+[data-testid="coach-events-filter-rail"] [role="group"]::-webkit-scrollbar{display:none!important}
+[data-testid="coach-players-filter-rail"] [role="group"]>button,
+[data-testid="coach-events-filter-rail"] [role="group"]>button{
+  flex:0 0 auto!important;
+  min-height:38px!important;
+  padding-inline:13px!important;
+  border-radius:999px!important;
+  white-space:nowrap!important;
+  box-shadow:none!important;
+}
+
+/* One intentional dark decision surface. Everything else stays quiet and light. */
+[data-testid="coach-players-decision-brief"],
+[data-testid="coach-events-decision-brief"]{
+  min-height:206px!important;
+  margin-bottom:10px!important;
+  padding:24px!important;
+  border:1px solid rgba(255,255,255,.06)!important;
+  border-radius:24px!important;
+  background:linear-gradient(145deg,#181c19 0%,#111411 100%)!important;
+  color:#fff!important;
+  box-shadow:var(--v9-shadow-focus)!important;
+}
+[data-testid="coach-players-decision-brief"] h2,
+[data-testid="coach-events-decision-brief"] h2{
+  max-width:14ch!important;
+  font-size:30px!important;
+  line-height:1.02!important;
+  letter-spacing:-.04em!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+}
+[data-testid="coach-players-decision-brief"] p,
+[data-testid="coach-events-decision-brief"] p{
+  max-width:34ch!important;
+  font-size:15px!important;
+  line-height:1.48!important;
+  color:rgba(255,255,255,.74)!important;
+  -webkit-text-fill-color:rgba(255,255,255,.74)!important;
+}
+[data-testid="coach-players-decision-brief"] button,
+[data-testid="coach-events-decision-brief"] button{
+  min-height:46px!important;
+  border-radius:14px!important;
+  box-shadow:none!important;
+}
+
+/* Mission Control: preserve one focal card and remove muddy inherited effects. */
+[data-testid="coach-command-center-full"] .mcAttentionRow,
+html.shotlab-demo [data-testid="coach-command-center-full"] .mcAttentionRow{
+  background:#eef1eb!important;
+  border:1px solid rgba(17,20,17,.08)!important;
+  color:var(--v9-ink)!important;
+  -webkit-text-fill-color:var(--v9-ink)!important;
+  box-shadow:none!important;
+}
+[data-testid="coach-command-center-full"] .mcAttentionRow *,
+html.shotlab-demo [data-testid="coach-command-center-full"] .mcAttentionRow *{
+  opacity:1!important;
+  filter:none!important;
+  color:inherit!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+[data-testid="coach-command-center-full"] button{box-shadow:none!important}
+
+/* Shared interaction restraint across upgraded pages. */
+[data-testid="coach-players-interactive-dashboard"] button,
+[data-testid="coach-events-interactive-dashboard"] button,
+[data-testid="coach-command-center-full"] button{-webkit-tap-highlight-color:transparent!important}
+[data-testid="coach-players-interactive-dashboard"] button:focus-visible,
+[data-testid="coach-events-interactive-dashboard"] button:focus-visible,
+[data-testid="coach-command-center-full"] button:focus-visible{outline:3px solid rgba(120,149,31,.28)!important;outline-offset:2px!important}
+
+@media(max-width:700px){
+  [data-testid="coach-players-interactive-dashboard"],
+  [data-testid="coach-events-interactive-dashboard"]{padding-inline:16px!important}
+  [data-testid="coach-players-command-bar"] h1,
+  [data-testid="coach-events-command-bar"] h1{font-size:36px!important}
+  [data-testid="coach-players-command-bar"],
+  [data-testid="coach-events-command-bar"]{padding:18px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  [data-testid="coach-players-interactive-dashboard"] *,
+  [data-testid="coach-events-interactive-dashboard"] *,
+  [data-testid="coach-command-center-full"] *{transition:none!important;animation:none!important}
+}

@@ -8,6 +8,24 @@
   width: 100%;
 }
 
+/* Canonical coach metric selection: no neon rail or glow. This stylesheet is imported
+   after the CSS module that defines InteractiveMetricStrip, so it owns the final state. */
+.performance-shell--coach [data-testid="coach-players-metric-strip"] button::after,
+.performance-shell--coach [data-testid="coach-events-metric-strip"] button::after {
+  display: none !important;
+  content: none !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  box-shadow: none !important;
+}
+
+.performance-shell--coach [data-testid="coach-players-metric-strip"] button[aria-pressed="true"],
+.performance-shell--coach [data-testid="coach-events-metric-strip"] button[aria-pressed="true"] {
+  border-color: rgba(126, 158, 30, .30) !important;
+  background: linear-gradient(145deg, #fafbf7, #f0f3e9) !important;
+  box-shadow: 0 9px 23px rgba(17, 20, 17, .065) !important;
+}
+
 .performance-shell--coach .coachDashboardNoResults {
   position: relative;
   margin-bottom: 16px;

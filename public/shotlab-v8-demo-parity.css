@@ -1,0 +1,44 @@
+/* ShotLab V8 — demo parity authority. Demo mode must never fall back to legacy styling. */
+:root{--demo-canvas:#f4f3ef;--demo-surface:#fffefa;--demo-ink:#121513;--demo-soft:#505853;--demo-muted:#747b76;--demo-line:rgba(18,21,19,.12);--demo-accent:#78951f;--demo-dark:#171b18;--demo-shadow:0 12px 30px rgba(20,24,21,.08)}
+html.shotlab-demo,html.shotlab-demo body,html.shotlab-demo #root{min-height:100%;background:var(--demo-canvas)!important;background-image:none!important;color:var(--demo-ink)!important;color-scheme:light!important}
+html.shotlab-demo body::before,html.shotlab-demo body::after,html.shotlab-demo #root::before,html.shotlab-demo #root::after{display:none!important;background:none!important}
+html.shotlab-demo body,html.shotlab-demo button,html.shotlab-demo input,html.shotlab-demo select,html.shotlab-demo textarea{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important}
+html.shotlab-demo [class*="page" i],html.shotlab-demo [class*="shell" i],html.shotlab-demo [class*="workspace" i],html.shotlab-demo [class*="dashboard" i]{background-color:transparent!important;background-image:none!important}
+html.shotlab-demo main,html.shotlab-demo [role="main"]{color:var(--demo-ink)!important}
+
+/* Demo cards, panels and rows use the same calm surface system. */
+html.shotlab-demo [class*="card" i],html.shotlab-demo [class*="panel" i],html.shotlab-demo [class*="tile" i],html.shotlab-demo [class*="section" i],html.shotlab-demo [class*="drawer" i],html.shotlab-demo [class*="modal" i]{border-color:var(--demo-line)!important}
+html.shotlab-demo [data-demo-surface="true"],html.shotlab-demo [class*="demoCard" i],html.shotlab-demo [class*="demoPanel" i]{background:var(--demo-surface)!important;color:var(--demo-ink)!important;box-shadow:var(--demo-shadow)!important}
+html.shotlab-demo h1,html.shotlab-demo h2,html.shotlab-demo h3,html.shotlab-demo h4,html.shotlab-demo strong{color:var(--demo-ink);-webkit-text-fill-color:currentColor}
+html.shotlab-demo p,html.shotlab-demo small,html.shotlab-demo label{color:var(--demo-soft)}
+
+/* Inputs and controls may not retain legacy black styling in demo mode. */
+html.shotlab-demo input,html.shotlab-demo select,html.shotlab-demo textarea{min-height:46px;border:1px solid var(--demo-line)!important;border-radius:14px!important;background:#fff!important;color:var(--demo-ink)!important;-webkit-text-fill-color:var(--demo-ink)!important;opacity:1!important;box-shadow:none!important}
+html.shotlab-demo button{min-height:44px}
+html.shotlab-demo button:disabled{opacity:.48!important}
+html.shotlab-demo [aria-pressed="true"],html.shotlab-demo [aria-current="page"]{--demo-selected:var(--demo-accent)}
+
+/* Demo notices are subordinate, not a competing theme. */
+html.shotlab-demo [class*="demoBanner" i],html.shotlab-demo [class*="demoNotice" i],html.shotlab-demo [class*="demoBadge" i]{border:1px solid rgba(120,149,31,.24)!important;background:#eef2df!important;color:#526819!important;-webkit-text-fill-color:#526819!important;box-shadow:none!important}
+
+/* Coach demo reuses the exact coach authorities. */
+html.shotlab-demo [data-testid="coach-command-center-full"],html.shotlab-demo [data-testid="coach-players-interactive-dashboard"],html.shotlab-demo [data-testid="coach-events-interactive-dashboard"]{background:var(--demo-canvas)!important;color:var(--demo-ink)!important}
+
+/* Player demo: one coherent premium light workspace with deliberate dark focus cards only. */
+html.shotlab-demo [data-testid*="player" i]{opacity:1!important;filter:none!important;mix-blend-mode:normal!important}
+html.shotlab-demo [data-testid*="player" i] [class*="hero" i],html.shotlab-demo [data-testid*="player" i] [class*="focus" i]{border-radius:24px!important}
+html.shotlab-demo [data-testid*="player" i] [class*="metric" i]{opacity:1!important;visibility:visible!important;filter:none!important;transform:none!important}
+html.shotlab-demo [data-testid*="player" i] [class*="empty" i]{border:1px solid var(--demo-line)!important;border-radius:22px!important;background:var(--demo-surface)!important;color:var(--demo-ink)!important;box-shadow:none!important}
+
+/* Navigation parity across coach and player demos. */
+html.shotlab-demo [class*="mobileNav" i],html.shotlab-demo nav[aria-label*="navigation" i]{border:1px solid rgba(255,255,255,.08)!important;background:rgba(23,27,24,.96)!important;color:#fff!important;backdrop-filter:blur(20px)!important;box-shadow:0 16px 38px rgba(20,24,21,.18)!important}
+html.shotlab-demo [class*="mobileNav" i] button,html.shotlab-demo nav[aria-label*="navigation" i] button{color:rgba(255,255,255,.58)!important;-webkit-text-fill-color:rgba(255,255,255,.58)!important}
+html.shotlab-demo [class*="mobileNav" i] [aria-current="page"],html.shotlab-demo nav[aria-label*="navigation" i] [aria-current="page"]{color:#c7ed45!important;-webkit-text-fill-color:#c7ed45!important}
+
+/* Team Store demo must remain in the same product language. */
+html.shotlab-demo .ts-overlay{background:rgba(22,26,23,.38)!important;backdrop-filter:blur(14px)!important}
+html.shotlab-demo .ts-panel{background:var(--demo-canvas)!important;color:var(--demo-ink)!important;font-family:inherit!important}
+html.shotlab-demo .ts-header,html.shotlab-demo .ts-form-card,html.shotlab-demo .ts-player-view-card,html.shotlab-demo .ts-metrics-card,html.shotlab-demo .ts-partner-start,html.shotlab-demo .ts-preview-card{background:var(--demo-surface)!important;color:var(--demo-ink)!important;border-color:var(--demo-line)!important;box-shadow:none!important}
+
+@media(max-width:700px){html.shotlab-demo main,html.shotlab-demo [role="main"]{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}}
+@media(prefers-reduced-motion:reduce){html.shotlab-demo *,html.shotlab-demo *::before,html.shotlab-demo *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}

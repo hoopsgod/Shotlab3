@@ -33,7 +33,7 @@ The value sequence is:
 3. Coach priorities stay connected to player action.
 4. Coaches can operate the full program from one place.
 5. Player intelligence makes follow-up more precise.
-6. Event readiness reduces manual chasing.
+6. Event readiness reduces manual follow-up.
 
 ## Screenshot set
 

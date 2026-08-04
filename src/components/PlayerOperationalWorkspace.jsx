@@ -1,5 +1,6 @@
 import { scheduleWorkspaceActionReveal } from "../lib/playerWorkspaceActionRouting.js";
 import styles from "./PlayerOperationalWorkspace.module.css";
+import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
 function MetricContent({ metric }) {
   return (
@@ -21,6 +22,8 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
     onMetric?.(metric);
     if (metric?.action) scheduleWorkspaceActionReveal(metric.action);
   };
+  const metrics = model.metrics || [];
+
   return (
     <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`}>
       <div className={styles.commandBar}>
@@ -38,25 +41,35 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
           </button>
         )}
       </div>
-      <div className={styles.metrics} aria-label={`${model.title} metrics`}>
-        {(model.metrics || []).map((metric) => {
+      <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} aria-label={`${model.title} metrics`}>
+        {metrics.map((metric, index) => {
           const interactive = Boolean(metric?.filter || metric?.action);
-          const metricClassName = `${styles.metric} ${interactive ? styles.metricInteractive : styles.metricStatic} ${activeMetric === metric.id ? styles.metricActive : ""}`;
+          const hierarchyClass = index === 0 ? hierarchyStyles.metricPrimary : hierarchyStyles.metricSupporting;
+          const metricClassName = `${styles.metric} ${hierarchyClass} ${interactive ? styles.metricInteractive : styles.metricStatic} ${activeMetric === metric.id ? styles.metricActive : ""}`;
+          const metricPriority = index === 0 ? "primary" : "supporting";
+
           if (!interactive) {
             return (
-              <div key={metric.id} className={metricClassName} data-interactive="false">
+              <div
+                key={metric.id}
+                className={metricClassName}
+                data-interactive="false"
+                data-metric-priority={metricPriority}
+              >
                 <MetricContent metric={metric} />
               </div>
             );
           }
+
           return (
             <button
               type="button"
               key={metric.id}
               className={metricClassName}
+              data-interactive="true"
+              data-metric-priority={metricPriority}
               onClick={() => runMetric(metric)}
               aria-pressed={activeMetric === metric.id}
-              data-interactive="true"
             >
               <MetricContent metric={metric} />
             </button>
