@@ -36,40 +36,38 @@ function CoachIntelligenceFallback() {
   )
 }
 
-function DeferredCoachIntelligence({ Component, testId, ...props }) {
+function DeferredCoachIntelligence({ Component, ...props }) {
   return (
-    <div data-testid={testId}>
-      <Suspense fallback={<CoachIntelligenceFallback />}>
-        <Component {...props} />
-      </Suspense>
-    </div>
+    <Suspense fallback={<CoachIntelligenceFallback />}>
+      <Component {...props} />
+    </Suspense>
   )
 }
 
 export function CoachActivityIntelligencePanel(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachActivityIntelligencePanel} testId="deferred-coach-activity-intelligence" {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachActivityIntelligencePanel} {...props} />
 }
 
 export function CoachDrillsOperationalPanel(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachDrillsOperationalPanel} testId="deferred-coach-drills-intelligence" {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachDrillsOperationalPanel} {...props} />
 }
 
 export function CoachEventIntelligenceDrawer(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachEventIntelligenceDrawer} testId="deferred-coach-event-intelligence" {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachEventIntelligenceDrawer} {...props} />
 }
 
 export function CoachLeaderboardOperationalPanel(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachLeaderboardOperationalPanel} testId="deferred-coach-leaderboard-intelligence" {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachLeaderboardOperationalPanel} {...props} />
 }
 
 export function CoachPlayerIntelligenceDrawer(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachPlayerIntelligenceDrawer} testId="deferred-coach-player-intelligence" {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachPlayerIntelligenceDrawer} {...props} />
 }
 
 export function CoachSeasonComparisonPanel(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachSeasonComparisonPanel} testId="deferred-coach-season-intelligence" {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachSeasonComparisonPanel} {...props} />
 }
 
 export function CoachStrengthOperationalPanel(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachStrengthOperationalPanel} testId="deferred-coach-strength-intelligence" {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachStrengthOperationalPanel} {...props} />
 }
