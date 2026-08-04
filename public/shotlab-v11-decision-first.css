@@ -23,25 +23,55 @@
   min-height:0!important;
   margin:0!important;
   padding:20px!important;
+  border:1px solid rgba(255,255,255,.07)!important;
   border-radius:22px!important;
+  background:linear-gradient(145deg,#191d1a 0%,#111411 100%)!important;
+  background-image:linear-gradient(145deg,#191d1a 0%,#111411 100%)!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
   box-shadow:0 14px 34px rgba(17,20,17,.13)!important;
+  opacity:1!important;
+  filter:none!important;
+}
+[data-testid="coach-players-decision-brief"] *,
+[data-testid="coach-events-decision-brief"] *{
+  opacity:1!important;
+  filter:none!important;
 }
 [data-testid="coach-players-decision-brief"] h2,
 [data-testid="coach-events-decision-brief"] h2{
   max-width:16ch!important;
   font-size:28px!important;
   line-height:1.02!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
 }
 [data-testid="coach-players-decision-brief"] p,
 [data-testid="coach-events-decision-brief"] p{
   margin-top:8px!important;
   font-size:14px!important;
   line-height:1.42!important;
+  color:rgba(255,255,255,.76)!important;
+  -webkit-text-fill-color:rgba(255,255,255,.76)!important;
+}
+[data-testid="coach-players-decision-brief"] [class*="eyebrow"],
+[data-testid="coach-events-decision-brief"] [class*="eyebrow"]{
+  color:#b9df35!important;
+  -webkit-text-fill-color:#b9df35!important;
 }
 [data-testid="coach-players-decision-brief"] button,
 [data-testid="coach-events-decision-brief"] button{
   min-height:44px!important;
   margin-top:12px!important;
+  border:1px solid rgba(255,255,255,.14)!important;
+  background:#fff!important;
+  color:#111411!important;
+  -webkit-text-fill-color:#111411!important;
+}
+[data-testid="coach-players-decision-brief"] button *,
+[data-testid="coach-events-decision-brief"] button *{
+  color:#111411!important;
+  -webkit-text-fill-color:#111411!important;
 }
 
 /* Supporting controls should be compact and quiet. */
