@@ -80,10 +80,13 @@ test('Coach administration uses one polished loading system', () => {
   assert.match(fallbackSource, /Preparing \{label\}/)
 })
 
-test('all Coach administration implementations share the existing Coach request slot', () => {
+test('Coach administration and Player Profile each use one coherent deferred request slot', () => {
   for (const boundary of boundaries) {
     assert.ok(viteConfig.includes(boundary.implementationPath))
   }
-  assert.match(viteConfig, /return ["']CoachOperationalWorkspaces["']/)
+  assert.match(viteConfig, /return ["']CoachAdministrationWorkspaces["']/)
+  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/ShotLabCharts\.jsx["']\)/)
+  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/PlayerCareerHistory\.jsx["']\)/)
+  assert.match(viteConfig, /return ["']PlayerProfileWorkspaces["']/)
   assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })
