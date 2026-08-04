@@ -114,5 +114,5 @@ test("database, API, and UI contracts preserve role boundaries and acknowledgmen
   assert.match(player, /Acknowledge assignment/);
   assert.match(player, /Start assignment/);
   assert.match(player, /Mark assignment complete/);
-  assert.match(bootstrap, /installPlayerAssignmentEnhancer\(\)/);
+  assert.doesNotMatch(bootstrap, /installPlayerAssignmentEnhancer\(\)/);
 });
