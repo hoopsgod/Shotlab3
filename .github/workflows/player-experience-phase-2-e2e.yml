@@ -8,6 +8,8 @@ on:
       - src/App.jsx
       - src/components/DeferredShotLabCharts.jsx
       - src/components/ShotLabCharts.jsx
+      - src/components/DeferredPremiumLeaderboardsHub.jsx
+      - src/components/PremiumLeaderboardsHub.jsx
       - src/components/PlayerOperationalWorkspace.jsx
       - src/components/PlayerOperationalWorkspace.module.css
       - src/lib/playerOperationalWorkspaces.js
