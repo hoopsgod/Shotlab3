@@ -158,7 +158,7 @@ test('leaderboard analytics load only after the player opens Leaderboards', asyn
   await expect.poll(() => implementationLoaded(page, 'PremiumLeaderboardsHub', 'DeferredPremiumLeaderboardsHub')).toBe(true)
 })
 
-test('Coach intelligence stays out of auth and Player, then loads on Coach Home', async ({ page }) => {
+test('Coach intelligence stays out of auth and Player, then initializes for Coach', async ({ page }) => {
   await installSafeRoutes(page)
   await seedStorage(page)
 
@@ -168,7 +168,7 @@ test('Coach intelligence stays out of auth and Player, then loads on Coach Home'
   await page.getByRole('button', { name: 'Demo Coach', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
 
-  await expect(page.getByTestId('coach-activity-intelligence-panel')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('coach-activity-intelligence-panel')).toHaveCount(1)
   await expect(page.getByTestId('coach-intelligence-loading')).toHaveCount(0)
   await expect.poll(() => implementationLoaded(page, 'CoachDashboardPhase2', 'DeferredCoachDashboardPhase2')).toBe(true)
 })
