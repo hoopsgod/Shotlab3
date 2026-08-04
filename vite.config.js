@@ -10,12 +10,14 @@ const STATIC_COACH_COMMAND_CENTER_IMPORT = './components/CoachCommandCenter'
 const STATIC_COACH_PHASE2_IMPORT = './components/CoachDashboardPhase2.jsx'
 const STATIC_COACH_INTERACTIVE_IMPORT = './components/CoachInteractiveDashboards.jsx'
 const STATIC_CAREER_HISTORY_IMPORT = './components/PlayerCareerHistory.jsx'
+const STATIC_LEGACY_STYLE_IMPORT = './styles/appLegacyStyles.js'
 const DEFERRED_CHART_MODULE = path.resolve(process.cwd(), 'src/components/DeferredShotLabCharts.jsx')
 const DEFERRED_LEADERBOARDS_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPremiumLeaderboardsHub.jsx')
 const DEFERRED_COACH_COMMAND_CENTER_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachCommandCenter.jsx')
 const DEFERRED_COACH_PHASE2_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPhase2.jsx')
 const DEFERRED_COACH_INTERACTIVE_MODULE = path.resolve(process.cwd(), 'src/components/DeferredCoachInteractiveDashboards.jsx')
 const DEFERRED_CAREER_HISTORY_MODULE = path.resolve(process.cwd(), 'src/components/DeferredPlayerCareerHistory.jsx')
+const LEGACY_STYLE_RUNTIME_MODULE = path.resolve(process.cwd(), 'src/styles/appLegacyStylesRuntime.js')
 const PLAYER_INTERFACE_REDIRECTS = new Map([
   ['./components/PlayerDashboardHeader', path.resolve(process.cwd(), 'src/components/DeferredPlayerDashboardHeader.jsx')],
   ['./components/PlayerDailyCommandCenter.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerDailyCommandCenter.jsx')],
@@ -112,6 +114,20 @@ function deferPlayerCareerHistory() {
   }
 }
 
+function hydrateLegacyStyles() {
+  return {
+    name: 'shotlab-hydrate-legacy-styles',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (source === STATIC_LEGACY_STYLE_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return LEGACY_STYLE_RUNTIME_MODULE
+      }
+      return null
+    },
+  }
+}
+
 function deferPlayerInterface() {
   return {
     name: 'shotlab-defer-player-interface',
@@ -201,6 +217,7 @@ export default defineConfig({
     deferCoachPhase2Intelligence(),
     deferCoachInteractiveDashboards(),
     deferPlayerCareerHistory(),
+    hydrateLegacyStyles(),
     deferPlayerInterface(),
     deferCoachAdministration(),
     react(),
