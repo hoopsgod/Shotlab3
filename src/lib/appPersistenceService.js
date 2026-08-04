@@ -1,6 +1,9 @@
 import { STORAGE_KEYS, sanitizeCoachPriorities } from "./appDataModels.js";
 import { buildApiIdentityHeaders } from "./apiIdentityHeaders.js";
+import { isDemoAccount } from "./demoMode.js";
 
+const PENDING_DEMO_SESSION_KEY = "sl:pendingDemoSession";
+const PENDING_DEMO_TTL_MS = 30_000;
 const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
 const asPriorityMap = (value) => value && typeof value === "object" && !Array.isArray(value) ? value : {};
 const sanitizePriorityMap = (value) => Object.fromEntries(
@@ -18,14 +21,25 @@ const readJson = async (response) => {
   }
 };
 
-const readBrowserValue = (key) => {
+const readStorageValue = (storage, key) => {
   try {
-    if (typeof globalThis?.localStorage?.getItem !== "function") return null;
-    const raw = globalThis.localStorage.getItem(key);
+    if (typeof storage?.getItem !== "function") return null;
+    const raw = storage.getItem(key);
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
+};
+
+const readBrowserValue = (key) => readStorageValue(globalThis?.localStorage, key);
+const readSessionBrowserValue = (key) => readStorageValue(globalThis?.sessionStorage, key);
+
+const readPendingDemoSession = () => {
+  const pending = readSessionBrowserValue(PENDING_DEMO_SESSION_KEY);
+  const email = normalizeIdentity(pending?.email);
+  const createdAt = Number(pending?.createdAt);
+  const fresh = Number.isFinite(createdAt) && Date.now() - createdAt <= PENDING_DEMO_TTL_MS;
+  return fresh && isDemoAccount(email) ? { email } : null;
 };
 
 export const installCoachPrioritySaveBridge = (target = globalThis) => {
@@ -77,8 +91,14 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
   const readRequesterContext = async () => {
     const browserSession = readBrowserValue(STORAGE_KEYS.sessions);
     const storedSession = browserSession || await db.get(STORAGE_KEYS.sessions);
-    const session = Array.isArray(storedSession) ? storedSession[0] : storedSession;
-    const requester = normalizeIdentity(session?.email || session?.userEmail || session?.user_id);
+    const durableSession = Array.isArray(storedSession) ? storedSession[0] : storedSession;
+    const durableRequester = normalizeIdentity(durableSession?.email || durableSession?.userEmail || durableSession?.user_id);
+    const pendingDemoSession = durableRequester ? null : readPendingDemoSession();
+    const requester = durableRequester || normalizeIdentity(pendingDemoSession?.email);
+
+    if (durableRequester) {
+      try { globalThis?.sessionStorage?.removeItem?.(PENDING_DEMO_SESSION_KEY); } catch {}
+    }
 
     const browserPlayers = readBrowserValue(STORAGE_KEYS.players);
     const storedPlayers = Array.isArray(browserPlayers) ? browserPlayers : await getCollection(STORAGE_KEYS.players);
@@ -91,9 +111,9 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     let context = await readRequesterContext();
     if (context.requester || typeof globalThis?.localStorage?.getItem !== "function") return context;
 
-    // Authentication and demo entry can commit the workspace before the durable
-    // session write completes. Hold the first identity-dependent request at this
-    // boundary instead of accepting stale local data for the rest of the session.
+    // Registered authentication can still commit React state just ahead of its
+    // durable session write. Demo entry uses the bounded pending identity above;
+    // all other identities must resolve through the real session boundary.
     for (let attempt = 0; attempt < 40 && !context.requester; attempt += 1) {
       await wait(50);
       context = await readRequesterContext();
