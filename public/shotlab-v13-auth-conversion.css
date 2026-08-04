@@ -129,6 +129,33 @@ div:has(> .auth-ball-enter) + h1 + p + div{
   margin-bottom:18px!important;
 }
 
+/* Player Mission Control: keep the primary action dominant and convert the
+   repeated coach assignment into a compact supporting signal. */
+[data-testid="player-coach-priority-signal"]{
+  margin-top:10px!important;
+  padding:13px 15px!important;
+  border-radius:16px!important;
+  box-shadow:none!important;
+}
+[data-testid="player-coach-priority-signal"] > div:first-child{
+  align-items:center!important;
+  gap:10px!important;
+}
+[data-testid="player-coach-priority-signal"] h2{
+  margin-top:4px!important;
+  max-width:none!important;
+  font-size:18px!important;
+  line-height:1.12!important;
+}
+[data-testid="player-coach-priority-signal"] > div:last-child{
+  display:none!important;
+}
+[data-testid="player-coach-priority-signal"] span{
+  min-height:24px!important;
+  padding:0 8px!important;
+  font-size:8px!important;
+}
+
 @media(max-width:390px){
   .auth-demo-enter{grid-template-columns:1fr!important}
   .auth-demo-enter button{min-height:50px!important}
@@ -136,6 +163,8 @@ div:has(> .auth-ball-enter) + h1 + p + div{
   div:has(> .auth-ball-enter){height:78px!important}
   div:has(> .auth-ball-enter) + h1{font-size:52px!important}
   .auth-card-enter{padding:24px 20px!important}
+  [data-testid="player-coach-priority-signal"]{padding:12px 13px!important}
+  [data-testid="player-coach-priority-signal"] h2{font-size:17px!important}
 }
 @media(prefers-reduced-motion:reduce){
   .auth-demo-enter button{transition:none!important}
