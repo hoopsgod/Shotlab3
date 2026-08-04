@@ -112,13 +112,19 @@ async function waitForHydration(page) {
 
 async function enterCoachDemo(page) {
   const demoCoachButton = page.getByRole("button", { name: "Demo Coach", exact: true });
-  await expect(page.getByRole("button", { name: /^(Demo Coach|Players)$/ }).first()).toBeVisible({ timeout: 15_000 });
-  if (await demoCoachButton.isVisible()) {
+  const dock = page.getByTestId("mobile-navigation-dock");
+
+  await expect.poll(async () => {
+    const demoReady = await demoCoachButton.isVisible().catch(() => false);
+    const dockReady = await dock.isVisible().catch(() => false);
+    return demoReady || dockReady;
+  }, { timeout: 20_000 }).toBe(true);
+
+  if (await demoCoachButton.isVisible().catch(() => false)) {
     await waitForHydration(page);
     await demoCoachButton.click();
   }
 
-  const dock = page.getByTestId("mobile-navigation-dock");
   await expect(dock).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("coach-command-center-loading")).toHaveCount(0);
