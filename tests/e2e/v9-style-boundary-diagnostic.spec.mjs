@@ -28,6 +28,9 @@ test("diagnose extracted legacy style geometry", async ({ page }) => {
       return {
         tag: element.tagName,
         className: element.className,
+        hidden: element.hidden,
+        ariaHidden: element.getAttribute("aria-hidden"),
+        inlineStyle: element.getAttribute("style"),
         display: style.display,
         visibility: style.visibility,
         opacity: style.opacity,
@@ -39,6 +42,11 @@ test("diagnose extracted legacy style geometry", async ({ page }) => {
         left: rect.left,
         pointerEvents: style.pointerEvents,
       };
+    };
+    const ancestry = (element) => {
+      const rows = [];
+      for (let node = element; node && rows.length < 10; node = node.parentElement) rows.push(snapshotElement(node));
+      return rows;
     };
     const matchingDisplayRules = (element) => {
       if (!element) return [];
@@ -52,9 +60,7 @@ test("diagnose extracted legacy style geometry", async ({ page }) => {
           }
           if (!rule.selectorText || !rule.style?.display) continue;
           try {
-            if (element.matches(rule.selectorText)) {
-              matches.push({ selector: rule.selectorText, display: rule.style.display, important: rule.style.getPropertyPriority("display"), context });
-            }
+            if (element.matches(rule.selectorText)) matches.push({ selector: rule.selectorText, display: rule.style.display, important: rule.style.getPropertyPriority("display"), context });
           } catch {}
         }
       };
@@ -79,7 +85,10 @@ test("diagnose extracted legacy style geometry", async ({ page }) => {
       styles,
       elements,
       accountabilityDisplayRules: matchingDisplayRules(accountability),
+      accountabilityAncestry: ancestry(accountability),
+      accountabilityOuterHtml: accountability?.outerHTML.slice(0, 500) || null,
       playersDisplayRules: matchingDisplayRules(players),
+      playersAncestry: ancestry(players),
       players: snapshotElement(players),
       elementFromPlayersCenter: players ? (() => {
         const rect = players.getBoundingClientRect();
