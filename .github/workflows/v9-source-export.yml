@@ -1,0 +1,35 @@
+name: V9 Source Export
+
+on:
+  push:
+    branches:
+      - agent/performance-decomposition-v9
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  export-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Package source snapshot
+        run: |
+          tar -czf shotlab-v9-source.tar.gz \
+            src \
+            tests \
+            scripts \
+            .github/workflows \
+            vite.config.js \
+            package.json \
+            package-lock.json \
+            performance-budget.json \
+            playwright.config.mjs
+      - name: Upload source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-v9-source
+          path: shotlab-v9-source.tar.gz
+          retention-days: 1
