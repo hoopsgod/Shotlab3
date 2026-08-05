@@ -67,3 +67,9 @@ replaceOnce(
   '  assert.match(activation, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);',
   '  assert.match(activation, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);',
 );
+
+replaceOnce(
+  "vite.config.js",
+  "    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')\n    || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n  ) {\n    return 'PlayerProfileWorkspaces'\n  }\n\n  if (\n    moduleId.includes('/src/components/PlayerDashboardHeader.jsx')",
+  "    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')\n  ) {\n    return 'PlayerProfileWorkspaces'\n  }\n\n  if (\n    moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n    || moduleId.includes('/src/components/PlayerDashboardHeader.jsx')",
+);
