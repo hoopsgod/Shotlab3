@@ -1,0 +1,105 @@
+@import url('/shotlab-v16-unified-visual-system.css?v=eddf5077');
+
+/* ShotLab V17 — screenshot-driven screen consistency corrections. */
+
+/* Dark intelligence surfaces: force readable hierarchy on every nested text node. */
+html body #root [class*="_insightCard_"],
+html body #root [data-testid*="insight"],
+html body #root [data-testid*="signal"]{
+  isolation:isolate!important;
+}
+html body #root [class*="_insightCard_"] :is(h1,h2,h3,h4,strong),
+html body #root [data-testid*="insight"] :is(h1,h2,h3,h4,strong),
+html body #root [data-testid*="signal"] :is(h1,h2,h3,h4,strong){
+  color:#f7f8f5!important;
+  -webkit-text-fill-color:#f7f8f5!important;
+}
+html body #root [class*="_insightCard_"] :is(p,small,span),
+html body #root [data-testid*="insight"] :is(p,small,span),
+html body #root [data-testid*="signal"] :is(p,small,span){
+  color:#b8c0ba!important;
+  -webkit-text-fill-color:#b8c0ba!important;
+}
+
+/* Assignment accountability: replace the oversized empty grid with a compact operational state. */
+html body #root [data-testid*="assignment-accountability"],
+html body #root [data-testid*="accountability"]{
+  overflow:hidden!important;
+  border:1px solid var(--sl-border)!important;
+  border-radius:var(--sl-radius-card)!important;
+  background:#fff!important;
+  box-shadow:var(--sl-shadow-card)!important;
+}
+html body #root [data-testid*="assignment-accountability"] [class*="metric"],
+html body #root [data-testid*="accountability"] [class*="metric"]{
+  min-height:88px!important;
+  padding:16px!important;
+}
+html body #root [data-testid*="assignment-accountability"] [class*="empty"],
+html body #root [data-testid*="accountability"] [class*="empty"]{
+  min-height:84px!important;
+  margin:16px!important;
+  padding:18px!important;
+  border-style:solid!important;
+  text-align:left!important;
+}
+
+/* Add Player and account forms: one native-feeling field system across Coach and Player. */
+html body #root :is(form,[class*="form"],[class*="Form"]) :is(input,select,textarea){
+  min-height:52px!important;
+  padding:0 16px!important;
+  border:1px solid var(--sl-border-strong)!important;
+  border-radius:var(--sl-radius-control)!important;
+  background:#fff!important;
+  color:var(--sl-ink)!important;
+  -webkit-text-fill-color:var(--sl-ink)!important;
+  box-shadow:0 1px 0 rgba(255,255,255,.75),inset 0 1px 2px rgba(17,20,17,.03)!important;
+  font:650 16px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+}
+html body #root :is(form,[class*="form"],[class*="Form"]) textarea{
+  min-height:112px!important;
+  padding-block:14px!important;
+}
+html body #root :is(form,[class*="form"],[class*="Form"]) :is(input,select,textarea):focus{
+  outline:3px solid rgba(138,165,31,.18)!important;
+  outline-offset:1px!important;
+  border-color:#8aa51f!important;
+}
+html body #root :is(form,[class*="form"],[class*="Form"]) :is(input,textarea)::placeholder{
+  color:#919892!important;
+  opacity:1!important;
+}
+
+/* Remove CTA duplication and normalize action groups. */
+html body #root :is([class*="Actions"],[class*="actions"]) > button{
+  min-height:48px!important;
+  padding-inline:18px!important;
+}
+html body #root :is([class*="Actions"],[class*="actions"]) > button + button{
+  margin-left:0!important;
+}
+
+/* Compact sparse sections so empty data never creates unfinished white voids. */
+html body #root :is([class*="section"],[class*="Section"]):has([class*="empty"]){
+  min-height:0!important;
+}
+html body #root :is([class*="sectionBody"],[class*="SectionBody"]):has([class*="empty"]){
+  padding-bottom:0!important;
+}
+
+@media(max-width:700px){
+  html body #root [data-testid*="assignment-accountability"] [class*="metric"],
+  html body #root [data-testid*="accountability"] [class*="metric"]{
+    min-height:76px!important;
+    padding:14px 10px!important;
+  }
+  html body #root :is(form,[class*="form"],[class*="Form"]) :is(input,select,textarea){
+    width:100%!important;
+    box-sizing:border-box!important;
+  }
+  html body #root :is([class*="Actions"],[class*="actions"]){
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:10px!important;
+  }
+}
