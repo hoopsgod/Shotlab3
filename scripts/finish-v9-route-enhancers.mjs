@@ -35,13 +35,7 @@ replaceOnce(
 replaceOnce(
   "public/shotlab-v3-mobile-corrections.css",
   '/* Mobile coaches must retain access to live operational evidence and assignment follow-up. */\n',
-  '/* Live operational evidence must remain visible and actionable at every viewport. */\nbody.mission-control-active [data-testid="coach-live-activity"] {\n  display: block !important;\n  visibility: visible !important;\n  opacity: 1 !important;\n  min-height: 1px !important;\n  max-height: none !important;\n}\n\n/* Mobile coaches must retain access to live operational evidence and assignment follow-up. */\n',
-);
-
-replaceOnce(
-  "tests/e2e/coach-player-invitation.spec.mjs",
-  `async function enterCoachPlayers(page) {\n  await page.goto("/");\n  const dock = page.getByTestId("mobile-navigation-dock");\n  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });\n  await expect(dock.or(demoCoach).first()).toBeVisible({ timeout: 15_000 });\n  if (await demoCoach.isVisible()) await demoCoach.click();\n  await expect(dock).toBeVisible({ timeout: 15_000 });\n  const players = dock.getByRole("button", { name: "Players", exact: true });\n  await expect(players).toBeVisible();\n  await players.click();\n}`,
-  `async function enterCoachPlayers(page) {\n  await page.goto("/");\n  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });\n  const players = page.getByRole("button", { name: "Players", exact: true });\n  await expect(page.getByRole("button", { name: /^(Demo Coach|Players)$/ }).first()).toBeVisible({ timeout: 15_000 });\n  if (await demoCoach.isVisible()) await demoCoach.click();\n  await expect(players).toBeVisible({ timeout: 15_000 });\n  await players.click();\n}`,
+  '/* Live operational evidence must remain visible and actionable at every viewport. */\n[data-testid="coach-live-activity"] {\n  display: block !important;\n  visibility: visible !important;\n  opacity: 1 !important;\n  min-height: 1px !important;\n  max-height: none !important;\n}\n\n/* Mobile coaches must retain access to live operational evidence and assignment follow-up. */\n',
 );
 
 replaceOnce(
