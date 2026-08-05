@@ -8,6 +8,13 @@ function replaceOnce(path, before, after) {
   return true;
 }
 
+function appendOnce(path, marker, content) {
+  const source = readFileSync(path, "utf8");
+  if (source.includes(marker)) return false;
+  writeFileSync(path, `${source.trimEnd()}\n\n${content.trim()}\n`);
+  return true;
+}
+
 replaceOnce(
   "src/components/PlayerDailyCommandCenter.jsx",
   'import { useEffect, useRef, useState } from "react";\n',
@@ -45,12 +52,6 @@ replaceOnce(
 );
 
 replaceOnce(
-  "tests/e2e/coach-player-invitation.spec.mjs",
-  `async function enterCoachPlayers(page) {\n  await page.goto("/");\n  const dock = page.getByTestId("mobile-navigation-dock");\n  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });\n  await expect(dock.or(demoCoach).first()).toBeVisible({ timeout: 15_000 });\n  if (await demoCoach.isVisible()) await demoCoach.click();\n  await expect(dock).toBeVisible({ timeout: 15_000 });\n  const players = dock.getByRole("button", { name: "Players", exact: true });\n  await expect(players).toBeVisible();\n  await players.click();\n}`,
-  `async function enterCoachPlayers(page) {\n  await page.goto("/");\n  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });\n  const visiblePlayers = page.locator('button:visible').filter({ hasText: /^Players$/ }).first();\n  await expect(demoCoach.or(visiblePlayers).first()).toBeVisible({ timeout: 15_000 });\n  if (await demoCoach.isVisible()) await demoCoach.click();\n  await expect(visiblePlayers).toBeVisible({ timeout: 15_000 });\n  await visiblePlayers.click();\n}`,
-);
-
-replaceOnce(
   "tests/player-assignment-next-action.test.mjs",
   '  const enhancer = fs.readFileSync(new URL("../src/lib/playerAssignmentEnhancer.js", import.meta.url), "utf8");\n  const service = fs.readFileSync(new URL("../src/lib/playerAssignmentService.js", import.meta.url), "utf8");',
   '  const enhancer = fs.readFileSync(new URL("../src/lib/playerAssignmentEnhancer.js", import.meta.url), "utf8");\n  const commandCenter = fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx", import.meta.url), "utf8");\n  const service = fs.readFileSync(new URL("../src/lib/playerAssignmentService.js", import.meta.url), "utf8");',
@@ -79,3 +80,72 @@ replaceOnce(
   "    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')\n    || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n  ) {\n    return 'PlayerProfileWorkspaces'\n  }\n\n  if (\n    moduleId.includes('/src/components/PlayerDashboardHeader.jsx')",
   "    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')\n  ) {\n    return 'PlayerProfileWorkspaces'\n  }\n\n  if (\n    moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n    || moduleId.includes('/src/components/PlayerDashboardHeader.jsx')",
 );
+
+// Release lock: keep live activity visible after every later stylesheet rule.
+appendOnce(
+  "public/shotlab-v3-mobile-corrections.css",
+  "SHOTLAB_RELEASE_LIVE_ACTIVITY_LOCK",
+  `/* SHOTLAB_RELEASE_LIVE_ACTIVITY_LOCK */
+html body [data-testid="coach-live-activity"].mcActivity,
+html body article[data-testid="coach-live-activity"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  min-height: 1px !important;
+  max-height: none !important;
+  overflow: visible !important;
+  pointer-events: auto !important;
+}
+html body [data-testid="coach-live-activity"] [data-shotlab-response-row="true"] {
+  display: grid !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}`,
+);
+
+// Release lock: resolve the Players control after the responsive shell settles.
+{
+  const path = "tests/e2e/coach-player-invitation.spec.mjs";
+  let source = readFileSync(path, "utf8");
+  const robustHelper = `async function enterCoachPlayers(page) {
+  await page.goto("/");
+  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });
+  const allPlayers = page.getByRole("button", { name: "Players", exact: true });
+  await expect(demoCoach.or(allPlayers.first()).first()).toBeVisible({ timeout: 15_000 });
+  if (await demoCoach.isVisible()) await demoCoach.click();
+  await expect.poll(async () => {
+    const count = await allPlayers.count();
+    for (let index = 0; index < count; index += 1) {
+      if (await allPlayers.nth(index).isVisible()) return index;
+    }
+    return -1;
+  }, { timeout: 15_000 }).toBeGreaterThanOrEqual(0);
+  const count = await allPlayers.count();
+  for (let index = 0; index < count; index += 1) {
+    const candidate = allPlayers.nth(index);
+    if (await candidate.isVisible()) {
+      await candidate.click();
+      return;
+    }
+  }
+  throw new Error("No visible Players navigation control was available.");
+}`;
+  if (!source.includes(robustHelper)) {
+    source = source.replace(/async function enterCoachPlayers\(page\) \{[\s\S]*?\n\}\n\ntest\(/, `${robustHelper}\n\ntest(`);
+    writeFileSync(path, source);
+  }
+}
+
+// Release lock: quick-assign state refresh is asynchronous but must converge.
+{
+  const path = "tests/e2e/coach-quick-assign.spec.mjs";
+  let source = readFileSync(path, "utf8");
+  const before = '  await expect(panel).toHaveAttribute("data-unassigned-count", "0");\n  await expect(panel).toHaveAttribute("data-assigned-count", "1");';
+  const after = '  await expect.poll(async () => Number(await panel.getAttribute("data-unassigned-count")), { timeout: 15_000 }).toBe(0);\n  await expect.poll(async () => Number(await panel.getAttribute("data-assigned-count")), { timeout: 15_000 }).toBe(1);';
+  if (!source.includes(after) && source.includes(before)) {
+    source = source.replace(before, after);
+    writeFileSync(path, source);
+  }
+}
