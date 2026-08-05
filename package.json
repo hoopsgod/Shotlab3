@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4173",
-    "build": "vite build",
+    "prepare:route-enhancers": "node scripts/finish-v9-route-enhancers.mjs",
+    "build": "npm run prepare:route-enhancers && vite build",
     "build:performance": "npm run build && npm run verify:performance-budget",
     "test": "node --test tests/**/*.test.mjs",
     "test:e2e": "playwright test",
