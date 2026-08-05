@@ -23,7 +23,7 @@ replaceOnce(
 replaceOnce(
   "src/components/CoachCommandCenter.jsx",
   'import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";\n',
-  'import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";\nimport { installCoachResponseLoopEnhancer } from "../lib/coachResponseLoopEnhancer.js";\n',
+  'import { deriveCoachActivationPath } from "../lib/coachActivationPath.js";\nimport { installCoachResponseLoopEnhancer, openLiveResultResponse } from "../lib/coachResponseLoopEnhancer.js";\n',
 );
 
 replaceOnce(
@@ -33,9 +33,21 @@ replaceOnce(
 );
 
 replaceOnce(
+  "src/components/CoachCommandCenter.jsx",
+  '<div className="mcTimeline">{items.slice(0, 5).map((item, index) => <div key={`${item.id || item.name || item.title}-${index}`}><Avatar item={item} size={42} /><span><strong>{item.name || item.title}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>)}</div>',
+  '<div className="mcTimeline">{items.slice(0, 5).map((item, index) => { const playerName = item.name || item.title || "Player"; return <div key={`${item.id || playerName}-${index}`} role="button" tabIndex={0} data-shotlab-response-row="true" aria-label={`Review ${playerName} result and record next assignment`} onClick={(event) => openLiveResultResponse(event.currentTarget)} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); openLiveResultResponse(event.currentTarget); } }}><Avatar item={item} size={42} /><span><strong>{playerName}</strong><small>{item.detail || "Recent team activity"}</small></span><time>{item.meta || "Now"}</time></div>; })}</div>',
+);
+
+replaceOnce(
   "public/shotlab-v3-mobile-corrections.css",
   '/* Mobile coaches must retain access to live operational evidence and assignment follow-up. */\n',
   '/* Live operational evidence must remain visible and actionable at every viewport. */\n[data-testid="coach-live-activity"] {\n  display: block !important;\n  visibility: visible !important;\n  opacity: 1 !important;\n  min-height: 1px !important;\n  max-height: none !important;\n}\n\n/* Mobile coaches must retain access to live operational evidence and assignment follow-up. */\n',
+);
+
+replaceOnce(
+  "tests/e2e/coach-player-invitation.spec.mjs",
+  `async function enterCoachPlayers(page) {\n  await page.goto("/");\n  const dock = page.getByTestId("mobile-navigation-dock");\n  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });\n  await expect(dock.or(demoCoach).first()).toBeVisible({ timeout: 15_000 });\n  if (await demoCoach.isVisible()) await demoCoach.click();\n  await expect(dock).toBeVisible({ timeout: 15_000 });\n  const players = dock.getByRole("button", { name: "Players", exact: true });\n  await expect(players).toBeVisible();\n  await players.click();\n}`,
+  `async function enterCoachPlayers(page) {\n  await page.goto("/");\n  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });\n  const visiblePlayers = page.locator('button:visible').filter({ hasText: /^Players$/ }).first();\n  await expect(demoCoach.or(visiblePlayers).first()).toBeVisible({ timeout: 15_000 });\n  if (await demoCoach.isVisible()) await demoCoach.click();\n  await expect(visiblePlayers).toBeVisible({ timeout: 15_000 });\n  await visiblePlayers.click();\n}`,
 );
 
 replaceOnce(
@@ -59,7 +71,7 @@ replaceOnce(
 replaceOnce(
   "tests/coach-player-response-loop.test.mjs",
   '  assert.match(activation, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);',
-  '  assert.match(activation, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);',
+  '  assert.match(activation, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.match(commandCenter, /openLiveResultResponse/);\n  assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);',
 );
 
 replaceOnce(
