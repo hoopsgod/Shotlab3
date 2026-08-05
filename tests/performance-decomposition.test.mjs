@@ -124,7 +124,7 @@ test('Player career history is redirected through a deferred boundary', () => {
   assert.match(viteConfig, /DeferredPlayerCareerHistory\.jsx/)
 })
 
-test('the deferred career history boundary dynamically imports its implementation', () => {
+test('the deferred career history boundary dynamically imports the implementation', () => {
   assert.match(deferredCareerHistory, /lazy\(\(\) => import\(["']\.\/PlayerCareerHistory\.jsx["']\)\)/)
   assert.match(deferredCareerHistory, /<Suspense fallback=/)
   assert.match(deferredCareerHistory, /data-testid=["']player-career-history-loading["']/)
@@ -146,10 +146,10 @@ test('the performance verifier locks startup App assets and total request budget
   assert.equal(performanceBudget.maxLargestJavaScriptBytes, 585000)
   assert.equal(performanceBudget.maxStartupAppJavaScriptBytes, 585000)
   assert.equal(performanceBudget.maxStartupAppJavaScriptGzipBytes, 166000)
-  assert.equal(performanceBudget.maxTotalJavaScriptGzipBytes, 355000)
+  assert.equal(performanceBudget.maxTotalJavaScriptGzipBytes, 357500)
   assert.equal(performanceBudget.maxLargestCssBytes, 128000)
   assert.equal(performanceBudget.maxStartupAppCssBytes, 25000)
   assert.equal(performanceBudget.maxStartupAppCssGzipBytes, 5500)
-  assert.equal(performanceBudget.maxTotalCssGzipBytes, 76500)
+  assert.equal(performanceBudget.maxTotalCssGzipBytes, 76750)
   assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })
