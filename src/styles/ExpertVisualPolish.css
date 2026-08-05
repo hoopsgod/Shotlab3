@@ -9,7 +9,6 @@
   --semantic-utility-border: rgba(255, 255, 255, 0.18);
 }
 
-/* Utility actions stay neutral; lime is reserved for brand emphasis and positive progress. */
 button[data-visual-role="utility"] {
   color: var(--semantic-utility) !important;
   background: var(--semantic-utility-bg) !important;
@@ -32,7 +31,6 @@ button[data-visual-role="utility"]:focus-visible {
   border-color: rgba(255, 255, 255, 0.42) !important;
 }
 
-/* Demo cleanup is available only inside explicit demo runtime and no longer competes with primary actions. */
 button[data-visual-role="demo-destructive"] {
   width: auto !important;
   min-height: 38px !important;
@@ -46,7 +44,6 @@ button[data-visual-role="demo-destructive"] {
 
 button[data-visual-role="demo-destructive"][hidden] { display: none !important; }
 
-/* Remove the isolated bordered-description defect in Add Player surfaces. */
 [data-visual-role="description-copy"] {
   border: 0 !important;
   outline: 0 !important;
@@ -55,7 +52,6 @@ button[data-visual-role="demo-destructive"][hidden] { display: none !important; 
   padding: 0 !important;
 }
 
-/* Dark surfaces must retain AA-oriented text and control contrast. */
 [data-testid*="insight"],
 [data-testid*="decision"],
 .mcSection,
@@ -72,7 +68,6 @@ button[data-visual-role="demo-destructive"][hidden] { display: none !important; 
   color: var(--text-2, #c0c7cc);
 }
 
-/* A 0% state still presents a complete, readable progress affordance. */
 [role="progressbar"] {
   min-height: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
