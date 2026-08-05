@@ -46,12 +46,6 @@ replaceOnce(
 );
 
 replaceOnce(
-  "public/shotlab-v3-mobile-corrections.css",
-  '/* Mobile coaches must retain access to live operational evidence and assignment follow-up. */\n',
-  '/* Live operational evidence must remain visible and actionable at every viewport. */\n[data-testid="coach-live-activity"] {\n  display: block !important;\n  visibility: visible !important;\n  opacity: 1 !important;\n  min-height: 1px !important;\n  max-height: none !important;\n}\n\n/* Mobile coaches must retain access to live operational evidence and assignment follow-up. */\n',
-);
-
-replaceOnce(
   "tests/player-assignment-next-action.test.mjs",
   '  const enhancer = fs.readFileSync(new URL("../src/lib/playerAssignmentEnhancer.js", import.meta.url), "utf8");\n  const service = fs.readFileSync(new URL("../src/lib/playerAssignmentService.js", import.meta.url), "utf8");',
   '  const enhancer = fs.readFileSync(new URL("../src/lib/playerAssignmentEnhancer.js", import.meta.url), "utf8");\n  const commandCenter = fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx", import.meta.url), "utf8");\n  const service = fs.readFileSync(new URL("../src/lib/playerAssignmentService.js", import.meta.url), "utf8");',
