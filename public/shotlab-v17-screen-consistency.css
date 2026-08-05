@@ -39,6 +39,8 @@ html body #root [data-testid*="event"] :is([class*="empty"],[class*="Empty"]){mi
   html body #root [data-testid="coach-primary-objective"] :is(h1,h2){font-size:clamp(36px,10.5vw,46px)!important;line-height:1!important}
   html body #root [data-testid="coach-primary-objective"] :is(p){margin-block:6px!important;line-height:1.32!important}
   html body #root [data-testid="coach-primary-objective"] button{min-height:46px!important}
+  html body #root [data-testid="coach-onboarding-state"]{padding:11px 15px!important;gap:8px!important}
+  html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy em{margin-top:3px!important;line-height:1.28!important}
   html body #root [data-testid*="assignment-accountability"] [class*="metric"],html body #root [data-testid*="accountability"] [class*="metric"]{min-height:76px!important;padding:14px 10px!important}
   html body #root :is(form,[class*="form"],[class*="Form"]) :is(input,select,textarea){width:100%!important;box-sizing:border-box!important}
   html body #root :is([class*="Actions"],[class*="actions"]){display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
