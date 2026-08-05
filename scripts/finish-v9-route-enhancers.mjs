@@ -8,13 +8,6 @@ function replaceOnce(path, before, after) {
   return true;
 }
 
-function appendOnce(path, marker, content) {
-  const source = readFileSync(path, "utf8");
-  if (source.includes(marker)) return false;
-  writeFileSync(path, `${source.trimEnd()}\n\n${content.trim()}\n`);
-  return true;
-}
-
 replaceOnce(
   "src/components/PlayerDailyCommandCenter.jsx",
   'import { useEffect, useRef, useState } from "react";\n',
@@ -46,6 +39,18 @@ replaceOnce(
 );
 
 replaceOnce(
+  "src/components/CoachCommandCenter.jsx",
+  '  const lowerPanels = [sessionPanel ? teamPanel : null, sessionPanel || teamPanel ? livePanel : null].filter(Boolean);',
+  '  const lowerPanels = [sessionPanel ? teamPanel : null].filter(Boolean);',
+);
+
+replaceOnce(
+  "src/components/CoachCommandCenter.jsx",
+  '        {!sparseOnboardingMode && lowerPanels.length > 0 ? <section className={`mcLowerGrid has-${lowerPanels.length}-panels`}>{lowerPanels}</section> : null}\n\n        {toolsOpen ?',
+  '        {!sparseOnboardingMode && lowerPanels.length > 0 ? <section className={`mcLowerGrid has-${lowerPanels.length}-panels`}>{lowerPanels}</section> : null}\n        {(sessionPanel || teamPanel) && livePanel ? <section className="mcLiveEvidence" data-testid="coach-live-evidence-region">{livePanel}</section> : null}\n\n        {toolsOpen ?',
+);
+
+replaceOnce(
   "tests/player-assignment-next-action.test.mjs",
   '  const enhancer = fs.readFileSync(new URL("../src/lib/playerAssignmentEnhancer.js", import.meta.url), "utf8");\n  const service = fs.readFileSync(new URL("../src/lib/playerAssignmentService.js", import.meta.url), "utf8");',
   '  const enhancer = fs.readFileSync(new URL("../src/lib/playerAssignmentEnhancer.js", import.meta.url), "utf8");\n  const commandCenter = fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx", import.meta.url), "utf8");\n  const service = fs.readFileSync(new URL("../src/lib/playerAssignmentService.js", import.meta.url), "utf8");',
@@ -66,7 +71,7 @@ replaceOnce(
 replaceOnce(
   "tests/coach-player-response-loop.test.mjs",
   '  assert.match(activation, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);',
-  '  assert.match(activation, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.match(commandCenter, /openLiveResultResponse/);\n  assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);',
+  '  assert.match(activation, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.match(commandCenter, /openLiveResultResponse/);\n  assert.match(commandCenter, /coach-live-evidence-region/);\n  assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);',
 );
 
 replaceOnce(
@@ -75,31 +80,6 @@ replaceOnce(
   "    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')\n  ) {\n    return 'PlayerProfileWorkspaces'\n  }\n\n  if (\n    moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n    || moduleId.includes('/src/components/PlayerDashboardHeader.jsx')",
 );
 
-// Release lock: keep live activity visible after every later stylesheet rule.
-appendOnce(
-  "public/shotlab-v3-mobile-corrections.css",
-  "SHOTLAB_RELEASE_LIVE_ACTIVITY_LOCK",
-  `/* SHOTLAB_RELEASE_LIVE_ACTIVITY_LOCK */
-html body [data-testid="coach-live-activity"].mcActivity,
-html body article[data-testid="coach-live-activity"] {
-  display: block !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  height: auto !important;
-  min-height: 1px !important;
-  max-height: none !important;
-  overflow: visible !important;
-  pointer-events: auto !important;
-}
-html body [data-testid="coach-live-activity"] [data-shotlab-response-row="true"] {
-  display: grid !important;
-  visibility: visible !important;
-  opacity: 1 !important;
-  pointer-events: auto !important;
-}`,
-);
-
-// Release lock: resolve the Players control after the responsive shell settles.
 {
   const path = "tests/e2e/coach-player-invitation.spec.mjs";
   let source = readFileSync(path, "utf8");
@@ -132,7 +112,6 @@ html body [data-testid="coach-live-activity"] [data-shotlab-response-row="true"]
   }
 }
 
-// Release lock: quick-assign state refresh is asynchronous but must converge.
 {
   const path = "tests/e2e/coach-quick-assign.spec.mjs";
   let source = readFileSync(path, "utf8");
