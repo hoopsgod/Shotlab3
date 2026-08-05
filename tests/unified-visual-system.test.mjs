@@ -46,6 +46,14 @@ test("mobile Mission Control keeps the primary objective compact", () => {
   assert.match(screenCss, /font-size:clamp\(36px,10\.5vw,46px\)!important/);
 });
 
+test("mobile Coach onboarding remains compact without clipping content", () => {
+  assert.match(screenCss, /data-testid="coach-onboarding-state"/);
+  assert.match(screenCss, /padding:11px 15px!important/);
+  assert.match(screenCss, /gap:8px!important/);
+  assert.match(screenCss, /line-height:1\.28!important/);
+  assert.doesNotMatch(screenCss, /data-testid="coach-onboarding-state"[^}]*overflow:hidden/);
+});
+
 test("Player Details, Events, Archive, Settings, Legal and Data Request share the same surface contract", () => {
   for (const surface of ["player-detail","career","archive","event","settings","legal","data-request"]) {
     assert.ok(screenCss.includes(surface), `missing ${surface} parity selector`);
