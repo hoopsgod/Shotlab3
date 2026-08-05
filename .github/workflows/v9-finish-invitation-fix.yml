@@ -1,0 +1,35 @@
+name: V9 Finish Invitation Fix
+
+on:
+  pull_request:
+    paths:
+      - "scripts/fix-v9-invitation-helper.mjs"
+      - ".github/workflows/v9-finish-invitation-fix.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Apply invitation helper correction
+        run: node scripts/fix-v9-invitation-helper.mjs
+      - name: Commit branch correction
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/e2e/coach-player-invitation.spec.mjs
+          if git diff --cached --quiet; then
+            echo "No correction required."
+          else
+            git commit -m "Restore resilient coach invitation entry flow"
+            git push origin HEAD:${{ github.head_ref }}
+          fi
