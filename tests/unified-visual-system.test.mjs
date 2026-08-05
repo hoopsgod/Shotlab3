@@ -42,8 +42,8 @@ test("screenshot-critical accountability and form surfaces share compact mobile 
 
 test("mobile Mission Control keeps the primary objective compact", () => {
   assert.match(screenCss, /data-testid="coach-primary-objective"/);
-  assert.match(screenCss, /max-height:322px!important/);
-  assert.match(screenCss, /font-size:clamp\(38px,11vw,48px\)!important/);
+  assert.match(screenCss, /max-height:318px!important/);
+  assert.match(screenCss, /font-size:clamp\(36px,10\.5vw,46px\)!important/);
 });
 
 test("Player Details, Events, Archive, Settings, Legal and Data Request share the same surface contract", () => {
@@ -52,4 +52,11 @@ test("Player Details, Events, Archive, Settings, Legal and Data Request share th
   }
   assert.match(screenCss, /background:var\(--sl-surface\)!important/);
   assert.match(screenCss, /box-shadow:var\(--sl-shadow-card\)!important/);
+});
+
+test("secondary pages share one header and action hierarchy", () => {
+  assert.match(screenCss, /One secondary-page header and action language/);
+  assert.match(screenCss, /letter-spacing:-\.045em!important/);
+  assert.match(screenCss, /min-height:44px!important/);
+  assert.match(screenCss, /outline:3px solid rgba\(138,165,31,.18\)!important/);
 });
