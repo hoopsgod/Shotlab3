@@ -54,3 +54,21 @@ appendOnce("src/components/CoachDashboardPrimitives.module.css", ".metricSparkli
 .progressTrack { min-height: 8px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.1) !important; }
 .progressTrack > span { min-height: 100%; }
 `);
+
+appendOnce("src/styles/ExpertVisualPolish.css", "/* coach-live-activity-release-lock */", `
+/* coach-live-activity-release-lock */
+html body [data-testid="coach-live-activity"],
+html body.mission-control-active [data-testid="coach-live-activity"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+`);
+
+patch(
+  "tests/e2e/coach-player-invitation.spec.mjs",
+  `async function enterCoachPlayers(page) {\n  await page.goto("/");\n  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });\n  const visiblePlayers = page.locator('button:visible').filter({ hasText: /^Players$/ }).first();\n  await expect(demoCoach.or(visiblePlayers).first()).toBeVisible({ timeout: 15_000 });\n  if (await demoCoach.isVisible()) await demoCoach.click();\n  await expect(visiblePlayers).toBeVisible({ timeout: 15_000 });\n  await visiblePlayers.click();\n}`,
+  `async function enterCoachPlayers(page) {\n  await page.goto("/");\n  const dock = page.getByTestId("mobile-navigation-dock");\n  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });\n  await expect(dock.or(demoCoach).first()).toBeVisible({ timeout: 15_000 });\n  if (await demoCoach.isVisible()) await demoCoach.click();\n  await expect(dock).toBeVisible({ timeout: 15_000 });\n  const players = dock.getByRole("button", { name: "Players", exact: true });\n  await expect(players).toBeVisible();\n  await players.click();\n}`,
+);
