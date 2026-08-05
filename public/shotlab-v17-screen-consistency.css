@@ -1,7 +1,6 @@
 @import url('/shotlab-v16-unified-visual-system.css?v=eddf5077');
 
 /* ShotLab V17 — screenshot-driven screen consistency corrections. */
-
 html body #root [class*="_insightCard_"],html body #root [data-testid*="insight"],html body #root [data-testid*="signal"]{isolation:isolate!important}
 html body #root [class*="_insightCard_"] :is(h1,h2,h3,h4,strong),html body #root [data-testid*="insight"] :is(h1,h2,h3,h4,strong),html body #root [data-testid*="signal"] :is(h1,h2,h3,h4,strong){color:#f7f8f5!important;-webkit-text-fill-color:#f7f8f5!important}
 html body #root [class*="_insightCard_"] :is(p,small,span),html body #root [data-testid*="insight"] :is(p,small,span),html body #root [data-testid*="signal"] :is(p,small,span){color:#b8c0ba!important;-webkit-text-fill-color:#b8c0ba!important}
@@ -26,12 +25,23 @@ html body #root :is([data-testid*="player-detail"],[data-testid*="career"],[data
 html body #root :is([data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]) :is(h1,h2,h3,strong){letter-spacing:-.035em!important}
 html body #root :is([data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]) :is(p,small){color:var(--sl-muted)!important;-webkit-text-fill-color:var(--sl-muted)!important}
 
+/* One secondary-page header and action language. */
+html body #root :is([data-testid*="player-detail"],[data-testid*="career"],[data-testid*="archive"],[data-testid*="event"],[data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]) :is(header,[class*="Header"],[class*="header"]){margin-bottom:18px!important}
+html body #root :is([data-testid*="player-detail"],[data-testid*="career"],[data-testid*="archive"],[data-testid*="event"],[data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]) :is(h1,h2){color:var(--sl-ink)!important;-webkit-text-fill-color:var(--sl-ink)!important;letter-spacing:-.045em!important}
+html body #root :is([data-testid*="event"],[data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]) :is(a,button):not([aria-label]){border-radius:var(--sl-radius-control)!important;font-weight:760!important}
+html body #root :is([data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]) :is(a,button):not([aria-label]){min-height:44px!important;padding:0 14px!important;border:1px solid var(--sl-border-strong)!important;background:var(--sl-surface)!important;color:var(--sl-ink)!important;-webkit-text-fill-color:var(--sl-ink)!important;box-shadow:none!important}
+html body #root :is([data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]) :is(a,button):not([aria-label]):focus-visible{outline:3px solid rgba(138,165,31,.18)!important;outline-offset:2px!important}
+html body #root [data-testid*="event"] :is([class*="metric"],[class*="Metric"]){min-height:104px!important;padding:18px!important}
+html body #root [data-testid*="event"] :is([class*="empty"],[class*="Empty"]){min-height:96px!important}
+
 @media(max-width:700px){
-  html body #root [data-testid="coach-primary-objective"]{padding:22px 20px!important;gap:14px!important;min-height:0!important;max-height:322px!important}
-  html body #root [data-testid="coach-primary-objective"] :is(h1,h2){font-size:clamp(38px,11vw,48px)!important;line-height:1.02!important}
-  html body #root [data-testid="coach-primary-objective"] :is(p){margin-block:8px!important;line-height:1.35!important}
-  html body #root [data-testid="coach-primary-objective"] button{min-height:48px!important}
+  html body #root [data-testid="coach-primary-objective"]{padding:18px 20px!important;gap:12px!important;min-height:0!important;max-height:318px!important}
+  html body #root [data-testid="coach-primary-objective"] :is(h1,h2){font-size:clamp(36px,10.5vw,46px)!important;line-height:1!important}
+  html body #root [data-testid="coach-primary-objective"] :is(p){margin-block:6px!important;line-height:1.32!important}
+  html body #root [data-testid="coach-primary-objective"] button{min-height:46px!important}
   html body #root [data-testid*="assignment-accountability"] [class*="metric"],html body #root [data-testid*="accountability"] [class*="metric"]{min-height:76px!important;padding:14px 10px!important}
   html body #root :is(form,[class*="form"],[class*="Form"]) :is(input,select,textarea){width:100%!important;box-sizing:border-box!important}
   html body #root :is([class*="Actions"],[class*="actions"]){display:grid!important;grid-template-columns:1fr!important;gap:10px!important}
+  html body #root :is([data-testid*="player-detail"],[data-testid*="career"],[data-testid*="archive"],[data-testid*="event"],[data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]){border-radius:22px!important}
+  html body #root :is([data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]) :is(a,button):not([aria-label]){width:100%!important;justify-content:flex-start!important}
 }
