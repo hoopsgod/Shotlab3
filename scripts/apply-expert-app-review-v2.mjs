@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 
 function patch(path, before, after) {
+  if (path === "tests/e2e/coach-player-invitation.spec.mjs") return;
   const source = readFileSync(path, "utf8");
   if (source.includes(after)) return;
   if (!source.includes(before)) throw new Error(`Expert app review anchor missing in ${path}`);
@@ -66,9 +67,3 @@ html body.mission-control-active [data-testid="coach-live-activity"] {
   overflow: visible !important;
 }
 `);
-
-patch(
-  "tests/e2e/coach-player-invitation.spec.mjs",
-  `async function enterCoachPlayers(page) {\n  await page.goto("/");\n  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });\n  const visiblePlayers = page.locator('button:visible').filter({ hasText: /^Players$/ }).first();\n  await expect(demoCoach.or(visiblePlayers).first()).toBeVisible({ timeout: 15_000 });\n  if (await demoCoach.isVisible()) await demoCoach.click();\n  await expect(visiblePlayers).toBeVisible({ timeout: 15_000 });\n  await visiblePlayers.click();\n}`,
-  `async function enterCoachPlayers(page) {\n  await page.goto("/");\n  const dock = page.getByTestId("mobile-navigation-dock");\n  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });\n  await expect(dock.or(demoCoach).first()).toBeVisible({ timeout: 15_000 });\n  if (await demoCoach.isVisible()) await demoCoach.click();\n  await expect(dock).toBeVisible({ timeout: 15_000 });\n  const players = dock.getByRole("button", { name: "Players", exact: true });\n  await expect(players).toBeVisible();\n  await players.click();\n}`,
-);
