@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 
 const css = readFileSync("public/shotlab-v16-unified-visual-system.css", "utf8");
 const screenCss = readFileSync("public/shotlab-v17-screen-consistency.css", "utf8");
+const activationCss = readFileSync("src/components/CoachActivationPath.css", "utf8");
 const authority = readFileSync("public/shotlab-v15-session-integrity.css", "utf8");
 
 test("unified visual system and screen corrections are loaded by the final presentation authority", () => {
@@ -46,12 +47,13 @@ test("mobile Mission Control keeps the primary objective compact", () => {
   assert.match(screenCss, /font-size:clamp\(36px,10\.5vw,46px\)!important/);
 });
 
-test("mobile Coach onboarding remains compact without clipping content", () => {
-  assert.match(screenCss, /data-testid="coach-onboarding-state"/);
-  assert.match(screenCss, /padding:11px 15px!important/);
-  assert.match(screenCss, /gap:8px!important/);
-  assert.match(screenCss, /line-height:1\.28!important/);
-  assert.doesNotMatch(screenCss, /data-testid="coach-onboarding-state"[^}]*overflow:hidden/);
+test("mobile Coach onboarding remains compact in its native component stylesheet", () => {
+  assert.match(activationCss, /@media\(max-width:700px\)/);
+  assert.match(activationCss, /gap:12px/);
+  assert.match(activationCss, /padding:16px/);
+  assert.match(activationCss, /min-height:48px/);
+  assert.match(activationCss, /margin-top:12px/);
+  assert.doesNotMatch(activationCss, /@media\(max-width:700px\)[\s\S]*?\.mcActivationPlan\{[\s\S]*?overflow:hidden/);
 });
 
 test("Player Details, Events, Archive, Settings, Legal and Data Request share the same surface contract", () => {
