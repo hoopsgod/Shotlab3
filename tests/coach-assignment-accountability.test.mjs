@@ -156,3 +156,10 @@ test("source contracts install the read-only coach panel and keep private follow
   assert.match(workflow, /coach-assignment-accountability\.test\.mjs/);
   assert.match(workflow, /coach-assignment-accountability\.spec\.mjs/);
 });
+
+
+test("mobile accountability remains visible and actionable", () => {
+  const mobileCss = fs.readFileSync(new URL("../public/shotlab-v3-mobile-corrections.css", import.meta.url), "utf8");
+  assert.match(mobileCss, /coach-assignment-accountability[\s\S]{0,180}display:\s*block\s*!important/);
+  assert.doesNotMatch(mobileCss, /coach-assignment-accountability[^}]*display:\s*none\s*!important/);
+});

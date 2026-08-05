@@ -88,10 +88,11 @@ body.mission-control-active [data-testid="coach-primary-objective"] {
   max-height: 310px !important;
 }
 
-/* Assignment accountability is a secondary workflow, not home-screen priority. */
+/* Mobile coaches must retain access to live operational evidence and assignment follow-up. */
 @media (max-width: 700px) {
-  body.mission-control-active [data-testid="coach-assignment-accountability"] {
-    display: none !important;
+  body.mission-control-active [data-testid="coach-assignment-accountability"],
+  body.mission-control-active [data-testid="coach-live-activity"] {
+    display: block !important;
   }
 
   body.mission-control-active .missionControl {

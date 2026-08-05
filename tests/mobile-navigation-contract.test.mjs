@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");
+const legacyStylesSource = fs.readFileSync(new URL("../src/styles/appLegacyStyles.js", import.meta.url), "utf8");
 const navigationSource = fs.readFileSync(new URL("../src/components/MobileNavigation.jsx", import.meta.url), "utf8");
 const navigationCss = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
 const architectureCss = fs.readFileSync(new URL("../src/components/MobileNavigationArchitecture.css", import.meta.url), "utf8");
@@ -62,7 +63,7 @@ test("coach mobile navigation keeps home, roster, and schedule direct while pres
 
 test("compact dock reclaims mobile viewport space", () => {
   assert.match(navigationCss, /--bottom-nav-content-padding:\s*88px/);
-  assert.match(appSource, /var\(--bottom-nav-content-padding, 88px\)/);
-  assert.doesNotMatch(appSource, /--bottom-nav-content-padding, 132px/);
-  assert.doesNotMatch(appSource, /--bottom-nav-content-padding, 156px/);
+  assert.match(legacyStylesSource, /var\(--bottom-nav-content-padding, 88px\)/);
+  assert.doesNotMatch(legacyStylesSource, /--bottom-nav-content-padding, 132px/);
+  assert.doesNotMatch(legacyStylesSource, /--bottom-nav-content-padding, 156px/);
 });

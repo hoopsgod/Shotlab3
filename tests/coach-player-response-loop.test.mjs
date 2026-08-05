@@ -74,3 +74,9 @@ test("response-loop source contracts keep the workflow one-tap and honest", () =
   assert.match(activation, /installCoachResponseLoopEnhancer\(\)/);
   assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);
 });
+
+
+test("mobile live activity remains visible for coach response workflows", () => {
+  const mobileCss = fs.readFileSync(new URL("../public/shotlab-v3-mobile-corrections.css", import.meta.url), "utf8");
+  assert.match(mobileCss, /coach-live-activity[\s\S]{0,120}display:\s*block\s*!important/);
+});

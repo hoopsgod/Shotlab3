@@ -2,7 +2,8 @@ import { openExactPlayerFollowUp } from "./coachAssignmentOutcomeEnhancer.js";
 import { buildCoachResponseContext, setCoachResponseContext } from "./coachPlayerResponseLoop.js";
 
 const STYLE_ID = "shotlab-coach-response-loop-styles";
-const ROW_SELECTOR = '[data-testid="coach-live-activity"] .mcTimeline > div';
+const ACTIVITY_SELECTOR = '[data-testid="coach-live-activity"]';
+const ROW_SELECTOR = `${ACTIVITY_SELECTOR} .mcTimeline > div`;
 const PLAYER_DRAWER_SELECTOR = '[data-testid="coach-player-intelligence-drawer"]';
 const PLAYER_STATS_ROW_SELECTOR = '#coach-roster-operations [role="button"]';
 const PLAYER_DRAWER_RECOVERY_DELAYS = [650, 1500, 2800, 4500];
@@ -25,6 +26,23 @@ function ensureStyles() {
   style.id = STYLE_ID;
   style.textContent = styles;
   document.head.appendChild(style);
+}
+
+function releaseLiveActivity(root = document) {
+  const activity = root?.querySelector?.(ACTIVITY_SELECTOR);
+  if (!activity?.style) return false;
+  for (const [property, value] of [
+    ["display", "block"],
+    ["visibility", "visible"],
+    ["opacity", "1"],
+    ["height", "auto"],
+    ["max-height", "none"],
+    ["overflow", "visible"],
+    ["pointer-events", "auto"],
+  ]) activity.style.setProperty(property, value, "important");
+  activity.removeAttribute("hidden");
+  activity.setAttribute("aria-hidden", "false");
+  return true;
 }
 
 export function readLiveResultRow(row) {
@@ -97,6 +115,7 @@ export function openLiveResultResponse(row) {
 }
 
 function markRows() {
+  releaseLiveActivity();
   for (const row of document.querySelectorAll(ROW_SELECTOR)) {
     const result = readLiveResultRow(row);
     if (!result.actionable) {
@@ -141,8 +160,9 @@ export function installCoachResponseLoopEnhancer() {
     });
   };
   const observer = new MutationObserver(schedule);
-  observer.observe(document.body, { childList: true, subtree: true, characterData: true });
+  observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["class", "style", "hidden", "aria-hidden"] });
   window.addEventListener("focus", schedule);
+  window.addEventListener("resize", schedule);
   schedule();
   return true;
 }
