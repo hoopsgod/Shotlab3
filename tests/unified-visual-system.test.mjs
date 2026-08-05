@@ -20,14 +20,9 @@ test("coach and player pages share the same canvas, spacing, and card contracts"
 });
 
 test("shared primitives cover cards, metrics, filters, buttons, progress, and empty states", () => {
-  for (const contract of [
-    "_insightCard_",
-    "_metricStrip_",
-    "_filterRail_",
-    "_primaryAction_",
-    "_progressTrack_",
-    "_emptyState_",
-  ]) assert.ok(css.includes(contract), `missing shared ${contract} contract`);
+  for (const contract of ["_insightCard_","_metricStrip_","_filterRail_","_primaryAction_","_progressTrack_","_emptyState_"]) {
+    assert.ok(css.includes(contract), `missing shared ${contract} contract`);
+  }
 });
 
 test("dark operational cards explicitly preserve readable text contrast", () => {
@@ -43,4 +38,18 @@ test("screenshot-critical accountability and form surfaces share compact mobile 
   assert.match(screenCss, /min-height:84px!important/);
   assert.match(screenCss, /:is\(form,\[class\*="form"\],\[class\*="Form"\]\)/);
   assert.match(screenCss, /outline:3px solid rgba\(138,165,31,.18\)/);
+});
+
+test("mobile Mission Control keeps the primary objective compact", () => {
+  assert.match(screenCss, /data-testid="coach-primary-objective"/);
+  assert.match(screenCss, /max-height:322px!important/);
+  assert.match(screenCss, /font-size:clamp\(38px,11vw,48px\)!important/);
+});
+
+test("Player Details, Events, Archive, Settings, Legal and Data Request share the same surface contract", () => {
+  for (const surface of ["player-detail","career","archive","event","settings","legal","data-request"]) {
+    assert.ok(screenCss.includes(surface), `missing ${surface} parity selector`);
+  }
+  assert.match(screenCss, /background:var\(--sl-surface\)!important/);
+  assert.match(screenCss, /box-shadow:var\(--sl-shadow-card\)!important/);
 });
