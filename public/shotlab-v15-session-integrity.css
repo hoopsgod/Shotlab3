@@ -1,4 +1,4 @@
-:root{--sl-ink:#151816;--sl-muted:#69716c;--sl-surface:#fff;--sl-border:rgba(21,24,22,.12);--sl-border-strong:rgba(21,24,22,.2);--sl-accent:#78951f;--sl-radius-card:24px;--sl-radius-control:14px;--sl-shadow-card:0 12px 30px rgba(22,28,24,.07)}
+:root{--sl-ink:#151816;--sl-surface:#fff;--sl-border:rgba(21,24,22,.12);--sl-border-strong:rgba(21,24,22,.2);--sl-accent:#78951f;--sl-radius-card:24px;--sl-radius-control:14px;--sl-shadow-card:0 12px 30px rgba(22,28,24,.07)}
 html body #root :is([data-role="coach"],[data-role="player"]) .page{width:min(100%,1180px);margin-inline:auto;padding-inline:clamp(16px,4vw,28px)}
 html body #root :is([class*="Card"],[class*="card"],[data-testid*="player-detail"],[data-testid*="career"],[data-testid*="archive"],[data-testid*="event"],[data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]){border-radius:var(--sl-radius-card)}
 html body #root :is([data-testid*="player-detail"],[data-testid*="career"],[data-testid*="archive"],[data-testid*="event"],[data-testid*="settings"],[data-testid*="legal"],[data-testid*="data-request"]) :is([class*="Card"],[class*="card"]){border:1px solid var(--sl-border)!important;background:var(--sl-surface)!important;box-shadow:var(--sl-shadow-card)!important}
@@ -14,7 +14,6 @@ html body #root :is([data-testid*="assignment-accountability"],[data-testid*="ac
 html body #root :is([data-testid*="assignment-accountability"],[data-testid*="accountability"]) [class*="metric"]{min-height:88px!important;padding:16px!important}
 html body #root [data-testid="coach-onboarding-state"]{display:grid!important;grid-template-columns:48px minmax(0,1fr) auto!important;align-items:center!important;gap:14px!important;padding:17px 18px!important;border:1px solid var(--sl-border)!important;border-radius:20px!important;background:linear-gradient(145deg,#fffefa,#f5f7ef)!important;color:var(--sl-ink)!important;box-shadow:var(--sl-shadow-card)!important}
 html body #root [data-testid="coach-onboarding-state"]::before{background:var(--sl-accent)!important}
-html body #root [data-testid="coach-onboarding-state"]::after{display:none!important}
 html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanIcon{width:46px!important;height:46px!important;border-color:rgba(120,149,31,.2)!important;background:#eef2e3!important;color:#667d2d!important}
 html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy :is(small,strong,em){-webkit-text-fill-color:currentColor!important}
 html body #root [data-testid="coach-onboarding-state"] .mcTodayPlanCopy small{margin:0 0 4px!important;color:#667d2d!important;font-size:10px!important;font-weight:750!important}
