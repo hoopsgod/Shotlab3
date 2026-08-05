@@ -11,8 +11,9 @@ const replacements = [
   [".milestoneFooter{align-items:center;margin-top:12px}", ".milestoneFooter{margin-top:12px}"],
   [".milestoneFooter p{max-width:620px;margin:0;color:#c9d1cb;font:550 12px/1.5 system-ui,sans-serif}", ".milestoneFooter p{margin:0;color:#c9d1cb;font-size:12px}"],
   [".milestoneFooter span{color:#fff;font:800 10px/1 system-ui,sans-serif;text-transform:uppercase}", ".milestoneFooter span{font-size:10px;font-weight:800}"],
-  [".milestoneTrack span{display:block;height:100%;border-radius:inherit;background:var(--accent,#c8ff1a);transition:width .7s ease}", ".milestoneTrack span{display:block;height:100%;background:var(--accent,#c8ff1a);transition:width .7s}"],
+  [".milestoneTrack span{display:block;height:100%;border-radius:inherit;background:var(--accent,#c8ff1a);transition:width .7s ease}", ".milestoneTrack span{display:block;height:100%;background:var(--accent,#c8ff1a)}"],
   [".milestoneTopline,.milestoneFooter{display:flex;justify-content:space-between;gap:16px}", ".milestoneTopline,.milestoneFooter{display:flex;justify-content:space-between;gap:12px}"],
+  ["@media(prefers-reduced-motion:reduce){.archiveButton,.milestoneTrack span{transition:none}.archiveButton:hover{transform:none}}", "@media(prefers-reduced-motion:reduce){.archiveButton{transition:none}.archiveButton:hover{transform:none}}"],
 ];
 
 for (const [before, after] of replacements) source = source.replace(before, after);
