@@ -9,6 +9,8 @@ const replacements = [
   [".milestoneTopline>strong{color:var(--accent,#c8ff1a);font:800 clamp(24px,5vw,34px)/1 system-ui,sans-serif}", ".milestoneTopline>strong{color:var(--accent,#c8ff1a);font-size:30px}"],
   [".milestoneFooter p{max-width:620px;margin:0;color:#c9d1cb;font:550 12px/1.5 system-ui,sans-serif}", ".milestoneFooter p{margin:0;color:#c9d1cb;font-size:12px;line-height:1.5}"],
   [".milestoneFooter span{color:#fff;font:800 10px/1 system-ui,sans-serif;text-transform:uppercase}", ".milestoneFooter span{font-size:10px;font-weight:800;text-transform:uppercase}"],
+  [".milestoneTrack span{display:block;height:100%;border-radius:inherit;background:var(--accent,#c8ff1a);transition:width .7s ease}", ".milestoneTrack span{display:block;height:100%;background:var(--accent,#c8ff1a);transition:width .7s}"],
+  [".milestoneTopline,.milestoneFooter{display:flex;justify-content:space-between;gap:16px}", ".milestoneTopline,.milestoneFooter{display:flex;justify-content:space-between;gap:12px}"],
 ];
 
 for (const [before, after] of replacements) source = source.replace(before, after);
