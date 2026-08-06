@@ -7,6 +7,25 @@ const ICON_STYLE = { width: 20, height: 20, strokeWidth: 1.75 };
 const ACTIVE_COLOR = "color-mix(in srgb, var(--team-brand-nav-active, var(--accent, #c8ff1a)) 82%, #78951f 18%)";
 const ACTIVE_HALO = "color-mix(in srgb, var(--accent, #c8ff1a) 8%, transparent)";
 
+const ROLE_NAVIGATION_MODELS = {
+  player: {
+    workspaceLabel: "Player workspace",
+    primary: [
+      { key: "home", mobileLabel: "Home" },
+      { key: "log-drill", mobileLabel: "Train" },
+      { key: "leaderboards", mobileLabel: "Progress" },
+    ],
+  },
+  coach: {
+    workspaceLabel: "Coach workspace",
+    primary: [
+      { key: "feed", mobileLabel: "Home" },
+      { key: "players", mobileLabel: "Players" },
+      { key: "events", mobileLabel: "Schedule" },
+    ],
+  },
+};
+
 const MoreIcon = () => (
   <svg style={ICON_STYLE} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" />
@@ -29,7 +48,7 @@ const GROUP_DEFINITIONS = [
     id: "program",
     title: "Program",
     description: "Schedule, training, and team operations",
-    keys: new Set(["program", "events", "drills", "sc", "lifting", "attendance"]),
+    keys: new Set(["program", "events", "drills", "sc", "lifting", "attendance", "duels"]),
   },
   {
     id: "performance",
@@ -70,6 +89,49 @@ function resolveNavigationGroup(item) {
   if (explicit) return explicit;
   const key = String(item?.k || "").trim().toLowerCase();
   return GROUP_DEFINITIONS.find((group) => group.keys.has(key))?.id || "other";
+}
+
+function inferNavigationRole(ariaLabel = "") {
+  const normalized = String(ariaLabel).trim().toLowerCase();
+  if (normalized.includes("player")) return "player";
+  if (normalized.includes("coach")) return "coach";
+  return "default";
+}
+
+export function buildNativeNavigationModel({ primaryItems = [], secondaryItems = [], ariaLabel = "" } = {}) {
+  const fallbackPrimary = primaryItems.filter(Boolean).slice(0, 3);
+  const allItems = [...primaryItems, ...secondaryItems].filter(Boolean);
+  const itemByKey = new Map();
+  allItems.forEach((item) => {
+    if (item?.k && !itemByKey.has(item.k)) itemByKey.set(item.k, item);
+  });
+
+  const role = inferNavigationRole(ariaLabel);
+  const model = ROLE_NAVIGATION_MODELS[role];
+  if (!model) {
+    const primaryKeys = new Set(fallbackPrimary.map((item) => item.k));
+    return {
+      role,
+      workspaceLabel: "ShotLab workspace",
+      primaryItems: fallbackPrimary,
+      secondaryItems: allItems.filter((item) => !primaryKeys.has(item.k)),
+    };
+  }
+
+  const resolvedPrimary = model.primary
+    .map(({ key, mobileLabel }) => {
+      const item = itemByKey.get(key);
+      return item ? { ...item, mobileLabel } : null;
+    })
+    .filter(Boolean);
+  const primaryKeys = new Set(resolvedPrimary.map((item) => item.k));
+
+  return {
+    role,
+    workspaceLabel: model.workspaceLabel,
+    primaryItems: resolvedPrimary,
+    secondaryItems: allItems.filter((item) => !primaryKeys.has(item.k)),
+  };
 }
 
 export function groupSecondaryNavigation(items = []) {
@@ -130,8 +192,12 @@ export default function MobileNavigation({
   const closeButtonRef = useRef(null);
   const sheetRef = useRef(null);
   const previousFocusRef = useRef(null);
-  const visiblePrimaryItems = useMemo(() => primaryItems.filter(Boolean).slice(0, 3), [primaryItems]);
-  const visibleSecondaryItems = useMemo(() => secondaryItems.filter(Boolean), [secondaryItems]);
+  const nativeNavigation = useMemo(
+    () => buildNativeNavigationModel({ primaryItems, secondaryItems, ariaLabel }),
+    [primaryItems, secondaryItems, ariaLabel],
+  );
+  const visiblePrimaryItems = nativeNavigation.primaryItems;
+  const visibleSecondaryItems = nativeNavigation.secondaryItems;
   const groupedSecondaryItems = useMemo(() => groupSecondaryNavigation(visibleSecondaryItems), [visibleSecondaryItems]);
   const secondaryActive = visibleSecondaryItems.some((item) => item.k === activeKey);
   const secondaryHasNotification = visibleSecondaryItems.some((item) => Boolean(item.dot));
@@ -185,7 +251,7 @@ export default function MobileNavigation({
 
   return (
     <>
-      <nav className={styles.dock} aria-label={ariaLabel} data-testid="mobile-navigation-dock">
+      <nav className={styles.dock} aria-label={ariaLabel} data-navigation-role={nativeNavigation.role} data-testid="mobile-navigation-dock">
         <div className={styles.dockInner}>
           {visiblePrimaryItems.map((item) => (
             <NavigationItem key={item.k} item={item} active={item.k === activeKey} onSelect={handleSelect} compact />
@@ -226,7 +292,7 @@ export default function MobileNavigation({
             <div className={styles.sheetHandle} aria-hidden="true" />
             <div className={styles.sheetHeader}>
               <div>
-                <div className={styles.sheetEyebrow}>ShotLab workspace</div>
+                <div className={styles.sheetEyebrow}>{nativeNavigation.workspaceLabel}</div>
                 <h2 className={styles.sheetTitle}>Everything else, organized</h2>
                 <p className={styles.sheetSummary}>Frequent actions stay in the dock. Related tools live together here.</p>
               </div>
