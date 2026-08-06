@@ -77,7 +77,7 @@ jobs:
       - name: Verify production build
         run: npm run build
 
-      - name: Generate branded and raw mobile screenshots
+      - name: Generate branded App Store screenshots and raw mobile audits
         run: npx playwright test --config=playwright.screenshots.config.mjs
 
       - name: Validate screenshot count, format, and dimensions
