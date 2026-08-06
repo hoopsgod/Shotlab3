@@ -3,13 +3,32 @@ import { test, expect } from "@playwright/test";
 
 const SCREENSHOT_DIR = "artifacts/phase-2-command-hierarchy";
 
-test.use({ viewport: { width: 390, height: 844 }, reducedMotion: "reduce" });
+test.use({
+  viewport: { width: 390, height: 844 },
+  reducedMotion: "reduce",
+});
 
 async function installSafeRoutes(page) {
-  await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
-  await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
-  await page.route("**/v1/coach/players/provision**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: [] }) }));
-  await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+  await page.route("**/v1/season-archives", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, archives: [] }),
+  }));
+  await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ leaderboard: [] }),
+  }));
+  await page.route("**/v1/coach/players/provision**", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, invitations: [] }),
+  }));
+  await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: "[]",
+  }));
 }
 
 async function startClean(page) {
@@ -27,11 +46,24 @@ async function enterDemo(page, role) {
 }
 
 async function disableVisualNoise(page) {
-  await page.addStyleTag({ content: `*, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; transition-duration: 0.01ms !important; caret-color: transparent !important; }` });
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+        caret-color: transparent !important;
+      }
+    `,
+  });
 }
 
 test.beforeAll(() => mkdirSync(SCREENSHOT_DIR, { recursive: true }));
-test.beforeEach(async ({ page }) => { await installSafeRoutes(page); await startClean(page); });
+
+test.beforeEach(async ({ page }) => {
+  await installSafeRoutes(page);
+  await startClean(page);
+});
 
 test("Player home presents action, evidence, priority, and disclosure in order", async ({ page }) => {
   await enterDemo(page, "player");
