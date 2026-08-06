@@ -40,11 +40,13 @@ test("Player supporting analytics use progressive disclosure", () => {
 
 test("Command evidence bar remains accessible and bounded", () => {
   assert.match(evidence, /slice\(0, 4\)/);
+  assert.match(evidence, /role="group"/);
   assert.match(evidence, /aria-label=\{ariaLabel\}/);
   assert.match(evidence, /type="button"/);
   assert.match(evidence, /ariaLabel \|\| `\$\{item\.label\}:/);
   assert.match(evidenceStyles, /grid-template-columns: repeat\(var\(--evidence-count, 3\)/);
   assert.match(evidenceStyles, /button\.item:focus-visible/);
+  assert.doesNotMatch(evidenceStyles, /font-size: 8px/);
 });
 
 test("dark performance command surfaces restore readable local text tokens", () => {
