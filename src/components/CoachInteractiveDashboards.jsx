@@ -36,10 +36,10 @@ const resolveEventAction = (action, { onStatusChange, onCreateEvent, onOpenEvent
 export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filter, query, onFilterChange, onQueryChange, onAddPlayer, onOpenArchives }) {
   const briefing = buildCoachPlayerActionBriefing({ metrics, rows });
   const metricItems = [
-    { key: "all", label: "Roster", value: briefing.total, detail: "Active team players" },
-    { key: "active", label: "Active This Week", value: briefing.active, detail: `${briefing.activeRate}% of roster`, tone: "positive" },
-    { key: "attention", label: "Needs Attention", value: briefing.attentionRows.length, detail: briefing.noActivityRows.length ? `${briefing.noActivityRows.length} with no activity` : "No current-week activity", tone: "attention" },
-    { key: "leaders", label: "Weekly Makes", value: Number(metrics.weeklyMakes) || 0, detail: `${Number(metrics.weeklyActions) || 0} logged actions`, tone: "info" },
+    { key: "all", label: "Roster", value: briefing.total, detail: "Active team players", evidence: rows.slice(0, 8).map((row) => row.engagementScore || 0), evidenceLabel: "Roster engagement distribution" },
+    { key: "active", label: "Active This Week", value: briefing.active, detail: `${briefing.activeRate}% of roster`, tone: "positive", evidence: rows.slice(0, 8).map((row) => row.statusKey === "active" ? 100 : row.statusKey === "attention" ? 45 : 8), evidenceLabel: "Current activity distribution" },
+    { key: "attention", label: "Needs Attention", value: briefing.attentionRows.length, detail: briefing.noActivityRows.length ? `${briefing.noActivityRows.length} with no activity` : "No current-week activity", tone: "attention", evidence: rows.slice(0, 8).map((row) => row.statusKey === "new" ? 100 : row.statusKey === "attention" ? 65 : 10), evidenceLabel: "Attention-risk distribution" },
+    { key: "leaders", label: "Weekly Makes", value: Number(metrics.weeklyMakes) || 0, detail: `${Number(metrics.weeklyActions) || 0} logged actions`, tone: "info", evidence: rows.slice(0, 8).map((row) => row.weeklyMakes || 0), evidenceLabel: "Weekly makes distribution" },
   ];
 
   return (
