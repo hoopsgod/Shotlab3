@@ -18,11 +18,13 @@ const semanticHexes = [...semanticSource.matchAll(/(?:SUCCESS|INFO|WARNING|DANGE
 test("semantic colors are explicit, fixed, and mutually distinct", () => {
   assert.equal(semanticHexes.length, 5);
   assert.equal(new Set(semanticHexes).size, 5);
-  assert.match(semanticSource, /SUCCESS: "#4ADE80"/);
-  assert.match(semanticSource, /INFO: "#38BDF8"/);
-  assert.match(semanticSource, /WARNING: "#F59E0B"/);
-  assert.match(semanticSource, /DANGER: "#F87171"/);
-  assert.match(semanticSource, /NEUTRAL: "#94A3B8"/);
+  assert.match(semanticSource, /SUCCESS: "#167A52"/);
+  assert.match(semanticSource, /INFO: "#176B87"/);
+  assert.match(semanticSource, /WARNING: "#A85F0C"/);
+  assert.match(semanticSource, /DANGER: "#C33B49"/);
+  assert.match(semanticSource, /NEUTRAL: "#65717A"/);
+  assert.match(semanticSource, /surface: "rgba\(22, 122, 82, 0\.09\)"/);
+  assert.match(semanticSource, /surface: "rgba\(23, 107, 135, 0\.09\)"/);
 });
 
 test("app and runtime theme tokens expose semantic roles independently from team branding", () => {
