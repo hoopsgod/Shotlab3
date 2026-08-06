@@ -57,4 +57,8 @@ test("every shared visual-system change triggers rendered screenshot verificatio
   assert.match(screenshotWorkflow, /Generate branded App Store screenshots/);
   assert.match(screenshotWorkflow, /Upload Phase 1 and Phase 2 presentation evidence/);
   assert.match(screenshotWorkflow, /shotlab-phase-1-2-presentation-evidence/);
+  assert.match(screenshotWorkflow, /artifacts\/visual-foundation\//);
+  assert.match(screenshotWorkflow, /artifacts\/native-app-shell\//);
+  assert.match(screenshotWorkflow, /artifacts\/app-store\/iphone-6\.9\//);
+  assert.match(screenshotWorkflow, /artifacts\/design-audit\/iphone\//);
 });
