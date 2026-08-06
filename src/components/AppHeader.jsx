@@ -1,50 +1,6 @@
-const VARIANT_STYLES = {
-  standard: {
-    padding: "10px 2px 14px",
-    border: "none",
-    borderBottom: "1px solid var(--stroke-1)",
-    background: "transparent",
-    shadow: "none",
-    radius: 0,
-  },
-  branded: {
-    padding: "16px",
-    border: "1px solid var(--stroke-2)",
-    background: "var(--surface-3)",
-    shadow: "var(--shadow-2)",
-    radius: "var(--radius-card)",
-  },
-  utility: {
-    padding: "10px 0 8px",
-    border: "none",
-    background: "transparent",
-    shadow: "none",
-    radius: 0,
-  },
-};
+import styles from "./AppHeader.module.css";
 
-const ACTION_BASE = {
-  borderRadius: 999,
-  border: "1px solid var(--team-brand-border, var(--stroke-1))",
-  background: "transparent",
-  color: "var(--team-brand-action-text, var(--text-2))",
-  minHeight: 38,
-  minWidth: 36,
-  padding: "8px 12px",
-  fontSize: 11,
-  lineHeight: 1.2,
-  fontWeight: 700,
-  letterSpacing: "0.02em",
-  textTransform: "uppercase",
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  textAlign: "center",
-  gap: 4,
-  whiteSpace: "normal",
-  cursor: "pointer",
-  transition: "background-color 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease",
-};
+const variantClass = (variant) => styles[variant] || styles.standard;
 
 export default function AppHeader({
   variant = "standard",
@@ -55,68 +11,30 @@ export default function AppHeader({
   brandLockup,
   action,
 }) {
-  const stylePreset = VARIANT_STYLES[variant] || VARIANT_STYLES.standard;
   const isIconOnlyAction = Boolean(action && !action.label);
-  const quietBrandedActionStyle = variant === "branded" && isIconOnlyAction
-    ? {
-      minHeight: 28,
-      minWidth: 28,
-      padding: 4,
-      fontSize: 10,
-      color: "color-mix(in srgb, var(--team-brand-action-text, var(--text-2)) 62%, transparent)",
-      borderColor: "color-mix(in srgb, var(--team-brand-border, var(--stroke-1)) 48%, transparent)",
-      background: "color-mix(in srgb, var(--surface-1) 58%, transparent)",
-      opacity: 0.6,
-    }
-    : null;
 
   return (
-    <header
-      className={`appHeader appHeader--${variant}`}
-      style={{
-        marginBottom: variant === "utility" ? 12 : "var(--stack-gap)",
-        padding: stylePreset.padding,
-        border: stylePreset.border,
-        borderBottom: stylePreset.borderBottom,
-        borderRadius: stylePreset.radius,
-        background: stylePreset.background,
-        boxShadow: `var(--pw-shadow, ${stylePreset.shadow})`,
-      }}
-    >
-      <div
-        className="appHeaderMain"
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "space-between",
-          gap: 14,
-          flexWrap: "wrap",
-        }}
-      >
-        <div className="appHeaderIdentity" style={{ display: "flex", alignItems: "flex-start", gap: 12, minWidth: 0, flex: "1 1 220px" }}>
-          {leading ? <div className="appHeaderLeading" style={{ marginTop: 1, color: "var(--text-2)", flexShrink: 0 }}>{leading}</div> : null}
-          <div className="appHeaderCopy" style={{ minWidth: 0 }}>
-            {eyebrow ? (
-              <div className="appHeaderEyebrow" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", color: "var(--accent)", fontWeight: 800, marginBottom: 5, lineHeight: 1.2 }}>
-                {eyebrow}
-              </div>
-            ) : null}
-            <h1 className="appHeaderTitle" style={{ fontSize: variant === "utility" ? 18 : 30, lineHeight: 1, margin: 0, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "var(--tracking-default)", textTransform: "uppercase" }}>
-              {title}
-            </h1>
-            {subtitle ? (
-              <p className="appHeaderSubtitle" style={{ marginTop: 6, marginBottom: 0, color: "var(--text-2)", fontSize: 13, letterSpacing: "0.01em", lineHeight: 1.45, overflowWrap: "anywhere", maxWidth: 560 }}>
-                {subtitle}
-              </p>
-            ) : null}
+    <header className={`appHeader ${styles.header} ${variantClass(variant)}`} data-variant={variant}>
+      <div className={`appHeaderMain ${styles.main}`}>
+        <div className={`appHeaderIdentity ${styles.identity}`}>
+          {leading ? <div className={`appHeaderLeading ${styles.leading}`}>{leading}</div> : null}
+          <div className={`appHeaderCopy ${styles.copy}`}>
+            {eyebrow ? <div className={`appHeaderEyebrow ${styles.eyebrow}`}>{eyebrow}</div> : null}
+            <h1 className={`appHeaderTitle ${styles.title}`}>{title}</h1>
+            {subtitle ? <p className={`appHeaderSubtitle ${styles.subtitle}`}>{subtitle}</p> : null}
           </div>
         </div>
 
         {(brandLockup || action) ? (
-          <div className="appHeaderTools" style={{ display: "flex", alignItems: "flex-start", gap: 6, marginLeft: "auto", maxWidth: "100%", flexWrap: "wrap" }}>
-            {brandLockup ? <div className="appHeaderBrand" style={{ minWidth: 0 }}>{brandLockup}</div> : null}
+          <div className={`appHeaderTools ${styles.tools}`}>
+            {brandLockup ? <div className={`appHeaderBrand ${styles.brand}`}>{brandLockup}</div> : null}
             {action ? (
-              <button className="appHeaderAction" type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, opacity: 0.88, ...(quietBrandedActionStyle || {}) }}>
+              <button
+                className={`appHeaderAction ${styles.action} ${isIconOnlyAction ? styles.iconOnly : ""}`}
+                type="button"
+                onClick={action.onClick}
+                aria-label={action.ariaLabel || action.label}
+              >
                 {action.icon}
                 {action.label ? <span>{action.label}</span> : null}
               </button>
