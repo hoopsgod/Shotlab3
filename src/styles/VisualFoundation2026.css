@@ -13,7 +13,7 @@
   --surface-inset: #eeece5 !important;
   --text-1: #111a21 !important;
   --text-2: #44515b !important;
-  --text-3: #727d85 !important;
+  --text-3: #65717a !important;
   --stroke-1: rgba(17, 26, 33, .09) !important;
   --stroke-2: rgba(17, 26, 33, .15) !important;
   --shadow-0: none !important;
@@ -32,8 +32,8 @@
   --accent-strong: #617900;
   --accent-ink: #10170b;
   --nav-active-text: #5f7600 !important;
-  --nav-inactive: #6e7981 !important;
-  --nav-inactive-icon: #7a858c !important;
+  --nav-inactive: #65717a !important;
+  --nav-inactive-icon: #65717a !important;
   --nav-focus: rgba(95, 118, 0, .14) !important;
   --nav-active-glow: transparent !important;
   --color-bg-base: var(--bg-0) !important;
@@ -255,7 +255,6 @@ button {
 .cta-ghost,
 .cta-danger {
   min-height: 50px !important;
-  width: 100% !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
   border-radius: var(--radius-md) !important;
@@ -266,6 +265,10 @@ button {
   letter-spacing: -.008em !important;
   text-transform: none !important;
   box-shadow: none !important;
+}
+
+[data-testid="auth-workspace"] .cta-primary {
+  width: 100% !important;
 }
 
 .cta-primary,
@@ -306,7 +309,19 @@ button {
   transform: scale(.985) !important;
 }
 
-input,
+input:not([type]),
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="number"],
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"],
+input[type="month"],
+input[type="week"],
 select,
 textarea {
   border: 1px solid var(--stroke-2) !important;
@@ -318,14 +333,31 @@ textarea {
 
 input::placeholder,
 textarea::placeholder {
-  color: #8a949a !important;
+  color: #69757d !important;
 }
 
-input:focus,
+input:not([type]):focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="url"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="time"]:focus,
+input[type="datetime-local"]:focus,
+input[type="month"]:focus,
+input[type="week"]:focus,
 select:focus,
 textarea:focus {
   border-color: rgba(95, 118, 0, .52) !important;
   box-shadow: 0 0 0 4px rgba(126, 158, 30, .10) !important;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: #7e9e1e;
 }
 
 .performance-shell .pageHeaderPill,
