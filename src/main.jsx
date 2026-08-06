@@ -155,6 +155,7 @@ window.addEventListener('shotlab:app-ready', () => {
     // Coach and Player demos are launched only by explicit UI actions in App.
     const { default: App } = await import('./App.jsx')
     await import('./styles/VisualFoundation2026.css')
+    await import('./styles/MissionControlHierarchy2026.css')
     const rootEl = document.getElementById('root')
     if (!rootEl) throw new Error('Missing root container (#root).')
 
