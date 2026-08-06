@@ -13,15 +13,20 @@ on:
       - "tests/e2e/design-system-screenshots.spec.mjs"
       - "tests/e2e/visual-foundation-2026.spec.mjs"
       - "tests/e2e/native-app-shell-2026.spec.mjs"
+      - "tests/e2e/phase-2-command-hierarchy.spec.mjs"
+      - "tests/e2e/mission-control-hierarchy-2026.spec.mjs"
       - "tests/app-store-presentation-readiness.test.mjs"
       - "tests/design-system-completion.test.mjs"
       - "tests/visual-foundation-2026.test.mjs"
       - "tests/native-identity-shell.test.mjs"
       - "tests/mobile-navigation-contract.test.mjs"
+      - "tests/phase-2-command-hierarchy.test.mjs"
+      - "tests/mission-control-hierarchy-2026.test.mjs"
       - "tests/workspace-recovery.test.mjs"
       - "scripts/validate-app-store-screenshots.mjs"
       - "scripts/minify-visual-authority-css.mjs"
       - "public/shotlab-*.css"
+      - "src/main.jsx"
       - "src/lib/demoMode.js"
       - "src/lib/workspaceRecovery.js"
       - "src/components/AppHeader.jsx"
@@ -47,6 +52,8 @@ on:
       - "src/components/MobileNavigation.jsx"
       - "src/components/MobileNavigation.module.css"
       - "src/components/CompactLeaderboardPreviewCard.jsx"
+      - "src/components/CommandEvidenceBar.jsx"
+      - "src/components/CommandEvidenceBar.module.css"
       - "src/components/WorkspaceRecoveryBoundary.jsx"
       - "src/components/WorkspaceRecoveryBoundary.module.css"
       - "src/components/DeferredCoachDashboardPhase2.jsx"
@@ -77,7 +84,7 @@ concurrency:
 jobs:
   verify-and-capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     steps:
       - name: Check out exact PR head
         uses: actions/checkout@v4
@@ -91,8 +98,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify listing, foundation, shell, design-system, and recovery contracts
-        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/visual-foundation-2026.test.mjs tests/native-identity-shell.test.mjs tests/mobile-navigation-contract.test.mjs tests/workspace-recovery.test.mjs
+      - name: Verify integrated Phase 1 and Phase 2 contracts
+        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/visual-foundation-2026.test.mjs tests/native-identity-shell.test.mjs tests/mobile-navigation-contract.test.mjs tests/phase-2-command-hierarchy.test.mjs tests/mission-control-hierarchy-2026.test.mjs tests/workspace-recovery.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -103,8 +110,8 @@ jobs:
       - name: Verify production build
         run: npm run build
 
-      - name: Verify Phase 1 foundation and Phase 2 native shell flows
-        run: npx playwright test tests/e2e/visual-foundation-2026.spec.mjs tests/e2e/native-app-shell-2026.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+      - name: Verify integrated mobile presentation flows
+        run: npx playwright test tests/e2e/visual-foundation-2026.spec.mjs tests/e2e/native-app-shell-2026.spec.mjs tests/e2e/phase-2-command-hierarchy.spec.mjs tests/e2e/mission-control-hierarchy-2026.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
       - name: Generate branded App Store screenshots and raw mobile audits
         run: npx playwright test --config=playwright.screenshots.config.mjs
@@ -112,13 +119,15 @@ jobs:
       - name: Validate screenshot count, format, and dimensions
         run: node scripts/validate-app-store-screenshots.mjs
 
-      - name: Upload Phase 1 and Phase 2 presentation evidence
+      - name: Upload integrated Phase 2 presentation evidence
         uses: actions/upload-artifact@v4
         with:
-          name: shotlab-phase-1-2-presentation-evidence
+          name: shotlab-phase-2-integrated-presentation-evidence
           path: |
             artifacts/visual-foundation/
             artifacts/native-app-shell/
+            artifacts/phase-2-command-hierarchy/
+            artifacts/mission-control-phase-2/
             artifacts/app-store/iphone-6.9/
             artifacts/design-audit/iphone/
             native/app-store-listing.json
@@ -130,12 +139,15 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: shotlab-phase-1-2-presentation-failure
+          name: shotlab-phase-2-integrated-presentation-failure
           path: |
             playwright-report-app-store/
+            playwright-report/
             test-results/
             artifacts/visual-foundation/
             artifacts/native-app-shell/
+            artifacts/phase-2-command-hierarchy/
+            artifacts/mission-control-phase-2/
             artifacts/app-store/iphone-6.9/
             artifacts/design-audit/iphone/
           if-no-files-found: ignore
