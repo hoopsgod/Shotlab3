@@ -8,6 +8,7 @@ import {
 } from "../src/lib/coachActionBriefings.js";
 
 const dashboardSource = fs.readFileSync(new URL("../src/components/CoachInteractiveDashboards.jsx", import.meta.url), "utf8");
+const enhancerSource = fs.readFileSync(new URL("../scripts/apply-expert-app-review-v2.mjs", import.meta.url), "utf8");
 
 test("player briefing gives a real setup action before roster data exists", () => {
   const model = buildCoachPlayerActionBriefing();
@@ -121,4 +122,12 @@ test("schedule formatting and dashboard integration remain stable", () => {
   assert.match(dashboardSource, /resolveEventAction/);
   assert.match(dashboardSource, /coach-players-decision-brief/);
   assert.match(dashboardSource, /coach-events-decision-brief/);
+  assert.match(dashboardSource, /evidenceLabel: "Roster engagement distribution"/);
+  assert.match(dashboardSource, /evidenceLabel: "Weekly makes distribution"/);
+});
+
+test("legacy visual enhancer accepts the Phase 3 selector architecture", () => {
+  assert.match(enhancerSource, /path === "src\/components\/CoachInteractiveDashboards\.jsx"/);
+  assert.match(enhancerSource, /source\.includes\("buildCoachPlayerActionBriefing"\)/);
+  assert.match(enhancerSource, /return;/);
 });
