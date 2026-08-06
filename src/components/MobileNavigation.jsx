@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import ShotLabIcon from "./ShotLabIcon";
 import styles from "./MobileNavigation.module.css";
 import "./MobileNavigationArchitecture.css";
 
 const MoreIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" />
     <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
     <circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" />
@@ -40,6 +41,12 @@ const GROUP_DEFINITIONS = [
   },
 ];
 
+const semanticNavigationIcon = (key) => {
+  if (key === "log-drill") return "home";
+  if (key === "duels") return "program";
+  return "";
+};
+
 function resolveNavigationGroup(item) {
   const explicit = String(item?.group || "").trim().toLowerCase();
   if (explicit) return explicit;
@@ -63,6 +70,7 @@ export function groupSecondaryNavigation(items = []) {
 
 function NavigationItem({ item, active, onSelect, compact = false }) {
   const label = item.mobileLabel || item.l || item.label || item.k;
+  const semanticIcon = semanticNavigationIcon(item.k);
   return (
     <button
       type="button"
@@ -74,7 +82,7 @@ function NavigationItem({ item, active, onSelect, compact = false }) {
       onClick={() => onSelect(item.k)}
     >
       <span className={compact ? styles.dockIcon : styles.sheetIcon} aria-hidden="true">
-        {item.svg}
+        {semanticIcon ? <ShotLabIcon name={semanticIcon} size={20} /> : item.svg}
         {compact && active && <span className={styles.activeIndicator} />}
         {item.dot && <span className={styles.notificationDot} />}
       </span>
@@ -198,7 +206,7 @@ export default function MobileNavigation({
                 <p className={styles.sheetSummary}>Frequent actions stay in the dock. Related tools live together here.</p>
               </div>
               <button ref={closeButtonRef} type="button" className={styles.closeButton} aria-label="Close more navigation" onClick={() => setOpen(false)}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
             <div className={styles.sheetGroups} data-testid="mobile-navigation-groups">
