@@ -83,7 +83,7 @@ jobs:
       - name: Validate screenshot count, format, and dimensions
         run: node scripts/validate-app-store-screenshots.mjs
 
-      - name: Upload complete presentation and design-audit package
+      - name: Upload App Store presentation package and design audit
         uses: actions/upload-artifact@v4
         with:
           name: shotlab-app-store-presentation
