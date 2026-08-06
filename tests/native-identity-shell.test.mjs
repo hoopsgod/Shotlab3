@@ -37,7 +37,7 @@ test("both roles preserve team identity and prominent custom logos", () => {
 test("coach branding access remains visible and keyboard accessible", () => {
   assert.match(coach, /Team Branding Settings/);
   assert.match(coach, /onClick=\{onOpenTeamBranding\}/);
-  assert.match(coach, /<SettingsIcon \/>/);
+  assert.match(coach, /<ShotLabIcon name="settings" size=\{17\} \/>/);
   assert.match(coachCss, /\.brandBtn:focus-visible/);
   assert.match(coachCss, /outline:\s*3px solid/);
 });
@@ -49,6 +49,7 @@ test("scroll-state coach chrome uses restrained navigation glass rather than leg
   assert.match(miniHeader, /pointerEvents: "none"/);
   assert.match(miniHeader, /pointerEvents: "auto"/);
   assert.match(miniHeader, /aria-label="Log out"/);
+  assert.match(miniHeader, /<ShotLabIcon name="logout" size=\{17\} \/>/);
   assert.doesNotMatch(miniHeader, /rgba\(10, 10, 10/);
   assert.doesNotMatch(miniHeader, legacyCondensedFont);
 });
