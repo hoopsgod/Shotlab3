@@ -1,0 +1,187 @@
+.header {
+  position: relative;
+  width: 100%;
+  margin: 0 0 var(--stack-gap, 24px);
+  color: var(--text-1, #121a20);
+}
+
+.standard {
+  padding: 2px 0 18px;
+  border-bottom: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
+}
+
+.branded {
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
+  border-radius: var(--radius-lg, 26px);
+  background:
+    radial-gradient(circle at 88% 0%, color-mix(in srgb, var(--team-brand-primary, var(--accent)) 9%, transparent), transparent 18rem),
+    var(--surface-1, #fff);
+  box-shadow: var(--shadow-1, 0 12px 34px rgba(27, 35, 41, .08));
+}
+
+.utility {
+  margin-bottom: 12px;
+  padding: 4px 0 12px;
+  border-bottom: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
+}
+
+.main {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.identity {
+  min-width: 0;
+  flex: 1 1 230px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.leading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--text-2, #4e5a63);
+}
+
+.copy {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin-bottom: 6px;
+  color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 62%, #496000);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
+  font-size: 10px;
+  font-weight: 760;
+  line-height: 1.2;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 0;
+  color: var(--text-1, #121a20);
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
+  font-size: clamp(31px, 4.4vw, 46px);
+  font-weight: 790;
+  line-height: 1.01;
+  letter-spacing: -.042em;
+  text-wrap: balance;
+}
+
+.utility .title {
+  font-size: 22px;
+  letter-spacing: -.025em;
+}
+
+.subtitle {
+  max-width: 640px;
+  margin: 8px 0 0;
+  color: var(--text-2, #4e5a63);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: -.008em;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
+}
+
+.tools {
+  max-width: 100%;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+
+.brand {
+  min-width: 0;
+}
+
+.action {
+  min-width: 42px;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, .8);
+  color: var(--text-1, #121a20);
+  box-shadow: 0 6px 18px rgba(27, 35, 41, .06);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -.005em;
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.action:hover,
+.action:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 30%, var(--stroke-1));
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(27, 35, 41, .09);
+}
+
+.action:active {
+  transform: scale(.97);
+}
+
+.iconOnly {
+  width: 42px;
+  padding: 0;
+}
+
+@media (max-width: 640px) {
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .branded {
+    padding: 18px;
+    border-radius: 22px;
+  }
+
+  .main {
+    gap: 12px;
+  }
+
+  .identity {
+    flex-basis: min(100%, 250px);
+  }
+
+  .title {
+    font-size: 34px;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  .tools {
+    width: 100%;
+    margin-left: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action {
+    transition: none;
+  }
+}
