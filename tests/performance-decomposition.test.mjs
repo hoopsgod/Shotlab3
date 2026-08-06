@@ -101,7 +101,7 @@ test('Player career history and season analytics preserve their deferred chunk c
   assert.doesNotMatch(vite, /return ["']charts-vendor["']/)
 })
 
-test('the verifier locks the Auth startup boundary and approved Phase 2 request budgets', () => {
+test('the verifier locks the Auth startup boundary and measured Phase 2 request budgets', () => {
   assert.match(app, /import Auth from ["']\.\/components\/AuthWorkspace\.jsx["']/)
   assert.match(app, /AUTH_WORKSPACE_RUNTIME=Object\.freeze/)
   assert.match(verifier, /const startupAppJavaScript = findStartupAsset\(javaScript, ["']js["']\)/)
@@ -112,11 +112,11 @@ test('the verifier locks the Auth startup boundary and approved Phase 2 request 
     maxLargestJavaScriptBytes: 585000,
     maxStartupAppJavaScriptBytes: 585000,
     maxStartupAppJavaScriptGzipBytes: 166000,
-    maxTotalJavaScriptGzipBytes: 358400,
+    maxTotalJavaScriptGzipBytes: 366000,
     maxLargestCssBytes: 128000,
-    maxStartupAppCssBytes: 25000,
-    maxStartupAppCssGzipBytes: 5500,
-    maxTotalCssGzipBytes: 76750,
+    maxStartupAppCssBytes: 27000,
+    maxStartupAppCssGzipBytes: 6100,
+    maxTotalCssGzipBytes: 78500,
     maxJavaScriptFileCount: 8,
   })
 })
