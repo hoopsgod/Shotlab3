@@ -37,6 +37,9 @@ async function prepare(page) {
     window.localStorage.clear();
     window.sessionStorage.clear();
   });
+}
+
+async function disableVisualNoise(page) {
   await page.addStyleTag({
     content: `
       *, *::before, *::after {
@@ -63,11 +66,13 @@ test.beforeEach(async ({ page }) => prepare(page));
 test("commit Coach Home mobile evidence", async ({ page }) => {
   await enterDemo(page, "coach");
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
+  await disableVisualNoise(page);
   await page.screenshot({ path: `${OUTPUT_DIR}/coach-home-390x844.png`, fullPage: true });
 });
 
 test("commit Player Home mobile evidence", async ({ page }) => {
   await enterDemo(page, "player");
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
+  await disableVisualNoise(page);
   await page.screenshot({ path: `${OUTPUT_DIR}/player-home-390x844.png`, fullPage: true });
 });
