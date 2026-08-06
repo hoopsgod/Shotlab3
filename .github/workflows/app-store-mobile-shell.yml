@@ -6,8 +6,16 @@ on:
       - "index.html"
       - "src/components/MobileNavigation.jsx"
       - "src/components/MobileNavigation.module.css"
+      - "src/components/CoachDashboardHeader.jsx"
+      - "src/components/CoachDashboardHeader.module.css"
+      - "src/components/PlayerDashboardHeader.jsx"
+      - "src/components/PlayerDashboardHeader.module.css"
+      - "src/components/CoachMiniHeader.jsx"
       - "src/styles/AppStoreExperience.css"
       - "tests/app-store-mobile-shell.test.mjs"
+      - "tests/mobile-navigation-contract.test.mjs"
+      - "tests/native-identity-shell.test.mjs"
+      - "tests/player-experience-2026-modernization.test.mjs"
       - ".github/workflows/app-store-mobile-shell.yml"
   workflow_dispatch:
 
@@ -29,6 +37,6 @@ jobs:
           cache: npm
       - run: npm ci
       - name: App Store mobile shell contracts
-        run: node --test tests/app-store-mobile-shell.test.mjs tests/mobile-navigation-contract.test.mjs
+        run: node --test tests/app-store-mobile-shell.test.mjs tests/mobile-navigation-contract.test.mjs tests/native-identity-shell.test.mjs tests/player-experience-2026-modernization.test.mjs tests/visual-foundation-2026.test.mjs
       - name: Production build
         run: npm run build
