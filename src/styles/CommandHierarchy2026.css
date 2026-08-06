@@ -197,29 +197,53 @@ body.mission-control-active .mcLowerGrid > .mcSection {
 }
 
 @media (max-width: 760px) {
-  body.mission-control-active .missionControl {
+  body.mission-control-active .mcShellV3 .missionControl {
     width: 100%;
   }
 
-  body.mission-control-active .mcHero {
-    min-height: 390px;
-    border-radius: 24px;
+  body.mission-control-active .mcShellV3 .mcHeader {
+    min-height: 58px;
   }
 
-  body.mission-control-active .mcHeroContent {
-    padding: 26px 19px 22px;
+  body.mission-control-active .mcShellV3 .mcHero {
+    min-height: 318px !important;
+    border-radius: 24px !important;
   }
 
-  body.mission-control-active .mcHeroContent h1 {
-    font-size: clamp(38px, 11vw, 54px);
+  body.mission-control-active .mcShellV3 .mcHeroContent {
+    padding: 22px 18px 17px !important;
   }
 
-  body.mission-control-active .mcFocusGrid {
+  body.mission-control-active .mcShellV3 .mcHeroContent h1 {
+    max-width: 250px !important;
+    font-size: 34px !important;
+    line-height: 1.01 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroContent > p {
+    max-width: 250px !important;
+    font-size: 13px !important;
+    line-height: 1.38 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcRealityStrip {
+    margin-top: 15px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcRealityStrip > button {
+    min-height: 55px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcPrimary {
+    min-height: 48px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcFocusGrid {
     grid-template-columns: 1fr;
-    margin-top: 20px;
+    margin-top: 16px;
   }
 
-  body.mission-control-active .mcLowerGrid {
+  body.mission-control-active .mcShellV3 .mcLowerGrid {
     grid-template-columns: 1fr;
   }
 
@@ -238,10 +262,6 @@ body.mission-control-active .mcLowerGrid > .mcSection {
 }
 
 @media (max-width: 390px) {
-  body.mission-control-active .mcRealityStrip > button {
-    min-height: 64px;
-  }
-
   .playerProgressDisclosure > summary {
     padding-inline: 13px;
   }
