@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import WorkspaceRecoveryBoundary from './WorkspaceRecoveryBoundary.jsx'
 
 const loadCoachInteractiveDashboards = () => import('./CoachInteractiveDashboards.jsx')
 const lazyNamed = (name) => lazy(() => loadCoachInteractiveDashboards().then((module) => ({ default: module[name] })))
@@ -32,22 +33,24 @@ function CoachWorkspaceFallback() {
   )
 }
 
-function DeferredCoachWorkspace({ Component, ...props }) {
+function DeferredCoachWorkspace({ Component, recoveryLabel, recoveryTestId, ...props }) {
   return (
-    <Suspense fallback={<CoachWorkspaceFallback />}>
-      <Component {...props} />
-    </Suspense>
+    <WorkspaceRecoveryBoundary label={recoveryLabel} testId={recoveryTestId}>
+      <Suspense fallback={<CoachWorkspaceFallback />}>
+        <Component {...props} />
+      </Suspense>
+    </WorkspaceRecoveryBoundary>
   )
 }
 
 export function CoachEventsInteractiveDashboard(props) {
-  return <DeferredCoachWorkspace Component={LazyCoachEventsInteractiveDashboard} {...props} />
+  return <DeferredCoachWorkspace Component={LazyCoachEventsInteractiveDashboard} recoveryLabel="Coach events" recoveryTestId="coach-events-recovery" {...props} />
 }
 
 export function CoachPageDashboardHeader(props) {
-  return <DeferredCoachWorkspace Component={LazyCoachPageDashboardHeader} {...props} />
+  return <DeferredCoachWorkspace Component={LazyCoachPageDashboardHeader} recoveryLabel="Coach dashboard" recoveryTestId="coach-page-dashboard-recovery" {...props} />
 }
 
 export function CoachPlayersInteractiveDashboard(props) {
-  return <DeferredCoachWorkspace Component={LazyCoachPlayersInteractiveDashboard} {...props} />
+  return <DeferredCoachWorkspace Component={LazyCoachPlayersInteractiveDashboard} recoveryLabel="Coach players" recoveryTestId="coach-players-recovery" {...props} />
 }
