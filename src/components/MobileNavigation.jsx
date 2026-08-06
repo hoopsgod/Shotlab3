@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from "react";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./MobileNavigation.module.css";
 import "./MobileNavigationArchitecture.css";
 
+const ICON_STYLE = { width: 20, height: 20, strokeWidth: 1.75 };
+const ACTIVE_COLOR = "color-mix(in srgb, var(--team-brand-nav-active, var(--accent, #c8ff1a)) 82%, #78951f 18%)";
+const ACTIVE_HALO = "color-mix(in srgb, var(--accent, #c8ff1a) 8%, transparent)";
+
 const MoreIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+  <svg style={ICON_STYLE} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
     <circle cx="5" cy="12" r="1" fill="currentColor" stroke="none" />
     <circle cx="12" cy="12" r="1" fill="currentColor" stroke="none" />
     <circle cx="19" cy="12" r="1" fill="currentColor" stroke="none" />
@@ -47,6 +51,20 @@ const semanticNavigationIcon = (key) => {
   return "";
 };
 
+const normalizeNavigationIcon = (item) => {
+  const semanticIcon = semanticNavigationIcon(item?.k);
+  if (semanticIcon) return <ShotLabIcon name={semanticIcon} size={20} />;
+  if (!isValidElement(item?.svg)) return item?.svg;
+  return cloneElement(item.svg, {
+    width: 20,
+    height: 20,
+    strokeWidth: 1.75,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    style: { ...(item.svg.props.style || {}), ...ICON_STYLE },
+  });
+};
+
 function resolveNavigationGroup(item) {
   const explicit = String(item?.group || "").trim().toLowerCase();
   if (explicit) return explicit;
@@ -70,20 +88,26 @@ export function groupSecondaryNavigation(items = []) {
 
 function NavigationItem({ item, active, onSelect, compact = false }) {
   const label = item.mobileLabel || item.l || item.label || item.k;
-  const semanticIcon = semanticNavigationIcon(item.k);
+  const buttonStyle = compact
+    ? active ? { color: ACTIVE_COLOR } : undefined
+    : { minHeight: 62, gridTemplateColumns: "40px minmax(0, 1fr) 18px", color: active ? ACTIVE_COLOR : undefined };
+  const iconStyle = compact
+    ? { width: 32, height: 26, background: active ? ACTIVE_HALO : undefined }
+    : { width: 40, height: 40, borderRadius: 12, background: active ? ACTIVE_HALO : undefined };
   return (
     <button
       type="button"
       className={`${compact ? styles.dockItem : styles.sheetItem} ${active ? styles.active : ""}`}
+      style={buttonStyle}
       aria-current={active ? "page" : undefined}
       aria-label={label}
       data-active={active ? "true" : "false"}
       data-nav-key={item.k}
       onClick={() => onSelect(item.k)}
     >
-      <span className={compact ? styles.dockIcon : styles.sheetIcon} aria-hidden="true">
-        {semanticIcon ? <ShotLabIcon name={semanticIcon} size={20} /> : item.svg}
-        {compact && active && <span className={styles.activeIndicator} />}
+      <span className={compact ? styles.dockIcon : styles.sheetIcon} style={iconStyle} aria-hidden="true">
+        {normalizeNavigationIcon(item)}
+        {compact && active && <span className={styles.activeIndicator} style={{ width: 13, boxShadow: "0 0 9px color-mix(in srgb, currentColor 30%, transparent)" }} />}
         {item.dot && <span className={styles.notificationDot} />}
       </span>
       <span className={compact ? styles.dockLabel : styles.sheetText}>
@@ -169,6 +193,7 @@ export default function MobileNavigation({
           <button
             type="button"
             className={`${styles.dockItem} ${secondaryActive || open ? styles.active : ""}`}
+            style={secondaryActive || open ? { color: ACTIVE_COLOR } : undefined}
             aria-expanded={open}
             aria-controls="mobile-navigation-more-sheet"
             aria-label="More"
@@ -176,9 +201,9 @@ export default function MobileNavigation({
             data-active={secondaryActive || open ? "true" : "false"}
             onClick={() => setOpen((value) => !value)}
           >
-            <span className={styles.dockIcon} aria-hidden="true">
+            <span className={styles.dockIcon} style={{ width: 32, height: 26, background: secondaryActive || open ? ACTIVE_HALO : undefined }} aria-hidden="true">
               <MoreIcon />
-              {(secondaryActive || open) && <span className={styles.activeIndicator} />}
+              {(secondaryActive || open) && <span className={styles.activeIndicator} style={{ width: 13, boxShadow: "0 0 9px color-mix(in srgb, currentColor 30%, transparent)" }} />}
               {secondaryHasNotification && <span className={styles.notificationDot} />}
             </span>
             <span className={styles.dockLabelText}>More</span>
@@ -206,7 +231,7 @@ export default function MobileNavigation({
                 <p className={styles.sheetSummary}>Frequent actions stay in the dock. Related tools live together here.</p>
               </div>
               <button ref={closeButtonRef} type="button" className={styles.closeButton} aria-label="Close more navigation" onClick={() => setOpen(false)}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg>
+                <svg style={{ width: 18, height: 18, strokeWidth: 1.75 }} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg>
               </button>
             </div>
             <div className={styles.sheetGroups} data-testid="mobile-navigation-groups">
