@@ -3,7 +3,9 @@ name: ShotLab Color System Quality
 on:
   pull_request:
     paths:
-      - "public/shotlab-color-system.css"
+      - "src/theme/appTokens.js"
+      - "src/theme/semanticColors.js"
+      - "src/styles/VisualFoundation2026.css"
       - "index.html"
       - "tests/shotlab-color-system.test.mjs"
       - "src/components/CoachCommandCenter.css"
