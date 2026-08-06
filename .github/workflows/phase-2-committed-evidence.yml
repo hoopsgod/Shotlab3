@@ -1,0 +1,59 @@
+name: Phase 2 Committed Visual Evidence
+
+on:
+  push:
+    branches:
+      - agent/phase-2-command-hierarchy
+    paths-ignore:
+      - "artifacts/phase-2-committed/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: phase-2-committed-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  capture-and-commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out Phase 2 branch
+        uses: actions/checkout@v4
+        with:
+          ref: agent/phase-2-command-hierarchy
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Capture exact mobile evidence
+        run: npx playwright test tests/e2e/phase-2-committed-evidence.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Commit visual evidence to the branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add artifacts/phase-2-committed/
+          git diff --cached --quiet && exit 0
+          git commit -m "Add exact Phase 2 mobile visual evidence"
+          git push origin HEAD:agent/phase-2-command-hierarchy
