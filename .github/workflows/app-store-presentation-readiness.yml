@@ -7,15 +7,22 @@ on:
     paths:
       - "native/app-store-listing.json"
       - "docs/app-store-presentation-package.md"
+      - "docs/phase-4-workspace-recovery.md"
       - "playwright.screenshots.config.mjs"
       - "tests/e2e/app-store-screenshots.spec.mjs"
       - "tests/e2e/design-system-screenshots.spec.mjs"
+      - "tests/e2e/visual-foundation-2026.spec.mjs"
       - "tests/app-store-presentation-readiness.test.mjs"
       - "tests/design-system-completion.test.mjs"
+      - "tests/visual-foundation-2026.test.mjs"
+      - "tests/workspace-recovery.test.mjs"
       - "scripts/validate-app-store-screenshots.mjs"
       - "scripts/minify-visual-authority-css.mjs"
       - "public/shotlab-*.css"
       - "src/lib/demoMode.js"
+      - "src/lib/workspaceRecovery.js"
+      - "src/components/AppHeader.jsx"
+      - "src/components/AuthWorkspace.jsx"
       - "src/components/CoachCommandCenter.jsx"
       - "src/components/CoachInteractiveDashboards.jsx"
       - "src/components/CoachDashboardPrimitives.jsx"
@@ -31,8 +38,19 @@ on:
       - "src/components/SecondaryPageSystem.css"
       - "src/components/MobileNavigation.jsx"
       - "src/components/MobileNavigation.module.css"
+      - "src/components/CompactLeaderboardPreviewCard.jsx"
+      - "src/components/WorkspaceRecoveryBoundary.jsx"
+      - "src/components/WorkspaceRecoveryBoundary.module.css"
+      - "src/components/DeferredCoachDashboardPhase2.jsx"
+      - "src/components/DeferredCoachInteractiveDashboards.jsx"
+      - "src/components/DeferredPlayerCareerHistory.jsx"
+      - "src/components/DeferredPlayerDailyCommandCenter.jsx"
+      - "src/components/DeferredPlayerDashboardHeader.jsx"
+      - "src/components/DeferredPlayerOperationalWorkspace.jsx"
       - "src/components/TeamStore/**"
       - "src/styles/**"
+      - "src/theme/appTokens.js"
+      - "src/theme/semanticColors.js"
       - "package.json"
       - "index.html"
       - ".github/workflows/app-store-presentation-readiness.yml"
@@ -51,9 +69,9 @@ concurrency:
 jobs:
   verify-and-capture:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
-      - name: Check out repository
+      - name: Check out exact PR head
         uses: actions/checkout@v4
 
       - name: Set up Node
@@ -65,8 +83,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify listing and visual-system contracts
-        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs
+      - name: Verify listing, foundation, design-system, and recovery contracts
+        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/visual-foundation-2026.test.mjs tests/workspace-recovery.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -77,16 +95,19 @@ jobs:
       - name: Verify production build
         run: npm run build
 
+      - name: Verify Phase 1 mobile foundation flows
+        run: npx playwright test tests/e2e/visual-foundation-2026.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
       - name: Generate branded App Store screenshots and raw mobile audits
         run: npx playwright test --config=playwright.screenshots.config.mjs
 
       - name: Validate screenshot count, format, and dimensions
         run: node scripts/validate-app-store-screenshots.mjs
 
-      - name: Upload App Store presentation package and design audit
+      - name: Upload Phase 1 presentation evidence
         uses: actions/upload-artifact@v4
         with:
-          name: shotlab-app-store-presentation
+          name: shotlab-phase-1-presentation-evidence
           path: |
             artifacts/app-store/iphone-6.9/
             artifacts/design-audit/iphone/
@@ -99,10 +120,10 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: shotlab-app-store-presentation-failure
+          name: shotlab-phase-1-presentation-failure
           path: |
             playwright-report-app-store/
-            test-results/app-store-screenshots/
+            test-results/
             artifacts/app-store/iphone-6.9/
             artifacts/design-audit/iphone/
           if-no-files-found: ignore
