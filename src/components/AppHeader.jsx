@@ -1,6 +1,6 @@
 const VARIANT_STYLES = {
   standard: {
-    padding: "10px 2px 14px",
+    padding: "4px 0 18px",
     border: "none",
     borderBottom: "1px solid var(--stroke-1)",
     background: "transparent",
@@ -8,15 +8,16 @@ const VARIANT_STYLES = {
     radius: 0,
   },
   branded: {
-    padding: "16px",
-    border: "1px solid var(--stroke-2)",
-    background: "var(--surface-3)",
-    shadow: "var(--shadow-2)",
-    radius: "var(--radius-card)",
+    padding: "20px",
+    border: "1px solid var(--stroke-1)",
+    background: "var(--surface-1)",
+    shadow: "var(--shadow-1)",
+    radius: "var(--radius-xl, 24px)",
   },
   utility: {
-    padding: "10px 0 8px",
+    padding: "2px 0 14px",
     border: "none",
+    borderBottom: "1px solid var(--stroke-1)",
     background: "transparent",
     shadow: "none",
     radius: 0,
@@ -24,25 +25,25 @@ const VARIANT_STYLES = {
 };
 
 const ACTION_BASE = {
-  borderRadius: 999,
-  border: "1px solid var(--team-brand-border, var(--stroke-1))",
-  background: "transparent",
-  color: "var(--team-brand-action-text, var(--text-2))",
-  minHeight: 38,
-  minWidth: 36,
-  padding: "8px 12px",
-  fontSize: 11,
+  borderRadius: "var(--radius-md, 14px)",
+  border: "1px solid var(--stroke-1)",
+  background: "rgba(255,255,255,.86)",
+  color: "var(--text-1)",
+  minHeight: 42,
+  minWidth: 42,
+  padding: "9px 13px",
+  fontSize: 12,
   lineHeight: 1.2,
   fontWeight: 700,
-  letterSpacing: "0.02em",
-  textTransform: "uppercase",
+  letterSpacing: "-0.005em",
   display: "inline-flex",
   alignItems: "center",
   justifyContent: "center",
   textAlign: "center",
-  gap: 4,
+  gap: 6,
   whiteSpace: "normal",
   cursor: "pointer",
+  boxShadow: "0 1px 2px rgba(17,26,33,.04)",
   transition: "background-color 0.16s ease, border-color 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease",
 };
 
@@ -59,14 +60,11 @@ export default function AppHeader({
   const isIconOnlyAction = Boolean(action && !action.label);
   const quietBrandedActionStyle = variant === "branded" && isIconOnlyAction
     ? {
-      minHeight: 28,
-      minWidth: 28,
-      padding: 4,
-      fontSize: 10,
-      color: "color-mix(in srgb, var(--team-brand-action-text, var(--text-2)) 62%, transparent)",
-      borderColor: "color-mix(in srgb, var(--team-brand-border, var(--stroke-1)) 48%, transparent)",
-      background: "color-mix(in srgb, var(--surface-1) 58%, transparent)",
-      opacity: 0.6,
+      minHeight: 38,
+      minWidth: 38,
+      padding: 7,
+      color: "var(--text-2)",
+      background: "var(--surface-3)",
     }
     : null;
 
@@ -74,13 +72,13 @@ export default function AppHeader({
     <header
       className={`appHeader appHeader--${variant}`}
       style={{
-        marginBottom: variant === "utility" ? 12 : "var(--stack-gap)",
+        marginBottom: variant === "utility" ? 16 : "var(--stack-gap)",
         padding: stylePreset.padding,
         border: stylePreset.border,
         borderBottom: stylePreset.borderBottom,
         borderRadius: stylePreset.radius,
         background: stylePreset.background,
-        boxShadow: `var(--pw-shadow, ${stylePreset.shadow})`,
+        boxShadow: stylePreset.shadow,
       }}
     >
       <div
@@ -89,23 +87,23 @@ export default function AppHeader({
           display: "flex",
           alignItems: "flex-start",
           justifyContent: "space-between",
-          gap: 14,
+          gap: 16,
           flexWrap: "wrap",
         }}
       >
-        <div className="appHeaderIdentity" style={{ display: "flex", alignItems: "flex-start", gap: 12, minWidth: 0, flex: "1 1 220px" }}>
-          {leading ? <div className="appHeaderLeading" style={{ marginTop: 1, color: "var(--text-2)", flexShrink: 0 }}>{leading}</div> : null}
+        <div className="appHeaderIdentity" style={{ display: "flex", alignItems: "flex-start", gap: 13, minWidth: 0, flex: "1 1 230px" }}>
+          {leading ? <div className="appHeaderLeading" style={{ marginTop: 2, color: "var(--text-2)", flexShrink: 0 }}>{leading}</div> : null}
           <div className="appHeaderCopy" style={{ minWidth: 0 }}>
             {eyebrow ? (
-              <div className="appHeaderEyebrow" style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "var(--tracking-wide)", color: "var(--accent)", fontWeight: 800, marginBottom: 5, lineHeight: 1.2 }}>
+              <div className="appHeaderEyebrow" style={{ fontFamily: "var(--font-body)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--accent-strong, #617900)", fontWeight: 750, marginBottom: 7, lineHeight: 1.2 }}>
                 {eyebrow}
               </div>
             ) : null}
-            <h1 className="appHeaderTitle" style={{ fontSize: variant === "utility" ? 18 : 30, lineHeight: 1, margin: 0, color: "var(--text-1)", fontFamily: "'Bebas Neue','Impact','Arial Black',sans-serif", letterSpacing: "var(--tracking-default)", textTransform: "uppercase" }}>
+            <h1 className="appHeaderTitle" style={{ fontFamily: "var(--font-display)", fontSize: variant === "utility" ? 24 : 38, fontWeight: 780, lineHeight: 1.02, margin: 0, color: "var(--text-1)", letterSpacing: "-.038em" }}>
               {title}
             </h1>
             {subtitle ? (
-              <p className="appHeaderSubtitle" style={{ marginTop: 6, marginBottom: 0, color: "var(--text-2)", fontSize: 13, letterSpacing: "0.01em", lineHeight: 1.45, overflowWrap: "anywhere", maxWidth: 560 }}>
+              <p className="appHeaderSubtitle" style={{ marginTop: 8, marginBottom: 0, color: "var(--text-2)", fontFamily: "var(--font-body)", fontSize: 14, letterSpacing: "-.008em", lineHeight: 1.5, overflowWrap: "anywhere", maxWidth: 680 }}>
                 {subtitle}
               </p>
             ) : null}
@@ -113,10 +111,10 @@ export default function AppHeader({
         </div>
 
         {(brandLockup || action) ? (
-          <div className="appHeaderTools" style={{ display: "flex", alignItems: "flex-start", gap: 6, marginLeft: "auto", maxWidth: "100%", flexWrap: "wrap" }}>
+          <div className="appHeaderTools" style={{ display: "flex", alignItems: "flex-start", gap: 8, marginLeft: "auto", maxWidth: "100%", flexWrap: "wrap" }}>
             {brandLockup ? <div className="appHeaderBrand" style={{ minWidth: 0 }}>{brandLockup}</div> : null}
             {action ? (
-              <button className="appHeaderAction" type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, opacity: 0.88, ...(quietBrandedActionStyle || {}) }}>
+              <button className="appHeaderAction" type="button" onClick={action.onClick} aria-label={action.ariaLabel || action.label} style={{ ...ACTION_BASE, ...(quietBrandedActionStyle || {}) }}>
                 {action.icon}
                 {action.label ? <span>{action.label}</span> : null}
               </button>
