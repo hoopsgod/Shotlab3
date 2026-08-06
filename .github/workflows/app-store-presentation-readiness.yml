@@ -109,6 +109,7 @@ jobs:
         with:
           name: shotlab-phase-1-presentation-evidence
           path: |
+            artifacts/visual-foundation/
             artifacts/app-store/iphone-6.9/
             artifacts/design-audit/iphone/
             native/app-store-listing.json
@@ -124,6 +125,7 @@ jobs:
           path: |
             playwright-report-app-store/
             test-results/
+            artifacts/visual-foundation/
             artifacts/app-store/iphone-6.9/
             artifacts/design-audit/iphone/
           if-no-files-found: ignore
