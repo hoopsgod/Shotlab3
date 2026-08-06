@@ -95,7 +95,7 @@ export default function AppHeader({
           {leading ? <div className="appHeaderLeading" style={{ marginTop: 2, color: "var(--text-2)", flexShrink: 0 }}>{leading}</div> : null}
           <div className="appHeaderCopy" style={{ minWidth: 0 }}>
             {eyebrow ? (
-              <div className="appHeaderEyebrow" style={{ fontFamily: "var(--font-body)", fontSize: 10, textTransform: "uppercase", letterSpacing: ".08em", color: "var(--accent-strong, #617900)", fontWeight: 750, marginBottom: 7, lineHeight: 1.2 }}>
+              <div className="appHeaderEyebrow" style={{ fontFamily: "var(--font-body)", fontSize: 11, letterSpacing: ".01em", color: "var(--accent-strong, #617900)", fontWeight: 720, marginBottom: 7, lineHeight: 1.25 }}>
                 {eyebrow}
               </div>
             ) : null}
