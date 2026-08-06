@@ -114,6 +114,7 @@ jobs:
         with:
           name: shotlab-phase-2-presentation-evidence
           path: |
+            artifacts/visual-foundation/
             artifacts/app-store/iphone-6.9/
             artifacts/design-audit/iphone/
             artifacts/phase-2-command-hierarchy/
@@ -130,6 +131,7 @@ jobs:
           path: |
             playwright-report-app-store/
             test-results/
+            artifacts/visual-foundation/
             artifacts/app-store/iphone-6.9/
             artifacts/design-audit/iphone/
             artifacts/phase-2-command-hierarchy/
