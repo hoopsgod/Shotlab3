@@ -63,3 +63,16 @@ test("Coach home tightens the above-the-fold decision zone", () => {
   assert.match(hierarchy, /body\.mission-control-active \.mcFocusGrid/);
   assert.match(hierarchy, /@media \(max-width: 760px\)/);
 });
+
+test("Coach mobile authority targets the live high-specificity shell", () => {
+  assert.match(hierarchy, /body\.mission-control-active \.mcShellV3 \.mcHero \{/);
+  assert.match(hierarchy, /min-height: 318px !important/);
+  assert.match(hierarchy, /body\.mission-control-active \.mcShellV3 \.mcHeroContent h1/);
+  assert.match(hierarchy, /font-size: 34px !important/);
+  assert.match(hierarchy, /body\.mission-control-active \.mcShellV3 \.mcHeroContent > p/);
+  assert.match(hierarchy, /font-size: 13px !important/);
+  assert.match(hierarchy, /body\.mission-control-active \.mcShellV3 \.mcRealityStrip > button/);
+  assert.match(hierarchy, /min-height: 55px !important/);
+  assert.match(hierarchy, /body\.mission-control-active \.mcShellV3 \.mcPrimary/);
+  assert.match(hierarchy, /min-height: 48px !important/);
+});
