@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import CommandEvidenceBar from "./CommandEvidenceBar.jsx";
 import { ExperiencePill, ExperienceProgressRing, ExperienceSignal } from "./PlayerDailyPrimitives.jsx";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./PlayerDailyCommandCenter.module.css";
@@ -34,7 +35,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
 
   if (!model?.primaryAction) return null;
   const primary = model.primaryAction;
-  const queue = Array.isArray(model.queue) ? model.queue.slice(1, 4) : [];
+  const queue = Array.isArray(model.queue) ? model.queue.slice(1, 3) : [];
   const coachSignal = model.coachSignal || {};
   const firstSession = model.firstSession || {};
   const dailyRemaining = Math.max((Number(model.daily?.goal) || 0) - (Number(model.daily?.makes) || 0), 0);
@@ -51,6 +52,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
       ? "Today and this week are complete. Review progress or protect the streak with optional work."
       : `${model.weekly.makes}/${model.weekly.goal} makes this week. The next action should build on the work already completed.`
     : `${model.streak || 0}-day streak · ${rankLabel(model.leaderboardRank)} team rank · ${model.actionableCount} open ${model.actionableCount === 1 ? "action" : "actions"}.`;
+  const progressShouldOpen = dailyComplete || primary.urgency === "urgent";
 
   const runAction = (action) => {
     const key = actionKey(action);
@@ -61,15 +63,43 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   };
 
   const primaryWorking = activeAction === actionKey(primary);
+  const evidenceItems = [
+    {
+      id: "today",
+      label: "Today",
+      value: `${model.daily.makes}/${model.daily.goal}`,
+      progress: model.daily.pct,
+      ariaLabel: `Today: ${model.daily.makes} of ${model.daily.goal} makes`,
+    },
+    {
+      id: "week",
+      label: "This week",
+      value: `${model.weekly.makes}/${model.weekly.goal}`,
+      progress: model.weekly.pct,
+      ariaLabel: `This week: ${model.weekly.makes} of ${model.weekly.goal} makes`,
+    },
+    {
+      id: "streak",
+      label: "Current streak",
+      value: model.streak || 0,
+      suffix: "d",
+      ariaLabel: `Current streak: ${model.streak || 0} days`,
+    },
+  ];
 
   return (
-    <section className={styles.root} data-testid="player-daily-command-center" aria-label="Daily training command center">
+    <section
+      className={styles.root}
+      data-testid="player-daily-command-center"
+      data-phase="phase-2-command-hierarchy"
+      aria-label="Daily training command center"
+    >
       <div className={styles.header}>
         <div className={styles.eyebrow}>{firstSession.pending ? "First session · Create your baseline" : "Today · Daily Command Center"}</div>
         <div className={styles.status}>{firstSession.pending ? "Activation" : urgencyLabel(primary.urgency)}</div>
       </div>
 
-      <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`}>
+      <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`} data-command-role="primary">
         <div className={styles.heroTop}>
           <ExperiencePill tone={primary.source === "coach" ? "info" : primary.source === "team" ? "attention" : "positive"}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -94,8 +124,14 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </button>
       </div>
 
+      <CommandEvidenceBar
+        items={evidenceItems}
+        ariaLabel="Today’s training evidence"
+        testId="player-command-evidence"
+      />
+
       {firstSession.complete && !model.activation.complete && (
-        <div className={styles.momentumSignal} data-testid="player-first-result-confirmation">
+        <div className={styles.momentumSignal} data-testid="player-first-result-confirmation" data-command-role="confirmation">
           <ExperienceSignal
             eyebrow="First session complete"
             title={firstSession.title || "First result banked"}
@@ -109,6 +145,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
       <section
         className={styles.coachSignal}
         data-testid="player-coach-priority-signal"
+        data-command-role="coach-priority"
         data-freshness={coachSignal.freshness || "unknown"}
         aria-label="Coach assignment"
         style={coachSignal.stale ? {
@@ -165,48 +202,8 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </div>
       </section>
 
-      <div className={styles.momentumSignal}>
-        <ExperienceSignal
-          eyebrow="Momentum"
-          title={momentumTitle}
-          detail={momentumDetail}
-          tone={momentumTone}
-          testId="player-daily-momentum-signal"
-        >
-          <ExperienceProgressRing
-            value={model.daily.makes}
-            max={model.daily.goal || 1}
-            label="Today"
-            detail={`${model.daily.makes} of ${model.daily.goal} makes`}
-            size={88}
-            testId="player-daily-progress-ring"
-          />
-        </ExperienceSignal>
-      </div>
-
-      <div className={styles.progressGrid}>
-        {[{ label: "Today", value: `${model.daily.makes}/${model.daily.goal}`, pct: model.daily.pct }, { label: "This week", value: `${model.weekly.makes}/${model.weekly.goal}`, pct: model.weekly.pct }].map((item) => (
-          <div className={styles.progressCard} key={item.label}>
-            <div className={styles.progressHeader}>
-              <div className={styles.sectionLabel}>{item.label}</div>
-              <div className={styles.meta}>{item.pct}%</div>
-            </div>
-            <div className={styles.progressValue}>{item.value}</div>
-            <div className={styles.progressTrack} aria-label={`${item.label} progress ${item.pct}%`}>
-              <div className={styles.progressFill} style={{ width: `${item.pct}%` }} />
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <div className={styles.metrics} aria-label="Player momentum metrics">
-        <div className={styles.metric}><div className={styles.metricValue}>{model.streak || 0}</div><div className={styles.metricLabel}>Day streak</div></div>
-        <div className={styles.metric}><div className={styles.metricValue}>{rankLabel(model.leaderboardRank)}</div><div className={styles.metricLabel}>Team rank</div></div>
-        <div className={styles.metric}><div className={styles.metricValue}>{model.actionableCount}</div><div className={styles.metricLabel}>Open actions</div></div>
-      </div>
-
       {queue.length > 0 && (
-        <div className={styles.section}>
+        <div className={styles.section} data-command-role="next-actions">
           <div className={styles.sectionHeading}>
             <div>
               <div className={styles.sectionLabel}>After this</div>
@@ -241,8 +238,64 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </div>
       )}
 
+      <details
+        className="playerProgressDisclosure"
+        data-testid="player-progress-disclosure"
+        data-command-role="progress-details"
+        open={progressShouldOpen || undefined}
+      >
+        <summary>
+          <span>
+            <small>Progress snapshot</small>
+            <strong>{model.daily.pct}% today · {model.weekly.pct}% this week</strong>
+          </span>
+          <span>View details</span>
+        </summary>
+        <div className="playerProgressDisclosureBody">
+          <div className={styles.momentumSignal}>
+            <ExperienceSignal
+              eyebrow="Momentum"
+              title={momentumTitle}
+              detail={momentumDetail}
+              tone={momentumTone}
+              testId="player-daily-momentum-signal"
+            >
+              <ExperienceProgressRing
+                value={model.daily.makes}
+                max={model.daily.goal || 1}
+                label="Today"
+                detail={`${model.daily.makes} of ${model.daily.goal} makes`}
+                size={88}
+                testId="player-daily-progress-ring"
+              />
+            </ExperienceSignal>
+          </div>
+
+          <div className={styles.progressGrid}>
+            {[{ label: "Today", value: `${model.daily.makes}/${model.daily.goal}`, pct: model.daily.pct }, { label: "This week", value: `${model.weekly.makes}/${model.weekly.goal}`, pct: model.weekly.pct }].map((item) => (
+              <div className={styles.progressCard} key={item.label}>
+                <div className={styles.progressHeader}>
+                  <div className={styles.sectionLabel}>{item.label}</div>
+                  <div className={styles.meta}>{item.pct}%</div>
+                </div>
+                <div className={styles.progressValue}>{item.value}</div>
+                <div className={styles.progressTrack} aria-label={`${item.label} progress ${item.pct}%`}>
+                  <div className={styles.progressFill} style={{ width: `${item.pct}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.metrics} aria-label="Player momentum metrics">
+            <div className={styles.metric}><div className={styles.metricValue}>{model.streak || 0}</div><div className={styles.metricLabel}>Day streak</div></div>
+            <div className={styles.metric}><div className={styles.metricValue}>{rankLabel(model.leaderboardRank)}</div><div className={styles.metricLabel}>Team rank</div></div>
+            <div className={styles.metric}><div className={styles.metricValue}>{model.actionableCount}</div><div className={styles.metricLabel}>Open actions</div></div>
+          </div>
+        </div>
+      </details>
+
       {!model.activation.complete && (
-        <details className={styles.activation} data-testid="player-activation-loop" open={model.activation.completeCount < 2}>
+        <details className={styles.activation} data-testid="player-activation-loop" data-command-role="activation" open={model.activation.completeCount < 2}>
           <summary>First-week activation · {model.activation.completeCount}/{model.activation.total} complete</summary>
           <div className={styles.activationRows}>
             {model.activation.steps.map((step) => (
