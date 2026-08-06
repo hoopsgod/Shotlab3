@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import CommandEvidenceBar from "./CommandEvidenceBar.jsx";
 import { ExperiencePill, ExperienceProgressRing, ExperienceSignal } from "./PlayerDailyPrimitives.jsx";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./PlayerDailyCommandCenter.module.css";
@@ -63,29 +62,6 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   };
 
   const primaryWorking = activeAction === actionKey(primary);
-  const evidenceItems = [
-    {
-      id: "today",
-      label: "Today",
-      value: `${model.daily.makes}/${model.daily.goal}`,
-      progress: model.daily.pct,
-      ariaLabel: `Today: ${model.daily.makes} of ${model.daily.goal} makes`,
-    },
-    {
-      id: "week",
-      label: "This week",
-      value: `${model.weekly.makes}/${model.weekly.goal}`,
-      progress: model.weekly.pct,
-      ariaLabel: `This week: ${model.weekly.makes} of ${model.weekly.goal} makes`,
-    },
-    {
-      id: "streak",
-      label: "Current streak",
-      value: model.streak || 0,
-      suffix: "d",
-      ariaLabel: `Current streak: ${model.streak || 0} days`,
-    },
-  ];
 
   return (
     <section
@@ -124,11 +100,19 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </button>
       </div>
 
-      <CommandEvidenceBar
-        items={evidenceItems}
-        ariaLabel="Today’s training evidence"
-        testId="player-command-evidence"
-      />
+      <div className="playerCommandEvidence" role="group" data-testid="player-command-evidence" aria-label="Today’s training evidence">
+        <div className="playerCommandEvidenceItem" aria-label={`Today: ${model.daily.makes} of ${model.daily.goal} makes`}>
+          <strong>{model.daily.makes}/{model.daily.goal}</strong><span>Today</span>
+          <i aria-hidden="true"><b style={{ width: `${Math.max(0, Math.min(100, Number(model.daily.pct) || 0))}%` }} /></i>
+        </div>
+        <div className="playerCommandEvidenceItem" aria-label={`This week: ${model.weekly.makes} of ${model.weekly.goal} makes`}>
+          <strong>{model.weekly.makes}/{model.weekly.goal}</strong><span>This week</span>
+          <i aria-hidden="true"><b style={{ width: `${Math.max(0, Math.min(100, Number(model.weekly.pct) || 0))}%` }} /></i>
+        </div>
+        <div className="playerCommandEvidenceItem" aria-label={`Current streak: ${model.streak || 0} days`}>
+          <strong>{model.streak || 0}<small>d</small></strong><span>Current streak</span>
+        </div>
+      </div>
 
       {firstSession.complete && !model.activation.complete && (
         <div className={styles.momentumSignal} data-testid="player-first-result-confirmation" data-command-role="confirmation">
@@ -286,8 +270,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
             ))}
           </div>
 
-          <div className={styles.metrics} aria-label="Player momentum metrics">
-            <div className={styles.metric}><div className={styles.metricValue}>{model.streak || 0}</div><div className={styles.metricLabel}>Day streak</div></div>
+          <div className={styles.metrics} aria-label="Supporting player metrics">
             <div className={styles.metric}><div className={styles.metricValue}>{rankLabel(model.leaderboardRank)}</div><div className={styles.metricLabel}>Team rank</div></div>
             <div className={styles.metric}><div className={styles.metricValue}>{model.actionableCount}</div><div className={styles.metricLabel}>Open actions</div></div>
           </div>
