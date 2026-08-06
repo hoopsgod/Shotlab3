@@ -1,6 +1,6 @@
 import { useTeamBranding } from "../context/TeamBrandingContext";
 import ShotLabIcon from "./ShotLabIcon";
-import styles from "./CoachDashboardHeader.module.css";
+import styles from "./DashboardIdentityHeader.module.css";
 
 export default function CoachDashboardHeader({ heroRef, userName, onOpenTeamBranding }) {
   const { branding } = useTeamBranding();
@@ -9,7 +9,7 @@ export default function CoachDashboardHeader({ heroRef, userName, onOpenTeamBran
   const displayName = String(userName || "Demo Coach").trim();
 
   return (
-    <section ref={heroRef} className={styles.header} data-testid="coach-dashboard-identity-header">
+    <section ref={heroRef} className={`${styles.header} ${styles.coach}`} data-testid="coach-dashboard-identity-header">
       <div className={styles.inner}>
         <div className={styles.identity}>
           <div className={styles.modeRow}>
