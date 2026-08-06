@@ -55,5 +55,6 @@ test("every shared visual-system change triggers rendered screenshot verificatio
     assert.ok(screenshotWorkflow.includes(watched), `screenshot workflow does not watch ${watched}`);
   }
   assert.match(screenshotWorkflow, /Generate branded App Store screenshots/);
-  assert.match(screenshotWorkflow, /Upload App Store presentation package/);
+  assert.match(screenshotWorkflow, /Upload Phase 1 and Phase 2 presentation evidence/);
+  assert.match(screenshotWorkflow, /shotlab-phase-1-2-presentation-evidence/);
 });
