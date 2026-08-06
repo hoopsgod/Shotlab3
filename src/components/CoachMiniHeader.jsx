@@ -1,5 +1,4 @@
-const FD="'Bebas Neue','Impact','Arial Black',sans-serif";
-const FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
+const SYSTEM_FONT="-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif";
 
 export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor, mutedColor, onLogout }) {
   if (!visible) return null;
@@ -13,48 +12,56 @@ export default function CoachMiniHeader({ visible, avatar, wordmark, borderColor
         left: 0,
         right: 0,
         zIndex: 25,
-        paddingTop: "max(env(safe-area-inset-top), 6px)",
+        paddingTop: "max(env(safe-area-inset-top), 8px)",
         paddingLeft: 12,
         paddingRight: 12,
+        pointerEvents: "none",
         animation: "coachMiniHeaderIn 180ms ease-out",
       }}
     >
       <div
         style={{
-          minHeight: "clamp(52px, 7.8vw, 60px)",
-          borderRadius: 12,
-          border: `1px solid ${borderColor}`,
-          background: "rgba(10, 10, 10, 0.92)",
-          boxShadow: "0 8px 20px rgba(0,0,0,0.3)",
-          display: "flex",
+          width: "min(620px, 100%)",
+          minHeight: 54,
+          margin: "0 auto",
+          borderRadius: 18,
+          border: `1px solid ${borderColor || "rgba(17,26,33,.11)"}`,
+          background: "rgba(250,249,245,.88)",
+          boxShadow: "0 12px 34px rgba(17,26,33,.13), inset 0 1px rgba(255,255,255,.78)",
+          display: "grid",
+          gridTemplateColumns: "auto minmax(0,1fr) auto",
           alignItems: "center",
-          justifyContent: "space-between",
-          padding: "8px 12px",
-          backdropFilter: "blur(8px)",
+          padding: "7px 8px 7px 10px",
+          WebkitBackdropFilter: "blur(24px) saturate(145%)",
+          backdropFilter: "blur(24px) saturate(145%)",
           gap: 10,
+          pointerEvents: "auto",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontFamily: FD, fontSize: 11, letterSpacing: "var(--tracking-tight)", color: "var(--text-2)", textTransform: "uppercase", border: "1px solid var(--stroke-1)", borderRadius: 999, padding: "4px 8px", lineHeight: 1.1 }}>Coach Mode</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
           {avatar}
+          <span style={{ fontFamily: SYSTEM_FONT, fontSize: 10, letterSpacing: ".055em", color: "var(--accent-strong,#617900)", textTransform: "uppercase", fontWeight: 750, lineHeight: 1.1 }}>Coach</span>
         </div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: 1 }}>{wordmark}</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minWidth: 0, overflow: "hidden" }}>{wordmark}</div>
         <button
+          type="button"
           aria-label="Log out"
           onClick={onLogout}
           style={{
-            background: "rgba(20,20,20,0.95)",
-            border: `1px solid ${borderColor}`,
-            borderRadius: 10,
-            color: mutedColor || "var(--text-secondary)",
-            width: 36,
-            height: 36,
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            background: "rgba(255,255,255,.72)",
+            border: `1px solid ${borderColor || "rgba(17,26,33,.11)"}`,
+            borderRadius: 12,
+            color: mutedColor || "var(--text-2,#44515b)",
+            width: 40,
+            height: 40,
             cursor: "pointer",
-            fontFamily: FB,
-            fontSize: 12,
+            fontFamily: SYSTEM_FONT,
           }}
         >
-          ✕
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
         </button>
       </div>
     </div>
