@@ -97,7 +97,9 @@ test("Player home presents action, evidence, priority, and disclosure in order",
   if (positions.nextActions >= 0) expect(positions.progress).toBeGreaterThan(positions.nextActions);
 
   await disclosure.scrollIntoViewIfNeeded();
-  await disclosure.locator("summary").click();
+  const progressOpen = await disclosure.evaluate((element) => element.open);
+  if (!progressOpen) await disclosure.locator("summary").click();
+  await expect(disclosure).toHaveAttribute("open", "");
   await expect(page.getByTestId("player-daily-momentum-signal")).toBeVisible();
 
   await disableVisualNoise(page);
