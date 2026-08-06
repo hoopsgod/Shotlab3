@@ -95,8 +95,9 @@ test("authentication keeps both demos while adopting the new entry system", () =
   assert.match(auth, /Train with intent/);
   assert.match(auth, /Player demo/);
   assert.match(auth, /Coach demo/);
-  assert.match(auth, /onDemo\("player"\)/);
-  assert.match(auth, /onDemo\("coach"\)/);
+  assert.match(auth, /onClick=\{\(\)=>doDemo\("player"\)\}/);
+  assert.match(auth, /onClick=\{\(\)=>doDemo\("coach"\)\}/);
+  assert.match(auth, /const demo=await onDemo\(kind\)/);
   assert.match(auth, /Create account/);
   assert.match(auth, /Private team data/);
   assert.match(auth, /Progress that carries forward/);
