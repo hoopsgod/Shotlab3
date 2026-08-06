@@ -1,36 +1,36 @@
 export const SEMANTIC_COLORS = Object.freeze({
-  SUCCESS: "#4ADE80",
-  INFO: "#38BDF8",
-  WARNING: "#F59E0B",
-  DANGER: "#F87171",
-  NEUTRAL: "#94A3B8",
+  SUCCESS: "#167A52",
+  INFO: "#176B87",
+  WARNING: "#A85F0C",
+  DANGER: "#C33B49",
+  NEUTRAL: "#65717A",
 });
 
 export const SEMANTIC_TONES = Object.freeze({
   success: Object.freeze({
     foreground: SEMANTIC_COLORS.SUCCESS,
-    surface: "rgba(74, 222, 128, 0.10)",
-    border: "rgba(74, 222, 128, 0.34)",
+    surface: "rgba(22, 122, 82, 0.09)",
+    border: "rgba(22, 122, 82, 0.28)",
   }),
   info: Object.freeze({
     foreground: SEMANTIC_COLORS.INFO,
-    surface: "rgba(56, 189, 248, 0.10)",
-    border: "rgba(56, 189, 248, 0.34)",
+    surface: "rgba(23, 107, 135, 0.09)",
+    border: "rgba(23, 107, 135, 0.28)",
   }),
   warning: Object.freeze({
     foreground: SEMANTIC_COLORS.WARNING,
-    surface: "rgba(245, 158, 11, 0.10)",
-    border: "rgba(245, 158, 11, 0.34)",
+    surface: "rgba(168, 95, 12, 0.09)",
+    border: "rgba(168, 95, 12, 0.28)",
   }),
   danger: Object.freeze({
     foreground: SEMANTIC_COLORS.DANGER,
-    surface: "rgba(248, 113, 113, 0.10)",
-    border: "rgba(248, 113, 113, 0.34)",
+    surface: "rgba(195, 59, 73, 0.09)",
+    border: "rgba(195, 59, 73, 0.28)",
   }),
   neutral: Object.freeze({
     foreground: SEMANTIC_COLORS.NEUTRAL,
-    surface: "rgba(148, 163, 184, 0.09)",
-    border: "rgba(148, 163, 184, 0.28)",
+    surface: "rgba(101, 113, 122, 0.08)",
+    border: "rgba(101, 113, 122, 0.24)",
   }),
 });
 
