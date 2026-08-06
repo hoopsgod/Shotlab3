@@ -74,7 +74,7 @@ button.item:focus-visible {
   font-size: 9px;
   font-weight: 700;
   line-height: 1.15;
-  letter-spacing: .065em;
+  letter-spacing: .055em;
   text-overflow: ellipsis;
   text-transform: uppercase;
   white-space: nowrap;
@@ -102,7 +102,7 @@ button.item:focus-visible {
 
 @media (max-width: 390px) {
   .item { padding-inline: 10px; }
-  .label { font-size: 8px; }
+  .label { letter-spacing: .035em; }
 }
 
 @media (prefers-reduced-motion: reduce) {
