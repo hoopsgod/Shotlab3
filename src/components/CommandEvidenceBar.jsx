@@ -14,6 +14,7 @@ export default function CommandEvidenceBar({
   return (
     <div
       className={styles.root}
+      role="group"
       data-tone={tone}
       data-testid={testId}
       aria-label={ariaLabel}
