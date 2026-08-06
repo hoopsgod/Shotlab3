@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 function patch(path, before, after) {
   if (path === "tests/e2e/coach-player-invitation.spec.mjs") return;
   const source = readFileSync(path, "utf8");
+  if (path === "src/components/CoachInteractiveDashboards.jsx" && source.includes("buildCoachPlayerActionBriefing")) return;
   if (source.includes(after)) return;
   if (!source.includes(before)) throw new Error(`Expert app review anchor missing in ${path}`);
   writeFileSync(path, source.replace(before, after));

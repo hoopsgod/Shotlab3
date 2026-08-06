@@ -1,0 +1,29 @@
+name: Phase 3 Coach Action Intelligence
+
+on:
+  pull_request:
+    paths:
+      - "src/lib/coachActionBriefings.js"
+      - "src/components/CoachInteractiveDashboards.jsx"
+      - "tests/coach-action-briefings.test.mjs"
+      - ".github/workflows/phase-3-coach-action-intelligence.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Run coach action briefing contracts
+        run: node --test tests/coach-action-briefings.test.mjs
+      - name: Build production application
+        run: npm run build
