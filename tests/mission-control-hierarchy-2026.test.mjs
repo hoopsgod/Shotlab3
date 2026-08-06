@@ -54,7 +54,7 @@ test("mobile hierarchy clears legacy clipping and preserves accessible control s
   assert.match(css, /min-height:\s*44px !important/);
   assert.match(css, /\.mcHeroContent[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\) 68px !important/);
   assert.match(css, /\.mcHero\s*\{[^}]*max-height:\s*none !important/s);
-  assert.equal(/\.mcHero\s*\{[^}]*max-height:\s*(?!none)/s.test(css), false, "hero must explicitly reject clipping height caps");
+  assert.equal(/max-height:\s*(?:\d|clamp\(|calc\(|min\(|max\()/i.test(css), false, "hero must not include a numeric or calculated height cap");
   assert.equal(/\.mcTeamSelect[^}]*display:\s*none/s.test(css), false);
   assert.equal(/\.mcBell[^}]*display:\s*none/s.test(css), false);
   assert.equal(/\.mcMobileMenu[^}]*display:\s*none/s.test(css), false);
