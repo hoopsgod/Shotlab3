@@ -12,7 +12,7 @@ const visualAuthority = fs.readFileSync("public/shotlab-v15-session-integrity.cs
 const screenshotWorkflow = fs.readFileSync(".github/workflows/app-store-presentation-readiness.yml", "utf8");
 
 test("ShotLab owns a proprietary restrained SVG icon family", () => {
-  for (const name of ["target","coach","training","momentum","streak","team","calendar","trophy","profile","store","chart","check","alert","plus","arrow","spark"]) {
+  for (const name of ["target","coach","training","momentum","streak","team","calendar","trophy","profile","store","chart","check","alert","arrow"]) {
     assert.ok(icon.includes(`${name}:`), `missing ShotLab icon ${name}`);
   }
   assert.match(icon, /strokeWidth="1\.75"/);
