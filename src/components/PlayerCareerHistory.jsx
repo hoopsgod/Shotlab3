@@ -1,13 +1,14 @@
 import { useMemo } from "react";
 import { buildPlayerCareerHistory } from "../lib/playerCareerHistory.js";
+import { buildPlayerCareerMilestoneStory } from "../lib/playerCareerMilestones.js";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./PlayerCareerHistory.module.css";
+import milestoneStyles from "./PlayerCareerMilestoneLadder.module.css";
 
 const number = (value) => Number(value || 0).toLocaleString();
 const seasonRange = (season) => [season.seasonStartDate, season.seasonEndDate].filter(Boolean).join(" — ");
 const playerName = (player) => String(player?.name || player?.displayName || player?.email || "Athlete").trim();
 const initials = (value) => value.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase() || "SL";
-const CAREER_MILESTONES = [100, 500, 1000, 2500, 5000, 10000];
 
 const comparisonLabel = (comparison) => {
   if (!comparison) return "Archive a completed season to unlock a verified year-over-year comparison.";
@@ -22,22 +23,10 @@ const recordLabel = (season, valueField, suffix) => season
   ? `${season.seasonName} · ${number(season[valueField])}${suffix}`
   : "No completed work yet";
 
-const buildMilestoneStory = (careerMakes) => {
-  const total = Math.max(0, Number(careerMakes) || 0);
-  const next = CAREER_MILESTONES.find((milestone) => milestone > total) || CAREER_MILESTONES.at(-1);
-  const previous = [...CAREER_MILESTONES].reverse().find((milestone) => milestone <= total) || 0;
-  const complete = total >= CAREER_MILESTONES.at(-1);
-  const span = Math.max(1, next - previous);
-  const progress = complete ? 100 : Math.min(100, Math.max(0, ((total - previous) / span) * 100));
-  return {
-    complete,
-    next,
-    progress,
-    title: complete ? "10,000-make milestone reached" : `${number(next)} makes is next`,
-    detail: complete
-      ? "Your verified career record has crossed ShotLab’s highest milestone tier."
-      : `${number(Math.max(0, next - total))} verified makes remain to reach the next career marker.`,
-  };
+const milestoneStateLabel = (step) => {
+  if (step.state === "complete") return `${number(step.value)} makes milestone complete`;
+  if (step.state === "current") return `${number(step.value)} makes is the current milestone target`;
+  return `${number(step.value)} makes milestone locked`;
 };
 
 export default function PlayerCareerHistory({
@@ -63,7 +52,7 @@ export default function PlayerCareerHistory({
 
   const participation = history.career.eventRsvpCount + history.career.scRsvpCount + history.career.scLogCount;
   const identity = playerName(player);
-  const milestone = buildMilestoneStory(history.career.totalShootingMakes);
+  const milestone = buildPlayerCareerMilestoneStory(history.career.totalShootingMakes);
   const metrics = [
     { label: "Career makes", value: number(history.career.totalShootingMakes), detail: "Verified shooting work", primary: true },
     { label: "At-home makes", value: number(history.career.totalHomeMakes), detail: "Independent training" },
@@ -103,7 +92,21 @@ export default function PlayerCareerHistory({
         <div className={styles.milestoneBody}>
           <div className={styles.milestoneTopline}><div><div className={styles.sectionLabel}>Career milestone</div><h3 id={`career-milestone-title-${viewerRole}`}>{milestone.title}</h3></div><strong>{Math.round(milestone.progress)}%</strong></div>
           <div className={styles.milestoneTrack} role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow={Math.round(milestone.progress)} aria-label={milestone.complete ? "Highest career milestone complete" : `Progress toward ${number(milestone.next)} career makes`}><span style={{ width: `${milestone.progress}%` }} /></div>
-          <div className={styles.milestoneFooter}><p>{milestone.detail}</p><span>{milestone.complete ? "Milestone complete" : `${number(history.career.totalShootingMakes)} of ${number(milestone.next)}`}</span></div>
+          <div className={styles.milestoneFooter}><p>{milestone.detail}</p><span>{milestone.status}</span></div>
+          <ol className={milestoneStyles.ladder} aria-label="Career shooting milestone ladder" data-testid="career-milestone-ladder">
+            {milestone.ladder.map((step) => (
+              <li
+                className={milestoneStyles.step}
+                data-state={step.state}
+                aria-current={step.state === "current" ? "step" : undefined}
+                aria-label={milestoneStateLabel(step)}
+                key={step.value}
+              >
+                <span className={milestoneStyles.dot} aria-hidden="true">{step.state === "complete" ? <ShotLabIcon name="check" size={12} /> : null}</span>
+                <strong aria-hidden="true">{step.label}</strong>
+              </li>
+            ))}
+          </ol>
         </div>
       </section>
 
