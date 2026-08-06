@@ -9,27 +9,31 @@ on:
       - "docs/app-store-presentation-package.md"
       - "playwright.screenshots.config.mjs"
       - "tests/e2e/app-store-screenshots.spec.mjs"
+      - "tests/e2e/design-system-screenshots.spec.mjs"
       - "tests/app-store-presentation-readiness.test.mjs"
+      - "tests/design-system-completion.test.mjs"
       - "scripts/validate-app-store-screenshots.mjs"
-      - "public/shotlab-v3-foundation.css"
-      - "public/shotlab-v3-mobile-corrections.css"
-      - "public/shotlab-v4-reference.css"
-      - "public/shotlab-v5-coach-integrity.css"
-      - "public/shotlab-v6-decision-workspaces.css"
-      - "public/shotlab-v7-page-authority.css"
-      - "public/shotlab-v8-demo-parity.css"
-      - "public/shotlab-v9-secondary-polish.css"
+      - "scripts/minify-visual-authority-css.mjs"
+      - "public/shotlab-*.css"
       - "src/lib/demoMode.js"
       - "src/components/CoachCommandCenter.jsx"
       - "src/components/CoachInteractiveDashboards.jsx"
       - "src/components/CoachDashboardPrimitives.jsx"
       - "src/components/CoachDashboardPrimitives.module.css"
+      - "src/components/PlayerDailyCommandCenter.jsx"
+      - "src/components/PlayerDailyCommandCenter.module.css"
+      - "src/components/PlayerDailyPrimitives.jsx"
+      - "src/components/PlayerDailyPrimitives.module.css"
+      - "src/components/PlayerCareerHistory.jsx"
+      - "src/components/PlayerCareerHistory.module.css"
+      - "src/components/ShotLabIcon.jsx"
       - "src/components/SecondaryPageSystem.jsx"
       - "src/components/SecondaryPageSystem.css"
       - "src/components/MobileNavigation.jsx"
       - "src/components/MobileNavigation.module.css"
       - "src/components/TeamStore/**"
       - "src/styles/**"
+      - "package.json"
       - "index.html"
       - ".github/workflows/app-store-presentation-readiness.yml"
   workflow_dispatch:
@@ -61,8 +65,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify listing and presentation contracts
-        run: node --test tests/app-store-presentation-readiness.test.mjs
+      - name: Verify listing and visual-system contracts
+        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -73,18 +77,19 @@ jobs:
       - name: Verify production build
         run: npm run build
 
-      - name: Generate branded App Store screenshots
+      - name: Generate branded App Store screenshots and raw mobile audits
         run: npx playwright test --config=playwright.screenshots.config.mjs
 
       - name: Validate screenshot count, format, and dimensions
         run: node scripts/validate-app-store-screenshots.mjs
 
-      - name: Upload App Store presentation package
+      - name: Upload App Store presentation package and design audit
         uses: actions/upload-artifact@v4
         with:
           name: shotlab-app-store-presentation
           path: |
             artifacts/app-store/iphone-6.9/
+            artifacts/design-audit/iphone/
             native/app-store-listing.json
             docs/app-store-presentation-package.md
           if-no-files-found: error
@@ -99,5 +104,6 @@ jobs:
             playwright-report-app-store/
             test-results/app-store-screenshots/
             artifacts/app-store/iphone-6.9/
+            artifacts/design-audit/iphone/
           if-no-files-found: ignore
           retention-days: 7

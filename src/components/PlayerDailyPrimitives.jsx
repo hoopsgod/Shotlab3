@@ -1,6 +1,16 @@
+import ShotLabIcon from "./ShotLabIcon";
 import styles from "./PlayerDailyPrimitives.module.css";
 
 const clamp = (value, min = 0, max = 100) => Math.min(max, Math.max(min, Number(value) || 0));
+const signalIcon = (tone, eyebrow = "") => {
+  const value = String(eyebrow).toLowerCase();
+  if (value.includes("coach")) return "coach";
+  if (value.includes("momentum") || value.includes("progress")) return "momentum";
+  if (value.includes("schedule") || value.includes("event")) return "calendar";
+  if (tone === "warning") return "alert";
+  if (tone === "success") return "check";
+  return "target";
+};
 
 export function ExperienceProgressRing({ value = 0, max = 100, label, detail, size = 92, testId }) {
   const pct = clamp(max > 0 ? (Number(value) / Number(max)) * 100 : 0);
@@ -23,9 +33,11 @@ export function ExperienceProgressRing({ value = 0, max = 100, label, detail, si
   );
 }
 
-export function ExperienceSignal({ eyebrow, title, detail, tone = "neutral", children, testId }) {
+export function ExperienceSignal({ eyebrow, title, detail, tone = "neutral", icon, children, testId }) {
+  const iconName = icon || signalIcon(tone, eyebrow);
   return (
     <section className={`${styles.signal} ${styles[`tone_${tone}`] || ""}`} data-testid={testId}>
+      <span className={styles.signalIcon} aria-hidden="true"><ShotLabIcon name={iconName} size={20} /></span>
       <div className={styles.signalCopy}>
         {eyebrow ? <div className={styles.signalEyebrow}>{eyebrow}</div> : null}
         <div className={styles.signalTitle}>{title}</div>
@@ -36,6 +48,6 @@ export function ExperienceSignal({ eyebrow, title, detail, tone = "neutral", chi
   );
 }
 
-export function ExperiencePill({ children, tone = "neutral" }) {
-  return <span className={`${styles.pill} ${styles[`tone_${tone}`] || ""}`}>{children}</span>;
+export function ExperiencePill({ children, tone = "neutral", icon }) {
+  return <span className={`${styles.pill} ${styles[`tone_${tone}`] || ""}`}>{icon ? <ShotLabIcon name={icon} size={13} /> : null}{children}</span>;
 }

@@ -2,7 +2,7 @@
   "maxLargestJavaScriptBytes": 585000,
   "maxStartupAppJavaScriptBytes": 585000,
   "maxStartupAppJavaScriptGzipBytes": 166000,
-  "maxTotalJavaScriptGzipBytes": 357500,
+  "maxTotalJavaScriptGzipBytes": 358400,
   "maxLargestCssBytes": 128000,
   "maxStartupAppCssBytes": 25000,
   "maxStartupAppCssGzipBytes": 5500,

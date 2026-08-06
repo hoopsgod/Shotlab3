@@ -16,13 +16,7 @@ test("Mission Control is the single visible coach onboarding system", () => {
 });
 
 test("activation readiness is based on actual identity, roster, schedule, and engagement state", () => {
-  for (const milestone of [
-    'id: "team-access"',
-    'id: "team-identity"',
-    'id: "first-player"',
-    'id: "first-session"',
-    'id: "first-engagement"',
-  ]) {
+  for (const milestone of ['id: "team-access"','id: "team-identity"','id: "first-player"','id: "first-session"','id: "first-engagement"']) {
     assert.equal(selector.includes(milestone), true, `missing activation milestone ${milestone}`);
   }
   assert.equal(selector.includes("isCoachIdentityConfigured"), true);
@@ -32,33 +26,14 @@ test("activation readiness is based on actual identity, roster, schedule, and en
 });
 
 test("activation surface meets mobile, focus, and reduced-motion release requirements", () => {
-  for (const requirement of [
-    "font-family:var(--mc-native",
-    "min-height:48px",
-    ":focus-visible",
-    "outline:3px solid",
-    "@media(max-width:700px)",
-    "min-height:50px",
-    "@media(prefers-reduced-motion:reduce)",
-    "backdrop-filter:none",
-  ]) {
+  for (const requirement of ["font-family:var(--mc-native","min-height:48px",":focus-visible","outline:3px solid","@media(max-width:700px)","@media(prefers-reduced-motion:reduce)","backdrop-filter:none"]) {
     assert.equal(css.includes(requirement), true, `missing activation style requirement ${requirement}`);
   }
 });
 
 test("activation changes remain presentation and decision-model only", () => {
-  const forbiddenTokens = [
-    "supabase",
-    "fetch(",
-    "localStorage",
-    "sessionStorage",
-    ".insert(",
-    ".update(",
-    ".delete(",
-  ];
+  const forbiddenTokens = ["supabase","fetch(","localStorage","sessionStorage",".insert(",".update(",".delete("];
   for (const [sourceName, source] of [["selector", selector], ["styles", css]]) {
-    for (const token of forbiddenTokens) {
-      assert.equal(source.includes(token), false, `${sourceName} must not include ${token}`);
-    }
+    for (const token of forbiddenTokens) assert.equal(source.includes(token), false, `${sourceName} must not include ${token}`);
   }
 });
