@@ -26,8 +26,10 @@ test("persistent navigation behaves as a floating native tab bar", () => {
   assert.match(navigationSource, /buildNativeNavigationModel/);
   assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
   assert.match(navigationSource, /className=\{styles\.activeIndicator\}/);
+  assert.match(navigationCss, /--bottom-nav-content-padding:\s*104px/);
   assert.match(navigationCss, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
   assert.match(navigationCss, /left:\s*50%/);
+  assert.match(navigationCss, /bottom:\s*max\(10px, env\(safe-area-inset-bottom, 0px\)\)/);
   assert.match(navigationCss, /transform:\s*translateX\(-50%\)/);
   assert.match(navigationCss, /border:\s*1px solid/);
   assert.match(navigationCss, /border-radius:\s*24px/);
