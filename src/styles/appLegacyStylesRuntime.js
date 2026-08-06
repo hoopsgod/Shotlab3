@@ -1,5 +1,6 @@
 import TOKENS from "../theme/appTokens";
 import legacyStyleModuleSource from "./appLegacyStyles.js?raw";
+import { VISUAL_FOUNDATION_2026_CSS } from "./visualFoundation2026.js";
 
 const LEGACY_STYLE_RUNTIME = Object.freeze({
   BG: TOKENS.BG_BASE,
@@ -42,7 +43,7 @@ function extractStyleTemplate(exportName) {
   return hydratedStyle;
 }
 
-export const _STYLES_CSS = extractStyleTemplate("_STYLES_CSS");
+export const _STYLES_CSS = `${extractStyleTemplate("_STYLES_CSS")}\n${VISUAL_FOUNDATION_2026_CSS}`;
 export const _PAGE_SIGNATURE_CSS = extractStyleTemplate("_PAGE_SIGNATURE_CSS");
 export const _DESKTOP_SHELL_CSS = extractStyleTemplate("_DESKTOP_SHELL_CSS");
 export const _PLAYER_COMPACT_DASHBOARD_CSS = extractStyleTemplate("_PLAYER_COMPACT_DASHBOARD_CSS");
