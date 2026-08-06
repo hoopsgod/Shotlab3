@@ -1,0 +1,532 @@
+.shell {
+  min-height: 100dvh;
+  position: relative;
+  overflow-x: hidden;
+  display: grid;
+  place-items: center;
+  padding: max(20px, env(safe-area-inset-top, 0px)) 18px max(24px, env(safe-area-inset-bottom, 0px));
+  color: var(--text-1, #121a20);
+  background:
+    radial-gradient(circle at 90% 4%, rgba(200, 255, 26, .18), transparent 28rem),
+    radial-gradient(circle at 2% 82%, rgba(16, 31, 42, .07), transparent 24rem),
+    var(--bg-0, #f3f0e8);
+}
+
+.shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .55;
+  background-image:
+    linear-gradient(rgba(18, 27, 34, .025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(18, 27, 34, .025) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, .7), transparent 78%);
+}
+
+.layout {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 980px);
+  display: grid;
+  grid-template-columns: minmax(0, .95fr) minmax(390px, 1.05fr);
+  gap: clamp(22px, 5vw, 58px);
+  align-items: center;
+}
+
+.brandPanel {
+  min-width: 0;
+  padding: clamp(8px, 3vw, 28px);
+}
+
+.brandLockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.logoFrame {
+  width: 62px;
+  height: 62px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(18, 27, 34, .1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, .74);
+  box-shadow: 0 12px 30px rgba(27, 35, 41, .08);
+}
+
+.wordmark {
+  margin: 0;
+  color: var(--text-1, #121a20);
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
+  font-size: 31px;
+  font-weight: 820;
+  line-height: .95;
+  letter-spacing: -.055em;
+}
+
+.wordmarkAccent {
+  color: #789700;
+}
+
+.productLabel {
+  margin-top: 6px;
+  color: var(--text-3, #76818a);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.heroCopy {
+  max-width: 500px;
+  margin-top: clamp(32px, 6vw, 70px);
+}
+
+.heroEyebrow {
+  color: #667f00;
+  font-size: 11px;
+  font-weight: 760;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.heroTitle {
+  margin: 11px 0 0;
+  color: var(--text-1, #121a20);
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
+  font-size: clamp(42px, 6vw, 67px);
+  font-weight: 810;
+  line-height: .98;
+  letter-spacing: -.058em;
+  text-wrap: balance;
+}
+
+.heroText {
+  max-width: 460px;
+  margin: 18px 0 0;
+  color: var(--text-2, #4e5a63);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.58;
+  letter-spacing: -.012em;
+}
+
+.proofRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 28px;
+}
+
+.proofItem {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(18, 27, 34, .09);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, .56);
+}
+
+.proofItem strong,
+.proofItem span {
+  display: block;
+}
+
+.proofItem strong {
+  color: var(--text-1, #121a20);
+  font-size: 12px;
+  font-weight: 760;
+  letter-spacing: -.008em;
+}
+
+.proofItem span {
+  margin-top: 4px;
+  color: var(--text-3, #76818a);
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.card {
+  width: 100%;
+  padding: clamp(24px, 4vw, 34px);
+  border: 1px solid rgba(18, 27, 34, .1);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 28px 72px rgba(27, 35, 41, .13), inset 0 1px rgba(255, 255, 255, .8);
+  -webkit-backdrop-filter: blur(24px) saturate(115%);
+  backdrop-filter: blur(24px) saturate(115%);
+}
+
+.cardHeader {
+  margin-bottom: 22px;
+}
+
+.cardEyebrow {
+  color: #667f00;
+  font-size: 10px;
+  font-weight: 780;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.cardTitle {
+  margin: 7px 0 0;
+  color: var(--text-1, #121a20);
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
+  font-size: 32px;
+  font-weight: 790;
+  line-height: 1.02;
+  letter-spacing: -.045em;
+}
+
+.cardSubtitle {
+  margin: 8px 0 0;
+  color: var(--text-2, #4e5a63);
+  font-size: 13px;
+  line-height: 1.48;
+}
+
+.notice,
+.error {
+  margin-bottom: 15px;
+  padding: 12px 13px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.notice {
+  border: 1px solid rgba(121, 153, 0, .28);
+  color: #435400;
+  background: rgba(200, 255, 26, .12);
+}
+
+.error {
+  border: 1px solid rgba(211, 62, 62, .2);
+  color: #9b2828;
+  background: rgba(211, 62, 62, .07);
+}
+
+.segmented {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(18, 27, 34, .08);
+  border-radius: 14px;
+  background: #f1efe9;
+}
+
+.segmentButton,
+.roleButton {
+  min-height: 42px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-3, #76818a);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 150ms ease, background 150ms ease, box-shadow 150ms ease, transform 120ms ease;
+}
+
+.segmentButtonActive {
+  color: var(--text-1, #121a20);
+  background: #fff;
+  box-shadow: 0 5px 16px rgba(27, 35, 41, .08);
+}
+
+.form {
+  margin-top: 22px;
+}
+
+.track {
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid rgba(18, 27, 34, .09);
+  border-radius: 16px;
+  background: var(--surface-2, #f8f6f0);
+}
+
+.trackLabel {
+  color: #667f00;
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.trackText {
+  margin-top: 6px;
+  color: var(--text-2, #4e5a63);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.trackSteps {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.trackStep {
+  display: flex;
+  gap: 8px;
+  color: var(--text-3, #76818a);
+  font-size: 11px;
+}
+
+.trackStep strong {
+  color: #667f00;
+}
+
+.roleSelector {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 18px;
+}
+
+.roleButton {
+  border: 1px solid rgba(18, 27, 34, .1);
+  background: #fff;
+}
+
+.roleButtonActive {
+  border-color: rgba(121, 153, 0, .38);
+  color: #425500;
+  background: rgba(200, 255, 26, .12);
+  box-shadow: 0 5px 16px rgba(102, 132, 15, .08);
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 15px;
+}
+
+.label {
+  color: var(--text-2, #4e5a63);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .035em;
+}
+
+.input {
+  width: 100%;
+  min-height: 50px;
+  padding: 0 14px;
+  border: 1px solid rgba(18, 27, 34, .16);
+  border-radius: 13px;
+  outline: none;
+  background: #fff;
+  color: var(--text-1, #121a20);
+  font-size: 16px;
+  font-weight: 550;
+  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+.input::placeholder {
+  color: #9aa2a8;
+}
+
+.input:focus {
+  border-color: #8cab14;
+  box-shadow: 0 0 0 4px rgba(164, 205, 31, .14);
+}
+
+.primaryButton {
+  width: 100%;
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 4px;
+  border: 1px solid #92b513;
+  border-radius: 14px;
+  background: var(--accent, #c8ff1a);
+  color: var(--accent-ink, #101806);
+  box-shadow: 0 10px 24px rgba(102, 132, 15, .15);
+  font-size: 14px;
+  font-weight: 780;
+  cursor: pointer;
+  transition: transform 130ms ease, box-shadow 160ms ease, filter 160ms ease;
+}
+
+.primaryButton:hover,
+.primaryButton:focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.01);
+  box-shadow: 0 14px 28px rgba(102, 132, 15, .18);
+}
+
+.primaryButton:active,
+.demoButton:active,
+.segmentButton:active,
+.roleButton:active {
+  transform: scale(.98);
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 18px 0 12px;
+  color: var(--text-3, #76818a);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: rgba(18, 27, 34, .09);
+}
+
+.demoRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.demoButton {
+  min-height: 46px;
+  border: 1px solid rgba(18, 27, 34, .1);
+  border-radius: 13px;
+  background: #fff;
+  color: var(--text-1, #121a20);
+  box-shadow: 0 6px 18px rgba(27, 35, 41, .05);
+  font-size: 12px;
+  font-weight: 720;
+  cursor: pointer;
+  transition: transform 130ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.demoButton:hover,
+.demoButton:focus-visible {
+  border-color: rgba(121, 153, 0, .34);
+  box-shadow: 0 10px 24px rgba(27, 35, 41, .08);
+}
+
+.switchMode {
+  margin: 16px 0 0;
+  color: var(--text-2, #4e5a63);
+  text-align: center;
+  font-size: 12px;
+}
+
+.switchMode button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #5b7200;
+  font: inherit;
+  font-weight: 760;
+  cursor: pointer;
+}
+
+.legalCopy {
+  margin: 12px 0 0;
+  color: var(--text-3, #76818a);
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.legalCopy a {
+  color: #5b7200;
+  font-weight: 720;
+  text-decoration: none;
+}
+
+@media (max-width: 780px) {
+  .shell {
+    display: block;
+    padding-inline: 16px;
+  }
+
+  .layout {
+    max-width: 440px;
+    margin: 0 auto;
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .brandPanel {
+    padding: 0 4px;
+  }
+
+  .brandLockup {
+    display: flex;
+    justify-content: center;
+  }
+
+  .heroCopy {
+    margin-top: 24px;
+    text-align: center;
+  }
+
+  .heroTitle {
+    font-size: clamp(38px, 12vw, 52px);
+  }
+
+  .heroText {
+    margin-inline: auto;
+    font-size: 14px;
+  }
+
+  .proofRow {
+    display: none;
+  }
+
+  .card {
+    padding: 24px 20px;
+    border-radius: 24px;
+  }
+}
+
+@media (max-width: 390px) {
+  .shell {
+    padding-inline: 12px;
+  }
+
+  .logoFrame {
+    width: 54px;
+    height: 54px;
+    border-radius: 16px;
+  }
+
+  .wordmark {
+    font-size: 28px;
+  }
+
+  .heroTitle {
+    font-size: 40px;
+  }
+
+  .card {
+    padding: 22px 17px;
+  }
+
+  .demoRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .segmentButton,
+  .roleButton,
+  .primaryButton,
+  .demoButton {
+    transition: none;
+  }
+}
