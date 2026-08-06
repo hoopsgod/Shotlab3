@@ -22,10 +22,21 @@ function installBrowserStorageFallback() {
   if (typeof window === 'undefined' || window.storage || !window.localStorage) return
   const local = window.localStorage
   window.storage = {
-    async get(key) { return { value: local.getItem(String(key)) } },
-    async set(key, value) { local.setItem(String(key), String(value)); return { value: String(value) } },
-    async remove(key) { local.removeItem(String(key)); return { value: null } },
-    async delete(key) { local.removeItem(String(key)); return { value: null } },
+    async get(key) {
+      return { value: local.getItem(String(key)) }
+    },
+    async set(key, value) {
+      local.setItem(String(key), String(value))
+      return { value: String(value) }
+    },
+    async remove(key) {
+      local.removeItem(String(key))
+      return { value: null }
+    },
+    async delete(key) {
+      local.removeItem(String(key))
+      return { value: null }
+    },
   }
 }
 
@@ -75,7 +86,10 @@ function registerRuntimeListeners() {
   let rafId = null
   const schedule = () => {
     if (rafId != null) return
-    rafId = window.requestAnimationFrame(() => { rafId = null; syncViewportHeightVar() })
+    rafId = window.requestAnimationFrame(() => {
+      rafId = null
+      syncViewportHeightVar()
+    })
   }
   syncViewportHeightVar()
   window.addEventListener('resize', schedule, { passive: true })
@@ -103,6 +117,7 @@ window.addEventListener('error', event => {
   const message = event?.error?.message || event?.message || 'Unexpected runtime error before app mount.'
   if (!appHasCommitted) renderStartupError(message)
 })
+
 window.addEventListener('unhandledrejection', event => {
   const reason = event?.reason
   const message = typeof reason === 'string' ? reason : reason?.message || 'Unhandled async startup error.'
@@ -118,8 +133,14 @@ window.addEventListener('shotlab:app-ready', () => {
 ;(async () => {
   try {
     markBoot('startup_mode', EXPLICIT_DEMO_RUNTIME ? 'explicit_demo' : 'authentication')
+
+    // Normal launches must complete demo-session cleanup before App can hydrate.
+    // This eliminates the startup race that previously restored Coach Demo.
     if (!EXPLICIT_DEMO_RUNTIME) {
-      await clearStaleDemoSession({ env: { DEV: false, VITE_ENABLE_DEMO_MODE: 'false' }, location: window.location })
+      await clearStaleDemoSession({
+        env: { DEV: false, VITE_ENABLE_DEMO_MODE: 'false' },
+        location: window.location,
+      })
       try {
         window.localStorage?.removeItem('sl:demoMode')
         window.localStorage?.removeItem('sl:demoSession')
@@ -130,6 +151,8 @@ window.addEventListener('shotlab:app-ready', () => {
       markBoot('demo_cleanup', 'completed_before_app_import')
     }
 
+    // Demo data is no longer bootstrapped during application startup.
+    // Coach and Player demos are launched only by explicit UI actions in App.
     const { default: App } = await import('./App.jsx')
     await import('./styles/VisualFoundation2026.css')
     await import('./styles/CommandHierarchy2026.css')
@@ -139,17 +162,23 @@ window.addEventListener('shotlab:app-ready', () => {
     ReactDOM.createRoot(rootEl).render(
       <React.StrictMode>
         <RuntimeErrorBoundary>
-          <ReleaseReadinessBoundary><App /></ReleaseReadinessBoundary>
+          <ReleaseReadinessBoundary>
+            <App />
+          </ReleaseReadinessBoundary>
         </RuntimeErrorBoundary>
       </React.StrictMode>
     )
 
-    checkBackendHealth().then(status => { logBackendHealth(status); markBoot('backend_health', status.status) })
-      .catch(() => markBoot('backend_health', 'health_check_failed'))
+    checkBackendHealth().then(status => {
+      logBackendHealth(status)
+      markBoot('backend_health', status.status)
+    }).catch(() => markBoot('backend_health', 'health_check_failed'))
+
     if (DEV) {
       verifySupabaseSchema().then(status => markBoot('schema_verify', status.status))
         .catch(() => markBoot('schema_verify', 'schema_check_failed'))
     }
+
     bootTimeoutId = window.setTimeout(() => {
       markBoot('boot_timeout', appHasCommitted ? 'app_already_committed' : 'waiting_for_app_ready')
     }, BOOT_TIMEOUT_MS)
