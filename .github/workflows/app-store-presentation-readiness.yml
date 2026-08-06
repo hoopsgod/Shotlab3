@@ -7,15 +7,18 @@ on:
     paths:
       - "native/app-store-listing.json"
       - "docs/app-store-presentation-package.md"
+      - "docs/phase-4-workspace-recovery.md"
       - "playwright.screenshots.config.mjs"
       - "tests/e2e/app-store-screenshots.spec.mjs"
       - "tests/e2e/design-system-screenshots.spec.mjs"
       - "tests/app-store-presentation-readiness.test.mjs"
       - "tests/design-system-completion.test.mjs"
+      - "tests/workspace-recovery.test.mjs"
       - "scripts/validate-app-store-screenshots.mjs"
       - "scripts/minify-visual-authority-css.mjs"
       - "public/shotlab-*.css"
       - "src/lib/demoMode.js"
+      - "src/lib/workspaceRecovery.js"
       - "src/components/CoachCommandCenter.jsx"
       - "src/components/CoachInteractiveDashboards.jsx"
       - "src/components/CoachDashboardPrimitives.jsx"
@@ -31,6 +34,15 @@ on:
       - "src/components/SecondaryPageSystem.css"
       - "src/components/MobileNavigation.jsx"
       - "src/components/MobileNavigation.module.css"
+      - "src/components/CompactLeaderboardPreviewCard.jsx"
+      - "src/components/WorkspaceRecoveryBoundary.jsx"
+      - "src/components/WorkspaceRecoveryBoundary.module.css"
+      - "src/components/DeferredCoachDashboardPhase2.jsx"
+      - "src/components/DeferredCoachInteractiveDashboards.jsx"
+      - "src/components/DeferredPlayerCareerHistory.jsx"
+      - "src/components/DeferredPlayerDailyCommandCenter.jsx"
+      - "src/components/DeferredPlayerDashboardHeader.jsx"
+      - "src/components/DeferredPlayerOperationalWorkspace.jsx"
       - "src/components/TeamStore/**"
       - "src/styles/**"
       - "package.json"
@@ -65,8 +77,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify listing and visual-system contracts
-        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs
+      - name: Verify listing, visual-system, and recovery contracts
+        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/workspace-recovery.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
