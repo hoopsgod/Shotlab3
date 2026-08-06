@@ -37,9 +37,19 @@ test("player briefing names the attention queue without inventing performance cl
   assert.equal(model.followUpRows.length, 2);
   assert.equal(model.decision.tone, "attention");
   assert.deepEqual(model.decision.action, { kind: "filter", value: "attention", label: "Open attention queue" });
-  assert.match(model.decision.detail, /1 player have no recorded activity/);
-  assert.match(model.insights[0].body, /Ryan, Avery, Mia/);
+  assert.match(model.decision.detail, /1 player has no recorded activity/);
+  assert.match(model.insights[0].body, /Ryan, Avery, Mia need a direct next step/);
   assert.doesNotMatch(JSON.stringify(model), /percentile|top \d+%|better than/i);
+});
+
+test("singular player briefing uses polished agreement", () => {
+  const model = buildCoachPlayerActionBriefing({
+    metrics: { total: 1, active: 0 },
+    rows: [{ name: "Ryan Lee", statusKey: "new", engagementScore: 0 }],
+  });
+  assert.equal(model.decision.title, "1 player needs a coaching touchpoint");
+  assert.match(model.decision.detail, /1 player has no recorded activity/);
+  assert.match(model.insights[0].body, /Ryan needs a direct next step/);
 });
 
 test("healthy player briefing prioritizes recognition and keeps exact evidence", () => {
