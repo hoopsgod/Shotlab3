@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import WorkspaceRecoveryBoundary from './WorkspaceRecoveryBoundary.jsx'
 
 const LazyPlayerCareerHistory = lazy(() => import('./PlayerCareerHistory.jsx'))
 
@@ -29,8 +30,10 @@ function PlayerCareerHistoryFallback() {
 
 export default function DeferredPlayerCareerHistory(props) {
   return (
-    <Suspense fallback={<PlayerCareerHistoryFallback />}>
-      <LazyPlayerCareerHistory {...props} />
-    </Suspense>
+    <WorkspaceRecoveryBoundary label="Career history" testId="player-career-history-recovery">
+      <Suspense fallback={<PlayerCareerHistoryFallback />}>
+        <LazyPlayerCareerHistory {...props} />
+      </Suspense>
+    </WorkspaceRecoveryBoundary>
   )
 }

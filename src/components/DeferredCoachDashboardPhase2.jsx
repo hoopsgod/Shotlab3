@@ -1,4 +1,5 @@
 import { lazy, Suspense } from 'react'
+import WorkspaceRecoveryBoundary from './WorkspaceRecoveryBoundary.jsx'
 
 const loadCoachPhase2 = () => import('./CoachDashboardPhase2.jsx')
 const lazyNamed = (name) => lazy(() => loadCoachPhase2().then((module) => ({ default: module[name] })))
@@ -36,38 +37,40 @@ function CoachIntelligenceFallback() {
   )
 }
 
-function DeferredCoachIntelligence({ Component, ...props }) {
+function DeferredCoachIntelligence({ Component, recoveryLabel, recoveryTestId, ...props }) {
   return (
-    <Suspense fallback={<CoachIntelligenceFallback />}>
-      <Component {...props} />
-    </Suspense>
+    <WorkspaceRecoveryBoundary label={recoveryLabel} testId={recoveryTestId}>
+      <Suspense fallback={<CoachIntelligenceFallback />}>
+        <Component {...props} />
+      </Suspense>
+    </WorkspaceRecoveryBoundary>
   )
 }
 
 export function CoachActivityIntelligencePanel(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachActivityIntelligencePanel} {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachActivityIntelligencePanel} recoveryLabel="Coach activity" recoveryTestId="coach-activity-recovery" {...props} />
 }
 
 export function CoachDrillsOperationalPanel(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachDrillsOperationalPanel} {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachDrillsOperationalPanel} recoveryLabel="Coach drills" recoveryTestId="coach-drills-recovery" {...props} />
 }
 
 export function CoachEventIntelligenceDrawer(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachEventIntelligenceDrawer} {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachEventIntelligenceDrawer} recoveryLabel="Event intelligence" recoveryTestId="coach-event-intelligence-recovery" {...props} />
 }
 
 export function CoachLeaderboardOperationalPanel(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachLeaderboardOperationalPanel} {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachLeaderboardOperationalPanel} recoveryLabel="Coach leaderboards" recoveryTestId="coach-leaderboards-recovery" {...props} />
 }
 
 export function CoachPlayerIntelligenceDrawer(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachPlayerIntelligenceDrawer} {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachPlayerIntelligenceDrawer} recoveryLabel="Player intelligence" recoveryTestId="coach-player-intelligence-recovery" {...props} />
 }
 
 export function CoachSeasonComparisonPanel(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachSeasonComparisonPanel} {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachSeasonComparisonPanel} recoveryLabel="Season comparison" recoveryTestId="coach-season-comparison-recovery" {...props} />
 }
 
 export function CoachStrengthOperationalPanel(props) {
-  return <DeferredCoachIntelligence Component={LazyCoachStrengthOperationalPanel} {...props} />
+  return <DeferredCoachIntelligence Component={LazyCoachStrengthOperationalPanel} recoveryLabel="Strength and conditioning" recoveryTestId="coach-strength-recovery" {...props} />
 }

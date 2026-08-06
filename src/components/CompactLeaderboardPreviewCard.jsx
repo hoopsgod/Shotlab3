@@ -1,7 +1,9 @@
 import React from "react";
+import { resolveDataDisplayState } from "../lib/workspaceRecovery.js";
 
 const DEFAULT_PLAYER_EMPTY = "No leaderboard data yet. Log shots to enter the rankings.";
 const DEFAULT_COACH_EMPTY = "No team leaderboard data yet. Players will appear here after they log shots.";
+const DEFAULT_ERROR = "Leaderboard data is temporarily unavailable. Saved training results are still safe.";
 
 export default function CompactLeaderboardPreviewCard({
   title = "Team Leaders",
@@ -10,11 +12,14 @@ export default function CompactLeaderboardPreviewCard({
   mode = "player",
   userEmail = "",
   emptyMessage,
+  errorMessage,
+  loadingMessage = "Loading leaderboard data…",
   maxRows,
   areaTitle = "Leaderboards",
   categoryLabel = "Home Shots",
   fullLeaderboardHref = "",
   onViewAll,
+  onRetry,
 }) {
   const safeRows = Array.isArray(rows) ? rows : [];
   const isCoachMode = mode === "coach";
@@ -25,11 +30,22 @@ export default function CompactLeaderboardPreviewCard({
     || (normalizedUser && String(row?.email || "").trim().toLowerCase() === normalizedUser))?.rank || null;
 
   const previewRows = safeRows.slice(0, Math.max(1, limit));
-  const message = emptyMessage || (isCoachMode ? DEFAULT_COACH_EMPTY : DEFAULT_PLAYER_EMPTY);
-  const hasRows = status === "success" && previewRows.length > 0;
+  const displayState = resolveDataDisplayState({ status, rows: previewRows });
+  const emptyCopy = emptyMessage || (isCoachMode ? DEFAULT_COACH_EMPTY : DEFAULT_PLAYER_EMPTY);
+  const message = displayState === "loading"
+    ? loadingMessage
+    : displayState === "error"
+      ? (errorMessage || emptyMessage || DEFAULT_ERROR)
+      : emptyCopy;
 
   return (
-    <section style={{borderTop:"1px solid var(--stroke-1)",borderBottom:"1px solid var(--stroke-1)",padding:"13px 0 11px"}} aria-live="polite" data-testid="compact-leaderboard-preview">
+    <section
+      style={{borderTop:"1px solid var(--stroke-1)",borderBottom:"1px solid var(--stroke-1)",padding:"13px 0 11px"}}
+      aria-live="polite"
+      aria-busy={displayState === "loading"}
+      data-testid="compact-leaderboard-preview"
+      data-data-state={displayState}
+    >
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: 10 }}>
         <div>
           <div style={{ color: "var(--accent)", fontSize: 10, fontWeight: 800, letterSpacing: "0.10em", textTransform: "uppercase" }}>{areaTitle}</div>
@@ -41,8 +57,8 @@ export default function CompactLeaderboardPreviewCard({
         </div>
       </div>
 
-      {hasRows ? (
-        <div style={{ display: "grid", marginTop: 10 }}>
+      {displayState === "ready" ? (
+        <div style={{ display: "grid", marginTop: 10 }} data-testid="leaderboard-ready-state">
           {previewRows.map((entry,index) => {
             const displayName = entry.player_display_name || entry.displayName || entry.name || (entry.email ? String(entry.email).split("@")[0] : "Player");
             const scoreValue = entry.metricValue ?? entry.total_home_shots ?? entry.score ?? entry.total ?? "";
@@ -57,8 +73,22 @@ export default function CompactLeaderboardPreviewCard({
           })}
         </div>
       ) : (
-        <div style={{ marginTop: 10, borderTop: "1px solid var(--stroke-1)", color: "var(--text-2)", fontSize: 12, lineHeight: 1.45, padding: "11px 2px 2px", fontWeight: 600 }}>
-          {message}
+        <div
+          role={displayState === "error" ? "alert" : "status"}
+          data-testid={`leaderboard-${displayState}-state`}
+          style={{ marginTop: 10, borderTop: "1px solid var(--stroke-1)", color: displayState === "error" ? "var(--semantic-warning, #ffbd66)" : "var(--text-2)", fontSize: 12, lineHeight: 1.45, padding: "11px 2px 2px", fontWeight: 600 }}
+        >
+          <div>{message}</div>
+          {displayState === "error" && typeof onRetry === "function" ? (
+            <button
+              type="button"
+              onClick={onRetry}
+              data-testid="leaderboard-retry"
+              style={{ minHeight: 40, marginTop: 10, borderRadius: 10, border: "1px solid var(--accent)", background: "transparent", color: "var(--accent)", padding: "8px 12px", fontSize: 11, fontWeight: 900, letterSpacing: ".06em", textTransform: "uppercase", cursor: "pointer" }}
+            >
+              Retry leaderboard
+            </button>
+          ) : null}
         </div>
       )}
       {typeof onViewAll === "function" ? (
