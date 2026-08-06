@@ -51,7 +51,7 @@ const focusInput=(event)=>{event.currentTarget.style.borderColor="rgba(95,118,0,
 const blurInput=(event)=>{event.currentTarget.style.borderColor="rgba(17,26,33,.14)";event.currentTarget.style.boxShadow="inset 0 1px 2px rgba(17,26,33,.025)";};
 const inp={width:"100%",height:52,padding:"0 15px",background:"#F8F7F2",border:"1px solid rgba(17,26,33,.14)",borderRadius:14,color:"#111A21",fontSize:15,fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontWeight:550,outline:"none",boxShadow:"inset 0 1px 2px rgba(17,26,33,.025)",transition:"border-color .15s ease, box-shadow .15s ease"};
 const labelStyle={display:"block",marginBottom:7,color:"#58646D",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:12,fontWeight:700,letterSpacing:"-.005em"};
-const segmentButton=(active)=>({flex:1,minHeight:42,borderRadius:11,border:"none",cursor:"pointer",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:13,fontWeight:700,letterSpacing:"-.01em",transition:"all .15s ease",background:active?"#FFFFFF":"transparent",color:active?"#111A21":"#6F7A82",boxShadow:active?"0 1px 2px rgba(17,26,33,.06),0 6px 16px rgba(17,26,33,.05)":"none"});
+const segmentButton=(active)=>({flex:1,minHeight:42,borderRadius:11,border:"none",cursor:"pointer",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:13,fontWeight:700,letterSpacing:"-.01em",transition:"all .15s ease",background:active?"#FFFFFF":"transparent",color:active?"#111A21":"#65717A",boxShadow:active?"0 1px 2px rgba(17,26,33,.06),0 6px 16px rgba(17,26,33,.05)":"none"});
 return <div data-testid="auth-workspace" style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"flex-start",justifyContent:"center",position:"relative",overflowX:"hidden",overflowY:"auto",WebkitOverflowScrolling:"touch",padding:"max(22px, env(safe-area-inset-top, 0px)) 0 max(30px, env(safe-area-inset-bottom, 0px))"}}>
 <div aria-hidden="true" style={{position:"fixed",inset:0,pointerEvents:"none",background:"radial-gradient(circle at 84% 4%, rgba(126,158,30,.09), transparent 27rem), linear-gradient(180deg,#FAF9F5 0%,#F3F1EA 70%)"}}/>
 <div className="fade-up" style={{position:"relative",zIndex:1,width:"100%",maxWidth:460,padding:"0 18px"}}>
@@ -60,7 +60,7 @@ return <div data-testid="auth-workspace" style={{minHeight:"100dvh",background:B
     <div style={{width:48,height:48,borderRadius:15,display:"grid",placeItems:"center",background:"#0D171E",boxShadow:"0 10px 24px rgba(13,23,30,.14)"}}><SLLogo size={30}/></div>
     <div style={{minWidth:0}}>
       <div style={{color:"#111A21",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif",fontSize:20,fontWeight:800,letterSpacing:"-.035em"}}>ShotLab</div>
-      <div style={{color:"#6F7A82",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:11,fontWeight:650,marginTop:2}}>Performance development</div>
+      <div style={{color:"#65717A",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:11,fontWeight:650,marginTop:2}}>Performance development</div>
     </div>
   </div>
   <div style={{display:"inline-flex",alignItems:"center",gap:7,padding:"7px 10px",border:"1px solid rgba(17,26,33,.09)",borderRadius:999,background:"rgba(255,255,255,.62)",color:"#617900",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:10,fontWeight:750,letterSpacing:".05em",textTransform:"uppercase"}}><span style={{width:6,height:6,borderRadius:999,background:"#8CAB12"}}/>Team ready</div>
@@ -74,17 +74,17 @@ return <div data-testid="auth-workspace" style={{minHeight:"100dvh",background:B
 
 <div className="auth-card-enter" style={{background:"rgba(255,255,255,.92)",borderRadius:26,padding:"24px 22px",border:"1px solid rgba(17,26,33,.09)",boxShadow:"0 2px 4px rgba(17,26,33,.04),0 24px 70px rgba(17,26,33,.10)",WebkitBackdropFilter:"blur(20px)",backdropFilter:"blur(20px)"}}>
 {accountNotice&&<div role="status" style={{background:"rgba(126,158,30,.09)",border:"1px solid rgba(126,158,30,.22)",borderRadius:14,padding:"12px 14px",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",color:"#334006",fontSize:13,lineHeight:1.45,marginBottom:16}}>{accountNotice}</div>}
-<div style={{display:"flex",background:"#F0EEE7",borderRadius:14,padding:3,marginBottom:24,border:"1px solid rgba(17,26,33,.07)"}}>
-{["login","register"].map(m=><button key={m} onClick={()=>{setMode(m);setErr("")}} style={segmentButton(mode===m)}>{m==="login"?"Sign in":"Create account"}</button>)}
+<div role="tablist" aria-label="Authentication mode" style={{display:"flex",background:"#F0EEE7",borderRadius:14,padding:3,marginBottom:24,border:"1px solid rgba(17,26,33,.07)"}}>
+{["login","register"].map(m=><button key={m} type="button" role="tab" aria-selected={mode===m} onClick={()=>{setMode(m);setErr("")}} style={segmentButton(mode===m)}>{m==="login"?"Sign in":"Create account"}</button>)}
 </div>
 
 {mode==="register"&&<>
   <div style={{marginBottom:20}}>
     <h2 style={{color:"#111A21",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif",fontSize:25,fontWeight:780,lineHeight:1.05,letterSpacing:"-.035em",margin:0}}>Build your ShotLab identity</h2>
-    <p style={{color:"#6F7A82",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:13,lineHeight:1.45,margin:"7px 0 0"}}>Your team history and progress stay connected to this account.</p>
+    <p style={{color:"#65717A",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:13,lineHeight:1.45,margin:"7px 0 0"}}>Your team history and progress stay connected to this account.</p>
   </div>
-  <div style={{display:"flex",background:"#F8F7F2",borderRadius:13,padding:3,marginBottom:18,border:"1px solid rgba(17,26,33,.09)"}}>
-    {["player","coach"].map(r=><button key={r} onClick={()=>setRole(r)} style={segmentButton(role===r)}>{r==="player"?"Player":"Coach"}</button>)}
+  <div role="radiogroup" aria-label="Account type" style={{display:"flex",background:"#F8F7F2",borderRadius:13,padding:3,marginBottom:18,border:"1px solid rgba(17,26,33,.09)"}}>
+    {["player","coach"].map(r=><button key={r} type="button" role="radio" aria-checked={role===r} onClick={()=>setRole(r)} style={segmentButton(role===r)}>{r==="player"?"Player":"Coach"}</button>)}
   </div>
   <div style={{marginBottom:18,padding:"14px",borderRadius:16,border:"1px solid rgba(17,26,33,.08)",background:"#F8F7F2"}}>
     <div style={{color:"#617900",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:10,fontWeight:750,letterSpacing:".08em",textTransform:"uppercase"}}>{activeTrack.label}</div>
@@ -96,28 +96,28 @@ return <div data-testid="auth-workspace" style={{minHeight:"100dvh",background:B
   {role==="player"&&<><label style={labelStyle}>Team join code</label><input type="text" value={inviteCode} onChange={e=>{setInviteCode(e.target.value.toUpperCase());setErr("")}} placeholder="Enter coach invite code" style={{...inp,marginBottom:15,textTransform:"uppercase",letterSpacing:".08em"}} onFocus={focusInput} onBlur={blurInput}/></>}
 </>}
 
-{mode==="login"&&<div style={{marginBottom:20}}><h2 style={{color:"#111A21",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif",fontSize:25,fontWeight:780,lineHeight:1.05,letterSpacing:"-.035em",margin:0}}>Welcome back</h2><p style={{color:"#6F7A82",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:13,lineHeight:1.45,margin:"7px 0 0"}}>Return to your team command center and training plan.</p></div>}
+{mode==="login"&&<div style={{marginBottom:20}}><h2 style={{color:"#111A21",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif",fontSize:25,fontWeight:780,lineHeight:1.05,letterSpacing:"-.035em",margin:0}}>Welcome back</h2><p style={{color:"#65717A",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:13,lineHeight:1.45,margin:"7px 0 0"}}>Return to your team command center and training plan.</p></div>}
 
 <label style={labelStyle}>Email</label>
 <input type="email" autoComplete="email" value={email} onChange={e=>{setEmail(e.target.value);setErr("")}} onKeyDown={e=>e.key==="Enter"&&(mode==="login"?doLogin():doRegister())} placeholder="you@example.com" style={{...inp,marginBottom:15}} onFocus={focusInput} onBlur={blurInput}/>
 <label style={labelStyle}>Password</label>
 <input type="password" autoComplete={mode==="login"?"current-password":"new-password"} value={password} onChange={e=>{setPassword(e.target.value);setErr("")}} onKeyDown={e=>e.key==="Enter"&&(mode==="login"?doLogin():doRegister())} placeholder={mode==="register"?"Minimum 4 characters":"••••••••"} style={{...inp,marginBottom:err?9:20}} onFocus={focusInput} onBlur={blurInput}/>
 {err&&<p role="alert" style={{fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",color:"#C33B49",fontSize:13,margin:"0 0 14px",lineHeight:1.4}}>{err}</p>}
-<button className="btn-v cta-primary" onClick={mode==="login"?doLogin:doRegister}>{mode==="login"?"Sign in":"Create account"}<span aria-hidden="true">→</span></button>
+<button type="button" className="btn-v cta-primary" onClick={mode==="login"?doLogin:doRegister}>{mode==="login"?"Sign in":"Create account"}<span aria-hidden="true">→</span></button>
 
 {mode==="login"&&<>
-  <div style={{display:"flex",alignItems:"center",gap:12,width:"100%",margin:"18px 0 14px"}}><div style={{height:1,background:"rgba(17,26,33,.08)",flex:1}}/><span style={{color:"#7A858C",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:11,fontWeight:650}}>Explore the app</span><div style={{height:1,background:"rgba(17,26,33,.08)",flex:1}}/></div>
+  <div style={{display:"flex",alignItems:"center",gap:12,width:"100%",margin:"18px 0 14px"}}><div style={{height:1,background:"rgba(17,26,33,.08)",flex:1}}/><span style={{color:"#65717A",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:11,fontWeight:650}}>Explore the app</span><div style={{height:1,background:"rgba(17,26,33,.08)",flex:1}}/></div>
   <div className="auth-demo-enter" style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,opacity:1}}>
-    <button onClick={()=>doDemo("player")} className="btn-v" style={{minHeight:48,padding:"0 12px",background:"#F8F7F2",color:"#26323A",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:12.5,fontWeight:720,border:"1px solid rgba(17,26,33,.10)",borderRadius:14,cursor:"pointer"}}>Player demo</button>
-    <button onClick={()=>doDemo("coach")} className="btn-v" style={{minHeight:48,padding:"0 12px",background:"#0D171E",color:"#F5F8F9",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:12.5,fontWeight:720,border:"1px solid #0D171E",borderRadius:14,cursor:"pointer",boxShadow:"0 8px 22px rgba(13,23,30,.12)"}}>Coach demo</button>
+    <button type="button" onClick={()=>doDemo("player")} className="btn-v" style={{minHeight:48,padding:"0 12px",background:"#F8F7F2",color:"#26323A",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:12.5,fontWeight:720,border:"1px solid rgba(17,26,33,.10)",borderRadius:14,cursor:"pointer"}}>Player demo</button>
+    <button type="button" onClick={()=>doDemo("coach")} className="btn-v" style={{minHeight:48,padding:"0 12px",background:"#0D171E",color:"#F5F8F9",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:12.5,fontWeight:720,border:"1px solid #0D171E",borderRadius:14,cursor:"pointer",boxShadow:"0 8px 22px rgba(13,23,30,.12)"}}>Coach demo</button>
   </div>
 </>}
 
-<p style={{fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",color:"#6F7A82",textAlign:"center",fontSize:12.5,marginTop:18,cursor:"pointer"}} onClick={()=>{setMode(mode==="login"?"register":"login");setErr("")}}>{mode==="login"?"New to ShotLab? ":"Already have an account? "}<span style={{color:"#526500",fontWeight:750}}>{mode==="login"?"Create an account":"Sign in"}</span></p>
-{mode==="register"&&<p style={{fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",color:"#7A858C",textAlign:"center",fontSize:10.5,marginTop:12,lineHeight:1.5}}>By creating an account, you agree to the <a href="/terms" style={{color:"#526500",textDecoration:"none",fontWeight:700}}>Terms</a> and acknowledge the <a href="/privacy" style={{color:"#526500",textDecoration:"none",fontWeight:700}}>Privacy Policy</a>.</p>}
+<button type="button" style={{width:"100%",padding:0,border:0,background:"transparent",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",color:"#65717A",textAlign:"center",fontSize:12.5,marginTop:18,cursor:"pointer"}} onClick={()=>{setMode(mode==="login"?"register":"login");setErr("")}}>{mode==="login"?"New to ShotLab? ":"Already have an account? "}<span style={{color:"#526500",fontWeight:750}}>{mode==="login"?"Create an account":"Sign in"}</span></button>
+{mode==="register"&&<p style={{fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",color:"#65717A",textAlign:"center",fontSize:10.5,marginTop:12,lineHeight:1.5}}>By creating an account, you agree to the <a href="/terms" style={{color:"#526500",textDecoration:"none",fontWeight:700}}>Terms</a> and acknowledge the <a href="/privacy" style={{color:"#526500",textDecoration:"none",fontWeight:700}}>Privacy Policy</a>.</p>}
 <LegalSupportLinks/>
 </div>
-<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:18,color:"#7A858C",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:10.5}}><DrillIcon type="ft" size={18}/><span>Private team data · Progress that carries forward</span></div>
+<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,marginTop:18,color:"#65717A",fontFamily:"-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif",fontSize:10.5}}><DrillIcon type="ft" size={18}/><span>Private team data · Progress that carries forward</span></div>
 </div>
 </div>;
 }
