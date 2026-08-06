@@ -1,26 +1,9 @@
 .root {
   position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, .07);
-  border-radius: 28px;
-  padding: 22px;
-  background:
-    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--team-brand-primary, var(--accent)) 12%, transparent), transparent 34%),
-    linear-gradient(155deg, rgba(25, 27, 29, .91), rgba(9, 10, 11, .97));
-  box-shadow: 0 26px 68px rgba(0, 0, 0, .3), inset 0 1px rgba(255, 255, 255, .045);
-  backdrop-filter: blur(26px) saturate(124%);
-  -webkit-backdrop-filter: blur(26px) saturate(124%);
+  padding: 0;
+  color: var(--text-1, #121a20);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
 }
-
-.root::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(112deg, rgba(255, 255, 255, .03), transparent 30%, transparent 78%, rgba(255, 255, 255, .016));
-}
-
-.root > * { position: relative; z-index: 1; }
 
 .header,
 .heroTop,
@@ -50,97 +33,94 @@
 .coachSignalEyebrow,
 .coachSignalLabel,
 .coachSignalStatus {
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
 }
 
 .eyebrow {
-  color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 84%, white 16%);
-  font-size: 11px;
-  font-weight: 720;
-  letter-spacing: .09em;
+  color: #607700;
+  font-size: 10px;
+  font-weight: 760;
+  letter-spacing: .08em;
   text-transform: uppercase;
 }
 
 .status {
+  min-height: 30px;
   display: inline-flex;
   align-items: center;
-  min-height: 30px;
   padding: 0 11px;
-  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 28%, transparent);
+  border: 1px solid rgba(121, 153, 0, .26);
   border-radius: 999px;
-  color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 86%, white 14%);
-  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 9%, rgba(255, 255, 255, .015));
+  color: #4d6200;
+  background: rgba(200, 255, 26, .1);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: .07em;
-  text-transform: uppercase;
+  letter-spacing: .04em;
 }
 
 .hero {
   position: relative;
-  margin-top: 16px;
+  margin-top: 13px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, .065);
-  border-radius: 24px;
-  padding: 21px;
+  padding: clamp(20px, 4vw, 28px);
+  border: 1px solid rgba(255, 255, 255, .09);
+  border-radius: var(--radius-lg, 26px);
+  color: #f6f7f3;
   background:
-    linear-gradient(145deg, rgba(255, 255, 255, .04), transparent 42%),
-    rgba(14, 16, 17, .82);
-  box-shadow: inset 0 1px rgba(255, 255, 255, .028), 0 18px 42px rgba(0, 0, 0, .18);
+    radial-gradient(circle at 92% 6%, color-mix(in srgb, var(--team-brand-primary, var(--accent)) 18%, transparent), transparent 20rem),
+    linear-gradient(145deg, #15212a 0%, #0d151b 58%, #091014 100%);
+  box-shadow: 0 22px 54px rgba(27, 35, 41, .2), inset 0 1px rgba(255, 255, 255, .04);
 }
 
 .hero::after {
   content: "";
   position: absolute;
-  right: -80px;
-  bottom: -110px;
-  width: 240px;
-  height: 240px;
+  inset: auto -50px -90px auto;
+  width: 210px;
+  height: 210px;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 11%, transparent);
-  filter: blur(34px);
   pointer-events: none;
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 10%, transparent);
+  filter: blur(34px);
 }
 
-.hero > * { position: relative; z-index: 1; }
+.hero > * {
+  position: relative;
+  z-index: 1;
+}
 
 .heroComplete {
-  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 23%, rgba(255, 255, 255, .055));
-  background:
-    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--team-brand-primary, var(--accent)) 10%, transparent), transparent 48%),
-    rgba(14, 16, 17, .84);
+  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 30%, rgba(255, 255, 255, .08));
 }
 
 .title {
   max-width: 760px;
-  margin: 13px 0 0;
-  color: var(--text-1, #fff);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-  font-size: clamp(32px, 6.5vw, 48px);
-  font-weight: 760;
-  line-height: 1.02;
-  letter-spacing: -.04em;
+  margin: 14px 0 0;
+  color: #f7f8f4;
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
+  font-size: clamp(34px, 6.5vw, 50px);
+  font-weight: 790;
+  line-height: .99;
+  letter-spacing: -.052em;
   text-wrap: balance;
 }
 
 .description {
-  max-width: 700px;
-  margin: 10px 0 0;
-  color: color-mix(in srgb, var(--text-2, #a5adb2) 92%, white 8%);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  max-width: 680px;
+  margin: 11px 0 0;
+  color: #bbc4ca;
   font-size: 15px;
   font-weight: 500;
   line-height: 1.55;
-  letter-spacing: -.009em;
+  letter-spacing: -.01em;
   text-wrap: pretty;
 }
 
 .meta {
-  color: var(--text-3, #858d92);
+  color: #89959d;
   font-size: 10px;
   font-weight: 650;
-  letter-spacing: .055em;
-  text-transform: uppercase;
+  letter-spacing: .04em;
 }
 
 .primaryButton,
@@ -148,21 +128,21 @@
 .activationButton {
   min-height: 48px;
   border-radius: 14px;
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
-  font-weight: 700;
-  letter-spacing: -.004em;
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
+  font-weight: 720;
+  letter-spacing: -.006em;
   cursor: pointer;
   touch-action: manipulation;
-  transition: transform 150ms ease, filter 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+  transition: transform 140ms ease, filter 160ms ease, border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
 }
 
 .primaryButton {
   width: 100%;
-  margin-top: 18px;
-  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 84%, white 16%);
-  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 90%, white 10%);
-  color: var(--team-brand-primary-text, #071007);
-  box-shadow: 0 13px 30px color-mix(in srgb, var(--team-brand-primary, var(--accent)) 18%, transparent), inset 0 1px rgba(255, 255, 255, .25);
+  margin-top: 20px;
+  border: 1px solid #91b311;
+  background: var(--team-brand-primary, var(--accent, #c8ff1a));
+  color: var(--team-brand-primary-text, #101806);
+  box-shadow: 0 10px 26px rgba(108, 137, 17, .17);
   font-size: 14px;
 }
 
@@ -171,33 +151,40 @@
 .taskButton:hover,
 .taskButton:focus-visible,
 .activationButton:hover,
-.activationButton:focus-visible { transform: translateY(-1px); filter: brightness(1.035); }
+.activationButton:focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.01);
+}
 
 .primaryButton:focus-visible,
 .taskButton:focus-visible,
 .activationButton:focus-visible,
 .activation summary:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 32%, transparent);
+  outline: 3px solid rgba(164, 205, 31, .25);
   outline-offset: 2px;
 }
 
 .primaryButton:active,
 .taskButton:active,
-.activationButton:active { transform: scale(.987); }
+.activationButton:active {
+  transform: scale(.985);
+}
+
 .primaryButton[data-state="working"],
-.taskButton[data-state="working"] { opacity: .68; cursor: progress; }
+.taskButton[data-state="working"] {
+  opacity: .68;
+  cursor: progress;
+}
 
 .coachSignal {
   position: relative;
   margin-top: 14px;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 17%, rgba(255, 255, 255, .055));
-  border-radius: 22px;
   padding: 18px;
-  background:
-    linear-gradient(145deg, color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 6%, rgba(255, 255, 255, .02)), transparent 56%),
-    rgba(13, 15, 16, .8);
-  box-shadow: inset 0 1px rgba(255, 255, 255, .025);
+  border: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
+  border-radius: var(--radius-md, 18px);
+  background: var(--surface-1, #fff);
+  box-shadow: var(--shadow-1, 0 12px 34px rgba(27, 35, 41, .08));
 }
 
 .coachSignal::before {
@@ -206,7 +193,7 @@
   inset: 16px auto 16px 0;
   width: 3px;
   border-radius: 0 999px 999px 0;
-  background: linear-gradient(180deg, var(--team-brand-secondary, var(--accent)), var(--team-brand-primary, var(--accent)));
+  background: var(--team-brand-primary, var(--accent));
 }
 
 .coachSignalHeader {
@@ -220,24 +207,24 @@
 .coachSignalLabel,
 .coachSignalStatus {
   font-weight: 700;
-  letter-spacing: .075em;
+  letter-spacing: .055em;
   text-transform: uppercase;
 }
 
 .coachSignalEyebrow {
-  color: color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 82%, white 18%);
+  color: #607700;
   font-size: 10px;
 }
 
 .coachSignalTitle {
   max-width: 590px;
   margin: 7px 0 0;
-  color: var(--text-1, #fff);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  color: var(--text-1, #121a20);
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
   font-size: clamp(22px, 4.8vw, 30px);
-  font-weight: 720;
-  line-height: 1.08;
-  letter-spacing: -.025em;
+  font-weight: 760;
+  line-height: 1.07;
+  letter-spacing: -.035em;
   text-wrap: balance;
 }
 
@@ -247,84 +234,83 @@
   display: inline-flex;
   align-items: center;
   padding: 0 9px;
-  border: 1px solid color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 26%, transparent);
+  border: 1px solid rgba(121, 153, 0, .24);
   border-radius: 999px;
-  color: color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 84%, white 16%);
-  background: color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 8%, transparent);
+  color: #4d6200;
+  background: rgba(200, 255, 26, .09);
   font-size: 9px;
 }
 
 .coachSignalGrid {
   display: grid;
   grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
-  gap: 12px;
+  gap: 10px;
   margin-top: 15px;
 }
 
 .coachSignalItem {
   min-width: 0;
   padding: 12px;
-  border: 1px solid rgba(255, 255, 255, .055);
-  border-radius: 15px;
-  background: rgba(255, 255, 255, .025);
+  border: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
+  border-radius: 14px;
+  background: var(--surface-2, #f8f6f0);
 }
 
 .coachSignalLabel {
-  color: var(--text-3, #858d92);
+  color: var(--text-3, #76818a);
   font-size: 9px;
 }
 
 .coachSignalValue {
   margin-top: 6px;
   overflow-wrap: anywhere;
-  color: color-mix(in srgb, var(--text-2, #a5adb2) 92%, white 8%);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  color: var(--text-2, #4e5a63);
   font-size: 13px;
   font-weight: 620;
   line-height: 1.42;
   letter-spacing: -.006em;
 }
 
-.momentumSignal { margin-top: 14px; }
+.momentumSignal {
+  margin-top: 14px;
+}
 
 .progressGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 11px;
+  gap: 10px;
   margin-top: 14px;
 }
 
 .progressCard {
   min-width: 0;
-  border: 1px solid rgba(255, 255, 255, .06);
-  border-radius: 19px;
-  background: rgba(255, 255, 255, .025);
   padding: 15px;
-  box-shadow: inset 0 1px rgba(255, 255, 255, .02);
+  border: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
+  border-radius: var(--radius-md, 18px);
+  background: var(--surface-1, #fff);
+  box-shadow: 0 8px 24px rgba(27, 35, 41, .055);
 }
 
 .progressValue {
-  color: var(--text-1, #fff);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-  font-size: 26px;
-  font-weight: 730;
-  letter-spacing: -.03em;
+  color: var(--text-1, #121a20);
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
+  font-size: 27px;
+  font-weight: 780;
+  letter-spacing: -.04em;
 }
 
 .progressTrack {
-  height: 8px;
+  height: 7px;
   margin-top: 10px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, .065);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .28);
+  background: #e6e4dd;
 }
 
 .progressFill {
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, color-mix(in srgb, var(--team-brand-primary, var(--accent)) 80%, white 20%), var(--team-brand-secondary, var(--accent)));
-  box-shadow: 0 0 14px color-mix(in srgb, var(--team-brand-primary, var(--accent)) 24%, transparent);
+  background: var(--team-brand-primary, var(--accent));
   transition: width 260ms cubic-bezier(.2, .74, .22, 1);
 }
 
@@ -332,58 +318,66 @@
   gap: 0;
   margin-top: 14px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, .06);
-  border-radius: 19px;
-  background: rgba(255, 255, 255, .02);
+  border: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
+  border-radius: var(--radius-md, 18px);
+  background: var(--surface-1, #fff);
+  box-shadow: 0 8px 24px rgba(27, 35, 41, .05);
 }
 
 .metric {
   flex: 1;
   min-width: 0;
   padding: 14px 12px;
-  border-right: 1px solid rgba(255, 255, 255, .055);
+  border-right: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
 }
-.metric:last-child { border-right: 0; }
+
+.metric:last-child {
+  border-right: 0;
+}
 
 .metricValue {
-  color: var(--text-1, #fff);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  color: var(--text-1, #121a20);
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
   font-size: 24px;
-  font-weight: 730;
-  letter-spacing: -.03em;
+  font-weight: 780;
+  letter-spacing: -.04em;
 }
 
 .metricLabel {
   margin-top: 4px;
-  color: var(--text-3, #858d92);
+  color: var(--text-3, #76818a);
   font-size: 9px;
   font-weight: 680;
-  letter-spacing: .055em;
+  letter-spacing: .045em;
   text-transform: uppercase;
 }
 
 .section {
-  margin-top: 18px;
-  padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, .06);
+  margin-top: 20px;
+  padding-top: 19px;
+  border-top: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
 }
 
-.sectionHeading { gap: 12px; }
+.sectionHeading {
+  gap: 12px;
+}
+
 .sectionLabel {
-  color: var(--text-3, #858d92);
+  color: var(--text-3, #76818a);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: .07em;
+  letter-spacing: .055em;
   text-transform: uppercase;
 }
+
 .sectionTitle {
   margin-top: 6px;
-  color: var(--text-1, #fff);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
-  font-size: 23px;
-  font-weight: 720;
-  line-height: 1.08;
-  letter-spacing: -.025em;
+  color: var(--text-1, #121a20);
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
+  font-size: 24px;
+  font-weight: 760;
+  line-height: 1.06;
+  letter-spacing: -.035em;
 }
 
 .tasks {
@@ -395,40 +389,45 @@
 .taskRow {
   gap: 12px;
   min-width: 0;
-  border: 1px solid rgba(255, 255, 255, .06);
-  border-radius: 17px;
-  background: rgba(255, 255, 255, .022);
   padding: 13px 14px;
+  border: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
+  border-radius: 16px;
+  background: var(--surface-1, #fff);
+  box-shadow: 0 7px 20px rgba(27, 35, 41, .045);
   transition: border-color .16s ease, background .16s ease, transform .16s ease;
 }
 
 .taskRow:hover {
-  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 20%, rgba(255, 255, 255, .055));
-  background: rgba(255, 255, 255, .035);
+  transform: translateY(-1px);
+  border-color: rgba(121, 153, 0, .26);
+  background: #fff;
 }
 
 .taskIndex {
-  display: grid;
-  place-items: center;
   width: 32px;
   height: 32px;
   flex: 0 0 auto;
-  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 24%, rgba(255, 255, 255, .06));
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(121, 153, 0, .24);
   border-radius: 11px;
-  color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 86%, white 14%);
-  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 7%, transparent);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  color: #4d6200;
+  background: rgba(200, 255, 26, .1);
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
   font-size: 15px;
-  font-weight: 720;
+  font-weight: 760;
 }
 
-.taskCopy { min-width: 0; flex: 1; }
+.taskCopy {
+  min-width: 0;
+  flex: 1;
+}
+
 .taskTitle {
   overflow: hidden;
-  color: var(--text-1, #fff);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  color: var(--text-1, #121a20);
   font-size: 14px;
-  font-weight: 680;
+  font-weight: 700;
   letter-spacing: -.008em;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -436,10 +435,10 @@
 
 .taskMeta {
   margin-top: 4px;
-  color: var(--text-3, #858d92);
+  color: var(--text-3, #76818a);
   font-size: 9px;
   font-weight: 650;
-  letter-spacing: .045em;
+  letter-spacing: .04em;
   text-transform: uppercase;
 }
 
@@ -447,38 +446,45 @@
 .activationButton {
   flex: 0 0 auto;
   min-height: 42px;
-  border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 24%, rgba(255, 255, 255, .06));
-  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 7%, transparent);
-  color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 86%, white 14%);
   padding: 0 13px;
+  border: 1px solid rgba(18, 27, 34, .11);
+  background: var(--surface-2, #f8f6f0);
+  color: var(--text-1, #121a20);
   font-size: 12px;
 }
 
 .activation {
   margin-top: 17px;
-  border-radius: 19px;
-  border: 1px solid rgba(255, 255, 255, .06);
-  background: rgba(255, 255, 255, .02);
   padding: 15px;
+  border: 1px solid var(--stroke-1, rgba(18, 27, 34, .1));
+  border-radius: var(--radius-md, 18px);
+  background: var(--surface-1, #fff);
+  box-shadow: 0 8px 24px rgba(27, 35, 41, .045);
 }
 
 .activation summary {
-  cursor: pointer;
-  color: var(--text-1, #fff);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  color: var(--text-1, #121a20);
   font-size: 13px;
   font-weight: 680;
   letter-spacing: -.006em;
   list-style: none;
+  cursor: pointer;
 }
-.activation summary::-webkit-details-marker { display: none; }
+
+.activation summary::-webkit-details-marker {
+  display: none;
+}
 
 .activationRows {
   display: grid;
   gap: 9px;
   margin-top: 12px;
 }
-.activationRow { gap: 10px; justify-content: flex-start; }
+
+.activationRow {
+  gap: 10px;
+  justify-content: flex-start;
+}
 
 .activationDot {
   width: 22px;
@@ -487,53 +493,116 @@
   align-items: center;
   justify-content: center;
   flex: 0 0 auto;
+  border: 1px solid var(--stroke-2, rgba(18, 27, 34, .17));
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, .13);
-  color: var(--text-3, #858d92);
+  color: var(--text-3, #76818a);
   font-size: 11px;
 }
 
 .activationDotDone {
-  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 45%, transparent);
-  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 10%, transparent);
-  color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 86%, white 14%);
+  border-color: rgba(121, 153, 0, .34);
+  background: rgba(200, 255, 26, .1);
+  color: #4d6200;
 }
 
 .activationText {
   flex: 1;
-  color: color-mix(in srgb, var(--text-2, #a5adb2) 92%, white 8%);
-  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
+  color: var(--text-2, #4e5a63);
   font-size: 13px;
   font-weight: 560;
   line-height: 1.4;
 }
 
 @media (max-width: 520px) {
-  .root { padding: 17px; border-radius: 24px; }
-  .header { align-items: flex-start; gap: 10px; }
-  .status { max-width: 44%; text-align: center; }
-  .hero { margin-top: 14px; padding: 18px; border-radius: 21px; }
-  .heroTop { align-items: flex-start; gap: 10px; }
-  .title { font-size: clamp(31px, 10vw, 41px); }
-  .description { font-size: 14px; }
-  .coachSignal { padding: 16px; border-radius: 20px; }
-  .coachSignalHeader { align-items: flex-start; flex-direction: column; gap: 10px; }
-  .coachSignalGrid { grid-template-columns: 1fr; gap: 8px; }
-  .progressGrid { gap: 8px; }
-  .progressCard { padding: 13px; }
-  .metrics { overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
-  .metrics::-webkit-scrollbar { display: none; }
-  .metric { flex: 0 0 46%; min-width: 128px; scroll-snap-align: start; }
-  .taskRow { align-items: stretch; flex-wrap: wrap; }
-  .taskCopy { flex-basis: calc(100% - 46px); }
-  .taskButton { width: 100%; min-height: 46px; }
+  .header {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .status {
+    max-width: 44%;
+    text-align: center;
+  }
+
+  .hero {
+    margin-top: 12px;
+    padding: 19px;
+    border-radius: 22px;
+  }
+
+  .heroTop {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .title {
+    font-size: clamp(32px, 10vw, 42px);
+  }
+
+  .description {
+    font-size: 14px;
+  }
+
+  .coachSignal {
+    padding: 16px;
+    border-radius: 18px;
+  }
+
+  .coachSignalHeader {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .coachSignalGrid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .progressGrid {
+    gap: 8px;
+  }
+
+  .progressCard {
+    padding: 13px;
+  }
+
+  .metrics {
+    overflow-x: auto;
+    scrollbar-width: none;
+    scroll-snap-type: x proximity;
+  }
+
+  .metrics::-webkit-scrollbar {
+    display: none;
+  }
+
+  .metric {
+    flex: 0 0 46%;
+    min-width: 128px;
+    scroll-snap-align: start;
+  }
+
+  .taskRow {
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .taskCopy {
+    flex-basis: calc(100% - 46px);
+  }
+
+  .taskButton {
+    width: 100%;
+    min-height: 46px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .root { backdrop-filter: none; -webkit-backdrop-filter: none; }
   .progressFill,
   .primaryButton,
   .taskButton,
   .activationButton,
-  .taskRow { transition: none; }
+  .taskRow {
+    transition: none;
+  }
 }
