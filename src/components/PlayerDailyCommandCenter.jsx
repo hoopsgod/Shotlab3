@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { ExperiencePill, ExperienceProgressRing, ExperienceSignal } from "./PlayerDailyPrimitives.jsx";
+import ShotLabIcon from "./ShotLabIcon";
 import styles from "./PlayerDailyCommandCenter.module.css";
 
 const urgencyLabel = (urgency = "normal") => {
@@ -16,6 +17,12 @@ const coachSignalStatus = (signal = {}) => {
   if (signal.freshness === "current") return signal.ageDays === 0 ? "Published today" : `${signal.ageDays}d old`;
   return "Unverified";
 };
+const coachSignalIcon = (signal = {}) => {
+  if (signal.stale) return "clock";
+  if (signal.freshness === "current") return "verified";
+  return "neutral";
+};
+const iconButtonStyle = { display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9 };
 
 export default function PlayerDailyCommandCenter({ model, onAction }) {
   const [activeAction, setActiveAction] = useState("");
@@ -53,6 +60,8 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
     feedbackTimer.current = setTimeout(() => setActiveAction(""), 900);
   };
 
+  const primaryWorking = activeAction === actionKey(primary);
+
   return (
     <section className={styles.root} data-testid="player-daily-command-center" aria-label="Daily training command center">
       <div className={styles.header}>
@@ -63,7 +72,10 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
       <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`}>
         <div className={styles.heroTop}>
           <ExperiencePill tone={primary.source === "coach" ? "info" : primary.source === "team" ? "attention" : "positive"}>
-            {primary.source === "activation" ? "First result" : primary.source === "coach" ? "Coach directed" : primary.source === "team" ? "Team commitment" : "Personal development"}
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <ShotLabIcon name={primary.source === "activation" ? "plus" : primary.source === "coach" ? "coach" : primary.source === "team" ? "team" : "training"} size={13} />
+              {primary.source === "activation" ? "First result" : primary.source === "coach" ? "Coach directed" : primary.source === "team" ? "Team commitment" : "Personal development"}
+            </span>
           </ExperiencePill>
           <div className={styles.meta}>About {primary.estimatedMinutes || 1} min</div>
         </div>
@@ -72,11 +84,13 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         <button
           type="button"
           className={styles.primaryButton}
+          style={iconButtonStyle}
           data-testid="player-daily-primary-action"
-          data-state={activeAction === actionKey(primary) ? "working" : "idle"}
+          data-state={primaryWorking ? "working" : "idle"}
           onClick={() => runAction(primary)}
         >
-          {activeAction === actionKey(primary) ? "Opening…" : `${primary.actionLabel} →`}
+          <span>{primaryWorking ? "Opening…" : primary.actionLabel}</span>
+          <ShotLabIcon name={primaryWorking ? "clock" : dailyComplete ? "check" : "arrow"} size={18} />
         </button>
       </div>
 
@@ -87,6 +101,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
             title={firstSession.title || "First result banked"}
             detail={firstSession.detail || "Your training baseline is active. Every result from here builds your progress history."}
             tone="positive"
+            icon="verified"
           />
         </div>
       )}
@@ -116,9 +131,11 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
               borderColor: "rgba(255,181,71,.48)",
               background: "rgba(255,181,71,.12)",
               color: "#ffd18a",
-            } : undefined}
+              gap: 5,
+            } : { gap: 5 }}
           >
-            {coachSignalStatus(coachSignal)}
+            <ShotLabIcon name={coachSignalIcon(coachSignal)} size={13} />
+            <span>{coachSignalStatus(coachSignal)}</span>
           </span>
         </div>
         <div className={styles.coachSignalGrid}>
@@ -198,23 +215,28 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
             <div className={styles.meta}>{queue.length} queued</div>
           </div>
           <div className={styles.tasks} data-testid="player-daily-task-queue">
-            {queue.map((task, index) => (
-              <div className={styles.taskRow} key={task.id}>
-                <div className={styles.taskIndex}>{index + 2}</div>
-                <div className={styles.taskCopy}>
-                  <div className={styles.taskTitle}>{task.title}</div>
-                  <div className={styles.taskMeta}>{task.detail} · {task.estimatedMinutes || 1} min</div>
+            {queue.map((task, index) => {
+              const taskWorking = activeAction === actionKey(task);
+              return (
+                <div className={styles.taskRow} key={task.id}>
+                  <div className={styles.taskIndex} aria-label={`Queued action ${index + 2}`}><ShotLabIcon name="neutral" size={17} /></div>
+                  <div className={styles.taskCopy}>
+                    <div className={styles.taskTitle}>{task.title}</div>
+                    <div className={styles.taskMeta}>{task.detail} · {task.estimatedMinutes || 1} min</div>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.taskButton}
+                    style={iconButtonStyle}
+                    data-state={taskWorking ? "working" : "idle"}
+                    onClick={() => runAction(task)}
+                  >
+                    <span>{taskWorking ? "Opening…" : task.actionLabel}</span>
+                    <ShotLabIcon name={taskWorking ? "clock" : "arrow"} size={16} />
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  className={styles.taskButton}
-                  data-state={activeAction === actionKey(task) ? "working" : "idle"}
-                  onClick={() => runAction(task)}
-                >
-                  {activeAction === actionKey(task) ? "Opening…" : task.actionLabel}
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -225,9 +247,9 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
           <div className={styles.activationRows}>
             {model.activation.steps.map((step) => (
               <div className={styles.activationRow} key={step.id}>
-                <span className={`${styles.activationDot} ${step.done ? styles.activationDotDone : ""}`} aria-hidden="true">{step.done ? "✓" : "·"}</span>
+                <span className={`${styles.activationDot} ${step.done ? styles.activationDotDone : ""}`} aria-hidden="true"><ShotLabIcon name={step.done ? "verified" : "neutral"} size={17} /></span>
                 <span className={styles.activationText}>{step.label}</span>
-                {!step.done && step.target !== "home" && <button type="button" className={styles.activationButton} onClick={() => runAction({ target: step.target, kind: `activation-${step.id}` })}>{step.actionLabel || "Do now"}</button>}
+                {!step.done && step.target !== "home" && <button type="button" className={styles.activationButton} style={iconButtonStyle} onClick={() => runAction({ target: step.target, kind: `activation-${step.id}` })}><span>{step.actionLabel || "Do now"}</span><ShotLabIcon name="plus" size={15} /></button>}
               </div>
             ))}
           </div>
