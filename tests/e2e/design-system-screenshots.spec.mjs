@@ -30,12 +30,72 @@ async function capture(page, name) {
   await page.screenshot({ path: path.join(outputDir, `${name}.png`), fullPage: true, animations: "disabled" });
 }
 
+async function captureViewport(page, name) {
+  await page.evaluate(() => document.fonts?.ready);
+  await page.waitForTimeout(250);
+  await noOverflow(page);
+  fs.mkdirSync(outputDir, { recursive: true });
+  await page.screenshot({ path: path.join(outputDir, `${name}.png`), fullPage: false, animations: "disabled" });
+}
+
 async function more(page) {
   await page.getByTestId("mobile-navigation-more").click();
   const sheet = page.getByTestId("mobile-navigation-sheet");
   await expect(sheet).toBeVisible();
   return sheet;
 }
+
+test("Phase 1 fixed mobile viewport presents one coherent visual system", async ({ browser }) => {
+  const openPage = async () => {
+    const context = await browser.newContext({
+      viewport: { width: 390, height: 844 },
+      screen: { width: 390, height: 844 },
+      deviceScaleFactor: 1,
+      isMobile: true,
+      hasTouch: true,
+      colorScheme: "light",
+      reducedMotion: "reduce",
+      locale: "en-US",
+      timezoneId: "America/New_York",
+    });
+    const page = await context.newPage();
+    await installRoutes(page);
+    return { context, page };
+  };
+
+  {
+    const { context, page } = await openPage();
+    await page.goto("/");
+    await expect(page.getByTestId("auth-workspace")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByRole("button", { name: "Demo Player", exact: true })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Demo Coach", exact: true })).toBeVisible();
+    const canvas = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--bg-0").trim().toLowerCase());
+    expect(canvas).toBe("#f3f0e8");
+    await captureViewport(page, "phase-1-00-sign-in-390x844");
+    await context.close();
+  }
+
+  {
+    const { context, page } = await openPage();
+    await page.goto("/");
+    await page.getByRole("button", { name: "Demo Player", exact: true }).click();
+    await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible();
+    await captureViewport(page, "phase-1-01-player-home-390x844");
+    await context.close();
+  }
+
+  {
+    const { context, page } = await openPage();
+    await page.goto("/");
+    await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
+    await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
+    await expect(page.getByTestId("coach-primary-objective")).toBeVisible();
+    await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible();
+    await captureViewport(page, "phase-1-02-coach-home-390x844");
+    await context.close();
+  }
+});
 
 test("Player visual system remains integrated across core and secondary pages", async ({ page }) => {
   await enterDemo(page, "player");
