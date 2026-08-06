@@ -1,0 +1,432 @@
+/*
+ * ShotLab 2026 Visual Foundation
+ * Canonical presentation authority loaded after application styles.
+ * Light-first content surfaces; dark performance moments remain intentional.
+ */
+
+:root {
+  color-scheme: light;
+  --bg-0: #f3f1ea !important;
+  --surface-1: #ffffff !important;
+  --surface-2: #ffffff !important;
+  --surface-3: #f8f7f2 !important;
+  --surface-inset: #eeece5 !important;
+  --text-1: #111a21 !important;
+  --text-2: #44515b !important;
+  --text-3: #727d85 !important;
+  --stroke-1: rgba(17, 26, 33, .09) !important;
+  --stroke-2: rgba(17, 26, 33, .15) !important;
+  --shadow-0: none !important;
+  --shadow-1: 0 1px 2px rgba(17, 26, 33, .05), 0 8px 24px rgba(17, 26, 33, .055) !important;
+  --shadow-2: 0 2px 4px rgba(17, 26, 33, .055), 0 18px 48px rgba(17, 26, 33, .075) !important;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-card: 18px !important;
+  --stack-gap: 24px !important;
+  --card-pad: 20px !important;
+  --mini-card-pad: 16px !important;
+  --accent: #c8ff1a !important;
+  --accent-soft: rgba(126, 158, 30, .12) !important;
+  --accent-strong: #617900;
+  --accent-ink: #10170b;
+  --nav-active-text: #5f7600 !important;
+  --nav-inactive: #6e7981 !important;
+  --nav-inactive-icon: #7a858c !important;
+  --nav-focus: rgba(95, 118, 0, .14) !important;
+  --nav-active-glow: transparent !important;
+  --color-bg-base: var(--bg-0) !important;
+  --color-bg-card: var(--surface-1) !important;
+  --color-bg-elevated: var(--surface-3) !important;
+  --color-bg-subtle: var(--stroke-1) !important;
+  --color-text-primary: var(--text-1) !important;
+  --color-text-secondary: var(--text-2) !important;
+  --color-text-muted: var(--text-3) !important;
+  --text-primary: var(--text-1) !important;
+  --text-secondary: var(--text-2) !important;
+  --text-tertiary: var(--text-3) !important;
+  --tracking-tight: -.015em !important;
+  --tracking-default: .01em !important;
+  --tracking-wide: .08em !important;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  --performance-ink: #0d171e;
+  --performance-surface: #101c23;
+  --performance-copy: #f5f8f9;
+  --performance-muted: #a9b5bc;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background: var(--bg-0) !important;
+}
+
+body {
+  color: var(--text-1);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 86% -8%, rgba(126, 158, 30, .07), transparent 31rem),
+    linear-gradient(180deg, #f8f7f2 0, #f3f1ea 30rem);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-body) !important;
+}
+
+button {
+  letter-spacing: -.005em;
+}
+
+::selection {
+  color: var(--accent-ink);
+  background: rgba(200, 255, 26, .62);
+}
+
+.performance-shell,
+.performance-shell--coach,
+.performance-shell--player,
+.coach-mode {
+  --pw-accent: var(--accent) !important;
+  --pw-accent-soft: rgba(95, 118, 0, .10) !important;
+  --pw-accent-faint: rgba(95, 118, 0, .045) !important;
+  --pw-border: var(--stroke-1) !important;
+  --pw-border-strong: var(--stroke-2) !important;
+  --pw-surface: #ffffff !important;
+  --pw-surface-raised: #ffffff !important;
+  --pw-surface-inset: #f1efe9 !important;
+  --pw-shadow: var(--shadow-1) !important;
+  --pw-shadow-raised: var(--shadow-2) !important;
+  --pw-radius: var(--radius-lg) !important;
+  --pw-radius-lg: var(--radius-xl) !important;
+  --pw-copy: var(--text-1) !important;
+  --pw-muted: var(--text-2) !important;
+  --pw-dim: var(--text-3) !important;
+  color: var(--text-1) !important;
+  background: transparent !important;
+}
+
+.performance-workspace::before,
+.performance-workspace::after,
+.performance-shell .coachDashboardOperationalContent::before,
+.performance-shell .coachDashboardOperationalContent::after {
+  display: none !important;
+}
+
+.performance-shell .shell-main,
+.performance-shell .content-wrap,
+.performance-workspace,
+.performance-shell .player-scroll-container,
+.performance-shell .coach-scroll-container {
+  background: transparent !important;
+}
+
+.performance-shell .content-wrap {
+  max-width: 1320px !important;
+}
+
+.performance-shell .player-scroll-container,
+.performance-shell .coach-scroll-container {
+  max-width: 1120px !important;
+}
+
+.performance-shell .sidebar-nav {
+  border-right: 1px solid var(--stroke-1) !important;
+  background: rgba(248, 247, 242, .94) !important;
+  box-shadow: 12px 0 34px rgba(17, 26, 33, .035) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(125%);
+  backdrop-filter: blur(20px) saturate(125%);
+}
+
+.performance-shell .sidebar-nav .nav-title {
+  color: var(--text-3) !important;
+  font-family: var(--font-body) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em !important;
+}
+
+.performance-shell .sidebar-nav .nav-item {
+  min-height: 46px !important;
+  border: 1px solid transparent !important;
+  border-radius: var(--radius-md) !important;
+  color: var(--text-2) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.performance-shell .sidebar-nav .nav-item:hover,
+.performance-shell .sidebar-nav .nav-item:focus-visible {
+  color: var(--text-1) !important;
+  border-color: var(--stroke-1) !important;
+  background: rgba(255, 255, 255, .72) !important;
+  transform: none !important;
+}
+
+.performance-shell .sidebar-nav .nav-item.is-active {
+  color: var(--text-1) !important;
+  border-color: rgba(95, 118, 0, .20) !important;
+  background: rgba(255, 255, 255, .94) !important;
+  box-shadow: inset 3px 0 #7e9e1e, var(--shadow-1) !important;
+}
+
+.appHeader,
+.performance-shell .appHeader,
+.premium-screen .appHeader {
+  overflow: visible !important;
+  padding: 4px 0 18px !important;
+  border: 0 !important;
+  border-bottom: 1px solid var(--stroke-1) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.appHeader::before,
+.performance-shell .appHeader::before,
+.premium-screen .appHeader::before {
+  display: none !important;
+}
+
+.appHeaderEyebrow,
+.performance-shell .appHeaderEyebrow,
+.premium-screen .appHeaderEyebrow {
+  color: #657b05 !important;
+  font-family: var(--font-body) !important;
+  font-size: 10px !important;
+  font-weight: 750 !important;
+  letter-spacing: .08em !important;
+}
+
+.appHeaderTitle,
+.performance-shell .appHeaderTitle,
+.premium-screen .appHeaderTitle {
+  color: var(--text-1) !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(28px, 5vw, 42px) !important;
+  font-weight: 780 !important;
+  line-height: 1.02 !important;
+  letter-spacing: -.038em !important;
+  text-transform: none !important;
+}
+
+.appHeaderSubtitle,
+.performance-shell .appHeaderSubtitle,
+.premium-screen .appHeaderSubtitle {
+  max-width: 680px !important;
+  color: var(--text-2) !important;
+  font-family: var(--font-body) !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  letter-spacing: -.008em !important;
+}
+
+.appHeaderAction,
+.performance-shell .appHeaderAction,
+.premium-screen .appHeaderAction {
+  min-height: 42px !important;
+  border: 1px solid var(--stroke-1) !important;
+  border-radius: var(--radius-md) !important;
+  background: rgba(255, 255, 255, .86) !important;
+  color: var(--text-1) !important;
+  box-shadow: 0 1px 2px rgba(17, 26, 33, .04) !important;
+  text-transform: none !important;
+}
+
+.cta-primary,
+.cta-primary-accent,
+.cta-brand,
+.cta-secondary,
+.cta-ghost,
+.cta-danger {
+  min-height: 50px !important;
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  border-radius: var(--radius-md) !important;
+  padding: 12px 18px !important;
+  font-family: var(--font-body) !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+  letter-spacing: -.008em !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+}
+
+.cta-primary,
+.cta-primary-accent,
+.cta-brand {
+  border: 1px solid #a5cf00 !important;
+  color: var(--accent-ink) !important;
+  background: #c8ff1a !important;
+  box-shadow: 0 8px 22px rgba(111, 139, 0, .14) !important;
+}
+
+.cta-secondary {
+  border: 1px solid var(--stroke-2) !important;
+  color: var(--text-1) !important;
+  background: #ffffff !important;
+}
+
+.cta-ghost {
+  color: var(--text-2) !important;
+  background: transparent !important;
+}
+
+.cta-primary:hover,
+.cta-primary-accent:hover,
+.cta-brand:hover,
+.cta-secondary:hover,
+.cta-danger:hover {
+  filter: none !important;
+  transform: translateY(-1px);
+}
+
+.cta-primary:active,
+.cta-primary-accent:active,
+.cta-brand:active,
+.cta-secondary:active,
+.cta-ghost:active,
+.cta-danger:active {
+  transform: scale(.985) !important;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid var(--stroke-2) !important;
+  border-radius: var(--radius-md) !important;
+  background: #ffffff !important;
+  color: var(--text-1) !important;
+  box-shadow: inset 0 1px 2px rgba(17, 26, 33, .025) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #8a949a !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(95, 118, 0, .52) !important;
+  box-shadow: 0 0 0 4px rgba(126, 158, 30, .10) !important;
+}
+
+.performance-shell .pageHeaderPill,
+.performance-shell .btn-v {
+  border-radius: var(--radius-md) !important;
+}
+
+.performance-shell .pageHeaderPill {
+  min-height: 40px !important;
+  border: 1px solid var(--stroke-1) !important;
+  background: rgba(255, 255, 255, .82) !important;
+  color: var(--text-2) !important;
+  box-shadow: none !important;
+}
+
+.performance-shell .coachDashboardNoResults,
+.state-fade {
+  border: 1px solid var(--stroke-1) !important;
+  border-radius: var(--radius-lg) !important;
+  color: var(--text-2) !important;
+  background: rgba(255, 255, 255, .72) !important;
+  box-shadow: none !important;
+}
+
+.card-glow-v,
+.card-glow-o,
+.card-glow-c,
+.grd-bdr {
+  box-shadow: none !important;
+}
+
+.grd-bdr {
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.u-allcaps-long {
+  font-family: var(--font-body) !important;
+  font-weight: 720 !important;
+  letter-spacing: -.012em !important;
+  text-transform: none !important;
+}
+
+.u-meta-label {
+  color: var(--text-3) !important;
+  font-family: var(--font-body) !important;
+  letter-spacing: .07em !important;
+}
+
+.glass-hdr {
+  border-bottom: 1px solid var(--stroke-1) !important;
+  background: rgba(248, 247, 242, .88) !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: blur(20px) saturate(125%) !important;
+  backdrop-filter: blur(20px) saturate(125%) !important;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --stack-gap: 20px !important;
+    --card-pad: 18px !important;
+  }
+
+  body::before {
+    background: linear-gradient(180deg, #f8f7f2 0, #f3f1ea 22rem);
+  }
+
+  .performance-shell .player-scroll-container,
+  .performance-shell .coach-scroll-container {
+    padding-inline: 16px !important;
+  }
+
+  .appHeader,
+  .performance-shell .appHeader,
+  .premium-screen .appHeader {
+    padding-bottom: 14px !important;
+  }
+
+  .appHeaderTitle,
+  .performance-shell .appHeaderTitle,
+  .premium-screen .appHeaderTitle {
+    font-size: clamp(27px, 9vw, 36px) !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .performance-shell .sidebar-nav,
+  .glass-hdr {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: #f8f7f2 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
