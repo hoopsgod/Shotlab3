@@ -49,11 +49,12 @@ test("Phase 2 establishes one dominant performance hero and calm supporting surf
   assert.match(css, /background:\s*var\(--mc-surface\) !important/);
 });
 
-test("mobile hierarchy avoids clipping and preserves accessible control sizing", () => {
+test("mobile hierarchy clears legacy clipping and preserves accessible control sizing", () => {
   assert.match(css, /@media \(max-width: 700px\)/);
   assert.match(css, /min-height:\s*44px !important/);
   assert.match(css, /\.mcHeroContent[\s\S]*grid-template-columns:\s*minmax\(0, 1fr\) 68px !important/);
-  assert.equal(/\.mcHero\s*\{[^}]*max-height:/s.test(css), false, "hero must not use a clipping max-height");
+  assert.match(css, /\.mcHero\s*\{[^}]*max-height:\s*none !important/s);
+  assert.equal(/\.mcHero\s*\{[^}]*max-height:\s*(?!none)/s.test(css), false, "hero must explicitly reject clipping height caps");
   assert.equal(/\.mcTeamSelect[^}]*display:\s*none/s.test(css), false);
   assert.equal(/\.mcBell[^}]*display:\s*none/s.test(css), false);
   assert.equal(/\.mcMobileMenu[^}]*display:\s*none/s.test(css), false);
