@@ -83,11 +83,15 @@ test("foundation preserves contextual CTA widths and specialized native controls
 });
 
 test("shared headers use editorial system typography", () => {
-  assert.match(header, /var\(--font-display\)/);
+  assert.match(header, /className="appHeaderTitle"/);
+  assert.match(header, /fontFamily: "var\(--font-display\)"/);
   assert.match(header, /fontWeight: 780/);
   assert.match(header, /letterSpacing: "-\.038em"/);
   assert.doesNotMatch(header, /Bebas Neue/);
-  assert.doesNotMatch(header, /textTransform: "uppercase"/);
+  const titleStyle = header.match(/<h1 className="appHeaderTitle" style=\{\{([^}]*)\}\}>/)?.[1] || "";
+  assert.ok(titleStyle);
+  assert.doesNotMatch(titleStyle, /textTransform:\s*"uppercase"/);
+  assert.match(header, /className="appHeaderEyebrow"[^\n]+textTransform: "uppercase"/);
 });
 
 test("authentication keeps both demos while adopting the new entry system", () => {
@@ -95,8 +99,10 @@ test("authentication keeps both demos while adopting the new entry system", () =
   assert.match(auth, /Train with intent/);
   assert.match(auth, /Player demo/);
   assert.match(auth, /Coach demo/);
-  assert.match(auth, /onDemo\("player"\)/);
-  assert.match(auth, /onDemo\("coach"\)/);
+  assert.match(auth, /const doDemo=async\(kind="player"\)/);
+  assert.match(auth, /const demo=await onDemo\(kind\)/);
+  assert.match(auth, /onClick=\{\(\)=>doDemo\("player"\)\}/);
+  assert.match(auth, /onClick=\{\(\)=>doDemo\("coach"\)\}/);
   assert.match(auth, /Create account/);
   assert.match(auth, /Private team data/);
   assert.match(auth, /Progress that carries forward/);
