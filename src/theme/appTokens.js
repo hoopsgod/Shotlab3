@@ -3,12 +3,17 @@ import resolveTeamBranding from "./resolveTeamBranding";
 import { SEMANTIC_COLORS } from "./semanticColors";
 
 const BASE_THEME_COLORS = Object.freeze({
-  BG_BASE: "#0B0D10",
-  BG_CARD: "#111418",
-  BG_SUBTLE: "rgba(255, 255, 255, 0.10)",
-  TEXT_PRIMARY: "#F5F7FA",
-  TEXT_SECONDARY: "#A6B0BF",
-  TEXT_MUTED: "#7E8794",
+  BG_BASE: "#F3F1EA",
+  BG_CARD: "#FFFFFF",
+  BG_ELEVATED: "#F8F7F2",
+  BG_SUBTLE: "rgba(17, 26, 33, 0.10)",
+  TEXT_PRIMARY: "#111A21",
+  TEXT_SECONDARY: "#44515B",
+  TEXT_MUTED: "#727D85",
+  INK: "#0D171E",
+  PERFORMANCE_SURFACE: "#101C23",
+  PERFORMANCE_TEXT: "#F5F8F9",
+  ACCENT_INK: "#10170B",
   ...SEMANTIC_COLORS,
 });
 
