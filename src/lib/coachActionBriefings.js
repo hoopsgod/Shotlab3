@@ -34,6 +34,10 @@ export function buildCoachPlayerActionBriefing({ metrics = {}, rows = [] } = {})
   const activeRate = total ? Math.min(100, Math.round((active / total) * 100)) : 0;
   const leader = metrics.leader || [...safeRows].sort((a, b) => safeNumber(b?.engagementScore) - safeNumber(a?.engagementScore))[0] || null;
   const engagementDistribution = safeRows.slice(0, 7).map((row) => safeNumber(row?.engagementScore));
+  const attentionVerb = attentionRows.length === 1 ? "needs" : "need";
+  const noActivityVerb = noActivityRows.length === 1 ? "has" : "have";
+  const followUpVerb = followUpRows.length === 1 ? "was" : "were";
+  const activeVerb = activeRows.length === 1 ? "has" : "have";
 
   const decision = !total
     ? {
@@ -44,14 +48,14 @@ export function buildCoachPlayerActionBriefing({ metrics = {}, rows = [] } = {})
       }
     : attentionRows.length
       ? {
-          title: `${pluralize(attentionRows.length, "player")} need a coaching touchpoint`,
-          detail: `${pluralize(noActivityRows.length, "player")} have no recorded activity and ${pluralize(followUpRows.length, "player")} were active previously but not this week.`,
+          title: `${pluralize(attentionRows.length, "player")} ${attentionVerb} a coaching touchpoint`,
+          detail: `${pluralize(noActivityRows.length, "player")} ${noActivityVerb} no recorded activity and ${pluralize(followUpRows.length, "player")} ${followUpVerb} active previously but not this week.`,
           tone: "attention",
           action: { kind: "filter", value: "attention", label: "Open attention queue" },
         }
       : {
           title: "Roster engagement is current",
-          detail: `${pluralize(activeRows.length, "player")} have current-week activity. Protect the standard with direct recognition and a specific next assignment.`,
+          detail: `${pluralize(activeRows.length, "player")} ${activeVerb} current-week activity. Protect the standard with direct recognition and a specific next assignment.`,
           tone: "positive",
           action: { kind: "filter", value: "active", label: "Recognize active players" },
         };
@@ -60,11 +64,11 @@ export function buildCoachPlayerActionBriefing({ metrics = {}, rows = [] } = {})
     {
       key: "follow-up",
       eyebrow: "Immediate follow-up",
-      title: !total ? "No roster signal yet" : attentionRows.length ? `${pluralize(attentionRows.length, "player")} need a touchpoint` : "Roster engagement is current",
+      title: !total ? "No roster signal yet" : attentionRows.length ? `${pluralize(attentionRows.length, "player")} ${attentionVerb} a touchpoint` : "Roster engagement is current",
       body: !total
         ? "The first rostered player will create a real coaching signal here."
         : attentionRows.length
-          ? `${namedSummary(attentionRows)} need a direct next step, not another generic reminder.`
+          ? `${namedSummary(attentionRows)} ${attentionVerb} a direct next step, not another generic reminder.`
           : "Every rostered player has current-week activity.",
       tone: attentionRows.length ? "attention" : total ? "positive" : "info",
       action: total
@@ -142,7 +146,7 @@ export function buildCoachEventActionBriefing({ metrics = {}, rows = [] } = {}) 
     {
       key: "attendance-risk",
       eyebrow: "Attendance risk",
-      title: missing ? `${pluralize(missing, "unresolved response")}` : next ? "No RSVP gaps" : "No event to evaluate",
+      title: missing ? pluralize(missing, "unresolved response") : next ? "No RSVP gaps" : "No event to evaluate",
       body: missing
         ? `${pluralize(gapEvents.length, "upcoming event")} ${gapEvents.length === 1 ? "has" : "have"} players who have not confirmed.`
         : next
@@ -166,7 +170,7 @@ export function buildCoachEventActionBriefing({ metrics = {}, rows = [] } = {}) 
     {
       key: "calendar-depth",
       eyebrow: "Calendar depth",
-      title: `${pluralize(upcoming, "upcoming event")}`,
+      title: pluralize(upcoming, "upcoming event"),
       body: `${pluralize(past, "completed event")} remain available for historical context without competing with the current agenda.`,
       tone: upcoming ? "info" : "attention",
       action: upcoming
