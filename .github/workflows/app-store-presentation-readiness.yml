@@ -12,13 +12,16 @@ on:
       - "tests/e2e/app-store-screenshots.spec.mjs"
       - "tests/e2e/design-system-screenshots.spec.mjs"
       - "tests/e2e/visual-foundation-2026.spec.mjs"
+      - "tests/e2e/phase-2-command-hierarchy.spec.mjs"
       - "tests/app-store-presentation-readiness.test.mjs"
       - "tests/design-system-completion.test.mjs"
       - "tests/visual-foundation-2026.test.mjs"
+      - "tests/phase-2-command-hierarchy.test.mjs"
       - "tests/workspace-recovery.test.mjs"
       - "scripts/validate-app-store-screenshots.mjs"
       - "scripts/minify-visual-authority-css.mjs"
       - "public/shotlab-*.css"
+      - "src/main.jsx"
       - "src/lib/demoMode.js"
       - "src/lib/workspaceRecovery.js"
       - "src/components/AppHeader.jsx"
@@ -39,6 +42,8 @@ on:
       - "src/components/MobileNavigation.jsx"
       - "src/components/MobileNavigation.module.css"
       - "src/components/CompactLeaderboardPreviewCard.jsx"
+      - "src/components/CommandEvidenceBar.jsx"
+      - "src/components/CommandEvidenceBar.module.css"
       - "src/components/WorkspaceRecoveryBoundary.jsx"
       - "src/components/WorkspaceRecoveryBoundary.module.css"
       - "src/components/DeferredCoachDashboardPhase2.jsx"
@@ -83,8 +88,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify listing, foundation, design-system, and recovery contracts
-        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/visual-foundation-2026.test.mjs tests/workspace-recovery.test.mjs
+      - name: Verify listing, foundation, hierarchy, design-system, and recovery contracts
+        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/visual-foundation-2026.test.mjs tests/phase-2-command-hierarchy.test.mjs tests/workspace-recovery.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -95,8 +100,8 @@ jobs:
       - name: Verify production build
         run: npm run build
 
-      - name: Verify Phase 1 mobile foundation flows
-        run: npx playwright test tests/e2e/visual-foundation-2026.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+      - name: Verify Phase 1 foundation and Phase 2 hierarchy mobile flows
+        run: npx playwright test tests/e2e/visual-foundation-2026.spec.mjs tests/e2e/phase-2-command-hierarchy.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
       - name: Generate branded App Store screenshots and raw mobile audits
         run: npx playwright test --config=playwright.screenshots.config.mjs
@@ -104,13 +109,14 @@ jobs:
       - name: Validate screenshot count, format, and dimensions
         run: node scripts/validate-app-store-screenshots.mjs
 
-      - name: Upload Phase 1 presentation evidence
+      - name: Upload Phase 2 presentation evidence
         uses: actions/upload-artifact@v4
         with:
-          name: shotlab-phase-1-presentation-evidence
+          name: shotlab-phase-2-presentation-evidence
           path: |
             artifacts/app-store/iphone-6.9/
             artifacts/design-audit/iphone/
+            artifacts/phase-2-command-hierarchy/
             native/app-store-listing.json
             docs/app-store-presentation-package.md
           if-no-files-found: error
@@ -120,11 +126,12 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: shotlab-phase-1-presentation-failure
+          name: shotlab-phase-2-presentation-failure
           path: |
             playwright-report-app-store/
             test-results/
             artifacts/app-store/iphone-6.9/
             artifacts/design-audit/iphone/
+            artifacts/phase-2-command-hierarchy/
           if-no-files-found: ignore
           retention-days: 7
