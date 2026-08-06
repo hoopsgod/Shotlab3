@@ -119,7 +119,7 @@ jobs:
       - name: Validate screenshot count, format, and dimensions
         run: node scripts/validate-app-store-screenshots.mjs
 
-      - name: Upload integrated Phase 2 presentation evidence
+      - name: Upload App Store presentation package
         uses: actions/upload-artifact@v4
         with:
           name: shotlab-phase-2-integrated-presentation-evidence
