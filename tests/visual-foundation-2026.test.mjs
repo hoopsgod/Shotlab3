@@ -60,6 +60,8 @@ test("authentication keeps both demos while adopting the new entry system", () =
   assert.match(auth, /onDemo\("player"\)/);
   assert.match(auth, /onDemo\("coach"\)/);
   assert.match(auth, /Create account/);
+  assert.match(auth, /Private team data/);
+  assert.match(auth, /Progress that carries forward/);
 });
 
 test("mobile navigation uses restrained light glass materials", () => {
