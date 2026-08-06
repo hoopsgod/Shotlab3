@@ -1,0 +1,77 @@
+name: Phase 4 Visual Evidence
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-4-visual-evidence-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+jobs:
+  verify-capture-and-package:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Phase 4 recovery and presentation contracts
+        run: node --test tests/workspace-recovery.test.mjs tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Generate current coach and player mobile evidence
+        run: npx playwright test --config=playwright.screenshots.config.mjs
+
+      - name: Validate visual evidence package
+        run: node scripts/validate-app-store-screenshots.mjs
+
+      - name: Upload exact-head visual evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-4-visual-evidence
+          path: |
+            artifacts/app-store/iphone-6.9/
+            artifacts/design-audit/iphone/
+            native/app-store-listing.json
+            docs/app-store-presentation-package.md
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-4-visual-evidence-failure
+          path: |
+            playwright-report-app-store/
+            test-results/app-store-screenshots/
+            artifacts/app-store/iphone-6.9/
+            artifacts/design-audit/iphone/
+          if-no-files-found: ignore
+          retention-days: 7
