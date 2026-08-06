@@ -4,9 +4,7 @@ const formatNumber = (value) => Number(value || 0).toLocaleString();
 
 export function formatCareerMilestone(value) {
   const milestone = Number(value) || 0;
-  if (milestone >= 1000 && milestone % 1000 === 0) return `${milestone / 1000}K`;
-  if (milestone >= 1000) return `${milestone / 1000}K`;
-  return String(milestone);
+  return milestone >= 1000 ? `${milestone / 1000}K` : String(milestone);
 }
 
 export function buildPlayerCareerMilestoneStory(careerMakes) {
