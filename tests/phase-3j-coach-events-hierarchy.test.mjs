@@ -50,6 +50,7 @@ test('mobile Schedule insights uses native summary hierarchy with accessible tou
   assert.match(css, /touch-action: manipulation/);
   assert.match(css, /:focus-visible/);
   assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(css, /\.coachEventsSupportingSummaryCopy \{[\s\S]*border: 0 !important[\s\S]*background: transparent !important[\s\S]*box-shadow: none !important[\s\S]*opacity: 1 !important/);
   assert.match(css, /coachEventsSupportingSummaryCopy > small[\s\S]*opacity: 1 !important/);
   assert.match(css, /coachEventsSupportingSummaryCopy > small[\s\S]*box-shadow: none !important/);
 });
