@@ -1,0 +1,156 @@
+/* Phase 3 secondary-page acceptance lock.
+   Exact runtime selectors discovered by rendered iPhone review. Presentation only. */
+
+/* Player secondary workspaces use explicit runtime test IDs from App.jsx. */
+[data-testid="player-leaderboards-workspace"] [class*="commandBar"],
+[data-testid="player-profile-workspace"] [class*="commandBar"]{
+  padding:18px!important;
+  border:1px solid var(--p3-line)!important;
+  border-radius:22px!important;
+  background:linear-gradient(135deg,#fff 0%,#f8f9f2 100%)!important;
+  background-image:linear-gradient(135deg,#fff 0%,#f8f9f2 100%)!important;
+  color:var(--p3-ink)!important;
+  box-shadow:var(--p3-shadow)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+[data-testid="player-leaderboards-workspace"] [class*="commandBar"]::after,
+[data-testid="player-profile-workspace"] [class*="commandBar"]::after{display:none!important}
+[data-testid="player-leaderboards-workspace"] [class*="title"],
+[data-testid="player-profile-workspace"] [class*="title"],
+[data-testid="player-leaderboards-workspace"] [class*="metricValue"],
+[data-testid="player-profile-workspace"] [class*="metricValue"]{
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+}
+[data-testid="player-leaderboards-workspace"] [class*="subtitle"],
+[data-testid="player-profile-workspace"] [class*="subtitle"],
+[data-testid="player-leaderboards-workspace"] [class*="metricDetail"],
+[data-testid="player-profile-workspace"] [class*="metricDetail"]{
+  color:var(--p3-muted)!important;
+  -webkit-text-fill-color:var(--p3-muted)!important;
+}
+[data-testid="player-leaderboards-workspace"] [class*="metric"],
+[data-testid="player-profile-workspace"] [class*="metric"]{
+  border-color:var(--p3-line)!important;
+  background:var(--p3-surface)!important;
+  background-image:none!important;
+  color:var(--p3-ink)!important;
+  box-shadow:none!important;
+}
+[data-testid="player-leaderboards-workspace"] [data-metric-priority="primary"],
+[data-testid="player-profile-workspace"] [data-metric-priority="primary"]{
+  border-color:color-mix(in srgb,var(--p3-accent) 30%,var(--p3-line))!important;
+  background:linear-gradient(180deg,#fff 0%,color-mix(in srgb,var(--p3-accent) 5%,#fff) 100%)!important;
+}
+
+/* Force the real mobile route canvases light, including wrappers that sit outside the new dashboard root. */
+html body:has([data-testid="coach-events-interactive-dashboard"]),
+html body:has(#coach-drills-management),
+html body:has([data-testid="coach-players-interactive-dashboard"]){
+  background:var(--p3-canvas)!important;
+  background-image:none!important;
+}
+html body:has([data-testid="coach-events-interactive-dashboard"]) #root,
+html body:has([data-testid="coach-events-interactive-dashboard"]) #root .performance-shell,
+html body:has([data-testid="coach-events-interactive-dashboard"]) #root .performance-workspace,
+html body:has([data-testid="coach-events-interactive-dashboard"]) #root .content-wrap,
+html body:has([data-testid="coach-events-interactive-dashboard"]) #root .coach-scroll-container,
+html body:has([data-testid="coach-events-interactive-dashboard"]) #coach-events-management,
+html body:has(#coach-drills-management) #root,
+html body:has(#coach-drills-management) #root .performance-shell,
+html body:has(#coach-drills-management) #root .performance-workspace,
+html body:has(#coach-drills-management) #root .content-wrap,
+html body:has(#coach-drills-management) #root .coach-scroll-container,
+html body:has(#coach-drills-management) #coach-drills-management,
+html body:has([data-testid="coach-players-interactive-dashboard"]) #root,
+html body:has([data-testid="coach-players-interactive-dashboard"]) #root .performance-shell,
+html body:has([data-testid="coach-players-interactive-dashboard"]) #root .performance-workspace,
+html body:has([data-testid="coach-players-interactive-dashboard"]) #root .content-wrap,
+html body:has([data-testid="coach-players-interactive-dashboard"]) #root .coach-scroll-container{
+  background:var(--p3-canvas)!important;
+  background-image:none!important;
+  color:var(--p3-ink)!important;
+}
+
+/* The mobile Events list was the largest remaining dark island. */
+[data-testid="coach-events-mobile-page"]{
+  padding:16px 14px calc(118px + env(safe-area-inset-bottom,0px))!important;
+  border:1px solid var(--p3-line)!important;
+  border-radius:24px!important;
+  background:var(--p3-surface)!important;
+  color:var(--p3-ink)!important;
+  box-shadow:var(--p3-shadow)!important;
+}
+[data-testid="coach-events-mobile-page"]>header{
+  padding:2px 0 16px!important;
+  border-color:var(--p3-line)!important;
+  background:transparent!important;
+}
+[data-testid="coach-events-mobile-page"]>header h1{
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif!important;
+  font-size:28px!important;
+  font-weight:780!important;
+  letter-spacing:-.045em!important;
+}
+[data-testid="coach-events-mobile-page"]>header p{
+  color:var(--p3-muted)!important;
+  -webkit-text-fill-color:var(--p3-muted)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+}
+[data-testid="coach-events-mobile-page"]>div>section>div:first-child>span:last-child{
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+}
+[data-testid="coach-events-mobile-page"] article{
+  padding:14px!important;
+  border:1px solid var(--p3-line)!important;
+  border-radius:16px!important;
+  background:var(--p3-surface-soft)!important;
+  color:var(--p3-ink)!important;
+  box-shadow:none!important;
+}
+[data-testid="coach-events-mobile-page"] article>div:first-child>div:first-child>div:first-child{
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-weight:760!important;
+}
+[data-testid="coach-events-mobile-page"] article>div:first-child>div:first-child>div:nth-child(2),
+[data-testid="coach-events-mobile-page"] article>div:last-child:not(:nth-child(2)){
+  color:var(--p3-muted)!important;
+  -webkit-text-fill-color:var(--p3-muted)!important;
+}
+[data-testid="coach-events-mobile-page"] article>div:nth-child(2){border-color:var(--p3-line)!important}
+
+/* Drills should sit on one continuous light canvas; cards already have strong content hierarchy. */
+#coach-drills-management{
+  padding-bottom:calc(118px + env(safe-area-inset-bottom,0px))!important;
+  background:var(--p3-canvas)!important;
+  background-image:none!important;
+}
+#coach-drills-management .accent-card,
+#coach-drills-management .ch{
+  border-color:var(--p3-line)!important;
+  background:var(--p3-surface)!important;
+  background-image:none!important;
+  color:var(--p3-ink)!important;
+  box-shadow:var(--p3-shadow)!important;
+}
+
+@media(max-width:700px){
+  [data-testid="player-leaderboards-workspace"] [class*="commandBar"],
+  [data-testid="player-profile-workspace"] [class*="commandBar"]{padding:16px!important;border-radius:20px!important}
+  [data-testid="player-leaderboards-workspace"] [class*="title"],
+  [data-testid="player-profile-workspace"] [class*="title"]{font-size:32px!important}
+  [data-testid="coach-events-mobile-page"]{width:calc(100% - 24px)!important;box-sizing:border-box!important;margin-inline:auto!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  [data-testid="player-leaderboards-workspace"] *,
+  [data-testid="player-profile-workspace"] *,
+  [data-testid="coach-events-mobile-page"] *,
+  #coach-drills-management *{transition:none!important;animation:none!important}
+}
