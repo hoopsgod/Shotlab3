@@ -53,6 +53,13 @@ test("PlayerCommitmentCenter exposes route identity, next action, runway, and pr
   assert.match(component, /onAction\?\.\(model\.primaryAction\)/);
 });
 
+test("Player commitment hero prioritizes unresolved decisions over already-confirmed chronological items", () => {
+  assert.match(component, /const focus = unresolved\[0\] \|\| upcoming\[0\] \|\| null/);
+  assert.match(component, /const requiresResponse = state\.unresolved\.length > 0/);
+  assert.match(component, /requiresResponse[\s\S]*"Respond now"/);
+  assert.match(component, /requiresResponse[\s\S]*"RESPONSE NEEDED"/);
+});
+
 test("Phase 3N visual system keeps route-first hierarchy and iPhone containment", () => {
   assert.match(css, /\.routeTitleRow h1[\s\S]*clamp\(/);
   assert.match(css, /\.hero[\s\S]*background-color: #111411 !important/);
