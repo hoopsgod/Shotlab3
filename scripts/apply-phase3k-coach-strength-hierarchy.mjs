@@ -3,6 +3,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 const panelPath = 'src/components/CoachDashboardPhase2.jsx';
 let source = readFileSync(panelPath, 'utf8');
 
+// Keep the rendered evidence seam on a real DOM wrapper so Playwright and CSS observe the same node.
 const marker = 'data-testid="coach-strength-supporting-intelligence"';
 if (source.includes(marker)) {
   console.log('Phase 3K Coach S&C hierarchy already applied.');
