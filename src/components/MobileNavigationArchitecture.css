@@ -1,9 +1,4 @@
 /* Premium information architecture for the shared mobile dock and More sheet. */
-body:has([data-testid="mobile-navigation-dock"]) #root > .screen-fade-in {
-  animation: none !important;
-  transform: none !important;
-}
-
 [data-testid="mobile-navigation-dock"] {
   border-top-color: rgba(22, 25, 27, .08) !important;
   background: rgba(252, 252, 250, .9) !important;
