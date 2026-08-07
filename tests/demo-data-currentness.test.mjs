@@ -27,5 +27,10 @@ test("entering a demo hydrates the rolling bundle before routing", () => {
   assert.match(expertReview, /await applyDemoData\(demoBundle\)/);
   assert.match(expertReview, /await hydratePersistedData\(\)/);
   assert.match(expertReview, /np=demoBundle\.players/);
-  assert.match(screenshotSpec, /Team Practice/);
+});
+
+test("App Store evidence requires a populated Coach schedule", () => {
+  assert.match(screenshotSpec, /Calendar is open/);
+  assert.match(expertReview, /tests\/e2e\/app-store-screenshots\.spec\.mjs/);
+  assert.match(expertReview, /getByText\(\\"Team Practice\\"/);
 });
