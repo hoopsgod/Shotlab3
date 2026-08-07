@@ -5,6 +5,8 @@ import { readFileSync } from "node:fs";
 const enhancer = readFileSync("scripts/apply-phase3o-player-training-session.mjs", "utf8");
 const component = readFileSync("src/components/PlayerTrainingSessionHeader.jsx", "utf8");
 const css = readFileSync("src/components/PlayerTrainingSessionHeader.module.css", "utf8");
+const authority = readFileSync("public/shotlab-phase3o-player-training-session.css", "utf8");
+const html = readFileSync("index.html", "utf8");
 const screenshotConfig = readFileSync("playwright.screenshots.config.mjs", "utf8");
 const screenshotSpec = readFileSync("tests/e2e/phase-3o-player-training-session-screenshots.spec.mjs", "utf8");
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
@@ -59,11 +61,22 @@ test("training-session visual system is compact, premium, responsive, and reduce
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
 
+test("Phase 3O uses a stable late authority boundary for the dark drill identity and score input", () => {
+  assert.match(html, /shotlab-phase3n-player-commitments\.css[\s\S]*shotlab-phase3o-player-training-session\.css/);
+  assert.match(authority, /\[data-testid="player-training-session-header"\][\s\S]*background-color: #111411 !important/);
+  assert.match(authority, /\[data-testid="player-training-session-header"\] > div[\s\S]*background-color: transparent !important/);
+  assert.match(authority, /\[data-testid="player-training-session-header"\] h1[\s\S]*#f8faf5 !important/);
+  assert.match(authority, /\[data-testid="player-training-session"\] input\[type="number"\][\s\S]*#c8ff1a !important/);
+});
+
 test("Phase 3O iPhone evidence is selected by the screenshot runner and exercises live-score state", () => {
   assert.match(screenshotConfig, /phase-3o-player-training-session-screenshots\.spec\.mjs/);
   assert.match(screenshotSpec, /player-training-session-header/);
   assert.match(screenshotSpec, /player-training-live-progress/);
   assert.match(screenshotSpec, /04p-player-training-session\.png/);
   assert.match(screenshotSpec, /scoreInput\.fill\("20"\)/);
+  assert.match(screenshotSpec, /identityBackground/);
+  assert.match(screenshotSpec, /titleColor/);
+  assert.match(screenshotSpec, /inputStyle\.color/);
   assert.match(screenshotSpec, /scrollWidth - window\.innerWidth/);
 });
