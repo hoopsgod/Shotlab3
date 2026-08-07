@@ -50,9 +50,9 @@ test('Player career presentation stays on the accepted light native system', () 
 });
 
 test('Phase 3E removes only the duplicate Profile identity hero and leaves deep analytics intact', () => {
-  assert.match(phaseCss, /\.fade-up div\[style\*="padding: 28px 22px"\]\[style\*="text-align: center"\]\[style\*="position: relative"\]\[style\*="overflow: hidden"\]/);
-  assert.match(phaseCss, /\.fade-up div\[style\*="padding:28px 22px"\]\[style\*="text-align:center"\]\[style\*="position:relative"\]\[style\*="overflow:hidden"\]/);
-  assert.doesNotMatch(phaseCss, /\.fade-up > div\[style\*="padding: ?28px 22px"\]/, 'identity lock must follow the rendered nested Profile DOM');
+  assert.match(phaseCss, /\[data-workspace-tab="profile"\]\s+div\[style\*="padding: 28px 22px"\]\[style\*="text-align: center"\]\[style\*="position: relative"\]\[style\*="overflow: hidden"\]/);
+  assert.match(phaseCss, /\[data-workspace-tab="profile"\]\s+div\[style\*="padding:28px 22px"\]\[style\*="text-align:center"\]\[style\*="position:relative"\]\[style\*="overflow:hidden"\]/);
+  assert.doesNotMatch(phaseCss, /\[data-workspace-tab="profile"\]\s+\.fade-up/, 'identity lock must not depend on incidental Profile wrapper classes');
   assert.doesNotMatch(phaseCss, /:has\(/, 'duplicate identity lock should not rely on brittle :has() matching');
   assert.match(phaseCss, /display:none!important/);
   assert.match(app, /OFFSEASON REPORT CARD/);
