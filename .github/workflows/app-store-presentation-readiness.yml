@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - march-3-reset-85393dd
+      - agent/phase-3-secondary-cohesion
     paths:
       - "native/app-store-listing.json"
       - "docs/app-store-presentation-package.md"
