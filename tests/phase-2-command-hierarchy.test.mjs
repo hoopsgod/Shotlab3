@@ -37,14 +37,16 @@ test("Player supporting analytics use progressive disclosure", () => {
   assert.match(player, /model\.queue\) \? model\.queue\.slice\(1, 3\)/);
 });
 
-test("Player evidence remains accessible, compact, and locally styled", () => {
-  assert.match(player, /className="playerCommandEvidence" role="group"/);
+test("Player evidence reuses existing progress primitives", () => {
+  assert.match(player, /className=\{styles\.progressGrid\} role="group" data-testid="player-command-evidence"/);
   assert.match(player, /aria-label="Today’s training evidence"/);
   assert.match(player, /Current streak:/);
+  assert.match(player, /className=\{styles\.progressCard\}/);
+  assert.match(hierarchy, /\[data-testid="player-command-evidence"\]/);
   assert.match(hierarchy, /grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/);
-  assert.match(hierarchy, /\.playerCommandEvidenceItem/);
-  assert.match(hierarchy, /font-size: clamp\(19px, 4\.8vw, 25px\)/);
-  assert.doesNotMatch(player, /CommandEvidenceBar/);
+  assert.match(hierarchy, /font-size: clamp\(20px, 4\.8vw, 26px\)/);
+  assert.doesNotMatch(player, /CommandEvidenceBar|playerCommandEvidenceItem/);
+  assert.doesNotMatch(hierarchy, /\.playerCommandEvidenceItem/);
 });
 
 test("dark Player command surfaces restore readable local text tokens", () => {
