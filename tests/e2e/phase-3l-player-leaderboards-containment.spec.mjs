@@ -17,29 +17,6 @@ async function enterPlayerDemo(page) {
   return dock;
 }
 
-const geometryFor = (selector) => {
-  const node = document.querySelector(selector);
-  if (!node) return null;
-  const rect = node.getBoundingClientRect();
-  const style = getComputedStyle(node);
-  return {
-    selector,
-    top: rect.top + window.scrollY,
-    bottom: rect.bottom + window.scrollY,
-    height: rect.height,
-    clientHeight: node.clientHeight,
-    scrollHeight: node.scrollHeight,
-    minHeight: style.minHeight,
-    heightStyle: style.height,
-    paddingTop: style.paddingTop,
-    paddingBottom: style.paddingBottom,
-    marginTop: style.marginTop,
-    marginBottom: style.marginBottom,
-    display: style.display,
-    flex: style.flex,
-  };
-};
-
 test("Player Leaderboards ends near its content while preserving ranking navigation and Logout", async ({ page }) => {
   await page.setViewportSize({ width: 430, height: 932 });
   const dock = await enterPlayerDemo(page);
