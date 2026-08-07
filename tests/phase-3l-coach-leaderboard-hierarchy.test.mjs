@@ -56,6 +56,14 @@ test('Leaderboard authority uses light native surfaces, accessible focus, and re
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
+test('mobile Leaderboards removes duplicated generic briefing and collapses dead shell space', () => {
+  assert.match(css, /coach-page-dashboard-leaderboards-decision-brief/);
+  assert.match(css, /coach-page-dashboard-leaderboards-evidence/);
+  assert.match(css, /display: none !important/);
+  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*padding-bottom: 14px !important/);
+  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*gap: 12px !important/);
+});
+
 test('rank and weekly pace receive dedicated mobile hierarchy without horizontal overflow debt', () => {
   assert.match(css, /grid-template-columns: 38px minmax\(0, 1fr\) auto/);
   assert.match(css, /coachLeaderboardRank/);
@@ -68,9 +76,12 @@ test('Phase 3L authority loads after Phase 3K', () => {
   assert.match(html, /shotlab-phase3k-coach-strength-hierarchy\.css[\s\S]*shotlab-phase3l-coach-leaderboard-hierarchy\.css/);
 });
 
-test('rendered iPhone evidence covers Coach Leaderboards and player drill-down', () => {
+test('rendered iPhone evidence covers first-viewport Leaderboards and player drill-down', () => {
   assert.match(screenshots, /data-nav-key="leaderboards"/);
   assert.match(screenshots, /coach-leaderboard-pulse/);
+  assert.match(screenshots, /coach-page-dashboard-leaderboards-decision-brief/);
+  assert.match(screenshots, /coach-page-dashboard-leaderboards-evidence/);
+  assert.match(screenshots, /window\.innerHeight/);
   assert.match(screenshots, /coach-leaderboard-operational-results/);
   assert.match(screenshots, /10-coach-leaderboards/);
   assert.match(screenshots, /coach-player-intelligence-drawer/);
