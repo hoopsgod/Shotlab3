@@ -222,7 +222,7 @@ test("capture Player App Store presentation assets", async ({ page }) => {
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(1));
 
-  await openNavigation(page, "At Home");
+  await openNavigation(page, "Train");
   await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(2));
 
