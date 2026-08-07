@@ -16,6 +16,7 @@ test("iPhone viewport and launch experience preserve accessibility", () => {
   assert.match(indexSource, /name="theme-color" content="#F5F5F2"/);
   assert.match(indexSource, /shotlab-v3-foundation\.css/);
   assert.match(indexSource, /shotlab-v3-mobile-corrections\.css/);
+  assert.doesNotMatch(indexSource, /appendChild\(sheet\)/);
   assert.match(indexSource, /class="boot-wordmark"/);
   assert.match(indexSource, />Train with intent</);
   assert.doesNotMatch(indexSource, /titans-exact-logo/);
