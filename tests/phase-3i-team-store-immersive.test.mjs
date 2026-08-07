@@ -33,7 +33,7 @@ test('mobile Team Store exclusively owns the viewport instead of behaving as a b
   assert.match(css, /\.ts-overlay[\s\S]*padding: 0 !important[\s\S]*backdrop-filter: none !important/);
   assert.match(css, /\.ts-panel[\s\S]*height: 100dvh !important[\s\S]*max-height: none !important[\s\S]*border-radius: 0 !important/);
   assert.match(css, /\.ts-header[\s\S]*position: sticky !important[\s\S]*safe-area-inset-top/);
-  assert.match(css, /\.ts-content[\s\S]*safe-area-inset-bottom/);
+  assert.match(css, /\.ts-coach-content,[\s\S]*\.ts-player-content[\s\S]*safe-area-inset-bottom/);
 });
 
 test('Team Store dialog receives stable rendered seams for viewport verification', () => {
@@ -53,8 +53,16 @@ test('referral attribution, publishing, and external-store behavior remain untou
   ]) {
     assert.ok(enhancer.includes(preserved), `missing preserved Team Store marker: ${preserved}`);
   }
-  assert.match(production, /team store persists verified SquadLocker partner referral/);
-  assert.match(production, /published stores are visible to the player role/);
+  for (const behavior of [
+    'CREATE SQUADLOCKER STORE',
+    'utm_source',
+    'referral_partner_master',
+    'PUBLISH STORE',
+    'SHOP TEAM STORE',
+    'ShotLab may receive referral compensation',
+  ]) {
+    assert.ok(production.includes(behavior), `missing Team Store production journey marker: ${behavior}`);
+  }
 });
 
 test('Phase 3I authority loads after Phase 3H and preserves focus/reduced-motion mobile behavior', () => {
