@@ -40,7 +40,14 @@ async function openSecondaryRoute(page, key) {
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
 }
 
-async function verifyCommitmentSurface(page, { mode, title, legacyTestId, screenshotName, responseRequired = false }) {
+async function verifyCommitmentSurface(page, {
+  mode,
+  title,
+  routeStatus,
+  legacyTestId,
+  screenshotName,
+  responseRequired = false,
+}) {
   const center = page.getByTestId(`player-commitment-center-${mode}`);
   const routeHeader = page.getByTestId(`player-commitment-route-header-${mode}`);
   const hero = page.getByTestId(`player-commitment-hero-${mode}`);
@@ -50,6 +57,7 @@ async function verifyCommitmentSurface(page, { mode, title, legacyTestId, screen
   await expect(center).toBeVisible({ timeout: 20_000 });
   await expect(routeHeader).toBeVisible();
   await expect(routeHeader.getByRole("heading", { name: title, exact: true })).toBeVisible();
+  await expect(routeHeader.getByText(routeStatus, { exact: true })).toBeVisible();
   await expect(hero).toBeVisible();
   await expect(details).not.toHaveAttribute("open", "");
   await expect(legacy).toBeHidden();
@@ -66,18 +74,32 @@ async function verifyCommitmentSurface(page, { mode, title, legacyTestId, screen
 
   const heroStyle = await hero.evaluate((node) => {
     const style = getComputedStyle(node);
-    const title = node.querySelector("h2");
+    const titleNode = node.querySelector("h2");
     return {
       backgroundImage: style.backgroundImage,
       backgroundColor: style.backgroundColor,
       borderRadius: style.borderRadius,
-      titleColor: title ? getComputedStyle(title).color : "",
+      titleColor: titleNode ? getComputedStyle(titleNode).color : "",
     };
   });
   expect(heroStyle.backgroundImage).toContain("gradient");
   expect(heroStyle.backgroundColor).toBe("rgb(17, 20, 17)");
   expect(heroStyle.titleColor).toBe("rgb(248, 250, 245)");
   expect(parseFloat(heroStyle.borderRadius)).toBeGreaterThanOrEqual(20);
+
+  const composition = hero.locator(":scope > div").nth(1);
+  await expect(composition).toBeVisible();
+  const compositionStyle = await composition.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      backgroundColor: style.backgroundColor,
+      backgroundImage: style.backgroundImage,
+      boxShadow: style.boxShadow,
+    };
+  });
+  expect(compositionStyle.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+  expect(compositionStyle.backgroundImage).toBe("none");
+  expect(compositionStyle.boxShadow).toBe("none");
 
   await capture(page, screenshotName);
 
@@ -100,6 +122,7 @@ test("Player Events and S&C expose one premium commitment hierarchy while preser
   await verifyCommitmentSurface(page, {
     mode: "events",
     title: "Events & Attendance",
+    routeStatus: "1 response needed",
     legacyTestId: "player-events-operational-list",
     screenshotName: "04n-player-events-commitment",
     responseRequired: true,
@@ -109,6 +132,7 @@ test("Player Events and S&C expose one premium commitment hierarchy while preser
   await verifyCommitmentSurface(page, {
     mode: "strength",
     title: "Strength & Conditioning",
+    routeStatus: "Schedule clear",
     legacyTestId: "player-strength-operational-panel",
     screenshotName: "04o-player-strength-commitment",
   });
