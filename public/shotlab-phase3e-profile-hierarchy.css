@@ -1,0 +1,140 @@
+/* Phase 3E — Player Profile information hierarchy & progressive disclosure.
+   Presentation only: preserve every metric, chart, drill row, archive, filter, and account control. */
+:root{
+  --p3e-surface:#ffffff;
+  --p3e-soft:#f8f8f4;
+  --p3e-ink:#171c18;
+  --p3e-muted:#68716a;
+  --p3e-line:rgba(23,28,24,.11);
+  --p3e-accent:var(--team-brand-primary,var(--accent,#8fae25));
+  --p3e-shadow:0 10px 26px rgba(24,31,27,.055);
+}
+
+/* Decision-first surfaces immediately below the season identity card. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-current-progress"],
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"]{
+  border:1px solid var(--p3e-line)!important;
+  border-radius:20px!important;
+  background:var(--p3e-surface)!important;
+  color:var(--p3e-ink)!important;
+  box-shadow:var(--p3e-shadow)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"]{
+  position:relative;
+  overflow:hidden;
+  padding:16px!important;
+  margin:0 0 16px!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"]::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:3px;
+  background:var(--p3e-accent);
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"] [data-profile-readout-eyebrow]{
+  color:color-mix(in srgb,var(--p3e-accent) 76%,#263226)!important;
+  font-size:10px!important;
+  font-weight:800!important;
+  letter-spacing:.11em!important;
+  text-transform:uppercase;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"] [data-profile-readout-primary]{
+  margin-top:6px;
+  color:var(--p3e-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif!important;
+  font-size:20px!important;
+  font-weight:760!important;
+  line-height:1.15!important;
+  letter-spacing:-.025em!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"] [data-profile-readout-support]{
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:6px;
+  margin-top:10px;
+  color:var(--p3e-muted)!important;
+  font-size:12px!important;
+  line-height:1.42!important;
+}
+
+/* The three deep-data disclosures become one calm intelligence stack. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-disclosure-stack"]{
+  display:grid;
+  gap:10px;
+  margin:8px 0 22px;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid^="player-profile-"][data-testid$="-disclosure"],
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-details"],
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-drill-development"]{
+  margin:0!important;
+  border-color:var(--p3e-line)!important;
+  border-radius:18px!important;
+  background:var(--p3e-surface)!important;
+  box-shadow:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-disclosure-stack"] details>summary{
+  min-height:62px;
+  padding:13px 15px!important;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-disclosure-stack"] details>summary strong{
+  color:var(--p3e-ink)!important;
+  font-size:14px!important;
+  font-weight:760!important;
+  letter-spacing:-.01em!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-disclosure-stack"] details>summary small{
+  color:var(--p3e-muted)!important;
+  font-size:11px!important;
+  line-height:1.35!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-disclosure-stack"] details[open]{
+  box-shadow:var(--p3e-shadow)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-disclosure-stack"] details>div{
+  padding:0 14px 15px!important;
+}
+
+/* Stable owner for the Phase 3D charts after they move inside disclosure content. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-analytics"]{
+  width:100%;
+  min-width:0;
+  margin:0;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-analytics"] div[style*="100vh"][style*="80px"]{
+  margin:0!important;
+}
+
+/* Deep-detail legacy cards remain readable when opened, but no longer dominate the default Profile. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-details"] [style*="background"]{
+  box-shadow:none;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-details"] > div,
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-drill-development"] > div{
+  min-width:0;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-disclosure-stack"] summary:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--p3e-accent) 32%,transparent)!important;
+  outline-offset:2px!important;
+}
+
+@media (max-width:520px){
+  .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"]{
+    padding:15px!important;
+  }
+  .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-disclosure-stack"]{
+    gap:8px;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-disclosure-stack"] *,
+  .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"] *{
+    transition-duration:.01ms!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+  }
+}
