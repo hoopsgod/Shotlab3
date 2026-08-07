@@ -23,7 +23,8 @@ test("iPhone viewport and launch experience preserve accessibility", () => {
 
 test("persistent navigation behaves as a floating native tab bar", () => {
   assert.match(navigationSource, /primaryItems\.filter\(Boolean\)\.slice\(0, 3\)/);
-  assert.match(navigationSource, /buildNativeNavigationModel/);
+  assert.match(navigationSource, /\["home", "log-drill", "leaderboards"\]/);
+  assert.match(navigationSource, /\["feed", "players", "events"\]/);
   assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
   assert.match(navigationSource, /className=\{styles\.activeIndicator\}/);
   assert.match(navigationCss, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
