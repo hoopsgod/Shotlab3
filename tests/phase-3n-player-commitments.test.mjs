@@ -55,7 +55,8 @@ test("PlayerCommitmentCenter exposes route identity, next action, runway, and pr
 
 test("Phase 3N visual system keeps route-first hierarchy and iPhone containment", () => {
   assert.match(css, /\.routeTitleRow h1[\s\S]*clamp\(/);
-  assert.match(css, /\.hero[\s\S]*linear-gradient/);
+  assert.match(css, /\.hero[\s\S]*background-color: #111411 !important/);
+  assert.match(css, /\.hero[\s\S]*background-image:[\s\S]*linear-gradient[\s\S]*!important/);
   assert.match(css, /\.signalStrip[\s\S]*grid-template-columns: repeat\(3/);
   assert.match(css, /\.queue[\s\S]*background: rgba\(255, 255, 255, \.94\)/);
   assert.match(css, /\.details\[open\]/);
