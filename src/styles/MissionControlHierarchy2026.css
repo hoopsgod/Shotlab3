@@ -4,6 +4,10 @@
  * Functional hooks, actions, routing, and data selectors remain unchanged.
  */
 
+body.mission-control-active .performance-workspace--coach {
+  background: var(--bg-0, #f3f1ea) !important;
+}
+
 body.mission-control-active .mcShellV3 {
   --mc-canvas: transparent;
   --mc-surface: var(--surface-1, #ffffff);
@@ -76,6 +80,10 @@ body.mission-control-active .mcShellV3 .mcMobileMenu {
 }
 
 body.mission-control-active .mcShellV3 .mcTeamSelect {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
   max-width: min(210px, 44vw) !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
@@ -139,6 +147,8 @@ body.mission-control-active .mcShellV3 .mcHeroContent {
   grid-template-columns: minmax(0, 1fr) minmax(96px, 138px) !important;
   gap: 12px 26px !important;
   align-items: center !important;
+  background: transparent !important;
+  color: var(--performance-copy, #f5f8f9) !important;
 }
 
 body.mission-control-active .mcShellV3 .mcEyebrow {
@@ -309,14 +319,25 @@ body.mission-control-active .mcShellV3 .mcRowAction {
   }
 
   body.mission-control-active .mcShellV3 .mcHeader {
+    grid-template-columns: 40px minmax(0, 1fr) auto !important;
+    gap: 8px !important;
     padding: 8px 9px !important;
     border-radius: 16px !important;
   }
 
+  body.mission-control-active .mcShellV3 .mcHeaderActions {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    gap: 6px !important;
+  }
+
   body.mission-control-active .mcShellV3 .mcTeamSelect {
-    max-width: 34vw !important;
-    padding-inline: 10px !important;
-    font-size: 11px !important;
+    display: inline-flex !important;
+    min-width: 0 !important;
+    max-width: min(104px, 27vw) !important;
+    padding-inline: 8px !important;
+    font-size: 10px !important;
   }
 
   body.mission-control-active .mcShellV3 .mcHero {
@@ -328,6 +349,7 @@ body.mission-control-active .mcShellV3 .mcRowAction {
     grid-template-columns: minmax(0, 1fr) 68px !important;
     padding: 20px 18px !important;
     gap: 8px 12px !important;
+    background: transparent !important;
   }
 
   body.mission-control-active .mcShellV3 .mcHeroTeamMark {
@@ -373,6 +395,24 @@ body.mission-control-active .mcShellV3 .mcRowAction {
   body.mission-control-active .mcShellV3 .mcPrimary {
     min-height: 48px !important;
     border-radius: 13px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  body.mission-control-active .mcShellV3 .mcTeamSelect {
+    width: 62px !important;
+    max-width: 62px !important;
+    font-size: 0 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTeamSelect::before {
+    content: "Team";
+    font-size: 9px !important;
+    font-weight: 720 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTeamSelect > span {
+    font-size: 11px !important;
   }
 }
 
