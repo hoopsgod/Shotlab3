@@ -36,7 +36,9 @@ function deferProgressCharts() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_CHART_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_CHART_MODULE
+      if (source === STATIC_CHART_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_CHART_MODULE
+      }
       return null
     },
   }
@@ -48,7 +50,9 @@ function deferLeaderboardAnalytics() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_LEADERBOARDS_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_LEADERBOARDS_MODULE
+      if (source === STATIC_LEADERBOARDS_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_LEADERBOARDS_MODULE
+      }
       return null
     },
   }
@@ -60,7 +64,9 @@ function deferCoachCommandCenter() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_COACH_COMMAND_CENTER_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_COACH_COMMAND_CENTER_MODULE
+      if (source === STATIC_COACH_COMMAND_CENTER_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_COACH_COMMAND_CENTER_MODULE
+      }
       return null
     },
   }
@@ -72,7 +78,9 @@ function deferCoachPhase2Intelligence() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_COACH_PHASE2_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_COACH_PHASE2_MODULE
+      if (source === STATIC_COACH_PHASE2_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_COACH_PHASE2_MODULE
+      }
       return null
     },
   }
@@ -84,7 +92,9 @@ function deferCoachInteractiveDashboards() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_COACH_INTERACTIVE_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_COACH_INTERACTIVE_MODULE
+      if (source === STATIC_COACH_INTERACTIVE_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_COACH_INTERACTIVE_MODULE
+      }
       return null
     },
   }
@@ -96,7 +106,9 @@ function deferPlayerCareerHistory() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_CAREER_HISTORY_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_CAREER_HISTORY_MODULE
+      if (source === STATIC_CAREER_HISTORY_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return DEFERRED_CAREER_HISTORY_MODULE
+      }
       return null
     },
   }
@@ -108,7 +120,9 @@ function hydrateLegacyStyles() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_LEGACY_STYLE_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return LEGACY_STYLE_RUNTIME_MODULE
+      if (source === STATIC_LEGACY_STYLE_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
+        return LEGACY_STYLE_RUNTIME_MODULE
+      }
       return null
     },
   }
@@ -145,32 +159,42 @@ function stableVendorChunk(id) {
     moduleId.includes('/node_modules/react/')
     || moduleId.includes('/node_modules/react-dom/')
     || moduleId.includes('/node_modules/scheduler/')
-  ) return 'react-vendor'
+  ) {
+    return 'react-vendor'
+  }
 
   if (
     moduleId.includes('/src/components/PremiumLeaderboardsHub.jsx')
     || moduleId.includes('/src/lib/seasonLeaderboardAnalytics.js')
-  ) return 'PremiumLeaderboardsHub'
+  ) {
+    return 'PremiumLeaderboardsHub'
+  }
 
   if (
     moduleId.includes('/src/components/ShotLabCharts.jsx')
     || moduleId.includes('/src/components/PlayerCareerHistory.jsx')
     || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')
-  ) return 'PlayerProfileWorkspaces'
+  ) {
+    return 'PlayerProfileWorkspaces'
+  }
 
   if (
     moduleId.includes('/src/components/PlayerDashboardHeader.jsx')
     || moduleId.includes('/src/components/PlayerDailyCommandCenter.jsx')
     || moduleId.includes('/src/components/PlayerDailyPrimitives.jsx')
     || moduleId.includes('/src/components/PlayerOperationalWorkspace.jsx')
-  ) return 'PlayerInterfaceWorkspaces'
+  ) {
+    return 'PlayerInterfaceWorkspaces'
+  }
 
   if (
     moduleId.includes('/src/components/NewSeasonWizard.jsx')
     || moduleId.includes('/src/components/CoachPlayerInviteForm.jsx')
     || moduleId.includes('/src/components/CoachProgramScoreDrawer.jsx')
     || moduleId.includes('/src/screens/CoachTeamBrandingScreen.jsx')
-  ) return 'CoachAdministrationWorkspaces'
+  ) {
+    return 'CoachAdministrationWorkspaces'
+  }
 
   if (
     moduleId.includes('/src/components/CoachCommandCenter.jsx')
@@ -178,7 +202,9 @@ function stableVendorChunk(id) {
     || moduleId.includes('/src/components/CoachInteractiveDashboards.jsx')
     || moduleId.includes('/src/components/SecondaryPageSystem.jsx')
     || moduleId.includes('/src/components/ExperiencePrimitives.jsx')
-  ) return 'CoachOperationalWorkspaces'
+  ) {
+    return 'CoachOperationalWorkspaces'
+  }
 
   return undefined
 }
