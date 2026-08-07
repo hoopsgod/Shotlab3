@@ -81,13 +81,16 @@ test('mobile Leaderboards compacts only duplicated command chrome while preservi
   assert.match(css, /coach-page-dashboard-leaderboards-metric-strip[\s\S]*font-size: 24px !important/);
 });
 
-test('Player Intelligence establishes a local dark token boundary when opened from light Leaderboards', () => {
+test('Player Intelligence establishes a complete dark-native surface boundary when opened from light Leaderboards', () => {
   assert.match(css, /coach-player-intelligence-drawer/);
   assert.match(css, /--text-1: #f4f7f2 !important/);
   assert.match(css, /--text-2: #aab4ad !important/);
   assert.match(css, /--text-3: #7f8a84 !important/);
   assert.match(css, /drawerHeader[\s\S]*h2[\s\S]*color: #f4f7f2 !important/);
   assert.match(css, /drawerMetric[\s\S]*strong[\s\S]*-webkit-text-fill-color: #f4f7f2 !important/);
+  assert.match(css, /sectionCompact[\s\S]*background: #101315 !important/);
+  assert.match(css, /sectionCompact[\s\S]*sectionHeader[\s\S]*sectionBody[\s\S]*background: transparent !important/);
+  assert.match(css, /compactMetric[\s\S]*background: #0c1012 !important/);
 });
 
 test('rank and weekly pace receive dedicated mobile hierarchy without horizontal overflow debt', () => {
@@ -112,7 +115,9 @@ test('rendered iPhone evidence covers first-viewport Leaderboards and high-contr
   assert.match(screenshots, /10-coach-leaderboards/);
   assert.match(screenshots, /coach-player-intelligence-drawer/);
   assert.match(screenshots, /rgb\(244, 247, 242\)/);
+  assert.match(screenshots, /rgb\(16, 19, 21\)/);
   assert.match(screenshots, /drawerMetric/);
+  assert.match(screenshots, /sectionCompact/);
   assert.match(screenshots, /coach-follow-up-ledger-host/);
   assert.match(screenshots, /toContain\("drawerBody"\)/);
 });
