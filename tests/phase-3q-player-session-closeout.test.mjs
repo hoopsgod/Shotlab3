@@ -83,6 +83,7 @@ test("Phase 3Q owns its late visual authority and uses compact safe dock clearan
   assert.match(authority, /player-session-closeout-hero/);
   assert.match(authority, /player-session-done/);
   assert.match(authority, /margin-bottom: calc\(28px \+ env\(safe-area-inset-bottom, 0px\)\)/);
+  assert.match(authority, /player-scroll-container:has\(\[data-testid="player-session-closeout"\]\)[\s\S]*padding-bottom: calc\(12px \+ env\(safe-area-inset-bottom, 0px\)\)/);
 });
 
 test("Phase 3Q iPhone evidence logs a real score, verifies live streak parity, and constrains dock gap", () => {
