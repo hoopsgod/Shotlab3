@@ -40,7 +40,7 @@ async function openSecondaryRoute(page, key) {
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
 }
 
-async function verifyCommitmentSurface(page, { mode, title, legacyTestId, screenshotName }) {
+async function verifyCommitmentSurface(page, { mode, title, legacyTestId, screenshotName, responseRequired = false }) {
   const center = page.getByTestId(`player-commitment-center-${mode}`);
   const routeHeader = page.getByTestId(`player-commitment-route-header-${mode}`);
   const hero = page.getByTestId(`player-commitment-hero-${mode}`);
@@ -53,6 +53,11 @@ async function verifyCommitmentSurface(page, { mode, title, legacyTestId, screen
   await expect(hero).toBeVisible();
   await expect(details).not.toHaveAttribute("open", "");
   await expect(legacy).toBeHidden();
+
+  if (responseRequired) {
+    await expect(hero.getByText("Response needed", { exact: true })).toBeVisible();
+    await expect(hero.getByRole("button", { name: /Respond now/i })).toBeVisible();
+  }
 
   const viewportHeight = await page.evaluate(() => window.innerHeight);
   const heroBox = await hero.boundingBox();
@@ -89,6 +94,7 @@ test("Player Events and S&C expose one premium commitment hierarchy while preser
     title: "Events & Attendance",
     legacyTestId: "player-events-operational-list",
     screenshotName: "04n-player-events-commitment",
+    responseRequired: true,
   });
 
   await openSecondaryRoute(page, "sc");
