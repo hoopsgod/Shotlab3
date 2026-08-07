@@ -26,8 +26,17 @@ test("Phase 3Q wires factual daily session context rather than synthetic aggrega
   assert.match(enhancer, /todayProgramScores:todayS/);
   assert.match(enhancer, /programDrills\.length:drills\.length/);
   assert.match(enhancer, /nextCommitment=\{events\.filter/);
+  assert.match(enhancer, /currentStreak=\{streak\}/);
   assert.match(enhancer, /switchTab\("profile"\)/);
   assert.doesNotMatch(closeout, /overall score|performance score|session grade/i);
+});
+
+test("Phase 3Q uses the authoritative live streak instead of double-counting today's result", () => {
+  assert.match(completion, /currentStreak = null/);
+  assert.match(completion, /const liveStreak = numberOrNull\(currentStreak\)/);
+  assert.match(completion, /currentStreak=\{liveStreak\}/);
+  assert.match(closeout, /currentStreak = null/);
+  assert.match(closeout, /liveStreak !== null \? liveStreak/);
 });
 
 test("training completion gives the player an intentional closeout path without blocking continued training", () => {
@@ -67,13 +76,13 @@ test("session closeout uses a compact premium hierarchy with mobile and reduced-
   assert.match(closeoutCss, /prefers-reduced-motion: reduce/);
 });
 
-test("Phase 3Q owns its late visual authority and safe dock clearance", () => {
+test("Phase 3Q owns its late visual authority and uses compact safe dock clearance", () => {
   assert.match(html, /shotlab-phase3p-player-training-completion\.css[\s\S]*shotlab-phase3q-player-session-closeout\.css/);
   assert.match(authority, /player-training-finish-session/);
-  assert.match(authority, /\[data-testid="player-session-closeout"\][\s\S]*background-color: #0f120f !important/);
+  assert.match(authority, /body #root \[data-testid="player-session-closeout"\][\s\S]*background-color: #0f120f !important/);
   assert.match(authority, /player-session-closeout-hero/);
   assert.match(authority, /player-session-done/);
-  assert.match(authority, /safe-area-inset-bottom/);
+  assert.match(authority, /margin-bottom: calc\(28px \+ env\(safe-area-inset-bottom, 0px\)\)/);
 });
 
 test("Phase 3Q iPhone evidence logs a real score, enters closeout, verifies contrast, and exits to progress", () => {
