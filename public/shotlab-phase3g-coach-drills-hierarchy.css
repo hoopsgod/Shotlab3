@@ -147,21 +147,37 @@
   gap: 3px;
 }
 
+/* Older page-level span authorities can box and fade summary copy. Reset only this owned row. */
+#coach-drills-management .coach-drills-library-summary-copy,
+#coach-drills-management .coach-drills-library-summary-copy > span,
+#coach-drills-management .coach-drills-library-summary-copy > strong,
+#coach-drills-management .coach-drills-library-summary-copy > small {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 .coach-drills-library-kicker {
-  color: var(--phase3g-accent-strong);
-  font: 800 9px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  letter-spacing: .11em;
+  color: var(--phase3g-accent-strong) !important;
+  font: 800 9px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  letter-spacing: .11em !important;
 }
 
 .coach-drills-library-summary strong {
-  color: var(--phase3g-ink);
-  font: 760 17px/1.12 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-  letter-spacing: -.018em;
+  color: var(--phase3g-ink) !important;
+  font: 760 17px/1.12 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif !important;
+  letter-spacing: -.018em !important;
 }
 
 .coach-drills-library-summary small {
-  color: var(--phase3g-muted);
-  font: 550 11px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  color: #596159 !important;
+  font: 600 11px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
 }
 
 .coach-drills-library-chevron {
