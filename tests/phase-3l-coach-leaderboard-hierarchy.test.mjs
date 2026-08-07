@@ -56,10 +56,11 @@ test('Leaderboard authority uses light native surfaces, accessible focus, and re
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
-test('mobile Leaderboards removes duplicated generic briefing and collapses dead shell space', () => {
+test('mobile Leaderboards removes duplicated generic briefing and the legacy full-viewport shell debt', () => {
   assert.match(css, /coach-page-dashboard-leaderboards-decision-brief/);
   assert.match(css, /coach-page-dashboard-leaderboards-evidence/);
   assert.match(css, /display: none !important/);
+  assert.match(css, /html body #root \[data-testid="coach-page-dashboard-leaderboards"\][\s\S]*min-height: 0 !important/);
   assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*padding: 8px 14px 12px !important/);
   assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*gap: 8px !important/);
 });
