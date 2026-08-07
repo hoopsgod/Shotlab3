@@ -1,4 +1,5 @@
 import { cloneElement, isValidElement, useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./MobileNavigation.module.css";
 import "./MobileNavigationArchitecture.css";
@@ -249,7 +250,7 @@ export default function MobileNavigation({
     onChange?.(key);
   };
 
-  return (
+  const navigationShell = (
     <>
       <nav className={styles.dock} aria-label={ariaLabel} data-navigation-role={nativeNavigation.role} data-testid="mobile-navigation-dock">
         <div className={styles.dockInner}>
@@ -320,4 +321,8 @@ export default function MobileNavigation({
       )}
     </>
   );
+
+  return typeof document === "undefined"
+    ? navigationShell
+    : createPortal(navigationShell, document.body);
 }
