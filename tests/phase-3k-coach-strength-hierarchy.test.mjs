@@ -41,8 +41,8 @@ test('S&C route joins the accepted light native secondary canvas', () => {
   assert.match(css, /body:has\(\[data-testid=\"coach-page-dashboard-strength\"\]\) \.performance-workspace::before[\s\S]*display:none!important/);
 });
 
-test('S&C keeps one header decision layer instead of repeating metric evidence', () => {
-  assert.match(css, /\[data-testid=\"coach-page-dashboard-strength\"\][\s\S]*padding-bottom:8px!important/);
+test('S&C keeps one compact header decision layer instead of repeating metric evidence', () => {
+  assert.match(css, /\[data-testid=\"coach-page-dashboard-strength\"\]\{[\s\S]*min-height:0!important[\s\S]*padding-bottom:8px!important/);
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-evidence\"\][\s\S]*display:none!important/);
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\]/);
   assert.match(css, /\[data-testid=\"coach-page-dashboard-strength-metric-strip\"\] > button[\s\S]*background:var\(--p3-surface,#fff\)!important/);
@@ -57,8 +57,8 @@ test('S&C operational filters use the light native utility rail', () => {
 
 test('desktop preserves expanded S&C intelligence while iPhone defaults it closed', () => {
   assert.match(enhancer, /open=\{typeof window !== \"undefined\" && window\.innerWidth > 760\}/);
-  assert.match(css, /@media \(min-width: 761px\)[\s\S]*coachStrengthSupportingSummary[\s\S]*display: none/);
-  assert.match(css, /@media \(max-width: 760px\)/);
+  assert.match(css, /@media \(min-width:761px\)[\s\S]*coachStrengthSupportingSummary[\s\S]*display:none/);
+  assert.match(css, /@media \(max-width:760px\)/);
   assert.doesNotMatch(enhancer, /open=\{true\}/);
 });
 
@@ -68,7 +68,7 @@ test('mobile compliance disclosure uses route-scoped native summary authority', 
   assert.match(css, /min-height:68px/);
   assert.match(css, /touch-action:manipulation/);
   assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.match(css, /prefers-reduced-motion:reduce/);
   assert.match(css, /html body #root \.pageShell\[data-accent=\"sc\"\] \[data-testid=\"coach-strength-operational-panel\"\] \.coachStrengthSupportingSummary > \.coachStrengthSupportingSummaryCopy/);
   assert.match(css, /all:unset!important/);
   assert.match(css, /coachStrengthSupportingSummaryCopy::before[\s\S]*coachStrengthSupportingSummaryCopy::after[\s\S]*content:none!important/);
