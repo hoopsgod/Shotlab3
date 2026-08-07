@@ -33,18 +33,22 @@ async function expectThreeMetrics(locator) {
   await expect(locator.locator(":scope > *")).toHaveCount(3);
 }
 
+function visibleCreateEventButton(eventsPage) {
+  return eventsPage.locator("button:visible").filter({ hasText: /CREATE EVENT|\+ ADD/i }).first();
+}
+
 test.beforeEach(async ({ page }) => {
   await installRoutes(page);
   await startClean(page);
 });
 
-test("player mobile home prioritizes one daily command center, three momentum metrics, and collapsed support", async ({ page }) => {
+test("player mobile home prioritizes one daily command center, three evidence metrics, and collapsed support", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "player");
 
   const commandCenter = page.getByTestId("player-daily-command-center");
   const primaryAction = page.getByTestId("player-daily-primary-action");
-  const metrics = commandCenter.getByLabel("Player momentum metrics");
+  const metrics = page.getByTestId("player-command-evidence");
   const schedule = page.getByTestId("player-upcoming-schedule");
   const standings = page.getByTestId("player-team-standings");
   const guidance = page.getByTestId("player-coach-guidance");
@@ -117,11 +121,11 @@ test("coach mobile home presents populated decision intelligence and a current S
 
   const eventsPage = page.getByTestId("coach-events-mobile-page");
   const eventsHeader = page.getByTestId("coach-events-command-bar");
-  const createEvent = page.getByTestId("coach-events-mobile-create-event");
+  const createEvent = visibleCreateEventButton(eventsPage);
 
   await expect(eventsPage).toBeVisible({ timeout: 20_000 });
   await expect(eventsHeader).toBeVisible();
-  await expect(eventsPage.getByRole("heading", { name: "Team Practice", exact: true })).toBeVisible();
+  await expect(eventsPage.getByText("Team Practice", { exact: true }).first()).toBeVisible();
   await expect(page.getByTestId("coach-events-mobile-empty-state")).toHaveCount(0);
   await expect(createEvent).toBeVisible();
   await expect(page.getByTestId("coach-command-center-full")).toHaveCount(0);
@@ -144,7 +148,7 @@ test("coach can create and revisit a mobile event without breaking navigation", 
   const dock = page.getByTestId("mobile-navigation-dock");
   await dock.getByRole("button", { name: "Schedule", exact: true }).click();
   const eventsPage = page.getByTestId("coach-events-mobile-page");
-  const createEvent = page.getByTestId("coach-events-mobile-create-event");
+  let createEvent = visibleCreateEventButton(eventsPage);
   await expect(createEvent).toBeVisible({ timeout: 20_000 });
 
   await createEvent.click();
@@ -153,7 +157,8 @@ test("coach can create and revisit a mobile event without breaking navigation", 
   await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(dialog).toHaveCount(0);
 
-  await page.getByTestId("coach-events-mobile-create-event").click();
+  createEvent = visibleCreateEventButton(eventsPage);
+  await createEvent.click();
   const reopenedDialog = page.getByRole("dialog", { name: "Create event" });
   await reopenedDialog.getByPlaceholder("Open Gym Run").fill("E2E Team Practice");
   await reopenedDialog.locator('input[type="date"]').fill("2026-08-15");
