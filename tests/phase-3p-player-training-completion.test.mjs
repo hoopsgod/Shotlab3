@@ -26,6 +26,8 @@ test("Phase 3P replaces equal-weight DONE and CHALLENGE controls with a momentum
   assert.match(enhancer, /shareCard=\{<ShareCard data=\{shareData\}\/\>\}/);
   assert.match(enhancer, /onContinue=\{closeShare\}/);
   assert.match(enhancer, /onChallenge=\{\(\)=>setShowChallForm\(true\)\}/);
+  assert.match(enhancer, /legacyShareInstruction/);
+  assert.match(enhancer, /obsolete share-first instruction survived Phase 3P transform/);
   assert.match(component, /NEXT MOVE/);
   assert.match(component, /Continue training/);
   assert.match(component, /Review program/);
@@ -39,6 +41,7 @@ test("Phase 3P answers what happened, what changed, and what happens next", () =
     "WHAT CHANGED",
     "MOMENTUM",
     "NEXT MOVE",
+    "player-training-result-hero",
     "player-training-result",
     "player-training-progress-copy",
     "player-training-next-action",
@@ -76,8 +79,12 @@ test("Phase 3P has a stable late visual authority and safe mobile dock clearance
   assert.match(html, /shotlab-phase3o-player-training-session\.css[\s\S]*shotlab-phase3p-player-training-completion\.css/);
   assert.match(authority, /player-training-completion-wrap[\s\S]*safe-area-inset-bottom/);
   assert.match(authority, /\[data-testid="player-training-completion"\][\s\S]*background-color: #111411 !important/);
+  assert.match(authority, /\[data-testid="player-training-result-hero"\][\s\S]*background-color: transparent !important/);
+  assert.match(authority, /\[data-testid="player-training-result-hero"\] > div[\s\S]*background-image: none !important/);
   assert.match(authority, /\[data-testid="player-training-result"\][\s\S]*#c8ff1a !important/);
   assert.match(authority, /\[data-testid="player-training-next-action"\][\s\S]*background: #c8ff1a !important/);
+  assert.match(authority, /\[data-testid="player-training-share-card"\][\s\S]*background-color: transparent !important/);
+  assert.match(authority, /\[data-testid="player-training-share-card"\][\s\S]*border-radius: 0 !important/);
 });
 
 test("Phase 3P iPhone evidence logs a real score and verifies post-log hierarchy", () => {
@@ -85,12 +92,17 @@ test("Phase 3P iPhone evidence logs a real score and verifies post-log hierarchy
   assert.match(screenshotSpec, /\/v1\/scores/);
   assert.match(screenshotSpec, /storage_mode: "e2e"/);
   assert.match(screenshotSpec, /Could not save score to team dashboard/);
+  assert.match(screenshotSpec, /Screenshot your card and share on social media/);
   assert.match(screenshotSpec, /player-training-log-score/);
   assert.match(screenshotSpec, /player-training-completion/);
+  assert.match(screenshotSpec, /player-training-result-hero/);
+  assert.match(screenshotSpec, /resultHeroStyle\.backgroundColor/);
+  assert.match(screenshotSpec, /resultHeroStyle\.titleColor/);
   assert.match(screenshotSpec, /player-training-result/);
   assert.match(screenshotSpec, /player-training-next-action/);
   assert.match(screenshotSpec, /player-training-share-toggle/);
   assert.match(screenshotSpec, /player-training-challenge-action/);
+  assert.match(screenshotSpec, /shareStyle\.backgroundColor/);
   assert.match(screenshotSpec, /04r-player-training-completion\.png/);
   assert.match(screenshotSpec, /04s-player-training-share-secondary\.png/);
   assert.match(screenshotSpec, /fullPage: false/);
