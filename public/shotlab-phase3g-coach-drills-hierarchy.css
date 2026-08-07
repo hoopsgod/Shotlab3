@@ -1,0 +1,227 @@
+/* Phase 3G — Coach Drills Command & Management Hierarchy */
+
+#coach-drills-management {
+  --phase3g-ink: #151915;
+  --phase3g-muted: #687069;
+  --phase3g-line: #dfe3da;
+  --phase3g-surface: #ffffff;
+  --phase3g-subtle: #f3f4ef;
+  --phase3g-accent: #a8cf00;
+  --phase3g-accent-strong: #7f9e1e;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-panel"] {
+  --text-1: var(--phase3g-ink);
+  --text-2: var(--phase3g-muted);
+  --text-3: #7d857e;
+  --page-accent: var(--phase3g-accent);
+  margin-top: 4px;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-filters"] {
+  margin: 0 0 12px !important;
+  padding: 8px !important;
+  border: 1px solid var(--phase3g-line) !important;
+  border-radius: 18px !important;
+  background: rgba(255,255,255,.94) !important;
+  box-shadow: 0 8px 24px rgba(31, 39, 30, .05) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-filters"] label {
+  min-height: 44px !important;
+  border: 1px solid #d9ddd5 !important;
+  border-radius: 13px !important;
+  color: #6f776f !important;
+  background: #f7f8f4 !important;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-filters"] label:focus-within {
+  border-color: color-mix(in srgb, var(--phase3g-accent) 55%, #d9ddd5) !important;
+  background: #fff !important;
+  outline: 3px solid color-mix(in srgb, var(--phase3g-accent) 20%, transparent) !important;
+  outline-offset: 1px;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-filters"] input {
+  color: var(--phase3g-ink) !important;
+  background: transparent !important;
+  font-size: 13px !important;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-filters"] input::placeholder {
+  color: #8b928c !important;
+  opacity: 1 !important;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-filters"] [role="group"] button {
+  min-height: 38px !important;
+  padding-inline: 12px !important;
+  border: 1px solid transparent !important;
+  color: #596159 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-filters"] [role="group"] button[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--phase3g-accent) 46%, #dfe3da) !important;
+  color: #263000 !important;
+  background: color-mix(in srgb, var(--phase3g-accent) 16%, #fff) !important;
+  box-shadow: 0 5px 14px rgba(93, 119, 0, .08) !important;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-panel"] article {
+  min-height: 0 !important;
+  padding: 15px !important;
+  border: 1px solid var(--phase3g-line) !important;
+  border-radius: 17px !important;
+  background: rgba(255,255,255,.96) !important;
+  box-shadow: 0 8px 22px rgba(31, 39, 30, .045) !important;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-panel"] article::after {
+  left: 15px !important;
+  right: 15px !important;
+  height: 2px !important;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-panel"] article h2 {
+  margin-top: 5px !important;
+  color: var(--phase3g-ink) !important;
+  font-size: 18px !important;
+  line-height: 1.08 !important;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-panel"] article p {
+  margin-top: 5px !important;
+  color: var(--phase3g-muted) !important;
+  font-size: 12px !important;
+  line-height: 1.42 !important;
+}
+
+#coach-drills-management [data-testid="coach-drills-operational-panel"] article button {
+  min-height: 38px !important;
+  border-color: #d7dcd2 !important;
+  border-radius: 11px !important;
+  color: #475100 !important;
+  background: #f7f9ef !important;
+}
+
+.coach-drills-library-disclosure {
+  margin: 14px 0 10px;
+  border: 1px solid var(--phase3g-line);
+  border-radius: 18px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 10px 28px rgba(31, 39, 30, .05);
+  overflow: clip;
+}
+
+.coach-drills-library-summary {
+  min-height: 74px;
+  padding: 14px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  cursor: pointer;
+  list-style: none;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.coach-drills-library-summary::-webkit-details-marker { display: none; }
+
+.coach-drills-library-summary-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.coach-drills-library-kicker {
+  color: var(--phase3g-accent-strong);
+  font: 800 9px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .11em;
+}
+
+.coach-drills-library-summary strong {
+  color: var(--phase3g-ink);
+  font: 760 17px/1.12 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.018em;
+}
+
+.coach-drills-library-summary small {
+  color: var(--phase3g-muted);
+  font: 550 11px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coach-drills-library-chevron {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dce1d7;
+  border-radius: 999px;
+  color: #586058;
+  background: #f6f7f3;
+  transition: transform .18s ease, background .18s ease;
+}
+
+.coach-drills-library-disclosure[open] .coach-drills-library-chevron {
+  transform: rotate(180deg);
+  background: color-mix(in srgb, var(--phase3g-accent) 12%, #fff);
+}
+
+.coach-drills-library-summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--phase3g-accent) 28%, transparent);
+  outline-offset: -3px;
+}
+
+.coach-drills-library-body {
+  padding: 14px 14px 16px;
+  border-top: 1px solid #e3e6df;
+  background: #fafbf8;
+}
+
+.coach-drills-library-body > div:first-child {
+  margin-top: 0 !important;
+}
+
+.coach-drills-library-body .accent-card {
+  border-color: #dfe3da !important;
+  background: #fff !important;
+  box-shadow: none !important;
+}
+
+.coach-drills-library-disclosure + .btn-v.cta-primary {
+  display: none !important;
+}
+
+#coach-drills-management .fade-up:has(> div[style*="NEW DRILL"]) {
+  margin-top: 10px !important;
+}
+
+@media (max-width: 720px) {
+  #coach-drills-management [data-testid="coach-drills-operational-filters"] {
+    gap: 8px !important;
+  }
+
+  #coach-drills-management [data-testid="coach-drills-operational-panel"] article {
+    padding: 14px !important;
+  }
+
+  .coach-drills-library-summary {
+    min-height: 70px;
+    padding: 13px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coach-drills-library-chevron,
+  #coach-drills-management [data-testid="coach-drills-operational-panel"] article,
+  #coach-drills-management [data-testid="coach-drills-operational-filters"] * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
