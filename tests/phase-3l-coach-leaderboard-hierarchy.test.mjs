@@ -90,6 +90,8 @@ test('Player Intelligence establishes a complete dark-native surface boundary wh
   assert.match(css, /drawerMetric[\s\S]*strong[\s\S]*-webkit-text-fill-color: #f4f7f2 !important/);
   assert.match(css, /sectionCompact[\s\S]*background: #101315 !important/);
   assert.match(css, /sectionCompact[\s\S]*sectionHeader[\s\S]*sectionBody[\s\S]*background: transparent !important/);
+  assert.match(css, /sectionEyebrow[\s\S]*sectionTitle[\s\S]*sectionSummary[\s\S]*background: transparent !important/);
+  assert.match(css, /sectionEyebrow[\s\S]*::before[\s\S]*sectionSummary[\s\S]*::after[\s\S]*content: none !important/);
   assert.match(css, /compactMetric[\s\S]*background: #0c1012 !important/);
 });
 
@@ -116,8 +118,11 @@ test('rendered iPhone evidence covers first-viewport Leaderboards and high-contr
   assert.match(screenshots, /coach-player-intelligence-drawer/);
   assert.match(screenshots, /rgb\(244, 247, 242\)/);
   assert.match(screenshots, /rgb\(16, 19, 21\)/);
+  assert.match(screenshots, /rgba\(0, 0, 0, 0\)/);
   assert.match(screenshots, /drawerMetric/);
   assert.match(screenshots, /sectionCompact/);
+  assert.match(screenshots, /sectionTitle/);
+  assert.match(screenshots, /sectionSummary/);
   assert.match(screenshots, /coach-follow-up-ledger-host/);
   assert.match(screenshots, /toContain\("drawerBody"\)/);
 });
