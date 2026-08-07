@@ -71,3 +71,7 @@ body #root [data-testid="player-session-resume"] {
 body #root .player-training-completion-wrap:has([data-testid="player-session-closeout"]) {
   margin-bottom: calc(28px + env(safe-area-inset-bottom, 0px)) !important;
 }
+
+body #root .player-scroll-container:has([data-testid="player-session-closeout"]) {
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+}
