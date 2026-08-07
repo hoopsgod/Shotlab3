@@ -161,7 +161,19 @@ test("Coach visual system remains integrated across command and management pages
   await rosterManagement.locator(":scope > summary").click();
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
+  const eventInsights = page.getByTestId("coach-events-supporting-intelligence");
+  await expect(eventInsights).toBeVisible({ timeout: 20_000 });
+  await expect(eventInsights).not.toHaveAttribute("open", "");
+  await expect(page.getByTestId("coach-events-insight-grid")).toBeHidden();
+  await expect(page.getByRole("button", { name: /MANAGE/ }).first()).toBeVisible();
   await capture(page, "07-coach-events");
+
+  await eventInsights.locator(":scope > summary").click();
+  await expect(eventInsights).toHaveAttribute("open", "");
+  await expect(page.getByTestId("coach-events-insight-grid")).toBeVisible();
+  await capture(page, "07b-coach-events-insights-expanded");
+  await eventInsights.locator(":scope > summary").click();
+  await expect(eventInsights).not.toHaveAttribute("open", "");
 
   let sheet = await more(page);
   await sheet.locator('[data-nav-key="drills"]').click();
