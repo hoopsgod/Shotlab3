@@ -15,7 +15,10 @@ async function startClean(page) {
 
 async function enterDemo(page, role) {
   await page.goto("/");
-  const button = page.getByRole("button", { name: role === "coach" ? "Demo Coach" : "Demo Player", exact: true });
+  const button = page.getByRole("button", {
+    name: role === "coach" ? "Coach demo" : "Player demo",
+    exact: true,
+  });
   await expect(button).toBeVisible({ timeout: 20_000 });
   await button.click();
 }
@@ -73,7 +76,7 @@ test("player mobile home prioritizes one daily command center, three momentum me
   await expectNoHorizontalOverflow(page);
 });
 
-test("coach mobile home gives the fresh one-player demo one compact truthful activation step", async ({ page }) => {
+test("coach mobile home presents populated decision intelligence and a current Schedule", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "coach");
 
@@ -81,30 +84,20 @@ test("coach mobile home gives the fresh one-player demo one compact truthful act
   const objective = page.getByTestId("coach-primary-objective");
   const metrics = page.getByTestId("coach-primary-metrics");
   const needsAttention = page.getByRole("heading", { name: "Needs attention", exact: true });
-  const onboarding = page.getByTestId("coach-onboarding-state");
 
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
   await expect(objective).toBeVisible();
   await expectThreeMetrics(metrics);
   await expect(needsAttention).toBeVisible();
-  await expect(onboarding).toBeVisible();
-  await expect(onboarding.getByText("Set your team identity", { exact: true })).toBeVisible();
-  await expect(onboarding.getByText("2/5", { exact: false })).toBeVisible();
-  await expect(onboarding.getByRole("button", { name: /Open team branding/i })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Activity today", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Recent activity", exact: true })).toHaveCount(0);
-  await expect(page.getByRole("heading", { name: "Next session", exact: true })).toHaveCount(0);
   await expect(page.getByTestId("coach-dashboard-identity-header")).not.toBeVisible();
   await expect(page.locator(".coach-home-dashboard")).not.toBeVisible();
 
   const shellBox = await commandCenter.boundingBox();
   const objectiveBox = await objective.boundingBox();
   const attentionBox = await needsAttention.boundingBox();
-  const onboardingBox = await onboarding.boundingBox();
   expect(shellBox).not.toBeNull();
   expect(objectiveBox).not.toBeNull();
   expect(attentionBox).not.toBeNull();
-  expect(onboardingBox).not.toBeNull();
   expect(shellBox.x).toBeLessThanOrEqual(1);
   expect(shellBox.width).toBeGreaterThanOrEqual(388);
   const leftGutter = objectiveBox.x;
@@ -114,50 +107,44 @@ test("coach mobile home gives the fresh one-player demo one compact truthful act
   expect(leftGutter).toBeLessThanOrEqual(16);
   expect(rightGutter).toBeLessThanOrEqual(16);
   expect(Math.abs(leftGutter - rightGutter)).toBeLessThanOrEqual(2);
-  expect(objectiveBox.height).toBeLessThan(330);
+  expect(objectiveBox.height).toBeLessThan(520);
   expect(attentionBox.y).toBeLessThan(844);
-  expect(onboardingBox.y).toBeGreaterThan(attentionBox.y);
-  expect(onboardingBox.height).toBeLessThanOrEqual(182);
   await expectNoHorizontalOverflow(page);
 
   const dock = page.getByTestId("mobile-navigation-dock");
   await expect(dock).toBeVisible();
-  await dock.getByRole("button", { name: "Events", exact: true }).click();
+  await dock.getByRole("button", { name: "Schedule", exact: true }).click();
 
   const eventsPage = page.getByTestId("coach-events-mobile-page");
   const eventsHeader = page.getByTestId("coach-events-command-bar");
-  const emptyState = page.getByTestId("coach-events-mobile-empty-state");
-  const createEvent = emptyState.getByTestId("coach-events-mobile-create-event");
+  const createEvent = page.getByTestId("coach-events-mobile-create-event");
 
   await expect(eventsPage).toBeVisible({ timeout: 20_000 });
   await expect(eventsHeader).toBeVisible();
-  await expect(emptyState).toBeVisible();
+  await expect(eventsPage.getByRole("heading", { name: "Team Practice", exact: true })).toBeVisible();
+  await expect(page.getByTestId("coach-events-mobile-empty-state")).toHaveCount(0);
   await expect(createEvent).toBeVisible();
   await expect(page.getByTestId("coach-command-center-full")).toHaveCount(0);
   await expect(page.getByRole("button", { name: "Log out", exact: true })).not.toBeVisible();
 
   expect(await eventsPage.evaluate((node) => node.closest(".accent-card") !== null)).toBe(false);
   const headerBox = await eventsHeader.boundingBox();
-  const emptyBox = await emptyState.boundingBox();
   const createBox = await createEvent.boundingBox();
   expect(headerBox).not.toBeNull();
-  expect(emptyBox).not.toBeNull();
   expect(createBox).not.toBeNull();
   expect(headerBox.y).toBeLessThan(150);
-  expect(createBox.width).toBeLessThan(390 * 0.8);
-  expect(createBox.y).toBeGreaterThan(headerBox.y + headerBox.height);
-  expect(emptyBox.width).toBeLessThanOrEqual(390);
+  expect(createBox.y).toBeGreaterThanOrEqual(headerBox.y);
   await expectNoHorizontalOverflow(page);
 });
 
-test("coach can open, close, save, and revisit a mobile event without breaking navigation", async ({ page }) => {
+test("coach can create and revisit a mobile event without breaking navigation", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await enterDemo(page, "coach");
 
   const dock = page.getByTestId("mobile-navigation-dock");
-  await dock.getByRole("button", { name: "Events", exact: true }).click();
+  await dock.getByRole("button", { name: "Schedule", exact: true }).click();
   const eventsPage = page.getByTestId("coach-events-mobile-page");
-  const createEvent = page.getByTestId("coach-events-mobile-empty-state").getByTestId("coach-events-mobile-create-event");
+  const createEvent = page.getByTestId("coach-events-mobile-create-event");
   await expect(createEvent).toBeVisible({ timeout: 20_000 });
 
   await createEvent.click();
@@ -166,7 +153,7 @@ test("coach can open, close, save, and revisit a mobile event without breaking n
   await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(dialog).toHaveCount(0);
 
-  await page.getByTestId("coach-events-mobile-empty-state").getByTestId("coach-events-mobile-create-event").click();
+  await page.getByTestId("coach-events-mobile-create-event").click();
   const reopenedDialog = page.getByRole("dialog", { name: "Create event" });
   await reopenedDialog.getByPlaceholder("Open Gym Run").fill("E2E Team Practice");
   await reopenedDialog.locator('input[type="date"]').fill("2026-08-15");
@@ -183,8 +170,8 @@ test("coach can open, close, save, and revisit a mobile event without breaking n
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible();
   await dock.getByRole("button", { name: "Players", exact: true }).click();
   await expect(page.getByTestId("coach-players-command-bar")).toBeVisible();
-  await dock.getByRole("button", { name: "Events", exact: true }).click();
+  await dock.getByRole("button", { name: "Schedule", exact: true }).click();
   await expect(page.getByTestId("coach-events-mobile-page").getByText("E2E Team Practice", { exact: true })).toBeVisible();
   await dock.getByRole("button", { name: "More", exact: true }).click();
-  await expect(page.getByRole("dialog", { name: /More/i })).toBeVisible();
+  await expect(page.getByTestId("mobile-navigation-sheet")).toBeVisible();
 });
