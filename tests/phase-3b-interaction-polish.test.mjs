@@ -42,3 +42,12 @@ test('Expert visual polish never converts the full Players decision into a dupli
   assert.match(expertPolishSource, /element\.closest\?\.\('\[data-testid="coach-players-interactive-dashboard"\]'\)/);
   assert.doesNotMatch(expertPolishSource, /fullPlayersSurface\?\.contains\(element\)/);
 });
+
+test('Add Player activation copy cannot inherit a legacy paragraph box and its roster action remains intentional', () => {
+  assert.match(coachCss, /coach-player-invite-dashboard-section/);
+  assert.match(coachCss, /\[class\*="sectionSummary"\]/);
+  assert.match(coachCss, /border: 0 !important/);
+  assert.match(coachCss, /background: transparent !important/);
+  assert.match(coachCss, /\[class\*="sectionAction"\]/);
+  assert.match(coachCss, /width: 100% !important/);
+});
