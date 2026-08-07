@@ -141,7 +141,7 @@ test("coach publish hydrates a separate player session and appears above the fol
   await installRoutes(coachPage, remoteState, telemetry);
   await seedPage(coachPage, INITIAL_PRIORITIES);
   await coachPage.goto("/");
-  await coachPage.getByRole("button", { name: "Demo Coach", exact: true }).click();
+  await coachPage.getByRole("button", { name: "Coach demo", exact: true }).click();
   await expect(coachPage.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
 
   await coachPage.getByRole("button", { name: "Open navigation", exact: true }).click();
@@ -170,7 +170,7 @@ test("coach publish hydrates a separate player session and appears above the fol
   await installRoutes(playerPage, remoteState, telemetry);
   await seedPage(playerPage, stalePriorities);
   await playerPage.goto("/");
-  await playerPage.getByRole("button", { name: "Demo Player", exact: true }).click();
+  await playerPage.getByRole("button", { name: "Player demo", exact: true }).click();
 
   const commandCenter = playerPage.getByTestId("player-daily-command-center");
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
