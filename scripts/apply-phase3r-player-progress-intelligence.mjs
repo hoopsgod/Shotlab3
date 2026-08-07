@@ -31,7 +31,7 @@ source = source.replace(importAnchor, `${importAnchor}import PlayerProgressStory
 
 const routeAnchor = '{tab==="profile"&&<div className={slideClass} key="profile"><PlayerWorkspaceCommandBar model={profileWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"profile"})} testId="player-profile-workspace"/><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scSessions={scSessions} scRsvps={scRsvps} scLogs={scLogs} seasonArchives={seasonArchives} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}';
 requireOne(source, routeAnchor, "Player Profile route");
-const routeReplacement = `{tab==="profile"&&<div className={\`${slideClass} player-progress-story-route\`} key="profile" data-testid="player-profile-workspace">
+const routeReplacement = `{tab==="profile"&&<div className={slideClass+" player-progress-story-route"} key="profile" data-testid="player-profile-workspace">
   <PlayerProgressStory userName={u.name} userEmail={u.email} teamId={u.teamId} shotLogs={shotLogs} scores={scores} programScores={programScores} drills={drills} programDrills={programDrills} streak={streak} coachPriorities={coachPriorities} today={today} onStartTraining={()=>switchTab("log-drill")} onOpenFullProfile={()=>{const trigger=document.querySelector('[data-testid="player-progress-full-profile"] button');if(trigger instanceof HTMLElement)trigger.click();window.setTimeout(()=>document.querySelector('[data-testid="player-profile-readout"]')?.scrollIntoView({behavior:"smooth",block:"start"}),0)}}/>
   <ProgressiveDisclosure title="Full progress profile" summary="Report card, performance intelligence, drill development, history, and privacy" testId="player-progress-full-profile">
     <ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scSessions={scSessions} scRsvps={scRsvps} scLogs={scLogs} seasonArchives={seasonArchives} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/>
@@ -41,6 +41,7 @@ source = source.replace(routeAnchor, routeReplacement);
 
 for (const preserved of [
   '<PlayerProgressStory userName={u.name}',
+  'className={slideClass+" player-progress-story-route"}',
   'data-testid="player-profile-workspace"',
   'testId="player-progress-full-profile"',
   '<ProfilePage u={u}',
