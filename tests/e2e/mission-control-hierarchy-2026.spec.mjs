@@ -57,38 +57,52 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   await expect(metrics.locator("button")).toHaveCount(3);
 
   const presentation = await page.evaluate(() => {
+    const workspace = document.querySelector(".performance-workspace--coach");
     const hero = document.querySelector(".mcHero");
+    const heroContent = document.querySelector(".mcHeroContent");
     const mark = document.querySelector(".mcHeroTeamMark");
     const primary = document.querySelector(".mcPrimary");
     const section = document.querySelector(".mcSection");
     const reality = document.querySelector(".mcRealityStrip");
+    const teamSelect = document.querySelector(".mcTeamSelect");
+    const workspaceStyle = workspace ? getComputedStyle(workspace) : null;
     const heroStyle = getComputedStyle(hero);
+    const heroContentStyle = getComputedStyle(heroContent);
     const markStyle = getComputedStyle(mark);
     const primaryStyle = getComputedStyle(primary);
     const sectionStyle = section ? getComputedStyle(section) : null;
     const realityStyle = getComputedStyle(reality);
+    const teamSelectStyle = getComputedStyle(teamSelect);
     return {
+      workspaceBackground: workspaceStyle?.backgroundColor || "",
       heroBackground: heroStyle.backgroundImage,
       heroMaxHeight: heroStyle.maxHeight,
       heroRadius: parseFloat(heroStyle.borderRadius),
+      heroContentBackground: heroContentStyle.backgroundColor,
       markBackground: markStyle.backgroundColor,
       markWidth: parseFloat(markStyle.width),
       primaryBackground: primaryStyle.backgroundColor,
       primaryHeight: parseFloat(primaryStyle.minHeight),
       supportingBackground: sectionStyle?.backgroundColor || "",
       metricColumns: realityStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
+      teamSelectDisplay: teamSelectStyle.display,
+      teamSelectWidth: parseFloat(teamSelectStyle.width),
     };
   });
 
+  expect(presentation.workspaceBackground).toBe("rgb(243, 241, 234)");
   expect(presentation.heroBackground).toContain("linear-gradient");
   expect(["none", "0px"]).toContain(presentation.heroMaxHeight);
   expect(presentation.heroRadius).toBeGreaterThanOrEqual(20);
+  expect(presentation.heroContentBackground).toBe("rgba(0, 0, 0, 0)");
   expect(presentation.markBackground).toBe("rgba(0, 0, 0, 0)");
   expect(presentation.markWidth).toBeGreaterThanOrEqual(60);
   expect(presentation.primaryBackground).toBe("rgb(200, 255, 26)");
   expect(presentation.primaryHeight).toBeGreaterThanOrEqual(44);
   expect(presentation.supportingBackground).toBe("rgb(255, 255, 255)");
   expect(presentation.metricColumns).toBe(3);
+  expect(presentation.teamSelectDisplay).toContain("flex");
+  expect(presentation.teamSelectWidth).toBeGreaterThanOrEqual(58);
 
   await expectNoHorizontalOverflow(page);
   await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}" });
