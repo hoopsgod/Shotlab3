@@ -68,7 +68,7 @@ async function enterSeededDemoCoach(page) {
   }, seedData);
 
   await page.goto("/");
-  const demoButton = page.getByRole("button", { name: "Demo Coach", exact: true });
+  const demoButton = page.getByRole("button", { name: "Coach demo", exact: true });
   await expect(demoButton).toBeVisible({ timeout: 20_000 });
   await demoButton.click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
@@ -76,7 +76,7 @@ async function enterSeededDemoCoach(page) {
 
 async function enterDemoPlayer(page) {
   await page.goto("/");
-  const demoButton = page.getByRole("button", { name: "Demo Player", exact: true });
+  const demoButton = page.getByRole("button", { name: "Player demo", exact: true });
   await expect(demoButton).toBeVisible({ timeout: 20_000 });
   await demoButton.click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
@@ -138,7 +138,7 @@ test("coach branding save persists and renders a cleaned prominent logo", async 
   expect(await heroLogo.getAttribute("src")).toMatch(/^data:image\/png;base64,/);
 
   await page.reload();
-  await expect(page.getByRole("button", { name: "Demo Coach", exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("button", { name: "Coach demo", exact: true })).toBeVisible({ timeout: 20_000 });
   expect(await readTeamBranding(page)).toEqual(savedBranding);
 });
 
@@ -198,7 +198,7 @@ test("coach-created strength session remains stored across refresh", async ({ pa
   expect(savedSession).not.toBeNull();
 
   await page.reload();
-  await expect(page.getByRole("button", { name: "Demo Coach", exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("button", { name: "Coach demo", exact: true })).toBeVisible({ timeout: 20_000 });
   expect(await readSavedSession()).toEqual(savedSession);
 });
 
@@ -208,13 +208,13 @@ test("Demo Player shot rows are removed on logout", async ({ page }) => {
   await page.reload();
   await enterDemoPlayer(page);
 
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "At Home", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await page.getByRole("spinbutton").first().fill("33");
   await page.getByRole("button", { name: "LOG SHOTS", exact: true }).first().click();
 
   await expect.poll(() => countDemoPlayerShotRows(page, 33), { timeout: 15_000 }).toBe(1);
 
-  await page.getByRole("button", { name: /^logout$/i }).click();
-  await expect(page.getByRole("button", { name: "Demo Player", exact: true })).toBeVisible({ timeout: 20_000 });
+  await page.getByRole("button", { name: /^log out$/i }).click();
+  await expect(page.getByRole("button", { name: "Player demo", exact: true })).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => countDemoPlayerShotRows(page, 33)).toBe(0);
 });
