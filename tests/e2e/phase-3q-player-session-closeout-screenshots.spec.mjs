@@ -59,6 +59,8 @@ test("player can intentionally close the daily training loop after logging a res
   const completion = page.getByTestId("player-training-completion");
   await expect(completion).toBeVisible({ timeout: 15_000 });
   await expect(page.getByText(/Could not save score to team dashboard/i)).toHaveCount(0);
+  const liveBodyText = await page.locator("body").innerText();
+  const liveStreakMatch = liveBodyText.match(/(\d+)D streak/i);
 
   const finishQuiet = page.getByTestId("player-training-finish-session");
   if (await finishQuiet.count()) {
@@ -79,6 +81,13 @@ test("player can intentionally close the daily training loop after logging a res
   await expect(closeout.getByTestId("player-session-next-commitment")).toBeVisible();
   await expect(closeout.getByTestId("player-session-done")).toBeVisible();
   await expect(closeout.getByTestId("player-session-view-progress")).toBeVisible();
+
+  if (liveStreakMatch) {
+    const closeoutMomentum = await closeout.getByText(/\d+-day rhythm/i).innerText();
+    const closeoutStreakMatch = closeoutMomentum.match(/(\d+)-day rhythm/i);
+    expect(closeoutStreakMatch).not.toBeNull();
+    expect(Number(closeoutStreakMatch[1])).toBe(Number(liveStreakMatch[1]));
+  }
 
   const rootStyle = await closeout.evaluate((node) => ({
     backgroundColor: getComputedStyle(node).backgroundColor,
@@ -116,7 +125,9 @@ test("player can intentionally close the daily training loop after logging a res
   const closeoutBox = await closeout.boundingBox();
   expect(dockBox).not.toBeNull();
   expect(closeoutBox).not.toBeNull();
-  expect(closeoutBox.y + closeoutBox.height).toBeLessThanOrEqual(dockBox.y - 6);
+  const dockGap = dockBox.y - (closeoutBox.y + closeoutBox.height);
+  expect(dockGap).toBeGreaterThanOrEqual(6);
+  expect(dockGap).toBeLessThanOrEqual(96);
   await captureViewport(page, "04u-player-session-closeout-actions.png");
 
   await closeout.getByTestId("player-session-view-progress").click();
