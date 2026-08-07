@@ -18,6 +18,7 @@ if (source.includes(marker)) {
     'onViewProgress={()=>{setSaved(false);setActive(null);setShareData(null)',
     'plannedTotal={shareData?.src==="program"?programDrills.length:drills.length}',
     'nextCommitment={events.filter(e=>e.date>=today)',
+    'currentStreak={streak}',
   ]) {
     if (!source.includes(preserved)) fail(`transformed closeout flow is missing ${preserved}`);
   }
@@ -30,7 +31,7 @@ if (!source.includes(phase3pMarker)) fail('Phase 3P training completion must be 
 
 const callAnchor = '<PlayerTrainingCompletion data={shareData} shareCard={<ShareCard data={shareData}/>} canChallenge={shareData?.src!=="program"} onContinue={closeShare} onChallenge={()=>setShowChallForm(true)}/>';
 requireOne(source, callAnchor, 'Phase 3P completion call');
-const closeoutCall = '<PlayerTrainingCompletion data={shareData} shareCard={<ShareCard data={shareData}/>} canChallenge={shareData?.src!=="program"} completedCount={(shareData?.src==="program"?todayProgramScores:todayS).length} plannedTotal={shareData?.src==="program"?programDrills.length:drills.length} nextCommitment={events.filter(e=>e.date>=today).sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")))[0]||null} onContinue={closeShare} onChallenge={()=>setShowChallForm(true)} onViewProgress={()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setChallengeSaveError("");setSubmitting(false);switchTab("profile")}}/>';
+const closeoutCall = '<PlayerTrainingCompletion data={shareData} shareCard={<ShareCard data={shareData}/>} canChallenge={shareData?.src!=="program"} completedCount={(shareData?.src==="program"?todayProgramScores:todayS).length} plannedTotal={shareData?.src==="program"?programDrills.length:drills.length} nextCommitment={events.filter(e=>e.date>=today).sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")))[0]||null} currentStreak={streak} onContinue={closeShare} onChallenge={()=>setShowChallForm(true)} onViewProgress={()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setChallengeSaveError("");setSubmitting(false);switchTab("profile")}}/>';
 source = source.replace(callAnchor, closeoutCall);
 
 for (const preserved of [
@@ -42,6 +43,7 @@ for (const preserved of [
   'completedCount={(shareData?.src==="program"?todayProgramScores:todayS).length}',
   'plannedTotal={shareData?.src==="program"?programDrills.length:drills.length}',
   'nextCommitment={events.filter(e=>e.date>=today)',
+  'currentStreak={streak}',
   'switchTab("profile")',
 ]) {
   if (!source.includes(preserved)) fail(`Player session closeout capability removed: ${preserved}`);
