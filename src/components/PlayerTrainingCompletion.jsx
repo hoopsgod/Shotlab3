@@ -31,6 +31,7 @@ export default function PlayerTrainingCompletion({
   completedCount = 0,
   plannedTotal = 0,
   nextCommitment = null,
+  currentStreak = null,
   onContinue,
   onChallenge,
   onViewProgress,
@@ -44,7 +45,8 @@ export default function PlayerTrainingCompletion({
   const isProgram = data?.src === "program";
   const hasMax = max !== null && max > 0;
   const pct = hasMax ? Math.max(0, Math.min(100, Math.round((score / max) * 100))) : null;
-  const homeMomentum = Math.max(1, (numberOrNull(data?.streak) ?? 0) + 1);
+  const liveStreak = numberOrNull(currentStreak);
+  const homeMomentum = Math.max(1, liveStreak ?? ((numberOrNull(data?.streak) ?? 0) + 1));
   const safeCompleted = Math.max(0, Number(completedCount) || 0);
   const safeTotal = Math.max(safeCompleted, Number(plannedTotal) || 0);
   const planComplete = safeTotal > 0 && safeCompleted >= safeTotal;
@@ -56,6 +58,7 @@ export default function PlayerTrainingCompletion({
         completedCount={safeCompleted}
         plannedTotal={safeTotal}
         nextCommitment={nextCommitment}
+        currentStreak={liveStreak}
         onDone={onContinue}
         onViewProgress={onViewProgress}
         onResume={() => setShowSessionCloseout(false)}
