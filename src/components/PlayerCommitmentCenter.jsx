@@ -143,6 +143,15 @@ export default function PlayerCommitmentCenter({
       data-testid={`player-commitment-center-${mode}`}
       data-mode={mode}
     >
+      <header className={styles.routeHeader} data-testid={`player-commitment-route-header-${mode}`}>
+        <div className={styles.routeEyebrow}>{model?.eyebrow || (isStrength ? "Physical development" : "Team commitments")}</div>
+        <div className={styles.routeTitleRow}>
+          <h1>{model?.title || (isStrength ? "Strength & Conditioning" : "Events & Attendance")}</h1>
+          <span>{model?.status || statusLabel}</span>
+        </div>
+        <p>{model?.subtitle || (isStrength ? "Keep every physical-development commitment clear." : "Keep every team commitment clear.")}</p>
+      </header>
+
       <div className={styles.hero} data-testid={`player-commitment-hero-${mode}`}>
         <div className={styles.heroTopline}>
           <span className={styles.eyebrow}>{eyebrow}</span>
