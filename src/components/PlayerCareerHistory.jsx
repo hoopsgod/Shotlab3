@@ -90,7 +90,7 @@ export default function PlayerCareerHistory({
     </section>
   );
 
-  return (
+  const careerContent = (
     <section className={styles.shell} data-testid="player-career-history" data-viewer-role={viewerRole} aria-labelledby={`player-career-history-title-${viewerRole}`}>
       <header className={`${styles.hero} ${isPlayerView ? styles.heroPlayer : ""}`}>
         {isPlayerView ? (
@@ -159,5 +159,16 @@ export default function PlayerCareerHistory({
 
       {!history.hasHistory && <div className={styles.empty}><ShotLabIcon name="training" size={24} /><strong>Your career record starts here.</strong><span>The first logged workout and every completed season archive will appear automatically.</span></div>}
     </section>
+  );
+
+  if (!isPlayerView) return careerContent;
+
+  return (
+    <details className={styles.careerDisclosure} data-testid="player-profile-career-disclosure">
+      <summary className={styles.careerDisclosureSummary}>
+        <span><span className={styles.sectionLabel}>Career history</span><strong>Verified season record</strong></span>
+      </summary>
+      <div className={styles.careerDisclosureBody}>{careerContent}</div>
+    </details>
   );
 }
