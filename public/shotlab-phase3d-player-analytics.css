@@ -1,0 +1,231 @@
+/* Phase 3D — Player Profile & Analytics Unification.
+   Presentation only: preserve every ShotLabCharts metric, score source, filter, history calculation, and interaction. */
+:root{
+  --p3d-canvas:#f4f5f1;
+  --p3d-surface:#ffffff;
+  --p3d-surface-soft:#f8f8f4;
+  --p3d-ink:#151a16;
+  --p3d-muted:#68716a;
+  --p3d-dim:#879089;
+  --p3d-line:rgba(21,26,22,.10);
+  --p3d-line-strong:rgba(21,26,22,.16);
+  --p3d-accent:var(--team-brand-primary,var(--accent,#8fae25));
+  --p3d-accent-deep:color-mix(in srgb,var(--p3d-accent) 78%,#243024);
+  --p3d-info:#237a86;
+  --p3d-warm:#a8611b;
+  --p3d-shadow:0 12px 30px rgba(24,31,27,.065);
+}
+
+/* ShotLabCharts is the only Profile child that still declares a 100vh legacy analytics canvas. */
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"]{
+  min-height:0!important;
+  margin:4px 0 24px!important;
+  padding-bottom:0!important;
+  background:transparent!important;
+  color:var(--p3d-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  border-radius:24px!important;
+  overflow:visible!important;
+}
+
+/* The old sticky analytics masthead becomes a calm in-flow native section header. */
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child{
+  position:relative!important;
+  top:auto!important;
+  z-index:1!important;
+  margin:0 0 12px!important;
+  padding:18px!important;
+  border:1px solid var(--p3d-line)!important;
+  border-radius:22px!important;
+  background:var(--p3d-surface)!important;
+  box-shadow:var(--p3d-shadow)!important;
+}
+
+/* The Profile route already establishes player identity. Keep only the analytics title here. */
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:first-child > div:first-child > div:first-child,
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:first-child > div:last-child{
+  display:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:first-child{
+  min-height:34px!important;
+  align-items:center!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:first-child > div:first-child > div:nth-child(2){
+  color:var(--p3d-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif!important;
+  font-size:25px!important;
+  font-weight:780!important;
+  line-height:1!important;
+  letter-spacing:-.04em!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:first-child > div:first-child > div:nth-child(2) span{
+  color:var(--p3d-accent-deep)!important;
+}
+
+/* Replace emoji-heavy analytics tabs with a restrained native segmented control. */
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:nth-child(2){
+  gap:4px!important;
+  margin-top:12px!important;
+  padding:4px!important;
+  overflow:visible!important;
+  border:1px solid var(--p3d-line)!important;
+  border-radius:14px!important;
+  background:var(--p3d-surface-soft)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:nth-child(2) button{
+  min-height:42px!important;
+  padding:8px 6px!important;
+  border-radius:10px!important;
+  color:var(--p3d-muted)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:10px!important;
+  font-weight:720!important;
+  letter-spacing:.02em!important;
+  box-shadow:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:nth-child(2) button > span:first-child{
+  display:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:nth-child(2) button[style*="background: rgb(184, 255, 0)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:nth-child(2) button[style*="background: #b8ff00"]{
+  background:color-mix(in srgb,var(--p3d-accent) 15%,#fff)!important;
+  color:var(--p3d-ink)!important;
+  box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--p3d-accent) 32%,transparent)!important;
+}
+
+/* The analytics content now follows the same single-gutter rhythm as the rest of Profile. */
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:nth-child(2){
+  padding:0!important;
+  gap:12px!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:nth-child(2) > div{
+  border:1px solid var(--p3d-line)!important;
+  border-radius:20px!important;
+  background:var(--p3d-surface)!important;
+  color:var(--p3d-ink)!important;
+  box-shadow:var(--p3d-shadow)!important;
+}
+
+/* Neutralize the old dark palette without touching the underlying chart values or markup. */
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: rgb(10, 10, 10)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: #0a0a0a"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: rgb(17, 19, 24)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: #111318"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: rgb(22, 27, 34)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: #161b22"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: rgb(26, 32, 48)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: #1a2030"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: rgb(13, 17, 23)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: #0d1117"]{
+  background:var(--p3d-surface-soft)!important;
+  background-image:none!important;
+  border-color:var(--p3d-line)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: rgb(42, 58, 26)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: #2a3a1a"]{
+  background:color-mix(in srgb,var(--p3d-accent) 11%,#fff)!important;
+  border-color:color-mix(in srgb,var(--p3d-accent) 30%,var(--p3d-line))!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: rgb(42, 48, 64)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: #2a3040"]{
+  background:var(--p3d-surface-soft)!important;
+}
+
+/* Translate legacy text tokens to the light Profile hierarchy. */
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: rgb(255, 255, 255)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: #ffffff"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: rgb(229, 231, 235)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: #e5e7eb"]{
+  color:var(--p3d-ink)!important;
+  -webkit-text-fill-color:var(--p3d-ink)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: rgb(107, 114, 128)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: #6b7280"]{
+  color:var(--p3d-muted)!important;
+  -webkit-text-fill-color:var(--p3d-muted)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: rgb(156, 163, 175)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: #9ca3af"]{
+  color:var(--p3d-dim)!important;
+  -webkit-text-fill-color:var(--p3d-dim)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: rgb(184, 255, 0)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: #b8ff00"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: rgb(122, 204, 0)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: #7acc00"]{
+  color:var(--p3d-accent-deep)!important;
+  -webkit-text-fill-color:var(--p3d-accent-deep)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: rgb(34, 211, 238)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: #22d3ee"]{
+  color:var(--p3d-info)!important;
+  -webkit-text-fill-color:var(--p3d-info)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: rgb(251, 146, 60)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="color: #fb923c"]{
+  color:var(--p3d-warm)!important;
+  -webkit-text-fill-color:var(--p3d-warm)!important;
+}
+
+/* Bright legacy fills become branded but restrained on light surfaces. */
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: rgb(184, 255, 0)"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="background: #b8ff00"]{
+  background:var(--p3d-accent)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] [style*="box-shadow"]{
+  box-shadow:none!important;
+}
+
+/* Recharts receives its legacy palette as SVG attributes rather than inline CSS. */
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] svg [stroke="#1e2530"]{
+  stroke:var(--p3d-line-strong)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] svg [fill="#1e2530"]{
+  fill:var(--p3d-line)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] svg [fill="#6b7280"]{
+  fill:var(--p3d-muted)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] svg [fill="#9ca3af"]{
+  fill:var(--p3d-dim)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] svg [stroke="#b8ff00"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] svg [fill="#b8ff00"]{
+  stroke:var(--p3d-accent)!important;
+  fill:var(--p3d-accent)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] svg [stroke="#22d3ee"],
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] svg [fill="#22d3ee"]{
+  stroke:var(--p3d-info)!important;
+  fill:var(--p3d-info)!important;
+}
+
+/* Touch and focus remain explicit after visual unification. */
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] button{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] button:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--p3d-accent) 32%,transparent)!important;
+  outline-offset:2px!important;
+}
+
+@media (max-width:820px){
+  .performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child{
+    padding:16px!important;
+    border-radius:20px!important;
+  }
+  .performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:nth-child(2) > div{
+    border-radius:18px!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] *,
+  .performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] *::before,
+  .performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] *::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}

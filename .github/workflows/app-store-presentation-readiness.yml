@@ -6,6 +6,7 @@ on:
       - march-3-reset-85393dd
       - agent/phase-3-secondary-cohesion
       - agent/phase-3b-interaction-polish
+      - agent/phase-3c-native-route-framing
     paths:
       - "native/app-store-listing.json"
       - "docs/app-store-presentation-package.md"
@@ -27,6 +28,7 @@ on:
       - "tests/phase-3-secondary-cohesion.test.mjs"
       - "tests/phase-3b-interaction-polish.test.mjs"
       - "tests/phase-3c-native-route-framing.test.mjs"
+      - "tests/phase-3d-player-analytics-unification.test.mjs"
       - "tests/mission-control-hierarchy-2026.test.mjs"
       - "tests/workspace-recovery.test.mjs"
       - "scripts/apply-expert-app-review-v2.mjs"
@@ -104,8 +106,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify integrated Phase 1, Phase 2, Phase 3, Phase 3B, and Phase 3C contracts
-        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/demo-data-currentness.test.mjs tests/visual-foundation-2026.test.mjs tests/native-identity-shell.test.mjs tests/mobile-navigation-contract.test.mjs tests/phase-2-command-hierarchy.test.mjs tests/phase-3-secondary-cohesion.test.mjs tests/phase-3b-interaction-polish.test.mjs tests/phase-3c-native-route-framing.test.mjs tests/mission-control-hierarchy-2026.test.mjs tests/workspace-recovery.test.mjs
+      - name: Verify integrated Phase 1, Phase 2, Phase 3, Phase 3B, Phase 3C, and Phase 3D contracts
+        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/demo-data-currentness.test.mjs tests/visual-foundation-2026.test.mjs tests/native-identity-shell.test.mjs tests/mobile-navigation-contract.test.mjs tests/phase-2-command-hierarchy.test.mjs tests/phase-3-secondary-cohesion.test.mjs tests/phase-3b-interaction-polish.test.mjs tests/phase-3c-native-route-framing.test.mjs tests/phase-3d-player-analytics-unification.test.mjs tests/mission-control-hierarchy-2026.test.mjs tests/workspace-recovery.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -128,7 +130,7 @@ jobs:
       - name: Upload App Store presentation package
         uses: actions/upload-artifact@v4
         with:
-          name: shotlab-phase-3c-native-route-framing-evidence
+          name: shotlab-phase-3d-player-analytics-evidence
           path: |
             artifacts/visual-foundation/
             artifacts/native-app-shell/
@@ -145,7 +147,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: shotlab-phase-3c-native-route-framing-failure
+          name: shotlab-phase-3d-player-analytics-failure
           path: |
             playwright-report-app-store/
             playwright-report/
