@@ -62,7 +62,10 @@ test("player mobile dock keeps Home, Train, and Progress direct while grouping s
   await sheet.locator('[data-nav-key="program"]').click();
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
   await expect(page).toHaveURL(/\/events$/);
-  await expect(page.getByText("PROGRAM EVENTS", { exact: true }).first()).toBeVisible();
+  const eventsCommitmentCenter = page.getByTestId("player-commitment-center-events");
+  await expect(eventsCommitmentCenter).toBeVisible();
+  await expect(eventsCommitmentCenter.getByRole("heading", { name: "Events & Attendance", exact: true })).toBeVisible();
+  await expect(page.getByTestId("player-events-operational-list")).toBeHidden();
 
   await dock.getByRole("button", { name: "Progress", exact: true }).click();
   await expect(page).toHaveURL(/\/leaderboards$/);
