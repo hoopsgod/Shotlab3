@@ -5,18 +5,18 @@
  */
 
 body.mission-control-active .performance-workspace--coach {
-  background: var(--bg-0, #f3f1ea) !important;
+  background: #f3f1ea !important;
 }
 
 body.mission-control-active .mcShellV3 {
   --mc-canvas: transparent;
-  --mc-surface: var(--surface-1, #ffffff);
-  --mc-surface-quiet: var(--surface-3, #f8f7f2);
-  --mc-ink: var(--text-1, #111a21);
-  --mc-muted: var(--text-2, #44515b);
-  --mc-dim: var(--text-3, #65717a);
-  --mc-line: var(--stroke-1, rgba(17, 26, 33, .09));
-  --mc-line-strong: var(--stroke-2, rgba(17, 26, 33, .15));
+  --mc-surface: #ffffff;
+  --mc-surface-quiet: #f5f4ef;
+  --mc-ink: #111a21;
+  --mc-muted: #44515b;
+  --mc-dim: #65717a;
+  --mc-line: rgba(17, 26, 33, .09);
+  --mc-line-strong: rgba(17, 26, 33, .15);
   color: var(--mc-ink) !important;
   background: var(--mc-canvas) !important;
   font-family: var(--font-body) !important;
@@ -67,6 +67,14 @@ body.mission-control-active .mcShellV3 .mcBrandCopy strong {
   text-transform: none !important;
 }
 
+body.mission-control-active .mcShellV3 .mcHeaderActions {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+}
+
 body.mission-control-active .mcShellV3 .mcTeamSelect,
 body.mission-control-active .mcShellV3 .mcBell,
 body.mission-control-active .mcShellV3 .mcMobileMenu {
@@ -114,10 +122,13 @@ body.mission-control-active .mcShellV3 .mcHero::after {
 
 body.mission-control-active .mcShellV3 .mcHeroTeamMark {
   position: absolute !important;
+  z-index: 4 !important;
   top: 26px !important;
   right: 28px !important;
   width: clamp(92px, 14vw, 132px) !important;
   height: clamp(92px, 14vw, 132px) !important;
+  display: grid !important;
+  place-items: center !important;
   padding: 0 !important;
   border: 0 !important;
   background: transparent !important;
@@ -141,14 +152,18 @@ body.mission-control-active .mcShellV3 .mcHeroTeamMark img {
 }
 
 body.mission-control-active .mcShellV3 .mcHeroContent {
+  position: relative !important;
+  z-index: 2 !important;
   max-width: none !important;
   padding: 30px !important;
   display: grid !important;
   grid-template-columns: minmax(0, 1fr) minmax(96px, 138px) !important;
   gap: 12px 26px !important;
   align-items: center !important;
+  border: 0 !important;
   background: transparent !important;
   color: var(--performance-copy, #f5f8f9) !important;
+  box-shadow: none !important;
 }
 
 body.mission-control-active .mcShellV3 .mcEyebrow {
