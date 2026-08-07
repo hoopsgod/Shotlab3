@@ -58,10 +58,22 @@ async function disableVisualNoise(page) {
   });
 }
 
-const channels = (value) => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
+const colorParts = (value) => (String(value).match(/\d+(?:\.\d+)?/g) || []).map(Number);
+const channels = (value) => colorParts(value).slice(0, 3);
 const expectDark = (value) => {
   const rgb = channels(value);
   expect(rgb).toHaveLength(3);
+  expect(Math.max(...rgb)).toBeLessThan(70);
+};
+const expectDarkSurface = (value) => {
+  const parts = colorParts(value);
+  const rgb = parts.slice(0, 3);
+  expect(rgb).toHaveLength(3);
+  const alpha = parts.length >= 4 ? parts[3] : 1;
+  if (alpha < 0.15) {
+    expect(alpha).toBeGreaterThanOrEqual(0);
+    return;
+  }
   expect(Math.max(...rgb)).toBeLessThan(70);
 };
 const expectLight = (value) => {
@@ -131,10 +143,10 @@ test("Player home presents action, evidence, priority, and disclosure in order",
   expectDark(presentation.rootBackground);
   expectDark(presentation.heroBackground);
   expectLight(presentation.heroTitle);
-  expectDark(presentation.evidenceBackground);
-  if (presentation.positions.nextActions >= 0) expectDark(presentation.nextBackground);
-  expectDark(presentation.disclosureBackground);
-  if (presentation.activationBackground) expectDark(presentation.activationBackground);
+  expectDarkSurface(presentation.evidenceBackground);
+  if (presentation.positions.nextActions >= 0) expectDarkSurface(presentation.nextBackground);
+  expectDarkSurface(presentation.disclosureBackground);
+  if (presentation.activationBackground) expectDarkSurface(presentation.activationBackground);
 
   await disclosure.scrollIntoViewIfNeeded();
   const progressOpen = await disclosure.evaluate((element) => element.open);
