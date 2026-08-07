@@ -37,12 +37,13 @@
   }
 
   html.team-store-portal-open .ts-overlay {
-    position: absolute !important;
+    position: fixed !important;
     inset: 0 !important;
     z-index: 1 !important;
-    width: 100% !important;
-    height: 100% !important;
-    min-height: 100% !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    margin: 0 !important;
     padding: 0 !important;
     display: block !important;
     background: #f6f7f3 !important;
@@ -52,8 +53,10 @@
   }
 
   html.team-store-portal-open .ts-panel {
-    position: relative !important;
-    width: 100% !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 2 !important;
+    width: 100vw !important;
     max-width: none !important;
     height: 100dvh !important;
     min-height: 100dvh !important;
@@ -62,6 +65,7 @@
     border: 0 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
+    transform: none !important;
     overflow-x: hidden !important;
     overflow-y: auto !important;
     overscroll-behavior: contain;
