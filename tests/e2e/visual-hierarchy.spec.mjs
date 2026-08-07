@@ -34,7 +34,7 @@ async function expectThreeMetrics(locator) {
 }
 
 function visibleCreateEventButton(page) {
-  return page.locator('[data-testid="coach-events-mobile-create-event"]:visible').first();
+  return page.getByRole("button", { name: "Create Event", exact: true });
 }
 
 test.beforeEach(async ({ page }) => {
