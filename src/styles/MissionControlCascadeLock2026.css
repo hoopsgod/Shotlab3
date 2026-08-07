@@ -1,0 +1,32 @@
+/* Final Phase 2 cascade lock for legacy mobile authorities loaded after the app bundle. */
+html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHero {
+  background-color: #0d171e !important;
+  background-image:
+    radial-gradient(circle at 92% 6%, color-mix(in srgb, var(--mc, #c8ff1a) 18%, transparent), transparent 34%),
+    linear-gradient(145deg, #0d171e 0%, #13222b 100%) !important;
+}
+
+html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHeroContent {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcAttentionRow {
+  border-color: rgba(17, 26, 33, .10) !important;
+  background: #f5f4ef !important;
+  color: #111a21 !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcAttentionCopy strong {
+  color: #111a21 !important;
+  -webkit-text-fill-color: #111a21 !important;
+}
+
+html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcAttentionCopy small,
+html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcAttentionMeta,
+html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcRowAction {
+  color: #44515b !important;
+  -webkit-text-fill-color: #44515b !important;
+}
