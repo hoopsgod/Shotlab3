@@ -2,7 +2,7 @@ import { defineConfig } from "@playwright/test";
 
 export default defineConfig({
   testDir: "./tests/e2e",
-  testMatch: ["app-store-screenshots.spec.mjs", "auth-landing-regression.spec.mjs", "design-system-screenshots.spec.mjs", "phase-3k-coach-strength-screenshots.spec.mjs", "phase-3l-coach-leaderboard-screenshots.spec.mjs", "phase-3m-player-team-store-retail-screenshots.spec.mjs"],
+  testMatch: ["app-store-screenshots.spec.mjs", "auth-landing-regression.spec.mjs", "design-system-screenshots.spec.mjs", "phase-3k-coach-strength-screenshots.spec.mjs", "phase-3l-coach-leaderboard-screenshots.spec.mjs", "phase-3m-player-team-store-retail-screenshots.spec.mjs", "phase-3n-player-commitments-screenshots.spec.mjs"],
   fullyParallel: false,
   forbidOnly: true,
   retries: 0,
