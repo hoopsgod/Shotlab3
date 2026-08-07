@@ -126,7 +126,7 @@ test("daily command center resolves urgent commitment then launches one bounded 
 test("logging the first result activates progress and confirms the baseline", async ({ page }) => {
   await enterSeededDemoPlayer(page);
 
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "At Home", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await page.getByRole("spinbutton").first().fill("33");
   await page.getByRole("button", { name: "LOG SHOTS", exact: true }).first().click();
 
