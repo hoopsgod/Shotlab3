@@ -28,6 +28,10 @@ test('supporting RSVP and calendar intelligence becomes one mobile disclosure wi
   assert.match(enhancer, /DashboardProgress/);
 });
 
+test('supporting disclosure preserves the established decision-first grid order', () => {
+  assert.match(css, /\.coachEventsSupportingIntelligence[\s\S]*order: 4 !important/);
+});
+
 test('desktop preserves expanded supporting intelligence while iPhone defaults it closed', () => {
   assert.match(enhancer, /open=\{typeof window !== \"undefined\" && window\.innerWidth > 760\}/);
   assert.match(css, /@media \(min-width: 761px\)[\s\S]*coachEventsSupportingSummary[\s\S]*display: none/);
