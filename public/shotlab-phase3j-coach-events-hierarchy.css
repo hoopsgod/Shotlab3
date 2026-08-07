@@ -61,31 +61,36 @@
     outline-offset: -3px;
   }
 
-  .coachEventsSupportingSummaryCopy {
-    min-width: 0;
-    display: grid;
-    gap: 3px;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummary > .coachEventsSupportingSummaryCopy {
+    all: unset !important;
+    min-width: 0 !important;
+    display: grid !important;
+    gap: 3px !important;
+    color: #171a18 !important;
     opacity: 1 !important;
     filter: none !important;
+    transform: none !important;
   }
 
-  .coachEventsSupportingSummaryCopy > span,
-  .coachEventsSupportingSummaryCopy > strong,
-  .coachEventsSupportingSummaryCopy > small {
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummary > .coachEventsSupportingSummaryCopy::before,
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummary > .coachEventsSupportingSummaryCopy::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummaryCopy > span,
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummaryCopy > strong,
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummaryCopy > small {
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
+    outline: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
     opacity: 1 !important;
     filter: none !important;
+    transform: none !important;
   }
 
   .coachEventsSupportingSummaryCopy > span {
