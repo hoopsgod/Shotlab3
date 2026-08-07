@@ -64,18 +64,18 @@ export default function PlayerProgressStory({
   return (
     <section className={styles.root} data-testid="player-progress-story" data-trend={story.trend}>
       <div className={styles.hero} data-testid="player-progress-story-hero">
-        <div className={styles.heroTopline}>
+        <div className={styles.heroTopline} data-testid="player-progress-story-topline">
           <span>DEVELOPMENT STORY</span>
           <span data-testid="player-progress-trend-badge">{trendWord}</span>
         </div>
-        <div className={styles.heroGrid}>
-          <div className={styles.heroCopy}>
+        <div className={styles.heroGrid} data-testid="player-progress-story-hero-grid">
+          <div className={styles.heroCopy} data-testid="player-progress-story-copy">
             <span className={styles.playerLabel}>{firstName.toUpperCase()} · LAST 14 DAYS</span>
             <h2>{story.headline}</h2>
             <p>{story.trendDetail}</p>
           </div>
           <div className={styles.trendPanel} data-testid="player-progress-trend-chart">
-            <div>
+            <div data-testid="player-progress-trend-summary">
               <span>AT-HOME VOLUME</span>
               <strong>{story.recent7Makes}</strong>
               <small>makes · last 7 days</small>
