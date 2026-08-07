@@ -241,6 +241,7 @@ test("capture Coach App Store presentation assets", async ({ page }) => {
   await captureMarketingAsset(page, itemFor(5));
 
   await openNavigation(page, "Schedule");
-  await expect(page.getByText("Team Practice", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("heading", { name: "Events", exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText("Calendar is open", { exact: true })).toBeVisible();
   await captureMarketingAsset(page, itemFor(6));
 });
