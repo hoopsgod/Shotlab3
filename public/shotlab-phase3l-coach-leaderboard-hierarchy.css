@@ -180,7 +180,8 @@
 }
 
 @media (max-width: 760px) {
-  #root [data-testid="coach-page-dashboard-leaderboards"] {
+  html body #root [data-testid="coach-page-dashboard-leaderboards"] {
+    min-height: 0 !important;
     gap: 8px !important;
     padding: 8px 14px 12px !important;
   }
