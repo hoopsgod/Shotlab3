@@ -57,6 +57,30 @@ test("player progress profile opens with a factual development story before deep
   expect(parseFloat(heroStyle.radius)).toBeGreaterThanOrEqual(24);
   expect(heroStyle.titleColor).toBe("rgb(248, 250, 245)");
 
+  const transparentHeroSeams = [
+    "player-progress-story-topline",
+    "player-progress-story-hero-grid",
+    "player-progress-story-copy",
+    "player-progress-trend-summary",
+  ];
+  for (const testId of transparentHeroSeams) {
+    const style = await story.getByTestId(testId).evaluate((node) => ({
+      backgroundColor: getComputedStyle(node).backgroundColor,
+      backgroundImage: getComputedStyle(node).backgroundImage,
+    }));
+    expect(style.backgroundColor, `${testId} must stay transparent inside dark hero`).toBe("rgba(0, 0, 0, 0)");
+    expect(style.backgroundImage, `${testId} must not receive demo background art`).toBe("none");
+  }
+
+  const trendStyle = await story.getByTestId("player-progress-trend-chart").evaluate((node) => ({
+    backgroundColor: getComputedStyle(node).backgroundColor,
+    backgroundImage: getComputedStyle(node).backgroundImage,
+    scoreColor: getComputedStyle(node.querySelector("strong")).color,
+  }));
+  expect(trendStyle.backgroundColor).toBe("rgba(255, 255, 255, 0.04)");
+  expect(trendStyle.backgroundImage).toBe("none");
+  expect(trendStyle.scoreColor).toBe("rgb(248, 250, 245)");
+
   const focusStyle = await story.getByTestId("player-progress-start-focus").evaluate((node) => ({
     backgroundColor: getComputedStyle(node).backgroundColor,
     color: getComputedStyle(node).color,
