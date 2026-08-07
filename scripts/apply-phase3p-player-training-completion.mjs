@@ -9,6 +9,7 @@ const requireOne = (source, anchor, label) => {
 const path = 'src/App.jsx';
 let source = readFileSync(path, 'utf8');
 const marker = '<PlayerTrainingCompletion data={shareData}';
+const legacyShareInstruction = '      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:12}}>Screenshot your card and share on social media</div>';
 
 if (source.includes(marker)) {
   for (const preserved of [
@@ -22,6 +23,7 @@ if (source.includes(marker)) {
   ]) {
     if (!source.includes(preserved)) fail(`transformed completion flow is missing ${preserved}`);
   }
+  if (source.includes(legacyShareInstruction)) fail('transformed completion flow still exposes the obsolete share-first instruction');
   console.log('Phase 3P Player Training Completion already applied.');
   process.exit(0);
 }
@@ -56,6 +58,9 @@ requireOne(source, legacyCompletion, 'legacy completion actions');
 const premiumCompletion = `      {!showChallForm?<PlayerTrainingCompletion data={shareData} shareCard={<ShareCard data={shareData}/>} canChallenge={shareData?.src!=="program"} onContinue={closeShare} onChallenge={()=>setShowChallForm(true)}/>`;
 source = source.replace(legacyCompletion, premiumCompletion);
 
+requireOne(source, legacyShareInstruction, 'legacy share instruction');
+source = source.replace(legacyShareInstruction, '');
+
 for (const preserved of [
   'setSaved(true)',
   'setConfetti(true)',
@@ -70,6 +75,7 @@ for (const preserved of [
 ]) {
   if (!source.includes(preserved)) fail(`Player completion capability removed: ${preserved}`);
 }
+if (source.includes(legacyShareInstruction)) fail('obsolete share-first instruction survived Phase 3P transform');
 
 writeFileSync(path, source);
 console.log('Applied Phase 3P Player Training Completion hierarchy.');
