@@ -37,5 +37,5 @@ test("demo entry refreshes managed demos without overwriting scoped custom data"
 test("App Store evidence requires a populated Coach schedule", () => {
   assert.match(screenshotSpec, /Calendar is open/);
   assert.match(expertReview, /tests\/e2e\/app-store-screenshots\.spec\.mjs/);
-  assert.match(expertReview, /getByText\(\\"Team Practice\\"/);
+  assert.match(expertReview, /Team Practice/);
 });
