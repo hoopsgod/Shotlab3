@@ -26,7 +26,7 @@ test("normal launch clears stale demo authentication and renders the full welcom
 
   await expect(page).not.toHaveURL(/demo=1/);
   await expect(page.getByRole("button", { name: /^sign in$/i }).first()).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByRole("button", { name: /^create account$/i }).first()).toBeVisible();
+  await expect(page.getByRole("tab", { name: /^create account$/i })).toBeVisible();
   await expect(page.getByRole("button", { name: /^coach demo$/i })).toBeVisible();
   await expect(page.getByRole("button", { name: /^player demo$/i })).toBeVisible();
   await expect(page.getByText(/mission control/i)).toHaveCount(0);
