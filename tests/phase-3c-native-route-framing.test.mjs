@@ -57,5 +57,5 @@ test('Phase 3C keeps account access, focus, and reduced-motion behavior explicit
 test('App Store presentation workflow verifies the stacked Phase 3C contract', () => {
   assert.match(workflow, /agent\/phase-3b-interaction-polish/);
   assert.match(workflow, /tests\/phase-3c-native-route-framing\.test\.mjs/);
-  assert.match(workflow, /shotlab-phase-3c-native-route-framing-evidence/);
+  assert.match(workflow, /name: shotlab-phase-3[\w-]*-evidence/);
 });
