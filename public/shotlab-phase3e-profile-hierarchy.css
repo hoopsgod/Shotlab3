@@ -12,7 +12,7 @@
 
 /* The report card + route header already establish identity. Remove the second avatar/name hero only.
    The hero is nested inside the Profile content wrapper in the rendered DOM, so use a descendant lock.
-   Its inline-style signature is unique within ProfilePage and avoids brittle text or :has() matching. */
+   Its inline-style signature is unique within ProfilePage and avoids brittle ancestor-dependent matching. */
 .performance-shell--player[data-workspace-tab="profile"] .fade-up div[style*="padding: 28px 22px"][style*="text-align: center"][style*="position: relative"][style*="overflow: hidden"],
 .performance-shell--player[data-workspace-tab="profile"] .fade-up div[style*="padding:28px 22px"][style*="text-align:center"][style*="position:relative"][style*="overflow:hidden"]{
   display:none!important;
