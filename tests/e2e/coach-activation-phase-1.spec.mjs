@@ -26,7 +26,7 @@ async function enterFreshCoachDemo(page) {
     window.sessionStorage.clear();
   });
   await page.goto("/");
-  await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
+  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
