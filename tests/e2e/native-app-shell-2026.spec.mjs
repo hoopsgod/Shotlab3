@@ -7,14 +7,14 @@ const ROLE_EXPECTATIONS = {
   coach: {
     demoButton: /Coach demo/i,
     homeReady: "coach-command-center-full",
-    identity: "coach-dashboard-identity-header",
+    identitySelector: ".mcHeader",
     tabs: ["Home", "Players", "Schedule", "More"],
     screenshot: "coach",
   },
   player: {
     demoButton: /Player demo/i,
     homeReady: "player-daily-command-center",
-    identity: "player-dashboard-identity-header",
+    identityTestId: "player-dashboard-identity-header",
     tabs: ["Home", "Train", "Progress", "More"],
     screenshot: "player",
   },
@@ -85,7 +85,8 @@ async function enterRole(page, role) {
   await expect(demoButton).toBeVisible({ timeout: 20_000 });
   await demoButton.click();
   await expect(page.getByTestId(expected.homeReady)).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId(expected.identity)).toBeVisible();
+  if (expected.identityTestId) await expect(page.getByTestId(expected.identityTestId)).toBeVisible();
+  if (expected.identitySelector) await expect(page.locator(expected.identitySelector)).toBeVisible();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible();
   await disableVisualNoise(page);
 }
@@ -106,9 +107,11 @@ async function expectFloatingDock(page, expectedLabels) {
       bottomGap: window.innerHeight - rect.bottom,
       radius: Number.parseFloat(style.borderTopLeftRadius),
       position: style.position,
+      parentTag: element.parentElement?.tagName || "",
     };
   });
   expect(geometry.position).toBe("fixed");
+  expect(geometry.parentTag).toBe("BODY");
   expect(geometry.leftGap).toBeGreaterThanOrEqual(7);
   expect(geometry.rightGap).toBeGreaterThanOrEqual(7);
   expect(Math.abs(geometry.leftGap - geometry.rightGap)).toBeLessThanOrEqual(2);
@@ -138,8 +141,10 @@ async function openAndVerifyMoreSheet(page, role) {
       rightGap: window.innerWidth - rect.right,
       bottomGap: window.innerHeight - rect.bottom,
       radius: Number.parseFloat(style.borderTopLeftRadius),
+      parentTag: element.parentElement?.parentElement?.tagName || "",
     };
   });
+  expect(sheetGeometry.parentTag).toBe("BODY");
   expect(sheetGeometry.leftGap).toBeGreaterThanOrEqual(8);
   expect(sheetGeometry.rightGap).toBeGreaterThanOrEqual(8);
   expect(sheetGeometry.bottomGap).toBeGreaterThanOrEqual(8);
