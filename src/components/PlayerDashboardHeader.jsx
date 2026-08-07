@@ -1,5 +1,5 @@
 import { useTeamBranding } from "../context/TeamBrandingContext";
-import styles from "./PlayerDashboardHeader.module.css";
+import styles from "./DashboardIdentityHeader.module.css";
 
 export default function PlayerDashboardHeader({
   userName,
@@ -12,7 +12,7 @@ export default function PlayerDashboardHeader({
   const displayName = String(userName || "Demo Player").trim();
 
   return (
-    <section className={styles.header} data-dashboard-header="player-premium" data-testid="player-dashboard-identity-header">
+    <section className={`${styles.header} ${styles.player}`} data-dashboard-header="player-premium" data-testid="player-dashboard-identity-header">
       <div className={styles.inner}>
         <div className={styles.identity}>
           <div className={styles.modeRow}>
@@ -29,7 +29,6 @@ export default function PlayerDashboardHeader({
         </div>
         <div className={styles.brandPanel} aria-hidden="true">
           <img className={styles.brandMark} src={logoSrc} alt="" />
-          <span className={styles.brandCaption}>Team identity</span>
         </div>
       </div>
     </section>

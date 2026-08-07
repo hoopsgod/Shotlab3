@@ -5,7 +5,7 @@ import fs from 'node:fs';
 const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
 const playerHeaderSource = fs.readFileSync(new URL('../src/components/PlayerDashboardHeader.jsx', import.meta.url), 'utf8');
 const coachHeaderSource = fs.readFileSync(new URL('../src/components/CoachDashboardHeader.jsx', import.meta.url), 'utf8');
-const headerCss = fs.readFileSync(new URL('../src/components/CoachDashboardHeader.module.css', import.meta.url), 'utf8');
+const headerCss = fs.readFileSync(new URL('../src/components/DashboardIdentityHeader.module.css', import.meta.url), 'utf8');
 
 const playerHeaderStart = appSource.indexOf('<PlayerDashboardHeader');
 const playerHeaderEnd = playerHeaderStart >= 0 ? appSource.indexOf('\n/>', playerHeaderStart) : -1;
@@ -30,9 +30,9 @@ test('player dashboard heading renders player identity through premium header sy
   assert.match(playerHeaderSource, /Demo Player/);
   assert.match(playerHeaderSource, /Player Mode/);
   assert.match(playerHeaderSource, /data-dashboard-header="player-premium"/);
-  assert.match(playerHeaderSource, /CoachDashboardHeader\.module\.css/);
-  assert.match(headerCss, /\.playerHeader/);
-  assert.doesNotMatch(headerCss, /\.playerHeader \.name \{ font-size: clamp\(24px, 8vw, 34px\); \}/);
+  assert.match(playerHeaderSource, /DashboardIdentityHeader\.module\.css/);
+  assert.match(headerCss, /\.player\{/);
+  assert.doesNotMatch(headerCss, /font-size:clamp\(24px,8vw,34px\)/);
 });
 
 test('player heading keeps coach-only controls out of the player header', () => {
@@ -67,16 +67,18 @@ test('player quick actions do not render Theme or wire setTheme', () => {
   assert.doesNotMatch(playerFunctionSignature, /setTheme/);
 });
 
-test('player dashboard header keeps the 1135 coach-style hero structure with large brand mark', () => {
+test('player dashboard header keeps a shared premium hero with large brand mark', () => {
   assert.match(playerHeaderSource, /useTeamBranding/);
-  assert.match(playerHeaderSource, /className=\{`\$\{styles\.header\} \$\{styles\.playerHeader\}`\}/);
+  assert.match(playerHeaderSource, /className=\{`\$\{styles\.header\} \$\{styles\.player\}`\}/);
   assert.match(playerHeaderSource, /<div className=\{styles\.inner\}>/);
   assert.match(playerHeaderSource, /<div className=\{styles\.identity\}>/);
   assert.match(playerHeaderSource, /<span className=\{styles\.badge\}>Player Mode<\/span>/);
+  assert.match(playerHeaderSource, /<span className=\{styles\.teamName\}>\{teamName\}<\/span>/);
   assert.match(playerHeaderSource, /<h1 className=\{styles\.name\}>/);
   assert.match(playerHeaderSource, /<p className=\{styles\.tagline\}>\{subtitle\}<\/p>/);
-  assert.match(playerHeaderSource, /<div className=\{styles\.meta\}>/);
+  assert.match(playerHeaderSource, /<div className=\{styles\.mission\}>/);
   assert.match(playerHeaderSource, /<img className=\{styles\.brandMark\}/);
+  assert.match(headerCss, /\.brandMark\{[^}]*width:96px/);
 });
 
 test('player dashboard header does not include compact avatar or action cluster structure', () => {

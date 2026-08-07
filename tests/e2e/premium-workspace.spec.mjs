@@ -13,7 +13,7 @@ async function enterDemo(page, role) {
     window.sessionStorage.clear();
   });
   await page.reload();
-  await page.getByRole("button", { name: role === "coach" ? "Demo Coach" : "Demo Player", exact: true }).click();
+  await page.getByRole("button", { name: role === "coach" ? "Coach demo" : "Player demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -87,7 +87,7 @@ test("coach secondary workspaces share the Mission Control visual system", async
   await expect(page.getByRole("heading", { name: "PLAYER ROSTER", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: /ADD PLAYER & SEND INVITE/i })).toBeVisible();
 
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Events", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
   await expectWorkspace(page, "coach", "events");
   await expect(page.getByTestId("coach-events-command-bar")).toBeVisible();
   await expect(page.getByTestId("coach-events-metric-strip")).toBeVisible();
@@ -119,10 +119,14 @@ test("player workspaces share premium surfaces and preserve mobile geometry", as
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
   await expect(commandCenter.getByTestId("player-daily-primary-action")).toBeVisible();
 
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "At Home", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await expectWorkspace(page, "player", "log-drill");
 
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Program", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
+  await expectWorkspace(page, "player", "leaderboards");
+  await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
+
+  await openMoreDestination(page, "duels");
   await expectWorkspace(page, "player", "duels");
 
   await openMoreDestination(page, "program");
@@ -130,10 +134,6 @@ test("player workspaces share premium surfaces and preserve mobile geometry", as
 
   await openMoreDestination(page, "sc");
   await expectWorkspace(page, "player", "sc");
-
-  await openMoreDestination(page, "leaderboards");
-  await expectWorkspace(page, "player", "leaderboards");
-  await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
 
   await openMoreDestination(page, "profile");
   await expectWorkspace(page, "player", "profile");

@@ -1,0 +1,115 @@
+/* ShotLab 2026 Phase 2 — Player command hierarchy. */
+[data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] {
+  --text-1: #f5f8f9;
+  --text-2: #c3cdd2;
+  --text-3: #9ba7ae;
+  width: min(100%, 920px);
+  margin-inline: auto;
+  padding: clamp(18px, 3vw, 26px);
+  border-radius: 28px;
+}
+
+/* Player operational command cards are dark surfaces inside the light Player shell.
+   Re-establish local readable text tokens so Phase 1 light-shell ink cannot bleed in. */
+.performance-shell--player [data-testid^="player-"][data-testid$="-workspace"] {
+  --text-1: #f5f8f9;
+  --text-2: #c3cdd2;
+  --text-3: #9ba7ae;
+}
+
+[data-testid="player-daily-command-center"] [data-command-role="primary"] {
+  margin-top: 14px;
+  padding: clamp(20px, 3.6vw, 28px);
+  border-radius: 24px;
+}
+[data-testid="player-daily-command-center"] [data-command-role="primary"] h1 {
+  max-width: 14ch;
+  font-size: clamp(34px, 7vw, 52px);
+}
+[data-testid="player-command-evidence"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 14px;
+}
+[data-testid="player-command-evidence"] > div {
+  min-height: 92px;
+  padding: 13px;
+}
+[data-testid="player-command-evidence"] [class*="progressValue"] {
+  font-size: clamp(20px, 4.8vw, 26px);
+  white-space: nowrap;
+}
+[data-testid="player-command-evidence"] [class*="progressTrack"] { height: 4px; }
+[data-testid="player-daily-command-center"] [data-command-role="coach-priority"] { margin-top: 18px; }
+[data-testid="player-daily-command-center"] [data-command-role="next-actions"] { margin-top: 20px; padding-top: 20px; }
+[data-testid="player-daily-command-center"] [data-command-role="activation"] { margin-top: 18px; }
+
+.playerProgressDisclosure {
+  margin-top: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .025);
+}
+.playerProgressDisclosure > summary {
+  min-height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 16px;
+  color: #f5f8f9;
+  cursor: pointer;
+  list-style: none;
+}
+.playerProgressDisclosure > summary::-webkit-details-marker,
+.playerProgressDisclosure > summary > span:last-child { display: none; }
+.playerProgressDisclosure > summary::after {
+  content: "+";
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255, 255, 255, .11);
+  border-radius: 50%;
+  color: #c3cdd2;
+  background: rgba(255, 255, 255, .04);
+  font-size: 20px;
+}
+.playerProgressDisclosure[open] > summary::after { content: "−"; }
+.playerProgressDisclosure > summary > span:first-child { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.playerProgressDisclosure > summary small {
+  color: #9ba7ae;
+  font-size: 9px;
+  font-weight: 720;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+}
+.playerProgressDisclosure > summary strong {
+  overflow: hidden;
+  color: #f5f8f9;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 720;
+  letter-spacing: -.025em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.playerProgressDisclosure > summary:focus-visible { outline: 3px solid rgba(126, 158, 30, .24); outline-offset: -3px; }
+.playerProgressDisclosureBody { padding: 0 16px 16px; border-top: 1px solid rgba(255, 255, 255, .07); }
+
+@media (max-width: 760px) {
+  [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] { padding: 16px; border-radius: 24px; }
+  [data-testid="player-daily-command-center"] [data-command-role="primary"] { padding: 19px 17px; }
+  [data-testid="player-daily-command-center"] [data-command-role="primary"] h1 { font-size: clamp(32px, 10vw, 44px); }
+}
+@media (max-width: 390px) {
+  [data-testid="player-command-evidence"] { gap: 7px; }
+  [data-testid="player-command-evidence"] > div { min-height: 86px; padding: 10px 9px; }
+  [data-testid="player-command-evidence"] [class*="sectionLabel"] { letter-spacing: .035em; }
+  .playerProgressDisclosure > summary { padding-inline: 13px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .playerProgressDisclosure,
+  .playerProgressDisclosure * { scroll-behavior: auto !important; transition: none !important; }
+}

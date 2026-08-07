@@ -1,0 +1,447 @@
+/*
+ * ShotLab 2026 — Phase 2 Mission Control hierarchy
+ * Presentation-only authority loaded after VisualFoundation2026.css.
+ * Functional hooks, actions, routing, and data selectors remain unchanged.
+ */
+
+body.mission-control-active .performance-workspace--coach {
+  background: #f3f1ea !important;
+}
+
+body.mission-control-active .mcShellV3 {
+  --mc-canvas: transparent;
+  --mc-surface: #ffffff;
+  --mc-surface-quiet: #f5f4ef;
+  --mc-ink: #111a21;
+  --mc-muted: #44515b;
+  --mc-dim: #65717a;
+  --mc-line: rgba(17, 26, 33, .09);
+  --mc-line-strong: rgba(17, 26, 33, .15);
+  color: var(--mc-ink) !important;
+  background: var(--mc-canvas) !important;
+  font-family: var(--font-body) !important;
+}
+
+body.mission-control-active .mcShellV3 .missionControl {
+  width: min(100%, 1120px) !important;
+  margin-inline: auto !important;
+  padding: 10px 16px 112px !important;
+  gap: 20px !important;
+  background: transparent !important;
+}
+
+/* Compact editorial command bar. */
+body.mission-control-active .mcShellV3 .mcHeader {
+  min-height: 0 !important;
+  padding: 10px 12px !important;
+  border: 1px solid var(--mc-line) !important;
+  border-radius: 18px !important;
+  background: rgba(255, 255, 255, .86) !important;
+  color: var(--mc-ink) !important;
+  box-shadow: 0 1px 2px rgba(17, 26, 33, .04), 0 10px 30px rgba(17, 26, 33, .045) !important;
+  -webkit-backdrop-filter: blur(18px) saturate(120%) !important;
+  backdrop-filter: blur(18px) saturate(120%) !important;
+}
+
+body.mission-control-active .mcShellV3 .mcBrandLockup {
+  min-width: 0 !important;
+}
+
+body.mission-control-active .mcShellV3 .mcBrandCopy small {
+  color: var(--mc-dim) !important;
+  font-family: var(--font-body) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: .04em !important;
+  text-transform: uppercase !important;
+}
+
+body.mission-control-active .mcShellV3 .mcBrandCopy strong {
+  color: var(--mc-ink) !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(20px, 4vw, 25px) !important;
+  font-weight: 790 !important;
+  line-height: 1 !important;
+  letter-spacing: -.04em !important;
+  text-transform: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcHeaderActions {
+  min-width: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 7px !important;
+}
+
+body.mission-control-active .mcShellV3 .mcTeamSelect,
+body.mission-control-active .mcShellV3 .mcBell,
+body.mission-control-active .mcShellV3 .mcMobileMenu {
+  min-height: 44px !important;
+  min-width: 44px !important;
+  border: 1px solid var(--mc-line) !important;
+  border-radius: 13px !important;
+  background: #ffffff !important;
+  color: var(--mc-ink) !important;
+  box-shadow: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcTeamSelect {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  max-width: min(210px, 44vw) !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+/* One dominant performance moment. */
+body.mission-control-active .mcShellV3 .mcHero {
+  position: relative !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  border: 1px solid rgba(255, 255, 255, .10) !important;
+  border-radius: 26px !important;
+  background:
+    radial-gradient(circle at 92% 6%, color-mix(in srgb, var(--mc, #c8ff1a) 18%, transparent), transparent 34%),
+    linear-gradient(145deg, #0d171e 0%, #13222b 100%) !important;
+  color: var(--performance-copy, #f5f8f9) !important;
+  box-shadow: 0 20px 54px rgba(17, 26, 33, .16) !important;
+  overflow: hidden !important;
+}
+
+body.mission-control-active .mcShellV3 .mcCourtArtwork,
+body.mission-control-active .mcShellV3 .mcHeroScrim,
+body.mission-control-active .mcShellV3 .mcHero::before,
+body.mission-control-active .mcShellV3 .mcHero::after {
+  display: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcHeroTeamMark {
+  position: absolute !important;
+  z-index: 4 !important;
+  top: 26px !important;
+  right: 28px !important;
+  width: clamp(92px, 14vw, 132px) !important;
+  height: clamp(92px, 14vw, 132px) !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  opacity: .98 !important;
+}
+
+body.mission-control-active .mcShellV3 .mcHeroTeamMark:focus-visible {
+  outline: 3px solid rgba(200, 255, 26, .42) !important;
+  outline-offset: 5px !important;
+  border-radius: 18px !important;
+}
+
+body.mission-control-active .mcShellV3 .mcHeroTeamMark img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, .20)) !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcHeroContent {
+  position: relative !important;
+  z-index: 2 !important;
+  max-width: none !important;
+  padding: 30px !important;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(96px, 138px) !important;
+  gap: 12px 26px !important;
+  align-items: center !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--performance-copy, #f5f8f9) !important;
+  box-shadow: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcEyebrow {
+  grid-column: 1 !important;
+  color: #c8ff1a !important;
+  font-family: var(--font-body) !important;
+  font-size: 10px !important;
+  font-weight: 760 !important;
+  line-height: 1.2 !important;
+  letter-spacing: .09em !important;
+  text-transform: uppercase !important;
+}
+
+body.mission-control-active .mcShellV3 .mcHero h1 {
+  grid-column: 1 !important;
+  max-width: 13ch !important;
+  margin: 0 !important;
+  color: var(--performance-copy, #f5f8f9) !important;
+  font-family: var(--font-display) !important;
+  font-size: clamp(38px, 6vw, 58px) !important;
+  font-weight: 800 !important;
+  line-height: .98 !important;
+  letter-spacing: -.055em !important;
+  text-transform: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcHeroContent > p {
+  grid-column: 1 !important;
+  max-width: 54ch !important;
+  margin: 2px 0 0 !important;
+  color: var(--performance-muted, #a9b5bc) !important;
+  font-family: var(--font-body) !important;
+  font-size: 15px !important;
+  line-height: 1.48 !important;
+  letter-spacing: -.008em !important;
+}
+
+/* Three compact truths instead of three competing cards. */
+body.mission-control-active .mcShellV3 .mcRealityStrip {
+  grid-column: 1 / -1 !important;
+  display: grid !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  margin: 12px 0 0 !important;
+  border-block: 1px solid rgba(255, 255, 255, .12) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcRealityStrip > button {
+  min-height: 68px !important;
+  padding: 10px 14px !important;
+  border: 0 !important;
+  border-right: 1px solid rgba(255, 255, 255, .12) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--performance-copy, #f5f8f9) !important;
+  box-shadow: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcRealityStrip > button:last-child {
+  border-right: 0 !important;
+}
+
+body.mission-control-active .mcShellV3 .mcRealityStrip > button:hover,
+body.mission-control-active .mcShellV3 .mcRealityStrip > button:focus-visible {
+  background: rgba(255, 255, 255, .055) !important;
+}
+
+body.mission-control-active .mcShellV3 .mcRealityStrip strong {
+  color: var(--performance-copy, #f5f8f9) !important;
+  font-family: var(--font-display) !important;
+  font-size: 25px !important;
+  font-weight: 780 !important;
+  letter-spacing: -.035em !important;
+}
+
+body.mission-control-active .mcShellV3 .mcRealityStrip strong span,
+body.mission-control-active .mcShellV3 .mcRealityStrip small {
+  color: var(--performance-muted, #a9b5bc) !important;
+}
+
+body.mission-control-active .mcShellV3 .mcRealityStrip small {
+  font-size: 10px !important;
+  font-weight: 650 !important;
+  letter-spacing: .04em !important;
+  text-transform: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcPrimary {
+  grid-column: 1 / -1 !important;
+  min-height: 52px !important;
+  margin: 2px 0 0 !important;
+  padding: 12px 18px !important;
+  border: 1px solid #a5cf00 !important;
+  border-radius: 15px !important;
+  background: #c8ff1a !important;
+  color: #10170b !important;
+  box-shadow: 0 10px 24px rgba(111, 139, 0, .18) !important;
+  font-size: 14px !important;
+  font-weight: 780 !important;
+  letter-spacing: -.01em !important;
+  text-transform: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcPrimary::after {
+  display: none !important;
+}
+
+/* Supporting workspaces are calm and clearly secondary. */
+body.mission-control-active .mcShellV3 .mcSection,
+body.mission-control-active .mcShellV3 .mcTodayPlan,
+body.mission-control-active [data-testid="coach-assignment-accountability"],
+body.mission-control-active [data-testid="coach-follow-up-queue"] {
+  border: 1px solid var(--mc-line) !important;
+  border-radius: 20px !important;
+  background: var(--mc-surface) !important;
+  color: var(--mc-ink) !important;
+  box-shadow: 0 1px 2px rgba(17, 26, 33, .035), 0 12px 34px rgba(17, 26, 33, .045) !important;
+}
+
+body.mission-control-active .mcShellV3 .mcSection h2,
+body.mission-control-active .mcShellV3 .mcSection h3,
+body.mission-control-active [data-testid="coach-assignment-accountability"] h2,
+body.mission-control-active [data-testid="coach-follow-up-queue"] h2 {
+  color: var(--mc-ink) !important;
+  font-family: var(--font-display) !important;
+  letter-spacing: -.035em !important;
+  text-transform: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcSection p,
+body.mission-control-active .mcShellV3 .mcSection small,
+body.mission-control-active [data-testid="coach-assignment-accountability"] small,
+body.mission-control-active [data-testid="coach-follow-up-queue"] small {
+  color: var(--mc-muted) !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcAttentionRow,
+body.mission-control-active .mcShellV3 .mcAssignmentAccountabilityRow,
+body.mission-control-active .mcShellV3 .mcAssignmentAccountabilityEmpty,
+body.mission-control-active [data-testid="coach-follow-up-queue"] button {
+  border-color: var(--mc-line) !important;
+  background: var(--mc-surface-quiet) !important;
+  color: var(--mc-ink) !important;
+  box-shadow: none !important;
+}
+
+body.mission-control-active .mcShellV3 .mcAttentionCopy strong,
+body.mission-control-active .mcShellV3 .mcAssignmentAccountabilityRow strong {
+  color: var(--mc-ink) !important;
+}
+
+body.mission-control-active .mcShellV3 .mcAttentionCopy small,
+body.mission-control-active .mcShellV3 .mcAttentionMeta,
+body.mission-control-active .mcShellV3 .mcRowAction {
+  color: var(--mc-muted) !important;
+}
+
+@media (max-width: 700px) {
+  body.mission-control-active .mcShellV3 .missionControl {
+    padding: 8px 12px 108px !important;
+    gap: 16px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeader {
+    grid-template-columns: 40px minmax(0, 1fr) auto !important;
+    gap: 8px !important;
+    padding: 8px 9px !important;
+    border-radius: 16px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeaderActions {
+    display: flex !important;
+    align-items: center !important;
+    min-width: 0 !important;
+    gap: 6px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTeamSelect {
+    display: inline-flex !important;
+    min-width: 0 !important;
+    max-width: min(104px, 27vw) !important;
+    padding-inline: 8px !important;
+    font-size: 10px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHero {
+    max-height: none !important;
+    border-radius: 22px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroContent {
+    grid-template-columns: minmax(0, 1fr) 68px !important;
+    padding: 20px 18px !important;
+    gap: 8px 12px !important;
+    background: transparent !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroTeamMark {
+    top: 18px !important;
+    right: 18px !important;
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcEyebrow {
+    font-size: 9px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHero h1 {
+    max-width: 12ch !important;
+    font-size: clamp(31px, 9vw, 39px) !important;
+    line-height: .98 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcHeroContent > p {
+    max-width: 30ch !important;
+    font-size: 13px !important;
+    line-height: 1.38 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcRealityStrip {
+    margin-top: 8px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcRealityStrip > button {
+    min-height: 52px !important;
+    padding: 5px 4px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcRealityStrip strong {
+    font-size: 20px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcRealityStrip small {
+    font-size: 9px !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcPrimary {
+    min-height: 48px !important;
+    border-radius: 13px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  body.mission-control-active .mcShellV3 .mcTeamSelect {
+    width: 62px !important;
+    max-width: 62px !important;
+    font-size: 0 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTeamSelect::before {
+    content: "Team";
+    font-size: 9px !important;
+    font-weight: 720 !important;
+  }
+
+  body.mission-control-active .mcShellV3 .mcTeamSelect > span {
+    font-size: 11px !important;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  body.mission-control-active .mcShellV3 .mcHeader {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    background: #ffffff !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.mission-control-active .mcShellV3 * {
+    animation: none !important;
+    transition-duration: .01ms !important;
+  }
+}

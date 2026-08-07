@@ -225,7 +225,7 @@ export default defineConfig({
   base: './',
   build: {
     outDir: 'dist',
-    assetsInlineLimit: 1048576,
+    assetsInlineLimit: 4096,
     reportCompressedSize: true,
     chunkSizeWarningLimit: 850,
     rollupOptions: {

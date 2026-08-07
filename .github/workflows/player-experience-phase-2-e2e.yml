@@ -44,7 +44,7 @@ on:
       - src/components/PlayerInterfaceFallback.jsx
       - src/components/PlayerInterfaceFallback.module.css
       - src/components/PlayerDashboardHeader.jsx
-      - src/components/PlayerDashboardHeader.module.css
+      - src/components/DashboardIdentityHeader.module.css
       - src/components/PlayerDailyCommandCenter.jsx
       - src/components/PlayerDailyCommandCenter.module.css
       - src/components/PlayerDailyPrimitives.jsx

@@ -74,7 +74,7 @@ async function firstVisiblePlayersButton(page) {
 }
 
 async function enterCoachDemo(page) {
-  const demoCoachButton = page.getByRole("button", { name: "Demo Coach", exact: true });
+  const demoCoachButton = page.getByRole("button", { name: "Coach demo", exact: true });
   const commandCenter = page.getByTestId("coach-command-center-full");
 
   await expect.poll(async () => {

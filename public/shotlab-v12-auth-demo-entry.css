@@ -16,27 +16,27 @@
   min-height:48px!important;
   height:auto!important;
   padding:0 14px!important;
-  border:1px solid rgba(127,158,30,.48)!important;
+  border:1px solid rgba(82,105,0,.42)!important;
   border-radius:13px!important;
-  background:rgba(127,158,30,.10)!important;
-  color:#dfff7a!important;
-  -webkit-text-fill-color:#dfff7a!important;
+  background:#edf2dd!important;
+  color:#44550b!important;
+  -webkit-text-fill-color:#44550b!important;
   box-shadow:none!important;
   opacity:1!important;
   visibility:visible!important;
 }
 .auth-demo-enter .btn-v:active{transform:scale(.985)!important}
 .auth-demo-enter .btn-v:focus-visible{
-  outline:3px solid rgba(185,223,53,.34)!important;
+  outline:3px solid rgba(97,121,0,.24)!important;
   outline-offset:3px!important;
 }
 .auth-demo-enter::before{
   content:"Preview the experience";
   grid-column:1/-1;
   margin:1px 0 0;
-  color:rgba(255,255,255,.62);
-  font:650 11px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-  letter-spacing:.02em;
+  color:#44515b!important;
+  font:700 11px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  letter-spacing:.01em;
   text-align:center;
 }
 

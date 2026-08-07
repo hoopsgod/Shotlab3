@@ -95,8 +95,9 @@ test("authentication keeps both demos while adopting the new entry system", () =
   assert.match(auth, /Train with intent/);
   assert.match(auth, /Player demo/);
   assert.match(auth, /Coach demo/);
-  assert.match(auth, /onDemo\("player"\)/);
-  assert.match(auth, /onDemo\("coach"\)/);
+  assert.match(auth, /onClick=\{\(\)=>doDemo\("player"\)\}/);
+  assert.match(auth, /onClick=\{\(\)=>doDemo\("coach"\)\}/);
+  assert.match(auth, /const demo=await onDemo\(kind\)/);
   assert.match(auth, /Create account/);
   assert.match(auth, /Private team data/);
   assert.match(auth, /Progress that carries forward/);
@@ -111,9 +112,11 @@ test("authentication segmented controls expose native interaction semantics", ()
   assert.match(auth, /<button type="button" style=\{\{width:"100%"/);
 });
 
-test("mobile navigation uses restrained light glass materials", () => {
-  assert.match(mobileNavigation, /background: rgba\(250, 249, 245, \.88\)/);
-  assert.match(mobileNavigation, /box-shadow: 0 -8px 30px rgba\(17, 26, 33, \.07\)/);
-  assert.match(mobileNavigation, /--mobile-tab-bar-height: 62px/);
+test("mobile navigation keeps glass restrained to the floating shell", () => {
+  assert.match(mobileNavigation, /background: rgba\(250, 249, 245, \.78\)/);
+  assert.match(mobileNavigation, /box-shadow: 0 18px 46px rgba\(17, 26, 33, \.16\)/);
+  assert.match(mobileNavigation, /--mobile-tab-bar-height: 64px/);
+  assert.match(mobileNavigation, /border-radius: 24px/);
+  assert.match(mobileNavigation, /backdrop-filter: blur\(28px\) saturate\(150%\)/);
   assert.doesNotMatch(mobileNavigation, /background: rgba\(7, 10, 12, \.84\)/);
 });

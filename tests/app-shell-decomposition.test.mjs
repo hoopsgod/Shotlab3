@@ -21,9 +21,11 @@ test('App shell stays below Babel code-generation deoptimization threshold', () 
 
 test('authentication remains a complete route workspace with preserved demo and legal entry contracts', () => {
   assert.match(authSource, /export default function Auth/);
-  assert.match(authSource, /const \{BG,BORDER_CLR,CARD_BG,CourtBG,DEMO_COACH,DEMO_PLAYER/);
-  assert.match(authSource, /Demo Player/);
-  assert.match(authSource, /Demo Coach/);
+  assert.match(authSource, /const \{BG,DEMO_COACH,DEMO_PLAYER,DrillIcon,LegalSupportLinks,SLLogo\}=runtime/);
+  assert.match(authSource, /Player demo/);
+  assert.match(authSource, /Coach demo/);
+  assert.match(authSource, /onClick=\{\(\)=>doDemo\("player"\)\}/);
+  assert.match(authSource, /onClick=\{\(\)=>doDemo\("coach"\)\}/);
   assert.match(authSource, /href="\/terms"/);
   assert.match(authSource, /href="\/privacy"/);
 });

@@ -14,6 +14,20 @@ const STORAGE_KEYS = Object.freeze({
 const DEMO_TEAM_ID = "team-demo-titans";
 const DEMO_TIMESTAMP = Date.parse("2026-03-20T12:00:00.000Z");
 
+const relativeDate = (days = 0) => {
+  const date = new Date();
+  date.setUTCHours(12, 0, 0, 0);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+};
+
+const relativeTimestamp = (days = 0, hour = 18, minute = 0) => {
+  const date = new Date();
+  date.setUTCHours(hour, minute, 0, 0);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.getTime();
+};
+
 const basePlayers = [
   { id: "player-demo-ava-brooks", email: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", role: "player", teamId: DEMO_TEAM_ID, hideFromLeaderboards: false, createdAt: DEMO_TIMESTAMP },
   { id: "player-demo-jordan-lee", email: "jordan.lee@demo.shotlab.app", name: "Jordan Lee", role: "player", teamId: DEMO_TEAM_ID, hideFromLeaderboards: false, createdAt: DEMO_TIMESTAMP + 1 },
@@ -29,13 +43,13 @@ const basePlayerProfiles = [
 ];
 
 const baseEvents = [
-  { id: "event-demo-january-open-gym", teamId: DEMO_TEAM_ID, title: "Foundation Shooting Block", date: "2026-01-18", time: "5:30 PM", location: "Main Gym", desc: "Footwork prep, paint finishes, and game-speed catch-and-shoot volume.", type: "workout" },
-  { id: "event-demo-february-skills-clinic", teamId: DEMO_TEAM_ID, title: "Advantage Reads Lab", date: "2026-02-07", time: "9:00 AM", location: "Aux Gym", desc: "Ball-screen reads, two-dribble counters, and weak-side decision reps.", type: "clinic" },
-  { id: "event-demo-february-recovery-lab", teamId: DEMO_TEAM_ID, title: "Reset + Mobility Session", date: "2026-02-21", time: "11:15 AM", location: "Training Room", desc: "Hip/ankle mobility and soft-tissue recovery between training blocks.", type: "recovery" },
-  { id: "evt-upcoming-1", teamId: DEMO_TEAM_ID, title: "Team Shooting Standards", date: "2026-03-25", time: "10:00 AM", location: "Main Gym", type: "workout" },
-  { id: "event-demo-skill-lab", teamId: DEMO_TEAM_ID, title: "Skill Lab: Rim Pressure Finishes", date: "2026-03-27", time: "6:15 PM", location: "Main Gym Court 2", desc: "Paint touch creation, contact finishes, and late-clock reads.", type: "workout" },
-  { id: "event-demo-shooting-club", teamId: DEMO_TEAM_ID, title: "Early Work 300", date: "2026-03-29", time: "6:30 AM", location: "Aux Gym", desc: "High-volume catch-and-shoot and relocation threes before school.", type: "shooting" },
-  { id: "event-demo-film-room", teamId: DEMO_TEAM_ID, title: "Film + Recovery Reset", date: "2026-04-01", time: "4:45 PM", location: "Team Room", desc: "Possession review, spacing corrections, and recovery circuit.", type: "recovery" },
+  { id: "event-demo-foundation-shooting", teamId: DEMO_TEAM_ID, title: "Foundation Shooting Block", date: relativeDate(-28), time: "5:30 PM", location: "Main Gym", desc: "Footwork prep, paint finishes, and game-speed catch-and-shoot volume.", type: "workout" },
+  { id: "event-demo-advantage-reads", teamId: DEMO_TEAM_ID, title: "Advantage Reads Lab", date: relativeDate(-21), time: "9:00 AM", location: "Aux Gym", desc: "Ball-screen reads, two-dribble counters, and weak-side decision reps.", type: "clinic" },
+  { id: "event-demo-recovery-lab", teamId: DEMO_TEAM_ID, title: "Reset + Mobility Session", date: relativeDate(-14), time: "11:15 AM", location: "Training Room", desc: "Hip/ankle mobility and soft-tissue recovery between training blocks.", type: "recovery" },
+  { id: "evt-upcoming-1", teamId: DEMO_TEAM_ID, title: "Team Practice", date: relativeDate(1), time: "6:00 PM", location: "Main Gym", desc: "Team shooting standards, transition decisions, and controlled five-on-five.", type: "practice" },
+  { id: "event-demo-skill-lab", teamId: DEMO_TEAM_ID, title: "Skill Lab: Rim Pressure Finishes", date: relativeDate(3), time: "6:15 PM", location: "Main Gym Court 2", desc: "Paint touch creation, contact finishes, and late-clock reads.", type: "workout" },
+  { id: "event-demo-shooting-club", teamId: DEMO_TEAM_ID, title: "Early Work 300", date: relativeDate(5), time: "6:30 AM", location: "Aux Gym", desc: "High-volume catch-and-shoot and relocation threes before school.", type: "shooting" },
+  { id: "event-demo-film-room", teamId: DEMO_TEAM_ID, title: "Film + Recovery Reset", date: relativeDate(8), time: "4:45 PM", location: "Team Room", desc: "Possession review, spacing corrections, and recovery circuit.", type: "recovery" },
 ];
 
 const baseRsvps = baseEvents.slice(0, 6).map((event, index) => ({
@@ -46,23 +60,23 @@ const baseRsvps = baseEvents.slice(0, 6).map((event, index) => ({
   eventId: event.id,
   teamId: DEMO_TEAM_ID,
   attended: true,
-  ts: DEMO_TIMESTAMP + index,
+  ts: relativeTimestamp(index - 5, 17, 0),
 }));
 
 const demoPrimaryScores = [
-  { id: "score-dp-s01", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 9, date: "2026-03-20", ts: Date.parse("2026-03-20T18:00:00.000Z"), src: "home" },
-  { id: "score-dp-s02", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-form-shooting", score: 22, date: "2026-03-19", ts: Date.parse("2026-03-19T18:00:00.000Z"), src: "home" },
-  { id: "score-dp-s03", email: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 11, date: "2026-03-20", ts: Date.parse("2026-03-20T18:05:00.000Z"), src: "home" },
-  { id: "score-dp-s04", email: "jordan.lee@demo.shotlab.app", name: "Jordan Lee", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 10, date: "2026-03-20", ts: Date.parse("2026-03-20T18:10:00.000Z"), src: "home" },
+  { id: "score-dp-s01", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 9, date: relativeDate(0), ts: relativeTimestamp(0, 18, 0), src: "home" },
+  { id: "score-dp-s02", email: "demo@shotlab.app", name: "Demo Player", teamId: DEMO_TEAM_ID, drillId: "demo-form-shooting", score: 22, date: relativeDate(-1), ts: relativeTimestamp(-1, 18, 0), src: "home" },
+  { id: "score-dp-s03", email: "ava.brooks@demo.shotlab.app", name: "Ava Brooks", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 11, date: relativeDate(0), ts: relativeTimestamp(0, 18, 5), src: "home" },
+  { id: "score-dp-s04", email: "jordan.lee@demo.shotlab.app", name: "Jordan Lee", teamId: DEMO_TEAM_ID, drillId: "demo-home-warm-up-shooting-4-minute", score: 10, date: relativeDate(0), ts: relativeTimestamp(0, 18, 10), src: "home" },
 ];
 
 const demoShotLogs = [
-  { id: "shotlog-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, name: "Demo Player", made: 125, date: "2026-03-20", ts: Date.parse("2026-03-20T19:00:00.000Z") },
-  { id: "shotlog-demo-02", email: "ava.brooks@demo.shotlab.app", playerId: "ava.brooks@demo.shotlab.app", teamId: DEMO_TEAM_ID, name: "Ava Brooks", made: 160, date: "2026-03-20", ts: Date.parse("2026-03-20T19:05:00.000Z") },
+  { id: "shotlog-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, name: "Demo Player", made: 125, date: relativeDate(0), ts: relativeTimestamp(0, 19, 0) },
+  { id: "shotlog-demo-02", email: "ava.brooks@demo.shotlab.app", playerId: "ava.brooks@demo.shotlab.app", teamId: DEMO_TEAM_ID, name: "Ava Brooks", made: 160, date: relativeDate(0), ts: relativeTimestamp(0, 19, 5) },
 ];
 
 const demoProgressSnapshots = [
-  { id: "progress-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, label: "7-day makes", value: 125, date: "2026-03-20", ts: Date.parse("2026-03-20T19:10:00.000Z") },
+  { id: "progress-demo-01", email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: DEMO_TEAM_ID, label: "7-day makes", value: 125, date: relativeDate(0), ts: relativeTimestamp(0, 19, 10) },
 ];
 
 function clone(value) {
@@ -91,7 +105,18 @@ function buildDemoTeam(teamId, coachEmail, team) {
 
 export function buildDemoDataBundle({ teamId = DEMO_TEAM_ID, coachEmail = null, team } = {}) {
   const resolvedTeam = buildDemoTeam(teamId, coachEmail, team);
-  const players = basePlayers.map((player) => ({ ...player, teamId: resolvedTeam.id }));
+  const playerRows = basePlayers.map((player) => ({ ...player, teamId: resolvedTeam.id }));
+  const coachRow = coachEmail ? {
+    id: "coach-demo-primary",
+    email: coachEmail,
+    name: "Demo Coach",
+    role: "coach",
+    isCoach: true,
+    teamId: resolvedTeam.id,
+    hideFromLeaderboards: true,
+    createdAt: DEMO_TIMESTAMP - 1,
+  } : null;
+  const players = coachRow ? [coachRow, ...playerRows] : playerRows;
   const playerProfiles = basePlayerProfiles.map((profile) => ({ ...profile, teamId: resolvedTeam.id }));
   const events = baseEvents.map((event) => ({ ...event, teamId: resolvedTeam.id }));
   const rsvps = baseRsvps.map((rsvp) => ({ ...rsvp, teamId: resolvedTeam.id }));
@@ -142,17 +167,7 @@ export async function applyDemoData(bundle) {
 }
 
 export async function clearDemoData() {
-  const keys = Object.values({
-    teams: "sl:teams",
-    players: "sl:players",
-    playerProfiles: "sl:player-profiles",
-    events: "sl:events",
-    rsvps: "sl:rsvps",
-    scores: "sl:scores",
-    shotLogs: "sl:shotlogs",
-    progressSnapshots: "sl:progress-snapshots",
-    demoMeta: "sl:demo-data-meta",
-  });
+  const keys = Object.values(STORAGE_KEYS);
   for (const key of keys) {
     if (typeof window !== "undefined") {
       if (key === "sl:shotlogs") {

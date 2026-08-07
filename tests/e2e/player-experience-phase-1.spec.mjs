@@ -79,7 +79,7 @@ async function enterSeededDemoPlayer(page) {
     window.sessionStorage.setItem("player-phase-one-seeded", "1");
   }, seedData);
   await page.goto("/");
-  await page.getByRole("button", { name: "Demo Player", exact: true }).click();
+  await page.getByRole("button", { name: "Player demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
 }
@@ -126,7 +126,7 @@ test("daily command center resolves urgent commitment then launches one bounded 
 test("logging the first result activates progress and confirms the baseline", async ({ page }) => {
   await enterSeededDemoPlayer(page);
 
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "At Home", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await page.getByRole("spinbutton").first().fill("33");
   await page.getByRole("button", { name: "LOG SHOTS", exact: true }).first().click();
 

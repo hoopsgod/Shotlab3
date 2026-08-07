@@ -1,133 +1,88 @@
 import { test, expect } from "@playwright/test";
 import fs from "node:fs";
 import path from "node:path";
-import process from "node:process";
 
-const listing = JSON.parse(fs.readFileSync("native/app-store-listing.json", "utf8"));
 const outputDir = path.resolve(process.cwd(), "artifacts/app-store/iphone-6.9");
-const TEAM_ID = "team-app-store-presentation";
-const PLAYER_EMAIL = "demo@shotlab.app";
-const COACH_EMAIL = "coach.demo@shotlab.app";
-
-const localDate = (date = new Date()) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+const listing = JSON.parse(fs.readFileSync("native/app-store-listing.json", "utf8"));
+const TEAM_ID = "northstar-varsity";
+const PLAYER_EMAIL = "jordan@northstar.test";
+const today = new Date();
 const isoOffset = (days) => {
-  const date = new Date();
-  date.setHours(12, 0, 0, 0);
+  const date = new Date(today);
   date.setDate(date.getDate() + days);
-  return localDate(date);
+  return date.toISOString().slice(0, 10);
 };
-const TODAY = isoOffset(0);
 
 const ARCHIVE = {
-  id: "archive-app-store-2025-26",
+  id: "northstar-2025-26",
+  seasonName: "2025-26 Season",
   teamId: TEAM_ID,
-  seasonName: "2025-26",
-  seasonStartDate: "2025-11-01",
-  seasonEndDate: "2026-03-15",
-  createdAt: "2026-03-20T12:00:00.000Z",
-  archivedBy: { email: COACH_EMAIL, name: "Coach Morgan", role: "coach" },
-  summary: {
-    rosterCount: 4,
-    homeScoreCount: 42,
-    shotLogCount: 31,
-    eventCount: 18,
-    eventRsvpCount: 58,
-    scSessionCount: 12,
-    scLogCount: 34,
-    totalShotLogMakes: 6840,
-  },
-  playerSeasonSummaries: [],
+  createdAt: new Date().toISOString(),
+  playerTotals: [
+    { email: PLAYER_EMAIL, name: "Jordan Lee", makes: 1780, attempts: 3260, sessions: 48 },
+    { email: "maya@northstar.test", name: "Maya Carter", makes: 1640, attempts: 3100, sessions: 44 },
+  ],
 };
 
 const seedData = {
-  "sl:teams": [{
-    id: TEAM_ID,
-    name: "Northstar Basketball",
-    ownerCoachId: COACH_EMAIL,
-    joinCode: "NORTH1",
-    createdAt: Date.now() - 86_400_000 * 120,
-    branding: {
-      name: "Northstar Basketball",
-      shortName: "NS",
-      wordmark: "NORTHSTAR BASKETBALL",
+  "sl:teams": [
+    {
+      id: TEAM_ID,
+      name: "Northstar Varsity",
+      teamName: "Northstar Varsity",
+      joinCode: "NORTH26",
       primaryColor: "#C8FF1A",
-      secondaryColor: "#77D7FF",
-      accentColor: "#C8FF1A",
-      textOnPrimary: "#071007",
+      secondaryColor: "#11202A",
       logoUrl: "/branding/titans-exact-logo.png.PNG",
-      logoMarkUrl: "/branding/titans-default-mark.svg",
-      textScale: "standard",
-      version: 1,
     },
-  }],
-  "sl:players": [
-    { id: "coach-app-store", email: COACH_EMAIL, name: "Coach Morgan", role: "coach", isCoach: true, teamId: TEAM_ID },
-    { id: "player-jordan", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Jordan Lee", role: "player", teamId: TEAM_ID },
-    { id: "player-maya", playerId: "maya@northstar.test", email: "maya@northstar.test", name: "Maya Carter", role: "player", teamId: TEAM_ID },
-    { id: "player-avery", playerId: "avery@northstar.test", email: "avery@northstar.test", name: "Avery Brooks", role: "player", teamId: TEAM_ID },
-    { id: "player-sam", playerId: "sam@northstar.test", email: "sam@northstar.test", name: "Sam Rivera", role: "player", teamId: TEAM_ID },
   ],
-  "sl:player-profiles": [
-    { id: "profile-jordan", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Jordan", lastName: "Lee", jerseyNumber: "12" },
-    { id: "profile-maya", userId: "maya@northstar.test", email: "maya@northstar.test", teamId: TEAM_ID, firstName: "Maya", lastName: "Carter", jerseyNumber: "3" },
-    { id: "profile-avery", userId: "avery@northstar.test", email: "avery@northstar.test", teamId: TEAM_ID, firstName: "Avery", lastName: "Brooks", jerseyNumber: "21" },
-    { id: "profile-sam", userId: "sam@northstar.test", email: "sam@northstar.test", teamId: TEAM_ID, firstName: "Sam", lastName: "Rivera", jerseyNumber: "8" },
+  "sl:activeTeam": TEAM_ID,
+  "sl:teamBranding": {
+    teamId: TEAM_ID,
+    teamName: "Northstar Varsity",
+    primaryColor: "#C8FF1A",
+    secondaryColor: "#11202A",
+    logoUrl: "/branding/titans-exact-logo.png.PNG",
+  },
+  "sl:roster": [
+    { id: "jordan", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, position: "Guard", number: "3" },
+    { id: "maya", email: "maya@northstar.test", name: "Maya Carter", teamId: TEAM_ID, position: "Wing", number: "12" },
+    { id: "avery", email: "avery@northstar.test", name: "Avery Brooks", teamId: TEAM_ID, position: "Forward", number: "21" },
+    { id: "riley", email: "riley@northstar.test", name: "Riley Quinn", teamId: TEAM_ID, position: "Guard", number: "5" },
   ],
-  "sl:drills": [
-    { id: "form-shooting", name: "Form Shooting", desc: "Clean mechanics and balanced feet", max: 50, icon: "ft" },
-    { id: "corner-threes", name: "Corner Threes", desc: "Build repeatable corner volume", max: 40, icon: "3p" },
-    { id: "five-spot", name: "5-Spot Catch & Shoot", desc: "Game-ready footwork from five locations", max: 50, icon: "shoot" },
-    { id: "free-throws", name: "Pressure Free Throws", desc: "Finish the workout at the line", max: 20, icon: "ft" },
-  ],
-  "sl:program-drills": [
-    { id: "program-form", name: "Program Form Series", desc: "Team shooting foundation", max: 30, icon: "ft" },
-    { id: "program-reads", name: "Game Speed Reads", desc: "Make decisions at pace", max: 24, icon: "shoot" },
-    { id: "program-finishing", name: "Contact Finishing", desc: "Finish through controlled contact", max: 30, icon: "layup" },
-    { id: "program-transition", name: "Transition Pull-Ups", desc: "Sprint into balanced shot preparation", max: 20, icon: "mr" },
-  ],
-  "sl:scores": [
-    { id: "jordan-today-form", email: PLAYER_EMAIL, playerId: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, drillId: "form-shooting", drillName: "Form Shooting", score: 46, src: "home", date: TODAY, ts: Date.now() - 10_000 },
-    { id: "jordan-day-1", email: PLAYER_EMAIL, playerId: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, drillId: "corner-threes", drillName: "Corner Threes", score: 32, src: "home", date: isoOffset(-1), ts: Date.now() - 86_400_000 },
-    { id: "jordan-day-2", email: PLAYER_EMAIL, playerId: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, drillId: "five-spot", drillName: "5-Spot Catch & Shoot", score: 41, src: "home", date: isoOffset(-2), ts: Date.now() - 86_400_000 * 2 },
-    { id: "jordan-day-3", email: PLAYER_EMAIL, playerId: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, drillId: "free-throws", drillName: "Pressure Free Throws", score: 18, src: "home", date: isoOffset(-3), ts: Date.now() - 86_400_000 * 3 },
-    { id: "maya-score", email: "maya@northstar.test", name: "Maya Carter", teamId: TEAM_ID, drillId: "five-spot", drillName: "5-Spot Catch & Shoot", score: 44, src: "home", date: TODAY },
-    { id: "avery-score", email: "avery@northstar.test", name: "Avery Brooks", teamId: TEAM_ID, drillId: "corner-threes", drillName: "Corner Threes", score: 29, src: "home", date: isoOffset(-1) },
-    { id: "sam-score", email: "sam@northstar.test", name: "Sam Rivera", teamId: TEAM_ID, drillId: "form-shooting", drillName: "Form Shooting", score: 38, src: "home", date: isoOffset(-8) },
-  ],
-  "sl:program-scores": [
-    { id: "jordan-program-form", email: PLAYER_EMAIL, playerId: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, drillId: "program-form", drillName: "Program Form Series", score: 27, src: "program", date: TODAY },
-    { id: "maya-program", email: "maya@northstar.test", name: "Maya Carter", teamId: TEAM_ID, drillId: "program-reads", drillName: "Game Speed Reads", score: 21, src: "program", date: TODAY },
-    { id: "avery-program", email: "avery@northstar.test", name: "Avery Brooks", teamId: TEAM_ID, drillId: "program-finishing", drillName: "Contact Finishing", score: 25, src: "program", date: isoOffset(-1) },
-  ],
-  "sl:shotlogs": [
-    { id: "jordan-shot-today", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, made: 84, attempted_shots: 120, date: TODAY, sessionId: "jordan-today" },
-    { id: "jordan-shot-1", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, made: 96, attempted_shots: 145, date: isoOffset(-1), sessionId: "jordan-1" },
-    { id: "jordan-shot-2", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, made: 78, attempted_shots: 115, date: isoOffset(-2), sessionId: "jordan-2" },
-    { id: "jordan-shot-3", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, made: 72, attempted_shots: 110, date: isoOffset(-3), sessionId: "jordan-3" },
-    { id: "maya-shot", playerId: "maya@northstar.test", email: "maya@northstar.test", name: "Maya Carter", teamId: TEAM_ID, made: 102, attempted_shots: 150, date: TODAY, sessionId: "maya-today" },
-    { id: "avery-shot", playerId: "avery@northstar.test", email: "avery@northstar.test", name: "Avery Brooks", teamId: TEAM_ID, made: 68, attempted_shots: 105, date: isoOffset(-1), sessionId: "avery-1" },
-    { id: "sam-shot", playerId: "sam@northstar.test", email: "sam@northstar.test", name: "Sam Rivera", teamId: TEAM_ID, made: 35, attempted_shots: 70, date: isoOffset(-8), sessionId: "sam-old" },
+  "sl:shot-logs": [
+    { id: "j1", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, makes: 160, attempts: 250, date: isoOffset(0), source: "program", drill: "Game Speed Reads" },
+    { id: "j2", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, makes: 140, attempts: 220, date: isoOffset(-1), source: "home", drill: "5-Spot Catch & Shoot" },
+    { id: "j3", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, makes: 120, attempts: 190, date: isoOffset(-2), source: "program", drill: "Corner-to-Corner 3s" },
+    { id: "m1", email: "maya@northstar.test", name: "Maya Carter", teamId: TEAM_ID, makes: 145, attempts: 230, date: isoOffset(0), source: "program", drill: "Game Speed Reads" },
+    { id: "a1", email: "avery@northstar.test", name: "Avery Brooks", teamId: TEAM_ID, makes: 118, attempts: 205, date: isoOffset(-1), source: "home", drill: "Free Throws" },
+    { id: "r1", email: "riley@northstar.test", name: "Riley Quinn", teamId: TEAM_ID, makes: 96, attempts: 180, date: isoOffset(-3), source: "home", drill: "Form Shooting Ladder" },
   ],
   "sl:events": [
-    { id: "event-practice", teamId: TEAM_ID, title: "Team Practice", type: "practice", date: isoOffset(1), time: "6:00 PM", location: "Main Gym", desc: "Team practice and controlled scrimmage" },
-    { id: "event-shooting", teamId: TEAM_ID, title: "Shooting Lab", type: "workout", date: isoOffset(3), time: "4:30 PM", location: "Court 2", desc: "High-volume shooting session" },
-    { id: "event-summer-game", teamId: TEAM_ID, title: "Summer League Game", type: "game", date: isoOffset(6), time: "7:15 PM", location: "Field House", desc: "Arrive 35 minutes early" },
+    { id: "practice-1", teamId: TEAM_ID, title: "Team Practice", date: isoOffset(1), time: "4:30 PM", place: "Main Gym", type: "practice" },
+    { id: "film-1", teamId: TEAM_ID, title: "Film & Scout", date: isoOffset(3), time: "3:45 PM", place: "Team Room", type: "meeting" },
+    { id: "game-1", teamId: TEAM_ID, title: "League Game", date: isoOffset(5), time: "7:00 PM", place: "Northstar Gym", type: "game" },
   ],
   "sl:rsvps": [
-    { id: "jordan-rsvp-practice", eventId: "event-practice", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, status: "yes" },
-    { id: "jordan-rsvp-shooting", eventId: "event-shooting", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, status: "yes" },
-    { id: "jordan-rsvp-game", eventId: "event-summer-game", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, status: "yes" },
-    { id: "maya-rsvp-practice", eventId: "event-practice", email: "maya@northstar.test", name: "Maya Carter", teamId: TEAM_ID, status: "yes" },
-    { id: "avery-rsvp-practice", eventId: "event-practice", email: "avery@northstar.test", name: "Avery Brooks", teamId: TEAM_ID, status: "yes" },
+    { id: "jordan-practice", eventId: "practice-1", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, status: "yes" },
+    { id: "maya-practice", eventId: "practice-1", email: "maya@northstar.test", name: "Maya Carter", teamId: TEAM_ID, status: "yes" },
+    { id: "avery-practice", eventId: "practice-1", email: "avery@northstar.test", name: "Avery Brooks", teamId: TEAM_ID, status: "pending" },
+  ],
+  "sl:drills": [
+    { id: "game-speed", teamId: TEAM_ID, name: "Game Speed Reads", target: 150, category: "Shooting" },
+    { id: "free-throws", teamId: TEAM_ID, name: "Pressure Free Throws", target: 50, category: "Shooting" },
+  ],
+  "sl:assignments": [
+    { id: "assignment-1", teamId: TEAM_ID, title: "Game Speed Reads", drillId: "game-speed", dueDate: isoOffset(2), targetMakes: 150, assignedTo: [PLAYER_EMAIL, "maya@northstar.test", "avery@northstar.test"] },
   ],
   "sl:sc-sessions": [
-    { id: "sc-team-lift", teamId: TEAM_ID, sport: "Team Lift", title: "Team Lift", date: isoOffset(2), time: "8:00 AM", location: "Weight Room", sessionType: "School" },
-    { id: "sc-recovery", teamId: TEAM_ID, sport: "Recovery + Mobility", title: "Recovery + Mobility", date: isoOffset(5), time: "9:00 AM", location: "Training Room", sessionType: "School" },
+    { id: "sc-team-lift", teamId: TEAM_ID, title: "Team Lift", date: isoOffset(2), time: "3:15 PM", place: "Weight Room", type: "strength" },
+    { id: "sc-prior", teamId: TEAM_ID, title: "Power & Mobility", date: isoOffset(-2), time: "7:30 AM", place: "School", type: "strength" },
   ],
   "sl:sc-rsvps": [
-    { id: "jordan-sc-lift", sessionId: "sc-team-lift", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID },
-    { id: "maya-sc-lift", sessionId: "sc-team-lift", email: "maya@northstar.test", name: "Maya Carter", teamId: TEAM_ID },
-    { id: "avery-sc-lift", sessionId: "sc-team-lift", email: "avery@northstar.test", name: "Avery Brooks", teamId: TEAM_ID },
+    { id: "jordan-sc", sessionId: "sc-team-lift", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, status: "yes" },
+    { id: "maya-sc", sessionId: "sc-team-lift", email: "maya@northstar.test", name: "Maya Carter", teamId: TEAM_ID, status: "yes" },
+    { id: "avery-sc", sessionId: "sc-team-lift", email: "avery@northstar.test", name: "Avery Brooks", teamId: TEAM_ID, status: "pending" },
   ],
   "sl:sc-logs": [
     { id: "jordan-sc-log", sessionId: "sc-prior", email: PLAYER_EMAIL, name: "Jordan Lee", teamId: TEAM_ID, date: isoOffset(-2), time: "7:30 AM", place: "School", sport: "Basketball Strength" },
@@ -168,7 +123,9 @@ async function enterSeededRole(page, role) {
     for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
   }, seedData);
   await page.goto("/");
-  await page.getByRole("button", { name: role === "coach" ? "Demo Coach" : "Demo Player", exact: true }).click();
+  const demoButton = page.getByRole("button", { name: role === "coach" ? /Coach demo/i : /Player demo/i });
+  await expect(demoButton).toBeVisible({ timeout: 20_000 });
+  await demoButton.click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await page.addStyleTag({ content: `
     *,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important;}
@@ -239,8 +196,17 @@ function itemFor(order) {
   return item;
 }
 
-async function openPrimaryNavigation(page, label) {
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: label, exact: true }).click();
+async function openNavigation(page, label) {
+  const dock = page.getByTestId("mobile-navigation-dock");
+  const direct = dock.getByRole("button", { name: label, exact: true });
+  if (await direct.count()) {
+    await direct.click();
+  } else {
+    await page.getByTestId("mobile-navigation-more").click();
+    const sheet = page.getByTestId("mobile-navigation-sheet");
+    await expect(sheet).toBeVisible();
+    await sheet.getByRole("button", { name: label, exact: true }).click();
+  }
   await page.waitForTimeout(150);
 }
 
@@ -256,11 +222,11 @@ test("capture Player App Store presentation assets", async ({ page }) => {
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(1));
 
-  await openPrimaryNavigation(page, "At Home");
+  await openNavigation(page, "Train");
   await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(2));
 
-  await openPrimaryNavigation(page, "Program");
+  await openNavigation(page, "Program");
   await expect(page.getByTestId("player-program-workspace")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(3));
 });
@@ -270,11 +236,12 @@ test("capture Coach App Store presentation assets", async ({ page }) => {
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(4));
 
-  await openPrimaryNavigation(page, "Players");
+  await openNavigation(page, "Players");
   await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(5));
 
-  await openPrimaryNavigation(page, "Events");
-  await expect(page.getByText("Team Practice", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
+  await openNavigation(page, "Schedule");
+  await expect(page.getByRole("heading", { name: "Events", exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText("Calendar is open", { exact: true })).toBeVisible();
   await captureMarketingAsset(page, itemFor(6));
 });

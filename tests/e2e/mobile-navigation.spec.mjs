@@ -11,7 +11,7 @@ async function installRoutes(page) {
 
 async function enterDemo(page, role) {
   await page.goto("/");
-  await page.getByRole("button", { name: role === "coach" ? "Demo Coach" : "Demo Player", exact: true }).click();
+  await page.getByRole("button", { name: role === "coach" ? "Coach demo" : "Player demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -26,7 +26,7 @@ async function openMore(page) {
   return page.getByTestId("mobile-navigation-sheet");
 }
 
-test("player mobile dock keeps three frequent destinations and moves secondary areas into More", async ({ page }) => {
+test("player mobile dock keeps Home, Train, and Progress direct while grouping secondary areas", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await installRoutes(page);
   await enterDemo(page, "player");
@@ -34,17 +34,18 @@ test("player mobile dock keeps three frequent destinations and moves secondary a
   const dock = page.getByTestId("mobile-navigation-dock");
   await expect(dock.getByRole("button")).toHaveCount(4);
   await expect(dock.getByRole("button", { name: "Home", exact: true })).toBeVisible();
-  await expect(dock.getByRole("button", { name: "At Home", exact: true })).toBeVisible();
-  await expect(dock.getByRole("button", { name: "Program", exact: true })).toBeVisible();
+  await expect(dock.getByRole("button", { name: "Train", exact: true })).toBeVisible();
+  await expect(dock.getByRole("button", { name: "Progress", exact: true })).toBeVisible();
   await expect(dock.getByRole("button", { name: "More", exact: true })).toBeVisible();
   await expect(dock.getByRole("button", { name: "Events", exact: true })).toHaveCount(0);
   await expect(dock.getByRole("button", { name: "Lifting", exact: true })).toHaveCount(0);
   await expect(dock.getByRole("button", { name: "Profile", exact: true })).toHaveCount(0);
 
   let sheet = await openMore(page);
-  for (const key of ["program", "sc", "leaderboards", "team-store", "profile"]) {
+  for (const key of ["program", "sc", "team-store", "profile"]) {
     await expect(sheet.locator(`[data-nav-key="${key}"]`)).toBeVisible();
   }
+  await expect(sheet.locator('[data-nav-key="leaderboards"]')).toHaveCount(0);
 
   await sheet.locator('[data-nav-key="team-store"]').click();
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
@@ -61,15 +62,13 @@ test("player mobile dock keeps three frequent destinations and moves secondary a
   await expect(page).toHaveURL(/\/events$/);
   await expect(page.getByText("PROGRAM EVENTS", { exact: true }).first()).toBeVisible();
 
-  sheet = await openMore(page);
-  await sheet.locator('[data-nav-key="leaderboards"]').click();
-  await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
+  await dock.getByRole("button", { name: "Progress", exact: true }).click();
   await expect(page).toHaveURL(/\/leaderboards$/);
   await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 
-test("coach mobile dock keeps home, roster, and schedule direct while preserving management areas", async ({ page }) => {
+test("coach mobile dock keeps Home, Players, and Schedule direct while preserving management areas", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await installRoutes(page);
   await enterDemo(page, "coach");
@@ -78,7 +77,7 @@ test("coach mobile dock keeps home, roster, and schedule direct while preserving
   await expect(dock.getByRole("button")).toHaveCount(4);
   await expect(dock.getByRole("button", { name: "Home", exact: true })).toBeVisible();
   await expect(dock.getByRole("button", { name: "Players", exact: true })).toBeVisible();
-  await expect(dock.getByRole("button", { name: "Events", exact: true })).toBeVisible();
+  await expect(dock.getByRole("button", { name: "Schedule", exact: true })).toBeVisible();
   await expect(dock.getByRole("button", { name: "More", exact: true })).toBeVisible();
   await expect(dock.getByRole("button", { name: "Drills", exact: true })).toHaveCount(0);
   await expect(dock.getByRole("button", { name: "S&C", exact: true })).toHaveCount(0);

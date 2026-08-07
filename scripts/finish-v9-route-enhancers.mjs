@@ -8,17 +8,22 @@ function replaceOnce(path, before, after) {
   return true;
 }
 
-replaceOnce(
-  "src/components/PlayerDailyCommandCenter.jsx",
-  'import { useEffect, useRef, useState } from "react";\n',
-  'import { useEffect, useRef, useState } from "react";\nimport { installPlayerAssignmentEnhancer } from "../lib/playerAssignmentEnhancer.js";\n',
-);
-
-replaceOnce(
-  "src/components/PlayerDailyCommandCenter.jsx",
-  '  const feedbackTimer = useRef(null);\n\n  useEffect(() => () => {',
-  '  const feedbackTimer = useRef(null);\n\n  useEffect(() => {\n    installPlayerAssignmentEnhancer();\n  }, []);\n\n  useEffect(() => () => {',
-);
+{
+  const path = "src/components/PlayerDailyCommandCenter.jsx";
+  let source = readFileSync(path, "utf8");
+  const importLine = 'import { useEffect, useRef, useState } from "react";\n';
+  const enhancerImport = 'import { installPlayerAssignmentEnhancer } from "../lib/playerAssignmentEnhancer.js";\n';
+  if (!source.includes(enhancerImport)) {
+    if (!source.includes(importLine)) throw new Error(`Expected React import was not found in ${path}`);
+    source = source.replace(importLine, `${importLine}${enhancerImport}`);
+  }
+  if (!source.includes("installPlayerAssignmentEnhancer();")) {
+    const anchor = "  const feedbackTimer = useRef(null);\n";
+    if (!source.includes(anchor)) throw new Error(`Expected feedback timer was not found in ${path}`);
+    source = source.replace(anchor, `${anchor}  useEffect(() => {\n    installPlayerAssignmentEnhancer();\n  }, []);\n`);
+  }
+  writeFileSync(path, source);
+}
 
 replaceOnce(
   "src/components/CoachCommandCenter.jsx",

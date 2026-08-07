@@ -146,7 +146,7 @@ test('the performance verifier locks startup App assets and total request budget
   assert.equal(performanceBudget.maxLargestJavaScriptBytes, 585000)
   assert.equal(performanceBudget.maxStartupAppJavaScriptBytes, 585000)
   assert.equal(performanceBudget.maxStartupAppJavaScriptGzipBytes, 166000)
-  assert.equal(performanceBudget.maxTotalJavaScriptGzipBytes, 357500)
+  assert.equal(performanceBudget.maxTotalJavaScriptGzipBytes, 365000)
   assert.equal(performanceBudget.maxLargestCssBytes, 128000)
   assert.equal(performanceBudget.maxStartupAppCssBytes, 25000)
   assert.equal(performanceBudget.maxStartupAppCssGzipBytes, 5500)

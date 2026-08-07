@@ -1,0 +1,226 @@
+/* Phase 2 critical cascade lock. Loaded after legacy public authorities. */
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcHero,
+html body.mission-control-active #root .performance-workspace--coach [data-testid="coach-primary-objective"] {
+  height: auto !important;
+  max-height: none !important;
+  overflow: hidden !important;
+  background-color: #0d171e !important;
+  background-image: linear-gradient(145deg, #0d171e 0%, #13222b 100%) !important;
+}
+
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcHeroContent {
+  min-height: 0 !important;
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcRealityStrip,
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcPrimary {
+  margin-right: 0 !important;
+}
+
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcPrimary {
+  position: relative !important;
+  display: inline-flex !important;
+  width: 100% !important;
+  min-height: 48px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  background-color: #c8ff1a !important;
+  color: #10170b !important;
+}
+
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionRow,
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAssignmentAccountabilityRow,
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAssignmentAccountabilityEmpty {
+  background-color: #f5f4ef !important;
+  color: #111a21 !important;
+}
+
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionRow strong,
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionRow small,
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionMeta,
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcRowAction {
+  color: #44515b !important;
+}
+
+html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionRow strong {
+  color: #111a21 !important;
+}
+
+/* Player command surfaces remain deep-ink even when light legacy card rules load later. */
+html body #root [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] {
+  --text-1: #f5f8f9 !important;
+  --text-2: #c3cdd2 !important;
+  --text-3: #9ba7ae !important;
+  background-color: #101315 !important;
+  background-image:
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 12%, transparent), transparent 34%),
+    linear-gradient(155deg, #191d20 0%, #090b0c 100%) !important;
+  color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: #141719 !important;
+  background-image: linear-gradient(145deg, rgba(255, 255, 255, .045), rgba(14, 16, 17, .88)) !important;
+  color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] [class*="heroTop"] {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] [class*="pill"] {
+  border-color: color-mix(in srgb, currentColor 32%, transparent) !important;
+  background: color-mix(in srgb, currentColor 9%, transparent) !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] h1 {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] p {
+  color: #c3cdd2 !important;
+  -webkit-text-fill-color: #c3cdd2 !important;
+}
+
+html body #root [data-testid="player-command-evidence"] > div {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: rgba(255, 255, 255, .045) !important;
+  background-image: none !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .025) !important;
+}
+
+html body #root [data-testid="player-command-evidence"] [class*="progressValue"] {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-command-evidence"] [class*="sectionLabel"],
+html body #root [data-testid="player-command-evidence"] [class*="meta"] {
+  color: #9ba7ae !important;
+  -webkit-text-fill-color: #9ba7ae !important;
+  background: transparent !important;
+}
+
+html body #root [data-testid="player-command-evidence"] [class*="progressTrack"] {
+  background-color: rgba(255, 255, 255, .08) !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="coach-priority"] {
+  border-color: rgba(220, 231, 236, .12) !important;
+  background-color: #0d1114 !important;
+  background-image: linear-gradient(145deg, rgba(21, 27, 31, .98), rgba(6, 9, 11, .99)) !important;
+  color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="coach-priority"] :is(h2, strong) {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="coach-priority"] :is(p, small, [class*="Value"], [class*="Meta"]) {
+  color: #c3cdd2 !important;
+  -webkit-text-fill-color: #c3cdd2 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="next-actions"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background: transparent !important;
+  color: #f5f8f9 !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="sectionTitle"],
+html body #root [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="taskTitle"] {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="next-actions"] :is([class*="sectionLabel"], [class*="taskMeta"], [class*="meta"]) {
+  color: #9ba7ae !important;
+  -webkit-text-fill-color: #9ba7ae !important;
+  background: transparent !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="taskRow"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: rgba(255, 255, 255, .035) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosure,
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosureBody {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: #0f1214 !important;
+  background-image: none !important;
+  color: #f5f8f9 !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosure > summary {
+  background: transparent !important;
+  color: #f5f8f9 !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosure > summary strong {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosure > summary small {
+  color: #9ba7ae !important;
+  -webkit-text-fill-color: #9ba7ae !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosureBody [class*="metrics"] {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosureBody [class*="metric"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: rgba(255, 255, 255, .035) !important;
+  background-image: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="activation"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: #0f1214 !important;
+  background-image: none !important;
+  color: #f5f8f9 !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="activation"] > summary {
+  background: transparent !important;
+  color: #c3cdd2 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="activation"] [class*="activationRow"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: rgba(255, 255, 255, .035) !important;
+  background-image: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="activation"] [class*="activationText"] {
+  color: #c3cdd2 !important;
+  -webkit-text-fill-color: #c3cdd2 !important;
+}
+
+/* The viewport-root More sheet must not inherit generic paragraph cards. */
+html body [data-testid="mobile-navigation-sheet"] [class*="sheetSummary"] {
+  margin-top: 6px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #65717a !important;
+  box-shadow: none !important;
+}

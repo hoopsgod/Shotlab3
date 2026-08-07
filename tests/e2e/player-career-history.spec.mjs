@@ -152,7 +152,12 @@ async function seed(page) {
 }
 
 async function enterDemo(page, roleName) {
-  const button = page.getByRole("button", { name: roleName, exact: true });
+  const currentLabel = roleName === "Demo Coach"
+    ? "Coach demo"
+    : roleName === "Demo Player"
+      ? "Player demo"
+      : roleName;
+  const button = page.getByRole("button", { name: currentLabel, exact: true });
   await expect(button).toBeVisible({ timeout: 20_000 });
   await button.click();
 }

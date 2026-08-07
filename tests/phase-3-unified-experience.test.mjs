@@ -5,16 +5,12 @@ import fs from "node:fs";
 const primitivesSource = fs.readFileSync("src/components/ExperiencePrimitives.jsx", "utf8");
 const primitivesCss = fs.readFileSync("src/components/ExperiencePrimitives.module.css", "utf8");
 const coachSource = fs.readFileSync("src/components/CoachInteractiveDashboards.jsx", "utf8");
+const briefingSource = fs.readFileSync("src/lib/coachActionBriefings.js", "utf8");
 const playerSource = fs.readFileSync("src/components/PlayerDailyCommandCenter.jsx", "utf8");
 const playerCss = fs.readFileSync("src/components/PlayerDailyCommandCenter.module.css", "utf8");
 
 test("Phase 3 exposes one reusable progress, trend, signal, and status vocabulary", () => {
-  for (const component of [
-    "ExperienceSparkline",
-    "ExperienceProgressRing",
-    "ExperienceSignal",
-    "ExperiencePill",
-  ]) {
+  for (const component of ["ExperienceSparkline", "ExperienceProgressRing", "ExperienceSignal", "ExperiencePill"]) {
     assert.match(primitivesSource, new RegExp(`export function ${component}`));
   }
   assert.match(primitivesCss, /\.sparkline/);
@@ -24,12 +20,14 @@ test("Phase 3 exposes one reusable progress, trend, signal, and status vocabular
 });
 
 test("Coach Players converts metrics into a decision brief with specific causes", () => {
+  assert.match(coachSource, /buildCoachPlayerActionBriefing/);
   assert.match(coachSource, /coach-players-decision-brief/);
   assert.match(coachSource, /coach-players-engagement-sparkline/);
-  assert.match(coachSource, /noActivityRows/);
-  assert.match(coachSource, /followUpRows/);
-  assert.match(coachSource, /Open attention queue/);
-  assert.match(coachSource, /Protect the standard|Resolve individual blockers/);
+  assert.match(coachSource, /briefing\.attentionRows/);
+  assert.match(coachSource, /briefing\.noActivityRows/);
+  assert.match(briefingSource, /const followUpRows/);
+  assert.match(briefingSource, /Open attention queue/);
+  assert.match(briefingSource, /Protect the standard|individual blockers still need direct follow-up/);
 });
 
 test("Player Home prioritizes one action, progress meaning, and visible feedback", () => {
@@ -44,7 +42,7 @@ test("Player Home prioritizes one action, progress meaning, and visible feedback
 });
 
 test("Phase 3 foundation remains presentation-only and preserves data boundaries", () => {
-  for (const source of [primitivesSource, primitivesCss, coachSource, playerSource, playerCss]) {
+  for (const source of [primitivesSource, primitivesCss, coachSource, briefingSource, playerSource, playerCss]) {
     assert.doesNotMatch(source, /supabase|auth\.|fetch\(|XMLHttpRequest|create table|alter table/i);
   }
 });

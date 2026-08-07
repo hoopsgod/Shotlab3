@@ -39,7 +39,6 @@
   </style>
   <link id="shotlab-v3-authority" rel="stylesheet" href="/shotlab-v3-foundation.css" />
   <link id="shotlab-v3-mobile-corrections" rel="stylesheet" href="/shotlab-v3-mobile-corrections.css" />
-  <link id="shotlab-v4-reference" rel="stylesheet" href="/shotlab-v4-reference.css" />
   <link id="shotlab-v5-coach-integrity" rel="stylesheet" href="/shotlab-v5-coach-integrity.css" />
   <link id="shotlab-v6-decision-workspaces" rel="stylesheet" href="/shotlab-v6-decision-workspaces.css" />
   <link id="shotlab-v7-page-authority" rel="stylesheet" href="/shotlab-v7-page-authority.css" />
@@ -47,8 +46,8 @@
   <link id="shotlab-v9-secondary-polish" rel="stylesheet" href="/shotlab-v9-secondary-polish.css" />
   <link id="shotlab-v11-decision-first" rel="stylesheet" href="/shotlab-v11-decision-first.css?v=8a79ecde" />
   <link id="shotlab-v12-auth-demo-entry" rel="stylesheet" href="/shotlab-v12-auth-demo-entry.css?v=75ba7ae2" />
-  <link id="shotlab-v13-visual-hierarchy" rel="stylesheet" href="/shotlab-v13-visual-hierarchy.css?v=2e468314" />
   <link id="shotlab-v15-session-integrity" rel="stylesheet" href="/shotlab-v15-session-integrity.css?v=af442c69" />
+  <link id="shotlab-phase2-critical" rel="stylesheet" href="/shotlab-phase2-critical.css" />
 </head>
 <body>
   <div id="root">
@@ -66,11 +65,6 @@
   <script type="module" src="/src/teamStoreEntry.jsx"></script>
   <script>
     window.addEventListener('load', function () {
-      ['shotlab-v3-authority','shotlab-v3-mobile-corrections','shotlab-v4-reference','shotlab-v5-coach-integrity','shotlab-v6-decision-workspaces','shotlab-v7-page-authority','shotlab-v8-demo-parity','shotlab-v9-secondary-polish','shotlab-v11-decision-first','shotlab-v12-auth-demo-entry','shotlab-v13-visual-hierarchy','shotlab-v15-session-integrity'].forEach(function (id) {
-        var sheet = document.getElementById(id);
-        if (sheet) document.head.appendChild(sheet);
-      });
-
       var requestedDemo = String(new URLSearchParams(window.location.search).get('demo') || '').toLowerCase();
       var directDemoRequested = requestedDemo === 'player' || requestedDemo === 'coach';
       var directDemoStarted = false;
