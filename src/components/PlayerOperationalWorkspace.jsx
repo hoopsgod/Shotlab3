@@ -12,6 +12,15 @@ function MetricContent({ metric }) {
   );
 }
 
+function resolveWorkspaceSubtitle(model) {
+  const subtitle = String(model?.subtitle || "");
+  if (model?.id !== "leaderboards" || !/own the top spot/i.test(subtitle)) return subtitle;
+  const rankMetric = (model?.metrics || []).find((metric) => metric?.id === "rank");
+  const rank = Number(String(rankMetric?.value || "").replace(/\D/g, ""));
+  if (!Number.isFinite(rank) || rank <= 1) return subtitle;
+  return `You are ranked #${rank}. You are tied on makes with the position ahead.`;
+}
+
 export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", testId }) {
   if (!model) return null;
   const runAction = (action) => {
@@ -23,6 +32,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
     if (metric?.action) scheduleWorkspaceActionReveal(metric.action);
   };
   const metrics = model.metrics || [];
+  const subtitle = resolveWorkspaceSubtitle(model);
 
   return (
     <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`}>
@@ -33,7 +43,7 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
             <h1 className={styles.title}>{model.title}</h1>
             <span className={styles.status}>{model.status}</span>
           </div>
-          <p className={styles.subtitle}>{model.subtitle}</p>
+          <p className={styles.subtitle}>{subtitle}</p>
         </div>
         {model.primaryAction && (
           <button type="button" className={styles.primaryAction} onClick={() => runAction(model.primaryAction)}>
