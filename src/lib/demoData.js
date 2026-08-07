@@ -105,7 +105,18 @@ function buildDemoTeam(teamId, coachEmail, team) {
 
 export function buildDemoDataBundle({ teamId = DEMO_TEAM_ID, coachEmail = null, team } = {}) {
   const resolvedTeam = buildDemoTeam(teamId, coachEmail, team);
-  const players = basePlayers.map((player) => ({ ...player, teamId: resolvedTeam.id }));
+  const playerRows = basePlayers.map((player) => ({ ...player, teamId: resolvedTeam.id }));
+  const coachRow = coachEmail ? {
+    id: "coach-demo-primary",
+    email: coachEmail,
+    name: "Demo Coach",
+    role: "coach",
+    isCoach: true,
+    teamId: resolvedTeam.id,
+    hideFromLeaderboards: true,
+    createdAt: DEMO_TIMESTAMP - 1,
+  } : null;
+  const players = coachRow ? [coachRow, ...playerRows] : playerRows;
   const playerProfiles = basePlayerProfiles.map((profile) => ({ ...profile, teamId: resolvedTeam.id }));
   const events = baseEvents.map((event) => ({ ...event, teamId: resolvedTeam.id }));
   const rsvps = baseRsvps.map((rsvp) => ({ ...rsvp, teamId: resolvedTeam.id }));
