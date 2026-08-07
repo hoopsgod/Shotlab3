@@ -1,0 +1,146 @@
+/* Phase 3J — Coach Events Decision-to-Agenda Hierarchy */
+
+.coachEventsSupportingIntelligence {
+  width: 100%;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  order: 4 !important;
+}
+
+.coachEventsSupportingSummary {
+  list-style: none;
+}
+
+.coachEventsSupportingSummary::-webkit-details-marker {
+  display: none;
+}
+
+@media (min-width: 761px) {
+  .coachEventsSupportingSummary {
+    display: none;
+  }
+
+  .coachEventsSupportingBody {
+    display: block;
+  }
+}
+
+@media (max-width: 760px) {
+  .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] {
+    padding-bottom: 8px !important;
+  }
+
+  .coachEventsSupportingIntelligence {
+    border: 1px solid rgba(23, 26, 24, .10);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 8px 24px rgba(23, 28, 24, .05);
+    overflow: hidden;
+  }
+
+  .coachEventsSupportingSummary {
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #171a18 !important;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .coachEventsSupportingSummary:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--semantic-info, #2b718c) 28%, transparent);
+    outline-offset: -3px;
+  }
+
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummary > .coachEventsSupportingSummaryCopy {
+    all: unset !important;
+    min-width: 0 !important;
+    display: grid !important;
+    gap: 3px !important;
+    color: #171a18 !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummary > .coachEventsSupportingSummaryCopy::before,
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummary > .coachEventsSupportingSummaryCopy::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummaryCopy > span,
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummaryCopy > strong,
+  html body #root .coach-events-mobile-surface [data-testid="coach-events-interactive-dashboard"] .coachEventsSupportingSummaryCopy > small {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+    transform: none !important;
+  }
+
+  .coachEventsSupportingSummaryCopy > span {
+    color: var(--semantic-info, #2b718c) !important;
+    font: 760 10px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    letter-spacing: .065em;
+    text-transform: uppercase;
+  }
+
+  .coachEventsSupportingSummaryCopy > strong {
+    color: #171a18 !important;
+    font: 760 15px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    letter-spacing: -.015em;
+  }
+
+  .coachEventsSupportingSummaryCopy > small {
+    color: #5d665f !important;
+    font: 540 12px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  }
+
+  .coachEventsSupportingChevron {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--semantic-info, #2b718c) 8%, #fff);
+    color: var(--semantic-info, #2b718c);
+    font: 650 22px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    transform: rotate(0deg);
+    transition: transform 150ms ease;
+  }
+
+  .coachEventsSupportingIntelligence[open] .coachEventsSupportingChevron {
+    transform: rotate(90deg);
+  }
+
+  .coachEventsSupportingBody {
+    padding: 0 12px 12px;
+    border-top: 1px solid rgba(23, 26, 24, .08);
+  }
+
+  .coachEventsSupportingBody .secondaryPageEvidence {
+    margin-top: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coachEventsSupportingChevron {
+    transition: none;
+  }
+}

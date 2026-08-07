@@ -83,7 +83,7 @@ test('rendered iPhone audit proves exclusive viewport ownership for both roles',
   assert.match(screenshots, /09-coach-team-store/);
 });
 
-test('App Store presentation workflow carries Phase 3I and its evidence package', () => {
+test('App Store presentation workflow carries Phase 3I and a current evidence package', () => {
   assert.match(workflow, /tests\/phase-3i-team-store-immersive\.test\.mjs/);
-  assert.match(workflow, /shotlab-phase-3i-team-store-immersive-evidence/);
+  assert.match(workflow, /shotlab-phase-(?:3i-team-store-immersive|3j-coach-events-hierarchy)-evidence/);
 });

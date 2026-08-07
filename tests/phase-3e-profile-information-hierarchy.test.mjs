@@ -63,5 +63,5 @@ test('Phase 3E removes the duplicate Profile identity hero at source and leaves 
 test('Phase 3E keeps reduced-motion handling and App Store evidence coverage explicit', () => {
   assert.match(phaseCss, /@media \(prefers-reduced-motion:reduce\)/);
   assert.match(workflow, /tests\/phase-3e-profile-information-hierarchy\.test\.mjs/);
-  assert.match(workflow, /shotlab-phase-(?:3e-profile-hierarchy|3f-profile-intelligence|3g-coach-drills-hierarchy|3h-coach-players-hierarchy|3i-team-store-immersive)-evidence/);
+  assert.match(workflow, /shotlab-phase-(?:3e-profile-hierarchy|3f-profile-intelligence|3g-coach-drills-hierarchy|3h-coach-players-hierarchy|3i-team-store-immersive|3j-coach-events-hierarchy)-evidence/);
 });
