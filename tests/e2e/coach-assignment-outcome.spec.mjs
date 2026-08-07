@@ -59,7 +59,7 @@ async function openCoachWithSeed(page, seed) {
     for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
   }, seed);
   await page.goto("/");
-  await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
+  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
   return { getFollowUpRecord: () => followUpRecord };
 }
 
