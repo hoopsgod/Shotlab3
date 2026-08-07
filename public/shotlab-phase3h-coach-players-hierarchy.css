@@ -1,0 +1,142 @@
+/* Phase 3H — Coach Players Command & Management Hierarchy */
+
+.page[data-accent="players"] {
+  --phase3h-ink: #151915;
+  --phase3h-muted: #5f675f;
+  --phase3h-line: #dfe3da;
+  --phase3h-surface: #ffffff;
+  --phase3h-subtle: #f7f8f4;
+  --phase3h-accent: #a8cf00;
+  --phase3h-accent-strong: #7f9e1e;
+}
+
+.coach-player-management-disclosure {
+  margin: 12px 0;
+  border: 1px solid var(--phase3h-line, #dfe3da);
+  border-radius: 18px;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 9px 26px rgba(31,39,30,.045);
+  overflow: clip;
+}
+
+.coach-player-management-summary {
+  min-height: 72px;
+  padding: 13px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  list-style: none;
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.coach-player-management-summary::-webkit-details-marker { display: none; }
+
+.coach-player-management-summary-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+/* Explicitly neutralize older page-level span/summary authorities. */
+.page[data-accent="players"] .coach-player-management-summary-copy,
+.page[data-accent="players"] .coach-player-management-summary-copy > span,
+.page[data-accent="players"] .coach-player-management-summary-copy > strong,
+.page[data-accent="players"] .coach-player-management-summary-copy > small {
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+.coach-player-management-kicker {
+  color: var(--phase3h-accent-strong, #7f9e1e) !important;
+  font: 800 9px/1.15 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  letter-spacing: .11em !important;
+}
+
+.coach-player-management-summary strong {
+  color: var(--phase3h-ink, #151915) !important;
+  font: 760 17px/1.12 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif !important;
+  letter-spacing: -.018em !important;
+}
+
+.coach-player-management-summary small {
+  color: var(--phase3h-muted, #5f675f) !important;
+  font: 600 11px/1.38 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+}
+
+.coach-player-management-chevron {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #dce1d7;
+  border-radius: 999px;
+  color: #586058;
+  background: #f6f7f3;
+  transition: transform .18s ease, background .18s ease;
+}
+
+.coach-player-management-disclosure[open] .coach-player-management-chevron {
+  transform: rotate(180deg);
+  background: color-mix(in srgb, var(--phase3h-accent, #a8cf00) 12%, #fff);
+}
+
+.coach-player-management-summary:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--phase3h-accent, #a8cf00) 28%, transparent);
+  outline-offset: -3px;
+}
+
+.coach-player-management-body {
+  padding: 14px;
+  border-top: 1px solid #e3e6df;
+  background: #fafbf8;
+}
+
+.coach-player-management-body > :first-child {
+  margin-top: 0 !important;
+}
+
+.coach-player-management-body > :last-child {
+  margin-bottom: 0 !important;
+}
+
+/* Expanded management surfaces should remain calm and light. */
+.page[data-accent="players"] .coach-player-management-body .coachDashboardOperationalContent,
+.page[data-accent="players"] .coach-player-management-body [data-testid="coach-player-invite-dashboard-section"],
+.page[data-accent="players"] .coach-player-management-body [data-testid="coach-season-archive"] {
+  margin-inline: 0 !important;
+}
+
+@media (max-width: 720px) {
+  .coach-player-management-disclosure {
+    margin-block: 10px;
+  }
+
+  .coach-player-management-summary {
+    min-height: 68px;
+    padding: 12px 14px;
+  }
+
+  .coach-player-management-body {
+    padding: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coach-player-management-chevron,
+  .coach-player-management-disclosure,
+  .coach-player-management-summary {
+    transition: none !important;
+    animation: none !important;
+  }
+}

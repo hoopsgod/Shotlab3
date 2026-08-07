@@ -237,7 +237,9 @@ test("capture Coach App Store presentation assets", async ({ page }) => {
   await captureMarketingAsset(page, itemFor(4));
 
   await openNavigation(page, "Players");
-  await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
+  const rosterManagement = page.getByTestId("coach-player-roster-management");
+  await expect(rosterManagement).toBeVisible({ timeout: 20_000 });
+  await expect(rosterManagement).not.toHaveAttribute("open", "");
   await captureMarketingAsset(page, itemFor(5));
 
   await openNavigation(page, "Schedule");

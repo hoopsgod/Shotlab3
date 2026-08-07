@@ -146,6 +146,11 @@ test("coach removal creates a hidden tombstone and excludes the player from rost
   await enterSeededDemoCoach(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
+  const rosterManagement = page.getByTestId("coach-player-roster-management");
+  await expect(rosterManagement).toBeVisible({ timeout: 20_000 });
+  await expect(rosterManagement).not.toHaveAttribute("open", "");
+  await rosterManagement.locator(":scope > summary").click();
+  await expect(rosterManagement).toHaveAttribute("open", "");
   await expect(page.getByText("Acceptance Player", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Removal Candidate", { exact: true }).first()).toBeVisible();
 
