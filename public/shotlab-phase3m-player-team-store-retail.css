@@ -1,0 +1,350 @@
+/* Phase 3M — Player Team Store Retail Hierarchy */
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] {
+  --ts-retail-ink: #171a18;
+  --ts-retail-muted: #68706a;
+  --ts-retail-line: rgba(23, 26, 24, .10);
+  --ts-retail-lime: #c8ff1a;
+  --ts-retail-olive: #6d8719;
+  width: min(560px, 100%);
+  max-width: 560px;
+  box-sizing: border-box;
+}
+
+html.team-store-portal-open .ts-player-retail-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 92% 2%, rgba(200, 255, 26, .18), transparent 34%),
+    radial-gradient(circle at 8% 110%, rgba(200, 255, 26, .08), transparent 42%),
+    linear-gradient(150deg, #20241f 0%, #111411 56%, #0b0d0b 100%);
+  box-shadow: 0 22px 55px rgba(20, 24, 20, .16);
+  color: #f7f9f4;
+}
+
+html.team-store-portal-open .ts-player-retail-hero::after {
+  position: absolute;
+  right: -12px;
+  bottom: -18px;
+  z-index: -1;
+  color: rgba(255, 255, 255, .025);
+  content: "STORE";
+  font: 900 72px/.8 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.07em;
+  pointer-events: none;
+}
+
+html.team-store-portal-open .ts-player-retail-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: #eef4e7;
+  font: 800 10px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+html.team-store-portal-open .ts-player-retail-status > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+html.team-store-portal-open .ts-player-retail-status i {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--ts-retail-lime);
+  box-shadow: 0 0 0 4px rgba(200, 255, 26, .10), 0 0 16px rgba(200, 255, 26, .42);
+}
+
+html.team-store-portal-open .ts-player-retail-status small {
+  color: rgba(238, 244, 231, .54);
+  font-size: 9px;
+  font-weight: 760;
+  letter-spacing: .05em;
+}
+
+html.team-store-portal-open .ts-player-retail-copy {
+  max-width: 430px;
+  margin-top: 28px;
+}
+
+html.team-store-portal-open .ts-player-retail-copy > span,
+html.team-store-portal-open .ts-player-storefront-heading > span {
+  color: var(--ts-retail-lime);
+  font: 850 10px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+html.team-store-portal-open .ts-player-retail-copy h3 {
+  max-width: 420px;
+  margin: 7px 0 0;
+  color: #f7f9f4;
+  font: 780 clamp(34px, 9vw, 46px)/.96 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.055em;
+}
+
+html.team-store-portal-open .ts-player-retail-copy p {
+  max-width: 390px;
+  margin: 12px 0 0;
+  color: rgba(237, 242, 233, .68);
+  font: 580 13px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+html.team-store-portal-open .ts-player-retail-signals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, .09);
+}
+
+html.team-store-portal-open .ts-player-retail-signals > span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding-right: 10px;
+}
+
+html.team-store-portal-open .ts-player-retail-signals > span + span {
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, .08);
+}
+
+html.team-store-portal-open .ts-player-retail-signals strong {
+  color: #f4f7ef;
+  font: 760 12px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+html.team-store-portal-open .ts-player-retail-signals small {
+  overflow: hidden;
+  color: rgba(235, 240, 230, .46);
+  font: 620 9px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.team-store-portal-open .ts-player-storefront-shell {
+  margin-top: 14px;
+  padding: 18px;
+  border: 1px solid var(--ts-retail-line);
+  border-radius: 26px;
+  background: rgba(255, 255, 255, .92);
+  box-shadow: 0 14px 38px rgba(23, 28, 24, .075);
+}
+
+html.team-store-portal-open .ts-player-storefront-heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 12px;
+  align-items: end;
+  padding: 0 2px 14px;
+}
+
+html.team-store-portal-open .ts-player-storefront-heading > span {
+  grid-column: 1 / -1;
+  color: var(--ts-retail-olive);
+}
+
+html.team-store-portal-open .ts-player-storefront-heading > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ts-retail-ink);
+  font: 760 20px/1.12 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.035em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+html.team-store-portal-open .ts-player-storefront-heading > small {
+  color: #858c86;
+  font: 650 9px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  white-space: nowrap;
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-panel {
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 20px;
+  background: #f4f5f0;
+  box-shadow: none;
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-label {
+  padding: 14px 16px 0;
+  color: #727a73;
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-dot {
+  background: var(--ts-retail-lime);
+  box-shadow: 0 0 0 4px rgba(200, 255, 26, .18);
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-storefront-art {
+  height: 116px;
+  margin: 14px 14px 18px;
+  border-radius: 18px;
+  background:
+    linear-gradient(135deg, transparent 39%, rgba(127, 158, 30, .09) 39% 40%, transparent 40%),
+    radial-gradient(circle at 50% 112%, rgba(200, 255, 26, .25), transparent 54%),
+    linear-gradient(160deg, #edf2df 0%, #f8f9f4 66%, #eef0e9 100%);
+  color: var(--ts-retail-olive);
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-art-line {
+  background: rgba(97, 112, 66, .18);
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-team,
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-panel h4,
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-panel p,
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-button,
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-button-disabled,
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-partner {
+  margin-right: 16px;
+  margin-left: 16px;
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-team {
+  color: var(--ts-retail-olive);
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-panel h4 {
+  color: var(--ts-retail-ink);
+  font-size: clamp(26px, 7vw, 32px);
+  line-height: 1;
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-panel p {
+  color: var(--ts-retail-muted);
+  font-size: 12px;
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-button {
+  min-height: 54px;
+  margin-top: 18px;
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-button-disabled {
+  min-height: 54px;
+  margin-top: 18px;
+  border-color: rgba(127, 158, 30, .22);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(200, 255, 26, .24), rgba(200, 255, 26, .13));
+  color: #739018;
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-preview-partner {
+  margin-top: 11px;
+  margin-bottom: 16px;
+  color: #7b827c;
+}
+
+html.team-store-portal-open .ts-player-store-trust {
+  display: flex;
+  gap: 10px;
+  margin: 12px 2px 0;
+  padding: 12px 13px;
+  border: 1px solid rgba(83, 114, 30, .12);
+  border-radius: 16px;
+  background: rgba(238, 243, 226, .64);
+}
+
+html.team-store-portal-open .ts-player-store-trust > svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #6f8c18;
+}
+
+html.team-store-portal-open .ts-player-store-trust p {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+}
+
+html.team-store-portal-open .ts-player-store-trust strong {
+  color: #343934;
+  font: 760 11px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+html.team-store-portal-open .ts-player-store-trust span {
+  color: #707870;
+  font: 560 10px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] .ts-disclosure {
+  margin-top: 10px;
+  color: #7d847e;
+  font-size: 9px;
+}
+
+@media (max-width: 759px) {
+  html.team-store-portal-open .ts-player-content[data-testid="player-team-store-retail"] {
+    padding: 14px 14px calc(24px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  html.team-store-portal-open .ts-player-retail-hero {
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  html.team-store-portal-open .ts-player-retail-copy {
+    margin-top: 24px;
+  }
+
+  html.team-store-portal-open .ts-player-retail-copy h3 {
+    font-size: clamp(34px, 10vw, 42px);
+  }
+
+  html.team-store-portal-open .ts-player-storefront-shell {
+    padding: 15px;
+    border-radius: 23px;
+  }
+
+  html.team-store-portal-open .ts-player-storefront-heading {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  html.team-store-portal-open .ts-player-storefront-heading > small {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 380px) {
+  html.team-store-portal-open .ts-player-retail-status small {
+    display: none;
+  }
+
+  html.team-store-portal-open .ts-player-retail-signals small {
+    font-size: 8px;
+  }
+
+  html.team-store-portal-open .ts-player-retail-hero,
+  html.team-store-portal-open .ts-player-storefront-shell {
+    border-radius: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.team-store-portal-open .ts-player-retail-hero,
+  html.team-store-portal-open .ts-player-storefront-shell,
+  html.team-store-portal-open .ts-player-store-trust {
+    animation: none !important;
+    transition: none !important;
+  }
+}
