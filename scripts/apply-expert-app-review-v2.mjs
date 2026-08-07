@@ -22,6 +22,10 @@ patch("src/main.jsx",
   "markBoot('main_executed')\nregisterRuntimeListeners()\n",
   "markBoot('main_executed')\nregisterRuntimeListeners()\ninstallExpertVisualPolish()\n");
 
+patch("src/App.jsx",
+  "const signedIn=np.find(p=>p.email===acct.email);\nif(!signedIn)return{ok:false,err:\"Unable to prepare demo account.\"};",
+  "const demoBundle=buildDemoDataBundle({teamId:demoTeam.id,coachEmail:DEMO_COACH.email,team:demoTeam});\nawait applyDemoData(demoBundle);\nawait hydratePersistedData();\nnp=demoBundle.players;\nnts=demoBundle.teams;\nconst signedIn=np.find(p=>p.email===acct.email);\nif(!signedIn)return{ok:false,err:\"Unable to prepare demo account.\"};");
+
 patch("src/components/CoachInteractiveDashboards.jsx",
   "? `${pluralize(noActivityRows.length, \"player\")} have no recorded activity and ${pluralize(followUpRows.length, \"player\")} were active previously but not this week.`",
   "? `${pluralize(noActivityRows.length, \"player\")} ${noActivityRows.length === 1 ? \"has\" : \"have\"} no recorded activity and ${pluralize(followUpRows.length, \"player\")} ${followUpRows.length === 1 ? \"was\" : \"were\"} active previously but not this week.`");
