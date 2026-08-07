@@ -113,7 +113,22 @@ test("Coach visual system remains integrated across command and management pages
   let sheet = await more(page);
   await sheet.locator('[data-nav-key="drills"]').click();
   await expect(page.locator("#coach-drills-management")).toBeVisible({ timeout: 20_000 });
+  const drillLibrary = page.getByTestId("coach-drills-library-management");
+  await expect(drillLibrary).toBeVisible({ timeout: 20_000 });
+  await expect(drillLibrary).not.toHaveAttribute("open", "");
+  await expect(page.getByText(/PROGRAM SHOOTING DRILLS/)).toBeHidden();
   await capture(page, "08-coach-drills");
+
+  await drillLibrary.locator(":scope > summary").click();
+  await expect(drillLibrary).toHaveAttribute("open", "");
+  await expect(page.getByText(/PROGRAM SHOOTING DRILLS/)).toBeVisible();
+  await capture(page, "08b-coach-drills-library-expanded");
+  await drillLibrary.locator(":scope > summary").click();
+  await expect(drillLibrary).not.toHaveAttribute("open", "");
+
+  await page.getByRole("button", { name: "Add Drill", exact: true }).click();
+  await expect(page.getByText("NEW DRILL", { exact: true })).toBeVisible({ timeout: 20_000 });
+  await noOverflow(page);
 
   sheet = await more(page);
   await sheet.locator('[data-nav-key="team-store"]').click();
