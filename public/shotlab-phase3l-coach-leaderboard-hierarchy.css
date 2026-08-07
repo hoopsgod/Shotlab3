@@ -179,6 +179,32 @@
   font-style: normal;
 }
 
+/* The Player Intelligence drawer is intentionally dark even when opened from a light Coach route.
+   Establish a local token boundary so route-level light tokens cannot invert its content. */
+html body [data-testid="coach-player-intelligence-drawer"] [role="dialog"] {
+  --text-1: #f4f7f2 !important;
+  --text-2: #aab4ad !important;
+  --text-3: #7f8a84 !important;
+  color: #f4f7f2 !important;
+}
+
+html body [data-testid="coach-player-intelligence-drawer"] [class*="drawerHeader"] h2,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="drawerMetric"] strong,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="compactMetric"] strong,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionTitle"] {
+  color: #f4f7f2 !important;
+  -webkit-text-fill-color: #f4f7f2 !important;
+}
+
+html body [data-testid="coach-player-intelligence-drawer"] [class*="drawerHeader"] p,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="drawerMetric"] span,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="compactMetric"] span,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionSummary"],
+html body [data-testid="coach-player-intelligence-drawer"] [class*="progressMeta"] {
+  color: #aab4ad !important;
+  -webkit-text-fill-color: #aab4ad !important;
+}
+
 @media (max-width: 760px) {
   html body #root [data-testid="coach-page-dashboard-leaderboards"] {
     min-height: 0 !important;
