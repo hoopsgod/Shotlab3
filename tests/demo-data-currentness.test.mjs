@@ -22,7 +22,12 @@ test("demo bundle preserves both role identities", () => {
   assert.match(demoData, /const players = coachRow \? \[coachRow, \.\.\.playerRows\] : playerRows/);
 });
 
-test("entering a demo hydrates the rolling bundle before routing", () => {
+test("demo entry refreshes managed demos without overwriting scoped custom data", () => {
+  assert.match(expertReview, /const scopedRowsPresent=/);
+  assert.match(expertReview, /const existingDemoMeta=await DB\.get\(\\"sl:demo-data-meta\\"\)/);
+  assert.match(expertReview, /const managedDemoData=/);
+  assert.match(expertReview, /const shouldHydrateDemoBundle=!scopedRowsPresent\|\|managedDemoData/);
+  assert.match(expertReview, /if\(shouldHydrateDemoBundle\)/);
   assert.match(expertReview, /const demoBundle=buildDemoDataBundle/);
   assert.match(expertReview, /await applyDemoData\(demoBundle\)/);
   assert.match(expertReview, /await hydratePersistedData\(\)/);
@@ -32,5 +37,5 @@ test("entering a demo hydrates the rolling bundle before routing", () => {
 test("App Store evidence requires a populated Coach schedule", () => {
   assert.match(screenshotSpec, /Calendar is open/);
   assert.match(expertReview, /tests\/e2e\/app-store-screenshots\.spec\.mjs/);
-  assert.match(expertReview, /getByText\("Team Practice"/);
+  assert.match(expertReview, /getByText\(\\"Team Practice\\"/);
 });
