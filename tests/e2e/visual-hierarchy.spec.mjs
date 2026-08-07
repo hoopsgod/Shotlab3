@@ -143,15 +143,15 @@ test("coach mobile home gives the fresh one-player demo one compact truthful act
   await expect(page.getByRole("button", { name: "Log out", exact: true })).not.toBeVisible();
 
   expect(await eventsPage.evaluate((node) => node.closest(".accent-card") !== null)).toBe(false);
-  const headerBox = await eventsHeader.boundingBox();
+  const eventsHeaderBox = await eventsHeader.boundingBox();
   const emptyBox = await emptyState.boundingBox();
   const createBox = await createEvent.boundingBox();
-  expect(headerBox).not.toBeNull();
+  expect(eventsHeaderBox).not.toBeNull();
   expect(emptyBox).not.toBeNull();
   expect(createBox).not.toBeNull();
-  expect(headerBox.y).toBeLessThan(150);
+  expect(eventsHeaderBox.y).toBeLessThan(150);
   expect(createBox.width).toBeLessThan(390 * 0.8);
-  expect(createBox.y).toBeGreaterThan(headerBox.y + headerBox.height);
+  expect(createBox.y).toBeGreaterThan(eventsHeaderBox.y + eventsHeaderBox.height);
   expect(emptyBox.width).toBeLessThanOrEqual(390);
   await expectNoHorizontalOverflow(page);
 });
