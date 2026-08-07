@@ -55,10 +55,35 @@ test("Player Train opens a focused drill session with live score feedback", asyn
   expect(heroBox).not.toBeNull();
   expect(heroBox.y).toBeLessThan(viewportHeight * 0.62);
 
+  const visualState = await header.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const identity = node.children[1];
+    const title = node.querySelector("h1");
+    return {
+      backgroundColor: style.backgroundColor,
+      backgroundImage: style.backgroundImage,
+      identityBackground: identity ? getComputedStyle(identity).backgroundColor : "",
+      identityImage: identity ? getComputedStyle(identity).backgroundImage : "",
+      titleColor: title ? getComputedStyle(title).color : "",
+    };
+  });
+  expect(visualState.backgroundColor).toBe("rgb(17, 20, 17)");
+  expect(visualState.backgroundImage).toContain("gradient");
+  expect(visualState.identityBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(visualState.identityImage).toBe("none");
+  expect(visualState.titleColor).toBe("rgb(248, 250, 245)");
+
   const scoreInput = session.locator('input[type="number"]').first();
   await expect(scoreInput).toBeVisible();
   await scoreInput.fill("20");
   await expect(header.getByText("20", { exact: true })).toBeVisible();
+  const inputStyle = await scoreInput.evaluate((node) => ({
+    backgroundColor: getComputedStyle(node).backgroundColor,
+    color: getComputedStyle(node).color,
+  }));
+  expect(inputStyle.backgroundColor).toBe("rgb(17, 20, 17)");
+  expect(inputStyle.color).toBe("rgb(200, 255, 26)");
+
   const liveProgress = page.getByTestId("player-training-live-progress");
   if (await liveProgress.count()) await expect(liveProgress).toBeVisible();
 
