@@ -29,6 +29,7 @@ test('Team Store open lifecycle owns and cleans a document-level immersive state
 test('mobile Team Store exclusively owns the viewport instead of behaving as a bottom sheet', () => {
   assert.match(css, /@media \(max-width: 759px\)/);
   assert.match(css, /body > #root[\s\S]*display: none !important/);
+  assert.match(css, /mobile-navigation-dock[\s\S]*mobile-navigation-overlay[\s\S]*display: none !important/);
   assert.match(css, /#team-store-root[\s\S]*position: fixed !important[\s\S]*height: 100dvh !important/);
   assert.match(css, /\.ts-overlay[\s\S]*padding: 0 !important[\s\S]*backdrop-filter: none !important/);
   assert.match(css, /\.ts-panel[\s\S]*height: 100dvh !important[\s\S]*max-height: none !important[\s\S]*border-radius: 0 !important/);
@@ -77,6 +78,7 @@ test('rendered iPhone audit proves exclusive viewport ownership for both roles',
   assert.match(screenshots, /expectImmersiveTeamStore/);
   assert.match(screenshots, /team-store-portal-overlay/);
   assert.match(screenshots, /team-store-portal-panel/);
+  assert.match(screenshots, /mobile-navigation-dock/);
   assert.match(screenshots, /04-player-team-store/);
   assert.match(screenshots, /09-coach-team-store/);
 });
