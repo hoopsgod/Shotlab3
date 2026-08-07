@@ -180,6 +180,20 @@
 }
 
 @media (max-width: 760px) {
+  #root [data-testid="coach-page-dashboard-leaderboards"] {
+    gap: 12px !important;
+    padding-bottom: 14px !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards-decision-brief"],
+  #root [data-testid="coach-page-dashboard-leaderboards-evidence"] {
+    display: none !important;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] {
+    margin-top: 0 !important;
+  }
+
   [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulse {
     grid-template-columns: 1fr;
     gap: 10px;
