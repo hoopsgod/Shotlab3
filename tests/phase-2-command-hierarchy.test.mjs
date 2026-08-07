@@ -53,6 +53,7 @@ test("dark Player command surfaces restore readable local text tokens", () => {
   assert.match(hierarchy, /--text-1: #f5f8f9/);
   assert.match(hierarchy, /--text-2: #c3cdd2/);
   assert.match(hierarchy, /--text-3: #9ba7ae/);
+  assert.match(hierarchy, /\.performance-shell--player \[data-testid\^="player-"\]\[data-testid\$="-workspace"\]/);
 });
 
 test("Player mobile hierarchy preserves a dominant action and deliberate disclosure", () => {
