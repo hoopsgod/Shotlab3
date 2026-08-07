@@ -85,15 +85,19 @@ test("Phase 3Q owns its late visual authority and uses compact safe dock clearan
   assert.match(authority, /margin-bottom: calc\(28px \+ env\(safe-area-inset-bottom, 0px\)\)/);
 });
 
-test("Phase 3Q iPhone evidence logs a real score, enters closeout, verifies contrast, and exits to progress", () => {
+test("Phase 3Q iPhone evidence logs a real score, verifies live streak parity, and constrains dock gap", () => {
   assert.match(screenshotConfig, /phase-3q-player-session-closeout-screenshots\.spec\.mjs/);
   assert.match(screenshotSpec, /\/v1\/scores/);
   assert.match(screenshotSpec, /fill\("20"\)/);
+  assert.match(screenshotSpec, /liveStreakMatch/);
+  assert.match(screenshotSpec, /closeoutStreakMatch/);
   assert.match(screenshotSpec, /player-training-finish-session/);
   assert.match(screenshotSpec, /player-session-closeout/);
   assert.match(screenshotSpec, /player-session-next-commitment/);
   assert.match(screenshotSpec, /player-session-done/);
   assert.match(screenshotSpec, /player-session-view-progress/);
+  assert.match(screenshotSpec, /const dockGap/);
+  assert.match(screenshotSpec, /dockGap\)\.toBeLessThanOrEqual\(96\)/);
   assert.match(screenshotSpec, /04t-player-session-closeout\.png/);
   assert.match(screenshotSpec, /04u-player-session-closeout-actions\.png/);
   assert.match(screenshotSpec, /fullPage: false/);
