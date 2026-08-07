@@ -12,6 +12,7 @@ on:
       - agent/phase-3f-native-analytics-controls
       - agent/phase-3g-coach-drills-hierarchy
       - agent/phase-3h-coach-players-hierarchy
+      - agent/phase-3i-team-store-immersive
     paths:
       - "native/app-store-listing.json"
       - "docs/app-store-presentation-package.md"
@@ -39,6 +40,7 @@ on:
       - "tests/phase-3g-coach-drills-hierarchy.test.mjs"
       - "tests/phase-3h-coach-players-hierarchy.test.mjs"
       - "tests/phase-3i-team-store-immersive.test.mjs"
+      - "tests/phase-3j-coach-events-hierarchy.test.mjs"
       - "tests/mission-control-hierarchy-2026.test.mjs"
       - "tests/workspace-recovery.test.mjs"
       - "scripts/apply-expert-app-review-v2.mjs"
@@ -46,6 +48,7 @@ on:
       - "scripts/apply-phase3g-coach-drills-hierarchy.mjs"
       - "scripts/apply-phase3h-coach-players-hierarchy.mjs"
       - "scripts/apply-phase3i-team-store-immersive.mjs"
+      - "scripts/apply-phase3j-coach-events-hierarchy.mjs"
       - "scripts/validate-app-store-screenshots.mjs"
       - "scripts/minify-visual-authority-css.mjs"
       - "public/shotlab-*.css"
@@ -123,8 +126,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify integrated Phase 1, Phase 2, Phase 3, Phase 3B, Phase 3C, Phase 3D, Phase 3E, Phase 3F, Phase 3G, Phase 3H, and Phase 3I contracts
-        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/demo-data-currentness.test.mjs tests/visual-foundation-2026.test.mjs tests/native-identity-shell.test.mjs tests/mobile-navigation-contract.test.mjs tests/phase-2-command-hierarchy.test.mjs tests/phase-3-secondary-cohesion.test.mjs tests/phase-3b-interaction-polish.test.mjs tests/phase-3c-native-route-framing.test.mjs tests/phase-3d-player-analytics-unification.test.mjs tests/phase-3e-profile-information-hierarchy.test.mjs tests/phase-3f-profile-intelligence.test.mjs tests/phase-3g-coach-drills-hierarchy.test.mjs tests/phase-3h-coach-players-hierarchy.test.mjs tests/phase-3i-team-store-immersive.test.mjs tests/mission-control-hierarchy-2026.test.mjs tests/workspace-recovery.test.mjs
+      - name: Verify integrated Phase 1, Phase 2, Phase 3, Phase 3B, Phase 3C, Phase 3D, Phase 3E, Phase 3F, Phase 3G, Phase 3H, Phase 3I, and Phase 3J contracts
+        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/demo-data-currentness.test.mjs tests/visual-foundation-2026.test.mjs tests/native-identity-shell.test.mjs tests/mobile-navigation-contract.test.mjs tests/phase-2-command-hierarchy.test.mjs tests/phase-3-secondary-cohesion.test.mjs tests/phase-3b-interaction-polish.test.mjs tests/phase-3c-native-route-framing.test.mjs tests/phase-3d-player-analytics-unification.test.mjs tests/phase-3e-profile-information-hierarchy.test.mjs tests/phase-3f-profile-intelligence.test.mjs tests/phase-3g-coach-drills-hierarchy.test.mjs tests/phase-3h-coach-players-hierarchy.test.mjs tests/phase-3i-team-store-immersive.test.mjs tests/phase-3j-coach-events-hierarchy.test.mjs tests/mission-control-hierarchy-2026.test.mjs tests/workspace-recovery.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
@@ -147,7 +150,7 @@ jobs:
       - name: Upload App Store presentation package
         uses: actions/upload-artifact@v4
         with:
-          name: shotlab-phase-3i-team-store-immersive-evidence
+          name: shotlab-phase-3j-coach-events-hierarchy-evidence
           path: |
             artifacts/visual-foundation/
             artifacts/native-app-shell/
@@ -164,7 +167,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: shotlab-phase-3i-team-store-immersive-failure
+          name: shotlab-phase-3j-coach-events-hierarchy-failure
           path: |
             playwright-report-app-store/
             playwright-report/
