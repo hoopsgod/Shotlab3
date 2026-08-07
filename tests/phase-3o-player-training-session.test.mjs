@@ -9,6 +9,7 @@ const authority = readFileSync("public/shotlab-phase3o-player-training-session.c
 const html = readFileSync("index.html", "utf8");
 const screenshotConfig = readFileSync("playwright.screenshots.config.mjs", "utf8");
 const screenshotSpec = readFileSync("tests/e2e/phase-3o-player-training-session-screenshots.spec.mjs", "utf8");
+const workflow = readFileSync(".github/workflows/phase-3o-player-training-session.yml", "utf8");
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 
 test("Phase 3O runs after accepted Phase 3N and remains idempotent", () => {
@@ -78,17 +79,21 @@ test("Phase 3O uses a stable late authority boundary for the dark drill identity
   assert.match(authority, /\[data-testid="player-training-session"\] input\[type="number"\][\s\S]*#c8ff1a !important/);
 });
 
-test("Phase 3O iPhone evidence is selected by the screenshot runner and exercises live-score state", () => {
+test("Phase 3O iPhone evidence uses faithful top and bottom viewport captures", () => {
   assert.match(screenshotConfig, /phase-3o-player-training-session-screenshots\.spec\.mjs/);
   assert.match(screenshotSpec, /player-training-session-header/);
   assert.match(screenshotSpec, /player-training-live-progress/);
   assert.match(screenshotSpec, /player-training-score-zone/);
   assert.match(screenshotSpec, /player-training-log-score/);
   assert.match(screenshotSpec, /04p-player-training-session\.png/);
+  assert.match(screenshotSpec, /04q-player-training-score-action\.png/);
+  assert.match(screenshotSpec, /fullPage: false/);
   assert.match(screenshotSpec, /scoreInput\.fill\("20"\)/);
   assert.match(screenshotSpec, /identityBackground/);
   assert.match(screenshotSpec, /titleColor/);
   assert.match(screenshotSpec, /inputStyle\.color/);
   assert.match(screenshotSpec, /logBox\.y \+ logBox\.height/);
   assert.match(screenshotSpec, /scrollWidth - window\.innerWidth/);
+  assert.match(workflow, /04p-player-training-session\.png/);
+  assert.match(workflow, /04q-player-training-score-action\.png/);
 });
