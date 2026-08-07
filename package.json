@@ -15,6 +15,7 @@
     "test:e2e:visual-hierarchy": "playwright test tests/e2e/visual-hierarchy.spec.mjs",
     "test:e2e:mobile-navigation": "playwright test tests/e2e/mobile-navigation.spec.mjs",
     "test:e2e:semantic-colors": "playwright test tests/e2e/semantic-color-system.spec.mjs",
+    "verify:phase3r": "node --test tests/phase-3r-player-progress-intelligence.test.mjs tests/phase-3q-player-session-closeout.test.mjs",
     "preview": "vite preview",
     "deploy:cloudflare": "npm run build && npx wrangler pages deploy dist --project-name shotlab3",
     "dev:agent": "npm run dev",
