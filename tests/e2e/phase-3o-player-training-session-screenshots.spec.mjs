@@ -100,7 +100,8 @@ test("Player Train opens a focused drill session with live score feedback", asyn
   const liveProgress = page.getByTestId("player-training-live-progress");
   if (await liveProgress.count()) await expect(liveProgress).toBeVisible();
 
-  await logScore.scrollIntoViewIfNeeded();
+  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, left: 0, behavior: "auto" }));
+  await page.waitForTimeout(120);
   const logBox = await logScore.boundingBox();
   const dockBox = await page.getByTestId("mobile-navigation-dock").boundingBox();
   expect(logBox).not.toBeNull();
