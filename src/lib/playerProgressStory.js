@@ -1,5 +1,3 @@
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 const safeArray = (value) => (Array.isArray(value) ? value : []);
 const safeNumber = (value, fallback = 0) => {
   const parsed = Number(value);
@@ -156,11 +154,13 @@ export function derivePlayerProgressStory({
   });
   const prior7Makes = dailyMakes.slice(0, 7).reduce((sum, day) => sum + day.made, 0);
   const recent7Makes = dailyMakes.slice(7).reduce((sum, day) => sum + day.made, 0);
-  const comparisonBase = Math.max(1, prior7Makes);
-  const deltaPct = prior7Makes === 0
-    ? (recent7Makes > 0 ? 100 : 0)
-    : Math.round(((recent7Makes - prior7Makes) / comparisonBase) * 100);
-  const trend = deltaPct >= 10 ? "rising" : deltaPct <= -10 ? "cooling" : "steady";
+  const hasPriorVolume = prior7Makes > 0;
+  const deltaPct = hasPriorVolume
+    ? Math.round(((recent7Makes - prior7Makes) / prior7Makes) * 100)
+    : null;
+  const trend = !hasPriorVolume
+    ? (recent7Makes > 0 ? "rising" : "steady")
+    : deltaPct >= 10 ? "rising" : deltaPct <= -10 ? "cooling" : "steady";
 
   const start7 = offsetDay(today, -6);
   const activityDays = new Set();
@@ -200,17 +200,21 @@ export function derivePlayerProgressStory({
   };
 
   const headline = trend === "rising"
-    ? "Your work is trending up."
+    ? "Your work is rising."
     : trend === "cooling"
       ? "Your base needs a reset."
       : recent7Makes > 0 || playerScores.length > 0
         ? "Your development base is holding."
         : "Your progress story starts with the next rep.";
   const trendDetail = trend === "rising"
-    ? `${recent7Makes} at-home makes in the last 7 days · ${deltaPct}% above the prior window.`
+    ? !hasPriorVolume
+      ? `${recent7Makes} at-home makes in the last 7 days · new volume after a quiet prior window.`
+      : `${recent7Makes} at-home makes in the last 7 days · ${deltaPct}% above the prior window.`
     : trend === "cooling"
       ? `${recent7Makes} at-home makes in the last 7 days · ${Math.abs(deltaPct)}% below the prior window.`
-      : `${recent7Makes} at-home makes in the last 7 days · volume is within 10% of the prior window.`;
+      : !hasPriorVolume
+        ? "No at-home makes in either 7-day window yet."
+        : `${recent7Makes} at-home makes in the last 7 days · volume is within 10% of the prior window.`;
 
   const nextFocus = coachFocus
     ? { label: "COACH FOCUS", title: coachFocus, detail: clean(coachPriorities?.challengeText) || "Carry the team priority into the next logged session." }
