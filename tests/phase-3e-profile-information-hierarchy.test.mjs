@@ -50,9 +50,12 @@ test('Player career presentation stays on the accepted light native system', () 
 });
 
 test('Phase 3E removes only the duplicate Profile identity hero and leaves deep analytics intact', () => {
-  assert.match(phaseCss, /:has\(> div\[style\*="120px"\]\[style\*="translate\(30%, -30%\)"\]\)/);
+  assert.match(phaseCss, /div\[style\*="padding: 28px 22px"\]\[style\*="text-align: center"\]\[style\*="position: relative"\]\[style\*="overflow: hidden"\]/);
+  assert.match(phaseCss, /div\[style\*="padding:28px 22px"\]\[style\*="text-align:center"\]\[style\*="position:relative"\]\[style\*="overflow:hidden"\]/);
+  assert.doesNotMatch(phaseCss, /:has\(/, 'duplicate identity lock should not rely on brittle :has() matching');
   assert.match(phaseCss, /display:none!important/);
   assert.match(app, /OFFSEASON REPORT CARD/);
+  assert.match(app, /OFFSEASON PLAYER/);
   assert.match(app, /PLAYER PROGRESS PROFILE/);
   assert.match(app, /INTERPRETED PERFORMANCE TRENDS/);
   assert.match(app, /<ShotLabCharts scores=\{scores\} drills=\{drills\} programDrills=\{programDrills\} user=\{u\} \/>/);
