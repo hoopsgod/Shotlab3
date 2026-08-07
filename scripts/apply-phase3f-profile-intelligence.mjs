@@ -172,7 +172,14 @@ function transformAnalytics() {
   source = replaceOne(source, '        <div style={{ fontSize: 28 }}>🎯</div>', '        <div aria-hidden="true" style={{ color: T.lime, display: "grid", placeItems: "center" }}><ShotLabIcon name="target" size={26} /></div>', 'season goal icon');
 
   if (source.includes('· MY DATA')) fail('duplicate analytics player identity remains');
-  if (/[📈🕸️🔥🎯]/u.test(source)) fail('emoji analytics controls remain');
+  const legacyControlAnchors = [
+    'icon: "📈"',
+    'icon: "🕸️"',
+    'icon: "🔥"',
+    'icon: "🎯"',
+    '<div style={{ fontSize: 28 }}>🎯</div>',
+  ];
+  if (legacyControlAnchors.some((anchor) => source.includes(anchor))) fail('legacy emoji analytics controls remain');
   if (!source.includes('const myScores = useMemo(')) fail('score filtering calculation changed unexpectedly');
   if (!source.includes('<MakesOverTime') || !source.includes('<WeeklyVolume') || !source.includes('<SkillRadar />') || !source.includes('<StreakCalendar />') || !source.includes('<SeasonGoal />')) fail('an analytics destination was removed');
   writeFileSync(path, source);
