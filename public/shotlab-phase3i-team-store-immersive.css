@@ -76,7 +76,8 @@
     -webkit-backdrop-filter: blur(18px) saturate(1.08) !important;
   }
 
-  html.team-store-portal-open .ts-content {
+  html.team-store-portal-open .ts-coach-content,
+  html.team-store-portal-open .ts-player-content {
     padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
