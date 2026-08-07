@@ -1,0 +1,45 @@
+/* Phase 3G — Expanded intelligence refinement */
+
+[data-testid="player-profile-drill-index"]{
+  margin:0 0 12px;
+  padding:14px;
+  border:1px solid rgba(21,26,22,.12);
+  border-radius:16px;
+  background:#fff;
+  box-shadow:0 8px 24px rgba(16,19,16,.04);
+}
+[data-drill-index-heading]{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:10px}
+[data-drill-index-eyebrow]{font:800 9px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.12em;color:#7f9e1e}
+[data-drill-index-title]{margin-top:3px;font:800 17px/1.1 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;letter-spacing:-.02em;color:#141814}
+[data-drill-index-count]{font:700 10px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;color:#6d746f;white-space:nowrap}
+[data-drill-index-list]{display:grid;gap:7px}
+[data-drill-index-row]{display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:54px;padding:9px 10px;border:1px solid rgba(21,26,22,.10);border-radius:12px;background:#f8f8f5;box-sizing:border-box}
+[data-drill-index-row][data-source="program"]{border-left:3px solid #22a8bd}
+[data-drill-index-row][data-source="home"]{border-left:3px solid #9fca16}
+[data-drill-index-main]{min-width:0;flex:1}
+[data-drill-index-name]{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:800 11px/1.15 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.015em;color:#161a16}
+[data-drill-index-meta]{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:5px;font:700 8px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.04em;color:#747b76;text-transform:uppercase}
+[data-drill-index-metrics]{display:flex;gap:5px;flex-shrink:0}
+[data-drill-index-metrics]>span{display:grid;place-items:center;min-width:38px;padding:6px 5px;border-radius:9px;background:#fff;border:1px solid rgba(21,26,22,.09)}
+[data-drill-index-metrics] strong{font:800 13px/1 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;color:#161a16}
+[data-drill-index-metrics] small{margin-top:3px;font:800 7px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.08em;color:#7a817c}
+
+/* The outer disclosure already names Performance Intelligence; remove the duplicate inner masthead. */
+[data-testid="player-profile-performance-intelligence"] [data-testid="player-analytics-heading"]{display:none!important}
+[data-testid="player-profile-performance-intelligence"] [data-testid="player-analytics-sections"]{margin-top:0!important}
+
+/* Nested full-detail disclosure should read as a secondary depth, not another hero card. */
+[data-testid="player-profile-full-drill-details"]{margin-top:10px!important;background:#f7f7f3!important;border-color:rgba(21,26,22,.10)!important;box-shadow:none!important}
+[data-testid="player-profile-full-drill-details"]>summary{min-height:54px!important;padding:11px 13px!important}
+[data-testid="player-profile-full-drill-details"]>summary:focus-visible{outline:3px solid rgba(127,158,30,.26);outline-offset:2px}
+[data-testid="player-profile-full-drill-details"]>summary{touch-action:manipulation}
+
+@media(max-width:430px){
+  [data-testid="player-profile-drill-index"]{padding:12px}
+  [data-drill-index-row]{min-height:52px;padding:8px 9px}
+  [data-drill-index-metrics]>span{min-width:36px}
+}
+@media(prefers-reduced-motion:reduce){
+  [data-testid="player-profile-full-drill-details"] *,
+  [data-testid="player-profile-drill-index"] *{scroll-behavior:auto!important;transition:none!important;animation:none!important}
+}

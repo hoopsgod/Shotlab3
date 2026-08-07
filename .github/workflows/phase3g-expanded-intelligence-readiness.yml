@@ -1,0 +1,78 @@
+name: Phase 3G Expanded Intelligence Readiness
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-3f-native-analytics-controls
+    paths:
+      - "scripts/apply-phase3g-expanded-intelligence-refinement.mjs"
+      - "public/shotlab-phase3g-expanded-intelligence.css"
+      - "tests/phase-3g-expanded-intelligence-refinement.test.mjs"
+      - "tests/e2e/design-system-screenshots.spec.mjs"
+      - "package.json"
+      - ".github/workflows/phase3g-expanded-intelligence-readiness.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+jobs:
+  verify-and-capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Phase 3F and Phase 3G contracts
+        run: node --test tests/phase-3f-profile-intelligence.test.mjs tests/phase-3g-expanded-intelligence-refinement.test.mjs
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Generate fresh iPhone evidence
+        run: npx playwright test tests/e2e/design-system-screenshots.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
+
+      - name: Validate screenshot count, format, and dimensions
+        run: node scripts/validate-app-store-screenshots.mjs
+
+      - name: Upload Phase 3G evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-3g-expanded-intelligence-evidence
+          path: |
+            artifacts/design-audit/iphone/
+            artifacts/app-store/iphone-6.9/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Phase 3G failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-3g-expanded-intelligence-failure
+          path: |
+            playwright-report-app-store/
+            playwright-report/
+            test-results/
+            artifacts/design-audit/iphone/
+          if-no-files-found: ignore
+          retention-days: 7
