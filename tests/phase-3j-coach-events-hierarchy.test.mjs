@@ -23,7 +23,7 @@ test('supporting RSVP and calendar intelligence becomes one mobile disclosure wi
   assert.match(enhancer, /RSVP & calendar context/);
   assert.match(enhancer, /briefing\.missing/);
   assert.match(enhancer, /briefing\.responseRate/);
-  assert.match(enhancer, /data-testid=\"coach-events-insight-grid\"/);
+  assert.match(enhancer, /testId=\"coach-events-insight-grid\"/);
   assert.match(enhancer, /briefing\.insights\.map/);
   assert.match(enhancer, /DashboardProgress/);
 });
