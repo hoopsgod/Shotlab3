@@ -64,11 +64,19 @@ async function verifyCommitmentSurface(page, { mode, title, legacyTestId, screen
   expect(heroBox).not.toBeNull();
   expect(heroBox.y).toBeLessThan(viewportHeight * 0.62);
 
-  const heroStyle = await hero.evaluate((node) => ({
-    backgroundImage: getComputedStyle(node).backgroundImage,
-    borderRadius: getComputedStyle(node).borderRadius,
-  }));
+  const heroStyle = await hero.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const title = node.querySelector("h2");
+    return {
+      backgroundImage: style.backgroundImage,
+      backgroundColor: style.backgroundColor,
+      borderRadius: style.borderRadius,
+      titleColor: title ? getComputedStyle(title).color : "",
+    };
+  });
   expect(heroStyle.backgroundImage).toContain("gradient");
+  expect(heroStyle.backgroundColor).toBe("rgb(17, 20, 17)");
+  expect(heroStyle.titleColor).toBe("rgb(248, 250, 245)");
   expect(parseFloat(heroStyle.borderRadius)).toBeGreaterThanOrEqual(20);
 
   await capture(page, screenshotName);
