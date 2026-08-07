@@ -1,0 +1,71 @@
+/* Phase 3O — stable authority for the active player training session.
+   Loaded after broad demo parity layers so the core in-drill experience keeps
+   its intended dark focus surface and readable live score controls. */
+
+html body #root [data-testid="player-training-session-header"] {
+  border-color: rgba(255,255,255,.08) !important;
+  background-color: #111411 !important;
+  background-image:
+    radial-gradient(circle at 100% 0%, rgba(200,255,26,.14), transparent 34%),
+    linear-gradient(155deg,#20231f 0%,#121512 58%,#0b0d0b 100%) !important;
+  color: #f8faf5 !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html body #root [data-testid="player-training-session-header"] > div {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-training-session-header"] > div:nth-child(2) {
+  border: 0 !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-training-session-header"] > div:nth-child(2) > div {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-training-session-header"] > div:nth-child(2) > div:first-child {
+  border-color: rgba(200,255,26,.20) !important;
+  background-color: rgba(200,255,26,.07) !important;
+}
+
+html body #root [data-testid="player-training-session-header"] h1,
+html body #root [data-testid="player-training-session-header"] strong {
+  color: #f8faf5 !important;
+  -webkit-text-fill-color: #f8faf5 !important;
+}
+
+html body #root [data-testid="player-training-session-header"] p {
+  color: rgba(242,246,238,.56) !important;
+  -webkit-text-fill-color: rgba(242,246,238,.56) !important;
+}
+
+html body #root [data-testid="player-training-session-header"] button {
+  border-color: rgba(255,255,255,.10) !important;
+  background-color: rgba(255,255,255,.045) !important;
+  background-image: none !important;
+  color: #f8faf5 !important;
+  -webkit-text-fill-color: #f8faf5 !important;
+}
+
+html body #root [data-testid="player-training-session"] input[type="number"] {
+  border-color: rgba(200,255,26,.42) !important;
+  background-color: #111411 !important;
+  background-image: none !important;
+  color: #c8ff1a !important;
+  -webkit-text-fill-color: #c8ff1a !important;
+  caret-color: #c8ff1a !important;
+  box-shadow: 0 0 0 1px rgba(200,255,26,.08), 0 14px 26px rgba(22,27,22,.08) !important;
+}
+
+html body #root [data-testid="player-training-session"] input[type="number"]::placeholder {
+  color: rgba(200,255,26,.34) !important;
+  -webkit-text-fill-color: rgba(200,255,26,.34) !important;
+}
