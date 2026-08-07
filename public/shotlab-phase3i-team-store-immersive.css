@@ -15,6 +15,12 @@
     display: none !important;
   }
 
+  /* MobileNavigation is itself portaled to document.body and must yield to the store. */
+  html.team-store-portal-open [data-testid="mobile-navigation-dock"],
+  html.team-store-portal-open [data-testid="mobile-navigation-overlay"] {
+    display: none !important;
+  }
+
   html.team-store-portal-open #team-store-root {
     position: fixed !important;
     inset: 0 !important;
