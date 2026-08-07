@@ -10,12 +10,7 @@ const playerSource = fs.readFileSync("src/components/PlayerDailyCommandCenter.js
 const playerCss = fs.readFileSync("src/components/PlayerDailyCommandCenter.module.css", "utf8");
 
 test("Phase 3 exposes one reusable progress, trend, signal, and status vocabulary", () => {
-  for (const component of [
-    "ExperienceSparkline",
-    "ExperienceProgressRing",
-    "ExperienceSignal",
-    "ExperiencePill",
-  ]) {
+  for (const component of ["ExperienceSparkline", "ExperienceProgressRing", "ExperienceSignal", "ExperiencePill"]) {
     assert.match(primitivesSource, new RegExp(`export function ${component}`));
   }
   assert.match(primitivesCss, /\.sparkline/);
