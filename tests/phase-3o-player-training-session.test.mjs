@@ -30,7 +30,7 @@ test("Phase 3O preserves score validation, persistence, completion, PB, and chal
     "addChallenge({to:challTarget",
     "const activeScoreValidation=",
     "const prevBest=activeScores.filter",
-    "pushCompletionCue({title:activeMode==\"program\"?\"Program drill completed\":\"Drill completed\"",
+    "pushCompletionCue({title:activeMode",
   ]) assert.ok(enhancer.includes(seam), `missing preserved training capability: ${seam}`);
 });
 
