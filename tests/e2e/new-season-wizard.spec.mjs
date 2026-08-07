@@ -74,7 +74,7 @@ async function firstVisiblePlayersButton(page) {
 }
 
 async function enterCoachDemo(page) {
-  const demoCoachButton = page.getByRole("button", { name: "Demo Coach", exact: true });
+  const demoCoachButton = page.getByRole("button", { name: "Coach demo", exact: true });
   const commandCenter = page.getByTestId("coach-command-center-full");
 
   await expect.poll(async () => {
@@ -139,21 +139,17 @@ test("coach completes all four new-season steps with zero historical carry-forwa
   const wizard = page.getByTestId("new-season-wizard");
   await expect(wizard).toBeVisible();
 
-  // Step 1: choose immutable archive.
   await wizard.getByText("2026 Completed Season", { exact: true }).click();
   await wizard.getByRole("button", { name: "Continue", exact: true }).click();
 
-  // Step 2: define the new active season.
   await wizard.getByTestId("new-season-name").fill("2027 Summer Season");
   await wizard.getByTestId("new-season-start").fill("2027-06-01");
   await wizard.locator('input[type="date"]').nth(1).fill("2027-08-31");
   await wizard.getByRole("button", { name: "Continue", exact: true }).click();
 
-  // Step 3: explicitly return only the selected player.
   await wizard.getByLabel("Status for Demo Player").selectOption("returning");
   await wizard.getByRole("button", { name: "Continue", exact: true }).click();
 
-  // Step 4: select reusable structure, then create.
   await wizard.getByText("Program Form Shooting", { exact: true }).click();
   await wizard.getByText("Team Practice", { exact: true }).click();
   await wizard.getByText("Strength Circuit", { exact: true }).click();
