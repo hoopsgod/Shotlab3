@@ -17,16 +17,19 @@ on:
       - "tests/e2e/mission-control-hierarchy-2026.spec.mjs"
       - "tests/app-store-presentation-readiness.test.mjs"
       - "tests/design-system-completion.test.mjs"
+      - "tests/demo-data-currentness.test.mjs"
       - "tests/visual-foundation-2026.test.mjs"
       - "tests/native-identity-shell.test.mjs"
       - "tests/mobile-navigation-contract.test.mjs"
       - "tests/phase-2-command-hierarchy.test.mjs"
       - "tests/mission-control-hierarchy-2026.test.mjs"
       - "tests/workspace-recovery.test.mjs"
+      - "scripts/apply-expert-app-review-v2.mjs"
       - "scripts/validate-app-store-screenshots.mjs"
       - "scripts/minify-visual-authority-css.mjs"
       - "public/shotlab-*.css"
       - "src/main.jsx"
+      - "src/lib/demoData.js"
       - "src/lib/demoMode.js"
       - "src/lib/workspaceRecovery.js"
       - "src/components/AppHeader.jsx"
@@ -96,7 +99,7 @@ jobs:
         run: npm ci
 
       - name: Verify integrated Phase 1 and Phase 2 contracts
-        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/visual-foundation-2026.test.mjs tests/native-identity-shell.test.mjs tests/mobile-navigation-contract.test.mjs tests/phase-2-command-hierarchy.test.mjs tests/mission-control-hierarchy-2026.test.mjs tests/workspace-recovery.test.mjs
+        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/demo-data-currentness.test.mjs tests/visual-foundation-2026.test.mjs tests/native-identity-shell.test.mjs tests/mobile-navigation-contract.test.mjs tests/phase-2-command-hierarchy.test.mjs tests/mission-control-hierarchy-2026.test.mjs tests/workspace-recovery.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
