@@ -11,7 +11,7 @@ async function installRoutes(page) {
 
 async function enterDemo(page, role) {
   await page.goto("/");
-  await page.getByRole("button", { name: role === "coach" ? "Demo Coach" : "Demo Player", exact: true }).click();
+  await page.getByRole("button", { name: role === "coach" ? "Coach demo" : "Player demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -72,7 +72,7 @@ test("coach roster statuses and event metadata render with semantic roles", asyn
   const actualStatusColor = await status.evaluate((node) => getComputedStyle(node).color);
   expect(actualStatusColor).toBe(expectedStatusColor);
 
-  await dock.getByRole("button", { name: "Events", exact: true }).click();
+  await dock.getByRole("button", { name: "Schedule", exact: true }).click();
   const eventsPage = page.locator('.pageShell[data-accent="events"]').first();
   await expect(eventsPage).toBeVisible({ timeout: 20_000 });
   const expectedInfoColor = await computedColorForVariable(page, "--semantic-info");
