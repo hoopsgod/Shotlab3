@@ -43,16 +43,17 @@ test('Coach Events removes shared mobile bottom-padding debt so the agenda follo
   assert.match(css, /coach-events-mobile-surface \[data-testid=\"coach-events-interactive-dashboard\"\][\s\S]*padding-bottom: 8px !important/);
 });
 
-test('mobile Schedule insights uses native summary hierarchy with accessible touch and focus behavior', () => {
+test('mobile Schedule insights uses route-scoped native summary authority with accessible behavior', () => {
   assert.match(css, /\.coachEventsSupportingIntelligence/);
   assert.match(css, /\.coachEventsSupportingSummary/);
   assert.match(css, /min-height: 68px/);
   assert.match(css, /touch-action: manipulation/);
   assert.match(css, /:focus-visible/);
   assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /\.coachEventsSupportingSummaryCopy \{[\s\S]*border: 0 !important[\s\S]*background: transparent !important[\s\S]*box-shadow: none !important[\s\S]*opacity: 1 !important/);
-  assert.match(css, /coachEventsSupportingSummaryCopy > small[\s\S]*opacity: 1 !important/);
-  assert.match(css, /coachEventsSupportingSummaryCopy > small[\s\S]*box-shadow: none !important/);
+  assert.match(css, /html body #root \.coach-events-mobile-surface \[data-testid=\"coach-events-interactive-dashboard\"\] \.coachEventsSupportingSummary > \.coachEventsSupportingSummaryCopy/);
+  assert.match(css, /all: unset !important/);
+  assert.match(css, /coachEventsSupportingSummaryCopy::before[\s\S]*coachEventsSupportingSummaryCopy::after[\s\S]*content: none !important/);
+  assert.match(css, /coachEventsSupportingSummaryCopy > small[\s\S]*box-shadow: none !important[\s\S]*transform: none !important/);
 });
 
 test('Phase 3J preserves existing event action wiring and event insight actions', () => {
