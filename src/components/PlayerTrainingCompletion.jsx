@@ -68,7 +68,7 @@ export default function PlayerTrainingCompletion({
         <span className={styles.mode}>{isProgram ? "PROGRAM" : "AT HOME"}</span>
       </div>
 
-      <div className={styles.resultHero}>
+      <div className={styles.resultHero} data-testid="player-training-result-hero">
         <ResultMark isPB={isPB} />
         <div className={styles.resultCopy}>
           <span>{isPB ? "PERSONAL BEST" : "DRILL COMPLETE"}</span>
