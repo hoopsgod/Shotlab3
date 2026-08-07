@@ -33,8 +33,8 @@ async function expectThreeMetrics(locator) {
   await expect(locator.locator(":scope > *")).toHaveCount(3);
 }
 
-function visibleCreateEventButton(eventsPage) {
-  return eventsPage.locator("button:visible").filter({ hasText: /CREATE EVENT|\+ ADD/i }).first();
+function visibleCreateEventButton(page) {
+  return page.getByRole("button", { name: "Create Event", exact: true });
 }
 
 test.beforeEach(async ({ page }) => {
@@ -121,7 +121,7 @@ test("coach mobile home presents populated decision intelligence and a current S
 
   const eventsPage = page.getByTestId("coach-events-mobile-page");
   const eventsHeader = page.getByTestId("coach-events-command-bar");
-  const createEvent = visibleCreateEventButton(eventsPage);
+  const createEvent = visibleCreateEventButton(page);
 
   await expect(eventsPage).toBeVisible({ timeout: 20_000 });
   await expect(eventsHeader).toBeVisible();
@@ -148,7 +148,7 @@ test("coach can create and revisit a mobile event without breaking navigation", 
   const dock = page.getByTestId("mobile-navigation-dock");
   await dock.getByRole("button", { name: "Schedule", exact: true }).click();
   const eventsPage = page.getByTestId("coach-events-mobile-page");
-  let createEvent = visibleCreateEventButton(eventsPage);
+  let createEvent = visibleCreateEventButton(page);
   await expect(createEvent).toBeVisible({ timeout: 20_000 });
 
   await createEvent.click();
@@ -157,7 +157,7 @@ test("coach can create and revisit a mobile event without breaking navigation", 
   await dialog.getByRole("button", { name: "Cancel", exact: true }).click();
   await expect(dialog).toHaveCount(0);
 
-  createEvent = visibleCreateEventButton(eventsPage);
+  createEvent = visibleCreateEventButton(page);
   await createEvent.click();
   const reopenedDialog = page.getByRole("dialog", { name: "Create event" });
   await reopenedDialog.getByPlaceholder("Open Gym Run").fill("E2E Team Practice");
