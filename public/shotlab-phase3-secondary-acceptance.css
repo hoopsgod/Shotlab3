@@ -16,22 +16,30 @@
 }
 [data-testid="player-leaderboards-workspace"] [class*="commandBar"]::after,
 [data-testid="player-profile-workspace"] [class*="commandBar"]::after{display:none!important}
-[data-testid="player-leaderboards-workspace"] [class*="title"],
-[data-testid="player-profile-workspace"] [class*="title"],
+[data-testid="player-leaderboards-workspace"] h1[class*="title"],
+[data-testid="player-profile-workspace"] h1[class*="title"],
 [data-testid="player-leaderboards-workspace"] [class*="metricValue"],
 [data-testid="player-profile-workspace"] [class*="metricValue"]{
   color:var(--p3-ink)!important;
   -webkit-text-fill-color:var(--p3-ink)!important;
 }
-[data-testid="player-leaderboards-workspace"] [class*="subtitle"],
-[data-testid="player-profile-workspace"] [class*="subtitle"],
+[data-testid="player-leaderboards-workspace"] p[class*="subtitle"],
+[data-testid="player-profile-workspace"] p[class*="subtitle"]{
+  margin-top:14px!important;
+  max-width:720px!important;
+  color:var(--p3-muted)!important;
+  -webkit-text-fill-color:var(--p3-muted)!important;
+  font-size:14px!important;
+  line-height:1.5!important;
+  letter-spacing:-.01em!important;
+}
 [data-testid="player-leaderboards-workspace"] [class*="metricDetail"],
 [data-testid="player-profile-workspace"] [class*="metricDetail"]{
   color:var(--p3-muted)!important;
   -webkit-text-fill-color:var(--p3-muted)!important;
 }
-[data-testid="player-leaderboards-workspace"] [class*="metric"],
-[data-testid="player-profile-workspace"] [class*="metric"]{
+[data-testid="player-leaderboards-workspace"] [data-metric-priority],
+[data-testid="player-profile-workspace"] [data-metric-priority]{
   border-color:var(--p3-line)!important;
   background:var(--p3-surface)!important;
   background-image:none!important;
@@ -143,8 +151,10 @@ html body:has([data-testid="coach-players-interactive-dashboard"]) #root .coach-
 @media(max-width:700px){
   [data-testid="player-leaderboards-workspace"] [class*="commandBar"],
   [data-testid="player-profile-workspace"] [class*="commandBar"]{padding:16px!important;border-radius:20px!important}
-  [data-testid="player-leaderboards-workspace"] [class*="title"],
-  [data-testid="player-profile-workspace"] [class*="title"]{font-size:32px!important}
+  [data-testid="player-leaderboards-workspace"] h1[class*="title"],
+  [data-testid="player-profile-workspace"] h1[class*="title"]{font-size:32px!important;line-height:1.02!important;letter-spacing:-.045em!important}
+  [data-testid="player-leaderboards-workspace"] p[class*="subtitle"],
+  [data-testid="player-profile-workspace"] p[class*="subtitle"]{font-size:14px!important;line-height:1.5!important}
   [data-testid="coach-events-mobile-page"]{width:calc(100% - 24px)!important;box-sizing:border-box!important;margin-inline:auto!important}
 }
 
