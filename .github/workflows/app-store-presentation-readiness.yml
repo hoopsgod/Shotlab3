@@ -36,7 +36,6 @@ on:
       - "tests/mission-control-hierarchy-2026.test.mjs"
       - "tests/workspace-recovery.test.mjs"
       - "scripts/apply-expert-app-review-v2.mjs"
-      - "scripts/apply-phase3f-profile-disclosure.py"
       - "scripts/validate-app-store-screenshots.mjs"
       - "scripts/minify-visual-authority-css.mjs"
       - "public/shotlab-*.css"
@@ -85,7 +84,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   VITE_ENABLE_PRODUCTION_DEMOS: "true"
@@ -102,24 +101,7 @@ jobs:
       - name: Check out exact PR head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.ref || github.ref_name }}
-          fetch-depth: 0
-
-      - name: Apply guarded Phase 3F source transform
-        id: phase3f_transform
-        if: github.event_name == 'pull_request' && github.event.pull_request.head.ref == 'agent/phase-3f-profile-progressive-disclosure'
-        run: |
-          python scripts/apply-phase3f-profile-disclosure.py
-          if git diff --quiet -- src/App.jsx; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            git config user.name "shotlab-phase3f-bot"
-            git config user.email "actions@users.noreply.github.com"
-            git add src/App.jsx
-            git commit -m "Phase 3F: progressively disclose deep Profile data"
-            git push origin HEAD:agent/phase-3f-profile-progressive-disclosure
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - name: Set up Node
         uses: actions/setup-node@v4
@@ -131,27 +113,7 @@ jobs:
         run: npm ci
 
       - name: Verify integrated Phase 1 through Phase 3F contracts
-        run: |
-          tests=(
-            tests/app-store-presentation-readiness.test.mjs
-            tests/design-system-completion.test.mjs
-            tests/demo-data-currentness.test.mjs
-            tests/visual-foundation-2026.test.mjs
-            tests/native-identity-shell.test.mjs
-            tests/mobile-navigation-contract.test.mjs
-            tests/phase-2-command-hierarchy.test.mjs
-            tests/phase-3-secondary-cohesion.test.mjs
-            tests/phase-3b-interaction-polish.test.mjs
-            tests/phase-3c-native-route-framing.test.mjs
-            tests/phase-3d-player-analytics-unification.test.mjs
-            tests/phase-3e-profile-information-hierarchy.test.mjs
-            tests/mission-control-hierarchy-2026.test.mjs
-            tests/workspace-recovery.test.mjs
-          )
-          if [ -f tests/phase-3f-profile-progressive-disclosure.test.mjs ]; then
-            tests+=(tests/phase-3f-profile-progressive-disclosure.test.mjs)
-          fi
-          node --test "${tests[@]}"
+        run: node --test tests/app-store-presentation-readiness.test.mjs tests/design-system-completion.test.mjs tests/demo-data-currentness.test.mjs tests/visual-foundation-2026.test.mjs tests/native-identity-shell.test.mjs tests/mobile-navigation-contract.test.mjs tests/phase-2-command-hierarchy.test.mjs tests/phase-3-secondary-cohesion.test.mjs tests/phase-3b-interaction-polish.test.mjs tests/phase-3c-native-route-framing.test.mjs tests/phase-3d-player-analytics-unification.test.mjs tests/phase-3e-profile-information-hierarchy.test.mjs tests/phase-3f-profile-progressive-disclosure.test.mjs tests/mission-control-hierarchy-2026.test.mjs tests/workspace-recovery.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
