@@ -155,6 +155,7 @@ async function enterDemo(page, roleName) {
   const button = page.getByRole("button", { name: roleName, exact: true });
   await expect(button).toBeVisible({ timeout: 20_000 });
   await button.click();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
 async function expectCareerSeasons(career, viewerRole) {
@@ -176,7 +177,7 @@ test.beforeEach(async ({ page }) => {
 
 test("player sees current and archived career history on Profile without horizontal overflow", async ({ page }) => {
   await page.goto("/");
-  await enterDemo(page, "Demo Player");
+  await enterDemo(page, "Player demo");
   await page.getByTestId("mobile-navigation-more").click();
   await page.getByTestId("mobile-navigation-sheet").getByRole("button", { name: "Profile", exact: true }).click();
   const career = page.getByTestId("player-career-history");
@@ -187,8 +188,8 @@ test("player sees current and archived career history on Profile without horizon
 
 test("coach sees the shared career record and can open its immutable archive", async ({ page }) => {
   await page.goto("/");
-  await enterDemo(page, "Demo Coach");
-  await page.getByRole("button", { name: "Players", exact: true }).first().click();
+  await enterDemo(page, "Coach demo");
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
   await page.getByText("DEMO PLAYER", { exact: true }).last().click();
   await page.getByRole("button", { name: "Open Full Profile", exact: true }).click();
   const career = page.getByTestId("player-career-history");
