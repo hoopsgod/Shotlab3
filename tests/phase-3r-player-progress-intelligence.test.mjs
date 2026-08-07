@@ -16,15 +16,18 @@ const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 test("Phase 3R runs after Phase 3Q and requires the accepted Profile intelligence boundary", () => {
   assert.match(pkg.scripts.dev, /apply-phase3q-player-session-closeout\.mjs[\s\S]*apply-phase3r-player-progress-intelligence\.mjs/);
   assert.match(pkg.scripts["prepare:route-enhancers"], /apply-phase3q-player-session-closeout\.mjs[\s\S]*apply-phase3r-player-progress-intelligence\.mjs/);
+  assert.match(pkg.scripts["verify:phase3r"], /phase-3r-player-progress-intelligence\.test\.mjs/);
   assert.match(enhancer, /Phase 3F Profile intelligence must be applied before Phase 3R/);
   assert.match(enhancer, /already applied/);
   assert.match(enhancer, /expected exactly one anchor/);
 });
 
-test("Phase 3R promotes the development story while preserving the complete legacy profile", () => {
+test("Phase 3R promotes the development story while preserving and directly revealing the complete legacy profile", () => {
   assert.match(enhancer, /PlayerProgressStory/);
   assert.match(enhancer, /data-testid=\"player-profile-workspace\"/);
   assert.match(enhancer, /testId=\"player-progress-full-profile\"/);
+  assert.match(enhancer, /details instanceof HTMLDetailsElement/);
+  assert.match(enhancer, /details\.open=true/);
   assert.match(enhancer, /<ProfilePage u=\{u\}/);
   assert.match(enhancer, /player-profile-readout/);
   assert.match(enhancer, /player-profile-performance-intelligence/);
@@ -80,11 +83,15 @@ test("Phase 3R labels practice frequency honestly when drill maxima are unavaila
   assert.match(story.strongest.detail, /practice frequency—not a strength claim/);
 });
 
-test("Progress Story presents a premium decision-first hierarchy with one next focus", () => {
+test("Progress Story presents a premium decision-first hierarchy with explicit dark-hero seams", () => {
   for (const seam of [
     "player-progress-story",
     "DEVELOPMENT STORY",
     "DEVELOPMENT READOUT",
+    "player-progress-story-topline",
+    "player-progress-story-hero-grid",
+    "player-progress-story-copy",
+    "player-progress-trend-summary",
     "player-progress-strongest-signal",
     "player-progress-opportunity",
     "player-progress-next-focus",
@@ -100,19 +107,26 @@ test("Progress Story presents a premium decision-first hierarchy with one next f
   assert.match(css, /prefers-reduced-motion: reduce/);
 });
 
-test("Phase 3R owns late visual authority after Phase 3Q", () => {
+test("Phase 3R owns late visual authority after Phase 3Q and prevents demo washout", () => {
   assert.match(html, /shotlab-phase3q-player-session-closeout\.css[\s\S]*shotlab-phase3r-player-progress-story\.css/);
   assert.match(authority, /body #root \[data-testid=\"player-progress-story-hero\"\]/);
   assert.match(authority, /background-color: #0f1412 !important/);
+  assert.match(authority, /player-progress-story-topline/);
+  assert.match(authority, /player-progress-story-copy/);
+  assert.match(authority, /player-progress-trend-summary/);
+  assert.match(authority, /background-color: transparent !important/);
   assert.match(authority, /player-progress-start-focus/);
   assert.match(authority, /player-progress-open-profile/);
 });
 
-test("Phase 3R iPhone evidence verifies first-viewport story and preserved full profile", () => {
+test("Phase 3R iPhone evidence verifies first-viewport story, washout guards, and preserved full profile", () => {
   assert.match(screenshotConfig, /phase-3r-player-progress-story-screenshots\.spec\.mjs/);
   assert.match(screenshotSpec, /mobile-navigation-more/);
   assert.match(screenshotSpec, /data-nav-key=\"profile\"/);
   assert.match(screenshotSpec, /player-progress-story/);
+  assert.match(screenshotSpec, /transparentHeroSeams/);
+  assert.match(screenshotSpec, /must stay transparent inside dark hero/);
+  assert.match(screenshotSpec, /player-progress-trend-summary/);
   assert.match(screenshotSpec, /player-progress-strongest-signal/);
   assert.match(screenshotSpec, /player-progress-opportunity/);
   assert.match(screenshotSpec, /player-progress-next-focus/);
