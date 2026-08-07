@@ -215,6 +215,27 @@ html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionCompa
   background: transparent !important;
 }
 
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionEyebrow"],
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionTitle"],
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionSummary"] {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionEyebrow"]::before,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionEyebrow"]::after,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionTitle"]::before,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionTitle"]::after,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionSummary"]::before,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionSummary"]::after {
+  content: none !important;
+  display: none !important;
+}
+
 html body [data-testid="coach-player-intelligence-drawer"] [class*="compactMetric"] {
   border-color: rgba(255, 255, 255, .07) !important;
   background: #0c1012 !important;
