@@ -25,6 +25,9 @@ test('Coach Drill library management becomes one closed-by-default native disclo
   assert.match(css, /\.coach-drills-library-disclosure/);
   assert.match(css, /\.coach-drills-library-summary/);
   assert.match(css, /\.coach-drills-library-disclosure\[open\]/);
+  assert.match(css, /coach-drills-library-summary-copy > small[\s\S]*opacity: 1 !important/);
+  assert.match(css, /coach-drills-library-summary-copy > small[\s\S]*box-shadow: none !important/);
+  assert.match(css, /color: #596159 !important/);
 });
 
 test('Coach Drills keeps every management capability behind or beside the disclosure', () => {
@@ -43,6 +46,12 @@ test('Drill search, filters, and operational cards use the light native secondar
   assert.match(css, /coach-drills-operational-panel/);
   assert.match(css, /article h2/);
   assert.match(css, /--phase3g-ink: #151915/);
+});
+
+test('Drills keeps one decision layer instead of repeating metric evidence twice', () => {
+  assert.match(css, /coach-page-dashboard-drills-evidence/);
+  assert.match(css, /coach-page-dashboard-drills-decision-brief/);
+  assert.match(css, /coach-page-dashboard-drills-evidence[^}]*display: none !important/s);
 });
 
 test('duplicate bottom Add Drill CTA is removed visually while the new-drill form remains available', () => {
