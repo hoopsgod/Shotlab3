@@ -8,10 +8,11 @@ const requireOne = (source, anchor, label) => {
 
 const path = 'src/App.jsx';
 let source = readFileSync(path, 'utf8');
-const marker = 'data-testid="player-commitment-center-events"';
+const marker = 'PlayerCommitmentCenter mode="events"';
 
 if (source.includes(marker)) {
   for (const preserved of [
+    'PlayerCommitmentCenter mode="strength"',
     'data-testid="player-events-operational-list"',
     'data-testid="player-strength-operational-panel"',
     '<EventsPanel events={events}',
