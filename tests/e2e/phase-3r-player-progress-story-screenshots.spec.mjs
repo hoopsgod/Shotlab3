@@ -96,6 +96,7 @@ test("player progress profile opens with a factual development story before deep
   await story.getByTestId("player-progress-open-profile").click();
   const readout = page.getByTestId("player-profile-readout");
   await expect(readout).toBeVisible({ timeout: 10_000 });
+  await expect(readout).not.toContainText(/demo-(?:home|program)-/i);
   await expect(page.getByTestId("player-profile-performance-intelligence")).toBeVisible();
   await expect(page.getByTestId("player-profile-drill-development")).toBeVisible();
   await readout.scrollIntoViewIfNeeded();
