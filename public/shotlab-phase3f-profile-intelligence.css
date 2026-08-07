@@ -1,0 +1,269 @@
+/* Phase 3F — Player Profile intelligence hierarchy.
+   Progressive disclosure + native analytics controls. Presentation only. */
+:root{
+  --p3f-ink:#171c18;
+  --p3f-muted:#68716a;
+  --p3f-surface:#ffffff;
+  --p3f-soft:#f5f6f1;
+  --p3f-line:rgba(23,28,24,.11);
+  --p3f-accent:var(--team-brand-primary,var(--accent,#8fae25));
+  --p3f-accent-deep:color-mix(in srgb,var(--p3f-accent) 78%,#263226);
+  --p3f-info:#237a86;
+  --p3f-shadow:0 10px 26px rgba(24,31,27,.055);
+}
+
+/* Visible decision layer after Current Progress. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-current-progress"],
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"]{
+  border:1px solid var(--p3f-line)!important;
+  border-radius:20px!important;
+  background:var(--p3f-surface)!important;
+  color:var(--p3f-ink)!important;
+  box-shadow:var(--p3f-shadow)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"]{
+  position:relative;
+  overflow:hidden;
+  margin:0 0 12px!important;
+  padding:15px 16px 15px 18px!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-readout"]::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:3px;
+  background:var(--p3f-accent);
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-profile-readout-eyebrow]{
+  color:var(--p3f-accent-deep)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:9px!important;
+  font-weight:800!important;
+  letter-spacing:.11em!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-profile-readout-primary]{
+  color:var(--p3f-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif!important;
+  font-size:19px!important;
+  font-weight:780!important;
+  line-height:1.18!important;
+  letter-spacing:-.025em!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-profile-readout-support]{
+  display:grid!important;
+  gap:4px!important;
+  color:var(--p3f-muted)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:11px!important;
+  line-height:1.45!important;
+}
+
+/* Deep intelligence is available, not dominant. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-intelligence"],
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-drill-development"]{
+  margin:0 0 9px!important;
+  overflow:hidden!important;
+  border:1px solid var(--p3f-line)!important;
+  border-radius:18px!important;
+  background:var(--p3f-surface)!important;
+  box-shadow:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-intelligence"] > summary,
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-drill-development"] > summary{
+  min-height:62px!important;
+  padding:13px 15px!important;
+  background:#fff!important;
+  color:var(--p3f-ink)!important;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-intelligence"] > summary span,
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-drill-development"] > summary span{
+  color:inherit;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-intelligence"] > summary span:first-child > span:first-child,
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-drill-development"] > summary span:first-child > span:first-child{
+  color:var(--p3f-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:14px!important;
+  font-weight:780!important;
+  letter-spacing:-.012em!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-intelligence"] > summary span:first-child > span:last-child,
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-drill-development"] > summary span:first-child > span:last-child{
+  color:var(--p3f-muted)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:11px!important;
+  line-height:1.35!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-intelligence"][open],
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-drill-development"][open]{
+  box-shadow:var(--p3f-shadow)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-intelligence"] > div,
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-drill-development"] > div{
+  padding:0 14px 15px!important;
+  border-top:1px solid var(--p3f-line)!important;
+}
+
+/* Stable semantic analytics root supersedes positional styling for control chrome. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-workspace"]{
+  min-height:0!important;
+  margin:0!important;
+  padding-bottom:0!important;
+  background:transparent!important;
+  color:var(--p3f-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-workspace"] > div:first-child{
+  position:relative!important;
+  top:auto!important;
+  z-index:1!important;
+  margin:0 0 12px!important;
+  padding:14px!important;
+  border:1px solid var(--p3f-line)!important;
+  border-radius:18px!important;
+  background:var(--p3f-surface)!important;
+  box-shadow:var(--p3f-shadow)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-heading"] > div:first-child > div:nth-child(2){
+  color:var(--p3f-ink)!important;
+  -webkit-text-fill-color:var(--p3f-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif!important;
+  font-size:21px!important;
+  font-weight:790!important;
+  line-height:1.05!important;
+  letter-spacing:-.035em!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-heading"] > div:first-child > div:nth-child(2) span{
+  color:var(--p3f-accent-deep)!important;
+  -webkit-text-fill-color:var(--p3f-accent-deep)!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-sections"]{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:4px!important;
+  margin-top:12px!important;
+  padding:4px!important;
+  border:1px solid var(--p3f-line)!important;
+  border-radius:14px!important;
+  background:var(--p3f-soft)!important;
+  overflow:visible!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-sections"] button{
+  min-width:0!important;
+  min-height:42px!important;
+  padding:8px 5px!important;
+  border:0!important;
+  border-radius:10px!important;
+  background:transparent!important;
+  color:var(--p3f-muted)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:10px!important;
+  font-weight:740!important;
+  letter-spacing:0!important;
+  text-transform:none!important;
+  box-shadow:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-sections"] button[aria-pressed="true"]{
+  background:#fff!important;
+  color:var(--p3f-ink)!important;
+  box-shadow:0 1px 2px rgba(23,28,24,.07),0 6px 16px rgba(23,28,24,.05)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-sections"] button[aria-pressed="true"] svg{
+  color:var(--p3f-accent-deep)!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-contexts"]{
+  gap:6px!important;
+  margin-bottom:10px!important;
+  padding:3px!important;
+  border:1px solid var(--p3f-line)!important;
+  border-radius:13px!important;
+  background:var(--p3f-soft)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-contexts"] button{
+  min-height:40px!important;
+  border:0!important;
+  border-radius:10px!important;
+  background:transparent!important;
+  color:var(--p3f-muted)!important;
+  box-shadow:none!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:10px!important;
+  font-weight:760!important;
+  letter-spacing:.025em!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-contexts"] button[aria-pressed="true"]{
+  background:#fff!important;
+  color:var(--p3f-ink)!important;
+  box-shadow:0 5px 14px rgba(23,28,24,.06)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-contexts"] button[data-analytics-context-option="home"][aria-pressed="true"]{color:var(--p3f-accent-deep)!important;}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-contexts"] button[data-analytics-context-option="program"][aria-pressed="true"]{color:var(--p3f-info)!important;}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-drills"]{gap:6px!important;}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-drills"] button{
+  min-height:38px!important;
+  padding:7px 11px!important;
+  border:1px solid var(--p3f-line)!important;
+  border-radius:999px!important;
+  background:#fff!important;
+  color:var(--p3f-muted)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:10px!important;
+  font-weight:700!important;
+  letter-spacing:0!important;
+  box-shadow:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-drills"] button[aria-pressed="true"]{
+  border-color:color-mix(in srgb,var(--p3f-accent) 28%,var(--p3f-line))!important;
+  background:color-mix(in srgb,var(--p3f-accent) 8%,#fff)!important;
+  color:var(--p3f-accent-deep)!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] :is(
+  [data-testid="player-profile-performance-intelligence"],
+  [data-testid="player-profile-drill-development"],
+  [data-testid="player-analytics-workspace"]
+) button{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.performance-shell--player[data-workspace-tab="profile"] :is(
+  [data-testid="player-profile-performance-intelligence"],
+  [data-testid="player-profile-drill-development"],
+  [data-testid="player-analytics-workspace"]
+) :is(button,summary):focus-visible{
+  outline:3px solid color-mix(in srgb,var(--p3f-accent) 32%,transparent)!important;
+  outline-offset:2px!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-workspace"] button:active,
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-performance-intelligence"] > summary:active,
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-drill-development"] > summary:active{
+  transform:scale(.985)!important;
+}
+
+@media(max-width:390px){
+  .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-sections"] button{
+    gap:4px!important;
+    padding-inline:3px!important;
+    font-size:9px!important;
+  }
+  .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-analytics-sections"] button svg{
+    width:14px!important;
+    height:14px!important;
+  }
+}
+@media(prefers-reduced-motion:reduce){
+  .performance-shell--player[data-workspace-tab="profile"] :is(
+    [data-testid="player-profile-performance-intelligence"],
+    [data-testid="player-profile-drill-development"],
+    [data-testid="player-analytics-workspace"]
+  ) *{
+    transition-duration:.01ms!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+  }
+}

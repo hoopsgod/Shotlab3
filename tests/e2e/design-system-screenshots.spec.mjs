@@ -50,13 +50,43 @@ test("Player visual system remains integrated across core and secondary pages", 
   let sheet = await more(page);
   await sheet.locator('[data-nav-key="profile"]').click();
   const careerDisclosure = page.getByTestId("player-profile-career-disclosure");
+  const performanceDisclosure = page.getByTestId("player-profile-performance-intelligence");
+  const drillDisclosure = page.getByTestId("player-profile-drill-development");
   await expect(careerDisclosure).toBeVisible({ timeout: 20_000 });
   await expect(careerDisclosure).not.toHaveAttribute("open", "");
   await expect(page.getByTestId("player-career-history")).toBeHidden();
   await expect(page.getByText("OFFSEASON PLAYER", { exact: true })).toHaveCount(0);
   await expect(page.getByText("OFFSEASON REPORT CARD", { exact: true })).toBeVisible();
   await expect(page.getByText("PLAYER PROGRESS PROFILE", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("player-profile-current-progress")).toBeVisible();
+  await expect(page.getByTestId("player-profile-readout")).toBeVisible();
+  await expect(performanceDisclosure).toBeVisible();
+  await expect(performanceDisclosure).not.toHaveAttribute("open", "");
+  await expect(drillDisclosure).toBeVisible();
+  await expect(drillDisclosure).not.toHaveAttribute("open", "");
+  await expect(page.getByTestId("player-profile-analytics")).toBeHidden();
   await capture(page, "03-player-profile-career");
+
+  await performanceDisclosure.locator(":scope > summary").click();
+  await expect(performanceDisclosure).toHaveAttribute("open", "");
+  const analytics = page.getByTestId("player-profile-analytics");
+  await expect(analytics).toBeVisible({ timeout: 20_000 });
+  const analyticsSections = page.getByTestId("player-analytics-sections");
+  const progressTab = analyticsSections.getByRole("button", { name: "Progress", exact: true });
+  const skillsTab = analyticsSections.getByRole("button", { name: "Skills", exact: true });
+  await expect(progressTab).toHaveAttribute("aria-pressed", "true");
+  await skillsTab.click();
+  await expect(skillsTab).toHaveAttribute("aria-pressed", "true");
+  await expect(progressTab).toHaveAttribute("aria-pressed", "false");
+  await capture(page, "03c-player-profile-performance-intelligence");
+  await performanceDisclosure.locator(":scope > summary").click();
+  await expect(performanceDisclosure).not.toHaveAttribute("open", "");
+
+  await drillDisclosure.locator(":scope > summary").click();
+  await expect(drillDisclosure).toHaveAttribute("open", "");
+  await expect(page.getByText("DRILL BREAKDOWN", { exact: true })).toBeVisible();
+  await capture(page, "03d-player-profile-drill-development");
+  await drillDisclosure.locator(":scope > summary").click();
 
   await careerDisclosure.locator(":scope > summary").click();
   await expect(careerDisclosure).toHaveAttribute("open", "");
