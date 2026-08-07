@@ -31,7 +31,7 @@ const oldBlock = `        </div> : <div className="ts-player-content">
             <p className="ts-disclosure">{AFFILIATE_DISCLOSURE}</p>
           </> : isDemoPlayerPreview ? <>
             <div className="ts-player-intro"><span>DEMO STOREFRONT</span><h3>See the player experience.</h3><p>This preview shows where official team gear will appear for players and families.</p></div>
-            <PlayerStorePreview teamName={activeIdentity.teamName} storeName={\`${activeIdentity.teamName} Team Store\`} providerLabel="SquadLocker" />
+            <PlayerStorePreview teamName={activeIdentity.teamName} storeName={\`\${activeIdentity.teamName} Team Store\`} providerLabel="SquadLocker" />
             <p className="ts-disclosure">A real team store will open only after the coach publishes a verified storefront link.</p>
           </> : <div className="ts-empty-state"><div className="ts-empty-icon"><StoreIcon size={28} /></div><h3>Your team store is not open yet</h3><p>Your coach has not published a store link. Check back after your program announces it.</p><button type="button" onClick={closePortal} className="ts-button ts-button-secondary">GOT IT</button></div>}
         </div>}`;
@@ -67,7 +67,7 @@ const newBlock = `        </div> : <div className="ts-player-content" data-testi
             </section>
             <section className="ts-player-storefront-shell is-demo" data-testid="player-team-store-card" aria-label="Demo team storefront">
               <div className="ts-player-storefront-heading"><span>STORE PREVIEW</span><strong>{activeIdentity.teamName} Team Store</strong><small>Shopping activates after coach publishing</small></div>
-              <PlayerStorePreview teamName={activeIdentity.teamName} storeName={\`${activeIdentity.teamName} Team Store\`} providerLabel="SquadLocker" />
+              <PlayerStorePreview teamName={activeIdentity.teamName} storeName={\`\${activeIdentity.teamName} Team Store\`} providerLabel="SquadLocker" />
             </section>
             <div className="ts-player-store-trust is-demo"><CheckIcon /><p><strong>Preview only in demo mode.</strong><span>A real team store opens only after the coach publishes a verified storefront link.</span></p></div>
             <p className="ts-disclosure">A real team store will open only after the coach publishes a verified storefront link.</p>
