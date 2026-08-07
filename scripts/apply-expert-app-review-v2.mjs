@@ -28,7 +28,7 @@ patch("src/App.jsx",
 
 patch("tests/e2e/app-store-screenshots.spec.mjs",
   '  await expect(page.getByText("Calendar is open", { exact: true })).toBeVisible();',
-  '  await expect(page.getByText("Team Practice", { exact: true })).toBeVisible({ timeout: 20_000 });');
+  '  await expect(page.getByText("Team Practice", { exact: true }).first()).toBeVisible({ timeout: 20_000 });');
 
 patch("src/components/CoachInteractiveDashboards.jsx",
   "? `${pluralize(noActivityRows.length, \"player\")} have no recorded activity and ${pluralize(followUpRows.length, \"player\")} were active previously but not this week.`",
