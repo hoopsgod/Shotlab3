@@ -85,7 +85,7 @@ async function enterSeededDemoCoach(page) {
     window.sessionStorage.setItem("coach-dashboard-e2e-seeded", "1");
   }, seedData);
   await page.goto("/");
-  await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
+  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -137,7 +137,7 @@ test("Coach Players behaves as an interactive operational dashboard", async ({ p
 
 test("Coach Events exposes RSVP gaps and searchable schedule controls", async ({ page }) => {
   await enterSeededDemoCoach(page);
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Events", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
 
   const scheduleResults = page.getByTestId("coach-events-mobile-page");
   await expect(page.getByTestId("coach-events-command-bar")).toBeVisible({ timeout: 20_000 });
