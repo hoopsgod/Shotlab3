@@ -1,0 +1,184 @@
+/* Phase 3D rendered-root lock.
+   React may serialize inline style whitespace differently across builds. Match the unique
+   Profile analytics canvas by its structural 100vh + 80px signature instead. */
+
+:root{
+  --p3dl-canvas:#f4f5f1;
+  --p3dl-surface:#ffffff;
+  --p3dl-soft:#f8f8f4;
+  --p3dl-ink:#151a16;
+  --p3dl-muted:#68716a;
+  --p3dl-dim:#879089;
+  --p3dl-line:rgba(21,26,22,.11);
+  --p3dl-accent:var(--team-brand-primary,var(--accent,#8fae25));
+  --p3dl-accent-deep:color-mix(in srgb,var(--p3dl-accent) 76%,#263226);
+  --p3dl-info:#237a86;
+  --p3dl-warm:#a8611b;
+  --p3dl-shadow:0 10px 26px rgba(24,31,27,.06);
+}
+
+/* This signature is unique to ShotLabCharts inside Player Profile. */
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"]{
+  min-height:0!important;
+  margin:4px 0 24px!important;
+  padding-bottom:0!important;
+  background:transparent!important;
+  background-image:none!important;
+  color:var(--p3dl-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  overflow:visible!important;
+}
+
+/* In-flow analytics masthead. */
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:first-child{
+  position:relative!important;
+  top:auto!important;
+  z-index:1!important;
+  margin:0 0 12px!important;
+  padding:16px!important;
+  border:1px solid var(--p3dl-line)!important;
+  border-radius:20px!important;
+  background:var(--p3dl-surface)!important;
+  box-shadow:var(--p3dl-shadow)!important;
+}
+
+/* Profile already owns player identity; remove the duplicate eyebrow/avatar inside analytics. */
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:first-child > div:first-child > div:first-child > div:first-child,
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:first-child > div:first-child > div:last-child{
+  display:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:first-child > div:first-child{
+  min-height:32px!important;
+  align-items:center!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:first-child > div:first-child > div:first-child > div:nth-child(2){
+  color:var(--p3dl-ink)!important;
+  -webkit-text-fill-color:var(--p3dl-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif!important;
+  font-size:25px!important;
+  font-weight:780!important;
+  line-height:1!important;
+  letter-spacing:-.04em!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:first-child > div:first-child > div:first-child > div:nth-child(2) span{
+  color:var(--p3dl-accent-deep)!important;
+  -webkit-text-fill-color:var(--p3dl-accent-deep)!important;
+}
+
+/* Native segmented analytics navigation. */
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:first-child > div:nth-child(2){
+  gap:4px!important;
+  margin-top:12px!important;
+  padding:4px!important;
+  border:1px solid var(--p3dl-line)!important;
+  border-radius:14px!important;
+  background:var(--p3dl-soft)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:first-child > div:nth-child(2) button{
+  min-height:42px!important;
+  padding:8px 5px!important;
+  border-radius:10px!important;
+  color:var(--p3dl-muted)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:10px!important;
+  font-weight:720!important;
+  letter-spacing:.015em!important;
+  box-shadow:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:first-child > div:nth-child(2) button > span:first-child{
+  display:none!important;
+}
+
+/* Main analytics stack shares the Profile gutter and card language. */
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:nth-child(2){
+  padding:0!important;
+  gap:12px!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] > div:nth-child(2) > div{
+  border:1px solid var(--p3dl-line)!important;
+  border-radius:18px!important;
+  background:var(--p3dl-surface)!important;
+  background-image:none!important;
+  color:var(--p3dl-ink)!important;
+  box-shadow:var(--p3dl-shadow)!important;
+}
+
+/* Convert all known legacy dark surface tokens inside this isolated analytics root. */
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] :is(
+  [style*="rgb(10, 10, 10)"],[style*="#0a0a0a"],
+  [style*="rgb(17, 19, 24)"],[style*="#111318"],
+  [style*="rgb(22, 27, 34)"],[style*="#161b22"],
+  [style*="rgb(26, 32, 48)"],[style*="#1a2030"],
+  [style*="rgb(13, 17, 23)"],[style*="#0d1117"],
+  [style*="rgb(42, 48, 64)"],[style*="#2a3040"]
+){
+  background:var(--p3dl-soft)!important;
+  background-image:none!important;
+  border-color:var(--p3dl-line)!important;
+  box-shadow:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] :is([style*="rgb(42, 58, 26)"],[style*="#2a3a1a"]){
+  background:color-mix(in srgb,var(--p3dl-accent) 10%,#fff)!important;
+  border-color:color-mix(in srgb,var(--p3dl-accent) 28%,var(--p3dl-line))!important;
+}
+
+/* Light-surface text translation. */
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] :is([style*="rgb(255, 255, 255)"],[style*="#ffffff"],[style*="rgb(229, 231, 235)"],[style*="#e5e7eb"]){
+  color:var(--p3dl-ink)!important;
+  -webkit-text-fill-color:var(--p3dl-ink)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] :is([style*="rgb(107, 114, 128)"],[style*="#6b7280"]){
+  color:var(--p3dl-muted)!important;
+  -webkit-text-fill-color:var(--p3dl-muted)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] :is([style*="rgb(156, 163, 175)"],[style*="#9ca3af"]){
+  color:var(--p3dl-dim)!important;
+  -webkit-text-fill-color:var(--p3dl-dim)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] :is([style*="rgb(184, 255, 0)"],[style*="#b8ff00"],[style*="rgb(122, 204, 0)"],[style*="#7acc00"]){
+  color:var(--p3dl-accent-deep)!important;
+  -webkit-text-fill-color:var(--p3dl-accent-deep)!important;
+  text-shadow:none!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] :is([style*="rgb(34, 211, 238)"],[style*="#22d3ee"]){
+  color:var(--p3dl-info)!important;
+  -webkit-text-fill-color:var(--p3dl-info)!important;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] :is([style*="rgb(251, 146, 60)"],[style*="#fb923c"]){
+  color:var(--p3dl-warm)!important;
+  -webkit-text-fill-color:var(--p3dl-warm)!important;
+}
+
+/* Active/brand fills remain distinct on the light system. */
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] :is([style*="background: rgb(184, 255, 0)"],[style*="background: #b8ff00"]){
+  background:var(--p3dl-accent)!important;
+  color:#101510!important;
+  -webkit-text-fill-color:#101510!important;
+}
+
+/* Recharts presentation attributes. Values/data remain untouched. */
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] svg [stroke="#1e2530"]{stroke:var(--p3dl-line)!important;}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] svg [fill="#1e2530"]{fill:var(--p3dl-line)!important;}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] svg [fill="#6b7280"]{fill:var(--p3dl-muted)!important;}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] svg [fill="#9ca3af"]{fill:var(--p3dl-dim)!important;}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] svg :is([stroke="#b8ff00"],[fill="#b8ff00"]){stroke:var(--p3dl-accent)!important;fill:var(--p3dl-accent)!important;}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] svg :is([stroke="#22d3ee"],[fill="#22d3ee"]){stroke:var(--p3dl-info)!important;fill:var(--p3dl-info)!important;}
+
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] button{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+.performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] button:focus-visible{
+  outline:3px solid color-mix(in srgb,var(--p3dl-accent) 32%,transparent)!important;
+  outline-offset:2px!important;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] *,
+  .performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] *::before,
+  .performance-shell--player[data-workspace-tab="profile"] div[style*="100vh"][style*="80px"] *::after{
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+    transition-duration:.01ms!important;
+  }
+}
