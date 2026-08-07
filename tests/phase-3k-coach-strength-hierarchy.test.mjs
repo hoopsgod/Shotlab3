@@ -27,7 +27,7 @@ test('S&C supporting intelligence becomes one mobile disclosure without deleting
   assert.match(enhancer, /Readiness & follow-up/);
   assert.match(enhancer, /\{rate\}% completion/);
   assert.match(enhancer, /\{overdue\.length\} overdue/);
-  assert.match(enhancer, /testId=\"coach-strength-insight-grid\"/);
+  assert.match(enhancer, /data-testid=\"coach-strength-insight-grid\"/);
   assert.match(enhancer, /Team compliance/);
   assert.match(enhancer, /Overdue work/);
   assert.match(enhancer, /Next session/);
