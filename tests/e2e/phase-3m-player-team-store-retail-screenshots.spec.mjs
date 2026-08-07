@@ -51,6 +51,8 @@ test("Player Team Store reads as a premium retail destination and restores navig
   await expect(card).toBeVisible();
   await expect(page.getByText("Your team. Your gear.", { exact: true })).toBeVisible();
   await expect(page.getByText("Partner checkout", { exact: true })).toBeVisible();
+  await expect(card.getByText("Demo Team Store", { exact: true }).first()).toBeVisible();
+  await expect(card.getByText("Demo Team Team Store", { exact: true })).toHaveCount(0);
 
   const viewportHeight = await page.evaluate(() => window.innerHeight);
   const heroBox = await hero.boundingBox();
