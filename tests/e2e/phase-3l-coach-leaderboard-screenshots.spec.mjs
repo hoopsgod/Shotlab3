@@ -66,6 +66,11 @@ test("Coach Leaderboards surfaces competitive signal in the first viewport and p
   const metricColor = await firstMetricValue.evaluate((node) => getComputedStyle(node).color);
   expect(metricColor).toBe("rgb(244, 247, 242)");
 
+  const firstSection = drawer.locator('[class*="sectionCompact"]').first();
+  await expect(firstSection).toBeVisible();
+  const sectionBackground = await firstSection.evaluate((node) => getComputedStyle(node).backgroundColor);
+  expect(sectionBackground).toBe("rgb(16, 19, 21)");
+
   const followUpHost = drawer.getByTestId("coach-follow-up-ledger-host");
   await expect(followUpHost).toBeAttached({ timeout: 10_000 });
   const followUpParentClass = await followUpHost.evaluate((node) => node.parentElement?.className || "");
