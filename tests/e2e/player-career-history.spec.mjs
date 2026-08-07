@@ -207,6 +207,13 @@ test("coach sees the shared career record and can open its immutable archive", a
   await page.goto("/");
   await enterDemo(page, "Demo Coach");
   await page.getByRole("button", { name: "Players", exact: true }).first().click();
+
+  const rosterManagement = page.getByTestId("coach-player-roster-management");
+  await expect(rosterManagement).toBeVisible({ timeout: 20_000 });
+  await expect(rosterManagement).not.toHaveAttribute("open", "");
+  await rosterManagement.locator(":scope > summary").click();
+  await expect(rosterManagement).toHaveAttribute("open", "");
+
   await page.getByText("DEMO PLAYER", { exact: true }).last().click();
   await page.getByRole("button", { name: "Open Full Profile", exact: true }).click();
   const career = page.getByTestId("player-career-history");
