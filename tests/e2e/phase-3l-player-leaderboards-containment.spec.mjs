@@ -17,6 +17,29 @@ async function enterPlayerDemo(page) {
   return dock;
 }
 
+const geometryFor = (selector) => {
+  const node = document.querySelector(selector);
+  if (!node) return null;
+  const rect = node.getBoundingClientRect();
+  const style = getComputedStyle(node);
+  return {
+    selector,
+    top: rect.top + window.scrollY,
+    bottom: rect.bottom + window.scrollY,
+    height: rect.height,
+    clientHeight: node.clientHeight,
+    scrollHeight: node.scrollHeight,
+    minHeight: style.minHeight,
+    heightStyle: style.height,
+    paddingTop: style.paddingTop,
+    paddingBottom: style.paddingBottom,
+    marginTop: style.marginTop,
+    marginBottom: style.marginBottom,
+    display: style.display,
+    flex: style.flex,
+  };
+};
+
 test("Player Leaderboards ends near its content while preserving ranking navigation and Logout", async ({ page }) => {
   await page.setViewportSize({ width: 430, height: 932 });
   const dock = await enterPlayerDemo(page);
@@ -37,12 +60,48 @@ test("Player Leaderboards ends near its content while preserving ranking navigat
     if (!node) throw new Error("Leaderboard hub missing");
     const rect = node.getBoundingClientRect();
     const hubBottom = rect.bottom + window.scrollY;
+    const read = (selector) => {
+      const target = document.querySelector(selector);
+      if (!target) return null;
+      const box = target.getBoundingClientRect();
+      const style = getComputedStyle(target);
+      return {
+        selector,
+        top: box.top + window.scrollY,
+        bottom: box.bottom + window.scrollY,
+        height: box.height,
+        clientHeight: target.clientHeight,
+        scrollHeight: target.scrollHeight,
+        minHeight: style.minHeight,
+        heightStyle: style.height,
+        paddingTop: style.paddingTop,
+        paddingBottom: style.paddingBottom,
+        marginTop: style.marginTop,
+        marginBottom: style.marginBottom,
+        display: style.display,
+        flex: style.flex,
+      };
+    };
     return {
       tail: document.documentElement.scrollHeight - hubBottom,
       overflow: document.documentElement.scrollWidth - window.innerWidth,
+      viewportHeight: window.innerHeight,
+      documentHeight: document.documentElement.scrollHeight,
+      bodyHeight: document.body.scrollHeight,
+      hubBottom,
+      nodes: [
+        read('.performance-shell--player'),
+        read('.performance-shell--player .shell-main'),
+        read('.performance-shell--player .content-wrap'),
+        read('.performance-shell--player .performance-workspace'),
+        read('.performance-shell--player .player-scroll-container'),
+        read('.performance-shell--player .player-scroll-container > .screen-fade-in'),
+        read('[data-testid="premium-leaderboards-hub"]'),
+      ],
     };
   });
 
+  console.log("PHASE3L_GEOMETRY", JSON.stringify(layout));
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.tail, "Leaderboards should retain only fixed-dock/safe-area breathing room after content").toBeLessThanOrEqual(220);
 });
