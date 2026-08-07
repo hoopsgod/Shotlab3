@@ -125,12 +125,8 @@
   }
 
   .coachStrengthSupportingBody {
-    padding: 0 12px 12px;
+    padding: 12px;
     border-top: 1px solid rgba(23, 26, 24, .08);
-  }
-
-  .coachStrengthSupportingBody [data-testid="coach-strength-insight-grid"] {
-    margin-top: 12px;
   }
 }
 
