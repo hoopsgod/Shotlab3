@@ -71,6 +71,16 @@ test("Coach Leaderboards surfaces competitive signal in the first viewport and p
   const sectionBackground = await firstSection.evaluate((node) => getComputedStyle(node).backgroundColor);
   expect(sectionBackground).toBe("rgb(16, 19, 21)");
 
+  const sectionTitle = firstSection.locator('[class*="sectionTitle"]').first();
+  await expect(sectionTitle).toBeVisible();
+  const sectionTitleBackground = await sectionTitle.evaluate((node) => getComputedStyle(node).backgroundColor);
+  expect(sectionTitleBackground).toBe("rgba(0, 0, 0, 0)");
+
+  const sectionSummary = firstSection.locator('[class*="sectionSummary"]').first();
+  await expect(sectionSummary).toBeVisible();
+  const sectionSummaryBackground = await sectionSummary.evaluate((node) => getComputedStyle(node).backgroundColor);
+  expect(sectionSummaryBackground).toBe("rgba(0, 0, 0, 0)");
+
   const followUpHost = drawer.getByTestId("coach-follow-up-ledger-host");
   await expect(followUpHost).toBeAttached({ timeout: 10_000 });
   const followUpParentClass = await followUpHost.evaluate((node) => node.parentElement?.className || "");
