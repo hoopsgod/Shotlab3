@@ -38,6 +38,15 @@ test("Phase 3O preserves score validation, persistence, completion, PB, and chal
   ]) assert.ok(enhancer.includes(seam), `missing preserved training capability: ${seam}`);
 });
 
+test("Phase 3O unifies score entry and LOG SCORE into one safe-area-aware completion zone", () => {
+  assert.match(enhancer, /data-testid="player-training-score-zone"/);
+  assert.match(enhancer, /LOG YOUR RESULT/);
+  assert.match(enhancer, /data-testid="player-training-log-score"/);
+  assert.match(enhancer, /LOG SCORE &#8594;/);
+  assert.match(authority, /\[data-testid="player-training-score-zone"\][\s\S]*safe-area-inset-bottom/);
+  assert.match(authority, /\[data-testid="player-training-log-score"\][\s\S]*background-color: #c8ff1a !important/);
+});
+
 test("training-session header exposes mode, drill identity, plan position, target, and live score", () => {
   for (const seam of [
     "player-training-session-header",
@@ -73,10 +82,13 @@ test("Phase 3O iPhone evidence is selected by the screenshot runner and exercise
   assert.match(screenshotConfig, /phase-3o-player-training-session-screenshots\.spec\.mjs/);
   assert.match(screenshotSpec, /player-training-session-header/);
   assert.match(screenshotSpec, /player-training-live-progress/);
+  assert.match(screenshotSpec, /player-training-score-zone/);
+  assert.match(screenshotSpec, /player-training-log-score/);
   assert.match(screenshotSpec, /04p-player-training-session\.png/);
   assert.match(screenshotSpec, /scoreInput\.fill\("20"\)/);
   assert.match(screenshotSpec, /identityBackground/);
   assert.match(screenshotSpec, /titleColor/);
   assert.match(screenshotSpec, /inputStyle\.color/);
+  assert.match(screenshotSpec, /logBox\.y \+ logBox\.height/);
   assert.match(screenshotSpec, /scrollWidth - window\.innerWidth/);
 });
