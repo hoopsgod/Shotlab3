@@ -39,6 +39,12 @@ async function more(page) {
   return sheet;
 }
 
+async function toggleDisclosure(disclosure, open) {
+  await disclosure.locator(":scope > summary").click();
+  if (open) await expect(disclosure).toHaveAttribute("open", "");
+  else await expect(disclosure).not.toHaveAttribute("open", "");
+}
+
 test("Player visual system remains integrated across core and secondary pages", async ({ page }) => {
   await enterDemo(page, "player");
   await capture(page, "01-player-home");
@@ -49,19 +55,40 @@ test("Player visual system remains integrated across core and secondary pages", 
 
   let sheet = await more(page);
   await sheet.locator('[data-nav-key="profile"]').click();
+
   const careerDisclosure = page.getByTestId("player-profile-career-disclosure");
+  const performanceDisclosure = page.getByTestId("player-profile-performance-details");
+  const drillDisclosure = page.getByTestId("player-profile-drill-development");
+
   await expect(careerDisclosure).toBeVisible({ timeout: 20_000 });
+  await expect(performanceDisclosure).toBeVisible({ timeout: 20_000 });
+  await expect(drillDisclosure).toBeVisible({ timeout: 20_000 });
   await expect(careerDisclosure).not.toHaveAttribute("open", "");
+  await expect(performanceDisclosure).not.toHaveAttribute("open", "");
+  await expect(drillDisclosure).not.toHaveAttribute("open", "");
   await expect(page.getByTestId("player-career-history")).toBeHidden();
+  await expect(page.getByTestId("player-profile-analytics")).toBeHidden();
+  await expect(page.getByTestId("player-profile-drill-detail-body")).toBeHidden();
+  await expect(page.getByTestId("player-profile-readout")).toBeVisible();
   await expect(page.getByText("OFFSEASON PLAYER", { exact: true })).toHaveCount(0);
   await expect(page.getByText("OFFSEASON REPORT CARD", { exact: true })).toBeVisible();
   await expect(page.getByText("PLAYER PROGRESS PROFILE", { exact: true })).toBeVisible();
-  await capture(page, "03-player-profile-career");
+  await capture(page, "03-player-profile-default");
 
-  await careerDisclosure.locator(":scope > summary").click();
-  await expect(careerDisclosure).toHaveAttribute("open", "");
+  await toggleDisclosure(performanceDisclosure, true);
+  await expect(page.getByTestId("player-profile-analytics")).toBeVisible({ timeout: 20_000 });
+  await capture(page, "03b-player-profile-performance-expanded");
+  await toggleDisclosure(performanceDisclosure, false);
+
+  await toggleDisclosure(drillDisclosure, true);
+  await expect(page.getByTestId("player-profile-drill-detail-body")).toBeVisible({ timeout: 20_000 });
+  await capture(page, "03c-player-profile-drills-expanded");
+  await toggleDisclosure(drillDisclosure, false);
+
+  await toggleDisclosure(careerDisclosure, true);
   await expect(page.getByTestId("player-career-history")).toBeVisible({ timeout: 20_000 });
-  await capture(page, "03b-player-profile-career-expanded");
+  await capture(page, "03d-player-profile-career-expanded");
+  await toggleDisclosure(careerDisclosure, false);
 
   sheet = await more(page);
   await sheet.locator('[data-nav-key="team-store"]').click();
