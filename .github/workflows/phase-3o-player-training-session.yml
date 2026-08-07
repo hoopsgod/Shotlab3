@@ -8,6 +8,9 @@ on:
       - "src/App.jsx"
       - "src/components/PlayerTrainingSessionHeader.jsx"
       - "src/components/PlayerTrainingSessionHeader.module.css"
+      - "public/shotlab-phase3o-player-training-session.css"
+      - "index.html"
+      - "playwright.screenshots.config.mjs"
       - "scripts/apply-phase3o-player-training-session.mjs"
       - "tests/phase-3o-player-training-session.test.mjs"
       - "tests/e2e/phase-3o-player-training-session-screenshots.spec.mjs"
@@ -61,7 +64,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: shotlab-phase-3o-player-training-session-evidence
-          path: artifacts/design-audit/iphone/04p-player-training-session.png
+          path: |
+            artifacts/design-audit/iphone/04p-player-training-session.png
+            artifacts/design-audit/iphone/04q-player-training-score-action.png
           if-no-files-found: error
           retention-days: 14
 
