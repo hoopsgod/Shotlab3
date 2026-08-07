@@ -1,0 +1,389 @@
+/* Phase 3 — secondary-page cohesion and native-feeling continuity.
+   Presentation only: no route, data, permission, scoring, or persistence changes. */
+:root{
+  --p3-canvas:#f4f5f1;
+  --p3-surface:#ffffff;
+  --p3-surface-soft:#f8f8f4;
+  --p3-ink:#151a16;
+  --p3-muted:#68716a;
+  --p3-dim:#879089;
+  --p3-line:rgba(21,26,22,.10);
+  --p3-line-strong:rgba(21,26,22,.16);
+  --p3-accent:var(--team-brand-primary,var(--accent,#8fae25));
+  --p3-shadow:0 12px 30px rgba(24,31,27,.07);
+  --p3-shadow-raised:0 18px 44px rgba(24,31,27,.11);
+}
+
+/* Secondary routes should read as one light app canvas, not a light header pasted onto a dark web dashboard. */
+html:has([data-testid="premium-leaderboards-hub"]),
+html:has([data-testid="player-career-history"]),
+html:has([data-testid="coach-players-interactive-dashboard"]),
+html:has([data-testid="coach-events-interactive-dashboard"]),
+html:has(#coach-drills-management),
+body:has([data-testid="premium-leaderboards-hub"]),
+body:has([data-testid="player-career-history"]),
+body:has([data-testid="coach-players-interactive-dashboard"]),
+body:has([data-testid="coach-events-interactive-dashboard"]),
+body:has(#coach-drills-management),
+#root:has([data-testid="premium-leaderboards-hub"]),
+#root:has([data-testid="player-career-history"]),
+#root:has([data-testid="coach-players-interactive-dashboard"]),
+#root:has([data-testid="coach-events-interactive-dashboard"]),
+#root:has(#coach-drills-management){
+  background:var(--p3-canvas)!important;
+  background-image:none!important;
+  color-scheme:light!important;
+}
+
+body:has([data-testid="premium-leaderboards-hub"]) .performance-shell,
+body:has([data-testid="player-career-history"]) .performance-shell,
+body:has([data-testid="coach-players-interactive-dashboard"]) .performance-shell,
+body:has([data-testid="coach-events-interactive-dashboard"]) .performance-shell,
+body:has(#coach-drills-management) .performance-shell{
+  --pw-border:var(--p3-line)!important;
+  --pw-border-strong:var(--p3-line-strong)!important;
+  --pw-surface:var(--p3-surface)!important;
+  --pw-surface-raised:var(--p3-surface)!important;
+  --pw-surface-inset:var(--p3-surface-soft)!important;
+  --pw-shadow:var(--p3-shadow)!important;
+  --pw-shadow-raised:var(--p3-shadow-raised)!important;
+  --pw-copy:var(--p3-ink)!important;
+  --pw-muted:var(--p3-muted)!important;
+  --pw-dim:var(--p3-dim)!important;
+  --text-1:var(--p3-ink)!important;
+  --text-2:var(--p3-muted)!important;
+  --text-3:var(--p3-dim)!important;
+  --stroke-1:var(--p3-line)!important;
+  min-height:100dvh!important;
+  background:var(--p3-canvas)!important;
+  background-image:none!important;
+  color:var(--p3-ink)!important;
+}
+
+body:has([data-testid="premium-leaderboards-hub"]) .performance-workspace::before,
+body:has([data-testid="premium-leaderboards-hub"]) .performance-workspace::after,
+body:has([data-testid="player-career-history"]) .performance-workspace::before,
+body:has([data-testid="player-career-history"]) .performance-workspace::after,
+body:has([data-testid="coach-players-interactive-dashboard"]) .performance-workspace::before,
+body:has([data-testid="coach-players-interactive-dashboard"]) .performance-workspace::after,
+body:has([data-testid="coach-events-interactive-dashboard"]) .performance-workspace::before,
+body:has([data-testid="coach-events-interactive-dashboard"]) .performance-workspace::after,
+body:has(#coach-drills-management) .performance-workspace::before,
+body:has(#coach-drills-management) .performance-workspace::after{
+  display:none!important;
+}
+
+/* Compact player identity chrome on secondary destinations. Keep identity and brand, remove repeated Home-only mission content. */
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"],
+body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"]{
+  margin:10px 16px 8px!important;
+  border:1px solid var(--p3-line)!important;
+  border-radius:22px!important;
+  background:rgba(255,255,255,.92)!important;
+  box-shadow:0 8px 24px rgba(24,31,27,.055)!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"]>div,
+body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"]>div{
+  min-height:78px!important;
+  padding:13px 15px!important;
+  align-items:center!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"] h1,
+body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"] h1{
+  margin:4px 0 0!important;
+  font-size:26px!important;
+  line-height:1!important;
+  letter-spacing:-.045em!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"] [class*="tagline"],
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"] [class*="mission"],
+body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"] [class*="tagline"],
+body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"] [class*="mission"]{
+  display:none!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"] img,
+body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"] img{
+  width:58px!important;
+  height:58px!important;
+  object-fit:contain!important;
+}
+
+/* Player operational command bars become calm light decision surfaces on secondary pages. */
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"],
+body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"]{
+  margin:0 16px 14px!important;
+  gap:10px!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="commandBar"],
+body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="commandBar"]{
+  padding:18px!important;
+  border:1px solid var(--p3-line)!important;
+  border-radius:22px!important;
+  background:linear-gradient(135deg,#fff 0%,#f8f9f2 100%)!important;
+  color:var(--p3-ink)!important;
+  box-shadow:var(--p3-shadow)!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="commandBar"]::after,
+body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="commandBar"]::after{
+  display:none!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] :is(h1,[class*="metricValue"]),
+body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] :is(h1,[class*="metricValue"]){
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] :is(p,[class*="metricDetail"]),
+body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] :is(p,[class*="metricDetail"]){
+  color:var(--p3-muted)!important;
+  -webkit-text-fill-color:var(--p3-muted)!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="eyebrow"],
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="status"],
+body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="eyebrow"],
+body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="status"]{
+  color:color-mix(in srgb,var(--p3-accent) 78%,#243024)!important;
+  -webkit-text-fill-color:currentColor!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [data-metric-priority],
+body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [data-metric-priority]{
+  min-height:88px!important;
+  padding:13px!important;
+  border:1px solid var(--p3-line)!important;
+  border-radius:17px!important;
+  background:var(--p3-surface)!important;
+  background-image:none!important;
+  color:var(--p3-ink)!important;
+  box-shadow:none!important;
+}
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [data-metric-priority="primary"],
+body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [data-metric-priority="primary"]{
+  border-color:color-mix(in srgb,var(--p3-accent) 28%,var(--p3-line))!important;
+  background:linear-gradient(180deg,#fff 0%,color-mix(in srgb,var(--p3-accent) 5%,#fff) 100%)!important;
+}
+
+/* Leaderboards: turn the remaining inline dark competition hub into one clean native content card. */
+[data-testid="premium-leaderboards-hub"]{
+  width:calc(100% - 32px)!important;
+  max-width:1048px!important;
+  margin:0 auto calc(124px + env(safe-area-inset-bottom,0px))!important;
+  padding:18px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+  border:1px solid var(--p3-line)!important;
+  border-radius:24px!important;
+  background:var(--p3-surface)!important;
+  color:var(--p3-ink)!important;
+  box-shadow:var(--p3-shadow)!important;
+}
+[data-testid="premium-leaderboards-hub"]>header{
+  margin:0 0 8px!important;
+  padding:2px 0 16px!important;
+  border-bottom:1px solid var(--p3-line)!important;
+  background:transparent!important;
+}
+[data-testid="premium-leaderboards-hub"]>header>div:nth-child(1){
+  color:color-mix(in srgb,var(--p3-accent) 82%,#263327)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:11px!important;
+  font-weight:750!important;
+  letter-spacing:.07em!important;
+}
+[data-testid="premium-leaderboards-hub"]>header>div:nth-child(2){
+  margin-top:5px!important;
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif!important;
+  font-size:28px!important;
+  font-weight:780!important;
+  line-height:1!important;
+  letter-spacing:-.045em!important;
+  text-transform:none!important;
+}
+[data-testid="premium-leaderboards-hub"]>header>div:nth-child(3),
+[data-testid="premium-leaderboards-hub"] [data-testid="leaderboard-status-line"]{
+  color:var(--p3-muted)!important;
+  -webkit-text-fill-color:var(--p3-muted)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  text-transform:none!important;
+  letter-spacing:0!important;
+}
+[data-testid="premium-leaderboards-hub"]>section[aria-label]{
+  border-color:var(--p3-line)!important;
+  background:transparent!important;
+}
+[data-testid="premium-leaderboards-hub"]>section[aria-label] button{
+  min-height:44px!important;
+  color:var(--p3-muted)!important;
+  -webkit-text-fill-color:var(--p3-muted)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:12px!important;
+  font-weight:700!important;
+  letter-spacing:-.01em!important;
+  text-transform:none!important;
+}
+[data-testid="premium-leaderboards-hub"]>section[aria-label] button[aria-pressed="true"],
+[data-testid="premium-leaderboards-hub"]>section[aria-label] button[aria-selected="true"]{
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+}
+[data-testid="premium-leaderboards-hub"] [data-testid="compact-leaderboard-preview"]{
+  margin-top:8px!important;
+  padding:16px!important;
+  border:1px solid var(--p3-line)!important;
+  border-radius:19px!important;
+  background:var(--p3-surface-soft)!important;
+  color:var(--p3-ink)!important;
+}
+[data-testid="premium-leaderboards-hub"] [data-testid="compact-leaderboard-preview"] :is(div,span,strong){
+  text-shadow:none!important;
+}
+[data-testid="premium-leaderboards-hub"] [data-testid="leaderboard-ready-state"]>div{
+  border-color:var(--p3-line)!important;
+}
+[data-testid="premium-leaderboards-hub"] [data-testid="leaderboard-ready-state"]>div:first-child{
+  border-radius:12px!important;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--p3-accent) 7%,#fff),transparent)!important;
+}
+[data-testid="premium-leaderboards-hub"] details,
+[data-testid="premium-leaderboards-hub"] [class*="disclosure"]{
+  border-color:var(--p3-line)!important;
+  background:var(--p3-surface-soft)!important;
+  color:var(--p3-ink)!important;
+  box-shadow:none!important;
+}
+[data-testid="premium-leaderboards-hub"] details :is(summary,strong),
+[data-testid="premium-leaderboards-hub"] [class*="disclosure"] :is(summary,strong){
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+}
+[data-testid="premium-leaderboards-hub"] details :is(p,small),
+[data-testid="premium-leaderboards-hub"] [class*="disclosure"] :is(p,small){
+  color:var(--p3-muted)!important;
+  -webkit-text-fill-color:var(--p3-muted)!important;
+}
+
+/* Profile: keep the useful development ledger, but remove the stacked-card / website feel. */
+[data-testid="player-career-history"]{
+  width:calc(100% - 32px)!important;
+  max-width:1048px!important;
+  margin:0 auto calc(124px + env(safe-area-inset-bottom,0px))!important;
+  padding:18px!important;
+  border:1px solid var(--p3-line)!important;
+  border-radius:24px!important;
+  background:var(--p3-surface)!important;
+  color:var(--p3-ink)!important;
+  box-shadow:var(--p3-shadow)!important;
+}
+[data-testid="player-career-history"] [class*="hero"]{
+  padding-bottom:18px!important;
+}
+[data-testid="player-career-history"] [class*="title"]{
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+}
+[data-testid="player-career-history"] [class*="copy"],
+[data-testid="player-career-history"] [class*="metricDetail"],
+[data-testid="player-career-history"] [class*="seasonRange"]{
+  color:var(--p3-muted)!important;
+  -webkit-text-fill-color:var(--p3-muted)!important;
+}
+[data-testid="player-career-history"] [class*="record"],
+[data-testid="player-career-history"] [class*="season"]{
+  border-color:var(--p3-line)!important;
+  background:var(--p3-surface-soft)!important;
+  box-shadow:none!important;
+}
+
+/* Coach secondary shells: remove the remaining black outer workspace while preserving decision hierarchy. */
+body:has([data-testid="coach-players-interactive-dashboard"]) .performance-shell :is(.pageShell,.accent-card,.premiumSummaryPanel,.premiumStatTile,.ch),
+body:has([data-testid="coach-events-interactive-dashboard"]) .performance-shell :is(.pageShell,.accent-card,.premiumSummaryPanel,.premiumStatTile,.ch),
+body:has(#coach-drills-management) .performance-shell :is(.pageShell,.accent-card,.premiumSummaryPanel,.premiumStatTile,.ch){
+  border-color:var(--p3-line)!important;
+  background:var(--p3-surface)!important;
+  background-image:none!important;
+  color:var(--p3-ink)!important;
+  box-shadow:var(--p3-shadow)!important;
+}
+body:has([data-testid="coach-players-interactive-dashboard"]) .performance-shell :is(.pageShell,.ch,.accent-card) :is(h1,h2,h3,strong),
+body:has([data-testid="coach-events-interactive-dashboard"]) .performance-shell :is(.pageShell,.ch,.accent-card) :is(h1,h2,h3,strong),
+body:has(#coach-drills-management) .performance-shell :is(.pageShell,.ch,.accent-card) :is(h1,h2,h3,strong){
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+}
+body:has([data-testid="coach-players-interactive-dashboard"]) .performance-shell :is(.pageShell,.ch,.accent-card) :is(p,small,label),
+body:has([data-testid="coach-events-interactive-dashboard"]) .performance-shell :is(.pageShell,.ch,.accent-card) :is(p,small,label),
+body:has(#coach-drills-management) .performance-shell :is(.pageShell,.ch,.accent-card) :is(p,small,label){
+  color:var(--p3-muted)!important;
+  -webkit-text-fill-color:var(--p3-muted)!important;
+}
+
+/* Forms and legacy management controls should feel native and readable on the light canvas. */
+body:has([data-testid="coach-players-interactive-dashboard"]) .performance-shell :is(input,textarea,select),
+body:has([data-testid="coach-events-interactive-dashboard"]) .performance-shell :is(input,textarea,select),
+body:has(#coach-drills-management) .performance-shell :is(input,textarea,select){
+  min-height:46px!important;
+  border:1px solid var(--p3-line-strong)!important;
+  border-radius:13px!important;
+  background:#fff!important;
+  color:var(--p3-ink)!important;
+  -webkit-text-fill-color:var(--p3-ink)!important;
+  box-shadow:none!important;
+}
+body:has([data-testid="coach-players-interactive-dashboard"]) .performance-shell :is(input,textarea)::placeholder,
+body:has([data-testid="coach-events-interactive-dashboard"]) .performance-shell :is(input,textarea)::placeholder,
+body:has(#coach-drills-management) .performance-shell :is(input,textarea)::placeholder{
+  color:var(--p3-dim)!important;
+  -webkit-text-fill-color:var(--p3-dim)!important;
+}
+
+/* Keep the floating dock visually above long management screens without obscuring content. */
+body:has([data-testid="premium-leaderboards-hub"]) [data-testid="mobile-navigation-dock"],
+body:has([data-testid="player-career-history"]) [data-testid="mobile-navigation-dock"],
+body:has([data-testid="coach-players-interactive-dashboard"]) [data-testid="mobile-navigation-dock"],
+body:has([data-testid="coach-events-interactive-dashboard"]) [data-testid="mobile-navigation-dock"],
+body:has(#coach-drills-management) [data-testid="mobile-navigation-dock"]{
+  border-color:rgba(21,26,22,.08)!important;
+  box-shadow:0 14px 38px rgba(24,31,27,.15)!important;
+}
+
+@media(max-width:700px){
+  [data-testid="premium-leaderboards-hub"],
+  [data-testid="player-career-history"]{
+    width:calc(100% - 24px)!important;
+    padding:15px!important;
+    border-radius:21px!important;
+  }
+  body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"],
+  body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"]{
+    margin-inline:12px!important;
+  }
+  body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="commandBar"],
+  body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="commandBar"]{
+    padding:16px!important;
+    border-radius:20px!important;
+  }
+  body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="title"],
+  body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="title"]{
+    font-size:32px!important;
+  }
+}
+
+@media(max-width:390px){
+  [data-testid="premium-leaderboards-hub"],
+  [data-testid="player-career-history"]{width:calc(100% - 20px)!important;padding:14px!important}
+  body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"],
+  body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"]{margin-inline:10px!important}
+}
+
+@media(prefers-reduced-motion:reduce){
+  body:has([data-testid="premium-leaderboards-hub"]) *,
+  body:has([data-testid="player-career-history"]) *,
+  body:has([data-testid="coach-players-interactive-dashboard"]) *,
+  body:has([data-testid="coach-events-interactive-dashboard"]) *,
+  body:has(#coach-drills-management) *{
+    transition:none!important;
+    animation:none!important;
+  }
+}
