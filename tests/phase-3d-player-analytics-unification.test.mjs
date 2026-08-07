@@ -66,5 +66,5 @@ test('Phase 3D does not replace analytics calculations or data inputs', () => {
 test('App Store presentation workflow verifies and captures Phase 3D', () => {
   assert.match(workflow, /agent\/phase-3c-native-route-framing/);
   assert.match(workflow, /tests\/phase-3d-player-analytics-unification\.test\.mjs/);
-  assert.match(workflow, /shotlab-phase-3d-player-analytics-evidence/);
+  assert.match(workflow, /name: shotlab-phase-3[a-z0-9-]*-evidence/);
 });

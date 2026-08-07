@@ -184,8 +184,21 @@ test("player sees current and archived career history on Profile without horizon
   await enterDemo(page, "Demo Player");
   await page.getByTestId("mobile-navigation-more").click();
   await page.getByTestId("mobile-navigation-sheet").getByRole("button", { name: "Profile", exact: true }).click();
+
+  const careerDisclosure = page.getByTestId("player-profile-career-disclosure");
   const career = page.getByTestId("player-career-history");
+  await expect(careerDisclosure).toBeVisible();
+  await expect(career).toBeHidden();
+
+  await careerDisclosure.locator(":scope > summary").click();
+  await expect(careerDisclosure).toHaveAttribute("open", "");
+  await expect(career).toBeVisible();
+
+  const detailDisclosure = career.getByTestId("player-career-detail-disclosure");
+  await detailDisclosure.locator(":scope > summary").click();
+  await expect(detailDisclosure).toHaveAttribute("open", "");
   await expectCareerSeasons(career, "player");
+
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 });
