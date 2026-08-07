@@ -53,6 +53,18 @@ test("Coach Leaderboards surfaces competitive signal in the first viewport and p
   await capture(page, "10-coach-leaderboards");
 
   await results.locator(".coachLeaderboardRow").first().click();
-  await expect(page.getByTestId("coach-player-intelligence-drawer")).toBeVisible({ timeout: 10_000 });
+  const drawer = page.getByTestId("coach-player-intelligence-drawer");
+  await expect(drawer).toBeVisible({ timeout: 10_000 });
+
+  const playerTitle = drawer.locator('[role="dialog"] h2').first();
+  await expect(playerTitle).toBeVisible();
+  const titleColor = await playerTitle.evaluate((node) => getComputedStyle(node).color);
+  expect(titleColor).toBe("rgb(244, 247, 242)");
+
+  const firstMetricValue = drawer.locator('[class*="drawerMetric"] strong').first();
+  await expect(firstMetricValue).toBeVisible();
+  const metricColor = await firstMetricValue.evaluate((node) => getComputedStyle(node).color);
+  expect(metricColor).toBe("rgb(244, 247, 242)");
+
   await capture(page, "10b-coach-leaderboard-player-intelligence");
 });
