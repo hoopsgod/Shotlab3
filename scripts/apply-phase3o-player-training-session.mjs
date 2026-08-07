@@ -17,6 +17,8 @@ if (source.includes(marker)) {
     'setSaved(true)',
     'addChallenge({to:challTarget',
     'pushCompletionCue({title:activeMode==="program"?"Program drill completed":"Drill completed"',
+    'data-testid="player-training-score-zone"',
+    'data-testid="player-training-log-score"',
   ]) {
     if (!source.includes(preserved)) fail(`transformed training session is missing ${preserved}`);
   }
@@ -43,6 +45,20 @@ requireOne(source, oldIntro, 'legacy active drill intro');
 const newIntro = ':<><PlayerTrainingSessionHeader drill={active} mode={activeMode} currentIndex={(activeMode==="program"?todayProgramScores:todayS).length+1} total={activeMode==="program"?programDrills.length:drills.length} score={input} onBack={()=>{setActive(null);if(tab==="home")switchTab("log-drill");if(tab==="duels")switchTab("duels")}}/>';
 source = source.replace(oldIntro, newIntro);
 
+const scoreInputAnchor = '      {/* Score input with reactive color */}';
+requireOne(source, scoreInputAnchor, 'score input zone');
+source = source.replace(
+  scoreInputAnchor,
+  '      <div className="player-training-score-zone" data-testid="player-training-score-zone">\n      <div className="player-training-score-zone-label">LOG YOUR RESULT</div>\n      {/* Score input with reactive color */}',
+);
+
+const logScoreAnchor = '      <button className="btn-v cta-primary" onClick={handleLog} disabled={submitting||activeScoreInvalid} style={{maxWidth:300,margin:"0 auto",opacity:(submitting||activeScoreInvalid)?0.55:1,cursor:submitting||activeScoreInvalid?"not-allowed":"pointer"}}>LOG SCORE &#8594;</button>';
+requireOne(source, logScoreAnchor, 'log score action');
+source = source.replace(
+  logScoreAnchor,
+  '      <button data-testid="player-training-log-score" className="btn-v cta-primary" onClick={handleLog} disabled={submitting||activeScoreInvalid} style={{width:"100%",maxWidth:"none",margin:"0 auto",opacity:(submitting||activeScoreInvalid)?0.55:1,cursor:submitting||activeScoreInvalid?"not-allowed":"pointer"}}>LOG SCORE &#8594;</button>\n      </div>',
+);
+
 for (const preserved of [
   'onClick={handleLog}',
   'disabled={submitting||activeScoreInvalid}',
@@ -50,6 +66,8 @@ for (const preserved of [
   'addChallenge({to:challTarget',
   'const activeScoreValidation=',
   'const prevBest=activeScores.filter',
+  'data-testid="player-training-score-zone"',
+  'data-testid="player-training-log-score"',
 ]) {
   if (!source.includes(preserved)) fail(`Player training capability removed: ${preserved}`);
 }
