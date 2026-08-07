@@ -39,6 +39,25 @@ async function more(page) {
   return sheet;
 }
 
+async function expectImmersiveTeamStore(page) {
+  await expect(page.locator("html")).toHaveClass(/team-store-portal-open/);
+  await expect(page.locator("body")).toHaveClass(/team-store-portal-open/);
+  const overlay = page.getByTestId("team-store-portal-overlay");
+  const panel = page.getByTestId("team-store-portal-panel");
+  await expect(overlay).toBeVisible({ timeout: 20_000 });
+  await expect(panel).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator("#root")).toBeHidden();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeHidden();
+  const bounds = await panel.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, innerWidth: window.innerWidth, innerHeight: window.innerHeight };
+  });
+  expect(Math.abs(bounds.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(bounds.y)).toBeLessThanOrEqual(1);
+  expect(Math.abs(bounds.width - bounds.innerWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(bounds.height - bounds.innerHeight)).toBeLessThanOrEqual(1);
+}
+
 test("Player visual system remains integrated across core and secondary pages", async ({ page }) => {
   await enterDemo(page, "player");
   await capture(page, "01-player-home");
@@ -97,6 +116,7 @@ test("Player visual system remains integrated across core and secondary pages", 
   await sheet.locator('[data-nav-key="team-store"]').click();
   const store = page.getByRole("dialog", { name: "Team Store" });
   await expect(store).toBeVisible();
+  await expectImmersiveTeamStore(page);
   await capture(page, "04-player-team-store");
 });
 
@@ -166,5 +186,6 @@ test("Coach visual system remains integrated across command and management pages
   sheet = await more(page);
   await sheet.locator('[data-nav-key="team-store"]').click();
   await expect(page.getByRole("dialog", { name: "Team Store" })).toBeVisible();
+  await expectImmersiveTeamStore(page);
   await capture(page, "09-coach-team-store");
 });

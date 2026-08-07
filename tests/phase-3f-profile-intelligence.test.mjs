@@ -73,5 +73,5 @@ test('Phase 3F presentation authority is loaded after Phase 3E and provides focu
 
 test('App Store workflow carries the Phase 3F contract and evidence package', () => {
   assert.match(workflow, /tests\/phase-3f-profile-intelligence\.test\.mjs/);
-  assert.match(workflow, /shotlab-phase-(?:3f-profile-intelligence|3g-coach-drills-hierarchy|3h-coach-players-hierarchy)-evidence/);
+  assert.match(workflow, /shotlab-phase-(?:3f-profile-intelligence|3g-coach-drills-hierarchy|3h-coach-players-hierarchy|3i-team-store-immersive)-evidence/);
 });
