@@ -33,8 +33,8 @@ const newBlock = `      <details
           </span>
           <span className="coachStrengthSupportingChevron" aria-hidden="true">›</span>
         </summary>
-        <div className="coachStrengthSupportingBody" data-testid="coach-strength-insight-grid">
-          <DashboardInsightGrid>
+        <div className="coachStrengthSupportingBody">
+          <DashboardInsightGrid testId="coach-strength-insight-grid">
             <DashboardInsightCard eyebrow="Team compliance" title={\`${'${rate}'}% completion\`} body={\`${'${completions}'} completed logs from ${'${commitments}'} committed session responses.\`} tone={rate >= 75 ? "positive" : "attention"}><DashboardProgress value={rate} max={100} label="S&C compliance" /></DashboardInsightCard>
             <DashboardInsightCard eyebrow="Overdue work" title={overdue.length ? \`${'${overdue.length}'} sessions need follow-up\` : "No overdue sessions"} body={overdue.length ? "Open the overdue view to identify committed players without a completion log." : "Current commitments and completion records are aligned."} tone={overdue.length ? "attention" : "positive"} action={overdue.length ? { label: "Show Overdue", onClick: () => onScopeChange("overdue") } : undefined} />
             <DashboardInsightCard eyebrow="Next session" title={rows.find((row) => row.statusKey === "upcoming")?.title || "No upcoming session"} body={rows.find((row) => row.statusKey === "upcoming") ? \`${'${rows.find((row) => row.statusKey === "upcoming").date}'} · ${'${rows.find((row) => row.statusKey === "upcoming").time}'}\` : "Add the next S&C session to restore the compliance cadence."} tone="info" action={rows.find((row) => row.statusKey === "upcoming") && onOpenSession ? { label: "Open Session", onClick: () => onOpenSession(rows.find((row) => row.statusKey === "upcoming").session) } : undefined} />
