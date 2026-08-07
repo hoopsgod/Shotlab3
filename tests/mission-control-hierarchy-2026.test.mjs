@@ -3,19 +3,23 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const index = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const css = fs.readFileSync(new URL("../src/styles/MissionControlHierarchy2026.css", import.meta.url), "utf8");
+const criticalCss = fs.readFileSync(new URL("../public/shotlab-phase2-critical.css", import.meta.url), "utf8");
 const commandCenter = fs.readFileSync(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 
 const indexOfOrFail = (source, value) => {
-  const index = source.indexOf(value);
-  assert.notEqual(index, -1, `Expected source to contain ${value}`);
-  return index;
+  const position = source.indexOf(value);
+  assert.notEqual(position, -1, `Expected source to contain ${value}`);
+  return position;
 };
 
 test("Mission Control hierarchy loads after the canonical visual foundation", () => {
   const foundation = indexOfOrFail(main, "./styles/VisualFoundation2026.css");
   const hierarchy = indexOfOrFail(main, "./styles/MissionControlHierarchy2026.css");
   assert.ok(hierarchy > foundation, "Mission Control hierarchy must load after the foundation");
+  assert.match(index, /shotlab-phase2-critical\.css/);
+  assert.doesNotMatch(index, /appendChild\(sheet\)/);
   assert.equal(main.includes("mission-control-canonical.css"), false);
 });
 
@@ -49,6 +53,15 @@ test("Phase 2 establishes one dominant performance hero and calm supporting surf
   assert.match(css, /background:\s*#c8ff1a !important/);
   assert.match(css, /\.mcSection,/);
   assert.match(css, /background:\s*var\(--mc-surface\) !important/);
+});
+
+test("critical cascade uses explicit longhands and removes legacy clipping", () => {
+  assert.match(criticalCss, /background-color:\s*#0d171e !important/);
+  assert.match(criticalCss, /background-image:\s*linear-gradient\(145deg, #0d171e 0%, #13222b 100%\) !important/);
+  assert.match(criticalCss, /\[data-testid="coach-primary-objective"\]/);
+  assert.match(criticalCss, /max-height:\s*none !important/);
+  assert.match(criticalCss, /\.mcPrimary\s*\{[\s\S]*display:\s*inline-flex !important/s);
+  assert.match(criticalCss, /\.mcAttentionRow/);
 });
 
 test("light support tokens cannot inherit legacy dark shell variables", () => {
