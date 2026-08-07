@@ -82,6 +82,9 @@ test("Phase 3P has a stable late visual authority and safe mobile dock clearance
 
 test("Phase 3P iPhone evidence logs a real score and verifies post-log hierarchy", () => {
   assert.match(screenshotConfig, /phase-3p-player-training-completion-screenshots\.spec\.mjs/);
+  assert.match(screenshotSpec, /\/v1\/scores/);
+  assert.match(screenshotSpec, /storage_mode: "e2e"/);
+  assert.match(screenshotSpec, /Could not save score to team dashboard/);
   assert.match(screenshotSpec, /player-training-log-score/);
   assert.match(screenshotSpec, /player-training-completion/);
   assert.match(screenshotSpec, /player-training-result/);
