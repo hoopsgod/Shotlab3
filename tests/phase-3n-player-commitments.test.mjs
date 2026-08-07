@@ -5,6 +5,8 @@ import { readFileSync } from "node:fs";
 const enhancer = readFileSync("scripts/apply-phase3n-player-commitments.mjs", "utf8");
 const component = readFileSync("src/components/PlayerCommitmentCenter.jsx", "utf8");
 const css = readFileSync("src/components/PlayerCommitmentCenter.module.css", "utf8");
+const authority = readFileSync("public/shotlab-phase3n-player-commitments.css", "utf8");
+const html = readFileSync("index.html", "utf8");
 const screenshots = readFileSync("tests/e2e/phase-3n-player-commitments-screenshots.spec.mjs", "utf8");
 const screenshotConfig = readFileSync("playwright.screenshots.config.mjs", "utf8");
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
@@ -62,13 +64,20 @@ test("Player commitment hero prioritizes unresolved decisions over already-confi
 
 test("Phase 3N visual system keeps route-first hierarchy and iPhone containment", () => {
   assert.match(css, /\.routeTitleRow h1[\s\S]*clamp\(/);
-  assert.match(css, /\.hero[\s\S]*background-color: #111411 !important/);
-  assert.match(css, /\.hero[\s\S]*background-image:[\s\S]*linear-gradient[\s\S]*!important/);
   assert.match(css, /\.signalStrip[\s\S]*grid-template-columns: repeat\(3/);
   assert.match(css, /\.queue[\s\S]*background: rgba\(255, 255, 255, \.94\)/);
   assert.match(css, /\.details\[open\]/);
   assert.match(css, /@media \(max-width: 759px\)/);
   assert.match(css, /prefers-reduced-motion: reduce/);
+});
+
+test("Phase 3N uses a stable late authority boundary so demo normalization cannot wash out the dark commitment hero", () => {
+  assert.match(html, /shotlab-phase3m-player-team-store-retail\.css[\s\S]*shotlab-phase3n-player-commitments\.css/);
+  assert.match(authority, /html body #root \[data-testid="player-commitment-center-events"\] \[data-testid="player-commitment-hero-events"\]/);
+  assert.match(authority, /background-color: #111411 !important/);
+  assert.match(authority, /background-image:[\s\S]*linear-gradient\(152deg[\s\S]*!important/);
+  assert.match(authority, /\[data-testid="player-commitment-hero-events"\] h2[\s\S]*#f8faf5 !important/);
+  assert.match(authority, /\[data-testid="player-commitment-hero-events"\] button[\s\S]*background-color: var\(--accent, #c8ff1a\) !important/);
 });
 
 test("fresh iPhone evidence covers both commitment routes and verifies legacy controls on demand", () => {
