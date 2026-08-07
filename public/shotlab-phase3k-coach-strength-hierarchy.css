@@ -1,0 +1,136 @@
+/* Phase 3K — Coach S&C Decision-to-Session Hierarchy */
+
+.coachStrengthSupportingIntelligence {
+  width: 100%;
+  margin: 12px 0 0;
+  border: 0;
+  background: transparent;
+}
+
+.coachStrengthSupportingSummary {
+  list-style: none;
+}
+
+.coachStrengthSupportingSummary::-webkit-details-marker {
+  display: none;
+}
+
+@media (min-width: 761px) {
+  .coachStrengthSupportingSummary {
+    display: none;
+  }
+
+  .coachStrengthSupportingBody {
+    display: block;
+  }
+}
+
+@media (max-width: 760px) {
+  .coachStrengthSupportingIntelligence {
+    border: 1px solid rgba(23, 26, 24, .10);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .94);
+    box-shadow: 0 8px 24px rgba(23, 28, 24, .05);
+    overflow: hidden;
+  }
+
+  .coachStrengthSupportingSummary {
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 16px;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #171a18 !important;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  .coachStrengthSupportingSummary:focus-visible {
+    outline: 3px solid color-mix(in srgb, var(--semantic-positive, #52731e) 28%, transparent);
+    outline-offset: -3px;
+  }
+
+  .coachStrengthSupportingSummaryCopy {
+    min-width: 0;
+    display: grid;
+    gap: 3px;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  .coachStrengthSupportingSummaryCopy > span,
+  .coachStrengthSupportingSummaryCopy > strong,
+  .coachStrengthSupportingSummaryCopy > small {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    filter: none !important;
+  }
+
+  .coachStrengthSupportingSummaryCopy > span {
+    color: var(--semantic-positive, #52731e) !important;
+    font: 760 10px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    letter-spacing: .065em;
+    text-transform: uppercase;
+  }
+
+  .coachStrengthSupportingSummaryCopy > strong {
+    color: #171a18 !important;
+    font: 760 15px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+    letter-spacing: -.015em;
+  }
+
+  .coachStrengthSupportingSummaryCopy > small {
+    color: #5d665f !important;
+    font: 540 12px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  }
+
+  .coachStrengthSupportingChevron {
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--semantic-positive, #52731e) 8%, #fff);
+    color: var(--semantic-positive, #52731e);
+    font: 650 22px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+    transform: rotate(0deg);
+    transition: transform 150ms ease;
+  }
+
+  .coachStrengthSupportingIntelligence[open] .coachStrengthSupportingChevron {
+    transform: rotate(90deg);
+  }
+
+  .coachStrengthSupportingBody {
+    padding: 0 12px 12px;
+    border-top: 1px solid rgba(23, 26, 24, .08);
+  }
+
+  .coachStrengthSupportingBody [data-testid="coach-strength-insight-grid"] {
+    margin-top: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .coachStrengthSupportingChevron {
+    transition: none;
+  }
+}
