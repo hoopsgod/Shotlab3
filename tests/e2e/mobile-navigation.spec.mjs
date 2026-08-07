@@ -51,7 +51,9 @@ test("player mobile dock keeps Home, Train, and Progress direct while grouping s
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
   const teamStoreDialog = page.getByRole("dialog", { name: "Team Store" });
   await expect(teamStoreDialog).toBeVisible();
-  await expect(teamStoreDialog.getByText("DEMO STOREFRONT", { exact: true })).toBeVisible();
+  await expect(teamStoreDialog.getByTestId("player-team-store-retail")).toBeVisible();
+  await expect(teamStoreDialog.getByTestId("player-team-store-hero")).toBeVisible();
+  await expect(teamStoreDialog.getByText("Your team. Your gear.", { exact: true })).toBeVisible();
   await expect(teamStoreDialog.getByText("Your team store is not open yet", { exact: true })).toHaveCount(0);
   await expect(teamStoreDialog.getByRole("button", { name: "SHOP TEAM STORE" })).toHaveCount(0);
   await teamStoreDialog.getByRole("button", { name: "Close team store" }).click();
