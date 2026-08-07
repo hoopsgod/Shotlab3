@@ -54,6 +54,15 @@ test('mobile compliance disclosure uses route-scoped native summary authority', 
   assert.match(css, /coachStrengthSupportingSummaryCopy > small[\s\S]*box-shadow: none !important[\s\S]*transform: none !important/);
 });
 
+test('expanded S&C insight cards preserve light-surface contrast and readable controls', () => {
+  assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article[\s\S]*--text-1: #171a18;[\s\S]*--text-2: #5d665f;/);
+  assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article[\s\S]*background: linear-gradient\(180deg, #ffffff 0%, #f5f6f3 100%\) !important/);
+  assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article h2[\s\S]*color: #171a18 !important/);
+  assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article p[\s\S]*color: #5d665f !important/);
+  assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article button[\s\S]*color: #25321c !important/);
+  assert.match(css, /\[data-testid=\"coach-strength-insight-grid\"\] article \[role=\"progressbar\"\][\s\S]*background: rgba\(23, 26, 24, \.10\) !important/);
+});
+
 test('Phase 3K preserves existing S&C management and operational actions', () => {
   for (const marker of [
     'CoachStrengthOperationalPanel',
