@@ -49,8 +49,16 @@ test("Player visual system remains integrated across core and secondary pages", 
 
   let sheet = await more(page);
   await sheet.locator('[data-nav-key="profile"]').click();
-  await expect(page.getByTestId("player-career-history")).toBeVisible({ timeout: 20_000 });
+  const careerDisclosure = page.getByTestId("player-profile-career-disclosure");
+  await expect(careerDisclosure).toBeVisible({ timeout: 20_000 });
+  await expect(careerDisclosure).not.toHaveAttribute("open", "");
+  await expect(page.getByTestId("player-career-history")).toBeHidden();
   await capture(page, "03-player-profile-career");
+
+  await careerDisclosure.locator("summary").click();
+  await expect(careerDisclosure).toHaveAttribute("open", "");
+  await expect(page.getByTestId("player-career-history")).toBeVisible({ timeout: 20_000 });
+  await capture(page, "03b-player-profile-career-expanded");
 
   sheet = await more(page);
   await sheet.locator('[data-nav-key="team-store"]').click();
