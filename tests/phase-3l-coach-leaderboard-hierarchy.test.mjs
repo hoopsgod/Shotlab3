@@ -46,6 +46,14 @@ test('Phase 3L keeps leaderboard filtering and player drill-down behavior intact
   assert.match(app, /filterLeaderboardIntelligenceRows/);
 });
 
+test('Phase 3L moves the intentional follow-up workflow into the drawer scroll body', () => {
+  assert.match(enhancer, /coachFollowUpEnhancer\.js/);
+  assert.match(enhancer, /expected exactly one Coach follow-up drawer placement anchor/);
+  assert.match(enhancer, /const drawerBody = dialog\.querySelector\('\[class\*=\"drawerBody\"\]'\) \|\| dialog/);
+  assert.match(enhancer, /drawerBody\.appendChild\(host\)/);
+  assert.doesNotMatch(enhancer, /newPlacement = `[\s\S]*dialog\.appendChild\(host\)/);
+});
+
 test('Leaderboard authority uses light native surfaces, accessible focus, and restrained motion', () => {
   assert.match(css, /coachLeaderboardPulse/);
   assert.match(css, /rgba\(255, 255, 255, \.95\)/);
@@ -105,6 +113,8 @@ test('rendered iPhone evidence covers first-viewport Leaderboards and high-contr
   assert.match(screenshots, /coach-player-intelligence-drawer/);
   assert.match(screenshots, /rgb\(244, 247, 242\)/);
   assert.match(screenshots, /drawerMetric/);
+  assert.match(screenshots, /coach-follow-up-ledger-host/);
+  assert.match(screenshots, /toContain\("drawerBody"\)/);
 });
 
 test('App Store workflow carries Phase 3L and its evidence package', () => {
