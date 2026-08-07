@@ -40,6 +40,12 @@ test('View roster inside account activation opens roster management before scrol
   assert.match(enhancer, /document\.getElementById\("coach-roster-operations"\)/);
 });
 
+test('career archive actions leave player detail and open Season Tools before scrolling to the selected archive', () => {
+  assert.match(enhancer, /viewerRole=\"coach\" onOpenArchive=\{\(archiveId\)=>\{setSelectedSeasonArchiveId\(archiveId\);setSelP\(null\);setTimeout/);
+  assert.match(enhancer, /document\.getElementById\(\"coach-player-season-tools\"\)/);
+  assert.match(enhancer, /document\.getElementById\(\"coach-season-tools\"\)\?\.scrollIntoView/);
+});
+
 test('Phase 3H preserves player provisioning, season, roster, and player-intelligence capabilities', () => {
   for (const preserved of [
     '<CoachPlayerInviteForm',
