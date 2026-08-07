@@ -5,14 +5,27 @@
   box-shadow: 0 -14px 38px rgba(25, 28, 30, .08) !important;
   -webkit-backdrop-filter: blur(24px) saturate(120%) !important;
   backdrop-filter: blur(24px) saturate(120%) !important;
+  transition: transform 180ms cubic-bezier(.22,.78,.22,1), opacity 160ms ease, box-shadow 180ms ease;
 }
 
 [data-testid="mobile-navigation-dock"] button {
   color: #747b80;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 [data-testid="mobile-navigation-dock"] button[data-active="true"] {
   color: var(--team-brand-nav-active, var(--accent, #617233));
+}
+
+[data-testid="mobile-navigation-dock"] button:active {
+  transform: scale(.96);
+}
+
+body[data-navigation-sheet-open="true"] [data-testid="mobile-navigation-dock"] {
+  transform: translateX(-50%) translateY(5px) scale(.985) !important;
+  opacity: .86;
+  box-shadow: 0 -8px 28px rgba(25, 28, 30, .06) !important;
 }
 
 [data-testid="mobile-navigation-overlay"] {
@@ -72,6 +85,8 @@
 [data-testid="mobile-navigation-groups"] button {
   border-bottom-color: rgba(22, 25, 27, .07) !important;
   color: #555d62 !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 [data-testid="mobile-navigation-groups"] button > span:first-child {
@@ -83,12 +98,44 @@
   color: inherit;
 }
 
+[data-testid="mobile-navigation-groups"] button:active {
+  transform: scale(.985);
+  background: #f3f3ee !important;
+}
+
+[data-testid="mobile-navigation-groups"] button:active > span:first-child {
+  transform: scale(.96);
+}
+
 [data-testid="mobile-navigation-groups"] button[data-active="true"] {
   background: color-mix(in srgb, var(--accent, #617233) 8%, white) !important;
   color: var(--accent, #617233) !important;
 }
 
+[data-testid="mobile-navigation-groups"] button[data-active="true"] > span:last-child {
+  transform: translateX(2px);
+}
+
 @media (prefers-reduced-transparency: reduce) {
   [data-testid="mobile-navigation-dock"] { background: #fcfcfa !important; }
   [data-testid="mobile-navigation-sheet"] { background: #f8f7f3 !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="mobile-navigation-dock"],
+  [data-testid="mobile-navigation-dock"] button,
+  [data-testid="mobile-navigation-groups"] button,
+  [data-testid="mobile-navigation-groups"] button > span {
+    transition: none !important;
+  }
+
+  body[data-navigation-sheet-open="true"] [data-testid="mobile-navigation-dock"] {
+    transform: translateX(-50%) !important;
+  }
+
+  [data-testid="mobile-navigation-dock"] button:active,
+  [data-testid="mobile-navigation-groups"] button:active,
+  [data-testid="mobile-navigation-groups"] button:active > span:first-child {
+    transform: none !important;
+  }
 }
