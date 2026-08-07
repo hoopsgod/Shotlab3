@@ -56,9 +56,10 @@ test("development story uses factual signals and does not synthesize an overall 
   assert.equal(story.recent7Makes, 160);
   assert.equal(story.activeDays7, 4);
   assert.equal(story.pbCount30, 1);
-  assert.equal(story.strongest.title, "Form Ladder");
+  assert.equal(story.strongest.title, "Free Throws");
   assert.equal(story.strongest.kind, "quality");
   assert.equal(story.strongest.eyebrow, "STRONGEST SIGNAL");
+  assert.match(story.strongest.detail, /75% average/);
   assert.equal(story.opportunity.eyebrow, "BIGGEST OPPORTUNITY");
   assert.equal(story.nextFocus.label, "COACH FOCUS");
   assert.equal(story.nextFocus.title, "Finish through contact");
