@@ -62,6 +62,13 @@ test("Player commitment hero prioritizes unresolved decisions over already-confi
   assert.match(component, /requiresResponse[\s\S]*"RESPONSE NEEDED"/);
 });
 
+test("Route status and subtitle summarize the actionable commitment state rather than stale model copy", () => {
+  assert.match(component, /const routeStatus = requiresResponse[\s\S]*response[\s\S]*needed/);
+  assert.match(component, /const routeSubtitle = requiresResponse[\s\S]*upcoming commitment/);
+  assert.match(component, /<span>{routeStatus}<\/span>/);
+  assert.match(component, /<p>{routeSubtitle}<\/p>/);
+});
+
 test("Phase 3N visual system keeps route-first hierarchy and iPhone containment", () => {
   assert.match(css, /\.routeTitleRow h1[\s\S]*clamp\(/);
   assert.match(css, /\.signalStrip[\s\S]*grid-template-columns: repeat\(3/);
@@ -76,6 +83,8 @@ test("Phase 3N uses a stable late authority boundary so demo normalization canno
   assert.match(authority, /html body #root \[data-testid="player-commitment-center-events"\] \[data-testid="player-commitment-hero-events"\]/);
   assert.match(authority, /background-color: #111411 !important/);
   assert.match(authority, /background-image:[\s\S]*linear-gradient\(152deg[\s\S]*!important/);
+  assert.match(authority, /\[data-testid="player-commitment-hero-events"\] > div[\s\S]*background-color: transparent !important/);
+  assert.match(authority, /> div:nth-child\(2\) > div\[aria-label\][\s\S]*rgba\(255, 255, 255, \.045\) !important/);
   assert.match(authority, /\[data-testid="player-commitment-hero-events"\] h2[\s\S]*#f8faf5 !important/);
   assert.match(authority, /\[data-testid="player-commitment-hero-events"\] button[\s\S]*background-color: var\(--accent, #c8ff1a\) !important/);
 });
@@ -84,6 +93,9 @@ test("fresh iPhone evidence covers both commitment routes and verifies legacy co
   assert.match(screenshotConfig, /phase-3n-player-commitments-screenshots\.spec\.mjs/);
   assert.match(screenshots, /04n-player-events-commitment/);
   assert.match(screenshots, /04o-player-strength-commitment/);
+  assert.match(screenshots, /routeStatus: "1 response needed"/);
+  assert.match(screenshots, /routeStatus: "Schedule clear"/);
+  assert.match(screenshots, /compositionStyle\.backgroundColor/);
   assert.match(screenshots, /scrollWidth - window\.innerWidth/);
   assert.match(screenshots, /player-events-operational-list/);
   assert.match(screenshots, /player-strength-operational-panel/);
