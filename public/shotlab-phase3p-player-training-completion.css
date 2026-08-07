@@ -4,7 +4,7 @@
   margin: 0 auto calc(118px + env(safe-area-inset-bottom, 0px)) !important;
 }
 
-[data-testid="player-training-completion"] {
+body #root [data-testid="player-training-completion"] {
   background-color: #111411 !important;
   background-image:
     radial-gradient(circle at 88% 10%, rgba(200,255,26,.13), transparent 34%),
@@ -13,42 +13,46 @@
   border-color: rgba(255,255,255,.10) !important;
 }
 
-[data-testid="player-training-result-hero"],
-[data-testid="player-training-result-hero"] > div {
+body #root [data-testid="player-training-result-hero"],
+body #root [data-testid="player-training-result-hero"] > div {
   background-color: transparent !important;
   background-image: none !important;
   border: 0 !important;
   box-shadow: none !important;
 }
 
-[data-testid="player-training-completion"] h2 {
+body #root [data-testid="player-training-completion"] h2 {
   color: #f8faf5 !important;
   opacity: 1 !important;
 }
 
-[data-testid="player-training-result-hero"] > div > span {
+body #root [data-testid="player-training-result-hero"] > div > span {
   color: rgba(248,250,245,.48) !important;
 }
 
-[data-testid="player-training-result"] {
+body #root [data-testid="player-training-result"] {
+  background-color: transparent !important;
+  background-image: none !important;
   color: #c8ff1a !important;
+  border: 0 !important;
+  box-shadow: none !important;
 }
 
-[data-testid="player-training-next-action"] {
+body #root [data-testid="player-training-next-action"] {
   background: #c8ff1a !important;
   color: #101310 !important;
   border-color: transparent !important;
   box-shadow: none !important;
 }
 
-[data-testid="player-training-share-toggle"],
-[data-testid="player-training-challenge-action"] {
+body #root [data-testid="player-training-share-toggle"],
+body #root [data-testid="player-training-challenge-action"] {
   background: rgba(255,255,255,.045) !important;
   color: rgba(248,250,245,.78) !important;
   border-color: rgba(255,255,255,.10) !important;
 }
 
-[data-testid="player-training-share-card"] {
+body #root [data-testid="player-training-share-card"] {
   background-color: transparent !important;
   background-image: none !important;
   color: #f8faf5 !important;
@@ -58,7 +62,7 @@
   box-shadow: none !important;
 }
 
-[data-testid="player-training-share-card"] > div:first-child {
+body #root [data-testid="player-training-share-card"] > div:first-child {
   background-color: transparent !important;
   background-image: none !important;
   color: rgba(248,250,245,.45) !important;
