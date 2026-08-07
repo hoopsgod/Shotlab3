@@ -73,6 +73,15 @@ test('mobile Leaderboards compacts only duplicated command chrome while preservi
   assert.match(css, /coach-page-dashboard-leaderboards-metric-strip[\s\S]*font-size: 24px !important/);
 });
 
+test('Player Intelligence establishes a local dark token boundary when opened from light Leaderboards', () => {
+  assert.match(css, /coach-player-intelligence-drawer/);
+  assert.match(css, /--text-1: #f4f7f2 !important/);
+  assert.match(css, /--text-2: #aab4ad !important/);
+  assert.match(css, /--text-3: #7f8a84 !important/);
+  assert.match(css, /drawerHeader[\s\S]*h2[\s\S]*color: #f4f7f2 !important/);
+  assert.match(css, /drawerMetric[\s\S]*strong[\s\S]*-webkit-text-fill-color: #f4f7f2 !important/);
+});
+
 test('rank and weekly pace receive dedicated mobile hierarchy without horizontal overflow debt', () => {
   assert.match(css, /grid-template-columns: 38px minmax\(0, 1fr\) auto/);
   assert.match(css, /coachLeaderboardRank/);
@@ -85,7 +94,7 @@ test('Phase 3L authority loads after Phase 3K', () => {
   assert.match(html, /shotlab-phase3k-coach-strength-hierarchy\.css[\s\S]*shotlab-phase3l-coach-leaderboard-hierarchy\.css/);
 });
 
-test('rendered iPhone evidence covers first-viewport Leaderboards and player drill-down', () => {
+test('rendered iPhone evidence covers first-viewport Leaderboards and high-contrast player drill-down', () => {
   assert.match(screenshots, /data-nav-key="leaderboards"/);
   assert.match(screenshots, /coach-leaderboard-pulse/);
   assert.match(screenshots, /coach-page-dashboard-leaderboards-decision-brief/);
@@ -94,6 +103,8 @@ test('rendered iPhone evidence covers first-viewport Leaderboards and player dri
   assert.match(screenshots, /coach-leaderboard-operational-results/);
   assert.match(screenshots, /10-coach-leaderboards/);
   assert.match(screenshots, /coach-player-intelligence-drawer/);
+  assert.match(screenshots, /rgb\(244, 247, 242\)/);
+  assert.match(screenshots, /drawerMetric/);
 });
 
 test('App Store workflow carries Phase 3L and its evidence package', () => {
