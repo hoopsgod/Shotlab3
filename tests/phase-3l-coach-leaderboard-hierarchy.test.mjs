@@ -60,8 +60,16 @@ test('mobile Leaderboards removes duplicated generic briefing and collapses dead
   assert.match(css, /coach-page-dashboard-leaderboards-decision-brief/);
   assert.match(css, /coach-page-dashboard-leaderboards-evidence/);
   assert.match(css, /display: none !important/);
-  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*padding-bottom: 14px !important/);
-  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*gap: 12px !important/);
+  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*padding: 8px 14px 12px !important/);
+  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*gap: 8px !important/);
+});
+
+test('mobile Leaderboards compacts only duplicated command chrome while preserving all four metric controls', () => {
+  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*secondaryPageIntro__summary[\s\S]*display: none !important/);
+  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*secondaryPageIntro__status[\s\S]*display: none !important/);
+  assert.match(css, /coach-page-dashboard-leaderboards-metric-strip[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\) !important/);
+  assert.match(css, /coach-page-dashboard-leaderboards-metric-strip[\s\S]*min-height: 72px !important/);
+  assert.match(css, /coach-page-dashboard-leaderboards-metric-strip[\s\S]*font-size: 24px !important/);
 });
 
 test('rank and weekly pace receive dedicated mobile hierarchy without horizontal overflow debt', () => {
