@@ -168,7 +168,7 @@ async function enterSeededRole(page, role) {
     for (const [key, value] of Object.entries(payload)) window.localStorage.setItem(key, JSON.stringify(value));
   }, seedData);
   await page.goto("/");
-  await page.getByRole("button", { name: role === "coach" ? "Demo Coach" : "Demo Player", exact: true }).click();
+  await page.getByRole("button", { name: role === "coach" ? "Coach demo" : "Player demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await page.addStyleTag({ content: `
     *,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important;}
@@ -239,8 +239,17 @@ function itemFor(order) {
   return item;
 }
 
-async function openPrimaryNavigation(page, label) {
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: label, exact: true }).click();
+async function openNavigation(page, label) {
+  const dock = page.getByTestId("mobile-navigation-dock");
+  const dockItem = dock.getByRole("button", { name: label, exact: true });
+  if (await dockItem.count()) {
+    await dockItem.click();
+  } else {
+    await page.getByTestId("mobile-navigation-more").click();
+    const sheet = page.getByTestId("mobile-navigation-sheet");
+    await expect(sheet).toBeVisible();
+    await sheet.getByRole("button", { name: label, exact: true }).click();
+  }
   await page.waitForTimeout(150);
 }
 
@@ -256,11 +265,11 @@ test("capture Player App Store presentation assets", async ({ page }) => {
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(1));
 
-  await openPrimaryNavigation(page, "At Home");
+  await openNavigation(page, "Train");
   await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(2));
 
-  await openPrimaryNavigation(page, "Program");
+  await openNavigation(page, "Program");
   await expect(page.getByTestId("player-program-workspace")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(3));
 });
@@ -270,11 +279,11 @@ test("capture Coach App Store presentation assets", async ({ page }) => {
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(4));
 
-  await openPrimaryNavigation(page, "Players");
+  await openNavigation(page, "Players");
   await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(5));
 
-  await openPrimaryNavigation(page, "Events");
+  await openNavigation(page, "Schedule");
   await expect(page.getByText("Team Practice", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
   await captureMarketingAsset(page, itemFor(6));
 });
