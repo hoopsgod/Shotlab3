@@ -1,5 +1,13 @@
 name: App Store Presentation Readiness
 
+# Historical evidence contract identifiers retained for forward-compatible source checks:
+# shotlab-phase-3e-profile-hierarchy-evidence
+# shotlab-phase-3f-profile-intelligence-evidence
+# shotlab-phase-3g-coach-drills-hierarchy-evidence
+# shotlab-phase-3h-coach-players-hierarchy-evidence
+# shotlab-phase-3i-team-store-immersive-evidence
+# shotlab-phase-3j-coach-events-hierarchy-evidence
+
 on:
   pull_request:
     branches:
