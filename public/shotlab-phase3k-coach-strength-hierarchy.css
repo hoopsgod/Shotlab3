@@ -1,0 +1,287 @@
+/* Phase 3K — Coach S&C Decision-to-Session Hierarchy */
+
+/* S&C was the last coach secondary route still sitting on the legacy dark canvas. */
+html:has([data-testid="coach-page-dashboard-strength"]),
+body:has([data-testid="coach-page-dashboard-strength"]),
+#root:has([data-testid="coach-page-dashboard-strength"]){
+  background:var(--p3-canvas,#f4f5f1)!important;
+  background-image:none!important;
+  color-scheme:light!important;
+}
+
+body:has([data-testid="coach-page-dashboard-strength"]) #root,
+body:has([data-testid="coach-page-dashboard-strength"]) #root .performance-shell,
+body:has([data-testid="coach-page-dashboard-strength"]) #root .performance-workspace,
+body:has([data-testid="coach-page-dashboard-strength"]) #root .content-wrap,
+body:has([data-testid="coach-page-dashboard-strength"]) #root .coach-scroll-container,
+body:has([data-testid="coach-page-dashboard-strength"]) .page.pageShell[data-accent="sc"]{
+  --text-1:var(--p3-ink,#151a16)!important;
+  --text-2:var(--p3-muted,#68716a)!important;
+  --text-3:var(--p3-dim,#879089)!important;
+  --stroke-1:var(--p3-line,rgba(21,26,22,.10))!important;
+  background:var(--p3-canvas,#f4f5f1)!important;
+  background-image:none!important;
+  color:var(--p3-ink,#151a16)!important;
+}
+
+body:has([data-testid="coach-page-dashboard-strength"]) .performance-workspace::before,
+body:has([data-testid="coach-page-dashboard-strength"]) .performance-workspace::after{
+  display:none!important;
+}
+
+.page.pageShell[data-accent="sc"]{
+  min-height:100dvh!important;
+  padding-bottom:calc(124px + env(safe-area-inset-bottom,0px))!important;
+}
+
+/* Keep one decision layer. The metric strip already carries these supporting signals. */
+[data-testid="coach-page-dashboard-strength"]{
+  min-height:0!important;
+  gap:14px!important;
+  padding-bottom:8px!important;
+}
+
+[data-testid="coach-page-dashboard-strength-evidence"]{
+  display:none!important;
+}
+
+/* Metric controls inherit the accepted light secondary language instead of dark dashboard tiles. */
+[data-testid="coach-page-dashboard-strength-metric-strip"]{
+  gap:8px!important;
+  margin-bottom:0!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+
+[data-testid="coach-page-dashboard-strength-metric-strip"] > button{
+  min-height:92px!important;
+  padding:13px 12px!important;
+  border:1px solid var(--p3-line,rgba(21,26,22,.10))!important;
+  border-radius:16px!important;
+  background:var(--p3-surface,#fff)!important;
+  background-image:none!important;
+  color:var(--p3-ink,#151a16)!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+
+[data-testid="coach-page-dashboard-strength-metric-strip"] > button::after{
+  left:12px!important;
+  right:12px!important;
+  height:2px!important;
+  box-shadow:none!important;
+}
+
+[data-testid="coach-page-dashboard-strength-metric-strip"] [class*="metricLabel"],
+[data-testid="coach-page-dashboard-strength-metric-strip"] [class*="metricDetail"]{
+  color:var(--p3-muted,#68716a)!important;
+  -webkit-text-fill-color:var(--p3-muted,#68716a)!important;
+}
+
+[data-testid="coach-page-dashboard-strength-metric-strip"] [class*="metricValue"]{
+  color:var(--p3-ink,#151a16)!important;
+  -webkit-text-fill-color:var(--p3-ink,#151a16)!important;
+}
+
+[data-testid="coach-page-dashboard-strength-metric-strip"] > button[aria-pressed="true"]{
+  border-color:color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 28%,var(--p3-line,rgba(21,26,22,.10)))!important;
+  background:linear-gradient(180deg,#fff 0%,color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 5%,#fff) 100%)!important;
+}
+
+/* Operational filters are a native light utility rail, not a charcoal admin panel. */
+[data-testid="coach-strength-operational-panel"]{
+  margin:4px 0 14px!important;
+}
+
+[data-testid="coach-strength-operational-filters"]{
+  margin-bottom:10px!important;
+  padding:9px!important;
+  border:1px solid var(--p3-line,rgba(21,26,22,.10))!important;
+  border-radius:18px!important;
+  background:var(--p3-surface,#fff)!important;
+  box-shadow:none!important;
+  backdrop-filter:none!important;
+  -webkit-backdrop-filter:none!important;
+}
+
+[data-testid="coach-strength-operational-filters"] label{
+  min-height:44px!important;
+  border:1px solid var(--p3-line-strong,rgba(21,26,22,.16))!important;
+  border-radius:12px!important;
+  background:var(--p3-surface-soft,#f8f8f4)!important;
+  color:var(--p3-muted,#68716a)!important;
+}
+
+[data-testid="coach-strength-operational-filters"] input{
+  color:var(--p3-ink,#151a16)!important;
+  -webkit-text-fill-color:var(--p3-ink,#151a16)!important;
+}
+
+[data-testid="coach-strength-operational-filters"] input::placeholder{
+  color:var(--p3-dim,#879089)!important;
+  -webkit-text-fill-color:var(--p3-dim,#879089)!important;
+  opacity:1!important;
+}
+
+[data-testid="coach-strength-operational-filters"] button{
+  min-height:38px!important;
+  color:var(--p3-muted,#68716a)!important;
+  -webkit-text-fill-color:var(--p3-muted,#68716a)!important;
+  background:transparent!important;
+  border-color:transparent!important;
+  box-shadow:none!important;
+}
+
+[data-testid="coach-strength-operational-filters"] button[aria-pressed="true"]{
+  color:color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 70%,#263327)!important;
+  -webkit-text-fill-color:currentColor!important;
+  border-color:color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 18%,var(--p3-line,rgba(21,26,22,.10)))!important;
+  background:color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 7%,#fff)!important;
+}
+
+.coachStrengthSupportingIntelligence {
+  width:100%;
+  margin:12px 0 0;
+  border:0;
+  background:transparent;
+}
+
+.coachStrengthSupportingSummary{list-style:none}
+.coachStrengthSupportingSummary::-webkit-details-marker{display:none}
+
+@media (min-width:761px){
+  .coachStrengthSupportingSummary{display:none}
+  .coachStrengthSupportingBody{display:block}
+}
+
+@media (max-width:760px){
+  .coachStrengthSupportingIntelligence{
+    border:1px solid var(--p3-line,rgba(21,26,22,.10));
+    border-radius:18px;
+    background:var(--p3-surface,#fff);
+    box-shadow:var(--p3-shadow,0 8px 24px rgba(23,28,24,.05));
+    overflow:hidden;
+  }
+
+  .coachStrengthSupportingSummary{
+    min-height:68px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+    padding:14px 16px;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    color:#171a18!important;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    touch-action:manipulation;
+  }
+
+  .coachStrengthSupportingSummary:focus-visible{
+    outline:3px solid color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 28%,transparent);
+    outline-offset:-3px;
+  }
+
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummary > .coachStrengthSupportingSummaryCopy{
+    all:unset!important;
+    min-width:0!important;
+    display:grid!important;
+    gap:3px!important;
+    color:#171a18!important;
+    opacity:1!important;
+    filter:none!important;
+    transform:none!important;
+  }
+
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummary > .coachStrengthSupportingSummaryCopy::before,
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummary > .coachStrengthSupportingSummaryCopy::after{
+    content:none!important;
+    display:none!important;
+  }
+
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummaryCopy > span,
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummaryCopy > strong,
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummaryCopy > small{
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    border-radius:0!important;
+    outline:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    opacity:1!important;
+    filter:none!important;
+    transform:none!important;
+  }
+
+  .coachStrengthSupportingSummaryCopy > span{
+    color:color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 78%,#263327)!important;
+    font:760 10px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+    letter-spacing:.065em;
+    text-transform:uppercase;
+  }
+
+  .coachStrengthSupportingSummaryCopy > strong{
+    color:#171a18!important;
+    font:760 15px/1.25 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+    letter-spacing:-.015em;
+  }
+
+  .coachStrengthSupportingSummaryCopy > small{
+    color:#5d665f!important;
+    font:540 12px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  }
+
+  .coachStrengthSupportingChevron{
+    flex:0 0 auto;
+    display:grid;
+    place-items:center;
+    width:30px;
+    height:30px;
+    border-radius:10px;
+    background:color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 8%,#fff);
+    color:color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 78%,#263327);
+    font:650 22px/1 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+    transform:rotate(0deg);
+    transition:transform 150ms ease;
+  }
+
+  .coachStrengthSupportingIntelligence[open] .coachStrengthSupportingChevron{transform:rotate(90deg)}
+
+  .coachStrengthSupportingBody{
+    padding:12px;
+    border-top:1px solid var(--p3-line,rgba(21,26,22,.10));
+  }
+
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-insight-grid"] article{
+    --text-1:#171a18;
+    --text-2:#5d665f;
+    --text-3:#747d77;
+    color:#171a18!important;
+    border-color:rgba(23,26,24,.10)!important;
+    background:linear-gradient(180deg,#ffffff 0%,#f5f6f3 100%)!important;
+    box-shadow:0 10px 24px rgba(23,28,24,.06)!important;
+  }
+
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-insight-grid"] article > div:first-child{color:#667269!important}
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-insight-grid"] article h2{color:#171a18!important}
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-insight-grid"] article p{color:#5d665f!important}
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-insight-grid"] article button{
+    color:#25321c!important;
+    border-color:rgba(82,115,30,.22)!important;
+    background:rgba(255,255,255,.82)!important;
+  }
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-insight-grid"] article [role="progressbar"]{
+    background:rgba(23,26,24,.10)!important;
+    box-shadow:inset 0 1px 2px rgba(23,26,24,.08)!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .coachStrengthSupportingChevron{transition:none}
+}
