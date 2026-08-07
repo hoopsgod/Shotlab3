@@ -108,7 +108,7 @@ test("Mission Control closes the exact player follow-up loop", async ({ page }) 
   }, seed);
 
   await page.goto("/");
-  await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
+  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
 
   const queue = page.getByTestId("coach-follow-up-queue");
   await expect(queue).toBeVisible({ timeout: 20_000 });

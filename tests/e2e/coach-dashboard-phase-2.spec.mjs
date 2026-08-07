@@ -140,7 +140,7 @@ async function enterSeededDemoCoach(page) {
     window.sessionStorage.setItem("coach-phase-two-seeded", "1");
   }, seedData);
   await page.goto("/");
-  await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
+  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -190,7 +190,7 @@ test("player intelligence drawer summarizes development and hands off to the ful
 
 test("event intelligence drawer identifies missing responses and returns to attendance management", async ({ page }) => {
   await enterSeededDemoCoach(page);
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Events", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
 
   await page.getByRole("button", { name: "Manage Attendance", exact: true }).click();
   const drawer = page.getByTestId("coach-event-intelligence-drawer");

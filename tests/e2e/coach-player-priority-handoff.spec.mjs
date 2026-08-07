@@ -1,8 +1,9 @@
 import { test, expect } from "@playwright/test";
 
 const TEAM_ID = "team-priority-handoff";
-const COACH_EMAIL = "coach.demo@shotlab.app";
-const PLAYER_EMAIL = "demo@shotlab.app";
+const COACH_EMAIL = "priority.coach@example.com";
+const PLAYER_EMAIL = "priority.player@example.com";
+const SECOND_PLAYER_EMAIL = "priority.second@example.com";
 const STALE_FOCUS = "Old local focus that must be replaced";
 const PUBLISHED_FOCUS = "Win the first three steps on every closeout";
 const PUBLISHED_DRILL = "Form Shooting";
@@ -39,13 +40,13 @@ const baseSeed = {
     },
   }],
   "sl:players": [
-    { id: "handoff-coach", email: COACH_EMAIL, name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
-    { id: "handoff-player", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Demo Player", role: "player", teamId: TEAM_ID },
-    { id: "handoff-player-two", playerId: "second@demo.shotlab.app", email: "second@demo.shotlab.app", name: "Second Player", role: "player", teamId: TEAM_ID },
+    { id: "handoff-coach", email: COACH_EMAIL, name: "Priority Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
+    { id: "handoff-player", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Priority Player", role: "player", teamId: TEAM_ID },
+    { id: "handoff-player-two", playerId: SECOND_PLAYER_EMAIL, email: SECOND_PLAYER_EMAIL, name: "Second Player", role: "player", teamId: TEAM_ID },
   ],
   "sl:player-profiles": [
-    { id: "handoff-profile", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Demo", lastName: "Player" },
-    { id: "handoff-profile-two", userId: "second@demo.shotlab.app", email: "second@demo.shotlab.app", teamId: TEAM_ID, firstName: "Second", lastName: "Player" },
+    { id: "handoff-profile", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Priority", lastName: "Player" },
+    { id: "handoff-profile-two", userId: SECOND_PLAYER_EMAIL, email: SECOND_PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Second", lastName: "Player" },
   ],
   "sl:drills": [
     { id: "form-shooting", name: "Form Shooting", desc: "Clean mechanics and balanced feet", max: 50, icon: "ft" },
@@ -63,15 +64,38 @@ const baseSeed = {
   "sl:season-archives": [],
 };
 
-async function seedPage(page, priorities) {
-  await page.addInitScript(({ seed, teamId, priorityValue }) => {
+const profileForIdentity = (email) => {
+  const row = baseSeed["sl:players"].find((player) => player.email === email);
+  return row ? {
+    email: row.email,
+    name: row.name,
+    role: row.role,
+    teamId: row.teamId,
+    hideFromLeaderboards: false,
+  } : null;
+};
+
+async function seedPage(page, priorities, sessionEmail) {
+  await page.addInitScript(({ seed, teamId, priorityValue, email }) => {
     window.localStorage.clear();
+    window.sessionStorage.clear();
     for (const [key, value] of Object.entries(seed)) window.localStorage.setItem(key, JSON.stringify(value));
     window.localStorage.setItem("sl:coach-priorities", JSON.stringify({ [teamId]: priorityValue }));
-  }, { seed: baseSeed, teamId: TEAM_ID, priorityValue: priorities });
+    window.localStorage.setItem("sl:session", JSON.stringify({ email }));
+  }, { seed: baseSeed, teamId: TEAM_ID, priorityValue: priorities, email: sessionEmail });
 }
 
 async function installRoutes(page, remoteState, telemetry) {
+  await page.route("**/v1/legacy-auth/restore", async (route) => {
+    const body = JSON.parse(route.request().postData() || "{}");
+    const profile = profileForIdentity(String(body?.email || "").trim().toLowerCase());
+    await route.fulfill({
+      status: profile ? 200 : 404,
+      contentType: "application/json",
+      body: JSON.stringify(profile ? { ok: true, profile } : { error: "profile_not_found" }),
+    });
+  });
+
   await page.route("**/v1/team-priorities", async (route) => {
     const request = route.request();
     const requester = String(request.headers()["x-user-id"] || "").toLowerCase();
@@ -132,16 +156,15 @@ async function expectNoHorizontalOverflow(page) {
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
-test("coach publish hydrates a separate player session and appears above the fold", async ({ browser }) => {
+test("registered coach publish hydrates a separate registered player session and appears above the fold", async ({ browser }) => {
   const remoteState = { current: { ...INITIAL_PRIORITIES } };
   const telemetry = [];
 
   const coachContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const coachPage = await coachContext.newPage();
   await installRoutes(coachPage, remoteState, telemetry);
-  await seedPage(coachPage, INITIAL_PRIORITIES);
+  await seedPage(coachPage, INITIAL_PRIORITIES, COACH_EMAIL);
   await coachPage.goto("/");
-  await coachPage.getByRole("button", { name: "Demo Coach", exact: true }).click();
   await expect(coachPage.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
 
   await coachPage.getByRole("button", { name: "Open navigation", exact: true }).click();
@@ -168,9 +191,8 @@ test("coach publish hydrates a separate player session and appears above the fol
   const playerPage = await playerContext.newPage();
   const stalePriorities = { ...INITIAL_PRIORITIES, todayFocusText: STALE_FOCUS };
   await installRoutes(playerPage, remoteState, telemetry);
-  await seedPage(playerPage, stalePriorities);
+  await seedPage(playerPage, stalePriorities, PLAYER_EMAIL);
   await playerPage.goto("/");
-  await playerPage.getByRole("button", { name: "Demo Player", exact: true }).click();
 
   const commandCenter = playerPage.getByTestId("player-daily-command-center");
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
@@ -187,6 +209,7 @@ test("coach publish hydrates a separate player session and appears above the fol
   }, { teamId: TEAM_ID })).toBe(PUBLISHED_FOCUS);
 
   expect(telemetry.some((entry) => entry.method === "PUBLISHED" && entry.body?.team_id === TEAM_ID)).toBe(true);
+  expect(telemetry.some((entry) => entry.method === "POST" && entry.requester === COACH_EMAIL)).toBe(true);
   expect(telemetry.some((entry) => entry.method === "GET" && entry.requester === PLAYER_EMAIL)).toBe(true);
   await expectNoHorizontalOverflow(playerPage);
 

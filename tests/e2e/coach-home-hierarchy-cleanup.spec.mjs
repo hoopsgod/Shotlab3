@@ -6,7 +6,7 @@ test("Mission Control removes duplicate setup while preserving operational secti
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 
   await page.goto("/");
-  await page.getByRole("button", { name: "Demo Coach", exact: true }).click();
+  await page.getByRole("button", { name: "Coach demo", exact: true }).click();
 
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("coach-setup-checklist")).toBeHidden();

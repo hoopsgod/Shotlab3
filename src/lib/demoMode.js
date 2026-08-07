@@ -32,8 +32,8 @@ function inferPendingDemoEmail() {
     || active?.textContent
     || "",
   ).trim().toLowerCase();
-  if (activeLabel.includes("demo coach")) return "coach.demo@shotlab.app";
-  if (activeLabel.includes("demo player")) return "demo@shotlab.app";
+  if (/\b(?:demo\s+coach|coach\s+demo)\b/.test(activeLabel)) return "coach.demo@shotlab.app";
+  if (/\b(?:demo\s+player|player\s+demo)\b/.test(activeLabel)) return "demo@shotlab.app";
   return "";
 }
 
