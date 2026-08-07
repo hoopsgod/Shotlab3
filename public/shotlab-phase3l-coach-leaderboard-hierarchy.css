@@ -1,0 +1,367 @@
+/* Phase 3L — Coach Leaderboard Competitive Hierarchy */
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulse {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(260px, .9fr);
+  gap: 12px;
+  margin: 0 0 12px;
+  padding: 18px;
+  border: 1px solid rgba(23, 26, 24, .10);
+  border-radius: 22px;
+  background:
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--team-brand-primary, #7f9e1e) 8%, transparent), transparent 42%),
+    rgba(255, 255, 255, .95);
+  box-shadow: 0 10px 30px rgba(23, 28, 24, .055);
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy > span,
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics span {
+  color: var(--semantic-positive, #52731e);
+  font: 760 10px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #171a18;
+  font: 760 clamp(22px, 3vw, 29px)/1.06 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.03em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy > small,
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics small {
+  color: #606862;
+  font: 550 12px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics > div {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 4px;
+  padding: 12px 13px;
+  border: 1px solid rgba(23, 26, 24, .08);
+  border-radius: 16px;
+  background: rgba(247, 248, 244, .88);
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #171a18;
+  font: 720 16px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.018em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] [data-testid="coach-leaderboard-operational-results"] {
+  gap: 8px;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRow {
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border: 1px solid rgba(23, 26, 24, .09);
+  border-radius: 17px;
+  color: #171a18;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 5px 18px rgba(23, 28, 24, .04);
+  text-align: left;
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRow:hover,
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRow:focus-visible {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--team-brand-primary, #7f9e1e) 34%, rgba(23, 26, 24, .08));
+  box-shadow: 0 9px 24px rgba(23, 28, 24, .07);
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRow:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--team-brand-primary, #7f9e1e) 24%, transparent);
+  outline-offset: 2px;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRow[data-rank="1"] {
+  border-color: color-mix(in srgb, var(--team-brand-primary, #7f9e1e) 30%, rgba(23, 26, 24, .08));
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--team-brand-primary, #7f9e1e) 6%, white), rgba(255, 255, 255, .96) 44%);
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRank {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: #f0f2ec;
+  color: #3e473f;
+  font: 760 14px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.02em;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRow[data-rank="1"] .coachLeaderboardRank {
+  background: color-mix(in srgb, var(--team-brand-primary, #7f9e1e) 13%, white);
+  color: color-mix(in srgb, var(--team-brand-primary, #52731e) 84%, #171a18);
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRowCopy {
+  min-width: 0;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRowCopy > strong {
+  display: block;
+  overflow: hidden;
+  color: #171a18;
+  font: 720 15px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.016em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRowCopy > span {
+  display: block;
+  margin-top: 3px;
+  overflow: hidden;
+  color: #656d67;
+  font: 540 11px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardWeek {
+  min-width: 60px;
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  justify-items: end;
+  gap: 2px 7px;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardWeek > small {
+  grid-column: 1 / -1;
+  color: #767e78;
+  font: 700 9px/1.1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardWeek > strong {
+  color: #171a18;
+  font: 760 20px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.025em;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardWeek > em {
+  font: 740 10px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  font-style: normal;
+}
+
+/* Player Intelligence is a dark-native surface even when launched from a light Coach route. */
+html body [data-testid="coach-player-intelligence-drawer"] [role="dialog"] {
+  --text-1: #f4f7f2 !important;
+  --text-2: #aab4ad !important;
+  --text-3: #7f8a84 !important;
+  color: #f4f7f2 !important;
+}
+
+html body [data-testid="coach-player-intelligence-drawer"] [class*="drawerHeader"] h2,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="drawerMetric"] strong,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="compactMetric"] strong,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionTitle"] {
+  color: #f4f7f2 !important;
+  -webkit-text-fill-color: #f4f7f2 !important;
+}
+
+html body [data-testid="coach-player-intelligence-drawer"] [class*="drawerHeader"] p,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="drawerMetric"] span,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="compactMetric"] span,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionSummary"],
+html body [data-testid="coach-player-intelligence-drawer"] [class*="progressMeta"] {
+  color: #aab4ad !important;
+  -webkit-text-fill-color: #aab4ad !important;
+}
+
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionCompact"] {
+  border-color: rgba(255, 255, 255, .075) !important;
+  background: #101315 !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .025), 0 16px 34px rgba(0, 0, 0, .18) !important;
+}
+
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionCompact"] [class*="sectionHeader"],
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionCompact"] [class*="sectionBody"] {
+  background: transparent !important;
+}
+
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionEyebrow"],
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionTitle"],
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionSummary"] {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionEyebrow"]::before,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionEyebrow"]::after,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionTitle"]::before,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionTitle"]::after,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionSummary"]::before,
+html body [data-testid="coach-player-intelligence-drawer"] [class*="sectionSummary"]::after {
+  content: none !important;
+  display: none !important;
+}
+
+html body [data-testid="coach-player-intelligence-drawer"] [class*="compactMetric"] {
+  border-color: rgba(255, 255, 255, .07) !important;
+  background: #0c1012 !important;
+}
+
+@media (max-width: 760px) {
+  html body #root [data-testid="coach-page-dashboard-leaderboards"] {
+    min-height: 0 !important;
+    gap: 8px !important;
+    padding: 8px 14px 12px !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards-decision-brief"],
+  #root [data-testid="coach-page-dashboard-leaderboards-evidence"] {
+    display: none !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro {
+    grid-template-columns: 40px minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 13px 14px !important;
+    border-radius: 17px !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__icon {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 12px !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__eyebrow {
+    margin-bottom: 4px !important;
+    font-size: 9px !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__title {
+    font-size: 30px !important;
+    line-height: 1 !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__summary,
+  #root [data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__status {
+    display: none !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__actions {
+    display: none !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards-toolbar"] {
+    gap: 6px !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards-metric-strip"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    margin-bottom: 0 !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards-metric-strip"] > button {
+    min-height: 72px !important;
+    gap: 3px !important;
+    padding: 9px 10px !important;
+    border-radius: 14px !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards-metric-strip"] > button > span:nth-child(1) {
+    font-size: 9px !important;
+    line-height: 1.05 !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards-metric-strip"] > button > span:nth-child(2) {
+    font-size: 24px !important;
+    line-height: .95 !important;
+  }
+
+  #root [data-testid="coach-page-dashboard-leaderboards-metric-strip"] > button > span:nth-child(3) {
+    font-size: 10px !important;
+    line-height: 1.15 !important;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] {
+    margin-top: 0 !important;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulse {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 13px 14px;
+    border-radius: 18px;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseCopy > strong {
+    font-size: 22px;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics > div {
+    padding: 10px 11px;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRow {
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    min-height: 68px;
+    padding: 9px 10px;
+    border-radius: 16px;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRank {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardWeek {
+    min-width: 52px;
+  }
+}
+
+@media (max-width: 390px) {
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardPulseMetrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="coach-leaderboard-operational-panel"] .coachLeaderboardRow {
+    transition: none;
+  }
+}
