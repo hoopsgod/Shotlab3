@@ -5,6 +5,7 @@
   margin: 0;
   border: 0;
   background: transparent;
+  order: 4 !important;
 }
 
 .coachEventsSupportingSummary {
