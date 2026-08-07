@@ -1,0 +1,29 @@
+/* Phase 3L — Player Leaderboards Canvas & Scroll Containment */
+
+@media (max-width:820px){
+  /* Leaderboards already reserves the fixed mobile dock inside player-scroll-container.
+     Remove the second route-level reserve that was leaving ~370 CSS px of empty canvas. */
+  .performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .performance-workspace{
+    min-height:0!important;
+    padding-bottom:0!important;
+  }
+
+  .performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .player-scroll-container{
+    min-height:0!important;
+    padding-bottom:calc(var(--bottom-nav-content-padding,88px) + 8px)!important;
+    scroll-padding-bottom:calc(var(--bottom-nav-content-padding,88px) + 8px)!important;
+  }
+
+  /* The route content itself should end with the leaderboard module rather than reserving
+     another viewport-sized flex area after it. */
+  .performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .player-scroll-container > .screen-fade-in{
+    min-height:0!important;
+    padding-bottom:0!important;
+    margin-bottom:0!important;
+  }
+
+  .performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] [data-testid="premium-leaderboards-hub"]{
+    margin-bottom:0!important;
+    padding-bottom:0!important;
+  }
+}
