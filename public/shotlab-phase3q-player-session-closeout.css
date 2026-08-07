@@ -1,5 +1,5 @@
 /* Phase 3Q — stable late authority for the player session closeout. */
-[data-testid="player-training-finish-session"] {
+body #root [data-testid="player-training-finish-session"] {
   width: 100% !important;
   min-height: 42px !important;
   margin-top: 9px !important;
@@ -14,7 +14,7 @@
   text-underline-offset: 4px !important;
 }
 
-[data-testid="player-session-closeout"] {
+body #root [data-testid="player-session-closeout"] {
   background-color: #0f120f !important;
   background-image:
     radial-gradient(circle at 86% 8%, rgba(200,255,26,.14), transparent 34%),
@@ -23,51 +23,51 @@
   border-color: rgba(255,255,255,.10) !important;
 }
 
-[data-testid="player-session-closeout-hero"],
-[data-testid="player-session-closeout-hero"] > div,
-[data-testid="player-session-closeout-metrics"],
-[data-testid="player-session-closeout-metrics"] > div,
-[data-testid="player-session-best-moment"],
-[data-testid="player-session-next-commitment"] {
+body #root [data-testid="player-session-closeout-hero"],
+body #root [data-testid="player-session-closeout-hero"] > div,
+body #root [data-testid="player-session-closeout-metrics"],
+body #root [data-testid="player-session-closeout-metrics"] > div,
+body #root [data-testid="player-session-best-moment"],
+body #root [data-testid="player-session-next-commitment"] {
   background-image: none !important;
   box-shadow: none !important;
 }
 
-[data-testid="player-session-closeout-hero"],
-[data-testid="player-session-closeout-hero"] > div:not(:first-child) {
+body #root [data-testid="player-session-closeout-hero"],
+body #root [data-testid="player-session-closeout-hero"] > div:not(:first-child) {
   background-color: transparent !important;
   border: 0 !important;
 }
 
-[data-testid="player-session-closeout"] h2,
-[data-testid="player-session-closeout"] [data-testid="player-session-best-moment"] strong,
-[data-testid="player-session-closeout"] [data-testid="player-session-next-commitment"] strong {
+body #root [data-testid="player-session-closeout"] h2,
+body #root [data-testid="player-session-closeout"] [data-testid="player-session-best-moment"] strong,
+body #root [data-testid="player-session-closeout"] [data-testid="player-session-next-commitment"] strong {
   color: #f8faf5 !important;
   opacity: 1 !important;
 }
 
-[data-testid="player-session-closeout-metrics"] > div,
-[data-testid="player-session-best-moment"],
-[data-testid="player-session-next-commitment"] {
+body #root [data-testid="player-session-closeout-metrics"] > div,
+body #root [data-testid="player-session-best-moment"],
+body #root [data-testid="player-session-next-commitment"] {
   background-color: rgba(255,255,255,.05) !important;
   border-color: rgba(255,255,255,.075) !important;
 }
 
-[data-testid="player-session-done"] {
+body #root [data-testid="player-session-done"] {
   background: #c8ff1a !important;
   color: #101310 !important;
   border-color: transparent !important;
   box-shadow: none !important;
 }
 
-[data-testid="player-session-view-progress"],
-[data-testid="player-session-resume"] {
+body #root [data-testid="player-session-view-progress"],
+body #root [data-testid="player-session-resume"] {
   background: rgba(255,255,255,.045) !important;
   color: rgba(248,250,245,.78) !important;
   border-color: rgba(255,255,255,.10) !important;
   box-shadow: none !important;
 }
 
-.player-training-completion-wrap:has([data-testid="player-session-closeout"]) {
+body #root .player-training-completion-wrap:has([data-testid="player-session-closeout"]) {
   margin-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
 }
