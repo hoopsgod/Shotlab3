@@ -12,29 +12,63 @@ body #root [data-testid="player-progress-story-hero"] {
   color: #f8faf5 !important;
 }
 
+body #root [data-testid="player-progress-story-topline"],
+body #root [data-testid="player-progress-story-hero-grid"],
+body #root [data-testid="player-progress-story-copy"],
+body #root [data-testid="player-progress-metrics"] {
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
 body #root [data-testid="player-progress-story-hero"] h2 {
   color: #f8faf5 !important;
   opacity: 1 !important;
 }
 
-body #root [data-testid="player-progress-story-hero"] > div,
-body #root [data-testid="player-progress-trend-chart"],
-body #root [data-testid="player-progress-metrics"],
-body #root [data-testid="player-progress-metrics"] > div {
-  background-image: none !important;
-  box-shadow: none !important;
+body #root [data-testid="player-progress-story-copy"] p {
+  color: rgba(248,250,245,.62) !important;
+}
+
+body #root [data-testid="player-progress-story-topline"] > span:first-child {
+  color: rgba(248,250,245,.50) !important;
 }
 
 body #root [data-testid="player-progress-trend-chart"],
 body #root [data-testid="player-progress-metrics"] > div {
   background-color: rgba(255,255,255,.04) !important;
+  background-image: none !important;
   border-color: rgba(255,255,255,.08) !important;
+  box-shadow: none !important;
+}
+
+body #root [data-testid="player-progress-trend-summary"] {
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body #root [data-testid="player-progress-trend-summary"] > span {
+  color: rgba(248,250,245,.42) !important;
+}
+
+body #root [data-testid="player-progress-trend-summary"] > strong {
+  color: #f8faf5 !important;
+  opacity: 1 !important;
+}
+
+body #root [data-testid="player-progress-trend-summary"] > small {
+  color: rgba(248,250,245,.52) !important;
 }
 
 body #root [data-testid="player-progress-trend-badge"] {
   background-color: rgba(200,255,26,.08) !important;
+  background-image: none !important;
   color: #c8ff1a !important;
   border-color: rgba(200,255,26,.24) !important;
+  box-shadow: none !important;
 }
 
 body #root [data-testid="player-progress-strongest-signal"],
