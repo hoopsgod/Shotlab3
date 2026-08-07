@@ -76,5 +76,5 @@ test('rendered iPhone evidence verifies default and expanded Coach Drills states
 
 test('App Store presentation workflow carries the Phase 3G contract and evidence package', () => {
   assert.match(workflow, /tests\/phase-3g-coach-drills-hierarchy\.test\.mjs/);
-  assert.match(workflow, /shotlab-phase-3g-coach-drills-hierarchy-evidence/);
+  assert.match(workflow, /shotlab-phase-(?:3g-coach-drills-hierarchy|3h-coach-players-hierarchy)-evidence/);
 });
