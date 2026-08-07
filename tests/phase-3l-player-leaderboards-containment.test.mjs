@@ -34,14 +34,15 @@ test('Leaderboards removes duplicate outer reserve while retaining one safe dock
   ]) requireMarker(css, marker);
 });
 
-test('rendered Phase 3L acceptance protects Logout, ranking controls, overflow, and hard tail budget', () => {
+test('rendered Phase 3L acceptance protects Logout, ranking controls, participation controls, overflow, and hard tail budget', () => {
   for (const marker of [
     'premium-leaderboards-hub',
     'Current / Offseason',
     'All-Time',
     'At-Home Shots',
     'Program Drills',
-    'PARTICIPATION CATEGORIES',
+    'Events Attended',
+    'Strength & Conditioning',
     'Logout',
     'PHASE3L_GEOMETRY',
     'layout.tail',
