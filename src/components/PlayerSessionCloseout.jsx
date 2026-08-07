@@ -24,6 +24,7 @@ export default function PlayerSessionCloseout({
   completedCount = 0,
   plannedTotal = 0,
   nextCommitment = null,
+  currentStreak = null,
   onDone,
   onViewProgress,
   onResume,
@@ -32,7 +33,8 @@ export default function PlayerSessionCloseout({
   const total = Math.max(completed, asNumber(plannedTotal));
   const planComplete = total > 0 && completed >= total;
   const completionPct = total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 100;
-  const momentum = Math.max(1, asNumber(data?.streak) + (data?.src === "program" ? 0 : 1));
+  const liveStreak = asNumber(currentStreak, null);
+  const momentum = Math.max(1, liveStreak !== null ? liveStreak : asNumber(data?.streak) + (data?.src === "program" ? 0 : 1));
   const score = Math.max(0, asNumber(data?.score));
   const max = asNumber(data?.max, null);
   const isPB = Boolean(data?.isPB);
