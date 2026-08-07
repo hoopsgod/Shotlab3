@@ -18,6 +18,7 @@ if (source.includes('data-testid="coach-player-account-activation"')) {
     'data-testid="coach-player-season-tools"',
     'data-testid="coach-player-roster-management"',
     'coach-player-management-disclosure',
+    'setSelectedSeasonArchiveId(archiveId);setSelP(null);setTimeout',
   ]) {
     if (!source.includes(marker)) fail(`transformed Coach Players source is missing ${marker}`);
   }
@@ -86,6 +87,13 @@ source = replaceOne(
 </details>
     {/* Account management — required by App Store §5.1.1(v) */}`,
   'roster management to account management boundary',
+);
+
+source = replaceOne(
+  source,
+  'viewerRole="coach" onOpenArchive={(archiveId)=>{setSelectedSeasonArchiveId(archiveId);setSelP(null);}}',
+  'viewerRole="coach" onOpenArchive={(archiveId)=>{setSelectedSeasonArchiveId(archiveId);setSelP(null);setTimeout(()=>{const disclosure=document.getElementById("coach-player-season-tools");if(disclosure)disclosure.open=true;setTimeout(()=>document.getElementById("coach-season-tools")?.scrollIntoView({behavior:"smooth",block:"start"}),0);},0);}}',
+  'career archive to Season Tools transition',
 );
 
 for (const preserved of [
