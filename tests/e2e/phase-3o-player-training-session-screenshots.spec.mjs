@@ -73,21 +73,42 @@ test("Player Train opens a focused drill session with live score feedback", asyn
   expect(visualState.identityImage).toBe("none");
   expect(visualState.titleColor).toBe("rgb(248, 250, 245)");
 
+  const scoreZone = page.getByTestId("player-training-score-zone");
   const scoreInput = session.locator('input[type="number"]').first();
+  const logScore = page.getByTestId("player-training-log-score");
+  await expect(scoreZone).toBeVisible();
+  await expect(scoreZone.getByText("LOG YOUR RESULT", { exact: true })).toBeVisible();
   await expect(scoreInput).toBeVisible();
   await scoreInput.fill("20");
   await expect(header.getByText("20", { exact: true })).toBeVisible();
+  await expect(logScore).toBeVisible();
+  await expect(logScore).toBeEnabled();
+
   const inputStyle = await scoreInput.evaluate((node) => ({
     backgroundColor: getComputedStyle(node).backgroundColor,
     color: getComputedStyle(node).color,
   }));
   expect(inputStyle.backgroundColor).toBe("rgb(17, 20, 17)");
   expect(inputStyle.color).toBe("rgb(200, 255, 26)");
+  const zoneStyle = await scoreZone.evaluate((node) => ({
+    backgroundColor: getComputedStyle(node).backgroundColor,
+    borderRadius: getComputedStyle(node).borderRadius,
+  }));
+  expect(zoneStyle.backgroundColor).toBe("rgba(255, 255, 255, 0.96)");
+  expect(parseFloat(zoneStyle.borderRadius)).toBeGreaterThanOrEqual(20);
 
   const liveProgress = page.getByTestId("player-training-live-progress");
   if (await liveProgress.count()) await expect(liveProgress).toBeVisible();
 
+  await logScore.scrollIntoViewIfNeeded();
+  const logBox = await logScore.boundingBox();
+  const dockBox = await page.getByTestId("mobile-navigation-dock").boundingBox();
+  expect(logBox).not.toBeNull();
+  expect(dockBox).not.toBeNull();
+  expect(logBox.y + logBox.height).toBeLessThan(dockBox.y - 6);
+
   await noOverflow(page);
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
   fs.mkdirSync(outputDir, { recursive: true });
   await page.screenshot({ path: path.join(outputDir, "04p-player-training-session.png"), fullPage: true, animations: "disabled" });
 });
