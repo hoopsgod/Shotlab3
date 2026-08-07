@@ -6,6 +6,7 @@ const secondaryCss = readFileSync('src/components/SecondaryPageSystem.css', 'utf
 const coachCss = readFileSync('src/styles/CoachInteractiveDashboard.css', 'utf8');
 const navigationCss = readFileSync('src/components/MobileNavigationArchitecture.css', 'utf8');
 const navigationSource = readFileSync('src/components/MobileNavigation.jsx', 'utf8');
+const expertPolishSource = readFileSync('src/lib/expertVisualPolish.js', 'utf8');
 
 test('Phase 3B gives secondary actions tactile pressed, focus, and reduced-motion states', () => {
   assert.match(secondaryCss, /secondaryPageAction:active:not\(:disabled\)/);
@@ -35,4 +36,9 @@ test('More sheet handoff visibly subordinates the dock while preserving accessib
   assert.match(navigationCss, /translateX\(-50%\) translateY\(5px\) scale\(\.985\)/);
   assert.match(navigationCss, /mobile-navigation-groups.*button:active/s);
   assert.match(navigationCss, /prefers-reduced-motion: reduce/);
+});
+
+test('Expert visual polish never converts the full Players decision into a duplicate teaser action', () => {
+  assert.match(expertPolishSource, /element\.closest\?\.\('\[data-testid="coach-players-interactive-dashboard"\]'\)/);
+  assert.doesNotMatch(expertPolishSource, /fullPlayersSurface\?\.contains\(element\)/);
 });
