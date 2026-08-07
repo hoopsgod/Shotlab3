@@ -1,0 +1,77 @@
+name: Phase 3O Player Training Session
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-3n-player-commitments
+    paths:
+      - "src/App.jsx"
+      - "src/components/PlayerTrainingSessionHeader.jsx"
+      - "src/components/PlayerTrainingSessionHeader.module.css"
+      - "scripts/apply-phase3o-player-training-session.mjs"
+      - "tests/phase-3o-player-training-session.test.mjs"
+      - "tests/e2e/phase-3o-player-training-session-screenshots.spec.mjs"
+      - "package.json"
+      - ".github/workflows/phase-3o-player-training-session.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: phase-3o-player-training-session-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-player-training-session:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Phase 3O contracts
+        run: node --test tests/phase-3o-player-training-session.test.mjs tests/phase-3n-player-commitments.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Capture and verify iPhone training session
+        run: npx playwright test tests/e2e/phase-3o-player-training-session-screenshots.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
+
+      - name: Upload Phase 3O evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-3o-player-training-session-evidence
+          path: artifacts/design-audit/iphone/04p-player-training-session.png
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Phase 3O failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-3o-player-training-session-failure
+          path: |
+            test-results/
+            artifacts/design-audit/iphone/
+          if-no-files-found: ignore
+          retention-days: 7
