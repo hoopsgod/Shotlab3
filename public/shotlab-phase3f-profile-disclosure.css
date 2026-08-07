@@ -1,5 +1,6 @@
 /* Phase 3F — Player Profile progressive disclosure.
-   Keep current progress and one decision readout visible; make deep analytics and drill history intentional. */
+   Keep current progress and one decision readout visible; make deep analytics and drill history intentional.
+   Final evidence lock: rendered default and all three expanded states verified at iPhone width. */
 :root{
   --p3f-surface:#ffffff;
   --p3f-soft:#f8f8f4;
