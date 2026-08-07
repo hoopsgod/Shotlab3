@@ -13,6 +13,8 @@ test("Phase 3N runs after accepted Phase 3M with a guarded idempotent route tran
   assert.match(pkg.scripts.dev, /apply-phase3m-player-team-store-retail\.mjs[\s\S]*apply-phase3n-player-commitments\.mjs/);
   assert.match(pkg.scripts["prepare:route-enhancers"], /apply-phase3m-player-team-store-retail\.mjs[\s\S]*apply-phase3n-player-commitments\.mjs/);
   assert.match(enhancer, /expected exactly one anchor/);
+  assert.match(enhancer, /const marker = 'PlayerCommitmentCenter mode="events"'/);
+  assert.match(enhancer, /source\.includes\(marker\)/);
   assert.match(enhancer, /Player Commitments hierarchy already applied/);
 });
 
