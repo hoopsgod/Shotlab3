@@ -13,9 +13,8 @@
   border-color: rgba(255,255,255,.10) !important;
 }
 
-[data-testid="player-training-completion"] h2,
-[data-testid="player-training-completion"] strong {
-  color: inherit;
+[data-testid="player-training-completion"] h2 {
+  color: #f8faf5 !important;
 }
 
 [data-testid="player-training-result"] {
