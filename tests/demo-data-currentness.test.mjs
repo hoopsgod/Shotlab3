@@ -32,5 +32,5 @@ test("entering a demo hydrates the rolling bundle before routing", () => {
 test("App Store evidence requires a populated Coach schedule", () => {
   assert.match(screenshotSpec, /Calendar is open/);
   assert.match(expertReview, /tests\/e2e\/app-store-screenshots\.spec\.mjs/);
-  assert.match(expertReview, /getByText\(\\"Team Practice\\"/);
+  assert.match(expertReview, /getByText\("Team Practice"/);
 });
