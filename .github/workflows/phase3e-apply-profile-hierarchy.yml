@@ -1,4 +1,5 @@
 name: Phase 3E Apply Profile Hierarchy
+# One-shot guarded transform: remove this workflow after the hierarchy commit lands.
 
 on:
   push:
