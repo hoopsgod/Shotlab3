@@ -1,0 +1,47 @@
+/* Phase 3P — stable late authority for player training completion. */
+.player-training-completion-wrap {
+  width: min(100%, 680px) !important;
+  margin: 0 auto calc(118px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+[data-testid="player-training-completion"] {
+  background-color: #111411 !important;
+  background-image:
+    radial-gradient(circle at 88% 10%, rgba(200,255,26,.13), transparent 34%),
+    linear-gradient(145deg, #111411 0%, #171b16 58%, #101310 100%) !important;
+  color: #f8faf5 !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+
+[data-testid="player-training-completion"] h2,
+[data-testid="player-training-completion"] strong {
+  color: inherit;
+}
+
+[data-testid="player-training-result"] {
+  color: #c8ff1a !important;
+}
+
+[data-testid="player-training-next-action"] {
+  background: #c8ff1a !important;
+  color: #101310 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+[data-testid="player-training-share-toggle"],
+[data-testid="player-training-challenge-action"] {
+  background: rgba(255,255,255,.045) !important;
+  color: rgba(248,250,245,.78) !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+
+[data-testid="player-training-share-card"] {
+  color: #f8faf5 !important;
+}
+
+@media (max-width: 767px) {
+  .player-training-completion-wrap {
+    margin-bottom: calc(104px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
