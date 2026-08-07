@@ -47,3 +47,54 @@ html body.mission-control-active #root .performance-workspace--coach .mcShellV3 
 html body.mission-control-active #root .performance-workspace--coach .mcShellV3 .mcAttentionRow strong {
   color: #111a21 !important;
 }
+
+/* Player command surfaces remain deep-ink even when light legacy card rules load later. */
+html body #root [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] {
+  --text-1: #f5f8f9 !important;
+  --text-2: #c3cdd2 !important;
+  --text-3: #9ba7ae !important;
+  background-color: #101315 !important;
+  background-image:
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 12%, transparent), transparent 34%),
+    linear-gradient(155deg, #191d20 0%, #090b0c 100%) !important;
+  color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: #141719 !important;
+  background-image: linear-gradient(145deg, rgba(255, 255, 255, .045), rgba(14, 16, 17, .88)) !important;
+  color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] h1 {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] p {
+  color: #c3cdd2 !important;
+  -webkit-text-fill-color: #c3cdd2 !important;
+}
+
+html body #root [data-testid="player-command-evidence"] > div {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: rgba(255, 255, 255, .045) !important;
+  background-image: none !important;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .025) !important;
+}
+
+html body #root [data-testid="player-command-evidence"] [class*="progressValue"] {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-command-evidence"] [class*="sectionLabel"],
+html body #root [data-testid="player-command-evidence"] [class*="meta"] {
+  color: #9ba7ae !important;
+  -webkit-text-fill-color: #9ba7ae !important;
+}
+
+html body #root [data-testid="player-command-evidence"] [class*="progressTrack"] {
+  background-color: rgba(255, 255, 255, .08) !important;
+}
