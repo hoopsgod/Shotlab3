@@ -7,6 +7,15 @@ const outputDir = path.resolve(process.cwd(), "artifacts/design-audit/iphone");
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
   await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
+  await page.route("**/v1/scores", async (route) => {
+    if (route.request().method() !== "POST") return route.continue();
+    const payload = route.request().postDataJSON();
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ ok: true, storage_mode: "e2e", scores: Array.isArray(payload?.scores) ? payload.scores : [] }),
+    });
+  });
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
@@ -57,6 +66,7 @@ test("logged training result becomes a momentum-first completion flow", async ({
 
   const completion = page.getByTestId("player-training-completion");
   await expect(completion).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByText(/Could not save score to team dashboard/i)).toHaveCount(0);
   await expect(completion.getByText("RESULT LOGGED", { exact: true })).toBeVisible();
   await expect(completion.getByText(/DRILL COMPLETE|PERSONAL BEST/, { exact: true })).toBeVisible();
   await expect(completion.getByTestId("player-training-result").getByText("20", { exact: true })).toBeVisible();
