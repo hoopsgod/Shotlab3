@@ -55,11 +55,13 @@
   position: relative;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, .08) !important;
   border-radius: 28px;
   padding: 20px;
-  background:
-    radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--accent, #c8ff1a) 16%, transparent), transparent 38%),
-    linear-gradient(152deg, #20231f 0%, #121512 58%, #0b0d0b 100%);
+  background-color: #111411 !important;
+  background-image:
+    radial-gradient(circle at 100% 0%, rgba(200, 255, 26, .16), transparent 38%),
+    linear-gradient(152deg, #20231f 0%, #121512 58%, #0b0d0b 100%) !important;
   box-shadow: 0 20px 44px rgba(22, 27, 22, .14);
   color: #f8faf5;
 }
