@@ -71,6 +71,7 @@ test("Player visual system remains integrated across core and secondary pages", 
   await expect(performanceDisclosure).toHaveAttribute("open", "");
   const analytics = page.getByTestId("player-profile-analytics");
   await expect(analytics).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("player-analytics-heading")).toBeHidden();
   const analyticsSections = page.getByTestId("player-analytics-sections");
   const progressTab = analyticsSections.getByRole("button", { name: "Progress", exact: true });
   const skillsTab = analyticsSections.getByRole("button", { name: "Skills", exact: true });
@@ -84,8 +85,19 @@ test("Player visual system remains integrated across core and secondary pages", 
 
   await drillDisclosure.locator(":scope > summary").click();
   await expect(drillDisclosure).toHaveAttribute("open", "");
-  await expect(page.getByText("DRILL BREAKDOWN", { exact: true })).toBeVisible();
+  const drillIndex = page.getByTestId("player-profile-drill-index");
+  const fullDrillDetails = page.getByTestId("player-profile-full-drill-details");
+  await expect(drillIndex).toBeVisible();
+  await expect(drillIndex.locator('[data-drill-index-row]')).toHaveCount(14);
+  await expect(fullDrillDetails).toBeVisible();
+  await expect(fullDrillDetails).not.toHaveAttribute("open", "");
+  await expect(page.getByText("DRILL BREAKDOWN", { exact: true })).toBeHidden();
   await capture(page, "03d-player-profile-drill-development");
+
+  await fullDrillDetails.locator(":scope > summary").click();
+  await expect(fullDrillDetails).toHaveAttribute("open", "");
+  await expect(page.getByText("DRILL BREAKDOWN", { exact: true })).toBeVisible();
+  await capture(page, "03e-player-profile-full-drill-details");
   await drillDisclosure.locator(":scope > summary").click();
 
   await careerDisclosure.locator(":scope > summary").click();
