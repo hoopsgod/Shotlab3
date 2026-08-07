@@ -108,18 +108,19 @@ test("Coach visual system remains integrated across command and management pages
   const accountActivation = page.getByTestId("coach-player-account-activation");
   const seasonTools = page.getByTestId("coach-player-season-tools");
   const rosterManagement = page.getByTestId("coach-player-roster-management");
+  const inviteForm = page.getByTestId("coach-player-invite-form");
   for (const disclosure of [accountActivation, seasonTools, rosterManagement]) {
     await expect(disclosure).toBeVisible({ timeout: 20_000 });
     await expect(disclosure).not.toHaveAttribute("open", "");
   }
-  await expect(page.getByText("ADD PLAYER & SEND LOGIN INVITE", { exact: true })).toBeHidden();
+  await expect(inviteForm).toBeHidden();
   await expect(page.getByText("SEASON ARCHIVE", { exact: true })).toBeHidden();
   await expect(page.getByText("PLAYER ROSTER", { exact: true })).toBeHidden();
   await capture(page, "06-coach-players");
 
   await page.getByTestId("coach-players-command-bar").getByRole("button", { name: "Add Player", exact: true }).click();
   await expect(accountActivation).toHaveAttribute("open", "");
-  await expect(page.getByText("ADD PLAYER & SEND LOGIN INVITE", { exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(inviteForm).toBeVisible({ timeout: 20_000 });
   await capture(page, "06b-coach-player-add");
   await accountActivation.locator(":scope > summary").click();
   await expect(accountActivation).not.toHaveAttribute("open", "");
