@@ -56,31 +56,36 @@
     outline-offset: -3px;
   }
 
-  .coachStrengthSupportingSummaryCopy {
-    min-width: 0;
-    display: grid;
-    gap: 3px;
-    margin: 0 !important;
-    padding: 0 !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummary > .coachStrengthSupportingSummaryCopy {
+    all: unset !important;
+    min-width: 0 !important;
+    display: grid !important;
+    gap: 3px !important;
+    color: #171a18 !important;
     opacity: 1 !important;
     filter: none !important;
+    transform: none !important;
   }
 
-  .coachStrengthSupportingSummaryCopy > span,
-  .coachStrengthSupportingSummaryCopy > strong,
-  .coachStrengthSupportingSummaryCopy > small {
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummary > .coachStrengthSupportingSummaryCopy::before,
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummary > .coachStrengthSupportingSummaryCopy::after {
+    content: none !important;
+    display: none !important;
+  }
+
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummaryCopy > span,
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummaryCopy > strong,
+  html body #root .pageShell[data-accent="sc"] [data-testid="coach-strength-operational-panel"] .coachStrengthSupportingSummaryCopy > small {
     margin: 0 !important;
     padding: 0 !important;
     border: 0 !important;
     border-radius: 0 !important;
+    outline: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
     opacity: 1 !important;
     filter: none !important;
+    transform: none !important;
   }
 
   .coachStrengthSupportingSummaryCopy > span {
