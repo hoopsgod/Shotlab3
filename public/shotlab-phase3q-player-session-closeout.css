@@ -1,0 +1,77 @@
+/* Phase 3Q — stable late authority for the player session closeout. */
+body #root [data-testid="player-training-finish-session"] {
+  width: 100% !important;
+  min-height: 42px !important;
+  margin-top: 9px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgba(248,250,245,.62) !important;
+  font: 800 11px/1 "Barlow Condensed", "Arial Narrow", sans-serif !important;
+  letter-spacing: .055em !important;
+  text-transform: uppercase !important;
+  text-decoration: underline !important;
+  text-decoration-color: rgba(248,250,245,.22) !important;
+  text-underline-offset: 4px !important;
+}
+
+body #root [data-testid="player-session-closeout"] {
+  background-color: #0f120f !important;
+  background-image:
+    radial-gradient(circle at 86% 8%, rgba(200,255,26,.14), transparent 34%),
+    linear-gradient(150deg, #0f120f 0%, #171b16 58%, #101310 100%) !important;
+  color: #f8faf5 !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+
+body #root [data-testid="player-session-closeout-hero"],
+body #root [data-testid="player-session-closeout-hero"] > div,
+body #root [data-testid="player-session-closeout-metrics"],
+body #root [data-testid="player-session-closeout-metrics"] > div,
+body #root [data-testid="player-session-best-moment"],
+body #root [data-testid="player-session-next-commitment"] {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+body #root [data-testid="player-session-closeout-hero"],
+body #root [data-testid="player-session-closeout-hero"] > div:not(:first-child) {
+  background-color: transparent !important;
+  border: 0 !important;
+}
+
+body #root [data-testid="player-session-closeout"] h2,
+body #root [data-testid="player-session-closeout"] [data-testid="player-session-best-moment"] strong,
+body #root [data-testid="player-session-closeout"] [data-testid="player-session-next-commitment"] strong {
+  color: #f8faf5 !important;
+  opacity: 1 !important;
+}
+
+body #root [data-testid="player-session-closeout-metrics"] > div,
+body #root [data-testid="player-session-best-moment"],
+body #root [data-testid="player-session-next-commitment"] {
+  background-color: rgba(255,255,255,.05) !important;
+  border-color: rgba(255,255,255,.075) !important;
+}
+
+body #root [data-testid="player-session-done"] {
+  background: #c8ff1a !important;
+  color: #101310 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body #root [data-testid="player-session-view-progress"],
+body #root [data-testid="player-session-resume"] {
+  background: rgba(255,255,255,.045) !important;
+  color: rgba(248,250,245,.78) !important;
+  border-color: rgba(255,255,255,.10) !important;
+  box-shadow: none !important;
+}
+
+body #root .player-training-completion-wrap:has([data-testid="player-session-closeout"]) {
+  margin-bottom: calc(28px + env(safe-area-inset-bottom, 0px)) !important;
+}
+
+body #root .player-scroll-container:has([data-testid="player-session-closeout"]) {
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+}

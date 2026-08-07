@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PlayerSessionCloseout from "./PlayerSessionCloseout.jsx";
 import styles from "./PlayerTrainingCompletion.module.css";
 
 const clean = (value) => String(value ?? "").trim();
@@ -27,10 +28,16 @@ export default function PlayerTrainingCompletion({
   data,
   shareCard,
   canChallenge = false,
+  completedCount = 0,
+  plannedTotal = 0,
+  nextCommitment = null,
+  currentStreak = null,
   onContinue,
   onChallenge,
+  onViewProgress,
 }) {
   const [showShareCard, setShowShareCard] = useState(false);
+  const [showSessionCloseout, setShowSessionCloseout] = useState(false);
   const score = numberOrNull(data?.score) ?? 0;
   const max = numberOrNull(data?.max);
   const prevBest = numberOrNull(data?.prevBest);
@@ -38,7 +45,26 @@ export default function PlayerTrainingCompletion({
   const isProgram = data?.src === "program";
   const hasMax = max !== null && max > 0;
   const pct = hasMax ? Math.max(0, Math.min(100, Math.round((score / max) * 100))) : null;
-  const homeMomentum = Math.max(1, (numberOrNull(data?.streak) ?? 0) + 1);
+  const liveStreak = numberOrNull(currentStreak);
+  const homeMomentum = Math.max(1, liveStreak ?? ((numberOrNull(data?.streak) ?? 0) + 1));
+  const safeCompleted = Math.max(0, Number(completedCount) || 0);
+  const safeTotal = Math.max(safeCompleted, Number(plannedTotal) || 0);
+  const planComplete = safeTotal > 0 && safeCompleted >= safeTotal;
+
+  if (showSessionCloseout) {
+    return (
+      <PlayerSessionCloseout
+        data={data}
+        completedCount={safeCompleted}
+        plannedTotal={safeTotal}
+        nextCommitment={nextCommitment}
+        currentStreak={liveStreak}
+        onDone={onContinue}
+        onViewProgress={onViewProgress}
+        onResume={() => setShowSessionCloseout(false)}
+      />
+    );
+  }
 
   let progressTitle = "Result added";
   let progressDetail = "Your work is saved in today’s training history.";
@@ -55,11 +81,16 @@ export default function PlayerTrainingCompletion({
     progressDetail = "You repeated your best result. Build on it with the next drill.";
   }
 
-  const nextTitle = isProgram ? "Review the program result" : "Keep today’s session moving";
-  const nextDetail = isProgram
-    ? "Your score is logged. Return to the program plan and see where it lands."
-    : "The result is banked. Go straight to the next drill while the rep quality is fresh.";
-  const nextButton = isProgram ? "Review program" : "Continue training";
+  const nextTitle = planComplete
+    ? "Close today’s training loop"
+    : isProgram ? "Review the program result" : "Keep today’s session moving";
+  const nextDetail = planComplete
+    ? "The planned work is complete. Finish the session and bank today’s progress."
+    : isProgram
+      ? "Your score is logged. Return to the program plan and see where it lands."
+      : "The result is banked. Go straight to the next drill while the rep quality is fresh.";
+  const nextButton = planComplete ? "Finish session" : isProgram ? "Review program" : "Continue training";
+  const handleNext = planComplete ? () => setShowSessionCloseout(true) : onContinue;
 
   return (
     <section className={styles.root} data-testid="player-training-completion" data-pb={isPB ? "true" : "false"}>
@@ -103,11 +134,17 @@ export default function PlayerTrainingCompletion({
         <span>NEXT MOVE</span>
         <strong>{nextTitle}</strong>
         <p>{nextDetail}</p>
-        <button type="button" className={styles.primaryAction} data-testid="player-training-next-action" onClick={onContinue}>
+        <button type="button" className={styles.primaryAction} data-testid="player-training-next-action" onClick={handleNext}>
           <span>{nextButton}</span>
           <span aria-hidden="true">→</span>
         </button>
       </div>
+
+      {!planComplete ? (
+        <button type="button" className={styles.finishSession} data-testid="player-training-finish-session" onClick={() => setShowSessionCloseout(true)}>
+          Finish for today
+        </button>
+      ) : null}
 
       <div className={styles.secondaryActions} aria-label="Optional training actions">
         <button
