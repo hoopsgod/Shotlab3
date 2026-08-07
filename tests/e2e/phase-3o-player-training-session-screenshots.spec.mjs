@@ -22,6 +22,11 @@ async function enterPlayerDemo(page) {
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
+async function captureViewport(page, name) {
+  fs.mkdirSync(outputDir, { recursive: true });
+  await page.screenshot({ path: path.join(outputDir, name), fullPage: false, animations: "disabled" });
+}
+
 test("Player Train opens a focused drill session with live score feedback", async ({ page }) => {
   await enterPlayerDemo(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
@@ -100,6 +105,11 @@ test("Player Train opens a focused drill session with live score feedback", asyn
   const liveProgress = page.getByTestId("player-training-live-progress");
   if (await liveProgress.count()) await expect(liveProgress).toBeVisible();
 
+  await noOverflow(page);
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
+  await page.waitForTimeout(120);
+  await captureViewport(page, "04p-player-training-session.png");
+
   await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, left: 0, behavior: "auto" }));
   await page.waitForTimeout(120);
   const logBox = await logScore.boundingBox();
@@ -107,9 +117,7 @@ test("Player Train opens a focused drill session with live score feedback", asyn
   expect(logBox).not.toBeNull();
   expect(dockBox).not.toBeNull();
   expect(logBox.y + logBox.height).toBeLessThan(dockBox.y - 6);
-
-  await noOverflow(page);
-  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "auto" }));
-  fs.mkdirSync(outputDir, { recursive: true });
-  await page.screenshot({ path: path.join(outputDir, "04p-player-training-session.png"), fullPage: true, animations: "disabled" });
+  await expect(scoreZone.getByText("LOG YOUR RESULT", { exact: true })).toBeVisible();
+  await expect(logScore).toBeVisible();
+  await captureViewport(page, "04q-player-training-score-action.png");
 });
