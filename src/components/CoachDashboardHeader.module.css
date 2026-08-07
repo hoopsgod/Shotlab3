@@ -1,3 +1,11 @@
+:global(body.mission-control-active) .header[data-testid="coach-dashboard-identity-header"] {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  max-height: none !important;
+  height: auto !important;
+}
+
 .header {
   position: relative;
   margin: 0 0 16px;
