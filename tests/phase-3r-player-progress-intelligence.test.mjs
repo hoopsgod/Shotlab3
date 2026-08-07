@@ -29,6 +29,8 @@ test("Phase 3R promotes the development story while preserving and directly reve
   assert.match(enhancer, /details instanceof HTMLDetailsElement/);
   assert.match(enhancer, /details\.open=true/);
   assert.match(enhancer, /<ProfilePage u=\{u\}/);
+  assert.match(enhancer, /Strength: \{\[\.\.\.drills,\.\.\.programDrills\]\.find/);
+  assert.match(enhancer, /\?\.name\|\|interpretedTrends\.strongestDrill/);
   assert.match(enhancer, /player-profile-readout/);
   assert.match(enhancer, /player-profile-performance-intelligence/);
   assert.match(enhancer, /player-profile-drill-development/);
@@ -67,6 +69,23 @@ test("development story uses factual signals and does not synthesize an overall 
   assert.equal(story.nextFocus.label, "COACH FOCUS");
   assert.equal(story.nextFocus.title, "Finish through contact");
   assert.doesNotMatch(JSON.stringify(story), /overall rating|performance score|player grade/i);
+});
+
+test("Phase 3R treats a zero prior-volume window as a new baseline instead of inventing a percentage gain", () => {
+  const story = derivePlayerProgressStory({
+    userEmail: "player@example.com",
+    today: "2026-08-07",
+    shotLogs: [
+      { email: "player@example.com", date: "2026-08-04", made: 45 },
+      { email: "player@example.com", date: "2026-08-07", made: 55 },
+    ],
+  });
+  assert.equal(story.recent7Makes, 100);
+  assert.equal(story.trend, "rising");
+  assert.equal(story.deltaPct, null);
+  assert.equal(story.headline, "Your work is rising.");
+  assert.match(story.trendDetail, /new volume after a quiet prior window/i);
+  assert.doesNotMatch(story.trendDetail, /% above/i);
 });
 
 test("Phase 3R labels practice frequency honestly when drill maxima are unavailable", () => {
@@ -119,7 +138,7 @@ test("Phase 3R owns late visual authority after Phase 3Q and prevents demo washo
   assert.match(authority, /player-progress-open-profile/);
 });
 
-test("Phase 3R iPhone evidence verifies first-viewport story, washout guards, and preserved full profile", () => {
+test("Phase 3R iPhone evidence verifies first-viewport story, washout guards, readable drill names, and preserved full profile", () => {
   assert.match(screenshotConfig, /phase-3r-player-progress-story-screenshots\.spec\.mjs/);
   assert.match(screenshotSpec, /mobile-navigation-more/);
   assert.match(screenshotSpec, /data-nav-key=\"profile\"/);
@@ -132,6 +151,7 @@ test("Phase 3R iPhone evidence verifies first-viewport story, washout guards, an
   assert.match(screenshotSpec, /player-progress-next-focus/);
   assert.match(screenshotSpec, /player-progress-open-profile/);
   assert.match(screenshotSpec, /player-profile-readout/);
+  assert.match(screenshotSpec, /not\.toContainText\(\/demo-/);
   assert.match(screenshotSpec, /04v-player-progress-story\.png/);
   assert.match(screenshotSpec, /04w-player-progress-full-profile\.png/);
   assert.match(screenshotSpec, /scrollWidth - window\.innerWidth/);
