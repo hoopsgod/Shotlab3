@@ -16,12 +16,13 @@ test("mobile dock limits persistent navigation to three destinations plus More",
   assert.match(navigationCss, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
 });
 
-test("native navigation model exposes the agreed role-specific destinations", () => {
-  assert.match(navigationSource, /export function buildNativeNavigationModel/);
-  assert.match(navigationSource, /player:[\s\S]*?key: "home", mobileLabel: "Home"[\s\S]*?key: "log-drill", mobileLabel: "Train"[\s\S]*?key: "leaderboards", mobileLabel: "Progress"/);
-  assert.match(navigationSource, /coach:[\s\S]*?key: "feed", mobileLabel: "Home"[\s\S]*?key: "players", mobileLabel: "Players"[\s\S]*?key: "events", mobileLabel: "Schedule"/);
-  assert.match(navigationSource, /data-navigation-role=\{nativeNavigation\.role\}/);
-  assert.match(navigationSource, /\{nativeNavigation\.workspaceLabel\}/);
+test("native navigation exposes the agreed role-specific destinations", () => {
+  assert.match(navigationSource, /role === "player" \? \["home", "log-drill", "leaderboards"\]/);
+  assert.match(navigationSource, /role === "coach" \? \["feed", "players", "events"\]/);
+  assert.match(navigationSource, /role === "player" \? \["Home", "Train", "Progress"\]/);
+  assert.match(navigationSource, /\["Home", "Players", "Schedule"\]/);
+  assert.match(navigationSource, /data-navigation-role=\{role\}/);
+  assert.match(navigationSource, /role\[0\]\.toUpperCase\(\) \+ role\.slice\(1\)/);
 });
 
 test("secondary navigation is accessible, dismissible, and does not leave body scrolling behind", () => {
@@ -58,7 +59,7 @@ test("floating navigation uses restrained glass and large touch targets", () => 
   assert.match(architectureCss, /prefers-reduced-transparency/);
 });
 
-test("App keeps every player and coach destination available to the navigation model", () => {
+test("App keeps every player and coach destination available to navigation", () => {
   assert.match(appSource, /import MobileNavigation from "\.\/components\/MobileNavigation\.jsx"/);
   assert.match(appSource, /const playerMobilePrimaryItems=/);
   assert.match(appSource, /const playerMobileSecondaryItems=/);
