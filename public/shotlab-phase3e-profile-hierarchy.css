@@ -10,10 +10,11 @@
   --p3e-shadow:0 10px 26px rgba(24,31,27,.055);
 }
 
-/* The dark season card + route header already establish identity. Remove the second avatar/name hero only.
-   Match the rendered hero itself instead of relying on :has(), which proved too brittle after inline-style serialization. */
-.performance-shell--player[data-workspace-tab="profile"] .fade-up > div[style*="padding: 28px 22px"][style*="text-align: center"][style*="position: relative"][style*="overflow: hidden"],
-.performance-shell--player[data-workspace-tab="profile"] .fade-up > div[style*="padding:28px 22px"][style*="text-align:center"][style*="position:relative"][style*="overflow:hidden"]{
+/* The report card + route header already establish identity. Remove the second avatar/name hero only.
+   The hero is nested inside the Profile content wrapper in the rendered DOM, so use a descendant lock.
+   Its inline-style signature is unique within ProfilePage and avoids brittle text or :has() matching. */
+.performance-shell--player[data-workspace-tab="profile"] .fade-up div[style*="padding: 28px 22px"][style*="text-align: center"][style*="position: relative"][style*="overflow: hidden"],
+.performance-shell--player[data-workspace-tab="profile"] .fade-up div[style*="padding:28px 22px"][style*="text-align:center"][style*="position:relative"][style*="overflow:hidden"]{
   display:none!important;
 }
 
