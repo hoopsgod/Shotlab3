@@ -19,6 +19,7 @@ if (source.includes(marker)) {
     'switchTab("log-drill")',
     'HTMLDetailsElement',
     'player-profile-readout',
+    'Strength: {[...drills,...programDrills].find(',
   ]) if (!source.includes(preserved)) fail(`transformed profile route is missing ${preserved}`);
   console.log("Phase 3R Player Progress Story already applied.");
   process.exit(0);
@@ -29,6 +30,11 @@ if (!source.includes('data-testid="player-profile-readout"')) fail("Phase 3F Pro
 const importAnchor = 'import PlayerCareerHistory from "./components/PlayerCareerHistory.jsx";\n';
 requireOne(source, importAnchor, "PlayerCareerHistory import");
 source = source.replace(importAnchor, `${importAnchor}import PlayerProgressStory from "./components/PlayerProgressStory.jsx";\n`);
+
+const rawStrengthReadout = '<span>Strength: {interpretedTrends.strongestDrill}</span>';
+requireOne(source, rawStrengthReadout, "Phase 3F strength readout");
+const friendlyStrengthReadout = '<span>Strength: {[...drills,...programDrills].find((drill)=>String(drill?.id||drill?.drillId||drill?.drill_id||"")===String(interpretedTrends.strongestDrill))?.name||interpretedTrends.strongestDrill}</span>';
+source = source.replace(rawStrengthReadout, friendlyStrengthReadout);
 
 const routeAnchor = '{tab==="profile"&&<div className={slideClass} key="profile"><PlayerWorkspaceCommandBar model={profileWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"profile"})} testId="player-profile-workspace"/><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scSessions={scSessions} scRsvps={scRsvps} scLogs={scLogs} seasonArchives={seasonArchives} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}';
 requireOne(source, routeAnchor, "Player Profile route");
@@ -50,6 +56,7 @@ for (const preserved of [
   'switchTab("log-drill")',
   'details instanceof HTMLDetailsElement',
   'details.open=true',
+  'Strength: {[...drills,...programDrills].find(',
   'player-profile-readout',
   'player-profile-performance-intelligence',
   'player-profile-drill-development',
