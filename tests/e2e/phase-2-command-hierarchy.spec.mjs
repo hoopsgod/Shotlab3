@@ -58,6 +58,18 @@ async function disableVisualNoise(page) {
   });
 }
 
+const channels = (value) => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
+const expectDark = (value) => {
+  const rgb = channels(value);
+  expect(rgb).toHaveLength(3);
+  expect(Math.max(...rgb)).toBeLessThan(70);
+};
+const expectLight = (value) => {
+  const rgb = channels(value);
+  expect(rgb).toHaveLength(3);
+  expect(Math.min(...rgb)).toBeGreaterThan(190);
+};
+
 test.beforeAll(() => mkdirSync(SCREENSHOT_DIR, { recursive: true }));
 
 test.beforeEach(async ({ page }) => {
@@ -80,21 +92,49 @@ test("Player home presents action, evidence, priority, and disclosure in order",
   await expect(priority).toBeVisible();
   await expect(disclosure).toBeVisible();
 
-  const positions = await page.evaluate(() => {
+  const presentation = await page.evaluate(() => {
+    const style = (selector) => {
+      const element = document.querySelector(selector);
+      return element ? getComputedStyle(element) : null;
+    };
     const top = (selector) => document.querySelector(selector)?.getBoundingClientRect().top ?? -1;
+    const rootStyle = style('[data-testid="player-daily-command-center"]');
+    const heroStyle = style('[data-command-role="primary"]');
+    const titleStyle = style('[data-command-role="primary"] h1');
+    const evidenceStyle = style('[data-testid="player-command-evidence"] > div');
+    const nextStyle = style('[data-command-role="next-actions"]');
+    const disclosureStyle = style('[data-command-role="progress-details"]');
+    const activationStyle = style('[data-command-role="activation"]');
     return {
-      primary: top('[data-command-role="primary"]'),
-      evidence: top('[data-testid="player-command-evidence"]'),
-      priority: top('[data-command-role="coach-priority"]'),
-      nextActions: top('[data-command-role="next-actions"]'),
-      progress: top('[data-command-role="progress-details"]'),
+      positions: {
+        primary: top('[data-command-role="primary"]'),
+        evidence: top('[data-testid="player-command-evidence"]'),
+        priority: top('[data-command-role="coach-priority"]'),
+        nextActions: top('[data-command-role="next-actions"]'),
+        progress: top('[data-command-role="progress-details"]'),
+      },
+      rootBackground: rootStyle?.backgroundColor || "",
+      heroBackground: heroStyle?.backgroundColor || "",
+      heroTitle: titleStyle?.color || "",
+      evidenceBackground: evidenceStyle?.backgroundColor || "",
+      nextBackground: nextStyle?.backgroundColor || "",
+      disclosureBackground: disclosureStyle?.backgroundColor || "",
+      activationBackground: activationStyle?.backgroundColor || "",
     };
   });
 
-  expect(positions.primary).toBeGreaterThanOrEqual(0);
-  expect(positions.evidence).toBeGreaterThan(positions.primary);
-  expect(positions.priority).toBeGreaterThan(positions.evidence);
-  if (positions.nextActions >= 0) expect(positions.progress).toBeGreaterThan(positions.nextActions);
+  expect(presentation.positions.primary).toBeGreaterThanOrEqual(0);
+  expect(presentation.positions.evidence).toBeGreaterThan(presentation.positions.primary);
+  expect(presentation.positions.priority).toBeGreaterThan(presentation.positions.evidence);
+  if (presentation.positions.nextActions >= 0) expect(presentation.positions.progress).toBeGreaterThan(presentation.positions.nextActions);
+
+  expectDark(presentation.rootBackground);
+  expectDark(presentation.heroBackground);
+  expectLight(presentation.heroTitle);
+  expectDark(presentation.evidenceBackground);
+  if (presentation.positions.nextActions >= 0) expectDark(presentation.nextBackground);
+  expectDark(presentation.disclosureBackground);
+  if (presentation.activationBackground) expectDark(presentation.activationBackground);
 
   await disclosure.scrollIntoViewIfNeeded();
   const progressOpen = await disclosure.evaluate((element) => element.open);
