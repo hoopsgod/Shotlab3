@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const enhancer = readFileSync('scripts/apply-phase3j-coach-events-hierarchy.mjs', 'utf8');
+const dashboards = readFileSync('src/components/CoachInteractiveDashboards.jsx', 'utf8');
 const css = readFileSync('public/shotlab-phase3j-coach-events-hierarchy.css', 'utf8');
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
@@ -55,12 +56,13 @@ test('Phase 3J preserves existing event action wiring and event insight actions'
     'onOpenEvent',
     'onStatusChange',
     'resolveEventAction',
-    'Manage attendance gaps',
-    'Review event',
     'Create Event',
   ]) {
-    assert.ok(enhancer.includes(marker), `missing preserved event capability marker: ${marker}`);
+    assert.ok(dashboards.includes(marker), `missing preserved event capability marker: ${marker}`);
   }
+  assert.match(dashboards, /buildCoachEventActionBriefing/);
+  assert.match(dashboards, /briefing\.insights\.map/);
+  assert.match(enhancer, /resolveEventAction\(insight\.action/);
 });
 
 test('Phase 3J authority loads after Phase 3I', () => {
