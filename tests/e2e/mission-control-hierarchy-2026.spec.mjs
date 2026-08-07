@@ -25,6 +25,8 @@ async function expectNoHorizontalOverflow(page) {
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
+const rgbChannels = (value) => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
+
 test.beforeAll(() => mkdirSync(SCREENSHOT_DIR, { recursive: true }));
 
 test.beforeEach(async ({ page }) => {
@@ -65,6 +67,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const section = document.querySelector(".mcSection");
     const reality = document.querySelector(".mcRealityStrip");
     const teamSelect = document.querySelector(".mcTeamSelect");
+    const attentionRow = document.querySelector(".mcAttentionRow");
+    const attentionTitle = attentionRow?.querySelector(".mcAttentionCopy strong");
     const workspaceStyle = workspace ? getComputedStyle(workspace) : null;
     const heroStyle = getComputedStyle(hero);
     const heroContentStyle = getComputedStyle(heroContent);
@@ -73,9 +77,12 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
     const sectionStyle = section ? getComputedStyle(section) : null;
     const realityStyle = getComputedStyle(reality);
     const teamSelectStyle = getComputedStyle(teamSelect);
+    const attentionStyle = attentionRow ? getComputedStyle(attentionRow) : null;
+    const attentionTitleStyle = attentionTitle ? getComputedStyle(attentionTitle) : null;
     return {
       workspaceBackground: workspaceStyle?.backgroundColor || "",
-      heroBackground: heroStyle.backgroundImage,
+      heroBackgroundImage: heroStyle.backgroundImage,
+      heroBackgroundColor: heroStyle.backgroundColor,
       heroMaxHeight: heroStyle.maxHeight,
       heroRadius: parseFloat(heroStyle.borderRadius),
       heroContentBackground: heroContentStyle.backgroundColor,
@@ -87,11 +94,15 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
       metricColumns: realityStyle.gridTemplateColumns.split(" ").filter(Boolean).length,
       teamSelectDisplay: teamSelectStyle.display,
       teamSelectWidth: parseFloat(teamSelectStyle.width),
+      attentionBackground: attentionStyle?.backgroundColor || "",
+      attentionTitleColor: attentionTitleStyle?.color || "",
     };
   });
 
   expect(presentation.workspaceBackground).toBe("rgb(243, 241, 234)");
-  expect(presentation.heroBackground).toContain("linear-gradient");
+  const heroChannels = rgbChannels(presentation.heroBackgroundColor);
+  expect(heroChannels).toHaveLength(3);
+  expect(Math.max(...heroChannels)).toBeLessThan(45);
   expect(["none", "0px"]).toContain(presentation.heroMaxHeight);
   expect(presentation.heroRadius).toBeGreaterThanOrEqual(20);
   expect(presentation.heroContentBackground).toBe("rgba(0, 0, 0, 0)");
@@ -103,6 +114,8 @@ test("Coach Mission Control presents one premium mobile hierarchy", async ({ pag
   expect(presentation.metricColumns).toBe(3);
   expect(presentation.teamSelectDisplay).toContain("flex");
   expect(presentation.teamSelectWidth).toBeGreaterThanOrEqual(58);
+  expect(presentation.attentionBackground).toBe("rgb(245, 244, 239)");
+  expect(presentation.attentionTitleColor).toBe("rgb(17, 26, 33)");
 
   await expectNoHorizontalOverflow(page);
   await page.addStyleTag({ content: "*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}" });
