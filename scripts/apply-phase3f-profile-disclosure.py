@@ -1,0 +1,86 @@
+from pathlib import Path
+
+path = Path('src/App.jsx')
+app = path.read_text()
+original = app
+
+MARKER = 'data-testid="player-profile-readout"'
+if MARKER in app and 'testId="player-profile-performance-details"' in app and 'testId="player-profile-drill-development"' in app:
+    print('Phase 3F Profile disclosure already applied.')
+    raise SystemExit(0)
+
+
+def require(condition, message):
+    if not condition:
+        raise SystemExit(message)
+
+
+profile_anchor = app.find('// PLAYER PROFILE — Offseason Resume')
+require(profile_anchor >= 0, 'ProfilePage anchor not found')
+
+trend_heading = app.find('>INTERPRETED PERFORMANCE TRENDS</div>', profile_anchor)
+require(trend_heading >= 0, 'interpreted trends heading not found')
+trend_start = app.rfind('\n<div style=', profile_anchor, trend_heading) + 1
+require(trend_start > 0, 'interpreted trends block start not found')
+
+chart_line = '<ShotLabCharts scores={scores} drills={drills} programDrills={programDrills} user={u} />'
+chart_start = app.find(chart_line, trend_heading)
+require(chart_start >= 0, 'Profile analytics line not found')
+chart_end = chart_start + len(chart_line)
+performance_block = app[trend_start:chart_end]
+for token in ['INTERPRETED PERFORMANCE TRENDS', 'Overall stats', chart_line]:
+    require(token in performance_block, f'performance safety token missing: {token}')
+
+readout = '''<div data-testid="player-profile-readout" style={{background:CARD_BG,borderRadius:16,padding:"15px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:12}}>
+  <div data-profile-readout-eyebrow style={{fontFamily:FB,color:VOLT,fontSize:9,fontWeight:800,letterSpacing:"0.12em"}}>PERFORMANCE READOUT</div>
+  <div data-profile-readout-primary style={{fontFamily:FB,color:LIGHT,fontSize:17,fontWeight:800,lineHeight:1.25,marginTop:5}}>{`Momentum is ${interpretedTrends.momentum}.`}</div>
+  <div data-profile-readout-support style={{display:"grid",gap:5,marginTop:9,fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.4}}>
+    <span><strong>Strongest:</strong> {interpretedTrends.strongestDrill}</span>
+    <span><strong>Focus:</strong> {interpretedTrends.weakArea}</span>
+  </div>
+</div>
+
+<ProgressiveDisclosure title="Performance details" summary="Trends, totals, charts, and recent logs" testId="player-profile-performance-details">
+<div data-testid="player-profile-performance-detail-body">
+'''
+performance_close = '''
+</div>
+</ProgressiveDisclosure>'''
+wrapped_performance = readout + performance_block.replace(
+    chart_line,
+    f'<div data-testid="player-profile-analytics">{chart_line}</div>',
+) + performance_close
+app = app[:trend_start] + wrapped_performance + app[chart_end:]
+
+drill_marker = app.find('{/* Per-drill breakdown with PBs and trends */}', profile_anchor)
+require(drill_marker >= 0, 'drill development marker not found')
+privacy_heading = app.find('>PRIVACY</div>', drill_marker)
+require(privacy_heading >= 0, 'privacy heading not found')
+privacy_start = app.rfind('\n<div style=', drill_marker, privacy_heading) + 1
+require(privacy_start > drill_marker, 'privacy block start not found')
+drill_block = app[drill_marker:privacy_start]
+require('DRILL BREAKDOWN' in drill_block and 'drillStats.map' in drill_block, 'drill development safety tokens missing')
+
+wrapped_drills = '''<ProgressiveDisclosure title="Drill development" summary={`${drillStats.length} drills tracked · personal bests and trends`} testId="player-profile-drill-development">
+<div data-testid="player-profile-drill-detail-body">
+''' + drill_block + '''</div>
+</ProgressiveDisclosure>
+
+'''
+app = app[:drill_marker] + wrapped_drills + app[privacy_start:]
+
+require(app.count(MARKER) == 1, 'readout should appear once')
+require(app.count('testId="player-profile-performance-details"') == 1, 'performance disclosure should appear once')
+require(app.count('data-testid="player-profile-analytics"') == 1, 'analytics wrapper should appear once')
+require(app.count('testId="player-profile-drill-development"') == 1, 'drill disclosure should appear once')
+require(app.count(chart_line) == 1, 'ShotLabCharts should remain exactly once')
+require(
+    app.find('testId="player-profile-performance-details"')
+    < app.find('testId="player-profile-drill-development"')
+    < app.find('>PRIVACY</div>'),
+    'Profile disclosure ordering is invalid',
+)
+require(app != original, 'Phase 3F transform made no change')
+
+path.write_text(app)
+print('Applied Phase 3F Profile progressive disclosure.')
