@@ -54,10 +54,12 @@ test("development story uses factual signals and does not synthesize an overall 
   });
   assert.equal(story.currentStreak, 4);
   assert.equal(story.recent7Makes, 160);
-  assert.equal(story.activeDays7, 3);
+  assert.equal(story.activeDays7, 4);
   assert.equal(story.pbCount30, 1);
   assert.equal(story.strongest.title, "Form Ladder");
   assert.equal(story.strongest.kind, "quality");
+  assert.equal(story.strongest.eyebrow, "STRONGEST SIGNAL");
+  assert.equal(story.opportunity.eyebrow, "BIGGEST OPPORTUNITY");
   assert.equal(story.nextFocus.label, "COACH FOCUS");
   assert.equal(story.nextFocus.title, "Finish through contact");
   assert.doesNotMatch(JSON.stringify(story), /overall rating|performance score|player grade/i);
@@ -82,8 +84,8 @@ test("Progress Story presents a premium decision-first hierarchy with one next f
     "player-progress-story",
     "DEVELOPMENT STORY",
     "DEVELOPMENT READOUT",
-    "STRONGEST SIGNAL",
-    "BIGGEST OPPORTUNITY",
+    "player-progress-strongest-signal",
+    "player-progress-opportunity",
     "player-progress-next-focus",
     "Start next focus",
     "Open full progress profile",
