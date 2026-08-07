@@ -1,0 +1,80 @@
+name: Phase 3E Remove Duplicate Profile Identity
+
+on:
+  push:
+    branches:
+      - agent/phase-3e-profile-information-hierarchy
+
+permissions:
+  contents: write
+
+jobs:
+  remove-duplicate-profile-identity:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/phase-3e-profile-information-hierarchy
+          fetch-depth: 0
+
+      - name: Remove redundant Player Profile identity at source
+        shell: python
+        run: |
+          from pathlib import Path
+
+          app_path = Path('src/App.jsx')
+          app = app_path.read_text()
+          original_app = app
+
+          profile_anchor = app.find('// PLAYER PROFILE — Offseason Resume')
+          if profile_anchor < 0:
+              raise SystemExit('ProfilePage anchor not found')
+          identity_copy = app.find('>OFFSEASON PLAYER</div>', profile_anchor)
+          if identity_copy < 0:
+              raise SystemExit('redundant OFFSEASON PLAYER identity block not found')
+          hero_start = app.rfind('{/* Hero card */}', profile_anchor, identity_copy)
+          badges_start = app.find('{/* Badges */}', identity_copy)
+          if hero_start < 0 or badges_start < 0 or badges_start <= hero_start:
+              raise SystemExit('Profile hero boundaries not found')
+
+          hero_block = app[hero_start:badges_start]
+          required_tokens = ['OFFSEASON PLAYER', 'u.name.toUpperCase()', 'padding:"28px 22px"']
+          for token in required_tokens:
+              if token not in hero_block:
+                  raise SystemExit(f'hero safety token missing: {token}')
+
+          app = app[:hero_start] + app[badges_start:]
+          if 'OFFSEASON PLAYER' in app[profile_anchor:]:
+              raise SystemExit('redundant OFFSEASON PLAYER copy remains after transform')
+          if app == original_app:
+              raise SystemExit('App transform made no change')
+          app_path.write_text(app)
+
+          css_path = Path('public/shotlab-phase3e-profile-hierarchy.css')
+          css = css_path.read_text()
+          css_start = css.find('/* The report card + route header already establish identity.')
+          css_end = css.find('/* Career history is valuable but deep.', css_start)
+          if css_start < 0 or css_end <= css_start:
+              raise SystemExit('Phase 3E legacy identity CSS block not found')
+          css = css[:css_start] + '/* Duplicate Profile identity is removed at source; no rendered-node hiding is required. */\n\n' + css[css_end:]
+          css_path.write_text(css)
+
+          test_path = Path('tests/phase-3e-profile-information-hierarchy.test.mjs')
+          test = test_path.read_text()
+          start = test.find("test('Phase 3E removes only the duplicate Profile identity hero and leaves deep analytics intact'")
+          end = test.find("\ntest('Phase 3E keeps reduced-motion handling", start)
+          if start < 0 or end <= start:
+              raise SystemExit('Phase 3E identity contract block not found')
+          replacement = '''test('Phase 3E removes the duplicate Profile identity hero at source and leaves deep analytics intact', () => {\n  assert.doesNotMatch(app, /OFFSEASON PLAYER/, 'redundant Profile identity copy must not render from source');\n  assert.doesNotMatch(phaseCss, /padding: ?28px 22px/, 'Phase 3E must not rely on hiding the removed hero with a style signature');\n  assert.match(app, /OFFSEASON REPORT CARD/);\n  assert.match(app, /PLAYER PROGRESS PROFILE/);\n  assert.match(app, /INTERPRETED PERFORMANCE TRENDS/);\n  assert.match(app, /<ShotLabCharts scores=\\{scores\\} drills=\\{drills\\} programDrills=\\{programDrills\\} user=\\{u\\} \\/>/);\n  assert.match(app, /DRILL BREAKDOWN/);\n  assert.match(app, /PRIVACY/);\n});\n'''
+          test = test[:start] + replacement + test[end:]
+          test_path.write_text(test)
+
+      - name: Commit source-level correction and remove one-shot workflow
+        run: |
+          git config user.name "shotlab-phase3e-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git rm .github/workflows/phase3e-remove-duplicate-profile-identity.yml
+          git add src/App.jsx public/shotlab-phase3e-profile-hierarchy.css tests/phase-3e-profile-information-hierarchy.test.mjs
+          git commit -m "Phase 3E: remove duplicate Profile identity at source"
+          git push origin HEAD:agent/phase-3e-profile-information-hierarchy
