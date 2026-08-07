@@ -61,7 +61,7 @@ test("stale coach guidance is not presented as today's player assignment", async
   }, seed);
 
   await page.goto("/");
-  await page.getByRole("button", { name: "Demo Player", exact: true }).click();
+  await page.getByRole("button", { name: "Player demo", exact: true }).click();
 
   const commandCenter = page.getByTestId("player-daily-command-center");
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
