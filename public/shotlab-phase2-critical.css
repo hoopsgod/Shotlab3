@@ -67,6 +67,18 @@ html body #root [data-testid="player-daily-command-center"] [data-command-role="
   color: #f5f8f9 !important;
 }
 
+html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] [class*="heroTop"] {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] [class*="pill"] {
+  border-color: color-mix(in srgb, currentColor 32%, transparent) !important;
+  background: color-mix(in srgb, currentColor 9%, transparent) !important;
+  box-shadow: none !important;
+}
+
 html body #root [data-testid="player-daily-command-center"] [data-command-role="primary"] h1 {
   color: #f5f8f9 !important;
   -webkit-text-fill-color: #f5f8f9 !important;
@@ -93,8 +105,122 @@ html body #root [data-testid="player-command-evidence"] [class*="sectionLabel"],
 html body #root [data-testid="player-command-evidence"] [class*="meta"] {
   color: #9ba7ae !important;
   -webkit-text-fill-color: #9ba7ae !important;
+  background: transparent !important;
 }
 
 html body #root [data-testid="player-command-evidence"] [class*="progressTrack"] {
   background-color: rgba(255, 255, 255, .08) !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="coach-priority"] {
+  border-color: rgba(220, 231, 236, .12) !important;
+  background-color: #0d1114 !important;
+  background-image: linear-gradient(145deg, rgba(21, 27, 31, .98), rgba(6, 9, 11, .99)) !important;
+  color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="coach-priority"] :is(h2, strong) {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="coach-priority"] :is(p, small, [class*="Value"], [class*="Meta"]) {
+  color: #c3cdd2 !important;
+  -webkit-text-fill-color: #c3cdd2 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="next-actions"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background: transparent !important;
+  color: #f5f8f9 !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="sectionTitle"],
+html body #root [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="taskTitle"] {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="next-actions"] :is([class*="sectionLabel"], [class*="taskMeta"], [class*="meta"]) {
+  color: #9ba7ae !important;
+  -webkit-text-fill-color: #9ba7ae !important;
+  background: transparent !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="taskRow"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: rgba(255, 255, 255, .035) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosure,
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosureBody {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: #0f1214 !important;
+  background-image: none !important;
+  color: #f5f8f9 !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosure > summary {
+  background: transparent !important;
+  color: #f5f8f9 !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosure > summary strong {
+  color: #f5f8f9 !important;
+  -webkit-text-fill-color: #f5f8f9 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosure > summary small {
+  color: #9ba7ae !important;
+  -webkit-text-fill-color: #9ba7ae !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosureBody [class*="metrics"] {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] .playerProgressDisclosureBody [class*="metric"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: rgba(255, 255, 255, .035) !important;
+  background-image: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="activation"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: #0f1214 !important;
+  background-image: none !important;
+  color: #f5f8f9 !important;
+  box-shadow: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="activation"] > summary {
+  background: transparent !important;
+  color: #c3cdd2 !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="activation"] [class*="activationRow"] {
+  border-color: rgba(255, 255, 255, .08) !important;
+  background-color: rgba(255, 255, 255, .035) !important;
+  background-image: none !important;
+}
+
+html body #root [data-testid="player-daily-command-center"] [data-command-role="activation"] [class*="activationText"] {
+  color: #c3cdd2 !important;
+  -webkit-text-fill-color: #c3cdd2 !important;
+}
+
+/* The viewport-root More sheet must not inherit generic paragraph cards. */
+html body [data-testid="mobile-navigation-sheet"] [class*="sheetSummary"] {
+  margin-top: 6px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #65717a !important;
+  box-shadow: none !important;
 }
