@@ -4381,6 +4381,17 @@ return <div className="fade-up">
 
 <div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>PLAYER PROGRESS PROFILE</div>{progress.isEmpty?<div style={{fontFamily:FB,color:MUTED,fontSize:11,lineHeight:1.5}}>No progress data yet. Log your first at-home session and RSVP to upcoming events to build your profile.</div>:<><div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:10}}>{[{l:"TOTAL AT HOME SHOTS",v:progress.totalAtHomeShots,c:VOLT},{l:"CURRENT STREAK",v:progress.currentStreak,c:ORANGE},{l:"WEEKLY ACTIVITY",v:progress.weeklyActivityCount,c:LIGHT},{l:"EVENTS",v:progress.eventsAttended,c:CYAN},{l:"RSVP RATE",v:`${progress.rsvpParticipationRate}%`,c:VOLT}].map(item=><div key={item.l} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}><div style={{fontFamily:FD,color:item.c,fontSize:18}}>{item.v}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:1.4,fontWeight:700}}>{item.l}</div></div>)}</div><div style={{marginBottom:8}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:2,fontWeight:700,marginBottom:6}}>7-DAY TREND</div><div style={{display:"flex",alignItems:"flex-end",gap:4,height:44}}>{progress.sevenDayTrend.map(d=>{const max=Math.max(1,...progress.sevenDayTrend.map(x=>x.made));const h=Math.max(4,Math.round((d.made/max)*40));return <div key={d.day} title={`${d.day}: ${d.made}`} style={{flex:1,height:h,borderRadius:4,background:d.made>0?VOLT+"66":BORDER_CLR}}/>;})}</div></div><div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5}}>{progress.recentActivitySummary.join(" · ")}</div></>}</div>
 
+<div data-testid="player-profile-readout" style={{background:CARD_BG,borderRadius:16,padding:"15px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:12}}>
+  <div data-profile-readout-eyebrow style={{fontFamily:FB,color:VOLT,fontSize:9,fontWeight:800,letterSpacing:"0.12em"}}>PERFORMANCE READOUT</div>
+  <div data-profile-readout-primary style={{fontFamily:FB,color:LIGHT,fontSize:17,fontWeight:800,lineHeight:1.25,marginTop:5}}>{`Momentum is ${interpretedTrends.momentum}.`}</div>
+  <div data-profile-readout-support style={{display:"grid",gap:5,marginTop:9,fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.4}}>
+    <span><strong>Strongest:</strong> {interpretedTrends.strongestDrill}</span>
+    <span><strong>Focus:</strong> {interpretedTrends.weakArea}</span>
+  </div>
+</div>
+
+<ProgressiveDisclosure title="Performance details" summary="Trends, totals, charts, and recent logs" testId="player-profile-performance-details">
+<div data-testid="player-profile-performance-detail-body">
 <div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
   <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>INTERPRETED PERFORMANCE TRENDS</div>
   <div style={{display:"grid",gap:7}}>
@@ -4400,8 +4411,12 @@ return <div className="fade-up">
   <div style={{height:4}}/>
 </div>
 
-<ShotLabCharts scores={scores} drills={drills} programDrills={programDrills} user={u} />
+<div data-testid="player-profile-analytics"><ShotLabCharts scores={scores} drills={drills} programDrills={programDrills} user={u} /></div>
+</div>
+</ProgressiveDisclosure>
 
+<ProgressiveDisclosure title="Drill development" summary={`${drillStats.length} drills tracked · personal bests and trends`} testId="player-profile-drill-development">
+<div data-testid="player-profile-drill-detail-body">
 {/* Per-drill breakdown with PBs and trends */}
 <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
 {drillStats.map(d=>{const accentColor=d.src==="program"?CYAN:getDrillAccentColor(d.name);return <div key={`${d.src}-${d.id}`} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
@@ -4437,6 +4452,9 @@ return <div className="fade-up">
     <Sparkline data={d.last10} color={VOLT} w={200} h={20}/>
   </div>}
 </div>})}
+
+</div>
+</ProgressiveDisclosure>
 
 <div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
   <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>PRIVACY</div>
