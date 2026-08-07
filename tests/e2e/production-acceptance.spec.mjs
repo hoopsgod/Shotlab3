@@ -214,7 +214,7 @@ test("Demo Player shot rows are removed on logout", async ({ page }) => {
 
   await expect.poll(() => countDemoPlayerShotRows(page, 33), { timeout: 15_000 }).toBe(1);
 
-  await page.getByRole("button", { name: /^log out$/i }).click();
+  await page.getByRole("button", { name: /^logout$/i }).click();
   await expect(page.getByRole("button", { name: "Player demo", exact: true })).toBeVisible({ timeout: 20_000 });
   await expect.poll(() => countDemoPlayerShotRows(page, 33)).toBe(0);
 });
