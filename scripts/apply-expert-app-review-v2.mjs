@@ -24,7 +24,7 @@ patch("src/main.jsx",
 
 patch("src/App.jsx",
   "const signedIn=np.find(p=>p.email===acct.email);\nif(!signedIn)return{ok:false,err:\"Unable to prepare demo account.\"};",
-  "const demoBundle=buildDemoDataBundle({teamId:demoTeam.id,coachEmail:DEMO_COACH.email,team:demoTeam});\nawait applyDemoData(demoBundle);\nawait hydratePersistedData();\nnp=demoBundle.players;\nnts=demoBundle.teams;\nconst signedIn=np.find(p=>p.email===acct.email);\nif(!signedIn)return{ok:false,err:\"Unable to prepare demo account.\"};");
+  "const scopedRowsPresent=[...playerProfiles,...events,...scores,...programScores,...shotLogs,...scSessions].some(row=>String(row?.teamId||row?.team_id||\"\")===String(demoTeam.id));\nconst existingDemoMeta=await DB.get(\"sl:demo-data-meta\");\nconst managedDemoData=existingDemoMeta?.source===\"demo-data\"&&String(existingDemoMeta?.teamId||\"\")===String(demoTeam.id);\nconst shouldHydrateDemoBundle=!scopedRowsPresent||managedDemoData;\nif(shouldHydrateDemoBundle){\nconst demoBundle=buildDemoDataBundle({teamId:demoTeam.id,coachEmail:DEMO_COACH.email,team:demoTeam});\nawait applyDemoData(demoBundle);\nawait hydratePersistedData();\nnp=demoBundle.players;\nnts=demoBundle.teams;\n}\nconst signedIn=np.find(p=>p.email===acct.email);\nif(!signedIn)return{ok:false,err:\"Unable to prepare demo account.\"};");
 
 patch("tests/e2e/app-store-screenshots.spec.mjs",
   '  await expect(page.getByText("Calendar is open", { exact: true })).toBeVisible();',
