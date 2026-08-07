@@ -17,11 +17,13 @@ html.team-store-portal-open .ts-player-retail-hero {
   overflow: hidden;
   padding: 22px;
   border: 1px solid rgba(255, 255, 255, .08);
+  border-color: rgba(255, 255, 255, .08) !important;
   border-radius: 28px;
-  background:
+  background-color: #111411 !important;
+  background-image:
     radial-gradient(circle at 92% 2%, rgba(200, 255, 26, .18), transparent 34%),
     radial-gradient(circle at 8% 110%, rgba(200, 255, 26, .08), transparent 42%),
-    linear-gradient(150deg, #20241f 0%, #111411 56%, #0b0d0b 100%);
+    linear-gradient(150deg, #20241f 0%, #111411 56%, #0b0d0b 100%) !important;
   box-shadow: 0 22px 55px rgba(20, 24, 20, .16);
   color: #f7f9f4;
 }
