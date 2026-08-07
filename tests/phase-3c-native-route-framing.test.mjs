@@ -14,7 +14,9 @@ test('Phase 3C route framing loads after the existing Phase 3 secondary authorit
 });
 
 test('Player secondary destinations use compact native route chrome and one gutter authority', () => {
-  assert.match(css, /\.performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\):not\(\[data-workspace-tab="profile"\]\) \.player-quick-actions\{\s*display:none!important;/s);
+  assert.match(css, /\.performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\) \.player-quick-actions\{[\s\S]*?height:0!important;[\s\S]*?overflow:visible!important;/);
+  assert.match(css, /player-quick-actions button\[aria-label="Logout"\][\s\S]*?min-height:44px!important;[\s\S]*?pointer-events:auto;/);
+  assert.doesNotMatch(css, /player-quick-actions\{\s*display:none!important;/s);
   assert.match(css, /\.performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\) \.player-scroll-container>button\[type="button"\][\s\S]*?width:var\(--p3c-route-control\)!important;[\s\S]*?font-size:0!important;/);
   assert.match(css, /player-scroll-container>button\[type="button"\]>span\[aria-hidden="true"\][\s\S]*?font-size:20px!important;/);
   assert.match(css, /\[data-testid\^="player-workspace-"\]\{\s*margin-left:0!important;\s*margin-right:0!important;/s);
@@ -35,7 +37,8 @@ test('Coach secondary routes share the same compact return affordance', () => {
   assert.match(css, /touch-action:manipulation;/);
 });
 
-test('Phase 3C keeps focus and reduced-motion behavior explicit', () => {
+test('Phase 3C keeps account access, focus, and reduced-motion behavior explicit', () => {
+  assert.match(css, /button\[aria-label="Logout"\]:focus-visible/);
   assert.match(css, /:focus-visible\{/);
   assert.match(css, /outline:3px solid color-mix/);
   assert.match(css, /@media \(prefers-reduced-motion:reduce\)/);
