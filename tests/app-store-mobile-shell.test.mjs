@@ -26,6 +26,8 @@ test("persistent navigation behaves as a floating native tab bar", () => {
   assert.match(navigationSource, /buildNativeNavigationModel/);
   assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
   assert.match(navigationSource, /className=\{styles\.activeIndicator\}/);
+  assert.match(navigationSource, /import \{ createPortal \} from "react-dom"/);
+  assert.match(navigationSource, /createPortal\(navigationShell, document\.body\)/);
   assert.match(navigationCss, /--bottom-nav-content-padding:\s*104px/);
   assert.match(navigationCss, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
   assert.match(navigationCss, /left:\s*50%/);
