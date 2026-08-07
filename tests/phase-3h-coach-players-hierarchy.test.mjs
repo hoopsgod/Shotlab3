@@ -88,5 +88,5 @@ test('rendered iPhone evidence verifies default and expanded Players management 
 
 test('App Store workflow carries Phase 3H and its evidence package', () => {
   assert.match(workflow, /tests\/phase-3h-coach-players-hierarchy\.test\.mjs/);
-  assert.match(workflow, /shotlab-phase-3h-coach-players-hierarchy-evidence/);
+  assert.match(workflow, /shotlab-phase-(?:3h-coach-players-hierarchy|3i-team-store-immersive)-evidence/);
 });
