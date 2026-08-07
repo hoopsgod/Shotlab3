@@ -116,6 +116,12 @@ export default function PlayerCommitmentCenter({
   const focusDate = formatDateParts(rowDate(state.focus));
   const hasAction = Boolean(model?.primaryAction);
   const statusLabel = !state.focus ? "Schedule clear" : requiresResponse ? "Response needed" : "Commitment set";
+  const routeStatus = requiresResponse
+    ? `${state.unresolved.length} response${state.unresolved.length === 1 ? "" : "s"} needed`
+    : statusLabel;
+  const routeSubtitle = requiresResponse
+    ? `${state.unresolved.length} upcoming commitment${state.unresolved.length === 1 ? "" : "s"} ${state.unresolved.length === 1 ? "needs" : "need"} your response.`
+    : model?.subtitle || (isStrength ? "Keep every physical-development commitment clear." : "Keep every team commitment clear.");
   const eyebrow = requiresResponse
     ? (isStrength ? "SESSION RESPONSE NEEDED" : "RESPONSE NEEDED")
     : (isStrength ? "NEXT DEVELOPMENT BLOCK" : "NEXT TEAM COMMITMENT");
@@ -150,9 +156,9 @@ export default function PlayerCommitmentCenter({
         <div className={styles.routeEyebrow}>{model?.eyebrow || (isStrength ? "Physical development" : "Team commitments")}</div>
         <div className={styles.routeTitleRow}>
           <h1>{model?.title || (isStrength ? "Strength & Conditioning" : "Events & Attendance")}</h1>
-          <span>{model?.status || statusLabel}</span>
+          <span>{routeStatus}</span>
         </div>
-        <p>{model?.subtitle || (isStrength ? "Keep every physical-development commitment clear." : "Keep every team commitment clear.")}</p>
+        <p>{routeSubtitle}</p>
       </header>
 
       <div className={styles.hero} data-testid={`player-commitment-hero-${mode}`}>
