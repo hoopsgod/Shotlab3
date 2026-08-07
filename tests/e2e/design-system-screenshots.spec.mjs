@@ -13,7 +13,9 @@ async function installRoutes(page) {
 async function enterDemo(page, role) {
   await installRoutes(page);
   await page.goto("/");
-  await page.getByRole("button", { name: role === "coach" ? "Demo Coach" : "Demo Player", exact: true }).click();
+  const demoButton = page.getByRole("button", { name: role === "coach" ? /Coach demo/i : /Player demo/i });
+  await expect(demoButton).toBeVisible({ timeout: 20_000 });
+  await demoButton.click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -41,12 +43,11 @@ test("Player visual system remains integrated across core and secondary pages", 
   await enterDemo(page, "player");
   await capture(page, "01-player-home");
 
-  let sheet = await more(page);
-  await sheet.locator('[data-nav-key="leaderboards"]').click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
   await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
   await capture(page, "02-player-leaderboards");
 
-  sheet = await more(page);
+  let sheet = await more(page);
   await sheet.locator('[data-nav-key="profile"]').click();
   await expect(page.getByTestId("player-career-history")).toBeVisible({ timeout: 20_000 });
   await capture(page, "03-player-profile-career");
@@ -65,7 +66,7 @@ test("Coach visual system remains integrated across command and management pages
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
   await capture(page, "06-coach-players");
 
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Events", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
   await capture(page, "07-coach-events");
 
   let sheet = await more(page);
