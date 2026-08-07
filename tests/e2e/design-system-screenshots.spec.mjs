@@ -55,7 +55,7 @@ test("Player visual system remains integrated across core and secondary pages", 
   await expect(page.getByTestId("player-career-history")).toBeHidden();
   await capture(page, "03-player-profile-career");
 
-  await careerDisclosure.locator("summary").click();
+  await careerDisclosure.locator(":scope > summary").click();
   await expect(careerDisclosure).toHaveAttribute("open", "");
   await expect(page.getByTestId("player-career-history")).toBeVisible({ timeout: 20_000 });
   await capture(page, "03b-player-profile-career-expanded");
