@@ -108,22 +108,25 @@ export default function PlayerCommitmentCenter({
     const unresolved = upcoming.filter((item) => !responseIds.has(clean(item?.id)));
     const confirmed = upcoming.filter((item) => responseIds.has(clean(item?.id)));
     const myLogs = safeArray(logs).filter((row) => identityMatches(row, userEmail) && teamMatches(row, teamId));
-    return { upcoming, unresolved, confirmed, myLogs, next: upcoming[0] || null };
+    const focus = unresolved[0] || upcoming[0] || null;
+    return { upcoming, unresolved, confirmed, myLogs, focus };
   }, [items, responses, logs, teamId, userEmail, today, mode]);
 
-  const nextDate = formatDateParts(rowDate(state.next));
-  const nextConfirmed = Boolean(state.next && state.confirmed.some((item) => clean(item?.id) === clean(state.next?.id)));
+  const requiresResponse = state.unresolved.length > 0;
+  const focusDate = formatDateParts(rowDate(state.focus));
   const hasAction = Boolean(model?.primaryAction);
-  const statusLabel = !state.next ? "Schedule clear" : nextConfirmed ? "Commitment set" : "Response needed";
-  const eyebrow = isStrength ? "NEXT DEVELOPMENT BLOCK" : "NEXT TEAM COMMITMENT";
+  const statusLabel = !state.focus ? "Schedule clear" : requiresResponse ? "Response needed" : "Commitment set";
+  const eyebrow = requiresResponse
+    ? (isStrength ? "SESSION RESPONSE NEEDED" : "RESPONSE NEEDED")
+    : (isStrength ? "NEXT DEVELOPMENT BLOCK" : "NEXT TEAM COMMITMENT");
   const emptyTitle = isStrength ? "No strength session scheduled" : "No upcoming team event";
   const detailTitle = isStrength ? "Session details & training log" : "Schedule & attendance details";
   const detailSummary = isStrength ? "Open full S&C schedule, RSVP controls, and logging." : "Open the full team schedule and RSVP controls.";
-  const actionLabel = state.next && !nextConfirmed
+  const actionLabel = requiresResponse
     ? "Respond now"
-    : isStrength && state.next
+    : isStrength && state.focus
       ? "Open session"
-      : state.next
+      : state.focus
         ? "View schedule"
         : isStrength
           ? "Open S&C workspace"
@@ -155,24 +158,24 @@ export default function PlayerCommitmentCenter({
       <div className={styles.hero} data-testid={`player-commitment-hero-${mode}`}>
         <div className={styles.heroTopline}>
           <span className={styles.eyebrow}>{eyebrow}</span>
-          <span className={`${styles.status} ${state.next && !nextConfirmed ? styles.statusOpen : styles.statusSet}`}>
+          <span className={`${styles.status} ${requiresResponse ? styles.statusOpen : styles.statusSet}`}>
             <i aria-hidden="true" /> {statusLabel}
           </span>
         </div>
 
-        {state.next ? (
+        {state.focus ? (
           <div className={styles.heroBody}>
-            <div className={styles.dateTile} aria-label={`${nextDate.month} ${nextDate.day}`}>
-              <span>{nextDate.month}</span>
-              <strong>{nextDate.day}</strong>
-              <small>{nextDate.weekday}</small>
+            <div className={styles.dateTile} aria-label={`${focusDate.month} ${focusDate.day}`}>
+              <span>{focusDate.month}</span>
+              <strong>{focusDate.day}</strong>
+              <small>{focusDate.weekday}</small>
             </div>
             <div className={styles.heroCopy}>
               <div className={styles.iconTitle}>
                 <span className={styles.icon}><CommitmentIcon mode={mode} /></span>
                 <div>
-                  <h2>{itemTitle(state.next, mode)}</h2>
-                  <p>{clean(state.next?.time) || "Time TBD"} · {itemLocation(state.next, mode)}</p>
+                  <h2>{itemTitle(state.focus, mode)}</h2>
+                  <p>{clean(state.focus?.time) || "Time TBD"} · {itemLocation(state.focus, mode)}</p>
                 </div>
               </div>
               <button type="button" className={styles.primaryAction} onClick={revealDetails}>
