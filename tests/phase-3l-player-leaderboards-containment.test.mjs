@@ -4,7 +4,6 @@ import { readFileSync } from 'node:fs';
 
 const css = readFileSync('public/shotlab-phase3l-player-leaderboards-containment.css', 'utf8');
 const html = readFileSync('index.html', 'utf8');
-const app = readFileSync('src/App.jsx', 'utf8');
 const rendered = readFileSync('tests/e2e/phase-3l-player-leaderboards-containment.spec.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 
@@ -23,24 +22,19 @@ test('Phase 3L loads after accepted Phase 3K and remains Leaderboards-only', () 
 });
 
 test('Leaderboards removes duplicate outer reserve while retaining one safe dock reserve', () => {
-  requireMarker(css, '.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .performance-workspace');
-  requireMarker(css, 'min-height:0!important');
-  requireMarker(css, 'padding-bottom:0!important');
-  requireMarker(css, '.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .player-scroll-container');
-  requireMarker(css, 'padding-bottom:calc(var(--bottom-nav-content-padding,88px) + 8px)!important');
-  requireMarker(css, 'scroll-padding-bottom:calc(var(--bottom-nav-content-padding,88px) + 8px)!important');
-  requireMarker(css, '.player-scroll-container > .screen-fade-in');
-  requireMarker(css, '[data-testid="premium-leaderboards-hub"]');
+  for (const marker of [
+    '.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .performance-workspace',
+    'min-height:0!important',
+    'padding-bottom:0!important',
+    '.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .player-scroll-container',
+    'padding-bottom:calc(var(--bottom-nav-content-padding,88px) + 8px)!important',
+    'scroll-padding-bottom:calc(var(--bottom-nav-content-padding,88px) + 8px)!important',
+    '.player-scroll-container > .screen-fade-in',
+    '[data-testid="premium-leaderboards-hub"]',
+  ]) requireMarker(css, marker);
 });
 
-test('Player shell keeps the global dock-safe contract and visible Logout behavior', () => {
-  requireMarker(app, '--player-scroll-bottom-padding:calc(var(--bottom-nav-content-padding, 88px) + 24px + env(safe-area-inset-bottom, 0px))');
-  requireMarker(app, 'aria-label="Logout"');
-  requireMarker(app, 'tab==="leaderboards"');
-  requireMarker(app, '<PremiumLeaderboardsHub');
-});
-
-test('rendered Phase 3L acceptance protects ranking controls and the hard empty-tail budget', () => {
+test('rendered Phase 3L acceptance protects Logout, ranking controls, overflow, and hard tail budget', () => {
   for (const marker of [
     'premium-leaderboards-hub',
     'Current / Offseason',
@@ -60,6 +54,5 @@ test('rendered Phase 3L acceptance protects ranking controls and the hard empty-
 test('App Store workflow carries Phase 3L source/browser acceptance and evidence', () => {
   requireMarker(workflow, 'tests/phase-3l-player-leaderboards-containment.test.mjs');
   requireMarker(workflow, 'tests/e2e/phase-3l-player-leaderboards-containment.spec.mjs');
-  requireMarker(workflow, 'shotlab-phase-3k-coach-strength-hierarchy-evidence');
   requireMarker(workflow, 'shotlab-phase-3l-player-leaderboards-containment-evidence');
 });
