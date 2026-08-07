@@ -65,6 +65,14 @@
     min-width: 0;
     display: grid;
     gap: 3px;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    opacity: 1 !important;
+    filter: none !important;
   }
 
   .coachEventsSupportingSummaryCopy > span,
@@ -77,6 +85,7 @@
     background: transparent !important;
     box-shadow: none !important;
     opacity: 1 !important;
+    filter: none !important;
   }
 
   .coachEventsSupportingSummaryCopy > span {
