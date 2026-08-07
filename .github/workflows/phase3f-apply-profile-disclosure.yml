@@ -1,4 +1,5 @@
 name: Phase 3F Apply Profile Disclosure
+# Guarded one-shot source transform. The workflow removes itself after a successful edit.
 
 on:
   push:
