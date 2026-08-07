@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { installPlayerAssignmentEnhancer } from "../lib/playerAssignmentEnhancer.js";
 import { ExperiencePill, ExperienceProgressRing, ExperienceSignal } from "./PlayerDailyPrimitives.jsx";
 import ShotLabIcon from "./ShotLabIcon";
 import styles from "./PlayerDailyCommandCenter.module.css";
@@ -18,7 +19,14 @@ const iconButtonStyle = { display: "inline-flex", alignItems: "center", justifyC
 export default function PlayerDailyCommandCenter({ model, onAction }) {
   const [activeAction, setActiveAction] = useState("");
   const feedbackTimer = useRef(null);
-  useEffect(() => () => feedbackTimer.current && clearTimeout(feedbackTimer.current), []);
+
+  useEffect(() => {
+    installPlayerAssignmentEnhancer();
+  }, []);
+
+  useEffect(() => () => {
+    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
+  }, []);
   if (!model?.primaryAction) return null;
 
   const primary = model.primaryAction;
