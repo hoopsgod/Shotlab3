@@ -1,15 +1,13 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
+let changed = false;
+
 const panelPath = 'src/components/CoachDashboardPhase2.jsx';
 let source = readFileSync(panelPath, 'utf8');
+const panelMarker = 'data-testid="coach-leaderboard-pulse"';
 
-const marker = 'data-testid="coach-leaderboard-pulse"';
-if (source.includes(marker)) {
-  console.log('Phase 3L Coach leaderboard hierarchy already applied.');
-  process.exit(0);
-}
-
-const oldBlock = `export function CoachLeaderboardOperationalPanel({ rows = [], scope, query, onScopeChange, onQueryChange, onOpenPlayer }) {
+if (!source.includes(panelMarker)) {
+  const oldBlock = `export function CoachLeaderboardOperationalPanel({ rows = [], scope, query, onScopeChange, onQueryChange, onOpenPlayer }) {
   const risers = rows.filter((row) => row.improvement > 0).length;
   return (
     <div className={styles.phasePanel} data-testid="coach-leaderboard-operational-panel">
@@ -41,12 +39,12 @@ const oldBlock = `export function CoachLeaderboardOperationalPanel({ rows = [], 
   );
 }`;
 
-const occurrences = source.split(oldBlock).length - 1;
-if (occurrences !== 1) {
-  throw new Error(`Phase 3L expected exactly one Coach leaderboard panel anchor, found ${occurrences}.`);
-}
+  const occurrences = source.split(oldBlock).length - 1;
+  if (occurrences !== 1) {
+    throw new Error(`Phase 3L expected exactly one Coach leaderboard panel anchor, found ${occurrences}.`);
+  }
 
-const newBlock = `export function CoachLeaderboardOperationalPanel({ rows = [], scope, query, onScopeChange, onQueryChange, onOpenPlayer }) {
+  const newBlock = `export function CoachLeaderboardOperationalPanel({ rows = [], scope, query, onScopeChange, onQueryChange, onOpenPlayer }) {
   const risers = rows.filter((row) => row.improvement > 0).length;
   const overallLeader = [...rows].sort((a, b) => a.rank - b.rank)[0];
   const weeklyLeader = [...rows].sort((a, b) => b.weekly - a.weekly || a.rank - b.rank)[0];
@@ -115,6 +113,34 @@ const newBlock = `export function CoachLeaderboardOperationalPanel({ rows = [], 
   );
 }`;
 
-source = source.replace(oldBlock, newBlock);
-writeFileSync(panelPath, source);
-console.log('Applied Phase 3L Coach leaderboard competitive hierarchy.');
+  source = source.replace(oldBlock, newBlock);
+  writeFileSync(panelPath, source);
+  changed = true;
+} else {
+  console.log('Phase 3L Coach leaderboard hierarchy already applied.');
+}
+
+const followUpPath = 'src/lib/coachFollowUpEnhancer.js';
+let followUpSource = readFileSync(followUpPath, 'utf8');
+const placementMarker = `const drawerBody = dialog.querySelector('[class*="drawerBody"]') || dialog;`;
+
+if (!followUpSource.includes(placementMarker)) {
+  const oldPlacement = `    host = document.createElement("div");
+    host.dataset.testid = HOST_TEST_ID;
+    dialog.appendChild(host);`;
+  const placementOccurrences = followUpSource.split(oldPlacement).length - 1;
+  if (placementOccurrences !== 1) {
+    throw new Error(`Phase 3L expected exactly one Coach follow-up drawer placement anchor, found ${placementOccurrences}.`);
+  }
+  const newPlacement = `    const drawerBody = dialog.querySelector('[class*="drawerBody"]') || dialog;
+    host = document.createElement("div");
+    host.dataset.testid = HOST_TEST_ID;
+    drawerBody.appendChild(host);`;
+  followUpSource = followUpSource.replace(oldPlacement, newPlacement);
+  writeFileSync(followUpPath, followUpSource);
+  changed = true;
+} else {
+  console.log('Phase 3L Coach follow-up placement already applied.');
+}
+
+if (changed) console.log('Applied Phase 3L Coach leaderboard hierarchy and player-intelligence workflow placement.');
