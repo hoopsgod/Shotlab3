@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const index = readFileSync('index.html', 'utf8');
 const css = readFileSync('public/shotlab-phase3-native-route-framing.css', 'utf8');
+const workspaceSource = readFileSync('src/components/PlayerOperationalWorkspace.jsx', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 
 test('Phase 3C route framing loads after the existing Phase 3 secondary authority', () => {
@@ -28,6 +29,14 @@ test('Leaderboard destination removes the duplicated inner title while keeping c
   assert.match(css, /premium-leaderboards-hub"\]>header>div:nth-child\(2\)/);
   assert.match(css, /display:none!important;/);
   assert.match(css, /premium-leaderboards-hub"\]>header\{[\s\S]*?padding:0 0 12px!important;/);
+});
+
+test('Leaderboard hero cannot claim the top spot for a lower displayed rank', () => {
+  assert.match(workspaceSource, /function resolveWorkspaceSubtitle\(model\)/);
+  assert.match(workspaceSource, /model\?\.id !== "leaderboards"/);
+  assert.match(workspaceSource, /rank <= 1/);
+  assert.match(workspaceSource, /You are tied on makes with the position ahead\./);
+  assert.match(workspaceSource, /<p className=\{styles\.subtitle\}>\{subtitle\}<\/p>/);
 });
 
 test('Coach secondary routes share the same compact return affordance', () => {
