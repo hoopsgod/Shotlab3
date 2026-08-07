@@ -10,6 +10,15 @@
   --phase3g-accent-strong: #7f9e1e;
 }
 
+/* The metric strip already carries these three supporting signals interactively. */
+#coach-drills-management [data-testid="coach-page-dashboard-drills-evidence"] {
+  display: none !important;
+}
+
+#coach-drills-management [data-testid="coach-page-dashboard-drills-decision-brief"] {
+  margin-bottom: 12px !important;
+}
+
 #coach-drills-management [data-testid="coach-drills-operational-panel"] {
   --text-1: var(--phase3g-ink);
   --text-2: var(--phase3g-muted);
@@ -196,10 +205,6 @@
 
 .coach-drills-library-disclosure + .btn-v.cta-primary {
   display: none !important;
-}
-
-#coach-drills-management .fade-up:has(> div[style*="NEW DRILL"]) {
-  margin-top: 10px !important;
 }
 
 @media (max-width: 720px) {
