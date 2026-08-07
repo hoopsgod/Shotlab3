@@ -49,14 +49,10 @@ test('Player career presentation stays on the accepted light native system', () 
   assert.match(phaseCss, /touch-action:manipulation/);
 });
 
-test('Phase 3E removes only the duplicate Profile identity hero and leaves deep analytics intact', () => {
-  assert.match(phaseCss, /\[data-workspace-tab="profile"\]\s+div\[style\*="padding: 28px 22px"\]\[style\*="text-align: center"\]\[style\*="position: relative"\]\[style\*="overflow: hidden"\]/);
-  assert.match(phaseCss, /\[data-workspace-tab="profile"\]\s+div\[style\*="padding:28px 22px"\]\[style\*="text-align:center"\]\[style\*="position:relative"\]\[style\*="overflow:hidden"\]/);
-  assert.doesNotMatch(phaseCss, /\[data-workspace-tab="profile"\]\s+\.fade-up/, 'identity lock must not depend on incidental Profile wrapper classes');
-  assert.doesNotMatch(phaseCss, /:has\(/, 'duplicate identity lock should not rely on brittle :has() matching');
-  assert.match(phaseCss, /display:none!important/);
+test('Phase 3E removes the duplicate Profile identity hero at source and leaves deep analytics intact', () => {
+  assert.doesNotMatch(app, /OFFSEASON PLAYER/, 'redundant Profile identity copy must not render from source');
+  assert.doesNotMatch(phaseCss, /padding: ?28px 22px/, 'Phase 3E must not rely on hiding the removed hero with a style signature');
   assert.match(app, /OFFSEASON REPORT CARD/);
-  assert.match(app, /OFFSEASON PLAYER/);
   assert.match(app, /PLAYER PROGRESS PROFILE/);
   assert.match(app, /INTERPRETED PERFORMANCE TRENDS/);
   assert.match(app, /<ShotLabCharts scores=\{scores\} drills=\{drills\} programDrills=\{programDrills\} user=\{u\} \/>/);

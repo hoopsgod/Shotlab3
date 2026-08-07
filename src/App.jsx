@@ -4368,22 +4368,6 @@ return <div className="fade-up">
   viewerRole="player"
 />
 
-{/* Hero card */}
-<div style={{background:`linear-gradient(135deg,${VOLT}08,${CARD_BG})`,borderRadius:20,padding:"28px 22px",border:`1px solid ${VOLT}22`,marginBottom:24,textAlign:"center",position:"relative",overflow:"hidden"}}>
-  <div style={{position:"absolute",top:0,right:0,width:120,height:120,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}08,transparent)`,transform:"translate(30%,-30%)"}}/>
-  <Av n={u.name} sz={72} email={u.email} style={{margin:"0 auto 16px"}}/>
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:3}}>{u.name.toUpperCase()}</div>
-  <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:4,letterSpacing:2}}>OFFSEASON PLAYER</div>
-  {/* Quick stats row */}
-  <div style={{display:"flex",gap:6,marginTop:20,justifyContent:"center"}}>
-    {[{v:totalMakes+totalProgramMakes+totalShots,l:"MAKES",c:VOLT},{v:sessionsLogged+programSessionsLogged,l:"SESSIONS",c:LIGHT},{v:streak,l:"STREAK",c:ORANGE}].map(s=>
-      <div key={s.l} style={{background:BG,borderRadius:12,padding:"10px 14px",border:`1px solid ${BORDER_CLR}`,minWidth:70}}>
-        <div style={{fontFamily:FD,color:s.c,fontSize:22,lineHeight:1}}>{s.v}</div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:7,letterSpacing:2,marginTop:3,fontWeight:600}}>{s.l}</div>
-      </div>)}
-  </div>
-</div>
-
 {/* Badges */}
 {earnedBadges.length>0&&<div style={{marginBottom:24}}>
   <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>BADGES EARNED</div>

@@ -10,13 +10,7 @@
   --p3e-shadow:0 10px 26px rgba(24,31,27,.055);
 }
 
-/* The report card + route header already establish identity. Remove the second avatar/name hero only.
-   The inline-style signature below occurs once in ProfilePage, so scope to the Profile route itself and
-   do not depend on incidental wrapper classes or nesting that can change during rendering. */
-.performance-shell--player[data-workspace-tab="profile"] div[style*="padding: 28px 22px"][style*="text-align: center"][style*="position: relative"][style*="overflow: hidden"],
-.performance-shell--player[data-workspace-tab="profile"] div[style*="padding:28px 22px"][style*="text-align:center"][style*="position:relative"][style*="overflow:hidden"]{
-  display:none!important;
-}
+/* Duplicate Profile identity is removed at source; no rendered-node hiding is required. */
 
 /* Career history is valuable but deep. Player view enters through one native summary row; Coach view stays expanded. */
 .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-career-disclosure"]{
