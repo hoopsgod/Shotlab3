@@ -25,6 +25,15 @@ async function enterPlayerDemo(page) {
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
+async function openCalipariDrill(page) {
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
+  await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
+  const drill = page.getByRole("button", { name: /CALIPARI SHOOTING/i });
+  await expect(drill).toBeVisible();
+  await drill.click();
+  await expect(page.getByTestId("player-training-session")).toBeVisible({ timeout: 15_000 });
+}
+
 test.beforeEach(async ({ page }) => {
   await installRoutes(page);
 });
@@ -89,6 +98,37 @@ test("Phase 4D makes an empty Player leaderboard intentional instead of blank", 
   await capture(page, "11c-phase4d-player-leaderboard-empty.png");
 });
 
+test("Phase 4D makes a disabled training action look intentionally unavailable", async ({ page }) => {
+  await enterPlayerDemo(page);
+  await openCalipariDrill(page);
+  const scoreZone = page.getByTestId("player-training-score-zone");
+  const save = page.getByTestId("player-training-log-score");
+  await expect(save).toBeDisabled();
+  await scoreZone.evaluate((node) => node.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" }));
+  await page.waitForTimeout(120);
+  const treatment = await save.evaluate((node) => {
+    const style = getComputedStyle(node);
+    const rect = node.getBoundingClientRect();
+    const dock = document.querySelector('[data-testid="mobile-navigation-dock"]');
+    const dockRect = dock?.getBoundingClientRect();
+    return {
+      filter: style.filter,
+      shadow: style.boxShadow,
+      transform: style.transform,
+      cursor: style.cursor,
+      bottom: rect.bottom,
+      dockTop: dockRect?.top ?? window.innerHeight,
+    };
+  });
+  expect(treatment.filter).toContain("saturate");
+  expect(treatment.shadow).toBe("none");
+  expect(treatment.transform).toBe("none");
+  expect(treatment.cursor).toBe("not-allowed");
+  expect(treatment.bottom).toBeLessThanOrEqual(treatment.dockTop - 16);
+  await noOverflow(page);
+  await capture(page, "11d-phase4d-disabled-training-action.png");
+});
+
 test("Phase 4D preserves Coach Mission Control while the shared state system is present", async ({ page }) => {
   await page.goto("/");
   await page.getByRole("button", { name: /Coach demo/i }).click();
@@ -101,5 +141,5 @@ test("Phase 4D preserves Coach Mission Control while the shared state system is 
   expect(await page.getByTestId("auth-error-state").count()).toBe(0);
   expect(await page.getByTestId("player-workspace-empty-state").count()).toBe(0);
   await noOverflow(page);
-  await capture(page, "11d-phase4d-coach-reconciliation.png");
+  await capture(page, "11e-phase4d-coach-reconciliation.png");
 });
