@@ -27,7 +27,8 @@ test("Phase 5A preserves the stronger Phase 4 metric strip and lower dashboard c
   assert.match(commandCenter, /function TeamActivityPanel\(/);
   assert.match(commandCenter, /const teamPanel = hasTeamActivity \? <TeamActivityPanel/);
   assert.match(commandCenter, /const priorityPanel = sessionPanel \|\| teamPanel \|\| livePanel/);
-  assert.match(commandCenter, /const lowerPanels = \[sessionPanel \? teamPanel : null, sessionPanel \|\| teamPanel \? livePanel : null\]\.filter\(Boolean\)/);
+  assert.match(commandCenter, /const lowerPanels = \[sessionPanel \? teamPanel : null\]\.filter\(Boolean\)/);
+  assert.match(commandCenter, /coach-live-evidence-region/);
 });
 
 test("Phase 5A removes pseudo-derived intelligence rather than dressing it up", () => {
