@@ -103,9 +103,21 @@ test("Phase 4B turns a new personal best into a premium achievement moment", asy
   await expect(reveal.getByText("+1", { exact: true })).toBeVisible();
   await expect(reveal.getByRole("button", { name: "Bank this result" })).toBeVisible();
   const card = reveal.locator(".performanceRevealCard");
-  const style = await card.evaluate((node) => ({ radius: parseFloat(getComputedStyle(node).borderRadius), background: getComputedStyle(node).backgroundImage }));
+  const style = await card.evaluate((node) => {
+    const computed = getComputedStyle(node);
+    return {
+      radius: parseFloat(computed.borderRadius),
+      background: computed.backgroundImage,
+      backgroundColor: computed.backgroundColor,
+      paddingTop: parseFloat(computed.paddingTop),
+      shadow: computed.boxShadow,
+    };
+  });
   expect(style.radius).toBeGreaterThanOrEqual(24);
   expect(style.background).toContain("gradient");
+  expect(style.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(style.paddingTop).toBeGreaterThanOrEqual(20);
+  expect(style.shadow).not.toBe("none");
   await noOverflow(page);
   await capture(page, "09c-phase4b-player-pb-achievement.png");
 });
