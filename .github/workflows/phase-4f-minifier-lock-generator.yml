@@ -6,7 +6,7 @@ on:
       - agent/phase-4e-final-polish
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   generate-lockfile:
@@ -24,22 +24,21 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Install locked repository dependencies
-        run: npm ci
+      - name: Regenerate lockfile from exact manifest
+        run: npm install --package-lock-only --ignore-scripts
 
-      - name: Resolve exact production minifiers
-        run: npm install --save-dev --save-exact terser@latest lightningcss@latest
-
-      - name: Record resolved versions
+      - name: Verify exact production minifiers are locked
         run: |
-          node -e "const p=require('./node_modules/terser/package.json'); console.log('terser', p.version)"
-          node -e "const p=require('./node_modules/lightningcss/package.json'); console.log('lightningcss', p.version)"
+          node -e "const lock=require('./package-lock.json'); const root=lock.packages[''].devDependencies; if(root.terser!=='5.49.2'||root.lightningcss!=='1.33.0') process.exit(1); console.log('terser', root.terser); console.log('lightningcss', root.lightningcss)"
 
-      - name: Upload reproducible manifests
-        uses: actions/upload-artifact@v4
-        with:
-          name: phase-4f-minifier-lockfiles
-          path: |
-            package.json
-            package-lock.json
-          retention-days: 2
+      - name: Commit reproducible lockfile if needed
+        run: |
+          if git diff --quiet -- package.json package-lock.json; then
+            echo "Minifier manifests already reproducible."
+            exit 0
+          fi
+          git config user.name "shotlab-ci"
+          git config user.email "shotlab-ci@users.noreply.github.com"
+          git add package.json package-lock.json
+          git commit -m "Phase 4F: lock production minifier dependencies"
+          git push origin HEAD:${{ github.event.pull_request.head.ref }}
