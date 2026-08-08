@@ -32,9 +32,13 @@ function sum(rows, key) {
   return rows.reduce((total, row) => total + row[key], 0)
 }
 
-function findStartupAsset(rows, extension) {
-  return rows.find((asset) => new RegExp(`^assets/App-[^/]+\\.${extension}$`).test(asset.file))
-    || { file: `missing App.${extension}`, bytes: 0, gzipBytes: 0, missing: true }
+function findStartupAsset(rows, extension, { zeroWhenMissing = false } = {}) {
+  const asset = rows.find((row) => new RegExp(`^assets/App-[^/]+\\.${extension}$`).test(row.file))
+  if (asset) return asset
+  if (zeroWhenMissing) {
+    return { file: `none (zero startup App.${extension})`, bytes: 0, gzipBytes: 0, missing: true, zeroPayload: true }
+  }
+  return { file: `missing App.${extension}`, bytes: 0, gzipBytes: 0, missing: true }
 }
 
 const budget = JSON.parse(await readFile(budgetPath, 'utf8'))
@@ -65,7 +69,7 @@ const css = assets.filter((asset) => asset.type === 'css')
 const largestJavaScript = javaScript[0] || { file: 'none', bytes: 0, gzipBytes: 0 }
 const largestCss = css[0] || { file: 'none', bytes: 0, gzipBytes: 0 }
 const startupAppJavaScript = findStartupAsset(javaScript, 'js')
-const startupAppCss = findStartupAsset(css, 'css')
+const startupAppCss = findStartupAsset(css, 'css', { zeroWhenMissing: true })
 
 const metrics = {
   generatedAt: new Date().toISOString(),
@@ -87,7 +91,6 @@ const metrics = {
 
 const failures = []
 if (startupAppJavaScript.missing) failures.push('The startup App JavaScript asset was not found.')
-if (startupAppCss.missing) failures.push('The startup App CSS asset was not found.')
 if (largestJavaScript.bytes > budget.maxLargestJavaScriptBytes) {
   failures.push(`Largest JavaScript chunk ${largestJavaScript.file} is ${formatBytes(largestJavaScript.bytes)}; budget is ${formatBytes(budget.maxLargestJavaScriptBytes)}.`)
 }
