@@ -21,10 +21,10 @@ test('Phase 3L loads after accepted Phase 3K and remains Leaderboards-only', () 
   assert.equal(css.includes('data-workspace-tab="profile"'), false);
 });
 
-test('Leaderboards removes duplicate outer reserve while retaining one structural dock spacer', () => {
+test('Leaderboards removes duplicate outer reserve while retaining one minifier-safe structural dock spacer', () => {
   for (const marker of [
     '.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .performance-workspace',
-    '--phase3l-leaderboards-dock-reserve:calc(112px + env(safe-area-inset-bottom,0px))',
+    '--phase3l-leaderboards-dock-reserve:112px',
     'min-height:0!important',
     'padding-bottom:0!important',
     '.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .player-scroll-container',
@@ -36,9 +36,10 @@ test('Leaderboards removes duplicate outer reserve while retaining one structura
     'pointer-events:none!important',
     '[data-testid="premium-leaderboards-hub"]',
   ]) requireMarker(css, marker);
+  assert.equal(css.includes('--phase3l-leaderboards-dock-reserve:calc('), false, 'Phase 3L reserve must not use calc() that the legacy minifier can invalidate');
 });
 
-test('rendered Phase 3L acceptance protects controls, dock clearance, overflow, and bounded end reserve', () => {
+test('rendered Phase 3L acceptance protects controls, runtime CSS, dock clearance, overflow, and bounded end reserve', () => {
   for (const marker of [
     'premium-leaderboards-hub',
     'Current / Offseason',
@@ -51,6 +52,7 @@ test('rendered Phase 3L acceptance protects controls, dock clearance, overflow, 
     'Events Attended',
     'Strength & Conditioning',
     'Logout',
+    'PHASE3L_CSS_DIAGNOSTIC',
     'PHASE3L_GEOMETRY',
     'PHASE3L_DOCK_CLEARANCE',
     'layout.tail',
