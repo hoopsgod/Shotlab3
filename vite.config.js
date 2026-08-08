@@ -258,6 +258,11 @@ export default defineConfig({
     reportBundleOwnership(),
     bundleVisualAuthorityCss(),
   ],
+  css: {
+    modules: {
+      generateScopedName: 's_[hash:base64:6]',
+    },
+  },
   esbuild: { drop: ['debugger'], pure: ['console.log', 'console.debug', 'console.info'] },
   base: './',
   build: {
