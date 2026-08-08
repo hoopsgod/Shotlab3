@@ -81,7 +81,8 @@ jobs:
             artifacts/design-audit/iphone/11a-phase4d-auth-error-state.png
             artifacts/design-audit/iphone/11b-phase4d-player-program-first-use.png
             artifacts/design-audit/iphone/11c-phase4d-player-leaderboard-empty.png
-            artifacts/design-audit/iphone/11d-phase4d-coach-reconciliation.png
+            artifacts/design-audit/iphone/11d-phase4d-disabled-training-action.png
+            artifacts/design-audit/iphone/11e-phase4d-coach-reconciliation.png
           if-no-files-found: error
           retention-days: 14
 
