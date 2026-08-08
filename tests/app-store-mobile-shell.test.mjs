@@ -44,9 +44,10 @@ test("persistent navigation behaves as a floating native tab bar", () => {
   assert.match(navigationCss, /-apple-system, BlinkMacSystemFont/);
 });
 
-test("notification dots have accessible text semantics", () => {
-  assert.match(navigationSource, /item\.dot \? `\$\{label\}, updates available` : label/);
-  assert.match(navigationSource, /secondaryHasNotification \? "More, updates available" : "More"/);
+test("notification dots add accessible descriptions without renaming controls", () => {
+  assert.match(navigationSource, /aria-label=\{label\}/);
+  assert.match(navigationSource, /aria-description=\{item\.dot \? "Updates available" : undefined\}/);
+  assert.match(navigationSource, /aria-label="More" aria-description=\{secondaryHasNotification \? "Updates available" : undefined\}/);
 });
 
 test("More navigation is a floating modal sheet with keyboard focus containment", () => {
