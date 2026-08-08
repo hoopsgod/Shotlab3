@@ -40,9 +40,9 @@ test("Phase 4A keeps Liquid Glass out of the content identity layer", () => {
   assert.match(identityCss, /player-progress-metrics/);
 });
 
-test("Phase 4A runs after Phase 3 closure and before visual-authority minification", () => {
+test("Phase 4A remains ordered after Phase 3 closure and before Phase 4B performance authority", () => {
   for (const name of ["dev", "prepare:route-enhancers"]) {
     const command = pkg.scripts[name];
-    assert.match(command, /apply-phase3v-final-reconciliation\.mjs.*apply-phase4a-signature-visual-identity\.mjs.*minify-visual-authority-css\.mjs/);
+    assert.match(command, /apply-phase3v-final-reconciliation\.mjs.*apply-phase4a-signature-visual-identity\.mjs.*apply-phase4b-premium-performance-marks\.mjs.*minify-visual-authority-css\.mjs/);
   }
 });

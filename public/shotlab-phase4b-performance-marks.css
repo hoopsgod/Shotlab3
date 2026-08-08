@@ -1,0 +1,64 @@
+/* Phase 4B — Premium performance marks and achievement language. */
+
+.performanceRevealOverlay{
+  position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:22px;
+  background:rgba(3,6,8,.76);-webkit-backdrop-filter:blur(14px) saturate(115%);backdrop-filter:blur(14px) saturate(115%)
+}
+.performanceRevealOverlay .performanceRevealCard{
+  width:min(100%,390px);position:relative;overflow:hidden;display:grid;gap:18px;padding:24px!important;border-radius:28px!important;
+  border:1px solid rgba(235,244,240,.12)!important;
+  background-color:#101712!important;
+  background-image:linear-gradient(150deg,#101712 0%,#151d17 64%,#0e1411 100%)!important;
+  box-shadow:0 30px 90px rgba(0,0,0,.46),inset 0 1px rgba(255,255,255,.035)!important;color:#f7faf5!important;
+  animation:phase4bRevealIn 260ms cubic-bezier(.2,.8,.2,1) both
+}
+.performanceRevealOverlay .performanceRevealCard [data-performance-kind]{--pm-ink:#f7faf5;--pm-muted:#9ca8a0}
+.performanceRevealOverlay .performanceRevealCard [data-performance-kind] strong,
+.performanceRevealOverlay .performanceRevealCard [data-performance-kind] span{color:#f7faf5!important}
+.performanceRevealOverlay .performanceRevealCard [data-performance-kind] small{color:#9ca8a0!important}
+.performanceRevealCard::before{
+  content:"";position:absolute;width:210px;height:210px;border-radius:999px;right:-102px;top:-112px;
+  border:1px solid color-mix(in srgb,var(--team-brand-primary,var(--accent,#c8ff1a)) 26%,transparent);
+  box-shadow:0 0 0 18px color-mix(in srgb,var(--team-brand-primary,var(--accent,#c8ff1a)) 4%,transparent);pointer-events:none
+}
+.performanceRevealCard::after{
+  content:"";position:absolute;left:24px;right:24px;top:0;height:2px;border-radius:999px;
+  background:linear-gradient(90deg,transparent,var(--team-brand-primary,var(--accent,#c8ff1a)) 26%,transparent);opacity:.82
+}
+.performanceRevealCard--pb::after{background:linear-gradient(90deg,transparent,var(--semantic-warning,#ffb547) 26%,transparent)}
+.performanceRevealEyebrow{position:relative;z-index:1;color:#8f9a91!important;font:800 10px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.12em;text-transform:uppercase;background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+.performanceRevealOverlay .performanceRevealSummary{position:relative;z-index:1;color:#9ca8a0!important;font:560 12px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:-.006em;background:transparent!important;background-image:none!important;border:0!important;box-shadow:none!important;padding:0!important;border-radius:0!important}
+.performanceRevealDelta{position:relative;z-index:1;display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:8px 10px;padding:13px 14px;border-block:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.018)}
+.performanceRevealDelta span{color:#7f8a82;font:700 8.5px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.07em;text-transform:uppercase}.performanceRevealDelta strong{color:#f7faf5;font:820 18px/1 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;letter-spacing:-.035em}
+.performanceRevealDismiss{position:relative;z-index:1;min-height:50px;border:1px solid color-mix(in srgb,var(--team-brand-primary,var(--accent,#c8ff1a)) 70%,#8cac00);border-radius:15px;background:var(--team-brand-primary,var(--accent,#c8ff1a));color:#11170d;font:780 13px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:-.01em;cursor:pointer;box-shadow:0 10px 26px color-mix(in srgb,var(--team-brand-primary,var(--accent,#c8ff1a)) 18%,transparent)}
+.performanceRevealCard--pb .performanceRevealDismiss{border-color:#d48c22;background:var(--semantic-warning,#ffb547);box-shadow:0 10px 26px rgba(255,181,71,.14)}
+
+.performanceBadgeShelf{margin:0 0 24px;padding:17px;border:1px solid rgba(17,26,33,.09);border-radius:22px;background:#fff;box-shadow:0 1px 2px rgba(17,26,33,.035),0 12px 32px rgba(17,26,33,.045)}
+.performanceBadgeShelfHeader{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px;padding-bottom:11px;border-bottom:1px solid rgba(17,26,33,.08)}
+.performanceBadgeShelfHeader span{color:#657b05;font:800 9px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.10em}.performanceBadgeShelfHeader strong{color:#65717a;font:700 10px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;text-align:right}
+.performanceBadgeShelfGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.performanceBadgeShelfGrid>[data-performance-kind]{min-width:0;padding:8px 9px;border:1px solid rgba(17,26,33,.07);border-radius:15px;background:#f8f8f4}
+.performanceBadgeNext{position:relative;overflow:hidden;margin-top:13px;padding:12px 13px;border:1px dashed rgba(17,26,33,.13);border-radius:17px;background:linear-gradient(135deg,#f7f7f2,#fbfbf8)}
+.performanceBadgeNext::after{content:"";position:absolute;width:74px;height:74px;border-radius:999px;right:-30px;top:-28px;border:1px solid rgba(101,123,5,.10);pointer-events:none}
+.performanceBadgeNextLabel{margin-bottom:7px;color:#7b847d;font:800 8px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.10em}
+.performanceBadgeNext [data-performance-kind]{opacity:.78}.performanceBadgeNext [data-performance-kind] div:first-child{filter:grayscale(.25)}
+.performanceBadgeComplete{padding:11px 12px;border-radius:14px;background:#f6f8ef;color:#516005;font:650 11px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}
+
+[data-testid="player-progress-metrics"]>.metricMark,
+[data-testid="player-progress-metrics"]>div{display:flex!important;align-items:center!important;min-width:0!important;padding:9px 10px!important}
+[data-testid="player-progress-metrics"] [data-performance-kind]{width:100%}
+[data-testid="player-progress-metrics"] [data-performance-kind] span{display:block!important;color:#f7faf5!important;font-size:9px!important;letter-spacing:-.005em!important;text-transform:none!important}
+[data-testid="player-progress-metrics"] [data-performance-kind] small{margin:0!important;color:rgba(248,250,245,.46)!important;font-size:7.5px!important;letter-spacing:.03em!important}
+
+[data-testid="compact-leaderboard-preview"] [data-performance-kind="rank"]{justify-self:start}
+[data-testid="compact-leaderboard-preview"] [data-performance-kind="rank"]>div:first-child{filter:saturate(.95)}
+[data-testid="compact-leaderboard-preview"] [data-leaderboard-rank="1"]{position:relative}
+[data-testid="compact-leaderboard-preview"] [data-leaderboard-rank="1"]::after{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;border-radius:999px;background:var(--accent);opacity:.8}
+
+@keyframes phase4bRevealIn{from{opacity:0;transform:translateY(12px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
+
+@media(max-width:620px){
+  .performanceRevealOverlay{padding:18px}.performanceRevealOverlay .performanceRevealCard{padding:21px!important;border-radius:25px!important}.performanceBadgeShelfGrid{grid-template-columns:1fr}
+  [data-testid="player-progress-metrics"]{gap:6px!important}[data-testid="player-progress-metrics"]>div{padding:8px 7px!important}
+}
+@media(max-width:390px){.performanceRevealDelta{grid-template-columns:1fr auto}.performanceRevealDelta span:nth-of-type(2){grid-column:1}.performanceRevealDelta strong:nth-of-type(2){grid-column:2}}
+@media(prefers-reduced-motion:reduce){.performanceRevealOverlay,.performanceRevealCard,.performanceRevealCard *{animation:none!important;transition:none!important}}

@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { derivePlayerProgressStory } from "../lib/playerProgressStory.js";
 import styles from "./PlayerProgressStory.module.css";
+import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
 
 function TrendSparkline({ points = [] }) {
   const values = points.map((point) => Number(point?.made) || 0);
@@ -84,9 +85,15 @@ export default function PlayerProgressStory({
           </div>
         </div>
         <div className={styles.metricStrip} data-testid="player-progress-metrics">
-          <div><span>ACTIVE DAYS</span><strong>{story.activeDays7}<small>/7</small></strong></div>
-          <div><span>LIVE RHYTHM</span><strong>{story.currentStreak}<small>D</small></strong></div>
-          <div><span>RECENT PBS</span><strong>{story.pbCount30}<small>30D</small></strong></div>
+          <div className={styles.metricMark}>
+            <ShotLabPerformanceMark kind="milestone" value={`${story.activeDays7}/7`} label="Active days" detail="Last 7 days" compact testId="player-progress-active-days-mark" />
+          </div>
+          <div className={styles.metricMark}>
+            <ShotLabPerformanceMark kind="streak" value={`${story.currentStreak}D`} label="Live rhythm" detail="Current streak" compact testId="player-progress-streak-mark" />
+          </div>
+          <div className={styles.metricMark}>
+            <ShotLabPerformanceMark kind="pb" value={story.pbCount30} label="Recent PBs" detail="Last 30 days" compact testId="player-progress-pb-mark" />
+          </div>
         </div>
       </div>
 

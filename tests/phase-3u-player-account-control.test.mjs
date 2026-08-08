@@ -39,6 +39,6 @@ test("Phase 3U remains ordered after legacy route enhancers and before later vis
   const pkg = JSON.parse(packageSource);
   for (const scriptName of ["dev", "prepare:route-enhancers"]) {
     const script = pkg.scripts[scriptName];
-    assert.match(script, /apply-expert-app-review-v2\.mjs && node scripts\/apply-phase3u-player-account-control\.mjs && node scripts\/apply-phase3u-production-acceptance-path\.mjs && node scripts\/apply-phase3v-final-reconciliation\.mjs && node scripts\/apply-phase4a-signature-visual-identity\.mjs && node scripts\/minify-visual-authority-css\.mjs/);
+    assert.match(script, /apply-expert-app-review-v2\.mjs && node scripts\/apply-phase3u-player-account-control\.mjs && node scripts\/apply-phase3u-production-acceptance-path\.mjs && node scripts\/apply-phase3v-final-reconciliation\.mjs && node scripts\/apply-phase4a-signature-visual-identity\.mjs && node scripts\/apply-phase4b-premium-performance-marks\.mjs && node scripts\/minify-visual-authority-css\.mjs/);
   }
 });
