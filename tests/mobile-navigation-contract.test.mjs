@@ -57,12 +57,13 @@ test("notification semantics add descriptions without renaming controls", () => 
   assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
 });
 
-test("coach Mission Control cannot replace the shared light native navigation surface", () => {
+test("shared navigation remains authoritative inside coach Mission Control", () => {
   assert.match(coachMissionControlCss, /Mission Control inherits the shared native navigation surface/);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\][^{]*\{[^}]*padding:7px 10px/s);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]:before\s*\{[^}]*rgba\(2,4,5/s);
   assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]>div\s*\{[^}]*background:rgba\(9,14,18,.88\)/s);
   assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*rgba\(252, 252, 250, \.9\)\s*!important/s);
+  assert.match(architectureCss, /body\.mission-control-active \[data-testid="mobile-navigation-dock"\]\[data-navigation-role="coach"\] > div\s*\{[^}]*background:\s*transparent;[^}]*backdrop-filter:\s*none;/s);
 });
 
 test("secondary navigation is accessible, dismissible, and does not leave body scrolling behind", () => {
