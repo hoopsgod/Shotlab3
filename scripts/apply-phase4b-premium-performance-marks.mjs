@@ -70,10 +70,12 @@ if (!source.includes('data-testid="player-achievement-shelf"')) {
 </div>}`;
   requireOne(source, oldBadges, "legacy profile badges");
   const newBadges = `{/* Badges */}
-{earnedBadges.length>0&&<section className="performanceBadgeShelf" data-testid="player-achievement-shelf" aria-label="Earned streak milestones">
-  <div className="performanceBadgeShelfHeader"><span>ACHIEVEMENT CABINET</span><strong>{earnedBadges.length} earned</strong></div>
-  <div className="performanceBadgeShelfGrid">{earnedBadges.map(b=><ShotLabPerformanceMark key={b.days} kind="streak" value={\`\${b.days}D\`} label={b.name} detail="Streak milestone" compact surface="light" testId={\`player-achievement-\${b.days}\`}/>)}</div>
-</section>}`;
+{(()=>{const nextBadge=STREAK_BADGES.find(b=>b.days>streak);return <section className="performanceBadgeShelf" data-testid="player-achievement-shelf" aria-label="Streak achievement milestones">
+  <div className="performanceBadgeShelfHeader"><span>ACHIEVEMENT CABINET</span><strong>{earnedBadges.length} earned · {streak}D current</strong></div>
+  {earnedBadges.length>0&&<div className="performanceBadgeShelfGrid performanceBadgeShelfGrid--earned">{earnedBadges.map(b=><ShotLabPerformanceMark key={b.days} kind="streak" value={\`\${b.days}D\`} label={b.name} detail="Streak milestone" compact surface="light" testId={\`player-achievement-\${b.days}\`}/>)}</div>}
+  {nextBadge&&<div className="performanceBadgeNext" data-testid="player-achievement-next"><div className="performanceBadgeNextLabel">NEXT MILESTONE</div><ShotLabPerformanceMark kind="milestone" value={\`\${nextBadge.days}D\`} label={nextBadge.name} detail={\`\${Math.max(0,nextBadge.days-streak)} days to unlock\`} compact surface="light" tone="neutral" testId="player-achievement-next-mark" /></div>}
+  {!nextBadge&&earnedBadges.length>0&&<div className="performanceBadgeComplete">All streak milestones earned. Keep protecting the standard.</div>}
+</section>})()}`;
   source = source.replace(oldBadges, newBadges);
 }
 
@@ -83,9 +85,11 @@ for (const retained of [
   'const isPB=v>prevBest&&prevBest>0;',
   'setPbReveal({drill:active.name,score:v,prev:prevBest})',
   'STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days)',
+  'STREAK_BADGES.find(b=>b.days>streak)',
   'data-testid="player-pb-achievement-reveal"',
   'data-testid="player-streak-achievement-reveal"',
   'data-testid="player-achievement-shelf"',
+  'data-testid="player-achievement-next"',
 ]) if (!source.includes(retained)) fail(`performance capability removed: ${retained}`);
 
 writeFileSync(appPath, source);
