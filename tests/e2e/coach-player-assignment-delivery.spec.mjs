@@ -1,134 +1,85 @@
 import { test, expect } from "@playwright/test";
 
 const TEAM_ID = "team-assignment-delivery";
-const COACH_EMAIL = "coach.delivery@example.com";
+const COACH_EMAIL = "coach.delivery@shotlab.app";
 const PLAYER_EMAIL = "ari.delivery@example.com";
-const today = new Date().toISOString().slice(0, 10);
-
-const team = {
-  id: TEAM_ID,
-  name: "Assignment Delivery Elite",
-  ownerCoachId: COACH_EMAIL,
-  joinCode: "DELIVER",
-  branding: {
-    name: "Assignment Delivery Elite",
-    teamName: "Assignment Delivery Elite",
-    primaryColor: "#C8FF1A",
-    secondaryColor: "#77D7FF",
-    accentColor: "#C8FF1A",
-    logoUrl: "/branding/titans-default-mark.svg",
-    logoMarkUrl: "/branding/titans-default-mark.svg",
-  },
-};
-
-const players = [
-  { id: "coach-delivery", email: COACH_EMAIL, name: "Delivery Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
-  { id: "player-delivery", playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Ari Delivery", role: "player", teamId: TEAM_ID },
-];
+const now = Date.now();
+const iso = new Date(now).toISOString();
 
 const commonSeed = {
-  "sl:teams": [team],
-  "sl:players": players,
-  "sl:player-profiles": [{ id: "profile-delivery", userId: PLAYER_EMAIL, email: PLAYER_EMAIL, teamId: TEAM_ID, firstName: "Ari", lastName: "Delivery" }],
-  "sl:drills": [{ id: "form", name: "Form Shooting", desc: "Clean mechanics", max: 50, icon: "ft" }],
+  "sl:teams": [{ id: TEAM_ID, name: "Delivery Team", ownerCoachId: COACH_EMAIL, joinCode: "DELIVERY", createdAt: now }],
+  "sl:players": [
+    { id: "coach-delivery", email: COACH_EMAIL, name: "Delivery Coach", role: "coach", teamId: TEAM_ID },
+    { id: "player-delivery", email: PLAYER_EMAIL, name: "Ari Delivery", role: "player", teamId: TEAM_ID },
+  ],
+  "sl:player-profiles": [{ id: "player-delivery", email: PLAYER_EMAIL, name: "Ari Delivery", teamId: TEAM_ID, role: "player" }],
+  "sl:home-drills": [{ id: "form", name: "Form Shooting", category: "Shooting", scoringType: "makes", target: 50 }],
   "sl:program-drills": [],
   "sl:scores": [],
   "sl:program-scores": [],
-  "sl:shotlogs": [{ id: "result-delivery", teamId: TEAM_ID, playerId: PLAYER_EMAIL, email: PLAYER_EMAIL, name: "Ari Delivery", made: 33, date: today, ts: Date.now() }],
+  "sl:shotlogs": [{ id: "shot-delivery", email: PLAYER_EMAIL, name: "Ari Delivery", player_id: "player-delivery", team_id: TEAM_ID, drill_id: "form", drill_name: "Form Shooting", made: 33, attempted: 50, date: iso.slice(0, 10), ts: now, src: "home", syncState: "remote_saved" }],
   "sl:events": [],
   "sl:rsvps": [],
   "sl:sc-sessions": [],
   "sl:sc-rsvps": [],
   "sl:sc-logs": [],
   "sl:season-archives": [],
-  "sl:coach-priorities": {},
 };
 
 const fulfill = (route, body, status = 200) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
 
 async function installRoutes(context, state) {
-  await context.route("**/v1/legacy-auth/restore", async (route) => {
-    const payload = route.request().postDataJSON?.() || {};
-    const requester = String(payload.email || route.request().headers()["x-user-id"] || "").toLowerCase();
-    const profile = requester === COACH_EMAIL
-      ? { email: COACH_EMAIL, name: "Delivery Coach", role: "coach", team_id: TEAM_ID }
-      : { email: PLAYER_EMAIL, name: "Ari Delivery", role: "player", team_id: TEAM_ID };
-    await fulfill(route, { ok: true, profile });
+  await context.route("**/v1/player-assignments**", async (route) => {
+    const request = route.request();
+    if (request.method() === "GET") {
+      const url = new URL(request.url());
+      if (url.searchParams.get("scope") === "team") {
+        return fulfill(route, { ok: true, storage_mode: "team_remote", team_id: TEAM_ID, assignments: state.assignment ? [state.assignment] : [] });
+      }
+      return fulfill(route, { ok: true, storage_mode: "team_remote", assignments: state.assignment ? [state.assignment] : [] });
+    }
+    const payload = request.postDataJSON();
+    if (payload.action === "assign") {
+      state.assignment = {
+        id: "assignment-delivery",
+        teamId: TEAM_ID,
+        playerIdentity: String(payload.assignment?.player_identity || payload.player_identity || PLAYER_EMAIL).toLowerCase(),
+        playerName: payload.assignment?.player_name || "Ari Delivery",
+        assignmentText: payload.assignment?.assignment_text || "",
+        resultDetail: payload.assignment?.result_detail || "Home shots · 33 makes",
+        state: "assigned",
+        assignedBy: COACH_EMAIL,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      return fulfill(route, { ok: true, storage_mode: "team_remote", assignment: state.assignment });
+    }
+    const nextState = payload.action === "acknowledge" ? "acknowledged" : payload.action === "start" ? "started" : payload.action === "complete" ? "completed" : state.assignment?.state;
+    state.assignment = { ...state.assignment, state: nextState, updatedAt: new Date().toISOString(), ...(nextState === "completed" ? { completedAt: new Date().toISOString() } : {}) };
+    return fulfill(route, { ok: true, storage_mode: "team_remote", assignment: state.assignment });
   });
 
   await context.route("**/v1/coach/activity/first-results**", (route) => fulfill(route, {
     ok: true,
     team_id: TEAM_ID,
     count: 1,
-    results: [{
-      id: "result-delivery",
-      team_id: TEAM_ID,
-      player_id: PLAYER_EMAIL,
-      player_email: PLAYER_EMAIL,
-      player_name: "Ari Delivery",
-      made: 33,
-      date: today,
-      observed_at: new Date().toISOString(),
-    }],
+    results: [{ id: "activity-delivery", player_email: PLAYER_EMAIL, player_name: "Ari Delivery", detail: "Home shots · 33 makes", meta: "Today", made: 33, date: iso.slice(0, 10), ts: now }],
   }));
-
-  await context.route("**/v1/player-assignments**", async (route) => {
-    const request = route.request();
-    const requester = String(request.headers()["x-user-id"] || "").toLowerCase();
-    if (request.method() === "GET") {
-      const visible = state.assignment && (requester === COACH_EMAIL || requester === PLAYER_EMAIL) ? [state.assignment] : [];
-      await fulfill(route, { ok: true, storage_mode: "team_remote", team_id: TEAM_ID, assignments: visible });
-      return;
-    }
-    const payload = request.postDataJSON();
-    const now = new Date().toISOString();
-    if (payload.action === "assign") {
-      state.assignment = {
-        teamId: TEAM_ID,
-        playerIdentity: payload.assignment.player_identity,
-        playerName: payload.assignment.player_name,
-        assignmentText: payload.assignment.assignment_text,
-        resultDetail: payload.assignment.result_detail,
-        state: "assigned",
-        assignedBy: COACH_EMAIL,
-        createdAt: now,
-        updatedAt: now,
-        acknowledgedAt: "",
-        startedAt: "",
-        completedAt: "",
-      };
-    } else {
-      const nextState = payload.action === "acknowledge" ? "acknowledged" : payload.action === "start" ? "started" : "completed";
-      state.assignment = {
-        ...state.assignment,
-        state: nextState,
-        updatedAt: now,
-        ...(nextState === "acknowledged" ? { acknowledgedAt: now } : {}),
-        ...(nextState === "started" ? { startedAt: now } : {}),
-        ...(nextState === "completed" ? { completedAt: now } : {}),
-      };
-    }
-    await fulfill(route, { ok: true, storage_mode: "team_remote", team_id: TEAM_ID, assignment: state.assignment });
-  });
-
   await context.route("**/v1/coach-follow-ups**", async (route) => {
-    if (route.request().method() === "GET") {
-      await fulfill(route, { ok: true, storage_mode: "team_remote", follow_ups: state.followUp ? [state.followUp] : [] });
-      return;
-    }
-    const payload = route.request().postDataJSON();
+    const request = route.request();
+    if (request.method() === "GET") return fulfill(route, { ok: true, storage_mode: "team_remote", follow_ups: state.followUp ? [state.followUp] : [] });
+    const payload = request.postDataJSON();
     state.followUp = {
-      teamId: payload.team_id,
-      playerIdentity: payload.player_identity,
-      playerName: payload.player_name,
-      state: payload.state,
-      note: payload.note,
-      createdAt: payload.created_at,
+      id: "followup-delivery",
+      teamId: TEAM_ID,
+      playerIdentity: PLAYER_EMAIL,
+      playerName: "Ari Delivery",
+      state: payload.follow_up?.state || "open",
+      note: payload.follow_up?.note || "",
+      createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
-      completedAt: "",
-      updatedBy: COACH_EMAIL,
     };
-    await fulfill(route, { ok: true, storage_mode: "team_remote", follow_up: state.followUp });
+    return fulfill(route, { ok: true, storage_mode: "team_remote", follow_up: state.followUp });
   });
 
   await context.route("**/v1/team-priorities**", (route) => fulfill(route, { ok: true, storage_mode: "team_remote", priorities_by_team: {} }));
@@ -194,6 +145,9 @@ test("coach assignment reaches the exact player and completion returns to the co
 
   await coachPage.bringToFront();
   await coachPage.evaluate(() => window.dispatchEvent(new Event("focus")));
+  const coachDock = coachPage.getByTestId("mobile-navigation-dock");
+  await expect(coachDock).toBeVisible({ timeout: 20_000 });
+  await coachDock.getByRole("button", { name: "Players", exact: true }).click();
   const roster = coachPage.locator("#coach-roster-operations");
   await expect(roster).toBeVisible({ timeout: 20_000 });
   await roster.locator('[role="button"]').filter({ hasText: "Ari Delivery" }).first().click();
