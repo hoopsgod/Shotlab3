@@ -74,7 +74,10 @@ update("tests/e2e/coach-player-cross-device-first-result.spec.mjs", (source) => 
   await responseButton.click();`,
     ];
     for (const legacy of legacyPatterns) {
-      if (next.includes(legacy)) next = next.replace(legacy, premiumResponse);
+      if (next.includes(legacy)) {
+        next = next.replace(legacy, premiumResponse);
+        break;
+      }
     }
   }
   if (!next.includes(premiumResponse)) throw new Error("Phase 4F premium attendance response transition was not found.");
