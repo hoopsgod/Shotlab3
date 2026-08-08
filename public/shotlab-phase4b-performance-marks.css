@@ -30,7 +30,7 @@
 .performanceBadgeShelfHeader{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px;padding-bottom:11px;border-bottom:1px solid rgba(17,26,33,.08)}
 .performanceBadgeShelfHeader span{color:#657b05;font:800 9px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.10em}.performanceBadgeShelfHeader strong{color:#65717a;font:700 10px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;text-align:right}
 .performanceBadgeShelfGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.performanceBadgeShelfGrid>[data-performance-kind]{min-width:0;padding:8px 9px;border:1px solid rgba(17,26,33,.07);border-radius:15px;background:#f8f8f4}
-.performanceBadgeNext{position:relative;overflow:hidden;margin-top:earned;padding:12px 13px;border:1px dashed rgba(17,26,33,.13);border-radius:17px;background:linear-gradient(135deg,#f7f7f2,#fbfbf8)}
+.performanceBadgeNext{position:relative;overflow:hidden;margin-top:13px;padding:12px 13px;border:1px dashed rgba(17,26,33,.13);border-radius:17px;background:linear-gradient(135deg,#f7f7f2,#fbfbf8)}
 .performanceBadgeNext::after{content:"";position:absolute;width:74px;height:74px;border-radius:999px;right:-30px;top:-28px;border:1px solid rgba(101,123,5,.10);pointer-events:none}
 .performanceBadgeNextLabel{margin-bottom:7px;color:#7b847d;font:800 8px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.10em}
 .performanceBadgeNext [data-performance-kind]{opacity:.78}.performanceBadgeNext [data-performance-kind] div:first-child{filter:grayscale(.25)}
