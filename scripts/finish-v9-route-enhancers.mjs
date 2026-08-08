@@ -82,14 +82,20 @@ replaceOnce(
 {
   const path = "vite.config.js";
   const source = readFileSync(path, "utf8");
-  const phase4fChunking = [
+  const consolidatedPhase4fChunking = [
+    "AuthenticatedUi",
+    "AppDomainServices",
+    "PlayerWorkspaces",
+    "CoachWorkspaces",
+  ].every((token) => source.includes(token));
+  const legacyPhase4fChunking = [
     "PlayerAnalyticsWorkspaces",
     "PlayerInterfaceWorkspaces",
     "PlayerCoachAssignmentCard.jsx",
     "PlayerDashboardHeader.jsx",
   ].every((token) => source.includes(token));
 
-  if (!phase4fChunking) {
+  if (!consolidatedPhase4fChunking && !legacyPhase4fChunking) {
     replaceOnce(
       path,
       "    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')\n    || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n  ) {\n    return 'PlayerProfileWorkspaces'\n  }\n\n  if (\n    moduleId.includes('/src/components/PlayerDashboardHeader.jsx')",
