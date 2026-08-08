@@ -29,6 +29,21 @@ const COACH_ADMIN_REDIRECTS = new Map([
   ['./components/CoachProgramScoreDrawer.jsx', path.resolve(process.cwd(), 'src/components/DeferredCoachProgramScoreDrawer.jsx')],
   ['./screens/CoachTeamBrandingScreen', path.resolve(process.cwd(), 'src/components/DeferredCoachTeamBrandingScreen.jsx')],
 ])
+const APP_DOMAIN_SERVICE_FRAGMENTS = [
+  '/src/lib/appPersistenceService',
+  '/src/lib/remotePersistence',
+  '/src/lib/homeShotLogging',
+  '/src/lib/playerDataManagement',
+  '/src/lib/seasonArchive',
+  '/src/lib/playerDashboardSelectors',
+  '/src/lib/coachDashboardSelectors',
+  '/src/lib/coachOperationalDashboard',
+  '/src/lib/coachOperationalIntelligence',
+  '/src/lib/playerOperationalWorkspaces',
+  '/src/lib/operationalInsightRails',
+  '/src/lib/trainingCatalogPersistenceService',
+  '/src/lib/playerChallengePersistenceService',
+]
 
 function deferProgressCharts() {
   return {
@@ -166,16 +181,11 @@ function stableVendorChunk(id) {
   if (
     moduleId.includes('/src/components/PremiumLeaderboardsHub.jsx')
     || moduleId.includes('/src/lib/seasonLeaderboardAnalytics.js')
-  ) {
-    return 'PremiumLeaderboardsHub'
-  }
-
-  if (
-    moduleId.includes('/src/components/ShotLabCharts.jsx')
+    || moduleId.includes('/src/components/ShotLabCharts.jsx')
     || moduleId.includes('/src/components/PlayerCareerHistory.jsx')
     || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')
   ) {
-    return 'PlayerProfileWorkspaces'
+    return 'PlayerAnalyticsWorkspaces'
   }
 
   if (
@@ -206,6 +216,10 @@ function stableVendorChunk(id) {
     return 'CoachOperationalWorkspaces'
   }
 
+  if (APP_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) {
+    return 'AppDomainServices'
+  }
+
   return undefined
 }
 
@@ -222,6 +236,10 @@ export default defineConfig({
     deferCoachAdministration(),
     react(),
   ],
+  esbuild: {
+    drop: ['debugger'],
+    pure: ['console.log', 'console.debug', 'console.info'],
+  },
   base: './',
   build: {
     outDir: 'dist',
