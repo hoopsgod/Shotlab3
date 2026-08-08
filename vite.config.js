@@ -46,10 +46,6 @@ const APP_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/trainingCatalogPersistenceService',
   '/src/lib/playerChallengePersistenceService',
 ]
-const APP_WORKSPACE_STYLE_IMPORTS = [
-  './styles/PremiumWorkspace.css',
-  './styles/CoachInteractiveDashboard.css',
-]
 const AUTHORITY_BUNDLE_TARGET_BYTES = 88_000
 
 function deferProgressCharts() {
@@ -180,15 +176,20 @@ function deferWorkspaceStyles() {
     enforce: 'pre',
     transform(code, id) {
       const moduleId = normalizeModuleId(id)
-      if (!moduleId.endsWith(APP_MODULE_SUFFIX)) return null
+      if (!moduleId.includes('/src/') || !/\.[cm]?[jt]sx?$/.test(moduleId)) return null
 
       let nextCode = code
       let changed = false
-      for (const source of APP_WORKSPACE_STYLE_IMPORTS) {
-        const staticImport = `import \"${source}\";`
-        if (!nextCode.includes(staticImport)) continue
-        nextCode = nextCode.replace(staticImport, `void import(\"${source}\");`)
+      nextCode = nextCode.replace(/import\s+["']([^"']*PremiumWorkspace\.css)["'];?/g, (_match, source) => {
         changed = true
+        return `void import(${JSON.stringify(source)});`
+      })
+
+      if (moduleId.endsWith(APP_MODULE_SUFFIX)) {
+        nextCode = nextCode.replace(/import\s+["'](\.\/styles\/CoachInteractiveDashboard\.css)["'];?/g, (_match, source) => {
+          changed = true
+          return `void import(${JSON.stringify(source)});`
+        })
       }
 
       return changed ? { code: nextCode, map: null } : null
@@ -205,7 +206,7 @@ function bundleVisualAuthorityCss() {
       const distDir = path.resolve(process.cwd(), 'dist')
       const indexPath = path.join(distDir, 'index.html')
       let html = await readFile(indexPath, 'utf8')
-      const linkPattern = /<link\b[^>]*href=["']\/?(shotlab-[^"'?]+\.css)(?:\?[^"']*)?["'][^>]*>/gi
+      const linkPattern = /<link\b[^>]*href=["'](?:\.\/|\/)?(shotlab-[^"'?]+\.css)(?:\?[^"']*)?["'][^>]*>/gi
       const links = [...html.matchAll(linkPattern)]
       if (links.length < 2) return
 
@@ -236,7 +237,7 @@ function bundleVisualAuthorityCss() {
         const concatenated = groups[index].map((entry) => entry.css).join('\n')
         const transformed = await transformWithEsbuild(concatenated, { loader: 'css', minify: true })
         await writeFile(path.join(distDir, bundleName), transformed.code)
-        bundleTags.push(`<link rel="stylesheet" href="/${bundleName}" data-shotlab-authority-bundle="${index + 1}" />`)
+        bundleTags.push(`<link rel="stylesheet" href="./${bundleName}" data-shotlab-authority-bundle="${index + 1}" />`)
       }
 
       let injected = false
