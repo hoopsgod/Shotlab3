@@ -6,6 +6,7 @@ const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "u
 const navSource = fs.readFileSync(new URL("../src/components/MobileNavigation.jsx", import.meta.url), "utf8");
 const navCss = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
 const packageSource = fs.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+const productionAcceptanceSource = fs.readFileSync(new URL("./e2e/production-acceptance.spec.mjs", import.meta.url), "utf8");
 
 test("mobile player account actions are consolidated into More", () => {
   assert.match(appSource, /\{isDesktop&&<div className="player-quick-actions"/);
@@ -27,10 +28,17 @@ test("player home removes the orphaned mobile utility band", () => {
   assert.match(navCss, /min-height:\s*58px/);
 });
 
+test("production acceptance follows the current More to Sign out path without weakening cleanup", () => {
+  assert.match(productionAcceptanceSource, /getByTestId\("mobile-navigation-more"\)\.click\(\)/);
+  assert.match(productionAcceptanceSource, /getByTestId\("mobile-navigation-sign-out"\)\.click\(\)/);
+  assert.doesNotMatch(productionAcceptanceSource, /getByRole\("button", \{ name: \/\^logout\$\/i \}\)\.click\(\)/);
+  assert.match(productionAcceptanceSource, /countDemoPlayerShotRows\(page, 33\)\)\.toBe\(0\)/);
+});
+
 test("Phase 3U runs after legacy route enhancers in both dev and production builds", () => {
   const pkg = JSON.parse(packageSource);
   for (const scriptName of ["dev", "prepare:route-enhancers"]) {
     const script = pkg.scripts[scriptName];
-    assert.match(script, /apply-expert-app-review-v2\.mjs && node scripts\/apply-phase3u-player-account-control\.mjs && node scripts\/minify-visual-authority-css\.mjs/);
+    assert.match(script, /apply-expert-app-review-v2\.mjs && node scripts\/apply-phase3u-player-account-control\.mjs && node scripts\/apply-phase3u-production-acceptance-path\.mjs && node scripts\/minify-visual-authority-css\.mjs/);
   }
 });
