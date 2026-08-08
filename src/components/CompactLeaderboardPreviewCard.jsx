@@ -99,14 +99,14 @@ export default function CompactLeaderboardPreviewCard({
         </div>
       )}
       {typeof onViewAll === "function" ? (
-        <div style={{ marginTop: 8 }}>
-          <button type="button" onClick={onViewAll} style={{ border:"none", background:"transparent", color:"var(--accent)", fontSize:11, fontWeight:800, letterSpacing:"0.03em", padding:"4px 0", cursor:"pointer" }}>
+        <div style={{ marginTop: 6 }}>
+          <button type="button" onClick={onViewAll} style={{ border:"none", background:"transparent", color:"var(--accent)", fontSize:11, fontWeight:800, letterSpacing:"0.03em", minHeight:44, display:"inline-flex", alignItems:"center", padding:"0 4px", marginLeft:-4, cursor:"pointer" }}>
             View all leaderboards →
           </button>
         </div>
       ) : fullLeaderboardHref ? (
-        <div style={{ marginTop: 8 }}>
-          <a href={fullLeaderboardHref} style={{ color: "var(--accent)", fontSize: 11, fontWeight: 700, textDecoration: "none" }}>
+        <div style={{ marginTop: 6 }}>
+          <a href={fullLeaderboardHref} style={{ color: "var(--accent)", fontSize: 11, fontWeight: 700, textDecoration: "none", minHeight:44, display:"inline-flex", alignItems:"center", padding:"0 4px", marginLeft:-4 }}>
             View all leaderboards →
           </a>
         </div>
