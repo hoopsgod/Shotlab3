@@ -8,14 +8,15 @@ const optimizer = await readFile(new URL('../scripts/optimize-production-css.mjs
 const budgetVerifier = await readFile(new URL('../scripts/verify-performance-budget.mjs', import.meta.url), 'utf8')
 const budget = JSON.parse(await readFile(new URL('../performance-budget.json', import.meta.url), 'utf8'))
 
-test('Phase 4F uses shared foundations plus one workspace chunk per role', () => {
-  for (const chunk of ['AuthenticatedUi', 'AppDomainServices', 'PlayerWorkspaces', 'CoachWorkspaces']) {
+test('Phase 4F uses neutral runtime plus shared foundations and one workspace chunk per role', () => {
+  for (const chunk of ['RuntimeShared', 'AuthenticatedUi', 'AppDomainServices', 'PlayerWorkspaces', 'CoachWorkspaces']) {
     assert.match(vite, new RegExp(`return '${chunk}'`))
   }
   for (const retired of ['PlayerAnalyticsWorkspaces', 'PlayerInterfaceWorkspaces', 'CoachAdministrationWorkspaces', 'CoachOperationalWorkspaces', 'PlayerProfileWorkspaces']) {
     assert.doesNotMatch(vite, new RegExp(`return '${retired}'`))
   }
-  assert.match(vite, /onlyExplicitManualChunks:\s*true/)
+  assert.match(vite, /vite\/preload-helper/)
+  assert.doesNotMatch(vite, /onlyExplicitManualChunks:\s*true/)
 })
 
 test('Phase 4F moves cross-role scoring and assignment services into AppDomainServices', () => {
@@ -36,9 +37,9 @@ test('Phase 4F moves cross-role scoring and assignment services into AppDomainSe
   assert.match(vite, /return 'AppDomainServices'/)
 })
 
-test('Phase 4F keeps cross-role presentation and branding in AuthenticatedUi', () => {
+test('Phase 4F keeps cross-role presentation, recovery, and fallback styling in AuthenticatedUi', () => {
   assert.match(vite, /SHARED_AUTHENTICATED_UI_FRAGMENTS/)
-  for (const fragment of ['TeamBrandingContext', 'MobileNavigation', 'VisualHierarchy', 'ShotLabStatePanel', 'SemanticStatus', 'WorkspaceRecoveryBoundary']) {
+  for (const fragment of ['TeamBrandingContext', 'MobileNavigation', 'VisualHierarchy', 'ShotLabStatePanel', 'SemanticStatus', 'WorkspaceRecoveryBoundary', 'PlayerInterfaceFallback']) {
     assert.match(vite, new RegExp(fragment))
   }
   assert.match(vite, /return 'AuthenticatedUi'/)
