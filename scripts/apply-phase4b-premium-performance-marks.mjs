@@ -27,7 +27,7 @@ if (!source.includes('data-testid="player-streak-achievement-reveal"')) {
   const end = '{/* Personal Best Reveal */}';
   const replacement = `{/* Badge Reveal Overlay */}
 {badgeReveal&&<div className="performanceRevealOverlay" data-testid="player-streak-achievement-reveal" onClick={()=>setBadgeReveal(null)}>
-  <div className="performanceRevealCard badge-pop" role="dialog" aria-modal="true" aria-label={\`Streak milestone: \${badgeReveal.name}\`} onClick={event=>event.stopPropagation()}>
+  <div className="performanceRevealCard" role="dialog" aria-modal="true" aria-label={\`Streak milestone: \${badgeReveal.name}\`} onClick={event=>event.stopPropagation()}>
     <div className="performanceRevealEyebrow">STREAK MILESTONE</div>
     <ShotLabPerformanceMark kind="streak" value={\`\${badgeReveal.days}D\`} label={badgeReveal.name} detail="Training streak achieved" testId="player-streak-achievement-mark" />
     <div className="performanceRevealSummary">Consistency banked. Your {badgeReveal.days}-day training streak is now part of your ShotLab record.</div>
@@ -44,7 +44,7 @@ if (!source.includes('data-testid="player-pb-achievement-reveal"')) {
   const end = '{/* Header — Premium dashboard heading */}';
   const replacement = `{/* Personal Best Reveal */}
 {pbReveal&&<div className="performanceRevealOverlay" data-testid="player-pb-achievement-reveal" onClick={()=>setPbReveal(null)}>
-  <div className="performanceRevealCard performanceRevealCard--pb badge-pop" role="dialog" aria-modal="true" aria-label={\`New personal best in \${pbReveal.drill}\`} onClick={event=>event.stopPropagation()}>
+  <div className="performanceRevealCard performanceRevealCard--pb" role="dialog" aria-modal="true" aria-label={\`New personal best in \${pbReveal.drill}\`} onClick={event=>event.stopPropagation()}>
     <div className="performanceRevealEyebrow">PERSONAL BEST</div>
     <ShotLabPerformanceMark kind="pb" value={pbReveal.score} label="New high mark" detail={pbReveal.drill} tone="warning" testId="player-pb-achievement-mark" />
     <div className="performanceRevealDelta"><span>Previous</span><strong>{pbReveal.prev}</strong><span>Improvement</span><strong>+{Math.max(0,Number(pbReveal.score)-Number(pbReveal.prev))}</strong></div>
@@ -56,6 +56,10 @@ if (!source.includes('data-testid="player-pb-achievement-reveal"')) {
 `;
   source = replaceRange(source, start, end, replacement, "PB reveal");
 }
+
+source = source
+  .replace('className="performanceRevealCard badge-pop"', 'className="performanceRevealCard"')
+  .replace('className="performanceRevealCard performanceRevealCard--pb badge-pop"', 'className="performanceRevealCard performanceRevealCard--pb"');
 
 if (!source.includes('data-testid="player-achievement-shelf"')) {
   const oldBadges = `{/* Badges */}
@@ -91,6 +95,8 @@ for (const retained of [
   'data-testid="player-achievement-shelf"',
   'data-testid="player-achievement-next"',
 ]) if (!source.includes(retained)) fail(`performance capability removed: ${retained}`);
+
+if (/className="performanceRevealCard[^\"]*badge-pop/.test(source)) fail("legacy badge-pop class still controls a Phase 4B achievement card");
 
 writeFileSync(appPath, source);
 
