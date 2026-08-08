@@ -1,0 +1,45 @@
+name: Phase 4F Minifier Lock Generator
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-4e-final-polish
+
+permissions:
+  contents: read
+
+jobs:
+  generate-lockfile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install locked repository dependencies
+        run: npm ci
+
+      - name: Resolve exact production minifiers
+        run: npm install --save-dev --save-exact terser@latest lightningcss@latest
+
+      - name: Record resolved versions
+        run: |
+          node -e "const p=require('./node_modules/terser/package.json'); console.log('terser', p.version)"
+          node -e "const p=require('./node_modules/lightningcss/package.json'); console.log('lightningcss', p.version)"
+
+      - name: Upload reproducible manifests
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-4f-minifier-lockfiles
+          path: |
+            package.json
+            package-lock.json
+          retention-days: 2
