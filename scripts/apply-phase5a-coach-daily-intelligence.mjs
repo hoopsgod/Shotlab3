@@ -53,11 +53,19 @@ update("src/components/CoachCommandCenter.jsx", (source) => {
     next = next.replace(realityPattern, reality);
   }
 
-  next = next.replace(/function TeamActivityPanel\([\s\S]*?\n}\n\nfunction LiveActivityPanel/, "function LiveActivityPanel");
-  next = next.replace(
-    "  const teamPanel = hasTeamActivity ? <TeamActivityPanel activeCount={activeCount} inactiveCount={inactiveCount} rosterSize={rosterSize} activeRate={activeRate} onOpen={onActiveTodayClick} /> : null;\n  const priorityPanel = sessionPanel || teamPanel || livePanel;\n  const lowerPanels = [sessionPanel ? teamPanel : null, sessionPanel || teamPanel ? livePanel : null].filter(Boolean);",
-    "  const priorityPanel = sessionPanel || livePanel;\n  const lowerPanels = [sessionPanel ? livePanel : null].filter(Boolean);",
-  );
+  const teamActivityStart = next.indexOf("function TeamActivityPanel(");
+  if (teamActivityStart >= 0) {
+    const liveActivityStart = next.indexOf("function LiveActivityPanel", teamActivityStart);
+    if (liveActivityStart < 0) throw new Error("Phase 5A live activity boundary was not found.");
+    next = next.slice(0, teamActivityStart) + next.slice(liveActivityStart);
+  }
+
+  if (next.includes("const teamPanel =")) {
+    const teamPanelStart = next.indexOf("  const teamPanel =");
+    const lowerPanelsEnd = next.indexOf("\n", next.indexOf("  const lowerPanels =", teamPanelStart));
+    if (teamPanelStart < 0 || lowerPanelsEnd < 0) throw new Error("Phase 5A team panel boundary was not found.");
+    next = next.slice(0, teamPanelStart) + "  const priorityPanel = sessionPanel || livePanel;\n  const lowerPanels = [sessionPanel ? livePanel : null].filter(Boolean);" + next.slice(lowerPanelsEnd);
+  }
 
   if (next.includes("TeamActivityPanel") || next.includes("const teamPanel =")) throw new Error("Phase 5A redundant team activity panel was not removed.");
   return next;
