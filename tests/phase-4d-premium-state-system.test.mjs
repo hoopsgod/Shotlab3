@@ -22,6 +22,7 @@ test("Phase 4D defines one semantic state component for loading, first-use, empt
   assert.match(panel, /aria-busy=\{busy \|\| undefined\}/);
   assert.match(panelCss, /prefers-reduced-motion:reduce/);
   assert.match(panelCss, /animation:none!important/);
+  assert.match(panelCss, /\.action\{[^}]*min-height:44px/s);
 });
 
 test("Phase 4D integrates the state language at high-value recovery seams", () => {
