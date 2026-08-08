@@ -39,6 +39,11 @@ const AUTHENTICATED_UI_REDIRECTS = new Map([
   ['./components/SemanticStatus.jsx', path.resolve(process.cwd(), 'src/components/DeferredSemanticStatus.jsx')],
   ['./components/CoachDashboardPrimitives.jsx', path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPrimitives.jsx')],
   ['./components/OperationalInsightRail.jsx', path.resolve(process.cwd(), 'src/components/DeferredOperationalInsightRail.jsx')],
+  ['./components/PlayerProgressStory.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerProgressStory.jsx')],
+  ['./components/PlayerCommitmentCenter.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerCommitmentCenter.jsx')],
+  ['./components/PlayerTrainingSessionHeader.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerTrainingSessionHeader.jsx')],
+  ['./components/PlayerSessionCloseout.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerSessionCloseout.jsx')],
+  ['./components/PlayerTrainingCompletion.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerTrainingCompletion.jsx')],
 ])
 const APP_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/appPersistenceService',
@@ -223,6 +228,12 @@ function stableVendorChunk(id) {
     || moduleId.includes('/src/components/OperationalInsightRail.jsx')
     || moduleId.includes('/src/components/ShotLabStatePanel.jsx')
     || moduleId.includes('/src/components/ShotLabPerformanceMark.jsx')
+    || moduleId.includes('/src/components/PlayerProgressStory.jsx')
+    || moduleId.includes('/src/components/PlayerCommitmentCenter.jsx')
+    || moduleId.includes('/src/components/PlayerTrainingSessionHeader.jsx')
+    || moduleId.includes('/src/components/PlayerSessionCloseout.jsx')
+    || moduleId.includes('/src/components/PlayerTrainingCompletion.jsx')
+    || moduleId.includes('/src/lib/playerProgressStory.js')
   ) return 'PlayerInterfaceWorkspaces'
   if (moduleId.includes('/src/components/NewSeasonWizard.jsx') || moduleId.includes('/src/components/CoachPlayerInviteForm.jsx') || moduleId.includes('/src/components/CoachProgramScoreDrawer.jsx') || moduleId.includes('/src/screens/CoachTeamBrandingScreen.jsx')) return 'CoachAdministrationWorkspaces'
   if (moduleId.includes('/src/components/CoachCommandCenter.jsx') || moduleId.includes('/src/components/CoachDashboardPhase2.jsx') || moduleId.includes('/src/components/CoachInteractiveDashboards.jsx') || moduleId.includes('/src/components/SecondaryPageSystem.jsx') || moduleId.includes('/src/components/ExperiencePrimitives.jsx')) return 'CoachOperationalWorkspaces'
