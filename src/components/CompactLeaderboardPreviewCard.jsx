@@ -94,6 +94,7 @@ export default function CompactLeaderboardPreviewCard({
             actionLabel={displayState === "error" && typeof onRetry === "function" ? "Retry leaderboard" : undefined}
             onAction={displayState === "error" ? onRetry : undefined}
             compact
+            surface="light"
             testId={`leaderboard-${displayState}-state`}
           />
         </div>
