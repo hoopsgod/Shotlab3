@@ -1,0 +1,33 @@
+/* Phase 3N — Player Profile Canvas & Scroll Containment.
+   Remove the duplicated outer/inner mobile dock reserves measured in the exact Phase 3M render,
+   then restore one deliberate, minifier-safe end spacer after the full Profile route. */
+
+@media (max-width:820px){
+  .performance-shell--player.is-mobile[data-workspace-tab="profile"] .performance-workspace{
+    --phase3n-profile-dock-reserve:112px;
+    min-height:0!important;
+    padding-bottom:0!important;
+  }
+
+  .performance-shell--player.is-mobile[data-workspace-tab="profile"] .player-scroll-container{
+    min-height:0!important;
+    padding-bottom:0!important;
+    scroll-padding-bottom:var(--phase3n-profile-dock-reserve)!important;
+  }
+
+  .performance-shell--player.is-mobile[data-workspace-tab="profile"] .player-scroll-container > .screen-fade-in{
+    min-height:0!important;
+    padding-bottom:0!important;
+    margin-bottom:0!important;
+  }
+
+  /* Structural rather than padding-based so legacy Profile cascade cannot erase the dock clearance. */
+  .performance-shell--player.is-mobile[data-workspace-tab="profile"] .player-scroll-container > .screen-fade-in::after{
+    content:""!important;
+    display:block!important;
+    width:100%!important;
+    height:var(--phase3n-profile-dock-reserve)!important;
+    min-height:var(--phase3n-profile-dock-reserve)!important;
+    pointer-events:none!important;
+  }
+}
