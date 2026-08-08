@@ -15,6 +15,13 @@ on:
       - "scripts/apply-phase4d-premium-state-system.mjs"
       - "public/shotlab-phase4d-state-reconciliation.css"
       - "tests/phase-4d-premium-state-system.test.mjs"
+      - "tests/phase-4c-premium-interaction-material-motion.test.mjs"
+      - "tests/phase-4b-premium-performance-marks.test.mjs"
+      - "tests/phase-4a-signature-visual-identity.test.mjs"
+      - "tests/phase-3v-final-reconciliation.test.mjs"
+      - "tests/phase-3u-player-account-control.test.mjs"
+      - "tests/mobile-navigation-contract.test.mjs"
+      - "tests/app-store-mobile-shell.test.mjs"
       - "tests/e2e/phase-4d-premium-state-system-screenshots.spec.mjs"
       - "playwright.screenshots.config.mjs"
       - ".github/workflows/phase-4d-premium-state-system.yml"
@@ -50,10 +57,40 @@ jobs:
         run: npm ci
 
       - name: Apply full production enhancer chain
+        id: enhancers
         run: npm run prepare:route-enhancers
 
-      - name: Verify Phase 4D and predecessor contracts
-        run: node --test tests/phase-4d-premium-state-system.test.mjs tests/phase-4c-premium-interaction-material-motion.test.mjs tests/phase-4b-premium-performance-marks.test.mjs tests/phase-4a-signature-visual-identity.test.mjs tests/phase-3v-final-reconciliation.test.mjs tests/phase-3u-player-account-control.test.mjs tests/mobile-navigation-contract.test.mjs tests/app-store-mobile-shell.test.mjs
+      - name: Verify Phase 4D contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/phase-4d-premium-state-system.test.mjs
+
+      - name: Verify Phase 4C predecessor contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/phase-4c-premium-interaction-material-motion.test.mjs
+
+      - name: Verify Phase 4B predecessor contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/phase-4b-premium-performance-marks.test.mjs
+
+      - name: Verify Phase 4A predecessor contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/phase-4a-signature-visual-identity.test.mjs
+
+      - name: Verify Phase 3V predecessor contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/phase-3v-final-reconciliation.test.mjs
+
+      - name: Verify Phase 3U predecessor contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/phase-3u-player-account-control.test.mjs
+
+      - name: Verify mobile navigation contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/mobile-navigation-contract.test.mjs
+
+      - name: Verify app-store mobile shell contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/app-store-mobile-shell.test.mjs
 
       - name: Verify production build
         run: npm run build
