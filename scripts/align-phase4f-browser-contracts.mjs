@@ -56,13 +56,21 @@ update("tests/e2e/coach-player-cross-device-first-result.spec.mjs", (source) => 
     if (!next.includes(before)) throw new Error("Phase 4F cross-device Supabase route was not found.");
     next = next.replace(before, after);
   }
-  const oldRsvp = `  await expect(playerPage.getByText("UPCOMING EVENTS", { exact: true })).toBeVisible({ timeout: 20_000 });
-  await playerPage.getByRole("button", { name: /RSVP NOW/ }).first().click();`;
-  const currentRsvp = `  const rsvpButton = playerPage.getByRole("button", { name: /RSVP NOW/ }).first();
+  const premiumResponse = `  const responseButton = playerPage.getByRole("button", { name: "Respond now", exact: true });
+  await expect(responseButton).toBeVisible({ timeout: 20_000 });
+  await responseButton.click();`;
+  const legacyPatterns = [
+    `  await expect(playerPage.getByText("UPCOMING EVENTS", { exact: true })).toBeVisible({ timeout: 20_000 });
+  await playerPage.getByRole("button", { name: /RSVP NOW/ }).first().click();`,
+    `  const rsvpButton = playerPage.getByRole("button", { name: /RSVP NOW/ }).first();
   await expect(rsvpButton).toBeVisible({ timeout: 20_000 });
-  await rsvpButton.click();`;
-  if (next.includes(oldRsvp)) next = next.replace(oldRsvp, currentRsvp);
+  await rsvpButton.click();`,
+  ];
+  for (const legacy of legacyPatterns) {
+    if (next.includes(legacy)) next = next.replace(legacy, premiumResponse);
+  }
+  if (!next.includes(premiumResponse)) throw new Error("Phase 4F premium attendance response transition was not found.");
   return next;
 });
 
-console.log("Aligned Phase 4F browser contracts with current premium navigation and hydrated event data.");
+console.log("Aligned Phase 4F browser contracts with current premium navigation and attendance actions.");
