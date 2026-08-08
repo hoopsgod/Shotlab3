@@ -21,34 +21,42 @@ test('Phase 3L loads after accepted Phase 3K and remains Leaderboards-only', () 
   assert.equal(css.includes('data-workspace-tab="profile"'), false);
 });
 
-test('Leaderboards removes duplicate outer reserve while retaining one safe dock reserve', () => {
+test('Leaderboards removes duplicate outer reserve while retaining one route-owned dock reserve', () => {
   for (const marker of [
     '.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .performance-workspace',
+    '--phase3l-leaderboards-dock-reserve:calc(112px + env(safe-area-inset-bottom,0px))',
     'min-height:0!important',
     'padding-bottom:0!important',
     '.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .player-scroll-container',
-    'padding-bottom:calc(var(--bottom-nav-content-padding,88px) + 8px)!important',
-    'scroll-padding-bottom:calc(var(--bottom-nav-content-padding,88px) + 8px)!important',
+    'scroll-padding-bottom:var(--phase3l-leaderboards-dock-reserve)!important',
     '.player-scroll-container > .screen-fade-in',
+    'padding-bottom:var(--phase3l-leaderboards-dock-reserve)!important',
     '[data-testid="premium-leaderboards-hub"]',
   ]) requireMarker(css, marker);
 });
 
-test('rendered Phase 3L acceptance protects Logout, ranking controls, participation controls, overflow, and hard tail budget', () => {
+test('rendered Phase 3L acceptance protects controls, dock clearance, overflow, and bounded end reserve', () => {
   for (const marker of [
     'premium-leaderboards-hub',
     'Current / Offseason',
     'All-Time',
     'At-Home Shots',
     'Program Drills',
+    'leaderboard-participation-categories',
+    'Participation categories',
+    'Events attended and strength work',
     'Events Attended',
     'Strength & Conditioning',
     'Logout',
     'PHASE3L_GEOMETRY',
+    'PHASE3L_DOCK_CLEARANCE',
     'layout.tail',
+    'toBeGreaterThanOrEqual(96)',
     'toBeLessThanOrEqual(220)',
     'layout.overflow',
     'toBeLessThanOrEqual(1)',
+    'toBeGreaterThanOrEqual(8)',
+    'toHaveAttribute("open", "")',
   ]) requireMarker(rendered, marker);
 });
 
