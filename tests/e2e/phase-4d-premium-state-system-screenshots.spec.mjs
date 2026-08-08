@@ -3,11 +3,31 @@ import fs from "node:fs";
 import path from "node:path";
 
 const outputDir = path.resolve(process.cwd(), "artifacts/design-audit/iphone");
-const leaderboardRoute = "**/v1/leaderboards/home-shots**";
+const DEMO_PLAYER_EMAIL = "demo@shotlab.app";
+const DEMO_COACH_EMAIL = "coach.demo@shotlab.app";
+const EMPTY_DEMO_TEAM_ID = "team-phase4d-empty";
+
+const emptyDemoSeed = {
+  "sl:teams": [{
+    id: EMPTY_DEMO_TEAM_ID,
+    name: "ShotLab Team",
+    ownerCoachId: DEMO_COACH_EMAIL,
+    joinCode: "P4D000",
+    createdAt: 1_780_000_000_000,
+  }],
+  "sl:players": [
+    { id: "coach-phase4d-empty", email: DEMO_COACH_EMAIL, name: "Demo Coach", role: "coach", isCoach: true, teamId: EMPTY_DEMO_TEAM_ID, hideFromLeaderboards: true },
+    { id: "player-phase4d-empty", email: DEMO_PLAYER_EMAIL, name: "Demo Player", role: "player", teamId: EMPTY_DEMO_TEAM_ID, hideFromLeaderboards: false },
+  ],
+  "sl:player-profiles": [{ id: "profile-phase4d-empty", userId: DEMO_PLAYER_EMAIL, email: DEMO_PLAYER_EMAIL, teamId: EMPTY_DEMO_TEAM_ID, firstName: "Demo", lastName: "Player" }],
+  "sl:scores": [],
+  "sl:program-scores": [],
+  "sl:shotlogs": [],
+};
 
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
-  await page.route(leaderboardRoute, (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
+  await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
@@ -18,6 +38,12 @@ async function capture(page, name) {
 
 async function noOverflow(page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+}
+
+async function seedStorage(page, payload) {
+  await page.addInitScript((values) => {
+    for (const [key, value] of Object.entries(values)) window.localStorage.setItem(key, JSON.stringify(value));
+  }, payload);
 }
 
 async function enterPlayerDemo(page) {
@@ -79,39 +105,32 @@ test("Phase 4D gives an empty Program filter a useful first-action state", async
   await expect(state).toBeVisible();
   await expect(state).toHaveAttribute("data-state", "first-use");
   await expect(state.getByText(/No completed Program drills yet|Program plan complete/i)).toBeVisible();
+  await state.evaluate((node) => node.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" }));
+  await page.waitForTimeout(120);
   const dockBox = await dock.boundingBox();
   const stateBox = await state.boundingBox();
   expect(dockBox).not.toBeNull();
   expect(stateBox).not.toBeNull();
+  expect(stateBox.y).toBeGreaterThanOrEqual(0);
   expect(stateBox.y + stateBox.height).toBeLessThan(dockBox.y - 8);
   await noOverflow(page);
   await capture(page, "11b-phase4d-player-program-first-use.png");
 });
 
 test("Phase 4D makes an empty Player leaderboard intentional instead of blank", async ({ page }) => {
-  await page.unroute(leaderboardRoute);
-  await page.route(leaderboardRoute, (route) => route.fulfill({
-    status: 200,
-    contentType: "application/json",
-    body: JSON.stringify({
-      leaderboard: [{
-        rank: 1,
-        player_id: "outside-roster@demo.shotlab.app",
-        email: "outside-roster@demo.shotlab.app",
-        player_display_name: "Outside Roster",
-        team_id: "team-demo-titans",
-        total_home_shots: 1,
-      }],
-    }),
-  }));
+  await seedStorage(page, emptyDemoSeed);
   await enterPlayerDemo(page);
-  const preview = page.getByTestId("compact-leaderboard-preview").first();
+  const disclosure = page.getByTestId("player-team-standings");
+  await expect(disclosure).toBeVisible();
+  await disclosure.locator(":scope > summary").click();
+  await expect(disclosure).toHaveAttribute("open", "");
+  const preview = disclosure.getByTestId("compact-leaderboard-preview");
   await expect(preview).toBeVisible();
   const state = preview.getByTestId("leaderboard-empty-state");
   await expect(state).toBeVisible({ timeout: 15_000 });
   await expect(state).toHaveAttribute("data-state", "empty");
   await expect(state.getByText("Your ranking starts with a result", { exact: true })).toBeVisible();
-  await state.scrollIntoViewIfNeeded();
+  await state.evaluate((node) => node.scrollIntoView({ block: "center", inline: "nearest", behavior: "auto" }));
   await page.waitForTimeout(120);
   await noOverflow(page);
   await capture(page, "11c-phase4d-player-leaderboard-empty.png");
