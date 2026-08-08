@@ -66,9 +66,9 @@ test("Phase 4B achievement sheets own their geometry, material, and motion inste
   assert.match(css, /border-radius:25px!important/);
 });
 
-test("Phase 4B is ordered after signature identity and before visual minification", () => {
+test("Phase 4B remains ordered after signature identity and before Phase 4C interaction authority", () => {
   for (const name of ["dev", "prepare:route-enhancers"]) {
     const command = pkg.scripts[name];
-    assert.match(command, /apply-phase4a-signature-visual-identity\.mjs.*apply-phase4b-premium-performance-marks\.mjs.*minify-visual-authority-css\.mjs/);
+    assert.match(command, /apply-phase4a-signature-visual-identity\.mjs.*apply-phase4b-premium-performance-marks\.mjs.*apply-phase4c-premium-interaction-material-motion\.mjs.*minify-visual-authority-css\.mjs/);
   }
 });
