@@ -1,10 +1,14 @@
 import { readdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const DIST_DIR = path.resolve(process.cwd(), "dist");
+const ROOT_DIR = process.cwd();
+const DIST_DIR = path.resolve(ROOT_DIR, "dist");
 const INDEX_PATH = path.join(DIST_DIR, "index.html");
+const SOURCE_DIR = path.resolve(ROOT_DIR, "src");
 const AUTHORITY_TARGET_BYTES = 82_000;
 const RECURSIVE_AT_RULE = /^@(media|supports|container|layer|scope|starting-style)\b/i;
+const RUNTIME_SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".html"]);
+const DYNAMIC_CLASS_PATTERN = /^(?:is|has|tone|status|state|role|mode|rank|theme|size|variant)(?:-|$)|^(?:active|selected|disabled|open|closed|expanded|collapsed|loading|success|error|warning|danger)$/i;
 
 function skipComment(source, index) {
   if (source[index] !== "/" || source[index + 1] !== "*") return index;
@@ -147,11 +151,11 @@ function parseNodes(source) {
     }
     const { content, end } = readBlock(source, endPrelude);
     if (prelude.startsWith("@")) {
-      if (RECURSIVE_AT_RULE.test(prelude)) nodes.push({ type: "at", prelude, children: parseNodes(content) });
+      if (RECURSIVE_AT_RULE.test(prelude)) nodes.push({ type: "at", prelude, children: parseNodes(content), remove: false });
       else nodes.push({ type: "raw", text: `${prelude}{${content}}` });
     } else {
       const declarations = splitDeclarations(content);
-      if (declarations) nodes.push({ type: "style", selector: prelude, declarations });
+      if (declarations) nodes.push({ type: "style", selector: prelude, declarations, remove: false });
       else nodes.push({ type: "raw", text: `${prelude}{${content}}` });
     }
     index = end;
@@ -163,8 +167,38 @@ function normalizeSelector(selector) {
   return selector.replace(/\s+/g, " ").replace(/\s*([>,+~])\s*/g, "$1").trim();
 }
 
+function selectorClassNames(selector) {
+  if (selector.includes("\\")) return [];
+  return [...selector.matchAll(/\.(-?[_a-zA-Z][_a-zA-Z0-9-]*)/g)].map((match) => match[1]);
+}
+
+function classIsReachable(className, corpus) {
+  if (!className) return true;
+  if (className.startsWith("_")) return true;
+  if (DYNAMIC_CLASS_PATTERN.test(className)) return true;
+  return corpus.includes(className);
+}
+
+function pruneUnreachableStyles(nodes, corpus, counters = { removedRules: 0 }) {
+  for (const node of nodes) {
+    if (node.type === "at") {
+      pruneUnreachableStyles(node.children, corpus, counters);
+      if (!node.children.some((child) => !child.remove)) node.remove = true;
+      continue;
+    }
+    if (node.type !== "style") continue;
+    const classes = selectorClassNames(node.selector);
+    if (!classes.length) continue;
+    if (classes.some((className) => classIsReachable(className, corpus))) continue;
+    node.remove = true;
+    counters.removedRules += 1;
+  }
+  return counters;
+}
+
 function markSuperseded(nodes, context = [], state = new Map(), counters = { removed: 0 }) {
   for (const node of nodes) {
+    if (node.remove) continue;
     if (node.type === "at") {
       markSuperseded(node.children, [...context, node.prelude.replace(/\s+/g, " ").trim()], state, counters);
       continue;
@@ -198,6 +232,7 @@ function markSuperseded(nodes, context = [], state = new Map(), counters = { rem
 function serializeNodes(nodes) {
   let output = "";
   for (const node of nodes) {
+    if (node.remove) continue;
     if (node.type === "raw") { output += node.text; continue; }
     if (node.type === "at") {
       const inner = serializeNodes(node.children);
@@ -211,10 +246,16 @@ function serializeNodes(nodes) {
   return output;
 }
 
-function optimizeCss(source) {
+function optimizeCss(source, corpus) {
   const nodes = parseNodes(source);
-  const counters = markSuperseded(nodes);
-  return { css: serializeNodes(nodes), removedDeclarations: counters.removed, nodes };
+  const unreachable = pruneUnreachableStyles(nodes, corpus);
+  const superseded = markSuperseded(nodes);
+  return {
+    css: serializeNodes(nodes),
+    removedDeclarations: superseded.removed,
+    removedRules: unreachable.removedRules,
+    nodes,
+  };
 }
 
 function splitNodesByBytes(nodes, targetBytes) {
@@ -237,26 +278,33 @@ function splitNodesByBytes(nodes, targetBytes) {
   return chunks;
 }
 
-async function listCssFiles(directory) {
+async function listFiles(directory, predicate) {
   const entries = await readdir(directory, { withFileTypes: true });
   const files = [];
   for (const entry of entries) {
     const full = path.join(directory, entry.name);
-    if (entry.isDirectory()) files.push(...await listCssFiles(full));
-    else if (entry.isFile() && entry.name.endsWith(".css")) files.push(full);
+    if (entry.isDirectory()) files.push(...await listFiles(full, predicate));
+    else if (entry.isFile() && predicate(full)) files.push(full);
   }
   return files;
 }
 
-async function optimizeAuthorityBundles() {
+async function collectRuntimeCorpus() {
+  const sourceFiles = await listFiles(SOURCE_DIR, (file) => RUNTIME_SOURCE_EXTENSIONS.has(path.extname(file)));
+  sourceFiles.push(path.resolve(ROOT_DIR, "index.html"));
+  const sources = await Promise.all(sourceFiles.map((file) => readFile(file, "utf8").catch(() => "")));
+  return sources.join("\n");
+}
+
+async function optimizeAuthorityBundles(corpus) {
   let html = await readFile(INDEX_PATH, "utf8");
   const linkPattern = /<link\b[^>]*href=["'](?:\.\/|\/)?(shotlab-authority-(\d+)\.css)["'][^>]*data-shotlab-authority-bundle=["']\d+["'][^>]*>/gi;
   const matches = [...html.matchAll(linkPattern)].sort((a, b) => Number(a[2]) - Number(b[2]));
-  if (matches.length < 2) return { removed: 0, bytesSaved: 0 };
+  if (matches.length < 2) return { removedDeclarations: 0, removedRules: 0, bytesSaved: 0 };
 
   const originalFiles = matches.map((match) => match[1]);
   const original = (await Promise.all(originalFiles.map((name) => readFile(path.join(DIST_DIR, name), "utf8")))).join("\n");
-  const optimized = optimizeCss(original);
+  const optimized = optimizeCss(original, corpus);
   const chunks = splitNodesByBytes(optimized.nodes, AUTHORITY_TARGET_BYTES);
   const tags = [];
   for (let index = 0; index < chunks.length; index += 1) {
@@ -275,28 +323,32 @@ async function optimizeAuthorityBundles() {
   });
   await writeFile(INDEX_PATH, html);
   return {
-    removed: optimized.removedDeclarations,
+    removedDeclarations: optimized.removedDeclarations,
+    removedRules: optimized.removedRules,
     bytesSaved: Buffer.byteLength(original) - chunks.reduce((sum, chunk) => sum + Buffer.byteLength(chunk), 0),
   };
 }
 
 async function main() {
   await stat(DIST_DIR);
-  const authority = await optimizeAuthorityBundles();
-  const cssFiles = await listCssFiles(DIST_DIR);
-  let removed = authority.removed;
+  const corpus = await collectRuntimeCorpus();
+  const authority = await optimizeAuthorityBundles(corpus);
+  const cssFiles = await listFiles(DIST_DIR, (file) => file.endsWith(".css"));
+  let removedDeclarations = authority.removedDeclarations;
+  let removedRules = authority.removedRules;
   let bytesSaved = authority.bytesSaved;
   for (const file of cssFiles) {
     if (/shotlab-authority-\d+\.css$/.test(file)) continue;
     const source = await readFile(file, "utf8");
-    const optimized = optimizeCss(source);
+    const optimized = optimizeCss(source, corpus);
     if (optimized.css && optimized.css !== source) {
       await writeFile(file, optimized.css);
-      removed += optimized.removedDeclarations;
+      removedDeclarations += optimized.removedDeclarations;
+      removedRules += optimized.removedRules;
       bytesSaved += Buffer.byteLength(source) - Buffer.byteLength(optimized.css);
     }
   }
-  console.log(`Optimized production CSS cascade: removed ${removed} superseded declarations, saved ${(bytesSaved / 1024).toFixed(1)} KiB raw.`);
+  console.log(`Optimized production CSS: removed ${removedRules} statically unreachable rules and ${removedDeclarations} superseded declarations; saved ${(bytesSaved / 1024).toFixed(1)} KiB raw.`);
 }
 
 await main();
