@@ -7,14 +7,20 @@ const replaceOne = (source, from, to, label) => {
   if (count !== 1) fail(`${label}: expected one anchor, found ${count}`);
   return source.replace(from, to);
 };
+const ensureImportAfter = (source, anchor, importStatement, label) => {
+  if (source.includes(importStatement)) return source;
+  const count = source.split(anchor).length - 1;
+  if (count !== 1) fail(`${label}: expected one anchor, found ${count}`);
+  return source.replace(anchor, `${anchor}${importStatement}`);
+};
 
 function patchPlayerDaily() {
   const path = "src/components/PlayerDailyCommandCenter.jsx";
   let source = readFileSync(path, "utf8");
-  source = replaceOne(
+  source = ensureImportAfter(
     source,
     'import ShotLabIcon from "./ShotLabIcon";\n',
-    'import ShotLabIcon from "./ShotLabIcon";\nimport ShotLabSignatureField from "./ShotLabSignatureField.jsx";\n',
+    'import ShotLabSignatureField from "./ShotLabSignatureField.jsx";\n',
     "PlayerDaily signature import",
   );
   source = replaceOne(
@@ -29,10 +35,10 @@ function patchPlayerDaily() {
 function patchProgressStory() {
   const path = "src/components/PlayerProgressStory.jsx";
   let source = readFileSync(path, "utf8");
-  source = replaceOne(
+  source = ensureImportAfter(
     source,
     'import styles from "./PlayerProgressStory.module.css";\n',
-    'import styles from "./PlayerProgressStory.module.css";\nimport ShotLabSignatureField from "./ShotLabSignatureField.jsx";\n',
+    'import ShotLabSignatureField from "./ShotLabSignatureField.jsx";\n',
     "PlayerProgress signature import",
   );
   source = replaceOne(
@@ -47,10 +53,10 @@ function patchProgressStory() {
 function patchAuth() {
   const path = "src/components/AuthWorkspace.jsx";
   let source = readFileSync(path, "utf8");
-  source = replaceOne(
+  source = ensureImportAfter(
     source,
     'import { useState } from "react";\n',
-    'import { useState } from "react";\nimport ShotLabSignatureField from "./ShotLabSignatureField.jsx";\n',
+    'import ShotLabSignatureField from "./ShotLabSignatureField.jsx";\n',
     "Auth signature import",
   );
   source = replaceOne(
