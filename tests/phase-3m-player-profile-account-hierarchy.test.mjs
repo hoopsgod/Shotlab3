@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const enhancer = readFileSync('scripts/apply-phase3m-player-profile-account-hierarchy.mjs', 'utf8');
+const css = readFileSync('public/shotlab-phase3m-player-profile-account-hierarchy.css', 'utf8');
+const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const rendered = readFileSync('tests/e2e/phase-3m-player-profile-account-hierarchy.spec.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
@@ -40,6 +42,22 @@ test('Phase 3M keeps leaderboard privacy visible and preserves all account capab
   ]) requireMarker(enhancer, marker);
 });
 
+test('Phase 3M presentation authority loads last and keeps Account & data readable on the light Profile canvas', () => {
+  const phase3l = html.indexOf('shotlab-phase3l-player-leaderboards-containment.css');
+  const phase3m = html.indexOf('shotlab-phase3m-player-profile-account-hierarchy.css');
+  assert.ok(phase3l >= 0, 'accepted Phase 3L authority must remain loaded');
+  assert.ok(phase3m > phase3l, 'Phase 3M authority must load after Phase 3L');
+  for (const marker of [
+    '[data-testid="player-profile-account-data"]',
+    'background:var(--p3m-surface)!important',
+    'color:var(--p3m-ink)!important',
+    'color:var(--p3m-muted)!important',
+    'background:var(--p3m-soft)!important',
+    ':focus-visible',
+    '@media(prefers-reduced-motion:reduce)',
+  ]) requireMarker(css, marker);
+});
+
 test('rendered Phase 3M acceptance proves compact default hierarchy and recoverable account controls', () => {
   for (const marker of [
     'player-profile-privacy',
@@ -53,6 +71,10 @@ test('rendered Phase 3M acceptance proves compact default hierarchy and recovera
     'Support',
     'Delete Account',
     'Data Request',
+    'PHASE3M_ACCOUNT_PRESENTATION',
+    'rgb(255, 255, 255)',
+    'rgb(23, 28, 24)',
+    'rgb(104, 113, 106)',
     'PHASE3M_PROFILE_HEIGHTS',
     'toBeLessThanOrEqual(2350)',
     'toBeGreaterThanOrEqual(240)',
