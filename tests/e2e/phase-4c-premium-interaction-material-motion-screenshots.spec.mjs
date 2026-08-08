@@ -94,13 +94,20 @@ test("Phase 4C makes active score entry feel deliberate without changing score b
   const input = session.locator('input[type="number"]').first();
   await input.focus();
   const zone = page.getByTestId("player-training-score-zone");
+  await zone.scrollIntoViewIfNeeded();
+  await page.evaluate(() => window.scrollBy({ top: 90, behavior: "instant" }));
+  await page.waitForTimeout(120);
+  await expect(input).toBeFocused();
   const style = await zone.evaluate((node) => {
     const computed = getComputedStyle(node);
-    return { transform: computed.transform, shadow: computed.boxShadow, transition: computed.transitionDuration };
+    const rect = node.getBoundingClientRect();
+    return { transform: computed.transform, shadow: computed.boxShadow, transition: computed.transitionDuration, top: rect.top, bottom: rect.bottom };
   });
   expect(style.transform).not.toBe("none");
   expect(style.shadow).not.toBe("none");
   expect(style.transition).not.toBe("0s");
+  expect(style.top).toBeGreaterThanOrEqual(80);
+  expect(style.bottom).toBeLessThanOrEqual(790);
   await expect(page.getByTestId("player-training-log-score")).toBeDisabled();
   await noOverflow(page);
   await capture(page, "10c-phase4c-player-score-focus.png");
