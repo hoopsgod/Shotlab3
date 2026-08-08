@@ -46,6 +46,7 @@ const AUTHENTICATED_UI_REDIRECTS = new Map([
   ['./components/PlayerTrainingCompletion.jsx', path.resolve(process.cwd(), 'src/components/DeferredPlayerTrainingCompletion.jsx')],
 ])
 const APP_DOMAIN_SERVICE_FRAGMENTS = [
+  '/src/lib/authFlow.js',
   '/src/lib/appPersistenceService',
   '/src/lib/remotePersistence',
   '/src/lib/homeShotLogging',
@@ -73,11 +74,16 @@ const SHARED_AUTHENTICATED_UI_FRAGMENTS = [
   '/src/context/TeamBrandingContext.jsx',
   '/src/components/AppFeedbackLayer',
   '/src/components/AppHeader.jsx',
+  '/src/components/AppHeaderLoadingState.jsx',
   '/src/components/ShotLabIcon.jsx',
   '/src/components/ShotLabStatePanel',
   '/src/components/ShotLabSignatureField',
   '/src/components/VisualHierarchy',
   '/src/lib/workspaceRecovery.js',
+  '/src/components/WorkspaceRecoveryBoundary.jsx',
+  '/src/components/PlayerInterfaceFallback.jsx',
+  '/src/components/DeferredAuthenticatedUi.jsx',
+  '/src/components/DeferredSharedAuthenticatedUi.jsx',
   '/src/components/ShotLabPerformanceMark',
   '/src/components/MobileNavigation',
   '/src/components/DashboardIdentityHeader',
@@ -99,6 +105,7 @@ const PLAYER_WORKSPACE_FRAGMENTS = [
 const COACH_WORKSPACE_FRAGMENTS = [
   '/src/components/Coach',
   '/src/screens/Coach',
+  '/src/components/DeferredCoachAuthenticatedUi.jsx',
   '/src/components/NewSeasonWizard.jsx',
   '/src/components/useCleanTeamLogo.js',
   '/src/components/team/',
