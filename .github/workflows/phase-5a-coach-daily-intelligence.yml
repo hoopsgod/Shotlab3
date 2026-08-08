@@ -35,18 +35,15 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Apply Phase 5A source enhancer
-        run: node scripts/apply-phase5a-coach-daily-intelligence.mjs
-
-      - name: Verify Phase 5A and predecessor contracts
-        run: node --test tests/phase-5a-coach-daily-intelligence.test.mjs tests/phase-4f-performance-architecture-hardening.test.mjs
-
       - name: Build and enforce unchanged performance budget
         shell: bash
         run: |
           set -o pipefail
           mkdir -p artifacts/performance
           npm run build:performance 2>&1 | tee artifacts/performance/phase5a-build.log
+
+      - name: Verify Phase 5A and predecessor contracts
+        run: node --test tests/phase-5a-coach-daily-intelligence.test.mjs tests/phase-4f-performance-architecture-hardening.test.mjs
 
       - name: Verify production chunk graph is acyclic
         shell: bash
