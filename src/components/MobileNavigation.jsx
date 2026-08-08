@@ -59,14 +59,14 @@ export function groupSecondaryNavigation(items = [], role = "default") {
 function NavigationItem({ item, active, onSelect, compact = false }) {
   const label = item.mobileLabel || item.l || item.label || item.k;
   const iconName = semanticNavigationIcon(item) || "custom";
-  const accessibleLabel = item.dot ? `${label}, updates available` : label;
   return (
     <button
       type="button"
       className={`${compact ? styles.dockItem : styles.sheetItem} ${active ? styles.active : ""}`}
       style={compact ? active ? { color: ACTIVE_COLOR } : undefined : { minHeight: 62, gridTemplateColumns: "40px minmax(0, 1fr) 18px", color: active ? ACTIVE_COLOR : undefined }}
       aria-current={active ? "page" : undefined}
-      aria-label={accessibleLabel}
+      aria-label={label}
+      aria-description={item.dot ? "Updates available" : undefined}
       data-active={active ? "true" : "false"}
       data-nav-key={item.k}
       data-icon-name={iconName}
@@ -154,7 +154,7 @@ export default function MobileNavigation({ primaryItems = [], secondaryItems = [
       <nav className={styles.dock} aria-label={ariaLabel} data-navigation-role={role} data-navigation-intent={role === "player" ? "development-first" : undefined} data-testid="mobile-navigation-dock">
         <div className={styles.dockInner}>
           {visiblePrimaryItems.map((item) => <NavigationItem key={item.k} item={item} active={item.k === activeKey} onSelect={handleSelect} compact />)}
-          <button type="button" className={`${styles.dockItem} ${activeMore ? styles.active : ""}`} style={activeMore ? { color: ACTIVE_COLOR } : undefined} aria-expanded={open} aria-controls="mobile-navigation-more-sheet" aria-label={secondaryHasNotification ? "More, updates available" : "More"} data-testid="mobile-navigation-more" data-active={activeMore ? "true" : "false"} data-icon-name="more" onClick={() => setOpen((value) => !value)}>
+          <button type="button" className={`${styles.dockItem} ${activeMore ? styles.active : ""}`} style={activeMore ? { color: ACTIVE_COLOR } : undefined} aria-expanded={open} aria-controls="mobile-navigation-more-sheet" aria-label="More" aria-description={secondaryHasNotification ? "Updates available" : undefined} data-testid="mobile-navigation-more" data-active={activeMore ? "true" : "false"} data-icon-name="more" onClick={() => setOpen((value) => !value)}>
             <span className={styles.dockIcon} style={{ width: 32, height: 26, background: activeMore ? ACTIVE_HALO : undefined }} aria-hidden="true"><MoreIcon />{activeMore && <span className={styles.activeIndicator} />}{secondaryHasNotification && <span className={styles.notificationDot} />}</span>
             <span className={styles.dockLabelText}>More</span>
           </button>
