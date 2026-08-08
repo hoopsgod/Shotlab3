@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 const commandCenter = await readFile(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 const selectors = await readFile(new URL("../src/lib/coachDashboardSelectors.js", import.meta.url), "utf8");
 const app = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+const statePanelCss = await readFile(new URL("../src/components/ShotLabStatePanel.module.css", import.meta.url), "utf8");
 const repeatBuildWrapper = await readFile(new URL("../scripts/run-finish-v9-compatible.mjs", import.meta.url), "utf8");
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const budget = JSON.parse(await readFile(new URL("../performance-budget.json", import.meta.url), "utf8"));
@@ -36,6 +37,11 @@ test("Phase 5A removes duplicate activity chrome instead of adding dashboard clu
   assert.doesNotMatch(commandCenter, /coach-live-evidence-region/);
   assert.match(commandCenter, /const priorityPanel = sessionPanel \|\| livePanel/);
   assert.match(commandCenter, /const lowerPanels = \[sessionPanel \? livePanel : null\]\.filter\(Boolean\)/);
+});
+
+test("Phase 5A preserves the 14px premium mobile gutter for shared state surfaces", () => {
+  assert.match(statePanelCss, /@media \(max-width:640px\)\{\s*\.root\{width:min\(calc\(100% - 28px\),calc\(100vw - 28px\)\)\}\s*\}/);
+  assert.match(statePanelCss, /\.action\{[\s\S]*?min-height:44px/);
 });
 
 test("Phase 5A owns the final enhancer position and makes repeated native builds safe", () => {
