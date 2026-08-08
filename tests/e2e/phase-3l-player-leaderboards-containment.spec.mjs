@@ -83,11 +83,22 @@ test("Player Leaderboards ends near its content while preserving ranking navigat
   });
 
   console.log("PHASE3L_GEOMETRY", JSON.stringify(layout));
+  expect(layout.overflow).toBeLessThanOrEqual(1);
+  expect(layout.tail, "Leaderboards should retain one deliberate dock-safe end reserve").toBeGreaterThanOrEqual(96);
+  expect(layout.tail, "Leaderboards should not restore the old empty canvas tail").toBeLessThanOrEqual(220);
+
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const dockClearance = await page.evaluate(() => {
+    const summary = document.querySelector('[data-testid="leaderboard-participation-categories"] summary');
+    const mobileDock = document.querySelector('[data-testid="mobile-navigation-dock"]');
+    if (!summary || !mobileDock) throw new Error("Leaderboards dock-clearance targets missing");
+    return mobileDock.getBoundingClientRect().top - summary.getBoundingClientRect().bottom;
+  });
+  console.log("PHASE3L_DOCK_CLEARANCE", dockClearance);
+  expect(dockClearance, "The final Leaderboards disclosure must scroll above the fixed dock").toBeGreaterThanOrEqual(8);
 
   await participation.locator("summary").click();
+  await expect(participation).toHaveAttribute("open", "");
   await expect(participation.getByRole("button", { name: "Events Attended", exact: true })).toBeVisible();
   await expect(participation.getByRole("button", { name: "Strength & Conditioning", exact: true })).toBeVisible();
-
-  expect(layout.overflow).toBeLessThanOrEqual(1);
-  expect(layout.tail, "Leaderboards should retain only fixed-dock/safe-area breathing room after content").toBeLessThanOrEqual(220);
 });
