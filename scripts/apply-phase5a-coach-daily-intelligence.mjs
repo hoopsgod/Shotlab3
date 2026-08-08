@@ -23,53 +23,42 @@ update("src/components/CoachCommandCenter.jsx", (source) => {
   next = replaceRequired(
     next,
     "  const activeRate = rosterSize ? clamp(Math.round((activeCount / rosterSize) * 100), 0, 100) : 0;\n",
-    "  const activeRate = rosterSize ? clamp(Math.round((activeCount / rosterSize) * 100), 0, 100) : 0;\n  const rsvpReadiness = eventReadiness ? clamp(eventReadiness.responseRate, 0, 100) : null;\n  const unresolvedRsvps = Math.max(0, Number(eventReadiness?.missing) || 0);\n",
-    "readiness metrics",
+    "  const activeRate = rosterSize ? clamp(Math.round((activeCount / rosterSize) * 100), 0, 100) : 0;\n  const unresolvedRsvps = Math.max(0, Number(eventReadiness?.missing) || 0);\n",
+    "RSVP decision evidence",
   );
-  next = next.replace("  const inactiveCount = Math.max(rosterSize - activeCount, 0);\n", "");
 
   if (!next.includes('label: "Review RSVPs"')) {
-    const primaryPattern = /  const primaryCommand = attentionCount > 0[\s\S]*?\n\s*: \{ eyebrow: \"Today’s next move\", title: \"Build today’s practice\", detail: \"Set the focus every athlete should see next\.\", label: \"Create practice\", onClick: onScheduleEvent, state: \"planning\" \}\);/;
-    if (!primaryPattern.test(next)) throw new Error("Phase 5A primary command target was not found.");
-    const primary = `  const primaryCommand = attentionCount > 0
-    ? { eyebrow: "Daily brief", title: attentionCount + " player follow-up" + (attentionCount === 1 ? "" : "s"), detail: "Clear the player priority before moving to the session plan.", label: "Review priority", onClick: onPlayersClick, state: "attention" }
+    const original = `  const primaryCommand = attentionCount > 0
+    ? { eyebrow: "Today at a glance", title: \`${"${attentionCount}"} decision${"${attentionCount === 1 ? \"\" : \"s\"}"} before practice\`, detail: "Clear the priority, then set today’s plan.", label: "Review priority", onClick: onPlayersClick, state: "attention" }
+    : activationCommand || (hasScheduledSession
+      ? { eyebrow: "Practice ready", title: "Today is under control", detail: \`Your next team session is ${"${nextEventDateFormatted}"}.\`, label: "Open session", onClick: onNextEventClick, state: "ready" }
+      : { eyebrow: "Today’s next move", title: "Build today’s practice", detail: "Set the focus every athlete should see next.", label: "Create practice", onClick: onScheduleEvent, state: "planning" });`;
+
+    const replacement = `  const primaryCommand = attentionCount > 0
+    ? { eyebrow: "Today at a glance", title: \`${"${attentionCount}"} decision${"${attentionCount === 1 ? \"\" : \"s\"}"} before practice\`, detail: "Clear the priority, then set today’s plan.", label: "Review priority", onClick: onPlayersClick, state: "attention" }
     : unresolvedRsvps > 0
-      ? { eyebrow: "Daily brief", title: unresolvedRsvps + " RSVP" + (unresolvedRsvps === 1 ? "" : "s") + " still open", detail: rsvpReadiness + "% of the roster has responded for " + (eventReadiness?.title || "the next session") + ".", label: "Review RSVPs", onClick: () => onEventReadinessClick?.(eventReadiness?.key), state: "attention" }
+      ? { eyebrow: "Today at a glance", title: "1 decision before practice", detail: unresolvedRsvps + " RSVP" + (unresolvedRsvps === 1 ? "" : "s") + " still open for " + (eventReadiness?.title || "the next session") + ".", label: "Review RSVPs", onClick: () => onEventReadinessClick?.(eventReadiness?.key), state: "attention" }
       : activationCommand || (hasScheduledSession
-        ? { eyebrow: "Daily brief", title: "Today is under control", detail: "Next session: " + nextEventDateFormatted + ".", label: "Open session", onClick: onNextEventClick, state: "ready" }
+        ? { eyebrow: "Practice ready", title: "Today is under control", detail: \`Your next team session is ${"${nextEventDateFormatted}"}.\`, label: "Open session", onClick: onNextEventClick, state: "ready" }
         : { eyebrow: "Today’s next move", title: "Build today’s practice", detail: "Set the focus every athlete should see next.", label: "Create practice", onClick: onScheduleEvent, state: "planning" });`;
-    next = next.replace(primaryPattern, primary);
+
+    if (!next.includes(original)) throw new Error("Phase 5A premium Coach hero target was not found.");
+    next = next.replace(original, replacement);
   }
 
-  if (!next.includes("<small>RSVP ready</small>")) {
-    const realityPattern = /            <div className="mcRealityStrip" data-testid="coach-primary-metrics">[\s\S]*?\n            <\/div>\n            <button type="button" className="mcPrimary"/;
-    if (!realityPattern.test(next)) throw new Error("Phase 5A reality strip target was not found.");
-    const reality = `            <div className="mcRealityStrip" data-testid="coach-primary-metrics" aria-label="Coach daily brief">
-              <button type="button" onClick={onActiveTodayClick}><strong>{rosterSize ? activeRate + "%" : "—"}</strong><small>Today active</small></button>
-              <button type="button" onClick={onNextEventClick}><strong>{rsvpReadiness == null ? "—" : rsvpReadiness + "%"}</strong><small>RSVP ready</small></button>
-              <button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Follow-up</small></button>
-            </div>
-            <button type="button" className="mcPrimary"`;
-    next = next.replace(realityPattern, reality);
+  for (const required of [
+    '<span className="mcEyebrow">{primaryCommand.eyebrow}</span>',
+    '<button type="button" onClick={onActiveTodayClick}><strong>{activeCount}<span>/{rosterSize}</span></strong><small>Active</small></button>',
+    '<button type="button" onClick={onPlayersClick}><strong>{attentionCount}</strong><small>Follow-up</small></button>',
+    '<button type="button" onClick={onNextEventClick}><strong>{hasScheduledSession ? "Set" : "—"}</strong><small>Next</small></button>',
+    'function TeamActivityPanel(',
+    'const teamPanel = hasTeamActivity ? <TeamActivityPanel',
+  ]) if (!next.includes(required)) throw new Error(`Phase 5A must preserve accepted Phase 4 Coach presentation: ${required}`);
+
+  if (next.includes('aria-label="Coach daily brief"') || next.includes("<small>RSVP ready</small>") || next.includes("player follow-up\" +")) {
+    throw new Error("Phase 5A must not replace the accepted Coach hero with the rejected Daily Brief treatment.");
   }
 
-  const teamActivityStart = next.indexOf("function TeamActivityPanel(");
-  if (teamActivityStart >= 0) {
-    const liveActivityStart = next.indexOf("function LiveActivityPanel", teamActivityStart);
-    if (liveActivityStart < 0) throw new Error("Phase 5A live activity boundary was not found.");
-    next = next.slice(0, teamActivityStart) + next.slice(liveActivityStart);
-  }
-
-  if (next.includes("const teamPanel =")) {
-    const teamPanelStart = next.indexOf("  const teamPanel =");
-    const lowerPanelsEnd = next.indexOf("\n", next.indexOf("  const lowerPanels =", teamPanelStart));
-    if (teamPanelStart < 0 || lowerPanelsEnd < 0) throw new Error("Phase 5A team panel boundary was not found.");
-    next = next.slice(0, teamPanelStart) + "  const priorityPanel = sessionPanel || livePanel;\n  const lowerPanels = [sessionPanel ? livePanel : null].filter(Boolean);" + next.slice(lowerPanelsEnd);
-  }
-
-  next = next.replace(/\n\s*\{\(sessionPanel \|\| teamPanel\) && livePanel \? <section className="mcLiveEvidence" data-testid="coach-live-evidence-region">\{livePanel\}<\/section> : null\}/, "");
-
-  if (next.includes("TeamActivityPanel") || /\bteamPanel\b/.test(next) || next.includes("coach-live-evidence-region")) throw new Error("Phase 5A redundant team activity/live evidence was not removed.");
   return next;
 });
 
@@ -93,4 +82,4 @@ update("src/App.jsx", (source) => replaceRequired(
   "roster intelligence copy",
 ));
 
-console.log("Applied Phase 5A truthful Coach daily intelligence.");
+console.log("Applied Phase 5A Coach decision intelligence without changing the accepted Phase 4 visual language.");
