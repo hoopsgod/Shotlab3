@@ -56,7 +56,7 @@ test('Phase 4F closes legacy browser mutations with current premium disclosures 
   assert.match(browserAligner, /locator\("summary"\)\.click\(\)/)
   assert.match(browserAligner, /requestUrl\.includes\("\/rest\/v1\/events"\)/)
   assert.match(browserAligner, /commonSeed\["sl:events"\]/)
-  assert.match(browserAligner, /const rsvpButton = playerPage\.getByRole\("button", \{ name: \/RSVP NOW\//)
+  assert.match(browserAligner, /const responseButton = playerPage\.getByRole\("button", \{ name: "Respond now", exact: true \}\)/)
 })
 
 test('Phase 4F treats absent startup App CSS as zero payload rather than a missing asset failure', () => {
