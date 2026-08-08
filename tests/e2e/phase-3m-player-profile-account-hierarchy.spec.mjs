@@ -48,6 +48,21 @@ test("Player Profile keeps privacy immediate while subordinating infrequent acco
   await expect(accountData.getByText("Account & data", { exact: true })).toBeVisible();
   await expect(accountData.getByText("Privacy resources, support, data requests, and account controls", { exact: true })).toBeVisible();
 
+  const accountPresentation = await accountData.evaluate((node) => {
+    const summary = node.querySelector(":scope > summary");
+    const title = summary?.querySelector(":scope > span:first-child > span:first-child");
+    const meta = summary?.querySelector(":scope > span:first-child > span:last-child");
+    return {
+      background: summary ? getComputedStyle(summary).backgroundColor : "",
+      titleColor: title ? getComputedStyle(title).color : "",
+      metaColor: meta ? getComputedStyle(meta).color : "",
+    };
+  });
+  console.log("PHASE3M_ACCOUNT_PRESENTATION", JSON.stringify(accountPresentation));
+  expect(accountPresentation.background).toBe("rgb(255, 255, 255)");
+  expect(accountPresentation.titleColor).toBe("rgb(23, 28, 24)");
+  expect(accountPresentation.metaColor).toBe("rgb(104, 113, 106)");
+
   const requestEntry = page.getByTestId("account-data-request-entry");
   await expect(requestEntry).toBeHidden();
   await expect(accountData.getByRole("button", { name: "Delete Account & Data", exact: true })).toBeHidden();
