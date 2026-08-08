@@ -31,13 +31,51 @@ async function noOverflow(page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
 }
 
-async function openWarmupDrill(page) {
+async function openFormShootingDrill(page) {
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
-  const warmup = page.getByText(/4 MINUTE WARM UP SHOOTING/i).first();
-  await expect(warmup).toBeVisible();
-  await warmup.locator("xpath=ancestor::button[1]").click();
+
+  const drillButtons = page.locator("button.ch");
+  const count = await drillButtons.count();
+  let opened = false;
+  for (let i = 0; i < count && !opened; i += 1) {
+    const button = drillButtons.nth(i);
+    const text = (await button.innerText()).toUpperCase();
+    if (!text.includes("FORM SHOOTING")) continue;
+    await button.click();
+    opened = await page.getByTestId("player-training-session").isVisible().catch(() => false);
+  }
+  expect(opened).toBe(true);
   await expect(page.getByTestId("player-training-session")).toBeVisible({ timeout: 15_000 });
+}
+
+async function seedSevenDayDemoStreak(page) {
+  await page.addInitScript(() => {
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function patchedSetItem(key, value) {
+      if (key === "sl:scores") {
+        try {
+          const rows = JSON.parse(value || "[]");
+          if (Array.isArray(rows)) {
+            const existingIds = new Set(rows.map((row) => row?.id));
+            const today = new Date();
+            for (let i = 0; i < 7; i += 1) {
+              const id = `phase4b-streak-${i}`;
+              if (existingIds.has(id)) continue;
+              const date = new Date(today);
+              date.setDate(today.getDate() - i);
+              const yyyy = date.getFullYear();
+              const mm = String(date.getMonth() + 1).padStart(2, "0");
+              const dd = String(date.getDate()).padStart(2, "0");
+              rows.push({ id, email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: "team-demo-titans", name: "Demo Player", drillId: "demo-form-shooting", score: 20 + i, date: `${yyyy}-${mm}-${dd}`, ts: Date.now() - i * 86400000, src: "home" });
+            }
+            value = JSON.stringify(rows);
+          }
+        } catch {}
+      }
+      return originalSetItem.call(this, key, value);
+    };
+  });
 }
 
 test.beforeEach(async ({ page }) => {
@@ -74,10 +112,11 @@ test("Phase 4B promotes top leaderboard ranks without changing leaderboard hiera
 
 test("Phase 4B turns a new personal best into a premium achievement moment", async ({ page }) => {
   await enterPlayerDemo(page);
-  await openWarmupDrill(page);
+  await openFormShootingDrill(page);
   const session = page.getByTestId("player-training-session");
   const scoreInput = session.locator('input[type="number"]').first();
-  await scoreInput.fill("20");
+  await scoreInput.fill("24");
+  await expect(page.getByTestId("player-training-log-score")).toBeEnabled();
   await page.getByTestId("player-training-log-score").click();
   const reveal = page.getByTestId("player-pb-achievement-reveal");
   await expect(reveal).toBeVisible({ timeout: 15_000 });
@@ -94,22 +133,8 @@ test("Phase 4B turns a new personal best into a premium achievement moment", asy
 });
 
 test("Phase 4B renders earned streak milestones as an achievement cabinet", async ({ page }) => {
+  await seedSevenDayDemoStreak(page);
   await enterPlayerDemo(page);
-  await page.evaluate(() => {
-    const rows = JSON.parse(localStorage.getItem("sl:scores") || "[]");
-    const today = new Date();
-    for (let i = 0; i < 7; i += 1) {
-      const date = new Date(today);
-      date.setDate(today.getDate() - i);
-      const yyyy = date.getFullYear();
-      const mm = String(date.getMonth() + 1).padStart(2, "0");
-      const dd = String(date.getDate()).padStart(2, "0");
-      rows.push({ id: `phase4b-streak-${i}`, email: "demo@shotlab.app", playerId: "demo@shotlab.app", teamId: "team-demo-titans", name: "Demo Player", drillId: "demo-form-shooting", score: 20 + i, date: `${yyyy}-${mm}-${dd}`, ts: Date.now() - i * 86400000, src: "home" });
-    }
-    localStorage.setItem("sl:scores", JSON.stringify(rows));
-  });
-  await page.reload();
-  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
   await page.getByTestId("player-progress-open-profile").click();
   const shelf = page.getByTestId("player-achievement-shelf");
