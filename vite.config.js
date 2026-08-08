@@ -31,6 +31,15 @@ const COACH_ADMIN_REDIRECTS = new Map([
   ['./components/CoachProgramScoreDrawer.jsx', path.resolve(process.cwd(), 'src/components/DeferredCoachProgramScoreDrawer.jsx')],
   ['./screens/CoachTeamBrandingScreen', path.resolve(process.cwd(), 'src/components/DeferredCoachTeamBrandingScreen.jsx')],
 ])
+const AUTHENTICATED_UI_REDIRECTS = new Map([
+  ['./components/CoachDashboardHeader', path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardHeader.jsx')],
+  ['./components/CompactLeaderboardPreviewCard', path.resolve(process.cwd(), 'src/components/DeferredCompactLeaderboardPreviewCard.jsx')],
+  ['./components/VisualHierarchy.jsx', path.resolve(process.cwd(), 'src/components/DeferredVisualHierarchy.jsx')],
+  ['./components/MobileNavigation.jsx', path.resolve(process.cwd(), 'src/components/DeferredMobileNavigation.jsx')],
+  ['./components/SemanticStatus.jsx', path.resolve(process.cwd(), 'src/components/DeferredSemanticStatus.jsx')],
+  ['./components/CoachDashboardPrimitives.jsx', path.resolve(process.cwd(), 'src/components/DeferredCoachDashboardPrimitives.jsx')],
+  ['./components/OperationalInsightRail.jsx', path.resolve(process.cwd(), 'src/components/DeferredOperationalInsightRail.jsx')],
+])
 const APP_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/appPersistenceService',
   '/src/lib/remotePersistence',
@@ -54,9 +63,7 @@ function deferProgressCharts() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_CHART_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
-        return DEFERRED_CHART_MODULE
-      }
+      if (source === STATIC_CHART_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_CHART_MODULE
       return null
     },
   }
@@ -68,9 +75,7 @@ function deferLeaderboardAnalytics() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_LEADERBOARDS_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
-        return DEFERRED_LEADERBOARDS_MODULE
-      }
+      if (source === STATIC_LEADERBOARDS_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_LEADERBOARDS_MODULE
       return null
     },
   }
@@ -82,9 +87,7 @@ function deferCoachCommandCenter() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_COACH_COMMAND_CENTER_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
-        return DEFERRED_COACH_COMMAND_CENTER_MODULE
-      }
+      if (source === STATIC_COACH_COMMAND_CENTER_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_COACH_COMMAND_CENTER_MODULE
       return null
     },
   }
@@ -96,9 +99,7 @@ function deferCoachPhase2Intelligence() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_COACH_PHASE2_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
-        return DEFERRED_COACH_PHASE2_MODULE
-      }
+      if (source === STATIC_COACH_PHASE2_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_COACH_PHASE2_MODULE
       return null
     },
   }
@@ -110,9 +111,7 @@ function deferCoachInteractiveDashboards() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_COACH_INTERACTIVE_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
-        return DEFERRED_COACH_INTERACTIVE_MODULE
-      }
+      if (source === STATIC_COACH_INTERACTIVE_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_COACH_INTERACTIVE_MODULE
       return null
     },
   }
@@ -124,9 +123,7 @@ function deferPlayerCareerHistory() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_CAREER_HISTORY_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
-        return DEFERRED_CAREER_HISTORY_MODULE
-      }
+      if (source === STATIC_CAREER_HISTORY_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return DEFERRED_CAREER_HISTORY_MODULE
       return null
     },
   }
@@ -138,9 +135,7 @@ function hydrateLegacyStyles() {
     enforce: 'pre',
     resolveId(source, importer) {
       const importerId = normalizeModuleId(importer)
-      if (source === STATIC_LEGACY_STYLE_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) {
-        return LEGACY_STYLE_RUNTIME_MODULE
-      }
+      if (source === STATIC_LEGACY_STYLE_IMPORT && importerId.endsWith(APP_MODULE_SUFFIX)) return LEGACY_STYLE_RUNTIME_MODULE
       return null
     },
   }
@@ -166,6 +161,18 @@ function deferCoachAdministration() {
       const importerId = normalizeModuleId(importer)
       if (!importerId.endsWith(APP_MODULE_SUFFIX)) return null
       return COACH_ADMIN_REDIRECTS.get(source) || null
+    },
+  }
+}
+
+function deferAuthenticatedUi() {
+  return {
+    name: 'shotlab-defer-authenticated-ui',
+    enforce: 'pre',
+    resolveId(source, importer) {
+      const importerId = normalizeModuleId(importer)
+      if (!importerId.endsWith(APP_MODULE_SUFFIX)) return null
+      return AUTHENTICATED_UI_REDIRECTS.get(source) || null
     },
   }
 }
@@ -235,11 +242,7 @@ function bundleVisualAuthorityCss() {
       for (let index = 0; index < groups.length; index += 1) {
         const bundleName = `shotlab-authority-${index + 1}.css`
         const concatenated = groups[index].map((entry) => entry.css).join('\n')
-        const transformed = transformWithLightningCss({
-          filename: bundleName,
-          code: Buffer.from(concatenated),
-          minify: true,
-        })
+        const transformed = transformWithLightningCss({ filename: bundleName, code: Buffer.from(concatenated), minify: true })
         await writeFile(path.join(distDir, bundleName), transformed.code)
         bundleTags.push(`<link rel="stylesheet" href="./${bundleName}" data-shotlab-authority-bundle="${index + 1}" />`)
       }
@@ -259,57 +262,12 @@ function bundleVisualAuthorityCss() {
 
 function stableVendorChunk(id) {
   const moduleId = normalizeModuleId(id)
-
-  if (
-    moduleId.includes('/node_modules/react/')
-    || moduleId.includes('/node_modules/react-dom/')
-    || moduleId.includes('/node_modules/scheduler/')
-  ) {
-    return 'react-vendor'
-  }
-
-  if (
-    moduleId.includes('/src/components/PremiumLeaderboardsHub.jsx')
-    || moduleId.includes('/src/lib/seasonLeaderboardAnalytics.js')
-    || moduleId.includes('/src/components/ShotLabCharts.jsx')
-    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')
-  ) {
-    return 'PlayerAnalyticsWorkspaces'
-  }
-
-  if (
-    moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')
-    || moduleId.includes('/src/components/PlayerDashboardHeader.jsx')
-    || moduleId.includes('/src/components/PlayerDailyCommandCenter.jsx')
-    || moduleId.includes('/src/components/PlayerDailyPrimitives.jsx')
-    || moduleId.includes('/src/components/PlayerOperationalWorkspace.jsx')
-  ) {
-    return 'PlayerInterfaceWorkspaces'
-  }
-
-  if (
-    moduleId.includes('/src/components/NewSeasonWizard.jsx')
-    || moduleId.includes('/src/components/CoachPlayerInviteForm.jsx')
-    || moduleId.includes('/src/components/CoachProgramScoreDrawer.jsx')
-    || moduleId.includes('/src/screens/CoachTeamBrandingScreen.jsx')
-  ) {
-    return 'CoachAdministrationWorkspaces'
-  }
-
-  if (
-    moduleId.includes('/src/components/CoachCommandCenter.jsx')
-    || moduleId.includes('/src/components/CoachDashboardPhase2.jsx')
-    || moduleId.includes('/src/components/CoachInteractiveDashboards.jsx')
-    || moduleId.includes('/src/components/SecondaryPageSystem.jsx')
-    || moduleId.includes('/src/components/ExperiencePrimitives.jsx')
-  ) {
-    return 'CoachOperationalWorkspaces'
-  }
-
-  if (APP_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) {
-    return 'AppDomainServices'
-  }
-
+  if (moduleId.includes('/node_modules/react/') || moduleId.includes('/node_modules/react-dom/') || moduleId.includes('/node_modules/scheduler/')) return 'react-vendor'
+  if (moduleId.includes('/src/components/PremiumLeaderboardsHub.jsx') || moduleId.includes('/src/lib/seasonLeaderboardAnalytics.js') || moduleId.includes('/src/components/ShotLabCharts.jsx') || moduleId.includes('/src/components/PlayerCareerHistory.jsx')) return 'PlayerAnalyticsWorkspaces'
+  if (moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx') || moduleId.includes('/src/components/PlayerDashboardHeader.jsx') || moduleId.includes('/src/components/PlayerDailyCommandCenter.jsx') || moduleId.includes('/src/components/PlayerDailyPrimitives.jsx') || moduleId.includes('/src/components/PlayerOperationalWorkspace.jsx')) return 'PlayerInterfaceWorkspaces'
+  if (moduleId.includes('/src/components/NewSeasonWizard.jsx') || moduleId.includes('/src/components/CoachPlayerInviteForm.jsx') || moduleId.includes('/src/components/CoachProgramScoreDrawer.jsx') || moduleId.includes('/src/screens/CoachTeamBrandingScreen.jsx')) return 'CoachAdministrationWorkspaces'
+  if (moduleId.includes('/src/components/CoachCommandCenter.jsx') || moduleId.includes('/src/components/CoachDashboardPhase2.jsx') || moduleId.includes('/src/components/CoachInteractiveDashboards.jsx') || moduleId.includes('/src/components/SecondaryPageSystem.jsx') || moduleId.includes('/src/components/ExperiencePrimitives.jsx')) return 'CoachOperationalWorkspaces'
+  if (APP_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'AppDomainServices'
   return undefined
 }
 
@@ -324,6 +282,7 @@ export default defineConfig({
     hydrateLegacyStyles(),
     deferPlayerInterface(),
     deferCoachAdministration(),
+    deferAuthenticatedUi(),
     deferWorkspaceStyles(),
     react(),
     bundleVisualAuthorityCss(),
@@ -341,18 +300,11 @@ export default defineConfig({
     minify: 'terser',
     cssMinify: 'lightningcss',
     terserOptions: {
-      compress: {
-        passes: 2,
-        pure_funcs: ['console.log', 'console.debug', 'console.info'],
-      },
-      format: {
-        comments: false,
-      },
+      compress: { passes: 2, pure_funcs: ['console.log', 'console.debug', 'console.info'] },
+      format: { comments: false },
     },
     rollupOptions: {
-      output: {
-        manualChunks: stableVendorChunk,
-      },
+      output: { manualChunks: stableVendorChunk },
     },
   },
 })
