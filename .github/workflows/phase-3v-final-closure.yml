@@ -1,0 +1,95 @@
+name: Phase 3V Final Phase 3 Closure
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-3u-player-account-control-consolidation
+    paths:
+      - "package.json"
+      - "scripts/apply-phase3v-final-reconciliation.mjs"
+      - "public/shotlab-phase3v-final-closure.css"
+      - "tests/phase-3v-final-reconciliation.test.mjs"
+      - "tests/e2e/phase-3v-final-closure-screenshots.spec.mjs"
+      - "playwright.screenshots.config.mjs"
+      - ".github/workflows/phase-3v-final-closure.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: phase-3v-final-closure-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-phase-3-closure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply full production enhancer chain
+        run: npm run prepare:route-enhancers
+
+      - name: Verify Phase 3 closure contracts
+        run: node --test tests/phase-3v-final-reconciliation.test.mjs tests/phase-3u-player-account-control.test.mjs tests/mobile-navigation-contract.test.mjs tests/app-store-mobile-shell.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify current mobile navigation
+        run: npx playwright test tests/e2e/mobile-navigation.spec.mjs --config=playwright.config.mjs --reporter=line
+
+      - name: Verify current production acceptance
+        run: npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Capture final Phase 3 iPhone matrix
+        run: npx playwright test tests/e2e/phase-3v-final-closure-screenshots.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
+
+      - name: Upload final Phase 3 evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-3-final-closure-evidence
+          path: |
+            artifacts/design-audit/iphone/07a-phase3-final-player-home.png
+            artifacts/design-audit/iphone/07b-phase3-final-player-home-end.png
+            artifacts/design-audit/iphone/07c-phase3-final-player-rankings.png
+            artifacts/design-audit/iphone/07d-phase3-final-player-progress-story.png
+            artifacts/design-audit/iphone/07e-phase3-final-player-drill-development.png
+            artifacts/design-audit/iphone/07f-phase3-final-player-account.png
+            artifacts/design-audit/iphone/07g-phase3-final-player-account-expanded.png
+            artifacts/design-audit/iphone/07h-phase3-final-coach-home.png
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Phase 3 closure failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-3-final-closure-failure
+          path: |
+            test-results/
+            artifacts/design-audit/iphone/
+          if-no-files-found: ignore
+          retention-days: 7

@@ -35,10 +35,10 @@ test("production acceptance follows the current More to Sign out path without we
   assert.match(productionAcceptanceSource, /countDemoPlayerShotRows\(page, 33\)\)\.toBe\(0\)/);
 });
 
-test("Phase 3U runs after legacy route enhancers in both dev and production builds", () => {
+test("Phase 3U remains ordered after legacy route enhancers and before Phase 3V final authority", () => {
   const pkg = JSON.parse(packageSource);
   for (const scriptName of ["dev", "prepare:route-enhancers"]) {
     const script = pkg.scripts[scriptName];
-    assert.match(script, /apply-expert-app-review-v2\.mjs && node scripts\/apply-phase3u-player-account-control\.mjs && node scripts\/apply-phase3u-production-acceptance-path\.mjs && node scripts\/minify-visual-authority-css\.mjs/);
+    assert.match(script, /apply-expert-app-review-v2\.mjs && node scripts\/apply-phase3u-player-account-control\.mjs && node scripts\/apply-phase3u-production-acceptance-path\.mjs && node scripts\/apply-phase3v-final-reconciliation\.mjs && node scripts\/minify-visual-authority-css\.mjs/);
   }
 });
