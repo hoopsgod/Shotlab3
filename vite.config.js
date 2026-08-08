@@ -2,7 +2,7 @@ import path from 'node:path'
 import { readFile, writeFile, unlink } from 'node:fs/promises'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { transform as transformWithEsbuild } from 'esbuild'
+import { transform as transformWithLightningCss } from 'lightningcss'
 
 const normalizeModuleId = (id = '') => String(id).replaceAll('\\', '/')
 const APP_MODULE_SUFFIX = '/src/App.jsx'
@@ -235,7 +235,11 @@ function bundleVisualAuthorityCss() {
       for (let index = 0; index < groups.length; index += 1) {
         const bundleName = `shotlab-authority-${index + 1}.css`
         const concatenated = groups[index].map((entry) => entry.css).join('\n')
-        const transformed = await transformWithEsbuild(concatenated, { loader: 'css', minify: true })
+        const transformed = transformWithLightningCss({
+          filename: bundleName,
+          code: Buffer.from(concatenated),
+          minify: true,
+        })
         await writeFile(path.join(distDir, bundleName), transformed.code)
         bundleTags.push(`<link rel="stylesheet" href="./${bundleName}" data-shotlab-authority-bundle="${index + 1}" />`)
       }
@@ -334,6 +338,17 @@ export default defineConfig({
     assetsInlineLimit: 4096,
     reportCompressedSize: true,
     chunkSizeWarningLimit: 850,
+    minify: 'terser',
+    cssMinify: 'lightningcss',
+    terserOptions: {
+      compress: {
+        passes: 2,
+        pure_funcs: ['console.log', 'console.debug', 'console.info'],
+      },
+      format: {
+        comments: false,
+      },
+    },
     rollupOptions: {
       output: {
         manualChunks: stableVendorChunk,
