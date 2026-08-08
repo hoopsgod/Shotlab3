@@ -109,26 +109,14 @@ replaceOnce(
   let source = readFileSync(path, "utf8");
   const robustHelper = `async function enterCoachPlayers(page) {
   await page.goto("/");
-  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });
-  const allPlayers = page.getByRole("button", { name: "Players", exact: true });
-  await expect(demoCoach.or(allPlayers.first()).first()).toBeVisible({ timeout: 15_000 });
-  if (await demoCoach.isVisible()) await demoCoach.click();
-  await expect.poll(async () => {
-    const count = await allPlayers.count();
-    for (let index = 0; index < count; index += 1) {
-      if (await allPlayers.nth(index).isVisible()) return index;
-    }
-    return -1;
-  }, { timeout: 15_000 }).toBeGreaterThanOrEqual(0);
-  const count = await allPlayers.count();
-  for (let index = 0; index < count; index += 1) {
-    const candidate = allPlayers.nth(index);
-    if (await candidate.isVisible()) {
-      await candidate.click();
-      return;
-    }
-  }
-  throw new Error("No visible Players navigation control was available.");
+  const dock = page.getByTestId("mobile-navigation-dock");
+  const coachDemo = page.getByRole("button", { name: "Coach demo", exact: true });
+  await expect(dock.or(coachDemo).first()).toBeVisible({ timeout: 15_000 });
+  if (await coachDemo.isVisible()) await coachDemo.click();
+  await expect(dock).toBeVisible({ timeout: 15_000 });
+  const players = dock.getByRole("button", { name: "Players", exact: true });
+  await expect(players).toBeVisible();
+  await players.click();
 }`;
   if (!source.includes(robustHelper)) {
     source = source.replace(/async function enterCoachPlayers\(page\) \{[\s\S]*?\n\}\n\ntest\(/, `${robustHelper}\n\ntest(`);
