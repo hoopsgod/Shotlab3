@@ -3,10 +3,11 @@ import fs from "node:fs";
 import path from "node:path";
 
 const outputDir = path.resolve(process.cwd(), "artifacts/design-audit/iphone");
+const leaderboardRoute = "**/v1/leaderboards/home-shots**";
 
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
-  await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
+  await page.route(leaderboardRoute, (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
@@ -23,6 +24,13 @@ async function enterPlayerDemo(page) {
   await page.goto("/");
   await page.getByRole("button", { name: /Player demo/i }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+}
+
+async function openMore(page) {
+  await page.getByTestId("mobile-navigation-more").click();
+  const sheet = page.getByTestId("mobile-navigation-sheet");
+  await expect(sheet).toBeVisible();
+  return sheet;
 }
 
 async function openCalipariDrill(page) {
@@ -61,7 +69,9 @@ test("Phase 4D turns Auth validation into a compact premium recovery state", asy
 test("Phase 4D gives an empty Program filter a useful first-action state", async ({ page }) => {
   await enterPlayerDemo(page);
   const dock = page.getByTestId("mobile-navigation-dock");
-  await dock.getByRole("button", { name: "Program", exact: true }).click();
+  const sheet = await openMore(page);
+  await sheet.locator('[data-nav-key="duels"]').click();
+  await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
   await expect(page.getByTestId("player-program-workspace")).toBeVisible({ timeout: 20_000 });
   const filters = page.getByTestId("player-program-filter-rail");
   await filters.getByRole("button", { name: /Completed/i }).click();
@@ -79,13 +89,22 @@ test("Phase 4D gives an empty Program filter a useful first-action state", async
 });
 
 test("Phase 4D makes an empty Player leaderboard intentional instead of blank", async ({ page }) => {
+  await page.unroute(leaderboardRoute);
+  await page.route(leaderboardRoute, (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({
+      leaderboard: [{
+        rank: 1,
+        player_id: "outside-roster@demo.shotlab.app",
+        email: "outside-roster@demo.shotlab.app",
+        player_display_name: "Outside Roster",
+        team_id: "team-demo-titans",
+        total_home_shots: 1,
+      }],
+    }),
+  }));
   await enterPlayerDemo(page);
-  await page.evaluate(() => {
-    localStorage.setItem("sl:shotlogs", "[]");
-    localStorage.setItem("sl:scores", "[]");
-  });
-  await page.reload();
-  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   const preview = page.getByTestId("compact-leaderboard-preview").first();
   await expect(preview).toBeVisible();
   const state = preview.getByTestId("leaderboard-empty-state");
