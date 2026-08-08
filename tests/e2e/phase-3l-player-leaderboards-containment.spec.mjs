@@ -58,7 +58,7 @@ test("Player Leaderboards ends near its content while preserving ranking navigat
       styleHrefs,
       stylesheetLoaded: styleHrefs.some((href) => href.includes("shotlab-phase3l-player-leaderboards-containment.css")),
       assetStatus,
-      assetHasSpacerRule: assetText.includes(".player-scroll-container > .screen-fade-in::after"),
+      assetHasSpacerRule: assetText.includes("screen-fade-in::after"),
       reserve: workspace ? getComputedStyle(workspace).getPropertyValue("--phase3l-leaderboards-dock-reserve").trim() : null,
       routeFound: Boolean(route),
       after: after ? {
@@ -125,7 +125,8 @@ test("Player Leaderboards ends near its content while preserving ranking navigat
   expect(cssDiagnostic.assetHasSpacerRule, "Built Phase 3L CSS must contain the structural spacer rule").toBe(true);
   expect(cssDiagnostic.stylesheetLoaded, "Phase 3L CSS must be attached to the rendered document").toBe(true);
   expect(cssDiagnostic.routeFound, "Player Leaderboards route wrapper must exist at the Phase 3L selector seam").toBe(true);
-  expect(cssDiagnostic.reserve, "Phase 3L dock reserve token must resolve on the live Leaderboards workspace").not.toBe("");
+  expect(cssDiagnostic.reserve, "Phase 3L dock reserve token must resolve on the live Leaderboards workspace").toBe("112px");
+  expect(Number.parseFloat(cssDiagnostic.after?.height || "0"), "Phase 3L structural spacer must retain its built height").toBeGreaterThanOrEqual(96);
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.tail, "Leaderboards should retain one deliberate dock-safe end reserve").toBeGreaterThanOrEqual(96);
   expect(layout.tail, "Leaderboards should not restore the old empty canvas tail").toBeLessThanOrEqual(220);
