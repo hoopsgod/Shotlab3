@@ -34,9 +34,12 @@ test("Player Profile ends near Account & data while retaining dock-safe access",
 
   const layout = await page.evaluate(() => {
     const account = document.querySelector('[data-testid="player-profile-account-data"]');
-    if (!account) throw new Error("Player Profile Account & data disclosure missing");
+    const workspace = document.querySelector('.performance-shell--player.is-mobile[data-workspace-tab="profile"] .performance-workspace');
+    const route = document.querySelector('.performance-shell--player.is-mobile[data-workspace-tab="profile"] .player-scroll-container > .screen-fade-in');
+    if (!account || !workspace || !route) throw new Error("Player Profile containment targets missing");
     const rect = account.getBoundingClientRect();
     const contentBottom = rect.bottom + window.scrollY;
+    const after = getComputedStyle(route, "::after");
     const read = (selector) => {
       const target = document.querySelector(selector);
       if (!target) return null;
@@ -66,6 +69,8 @@ test("Player Profile ends near Account & data while retaining dock-safe access",
       documentHeight: document.documentElement.scrollHeight,
       bodyHeight: document.body.scrollHeight,
       contentBottom,
+      reserve: getComputedStyle(workspace).getPropertyValue("--phase3n-profile-dock-reserve").trim(),
+      spacerHeight: Number.parseFloat(after.height || "0"),
       nodes: [
         read('.performance-shell--player'),
         read('.performance-shell--player .shell-main'),
@@ -80,8 +85,11 @@ test("Player Profile ends near Account & data while retaining dock-safe access",
   });
 
   console.log("PHASE3N_PROFILE_GEOMETRY", JSON.stringify(layout));
+  expect(layout.reserve).toBe("112px");
+  expect(layout.spacerHeight, "Profile structural spacer must survive the built CSS cascade").toBeGreaterThanOrEqual(96);
   expect(layout.overflow).toBeLessThanOrEqual(1);
-  expect(layout.tail, "Player Profile should retain only one intentional dock-safe end reserve").toBeLessThanOrEqual(220);
+  expect(layout.tail, "Player Profile should retain one deliberate dock-safe end reserve").toBeGreaterThanOrEqual(96);
+  expect(layout.tail, "Player Profile should not retain duplicate dock padding").toBeLessThanOrEqual(220);
 
   await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   const dockClearance = await page.evaluate(() => {
