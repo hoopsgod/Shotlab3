@@ -95,7 +95,8 @@ test("database, API, and UI contracts preserve role boundaries and acknowledgmen
   const api = fs.readFileSync(new URL("../functions/v1/player-assignments/index.js", import.meta.url), "utf8");
   const coach = fs.readFileSync(new URL("../src/lib/coachFollowUpEnhancer.js", import.meta.url), "utf8");
   const player = fs.readFileSync(new URL("../src/components/PlayerCoachAssignmentCard.jsx", import.meta.url), "utf8");
-  const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
+  const coachBootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
+  const playerBootstrap = fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx", import.meta.url), "utf8");
 
   assert.match(migration, /create table if not exists public\.player_assignments/i);
   assert.match(migration, /enable row level security/i);
@@ -114,5 +115,7 @@ test("database, API, and UI contracts preserve role boundaries and acknowledgmen
   assert.match(player, /Acknowledge assignment/);
   assert.match(player, /Start assignment/);
   assert.match(player, /Mark assignment complete/);
-  assert.match(bootstrap, /installPlayerAssignmentEnhancer\(\)/);
+  assert.doesNotMatch(coachBootstrap, /installPlayerAssignmentEnhancer/);
+  assert.match(playerBootstrap, /import \{ installPlayerAssignmentEnhancer \}/);
+  assert.match(playerBootstrap, /installPlayerAssignmentEnhancer\(\)/);
 });
