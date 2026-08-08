@@ -15,6 +15,10 @@ async function installRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
+async function enableMotion(page) {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+}
+
 async function enterPlayerDemo(page) {
   await page.goto("/");
   await page.getByRole("button", { name: /Player demo/i }).click();
@@ -44,6 +48,7 @@ test.beforeEach(async ({ page }) => {
 });
 
 test("Phase 4C gives the Player dock a consistent premium selected and press material", async ({ page }) => {
+  await enableMotion(page);
   await enterPlayerDemo(page);
   const dock = page.getByTestId("mobile-navigation-dock");
   await expect(dock).toHaveAttribute("data-navigation-role", "player");
@@ -61,6 +66,7 @@ test("Phase 4C gives the Player dock a consistent premium selected and press mat
 });
 
 test("Phase 4C uses restrained translucent material for the Player More sheet", async ({ page }) => {
+  await enableMotion(page);
   await enterPlayerDemo(page);
   await page.getByTestId("mobile-navigation-more").click();
   const overlay = page.getByTestId("mobile-navigation-overlay");
@@ -81,6 +87,7 @@ test("Phase 4C uses restrained translucent material for the Player More sheet", 
 });
 
 test("Phase 4C makes active score entry feel deliberate without changing score behavior", async ({ page }) => {
+  await enableMotion(page);
   await enterPlayerDemo(page);
   await openCalipariDrill(page);
   const session = page.getByTestId("player-training-session");
@@ -100,6 +107,7 @@ test("Phase 4C makes active score entry feel deliberate without changing score b
 });
 
 test("Phase 4C gives training completion a restrained arrival and tactile next action", async ({ page }) => {
+  await enableMotion(page);
   await enterPlayerDemo(page);
   await openCalipariDrill(page);
   const input = page.getByTestId("player-training-session").locator('input[type="number"]').first();
