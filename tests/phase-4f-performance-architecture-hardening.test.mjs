@@ -11,39 +11,21 @@ const browserAligner = await readFile(new URL('../scripts/align-phase4f-browser-
 const budget = JSON.parse(await readFile(new URL('../performance-budget.json', import.meta.url), 'utf8'))
 
 test('Phase 4F uses neutral runtime plus shared foundations and one workspace chunk per role', () => {
-  for (const chunk of ['RuntimeShared', 'AuthenticatedUi', 'AppDomainServices', 'PlayerWorkspaces', 'CoachWorkspaces']) {
-    assert.match(vite, new RegExp(`return '${chunk}'`))
-  }
-  for (const retired of ['PlayerAnalyticsWorkspaces', 'PlayerInterfaceWorkspaces', 'CoachAdministrationWorkspaces', 'CoachOperationalWorkspaces', 'PlayerProfileWorkspaces']) {
-    assert.doesNotMatch(vite, new RegExp(`return '${retired}'`))
-  }
+  for (const chunk of ['RuntimeShared', 'AuthenticatedUi', 'AppDomainServices', 'PlayerWorkspaces', 'CoachWorkspaces']) assert.match(vite, new RegExp(`return '${chunk}'`))
+  for (const retired of ['PlayerAnalyticsWorkspaces', 'PlayerInterfaceWorkspaces', 'CoachAdministrationWorkspaces', 'CoachOperationalWorkspaces', 'PlayerProfileWorkspaces']) assert.doesNotMatch(vite, new RegExp(`return '${retired}'`))
   assert.match(vite, /vite\/preload-helper/)
   assert.doesNotMatch(vite, /onlyExplicitManualChunks:\s*true/)
 })
 
 test('Phase 4F moves cross-role scoring and assignment services into AppDomainServices', () => {
   assert.match(vite, /APP_DOMAIN_SERVICE_FRAGMENTS/)
-  for (const fragment of [
-    'authFlow',
-    'appPersistenceService',
-    'homeShotLogging',
-    'playerDataManagement',
-    'seasonLeaderboardAnalytics',
-    'programDrillScoring',
-    'assignmentDeadline',
-    'playerAssignmentService',
-    'playerAssignmentHistoryService',
-  ]) {
-    assert.match(vite, new RegExp(fragment))
-  }
+  for (const fragment of ['authFlow','appPersistenceService','homeShotLogging','playerDataManagement','seasonLeaderboardAnalytics','programDrillScoring','assignmentDeadline','playerAssignmentService','playerAssignmentHistoryService']) assert.match(vite, new RegExp(fragment))
   assert.match(vite, /return 'AppDomainServices'/)
 })
 
 test('Phase 4F keeps cross-role presentation, recovery, and fallback styling in AuthenticatedUi', () => {
   assert.match(vite, /SHARED_AUTHENTICATED_UI_FRAGMENTS/)
-  for (const fragment of ['TeamBrandingContext', 'MobileNavigation', 'VisualHierarchy', 'ShotLabStatePanel', 'SemanticStatus', 'WorkspaceRecoveryBoundary', 'PlayerInterfaceFallback']) {
-    assert.match(vite, new RegExp(fragment))
-  }
+  for (const fragment of ['TeamBrandingContext','MobileNavigation','VisualHierarchy','ShotLabStatePanel','SemanticStatus','WorkspaceRecoveryBoundary','PlayerInterfaceFallback']) assert.match(vite, new RegExp(fragment))
   assert.match(vite, /return 'AuthenticatedUi'/)
 })
 
@@ -60,6 +42,7 @@ test('Phase 4F closes legacy browser mutations with current premium disclosures 
   assert.match(browserAligner, /const rsvpButton = playerPage\.getByRole\("button", \{ name: \/RSVP NOW\/ \}\)\.first\(\)/)
   assert.match(browserAligner, /await rsvpButton\.click\(\)/)
   assert.match(browserAligner, /if \(!next\.includes\(premiumResponse\)\)/)
+  assert.match(browserAligner, /next = next\.replace\(legacy, premiumResponse\);\s*break;/)
 })
 
 test('Phase 4F treats absent startup App CSS as zero payload rather than a missing asset failure', () => {
