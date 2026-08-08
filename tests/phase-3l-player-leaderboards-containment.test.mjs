@@ -21,7 +21,7 @@ test('Phase 3L loads after accepted Phase 3K and remains Leaderboards-only', () 
   assert.equal(css.includes('data-workspace-tab="profile"'), false);
 });
 
-test('Leaderboards removes duplicate outer reserve while retaining one route-owned dock reserve', () => {
+test('Leaderboards removes duplicate outer reserve while retaining one structural dock spacer', () => {
   for (const marker of [
     '.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .performance-workspace',
     '--phase3l-leaderboards-dock-reserve:calc(112px + env(safe-area-inset-bottom,0px))',
@@ -29,8 +29,11 @@ test('Leaderboards removes duplicate outer reserve while retaining one route-own
     'padding-bottom:0!important',
     '.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .player-scroll-container',
     'scroll-padding-bottom:var(--phase3l-leaderboards-dock-reserve)!important',
-    '.player-scroll-container > .screen-fade-in',
-    'padding-bottom:var(--phase3l-leaderboards-dock-reserve)!important',
+    '.player-scroll-container > .screen-fade-in::after',
+    'content:""!important',
+    'height:var(--phase3l-leaderboards-dock-reserve)!important',
+    'min-height:var(--phase3l-leaderboards-dock-reserve)!important',
+    'pointer-events:none!important',
     '[data-testid="premium-leaderboards-hub"]',
   ]) requireMarker(css, marker);
 });
