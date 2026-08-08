@@ -9,6 +9,8 @@ if (source.includes('testId="player-profile-account-data"')) {
   if (!source.includes('data-testid="player-profile-privacy"')) fail('privacy semantic owner missing from transformed Profile');
   if (!source.includes('<LegalSupportLinks compact/>')) fail('legal/support links missing from transformed Profile');
   if (!source.includes('<AccountTrustActions deleteAccount={deleteAccount}/>')) fail('account trust actions missing from transformed Profile');
+  if (!source.includes('Delete Account & Data')) fail('shared in-app account deletion control missing');
+  if (!source.includes('REQUEST DATA')) fail('shared data request control missing');
   console.log('Phase 3M Player Profile account hierarchy already applied.');
   process.exit(0);
 }
@@ -47,8 +49,8 @@ if (!transformedProfile.includes('>LEGAL & SUPPORT</div>')) fail('Legal & Suppor
 if (!transformedProfile.includes('<LegalSupportLinks compact/>')) fail('legal/support links were removed');
 if (!transformedProfile.includes('<AccountTrustActions deleteAccount={deleteAccount}/>')) fail('account trust actions were removed');
 if (!transformedProfile.includes('Hide me from leaderboards')) fail('leaderboard privacy control was removed');
-if (!transformedProfile.includes('Delete Account & Data')) fail('in-app account deletion was removed');
-if (!transformedProfile.includes('REQUEST DATA')) fail('data request action was removed');
+if (!source.includes('Delete Account & Data')) fail('shared in-app account deletion control was removed');
+if (!source.includes('REQUEST DATA')) fail('shared data request action was removed');
 
 writeFileSync(path, source);
 console.log('Applied Phase 3M Player Profile account hierarchy.');
