@@ -16,13 +16,17 @@ test("mobile dock limits persistent navigation to three destinations plus More",
   assert.match(navigationCss, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
 });
 
-test("native navigation exposes the agreed role-specific destinations", () => {
-  assert.match(navigationSource, /role === "player" \? \["home", "log-drill", "leaderboards"\]/);
+test("native navigation makes player development primary and rankings secondary", () => {
+  assert.match(navigationSource, /role === "player" \? \["home", "log-drill", "profile"\]/);
+  assert.doesNotMatch(navigationSource, /role === "player" \? \["home", "log-drill", "leaderboards"\]/);
   assert.match(navigationSource, /role === "coach" \? \["feed", "players", "events"\]/);
   assert.match(navigationSource, /role === "player" \? \["Home", "Train", "Progress"\]/);
+  assert.match(navigationSource, /mobileLabel: "Rankings"/);
+  assert.match(navigationSource, /title: "Rankings"/);
+  assert.match(navigationSource, /data-navigation-intent=\{role === "player" \? "development-first" : undefined\}/);
+  assert.match(navigationSource, /Program work, schedule, rankings, and team tools\./);
   assert.match(navigationSource, /\["Home", "Players", "Schedule"\]/);
   assert.match(navigationSource, /data-navigation-role=\{role\}/);
-  assert.match(navigationSource, /role\[0\]\.toUpperCase\(\) \+ role\.slice\(1\)/);
 });
 
 test("secondary navigation is accessible, dismissible, and does not leave body scrolling behind", () => {
@@ -36,6 +40,7 @@ test("secondary navigation is accessible, dismissible, and does not leave body s
 
 test("secondary tools are grouped without removing destinations", () => {
   assert.match(navigationSource, /export function groupSecondaryNavigation/);
+  assert.match(navigationSource, /PLAYER_GROUP_DEFINITIONS/);
   assert.match(navigationSource, /id: "program"/);
   assert.match(navigationSource, /id: "performance"/);
   assert.match(navigationSource, /id: "team"/);
