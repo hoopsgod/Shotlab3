@@ -1,0 +1,117 @@
+.root{
+  --state-accent:var(--accent,#c8ff1a);
+  --state-accent-soft:color-mix(in srgb,var(--state-accent) 14%,transparent);
+  position:relative;
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:13px;
+  align-items:flex-start;
+  width:100%;
+  padding:16px;
+  border:1px solid color-mix(in srgb,var(--state-accent) 22%,rgba(255,255,255,.10));
+  border-radius:18px;
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+  box-shadow:0 14px 34px rgba(0,0,0,.18);
+  color:#f7f8f3;
+  overflow:hidden;
+  isolation:isolate;
+}
+.root::after{
+  content:"";
+  position:absolute;
+  width:132px;
+  height:132px;
+  right:-62px;
+  top:-70px;
+  border:1px solid color-mix(in srgb,var(--state-accent) 24%,transparent);
+  border-radius:999px;
+  opacity:.65;
+  pointer-events:none;
+  z-index:-1;
+}
+.compact{padding:13px 14px;gap:11px;border-radius:16px;box-shadow:none}
+.light{
+  background:linear-gradient(145deg,rgba(255,255,255,.98),rgba(248,247,242,.94));
+  border-color:color-mix(in srgb,var(--state-accent) 20%,rgba(17,26,33,.10));
+  color:#111a21;
+  box-shadow:0 12px 30px rgba(17,26,33,.07);
+}
+.iconWell{
+  width:44px;
+  height:44px;
+  display:grid;
+  place-items:center;
+  border-radius:14px;
+  color:var(--state-accent);
+  background:color-mix(in srgb,var(--state-accent) 11%,rgba(255,255,255,.035));
+  border:1px solid color-mix(in srgb,var(--state-accent) 30%,transparent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+}
+.compact .iconWell{width:38px;height:38px;border-radius:12px}
+.copy{min-width:0}
+.eyebrow{
+  color:var(--state-accent);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  font-size:9px;
+  font-weight:850;
+  letter-spacing:.105em;
+  text-transform:uppercase;
+}
+.title{
+  margin:4px 0 0;
+  color:inherit;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  font-size:16px;
+  font-weight:820;
+  line-height:1.12;
+  letter-spacing:-.025em;
+}
+.compact .title{font-size:14px}
+.detail{
+  margin:6px 0 0;
+  color:rgba(238,241,235,.68);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  font-size:12px;
+  font-weight:560;
+  line-height:1.46;
+}
+.light .detail{color:#5e6971}
+.action{
+  min-height:40px;
+  margin-top:11px;
+  padding:0 13px;
+  border:1px solid color-mix(in srgb,var(--state-accent) 55%,transparent);
+  border-radius:11px;
+  background:color-mix(in srgb,var(--state-accent) 10%,transparent);
+  color:var(--state-accent);
+  font:800 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  letter-spacing:.02em;
+  cursor:pointer;
+  transition:transform .16s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+.action:active{transform:scale(.975)}
+.action:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--state-accent) 22%,transparent)}
+.loading{--state-accent:var(--team-brand-primary,var(--accent,#c8ff1a))}
+.empty{--state-accent:var(--team-brand-primary,var(--accent,#c8ff1a))}
+.firstUse{--state-accent:var(--team-brand-primary,var(--accent,#c8ff1a))}
+.success{--state-accent:var(--semantic-success,#73d59a)}
+.error{--state-accent:var(--semantic-warning,#ffbd66)}
+.loading .iconWell{animation:statePulse 1.55s ease-in-out infinite}
+.loading .iconWell::after{
+  content:"";
+  position:absolute;
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  background:currentColor;
+  box-shadow:0 0 14px currentColor;
+}
+.iconWell{position:relative}
+.loading .iconWell svg{opacity:.28}
+@keyframes statePulse{
+  0%,100%{transform:scale(1);box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+  50%{transform:scale(1.035);box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 0 20px color-mix(in srgb,var(--state-accent) 14%,transparent)}
+}
+@media (prefers-reduced-motion:reduce){
+  .loading .iconWell,.action{animation:none!important;transition:none!important}
+}
