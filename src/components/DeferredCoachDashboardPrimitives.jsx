@@ -1,1 +1,1 @@
-export { DashboardSection } from "./DeferredAuthenticatedUi.jsx";
+export { DashboardSection } from "./DeferredCoachAuthenticatedUi.jsx";
