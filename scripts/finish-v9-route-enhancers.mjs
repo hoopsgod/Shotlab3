@@ -108,11 +108,15 @@ replaceOnce(
   const path = "tests/e2e/coach-player-invitation.spec.mjs";
   let source = readFileSync(path, "utf8");
   const robustHelper = `async function enterCoachPlayers(page) {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route("**/v1/legacy-auth/restore", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, profile: { email: COACH_EMAIL, name: "Demo Coach", role: "coach", team_id: TEAM_ID } }),
+  }));
   await page.goto("/");
+  await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
   const dock = page.getByTestId("mobile-navigation-dock");
-  const coachDemo = page.getByRole("button", { name: "Coach demo", exact: true });
-  await expect(dock.or(coachDemo).first()).toBeVisible({ timeout: 15_000 });
-  if (await coachDemo.isVisible()) await coachDemo.click();
   await expect(dock).toBeVisible({ timeout: 15_000 });
   const players = dock.getByRole("button", { name: "Players", exact: true });
   await expect(players).toBeVisible();
@@ -120,6 +124,17 @@ replaceOnce(
 }`;
   if (!source.includes(robustHelper)) {
     source = source.replace(/async function enterCoachPlayers\(page\) \{[\s\S]*?\n\}\n\ntest\(/, `${robustHelper}\n\ntest(`);
+    writeFileSync(path, source);
+  }
+}
+
+{
+  const path = "tests/e2e/coach-player-cross-device-first-result.spec.mjs";
+  let source = readFileSync(path, "utf8");
+  const before = '  await expect(playerPage.getByText("UPCOMING EVENTS", { exact: true })).toBeVisible({ timeout: 20_000 });\n  await playerPage.getByRole("button", { name: /RSVP NOW/ }).first().click();';
+  const after = '  const rsvpButton = playerPage.getByRole("button", { name: /RSVP NOW/ }).first();\n  await expect(rsvpButton).toBeVisible({ timeout: 20_000 });\n  await rsvpButton.click();';
+  if (!source.includes(after) && source.includes(before)) {
+    source = source.replace(before, after);
     writeFileSync(path, source);
   }
 }
