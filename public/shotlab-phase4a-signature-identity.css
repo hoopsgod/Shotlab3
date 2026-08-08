@@ -1,0 +1,81 @@
+/* Phase 4A — Signature visual identity.
+   Ownable basketball geometry + premium stat accents without adding glass to the content layer. */
+
+:root{
+  --p4a-lime:var(--team-brand-primary,var(--accent,#c8ff1a));
+  --p4a-ink:#101712;
+  --p4a-night:#0f1412;
+  --p4a-cream:#f6f5ef;
+  --p4a-line:rgba(20,28,23,.11);
+}
+
+/* Entry experience: branded field lives behind content, not as another glass card. */
+[data-testid="auth-workspace"]{isolation:isolate}
+[data-testid="auth-workspace"]>[data-testid="auth-signature-field"]{z-index:0!important}
+[data-testid="auth-workspace"] .fade-up{z-index:1!important}
+[data-testid="auth-workspace"] .auth-card-enter{position:relative;overflow:hidden}
+[data-testid="auth-workspace"] .auth-card-enter::before{
+  content:"";position:absolute;left:22px;right:22px;top:0;height:2px;border-radius:999px;
+  background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--p4a-lime) 92%,white 8%) 22%,color-mix(in srgb,var(--p4a-lime) 42%,transparent) 70%,transparent);
+  opacity:.72;pointer-events:none
+}
+
+/* Player Home: let the signature artwork sit inside the accepted dark command layer. */
+[data-testid="player-daily-command-center"]{isolation:isolate}
+[data-testid="player-daily-command-center"]>[data-testid="player-home-signature-field"]{position:absolute!important;inset:0!important;z-index:0!important}
+[data-testid="player-daily-command-center"]>[data-testid="player-home-signature-field"]+*{position:relative;z-index:1}
+[data-testid="player-daily-command-center"]>[data-testid="player-home-signature-field"]~*{position:relative;z-index:1}
+[data-testid="player-daily-command-center"] [data-command-role="primary"]{
+  box-shadow:inset 0 1px rgba(255,255,255,.035),0 18px 44px rgba(0,0,0,.20),0 0 54px color-mix(in srgb,var(--p4a-lime) 6%,transparent)!important
+}
+[data-testid="player-command-evidence"]>div{position:relative;overflow:hidden}
+[data-testid="player-command-evidence"]>div::before{
+  content:"";position:absolute;left:12px;right:12px;top:0;height:1px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--p4a-lime) 52%,transparent),transparent 78%);opacity:.8
+}
+[data-testid="player-command-evidence"]>div::after{
+  content:"";position:absolute;width:28px;height:28px;border:1px solid color-mix(in srgb,var(--p4a-lime) 15%,transparent);border-radius:999px;right:-11px;bottom:-11px;opacity:.75
+}
+
+/* Development Story: same signature geometry, different crop, plus premium metric instrumentation. */
+[data-testid="player-progress-story-hero"]{isolation:isolate}
+[data-testid="player-progress-story-hero"]>[data-testid="player-progress-signature-field"]{position:absolute!important;inset:0!important;z-index:0!important}
+[data-testid="player-progress-story-hero"]>[data-testid="player-progress-signature-field"]~*{position:relative;z-index:1}
+[data-testid="player-progress-metrics"]>div{position:relative;overflow:hidden}
+[data-testid="player-progress-metrics"]>div::after{
+  content:"";position:absolute;right:-13px;bottom:-13px;width:34px;height:34px;border-radius:999px;
+  border:1px solid color-mix(in srgb,var(--p4a-lime) 16%,transparent);opacity:.78
+}
+[data-testid="player-progress-trend-chart"]{position:relative;overflow:hidden}
+[data-testid="player-progress-trend-chart"]::after{
+  content:"";position:absolute;left:14px;right:14px;bottom:10px;height:1px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--p4a-lime) 48%,transparent),transparent);opacity:.45
+}
+
+/* Rankings remains light-first but now carries a restrained competitive signature. */
+[data-testid="premium-leaderboards-hub"]{position:relative;isolation:isolate}
+[data-testid="premium-leaderboards-hub"]>header{position:relative;overflow:hidden}
+[data-testid="premium-leaderboards-hub"]>header::after{
+  content:"";position:absolute;width:112px;height:112px;border-radius:999px;right:-42px;top:-62px;
+  border:1px solid color-mix(in srgb,var(--p4a-lime) 28%,transparent);box-shadow:0 0 0 12px color-mix(in srgb,var(--p4a-lime) 4%,transparent);pointer-events:none
+}
+[data-testid="premium-leaderboards-hub"]>header::before{
+  content:"";position:absolute;width:7px;height:7px;border-radius:999px;right:29px;top:21px;background:var(--p4a-lime);
+  box-shadow:0 0 18px color-mix(in srgb,var(--p4a-lime) 42%,transparent);opacity:.72;pointer-events:none
+}
+
+/* Coach already owns a richer court illustration. Align its glow family without replacing it. */
+body.mission-control-active [data-testid="coach-primary-objective"]{
+  box-shadow:0 24px 64px rgba(13,23,30,.24),0 0 70px color-mix(in srgb,var(--p4a-lime) 5%,transparent)!important
+}
+
+@media(max-width:620px){
+  [data-testid="auth-workspace"] .auth-card-enter::before{left:18px;right:18px}
+  [data-testid="player-command-evidence"]>div::before{left:9px;right:9px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  [data-testid="auth-signature-field"],
+  [data-testid="player-home-signature-field"],
+  [data-testid="player-progress-signature-field"]{animation:none!important;transition:none!important}
+}
