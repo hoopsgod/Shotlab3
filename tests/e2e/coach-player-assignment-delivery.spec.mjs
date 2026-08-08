@@ -29,6 +29,20 @@ const commonSeed = {
 const fulfill = (route, body, status = 200) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
 
 async function installRoutes(context, state) {
+  await context.route("**/v1/legacy-auth/restore", async (route) => {
+    const request = route.request();
+    let payload = {};
+    try { payload = request.postDataJSON() || {}; } catch {}
+    const email = String(payload.email || request.headers()["x-user-id"] || "").trim().toLowerCase();
+    const coach = email === COACH_EMAIL;
+    return fulfill(route, {
+      ok: true,
+      profile: coach
+        ? { email: COACH_EMAIL, name: "Delivery Coach", role: "coach", team_id: TEAM_ID }
+        : { email: PLAYER_EMAIL, name: "Ari Delivery", role: "player", team_id: TEAM_ID },
+    });
+  });
+
   await context.route("**/v1/player-assignments**", async (route) => {
     const request = route.request();
     if (request.method() === "GET") {
