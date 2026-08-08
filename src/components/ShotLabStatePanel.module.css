@@ -77,7 +77,7 @@
 }
 .light .detail{color:#5e6971}
 .action{
-  min-height:40px;
+  min-height:44px;
   margin-top:11px;
   padding:0 13px;
   border:1px solid color-mix(in srgb,var(--state-accent) 55%,transparent);
