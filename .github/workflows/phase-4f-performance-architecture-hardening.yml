@@ -38,11 +38,21 @@ jobs:
       - name: Verify Phase 4F architecture contract
         run: node --test tests/phase-4f-performance-architecture-hardening.test.mjs
 
-      - name: Analyze CSS generation overlap
-        run: node scripts/analyze-phase4f-css-debt.mjs
-
       - name: Build and enforce unchanged performance budget
-        run: npm run build:performance
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/performance
+          npm run build:performance 2>&1 | tee artifacts/performance/build.log
+
+      - name: Verify production chunk graph is acyclic
+        shell: bash
+        run: |
+          if grep -F "Circular chunk" artifacts/performance/build.log; then
+            echo "Circular manual-chunk relationship detected."
+            exit 1
+          fi
+          echo "No circular chunk warnings detected."
 
       - name: Verify predecessor visual contract
         run: node --test tests/phase-4e-final-polish.test.mjs
@@ -71,6 +81,5 @@ jobs:
             artifacts/performance/
             artifacts/design-audit/iphone/
             test-results/
-            dist/**/*.css
           if-no-files-found: ignore
           retention-days: 14
