@@ -74,14 +74,21 @@ if (!source.includes('data-testid="player-achievement-shelf"')) {
 </div>}`;
   requireOne(source, oldBadges, "legacy profile badges");
   const newBadges = `{/* Badges */}
-{(()=>{const nextBadge=STREAK_BADGES.find(b=>b.days>streak);return <section className="performanceBadgeShelf" data-testid="player-achievement-shelf" aria-label="Streak achievement milestones">
-  <div className="performanceBadgeShelfHeader"><span>ACHIEVEMENT CABINET</span><strong>{earnedBadges.length} earned · {streak}D current</strong></div>
-  {earnedBadges.length>0&&<div className="performanceBadgeShelfGrid performanceBadgeShelfGrid--earned">{earnedBadges.map(b=><ShotLabPerformanceMark key={b.days} kind="streak" value={\`\${b.days}D\`} label={b.name} detail="Streak milestone" compact surface="light" testId={\`player-achievement-\${b.days}\`}/>)}</div>}
-  {nextBadge&&<div className="performanceBadgeNext" data-testid="player-achievement-next"><div className="performanceBadgeNextLabel">NEXT MILESTONE</div><ShotLabPerformanceMark kind="milestone" value={\`\${nextBadge.days}D\`} label={nextBadge.name} detail={\`\${Math.max(0,nextBadge.days-streak)} days to unlock\`} compact surface="light" tone="neutral" testId="player-achievement-next-mark" /></div>}
-  {!nextBadge&&earnedBadges.length>0&&<div className="performanceBadgeComplete">All streak milestones earned. Keep protecting the standard.</div>}
+{(()=>{const nextBadge=STREAK_BADGES.find(b=>b.days>streak);return <section className="performanceBadgeShelf" data-testid="player-achievement-shelf" aria-label="Logged drill streak achievement milestones">
+  <div className="performanceBadgeShelfHeader"><span>ACHIEVEMENT CABINET</span><strong>{earnedBadges.length} earned · {streak}D logged drill streak</strong></div>
+  {earnedBadges.length>0&&<div className="performanceBadgeShelfGrid performanceBadgeShelfGrid--earned">{earnedBadges.map(b=><ShotLabPerformanceMark key={b.days} kind="streak" value={\`\${b.days}D\`} label={b.name} detail="Logged drill streak milestone" compact surface="light" testId={\`player-achievement-\${b.days}\`}/>)}</div>}
+  {nextBadge&&<div className="performanceBadgeNext" data-testid="player-achievement-next"><div className="performanceBadgeNextLabel">NEXT MILESTONE</div><ShotLabPerformanceMark kind="milestone" value={\`\${nextBadge.days}D\`} label={nextBadge.name} detail={\`\${Math.max(0,nextBadge.days-streak)} logged drill days to unlock\`} compact surface="light" tone="neutral" testId="player-achievement-next-mark" /></div>}
+  {!nextBadge&&earnedBadges.length>0&&<div className="performanceBadgeComplete">All logged drill streak milestones earned. Keep protecting the standard.</div>}
 </section>})()}`;
   source = source.replace(oldBadges, newBadges);
 }
+
+source = source
+  .replace('{earnedBadges.length} earned · {streak}D current', '{earnedBadges.length} earned · {streak}D logged drill streak')
+  .replace('detail="Streak milestone"', 'detail="Logged drill streak milestone"')
+  .replace('${Math.max(0,nextBadge.days-streak)} days to unlock', '${Math.max(0,nextBadge.days-streak)} logged drill days to unlock')
+  .replace('aria-label="Streak achievement milestones"', 'aria-label="Logged drill streak achievement milestones"')
+  .replace('l:"CURRENT STREAK",v:progress.currentStreak', 'l:"AT-HOME SHOT STREAK",v:progress.currentStreak');
 
 for (const retained of [
   'const STREAK_BADGES=',
@@ -94,6 +101,8 @@ for (const retained of [
   'data-testid="player-streak-achievement-reveal"',
   'data-testid="player-achievement-shelf"',
   'data-testid="player-achievement-next"',
+  'logged drill streak',
+  'AT-HOME SHOT STREAK',
 ]) if (!source.includes(retained)) fail(`performance capability removed: ${retained}`);
 
 if (/className="performanceRevealCard[^\"]*badge-pop/.test(source)) fail("legacy badge-pop class still controls a Phase 4B achievement card");
