@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
+import { deriveCoachInsightSummary } from "../src/lib/coachDashboardSelectors.js";
 
 const commandCenter = await readFile(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 const selectors = await readFile(new URL("../src/lib/coachDashboardSelectors.js", import.meta.url), "utf8");
@@ -34,8 +35,26 @@ test("Phase 5A preserves the stronger Phase 4 metric strip and lower dashboard c
 test("Phase 5A removes pseudo-derived intelligence rather than dressing it up", () => {
   assert.doesNotMatch(selectors, /completionRate\s*-\s*8/);
   assert.doesNotMatch(selectors, /priorityCompletionRate/);
+  assert.match(selectors, /rosterEmails\.has\(r\.email\)/);
   assert.match(selectors, /weeklyActivityRate:\s*completionRate/);
   assert.match(app, /Weekly roster activity: \$\{coachInsights\.weeklyActivityRate\}%/);
+});
+
+test("Phase 5A weekly activity cannot be inflated by activity outside the supplied roster", () => {
+  const today = "2026-08-08";
+  const roster = [{ email: "visible@shotlab.test", name: "Visible Player" }];
+  const otherScores = Array.from({ length: 9 }, (_, index) => ({ email: `other-${index}@shotlab.test`, date: today, score: 10 }));
+  const withVisibleActivity = deriveCoachInsightSummary({
+    roster,
+    scores: [{ email: "visible@shotlab.test", date: today, score: 10 }, ...otherScores],
+    today,
+  });
+  assert.equal(withVisibleActivity.weeklyActivityRate, 100);
+  assert.deepEqual(withVisibleActivity.engagedAthletes, ["visible@shotlab.test"]);
+
+  const withoutVisibleActivity = deriveCoachInsightSummary({ roster, scores: otherScores, today });
+  assert.equal(withoutVisibleActivity.weeklyActivityRate, 0);
+  assert.deepEqual(withoutVisibleActivity.engagedAthletes, []);
 });
 
 test("Phase 5A preserves the 14px premium mobile gutter for shared state surfaces", () => {
