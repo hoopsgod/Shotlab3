@@ -19,6 +19,8 @@ if (source.includes(marker)) {
     'switchTab("log-drill")',
     'HTMLDetailsElement',
     'player-profile-readout',
+    'DRILL TREND READOUT',
+    'Drill momentum is {interpretedTrends.momentum}.',
     'Strength: {[...drills,...programDrills].find(',
   ]) if (!source.includes(preserved)) fail(`transformed profile route is missing ${preserved}`);
   console.log("Phase 3R Player Progress Story already applied.");
@@ -30,6 +32,14 @@ if (!source.includes('data-testid="player-profile-readout"')) fail("Phase 3F Pro
 const importAnchor = 'import PlayerCareerHistory from "./components/PlayerCareerHistory.jsx";\n';
 requireOne(source, importAnchor, "PlayerCareerHistory import");
 source = source.replace(importAnchor, `${importAnchor}import PlayerProgressStory from "./components/PlayerProgressStory.jsx";\n`);
+
+const rawReadoutEyebrow = '>PLAYER READOUT</div>';
+requireOne(source, rawReadoutEyebrow, "Phase 3F readout eyebrow");
+source = source.replace(rawReadoutEyebrow, '>DRILL TREND READOUT</div>');
+
+const rawMomentumReadout = '>Momentum is {interpretedTrends.momentum}.</div>';
+requireOne(source, rawMomentumReadout, "Phase 3F momentum readout");
+source = source.replace(rawMomentumReadout, '>Drill momentum is {interpretedTrends.momentum}.</div>');
 
 const rawStrengthReadout = '<span>Strength: {interpretedTrends.strongestDrill}</span>';
 requireOne(source, rawStrengthReadout, "Phase 3F strength readout");
@@ -56,6 +66,8 @@ for (const preserved of [
   'switchTab("log-drill")',
   'details instanceof HTMLDetailsElement',
   'details.open=true',
+  'DRILL TREND READOUT',
+  'Drill momentum is {interpretedTrends.momentum}.',
   'Strength: {[...drills,...programDrills].find(',
   'player-profile-readout',
   'player-profile-performance-intelligence',
