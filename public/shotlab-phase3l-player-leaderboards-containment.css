@@ -1,9 +1,8 @@
 /* Phase 3L — Player Leaderboards Canvas & Scroll Containment */
 
 @media (max-width:820px){
-  /* Leaderboards should reserve the mobile dock exactly once. The shared shell already
-     carries global dock variables, but this route owns a smaller presentation-specific
-     end reserve so its final disclosure can scroll fully above the floating dock. */
+  /* Leaderboards should reserve the mobile dock exactly once. Keep shared Player layout
+     untouched and give this route one bounded end-clearance token. */
   .performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .performance-workspace{
     --phase3l-leaderboards-dock-reserve:calc(112px + env(safe-area-inset-bottom,0px));
     min-height:0!important;
@@ -16,12 +15,22 @@
     scroll-padding-bottom:var(--phase3l-leaderboards-dock-reserve)!important;
   }
 
-  /* Keep the route content-sized, then add one deliberate dock-clearance zone after
-     the actual leaderboard module instead of the old duplicate viewport reserve. */
   .performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .player-scroll-container > .screen-fade-in{
     min-height:0!important;
-    padding-bottom:var(--phase3l-leaderboards-dock-reserve)!important;
+    padding-bottom:0!important;
     margin-bottom:0!important;
+  }
+
+  /* Legacy route styles can zero wrapper padding late in the cascade. A structural,
+     non-interactive after-block gives the final disclosure reliable dock clearance
+     without growing the leaderboard card itself or restoring the old empty canvas. */
+  .performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .player-scroll-container > .screen-fade-in::after{
+    content:""!important;
+    display:block!important;
+    width:100%!important;
+    height:var(--phase3l-leaderboards-dock-reserve)!important;
+    min-height:var(--phase3l-leaderboards-dock-reserve)!important;
+    pointer-events:none!important;
   }
 
   .performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] [data-testid="premium-leaderboards-hub"]{
