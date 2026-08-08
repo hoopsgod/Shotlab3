@@ -5,6 +5,9 @@ const requireOne = (source, anchor, label) => {
   const count = source.split(anchor).length - 1;
   if (count !== 1) fail(`${label}: expected one anchor, found ${count}`);
 };
+const requirePattern = (source, pattern, label) => {
+  if (!pattern.test(source)) fail(`${label}: required pattern missing`);
+};
 
 const appHeader = readFileSync("src/components/AppHeader.jsx", "utf8");
 for (const expected of [
@@ -30,10 +33,10 @@ for (const expected of [
   "--phase4e-dock-clearance",
   ".performance-shell .appHeaderAction",
   'data-testid="player-workspace-empty-state"',
-  "@media (max-width: 820px)",
 ]) {
   if (!authority.includes(expected)) fail(`Phase 4E authority missing: ${expected}`);
 }
+requirePattern(authority, /@media\s*\(max-width:\s*820px\)/, "Phase 4E mobile authority");
 
 const indexPath = "index.html";
 let index = readFileSync(indexPath, "utf8");
