@@ -49,9 +49,10 @@ test("secondary player tools use stable semantic icons without overriding specia
   assert.doesNotMatch(navigationSource, /item\.k === "sc"[^\n]+mobileIcon:/);
 });
 
-test("notification semantics are exposed to assistive technology", () => {
-  assert.match(navigationSource, /item\.dot \? `\$\{label\}, updates available` : label/);
-  assert.match(navigationSource, /secondaryHasNotification \? "More, updates available" : "More"/);
+test("notification semantics add descriptions without renaming controls", () => {
+  assert.match(navigationSource, /aria-label=\{label\}/);
+  assert.match(navigationSource, /aria-description=\{item\.dot \? "Updates available" : undefined\}/);
+  assert.match(navigationSource, /aria-label="More" aria-description=\{secondaryHasNotification \? "Updates available" : undefined\}/);
   assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
 });
 
