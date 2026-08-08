@@ -31,6 +31,14 @@ test("Phase 4A applies the signature to entry, Player Home, and Player Progress 
   assert.doesNotMatch(script, /mcCourtArtwork/);
 });
 
+test("Phase 4A signature imports remain idempotent across repeated production enhancer passes", () => {
+  assert.match(script, /const ensureImportAfter =/);
+  assert.match(script, /if \(source\.includes\(importStatement\)\) return source/);
+  for (const target of ["PlayerDaily signature import", "PlayerProgress signature import", "Auth signature import"]) {
+    assert.match(script, new RegExp(target));
+  }
+});
+
 test("Phase 4A keeps Liquid Glass out of the content identity layer", () => {
   assert.doesNotMatch(identityCss, /backdrop-filter/i);
   assert.doesNotMatch(identityCss, /-webkit-backdrop-filter/i);
