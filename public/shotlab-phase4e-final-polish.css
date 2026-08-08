@@ -99,7 +99,13 @@
     padding-inline: 12px !important;
   }
 
-  [data-testid="player-workspace-empty-state"],
+  [data-testid="player-workspace-empty-state"] {
+    box-sizing: border-box;
+    max-width: calc(100% - 6px);
+    margin-left: 3px;
+    margin-right: 3px;
+  }
+
   [data-testid^="leaderboard-"][data-testid$="-state"] {
     max-width: 100%;
   }
