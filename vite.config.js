@@ -60,7 +60,7 @@ const APP_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/trainingCatalogPersistenceService',
   '/src/lib/playerChallengePersistenceService',
 ]
-const AUTHORITY_BUNDLE_TARGET_BYTES = 88_000
+const AUTHORITY_BUNDLE_TARGET_BYTES = 120_000
 
 function redirectAppImport(name, sourceMatch, modulePath) {
   return {
