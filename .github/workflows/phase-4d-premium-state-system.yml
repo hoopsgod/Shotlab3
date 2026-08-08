@@ -1,0 +1,97 @@
+name: Phase 4D Premium State System
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-4c-premium-interaction-material-motion
+    paths:
+      - "package.json"
+      - "src/components/ShotLabStatePanel.jsx"
+      - "src/components/ShotLabStatePanel.module.css"
+      - "src/components/CompactLeaderboardPreviewCard.jsx"
+      - "src/components/PlayerOperationalWorkspace.jsx"
+      - "src/components/AuthWorkspace.jsx"
+      - "src/App.jsx"
+      - "scripts/apply-phase4d-premium-state-system.mjs"
+      - "public/shotlab-phase4d-state-reconciliation.css"
+      - "tests/phase-4d-premium-state-system.test.mjs"
+      - "tests/e2e/phase-4d-premium-state-system-screenshots.spec.mjs"
+      - "playwright.screenshots.config.mjs"
+      - ".github/workflows/phase-4d-premium-state-system.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: phase-4d-state-system-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-state-system:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply full production enhancer chain
+        run: npm run prepare:route-enhancers
+
+      - name: Verify Phase 4D and predecessor contracts
+        run: node --test tests/phase-4d-premium-state-system.test.mjs tests/phase-4c-premium-interaction-material-motion.test.mjs tests/phase-4b-premium-performance-marks.test.mjs tests/phase-4a-signature-visual-identity.test.mjs tests/phase-3v-final-reconciliation.test.mjs tests/phase-3u-player-account-control.test.mjs tests/mobile-navigation-contract.test.mjs tests/app-store-mobile-shell.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify current mobile navigation
+        run: npx playwright test tests/e2e/mobile-navigation.spec.mjs --config=playwright.config.mjs --reporter=line
+
+      - name: Verify production acceptance
+        run: npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Capture Phase 4D iPhone evidence
+        run: npx playwright test tests/e2e/phase-4d-premium-state-system-screenshots.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
+
+      - name: Upload Phase 4D evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-4d-premium-state-system-evidence
+          path: |
+            artifacts/design-audit/iphone/11a-phase4d-auth-error-state.png
+            artifacts/design-audit/iphone/11b-phase4d-player-program-first-use.png
+            artifacts/design-audit/iphone/11c-phase4d-player-leaderboard-empty.png
+            artifacts/design-audit/iphone/11d-phase4d-coach-reconciliation.png
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Phase 4D failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-4d-premium-state-system-failure
+          path: |
+            test-results/
+            artifacts/design-audit/iphone/
+          if-no-files-found: ignore
+          retention-days: 7
