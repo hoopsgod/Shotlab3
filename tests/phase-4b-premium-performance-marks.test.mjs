@@ -50,6 +50,15 @@ test("Phase 4B preserves PB and streak logic while making progression visible be
   assert.match(css, /performanceBadgeNext/);
 });
 
+test("Phase 4B achievement sheets own their geometry and motion instead of inheriting legacy badge styling", () => {
+  assert.doesNotMatch(script, /className=\"performanceRevealCard[^\"]*badge-pop/);
+  assert.match(script, /legacy badge-pop class still controls a Phase 4B achievement card/);
+  assert.match(css, /\.performanceRevealOverlay \.performanceRevealCard\{/);
+  assert.match(css, /border-radius:28px!important/);
+  assert.match(css, /phase4bRevealIn/);
+  assert.match(css, /border-radius:25px!important/);
+});
+
 test("Phase 4B is ordered after signature identity and before visual minification", () => {
   for (const name of ["dev", "prepare:route-enhancers"]) {
     const command = pkg.scripts[name];
