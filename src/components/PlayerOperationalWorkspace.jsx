@@ -1,4 +1,5 @@
 import { scheduleWorkspaceActionReveal } from "../lib/playerWorkspaceActionRouting.js";
+import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
@@ -111,10 +112,17 @@ export function PlayerWorkspaceFilterRail({ value = "all", onChange, options = [
 
 export function PlayerWorkspaceEmptyState({ title, detail, actionLabel, onAction }) {
   return (
-    <div className={styles.emptyState}>
-      <div className={styles.emptyTitle}>{title}</div>
-      <div className={styles.emptyDetail}>{detail}</div>
-      {actionLabel && <button type="button" onClick={onAction}>{actionLabel} →</button>}
+    <div className={styles.emptyState} data-testid="player-workspace-state-shell">
+      <ShotLabStatePanel
+        state={actionLabel ? "first-use" : "empty"}
+        eyebrow={actionLabel ? "Next useful move" : "Current view"}
+        title={title}
+        detail={detail}
+        actionLabel={actionLabel}
+        onAction={onAction}
+        compact
+        testId="player-workspace-empty-state"
+      />
     </div>
   );
 }
