@@ -67,7 +67,9 @@ update("src/components/CoachCommandCenter.jsx", (source) => {
     next = next.slice(0, teamPanelStart) + "  const priorityPanel = sessionPanel || livePanel;\n  const lowerPanels = [sessionPanel ? livePanel : null].filter(Boolean);" + next.slice(lowerPanelsEnd);
   }
 
-  if (next.includes("TeamActivityPanel") || next.includes("const teamPanel =")) throw new Error("Phase 5A redundant team activity panel was not removed.");
+  next = next.replace(/\n\s*\{\(sessionPanel \|\| teamPanel\) && livePanel \? <section className="mcLiveEvidence" data-testid="coach-live-evidence-region">\{livePanel\}<\/section> : null\}/, "");
+
+  if (next.includes("TeamActivityPanel") || /\bteamPanel\b/.test(next) || next.includes("coach-live-evidence-region")) throw new Error("Phase 5A redundant team activity/live evidence was not removed.");
   return next;
 });
 
