@@ -24,11 +24,16 @@ test("iPhone viewport and launch experience preserve accessibility", () => {
 
 test("persistent navigation behaves as a floating native tab bar", () => {
   assert.match(navigationSource, /primaryItems\.filter\(Boolean\)\.slice\(0, 3\)/);
-  assert.match(navigationSource, /\["home", "log-drill", "profile"\]/);
-  assert.doesNotMatch(navigationSource, /\["home", "log-drill", "leaderboards"\]/);
+  assert.match(navigationSource, /ROLE_PRIMARY_NAV/);
+  assert.match(navigationSource, /\{ key: "home", label: "Home", icon: "home" \}/);
+  assert.match(navigationSource, /\{ key: "log-drill", label: "Train", icon: "target" \}/);
+  assert.match(navigationSource, /\{ key: "profile", label: "Progress", icon: "momentum" \}/);
+  assert.match(navigationSource, /\{ key: "feed", label: "Home", icon: "home" \}/);
+  assert.match(navigationSource, /\{ key: "players", label: "Players", icon: "team" \}/);
+  assert.match(navigationSource, /\{ key: "events", label: "Schedule", icon: "calendar" \}/);
   assert.match(navigationSource, /data-navigation-intent=\{role === "player" \? "development-first" : undefined\}/);
   assert.match(navigationSource, /mobileLabel: "Rankings"/);
-  assert.match(navigationSource, /\["feed", "players", "events"\]/);
+  assert.match(navigationSource, /data-icon-name=\{iconName\}/);
   assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
   assert.match(navigationSource, /className=\{styles\.activeIndicator\}/);
   assert.match(navigationCss, /grid-template-columns:\s*repeat\(4, minmax\(0, 1fr\)\)/);
@@ -37,6 +42,12 @@ test("persistent navigation behaves as a floating native tab bar", () => {
   assert.match(navigationCss, /border:\s*1px solid/);
   assert.match(navigationCss, /border-radius:\s*24px/);
   assert.match(navigationCss, /-apple-system, BlinkMacSystemFont/);
+});
+
+test("notification dots add accessible descriptions without renaming controls", () => {
+  assert.match(navigationSource, /aria-label=\{label\}/);
+  assert.match(navigationSource, /aria-description=\{item\.dot \? "Updates available" : undefined\}/);
+  assert.match(navigationSource, /aria-label="More" aria-description=\{secondaryHasNotification \? "Updates available" : undefined\}/);
 });
 
 test("More navigation is a floating modal sheet with keyboard focus containment", () => {

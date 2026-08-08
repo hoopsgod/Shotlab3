@@ -7,6 +7,7 @@ const legacyStylesSource = fs.readFileSync(new URL("../src/styles/appLegacyStyle
 const navigationSource = fs.readFileSync(new URL("../src/components/MobileNavigation.jsx", import.meta.url), "utf8");
 const navigationCss = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
 const architectureCss = fs.readFileSync(new URL("../src/components/MobileNavigationArchitecture.css", import.meta.url), "utf8");
+const coachMissionControlCss = fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css", import.meta.url), "utf8");
 
 test("mobile dock limits persistent navigation to three destinations plus More", () => {
   assert.match(navigationSource, /primaryItems\.filter\(Boolean\)\.slice\(0, 3\)/);
@@ -17,16 +18,52 @@ test("mobile dock limits persistent navigation to three destinations plus More",
 });
 
 test("native navigation makes player development primary and rankings secondary", () => {
-  assert.match(navigationSource, /role === "player" \? \["home", "log-drill", "profile"\]/);
-  assert.doesNotMatch(navigationSource, /role === "player" \? \["home", "log-drill", "leaderboards"\]/);
-  assert.match(navigationSource, /role === "coach" \? \["feed", "players", "events"\]/);
-  assert.match(navigationSource, /role === "player" \? \["Home", "Train", "Progress"\]/);
+  assert.match(navigationSource, /ROLE_PRIMARY_NAV/);
+  assert.match(navigationSource, /\{ key: "home", label: "Home", icon: "home" \}/);
+  assert.match(navigationSource, /\{ key: "log-drill", label: "Train", icon: "target" \}/);
+  assert.match(navigationSource, /\{ key: "profile", label: "Progress", icon: "momentum" \}/);
+  assert.doesNotMatch(navigationSource, /\{ key: "leaderboards", label: "Progress"/);
   assert.match(navigationSource, /mobileLabel: "Rankings"/);
   assert.match(navigationSource, /title: "Rankings"/);
   assert.match(navigationSource, /data-navigation-intent=\{role === "player" \? "development-first" : undefined\}/);
   assert.match(navigationSource, /Program work, schedule, rankings, and team tools\./);
-  assert.match(navigationSource, /\["Home", "Players", "Schedule"\]/);
   assert.match(navigationSource, /data-navigation-role=\{role\}/);
+});
+
+test("primary navigation icons communicate destination semantics", () => {
+  assert.match(navigationSource, /player:\s*\[/);
+  assert.match(navigationSource, /coach:\s*\[/);
+  assert.match(navigationSource, /\{ key: "feed", label: "Home", icon: "home" \}/);
+  assert.match(navigationSource, /\{ key: "players", label: "Players", icon: "team" \}/);
+  assert.match(navigationSource, /\{ key: "events", label: "Schedule", icon: "calendar" \}/);
+  assert.match(navigationSource, /data-icon-name=\{iconName\}/);
+  assert.match(navigationSource, /data-icon-name="more"/);
+  assert.doesNotMatch(navigationSource, /key === "log-drill" \? "home"/);
+});
+
+test("secondary player tools use stable semantic icons without overriding specialized lifting artwork", () => {
+  assert.match(navigationSource, /item\.k === "leaderboards"[^\n]+mobileIcon: "chart"/);
+  assert.match(navigationSource, /item\.k === "duels"[^\n]+mobileIcon: "program"/);
+  assert.match(navigationSource, /item\.k === "program"[^\n]+mobileIcon: "calendar"/);
+  assert.match(navigationSource, /item\.k === "team-store"[^\n]+mobileIcon: "store"/);
+  assert.match(navigationSource, /item\.k === "sc"[^\n]+mobileLabel: "Lifting"/);
+  assert.doesNotMatch(navigationSource, /item\.k === "sc"[^\n]+mobileIcon:/);
+});
+
+test("notification semantics add descriptions without renaming controls", () => {
+  assert.match(navigationSource, /aria-label=\{label\}/);
+  assert.match(navigationSource, /aria-description=\{item\.dot \? "Updates available" : undefined\}/);
+  assert.match(navigationSource, /aria-label="More" aria-description=\{secondaryHasNotification \? "Updates available" : undefined\}/);
+  assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
+});
+
+test("shared navigation remains authoritative inside coach Mission Control", () => {
+  assert.match(coachMissionControlCss, /Mission Control inherits the shared native navigation surface/);
+  assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\][^{]*\{[^}]*padding:7px 10px/s);
+  assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]:before\s*\{[^}]*rgba\(2,4,5/s);
+  assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]>div\s*\{[^}]*background:rgba\(9,14,18,.88\)/s);
+  assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*rgba\(252, 252, 250, \.9\)\s*!important/s);
+  assert.match(architectureCss, /body\.mission-control-active \[data-testid="mobile-navigation-dock"\]\[data-navigation-role="coach"\] > div\s*\{[^}]*background:\s*transparent;[^}]*backdrop-filter:\s*none;/s);
 });
 
 test("secondary navigation is accessible, dismissible, and does not leave body scrolling behind", () => {
@@ -35,7 +72,6 @@ test("secondary navigation is accessible, dismissible, and does not leave body s
   assert.match(navigationSource, /event\.key === "Escape"/);
   assert.match(navigationSource, /document\.body\.style\.overflow = "hidden"/);
   assert.match(navigationSource, /document\.body\.style\.overflow = previousOverflow/);
-  assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
 });
 
 test("secondary tools are grouped without removing destinations", () => {
