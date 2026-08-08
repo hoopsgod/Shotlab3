@@ -58,13 +58,19 @@ update("tests/e2e/coach-player-cross-device-first-result.spec.mjs", (source) => 
   }
   const premiumResponse = `  const responseButton = playerPage.getByRole("button", { name: "Respond now", exact: true });
   await expect(responseButton).toBeVisible({ timeout: 20_000 });
-  await responseButton.click();`;
+  await responseButton.click();
+  const rsvpButton = playerPage.getByRole("button", { name: /RSVP NOW/ }).first();
+  await expect(rsvpButton).toBeVisible({ timeout: 20_000 });
+  await rsvpButton.click();`;
   const legacyPatterns = [
     `  await expect(playerPage.getByText("UPCOMING EVENTS", { exact: true })).toBeVisible({ timeout: 20_000 });
   await playerPage.getByRole("button", { name: /RSVP NOW/ }).first().click();`,
     `  const rsvpButton = playerPage.getByRole("button", { name: /RSVP NOW/ }).first();
   await expect(rsvpButton).toBeVisible({ timeout: 20_000 });
   await rsvpButton.click();`,
+    `  const responseButton = playerPage.getByRole("button", { name: "Respond now", exact: true });
+  await expect(responseButton).toBeVisible({ timeout: 20_000 });
+  await responseButton.click();`,
   ];
   for (const legacy of legacyPatterns) {
     if (next.includes(legacy)) next = next.replace(legacy, premiumResponse);
