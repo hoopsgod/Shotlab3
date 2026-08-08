@@ -43,8 +43,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Apply final reconciliation
-        run: node scripts/apply-phase3v-final-reconciliation.mjs
+      - name: Apply full production enhancer chain
+        run: npm run prepare:route-enhancers
 
       - name: Verify Phase 3 closure contracts
         run: node --test tests/phase-3v-final-reconciliation.test.mjs tests/phase-3u-player-account-control.test.mjs tests/mobile-navigation-contract.test.mjs tests/app-store-mobile-shell.test.mjs
