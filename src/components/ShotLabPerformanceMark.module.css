@@ -1,7 +1,7 @@
 .root{
   --pm-accent:var(--team-brand-primary,var(--accent,#c8ff1a));
-  --pm-ink:#f7faf5;
-  --pm-muted:#87939a;
+  --pm-ink:var(--text-1,#f7faf5);
+  --pm-muted:var(--text-3,#87939a);
   display:inline-flex;align-items:center;gap:10px;min-width:0;color:var(--pm-accent)
 }
 .glyph{position:relative;display:grid;place-items:center;width:62px;height:62px;flex:0 0 62px;isolation:isolate}
