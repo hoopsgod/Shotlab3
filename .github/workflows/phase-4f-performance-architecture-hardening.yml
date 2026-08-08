@@ -81,6 +81,5 @@ jobs:
             artifacts/performance/
             artifacts/design-audit/iphone/
             test-results/
-            dist/assets/*.js
           if-no-files-found: ignore
           retention-days: 14
