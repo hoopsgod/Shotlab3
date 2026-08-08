@@ -60,9 +60,25 @@ jobs:
         id: enhancers
         run: npm run prepare:route-enhancers
 
-      - name: Verify Phase 4D contract
+      - name: Verify Phase 4D semantic state contract
         if: ${{ always() && steps.enhancers.outcome == 'success' }}
-        run: node --test tests/phase-4d-premium-state-system.test.mjs
+        run: node --test --test-name-pattern="defines one semantic state component" tests/phase-4d-premium-state-system.test.mjs
+
+      - name: Verify Phase 4D recovery integration contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test --test-name-pattern="integrates the state language" tests/phase-4d-premium-state-system.test.mjs
+
+      - name: Verify Phase 4D no-blur material contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test --test-name-pattern="keeps content states out" tests/phase-4d-premium-state-system.test.mjs
+
+      - name: Verify Phase 4D disabled and completion contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test --test-name-pattern="improves disabled and completion semantics" tests/phase-4d-premium-state-system.test.mjs
+
+      - name: Verify Phase 4D enhancer ordering contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test --test-name-pattern="runs after Phase 4C" tests/phase-4d-premium-state-system.test.mjs
 
       - name: Verify Phase 4C predecessor contract
         if: ${{ always() && steps.enhancers.outcome == 'success' }}
