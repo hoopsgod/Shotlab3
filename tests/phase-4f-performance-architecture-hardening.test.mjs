@@ -5,6 +5,7 @@ import { readFile } from 'node:fs/promises'
 const vite = await readFile(new URL('../vite.config.js', import.meta.url), 'utf8')
 const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
 const optimizer = await readFile(new URL('../scripts/optimize-production-css.mjs', import.meta.url), 'utf8')
+const budgetVerifier = await readFile(new URL('../scripts/verify-performance-budget.mjs', import.meta.url), 'utf8')
 const budget = JSON.parse(await readFile(new URL('../performance-budget.json', import.meta.url), 'utf8'))
 
 test('Phase 4F uses shared foundations plus one workspace chunk per role', () => {
@@ -14,11 +15,13 @@ test('Phase 4F uses shared foundations plus one workspace chunk per role', () =>
   for (const retired of ['PlayerAnalyticsWorkspaces', 'PlayerInterfaceWorkspaces', 'CoachAdministrationWorkspaces', 'CoachOperationalWorkspaces', 'PlayerProfileWorkspaces']) {
     assert.doesNotMatch(vite, new RegExp(`return '${retired}'`))
   }
+  assert.match(vite, /onlyExplicitManualChunks:\s*true/)
 })
 
 test('Phase 4F moves cross-role scoring and assignment services into AppDomainServices', () => {
   assert.match(vite, /APP_DOMAIN_SERVICE_FRAGMENTS/)
   for (const fragment of [
+    'authFlow',
     'appPersistenceService',
     'homeShotLogging',
     'playerDataManagement',
@@ -35,10 +38,16 @@ test('Phase 4F moves cross-role scoring and assignment services into AppDomainSe
 
 test('Phase 4F keeps cross-role presentation and branding in AuthenticatedUi', () => {
   assert.match(vite, /SHARED_AUTHENTICATED_UI_FRAGMENTS/)
-  for (const fragment of ['TeamBrandingContext', 'MobileNavigation', 'VisualHierarchy', 'ShotLabStatePanel', 'SemanticStatus']) {
+  for (const fragment of ['TeamBrandingContext', 'MobileNavigation', 'VisualHierarchy', 'ShotLabStatePanel', 'SemanticStatus', 'WorkspaceRecoveryBoundary']) {
     assert.match(vite, new RegExp(fragment))
   }
   assert.match(vite, /return 'AuthenticatedUi'/)
+})
+
+test('Phase 4F treats absent startup App CSS as zero payload rather than a missing asset failure', () => {
+  assert.match(budgetVerifier, /zeroWhenMissing:\s*true/)
+  assert.match(budgetVerifier, /none \(zero startup App\.\$\{extension\}\)/)
+  assert.doesNotMatch(budgetVerifier, /startupAppCss\.missing\).*failures\.push/)
 })
 
 test('Phase 4F uses reproducible production-grade minification and compact CSS module names', () => {
