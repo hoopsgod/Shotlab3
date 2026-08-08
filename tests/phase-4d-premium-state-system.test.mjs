@@ -23,17 +23,23 @@ test("Phase 4D defines one semantic state component for loading, first-use, empt
   assert.match(panelCss, /prefers-reduced-motion:reduce/);
   assert.match(panelCss, /animation:none!important/);
   assert.match(panelCss, /\.action\{[^}]*min-height:44px/s);
+  assert.match(leaderboard, /<button[^>]+onClick=\{onViewAll\}[^>]+minHeight:44/s);
+  assert.match(leaderboard, /<a href=\{fullLeaderboardHref\}[^>]+minHeight:44/s);
 });
 
 test("Phase 4D integrates the state language at high-value recovery seams", () => {
-  assert.match(app, /data-testid="startup-loading-state"/);
-  assert.match(app, /data-testid="startup-error-state"/);
-  assert.match(auth, /data-testid="auth-success-state"/);
-  assert.match(auth, /data-testid="auth-error-state"/);
+  assert.match(app, /testId="startup-loading-state"/);
+  assert.match(app, /testId="startup-error-state"/);
+  assert.match(auth, /testId="auth-success-state"/);
+  assert.match(auth, /testId="auth-error-state"/);
   assert.match(leaderboard, /testId=\{`leaderboard-\$\{displayState\}-state`\}/);
   assert.match(leaderboard, /state=\{recoveryState\}/);
   assert.match(workspace, /testId="player-workspace-empty-state"/);
   assert.match(workspace, /state=\{actionLabel \? "first-use" : "empty"\}/);
+  assert.match(script, /app\.includes\('testId="startup-loading-state"'\)/);
+  assert.match(script, /app\.includes\('testId="startup-error-state"'\)/);
+  assert.match(script, /auth\.includes\('testId="auth-success-state"'\)/);
+  assert.match(script, /auth\.includes\('testId="auth-error-state"'\)/);
 });
 
 test("Phase 4D keeps content states out of the Liquid Glass layer", () => {
