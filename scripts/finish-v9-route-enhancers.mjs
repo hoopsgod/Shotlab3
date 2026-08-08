@@ -82,8 +82,12 @@ replaceOnce(
 {
   const path = "vite.config.js";
   const source = readFileSync(path, "utf8");
-  const phase4fChunking = source.includes("return 'PlayerAnalyticsWorkspaces'")
-    && source.includes("moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n    || moduleId.includes('/src/components/PlayerDashboardHeader.jsx')");
+  const phase4fChunking = [
+    "PlayerAnalyticsWorkspaces",
+    "PlayerInterfaceWorkspaces",
+    "PlayerCoachAssignmentCard.jsx",
+    "PlayerDashboardHeader.jsx",
+  ].every((token) => source.includes(token));
 
   if (!phase4fChunking) {
     replaceOnce(
