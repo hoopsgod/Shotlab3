@@ -1,7 +1,7 @@
 /* Phase 3V — Final Phase 3 reconciliation & closure.
    Consolidates verified parallel Phase 3 refinements onto the current Phase 3U lineage.
    Scope: Player drill-development density, Rankings/Profile/Home end containment,
-   and Profile account disclosure presentation. */
+   Profile account disclosure presentation, and final Player Home support contrast. */
 
 :root{
   --p3v-ink:#171c18;
@@ -63,6 +63,54 @@
 .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > div{padding:14px!important;border-top:1px solid var(--p3v-line)!important;background:var(--p3v-soft)!important;color:var(--p3v-ink)!important}
 .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] :is(a,button,summary):focus-visible{outline:3px solid color-mix(in srgb,var(--p3v-accent) 32%,transparent)!important;outline-offset:2px!important}
 .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary:active{transform:scale(.985)!important}
+
+/* Final Player Home support contrast: keep command hierarchy dark, then transition cleanly into light native support cards. */
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="sectionHeading"]{
+  padding:0!important;border:0!important;background:transparent!important;background-image:none!important;
+  box-shadow:none!important;filter:none!important;text-shadow:none!important
+}
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="sectionLabel"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="meta"]{
+  color:#9ba7ae!important;-webkit-text-fill-color:#9ba7ae!important;background:transparent!important
+}
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="sectionTitle"]{
+  color:#f5f8f9!important;-webkit-text-fill-color:#f5f8f9!important;background:transparent!important
+}
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"]{
+  border:1px solid var(--p3v-line)!important;border-radius:18px!important;background:#fff!important;background-image:none!important;
+  color:var(--p3v-ink)!important;box-shadow:0 7px 22px rgba(20,28,23,.045)!important
+}
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > summary,
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > summary,
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > summary,
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > summary{
+  background:transparent!important;background-image:none!important;color:var(--p3v-ink)!important;box-shadow:none!important
+}
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > summary [class*="disclosureTitle"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > summary [class*="disclosureTitle"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > summary [class*="disclosureTitle"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > summary [class*="disclosureTitle"]{
+  color:var(--p3v-ink)!important;-webkit-text-fill-color:var(--p3v-ink)!important
+}
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > summary [class*="disclosureMeta"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > summary [class*="disclosureMeta"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > summary [class*="disclosureMeta"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > summary [class*="disclosureMeta"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > summary [class*="disclosureChevron"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > summary [class*="disclosureChevron"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > summary [class*="disclosureChevron"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > summary [class*="disclosureChevron"]{
+  color:var(--p3v-muted)!important;-webkit-text-fill-color:var(--p3v-muted)!important
+}
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > div,
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > div,
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > div,
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > div{
+  border-top:1px solid var(--p3v-line)!important;background:var(--p3v-soft)!important;color:#44515b!important
+}
 
 /* Final player-route containment: each route owns one dock reserve, not stacked outer + inner reserves. */
 @media(max-width:820px){
