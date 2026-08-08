@@ -310,6 +310,11 @@ export default defineConfig({
     minify: 'terser',
     cssMinify: 'lightningcss',
     terserOptions: { compress: { passes: 2, pure_funcs: ['console.log', 'console.debug', 'console.info'] }, format: { comments: false } },
-    rollupOptions: { output: { manualChunks: stableVendorChunk } },
+    rollupOptions: {
+      output: {
+        manualChunks: stableVendorChunk,
+        onlyExplicitManualChunks: true,
+      },
+    },
   },
 })
