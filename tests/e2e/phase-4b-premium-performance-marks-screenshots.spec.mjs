@@ -143,7 +143,7 @@ test("Phase 4B turns a new personal best into a premium achievement moment", asy
   await capture(page, "09c-phase4b-player-pb-achievement.png");
 });
 
-test("Phase 4B makes the achievement cabinet useful before the first milestone", async ({ page }) => {
+test("Phase 4B makes the achievement cabinet useful before the first milestone with explicit streak semantics", async ({ page }) => {
   await enterPlayerDemo(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
   await page.getByTestId("player-progress-open-profile").click();
@@ -151,8 +151,9 @@ test("Phase 4B makes the achievement cabinet useful before the first milestone",
   await expect(shelf).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("player-achievement-next")).toBeVisible();
   await expect(page.getByTestId("player-achievement-next-mark")).toHaveAttribute("data-performance-kind", "milestone");
-  await expect(shelf.getByText(/0 earned · 2D current/i)).toBeVisible();
-  await expect(shelf.getByText(/5 days to unlock/i)).toBeVisible();
+  await expect(shelf.getByText(/0 earned · 2D logged drill streak/i)).toBeVisible();
+  await expect(shelf.getByText(/5 logged drill days to unlock/i)).toBeVisible();
+  await expect(page.getByText("AT-HOME SHOT STREAK", { exact: true })).toBeVisible();
   await shelf.scrollIntoViewIfNeeded();
   await page.waitForTimeout(120);
   await noOverflow(page);
