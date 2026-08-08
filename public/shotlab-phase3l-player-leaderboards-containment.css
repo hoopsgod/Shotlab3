@@ -2,9 +2,11 @@
 
 @media (max-width:820px){
   /* Leaderboards should reserve the mobile dock exactly once. Keep shared Player layout
-     untouched and give this route one bounded end-clearance token. */
+     untouched and give this route one bounded end-clearance token. Use a fixed measured
+     value here because the legacy visual-CSS minifier strips required calc() operator
+     whitespace; dock clearance is verified against the rendered iPhone layout below. */
   .performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .performance-workspace{
-    --phase3l-leaderboards-dock-reserve:calc(112px + env(safe-area-inset-bottom,0px));
+    --phase3l-leaderboards-dock-reserve:112px;
     min-height:0!important;
     padding-bottom:0!important;
   }
