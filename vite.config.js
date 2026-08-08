@@ -81,7 +81,7 @@ const SHARED_AUTHENTICATED_UI_FRAGMENTS = [
   '/src/components/VisualHierarchy',
   '/src/lib/workspaceRecovery.js',
   '/src/components/WorkspaceRecoveryBoundary.jsx',
-  '/src/components/PlayerInterfaceFallback.jsx',
+  '/src/components/PlayerInterfaceFallback',
   '/src/components/DeferredAuthenticatedUi.jsx',
   '/src/components/DeferredSharedAuthenticatedUi.jsx',
   '/src/components/ShotLabPerformanceMark',
@@ -270,6 +270,7 @@ function reportBundleOwnership() {
 
 function stableVendorChunk(id) {
   const moduleId = normalizeModuleId(id)
+  if (moduleId.includes('vite/preload-helper')) return 'RuntimeShared'
   if (moduleId.includes('/node_modules/react/') || moduleId.includes('/node_modules/react-dom/') || moduleId.includes('/node_modules/scheduler/')) return 'react-vendor'
   if (matchesAny(moduleId, SHARED_AUTHENTICATED_UI_FRAGMENTS)) return 'AuthenticatedUi'
   if (matchesAny(moduleId, APP_DOMAIN_SERVICE_FRAGMENTS)) return 'AppDomainServices'
@@ -313,7 +314,6 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: stableVendorChunk,
-        onlyExplicitManualChunks: true,
       },
     },
   },
