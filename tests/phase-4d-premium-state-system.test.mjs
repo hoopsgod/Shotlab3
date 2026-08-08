@@ -43,8 +43,8 @@ test("Phase 4D keeps content states out of the Liquid Glass layer", () => {
 });
 
 test("Phase 4D improves disabled and completion semantics without changing data behavior", () => {
-  assert.match(authorityCss, /player-training-session\"\] button:disabled/);
-  assert.match(authorityCss, /data-command-role=\"confirmation\"/);
+  assert.match(authorityCss, /\[data-testid="player-training-session"\] button:disabled/);
+  assert.match(authorityCss, /\[data-command-role="confirmation"\]/);
   for (const forbidden of ["setScores", "setProgramScores", "setPlayers", "addScore", "deleteAccount", "toggleRsvp", "saveTeamBranding"]) {
     assert.doesNotMatch(script, new RegExp(forbidden));
   }
