@@ -8,6 +8,15 @@
   transition: transform 180ms cubic-bezier(.22,.78,.22,1), opacity 160ms ease, box-shadow 180ms ease;
 }
 
+/* Shared navigation owns its material even inside cinematic coach surfaces. */
+body.mission-control-active [data-testid="mobile-navigation-dock"][data-navigation-role="coach"] > div {
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 [data-testid="mobile-navigation-dock"] button {
   color: #747b80;
   -webkit-tap-highlight-color: transparent;
