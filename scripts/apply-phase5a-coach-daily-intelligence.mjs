@@ -68,9 +68,14 @@ update("src/lib/coachDashboardSelectors.js", (source) => {
     "export const deriveCoachInsightSummary = ({ roster = [], scores = [], shotLogs = [], priorities = null, today = new Date().toISOString().slice(0,10) } = {}) => {",
     "export const deriveCoachInsightSummary = ({ roster = [], scores = [], shotLogs = [], today = new Date().toISOString().slice(0,10) } = {}) => {",
   );
+  next = next.replace(
+    "  const activityRows = [...normalizeCoachScores(scores), ...(Array.isArray(shotLogs)?shotLogs:[]).map((s)=>({email:normalizeEmailSafe(s?.email),date:String(s?.date||\"\")}))].filter((r)=>r.email&&r.date>=weekStart);",
+    "  const rosterEmails = new Set(players.map((player)=>player.email));\n  const activityRows = [...normalizeCoachScores(scores), ...(Array.isArray(shotLogs)?shotLogs:[]).map((s)=>({email:normalizeEmailSafe(s?.email),date:String(s?.date||\"\")}))].filter((r)=>r.email&&r.date>=weekStart&&rosterEmails.has(r.email));",
+  );
   next = next.replace("  const priorityCompletionRate = priorities?.priorityDrillText ? completionRate : Math.max(0, completionRate-8);\n", "");
   next = next.replace("    priorityCompletionRate,", "    weeklyActivityRate: completionRate,");
   if (next.includes("completionRate-8") || next.includes("priorityCompletionRate")) throw new Error("Phase 5A removed pseudo-derived priority completion evidence.");
+  if (!next.includes("rosterEmails.has(r.email)")) throw new Error("Phase 5A weekly activity must be scoped to the supplied roster.");
   if (!next.includes("weeklyActivityRate: completionRate")) throw new Error("Phase 5A weekly activity evidence was not installed.");
   return next;
 });
