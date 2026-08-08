@@ -107,16 +107,30 @@ test("Phase 4A Rankings gets restrained competitive branding without becoming a 
   await capture(page, "08d-phase4a-player-rankings-signature.png");
 });
 
-test("Phase 4A preserves Coach Mission Control's richer existing court identity", async ({ page }) => {
+test("Phase 4A preserves Coach Mission Control's established mobile team-mark identity", async ({ page }) => {
   await page.goto("/");
   await enterDemo(page, "Coach");
   const hero = page.getByTestId("coach-primary-objective");
   await expect(hero).toBeVisible({ timeout: 20_000 });
-  await expect(hero.locator(".mcCourtArtwork")).toBeVisible();
+
+  const teamMark = hero.locator(".mcHeroTeamMark");
+  await expect(teamMark).toBeVisible();
+  await expect(teamMark.locator("img")).toBeVisible();
+  const coachIdentity = await hero.evaluate((node) => ({
+    courtArtworkDisplay: getComputedStyle(node.querySelector(".mcCourtArtwork")).display,
+    teamMarkDisplay: getComputedStyle(node.querySelector(".mcHeroTeamMark")).display,
+    teamMarkOpacity: Number.parseFloat(getComputedStyle(node.querySelector(".mcHeroTeamMark")).opacity),
+    backgroundImage: getComputedStyle(node).backgroundImage,
+    shadow: getComputedStyle(node).boxShadow,
+  }));
+  expect(coachIdentity.courtArtworkDisplay).toBe("none");
+  expect(coachIdentity.teamMarkDisplay).not.toBe("none");
+  expect(coachIdentity.teamMarkOpacity).toBeGreaterThanOrEqual(.9);
+  expect(coachIdentity.backgroundImage).toContain("gradient");
+  expect(coachIdentity.shadow).not.toBe("none");
+
   await expect(page.getByTestId("player-home-signature-field")).toHaveCount(0);
   await expect(page.getByTestId("player-progress-signature-field")).toHaveCount(0);
-  const shadow = await hero.evaluate((node) => getComputedStyle(node).boxShadow);
-  expect(shadow).not.toBe("none");
   await expectNoOverflow(page);
   await capture(page, "08e-phase4a-coach-existing-signature.png");
 });
