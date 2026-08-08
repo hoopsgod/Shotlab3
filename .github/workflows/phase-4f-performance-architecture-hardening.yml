@@ -38,6 +38,9 @@ jobs:
       - name: Verify Phase 4F architecture contract
         run: node --test tests/phase-4f-performance-architecture-hardening.test.mjs
 
+      - name: Analyze CSS generation overlap
+        run: node scripts/analyze-phase4f-css-debt.mjs
+
       - name: Build and enforce unchanged performance budget
         run: npm run build:performance
 
