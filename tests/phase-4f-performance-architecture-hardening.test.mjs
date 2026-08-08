@@ -6,6 +6,7 @@ const vite = await readFile(new URL('../vite.config.js', import.meta.url), 'utf8
 const packageJson = JSON.parse(await readFile(new URL('../package.json', import.meta.url), 'utf8'))
 const optimizer = await readFile(new URL('../scripts/optimize-production-css.mjs', import.meta.url), 'utf8')
 const budgetVerifier = await readFile(new URL('../scripts/verify-performance-budget.mjs', import.meta.url), 'utf8')
+const routeEnhancer = await readFile(new URL('../scripts/finish-v9-route-enhancers.mjs', import.meta.url), 'utf8')
 const budget = JSON.parse(await readFile(new URL('../performance-budget.json', import.meta.url), 'utf8'))
 
 test('Phase 4F uses neutral runtime plus shared foundations and one workspace chunk per role', () => {
@@ -43,6 +44,14 @@ test('Phase 4F keeps cross-role presentation, recovery, and fallback styling in 
     assert.match(vite, new RegExp(fragment))
   }
   assert.match(vite, /return 'AuthenticatedUi'/)
+})
+
+test('Phase 4F build enhancer preserves current Coach navigation instead of resurrecting legacy browser fixtures', () => {
+  assert.match(routeEnhancer, /mobile-navigation-dock/)
+  assert.match(routeEnhancer, /name: "Coach demo"/)
+  assert.match(routeEnhancer, /dock\.getByRole\("button", \{ name: "Players", exact: true \}\)/)
+  assert.doesNotMatch(routeEnhancer, /const allPlayers = page\.getByRole/)
+  assert.doesNotMatch(routeEnhancer, /name: "Demo Coach", exact: true/)
 })
 
 test('Phase 4F treats absent startup App CSS as zero payload rather than a missing asset failure', () => {
