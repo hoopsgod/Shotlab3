@@ -49,7 +49,7 @@ test("player dock uses destination-true icons and secondary tools stay visually 
   await capture(page, "05b-player-secondary-iconography.png");
 });
 
-test("coach dock uses destination-true icons without changing coach navigation", async ({ page }) => {
+test("coach dock uses destination-true icons on the shared light native surface", async ({ page }) => {
   await installRoutes(page);
   await page.goto("/");
   await page.getByRole("button", { name: /Coach demo/i }).click();
@@ -60,6 +60,12 @@ test("coach dock uses destination-true icons without changing coach navigation",
   await expectIcon(dock, "Players", "team");
   await expectIcon(dock, "Schedule", "calendar");
   await expectIcon(dock, "More", "more");
+  const surface = await dock.evaluate((node) => ({
+    outer: getComputedStyle(node).backgroundColor,
+    inner: getComputedStyle(node.firstElementChild).backgroundColor,
+  }));
+  expect(surface.outer).toBe("rgba(252, 252, 250, 0.9)");
+  expect(surface.inner).toBe("rgba(0, 0, 0, 0)");
   await expectNoOverflow(page);
   await capture(page, "05c-coach-native-iconography.png");
 });
