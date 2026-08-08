@@ -1,5 +1,7 @@
 import { test, expect } from "@playwright/test";
 
+const PHASE3L_CSS_PATH = "/shotlab-phase3l-player-leaderboards-containment.css";
+
 async function installRoutes(page) {
   await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
   await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
@@ -35,6 +37,42 @@ test("Player Leaderboards ends near its content while preserving ranking navigat
   await expect(participation).toBeVisible();
   await expect(participation.getByText("Participation categories", { exact: true })).toBeVisible();
   await expect(participation.getByText("Events attended and strength work", { exact: true })).toBeVisible();
+
+  const cssDiagnostic = await page.evaluate(async (cssPath) => {
+    const workspace = document.querySelector('.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .performance-workspace');
+    const route = document.querySelector('.performance-shell--player.is-mobile[data-workspace-tab="leaderboards"] .player-scroll-container > .screen-fade-in');
+    const after = route ? getComputedStyle(route, "::after") : null;
+    let assetStatus = 0;
+    let assetText = "";
+    try {
+      const response = await fetch(cssPath, { cache: "no-store" });
+      assetStatus = response.status;
+      assetText = await response.text();
+    } catch (error) {
+      assetText = String(error?.message || error || "fetch failed");
+    }
+    const styleHrefs = Array.from(document.styleSheets)
+      .map((sheet) => sheet.href || "")
+      .filter(Boolean);
+    return {
+      styleHrefs,
+      stylesheetLoaded: styleHrefs.some((href) => href.includes("shotlab-phase3l-player-leaderboards-containment.css")),
+      assetStatus,
+      assetHasSpacerRule: assetText.includes(".player-scroll-container > .screen-fade-in::after"),
+      reserve: workspace ? getComputedStyle(workspace).getPropertyValue("--phase3l-leaderboards-dock-reserve").trim() : null,
+      routeFound: Boolean(route),
+      after: after ? {
+        content: after.content,
+        display: after.display,
+        height: after.height,
+        minHeight: after.minHeight,
+        width: after.width,
+        position: after.position,
+      } : null,
+    };
+  }, PHASE3L_CSS_PATH);
+
+  console.log("PHASE3L_CSS_DIAGNOSTIC", JSON.stringify(cssDiagnostic));
 
   const layout = await page.evaluate(() => {
     const node = document.querySelector('[data-testid="premium-leaderboards-hub"]');
@@ -83,6 +121,11 @@ test("Player Leaderboards ends near its content while preserving ranking navigat
   });
 
   console.log("PHASE3L_GEOMETRY", JSON.stringify(layout));
+  expect(cssDiagnostic.assetStatus, "Phase 3L CSS must ship in the production build").toBe(200);
+  expect(cssDiagnostic.assetHasSpacerRule, "Built Phase 3L CSS must contain the structural spacer rule").toBe(true);
+  expect(cssDiagnostic.stylesheetLoaded, "Phase 3L CSS must be attached to the rendered document").toBe(true);
+  expect(cssDiagnostic.routeFound, "Player Leaderboards route wrapper must exist at the Phase 3L selector seam").toBe(true);
+  expect(cssDiagnostic.reserve, "Phase 3L dock reserve token must resolve on the live Leaderboards workspace").not.toBe("");
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.tail, "Leaderboards should retain one deliberate dock-safe end reserve").toBeGreaterThanOrEqual(96);
   expect(layout.tail, "Leaderboards should not restore the old empty canvas tail").toBeLessThanOrEqual(220);
