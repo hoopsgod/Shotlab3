@@ -75,7 +75,8 @@ test("Phase 4E keeps Program first-use content readable and dock-safe", async ({
 
 test("Phase 4E keeps Player Profile typography inside the iPhone viewport", async ({ page }) => {
   await enterDemo(page, "player");
-  await openMoreDestination(page, "profile");
+  const dock = page.getByTestId("mobile-navigation-dock");
+  await dock.getByRole("button", { name: "Progress", exact: true }).click();
   const workspace = page.getByTestId("player-profile-workspace");
   await expect(workspace).toBeVisible({ timeout: 20_000 });
   const header = page.locator(".appHeader").first();
