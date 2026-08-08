@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 const commandCenter = await readFile(new URL("../src/components/CoachCommandCenter.jsx", import.meta.url), "utf8");
 const selectors = await readFile(new URL("../src/lib/coachDashboardSelectors.js", import.meta.url), "utf8");
 const app = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
+const repeatBuildWrapper = await readFile(new URL("../scripts/run-finish-v9-compatible.mjs", import.meta.url), "utf8");
 const packageJson = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const budget = JSON.parse(await readFile(new URL("../performance-budget.json", import.meta.url), "utf8"));
 
@@ -31,15 +32,21 @@ test("Phase 5A prioritizes unresolved team decisions without inventing scores", 
 
 test("Phase 5A removes duplicate activity chrome instead of adding dashboard clutter", () => {
   assert.doesNotMatch(commandCenter, /function TeamActivityPanel/);
-  assert.doesNotMatch(commandCenter, /const teamPanel =/);
+  assert.doesNotMatch(commandCenter, /\bteamPanel\b/);
+  assert.doesNotMatch(commandCenter, /coach-live-evidence-region/);
   assert.match(commandCenter, /const priorityPanel = sessionPanel \|\| livePanel/);
   assert.match(commandCenter, /const lowerPanels = \[sessionPanel \? livePanel : null\]\.filter\(Boolean\)/);
 });
 
-test("Phase 5A runs after the Phase 4F compatibility aligner", () => {
+test("Phase 5A owns the final enhancer position and makes repeated native builds safe", () => {
   const prepare = packageJson.scripts["prepare:route-enhancers"];
-  assert.match(prepare, /align-phase4f-browser-contracts\.mjs.*apply-phase5a-coach-daily-intelligence\.mjs/);
+  assert.match(prepare, /^node scripts\/run-finish-v9-compatible\.mjs/);
+  assert.match(prepare, /align-phase4f-browser-contracts\.mjs.*apply-phase5a-coach-daily-intelligence\.mjs$/);
   assert.match(packageJson.scripts.dev, /apply-phase5a-coach-daily-intelligence\.mjs.*vite/);
+  assert.match(repeatBuildWrapper, /phase5DailyBriefApplied/);
+  assert.match(repeatBuildWrapper, /aria-label=\"Coach daily brief\"/);
+  assert.match(repeatBuildWrapper, /!\/\\bteamPanel\\b\/\.test\(commandCenter\)/);
+  assert.match(repeatBuildWrapper, /spawnSync\(process\.execPath, \["scripts\/finish-v9-route-enhancers\.mjs"\]/);
 });
 
 test("Phase 5A keeps every accepted performance threshold unchanged", () => {
