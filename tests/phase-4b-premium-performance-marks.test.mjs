@@ -50,14 +50,19 @@ test("Phase 4B preserves PB and streak logic while making progression visible be
   assert.match(css, /performanceBadgeNext/);
 });
 
-test("Phase 4B achievement sheets own their geometry and motion instead of inheriting legacy badge styling", () => {
+test("Phase 4B achievement sheets own their geometry, material, and motion instead of inheriting legacy badge styling", () => {
   assert.match(script, /<div className=\"performanceRevealCard\" role=\"dialog\"/);
   assert.match(script, /<div className=\"performanceRevealCard performanceRevealCard--pb\" role=\"dialog\"/);
   assert.match(script, /\.replace\('className=\"performanceRevealCard badge-pop\"', 'className=\"performanceRevealCard\"'\)/);
   assert.match(script, /legacy badge-pop class still controls a Phase 4B achievement card/);
   assert.match(css, /\.performanceRevealOverlay \.performanceRevealCard\{/);
+  assert.match(css, /padding:24px!important/);
   assert.match(css, /border-radius:28px!important/);
+  assert.match(css, /background-color:#101712!important/);
+  assert.match(css, /background-image:linear-gradient\(150deg/);
+  assert.match(css, /box-shadow:0 30px 90px[^;]+!important/);
   assert.match(css, /phase4bRevealIn/);
+  assert.match(css, /padding:21px!important/);
   assert.match(css, /border-radius:25px!important/);
 });
 
