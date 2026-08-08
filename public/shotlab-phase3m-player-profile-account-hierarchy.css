@@ -1,0 +1,92 @@
+/* Phase 3M — Player Profile account/privacy hierarchy.
+   Light-native authority for the new Account & data disclosure only. */
+
+:root{
+  --p3m-ink:#171c18;
+  --p3m-muted:#68716a;
+  --p3m-surface:#ffffff;
+  --p3m-soft:#f5f6f1;
+  --p3m-line:rgba(23,28,24,.11);
+  --p3m-accent:var(--team-brand-primary,var(--accent,#8fae25));
+  --p3m-accent-deep:color-mix(in srgb,var(--p3m-accent) 78%,#263226);
+  --p3m-shadow:0 10px 26px rgba(24,31,27,.055);
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"]{
+  margin:0 0 9px!important;
+  overflow:hidden!important;
+  border:1px solid var(--p3m-line)!important;
+  border-radius:18px!important;
+  background:var(--p3m-surface)!important;
+  color:var(--p3m-ink)!important;
+  box-shadow:none!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary{
+  min-height:62px!important;
+  padding:13px 15px!important;
+  background:var(--p3m-surface)!important;
+  color:var(--p3m-ink)!important;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary span{
+  color:inherit;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary span:first-child > span:first-child{
+  color:var(--p3m-ink)!important;
+  -webkit-text-fill-color:var(--p3m-ink)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:14px!important;
+  font-weight:780!important;
+  line-height:1.15!important;
+  letter-spacing:-.012em!important;
+  text-transform:none!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary span:first-child > span:last-child{
+  color:var(--p3m-muted)!important;
+  -webkit-text-fill-color:var(--p3m-muted)!important;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
+  font-size:11px!important;
+  line-height:1.35!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary > span:last-child{
+  color:var(--p3m-muted)!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"][open]{
+  border-color:color-mix(in srgb,var(--p3m-accent) 24%,var(--p3m-line))!important;
+  box-shadow:var(--p3m-shadow)!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"][open] > summary > span:last-child{
+  color:var(--p3m-accent-deep)!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > div{
+  padding:14px!important;
+  border-top:1px solid var(--p3m-line)!important;
+  background:var(--p3m-soft)!important;
+  color:var(--p3m-ink)!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] :is(a,button,summary):focus-visible{
+  outline:3px solid color-mix(in srgb,var(--p3m-accent) 32%,transparent)!important;
+  outline-offset:2px!important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary:active{
+  transform:scale(.985)!important;
+}
+
+@media(prefers-reduced-motion:reduce){
+  .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] *{
+    transition-duration:.01ms!important;
+    animation-duration:.01ms!important;
+    animation-iteration-count:1!important;
+  }
+}
