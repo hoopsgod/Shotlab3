@@ -21,24 +21,31 @@ test.beforeEach(async ({ page }) => {
   await installRoutes(page);
 });
 
-test("Phase 5A presents a truthful, touch-safe Coach Daily Brief without duplicate activity chrome", async ({ page }) => {
+test("Phase 5A keeps the accepted Phase 4 Coach visual hierarchy while adding decision intelligence", async ({ page }) => {
   await page.goto("/");
   const demo = page.getByRole("button", { name: /Coach demo/i });
   await expect(demo).toBeVisible({ timeout: 20_000 });
   await demo.click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 
-  const brief = page.getByTestId("coach-primary-metrics");
-  await expect(brief).toBeVisible({ timeout: 20_000 });
-  await expect(brief).toHaveAttribute("aria-label", "Coach daily brief");
-  await expect(brief).toContainText("Today active");
-  await expect(brief).toContainText("RSVP ready");
-  await expect(brief).toContainText("Follow-up");
-  await expect(page.locator(".mcTeamHealth")).toHaveCount(0);
+  const hero = page.getByTestId("coach-primary-objective");
+  const metrics = page.getByTestId("coach-primary-metrics");
+  await expect(hero).toBeVisible({ timeout: 20_000 });
+  await expect(hero).toContainText("Today at a glance");
+  await expect(hero).toContainText(/decision.*before practice/i);
+  await expect(metrics).toContainText("Active");
+  await expect(metrics).toContainText("Follow-up");
+  await expect(metrics).toContainText("Next");
+  await expect(metrics).not.toContainText("RSVP ready");
 
-  const buttonHeights = await brief.getByRole("button").evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().height));
+  const buttonHeights = await metrics.getByRole("button").evaluateAll((buttons) => buttons.map((button) => button.getBoundingClientRect().height));
   expect(buttonHeights).toHaveLength(3);
   for (const height of buttonHeights) expect(height).toBeGreaterThanOrEqual(44);
+
+  const heroBox = await hero.boundingBox();
+  expect(heroBox).not.toBeNull();
+  expect(heroBox.x).toBeGreaterThanOrEqual(12);
+  expect(heroBox.x + heroBox.width).toBeLessThanOrEqual(418);
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
@@ -48,5 +55,5 @@ test("Phase 5A presents a truthful, touch-safe Coach Daily Brief without duplica
   expect(settledOverflow).toBeLessThanOrEqual(1);
 
   fs.mkdirSync(outputDir, { recursive: true });
-  await page.screenshot({ path: path.join(outputDir, "13a-phase5a-coach-daily-intelligence.png"), fullPage: false, animations: "disabled" });
+  await page.screenshot({ path: path.join(outputDir, "13a-phase5a-coach-decision-intelligence.png"), fullPage: false, animations: "disabled" });
 });
