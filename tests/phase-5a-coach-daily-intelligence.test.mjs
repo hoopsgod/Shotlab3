@@ -58,9 +58,10 @@ test("Phase 5A weekly activity cannot be inflated by activity outside the suppli
   assert.deepEqual(withoutVisibleActivity.engagedAthletes, []);
 });
 
-test("Phase 5A preserves the 14px premium mobile gutter for shared state surfaces", () => {
+test("Phase 5A preserves premium mobile gutters and prevents hidden Player horizontal drift", () => {
   assert.match(statePanelCss, /@media \(max-width:640px\)\{\s*\.root\{width:min\(calc\(100% - 28px\),calc\(100vw - 28px\)\)\}\s*\}/);
   assert.match(statePanelCss, /\.action\{[\s\S]*?min-height:44px/);
+  assert.match(app, /className="player-scroll-container"[\s\S]*?width:"100%",boxSizing:"border-box",maxWidth:isDesktop\?"none":760/);
   assert.doesNotMatch(phase4eAuthorityCss, /\[data-testid="player-workspace-empty-state"\]\s*\{[\s\S]*?max-width:\s*calc\(100%\s*-\s*6px\)/);
   assert.doesNotMatch(phase4eAuthorityCss, /\[data-testid="player-workspace-empty-state"\]\s*\{[\s\S]*?margin-left:\s*3px/);
 });
