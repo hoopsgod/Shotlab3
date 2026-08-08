@@ -59,8 +59,60 @@ const APP_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/operationalInsightRails',
   '/src/lib/trainingCatalogPersistenceService',
   '/src/lib/playerChallengePersistenceService',
+  '/src/lib/programDrillScoring',
+  '/src/lib/seasonLeaderboardAnalytics',
+  '/src/lib/participationLeaderboardService',
+  '/src/lib/releaseDiagnostics',
+  '/src/lib/assignmentDeadline',
+  '/src/lib/playerAssignmentService',
+  '/src/lib/playerAssignmentHistoryService',
+  '/src/lib/playerAssignmentPriority',
+]
+const SHARED_AUTHENTICATED_UI_FRAGMENTS = [
+  '/src/theme/',
+  '/src/context/TeamBrandingContext.jsx',
+  '/src/components/AppFeedbackLayer',
+  '/src/components/AppHeader.jsx',
+  '/src/components/ShotLabIcon.jsx',
+  '/src/components/ShotLabStatePanel',
+  '/src/components/ShotLabSignatureField',
+  '/src/components/VisualHierarchy',
+  '/src/lib/workspaceRecovery.js',
+  '/src/components/ShotLabPerformanceMark',
+  '/src/components/MobileNavigation',
+  '/src/components/DashboardIdentityHeader',
+  '/src/components/CompactLeaderboardPreviewCard.jsx',
+  '/src/components/SemanticStatus',
+  '/src/components/OperationalInsightRail',
+  '/src/components/CoachDashboardPrimitives',
+]
+const PLAYER_WORKSPACE_FRAGMENTS = [
+  '/src/components/Player',
+  '/src/components/PremiumLeaderboardsHub.jsx',
+  '/src/components/ShotLabCharts.jsx',
+  '/src/lib/playerProgressStory.js',
+  '/src/lib/playerCareerHistory.js',
+  '/src/lib/playerCareerMilestones.js',
+  '/src/lib/playerWorkspaceActionRouting.js',
+  '/src/lib/playerAssignmentEnhancer.js',
+]
+const COACH_WORKSPACE_FRAGMENTS = [
+  '/src/components/Coach',
+  '/src/screens/Coach',
+  '/src/components/NewSeasonWizard.jsx',
+  '/src/components/useCleanTeamLogo.js',
+  '/src/components/team/',
+  '/src/components/ExperiencePrimitives',
+  '/src/components/SecondaryPageSystem',
+  '/src/lib/coach',
+  '/src/lib/seasonRollover',
+  '/src/lib/industrialDesignFoundation.js',
+  '/src/lib/homeExperienceHierarchy.js',
+  '/src/lib/visualSystemReboot',
 ]
 const AUTHORITY_BUNDLE_TARGET_BYTES = 120_000
+
+const matchesAny = (moduleId, fragments) => fragments.some((fragment) => moduleId.includes(fragment))
 
 function redirectAppImport(name, sourceMatch, modulePath) {
   return {
@@ -212,32 +264,10 @@ function reportBundleOwnership() {
 function stableVendorChunk(id) {
   const moduleId = normalizeModuleId(id)
   if (moduleId.includes('/node_modules/react/') || moduleId.includes('/node_modules/react-dom/') || moduleId.includes('/node_modules/scheduler/')) return 'react-vendor'
-  if (moduleId.includes('/src/components/PremiumLeaderboardsHub.jsx') || moduleId.includes('/src/lib/seasonLeaderboardAnalytics.js') || moduleId.includes('/src/components/ShotLabCharts.jsx') || moduleId.includes('/src/components/PlayerCareerHistory.jsx')) return 'PlayerAnalyticsWorkspaces'
-  if (
-    moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')
-    || moduleId.includes('/src/components/PlayerDashboardHeader.jsx')
-    || moduleId.includes('/src/components/PlayerDailyCommandCenter.jsx')
-    || moduleId.includes('/src/components/PlayerDailyPrimitives.jsx')
-    || moduleId.includes('/src/components/PlayerOperationalWorkspace.jsx')
-    || moduleId.includes('/src/components/MobileNavigation.jsx')
-    || moduleId.includes('/src/components/CoachDashboardHeader.jsx')
-    || moduleId.includes('/src/components/CompactLeaderboardPreviewCard.jsx')
-    || moduleId.includes('/src/components/VisualHierarchy.jsx')
-    || moduleId.includes('/src/components/SemanticStatus.jsx')
-    || moduleId.includes('/src/components/CoachDashboardPrimitives.jsx')
-    || moduleId.includes('/src/components/OperationalInsightRail.jsx')
-    || moduleId.includes('/src/components/ShotLabStatePanel.jsx')
-    || moduleId.includes('/src/components/ShotLabPerformanceMark.jsx')
-    || moduleId.includes('/src/components/PlayerProgressStory.jsx')
-    || moduleId.includes('/src/components/PlayerCommitmentCenter.jsx')
-    || moduleId.includes('/src/components/PlayerTrainingSessionHeader.jsx')
-    || moduleId.includes('/src/components/PlayerSessionCloseout.jsx')
-    || moduleId.includes('/src/components/PlayerTrainingCompletion.jsx')
-    || moduleId.includes('/src/lib/playerProgressStory.js')
-  ) return 'PlayerInterfaceWorkspaces'
-  if (moduleId.includes('/src/components/NewSeasonWizard.jsx') || moduleId.includes('/src/components/CoachPlayerInviteForm.jsx') || moduleId.includes('/src/components/CoachProgramScoreDrawer.jsx') || moduleId.includes('/src/screens/CoachTeamBrandingScreen.jsx')) return 'CoachAdministrationWorkspaces'
-  if (moduleId.includes('/src/components/CoachCommandCenter.jsx') || moduleId.includes('/src/components/CoachDashboardPhase2.jsx') || moduleId.includes('/src/components/CoachInteractiveDashboards.jsx') || moduleId.includes('/src/components/SecondaryPageSystem.jsx') || moduleId.includes('/src/components/ExperiencePrimitives.jsx')) return 'CoachOperationalWorkspaces'
-  if (APP_DOMAIN_SERVICE_FRAGMENTS.some((fragment) => moduleId.includes(fragment))) return 'AppDomainServices'
+  if (matchesAny(moduleId, SHARED_AUTHENTICATED_UI_FRAGMENTS)) return 'AuthenticatedUi'
+  if (matchesAny(moduleId, APP_DOMAIN_SERVICE_FRAGMENTS)) return 'AppDomainServices'
+  if (matchesAny(moduleId, PLAYER_WORKSPACE_FRAGMENTS)) return 'PlayerWorkspaces'
+  if (matchesAny(moduleId, COACH_WORKSPACE_FRAGMENTS)) return 'CoachWorkspaces'
   return undefined
 }
 
