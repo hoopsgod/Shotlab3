@@ -13,6 +13,11 @@ const GROUP_DEFINITIONS = [
   { id: "performance", title: "Performance", description: "Results, progress, and season intelligence", keys: new Set(["leaderboards", "analytics", "progress", "history", "archives"]) },
   { id: "team", title: "Team & account", description: "Identity, store, profile, and settings", keys: new Set(["team-store", "branding", "profile", "settings", "account"]) },
 ];
+const PLAYER_GROUP_DEFINITIONS = [
+  { id: "program", title: "Team program", description: "Program work, events, and lifting", keys: new Set(["program", "events", "drills", "sc", "lifting", "attendance", "duels"]) },
+  { id: "performance", title: "Rankings", description: "Team standings and historical context", keys: new Set(["leaderboards", "analytics", "history", "archives"]) },
+  { id: "team", title: "Team & account", description: "Store, identity, and account tools", keys: new Set(["team-store", "branding", "settings", "account"]) },
+];
 
 const MoreIcon = () => <svg style={ICON_STYLE} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg>;
 const semanticNavigationIcon = (key) => key === "log-drill" ? "home" : key === "duels" ? "program" : "";
@@ -22,16 +27,17 @@ const normalizeNavigationIcon = (item) => {
   if (!isValidElement(item?.svg)) return item?.svg;
   return cloneElement(item.svg, { width: 20, height: 20, strokeWidth: 1.75, strokeLinecap: "round", strokeLinejoin: "round", style: { ...(item.svg.props.style || {}), ...ICON_STYLE } });
 };
-const resolveNavigationGroup = (item) => {
+const resolveNavigationGroup = (item, definitions = GROUP_DEFINITIONS) => {
   const explicit = String(item?.group || "").trim().toLowerCase();
   if (explicit) return explicit;
   const key = String(item?.k || "").trim().toLowerCase();
-  return GROUP_DEFINITIONS.find((group) => group.keys.has(key))?.id || "other";
+  return definitions.find((group) => group.keys.has(key))?.id || "other";
 };
 
-export function groupSecondaryNavigation(items = []) {
+export function groupSecondaryNavigation(items = [], role = "default") {
   const safeItems = items.filter(Boolean);
-  const groups = GROUP_DEFINITIONS.map((definition) => ({ ...definition, items: safeItems.filter((item) => resolveNavigationGroup(item) === definition.id) })).filter((group) => group.items.length);
+  const definitions = role === "player" ? PLAYER_GROUP_DEFINITIONS : GROUP_DEFINITIONS;
+  const groups = definitions.map((definition) => ({ ...definition, items: safeItems.filter((item) => resolveNavigationGroup(item, definitions) === definition.id) })).filter((group) => group.items.length);
   const assigned = new Set(groups.flatMap((group) => group.items));
   const otherItems = safeItems.filter((item) => !assigned.has(item));
   if (otherItems.length) groups.push({ id: "other", title: "More tools", description: "Additional ShotLab areas", items: otherItems });
@@ -73,7 +79,7 @@ export default function MobileNavigation({ primaryItems = [], secondaryItems = [
   const role = ariaLabel.toLowerCase().includes("player") ? "player" : ariaLabel.toLowerCase().includes("coach") ? "coach" : "default";
   const allItems = useMemo(() => [...primaryItems, ...secondaryItems].filter(Boolean), [primaryItems, secondaryItems]);
   const visiblePrimaryItems = useMemo(() => {
-    const keys = role === "player" ? ["home", "log-drill", "leaderboards"] : role === "coach" ? ["feed", "players", "events"] : [];
+    const keys = role === "player" ? ["home", "log-drill", "profile"] : role === "coach" ? ["feed", "players", "events"] : [];
     const labels = role === "player" ? ["Home", "Train", "Progress"] : ["Home", "Players", "Schedule"];
     if (!keys.length) return primaryItems.filter(Boolean).slice(0, 3);
     return keys.map((key, index) => {
@@ -83,11 +89,22 @@ export default function MobileNavigation({ primaryItems = [], secondaryItems = [
   }, [allItems, primaryItems, role]);
   const visibleSecondaryItems = useMemo(() => {
     const primaryKeys = new Set(visiblePrimaryItems.map((item) => item.k));
-    return allItems.filter((item) => !primaryKeys.has(item.k));
-  }, [allItems, visiblePrimaryItems]);
-  const groupedSecondaryItems = useMemo(() => groupSecondaryNavigation(visibleSecondaryItems), [visibleSecondaryItems]);
+    return allItems.filter((item) => !primaryKeys.has(item.k)).map((item) => {
+      if (role !== "player") return item;
+      if (item.k === "leaderboards") return { ...item, mobileLabel: "Rankings", description: "Team standings and all-time context", group: "performance" };
+      if (item.k === "duels") return { ...item, mobileLabel: "Program", description: item.description || "Coach-assigned team work", group: "program" };
+      if (item.k === "program") return { ...item, mobileLabel: "Events", description: item.description || "Team schedule and RSVPs", group: "program" };
+      if (item.k === "sc") return { ...item, mobileLabel: "Lifting", description: item.description || "Strength and conditioning", group: "program" };
+      if (item.k === "team-store") return { ...item, mobileLabel: "Team Store", description: item.description || "Official team apparel and gear", group: "team" };
+      return item;
+    });
+  }, [allItems, visiblePrimaryItems, role]);
+  const groupedSecondaryItems = useMemo(() => groupSecondaryNavigation(visibleSecondaryItems, role), [visibleSecondaryItems, role]);
   const secondaryActive = visibleSecondaryItems.some((item) => item.k === activeKey);
   const secondaryHasNotification = visibleSecondaryItems.some((item) => Boolean(item.dot));
+  const sheetCopy = role === "player"
+    ? { eyebrow: "Player workspace", title: "More", summary: "Program work, schedule, rankings, and team tools." }
+    : { eyebrow: role === "default" ? "ShotLab" : `${role[0].toUpperCase()}${role.slice(1)} workspace`, title: "Everything else, organized", summary: "Frequent actions stay in the dock. Related tools live together here." };
 
   useEffect(() => setOpen(false), [activeKey]);
   useEffect(() => {
@@ -120,7 +137,7 @@ export default function MobileNavigation({ primaryItems = [], secondaryItems = [
   const activeMore = secondaryActive || open;
   const shell = (
     <>
-      <nav className={styles.dock} aria-label={ariaLabel} data-navigation-role={role} data-testid="mobile-navigation-dock">
+      <nav className={styles.dock} aria-label={ariaLabel} data-navigation-role={role} data-navigation-intent={role === "player" ? "development-first" : undefined} data-testid="mobile-navigation-dock">
         <div className={styles.dockInner}>
           {visiblePrimaryItems.map((item) => <NavigationItem key={item.k} item={item} active={item.k === activeKey} onSelect={handleSelect} compact />)}
           <button type="button" className={`${styles.dockItem} ${activeMore ? styles.active : ""}`} style={activeMore ? { color: ACTIVE_COLOR } : undefined} aria-expanded={open} aria-controls="mobile-navigation-more-sheet" aria-label="More" data-testid="mobile-navigation-more" data-active={activeMore ? "true" : "false"} onClick={() => setOpen((value) => !value)}>
@@ -134,7 +151,7 @@ export default function MobileNavigation({ primaryItems = [], secondaryItems = [
         <section ref={sheetRef} id="mobile-navigation-more-sheet" className={styles.sheet} role="dialog" aria-modal="true" aria-label="More navigation" data-testid="mobile-navigation-sheet" onMouseDown={(event) => event.stopPropagation()}>
           <div className={styles.sheetHandle} aria-hidden="true" />
           <div className={styles.sheetHeader}>
-            <div><div className={styles.sheetEyebrow}>{role === "default" ? "ShotLab" : role[0].toUpperCase() + role.slice(1)} workspace</div><h2 className={styles.sheetTitle}>Everything else, organized</h2><p className={styles.sheetSummary}>Frequent actions stay in the dock. Related tools live together here.</p></div>
+            <div><div className={styles.sheetEyebrow}>{sheetCopy.eyebrow}</div><h2 className={styles.sheetTitle}>{sheetCopy.title}</h2><p className={styles.sheetSummary}>{sheetCopy.summary}</p></div>
             <button ref={closeButtonRef} type="button" className={styles.closeButton} aria-label="Close more navigation" onClick={() => setOpen(false)}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12" /></svg></button>
           </div>
           <div className={styles.sheetGroups} data-testid="mobile-navigation-groups">

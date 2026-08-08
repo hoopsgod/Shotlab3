@@ -192,8 +192,10 @@ test.beforeEach(async ({ page }) => {
 test("player sees current and archived career history on Profile without horizontal overflow", async ({ page }) => {
   await page.goto("/");
   await enterDemo(page, "Demo Player");
-  await page.getByTestId("mobile-navigation-more").click();
-  await page.getByTestId("mobile-navigation-sheet").getByRole("button", { name: "Profile", exact: true }).click();
+  const dock = page.getByTestId("mobile-navigation-dock");
+  await expect(dock).toHaveAttribute("data-navigation-intent", "development-first");
+  await dock.getByRole("button", { name: "Progress", exact: true }).click();
+  await expect(page).toHaveURL(/\/profile$/);
   await openFullProgressProfileIfPresent(page);
 
   const careerDisclosure = page.getByTestId("player-profile-career-disclosure");
