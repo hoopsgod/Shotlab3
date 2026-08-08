@@ -7,6 +7,7 @@ const legacyStylesSource = fs.readFileSync(new URL("../src/styles/appLegacyStyle
 const navigationSource = fs.readFileSync(new URL("../src/components/MobileNavigation.jsx", import.meta.url), "utf8");
 const navigationCss = fs.readFileSync(new URL("../src/components/MobileNavigation.module.css", import.meta.url), "utf8");
 const architectureCss = fs.readFileSync(new URL("../src/components/MobileNavigationArchitecture.css", import.meta.url), "utf8");
+const coachMissionControlCss = fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css", import.meta.url), "utf8");
 
 test("mobile dock limits persistent navigation to three destinations plus More", () => {
   assert.match(navigationSource, /primaryItems\.filter\(Boolean\)\.slice\(0, 3\)/);
@@ -54,6 +55,14 @@ test("notification semantics add descriptions without renaming controls", () => 
   assert.match(navigationSource, /aria-description=\{item\.dot \? "Updates available" : undefined\}/);
   assert.match(navigationSource, /aria-label="More" aria-description=\{secondaryHasNotification \? "Updates available" : undefined\}/);
   assert.match(navigationSource, /aria-current=\{active \? "page" : undefined\}/);
+});
+
+test("coach Mission Control cannot replace the shared light native navigation surface", () => {
+  assert.match(coachMissionControlCss, /Mission Control inherits the shared native navigation surface/);
+  assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\][^{]*\{[^}]*padding:7px 10px/s);
+  assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]:before\s*\{[^}]*rgba\(2,4,5/s);
+  assert.doesNotMatch(coachMissionControlCss, /\[data-testid="mobile-navigation-dock"\]>div\s*\{[^}]*background:rgba\(9,14,18,.88\)/s);
+  assert.match(architectureCss, /\[data-testid="mobile-navigation-dock"\]\s*\{[^}]*background:\s*rgba\(252, 252, 250, \.9\)\s*!important/s);
 });
 
 test("secondary navigation is accessible, dismissible, and does not leave body scrolling behind", () => {
