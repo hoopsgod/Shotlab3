@@ -28,8 +28,13 @@
 
 .performanceBadgeShelf{margin:0 0 24px;padding:17px;border:1px solid rgba(17,26,33,.09);border-radius:22px;background:#fff;box-shadow:0 1px 2px rgba(17,26,33,.035),0 12px 32px rgba(17,26,33,.045)}
 .performanceBadgeShelfHeader{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px;padding-bottom:11px;border-bottom:1px solid rgba(17,26,33,.08)}
-.performanceBadgeShelfHeader span{color:#657b05;font:800 9px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.10em}.performanceBadgeShelfHeader strong{color:#65717a;font:700 10px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}
+.performanceBadgeShelfHeader span{color:#657b05;font:800 9px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.10em}.performanceBadgeShelfHeader strong{color:#65717a;font:700 10px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;text-align:right}
 .performanceBadgeShelfGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.performanceBadgeShelfGrid>[data-performance-kind]{min-width:0;padding:8px 9px;border:1px solid rgba(17,26,33,.07);border-radius:15px;background:#f8f8f4}
+.performanceBadgeNext{position:relative;overflow:hidden;margin-top:earned;padding:12px 13px;border:1px dashed rgba(17,26,33,.13);border-radius:17px;background:linear-gradient(135deg,#f7f7f2,#fbfbf8)}
+.performanceBadgeNext::after{content:"";position:absolute;width:74px;height:74px;border-radius:999px;right:-30px;top:-28px;border:1px solid rgba(101,123,5,.10);pointer-events:none}
+.performanceBadgeNextLabel{margin-bottom:7px;color:#7b847d;font:800 8px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.10em}
+.performanceBadgeNext [data-performance-kind]{opacity:.78}.performanceBadgeNext [data-performance-kind] div:first-child{filter:grayscale(.25)}
+.performanceBadgeComplete{padding:11px 12px;border-radius:14px;background:#f6f8ef;color:#516005;font:650 11px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}
 
 [data-testid="player-progress-metrics"]>.metricMark,
 [data-testid="player-progress-metrics"]>div{display:flex!important;align-items:center!important;min-width:0!important;padding:9px 10px!important}
