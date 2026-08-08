@@ -7,7 +7,8 @@ const DIST_DIR = path.resolve(ROOT_DIR, "dist");
 const SOURCE_DIR = path.resolve(ROOT_DIR, "src");
 const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".html"]);
 const MODULE_CLASS = /^_([A-Za-z][A-Za-z0-9_-]*?)_[A-Za-z0-9]{5,}_(?:\d+)$/;
-const DYNAMIC_LOCAL = /^(?:root|active|selected|disabled|open|closed|expanded|collapsed|loading|success|error|warning|danger|compact|daily|header|panel|command|tone|status|state|role|mode|rank|theme|size|variant)$/i;
+const DYNAMIC_LOCAL = /^(?:(?:tone|surface|insight|status|state|role|mode|rank|theme|size|variant)[_-]|is[_-]|has[_-])|^(?:root|active|selected|disabled|open|closed|expanded|collapsed|loading|success|error|warning|danger|compact|daily|header|panel|command|tone|status|state|role|mode|rank|theme|size|variant)$/i;
+const COMPLEX_PSEUDO = /:(?:not|is|where|has)\s*\(/i;
 
 async function listFiles(directory, predicate) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -76,6 +77,7 @@ function localIsReferenced(local, corpus) {
 }
 
 function selectorArmIsReachable(selector, corpus) {
+  if (COMPLEX_PSEUDO.test(selector)) return true;
   const locals = generatedModuleLocals(selector);
   if (!locals.length) return true;
   return locals.every((local) => localIsReferenced(local, corpus));
