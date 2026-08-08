@@ -57,7 +57,7 @@ async function expectRouteEndBounded(page, options) {
   return geometry;
 }
 
-test("Phase 3 closure: Player Home has one dock reserve and no orphaned account band", async ({ page }) => {
+test("Phase 3 closure: Player Home has one dock reserve, clean support contrast, and no orphaned account band", async ({ page }) => {
   const dock = await enterDemo(page, "Player");
   await expect(page.getByTestId("player-daily-command-center")).toBeVisible({ timeout: 20_000 });
   await expect(page.locator(".player-quick-actions")).toHaveCount(0);
@@ -73,6 +73,30 @@ test("Phase 3 closure: Player Home has one dock reserve and no orphaned account 
     await expect(disclosure).toBeVisible();
     await expect(disclosure).not.toHaveAttribute("open", "");
   }
+
+  const contrast = await page.evaluate(() => {
+    const nextHeading = document.querySelector('[data-command-role="next-actions"] [class*="sectionHeading"]');
+    const nextTitle = document.querySelector('[data-command-role="next-actions"] [class*="sectionTitle"]');
+    const schedule = document.querySelector('[data-testid="player-upcoming-schedule"]');
+    const scheduleTitle = schedule?.querySelector('[class*="disclosureTitle"]');
+    const scheduleMeta = schedule?.querySelector('[class*="disclosureMeta"]');
+    if (!nextHeading || !nextTitle || !schedule || !scheduleTitle || !scheduleMeta) throw new Error("Missing Player Home contrast targets");
+    return {
+      nextHeadingBackground: getComputedStyle(nextHeading).backgroundColor,
+      nextHeadingImage: getComputedStyle(nextHeading).backgroundImage,
+      nextTitleColor: getComputedStyle(nextTitle).color,
+      supportBackground: getComputedStyle(schedule).backgroundColor,
+      supportTitleColor: getComputedStyle(scheduleTitle).color,
+      supportMetaColor: getComputedStyle(scheduleMeta).color,
+    };
+  });
+  expect(contrast.nextHeadingBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(contrast.nextHeadingImage).toBe("none");
+  expect(contrast.nextTitleColor).toBe("rgb(245, 248, 249)");
+  expect(contrast.supportBackground).toBe("rgb(255, 255, 255)");
+  expect(contrast.supportTitleColor).toBe("rgb(23, 28, 24)");
+  expect(contrast.supportMetaColor).toBe("rgb(104, 113, 106)");
+
   await expectRouteEndBounded(page, { route: "home", finalSelector: '[data-testid="player-secondary-intelligence"]' });
   await expectNoOverflow(page);
   await capture(page, "07a-phase3-final-player-home.png");
