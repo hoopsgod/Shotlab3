@@ -54,14 +54,22 @@ test("player More owns the sign-out action without turning it into primary navig
   const sheet = page.getByTestId("mobile-navigation-sheet");
   await expect(sheet).toBeVisible();
   const accountActions = page.getByTestId("mobile-navigation-account-actions");
+  const signOut = page.getByTestId("mobile-navigation-sign-out");
   await expect(accountActions).toBeVisible();
-  await expect(page.getByTestId("mobile-navigation-sign-out")).toHaveText(/Sign out/);
-  await expect(page.getByTestId("mobile-navigation-sign-out")).toContainText("Leave this ShotLab session");
+  await expect(signOut).toHaveText(/Sign out/);
+  await expect(signOut).toContainText("Leave this ShotLab session");
   await expect(sheet.locator('[data-nav-key="profile"]')).toHaveCount(0);
+  await signOut.scrollIntoViewIfNeeded();
+  const signOutBounds = await signOut.boundingBox();
+  const sheetBounds = await sheet.boundingBox();
+  expect(signOutBounds).not.toBeNull();
+  expect(sheetBounds).not.toBeNull();
+  expect(signOutBounds.y).toBeGreaterThanOrEqual(sheetBounds.y);
+  expect(signOutBounds.y + signOutBounds.height).toBeLessThanOrEqual(sheetBounds.y + sheetBounds.height + 1);
   await expectNoOverflow(page);
   await capture(page, "06b-player-more-account-actions.png");
 
-  await page.getByTestId("mobile-navigation-sign-out").click();
+  await signOut.click();
   await expect(page.getByRole("button", { name: "Player demo", exact: true })).toBeVisible({ timeout: 20_000 });
   await expect(page.getByTestId("mobile-navigation-dock")).toHaveCount(0);
 });
