@@ -33,17 +33,21 @@ test("Phase 4B upgrades progress metrics and top leaderboard ranks without chang
   assert.match(leaderboard, /entry\.metricValue \?\? entry\.total_home_shots \?\? entry\.score/);
 });
 
-test("Phase 4B preserves PB and streak achievement logic while replacing legacy presentation", () => {
+test("Phase 4B preserves PB and streak logic while making progression visible before unlock", () => {
   assert.match(script, /const STREAK_BADGES=/);
   assert.match(script, /const getEarnedBadges=/);
   assert.match(script, /const isPB=v>prevBest&&prevBest>0;/);
   assert.match(script, /setPbReveal\(\{drill:active\.name,score:v,prev:prevBest\}\)/);
   assert.match(script, /STREAK_BADGES\.find\(b=>oldStreak<b\.days&&ns>=b\.days\)/);
+  assert.match(script, /STREAK_BADGES\.find\(b=>b\.days>streak\)/);
   assert.match(script, /player-pb-achievement-reveal/);
   assert.match(script, /player-streak-achievement-reveal/);
   assert.match(script, /player-achievement-shelf/);
+  assert.match(script, /player-achievement-next/);
+  assert.match(script, /days to unlock/);
   assert.match(css, /performanceRevealCard/);
   assert.match(css, /performanceBadgeShelf/);
+  assert.match(css, /performanceBadgeNext/);
 });
 
 test("Phase 4B is ordered after signature identity and before visual minification", () => {
