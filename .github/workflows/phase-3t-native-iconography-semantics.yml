@@ -6,6 +6,7 @@ on:
       - agent/phase-3s-navigation-progress-ia
     paths:
       - "src/components/MobileNavigation.jsx"
+      - "src/components/CoachMissionControl2026.css"
       - "tests/app-store-mobile-shell.test.mjs"
       - "tests/mobile-navigation-contract.test.mjs"
       - "tests/e2e/mobile-navigation.spec.mjs"
