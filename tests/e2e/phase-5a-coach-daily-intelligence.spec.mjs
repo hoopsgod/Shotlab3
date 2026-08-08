@@ -10,6 +10,13 @@ async function installRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
+async function settleCoachSurface(page) {
+  await page.waitForFunction(() => document.readyState === "complete" && Boolean(document.querySelector('[data-testid="coach-command-center-full"]')));
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+  await page.waitForTimeout(750);
+  await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+}
+
 test.beforeEach(async ({ page }) => {
   await installRoutes(page);
 });
@@ -35,6 +42,10 @@ test("Phase 5A presents a truthful, touch-safe Coach Daily Brief without duplica
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
+
+  await settleCoachSurface(page);
+  const settledOverflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+  expect(settledOverflow).toBeLessThanOrEqual(1);
 
   fs.mkdirSync(outputDir, { recursive: true });
   await page.screenshot({ path: path.join(outputDir, "13a-phase5a-coach-daily-intelligence.png"), fullPage: false, animations: "disabled" });
