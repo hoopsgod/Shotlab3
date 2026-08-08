@@ -29,6 +29,8 @@ test("Phase 3R promotes the development story while preserving and directly reve
   assert.match(enhancer, /details instanceof HTMLDetailsElement/);
   assert.match(enhancer, /details\.open=true/);
   assert.match(enhancer, /<ProfilePage u=\{u\}/);
+  assert.match(enhancer, /DRILL TREND READOUT/);
+  assert.match(enhancer, /Drill momentum is \{interpretedTrends\.momentum\}/);
   assert.match(enhancer, /Strength: \{\[\.\.\.drills,\.\.\.programDrills\]\.find/);
   assert.match(enhancer, /\?\.name\|\|interpretedTrends\.strongestDrill/);
   assert.match(enhancer, /player-profile-readout/);
