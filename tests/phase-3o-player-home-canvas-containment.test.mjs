@@ -59,13 +59,17 @@ test('rendered Phase 3O protects Home hierarchy and enforces one bounded dock re
   ]) requireMarker(rendered, marker);
 });
 
-test('Phase 3O preserves all supporting disclosures and final dock-safe interaction', () => {
+test('Phase 3O preserves all supporting disclosures and actual More progress expanded actions', () => {
   for (const marker of [
     'PHASE3O_HOME_DOCK_CLEARANCE',
     'toBeGreaterThanOrEqual(8)',
     'toHaveAttribute("open", "")',
-    'player-daily-momentum-signal',
+    'Team Rank',
+    'View Program',
+    'Events',
+    'Progress',
   ]) requireMarker(rendered, marker);
+  assert.equal(rendered.includes('player-daily-momentum-signal'), false, 'Phase 3O must not treat command-center momentum as More progress content');
 });
 
 test('App Store workflow carries Phase 3O contract, rendered acceptance, and evidence package', () => {
