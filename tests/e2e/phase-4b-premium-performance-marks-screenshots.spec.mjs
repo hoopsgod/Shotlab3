@@ -96,7 +96,8 @@ test("Phase 4B turns a new personal best into a premium achievement moment", asy
   await page.getByTestId("player-training-log-score").click();
   const reveal = page.getByTestId("player-pb-achievement-reveal");
   await expect(reveal).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByTestId("player-pb-achievement-mark")).toHaveAttribute("data-performance-kind", "pb");
+  const pbMark = page.getByTestId("player-pb-achievement-mark");
+  await expect(pbMark).toHaveAttribute("data-performance-kind", "pb");
   await expect(reveal.getByText("PERSONAL BEST", { exact: true })).toBeVisible();
   await expect(reveal.getByText(/Previous/i)).toBeVisible();
   await expect(reveal.getByText("41", { exact: true })).toBeVisible();
@@ -118,6 +119,26 @@ test("Phase 4B turns a new personal best into a premium achievement moment", asy
   expect(style.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
   expect(style.paddingTop).toBeGreaterThanOrEqual(20);
   expect(style.shadow).not.toBe("none");
+
+  const summaryStyle = await reveal.locator(".performanceRevealSummary").evaluate((node) => {
+    const computed = getComputedStyle(node);
+    return { background: computed.backgroundColor, image: computed.backgroundImage, border: computed.borderTopWidth, shadow: computed.boxShadow, color: computed.color };
+  });
+  expect(summaryStyle.background).toBe("rgba(0, 0, 0, 0)");
+  expect(summaryStyle.image).toBe("none");
+  expect(summaryStyle.border).toBe("0px");
+  expect(summaryStyle.shadow).toBe("none");
+  expect(summaryStyle.color).toBe("rgb(156, 168, 160)");
+
+  const markContrast = await pbMark.evaluate((node) => ({
+    value: getComputedStyle(node.querySelector("strong")).color,
+    label: getComputedStyle(node.querySelector("span")).color,
+    detail: getComputedStyle(node.querySelector("small")).color,
+  }));
+  expect(markContrast.value).toBe("rgb(247, 250, 245)");
+  expect(markContrast.label).toBe("rgb(247, 250, 245)");
+  expect(markContrast.detail).toBe("rgb(156, 168, 160)");
+
   await noOverflow(page);
   await capture(page, "09c-phase4b-player-pb-achievement.png");
 });
