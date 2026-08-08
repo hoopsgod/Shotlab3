@@ -1,1 +1,1 @@
-export { CoachDashboardHeader as default } from "./DeferredAuthenticatedUi.jsx";
+export { CoachDashboardHeader as default } from "./DeferredCoachAuthenticatedUi.jsx";
