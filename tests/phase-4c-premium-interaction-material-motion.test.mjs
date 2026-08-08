@@ -40,7 +40,9 @@ test("Phase 4C keeps translucent material limited to navigation and provides a r
   assert.match(css, /prefers-reduced-transparency:reduce/);
   assert.match(css, /background-color:#faf9f5!important/);
   assert.match(css, /background-image:none!important/);
-  assert.doesNotMatch(css, /player-training-completion[^\n]*backdrop-filter/);
+  const completionBlock = css.match(/body #root \[data-testid=\"player-training-completion\"\]\{([^}]*)\}/)?.[1] || "";
+  assert.ok(completionBlock, "training completion authority block should exist");
+  assert.doesNotMatch(completionBlock, /backdrop-filter/);
 });
 
 test("Phase 4C runs after Phase 4B and before final visual minification", () => {
