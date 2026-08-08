@@ -62,18 +62,20 @@ update("tests/e2e/coach-player-cross-device-first-result.spec.mjs", (source) => 
   const rsvpButton = playerPage.getByRole("button", { name: /RSVP NOW/ }).first();
   await expect(rsvpButton).toBeVisible({ timeout: 20_000 });
   await rsvpButton.click();`;
-  const legacyPatterns = [
-    `  await expect(playerPage.getByText("UPCOMING EVENTS", { exact: true })).toBeVisible({ timeout: 20_000 });
+  if (!next.includes(premiumResponse)) {
+    const legacyPatterns = [
+      `  await expect(playerPage.getByText("UPCOMING EVENTS", { exact: true })).toBeVisible({ timeout: 20_000 });
   await playerPage.getByRole("button", { name: /RSVP NOW/ }).first().click();`,
-    `  const rsvpButton = playerPage.getByRole("button", { name: /RSVP NOW/ }).first();
+      `  const rsvpButton = playerPage.getByRole("button", { name: /RSVP NOW/ }).first();
   await expect(rsvpButton).toBeVisible({ timeout: 20_000 });
   await rsvpButton.click();`,
-    `  const responseButton = playerPage.getByRole("button", { name: "Respond now", exact: true });
+      `  const responseButton = playerPage.getByRole("button", { name: "Respond now", exact: true });
   await expect(responseButton).toBeVisible({ timeout: 20_000 });
   await responseButton.click();`,
-  ];
-  for (const legacy of legacyPatterns) {
-    if (next.includes(legacy)) next = next.replace(legacy, premiumResponse);
+    ];
+    for (const legacy of legacyPatterns) {
+      if (next.includes(legacy)) next = next.replace(legacy, premiumResponse);
+    }
   }
   if (!next.includes(premiumResponse)) throw new Error("Phase 4F premium attendance response transition was not found.");
   return next;
