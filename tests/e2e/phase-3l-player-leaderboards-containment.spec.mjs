@@ -30,8 +30,11 @@ test("Player Leaderboards ends near its content while preserving ranking navigat
   await expect(hub.getByRole("button", { name: "All-Time", exact: true })).toBeVisible();
   await expect(hub.getByRole("button", { name: "At-Home Shots", exact: true })).toBeVisible();
   await expect(hub.getByRole("button", { name: "Program Drills", exact: true })).toBeVisible();
-  await expect(hub.getByRole("button", { name: "Events Attended", exact: true })).toBeVisible();
-  await expect(hub.getByRole("button", { name: "Strength & Conditioning", exact: true })).toBeVisible();
+
+  const participation = hub.getByTestId("leaderboard-participation-categories");
+  await expect(participation).toBeVisible();
+  await expect(participation.getByText("Participation categories", { exact: true })).toBeVisible();
+  await expect(participation.getByText("Events attended and strength work", { exact: true })).toBeVisible();
 
   const layout = await page.evaluate(() => {
     const node = document.querySelector('[data-testid="premium-leaderboards-hub"]');
@@ -80,6 +83,11 @@ test("Player Leaderboards ends near its content while preserving ranking navigat
   });
 
   console.log("PHASE3L_GEOMETRY", JSON.stringify(layout));
+
+  await participation.locator("summary").click();
+  await expect(participation.getByRole("button", { name: "Events Attended", exact: true })).toBeVisible();
+  await expect(participation.getByRole("button", { name: "Strength & Conditioning", exact: true })).toBeVisible();
+
   expect(layout.overflow).toBeLessThanOrEqual(1);
   expect(layout.tail, "Leaderboards should retain only fixed-dock/safe-area breathing room after content").toBeLessThanOrEqual(220);
 });
