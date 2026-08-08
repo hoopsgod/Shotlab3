@@ -24,16 +24,17 @@ if (!source.includes('import ShotLabPerformanceMark from "./components/ShotLabPe
 
 if (!source.includes('data-testid="player-streak-achievement-reveal"')) {
   const start = '{/* Badge Reveal Overlay */}';
-  const end = '{statSyncError&&';
+  const end = '{/* Personal Best Reveal */}';
   const replacement = `{/* Badge Reveal Overlay */}
 {badgeReveal&&<div className="performanceRevealOverlay" data-testid="player-streak-achievement-reveal" onClick={()=>setBadgeReveal(null)}>
   <div className="performanceRevealCard badge-pop" role="dialog" aria-modal="true" aria-label={\`Streak milestone: \${badgeReveal.name}\`} onClick={event=>event.stopPropagation()}>
     <div className="performanceRevealEyebrow">STREAK MILESTONE</div>
     <ShotLabPerformanceMark kind="streak" value={\`\${badgeReveal.days}D\`} label={badgeReveal.name} detail="Training streak achieved" testId="player-streak-achievement-mark" />
-    <div className="performanceRevealSummary">Consistency banked. Your \{badgeReveal.days\}-day training streak is now part of your ShotLab record.</div>
+    <div className="performanceRevealSummary">Consistency banked. Your {badgeReveal.days}-day training streak is now part of your ShotLab record.</div>
     <button type="button" className="performanceRevealDismiss" onClick={()=>setBadgeReveal(null)}>Continue</button>
   </div>
 </div>}
+
 `;
   source = replaceRange(source, start, end, replacement, "streak reveal");
 }
