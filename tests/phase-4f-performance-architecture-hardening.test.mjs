@@ -46,10 +46,13 @@ test('Phase 4F keeps cross-role presentation, recovery, and fallback styling in 
   assert.match(vite, /return 'AuthenticatedUi'/)
 })
 
-test('Phase 4F build enhancer preserves current Coach navigation instead of resurrecting legacy browser fixtures', () => {
+test('Phase 4F build enhancer preserves authenticated mobile Coach navigation and current event actions', () => {
+  assert.match(routeEnhancer, /setViewportSize\(\{ width: 390, height: 844 \}\)/)
+  assert.match(routeEnhancer, /v1\/legacy-auth\/restore/)
+  assert.match(routeEnhancer, /coach-command-center-full/)
   assert.match(routeEnhancer, /mobile-navigation-dock/)
-  assert.match(routeEnhancer, /name: "Coach demo"/)
   assert.match(routeEnhancer, /dock\.getByRole\("button", \{ name: "Players", exact: true \}\)/)
+  assert.match(routeEnhancer, /const rsvpButton = playerPage\.getByRole\("button", \{ name: \/RSVP NOW\//)
   assert.doesNotMatch(routeEnhancer, /const allPlayers = page\.getByRole/)
   assert.doesNotMatch(routeEnhancer, /name: "Demo Coach", exact: true/)
 })
