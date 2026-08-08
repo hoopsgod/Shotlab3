@@ -34,6 +34,7 @@ test("Phase 4D integrates the state language at high-value recovery seams", () =
   assert.match(auth, /testId="auth-error-state"/);
   assert.match(leaderboard, /testId=\{`leaderboard-\$\{displayState\}-state`\}/);
   assert.match(leaderboard, /state=\{recoveryState\}/);
+  assert.match(leaderboard, /surface="light"/);
   assert.match(workspace, /testId="player-workspace-empty-state"/);
   assert.match(workspace, /state=\{actionLabel \? "first-use" : "empty"\}/);
   assert.match(script, /app\.includes\('testId="startup-loading-state"'\)/);
