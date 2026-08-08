@@ -7,6 +7,7 @@ const packageJson = JSON.parse(await readFile(new URL('../package.json', import.
 const optimizer = await readFile(new URL('../scripts/optimize-production-css.mjs', import.meta.url), 'utf8')
 const budgetVerifier = await readFile(new URL('../scripts/verify-performance-budget.mjs', import.meta.url), 'utf8')
 const routeEnhancer = await readFile(new URL('../scripts/finish-v9-route-enhancers.mjs', import.meta.url), 'utf8')
+const browserAligner = await readFile(new URL('../scripts/align-phase4f-browser-contracts.mjs', import.meta.url), 'utf8')
 const budget = JSON.parse(await readFile(new URL('../performance-budget.json', import.meta.url), 'utf8'))
 
 test('Phase 4F uses neutral runtime plus shared foundations and one workspace chunk per role', () => {
@@ -46,15 +47,16 @@ test('Phase 4F keeps cross-role presentation, recovery, and fallback styling in 
   assert.match(vite, /return 'AuthenticatedUi'/)
 })
 
-test('Phase 4F build enhancer preserves authenticated mobile Coach navigation and current event actions', () => {
+test('Phase 4F closes legacy browser mutations with current premium disclosures and hydrated events', () => {
+  assert.match(packageJson.scripts['prepare:route-enhancers'], /align-phase4f-browser-contracts\.mjs/)
   assert.match(routeEnhancer, /setViewportSize\(\{ width: 390, height: 844 \}\)/)
   assert.match(routeEnhancer, /v1\/legacy-auth\/restore/)
-  assert.match(routeEnhancer, /coach-command-center-full/)
-  assert.match(routeEnhancer, /mobile-navigation-dock/)
-  assert.match(routeEnhancer, /dock\.getByRole\("button", \{ name: "Players", exact: true \}\)/)
-  assert.match(routeEnhancer, /const rsvpButton = playerPage\.getByRole\("button", \{ name: \/RSVP NOW\//)
-  assert.doesNotMatch(routeEnhancer, /const allPlayers = page\.getByRole/)
-  assert.doesNotMatch(routeEnhancer, /name: "Demo Coach", exact: true/)
+  assert.match(browserAligner, /coach-player-account-activation/)
+  assert.match(browserAligner, /coach-player-roster-management/)
+  assert.match(browserAligner, /locator\("summary"\)\.click\(\)/)
+  assert.match(browserAligner, /requestUrl\.includes\("\/rest\/v1\/events"\)/)
+  assert.match(browserAligner, /commonSeed\["sl:events"\]/)
+  assert.match(browserAligner, /const rsvpButton = playerPage\.getByRole\("button", \{ name: \/RSVP NOW\//)
 })
 
 test('Phase 4F treats absent startup App CSS as zero payload rather than a missing asset failure', () => {
