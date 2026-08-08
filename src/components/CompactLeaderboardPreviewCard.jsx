@@ -1,5 +1,6 @@
 import React from "react";
 import { resolveDataDisplayState } from "../lib/workspaceRecovery.js";
+import ShotLabPerformanceMark from "./ShotLabPerformanceMark.jsx";
 
 const DEFAULT_PLAYER_EMPTY = "No leaderboard data yet. Log shots to enter the rankings.";
 const DEFAULT_COACH_EMPTY = "No team leaderboard data yet. Players will appear here after they log shots.";
@@ -65,8 +66,12 @@ export default function CompactLeaderboardPreviewCard({
             const currentPlayer = entry?.isCurrentUser === true
               || entry?.is_current_user === true
               || (normalizedUser && String(entry?.email || "").trim().toLowerCase() === normalizedUser);
-            return <div key={`${entry.rank}-${displayName}`} style={{ display: "grid", gridTemplateColumns: "34px 1fr auto", alignItems: "center", gap: 9, borderTop:index===0?"none":"1px solid var(--stroke-1)", padding: "10px 2px", background:index===0?"linear-gradient(90deg, color-mix(in srgb,var(--accent) 7%, transparent), transparent)":"transparent" }}>
-              <div style={{ color: index===0?"var(--accent)":"var(--text-3)", fontSize: index===0?14:12, fontWeight: 900 }}>#{entry.rank}</div>
+            const rank = Number(entry.rank) || index + 1;
+            const premiumRank = rank <= 3;
+            return <div key={`${entry.rank}-${displayName}`} data-leaderboard-rank={rank} style={{ display: "grid", gridTemplateColumns: premiumRank ? "44px 1fr auto" : "34px 1fr auto", alignItems: "center", gap: 9, borderTop:index===0?"none":"1px solid var(--stroke-1)", padding: premiumRank ? "8px 2px" : "10px 2px", background:index===0?"linear-gradient(90deg, color-mix(in srgb,var(--accent) 7%, transparent), transparent)":"transparent" }}>
+              {premiumRank
+                ? <ShotLabPerformanceMark kind="rank" value={rank} compact testId={`leaderboard-rank-mark-${rank}`} />
+                : <div style={{ color: "var(--text-3)", fontSize: 12, fontWeight: 900 }}>#{rank}</div>}
               <div style={{ color: currentPlayer?"var(--accent)":"var(--text-1)", fontSize: 13, fontWeight: index===0?800:700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{displayName}</div>
               <div style={{ color: index===0?"var(--text-1)":"var(--text-2)", fontSize: 13, fontWeight: 800 }}>{scoreValue}</div>
             </div>;
