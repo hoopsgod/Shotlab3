@@ -24,21 +24,21 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Regenerate lockfile from exact manifest
-        run: npm install --package-lock-only --ignore-scripts
+      - name: Resolve exact structural CSS optimizer
+        run: npm install --save-dev --save-exact csso@latest
 
-      - name: Verify exact production minifiers are locked
+      - name: Verify production optimizer toolchain is exact
         run: |
-          node -e "const lock=require('./package-lock.json'); const root=lock.packages[''].devDependencies; if(root.terser!=='5.49.2'||root.lightningcss!=='1.33.0') process.exit(1); console.log('terser', root.terser); console.log('lightningcss', root.lightningcss)"
+          node -e "const p=require('./package.json'); const d=p.devDependencies; if(d.terser!=='5.49.2'||d.lightningcss!=='1.33.0'||!/^\\d+\\.\\d+\\.\\d+$/.test(d.csso||'')) process.exit(1); console.log('terser', d.terser); console.log('lightningcss', d.lightningcss); console.log('csso', d.csso)"
 
-      - name: Commit reproducible lockfile if needed
+      - name: Commit reproducible manifests if needed
         run: |
           if git diff --quiet -- package.json package-lock.json; then
-            echo "Minifier manifests already reproducible."
+            echo "Optimizer manifests already reproducible."
             exit 0
           fi
           git config user.name "shotlab-ci"
           git config user.email "shotlab-ci@users.noreply.github.com"
           git add package.json package-lock.json
-          git commit -m "Phase 4F: lock production minifier dependencies"
+          git commit -m "Phase 4F: lock structural CSS optimizer"
           git push origin HEAD:${{ github.event.pull_request.head.ref }}
