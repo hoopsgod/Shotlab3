@@ -108,5 +108,8 @@ test("Player Home ends near More progress while preserving command center and do
 
   await moreProgress.locator(":scope > summary").click();
   await expect(moreProgress).toHaveAttribute("open", "");
-  await expect(page.getByTestId("player-daily-momentum-signal")).toBeVisible();
+  await expect(moreProgress.getByText("Team Rank", { exact: true })).toBeVisible();
+  await expect(moreProgress.getByRole("button", { name: "View Program", exact: true })).toBeVisible();
+  await expect(moreProgress.getByRole("button", { name: "Events", exact: true })).toBeVisible();
+  await expect(moreProgress.getByRole("button", { name: "Progress", exact: true })).toBeVisible();
 });
