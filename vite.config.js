@@ -183,13 +183,13 @@ function stableVendorChunk(id) {
     || moduleId.includes('/src/lib/seasonLeaderboardAnalytics.js')
     || moduleId.includes('/src/components/ShotLabCharts.jsx')
     || moduleId.includes('/src/components/PlayerCareerHistory.jsx')
-    || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')
   ) {
     return 'PlayerAnalyticsWorkspaces'
   }
 
   if (
-    moduleId.includes('/src/components/PlayerDashboardHeader.jsx')
+    moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')
+    || moduleId.includes('/src/components/PlayerDashboardHeader.jsx')
     || moduleId.includes('/src/components/PlayerDailyCommandCenter.jsx')
     || moduleId.includes('/src/components/PlayerDailyPrimitives.jsx')
     || moduleId.includes('/src/components/PlayerOperationalWorkspace.jsx')
