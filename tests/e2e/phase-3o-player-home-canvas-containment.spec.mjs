@@ -38,9 +38,12 @@ test("Player Home ends near More progress while preserving command center and do
 
   const layout = await page.evaluate(() => {
     const finalDisclosure = document.querySelector('[data-testid="player-secondary-intelligence"]');
-    if (!finalDisclosure) throw new Error("Player Home More progress disclosure missing");
+    const workspace = document.querySelector('.performance-shell--player.is-mobile[data-workspace-tab="home"] .performance-workspace');
+    const route = document.querySelector('.performance-shell--player.is-mobile[data-workspace-tab="home"] .player-scroll-container > .screen-fade-in');
+    if (!finalDisclosure || !workspace || !route) throw new Error("Player Home containment targets missing");
     const rect = finalDisclosure.getBoundingClientRect();
     const contentBottom = rect.bottom + window.scrollY;
+    const after = getComputedStyle(route, "::after");
     const read = (selector) => {
       const target = document.querySelector(selector);
       if (!target) return null;
@@ -70,6 +73,8 @@ test("Player Home ends near More progress while preserving command center and do
       documentHeight: document.documentElement.scrollHeight,
       bodyHeight: document.body.scrollHeight,
       contentBottom,
+      reserve: getComputedStyle(workspace).getPropertyValue("--phase3o-home-dock-reserve").trim(),
+      spacerHeight: Number.parseFloat(after.height || "0"),
       nodes: [
         read('.performance-shell--player'),
         read('.performance-shell--player .shell-main'),
@@ -94,8 +99,11 @@ test("Player Home ends near More progress while preserving command center and do
   console.log("PHASE3O_HOME_GEOMETRY", JSON.stringify(layout));
   console.log("PHASE3O_HOME_DOCK_CLEARANCE", dockClearance);
 
+  expect(layout.reserve).toBe("112px");
+  expect(layout.spacerHeight, "Home structural spacer must survive the built CSS cascade").toBeGreaterThanOrEqual(96);
   expect(layout.overflow).toBeLessThanOrEqual(1);
-  expect(layout.tail, "Player Home should retain only one intentional dock-safe end reserve").toBeLessThanOrEqual(220);
+  expect(layout.tail, "Player Home should retain one deliberate dock-safe end reserve").toBeGreaterThanOrEqual(96);
+  expect(layout.tail, "Player Home should not retain duplicate dock padding").toBeLessThanOrEqual(220);
   expect(dockClearance, "More progress must be able to scroll above the fixed mobile dock").toBeGreaterThanOrEqual(8);
 
   await moreProgress.locator(":scope > summary").click();
