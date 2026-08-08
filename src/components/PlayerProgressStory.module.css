@@ -1,0 +1,233 @@
+.root {
+  display: grid;
+  gap: 16px;
+  width: min(100%, 760px);
+  margin: 0 auto 18px;
+  color: #101a20;
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 30px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at 88% 10%, rgba(200,255,26,.15), transparent 34%),
+    linear-gradient(150deg, #0f1412 0%, #151b17 55%, #0f1412 100%);
+  color: #f8faf5;
+  box-shadow: 0 18px 44px rgba(15,20,18,.16);
+}
+
+.heroTopline,
+.heroGrid,
+.metricStrip,
+.readoutHeader,
+.signalGrid,
+.detailRow {
+  display: flex;
+}
+
+.heroTopline {
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.heroTopline > span:first-child,
+.playerLabel,
+.trendPanel span,
+.metricStrip span,
+.readoutHeader span,
+.signalCard > span,
+.nextFocusCopy > span,
+.detailRow > div > span {
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.heroTopline > span:first-child { color: rgba(248,250,245,.50); }
+.heroTopline > span:last-child {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(200,255,26,.24);
+  background: rgba(200,255,26,.08);
+  color: #c8ff1a;
+}
+
+.heroGrid {
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.heroCopy { flex: 1 1 54%; min-width: 0; padding: 5px 0 3px; }
+.playerLabel { color: #c8ff1a; }
+.heroCopy h2 {
+  margin: 8px 0 8px;
+  max-width: 430px;
+  color: #f8faf5;
+  font-size: clamp(34px, 8vw, 54px);
+  font-weight: 850;
+  line-height: .94;
+  letter-spacing: -.048em;
+}
+.heroCopy p {
+  max-width: 470px;
+  margin: 0;
+  color: rgba(248,250,245,.62);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.trendPanel {
+  flex: 0 0 35%;
+  min-width: 190px;
+  display: grid;
+  align-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  background: rgba(255,255,255,.035);
+}
+.trendPanel > div { display: grid; gap: 2px; }
+.trendPanel span { color: rgba(248,250,245,.42); }
+.trendPanel strong { color: #f8faf5; font-size: 30px; line-height: 1; letter-spacing: -.035em; }
+.trendPanel small { color: rgba(248,250,245,.52); font-size: 10px; }
+.sparkline { width: 100%; height: 66px; overflow: visible; }
+.sparkTrack { stroke: rgba(255,255,255,.10); stroke-width: 1; }
+.sparkPath { fill: none; stroke: #c8ff1a; stroke-width: 2.3; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+
+.metricStrip {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 8px;
+}
+.metricStrip > div {
+  min-width: 0;
+  padding: 12px 13px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.045);
+  border: 1px solid rgba(255,255,255,.07);
+}
+.metricStrip span { display: block; color: rgba(248,250,245,.43); }
+.metricStrip strong { display: block; margin-top: 5px; color: #f8faf5; font-size: 22px; line-height: 1; letter-spacing: -.025em; }
+.metricStrip small { margin-left: 2px; color: rgba(248,250,245,.42); font-size: 10px; }
+
+.readoutHeader {
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 2px 2px 0;
+}
+.readoutHeader > div { min-width: 0; }
+.readoutHeader span { color: #657b05; }
+.readoutHeader h3 { margin: 4px 0 0; color: #101a20; font-size: 24px; line-height: 1.05; letter-spacing: -.035em; }
+.readoutHeader > p { max-width: 320px; margin: 0; color: #65717a; font-size: 11px; line-height: 1.45; text-align: right; }
+
+.signalGrid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+.signalCard {
+  min-width: 0;
+  min-height: 150px;
+  padding: 17px;
+  border: 1px solid rgba(17,26,33,.09);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(17,26,33,.04), 0 14px 34px rgba(17,26,33,.05);
+}
+.signalCard > span { color: #65717a; }
+.signalCard strong { display: block; margin-top: 9px; color: #101a20; font-size: 20px; line-height: 1.06; letter-spacing: -.025em; }
+.signalCard p { margin: 8px 0 0; color: #59666f; font-size: 12px; line-height: 1.48; }
+
+.nextFocus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid rgba(111,139,0,.18);
+  background: #f7f8f4;
+  box-shadow: 0 1px 2px rgba(17,26,33,.04);
+}
+.nextFocusCopy { min-width: 0; flex: 1; }
+.nextFocusCopy > span { color: #657b05; }
+.nextFocusCopy strong { display: block; margin-top: 5px; color: #101a20; font-size: 22px; line-height: 1.05; letter-spacing: -.03em; }
+.nextFocusCopy p { margin: 7px 0 0; max-width: 480px; color: #59666f; font-size: 12px; line-height: 1.46; }
+.nextFocus button {
+  flex: 0 0 auto;
+  min-height: 50px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 14px;
+  background: #c8ff1a;
+  color: #101310;
+  font-size: 12px;
+  font-weight: 850;
+  letter-spacing: -.01em;
+  cursor: pointer;
+}
+
+.detailRow {
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 0 2px 4px;
+}
+.detailRow > div { max-width: 480px; }
+.detailRow > div > span { color: #65717a; }
+.detailRow p { margin: 5px 0 0; color: #65717a; font-size: 11px; line-height: 1.45; }
+.detailRow button {
+  flex: 0 0 auto;
+  min-height: 42px;
+  border: 1px solid rgba(17,26,33,.10);
+  border-radius: 12px;
+  background: #fff;
+  color: #25323b;
+  padding: 0 13px;
+  font-size: 11px;
+  font-weight: 760;
+  cursor: pointer;
+}
+
+@media (max-width: 620px) {
+  .root { gap: 14px; }
+  .hero { border-radius: 26px; padding: 17px; }
+  .heroGrid { display: grid; gap: 14px; }
+  .heroCopy h2 { font-size: clamp(34px, 11vw, 46px); }
+  .trendPanel { min-width: 0; grid-template-columns: 112px minmax(0,1fr); align-items: end; gap: 10px; }
+  .sparkline { height: 54px; }
+  .readoutHeader { display: grid; gap: 7px; }
+  .readoutHeader > p { max-width: none; text-align: left; }
+  .signalGrid { grid-template-columns: 1fr; }
+  .signalCard { min-height: 0; }
+  .nextFocus { display: grid; gap: 14px; }
+  .nextFocus button { width: 100%; }
+  .detailRow { display: grid; gap: 12px; }
+  .detailRow button { width: 100%; }
+}
+
+@media (max-width: 390px) {
+  .heroTopline { margin-bottom: 14px; }
+  .heroCopy h2 { font-size: 37px; }
+  .metricStrip > div { padding: 11px 9px; }
+  .metricStrip strong { font-size: 20px; }
+  .trendPanel { grid-template-columns: 96px minmax(0,1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root *, .root *::before, .root *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

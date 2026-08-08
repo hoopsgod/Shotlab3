@@ -162,6 +162,16 @@ async function enterDemo(page, roleName) {
   await button.click();
 }
 
+async function openFullProgressProfileIfPresent(page) {
+  const fullProfile = page.getByTestId("player-progress-full-profile");
+  if (!(await fullProfile.count())) return;
+  await expect(fullProfile).toBeVisible();
+  if (!(await fullProfile.getAttribute("open"))) {
+    await fullProfile.locator(":scope > summary").click();
+  }
+  await expect(fullProfile).toHaveAttribute("open", "");
+}
+
 async function expectCareerSeasons(career, viewerRole) {
   await expect(career).toBeVisible();
   await expect(career).toHaveAttribute("data-viewer-role", viewerRole);
@@ -184,6 +194,7 @@ test("player sees current and archived career history on Profile without horizon
   await enterDemo(page, "Demo Player");
   await page.getByTestId("mobile-navigation-more").click();
   await page.getByTestId("mobile-navigation-sheet").getByRole("button", { name: "Profile", exact: true }).click();
+  await openFullProgressProfileIfPresent(page);
 
   const careerDisclosure = page.getByTestId("player-profile-career-disclosure");
   const career = page.getByTestId("player-career-history");
