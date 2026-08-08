@@ -7,10 +7,12 @@ on:
     paths:
       - "package.json"
       - "scripts/apply-phase3u-player-account-control.mjs"
+      - "scripts/apply-phase3u-production-acceptance-path.mjs"
       - "src/App.jsx"
       - "src/components/MobileNavigation.jsx"
       - "src/components/MobileNavigation.module.css"
       - "tests/phase-3u-player-account-control.test.mjs"
+      - "tests/e2e/production-acceptance.spec.mjs"
       - "tests/e2e/mobile-navigation.spec.mjs"
       - "tests/e2e/phase-3u-player-account-control-screenshots.spec.mjs"
       - "playwright.screenshots.config.mjs"
@@ -45,7 +47,7 @@ jobs:
         run: npm ci
 
       - name: Apply Phase 3U source transformation
-        run: node scripts/apply-phase3u-player-account-control.mjs
+        run: node scripts/apply-phase3u-player-account-control.mjs && node scripts/apply-phase3u-production-acceptance-path.mjs
 
       - name: Verify account control contracts
         run: node --test tests/phase-3u-player-account-control.test.mjs tests/app-store-mobile-shell.test.mjs tests/mobile-navigation-contract.test.mjs
@@ -61,6 +63,9 @@ jobs:
 
       - name: Verify shared mobile navigation behavior
         run: npx playwright test tests/e2e/mobile-navigation.spec.mjs --config=playwright.config.mjs --reporter=line
+
+      - name: Verify production logout cleanup through current UI
+        run: npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
       - name: Capture exact-head iPhone account-control evidence
         run: npx playwright test tests/e2e/phase-3u-player-account-control-screenshots.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
