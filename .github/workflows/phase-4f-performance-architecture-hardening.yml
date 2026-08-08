@@ -38,11 +38,11 @@ jobs:
       - name: Verify Phase 4F architecture contract
         run: node --test tests/phase-4f-performance-architecture-hardening.test.mjs
 
-      - name: Verify predecessor visual contract
-        run: node --test tests/phase-4e-final-polish.test.mjs
-
       - name: Build and enforce unchanged performance budget
         run: npm run build:performance
+
+      - name: Verify predecessor visual contract
+        run: node --test tests/phase-4e-final-polish.test.mjs
 
       - name: Install Playwright test runner
         run: npm install --no-save @playwright/test@1.55.1
