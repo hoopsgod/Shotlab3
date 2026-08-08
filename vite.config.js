@@ -1,6 +1,8 @@
 import path from 'node:path'
+import { readFile, writeFile, unlink } from 'node:fs/promises'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { transform as transformWithEsbuild } from 'esbuild'
 
 const normalizeModuleId = (id = '') => String(id).replaceAll('\\', '/')
 const APP_MODULE_SUFFIX = '/src/App.jsx'
@@ -44,6 +46,11 @@ const APP_DOMAIN_SERVICE_FRAGMENTS = [
   '/src/lib/trainingCatalogPersistenceService',
   '/src/lib/playerChallengePersistenceService',
 ]
+const APP_WORKSPACE_STYLE_IMPORTS = [
+  './styles/PremiumWorkspace.css',
+  './styles/CoachInteractiveDashboard.css',
+]
+const AUTHORITY_BUNDLE_TARGET_BYTES = 88_000
 
 function deferProgressCharts() {
   return {
@@ -167,6 +174,84 @@ function deferCoachAdministration() {
   }
 }
 
+function deferWorkspaceStyles() {
+  return {
+    name: 'shotlab-defer-workspace-styles',
+    enforce: 'pre',
+    transform(code, id) {
+      const moduleId = normalizeModuleId(id)
+      if (!moduleId.endsWith(APP_MODULE_SUFFIX)) return null
+
+      let nextCode = code
+      let changed = false
+      for (const source of APP_WORKSPACE_STYLE_IMPORTS) {
+        const staticImport = `import \"${source}\";`
+        if (!nextCode.includes(staticImport)) continue
+        nextCode = nextCode.replace(staticImport, `void import(\"${source}\");`)
+        changed = true
+      }
+
+      return changed ? { code: nextCode, map: null } : null
+    },
+  }
+}
+
+function bundleVisualAuthorityCss() {
+  return {
+    name: 'shotlab-bundle-visual-authority-css',
+    apply: 'build',
+    enforce: 'post',
+    async closeBundle() {
+      const distDir = path.resolve(process.cwd(), 'dist')
+      const indexPath = path.join(distDir, 'index.html')
+      let html = await readFile(indexPath, 'utf8')
+      const linkPattern = /<link\b[^>]*href=["']\/?(shotlab-[^"'?]+\.css)(?:\?[^"']*)?["'][^>]*>/gi
+      const links = [...html.matchAll(linkPattern)]
+      if (links.length < 2) return
+
+      const ordered = []
+      for (const match of links) {
+        const name = match[1]
+        const css = await readFile(path.join(distDir, name), 'utf8')
+        ordered.push({ name, css, bytes: Buffer.byteLength(css) })
+      }
+
+      const groups = []
+      let group = []
+      let groupBytes = 0
+      for (const entry of ordered) {
+        if (group.length && groupBytes + entry.bytes > AUTHORITY_BUNDLE_TARGET_BYTES) {
+          groups.push(group)
+          group = []
+          groupBytes = 0
+        }
+        group.push(entry)
+        groupBytes += entry.bytes
+      }
+      if (group.length) groups.push(group)
+
+      const bundleTags = []
+      for (let index = 0; index < groups.length; index += 1) {
+        const bundleName = `shotlab-authority-${index + 1}.css`
+        const concatenated = groups[index].map((entry) => entry.css).join('\n')
+        const transformed = await transformWithEsbuild(concatenated, { loader: 'css', minify: true })
+        await writeFile(path.join(distDir, bundleName), transformed.code)
+        bundleTags.push(`<link rel="stylesheet" href="/${bundleName}" data-shotlab-authority-bundle="${index + 1}" />`)
+      }
+
+      let injected = false
+      html = html.replace(linkPattern, () => {
+        if (injected) return ''
+        injected = true
+        return bundleTags.join('\n  ')
+      })
+      await writeFile(indexPath, html)
+      await Promise.all(ordered.map((entry) => unlink(path.join(distDir, entry.name))))
+      console.log(`Bundled ${ordered.length} visual authority stylesheets into ${groups.length} ordered production bundles.`)
+    },
+  }
+}
+
 function stableVendorChunk(id) {
   const moduleId = normalizeModuleId(id)
 
@@ -234,7 +319,9 @@ export default defineConfig({
     hydrateLegacyStyles(),
     deferPlayerInterface(),
     deferCoachAdministration(),
+    deferWorkspaceStyles(),
     react(),
+    bundleVisualAuthorityCss(),
   ],
   esbuild: {
     drop: ['debugger'],
