@@ -91,6 +91,7 @@
   letter-spacing: .025em;
   text-transform: uppercase;
   text-wrap: balance;
+  overflow-wrap: break-word;
 }
 
 .objectiveDescription {
@@ -221,9 +222,9 @@
   background: linear-gradient(155deg, rgba(14,19,22,.88), rgba(6,9,11,.94));
   box-shadow: inset 0 1px rgba(255,255,255,.018);
 }
-.quietHeader { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
-.quietTitle { margin: 4px 0 0; color: #ebf0f2; font-size: 17px; line-height: 1.15; letter-spacing: .025em; text-transform: uppercase; }
-.quietAction { min-height: 36px; padding: 6px 10px; border: 1px solid color-mix(in srgb, var(--accent) 22%, rgba(211,224,231,.1)); background: color-mix(in srgb, var(--accent) 6%, transparent); color: var(--accent); }
+.quietHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; min-width: 0; }
+.quietTitle { margin: 4px 0 0; color: #ebf0f2; font-size: 17px; line-height: 1.15; letter-spacing: .025em; text-transform: uppercase; overflow-wrap: break-word; }
+.quietAction { min-height: 44px; padding: 8px 12px; border: 1px solid color-mix(in srgb, var(--accent) 22%, rgba(211,224,231,.1)); background: color-mix(in srgb, var(--accent) 6%, transparent); color: var(--accent); flex-shrink: 0; }
 .quietAction:hover,
 .quietAction:focus-visible { transform: translateY(-1px); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .quietBody { min-width: 0; }
@@ -242,8 +243,8 @@
   .objectiveContent { grid-template-columns: 1fr; align-items: start; padding: 19px 17px 17px; gap: 15px; }
   .objectiveActions { justify-content: stretch; }
   .primaryAction { flex: 1 1 auto; min-height: 46px; }
-  .secondaryAction { flex: 0 1 auto; }
-  .objectiveTitle { font-size: 34px; max-width: 92%; }
+  .secondaryAction { flex: 0 1 auto; min-height: 44px; }
+  .objectiveTitle { font-size: 34px; max-width: 100%; }
   .objectiveDescription { font-size: 12px; }
   .metric { padding-left: 7px; padding-right: 7px; }
   .metricValue { font-size: 24px; }
@@ -251,6 +252,8 @@
   .metricDetail { font-size: 8px; }
   .disclosureSummary { min-height: 56px; padding-inline: 13px; }
   .quietSection { padding: 14px; }
+  .quietHeader { flex-wrap: wrap; }
+  .quietAction { margin-left: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
