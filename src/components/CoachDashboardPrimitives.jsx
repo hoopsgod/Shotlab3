@@ -32,7 +32,15 @@ const metricEvidencePoints = (values = []) => {
 
 function PremiumMetricEvidence({ values, label }) {
   const points = metricEvidencePoints(values);
-  if (!points) return <span data-premium-metric-pulse aria-hidden="true" />;
+  if (!points) {
+    return (
+      <span data-premium-metric-evidence data-premium-metric-placeholder role="img" aria-label={`${label || "Recent metric signal"}: no trend series available`}>
+        <svg viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">
+          <line data-premium-metric-path x1="0" y1="22" x2="100" y2="22" />
+        </svg>
+      </span>
+    );
+  }
   return (
     <span data-premium-metric-evidence role="img" aria-label={label || "Recent metric signal"}>
       <svg viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">
@@ -88,11 +96,13 @@ export function InteractiveMetricStrip({ items = [], activeKey, onSelect, testId
     <div className={styles.metricStrip} data-testid={testId} role="group" aria-label="Dashboard filters">
       {items.map((item) => {
         const active = item.key === activeKey;
+        const accessibleLabel = `${item.label}: ${item.value}${item.detail ? ` · ${item.detail}` : ""}`;
         return (
           <button
             key={item.key}
             type="button"
             className={cx(styles.metric, active && styles.metricActive, item.tone && styles[`tone_${item.tone}`])}
+            aria-label={item.ariaLabel || accessibleLabel}
             aria-pressed={active}
             onClick={() => onSelect?.(item.key)}
             data-premium-metric
@@ -100,7 +110,7 @@ export function InteractiveMetricStrip({ items = [], activeKey, onSelect, testId
           >
             <span data-premium-metric-head>
               <span data-premium-metric-icon aria-hidden="true"><ShotLabIcon name={metricIconName(item)} size={15} /></span>
-              <span className={styles.metricLabel} data-premium-metric-label>{item.label}</span>
+              <span className={styles.metricLabel} data-premium-metric-label>{item.displayLabel || item.label}</span>
             </span>
             <span className={styles.metricValue} data-premium-metric-value>{item.value}</span>
             {item.detail ? <span className={styles.metricDetail}>{item.detail}</span> : null}
