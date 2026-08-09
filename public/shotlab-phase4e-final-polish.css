@@ -113,6 +113,12 @@
     padding-inline: 12px !important;
   }
 
+  [data-testid="player-workspace-empty-state"] {
+    width: calc(100% - 18px) !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+  }
+
   [data-testid^="leaderboard-"][data-testid$="-state"] {
     max-width: 100%;
   }
