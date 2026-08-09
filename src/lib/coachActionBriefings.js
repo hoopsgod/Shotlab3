@@ -121,12 +121,20 @@ export function buildCoachEventActionBriefing({ metrics = {}, rows = [] } = {}) 
   const gapEvents = safeRows.filter((row) => Boolean(row?.needsResponse));
   const next = metrics.next || null;
   const upcoming = safeNumber(metrics.upcoming);
-  const missing = safeNumber(metrics.missing);
-  const confirmed = safeNumber(metrics.confirmed);
+  const awaitingResponse = safeNumber(metrics.awaitingResponse ?? metrics.missing);
+  const attending = safeNumber(metrics.attending ?? metrics.confirmed);
+  const unavailable = safeNumber(metrics.unavailable);
+  const responded = safeNumber(metrics.responded || (attending + unavailable));
   const responseRate = Math.min(100, safeNumber(metrics.responseRate));
+  const availabilityRate = Math.min(100, safeNumber(metrics.availabilityRate));
   const past = safeNumber(metrics.past);
   const total = safeNumber(metrics.total || safeRows.length);
   const nextId = next?.event?.id ?? next?.id ?? null;
+  const nextAttending = safeNumber(next?.attending ?? next?.confirmed);
+  const nextUnavailable = safeNumber(next?.unavailable);
+  const nextAwaiting = safeNumber(next?.awaitingResponse ?? next?.missing);
+  const nextRoster = safeNumber(next?.rosterCount || (nextAttending + nextUnavailable + nextAwaiting));
+  const nextAvailabilityRate = nextRoster ? Math.min(100, Math.round((nextAttending / nextRoster) * 100)) : 0;
 
   const decision = !next
     ? {
@@ -137,45 +145,46 @@ export function buildCoachEventActionBriefing({ metrics = {}, rows = [] } = {}) 
       }
     : {
         title: next.title || "Next team event",
-        detail: `${formatCoachScheduleDate(next.date, { weekday: true })} at ${next.time || "TBD"} · ${next.location || "Location TBD"}. ${safeNumber(next.confirmed)} confirmed and ${safeNumber(next.missing)} still missing.`,
-        tone: safeNumber(next.missing) ? "attention" : "positive",
-        action: { kind: "open-event", id: nextId, label: safeNumber(next.missing) ? "Manage Attendance" : "Open Event" },
+        detail: `${formatCoachScheduleDate(next.date, { weekday: true })} at ${next.time || "TBD"} · ${next.location || "Location TBD"}. ${nextAttending} attending · ${nextUnavailable} unavailable · ${nextAwaiting} awaiting response.`,
+        tone: nextAwaiting ? "attention" : nextUnavailable ? "info" : "positive",
+        action: { kind: "open-event", id: nextId, label: nextAwaiting ? "Resolve RSVPs" : "Open Event" },
       };
 
   const insights = [
     {
       key: "attendance-risk",
-      eyebrow: "Attendance risk",
-      title: missing ? pluralize(missing, "unresolved response") : next ? "No RSVP gaps" : "No event to evaluate",
-      body: missing
-        ? `${pluralize(gapEvents.length, "upcoming event")} ${gapEvents.length === 1 ? "has" : "have"} players who have not confirmed.`
+      eyebrow: "RSVP follow-up",
+      title: awaitingResponse ? pluralize(awaitingResponse, "awaiting response") : next ? "No unanswered RSVPs" : "No event to evaluate",
+      body: awaitingResponse
+        ? `${pluralize(gapEvents.length, "upcoming event")} ${gapEvents.length === 1 ? "still has" : "still have"} unanswered roster spots.`
         : next
-          ? "Every currently scheduled event has complete roster responses."
+          ? "Every currently scheduled event has a recorded response for each roster spot."
           : "Create the next event to start measuring attendance readiness.",
-      tone: missing ? "attention" : next ? "positive" : "info",
+      tone: awaitingResponse ? "attention" : next ? "positive" : "info",
       action: next
-        ? { kind: "status-filter", value: missing ? "gaps" : "upcoming", label: missing ? "Show Gaps" : "Show Upcoming" }
+        ? { kind: "status-filter", value: awaitingResponse ? "gaps" : "upcoming", label: awaitingResponse ? "Show Awaiting" : "Show Upcoming" }
         : { kind: "create-event", label: "Create Event" },
+    },
+    {
+      key: "next-session-availability",
+      eyebrow: "Next-session availability",
+      title: next ? `${nextAttending} of ${nextRoster} attending` : "No availability signal yet",
+      body: next
+        ? `${nextUnavailable} unavailable and ${nextAwaiting} still awaiting response. This is observed roster status, not a predicted readiness score.`
+        : "Attendance availability becomes useful after the next event is scheduled.",
+      tone: !next ? "info" : nextAwaiting ? "attention" : nextUnavailable ? "info" : "positive",
+      progress: next ? { value: nextAttending, max: nextRoster || 1, label: "Next-session availability", detail: `${nextAvailabilityRate}% attending` } : undefined,
+      action: next ? { kind: "open-event", id: nextId, label: nextAwaiting ? "Resolve RSVPs" : "Open Event" } : undefined,
     },
     {
       key: "response-health",
       eyebrow: "Response health",
-      title: `${responseRate}% average response`,
+      title: `${responseRate}% roster response`,
       body: next
-        ? `${confirmed} confirmed responses currently support the schedule-readiness signal.`
+        ? `${responded} responses are recorded across upcoming roster slots: ${attending} attending and ${unavailable} unavailable.`
         : "Response health will become meaningful after an event is scheduled.",
       tone: !next ? "info" : responseRate >= 80 ? "positive" : responseRate >= 55 ? "info" : "attention",
-      progress: { value: responseRate, max: 100, label: "Upcoming RSVP completion", detail: `${confirmed} confirmed` },
-    },
-    {
-      key: "calendar-depth",
-      eyebrow: "Calendar depth",
-      title: pluralize(upcoming, "upcoming event"),
-      body: `${pluralize(past, "completed event")} remain available for historical context without competing with the current agenda.`,
-      tone: upcoming ? "info" : "attention",
-      action: upcoming
-        ? { kind: "status-filter", value: "upcoming", label: "Show Upcoming" }
-        : { kind: "create-event", label: "Create Event" },
+      progress: { value: responseRate, max: 100, label: "Upcoming RSVP completion", detail: `${responded} responses recorded` },
     },
   ];
 
@@ -183,9 +192,14 @@ export function buildCoachEventActionBriefing({ metrics = {}, rows = [] } = {}) 
     next,
     nextId,
     upcoming,
-    missing,
-    confirmed,
+    missing: awaitingResponse,
+    awaitingResponse,
+    confirmed: attending,
+    attending,
+    unavailable,
+    responded,
     responseRate,
+    availabilityRate,
     past,
     total,
     gapEvents,
