@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 const primitives = readFileSync('src/components/CoachDashboardPrimitives.jsx', 'utf8');
 const layer = readFileSync('src/components/Phase2PremiumMetricLayer.css', 'utf8');
 const practiceReadinessMigration = readFileSync('scripts/apply-phase5b-practice-readiness.mjs', 'utf8');
+const expertReviewMigration = readFileSync('scripts/apply-expert-app-review-v2.mjs', 'utf8');
 
 test('Phase 2 premium metrics preserve dashboard filter semantics and full accessible labels', () => {
   assert.match(primitives, /export function InteractiveMetricStrip/);
@@ -63,4 +64,11 @@ test('Phase 2 display labels remain compatible with the truthful Phase 5B RSVP m
   assert.match(practiceReadinessMigration, /label: \"Response Rate\", displayLabel: \"Response\"/);
   assert.match(practiceReadinessMigration, /briefing\.awaitingResponse/);
   assert.match(practiceReadinessMigration, /briefing\.responded/);
+});
+
+test('legacy expert review leaves Phase 2 native metric evidence untouched', () => {
+  assert.match(expertReviewMigration, /const phase2OwnsMetricEvidence = primitives\.includes\("function PremiumMetricEvidence"\)/);
+  assert.match(expertReviewMigration, /if \(!phase2OwnsMetricEvidence\) \{/);
+  assert.match(expertReviewMigration, /MetricEvidenceSparkline/);
+  assert.match(expertReviewMigration, /Metric evidence render anchor missing/);
 });
