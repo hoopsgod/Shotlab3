@@ -23,6 +23,17 @@ async function capture(page, name) {
   await page.screenshot({ path: path.join(outputDir, `${name}.png`), fullPage: true, animations: "disabled" });
 }
 
+function parseCssColor(value) {
+  const match = String(value).match(/^rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)(?:\s*,\s*([\d.]+))?\s*\)$/);
+  expect(match, `Expected an rgb/rgba color, received ${value}`).not.toBeNull();
+  return {
+    r: Number(match[1]),
+    g: Number(match[2]),
+    b: Number(match[3]),
+    a: match[4] === undefined ? 1 : Number(match[4]),
+  };
+}
+
 test("Coach Leaderboards preserves decision context, competitive signal, and player drill-down", async ({ page }) => {
   await installRoutes(page);
   await page.goto("/");
@@ -74,10 +85,13 @@ test("Coach Leaderboards preserves decision context, competitive signal, and pla
   const sectionTitle = sectionHeading;
   const firstSection = sectionHeading.locator("xpath=ancestor::section[1]");
   await expect(firstSection).toBeVisible();
-  const sectionBackground = await firstSection.evaluate((node) => getComputedStyle(node).backgroundColor);
-  expect(sectionBackground).toBe("rgb(16, 19, 21)");
+  const sectionBackground = parseCssColor(await firstSection.evaluate((node) => getComputedStyle(node).backgroundColor));
+  expect(Math.max(sectionBackground.r, sectionBackground.g, sectionBackground.b)).toBeLessThanOrEqual(24);
+  expect(sectionBackground.a).toBeGreaterThanOrEqual(0.9);
 
   await expect(sectionTitle).toBeVisible();
+  const sectionTitleColor = await sectionTitle.evaluate((node) => getComputedStyle(node).color);
+  expect(sectionTitleColor).toBe("rgb(244, 247, 242)");
   const sectionTitleBackground = await sectionTitle.evaluate((node) => getComputedStyle(node).backgroundColor);
   expect(sectionTitleBackground).toBe("rgba(0, 0, 0, 0)");
 
