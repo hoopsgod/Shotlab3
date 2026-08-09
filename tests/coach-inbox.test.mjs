@@ -43,7 +43,7 @@ test("coach inbox shows the upcoming session as context once activation is compl
   });
 });
 
-test("coach inbox promotes the next event RSVP gap into an exact attendance action", () => {
+test("coach inbox promotes unanswered RSVPs without treating unavailable players as attending", () => {
   const model = buildCoachInboxModel({
     attentionItems: [],
     activationPath: { complete: true, next: null },
@@ -53,9 +53,12 @@ test("coach inbox promotes the next event RSVP gap into an exact attendance acti
       eventId: "practice-aug-3",
       title: "Team Practice",
       dateLabel: "Aug 3 at 6:00 PM",
-      confirmed: 4,
-      missing: 2,
-      responseRate: 67,
+      rosterCount: 8,
+      responded: 6,
+      attending: 4,
+      unavailable: 2,
+      awaitingResponse: 2,
+      responseRate: 75,
     },
   });
 
@@ -64,13 +67,31 @@ test("coach inbox promotes the next event RSVP gap into an exact attendance acti
   assert.deepEqual(model.items[0], {
     kind: "event-readiness",
     title: "Team Practice",
-    detail: "2 of 6 players still need to RSVP.",
-    meta: "67% confirmed · Aug 3 at 6:00 PM",
+    detail: "2 of 8 players still need to RSVP.",
+    meta: "4 attending · 2 unavailable · 75% responded · Aug 3 at 6:00 PM",
     label: "Review RSVPs",
     action: "open-event-readiness",
     eventId: "practice-aug-3",
     tone: "warning",
   });
+});
+
+test("coach inbox derives the full roster from attendance states when rosterCount is unavailable", () => {
+  const model = buildCoachInboxModel({
+    attentionItems: [],
+    activationPath: { complete: true, next: null },
+    eventReadiness: {
+      eventId: "practice-derived-roster",
+      title: "Practice",
+      dateLabel: "Aug 4 at 5:30 PM",
+      attending: 5,
+      unavailable: 1,
+      awaitingResponse: 2,
+    },
+  });
+
+  assert.equal(model.items[0]?.detail, "2 of 8 players still need to RSVP.");
+  assert.match(model.items[0]?.meta || "", /5 attending · 1 unavailable · 75% responded/);
 });
 
 test("coach inbox does not create false readiness alerts for complete or malformed event data", () => {
@@ -80,8 +101,10 @@ test("coach inbox does not create false readiness alerts for complete or malform
     eventReadiness: {
       eventId: "complete-event",
       title: "Team Practice",
-      confirmed: 6,
-      missing: 0,
+      rosterCount: 6,
+      attending: 5,
+      unavailable: 1,
+      awaitingResponse: 0,
       responseRate: 100,
     },
   });
@@ -91,8 +114,9 @@ test("coach inbox does not create false readiness alerts for complete or malform
     eventReadiness: {
       eventId: "undated-event",
       title: "Unknown event",
-      confirmed: 0,
-      missing: 4,
+      attending: 0,
+      unavailable: 0,
+      awaitingResponse: 4,
       responseRate: 0,
     },
   });
