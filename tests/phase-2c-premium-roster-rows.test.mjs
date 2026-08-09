@@ -19,15 +19,16 @@ test('Phase 2C roster rows use a deliberate mobile information hierarchy', () =>
 });
 
 test('Phase 2C removes only the duplicate legacy roster recap and keeps the working list visible', () => {
-  assert.match(rosterLayer, /div:nth-of-type\(2\),/);
-  assert.match(rosterLayer, /div:nth-of-type\(3\) \{/);
+  assert.match(rosterLayer, /div:nth-of-type\(1\),/);
+  assert.match(rosterLayer, /div:nth-of-type\(2\) \{/);
   assert.match(rosterLayer, /display: none !important/);
+  assert.match(rosterLayer, /header:first-child/);
   assert.doesNotMatch(rosterLayer, /\[role="button"\][^{]*\{[^}]*display:\s*none/s);
   assert.doesNotMatch(rosterLayer, /visibility:\s*hidden/);
 });
 
 test('Phase 2C gives the remaining roster tool a phone-safe control', () => {
-  assert.match(rosterLayer, /div:nth-of-type\(4\) select/);
+  assert.match(rosterLayer, /div:nth-of-type\(3\) select/);
   assert.match(rosterLayer, /min-height: 44px !important/);
   assert.match(rosterLayer, /min-width: 178px !important/);
 });
