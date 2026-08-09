@@ -91,14 +91,14 @@ update("src/App.jsx", (source) => {
   next = replaceRequired(
     next,
     'let catalog=null;try{catalog=await trainingCatalogPersistence.hydrateCatalog({localHomeDrills:localSeededDrills,localProgramDrills:localSeededProgramDrills});}catch(error){emitReleaseDiagnostic("training_catalog_hydration_failed",{message:String(error?.message||"unknown")});}',
-    'let catalog=null;if(sess?.email){try{catalog=await trainingCatalogPersistence.hydrateCatalog({localHomeDrills:localSeededDrills,localProgramDrills:localSeededProgramDrills});}catch(error){emitReleaseDiagnostic("training_catalog_hydration_failed",{message:String(error?.message||"unknown")});}}',
+    'let catalog;if(sess?.email){try{catalog=await trainingCatalogPersistence.hydrateCatalog({localHomeDrills:localSeededDrills,localProgramDrills:localSeededProgramDrills});}catch(error){emitReleaseDiagnostic("training_catalog_hydration_failed",{message:String(error?.message||"unknown")});}}',
     "unauthenticated catalog bootstrap guard",
   );
 
   next = replaceRequired(
     next,
     'const authSession=SUPABASE_AUTH_ENABLED?await supabase.auth.getSession():null; const authEmail=normalizeEmail((SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:"")||sess?.email||"");',
-    'const authSession=SUPABASE_AUTH_ENABLED?await Promise.race([supabase.auth.getSession(),new Promise(r=>setTimeout(r,3e3))]):null;const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:sess?.email);',
+    'const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?(await Promise.race([supabase.auth.getSession(),new Promise(r=>setTimeout(r,3e3))]))?.data?.session?.user?.email:sess?.email);',
     "bounded production auth bootstrap",
   );
 
