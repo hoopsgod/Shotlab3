@@ -54,7 +54,7 @@ test("auth hero stays on the light canvas with no legacy dark overlay", async ({
   await capture(page, "13a-auth-entry-regression.png");
 });
 
-test("Player Demo never exposes the high-resolution team logo at viewport scale", async ({ page }) => {
+test("Player Demo keeps the complete Player presentation system from first paint", async ({ page }) => {
   await page.goto("/");
   const demo = page.getByRole("button", { name: /Player demo/i });
   await expect(demo).toBeVisible({ timeout: 20_000 });
@@ -68,6 +68,45 @@ test("Player Demo never exposes the high-resolution team logo at viewport scale"
   expect(box).not.toBeNull();
   expect(box.width).toBeLessThanOrEqual(100);
   expect(box.height).toBeLessThanOrEqual(100);
+
+  const headerStyle = await header.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      borderRadius: parseFloat(style.borderRadius),
+      borderTopWidth: parseFloat(style.borderTopWidth),
+      backgroundColor: style.backgroundColor,
+    };
+  });
+  expect(headerStyle.borderRadius).toBeGreaterThanOrEqual(16);
+  expect(headerStyle.borderTopWidth).toBeGreaterThanOrEqual(1);
+  expect(headerStyle.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+
+  const commandCenter = page.getByTestId("player-daily-command-center");
+  await expect(commandCenter).toBeVisible({ timeout: 20_000 });
+  const commandStyle = await commandCenter.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      borderRadius: parseFloat(style.borderRadius),
+      paddingLeft: parseFloat(style.paddingLeft),
+      backgroundImage: style.backgroundImage,
+    };
+  });
+  expect(commandStyle.borderRadius).toBeGreaterThanOrEqual(20);
+  expect(commandStyle.paddingLeft).toBeGreaterThanOrEqual(14);
+  expect(commandStyle.backgroundImage).not.toBe("none");
+
+  const primary = page.getByTestId("player-daily-primary-action");
+  await expect(primary).toBeVisible();
+  const primaryStyle = await primary.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      minHeight: parseFloat(style.minHeight),
+      borderRadius: parseFloat(style.borderRadius),
+    };
+  });
+  expect(primaryStyle.minHeight).toBeGreaterThanOrEqual(44);
+  expect(primaryStyle.borderRadius).toBeGreaterThanOrEqual(12);
+
   await assertNoOverflow(page);
   await capture(page, "13b-player-demo-entry-regression.png");
 });
