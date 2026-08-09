@@ -171,7 +171,7 @@ test("Coach Inbox routes the next-event RSVP risk into exact attendance manageme
   const eventDrawer = page.getByTestId("coach-event-intelligence-drawer");
   await expect(eventDrawer).toBeVisible();
   await expect(eventDrawer.getByText("Team Practice", { exact: true })).toBeVisible();
-  await expect(eventDrawer.getByText("Awaiting RSVP", { exact: true })).toBeVisible();
+  await expect(eventDrawer.getByRole("heading", { name: "Awaiting RSVP", exact: true })).toBeVisible();
   await eventDrawer.getByRole("button", { name: "Manage Attendance", exact: true }).click();
 
   const eventsPage = page.getByTestId("coach-events-mobile-page");
