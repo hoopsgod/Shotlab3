@@ -8,6 +8,7 @@ const SOURCE_DIR = path.resolve(ROOT_DIR, "src");
 const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".html"]);
 const DYNAMIC_CLASS = /^(?:is|has|tone|status|state|role|mode|rank|theme|size|variant)(?:-|_|$)|^(?:active|selected|disabled|open|closed|expanded|collapsed|loading|success|error|warning|danger)$/i;
 const COMPLEX_PSEUDO = /:(?:not|is|where|has)\s*\(/i;
+const GENERATED_CSS_MODULE_CLASS = /^s_[A-Za-z0-9_-]+$/;
 
 async function listFiles(directory, predicate) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -59,6 +60,11 @@ function classNames(selector) {
 
 function classIsReachable(name, corpus) {
   if (!name || name.startsWith("_")) return true;
+  // Vite generates CSS-module classes with the stable `s_` prefix configured in
+  // vite.config.js. Those names only exist after compilation, so source-text
+  // reachability can never prove them. Treating them as dead stripped the
+  // Player workspace stylesheet from production while dev remained correct.
+  if (GENERATED_CSS_MODULE_CLASS.test(name)) return true;
   if (DYNAMIC_CLASS.test(name)) return true;
   return corpus.includes(name);
 }
