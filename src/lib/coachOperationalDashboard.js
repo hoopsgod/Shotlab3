@@ -27,18 +27,13 @@ const rowsMatchPlayer = (row, playerKeys) => {
 };
 
 const rowDate = (row = {}) => String(row.date || row.session_date || row.created_at || row.createdAt || "").slice(0, 10);
-
 const latestDate = (rows) => rows.map(rowDate).filter(Boolean).sort().at(-1) || "";
-
-const rsvpPlayerIdentity = (row = {}) => normalize(
-  row.playerId || row.player_id || row.email || row.player_email || row.userId || row.user_id || row.name,
-);
+const rsvpPlayerIdentity = (row = {}) => normalize(row.playerId || row.player_id || row.email || row.player_email || row.userId || row.user_id || row.name);
 
 const latestRosterRsvpsForEvent = ({ rsvps = [], eventId = "", roster = [] } = {}) => {
   const rosterPlayers = safeArray(roster).filter((player) => !isCoachIdentity(player));
   const rosterIdentities = new Set();
   for (const player of rosterPlayers) for (const key of identityKeys(player)) rosterIdentities.add(key);
-
   const latestByPlayer = new Map();
   for (const row of safeArray(rsvps)) {
     if (String(row.eventId || row.event_id || "") !== String(eventId || "")) continue;
@@ -52,14 +47,7 @@ const latestRosterRsvpsForEvent = ({ rsvps = [], eventId = "", roster = [] } = {
   return { rosterPlayers, responses: [...latestByPlayer.values()] };
 };
 
-export function buildCoachPlayerDashboardRows({
-  players = [],
-  scores = [],
-  shotLogs = [],
-  rsvps = [],
-  scLogs = [],
-  weekStart = "",
-} = {}) {
+export function buildCoachPlayerDashboardRows({ players = [], scores = [], shotLogs = [], rsvps = [], scLogs = [], weekStart = "" } = {}) {
   return safeArray(players)
     .filter((player) => !isCoachIdentity(player))
     .map((player) => {
@@ -70,9 +58,7 @@ export function buildCoachPlayerDashboardRows({
       const playerScLogs = safeArray(scLogs).filter((row) => rowsMatchPlayer(row, keys));
       const activityRows = [...playerScores, ...playerShots, ...playerScLogs];
       const weeklyRows = weekStart ? activityRows.filter((row) => rowDate(row) >= weekStart) : activityRows;
-      const weeklyMakes = playerShots
-        .filter((row) => !weekStart || rowDate(row) >= weekStart)
-        .reduce((total, row) => total + safeNumber(row.made), 0);
+      const weeklyMakes = playerShots.filter((row) => !weekStart || rowDate(row) >= weekStart).reduce((total, row) => total + safeNumber(row.made), 0);
       const totalMakes = playerShots.reduce((total, row) => total + safeNumber(row.made), 0);
       const lastActivityDate = latestDate(activityRows);
       const statusKey = weeklyRows.length > 0 ? "active" : activityRows.length > 0 ? "attention" : "new";
@@ -124,11 +110,9 @@ export function buildCoachEventDashboardRows({ events = [], rsvps = [], roster =
   return safeArray(events).map((event) => {
     const { responses } = latestRosterRsvpsForEvent({ rsvps, eventId: event.id, roster });
     const responded = Math.min(responses.length, rosterCount);
-    const attending = responses.filter((row) => row?.attended === true).length;
-    const unavailable = Math.max(responded - attending, 0);
     const awaitingResponse = Math.max(rosterCount - responded, 0);
     const responseRate = rosterCount > 0 ? Math.round((responded / rosterCount) * 100) : 0;
-    const availabilityRate = rosterCount > 0 ? Math.round((attending / rosterCount) * 100) : 0;
+    const attendanceRecorded = responses.filter((row) => row?.attended === true).length;
     const date = String(event.date || "");
     const statusKey = date && today && date < today ? "past" : "upcoming";
     return {
@@ -141,13 +125,12 @@ export function buildCoachEventDashboardRows({ events = [], rsvps = [], roster =
       location: event.location || "Location TBD",
       rosterCount,
       responded,
-      attending,
-      unavailable,
+      rsvpConfirmed: responded,
       awaitingResponse,
-      confirmed: attending,
+      confirmed: responded,
       missing: awaitingResponse,
       responseRate,
-      availabilityRate,
+      attendanceRecorded,
       statusKey,
       needsResponse: statusKey === "upcoming" && awaitingResponse > 0,
     };
@@ -170,60 +153,31 @@ export function buildCoachEventDashboardMetrics(rows = []) {
   const safeRows = safeArray(rows);
   const upcoming = safeRows.filter((row) => row.statusKey === "upcoming");
   const responded = upcoming.reduce((total, row) => total + safeNumber(row.responded), 0);
-  const attending = upcoming.reduce((total, row) => total + safeNumber(row.attending ?? row.confirmed), 0);
-  const unavailable = upcoming.reduce((total, row) => total + safeNumber(row.unavailable), 0);
   const awaitingResponse = upcoming.reduce((total, row) => total + safeNumber(row.awaitingResponse ?? row.missing), 0);
   const rosterSlots = upcoming.reduce((total, row) => total + safeNumber(row.rosterCount || (safeNumber(row.responded) + safeNumber(row.awaitingResponse))), 0);
   const responseRate = rosterSlots ? Math.round((responded / rosterSlots) * 100) : 0;
-  const availabilityRate = rosterSlots ? Math.round((attending / rosterSlots) * 100) : 0;
+  const attendanceRecorded = safeRows.filter((row) => row.statusKey === "past").reduce((total, row) => total + safeNumber(row.attendanceRecorded), 0);
   return {
     total: safeRows.length,
     upcoming: upcoming.length,
     past: safeRows.filter((row) => row.statusKey === "past").length,
     responded,
-    attending,
-    unavailable,
+    rsvpConfirmed: responded,
     awaitingResponse,
-    confirmed: attending,
+    confirmed: responded,
     missing: awaitingResponse,
     responseRate,
-    availabilityRate,
+    attendanceRecorded,
     next: upcoming[0] || null,
   };
 }
 
-export function buildCoachPageDashboardSummary({
-  drills = [],
-  programDrills = [],
-  scSessions = [],
-  scRsvps = [],
-  scLogs = [],
-  leaderboardRows = [],
-  activityRows = [],
-  seasonArchives = [],
-} = {}) {
+export function buildCoachPageDashboardSummary({ drills = [], programDrills = [], scSessions = [], scRsvps = [], scLogs = [], leaderboardRows = [], activityRows = [], seasonArchives = [] } = {}) {
   return {
-    drills: {
-      active: safeArray(drills).length,
-      program: safeArray(programDrills).length,
-      total: safeArray(drills).length + safeArray(programDrills).length,
-    },
-    strength: {
-      sessions: safeArray(scSessions).length,
-      rsvps: safeArray(scRsvps).length,
-      logs: safeArray(scLogs).length,
-    },
-    leaderboards: {
-      ranked: safeArray(leaderboardRows).length,
-      leader: safeArray(leaderboardRows)[0] || null,
-    },
-    activity: {
-      total: safeArray(activityRows).length,
-      recent: safeArray(activityRows).slice(-7).length,
-    },
-    archives: {
-      total: safeArray(seasonArchives).length,
-      latest: safeArray(seasonArchives).at(-1) || null,
-    },
+    drills: { active: safeArray(drills).length, program: safeArray(programDrills).length, total: safeArray(drills).length + safeArray(programDrills).length },
+    strength: { sessions: safeArray(scSessions).length, rsvps: safeArray(scRsvps).length, logs: safeArray(scLogs).length },
+    leaderboards: { ranked: safeArray(leaderboardRows).length, leader: safeArray(leaderboardRows)[0] || null },
+    activity: { total: safeArray(activityRows).length, recent: safeArray(activityRows).slice(-7).length },
+    archives: { total: safeArray(seasonArchives).length, latest: safeArray(seasonArchives).at(-1) || null },
   };
 }
