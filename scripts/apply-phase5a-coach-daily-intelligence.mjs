@@ -80,20 +80,11 @@ update("src/lib/coachDashboardSelectors.js", (source) => {
   return next;
 });
 
-update("src/App.jsx", (source) => {
-  let next = replaceRequired(
-    source,
-    "`Priority completion rate: ${coachInsights.priorityCompletionRate}%`",
-    "`Weekly roster activity: ${coachInsights.weeklyActivityRate}%`",
-    "roster intelligence copy",
-  );
-  next = replaceRequired(
-    next,
-    'width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"',
-    'width:"100%",boxSizing:"border-box",maxWidth:isDesktop?"none":760,margin:"0 auto"',
-    "Player scroll container box sizing",
-  );
-  return next;
-});
+update("src/App.jsx", (source) => replaceRequired(
+  source,
+  "`Priority completion rate: ${coachInsights.priorityCompletionRate}%`",
+  "`Weekly roster activity: ${coachInsights.weeklyActivityRate}%`",
+  "roster intelligence copy",
+));
 
 console.log("Applied Phase 5A Coach decision intelligence without changing the accepted Phase 4 visual language.");
