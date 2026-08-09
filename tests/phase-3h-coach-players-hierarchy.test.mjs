@@ -1,92 +1,41 @@
-import test from 'node:test';
-import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 
-const enhancer = readFileSync('scripts/apply-phase3h-coach-players-hierarchy.mjs', 'utf8');
-const css = readFileSync('public/shotlab-phase3h-coach-players-hierarchy.css', 'utf8');
-const html = readFileSync('index.html', 'utf8');
-const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
-const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
-const screenshots = readFileSync('tests/e2e/design-system-screenshots.spec.mjs', 'utf8');
+const app = readFileSync("src/App.jsx", "utf8");
+const enhancer = readFileSync("scripts/apply-phase3h-coach-players-hierarchy.mjs", "utf8");
+const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+const screenshots = readFileSync("tests/e2e/design-system-screenshots.spec.mjs", "utf8");
 
-test('Phase 3H enhancer runs after Phase 3G and remains guarded and idempotent', () => {
+test("Phase 3H compatibility verifier remains in the build pipeline", () => {
   assert.match(pkg.scripts.dev, /apply-phase3g-coach-drills-hierarchy\.mjs[\s\S]*apply-phase3h-coach-players-hierarchy\.mjs/);
-  assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase3g-coach-drills-hierarchy\.mjs[\s\S]*apply-phase3h-coach-players-hierarchy\.mjs/);
-  assert.match(enhancer, /expected exactly one anchor/);
-  assert.match(enhancer, /Phase 3H Coach Players hierarchy already applied/);
+  assert.match(pkg.scripts["prepare:route-enhancers"], /apply-phase3g-coach-drills-hierarchy\.mjs[\s\S]*apply-phase3h-coach-players-hierarchy\.mjs/);
+  assert.doesNotMatch(enhancer, /writeFileSync/);
+  assert.match(enhancer, /Phase 5B\.3 supersedes the old build-time disclosure rewrite/);
 });
 
-test('Coach Players separates account activation, season tools, and roster management into closed native disclosures', () => {
-  for (const id of ['coach-player-account-activation', 'coach-player-season-tools', 'coach-player-roster-management']) {
-    assert.match(enhancer, new RegExp(`data-testid=\\"${id}\\"`));
-  }
-  assert.match(enhancer, /Add a player/);
-  assert.match(enhancer, /Season tools/);
-  assert.match(enhancer, /Roster & player management/);
-  assert.doesNotMatch(enhancer, /<details[^>]*open/);
-  assert.match(css, /\.coach-player-management-disclosure/);
-  assert.match(css, /\.coach-player-management-summary/);
+test("Coach Players keeps activation and roster work while Team & Account owns history", () => {
+  const playersStart = app.indexOf('{tab==="players"&&!selP');
+  const administrationStart = app.indexOf('{tab==="settings"', playersStart);
+  assert.ok(playersStart >= 0 && administrationStart > playersStart);
+  const players = app.slice(playersStart, administrationStart);
+  assert.match(players, /<CoachPlayerInviteForm/);
+  assert.match(players, /<CoachRoster/);
+  assert.match(players, /onSelectPlayer=\{openPlayerIntelligence\}/);
+  assert.doesNotMatch(players, /coach-season-archive|<NewSeasonWizard|DEMO SETTINGS|LEGAL & SUPPORT/);
+  assert.match(app.slice(administrationStart), /testId="coach-administration-workspace"/);
+  assert.match(app.slice(administrationStart), /data-testid="coach-season-archive"/);
 });
 
-test('existing Players command actions open the appropriate hidden management workflow', () => {
-  assert.match(enhancer, /document\.getElementById\("coach-player-account-activation"\)/);
-  assert.match(enhancer, /document\.getElementById\("coach-player-season-tools"\)/);
-  assert.match(enhancer, /disclosure\.open=true/);
-  assert.match(enhancer, /scrollIntoView\(\{behavior:\"smooth\",block:\"start\"\}\)/);
+test("legacy disclosure CSS is retired instead of shipping unused styling", () => {
+  const html = readFileSync("index.html", "utf8");
+  assert.doesNotMatch(html, /shotlab-phase3h-coach-players-hierarchy\.css/);
+  assert.doesNotMatch(enhancer, /coach-player-management-disclosure|coach-player-season-tools/);
 });
 
-test('View roster inside account activation opens roster management before scrolling', () => {
-  assert.match(enhancer, /document\.getElementById\("coach-player-roster-management"\)/);
-  assert.match(enhancer, /document\.getElementById\("coach-roster-operations"\)/);
-});
-
-test('career archive actions leave player detail and open Season Tools before scrolling to the selected archive', () => {
-  assert.match(enhancer, /viewerRole=\"coach\" onOpenArchive=\{\(archiveId\)=>\{setSelectedSeasonArchiveId\(archiveId\);setSelP\(null\);setTimeout/);
-  assert.match(enhancer, /document\.getElementById\(\"coach-player-season-tools\"\)/);
-  assert.match(enhancer, /document\.getElementById\(\"coach-season-tools\"\)\?\.scrollIntoView/);
-});
-
-test('Phase 3H preserves player provisioning, season, roster, and player-intelligence capabilities', () => {
-  for (const preserved of [
-    '<CoachPlayerInviteForm',
-    '<CoachSeasonComparisonPanel',
-    'data-testid="coach-season-archive"',
-    '<NewSeasonWizard',
-    '<CoachRoster',
-    't="PLAYER DETAILS"',
-    'onRemovePlayer={removeRosterPlayer}',
-    'onSelectPlayer={openPlayerIntelligence}',
-    'Account management — required by App Store §5.1.1(v)',
-  ]) {
-    assert.ok(enhancer.includes(preserved), `missing preserved marker: ${preserved}`);
-  }
-});
-
-test('management summaries are protected from legacy boxing and low-contrast cascade', () => {
-  assert.match(css, /coach-player-management-summary-copy > small[\s\S]*opacity: 1 !important/);
-  assert.match(css, /coach-player-management-summary-copy > small[\s\S]*box-shadow: none !important/);
-  assert.match(css, /--phase3h-ink: #151915/);
-  assert.match(css, /--phase3h-muted: #5f675f/);
-});
-
-test('Phase 3H authority loads after Phase 3G and keeps focus and reduced-motion behavior explicit', () => {
-  assert.match(html, /shotlab-phase3g-coach-drills-hierarchy\.css[\s\S]*shotlab-phase3h-coach-players-hierarchy\.css/);
-  assert.match(css, /:focus-visible/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /touch-action: manipulation/);
-});
-
-test('rendered iPhone evidence verifies default and expanded Players management states', () => {
-  assert.match(screenshots, /coach-player-account-activation/);
-  assert.match(screenshots, /coach-player-season-tools/);
-  assert.match(screenshots, /coach-player-roster-management/);
+test("rendered evidence follows Players into the dedicated Team & Account route", () => {
   assert.match(screenshots, /06-coach-players/);
   assert.match(screenshots, /06b-coach-player-add/);
-  assert.match(screenshots, /06c-coach-season-tools/);
-  assert.match(screenshots, /06d-coach-roster-management/);
-});
-
-test('App Store workflow carries Phase 3H and a current evidence package', () => {
-  assert.match(workflow, /tests\/phase-3h-coach-players-hierarchy\.test\.mjs/);
-  assert.match(workflow, /shotlab-phase-(?:3h-coach-players-hierarchy|3i-team-store-immersive|3j-coach-events-hierarchy)-evidence/);
+  assert.match(screenshots, /06c-coach-team-account/);
+  assert.doesNotMatch(screenshots, /coach-player-season-tools|coach-player-roster-management/);
 });

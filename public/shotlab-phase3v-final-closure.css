@@ -71,17 +71,17 @@
 }
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="sectionLabel"],
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="meta"]{
-  color:#9ba7ae!important;-webkit-text-fill-color:#9ba7ae!important;background:transparent!important
+  color:var(--p3v-muted)!important;-webkit-text-fill-color:var(--p3v-muted)!important;background:transparent!important
 }
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="sectionTitle"]{
-  color:#f5f8f9!important;-webkit-text-fill-color:#f5f8f9!important;background:transparent!important
+  color:var(--p3v-ink)!important;-webkit-text-fill-color:var(--p3v-ink)!important;background:transparent!important
 }
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"],
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"],
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"],
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"]{
-  border:1px solid var(--p3v-line)!important;border-radius:18px!important;background:#fff!important;background-image:none!important;
-  color:var(--p3v-ink)!important;box-shadow:0 7px 22px rgba(20,28,23,.045)!important
+  border:0!important;border-top:1px solid var(--p3v-line)!important;border-radius:0!important;background:transparent!important;background-image:none!important;
+  color:var(--p3v-ink)!important;box-shadow:none!important
 }
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > summary,
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > summary,
@@ -109,7 +109,7 @@
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > div,
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > div,
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > div{
-  border-top:1px solid var(--p3v-line)!important;background:var(--p3v-soft)!important;color:#44515b!important
+  border-top:1px solid var(--p3v-line)!important;background:transparent!important;color:#44515b!important
 }
 
 /* Final player-route containment: each route owns one dock reserve, not stacked outer + inner reserves. */

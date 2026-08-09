@@ -170,7 +170,11 @@ async function installRoutes(context, state) {
   await context.route("**/v1/team-priorities**", (route) => fulfillJson(route, { ok: true, priorities_by_team: {} }));
   await context.route("**/v1/season-archives**", (route) => fulfillJson(route, { ok: true, archives: [] }));
   await context.route("**/v1/coach/players/provision**", (route) => fulfillJson(route, { ok: true, invitations: [{ id: "invite-cross", player_name: "Ari Cross", player_email: PLAYER_EMAIL, status: state.claimed ? "claimed" : "sent" }] }));
-  await context.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => fulfillJson(route, []));
+  await context.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => {
+    const requestUrl = route.request().url();
+    if (requestUrl.includes("/rest/v1/events")) return fulfillJson(route, commonSeed["sl:events"]);
+    return fulfillJson(route, []);
+  });
 }
 
 async function seed(context, payload) {
@@ -211,8 +215,12 @@ test("player activation, first result, and coach response loop work across separ
 
   await expect(playerPage.getByTestId("player-daily-primary-action")).toContainText("Confirm attendance");
   await playerPage.getByTestId("player-daily-primary-action").click();
-  await expect(playerPage.getByText("UPCOMING EVENTS", { exact: true })).toBeVisible({ timeout: 20_000 });
-  await playerPage.getByRole("button", { name: /RSVP NOW/ }).first().click();
+  const responseButton = playerPage.getByRole("button", { name: "Respond now", exact: true });
+  await expect(responseButton).toBeVisible({ timeout: 20_000 });
+  await responseButton.click();
+  const rsvpButton = playerPage.getByRole("button", { name: /RSVP NOW/ }).first();
+  await expect(rsvpButton).toBeVisible({ timeout: 20_000 });
+  await rsvpButton.click();
   await expect(playerPage.getByTestId("player-completion-cue")).toContainText("Event participation confirmed");
   await playerPage.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Home", exact: true }).click();
 

@@ -10,15 +10,15 @@ const index = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8")
 const pkg = JSON.parse(fs.readFileSync(new URL("../package.json", import.meta.url), "utf8"));
 
 test("Phase 4E locks AppHeader actions to 44px and prevents title clipping", () => {
-  assert.match(header, /minHeight:\s*44/);
-  assert.match(header, /minWidth:\s*44/);
+  assert.match(header, /minHeight:\s*"var\(--touch-target, 44px\)"/);
+  assert.match(header, /minWidth:\s*"var\(--touch-target, 44px\)"/);
   assert.doesNotMatch(header, /minHeight:\s*38/);
   assert.match(header, /overflowWrap:\s*"break-word"/);
   assert.match(header, /maxWidth:\s*"100%"/);
 });
 
 test("Phase 4E reconciles hierarchy actions and mobile title width", () => {
-  assert.match(hierarchy, /\.quietAction\s*\{[^}]*min-height:\s*44px/s);
+  assert.match(hierarchy, /\.quietAction\s*\{[^}]*min-height:\s*var\(--touch-target, 44px\)/s);
   assert.doesNotMatch(hierarchy, /\.quietAction\s*\{[^}]*min-height:\s*36px/s);
   assert.match(hierarchy, /@media \(max-width: 640px\)[\s\S]*\.objectiveTitle\s*\{[^}]*max-width:\s*100%/);
   assert.match(hierarchy, /\.quietHeader\s*\{[^}]*min-width:\s*0/);

@@ -421,7 +421,14 @@ export function installVisualSystemReboot() {
   const style = document.createElement("style");
   style.id = STYLE_ID;
   style.dataset.designSystem = VISUAL_SYSTEM_REBOOT_VERSION;
-  style.textContent = CSS;
+  // SecondaryPageSystem.css is the canonical authority for Coach secondary-page
+  // composition. The historical reboot CSS still contains its old rules so older
+  // prepared bundles remain readable, but those rules must never win at runtime.
+  const secondaryStart = CSS.indexOf("/* Canonical secondary pages:");
+  const secondaryEnd = CSS.indexOf("/* Empty states:", secondaryStart);
+  style.textContent = secondaryStart >= 0 && secondaryEnd > secondaryStart
+    ? `${CSS.slice(0, secondaryStart)}${CSS.slice(secondaryEnd)}`
+    : CSS;
   document.head.appendChild(style);
   document.documentElement.dataset.shotlabDesign = VISUAL_SYSTEM_REBOOT_VERSION;
   return true;

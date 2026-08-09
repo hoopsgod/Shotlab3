@@ -151,9 +151,9 @@ async function enterCoachDemo(page) {
 async function openSeasonArchivePanel(page) {
   const panel = page.getByTestId("coach-season-archive");
   if (!(await panel.isVisible().catch(() => false))) {
-    const seasonToolsButton = page.getByRole("button", { name: "Season Tools", exact: true });
-    await expect(seasonToolsButton).toBeVisible({ timeout: 15_000 });
-    await seasonToolsButton.click();
+    const teamAccountButton = page.getByRole("button", { name: "Team & Account", exact: true });
+    await expect(teamAccountButton).toBeVisible({ timeout: 15_000 });
+    await teamAccountButton.click();
   }
   await expect(panel).toBeVisible({ timeout: 15_000 });
   return panel;

@@ -1,20 +1,9 @@
 /* ShotLab 2026 Phase 2 — Player command hierarchy. */
 [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] {
-  --text-1: #f5f8f9;
-  --text-2: #c3cdd2;
-  --text-3: #9ba7ae;
   width: min(100%, 920px);
   margin-inline: auto;
-  padding: clamp(18px, 3vw, 26px);
-  border-radius: 28px;
-}
-
-/* Player operational command cards are dark surfaces inside the light Player shell.
-   Re-establish local readable text tokens so Phase 1 light-shell ink cannot bleed in. */
-.performance-shell--player [data-testid^="player-"][data-testid$="-workspace"] {
-  --text-1: #f5f8f9;
-  --text-2: #c3cdd2;
-  --text-3: #9ba7ae;
+  padding: 0;
+  border-radius: 0;
 }
 
 [data-testid="player-daily-command-center"] [data-command-role="primary"] {
@@ -45,10 +34,11 @@
 
 .playerProgressDisclosure {
   margin-top: 20px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, .08);
-  border-radius: 20px;
-  background: rgba(255, 255, 255, .025);
+  overflow: visible;
+  border: 0;
+  border-top: 1px solid rgba(23, 26, 24, .1);
+  border-radius: 0;
+  background: transparent;
 }
 .playerProgressDisclosure > summary {
   min-height: 68px;
@@ -57,7 +47,7 @@
   justify-content: space-between;
   gap: 16px;
   padding: 13px 16px;
-  color: #f5f8f9;
+  color: #171a18;
   cursor: pointer;
   list-style: none;
 }
@@ -70,16 +60,16 @@
   display: grid;
   place-items: center;
   flex: 0 0 auto;
-  border: 1px solid rgba(255, 255, 255, .11);
+  border: 1px solid rgba(23, 26, 24, .12);
   border-radius: 50%;
-  color: #c3cdd2;
-  background: rgba(255, 255, 255, .04);
+  color: #536057;
+  background: transparent;
   font-size: 20px;
 }
 .playerProgressDisclosure[open] > summary::after { content: "−"; }
 .playerProgressDisclosure > summary > span:first-child { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
 .playerProgressDisclosure > summary small {
-  color: #9ba7ae;
+  color: #6d776f;
   font-size: 9px;
   font-weight: 720;
   letter-spacing: .075em;
@@ -87,7 +77,7 @@
 }
 .playerProgressDisclosure > summary strong {
   overflow: hidden;
-  color: #f5f8f9;
+  color: #171a18;
   font-family: var(--font-display);
   font-size: 18px;
   font-weight: 720;
@@ -96,20 +86,254 @@
   white-space: nowrap;
 }
 .playerProgressDisclosure > summary:focus-visible { outline: 3px solid rgba(126, 158, 30, .24); outline-offset: -3px; }
-.playerProgressDisclosureBody { padding: 0 16px 16px; border-top: 1px solid rgba(255, 255, 255, .07); }
+.playerProgressDisclosureBody { padding: 0 0 16px; border-top: 1px solid rgba(23, 26, 24, .1); }
+.playerProgressDisclosureBody [class*="signal"] {
+  padding: 16px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Phase 5C — Player activation loop. One elevated action region; evidence stays flat. */
+.player-training-workspace {
+  --player-training-ink: #171a18;
+  --player-training-muted: #657067;
+  display: grid;
+  gap: 20px;
+  color: var(--player-training-ink);
+}
+
+.player-training-kicker {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: -6px;
+  color: color-mix(in srgb, var(--accent) 68%, #354039);
+  font: 760 11px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.player-primary-logging-region {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 22px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--accent) 15%, transparent), transparent 38%),
+    linear-gradient(145deg, #171b18, #0c0f0d 72%);
+  color: #f5f8f9;
+  box-shadow: 0 24px 58px rgba(25, 31, 26, .16);
+}
+
+.player-logging-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.player-logging-field { min-width: 0; }
+.player-logging-field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #9ba7ae !important;
+  font: 720 10px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .08em !important;
+}
+
+.player-logging-input {
+  width: 100%;
+  min-height: 52px !important;
+  padding: 10px 12px !important;
+  border: 1px solid rgba(255, 255, 255, .13) !important;
+  border-radius: 13px !important;
+  background: rgba(255, 255, 255, .045) !important;
+  color: #f5f8f9 !important;
+  font: 620 16px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  outline: none;
+}
+
+.player-logging-input--score {
+  color: var(--accent) !important;
+  font-size: 25px !important;
+  font-weight: 760 !important;
+  text-align: center;
+}
+
+.player-logging-input:focus-visible {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent) !important;
+}
+
+.player-training-plan {
+  display: grid;
+  gap: 0;
+  padding: 18px 0 0;
+  border-block: 1px solid rgba(23, 26, 24, .1);
+}
+
+.player-training-plan__header,
+.player-program-session__header,
+.player-drill-row {
+  display: flex;
+  align-items: center;
+}
+
+.player-training-plan__header {
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 2px 14px;
+}
+
+.player-training-plan__header > div { display: grid; gap: 4px; }
+.player-training-plan__header span {
+  color: var(--player-training-muted);
+  font: 700 10px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.player-training-plan__header strong {
+  color: var(--player-training-ink);
+  font: 750 24px/1.05 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.025em;
+}
+
+.player-training-progress {
+  height: 3px;
+  overflow: hidden;
+  background: rgba(23, 26, 24, .08);
+}
+.player-training-progress > div {
+  height: 100%;
+  border-radius: 0;
+  background: var(--progress-accent, var(--accent));
+  transition: width .25s ease;
+}
+
+.player-drill-row {
+  width: 100%;
+  min-height: 74px;
+  gap: 14px;
+  margin: 0;
+  padding: 13px 2px;
+  border: 0;
+  border-bottom: 1px solid rgba(23, 26, 24, .1);
+  border-radius: 0;
+  background: transparent;
+  color: var(--player-training-ink);
+  text-align: left;
+  cursor: pointer;
+  transition: background .16s ease, opacity .16s ease;
+}
+.player-drill-row:hover,
+.player-drill-row:focus-visible { background: color-mix(in srgb, var(--drill-accent, var(--accent)) 5%, transparent); }
+.player-drill-row:focus-visible { outline: 3px solid color-mix(in srgb, var(--drill-accent, var(--accent)) 24%, transparent); outline-offset: -3px; }
+.player-drill-row.is-complete { opacity: .62; cursor: default; }
+.player-drill-row__icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: var(--drill-accent, var(--accent));
+}
+.player-drill-row__copy { min-width: 0; flex: 1; }
+.player-drill-row__title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--player-training-ink);
+  font: 700 14px/1.25 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.006em;
+}
+.player-drill-row__detail,
+.player-drill-row__meta {
+  margin-top: 4px;
+  color: var(--player-training-muted);
+  font: 540 12px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+.player-drill-row__meta { font-size: 10px; }
+.player-drill-row__action {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  color: var(--drill-accent, var(--accent));
+}
+.player-drill-row__priority {
+  color: color-mix(in srgb, var(--drill-accent, var(--accent)) 64%, #354039);
+  font-size: 9px;
+  font-weight: 780;
+  letter-spacing: .06em;
+}
+
+.player-program-session {
+  padding: 19px 2px 0;
+  border-top: 1px solid rgba(23, 26, 24, .1);
+}
+.player-program-session__header { justify-content: space-between; gap: 12px; padding: 0 0 10px; }
+.player-program-session__title {
+  color: var(--player-training-ink);
+  font: 750 15px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.006em;
+}
+.player-program-session__detail {
+  margin-top: 4px;
+  color: var(--player-training-muted);
+  font: 540 12px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+.player-program-session__status {
+  color: var(--player-training-muted);
+  font: 720 9px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .07em;
+}
+.player-program-session__status[data-status="completed"] { color: color-mix(in srgb, var(--accent) 65%, #354039); }
+.player-program-session__status[data-status="in-progress"] { color: color-mix(in srgb, var(--semantic-info, #77d7ff) 62%, #354039); }
+
+.player-program-session--primary {
+  margin: 18px 0;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--semantic-info, #77d7ff) 14%, transparent), transparent 38%),
+    linear-gradient(145deg, #171b1d, #0c0f11 72%);
+  color: #f5f8f9;
+  box-shadow: 0 24px 58px rgba(25, 31, 33, .15);
+}
+.player-program-session--primary .player-program-session__title,
+.player-program-session--primary .player-drill-row__title { color: #f5f8f9; }
+.player-program-session--primary .player-program-session__detail,
+.player-program-session--primary .player-drill-row__detail,
+.player-program-session--primary .player-drill-row__meta { color: #9ba7ae; }
+.player-program-session--primary .player-program-session__status { color: #c3cdd2; }
+.player-program-session--primary .player-program-session__status[data-status="completed"] { color: var(--accent); }
+.player-program-session--primary .player-program-session__status[data-status="in-progress"] { color: var(--semantic-info, #77d7ff); }
+.player-program-session--primary .player-drill-row { border-bottom-color: rgba(255, 255, 255, .08); }
+.player-program-session--primary .player-drill-row:hover,
+.player-program-session--primary .player-drill-row:focus-visible { background: rgba(255, 255, 255, .035); }
 
 @media (max-width: 760px) {
-  [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] { padding: 16px; border-radius: 24px; }
+  [data-testid="player-daily-command-center"][data-phase="phase-2-command-hierarchy"] { padding: 0; border-radius: 0; }
   [data-testid="player-daily-command-center"] [data-command-role="primary"] { padding: 19px 17px; }
   [data-testid="player-daily-command-center"] [data-command-role="primary"] h1 { font-size: clamp(32px, 10vw, 44px); }
+  .player-primary-logging-region { padding: 19px 17px; }
+  .player-program-session--primary { padding: 18px 16px; }
 }
 @media (max-width: 390px) {
-  [data-testid="player-command-evidence"] { gap: 7px; }
+  [data-testid="player-command-evidence"] { gap: 0; }
   [data-testid="player-command-evidence"] > div { min-height: 86px; padding: 10px 9px; }
   [data-testid="player-command-evidence"] [class*="sectionLabel"] { letter-spacing: .035em; }
   .playerProgressDisclosure > summary { padding-inline: 13px; }
+  .player-logging-fields { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .playerProgressDisclosure,
-  .playerProgressDisclosure * { scroll-behavior: auto !important; transition: none !important; }
+  .playerProgressDisclosure *,
+  .player-training-workspace * { scroll-behavior: auto !important; transition: none !important; }
 }

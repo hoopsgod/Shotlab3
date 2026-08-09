@@ -29,10 +29,7 @@ async function removeInactiveDemoPlayerThroughUi(page) {
   const dock = page.getByTestId("mobile-navigation-dock");
   await dock.getByRole("button", { name: "Players", exact: true }).click();
 
-  const rosterManagement = page.getByTestId("coach-player-roster-management");
-  await expect(rosterManagement).toBeVisible({ timeout: 20_000 });
-  if ((await rosterManagement.getAttribute("open")) === null) await rosterManagement.locator(":scope > summary").click();
-  await expect(rosterManagement).toHaveAttribute("open", "");
+  await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Micah Santos", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
 
   const micahRow = page

@@ -54,7 +54,7 @@
 .eyebrow{
   color:var(--state-accent);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-  font-size:9px;
+  font-size:var(--type-micro,11px);
   font-weight:850;
   letter-spacing:.105em;
   text-transform:uppercase;
@@ -73,20 +73,20 @@
   margin:6px 0 0;
   color:rgba(238,241,235,.68);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
-  font-size:12px;
+  font-size:var(--type-meta,12px);
   font-weight:560;
   line-height:1.46;
 }
 .light .detail{color:#5e6971}
 .action{
-  min-height:44px;
+  min-height:var(--touch-target,44px);
   margin-top:11px;
   padding:0 13px;
   border:1px solid color-mix(in srgb,var(--state-accent) 55%,transparent);
   border-radius:11px;
   background:color-mix(in srgb,var(--state-accent) 10%,transparent);
   color:var(--state-accent);
-  font:800 11px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  font:800 var(--type-meta,12px)/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
   letter-spacing:.02em;
   cursor:pointer;
   transition:transform .16s ease,background-color .16s ease,border-color .16s ease,box-shadow .16s ease;

@@ -25,8 +25,8 @@ function patchPlayerDaily() {
   );
   source = replaceOne(
     source,
-    '    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" aria-label="Daily training command center">\n      <div className={styles.header}>',
-    '    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" aria-label="Daily training command center">\n      <ShotLabSignatureField variant="court" testId="player-home-signature-field" style={{ position: "absolute", inset: 0, zIndex: 0 }} />\n      <div className={styles.header}>',
+    '    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" aria-label="Daily training command center">\n      <div className={styles.header} data-layout-role="editorial-header">',
+    '    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" aria-label="Daily training command center">\n      <ShotLabSignatureField variant="court" testId="player-home-signature-field" style={{ position: "absolute", inset: 0, zIndex: 0 }} />\n      <div className={styles.header} data-layout-role="editorial-header">',
     "PlayerDaily signature field",
   );
   writeFileSync(path, source);
