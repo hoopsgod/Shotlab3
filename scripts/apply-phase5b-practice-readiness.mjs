@@ -17,7 +17,7 @@ update("src/components/CoachInteractiveDashboards.jsx", (source) => {
   next = replaceRequired(
     next,
     '    { key: "gaps", label: "Missing RSVPs", value: briefing.missing, detail: `${briefing.gapEvents.length} affected events`, tone: "attention" },',
-    '    { key: "gaps", label: "Awaiting RSVP", value: briefing.awaitingResponse, detail: `${briefing.gapEvents.length} affected events`, tone: "attention" },',
+    '    { key: "gaps", label: "Awaiting RSVP", value: briefing.awaitingResponse, detail: `${briefing.gapEvents.length} affected ${briefing.gapEvents.length === 1 ? "event" : "events"}`, tone: "attention" },',
     "awaiting-RSVP metric",
   );
   next = replaceRequired(
@@ -25,6 +25,12 @@ update("src/components/CoachInteractiveDashboards.jsx", (source) => {
     '    { key: "all", label: "Response Rate", value: `${briefing.responseRate}%`, detail: `${briefing.confirmed} confirmations`, tone: briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },',
     '    { key: "all", label: "Response Rate", value: `${briefing.responseRate}%`, detail: `${briefing.responded} RSVPs received`, tone: briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },',
     "truthful response metric",
+  );
+  next = replaceRequired(
+    next,
+    '      <SecondaryPageIntro eyebrow="Schedule intelligence" title="Events" summary="Run the team agenda, resolve attendance gaps, and move from schedule insight to action." status={next ? `${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />',
+    '      <SecondaryPageIntro eyebrow="Schedule intelligence" title="Events" summary="Run the team agenda, resolve RSVP gaps, and move from schedule insight to action." status={next ? `${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />',
+    "RSVP-specific schedule summary",
   );
   next = replaceRequired(
     next,
