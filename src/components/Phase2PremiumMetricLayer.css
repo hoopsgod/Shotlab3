@@ -74,14 +74,10 @@
   vector-effect: non-scaling-stroke;
 }
 
-[data-premium-metric-pulse] {
-  display: block;
-  width: 100%;
-  height: 3px;
-  margin-top: auto;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--premium-metric-signal), color-mix(in srgb, var(--premium-metric-signal) 18%, transparent) 72%, transparent);
-  opacity: .72;
+[data-premium-metric-placeholder] [data-premium-metric-path] {
+  stroke-dasharray: 4 6;
+  stroke-width: 1.5;
+  opacity: .34;
 }
 
 .secondaryPageToolbar [data-premium-metric] {
@@ -118,36 +114,54 @@
   height: 25px;
 }
 
-.secondaryPageToolbar [data-premium-metric-pulse] {
-  height: 2px;
-  opacity: .58;
-}
-
 .secondaryPageToolbar [data-premium-metric][aria-pressed="true"] [data-premium-metric-icon] {
   border-color: color-mix(in srgb, var(--premium-metric-signal) 38%, rgba(23, 26, 24, .08));
   background: color-mix(in srgb, var(--premium-metric-signal) 12%, #fff);
 }
 
-.secondaryPageToolbar [data-premium-metric][aria-pressed="true"] [data-premium-metric-evidence],
-.secondaryPageToolbar [data-premium-metric][aria-pressed="true"] [data-premium-metric-pulse] {
+.secondaryPageToolbar [data-premium-metric][aria-pressed="true"] [data-premium-metric-evidence] {
   opacity: 1;
 }
 
 @media (max-width: 760px) {
   .secondaryPageToolbar [data-premium-metric] {
-    min-height: 118px !important;
-    padding: 14px 13px 12px !important;
+    min-height: 116px !important;
+    padding: 13px 12px 11px !important;
   }
 
-  [data-premium-metric-head] {
-    gap: 8px;
+  .secondaryPageToolbar [data-premium-metric-head] {
+    gap: 6px;
   }
 
-  [data-premium-metric-icon] {
-    width: 27px;
-    height: 27px;
-    flex-basis: 27px;
-    border-radius: 9px;
+  .secondaryPageToolbar [data-premium-metric-icon] {
+    width: 23px;
+    height: 23px;
+    flex-basis: 23px;
+    border-radius: 8px;
+  }
+
+  .secondaryPageToolbar [data-premium-metric-icon] svg {
+    width: 13px;
+    height: 13px;
+  }
+
+  .secondaryPageToolbar [data-premium-metric-label] {
+    font-size: 9px !important;
+    line-height: 1.12 !important;
+    letter-spacing: .045em !important;
+  }
+
+  .secondaryPageToolbar [data-premium-metric-value] {
+    font-size: 30px !important;
+    line-height: .96 !important;
+  }
+
+  .secondaryPageToolbar [data-premium-metric-evidence] {
+    height: 22px;
+  }
+
+  .secondaryPageToolbar [data-premium-metric-evidence] svg {
+    height: 22px;
   }
 }
 
