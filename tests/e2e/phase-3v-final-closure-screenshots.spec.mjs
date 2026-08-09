@@ -92,8 +92,8 @@ test("Phase 3 closure: Player Home has one dock reserve, clean support contrast,
   });
   expect(contrast.nextHeadingBackground).toBe("rgba(0, 0, 0, 0)");
   expect(contrast.nextHeadingImage).toBe("none");
-  expect(contrast.nextTitleColor).toBe("rgb(245, 248, 249)");
-  expect(contrast.supportBackground).toBe("rgb(255, 255, 255)");
+  expect(contrast.nextTitleColor).toBe("rgb(23, 26, 24)");
+  expect(contrast.supportBackground).toBe("rgba(0, 0, 0, 0)");
   expect(contrast.supportTitleColor).toBe("rgb(23, 28, 24)");
   expect(contrast.supportMetaColor).toBe("rgb(104, 113, 106)");
 

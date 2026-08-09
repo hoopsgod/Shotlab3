@@ -5,6 +5,7 @@ import fs from "node:fs";
 const css = fs.readFileSync(new URL("../public/shotlab-v3-foundation.css", import.meta.url), "utf8");
 const corrections = fs.readFileSync(new URL("../public/shotlab-v3-mobile-corrections.css", import.meta.url), "utf8");
 const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const secondaryCss = fs.readFileSync(new URL("../src/components/SecondaryPageSystem.css", import.meta.url), "utf8");
 
 const channel = (hex) => {
   const value = Number.parseInt(hex, 16) / 255;
@@ -45,8 +46,9 @@ test("Mission Control uses one readable light hierarchy", () => {
 });
 
 test("secondary coach pages and Team Store share the same product language", () => {
-  assert.match(css, /\.secondaryPageShell[\s\S]*background:transparent/);
-  assert.match(css, /\.secondaryPageIntro[\s\S]*background-image:none/);
+  assert.match(secondaryCss, /\.secondaryPageShell[\s\S]*color: var\(--sl-ink/);
+  assert.match(secondaryCss, /\.secondaryPageIntro[\s\S]*background: transparent/);
+  assert.match(secondaryCss, /\.secondaryPageDecision[\s\S]*linear-gradient\(145deg/);
   assert.match(css, /\.ts-panel[\s\S]*background:var\(--v3-canvas\)/);
   assert.match(css, /\.ts-header h2[\s\S]*font-family:inherit/);
   assert.match(css, /\.ts-field input,[\s\S]*font-size:16px/);

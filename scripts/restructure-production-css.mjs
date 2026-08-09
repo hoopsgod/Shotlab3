@@ -1,8 +1,26 @@
-import { readdir, readFile, stat, writeFile } from "node:fs/promises";
+import { readdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { minify } from "csso";
 
 const DIST_DIR = path.resolve(process.cwd(), "dist");
+
+async function removeBundledAuthorityDuplicates() {
+  const indexPath = path.join(DIST_DIR, "index.html");
+  const html = await readFile(indexPath, "utf8");
+  if (!html.includes("data-shotlab-authority-bundle")) return 0;
+
+  const referenced = new Set(
+    [...html.matchAll(/href=["'](?:\.\/|\/)?([^"'?]+\.css)(?:\?[^"']*)?["']/gi)]
+      .map((match) => path.basename(match[1])),
+  );
+  const rootEntries = await readdir(DIST_DIR, { withFileTypes: true });
+  const staleAuthorities = rootEntries
+    .filter((entry) => entry.isFile() && /^shotlab-.*\.css$/i.test(entry.name) && !referenced.has(entry.name))
+    .map((entry) => entry.name);
+
+  await Promise.all(staleAuthorities.map((name) => unlink(path.join(DIST_DIR, name))));
+  return staleAuthorities.length;
+}
 
 async function listCssFiles(directory) {
   const entries = await readdir(directory, { withFileTypes: true });
@@ -17,6 +35,7 @@ async function listCssFiles(directory) {
 
 async function main() {
   await stat(DIST_DIR);
+  const removedAuthorityCopies = await removeBundledAuthorityDuplicates();
   const files = await listCssFiles(DIST_DIR);
   let sourceBytes = 0;
   let outputBytes = 0;
@@ -39,6 +58,7 @@ async function main() {
     }
   }
 
+  console.log(`Removed ${removedAuthorityCopies} unreferenced visual-authority CSS copies.`);
   console.log(`Restructured ${changedFiles}/${files.length} production CSS files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw.`);
 }
 

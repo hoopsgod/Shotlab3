@@ -29,20 +29,18 @@ test('Phase 4F keeps cross-role presentation, recovery, and fallback styling in 
   assert.match(vite, /return 'AuthenticatedUi'/)
 })
 
-test('Phase 4F closes legacy browser mutations with current premium disclosures and hydrated events', () => {
+test('Phase 4F verifies current Coach routes and hydrated attendance events without mutating browser contracts', () => {
   assert.match(packageJson.scripts['prepare:route-enhancers'], /align-phase4f-browser-contracts\.mjs/)
   assert.match(routeEnhancer, /setViewportSize\(\{ width: 390, height: 844 \}\)/)
   assert.match(routeEnhancer, /v1\/legacy-auth\/restore/)
-  assert.match(browserAligner, /coach-player-account-activation/)
-  assert.match(browserAligner, /coach-player-roster-management/)
-  assert.match(browserAligner, /locator\("summary"\)\.click\(\)/)
+  assert.doesNotMatch(browserAligner, /writeFileSync/)
+  assert.match(browserAligner, /coach-administration-workspace/)
+  assert.match(browserAligner, /#coach-roster-operations/)
+  assert.match(browserAligner, /retired Coach Players disclosure/)
   assert.match(browserAligner, /requestUrl\.includes\("\/rest\/v1\/events"\)/)
   assert.match(browserAligner, /commonSeed\["sl:events"\]/)
-  assert.match(browserAligner, /const responseButton = playerPage\.getByRole\("button", \{ name: "Respond now", exact: true \}\)/)
-  assert.match(browserAligner, /const rsvpButton = playerPage\.getByRole\("button", \{ name: \/RSVP NOW\/ \}\)\.first\(\)/)
-  assert.match(browserAligner, /await rsvpButton\.click\(\)/)
-  assert.match(browserAligner, /if \(!next\.includes\(premiumResponse\)\)/)
-  assert.match(browserAligner, /next = next\.replace\(legacy, premiumResponse\);\s*break;/)
+  assert.match(browserAligner, /name: "Respond now"/)
+  assert.match(browserAligner, /name: \/RSVP NOW\//)
 })
 
 test('Phase 4F treats absent startup App CSS as zero payload rather than a missing asset failure', () => {

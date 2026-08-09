@@ -29,13 +29,6 @@
   box-shadow:inset 0 1px rgba(255,255,255,.035),0 18px 44px rgba(0,0,0,.20),0 0 54px color-mix(in srgb,var(--p4a-lime) 6%,transparent)!important
 }
 [data-testid="player-command-evidence"]>div{position:relative;overflow:hidden}
-[data-testid="player-command-evidence"]>div::before{
-  content:"";position:absolute;left:12px;right:12px;top:0;height:1px;
-  background:linear-gradient(90deg,color-mix(in srgb,var(--p4a-lime) 52%,transparent),transparent 78%);opacity:.8
-}
-[data-testid="player-command-evidence"]>div::after{
-  content:"";position:absolute;width:28px;height:28px;border:1px solid color-mix(in srgb,var(--p4a-lime) 15%,transparent);border-radius:999px;right:-11px;bottom:-11px;opacity:.75
-}
 
 /* Development Story: same signature geometry, different crop, plus premium metric instrumentation. */
 [data-testid="player-progress-story-hero"]{isolation:isolate}
@@ -71,7 +64,6 @@ body.mission-control-active [data-testid="coach-primary-objective"]{
 
 @media(max-width:620px){
   [data-testid="auth-workspace"] .auth-card-enter::before{left:18px;right:18px}
-  [data-testid="player-command-evidence"]>div::before{left:9px;right:9px}
 }
 
 @media(prefers-reduced-motion:reduce){

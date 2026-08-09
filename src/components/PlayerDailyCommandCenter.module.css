@@ -1,24 +1,19 @@
 .root {
+  --text-1: #171a18;
+  --text-2: #4f5a52;
+  --text-3: #6d776f;
   position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, .07);
-  border-radius: 28px;
-  padding: 22px;
-  background:
-    radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--team-brand-primary, var(--accent)) 12%, transparent), transparent 34%),
-    linear-gradient(155deg, rgba(25, 27, 29, .91), rgba(9, 10, 11, .97));
-  box-shadow: 0 26px 68px rgba(0, 0, 0, .3), inset 0 1px rgba(255, 255, 255, .045);
-  backdrop-filter: blur(26px) saturate(124%);
-  -webkit-backdrop-filter: blur(26px) saturate(124%);
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
-.root::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: linear-gradient(112deg, rgba(255, 255, 255, .03), transparent 30%, transparent 78%, rgba(255, 255, 255, .016));
-}
+.root::before { display: none; }
 
 .root > * { position: relative; z-index: 1; }
 
@@ -54,7 +49,7 @@
 }
 
 .eyebrow {
-  color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 84%, white 16%);
+  color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 68%, #354039);
   font-size: 11px;
   font-weight: 720;
   letter-spacing: .09em;
@@ -68,8 +63,8 @@
   padding: 0 11px;
   border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 28%, transparent);
   border-radius: 999px;
-  color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 86%, white 14%);
-  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 9%, rgba(255, 255, 255, .015));
+  color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 66%, #354039);
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 8%, transparent);
   font-size: 10px;
   font-weight: 700;
   letter-spacing: .07em;
@@ -77,6 +72,9 @@
 }
 
 .hero {
+  --text-1: #f5f8f9;
+  --text-2: #c3cdd2;
+  --text-3: #9ba7ae;
   position: relative;
   margin-top: 16px;
   overflow: hidden;
@@ -189,24 +187,23 @@
 
 .coachSignal {
   position: relative;
-  margin-top: 14px;
-  overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 17%, rgba(255, 255, 255, .055));
-  border-radius: 22px;
-  padding: 18px;
-  background:
-    linear-gradient(145deg, color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 6%, rgba(255, 255, 255, .02)), transparent 56%),
-    rgba(13, 15, 16, .8);
-  box-shadow: inset 0 1px rgba(255, 255, 255, .025);
+  margin-top: 20px;
+  overflow: visible;
+  border: 0;
+  border-block: 1px solid rgba(23, 26, 24, .1);
+  border-radius: 0;
+  padding: 20px 2px;
+  background: transparent;
+  box-shadow: none;
 }
 
 .coachSignal::before {
   content: "";
   position: absolute;
-  inset: 16px auto 16px 0;
+  inset: 20px auto 20px -2px;
   width: 3px;
   border-radius: 0 999px 999px 0;
-  background: linear-gradient(180deg, var(--team-brand-secondary, var(--accent)), var(--team-brand-primary, var(--accent)));
+  background: var(--coach-signal-accent, var(--team-brand-secondary, var(--accent)));
 }
 
 .coachSignalHeader {
@@ -225,14 +222,14 @@
 }
 
 .coachSignalEyebrow {
-  color: color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 82%, white 18%);
+  color: color-mix(in srgb, var(--coach-signal-accent, var(--team-brand-secondary, var(--accent))) 66%, #354039);
   font-size: 10px;
 }
 
 .coachSignalTitle {
   max-width: 590px;
   margin: 7px 0 0;
-  color: var(--text-1, #fff);
+  color: var(--text-1, #171a18);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
   font-size: clamp(22px, 4.8vw, 30px);
   font-weight: 720;
@@ -247,27 +244,28 @@
   display: inline-flex;
   align-items: center;
   padding: 0 9px;
-  border: 1px solid color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 26%, transparent);
-  border-radius: 999px;
-  color: color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 84%, white 16%);
-  background: color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 8%, transparent);
+  border: 0;
+  border-radius: 0;
+  color: color-mix(in srgb, var(--coach-signal-accent, var(--team-brand-secondary, var(--accent))) 62%, #354039);
+  background: transparent;
   font-size: 9px;
 }
 
 .coachSignalGrid {
   display: grid;
   grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr);
-  gap: 12px;
+  gap: 0;
   margin-top: 15px;
 }
 
 .coachSignalItem {
   min-width: 0;
-  padding: 12px;
-  border: 1px solid rgba(255, 255, 255, .055);
-  border-radius: 15px;
-  background: rgba(255, 255, 255, .025);
+  padding: 12px 14px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
+.coachSignalItem + .coachSignalItem { padding-left: 14px; border-left: 1px solid rgba(23, 26, 24, .1); }
 
 .coachSignalLabel {
   color: var(--text-3, #858d92);
@@ -277,7 +275,7 @@
 .coachSignalValue {
   margin-top: 6px;
   overflow-wrap: anywhere;
-  color: color-mix(in srgb, var(--text-2, #a5adb2) 92%, white 8%);
+  color: var(--text-2, #4f5a52);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
   font-size: 13px;
   font-weight: 620;
@@ -289,19 +287,21 @@
 
 .progressGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 11px;
-  margin-top: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  margin-top: 18px;
+  border-block: 1px solid rgba(23, 26, 24, .1);
 }
 
 .progressCard {
   min-width: 0;
-  border: 1px solid rgba(255, 255, 255, .06);
-  border-radius: 19px;
-  background: rgba(255, 255, 255, .025);
-  padding: 15px;
-  box-shadow: inset 0 1px rgba(255, 255, 255, .02);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 17px 16px;
+  box-shadow: none;
 }
+.progressCard + .progressCard { border-left: 1px solid rgba(23, 26, 24, .1); }
 
 .progressValue {
   color: var(--text-1, #fff);
@@ -316,8 +316,8 @@
   margin-top: 10px;
   overflow: hidden;
   border-radius: 999px;
-  background: rgba(255, 255, 255, .065);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, .28);
+  background: rgba(23, 26, 24, .08);
+  box-shadow: none;
 }
 
 .progressFill {
@@ -332,16 +332,17 @@
   gap: 0;
   margin-top: 14px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, .06);
-  border-radius: 19px;
-  background: rgba(255, 255, 255, .02);
+  border: 0;
+  border-block: 1px solid rgba(23, 26, 24, .1);
+  border-radius: 0;
+  background: transparent;
 }
 
 .metric {
   flex: 1;
   min-width: 0;
   padding: 14px 12px;
-  border-right: 1px solid rgba(255, 255, 255, .055);
+  border-right: 1px solid rgba(23, 26, 24, .1);
 }
 .metric:last-child { border-right: 0; }
 
@@ -365,7 +366,7 @@
 .section {
   margin-top: 18px;
   padding-top: 18px;
-  border-top: 1px solid rgba(255, 255, 255, .06);
+  border-top: 1px solid rgba(23, 26, 24, .1);
 }
 
 .sectionHeading { gap: 12px; }
@@ -388,23 +389,24 @@
 
 .tasks {
   display: grid;
-  gap: 9px;
+  gap: 0;
   margin-top: 12px;
 }
 
 .taskRow {
   gap: 12px;
   min-width: 0;
-  border: 1px solid rgba(255, 255, 255, .06);
-  border-radius: 17px;
-  background: rgba(255, 255, 255, .022);
-  padding: 13px 14px;
+  border: 0;
+  border-top: 1px solid rgba(23, 26, 24, .1);
+  border-radius: 0;
+  background: transparent;
+  padding: 14px 2px;
   transition: border-color .16s ease, background .16s ease, transform .16s ease;
 }
 
 .taskRow:hover {
-  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 20%, rgba(255, 255, 255, .055));
-  background: rgba(255, 255, 255, .035);
+  border-color: rgba(23, 26, 24, .1);
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 4%, transparent);
 }
 
 .taskIndex {
@@ -456,10 +458,11 @@
 
 .activation {
   margin-top: 17px;
-  border-radius: 19px;
-  border: 1px solid rgba(255, 255, 255, .06);
-  background: rgba(255, 255, 255, .02);
-  padding: 15px;
+  border-radius: 0;
+  border: 0;
+  border-top: 1px solid rgba(23, 26, 24, .1);
+  background: transparent;
+  padding: 17px 2px 0;
 }
 
 .activation summary {
@@ -509,18 +512,19 @@
 }
 
 @media (max-width: 520px) {
-  .root { padding: 17px; border-radius: 24px; }
+  .root { padding: 0; border-radius: 0; }
   .header { align-items: flex-start; gap: 10px; }
   .status { max-width: 44%; text-align: center; }
   .hero { margin-top: 14px; padding: 18px; border-radius: 21px; }
   .heroTop { align-items: flex-start; gap: 10px; }
   .title { font-size: clamp(31px, 10vw, 41px); }
   .description { font-size: 14px; }
-  .coachSignal { padding: 16px; border-radius: 20px; }
+  .coachSignal { padding: 18px 2px; border-radius: 0; }
   .coachSignalHeader { align-items: flex-start; flex-direction: column; gap: 10px; }
-  .coachSignalGrid { grid-template-columns: 1fr; gap: 8px; }
-  .progressGrid { gap: 8px; }
-  .progressCard { padding: 13px; }
+  .coachSignalGrid { grid-template-columns: 1fr; gap: 0; }
+  .coachSignalItem + .coachSignalItem { margin-top: 12px; padding: 12px 0 0; border-left: 0; border-top: 1px solid rgba(23, 26, 24, .1); }
+  .progressGrid { gap: 0; }
+  .progressCard { padding: 14px 10px; }
   .metrics { overflow-x: auto; scrollbar-width: none; scroll-snap-type: x proximity; }
   .metrics::-webkit-scrollbar { display: none; }
   .metric { flex: 0 0 46%; min-width: 128px; scroll-snap-align: start; }

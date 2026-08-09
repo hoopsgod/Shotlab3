@@ -27,13 +27,13 @@ test('Team Store open lifecycle owns and cleans a document-level immersive state
 });
 
 test('mobile Team Store exclusively owns the viewport instead of behaving as a bottom sheet', () => {
-  assert.match(css, /@media \(max-width: 759px\)/);
-  assert.match(css, /body > #root[\s\S]*display: none !important/);
-  assert.match(css, /mobile-navigation-dock[\s\S]*mobile-navigation-overlay[\s\S]*display: none !important/);
-  assert.match(css, /#team-store-root[\s\S]*position: fixed !important[\s\S]*height: 100dvh !important/);
-  assert.match(css, /\.ts-overlay[\s\S]*padding: 0 !important[\s\S]*backdrop-filter: none !important/);
-  assert.match(css, /\.ts-panel[\s\S]*height: 100dvh !important[\s\S]*max-height: none !important[\s\S]*border-radius: 0 !important/);
-  assert.match(css, /\.ts-header[\s\S]*position: sticky !important[\s\S]*safe-area-inset-top/);
+  assert.match(css, /@media \(max-width:\s*759px\)/);
+  assert.match(css, /body\s*>\s*#root[\s\S]*display:\s*none !important/);
+  assert.match(css, /mobile-navigation-dock[\s\S]*mobile-navigation-overlay[\s\S]*display:\s*none !important/);
+  assert.match(css, /#team-store-root[\s\S]*position:\s*fixed !important[\s\S]*height:\s*100dvh !important/);
+  assert.match(css, /\.ts-overlay[\s\S]*padding:\s*0 !important[\s\S]*backdrop-filter:\s*none !important/);
+  assert.match(css, /\.ts-panel[\s\S]*height:\s*100dvh !important[\s\S]*max-height:\s*none !important[\s\S]*border-radius:\s*0 !important/);
+  assert.match(css, /\.ts-header[\s\S]*position:\s*sticky !important[\s\S]*safe-area-inset-top/);
   assert.match(css, /\.ts-coach-content,[\s\S]*\.ts-player-content[\s\S]*safe-area-inset-bottom/);
 });
 
@@ -66,12 +66,12 @@ test('referral attribution, publishing, and external-store behavior remain untou
   }
 });
 
-test('Phase 3I authority loads after Phase 3H and preserves focus/reduced-motion mobile behavior', () => {
-  assert.match(html, /shotlab-phase3h-coach-players-hierarchy\.css[\s\S]*shotlab-phase3i-team-store-immersive\.css/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.match(css, /touch-action: manipulation/);
-  assert.match(css, /min-width: 44px !important/);
-  assert.match(css, /min-height: 44px !important/);
+test('Phase 3I authority follows the remaining Coach hierarchy CSS and preserves focus/reduced-motion mobile behavior', () => {
+  assert.match(html, /shotlab-phase3g-coach-drills-hierarchy\.css[\s\S]*shotlab-phase3i-team-store-immersive\.css/);
+  assert.match(css, /prefers-reduced-motion:\s*reduce/);
+  assert.match(css, /touch-action:\s*manipulation/);
+  assert.match(css, /min-width:\s*44px !important/);
+  assert.match(css, /min-height:\s*44px !important/);
 });
 
 test('rendered iPhone audit proves exclusive viewport ownership for both roles', () => {

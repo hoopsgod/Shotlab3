@@ -1,0 +1,69 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+
+const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
+
+const playerComponent = read("src/components/PlayerOperationalWorkspace.jsx");
+const playerCss = read("src/components/PlayerOperationalWorkspace.module.css");
+const secondaryComponent = read("src/components/SecondaryPageSystem.jsx");
+const secondaryCss = read("src/components/SecondaryPageSystem.css");
+const coachDashboards = read("src/components/CoachInteractiveDashboards.jsx");
+
+test("Player workspaces encode an editorial opening and a single evidence ledger", () => {
+  assert.match(playerComponent, /data-page-hierarchy="editorial"/);
+  assert.match(playerComponent, /<header[^>]+data-layout-role="editorial-header"/);
+  assert.match(playerComponent, /data-layout-role="supporting-evidence"/);
+
+  assert.match(playerCss, /\.commandBar\s*\{[\s\S]*?border-bottom:1px solid[\s\S]*?background:transparent;[\s\S]*?box-shadow:none;/);
+  assert.match(playerCss, /\.metrics\s*\{[\s\S]*?gap:0;[\s\S]*?border-block:1px solid/);
+  assert.match(playerCss, /\.metric\s*\{[\s\S]*?border:0;[\s\S]*?border-radius:0;[\s\S]*?background:transparent;[\s\S]*?box-shadow:none;/);
+  assert.match(playerCss, /\.metric \+ \.metric\s*\{border-left:1px solid/);
+  assert.match(playerCss, /@media\(max-width:700px\)[\s\S]*?\.metrics\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+});
+
+test("Coach secondary pages expose the four-part decision hierarchy in DOM order", () => {
+  assert.match(secondaryComponent, /data-page-hierarchy="editorial"/);
+  assert.match(secondaryComponent, /data-layout-role="editorial-header"/);
+  assert.match(secondaryComponent, /data-layout-role="primary-decision"/);
+  assert.match(secondaryComponent, /data-layout-role="evidence-tools"/);
+  assert.match(secondaryComponent, /data-layout-role="supporting-evidence"/);
+
+  const start = coachDashboards.indexOf("export function CoachPageDashboardHeader");
+  const end = coachDashboards.indexOf("\n}", start);
+  const component = coachDashboards.slice(start, end);
+  assert.ok(component.indexOf("<SecondaryPageIntro") < component.indexOf("<SecondaryPageDecision"));
+  assert.ok(component.indexOf("<SecondaryPageDecision") < component.indexOf("<SecondaryPageToolbar"));
+  assert.ok(component.indexOf("<SecondaryPageToolbar") < component.indexOf("<SecondaryPageEvidence"));
+});
+
+test("Coach hierarchy uses typography and dividers outside the intentional decision surface", () => {
+  assert.match(secondaryCss, /\.secondaryPageIntro__icon\s*\{[\s\S]*?border: 0;[\s\S]*?background: transparent;/);
+  assert.match(secondaryCss, /\.secondaryPageIntro__status\s*\{[\s\S]*?border: 0;[\s\S]*?background: transparent;/);
+  assert.match(secondaryCss, /\.secondaryPageToolbar \[class\*="metricStrip"\]\s*\{[\s\S]*?border-block: 1px solid[\s\S]*?border-radius: 0 !important;[\s\S]*?background: transparent !important;/);
+  assert.match(secondaryCss, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(secondaryCss, /\.secondaryPageEvidence\s*\{[\s\S]*?gap: 0;[\s\S]*?border-block: 1px solid/);
+});
+
+test("Retired authority files no longer recreate card-heavy shared primitives", () => {
+  const legacy = [
+    "public/shotlab-v3-foundation.css",
+    "public/shotlab-v3-mobile-corrections.css",
+    "public/shotlab-v5-coach-integrity.css",
+    "public/shotlab-v11-decision-first.css",
+    "public/shotlab-phase3-secondary-cohesion.css",
+    "public/shotlab-phase3-secondary-acceptance.css",
+  ].map(read).join("\n");
+
+  assert.doesNotMatch(legacy, /secondaryPageToolbar \[class\*="metricStrip"\]/);
+  assert.doesNotMatch(legacy, /secondaryPageIntro\s*\{/);
+  assert.doesNotMatch(legacy, /\[class\*="commandBar"\]/);
+  assert.doesNotMatch(legacy, /\[data-metric-priority\]/);
+});
+
+test("Leaderboard mobile CSS keeps the primary decision and editorial context visible", () => {
+  const leaderboardCss = read("public/shotlab-phase3l-coach-leaderboard-hierarchy.css");
+  assert.doesNotMatch(leaderboardCss, /coach-page-dashboard-leaderboards-decision-brief"\][^\{]*\{\s*display:\s*none/i);
+  assert.doesNotMatch(leaderboardCss, /secondaryPageIntro__summary[^\{]*\{\s*display:\s*none/i);
+  assert.doesNotMatch(leaderboardCss, /secondaryPageIntro__eyebrow[^\{]*\{[\s\S]*?font-size:\s*9px/i);
+});

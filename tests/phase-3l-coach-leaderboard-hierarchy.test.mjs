@@ -10,6 +10,7 @@ const app = readFileSync('src/App.jsx', 'utf8');
 const panel = readFileSync('src/components/CoachDashboardPhase2.jsx', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/phase-3l-coach-leaderboard-screenshots.spec.mjs', 'utf8');
+const secondaryCss = readFileSync('src/components/SecondaryPageSystem.css', 'utf8');
 
 test('Phase 3L runs after accepted Phase 3K and remains guarded/idempotent', () => {
   assert.match(pkg.scripts.dev, /apply-phase3k-coach-strength-hierarchy\.mjs[\s\S]*apply-phase3l-coach-leaderboard-hierarchy\.mjs/);
@@ -56,50 +57,48 @@ test('Phase 3L moves the intentional follow-up workflow into the drawer scroll b
 
 test('Leaderboard authority uses light native surfaces, accessible focus, and restrained motion', () => {
   assert.match(css, /coachLeaderboardPulse/);
-  assert.match(css, /rgba\(255, 255, 255, \.95\)/);
-  assert.match(css, /color: #171a18/);
+  assert.match(css, /rgba\(255,\s*255,\s*255,\s*\.95\)/);
+  assert.match(css, /color:\s*#171a18/);
   assert.match(css, /coachLeaderboardRow:focus-visible/);
-  assert.match(css, /outline: 3px solid/);
-  assert.match(css, /@media \(max-width: 760px\)/);
-  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(css, /outline:\s*3px solid/);
+  assert.match(css, /@media\s*\(max-width:\s*760px\)/);
+  assert.match(css, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 });
 
-test('mobile Leaderboards removes duplicated generic briefing and the legacy full-viewport shell debt', () => {
-  assert.match(css, /coach-page-dashboard-leaderboards-decision-brief/);
-  assert.match(css, /coach-page-dashboard-leaderboards-evidence/);
-  assert.match(css, /display: none !important/);
-  assert.match(css, /html body #root \[data-testid="coach-page-dashboard-leaderboards"\][\s\S]*min-height: 0 !important/);
-  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*padding: 8px 14px 12px !important/);
-  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*gap: 8px !important/);
+test('mobile Leaderboards preserves the decision and evidence hierarchy', () => {
+  assert.doesNotMatch(css, /coach-page-dashboard-leaderboards-decision-brief/);
+  assert.doesNotMatch(css, /coach-page-dashboard-leaderboards-evidence/);
+  assert.match(secondaryCss, /\.secondaryPageDecision\s*\{[\s\S]*?linear-gradient\(145deg, #171b18, #0c0f0d 72%\)/);
+  assert.match(secondaryCss, /\.secondaryPageEvidence\s*\{[\s\S]*?border-block: 1px solid/);
 });
 
-test('mobile Leaderboards compacts only duplicated command chrome while preserving all four metric controls', () => {
-  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*secondaryPageIntro__summary[\s\S]*display: none !important/);
-  assert.match(css, /coach-page-dashboard-leaderboards[\s\S]*secondaryPageIntro__status[\s\S]*display: none !important/);
-  assert.match(css, /coach-page-dashboard-leaderboards-metric-strip[\s\S]*grid-template-columns: repeat\(2, minmax\(0, 1fr\)\) !important/);
-  assert.match(css, /coach-page-dashboard-leaderboards-metric-strip[\s\S]*min-height: 72px !important/);
-  assert.match(css, /coach-page-dashboard-leaderboards-metric-strip[\s\S]*font-size: 24px !important/);
+test('mobile Leaderboards keeps editorial context readable and metric controls flat', () => {
+  assert.doesNotMatch(css, /secondaryPageIntro__summary/);
+  assert.doesNotMatch(css, /secondaryPageIntro__status/);
+  assert.doesNotMatch(css, /font-size: 9px !important/);
+  assert.match(secondaryCss, /\.secondaryPageToolbar \[class\*="metricStrip"\][\s\S]*?border-block: 1px solid/);
+  assert.match(secondaryCss, /@media \(max-width: 760px\)[\s\S]*?grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
 });
 
 test('Player Intelligence establishes a complete dark-native surface boundary when opened from light Leaderboards', () => {
   assert.match(css, /coach-player-intelligence-drawer/);
-  assert.match(css, /--text-1: #f4f7f2 !important/);
-  assert.match(css, /--text-2: #aab4ad !important/);
-  assert.match(css, /--text-3: #7f8a84 !important/);
-  assert.match(css, /drawerHeader[\s\S]*h2[\s\S]*color: #f4f7f2 !important/);
-  assert.match(css, /drawerMetric[\s\S]*strong[\s\S]*-webkit-text-fill-color: #f4f7f2 !important/);
-  assert.match(css, /sectionCompact[\s\S]*background: #101315 !important/);
-  assert.match(css, /sectionCompact[\s\S]*sectionHeader[\s\S]*sectionBody[\s\S]*background: transparent !important/);
-  assert.match(css, /sectionEyebrow[\s\S]*sectionTitle[\s\S]*sectionSummary[\s\S]*background: transparent !important/);
-  assert.match(css, /sectionEyebrow[\s\S]*::before[\s\S]*sectionSummary[\s\S]*::after[\s\S]*content: none !important/);
-  assert.match(css, /compactMetric[\s\S]*background: #0c1012 !important/);
+  assert.match(css, /--text-1:\s*#f4f7f2\s*!important/);
+  assert.match(css, /--text-2:\s*#aab4ad\s*!important/);
+  assert.match(css, /--text-3:\s*#7f8a84\s*!important/);
+  assert.match(css, /drawerHeader[\s\S]*h2[\s\S]*color:\s*#f4f7f2\s*!important/);
+  assert.match(css, /drawerMetric[\s\S]*strong[\s\S]*-webkit-text-fill-color:\s*#f4f7f2\s*!important/);
+  assert.match(css, /sectionCompact[\s\S]*background:\s*#101315\s*!important/);
+  assert.match(css, /sectionCompact[\s\S]*sectionHeader[\s\S]*sectionBody[\s\S]*background:\s*transparent\s*!important/);
+  assert.match(css, /sectionEyebrow[\s\S]*sectionTitle[\s\S]*sectionSummary[\s\S]*background:\s*transparent\s*!important/);
+  assert.match(css, /sectionEyebrow[\s\S]*::before[\s\S]*sectionSummary[\s\S]*::after[\s\S]*content:\s*none\s*!important/);
+  assert.match(css, /compactMetric[\s\S]*background:\s*#0c1012\s*!important/);
 });
 
 test('rank and weekly pace receive dedicated mobile hierarchy without horizontal overflow debt', () => {
-  assert.match(css, /grid-template-columns: 38px minmax\(0, 1fr\) auto/);
+  assert.match(css, /grid-template-columns:\s*38px\s+minmax\(0,\s*1fr\)\s+auto/);
   assert.match(css, /coachLeaderboardRank/);
   assert.match(css, /coachLeaderboardWeek/);
-  assert.match(css, /text-overflow: ellipsis/);
+  assert.match(css, /text-overflow:\s*ellipsis/);
   assert.doesNotMatch(css, /min-width:\s*[4-9][0-9]{2}px/);
 });
 

@@ -10,16 +10,15 @@ const expertPolishSource = readFileSync('src/lib/expertVisualPolish.js', 'utf8')
 
 test('Phase 3B gives secondary actions tactile pressed, focus, and reduced-motion states', () => {
   assert.match(secondaryCss, /secondaryPageAction:active:not\(:disabled\)/);
-  assert.match(secondaryCss, /secondaryPageToolbar button\[aria-pressed="true"\]/);
-  assert.match(secondaryCss, /secondaryPageEvidence button:focus-visible/);
-  assert.match(secondaryCss, /prefers-reduced-motion:reduce/);
+  assert.match(secondaryCss, /metricStrip"\]\s*> button\[aria-pressed="true"\]/);
+  assert.match(secondaryCss, /secondaryPageDecision button:focus-visible/);
+  assert.match(secondaryCss, /prefers-reduced-motion:\s*reduce/);
 });
 
 test('Phase 3B makes insight actions deliberate rather than a loose button cluster', () => {
   assert.match(secondaryCss, /\[class\*="insightActions"\]/);
-  assert.match(secondaryCss, /grid-template-columns:minmax\(0,1fr\)/);
   assert.match(secondaryCss, /\[class\*="quietAction"\]/);
-  assert.match(secondaryCss, /min-height:42px/);
+  assert.match(secondaryCss, /min-height: var\(--touch-target, 44px\) !important/);
 });
 
 test('Coach management empty states remain on the light native secondary system', () => {

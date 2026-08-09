@@ -12,7 +12,7 @@ export default function PlayerDashboardHeader({
   const displayName = String(userName || "Demo Player").trim();
 
   return (
-    <section className={`${styles.header} ${styles.player}`} data-dashboard-header="player-premium" data-testid="player-dashboard-identity-header">
+    <section className={`${styles.header} ${styles.player}`} data-dashboard-header="player-premium" data-testid="player-dashboard-identity-header" data-layout-role="editorial-header">
       <div className={styles.inner}>
         <div className={styles.identity}>
           <div className={styles.modeRow}>

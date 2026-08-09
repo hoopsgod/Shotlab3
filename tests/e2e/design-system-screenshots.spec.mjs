@@ -125,40 +125,22 @@ test("Coach visual system remains integrated across command and management pages
   await capture(page, "05-coach-home");
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
-  const accountActivation = page.getByTestId("coach-player-account-activation");
-  const seasonTools = page.getByTestId("coach-player-season-tools");
-  const rosterManagement = page.getByTestId("coach-player-roster-management");
+  await expect(page.getByTestId("coach-players-interactive-dashboard")).toBeVisible({ timeout: 20_000 });
   const inviteForm = page.getByTestId("coach-player-invite-form");
-  for (const disclosure of [accountActivation, seasonTools, rosterManagement]) {
-    await expect(disclosure).toBeVisible({ timeout: 20_000 });
-    await expect(disclosure).not.toHaveAttribute("open", "");
-  }
-  await expect(inviteForm).toBeHidden();
-  await expect(page.getByText("SEASON ARCHIVE", { exact: true })).toBeHidden();
-  await expect(page.getByText("PLAYER ROSTER", { exact: true })).toBeHidden();
+  await expect(inviteForm).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator("#coach-roster-operations")).toBeVisible();
+  await expect(page.getByTestId("coach-season-archive")).toHaveCount(0);
   await capture(page, "06-coach-players");
 
   await page.getByTestId("coach-players-command-bar").getByRole("button", { name: "Add Player", exact: true }).click();
-  await expect(accountActivation).toHaveAttribute("open", "");
   await expect(inviteForm).toBeVisible({ timeout: 20_000 });
   await capture(page, "06b-coach-player-add");
-  await accountActivation.locator(":scope > summary").click();
-  await expect(accountActivation).not.toHaveAttribute("open", "");
 
-  await page.getByTestId("coach-players-command-bar").getByRole("button", { name: "Season Tools", exact: true }).click();
-  await expect(seasonTools).toHaveAttribute("open", "");
-  await expect(page.getByText("SEASON ARCHIVE", { exact: true })).toBeVisible({ timeout: 20_000 });
+  await page.getByTestId("coach-players-command-bar").getByRole("button", { name: "Team & Account", exact: true }).click();
+  await expect(page.getByTestId("coach-administration-workspace")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("coach-season-archive")).toBeVisible();
   await expect(page.getByText("Start a New Season", { exact: true })).toBeVisible();
-  await capture(page, "06c-coach-season-tools");
-  await seasonTools.locator(":scope > summary").click();
-  await expect(seasonTools).not.toHaveAttribute("open", "");
-
-  await rosterManagement.locator(":scope > summary").click();
-  await expect(rosterManagement).toHaveAttribute("open", "");
-  await expect(page.getByText("PLAYER ROSTER", { exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("PLAYER DETAILS", { exact: true })).toBeVisible();
-  await capture(page, "06d-coach-roster-management");
-  await rosterManagement.locator(":scope > summary").click();
+  await capture(page, "06c-coach-team-account");
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
   const eventInsights = page.getByTestId("coach-events-supporting-intelligence");

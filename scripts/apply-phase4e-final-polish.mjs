@@ -11,8 +11,8 @@ const requirePattern = (source, pattern, label) => {
 
 const appHeader = readFileSync("src/components/AppHeader.jsx", "utf8");
 for (const expected of [
-  "minHeight: 44",
-  "minWidth: 44",
+  'minHeight: "var(--touch-target, 44px)"',
+  'minWidth: "var(--touch-target, 44px)"',
   'overflowWrap: "break-word"',
 ]) {
   if (!appHeader.includes(expected)) fail(`AppHeader final-polish contract missing: ${expected}`);
@@ -20,7 +20,7 @@ for (const expected of [
 
 const hierarchy = readFileSync("src/components/VisualHierarchy.module.css", "utf8");
 for (const expected of [
-  ".quietAction { min-height: 44px",
+  ".quietAction { min-height: var(--touch-target, 44px)",
   ".objectiveTitle { font-size: 34px; max-width: 100%;",
   ".quietHeader { flex-wrap: wrap; }",
 ]) {

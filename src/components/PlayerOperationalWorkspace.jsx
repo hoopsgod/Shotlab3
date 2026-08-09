@@ -36,8 +36,8 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
   const subtitle = resolveWorkspaceSubtitle(model);
 
   return (
-    <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`}>
-      <div className={styles.commandBar}>
+    <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial">
+      <header className={styles.commandBar} data-layout-role="editorial-header">
         <div className={styles.copy}>
           <div className={styles.eyebrow}>{model.eyebrow}</div>
           <div className={styles.titleRow}>
@@ -51,8 +51,8 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
             {model.primaryAction.label} →
           </button>
         )}
-      </div>
-      <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} aria-label={`${model.title} metrics`}>
+      </header>
+      <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} data-layout-role="supporting-evidence" aria-label={`${model.title} metrics`}>
         {metrics.map((metric, index) => {
           const interactive = Boolean(metric?.filter || metric?.action);
           const hierarchyClass = index === 0 ? hierarchyStyles.metricPrimary : hierarchyStyles.metricSupporting;
