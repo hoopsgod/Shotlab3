@@ -51,8 +51,7 @@ test('embedded brand asset and legacy style payload no longer inflate App source
 test('legacy style payload hydrates every extracted runtime token before browser evaluation', () => {
   assert.match(viteConfigSource, /STATIC_LEGACY_STYLE_IMPORT = '\.\/styles\/appLegacyStyles\.js'/);
   assert.match(viteConfigSource, /LEGACY_STYLE_RUNTIME_MODULE/);
-  assert.match(viteConfigSource, /function hydrateLegacyStyles\(\)/);
-  assert.match(viteConfigSource, /hydrateLegacyStyles\(\)/);
+  assert.match(viteConfigSource, /redirectAppImport\(['"]shotlab-hydrate-legacy-styles['"],\s*STATIC_LEGACY_STYLE_IMPORT,\s*LEGACY_STYLE_RUNTIME_MODULE\)/);
   assert.match(legacyStyleRuntimeSource, /import TOKENS from "\.\.\/theme\/appTokens"/);
   assert.match(legacyStyleRuntimeSource, /import legacyStyleModuleSource from "\.\/appLegacyStyles\.js\?raw"/);
   assert.match(legacyStyleRuntimeSource, /unresolvedTokens/);

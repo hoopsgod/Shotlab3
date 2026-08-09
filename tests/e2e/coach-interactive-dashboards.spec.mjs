@@ -145,8 +145,8 @@ test("Coach Events exposes RSVP gaps and searchable schedule controls", async ({
   await expect(page.getByTestId("coach-events-filter-rail")).toBeVisible();
   await expect(scheduleResults.getByText("Team Practice", { exact: true }).first()).toBeVisible();
 
-  await page.getByTestId("coach-events-metric-strip").getByRole("button", { name: /Missing RSVPs/i }).click();
-  await expect(page.getByTestId("coach-events-metric-strip").getByRole("button", { name: /Missing RSVPs/i })).toHaveAttribute("aria-pressed", "true");
+  await page.getByTestId("coach-events-metric-strip").getByRole("button", { name: /Awaiting RSVP/i }).click();
+  await expect(page.getByTestId("coach-events-metric-strip").getByRole("button", { name: /Awaiting RSVP/i })).toHaveAttribute("aria-pressed", "true");
 
   const search = page.getByTestId("coach-events-filter-rail").getByRole("searchbox");
   await search.fill("Summer Game");
@@ -165,7 +165,7 @@ test("Coach Inbox routes the next-event RSVP risk into exact attendance manageme
   const inbox = page.getByRole("dialog", { name: "Coach Inbox" });
   const readiness = inbox.getByRole("button", { name: /Event readiness Team Practice/i });
   await expect(readiness).toContainText("3 of 4 players still need to RSVP.");
-  await expect(readiness).toContainText("25% confirmed");
+  await expect(readiness).toContainText("25% responded");
   await readiness.click();
 
   const eventDrawer = page.getByTestId("coach-event-intelligence-drawer");

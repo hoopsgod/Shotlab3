@@ -123,6 +123,9 @@ test("player workspaces share premium surfaces and preserve mobile geometry", as
   await expectWorkspace(page, "player", "log-drill");
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
+  await expectWorkspace(page, "player", "profile");
+
+  await openMoreDestination(page, "leaderboards");
   await expectWorkspace(page, "player", "leaderboards");
   await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
 
@@ -135,6 +138,6 @@ test("player workspaces share premium surfaces and preserve mobile geometry", as
   await openMoreDestination(page, "sc");
   await expectWorkspace(page, "player", "sc");
 
-  await openMoreDestination(page, "profile");
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
   await expectWorkspace(page, "player", "profile");
 });

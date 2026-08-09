@@ -178,7 +178,7 @@ test("player intelligence drawer summarizes development and hands off to the ful
   await expect(drawer).toBeVisible();
   await expect(drawer.getByRole("heading", { name: "Active Player", exact: true })).toBeVisible();
   await expect(drawer.getByText("Weekly makes", { exact: true }).first()).toBeVisible();
-  await expect(drawer.getByText("Event readiness", { exact: true }).first()).toBeVisible();
+  await expect(drawer.getByText("Upcoming RSVPs", { exact: true }).first()).toBeVisible();
   await expect(drawer.getByText("S&C completion", { exact: true }).first()).toBeVisible();
   await expect(drawer.getByText("Activity timeline", { exact: true })).toBeVisible();
 
@@ -192,7 +192,7 @@ test("event intelligence drawer identifies missing responses and returns to atte
   await enterSeededDemoCoach(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
 
-  await page.getByRole("button", { name: "Manage Attendance", exact: true }).click();
+  await page.getByTestId("coach-events-decision-brief").getByRole("button", { name: "Resolve RSVPs", exact: true }).click();
   const drawer = page.getByTestId("coach-event-intelligence-drawer");
   await expect(drawer).toBeVisible({ timeout: 20_000 });
   await expect(drawer.getByRole("heading", { name: "Team Practice", exact: true })).toBeVisible();
@@ -212,11 +212,13 @@ test("drills and strength dashboards support decision-ready filtering", async ({
   await openMoreDestination(page, "drills");
   const drillPanel = page.getByTestId("coach-drills-operational-panel");
   await expect(drillPanel).toBeVisible({ timeout: 20_000 });
+  const drillLibrary = page.getByTestId("coach-drills-library-management");
+  await drillLibrary.locator("summary").click();
   const drillFilters = page.getByTestId("coach-drills-operational-filters");
   await drillFilters.getByRole("button", { name: /^Underused/ }).click();
   await expect(drillFilters.getByRole("button", { name: /^Underused/ })).toHaveAttribute("aria-pressed", "true");
   await drillFilters.getByRole("searchbox").fill("Corner");
-  await expect(page.getByText("Corner Threes", { exact: true }).first()).toBeVisible();
+  await expect(drillLibrary.getByText("Corner Threes", { exact: true }).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
   await openMoreDestination(page, "sc");
@@ -254,7 +256,7 @@ test("leaderboard, activity, and season comparison use the shared intelligence l
   await expect(activityResults.getByText("Active Player", { exact: true }).first()).toBeVisible();
   await expectNoHorizontalOverflow(page);
 
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
+  await openMoreDestination(page, "settings");
   const comparison = page.getByTestId("coach-season-comparison-panel");
   await comparison.scrollIntoViewIfNeeded();
   await expect(comparison).toBeVisible({ timeout: 20_000 });
