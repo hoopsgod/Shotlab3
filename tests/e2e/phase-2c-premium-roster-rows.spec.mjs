@@ -49,12 +49,21 @@ test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
 
-test('Coach Players roster rows match the Phase 2C mobile hierarchy and preserve player intelligence routing', async ({ page }) => {
+test('Coach Players roster matches the Phase 2C mobile hierarchy and preserves player intelligence routing', async ({ page }) => {
   await enterCoachPlayers(page);
 
   const roster = page.locator('#coach-roster-operations');
   await expect(roster).toBeVisible({ timeout: 20_000 });
   await roster.scrollIntoViewIfNeeded();
+
+  await expect(roster.getByText(/Most engaged:/)).toBeHidden();
+  await expect(roster.getByText(/Track who's putting in work today/)).toBeHidden();
+
+  const sort = roster.getByRole('combobox', { name: 'Sort' });
+  await expect(sort).toBeVisible();
+  const sortBox = await sort.boundingBox();
+  expect(sortBox).not.toBeNull();
+  expect(sortBox.height).toBeGreaterThanOrEqual(44);
 
   const rows = roster.locator('> .fade-up > [role="button"]');
   expect(await rows.count()).toBeGreaterThanOrEqual(1);
@@ -92,19 +101,19 @@ test('Coach Players roster rows match the Phase 2C mobile hierarchy and preserve
   expect(removeBox).not.toBeNull();
   expect(removeBox.height).toBeGreaterThanOrEqual(44);
 
-  const rowName = (await firstRow.locator('span').first().textContent())?.trim();
+  const rowName = (await firstRow.locator('span').first().textContent())?.trim() || 'Player';
   await capture(page, '01-coach-players-premium-roster-section', roster);
 
   await firstRow.click({ position: { x: 18, y: 18 } });
-  const drawer = page.getByTestId('coach-player-intelligence-drawer');
+  const drawer = page.getByRole('dialog', { name: rowName });
   await expect(drawer).toBeVisible({ timeout: 10_000 });
-  if (rowName) await expect(drawer).toContainText(rowName);
+  await expect(drawer).toContainText(rowName);
   await expectNoHorizontalOverflow(page);
 
   await drawer.getByRole('button', { name: 'Open Full Profile', exact: true }).click();
   const detail = page.getByTestId('coach-player-detail-workspace');
   await expect(detail).toBeVisible({ timeout: 10_000 });
-  if (rowName) await expect(detail).toContainText(rowName);
+  await expect(detail).toContainText(rowName);
   await expectNoHorizontalOverflow(page);
 });
 
