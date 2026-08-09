@@ -110,7 +110,7 @@ export function InteractiveMetricStrip({ items = [], activeKey, onSelect, testId
           >
             <span data-premium-metric-head>
               <span data-premium-metric-icon aria-hidden="true"><ShotLabIcon name={metricIconName(item)} size={15} /></span>
-              <span className={styles.metricLabel} data-premium-metric-label>{item.displayLabel || item.label}</span>
+              <span data-premium-metric-label>{item.displayLabel || item.label}</span>
             </span>
             <span className={styles.metricValue} data-premium-metric-value>{item.value}</span>
             {item.detail ? <span className={styles.metricDetail}>{item.detail}</span> : null}
