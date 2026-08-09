@@ -17,9 +17,11 @@ test('Phase 2 premium metrics preserve dashboard filter semantics and full acces
   assert.match(primitives, /data-premium-metric-tone=\{item\.tone \|\| "neutral"\}/);
 });
 
-test('Phase 2 premium labels are isolated from the legacy metricLabel authority class', () => {
-  assert.match(primitives, /<span data-premium-metric-label>\{item\.displayLabel \|\| item\.label\}<\/span>/);
-  assert.doesNotMatch(primitives, /className=\{styles\.metricLabel\} data-premium-metric-label/);
+test('Phase 2 premium label and value escape the legacy positional span authority', () => {
+  assert.match(primitives, /<small data-premium-metric-label>\{item\.displayLabel \|\| item\.label\}<\/small>/);
+  assert.match(primitives, /<output className=\{styles\.metricValue\} data-premium-metric-value>\{item\.value\}<\/output>/);
+  assert.doesNotMatch(primitives, /<span[^>]*data-premium-metric-label/);
+  assert.doesNotMatch(primitives, /<span[^>]*data-premium-metric-value/);
 });
 
 test('Phase 2 premium metrics use the ShotLab icon family instead of ornamental glyphs', () => {
