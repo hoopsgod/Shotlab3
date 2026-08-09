@@ -44,6 +44,15 @@ test("Phase 5B presentation uses RSVP coverage rather than future-attendance cla
   assert.match(phase5a, /apply-phase5b-practice-readiness\.mjs/);
 });
 
+test("Phase 5B Event Intelligence drawer owns high-contrast dark-surface tokens", async () => {
+  const css = await read("src/components/CoachDashboardPhase2.module.css");
+  assert.match(css, /coach-event-intelligence-drawer/);
+  assert.match(css, /--text-1:\s*#f7fafb/);
+  assert.match(css, /--text-2:\s*#b8c3c8/);
+  assert.match(css, /aside section[^}]*background:[^}]*#0f1214[^}]*!important/s);
+  assert.match(css, /drawerActionSecondary[^}]*color:\s*#f7fafb\s*!important/s);
+});
+
 test("Phase 5B preserves the accepted Phase 5A.1 performance asset strategy", async () => {
   const phase5a = await read("scripts/apply-phase5a-coach-daily-intelligence.mjs");
   const externalizer = await read("scripts/externalize-shotlab-brand-logo.mjs");
