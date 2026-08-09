@@ -49,7 +49,28 @@
 }
 
 [data-premium-metric-value] {
+  display: block;
+  min-width: 0;
+  margin: 0;
+  color: var(--text-1, #fff);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  font-size: 30px;
+  font-weight: 800;
   font-variant-numeric: tabular-nums;
+  line-height: .96;
+  letter-spacing: -.035em;
+}
+
+[data-premium-metric][data-premium-metric-tone="attention"] [data-premium-metric-value] {
+  color: var(--semantic-warning, #ffb547);
+}
+
+[data-premium-metric][data-premium-metric-tone="info"] [data-premium-metric-value] {
+  color: var(--semantic-info, #77d7ff);
+}
+
+[data-premium-metric][data-premium-metric-tone="positive"] [data-premium-metric-value] {
+  color: var(--accent, #c8ff1a);
 }
 
 [data-premium-metric-evidence] {
@@ -117,6 +138,28 @@
 
 .secondaryPageToolbar [data-premium-metric-label] {
   color: #526059 !important;
+}
+
+.secondaryPageToolbar [data-premium-metric-value] {
+  color: #171a18 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif !important;
+  font-size: 30px !important;
+  font-weight: 800 !important;
+  line-height: .96 !important;
+  letter-spacing: -.035em !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.secondaryPageToolbar [data-premium-metric][data-premium-metric-tone="attention"] [data-premium-metric-value] {
+  color: #8d4d0b !important;
+}
+
+.secondaryPageToolbar [data-premium-metric][data-premium-metric-tone="info"] [data-premium-metric-value] {
+  color: #1e708e !important;
+}
+
+.secondaryPageToolbar [data-premium-metric][data-premium-metric-tone="positive"] [data-premium-metric-value] {
+  color: #566b17 !important;
 }
 
 .secondaryPageToolbar [data-premium-metric-evidence] {
