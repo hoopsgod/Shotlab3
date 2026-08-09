@@ -40,48 +40,25 @@ export function buildCoachPlayerActionBriefing({ metrics = {}, rows = [] } = {})
   const activeVerb = activeRows.length === 1 ? "has" : "have";
 
   const decision = !total
-    ? {
-        title: "Build the roster intelligence signal",
-        detail: "Add the first player to unlock engagement, follow-up, and recognition guidance.",
-        tone: "info",
-        action: { kind: "add-player", label: "Add Player" },
-      }
+    ? { title: "Build the roster intelligence signal", detail: "Add the first player to unlock engagement, follow-up, and recognition guidance.", tone: "info", action: { kind: "add-player", label: "Add Player" } }
     : attentionRows.length
-      ? {
-          title: `${pluralize(attentionRows.length, "player")} ${attentionVerb} a coaching touchpoint`,
-          detail: `${pluralize(noActivityRows.length, "player")} ${noActivityVerb} no recorded activity and ${pluralize(followUpRows.length, "player")} ${followUpVerb} active previously but not this week.`,
-          tone: "attention",
-          action: { kind: "filter", value: "attention", label: "Open attention queue" },
-        }
-      : {
-          title: "Roster engagement is current",
-          detail: `${pluralize(activeRows.length, "player")} ${activeVerb} current-week activity. Protect the standard with direct recognition and a specific next assignment.`,
-          tone: "positive",
-          action: { kind: "filter", value: "active", label: "Recognize active players" },
-        };
+      ? { title: `${pluralize(attentionRows.length, "player")} ${attentionVerb} a coaching touchpoint`, detail: `${pluralize(noActivityRows.length, "player")} ${noActivityVerb} no recorded activity and ${pluralize(followUpRows.length, "player")} ${followUpVerb} active previously but not this week.`, tone: "attention", action: { kind: "filter", value: "attention", label: "Open attention queue" } }
+      : { title: "Roster engagement is current", detail: `${pluralize(activeRows.length, "player")} ${activeVerb} current-week activity. Protect the standard with direct recognition and a specific next assignment.`, tone: "positive", action: { kind: "filter", value: "active", label: "Recognize active players" } };
 
   const insights = [
     {
       key: "follow-up",
       eyebrow: "Immediate follow-up",
       title: !total ? "No roster signal yet" : attentionRows.length ? `${pluralize(attentionRows.length, "player")} ${attentionVerb} a touchpoint` : "Roster engagement is current",
-      body: !total
-        ? "The first rostered player will create a real coaching signal here."
-        : attentionRows.length
-          ? `${namedSummary(attentionRows)} ${attentionVerb} a direct next step, not another generic reminder.`
-          : "Every rostered player has current-week activity.",
+      body: !total ? "The first rostered player will create a real coaching signal here." : attentionRows.length ? `${namedSummary(attentionRows)} ${attentionVerb} a direct next step, not another generic reminder.` : "Every rostered player has current-week activity.",
       tone: attentionRows.length ? "attention" : total ? "positive" : "info",
-      action: total
-        ? { kind: "filter", value: attentionRows.length ? "attention" : "active", label: attentionRows.length ? "Show Players" : "View Active" }
-        : { kind: "add-player", label: "Add Player" },
+      action: total ? { kind: "filter", value: attentionRows.length ? "attention" : "active", label: attentionRows.length ? "Show Players" : "View Active" } : { kind: "add-player", label: "Add Player" },
     },
     {
       key: "recognition",
       eyebrow: "Recognition opportunity",
       title: leader?.name || "No engagement leader yet",
-      body: leader
-        ? `${safeNumber(leader.weeklyMakes)} weekly makes and ${safeNumber(leader.weeklyActivityCount)} logged actions currently set the pace. Use this as recognition, not only a ranking.`
-        : "Verified player activity will surface the first recognition opportunity.",
+      body: leader ? `${safeNumber(leader.weeklyMakes)} weekly makes and ${safeNumber(leader.weeklyActivityCount)} logged actions currently set the pace. Use this as recognition, not only a ranking.` : "Verified player activity will surface the first recognition opportunity.",
       tone: leader ? "positive" : "info",
       action: leader ? { kind: "filter", value: "leaders", label: "Open Top Five" } : undefined,
     },
@@ -89,31 +66,13 @@ export function buildCoachPlayerActionBriefing({ metrics = {}, rows = [] } = {})
       key: "team-pulse",
       eyebrow: "Team pulse",
       title: `${activeRate}% active this week`,
-      body: !total
-        ? "Roster activation begins after the first player joins."
-        : activeRate >= 80
-          ? "Engagement is strong. Reinforce the behavior and keep the next assignment specific."
-          : activeRate >= 55
-            ? "Engagement is building, but individual blockers still need direct follow-up."
-            : "Roster activation needs intervention before more programming is added.",
+      body: !total ? "Roster activation begins after the first player joins." : activeRate >= 80 ? "Engagement is strong. Reinforce the behavior and keep the next assignment specific." : activeRate >= 55 ? "Engagement is building, but individual blockers still need direct follow-up." : "Roster activation needs intervention before more programming is added.",
       tone: !total ? "info" : activeRate >= 80 ? "positive" : activeRate >= 55 ? "info" : "attention",
       progress: { value: active, max: total || 1, label: "Weekly roster activation", detail: `${active} of ${total}` },
     },
   ];
 
-  return {
-    total,
-    active,
-    activeRate,
-    attentionRows,
-    noActivityRows,
-    followUpRows,
-    activeRows,
-    leader,
-    engagementDistribution,
-    decision,
-    insights,
-  };
+  return { total, active, activeRate, attentionRows, noActivityRows, followUpRows, activeRows, leader, engagementDistribution, decision, insights };
 }
 
 export function buildCoachEventActionBriefing({ metrics = {}, rows = [] } = {}) {
@@ -122,88 +81,52 @@ export function buildCoachEventActionBriefing({ metrics = {}, rows = [] } = {}) 
   const next = metrics.next || null;
   const upcoming = safeNumber(metrics.upcoming);
   const awaitingResponse = safeNumber(metrics.awaitingResponse ?? metrics.missing);
-  const attending = safeNumber(metrics.attending ?? metrics.confirmed);
-  const unavailable = safeNumber(metrics.unavailable);
-  const responded = safeNumber(metrics.responded || (attending + unavailable));
+  const responded = safeNumber(metrics.responded ?? metrics.rsvpConfirmed ?? metrics.confirmed);
   const responseRate = Math.min(100, safeNumber(metrics.responseRate));
-  const availabilityRate = Math.min(100, safeNumber(metrics.availabilityRate));
   const past = safeNumber(metrics.past);
   const total = safeNumber(metrics.total || safeRows.length);
   const nextId = next?.event?.id ?? next?.id ?? null;
-  const nextAttending = safeNumber(next?.attending ?? next?.confirmed);
-  const nextUnavailable = safeNumber(next?.unavailable);
+  const nextResponded = safeNumber(next?.responded ?? next?.rsvpConfirmed ?? next?.confirmed);
   const nextAwaiting = safeNumber(next?.awaitingResponse ?? next?.missing);
-  const nextRoster = safeNumber(next?.rosterCount || (nextAttending + nextUnavailable + nextAwaiting));
-  const nextAvailabilityRate = nextRoster ? Math.min(100, Math.round((nextAttending / nextRoster) * 100)) : 0;
+  const nextRoster = safeNumber(next?.rosterCount || (nextResponded + nextAwaiting));
+  const nextResponseRate = nextRoster ? Math.min(100, Math.round((nextResponded / nextRoster) * 100)) : 0;
 
   const decision = !next
-    ? {
-        title: "Calendar is open",
-        detail: "Create the next event to begin attendance tracking and player communication.",
-        tone: "info",
-        action: { kind: "create-event", label: "Create Event" },
-      }
+    ? { title: "Calendar is open", detail: "Create the next event to begin RSVP tracking and player communication.", tone: "info", action: { kind: "create-event", label: "Create Event" } }
     : {
         title: next.title || "Next team event",
-        detail: `${formatCoachScheduleDate(next.date, { weekday: true })} at ${next.time || "TBD"} · ${next.location || "Location TBD"}. ${nextAttending} attending · ${nextUnavailable} unavailable · ${nextAwaiting} awaiting response.`,
-        tone: nextAwaiting ? "attention" : nextUnavailable ? "info" : "positive",
+        detail: `${formatCoachScheduleDate(next.date, { weekday: true })} at ${next.time || "TBD"} · ${next.location || "Location TBD"}. ${nextResponded} RSVP${nextResponded === 1 ? "" : "s"} received · ${nextAwaiting} awaiting response.`,
+        tone: nextAwaiting ? "attention" : "positive",
         action: { kind: "open-event", id: nextId, label: nextAwaiting ? "Resolve RSVPs" : "Open Event" },
       };
 
   const insights = [
     {
-      key: "attendance-risk",
+      key: "rsvp-follow-up",
       eyebrow: "RSVP follow-up",
-      title: awaitingResponse ? pluralize(awaitingResponse, "awaiting response") : next ? "No unanswered RSVPs" : "No event to evaluate",
-      body: awaitingResponse
-        ? `${pluralize(gapEvents.length, "upcoming event")} ${gapEvents.length === 1 ? "still has" : "still have"} unanswered roster spots.`
-        : next
-          ? "Every currently scheduled event has a recorded response for each roster spot."
-          : "Create the next event to start measuring attendance readiness.",
+      title: awaitingResponse ? pluralize(awaitingResponse, "awaiting response") : next ? "RSVP coverage is complete" : "No event to evaluate",
+      body: awaitingResponse ? `${pluralize(gapEvents.length, "upcoming event")} ${gapEvents.length === 1 ? "still has" : "still have"} unanswered roster spots.` : next ? "Every currently scheduled event has an RSVP recorded for each roster spot." : "Create the next event to start measuring practice-readiness coverage.",
       tone: awaitingResponse ? "attention" : next ? "positive" : "info",
-      action: next
-        ? { kind: "status-filter", value: awaitingResponse ? "gaps" : "upcoming", label: awaitingResponse ? "Show Awaiting" : "Show Upcoming" }
-        : { kind: "create-event", label: "Create Event" },
+      action: next ? { kind: "status-filter", value: awaitingResponse ? "gaps" : "upcoming", label: awaitingResponse ? "Show Awaiting" : "Show Upcoming" } : { kind: "create-event", label: "Create Event" },
     },
     {
-      key: "next-session-availability",
-      eyebrow: "Next-session availability",
-      title: next ? `${nextAttending} of ${nextRoster} attending` : "No availability signal yet",
-      body: next
-        ? `${nextUnavailable} unavailable and ${nextAwaiting} still awaiting response. This is observed roster status, not a predicted readiness score.`
-        : "Attendance availability becomes useful after the next event is scheduled.",
-      tone: !next ? "info" : nextAwaiting ? "attention" : nextUnavailable ? "info" : "positive",
-      progress: next ? { value: nextAttending, max: nextRoster || 1, label: "Next-session availability", detail: `${nextAvailabilityRate}% attending` } : undefined,
+      key: "next-session-coverage",
+      eyebrow: "Next-session coverage",
+      title: next ? `${nextResponded} of ${nextRoster} RSVP'd` : "No RSVP signal yet",
+      body: next ? `${nextAwaiting} roster spot${nextAwaiting === 1 ? "" : "s"} still need a response. ShotLab does not infer future attendance from the separate attendance field.` : "RSVP coverage becomes useful after the next event is scheduled.",
+      tone: !next ? "info" : nextAwaiting ? "attention" : "positive",
+      progress: next ? { value: nextResponded, max: nextRoster || 1, label: "Next-session RSVP coverage", detail: `${nextResponseRate}% responded` } : undefined,
       action: next ? { kind: "open-event", id: nextId, label: nextAwaiting ? "Resolve RSVPs" : "Open Event" } : undefined,
     },
     {
       key: "response-health",
       eyebrow: "Response health",
       title: `${responseRate}% roster response`,
-      body: next
-        ? `${responded} responses are recorded across upcoming roster slots: ${attending} attending and ${unavailable} unavailable.`
-        : "Response health will become meaningful after an event is scheduled.",
+      body: next ? `${responded} RSVP${responded === 1 ? "" : "s"} are recorded across upcoming roster slots.` : "Response health will become meaningful after an event is scheduled.",
       tone: !next ? "info" : responseRate >= 80 ? "positive" : responseRate >= 55 ? "info" : "attention",
       progress: { value: responseRate, max: 100, label: "Upcoming RSVP completion", detail: `${responded} responses recorded` },
     },
   ];
 
-  return {
-    next,
-    nextId,
-    upcoming,
-    missing: awaitingResponse,
-    awaitingResponse,
-    confirmed: attending,
-    attending,
-    unavailable,
-    responded,
-    responseRate,
-    availabilityRate,
-    past,
-    total,
-    gapEvents,
-    decision,
-    insights,
-  };
+  return { next, nextId, upcoming, missing: awaitingResponse, awaitingResponse, confirmed: responded, rsvpConfirmed: responded, responded, responseRate, past, total, gapEvents, decision, insights };
 }
