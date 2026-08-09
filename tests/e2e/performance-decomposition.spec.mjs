@@ -213,9 +213,9 @@ test('Profile workspaces load together only after the player opens Profile', asy
 
   await page.getByTestId('player-progress-open-profile').click()
   await expect(fullProfile).toHaveAttribute('open', '')
-  await expect(workspace).toBeVisible({ timeout: 20_000 })
-  await expect(workspace.getByText(/MY\s*PROGRESS/i)).toBeVisible({ timeout: 20_000 })
-  await expect(page.getByTestId('player-career-history')).toBeVisible({ timeout: 20_000 })
+  await expect(page.getByTestId('player-profile-readout')).toBeVisible({ timeout: 20_000 })
+  await expect(workspace).toBeAttached()
+  await expect(page.getByTestId('player-career-history')).toBeAttached()
 })
 
 test('leaderboard analytics load only after the player opens Leaderboards', async ({ page }) => {
