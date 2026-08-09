@@ -1,15 +1,9 @@
 /* Phase 2B — premium action and empty-state language.
-   Loaded after the existing hierarchy layers so these targeted operational
-   surfaces have one intentional, late visual owner. */
+   Stable data hooks are applied by apply-phase2b-action-language.mjs before
+   Vite and CSS reachability pruning run. */
 
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="drawerActions"] {
-  gap: 10px !important;
-  margin-bottom: 18px !important;
-}
-
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="drawerActions"] > button {
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action],
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action] {
   position: relative;
   min-height: 50px !important;
   display: flex !important;
@@ -28,8 +22,8 @@
   transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease !important;
 }
 
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="drawerActions"] > button::before {
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action]::before,
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action]::before {
   content: "";
   width: 28px;
   height: 28px;
@@ -41,8 +35,8 @@
   opacity: .88;
 }
 
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="drawerActions"] > button::after {
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action]::after,
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action]::after {
   content: "→";
   margin-left: auto;
   font-size: 16px;
@@ -51,35 +45,35 @@
   opacity: .72;
 }
 
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="drawerActions"] > button:first-child {
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action="primary"],
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action="primary"] {
   color: #10150d !important;
   border-color: rgba(200, 255, 26, .72) !important;
   background: #c8ff1a !important;
 }
 
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="drawerActions"] > button:last-child {
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action="secondary"],
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action="secondary"] {
   color: #f4f7f2 !important;
   border-color: rgba(244, 247, 242, .16) !important;
   background: rgba(244, 247, 242, .045) !important;
 }
 
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="drawerActions"] > button:last-child::before {
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action="secondary"]::before,
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action="secondary"]::before {
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 17l4.2-4.2 3.1 2.7L17.8 8H20'/%3E%3Cpath d='M16.5 8H20v3.5'/%3E%3C/svg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 17l4.2-4.2 3.1 2.7L17.8 8H20'/%3E%3Cpath d='M16.5 8H20v3.5'/%3E%3C/svg%3E");
 }
 
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="drawerActions"] > button:hover,
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="drawerActions"] > button:focus-visible {
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action]:hover,
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action]:focus-visible,
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action]:hover,
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action]:focus-visible {
   transform: translateY(-1px);
 }
 
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="emptyState"] {
+[data-testid="coach-player-intelligence-drawer"] [data-operational-empty-state],
+[data-testid="coach-event-intelligence-drawer"] [data-operational-empty-state] {
   min-height: 88px;
   display: flex !important;
   align-items: center;
@@ -96,8 +90,8 @@
   line-height: 1.45 !important;
 }
 
-:is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-[class*="emptyState"]::before {
+[data-testid="coach-player-intelligence-drawer"] [data-operational-empty-state]::before,
+[data-testid="coach-event-intelligence-drawer"] [data-operational-empty-state]::before {
   content: "";
   width: 36px;
   height: 36px;
@@ -110,7 +104,7 @@
   opacity: .8;
 }
 
-[data-testid="coach-leaderboard-operational-panel"] [class*="emptyState"] {
+[data-testid="coach-leaderboard-operational-panel"] [data-operational-empty-state] {
   min-height: 92px;
   display: flex !important;
   align-items: center;
@@ -127,7 +121,7 @@
   line-height: 1.45 !important;
 }
 
-[data-testid="coach-leaderboard-operational-panel"] [class*="emptyState"]::before {
+[data-testid="coach-leaderboard-operational-panel"] [data-operational-empty-state]::before {
   content: "";
   width: 36px;
   height: 36px;
@@ -135,20 +129,20 @@
   border-radius: 12px;
   background-color: #71851f;
   -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 20h10M9 20v-4h6v4M8 4h8v4a4 4 0 01-8 0V4z'/%3E%3Cpath d='M8 6H4v1a4 4 0 004 4M16 6h4v1a4 4 0 01-4 4'/%3E%3C/svg%3E") center / 21px 21px no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 20h10M9 20v-4h6v4M8 4h8v4a4 4 0 01-8 0V4z'/%3E%3Cpath d='M8 6H4v1a4 4 0 004 4M16 6h4v1a4 4 0 01-4 4'/%3E%3C/svg%3E") center / 21px 21px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 20h10M9 20v-4h6v4a4 4 0 01-8 0V4z'/%3E%3Cpath d='M8 6H4v1a4 4 0 004 4M16 6h4v1a4 4 0 01-4 4'/%3E%3C/svg%3E") center / 21px 21px no-repeat;
   opacity: .82;
 }
 
 @media (max-width: 620px) {
-  :is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-  [class*="drawerActions"] > button {
+  [data-testid="coach-player-intelligence-drawer"] [data-drawer-action],
+  [data-testid="coach-event-intelligence-drawer"] [data-drawer-action] {
     min-height: 52px !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  :is([data-testid="coach-player-intelligence-drawer"], [data-testid="coach-event-intelligence-drawer"])
-  [class*="drawerActions"] > button {
+  [data-testid="coach-player-intelligence-drawer"] [data-drawer-action],
+  [data-testid="coach-event-intelligence-drawer"] [data-drawer-action] {
     transition-duration: .01ms !important;
   }
 }
