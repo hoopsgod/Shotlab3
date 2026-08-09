@@ -17,6 +17,11 @@ test('Phase 2 premium metrics preserve dashboard filter semantics and full acces
   assert.match(primitives, /data-premium-metric-tone=\{item\.tone \|\| "neutral"\}/);
 });
 
+test('Phase 2 premium labels are isolated from the legacy metricLabel authority class', () => {
+  assert.match(primitives, /<span data-premium-metric-label>\{item\.displayLabel \|\| item\.label\}<\/span>/);
+  assert.doesNotMatch(primitives, /className=\{styles\.metricLabel\} data-premium-metric-label/);
+});
+
 test('Phase 2 premium metrics use the ShotLab icon family instead of ornamental glyphs', () => {
   assert.match(primitives, /import ShotLabIcon from "\.\/ShotLabIcon"/);
   assert.match(primitives, /metricIconName/);
@@ -36,12 +41,13 @@ test('Phase 2 premium metrics render truthful evidence and a clearly non-trend p
 
 test('Phase 2 premium metric styling remains editorial, mobile safe, and reduced-motion safe', () => {
   assert.match(layer, /\.secondaryPageToolbar \[data-premium-metric\]/);
+  assert.match(layer, /\[data-premium-metric-label\][\s\S]*white-space: nowrap/);
   assert.match(layer, /\[data-premium-metric-evidence\]/);
   assert.match(layer, /\[data-premium-metric-placeholder\] \[data-premium-metric-path\]/);
   assert.match(layer, /stroke-dasharray: 4 6/);
   assert.match(layer, /@media \(max-width: 760px\)/);
   assert.match(layer, /min-height: 116px !important/);
-  assert.match(layer, /font-size: 9px !important/);
+  assert.match(layer, /font-size: 10px !important/);
   assert.match(layer, /font-size: 30px !important/);
   assert.match(layer, /@media \(prefers-reduced-motion: reduce\)/);
 });
