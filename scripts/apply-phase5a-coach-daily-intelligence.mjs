@@ -98,12 +98,12 @@ update("src/App.jsx", (source) => {
   next = replaceRequired(
     next,
     'const authSession=SUPABASE_AUTH_ENABLED?await supabase.auth.getSession():null; const authEmail=normalizeEmail((SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:"")||sess?.email||"");',
-    'const authSession=SUPABASE_AUTH_ENABLED?await Promise.race([supabase.auth.getSession(),new Promise(resolve=>window.setTimeout(()=>resolve({data:{session:null},error:{code:"session_timeout"}}),3000))]):null; const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?(authSession?.data?.session?.user?.email||""):(sess?.email||""));',
+    'const authSession=SUPABASE_AUTH_ENABLED?await Promise.race([supabase.auth.getSession(),new Promise(r=>setTimeout(r,3e3))]):null;const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:sess?.email);',
     "bounded production auth bootstrap",
   );
 
   if (!next.includes('if(sess?.email){try{catalog=await trainingCatalogPersistence.hydrateCatalog')) throw new Error("Phase 5A auth landing must skip team catalog hydration for signed-out launches.");
-  if (!next.includes('error:{code:"session_timeout"}')) throw new Error("Phase 5A production session bootstrap must have a bounded timeout.");
+  if (!next.includes('new Promise(r=>setTimeout(r,3e3))')) throw new Error("Phase 5A production session bootstrap must have a bounded timeout.");
   if (next.includes('(SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:"")||sess?.email')) throw new Error("Phase 5A must not trust the local app session when production Supabase verification is unavailable.");
   return next;
 });
