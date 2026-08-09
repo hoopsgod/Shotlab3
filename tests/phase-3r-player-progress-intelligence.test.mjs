@@ -142,8 +142,8 @@ test("Phase 3R owns late visual authority after Phase 3Q and prevents demo washo
 
 test("Phase 3R iPhone evidence verifies first-viewport story, washout guards, readable drill names, and preserved full profile", () => {
   assert.match(screenshotConfig, /phase-3r-player-progress-story-screenshots\.spec\.mjs/);
-  assert.match(screenshotSpec, /mobile-navigation-more/);
-  assert.match(screenshotSpec, /data-nav-key=\"profile\"/);
+  assert.match(screenshotSpec, /mobile-navigation-dock/);
+  assert.match(screenshotSpec, /name: \"Progress\"/);
   assert.match(screenshotSpec, /player-progress-story/);
   assert.match(screenshotSpec, /transparentHeroSeams/);
   assert.match(screenshotSpec, /must stay transparent inside dark hero/);

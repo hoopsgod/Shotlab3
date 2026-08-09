@@ -35,17 +35,9 @@ async function openTrainingDrill(page) {
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
 
-  const preferred = page.getByText(/5[- ]?SPOT CATCH/i).first();
-  if (await preferred.count()) {
-    await preferred.locator("xpath=ancestor::button[1]").click();
-  } else {
-    const drills = page.locator("button.ch");
-    const count = await drills.count();
-    for (let i = 0; i < count; i += 1) {
-      await drills.nth(i).click();
-      if (await page.getByTestId("player-training-session").isVisible().catch(() => false)) break;
-    }
-  }
+  const drill = page.getByRole("button", { name: /CALIPARI SHOOTING/i });
+  await expect(drill).toBeVisible();
+  await drill.click();
   await expect(page.getByTestId("player-training-session")).toBeVisible({ timeout: 15_000 });
 }
 

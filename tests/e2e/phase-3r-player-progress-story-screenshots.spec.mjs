@@ -27,10 +27,7 @@ test("player progress profile opens with a factual development story before deep
   const dock = page.getByTestId("mobile-navigation-dock");
   await expect(dock).toBeVisible({ timeout: 20_000 });
 
-  await page.getByTestId("mobile-navigation-more").click();
-  const sheet = page.getByTestId("mobile-navigation-sheet");
-  await expect(sheet).toBeVisible();
-  await sheet.locator('[data-nav-key="profile"]').click();
+  await dock.getByRole("button", { name: "Progress", exact: true }).click();
   await expect(page).toHaveURL(/\/profile$/);
 
   const story = page.getByTestId("player-progress-story");

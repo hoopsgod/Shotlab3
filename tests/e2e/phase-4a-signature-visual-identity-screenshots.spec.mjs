@@ -33,13 +33,16 @@ test.beforeEach(async ({ page }) => {
 test("Phase 4A entry experience carries the ShotLab basketball signature without blocking auth", async ({ page }) => {
   const field = page.getByTestId("auth-signature-field");
   await expect(field).toBeVisible();
-  const presentation = await field.evaluate((node) => ({
-    pointerEvents: getComputedStyle(node).pointerEvents,
-    opacity: Number.parseFloat(getComputedStyle(node).opacity),
-    position: getComputedStyle(node).position,
-    courtVisible: node.querySelector('svg[class*="court"]')?.getBoundingClientRect().width > 0,
-    ballVisible: node.querySelector('svg[class*="ball"]')?.getBoundingClientRect().width > 0,
-  }));
+  const presentation = await field.evaluate((node) => {
+    const [court, ball] = node.querySelectorAll("svg");
+    return {
+      pointerEvents: getComputedStyle(node).pointerEvents,
+      opacity: Number.parseFloat(getComputedStyle(node).opacity),
+      position: getComputedStyle(node).position,
+      courtVisible: court?.getBoundingClientRect().width > 0,
+      ballVisible: ball?.getBoundingClientRect().width > 0,
+    };
+  });
   expect(presentation.pointerEvents).toBe("none");
   expect(presentation.position).toBe("fixed");
   expect(presentation.opacity).toBeGreaterThanOrEqual(.5);
@@ -60,12 +63,21 @@ test("Phase 4A Player Home uses signature court geometry and branded stat instru
   await expect(field).toBeVisible();
   await expect(field).toHaveAttribute("data-shotlab-signature", "court");
   expect(await field.evaluate((node) => node.parentElement?.getAttribute("data-testid"))).toBe("player-daily-command-center");
-  const metricAccent = await page.getByTestId("player-command-evidence").locator(":scope > div").first().evaluate((node) => ({
-    beforeImage: getComputedStyle(node, "::before").backgroundImage,
-    afterWidth: Number.parseFloat(getComputedStyle(node, "::after").width || "0"),
-  }));
-  expect(metricAccent.beforeImage).toContain("gradient");
-  expect(metricAccent.afterWidth).toBeGreaterThanOrEqual(20);
+  const firstMetric = page.getByTestId("player-command-evidence").locator(":scope > div").first();
+  const metricAccent = await firstMetric.evaluate((node) => {
+    const track = node.querySelector('[aria-hidden="true"]');
+    const fill = track?.firstElementChild;
+    return {
+      backgroundColor: getComputedStyle(node).backgroundColor,
+      borderRadius: Number.parseFloat(getComputedStyle(node).borderRadius),
+      trackHeight: track ? Number.parseFloat(getComputedStyle(track).height) : 0,
+      fillColor: fill ? getComputedStyle(fill).backgroundColor : "rgba(0, 0, 0, 0)",
+    };
+  });
+  expect(metricAccent.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+  expect(metricAccent.borderRadius).toBe(0);
+  expect(metricAccent.trackHeight).toBeGreaterThanOrEqual(4);
+  expect(metricAccent.fillColor).not.toBe("rgba(0, 0, 0, 0)");
   await expectNoOverflow(page);
   await capture(page, "08b-phase4a-player-home-signature.png");
 });

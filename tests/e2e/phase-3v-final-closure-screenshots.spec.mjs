@@ -75,24 +75,24 @@ test("Phase 3 closure: Player Home has one dock reserve, clean support contrast,
   }
 
   const contrast = await page.evaluate(() => {
-    const nextHeading = document.querySelector('[data-command-role="next-actions"] [class*="sectionHeading"]');
-    const nextTitle = document.querySelector('[data-command-role="next-actions"] [class*="sectionTitle"]');
+    const evidenceCard = document.querySelector('[data-testid="player-command-evidence"] > div');
+    const evidenceValue = evidenceCard?.children?.[1];
     const schedule = document.querySelector('[data-testid="player-upcoming-schedule"]');
     const scheduleTitle = schedule?.querySelector('[class*="disclosureTitle"]');
     const scheduleMeta = schedule?.querySelector('[class*="disclosureMeta"]');
-    if (!nextHeading || !nextTitle || !schedule || !scheduleTitle || !scheduleMeta) throw new Error("Missing Player Home contrast targets");
+    if (!evidenceCard || !evidenceValue || !schedule || !scheduleTitle || !scheduleMeta) throw new Error("Missing Player Home contrast targets");
     return {
-      nextHeadingBackground: getComputedStyle(nextHeading).backgroundColor,
-      nextHeadingImage: getComputedStyle(nextHeading).backgroundImage,
-      nextTitleColor: getComputedStyle(nextTitle).color,
+      evidenceBackground: getComputedStyle(evidenceCard).backgroundColor,
+      evidenceRadius: Number.parseFloat(getComputedStyle(evidenceCard).borderRadius),
+      evidenceValueColor: getComputedStyle(evidenceValue).color,
       supportBackground: getComputedStyle(schedule).backgroundColor,
       supportTitleColor: getComputedStyle(scheduleTitle).color,
       supportMetaColor: getComputedStyle(scheduleMeta).color,
     };
   });
-  expect(contrast.nextHeadingBackground).toBe("rgba(0, 0, 0, 0)");
-  expect(contrast.nextHeadingImage).toBe("none");
-  expect(contrast.nextTitleColor).toBe("rgb(23, 26, 24)");
+  expect(contrast.evidenceBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(contrast.evidenceRadius).toBe(0);
+  expect(contrast.evidenceValueColor).toBe("rgb(23, 26, 24)");
   expect(contrast.supportBackground).toBe("rgba(0, 0, 0, 0)");
   expect(contrast.supportTitleColor).toBe("rgb(23, 28, 24)");
   expect(contrast.supportMetaColor).toBe("rgb(104, 113, 106)");

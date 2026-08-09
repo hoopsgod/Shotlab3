@@ -32,18 +32,9 @@ test("Player Train opens a focused drill session with live score feedback", asyn
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
   await expect(page.getByTestId("player-at-home-workspace")).toBeVisible({ timeout: 20_000 });
 
-  const preferred = page.getByText(/5[- ]?SPOT CATCH/i).first();
-  if (await preferred.count()) {
-    await preferred.locator("xpath=ancestor::button[1]").click();
-  } else {
-    const drillNames = page.locator("button.ch");
-    const count = await drillNames.count();
-    let opened = false;
-    for (let i = 0; i < count && !opened; i += 1) {
-      await drillNames.nth(i).click();
-      opened = await page.getByTestId("player-training-session").isVisible().catch(() => false);
-    }
-  }
+  const drill = page.getByRole("button", { name: /CALIPARI SHOOTING/i });
+  await expect(drill).toBeVisible();
+  await drill.click();
 
   const session = page.getByTestId("player-training-session");
   const header = page.getByTestId("player-training-session-header");

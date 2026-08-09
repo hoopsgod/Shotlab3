@@ -23,7 +23,7 @@ async function capture(page, name) {
   await page.screenshot({ path: path.join(outputDir, `${name}.png`), fullPage: true, animations: "disabled" });
 }
 
-test("Coach Leaderboards surfaces competitive signal in the first viewport and preserves player drill-down", async ({ page }) => {
+test("Coach Leaderboards preserves decision context, competitive signal, and player drill-down", async ({ page }) => {
   await installRoutes(page);
   await page.goto("/");
   const demoButton = page.getByRole("button", { name: /Coach demo/i });
@@ -37,8 +37,8 @@ test("Coach Leaderboards surfaces competitive signal in the first viewport and p
   await sheet.locator('[data-nav-key="leaderboards"]').click();
 
   await expect(page.getByTestId("coach-leaderboard-operational-panel")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId("coach-page-dashboard-leaderboards-decision-brief")).toBeHidden();
-  await expect(page.getByTestId("coach-page-dashboard-leaderboards-evidence")).toBeHidden();
+  await expect(page.getByTestId("coach-page-dashboard-leaderboards-decision-brief")).toBeVisible();
+  await expect(page.getByTestId("coach-page-dashboard-leaderboards-evidence")).toBeVisible();
 
   const pulse = page.getByTestId("coach-leaderboard-pulse");
   await expect(pulse).toBeVisible();

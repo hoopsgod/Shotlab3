@@ -63,11 +63,16 @@ test("Player visual system remains integrated across core and secondary pages", 
   await capture(page, "01-player-home");
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
-  await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
-  await capture(page, "02-player-leaderboards");
+  await expect(page.getByTestId("player-progress-story")).toBeVisible({ timeout: 20_000 });
+  await capture(page, "02-player-progress");
 
   let sheet = await more(page);
-  await sheet.locator('[data-nav-key="profile"]').click();
+  await sheet.locator('[data-nav-key="leaderboards"]').click();
+  await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
+  await capture(page, "02b-player-leaderboards");
+
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
+  await page.getByTestId("player-progress-open-profile").click();
   const careerDisclosure = page.getByTestId("player-profile-career-disclosure");
   const performanceDisclosure = page.getByTestId("player-profile-performance-intelligence");
   const drillDisclosure = page.getByTestId("player-profile-drill-development");
