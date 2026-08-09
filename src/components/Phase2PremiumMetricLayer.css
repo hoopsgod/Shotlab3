@@ -34,7 +34,18 @@
 }
 
 [data-premium-metric-label] {
+  display: block;
   min-width: 0;
+  overflow: hidden;
+  color: var(--text-3, #848b90);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  font-size: 11px;
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: .065em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
 }
 
 [data-premium-metric-value] {
@@ -104,6 +115,10 @@
   background: color-mix(in srgb, var(--premium-metric-signal) 7%, #fff);
 }
 
+.secondaryPageToolbar [data-premium-metric-label] {
+  color: #526059 !important;
+}
+
 .secondaryPageToolbar [data-premium-metric-evidence] {
   height: 25px;
   color: var(--premium-metric-signal);
@@ -146,9 +161,13 @@
   }
 
   .secondaryPageToolbar [data-premium-metric-label] {
-    font-size: 9px !important;
-    line-height: 1.12 !important;
-    letter-spacing: .045em !important;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+    font-size: 10px !important;
+    font-weight: 760 !important;
+    line-height: 1.05 !important;
+    letter-spacing: .06em !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
   }
 
   .secondaryPageToolbar [data-premium-metric-value] {
