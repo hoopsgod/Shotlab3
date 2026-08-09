@@ -38,6 +38,7 @@ async function expectPremiumMetricStrip(page, testId) {
   const metrics = strip.locator('[data-premium-metric]');
   await expect(metrics).toHaveCount(4);
   await expect(strip.locator('[data-premium-metric-icon]')).toHaveCount(4);
+  await expect(strip.locator('[data-premium-metric-evidence]')).toHaveCount(4);
 
   for (let index = 0; index < 4; index += 1) {
     const box = await metrics.nth(index).boundingBox();
@@ -65,7 +66,7 @@ test('Coach Players premium metrics expose iconography, evidence, and working fi
   await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 });
 
   const strip = await expectPremiumMetricStrip(page, 'coach-players-metric-strip');
-  expect(await strip.locator('[data-premium-metric-evidence]').count()).toBeGreaterThanOrEqual(1);
+  expect(await strip.locator('[data-premium-metric-evidence]:not([data-premium-metric-placeholder])').count()).toBeGreaterThanOrEqual(1);
 
   const attention = strip.getByRole('button', { name: /Needs Attention/i });
   await attention.click();
@@ -74,13 +75,13 @@ test('Coach Players premium metrics expose iconography, evidence, and working fi
   await capture(page, '01-coach-players-premium-metrics');
 });
 
-test('Coach Schedule premium metrics preserve hierarchy and filter behavior', async ({ page }) => {
+test('Coach Schedule premium metrics preserve hierarchy and truthful no-trend signals', async ({ page }) => {
   await enterCoachDemo(page);
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Schedule', exact: true }).click();
   await expect(page.getByTestId('coach-events-interactive-dashboard')).toBeVisible({ timeout: 20_000 });
 
   const strip = await expectPremiumMetricStrip(page, 'coach-events-metric-strip');
-  await expect(strip.locator('[data-premium-metric-pulse]').first()).toBeVisible();
+  await expect(strip.locator('[data-premium-metric-placeholder]').first()).toBeVisible();
 
   const missing = strip.getByRole('button', { name: /Missing RSVPs/i });
   await missing.click();
