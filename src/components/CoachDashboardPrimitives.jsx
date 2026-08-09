@@ -108,17 +108,19 @@ export function InteractiveMetricStrip({ items = [], activeKey, onSelect, testId
             data-premium-metric
             data-premium-metric-tone={item.tone || "neutral"}
           >
-            <span data-premium-metric-head>
-              <span data-premium-metric-icon aria-hidden="true"><ShotLabIcon name={metricIconName(item)} size={15} /></span>
-              <small data-premium-metric-label>{item.displayLabel || item.label}</small>
+            <span data-premium-metric-head-shell>
+              <span data-premium-metric-head>
+                <span data-premium-metric-icon aria-hidden="true"><ShotLabIcon name={metricIconName(item)} size={15} /></span>
+                <small data-premium-metric-label>{item.displayLabel || item.label}</small>
+              </span>
             </span>
-            <div data-premium-metric-readout>
+            <span data-premium-metric-readout>
               <output data-premium-metric-value>{item.value}</output>
-            </div>
-            <div data-premium-metric-foot>
+            </span>
+            <span data-premium-metric-foot>
               {item.detail ? <span className={styles.metricDetail} data-premium-metric-detail>{item.detail}</span> : null}
               <PremiumMetricEvidence values={item.evidence} label={item.evidenceLabel || `${item.label} recent signal`} />
-            </div>
+            </span>
           </button>
         );
       })}
