@@ -1,4 +1,4 @@
-/* Phase 2C — premium operational roster rows.
+/* Phase 2C — premium operational roster.
    Presentation only: preserve roster selection, nudge, removal, identity, and persistence behavior. */
 
 .performance-shell--coach #coach-roster-operations {
@@ -8,7 +8,75 @@
   --phase2c-surface: #ffffff;
   --phase2c-soft: #f6f7f3;
   --phase2c-accent: #71851f;
-  margin-top: 6px;
+  margin-top: 10px;
+}
+
+/* The intelligence dashboard immediately above this section already owns engagement,
+   momentum, completion, and weekly-activity interpretation. Suppress the duplicate
+   legacy text recap here so the roster becomes a clean working list rather than a
+   second dashboard. Data and actions remain unchanged. */
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(2),
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(3) {
+  display: none !important;
+}
+
+/* Keep one restrained roster heading instead of another card-like hero. */
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(1) {
+  margin: 0 0 8px !important;
+  padding: 2px 2px 6px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(1) h1,
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(1) h2 {
+  color: var(--phase2c-ink) !important;
+  -webkit-text-fill-color: var(--phase2c-ink) !important;
+}
+
+/* Sort is the only persistent roster tool at this depth. Give it an intentional,
+   phone-safe control rather than the former tiny utility treatment. */
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(4) {
+  margin: 0 0 12px !important;
+  padding: 0 2px !important;
+  justify-content: flex-start !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(4) > label {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  color: var(--phase2c-muted) !important;
+  -webkit-text-fill-color: var(--phase2c-muted) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 720 !important;
+  letter-spacing: .075em !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(4) select {
+  min-width: 178px !important;
+  min-height: 44px !important;
+  padding: 0 34px 0 13px !important;
+  border: 1px solid var(--phase2c-line) !important;
+  border-radius: 12px !important;
+  background: var(--phase2c-surface) !important;
+  color: var(--phase2c-ink) !important;
+  -webkit-text-fill-color: var(--phase2c-ink) !important;
+  box-shadow: 0 5px 14px rgba(29, 38, 31, .035) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 680 !important;
+  letter-spacing: -.005em !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(4) select:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--phase2c-accent) 24%, transparent) !important;
+  outline-offset: 2px !important;
 }
 
 /* Direct role=button children are the legacy CoachRoster player rows. The stable
@@ -36,6 +104,11 @@
 .performance-shell--coach #coach-roster-operations > .fade-up > [role="button"]:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--phase2c-accent) 24%, transparent) !important;
   outline-offset: 2px !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:first-child {
+  width: 3px !important;
+  opacity: .72 !important;
 }
 
 /* Reflow each row into a calm two-column mobile composition: identity beside details,
@@ -121,7 +194,15 @@
 }
 
 .performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:last-child {
-  border-color: rgba(195, 59, 73, .18) !important;
+  border-color: rgba(35, 45, 37, .11) !important;
+  background: #fafbf8 !important;
+  color: #727a74 !important;
+  -webkit-text-fill-color: #727a74 !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:last-child:hover,
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:last-child:focus-visible {
+  border-color: rgba(195, 59, 73, .22) !important;
   background: rgba(195, 59, 73, .045) !important;
   color: #a93643 !important;
   -webkit-text-fill-color: #a93643 !important;
