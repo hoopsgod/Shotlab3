@@ -27,7 +27,7 @@ test("player intelligence matches canonical identities and calculates weekly tre
       { id: "prior", email: "one@example.com", made: 20, date: "2026-07-15" },
     ],
     scores: [{ id: "score", email: "one@example.com", score: 10, date: "2026-07-25" }],
-    rsvps: [{ eventId: "e1", email: "one@example.com" }],
+    rsvps: [{ eventId: "e1", email: "one@example.com", attended: true, ts: 10 }],
     events: [{ id: "e1", date: "2026-08-01" }, { id: "e2", date: "2026-08-02" }],
     scRsvps: [{ sessionId: "s1", email: "one@example.com" }],
     scLogs: [{ sessionId: "s1", email: "one@example.com", date: "2026-07-25" }],
@@ -39,20 +39,64 @@ test("player intelligence matches canonical identities and calculates weekly tre
   assert.equal(model.previousWeeklyMakes, 20);
   assert.equal(model.weeklyActions, 3);
   assert.equal(model.previousWeeklyActions, 1);
+  assert.equal(model.attendanceResponded, 1);
+  assert.equal(model.attendanceConfirmed, 1);
+  assert.equal(model.attendanceUnavailable, 0);
   assert.equal(model.attendanceRate, 50);
   assert.equal(model.scCompletionRate, 100);
 });
 
-test("event intelligence exposes confirmed and missing roster players", () => {
+test("player intelligence does not count an unavailable response as attending", () => {
+  const model = buildPlayerIntelligenceModel({
+    playerRow: { key: "one", player: roster[0] },
+    rsvps: [{ eventId: "e1", email: "one@example.com", attended: false, ts: 10 }],
+    events: [{ id: "e1", date: "2026-08-01" }],
+    today: "2026-07-26",
+  });
+  assert.equal(model.attendanceResponded, 1);
+  assert.equal(model.attendanceConfirmed, 0);
+  assert.equal(model.attendanceUnavailable, 1);
+  assert.equal(model.attendanceRate, 0);
+});
+
+test("event intelligence separates attending, unavailable, and awaiting roster players", () => {
   const model = buildEventIntelligenceModel({
     eventRow: { event: { id: "event-1", title: "Practice", date: "2026-08-01" } },
     roster,
-    rsvps: [{ eventId: "event-1", player_email: "one@example.com" }],
+    rsvps: [
+      { id: "one-old", eventId: "event-1", player_email: "one@example.com", attended: false, ts: 5 },
+      { id: "one-new", eventId: "event-1", player_email: "one@example.com", attended: true, ts: 10 },
+      { id: "walk-in", eventId: "event-1", email: "guest@example.com", attended: true, walkIn: true, ts: 11 },
+    ],
   });
+  assert.equal(model.rosterCount, 2);
+  assert.equal(model.responded, 1);
+  assert.equal(model.attending.length, 1);
+  assert.equal(model.unavailable.length, 0);
+  assert.equal(model.awaitingResponse.length, 1);
   assert.equal(model.confirmed.length, 1);
   assert.equal(model.missing.length, 1);
+  assert.equal(model.walkIns.length, 1);
   assert.equal(model.responseRate, 50);
-  assert.equal(model.missing[0].name, "Player Two");
+  assert.equal(model.availabilityRate, 50);
+  assert.equal(model.awaitingResponse[0].name, "Player Two");
+});
+
+test("event intelligence preserves an explicit unavailable response without inflating availability", () => {
+  const model = buildEventIntelligenceModel({
+    eventRow: { event: { id: "event-1", title: "Practice", date: "2026-08-01" } },
+    roster,
+    rsvps: [
+      { eventId: "event-1", email: "one@example.com", attended: true, ts: 10 },
+      { eventId: "event-1", email: "two@example.com", attended: false, ts: 11 },
+    ],
+  });
+  assert.equal(model.responded, 2);
+  assert.equal(model.attending.length, 1);
+  assert.equal(model.unavailable.length, 1);
+  assert.equal(model.awaitingResponse.length, 0);
+  assert.equal(model.responseRate, 100);
+  assert.equal(model.availabilityRate, 50);
 });
 
 test("drill selectors surface underused work and respect search", () => {
