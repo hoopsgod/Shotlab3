@@ -17,11 +17,11 @@ test('Phase 2 premium metrics preserve dashboard filter semantics and full acces
   assert.match(primitives, /data-premium-metric-tone=\{item\.tone \|\| "neutral"\}/);
 });
 
-test('Phase 2 premium label and value are fully isolated from legacy positional and module authorities', () => {
+test('Phase 2 premium internals sit behind three legacy-compatible direct-child shells', () => {
+  assert.match(primitives, /<span data-premium-metric-head-shell>[\s\S]*?<span data-premium-metric-head>/);
+  assert.match(primitives, /<span data-premium-metric-readout>[\s\S]*?<output data-premium-metric-value>\{item\.value\}<\/output>[\s\S]*?<\/span>/);
+  assert.match(primitives, /<span data-premium-metric-foot>[\s\S]*?data-premium-metric-detail[\s\S]*?<PremiumMetricEvidence/);
   assert.match(primitives, /<small data-premium-metric-label>\{item\.displayLabel \|\| item\.label\}<\/small>/);
-  assert.match(primitives, /<output data-premium-metric-value>\{item\.value\}<\/output>/);
-  assert.doesNotMatch(primitives, /<span[^>]*data-premium-metric-label/);
-  assert.doesNotMatch(primitives, /<span[^>]*data-premium-metric-value/);
   assert.doesNotMatch(primitives, /className=\{styles\.metricValue\} data-premium-metric-value/);
 });
 
