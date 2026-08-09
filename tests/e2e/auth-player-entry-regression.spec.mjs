@@ -24,6 +24,20 @@ test.beforeEach(async ({ page }) => {
   await installRoutes(page);
 });
 
+test("signed-out auth entry renders without waiting on team-only catalog hydration", async ({ page }) => {
+  let catalogRequests = 0;
+  await page.route("**/v1/training-catalog**", async () => {
+    catalogRequests += 1;
+    await new Promise(() => {});
+  });
+
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await expect(page.getByTestId("auth-workspace")).toBeVisible({ timeout: 5_000 });
+  await expect(page.getByRole("tab", { name: /^sign in$/i })).toBeVisible();
+  await expect(page.getByRole("tab", { name: /^create account$/i })).toBeVisible();
+  expect(catalogRequests).toBe(0);
+});
+
 test("auth hero stays on the light canvas with no legacy dark overlay", async ({ page }) => {
   await page.goto("/");
   const auth = page.getByTestId("auth-workspace");
