@@ -161,8 +161,10 @@ test("Events and S&C commitment centers reveal the exact unresolved commitment",
   await expectButtonTouchTargets(strengthCenter);
   await strengthCenter.getByRole("button", { name: "Respond now", exact: true }).click();
   await expect(page.getByTestId("player-commitment-details-strength")).toHaveAttribute("open", "");
-  await expect(page.getByTestId("player-strength-operational-panel")).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByRole("button", { name: /RSVP NOW/i }).first()).toBeVisible();
+  const strengthPanel = page.getByTestId("player-strength-operational-panel");
+  await expect(strengthPanel).toBeVisible({ timeout: 10_000 });
+  await strengthPanel.getByRole("button", { name: /Speed Session/i }).click();
+  await expect(strengthPanel.getByRole("button", { name: /RSVP NOW/i })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 
