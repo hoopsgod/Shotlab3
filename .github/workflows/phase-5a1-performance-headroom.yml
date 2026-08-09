@@ -75,6 +75,12 @@ jobs:
       - name: Verify inherited 430x932 visual regression
         run: npx playwright test tests/e2e/phase-4e-final-polish-screenshots.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
 
+      - name: Report rendered production weight by source module
+        shell: bash
+        run: |
+          set -o pipefail
+          npx vite build --config vite.phase5a1.config.js 2>&1 | tee artifacts/performance/rendered-analysis-build.log
+
       - name: Upload Phase 5A.1 evidence
         if: always()
         uses: actions/upload-artifact@v4
