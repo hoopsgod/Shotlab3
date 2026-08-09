@@ -9,6 +9,7 @@ import {
 
 const dashboardSource = fs.readFileSync(new URL("../src/components/CoachInteractiveDashboards.jsx", import.meta.url), "utf8");
 const enhancerSource = fs.readFileSync(new URL("../scripts/apply-expert-app-review-v2.mjs", import.meta.url), "utf8");
+const phase5bSource = fs.readFileSync(new URL("../scripts/apply-phase5b-practice-readiness.mjs", import.meta.url), "utf8");
 
 test("player briefing gives a real setup action before roster data exists", () => {
   const model = buildCoachPlayerActionBriefing();
@@ -68,21 +69,24 @@ test("healthy player briefing prioritizes recognition and keeps exact evidence",
 });
 
 test("event briefing creates a useful empty-calendar action", () => {
-  const model = buildCoachEventActionBriefing({ metrics: { total: 0, upcoming: 0, missing: 0, responseRate: 0 }, rows: [] });
+  const model = buildCoachEventActionBriefing({ metrics: { total: 0, upcoming: 0, awaitingResponse: 0, responseRate: 0 }, rows: [] });
   assert.equal(model.decision.title, "Calendar is open");
   assert.deepEqual(model.decision.action, { kind: "create-event", label: "Create Event" });
   assert.equal(model.insights[0].title, "No event to evaluate");
-  assert.equal(model.insights[2].tone, "attention");
+  assert.equal(model.insights[1].title, "No availability signal yet");
 });
 
-test("event briefing turns missing RSVPs into a direct attendance action", () => {
+test("event briefing separates attending, unavailable, and awaiting responses", () => {
   const next = {
     title: "Team Practice",
     date: "2026-08-08",
     time: "6:30 PM",
     location: "Main Gym",
-    confirmed: 7,
-    missing: 3,
+    rosterCount: 10,
+    responded: 8,
+    attending: 7,
+    unavailable: 1,
+    awaitingResponse: 2,
     event: { id: "event-8" },
   };
   const rows = [
@@ -90,26 +94,30 @@ test("event briefing turns missing RSVPs into a direct attendance action", () =>
     { title: "Film", needsResponse: false },
   ];
   const model = buildCoachEventActionBriefing({
-    metrics: { next, total: 4, upcoming: 2, missing: 3, confirmed: 7, responseRate: 70, past: 2 },
+    metrics: { next, total: 4, upcoming: 2, awaitingResponse: 2, attending: 7, unavailable: 1, responded: 8, responseRate: 80, availabilityRate: 70, past: 2 },
     rows,
   });
 
   assert.equal(model.nextId, "event-8");
   assert.equal(model.decision.tone, "attention");
-  assert.deepEqual(model.decision.action, { kind: "open-event", id: "event-8", label: "Manage Attendance" });
-  assert.match(model.decision.detail, /7 confirmed and 3 still missing/);
-  assert.equal(model.insights[0].title, "3 unresolved responses");
-  assert.deepEqual(model.insights[0].action, { kind: "status-filter", value: "gaps", label: "Show Gaps" });
-  assert.equal(model.insights[1].tone, "info");
+  assert.deepEqual(model.decision.action, { kind: "open-event", id: "event-8", label: "Resolve RSVPs" });
+  assert.match(model.decision.detail, /7 attending · 1 unavailable · 2 awaiting response/);
+  assert.equal(model.insights[0].title, "2 awaiting responses");
+  assert.deepEqual(model.insights[0].action, { kind: "status-filter", value: "gaps", label: "Show Awaiting" });
+  assert.equal(model.insights[1].title, "7 of 10 attending");
+  assert.match(model.insights[1].body, /observed roster status, not a predicted readiness score/);
+  assert.deepEqual(model.insights[1].progress, { value: 7, max: 10, label: "Next-session availability", detail: "70% attending" });
+  assert.equal(model.insights[2].title, "80% roster response");
 });
 
-test("event briefing recognizes a fully ready schedule", () => {
-  const next = { title: "Game", date: "2026-08-09", time: "4:00 PM", location: "Field House", confirmed: 12, missing: 0, id: 12 };
-  const model = buildCoachEventActionBriefing({ metrics: { next, total: 3, upcoming: 1, missing: 0, confirmed: 12, responseRate: 100, past: 2 }, rows: [{ needsResponse: false }] });
-  assert.equal(model.decision.tone, "positive");
+test("event briefing recognizes a complete response set without mislabeling unavailable players as attending", () => {
+  const next = { title: "Game", date: "2026-08-09", time: "4:00 PM", location: "Field House", rosterCount: 12, responded: 12, attending: 10, unavailable: 2, awaitingResponse: 0, id: 12 };
+  const model = buildCoachEventActionBriefing({ metrics: { next, total: 3, upcoming: 1, awaitingResponse: 0, attending: 10, unavailable: 2, responded: 12, responseRate: 100, availabilityRate: 83, past: 2 }, rows: [{ needsResponse: false }] });
+  assert.equal(model.decision.tone, "info");
   assert.deepEqual(model.decision.action, { kind: "open-event", id: 12, label: "Open Event" });
-  assert.equal(model.insights[0].title, "No RSVP gaps");
-  assert.equal(model.insights[1].tone, "positive");
+  assert.equal(model.insights[0].title, "No unanswered RSVPs");
+  assert.equal(model.insights[1].title, "10 of 12 attending");
+  assert.equal(model.insights[2].tone, "positive");
 });
 
 test("schedule formatting and dashboard integration remain stable", () => {
@@ -122,8 +130,9 @@ test("schedule formatting and dashboard integration remain stable", () => {
   assert.match(dashboardSource, /resolveEventAction/);
   assert.match(dashboardSource, /coach-players-decision-brief/);
   assert.match(dashboardSource, /coach-events-decision-brief/);
-  assert.match(dashboardSource, /evidenceLabel: "Roster engagement distribution"/);
-  assert.match(dashboardSource, /evidenceLabel: "Weekly makes distribution"/);
+  assert.match(phase5bSource, /Awaiting RSVP/);
+  assert.match(phase5bSource, /Next-session availability/);
+  assert.match(phase5bSource, /briefing\.responded/);
 });
 
 test("legacy visual enhancer accepts the Phase 3 selector architecture", () => {
