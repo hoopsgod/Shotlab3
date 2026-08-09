@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import fs from 'node:fs'
 
 import { isDemoAccount, isDemoPlayerSessionShotLog, setDemoMode } from '../src/lib/demoMode.js'
 
@@ -73,4 +74,18 @@ test('current Phase 2 demo button labels seed the pending identity bridge', () =
       environment.restore()
     }
   }
+})
+
+test('demo sign-in establishes local-only persistence before seeding collections', () => {
+  const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8')
+  const start = appSource.indexOf('const demoSignIn=')
+  const end = appSource.indexOf('const cleanupDemoPlayerSessionData=', start)
+  const demoSignInSource = appSource.slice(start, end)
+  const sessionMarker = demoSignInSource.indexOf('await DB.set("sl:session",{email:acct.email})')
+  const firstSeedWrite = demoSignInSource.indexOf('await savePlayers()')
+
+  assert.ok(start >= 0 && end > start)
+  assert.ok(sessionMarker >= 0)
+  assert.ok(firstSeedWrite > sessionMarker)
+  assert.equal((demoSignInSource.match(/DB\.set\("sl:session"/g) || []).length, 1)
 })

@@ -37,8 +37,14 @@ import { CoachEventsInteractiveDashboard, CoachPageDashboardHeader, CoachPlayers
 import { CoachActivityIntelligencePanel, CoachDrillsOperationalPanel, CoachEventIntelligenceDrawer, CoachLeaderboardOperationalPanel, CoachPlayerIntelligenceDrawer, CoachSeasonComparisonPanel, CoachStrengthOperationalPanel } from "./components/CoachDashboardPhase2.jsx";
 import { SecondaryPageDecision, SecondaryPageIntro, SecondaryPageShell } from "./components/SecondaryPageSystem.jsx";
 import PlayerDailyCommandCenter from "./components/PlayerDailyCommandCenter.jsx";
+import ShotLabStatePanel from "./components/ShotLabStatePanel.jsx";
+import ShotLabPerformanceMark from "./components/ShotLabPerformanceMark.jsx";
 import PlayerCareerHistory from "./components/PlayerCareerHistory.jsx";
+import PlayerProgressStory from "./components/PlayerProgressStory.jsx";
 import { PlayerWorkspaceCommandBar, PlayerWorkspaceEmptyState, PlayerWorkspaceFilterRail } from "./components/PlayerOperationalWorkspace.jsx";
+import PlayerCommitmentCenter from "./components/PlayerCommitmentCenter.jsx";
+import PlayerTrainingSessionHeader from "./components/PlayerTrainingSessionHeader.jsx";
+import PlayerTrainingCompletion from "./components/PlayerTrainingCompletion.jsx";
 import OperationalInsightRail from "./components/OperationalInsightRail.jsx";
 import "./styles/PremiumWorkspace.css";
 import "./styles/CoachInteractiveDashboard.css";
@@ -969,12 +975,12 @@ setPendingJoinContext(normalized||null);
 writeInviteContextToStorage(normalized||null);
 await DB.set(PENDING_JOIN_CONTEXT_KEY,normalized||null);
 },[normalizeStoredInviteContext,writeInviteContextToStorage]);
-const hydratePersistedData=useCallback(async()=>{const[d,pd,s,ps,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sa,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:program-scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:season-archives"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const localSeededDrills=mergeDefaultDrills(d,DRILLS_INIT);const localSeededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);let catalog=null;try{catalog=await trainingCatalogPersistence.hydrateCatalog({localHomeDrills:localSeededDrills,localProgramDrills:localSeededProgramDrills});}catch(error){emitReleaseDiagnostic("training_catalog_hydration_failed",{message:String(error?.message||"unknown")});}const seededDrills=catalog?.useRemote?mergeDefaultDrills(catalog.homeDrills,DRILLS_INIT):localSeededDrills;const seededProgramDrills=catalog?.useRemote?mergeDefaultDrills(catalog.programDrills,PROGRAM_DRILLS_INIT):localSeededProgramDrills;setDrills(seededDrills);setProgramDrills(seededProgramDrills);
+const hydratePersistedData=useCallback(async()=>{const[d,pd,s,ps,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sa,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:program-scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:season-archives"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const localSeededDrills=mergeDefaultDrills(d,DRILLS_INIT);const localSeededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);let catalog;if(sess?.email){try{catalog=await trainingCatalogPersistence.hydrateCatalog({localHomeDrills:localSeededDrills,localProgramDrills:localSeededProgramDrills});}catch(error){emitReleaseDiagnostic("training_catalog_hydration_failed",{message:String(error?.message||"unknown")});}}const seededDrills=catalog?.useRemote?mergeDefaultDrills(catalog.homeDrills,DRILLS_INIT):localSeededDrills;const seededProgramDrills=catalog?.useRemote?mergeDefaultDrills(catalog.programDrills,PROGRAM_DRILLS_INIT):localSeededProgramDrills;setDrills(seededDrills);setProgramDrills(seededProgramDrills);
 const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const normalizedProgramScores=normalizeScoresForDefaultDrills(ps,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,programScores:normalizedProgramScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
 setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setSeasonArchives(Array.isArray(sa)?sa:[]);setScores(m.scoresM);setProgramScores(m.programScoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
 await DB.set("sl:sc-sessions",m.scSM);
 await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:program-scores",m.programScoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
-const authSession=SUPABASE_AUTH_ENABLED?await supabase.auth.getSession():null; const authEmail=normalizeEmail((SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:"")||sess?.email||""); setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:authEmail?"yes":"no"}})); if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail}); if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.teamId)await restoreLegacyTeamContext(rp).catch(()=>null);setUser(rp);setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"success",profileLoad:"success",profileTeamId:rp.teamId||""}}));if(rp.role==="coach"&&!rp.teamId)setView("create-team");else if(rp.role==="player"&&!rp.teamId)setView("join-team");else{if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}else{setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"failed",profileLoad:"failed"}}));}} else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no"}}));if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}} else {setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));}}
+const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?(await Promise.race([supabase.auth.getSession(),new Promise(r=>setTimeout(r,3e3))]))?.data?.session?.user?.email:sess?.email); setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:authEmail?"yes":"no"}})); if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail}); if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.teamId)await restoreLegacyTeamContext(rp).catch(()=>null);setUser(rp);setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"success",profileLoad:"success",profileTeamId:rp.teamId||""}}));if(rp.role==="coach"&&!rp.teamId)setView("create-team");else if(rp.role==="player"&&!rp.teamId)setView("join-team");else{if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}else{setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"failed",profileLoad:"failed"}}));}} else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no"}}));if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}} else {setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));}}
 setPendingJoinContext(normalizeStoredInviteContext(pendingCtx)||readInviteContextFromStorage()||null);
 return {teams:m.teamsMigrated,players:m.playersMigrated};
 },[migrateData,navigateToPlayerHome,normalizeStoredInviteContext,readInviteContextFromStorage]);
@@ -1252,6 +1258,9 @@ return{ok:true};
 const demoSignIn=async(kind="player")=>{
 setDemoMode(true);
 const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
+// Establish the hard-coded demo identity before any seed collection is saved.
+// The persistence client uses this marker to keep demo writes on-device.
+await DB.set("sl:session",{email:acct.email});
 let np=[...players];
 let nts=[...teams];
 const savePlayers=async()=>{await P("sl:players",np,setPlayers)};
@@ -1286,12 +1295,22 @@ if(!hasPlayerProfile){
 await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:DEMO_PLAYER.email,teamId:demoTeam.id,firstName:"Demo",lastName:"Player",createdAt:Date.now()}],setPlayerProfiles);
 }
 
+const scopedRowsPresent=[...playerProfiles,...events,...scores,...programScores,...shotLogs,...scSessions].some(row=>String(row?.teamId||row?.team_id||"")===String(demoTeam.id));
+const existingDemoMeta=await DB.get("sl:demo-data-meta");
+const managedDemoData=existingDemoMeta?.source==="demo-data"&&String(existingDemoMeta?.teamId||"")===String(demoTeam.id);
+const shouldHydrateDemoBundle=!scopedRowsPresent||managedDemoData;
+if(shouldHydrateDemoBundle){
+const demoBundle=buildDemoDataBundle({teamId:demoTeam.id,coachEmail:DEMO_COACH.email,team:demoTeam});
+await applyDemoData(demoBundle);
+await hydratePersistedData();
+np=demoBundle.players;
+nts=demoBundle.teams;
+}
 const signedIn=np.find(p=>p.email===acct.email);
 if(!signedIn)return{ok:false,err:"Unable to prepare demo account."};
 setUser({email:signedIn.email,role:signedIn.role||"player",isCoach:(signedIn.role||"player")==="coach",name:signedIn.name,teamId:demoTeam.id,hideFromLeaderboards:signedIn.hideFromLeaderboards===true});
 if(kind!=="coach")navigateToPlayerHome();
 setView(kind==="coach"?"coach":"player");
-await DB.set("sl:session",{email:signedIn.email});
 await trackEvent("auth_demo_login",{kind},{email:signedIn.email,role:signedIn.role||"player",teamId:demoTeam.id});
 return{ok:true};
 };
@@ -1757,8 +1776,8 @@ if(!ready||!user?.teamId||!["coach","player"].includes(view))return;
 fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
 },[ready,user?.teamId,view,homeShotsLeaderboardScope,fetchHomeShotsLeaderboard]);
 
-if(!ready)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:24,position:"relative",overflow:"hidden"}}><CourtBG opacity={.015}/><div style={{position:"relative",zIndex:1,textAlign:"center"}}><SLLogo size={72} glow/><div style={{fontFamily:FD,fontSize:14,color:VOLT,letterSpacing:6,marginTop:16,animation:"pulse 1.5s infinite"}}>LOADING</div></div></div></>;
-if(startupError)return <><Styles/><div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:520,background:CARD_BG,border:`1px solid rgba(255,69,69,0.45)`,borderRadius:16,padding:20}}><div style={{fontFamily:FD,color:"#FF8B8B",fontSize:20,letterSpacing:2,marginBottom:8}}>STARTUP ERROR</div><div style={{fontFamily:FB,color:"#FFB5B5",fontSize:13,lineHeight:1.55}}>{startupError}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:12}}>Check deployment environment variables and network access, then reload.</div><button onClick={()=>window.location.reload()} className="btn-v cta-primary" style={{marginTop:14}}>RELOAD</button></div></div></>;
+if(!ready)return <><Styles/><main className="phase4dBootState" data-testid="startup-state-shell"><div className="phase4dBootStateInner"><div className="phase4dBootBrand"><SLLogo size={42} glow/><div className="phase4dBootBrandCopy"><div className="phase4dBootBrandTitle">ShotLab</div><div className="phase4dBootBrandDetail">Performance development</div></div></div><ShotLabStatePanel state="loading" eyebrow="Secure team sync" title="Preparing your command center" detail="Loading your team, training plan, and performance history." testId="startup-loading-state"/></div></main></>;
+if(startupError)return <><Styles/><main className="phase4dBootState" data-testid="startup-state-shell"><div className="phase4dBootStateInner"><div className="phase4dBootBrand"><SLLogo size={42} glow/><div className="phase4dBootBrandCopy"><div className="phase4dBootBrandTitle">ShotLab</div><div className="phase4dBootBrandDetail">Performance development</div></div></div><ShotLabStatePanel state="error" eyebrow="Connection recovery" title="ShotLab could not finish loading" detail={startupError} actionLabel="Reload ShotLab" onAction={()=>window.location.reload()} testId="startup-error-state"/></div></main></>;
 
 const isDeleteAccountRoute=typeof window!=="undefined"&&getLegalRouteKey(window.location.pathname)==="delete-account";
 const dataDebugPanel=dataDebugEnabled?<div style={{position:"fixed",right:12,bottom:12,zIndex:60,width:"min(360px, calc(100vw - 24px))",maxHeight:"45vh",overflow:"auto",background:"rgba(8,8,8,0.94)",border:"1px solid rgba(255,255,255,0.18)",borderRadius:10,padding:10,fontFamily:"system-ui,-apple-system,Segoe UI,Roboto,sans-serif",fontSize:11,color:"#E5E7EB"}}><div style={{fontWeight:700,letterSpacing:"0.06em",marginBottom:6,color:"#C8FF1A"}}>DATA DEBUG (?dataDebug=1)</div><div>User: {user?.email||"none"}</div><div>Role: {user?.role||"none"}</div><div>Team ID: {user?.teamId||"none"}</div><div>Team Code: {myTeam?.joinCode||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Auth mode: {dataDebug.auth.mode||"legacy"}</div><div>Supabase auth enabled: {dataDebug.auth.supabaseEnabled||"no"}</div><div>Profile persist status: {dataDebug.auth.profilePersistStatus||"idle"}</div><div>Profile restore status: {dataDebug.auth.profileRestoreStatus||"idle"}</div><div>Legacy register status: {dataDebug.auth.legacyAuthRegisterStatus||"idle"}</div><div>Legacy login status: {dataDebug.auth.legacyAuthLoginStatus||"idle"}</div><div>Legacy update status: {dataDebug.auth.legacyAuthUpdateStatus||"idle"}</div><div>Profile teamId: {dataDebug.auth.profileTeamId||"none"}</div><div>Auth signup HTTP status: {dataDebug.auth.signupHttpStatus==null?"n/a":dataDebug.auth.signupHttpStatus}</div><div>Auth signup code: {dataDebug.auth.signupCode||"none"}</div><div>Auth signup stage: {dataDebug.auth.signupStage||"none"}</div><div>Auth signup message: {dataDebug.auth.signupMessage||"none"}</div><div>Auth login HTTP status: {dataDebug.auth.loginHttpStatus==null?"n/a":dataDebug.auth.loginHttpStatus}</div><div>Auth login code: {dataDebug.auth.loginCode||"none"}</div><div>Auth login message: {dataDebug.auth.loginMessage||"none"}</div><div>Auth provider hint: {dataDebug.auth.providerHint||"none"}</div><div>Register endpoint: {dataDebug.auth.registerEndpoint||"none"}</div><div>Register parse mode: {dataDebug.auth.registerParseMode||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Create team name: {dataDebug.createTeam.teamName||"none"}</div><div>Create endpoint: {dataDebug.createTeam.endpoint||"none"}</div><div>Create status: {dataDebug.createTeam.status||"none"}</div><div>Create HTTP status: {dataDebug.createTeam.httpStatus==null?"n/a":dataDebug.createTeam.httpStatus}</div><div>Create error code: {dataDebug.createTeam.errorCode||"none"}</div><div>Create response summary: {dataDebug.createTeam.responseSummary||"none"}</div><div>Returned teamId: {dataDebug.createTeam.teamId||"none"}</div><div>Returned joinCode: {dataDebug.createTeam.joinCode||"none"}</div><div>Coach state updated: {dataDebug.createTeam.stateUpdated?"yes":"no"}</div><div>Remote persisted: {dataDebug.createTeam.remotePersisted?"yes":"no"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Join code entered: {dataDebug.join.enteredCode||"none"}</div><div>Normalized code: {dataDebug.join.normalizedCode||"none"}</div><div>Lookup source: {dataDebug.join.lookupSource}</div><div>Lookup field: {dataDebug.join.lookupField}</div><div>Lookup hash prefix: {dataDebug.join.lookupHashPrefix||"none"}</div><div>Lookup hash source: {dataDebug.join.lookupHashSource||"none"}</div><div>Join status: {dataDebug.join.status}</div><div>Lookup count: {dataDebug.join.lookupCount==null?"n/a":dataDebug.join.lookupCount}</div><div>Matched teamId: {dataDebug.join.matchedTeamId||"none"}</div><div>Invite state: {dataDebug.join.inviteState||"none"}</div><div>Invite expiresAt: {dataDebug.join.expiresAt||"none"}</div><div>Invite context saved: {dataDebug.join.inviteContextSaved||"no"}</div><div>Invite context storage key: {dataDebug.join.inviteContextStorageKey||"none"}</div><div>Invite context token present: {dataDebug.join.inviteContextTokenPresent||"no"}</div><div>Invite context teamId: {dataDebug.join.inviteContextTeamId||"none"}</div><div>Invite context subject: {dataDebug.join.inviteContextSubject||"none"}</div><div>Current user email: {dataDebug.join.currentUserEmail||"none"}</div><div>Context subject matches user: {dataDebug.join.contextSubjectMatchesUser||"no"}</div><div>Consume attempt started: {dataDebug.join.consumeAttemptStarted||"no"}</div><div>Consume attempt blocked: {dataDebug.join.consumeAttemptBlocked||"no"}</div><div>Consume blocked reason: {dataDebug.join.consumeAttemptBlockedReason||"none"}</div><div>Consume in-flight key: {dataDebug.join.consumeInFlightKey||"none"}</div><div>Consume in-flight age ms: {dataDebug.join.consumeInFlightAgeMs==null?"n/a":dataDebug.join.consumeInFlightAgeMs}</div><div>Consume timeout ms: {dataDebug.join.consumeTimeoutMs==null?"n/a":dataDebug.join.consumeTimeoutMs}</div><div>Consume guard cleared: {dataDebug.join.consumeGuardCleared||"no"}</div><div>Consume guard clear reason: {dataDebug.join.consumeGuardClearReason||"none"}</div><div>Consume fetch started: {dataDebug.join.consumeFetchStarted||"no"}</div><div>Consume fetch finished: {dataDebug.join.consumeFetchFinished||"no"}</div><div>Consume endpoint: {dataDebug.join.consumeEndpoint||"none"}</div><div>Consume HTTP status: {dataDebug.join.consumeHttpStatus==null?"n/a":dataDebug.join.consumeHttpStatus}</div><div>Consume diagnostic code: {dataDebug.join.consumeDiagnosticCode||"none"}</div><div>Consume diagnostic message: {dataDebug.join.consumeDiagnosticMessage||"none"}</div><div>Consume token present: {dataDebug.join.consumeTokenPresent||"no"}</div><div>Consume teamId used: {dataDebug.join.consumeTeamIdUsed||"none"}</div><div>Consume user email: {dataDebug.join.consumeUserEmail||"none"}</div><div>Consume resolved user UUID: {dataDebug.join.consumeResolvedUserUuid||"none"}</div><div>Membership insert status: {dataDebug.join.membershipInsertStatus||"none"}</div><div>Membership insert error: {dataDebug.join.membershipInsertError||"none"}</div><div>Profile update status: {dataDebug.join.profileUpdateStatus||"none"}</div><div>Final route decision: {dataDebug.join.finalRouteDecision||"none"}</div><div>Profile update: {dataDebug.join.update}</div><div>Join error: {dataDebug.join.error||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Leaderboard endpoint: {dataDebug.leaderboard.endpoint||"none"}</div><div>HTTP status: {dataDebug.leaderboard.httpStatus==null?"n/a":dataDebug.leaderboard.httpStatus}</div><div>Error code: {dataDebug.leaderboard.errorCode||"none"}</div><div>Result count: {dataDebug.leaderboard.resultCount==null?"n/a":dataDebug.leaderboard.resultCount}</div><div>Empty data: {dataDebug.leaderboard.isEmpty?"yes":"no"}</div></div>:null;
@@ -2035,26 +2054,23 @@ return <div className={`app-shell performance-shell performance-shell--player ${
 <div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
 
 {/* Badge Reveal Overlay */}
-{badgeReveal&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(8px)"}} onClick={()=>setBadgeReveal(null)}>
-  <div className="badge-pop badge-shine" style={{textAlign:"center",padding:40}}>
-    <div style={{width:120,height:120,borderRadius:"50%",background:`linear-gradient(145deg,${badgeReveal.color}22,${badgeReveal.color}08)`,border:`3px solid ${badgeReveal.color}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",boxShadow:`0 0 60px ${badgeReveal.color}33`}}>
-      <span style={{fontFamily:FD,fontSize:36,color:badgeReveal.color}}>{badgeReveal.icon}</span>
-    </div>
-    <div style={{fontFamily:FD,color:badgeReveal.color,fontSize:32,letterSpacing:6}}>UNLOCKED</div>
-    <div style={{fontFamily:FD,color:"#FFFFFF",fontSize:22,letterSpacing:3,marginTop:8}}>{badgeReveal.name}</div>
-    <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:13,marginTop:8}}>{badgeReveal.days}-day streak achieved</div>
-    <div style={{fontFamily:FB,color:T.MUT,fontSize:10,marginTop:24}}>Tap to dismiss</div>
+{badgeReveal&&<div className="performanceRevealOverlay" data-testid="player-streak-achievement-reveal" onClick={()=>setBadgeReveal(null)}>
+  <div className="performanceRevealCard" role="dialog" aria-modal="true" aria-label={`Streak milestone: ${badgeReveal.name}`} onClick={event=>event.stopPropagation()}>
+    <div className="performanceRevealEyebrow">STREAK MILESTONE</div>
+    <ShotLabPerformanceMark kind="streak" value={`${badgeReveal.days}D`} label={badgeReveal.name} detail="Training streak achieved" testId="player-streak-achievement-mark" />
+    <div className="performanceRevealSummary">Consistency banked. Your {badgeReveal.days}-day training streak is now part of your ShotLab record.</div>
+    <button type="button" className="performanceRevealDismiss" onClick={()=>setBadgeReveal(null)}>Continue</button>
   </div>
 </div>}
 
 {/* Personal Best Reveal */}
-{pbReveal&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000a",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setPbReveal(null)}>
-  <div className="badge-pop" style={{textAlign:"center",padding:32}}>
-    <div style={{fontFamily:FD,color:ORANGE,fontSize:48,letterSpacing:4,lineHeight:1}}>NEW PB!</div>
-    <div style={{fontFamily:FD,color:LIGHT,fontSize:64,lineHeight:1,margin:"16px 0 8px"}}>{pbReveal.score}</div>
-    <div style={{fontFamily:FB,color:MUTED,fontSize:14}}>Previous best: {pbReveal.prev}</div>
-    <div style={{fontFamily:FB,color:ORANGE,fontSize:13,fontWeight:700,marginTop:8,letterSpacing:2}}>{pbReveal.drill}</div>
-    <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:20}}>Tap to dismiss</div>
+{pbReveal&&<div className="performanceRevealOverlay" data-testid="player-pb-achievement-reveal" onClick={()=>setPbReveal(null)}>
+  <div className="performanceRevealCard performanceRevealCard--pb" role="dialog" aria-modal="true" aria-label={`New personal best in ${pbReveal.drill}`} onClick={event=>event.stopPropagation()}>
+    <div className="performanceRevealEyebrow">PERSONAL BEST</div>
+    <ShotLabPerformanceMark kind="pb" value={pbReveal.score} label="New high mark" detail={pbReveal.drill} tone="warning" testId="player-pb-achievement-mark" />
+    <div className="performanceRevealDelta"><span>Previous</span><strong>{pbReveal.prev}</strong><span>Improvement</span><strong>+{Math.max(0,Number(pbReveal.score)-Number(pbReveal.prev))}</strong></div>
+    <div className="performanceRevealSummary">That result moved your benchmark. The next comparable session now measures against this score.</div>
+    <button type="button" className="performanceRevealDismiss" onClick={()=>setPbReveal(null)}>Bank this result</button>
   </div>
 </div>}
 
@@ -2070,12 +2086,12 @@ return <div className={`app-shell performance-shell performance-shell--player ${
   })()}
 />
 
-<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
-  {isDesktop&&<button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>}
+{isDesktop&&<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
+  <button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>
   <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.MUT,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
-</div>
+</div>}
 
-<div ref={playerScrollRef} className="player-scroll-container" style={{flex:1,padding:isDesktop?"14px 20px 36px":"16px 20px var(--player-scroll-bottom-padding)",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
+<div ref={playerScrollRef} className="player-scroll-container" style={{flex:1,padding:isDesktop?"14px 20px 36px":"8px 20px var(--player-scroll-bottom-padding)",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
   {/* Pull-to-refresh basketball */}
   {pullY>5&&<div style={{position:"absolute",top:-44,left:"50%",transform:"translateX(-50%)",textAlign:"center",opacity:Math.min(pullY/30,1)}}>
     <svg width="24" height="24" viewBox="0 0 40 40" fill="none" style={{animation:pullY>40?"bbBounce .5s ease infinite":"none"}}><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="2.5"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="1.5"/><path d="M20 3v34" stroke={ORANGE} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/></svg>
@@ -2326,18 +2342,10 @@ return <div className={`app-shell performance-shell performance-shell--player ${
 
 
   {/* ═════════════ ACTIVE DRILL INPUT ═════════════ */}
-  {(tab==="home"||tab==="log-drill"||tab==="duels")&&active&&<div className="detail-enter" style={{textAlign:"center",paddingTop:12,position:"relative"}}>
+  {(tab==="home"||tab==="log-drill"||tab==="duels")&&active&&<div className="detail-enter player-training-session" data-testid="player-training-session" style={{textAlign:"center",paddingTop:12,position:"relative"}}>
     {confetti&&<ConfettiBurst/>}
-    {saved&&shareData?<div className="fade-up" style={{padding:"16px 0"}}>
-      {/* ── SHAREABLE WORKOUT CARD ── */}
-      <ShareCard data={shareData}/>
-      {/* Challenge button */}
-      {!showChallForm?<div style={{display:"flex",gap:8,marginTop:16}}>
-        <button className="btn-v cta-primary" onClick={closeShare} style={{width:"100%"}}>DONE</button>
-        {shareData?.src!=="program"&&<button className="btn-v cta-primary" onClick={()=>setShowChallForm(true)} style={{width:"100%"}}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>CHALLENGE
-        </button>}
-      </div>
+    {saved&&shareData?<div className="fade-up player-training-completion-wrap" data-testid="player-training-completion-wrap" style={{padding:"16px 0"}}>
+      {!showChallForm?<PlayerTrainingCompletion data={shareData} shareCard={<ShareCard data={shareData}/>} canChallenge={shareData?.src!=="program"} completedCount={(shareData?.src==="program"?todayProgramScores:todayS).length} plannedTotal={shareData?.src==="program"?programDrills.length:drills.length} nextCommitment={events.filter(e=>e.date>=today).sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")))[0]||null} currentStreak={streak} onContinue={closeShare} onChallenge={()=>setShowChallForm(true)} onViewProgress={()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setChallengeSaveError("");setSubmitting(false);switchTab("profile")}}/>
       :<div className="fade-up" style={{marginTop:16,background:CARD_BG,borderRadius:16,padding:"20px 18px",border:`1px solid ${ORANGE}33`,textAlign:"left"}}>
         <div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3,marginBottom:4}}>SEND A CHALLENGE</div>
         <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:14}}>Dare a teammate to beat your {shareData.score}{shareData.max?`/${shareData.max}`:""} on {shareData.drill}</div>
@@ -2356,12 +2364,9 @@ return <div className={`app-shell performance-shell performance-shell--player ${
           </div>
         </>}
       </div>}
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:12}}>Screenshot your card and share on social media</div>
+
     </div>
-    :<><button onClick={()=>{setActive(null);if(tab==="home")switchTab("log-drill");if(tab==="duels")switchTab("duels")}} style={{background:"none",border:"none",color:activeMode==="program"?CYAN:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:32,padding:"8px 16px"}}>&#8592; BACK</button>
-      <div style={{width:100,height:100,borderRadius:22,background:`linear-gradient(135deg,${SURFACE},${CARD_BG})`,border:`1px solid ${activeMode==="program"?CYAN+"40":BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 24px",boxShadow:activeMode==="program"?`0 0 24px ${CYAN}14`:"none"}}><DrillIcon type={active.icon} size={48} color={activeMode==="program"?CYAN:undefined}/></div>
-      <h2 style={{fontFamily:FD,color:activeMode==="program"?CYAN:LIGHT,fontSize:36,letterSpacing:4,margin:"0 0 8px"}}>{active.name}</h2>
-      <p style={{fontFamily:FB,color:activeMode==="program"?CYAN: MUTED,fontSize:14,margin:"0 auto 6px",maxWidth:280,lineHeight:1.6,textShadow:activeMode==="program"?`0 0 18px ${CYAN}22`:"none"}}>{active.desc}</p>
+    :<><PlayerTrainingSessionHeader drill={active} mode={activeMode} currentIndex={(activeMode==="program"?todayProgramScores:todayS).length+1} total={activeMode==="program"?programDrills.length:drills.length} score={input} onBack={()=>{setActive(null);if(tab==="home")switchTab("log-drill");if(tab==="duels")switchTab("duels")}}/>
       {/* Personal Best + Average */}
       {(()=>{const ds=activeScores.filter(s=>s.drillId===active.id);const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;const statAccent=activeMode==="program"?CYAN:ORANGE;
         return ds.length>0?<div style={{display:"flex",gap:8,justifyContent:"center",margin:"12px 0 6px"}}>
@@ -2388,6 +2393,8 @@ return <div className={`app-shell performance-shell performance-shell--player ${
       {/* Motivational line */}
       <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:"#555555",fontSize:12,fontStyle:"italic",letterSpacing:1,margin:"20px 0 8px",fontWeight:500,textShadow:activeMode==="program"?`0 0 16px ${CYAN}18`:"none"}}>{["Lock in.","No shortcuts.","This rep counts.","Earn it.","Be honest with yourself.","Own the work.","Details matter.","Trust the process.","Stay disciplined.","Championship habits."][Math.floor((active.id*7+new Date().getDate())%10)]}</div>
       {hasDrillMax(active)&&<div style={{fontFamily:FD,color:activeMode==="program"?CYAN:T.SUB,fontSize:13,letterSpacing:3,marginBottom:28}}>MAX: {active.max}</div>}
+      <div className="player-training-score-zone" data-testid="player-training-score-zone">
+      <div className="player-training-score-zone-label">LOG YOUR RESULT</div>
       {/* Score input with reactive color */}
       {(()=>{const v=Number(input)||0;const pct=hasDrillMax(active)&&active.max>0?v/active.max:0;const glowColor=hasDrillMax(active)?(pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#FF4545":VOLT):VOLT;const borderColor=v>0?glowColor:VOLT;
         return <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8,marginBottom:40}}>
@@ -2397,12 +2404,13 @@ return <div className={`app-shell performance-shell performance-shell--player ${
       {/* Score quality indicator */}
       {(()=>{const v=parseInt(input)||0;if(v<=0||!hasDrillMax(active))return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?SUCCESS:pct>=75?SUCCESS:pct>=50?WARNING:DANGER;
         return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% — {label}</div>})()}
-      <button className="btn-v cta-primary" onClick={handleLog} disabled={submitting||activeScoreInvalid} style={{maxWidth:300,margin:"0 auto",opacity:(submitting||activeScoreInvalid)?0.55:1,cursor:submitting||activeScoreInvalid?"not-allowed":"pointer"}}>LOG SCORE &#8594;</button>
+      <button data-testid="player-training-log-score" className="btn-v cta-primary" onClick={handleLog} disabled={submitting||activeScoreInvalid} style={{width:"100%",maxWidth:"none",margin:"0 auto",opacity:(submitting||activeScoreInvalid)?0.55:1,cursor:submitting||activeScoreInvalid?"not-allowed":"pointer"}}>LOG SCORE &#8594;</button>
+      </div>
     </>}
   </div>}
 
   {/* ═════════════ PROGRAM (Coach-Verified) ═════════════ */}
-  {tab==="program"&&<div className={slideClass} key="program"><PlayerWorkspaceCommandBar model={eventsWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={()=>document.querySelector("[data-testid=player-events-operational-list]")?.scrollIntoView({behavior:"smooth",block:"start"})} testId="player-events-workspace"/><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></div>}
+  {tab==="program"&&<div className={slideClass} key="program"><PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter></div>}
 
 
 
@@ -2446,13 +2454,18 @@ return <div className={`app-shell performance-shell performance-shell--player ${
   {u.isCoach&&tab==="players"&&<div className={slideClass} key="players"><PlayersScreen/></div>}
 
   {/* ═════════════ STRENGTH & CONDITIONING ═════════════ */}
-  {tab==="sc"&&<div className={slideClass} key="sc"><PlayerWorkspaceCommandBar model={strengthWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={()=>document.querySelector("[data-testid=player-strength-operational-panel]")?.scrollIntoView({behavior:"smooth",block:"start"})} testId="player-strength-workspace"/><div data-testid="player-strength-operational-panel"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div></div>}
+  {tab==="sc"&&<div className={slideClass} key="sc"><PlayerCommitmentCenter mode="strength" model={strengthWorkspaceModel} items={scSessions} responses={scRsvps} logs={scLogs} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-strength-operational-panel"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter></div>}
 
   {/* ═════════════ PROFILE — Offseason Resume ═════════════ */}
-  {tab==="profile"&&<div className={slideClass} key="profile"><PlayerWorkspaceCommandBar model={profileWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"profile"})} testId="player-profile-workspace"/><ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scSessions={scSessions} scRsvps={scRsvps} scLogs={scLogs} seasonArchives={seasonArchives} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/></div>}
+  {tab==="profile"&&<div className={slideClass+" player-progress-story-route"} key="profile" data-testid="player-profile-workspace">
+  <PlayerProgressStory userName={u.name} userEmail={u.email} teamId={u.teamId} shotLogs={shotLogs} scores={scores} programScores={programScores} drills={drills} programDrills={programDrills} streak={streak} coachPriorities={coachPriorities} today={today} onStartTraining={()=>switchTab("log-drill")} onOpenFullProfile={()=>{const details=document.querySelector('[data-testid="player-progress-full-profile"]');if(details instanceof HTMLDetailsElement)details.open=true;window.setTimeout(()=>document.querySelector('[data-testid="player-profile-readout"]')?.scrollIntoView({behavior:"smooth",block:"start"}),0)}}/>
+  <ProgressiveDisclosure title="Full progress profile" summary="Report card, performance intelligence, drill development, history, and privacy" testId="player-progress-full-profile">
+    <ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scSessions={scSessions} scRsvps={scRsvps} scLogs={scLogs} seasonArchives={seasonArchives} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/>
+  </ProgressiveDisclosure>
+</div>}
 </div>
 
-{!isDesktop&&<MobileNavigation primaryItems={playerMobilePrimaryItems} secondaryItems={playerMobileSecondaryItems} activeKey={tab} onChange={switchTab} ariaLabel="Player navigation"/>} 
+{!isDesktop&&<MobileNavigation primaryItems={playerMobilePrimaryItems} secondaryItems={playerMobileSecondaryItems} activeKey={tab} onChange={switchTab} onLogout={logout} ariaLabel="Player navigation"/>}
 
   </div></div></main>
 {isDesktop&&<aside className="insights-panel"><OperationalInsightRail model={playerInsightRailModel} onAction={handlePlayerInsightAction} testId="player-operational-insight-rail"/></aside>}
@@ -3902,7 +3915,16 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
     })()}
   </div>}
   {/** DRILLS */}
-  {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPageDashboardHeader eyebrow="Development operations" title="Drills Dashboard" summary="Manage the training library, program standards, and player execution pathways." status={`${coachPageDashboardSummary.drills.total} total options`} actions={[{key:"add",label:"Add Drill",onClick:()=>setShowNewDrill(true)}]} metrics={[{key:"active",label:"At Home Library",value:coachPageDashboardSummary.drills.active,detail:"Player-facing drills"},{key:"program",label:"Program Set",value:coachPageDashboardSummary.drills.program,detail:"Coach-scored standards",tone:"info"},{key:"total",label:"Total Options",value:coachPageDashboardSummary.drills.total,detail:"All development paths",tone:"positive"},{key:"create",label:"Custom Capacity",value:`${customProgramDrillCount}/7`,detail:"Program drill slots"}]} activeMetric={coachPageMetric} onMetricSelect={(key)=>{setCoachPageMetric(key);if(key==="create")setShowNewDrill(true);else document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth",block:"start"});}} testId="coach-page-dashboard-drills"/><CoachDrillsOperationalPanel rows={coachDrillIntelligenceRows} scope={drillIntelligenceScope} query={drillIntelligenceQuery} onScopeChange={setDrillIntelligenceScope} onQueryChange={setDrillIntelligenceQuery} onOpenDrill={(drill)=>{setEditD(drill);setEName(drill.name);setEDesc(drill.desc||"");setEInstr(drill.instructions||"");setEMax(hasDrillMax(drill)?String(drill.max):"");setEIcon(drill.icon||"ft");}}/><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="Drill Management" s={`${visibleHomeDrills.length} visible`} identity/>
+  {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPageDashboardHeader eyebrow="Development operations" title="Drills Dashboard" summary="Manage the training library, program standards, and player execution pathways." status={`${coachPageDashboardSummary.drills.total} total options`} actions={[{key:"add",label:"Add Drill",onClick:()=>setShowNewDrill(true)}]} metrics={[{key:"active",label:"At Home Library",value:coachPageDashboardSummary.drills.active,detail:"Player-facing drills"},{key:"program",label:"Program Set",value:coachPageDashboardSummary.drills.program,detail:"Coach-scored standards",tone:"info"},{key:"total",label:"Total Options",value:coachPageDashboardSummary.drills.total,detail:"All development paths",tone:"positive"},{key:"create",label:"Custom Capacity",value:`${customProgramDrillCount}/7`,detail:"Program drill slots"}]} activeMetric={coachPageMetric} onMetricSelect={(key)=>{setCoachPageMetric(key);if(key==="create")setShowNewDrill(true);else document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth",block:"start"});}} testId="coach-page-dashboard-drills"/><CoachDrillsOperationalPanel rows={coachDrillIntelligenceRows} scope={drillIntelligenceScope} query={drillIntelligenceQuery} onScopeChange={setDrillIntelligenceScope} onQueryChange={setDrillIntelligenceQuery} onOpenDrill={(drill)=>{setEditD(drill);setEName(drill.name);setEDesc(drill.desc||"");setEInstr(drill.instructions||"");setEMax(hasDrillMax(drill)?String(drill.max):"");setEIcon(drill.icon||"ft");}}/><details className="coach-drills-library-disclosure" data-testid="coach-drills-library-management">
+  <summary className="coach-drills-library-summary">
+    <span className="coach-drills-library-summary-copy">
+      <span className="coach-drills-library-kicker">LIBRARY MANAGEMENT</span>
+      <strong>Manage drill library</strong>
+      <small>{visibleHomeDrills.length} player-facing drills · {customProgramDrillCount}/7 custom program slots</small>
+    </span>
+    <span className="coach-drills-library-chevron" aria-hidden="true">⌄</span>
+  </summary>
+  <div className="coach-drills-library-body">
     <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
     <div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:16}}>
       <div style={{fontFamily:FD,color:PAGE_ACCENTS.drills.accent,fontSize:12,letterSpacing:"var(--tracking-default)",marginBottom:6}}>PROGRAM SHOOTING DRILLS ({customProgramDrillCount}/7 CUSTOM)</div>
@@ -3935,6 +3957,8 @@ return <div className={`app-shell performance-shell performance-shell--coach ${i
         </button>}
       </div>
     </div>})}
+  </div>
+</details>
 
     {/* Add new drill */}
     {!showNewDrill?<button onClick={()=>setShowNewDrill(true)} className="btn-v cta-primary" style={{marginTop:8}}>+ ADD DRILL</button>
@@ -4380,18 +4404,25 @@ return <div className="fade-up">
 />
 
 {/* Badges */}
-{earnedBadges.length>0&&<div style={{marginBottom:24}}>
-  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>BADGES EARNED</div>
-  <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>{earnedBadges.map(b=>
-    <div key={b.days} style={{display:"flex",alignItems:"center",gap:5,background:`${b.color}10`,border:`1px solid ${b.color}33`,borderRadius:10,padding:"6px 12px"}}>
-      <span style={{fontFamily:FD,fontSize:14,color:b.color}}>{b.icon}</span>
-      <span style={{fontFamily:FB,fontSize:10,color:b.color,fontWeight:700,letterSpacing:1}}>{b.name}</span>
-    </div>)}
+{(()=>{const nextBadge=STREAK_BADGES.find(b=>b.days>streak);return <section className="performanceBadgeShelf" data-testid="player-achievement-shelf" aria-label="Logged drill streak achievement milestones">
+  <div className="performanceBadgeShelfHeader"><span>ACHIEVEMENT CABINET</span><strong>{earnedBadges.length} earned · {streak}D logged drill streak</strong></div>
+  {earnedBadges.length>0&&<div className="performanceBadgeShelfGrid performanceBadgeShelfGrid--earned">{earnedBadges.map(b=><ShotLabPerformanceMark key={b.days} kind="streak" value={`${b.days}D`} label={b.name} detail="Logged drill streak milestone" compact surface="light" testId={`player-achievement-${b.days}`}/>)}</div>}
+  {nextBadge&&<div className="performanceBadgeNext" data-testid="player-achievement-next"><div className="performanceBadgeNextLabel">NEXT MILESTONE</div><ShotLabPerformanceMark kind="milestone" value={`${nextBadge.days}D`} label={nextBadge.name} detail={`${Math.max(0,nextBadge.days-streak)} logged drill days to unlock`} compact surface="light" tone="neutral" testId="player-achievement-next-mark" /></div>}
+  {!nextBadge&&earnedBadges.length>0&&<div className="performanceBadgeComplete">All logged drill streak milestones earned. Keep protecting the standard.</div>}
+</section>})()}
+
+<div data-testid="player-profile-current-progress" style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>PLAYER PROGRESS PROFILE</div>{progress.isEmpty?<div style={{fontFamily:FB,color:MUTED,fontSize:11,lineHeight:1.5}}>No progress data yet. Log your first at-home session and RSVP to upcoming events to build your profile.</div>:<><div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:10}}>{[{l:"TOTAL AT HOME SHOTS",v:progress.totalAtHomeShots,c:VOLT},{l:"AT-HOME SHOT STREAK",v:progress.currentStreak,c:ORANGE},{l:"WEEKLY ACTIVITY",v:progress.weeklyActivityCount,c:LIGHT},{l:"EVENTS",v:progress.eventsAttended,c:CYAN},{l:"RSVP RATE",v:`${progress.rsvpParticipationRate}%`,c:VOLT}].map(item=><div key={item.l} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}><div style={{fontFamily:FD,color:item.c,fontSize:18}}>{item.v}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:1.4,fontWeight:700}}>{item.l}</div></div>)}</div><div style={{marginBottom:8}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:2,fontWeight:700,marginBottom:6}}>7-DAY TREND</div><div style={{display:"flex",alignItems:"flex-end",gap:4,height:44}}>{progress.sevenDayTrend.map(d=>{const max=Math.max(1,...progress.sevenDayTrend.map(x=>x.made));const h=Math.max(4,Math.round((d.made/max)*40));return <div key={d.day} title={`${d.day}: ${d.made}`} style={{flex:1,height:h,borderRadius:4,background:d.made>0?VOLT+"66":BORDER_CLR}}/>;})}</div></div><div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5}}>{progress.recentActivitySummary.join(" · ")}</div></>}</div>
+
+<div data-testid="player-profile-readout" style={{background:CARD_BG,borderRadius:16,padding:"15px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:14}}>
+  <div data-profile-readout-eyebrow style={{fontFamily:FB,color:VOLT,fontSize:9,fontWeight:800,letterSpacing:"0.10em"}}>DRILL TREND READOUT</div>
+  <div data-profile-readout-primary style={{fontFamily:FB,color:LIGHT,fontSize:17,fontWeight:800,marginTop:5}}>Drill momentum is {interpretedTrends.momentum}.</div>
+  <div data-profile-readout-support style={{fontFamily:FB,color:MUTED,fontSize:11,lineHeight:1.45,marginTop:7}}>
+    <span>Focus: {interpretedTrends.weakArea}</span>
+    <span>Strength: {[...drills,...programDrills].find((drill)=>String(drill?.id||drill?.drillId||drill?.drill_id||"")===String(interpretedTrends.strongestDrill))?.name||interpretedTrends.strongestDrill}</span>
   </div>
-</div>}
+</div>
 
-<div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>PLAYER PROGRESS PROFILE</div>{progress.isEmpty?<div style={{fontFamily:FB,color:MUTED,fontSize:11,lineHeight:1.5}}>No progress data yet. Log your first at-home session and RSVP to upcoming events to build your profile.</div>:<><div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginBottom:10}}>{[{l:"TOTAL AT HOME SHOTS",v:progress.totalAtHomeShots,c:VOLT},{l:"CURRENT STREAK",v:progress.currentStreak,c:ORANGE},{l:"WEEKLY ACTIVITY",v:progress.weeklyActivityCount,c:LIGHT},{l:"EVENTS",v:progress.eventsAttended,c:CYAN},{l:"RSVP RATE",v:`${progress.rsvpParticipationRate}%`,c:VOLT}].map(item=><div key={item.l} style={{background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}><div style={{fontFamily:FD,color:item.c,fontSize:18}}>{item.v}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:1.4,fontWeight:700}}>{item.l}</div></div>)}</div><div style={{marginBottom:8}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:2,fontWeight:700,marginBottom:6}}>7-DAY TREND</div><div style={{display:"flex",alignItems:"flex-end",gap:4,height:44}}>{progress.sevenDayTrend.map(d=>{const max=Math.max(1,...progress.sevenDayTrend.map(x=>x.made));const h=Math.max(4,Math.round((d.made/max)*40));return <div key={d.day} title={`${d.day}: ${d.made}`} style={{flex:1,height:h,borderRadius:4,background:d.made>0?VOLT+"66":BORDER_CLR}}/>;})}</div></div><div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5}}>{progress.recentActivitySummary.join(" · ")}</div></>}</div>
-
+<ProgressiveDisclosure title="Performance intelligence" summary="Trends, totals, charts, and recent logs" testId="player-profile-performance-intelligence">
 <div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
   <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>INTERPRETED PERFORMANCE TRENDS</div>
   <div style={{display:"grid",gap:7}}>
@@ -4411,8 +4442,41 @@ return <div className="fade-up">
   <div style={{height:4}}/>
 </div>
 
-<ShotLabCharts scores={scores} drills={drills} programDrills={programDrills} user={u} />
+<div data-testid="player-profile-analytics"><ShotLabCharts scores={scores} drills={drills} programDrills={programDrills} user={u} /></div>
+</ProgressiveDisclosure>
 
+<ProgressiveDisclosure title="Drill development" summary={`${drillStats.length} drills tracked · personal bests and trends`} testId="player-profile-drill-development">
+<div data-testid="player-profile-drill-index" data-drill-count={drillStats.length}>
+  <div data-drill-index-heading>
+    <div>
+      <div data-drill-index-eyebrow>DEVELOPMENT INDEX</div>
+      <div data-drill-index-title>Your drills at a glance</div>
+    </div>
+    <div data-drill-index-count>{drillStats.length} tracked</div>
+  </div>
+  <div data-drill-index-list>
+    {drillStats.map(d=>{
+      const sourceColor=d.src==="program"?CYAN:VOLT;
+      const trendLabel=d.trend==="up"?"Rising":d.trend==="down"?"Needs work":"Steady";
+      return <div key={`index-${d.src}-${d.id}`} data-drill-index-row data-source={d.src}>
+        <div data-drill-index-main>
+          <div data-drill-index-name>{d.name}</div>
+          <div data-drill-index-meta>
+            <span style={{color:sourceColor}}>{d.src==="program"?"PROGRAM":"AT HOME"}</span>
+            <span>{d.count} logs</span>
+            <span>{trendLabel}</span>
+          </div>
+        </div>
+        <div data-drill-index-metrics>
+          <span><strong>{d.pb}</strong><small>PB</small></span>
+          <span><strong>{d.avg}</strong><small>AVG</small></span>
+        </div>
+      </div>;
+    })}
+  </div>
+</div>
+
+<ProgressiveDisclosure title="Full drill details" summary="Personal bests, averages, trends, and score history" testId="player-profile-full-drill-details">
 {/* Per-drill breakdown with PBs and trends */}
 <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>DRILL BREAKDOWN</div>
 {drillStats.map(d=>{const accentColor=d.src==="program"?CYAN:getDrillAccentColor(d.name);return <div key={`${d.src}-${d.id}`} style={{background:CARD_BG,borderRadius:14,padding:"16px 18px",border:`1px solid ${BORDER_CLR}`,borderLeft:`5px solid ${accentColor}`,marginBottom:10}}>
@@ -4448,8 +4512,10 @@ return <div className="fade-up">
     <Sparkline data={d.last10} color={VOLT} w={200} h={20}/>
   </div>}
 </div>})}
+</ProgressiveDisclosure>
+</ProgressiveDisclosure>
 
-<div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
+<div data-testid="player-profile-privacy" style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
   <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>PRIVACY</div>
   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,marginBottom:8}}>
     <div>
@@ -4461,6 +4527,7 @@ return <div className="fade-up">
   <div style={{fontFamily:FB,color:MUTED,fontSize:10}}>{u.hideFromLeaderboards?"You are hidden from public leaderboard rankings.":"You are visible in team leaderboards."}</div>
 </div>
 
+<ProgressiveDisclosure title="Account & data" summary="Privacy resources, support, data requests, and account controls" testId="player-profile-account-data">
 <div style={{background:CARD_BG,borderRadius:16,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:24}}>
   <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:8}}>LEGAL & SUPPORT</div>
   <div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5}}>Privacy, terms, support, account deletion, and data request resources.</div>
@@ -4469,6 +4536,7 @@ return <div className="fade-up">
 
 {/* ══════ ACCOUNT MANAGEMENT ══════ */}
 <AccountTrustActions deleteAccount={deleteAccount}/>
+</ProgressiveDisclosure>
 
   </div>;
 }
@@ -4543,7 +4611,7 @@ function CoachRoster({players,scores,shotLogs,drills,nudged,setNudged,onRemovePl
 return <div className="fade-up">
 <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PLAYER ROSTER" s={`${roster.length} PLAYERS`} identity/>
 <div style={{display:"grid",gap:8,marginBottom:14}}>
-  {[`Most engaged: ${coachInsights.engagedAthletes.slice(0,2).join(", ")||"No activity yet"}`,`Losing momentum: ${coachInsights.playersLosingMomentum.slice(0,2).join(", ")||"None"}`,`Team completion trend: ${coachInsights.teamCompletionTrend}`,`Priority completion rate: ${coachInsights.priorityCompletionRate}%`].map((line)=><div key={line} style={{fontFamily:FB,fontSize:11,color:LIGHT,padding:"8px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.02)"}}>{line}</div>)}
+  {[`Most engaged: ${coachInsights.engagedAthletes.slice(0,2).join(", ")||"No activity yet"}`,`Losing momentum: ${coachInsights.playersLosingMomentum.slice(0,2).join(", ")||"None"}`,`Team completion trend: ${coachInsights.teamCompletionTrend}`,`Weekly roster activity: ${coachInsights.weeklyActivityRate}%`].map((line)=><div key={line} style={{fontFamily:FB,fontSize:11,color:LIGHT,padding:"8px 10px",borderRadius:10,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.02)"}}>{line}</div>)}
 </div>
 <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:18,lineHeight:1.5}}>Track who's putting in work today. Tap "NUDGE" to flag inactive players for follow-up.</div>
 
