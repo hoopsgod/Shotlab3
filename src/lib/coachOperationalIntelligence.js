@@ -22,6 +22,32 @@ const rowsMatch = (row = {}, keys = new Set()) => {
 const nameOf = (row = {}) => row.name || row.displayName || [row.firstName, row.lastName].filter(Boolean).join(" ") || [row.first_name, row.last_name].filter(Boolean).join(" ") || row.email || "Player";
 const sum = (rows, keys) => safeArray(rows).reduce((total, row) => total + numberFrom(row, keys), 0);
 const clamp = (value, min = 0, max = 100) => Math.min(max, Math.max(min, Number(value) || 0));
+const isCoachIdentity = (row = {}) => normalize(row.role) === "coach" || row.isCoach === true || row.is_coach === true;
+const responseTimestamp = (row = {}) => numberFrom(row, ["ts", "updatedAt", "updated_at", "createdAt", "created_at"]);
+const responseIdentity = (row = {}) => normalize(row.playerId || row.player_id || row.email || row.player_email || row.userId || row.user_id || row.name);
+
+const latestEventResponses = ({ eventId = "", roster = [], rsvps = [] } = {}) => {
+  const rosterPlayers = safeArray(roster).filter((player) => !isCoachIdentity(player));
+  const rosterKeyToPlayer = new Map();
+  for (const player of rosterPlayers) for (const key of identityKeys(player)) rosterKeyToPlayer.set(key, player);
+  const latestByPlayer = new Map();
+  const walkIns = [];
+
+  for (const row of safeArray(rsvps)) {
+    if (String(row.eventId || row.event_id || "") !== String(eventId || "")) continue;
+    const identity = responseIdentity(row);
+    const player = rosterKeyToPlayer.get(identity);
+    const isWalkIn = row.walkIn === true || row.walk_in === true || normalize(row.source) === "walk-in";
+    if (!player) {
+      if (isWalkIn) walkIns.push(row);
+      continue;
+    }
+    const prior = latestByPlayer.get(identity);
+    if (!prior || responseTimestamp(row) >= responseTimestamp(prior.row)) latestByPlayer.set(identity, { row, player });
+  }
+
+  return { rosterPlayers, responses: [...latestByPlayer.values()], walkIns };
+};
 
 export function buildPlayerIntelligenceModel({
   playerRow,
@@ -48,12 +74,19 @@ export function buildPlayerIntelligenceModel({
   const currentMakes = sum(playerShots.filter((row) => !weekStart || dateOf(row) >= weekStart), ["made", "makes", "score"]);
   const priorMakes = sum(playerShots.filter((row) => previousWeekStart && dateOf(row) >= previousWeekStart && (!weekStart || dateOf(row) < weekStart)), ["made", "makes", "score"]);
   const eventById = new Map(safeArray(events).map((event) => [String(event.id || ""), event]));
-  const upcomingRsvps = playerRsvps.filter((row) => {
-    const event = eventById.get(String(row.eventId || row.event_id || ""));
-    return event && (!today || String(event.date || "") >= today);
-  });
+  const upcomingResponses = new Map();
+  for (const row of playerRsvps) {
+    const eventId = String(row.eventId || row.event_id || "");
+    const event = eventById.get(eventId);
+    if (!event || (today && String(event.date || "") < today)) continue;
+    const prior = upcomingResponses.get(eventId);
+    if (!prior || responseTimestamp(row) >= responseTimestamp(prior)) upcomingResponses.set(eventId, row);
+  }
+  const upcomingRsvps = [...upcomingResponses.values()];
+  const upcomingAttending = upcomingRsvps.filter((row) => row?.attended === true).length;
+  const upcomingUnavailable = Math.max(upcomingRsvps.length - upcomingAttending, 0);
   const scheduledEvents = safeArray(events).filter((event) => !today || String(event.date || "") >= today).length;
-  const attendanceRate = scheduledEvents ? Math.round((upcomingRsvps.length / scheduledEvents) * 100) : 0;
+  const attendanceRate = scheduledEvents ? Math.round((upcomingAttending / scheduledEvents) * 100) : 0;
   const scCompletionRate = playerScRsvps.length ? Math.round((playerScLogs.length / playerScRsvps.length) * 100) : 0;
   const latestActivity = [...playerScores, ...playerShots, ...playerScLogs].map(dateOf).filter(Boolean).sort().at(-1) || "";
   const trendDelta = currentRows.length - priorRows.length;
@@ -68,7 +101,9 @@ export function buildPlayerIntelligenceModel({
     weeklyMakes: currentMakes,
     previousWeeklyMakes: priorMakes,
     totalMakes: sum(playerShots, ["made", "makes", "score"]),
-    attendanceConfirmed: upcomingRsvps.length,
+    attendanceResponded: upcomingRsvps.length,
+    attendanceConfirmed: upcomingAttending,
+    attendanceUnavailable: upcomingUnavailable,
     attendancePossible: scheduledEvents,
     attendanceRate: clamp(attendanceRate),
     scCompleted: playerScLogs.length,
@@ -94,12 +129,13 @@ export function buildEventIntelligenceModel({ eventRow, roster = [], rsvps = [] 
   if (!eventRow) return null;
   const event = eventRow.event || eventRow;
   const eventId = String(event.id || eventRow.key || "");
-  const eventRsvps = safeArray(rsvps).filter((row) => String(row.eventId || row.event_id || "") === eventId);
-  const confirmedKeys = new Set(eventRsvps.flatMap((row) => [...identityKeys(row)]));
-  const confirmed = safeArray(roster).filter((player) => [...identityKeys(player)].some((key) => confirmedKeys.has(key)));
-  const missing = safeArray(roster).filter((player) => ![...identityKeys(player)].some((key) => confirmedKeys.has(key)));
-  const walkIns = eventRsvps.filter((row) => row.walkIn === true || row.walk_in === true || normalize(row.source) === "walk-in");
-  const responseRate = roster.length ? Math.round((confirmed.length / roster.length) * 100) : 0;
+  const { rosterPlayers, responses, walkIns } = latestEventResponses({ eventId, roster, rsvps });
+  const attending = responses.filter(({ row }) => row?.attended === true).map(({ player }) => player);
+  const unavailable = responses.filter(({ row }) => row?.attended !== true).map(({ player }) => player);
+  const respondedKeys = new Set(responses.flatMap(({ player }) => [...identityKeys(player)]));
+  const awaitingResponse = rosterPlayers.filter((player) => ![...identityKeys(player)].some((key) => respondedKeys.has(key)));
+  const responseRate = rosterPlayers.length ? Math.round((responses.length / rosterPlayers.length) * 100) : 0;
+  const availabilityRate = rosterPlayers.length ? Math.round((attending.length / rosterPlayers.length) * 100) : 0;
   return {
     id: eventId,
     event,
@@ -109,10 +145,16 @@ export function buildEventIntelligenceModel({ eventRow, roster = [], rsvps = [] 
     location: event.location || eventRow.location || "Location TBD",
     type: event.type || eventRow.type || "event",
     description: event.desc || event.description || "No additional details.",
-    confirmed,
-    missing,
+    rosterCount: rosterPlayers.length,
+    responded: responses.length,
+    attending,
+    unavailable,
+    awaitingResponse,
+    confirmed: attending,
+    missing: awaitingResponse,
     walkIns,
     responseRate: clamp(responseRate),
+    availabilityRate: clamp(availabilityRate),
   };
 }
 
@@ -241,27 +283,31 @@ export function buildSeasonComparisonModel({
   archives = [],
   selectedArchiveId = "",
 } = {}) {
-  const archiveList = safeArray(archives);
-  const selected = archiveList.find((archive) => String(archive.id || "") === String(selectedArchiveId || "")) || archiveList.at(-1) || null;
-  const current = {
-    rosterCount: safeArray(currentRoster).length,
-    homeScoreCount: safeArray(currentScores).length,
-    shotLogCount: safeArray(currentShotLogs).length,
-    eventCount: safeArray(currentEvents).length,
-    eventRsvpCount: safeArray(currentRsvps).length,
-    scSessionCount: safeArray(currentScSessions).length,
-    scLogCount: safeArray(currentScLogs).length,
-    totalShotLogMakes: sum(currentShotLogs, ["made", "makes", "score"]),
-  };
-  const previous = selected?.summary || {};
+  const archiveRows = safeArray(archives).map((archive) => ({
+    id: archive.id,
+    seasonName: archive.seasonName || archive.season_name || "Archived season",
+    archivedAt: archive.archivedAt || archive.archived_at || "",
+    snapshot: archive.snapshot || {},
+    source: archive,
+  })).sort((a, b) => String(b.archivedAt).localeCompare(String(a.archivedAt)));
+  const selected = archiveRows.find((row) => row.id === selectedArchiveId) || archiveRows[0] || null;
+  const archiveRoster = selected?.snapshot?.players || [];
+  const archiveScores = selected?.snapshot?.scores || [];
+  const archiveShots = selected?.snapshot?.shotLogs || selected?.snapshot?.shotlogs || [];
+  const archiveEvents = selected?.snapshot?.events || [];
+  const archiveRsvps = selected?.snapshot?.rsvps || [];
+  const archiveScSessions = selected?.snapshot?.scSessions || selected?.snapshot?.sc_sessions || [];
+  const archiveScLogs = selected?.snapshot?.scLogs || selected?.snapshot?.sc_logs || [];
+  const currentMakes = sum(currentShotLogs, ["made", "makes", "score"]);
+  const archiveMakes = sum(archiveShots, ["made", "makes", "score"]);
   const metrics = [
-    ["Roster", "rosterCount"],
-    ["Shot logs", "shotLogCount"],
-    ["Total makes", "totalShotLogMakes"],
-    ["Events", "eventCount"],
-    ["Event RSVPs", "eventRsvpCount"],
-    ["S&C sessions", "scSessionCount"],
-    ["S&C completions", "scLogCount"],
-  ].map(([label, key]) => ({ label, key, current: Number(current[key] || 0), previous: Number(previous[key] || 0), delta: Number(current[key] || 0) - Number(previous[key] || 0) }));
-  return { selected, current, previous, metrics, archives: archiveList };
+    { key: "roster", label: "Roster size", current: currentRoster.length, previous: archiveRoster.length },
+    { key: "scores", label: "Logged drill scores", current: currentScores.length, previous: archiveScores.length },
+    { key: "makes", label: "Recorded makes", current: currentMakes, previous: archiveMakes },
+    { key: "events", label: "Team events", current: currentEvents.length, previous: archiveEvents.length },
+    { key: "eventRsvps", label: "Event RSVPs", current: currentRsvps.length, previous: archiveRsvps.length },
+    { key: "scSessions", label: "S&C sessions", current: currentScSessions.length, previous: archiveScSessions.length },
+    { key: "scLogs", label: "S&C logs", current: currentScLogs.length, previous: archiveScLogs.length },
+  ].map((metric) => ({ ...metric, delta: metric.current - metric.previous }));
+  return { archives: archiveRows, selected, metrics };
 }
