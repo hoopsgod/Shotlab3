@@ -58,12 +58,14 @@ test("Phase 5A weekly activity cannot be inflated by activity outside the suppli
   assert.deepEqual(withoutVisibleActivity.engagedAthletes, []);
 });
 
-test("Phase 5A preserves the proven Phase 4E mobile state inset and contains Player workspace overflow", () => {
+test("Phase 5A preserves proven state geometry and fixes the actual mobile Player overflow source", () => {
   assert.match(statePanelCss, /width:min\(calc\(100% - 12px\),calc\(100vw - 28px\)\);[\s\S]*?margin-inline:auto/);
   assert.doesNotMatch(statePanelCss, /@media \(max-width:640px\)[\s\S]*?\.root\{width:min\(calc\(100% - 28px\),calc\(100vw - 28px\)\)\}/);
   assert.match(statePanelCss, /\.action\{[\s\S]*?min-height:44px/);
   assert.match(phase4eAuthorityCss, /\.performance-shell--player \.performance-workspace--player\s*\{[\s\S]*?max-width:\s*100vw;[\s\S]*?overflow-x:\s*clip;[\s\S]*?box-sizing:\s*border-box\b/);
-  assert.match(phase4eAuthorityCss, /\[data-testid="player-workspace-empty-state"\]\s*\{[\s\S]*?max-width:\s*calc\(100%\s*-\s*6px\);[\s\S]*?margin-left:\s*3px;[\s\S]*?margin-right:\s*3px/);
+  assert.match(phase4eAuthorityCss, /\.performance-shell \.player-scroll-container\s*\{[\s\S]*?box-sizing:\s*border-box\s*!important;[\s\S]*?width:\s*100%\s*!important;[\s\S]*?max-width:\s*100%\s*!important/);
+  assert.doesNotMatch(phase4eAuthorityCss, /\[data-testid="player-workspace-empty-state"\]\s*\{[\s\S]*?max-width:\s*calc\(100%\s*-\s*6px\)/);
+  assert.doesNotMatch(phase4eAuthorityCss, /\[data-testid="player-workspace-empty-state"\]\s*\{[\s\S]*?margin-left:\s*3px/);
 });
 
 test("Phase 5A owns the final enhancer position and makes repeated native builds safe", () => {
