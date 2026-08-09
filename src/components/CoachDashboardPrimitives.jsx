@@ -1,7 +1,47 @@
 import { createPortal } from "react-dom";
+import ShotLabIcon from "./ShotLabIcon";
 import styles from "./CoachDashboardPrimitives.module.css";
+import "./Phase2PremiumMetricLayer.css";
 
 const cx = (...values) => values.filter(Boolean).join(" ");
+
+const metricIconName = (item = {}) => {
+  if (item.icon) return item.icon;
+  const value = `${item.key || ""} ${item.label || ""}`.toLowerCase();
+  if (value.includes("roster") || value.includes("player")) return "team";
+  if (value.includes("active") || value.includes("completed")) return "check";
+  if (value.includes("attention") || value.includes("missing") || value.includes("awaiting")) return "alert";
+  if (value.includes("response") || value.includes("rate")) return "chart";
+  if (value.includes("upcoming") || value.includes("event")) return "calendar";
+  if (value.includes("make") || value.includes("shot")) return "target";
+  return "momentum";
+};
+
+const metricEvidencePoints = (values = []) => {
+  const numeric = values.map((value) => Number(value)).filter(Number.isFinite).slice(0, 10);
+  if (numeric.length < 2) return null;
+  const min = Math.min(...numeric);
+  const max = Math.max(...numeric);
+  const flat = max === min;
+  return numeric.map((value, index) => {
+    const x = numeric.length === 1 ? 50 : (index / (numeric.length - 1)) * 100;
+    const y = flat ? 14 : 24 - ((value - min) / (max - min)) * 18;
+    return `${x.toFixed(2)},${y.toFixed(2)}`;
+  }).join(" ");
+};
+
+function PremiumMetricEvidence({ values, label }) {
+  const points = metricEvidencePoints(values);
+  if (!points) return <span data-premium-metric-pulse aria-hidden="true" />;
+  return (
+    <span data-premium-metric-evidence role="img" aria-label={label || "Recent metric signal"}>
+      <svg viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true">
+        <line data-premium-metric-baseline x1="0" y1="24" x2="100" y2="24" />
+        <polyline data-premium-metric-path points={points} />
+      </svg>
+    </span>
+  );
+}
 
 export function DashboardCommandBar({
   eyebrow,
@@ -55,10 +95,16 @@ export function InteractiveMetricStrip({ items = [], activeKey, onSelect, testId
             className={cx(styles.metric, active && styles.metricActive, item.tone && styles[`tone_${item.tone}`])}
             aria-pressed={active}
             onClick={() => onSelect?.(item.key)}
+            data-premium-metric
+            data-premium-metric-tone={item.tone || "neutral"}
           >
-            <span className={styles.metricLabel}>{item.label}</span>
-            <span className={styles.metricValue}>{item.value}</span>
+            <span data-premium-metric-head>
+              <span data-premium-metric-icon aria-hidden="true"><ShotLabIcon name={metricIconName(item)} size={15} /></span>
+              <span className={styles.metricLabel} data-premium-metric-label>{item.label}</span>
+            </span>
+            <span className={styles.metricValue} data-premium-metric-value>{item.value}</span>
             {item.detail ? <span className={styles.metricDetail}>{item.detail}</span> : null}
+            <PremiumMetricEvidence values={item.evidence} label={item.evidenceLabel || `${item.label} recent signal`} />
           </button>
         );
       })}
