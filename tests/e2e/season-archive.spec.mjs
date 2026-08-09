@@ -255,5 +255,5 @@ test("server write failure shows an error and creates no local archive", async (
   expect(remoteArchives).toHaveLength(0);
   const localArchives = await page.evaluate(() => JSON.parse(window.localStorage.getItem("sl:season-archives") || "[]"));
   expect(localArchives).toHaveLength(0);
-  await expect(archivePanel.getByText("No archived seasons yet.")).toBeVisible();
+  await expect(archivePanel.getByText("No archived seasons yet", { exact: true })).toBeVisible();
 });
