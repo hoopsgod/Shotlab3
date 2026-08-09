@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const primitives = readFileSync('src/components/CoachDashboardPrimitives.jsx', 'utf8');
 const layer = readFileSync('src/components/Phase2PremiumMetricLayer.css', 'utf8');
+const practiceReadinessMigration = readFileSync('scripts/apply-phase5b-practice-readiness.mjs', 'utf8');
 
 test('Phase 2 premium metrics preserve dashboard filter semantics and full accessible labels', () => {
   assert.match(primitives, /export function InteractiveMetricStrip/);
@@ -43,4 +44,12 @@ test('Phase 2 premium metric styling remains editorial, mobile safe, and reduced
   assert.match(layer, /font-size: 9px !important/);
   assert.match(layer, /font-size: 30px !important/);
   assert.match(layer, /@media \(prefers-reduced-motion: reduce\)/);
+});
+
+test('Phase 2 display labels remain compatible with the truthful Phase 5B RSVP migration', () => {
+  assert.match(practiceReadinessMigration, /label: \"Missing RSVPs\", displayLabel: \"RSVP Gaps\"/);
+  assert.match(practiceReadinessMigration, /label: \"Awaiting RSVP\", displayLabel: \"RSVP Gaps\"/);
+  assert.match(practiceReadinessMigration, /label: \"Response Rate\", displayLabel: \"Response\"/);
+  assert.match(practiceReadinessMigration, /briefing\.awaitingResponse/);
+  assert.match(practiceReadinessMigration, /briefing\.responded/);
 });
