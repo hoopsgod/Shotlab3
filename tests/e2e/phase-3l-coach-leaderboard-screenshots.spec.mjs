@@ -65,30 +65,33 @@ test("Coach Leaderboards preserves decision context, competitive signal, and pla
   const titleColor = await playerTitle.evaluate((node) => getComputedStyle(node).color);
   expect(titleColor).toBe("rgb(244, 247, 242)");
 
-  const firstMetricValue = drawer.locator('[class*="drawerMetric"] strong').first();
+  const firstMetricValue = drawer.getByText("Weekly makes", { exact: true }).locator("xpath=..").locator("strong");
   await expect(firstMetricValue).toBeVisible();
   const metricColor = await firstMetricValue.evaluate((node) => getComputedStyle(node).color);
   expect(metricColor).toBe("rgb(244, 247, 242)");
 
-  const firstSection = drawer.locator('[class*="sectionCompact"]').first();
+  const sectionHeading = drawer.getByRole("heading", { name: "Development pulse", exact: true });
+  const sectionTitle = sectionHeading;
+  const firstSection = sectionHeading.locator("xpath=ancestor::section[1]");
   await expect(firstSection).toBeVisible();
   const sectionBackground = await firstSection.evaluate((node) => getComputedStyle(node).backgroundColor);
   expect(sectionBackground).toBe("rgb(16, 19, 21)");
 
-  const sectionTitle = firstSection.locator('[class*="sectionTitle"]').first();
   await expect(sectionTitle).toBeVisible();
   const sectionTitleBackground = await sectionTitle.evaluate((node) => getComputedStyle(node).backgroundColor);
   expect(sectionTitleBackground).toBe("rgba(0, 0, 0, 0)");
 
-  const sectionSummary = firstSection.locator('[class*="sectionSummary"]').first();
+  const sectionSummary = firstSection.getByText("A decision-ready summary of volume, attendance, and training compliance.", { exact: true });
   await expect(sectionSummary).toBeVisible();
   const sectionSummaryBackground = await sectionSummary.evaluate((node) => getComputedStyle(node).backgroundColor);
   expect(sectionSummaryBackground).toBe("rgba(0, 0, 0, 0)");
 
   const followUpHost = drawer.getByTestId("coach-follow-up-ledger-host");
   await expect(followUpHost).toBeAttached({ timeout: 10_000 });
-  const followUpParentClass = await followUpHost.evaluate((node) => node.parentElement?.className || "");
-  expect(followUpParentClass).toContain("drawerBody");
+  const drawerDialog = drawer.getByRole("dialog", { name: "Ava Brooks", exact: true });
+  await expect(drawerDialog).toBeVisible();
+  const followUpInsideDialog = await followUpHost.evaluate((node) => Boolean(node.closest('[role="dialog"]')));
+  expect(followUpInsideDialog).toBe(true);
 
   await capture(page, "10b-coach-leaderboard-player-intelligence");
 });

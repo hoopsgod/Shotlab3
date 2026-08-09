@@ -118,12 +118,11 @@ test('rendered iPhone evidence covers first-viewport Leaderboards and high-contr
   assert.match(screenshots, /rgb\(244, 247, 242\)/);
   assert.match(screenshots, /rgb\(16, 19, 21\)/);
   assert.match(screenshots, /rgba\(0, 0, 0, 0\)/);
-  assert.match(screenshots, /drawerMetric/);
-  assert.match(screenshots, /sectionCompact/);
-  assert.match(screenshots, /sectionTitle/);
-  assert.match(screenshots, /sectionSummary/);
+  assert.match(screenshots, /Weekly makes/);
+  assert.match(screenshots, /Development pulse/);
+  assert.match(screenshots, /A decision-ready summary of volume, attendance, and training compliance\./);
   assert.match(screenshots, /coach-follow-up-ledger-host/);
-  assert.match(screenshots, /toContain\("drawerBody"\)/);
+  assert.match(screenshots, /closest\('\[role="dialog"\]'\)/);
 });
 
 test('App Store workflow carries Phase 3L and its evidence package', () => {

@@ -152,7 +152,7 @@ async function enterPlayer(page) {
   await installSafeRoutes(page)
   await seedStorage(page)
   await page.goto('/')
-  await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
+  await page.getByRole('button', { name: 'Player demo', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('player-dashboard-identity-header')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('player-daily-command-center')).toBeVisible({ timeout: 20_000 })
@@ -178,7 +178,7 @@ test('Player interface stays out of auth and initializes only after Player entry
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
-  await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
+  await page.getByRole('button', { name: 'Player demo', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('player-dashboard-identity-header')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('player-daily-command-center')).toBeVisible({ timeout: 20_000 })
@@ -237,7 +237,7 @@ test('Coach operational and administration workspaces stay out of auth and Playe
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
-  await page.getByRole('button', { name: 'Demo Coach', exact: true }).click()
+  await page.getByRole('button', { name: 'Coach demo', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
 
   await expect(page.getByTestId('coach-command-center-full')).toBeVisible({ timeout: 20_000 })

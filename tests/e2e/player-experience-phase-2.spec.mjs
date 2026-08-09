@@ -60,7 +60,7 @@ async function enterSeededDemoPlayer(page) {
     window.sessionStorage.setItem("player-phase-two-seeded", "1");
   }, seedData);
   await page.goto("/");
-  await page.getByRole("button", { name: "Demo Player", exact: true }).click();
+  await page.getByRole("button", { name: "Player demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
