@@ -28,8 +28,10 @@ const shotLogs = [
 ];
 
 const rsvps = [
-  { id: "r1", eventId: "e1", email: "active@example.com" },
-  { id: "r2", eventId: "e1", email: "quiet@example.com" },
+  { id: "r1", eventId: "e1", email: "active@example.com", playerId: "active@example.com", attended: true, ts: 10 },
+  { id: "r2-old", eventId: "e1", email: "quiet@example.com", playerId: "quiet@example.com", attended: true, ts: 8 },
+  { id: "r2", eventId: "e1", email: "quiet@example.com", playerId: "quiet@example.com", attended: false, ts: 12 },
+  { id: "stale", eventId: "e1", email: "former@example.com", playerId: "former@example.com", attended: true, ts: 15 },
 ];
 
 const scLogs = [{ id: "l1", email: "active@example.com", date: "2026-07-25" }];
@@ -53,21 +55,36 @@ test("player metrics and filters drive interactive roster views", () => {
   assert.equal(filterCoachPlayerDashboardRows(rows, { filter: "leaders" })[0]?.email, "active@example.com");
 });
 
-test("event dashboard rows expose RSVP gaps and ignore coach identities in roster capacity", () => {
+test("event dashboard distinguishes attendance from response and ignores stale or duplicate RSVP rows", () => {
   const events = [
     { id: "e1", title: "Practice", type: "run", date: "2026-07-27", time: "6:00 PM" },
     { id: "e2", title: "Film", type: "recovery", date: "2026-07-10", time: "4:00 PM" },
   ];
   const rows = buildCoachEventDashboardRows({ events, rsvps, roster: players, today: "2026-07-26" });
-  assert.equal(rows.find((row) => row.key === "e1")?.confirmed, 2);
-  assert.equal(rows.find((row) => row.key === "e1")?.missing, 1);
-  assert.equal(rows.find((row) => row.key === "e1")?.needsResponse, true);
+  const practice = rows.find((row) => row.key === "e1");
+
+  assert.equal(practice?.rosterCount, 3);
+  assert.equal(practice?.responded, 2);
+  assert.equal(practice?.attending, 1);
+  assert.equal(practice?.unavailable, 1);
+  assert.equal(practice?.awaitingResponse, 1);
+  assert.equal(practice?.confirmed, 1);
+  assert.equal(practice?.missing, 1);
+  assert.equal(practice?.responseRate, 67);
+  assert.equal(practice?.availabilityRate, 33);
+  assert.equal(practice?.needsResponse, true);
   assert.equal(filterCoachEventDashboardRows(rows, { status: "gaps" }).length, 1);
   assert.equal(filterCoachEventDashboardRows(rows, { status: "past" }).length, 1);
+
   const metrics = buildCoachEventDashboardMetrics(rows);
   assert.equal(metrics.upcoming, 1);
   assert.equal(metrics.past, 1);
+  assert.equal(metrics.responded, 2);
+  assert.equal(metrics.attending, 1);
+  assert.equal(metrics.unavailable, 1);
+  assert.equal(metrics.awaitingResponse, 1);
   assert.equal(metrics.responseRate, 67);
+  assert.equal(metrics.availabilityRate, 33);
 });
 
 test("remaining coach pages receive shared dashboard summaries", () => {
