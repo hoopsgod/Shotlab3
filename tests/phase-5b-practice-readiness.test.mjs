@@ -30,13 +30,15 @@ test("Phase 5B explicitly refuses to infer future attendance from the separate a
   assert.doesNotMatch(briefing, /unavailable/);
 });
 
-test("Phase 5B presentation uses RSVP coverage rather than future-attendance claims", async () => {
+test("Phase 5B presentation uses precise RSVP language and correct singular grammar", async () => {
   const patch = await read("scripts/apply-phase5b-practice-readiness.mjs");
   const phase5a = await read("scripts/apply-phase5a-coach-daily-intelligence.mjs");
   assert.match(patch, /Awaiting RSVP/);
   assert.match(patch, /Next-session RSVP coverage/);
   assert.match(patch, /briefing\.responded/);
   assert.match(patch, /RSVP'd/);
+  assert.match(patch, /resolve RSVP gaps/);
+  assert.ok(patch.includes('affected ${briefing.gapEvents.length === 1 ? "event" : "events"}'));
   assert.match(patch, /next\.includes\("briefing\.attending"\)/);
   assert.match(patch, /next\.includes\("model\.unavailable"\)/);
   assert.match(patch, /rejected RSVP\/attendance conflation/);
