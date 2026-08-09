@@ -113,12 +113,15 @@
     padding-inline: 12px !important;
   }
 
+  /* The workspace shell already owns its internal padding/gutter. The state
+     panel must fill that content box rather than calculate another viewport-
+     based width, which caused 7–10px edge drift inside the 430px shell. */
   [data-testid="player-workspace-empty-state"] {
     box-sizing: border-box !important;
-    width: calc(100% - (2 * var(--phase4e-mobile-gutter))) !important;
-    max-width: calc(100% - (2 * var(--phase4e-mobile-gutter))) !important;
-    margin-left: auto !important;
-    margin-right: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 
   [data-testid^="leaderboard-"][data-testid$="-state"] {
