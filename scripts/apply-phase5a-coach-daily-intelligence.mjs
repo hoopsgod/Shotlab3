@@ -80,11 +80,32 @@ update("src/lib/coachDashboardSelectors.js", (source) => {
   return next;
 });
 
-update("src/App.jsx", (source) => replaceRequired(
-  source,
-  "`Priority completion rate: ${coachInsights.priorityCompletionRate}%`",
-  "`Weekly roster activity: ${coachInsights.weeklyActivityRate}%`",
-  "roster intelligence copy",
-));
+update("src/App.jsx", (source) => {
+  let next = replaceRequired(
+    source,
+    "`Priority completion rate: ${coachInsights.priorityCompletionRate}%`",
+    "`Weekly roster activity: ${coachInsights.weeklyActivityRate}%`",
+    "roster intelligence copy",
+  );
 
-console.log("Applied Phase 5A Coach decision intelligence without changing the accepted Phase 4 visual language.");
+  next = replaceRequired(
+    next,
+    'let catalog=null;try{catalog=await trainingCatalogPersistence.hydrateCatalog({localHomeDrills:localSeededDrills,localProgramDrills:localSeededProgramDrills});}catch(error){emitReleaseDiagnostic("training_catalog_hydration_failed",{message:String(error?.message||"unknown")});}',
+    'let catalog=null;if(sess?.email){try{catalog=await trainingCatalogPersistence.hydrateCatalog({localHomeDrills:localSeededDrills,localProgramDrills:localSeededProgramDrills});}catch(error){emitReleaseDiagnostic("training_catalog_hydration_failed",{message:String(error?.message||"unknown")});}}',
+    "unauthenticated catalog bootstrap guard",
+  );
+
+  next = replaceRequired(
+    next,
+    'const authSession=SUPABASE_AUTH_ENABLED?await supabase.auth.getSession():null; const authEmail=normalizeEmail((SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:"")||sess?.email||"");',
+    'const authSession=SUPABASE_AUTH_ENABLED?await Promise.race([supabase.auth.getSession(),new Promise(resolve=>window.setTimeout(()=>resolve({data:{session:null},error:{code:"session_timeout"}}),3000))]):null; const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?(authSession?.data?.session?.user?.email||""):(sess?.email||""));',
+    "bounded production auth bootstrap",
+  );
+
+  if (!next.includes('if(sess?.email){try{catalog=await trainingCatalogPersistence.hydrateCatalog')) throw new Error("Phase 5A auth landing must skip team catalog hydration for signed-out launches.");
+  if (!next.includes('error:{code:"session_timeout"}')) throw new Error("Phase 5A production session bootstrap must have a bounded timeout.");
+  if (next.includes('(SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:"")||sess?.email')) throw new Error("Phase 5A must not trust the local app session when production Supabase verification is unavailable.");
+  return next;
+});
+
+console.log("Applied Phase 5A Coach decision intelligence and bounded auth bootstrap without changing the accepted Phase 4 visual language.");
