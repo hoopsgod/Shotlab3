@@ -83,9 +83,9 @@ test('Coach Schedule premium metrics preserve hierarchy and truthful no-trend si
   const strip = await expectPremiumMetricStrip(page, 'coach-events-metric-strip');
   await expect(strip.locator('[data-premium-metric-placeholder]').first()).toBeVisible();
 
-  const missing = strip.getByRole('button', { name: /Missing RSVPs/i });
-  await missing.click();
-  await expect(missing).toHaveAttribute('aria-pressed', 'true');
+  const awaiting = strip.getByRole('button', { name: /Awaiting RSVP/i });
+  await awaiting.click();
+  await expect(awaiting).toHaveAttribute('aria-pressed', 'true');
 
   await capture(page, '02-coach-events-premium-metrics');
 });
