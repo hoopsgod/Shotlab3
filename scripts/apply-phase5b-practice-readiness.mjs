@@ -16,14 +16,14 @@ update("src/components/CoachInteractiveDashboards.jsx", (source) => {
   let next = source;
   next = replaceRequired(
     next,
-    '    { key: "gaps", label: "Missing RSVPs", value: briefing.missing, detail: `${briefing.gapEvents.length} affected events`, tone: "attention" },',
-    '    { key: "gaps", label: "Awaiting RSVP", value: briefing.awaitingResponse, detail: `${briefing.gapEvents.length} affected ${briefing.gapEvents.length === 1 ? "event" : "events"}`, tone: "attention" },',
+    '    { key: "gaps", label: "Missing RSVPs", displayLabel: "RSVP Gaps", value: briefing.missing, detail: `${briefing.gapEvents.length} affected events`, tone: "attention" },',
+    '    { key: "gaps", label: "Awaiting RSVP", displayLabel: "RSVP Gaps", value: briefing.awaitingResponse, detail: `${briefing.gapEvents.length} affected ${briefing.gapEvents.length === 1 ? "event" : "events"}`, tone: "attention" },',
     "awaiting-RSVP metric",
   );
   next = replaceRequired(
     next,
-    '    { key: "all", label: "Response Rate", value: `${briefing.responseRate}%`, detail: `${briefing.confirmed} confirmations`, tone: briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },',
-    '    { key: "all", label: "Response Rate", value: `${briefing.responseRate}%`, detail: `${briefing.responded} RSVPs received`, tone: briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },',
+    '    { key: "all", label: "Response Rate", displayLabel: "Response", value: `${briefing.responseRate}%`, detail: `${briefing.confirmed} confirmations`, tone: briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },',
+    '    { key: "all", label: "Response Rate", displayLabel: "Response", value: `${briefing.responseRate}%`, detail: `${briefing.responded} RSVPs received`, tone: briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },',
     "truthful response metric",
   );
   next = replaceRequired(
