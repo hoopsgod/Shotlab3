@@ -41,9 +41,31 @@ async function expectPremiumMetricStrip(page, testId) {
   await expect(strip.locator('[data-premium-metric-evidence]')).toHaveCount(4);
 
   for (let index = 0; index < 4; index += 1) {
-    const box = await metrics.nth(index).boundingBox();
+    const metric = metrics.nth(index);
+    const box = await metric.boundingBox();
     expect(box).not.toBeNull();
     expect(box.height).toBeGreaterThanOrEqual(44);
+
+    const type = await metric.evaluate((node) => {
+      const label = node.querySelector('[data-premium-metric-label]');
+      const value = node.querySelector('[data-premium-metric-value]');
+      const labelStyle = getComputedStyle(label);
+      const valueStyle = getComputedStyle(value);
+      return {
+        labelFontSize: Number.parseFloat(labelStyle.fontSize),
+        labelWhiteSpace: labelStyle.whiteSpace,
+        labelClientWidth: label.clientWidth,
+        labelScrollWidth: label.scrollWidth,
+        valueFontSize: Number.parseFloat(valueStyle.fontSize),
+      };
+    });
+
+    expect(type.labelFontSize).toBeLessThanOrEqual(11);
+    expect(type.labelFontSize).toBeGreaterThanOrEqual(9);
+    expect(type.labelWhiteSpace).toBe('nowrap');
+    expect(type.labelScrollWidth).toBeLessThanOrEqual(type.labelClientWidth + 1);
+    expect(type.valueFontSize).toBeGreaterThanOrEqual(28);
+    expect(type.valueFontSize).toBeLessThanOrEqual(32);
   }
   return strip;
 }
