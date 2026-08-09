@@ -68,6 +68,13 @@ test("Phase 5A preserves proven state geometry and fixes the actual mobile Playe
   assert.doesNotMatch(phase4eAuthorityCss, /\[data-testid="player-workspace-empty-state"\]\s*\{[\s\S]*?margin-left:\s*3px/);
 });
 
+test("Phase 5A signed-out bootstrap cannot be held behind team hydration or an unbounded Supabase session request", () => {
+  assert.match(app, /if\(sess\?\.email\)\{try\{catalog=await trainingCatalogPersistence\.hydrateCatalog/);
+  assert.match(app, /Promise\.race\(\[supabase\.auth\.getSession\(\),new Promise\(resolve=>window\.setTimeout\(\(\)=>resolve\(\{data:\{session:null\},error:\{code:"session_timeout"\}\}\),3000\)\)\]\)/);
+  assert.match(app, /const authEmail=normalizeEmail\(SUPABASE_AUTH_ENABLED\?\(authSession\?\.data\?\.session\?\.user\?\.email\|\|""\):\(sess\?\.email\|\|""\)\)/);
+  assert.doesNotMatch(app, /\(SUPABASE_AUTH_ENABLED\?authSession\?\.data\?\.session\?\.user\?\.email:""\)\|\|sess\?\.email/);
+});
+
 test("Phase 5A owns the final enhancer position and makes repeated native builds safe", () => {
   const prepare = packageJson.scripts["prepare:route-enhancers"];
   assert.match(prepare, /^node scripts\/run-finish-v9-compatible\.mjs/);
