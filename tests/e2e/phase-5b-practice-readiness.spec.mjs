@@ -18,9 +18,9 @@ const seedData = {
   "sl:teams": [{ id: TEAM_ID, name: "Thomas Titans", ownerCoachId: COACH_EMAIL, joinCode: "READY5", createdAt: 1_750_000_000_000 }],
   "sl:players": [
     { id: "coach-ready", email: COACH_EMAIL, name: "Demo Coach", role: "coach", isCoach: true, teamId: TEAM_ID },
-    { id: "player-attending", playerId: "player-attending", email: "attending@example.com", name: "Ava Brooks", role: "player", teamId: TEAM_ID },
-    { id: "player-unavailable", playerId: "player-unavailable", email: "unavailable@example.com", name: "Jordan Lee", role: "player", teamId: TEAM_ID },
-    { id: "player-awaiting", playerId: "player-awaiting", email: "awaiting@example.com", name: "Micah Santos", role: "player", teamId: TEAM_ID },
+    { id: "player-rsvp-a", playerId: "player-rsvp-a", email: "ava@example.com", name: "Ava Brooks", role: "player", teamId: TEAM_ID },
+    { id: "player-rsvp-b", playerId: "player-rsvp-b", email: "jordan@example.com", name: "Jordan Lee", role: "player", teamId: TEAM_ID },
+    { id: "player-awaiting", playerId: "player-awaiting", email: "micah@example.com", name: "Micah Santos", role: "player", teamId: TEAM_ID },
   ],
   "sl:player-profiles": [],
   "sl:scores": [],
@@ -30,8 +30,8 @@ const seedData = {
     { id: "event-practice", teamId: TEAM_ID, title: "Team Practice", type: "run", date: NEXT_EVENT_DATE, time: "6:00 PM", location: "Main Gym", desc: "Team shooting standards and controlled five-on-five." },
   ],
   "sl:rsvps": [
-    { id: "rsvp-attending", eventId: "event-practice", playerId: "player-attending", email: "attending@example.com", name: "Ava Brooks", teamId: TEAM_ID, attended: true, ts: 100 },
-    { id: "rsvp-unavailable", eventId: "event-practice", playerId: "player-unavailable", email: "unavailable@example.com", name: "Jordan Lee", teamId: TEAM_ID, attended: false, ts: 110 },
+    { id: "rsvp-a", eventId: "event-practice", playerId: "player-rsvp-a", email: "ava@example.com", name: "Ava Brooks", teamId: TEAM_ID, attended: true, ts: 100 },
+    { id: "rsvp-b", eventId: "event-practice", playerId: "player-rsvp-b", email: "jordan@example.com", name: "Jordan Lee", teamId: TEAM_ID, attended: false, ts: 110 },
   ],
   "sl:sc-sessions": [],
   "sl:sc-rsvps": [],
@@ -73,7 +73,7 @@ test.beforeEach(async ({ page }) => {
   await installRoutes(page);
 });
 
-test("Phase 5B presents next-practice attendance as observed roster evidence", async ({ page }) => {
+test("Phase 5B presents next-practice readiness as roster-scoped RSVP coverage", async ({ page }) => {
   await enterCoach(page);
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
 
@@ -82,13 +82,16 @@ test("Phase 5B presents next-practice attendance as observed roster evidence", a
   const decision = page.getByTestId("coach-events-decision-brief");
   await expect(dashboard).toBeVisible({ timeout: 20_000 });
   await expect(metrics).toContainText("Awaiting RSVP");
-  await expect(metrics).toContainText("1");
-  await expect(metrics).toContainText("67%");
-  await expect(metrics).toContainText("2 responses · 1 attending");
+  await expect(metrics).toContainText("2");
+  await expect(metrics).toContainText("50%");
+  await expect(metrics).toContainText("2 RSVPs received");
   await expect(decision).toContainText("Team Practice");
-  await expect(decision).toContainText("1 attending · 1 unavailable · 1 awaiting response");
-  await expect(decision).toContainText("Next-session availability");
-  await expect(decision).toContainText("1 attending · 1 awaiting");
+  await expect(decision).toContainText("2 RSVPs received · 2 awaiting response");
+  await expect(decision).toContainText("Next-session RSVP coverage");
+  await expect(decision).toContainText("2 RSVP");
+  await expect(decision).toContainText("2 awaiting");
+  await expect(decision).not.toContainText("unavailable");
+  await expect(decision).not.toContainText("attending");
   await expect(decision.getByRole("button", { name: "Resolve RSVPs", exact: true })).toBeVisible();
 
   const buttonBox = await decision.getByRole("button", { name: "Resolve RSVPs", exact: true }).boundingBox();
@@ -109,13 +112,13 @@ test("Phase 5B keeps event intelligence truthful one level deeper", async ({ pag
 
   const drawer = page.getByTestId("coach-event-intelligence-drawer");
   await expect(drawer).toBeVisible({ timeout: 10_000 });
-  await expect(drawer).toContainText("Attending");
-  await expect(drawer).toContainText("Unavailable");
+  await expect(drawer).toContainText("RSVP'd");
   await expect(drawer).toContainText("Awaiting RSVP");
-  await expect(drawer).toContainText("67%");
+  await expect(drawer).toContainText("50%");
   await expect(drawer).toContainText("Ava Brooks");
   await expect(drawer).toContainText("Jordan Lee");
   await expect(drawer).toContainText("Micah Santos");
+  await expect(drawer).not.toContainText("Unavailable");
   await expect(drawer).not.toContainText("No confirmed players yet");
   await expectNoHorizontalOverflow(page);
   await settle(page);
