@@ -49,7 +49,7 @@ test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
 
-test('Coach Players roster rows match the Phase 2C mobile hierarchy and preserve player selection', async ({ page }) => {
+test('Coach Players roster rows match the Phase 2C mobile hierarchy and preserve player intelligence routing', async ({ page }) => {
   await enterCoachPlayers(page);
 
   const roster = page.locator('#coach-roster-operations');
@@ -96,6 +96,12 @@ test('Coach Players roster rows match the Phase 2C mobile hierarchy and preserve
   await capture(page, '01-coach-players-premium-roster-section', roster);
 
   await firstRow.click({ position: { x: 18, y: 18 } });
+  const drawer = page.getByTestId('coach-player-intelligence-drawer');
+  await expect(drawer).toBeVisible({ timeout: 10_000 });
+  if (rowName) await expect(drawer).toContainText(rowName);
+  await expectNoHorizontalOverflow(page);
+
+  await drawer.getByRole('button', { name: 'Open Full Profile', exact: true }).click();
   const detail = page.getByTestId('coach-player-detail-workspace');
   await expect(detail).toBeVisible({ timeout: 10_000 });
   if (rowName) await expect(detail).toContainText(rowName);
