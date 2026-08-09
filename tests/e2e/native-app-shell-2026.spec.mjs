@@ -133,6 +133,13 @@ async function openAndVerifyMoreSheet(page, role) {
   await expect(page.locator('[data-navigation-group="program"]')).toBeVisible();
   await expect(page.locator('[data-navigation-group="team"]')).toBeVisible();
 
+  // The sheet enters with a short native-style translate animation. Verify the
+  // settled geometry rather than sampling the transient transform mid-frame.
+  await expect.poll(
+    () => sheet.evaluate((element) => window.innerHeight - element.getBoundingClientRect().bottom),
+    { timeout: 1_000 },
+  ).toBeGreaterThanOrEqual(8);
+
   const sheetGeometry = await sheet.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     const style = getComputedStyle(element);
