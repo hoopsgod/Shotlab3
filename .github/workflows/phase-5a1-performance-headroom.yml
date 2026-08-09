@@ -45,8 +45,8 @@ jobs:
       - name: Report source weight by production chunk
         run: node scripts/report-phase5a1-source-weight.mjs
 
-      - name: Verify Phase 5A and Phase 4F contracts
-        run: node --test tests/phase-5a-coach-daily-intelligence.test.mjs tests/phase-4f-performance-architecture-hardening.test.mjs
+      - name: Verify Phase 5A.1, Phase 5A and Phase 4F contracts
+        run: node --test tests/phase-5a1-performance-headroom.test.mjs tests/phase-5a-coach-daily-intelligence.test.mjs tests/phase-4f-performance-architecture-hardening.test.mjs
 
       - name: Verify production chunk graph is acyclic
         shell: bash
