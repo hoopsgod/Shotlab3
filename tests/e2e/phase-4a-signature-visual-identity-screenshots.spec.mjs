@@ -71,13 +71,13 @@ test("Phase 4A Player Home uses signature court geometry and branded stat instru
       backgroundColor: getComputedStyle(node).backgroundColor,
       borderRadius: Number.parseFloat(getComputedStyle(node).borderRadius),
       trackHeight: track ? Number.parseFloat(getComputedStyle(track).height) : 0,
-      fillColor: fill ? getComputedStyle(fill).backgroundColor : "rgba(0, 0, 0, 0)",
+      fillImage: fill ? getComputedStyle(fill).backgroundImage : "none",
     };
   });
   expect(metricAccent.backgroundColor).toBe("rgba(0, 0, 0, 0)");
   expect(metricAccent.borderRadius).toBe(0);
   expect(metricAccent.trackHeight).toBeGreaterThanOrEqual(4);
-  expect(metricAccent.fillColor).not.toBe("rgba(0, 0, 0, 0)");
+  expect(metricAccent.fillImage).not.toBe("none");
   await expectNoOverflow(page);
   await capture(page, "08b-phase4a-player-home-signature.png");
 });

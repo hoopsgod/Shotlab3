@@ -108,8 +108,14 @@ test("Player visual system remains integrated across core and secondary pages", 
 
   await drillDisclosure.locator(":scope > summary").click();
   await expect(drillDisclosure).toHaveAttribute("open", "");
-  await expect(page.getByText("DRILL BREAKDOWN", { exact: true })).toBeVisible();
+  const fullDrillDetails = page.getByTestId("player-profile-full-drill-details");
+  await expect(fullDrillDetails).toBeVisible();
+  await expect(fullDrillDetails).not.toHaveAttribute("open", "");
+  await fullDrillDetails.locator(":scope > summary").click();
+  await expect(fullDrillDetails).toHaveAttribute("open", "");
+  await expect(fullDrillDetails.getByText("DRILL BREAKDOWN", { exact: true })).toBeVisible();
   await capture(page, "03d-player-profile-drill-development");
+  await fullDrillDetails.locator(":scope > summary").click();
   await drillDisclosure.locator(":scope > summary").click();
 
   await careerDisclosure.locator(":scope > summary").click();

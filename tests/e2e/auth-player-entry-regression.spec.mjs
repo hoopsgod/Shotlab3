@@ -107,9 +107,23 @@ test("Player Demo keeps the complete Player presentation system from first paint
       backgroundImage: style.backgroundImage,
     };
   });
-  expect(commandStyle.borderRadius).toBeGreaterThanOrEqual(20);
-  expect(commandStyle.paddingLeft).toBeGreaterThanOrEqual(14);
-  expect(commandStyle.backgroundImage).not.toBe("none");
+  expect(commandStyle.borderRadius).toBe(0);
+  expect(commandStyle.paddingLeft).toBe(0);
+  expect(commandStyle.backgroundImage).toBe("none");
+
+  const primaryDecision = commandCenter.locator('[data-layout-role="primary-decision"]');
+  await expect(primaryDecision).toBeVisible();
+  const primaryDecisionStyle = await primaryDecision.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      borderRadius: parseFloat(style.borderRadius),
+      paddingLeft: parseFloat(style.paddingLeft),
+      backgroundImage: style.backgroundImage,
+    };
+  });
+  expect(primaryDecisionStyle.borderRadius).toBeGreaterThanOrEqual(20);
+  expect(primaryDecisionStyle.paddingLeft).toBeGreaterThanOrEqual(14);
+  expect(primaryDecisionStyle.backgroundImage).not.toBe("none");
 
   const primary = page.getByTestId("player-daily-primary-action");
   await expect(primary).toBeVisible();

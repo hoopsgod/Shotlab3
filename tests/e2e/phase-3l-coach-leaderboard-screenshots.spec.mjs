@@ -37,15 +37,19 @@ test("Coach Leaderboards preserves decision context, competitive signal, and pla
   await sheet.locator('[data-nav-key="leaderboards"]').click();
 
   await expect(page.getByTestId("coach-leaderboard-operational-panel")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId("coach-page-dashboard-leaderboards-decision-brief")).toBeVisible();
+  const decisionBrief = page.getByTestId("coach-page-dashboard-leaderboards-decision-brief");
+  await expect(decisionBrief).toBeVisible();
   await expect(page.getByTestId("coach-page-dashboard-leaderboards-evidence")).toBeVisible();
 
   const pulse = page.getByTestId("coach-leaderboard-pulse");
   await expect(pulse).toBeVisible();
+  const decisionBox = await decisionBrief.boundingBox();
   const pulseBox = await pulse.boundingBox();
   const viewportHeight = await page.evaluate(() => window.innerHeight);
+  expect(decisionBox).not.toBeNull();
   expect(pulseBox).not.toBeNull();
-  expect(pulseBox.y).toBeLessThan(viewportHeight);
+  expect(decisionBox.y).toBeLessThan(viewportHeight);
+  expect(pulseBox.y).toBeGreaterThan(decisionBox.y);
 
   const results = page.getByTestId("coach-leaderboard-operational-results");
   await expect(results).toBeVisible();

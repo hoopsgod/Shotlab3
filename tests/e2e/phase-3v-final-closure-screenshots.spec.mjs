@@ -78,8 +78,8 @@ test("Phase 3 closure: Player Home has one dock reserve, clean support contrast,
     const evidenceCard = document.querySelector('[data-testid="player-command-evidence"] > div');
     const evidenceValue = evidenceCard?.children?.[1];
     const schedule = document.querySelector('[data-testid="player-upcoming-schedule"]');
-    const scheduleTitle = schedule?.querySelector('[class*="disclosureTitle"]');
-    const scheduleMeta = schedule?.querySelector('[class*="disclosureMeta"]');
+    const scheduleTitle = schedule?.querySelector('summary > span:first-child > span:first-child');
+    const scheduleMeta = schedule?.querySelector('summary > span:first-child > span:nth-child(2)');
     if (!evidenceCard || !evidenceValue || !schedule || !scheduleTitle || !scheduleMeta) throw new Error("Missing Player Home contrast targets");
     return {
       evidenceBackground: getComputedStyle(evidenceCard).backgroundColor,
@@ -96,6 +96,20 @@ test("Phase 3 closure: Player Home has one dock reserve, clean support contrast,
   expect(contrast.supportBackground).toBe("rgba(0, 0, 0, 0)");
   expect(contrast.supportTitleColor).toBe("rgb(23, 28, 24)");
   expect(contrast.supportMetaColor).toBe("rgb(104, 113, 106)");
+
+  const momentum = page.getByTestId("player-daily-momentum-signal");
+  await expect(momentum).toBeVisible();
+  const momentumContrast = await momentum.evaluate((node) => {
+    const title = [...node.querySelectorAll("div")].find((item) => item.textContent === "Daily target complete");
+    const detail = [...node.querySelectorAll("div")].find((item) => item.textContent?.startsWith("125/500 makes this week"));
+    if (!title || !detail) throw new Error("Missing Player momentum contrast targets");
+    return {
+      titleColor: getComputedStyle(title).color,
+      detailColor: getComputedStyle(detail).color,
+    };
+  });
+  expect(momentumContrast.titleColor).toBe("rgb(245, 247, 248)");
+  expect(momentumContrast.detailColor).toBe("rgb(174, 184, 176)");
 
   await expectRouteEndBounded(page, { route: "home", finalSelector: '[data-testid="player-secondary-intelligence"]' });
   await expectNoOverflow(page);
