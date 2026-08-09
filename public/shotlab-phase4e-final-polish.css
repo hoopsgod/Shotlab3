@@ -114,7 +114,9 @@
   }
 
   [data-testid="player-workspace-empty-state"] {
-    width: calc(100% - 18px) !important;
+    box-sizing: border-box !important;
+    width: min(100%, calc(100vw - (2 * var(--phase4e-mobile-gutter)))) !important;
+    max-width: calc(100vw - (2 * var(--phase4e-mobile-gutter))) !important;
     margin-left: auto !important;
     margin-right: auto !important;
   }
