@@ -10,8 +10,8 @@ async function installRoutes(page) {
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
 }
 
-async function enterCoachDemo(page, path = "/") {
-  await page.goto(path);
+async function enterCoachDemo(page) {
+  await page.goto("/");
   const demo = page.getByRole("button", { name: /Coach demo/i });
   await expect(demo).toBeVisible({ timeout: 20_000 });
   await demo.click();
@@ -25,20 +25,27 @@ async function settleCoachSurface(page) {
   await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
 }
 
-async function removeInactiveDemoPlayer(page) {
-  const remaining = await page.evaluate(async () => {
-    const key = "sl:players";
-    const raw = window.localStorage.getItem(key) || "[]";
-    const rows = JSON.parse(raw);
-    const next = Array.isArray(rows)
-      ? rows.filter((row) => String(row?.email || "").trim().toLowerCase() !== "micah.santos@demo.shotlab.app")
-      : [];
-    const json = JSON.stringify(next);
-    window.localStorage.setItem(key, json);
-    if (window.storage && typeof window.storage.set === "function") await window.storage.set(key, json, true);
-    return next.filter((row) => String(row?.role || "").toLowerCase() !== "coach").length;
-  });
-  expect(remaining).toBe(3);
+async function removeInactiveDemoPlayerThroughUi(page) {
+  const dock = page.getByTestId("mobile-navigation-dock");
+  await dock.getByRole("button", { name: "Players", exact: true }).click();
+
+  const rosterManagement = page.getByTestId("coach-player-roster-management");
+  await expect(rosterManagement).toBeVisible({ timeout: 20_000 });
+  if ((await rosterManagement.getAttribute("open")) === null) await rosterManagement.locator(":scope > summary").click();
+  await expect(rosterManagement).toHaveAttribute("open", "");
+  await expect(page.getByText("Micah Santos", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
+
+  const micahRow = page
+    .locator('[role="button"]')
+    .filter({ hasText: "Micah Santos" })
+    .filter({ has: page.getByRole("button", { name: "REMOVE", exact: true }) })
+    .first();
+  page.once("dialog", async (dialog) => dialog.accept());
+  await micahRow.getByRole("button", { name: "REMOVE", exact: true }).click();
+  await expect(page.getByText("Micah Santos", { exact: true })).toHaveCount(0);
+
+  await dock.getByRole("button", { name: "Home", exact: true }).click();
+  await expect(page.getByTestId("coach-primary-objective")).toBeVisible({ timeout: 20_000 });
 }
 
 test.beforeEach(async ({ page }) => {
@@ -79,13 +86,10 @@ test("Phase 5A keeps the accepted Phase 4 Coach visual hierarchy while adding de
 });
 
 test("Phase 5A renders the RSVP decision path and routes directly to event intelligence", async ({ page }) => {
-  await enterCoachDemo(page, "/?demo=1");
-  await removeInactiveDemoPlayer(page);
-  await page.reload();
-  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+  await enterCoachDemo(page);
+  await removeInactiveDemoPlayerThroughUi(page);
 
   const hero = page.getByTestId("coach-primary-objective");
-  await expect(hero).toBeVisible({ timeout: 20_000 });
   await expect(hero).toContainText("Today at a glance");
   await expect(hero).toContainText("1 decision before practice");
   await expect(hero).toContainText(/2 RSVPs still open for Team Practice/i);
