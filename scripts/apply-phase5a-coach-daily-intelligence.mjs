@@ -109,3 +109,4 @@ update("src/App.jsx", (source) => {
 });
 
 console.log("Applied Phase 5A Coach decision intelligence and bounded auth bootstrap without changing the accepted Phase 4 visual language.");
+await import("./externalize-shotlab-brand-logo.mjs");
