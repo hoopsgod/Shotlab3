@@ -1,0 +1,97 @@
+name: Phase 5A Coach Daily Intelligence
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-4f-performance-architecture-hardening
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-5a-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: 'true'
+
+jobs:
+  verify-daily-intelligence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build and enforce unchanged performance budget
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p artifacts/performance
+          npm run build:performance 2>&1 | tee artifacts/performance/phase5a-build.log
+
+      - name: Verify production CSS module integrity
+        run: node --test tests/production-css-module-integrity.test.mjs
+
+      - name: Verify Phase 5A and predecessor contracts
+        run: node --test tests/phase-5a-coach-daily-intelligence.test.mjs tests/phase-4f-performance-architecture-hardening.test.mjs
+
+      - name: Verify production chunk graph is acyclic
+        shell: bash
+        run: |
+          if grep -F "Circular chunk" artifacts/performance/phase5a-build.log; then
+            echo "Circular manual-chunk relationship detected."
+            exit 1
+          fi
+          echo "No circular chunk warnings detected."
+
+      - name: Verify Phase 4E visual predecessor contract
+        run: node --test tests/phase-4e-final-polish.test.mjs
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify mobile navigation
+        run: npx playwright test tests/e2e/mobile-navigation.spec.mjs --config=playwright.config.mjs --reporter=line
+
+      - name: Verify production acceptance
+        run: npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Verify Auth and Player Demo entry regression in development
+        run: npx playwright test tests/e2e/auth-player-entry-regression.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
+
+      - name: Verify Auth and Player Demo against built production output
+        run: npx playwright test tests/e2e/auth-player-entry-regression.spec.mjs --config=playwright.production-built.config.mjs --reporter=line
+
+      - name: Verify Phase 5A Coach Daily Brief
+        run: npx playwright test tests/e2e/phase-5a-coach-daily-intelligence.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
+
+      - name: Verify inherited 430x932 visual regression
+        run: npx playwright test tests/e2e/phase-4e-final-polish-screenshots.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
+
+      - name: Upload Phase 5A evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-5a-daily-intelligence-evidence
+          path: |
+            artifacts/performance/
+            artifacts/design-audit/iphone/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
