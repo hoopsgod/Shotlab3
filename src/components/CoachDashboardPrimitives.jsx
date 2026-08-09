@@ -112,7 +112,7 @@ export function InteractiveMetricStrip({ items = [], activeKey, onSelect, testId
               <span data-premium-metric-icon aria-hidden="true"><ShotLabIcon name={metricIconName(item)} size={15} /></span>
               <small data-premium-metric-label>{item.displayLabel || item.label}</small>
             </span>
-            <output className={styles.metricValue} data-premium-metric-value>{item.value}</output>
+            <output data-premium-metric-value>{item.value}</output>
             {item.detail ? <span className={styles.metricDetail}>{item.detail}</span> : null}
             <PremiumMetricEvidence values={item.evidence} label={item.evidenceLabel || `${item.label} recent signal`} />
           </button>
