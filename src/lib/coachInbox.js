@@ -14,13 +14,12 @@ export function buildCoachInboxModel({
   eventReadiness = null,
 } = {}) {
   const eventId = clean(eventReadiness?.eventId || eventReadiness?.key || eventReadiness?.event?.id);
-  const attending = count(eventReadiness?.attending ?? eventReadiness?.confirmed);
-  const unavailable = count(eventReadiness?.unavailable);
+  const responded = count(eventReadiness?.responded ?? eventReadiness?.rsvpConfirmed ?? eventReadiness?.confirmed);
   const awaitingResponse = count(eventReadiness?.awaitingResponse ?? eventReadiness?.missing);
   const observedRoster = count(eventReadiness?.rosterCount);
-  const rosterSize = observedRoster || (attending + unavailable + awaitingResponse);
-  const responded = Math.min(rosterSize, count(eventReadiness?.responded || (attending + unavailable)));
-  const calculatedRate = rosterSize ? (responded / rosterSize) * 100 : 0;
+  const rosterSize = observedRoster || (responded + awaitingResponse);
+  const boundedResponded = Math.min(rosterSize, responded);
+  const calculatedRate = rosterSize ? (boundedResponded / rosterSize) * 100 : 0;
   const responseRate = percent(eventReadiness?.responseRate, calculatedRate);
   const dateLabel = clean(eventReadiness?.dateLabel) || [clean(eventReadiness?.date), clean(eventReadiness?.time)].filter(Boolean).join(" at ");
   const readiness = eventId && dateLabel && awaitingResponse > 0 && rosterSize > 0
@@ -28,7 +27,7 @@ export function buildCoachInboxModel({
         kind: "event-readiness",
         title: clean(eventReadiness?.title) || "Next team event",
         detail: `${awaitingResponse} of ${rosterSize} ${rosterSize === 1 ? "player" : "players"} still ${awaitingResponse === 1 ? "needs" : "need"} to RSVP.`,
-        meta: [`${attending} attending`, unavailable ? `${unavailable} unavailable` : "", `${responseRate}% responded`, dateLabel].filter(Boolean).join(" · "),
+        meta: [`${boundedResponded} RSVP${boundedResponded === 1 ? "" : "s"} received`, `${responseRate}% responded`, dateLabel].filter(Boolean).join(" · "),
         label: "Review RSVPs",
         action: "open-event-readiness",
         eventId,
@@ -68,13 +67,7 @@ export function buildCoachInboxModel({
     actionableCount: items.length,
     allClear: items.length === 0,
     context: validSession
-      ? {
-          kind: "session",
-          title: "Next team session",
-          detail: sessionDate,
-          label: "Open session",
-          action: "open-session",
-        }
+      ? { kind: "session", title: "Next team session", detail: sessionDate, label: "Open session", action: "open-session" }
       : null,
   };
 }
