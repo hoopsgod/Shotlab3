@@ -9,15 +9,11 @@
   --phase2-action-accent: var(--sl-accent, #71851f);
 }
 
-/* Supporting evidence actions should read as deliberate controls, not leftover text buttons. */
-.secondaryPageEvidence [class*="insightActions"] {
-  align-items: center !important;
-  gap: 8px !important;
-  margin-top: 16px !important;
-}
-
-.secondaryPageEvidence [class*="insightActions"] button,
-.secondaryPageShell [class*="sectionAction"] {
+/* CSS-module class names are intentionally hashed in the runtime bundle.
+   Anchor the premium action layer to stable page IDs and semantic global classes instead. */
+[data-testid="coach-players-insight-grid"] article button,
+[data-testid="coach-events-insight-grid"] article button,
+.secondaryPageAction--secondary {
   min-height: 44px !important;
   max-width: 100%;
   padding: 0 12px 0 14px !important;
@@ -40,8 +36,8 @@
   transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease, box-shadow 150ms ease !important;
 }
 
-.secondaryPageEvidence [class*="insightActions"] button::after,
-.secondaryPageShell [class*="sectionAction"]::after,
+[data-testid="coach-players-insight-grid"] article button::after,
+[data-testid="coach-events-insight-grid"] article button::after,
 .secondaryPageAction--secondary::after {
   content: "";
   width: 14px;
@@ -54,75 +50,57 @@
   transition: transform 150ms ease, opacity 150ms ease;
 }
 
-.secondaryPageEvidence [class*="insightActions"] button:hover:not(:disabled),
-.secondaryPageEvidence [class*="insightActions"] button:focus-visible:not(:disabled),
-.secondaryPageShell [class*="sectionAction"]:hover:not(:disabled),
-.secondaryPageShell [class*="sectionAction"]:focus-visible:not(:disabled) {
+[data-testid="coach-players-insight-grid"] article button:hover:not(:disabled),
+[data-testid="coach-players-insight-grid"] article button:focus-visible:not(:disabled),
+[data-testid="coach-events-insight-grid"] article button:hover:not(:disabled),
+[data-testid="coach-events-insight-grid"] article button:focus-visible:not(:disabled),
+.secondaryPageAction--secondary:hover:not(:disabled),
+.secondaryPageAction--secondary:focus-visible:not(:disabled) {
   transform: translateY(-1px) !important;
   border-color: color-mix(in srgb, var(--phase2-action-accent) 28%, var(--phase2-action-line)) !important;
   background: color-mix(in srgb, var(--phase2-action-accent) 5%, #f8f9f5) !important;
   box-shadow: 0 8px 18px rgba(28, 34, 29, .06) !important;
 }
 
-.secondaryPageEvidence [class*="insightActions"] button:hover:not(:disabled)::after,
-.secondaryPageEvidence [class*="insightActions"] button:focus-visible:not(:disabled)::after,
-.secondaryPageShell [class*="sectionAction"]:hover:not(:disabled)::after,
-.secondaryPageShell [class*="sectionAction"]:focus-visible:not(:disabled)::after,
+[data-testid="coach-players-insight-grid"] article button:hover:not(:disabled)::after,
+[data-testid="coach-players-insight-grid"] article button:focus-visible:not(:disabled)::after,
+[data-testid="coach-events-insight-grid"] article button:hover:not(:disabled)::after,
+[data-testid="coach-events-insight-grid"] article button:focus-visible:not(:disabled)::after,
 .secondaryPageAction--secondary:hover:not(:disabled)::after,
 .secondaryPageAction--secondary:focus-visible:not(:disabled)::after {
   transform: translateX(2px);
   opacity: 1;
 }
 
-.secondaryPageEvidence [class*="insightActions"] [class*="quietAction"] {
-  border-color: transparent !important;
-  background: transparent !important;
-  color: var(--phase2-action-muted) !important;
-  box-shadow: none !important;
-}
-
-/* Header secondary actions get the same directional language as the primary CTA
-   without competing with its dark fill. */
-.secondaryPageAction--secondary {
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.secondaryPageAction--secondary::after {
-  color: currentColor;
-}
-
-.secondaryPageEvidence [class*="insightActions"] button:focus-visible,
-.secondaryPageShell [class*="sectionAction"]:focus-visible,
+[data-testid="coach-players-insight-grid"] article button:focus-visible,
+[data-testid="coach-events-insight-grid"] article button:focus-visible,
 .secondaryPageAction--secondary:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--phase2-action-accent) 28%, transparent) !important;
   outline-offset: 3px !important;
 }
 
-.secondaryPageEvidence [class*="insightActions"] button:disabled,
-.secondaryPageShell [class*="sectionAction"]:disabled,
+[data-testid="coach-players-insight-grid"] article button:disabled,
+[data-testid="coach-events-insight-grid"] article button:disabled,
 .secondaryPageAction--secondary:disabled {
   cursor: not-allowed;
   opacity: .5;
 }
 
 @media (max-width: 480px) {
-  .secondaryPageEvidence [class*="insightActions"] {
-    gap: 6px !important;
-  }
-
-  .secondaryPageEvidence [class*="insightActions"] button,
-  .secondaryPageShell [class*="sectionAction"] {
+  [data-testid="coach-players-insight-grid"] article button,
+  [data-testid="coach-events-insight-grid"] article button,
+  .secondaryPageAction--secondary {
     min-height: 44px !important;
     padding-inline: 12px !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .secondaryPageEvidence [class*="insightActions"] button,
-  .secondaryPageEvidence [class*="insightActions"] button::after,
-  .secondaryPageShell [class*="sectionAction"],
-  .secondaryPageShell [class*="sectionAction"]::after,
+  [data-testid="coach-players-insight-grid"] article button,
+  [data-testid="coach-players-insight-grid"] article button::after,
+  [data-testid="coach-events-insight-grid"] article button,
+  [data-testid="coach-events-insight-grid"] article button::after,
+  .secondaryPageAction--secondary,
   .secondaryPageAction--secondary::after {
     transition: none !important;
   }
