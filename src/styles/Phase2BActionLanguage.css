@@ -1,0 +1,148 @@
+/* Phase 2B — premium action and empty-state language.
+   Stable data hooks are applied by apply-phase2b-action-language.mjs before
+   Vite and CSS reachability pruning run. */
+
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action],
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action] {
+  position: relative;
+  min-height: 50px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 10px !important;
+  padding: 0 14px !important;
+  border-radius: 14px !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 760 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -.005em !important;
+  text-transform: none !important;
+  box-shadow: none !important;
+  transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease !important;
+}
+
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action]::before,
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action]::before {
+  content: "";
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 9px;
+  background-color: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='3.25'/%3E%3Cpath d='M5.75 19c.75-3.25 3.05-5 6.25-5s5.5 1.75 6.25 5'/%3E%3C/svg%3E") center / 17px 17px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='3.25'/%3E%3Cpath d='M5.75 19c.75-3.25 3.05-5 6.25-5s5.5 1.75 6.25 5'/%3E%3C/svg%3E") center / 17px 17px no-repeat;
+  opacity: .88;
+}
+
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action]::after,
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action]::after {
+  content: "→";
+  margin-left: auto;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  opacity: .72;
+}
+
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action="primary"],
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action="primary"] {
+  color: #10150d !important;
+  border-color: rgba(200, 255, 26, .72) !important;
+  background: #c8ff1a !important;
+}
+
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action="secondary"],
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action="secondary"] {
+  color: #f4f7f2 !important;
+  border-color: rgba(244, 247, 242, .16) !important;
+  background: rgba(244, 247, 242, .045) !important;
+}
+
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action="secondary"]::before,
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action="secondary"]::before {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 17l4.2-4.2 3.1 2.7L17.8 8H20'/%3E%3Cpath d='M16.5 8H20v3.5'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 17l4.2-4.2 3.1 2.7L17.8 8H20'/%3E%3Cpath d='M16.5 8H20v3.5'/%3E%3C/svg%3E");
+}
+
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action]:hover,
+[data-testid="coach-player-intelligence-drawer"] [data-drawer-action]:focus-visible,
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action]:hover,
+[data-testid="coach-event-intelligence-drawer"] [data-drawer-action]:focus-visible {
+  transform: translateY(-1px);
+}
+
+[data-testid="coach-player-intelligence-drawer"] [data-operational-empty-state],
+[data-testid="coach-event-intelligence-drawer"] [data-operational-empty-state] {
+  min-height: 88px;
+  display: flex !important;
+  align-items: center;
+  gap: 13px;
+  padding: 16px !important;
+  border: 1px solid rgba(244, 247, 242, .10) !important;
+  border-radius: 16px !important;
+  background: linear-gradient(145deg, rgba(244, 247, 242, .045), rgba(244, 247, 242, .018)) !important;
+  color: #aeb8b2 !important;
+  text-align: left !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 560 !important;
+  line-height: 1.45 !important;
+}
+
+[data-testid="coach-player-intelligence-drawer"] [data-operational-empty-state]::before,
+[data-testid="coach-event-intelligence-drawer"] [data-operational-empty-state]::before {
+  content: "";
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border: 1px solid rgba(200, 255, 26, .18);
+  border-radius: 12px;
+  background-color: #c8ff1a;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='7.5'/%3E%3Ccircle cx='12' cy='12' r='2.5'/%3E%3Cpath d='M12 4.5V2.5M19.5 12h2M12 19.5v2M4.5 12h-2'/%3E%3C/svg%3E") center / 21px 21px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='7.5'/%3E%3Ccircle cx='12' cy='12' r='2.5'/%3E%3Cpath d='M12 4.5V2.5M19.5 12h2M12 19.5v2M4.5 12h-2'/%3E%3C/svg%3E") center / 21px 21px no-repeat;
+  opacity: .8;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] [data-operational-empty-state] {
+  min-height: 92px;
+  display: flex !important;
+  align-items: center;
+  gap: 13px;
+  padding: 16px !important;
+  border: 1px solid rgba(23, 26, 24, .10) !important;
+  border-radius: 16px !important;
+  background: #f8f9f5 !important;
+  color: #657069 !important;
+  text-align: left !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 560 !important;
+  line-height: 1.45 !important;
+}
+
+[data-testid="coach-leaderboard-operational-panel"] [data-operational-empty-state]::before {
+  content: "";
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  border-radius: 12px;
+  background-color: #71851f;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 20h10M9 20v-4h6v4M8 4h8v4a4 4 0 01-8 0V4z'/%3E%3Cpath d='M8 6H4v1a4 4 0 004 4M16 6h4v1a4 4 0 01-4 4'/%3E%3C/svg%3E") center / 21px 21px no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 20h10M9 20v-4h6v4a4 4 0 01-8 0V4z'/%3E%3Cpath d='M8 6H4v1a4 4 0 004 4M16 6h4v1a4 4 0 01-4 4'/%3E%3C/svg%3E") center / 21px 21px no-repeat;
+  opacity: .82;
+}
+
+@media (max-width: 620px) {
+  [data-testid="coach-player-intelligence-drawer"] [data-drawer-action],
+  [data-testid="coach-event-intelligence-drawer"] [data-drawer-action] {
+    min-height: 52px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-testid="coach-player-intelligence-drawer"] [data-drawer-action],
+  [data-testid="coach-event-intelligence-drawer"] [data-drawer-action] {
+    transition-duration: .01ms !important;
+  }
+}
