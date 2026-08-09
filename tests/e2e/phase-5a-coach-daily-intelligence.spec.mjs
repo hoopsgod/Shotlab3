@@ -108,6 +108,7 @@ test("Phase 5A renders the RSVP decision path and routes directly to event intel
   const drawer = page.getByTestId("coach-event-intelligence-drawer");
   await expect(drawer).toBeVisible({ timeout: 10_000 });
   await expect(drawer).toContainText("Team Practice");
-  await expect(drawer).toContainText("Missing");
+  await expect(drawer).toContainText("Awaiting RSVP");
   await expect(drawer).toContainText("2");
+  await expect(drawer).not.toContainText("Unavailable");
 });
