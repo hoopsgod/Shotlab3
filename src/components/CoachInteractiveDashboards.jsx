@@ -44,7 +44,7 @@ export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filt
 
   return (
     <SecondaryPageShell testId="coach-players-interactive-dashboard">
-      <SecondaryPageIntro eyebrow="Roster intelligence" title="Players" summary="See who is progressing, where engagement is slipping, and the coaching action that matters next." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "archives", label: "Season Tools", onClick: onOpenArchives }]} testId="coach-players-command-bar" />
+      <SecondaryPageIntro eyebrow="Roster intelligence" title="Players" summary="See who is progressing, where engagement is slipping, and the coaching action that matters next." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "administration", label: "Team & Account", onClick: onOpenArchives }]} testId="coach-players-command-bar" />
       <SecondaryPageToolbar testId="coach-players-toolbar">
         <InteractiveMetricStrip items={metricItems} activeKey={filter} onSelect={onFilterChange} testId="coach-players-metric-strip" />
         <DashboardFilterRail searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search player name or email" filters={[{ key: "all", label: "All", count: briefing.total }, { key: "active", label: "Active", count: briefing.active }, { key: "attention", label: "Attention", count: briefing.attentionRows.length }, { key: "new", label: "No Activity", count: briefing.noActivityRows.length }, { key: "leaders", label: "Top Engagement", count: Math.min(briefing.total, 5) }]} activeFilter={filter} onFilterChange={onFilterChange} testId="coach-players-filter-rail" />
@@ -154,11 +154,6 @@ export function CoachPageDashboardHeader({ eyebrow, title, summary, status, acti
   return (
     <SecondaryPageShell testId={testId}>
       <SecondaryPageIntro eyebrow={eyebrow || model.eyebrow} title={title} summary={summary} status={status} actions={actions} />
-      {metrics.length ? (
-        <SecondaryPageToolbar testId={`${testId}-toolbar`}>
-          <InteractiveMetricStrip items={metrics} activeKey={activeMetric} onSelect={onMetricSelect} testId={`${testId}-metric-strip`} />
-        </SecondaryPageToolbar>
-      ) : null}
       <SecondaryPageDecision
         eyebrow={model.decisionEyebrow}
         title={model.decisionTitle}
@@ -171,6 +166,11 @@ export function CoachPageDashboardHeader({ eyebrow, title, summary, status, acti
           <DashboardProgress value={model.primary.value} max={Math.max(model.primary.value, 1)} label={model.primary.label} detail={model.primary.detail} />
         ) : null}
       </SecondaryPageDecision>
+      {metrics.length ? (
+        <SecondaryPageToolbar testId={`${testId}-toolbar`}>
+          <InteractiveMetricStrip items={metrics} activeKey={activeMetric} onSelect={onMetricSelect} testId={`${testId}-metric-strip`} />
+        </SecondaryPageToolbar>
+      ) : null}
       {model.supporting.length ? (
         <SecondaryPageEvidence testId={`${testId}-evidence`}>
           {model.supporting.map((metric, index) => (

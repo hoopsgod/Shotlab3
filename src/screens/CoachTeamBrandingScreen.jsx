@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { DEFAULT_BRANDING } from "../theme/brandingDefaults";
 import TeamBrandingForm from "../components/team/TeamBrandingForm";
 import TeamBrandingPreview from "../components/team/TeamBrandingPreview";
-import AppHeader from "../components/AppHeader";
+import { SecondaryPageIntro, SecondaryPageShell } from "../components/SecondaryPageSystem";
 import AppFeedbackLayer, { announceFeedback } from "../components/AppFeedbackLayer";
 import "../styles/PremiumWorkspace.css";
 import "./CoachTeamBrandingScreen.css";
@@ -40,13 +40,15 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
   return (
     <main className="team-brand premium-screen premium-screen--branding branding-industrial">
       <AppFeedbackLayer />
-      <div className="branding-industrial__inner">
-        <AppHeader
-          variant="standard"
+      <SecondaryPageShell className="brandingEditorialWorkspace" testId="coach-branding-workspace">
+        <SecondaryPageIntro
           eyebrow="Team identity system"
           title="Branding"
-          subtitle={`${teamName} branding flows through coach, player, training, event, leaderboard, and storefront experiences.`}
-          action={{ label: "Back", onClick: onBack }}
+          summary={`${teamName} branding flows through coach, player, training, event, leaderboard, and storefront experiences.`}
+          status="Coach + Player"
+          actions={[{ key: "back", label: "Back to Coach", onClick: onBack }]}
+          testId="coach-branding-header"
+          icon="settings"
         />
 
         <div className="branding-industrial__workspace" data-testid="branding-identity-workspace">
@@ -74,7 +76,7 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
             <TeamBrandingPreview branding={draftBranding} />
           </aside>
         </div>
-      </div>
+      </SecondaryPageShell>
     </main>
   );
 }

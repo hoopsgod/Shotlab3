@@ -128,7 +128,7 @@ test("coach branding save persists and renders a cleaned prominent logo", async 
   await page.getByLabel("Full logo URL").fill(FULL_LOGO_URL);
   await page.getByLabel("Logo mark URL").fill(MARK_LOGO_URL);
   await page.getByRole("button", { name: "Save team branding", exact: true }).click();
-  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await page.getByRole("button", { name: "Back to Coach", exact: true }).click();
 
   const heroLogo = page.locator(".mcHeroTeamMark img");
   await expect(heroLogo).toBeVisible({ timeout: 20_000 });
@@ -146,11 +146,7 @@ test("coach removal creates a hidden tombstone and excludes the player from rost
   await enterSeededDemoCoach(page);
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
-  const rosterManagement = page.getByTestId("coach-player-roster-management");
-  await expect(rosterManagement).toBeVisible({ timeout: 20_000 });
-  await expect(rosterManagement).not.toHaveAttribute("open", "");
-  await rosterManagement.locator(":scope > summary").click();
-  await expect(rosterManagement).toHaveAttribute("open", "");
+  await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Acceptance Player", { exact: true }).first()).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Removal Candidate", { exact: true }).first()).toBeVisible();
 

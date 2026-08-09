@@ -9,7 +9,7 @@
   right: auto;
   bottom: max(10px, env(safe-area-inset-bottom, 0px));
   z-index: 24;
-  width: min(620px, calc(100% - 24px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  width: min(620px, calc(100% - var(--layout-gutter, 16px) - var(--layout-gutter, 16px) - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
   min-height: var(--mobile-tab-bar-height);
   padding: 0;
   overflow: hidden;
@@ -124,7 +124,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  font-size: 10px;
+  font-size: var(--type-micro, 11px);
   font-weight: 680;
   line-height: 1.1;
   letter-spacing: -.01em;
@@ -191,7 +191,7 @@
 .sheetEyebrow {
   color: #617900;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  font-size: 10px;
+  font-size: var(--type-micro, 11px);
   font-weight: 750;
   letter-spacing: .08em;
   text-transform: uppercase;
@@ -212,7 +212,7 @@
   margin: 7px 0 0;
   color: var(--text-2, #44515b);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  font-size: 13px;
+  font-size: var(--type-secondary, 14px);
   font-weight: 500;
   line-height: 1.4;
 }
@@ -387,12 +387,12 @@
 
 @media (max-width: 370px) {
   .dock {
-    width: calc(100% - 16px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
+    width: calc(100% - var(--layout-gutter, 16px) - var(--layout-gutter, 16px) - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
     border-radius: 21px;
   }
 
   .dockInner { padding-inline: 3px; }
-  .dockLabelText { font-size: 9px; }
+  .dockLabelText { font-size: var(--type-micro, 11px); }
   .sheet { padding-inline: 10px; }
   .sheetSummary { max-width: 245px; }
 }

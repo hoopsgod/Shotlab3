@@ -15,11 +15,12 @@ test("visual reboot creates one light product language across coach surfaces", (
   assert.match(source, /\.coachDashboardNoResults/);
 });
 
-test("reboot removes legacy poster proportions and nested dashboard styling", () => {
+test("reboot removes legacy poster proportions and yields secondary-page ownership to the component system", () => {
   assert.match(source, /mcHero[\s\S]*min-height: 0 !important/);
   assert.match(source, /mcHeroContent[\s\S]*grid-template-columns/);
-  assert.match(source, /secondaryPageToolbar[\s\S]*border: 0 !important/);
-  assert.match(source, /secondaryPageDecision__visual[\s\S]*display: none/);
+  assert.match(source, /const secondaryStart = CSS\.indexOf\("\/\* Canonical secondary pages:"\)/);
+  assert.match(source, /const secondaryEnd = CSS\.indexOf\("\/\* Empty states:"/);
+  assert.match(source, /CSS\.slice\(0, secondaryStart\).*CSS\.slice\(secondaryEnd\)/s);
   assert.match(source, /mcAssignmentStateFacts[\s\S]*repeat\(5/);
 });
 

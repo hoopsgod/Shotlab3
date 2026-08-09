@@ -31,8 +31,8 @@ test("secondary page heroes and decision surfaces use signature icons", () => {
   assert.match(secondary, /import ShotLabIcon/);
   assert.match(secondary, /secondaryPageIntro__icon/);
   assert.match(secondary, /secondaryPageDecision__icon/);
-  assert.match(secondaryStyles, /grid-template-columns:56px minmax\(0,1fr\) auto/);
-  assert.match(secondaryStyles, /overflow-wrap:anywhere/);
+  assert.match(secondaryStyles, /grid-template-columns:\s*48px minmax\(0, 1fr\) auto/);
+  assert.match(secondaryStyles, /overflow-wrap:\s*anywhere/);
 });
 
 test("Coach iconography remains custom SVG with the same precision language", () => {

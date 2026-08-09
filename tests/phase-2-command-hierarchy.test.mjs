@@ -38,7 +38,7 @@ test("Player supporting analytics use progressive disclosure", () => {
 });
 
 test("Player evidence reuses existing progress primitives", () => {
-  assert.match(player, /className=\{styles\.progressGrid\} role="group" data-testid="player-command-evidence"/);
+  assert.match(player, /className=\{styles\.progressGrid\} role="group" data-testid="player-command-evidence" data-layout-role="supporting-evidence"/);
   assert.match(player, /aria-label="Today’s training evidence"/);
   assert.match(player, /Current streak:/);
   assert.match(player, /className=\{styles\.progressCard\}/);
@@ -49,11 +49,12 @@ test("Player evidence reuses existing progress primitives", () => {
   assert.doesNotMatch(hierarchy, /\.playerCommandEvidenceItem/);
 });
 
-test("dark Player command surfaces restore readable local text tokens", () => {
-  assert.match(hierarchy, /--text-1: #f5f8f9/);
-  assert.match(hierarchy, /--text-2: #c3cdd2/);
-  assert.match(hierarchy, /--text-3: #9ba7ae/);
-  assert.match(hierarchy, /\.performance-shell--player \[data-testid\^="player-"\]\[data-testid\$="-workspace"\]/);
+test("Player command hierarchy keeps only the primary decision surface in dark performance mode", () => {
+  assert.match(player, /data-layout-role="primary-decision"/);
+  assert.match(player, /data-layout-role="supporting-evidence"/);
+  assert.match(player, /data-layout-role="quiet-secondary"/);
+  assert.doesNotMatch(hierarchy, /\.performance-shell--player \[data-testid\^="player-"\]\[data-testid\$="-workspace"\]/);
+  assert.match(hierarchy, /\.player-primary-logging-region/);
 });
 
 test("Player mobile hierarchy preserves a dominant action and deliberate disclosure", () => {

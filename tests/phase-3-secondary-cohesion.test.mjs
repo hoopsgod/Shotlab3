@@ -5,6 +5,8 @@ import { readFileSync } from 'node:fs';
 const html = readFileSync('index.html', 'utf8');
 const css = readFileSync('public/shotlab-phase3-secondary-cohesion.css', 'utf8');
 const acceptanceCss = readFileSync('public/shotlab-phase3-secondary-acceptance.css', 'utf8');
+const playerWorkspace = readFileSync('src/components/PlayerOperationalWorkspace.jsx', 'utf8');
+const playerWorkspaceCss = readFileSync('src/components/PlayerOperationalWorkspace.module.css', 'utf8');
 
 test('Phase 3 secondary authorities load after the Phase 2 lock in acceptance order', () => {
   const phase2 = html.indexOf('id="shotlab-phase2-critical"');
@@ -42,12 +44,14 @@ test('Player secondary identity chrome is compact without changing the shared co
   assert.match(css, /height:58px!important/);
 });
 
-test('Rendered player workspace IDs receive light command and metric hierarchy', () => {
-  assert.match(acceptanceCss, /player-leaderboards-workspace/);
-  assert.match(acceptanceCss, /player-profile-workspace/);
-  assert.match(acceptanceCss, /\[class\*="commandBar"\]/);
-  assert.match(acceptanceCss, /\[data-metric-priority="primary"\]/);
-  assert.match(acceptanceCss, /linear-gradient\(135deg,#fff 0%,#f8f9f2 100%\)/);
+test('Player workspaces own their editorial command and evidence hierarchy', () => {
+  assert.match(playerWorkspace, /data-page-hierarchy="editorial"/);
+  assert.match(playerWorkspace, /data-layout-role="editorial-header"/);
+  assert.match(playerWorkspace, /data-layout-role="supporting-evidence"/);
+  assert.match(playerWorkspaceCss, /\.commandBar\{[\s\S]*?background:transparent/);
+  assert.match(playerWorkspaceCss, /\.metrics\{[\s\S]*?border-block:1px solid/);
+  assert.doesNotMatch(acceptanceCss, /\[class\*="commandBar"\]/);
+  assert.doesNotMatch(acceptanceCss, /\[data-metric-priority/);
 });
 
 test('Rendered Coach Events and Drills canvases cannot fall back to legacy black', () => {

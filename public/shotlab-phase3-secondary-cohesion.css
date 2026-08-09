@@ -108,61 +108,6 @@ body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-i
   object-fit:contain!important;
 }
 
-/* Player operational command bars become calm light decision surfaces on secondary pages. */
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"],
-body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"]{
-  margin:0 16px 14px!important;
-  gap:10px!important;
-}
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="commandBar"],
-body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="commandBar"]{
-  padding:18px!important;
-  border:1px solid var(--p3-line)!important;
-  border-radius:22px!important;
-  background:linear-gradient(135deg,#fff 0%,#f8f9f2 100%)!important;
-  color:var(--p3-ink)!important;
-  box-shadow:var(--p3-shadow)!important;
-  backdrop-filter:none!important;
-  -webkit-backdrop-filter:none!important;
-}
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="commandBar"]::after,
-body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="commandBar"]::after{
-  display:none!important;
-}
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] :is(h1,[class*="metricValue"]),
-body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] :is(h1,[class*="metricValue"]){
-  color:var(--p3-ink)!important;
-  -webkit-text-fill-color:var(--p3-ink)!important;
-}
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] :is(p,[class*="metricDetail"]),
-body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] :is(p,[class*="metricDetail"]){
-  color:var(--p3-muted)!important;
-  -webkit-text-fill-color:var(--p3-muted)!important;
-}
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="eyebrow"],
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="status"],
-body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="eyebrow"],
-body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="status"]{
-  color:color-mix(in srgb,var(--p3-accent) 78%,#243024)!important;
-  -webkit-text-fill-color:currentColor!important;
-}
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [data-metric-priority],
-body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [data-metric-priority]{
-  min-height:88px!important;
-  padding:13px!important;
-  border:1px solid var(--p3-line)!important;
-  border-radius:17px!important;
-  background:var(--p3-surface)!important;
-  background-image:none!important;
-  color:var(--p3-ink)!important;
-  box-shadow:none!important;
-}
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [data-metric-priority="primary"],
-body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [data-metric-priority="primary"]{
-  border-color:color-mix(in srgb,var(--p3-accent) 28%,var(--p3-line))!important;
-  background:linear-gradient(180deg,#fff 0%,color-mix(in srgb,var(--p3-accent) 5%,#fff) 100%)!important;
-}
-
 /* Leaderboards: turn the remaining inline dark competition hub into one clean native content card. */
 [data-testid="premium-leaderboards-hub"]{
   width:calc(100% - 32px)!important;
@@ -354,19 +299,6 @@ body:has(#coach-drills-management) [data-testid="mobile-navigation-dock"]{
     width:calc(100% - 24px)!important;
     padding:15px!important;
     border-radius:21px!important;
-  }
-  body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"],
-  body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"]{
-    margin-inline:12px!important;
-  }
-  body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="commandBar"],
-  body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="commandBar"]{
-    padding:16px!important;
-    border-radius:20px!important;
-  }
-  body:has([data-testid="premium-leaderboards-hub"]) [data-testid^="player-workspace-"] [class*="title"],
-  body:has([data-testid="player-career-history"]) [data-testid^="player-workspace-"] [class*="title"]{
-    font-size:32px!important;
   }
 }
 

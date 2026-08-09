@@ -6,15 +6,15 @@ const appSource = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "u
 const componentSource = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.jsx", import.meta.url), "utf8");
 const cssSource = fs.readFileSync(new URL("../src/components/PlayerOperationalWorkspace.module.css", import.meta.url), "utf8");
 
-test("all remaining Player routes use the shared operational workspace command bar", () => {
+test("all remaining Player routes use the shared operational hierarchy", () => {
   [
     "player-at-home-workspace",
     "player-program-workspace",
-    "player-events-workspace",
-    "player-strength-workspace",
     "player-leaderboards-workspace",
-    "player-profile-workspace",
   ].forEach((testId) => assert.match(appSource, new RegExp(`testId=\\"${testId}\\"`)));
+  assert.match(appSource, /testId="player-events-workspace"|PlayerCommitmentCenter mode="events"/);
+  assert.match(appSource, /testId="player-strength-workspace"|PlayerCommitmentCenter mode="strength"/);
+  assert.match(appSource, /testId="player-profile-workspace"|data-testid="player-profile-workspace"/);
   assert.match(appSource, /PlayerWorkspaceCommandBar/);
   assert.match(appSource, /buildAtHomeWorkspaceModel/);
   assert.match(appSource, /buildProgramWorkspaceModel/);
@@ -40,8 +40,9 @@ test("workspace components preserve mobile interaction and accessibility contrac
   assert.match(componentSource, /aria-pressed=\{activeMetric === metric\.id\}/);
   assert.match(componentSource, /role="group"/);
   assert.match(componentSource, /PlayerWorkspaceEmptyState/);
-  assert.match(cssSource, /min-height:46px/);
+  assert.match(cssSource, /min-height:48px/);
   assert.match(cssSource, /grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+  assert.match(cssSource, /border-block:1px solid/);
   assert.match(cssSource, /overflow-x:auto/);
 });
 

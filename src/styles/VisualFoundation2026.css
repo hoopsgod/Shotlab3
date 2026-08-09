@@ -24,9 +24,23 @@
   --radius-lg: 18px;
   --radius-xl: 24px;
   --radius-card: 18px !important;
-  --stack-gap: 24px !important;
-  --card-pad: 20px !important;
-  --mini-card-pad: 16px !important;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --layout-gutter: clamp(16px, 4.65vw, 20px);
+  --touch-target: 44px;
+  --control-height: 48px;
+  --type-micro: 11px;
+  --type-meta: 12px;
+  --type-secondary: 14px;
+  --type-body: 15px;
+  --stack-gap: var(--space-6) !important;
+  --card-pad: var(--space-5) !important;
+  --mini-card-pad: var(--space-4) !important;
   --accent: #c8ff1a !important;
   --accent-soft: rgba(126, 158, 30, .12) !important;
   --accent-strong: #617900;
@@ -156,7 +170,7 @@ button {
 .performance-shell .sidebar-nav .nav-title {
   color: var(--text-3) !important;
   font-family: var(--font-body) !important;
-  font-size: 10px !important;
+  font-size: var(--type-micro) !important;
   font-weight: 700 !important;
   letter-spacing: .08em !important;
 }
@@ -208,7 +222,7 @@ button {
 .premium-screen .appHeaderEyebrow {
   color: #657b05 !important;
   font-family: var(--font-body) !important;
-  font-size: 10px !important;
+  font-size: var(--type-micro) !important;
   font-weight: 750 !important;
   letter-spacing: .08em !important;
 }
@@ -231,7 +245,7 @@ button {
   max-width: 680px !important;
   color: var(--text-2) !important;
   font-family: var(--font-body) !important;
-  font-size: 14px !important;
+  font-size: var(--type-secondary) !important;
   line-height: 1.5 !important;
   letter-spacing: -.008em !important;
 }
@@ -254,13 +268,13 @@ button {
 .cta-secondary,
 .cta-ghost,
 .cta-danger {
-  min-height: 50px !important;
+  min-height: var(--control-height) !important;
   margin-left: 0 !important;
   margin-right: 0 !important;
   border-radius: var(--radius-md) !important;
   padding: 12px 18px !important;
   font-family: var(--font-body) !important;
-  font-size: 14px !important;
+  font-size: var(--type-secondary) !important;
   font-weight: 750 !important;
   letter-spacing: -.008em !important;
   text-transform: none !important;
@@ -417,7 +431,7 @@ input[type="radio"] {
 
 @media (max-width: 767px) {
   :root {
-    --stack-gap: 20px !important;
+    --stack-gap: var(--space-5) !important;
     --card-pad: 18px !important;
   }
 
@@ -427,7 +441,7 @@ input[type="radio"] {
 
   .performance-shell .player-scroll-container,
   .performance-shell .coach-scroll-container {
-    padding-inline: 16px !important;
+    padding-inline: var(--layout-gutter) !important;
   }
 
   .appHeader,
