@@ -8,6 +8,7 @@ const css=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",
 const headerCss=fs.readFileSync(new URL("../src/components/CoachMissionControlHeader.css",import.meta.url),"utf8");
 const polishCss=fs.readFileSync(new URL("../src/components/CoachMissionControlPolish.css",import.meta.url),"utf8");
 const premiumCss=fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css",import.meta.url),"utf8");
+const navigationCss=fs.readFileSync(new URL("../src/components/MobileNavigation.module.css",import.meta.url),"utf8");
 const shellCss=fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css",import.meta.url),"utf8");
 const finalCss=fs.readFileSync(new URL("../src/components/CoachMissionControlFinal.css",import.meta.url),"utf8");
 const activationCss=fs.readFileSync(new URL("../src/components/CoachActivationPath.css",import.meta.url),"utf8");
@@ -133,7 +134,7 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(finalCss,/min-height:\s*286px\s*!important/);
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
-  assert.match(premiumCss,/backdrop-filter:blur\(24px\)/);
+  assert.match(navigationCss,/backdrop-filter:\s*blur\(28px\) saturate\(150%\)/);
   assert.match(finalCss,/\.mcPrimary:active/);
   assert.match(finalCss,/@media \(prefers-reduced-motion: reduce\)/);
   assert.match(activationCss,/@media\(prefers-reduced-motion:reduce\)/);
