@@ -101,7 +101,7 @@ test.beforeEach(async ({ page }) => {
 
 test("At Home workspace filters drills and routes the Today metric to shot entry", async ({ page }) => {
   await enterSeededDemoPlayer(page);
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "At Home", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
 
   await expectWorkspaceTouchTargets(page, "player-at-home-workspace");
   const filters = page.getByTestId("player-at-home-filter-rail");
@@ -121,7 +121,7 @@ test("At Home workspace filters drills and routes the Today metric to shot entry
 
 test("Program workspace filters the plan and launches the exact coach-priority drill", async ({ page }) => {
   await enterSeededDemoPlayer(page);
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Program", exact: true }).click();
+  await openMoreDestination(page, "duels");
 
   await expectWorkspaceTouchTargets(page, "player-program-workspace");
   const filters = page.getByTestId("player-program-filter-rail");
@@ -162,7 +162,7 @@ test("Leaderboards and Profile retain the operational workspace system", async (
   await expectWorkspaceTouchTargets(page, "player-leaderboards-workspace");
   await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
 
-  await openMoreDestination(page, "profile");
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
   await expectWorkspaceTouchTargets(page, "player-profile-workspace");
   await expectNoHorizontalOverflow(page);
 });
