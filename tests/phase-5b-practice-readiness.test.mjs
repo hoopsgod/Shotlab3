@@ -37,8 +37,10 @@ test("Phase 5B presentation uses RSVP coverage rather than future-attendance cla
   assert.match(patch, /Next-session RSVP coverage/);
   assert.match(patch, /briefing\.responded/);
   assert.match(patch, /RSVP'd/);
+  assert.match(patch, /next\.includes\("briefing\.attending"\)/);
+  assert.match(patch, /next\.includes\("model\.unavailable"\)/);
+  assert.match(patch, /rejected RSVP\/attendance conflation/);
   assert.match(patch, /rejected future-attendance inference/);
-  assert.doesNotMatch(patch, /briefing\.attending|model\.unavailable/);
   assert.match(phase5a, /apply-phase5b-practice-readiness\.mjs/);
 });
 
