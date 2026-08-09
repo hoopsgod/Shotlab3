@@ -198,7 +198,7 @@ test("event intelligence drawer identifies missing responses and returns to atte
   await expect(drawer.getByRole("heading", { name: "Team Practice", exact: true })).toBeVisible();
   await expect(drawer.getByText("Active Player", { exact: true })).toBeVisible();
   await expect(drawer.getByText("Quiet Player", { exact: true })).toBeVisible();
-  await expect(drawer.getByText("Missing responses", { exact: true })).toBeVisible();
+  await expect(drawer.getByText("Awaiting RSVP", { exact: true })).toBeVisible();
 
   await drawer.getByRole("button", { name: "Manage Attendance", exact: true }).click();
   await expect(drawer).toHaveCount(0);

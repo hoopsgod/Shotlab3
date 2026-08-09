@@ -129,7 +129,7 @@ async function openAndVerifyMoreSheet(page, role) {
   await expect(sheet).toHaveAttribute("role", "dialog");
   await expect(sheet).toHaveAttribute("aria-modal", "true");
   await expect(sheet.getByText(role === "coach" ? "Coach workspace" : "Player workspace")).toBeVisible();
-  await expect(sheet.getByRole("heading", { name: "Everything else, organized" })).toBeVisible();
+  await expect(sheet.getByRole("heading", { name: role === "player" ? "More" : "Everything else, organized" })).toBeVisible();
   await expect(page.locator('[data-navigation-group="program"]')).toBeVisible();
   await expect(page.locator('[data-navigation-group="team"]')).toBeVisible();
 
