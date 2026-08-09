@@ -30,6 +30,28 @@ const rowDate = (row = {}) => String(row.date || row.session_date || row.created
 
 const latestDate = (rows) => rows.map(rowDate).filter(Boolean).sort().at(-1) || "";
 
+const rsvpPlayerIdentity = (row = {}) => normalize(
+  row.playerId || row.player_id || row.email || row.player_email || row.userId || row.user_id || row.name,
+);
+
+const latestRosterRsvpsForEvent = ({ rsvps = [], eventId = "", roster = [] } = {}) => {
+  const rosterPlayers = safeArray(roster).filter((player) => !isCoachIdentity(player));
+  const rosterIdentities = new Set();
+  for (const player of rosterPlayers) for (const key of identityKeys(player)) rosterIdentities.add(key);
+
+  const latestByPlayer = new Map();
+  for (const row of safeArray(rsvps)) {
+    if (String(row.eventId || row.event_id || "") !== String(eventId || "")) continue;
+    const identity = rsvpPlayerIdentity(row);
+    if (!identity || !rosterIdentities.has(identity)) continue;
+    const prior = latestByPlayer.get(identity);
+    const rowTs = safeNumber(row.ts || row.updatedAt || row.updated_at || row.createdAt || row.created_at);
+    const priorTs = safeNumber(prior?.ts || prior?.updatedAt || prior?.updated_at || prior?.createdAt || prior?.created_at);
+    if (!prior || rowTs >= priorTs) latestByPlayer.set(identity, row);
+  }
+  return { rosterPlayers, responses: [...latestByPlayer.values()] };
+};
+
 export function buildCoachPlayerDashboardRows({
   players = [],
   scores = [],
@@ -100,10 +122,13 @@ export function buildCoachPlayerDashboardMetrics(rows = []) {
 export function buildCoachEventDashboardRows({ events = [], rsvps = [], roster = [], today = "" } = {}) {
   const rosterCount = safeArray(roster).filter((player) => !isCoachIdentity(player)).length;
   return safeArray(events).map((event) => {
-    const eventRsvps = safeArray(rsvps).filter((row) => String(row.eventId || row.event_id || "") === String(event.id || ""));
-    const confirmed = eventRsvps.length;
-    const missing = Math.max(rosterCount - confirmed, 0);
-    const responseRate = rosterCount > 0 ? Math.round((confirmed / rosterCount) * 100) : 0;
+    const { responses } = latestRosterRsvpsForEvent({ rsvps, eventId: event.id, roster });
+    const responded = Math.min(responses.length, rosterCount);
+    const attending = responses.filter((row) => row?.attended === true).length;
+    const unavailable = Math.max(responded - attending, 0);
+    const awaitingResponse = Math.max(rosterCount - responded, 0);
+    const responseRate = rosterCount > 0 ? Math.round((responded / rosterCount) * 100) : 0;
+    const availabilityRate = rosterCount > 0 ? Math.round((attending / rosterCount) * 100) : 0;
     const date = String(event.date || "");
     const statusKey = date && today && date < today ? "past" : "upcoming";
     return {
@@ -114,11 +139,17 @@ export function buildCoachEventDashboardRows({ events = [], rsvps = [], roster =
       date,
       time: event.time || "TBD",
       location: event.location || "Location TBD",
-      confirmed,
-      missing,
+      rosterCount,
+      responded,
+      attending,
+      unavailable,
+      awaitingResponse,
+      confirmed: attending,
+      missing: awaitingResponse,
       responseRate,
+      availabilityRate,
       statusKey,
-      needsResponse: statusKey === "upcoming" && missing > 0,
+      needsResponse: statusKey === "upcoming" && awaitingResponse > 0,
     };
   }).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
 }
@@ -138,16 +169,25 @@ export function filterCoachEventDashboardRows(rows = [], { status = "upcoming", 
 export function buildCoachEventDashboardMetrics(rows = []) {
   const safeRows = safeArray(rows);
   const upcoming = safeRows.filter((row) => row.statusKey === "upcoming");
-  const confirmed = upcoming.reduce((total, row) => total + row.confirmed, 0);
-  const missing = upcoming.reduce((total, row) => total + row.missing, 0);
-  const responseRate = upcoming.length ? Math.round(upcoming.reduce((total, row) => total + row.responseRate, 0) / upcoming.length) : 0;
+  const responded = upcoming.reduce((total, row) => total + safeNumber(row.responded), 0);
+  const attending = upcoming.reduce((total, row) => total + safeNumber(row.attending ?? row.confirmed), 0);
+  const unavailable = upcoming.reduce((total, row) => total + safeNumber(row.unavailable), 0);
+  const awaitingResponse = upcoming.reduce((total, row) => total + safeNumber(row.awaitingResponse ?? row.missing), 0);
+  const rosterSlots = upcoming.reduce((total, row) => total + safeNumber(row.rosterCount || (safeNumber(row.responded) + safeNumber(row.awaitingResponse))), 0);
+  const responseRate = rosterSlots ? Math.round((responded / rosterSlots) * 100) : 0;
+  const availabilityRate = rosterSlots ? Math.round((attending / rosterSlots) * 100) : 0;
   return {
     total: safeRows.length,
     upcoming: upcoming.length,
     past: safeRows.filter((row) => row.statusKey === "past").length,
-    confirmed,
-    missing,
+    responded,
+    attending,
+    unavailable,
+    awaitingResponse,
+    confirmed: attending,
+    missing: awaitingResponse,
     responseRate,
+    availabilityRate,
     next: upcoming[0] || null,
   };
 }
