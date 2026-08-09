@@ -132,6 +132,70 @@
   font: 700 11px 'Barlow Condensed', sans-serif;
 }
 
+/* Phase 5B: the detail drawer is portaled to <body>, so it must own its
+   dark-surface text tokens instead of inheriting the light Coach page tokens. */
+:global([data-testid="coach-event-intelligence-drawer"]) {
+  --text-1: #f7fafb;
+  --text-2: #b8c3c8;
+  --text-3: #8f9ba1;
+  color: #f7fafb;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"] aside) {
+  color: #f7fafb;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"] aside h2) {
+  color: #f7fafb !important;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"] aside p) {
+  color: #b8c3c8 !important;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"] aside section) {
+  color: #f7fafb !important;
+  border-color: rgba(220, 231, 236, .11) !important;
+  background: linear-gradient(150deg, rgba(255, 255, 255, .035), transparent 44%), #0f1214 !important;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"] aside section > div) {
+  background-color: transparent !important;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"] aside section h2) {
+  color: #f7fafb !important;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"] aside section p),
+:global([data-testid="coach-event-intelligence-drawer"] aside section span) {
+  color: #b8c3c8;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"] aside [role="progressbar"]) {
+  background: rgba(255, 255, 255, .09) !important;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"] aside [role="progressbar"] > span) {
+  color: inherit;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"]) .drawerActionSecondary {
+  color: #f7fafb !important;
+  border-color: rgba(220, 231, 236, .18);
+  background: rgba(255, 255, 255, .045);
+}
+
+:global([data-testid="coach-event-intelligence-drawer"]) .drawerMetric strong,
+:global([data-testid="coach-event-intelligence-drawer"]) .personRow strong {
+  color: #f7fafb;
+}
+
+:global([data-testid="coach-event-intelligence-drawer"]) .drawerMetric span,
+:global([data-testid="coach-event-intelligence-drawer"]) .personRow span {
+  color: #9eabb1;
+}
+
 @media (max-width: 620px) {
   .drawerActions { grid-template-columns: 1fr; }
   .compactMetricGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
