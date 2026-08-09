@@ -115,8 +115,10 @@ test('rendered iPhone evidence covers first-viewport Leaderboards and high-contr
   assert.match(screenshots, /coach-leaderboard-operational-results/);
   assert.match(screenshots, /10-coach-leaderboards/);
   assert.match(screenshots, /coach-player-intelligence-drawer/);
+  assert.match(screenshots, /parseCssColor/);
   assert.match(screenshots, /rgb\(244, 247, 242\)/);
-  assert.match(screenshots, /rgb\(16, 19, 21\)/);
+  assert.match(screenshots, /toBeLessThanOrEqual\(24\)/);
+  assert.match(screenshots, /toBeGreaterThanOrEqual\(0\.9\)/);
   assert.match(screenshots, /rgba\(0, 0, 0, 0\)/);
   assert.match(screenshots, /Weekly makes/);
   assert.match(screenshots, /Development pulse/);
