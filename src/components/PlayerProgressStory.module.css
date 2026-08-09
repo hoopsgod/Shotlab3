@@ -192,7 +192,7 @@
 .detailRow p { margin: 5px 0 0; color: #65717a; font-size: 11px; line-height: 1.45; }
 .detailRow button {
   flex: 0 0 auto;
-  min-height: 42px;
+  min-height: 44px;
   border: 1px solid rgba(17,26,33,.10);
   border-radius: 12px;
   background: #fff;
