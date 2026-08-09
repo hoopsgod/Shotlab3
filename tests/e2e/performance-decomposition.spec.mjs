@@ -196,7 +196,7 @@ test('Profile workspaces load together only after the player opens Profile', asy
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
-  await openMoreDestination(page, 'profile')
+  await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Progress', exact: true }).click()
   const workspace = page.getByTestId('progress-charts-workspace')
   await expect(workspace).toBeVisible({ timeout: 20_000 })
   await expect(workspace.getByText(/MY\s*PROGRESS/i)).toBeVisible({ timeout: 20_000 })
