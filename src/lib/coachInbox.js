@@ -14,18 +14,21 @@ export function buildCoachInboxModel({
   eventReadiness = null,
 } = {}) {
   const eventId = clean(eventReadiness?.eventId || eventReadiness?.key || eventReadiness?.event?.id);
-  const confirmed = count(eventReadiness?.confirmed);
-  const missing = count(eventReadiness?.missing);
-  const rosterSize = confirmed + missing;
-  const calculatedRate = rosterSize ? (confirmed / rosterSize) * 100 : 0;
+  const attending = count(eventReadiness?.attending ?? eventReadiness?.confirmed);
+  const unavailable = count(eventReadiness?.unavailable);
+  const awaitingResponse = count(eventReadiness?.awaitingResponse ?? eventReadiness?.missing);
+  const observedRoster = count(eventReadiness?.rosterCount);
+  const rosterSize = observedRoster || (attending + unavailable + awaitingResponse);
+  const responded = Math.min(rosterSize, count(eventReadiness?.responded || (attending + unavailable)));
+  const calculatedRate = rosterSize ? (responded / rosterSize) * 100 : 0;
   const responseRate = percent(eventReadiness?.responseRate, calculatedRate);
   const dateLabel = clean(eventReadiness?.dateLabel) || [clean(eventReadiness?.date), clean(eventReadiness?.time)].filter(Boolean).join(" at ");
-  const readiness = eventId && dateLabel && missing > 0 && rosterSize > 0
+  const readiness = eventId && dateLabel && awaitingResponse > 0 && rosterSize > 0
     ? [{
         kind: "event-readiness",
         title: clean(eventReadiness?.title) || "Next team event",
-        detail: `${missing} of ${rosterSize} ${rosterSize === 1 ? "player" : "players"} still ${missing === 1 ? "needs" : "need"} to RSVP.`,
-        meta: [`${responseRate}% confirmed`, dateLabel].filter(Boolean).join(" · "),
+        detail: `${awaitingResponse} of ${rosterSize} ${rosterSize === 1 ? "player" : "players"} still ${awaitingResponse === 1 ? "needs" : "need"} to RSVP.`,
+        meta: [`${attending} attending`, unavailable ? `${unavailable} unavailable` : "", `${responseRate}% responded`, dateLabel].filter(Boolean).join(" · "),
         label: "Review RSVPs",
         action: "open-event-readiness",
         eventId,
