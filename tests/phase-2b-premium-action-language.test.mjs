@@ -5,15 +5,17 @@ import { readFileSync } from 'node:fs';
 const secondaryPageSystem = readFileSync('src/components/SecondaryPageSystem.jsx', 'utf8');
 const actionLayer = readFileSync('src/components/Phase2PremiumActionLayer.css', 'utf8');
 
-test('Phase 2B action layer is attached only to the shared secondary-page system', () => {
+test('Phase 2B action layer is attached to the shared secondary-page system and stable runtime selectors', () => {
   assert.match(secondaryPageSystem, /import "\.\/Phase2PremiumActionLayer\.css"/);
   assert.match(actionLayer, /\.secondaryPageShell/);
-  assert.match(actionLayer, /\.secondaryPageEvidence \[class\*="insightActions"\] button/);
-  assert.match(actionLayer, /\.secondaryPageShell \[class\*="sectionAction"\]/);
+  assert.match(actionLayer, /\[data-testid="coach-players-insight-grid"\] article button/);
+  assert.match(actionLayer, /\[data-testid="coach-events-insight-grid"\] article button/);
+  assert.match(actionLayer, /\.secondaryPageAction--secondary/);
+  assert.doesNotMatch(actionLayer, /\[class\*="insightActions"\]/);
 });
 
 test('Phase 2B supporting actions carry a directional icon treatment without changing button semantics', () => {
-  assert.match(actionLayer, /button::after/);
+  assert.match(actionLayer, /article button::after/);
   assert.match(actionLayer, /secondaryPageAction--secondary::after/);
   assert.match(actionLayer, /mask: url\("data:image\/svg\+xml/);
   assert.match(actionLayer, /M5 12h14m-6-6 6 6-6 6/);
@@ -29,7 +31,7 @@ test('Phase 2B controls preserve phone-scale touch and focus safety', () => {
   assert.match(actionLayer, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
-test('Primary decision actions keep native ShotLab arrow iconography', () => {
+test('Primary decision actions keep native ShotLab arrow iconography and handlers', () => {
   assert.match(secondaryPageSystem, /SecondaryPageDecision/);
   assert.match(secondaryPageSystem, /<ShotLabIcon name="arrow" size=\{16\}\/>/);
   assert.match(secondaryPageSystem, /onClick=\{action\.onClick\}/);
