@@ -27,10 +27,12 @@ test('Phase 5A.1 externalizes the exact embedded ShotLab PNG instead of re-encod
   assert.match(phase5a, /externalize-shotlab-brand-logo\.mjs/)
 })
 
-test('Phase 5A.1 keeps Program first-use states inside the shared mobile gutter token', async () => {
+test('Phase 5A.1 lets the Program state shell own mobile gutter geometry', async () => {
   const css = await read('public/shotlab-phase4e-final-polish.css')
   assert.match(css, /--phase4e-mobile-gutter:\s*clamp\(16px,\s*4\.65vw,\s*20px\)/)
-  assert.match(css, /width:\s*calc\(100% - \(2 \* var\(--phase4e-mobile-gutter\)\)\)\s*!important/)
-  assert.match(css, /max-width:\s*calc\(100% - \(2 \* var\(--phase4e-mobile-gutter\)\)\)\s*!important/)
-  assert.doesNotMatch(css, /player-workspace-empty-state[^}]*(100vw|100% - 18px)/s)
+  assert.match(css, /player-workspace-empty-state[^}]*width:\s*100%\s*!important/s)
+  assert.match(css, /player-workspace-empty-state[^}]*max-width:\s*100%\s*!important/s)
+  assert.match(css, /player-workspace-empty-state[^}]*margin-left:\s*0\s*!important/s)
+  assert.match(css, /player-workspace-empty-state[^}]*margin-right:\s*0\s*!important/s)
+  assert.doesNotMatch(css, /player-workspace-empty-state[^}]*(100vw|100% - 18px|100% - \(2 \* var\(--phase4e-mobile-gutter\)\))/s)
 })
