@@ -99,18 +99,21 @@ test('Team Store source and build enhancer preserve the same player state for de
   const teamStoreSource = await readFile(path.join(srcRoot, 'components/TeamStorePortal.jsx'), 'utf8');
   const teamStoreEnhancer = await readFile(path.join(repoRoot, 'scripts/apply-phase3m-player-team-store-retail.mjs'), 'utf8');
 
-  for (const [label, source] of [
-    ['TeamStorePortal.jsx', teamStoreSource],
-    ['apply-phase3m-player-team-store-retail.mjs', teamStoreEnhancer],
-  ]) {
-    assert.doesNotMatch(
-      source,
-      /isDemoAccount|isDemoPlayerPreview|DEMO STOREFRONT|Preview only in demo mode|Player experience preview/i,
-      `${label} must not contain a demo-only Team Store product path`,
-    );
-    assert.match(source, /Your team store is not open yet/);
-  }
-
+  assert.doesNotMatch(
+    teamStoreSource,
+    /isDemoAccount|isDemoPlayerPreview|DEMO STOREFRONT|Preview only in demo mode|Player experience preview/i,
+    'TeamStorePortal.jsx must not contain a demo-only Team Store product path',
+  );
+  assert.match(teamStoreSource, /Your team store is not open yet/);
   assert.match(teamStoreSource, /store \? <>/);
+
+  // The enhancer intentionally names forbidden demo artifacts in its detector regex.
+  // Reject actual generated/rendered branch artifacts rather than the guard that detects them.
+  assert.match(teamStoreEnhancer, /const forbiddenDemoUi\s*=\s*\/[^\n]+isDemoPlayerPreview[^\n]+\//);
+  assert.doesNotMatch(teamStoreEnhancer, /:\s*isDemoPlayerPreview\s*\?/);
+  assert.doesNotMatch(teamStoreEnhancer, /className="[^"]*\bis-demo\b[^"]*"/);
+  assert.doesNotMatch(teamStoreEnhancer, /data-testid="player-team-store-demo-preview"/);
+  assert.doesNotMatch(teamStoreEnhancer, /data-testid="player-team-store-demo-disclosure"/);
+  assert.match(teamStoreEnhancer, /Your team store is not open yet/);
   assert.match(teamStoreEnhancer, /demo\/registered parity/);
 });
