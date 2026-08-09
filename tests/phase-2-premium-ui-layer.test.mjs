@@ -17,11 +17,12 @@ test('Phase 2 premium metrics preserve dashboard filter semantics and full acces
   assert.match(primitives, /data-premium-metric-tone=\{item\.tone \|\| "neutral"\}/);
 });
 
-test('Phase 2 premium label and value escape the legacy positional span authority', () => {
+test('Phase 2 premium label and value are fully isolated from legacy positional and module authorities', () => {
   assert.match(primitives, /<small data-premium-metric-label>\{item\.displayLabel \|\| item\.label\}<\/small>/);
-  assert.match(primitives, /<output className=\{styles\.metricValue\} data-premium-metric-value>\{item\.value\}<\/output>/);
+  assert.match(primitives, /<output data-premium-metric-value>\{item\.value\}<\/output>/);
   assert.doesNotMatch(primitives, /<span[^>]*data-premium-metric-label/);
   assert.doesNotMatch(primitives, /<span[^>]*data-premium-metric-value/);
+  assert.doesNotMatch(primitives, /className=\{styles\.metricValue\} data-premium-metric-value/);
 });
 
 test('Phase 2 premium metrics use the ShotLab icon family instead of ornamental glyphs', () => {
@@ -41,16 +42,18 @@ test('Phase 2 premium metrics render truthful evidence and a clearly non-trend p
   assert.match(primitives, /<line data-premium-metric-path x1="0" y1="22" x2="100" y2="22"/);
 });
 
-test('Phase 2 premium metric styling remains editorial, mobile safe, and reduced-motion safe', () => {
+test('Phase 2 premium metric styling owns value hierarchy and remains mobile safe', () => {
   assert.match(layer, /\.secondaryPageToolbar \[data-premium-metric\]/);
   assert.match(layer, /\[data-premium-metric-label\][\s\S]*white-space: nowrap/);
+  assert.match(layer, /\[data-premium-metric-value\][\s\S]*font-size: 30px/);
+  assert.match(layer, /\[data-premium-metric-value\][\s\S]*font-weight: 800/);
+  assert.match(layer, /\.secondaryPageToolbar \[data-premium-metric-value\][\s\S]*font-size: 30px !important/);
   assert.match(layer, /\[data-premium-metric-evidence\]/);
   assert.match(layer, /\[data-premium-metric-placeholder\] \[data-premium-metric-path\]/);
   assert.match(layer, /stroke-dasharray: 4 6/);
   assert.match(layer, /@media \(max-width: 760px\)/);
   assert.match(layer, /min-height: 116px !important/);
   assert.match(layer, /font-size: 10px !important/);
-  assert.match(layer, /font-size: 30px !important/);
   assert.match(layer, /@media \(prefers-reduced-motion: reduce\)/);
 });
 
