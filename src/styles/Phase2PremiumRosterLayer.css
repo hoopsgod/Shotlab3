@@ -1,0 +1,231 @@
+/* Phase 2C — premium operational roster.
+   Presentation only: preserve roster selection, nudge, removal, identity, and persistence behavior. */
+
+.performance-shell--coach #coach-roster-operations {
+  --phase2c-ink: #182019;
+  --phase2c-muted: #667068;
+  --phase2c-line: rgba(35, 45, 37, .11);
+  --phase2c-surface: #ffffff;
+  --phase2c-soft: #f6f7f3;
+  --phase2c-accent: #71851f;
+  margin-top: 10px;
+}
+
+/* The intelligence dashboard immediately above this section already owns engagement,
+   momentum, completion, and weekly-activity interpretation. The CoachRoster DOM starts
+   with a HEADER, so the first two DIV siblings are the duplicate recap and instruction. */
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(1),
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(2) {
+  display: none !important;
+}
+
+/* Keep one restrained roster heading instead of another card-like hero. */
+.performance-shell--coach #coach-roster-operations > .fade-up > header:first-child {
+  margin: 0 0 8px !important;
+  padding: 2px 2px 6px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > header:first-child h1,
+.performance-shell--coach #coach-roster-operations > .fade-up > header:first-child h2 {
+  color: var(--phase2c-ink) !important;
+  -webkit-text-fill-color: var(--phase2c-ink) !important;
+}
+
+/* Sort is the only persistent roster tool at this depth. Because HEADER elements do
+   not participate in DIV:nth-of-type indexing, the sort row is the third DIV sibling. */
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(3) {
+  margin: 0 0 12px !important;
+  padding: 0 2px !important;
+  justify-content: flex-start !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(3) > label {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  color: var(--phase2c-muted) !important;
+  -webkit-text-fill-color: var(--phase2c-muted) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 720 !important;
+  letter-spacing: .075em !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(3) select {
+  min-width: 178px !important;
+  min-height: 44px !important;
+  padding: 0 34px 0 13px !important;
+  border: 1px solid var(--phase2c-line) !important;
+  border-radius: 12px !important;
+  background: var(--phase2c-surface) !important;
+  color: var(--phase2c-ink) !important;
+  -webkit-text-fill-color: var(--phase2c-ink) !important;
+  box-shadow: 0 5px 14px rgba(29, 38, 31, .035) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 680 !important;
+  letter-spacing: -.005em !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > div:nth-of-type(3) select:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--phase2c-accent) 24%, transparent) !important;
+  outline-offset: 2px !important;
+}
+
+/* Direct role=button children are the legacy CoachRoster player rows. The stable
+   container ID lets this layer override inline legacy presentation without touching logic. */
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] {
+  min-height: 104px !important;
+  margin-bottom: 10px !important;
+  border: 1px solid var(--phase2c-line) !important;
+  border-radius: 18px !important;
+  background: var(--phase2c-surface) !important;
+  color: var(--phase2c-ink) !important;
+  box-shadow: 0 8px 22px rgba(29, 38, 31, .045) !important;
+  overflow: hidden !important;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"]:hover,
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"]:focus-visible {
+  border-color: color-mix(in srgb, var(--phase2c-accent) 22%, var(--phase2c-line)) !important;
+  box-shadow: 0 12px 28px rgba(29, 38, 31, .065) !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"]:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--phase2c-accent) 24%, transparent) !important;
+  outline-offset: 2px !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:first-child {
+  width: 3px !important;
+  opacity: .72 !important;
+}
+
+/* Reflow each row into a calm two-column mobile composition: identity beside details,
+   with administrative actions below the information instead of squeezing it. */
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) {
+  width: 100% !important;
+  min-width: 0 !important;
+  padding: 14px 14px 13px !important;
+  display: grid !important;
+  grid-template-columns: 46px minmax(0, 1fr) !important;
+  grid-template-areas:
+    "avatar details"
+    ". actions" !important;
+  align-items: start !important;
+  gap: 9px 12px !important;
+  box-sizing: border-box !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(1) {
+  grid-area: avatar !important;
+  align-self: start !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(2) {
+  grid-area: details !important;
+  min-width: 0 !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) {
+  grid-area: actions !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+
+/* Player identity gets proper editorial hierarchy instead of condensed micro-copy. */
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(2) > div:first-child span:first-child {
+  color: var(--phase2c-ink) !important;
+  -webkit-text-fill-color: var(--phase2c-ink) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif !important;
+  font-size: 15px !important;
+  font-weight: 760 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.012em !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) {
+  margin-top: 5px !important;
+  color: var(--phase2c-muted) !important;
+  -webkit-text-fill-color: var(--phase2c-muted) !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  font-size: 11.5px !important;
+  font-weight: 560 !important;
+  line-height: 1.45 !important;
+  letter-spacing: -.002em !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(2) > div:nth-child(2) span {
+  color: var(--phase2c-accent) !important;
+  -webkit-text-fill-color: var(--phase2c-accent) !important;
+  font-weight: 730 !important;
+}
+
+/* Administrative row actions remain available but no longer dominate the player record. */
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button {
+  width: auto !important;
+  min-width: 78px !important;
+  min-height: 44px !important;
+  padding: 0 13px !important;
+  border-radius: 11px !important;
+  background: var(--phase2c-soft) !important;
+  box-shadow: none !important;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  font-size: 10.5px !important;
+  font-weight: 720 !important;
+  line-height: 1 !important;
+  letter-spacing: .035em !important;
+  touch-action: manipulation;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:last-child {
+  border-color: rgba(35, 45, 37, .11) !important;
+  background: #fafbf8 !important;
+  color: #727a74 !important;
+  -webkit-text-fill-color: #727a74 !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:last-child:hover,
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:last-child:focus-visible {
+  border-color: rgba(195, 59, 73, .22) !important;
+  background: rgba(195, 59, 73, .045) !important;
+  color: #a93643 !important;
+  -webkit-text-fill-color: #a93643 !important;
+}
+
+.performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) > div:nth-child(3) button:focus-visible {
+  outline: 3px solid rgba(113, 133, 31, .2) !important;
+  outline-offset: 2px !important;
+}
+
+@media (max-width: 480px) {
+  .performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] {
+    min-height: 108px !important;
+  }
+
+  .performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] > div:nth-child(2) {
+    padding-inline: 13px !important;
+    grid-template-columns: 44px minmax(0, 1fr) !important;
+    gap: 9px 10px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .performance-shell--coach #coach-roster-operations > .fade-up > [role="button"] {
+    transition: none !important;
+  }
+}

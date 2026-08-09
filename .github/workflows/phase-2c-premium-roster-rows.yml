@@ -1,0 +1,79 @@
+name: Phase 2C Premium Roster Rows
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-2b-premium-action-language
+    paths:
+      - "src/components/SecondaryPageSystem.jsx"
+      - "src/styles/Phase2PremiumRosterLayer.css"
+      - "tests/phase-2c-premium-roster-rows.test.mjs"
+      - "tests/e2e/phase-2c-premium-roster-rows.spec.mjs"
+      - ".github/workflows/phase-2c-premium-roster-rows.yml"
+      - "package.json"
+      - "playwright.acceptance.config.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: phase-2c-premium-roster-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  premium-roster-slice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Phase 2C roster contracts
+        run: node --test tests/phase-2c-premium-roster-rows.test.mjs
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Run Coach premium roster browser flow
+        run: npx playwright test tests/e2e/phase-2c-premium-roster-rows.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload Phase 2C roster screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-2c-premium-roster-evidence
+          path: artifacts/phase-2c-premium-roster/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Phase 2C failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-2c-premium-roster-failure
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7
