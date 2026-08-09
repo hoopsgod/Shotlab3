@@ -58,6 +58,18 @@ async function expectPremiumSupportingAction(button) {
   expect(result.afterWidth).toBeGreaterThanOrEqual(13);
 }
 
+async function expectNativeShotLabAction(button) {
+  await button.scrollIntoViewIfNeeded();
+  await expect(button).toBeVisible();
+  const box = await button.boundingBox();
+  expect(box).not.toBeNull();
+  expect(box.height).toBeGreaterThanOrEqual(44);
+  expect(box.x).toBeGreaterThanOrEqual(-1);
+  expect(box.x + box.width).toBeLessThanOrEqual(391);
+  const arrow = button.locator('svg path[d="M5 12h14m-6-6 6 6-6 6"]');
+  await expect(arrow).toHaveCount(1);
+}
+
 async function capture(page, name) {
   fs.mkdirSync(outputDir, { recursive: true });
   await page.evaluate(() => document.fonts?.ready);
@@ -85,24 +97,26 @@ test('Coach Players supporting actions use the Phase 2B premium affordance and k
   const teamAndAccount = page.getByRole('button', { name: 'Team & Account', exact: true });
   await expectPremiumSupportingAction(teamAndAccount);
 
+  await capture(page, '01-coach-players-premium-actions');
   await action.click();
   await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible();
-  await capture(page, '01-coach-players-premium-actions');
 });
 
-test('Coach Schedule supporting actions share the premium affordance without changing schedule semantics', async ({ page }) => {
+test('Coach Schedule keeps the accepted decision hierarchy and native premium actions functional', async ({ page }) => {
   await enterCoachDemo(page);
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Schedule', exact: true }).click();
   await expect(page.getByTestId('coach-events-interactive-dashboard')).toBeVisible({ timeout: 20_000 });
 
-  const evidence = page.getByTestId('coach-events-insight-grid');
-  await expect(evidence).toBeVisible();
-  const actions = evidence.locator('button');
-  expect(await actions.count()).toBeGreaterThanOrEqual(1);
-  const action = actions.first();
-  await expectPremiumSupportingAction(action);
+  const createEvent = page.getByTestId('coach-events-command-bar').getByRole('button', { name: 'Create Event', exact: true });
+  const resolveRsvps = page.getByTestId('coach-events-decision-brief').getByRole('button', { name: 'Resolve RSVPs', exact: true });
+  await expectNativeShotLabAction(createEvent);
+  await expectNativeShotLabAction(resolveRsvps);
 
-  await action.click();
-  await expect(page.getByTestId('coach-events-interactive-dashboard')).toBeVisible();
+  const hiddenEvidence = page.getByTestId('coach-events-insight-grid');
+  await expect(hiddenEvidence).toBeHidden();
+
   await capture(page, '02-coach-events-premium-actions');
+  await resolveRsvps.click();
+  await expect(page.getByTestId('coach-event-intelligence-drawer')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('coach-event-intelligence-drawer').getByText('Team Practice', { exact: true })).toBeVisible();
 });
