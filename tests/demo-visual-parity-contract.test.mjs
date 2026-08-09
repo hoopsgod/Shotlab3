@@ -5,7 +5,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const srcRoot = path.resolve(here, '../src');
+const repoRoot = path.resolve(here, '..');
+const srcRoot = path.join(repoRoot, 'src');
 const appSource = await readFile(path.join(srcRoot, 'App.jsx'), 'utf8');
 
 const requiredSharedSurfaces = [
@@ -94,9 +95,22 @@ test('demo mode is limited to identity, sample data, and persistence safety—no
   assert.match(appSource, /import "\.\/styles\/CoachInteractiveDashboard\.css";/);
 });
 
-test('Team Store uses the same player state for demo and registered users', async () => {
+test('Team Store source and build enhancer preserve the same player state for demo and registered users', async () => {
   const teamStoreSource = await readFile(path.join(srcRoot, 'components/TeamStorePortal.jsx'), 'utf8');
-  assert.doesNotMatch(teamStoreSource, /isDemoAccount|isDemoPlayerPreview|DEMO STOREFRONT/i);
-  assert.match(teamStoreSource, /Your team store is not open yet/);
+  const teamStoreEnhancer = await readFile(path.join(repoRoot, 'scripts/apply-phase3m-player-team-store-retail.mjs'), 'utf8');
+
+  for (const [label, source] of [
+    ['TeamStorePortal.jsx', teamStoreSource],
+    ['apply-phase3m-player-team-store-retail.mjs', teamStoreEnhancer],
+  ]) {
+    assert.doesNotMatch(
+      source,
+      /isDemoAccount|isDemoPlayerPreview|DEMO STOREFRONT|Preview only in demo mode|Player experience preview/i,
+      `${label} must not contain a demo-only Team Store product path`,
+    );
+    assert.match(source, /Your team store is not open yet/);
+  }
+
   assert.match(teamStoreSource, /store \? <>/);
+  assert.match(teamStoreEnhancer, /demo\/registered parity/);
 });
