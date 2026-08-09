@@ -145,10 +145,22 @@ test("activity filters preserve category and search behavior", () => {
   assert.equal(filterActivityIntelligenceRows(rows, { query: "player one" })[0].type, "score");
 });
 
-test("season comparison uses archive summary without mutating source records", () => {
-  const archive = { id: "a1", seasonName: "2025-26", summary: { rosterCount: 2, shotLogCount: 4, totalShotLogMakes: 100, eventCount: 3, eventRsvpCount: 5, scSessionCount: 2, scLogCount: 4 } };
+test("season comparison uses the current archive snapshot contract without mutating source records", () => {
+  const archive = {
+    id: "a1",
+    seasonName: "2025-26",
+    snapshot: {
+      players: [{ id: "a" }, { id: "b" }],
+      scores: [{ id: "s1" }],
+      shotLogs: [{ made: 60 }, { made: 40 }],
+      events: [{ id: "e1" }, { id: "e2" }, { id: "e3" }],
+      rsvps: [{ id: "r1" }],
+      scSessions: [{ id: "sc1" }],
+      scLogs: [{ id: "log1" }],
+    },
+  };
   const model = buildSeasonComparisonModel({ currentRoster: roster, currentShotLogs: [{ made: 80 }, { made: 70 }], currentEvents: [{}, {}, {}, {}], archives: [archive] });
   assert.equal(model.selected.id, "a1");
-  assert.equal(model.metrics.find((metric) => metric.key === "totalShotLogMakes").delta, 50);
-  assert.equal(archive.summary.totalShotLogMakes, 100);
+  assert.equal(model.metrics.find((metric) => metric.key === "makes").delta, 50);
+  assert.equal(archive.snapshot.shotLogs.reduce((total, row) => total + row.made, 0), 100);
 });
