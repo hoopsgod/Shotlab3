@@ -159,6 +159,22 @@ async function stateMetrics(locator) {
   });
 }
 
+async function leaderboardEvidenceMetrics(locator) {
+  return locator.evaluate((node) => {
+    const title = node.querySelector('h2');
+    const body = node.querySelector('p');
+    const action = node.querySelector('button');
+    const style = (element) => element ? getComputedStyle(element) : null;
+    return {
+      backgroundColor: getComputedStyle(node).backgroundColor,
+      titleColor: style(title)?.color || '',
+      bodyColor: style(body)?.color || '',
+      actionColor: style(action)?.color || '',
+      actionBackgroundColor: style(action)?.backgroundColor || '',
+    };
+  });
+}
+
 test.use({ viewport: { width: 390, height: 844 } });
 
 test.beforeEach(async ({ page }) => {
@@ -170,6 +186,15 @@ test('Leaderboard no-results state uses semantic filtered-view language without 
   await openMoreDestination(page, 'leaderboards');
   const panel = page.getByTestId('coach-leaderboard-operational-panel');
   await expect(panel).toBeVisible({ timeout: 20_000 });
+
+  const evidence = page.getByTestId('coach-page-dashboard-leaderboards-evidence');
+  await expect(evidence).toBeVisible({ timeout: 20_000 });
+  const evidenceMetrics = await leaderboardEvidenceMetrics(evidence);
+  expect(evidenceMetrics.backgroundColor).toBe('rgb(247, 248, 242)');
+  expect(evidenceMetrics.titleColor).toBe('rgb(38, 48, 42)');
+  expect(evidenceMetrics.bodyColor).toBe('rgb(92, 103, 95)');
+  expect(evidenceMetrics.actionColor).toBe('rgb(51, 64, 47)');
+  expect(evidenceMetrics.actionBackgroundColor).toBe('rgb(242, 244, 238)');
 
   await panel.getByRole('searchbox').fill('NO_MATCH_PHASE_2D_999');
   const state = panel.locator('[data-phase2-empty-state]').filter({ hasText: 'No leaderboard players match the selected view.' });
