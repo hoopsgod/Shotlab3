@@ -28,9 +28,10 @@ if (sectionMarkerCount !== 1) {
   throw new Error(`Phase 4E.6 expected exactly one shared analytics tab template, found ${sectionMarkerCount}.`);
 }
 
-const phase3dTarget = '.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:nth-child(2) button';
-if (!phase3d.includes(phase3dTarget) || !phase3d.includes('min-height:42px!important;')) {
-  throw new Error('Phase 4E.6 expected the Phase 3D 42px segmented-control authority before applying its bounded override.');
+// This script runs after minify-visual-authority-css.mjs in production, so validate
+// the durable Phase 3D geometry contract rather than brittle selector whitespace.
+if (!phase3d.includes('min-height:42px!important') || !phase3d.includes('data-workspace-tab="profile"')) {
+  throw new Error('Phase 4E.6 expected the minified Phase 3D 42px Profile segmented-control authority before applying its bounded override.');
 }
 
 for (const required of [
