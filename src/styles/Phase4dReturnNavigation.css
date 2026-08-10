@@ -1,0 +1,10 @@
+/* Phase 4D — shared Coach/Player return navigation ergonomics.
+ * Preserve the existing pill presentation while raising the physical tap target
+ * to the premium mobile baseline across the single shared DashboardReturnButton.
+ */
+button.shotlab-dashboard-return-button {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
