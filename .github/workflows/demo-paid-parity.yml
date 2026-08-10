@@ -57,6 +57,15 @@ jobs:
       - name: Compare registered and demo runtime experiences
         run: npx playwright test tests/e2e/demo-paid-parity.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
+      - name: Upload parity certification screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-paid-parity-certification
+          path: parity-evidence/
+          if-no-files-found: ignore
+          retention-days: 14
+
       - name: Upload parity failure evidence
         if: failure()
         uses: actions/upload-artifact@v4
