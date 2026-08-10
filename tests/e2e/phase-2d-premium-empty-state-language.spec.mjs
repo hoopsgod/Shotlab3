@@ -114,9 +114,12 @@ async function stateMetrics(locator) {
     const style = getComputedStyle(node);
     const before = getComputedStyle(node, '::before');
     const after = getComputedStyle(node, '::after');
+    const label = node.querySelector('.phase2-empty-state-label');
+    const labelStyle = label ? getComputedStyle(label) : null;
     return {
       display: style.display,
       gridColumns: style.gridTemplateColumns,
+      gridRows: style.gridTemplateRows,
       borderTopStyle: style.borderTopStyle,
       borderLeftStyle: style.borderLeftStyle,
       radius: Number.parseFloat(style.borderTopLeftRadius),
@@ -124,6 +127,9 @@ async function stateMetrics(locator) {
       height: node.getBoundingClientRect().height,
       backgroundColor: style.backgroundColor,
       color: style.color,
+      kind: node.getAttribute('data-phase2-empty-kind'),
+      tone: node.getAttribute('data-phase2-empty-tone'),
+      labelTransform: labelStyle?.textTransform || '',
       beforeMask: before.getPropertyValue('mask-image') || before.getPropertyValue('-webkit-mask-image'),
       beforeWidth: Number.parseFloat(before.width),
       railWidth: Number.parseFloat(after.width),
@@ -137,19 +143,22 @@ test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
 
-test('Leaderboard no-results state uses the quiet Phase 2D operational language', async ({ page }) => {
+test('Leaderboard no-results state uses semantic filtered-view language', async ({ page }) => {
   await enterCoach(page);
   await openMoreDestination(page, 'leaderboards');
   const panel = page.getByTestId('coach-leaderboard-operational-panel');
   await expect(panel).toBeVisible({ timeout: 20_000 });
 
   await panel.getByRole('searchbox').fill('NO_MATCH_PHASE_2D_999');
-  const state = panel.getByText('No leaderboard players match the selected view.', { exact: true });
+  const state = panel.locator('[data-phase2-empty-state]').filter({ hasText: 'No leaderboard players match the selected view.' });
   await expect(state).toBeVisible();
+  await expect(state.getByText('Filtered view', { exact: true })).toBeVisible();
+  await expect(state.getByText('No leaderboard players match the selected view.', { exact: true })).toBeVisible();
   const metrics = await stateMetrics(state);
 
   expect(metrics.display).toBe('grid');
   expect(metrics.gridColumns).toContain('36px');
+  expect(metrics.gridRows).not.toBe('none');
   expect(metrics.borderTopStyle).toBe('solid');
   expect(metrics.borderLeftStyle).toBe('none');
   expect(metrics.radius).toBe(0);
@@ -157,6 +166,9 @@ test('Leaderboard no-results state uses the quiet Phase 2D operational language'
   expect(metrics.height).toBeGreaterThanOrEqual(88);
   expect(metrics.backgroundColor).toBe('rgb(247, 248, 242)');
   expect(metrics.color).toBe('rgb(65, 75, 68)');
+  expect(metrics.kind).toBe('filter');
+  expect(metrics.tone).toBe('neutral');
+  expect(metrics.labelTransform).toBe('uppercase');
   expect(metrics.beforeMask).not.toBe('none');
   expect(metrics.beforeMask).not.toBe('');
   expect(metrics.beforeWidth).toBeGreaterThanOrEqual(35);
@@ -165,7 +177,7 @@ test('Leaderboard no-results state uses the quiet Phase 2D operational language'
   await capture(page, '01-leaderboard-empty-state', state);
 });
 
-test('Player Intelligence no-activity state keeps the same premium language on the dark drawer', async ({ page }) => {
+test('Player Intelligence no-activity state keeps semantic hierarchy on the dark drawer', async ({ page }) => {
   await enterCoach(page);
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Players', exact: true }).click();
   await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 });
@@ -180,12 +192,15 @@ test('Player Intelligence no-activity state keeps the same premium language on t
 
   const drawer = page.getByTestId('coach-player-intelligence-drawer');
   await expect(drawer).toBeVisible({ timeout: 20_000 });
-  const state = drawer.getByText('No player activity has been recorded yet.', { exact: true });
+  const state = drawer.locator('[data-phase2-empty-state]').filter({ hasText: 'No player activity has been recorded yet.' });
   await expect(state).toBeVisible({ timeout: 10_000 });
+  await expect(state.getByText('Activity status', { exact: true })).toBeVisible();
+  await expect(state.getByText('No player activity has been recorded yet.', { exact: true })).toBeVisible();
   const metrics = await stateMetrics(state);
 
   expect(metrics.display).toBe('grid');
   expect(metrics.gridColumns).toContain('36px');
+  expect(metrics.gridRows).not.toBe('none');
   expect(metrics.borderTopStyle).toBe('solid');
   expect(metrics.borderLeftStyle).toBe('none');
   expect(metrics.radius).toBe(0);
@@ -193,6 +208,9 @@ test('Player Intelligence no-activity state keeps the same premium language on t
   expect(metrics.height).toBeGreaterThanOrEqual(88);
   expect(metrics.backgroundColor).toBe('rgb(16, 21, 19)');
   expect(metrics.color).toBe('rgb(199, 208, 203)');
+  expect(metrics.kind).toBe('activity');
+  expect(metrics.tone).toBe('neutral');
+  expect(metrics.labelTransform).toBe('uppercase');
   expect(metrics.beforeMask).not.toBe('none');
   expect(metrics.beforeMask).not.toBe('');
   expect(metrics.beforeWidth).toBeGreaterThanOrEqual(35);
