@@ -51,6 +51,39 @@ async function installSharedRoutes(target, paidUser = null) {
   await target.route('**/v1/coach/players/provision**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, invitations: [] }) }));
   await target.route(`${PAID_SUPABASE_ORIGIN}/auth/v1/user`, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(paidUser || {}) }));
   await target.route(`${PAID_SUPABASE_ORIGIN}/rest/v1/**`, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
+
+  if (paidUser?.email) {
+    const role = Object.keys(PAID_IDENTITIES).find((key) => PAID_IDENTITIES[key].email === paidUser.email);
+    const identity = role ? PAID_IDENTITIES[role] : null;
+    const coach = PAID_IDENTITIES.coach;
+    const legacyProfile = identity ? {
+      email: identity.email,
+      name: identity.name,
+      role: identity.role,
+      team_id: TEAM_ID,
+      hide_from_leaderboards: role === 'coach',
+    } : null;
+
+    await target.route('**/v1/legacy-auth/restore', (route) => route.fulfill({
+      status: legacyProfile ? 200 : 404,
+      contentType: 'application/json',
+      body: JSON.stringify(legacyProfile ? { ok: true, profile: legacyProfile } : { error: 'profile_not_found' }),
+    }));
+    await target.route('**/v1/teams/restore-context', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ok: true,
+        team: {
+          id: TEAM_ID,
+          name: 'Parity Team',
+          ownerCoachId: coach.email,
+          joinCode: 'PARITY26',
+          createdAt: 1_780_000_000_000,
+        },
+      }),
+    }));
+  }
 }
 
 async function seedPaidSession(context, role) {
