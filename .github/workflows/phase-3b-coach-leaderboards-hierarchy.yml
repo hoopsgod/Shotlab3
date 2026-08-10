@@ -1,0 +1,78 @@
+name: Phase 3B Coach Leaderboards Hierarchy
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: true
+
+jobs:
+  coach-leaderboards-hierarchy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Start built production preview
+        run: |
+          npm run preview:agent > /tmp/phase-3b-preview.log 2>&1 &
+          for attempt in {1..40}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/phase-3b-preview.log
+          exit 1
+
+      - name: Verify Coach Leaderboards hierarchy
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-3b-coach-leaderboards-hierarchy.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload Coach Leaderboards visual evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-3b-coach-leaderboards-hierarchy
+          path: artifacts/phase-3b-coach-leaderboards-hierarchy/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-3b-coach-leaderboards-hierarchy-failure
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/phase-3b-preview.log
+          if-no-files-found: ignore
+          retention-days: 7
