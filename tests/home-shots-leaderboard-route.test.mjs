@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { mapLeaderboardError, parseLimit, parseScope } from "../functions/v1/leaderboards/home-shots.js";
+import { mapLeaderboardError, mapLeaderboardRow, parseLimit, parseScope } from "../functions/v1/leaderboards/home-shots.js";
 
 test("parseLimit clamps and defaults safely", () => {
   assert.equal(parseLimit(undefined), 10);
@@ -26,4 +26,18 @@ test("mapLeaderboardError maps known authorization and validation errors", () =>
   assert.deepEqual(mapLeaderboardError(new Error("NOT_AUTHORIZED_FOR_TEAM")), { status: 403, code: "forbidden" });
   assert.deepEqual(mapLeaderboardError(new Error("SCOPE_INVALID")), { status: 400, code: "invalid_scope" });
   assert.deepEqual(mapLeaderboardError(new Error("unexpected")), { status: 500, code: "internal_error" });
+});
+
+test("mapLeaderboardRow marks authorized aggregate rows as remote provenance", () => {
+  assert.deepEqual(mapLeaderboardRow({
+    rank: 2,
+    player_display_name: "Ava Brooks",
+    total_home_shots: 160,
+    private_field: "must-not-leak",
+  }), {
+    rank: 2,
+    player_display_name: "Ava Brooks",
+    total_home_shots: 160,
+    leaderboard_source: "remote",
+  });
 });
