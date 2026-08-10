@@ -1,0 +1,7 @@
+/* Phase 4E.7 — Player Profile source-filter physical targets.
+   Preserve the accepted segmented-control presentation; change only mobile touch geometry. */
+.performance-shell--player[data-workspace-tab="profile"] #player-profile-source-filters button[data-player-profile-source-filter] {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}
