@@ -182,7 +182,7 @@ test('Leaderboard no-results state uses semantic filtered-view language without 
   await capture(page, '03-leaderboard-panel-context', panel);
 });
 
-test('Player Intelligence no-activity state keeps semantic hierarchy and dark material continuity', async ({ page }) => {
+test('Player Intelligence no-activity state keeps nonredundant hierarchy and dark material continuity', async ({ page }) => {
   await enterCoach(page);
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Players', exact: true }).click();
   await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 });
@@ -197,6 +197,8 @@ test('Player Intelligence no-activity state keeps semantic hierarchy and dark ma
 
   const drawer = page.getByTestId('coach-player-intelligence-drawer');
   await expect(drawer).toBeVisible({ timeout: 20_000 });
+  await expect(drawer.getByText('New roster profile · Awaiting first logged session', { exact: true })).toBeVisible();
+  await expect(drawer.getByText('No activity yet · No activity recorded', { exact: true })).toHaveCount(0);
   const state = drawer.locator('[data-phase2-empty-state]').filter({ hasText: 'No player activity recorded yet.' });
   await expect(state).toBeVisible({ timeout: 10_000 });
   await expect(state.getByText('Activity status', { exact: true })).toBeVisible();
