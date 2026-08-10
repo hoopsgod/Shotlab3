@@ -175,6 +175,7 @@ test('Leaderboard no-results state uses semantic filtered-view language', async 
   expect(metrics.railWidth).toBeGreaterThanOrEqual(2);
 
   await capture(page, '01-leaderboard-empty-state', state);
+  await capture(page, '03-leaderboard-panel-context', panel);
 });
 
 test('Player Intelligence no-activity state keeps semantic hierarchy on the dark drawer', async ({ page }) => {
@@ -192,10 +193,10 @@ test('Player Intelligence no-activity state keeps semantic hierarchy on the dark
 
   const drawer = page.getByTestId('coach-player-intelligence-drawer');
   await expect(drawer).toBeVisible({ timeout: 20_000 });
-  const state = drawer.locator('[data-phase2-empty-state]').filter({ hasText: 'No player activity has been recorded yet.' });
+  const state = drawer.locator('[data-phase2-empty-state]').filter({ hasText: 'No player activity recorded yet.' });
   await expect(state).toBeVisible({ timeout: 10_000 });
   await expect(state.getByText('Activity status', { exact: true })).toBeVisible();
-  await expect(state.getByText('No player activity has been recorded yet.', { exact: true })).toBeVisible();
+  await expect(state.getByText('No player activity recorded yet.', { exact: true })).toBeVisible();
   const metrics = await stateMetrics(state);
 
   expect(metrics.display).toBe('grid');
@@ -216,4 +217,5 @@ test('Player Intelligence no-activity state keeps semantic hierarchy on the dark
   expect(metrics.beforeWidth).toBeGreaterThanOrEqual(35);
 
   await capture(page, '02-player-drawer-no-activity-state', state);
+  await capture(page, '04-player-drawer-context', drawer);
 });
