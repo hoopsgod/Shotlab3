@@ -180,10 +180,14 @@
   color: #61731f !important;
 }
 
-[data-testid="coach-page-dashboard-leaderboards-evidence"] [class*="insightActions"] button {
+/* Keep an optimizer-safe selector for production. CSS-module class fragments can
+   be pruned after build, while the evidence test id and article/button structure
+   are stable runtime contracts. */
+[data-testid="coach-page-dashboard-leaderboards-evidence"] article button {
   border: 1px solid rgba(97, 115, 31, .32) !important;
   background: #f2f4ee !important;
   color: #33402f !important;
+  -webkit-text-fill-color: #33402f !important;
 }
 
 /* Empty states inside portaled intelligence drawers must own the surrounding
