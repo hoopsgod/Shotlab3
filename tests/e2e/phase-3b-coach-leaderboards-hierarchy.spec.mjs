@@ -48,15 +48,31 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   const summary = shell.locator(".secondaryPageIntro__summary");
   const decision = page.getByTestId("coach-page-dashboard-leaderboards-decision-brief");
   const metricStrip = page.getByTestId("coach-page-dashboard-leaderboards-metric-strip");
+  const metrics = metricStrip.locator("[data-premium-metric]");
 
   await expect(pageSurface).toHaveCSS("background-color", "rgb(247, 248, 242)");
-  await expect(title).toHaveCSS("color", "rgb(23, 26, 24)");
+  await expect(title).toHaveCSS("-webkit-text-fill-color", "rgb(23, 26, 24)");
+  const titleColor = await title.evaluate((node) => getComputedStyle(node).color);
+  const titleChannels = titleColor.match(/\d+/g)?.map(Number) || [];
+  expect(titleChannels.slice(0, 3).every((value) => value <= 40)).toBeTruthy();
   await expect(summary).toHaveCSS("color", "rgb(93, 102, 95)");
   await expect(summary).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(decision.locator("h2")).toHaveCSS("color", "rgb(245, 247, 244)");
   expect(await decision.evaluate((node) => getComputedStyle(node).backgroundImage)).toContain("linear-gradient");
-  await expect(metricStrip.locator("[data-premium-metric-value]").first()).toHaveCSS("color", "rgb(23, 26, 24)");
-  await expect(metricStrip.locator("[data-premium-metric-label]").first()).toHaveCSS("color", "rgb(82, 96, 89)");
+  await expect(metricStrip.locator("[data-premium-metric-value]").first()).toHaveCSS("-webkit-text-fill-color", "rgb(23, 26, 24)");
+  await expect(metricStrip.locator("[data-premium-metric-label]").first()).toHaveCSS("-webkit-text-fill-color", "rgb(82, 96, 89)");
+  await expect(metrics).toHaveCount(4);
+  await expect(metricStrip).toHaveCSS("display", "grid");
+
+  const metricGeometry = await metrics.evaluateAll((nodes) => nodes.map((node) => {
+    const rect = node.getBoundingClientRect();
+    return { left: rect.left, right: rect.right, top: rect.top, width: rect.width };
+  }));
+  expect(metricGeometry[0].right).toBeLessThanOrEqual(374);
+  expect(metricGeometry[1].right).toBeLessThanOrEqual(374);
+  expect(Math.abs(metricGeometry[0].top - metricGeometry[1].top)).toBeLessThanOrEqual(1);
+  expect(metricGeometry[2].top).toBeGreaterThan(metricGeometry[0].top + 60);
+  expect(Math.abs(metricGeometry[0].width - metricGeometry[1].width)).toBeLessThanOrEqual(2);
 
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
   expect(overflow).toBeLessThanOrEqual(1);
