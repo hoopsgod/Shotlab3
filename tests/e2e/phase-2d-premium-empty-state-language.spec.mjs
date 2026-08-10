@@ -116,6 +116,8 @@ async function stateMetrics(locator) {
     const after = getComputedStyle(node, '::after');
     const label = node.querySelector('.phase2-empty-state-label');
     const labelStyle = label ? getComputedStyle(label) : null;
+    const section = node.closest('section');
+    const sectionStyle = section ? getComputedStyle(section) : null;
     return {
       display: style.display,
       gridColumns: style.gridTemplateColumns,
@@ -133,6 +135,7 @@ async function stateMetrics(locator) {
       beforeMask: before.getPropertyValue('mask-image') || before.getPropertyValue('-webkit-mask-image'),
       beforeWidth: Number.parseFloat(before.width),
       railWidth: Number.parseFloat(after.width),
+      sectionBackgroundColor: sectionStyle?.backgroundColor || '',
     };
   });
 }
@@ -143,7 +146,7 @@ test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
 
-test('Leaderboard no-results state uses semantic filtered-view language', async ({ page }) => {
+test('Leaderboard no-results state uses semantic filtered-view language without a misleading empty pulse', async ({ page }) => {
   await enterCoach(page);
   await openMoreDestination(page, 'leaderboards');
   const panel = page.getByTestId('coach-leaderboard-operational-panel');
@@ -154,6 +157,7 @@ test('Leaderboard no-results state uses semantic filtered-view language', async 
   await expect(state).toBeVisible();
   await expect(state.getByText('Filtered view', { exact: true })).toBeVisible();
   await expect(state.getByText('No leaderboard players match the selected view.', { exact: true })).toBeVisible();
+  await expect(panel.getByTestId('coach-leaderboard-pulse')).toBeHidden();
   const metrics = await stateMetrics(state);
 
   expect(metrics.display).toBe('grid');
@@ -178,7 +182,7 @@ test('Leaderboard no-results state uses semantic filtered-view language', async 
   await capture(page, '03-leaderboard-panel-context', panel);
 });
 
-test('Player Intelligence no-activity state keeps semantic hierarchy on the dark drawer', async ({ page }) => {
+test('Player Intelligence no-activity state keeps semantic hierarchy and dark material continuity', async ({ page }) => {
   await enterCoach(page);
   await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Players', exact: true }).click();
   await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 });
@@ -215,6 +219,7 @@ test('Player Intelligence no-activity state keeps semantic hierarchy on the dark
   expect(metrics.beforeMask).not.toBe('none');
   expect(metrics.beforeMask).not.toBe('');
   expect(metrics.beforeWidth).toBeGreaterThanOrEqual(35);
+  expect(metrics.sectionBackgroundColor).toBe('rgb(16, 21, 19)');
 
   await capture(page, '02-player-drawer-no-activity-state', state);
   await capture(page, '04-player-drawer-context', drawer);
