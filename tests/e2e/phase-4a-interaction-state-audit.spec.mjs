@@ -75,6 +75,27 @@ async function collectSurfaceAudit(page, role, key) {
       const navKey = node.getAttribute("data-nav-key") || "";
       return (aria || text || placeholder || testId || navKey || node.tagName).slice(0, 100);
     };
+    const findHorizontalScroller = (node) => {
+      let parent = node.parentElement;
+      while (parent && parent !== document.body) {
+        const parentStyle = getComputedStyle(parent);
+        const overflowX = String(parentStyle.overflowX || "").toLowerCase();
+        const scrollable = ["auto", "scroll", "overlay"].includes(overflowX) && parent.scrollWidth > parent.clientWidth + 1;
+        if (scrollable) {
+          return {
+            tag: parent.tagName.toLowerCase(),
+            testId: parent.getAttribute("data-testid") || "",
+            className: typeof parent.className === "string" ? parent.className.replace(/\s+/g, " ").trim().slice(0, 160) : "",
+            overflowX,
+            clientWidth: round(parent.clientWidth),
+            scrollWidth: round(parent.scrollWidth),
+          };
+        }
+        parent = parent.parentElement;
+      }
+      return null;
+    };
+
     const seen = new Set();
     const targets = [];
     for (const node of document.querySelectorAll(selector)) {
@@ -84,7 +105,11 @@ async function collectSurfaceAudit(page, role, key) {
       const style = getComputedStyle(node);
       const rect = node.getBoundingClientRect();
       if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity || 1) === 0 || rect.width <= 0 || rect.height <= 0) continue;
-      const clippedHorizontally = rect.left < -1 || rect.right > innerWidth + 1;
+
+      const offViewportHorizontally = rect.left < -1 || rect.right > innerWidth + 1;
+      const horizontalScroller = offViewportHorizontally ? findHorizontalScroller(node) : null;
+      const scrollDependent = Boolean(offViewportHorizontally && horizontalScroller);
+      const clippedHorizontally = Boolean(offViewportHorizontally && !horizontalScroller);
       const sub44 = rect.width < 44 || rect.height < 44;
       const criticallyTiny = rect.width < 32 || rect.height < 32;
       targets.push({
@@ -102,6 +127,8 @@ async function collectSurfaceAudit(page, role, key) {
         sub44,
         criticallyTiny,
         clippedHorizontally,
+        scrollDependent,
+        horizontalScroller,
       });
     }
     return {
@@ -114,6 +141,7 @@ async function collectSurfaceAudit(page, role, key) {
       sub44: targets.filter((target) => target.sub44),
       criticallyTiny: targets.filter((target) => target.criticallyTiny),
       clippedHorizontally: targets.filter((target) => target.clippedHorizontally),
+      scrollDependent: targets.filter((target) => target.scrollDependent),
       targets,
     };
   }, { selector: INTERACTIVE_SELECTOR, role, key });
@@ -123,8 +151,6 @@ async function collectSurfaceAudit(page, role, key) {
 
   expect(result.documentWidth - result.viewport.width, `${role}/${key} document must not overflow horizontally`).toBeLessThanOrEqual(1);
   expect(result.bodyWidth - result.viewport.width, `${role}/${key} body must not overflow horizontally`).toBeLessThanOrEqual(1);
-  expect(result.clippedHorizontally, `${role}/${key} must not expose horizontally clipped controls`).toEqual([]);
-  expect(result.criticallyTiny, `${role}/${key} must not expose controls below 32px in either dimension`).toEqual([]);
   return result;
 }
 
@@ -158,17 +184,31 @@ async function auditMoreSheet(page, role) {
   await expect.poll(() => page.evaluate(() => document.body.style.overflow)).not.toBe("hidden");
 }
 
-function writeSummary(role, audits) {
-  const summary = {
+function buildSummary(role, audits) {
+  return {
     role,
     surfaceCount: audits.length,
     interactiveCount: audits.reduce((sum, audit) => sum + audit.interactiveCount, 0),
     sub44Count: audits.reduce((sum, audit) => sum + audit.sub44.length, 0),
     criticallyTinyCount: audits.reduce((sum, audit) => sum + audit.criticallyTiny.length, 0),
     clippedControlCount: audits.reduce((sum, audit) => sum + audit.clippedHorizontally.length, 0),
+    scrollDependentCount: audits.reduce((sum, audit) => sum + audit.scrollDependent.length, 0),
     sub44BySurface: Object.fromEntries(audits.map((audit) => [audit.key, audit.sub44.length])),
+    criticallyTinyBySurface: Object.fromEntries(audits.map((audit) => [audit.key, audit.criticallyTiny.length])),
+    clippedBySurface: Object.fromEntries(audits.map((audit) => [audit.key, audit.clippedHorizontally.length])),
+    scrollDependentBySurface: Object.fromEntries(audits.map((audit) => [audit.key, audit.scrollDependent.length])),
+    criticallyTiny: audits.flatMap((audit) => audit.criticallyTiny.map((target) => ({ surface: audit.key, ...target }))),
+    clippedHorizontally: audits.flatMap((audit) => audit.clippedHorizontally.map((target) => ({ surface: audit.key, ...target }))),
+    scrollDependent: audits.flatMap((audit) => audit.scrollDependent.map((target) => ({ surface: audit.key, ...target }))),
+    sub44: audits.flatMap((audit) => audit.sub44.map((target) => ({ surface: audit.key, ...target }))),
   };
+}
+
+function writeAndGateSummary(role, audits) {
+  const summary = buildSummary(role, audits);
   fs.writeFileSync(path.join(OUTPUT_DIR, `${role}-summary.json`), JSON.stringify(summary, null, 2));
+  expect(summary.clippedHorizontally, `${role} must not expose accidental horizontally clipped controls`).toEqual([]);
+  expect(summary.criticallyTiny, `${role} must not expose controls below 32px in either dimension`).toEqual([]);
 }
 
 test("Phase 4A audits Coach interaction ergonomics and More-sheet behavior", async ({ page }) => {
@@ -184,8 +224,8 @@ test("Phase 4A audits Coach interaction ergonomics and More-sheet behavior", asy
   }
   await navigateByKey(page, "feed");
   await auditMoreSheet(page, "coach");
-  writeSummary("coach", audits);
   expect(pageErrors).toEqual([]);
+  writeAndGateSummary("coach", audits);
 });
 
 test("Phase 4A audits Player interaction ergonomics and More-sheet behavior", async ({ page }) => {
@@ -201,6 +241,6 @@ test("Phase 4A audits Player interaction ergonomics and More-sheet behavior", as
   }
   await navigateByKey(page, "home");
   await auditMoreSheet(page, "player");
-  writeSummary("player", audits);
   expect(pageErrors).toEqual([]);
+  writeAndGateSummary("player", audits);
 });
