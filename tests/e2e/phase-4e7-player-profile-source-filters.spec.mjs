@@ -41,11 +41,10 @@ async function enterPlayerProfile(page) {
 
   const analytics = page.getByTestId("player-analytics-sections");
   await expect(analytics).toBeVisible({ timeout: 20_000 });
-  const progressTab = analytics.locator('button[data-analytics-section="progress"]');
-  await progressTab.click();
+  await analytics.locator('button[data-analytics-section="progress"]').click();
   await settle(page);
 
-  const group = page.getByTestId("player-profile-source-filters");
+  const group = page.getByTestId("player-analytics-contexts");
   await expect(group).toBeVisible({ timeout: 20_000 });
   await group.scrollIntoViewIfNeeded();
   await settle(page);
@@ -56,7 +55,7 @@ test("Phase 4E.7 keeps Player Profile AT HOME / PROGRAM filters touch-safe", asy
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
   const { performance, group } = await enterPlayerProfile(page);
-  const filters = group.locator('button[data-player-profile-source-filter]');
+  const filters = group.locator('button[data-analytics-context-option]');
   await expect(filters).toHaveCount(2);
   await expect(filters.nth(0)).toHaveText(/AT HOME \(\d+\)/);
   await expect(filters.nth(1)).toHaveText(/PROGRAM \(\d+\)/);
@@ -68,7 +67,9 @@ test("Phase 4E.7 keeps Player Profile AT HOME / PROGRAM filters touch-safe", asy
     const style = await button.evaluate((node) => {
       const css = getComputedStyle(node);
       return {
+        context: node.getAttribute("data-analytics-context-option"),
         label: String(node.textContent || "").replace(/\s+/g, " ").trim(),
+        ariaPressed: node.getAttribute("aria-pressed"),
         height: parseFloat(css.height),
         minHeight: parseFloat(css.minHeight),
         maxHeight: css.maxHeight,
@@ -89,12 +90,14 @@ test("Phase 4E.7 keeps Player Profile AT HOME / PROGRAM filters touch-safe", asy
     evidence.push({ box, style });
   }
 
+  await expect(filters.nth(0)).toHaveAttribute("aria-pressed", "true");
   await filters.nth(1).click();
   await settle(page);
-  await expect(group.locator('button[data-player-profile-source-filter]').nth(1)).toBeVisible();
+  await expect(filters.nth(1)).toHaveAttribute("aria-pressed", "true");
+  await expect(filters.nth(0)).toHaveAttribute("aria-pressed", "false");
   await filters.nth(0).click();
   await settle(page);
-  await expect(group.locator('button[data-player-profile-source-filter]').nth(0)).toBeVisible();
+  await expect(filters.nth(0)).toHaveAttribute("aria-pressed", "true");
 
   const horizontal = await page.evaluate(() => ({ innerWidth, documentWidth: document.documentElement.scrollWidth, bodyWidth: document.body.scrollWidth }));
   expect(horizontal.documentWidth - horizontal.innerWidth).toBeLessThanOrEqual(1);
