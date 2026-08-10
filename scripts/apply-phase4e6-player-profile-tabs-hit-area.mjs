@@ -1,9 +1,14 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 
 const chartsPath = 'src/components/ShotLabCharts.jsx';
-const authorityPath = 'public/shotlab-v3-mobile-corrections.css';
-let charts = readFileSync(chartsPath, 'utf8');
-let authority = readFileSync(authorityPath, 'utf8');
+const phase3dPath = 'public/shotlab-phase3d-player-analytics.css';
+const phase4e6Path = 'public/shotlab-phase4e6-player-profile-tabs-hit-area.css';
+const indexPath = 'index.html';
+
+const charts = readFileSync(chartsPath, 'utf8');
+const phase3d = readFileSync(phase3dPath, 'utf8');
+const phase4e6 = readFileSync(phase4e6Path, 'utf8');
+let index = readFileSync(indexPath, 'utf8');
 
 const requiredContracts = [
   'data-testid="player-analytics-sections"',
@@ -12,10 +17,9 @@ const requiredContracts = [
   'flexDirection: "row"',
   '<ShotLabIcon name={t.icon} size={15} />',
 ];
-
 for (const contract of requiredContracts) {
   if (!charts.includes(contract)) {
-    throw new Error(`Phase 4E.6 requires the Phase 3F analytics tab contract before applying the physical target: ${contract}`);
+    throw new Error(`Phase 4E.6 requires the Phase 3F analytics tab contract: ${contract}`);
   }
 }
 
@@ -24,28 +28,34 @@ if (sectionMarkerCount !== 1) {
   throw new Error(`Phase 4E.6 expected exactly one shared analytics tab template, found ${sectionMarkerCount}.`);
 }
 
-const inlineMarker = '                minHeight: 44,\n                boxSizing: "border-box",\n                touchAction: "manipulation",';
-if (!charts.includes(inlineMarker)) {
-  const styleAnchor = '                flex: 1,\n                padding: "9px 4px",\n                background: tab === t.id ? T.lime : "transparent",';
-  const anchorCount = charts.split(styleAnchor).length - 1;
-  if (anchorCount !== 1) {
-    throw new Error(`Phase 4E.6 expected exactly one analytics-tab style anchor, found ${anchorCount}.`);
+const phase3dTarget = '.performance-shell--player[data-workspace-tab="profile"] .player-scroll-container .fade-up > div[style*="min-height: 100vh"] > div:first-child > div:nth-child(2) button';
+if (!phase3d.includes(phase3dTarget) || !phase3d.includes('min-height:42px!important;')) {
+  throw new Error('Phase 4E.6 expected the Phase 3D 42px segmented-control authority before applying its bounded override.');
+}
+
+for (const required of [
+  'div[data-testid="player-analytics-sections"]',
+  'button[data-analytics-section]',
+  'min-height: 44px !important;',
+  'box-sizing: border-box !important;',
+  'touch-action: manipulation !important;',
+]) {
+  if (!phase4e6.includes(required)) {
+    throw new Error(`Phase 4E.6 final geometry authority missing: ${required}`);
   }
-  charts = charts.replace(
-    styleAnchor,
-    '                flex: 1,\n                minHeight: 44,\n                boxSizing: "border-box",\n                touchAction: "manipulation",\n                padding: "9px 4px",\n                background: tab === t.id ? T.lime : "transparent",',
-  );
-  writeFileSync(chartsPath, charts);
-} else {
-  console.log('Phase 4E.6 inline Player Profile analytics-tab target already applied.');
 }
 
-const authorityMarker = 'Phase 4E.6 Player Profile analytics-tab physical target';
-if (!authority.includes(authorityMarker)) {
-  authority += `\n\n/* ${authorityMarker}. The four Progress / Skills / Streaks / Goals tabs keep their accepted compact visual treatment while meeting the mobile touch baseline. */\n.performance-shell[data-workspace-tab="profile"] [data-testid="player-analytics-sections"] button[data-analytics-section] {\n  min-height: 44px !important;\n  box-sizing: border-box !important;\n  touch-action: manipulation !important;\n}\n`;
-  writeFileSync(authorityPath, authority);
+const link = '  <link id="shotlab-phase4e6-player-profile-tabs-hit-area" rel="stylesheet" href="/shotlab-phase4e6-player-profile-tabs-hit-area.css" />';
+if (!index.includes(link)) {
+  const anchor = '  <link id="shotlab-phase4e-final-polish" rel="stylesheet" href="/shotlab-phase4e-final-polish.css" />';
+  const anchorCount = index.split(anchor).length - 1;
+  if (anchorCount !== 1) {
+    throw new Error(`Phase 4E.6 expected one Phase 4E final-polish link, found ${anchorCount}.`);
+  }
+  index = index.replace(anchor, `${anchor}\n${link}`);
+  writeFileSync(indexPath, index);
 } else {
-  console.log('Phase 4E.6 final Player Profile analytics-tab authority already applied.');
+  console.log('Phase 4E.6 final stylesheet link already applied.');
 }
 
-console.log('Applied Phase 4E.6 Player Profile analytics-tab hit-area correction.');
+console.log('Applied Phase 4E.6 Player Profile analytics-tab hit-area correction after Phase 3D visual authority.');
