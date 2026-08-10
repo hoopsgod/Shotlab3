@@ -151,6 +151,41 @@
   display: none !important;
 }
 
+/* The leaderboard page carries editorial evidence through a legacy dark canvas.
+   Secondary-page evidence intentionally uses dark ink, so this rail must own a
+   quiet light material instead of inheriting that dark workspace underneath. */
+[data-testid="coach-page-dashboard-leaderboards-evidence"] {
+  overflow: hidden;
+  border: 1px solid rgba(38, 48, 41, .12) !important;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .72), rgba(255, 255, 255, .28)),
+    #f7f8f2 !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .74);
+}
+
+[data-testid="coach-page-dashboard-leaderboards-evidence"] > * {
+  background: transparent !important;
+}
+
+[data-testid="coach-page-dashboard-leaderboards-evidence"] :is(h2, h3, strong) {
+  color: #26302a !important;
+}
+
+[data-testid="coach-page-dashboard-leaderboards-evidence"] :is(p, small) {
+  color: #5c675f !important;
+}
+
+[data-testid="coach-page-dashboard-leaderboards-evidence"] [class*="insightEyebrow"] {
+  color: #61731f !important;
+}
+
+[data-testid="coach-page-dashboard-leaderboards-evidence"] [class*="insightActions"] button {
+  border: 1px solid rgba(97, 115, 31, .32) !important;
+  background: #f2f4ee !important;
+  color: #33402f !important;
+}
+
 /* Empty states inside portaled intelligence drawers must own the surrounding
    section material as well as the lane itself. This prevents a light section
    gutter from breaking the dark drawer surface. */
