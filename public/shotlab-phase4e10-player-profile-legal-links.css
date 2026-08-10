@@ -1,0 +1,7 @@
+/* Phase 4E.10 — Player Profile legal/support link physical targets.
+   The shared link component remains visually unchanged outside Player Profile. */
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] a[data-player-profile-legal-link] {
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}
