@@ -96,7 +96,7 @@ async function collectSurfaceAudit(page, role, key) {
       }
       return null;
     };
-    const findAncestorClip = (node, rect) => {
+    const findAncestorClip = (node, rect, preserveHorizontalScroll) => {
       const hardClip = new Set(["hidden", "clip"]);
       let parent = node.parentElement;
       while (parent && parent !== document.documentElement) {
@@ -127,7 +127,7 @@ async function collectSurfaceAudit(page, role, key) {
 
         const overflowX = String(parentStyle.overflowX || "").toLowerCase();
         const overflowY = String(parentStyle.overflowY || "").toLowerCase();
-        if (hardClip.has(overflowX)) {
+        if (!preserveHorizontalScroll && hardClip.has(overflowX)) {
           const intersectionWidth = Math.min(rect.right, parentRect.right) - Math.max(rect.left, parentRect.left);
           if (intersectionWidth <= 1) {
             return {
@@ -183,7 +183,9 @@ async function collectSurfaceAudit(page, role, key) {
       const rect = node.getBoundingClientRect();
       if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity || 1) === 0 || rect.width <= 0 || rect.height <= 0) continue;
 
-      const ancestorClip = findAncestorClip(node, rect);
+      const offViewportHorizontally = rect.left < -1 || rect.right > innerWidth + 1;
+      const horizontalScroller = offViewportHorizontally ? findHorizontalScroller(node) : null;
+      const ancestorClip = findAncestorClip(node, rect, Boolean(horizontalScroller));
       if (ancestorClip) {
         excludedAncestorClipped.push({
           tag: node.tagName.toLowerCase(),
@@ -201,8 +203,6 @@ async function collectSurfaceAudit(page, role, key) {
         continue;
       }
 
-      const offViewportHorizontally = rect.left < -1 || rect.right > innerWidth + 1;
-      const horizontalScroller = offViewportHorizontally ? findHorizontalScroller(node) : null;
       const scrollDependent = Boolean(offViewportHorizontally && horizontalScroller);
       const clippedHorizontally = Boolean(offViewportHorizontally && !horizontalScroller);
       const sub44 = rect.width < 44 || rect.height < 44;
@@ -337,6 +337,11 @@ test("Phase 4A audits Coach interaction ergonomics and More-sheet behavior", asy
   await navigateByKey(page, "feed");
   await auditMoreSheet(page, "coach");
   expect(pageErrors).toEqual([]);
+
+  const scrollDependentLabels = audits.flatMap((audit) => audit.scrollDependent.map((target) => target.label));
+  expect(scrollDependentLabels.some((label) => /Top Engagement/.test(label)), "Coach Top Engagement must remain audit-visible through its horizontal scroller").toBe(true);
+  expect(scrollDependentLabels.some((label) => /^Meeting/.test(label)), "Coach Meeting must remain audit-visible through its horizontal scroller").toBe(true);
+
   writeAndGateSummary("coach", audits);
 });
 
