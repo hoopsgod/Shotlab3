@@ -9,6 +9,10 @@ import {
   DEV_ROUTE_ENHANCERS,
   routeEnhancersFor,
 } from '../scripts/run-route-enhancers.mjs'
+import {
+  findBuildRegressions,
+  inheritedBudgetDebt,
+} from '../scripts/verify-phase5a-build-equivalence.mjs'
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const packageJson = JSON.parse(await readFile(path.join(rootDir, 'package.json'), 'utf8'))
@@ -25,6 +29,27 @@ const finalTouchSafety = [
 
 function assertUnique(label, entries) {
   assert.equal(new Set(entries).size, entries.length, `${label} must not contain duplicate enhancers`)
+}
+
+function performanceFixture() {
+  return {
+    budget: {
+      maxLargestCssBytes: 128000,
+      maxTotalCssGzipBytes: 88000,
+    },
+    totals: {
+      javaScriptFiles: 8,
+      javaScriptBytes: 1320000,
+      javaScriptGzipBytes: 347000,
+      cssFiles: 12,
+      cssBytes: 534000,
+      cssGzipBytes: 90900,
+    },
+    startupAppJavaScript: { bytes: 471000, gzipBytes: 119000 },
+    startupAppCss: { bytes: 0, gzipBytes: 0 },
+    largestJavaScript: { bytes: 471000, gzipBytes: 119000 },
+    largestCss: { bytes: 153000, gzipBytes: 24900 },
+  }
 }
 
 test('route enhancer manifests preserve the certified dev/build ordering contract', () => {
@@ -79,4 +104,31 @@ test('mode selection is explicit and rejects silent fallback', () => {
   assert.strictEqual(routeEnhancersFor('build'), BUILD_ROUTE_ENHANCERS)
   assert.throws(() => routeEnhancersFor('production'), /Expected "dev" or "build"/)
   assert.throws(() => routeEnhancersFor(undefined), /Expected "dev" or "build"/)
+})
+
+test('build equivalence gate rejects candidate bundle regressions', () => {
+  const base = performanceFixture()
+  const equal = structuredClone(base)
+  assert.deepEqual(findBuildRegressions(base, equal), [])
+
+  const improved = structuredClone(base)
+  improved.totals.javaScriptGzipBytes -= 100
+  improved.totals.cssGzipBytes -= 100
+  assert.deepEqual(findBuildRegressions(base, improved), [])
+
+  const regressed = structuredClone(base)
+  regressed.totals.cssGzipBytes += 1
+  regressed.largestCss.bytes += 25
+  const failures = findBuildRegressions(base, regressed)
+  assert.equal(failures.length, 2)
+  assert.match(failures.join('\n'), /total CSS gzip bytes regressed/)
+  assert.match(failures.join('\n'), /largest CSS raw bytes regressed/)
+})
+
+test('build equivalence reports inherited CSS budget debt without erasing it', () => {
+  const metrics = performanceFixture()
+  const debt = inheritedBudgetDebt(metrics)
+  assert.equal(debt.length, 2)
+  assert.match(debt[0], /largest CSS raw bytes/)
+  assert.match(debt[1], /total CSS gzip bytes/)
 })
