@@ -23,6 +23,8 @@ test('Phase 2D enhancer is idempotent, semantic, and leaves the source tree clea
     assert.match(pkg.scripts.dev, /apply-phase2d-premium-empty-state-language\.mjs/);
     assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase2d-premium-empty-state-language\.mjs/);
 
+    assert.match(source, /New roster profile · Awaiting first logged session/);
+    assert.doesNotMatch(source, /No activity recorded\"}`/);
     assert.match(source, /label="Activity status" kind="activity"/);
     assert.match(source, /No player activity recorded yet\./);
     assert.match(source, /label="Response status" kind="attendance"/);
