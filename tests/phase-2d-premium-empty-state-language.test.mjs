@@ -24,6 +24,7 @@ test('Phase 2D enhancer is idempotent, semantic, and leaves the source tree clea
     assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase2d-premium-empty-state-language\.mjs/);
 
     assert.match(source, /label="Activity status" kind="activity"/);
+    assert.match(source, /No player activity recorded yet\./);
     assert.match(source, /label="Response status" kind="attendance"/);
     assert.match(source, /label="Follow-up cleared" tone="positive" kind="complete"/);
     assert.match(source, /label="Filtered view" kind="filter"/);
@@ -38,7 +39,7 @@ test('Phase 2D enhancer is idempotent, semantic, and leaves the source tree clea
   assert.equal(read(TARGET), original);
 });
 
-test('Phase 2D uses a quiet premium state lane with semantic icon and copy hierarchy', () => {
+test('Phase 2D uses a quiet premium state lane with semantic icon, copy hierarchy, and contextual material safeguards', () => {
   const css = read('src/components/Phase2PremiumEmptyStateLanguage.css');
 
   assert.match(css, /\[data-phase2-empty-state\]/);
@@ -57,6 +58,9 @@ test('Phase 2D uses a quiet premium state lane with semantic icon and copy hiera
   assert.match(css, /data-phase2-empty-tone="positive"/);
   assert.match(css, /coach-player-intelligence-drawer/);
   assert.match(css, /coach-event-intelligence-drawer/);
+  assert.match(css, /coach-leaderboard-operational-panel/);
+  assert.match(css, /:has\(\[data-phase2-empty-kind="filter"\]\)/);
+  assert.match(css, /section:has\(\[data-phase2-empty-state\]\)/);
   assert.doesNotMatch(css, /border:\s*1px dashed/);
   assert.doesNotMatch(css, /isDemoAccount|isDemoMode|demoMode|setDemoMode/);
 });
