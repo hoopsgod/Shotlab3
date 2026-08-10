@@ -63,6 +63,11 @@ if (!next.includes(semanticEmptyState)) {
 }
 
 replaceOnce(
+  '      meta={model ? `${model.statusLabel} · ${model.lastActivityDate || "No activity recorded"}` : ""}',
+  '      meta={model ? (model.lastActivityDate ? `${model.statusLabel} · ${model.lastActivityDate}` : model.statusLabel === "No activity yet" ? "New roster profile · Awaiting first logged session" : `${model.statusLabel} · Awaiting first logged session`) : ""}',
+  'player drawer state summary',
+);
+replaceOnce(
   '<EmptyState>No player activity has been recorded yet.</EmptyState>',
   '<EmptyState label="Activity status" kind="activity">No player activity recorded yet.</EmptyState>',
   'player activity state',
@@ -122,6 +127,7 @@ for (const required of [
   'data-phase2-empty-state',
   'phase2-empty-state-label',
   'phase2-empty-state-message',
+  'New roster profile · Awaiting first logged session',
   'label="Activity status" kind="activity">No player activity recorded yet.',
   'label="Response status" kind="attendance"',
   'label="Follow-up cleared" tone="positive" kind="complete"',
