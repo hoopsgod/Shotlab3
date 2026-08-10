@@ -3,6 +3,7 @@ export const normalizeRosterIdentityValue = (value = "") => clean(value).toLower
 
 export const ROSTER_IDENTITY_FIELDS = ["email", "player_email", "playerId", "player_id", "userId", "user_id", "profileId", "profile_id"];
 const ROSTER_STATUS_BLOCKLIST = new Set(["archived", "removed", "team_local_data_deleted", "deleted", "hidden"]);
+const REMOTE_LEADERBOARD_SOURCE = "remote";
 
 export const getRosterTeamId = (row = {}) => clean(row?.teamId || row?.team_id);
 
@@ -47,6 +48,18 @@ export const buildActiveRosterIdentity = (players = [], teamId = "") => {
 
 const toSet = (values = []) => values instanceof Set ? values : new Set(Array.isArray(values) ? values : []);
 const setTeamId = (...sets) => sets.map((set) => set?.teamId).find(Boolean) || "";
+const isAuthoritativeRemoteLeaderboardRow = (row = {}) => {
+  const displayName = clean(row?.player_display_name || row?.playerDisplayName || row?.name);
+  const rawTotal = row?.total_home_shots ?? row?.total ?? row?.score;
+  const numericTotal = Number(rawTotal);
+  return normalizeRosterIdentityValue(row?.leaderboard_source) === REMOTE_LEADERBOARD_SOURCE
+    && Boolean(displayName)
+    && rawTotal !== null
+    && rawTotal !== undefined
+    && clean(rawTotal) !== ""
+    && Number.isFinite(numericTotal)
+    && numericTotal >= 0;
+};
 
 export const isActiveRosterRow = (row = {}, activeEmails = [], activeKeys = activeEmails, teamId = "") => {
   const activeEmailSet = toSet(activeEmails);
@@ -67,6 +80,13 @@ export const isActiveRosterLeaderboardRow = (row = {}, activeKeys = [], activeEm
   const rowTeamId = getRosterTeamId(row);
   if (targetTeamId && rowTeamId && rowTeamId !== targetTeamId) return false;
   if (isInactiveRosterRecord(row)) return false;
+
+  // Team leaderboard RPC rows are privacy-minimal by design: the authorized
+  // server returns display name + aggregate only, so a player cannot validate
+  // teammates against a self-scoped local roster. The explicit server source
+  // marker lets those already-authorized rows survive client roster filtering.
+  if (isAuthoritativeRemoteLeaderboardRow(row)) return true;
+
   const activeNameSet = toSet(activeNames);
   const displayName = normalizeRosterIdentityValue(row?.player_display_name || row?.name || row?.playerName || row?.player_name);
   return Boolean(displayName && activeNameSet.has(displayName));

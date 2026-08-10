@@ -39,7 +39,16 @@ function mapLeaderboardError(error) {
   return { status: 500, code: "internal_error" };
 }
 
-export { parseLimit, parseScope, mapLeaderboardError };
+function mapLeaderboardRow(row = {}) {
+  return {
+    rank: row.rank,
+    player_display_name: row.player_display_name,
+    total_home_shots: row.total_home_shots,
+    leaderboard_source: "remote",
+  };
+}
+
+export { parseLimit, parseScope, mapLeaderboardError, mapLeaderboardRow };
 
 function sanitizeRpcError(error) {
   return {
@@ -102,12 +111,7 @@ export async function onRequestGet(context) {
 
   try {
     const rows = await callRpc(env, rpcName, rpcArgs);
-
-    const leaderboard = (Array.isArray(rows) ? rows : []).map((row) => ({
-      rank: row.rank,
-      player_display_name: row.player_display_name,
-      total_home_shots: row.total_home_shots,
-    }));
+    const leaderboard = (Array.isArray(rows) ? rows : []).map(mapLeaderboardRow);
 
     const event = leaderboard.length === 0 ? LEADERBOARD_EVENTS.QUERY_EMPTY : LEADERBOARD_EVENTS.QUERY_SUCCESS;
     recordLeaderboardEvent(event, {

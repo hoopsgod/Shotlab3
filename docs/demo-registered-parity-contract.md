@@ -37,19 +37,34 @@ Product UI must derive from role, permissions, feature configuration, and produc
 
 If a feature needs a richer demo, add representative demo data that drives the normal production component path. Do not add a demo-specific rendering branch.
 
-## Release gate
+## Server-authoritative leaderboard rule
 
-Every product change must pass `Demo Paid Experience Parity` before its phase can close.
+Registered players can legitimately have a self-scoped local roster while the authorized team leaderboard endpoint returns privacy-minimal teammate summaries containing only display name and aggregate totals. Client-side roster filtering must not discard those already-authorized teammates merely because their private roster identity fields are absent locally.
 
-The gate verifies:
+The home-shots leaderboard API therefore marks its authorized aggregate rows with `leaderboard_source: "remote"`. The client may treat that marker as authoritative for leaderboard display only after normal team/inactive checks and only when the row contains a non-empty display name and a finite, non-negative aggregate. Unmarked identity-less rows and malformed remote rows remain subject to normal roster validation and must be rejected.
 
-1. the shared production application tree remains intact;
-2. UI components/screens do not branch on demo mode or demo identity;
-3. registered Coach and Coach Demo load the same core product surfaces and navigation;
-4. registered Player and Player Demo load the same core product surfaces and navigation;
-5. equivalent feature states, including Team Store state, use the same component path;
-6. mobile parity remains safe at the current 390×844 acceptance viewport.
+This marker is a display/data-provenance contract, not an authorization boundary. Team authorization remains server-side.
+
+## Release gates
+
+Every product change must pass both parity layers before its phase can close:
+
+1. `Demo Paid Experience Parity` protects the shared application tree, equivalent feature behavior, backend-triggered parity contracts, and focused registered/demo journeys.
+2. `Demo Paid Runtime Parity` certifies matched Coach and Player data across the complete reachable mobile navigation matrices against the exact built production bundle, comparing structure, geometry, typography, spacing, navigation state, and bounded rendered-pixel drift.
+
+The gates require:
+
+- one shared production component tree;
+- matched data state when registered and demo rendering is compared;
+- Coach and Player navigation parity;
+- Coach Leaderboards parity;
+- Team Store and Team Branding coverage where reachable;
+- 390×844 mobile overflow safety;
+- production-bundle verification rather than a dev-only substitute;
+- paid remote leaderboard rows to survive self-scoped local-roster filtering only under the server-authoritative contract above.
 
 ## Phase rule
 
-A visual or functional phase is not certified unless its relevant registered and demo paths have both been exercised. Future phases must branch from the latest certified parity-preserving head, not bypass this gate.
+A visual or functional phase is not certified unless its relevant registered and demo paths have both been exercised. Future phases must branch from the latest certified parity-preserving head, not bypass these gates.
+
+If parity fails, fix the shared component, matched data state, backend provenance contract, or safe demo boundary. Never copy a visual or functional change into a separate demo implementation.
