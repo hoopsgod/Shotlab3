@@ -169,6 +169,8 @@ test('Coach demo and registered Coach use the same product surfaces and navigati
     await expect(demo.page.getByTestId('coach-command-center-full')).toBeVisible();
     expect(await surfaceSignature(demo.page.getByTestId('coach-command-center-full'))).toEqual(await surfaceSignature(paid.page.getByTestId('coach-command-center-full')));
     expect(await navLabels(demo.page)).toEqual(await navLabels(paid.page));
+    await paid.page.screenshot({ path: 'parity-evidence/coach-paid-home.png', fullPage: true });
+    await demo.page.screenshot({ path: 'parity-evidence/coach-demo-home.png', fullPage: true });
 
     for (const destination of ['Players', 'Schedule']) {
       await paid.page.getByTestId('mobile-navigation-dock').getByRole('button', { name: destination, exact: true }).click();
@@ -198,6 +200,8 @@ test('Player demo and registered Player use the same command center, navigation,
     await expect(demoCommand).toBeVisible({ timeout: 15_000 });
     expect(await surfaceSignature(demoCommand)).toEqual(await surfaceSignature(paidCommand));
     expect(await navLabels(demo.page)).toEqual(await navLabels(paid.page));
+    await paid.page.screenshot({ path: 'parity-evidence/player-paid-home.png', fullPage: true });
+    await demo.page.screenshot({ path: 'parity-evidence/player-demo-home.png', fullPage: true });
 
     for (const page of [paid.page, demo.page]) {
       const more = page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'More', exact: true });
@@ -213,6 +217,8 @@ test('Player demo and registered Player use the same command center, navigation,
     }
 
     expect(await surfaceSignature(demo.page.getByRole('dialog', { name: 'Team Store' }))).toEqual(await surfaceSignature(paid.page.getByRole('dialog', { name: 'Team Store' })));
+    await paid.page.screenshot({ path: 'parity-evidence/player-paid-team-store.png', fullPage: true });
+    await demo.page.screenshot({ path: 'parity-evidence/player-demo-team-store.png', fullPage: true });
   } finally {
     await paid.context.close();
     await demo.context.close();
