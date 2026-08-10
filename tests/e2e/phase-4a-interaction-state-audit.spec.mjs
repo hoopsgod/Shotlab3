@@ -66,7 +66,7 @@ async function navigateByKey(page, key) {
 }
 
 async function collectSurfaceAudit(page, role, key) {
-  const result = await page.evaluate(({ selector, role, key }) => {
+  const result = await page.evaluate(({ selector, role, key, minTarget }) => {
     const round = (value) => Math.round(value * 10) / 10;
     const describe = (node) => {
       const aria = node.getAttribute("aria-label") || "";
@@ -205,7 +205,7 @@ async function collectSurfaceAudit(page, role, key) {
 
       const scrollDependent = Boolean(offViewportHorizontally && horizontalScroller);
       const clippedHorizontally = Boolean(offViewportHorizontally && !horizontalScroller);
-      const sub44 = rect.width < 44 || rect.height < 44;
+      const sub44 = rect.width < minTarget || rect.height < minTarget;
       const criticallyTiny = rect.width < 32 || rect.height < 32;
       targets.push({
         tag: node.tagName.toLowerCase(),
@@ -241,7 +241,7 @@ async function collectSurfaceAudit(page, role, key) {
       scrollDependent: targets.filter((target) => target.scrollDependent),
       targets,
     };
-  }, { selector: INTERACTIVE_SELECTOR, role, key });
+  }, { selector: INTERACTIVE_SELECTOR, role, key, minTarget: MIN_FRACTIONAL_44_TARGET });
 
   fs.writeFileSync(path.join(OUTPUT_DIR, `${role}-${key}.json`), JSON.stringify(result, null, 2));
   await page.screenshot({ path: path.join(OUTPUT_DIR, `${role}-${key}.png`), animations: "disabled" });
