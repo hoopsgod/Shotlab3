@@ -1,6 +1,7 @@
 import ShotLabIcon from "./ShotLabIcon";
 import "./SecondaryPageSystem.css";
 import "./Phase2PremiumActionLayer.css";
+import "./Phase3CoachLeaderboardHierarchy.css";
 import "../styles/Phase2PremiumRosterLayer.css";
 const ICONS=[[/player|roster/,"team"],[/event|schedule|calendar/,"calendar"],[/career|profile/,"profile"],[/leader|rank/,"trophy"],[/store/,"store"],[/progress|analytic/,"chart"],[/coach|assignment/,"coach"],[/training|drill/,"training"]];
 const iconFor=value=>ICONS.find(([pattern])=>pattern.test(String(value).toLowerCase()))?.[1]||"target";
