@@ -78,9 +78,9 @@ test("player mobile dock makes Development Story primary with semantic native ic
   const teamStoreDialog = page.getByRole("dialog", { name: "Team Store" });
   await expect(teamStoreDialog).toBeVisible();
   await expect(teamStoreDialog.getByTestId("player-team-store-retail")).toBeVisible();
-  await expect(teamStoreDialog.getByTestId("player-team-store-hero")).toBeVisible();
-  await expect(teamStoreDialog.getByText("Your team. Your gear.", { exact: true })).toBeVisible();
-  await expect(teamStoreDialog.getByText("Your team store is not open yet", { exact: true })).toHaveCount(0);
+  await expect(teamStoreDialog.getByTestId("player-team-store-hero")).toHaveCount(0);
+  await expect(teamStoreDialog.getByText("Your team. Your gear.", { exact: true })).toHaveCount(0);
+  await expect(teamStoreDialog.getByText("Your team store is not open yet", { exact: true })).toBeVisible();
   await expect(teamStoreDialog.getByRole("button", { name: "SHOP TEAM STORE" })).toHaveCount(0);
   await teamStoreDialog.getByRole("button", { name: "Close team store" }).click();
 
