@@ -63,6 +63,10 @@ test('Phase 2D uses a quiet premium state lane with semantic icon, copy hierarch
   assert.match(css, /coach-leaderboard-operational-panel/);
   assert.match(css, /:has\(\[data-phase2-empty-kind="filter"\]\)/);
   assert.match(css, /section:has\(\[data-phase2-empty-state\]\)/);
+  assert.match(css, /coach-page-dashboard-leaderboards-evidence/);
+  assert.match(css, /#f7f8f2 !important/);
+  assert.match(css, /#26302a !important/);
+  assert.match(css, /#33402f !important/);
   assert.doesNotMatch(css, /border:\s*1px dashed/);
   assert.doesNotMatch(css, /isDemoAccount|isDemoMode|demoMode|setDemoMode/);
 });
