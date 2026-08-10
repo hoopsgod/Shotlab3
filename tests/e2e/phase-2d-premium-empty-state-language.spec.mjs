@@ -101,12 +101,31 @@ async function expectPhoneSafe(page) {
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
+async function centerClearOfMobileDock(page, locator) {
+  await locator.evaluate((node) => node.scrollIntoView({ block: 'center', inline: 'nearest' }));
+  await page.waitForTimeout(180);
+  const dock = page.getByTestId('mobile-navigation-dock');
+  const [targetBox, dockBox] = await Promise.all([locator.boundingBox(), dock.boundingBox()]);
+  expect(targetBox).not.toBeNull();
+  expect(dockBox).not.toBeNull();
+  expect(targetBox.y).toBeGreaterThanOrEqual(8);
+  expect(targetBox.y + targetBox.height).toBeLessThanOrEqual(dockBox.y - 8);
+}
+
 async function capture(page, name, locator) {
   fs.mkdirSync(outputDir, { recursive: true });
   await page.evaluate(() => document.fonts?.ready);
   await page.waitForTimeout(200);
   await expectPhoneSafe(page);
   await locator.screenshot({ path: path.join(outputDir, `${name}.png`), animations: 'disabled' });
+}
+
+async function captureViewport(page, name) {
+  fs.mkdirSync(outputDir, { recursive: true });
+  await page.evaluate(() => document.fonts?.ready);
+  await page.waitForTimeout(200);
+  await expectPhoneSafe(page);
+  await page.screenshot({ path: path.join(outputDir, `${name}.png`), animations: 'disabled', fullPage: false });
 }
 
 async function stateMetrics(locator) {
@@ -158,6 +177,7 @@ test('Leaderboard no-results state uses semantic filtered-view language without 
   await expect(state.getByText('Filtered view', { exact: true })).toBeVisible();
   await expect(state.getByText('No leaderboard players match the selected view.', { exact: true })).toBeVisible();
   await expect(panel.getByTestId('coach-leaderboard-pulse')).toBeHidden();
+  await centerClearOfMobileDock(page, state);
   const metrics = await stateMetrics(state);
 
   expect(metrics.display).toBe('grid');
@@ -179,7 +199,7 @@ test('Leaderboard no-results state uses semantic filtered-view language without 
   expect(metrics.railWidth).toBeGreaterThanOrEqual(2);
 
   await capture(page, '01-leaderboard-empty-state', state);
-  await capture(page, '03-leaderboard-panel-context', panel);
+  await captureViewport(page, '03-leaderboard-panel-context');
 });
 
 test('Player Intelligence no-activity state keeps nonredundant hierarchy and dark material continuity', async ({ page }) => {
