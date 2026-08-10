@@ -24,7 +24,7 @@ test('Phase 2D assigns meaning to operational states instead of treating every e
   const source = read('src/components/CoachDashboardPhase2.jsx');
 
   assert.match(source, /label="Activity status" kind="activity"/);
-  assert.match(source, /label="Attendance status" kind="attendance"/);
+  assert.match(source, /label="Response status" kind="attendance"/);
   assert.match(source, /label="Follow-up cleared" tone="positive" kind="complete"/);
   assert.match(source, /label="Filtered view" kind="filter"/);
   assert.match(source, /label="Season history" kind="history"/);
