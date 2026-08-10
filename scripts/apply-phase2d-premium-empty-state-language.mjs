@@ -14,6 +14,19 @@ const replaceOnce = (before, after, label) => {
   next = next.replace(before, after);
 };
 
+const replaceFirstKnown = (pairs, label) => {
+  for (const [, after] of pairs) {
+    if (next.includes(after)) return;
+  }
+  for (const [before, after] of pairs) {
+    if (next.includes(before)) {
+      next = next.replace(before, after);
+      return;
+    }
+  }
+  throw new Error(`[phase2d-empty-state-language] ${label} anchor was not found in any supported enhancer state.`);
+};
+
 const cssImport = 'import "./Phase2PremiumEmptyStateLanguage.css";';
 if (!next.includes(cssImport)) {
   const anchor = 'import styles from "./CoachDashboardPhase2.module.css";';
@@ -54,11 +67,16 @@ replaceOnce(
   '<EmptyState label="Activity status" kind="activity">No player activity has been recorded yet.</EmptyState>',
   'player activity state',
 );
-replaceOnce(
-  '<EmptyState>No confirmed players yet.</EmptyState>',
-  '<EmptyState label="Attendance status" kind="attendance">No confirmed players yet.</EmptyState>',
-  'confirmed attendance state',
-);
+replaceFirstKnown([
+  [
+    '<EmptyState>No confirmed players yet.</EmptyState>',
+    '<EmptyState label="Response status" kind="attendance">No confirmed players yet.</EmptyState>',
+  ],
+  [
+    "<EmptyState>No rostered players have RSVP'd yet.</EmptyState>",
+    "<EmptyState label=\"Response status\" kind=\"attendance\">No rostered players have RSVP'd yet.</EmptyState>",
+  ],
+], 'event response state');
 replaceOnce(
   '<EmptyState>Every rostered player has responded.</EmptyState>',
   '<EmptyState label="Follow-up cleared" tone="positive" kind="complete">Every rostered player has responded.</EmptyState>',
@@ -104,6 +122,7 @@ for (const required of [
   'data-phase2-empty-state',
   'phase2-empty-state-label',
   'phase2-empty-state-message',
+  'label="Response status" kind="attendance"',
   'label="Follow-up cleared" tone="positive" kind="complete"',
   'No team activity matches the selected view.',
 ]) {
