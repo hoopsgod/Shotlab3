@@ -25,7 +25,8 @@
   -webkit-text-fill-color: #71851f !important;
 }
 
-[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__title {
+[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__title,
+[data-testid="coach-page-dashboard-leaderboards"] .secondaryPageIntro__title.appHeaderTitle {
   color: #171a18 !important;
   -webkit-text-fill-color: #171a18 !important;
   text-shadow: none !important;
@@ -131,5 +132,34 @@
 @media (max-width: 760px) {
   .page.pageShell:has(> [data-testid="coach-page-dashboard-leaderboards"]) {
     background: #f7f8f2 !important;
+  }
+
+  [data-testid="coach-page-dashboard-leaderboards-metric-strip"] {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0 !important;
+    margin-inline: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    scroll-snap-type: none !important;
+  }
+
+  [data-testid="coach-page-dashboard-leaderboards-metric-strip"] [data-premium-metric] {
+    min-width: 0 !important;
+    min-height: 116px !important;
+    flex: none !important;
+    scroll-snap-align: none !important;
+  }
+
+  [data-testid="coach-page-dashboard-leaderboards-metric-strip"] [data-premium-metric] + [data-premium-metric] {
+    border-left: 0 !important;
+  }
+
+  [data-testid="coach-page-dashboard-leaderboards-metric-strip"] [data-premium-metric]:nth-child(even) {
+    border-left: 1px solid rgba(23, 26, 24, .10) !important;
+  }
+
+  [data-testid="coach-page-dashboard-leaderboards-metric-strip"] [data-premium-metric]:nth-child(n + 3) {
+    border-top: 1px solid rgba(23, 26, 24, .10) !important;
   }
 }
