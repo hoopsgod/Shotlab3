@@ -2,7 +2,8 @@
  * Preserve the existing pill presentation while raising the physical tap target
  * to the premium mobile baseline across the single shared DashboardReturnButton.
  * A 44.5px floor absorbs fractional Chromium layout underflow while remaining
- * visually equivalent to the intended 44px mobile target.
+ * visually equivalent to the intended 44px mobile target. This comment-only
+ * revision retriggers the deployment pipeline after an infrastructure failure.
  */
 button.shotlab-dashboard-return-button {
   min-height: 44.5px !important;
