@@ -1,13 +1,16 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { isDeepStrictEqual } from "node:util";
 import { PNG } from "pngjs";
 
 const ROOT = path.resolve(process.cwd(), "artifacts/demo-paid-runtime-parity");
 const ROLES = ["coach", "player"];
 const COLOR_FIELDS = new Set(["color", "backgroundColor", "borderTopColor"]);
-const MAX_DIFFERENT_PIXEL_RATIO = 0.002;
-const MAX_MEAN_CHANNEL_DELTA = 0.1;
+const MAX_DIFFERENT_PIXEL_RATIO = 0.0015;
+const MAX_MEAN_CHANNEL_DELTA = 0.05;
+const MAX_COLOR_SERIALIZATION_PIXEL_RATIO = 0.00005;
+const MAX_COLOR_SERIALIZATION_MEAN_DELTA = 0.005;
 
 function normalizeFingerprint(value) {
   if (Array.isArray(value)) return value.map((entry) => normalizeFingerprint(entry));
@@ -56,14 +59,6 @@ function compareRenderedPixels(demoPath, registeredPath, label) {
 
   const differentPixelRatio = differentPixels / pixelCount;
   const meanChannelDelta = totalChannelDelta / (pixelCount * 4);
-  assert.ok(
-    differentPixelRatio <= MAX_DIFFERENT_PIXEL_RATIO,
-    `${label} rendered pixel drift is ${(differentPixelRatio * 100).toFixed(4)}%, above ${(MAX_DIFFERENT_PIXEL_RATIO * 100).toFixed(2)}%`,
-  );
-  assert.ok(
-    meanChannelDelta <= MAX_MEAN_CHANNEL_DELTA,
-    `${label} mean rendered channel drift is ${meanChannelDelta.toFixed(4)}, above ${MAX_MEAN_CHANNEL_DELTA}`,
-  );
   return { differentPixels, pixelCount, differentPixelRatio, meanChannelDelta };
 }
 
@@ -88,26 +83,41 @@ for (const role of ROLES) {
     const demoPngPath = path.join(ROOT, role, "demo", `${route}.png`);
     const registeredPngPath = path.join(ROOT, role, "registered", `${route}.png`);
 
-    const demoFingerprint = normalizeFingerprint(readJson(demoJsonPath));
-    const registeredFingerprint = normalizeFingerprint(readJson(registeredJsonPath));
+    const demoRawFingerprint = readJson(demoJsonPath);
+    const registeredRawFingerprint = readJson(registeredJsonPath);
+    const rawFingerprintExact = isDeepStrictEqual(registeredRawFingerprint, demoRawFingerprint);
+    const demoFingerprint = normalizeFingerprint(demoRawFingerprint);
+    const registeredFingerprint = normalizeFingerprint(registeredRawFingerprint);
     assert.deepEqual(
       registeredFingerprint,
       demoFingerprint,
       `${role}/${route} structure, geometry, typography, spacing, or state differs between demo and registered`,
     );
 
-    // Chromium can serialize equivalent colors differently and can rasterize a
-    // few antialiased/animated edge pixels differently between isolated browser
-    // contexts. Bound the actual paint drift tightly instead of requiring PNG
-    // byte identity, while the computed UI contract above remains exact.
+    // Chromium can serialize an equivalent rendered color as rgb() in one
+    // isolated context and oklab() in another. If raw computed styles differ,
+    // require essentially identical paint so a real color change cannot hide
+    // behind that serialization exception. When raw computed UI is already
+    // exact, allow only the narrowly observed antialias/pseudo-animation noise.
     const rendered = compareRenderedPixels(demoPngPath, registeredPngPath, `${role}/${route}`);
+    const pixelRatioLimit = rawFingerprintExact ? MAX_DIFFERENT_PIXEL_RATIO : MAX_COLOR_SERIALIZATION_PIXEL_RATIO;
+    const meanDeltaLimit = rawFingerprintExact ? MAX_MEAN_CHANNEL_DELTA : MAX_COLOR_SERIALIZATION_MEAN_DELTA;
+    assert.ok(
+      rendered.differentPixelRatio <= pixelRatioLimit,
+      `${role}/${route} rendered pixel drift is ${(rendered.differentPixelRatio * 100).toFixed(4)}%, above ${(pixelRatioLimit * 100).toFixed(3)}%`,
+    );
+    assert.ok(
+      rendered.meanChannelDelta <= meanDeltaLimit,
+      `${role}/${route} mean rendered channel drift is ${rendered.meanChannelDelta.toFixed(4)}, above ${meanDeltaLimit}`,
+    );
+
     roleDifferentPixels += rendered.differentPixels;
     rolePixelCount += rendered.pixelCount;
   }
 
   console.log(
     `Runtime parity verified for ${role}: ${demoJsonRoutes.length} destinations; exact non-color computed UI; `
-      + `${roleDifferentPixels}/${rolePixelCount} rendered pixels differ within bounded antialias/motion tolerance.`,
+      + `${roleDifferentPixels}/${rolePixelCount} rendered pixels differ within bounded browser-raster tolerance.`,
   );
 }
 
