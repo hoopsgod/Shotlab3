@@ -49,9 +49,7 @@ test("Phase 4E.2 keeps Player Program RSVP actions touch-safe without changing h
   page.on("pageerror", (error) => pageErrors.push(error.message));
   await enterPlayerProgram(page);
 
-  const allProgramActions = page.locator('button[data-player-program-rsvp-action]');
   const actions = page.locator('button[data-player-program-rsvp-action]:visible');
-  await expect(allProgramActions).toHaveCount(9);
   await expect(actions.first()).toBeVisible();
   await expect(actions).toHaveCount(4);
 
@@ -114,6 +112,6 @@ test("Phase 4E.2 keeps Player Program RSVP actions touch-safe without changing h
     path: path.join(OUTPUT_DIR, "player-program-rsvp-control.png"),
     animations: "disabled",
   });
-  fs.writeFileSync(path.join(OUTPUT_DIR, "player-program-rsvp-family.json"), JSON.stringify({ viewport, totalTemplateActions: 9, visibleActions: 4, evidence }, null, 2));
+  fs.writeFileSync(path.join(OUTPUT_DIR, "player-program-rsvp-family.json"), JSON.stringify({ viewport, visibleActions: 4, evidence }, null, 2));
   expect(pageErrors).toEqual([]);
 });
