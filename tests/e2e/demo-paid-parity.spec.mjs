@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import DEFAULT_BRANDING from '../../src/theme/brandingDefaults.js';
 import { buildDemoDataBundle } from '../../src/lib/demoData.js';
+import { calculateLeaderboardFromShotLogs } from '../../src/lib/leaderboardService.js';
 
 const PAID_SUPABASE_ORIGIN = 'https://parity.supabase.co';
 const TEAM_ID = 'team-parity-2026';
@@ -53,6 +54,30 @@ function replacePrimaryPlayerIdentity(bundle, identity) {
   };
 }
 
+function toApiPlayer(row = {}) {
+  return {
+    id: row.id,
+    email: row.email,
+    name: row.name,
+    role: row.role,
+    team_id: row.teamId || row.team_id || null,
+    hide_from_leaderboards: row.hideFromLeaderboards === true || row.hide_from_leaderboards === true,
+    created_at: row.createdAt ?? row.created_at ?? null,
+  };
+}
+
+function toApiProfile(row = {}) {
+  return {
+    id: row.id,
+    team_id: row.teamId || row.team_id || TEAM_ID,
+    user_id: row.userId || row.user_id || null,
+    first_name: row.firstName || row.first_name || '',
+    last_name: row.lastName || row.last_name || '',
+    jersey_number: row.jerseyNumber || row.jersey_number || '',
+    created_at: row.createdAt ?? row.created_at ?? null,
+  };
+}
+
 function paidSeed(role) {
   const current = PAID_IDENTITIES[role];
   const coach = PAID_IDENTITIES.coach;
@@ -70,9 +95,35 @@ function paidSeed(role) {
   let bundle = buildDemoDataBundle({ teamId: TEAM_ID, coachEmail: coach.email, team });
   if (role === 'player') bundle = replacePrimaryPlayerIdentity(bundle, current);
 
+  const readablePlayers = role === 'coach'
+    ? bundle.players
+    : bundle.players.filter((row) => String(row.email || '').toLowerCase() === current.email);
+  const readableProfiles = role === 'coach'
+    ? bundle.playerProfiles
+    : bundle.playerProfiles.filter((row) => String(row.userId || row.user_id || '').toLowerCase() === current.email);
+  const remoteLeaderboard = calculateLeaderboardFromShotLogs({
+    shotLogs: bundle.shotLogs,
+    teamId: TEAM_ID,
+    playerContext: {
+      players: bundle.players,
+      profiles: bundle.playerProfiles,
+      scope: 'players',
+    },
+  }).slice(0, 10).map((row) => ({
+    rank: row.rank,
+    player_display_name: row.player_display_name,
+    total_home_shots: row.total_home_shots,
+    leaderboard_source: 'remote',
+  }));
+
   return {
+    role,
     user: { id: current.id, email: current.email, aud: 'authenticated', role: 'authenticated' },
     team,
+    bundle,
+    apiPlayers: readablePlayers.map(toApiPlayer),
+    apiProfiles: readableProfiles.map(toApiProfile),
+    remoteLeaderboard,
     storage: {
       'sl:supabase-session': {
         access_token: `paid-${role}-token`,
@@ -104,8 +155,19 @@ function paidSeed(role) {
 
 async function installSharedRoutes(target, paidSeedState = null) {
   const paidUser = paidSeedState?.user || null;
+  const remoteLeaderboard = paidSeedState?.remoteLeaderboard || [];
   await target.route('**/v1/season-archives', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, archives: [] }) }));
-  await target.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ leaderboard: [] }) }));
+  await target.route('**/v1/leaderboards/home-shots**', (route) => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({
+      team_id: TEAM_ID,
+      limit: 10,
+      scope: 'players',
+      count: remoteLeaderboard.length,
+      leaderboard: remoteLeaderboard,
+    }),
+  }));
   await target.route('**/v1/coach/players/provision**', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ ok: true, invitations: [] }) }));
   await target.route(`${PAID_SUPABASE_ORIGIN}/auth/v1/user`, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(paidUser || {}) }));
   await target.route(`${PAID_SUPABASE_ORIGIN}/rest/v1/**`, (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }));
@@ -121,6 +183,16 @@ async function installSharedRoutes(target, paidSeedState = null) {
       hide_from_leaderboards: role === 'coach',
     } : null;
 
+    await target.route('**/v1/players**', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ ok: true, storage_mode: 'signed_api', players: paidSeedState.apiPlayers }),
+    }));
+    await target.route('**/v1/player-profiles**', (route) => route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ ok: true, storage_mode: 'signed_api', profiles: paidSeedState.apiProfiles }),
+    }));
     await target.route('**/v1/legacy-auth/restore', (route) => route.fulfill({
       status: legacyProfile ? 200 : 404,
       contentType: 'application/json',
@@ -235,6 +307,13 @@ async function selectNavigationKey(page, key) {
     await expect(item).toBeVisible();
     await item.click();
   }
+
+  if (key === 'branding') {
+    await expect(page.getByTestId('coach-branding-workspace')).toBeVisible({ timeout: 10_000 });
+    await stabilizePage(page);
+    return;
+  }
+
   await expectMoreSheetClosed(page);
   await stabilizePage(page);
 }
