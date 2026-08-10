@@ -68,11 +68,24 @@ function readSeedRows(storage, key) {
   }
 }
 
+function readSeedTeam(storage) {
+  const teams = readSeedRows(storage, "sl:teams");
+  const players = readSeedRows(storage, "sl:players");
+  const team = teams[0] || {};
+  const playerTeamId = players.find((row) => row?.teamId || row?.team_id)?.teamId
+    || players.find((row) => row?.teamId || row?.team_id)?.team_id;
+  return {
+    id: String(team?.id || team?.teamId || team?.team_id || playerTeamId || TEAM_ID),
+    name: String(team?.name || team?.teamName || "Demo Titans"),
+    joinCode: String(team?.joinCode || team?.join_code || "DEMO26"),
+  };
+}
+
 async function fulfillJson(route, body, status = 200) {
   await route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
 }
 
-async function installSeededPersistenceRoutes(page, storage) {
+async function installSeededPersistenceRoutes(page, storage, activeTeamId) {
   if (!storage) return;
 
   const rows = {
@@ -119,7 +132,7 @@ async function installSeededPersistenceRoutes(page, storage) {
       await fulfillJson(route, {
         ok: true,
         storage_mode: "parity_seed",
-        team_id: TEAM_ID,
+        team_id: activeTeamId,
         can_write_sessions: true,
         sessions: rows.scSessions,
         rsvps: rows.scRsvps,
@@ -132,7 +145,7 @@ async function installSeededPersistenceRoutes(page, storage) {
     await fulfillJson(route, {
       ok: true,
       storage_mode: "parity_seed",
-      team_id: TEAM_ID,
+      team_id: activeTeamId,
       resource: posted?.resource || "",
       rows: Array.isArray(posted?.rows) ? posted.rows : [],
       deleted_count: 0,
@@ -142,11 +155,13 @@ async function installSeededPersistenceRoutes(page, storage) {
 
 async function installSafeRoutes(page, role, remoteStorage = null) {
   const registered = REGISTERED_IDENTITIES[role];
+  const seededTeam = readSeedTeam(remoteStorage);
+  const activeTeamId = seededTeam.id;
   const profile = {
     email: registered.email,
     name: registered.name,
     role: registered.role,
-    team_id: TEAM_ID,
+    team_id: activeTeamId,
     hide_from_leaderboards: role === "coach",
   };
 
@@ -159,7 +174,7 @@ async function installSafeRoutes(page, role, remoteStorage = null) {
   await page.route("**/v1/teams/restore-context", async (route) => {
     await fulfillJson(route, {
       ok: true,
-      team: { id: TEAM_ID, name: "Demo Titans", joinCode: "DEMO26" },
+      team: { id: activeTeamId, name: seededTeam.name, joinCode: seededTeam.joinCode },
     });
   });
   await page.route("**/v1/season-archives", async (route) => {
@@ -169,7 +184,7 @@ async function installSafeRoutes(page, role, remoteStorage = null) {
     await fulfillJson(route, { ok: true, invitations: [] });
   });
 
-  await installSeededPersistenceRoutes(page, remoteStorage);
+  await installSeededPersistenceRoutes(page, remoteStorage, activeTeamId);
 
   // Any remaining direct Supabase request is made healthy and non-destructive.
   // The app's signed persistence bridge above is the authoritative path exercised
