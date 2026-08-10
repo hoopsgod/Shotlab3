@@ -1,36 +1,41 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 
+const TARGET = 'src/components/CoachDashboardPhase2.jsx';
 const read = (path) => readFileSync(path, 'utf8');
 
-test('Phase 2D empty-state enhancer is idempotent and wired into dev/build preparation', () => {
-  execFileSync(process.execPath, ['scripts/apply-phase2d-premium-empty-state-language.mjs'], { stdio: 'pipe' });
-  execFileSync(process.execPath, ['scripts/apply-phase2d-premium-empty-state-language.mjs'], { stdio: 'pipe' });
+test('Phase 2D enhancer is idempotent, semantic, and leaves the source tree clean for earlier build enhancers', () => {
+  const original = read(TARGET);
 
-  const source = read('src/components/CoachDashboardPhase2.jsx');
-  const pkg = JSON.parse(read('package.json'));
+  try {
+    execFileSync(process.execPath, ['scripts/apply-phase2d-premium-empty-state-language.mjs'], { stdio: 'pipe' });
+    execFileSync(process.execPath, ['scripts/apply-phase2d-premium-empty-state-language.mjs'], { stdio: 'pipe' });
 
-  assert.match(source, /import "\.\/Phase2PremiumEmptyStateLanguage\.css";/);
-  assert.match(source, /data-phase2-empty-state data-phase2-empty-tone=\{tone\} data-phase2-empty-kind=\{kind\}/);
-  assert.match(source, /phase2-empty-state-label/);
-  assert.match(source, /phase2-empty-state-message/);
-  assert.match(pkg.scripts.dev, /apply-phase2d-premium-empty-state-language\.mjs/);
-  assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase2d-premium-empty-state-language\.mjs/);
-});
+    const source = read(TARGET);
+    const pkg = JSON.parse(read('package.json'));
 
-test('Phase 2D assigns meaning to operational states instead of treating every empty condition alike', () => {
-  const source = read('src/components/CoachDashboardPhase2.jsx');
+    assert.match(source, /import "\.\/Phase2PremiumEmptyStateLanguage\.css";/);
+    assert.match(source, /data-phase2-empty-state data-phase2-empty-tone=\{tone\} data-phase2-empty-kind=\{kind\}/);
+    assert.match(source, /phase2-empty-state-label/);
+    assert.match(source, /phase2-empty-state-message/);
+    assert.match(pkg.scripts.dev, /apply-phase2d-premium-empty-state-language\.mjs/);
+    assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase2d-premium-empty-state-language\.mjs/);
 
-  assert.match(source, /label="Activity status" kind="activity"/);
-  assert.match(source, /label="Response status" kind="attendance"/);
-  assert.match(source, /label="Follow-up cleared" tone="positive" kind="complete"/);
-  assert.match(source, /label="Filtered view" kind="filter"/);
-  assert.match(source, /label="Season history" kind="history"/);
-  assert.match(source, /label="Filtered activity" kind="filter"/);
-  assert.match(source, /No team activity matches the selected view\./);
-  assert.match(source, /rows\.length \? \(/);
+    assert.match(source, /label="Activity status" kind="activity"/);
+    assert.match(source, /label="Response status" kind="attendance"/);
+    assert.match(source, /label="Follow-up cleared" tone="positive" kind="complete"/);
+    assert.match(source, /label="Filtered view" kind="filter"/);
+    assert.match(source, /label="Season history" kind="history"/);
+    assert.match(source, /label="Filtered activity" kind="filter"/);
+    assert.match(source, /No team activity matches the selected view\./);
+    assert.match(source, /rows\.length \? \(/);
+  } finally {
+    writeFileSync(TARGET, original);
+  }
+
+  assert.equal(read(TARGET), original);
 });
 
 test('Phase 2D uses a quiet premium state lane with semantic icon and copy hierarchy', () => {
