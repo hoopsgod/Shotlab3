@@ -54,7 +54,22 @@ function buildRegisteredStorage(demoStorage, role) {
       next[key] = rawValue;
       continue;
     }
-    next[key] = JSON.stringify(replaceIdentity(parsed, demoIdentity.email, registeredIdentity.email));
+    let registeredValue = replaceIdentity(parsed, demoIdentity.email, registeredIdentity.email);
+    // Demo shot logs may be intentionally marked as local/pending because demo
+    // persistence never writes remotely. A healthy registered session receives
+    // the same basketball rows as remote-saved data; normalize only those
+    // transport fields so persistence safety does not masquerade as UI drift.
+    if (key === "sl:shotlogs" && Array.isArray(registeredValue)) {
+      registeredValue = registeredValue.map((row) => ({
+        ...row,
+        demo: false,
+        syncState: "remote_saved",
+        syncSource: "remote",
+        syncError: "",
+        syncDiagnostic: null,
+      }));
+    }
+    next[key] = JSON.stringify(registeredValue);
   }
   return next;
 }
