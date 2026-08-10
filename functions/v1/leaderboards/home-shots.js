@@ -107,6 +107,7 @@ export async function onRequestGet(context) {
       rank: row.rank,
       player_display_name: row.player_display_name,
       total_home_shots: row.total_home_shots,
+      leaderboard_source: "remote",
     }));
 
     const event = leaderboard.length === 0 ? LEADERBOARD_EVENTS.QUERY_EMPTY : LEADERBOARD_EVENTS.QUERY_SUCCESS;
