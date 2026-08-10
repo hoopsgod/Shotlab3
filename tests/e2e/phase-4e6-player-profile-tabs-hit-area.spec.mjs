@@ -61,7 +61,9 @@ test("Phase 4E.6 keeps the four Player Profile analytics tabs touch-safe", async
     const style = await tab.evaluate((node) => {
       const css = getComputedStyle(node);
       return {
+        height: parseFloat(css.height),
         minHeight: parseFloat(css.minHeight),
+        maxHeight: css.maxHeight,
         fontSize: parseFloat(css.fontSize),
         fontWeight: css.fontWeight,
         display: css.display,
@@ -70,11 +72,12 @@ test("Phase 4E.6 keeps the four Player Profile analytics tabs touch-safe", async
         touchAction: css.touchAction,
       };
     });
-    expect(box?.height || 0).toBeGreaterThanOrEqual(43.5);
-    expect(box?.width || 0).toBeGreaterThanOrEqual(44);
-    expect(style.minHeight).toBeGreaterThanOrEqual(44);
-    expect(style.fontSize).toBe(9);
-    expect(style.fontWeight).toBe("900");
+    expect(box?.height || 0, `${LABELS[index]} physical height`).toBeGreaterThanOrEqual(43.5);
+    expect(box?.width || 0, `${LABELS[index]} physical width`).toBeGreaterThanOrEqual(44);
+    expect(style.minHeight, `${LABELS[index]} CSS minimum`).toBeGreaterThanOrEqual(44);
+    expect(style.fontSize, `${LABELS[index]} final Phase 3D typography`).toBe(10);
+    expect(Number(style.fontWeight), `${LABELS[index]} final Phase 3D weight`).toBeGreaterThanOrEqual(700);
+    expect(Number(style.fontWeight), `${LABELS[index]} final Phase 3D weight`).toBeLessThanOrEqual(800);
     expect(style.display).toBe("flex");
     expect(style.flexDirection).toBe("row");
     expect(style.boxSizing).toBe("border-box");
