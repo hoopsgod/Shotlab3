@@ -64,7 +64,7 @@ if (!next.includes(semanticEmptyState)) {
 
 replaceOnce(
   '<EmptyState>No player activity has been recorded yet.</EmptyState>',
-  '<EmptyState label="Activity status" kind="activity">No player activity has been recorded yet.</EmptyState>',
+  '<EmptyState label="Activity status" kind="activity">No player activity recorded yet.</EmptyState>',
   'player activity state',
 );
 replaceFirstKnown([
@@ -122,6 +122,7 @@ for (const required of [
   'data-phase2-empty-state',
   'phase2-empty-state-label',
   'phase2-empty-state-message',
+  'label="Activity status" kind="activity">No player activity recorded yet.',
   'label="Response status" kind="attendance"',
   'label="Follow-up cleared" tone="positive" kind="complete"',
   'No team activity matches the selected view.',
