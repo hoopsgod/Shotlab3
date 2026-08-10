@@ -117,7 +117,7 @@ test('Team Store source and build enhancer preserve the same player state for de
 
   // The enhancer intentionally names forbidden demo artifacts in its detector regex.
   // Reject actual generated/rendered branch artifacts rather than the guard that detects them.
-  assert.match(teamStoreEnhancer, /const forbiddenDemoUi\s*=\s*\/[^\n]+isDemoPlayerPreview[^\n]+\//);
+  assert.match(teamStoreEnhancer, /const forbiddenDemoUi\s*=\s*\/[^\n]*isDemoPlayerPreview[^\n]*\//);
   assert.doesNotMatch(teamStoreEnhancer, /:\s*isDemoPlayerPreview\s*\?/);
   assert.doesNotMatch(teamStoreEnhancer, /className="[^"]*\bis-demo\b[^"]*"/);
   assert.doesNotMatch(teamStoreEnhancer, /data-testid="player-team-store-demo-preview"/);
