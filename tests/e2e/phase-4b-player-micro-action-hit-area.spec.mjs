@@ -99,7 +99,11 @@ test("Player Train SHOT STATS stays visually quiet while becoming touch-safe", a
   expect(viewport.bodyWidth - viewport.innerWidth).toBeLessThanOrEqual(1);
 
   fs.writeFileSync(path.join(OUTPUT_DIR, "player-train-shot-stats.json"), JSON.stringify({ box, presentation, viewport }, null, 2));
+
+  await action.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(60);
   await page.screenshot({ path: path.join(OUTPUT_DIR, "player-train-shot-stats.png"), animations: "disabled" });
+  await action.screenshot({ path: path.join(OUTPUT_DIR, "player-train-shot-stats-control.png"), animations: "disabled" });
 
   await action.click();
   await expect(page.getByRole("button", { name: /BACK TO DRILLS/i })).toBeVisible();
