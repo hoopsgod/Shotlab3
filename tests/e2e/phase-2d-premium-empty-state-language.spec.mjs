@@ -142,9 +142,8 @@ test('Leaderboard no-results state uses the quiet Phase 2D operational language'
   await expect(panel).toBeVisible({ timeout: 20_000 });
 
   await panel.getByRole('searchbox').fill('NO_MATCH_PHASE_2D_999');
-  const message = panel.getByText('No leaderboard players match the selected view.', { exact: true });
-  await expect(message).toBeVisible();
-  const state = message.locator('xpath=..');
+  const state = panel.getByText('No leaderboard players match the selected view.', { exact: true });
+  await expect(state).toBeVisible();
   const metrics = await stateMetrics(state);
 
   expect(metrics.display).toBe('grid');
@@ -162,20 +161,27 @@ test('Leaderboard no-results state uses the quiet Phase 2D operational language'
   await capture(page, '01-leaderboard-empty-state', state);
 });
 
-test('Event Intelligence completed-response state keeps the same premium language on the dark drawer', async ({ page }) => {
+test('Player Intelligence no-activity state keeps the same premium language on the dark drawer', async ({ page }) => {
   await enterCoach(page);
-  await page.getByRole('button', { name: /Open Coach Inbox/i }).click();
-  const inbox = page.getByRole('dialog', { name: 'Coach Inbox' });
-  await inbox.getByRole('button', { name: /Event readiness Team Practice/i }).click();
+  await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Players', exact: true }).click();
+  await expect(page.getByTestId('coach-players-interactive-dashboard')).toBeVisible({ timeout: 20_000 });
 
-  const drawer = page.getByTestId('coach-event-intelligence-drawer');
+  const roster = page.locator('#coach-roster-operations');
+  await expect(roster).toBeVisible({ timeout: 20_000 });
+  const newPlayerName = roster.getByText('New Player', { exact: true }).first();
+  await expect(newPlayerName).toBeVisible({ timeout: 10_000 });
+  const newPlayerRow = newPlayerName.locator('xpath=ancestor::*[@role="button"][1]');
+  await expect(newPlayerRow).toBeVisible();
+  await newPlayerRow.click({ position: { x: 18, y: 18 } });
+
+  const drawer = page.getByTestId('coach-player-intelligence-drawer');
   await expect(drawer).toBeVisible({ timeout: 20_000 });
-  const message = drawer.getByText('Every rostered player has responded.', { exact: true });
-  await expect(message).toBeVisible({ timeout: 10_000 });
-  const state = message.locator('xpath=..');
+  const state = drawer.getByText('No player activity has been recorded yet.', { exact: true });
+  await expect(state).toBeVisible({ timeout: 10_000 });
   const metrics = await stateMetrics(state);
 
   expect(metrics.display).toBe('grid');
+  expect(metrics.gridColumns).toContain('36px');
   expect(metrics.borderTopStyle).toBe('solid');
   expect(metrics.borderLeftStyle).toBe('none');
   expect(metrics.radius).toBe(0);
@@ -183,8 +189,9 @@ test('Event Intelligence completed-response state keeps the same premium languag
   expect(metrics.height).toBeGreaterThanOrEqual(88);
   expect(metrics.beforeMask).not.toBe('none');
   expect(metrics.beforeMask).not.toBe('');
+  expect(metrics.beforeWidth).toBeGreaterThanOrEqual(35);
 
   const color = await state.evaluate((node) => getComputedStyle(node).color);
   expect(color).toBe('rgb(184, 195, 200)');
-  await capture(page, '02-event-drawer-complete-state', state);
+  await capture(page, '02-player-drawer-no-activity-state', state);
 });
