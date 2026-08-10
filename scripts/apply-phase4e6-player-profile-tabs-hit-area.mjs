@@ -29,19 +29,20 @@ if (sectionMarkerCount !== 1) {
 }
 
 // This script runs after minify-visual-authority-css.mjs in production, so validate
-// the durable Phase 3D geometry contract rather than brittle selector whitespace.
+// semantic tokens rather than formatting that the minifier is expected to rewrite.
 if (!phase3d.includes('min-height:42px!important') || !phase3d.includes('data-workspace-tab="profile"')) {
   throw new Error('Phase 4E.6 expected the minified Phase 3D 42px Profile segmented-control authority before applying its bounded override.');
 }
 
+const compactAuthority = phase4e6.replace(/\s+/g, '');
 for (const required of [
-  'div[data-testid="player-analytics-sections"]',
-  'button[data-analytics-section]',
-  'min-height: 44px !important;',
-  'box-sizing: border-box !important;',
-  'touch-action: manipulation !important;',
+  'player-analytics-sections',
+  'data-analytics-section',
+  'min-height:44px!important',
+  'box-sizing:border-box!important',
+  'touch-action:manipulation!important',
 ]) {
-  if (!phase4e6.includes(required)) {
+  if (!compactAuthority.includes(required)) {
     throw new Error(`Phase 4E.6 final geometry authority missing: ${required}`);
   }
 }
