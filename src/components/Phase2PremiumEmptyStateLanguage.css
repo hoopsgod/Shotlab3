@@ -144,6 +144,33 @@
   color: #c8ff1a;
 }
 
+/* Filtered leaderboard results should not inherit the Phase 3L competitive pulse.
+   The pulse is derived from the already-filtered row set, so a zero-match search
+   would otherwise imply that the team has no ranking history at all. */
+[data-testid="coach-leaderboard-operational-panel"]:has([data-phase2-empty-kind="filter"]) .coachLeaderboardPulse {
+  display: none !important;
+}
+
+/* Empty states inside portaled intelligence drawers must own the surrounding
+   section material as well as the lane itself. This prevents a light section
+   gutter from breaking the dark drawer surface. */
+[data-testid="coach-player-intelligence-drawer"] section:has([data-phase2-empty-state]),
+[data-testid="coach-event-intelligence-drawer"] section:has([data-phase2-empty-state]) {
+  color: #f7fafb !important;
+  border-color: rgba(226, 234, 238, .11) !important;
+  background:
+    linear-gradient(150deg, rgba(255, 255, 255, .025), transparent 48%),
+    #101513 !important;
+  box-shadow: none !important;
+}
+
+[data-testid="coach-player-intelligence-drawer"] section:has([data-phase2-empty-state]) > div,
+[data-testid="coach-event-intelligence-drawer"] section:has([data-phase2-empty-state]) > div,
+[data-testid="coach-player-intelligence-drawer"] section:has([data-phase2-empty-state]) [class*="sectionBody"],
+[data-testid="coach-event-intelligence-drawer"] section:has([data-phase2-empty-state]) [class*="sectionBody"] {
+  background-color: transparent !important;
+}
+
 @media (max-width: 620px) {
   [data-phase2-empty-state] {
     min-height: 88px;
