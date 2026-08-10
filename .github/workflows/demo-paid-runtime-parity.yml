@@ -1,0 +1,85 @@
+name: Demo Paid Runtime Parity
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: demo-paid-runtime-parity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  runtime-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify shared UI source contract
+        run: node --test tests/demo-visual-parity-contract.test.mjs
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build exact production bundle
+        run: npm run build
+
+      - name: Start exact built bundle
+        run: |
+          npm run preview:agent > /tmp/demo-paid-runtime-parity-preview.log 2>&1 &
+          for attempt in {1..40}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/demo-paid-runtime-parity-preview.log
+          exit 1
+
+      - name: Compare demo and registered runtime UI
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/demo-paid-runtime-parity.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload parity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-paid-runtime-parity-evidence
+          path: artifacts/demo-paid-runtime-parity/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-paid-runtime-parity-failure
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/demo-paid-runtime-parity-preview.log
+          if-no-files-found: ignore
+          retention-days: 7
