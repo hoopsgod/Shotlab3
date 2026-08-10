@@ -45,11 +45,17 @@ The gate verifies:
 
 1. the shared production application tree remains intact;
 2. UI components/screens do not branch on demo mode or demo identity;
-3. registered Coach and Coach Demo load the same core product surfaces and navigation;
-4. registered Player and Player Demo load the same core product surfaces and navigation;
-5. equivalent feature states, including Team Store state, use the same component path;
-6. mobile parity remains safe at the current 390×844 acceptance viewport.
+3. registered and demo sessions are fed matched canonical product data so state differences cannot hide UI drift;
+4. registered Coach and Coach Demo expose the same complete mobile navigation matrix and render equivalent geometry, computed styles, responsive behavior, and controls on every destination;
+5. registered Player and Player Demo expose the same complete mobile navigation matrix and render equivalent geometry, computed styles, responsive behavior, and controls on every destination;
+6. equivalent feature states, including Team Store and Coach Branding, use the same component path;
+7. Coach Leaderboards is explicitly exercised in both registered and demo mode whenever the parity matrix runs;
+8. mobile parity remains safe at the current 390×844 acceptance viewport with no horizontal overflow;
+9. paired screenshots are produced for direct visual review of every tested destination;
+10. the comparison runs against the exact built production bundle, not a development-server substitute.
 
 ## Phase rule
 
-A visual or functional phase is not certified unless its relevant registered and demo paths have both been exercised. Future phases must branch from the latest certified parity-preserving head, not bypass this gate.
+A visual or functional phase is not certified unless its relevant registered and demo paths have both been exercised by the strengthened parity gate. Future phases must branch from the latest certified parity-preserving head, not bypass this gate.
+
+If a future phase changes a shared surface, the change is made once in the production UI. Demo receives that change automatically because it enters the same component tree. If parity fails, fix the shared component, data-state equivalence, or safe demo boundary; never copy a visual change into a separate demo implementation.
