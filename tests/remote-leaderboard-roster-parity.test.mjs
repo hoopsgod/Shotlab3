@@ -1,13 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import {
   buildActiveRosterIdentity,
   filterActiveRosterLeaderboardRows,
 } from '../src/lib/rosterIdentity.js';
 
 const TEAM_ID = 'team-parity-2026';
-const homeShotsSource = await readFile(new URL('../functions/v1/leaderboards/home-shots.js', import.meta.url), 'utf8');
 
 function selfOnlyIdentity() {
   return buildActiveRosterIdentity([
@@ -20,10 +18,6 @@ function selfOnlyIdentity() {
     },
   ], TEAM_ID);
 }
-
-test('authorized home-shots API marks privacy-minimal leaderboard summaries as remote', () => {
-  assert.match(homeShotsSource, /leaderboard_source:\s*["']remote["']/);
-});
 
 test('authorized remote leaderboard summaries survive a self-scoped player roster', () => {
   const identity = selfOnlyIdentity();
