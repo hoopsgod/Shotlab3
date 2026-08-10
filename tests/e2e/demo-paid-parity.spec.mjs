@@ -17,58 +17,18 @@ const REQUIRED_NAV_KEYS = {
 };
 
 const FINGERPRINT_STYLE_PROPERTIES = [
-  'display',
-  'position',
-  'visibility',
-  'opacity',
-  'boxSizing',
-  'width',
-  'height',
-  'minWidth',
-  'minHeight',
-  'maxWidth',
-  'maxHeight',
-  'marginTop',
-  'marginRight',
-  'marginBottom',
-  'marginLeft',
-  'paddingTop',
-  'paddingRight',
-  'paddingBottom',
-  'paddingLeft',
-  'gap',
-  'rowGap',
-  'columnGap',
-  'gridTemplateColumns',
-  'gridTemplateRows',
-  'flexDirection',
-  'flexWrap',
-  'justifyContent',
-  'alignItems',
-  'overflow',
-  'overflowX',
-  'overflowY',
-  'fontFamily',
-  'fontSize',
-  'fontWeight',
-  'lineHeight',
-  'letterSpacing',
-  'textAlign',
-  'textTransform',
-  'color',
-  'backgroundColor',
-  'backgroundImage',
-  'borderTopWidth',
-  'borderRightWidth',
-  'borderBottomWidth',
-  'borderLeftWidth',
-  'borderTopColor',
-  'borderRightColor',
-  'borderBottomColor',
-  'borderLeftColor',
-  'borderRadius',
-  'boxShadow',
-  'transform',
+  'display', 'position', 'visibility', 'opacity', 'boxSizing',
+  'width', 'height', 'minWidth', 'minHeight', 'maxWidth', 'maxHeight',
+  'marginTop', 'marginRight', 'marginBottom', 'marginLeft',
+  'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft',
+  'gap', 'rowGap', 'columnGap', 'gridTemplateColumns', 'gridTemplateRows',
+  'flexDirection', 'flexWrap', 'justifyContent', 'alignItems',
+  'overflow', 'overflowX', 'overflowY',
+  'fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing',
+  'textAlign', 'textTransform', 'color', 'backgroundColor', 'backgroundImage',
+  'borderTopWidth', 'borderRightWidth', 'borderBottomWidth', 'borderLeftWidth',
+  'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
+  'borderRadius', 'boxShadow', 'transform',
 ];
 
 function replacePrimaryPlayerIdentity(bundle, identity) {
@@ -107,12 +67,7 @@ function paidSeed(role) {
     branding: DEFAULT_BRANDING,
   };
 
-  let bundle = buildDemoDataBundle({
-    teamId: TEAM_ID,
-    coachEmail: coach.email,
-    team,
-  });
-
+  let bundle = buildDemoDataBundle({ teamId: TEAM_ID, coachEmail: coach.email, team });
   if (role === 'player') bundle = replacePrimaryPlayerIdentity(bundle, current);
 
   return {
@@ -184,12 +139,9 @@ async function seedPaidSession(context, role) {
   await context.addInitScript(({ storage }) => {
     window.localStorage.clear();
     window.sessionStorage.clear();
-    for (const [key, value] of Object.entries(storage)) {
-      window.localStorage.setItem(key, JSON.stringify(value));
-    }
+    for (const [key, value] of Object.entries(storage)) window.localStorage.setItem(key, JSON.stringify(value));
   }, { storage: seed.storage });
   await installSharedRoutes(context, seed);
-  return seed;
 }
 
 async function normalizeDynamicIdentityText(page) {
@@ -199,19 +151,12 @@ async function normalizeDynamicIdentityText(page) {
     while (walker.nextNode()) nodes.push(walker.currentNode);
     for (const node of nodes) {
       let value = node.nodeValue || '';
-      for (const email of emails) {
-        value = value.split(email).join('parity.user@shotlab.app');
-      }
+      for (const email of emails) value = value.split(email).join('parity.user@shotlab.app');
       value = value.replace(/\b[A-HJ-NP-Z2-9]{6}\b/g, 'ABC234');
       if (value !== node.nodeValue) node.nodeValue = value;
     }
   }, {
-    emails: [
-      'demo@shotlab.app',
-      'coach.demo@shotlab.app',
-      'paid.coach@shotlab.app',
-      'paid.player@shotlab.app',
-    ],
+    emails: ['demo@shotlab.app', 'coach.demo@shotlab.app', 'paid.coach@shotlab.app', 'paid.player@shotlab.app'],
   });
 }
 
@@ -256,25 +201,25 @@ async function navLabels(page) {
   return page.getByTestId('mobile-navigation-dock').getByRole('button').allTextContents().then((rows) => rows.map((value) => value.replace(/\s+/g, ' ').trim()).filter(Boolean));
 }
 
-async function noHorizontalOverflow(page) {
-  return page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
-}
-
 async function expectPhoneSafe(page) {
-  const widths = await noHorizontalOverflow(page);
+  const widths = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
   expect(widths.document).toBeLessThanOrEqual(widths.viewport + 2);
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
+async function expectMoreSheetClosed(page) {
+  await expect(page.getByTestId('mobile-navigation-more')).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByTestId('mobile-navigation-sheet')).toBeHidden();
+}
+
 async function collectNavigationKeys(page) {
   const dockKeys = await page.getByTestId('mobile-navigation-dock').locator('[data-nav-key]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-nav-key')).filter(Boolean));
-  const more = page.getByTestId('mobile-navigation-more');
-  await more.click();
+  await page.getByTestId('mobile-navigation-more').click();
   const sheet = page.getByTestId('mobile-navigation-sheet');
   await expect(sheet).toBeVisible();
   const sheetKeys = await sheet.locator('[data-nav-key]').evaluateAll((nodes) => nodes.map((node) => node.getAttribute('data-nav-key')).filter(Boolean));
   await page.getByRole('button', { name: 'Close more navigation' }).click();
-  await expect(sheet).toHaveCount(0);
+  await expectMoreSheetClosed(page);
   return [...new Set([...dockKeys, ...sheetKeys])];
 }
 
@@ -290,7 +235,7 @@ async function selectNavigationKey(page, key) {
     await expect(item).toBeVisible();
     await item.click();
   }
-  await expect(page.getByTestId('mobile-navigation-sheet')).toHaveCount(0);
+  await expectMoreSheetClosed(page);
   await stabilizePage(page);
 }
 
@@ -313,7 +258,6 @@ async function visualFingerprint(page) {
 
       const styles = {};
       for (const property of styleProperties) styles[property] = style[property];
-
       result.push({
         tag: node.tagName,
         className: typeof node.className === 'string' ? node.className : '',
@@ -326,7 +270,6 @@ async function visualFingerprint(page) {
         styles,
       });
     }
-
     return result;
   }, { styleProperties: FINGERPRINT_STYLE_PROPERTIES });
 }
@@ -404,12 +347,7 @@ for (const role of ['coach', 'player']) {
       }
 
       for (const key of paidKeys) {
-        await expectRouteParity({
-          paidPage: paid.page,
-          demoPage: demo.page,
-          role,
-          key,
-        });
+        await expectRouteParity({ paidPage: paid.page, demoPage: demo.page, role, key });
       }
     } finally {
       await paid.context.close();
