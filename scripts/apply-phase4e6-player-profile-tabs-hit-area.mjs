@@ -5,13 +5,15 @@ const phase3dPath = 'public/shotlab-phase3d-player-analytics.css';
 const phase4e6Path = 'public/shotlab-phase4e6-player-profile-tabs-hit-area.css';
 const indexPath = 'index.html';
 
-const charts = readFileSync(chartsPath, 'utf8');
+let charts = readFileSync(chartsPath, 'utf8');
 const phase3d = readFileSync(phase3dPath, 'utf8');
 const phase4e6 = readFileSync(phase4e6Path, 'utf8');
 let index = readFileSync(indexPath, 'utf8');
 
+const analyticsTestId = 'data-testid="player-analytics-sections"';
+const analyticsId = 'id="player-profile-analytics-sections"';
 const requiredContracts = [
-  'data-testid="player-analytics-sections"',
+  analyticsTestId,
   'data-analytics-section={t.id}',
   'aria-pressed={tab === t.id}',
   'flexDirection: "row"',
@@ -28,6 +30,17 @@ if (sectionMarkerCount !== 1) {
   throw new Error(`Phase 4E.6 expected exactly one shared analytics tab template, found ${sectionMarkerCount}.`);
 }
 
+if (!charts.includes(analyticsId)) {
+  const testIdCount = charts.split(analyticsTestId).length - 1;
+  if (testIdCount !== 1) {
+    throw new Error(`Phase 4E.6 expected exactly one analytics group test id, found ${testIdCount}.`);
+  }
+  charts = charts.replace(analyticsTestId, `${analyticsId} ${analyticsTestId}`);
+  writeFileSync(chartsPath, charts);
+} else {
+  console.log('Phase 4E.6 stable Player Profile analytics group id already applied.');
+}
+
 // This script runs after minify-visual-authority-css.mjs in production, so validate
 // semantic tokens rather than formatting that the minifier is expected to rewrite.
 if (!phase3d.includes('min-height:42px!important') || !phase3d.includes('data-workspace-tab="profile"')) {
@@ -36,7 +49,7 @@ if (!phase3d.includes('min-height:42px!important') || !phase3d.includes('data-wo
 
 const compactAuthority = phase4e6.replace(/\s+/g, '');
 for (const required of [
-  'player-analytics-sections',
+  '#player-profile-analytics-sections',
   'data-analytics-section',
   'min-height:44px!important',
   'box-sizing:border-box!important',
