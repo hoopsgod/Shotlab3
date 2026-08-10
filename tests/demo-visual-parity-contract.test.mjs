@@ -22,7 +22,14 @@ const UI_ROOTS = ['components', 'screens'];
 const UI_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx']);
 
 async function collectFiles(root) {
-  const entries = await readdir(root);
+  let entries;
+  try {
+    entries = await readdir(root);
+  } catch (error) {
+    if (error?.code === 'ENOENT') return [];
+    throw error;
+  }
+
   const files = [];
   for (const entry of entries) {
     const fullPath = path.join(root, entry);
