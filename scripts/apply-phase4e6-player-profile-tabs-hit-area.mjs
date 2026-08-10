@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 
 const chartsPath = 'src/components/ShotLabCharts.jsx';
 const authorityPath = 'public/shotlab-v3-mobile-corrections.css';
-const charts = readFileSync(chartsPath, 'utf8');
+let charts = readFileSync(chartsPath, 'utf8');
 let authority = readFileSync(authorityPath, 'utf8');
 
 const requiredContracts = [
@@ -22,6 +22,22 @@ for (const contract of requiredContracts) {
 const sectionMarkerCount = charts.split('data-analytics-section={t.id}').length - 1;
 if (sectionMarkerCount !== 1) {
   throw new Error(`Phase 4E.6 expected exactly one shared analytics tab template, found ${sectionMarkerCount}.`);
+}
+
+const inlineMarker = '                minHeight: 44,\n                boxSizing: "border-box",\n                touchAction: "manipulation",';
+if (!charts.includes(inlineMarker)) {
+  const styleAnchor = '                flex: 1,\n                padding: "9px 4px",\n                background: tab === t.id ? T.lime : "transparent",';
+  const anchorCount = charts.split(styleAnchor).length - 1;
+  if (anchorCount !== 1) {
+    throw new Error(`Phase 4E.6 expected exactly one analytics-tab style anchor, found ${anchorCount}.`);
+  }
+  charts = charts.replace(
+    styleAnchor,
+    '                flex: 1,\n                minHeight: 44,\n                boxSizing: "border-box",\n                touchAction: "manipulation",\n                padding: "9px 4px",\n                background: tab === t.id ? T.lime : "transparent",',
+  );
+  writeFileSync(chartsPath, charts);
+} else {
+  console.log('Phase 4E.6 inline Player Profile analytics-tab target already applied.');
 }
 
 const authorityMarker = 'Phase 4E.6 Player Profile analytics-tab physical target';
