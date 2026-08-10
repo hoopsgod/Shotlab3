@@ -66,7 +66,7 @@ async function navigateByKey(page, key) {
 }
 
 async function collectSurfaceAudit(page, role, key) {
-  const result = await page.evaluate(({ selector, role, key }) => {
+  const result = await page.evaluate(({ selector, role, key, minTarget }) => {
     const round = (value) => Math.round(value * 10) / 10;
     const describe = (node) => {
       const aria = node.getAttribute("aria-label") || "";
@@ -96,9 +96,85 @@ async function collectSurfaceAudit(page, role, key) {
       }
       return null;
     };
+    const findAncestorClip = (node, rect, preserveHorizontalScroll) => {
+      const hardClip = new Set(["hidden", "clip"]);
+      let parent = node.parentElement;
+      while (parent && parent !== document.documentElement) {
+        const parentStyle = getComputedStyle(parent);
+        const parentRect = parent.getBoundingClientRect();
+        const hiddenByState = parent.hidden || parent.hasAttribute("inert") || parent.getAttribute("aria-hidden") === "true";
+        const hiddenByStyle = parentStyle.display === "none"
+          || parentStyle.visibility === "hidden"
+          || Number(parentStyle.opacity || 1) === 0
+          || parentStyle.contentVisibility === "hidden";
+        if (hiddenByState || hiddenByStyle) {
+          return {
+            reason: hiddenByState ? "ancestor-state" : "ancestor-style",
+            tag: parent.tagName.toLowerCase(),
+            className: typeof parent.className === "string" ? parent.className.replace(/\s+/g, " ").trim().slice(0, 160) : "",
+            overflowX: String(parentStyle.overflowX || "").toLowerCase(),
+            overflowY: String(parentStyle.overflowY || "").toLowerCase(),
+            ancestorRect: {
+              left: round(parentRect.left),
+              right: round(parentRect.right),
+              top: round(parentRect.top),
+              bottom: round(parentRect.bottom),
+              width: round(parentRect.width),
+              height: round(parentRect.height),
+            },
+          };
+        }
+
+        const overflowX = String(parentStyle.overflowX || "").toLowerCase();
+        const overflowY = String(parentStyle.overflowY || "").toLowerCase();
+        if (!preserveHorizontalScroll && hardClip.has(overflowX)) {
+          const intersectionWidth = Math.min(rect.right, parentRect.right) - Math.max(rect.left, parentRect.left);
+          if (intersectionWidth <= 1) {
+            return {
+              reason: "ancestor-x-clip",
+              tag: parent.tagName.toLowerCase(),
+              className: typeof parent.className === "string" ? parent.className.replace(/\s+/g, " ").trim().slice(0, 160) : "",
+              overflowX,
+              overflowY,
+              ancestorRect: {
+                left: round(parentRect.left),
+                right: round(parentRect.right),
+                top: round(parentRect.top),
+                bottom: round(parentRect.bottom),
+                width: round(parentRect.width),
+                height: round(parentRect.height),
+              },
+            };
+          }
+        }
+        if (hardClip.has(overflowY)) {
+          const intersectionHeight = Math.min(rect.bottom, parentRect.bottom) - Math.max(rect.top, parentRect.top);
+          if (intersectionHeight <= 1) {
+            return {
+              reason: "ancestor-y-clip",
+              tag: parent.tagName.toLowerCase(),
+              className: typeof parent.className === "string" ? parent.className.replace(/\s+/g, " ").trim().slice(0, 160) : "",
+              overflowX,
+              overflowY,
+              ancestorRect: {
+                left: round(parentRect.left),
+                right: round(parentRect.right),
+                top: round(parentRect.top),
+                bottom: round(parentRect.bottom),
+                width: round(parentRect.width),
+                height: round(parentRect.height),
+              },
+            };
+          }
+        }
+        parent = parent.parentElement;
+      }
+      return null;
+    };
 
     const seen = new Set();
     const targets = [];
+    const excludedAncestorClipped = [];
     for (const node of document.querySelectorAll(selector)) {
       if (seen.has(node)) continue;
       seen.add(node);
@@ -109,9 +185,27 @@ async function collectSurfaceAudit(page, role, key) {
 
       const offViewportHorizontally = rect.left < -1 || rect.right > innerWidth + 1;
       const horizontalScroller = offViewportHorizontally ? findHorizontalScroller(node) : null;
+      const ancestorClip = findAncestorClip(node, rect, Boolean(horizontalScroller));
+      if (ancestorClip) {
+        excludedAncestorClipped.push({
+          tag: node.tagName.toLowerCase(),
+          label: describe(node),
+          testId: node.getAttribute("data-testid") || "",
+          navKey: node.getAttribute("data-nav-key") || "",
+          width: round(rect.width),
+          height: round(rect.height),
+          left: round(rect.left),
+          right: round(rect.right),
+          top: round(rect.top),
+          bottom: round(rect.bottom),
+          ancestorClip,
+        });
+        continue;
+      }
+
       const scrollDependent = Boolean(offViewportHorizontally && horizontalScroller);
       const clippedHorizontally = Boolean(offViewportHorizontally && !horizontalScroller);
-      const sub44 = rect.width < 44 || rect.height < 44;
+      const sub44 = rect.width < minTarget || rect.height < minTarget;
       const criticallyTiny = rect.width < 32 || rect.height < 32;
       targets.push({
         tag: node.tagName.toLowerCase(),
@@ -139,13 +233,15 @@ async function collectSurfaceAudit(page, role, key) {
       documentWidth: document.documentElement.scrollWidth,
       bodyWidth: document.body.scrollWidth,
       interactiveCount: targets.length,
+      excludedAncestorClippedCount: excludedAncestorClipped.length,
+      excludedAncestorClipped,
       sub44: targets.filter((target) => target.sub44),
       criticallyTiny: targets.filter((target) => target.criticallyTiny),
       clippedHorizontally: targets.filter((target) => target.clippedHorizontally),
       scrollDependent: targets.filter((target) => target.scrollDependent),
       targets,
     };
-  }, { selector: INTERACTIVE_SELECTOR, role, key });
+  }, { selector: INTERACTIVE_SELECTOR, role, key, minTarget: MIN_FRACTIONAL_44_TARGET });
 
   fs.writeFileSync(path.join(OUTPUT_DIR, `${role}-${key}.json`), JSON.stringify(result, null, 2));
   await page.screenshot({ path: path.join(OUTPUT_DIR, `${role}-${key}.png`), animations: "disabled" });
@@ -203,14 +299,17 @@ function buildSummary(role, audits) {
     role,
     surfaceCount: audits.length,
     interactiveCount: audits.reduce((sum, audit) => sum + audit.interactiveCount, 0),
+    excludedAncestorClippedCount: audits.reduce((sum, audit) => sum + audit.excludedAncestorClippedCount, 0),
     sub44Count: audits.reduce((sum, audit) => sum + audit.sub44.length, 0),
     criticallyTinyCount: audits.reduce((sum, audit) => sum + audit.criticallyTiny.length, 0),
     clippedControlCount: audits.reduce((sum, audit) => sum + audit.clippedHorizontally.length, 0),
     scrollDependentCount: audits.reduce((sum, audit) => sum + audit.scrollDependent.length, 0),
+    excludedAncestorClippedBySurface: Object.fromEntries(audits.map((audit) => [audit.key, audit.excludedAncestorClippedCount])),
     sub44BySurface: Object.fromEntries(audits.map((audit) => [audit.key, audit.sub44.length])),
     criticallyTinyBySurface: Object.fromEntries(audits.map((audit) => [audit.key, audit.criticallyTiny.length])),
     clippedBySurface: Object.fromEntries(audits.map((audit) => [audit.key, audit.clippedHorizontally.length])),
     scrollDependentBySurface: Object.fromEntries(audits.map((audit) => [audit.key, audit.scrollDependent.length])),
+    excludedAncestorClipped: audits.flatMap((audit) => audit.excludedAncestorClipped.map((target) => ({ surface: audit.key, ...target }))),
     criticallyTiny: audits.flatMap((audit) => audit.criticallyTiny.map((target) => ({ surface: audit.key, ...target }))),
     clippedHorizontally: audits.flatMap((audit) => audit.clippedHorizontally.map((target) => ({ surface: audit.key, ...target }))),
     scrollDependent: audits.flatMap((audit) => audit.scrollDependent.map((target) => ({ surface: audit.key, ...target }))),
@@ -238,6 +337,11 @@ test("Phase 4A audits Coach interaction ergonomics and More-sheet behavior", asy
   await navigateByKey(page, "feed");
   await auditMoreSheet(page, "coach");
   expect(pageErrors).toEqual([]);
+
+  const scrollDependentLabels = audits.flatMap((audit) => audit.scrollDependent.map((target) => target.label));
+  expect(scrollDependentLabels.some((label) => /Top Engagement/.test(label)), "Coach Top Engagement must remain audit-visible through its horizontal scroller").toBe(true);
+  expect(scrollDependentLabels.some((label) => /^Meeting/.test(label)), "Coach Meeting must remain audit-visible through its horizontal scroller").toBe(true);
+
   writeAndGateSummary("coach", audits);
 });
 
@@ -255,5 +359,10 @@ test("Phase 4A audits Player interaction ergonomics and More-sheet behavior", as
   await navigateByKey(page, "home");
   await auditMoreSheet(page, "player");
   expect(pageErrors).toEqual([]);
+
+  const programAudit = audits.find((audit) => audit.key === "program");
+  const excludedProgramRsvpActions = (programAudit?.excludedAncestorClipped || []).filter((target) => /YOU'RE LOCKED IN|RSVP NOW/.test(target.label));
+  expect(excludedProgramRsvpActions.length, "collapsed Player Program RSVP controls must not be counted as visible interaction debt").toBeGreaterThanOrEqual(4);
+
   writeAndGateSummary("player", audits);
 });
