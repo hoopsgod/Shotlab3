@@ -59,7 +59,88 @@ function buildRegisteredStorage(demoStorage, role) {
   return next;
 }
 
-async function installSafeRoutes(page, role) {
+function readSeedRows(storage, key) {
+  try {
+    const parsed = JSON.parse(storage?.[key] || "[]");
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+async function fulfillJson(route, body, status = 200) {
+  await route.fulfill({ status, contentType: "application/json", body: JSON.stringify(body) });
+}
+
+async function installSeededPersistenceRoutes(page, storage) {
+  if (!storage) return;
+
+  const rows = {
+    teams: readSeedRows(storage, "sl:teams"),
+    players: readSeedRows(storage, "sl:players"),
+    profiles: readSeedRows(storage, "sl:player-profiles"),
+    events: readSeedRows(storage, "sl:events"),
+    rsvps: readSeedRows(storage, "sl:rsvps"),
+    scores: readSeedRows(storage, "sl:scores"),
+    programScores: readSeedRows(storage, "sl:program-scores"),
+    shotLogs: readSeedRows(storage, "sl:shotlogs"),
+    scSessions: readSeedRows(storage, "sl:sc-sessions"),
+    scRsvps: readSeedRows(storage, "sl:sc-rsvps"),
+    scLogs: readSeedRows(storage, "sl:sc-logs"),
+  };
+
+  const collectionRoute = async (route, field, seededRows) => {
+    const method = route.request().method().toUpperCase();
+    if (method === "GET") {
+      await fulfillJson(route, { ok: true, storage_mode: "parity_seed", [field]: seededRows });
+      return;
+    }
+    if (method === "DELETE") {
+      await fulfillJson(route, { ok: true, storage_mode: "parity_seed", deleted_count: 0, [field]: seededRows });
+      return;
+    }
+    let posted = {};
+    try { posted = route.request().postDataJSON() || {}; } catch {}
+    const echoed = Array.isArray(posted?.[field]) ? posted[field] : seededRows;
+    await fulfillJson(route, { ok: true, storage_mode: "parity_seed", [field]: echoed });
+  };
+
+  await page.route(/\/v1\/teams(?:\?.*)?$/, (route) => collectionRoute(route, "teams", rows.teams));
+  await page.route(/\/v1\/players(?:\?.*)?$/, (route) => collectionRoute(route, "players", rows.players));
+  await page.route(/\/v1\/player-profiles(?:\?.*)?$/, (route) => collectionRoute(route, "profiles", rows.profiles));
+  await page.route(/\/v1\/events(?:\?.*)?$/, (route) => collectionRoute(route, "events", rows.events));
+  await page.route(/\/v1\/rsvps(?:\?.*)?$/, (route) => collectionRoute(route, "rsvps", rows.rsvps));
+  await page.route(/\/v1\/scores(?:\?.*)?$/, (route) => collectionRoute(route, "scores", rows.scores));
+  await page.route(/\/v1\/program-scores(?:\?.*)?$/, (route) => collectionRoute(route, "program_scores", rows.programScores));
+  await page.route(/\/v1\/shot-logs(?:\?.*)?$/, (route) => collectionRoute(route, "shot_logs", rows.shotLogs));
+  await page.route(/\/v1\/strength-conditioning(?:\?.*)?$/, async (route) => {
+    const method = route.request().method().toUpperCase();
+    if (method === "GET") {
+      await fulfillJson(route, {
+        ok: true,
+        storage_mode: "parity_seed",
+        team_id: TEAM_ID,
+        can_write_sessions: true,
+        sessions: rows.scSessions,
+        rsvps: rows.scRsvps,
+        logs: rows.scLogs,
+      });
+      return;
+    }
+    let posted = {};
+    try { posted = route.request().postDataJSON() || {}; } catch {}
+    await fulfillJson(route, {
+      ok: true,
+      storage_mode: "parity_seed",
+      team_id: TEAM_ID,
+      resource: posted?.resource || "",
+      rows: Array.isArray(posted?.rows) ? posted.rows : [],
+      deleted_count: 0,
+    });
+  });
+}
+
+async function installSafeRoutes(page, role, remoteStorage = null) {
   const registered = REGISTERED_IDENTITIES[role];
   const profile = {
     email: registered.email,
@@ -70,37 +151,38 @@ async function installSafeRoutes(page, role) {
   };
 
   await page.route("**/v1/legacy-auth/login", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ ok: true, profile }),
-    });
+    await fulfillJson(route, { ok: true, profile });
   });
   await page.route("**/v1/legacy-auth/restore", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({ ok: true, profile }),
-    });
+    await fulfillJson(route, { ok: true, profile });
   });
   await page.route("**/v1/teams/restore-context", async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        ok: true,
-        team: { id: TEAM_ID, name: "Demo Titans", joinCode: "DEMO26" },
-      }),
+    await fulfillJson(route, {
+      ok: true,
+      team: { id: TEAM_ID, name: "Demo Titans", joinCode: "DEMO26" },
     });
   });
   await page.route("**/v1/season-archives", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) });
+    await fulfillJson(route, { ok: true, archives: [] });
   });
   await page.route("**/v1/coach/players/provision**", async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: [] }) });
+    await fulfillJson(route, { ok: true, invitations: [] });
   });
+
+  await installSeededPersistenceRoutes(page, remoteStorage);
+
+  // Any remaining direct Supabase request is made healthy and non-destructive.
+  // The app's signed persistence bridge above is the authoritative path exercised
+  // for registered users in this test.
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, async (route) => {
-    await route.fulfill({ status: 200, contentType: "application/json", body: "[]" });
+    const method = route.request().method().toUpperCase();
+    if (method === "GET") {
+      await fulfillJson(route, []);
+      return;
+    }
+    let posted = [];
+    try { posted = route.request().postDataJSON() || []; } catch {}
+    await fulfillJson(route, posted);
   });
 }
 
@@ -248,7 +330,7 @@ async function captureExperience(browser, role, kind, seedStorage = null) {
   const page = await context.newPage();
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
-  await installSafeRoutes(page, role);
+  await installSafeRoutes(page, role, kind === "registered" ? seedStorage : null);
 
   if (kind === "demo") await enterDemo(page, role);
   else await enterRegistered(page, role, seedStorage);
