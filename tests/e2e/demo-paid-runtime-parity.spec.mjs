@@ -159,7 +159,11 @@ async function getNavigationKeys(page) {
   const secondary = await sheet.locator("[data-nav-key]").evaluateAll((nodes) => nodes.map((node) => node.getAttribute("data-nav-key")).filter(Boolean));
   await sheet.getByRole("button", { name: /close more navigation/i }).click();
   await expect(sheet).toHaveCount(0);
-  return [...new Set([...primary, ...secondary])];
+  const keys = [...new Set([...primary, ...secondary])];
+  // Branding intentionally opens the standalone team-branding workspace, which
+  // does not render the Coach mobile dock. Audit it last so every route remains
+  // covered without requiring a test-only product navigation path.
+  return [...keys.filter((key) => key !== "branding"), ...keys.filter((key) => key === "branding")];
 }
 
 async function navigateToKey(page, key) {
