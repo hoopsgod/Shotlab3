@@ -28,7 +28,7 @@ for (const required of [
   'data-testid="player-profile-privacy"',
   'data-player-profile-privacy-toggle',
   'aria-pressed={!u.hideFromLeaderboards}',
-  'data-testid="player-profile-account-data"',
+  'testId="player-profile-account-data"',
   'data-player-profile-legal-link={link.href}',
   'data-player-account-data-request',
 ]) {
