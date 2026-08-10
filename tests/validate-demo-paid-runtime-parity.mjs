@@ -5,29 +5,22 @@ import path from "node:path";
 
 const ROOT = path.resolve(process.cwd(), "artifacts/demo-paid-runtime-parity");
 const ROLES = ["coach", "player"];
-const MODES = ["demo", "registered"];
 const COLOR_FIELDS = new Set(["color", "backgroundColor", "borderTopColor"]);
 
 function hashFile(filePath) {
   return crypto.createHash("sha256").update(fs.readFileSync(filePath)).digest("hex");
 }
 
-function normalizeColor(value) {
-  if (typeof value !== "string") return value;
-  return value.replace(/-?(?:\d+\.\d+|\.\d+)/g, (token) => {
-    const rounded = Number(token).toFixed(4);
-    return String(Number(rounded));
-  });
-}
-
-function normalizeFingerprint(value, key = "") {
+function normalizeFingerprint(value) {
   if (Array.isArray(value)) return value.map((entry) => normalizeFingerprint(entry));
   if (value && typeof value === "object") {
     return Object.fromEntries(
-      Object.entries(value).map(([childKey, childValue]) => [childKey, normalizeFingerprint(childValue, childKey)]),
+      Object.entries(value)
+        .filter(([key]) => !COLOR_FIELDS.has(key))
+        .map(([key, childValue]) => [key, normalizeFingerprint(childValue)]),
     );
   }
-  return COLOR_FIELDS.has(key) ? normalizeColor(value) : value;
+  return value;
 }
 
 function routeNames(role, mode, extension) {
@@ -67,9 +60,12 @@ for (const role of ROLES) {
     assert.deepEqual(
       registeredFingerprint,
       demoFingerprint,
-      `${role}/${route} computed UI differs after insignificant CSS color serialization is normalized`,
+      `${role}/${route} structure, geometry, typography, spacing, or state differs between demo and registered`,
     );
 
+    // Chromium may serialize the same rendered color through different CSS color
+    // spaces (for example rgb() vs oklab()). Exact screenshot bytes are the
+    // authoritative color/paint check; any real visual color drift fails here.
     assert.equal(
       hashFile(registeredPngPath),
       hashFile(demoPngPath),
@@ -77,7 +73,7 @@ for (const role of ROLES) {
     );
   }
 
-  console.log(`Runtime parity verified for ${role}: ${demoJsonRoutes.length} destinations, normalized computed UI + exact screenshot bytes.`);
+  console.log(`Runtime parity verified for ${role}: ${demoJsonRoutes.length} destinations, identical non-color computed UI + exact screenshot bytes.`);
 }
 
 console.log("Demo/registered runtime parity evidence is exact at the rendered-pixel level.");
