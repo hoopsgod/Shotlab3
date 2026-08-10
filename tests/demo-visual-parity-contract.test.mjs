@@ -53,7 +53,8 @@ for (const rootName of UI_ROOTS) {
 }
 
 test('demo sessions use the shared production application tree', () => {
-  assert.match(appSource, /const doDemo=async\(kind="player"\)=>/);
+  assert.match(appSource, /const demoSignIn=async\(kind="player"\)=>/);
+  assert.match(appSource, /onDemo=\{demoSignIn\}/);
   assert.match(appSource, /kind==="coach"\?DEMO_COACH:DEMO_PLAYER/);
   assert.match(appSource, /setDemoMode\(true\)/);
 
