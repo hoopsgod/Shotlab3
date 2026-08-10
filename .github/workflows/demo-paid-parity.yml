@@ -44,7 +44,7 @@ jobs:
         run: npm ci
 
       - name: Enforce shared UI and paid leaderboard parity contracts
-        run: node --test tests/demo-visual-parity-contract.test.mjs tests/remote-leaderboard-roster-parity.test.mjs
+        run: node --test tests/demo-visual-parity-contract.test.mjs tests/home-shots-leaderboard-route.test.mjs tests/remote-leaderboard-roster-parity.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
