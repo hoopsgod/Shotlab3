@@ -1,0 +1,206 @@
+import { test, expect } from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
+
+const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/phase-4a-interaction-state-audit");
+const INTERACTIVE_SELECTOR = [
+  "button",
+  "a[href]",
+  "input:not([type='hidden'])",
+  "select",
+  "textarea",
+  "[role='button']",
+  "[role='tab']",
+  "[role='switch']",
+  "[role='checkbox']",
+].join(",");
+
+fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+
+test.use({ viewport: { width: 390, height: 844 } });
+
+async function installSafeRoutes(page) {
+  await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
+  await page.route("**/v1/coach/players/provision**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: [] }) }));
+  await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ team_id: "demo", limit: 10, scope: "players", count: 0, leaderboard: [] }) }));
+  await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+}
+
+async function stabilize(page) {
+  await page.evaluate(async () => {
+    if (document.fonts?.ready) await document.fonts.ready;
+    window.scrollTo(0, 0);
+    document.querySelector(".player-scroll-container")?.scrollTo(0, 0);
+    document.querySelector(".coach-scroll-container")?.scrollTo(0, 0);
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+  });
+  await page.waitForTimeout(120);
+}
+
+async function enterDemo(page, role) {
+  await installSafeRoutes(page);
+  await page.goto("/");
+  const button = page.getByRole("button", { name: role === "coach" ? /Coach demo/i : /Player demo/i });
+  await expect(button).toBeVisible({ timeout: 20_000 });
+  await button.click();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+  await stabilize(page);
+}
+
+async function navigateByKey(page, key) {
+  const dock = page.getByTestId("mobile-navigation-dock");
+  const direct = dock.locator(`[data-nav-key="${key}"]`);
+  if (await direct.count()) {
+    await direct.click();
+  } else {
+    await page.getByTestId("mobile-navigation-more").click();
+    const sheet = page.getByTestId("mobile-navigation-sheet");
+    await expect(sheet).toBeVisible();
+    const item = sheet.locator(`[data-nav-key="${key}"]`);
+    await expect(item).toBeVisible();
+    await item.click();
+    await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
+  }
+  await stabilize(page);
+}
+
+async function collectSurfaceAudit(page, role, key) {
+  const result = await page.evaluate(({ selector, role, key }) => {
+    const round = (value) => Math.round(value * 10) / 10;
+    const describe = (node) => {
+      const aria = node.getAttribute("aria-label") || "";
+      const text = String(node.textContent || "").replace(/\s+/g, " ").trim();
+      const placeholder = node.getAttribute("placeholder") || "";
+      const testId = node.getAttribute("data-testid") || "";
+      const navKey = node.getAttribute("data-nav-key") || "";
+      return (aria || text || placeholder || testId || navKey || node.tagName).slice(0, 100);
+    };
+    const seen = new Set();
+    const targets = [];
+    for (const node of document.querySelectorAll(selector)) {
+      if (seen.has(node)) continue;
+      seen.add(node);
+      if (node.disabled || node.getAttribute("aria-disabled") === "true") continue;
+      const style = getComputedStyle(node);
+      const rect = node.getBoundingClientRect();
+      if (style.display === "none" || style.visibility === "hidden" || Number(style.opacity || 1) === 0 || rect.width <= 0 || rect.height <= 0) continue;
+      const clippedHorizontally = rect.left < -1 || rect.right > innerWidth + 1;
+      const sub44 = rect.width < 44 || rect.height < 44;
+      const criticallyTiny = rect.width < 32 || rect.height < 32;
+      targets.push({
+        tag: node.tagName.toLowerCase(),
+        role: node.getAttribute("role") || "",
+        label: describe(node),
+        testId: node.getAttribute("data-testid") || "",
+        navKey: node.getAttribute("data-nav-key") || "",
+        width: round(rect.width),
+        height: round(rect.height),
+        left: round(rect.left),
+        right: round(rect.right),
+        top: round(rect.top),
+        bottom: round(rect.bottom),
+        sub44,
+        criticallyTiny,
+        clippedHorizontally,
+      });
+    }
+    return {
+      role,
+      key,
+      viewport: { width: innerWidth, height: innerHeight },
+      documentWidth: document.documentElement.scrollWidth,
+      bodyWidth: document.body.scrollWidth,
+      interactiveCount: targets.length,
+      sub44: targets.filter((target) => target.sub44),
+      criticallyTiny: targets.filter((target) => target.criticallyTiny),
+      clippedHorizontally: targets.filter((target) => target.clippedHorizontally),
+      targets,
+    };
+  }, { selector: INTERACTIVE_SELECTOR, role, key });
+
+  fs.writeFileSync(path.join(OUTPUT_DIR, `${role}-${key}.json`), JSON.stringify(result, null, 2));
+  await page.screenshot({ path: path.join(OUTPUT_DIR, `${role}-${key}.png`), animations: "disabled" });
+
+  expect(result.documentWidth - result.viewport.width, `${role}/${key} document must not overflow horizontally`).toBeLessThanOrEqual(1);
+  expect(result.bodyWidth - result.viewport.width, `${role}/${key} body must not overflow horizontally`).toBeLessThanOrEqual(1);
+  expect(result.clippedHorizontally, `${role}/${key} must not expose horizontally clipped controls`).toEqual([]);
+  expect(result.criticallyTiny, `${role}/${key} must not expose controls below 32px in either dimension`).toEqual([]);
+  return result;
+}
+
+async function auditMoreSheet(page, role) {
+  const trigger = page.getByTestId("mobile-navigation-more");
+  await trigger.click();
+  const sheet = page.getByTestId("mobile-navigation-sheet");
+  await expect(sheet).toBeVisible();
+  await expect(trigger).toHaveAttribute("aria-expanded", "true");
+  await expect(sheet).toHaveAttribute("role", "dialog");
+  await expect(sheet).toHaveAttribute("aria-modal", "true");
+  await expect.poll(() => page.evaluate(() => document.body.style.overflow)).toBe("hidden");
+
+  const close = page.getByRole("button", { name: "Close more navigation" });
+  await expect(close).toBeFocused();
+  const closeBox = await close.boundingBox();
+  expect(closeBox?.width || 0, `${role} More close target width`).toBeGreaterThanOrEqual(44);
+  expect(closeBox?.height || 0, `${role} More close target height`).toBeGreaterThanOrEqual(44);
+
+  const focusable = sheet.locator("button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex='-1'])");
+  const count = await focusable.count();
+  expect(count, `${role} More sheet must contain actionable destinations`).toBeGreaterThan(1);
+  await focusable.nth(count - 1).focus();
+  await page.keyboard.press("Tab");
+  await expect(close, `${role} More focus trap must wrap to the first control`).toBeFocused();
+
+  await page.screenshot({ path: path.join(OUTPUT_DIR, `${role}-more-sheet.png`), animations: "disabled" });
+  await page.keyboard.press("Escape");
+  await expect(sheet).toHaveCount(0);
+  await expect(trigger).toBeFocused();
+  await expect.poll(() => page.evaluate(() => document.body.style.overflow)).not.toBe("hidden");
+}
+
+function writeSummary(role, audits) {
+  const summary = {
+    role,
+    surfaceCount: audits.length,
+    interactiveCount: audits.reduce((sum, audit) => sum + audit.interactiveCount, 0),
+    sub44Count: audits.reduce((sum, audit) => sum + audit.sub44.length, 0),
+    criticallyTinyCount: audits.reduce((sum, audit) => sum + audit.criticallyTiny.length, 0),
+    clippedControlCount: audits.reduce((sum, audit) => sum + audit.clippedHorizontally.length, 0),
+    sub44BySurface: Object.fromEntries(audits.map((audit) => [audit.key, audit.sub44.length])),
+  };
+  fs.writeFileSync(path.join(OUTPUT_DIR, `${role}-summary.json`), JSON.stringify(summary, null, 2));
+}
+
+test("Phase 4A audits Coach interaction ergonomics and More-sheet behavior", async ({ page }) => {
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  await enterDemo(page, "coach");
+
+  const audits = [];
+  audits.push(await collectSurfaceAudit(page, "coach", "home"));
+  for (const key of ["players", "events", "leaderboards"]) {
+    await navigateByKey(page, key);
+    audits.push(await collectSurfaceAudit(page, "coach", key));
+  }
+  await navigateByKey(page, "feed");
+  await auditMoreSheet(page, "coach");
+  writeSummary("coach", audits);
+  expect(pageErrors).toEqual([]);
+});
+
+test("Phase 4A audits Player interaction ergonomics and More-sheet behavior", async ({ page }) => {
+  const pageErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  await enterDemo(page, "player");
+
+  const audits = [];
+  audits.push(await collectSurfaceAudit(page, "player", "home"));
+  for (const key of ["log-drill", "profile", "program", "leaderboards"]) {
+    await navigateByKey(page, key);
+    audits.push(await collectSurfaceAudit(page, "player", key));
+  }
+  await navigateByKey(page, "home");
+  await auditMoreSheet(page, "player");
+  writeSummary("player", audits);
+  expect(pageErrors).toEqual([]);
+});
