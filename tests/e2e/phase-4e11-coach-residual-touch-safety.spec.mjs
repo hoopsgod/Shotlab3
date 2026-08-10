@@ -108,7 +108,7 @@ test("Phase 4E.11 closes the four measured Coach default-state touch targets", a
 
   const decision = page.getByTestId("coach-page-dashboard-leaderboards-decision-brief");
   const evidence = page.getByTestId("coach-page-dashboard-leaderboards-evidence");
-  const currentLeader = decision.getByRole("button", { name: "Review Current Leader" });
+  const currentLeader = evidence.getByRole("button", { name: "Review Current Leader" });
   const archivedSeasons = evidence.getByRole("button", { name: "Review Archived Seasons" });
   const reviewView = evidence.getByRole("button", { name: "Review View" });
 
