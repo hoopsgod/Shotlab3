@@ -124,23 +124,34 @@ test("Phase 4E.4 keeps reachable Program RSVP/status actions touch-safe", async 
   expect(viewport.documentWidth - viewport.innerWidth, "Program document overflow").toBeLessThanOrEqual(1);
   expect(viewport.bodyWidth - viewport.innerWidth, "Program body overflow").toBeLessThanOrEqual(1);
 
+  const lockedBefore = await actions.filter({ hasText: /YOU'RE LOCKED IN/ }).count();
   const unlocked = actions.filter({ hasText: /RSVP NOW/ }).first();
   await expect(unlocked).toBeVisible();
   await unlocked.click();
-  await expect(unlocked).toContainText(/YOU'RE LOCKED IN/);
   await settle(page);
-  const toggledBox = await unlocked.boundingBox();
-  expect(toggledBox?.height || 0, "toggled RSVP physical height").toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
+
+  const refreshedActions = page.locator('button[data-player-program-rsvp-action]:visible');
+  await expect(refreshedActions).toHaveCount(4);
+  await expect(refreshedActions.filter({ hasText: /YOU'RE LOCKED IN/ })).toHaveCount(lockedBefore + 1);
+  await expect(refreshedActions.filter({ hasText: /RSVP NOW/ })).toHaveCount(0);
+
+  for (let index = 0; index < 4; index += 1) {
+    const box = await refreshedActions.nth(index).boundingBox();
+    expect(box?.height || 0, `post-RSVP action ${index + 1} physical height`).toBeGreaterThanOrEqual(MIN_TOUCH_TARGET);
+  }
 
   await page.screenshot({
     path: path.join(OUTPUT_DIR, "player-program-expanded-44px-rsvp-family.png"),
     fullPage: true,
     animations: "disabled",
   });
-  await actions.last().screenshot({
-    path: path.join(OUTPUT_DIR, "player-program-rsvp-now-control.png"),
+  await refreshedActions.last().screenshot({
+    path: path.join(OUTPUT_DIR, "player-program-rsvp-control.png"),
     animations: "disabled",
   });
-  fs.writeFileSync(path.join(OUTPUT_DIR, "player-program-rsvp-family.json"), JSON.stringify({ viewport, evidence }, null, 2));
+  fs.writeFileSync(
+    path.join(OUTPUT_DIR, "player-program-rsvp-family.json"),
+    JSON.stringify({ viewport, evidence, lockedBefore, lockedAfter: lockedBefore + 1 }, null, 2),
+  );
   expect(pageErrors).toEqual([]);
 });
