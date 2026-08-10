@@ -1,9 +1,11 @@
 /* Phase 4D — shared Coach/Player return navigation ergonomics.
  * Preserve the existing pill presentation while raising the physical tap target
  * to the premium mobile baseline across the single shared DashboardReturnButton.
+ * A 44.5px floor absorbs fractional Chromium layout underflow while remaining
+ * visually equivalent to the intended 44px mobile target.
  */
 button.shotlab-dashboard-return-button {
-  min-height: 44px !important;
+  min-height: 44.5px !important;
   box-sizing: border-box !important;
   touch-action: manipulation !important;
   -webkit-tap-highlight-color: transparent !important;
