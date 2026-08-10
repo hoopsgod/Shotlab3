@@ -55,10 +55,14 @@ jobs:
           cat /tmp/phase-4e-readiness-preview.log
           exit 1
 
-      - name: Simulate 44pt compact-control readiness
+      - name: Simulate 44pt compact-control readiness and capture findings
+        continue-on-error: true
         env:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test tests/e2e/phase-4e-compact-control-readiness-audit.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --timeout=120000 --retries=0
+
+      - name: Validate complete Phase 4E evidence and safe-family split
+        run: node tests/validate-phase-4e-compact-control-readiness.mjs
 
       - name: Upload Phase 4E readiness evidence
         if: always()
