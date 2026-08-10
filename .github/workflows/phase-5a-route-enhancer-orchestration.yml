@@ -3,9 +3,18 @@ name: Phase 5A Route Enhancer Orchestration
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Exact cumulative baseline commit to compare against
+        required: true
+        type: string
 
 permissions:
   contents: read
+
+env:
+  PHASE5A_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PHASE5A_BASE_SHA: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
 
 concurrency:
   group: phase-5a-route-enhancer-orchestration-${{ github.event.pull_request.number || github.ref }}
@@ -19,7 +28,8 @@ jobs:
       - name: Check out exact PR head
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          ref: ${{ env.PHASE5A_HEAD_SHA }}
+          fetch-depth: 0
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -27,17 +37,46 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Verify orchestration contract
+      - name: Verify orchestration and equivalence contracts
         run: node --test tests/phase-5a-route-enhancer-orchestration.test.mjs
-      - name: Build through centralized enhancer pipeline
+      - name: Build exact candidate through centralized enhancer pipeline
         run: npm run build
-      - name: Verify production performance budget
-        run: npm run verify:performance-budget
-      - name: Upload performance evidence
+      - name: Capture candidate performance metrics
+        run: |
+          set +e
+          npm run verify:performance-budget
+          absolute_budget_status=$?
+          set -e
+          test -f artifacts/performance/build-metrics.json
+          cp artifacts/performance/build-metrics.json /tmp/phase5a-head-metrics.json
+          echo "Candidate absolute performance-budget exit code: ${absolute_budget_status}"
+      - name: Build exact cumulative baseline through legacy npm chain
+        run: |
+          git reset --hard "${PHASE5A_HEAD_SHA}"
+          git clean -fd
+          git checkout --force "${PHASE5A_BASE_SHA}"
+          npm ci
+          npm run build
+          set +e
+          npm run verify:performance-budget
+          absolute_budget_status=$?
+          set -e
+          test -f artifacts/performance/build-metrics.json
+          cp artifacts/performance/build-metrics.json /tmp/phase5a-base-metrics.json
+          echo "Baseline absolute performance-budget exit code: ${absolute_budget_status}"
+      - name: Verify candidate bundle does not regress from exact base
+        run: |
+          git reset --hard "${PHASE5A_BASE_SHA}"
+          git checkout --force "${PHASE5A_HEAD_SHA}"
+          node scripts/verify-phase5a-build-equivalence.mjs /tmp/phase5a-base-metrics.json /tmp/phase5a-head-metrics.json
+          mkdir -p artifacts/phase-5a-route-enhancer-orchestration
+          cp /tmp/phase5a-base-metrics.json artifacts/phase-5a-route-enhancer-orchestration/base-build-metrics.json
+          cp /tmp/phase5a-head-metrics.json artifacts/phase-5a-route-enhancer-orchestration/head-build-metrics.json
+      - name: Upload exact-base equivalence evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: phase-5a-route-enhancer-orchestration-performance
-          path: artifacts/performance/
+          name: phase-5a-route-enhancer-orchestration-evidence
+          path: artifacts/phase-5a-route-enhancer-orchestration/
           if-no-files-found: warn
           retention-days: 14
