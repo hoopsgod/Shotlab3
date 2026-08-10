@@ -5,6 +5,15 @@ const source = readFileSync(path, 'utf8');
 
 let next = source;
 
+const replaceOnce = (before, after, label) => {
+  if (next.includes(after)) return;
+  const matches = next.split(before).length - 1;
+  if (matches !== 1) {
+    throw new Error(`[phase2d-empty-state-language] ${label} anchor expected once; found ${matches}.`);
+  }
+  next = next.replace(before, after);
+};
+
 const cssImport = 'import "./Phase2PremiumEmptyStateLanguage.css";';
 if (!next.includes(cssImport)) {
   const anchor = 'import styles from "./CoachDashboardPhase2.module.css";';
@@ -15,19 +24,93 @@ if (!next.includes(cssImport)) {
   next = next.replace(anchor, `${anchor}\n${cssImport}`);
 }
 
-const before = 'return <div className={styles.emptyState}>{children}</div>;';
-const after = 'return <div className={styles.emptyState} data-phase2-empty-state>{children}</div>;';
-if (!next.includes(after)) {
-  const matches = next.split(before).length - 1;
-  if (matches !== 1) {
-    throw new Error(`[phase2d-empty-state-language] EmptyState anchor expected once; found ${matches}.`);
+const legacyEmptyState = `function EmptyState({ children }) {
+  return <div className={styles.emptyState}>{children}</div>;
+}`;
+const firstSliceEmptyState = `function EmptyState({ children }) {
+  return <div className={styles.emptyState} data-phase2-empty-state>{children}</div>;
+}`;
+const semanticEmptyState = `function EmptyState({ children, label = "Current state", tone = "neutral", kind = "status" }) {
+  return (
+    <div className={styles.emptyState} data-phase2-empty-state data-phase2-empty-tone={tone} data-phase2-empty-kind={kind}>
+      <span className="phase2-empty-state-label">{label}</span>
+      <span className="phase2-empty-state-message">{children}</span>
+    </div>
+  );
+}`;
+
+if (!next.includes(semanticEmptyState)) {
+  if (next.includes(firstSliceEmptyState)) {
+    next = next.replace(firstSliceEmptyState, semanticEmptyState);
+  } else if (next.includes(legacyEmptyState)) {
+    next = next.replace(legacyEmptyState, semanticEmptyState);
+  } else {
+    throw new Error('[phase2d-empty-state-language] EmptyState component anchor was not found.');
   }
-  next = next.replace(before, after);
 }
 
-if (!next.includes(cssImport) || !next.includes('data-phase2-empty-state')) {
-  throw new Error('[phase2d-empty-state-language] premium empty-state contract was not applied.');
+replaceOnce(
+  '<EmptyState>No player activity has been recorded yet.</EmptyState>',
+  '<EmptyState label="Activity status" kind="activity">No player activity has been recorded yet.</EmptyState>',
+  'player activity state',
+);
+replaceOnce(
+  '<EmptyState>No confirmed players yet.</EmptyState>',
+  '<EmptyState label="Attendance status" kind="attendance">No confirmed players yet.</EmptyState>',
+  'confirmed attendance state',
+);
+replaceOnce(
+  '<EmptyState>Every rostered player has responded.</EmptyState>',
+  '<EmptyState label="Follow-up cleared" tone="positive" kind="complete">Every rostered player has responded.</EmptyState>',
+  'follow-up cleared state',
+);
+replaceOnce(
+  '<EmptyState>No leaderboard players match the selected view.</EmptyState>',
+  '<EmptyState label="Filtered view" kind="filter">No leaderboard players match the selected view.</EmptyState>',
+  'leaderboard filtered state',
+);
+replaceOnce(
+  '<EmptyState>Create the first season archive to unlock current-versus-previous comparisons.</EmptyState>',
+  '<EmptyState label="Season history" kind="history">Create the first season archive to unlock current-versus-previous comparisons.</EmptyState>',
+  'season history state',
+);
+
+const activityBefore = `      <div className={styles.activityList} data-testid="coach-activity-intelligence-results">
+        {rows.slice(0, 12).map((row) => (
+          <button type="button" className={styles.activityRow} key={row.id} onClick={() => onOpenItem?.(row)}>
+            <div><strong>{row.title}</strong><span>{row.type.toUpperCase()} · {row.detail}</span></div>
+            <time>{row.date}</time>
+          </button>
+        ))}
+      </div>`;
+const activityAfter = `      {rows.length ? (
+        <div className={styles.activityList} data-testid="coach-activity-intelligence-results">
+          {rows.slice(0, 12).map((row) => (
+            <button type="button" className={styles.activityRow} key={row.id} onClick={() => onOpenItem?.(row)}>
+              <div><strong>{row.title}</strong><span>{row.type.toUpperCase()} · {row.detail}</span></div>
+              <time>{row.date}</time>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div data-testid="coach-activity-intelligence-results">
+          <EmptyState label="Filtered activity" kind="filter">No team activity matches the selected view.</EmptyState>
+        </div>
+      )}`;
+replaceOnce(activityBefore, activityAfter, 'activity no-results state');
+
+for (const required of [
+  cssImport,
+  'data-phase2-empty-state',
+  'phase2-empty-state-label',
+  'phase2-empty-state-message',
+  'label="Follow-up cleared" tone="positive" kind="complete"',
+  'No team activity matches the selected view.',
+]) {
+  if (!next.includes(required)) {
+    throw new Error(`[phase2d-empty-state-language] premium semantic state contract missing: ${required}`);
+  }
 }
 
 if (next !== source) writeFileSync(path, next);
-console.log('Applied Phase 2D premium operational empty-state language.');
+console.log('Applied Phase 2D premium semantic operational-state language.');
