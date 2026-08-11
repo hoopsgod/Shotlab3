@@ -102,9 +102,17 @@ update("src/App.jsx", (source) => {
     "bounded production auth bootstrap",
   );
 
+  next = replaceRequired(
+    next,
+    'const coachSeasonComparisonModel=useMemo(()=>buildSeasonComparisonModel({currentRoster:coachRosterPlayers,currentScores:safeScores,currentShotLogs:safeShotLogs,currentEvents:safeEvents,currentRsvps:safeRsvps,currentScSessions:scSessions,currentScLogs:safeScLogs,archives:seasonArchives,selectedArchiveId:selectedSeasonArchiveId}),[coachRosterPlayers,safeScores,safeShotLogs,safeEvents,safeRsvps,scSessions,safeScLogs,seasonArchives,selectedSeasonArchiveId]);',
+    'const coachSeasonComparisonModel=useMemo(()=>buildSeasonComparisonModel({currentRoster:coachRosterPlayers,currentScores:[...safeScores,...safeProgramScores],currentShotLogs:safeShotLogs,currentEvents:safeEvents,currentRsvps:safeRsvps,currentScSessions:scSessions,currentScLogs:safeScLogs,archives:seasonArchives,selectedArchiveId:selectedSeasonArchiveId}),[coachRosterPlayers,safeScores,safeProgramScores,safeShotLogs,safeEvents,safeRsvps,scSessions,safeScLogs,seasonArchives,selectedSeasonArchiveId]);',
+    "season comparison program-score coverage",
+  );
+
   if (!next.includes('if(sess?.email){try{catalog=await trainingCatalogPersistence.hydrateCatalog')) throw new Error("Phase 5A auth landing must skip team catalog hydration for signed-out launches.");
   if (!next.includes('new Promise(r=>setTimeout(r,3e3))')) throw new Error("Phase 5A production session bootstrap must have a bounded timeout.");
   if (next.includes('(SUPABASE_AUTH_ENABLED?authSession?.data?.session?.user?.email:"")||sess?.email')) throw new Error("Phase 5A must not trust the local app session when production Supabase verification is unavailable.");
+  if (!next.includes('currentScores:[...safeScores,...safeProgramScores]')) throw new Error("Phase 5A season comparison must include both home and program score collections.");
   return next;
 });
 
