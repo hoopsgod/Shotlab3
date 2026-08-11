@@ -151,6 +151,14 @@
 .ts-processing-note,
 .ts-approval-note { color: #777c72; }
 
+.ts-launcher,
+.ts-button,
+.ts-close,
+.ts-field input,
+.ts-field select {
+  min-height: 48px;
+}
+
 .ts-button { transition: transform .18s ease, box-shadow .18s ease, background .18s ease; }
 .ts-button:hover:not(:disabled) { transform: translateY(-1px); }
 .ts-button-primary,
