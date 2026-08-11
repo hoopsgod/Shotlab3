@@ -10,10 +10,12 @@ const html = readFileSync("index.html", "utf8");
 const screenshots = readFileSync("tests/e2e/phase-3n-player-commitments-screenshots.spec.mjs", "utf8");
 const screenshotConfig = readFileSync("playwright.screenshots.config.mjs", "utf8");
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+const routeEnhancers = readFileSync("scripts/run-route-enhancers.mjs", "utf8");
 
 test("Phase 3N runs after accepted Phase 3M with a guarded idempotent route transform", () => {
-  assert.match(pkg.scripts.dev, /apply-phase3m-player-team-store-retail\.mjs[\s\S]*apply-phase3n-player-commitments\.mjs/);
-  assert.match(pkg.scripts["prepare:route-enhancers"], /apply-phase3m-player-team-store-retail\.mjs[\s\S]*apply-phase3n-player-commitments\.mjs/);
+  assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
+  assert.match(pkg.scripts["prepare:route-enhancers"], /run-route-enhancers\.mjs build/);
+  assert.match(routeEnhancers, /apply-phase3m-player-team-store-retail\.mjs[\s\S]*apply-phase3n-player-commitments\.mjs/);
   assert.match(enhancer, /expected exactly one anchor/);
   assert.match(enhancer, /const marker = 'PlayerCommitmentCenter mode="events"'/);
   assert.match(enhancer, /source\.includes\(marker\)/);
