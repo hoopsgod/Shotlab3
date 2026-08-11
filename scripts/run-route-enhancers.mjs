@@ -40,10 +40,10 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-phase4e6-player-profile-tabs-hit-area.mjs',
   'scripts/apply-phase4e7-player-profile-source-filters.mjs',
   'scripts/apply-phase4e8-player-profile-drill-filters.mjs',
+  'scripts/apply-release-auth-session-recovery.mjs',
   'scripts/apply-phase4e9-player-profile-data-request.mjs',
   'scripts/apply-phase4e10-player-profile-account-touch-safety.mjs',
   'scripts/apply-phase4e11-coach-residual-touch-safety.mjs',
-  'scripts/apply-release-auth-session-recovery.mjs',
 ])
 
 export const DEV_ROUTE_ENHANCERS = Object.freeze([
