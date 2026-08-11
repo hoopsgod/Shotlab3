@@ -25,10 +25,29 @@ async function capture(page, name) {
 
 test("Player Team Store reads as a premium retail destination and restores navigation cleanly", async ({ page }) => {
   await installRoutes(page);
-  await page.addInitScript(() => {
+  await page.goto("/");
+  const demoButton = page.getByRole("button", { name: /Player demo/i });
+  await expect(demoButton).toBeVisible({ timeout: 20_000 });
+  await demoButton.click();
+  const dock = page.getByTestId("mobile-navigation-dock");
+  await expect(dock).toBeVisible({ timeout: 20_000 });
+
+  const activeTeamId = await page.evaluate(() => {
+    const parse = (key, fallback) => {
+      try { return JSON.parse(window.localStorage.getItem(key) || JSON.stringify(fallback)); } catch { return fallback; }
+    };
+    const session = parse("sl:session", {});
+    const players = parse("sl:players", []);
+    const currentEmail = String(session?.email || "").toLowerCase();
+    const player = players.find((row) => String(row?.email || row?.player_email || "").toLowerCase() === currentEmail) || players.find((row) => row?.teamId || row?.team_id);
+    return String(session?.teamId || session?.team_id || player?.teamId || player?.team_id || "");
+  });
+  expect(activeTeamId).not.toBe("");
+
+  await page.evaluate((teamId) => {
     window.localStorage.setItem("sl:team-stores", JSON.stringify([{
-      id: "team-store-team-demo-titans",
-      teamId: "team-demo-titans",
+      id: `team-store-${teamId}`,
+      teamId,
       provider: "squadlocker",
       storeName: "Demo Team Store",
       storeUrl: "https://example.com/demo-team-store",
@@ -36,13 +55,8 @@ test("Player Team Store reads as a premium retail destination and restores navig
       createdAt: "2026-08-10T12:00:00.000Z",
       updatedAt: "2026-08-10T12:00:00.000Z",
     }]));
-  });
-  await page.goto("/");
-  const demoButton = page.getByRole("button", { name: /Player demo/i });
-  await expect(demoButton).toBeVisible({ timeout: 20_000 });
-  await demoButton.click();
-  const dock = page.getByTestId("mobile-navigation-dock");
-  await expect(dock).toBeVisible({ timeout: 20_000 });
+  }, activeTeamId);
+  await page.waitForTimeout(2700);
 
   await page.getByTestId("mobile-navigation-more").click();
   const sheet = page.getByTestId("mobile-navigation-sheet");
