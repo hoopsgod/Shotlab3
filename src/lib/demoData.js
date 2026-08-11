@@ -154,12 +154,17 @@ function parseStored(value, fallback) {
   try { return JSON.parse(value); } catch { return fallback; }
 }
 
+export function unwrapManagedStorageValue(result) {
+  if (result && typeof result === "object" && Object.prototype.hasOwnProperty.call(result, "value")) return result.value;
+  return result;
+}
+
 async function readStored(key, fallback) {
   if (typeof window === "undefined") return fallback;
   try {
     if (window.storage && typeof window.storage.get === "function") {
       const result = await window.storage.get(key);
-      const parsed = parseStored(result?.value ?? result, null);
+      const parsed = parseStored(unwrapManagedStorageValue(result), null);
       if (parsed != null) return parsed;
     }
   } catch {}
