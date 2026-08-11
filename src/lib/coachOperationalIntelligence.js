@@ -247,16 +247,39 @@ export function filterActivityIntelligenceRows(rows = [], { scope = "all", query
   });
 }
 
+function archiveSnapshotForComparison(archive = {}) {
+  const legacy = archive.snapshot && typeof archive.snapshot === "object" ? archive.snapshot : {};
+  const hasPersistedScoreSnapshots = Array.isArray(archive.homeScoresSnapshot) || Array.isArray(archive.programScoresSnapshot);
+  const persistedScores = hasPersistedScoreSnapshots
+    ? [...safeArray(archive.homeScoresSnapshot), ...safeArray(archive.programScoresSnapshot)]
+    : safeArray(legacy.scores);
+  return {
+    players: Array.isArray(archive.rosterSnapshot) ? archive.rosterSnapshot : safeArray(legacy.players || legacy.rosterSnapshot),
+    scores: persistedScores,
+    shotLogs: Array.isArray(archive.shotLogsSnapshot) ? archive.shotLogsSnapshot : safeArray(legacy.shotLogs || legacy.shotlogs || legacy.shotLogsSnapshot),
+    events: Array.isArray(archive.eventSnapshot) ? archive.eventSnapshot : safeArray(legacy.events || legacy.eventSnapshot),
+    rsvps: Array.isArray(archive.eventRsvpSnapshot) ? archive.eventRsvpSnapshot : safeArray(legacy.rsvps || legacy.eventRsvpSnapshot),
+    scSessions: Array.isArray(archive.scSessionSnapshot) ? archive.scSessionSnapshot : safeArray(legacy.scSessions || legacy.sc_sessions || legacy.scSessionSnapshot),
+    scLogs: Array.isArray(archive.scLogSnapshot) ? archive.scLogSnapshot : safeArray(legacy.scLogs || legacy.sc_logs || legacy.scLogSnapshot),
+  };
+}
+
 export function buildSeasonComparisonModel({ currentRoster = [], currentScores = [], currentShotLogs = [], currentEvents = [], currentRsvps = [], currentScSessions = [], currentScLogs = [], archives = [], selectedArchiveId = "" } = {}) {
-  const archiveRows = safeArray(archives).map((archive) => ({ id: archive.id, seasonName: archive.seasonName || archive.season_name || "Archived season", archivedAt: archive.archivedAt || archive.archived_at || "", snapshot: archive.snapshot || {}, source: archive })).sort((a, b) => String(b.archivedAt).localeCompare(String(a.archivedAt)));
+  const archiveRows = safeArray(archives).map((archive) => ({
+    id: archive.id,
+    seasonName: archive.seasonName || archive.season_name || "Archived season",
+    archivedAt: archive.archivedAt || archive.archived_at || archive.createdAt || archive.created_at || "",
+    snapshot: archiveSnapshotForComparison(archive),
+    source: archive,
+  })).sort((a, b) => String(b.archivedAt).localeCompare(String(a.archivedAt)));
   const selected = archiveRows.find((row) => row.id === selectedArchiveId) || archiveRows[0] || null;
   const archiveRoster = selected?.snapshot?.players || [];
   const archiveScores = selected?.snapshot?.scores || [];
-  const archiveShots = selected?.snapshot?.shotLogs || selected?.snapshot?.shotlogs || [];
+  const archiveShots = selected?.snapshot?.shotLogs || [];
   const archiveEvents = selected?.snapshot?.events || [];
   const archiveRsvps = selected?.snapshot?.rsvps || [];
-  const archiveScSessions = selected?.snapshot?.scSessions || selected?.snapshot?.sc_sessions || [];
-  const archiveScLogs = selected?.snapshot?.scLogs || selected?.snapshot?.sc_logs || [];
+  const archiveScSessions = selected?.snapshot?.scSessions || [];
+  const archiveScLogs = selected?.snapshot?.scLogs || [];
   const currentMakes = sum(currentShotLogs, ["made", "makes", "score"]);
   const archiveMakes = sum(archiveShots, ["made", "makes", "score"]);
   const metrics = [
