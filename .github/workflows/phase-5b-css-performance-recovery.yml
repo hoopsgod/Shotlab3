@@ -7,6 +7,7 @@ on:
       - 'vite.config.js'
       - 'vite.phase5b.config.js'
       - 'scripts/css-module-dead-selector-pruner.mjs'
+      - 'scripts/analyze-coach-css-recovery.mjs'
       - 'scripts/optimize-production-css.mjs'
       - 'scripts/restructure-production-css.mjs'
       - 'scripts/prune-unreachable-global-selectors.mjs'
@@ -30,6 +31,8 @@ jobs:
         run: node --test tests/css-module-dead-selector-pruner.test.mjs
       - name: Build optimized production bundle
         run: npm run build
+      - name: Analyze Coach CSS cascade debt
+        run: node scripts/analyze-coach-css-recovery.mjs
       - name: Enforce existing performance budgets
         run: npm run verify:performance-budget
       - name: Upload CSS recovery evidence
@@ -40,5 +43,6 @@ jobs:
           path: |
             artifacts/performance/build-metrics.json
             artifacts/performance/css-module-pruning.json
+            artifacts/performance/coach-css-recovery-analysis.json
             artifacts/performance/bundle-ownership.json
           if-no-files-found: warn
