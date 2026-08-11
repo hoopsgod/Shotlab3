@@ -10,6 +10,7 @@ const SOURCE_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx'])
 const MISSION_CONTROL_BODY_SCOPE = 'body.mission-control-active .mcShellV3'
 const MISSION_CONTROL_SHELL_SCOPE = '.mcShellV3'
 const MISSION_CONTROL_CLASS = /^(?:mc[A-Z0-9_-]|mcShellV3$|missionControl$)/
+const MERGEABLE_CONTEXT_AT_RULE = /^@(media|supports|container)\b/i
 
 function findMatchingBrace(source, openIndex) {
   let depth = 1
@@ -131,6 +132,11 @@ function isNestedRuleAtRule(prelude) {
   return /^@(media|supports|container|layer|scope|starting-style)\b/i.test(prelude)
 }
 
+function normalizedContextPart(prelude, openIndex) {
+  const normalized = prelude.replace(/\s+/g, ' ').trim()
+  return MERGEABLE_CONTEXT_AT_RULE.test(normalized) ? normalized : `${normalized}#${openIndex}`
+}
+
 function extractClassNames(selector) {
   return [...selector.matchAll(/\.([_a-zA-Z][\w-]*)/g)].map((match) => match[1])
 }
@@ -170,8 +176,11 @@ function findWinningScopedDeclaration(candidates, current, scopeRank) {
   return candidates.find((candidate) => candidate.scopeRank >= scopeRank && declarationCanBeOverridden(current, candidate.declaration)) || null
 }
 
-function analyzeContext(source, start, end, removals, stats, options) {
-  const rules = []
+function collectRulesByContext(source, start, end, contexts, contextPath, options) {
+  const contextKey = JSON.stringify(contextPath)
+  let rules = contexts.get(contextKey)
+  if (!rules) { rules = []; contexts.set(contextKey, rules) }
+
   let cursor = start
   while (cursor < end) {
     while (cursor < end && /\s/.test(source[cursor])) cursor += 1
@@ -183,8 +192,16 @@ function analyzeContext(source, start, end, removals, stats, options) {
     const close = findMatchingBrace(source, token.index)
     if (close < 0 || close > end) break
     const bodyStart = token.index + 1
+
     if (isNestedRuleAtRule(prelude)) {
-      analyzeContext(source, bodyStart, close, removals, stats, options)
+      collectRulesByContext(
+        source,
+        bodyStart,
+        close,
+        contexts,
+        [...contextPath, normalizedContextPart(prelude, token.index)],
+        options,
+      )
     } else if (!prelude.startsWith('@')) {
       const declarations = parseDeclarations(source, bodyStart, close)
       if (declarations.length) {
@@ -199,7 +216,9 @@ function analyzeContext(source, start, end, removals, stats, options) {
     }
     cursor = close + 1
   }
+}
 
+function analyzeRules(rules, removals, stats) {
   const laterBySelector = new Map()
   const laterByMissionControlKey = new Map()
   for (let ruleIndex = rules.length - 1; ruleIndex >= 0; ruleIndex -= 1) {
@@ -219,13 +238,14 @@ function analyzeContext(source, start, end, removals, stats, options) {
       const scopedLater = rule.missionControl
         ? findWinningScopedDeclaration(scopedSeen?.get(declaration.property), declaration, rule.missionControl.scopeRank)
         : null
-      const laterWins = declarationCanBeOverridden(declaration, exactLater) || Boolean(scopedLater)
+      const exactWins = declarationCanBeOverridden(declaration, exactLater)
+      const laterWins = exactWins || Boolean(scopedLater)
 
       if (laterWins) {
         removals.push({ start: declaration.start, end: declaration.end })
         stats.removedDeclarations += 1
         stats.rawBytesRemoved += declaration.end - declaration.start
-        if (!declarationCanBeOverridden(declaration, exactLater) && scopedLater) stats.scopedDeclarationsRemoved += 1
+        if (!exactWins && scopedLater) stats.scopedDeclarationsRemoved += 1
       } else if (!exactLater || declaration.important) {
         seen.set(declaration.property, declaration)
       }
@@ -245,7 +265,9 @@ export function pruneOverriddenCoachDeclarations(source, {
 } = {}) {
   const removals = []
   const stats = { removedDeclarations: 0, scopedDeclarationsRemoved: 0, rawBytesRemoved: 0 }
-  analyzeContext(source, 0, source.length, removals, stats, { allowMissionControlScope, exclusiveMissionControlClasses })
+  const contexts = new Map()
+  collectRulesByContext(source, 0, source.length, contexts, [], { allowMissionControlScope, exclusiveMissionControlClasses })
+  for (const rules of contexts.values()) analyzeRules(rules, removals, stats)
   if (!removals.length) return { css: source, ...stats }
   removals.sort((a, b) => b.start - a.start)
   let output = source
