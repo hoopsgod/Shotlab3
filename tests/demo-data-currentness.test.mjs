@@ -1,14 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { buildDemoDataBundle, mergeDemoCollection } from "../src/lib/demoData.js";
+import { buildDemoDataBundle, localDateKey, mergeDemoCollection } from "../src/lib/demoData.js";
 
 const demoData = fs.readFileSync("src/lib/demoData.js", "utf8");
 const expertReview = fs.readFileSync("scripts/apply-expert-app-review-v2.mjs", "utf8");
 const screenshotSpec = fs.readFileSync("tests/e2e/app-store-screenshots.spec.mjs", "utf8");
 
-test("demo content uses rolling dates instead of expiring calendar fixtures", () => {
+test("demo content uses rolling local-calendar dates instead of expiring or UTC-shifted fixtures", () => {
   assert.match(demoData, /const relativeDate = \(days = 0\)/);
+  assert.match(demoData, /date\.setHours\(12, 0, 0, 0\)/);
+  assert.match(demoData, /date\.setDate\(date\.getDate\(\) \+ days\)/);
+  assert.doesNotMatch(demoData, /setUTCHours|setUTCDate|toISOString\(\)\.slice\(0, 10\)/);
+  assert.equal(localDateKey(new Date(2026, 7, 10, 23, 45)), "2026-08-10");
   assert.match(demoData, /title: "Team Practice", date: relativeDate\(1\)/);
   assert.match(demoData, /date: relativeDate\(3\)/);
   assert.match(demoData, /date: relativeDate\(5\)/);
