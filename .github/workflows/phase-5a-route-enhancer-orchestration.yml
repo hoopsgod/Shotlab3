@@ -39,6 +39,9 @@ jobs:
         run: npm ci
       - name: Verify orchestration and equivalence contracts
         run: node --test tests/phase-5a-route-enhancer-orchestration.test.mjs
+      - name: Verify full source suite for production promotion
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'march-3-reset-85393dd'
+        run: npm test
       - name: Build exact candidate through centralized enhancer pipeline
         run: npm run build
       - name: Capture candidate performance metrics
@@ -85,7 +88,7 @@ jobs:
           cat > artifacts/phase-5a-route-enhancer-orchestration/production-promotion-scope.txt <<'EOF'
           Relative Phase 5A build equivalence is intentionally scoped to Phase 5A development PRs and stacked descendants where the PR base is the certified cumulative predecessor.
           A production promotion contains later independently certified product phases, so comparing its cumulative bundle size to the older production branch is not the Phase 5A invariant.
-          This production-targeted run still enforces the centralized orchestration source contract, builds the exact candidate, and requires the current absolute performance budget to pass.
+          This production-targeted run still enforces the centralized orchestration source contract, the full source test suite, the exact production build, and the current absolute performance budget.
           EOF
       - name: Upload exact-base equivalence evidence
         if: always()
