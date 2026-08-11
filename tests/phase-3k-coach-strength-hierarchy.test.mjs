@@ -8,12 +8,14 @@ const app = readFileSync('src/App.jsx', 'utf8');
 const css = readFileSync('public/shotlab-phase3k-coach-strength-hierarchy.css', 'utf8');
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/phase-3k-coach-strength-screenshots.spec.mjs', 'utf8');
 
 test('Phase 3K enhancer runs after accepted Phase 3J and remains guarded/idempotent', () => {
-  assert.match(pkg.scripts.dev, /apply-phase3j-coach-events-hierarchy\.mjs[\s\S]*apply-phase3k-coach-strength-hierarchy\.mjs/);
-  assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase3j-coach-events-hierarchy\.mjs[\s\S]*apply-phase3k-coach-strength-hierarchy\.mjs/);
+  assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
+  assert.match(pkg.scripts['prepare:route-enhancers'], /run-route-enhancers\.mjs build/);
+  assert.match(routeEnhancers, /apply-phase3j-coach-events-hierarchy\.mjs[\s\S]*apply-phase3k-coach-strength-hierarchy\.mjs/);
   assert.match(enhancer, /expected exactly one Coach S&C insight-grid anchor/);
   assert.match(enhancer, /Phase 3K Coach S&C hierarchy already applied/);
   assert.match(enhancer, /\$\{'\$\{rate\}'\}/);
