@@ -86,9 +86,14 @@ function readSeedRows(storage, key) {
 function readSeedTeam(storage) {
   const teams = readSeedRows(storage, "sl:teams");
   const players = readSeedRows(storage, "sl:players");
-  const team = teams[0] || {};
-  const playerTeamId = players.find((row) => row?.teamId || row?.team_id)?.teamId
-    || players.find((row) => row?.teamId || row?.team_id)?.team_id;
+  const teamIdOf = (row) => String(row?.teamId || row?.team_id || "");
+  const idOf = (row) => String(row?.id || row?.teamId || row?.team_id || "");
+  const playerTeamId = teamIdOf(players.find((row) => teamIdOf(row) === TEAM_ID))
+    || teamIdOf(players.find((row) => teamIdOf(row)))
+    || TEAM_ID;
+  const team = teams.find((row) => idOf(row) === playerTeamId)
+    || teams.find((row) => idOf(row) === TEAM_ID)
+    || {};
   return {
     id: String(team?.id || team?.teamId || team?.team_id || playerTeamId || TEAM_ID),
     name: String(team?.name || team?.teamName || "Demo Titans"),
