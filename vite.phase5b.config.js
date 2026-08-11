@@ -6,7 +6,6 @@ const COACH_COMMAND_CENTER_SUFFIX = '/src/components/CoachCommandCenter.jsx'
 const SUPERSEDED_MISSION_CONTROL_CSS = new Set([
   './CoachMissionControlPolish.css',
   './CoachMissionControl2026.css',
-  './CoachMissionControlFinal.css',
 ])
 const RETIRED_COACH_CSS_MODULE = '\0shotlab-retired-mission-control-css'
 
