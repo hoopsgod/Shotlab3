@@ -5,6 +5,7 @@ import { transform as transformCss } from "lightningcss";
 
 const DIST_DIR = path.resolve(process.cwd(), "dist");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
+const FINAL_COACH_MODE = process.argv.includes("--final-coach");
 
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
@@ -45,10 +46,28 @@ function compactCoachCss(css, filename) {
   }).code.toString("utf8");
 }
 
+async function finalizeCoachCss(files) {
+  const coachFile = files.find((file) => COACH_WORKSPACE_ASSET.test(path.basename(file)));
+  if (!coachFile) {
+    console.log("CoachWorkspaces CSS asset not found; no final Coach compaction applied.");
+    return;
+  }
+  const source = await readFile(coachFile, "utf8");
+  const output = compactCoachCss(source, path.basename(coachFile));
+  if (output !== source) await writeFile(coachFile, output);
+  console.log(`Final Coach CSS compaction saved ${((Buffer.byteLength(source) - Buffer.byteLength(output)) / 1024).toFixed(1)} KiB raw after selector reachability pruning.`);
+}
+
 async function main() {
   await stat(DIST_DIR);
-  const removedAuthorityCopies = await removeBundledAuthorityDuplicates();
   const files = await listCssFiles(DIST_DIR);
+
+  if (FINAL_COACH_MODE) {
+    await finalizeCoachCss(files);
+    return;
+  }
+
+  const removedAuthorityCopies = await removeBundledAuthorityDuplicates();
   let sourceBytes = 0;
   let outputBytes = 0;
   let changedFiles = 0;
@@ -62,10 +81,7 @@ async function main() {
       comments: false,
       forceMediaMerge: isCoachWorkspace,
     });
-    let output = result.css;
-    if (isCoachWorkspace) {
-      output = compactCoachCss(output, path.basename(file));
-    }
+    const output = result.css;
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
