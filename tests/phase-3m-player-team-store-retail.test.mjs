@@ -6,11 +6,13 @@ const enhancer = readFileSync('scripts/apply-phase3m-player-team-store-retail.mj
 const css = readFileSync('public/shotlab-phase3m-player-team-store-retail.css', 'utf8');
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const screenshots = readFileSync('tests/e2e/phase-3m-player-team-store-retail-screenshots.spec.mjs', 'utf8');
 
 test('Phase 3M runs after accepted Team Store and Leaderboard transforms with a guarded idempotent mutation', () => {
-  assert.match(pkg.scripts.dev, /apply-phase3i-team-store-immersive\.mjs[\s\S]*apply-phase3l-coach-leaderboard-hierarchy\.mjs[\s\S]*apply-phase3m-player-team-store-retail\.mjs/);
-  assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase3i-team-store-immersive\.mjs[\s\S]*apply-phase3m-player-team-store-retail\.mjs/);
+  assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
+  assert.match(pkg.scripts['prepare:route-enhancers'], /run-route-enhancers\.mjs build/);
+  assert.match(routeEnhancers, /apply-phase3i-team-store-immersive\.mjs[\s\S]*apply-phase3l-coach-leaderboard-hierarchy\.mjs[\s\S]*apply-phase3m-player-team-store-retail\.mjs/);
   assert.match(enhancer, /expected exactly one anchor/);
   assert.match(enhancer, /Player Team Store retail hierarchy already applied/);
 });
@@ -21,7 +23,7 @@ test('Player Team Store gains stable first-screen retail hierarchy seams', () =>
     'data-testid="player-team-store-hero"',
     'data-testid="player-team-store-card"',
     'Official program store',
-    'Your team. Your gear.',
+    'Rep your program.',
     'Partner checkout',
   ]) assert.ok(enhancer.includes(marker), `missing Player Team Store marker: ${marker}`);
 });
