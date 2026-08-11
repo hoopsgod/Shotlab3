@@ -16,6 +16,7 @@ import {
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const packageJson = JSON.parse(await readFile(path.join(rootDir, 'package.json'), 'utf8'))
+const phase5aEnhancer = await readFile(path.join(rootDir, 'scripts/apply-phase5a-coach-daily-intelligence.mjs'), 'utf8')
 
 const buildPrefix = [
   'scripts/run-finish-v9-compatible.mjs',
@@ -97,6 +98,12 @@ test('package scripts delegate orchestration instead of duplicating the enhancer
   )
   assert.doesNotMatch(packageJson.scripts.dev, /apply-phase/)
   assert.doesNotMatch(packageJson.scripts['prepare:route-enhancers'], /apply-phase/)
+})
+
+test('Phase 5A prepared source includes both home and program scores in season comparisons', () => {
+  assert.match(phase5aEnhancer, /currentScores:\[\.\.\.safeScores,\.\.\.safeProgramScores\]/)
+  assert.match(phase5aEnhancer, /\[coachRosterPlayers,safeScores,safeProgramScores,safeShotLogs/)
+  assert.match(phase5aEnhancer, /season comparison must include both home and program score collections/)
 })
 
 test('mode selection is explicit and rejects silent fallback', () => {
