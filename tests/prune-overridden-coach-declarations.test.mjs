@@ -20,7 +20,7 @@ test('removes an earlier property when the exact selector later replaces it', ()
   assert.equal(result.removedDeclarations, 1)
 })
 
-test('does not cross media contexts', () => {
+test('does not cross different media contexts', () => {
   const source = '.card{padding:12px}@media(max-width:600px){.card{padding:8px}}'
   const result = pruneOverriddenCoachDeclarations(source)
   assert.equal(result.css, source)
@@ -31,6 +31,20 @@ test('prunes repeated selectors inside the same media context', () => {
   const source = '@media(max-width:600px){.card{padding:12px;color:red}.card{padding:8px}}'
   const result = pruneOverriddenCoachDeclarations(source)
   assert.equal(result.css, '@media(max-width:600px){.card{color:red}.card{padding:8px}}')
+})
+
+test('prunes exact overrides across separate identical media blocks', () => {
+  const source = '@media(max-width:600px){.card{padding:12px;color:red}}.other{display:block}@media(max-width:600px){.card{padding:8px}}'
+  const result = pruneOverriddenCoachDeclarations(source)
+  assert.equal(result.css, '@media(max-width:600px){.card{color:red}}.other{display:block}@media(max-width:600px){.card{padding:8px}}')
+  assert.equal(result.removedDeclarations, 1)
+})
+
+test('keeps similar but different media queries independent', () => {
+  const source = '@media(max-width:600px){.card{padding:12px}}@media(max-width:700px){.card{padding:8px}}'
+  const result = pruneOverriddenCoachDeclarations(source)
+  assert.equal(result.css, source)
+  assert.equal(result.removedDeclarations, 0)
 })
 
 test('preserves an earlier important declaration when the later declaration is not important', () => {
@@ -49,6 +63,13 @@ test('keeps nested supports and media contexts independent', () => {
   const source = '.card{display:block}@supports(display:grid){.card{display:block}.card{display:grid}}'
   const result = pruneOverriddenCoachDeclarations(source)
   assert.equal(result.css, '.card{display:block}@supports(display:grid){.card{}.card{display:grid}}')
+})
+
+test('merges repeated identical nested support/media context chains', () => {
+  const source = '@media(max-width:600px){@supports(display:grid){.card{gap:8px;color:red}}}@media(max-width:600px){@supports(display:grid){.card{gap:12px}}}'
+  const result = pruneOverriddenCoachDeclarations(source)
+  assert.equal(result.css, '@media(max-width:600px){@supports(display:grid){.card{color:red}}}@media(max-width:600px){@supports(display:grid){.card{gap:12px}}}')
+  assert.equal(result.removedDeclarations, 1)
 })
 
 test('removes an unscoped Mission Control declaration replaced by a later shell-scoped declaration', () => {
@@ -77,6 +98,13 @@ test('does not cross media contexts when pruning Mission Control scopes', () => 
   const result = pruneOverriddenCoachDeclarations(source, scopedOptions)
   assert.equal(result.css, source)
   assert.equal(result.scopedDeclarationsRemoved, 0)
+})
+
+test('prunes Mission Control scope overrides across separate identical media blocks', () => {
+  const source = '@media(max-width:600px){.mcCard{padding:12px;color:red}}@media(max-width:600px){.mcShellV3 .mcCard{padding:8px}}'
+  const result = pruneOverriddenCoachDeclarations(source, scopedOptions)
+  assert.equal(result.css, '@media(max-width:600px){.mcCard{color:red}}@media(max-width:600px){.mcShellV3 .mcCard{padding:8px}}')
+  assert.equal(result.scopedDeclarationsRemoved, 1)
 })
 
 test('skips grouped Mission Control selectors for scoped pruning', () => {
