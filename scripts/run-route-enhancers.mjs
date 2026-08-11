@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -46,6 +47,9 @@ const FINAL_ROUTE_ENHANCERS = Object.freeze([
   'scripts/apply-phase4e11-coach-residual-touch-safety.mjs',
 ])
 
+const RELEASE_AUTH_RECOVERY_MARKER = 'const supabaseSessionRequest=SUPABASE_AUTH_ENABLED?supabase.auth.getSession():null;'
+const PHASE5A_COACH_INTELLIGENCE = 'scripts/apply-phase5a-coach-daily-intelligence.mjs'
+
 export const DEV_ROUTE_ENHANCERS = Object.freeze([
   ...CORE_ROUTE_ENHANCERS,
   ...FINAL_ROUTE_ENHANCERS,
@@ -65,10 +69,23 @@ export function routeEnhancersFor(mode) {
   throw new Error(`Unknown route-enhancer mode: ${String(mode)}. Expected "dev" or "build".`)
 }
 
+function hasReleaseAuthRecovery(cwd) {
+  try {
+    return readFileSync(path.resolve(cwd, 'src/App.jsx'), 'utf8').includes(RELEASE_AUTH_RECOVERY_MARKER)
+  } catch {
+    return false
+  }
+}
+
 export function runRouteEnhancers(mode, { cwd = process.cwd(), env = process.env } = {}) {
   const enhancers = routeEnhancersFor(mode)
 
   for (const script of enhancers) {
+    if (script === PHASE5A_COACH_INTELLIGENCE && hasReleaseAuthRecovery(cwd)) {
+      console.log('Phase 5A Coach intelligence already satisfied before release auth recovery; skipping repeat mutation.')
+      continue
+    }
+
     const result = spawnSync(process.execPath, [path.resolve(cwd, script)], {
       cwd,
       env,
