@@ -50,7 +50,11 @@ jobs:
           test -f artifacts/performance/build-metrics.json
           cp artifacts/performance/build-metrics.json /tmp/phase5a-head-metrics.json
           echo "Candidate absolute performance-budget exit code: ${absolute_budget_status}"
+      - name: Enforce absolute budget for production promotion
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'march-3-reset-85393dd'
+        run: npm run verify:performance-budget
       - name: Build exact cumulative baseline through legacy npm chain
+        if: github.event_name != 'pull_request' || github.event.pull_request.base.ref != 'march-3-reset-85393dd'
         run: |
           git reset --hard "${PHASE5A_HEAD_SHA}"
           git clean -fd
@@ -65,6 +69,7 @@ jobs:
           cp artifacts/performance/build-metrics.json /tmp/phase5a-base-metrics.json
           echo "Baseline absolute performance-budget exit code: ${absolute_budget_status}"
       - name: Verify candidate bundle does not regress from exact base
+        if: github.event_name != 'pull_request' || github.event.pull_request.base.ref != 'march-3-reset-85393dd'
         run: |
           git reset --hard "${PHASE5A_BASE_SHA}"
           git checkout --force "${PHASE5A_HEAD_SHA}"
@@ -72,6 +77,16 @@ jobs:
           mkdir -p artifacts/phase-5a-route-enhancer-orchestration
           cp /tmp/phase5a-base-metrics.json artifacts/phase-5a-route-enhancer-orchestration/base-build-metrics.json
           cp /tmp/phase5a-head-metrics.json artifacts/phase-5a-route-enhancer-orchestration/head-build-metrics.json
+      - name: Record production-promotion scope
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'march-3-reset-85393dd'
+        run: |
+          mkdir -p artifacts/phase-5a-route-enhancer-orchestration
+          cp /tmp/phase5a-head-metrics.json artifacts/phase-5a-route-enhancer-orchestration/head-build-metrics.json
+          cat > artifacts/phase-5a-route-enhancer-orchestration/production-promotion-scope.txt <<'EOF'
+          Relative Phase 5A build equivalence is intentionally scoped to Phase 5A development PRs and stacked descendants where the PR base is the certified cumulative predecessor.
+          A production promotion contains later independently certified product phases, so comparing its cumulative bundle size to the older production branch is not the Phase 5A invariant.
+          This production-targeted run still enforces the centralized orchestration source contract, builds the exact candidate, and requires the current absolute performance budget to pass.
+          EOF
       - name: Upload exact-base equivalence evidence
         if: always()
         uses: actions/upload-artifact@v4
