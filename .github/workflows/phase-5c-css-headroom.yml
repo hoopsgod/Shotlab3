@@ -42,4 +42,5 @@ jobs:
           path: |
             artifacts/performance/build-metrics.json
             artifacts/performance/coach-css-recovery-analysis.json
+            dist/assets/CoachWorkspaces-*.css
           if-no-files-found: warn
