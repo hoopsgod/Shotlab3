@@ -36,7 +36,7 @@ async function listCssFiles(directory) {
   return files;
 }
 
-function compactCoachCss(css, filename) {
+function compactProductionCss(css, filename) {
   return transformCss({
     filename,
     code: Buffer.from(css),
@@ -46,16 +46,23 @@ function compactCoachCss(css, filename) {
   }).code.toString("utf8");
 }
 
-async function finalizeCoachCss(files) {
-  const coachFile = files.find((file) => COACH_WORKSPACE_ASSET.test(path.basename(file)));
-  if (!coachFile) {
-    console.log("CoachWorkspaces CSS asset not found; no final Coach compaction applied.");
-    return;
+async function finalizeProductionCss(files) {
+  let sourceBytes = 0;
+  let outputBytes = 0;
+  let changedFiles = 0;
+
+  for (const file of files) {
+    const source = await readFile(file, "utf8");
+    const output = compactProductionCss(source, path.basename(file));
+    sourceBytes += Buffer.byteLength(source);
+    outputBytes += Buffer.byteLength(output);
+    if (output !== source) {
+      await writeFile(file, output);
+      changedFiles += 1;
+    }
   }
-  const source = await readFile(coachFile, "utf8");
-  const output = compactCoachCss(source, path.basename(coachFile));
-  if (output !== source) await writeFile(coachFile, output);
-  console.log(`Final Coach CSS compaction saved ${((Buffer.byteLength(source) - Buffer.byteLength(output)) / 1024).toFixed(1)} KiB raw after selector reachability pruning.`);
+
+  console.log(`Final production CSS compaction changed ${changedFiles}/${files.length} files; saved ${((sourceBytes - outputBytes) / 1024).toFixed(1)} KiB raw after selector reachability pruning.`);
 }
 
 async function main() {
@@ -63,7 +70,7 @@ async function main() {
   const files = await listCssFiles(DIST_DIR);
 
   if (FINAL_COACH_MODE) {
-    await finalizeCoachCss(files);
+    await finalizeProductionCss(files);
     return;
   }
 
