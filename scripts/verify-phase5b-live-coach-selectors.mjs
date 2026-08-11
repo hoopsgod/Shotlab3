@@ -2,13 +2,14 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const assetsDir = path.resolve('dist/assets')
+const coachSourcePath = path.resolve('src/components/CoachCommandCenter.jsx')
 
 if (!fs.existsSync(assetsDir)) {
   throw new Error(`Missing production assets directory: ${assetsDir}`)
 }
 
-const builtAssets = fs.readdirSync(assetsDir)
-  .filter((name) => name.endsWith('.css') || name.endsWith('.js'))
+const builtCss = fs.readdirSync(assetsDir)
+  .filter((name) => name.endsWith('.css'))
   .map((name) => fs.readFileSync(path.join(assetsDir, name), 'utf8'))
   .join('\n')
 
@@ -21,15 +22,18 @@ const requiredSelectors = [
   '.mcDrawerLogo img',
 ]
 
-const missing = requiredSelectors.filter((selector) => !builtAssets.includes(selector))
-const retainedStyleMarker = 'shotlab-retained-mission-control-css'
-
-if (!builtAssets.includes(retainedStyleMarker)) {
-  throw new Error('Phase 5B retained Coach Mission Control style module is missing from the production bundle')
-}
-
+const missing = requiredSelectors.filter((selector) => !builtCss.includes(selector))
 if (missing.length) {
   throw new Error(`Phase 5B removed live Coach Mission Control selectors: ${missing.join(', ')}`)
 }
 
-console.log(`Phase 5B lazy Coach selector preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length})`)
+const coachSource = fs.readFileSync(coachSourcePath, 'utf8')
+const brandLockup = coachSource.match(/<div className="mcBrandLockup">([\s\S]*?)<\/div>/)?.[1]
+if (!brandLockup) {
+  throw new Error('Phase 5B could not verify the Coach brand-lockup DOM contract')
+}
+if (/<img\b/.test(brandLockup)) {
+  throw new Error('Coach brand lockup now renders an image; restore its production image rules before shipping')
+}
+
+console.log(`Phase 5B Coach CSS preservation: PASS (${requiredSelectors.length}/${requiredSelectors.length}); dead brand-image contract remains valid`)
