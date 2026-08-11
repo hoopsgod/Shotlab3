@@ -6,11 +6,13 @@ const enhancer = readFileSync('scripts/apply-phase3f-profile-intelligence.mjs', 
 const css = readFileSync('public/shotlab-phase3f-profile-intelligence.css', 'utf8');
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 
 test('Phase 3F enhancer is guarded and runs for both dev and production build preparation', () => {
-  assert.match(pkg.scripts.dev, /apply-phase3f-profile-intelligence\.mjs/);
-  assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase3f-profile-intelligence\.mjs/);
+  assert.equal(pkg.scripts.dev, 'node scripts/run-route-enhancers.mjs dev && vite --host 0.0.0.0 --port 4173');
+  assert.equal(pkg.scripts['prepare:route-enhancers'], 'node scripts/run-route-enhancers.mjs build');
+  assert.match(routeEnhancers, /apply-phase3f-profile-intelligence\.mjs/);
   assert.match(enhancer, /expected exactly one anchor/);
   assert.match(enhancer, /Phase 3F Profile disclosure already applied/);
   assert.match(enhancer, /Phase 3F analytics controls already applied/);
