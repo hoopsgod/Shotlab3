@@ -6,12 +6,14 @@ const enhancer = readFileSync('scripts/apply-phase3g-coach-drills-hierarchy.mjs'
 const css = readFileSync('public/shotlab-phase3g-coach-drills-hierarchy.css', 'utf8');
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/design-system-screenshots.spec.mjs', 'utf8');
 
 test('Phase 3G enhancer is guarded and runs after the accepted Phase 3F transform', () => {
-  assert.match(pkg.scripts.dev, /apply-phase3f-profile-intelligence\.mjs[\s\S]*apply-phase3g-coach-drills-hierarchy\.mjs/);
-  assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase3f-profile-intelligence\.mjs[\s\S]*apply-phase3g-coach-drills-hierarchy\.mjs/);
+  assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
+  assert.match(pkg.scripts['prepare:route-enhancers'], /run-route-enhancers\.mjs build/);
+  assert.match(routeEnhancers, /apply-phase3f-profile-intelligence\.mjs[\s\S]*apply-phase3g-coach-drills-hierarchy\.mjs/);
   assert.match(enhancer, /expected exactly one anchor/);
   assert.match(enhancer, /Phase 3G Coach Drills hierarchy already applied/);
 });
