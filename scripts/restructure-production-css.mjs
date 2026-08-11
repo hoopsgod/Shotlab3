@@ -1,6 +1,7 @@
 import { readdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { minify } from "csso";
+import { transform as transformCss } from "lightningcss";
 
 const DIST_DIR = path.resolve(process.cwd(), "dist");
 const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
@@ -34,6 +35,16 @@ async function listCssFiles(directory) {
   return files;
 }
 
+function compactCoachCss(css, filename) {
+  return transformCss({
+    filename,
+    code: Buffer.from(css),
+    minify: true,
+    sourceMap: false,
+    errorRecovery: false,
+  }).code.toString("utf8");
+}
+
 async function main() {
   await stat(DIST_DIR);
   const removedAuthorityCopies = await removeBundledAuthorityDuplicates();
@@ -49,14 +60,12 @@ async function main() {
       filename: path.relative(DIST_DIR, file),
       restructure: true,
       comments: false,
-      // Phase 5B: the Coach workspace has accumulated many identical media
-      // contexts from successive presentation layers. CSSO keeps this off by
-      // default because non-adjacent media merging can be surprising in a
-      // general stylesheet. The Coach bundle is protected by exact-head visual
-      // and interaction gates, so merge only this measured hotspot.
       forceMediaMerge: isCoachWorkspace,
     });
-    const output = result.css;
+    let output = result.css;
+    if (isCoachWorkspace) {
+      output = compactCoachCss(output, path.basename(file));
+    }
     sourceBytes += Buffer.byteLength(source);
     outputBytes += Buffer.byteLength(output);
     if (output !== source) {
