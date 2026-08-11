@@ -5,11 +5,13 @@ import { readFileSync } from "node:fs";
 const app = readFileSync("src/App.jsx", "utf8");
 const enhancer = readFileSync("scripts/apply-phase3h-coach-players-hierarchy.mjs", "utf8");
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
+const routeEnhancers = readFileSync("scripts/run-route-enhancers.mjs", "utf8");
 const screenshots = readFileSync("tests/e2e/design-system-screenshots.spec.mjs", "utf8");
 
 test("Phase 3H compatibility verifier remains in the build pipeline", () => {
-  assert.match(pkg.scripts.dev, /apply-phase3g-coach-drills-hierarchy\.mjs[\s\S]*apply-phase3h-coach-players-hierarchy\.mjs/);
-  assert.match(pkg.scripts["prepare:route-enhancers"], /apply-phase3g-coach-drills-hierarchy\.mjs[\s\S]*apply-phase3h-coach-players-hierarchy\.mjs/);
+  assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
+  assert.match(pkg.scripts["prepare:route-enhancers"], /run-route-enhancers\.mjs build/);
+  assert.match(routeEnhancers, /apply-phase3g-coach-drills-hierarchy\.mjs[\s\S]*apply-phase3h-coach-players-hierarchy\.mjs/);
   assert.doesNotMatch(enhancer, /writeFileSync/);
   assert.match(enhancer, /Phase 5B\.3 supersedes the old build-time disclosure rewrite/);
 });
