@@ -54,8 +54,8 @@ function performanceFixture() {
 }
 
 test('route enhancer manifests preserve the certified dev/build ordering contract', () => {
-  assert.equal(DEV_ROUTE_ENHANCERS.length, 36)
-  assert.equal(BUILD_ROUTE_ENHANCERS.length, 39)
+  assert.equal(DEV_ROUTE_ENHANCERS.length, 37)
+  assert.equal(BUILD_ROUTE_ENHANCERS.length, 40)
   assertUnique('dev route enhancer manifest', DEV_ROUTE_ENHANCERS)
   assertUnique('build route enhancer manifest', BUILD_ROUTE_ENHANCERS)
 
