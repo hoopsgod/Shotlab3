@@ -25,6 +25,18 @@ async function capture(page, name) {
 
 test("Player Team Store reads as a premium retail destination and restores navigation cleanly", async ({ page }) => {
   await installRoutes(page);
+  await page.addInitScript(() => {
+    window.localStorage.setItem("sl:team-stores", JSON.stringify([{
+      id: "team-store-team-demo-titans",
+      teamId: "team-demo-titans",
+      provider: "squadlocker",
+      storeName: "Demo Team Store",
+      storeUrl: "https://example.com/demo-team-store",
+      status: "active",
+      createdAt: "2026-08-10T12:00:00.000Z",
+      updatedAt: "2026-08-10T12:00:00.000Z",
+    }]));
+  });
   await page.goto("/");
   const demoButton = page.getByRole("button", { name: /Player demo/i });
   await expect(demoButton).toBeVisible({ timeout: 20_000 });
@@ -49,7 +61,7 @@ test("Player Team Store reads as a premium retail destination and restores navig
   await expect(retail).toBeVisible();
   await expect(hero).toBeVisible();
   await expect(card).toBeVisible();
-  await expect(page.getByText("Your team. Your gear.", { exact: true })).toBeVisible();
+  await expect(page.getByText("Rep your program.", { exact: true })).toBeVisible();
   await expect(page.getByText("Partner checkout", { exact: true })).toBeVisible();
   await expect(card.getByText("Demo Team Store", { exact: true }).first()).toBeVisible();
   await expect(card.getByText("Demo Team Team Store", { exact: true })).toHaveCount(0);
@@ -69,9 +81,9 @@ test("Player Team Store reads as a premium retail destination and restores navig
   expect(heroStyle.backgroundImage).toContain("gradient");
   expect(parseFloat(heroStyle.borderRadius)).toBeGreaterThanOrEqual(20);
 
-  const disabledShop = retail.locator(".ts-preview-button-disabled");
-  await expect(disabledShop).toBeVisible();
-  await expect(disabledShop).toContainText("SHOP TEAM STORE");
+  const shopButton = retail.getByRole("button", { name: /SHOP TEAM STORE/i });
+  await expect(shopButton).toBeVisible();
+  await expect(shopButton).toHaveText(/SHOP TEAM STORE/);
 
   await capture(page, "04m-player-team-store-retail");
 
