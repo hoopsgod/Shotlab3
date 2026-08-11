@@ -4,6 +4,7 @@ import { createCssModuleDeadSelectorPruner } from './scripts/css-module-dead-sel
 
 const COACH_COMMAND_CENTER_SUFFIX = '/src/components/CoachCommandCenter.jsx'
 const SUPERSEDED_MISSION_CONTROL_CSS = new Set([
+  './CoachMissionControlHeader.css',
   './CoachMissionControlPolish.css',
   './CoachMissionControl2026.css',
 ])
