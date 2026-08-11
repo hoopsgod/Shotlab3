@@ -14,17 +14,23 @@ const STORAGE_KEYS = Object.freeze({
 const DEMO_TEAM_ID = "team-demo-titans";
 const DEMO_TIMESTAMP = Date.parse("2026-03-20T12:00:00.000Z");
 
+const padDatePart = (value) => String(value).padStart(2, "0");
+export const localDateKey = (value = new Date()) => {
+  const date = value instanceof Date ? value : new Date(value);
+  return `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`;
+};
+
 const relativeDate = (days = 0) => {
   const date = new Date();
-  date.setUTCHours(12, 0, 0, 0);
-  date.setUTCDate(date.getUTCDate() + days);
-  return date.toISOString().slice(0, 10);
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+  return localDateKey(date);
 };
 
 const relativeTimestamp = (days = 0, hour = 18, minute = 0) => {
   const date = new Date();
-  date.setUTCHours(hour, minute, 0, 0);
-  date.setUTCDate(date.getUTCDate() + days);
+  date.setHours(hour, minute, 0, 0);
+  date.setDate(date.getDate() + days);
   return date.getTime();
 };
 
