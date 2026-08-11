@@ -3,6 +3,7 @@ import path from "node:path";
 import { minify } from "csso";
 
 const DIST_DIR = path.resolve(process.cwd(), "dist");
+const COACH_WORKSPACE_ASSET = /^CoachWorkspaces-.*\.css$/;
 
 async function removeBundledAuthorityDuplicates() {
   const indexPath = path.join(DIST_DIR, "index.html");
@@ -43,11 +44,17 @@ async function main() {
 
   for (const file of files) {
     const source = await readFile(file, "utf8");
+    const isCoachWorkspace = COACH_WORKSPACE_ASSET.test(path.basename(file));
     const result = minify(source, {
       filename: path.relative(DIST_DIR, file),
       restructure: true,
       comments: false,
-      forceMediaMerge: false,
+      // Phase 5B: the Coach workspace has accumulated many identical media
+      // contexts from successive presentation layers. CSSO keeps this off by
+      // default because non-adjacent media merging can be surprising in a
+      // general stylesheet. The Coach bundle is protected by exact-head visual
+      // and interaction gates, so merge only this measured hotspot.
+      forceMediaMerge: isCoachWorkspace,
     });
     const output = result.css;
     sourceBytes += Buffer.byteLength(source);
