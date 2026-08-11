@@ -7,12 +7,14 @@ const dashboards = readFileSync('src/components/CoachInteractiveDashboards.jsx',
 const css = readFileSync('public/shotlab-phase3j-coach-events-hierarchy.css', 'utf8');
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/design-system-screenshots.spec.mjs', 'utf8');
 
 test('Phase 3J enhancer runs after accepted Phase 3I and remains guarded/idempotent', () => {
-  assert.match(pkg.scripts.dev, /apply-phase3i-team-store-immersive\.mjs[\s\S]*apply-phase3j-coach-events-hierarchy\.mjs/);
-  assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase3i-team-store-immersive\.mjs[\s\S]*apply-phase3j-coach-events-hierarchy\.mjs/);
+  assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
+  assert.match(pkg.scripts['prepare:route-enhancers'], /run-route-enhancers\.mjs build/);
+  assert.match(routeEnhancers, /apply-phase3i-team-store-immersive\.mjs[\s\S]*apply-phase3j-coach-events-hierarchy\.mjs/);
   assert.match(enhancer, /expected exactly one Coach Events insight-grid anchor/);
   assert.match(enhancer, /Phase 3J Coach Events hierarchy already applied/);
 });
