@@ -10,6 +10,7 @@ const SOURCE_EXTENSIONS = new Set(['.js', '.jsx', '.ts', '.tsx'])
 const MISSION_CONTROL_BODY_SCOPE = 'body.mission-control-active .mcShellV3'
 const MISSION_CONTROL_SHELL_SCOPE = '.mcShellV3'
 const MISSION_CONTROL_CLASS = /^(?:mc[A-Z0-9_-]|mcShellV3$|missionControl$)/
+const MISSION_CONTROL_TOKEN = /\b(?:mc[A-Z][\w-]*|mcShellV3|missionControl)\b/g
 const MERGEABLE_CONTEXT_AT_RULE = /^@(media|supports|container)\b/i
 
 function findMatchingBrace(source, openIndex) {
@@ -139,6 +140,26 @@ function normalizedContextPart(prelude, openIndex) {
 
 function extractClassNames(selector) {
   return [...selector.matchAll(/\.([_a-zA-Z][\w-]*)/g)].map((match) => match[1])
+}
+
+export function extractRenderedMissionControlClasses(source) {
+  const rendered = new Set()
+  const addTokens = (snippet = '') => {
+    for (const match of snippet.matchAll(MISSION_CONTROL_TOKEN)) rendered.add(match[0])
+  }
+  const patterns = [
+    /\bclassName\s*=\s*["']([^"']*)["']/g,
+    /\bclassName\s*=\s*\{?\s*`([^`]*)`\s*\}?/gs,
+    /\bclassName\s*=\s*\{([^}]{0,1200})\}/gs,
+    /\.className\s*=\s*["']([^"']*)["']/g,
+    /\.className\s*=\s*`([^`]*)`/gs,
+    /\.setAttribute\(\s*["']class(?:Name)?["']\s*,([^)]{0,1200})\)/gs,
+    /\.classList\.(?:add|toggle|replace)\(([^)]{0,1200})\)/gs,
+  ]
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) addTokens(match[1])
+  }
+  return rendered
 }
 
 function describeMissionControlSelector(selector, exclusiveMissionControlClasses) {
@@ -295,17 +316,19 @@ async function collectExclusiveMissionControlClasses() {
     throw new Error('Phase 5C requires CoachCommandCenter full mode to render the mcShellV3 root')
   }
 
-  const commandCenterClasses = new Set(
-    [...commandCenterSource.matchAll(/\b(?:mc[A-Z][\w-]*|mcShellV3|missionControl)\b/g)].map((match) => match[0]),
-  )
+  const commandCenterClasses = extractRenderedMissionControlClasses(commandCenterSource)
   const owners = new Map([...commandCenterClasses].map((className) => [className, new Set()]))
   const files = await listSourceFiles(SRC_DIR)
 
   for (const file of files) {
     const source = await readFile(file, 'utf8')
     const relative = path.relative(SRC_DIR, file).replaceAll('\\', '/')
+    const extension = path.extname(file)
+    const renderedClasses = extension === '.jsx' || extension === '.tsx'
+      ? new Set([...source.matchAll(MISSION_CONTROL_TOKEN)].map((match) => match[0]))
+      : extractRenderedMissionControlClasses(source)
     for (const className of commandCenterClasses) {
-      if (source.includes(className)) owners.get(className).add(relative)
+      if (renderedClasses.has(className)) owners.get(className).add(relative)
     }
   }
 
