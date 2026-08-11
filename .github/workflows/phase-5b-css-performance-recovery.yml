@@ -8,6 +8,7 @@ on:
       - 'vite.phase5b.config.js'
       - 'scripts/css-module-dead-selector-pruner.mjs'
       - 'scripts/prune-overridden-coach-declarations.mjs'
+      - 'scripts/prune-unreferenced-keyframes.mjs'
       - 'scripts/analyze-coach-css-recovery.mjs'
       - 'scripts/optimize-production-css.mjs'
       - 'scripts/restructure-production-css.mjs'
@@ -15,6 +16,7 @@ on:
       - 'scripts/remove-unreferenced-authority-css.mjs'
       - 'tests/css-module-dead-selector-pruner.test.mjs'
       - 'tests/prune-overridden-coach-declarations.test.mjs'
+      - 'tests/prune-unreferenced-keyframes.test.mjs'
       - '.github/workflows/phase-5b-css-performance-recovery.yml'
   workflow_dispatch:
 
@@ -30,7 +32,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Verify pruning safety contracts
-        run: node --test tests/css-module-dead-selector-pruner.test.mjs tests/prune-overridden-coach-declarations.test.mjs
+        run: node --test tests/css-module-dead-selector-pruner.test.mjs tests/prune-overridden-coach-declarations.test.mjs tests/prune-unreferenced-keyframes.test.mjs
       - name: Build optimized production bundle
         run: npm run build
       - name: Analyze Coach CSS cascade debt
