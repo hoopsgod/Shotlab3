@@ -1,0 +1,44 @@
+name: Phase 5B CSS Performance Recovery
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'vite.config.js'
+      - 'vite.phase5b.config.js'
+      - 'scripts/css-module-dead-selector-pruner.mjs'
+      - 'scripts/optimize-production-css.mjs'
+      - 'scripts/restructure-production-css.mjs'
+      - 'scripts/prune-unreachable-global-selectors.mjs'
+      - 'scripts/remove-unreferenced-authority-css.mjs'
+      - 'tests/css-module-dead-selector-pruner.test.mjs'
+      - '.github/workflows/phase-5b-css-performance-recovery.yml'
+  workflow_dispatch:
+
+jobs:
+  css-performance-recovery:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Verify pruning safety contracts
+        run: node --test tests/css-module-dead-selector-pruner.test.mjs
+      - name: Build optimized production bundle
+        run: npm run build
+      - name: Enforce existing performance budgets
+        run: npm run verify:performance-budget
+      - name: Upload CSS recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-5b-css-performance-recovery-evidence
+          path: |
+            artifacts/performance/build-metrics.json
+            artifacts/performance/css-module-pruning.json
+            artifacts/performance/bundle-ownership.json
+          if-no-files-found: warn
