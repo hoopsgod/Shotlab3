@@ -8,6 +8,7 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(here, '..');
 const srcRoot = path.join(repoRoot, 'src');
 const appSource = await readFile(path.join(srcRoot, 'App.jsx'), 'utf8');
+const runtimeParitySource = await readFile(path.join(repoRoot, 'tests/e2e/demo-paid-runtime-parity.spec.mjs'), 'utf8');
 
 const requiredSharedSurfaces = [
   'CoachPlayersInteractiveDashboard',
@@ -101,6 +102,13 @@ test('demo mode is limited to identity, sample data, and persistence safety—no
 
   assert.match(appSource, /import "\.\/styles\/PremiumWorkspace\.css";/);
   assert.match(appSource, /import "\.\/styles\/CoachInteractiveDashboard\.css";/);
+});
+
+test('runtime parity mirrors the active demo team instead of assuming stored team order', () => {
+  assert.match(runtimeParitySource, /const TEAM_ID = "team-demo-titans"/);
+  assert.match(runtimeParitySource, /teams\.find\(\(row\) => idOf\(row\) === playerTeamId\)/);
+  assert.match(runtimeParitySource, /teams\.find\(\(row\) => idOf\(row\) === TEAM_ID\)/);
+  assert.doesNotMatch(runtimeParitySource, /const team = teams\[0\]/);
 });
 
 test('Team Store source and build enhancer preserve the same player state for demo and registered users', async () => {
