@@ -21,6 +21,7 @@ import {
   TEAM_STORE_OPEN_EVENT,
   normalizeTeamStorePortalIdentity,
 } from "../lib/teamStorePortalBridge.js";
+import { isDemoAccount } from "../lib/demoMode.js";
 import "./TeamStorePortal.css";
 
 const STORAGE_SESSION = "sl:session";
@@ -239,6 +240,7 @@ export default function TeamStorePortal() {
   );
   const partnerReadiness = useMemo(() => getSquadLockerPartnerReadiness(), []);
   const verifiedReferralStart = referralStart?.attribution === "official_partner_url";
+  const isDemoPlayerPreview = !activeIdentity?.isCoach && isDemoAccount(activeIdentity?.email) && !store;
 
   useEffect(() => {
     if (editing) return;
@@ -434,6 +436,10 @@ export default function TeamStorePortal() {
             <div className="ts-player-intro"><span>OFFICIAL TEAM GEAR</span><h3>Rep your program.</h3><p>Shop apparel and fan gear selected by your coach.</p></div>
             <PlayerStorePreview teamName={activeIdentity.teamName} storeName={store.storeName} providerLabel={getProviderLabel(store.provider)} onOpen={() => openStore("player_portal")} live />
             <p className="ts-disclosure">{AFFILIATE_DISCLOSURE}</p>
+          </> : isDemoPlayerPreview ? <>
+            <div className="ts-player-intro"><span>DEMO STOREFRONT</span><h3>See the player experience.</h3><p>This preview shows where official team gear will appear for players and families.</p></div>
+            <PlayerStorePreview teamName={activeIdentity.teamName} storeName={`${activeIdentity.teamName} Team Store`} providerLabel="SquadLocker" />
+            <p className="ts-disclosure">A real team store will open only after the coach publishes a verified storefront link.</p>
           </> : <div className="ts-empty-state"><div className="ts-empty-icon"><StoreIcon size={28} /></div><h3>Your team store is not open yet</h3><p>Your coach has not published a store link. Check back after your program announces it.</p><button type="button" onClick={closePortal} className="ts-button ts-button-secondary">GOT IT</button></div>}
         </div>}
       </section>
