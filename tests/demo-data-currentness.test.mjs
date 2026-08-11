@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { buildDemoDataBundle, localDateKey, mergeDemoCollection } from "../src/lib/demoData.js";
+import { buildDemoDataBundle, localDateKey, mergeDemoCollection, unwrapManagedStorageValue } from "../src/lib/demoData.js";
 
 const demoData = fs.readFileSync("src/lib/demoData.js", "utf8");
 const expertReview = fs.readFileSync("scripts/apply-expert-app-review-v2.mjs", "utf8");
@@ -18,6 +18,14 @@ test("demo content uses rolling local-calendar dates instead of expiring or UTC-
   assert.match(demoData, /date: relativeDate\(5\)/);
   assert.match(demoData, /date: relativeDate\(8\)/);
   assert.doesNotMatch(demoData, /date: "2026-0[34]-/);
+});
+
+test("managed storage wrappers preserve null so localStorage can remain the fallback", () => {
+  assert.equal(unwrapManagedStorageValue({ value: null }), null);
+  assert.equal(unwrapManagedStorageValue({ value: "[]" }), "[]");
+  assert.equal(unwrapManagedStorageValue("[]"), "[]");
+  assert.match(demoData, /Object\.prototype\.hasOwnProperty\.call\(result, "value"\)/);
+  assert.doesNotMatch(demoData, /result\?\.value \?\? result/);
 });
 
 test("demo bundle preserves both role identities", () => {
