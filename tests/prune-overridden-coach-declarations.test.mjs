@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict'
 import test from 'node:test'
-import { pruneOverriddenCoachDeclarations } from '../scripts/prune-overridden-coach-declarations.mjs'
+import {
+  extractRenderedMissionControlClasses,
+  pruneOverriddenCoachDeclarations,
+} from '../scripts/prune-overridden-coach-declarations.mjs'
 
 const exclusiveMissionControlClasses = new Set([
   'mcActivationPlan',
@@ -12,6 +15,20 @@ const scopedOptions = {
   allowMissionControlScope: true,
   exclusiveMissionControlClasses,
 }
+
+test('render ownership ignores CSS/query references but detects actual class creation', () => {
+  const source = `
+    const CSS = '.mcPrimary{min-height:54px}.mcHero{padding:20px}';
+    document.querySelector('.mcRealityStrip');
+    const card = <button className="mcPrimary mcCard" />;
+    const hero = <section className={active ? 'mcHero' : 'mcActivationPlan'} />;
+    node.classList.add('mcShellV3');
+  `
+  assert.deepEqual(
+    [...extractRenderedMissionControlClasses(source)].sort(),
+    ['mcActivationPlan', 'mcCard', 'mcHero', 'mcPrimary', 'mcShellV3'],
+  )
+})
 
 test('removes an earlier property when the exact selector later replaces it', () => {
   const source = '.card{padding:12px;color:#111}.other{color:red}.card{padding:16px}'
