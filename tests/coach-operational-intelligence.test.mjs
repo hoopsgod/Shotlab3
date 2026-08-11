@@ -130,8 +130,39 @@ test("activity filters preserve category and search behavior", () => {
   assert.equal(filterActivityIntelligenceRows(rows, { query: "player one" })[0].type, "score");
 });
 
-test("season comparison uses the current archive snapshot contract without mutating source records", () => {
-  const archive = { id: "a1", seasonName: "2025-26", snapshot: { players: [{ id: "a" }, { id: "b" }], scores: [{ id: "s1" }], shotLogs: [{ made: 60 }, { made: 40 }], events: [{ id: "e1" }, { id: "e2" }, { id: "e3" }], rsvps: [{ id: "r1" }], scSessions: [{ id: "sc1" }], scLogs: [{ id: "log1" }] } };
+test("season comparison reads the persisted top-level archive snapshot schema", () => {
+  const archive = {
+    id: "a-persisted",
+    seasonName: "2025-26",
+    createdAt: "2026-03-01T12:00:00.000Z",
+    rosterSnapshot: [{ id: "a" }, { id: "b" }, { id: "c" }],
+    homeScoresSnapshot: [{ id: "h1" }, { id: "h2" }],
+    programScoresSnapshot: [{ id: "p1" }],
+    shotLogsSnapshot: [{ made: 60 }, { made: 40 }],
+    eventSnapshot: [{ id: "e1" }, { id: "e2" }],
+    eventRsvpSnapshot: [{ id: "r1" }, { id: "r2" }],
+    scSessionSnapshot: [{ id: "sc1" }],
+    scLogSnapshot: [{ id: "log1" }, { id: "log2" }],
+  };
+  const model = buildSeasonComparisonModel({
+    currentRoster: roster,
+    currentScores: [{ id: "current-score" }],
+    currentShotLogs: [{ made: 150 }],
+    currentEvents: [{}],
+    currentRsvps: [{}],
+    currentScSessions: [{}, {}],
+    currentScLogs: [{}],
+    archives: [archive],
+  });
+  const previous = Object.fromEntries(model.metrics.map((metric) => [metric.key, metric.previous]));
+  assert.equal(model.selected.id, "a-persisted");
+  assert.deepEqual(previous, { roster: 3, scores: 3, makes: 100, events: 2, eventRsvps: 2, scSessions: 1, scLogs: 2 });
+  assert.equal(model.metrics.find((metric) => metric.key === "makes").delta, 50);
+  assert.equal(archive.shotLogsSnapshot.reduce((total, row) => total + row.made, 0), 100, "source archive remains unchanged");
+});
+
+test("season comparison retains legacy nested snapshot support as a fallback", () => {
+  const archive = { id: "a1", seasonName: "2024-25", snapshot: { players: [{ id: "a" }, { id: "b" }], scores: [{ id: "s1" }], shotLogs: [{ made: 60 }, { made: 40 }], events: [{ id: "e1" }, { id: "e2" }, { id: "e3" }], rsvps: [{ id: "r1" }], scSessions: [{ id: "sc1" }], scLogs: [{ id: "log1" }] } };
   const model = buildSeasonComparisonModel({ currentRoster: roster, currentShotLogs: [{ made: 80 }, { made: 70 }], currentEvents: [{}, {}, {}, {}], archives: [archive] });
   assert.equal(model.selected.id, "a1");
   assert.equal(model.metrics.find((metric) => metric.key === "makes").delta, 50);
