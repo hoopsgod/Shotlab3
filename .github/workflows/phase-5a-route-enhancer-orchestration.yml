@@ -41,7 +41,22 @@ jobs:
         run: node --test tests/phase-5a-route-enhancer-orchestration.test.mjs
       - name: Verify full source suite for production promotion
         if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'march-3-reset-85393dd'
-        run: npm test
+        run: |
+          mkdir -p artifacts/phase-5a-route-enhancer-orchestration
+          set +e
+          npm test 2>&1 | tee artifacts/phase-5a-route-enhancer-orchestration/source-suite.log
+          source_status=${PIPESTATUS[0]}
+          set -e
+          if [ "${source_status}" -ne 0 ]; then
+            grep -E 'not ok|failureType|error:|code:|stack:|location:|ERR_|actual:|expected:|operator:' artifacts/phase-5a-route-enhancer-orchestration/source-suite.log \
+              | tail -n 45 \
+              | while IFS= read -r line; do
+                  line=${line//'%'/'%25'}
+                  line=${line//$'\r'/'%0D'}
+                  echo "::error title=Source suite diagnostic::${line}"
+                done
+            exit "${source_status}"
+          fi
       - name: Build exact candidate through centralized enhancer pipeline
         run: npm run build
       - name: Capture candidate performance metrics
