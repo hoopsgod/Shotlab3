@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "node scripts/run-route-enhancers.mjs dev && vite --host 0.0.0.0 --port 4173",
     "prepare:route-enhancers": "node scripts/run-route-enhancers.mjs build",
-    "build": "npm run prepare:route-enhancers && vite build --config vite.phase5b.config.js && node scripts/optimize-production-css.mjs && node scripts/restructure-production-css.mjs && node scripts/prune-overridden-coach-declarations.mjs && node scripts/prune-unreachable-global-selectors.mjs && node scripts/remove-unreferenced-authority-css.mjs",
+    "build": "npm run prepare:route-enhancers && vite build --config vite.phase5b.config.js && node scripts/optimize-production-css.mjs && node scripts/restructure-production-css.mjs && node scripts/prune-overridden-coach-declarations.mjs && node scripts/restructure-production-css.mjs && node scripts/prune-unreachable-global-selectors.mjs && node scripts/remove-unreferenced-authority-css.mjs",
     "build:performance": "npm run build && npm run verify:performance-budget",
     "test": "node --test tests/**/*.test.mjs",
     "test:e2e": "playwright test",
