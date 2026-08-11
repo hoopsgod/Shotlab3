@@ -14,6 +14,7 @@ on:
       - 'scripts/restructure-production-css.mjs'
       - 'scripts/prune-unreachable-global-selectors.mjs'
       - 'scripts/remove-unreferenced-authority-css.mjs'
+      - 'scripts/verify-phase5b-live-coach-selectors.mjs'
       - 'tests/css-module-dead-selector-pruner.test.mjs'
       - 'tests/prune-overridden-coach-declarations.test.mjs'
       - 'tests/prune-unreferenced-keyframes.test.mjs'
@@ -35,6 +36,8 @@ jobs:
         run: node --test tests/css-module-dead-selector-pruner.test.mjs tests/prune-overridden-coach-declarations.test.mjs tests/prune-unreferenced-keyframes.test.mjs
       - name: Build optimized production bundle
         run: npm run build
+      - name: Verify live Coach selectors survive optimization
+        run: node scripts/verify-phase5b-live-coach-selectors.mjs
       - name: Analyze Coach CSS cascade debt
         run: node scripts/analyze-coach-css-recovery.mjs
       - name: Enforce existing performance budgets
