@@ -6,13 +6,15 @@ const enhancer = readFileSync('scripts/apply-phase3i-team-store-immersive.mjs', 
 const css = readFileSync('public/shotlab-phase3i-team-store-immersive.css', 'utf8');
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/design-system-screenshots.spec.mjs', 'utf8');
 const production = readFileSync('tests/e2e/team-store-production.spec.mjs', 'utf8');
 
 test('Phase 3I enhancer runs after the accepted Phase 3H transform and is guarded/idempotent', () => {
-  assert.match(pkg.scripts.dev, /apply-phase3h-coach-players-hierarchy\.mjs[\s\S]*apply-phase3i-team-store-immersive\.mjs/);
-  assert.match(pkg.scripts['prepare:route-enhancers'], /apply-phase3h-coach-players-hierarchy\.mjs[\s\S]*apply-phase3i-team-store-immersive\.mjs/);
+  assert.match(pkg.scripts.dev, /run-route-enhancers\.mjs dev/);
+  assert.match(pkg.scripts['prepare:route-enhancers'], /run-route-enhancers\.mjs build/);
+  assert.match(routeEnhancers, /apply-phase3h-coach-players-hierarchy\.mjs[\s\S]*apply-phase3i-team-store-immersive\.mjs/);
   assert.match(enhancer, /expected exactly one anchor/);
   assert.match(enhancer, /Phase 3I Team Store immersive shell already applied/);
 });
