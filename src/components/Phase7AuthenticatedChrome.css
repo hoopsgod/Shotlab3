@@ -1,6 +1,14 @@
 /* Phase 7 — shared authenticated mobile chrome.
    Keep secondary Coach routes native and task-first without changing navigation semantics. */
 
+/* The Player Home hero is a deliberate dark performance moment. Its supporting copy
+   must remain visibly subordinate without dropping below premium screenshot readability. */
+.performance-shell--player[data-workspace-tab="home"]
+  [data-testid="player-daily-command-center"]
+  [data-command-role="primary"] > p {
+  color: #c7d0d5 !important;
+}
+
 @media (max-width: 767px) {
   .performance-shell--coach.is-mobile .page.pageShell > button[type="button"]:first-child {
     position: relative !important;
