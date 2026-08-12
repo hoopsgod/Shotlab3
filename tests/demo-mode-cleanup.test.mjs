@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 
-import { isDemoAccount, isDemoPlayerSessionShotLog, setDemoMode } from '../src/lib/demoMode.js'
+import { isDemoAccount, isDemoPersistenceSession, isDemoPlayerSessionShotLog, setDemoMode } from '../src/lib/demoMode.js'
 
 const createStorage = () => {
   const values = new Map()
@@ -76,6 +76,33 @@ test('current Phase 2 demo button labels seed the pending identity bridge', () =
   }
 })
 
+test('Phase 1 recognizes only explicit, pending, or durable demo persistence sessions', () => {
+  const now = 1_786_500_000_000
+  const localStorage = createStorage()
+  const sessionStorage = createStorage()
+
+  assert.equal(isDemoPersistenceSession({ localStorage, sessionStorage, location: { search: '' }, now }), false)
+
+  sessionStorage.setItem('sl:pendingDemoSession', JSON.stringify({
+    email: 'demo@shotlab.app',
+    createdAt: now - 1_000,
+  }))
+  assert.equal(isDemoPersistenceSession({ localStorage, sessionStorage, location: { search: '' }, now }), true)
+
+  sessionStorage.setItem('sl:pendingDemoSession', JSON.stringify({
+    email: 'demo@shotlab.app',
+    createdAt: now - 31_000,
+  }))
+  assert.equal(isDemoPersistenceSession({ localStorage, sessionStorage, location: { search: '' }, now }), false)
+
+  localStorage.setItem('sl:session', JSON.stringify({ email: 'coach.demo@shotlab.app' }))
+  assert.equal(isDemoPersistenceSession({ localStorage, sessionStorage, location: { search: '' }, now }), true)
+
+  localStorage.setItem('sl:session', JSON.stringify({ email: 'registered@shotlab.app' }))
+  assert.equal(isDemoPersistenceSession({ localStorage, sessionStorage, location: { search: '' }, now }), false)
+  assert.equal(isDemoPersistenceSession({ localStorage, sessionStorage, location: { search: '?demo=1' }, now }), true)
+})
+
 test('demo sign-in establishes local-only persistence before seeding collections', () => {
   const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8')
   const start = appSource.indexOf('const demoSignIn=')
@@ -88,4 +115,27 @@ test('demo sign-in establishes local-only persistence before seeding collections
   assert.ok(sessionMarker >= 0)
   assert.ok(firstSeedWrite > sessionMarker)
   assert.equal((demoSignInSource.match(/DB\.set\("sl:session"/g) || []).length, 1)
+  assert.match(demoSignInSource, /shotlab:demo-session-started/)
+})
+
+test('Phase 1 keeps demo database writes local and demo leaderboards deterministic', () => {
+  const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8')
+  const databaseSetStart = appSource.indexOf('async set(k, v, options = {})')
+  const databaseSetEnd = appSource.indexOf('\n};\n\nconst persistenceService', databaseSetStart)
+  const databaseSetSource = appSource.slice(databaseSetStart, databaseSetEnd)
+  const demoGuard = databaseSetSource.indexOf('isDemoPersistenceSession()')
+  const remoteTableLookup = databaseSetSource.indexOf('const table = TABLE_MAP[k]')
+
+  assert.ok(databaseSetStart >= 0 && databaseSetEnd > databaseSetStart)
+  assert.ok(demoGuard >= 0 && demoGuard < remoteTableLookup)
+
+  const leaderboardStart = appSource.indexOf('const fetchHomeShotsLeaderboard=')
+  const leaderboardEnd = appSource.indexOf('\n\nconst migrateData=', leaderboardStart)
+  const leaderboardSource = appSource.slice(leaderboardStart, leaderboardEnd)
+  const demoFallback = leaderboardSource.indexOf('isDemoAccount(user)||isDemoMode()')
+  const remoteFetch = leaderboardSource.indexOf('await fetch(url')
+
+  assert.ok(leaderboardStart >= 0 && leaderboardEnd > leaderboardStart)
+  assert.ok(demoFallback >= 0 && demoFallback < remoteFetch)
+  assert.match(leaderboardSource, /errorCode:"demo_local"/)
 })

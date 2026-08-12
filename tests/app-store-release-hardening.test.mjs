@@ -6,6 +6,7 @@ import {
   RUNTIME_STORAGE_KEYS,
   clearStaleDemoSession,
   getAutoSyncShotLogs,
+  isDemoRuntimeAccount,
   isDemoRuntimeEnabled,
   isSessionAuthError,
   syncPendingHomeShotLogs,
@@ -47,6 +48,12 @@ test("demo runtime requires explicit opt-in and never activates from hosting or 
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "shotlab3.pages.dev", search: "" } }), false);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "agent-visual-rebuild-v3.shotlab3.pages.dev", search: "" } }), false);
   assert.equal(isDemoRuntimeEnabled({ env: { DEV: false }, location: { hostname: "agent-visual-rebuild-v3.shotlab3.pages.dev", search: "?demo=1" } }), true);
+});
+
+test("release persistence recognizes only the two isolated demo identities", () => {
+  assert.equal(isDemoRuntimeAccount("demo@shotlab.app"), true);
+  assert.equal(isDemoRuntimeAccount({ email: "COACH.DEMO@SHOTLAB.APP" }), true);
+  assert.equal(isDemoRuntimeAccount("registered@shotlab.app"), false);
 });
 
 test("stale demo sessions are removed from a production runtime", async () => {

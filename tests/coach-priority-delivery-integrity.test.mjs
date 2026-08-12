@@ -100,6 +100,29 @@ test("coach priority publishing writes local fallback and posts team-scoped guid
   assert.equal(db.writes.at(-1).options.strictLocal, true);
 });
 
+test("Phase 1 keeps demo priority reads and writes local without production requests", async () => {
+  const db = makeDb({
+    "sl:session": { email: "coach.demo@shotlab.app" },
+    "sl:coach-priorities": { "demo-team": LOCAL_PRIORITY },
+  });
+  const calls = [];
+  const service = createAppPersistenceService({
+    db,
+    fetchImpl: async (...args) => {
+      calls.push(args);
+      throw new Error("demo persistence must not reach production");
+    },
+  });
+
+  const hydrated = await service.getPlayerPriorities();
+  const saved = await service.savePlayerPriorities({ "demo-team": REMOTE_PRIORITY });
+
+  assert.equal(hydrated["demo-team"].todayFocusText, "Local focus");
+  assert.deepEqual(saved, { ok: true, storageMode: "demo_local", deliveredTeamIds: [] });
+  assert.equal(calls.length, 0);
+  assert.equal(db.values.get("sl:coach-priorities")["demo-team"].todayFocusText, "Remote team focus");
+});
+
 test("failed remote delivery preserves the local draft and rejects the publish attempt", async () => {
   const db = makeDb({ "sl:session": { email: "coach@example.com" } });
   const service = createAppPersistenceService({

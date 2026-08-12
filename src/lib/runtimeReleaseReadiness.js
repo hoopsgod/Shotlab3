@@ -24,6 +24,11 @@ export function isDemoRuntimeEnabled({ env, location } = {}) {
   return Boolean(explicitDemo || resolvedEnv?.DEV || localHost);
 }
 
+export function isDemoRuntimeAccount(userOrEmail) {
+  const email = typeof userOrEmail === "string" ? userOrEmail : userOrEmail?.email;
+  return DEMO_EMAILS.has(normalizeEmail(email));
+}
+
 export function isSupabaseAuthEnabled(env) {
   const resolvedEnv = env || (typeof import.meta !== "undefined" ? import.meta.env : {});
   return boolValue(resolvedEnv?.VITE_ENABLE_SUPABASE_AUTH);
@@ -85,7 +90,7 @@ export async function clearStaleDemoSession(options = {}) {
   const session = await readRuntimeJson(APP_SESSION_KEY, options);
   const email = normalizeEmail(session?.email);
   try { localStorage?.removeItem?.(DEMO_MODE_KEY); } catch {}
-  if (!DEMO_EMAILS.has(email)) return false;
+  if (!isDemoRuntimeAccount(email)) return false;
   await clearPersistedAuthSession(options);
   return true;
 }

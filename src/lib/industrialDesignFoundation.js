@@ -143,10 +143,13 @@ const CSS = `
 }
 .performance-shell .pageHeaderPillBrand,
 .performance-shell .cta-primary,
+.premium-screen .cta-primary,
 .performance-shell .btn-v.is-primary {
   border-color:#17191b !important;
+  border-radius:var(--radius-md, 14px) !important;
   background:#17191b !important;
   color:#fff !important;
+  font-family:var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif) !important;
   box-shadow:0 12px 28px rgba(20,22,24,.16) !important;
 }
 
@@ -157,6 +160,7 @@ const CSS = `
 .premium-screen textarea,
 .premium-screen select {
   border-color:var(--pw-border-strong) !important;
+  border-radius:var(--radius-md, 14px) !important;
   background:#fff !important;
   color:#17191b !important;
   box-shadow:0 1px 0 rgba(255,255,255,.8), inset 0 1px 2px rgba(22,25,27,.025) !important;
@@ -178,7 +182,44 @@ const CSS = `
 .performance-shell label,
 .premium-screen label { color:#74797c !important; }
 
-.performance-shell p,
+/*
+ * Identity-neutral control contract. Route-level styles load on demand, so
+ * geometry must be owned here to keep demo and registered sessions identical.
+ */
+html body .performance-shell.performance-shell button,
+html body .premium-screen.premium-screen button {
+  min-height:44px !important;
+}
+html body .performance-shell.performance-shell .secondaryPageAction,
+html body .premium-screen.premium-screen .secondaryPageAction {
+  min-height:48px !important;
+}
+html body .performance-shell.performance-shell input,
+html body .performance-shell.performance-shell select,
+html body .premium-screen.premium-screen input,
+html body .premium-screen.premium-screen select {
+  min-height:48px !important;
+}
+html body .performance-shell.performance-shell select,
+html body .premium-screen.premium-screen select {
+  border-radius:14px !important;
+}
+html body .performance-shell.performance-shell .btn-v,
+html body .premium-screen.premium-screen .btn-v {
+  font-family:var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif) !important;
+}
+html body .ts-overlay.ts-overlay .ts-close {
+  width:44px !important;
+  min-width:44px !important;
+  height:44px !important;
+  min-height:44px !important;
+}
+html body .ts-overlay.ts-overlay select {
+  min-height:48px !important;
+  border-radius:14px !important;
+}
+
+.performance-shell p:not([data-command-role="primary"] p),
 .performance-shell small,
 .performance-shell [class*="Subtitle"],
 .performance-shell [class*="Meta"],

@@ -49,8 +49,8 @@ This marker is a display/data-provenance contract, not an authorization boundary
 
 Every product change must pass both parity layers before its phase can close:
 
-1. `Demo Paid Experience Parity` protects the shared application tree, equivalent feature behavior, backend-triggered parity contracts, and focused registered/demo journeys.
-2. `Demo Paid Runtime Parity` certifies matched Coach and Player data across the complete reachable mobile navigation matrices against the exact built production bundle, comparing structure, geometry, typography, spacing, navigation state, and bounded rendered-pixel drift.
+1. `Demo Registered Experience Parity` protects the shared application tree, equivalent feature behavior, backend-triggered parity contracts, and focused registered/demo journeys.
+2. `Demo Registered Runtime Parity` certifies matched Coach and Player data across the complete reachable mobile navigation matrices against the exact built production bundle—or an explicitly supplied deployed URL—comparing structure, geometry, typography, spacing, navigation state, and bounded rendered-pixel drift.
 
 The gates require:
 
@@ -61,7 +61,7 @@ The gates require:
 - Team Store and Team Branding coverage where reachable;
 - 390×844 mobile overflow safety;
 - production-bundle verification rather than a dev-only substitute;
-- paid remote leaderboard rows to survive self-scoped local-roster filtering only under the server-authoritative contract above.
+- registered remote leaderboard rows to survive self-scoped local-roster filtering only under the server-authoritative contract above.
 
 ## Phase rule
 

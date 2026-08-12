@@ -5,6 +5,7 @@ import {
   RUNTIME_STORAGE_KEYS,
   clearPersistedAuthSession,
   clearStaleDemoSession,
+  isDemoRuntimeAccount,
   isDemoRuntimeEnabled,
   isSessionAuthError,
   isSupabaseAuthEnabled,
@@ -14,7 +15,8 @@ import {
 
 const SESSION_NOTICE_KEY = "sl:release-session-notice";
 const SESSION_NOTICE = "Your secure session expired. Sign in again to continue. Training data saved on this device has been preserved.";
-const DEMO_BUTTON_LABELS = new Set(["DEMO PLAYER", "DEMO COACH", "LOAD DEMO DATA", "CLEAR DEMO DATA"]);
+const DEMO_AUTH_BUTTON_LABELS = new Set(["DEMO PLAYER", "DEMO COACH"]);
+const DEMO_WORKSPACE_BUTTON_LABELS = new Set(["LOAD DEMO DATA", "CLEAR DEMO DATA"]);
 const CONNECTIVITY_FEEDBACK_KEY = "release-connectivity";
 
 const bannerStyle = {
@@ -47,18 +49,20 @@ function ProductionDemoGuard({ enabled }) {
   useEffect(() => {
     if (typeof document === "undefined") return undefined;
     document.documentElement.dataset.shotlabDemoEnabled = enabled ? "true" : "false";
-    if (enabled) return undefined;
-
-    const style = document.createElement("style");
-    style.dataset.shotlabProductionDemoGuard = "true";
-    style.textContent = `html[data-shotlab-demo-enabled="false"] .auth-demo-enter{display:none!important}`;
-    document.head.appendChild(style);
+    const style = enabled ? null : document.createElement("style");
+    if (style) {
+      style.dataset.shotlabProductionDemoGuard = "true";
+      style.textContent = `html[data-shotlab-demo-enabled="false"] .auth-demo-enter{display:none!important}`;
+      document.head.appendChild(style);
+    }
 
     const suppressDemoButtons = (root = document) => {
       root.querySelectorAll?.("button").forEach((button) => {
         const label = String(button.textContent || "").trim().toUpperCase();
-        if (!DEMO_BUTTON_LABELS.has(label)) return;
+        const isWorkspaceUtility = DEMO_WORKSPACE_BUTTON_LABELS.has(label);
+        if (!isWorkspaceUtility && (enabled || !DEMO_AUTH_BUTTON_LABELS.has(label))) return;
         button.hidden = true;
+        button.style.setProperty("display", "none", "important");
         button.setAttribute("aria-hidden", "true");
         button.tabIndex = -1;
       });
@@ -68,7 +72,7 @@ function ProductionDemoGuard({ enabled }) {
     observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
-      style.remove();
+      style?.remove();
     };
   }, [enabled]);
   return null;
@@ -85,6 +89,15 @@ export default function ReleaseReadinessBoundary({ children }) {
   const syncInFlightRef = useRef(false);
   const sessionRecoveryRef = useRef(false);
   const clearStatusTimerRef = useRef(null);
+  const syncGenerationRef = useRef(0);
+
+  const resetDemoSyncState = useCallback(() => {
+    syncGenerationRef.current += 1;
+    if (clearStatusTimerRef.current) window.clearTimeout(clearStatusTimerRef.current);
+    setSyncSummary({ synced: 0, failed: 0, pending: 0 });
+    setSyncState("idle");
+    clearFeedback(CONNECTIVITY_FEEDBACK_KEY);
+  }, []);
 
   const dismissSessionNotice = useCallback(() => {
     setSessionNotice("");
@@ -110,6 +123,7 @@ export default function ReleaseReadinessBoundary({ children }) {
     try {
       const persisted = await readRuntimeJson(RUNTIME_STORAGE_KEYS.appSession);
       if (!persisted?.email) return { ok: true, skipped: true };
+      if (isDemoRuntimeAccount(persisted.email)) return { ok: true, skipped: true, demo: true };
       const result = await releaseAuthService.getSession();
       if (isSessionAuthError(result?.error) || !result?.data?.session?.user?.email) {
         await expireSession(result?.error?.code || "session_missing");
@@ -127,9 +141,14 @@ export default function ReleaseReadinessBoundary({ children }) {
     syncInFlightRef.current = true;
     if (clearStatusTimerRef.current) window.clearTimeout(clearStatusTimerRef.current);
     setSyncState("syncing");
+    const syncGeneration = syncGenerationRef.current;
 
     try {
       const persisted = await readRuntimeJson(RUNTIME_STORAGE_KEYS.appSession);
+      if (isDemoRuntimeAccount(persisted?.email)) {
+        resetDemoSyncState();
+        return;
+      }
       let authEmail = String(persisted?.email || "").trim().toLowerCase();
       if (supabaseAuthEnabled && authEmail) {
         let sessionResult;
@@ -149,6 +168,7 @@ export default function ReleaseReadinessBoundary({ children }) {
       }
 
       const result = await syncPendingHomeShotLogs({ authEmail, maxAttempts: 20 });
+      if (syncGeneration !== syncGenerationRef.current) return;
       setSyncSummary({ synced: result.synced || 0, failed: result.failed || 0, pending: result.pending || 0 });
       if (result.requiresAuth && authEmail) {
         await expireSession("sync_auth_required");
@@ -175,7 +195,7 @@ export default function ReleaseReadinessBoundary({ children }) {
     } finally {
       syncInFlightRef.current = false;
     }
-  }, [expireSession, isOnline, supabaseAuthEnabled]);
+  }, [expireSession, isOnline, resetDemoSyncState, supabaseAuthEnabled]);
 
   useEffect(() => {
     clearStaleDemoSession().then((cleared) => {
@@ -201,6 +221,12 @@ export default function ReleaseReadinessBoundary({ children }) {
     if (!isOnline) return;
     runPendingSync("network_available");
   }, [isOnline, runPendingSync]);
+
+  useEffect(() => {
+    const onDemoSessionStarted = () => resetDemoSyncState();
+    window.addEventListener("shotlab:demo-session-started", onDemoSessionStarted);
+    return () => window.removeEventListener("shotlab:demo-session-started", onDemoSessionStarted);
+  }, [resetDemoSyncState]);
 
   useEffect(() => {
     if (!supabaseAuthEnabled) return undefined;
@@ -232,6 +258,7 @@ export default function ReleaseReadinessBoundary({ children }) {
   }, []);
 
   const status = !isOnline ? "offline" : syncState;
+  const attentionCount = syncSummary.pending || syncSummary.failed;
   const statusCopy = status === "offline"
     ? "Local training remains available. Team updates will resume when your connection returns."
     : status === "syncing"
@@ -239,7 +266,7 @@ export default function ReleaseReadinessBoundary({ children }) {
       : status === "synced"
         ? `${syncSummary.synced} locally saved update${syncSummary.synced === 1 ? "" : "s"} synced to your team.`
         : status === "attention"
-          ? `${syncSummary.pending || syncSummary.failed} update${(syncSummary.pending || syncSummary.failed) === 1 ? "" : "s"} still need attention. Open At Home training to retry.`
+          ? `${attentionCount} update${attentionCount === 1 ? "" : "s"} still ${attentionCount === 1 ? "needs" : "need"} attention. Open At Home training to retry.`
           : "";
 
   useEffect(() => {

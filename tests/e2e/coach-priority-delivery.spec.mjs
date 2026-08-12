@@ -99,7 +99,7 @@ async function enterSeededCoach(page) {
   await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
 }
 
-test("coach can publish player-facing priorities through the visible Mission Control flow", async ({ page }) => {
+test("demo coach can save player-facing priorities locally without a production publish", async ({ page }) => {
   const published = [];
   await installRoutes(page, published);
   await enterSeededCoach(page);
@@ -123,10 +123,12 @@ test("coach can publish player-facing priorities through the visible Mission Con
   await editor.getByRole("button", { name: "SAVE PRIORITIES", exact: true }).click();
 
   await expect(editor.getByText("Priorities saved", { exact: true })).toBeVisible();
-  await expect.poll(() => published.length).toBe(1);
-  expect(published[0].team_id).toBe(TEAM_ID);
-  expect(published[0].priorities.todayFocusText).toBe("Win the first three steps on every closeout");
-  expect(published[0].priorities.priorityDrillText).toBe("Two-foot finishing");
+  await expect.poll(() => page.evaluate((teamId) => {
+    const saved = JSON.parse(window.localStorage.getItem("sl:coach-priorities") || "{}");
+    return saved?.[teamId]?.todayFocusText || "";
+  }, TEAM_ID)).toBe("Win the first three steps on every closeout");
+  await page.waitForTimeout(200);
+  expect(published, "demo saves must never POST team priorities to production persistence").toEqual([]);
 
   const widths = await page.evaluate(() => ({
     viewport: window.innerWidth,

@@ -5,6 +5,8 @@ import RuntimeErrorBoundary from './components/RuntimeErrorBoundary.jsx'
 import { checkBackendHealth, getBackendStatusLabel, logBackendHealth } from './lib/backendHealth.js'
 import { clearStaleDemoSession, isDemoRuntimeEnabled } from './lib/runtimeReleaseReadiness.js'
 import { verifySupabaseSchema } from './lib/supabaseSchemaVerification.js'
+import { installExpertVisualPolish } from './lib/expertVisualPolish.js'
+import './styles/ExpertVisualPolish.css'
 
 const STARTUP_ERROR_TITLE = 'SHOTLAB STARTUP ERROR'
 const BOOT_TIMEOUT_MS = 10000
@@ -112,6 +114,7 @@ function renderStartupError(message) {
 
 markBoot('main_executed')
 registerRuntimeListeners()
+installExpertVisualPolish()
 
 window.addEventListener('error', event => {
   const message = event?.error?.message || event?.message || 'Unexpected runtime error before app mount.'
@@ -153,6 +156,12 @@ window.addEventListener('shotlab:app-ready', () => {
 
     // Demo data is no longer bootstrapped during application startup.
     // Coach and Player demos are launched only by explicit UI actions in App.
+    // Install the legacy industrial layer at one deterministic point before the
+    // application and the canonical 2026 styles load. Import-time DOM mutation
+    // from a component dependency made stylesheet order depend on module/cache
+    // timing, which could give demo and registered sessions different skins.
+    const { installIndustrialDesignFoundation } = await import('./lib/industrialDesignFoundation.js')
+    installIndustrialDesignFoundation()
     const { default: App } = await import('./App.jsx')
     await import('./styles/VisualFoundation2026.css')
     await import('./styles/CommandHierarchy2026.css')

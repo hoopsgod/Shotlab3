@@ -3,7 +3,7 @@ import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
-const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/demo-paid-runtime-parity");
+const OUTPUT_DIR = path.resolve(process.cwd(), "artifacts/demo-registered-runtime-parity");
 const TEAM_ID = "team-demo-titans";
 const DEMO_IDENTITIES = {
   coach: { email: "coach.demo@shotlab.app", name: "Demo Coach", role: "coach" },
@@ -24,6 +24,7 @@ const MOTION_FREEZE = `
   }
 `;
 const COLOR_SERIALIZATION_FIELDS = new Set(["backgroundColor", "color", "borderTopColor"]);
+const INTERACTIVE_FINGERPRINT_TAGS = new Set(["button", "a", "input", "select", "textarea"]);
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -38,8 +39,8 @@ function normalizeFingerprintForDigest(value) {
   if (value && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value)
-        .filter(([key]) => !COLOR_SERIALIZATION_FIELDS.has(key))
-        .map(([key, entry]) => [key, normalizeFingerprintForDigest(entry)]),
+        .filter(([key]) => !COLOR_SERIALIZATION_FIELDS.has(key) && (key !== "box" || INTERACTIVE_FINGERPRINT_TAGS.has(value.tag)))
+        .map(([key, entry]) => [key, key === "box" ? entry.slice(2) : normalizeFingerprintForDigest(entry)]),
     );
   }
   return value;
@@ -59,7 +60,7 @@ function buildRegisteredStorage(demoStorage, role) {
   const registeredIdentity = REGISTERED_IDENTITIES[role];
   const next = {};
   for (const [key, rawValue] of Object.entries(demoStorage || {})) {
-    if (key === "sl:session" || key === "sl:demoMode" || key === "sl:demo-data-meta") continue;
+    if (key === "sl:session" || key === "sl:demoMode") continue;
     let parsed;
     try {
       parsed = JSON.parse(rawValue);
@@ -242,9 +243,34 @@ async function settle(page) {
     document.querySelector(".player-scroll-container")?.scrollTo(0, 0);
     document.querySelector(".coach-scroll-container")?.scrollTo(0, 0);
     if (document.fonts?.ready) await document.fonts.ready;
+    await Promise.all([...document.images].map((image) => image.complete ? image.decode?.().catch(() => {}) : new Promise((resolve) => {
+      image.addEventListener("load", resolve, { once: true });
+      image.addEventListener("error", resolve, { once: true });
+    })));
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
-  await page.waitForTimeout(80);
+
+  let previousLayout = "";
+  let stableSamples = 0;
+  for (let attempt = 0; attempt < 12 && stableSamples < 2; attempt += 1) {
+    const layout = await page.evaluate(() => JSON.stringify([...document.body.querySelectorAll("*")].map((node) => {
+      const rect = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      if (style.display === "none" || style.visibility === "hidden" || rect.width <= 0 || rect.height <= 0) return null;
+      return [
+        Math.round(rect.x * 2) / 2,
+        Math.round(rect.y * 2) / 2,
+        Math.round(rect.width * 2) / 2,
+        Math.round(rect.height * 2) / 2,
+        style.fontFamily,
+        style.borderRadius,
+      ];
+    }).filter(Boolean)));
+    stableSamples = layout === previousLayout ? stableSamples + 1 : 0;
+    previousLayout = layout;
+    if (stableSamples < 2) await page.waitForTimeout(100);
+  }
+  expect(stableSamples, "Visual parity capture requires a stable computed layout").toBeGreaterThanOrEqual(2);
 }
 
 async function collectDemoStorage(page) {
@@ -260,12 +286,13 @@ async function collectDemoStorage(page) {
 }
 
 async function enterDemo(page, role) {
-  await page.goto("/");
+  await page.goto("/?demo=1");
   await expect(page.getByRole("button", { name: role === "coach" ? "Coach demo" : "Player demo", exact: true })).toBeVisible({ timeout: 20_000 });
   await page.getByRole("button", { name: role === "coach" ? "Coach demo" : "Player demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
   await page.addStyleTag({ content: MOTION_FREEZE });
   await settle(page);
+  await expect(page.locator('[data-feedback-key="release-connectivity"]')).toHaveCount(0);
 }
 
 async function enterRegistered(page, role, storage) {
@@ -301,6 +328,40 @@ async function getNavigationKeys(page) {
   return [...keys.filter((key) => key !== "branding"), ...keys.filter((key) => key === "branding")];
 }
 
+async function expectPlayerHeroContrast(page) {
+  const ratio = await page.locator('[data-command-role="primary"] p').first().evaluate((node) => {
+    const channels = (value) => {
+      const serialized = String(value).trim();
+      const values = (serialized.match(/[\d.]+/g) || []).map(Number);
+      if (serialized.startsWith("color(srgb")) {
+        return [values[0] * 255, values[1] * 255, values[2] * 255, values[3] ?? 1];
+      }
+      return [values[0], values[1], values[2], values[3] ?? 1];
+    };
+    const [red, green, blue] = channels(getComputedStyle(node).color);
+    let backgroundNode = node;
+    let background = [255, 255, 255, 1];
+    while (backgroundNode) {
+      const parsed = channels(getComputedStyle(backgroundNode).backgroundColor);
+      if (parsed.length >= 3 && parsed[3] > 0) {
+        background = parsed;
+        break;
+      }
+      backgroundNode = backgroundNode.parentElement;
+    }
+    const alpha = background[3];
+    const compositedBackground = background.slice(0, 3).map((channel) => channel * alpha + 255 * (1 - alpha));
+    const luminance = (rgb) => rgb
+      .map((channel) => channel / 255)
+      .map((channel) => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
+      .reduce((total, channel, index) => total + channel * [0.2126, 0.7152, 0.0722][index], 0);
+    const light = luminance([red, green, blue]);
+    const dark = luminance(compositedBackground);
+    return (Math.max(light, dark) + 0.05) / (Math.min(light, dark) + 0.05);
+  });
+  expect(ratio, 'Player command hero body copy must meet WCAG AA contrast').toBeGreaterThanOrEqual(4.5);
+}
+
 async function navigateToKey(page, key) {
   const dockTarget = page.getByTestId("mobile-navigation-dock").locator(`[data-nav-key="${key}"]`);
   if (await dockTarget.count()) {
@@ -332,6 +393,10 @@ async function captureFingerprint(page, role, kind, key) {
 
     return [...document.body.querySelectorAll("*")]
       .filter((node) => !excludedTags.has(node.tagName))
+      // Demo-data cleanup is intentionally state-dependent: the action is only
+      // available while managed sample data exists. It is not a paid/demo UI
+      // branch and therefore is outside the commercial surface comparison.
+      .filter((node) => !(node.tagName === "BUTTON" && normalizeText(node.textContent) === "CLEAR DEMO DATA"))
       .map((node) => {
         const rect = node.getBoundingClientRect();
         const style = getComputedStyle(node);
@@ -382,11 +447,20 @@ async function captureExperience(browser, role, kind, seedStorage = null) {
   const context = await browser.newContext({ viewport: { width: 390, height: 844 } });
   const page = await context.newPage();
   const pageErrors = [];
+  const phaseOneConsoleIssues = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
+  page.on("console", (message) => {
+    if (!["warning", "error"].includes(message.type())) return;
+    const text = message.text();
+    if (/\[remote-persist\] upsert failed|\[home-shots-leaderboard\] refresh|\[release-readiness\] pending sync/i.test(text)) {
+      phaseOneConsoleIssues.push(text);
+    }
+  });
   await installSafeRoutes(page, role, kind === "registered" ? seedStorage : null);
 
   if (kind === "demo") await enterDemo(page, role);
   else await enterRegistered(page, role, seedStorage);
+  if (role === "player") await expectPlayerHeroContrast(page);
 
   const storage = kind === "demo" ? await collectDemoStorage(page) : null;
   const navKeys = await getNavigationKeys(page);
@@ -397,6 +471,7 @@ async function captureExperience(browser, role, kind, seedStorage = null) {
   }
 
   expect(pageErrors, `${role} ${kind} must not throw uncaught page errors`).toEqual([]);
+  expect(phaseOneConsoleIssues, `${role} ${kind} must not emit Phase 1 persistence or leaderboard errors`).toEqual([]);
   await context.close();
   return { storage, navKeys, routes };
 }

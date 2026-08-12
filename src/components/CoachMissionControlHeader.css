@@ -321,3 +321,10 @@
 @media(prefers-reduced-motion:reduce){
   .mcShellV3 .mcHeroTeamMark img{transition:none}
 }
+
+/* Phase 1 interaction floor: mobile shell controls remain 44px. */
+.mcShellV3 .mcMobileMenu,.mcShellV3 .mcBell{min-width:44px;min-height:44px}
+@media(max-width:700px){
+  .mcShellV3 .mcHeader{grid-template-columns:44px minmax(0,1fr) 44px}
+  .mcShellV3 .mcMobileMenu,.mcShellV3 .mcBell{width:44px;height:44px}
+}

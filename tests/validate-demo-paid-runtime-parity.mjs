@@ -4,7 +4,7 @@ import path from "node:path";
 import { isDeepStrictEqual } from "node:util";
 import { PNG } from "pngjs";
 
-const ROOT = path.resolve(process.cwd(), "artifacts/demo-paid-runtime-parity");
+const ROOT = path.resolve(process.cwd(), "artifacts/demo-registered-runtime-parity");
 const ROLES = ["coach", "player"];
 const COLOR_FIELDS = new Set(["color", "backgroundColor", "borderTopColor"]);
 const MAX_DIFFERENT_PIXEL_RATIO = 0.0015;
