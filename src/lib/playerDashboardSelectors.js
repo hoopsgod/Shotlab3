@@ -10,7 +10,7 @@ const MACHINE_DRILL_PREFIXES = new Set(["demo", "home", "program", "training"]);
 const MACHINE_DRILL_ID_RE = /^[a-z0-9]+(?:[-_][a-z0-9]+)+$/i;
 const INTERNAL_MACHINE_DRILL_ID_RE = /^(?:demo|home|program|training)[-_]/i;
 const GENERATED_CATALOG_NAME_RE = /^[A-Z0-9][A-Z0-9 &'+./-]*$/;
-const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const LOWERCASE_TITLE_WORDS = new Set(["and", "at", "for", "from", "in", "of", "on", "the", "to", "vs"]);
 
 const titleCaseDrillToken = (token, index) => {
