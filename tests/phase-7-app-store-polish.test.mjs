@@ -10,6 +10,8 @@ const sharedDeferred = fs.readFileSync("src/components/DeferredSharedAuthenticat
 const sharedChrome = fs.readFileSync("src/components/Phase7AuthenticatedChrome.css", "utf8");
 const secondaryAcceptance = fs.readFileSync("public/shotlab-phase3-secondary-acceptance.css", "utf8");
 const backEnhancer = fs.readFileSync("scripts/apply-phase4d-shared-back-hit-area.mjs", "utf8");
+const industrialFoundation = fs.readFileSync("src/lib/industrialDesignFoundation.js", "utf8");
+const releaseBoundary = fs.readFileSync("src/components/ReleaseReadinessBoundary.jsx", "utf8");
 
 test("Phase 7 exposes stable Player identity semantics", () => {
   for (const role of ["inner", "identity", "mode-row", "badge", "team-name", "name", "tagline", "mission", "brand-panel", "brand-mark"]) {
@@ -60,4 +62,15 @@ test("Phase 7 keeps authenticated chrome bounded to route framing rather than du
   assert.doesNotMatch(sharedChrome, /player-scroll-container>button/);
   assert.doesNotMatch(sharedChrome, /background:#fff!important/);
   assert.doesNotMatch(sharedChrome, /box-shadow:none!important/);
+});
+
+test("Phase 1 protects the Player command hero from low-contrast generic paragraph paint", () => {
+  assert.match(industrialFoundation, /\.performance-shell p:not\(\[data-command-role="primary"\] p\)/);
+  assert.doesNotMatch(industrialFoundation, /\.performance-shell p,\n\.performance-shell small/);
+});
+
+test("Phase 1 clears stale sync feedback at demo entry and uses grammatically correct status copy", () => {
+  assert.match(releaseBoundary, /isDemoRuntimeAccount\(persisted\?\.email\)/);
+  assert.match(releaseBoundary, /shotlab:demo-session-started/);
+  assert.match(releaseBoundary, /still \$\{attentionCount === 1 \? "needs" : "need"\} attention/);
 });

@@ -57,7 +57,7 @@ import TOKENS from "./theme/appTokens";
 
 import { initAnalytics, trackBackendEvent } from "./lib/analytics";
 import { buildDemoDataBundle, applyDemoData, clearDemoData } from "./lib/demoData";
-import { isDemoAccount, isDemoMode, isDemoPlayerSessionShotLog, setDemoMode } from "./lib/demoMode.js";
+import { isDemoAccount, isDemoMode, isDemoPersistenceSession, isDemoPlayerSessionShotLog, setDemoMode } from "./lib/demoMode.js";
 import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard } from "./lib/joinConsumeGuard.js";
 
 import { supabase } from "./lib/supabase.js";
@@ -443,6 +443,7 @@ const DB = {
       localPersisted = true;
     } catch (e) { localError = localError || e; }
     if (strictLocal && !localPersisted) throw (localError || new Error("local_persist_failed"));
+    if (isDemoPersistenceSession()) return { storageMode: "demo_local" };
     const table = TABLE_MAP[k];
     const remoteRows = buildRemoteRows(k, v, options);
     if ((k === "sl:events" || k === "sl:players" || k === "sl:player-profiles") && Array.isArray(v) && v.length > 0 && remoteRows.length === 0) {
@@ -856,6 +857,11 @@ return true;
 };
 leaderboardRequestRef.current={teamId,requestId};
 setHomeShotsLeaderboard(prev=>({...prev,status:"loading",error:""}));
+if(isDemoAccount(user)||isDemoMode()){
+const rows=localLeaderboardRows();
+applyLeaderboardRows(rows,{httpStatus:200,errorCode:"demo_local",isEmpty:rows.length===0});
+return;
+}
 try{
 const url=`/v1/leaderboards/home-shots?team_id=${encodeURIComponent(teamId)}&limit=${HOME_SHOTS_LEADERBOARD_LIMIT}&scope=${encodeURIComponent(scope)}`;
 setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,endpoint:url,httpStatus:null,errorCode:"",resultCount:null,isEmpty:false}}));
@@ -1261,6 +1267,7 @@ const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
 // Establish the hard-coded demo identity before any seed collection is saved.
 // The persistence client uses this marker to keep demo writes on-device.
 await DB.set("sl:session",{email:acct.email});
+window.dispatchEvent(new CustomEvent("shotlab:demo-session-started",{detail:{email:acct.email,kind}}));
 let np=[...players];
 let nts=[...teams];
 const savePlayers=async()=>{await P("sl:players",np,setPlayers)};

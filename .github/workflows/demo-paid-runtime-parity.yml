@@ -1,8 +1,13 @@
-name: Demo Paid Runtime Parity
+name: Demo Registered Runtime Parity
 
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      acceptance_base_url:
+        description: Optional deployed ShotLab URL to certify instead of the local production bundle
+        required: false
+        type: string
 
 permissions:
   contents: read
@@ -11,7 +16,7 @@ env:
   VITE_ENABLE_PRODUCTION_DEMOS: "true"
 
 concurrency:
-  group: demo-paid-runtime-parity-${{ github.event.pull_request.number || github.ref }}
+  group: demo-registered-runtime-parity-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -47,21 +52,22 @@ jobs:
         run: npm run build
 
       - name: Start exact built bundle
+        if: ${{ !inputs.acceptance_base_url }}
         run: |
-          npm run preview:agent > /tmp/demo-paid-runtime-parity-preview.log 2>&1 &
+          npm run preview:agent > /tmp/demo-registered-runtime-parity-preview.log 2>&1 &
           for attempt in {1..40}; do
             if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
               exit 0
             fi
             sleep 1
           done
-          cat /tmp/demo-paid-runtime-parity-preview.log
+          cat /tmp/demo-registered-runtime-parity-preview.log
           exit 1
 
       - name: Capture strict demo and registered runtime UI
         continue-on-error: true
         env:
-          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+          ACCEPTANCE_BASE_URL: ${{ inputs.acceptance_base_url || 'http://127.0.0.1:4173' }}
         run: npx playwright test tests/e2e/demo-paid-runtime-parity.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --timeout=120000 --retries=0
 
       - name: Validate computed UI and bounded rendered pixels
@@ -71,8 +77,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: demo-paid-runtime-parity-evidence
-          path: artifacts/demo-paid-runtime-parity/
+          name: demo-registered-runtime-parity-evidence
+          path: artifacts/demo-registered-runtime-parity/
           if-no-files-found: warn
           retention-days: 14
 
@@ -80,10 +86,10 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: demo-paid-runtime-parity-failure
+          name: demo-registered-runtime-parity-failure
           path: |
             playwright-report/
             test-results/
-            /tmp/demo-paid-runtime-parity-preview.log
+            /tmp/demo-registered-runtime-parity-preview.log
           if-no-files-found: ignore
           retention-days: 7

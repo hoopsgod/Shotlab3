@@ -1,4 +1,4 @@
-name: Demo Paid Experience Parity
+name: Demo Registered Experience Parity
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ env:
   VITE_SUPABASE_ANON_KEY: "parity-anon-key"
 
 concurrency:
-  group: demo-paid-parity-${{ github.event.pull_request.number || github.ref }}
+  group: demo-registered-parity-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Enforce shared UI and paid leaderboard parity contracts
+      - name: Enforce shared UI and registered leaderboard parity contracts
         run: node --test tests/demo-visual-parity-contract.test.mjs tests/home-shots-leaderboard-route.test.mjs tests/remote-leaderboard-roster-parity.test.mjs
 
       - name: Install pinned Playwright runner
@@ -62,7 +62,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: demo-paid-parity-certification
+          name: demo-registered-parity-certification
           path: parity-evidence/
           if-no-files-found: ignore
           retention-days: 14
@@ -71,7 +71,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: demo-paid-parity-failure
+          name: demo-registered-parity-failure
           path: |
             playwright-report/
             test-results/

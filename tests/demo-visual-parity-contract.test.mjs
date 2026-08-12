@@ -9,6 +9,10 @@ const repoRoot = path.resolve(here, '..');
 const srcRoot = path.join(repoRoot, 'src');
 const appSource = await readFile(path.join(srcRoot, 'App.jsx'), 'utf8');
 const runtimeParitySource = await readFile(path.join(repoRoot, 'tests/e2e/demo-paid-runtime-parity.spec.mjs'), 'utf8');
+const focusedParitySource = await readFile(path.join(repoRoot, 'tests/e2e/demo-paid-parity.spec.mjs'), 'utf8');
+const focusedParityWorkflow = await readFile(path.join(repoRoot, '.github/workflows/demo-paid-parity.yml'), 'utf8');
+const runtimeParityWorkflow = await readFile(path.join(repoRoot, '.github/workflows/demo-paid-runtime-parity.yml'), 'utf8');
+const parityContract = await readFile(path.join(repoRoot, 'docs/demo-registered-parity-contract.md'), 'utf8');
 
 const requiredSharedSurfaces = [
   'CoachPlayersInteractiveDashboard',
@@ -109,6 +113,21 @@ test('runtime parity mirrors the active demo team instead of assuming stored tea
   assert.match(runtimeParitySource, /teams\.find\(\(row\) => idOf\(row\) === playerTeamId\)/);
   assert.match(runtimeParitySource, /teams\.find\(\(row\) => idOf\(row\) === TEAM_ID\)/);
   assert.doesNotMatch(runtimeParitySource, /const team = teams\[0\]/);
+});
+
+test('Phase 1 names the commercial comparison truthfully as demo versus registered', () => {
+  for (const [label, source] of [
+    ['focused parity spec', focusedParitySource],
+    // Legacy filenames stay stable so branch-protection and workflow references
+    // do not break; only visible terminology and test data must be truthful.
+    ['focused parity workflow', focusedParityWorkflow.replaceAll('demo-paid', 'demo-registered')],
+    ['runtime parity workflow', runtimeParityWorkflow.replaceAll('demo-paid', 'demo-registered')],
+    ['parity contract', parityContract],
+  ]) {
+    assert.doesNotMatch(source, /\bpaid\b/i, `${label} must not imply a paid subscription state that does not exist`);
+  }
+  assert.match(focusedParityWorkflow, /^name: Demo Registered Experience Parity/m);
+  assert.match(runtimeParityWorkflow, /^name: Demo Registered Runtime Parity/m);
 });
 
 test('Team Store source and build enhancer preserve the same player state for demo and registered users', async () => {

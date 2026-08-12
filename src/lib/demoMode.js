@@ -3,6 +3,7 @@ const DEMO_SESSION_KEY = "sl:demoSession";
 const PENDING_DEMO_SESSION_KEY = "sl:pendingDemoSession";
 const LEGACY_DEMO_KEY = "sl:demoMode";
 const APP_SESSION_KEY = "sl:session";
+const PENDING_DEMO_TTL_MS = 30_000;
 
 export function isDemoAccount(userOrEmail) {
   const email = typeof userOrEmail === "string" ? userOrEmail : userOrEmail?.email;
@@ -18,6 +19,32 @@ function parseStoredSession(raw) {
   } catch {
     return null;
   }
+}
+
+export function isDemoPersistenceSession(options = {}) {
+  const browserWindow = typeof window === "undefined" ? null : window;
+  const localStorage = options.localStorage ?? browserWindow?.localStorage;
+  const sessionStorage = options.sessionStorage ?? browserWindow?.sessionStorage;
+  const location = options.location ?? browserWindow?.location;
+  const now = Number(options.now ?? Date.now());
+  const explicitDemo = new URLSearchParams(String(location?.search || "")).get("demo") === "1";
+  if (explicitDemo) return true;
+
+  const durableSession = [localStorage, sessionStorage]
+    .map((storage) => {
+      try { return parseStoredSession(storage?.getItem?.(APP_SESSION_KEY)); } catch { return null; }
+    })
+    .find((session) => isDemoAccount(session?.email));
+  if (durableSession) return true;
+
+  let pendingSession = null;
+  try { pendingSession = parseStoredSession(sessionStorage?.getItem?.(PENDING_DEMO_SESSION_KEY)); } catch {}
+  const createdAt = Number(pendingSession?.createdAt);
+  const age = now - createdAt;
+  return isDemoAccount(pendingSession?.email)
+    && Number.isFinite(createdAt)
+    && age >= 0
+    && age <= PENDING_DEMO_TTL_MS;
 }
 
 function inferPendingDemoEmail() {

@@ -124,7 +124,7 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
   const getPlayerPriorities = async () => {
     const localPriorities = sanitizePriorityMap(await db.get(STORAGE_KEYS.coachPriorities));
     const { requester } = await getRequesterContext();
-    if (!requester) return localPriorities;
+    if (!requester || isDemoAccount(requester)) return localPriorities;
 
     try {
       const response = await fetchImpl("/v1/team-priorities", {
@@ -160,6 +160,9 @@ export const createAppPersistenceService = ({ db, fetchImpl = fetch }) => {
     await db.set(STORAGE_KEYS.coachPriorities, nextPriorities, { strictLocal: true });
 
     const { requester, teamId: activeTeamId } = await getRequesterContext();
+    if (isDemoAccount(requester)) {
+      return { ok: true, storageMode: "demo_local", deliveredTeamIds: [] };
+    }
     const allEntries = Object.entries(nextPriorities);
     const entries = activeTeamId && nextPriorities[activeTeamId]
       ? [[activeTeamId, nextPriorities[activeTeamId]]]
