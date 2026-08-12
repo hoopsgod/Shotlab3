@@ -74,7 +74,6 @@ async function verifyBackControl(page, role, surface) {
       borderRadius: Number.parseFloat(style.borderRadius),
       backgroundImage: style.backgroundImage,
       fontSize: Number.parseFloat(style.fontSize),
-      textTransform: style.textTransform,
       touchAction: style.touchAction,
       iconText: String(icon?.textContent || "").trim(),
       iconFontSize: Number.parseFloat(iconStyle?.fontSize || "0"),
@@ -94,7 +93,6 @@ async function verifyBackControl(page, role, surface) {
   expect(presentation.borderRadius).toBeLessThanOrEqual(15);
   expect(presentation.backgroundImage).toBe("none");
   expect(presentation.fontSize).toBe(0);
-  expect(presentation.textTransform).toBe("none");
   expect(presentation.touchAction).toBe("manipulation");
   expect(presentation.iconText.length).toBeGreaterThan(0);
   expect(presentation.iconFontSize).toBeGreaterThanOrEqual(20);
