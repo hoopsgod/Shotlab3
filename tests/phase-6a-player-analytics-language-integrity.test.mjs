@@ -16,13 +16,23 @@ test("machine drill identifiers become player-facing basketball labels", () => {
   assert.equal(formatPlayerDrillDisplayName("demo-drill"), "Practice Drill");
 });
 
-test("catalog names win over machine identifiers", () => {
+test("curated catalog names win over machine identifiers", () => {
   assert.equal(
     resolvePlayerDrillDisplayName({
       drillId: "demo-program-pressure-shooting-50",
       drills: [{ id: "demo-program-pressure-shooting-50", name: "Pressure Shooting 50" }],
     }),
     "Pressure Shooting 50",
+  );
+});
+
+test("generated internal catalog labels are normalized instead of preserved as all caps", () => {
+  assert.equal(
+    resolvePlayerDrillDisplayName({
+      drillId: "demo-home-warm-up-shooting-4-minute",
+      drills: [{ id: "demo-home-warm-up-shooting-4-minute", name: "4 MINUTE WARM UP SHOOTING" }],
+    }),
+    "4-Minute Warm-Up Shooting",
   );
 });
 
