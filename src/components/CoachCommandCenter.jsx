@@ -110,7 +110,7 @@ function TodayPlan({ activation, onAction }) {
   const next = activation?.next;
   if (!next) return null;
   return (
-    <article className="mcTodayPlan mcActivationPlan" data-testid="coach-onboarding-state">
+    <article className="mcTodayPlan mcActivationPlan" data-testid="coach-onboarding-state" data-home-role="supporting">
       <span className="mcTodayPlanIcon"><Icon name={next.icon || "spark"} size={21} /></span>
       <span className="mcTodayPlanCopy">
         <small>Coach activation · {activation.completed}/{activation.total}</small>
@@ -398,7 +398,7 @@ export default function CoachCommandCenter({
   }
 
   return (
-    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" style={{ "--mc": accent, "--mc-secondary": secondary }}>
+    <div className={`mcShell mcShellV3 ${onboardingMode ? "is-onboarding" : "has-team-data"}`} data-testid="coach-command-center-full" data-home-hierarchy="decision-first" style={{ "--mc": accent, "--mc-secondary": secondary }}>
       <aside className="mcRail" aria-label="Coach navigation">
         <button type="button" className="mcRailBrand" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img className="mcRailLogo" src={cleanFullLogoUrl} alt={`${teamName} logo`} /></button>
         <nav>{navigation.map((item) => <button key={item.label} type="button" className={item.active ? "is-active" : ""} onClick={item.onClick}><Icon name={item.icon} /><span>{item.label}</span></button>)}</nav>
@@ -412,7 +412,7 @@ export default function CoachCommandCenter({
           <div className="mcHeaderActions"><button type="button" className="mcTeamSelect" onClick={openBrandingSettings}>{teamName}<span>⌄</span></button><button type="button" className="mcBell" aria-label={`Open Coach Inbox, ${inboxModel.actionableCount} ${inboxModel.actionableCount === 1 ? "item" : "items"}`} aria-expanded={inboxOpen} aria-controls="coach-inbox-panel" onClick={openInbox}><Icon name="bell" />{inboxModel.actionableCount > 0 ? <b>{inboxModel.actionableCount}</b> : null}</button></div>
         </header>
 
-        <section className={`mcHero is-${primaryCommand.state}`} data-testid="coach-primary-objective">
+        <section className={`mcHero is-${primaryCommand.state}`} data-testid="coach-primary-objective" data-home-role="primary">
           <CourtArtwork logoUrl={cleanMarkLogoUrl} />
           <div className="mcHeroScrim" />
           <button type="button" className="mcHeroTeamMark" onClick={openBrandingSettings} aria-label={`Customize ${teamName} team identity`}><img src={cleanMarkLogoUrl} alt={`${teamName} logo`} /></button>

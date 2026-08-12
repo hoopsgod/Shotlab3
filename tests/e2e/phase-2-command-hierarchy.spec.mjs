@@ -100,6 +100,7 @@ test("Player home presents action, evidence, priority, and disclosure in order",
   await expect(root).toBeVisible({ timeout: 20_000 });
   await expect(root).toHaveAttribute("data-phase", "phase-2-command-hierarchy");
   await expect(primary).toBeVisible();
+  await expect(root.getByRole("heading", { level: 1 })).toContainText("Daily work banked.");
   await expect(evidence).toBeVisible();
   await expect(priority).toBeVisible();
   await expect(disclosure).toBeVisible();
@@ -167,6 +168,25 @@ test("Coach home keeps the primary decision and evidence compact on iPhone", asy
   await expect(commandCenter).toBeVisible({ timeout: 20_000 });
   await expect(objective).toBeVisible();
   await expect(metrics).toBeVisible();
+  await expect(commandCenter).toHaveAttribute("data-home-hierarchy", "decision-first");
+  await expect(objective).toHaveAttribute("data-home-role", "primary");
+
+  const onboarding = page.getByTestId("coach-onboarding-state");
+  if (await onboarding.count()) {
+    await expect(onboarding).toHaveAttribute("data-home-role", "supporting");
+    const onboardingTreatment = await onboarding.evaluate((element) => {
+      const surface = getComputedStyle(element);
+      const accent = getComputedStyle(element, "::before");
+      return {
+        surfaceBackground: surface.backgroundImage,
+        accentWidth: Number.parseFloat(accent.width),
+        accentInset: accent.inset,
+      };
+    });
+    expect(onboardingTreatment.surfaceBackground).toContain("linear-gradient");
+    expect(onboardingTreatment.accentWidth).toBeLessThanOrEqual(6);
+    expect(onboardingTreatment.accentInset).not.toBe("0px");
+  }
 
   const heroBox = await objective.boundingBox();
   expect(heroBox).not.toBeNull();
@@ -174,4 +194,32 @@ test("Coach home keeps the primary decision and evidence compact on iPhone", asy
 
   await disableVisualNoise(page);
   await page.screenshot({ path: `${SCREENSHOT_DIR}/coach-home-390x844.png`, fullPage: true });
+});
+
+test("Player desktop keeps one priority card in the decision rail", async ({ page }) => {
+  await page.setViewportSize({ width: 1363, height: 936 });
+  await enterDemo(page, "player");
+
+  const rail = page.getByTestId("player-operational-insight-rail");
+  await expect(rail).toBeVisible({ timeout: 20_000 });
+  await expect(rail).toHaveAttribute("data-density", "decision-first");
+  await expect(rail.getByRole("heading", { level: 2 })).toContainText("Daily brief");
+
+  const cards = rail.locator("article");
+  await expect(cards).toHaveCount(3);
+  await expect(cards.first()).toHaveAttribute("data-rail-role", "primary");
+  await expect(cards.nth(1)).toHaveAttribute("data-rail-role", "supporting");
+  await expect(cards.nth(2)).toContainText("1 RSVP needs a response");
+
+  const materials = await cards.evaluateAll((elements) => elements.map((element) => ({
+    role: element.dataset.railRole,
+    background: getComputedStyle(element).backgroundColor,
+    color: getComputedStyle(element.querySelector("h3")).color,
+  })));
+  expect(materials[0].role).toBe("primary");
+  expect(Math.max(...colorParts(materials[0].color).slice(0, 3))).toBeGreaterThan(220);
+  expect(Math.min(...colorParts(materials[1].background).slice(0, 3))).toBeGreaterThan(220);
+
+  await disableVisualNoise(page);
+  await page.screenshot({ path: `${SCREENSHOT_DIR}/player-home-desktop-1363x936.png`, fullPage: false });
 });

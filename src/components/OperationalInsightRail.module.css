@@ -66,12 +66,11 @@
 }
 
 .card {
-  --rail-tone: rgba(255, 255, 255, 0.72);
-  background:
-    linear-gradient(155deg, color-mix(in srgb, var(--rail-tone) 6%, var(--insight-card-surface, #10171d)), #0a0e14);
-  border: 1px solid color-mix(in srgb, var(--rail-tone) 24%, rgba(255, 255, 255, 0.08));
+  --rail-tone: #67736b;
+  background: #fbfbf8;
+  border: 1px solid color-mix(in srgb, var(--rail-tone) 15%, rgba(17, 26, 33, 0.09));
   border-radius: var(--insight-card-radius, 18px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 10px 24px rgba(17, 26, 33, 0.14);
+  box-shadow: 0 6px 16px rgba(17, 26, 33, 0.045);
   overflow: hidden;
   padding: 14px;
   position: relative;
@@ -89,27 +88,32 @@
 }
 
 .primaryCard {
+  background:
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--rail-tone) 10%, transparent), transparent 42%),
+    linear-gradient(155deg, #151b1c, #0a0e11);
+  border-color: color-mix(in srgb, var(--rail-tone) 26%, rgba(255, 255, 255, 0.08));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 12px 26px rgba(17, 26, 33, 0.15);
   padding: 16px 15px 14px;
 }
 
 .tone_primary {
-  --rail-tone: var(--team-brand-primary, #c8ff1a);
+  --rail-tone: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 68%, #405400);
 }
 
 .tone_positive {
-  --rail-tone: var(--semantic-success, #67e8a5);
+  --rail-tone: #2b7a5d;
 }
 
 .tone_attention {
-  --rail-tone: var(--semantic-warning, #ffb86b);
+  --rail-tone: #b56a20;
 }
 
 .tone_info {
-  --rail-tone: var(--semantic-info, #5ed0ff);
+  --rail-tone: #187795;
 }
 
 .tone_neutral {
-  --rail-tone: #aeb8bd;
+  --rail-tone: #68746d;
 }
 
 .cardEyebrow {
@@ -118,7 +122,7 @@
 }
 
 .card h3 {
-  color: var(--insight-card-copy, #f5f8f9);
+  color: #172019;
   font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
   font-size: 14px;
   font-weight: 760;
@@ -127,11 +131,19 @@
 }
 
 .card p {
-  color: var(--insight-card-muted, #b6c0c6);
+  color: #5f6962;
   font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
   font-size: var(--type-meta, 12px);
   line-height: 1.48;
   margin: 7px 0 0;
+}
+
+.primaryCard h3 {
+  color: #f5f8f6;
+}
+
+.primaryCard p {
+  color: #b8c2bc;
 }
 
 .card button {
@@ -150,6 +162,11 @@
   min-height: var(--touch-target, 44px);
   padding: 0;
   text-transform: uppercase;
+}
+
+.primaryCard .cardEyebrow,
+.primaryCard button {
+  color: color-mix(in srgb, var(--rail-tone) 64%, white);
 }
 
 .card button:hover {
