@@ -182,7 +182,7 @@ export const deriveInterpretedPerformanceTrends = ({ shotLogs = [], scores = [],
   allScores.forEach((score) => {
     const drillId = String(score?.drillId || "").trim();
     const drillName = String(score?.drillName || "").trim();
-    const key = drillId || drillName || "drill";
+    const key = drillName || drillId || "Drill";
     const current = byDrill.get(key) || { count: 0, drillId, drillName };
     current.count += 1;
     if (!current.drillId && drillId) current.drillId = drillId;
