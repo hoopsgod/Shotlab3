@@ -208,12 +208,15 @@ html body .performance-shell.performance-shell .btn-v,
 html body .premium-screen.premium-screen .btn-v {
   font-family:var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif) !important;
 }
-html body .performance-shell.performance-shell .ts-close,
-html body .premium-screen.premium-screen .ts-close {
+html body .ts-overlay.ts-overlay .ts-close {
   width:44px !important;
   min-width:44px !important;
   height:44px !important;
   min-height:44px !important;
+}
+html body .ts-overlay.ts-overlay select {
+  min-height:48px !important;
+  border-radius:14px !important;
 }
 
 .performance-shell p:not([data-command-role="primary"] p),
