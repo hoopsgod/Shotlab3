@@ -7,6 +7,7 @@ const styles = fs.readFileSync("src/components/DashboardIdentityHeader.module.cs
 const leaderboardDeferred = fs.readFileSync("src/components/DeferredPremiumLeaderboardsHub.jsx", "utf8");
 const sharedDeferred = fs.readFileSync("src/components/DeferredSharedAuthenticatedUi.jsx", "utf8");
 const sharedChrome = fs.readFileSync("src/components/Phase7AuthenticatedChrome.css", "utf8");
+const backEnhancer = fs.readFileSync("scripts/apply-phase4d-shared-back-hit-area.mjs", "utf8");
 
 test("Phase 7 exposes stable Player identity semantics", () => {
   for (const role of ["inner", "identity", "mode-row", "badge", "team-name", "name", "tagline", "mission", "brand-panel", "brand-mark"]) {
@@ -14,25 +15,27 @@ test("Phase 7 exposes stable Player identity semantics", () => {
   }
 });
 
-test("Phase 7 compacts Player identity only away from Home while preserving the mobile gutter", () => {
-  assert.match(styles, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab=\\?"home\\?"\]\)/);
-  assert.match(styles, /margin:0 14px 8px!important/);
-  assert.match(styles, /min-height:92px!important/);
-  assert.match(styles, /\.player \.tagline\{display:none!important/);
-  assert.match(styles, /\.player \.brandMark\{width:58px!important/);
+test("Phase 7 makes the compact Player identity the mobile default", () => {
+  assert.match(styles, /@media\(max-width:700px\)/);
+  assert.match(styles, /\.player\{margin:0 14px 8px\}/);
+  assert.match(styles, /\.player \.inner\{grid-template-columns:minmax\(0,1fr\) 62px;gap:10px;min-height:92px;padding:10px 0 11px\}/);
+  assert.match(styles, /\.player \.tagline\{display:none\}/);
+  assert.match(styles, /\.player \.brandMark\{width:58px;height:58px/);
+  assert.doesNotMatch(styles, /performance-shell--player\.is-mobile:not/);
 });
 
 test("Phase 7 uses one shared 44px native return-control authority", () => {
   assert.match(sharedDeferred, /import "\.\/Phase7AuthenticatedChrome\.css"/);
-  assert.match(sharedChrome, /player-scroll-container>button\.shared-dashboard-back-action/);
-  assert.match(sharedChrome, /page\.pageShell>button\.shared-dashboard-back-action:first-child/);
-  assert.match(sharedChrome, /p3c-route-control,44px/);
+  assert.match(sharedChrome, /performance-shell\.is-mobile \.shared-dashboard-back-action/);
+  assert.match(sharedChrome, /width:44px!important/);
+  assert.match(sharedChrome, /height:44px!important/);
   assert.match(sharedChrome, /padding:0!important/);
   assert.match(sharedChrome, /p3c-route-radius,14px/);
   assert.match(sharedChrome, />span\[aria-hidden="true"\]/);
   assert.match(sharedChrome, /font-size:21px!important/);
-  assert.match(sharedChrome, /touch-action:manipulation!important/);
   assert.match(sharedChrome, /:focus-visible/);
+  assert.match(backEnhancer, /minHeight:44/);
+  assert.match(backEnhancer, /touchAction:"manipulation"/);
   assert.doesNotMatch(styles, /shared-dashboard-back-action/);
 });
 
@@ -40,12 +43,10 @@ test("Phase 7 removes the retired black Coach Leaderboards route canvas without 
   assert.doesNotMatch(leaderboardDeferred, /LeaderboardsRoutePolish\.css/);
   assert.match(sharedChrome, /performance-shell--coach\[data-workspace-tab="leaderboards"\]/);
   assert.match(sharedChrome, /background:var\(--bg-0,#f3f1ea\)!important/);
-  assert.match(sharedChrome, /performance-workspace::before/);
-  assert.match(sharedChrome, /performance-workspace::after/);
 });
 
-test("Phase 7 keeps Player Home hero supporting copy readable on the dark performance surface", () => {
-  assert.match(sharedChrome, /player-daily-command-center/);
-  assert.match(sharedChrome, /data-command-role="primary"/);
-  assert.match(sharedChrome, /color:#c7d0d5!important/);
+test("Phase 7 keeps authenticated chrome bounded to route framing rather than duplicating component paint", () => {
+  assert.doesNotMatch(sharedChrome, /player-daily-command-center/);
+  assert.doesNotMatch(sharedChrome, /performance-workspace::before/);
+  assert.doesNotMatch(sharedChrome, /player-scroll-container>button/);
 });
