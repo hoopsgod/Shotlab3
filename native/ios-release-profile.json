@@ -3,7 +3,7 @@
   "platform": "ios",
   "productName": "ShotLab",
   "bundleIdentifier": "com.shotlab.training",
-  "marketingVersion": "1.0.0",
+  "marketingVersion": "1.0",
   "buildNumber": 1,
   "primaryCategory": "Sports",
   "deviceFamily": "iPhone",
