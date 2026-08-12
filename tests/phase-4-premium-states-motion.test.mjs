@@ -28,8 +28,8 @@ test("release boundary routes connectivity through the single premium feedback l
   assert.match(source, /import AppFeedbackLayer, \{ announceFeedback, clearFeedback \}/);
   assert.match(source, /CONNECTIVITY_FEEDBACK_KEY = "release-connectivity"/);
   assert.match(source, /title: "Working offline"/);
-  assert.match(source, /title: "Connection restored"/);
-  assert.match(source, /title: "Team sync complete"/);
+  assert.match(source, /title: "Checking team sync"/);
+  assert.match(source, /title: status === "synced" \? "Team sync complete" : "Sync needs attention"/);
   assert.match(source, /clearFeedback\(CONNECTIVITY_FEEDBACK_KEY\)/);
   assert.match(source, /<AppFeedbackLayer \/>/);
   assert.doesNotMatch(source, /data-testid="release-connectivity-status"/);
