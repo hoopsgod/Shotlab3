@@ -36,9 +36,13 @@ test("generated internal catalog labels are normalized instead of preserved as a
   );
 });
 
-test("opaque identifiers never leak to the player experience", () => {
+test("opaque UUID identifiers never leak to the player experience", () => {
   assert.equal(
     formatPlayerDrillDisplayName("550e8400-e29b-41d4-a716-446655440000"),
+    "Training Drill",
+  );
+  assert.equal(
+    formatPlayerDrillDisplayName("0194f740-7b00-7cc8-8f0f-123456789abc"),
     "Training Drill",
   );
 });
