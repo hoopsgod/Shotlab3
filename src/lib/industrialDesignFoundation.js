@@ -182,9 +182,39 @@ const CSS = `
 .performance-shell label,
 .premium-screen label { color:#74797c !important; }
 
-html[data-shotlab-design="industrial-light-v1"] .performance-shell select,
-html[data-shotlab-design="industrial-light-v1"] .premium-screen select {
-  border-radius:var(--radius-md, 14px) !important;
+/*
+ * Identity-neutral control contract. Route-level styles load on demand, so
+ * geometry must be owned here to keep demo and registered sessions identical.
+ */
+html[data-shotlab-design="industrial-light-v1"] body .performance-shell button,
+html[data-shotlab-design="industrial-light-v1"] body .premium-screen button {
+  min-width:44px !important;
+  min-height:44px !important;
+}
+html[data-shotlab-design="industrial-light-v1"] body .performance-shell .secondaryPageAction,
+html[data-shotlab-design="industrial-light-v1"] body .premium-screen .secondaryPageAction {
+  min-height:48px !important;
+}
+html[data-shotlab-design="industrial-light-v1"] body .performance-shell input,
+html[data-shotlab-design="industrial-light-v1"] body .performance-shell select,
+html[data-shotlab-design="industrial-light-v1"] body .premium-screen input,
+html[data-shotlab-design="industrial-light-v1"] body .premium-screen select {
+  min-height:48px !important;
+}
+html[data-shotlab-design="industrial-light-v1"] body .performance-shell select,
+html[data-shotlab-design="industrial-light-v1"] body .premium-screen select {
+  border-radius:14px !important;
+}
+html[data-shotlab-design="industrial-light-v1"] body .performance-shell .btn-v,
+html[data-shotlab-design="industrial-light-v1"] body .premium-screen .btn-v {
+  font-family:var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif) !important;
+}
+html[data-shotlab-design="industrial-light-v1"] body .performance-shell .ts-close,
+html[data-shotlab-design="industrial-light-v1"] body .premium-screen .ts-close {
+  width:44px !important;
+  min-width:44px !important;
+  height:44px !important;
+  min-height:44px !important;
 }
 
 .performance-shell p:not([data-command-role="primary"] p),
