@@ -10,13 +10,14 @@ body.mission-control-active .performance-workspace--coach {
 
 body.mission-control-active .mcShellV3 {
   --mc-canvas: transparent;
-  --mc-surface: var(--surface-1);
-  --mc-surface-quiet: var(--surface-3);
-  --mc-ink: var(--text-1);
-  --mc-muted: var(--text-2);
-  --mc-dim: var(--text-3);
-  --mc-line: var(--stroke-1);
-  --mc-line-strong: var(--stroke-2);
+  /* Fixed locally so older coach-shell variables cannot invert light support cards. */
+  --mc-surface: #ffffff;
+  --mc-surface-quiet: #f5f4ef;
+  --mc-ink: #111a21;
+  --mc-muted: #44515b;
+  --mc-dim: #65717a;
+  --mc-line: rgba(17, 26, 33, .09);
+  --mc-line-strong: rgba(17, 26, 33, .15);
   color: var(--mc-ink) !important;
   background: var(--mc-canvas) !important;
   font-family: var(--font-body) !important;

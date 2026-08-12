@@ -101,13 +101,14 @@ test("Phase 1 shell materials and legacy namespaces resolve through the canonica
   assert.match(foundation, /\.performance-shell \.sidebar-nav[\s\S]*var\(--shell-rail-surface-raised\)[\s\S]*var\(--shell-rail-surface\)/);
   assert.match(foundation, /\.nav-item\.is-active[\s\S]*var\(--accent\)/);
 
-  for (const alias of [
-    "--mc-surface: var(--surface-1)",
-    "--mc-surface-quiet: var(--surface-3)",
-    "--mc-ink: var(--text-1)",
-    "--mc-muted: var(--text-2)",
-    "--mc-line: var(--stroke-1)",
-  ]) assert.ok(missionControl.includes(alias), "missing " + alias);
+  for (const isolatedMaterial of [
+    "--mc-surface: #ffffff",
+    "--mc-surface-quiet: #f5f4ef",
+    "--mc-ink: #111a21",
+    "--mc-muted: #44515b",
+  ]) assert.ok(missionControl.includes(isolatedMaterial), "missing " + isolatedMaterial);
+  assert.doesNotMatch(missionControl, /--mc-surface:\s*var\(--surface-1/);
+  assert.doesNotMatch(missionControl, /--mc-surface-quiet:\s*var\(--surface-3/);
 
   assert.match(secondaryPages, /border-radius: var\(--radius-xl, 24px\)/);
   assert.match(secondaryPages, /border-radius: var\(--radius-md, 14px\)/);
