@@ -39,7 +39,7 @@ test("Capacitor identity is deterministic and aligned with the release profile",
   assert.equal(releaseProfile.schemaVersion, 3);
 });
 
-test("native scripts expose a repeatable build, sync, verify, release-readiness, and Xcode workflow", () => {
+test("native scripts expose a repeatable build, sync, verify, readiness, and Xcode workflow without changing the web package surface", () => {
   for (const script of [
     "native:doctor",
     "native:install:toolchain",
@@ -47,14 +47,14 @@ test("native scripts expose a repeatable build, sync, verify, release-readiness,
     "native:sync:ios",
     "native:verify:ios",
     "native:open:ios",
-    "ios:release-readiness",
     "ios:validate",
     "ios:simulator-build",
     "ios:device-build",
     "ios:archive",
-    "ios:release-candidate",
   ]) assert.equal(typeof packageJson.scripts?.[script], "string", `Missing ${script}`);
 
+  assert.equal(packageJson.scripts?.["ios:release-readiness"], undefined);
+  assert.equal(packageJson.scripts?.["ios:release-candidate"], undefined);
   assert.match(nativeScript, /CAPACITOR_VERSION = "8\.4\.2"/);
   assert.match(nativeScript, /@capacitor\/core@/);
   assert.match(nativeScript, /@capacitor\/cli@/);
@@ -69,6 +69,7 @@ test("native scripts expose a repeatable build, sync, verify, release-readiness,
   assert.match(readinessScript, /submissionMinimums/);
   assert.match(readinessScript, /--strict-owner/);
   assert.match(readinessScript, /--require-signing/);
+  assert.match(releaseScript, /case "release-candidate"/);
   assert.match(releaseScript, /syncReleaseBundle/);
   assert.match(releaseScript, /verifyAppleToolchain/);
 });
@@ -83,6 +84,7 @@ test("release readiness stays explicit instead of inventing submission metadata"
   assert.match(runbook, /Do not submit the build for Apple review/i);
   assert.match(runbook, /npm run native:prepare:ios/);
   assert.match(runbook, /npm run native:sync:ios/);
+  assert.match(runbook, /node scripts\/testflight-readiness\.mjs/);
 });
 
 test("native foundation does not add remote web loading or application data access", () => {
