@@ -60,6 +60,8 @@ async function verifyBackControl(page, role, surface) {
 
   const presentation = await back.evaluate((node) => {
     const style = getComputedStyle(node);
+    const icon = node.querySelector('span[aria-hidden="true"]');
+    const iconStyle = icon ? getComputedStyle(icon) : null;
     return {
       text: String(node.textContent || "").replace(/\s+/g, " ").trim(),
       minHeight: Number.parseFloat(style.minHeight),
@@ -69,27 +71,39 @@ async function verifyBackControl(page, role, surface) {
       paddingLeft: Number.parseFloat(style.paddingLeft),
       paddingRight: Number.parseFloat(style.paddingRight),
       borderTopWidth: style.borderTopWidth,
-      borderRadius: style.borderRadius,
+      borderRadius: Number.parseFloat(style.borderRadius),
       backgroundImage: style.backgroundImage,
       fontSize: Number.parseFloat(style.fontSize),
-      fontWeight: style.fontWeight,
       textTransform: style.textTransform,
       touchAction: style.touchAction,
+      iconText: String(icon?.textContent || "").trim(),
+      iconFontSize: Number.parseFloat(iconStyle?.fontSize || "0"),
+      iconColor: iconStyle?.color || "",
     };
   });
 
+  expect(presentation.text).toMatch(/dashboard/i);
   expect(presentation.minHeight).toBeGreaterThanOrEqual(44);
-  expect(presentation.paddingTop).toBe(9);
-  expect(presentation.paddingBottom).toBe(9);
-  expect(presentation.paddingLeft).toBe(14);
-  expect(presentation.paddingRight).toBe(14);
+  expect(presentation.height).toBeGreaterThanOrEqual(44);
+  expect(presentation.paddingTop).toBe(0);
+  expect(presentation.paddingBottom).toBe(0);
+  expect(presentation.paddingLeft).toBe(0);
+  expect(presentation.paddingRight).toBe(0);
   expect(presentation.borderTopWidth).toBe("1px");
-  expect(Number.parseFloat(presentation.borderRadius)).toBeGreaterThan(100);
-  expect(presentation.backgroundImage).not.toBe("none");
-  expect(presentation.fontSize).toBe(11);
-  expect(Number(presentation.fontWeight)).toBe(700);
-  expect(presentation.textTransform).toBe("uppercase");
+  expect(presentation.borderRadius).toBeGreaterThanOrEqual(13);
+  expect(presentation.borderRadius).toBeLessThanOrEqual(15);
+  expect(presentation.backgroundImage).toBe("none");
+  expect(presentation.fontSize).toBe(0);
+  expect(presentation.textTransform).toBe("none");
   expect(presentation.touchAction).toBe("manipulation");
+  expect(presentation.iconText.length).toBeGreaterThan(0);
+  expect(presentation.iconFontSize).toBeGreaterThanOrEqual(20);
+  expect(presentation.iconColor).not.toBe("rgba(0, 0, 0, 0)");
+
+  await back.focus();
+  await expect(back).toBeFocused();
+  const focusOutline = await back.evaluate((node) => getComputedStyle(node).outlineStyle);
+  expect(focusOutline).not.toBe("none");
 
   const viewport = await page.evaluate(() => ({
     innerWidth,
@@ -102,7 +116,7 @@ async function verifyBackControl(page, role, surface) {
   return { role, surface, box, presentation, viewport };
 }
 
-test("shared Coach and Player dashboard back actions are touch-safe without visual restyling", async ({ browser }) => {
+test("shared Coach and Player dashboard back actions stay touch-safe under Phase 7 compact framing", async ({ browser }) => {
   const evidence = [];
 
   const coachContext = await browser.newContext({ viewport: { width: 390, height: 844 } });
