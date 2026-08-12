@@ -1,56 +1,7 @@
-/* Phase 7 — final authenticated presentation authority.
-   Keep intentional dark performance moments, native mobile return controls, and one light route canvas. */
-
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="primary"]>p{color:#c7d0d5!important}
-
-.performance-shell--coach[data-workspace-tab="leaderboards"]{min-height:100dvh;background:var(--bg-0,#f3f1ea)!important;color:var(--text-1,#111a21)!important}
-.performance-shell--coach[data-workspace-tab="leaderboards"] .performance-workspace,
-.performance-shell--coach[data-workspace-tab="leaderboards"] .shell-main,
-.performance-shell--coach[data-workspace-tab="leaderboards"] .content-wrap,
-.performance-shell--coach[data-workspace-tab="leaderboards"] .coach-scroll-container{background:transparent!important}
-.performance-shell--coach[data-workspace-tab="leaderboards"] .performance-workspace::before,
-.performance-shell--coach[data-workspace-tab="leaderboards"] .performance-workspace::after{display:none!important}
-
+/* Phase 7 — final authenticated presentation authority. */
+.performance-shell--coach[data-workspace-tab="leaderboards"]{background:var(--bg-0,#f3f1ea)!important}
 @media(max-width:767px){
-  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) .player-scroll-container>button.shared-dashboard-back-action,
-  .performance-shell--coach.is-mobile .page.pageShell>button.shared-dashboard-back-action:first-child{
-    width:var(--p3c-route-control,44px)!important;
-    min-width:var(--p3c-route-control,44px)!important;
-    max-width:var(--p3c-route-control,44px)!important;
-    height:var(--p3c-route-control,44px)!important;
-    min-height:var(--p3c-route-control,44px)!important;
-    margin:0 0 10px!important;
-    padding:0!important;
-    display:inline-flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    gap:0!important;
-    border:1px solid var(--p3c-route-line,rgba(21,26,22,.14))!important;
-    border-radius:var(--p3c-route-radius,14px)!important;
-    background:rgba(255,255,255,.94)!important;
-    color:transparent!important;
-    box-shadow:var(--p3c-route-shadow,0 7px 18px rgba(24,31,27,.075))!important;
-    font-size:0!important;
-    letter-spacing:0!important;
-    text-transform:none!important;
-    overflow:hidden!important;
-    -webkit-tap-highlight-color:transparent;
-    touch-action:manipulation!important
-  }
-
-  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) .player-scroll-container>button.shared-dashboard-back-action>span[aria-hidden="true"],
-  .performance-shell--coach.is-mobile .page.pageShell>button.shared-dashboard-back-action:first-child>span[aria-hidden="true"]{
-    color:#182019!important;
-    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
-    font-size:21px!important;
-    font-weight:650!important;
-    line-height:1!important;
-    transform:translateY(-1px)!important
-  }
-
-  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) .player-scroll-container>button.shared-dashboard-back-action:focus-visible,
-  .performance-shell--coach.is-mobile .page.pageShell>button.shared-dashboard-back-action:first-child:focus-visible{
-    outline:3px solid color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 32%,transparent)!important;
-    outline-offset:2px!important
-  }
+.performance-shell.is-mobile .shared-dashboard-back-action{width:44px!important;height:44px!important;padding:0!important;justify-content:center!important;border-radius:var(--p3c-route-radius,14px)!important;background:#fff!important;color:transparent!important;box-shadow:var(--p3c-route-shadow,0 7px 18px rgba(24,31,27,.075))!important;font-size:0!important}
+.performance-shell.is-mobile .shared-dashboard-back-action>span[aria-hidden="true"]{color:#182019!important;font-size:21px!important}
+.performance-shell.is-mobile .shared-dashboard-back-action:focus-visible{outline:3px solid color-mix(in srgb,var(--team-brand-primary,var(--accent,#8fae25)) 32%,transparent)!important;outline-offset:2px!important}
 }
