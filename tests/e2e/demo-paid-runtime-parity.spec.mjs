@@ -304,14 +304,21 @@ async function getNavigationKeys(page) {
 
 async function expectPlayerHeroContrast(page) {
   const ratio = await page.locator('[data-command-role="primary"] p').first().evaluate((node) => {
-    const channels = (value) => (String(value).match(/[\d.]+/g) || []).map(Number);
+    const channels = (value) => {
+      const serialized = String(value).trim();
+      const values = (serialized.match(/[\d.]+/g) || []).map(Number);
+      if (serialized.startsWith("color(srgb")) {
+        return [values[0] * 255, values[1] * 255, values[2] * 255, values[3] ?? 1];
+      }
+      return [values[0], values[1], values[2], values[3] ?? 1];
+    };
     const [red, green, blue] = channels(getComputedStyle(node).color);
     let backgroundNode = node;
     let background = [255, 255, 255, 1];
     while (backgroundNode) {
       const parsed = channels(getComputedStyle(backgroundNode).backgroundColor);
-      if (parsed.length >= 3 && (parsed[3] ?? 1) > 0) {
-        background = [parsed[0], parsed[1], parsed[2], parsed[3] ?? 1];
+      if (parsed.length >= 3 && parsed[3] > 0) {
+        background = parsed;
         break;
       }
       backgroundNode = backgroundNode.parentElement;

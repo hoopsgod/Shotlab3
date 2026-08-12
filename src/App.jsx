@@ -1,4054 +1,638 @@
-// src/App.jsx
-
-import {
-  cloneElement,
-  isValidElement,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-
-import Auth from "./components/AuthWorkspace.jsx";
-import { BrandBackdrop, BrandWordmark, SLLogo } from "./components/ShotLabBrand.jsx";
-import { _DESKTOP_SHELL_CSS, _PAGE_SIGNATURE_CSS, _PLAYER_COMPACT_DASHBOARD_CSS, _STYLES_CSS } from "./styles/appLegacyStyles.js";
-
-import PlayersScreen from "./screens/PlayersScreen";
-import NewSeasonWizard from "./components/NewSeasonWizard.jsx";
-import CoachPlayerInviteForm from "./components/CoachPlayerInviteForm.jsx";
-import CoachProgramScoreDrawer from "./components/CoachProgramScoreDrawer.jsx";
-import CoachTeamBrandingScreen from "./screens/CoachTeamBrandingScreen";
-
-import PageHeader from "./components/PageHeader";
-import AppHeader from "./components/AppHeader";
-import CoachCommandCenter from "./components/CoachCommandCenter";
-import CoachDashboardHeader from "./components/CoachDashboardHeader";
-import PlayerDashboardHeader from "./components/PlayerDashboardHeader";
-import CoachMiniHeader from "./components/CoachMiniHeader";
-import ShotLabCharts from "./components/ShotLabCharts";
-import CompactLeaderboardPreviewCard from "./components/CompactLeaderboardPreviewCard";
-import PremiumLeaderboardsHub from "./components/PremiumLeaderboardsHub";
-import { DominantObjectiveCard, MetricStrip, ProgressiveDisclosure, QuietSection } from "./components/VisualHierarchy.jsx";
-import MobileNavigation from "./components/MobileNavigation.jsx";
-import SemanticStatus from "./components/SemanticStatus.jsx";
-import { DashboardSection } from "./components/CoachDashboardPrimitives.jsx";
-import { CoachEventsInteractiveDashboard, CoachPageDashboardHeader, CoachPlayersInteractiveDashboard } from "./components/CoachInteractiveDashboards.jsx";
-import { CoachActivityIntelligencePanel, CoachDrillsOperationalPanel, CoachEventIntelligenceDrawer, CoachLeaderboardOperationalPanel, CoachPlayerIntelligenceDrawer, CoachSeasonComparisonPanel, CoachStrengthOperationalPanel } from "./components/CoachDashboardPhase2.jsx";
-import { SecondaryPageDecision, SecondaryPageIntro, SecondaryPageShell } from "./components/SecondaryPageSystem.jsx";
-import PlayerDailyCommandCenter from "./components/PlayerDailyCommandCenter.jsx";
-import ShotLabStatePanel from "./components/ShotLabStatePanel.jsx";
-import ShotLabPerformanceMark from "./components/ShotLabPerformanceMark.jsx";
-import PlayerCareerHistory from "./components/PlayerCareerHistory.jsx";
-import PlayerProgressStory from "./components/PlayerProgressStory.jsx";
-import { PlayerWorkspaceCommandBar, PlayerWorkspaceEmptyState, PlayerWorkspaceFilterRail } from "./components/PlayerOperationalWorkspace.jsx";
-import PlayerCommitmentCenter from "./components/PlayerCommitmentCenter.jsx";
-import PlayerTrainingSessionHeader from "./components/PlayerTrainingSessionHeader.jsx";
-import PlayerTrainingCompletion from "./components/PlayerTrainingCompletion.jsx";
-import OperationalInsightRail from "./components/OperationalInsightRail.jsx";
-import "./styles/PremiumWorkspace.css";
-import "./styles/CoachInteractiveDashboard.css";
-
-import { TeamBrandingProvider } from "./context/TeamBrandingContext";
-
-import DEFAULT_BRANDING from "./theme/brandingDefaults";
-import resolveTeamBranding from "./theme/resolveTeamBranding";
-import TOKENS from "./theme/appTokens";
-
-import { initAnalytics, trackBackendEvent } from "./lib/analytics";
-import { buildDemoDataBundle, applyDemoData, clearDemoData } from "./lib/demoData";
-import { isDemoAccount, isDemoMode, isDemoPersistenceSession, isDemoPlayerSessionShotLog, setDemoMode } from "./lib/demoMode.js";
-import { acquireConsumeSingleFlight, buildConsumeInFlightKey, clearConsumeGuard } from "./lib/joinConsumeGuard.js";
-
-import { supabase } from "./lib/supabase.js";
-import { normalizeEmail, upsertPlayerProfile, isPendingConfirmation } from "./lib/authFlow.js";
-import { buildAppRows, buildRemoteRows, formatRemotePersistErrorForDebug, mergeHydratedRows, normalizeShotLogRowForApp } from "./lib/remotePersistence.js";
-import { deriveActivityFeedItems } from "./lib/activityFeed.js";
-import { createAppPersistenceService } from "./lib/appPersistenceService";
-import {
-  HOME_SHOT_SYNC_ERROR_MESSAGE,
-  buildLocalHomeShotLog,
-  extractHomeShotSyncDiagnostic,
-  formatHomeShotSyncIssueMessage,
-  normalizeHomeShotRemoteException,
-  normalizeSavedHomeShotLog,
-  resolveHomeShotRetryFailure,
-  resolveHomeShotSaveFailure,
-  shouldUseQuietHomeShotFallback,
-  validateHomeShotLogInput,
-} from "./lib/homeShotLogging.js";
-import { bootstrapCoachProfile } from "./lib/coachProfileBootstrap.js";
-import { TABLE_MAP, COACH_PRIORITIES_INIT, sanitizeCoachPriorities, PLAYER_DAILY_SHOT_TARGET, PLAYER_WEEKLY_SHOT_TARGET, STORAGE_KEYS } from "./lib/appDataModels";
-import { calculateLeaderboardFromShotLogs } from "./lib/leaderboardService.js";
-import { buildAtHomeLeaderboardRows, isHomeLeaderboardScoreRow } from "./lib/homeLeaderboardRows.js";
-import { buildProgramScoreRow, getAllProgramScoreRows, getProgramDrillBreakdownRows, getProgramLeaderboardRows, getProgramScoresForDrill, getProgramScoresForPlayer, validateProgramDrillScore } from "./lib/programDrillScoring.js";
-import { archivePlayerForTeam, deleteTeamLocalPlayerData, filterActiveTeamChallengeRows, filterActiveTeamLeaderboardRows, filterActiveTeamPlayerRows, getActiveTeamPlayerIdentity, getCoachRosterPlayers, isPlayerHiddenFromActiveLeaderboards, removePlayerFromTeam, resolveMigratedRosterTeamId, resolvePlayerDisplayName, buildCoachPlayerDevelopmentProfile } from "./lib/playerDataManagement.js";
-import { deleteTeamEvent, deleteTeamScSession } from "./lib/teamScheduleDeletion.js";
-import { createSeasonArchive, getSeasonArchiveDetailModel } from "./lib/seasonArchive.js";
-import { emitReleaseDiagnostic, isShotLabDebugMode } from "./lib/releaseDiagnostics.js";
-import { derivePlayerProgressProfile } from "./lib/progressProfile.js";
-import { getCoachEventRsvpRows, getCoachRsvpLabel } from "./lib/coachEventRsvpVisibility.js";
-import {
-  normalizePlayerActivity,
-  normalizeWorkoutAndLogs,
-  normalizeEventsAndRsvps,
-  deriveCompletionRatio,
-  deriveMomentumLabel,
-  deriveNextFocusLabel,
-  derivePlayerNotificationBriefing,
-  deriveUpcomingSchedule,
-  deriveFirstWeekActivationMilestones,
-  deriveTrainingIdentityLabels,
-  deriveInterpretedPerformanceTrends,
-} from "./lib/playerDashboardSelectors.js";
-import {
-  normalizeCoachRoster,
-  normalizeCoachEvents,
-  normalizeCoachRsvps,
-  normalizeCoachScores,
-  calcCoachAttendanceReadiness,
-  getUnresolvedRsvpCount,
-  getNext7DayEventSummary,
-  deriveCoachAlerts,
-  deriveCultureReadinessLabels,
-  deriveCoachInsightSummary,
-} from "./lib/coachDashboardSelectors.js";
-import { buildCoachEventDashboardMetrics, buildCoachEventDashboardRows, buildCoachPageDashboardSummary, buildCoachPlayerDashboardMetrics, buildCoachPlayerDashboardRows, filterCoachEventDashboardRows, filterCoachPlayerDashboardRows } from "./lib/coachOperationalDashboard.js";
-import { buildActivityIntelligenceRows, buildDrillIntelligenceRows, buildEventIntelligenceModel, buildLeaderboardIntelligenceRows, buildPlayerIntelligenceModel, buildSeasonComparisonModel, buildStrengthIntelligenceRows, filterActivityIntelligenceRows, filterDrillIntelligenceRows, filterLeaderboardIntelligenceRows, filterStrengthIntelligenceRows } from "./lib/coachOperationalIntelligence.js";
-import { derivePlayerDailyCommandCenter } from "./lib/playerDailyCommandCenter.js";
-import { buildAtHomeWorkspaceModel, buildEventsWorkspaceModel, buildLeaderboardWorkspaceModel, buildProfileWorkspaceModel, buildProgramWorkspaceModel, buildStrengthWorkspaceModel, filterAtHomeDrills, filterProgramSessionBlocks } from "./lib/playerOperationalWorkspaces.js";
-import { buildCoachOperationalInsightRail, buildPlayerOperationalInsightRail } from "./lib/operationalInsightRails.js";
-import { buildCoachVerifiedProgramScoreRow } from "./lib/coachProgramScoreEntry.js";
-import { scheduleWorkspaceActionReveal } from "./lib/playerWorkspaceActionRouting.js";
-import { createTrainingCatalogPersistenceService } from "./lib/trainingCatalogPersistenceService.js";
-import { createPlayerChallengePersistenceService, mergePlayerChallenges } from "./lib/playerChallengePersistenceService.js";
-import { openTeamStorePortal } from "./lib/teamStorePortalBridge.js";
-const VOLT = TOKENS.PRIMARY;
-const SUCCESS = TOKENS.SUCCESS;
-const INFO = TOKENS.INFO;
-const WARNING = TOKENS.WARNING;
-const DANGER = TOKENS.DANGER;
-const NEUTRAL = TOKENS.NEUTRAL;
-const ORANGE = WARNING;
-const CYAN = INFO;
-const BG = TOKENS.BG_BASE;
-const SURFACE = TOKENS.BG_CARD;
-const CARD_BG = TOKENS.BG_CARD;
-const BORDER_CLR = TOKENS.BG_SUBTLE;
-const MUTED=TOKENS.TEXT_MUTED,LIGHT=TOKENS.TEXT_PRIMARY;
-const FD="'Bebas Neue','Impact','Arial Black',sans-serif",FB="'Barlow Condensed','Arial Narrow','Helvetica Neue',sans-serif";
-const PAGE_ACCENTS={
-feed:{accent:"var(--accent)",glow:"var(--accent-soft)",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
-drills:{accent:"var(--team-brand-primary, var(--accent))",glow:"var(--team-brand-primary-soft, var(--accent-soft))",bg:"var(--team-brand-accent-bg, rgba(200,255,26,0.08))"},
-events:{accent:"var(--semantic-info)",glow:"var(--semantic-info-border)",bg:"var(--semantic-info-surface)"},
-sc:{accent:"var(--semantic-neutral)",glow:"var(--semantic-neutral-border)",bg:"var(--semantic-neutral-surface)"},
-players:{accent:"var(--team-brand-secondary, var(--accent))",glow:"color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 34%, transparent)",bg:"color-mix(in srgb, var(--team-brand-secondary, var(--accent)) 10%, transparent)"},
-};
-const MODE_CARD_TOKENS={
-BASE_BG:"linear-gradient(160deg, rgba(30, 30, 30, 0.96) 0%, rgba(15, 15, 15, 0.94) 100%)",
-BASE_BORDER:"rgba(255, 255, 255, 0.18)",
-BASE_SHADOW:"0 12px 30px rgba(0, 0, 0, 0.42)",
-HOME_TINT:"rgba(200, 255, 0, 0.18)",
-PROGRAM_TINT:"rgba(0, 176, 255, 0.14)",
-HOME_GLOW:"rgba(200, 255, 0, 0.20)",
-PROGRAM_GLOW:"rgba(0, 176, 255, 0.22)",
-HOME_FOCUS_RING:"rgba(200, 255, 0, 0.45)",
-PROGRAM_FOCUS_RING:"rgba(0, 176, 255, 0.38)",
-PROGRAM_ACCENT_LINE:"rgba(124, 223, 255, 0.9)",
-PROGRAM_CTA_BG:"rgba(0, 176, 255, 0.05)",
-PROGRAM_CTA_SHADOW:"0 0 16px rgba(0, 176, 255, 0.12)",
-PROGRAM_CHIP_BG:"rgba(0, 176, 255, 0.08)",
-PROGRAM_CHIP_BORDER:"rgba(0, 176, 255, 0.26)",
-ICON_INNER:"rgba(255, 255, 255, 0.06)",
-CHEVRON_BG:"rgba(255, 255, 255, 0.06)",
-};
-const MODE_CARD_ACCENTS={
-home:{
-  tint:MODE_CARD_TOKENS.HOME_TINT,
-  glow:MODE_CARD_TOKENS.HOME_GLOW,
-  iconStroke:VOLT,
-  focusRing:MODE_CARD_TOKENS.HOME_FOCUS_RING,
-  topAccentStart:VOLT,
-  topAccentEnd:MODE_CARD_TOKENS.HOME_GLOW,
-  ctaBackground:MODE_CARD_TOKENS.CHEVRON_BG,
-  ctaShadow:"0 0 10px var(--glow)",
-  chipBackground:"var(--chip-bg)",
-  chipBorder:"1.5px solid var(--chip-border)",
-  chipColor:"var(--chip-color)",
-},
-program:{
-  tint:MODE_CARD_TOKENS.PROGRAM_TINT,
-  glow:MODE_CARD_TOKENS.PROGRAM_GLOW,
-  iconStroke:CYAN,
-  focusRing:MODE_CARD_TOKENS.PROGRAM_FOCUS_RING,
-  topAccentStart:MODE_CARD_TOKENS.PROGRAM_ACCENT_LINE,
-  topAccentEnd:MODE_CARD_TOKENS.PROGRAM_GLOW,
-  ctaBackground:MODE_CARD_TOKENS.PROGRAM_CTA_BG,
-  ctaShadow:MODE_CARD_TOKENS.PROGRAM_CTA_SHADOW,
-  chipBackground:MODE_CARD_TOKENS.PROGRAM_CHIP_BG,
-  chipBorder:`1px solid ${MODE_CARD_TOKENS.PROGRAM_CHIP_BORDER}`,
-  chipColor:CYAN,
-},
-};
-function RecentActivityCard({ title = "Recent Activity", items = [] }) {
-  const legacyCoachEmptyStateCopy = "No activity yet ‚Äî invite players or have them log their first workout.";
-  return <section style={{marginTop:14,marginBottom:16,padding:"12px",borderRadius:14,border:`1px solid ${BORDER_CLR}`,background:"linear-gradient(170deg, rgba(255,255,255,0.02), rgba(0,0,0,0.2))"}}>
-    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:1.4,textTransform:"uppercase"}}>{title}</div>
-      <div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,letterSpacing:1.2}}>Today</div>
-    </div>
-    {items.length===0?<div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:11,padding:"8px 2px"}} title={legacyCoachEmptyStateCopy}>Team activity will appear here as players and coaches use ShotLab.</div>:items.map((item,idx)=><div key={`${item.text}-${idx}`} style={{display:"flex",gap:8,alignItems:"flex-start",padding:"8px 2px",borderTop:idx===0?"none":`1px solid ${BORDER_CLR}55`}}>
-      <span style={{width:6,height:6,borderRadius:999,background:"var(--accent)",marginTop:6,flexShrink:0}}/>
-      <div style={{flex:1,minWidth:0}}>
-        <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:600,lineHeight:1.35}}>{item.text}</div>
-        <div style={{fontFamily:FB,color:TOKENS.TEXT_MUTED,fontSize:10,marginTop:2}}>{item.date===todayStr()?"Today":item.date}</div>
-      </div>
-    </div>)}
-  </section>;
-}
-const MODE_CARD_VARIANTS={
-active:{
-showTopAccent:true,
-chipBackground:"accent",
-chipBorder:"accent",
-chipColor:"accent",
-iconBorderWidth:"1.5px",
-iconGlow:"inset 0 0 10px var(--glow)",
-ctaShadow:"accent",
-ctaBackground:"accent",
-},
-structured:{
-showTopAccent:false,
-chipBackground:"accent",
-chipBorder:"accent",
-chipColor:"accent",
-iconBorderWidth:"1px",
-iconGlow:"none",
-ctaShadow:"accent",
-ctaBackground:"accent",
-	},
-};
-const MODE_CARD_INFO_LAYOUTS={
-equal:{
-container:{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:10},
-getTileStyle:()=>({}),
-},
-schedule:{
-container:{display:"grid",gridTemplateColumns:"1.45fr 1fr",gridTemplateRows:"repeat(2,minmax(0,1fr))",gap:10},
-getTileStyle:(index,total)=>total>=3&&index===0?{gridRow:"1 / span 2"}: {},
-},
-};
-const COACH_TEXT_SIZES=["standard","large","xl"];
-const LEADERBOARD_SCOPE_COACHES_LABEL="COACHES";
-
-const DEFAULT_DEMO_DRILL_CATALOG=[
-{key:"warm-up-shooting-4-minute",name:"4 MINUTE WARM UP SHOOTING",desc:"4-minute weighted shooting circuit.",icon:"mr",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
-
-1st minute: FT line jumpers = 1 point
-2nd minute: wing 15 foot jumpers = 2 points
-3rd minute: baseline 15 foot jumpers = 2 points
-4th minute: top of key 3 pointers = 3 points`,homeId:"demo-home-warm-up-shooting-4-minute",programId:"demo-program-warm-up-shooting-4-minute"},
-{key:"calipari-shooting",name:"CALIPARI SHOOTING",desc:"Complete as many 3-point spots as possible in 1:30.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
-
-1:30 on clock
-5 spots: 2 corners, 2 wings, top of key
-All 3 pointers
-Make 2 in a row from each spot, then move on
-Score is how many spots were completed in 1:30`,homeId:"demo-home-calipari-shooting",programId:"demo-program-calipari-shooting"},
-{key:"3-minute-shooting",name:"3 MINUTE SHOOTING",desc:"Make as many 3s as possible in 3 minutes.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
-
-Make as many 3s as possible in 3 minutes at any spot or spots
-
-Reference:
-Standard score = 32
-Good shooters = 40+`,homeId:"demo-home-3-minute-shooting",programId:"demo-program-3-minute-shooting"},
-{key:"47-shooting",name:"47 SHOOTING",desc:"Finish the sequence, then score top-of-key 3s with time left.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
-
-4:00 on clock
-5 spots: 2 corners, 2 wings, top of key
-First make 3/5 at each of the 5 spots
-If player goes 2/5 at a spot, stay there and restart from 0/0
-Next make 5 in a row, 1 from each of the 5 spots
-If any of the 5 is missed, restart from either corner at 0
-Then make 5 in a row again with the same rules
-Once completed, go to top of key and make as many 3s as possible in the remaining time
-Only those final top of key makes count as the posted score`,homeId:"demo-home-47-shooting",programId:"demo-program-47-shooting"},
-{key:"buddy-hield-shooting",name:"BUDDY HIELD SHOOTING",desc:"Keep shooting until you miss twice in a row.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
-
-No time
-Start with a make
-Continue shooting until 2 misses in a row
-Score is total makes before the drill ends`,homeId:"demo-home-buddy-hield-shooting",programId:"demo-program-buddy-hield-shooting"},
-{key:"make-20",name:"MAKE 20",desc:"Track how many shots it takes to make 20 threes.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
-
-No time
-Take 3s from any spot
-Continue until 20 made 3 pointers
-Score is total shots taken`,homeId:"demo-home-make-20",programId:"demo-program-make-20"},
-{key:"230s",name:"230'S",desc:"2:30 weighted shooting circuit from elbows, corners, and top.",icon:"3p",instructions:`Setup: 1 shooter, 1 ball, 1 rebounder.
-
-2 minutes 30 seconds on clock
-30 seconds from one elbow
-30 seconds from the other elbow
-30 seconds from one corner
-30 seconds from the other corner
-30 seconds from top of key 3s
-
-Scoring:
-Elbows and corners = 1 point per make
-Top of key 3s = 2 points per make`,homeId:"demo-home-230s",programId:"demo-program-230s"},
-];
-const DEFAULT_HOME_DRILLS=DEFAULT_DEMO_DRILL_CATALOG.map(({homeId,key,...drill})=>({...drill,id:homeId,slug:`home-${key}`,isDefaultDemo:true,mode:"home"}));
-const DEFAULT_PROGRAM_DRILLS=DEFAULT_DEMO_DRILL_CATALOG.map(({programId,key,...drill})=>({...drill,id:programId,slug:`program-${key}`,isDefaultDemo:true,mode:"program"}));
-const DEFAULT_HOME_DRILL_SLUGS=new Set(DEFAULT_HOME_DRILLS.map(d=>d.slug));
-const DEFAULT_PROGRAM_DRILL_SLUGS=new Set(DEFAULT_PROGRAM_DRILLS.map(d=>d.slug));
-const normalizeDrillText=value=>String(value||"").trim().toLowerCase().replace(/\s+/g," ");
-const buildDefaultDrillIndex=defaults=>{const byId=new Map(),bySlug=new Map(),byName=new Map();defaults.forEach(def=>{byId.set(String(def.id),def);bySlug.set(def.slug,def);byName.set(normalizeDrillText(def.name),def);});return{byId,bySlug,byName};};
-const DEFAULT_HOME_DRILL_INDEX=buildDefaultDrillIndex(DEFAULT_HOME_DRILLS);
-const DEFAULT_PROGRAM_DRILL_INDEX=buildDefaultDrillIndex(DEFAULT_PROGRAM_DRILLS);
-const findMatchingDefaultDrill=(drill,index)=>{if(!drill)return null;return index.byId.get(String(drill.id))||index.bySlug.get(drill.slug)||index.byName.get(normalizeDrillText(drill.name))||null;};
-const mergeDefaultDrills=(existing=[],defaults=[])=>{const list=Array.isArray(existing)?existing:[];const index=defaults===DEFAULT_PROGRAM_DRILLS?DEFAULT_PROGRAM_DRILL_INDEX:DEFAULT_HOME_DRILL_INDEX;const custom=[];const seenDefaults=new Set();list.forEach(item=>{const match=findMatchingDefaultDrill(item,index);if(match){if(seenDefaults.has(match.slug))return;seenDefaults.add(match.slug);custom.push({...item,...match,id:match.id,slug:match.slug,isDefaultDemo:true,mode:match.mode});return;}custom.push(item);});defaults.forEach(def=>{if(!seenDefaults.has(def.slug))custom.push(def);});return custom;};
-const buildDefaultDrillIdAliases=(existing=[],defaults=[])=>{const aliases=new Map();const index=defaults===DEFAULT_PROGRAM_DRILLS?DEFAULT_PROGRAM_DRILL_INDEX:DEFAULT_HOME_DRILL_INDEX;(Array.isArray(existing)?existing:[]).forEach(item=>{const match=findMatchingDefaultDrill(item,index);if(!match)return;aliases.set(String(match.id),match.id);if(item?.id!=null)aliases.set(String(item.id),match.id);if(item?.slug)aliases.set(item.slug,match.id);});defaults.forEach(def=>{aliases.set(String(def.id),def.id);aliases.set(def.slug,def.id);});return aliases;};
-const normalizeScoresForDefaultDrills=(scores=[],homeAliases=new Map(),programAliases=new Map())=>(Array.isArray(scores)?scores:[]).map(score=>{const src=score?.src||"home";const aliases=src==="program"?programAliases:homeAliases;const nextDrillId=aliases.get(String(score?.drillId))||score?.drillId;return nextDrillId===score?.drillId&&src===score?.src?score:{...score,src,drillId:nextDrillId};});
-const countCustomProgramDrills=list=>(Array.isArray(list)?list:[]).filter(d=>!findMatchingDefaultDrill(d,DEFAULT_PROGRAM_DRILL_INDEX)).length;
-const DRILLS_INIT=DEFAULT_HOME_DRILLS;
-const PROGRAM_DRILLS_INIT=DEFAULT_PROGRAM_DRILLS;
-const ICONS=["ft","3p","mr","fl","sb"];
-const hasDrillMax=drill=>Number.isFinite(Number(drill?.max))&&Number(drill.max)>0;
-const EVENTS_INIT=[
-{id:1,title:"OPEN GYM RUN",date:"2026-02-28",time:"6:00 PM",location:"Main Gym ‚Äî Court 1",desc:"Full-court 5v5 runs. First 20 players.",type:"run"},
-{id:2,title:"SHOOTING CLINIC",date:"2026-03-05",time:"4:00 PM",location:"Training Facility ‚Äî Bay 3",desc:"Guided shooting with film review.",type:"clinic"},
-{id:3,title:"PRO-AM SCRIMMAGE",date:"2026-03-12",time:"7:00 PM",location:"Community Center",desc:"Competitive scrimmage. Jersey required.",type:"game"},
-{id:4,title:"SKILLS CHALLENGE",date:"2026-03-19",time:"5:30 PM",location:"Main Gym ‚Äî Court 2",desc:"Timed skills course. Prizes for top 3.",type:"challenge"},
-{id:5,title:"FILM + RECOVERY",date:"2026-03-26",time:"3:00 PM",location:"Film Room + Recovery Suite",desc:"Film breakdown + cold plunge and stretch.",type:"recovery"},
-];
-const SC_INIT=[
-{id:101,title:"UPPER BODY POWER",date:"2026-02-25",time:"6:00 AM",location:"Weight Room ‚Äî Bay A",desc:"Bench press, overhead press, rows, and accessory work. Bring your lifting shoes."},
-{id:102,title:"LOWER BODY STRENGTH",date:"2026-02-27",time:"6:00 AM",location:"Weight Room ‚Äî Bay A",desc:"Squats, deadlifts, lunges. Focus on posterior chain."},
-{id:103,title:"FULL BODY CIRCUIT",date:"2026-03-04",time:"7:00 AM",location:"Weight Room ‚Äî Bay B",desc:"High-intensity circuit training. 45 min. Bring water."},
-{id:104,title:"OLYMPIC LIFTS",date:"2026-03-11",time:"6:00 AM",location:"Weight Room ‚Äî Platform Area",desc:"Clean & jerk, snatch progressions. Coached session."},
-{id:105,title:"CORE & CONDITIONING",date:"2026-03-18",time:"6:30 AM",location:"Training Facility ‚Äî Turf",desc:"Core stability, sled pushes, agility ladder. Game-day conditioning."},
-];
-const PLAYER_TAB_PATHS={home:"/",duels:"/program-log","log-drill":"/quick-menu",sc:"/lifting",program:"/events",leaderboards:"/leaderboards",profile:"/profile",players:"/players"};
-const PLAYER_PATH_TABS={"/":"home","/duels":"duels","/program-log":"duels","/quick-menu":"log-drill","/lifting":"sc","/events":"program","/leaderboards":"leaderboards","/profile":"profile","/players":"players"};
-const TIERS=[
-{min:0,name:"ROOKIE",color:"#555",bg:"#55555515"},
-{min:3,name:"STARTER",color:"#7D7D7D",bg:"#7D7D7D15"},
-{min:6,name:"VARSITY",color:"#A0A0A0",bg:"#A0A0A015"},
-{min:10,name:"ALL-STAR",color:"#D7E7FF",bg:"#D7E7FF15"},
-{min:15,name:"ELITE",color:"#C8FF00",bg:"#C8FF0015"},
-{min:22,name:"MVP",color:"#FFE082",bg:"#FFE08215"},
-{min:30,name:"LEGEND",color:CYAN,bg:CYAN+"15"},
-];
-const getTier = c => [...TIERS].reverse().find(t => c >= t.min) || TIERS[0];
-const todayStr=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`};
-const ALNUM="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-const DEMO_PLAYER={email:"demo@shotlab.app",password:"demo1234",name:"Demo Player",role:"player"};
-const DEMO_COACH={email:"coach.demo@shotlab.app",password:"demo1234",name:"Demo Coach",role:"coach"};
-const genId=(p="id")=>`${p}-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
-function generateJoinCode(existing=[],length=6){
-for(let tries=0;tries<30;tries++){
-let code="";
-for(let i=0;i<length;i++)code+=ALNUM[Math.floor(Math.random()*ALNUM.length)];
-if(!existing.includes(code))return code;
-}
-return Math.random().toString(36).slice(2,2+length).toUpperCase();
-}
-const PENDING_JOIN_CONTEXT_KEY = "sl:pending-join-context";
-const HOME_SHOTS_LEADERBOARD_LIMIT = 10;
-const INVITE_CONTEXT_STORAGE_KEY = "sl:invite-context";
-const SUPABASE_AUTH_ENABLED = String(import.meta.env.VITE_ENABLE_SUPABASE_AUTH || "").trim() === "true";
-const HOME_SHOTS_SCOPE_BUTTON_BASE_STYLE = {
-  borderRadius: 999,
-  padding: "7px 12px",
-  fontSize: 10,
-  fontWeight: 700,
-  letterSpacing: "0.08em",
-  cursor: "pointer",
-};
-const CHECKLIST_CARD_STYLE = {
-  marginBottom: 16,
-  padding: "11px 12px",
-  borderRadius: 14,
-  border: `1px solid ${BORDER_CLR}`,
-  background: "linear-gradient(155deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01))",
-};
-const CHECKLIST_ITEM_DOT_STYLE = (done) => ({
-  width: 18,
-  height: 18,
-  borderRadius: "50%",
-  border: `1px solid ${done ? "rgba(200,255,0,0.7)" : BORDER_CLR}`,
-  background: done ? "rgba(200,255,0,0.18)" : "transparent",
-  color: done ? VOLT : MUTED,
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: 11,
-  flexShrink: 0,
-});
-
-const DB = {
-  async get(k) {
-    const hasData = (value) => {
-      if (Array.isArray(value)) return value.length > 0;
-      if (value && typeof value === "object") return Object.keys(value).length > 0;
-      return Boolean(value);
-    };
-
-    let local = null;
-    try {
-      const r = await window.storage?.get(k, true);
-      local = r?.value ? JSON.parse(r.value) : null;
-    } catch (e) {}
-    if (local === null) {
-      try {
-        const raw = window.localStorage?.getItem(k);
-        local = raw ? JSON.parse(raw) : null;
-      } catch (e) {}
-    }
-
-    const table = TABLE_MAP[k];
-    if (table) {
-      try {
-        const { data } = await supabase.from(table).select("*");
-        const localRows = hasData(local) ? buildAppRows(k, local, { source: "local" }) : [];
-        const remoteRows = hasData(data) ? buildAppRows(k, data, { source: "remote" }) : [];
-        if (k === "sl:events" || k === "sl:rsvps" || k === "sl:players" || k === "sl:player-profiles" || k === "sl:shotlogs") {
-          const merged = mergeHydratedRows(k, localRows, remoteRows);
-          if (hasData(merged)) return merged;
-        }
-        if (hasData(remoteRows)) return remoteRows;
-      } catch (e) {}
-    }
-
-    // Non-table keys (ex: sl:coach-priorities) should round-trip raw JSON
-    // so app-level persisted settings are not dropped by row normalizers.
-    if (!table) return hasData(local) ? local : null;
-    return hasData(local) ? buildAppRows(k, local, { source: "local" }) : null;
-  },
-  async set(k, v, options = {}) {
-    const strictRemote = options?.strictRemote === true;
-    const strictLocal = options?.strictLocal === true;
-    const serialized = JSON.stringify(v);
-    let localPersisted = false;
-    let localError = null;
-    try {
-      if (typeof window.storage?.set === "function") {
-        await window.storage.set(k, serialized, true);
-        localPersisted = true;
-      }
-    } catch (e) { localError = e; }
-    try {
-      window.localStorage?.setItem(k, serialized);
-      localPersisted = true;
-    } catch (e) { localError = localError || e; }
-    if (strictLocal && !localPersisted) throw (localError || new Error("local_persist_failed"));
-    if (isDemoPersistenceSession()) return { storageMode: "demo_local" };
-    const table = TABLE_MAP[k];
-    const remoteRows = buildRemoteRows(k, v, options);
-    if ((k === "sl:events" || k === "sl:players" || k === "sl:player-profiles") && Array.isArray(v) && v.length > 0 && remoteRows.length === 0) {
-      console.warn("[remote-persist] buildRemoteRows dropped all rows", { key: k, inputCount: v.length });
-    }
-    const signedReplacementCollection = k === "sl:sc-sessions" || k === "sl:sc-rsvps" || k === "sl:sc-logs";
-    if (table && (remoteRows.length > 0 || signedReplacementCollection)) {
-      try {
-        if (strictRemote && isShotLabDebugMode()) {
-          console.info("[remote-persist] strict remote payload", {
-            key: k,
-            table,
-            supabaseUrl: supabase.url || "",
-            projectRef: supabase.projectRef || "",
-            remoteRows,
-          });
-        }
-        const { error } = await supabase.from(table).upsert(remoteRows, { onConflict: "id" });
-        if (error) {
-          console.error("[remote-persist] upsert failed", {
-            key: k,
-            table,
-            message: error?.message || "",
-            code: error?.code || "",
-            details: error?.details || "",
-            hint: error?.hint || "",
-            rowCount: remoteRows.length,
-          });
-          if (strictRemote) {
-            const remoteError = new Error(error?.message || "remote_persist_failed");
-            remoteError.name = "RemotePersistError";
-            remoteError.code = error?.code || "";
-            remoteError.details = error?.details || "";
-            remoteError.hint = error?.hint || "";
-            remoteError.key = k;
-            remoteError.table = table;
-            remoteError.rowCount = remoteRows.length;
-            remoteError.remoteRows = remoteRows;
-            remoteError.supabaseUrl = supabase.url || "";
-            remoteError.projectRef = supabase.projectRef || "";
-            if (isShotLabDebugMode()) console.error("[remote-persist] strict remote error", { error: remoteError, remoteRows });
-            throw remoteError;
-          }
-        }
-      } catch (e) {
-        if (strictRemote) throw e;
-      }
-    }
-  }
-};
-
-const persistenceService=createAppPersistenceService({db:DB,fetchImpl:fetch});
-const trainingCatalogPersistence=createTrainingCatalogPersistenceService({
-fetchImpl:(...args)=>globalThis.fetch(...args),
-storage:globalThis?.localStorage,
-});
-const playerChallengePersistence=createPlayerChallengePersistenceService({
-fetchImpl:(...args)=>globalThis.fetch(...args),
-storage:globalThis?.localStorage,
-});
-
-const parseLeaderboardErrorMessage = (errorCode = "", status = 0, parseMode = "json") => {
-  if (parseMode === "non_json") return "Leaderboard endpoint unavailable (invalid response format).";
-  if (status === 404) return "Leaderboard endpoint missing.";
-  if (status >= 500) return "Leaderboard service error.";
-  switch (String(errorCode || "").toLowerCase()) {
-    case "unauthorized":
-      return "Sign in required.";
-    case "forbidden":
-      return "Not allowed for this team.";
-    case "team_id_required":
-      return "Team id is required.";
-    case "invalid_scope":
-      return "Leaderboard scope is invalid.";
-    case "internal_error":
-      return "Leaderboard service error.";
-    case "rate_limited":
-      return "Too many requests. Try again shortly.";
-    default:
-      return "Leaderboard unavailable.";
-  }
-};
-const parseCreateTeamErrorMessage=(status=0,errorCode="",parseMode="json")=>{
-if(parseMode==="non_json"||parseMode==="invalid_json")return"Team setup returned an invalid response.";
-if(status===404)return"Team setup endpoint is missing.";
-if(status===401||status===403)return"Coach authorization failed. Please sign in again.";
-if(status>=500&&String(errorCode||"").toLowerCase()==="env_config_mismatch")return"Team setup is not configured on the server.";
-if(status>=500)return"Team setup service error. Please try again.";
-const normalizedErrorCode=String(errorCode||"").toLowerCase();
-if(normalizedErrorCode.startsWith("table_missing_"))return`Team setup is missing backend table: ${normalizedErrorCode.replace("table_missing_","")}.`;
-if(normalizedErrorCode.startsWith("missing_function_"))return`Team setup is missing backend function: ${normalizedErrorCode.replace("missing_function_","")}.`;
-switch(normalizedErrorCode){
-case"team_invite_creation_failed":
-return"Could not create team code.";
-case"unauthorized":
-return"Coach authorization failed. Please sign in again.";
-case"coach_user_not_found":
-return"Coach account was not found in backend auth users.";
-case"missing_rpc":
-return"Team setup RPC is missing on the backend.";
-case"rpc_permission_denied":
-return"Team setup RPC permission was denied.";
-case"table_missing":
-return"Team setup tables are missing on the backend.";
-case"invalid_service_key":
-return"Team setup backend key is invalid.";
-case"rpc_argument_mismatch":
-return"Team setup RPC arguments do not match backend signature.";
-case"schema_type_mismatch_teams_id":
-return"Team setup backend schema has incompatible teams id types.";
-case"unknown_rpc_failure":
-return"Team setup RPC failed unexpectedly.";
-default:
-return"Could not create team.";
-}
-};
-const isTechnicalBackendMessage=value=>{const raw=String(value||"").toLowerCase();if(!raw)return false;return["supabase","postgres","sql","relation","schema","jwt","rpc","function","column"].some(token=>raw.includes(token));};
-const parseStartupErrorMessage=(error)=>{
-const raw=String(error?.message||error||"").toLowerCase();
-if(raw.includes("supabase")&&raw.includes("missing"))return"We could not start ShotLab because team data is temporarily unavailable.";
-if(raw.includes("config_missing")||raw.includes("config_invalid"))return"ShotLab is still warming up. Please refresh in a moment.";
-if(raw.includes("unauthorized")||raw.includes("forbidden"))return"Your session needs to be refreshed. Please sign in again.";
-if(raw.includes("network")||raw.includes("failed to fetch"))return"Connection was interrupted while loading your team data. Please retry.";
-if(isTechnicalBackendMessage(raw))return"ShotLab is temporarily unavailable. Please try again shortly.";
-return"ShotLab ran into a loading issue. Please refresh and try again.";
-};
-// Password hashing (simple but not plaintext)
-function hashPw(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,0x01000193)}return(h>>>0).toString(36)}
-// AudioContext must be lazy-initialized on user gesture (iOS WebKit requirement)
-let _audioCtx=null;
-function getAudioCtx(){if(!_audioCtx&&typeof AudioContext!=="undefined"){try{_audioCtx=new AudioContext()}catch(error){}}if(_audioCtx&&_audioCtx.state==="suspended"){_audioCtx.resume().catch(()=>{})}return _audioCtx}
-function playTick(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=1200;o.type="sine";g.gain.setValueAtTime(.07,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+.05);o.start();o.stop(audioCtx.currentTime+.05)}catch(error){}}
-function playScore(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[800,1200,1600].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="sine";g.gain.setValueAtTime(.05,audioCtx.currentTime+i*.08);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.08+.12);o.start(audioCtx.currentTime+i*.08);o.stop(audioCtx.currentTime+i*.08+.12)})}catch(error){}}
-function playUnlock(){const audioCtx=getAudioCtx();if(!audioCtx)return;try{[523,659,784,1047].forEach((f,i)=>{const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.connect(g);g.connect(audioCtx.destination);o.frequency.value=f;o.type="triangle";g.gain.setValueAtTime(.06,audioCtx.currentTime+i*.1);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+i*.1+.25);o.start(audioCtx.currentTime+i*.1);o.stop(audioCtx.currentTime+i*.1+.25)})}catch(error){}}
-export function formatInactivePlayersPulseCopy(inactivePlayers=[],totalPlayers=0){
-if(totalPlayers<=0)return"No players yet ‚Äî invite players to start tracking activity.";
-if(inactivePlayers.length===0)return"All players have logged activity this week.";
-if(inactivePlayers.length===1){
-const name=inactivePlayers[0]?.name?.split(" ")[0]||"Player";
-return`Needs follow-up: ${name} hasn't logged activity this week.`;
-}
-const listedNames=inactivePlayers.slice(0,3).map(p=>p?.name?.split(" ")[0]||"Player").join(", ");
-const moreSuffix=inactivePlayers.length>3?` +${inactivePlayers.length-3} more`:"";
-return`Needs follow-up: ${inactivePlayers.length} players haven't logged activity this week: ${listedNames}${moreSuffix}`;
-}
-const THEMES={dark:{BG:TOKENS.BG_BASE,SURFACE:TOKENS.BG_CARD,CARD_BG:TOKENS.BG_CARD,BORDER:TOKENS.BG_SUBTLE,MUT:TOKENS.TEXT_MUTED,LT:TOKENS.TEXT_PRIMARY,SUB:TOKENS.TEXT_SECONDARY,TRACK:TOKENS.BG_SUBTLE},light:{BG:TOKENS.BG_BASE,SURFACE:TOKENS.BG_CARD,CARD_BG:TOKENS.BG_CARD,BORDER:TOKENS.BG_SUBTLE,MUT:TOKENS.TEXT_MUTED,LT:TOKENS.TEXT_PRIMARY,SUB:TOKENS.TEXT_SECONDARY,TRACK:TOKENS.BG_SUBTLE}};
-const T=THEMES.dark; // module-level default for standalone components
-const STREAK_BADGES=[{days:7,name:"WEEK WARRIOR",icon:"7",color:"#A0A0A0"},{days:14,name:"TWO-WEEK GRIND",icon:"14",color:"#A0A0A0"},{days:30,name:"MONTHLY BEAST",icon:"30",color:"#C8FF00"},{days:60,name:"IRON WILL",icon:"60",color:CYAN},{days:100,name:"CENTURION",icon:"üíØ",color:VOLT}];
-const getEarnedBadges=s=>STREAK_BADGES.filter(b=>s>=b.days);
-const DRILL_ACCENTS={"FORM SHOOTING":VOLT,"FREE THROWS":VOLT,"CATCH & SHOOT":VOLT,"BALL HANDLING":VOLT,"MID-RANGE":VOLT,"FLOATERS":VOLT};
-const getDrillAccentColor=name=>DRILL_ACCENTS[name]||"#C8FF00";
-const isLeaderboardEligible=(players,email)=>{const p=players.find(p=>normalizeEmail(p.email)===normalizeEmail(email));return !!p&&!isPlayerHiddenFromActiveLeaderboards(p);};
-function Sparkline({data,color=VOLT,w=44,h=16}){if(!data||data.length<2)return null;const max=Math.max(...data,1);const pts=data.map((v,i)=>`${(i/(data.length-1))*w},${h-((v/max)*h*.8+h*.1)}`).join(" ");return <svg width={w} height={h} style={{display:"block",opacity:.6}}><polyline points={pts} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-
-const EventIcon=({type,size=24,color=VOLT})=>{const s={width:size,height:size,display:"block"};
-if(type==="run")return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="8" r="5" stroke={color} strokeWidth="2"/><path d="M12 38l4-14 4 6 4-6 4 14" stroke={color} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 24h12" stroke={color} strokeWidth="1.5"/></svg>;
-if(type==="clinic")return <svg viewBox="0 0 40 40" fill="none" style={s}><rect x="6" y="10" width="28" height="22" rx="3" stroke={color} strokeWidth="2"/><path d="M6 18h28" stroke={color} strokeWidth="1.5"/><circle cx="20" cy="27" r="4" stroke={color} strokeWidth="1.5"/><path d="M14 6v6M26 6v6" stroke={color} strokeWidth="2" strokeLinecap="round"/></svg>;
-if(type==="game")return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="20" r="16" stroke={color} strokeWidth="2"/><path d="M4 20h32M20 4v32" stroke={color} strokeWidth="1.5"/><path d="M8 6c4.5 5 6.5 9 6.5 14s-2 9-6.5 14" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 6c-4.5 5-6.5 9-6.5 14s2 9 6.5 14" stroke={color} strokeWidth="1.5" fill="none"/></svg>;
-if(type==="challenge")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M20 4l4 8 8 2-6 6 2 8-8-4-8 4 2-8-6-6 8-2z" stroke={color} strokeWidth="2" fill="none" strokeLinejoin="round"/></svg>;
-if(type==="recovery")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M20 6v10l6 6" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><circle cx="20" cy="20" r="16" stroke={color} strokeWidth="2"/></svg>;
-return <svg viewBox="0 0 40 40" fill="none" style={s}><rect x="6" y="10" width="28" height="22" rx="3" stroke={color} strokeWidth="2"/><path d="M14 6v6M26 6v6M6 18h28" stroke={color} strokeWidth="2" strokeLinecap="round"/></svg>;
-};
-const DrillIcon=({type,size=28,color=VOLT})=>{const s={width:size,height:size,display:"block"};
-if(type==="ft")return <svg viewBox="0 0 40 40" fill="none" style={s}><circle cx="20" cy="20" r="17" stroke={color} strokeWidth="2"/><path d="M3 20h34" stroke={color} strokeWidth="1.5"/><path d="M20 3v34" stroke={color} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={color} strokeWidth="1.5" fill="none"/></svg>;
-if(type==="3p")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M6 36Q20 4 34 36" stroke={color} strokeWidth="2" fill="none"/><circle cx="20" cy="18" r="4" fill={color} opacity=".8"/><line x1="20" y1="22" x2="20" y2="36" stroke={color} strokeWidth="1.5"/></svg>;
-if(type==="mr")return <svg viewBox="0 0 40 40" fill="none" style={s}><rect x="6" y="6" width="28" height="28" rx="3" stroke={color} strokeWidth="1.5"/><circle cx="20" cy="20" r="8" stroke={color} strokeWidth="1.5" fill="none"/><circle cx="20" cy="20" r="2.5" fill={color}/></svg>;
-if(type==="fl")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M10 34Q12 14 20 10Q28 14 30 34" stroke={color} strokeWidth="2" fill="none"/><circle cx="20" cy="10" r="4" stroke={color} strokeWidth="1.5" fill="none"/><path d="M16 20h8" stroke={color} strokeWidth="1.5" strokeDasharray="2 2"/></svg>;
-if(type==="sb")return <svg viewBox="0 0 40 40" fill="none" style={s}><path d="M28 32L12 24L22 12" stroke={color} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/><circle cx="22" cy="12" r="5" stroke={color} strokeWidth="1.5" fill="none"/><path d="M32 8l-4 2" stroke={color} strokeWidth="1.5" strokeLinecap="round"/></svg>;
-return <svg viewBox="0 0 40 40" style={s}><circle cx="20" cy="20" r="16" stroke={color} strokeWidth="2" fill="none"/></svg>;
-};
-const WhistleIcon=({size=12,color=VOLT,style={}})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style}><path d="M5 14a4 4 0 118 0v2a2 2 0 11-4 0v-2"/><path d="M13 14h3a3 3 0 010 6h-3"/><circle cx="19" cy="9" r="1.5"/></svg>
-const ShieldIcon=({size=12,color=VOLT,style={}})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={style}><path d="M12 3l7 3v6c0 5-3.4 8.8-7 10-3.6-1.2-7-5-7-10V6l7-3z"/></svg>
-const UsersIcon=({size=14,color="#A0A0A0"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>
-const CourtBG=({opacity=.02})=><svg style={{position:"absolute",inset:0,width:"100%",height:"100%",pointerEvents:"none",opacity}} viewBox="0 0 400 900" fill="none" preserveAspectRatio="xMidYMid slice"><rect x="20" y="40" width="360" height="700" stroke={VOLT} strokeWidth="1"/><line x1="20" y1="390" x2="380" y2="390" stroke={VOLT} strokeWidth=".8"/><circle cx="200" cy="390" r="60" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="40" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 40Q200 140 260 40" stroke={VOLT} strokeWidth=".8" fill="none"/><rect x="110" y="550" width="180" height="190" stroke={VOLT} strokeWidth=".8"/><path d="M140 740Q200 640 260 740" stroke={VOLT} strokeWidth=".8" fill="none"/></svg>;
-const GlowOrb=({color=VOLT,top="20%",left="50%",size=300,animate})=><div style={{position:"absolute",top,left,width:size,height:size,borderRadius:"50%",background:`radial-gradient(circle,${color}0a 0%,transparent 70%)`,transform:"translate(-50%,-50%)",pointerEvents:"none",animation:animate?"orbDrift 12s ease-in-out infinite alternate":"none"}}/>;
-
-
-
-
-const Styles=()=><><style>{_STYLES_CSS}</style><style>{_PLAYER_COMPACT_DASHBOARD_CSS}</style><style>{_PAGE_SIGNATURE_CSS}</style><style>{_DESKTOP_SHELL_CSS}</style></>;
-
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// APP ROOT
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// Error Boundary using try-catch pattern (functional)
-function ErrorFallback(){return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:16,padding:40}}>
-<SLLogo size={64} glow/>
-
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:24,letterSpacing:3}}>SOMETHING WENT WRONG</div>
-  <p style={{fontFamily:FB,color:MUTED,fontSize:13,textAlign:"center",lineHeight:1.6,maxWidth:300}}>The app hit an unexpected error. Try refreshing the page.</p>
-  <button onClick={()=>window.location.reload()} style={{padding:"12px 32px",background:VOLT,color:"#000000",fontFamily:FD,fontSize:16,letterSpacing:3,border:"none",borderRadius:10,cursor:"pointer"}}>RELOAD</button>
-</div>}
-
-const LEGAL_ROUTES={
-"/privacy":"privacy",
-"/privacy-policy":"privacy",
-"/terms":"terms",
-"/terms-of-use":"terms",
-"/support":"support",
-"/delete-account":"delete-account",
-"/data-request":"data-request",
-"/delete-account-data-request":"data-request",
-};
-const LEGAL_CONTACT_EMAIL="support@shotlab.app";
-const buildLegalContactHref=(subject="ShotLab support")=>`mailto:${LEGAL_CONTACT_EMAIL}?subject=${encodeURIComponent(subject)}`;
-const LEGAL_PAGE_COPY={
-privacy:{eyebrow:"Privacy",title:"Privacy Policy",updated:"Updated June 8, 2026",summary:"ShotLab collects only the account, team, training, RSVP, and support information needed to operate basketball development workflows.",sections:[
-{h:"Information we use",p:"We use account identifiers, team membership details, workout scores, shot logs, event RSVPs, and support messages to provide the app experience."},
-{h:"How we use it",p:"Data powers player progress, coach roster views, team analytics, support responses, safety diagnostics, and account administration."},
-{h:"Your choices",p:"You can request access, correction, export, or deletion using the data request and delete-account links on this page."},
-]},
-terms:{eyebrow:"Terms",title:"Terms of Use",updated:"Updated June 8, 2026",summary:"Use ShotLab for lawful team training, player development, and coach/player coordination.",sections:[
-{h:"Accounts",p:"Keep your sign-in details accurate and secure. Coaches are responsible for managing team access and roster membership."},
-{h:"Training content",p:"ShotLab helps organize drills, events, and performance data, but it does not replace professional medical, safety, or coaching judgment."},
-{h:"Acceptable use",p:"Do not misuse the service, attempt unauthorized access, or upload content that violates others' rights or safety."},
-]},
-support:{eyebrow:"Support",title:"Support",updated:"We aim to respond as quickly as possible.",summary:"Need help with sign-in, team access, app data, or billing/admin questions? Contact ShotLab support.",sections:[
-{h:"Email support",p:"Send a message to support@shotlab.app with your account email, team name, device, browser, and a short description of the issue."},
-{h:"Account help",p:"If you cannot access a team, include any invite code or coach contact so support can troubleshoot membership status."},
-{h:"Privacy requests",p:"Use the data request or delete-account request pages for formal privacy and account data requests."},
-]},
-"delete-account":{eyebrow:"Account deletion",title:"Delete Account",updated:"Requests are reviewed for account safety.",summary:"You can request deletion of your ShotLab account and associated personal training data.",sections:[
-{h:"In-app deletion",p:"Signed-in users should go to Profile ‚Üí Account & Data ‚Üí Delete Account & Data to start and confirm deletion inside ShotLab."},
-{h:"Support fallback",p:"Email support is only for help or special requests, such as when you cannot sign in to use the in-app deletion flow."},
-{h:"What deletion includes",p:"We will remove or de-identify personal account details, player scores, shot logs, RSVPs, and support records unless retention is legally required."},
-{h:"Coach/team data",p:"Team-level program content may remain for other authorized members unless it directly identifies the deleted account."},
-]},
-"data-request":{eyebrow:"Data request",title:"Account Data Request",updated:"Requests are verified before fulfillment.",summary:"Request access to, export of, correction of, or deletion of personal ShotLab data.",sections:[
-{h:"Submit a request",p:"Email support@shotlab.app from your account email and include whether you need access, export, correction, or deletion."},
-{h:"Verification",p:"We may ask for information needed to confirm account ownership before sharing or deleting data."},
-{h:"Response",p:"ShotLab will respond according to applicable privacy law and the scope of data associated with your account."},
-]},
-};
-const LEGAL_SUPPORT_LINKS=[
-{href:"/privacy",label:"Privacy"},
-{href:"/terms",label:"Terms"},
-{href:"/support",label:"Support"},
-{href:"/delete-account",label:"Delete Account"},
-{href:"/data-request",label:"Data Request"},
-];
-const getLegalRouteKey=(path)=>LEGAL_ROUTES[String(path||"").replace(/\/$/,"")||"/"]||null;
-function LegalSupportLinks({compact=false}){return <div aria-label="Legal and support links" style={{display:"flex",flexWrap:"wrap",justifyContent:compact?"flex-start":"center",gap:compact?8:12,marginTop:compact?10:18}}>{LEGAL_SUPPORT_LINKS.map(link=><a key={link.href} href={link.href} style={{fontFamily:FB,color:compact?VOLT:MUTED,fontSize:compact?10:11,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",textDecoration:"none",border:`1px solid ${compact?VOLT+"33":"transparent"}`,borderRadius:999,padding:compact?"6px 10px":"4px 8px",minHeight:36,display:"inline-flex",alignItems:"center",justifyContent:"center",touchAction:"manipulation"}}>{link.label}</a>)}</div>}
-function AccountTrustActions({deleteAccount,preserveTeamData=false}){
-const[confirming,setConfirming]=useState(false);
-const[busy,setBusy]=useState(false);
-const[message,setMessage]=useState("");
-const[dataRequestSent,setDataRequestSent]=useState(false);
-const requestHref=buildLegalContactHref("ShotLab account data request");
-const deleteHref=buildLegalContactHref("Delete my ShotLab account");
-return <div data-testid="account-data-request-entry" style={{marginTop:32,paddingTop:24,borderTop:`1px solid ${BORDER_CLR}44`}}>
-  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:12}}>ACCOUNT & DATA</div>
-  <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 16px",marginBottom:12}}>
-    <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:800,letterSpacing:1,marginBottom:4}}>Data Request</div>
-    <div style={{fontFamily:FB,color:MUTED,fontSize:10,lineHeight:1.5,marginBottom:10}}>Request access, export, correction, or deletion help from ShotLab support.</div>
-    <div style={{display:"grid",gridTemplateColumns:"1fr",gap:8}}>
-      <a href={requestHref} onClick={()=>setDataRequestSent(true)} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minHeight:42,borderRadius:10,background:VOLT,color:"#000",fontFamily:FD,fontSize:14,letterSpacing:2,textDecoration:"none",touchAction:"manipulation"}}>REQUEST DATA</a>
-      {dataRequestSent&&<div role="status" style={{fontFamily:FB,color:VOLT,fontSize:10,lineHeight:1.4}}>Request email opened. Send it from your account email so support can verify you.</div>}
-    </div>
-  </div>
-  {!confirming?<button onClick={()=>{setConfirming(true);setMessage("");}} style={{width:"100%",padding:"14px",background:"transparent",border:`1px solid #FF454544`,borderRadius:12,cursor:"pointer",fontFamily:FB,fontSize:13,color:"#FF6969",fontWeight:700,letterSpacing:1}}>Delete Account & Data</button>
-  :<div className="fade-up" style={{background:"#FF454508",borderRadius:16,padding:"18px",border:`1px solid #FF454533`}}>
-    <div style={{fontFamily:FD,color:"#FF6969",fontSize:18,letterSpacing:3,marginBottom:8}}>CONFIRM ACCOUNT REQUEST</div>
-    <p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:12}}>{preserveTeamData?"This removes your coach account from this device. Player roster, team drills, and other users are preserved.":"This removes only your account, scores, shot logs, RSVPs, and personal activity from this device. Other users stay untouched."}</p>
-    {message&&<div role="status" style={{fontFamily:FB,color:message.startsWith("Could not")?"#FFB5B5":VOLT,fontSize:11,lineHeight:1.45,marginBottom:12}}>{message}</div>}
-    <div style={{display:"flex",gap:8}}>
-      <button onClick={()=>{setConfirming(false);setMessage("");}} disabled={busy} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-      <button onClick={async()=>{if(busy)return;setBusy(true);setMessage("");const result=await deleteAccount();if(!result?.ok){setMessage(result?.error||"Could not complete that request. Please try again or contact support.");setBusy(false);return;}setMessage("Account request complete. You have been signed out safely.");}} disabled={busy} className="btn-v cta-danger" style={{opacity:busy?0.65:1}}>CONFIRM DELETE ACCOUNT</button>
-    </div>
-    <a href={deleteHref} style={{display:"inline-flex",alignItems:"center",minHeight:36,color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,textDecoration:"none",marginTop:10}}>Need help? Email support</a>
-  </div>}
-  <p style={{fontFamily:FB,color:T.SUB,fontSize:10,textAlign:"center",marginTop:12,lineHeight:1.5}}>Account and data requests are available here and in Legal & Support. We verify requests before fulfilling server-side data changes.</p>
-</div>
-}
-function StaticLegalPage({pageKey}){
-const page=LEGAL_PAGE_COPY[pageKey]||LEGAL_PAGE_COPY.support;
-const contactHref=buildLegalContactHref(page.title||"ShotLab support");
-useEffect(()=>{try{window.__shotlabBootMark?.("legal_route_ready",pageKey);window.dispatchEvent(new CustomEvent("shotlab:legal-route-ready",{detail:{route:pageKey}}));}catch(error){}},[pageKey]);
-return <><Styles/><main data-testid="static-legal-page" style={{minHeight:"100dvh",background:BG,color:LIGHT,padding:"40px 20px",fontFamily:FB}}><div style={{maxWidth:760,margin:"0 auto"}}><a href="/" style={{display:"inline-flex",alignItems:"center",gap:8,color:VOLT,textDecoration:"none",fontFamily:FD,fontSize:16,letterSpacing:2,marginBottom:26,minHeight:44,touchAction:"manipulation"}}><SLLogo size={24}/> SHOTLAB</a><section style={{background:`linear-gradient(145deg,${CARD_BG},#111111)`,border:`1px solid ${BORDER_CLR}`,borderRadius:24,padding:"28px 24px",boxShadow:"0 18px 46px rgba(0,0,0,0.38)"}}><div style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:800,letterSpacing:"0.16em",textTransform:"uppercase",marginBottom:10}}>{page.eyebrow}</div><h1 style={{fontFamily:FD,color:LIGHT,fontSize:42,letterSpacing:3,lineHeight:1,marginBottom:8}}>{page.title}</h1><div style={{color:MUTED,fontSize:12,letterSpacing:"0.06em",marginBottom:18}}>{page.updated}</div><p style={{fontSize:17,lineHeight:1.55,color:LIGHT,marginBottom:24}}>{page.summary}</p><div style={{display:"grid",gap:14}}>{page.sections.map(section=><article key={section.h} style={{background:"rgba(255,255,255,0.035)",border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"16px 18px"}}><h2 style={{fontFamily:FD,color:VOLT,fontSize:20,letterSpacing:2,marginBottom:6}}>{section.h}</h2><p style={{color:MUTED,fontSize:14,lineHeight:1.6}}>{section.p}</p></article>)}</div><a href={contactHref} style={{display:"inline-flex",alignItems:"center",justifyContent:"center",minHeight:44,marginTop:16,padding:"0 16px",borderRadius:999,background:VOLT,color:"#000000",fontFamily:FD,fontSize:15,letterSpacing:2,textDecoration:"none",touchAction:"manipulation"}}>EMAIL SUPPORT</a><LegalSupportLinks compact/></section><p style={{textAlign:"center",color:MUTED,fontSize:11,lineHeight:1.5,marginTop:18}}>For urgent account or safety concerns, <a href={contactHref} style={{color:VOLT,textDecoration:"none",fontWeight:700}}>contact {LEGAL_CONTACT_EMAIL}</a>.</p></div></main></>;
-}
-
-const AUTH_WORKSPACE_RUNTIME=Object.freeze({
-  BG,
-  BORDER_CLR,
-  CARD_BG,
-  CourtBG,
-  DEMO_COACH,
-  DEMO_PLAYER,
-  DrillIcon,
-  FB,
-  FD,
-  GlowOrb,
-  LIGHT,
-  LegalSupportLinks,
-  MUTED,
-  ORANGE,
-  SLLogo,
-  TOKENS,
-  VOLT,
-});
-
-export default function App(){
-const[appErr,setAppErr]=useState(false);
-const legalRouteKey=typeof window!=="undefined"?getLegalRouteKey(window.location.pathname):null;
-useEffect(()=>{
-try{
-window.__shotlabBootMark?.("app_ready_dispatched");
-window.dispatchEvent(new Event("shotlab:app-ready"));
-}catch(error){}
-},[]);
-if(appErr)return <><Styles/><ErrorFallback/></>;
-if(legalRouteKey&&legalRouteKey!=="delete-account")return <StaticLegalPage pageKey={legalRouteKey}/>;
-try{return <AppInner/>}catch(e){return <><Styles/><ErrorFallback/></>}
-}
-
-function AppInner(){
-const[view,setView]=useState("auth"),[user,setUser]=useState(null),[drills,setDrills]=useState(DRILLS_INIT),[programDrills,setProgramDrills]=useState(PROGRAM_DRILLS_INIT),[scores,setScores]=useState([]),[programScores,setProgramScores]=useState([]),[players,setPlayers]=useState([]),[playerProfiles,setPlayerProfiles]=useState([]),[events,setEvents]=useState(EVENTS_INIT),[rsvps,setRsvps]=useState([]),[shotLogs,setShotLogs]=useState([]),[challenges,setChallenges]=useState([]),[theme,setTheme]=useState("dark"),[scSessions,setScSessions]=useState(SC_INIT),[scRsvps,setScRsvps]=useState([]),[scLogs,setScLogs]=useState([]),[teams,setTeams]=useState([]),[seasonArchives,setSeasonArchives]=useState([]),[coachPriorities,setCoachPriorities]=useState(COACH_PRIORITIES_INIT),[ready,setReady]=useState(false),[pendingJoinContext,setPendingJoinContext]=useState(null);
-const[demoSettingsBusy,setDemoSettingsBusy]=useState(false);
-const[accountNotice,setAccountNotice]=useState("");
-const[startupError,setStartupError]=useState("");
-const [homeShotsLeaderboard,setHomeShotsLeaderboard]=useState({status:"idle",rows:[],error:""});
-const [homeShotsLeaderboardScope,setHomeShotsLeaderboardScope]=useState("players");
-const [statSyncError,setStatSyncError]=useState("");
-const [dataDebug,setDataDebug]=useState({join:{enteredCode:"",normalizedCode:"",status:"idle",lookupSource:"none",lookupField:"none",lookupHashPrefix:"",lookupHashSource:"",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:"",contextSubjectMatchesUser:"no",consumeEndpoint:"/v1/team-memberships/confirm-context",consumeHttpStatus:null,consumeDiagnosticCode:"",consumeDiagnosticMessage:"",consumeTokenPresent:"no",consumeTeamIdUsed:"",consumeUserEmail:"",consumeResolvedUserUuid:"",consumeAttemptStarted:"no",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeInFlightKey:"",consumeInFlightAgeMs:null,consumeGuardCleared:"no",consumeGuardClearReason:"",consumeTimeoutMs:15000,consumeFetchStarted:"no",consumeFetchFinished:"no",membershipInsertStatus:"idle",membershipInsertError:"",profileUpdateStatus:"idle",finalRouteDecision:"idle",update:"idle",error:""},auth:{mode:SUPABASE_AUTH_ENABLED?"supabase":"legacy",supabaseEnabled:SUPABASE_AUTH_ENABLED?"yes":"no",sessionPresent:"no",signupHttpStatus:null,signupCode:"",signupStage:"",signupMessage:"",loginHttpStatus:null,loginCode:"",loginMessage:"",providerHint:"",profileLoad:"idle",restoredRoleTeamId:"no",profilePersistStatus:"idle",profileRestoreStatus:"idle",legacyAuthRegisterStatus:"idle",legacyAuthLoginStatus:"idle",legacyAuthUpdateStatus:"idle",profileTeamId:"",registerEndpoint:"/v1/legacy-auth/register",registerParseMode:""},leaderboard:{endpoint:"",httpStatus:null,errorCode:"",resultCount:null,isEmpty:false},createTeam:{teamName:"",endpoint:"",httpStatus:null,errorCode:"",responseSummary:"",teamId:"",joinCode:"",stateUpdated:false,remotePersisted:false,status:"idle"}});
-const leaderboardRequestRef=useRef({teamId:null,requestId:0});
-const [isJoinConsumeActive,setIsJoinConsumeActive]=useState(false);
-const joinConsumeFlightRef=useRef({active:false,key:"",startedAt:0,lastClearedAt:0,lastClearedReason:"",promise:null,abortController:null});
-const autoJoinAttemptRef=useRef("");
-const legacyAuthSecretRef=useRef({email:"",password:""});
-const bootMark=(stage,detail="")=>{try{window.__shotlabBootMark?.(stage,detail);}catch(error){}};
-const T=THEMES[theme];
-const dataDebugRequested=typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("dataDebug")==="1";
-const dataDebugEnvOverride=String(import.meta.env.VITE_ENABLE_DATA_DEBUG||"").trim().toLowerCase();
-const dataDebugEnvEnabled=dataDebugEnvOverride==="1"||dataDebugEnvOverride==="true"||dataDebugEnvOverride==="yes";
-const dataDebugLocalHost=typeof window!=="undefined"&&["localhost","127.0.0.1","::1"].includes(window.location.hostname);
-const dataDebugSafeMode=Boolean(import.meta.env.DEV||dataDebugLocalHost||(dataDebugEnvEnabled&&user?.role==="coach"));
-const dataDebugEnabled=dataDebugRequested&&dataDebugSafeMode;
-const normalizeJoin=v=>String(v||"").trim().toUpperCase();
-const loadCoachPrioritiesForTeam = useCallback(async (teamId) => {
-  if (!teamId) return;
-  const saved = await persistenceService.getPlayerPriorities();
-  const scoped = saved?.[teamId];
-  if (scoped) setCoachPriorities(sanitizeCoachPriorities(scoped));
-  else setCoachPriorities(COACH_PRIORITIES_INIT);
-}, []);
-const saveCoachPrioritiesForTeam = useCallback(async (teamId, nextPriorities) => {
-  if (!teamId) return { ok: false, message: "Missing team id." };
-  const saved = await persistenceService.getPlayerPriorities();
-  const next = { ...(saved || {}), [teamId]: sanitizeCoachPriorities(nextPriorities) };
-  await persistenceService.savePlayerPriorities(next);
-  setCoachPriorities(next[teamId]);
-  return { ok: true, message: "Priorities saved. Player dashboard updated." };
-}, []);
-const mapConsumeDiagnostic=(errorCode,status)=>{
-const code=String(errorCode||"").toLowerCase();
-if(code==="consume_context_token_missing"||code==="join_context_token_required")return{code:"consume_context_token_missing",message:"Validated context token is missing."};
-if(code==="consume_subject_mismatch"||code==="subject_required")return{code:"consume_subject_mismatch",message:"Invite context subject does not match current user."};
-if(code==="consume_user_id_type_mismatch")return{code:"consume_user_id_type_mismatch",message:"User identifier type did not match backend expectation."};
-if(code==="consume_team_id_type_mismatch")return{code:"consume_team_id_type_mismatch",message:"Team identifier type did not match backend expectation."};
-if(code==="rate_limited")return{code:"retryable_inflight",message:"Join is already in progress. Please retry in a moment."};
-if(code==="invalid_join_context"||code==="join_context_expired"||code==="join_context_used")return{code:"consume_session_lookup_failed",message:"Saved invite context could not be found or is no longer valid."};
-if(code==="consume_membership_insert_failed"||code==="membership_insert_failed")return{code:"consume_membership_insert_failed",message:"Backend could not insert membership for this player."};
-if(code==="internal_error"||status>=500)return{code:"consume_membership_insert_failed",message:"Backend failed while creating membership."};
-return{code:code||"consume_membership_insert_failed",message:"Unable to consume invite context."};
-};
-const getAuthErrorCode=error=>String(error?.code||error?.error||"").trim().toLowerCase();
-const getAuthErrorMessage=error=>String(error?.message||error?.error_description||error?.msg||error?.error||"").trim();
-const authDebugSuffix=error=>` [${String(error?.code||error?.error||"unknown_error")}: ${getAuthErrorMessage(error)||"unknown"}]`;
-const mapSignupErrorMessage=(error,dataDebugRequested)=>{
-const code=getAuthErrorCode(error);
-const message=getAuthErrorMessage(error).toLowerCase();
-if(code.includes("signup_disabled")||message.includes("signups not allowed"))return"Email signup is disabled in Supabase Auth settings.";
-if(code.includes("weak_password")||message.includes("password")&&message.includes("weak"))return"Password does not meet the required policy.";
-if(code.includes("user_already_exists")||message.includes("already registered")||message.includes("already been registered"))return"Account already exists. Please sign in.";
-if(code.includes("email_provider_disabled")||message.includes("email provider is disabled"))return"Email login is not enabled in Supabase Auth settings.";
-if(code.includes("over_request_rate_limit")||message.includes("rate limit"))return"Too many attempts. Wait and try again.";
-if(!dataDebugRequested&&isTechnicalBackendMessage(getAuthErrorMessage(error)))return"Unable to register right now. Please try again in a moment.";
-return dataDebugRequested?`Unable to register. Please try again.${authDebugSuffix(error)}`:"Unable to register. Please try again.";
-};
-const mapLoginErrorMessage=(error,dataDebugRequested)=>{
-const code=getAuthErrorCode(error);
-const message=getAuthErrorMessage(error).toLowerCase();
-if(code.includes("invalid_credentials")||message.includes("invalid login credentials"))return"Invalid email or password.";
-if(code.includes("email_not_confirmed")||message.includes("email not confirmed"))return"Please confirm your email before signing in.";
-if(code.includes("user_not_found")||message.includes("user not found")||message.includes("account does not exist")||message.includes("no account"))return"No account found. Create an account first.";
-if(!dataDebugRequested&&isTechnicalBackendMessage(getAuthErrorMessage(error)))return"Unable to sign in right now. Please try again in a moment.";
-return dataDebugRequested?`Login failed.${authDebugSuffix(error)}`:"Unable to sign in. Please try again.";
-};
-const requireCoach=(actor,teamId)=>actor?.role==="coach"&&actor.teamId&&actor.teamId===teamId;
-const requirePlayer=(actor,teamId,email)=>actor?.role==="player"&&actor.teamId&&actor.teamId===teamId&&actor.email===email;
-const trackEvent=useCallback((type,meta={},actor=user)=>{
-trackBackendEvent(type,{
-teamId:meta.teamId??actor?.teamId??null,
-userEmail:actor?.email||meta.userEmail||null,
-userRole:actor?.role||meta.userRole||null,
-view,
-meta,
-});
-},[user,view]);
-
-const homeShotDebugMode=typeof window!=="undefined"&&new URLSearchParams(window.location.search).get("homeShotDebug")==="1";
-const fetchHomeShotsLeaderboard=useCallback(async(teamId,scope=homeShotsLeaderboardScope)=>{
-if(!teamId||!user?.email)return;
-const requestId=Date.now();
-const debugMode=isShotLabDebugMode();
-const localLeaderboardRows=()=>calculateLeaderboardFromShotLogs({shotLogs,teamId,playerContext:{players,profiles:playerProfiles,scope}}).slice(0,HOME_SHOTS_LEADERBOARD_LIMIT);
-const applyLeaderboardRows=(rows,{httpStatus=null,errorCode="",isEmpty=null}={})=>{
-if(leaderboardRequestRef.current.requestId!==requestId)return false;
-setHomeShotsLeaderboard({status:"success",rows,error:""});
-setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,httpStatus,errorCode,resultCount:rows.length,isEmpty:isEmpty??rows.length===0}}));
-return true;
-};
-leaderboardRequestRef.current={teamId,requestId};
-setHomeShotsLeaderboard(prev=>({...prev,status:"loading",error:""}));
-if(isDemoAccount(user)||isDemoMode()){
-const rows=localLeaderboardRows();
-applyLeaderboardRows(rows,{httpStatus:200,errorCode:"demo_local",isEmpty:rows.length===0});
-return;
-}
-try{
-const url=`/v1/leaderboards/home-shots?team_id=${encodeURIComponent(teamId)}&limit=${HOME_SHOTS_LEADERBOARD_LIMIT}&scope=${encodeURIComponent(scope)}`;
-setDataDebug(prev=>({...prev,leaderboard:{...prev.leaderboard,endpoint:url,httpStatus:null,errorCode:"",resultCount:null,isEmpty:false}}));
-const res=await fetch(url,{headers:{"x-user-id":user.email}});
-const contentType=String(res.headers.get("content-type")||"").toLowerCase();
-let body={};
-let parseMode="json";
-if(contentType.includes("application/json")){
-body=await res.json().catch(()=>{parseMode="invalid_json";return{};});
-}else{
-parseMode="non_json";
-await res.text().catch(()=>"");
-}
-if(!res.ok){
-const msg=parseLeaderboardErrorMessage(body?.error,res.status,parseMode==="non_json"?"non_json":"json");
-const backendErrorCode=String(body?.diagnostics?.rpc_error?.code||body?.error||"unknown");
-const backendErrorMessage=String(body?.diagnostics?.rpc_error?.message||"unknown_error");
-const debugErrorDetail=`${backendErrorCode}: ${backendErrorMessage}`;
-console.warn("[home-shots-leaderboard] refresh failed",{status:res.status,error:body?.error||"",scope,teamId,requesterIdentityPresent:body?.diagnostics?.requester_identity_present||"unknown",teamIdPresent:body?.diagnostics?.team_id_present||"unknown",rpcName:body?.diagnostics?.rpc_name_called||"",rpcSuccess:body?.diagnostics?.rpc_success||"unknown",rpcExistsDetectable:body?.diagnostics?.rpc_exists_detectable||"unknown",requesterResolvedUuidAvailable:body?.diagnostics?.requester_resolved_uuid_available||"unknown",rpcErrorCode:backendErrorCode,rpcErrorMessage:backendErrorMessage});
-const fallbackRows=localLeaderboardRows();
-emitReleaseDiagnostic({event:"leaderboard_fetch_failed",leaderboardRpcResultCount:0,fallbackLeaderboardResultCount:fallbackRows.length,teamId,playerId:user?.id||user?.email,authenticatedUserEmail:user?.email,extra:{scope,httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown")}}, {debug:debugMode});
-if(applyLeaderboardRows(fallbackRows,{httpStatus:res.status,errorCode:String(body?.error||parseMode||"unknown"),isEmpty:fallbackRows.length===0}))return;
-return;
-}
-const rows=Array.isArray(body?.leaderboard)?body.leaderboard:[];
-const rpcRows=rows;
-const fallbackRows=rpcRows.length?[]:localLeaderboardRows();
-// Legacy debug contract for empty RPC responses: isEmpty:rows.length===0
-const leaderboardRows=rpcRows.length?rpcRows:fallbackRows;
-emitReleaseDiagnostic({event:"leaderboard_fetch_completed",leaderboardRpcResultCount:rpcRows.length,fallbackLeaderboardResultCount:fallbackRows.length,teamId,playerId:user?.id||user?.email,authenticatedUserEmail:user?.email,extra:{scope,httpStatus:res.status,usedFallback:rpcRows.length===0&&fallbackRows.length>0}}, {debug:debugMode});
-if(applyLeaderboardRows(leaderboardRows,{httpStatus:res.status,errorCode:rpcRows.length||!fallbackRows.length?"":"rpc_empty_local_fallback",isEmpty:leaderboardRows.length===0}))return;
-}catch(error){
-if(leaderboardRequestRef.current.requestId!==requestId)return;
-console.warn("[home-shots-leaderboard] refresh network failure",{scope,teamId,message:String(error?.message||"network_error")});
-const fallbackRows=localLeaderboardRows();
-emitReleaseDiagnostic({event:"leaderboard_fetch_network_failure",leaderboardRpcResultCount:0,fallbackLeaderboardResultCount:fallbackRows.length,teamId,playerId:user?.id||user?.email,authenticatedUserEmail:user?.email,extra:{scope,errorCode:"network_error"}}, {debug:debugMode});
-applyLeaderboardRows(fallbackRows,{httpStatus:null,errorCode:"network_error",isEmpty:fallbackRows.length===0});
-}
-},[user,homeShotsLeaderboardScope,shotLogs,players,playerProfiles]);
-
-const migrateData=useCallback(({players:rawPlayers,playerProfiles:rawPlayerProfiles,scores:rawScores,programScores:rawProgramScores,events:rawEvents,rsvps:rawRsvps,shotLogs:rawShotLogs,challenges:rawChallenges,scSessions:rawScSessions,scRsvps:rawScRsvps,scLogs:rawScLogs,teams:rawTeams})=>{
-const ps=(rawPlayers||[]).map(p=>({...p,role:p.role||"player"}));
-const existingTeams=rawTeams||[];
-const coaches=ps.filter(p=>p.role==="coach");
-const hasTeams=existingTeams.length>0;
-const map={};
-let ts=[...existingTeams];
-const used=ts.map(t=>t.joinCode);
-if(!hasTeams){
-if(coaches.length===0){
-const tid=genId("team");
-ts=[{id:tid,name:"ShotLab Team",ownerCoachId:null,joinCode:generateJoinCode(used),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING}];
-ps.forEach(p=>{map[p.email]=tid});
-}else{
-coaches.forEach((c,i)=>{const tid=genId("team");const code=generateJoinCode([...used,...ts.map(t=>t.joinCode)]);ts.push({id:tid,name:c.name?`${c.name.split(" ")[0]}'s Team`:`Team ${i+1}`,ownerCoachId:c.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING});map[c.email]=tid;});
-ps.forEach(p=>{if(p.role!=="coach"){const firstCoach=coaches[0];if(firstCoach)map[p.email]=map[firstCoach.email];}});
-}
-}else{
-ts.forEach(t=>{if(t.ownerCoachId)map[t.ownerCoachId]=t.id;});
-}
-const teamsWithBranding=ts.map(t=>({...t,branding:resolveTeamBranding(t.branding||DEFAULT_BRANDING)}));
-const playersMigrated=ps.map(p=>({...p,teamId:resolveMigratedRosterTeamId({row:p,mappedTeamId:map[p.email],fallbackTeamId:teamsWithBranding[0]?.id}),hideFromLeaderboards:p.hideFromLeaderboards===true||p.hide_from_leaderboards===true}));
-const profilesExisting=rawPlayerProfiles||[];
-const profilesMigrated=(profilesExisting.length?profilesExisting:playersMigrated.filter(p=>p.role!=="coach").map(p=>({id:genId("pp"),userId:p.email,teamId:p.teamId,firstName:(p.name||"").split(" ")[0]||"Player",lastName:(p.name||"").split(" ").slice(1).join(" "),createdAt:Date.now()}))).map(pp=>({...pp,teamId:pp.teamId||playersMigrated.find(p=>p.email===pp.userId)?.teamId||ts[0]?.id||null}));
-const teamForEmail=e=>playersMigrated.find(p=>p.email===e)?.teamId||ts[0]?.id||null;
-const scoresM=(rawScores||[]).filter(s=>(s.src||"home")!=="program").map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||teamForEmail(s.email),drillId:s.drillId||s.drill_id,src:s.src||"home"}));
-const programScoresM=[...(rawProgramScores||[]),...(rawScores||[]).filter(s=>s.src==="program")].map(s=>({...s,email:s.email||s.player_email,playerId:s.playerId||s.player_id||s.email||s.player_email,player_id:s.player_id||s.playerId||s.email||s.player_email,teamId:s.teamId||s.team_id||teamForEmail(s.email||s.player_email),team_id:s.team_id||s.teamId||teamForEmail(s.email||s.player_email),drillId:s.drillId||s.drill_id,drill_id:s.drill_id||s.drillId,drillName:s.drillName||s.drill_name||"Program Drill",score:Number(s.score||0),date:s.date||s.session_date||todayStr(),src:"program"}));
-const eventsM=(rawEvents||[]).map(e=>({...e,teamId:e.teamId||teamForEmail(e.ownerCoachId)}));
-const rsvpsM=(rawRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
-const shotM=(rawShotLogs||[]).map(l=>normalizeShotLogRowForApp({...l,teamId:l.teamId||l.team_id||teamForEmail(l.email)},{source:"local"})).filter(Boolean);
-const chM=(rawChallenges||[]).map(c=>({...c,teamId:c.teamId||teamForEmail(c.from),playerId:c.playerId||c.from}));
-const scSM=(rawScSessions||[]).map(s=>({...s,teamId:s.teamId||teamForEmail(s.ownerCoachId)}));
-const scRM=(rawScRsvps||[]).map(r=>({...r,playerId:r.playerId||r.email,teamId:r.teamId||teamForEmail(r.email)}));
-const scLM=(rawScLogs||[]).map(l=>({...l,playerId:l.playerId||l.email,teamId:l.teamId||teamForEmail(l.email)}));
-return {playersMigrated,profilesMigrated,teamsMigrated:teamsWithBranding,scoresM,programScoresM,eventsM,rsvpsM,shotM,chM,scSM,scRM,scLM};
-},[]);
-
-const navigateToPlayerHome=useCallback(()=>{
-if(typeof window==="undefined")return;
-const homePath=PLAYER_TAB_PATHS.home||"/";
-if(window.location.pathname!==homePath)window.history.replaceState({},"",homePath);
-},[]);
-
-const normalizeStoredInviteContext=useCallback((ctx)=>{
-if(!ctx||typeof ctx!=="object")return null;
-const joinContextToken=String(ctx.joinContextToken||ctx.token||"").trim();
-if(!joinContextToken)return null;
-return{
-joinContextToken,
-token:joinContextToken,
-inviteId:String(ctx.inviteId||ctx.invite_id||"").trim(),
-teamId:String(ctx.teamId||ctx.team_id||"").trim(),
-inviteCode:String(ctx.inviteCode||ctx.invite_code||ctx.normalizedCode||"").trim().toUpperCase(),
-subject:String(ctx.subject||ctx.subjectKey||ctx.subject_key||"").trim().toLowerCase(),
-subjectKey:String(ctx.subject||ctx.subjectKey||ctx.subject_key||"").trim().toLowerCase(),
-expiresAt:ctx.expiresAt||ctx.expires_at||null,
-createdAt:Number(ctx.createdAt||Date.now()),
-};
-},[]);
-const readInviteContextFromStorage=useCallback(()=>{
-if(typeof window==="undefined")return null;
-const parse=(raw)=>{if(!raw)return null;try{return JSON.parse(raw);}catch(error){return null;}};
-const sessionValue=parse(window.sessionStorage?.getItem(INVITE_CONTEXT_STORAGE_KEY)||"");
-const localValue=parse(window.localStorage?.getItem(INVITE_CONTEXT_STORAGE_KEY)||"");
-return normalizeStoredInviteContext(sessionValue||localValue||null);
-},[normalizeStoredInviteContext]);
-const writeInviteContextToStorage=useCallback((ctx)=>{
-if(typeof window==="undefined")return;
-const normalized=normalizeStoredInviteContext(ctx);
-const serialized=JSON.stringify(normalized||null);
-window.sessionStorage?.setItem(INVITE_CONTEXT_STORAGE_KEY,serialized);
-window.localStorage?.setItem(INVITE_CONTEXT_STORAGE_KEY,serialized);
-},[normalizeStoredInviteContext]);
-const savePendingJoinContext=useCallback(async(next)=>{
-const normalized=normalizeStoredInviteContext(next);
-setPendingJoinContext(normalized||null);
-writeInviteContextToStorage(normalized||null);
-await DB.set(PENDING_JOIN_CONTEXT_KEY,normalized||null);
-},[normalizeStoredInviteContext,writeInviteContextToStorage]);
-const hydratePersistedData=useCallback(async()=>{const[d,pd,s,ps,p,pp,ev,rv,sl,ch,scs,scr,scl,tm,sa,sess,pendingCtx]=await Promise.all([DB.get("sl:drills"),DB.get("sl:program-drills"),DB.get("sl:scores"),DB.get("sl:program-scores"),DB.get("sl:players"),DB.get("sl:player-profiles"),DB.get("sl:events"),DB.get("sl:rsvps"),DB.get("sl:shotlogs"),DB.get("sl:challenges"),DB.get("sl:sc-sessions"),DB.get("sl:sc-rsvps"),DB.get("sl:sc-logs"),DB.get("sl:teams"),DB.get("sl:season-archives"),DB.get("sl:session"),DB.get(PENDING_JOIN_CONTEXT_KEY)]);const homeDrillAliases=buildDefaultDrillIdAliases(d,DRILLS_INIT);const programDrillAliases=buildDefaultDrillIdAliases(pd,PROGRAM_DRILLS_INIT);const localSeededDrills=mergeDefaultDrills(d,DRILLS_INIT);const localSeededProgramDrills=mergeDefaultDrills(pd,PROGRAM_DRILLS_INIT);let catalog;if(sess?.email){try{catalog=await trainingCatalogPersistence.hydrateCatalog({localHomeDrills:localSeededDrills,localProgramDrills:localSeededProgramDrills});}catch(error){emitReleaseDiagnostic("training_catalog_hydration_failed",{message:String(error?.message||"unknown")});}}const seededDrills=catalog?.useRemote?mergeDefaultDrills(catalog.homeDrills,DRILLS_INIT):localSeededDrills;const seededProgramDrills=catalog?.useRemote?mergeDefaultDrills(catalog.programDrills,PROGRAM_DRILLS_INIT):localSeededProgramDrills;setDrills(seededDrills);setProgramDrills(seededProgramDrills);
-const normalizedScores=normalizeScoresForDefaultDrills(s,homeDrillAliases,programDrillAliases);const normalizedProgramScores=normalizeScoresForDefaultDrills(ps,homeDrillAliases,programDrillAliases);const m=migrateData({players:p,playerProfiles:pp,scores:normalizedScores,programScores:normalizedProgramScores,events:ev,rsvps:rv,shotLogs:sl,challenges:ch,scSessions:scs,scRsvps:scr,scLogs:scl,teams:tm});
-setPlayers(m.playersMigrated);setPlayerProfiles(m.profilesMigrated);setTeams(m.teamsMigrated);setSeasonArchives(Array.isArray(sa)?sa:[]);setScores(m.scoresM);setProgramScores(m.programScoresM);setEvents(m.eventsM);setRsvps(m.rsvpsM);setShotLogs(m.shotM);setChallenges(m.chM);setScSessions(m.scSM);setScRsvps(m.scRM);setScLogs(m.scLM);
-await DB.set("sl:sc-sessions",m.scSM);
-await Promise.all([DB.set("sl:drills",seededDrills),DB.set("sl:program-drills",seededProgramDrills),DB.set("sl:players",m.playersMigrated),DB.set("sl:player-profiles",m.profilesMigrated),DB.set("sl:teams",m.teamsMigrated),DB.set("sl:scores",m.scoresM),DB.set("sl:program-scores",m.programScoresM),DB.set("sl:events",m.eventsM),DB.set("sl:rsvps",m.rsvpsM),DB.set("sl:shotlogs",m.shotM),DB.set("sl:challenges",m.chM),DB.set("sl:sc-rsvps",m.scRM),DB.set("sl:sc-logs",m.scLM)]);
-const authEmail=normalizeEmail(SUPABASE_AUTH_ENABLED?(await Promise.race([supabase.auth.getSession(),new Promise(r=>setTimeout(r,3e3))]))?.data?.session?.user?.email:sess?.email); setDataDebug(prev=>({...prev,auth:{...prev.auth,sessionPresent:authEmail?"yes":"no"}})); if(authEmail&&!SUPABASE_AUTH_ENABLED){const restore=await legacyAuthFetch("/v1/legacy-auth/restore",{email:authEmail}); if(restore.ok&&restore.body?.profile){const rp=normalizeLegacyProfile(restore.body.profile);if(rp.teamId)await restoreLegacyTeamContext(rp).catch(()=>null);setUser(rp);setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"success",profileLoad:"success",profileTeamId:rp.teamId||""}}));if(rp.role==="coach"&&!rp.teamId)setView("create-team");else if(rp.role==="player"&&!rp.teamId)setView("join-team");else{if(rp.role==="player")navigateToPlayerHome();setView(rp.role||"player");}}else{setDataDebug(prev=>({...prev,auth:{...prev.auth,profileRestoreStatus:"failed",profileLoad:"failed"}}));}} else if(authEmail){const found=m.playersMigrated.find(pl=>normalizeEmail(pl.email)===authEmail);if(found){setUser({email:found.email,role:found.role||"player",isCoach:(found.role||"player")==="coach",name:found.name,teamId:found.teamId,hideFromLeaderboards:found.hideFromLeaderboards===true});setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success",restoredRoleTeamId:(found.role&&found.teamId)?"yes":"no"}}));if(found.role==="coach"&&!found.teamId)setView("create-team");else if(found.role==="player"&&!found.teamId)setView("join-team");else {if((found.role||"player")==="player")navigateToPlayerHome();setView(found.role||"player")}} else {setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));}}
-setPendingJoinContext(normalizeStoredInviteContext(pendingCtx)||readInviteContextFromStorage()||null);
-return {teams:m.teamsMigrated,players:m.playersMigrated};
-},[migrateData,navigateToPlayerHome,normalizeStoredInviteContext,readInviteContextFromStorage]);
-const P=useCallback(async(k,v,set,options)=>{set(v);await DB.set(k,v,options)},[]);
-useEffect(()=>{
-if(!ready||user?.role!=="player"||!user?.teamId||!user?.email)return undefined;
-let cancelled=false;
-const localSnapshot=challenges;
-playerChallengePersistence.hydrateChallenges({teamId:user.teamId,localChallenges:localSnapshot}).then(async(result)=>{
-if(cancelled||!result?.ok)return;
-const rows=Array.isArray(result.rows)?result.rows:localSnapshot;
-setChallenges(rows);
-await DB.set("sl:challenges",rows,{strictLocal:true});
-}).catch(error=>emitReleaseDiagnostic("player_challenge_hydration_failed",{teamId:user.teamId,message:String(error?.message||"unknown")}));
-return()=>{cancelled=true};
-},[ready,user?.email,user?.role,user?.teamId]);
-const persistTrainingCatalog=useCallback(async(nextHomeDrills,nextProgramDrills)=>{
-setDrills(nextHomeDrills);setProgramDrills(nextProgramDrills);
-await Promise.all([DB.set("sl:drills",nextHomeDrills,{strictLocal:true}),DB.set("sl:program-drills",nextProgramDrills,{strictLocal:true})]);
-if(!user?.teamId)return{ok:true,storageMode:"local_pending"};
-try{const result=await trainingCatalogPersistence.syncCatalog({teamId:user.teamId,homeDrills:nextHomeDrills,programDrills:nextProgramDrills});return{ok:true,storageMode:result.storageMode,remoteRows:result.rows};}
-catch(error){emitReleaseDiagnostic("training_catalog_sync_pending",{teamId:user.teamId,message:String(error?.message||"unknown")});return{ok:true,storageMode:"local_pending",remotePending:true};}
-},[user?.teamId]);
-const archiveSeason=useCallback(async(input={})=>{
-const activeRosterPlayers=getCoachRosterPlayers({
-players,
-playerProfiles,
-teamId:user?.teamId,
-});
-const result=await createSeasonArchive({
-...input,
-teamId:user?.teamId,
-coach:user,
-players,
-playerProfiles,
-activeRosterPlayers,
-scores,
-programScores,
-shotLogs,
-events,
-rsvps,
-scSessions,
-scRsvps,
-scLogs,
-programDrills,
-drills,
-challenges,
-existingArchives:seasonArchives,
-now:()=>new Date().toISOString(),
-});
-if(!result.ok)return result;await P("sl:season-archives",result.seasonArchives,setSeasonArchives,{strictLocal:true});trackEvent("season_archive_created",{archiveId:result.archive.id,seasonName:result.archive.seasonName});return result;},[user,players,playerProfiles,scores,programScores,shotLogs,events,rsvps,scSessions,scRsvps,scLogs,programDrills,drills,challenges,seasonArchives,P,trackEvent]);
-const startJoinContext=useCallback(async(code,subjectKey)=>{
-const normalizedCode=normalizeJoin(code).replace(/[-\s]+/g,"");
-const normalizedSubject=String(subjectKey||"").trim().toLowerCase();
-setDataDebug(prev=>({...prev,join:{...prev.join,enteredCode:String(code||""),normalizedCode,status:"lookup",lookupSource:"backend_invite_context",lookupField:"team_invites.code_hash",lookupHashPrefix:"",lookupHashSource:"public.hash_invite_code(public.normalize_invite_code(code))",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:normalizedSubject,currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"no",update:"idle",error:""}}));
-if(!normalizedCode)return{ok:false,err:"Enter a valid team code."};
-if(!normalizedSubject)return{ok:false,err:"Enter a valid email."};
-try{
-const res=await fetch("/v1/team-invites/context/start",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({invite_code:normalizedCode,subject_key:normalizedSubject})});
-const body=await res.json().catch(()=>({}));
-const resolvedNormalizedCode=String(body?.normalized_code||normalizedCode||"");
-const resolvedHashPrefix=String(body?.lookup_hash_prefix||"");
-const resolvedHashSource=String(body?.hash_source||"public.hash_invite_code(public.normalize_invite_code(code))");
-const resolvedLookupCount=Number.isFinite(Number(body?.lookup_count))?Number(body?.lookup_count):0;
-const resolvedMatchedTeamId=String(body?.matched_team_id||body?.team_id||"");
-const resolvedInviteState=String(body?.invite_state||"");
-const resolvedExpiresAt=body?.expires_at||body?.invite_expires_at||null;
-if(!res.ok){
-const safeError=String(body?.error||"lookup_failed");
-setDataDebug(prev=>({...prev,join:{...prev.join,normalizedCode:resolvedNormalizedCode,status:"failed",lookupHashPrefix:resolvedHashPrefix,lookupHashSource:resolvedHashSource,lookupCount:resolvedLookupCount,matchedTeamId:resolvedMatchedTeamId,inviteState:resolvedInviteState,expiresAt:resolvedExpiresAt,inviteContextSaved:"no",inviteContextTokenPresent:"no",inviteContextTeamId:resolvedMatchedTeamId,inviteContextSubject:normalizedSubject,currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"no",error:safeError}}));
-if(safeError==="invalid_or_unavailable_code"||safeError==="invalid_code")return{ok:false,err:"Invalid team code."};
-return{ok:false,err:"Could not validate team code."};
-}
-const ctx={joinContextToken:body.join_context_token,token:body.join_context_token,expiresAt:body.expires_at,subject:normalizedSubject,subjectKey:normalizedSubject,inviteId:body.invite_id,teamId:resolvedMatchedTeamId,inviteCode:resolvedNormalizedCode,createdAt:Date.now()};
-setDataDebug(prev=>({...prev,join:{...prev.join,normalizedCode:resolvedNormalizedCode,status:"validated",lookupHashPrefix:resolvedHashPrefix,lookupHashSource:resolvedHashSource,lookupCount:Number.isFinite(resolvedLookupCount)&&resolvedLookupCount>0?resolvedLookupCount:1,matchedTeamId:resolvedMatchedTeamId,inviteState:resolvedInviteState,expiresAt:resolvedExpiresAt,error:""}}));
-await savePendingJoinContext(ctx);
-setDataDebug(prev=>({...prev,join:{...prev.join,inviteContextSaved:"yes",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:ctx.joinContextToken?"yes":"no",inviteContextTeamId:ctx.teamId||"",inviteContextSubject:ctx.subject||"",currentUserEmail:normalizedSubject,contextSubjectMatchesUser:"yes"}}));
-return{ok:true,context:ctx};
-}catch(error){
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,error:"network_error"}}));
-return{ok:false,err:"Could not validate team code."};
-}
-},[normalizeJoin,savePendingJoinContext]);
-const consumeJoinContext=useCallback(async(actor,clientRequestId=null,contextOverride=null)=>{
-const currentUserEmail=String(actor?.email||"").trim().toLowerCase();
-const consumeEndpoint="/v1/team-memberships/confirm-context";
-const resolvedContext=normalizeStoredInviteContext(contextOverride)||normalizeStoredInviteContext(pendingJoinContext)||readInviteContextFromStorage();
-if(!currentUserEmail){
-const diagnostic=mapConsumeDiagnostic("consume_user_id_type_mismatch",400);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeEndpoint,consumeAttemptStarted:"yes",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeHttpStatus:400,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnostic.message,consumeTokenPresent:"no",consumeTeamIdUsed:"",consumeUserEmail:"",consumeResolvedUserUuid:"",membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:"",contextSubjectMatchesUser:"no",error:diagnostic.code}}));
-return{ok:false,err:diagnostic.message,diagnosticCode:diagnostic.code,diagnosticMessage:diagnostic.message};
-}
-if(!resolvedContext?.joinContextToken){
-const diagnostic=mapConsumeDiagnostic("consume_context_token_missing",400);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeEndpoint,consumeAttemptStarted:"yes",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeHttpStatus:400,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:`${diagnostic.message} Checked ${INVITE_CONTEXT_STORAGE_KEY}.`,consumeTokenPresent:"no",consumeTeamIdUsed:"",consumeUserEmail:currentUserEmail,consumeResolvedUserUuid:"",membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail,contextSubjectMatchesUser:"no",error:`missing_invite_context:${INVITE_CONTEXT_STORAGE_KEY}`}}));
-return{ok:false,err:`No validated invite context (checked ${INVITE_CONTEXT_STORAGE_KEY}).`,diagnosticCode:diagnostic.code,diagnosticMessage:diagnostic.message};
-}
-const subject=String(resolvedContext.subject||resolvedContext.subjectKey||"").trim().toLowerCase();
-const contextSubjectMatchesUser=subject===currentUserEmail?"yes":"no";
-if(contextSubjectMatchesUser!=="yes"){
-const diagnostic=mapConsumeDiagnostic("consume_subject_mismatch",400);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeHttpStatus:400,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnostic.message,membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",error:diagnostic.code}}));
-return{ok:false,err:diagnostic.message,diagnosticCode:diagnostic.code,diagnosticMessage:diagnostic.message};
-}
-const consumeInFlightKey=buildConsumeInFlightKey({email:currentUserEmail,inviteCode:resolvedContext?.inviteCode||"",joinContextToken:resolvedContext?.joinContextToken||"",teamId:resolvedContext?.teamId||""});
-const acquired=acquireConsumeSingleFlight(joinConsumeFlightRef.current,{key:consumeInFlightKey,start:()=>{
-const abortController=new AbortController();
-let timeoutId=null;
-const promise=(async()=>{
-setIsJoinConsumeActive(true);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeEndpoint,consumeAttemptStarted:"yes",consumeAttemptBlocked:"no",consumeAttemptBlockedReason:"",consumeInFlightKey:consumeInFlightKey,consumeInFlightAgeMs:0,consumeTimeoutMs:15000,consumeHttpStatus:null,consumeDiagnosticCode:"",consumeDiagnosticMessage:"",consumeTokenPresent:resolvedContext.joinContextToken?"yes":"no",consumeTeamIdUsed:resolvedContext.teamId||"",consumeUserEmail:currentUserEmail,consumeResolvedUserUuid:"",consumeFetchStarted:"yes",consumeFetchFinished:"no",membershipInsertStatus:"pending",membershipInsertError:"",finalRouteDecision:"pending_consume",inviteContextSaved:"yes",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:resolvedContext.joinContextToken?"yes":"no",inviteContextTeamId:resolvedContext.teamId||"",inviteContextSubject:subject||"",currentUserEmail,contextSubjectMatchesUser,consumeGuardCleared:"no",consumeGuardClearReason:""}}));
-try{
-timeoutId=setTimeout(()=>abortController.abort("consume_fetch_timeout"),15_000);
-const res=await fetch(consumeEndpoint,{method:"POST",headers:{"Content-Type":"application/json","x-user-id":actor.email},signal:abortController.signal,body:JSON.stringify({join_context_token:resolvedContext.joinContextToken,subject_key:subject,client_request_id:clientRequestId||genId("join"),team_id_hint:resolvedContext.teamId||"",role_hint:"player"})});
-const body=await res.json().catch(()=>({}));
-if(!res.ok){
-const diagnostic=mapConsumeDiagnostic(body?.diagnostic_code||body?.error,res.status);
-const diagnosticMessage=String(body?.diagnostic_message||body?.db_message||diagnostic.message||"");
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeHttpStatus:res.status,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnosticMessage,consumeResolvedUserUuid:String(body?.resolved_uuid||prev.join.consumeResolvedUserUuid||""),membershipInsertStatus:res.status===429?"retryable":"failed",membershipInsertError:diagnostic.code,finalRouteDecision:res.status===429?"retry_join_team":"stay_join_team",error:res.status===429?"":diagnostic.code}}));
-return{ok:false,retryable:res.status===429,err:diagnostic.message,diagnosticCode:diagnostic.code,diagnosticMessage:diagnostic.message,resolvedUserUuid:String(body?.resolved_uuid||"")};
-}
-await savePendingJoinContext(null);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeHttpStatus:res.status,consumeDiagnosticCode:"",consumeDiagnosticMessage:"",consumeResolvedUserUuid:String(body?.resolved_user_uuid||prev.join.consumeResolvedUserUuid||""),membershipInsertStatus:"success",membershipInsertError:"",finalRouteDecision:"apply_profile_update"}}));
-return{ok:true,teamId:body.team_id||resolvedContext.teamId,status:body.status||"joined",diagnosticCode:"",diagnosticMessage:"",resolvedUserUuid:String(body?.resolved_user_uuid||"")};
-}catch(error){
-if(error?.name==="AbortError"||String(error?.message||"").includes("consume_fetch_timeout")){
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeHttpStatus:null,consumeDiagnosticCode:"consume_fetch_timeout",consumeDiagnosticMessage:"Join consume request timed out.",membershipInsertStatus:"failed",membershipInsertError:"consume_fetch_timeout",finalRouteDecision:"retry_join_team",error:"consume_fetch_timeout"}}));
-return{ok:false,retryable:true,err:"Join request timed out. Please retry.",diagnosticCode:"consume_fetch_timeout",diagnosticMessage:"Join consume request timed out."};
-}
-const diagnostic=mapConsumeDiagnostic("consume_membership_insert_failed",500);
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeHttpStatus:500,consumeDiagnosticCode:diagnostic.code,consumeDiagnosticMessage:diagnostic.message,membershipInsertStatus:"failed",membershipInsertError:diagnostic.code,finalRouteDecision:"stay_join_team",error:diagnostic.code}}));
-return{ok:false,err:diagnostic.message,diagnosticCode:diagnostic.code,diagnosticMessage:diagnostic.message};
-}finally{
-if(timeoutId)clearTimeout(timeoutId);
-clearConsumeGuard(joinConsumeFlightRef.current,Date.now(),"consume_request_complete");
-setDataDebug(prev=>({...prev,join:{...prev.join,consumeFetchFinished:"yes",consumeGuardCleared:"yes",consumeGuardClearReason:joinConsumeFlightRef.current.lastClearedReason||"consume_request_complete"}}));
-setIsJoinConsumeActive(false);
-}
-})();
-return{promise,abortController};
-}});
-if(acquired.mode==="joined")return acquired.promise;
-return await acquired.promise;
-},[pendingJoinContext,normalizeStoredInviteContext,readInviteContextFromStorage,savePendingJoinContext,mapConsumeDiagnostic]);
-
-// Load persisted data + restore session
-useEffect(()=>{
-let canceled=false;
-(async()=>{
-try{
-bootMark("hydration_started");
-await hydratePersistedData();
-bootMark("hydration_data_loaded");
-}catch(error){
-if(canceled)return;
-bootMark("hydration_failed",String(error?.message||error||"unknown"));
-setStartupError(parseStartupErrorMessage(error));
-}finally{
-if(!canceled)setReady(true);
-}
-})();
-return()=>{canceled=true;};
-},[hydratePersistedData]);
-useEffect(()=>{
-if(ready){
-bootMark("hydration_completed");
-}
-},[ready]);
-useEffect(()=>{
-if(!ready||view!=="join-team"||!user||user.role!=="player"||user.teamId)return;
-const saved=normalizeStoredInviteContext(pendingJoinContext)||readInviteContextFromStorage();
-if(!saved?.joinContextToken)return;
-const normalizedUserEmail=String(user.email||"").trim().toLowerCase();
-const subject=String(saved.subject||saved.subjectKey||"").trim().toLowerCase();
-if(!subject||subject!==normalizedUserEmail)return;
-const consumeKey=`${normalizedUserEmail}:${saved.joinContextToken}`;
-if(autoJoinAttemptRef.current===consumeKey)return;
-autoJoinAttemptRef.current=consumeKey;
-joinTeam(saved.inviteCode||"").catch(()=>{}).finally(()=>{autoJoinAttemptRef.current="";});
-},[ready,view,user,pendingJoinContext,normalizeStoredInviteContext,readInviteContextFromStorage]);
-
-const normalizeLegacyProfile=profile=>({email:normalizeEmail(profile?.email||""),name:String(profile?.name||""),role:profile?.role==="coach"?"coach":"player",teamId:profile?.team_id||profile?.teamId||null,hideFromLeaderboards:profile?.hide_from_leaderboards===true||profile?.hideFromLeaderboards===true,isCoach:(profile?.role||"player")==="coach"});
-const legacyAuthFetch=async(path,payload={})=>{const res=await fetch(path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});const text=await res.text();let body={};let parseMode="non_json";if(text){try{body=JSON.parse(text);parseMode="json";}catch{body={};}}const errorCode=String(body?.error||body?.code||"");const errorStage=typeof body?.stage==="string"?body.stage:"";const safeMessage=typeof body?.message==="string"?body.message:"";return{ok:res.ok,status:res.status,body,parseMode,errorCode,errorStage,safeMessage};};
-const restoreLegacyTeamContext=async(profile)=>{
-if(!profile?.teamId||normalizeEmail(profile?.email||"")==="")return null;
-const response=await fetch("/v1/teams/restore-context",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({email:normalizeEmail(profile.email),team_id:profile.teamId})});
-if(!response.ok)return null;
-const payload=await response.json().catch(()=>null);
-const restoredTeam=payload?.team;
-if(!restoredTeam?.id||!restoredTeam?.joinCode)return null;
-setTeams(prev=>{
-const existing=prev.find(t=>t.id===restoredTeam.id);
-if(existing)return prev.map(t=>t.id===restoredTeam.id?{...t,name:restoredTeam.name||t.name,joinCode:restoredTeam.joinCode,joinCodeUpdatedAt:Date.now()}:t);
-return [...prev,{id:restoredTeam.id,name:restoredTeam.name||"Team",ownerCoachId:normalizeEmail(profile.email),joinCode:restoredTeam.joinCode,joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING}];
-});
-return restoredTeam;
-};
-// Auth with backend legacy persistence
-const register=async(email,password,name,role)=>{
-setDemoMode(false);
-const normalizedEmail=normalizeEmail(email);
-const existing=!SUPABASE_AUTH_ENABLED?players.find(p=>normalizeEmail(p.email)===normalizedEmail):null;
-if(existing)return{ok:false,err:"Account already exists. Please sign in."};
-if(SUPABASE_AUTH_ENABLED){
-const authRes=await supabase.auth.signUp({email:normalizedEmail,password});
-if(authRes.error){
-const safeMessage=getAuthErrorMessage(authRes.error);
-setDataDebug(prev=>({...prev,auth:{...prev.auth,signupHttpStatus:Number(authRes.error?.status||0)||null,signupCode:String(authRes.error.code||authRes.error.error||"signup_failed"),signupMessage:safeMessage,providerHint:mapSignupErrorMessage(authRes.error,false)}}));
-console.error("[auth] signup failed",{status:authRes.error?.status??null,code:authRes.error?.code||authRes.error?.error||"signup_failed",message:safeMessage||"Signup failed"});
-return{ok:false,err:mapSignupErrorMessage(authRes.error,dataDebugRequested)};
-}
-setDataDebug(prev=>({...prev,auth:{...prev.auth,signupHttpStatus:200,signupCode:"success",signupMessage:"",providerHint:"",sessionPresent:authRes.data?.access_token?"yes":"no"}}));
-const hashed=hashPw(password);
-const np=upsertPlayerProfile(players,{email:normalizedEmail,name,password:hashed,role,teamId:null,hideFromLeaderboards:false});
-const seededDrills=mergeDefaultDrills(drills,DRILLS_INIT);
-const seededProgramDrills=mergeDefaultDrills(programDrills,PROGRAM_DRILLS_INIT);
-await Promise.all([
-P("sl:players",np,setPlayers),
-P("sl:drills",seededDrills,setDrills),
-P("sl:program-drills",seededProgramDrills,setProgramDrills),
-]);
-if(SUPABASE_AUTH_ENABLED&&role==="coach")await bootstrapCoachProfile({supabaseClient:supabase,authUser:authRes.data?.user,displayName:name,email:normalizedEmail});
-if(SUPABASE_AUTH_ENABLED&&isPendingConfirmation(authRes.data))return{ok:true,pendingConfirmation:true,message:"Account created. Check your email to confirm your account, then log in."};
-setUser({email:normalizedEmail,role,isCoach:role==="coach",name,teamId:null,hideFromLeaderboards:false});setView(role==="coach"?"create-team":"join-team");
-DB.set("sl:session",{email:normalizedEmail});
-trackEvent("auth_register",{targetRole:role,userEmail:normalizedEmail,userRole:role},{email:normalizedEmail,role,teamId:null});
-return{ok:true};
-}
-const registerEndpoint="/v1/legacy-auth/register";
-const reg=await legacyAuthFetch(registerEndpoint,{email:normalizedEmail,password,name,role});
-if(!reg.ok){
-const msg=reg.errorCode==="account_exists"?"Account already exists. Please sign in.":reg.errorCode==="invalid_request"?"Please enter a valid email, name, role, and an 8+ character password.":reg.errorCode==="rate_limited"?"Too many attempts. Wait and try again.":(reg.status===404||reg.parseMode!=="json")?"Registration service is not deployed yet.":reg.errorCode==="config_error"?"Registration service is not configured correctly.":reg.errorCode==="table_error"&&reg.errorStage==="select_existing_profile"?"Registration database lookup failed.":reg.errorCode==="table_error"&&reg.errorStage==="insert_legacy_profile"?"Registration database insert failed.":reg.errorCode==="internal_error"&&reg.errorStage==="hash_password"?"Registration password setup failed.":reg.errorCode==="internal_error"&&reg.errorStage==="insert_legacy_profile"?"Registration profile save failed.":"Registration service error. Please try again.";
-setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthRegisterStatus:"failed",signupHttpStatus:reg.status,signupCode:String(reg.errorCode||"register_failed"),signupStage:String(reg.errorStage||""),signupMessage:reg.safeMessage||"",providerHint:"legacy_backend",profilePersistStatus:"failed",registerEndpoint,registerParseMode:reg.parseMode}}));
-console.error("[legacy-auth] register failed",{endpoint:registerEndpoint,status:reg.status,code:reg.errorCode||"register_failed",parseMode:reg.parseMode});
-return{ok:false,err:msg};}
-const profile=normalizeLegacyProfile(reg.body?.profile||{});
-setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthRegisterStatus:"success",signupHttpStatus:reg.status||200,signupCode:"legacy_success",signupStage:"",signupMessage:"",providerHint:"legacy_backend",sessionPresent:"yes",profilePersistStatus:"success",profileTeamId:profile.teamId||"",registerEndpoint,registerParseMode:reg.parseMode}}));
-const np=upsertPlayerProfile(players,{email:profile.email,name:profile.name,password:"",role:profile.role,teamId:profile.teamId,hideFromLeaderboards:profile.hideFromLeaderboards});
-await P("sl:players",np,setPlayers);
-setUser(profile);legacyAuthSecretRef.current={email:profile.email,password};setView(profile.role==="coach"?"create-team":"join-team");DB.set("sl:session",{email:profile.email});trackEvent("auth_register",{targetRole:profile.role,userEmail:profile.email,userRole:profile.role},{email:profile.email,role:profile.role,teamId:profile.teamId||null});return{ok:true};
-};
-const login=async(email,password)=>{
-setDemoMode(false);
-const normalizedEmail=normalizeEmail(email);
-let remoteProfile=null;
-if(SUPABASE_AUTH_ENABLED){
-const authRes=await supabase.auth.signInWithPassword({email:normalizedEmail,password});
-if(authRes.error){
-const safeMessage=getAuthErrorMessage(authRes.error);
-setDataDebug(prev=>({...prev,auth:{...prev.auth,loginHttpStatus:Number(authRes.error?.status||0)||null,loginCode:String(authRes.error.code||authRes.error.error||"login_failed"),loginMessage:safeMessage,providerHint:mapLoginErrorMessage(authRes.error,false)}}));
-console.error("[auth] login failed",{status:authRes.error?.status??null,code:authRes.error?.code||authRes.error?.error||"login_failed",message:safeMessage||"Login failed"});
-return{ok:false,err:mapLoginErrorMessage(authRes.error,dataDebugRequested)};
-}
-setDataDebug(prev=>({...prev,auth:{...prev.auth,loginHttpStatus:200,loginCode:"success",loginMessage:"",providerHint:"",sessionPresent:"yes"}}));
-const activeSession=await supabase.auth.getSession();
-await bootstrapCoachProfile({supabaseClient:supabase,authUser:activeSession?.data?.session?.user,email:normalizedEmail});
-}else{
-const auth=await legacyAuthFetch("/v1/legacy-auth/login",{email:normalizedEmail,password});
-if(!auth.ok){setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthLoginStatus:"failed",loginHttpStatus:auth.status,loginCode:String(auth.body?.error||"invalid_credentials"),loginMessage:"Invalid email or password",providerHint:"legacy_backend"}}));return{ok:false,err:"Invalid email or password"};}
-remoteProfile=normalizeLegacyProfile(auth.body?.profile||{});
-setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthLoginStatus:"success",loginHttpStatus:200,loginCode:"legacy_success",loginMessage:"",providerHint:"legacy_backend",sessionPresent:"yes",profileTeamId:remoteProfile.teamId||""}}));
-}
-const p=SUPABASE_AUTH_ENABLED?players.find(p=>normalizeEmail(p.email)===normalizedEmail):remoteProfile;
-if(!p){setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"failed"}}));return{ok:false,err:"Account not found. Please register again."};}
-setDataDebug(prev=>({...prev,auth:{...prev.auth,profileLoad:"success"}}));if(!SUPABASE_AUTH_ENABLED)legacyAuthSecretRef.current={email:normalizeEmail(p.email),password};
-if(!SUPABASE_AUTH_ENABLED&&p.teamId)await restoreLegacyTeamContext(p).catch(()=>null);
-setUser({email:normalizeEmail(p.email),role:p.role||"player",isCoach:(p.role||"player")==="coach",name:p.name,teamId:p.teamId||null,hideFromLeaderboards:p.hideFromLeaderboards===true});
-if((p.role||"player")==="coach"&&!p.teamId)setView("create-team");
-else if((p.role||"player")==="player"&&!p.teamId)setView("join-team");
-else {if((p.role||"player")==="player")navigateToPlayerHome();setView(p.role||"player");}
-DB.set("sl:session",{email:normalizeEmail(p.email)});
-trackEvent("auth_login",{method:"password"},{email:normalizeEmail(p.email),role:p.role||"player",teamId:p.teamId||null});
-return{ok:true};
-};
-const demoSignIn=async(kind="player")=>{
-setDemoMode(true);
-const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
-// Establish the hard-coded demo identity before any seed collection is saved.
-// The persistence client uses this marker to keep demo writes on-device.
-await DB.set("sl:session",{email:acct.email});
-window.dispatchEvent(new CustomEvent("shotlab:demo-session-started",{detail:{email:acct.email,kind}}));
-let np=[...players];
-let nts=[...teams];
-const savePlayers=async()=>{await P("sl:players",np,setPlayers)};
-const saveTeams=async()=>{await P("sl:teams",nts,setTeams)};
-
-if(!np.find(p=>p.email===DEMO_COACH.email)){
-np=[...np,{email:DEMO_COACH.email,name:DEMO_COACH.name,password:hashPw(DEMO_COACH.password),role:"coach",teamId:null,hideFromLeaderboards:false}];
-}
-if(!np.find(p=>p.email===DEMO_PLAYER.email)){
-np=[...np,{email:DEMO_PLAYER.email,name:DEMO_PLAYER.name,password:hashPw(DEMO_PLAYER.password),role:"player",teamId:null,hideFromLeaderboards:false}];
-}
-await savePlayers();
-
-const seededDemoPlayer=np.find(p=>p.email===DEMO_PLAYER.email&&p.teamId);
-let demoTeam=(seededDemoPlayer&&nts.find(t=>t.id===seededDemoPlayer.teamId))||nts.find(t=>t.ownerCoachId===DEMO_COACH.email);
-if(!demoTeam){
-demoTeam={id:genId("team"),name:"Demo Team",ownerCoachId:DEMO_COACH.email,joinCode:generateJoinCode(nts.map(t=>t.joinCode)),joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
-nts=[...nts,demoTeam];
-await saveTeams();
-}
-
-let changedPlayers=false;
-np=np.map(p=>{
-if(p.email===DEMO_COACH.email&&p.teamId!==demoTeam.id){changedPlayers=true;return {...p,teamId:demoTeam.id};}
-if(p.email===DEMO_PLAYER.email&&p.teamId!==demoTeam.id){changedPlayers=true;return {...p,teamId:demoTeam.id};}
-return p;
-});
-if(changedPlayers)await savePlayers();
-
-const hasPlayerProfile=playerProfiles.some(pp=>pp.userId===DEMO_PLAYER.email&&pp.teamId===demoTeam.id);
-if(!hasPlayerProfile){
-await P("sl:player-profiles",[...playerProfiles,{id:genId("pp"),userId:DEMO_PLAYER.email,teamId:demoTeam.id,firstName:"Demo",lastName:"Player",createdAt:Date.now()}],setPlayerProfiles);
-}
-
-const scopedRowsPresent=[...playerProfiles,...events,...scores,...programScores,...shotLogs,...scSessions].some(row=>String(row?.teamId||row?.team_id||"")===String(demoTeam.id));
-const existingDemoMeta=await DB.get("sl:demo-data-meta");
-const managedDemoData=existingDemoMeta?.source==="demo-data"&&String(existingDemoMeta?.teamId||"")===String(demoTeam.id);
-const shouldHydrateDemoBundle=!scopedRowsPresent||managedDemoData;
-if(shouldHydrateDemoBundle){
-const demoBundle=buildDemoDataBundle({teamId:demoTeam.id,coachEmail:DEMO_COACH.email,team:demoTeam});
-await applyDemoData(demoBundle);
-await hydratePersistedData();
-np=demoBundle.players;
-nts=demoBundle.teams;
-}
-const signedIn=np.find(p=>p.email===acct.email);
-if(!signedIn)return{ok:false,err:"Unable to prepare demo account."};
-setUser({email:signedIn.email,role:signedIn.role||"player",isCoach:(signedIn.role||"player")==="coach",name:signedIn.name,teamId:demoTeam.id,hideFromLeaderboards:signedIn.hideFromLeaderboards===true});
-if(kind!=="coach")navigateToPlayerHome();
-setView(kind==="coach"?"coach":"player");
-await trackEvent("auth_demo_login",{kind},{email:signedIn.email,role:signedIn.role||"player",teamId:demoTeam.id});
-return{ok:true};
-};
-const cleanupDemoPlayerSessionData=useCallback(async(activeUser=user)=>{
-if(!isDemoMode()&&!isDemoAccount(activeUser))return;
-const demoTeamId=activeUser?.teamId||"";
-const storedShotLogs=await DB.get("sl:shotlogs");
-const sourceShotLogs=Array.isArray(storedShotLogs)?storedShotLogs:shotLogs;
-const nextShotLogs=sourceShotLogs.filter(log=>!isDemoPlayerSessionShotLog(log,{teamId:demoTeamId}));
-await P("sl:shotlogs",nextShotLogs,setShotLogs);
-setHomeShotsLeaderboard(prev=>({...prev,rows:(Array.isArray(prev?.rows)?prev.rows:[]).filter(row=>!isDemoPlayerSessionShotLog(row,{teamId:demoTeamId}))}));
-},[P,shotLogs,user]);
-const logout=async()=>{const exitingUser=user;trackEvent("auth_logout");if(isDemoMode()||isDemoAccount(exitingUser))await cleanupDemoPlayerSessionData(exitingUser);setDemoMode(false);if(SUPABASE_AUTH_ENABLED)await supabase.auth.signOut();legacyAuthSecretRef.current={email:"",password:""};setUser(null);setView("auth");DB.set("sl:session",null)};
-const deleteAccount=async()=>{
-if(!user)return{ok:false,error:"No active account."};
-const e=String(user.email||"").trim().toLowerCase();
-const isSelf=(row={})=>String(row?.playerId||row?.player_id||row?.email||row?.userId||row?.user_id||"").trim().toLowerCase()===e;
-try{
-if(isDemoMode()||isDemoAccount(user))await cleanupDemoPlayerSessionData(user);
-setDemoMode(false);
-await P("sl:players",players.filter(p=>String(p?.email||"").trim().toLowerCase()!==e),setPlayers);
-await P("sl:scores",scores.filter(s=>!isSelf(s)),setScores);
-await P("sl:program-scores",programScores.filter(s=>!isSelf(s)),setProgramScores);
-await P("sl:rsvps",rsvps.filter(r=>!isSelf(r)),setRsvps);
-await P("sl:shotlogs",shotLogs.filter(s=>!isSelf(s)),setShotLogs);
-await P("sl:challenges",challenges.filter(c=>String(c?.from||"").trim().toLowerCase()!==e&&String(c?.to||"").trim().toLowerCase()!==e),setChallenges);
-await P("sl:sc-rsvps",scRsvps.filter(r=>!isSelf(r)),setScRsvps);
-await P("sl:sc-logs",scLogs.filter(l=>!isSelf(l)),setScLogs);
-setAccountNotice("Your account deletion request is complete on this device. Contact support if you need anything else removed from ShotLab.");
-DB.set("sl:session",null);legacyAuthSecretRef.current={email:"",password:""};setUser(null);setView("auth");
-return{ok:true};
-}catch(error){
-console.warn("account_delete_failed",{error:String(error?.message||error||"unknown")});
-return{ok:false,error:"Could not complete that request. Please try again or contact support."};
-}
-};
-const createTeam=async(name,meta={})=>{
-if(!user||user.role!=="coach")return{ok:false,err:"Not authorized"};
-if(teams.some(t=>t.ownerCoachId===user.email))return{ok:false,err:"Team already exists"};
-const endpoint="/v1/coach-signup/bootstrap";
-setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,teamName:String(name||""),endpoint,status:"request_start",httpStatus:null,errorCode:"",responseSummary:"",teamId:"",joinCode:"",stateUpdated:false,remotePersisted:false}}));
-let bootstrapBody={};
-let bootstrapStatus=0;
-try{
-const bootstrapRes=await fetch(endpoint,{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({team_name:san(name)||"Team"})});
-bootstrapStatus=bootstrapRes.status;
-const contentType=String(bootstrapRes.headers.get("content-type")||"").toLowerCase();
-let parseMode="json";
-if(contentType.includes("application/json")){
-bootstrapBody=await bootstrapRes.json().catch(()=>{parseMode="invalid_json";return{};});
-}else{
-parseMode="non_json";
-await bootstrapRes.text().catch(()=>"");
-}
-const errorCode=String(bootstrapBody?.error||"");
-setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,httpStatus:bootstrapStatus,errorCode:errorCode||parseMode,responseSummary:bootstrapRes.ok?`invite:${Boolean(bootstrapBody?.invite_code)} team:${Boolean(bootstrapBody?.team_id)}`:`error:${errorCode||parseMode}`,status:bootstrapRes.ok?"response_ok":"response_error"}}));
-if(!bootstrapRes.ok)return{ok:false,err:parseCreateTeamErrorMessage(bootstrapStatus,errorCode,parseMode)};
-}catch(error){
-setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,httpStatus:bootstrapStatus||null,errorCode:"network_error",responseSummary:"request_failed",status:"request_failed"}}));
-return{ok:false,err:"Network error while creating team."};
-}
-const code=normalizeJoin(bootstrapBody?.invite_code||"");
-const teamId=String(bootstrapBody?.team_id||"").trim();
-if(!code||!teamId){
-setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,errorCode:"invalid_response_shape",responseSummary:"missing team_id/invite_code",status:"response_invalid"}}));
-return{ok:false,err:"Team setup response was incomplete."};
-}
-const nt={id:teamId,name:san(name)||"Team",school:san(meta.school||""),level:san(meta.level||""),ownerCoachId:user.email,joinCode:code,joinCodeUpdatedAt:Date.now(),createdAt:Date.now(),branding:DEFAULT_BRANDING};
-await P("sl:teams",[...teams,nt],setTeams);
-const np=players.map(p=>p.email===user.email?{...p,teamId:nt.id}:p);
-await P("sl:players",np,setPlayers);
-setUser({...user,teamId:nt.id});setView("coach");if(!SUPABASE_AUTH_ENABLED){await legacyAuthFetch("/v1/legacy-auth/update-profile",{email:user.email,password:legacyAuthSecretRef.current?.password||"",team_id:nt.id});setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthUpdateStatus:"success",profileTeamId:nt.id}}));}
-setDataDebug(prev=>({...prev,createTeam:{...prev.createTeam,teamId,joinCode:code,stateUpdated:true,remotePersisted:true,status:"success"}}));
-return{ok:true,team:nt};
-};
-const persistJoinedPlayerRoster=async(resolvedTeamId)=>{
-const normalizedUserEmail=normalizeEmail(user?.email);
-const displayName=san(user?.name||normalizedUserEmail.split("@")[0]||"Player");
-const np=upsertPlayerProfile(players,{email:normalizedUserEmail,name:displayName,role:"player",teamId:resolvedTeamId,hideFromLeaderboards:user?.hideFromLeaderboards===true});
-await P("sl:players",np,setPlayers);
-const parts=(displayName||"Player").trim().split(/\s+/);
-const profileIdx=playerProfiles.findIndex(pp=>normalizeEmail(pp.userId||pp.user_id||pp.email||pp.player_email)===normalizedUserEmail);
-const nextProfiles=profileIdx>=0?playerProfiles.map((pp,i)=>i===profileIdx?{...pp,userId:pp.userId||normalizedUserEmail,teamId:resolvedTeamId,firstName:pp.firstName||pp.first_name||parts[0]||"Player",lastName:pp.lastName||pp.last_name||parts.slice(1).join(" "),updatedAt:Date.now()}:pp):[...playerProfiles,{id:genId("pp"),userId:normalizedUserEmail,teamId:resolvedTeamId,firstName:parts[0]||"Player",lastName:parts.slice(1).join(" "),createdAt:Date.now()}];
-await P("sl:player-profiles",nextProfiles,setPlayerProfiles);
-return{players:np,playerProfiles:nextProfiles};
-};
-const joinTeam=async(code)=>{
-if(!user||user.role!=="player")return{ok:false,err:"Not authorized"};
-const normalizedCode=normalizeJoin(code).replace(/[-\s]+/g,"");
-setDataDebug(prev=>({...prev,join:{...prev.join,enteredCode:String(code||""),normalizedCode,status:"lookup",lookupSource:"backend_invite_context",lookupField:"team_invites.code_hash",lookupHashPrefix:"",lookupHashSource:"public.hash_invite_code(public.normalize_invite_code(code))",lookupCount:null,matchedTeamId:"",inviteState:"",expiresAt:null,inviteContextSaved:"no",inviteContextStorageKey:INVITE_CONTEXT_STORAGE_KEY,inviteContextTokenPresent:"no",inviteContextTeamId:"",inviteContextSubject:"",currentUserEmail:String(user?.email||"").trim().toLowerCase(),contextSubjectMatchesUser:"no",update:"idle",error:""}}));
-let resolvedTeamId=null;
-const savedInviteContext=normalizeStoredInviteContext(pendingJoinContext)||readInviteContextFromStorage();
-let activeContext=savedInviteContext;
-const normalizedUserEmail=String(user.email||"").trim().toLowerCase();
-const canUseSavedContext=Boolean(activeContext?.joinContextToken)&&String(activeContext?.subject||activeContext?.subjectKey||"").trim().toLowerCase()===normalizedUserEmail&&(!normalizedCode||!String(activeContext?.inviteCode||"").trim()||String(activeContext?.inviteCode||"").trim()===normalizedCode);
-if(!canUseSavedContext){
-const ctx=await startJoinContext(normalizedCode,user.email);
-if(!ctx.ok){
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,error:ctx.err||"invalid_code"}}));
-return{ok:false,err:ctx.err||"Invalid team code."};
-}
-activeContext=ctx.context||null;
-}
-const joined=await consumeJoinContext(user,null,activeContext);
-if(!joined.ok){
-if(joined?.retryable)return{ok:false,retryable:true,err:joined.err||"Could not join team. Please retry."};
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",lookupCount:0,consumeDiagnosticCode:joined?.diagnosticCode||prev.join.consumeDiagnosticCode,consumeDiagnosticMessage:joined?.diagnosticMessage||joined.err||"",membershipInsertStatus:"failed",profileUpdateStatus:"idle",finalRouteDecision:"stay_join_team",error:joined?.diagnosticCode||joined.err||"join_failed"}}));
-return{ok:false,err:joined.err||"Could not join team."};
-}
-resolvedTeamId=joined.teamId;
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"backend_match",lookupCount:1,matchedTeamId:resolvedTeamId,consumeResolvedUserUuid:joined?.resolvedUserUuid||prev.join.consumeResolvedUserUuid}}));
-if(!resolvedTeamId)return{ok:false,err:"Could not resolve team."};
-if(user.teamId===resolvedTeamId){await persistJoinedPlayerRoster(resolvedTeamId);setDataDebug(prev=>({...prev,join:{...prev.join,profileUpdateStatus:"roster_synced",finalRouteDecision:"route_player_dashboard"}}));navigateToPlayerHome();setView("player");return{ok:true,alreadyJoined:true};}
-try{
-await persistJoinedPlayerRoster(resolvedTeamId);
-setDataDebug(prev=>({...prev,join:{...prev.join,profileUpdateStatus:"roster_synced"}}));
-setUser({...user,teamId:resolvedTeamId});if(!SUPABASE_AUTH_ENABLED){await legacyAuthFetch("/v1/legacy-auth/update-profile",{email:user.email,password:legacyAuthSecretRef.current?.password||"",team_id:resolvedTeamId});setDataDebug(prev=>({...prev,auth:{...prev.auth,legacyAuthUpdateStatus:"success",profileTeamId:resolvedTeamId}}));}navigateToPlayerHome();setView("player");
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"joined",update:"success",profileUpdateStatus:prev.join.profileUpdateStatus==="idle"?"profile_unchanged":prev.join.profileUpdateStatus,finalRouteDecision:"route_player_dashboard",error:""}}));
-return{ok:true};
-}catch(error){
-setDataDebug(prev=>({...prev,join:{...prev.join,status:"failed",consumeDiagnosticCode:"consume_profile_update_failed",consumeDiagnosticMessage:"Local profile/team persistence failed after membership confirmation.",profileUpdateStatus:"failed",finalRouteDecision:"stay_join_team",error:"consume_profile_update_failed"}}));
-return{ok:false,err:"Could not save player team profile locally.",diagnosticCode:"consume_profile_update_failed"};
-}
-};
-const addRosterPlayer=async(data)=>{
-if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
-if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
-const firstName=san(data.firstName||"");
-const lastName=san(data.lastName||"");
-if(!firstName)return{ok:false,err:"First name is required"};
-const profile={id:genId("pp"),userId:null,teamId:user.teamId,firstName,lastName,jerseyNumber:san(data.jerseyNumber||""),createdAt:Date.now()};
-await P("sl:player-profiles",[...playerProfiles,profile],setPlayerProfiles);
-return{ok:true};
-};
-const findRosterProfile=(identity)=>{
-const target=normalizeEmail(identity);
-return playerProfiles.find(pp=>String(pp.teamId||pp.team_id||"")===String(user?.teamId||"")&&[pp.id,pp.profileId,pp.userId,pp.user_id,pp.email,pp.player_email,pp.playerId,pp.player_id].map(v=>normalizeEmail(v)).includes(target));
-};
-const archiveRosterPlayer=async(playerEmail)=>{
-if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
-if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
-const result=archivePlayerForTeam({players,coach:user,playerEmail});
-if(!result.ok){
-const profile=findRosterProfile(playerEmail);
-if(!profile)return result;
-await P("sl:player-profiles",playerProfiles.map(pp=>pp.id===profile.id?{...pp,archived:true,rosterStatus:"archived",rosterAction:"coach_archive_player",accountDeletion:false,supabaseAuthUserDeleted:false,hideFromLeaderboards:true,archivedAt:Date.now(),archivedBy:user.email}:pp),setPlayerProfiles);
-return{ok:true};
-}
-await P("sl:players",result.players,setPlayers);
-return{ok:true};
-};
-const removeRosterPlayer=async(playerIdentity)=>{
-if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
-if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
-const profile=findRosterProfile(playerIdentity);
-const canonicalIdentity=normalizeEmail(profile?.email||profile?.userId||profile?.user_id||playerIdentity);
-const identityKeys=new Set([playerIdentity,canonicalIdentity,profile?.id,profile?.profileId,profile?.userId,profile?.user_id,profile?.email,profile?.player_email,profile?.playerId,profile?.player_id].map(v=>normalizeEmail(v)).filter(Boolean));
-const matchesRosterIdentity=(row={})=>[row.id,row.profileId,row.profile_id,row.userId,row.user_id,row.email,row.player_email,row.playerId,row.player_id].map(v=>normalizeEmail(v)).some(key=>key&&identityKeys.has(key));
-const removedAt=Date.now();
-const buildRemovedRow=(row)=>({...row,teamId:null,rosterStatus:"removed",rosterAction:"coach_remove_from_team",accountDeletion:false,supabaseAuthUserDeleted:false,removedFromTeamId:user.teamId,removedAt,removedBy:user.email,hideFromLeaderboards:true});
-const result=removePlayerFromTeam({players,coach:user,playerEmail:canonicalIdentity||playerIdentity,now:removedAt});
-const nextPlayers=result.ok?result.players:players.map(player=>player.role!=="coach"&&String(player.teamId||player.team_id||"")===String(user.teamId)&&matchesRosterIdentity(player)?buildRemovedRow(player):player);
-const nextProfiles=playerProfiles.map(playerProfile=>String(playerProfile.teamId||playerProfile.team_id||"")===String(user.teamId)&&matchesRosterIdentity(playerProfile)?buildRemovedRow(playerProfile):playerProfile);
-const playersChanged=nextPlayers.length!==players.length||nextPlayers.some((row,index)=>row!==players[index]);
-const profilesChanged=nextProfiles.length!==playerProfiles.length||nextProfiles.some((row,index)=>row!==playerProfiles[index]);
-if(!playersChanged&&!profilesChanged)return result;
-if(playersChanged)setPlayers(nextPlayers);
-if(profilesChanged)setPlayerProfiles(nextProfiles);
-const writes=[];
-if(playersChanged)writes.push(P("sl:players",nextPlayers,setPlayers));
-if(profilesChanged)writes.push(P("sl:player-profiles",nextProfiles,setPlayerProfiles));
-await Promise.all(writes);
-return{ok:true};
-};
-const deleteTeamLocalRosterPlayerData=async(playerEmail,confirmationText)=>{
-if(!user||user.role!=="coach"||!user.teamId)return{ok:false,err:"Not authorized"};
-if(!requireCoach(user,user.teamId))return{ok:false,err:"Not authorized"};
-const result=deleteTeamLocalPlayerData({players,playerProfiles,scores:[...scores,...programScores],shotLogs,rsvps,scRsvps,scLogs,challenges,coach:user,playerEmail,confirmationText});
-if(!result.ok){
-const profile=findRosterProfile(playerEmail);
-if(!profile)return result;
-const name=[profile.firstName,profile.lastName].filter(Boolean).join(" ").trim();
-const confirmed=String(confirmationText||"").toLowerCase().includes(String(name||profile.id||"").toLowerCase());
-if(!confirmed)return{ok:false,err:"Confirmation must include the player name/email."};
-await P("sl:player-profiles",playerProfiles.map(pp=>pp.id===profile.id?{...pp,teamId:null,rosterStatus:"team_local_data_deleted",rosterAction:"coach_delete_team_local_player_data",accountDeletion:false,supabaseAuthUserDeleted:false,removedFromTeamId:user.teamId,teamLocalDataDeletedFromTeamId:user.teamId,teamLocalDataDeletedAt:Date.now(),teamLocalDataDeletedBy:user.email,hideFromLeaderboards:true}:pp),setPlayerProfiles);
-return{ok:true};
-}
-await Promise.all([
-P("sl:players",result.players,setPlayers),
-P("sl:scores",result.scores.filter(s=>(s.src||"home")!=="program"),setScores),
-P("sl:program-scores",result.scores.filter(s=>s.src==="program"),setProgramScores),
-P("sl:rsvps",result.rsvps,setRsvps),
-P("sl:shotlogs",result.shotLogs,setShotLogs),
-P("sl:challenges",result.challenges,setChallenges),
-P("sl:sc-rsvps",result.scRsvps,setScRsvps),
-P("sl:sc-logs",result.scLogs,setScLogs),
-P("sl:player-profiles",result.playerProfiles,setPlayerProfiles),
-]);
-return{ok:true};
-};
-const regenerateJoinCode=async(teamId)=>{
-if(!requireCoach(user,teamId))return{ok:false,err:"Not authorized"};
-const t=teams.find(tm=>tm.id===teamId&&tm.ownerCoachId===user.email);
-if(!t)return{ok:false,err:"Team not found"};
-const code=generateJoinCode(teams.filter(x=>x.id!==teamId).map(x=>x.joinCode));
-await P("sl:teams",teams.map(tm=>tm.id===teamId?{...tm,joinCode:code,joinCodeUpdatedAt:Date.now()}:tm),setTeams);
-return{ok:true,joinCode:code};
-};
-const addScore=async(drillId,score,src="home")=>{
-if(!requirePlayer(user,user?.teamId,user?.email))return;
-try{
-const now=Date.now();
-const selectedDrill=(src==="program"?programDrills:drills).find(d=>String(d.id)===String(drillId));
-const scoreRow=src==="program"
-?buildProgramScoreRow({id:genId("score"),drill:selectedDrill||{id:drillId},score,user,players,now,date:todayStr()})
-:{id:genId("score"),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,drillId,score,date:todayStr(),ts:now,src};
-if(!scoreRow)throw new Error("score_row_invalid");
-if(src==="program"){
-const nextProgramScores=[...programScores,scoreRow];
-await P("sl:program-scores",nextProgramScores,setProgramScores,{strictRemote:true,remoteRows:[scoreRow]});
-}else{
-const nextScores=[...scores,scoreRow];
-await P("sl:scores",nextScores,setScores,{strictRemote:true,remoteRows:[scoreRow]});
-}
-setStatSyncError("");
-trackEvent("score_logged",{drillId,score,src});
-await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
-return {ok:true,row:scoreRow};
-}catch(e){
-const debugDetail=isShotLabDebugMode()?` ${formatRemotePersistErrorForDebug(e)}`:"";
-setStatSyncError("Could not save score to team dashboard. Please try again.");
-if(debugDetail)setStatSyncError(`Could not save score to team dashboard. Please try again.${debugDetail}`);
-trackEvent("score_log_failed",{drillId,score,src,error:String(e?.message||"unknown"),code:String(e?.code||"")});
-return {ok:false,err:e};
-}
-};
-const addCoachProgramScore=async({player,drillId,score,date})=>{
-if(!requireCoach(user,user?.teamId))return{ok:false,error:"Coach authorization required."};
-try{
-const drill=programDrills.find(candidate=>String(candidate?.id||candidate?.drill_id||"")===String(drillId||""));
-const scoreRow=buildCoachVerifiedProgramScoreRow({id:genId("coach-program-score"),player,drill,score,date,teamId:user.teamId,now:Date.now()});
-if(!scoreRow)return{ok:false,error:"Choose an active player, Program drill, valid score, and session date."};
-const nextProgramScores=[...programScores,scoreRow];
-await P("sl:program-scores",nextProgramScores,setProgramScores,{strictRemote:true,remoteRows:[scoreRow]});
-trackEvent("coach_program_score_logged",{drillId:scoreRow.drillId,playerEmail:scoreRow.email,score:scoreRow.score});
-return{ok:true,row:scoreRow};
-}catch(error){
-trackEvent("coach_program_score_log_failed",{drillId,error:String(error?.message||"unknown"),code:String(error?.code||"")});
-return{ok:false,error:"Could not save the verified Program result. Check the connection and try again.",err:error};
-}
-};
-const updateDrill=async(id,up)=>{if(user?.role!=="coach")return;return persistTrainingCatalog(drills.map(d=>d.id===id?{...d,...up}:d),programDrills)};
-const addDrill=async(drill)=>{if(user?.role!=="coach")return;return persistTrainingCatalog([...drills,{...drill,id:Date.now()}],programDrills)};
-const removeDrill=async(id)=>{if(user?.role!=="coach")return;return persistTrainingCatalog(drills.filter(d=>d.id!==id),programDrills)};
-const addProgramDrill=async(drill)=>{if(user?.role!=="coach")return{ok:false,err:"Not authorized"};if(countCustomProgramDrills(programDrills)>=7)return{ok:false,err:"Program drill limit reached (7 custom drills)."};return persistTrainingCatalog(drills,[...programDrills,{...drill,id:Date.now()}])};
-const removeProgramDrill=async(id)=>{if(user?.role!=="coach")return;return persistTrainingCatalog(drills,programDrills.filter(d=>d.id!==id))};
-const toggleRsvp=async(eid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return;const ex=rsvps.find(r=>r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId);if(ex){await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===user.email&&r.teamId===user.teamId)),setRsvps);trackEvent("event_rsvp_removed",{eventId:eid});}else{await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}],setRsvps);trackEvent("event_rsvp_added",{eventId:eid});}};
-const addEvent=async ev=>{if(user?.role!=="coach"||!user.teamId)return{ok:false};const eventPayload={...ev,id:genId("event"),teamId:user.teamId,ownerCoachId:user.email};
-try{await P("sl:events",[...events,eventPayload],setEvents,{strictLocal:true});trackEvent("event_created",{eventType:ev.type||"run"});return{ok:true};}catch(error){console.error("event_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),eventTitle:String(ev?.title||"")});trackEvent("event_create_failed",{eventType:ev?.type||"run",error:String(error?.message||"unknown")});throw error;}};
-const removeEvent=async id=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};const deletion=deleteTeamEvent({events,rsvps,eventId:id,teamId:user.teamId,user});if(!deletion.ok)return deletion;await P("sl:events",deletion.events,setEvents);await P("sl:rsvps",deletion.rsvps,setRsvps);return deletion};
-const removeRsvp=async(eid,email)=>{if(user?.role!=="coach"||!user.teamId)return;await P("sl:rsvps",rsvps.filter(r=>!(r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId)),setRsvps)};
-const addRsvp=async(eid,email,name)=>{if(user?.role!=="coach"||!user.teamId)return;if(rsvps.find(r=>r.eventId===eid&&r.playerId===email&&r.teamId===user.teamId))return;await P("sl:rsvps",[...rsvps,{id:genId("rsvp"),eventId:eid,email,playerId:email,teamId:user.teamId,name,ts:Date.now()}],setRsvps)};
-const persistLocalShotLogs=(nextLogs)=>{try{window.storage?.set("sl:shotlogs",JSON.stringify(nextLogs),true);}catch(e){}};
-const saveHomeShotLogRemote=async(log)=>{
-let res;
-try{res=await fetch("/v1/home-shots/log",{method:"POST",headers:{"Content-Type":"application/json","x-user-id":user.email},body:JSON.stringify({id:log.id,ts:log.ts,team_id:log.teamId,player_id:log.playerId||log.email,email:log.email,name:log.name,made:log.made,date:log.date})});}
-catch(error){throw normalizeHomeShotRemoteException(error);}
-const body=await res.json().catch(()=>({}));
-if(!res.ok){const error=new Error(String(body?.error||"home_shot_log_failed"));error.status=res.status;error.body=body;throw error;}
-return normalizeSavedHomeShotLog(body?.shot_log||{},log);
-};
-const isUnconfirmedHomeShot=(log)=>log?.syncState==="local_pending"||log?.syncState==="failed_sync"||log?.syncState==="syncing"||log?.syncState==="background_saved";
-const isSameHomeShotEntry=(a,b)=>String(a?.email||"").toLowerCase()===String(b?.email||"").toLowerCase()&&String(a?.teamId||a?.team_id||"")===String(b?.teamId||b?.team_id||"")&&String(a?.date||"")===String(b?.date||"")&&Number(a?.made||0)===Number(b?.made||0);
-const markShotSyncState=(shotId,syncState,syncError="",syncDiagnostic=null)=>{
-setShotLogs(prev=>{const next=prev.map(log=>log.id===shotId?{...log,syncState,syncSource:syncState==="remote_saved"?"remote":"local",syncError,syncDiagnostic:syncDiagnostic||log.syncDiagnostic||null}:log);persistLocalShotLogs(next);return next;});
-};
-const replaceShotLog=(shotId,savedLog)=>{
-setShotLogs(prev=>{const next=prev.flatMap(log=>{if(log.id===shotId)return[savedLog];if(isUnconfirmedHomeShot(log)&&isSameHomeShotEntry(log,savedLog))return[];return[log];});persistLocalShotLogs(next);return next;});
-};
-const buildHomeShotQuietContext=()=>({
-isExplicitDemoOrLocal:isDemoMode()||isDemoAccount(user),
-isOffline:typeof navigator!=="undefined"&&navigator.onLine===false,
-isMembershipPending:Boolean(pendingJoinContext),
-});
-const refreshHomeShotsLeaderboardAfterSave=async({made,date,mode="remote_saved"}={})=>{
-try{
-await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
-return{ok:true};
-}catch(error){
-console.warn("home_shots_leaderboard_refresh_failed",{mode,nonBlocking:true,error:String(error?.message||"network_error"),userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made,date});
-return{ok:false,error:"leaderboard_refresh_failed"};
-}
-};
-const addShotLog=async(made,date)=>{
-if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required.",mode:"failed_sync"};
-const validation=validateHomeShotLogInput({made,date});
-if(!validation.ok){setStatSyncError(validation.error);return{ok:false,error:validation.error,validation:true,mode:"failed_sync"};}
-const homeShotDebugMode=isShotLabDebugMode();
-const localLog=buildLocalHomeShotLog({id:genId("shotlog"),user,made:validation.made,date:validation.date});
-if(!localLog){setStatSyncError("Player team context is required before logging shots.");return{ok:false,error:"missing_player_or_team_context",mode:"failed_sync"};}
-const appendOptimisticShot=(log)=>{
-setShotLogs(prev=>{const next=[...prev.filter(existing=>!(isUnconfirmedHomeShot(existing)&&isSameHomeShotEntry(existing,log))),log];persistLocalShotLogs(next);return next;});
-};
-appendOptimisticShot(localLog);
-if(isDemoMode()||isDemoAccount(user)){
-const demoSavedLog={...localLog,demo:true,syncState:"local_pending",syncSource:"local",syncError:"",syncDiagnostic:null};
-replaceShotLog(localLog.id,demoSavedLog);
-setStatSyncError("");
-trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"demo_saved",syncState:"local_pending",demo:true});
-const demoLeaderboardRows=calculateLeaderboardFromShotLogs({shotLogs:[...shotLogs.filter(existing=>!isSameHomeShotEntry(existing,demoSavedLog)),demoSavedLog],teamId:user.teamId,playerContext:{players,profiles:playerProfiles,scope:view==="player"?"players":homeShotsLeaderboardScope}}).slice(0,HOME_SHOTS_LEADERBOARD_LIMIT);
-setHomeShotsLeaderboard({status:"success",rows:demoLeaderboardRows,error:""});
-return{ok:true,mode:"demo_saved",syncState:"local_pending",demo:true};
-}
-try{
-const savedLog=await saveHomeShotLogRemote(localLog);
-emitReleaseDiagnostic({event:"shot_logs_save_completed",shotLogSaveStatus:"success",teamId:user?.teamId,playerId:savedLog?.playerId||savedLog?.player_id||localLog.playerId||localLog.email,authenticatedUserEmail:user?.email,extra:{made:validation.made,date:validation.date}}, {debug:homeShotDebugMode});
-replaceShotLog(localLog.id,savedLog);
-setStatSyncError("");
-trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"remote_saved",syncState:"remote_saved"});
-void refreshHomeShotsLeaderboardAfterSave({made:validation.made,date:validation.date,mode:"remote_saved"});
-return{ok:true,mode:"remote_saved",syncState:"remote_saved"};
-}catch(e){
-const saveFailure=resolveHomeShotSaveFailure({error:e,quietContext:buildHomeShotQuietContext(),debug:homeShotDebugMode});
-if(saveFailure.quietFallback){
-markShotSyncState(localLog.id,"local_pending",saveFailure.errorCode,saveFailure.diagnostic);
-emitReleaseDiagnostic({event:"shot_logs_save_completed",shotLogSaveStatus:"local_pending",teamId:user?.teamId,playerId:localLog.playerId||localLog.email,authenticatedUserEmail:user?.email,extra:{errorCode:saveFailure.errorCode,status:saveFailure.status}}, {debug:homeShotDebugMode});
-setStatSyncError("");
-console.warn("home_shots_remote_fallback",{mode:"local_pending",syncState:"local_pending",quiet:true,errorCode:saveFailure.errorCode,status:saveFailure.status,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
-trackEvent("shot_log_added",{made:validation.made,date:validation.date,mode:"local_pending",syncState:"local_pending",quiet:true,fallbackReason:saveFailure.errorCode});
-return{ok:true,mode:"local_pending",syncState:"local_pending",fallbackReason:saveFailure.errorCode};
-}
-markShotSyncState(localLog.id,"failed_sync",saveFailure.errorCode,saveFailure.diagnostic);
-emitReleaseDiagnostic({event:"shot_logs_save_failed",shotLogSaveStatus:"failure",teamId:user?.teamId,playerId:localLog.playerId||localLog.email,authenticatedUserEmail:user?.email,extra:{errorCode:saveFailure.errorCode,status:saveFailure.status}}, {debug:homeShotDebugMode});
-await fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
-console.error("home_shots_save_failed",{mode:"failed_sync",syncState:"failed_sync",errorCode:saveFailure.errorCode,status:saveFailure.status,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),made:validation.made,date:validation.date});
-setStatSyncError(saveFailure.issueMessage||saveFailure.statSyncError);
-trackEvent("shot_log_failed",{made:validation.made,date:validation.date,mode:"failed_sync",syncState:"failed_sync",error:saveFailure.errorCode});
-return{ok:false,mode:"failed_sync",syncState:"failed_sync",error:saveFailure.errorCode};
-}
-};
-const retryHomeShotLog=async(log)=>{
-if(isDemoMode()||isDemoAccount(user)||isDemoAccount(log)){
-if(log?.id)markShotSyncState(log.id,"local_pending","");
-setStatSyncError("");
-return{ok:true,mode:"demo_saved",syncState:"local_pending",demo:true};
-}
-if(!requirePlayer(user,user?.teamId,user?.email)||!log?.id)return{ok:false,mode:"failed_sync",error:"Player team context is required."};
-markShotSyncState(log.id,"local_pending","");
-try{
-const savedLog=await saveHomeShotLogRemote({...log,syncState:"local_pending"});
-replaceShotLog(log.id,savedLog);
-setStatSyncError("");
-trackEvent("shot_log_retry_succeeded",{made:savedLog.made,date:savedLog.date,mode:"remote_saved",syncState:"remote_saved"});
-void refreshHomeShotsLeaderboardAfterSave({made:savedLog.made,date:savedLog.date,mode:"remote_saved"});
-return{ok:true,mode:"remote_saved",syncState:"remote_saved"};
-}catch(e){
-const backendErrorCode=String(e?.body?.error||e?.message||"sync_failed");
-const retryDiagnostic=extractHomeShotSyncDiagnostic(e);
-const quietFallback=shouldUseQuietHomeShotFallback({status:e?.status,errorCode:backendErrorCode,message:String(e?.body?.diagnostic?.message||""),...buildHomeShotQuietContext()});
-const retryFailure=resolveHomeShotRetryFailure({quietFallback,errorCode:backendErrorCode});
-markShotSyncState(log.id,retryFailure.syncState,backendErrorCode,retryDiagnostic);
-if(quietFallback)setStatSyncError("");
-else setStatSyncError(formatHomeShotSyncIssueMessage({errorCode:backendErrorCode,diagnosticMessage:String(e?.body?.diagnostic?.message||"")})||retryFailure.statSyncError);
-trackEvent("shot_log_retry_failed",{made:log.made,date:log.date,mode:retryFailure.mode,syncState:retryFailure.syncState,error:backendErrorCode});
-return retryFailure;
-}
-};
-const addChallenge=async(ch)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required."};const draft={...ch,id:genId("challenge"),teamId:user.teamId,playerId:user.email,from:user.email,fromName:user.name,status:"pending",ts:Date.now()};if(isDemoMode()||isDemoAccount(user)){await P("sl:challenges",mergePlayerChallenges(challenges,[draft]),setChallenges);trackEvent("challenge_created",{to:ch.to||null});return{ok:true,challenge:draft,storageMode:"demo_local"}}try{const result=await playerChallengePersistence.createChallenge(draft,{teamId:user.teamId});const next=mergePlayerChallenges(challenges,[result.challenge]);await DB.set("sl:challenges",next,{strictLocal:true});setChallenges(next);trackEvent("challenge_created",{to:ch.to||null});return{ok:true,challenge:result.challenge,storageMode:result.storageMode}}catch(error){emitReleaseDiagnostic("player_challenge_create_failed",{teamId:user.teamId,to:ch.to||"",message:String(error?.message||"unknown")});return{ok:false,error:"Challenge could not be delivered. Please try again."}}};
-const respondChallenge=async(id,score)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,error:"Player team context is required."};const localChallenge=challenges.find(c=>String(c.id)===String(id)&&c.teamId===user.teamId&&c.to===user.email);if(!localChallenge)return{ok:false,error:"Challenge is no longer available."};if(isDemoMode()||isDemoAccount(user)){const updated={...localChallenge,respScore:score,respTs:Date.now(),status:score>localChallenge.score?"won":score===localChallenge.score?"tied":"lost"};const next=mergePlayerChallenges(challenges,[updated]);await P("sl:challenges",next,setChallenges);return{ok:true,challenge:updated,storageMode:"demo_local"}}try{const result=await playerChallengePersistence.respondChallenge({id:String(id),score,teamId:user.teamId});const next=mergePlayerChallenges(challenges,[result.challenge]);await DB.set("sl:challenges",next,{strictLocal:true});setChallenges(next);trackEvent("challenge_responded",{challengeId:String(id),status:result.challenge.status});return{ok:true,challenge:result.challenge,storageMode:result.storageMode}}catch(error){emitReleaseDiagnostic("player_challenge_response_failed",{teamId:user.teamId,challengeId:String(id),message:String(error?.message||"unknown")});return{ok:false,error:"Response could not be saved. Please try again."}}};
-const addScSession=async(s)=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};try{await P("sl:sc-sessions",[...scSessions,{...s,id:Date.now(),teamId:user.teamId,ownerCoachId:user.email}],setScSessions,{strictRemote:true});trackEvent("sc_session_created",{sport:s.sport||""});return{ok:true}}catch(error){console.error("sc_session_save_failed",{error,teamId:user.teamId,sport:String(s?.sport||"")});return{ok:false,error:"Session could not be saved. Please try again."}}};
-const removeScSession=async(id)=>{if(user?.role!=="coach"||!user.teamId)return{ok:false,error:"Not authorized"};const deletion=deleteTeamScSession({scSessions,scRsvps,scLogs,sessionId:id,teamId:user.teamId,user});if(!deletion.ok)return deletion;try{await P("sl:sc-sessions",deletion.scSessions,setScSessions,{strictRemote:true});await P("sl:sc-rsvps",deletion.scRsvps,setScRsvps,{strictRemote:true});await P("sl:sc-logs",deletion.scLogs,setScLogs,{strictLocal:true,strictRemote:true});return deletion}catch(error){console.error("sc_session_delete_failed",{error,teamId:user.teamId,sessionId:id});return{ok:false,error:"Session could not be deleted. Please try again."}}};
-const toggleScRsvp=async(sid)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false};const ex=scRsvps.find(r=>r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId);const nextRsvps=ex?scRsvps.filter(r=>!(r.sessionId===sid&&r.playerId===user.email&&r.teamId===user.teamId)):[...scRsvps,{sessionId:sid,email:user.email,playerId:user.email,teamId:user.teamId,name:user.name,ts:Date.now()}];try{await P("sl:sc-rsvps",nextRsvps,setScRsvps,{strictRemote:true});trackEvent(ex?"sc_rsvp_removed":"sc_rsvp_added",{sessionId:sid});return{ok:true}}catch(error){console.error("sc_rsvp_save_failed",{error,teamId:user.teamId,sessionId:sid});return{ok:false,error:"RSVP could not be saved. Please try again."}}};
-const addScLog=async(log)=>{if(!requirePlayer(user,user?.teamId,user?.email))return{ok:false,err:"Player team context is required to log S&C sessions."};const nextLog={...log,id:Date.now(),email:user.email,playerId:user.email,teamId:user.teamId,name:user.name};const nextLogs=[nextLog,...scLogs];try{await DB.set("sl:sc-logs",nextLogs,{strictLocal:true,strictRemote:true});setScLogs(nextLogs);return{ok:true};}catch(error){console.error("sc_log_save_failed",{error,userEmail:String(user?.email||""),teamId:String(user?.teamId||""),sport:String(log?.sport||"")});return{ok:false,err:"Session could not be saved. Please try again."};}};
-const toggleLeaderboardVisibility=async()=>{if(!user||user.role!=="player")return;const np=players.map(p=>p.email===user.email?{...p,hideFromLeaderboards:!(p.hideFromLeaderboards===true)}:p);await P("sl:players",np,setPlayers);const updated=np.find(p=>p.email===user.email);if(updated){if(!SUPABASE_AUTH_ENABLED)await legacyAuthFetch("/v1/legacy-auth/update-profile",{email:user.email,password:legacyAuthSecretRef.current?.password||"",hide_from_leaderboards:updated.hideFromLeaderboards===true});setUser(prev=>prev?{...prev,hideFromLeaderboards:updated.hideFromLeaderboards===true}:prev)}};
-useEffect(()=>{
-if(view!=="coach"||!user?.teamId)return;
-let cancelled=false;
-const refreshScores=async()=>{
-const latest=await DB.get("sl:scores");
-const latestProgram=await DB.get("sl:program-scores");
-if(cancelled)return;
-if(Array.isArray(latest))setScores(latest.map(s=>({...s,playerId:s.playerId||s.email,teamId:s.teamId||null,src:s.src||"home"})));
-if(Array.isArray(latestProgram))setProgramScores(latestProgram.map(s=>({...s,playerId:s.playerId||s.player_id||s.email,teamId:s.teamId||s.team_id||null,src:"program"})));
-};
-refreshScores();
-const pollId=setInterval(refreshScores,15000);
-const onFocus=()=>{refreshScores();};
-window.addEventListener("focus",onFocus);
-return()=>{cancelled=true;clearInterval(pollId);window.removeEventListener("focus",onFocus);};
-},[view,user?.teamId]);
-const saveTeamBranding=async(nextBranding)=>{
-if(user?.role!=="coach"||!user?.teamId)return{ok:false,err:"Not authorized"};
-const team=teams.find(t=>t.id===user.teamId);
-if(!team)return{ok:false,err:"Team not found"};
-const mergedBranding=resolveTeamBranding({
-...(team.branding||{}),
-...(nextBranding||{}),
-updatedAt:Date.now(),
-updatedBy:user.email,
-version:Number(team.branding?.version||DEFAULT_BRANDING.version||1)+1,
-});
-const nextTeams=teams.map(t=>t.id===team.id?{...t,branding:mergedBranding}:t);
-await P("sl:teams",nextTeams,setTeams);
-trackEvent("team_branding_saved",{teamId:team.id});
-return{ok:true};
-};
-const onLoadDemoData=async()=>{
-if(demoSettingsBusy)return;
-setDemoSettingsBusy(true);
-try{
-const activeTeam=teams.find(team=>team.id===user?.teamId)||null;
-const bundle=buildDemoDataBundle({teamId:activeTeam?.id,coachEmail:user?.email,team:activeTeam?{...activeTeam,createdAt:activeTeam.createdAt||Date.now()}:undefined});
-await applyDemoData(bundle);
-await hydratePersistedData();
-}finally{
-setDemoSettingsBusy(false);
-}
-};
-const onClearDemoData=async()=>{
-if(demoSettingsBusy)return;
-setDemoSettingsBusy(true);
-try{
-await clearDemoData();
-await hydratePersistedData();
-}finally{
-setDemoSettingsBusy(false);
-}
-};
-const appActiveTeamPlayerIdentity=useMemo(()=>getActiveTeamPlayerIdentity(players,user?.teamId),[players,user?.teamId]);
-const scopedPlayers=appActiveTeamPlayerIdentity.players;
-const scopedHomeScores=scores.filter(s=>s.teamId===user?.teamId);
-const scopedProgramScores=getAllProgramScoreRows(programScores).filter(s=>s.teamId===user?.teamId);
-const scopedScores=[...scopedHomeScores,...scopedProgramScores];
-const scopedEvents=events.filter(e=>e.teamId===user?.teamId);
-const scopedRsvps=rsvps.filter(r=>r.teamId===user?.teamId);
-const scopedShotLogs=shotLogs.filter(l=>l.teamId===user?.teamId);
-const appLeaderboardPlayers=useMemo(()=>[...(Array.isArray(scopedPlayers)?scopedPlayers:[]),...(Array.isArray(playerProfiles)?playerProfiles.filter(pp=>String(pp.teamId||pp.team_id||"")===String(user?.teamId||"")):[])],[scopedPlayers,playerProfiles,user?.teamId]);
-const rawCoachHomeLeaderboardRows=useMemo(()=>buildAtHomeLeaderboardRows({scores:scopedHomeScores,shotLogs:scopedShotLogs,programDrills,players:appLeaderboardPlayers,limit:HOME_SHOTS_LEADERBOARD_LIMIT}),[scopedHomeScores,scopedShotLogs,programDrills,appLeaderboardPlayers]);
-const coachHomeLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboardRows(rawCoachHomeLeaderboardRows,appActiveTeamPlayerIdentity.keySet,appActiveTeamPlayerIdentity.emailSet,appActiveTeamPlayerIdentity.nameSet),[rawCoachHomeLeaderboardRows,appActiveTeamPlayerIdentity.keySet,appActiveTeamPlayerIdentity.emailSet,appActiveTeamPlayerIdentity.nameSet]);
-useEffect(()=>{if(!isShotLabDebugMode())return;rawCoachHomeLeaderboardRows.forEach(row=>{const filtered=!coachHomeLeaderboardRows.some(allowed=>String(allowed?.email||allowed?.player_id||allowed?.playerId||allowed?.id)===String(row?.email||row?.player_id||row?.playerId||row?.id));if(filtered)console.warn("[coach-leaderboard] filtered non-roster leaderboard row",{normalizedRowEmail:normalizeEmail(row?.email||row?.player_email),rowIdentity:{playerId:row?.playerId,player_id:row?.player_id,userId:row?.userId,user_id:row?.user_id,profileId:row?.profileId,profile_id:row?.profile_id,id:row?.id},coachTeamId:user?.teamId||"",activeRosterCount:appActiveTeamPlayerIdentity.players.length,rosterMatchFound:false,reason:"excluded_not_active_roster_member"});});},[rawCoachHomeLeaderboardRows,coachHomeLeaderboardRows,appActiveTeamPlayerIdentity.players.length,user?.teamId]);
-const coachVisibleShotLogs=scopedShotLogs.filter(l=>l.syncState==="remote_saved"&&l.syncSource==="remote");
-const scopedChallenges=filterActiveTeamChallengeRows(challenges.filter(c=>c.teamId===user?.teamId),appActiveTeamPlayerIdentity.keySet,appActiveTeamPlayerIdentity.emailSet);
-const scopedScSessions=scSessions.filter(s=>s.teamId===user?.teamId);
-const scopedScRsvps=scRsvps.filter(r=>r.teamId===user?.teamId);
-const scopedScLogs=scLogs.filter(l=>l.teamId===user?.teamId);
-const activeHomeShotsLeaderboard=useMemo(()=>({
-...homeShotsLeaderboard,
-rows:filterActiveTeamLeaderboardRows(homeShotsLeaderboard?.rows||[],appActiveTeamPlayerIdentity.keySet,appActiveTeamPlayerIdentity.emailSet,appActiveTeamPlayerIdentity.nameSet),
-}),[homeShotsLeaderboard,appActiveTeamPlayerIdentity.keySet,appActiveTeamPlayerIdentity.emailSet,appActiveTeamPlayerIdentity.nameSet]);
-const myTeam=teams.find(t=>t.id===user?.teamId)||null;
-const resolvedTeamBranding=resolveTeamBranding(myTeam?.branding||DEFAULT_BRANDING);
-const coachTextSize=COACH_TEXT_SIZES.includes(resolvedTeamBranding?.textScale)?resolvedTeamBranding.textScale:"standard";
-
-useEffect(()=>{initAnalytics();trackBackendEvent("app_loaded",{path:window.location.pathname});},[]);
-useEffect(()=>{if(ready&&user&&["coach","player"].includes(view))trackEvent("screen_view",{screen:view,role:user.role||"player"});},[ready,user,view,trackEvent]);
-useEffect(()=>{
-if(!ready||!user?.teamId)return;
-loadCoachPrioritiesForTeam(user.teamId);
-},[ready,user?.teamId,loadCoachPrioritiesForTeam]);
-useEffect(()=>{const onErr=(e)=>trackEvent("app_error",{kind:"error",message:e?.message||"unknown"});const onRej=(e)=>trackEvent("app_error",{kind:"unhandledrejection",message:e?.reason?.message||String(e?.reason||"unknown")});window.addEventListener("error",onErr);window.addEventListener("unhandledrejection",onRej);return()=>{window.removeEventListener("error",onErr);window.removeEventListener("unhandledrejection",onRej);};},[trackEvent]);
-useEffect(()=>{
-if(!ready||!user?.teamId||!["coach","player"].includes(view))return;
-fetchHomeShotsLeaderboard(user.teamId,view==="player"?"players":homeShotsLeaderboardScope);
-},[ready,user?.teamId,view,homeShotsLeaderboardScope,fetchHomeShotsLeaderboard]);
-
-if(!ready)return <><Styles/><main className="phase4dBootState" data-testid="startup-state-shell"><div className="phase4dBootStateInner"><div className="phase4dBootBrand"><SLLogo size={42} glow/><div className="phase4dBootBrandCopy"><div className="phase4dBootBrandTitle">ShotLab</div><div className="phase4dBootBrandDetail">Performance development</div></div></div><ShotLabStatePanel state="loading" eyebrow="Secure team sync" title="Preparing your command center" detail="Loading your team, training plan, and performance history." testId="startup-loading-state"/></div></main></>;
-if(startupError)return <><Styles/><main className="phase4dBootState" data-testid="startup-state-shell"><div className="phase4dBootStateInner"><div className="phase4dBootBrand"><SLLogo size={42} glow/><div className="phase4dBootBrandCopy"><div className="phase4dBootBrandTitle">ShotLab</div><div className="phase4dBootBrandDetail">Performance development</div></div></div><ShotLabStatePanel state="error" eyebrow="Connection recovery" title="ShotLab could not finish loading" detail={startupError} actionLabel="Reload ShotLab" onAction={()=>window.location.reload()} testId="startup-error-state"/></div></main></>;
-
-const isDeleteAccountRoute=typeof window!=="undefined"&&getLegalRouteKey(window.location.pathname)==="delete-account";
-const dataDebugPanel=dataDebugEnabled?<div style={{position:"fixed",right:12,bottom:12,zIndex:60,width:"min(360px, calc(100vw - 24px))",maxHeight:"45vh",overflow:"auto",background:"rgba(8,8,8,0.94)",border:"1px solid rgba(255,255,255,0.18)",borderRadius:10,padding:10,fontFamily:"system-ui,-apple-system,Segoe UI,Roboto,sans-serif",fontSize:11,color:"#E5E7EB"}}><div style={{fontWeight:700,letterSpacing:"0.06em",marginBottom:6,color:"#C8FF1A"}}>DATA DEBUG (?dataDebug=1)</div><div>User: {user?.email||"none"}</div><div>Role: {user?.role||"none"}</div><div>Team ID: {user?.teamId||"none"}</div><div>Team Code: {myTeam?.joinCode||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Auth mode: {dataDebug.auth.mode||"legacy"}</div><div>Supabase auth enabled: {dataDebug.auth.supabaseEnabled||"no"}</div><div>Profile persist status: {dataDebug.auth.profilePersistStatus||"idle"}</div><div>Profile restore status: {dataDebug.auth.profileRestoreStatus||"idle"}</div><div>Legacy register status: {dataDebug.auth.legacyAuthRegisterStatus||"idle"}</div><div>Legacy login status: {dataDebug.auth.legacyAuthLoginStatus||"idle"}</div><div>Legacy update status: {dataDebug.auth.legacyAuthUpdateStatus||"idle"}</div><div>Profile teamId: {dataDebug.auth.profileTeamId||"none"}</div><div>Auth signup HTTP status: {dataDebug.auth.signupHttpStatus==null?"n/a":dataDebug.auth.signupHttpStatus}</div><div>Auth signup code: {dataDebug.auth.signupCode||"none"}</div><div>Auth signup stage: {dataDebug.auth.signupStage||"none"}</div><div>Auth signup message: {dataDebug.auth.signupMessage||"none"}</div><div>Auth login HTTP status: {dataDebug.auth.loginHttpStatus==null?"n/a":dataDebug.auth.loginHttpStatus}</div><div>Auth login code: {dataDebug.auth.loginCode||"none"}</div><div>Auth login message: {dataDebug.auth.loginMessage||"none"}</div><div>Auth provider hint: {dataDebug.auth.providerHint||"none"}</div><div>Register endpoint: {dataDebug.auth.registerEndpoint||"none"}</div><div>Register parse mode: {dataDebug.auth.registerParseMode||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Create team name: {dataDebug.createTeam.teamName||"none"}</div><div>Create endpoint: {dataDebug.createTeam.endpoint||"none"}</div><div>Create status: {dataDebug.createTeam.status||"none"}</div><div>Create HTTP status: {dataDebug.createTeam.httpStatus==null?"n/a":dataDebug.createTeam.httpStatus}</div><div>Create error code: {dataDebug.createTeam.errorCode||"none"}</div><div>Create response summary: {dataDebug.createTeam.responseSummary||"none"}</div><div>Returned teamId: {dataDebug.createTeam.teamId||"none"}</div><div>Returned joinCode: {dataDebug.createTeam.joinCode||"none"}</div><div>Coach state updated: {dataDebug.createTeam.stateUpdated?"yes":"no"}</div><div>Remote persisted: {dataDebug.createTeam.remotePersisted?"yes":"no"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Join code entered: {dataDebug.join.enteredCode||"none"}</div><div>Normalized code: {dataDebug.join.normalizedCode||"none"}</div><div>Lookup source: {dataDebug.join.lookupSource}</div><div>Lookup field: {dataDebug.join.lookupField}</div><div>Lookup hash prefix: {dataDebug.join.lookupHashPrefix||"none"}</div><div>Lookup hash source: {dataDebug.join.lookupHashSource||"none"}</div><div>Join status: {dataDebug.join.status}</div><div>Lookup count: {dataDebug.join.lookupCount==null?"n/a":dataDebug.join.lookupCount}</div><div>Matched teamId: {dataDebug.join.matchedTeamId||"none"}</div><div>Invite state: {dataDebug.join.inviteState||"none"}</div><div>Invite expiresAt: {dataDebug.join.expiresAt||"none"}</div><div>Invite context saved: {dataDebug.join.inviteContextSaved||"no"}</div><div>Invite context storage key: {dataDebug.join.inviteContextStorageKey||"none"}</div><div>Invite context token present: {dataDebug.join.inviteContextTokenPresent||"no"}</div><div>Invite context teamId: {dataDebug.join.inviteContextTeamId||"none"}</div><div>Invite context subject: {dataDebug.join.inviteContextSubject||"none"}</div><div>Current user email: {dataDebug.join.currentUserEmail||"none"}</div><div>Context subject matches user: {dataDebug.join.contextSubjectMatchesUser||"no"}</div><div>Consume attempt started: {dataDebug.join.consumeAttemptStarted||"no"}</div><div>Consume attempt blocked: {dataDebug.join.consumeAttemptBlocked||"no"}</div><div>Consume blocked reason: {dataDebug.join.consumeAttemptBlockedReason||"none"}</div><div>Consume in-flight key: {dataDebug.join.consumeInFlightKey||"none"}</div><div>Consume in-flight age ms: {dataDebug.join.consumeInFlightAgeMs==null?"n/a":dataDebug.join.consumeInFlightAgeMs}</div><div>Consume timeout ms: {dataDebug.join.consumeTimeoutMs==null?"n/a":dataDebug.join.consumeTimeoutMs}</div><div>Consume guard cleared: {dataDebug.join.consumeGuardCleared||"no"}</div><div>Consume guard clear reason: {dataDebug.join.consumeGuardClearReason||"none"}</div><div>Consume fetch started: {dataDebug.join.consumeFetchStarted||"no"}</div><div>Consume fetch finished: {dataDebug.join.consumeFetchFinished||"no"}</div><div>Consume endpoint: {dataDebug.join.consumeEndpoint||"none"}</div><div>Consume HTTP status: {dataDebug.join.consumeHttpStatus==null?"n/a":dataDebug.join.consumeHttpStatus}</div><div>Consume diagnostic code: {dataDebug.join.consumeDiagnosticCode||"none"}</div><div>Consume diagnostic message: {dataDebug.join.consumeDiagnosticMessage||"none"}</div><div>Consume token present: {dataDebug.join.consumeTokenPresent||"no"}</div><div>Consume teamId used: {dataDebug.join.consumeTeamIdUsed||"none"}</div><div>Consume user email: {dataDebug.join.consumeUserEmail||"none"}</div><div>Consume resolved user UUID: {dataDebug.join.consumeResolvedUserUuid||"none"}</div><div>Membership insert status: {dataDebug.join.membershipInsertStatus||"none"}</div><div>Membership insert error: {dataDebug.join.membershipInsertError||"none"}</div><div>Profile update status: {dataDebug.join.profileUpdateStatus||"none"}</div><div>Final route decision: {dataDebug.join.finalRouteDecision||"none"}</div><div>Profile update: {dataDebug.join.update}</div><div>Join error: {dataDebug.join.error||"none"}</div><hr style={{borderColor:"rgba(255,255,255,0.14)"}}/><div>Leaderboard endpoint: {dataDebug.leaderboard.endpoint||"none"}</div><div>HTTP status: {dataDebug.leaderboard.httpStatus==null?"n/a":dataDebug.leaderboard.httpStatus}</div><div>Error code: {dataDebug.leaderboard.errorCode||"none"}</div><div>Result count: {dataDebug.leaderboard.resultCount==null?"n/a":dataDebug.leaderboard.resultCount}</div><div>Empty data: {dataDebug.leaderboard.isEmpty?"yes":"no"}</div></div>:null;
-
-if(isDeleteAccountRoute){
-if(!user)return <StaticLegalPage pageKey="delete-account"/>;
-return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/><main data-testid="signed-in-delete-account-route" style={{minHeight:"100dvh",background:BG,color:LIGHT,padding:"40px 20px",fontFamily:FB}}><div style={{maxWidth:560,margin:"0 auto"}}><a href={user?.role==="coach"?"/coach/profile":"/player/profile"} style={{display:"inline-flex",alignItems:"center",gap:8,color:VOLT,textDecoration:"none",fontFamily:FD,fontSize:16,letterSpacing:2,marginBottom:22,minHeight:44,touchAction:"manipulation"}}><SLLogo size={24}/> SHOTLAB</a><section style={{background:`linear-gradient(145deg,${CARD_BG},#111111)`,border:`1px solid ${BORDER_CLR}`,borderRadius:24,padding:"22px 20px",boxShadow:"0 18px 46px rgba(0,0,0,0.38)"}}><div style={{fontFamily:FB,color:VOLT,fontSize:11,fontWeight:800,letterSpacing:"0.16em",textTransform:"uppercase",marginBottom:8}}>Signed-in account deletion</div><h1 style={{fontFamily:FD,color:LIGHT,fontSize:34,letterSpacing:2,lineHeight:1,marginBottom:8}}>Account & Data</h1><p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.55,marginBottom:12}}>You are signed in. Delete your account in-app below instead of using the static support fallback.</p><AccountTrustActions deleteAccount={deleteAccount} preserveTeamData={user?.role==="coach"||user?.isCoach}/></section></div></main>{dataDebugPanel}</TeamBrandingProvider>;
-}
-return <TeamBrandingProvider branding={resolvedTeamBranding}><Styles/>
-{view==="auth"&&<div className="screen-fade-in"><Auth runtime={AUTH_WORKSPACE_RUNTIME} onLogin={login} onRegister={register} onDemo={demoSignIn} onCreateJoinContext={startJoinContext} accountNotice={accountNotice} onClearAccountNotice={()=>setAccountNotice("")}/></div>}{view==="create-team"&&<div className="screen-fade-in"><CreateTeam onCreate={createTeam} u={user}/></div>} 
-{view==="join-team"&&<div className="screen-fade-in"><JoinTeam onJoin={joinTeam} u={user} pendingJoinContext={pendingJoinContext} onClearPendingJoinContext={()=>savePendingJoinContext(null)} isJoinConsumeActive={isJoinConsumeActive}/></div>}
-{view==="player"&&<div className="screen-fade-in"><Player u={user} team={myTeam} drills={drills} programDrills={programDrills} scores={scopedScores} programScores={scopedProgramScores} addScore={addScore} events={scopedEvents} rsvps={scopedRsvps} toggleRsvp={toggleRsvp} shotLogs={scopedShotLogs} addShotLog={addShotLog} challenges={scopedChallenges} addChallenge={addChallenge} respondChallenge={respondChallenge} players={scopedPlayers} coachPriorities={coachPriorities} T={T} theme={theme} scSessions={scopedScSessions} scRsvps={scopedScRsvps} toggleScRsvp={toggleScRsvp} scLogs={scopedScLogs} addScLog={addScLog} logout={logout} deleteAccount={deleteAccount} toggleLeaderboardVisibility={toggleLeaderboardVisibility} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")} statSyncError={statSyncError} retryHomeShotLog={retryHomeShotLog} seasonArchives={seasonArchives.filter(a=>String(a?.teamId||a?.team_id||"")===String(user?.teamId||""))}/></div>}
-{view==="coach"&&<div className="screen-fade-in"><Coach u={user} team={myTeam} regenerateJoinCode={regenerateJoinCode} addRosterPlayer={addRosterPlayer} removeRosterPlayer={removeRosterPlayer} archiveRosterPlayer={archiveRosterPlayer} deleteTeamLocalRosterPlayerData={deleteTeamLocalRosterPlayerData} archiveSeason={archiveSeason} seasonArchives={seasonArchives.filter(a=>String(a.teamId||"")===String(user?.teamId||""))} playerProfiles={playerProfiles.filter(pp=>String(pp.teamId||pp.team_id||"")===String(user?.teamId||""))} drills={drills} programDrills={programDrills} scores={scopedScores} programScores={scopedProgramScores} players={scopedPlayers} addCoachProgramScore={addCoachProgramScore} updateDrill={updateDrill} addDrill={addDrill} removeDrill={removeDrill} addProgramDrill={addProgramDrill} removeProgramDrill={removeProgramDrill} events={scopedEvents} rsvps={scopedRsvps} addEvent={addEvent} removeEvent={removeEvent} removeRsvp={removeRsvp} addRsvp={addRsvp} scSessions={scopedScSessions} scRsvps={scopedScRsvps} scLogs={scopedScLogs} addScSession={addScSession} removeScSession={removeScSession} shotLogs={coachVisibleShotLogs} coachHomeLeaderboardRows={coachHomeLeaderboardRows} coachPriorities={coachPriorities} onSaveCoachPriorities={saveCoachPrioritiesForTeam} logout={logout} deleteAccount={deleteAccount} openTeamBranding={()=>setView("coach-branding")} coachTextSize={coachTextSize} demoSettingsBusy={demoSettingsBusy} onLoadDemoData={onLoadDemoData} onClearDemoData={onClearDemoData} homeShotsLeaderboard={activeHomeShotsLeaderboard} refreshHomeShotsLeaderboard={()=>fetchHomeShotsLeaderboard(user?.teamId,"players")}/></div>}
-{view==="coach-branding"&&user?.role==="coach"&&<div className="screen-fade-in"><CoachTeamBrandingScreen branding={resolvedTeamBranding} onSave={saveTeamBranding} onBack={()=>setView("coach")} teamName={myTeam?.name||"Team"}/></div>}
-{dataDebugPanel}
-</TeamBrandingProvider>;
-}
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// AUTH
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-
-
-function CreateTeam({u,onCreate}){
-const[name,setName]=useState("");const[school,setSchool]=useState("");const[level,setLevel]=useState("");const[err,setErr]=useState("");
-const submit=async()=>{if(!name.trim())return setErr("Enter a team name");const r=await onCreate(name.trim(),{school,level});if(!r.ok)setErr(r.err||"Could not create team")}
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>CREATE TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Welcome {u?.name}. Establish your team identity, ownership, and player lane structure.</p><input value={name} onChange={e=>{setName(e.target.value);setErr("")}} placeholder="Team Name" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={school} onChange={e=>setSchool(e.target.value)} placeholder="School (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/><input value={level} onChange={e=>setLevel(e.target.value)} placeholder="Level / group (optional)" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button onClick={submit} className="btn-v cta-primary" style={{}}>CREATE TEAM</button><div style={{marginTop:10,fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4}}>Team identity is persistent: branding, roster membership, and coach ownership sync across player + coach surfaces.</div></div></div>;
-}
-
-function JoinTeam({u,onJoin,pendingJoinContext,onClearPendingJoinContext,isJoinConsumeActive=false}){
-const[code,setCode]=useState("");const[err,setErr]=useState("");
-const submit=async()=>{
-if(isJoinConsumeActive)return;
-const r=await onJoin(code);
-if(!r.ok&&!r.retryable)setErr(r.err||"Could not join team");
-};
-return <div style={{minHeight:"100dvh",background:BG,display:"flex",alignItems:"center",justifyContent:"center",padding:24}}><div style={{width:"100%",maxWidth:420,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:24}}><h2 style={{fontFamily:FD,color:LIGHT,letterSpacing:2,margin:"0 0 8px"}}>JOIN TEAM</h2><p style={{fontFamily:FB,color:MUTED,fontSize:12,margin:"0 0 16px"}}>Hey {u?.name}, join your coach's team to activate your progression, momentum, and membership history.</p>{pendingJoinContext?.token&&<div style={{border:`1px solid ${BORDER_CLR}`,background:BG,borderRadius:10,padding:10,marginBottom:10,fontFamily:FB,fontSize:11,color:T.SUB}}>Validated invite context is saved for {pendingJoinContext.subjectKey}. <button type="button" onClick={onClearPendingJoinContext} style={{marginLeft:8,background:"transparent",border:"none",color:VOLT,cursor:"pointer",fontWeight:700}}>Clear</button></div>}<input value={code} onChange={e=>{setCode(e.target.value.toUpperCase());setErr("")}} placeholder="TEAM JOIN CODE" style={{width:"100%",padding:12,marginBottom:10,background:BG,color:LIGHT,border:`1px solid ${BORDER_CLR}`,borderRadius:10,textTransform:"uppercase",letterSpacing:2}}/>{err&&<div style={{color:"#FF4545",fontFamily:FB,fontSize:12,marginBottom:10}}>{err}</div>}<button type="button" onClick={submit} disabled={isJoinConsumeActive} className="btn-v cta-primary" style={{opacity:isJoinConsumeActive?0.75:1,cursor:isJoinConsumeActive?"not-allowed":"pointer"}}>{isJoinConsumeActive?"JOINING...":"JOIN TEAM"}</button><div style={{marginTop:10,fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.45}}>Joining links your player identity to team branding, coach guidance, and persistent drill progression.</div></div></div>;
-}
-
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// PLAYER SCREEN ‚Äî Dual Dashboard
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-function Player({u,team,drills,programDrills,scores,programScores:programScoresFromDb=[],addScore,events,rsvps,toggleRsvp,shotLogs,addShotLog,retryHomeShotLog,challenges,addChallenge,respondChallenge,players,coachPriorities,T,theme,scSessions,scRsvps,toggleScRsvp,scLogs,addScLog,logout,deleteAccount,toggleLeaderboardVisibility,homeShotsLeaderboard,refreshHomeShotsLeaderboard,statSyncError="",seasonArchives=[]}){
-const canAccessTab=useCallback((nextTab)=>{
-  if(nextTab==="players")return u.isCoach;
-  if(nextTab==="duels")return !u.isCoach;
-  return true;
-},[u.isCoach]);
-const tabFromPath=useCallback((path)=>{
-  const normalized=path==="/"?"/":path.replace(/\/+$/,"")||"/";
-  const nextTab=PLAYER_PATH_TABS[normalized]||"home";
-  return canAccessTab(nextTab)?nextTab:"home";
-},[canAccessTab]);
-const initialTab = tabFromPath(window.location.pathname);
-const[tab,setTab]=useState(initialTab),[active,setActive]=useState(null),[input,setInput]=useState(""),[saved,setSaved]=useState(false),[shareData,setShareData]=useState(null),[confetti,setConfetti]=useState(false);
-const[shotMade,setShotMade]=useState(""),[shotDate,setShotDate]=useState(todayStr()),[shotSaved,setShotSaved]=useState(false),[shotSaving,setShotSaving]=useState(false),[shotInputError,setShotInputError]=useState(""),[shotSaveNotice,setShotSaveNotice]=useState("");
-const isDemoHomeShotSession=isDemoMode()||isDemoAccount(u);
-const syncIssueShots=useMemo(()=>isDemoHomeShotSession?[]:shotLogs.filter(s=>s.email===u.email&&!isDemoAccount(s)&&(s.syncState==="failed_sync")),[isDemoHomeShotSession,shotLogs,u.email]);
-const[challTarget,setChallTarget]=useState(""),[showChallForm,setShowChallForm]=useState(false),[challengeSending,setChallengeSending]=useState(false),[challengeSaveError,setChallengeSaveError]=useState("");
-const[badgeReveal,setBadgeReveal]=useState(null),[pullY,setPullY]=useState(0);
-const[showShotStats,setShowShotStats]=useState(false);
-const[isNarrow,setIsNarrow]=useState(typeof window!=="undefined"?window.innerWidth<768:false);
-const[isDesktop,setIsDesktop]=useState(typeof window!=="undefined"?window.innerWidth>=1024:false);
-const playerScrollRef=useRef(null);
-const slideClass="screen-fade-in";
-const switchTab=useCallback((requestedTab)=>{
-  if(requestedTab==="team-store"){
-    openTeamStorePortal({email:u?.email,role:"player",isCoach:false,teamId:u?.teamId,teamName:team?.name||team?.teamName||"Your Team"});
-    return;
-  }
-  const nextTab=canAccessTab(requestedTab)?requestedTab:"home";
-  const nextPath=PLAYER_TAB_PATHS[nextTab]||"/";
-  const currentPath=window.location.pathname==="/"?"/":(window.location.pathname.replace(/\/+$/,"" )||"/");
-  if(currentPath!==nextPath)window.history.pushState({},"",nextPath);
-  setTab(nextTab);
-  setActive(null);
-  setShowShotStats(false);
-  if(typeof window!=="undefined"){
-    requestAnimationFrame(()=>{
-      playerScrollRef.current?.scrollTo?.({top:0,left:0,behavior:"auto"});
-      window.scrollTo({top:0,left:0,behavior:"auto"});
-    });
-  }
-},[canAccessTab,team?.name,team?.teamName,u?.email,u?.teamId]);
-useEffect(()=>{const onResize=()=>{setIsNarrow(window.innerWidth<768);setIsDesktop(window.innerWidth>=1024)};window.addEventListener("resize",onResize);return()=>window.removeEventListener("resize",onResize);},[]);
-useEffect(()=>{
-  const onPop=()=>{
-    setTab(tabFromPath(window.location.pathname));
-    setActive(null);
-    setShowShotStats(false);
-  };
-  window.addEventListener("popstate",onPop);
-  return ()=>window.removeEventListener("popstate",onPop);
-},[tabFromPath]);
-useEffect(()=>{
-  if(!canAccessTab(tab)){
-    switchTab("home");
-  }
-},[tab,canAccessTab,switchTab]);
-useEffect(()=>{
-  playerScrollRef.current?.scrollTo?.({top:0,left:0,behavior:"auto"});
-  window.scrollTo({top:0,left:0,behavior:"auto"});
-},[tab,active]);
-const playerIdentityKeys=useMemo(()=>new Set([u?.email,u?.playerId,u?.player_id,u?.userId,u?.user_id,u?.profileId,u?.profile_id,u?.id].map(normalizeEmail).filter(Boolean)),[u]);
-const rowMatchesPlayerIdentity=useCallback((row={})=>[row?.email,row?.player_email,row?.playerId,row?.player_id,row?.userId,row?.user_id,row?.profileId,row?.profile_id,row?.id].map(normalizeEmail).some(key=>key&&playerIdentityKeys.has(key)),[playerIdentityKeys]);
-const my=useMemo(()=>scores.filter(s=>(!u?.teamId||!String(s?.teamId||s?.team_id||"")||String(s?.teamId||s?.team_id)===String(u.teamId))&&rowMatchesPlayerIdentity(s)),[scores,u?.teamId,rowMatchesPlayerIdentity]);
-const homeScores=useMemo(()=>my.filter(s=>s.src==="home"||!s.src),[my]);
-const teamProgramScores=useMemo(()=>getAllProgramScoreRows(programScoresFromDb),[programScoresFromDb]);
-const programScores=useMemo(()=>getProgramScoresForPlayer(teamProgramScores,u.email,u.teamId),[teamProgramScores,u.email,u.teamId]);
-const today=todayStr();
-const todayS=useMemo(()=>homeScores.filter(s=>s.date===today),[homeScores,today]);
-const todayProgramScores=useMemo(()=>programScores.filter(s=>s.date===today),[programScores,today]);
-const categorizeProgramDrill=useCallback((drillName="")=>{
-  const normalized=String(drillName).toLowerCase();
-  if(/warm|prep|activation|mobility/.test(normalized))return "Warm-Up";
-  if(/form|footwork|balance|one hand/.test(normalized))return "Form Work";
-  if(/volume|spot|around|arc|catch|shoot|3pt|three/.test(normalized))return "Volume Shooting";
-  if(/game|transition|decision|closeout|read/.test(normalized))return "Game-Speed Work";
-  if(/finish|rim|layup|floater|paint/.test(normalized))return "Finishing";
-  if(/condition|stamina|sprint|burst|endurance/.test(normalized))return "Conditioning";
-  return "Volume Shooting";
-},[]);
-const programSessionBlocks=useMemo(()=>{
-  const phaseOrder=["Warm-Up","Form Work","Volume Shooting","Game-Speed Work","Finishing","Conditioning"];
-  const phaseMeta={
-    "Warm-Up":"Prime feet and rhythm before live reps.",
-    "Form Work":"Lock mechanics and clean shot prep.",
-    "Volume Shooting":"Build repeatable make volume.",
-    "Game-Speed Work":"Transfer skill at pace and pressure.",
-    "Finishing":"Complete at the rim through contact reads.",
-    "Conditioning":"Close with fatigue-resilient execution."
-  };
-  const completedSet=new Set(todayProgramScores.map(s=>s.drillId));
-  const grouped=phaseOrder.map((phase)=>({
-    phase,
-    emphasis:phaseMeta[phase],
-    drills:programDrills.filter(d=>categorizeProgramDrill(d?.name)===phase)
-  })).filter(group=>group.drills.length>0).map(group=>{
-    const doneCount=group.drills.filter(d=>completedSet.has(d.id)).length;
-    const status=doneCount===group.drills.length?"completed":doneCount>0?"in-progress":"upcoming";
-    return {...group,doneCount,status};
-  });
-  const nextPriority=grouped.find(g=>g.status!=="completed")?.drills?.find(d=>!completedSet.has(d.id))?.id||null;
-  return {grouped,nextPriority};
-},[programDrills,todayProgramScores,categorizeProgramDrill]);
-const streak=useMemo(()=>calcStreak(homeScores),[homeScores]);
-const earnedBadges=useMemo(()=>getEarnedBadges(streak),[streak]);
-const myRsvps=useMemo(()=>rsvps.filter(r=>r.email===u.email).length,[rsvps,u]);
-const tier=useMemo(()=>getTier(myRsvps),[myRsvps]);
-
-// Notification dots for nav
-const unrsvpEvents=useMemo(()=>{const up=events.filter(e=>e.date>=today);return up.filter(e=>!rsvps.some(r=>r.eventId===e.id&&r.email===u.email)).length},[events,rsvps,u,today]);
-const soonSC=useMemo(()=>{const d2=new Date();d2.setDate(d2.getDate()+2);const cut=`${d2.getFullYear()}-${String(d2.getMonth()+1).padStart(2,"0")}-${String(d2.getDate()).padStart(2,"0")}`;return scSessions.filter(s=>s.date>=today&&s.date<=cut&&!scRsvps.some(r=>r.sessionId===s.id&&r.email===u.email)).length},[scSessions,scRsvps,u,today]);
-
-const[homeDrillFilter,setHomeDrillFilter]=useState("all");
-const[programDrillFilter,setProgramDrillFilter]=useState("all");
-const[pbReveal,setPbReveal]=useState(null);
-const[submitting,setSubmitting]=useState(false);
-const[drillBarW,setDrillBarW]=useState(0);
-const[showCoachGuidanceDetails,setShowCoachGuidanceDetails]=useState(false);
-const playerLeaderboardState=useMemo(()=>{
-  const rows=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows:[];
-  const requestedStatus=typeof homeShotsLeaderboard?.status==="string"?homeShotsLeaderboard.status:"idle";
-  const rawError=String(homeShotsLeaderboard?.error||"").toLowerCase();
-  const hasData=rows.length>0;
-  const emptyStateSafeError=requestedStatus==="error"&&(rawError.includes("not allowed for this team")||rawError.includes("team id is required")||rawError.includes("sign in required")||rawError.includes("invalid_scope")||rawError.includes("endpoint missing"));
-  const status=hasData?"success":emptyStateSafeError?"idle":requestedStatus;
-  const error=status==="error"?String(homeShotsLeaderboard?.error||""):"";
-  return {rows,status,error,hasData};
-},[homeShotsLeaderboard]);
-const playerActiveTeamIdentity=useMemo(()=>getActiveTeamPlayerIdentity(players,u?.teamId),[players,u?.teamId]);
-const playerActiveTeamKeySet=playerActiveTeamIdentity.keySet;
-const playerActiveTeamEmailSet=playerActiveTeamIdentity.emailSet;
-const playerActiveTeamNameSet=playerActiveTeamIdentity.nameSet;
-const playerLeaderboardPlayers=useMemo(()=>playerActiveTeamIdentity.players,[playerActiveTeamIdentity.players]);
-const playerDashboardHomeLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboardRows(buildAtHomeLeaderboardRows({scores,shotLogs,programDrills,players:playerLeaderboardPlayers,limit:3}),playerActiveTeamKeySet,playerActiveTeamEmailSet,playerActiveTeamNameSet),[scores,shotLogs,programDrills,playerLeaderboardPlayers,playerActiveTeamKeySet,playerActiveTeamEmailSet,playerActiveTeamNameSet]);
-const playerLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboardRows(playerLeaderboardState.rows,playerActiveTeamKeySet,playerActiveTeamEmailSet,playerActiveTeamNameSet),[playerLeaderboardState.rows,playerActiveTeamKeySet,playerActiveTeamEmailSet,playerActiveTeamNameSet]);
-const playerDashboardLeaderboardRows=playerLeaderboardRows.length?playerLeaderboardRows:playerDashboardHomeLeaderboardRows;
-const playerDashboardLeaderboardStatus=playerLeaderboardState.status==="success"||playerDashboardHomeLeaderboardRows.length>0?"success":playerLeaderboardState.status;
-const playerWeeklyMakes=useMemo(()=>{const cutoff=new Date(`${today}T00:00:00`);cutoff.setDate(cutoff.getDate()-6);const start=`${cutoff.getFullYear()}-${String(cutoff.getMonth()+1).padStart(2,"0")}-${String(cutoff.getDate()).padStart(2,"0")}`;return shotLogs.filter((row)=>rowMatchesPlayerIdentity(row)&&(!u?.teamId||!String(row?.teamId||row?.team_id||"")||String(row?.teamId||row?.team_id)===String(u.teamId))&&String(row?.date||"")>=start).reduce((sum,row)=>sum+Number(row?.made||0),0);},[shotLogs,rowMatchesPlayerIdentity,u?.teamId,today]);
-const atHomeWorkspaceModel=useMemo(()=>buildAtHomeWorkspaceModel({today,userEmail:u?.email,teamId:u?.teamId,drills,todayScores:todayS,shotLogs,streak,dailyGoal:PLAYER_DAILY_SHOT_TARGET}),[today,u?.email,u?.teamId,drills,todayS,shotLogs,streak]);
-const programWorkspaceModel=useMemo(()=>buildProgramWorkspaceModel({programDrills,todayScores:todayProgramScores,allScores:programScores,coachPriorities}),[programDrills,todayProgramScores,programScores,coachPriorities]);
-const eventsWorkspaceModel=useMemo(()=>buildEventsWorkspaceModel({events,rsvps,userEmail:u?.email,teamId:u?.teamId,today}),[events,rsvps,u?.email,u?.teamId,today]);
-const strengthWorkspaceModel=useMemo(()=>buildStrengthWorkspaceModel({sessions:scSessions,rsvps:scRsvps,logs:scLogs,userEmail:u?.email,teamId:u?.teamId,today}),[scSessions,scRsvps,scLogs,u?.email,u?.teamId,today]);
-const leaderboardWorkspaceModel=useMemo(()=>buildLeaderboardWorkspaceModel({rows:playerDashboardLeaderboardRows,userEmail:u?.email,weeklyMakes:playerWeeklyMakes,streak}),[playerDashboardLeaderboardRows,u?.email,playerWeeklyMakes,streak]);
-const profileWorkspaceModel=useMemo(()=>buildProfileWorkspaceModel({shotLogs,scores,rsvps,scLogs,userEmail:u?.email,teamId:u?.teamId,streak}),[shotLogs,scores,rsvps,scLogs,u?.email,u?.teamId,streak]);
-const playerInsightRailModel=useMemo(()=>buildPlayerOperationalInsightRail({activeTab:tab,atHome:atHomeWorkspaceModel,program:programWorkspaceModel,events:eventsWorkspaceModel,strength:strengthWorkspaceModel,leaderboard:leaderboardWorkspaceModel,profile:profileWorkspaceModel}),[tab,atHomeWorkspaceModel,programWorkspaceModel,eventsWorkspaceModel,strengthWorkspaceModel,leaderboardWorkspaceModel,profileWorkspaceModel]);
-const visibleHomeDrills=useMemo(()=>filterAtHomeDrills({drills,todayScores:todayS,filter:homeDrillFilter}),[drills,todayS,homeDrillFilter]);
-const visibleProgramSessionBlocks=useMemo(()=>filterProgramSessionBlocks({blocks:programSessionBlocks.grouped,todayScores:todayProgramScores,filter:programDrillFilter}),[programSessionBlocks.grouped,todayProgramScores,programDrillFilter]);
-useEffect(()=>{const target=drills.length>0?Math.round(todayS.length/drills.length*100):0;const timer=setTimeout(()=>{if(target===0){setDrillBarW(8);setTimeout(()=>setDrillBarW(0),200);}else{setDrillBarW(target);}},300);return()=>clearTimeout(timer);},[]);
-const activeMode=tab==="duels"?"program":"home";
-const activeScores=activeMode==="program"?programScores:homeScores;
-const activeScoreValidation=active?(activeMode==="program"?validateProgramDrillScore(input,active):(()=>{const score=Number(input);if(input===""||!Number.isFinite(score)||score<0||(hasDrillMax(active)&&score>active.max))return{ok:false};return{ok:true,score};})()):{ok:false};
-const activeScoreInvalid=!activeScoreValidation.ok;
-const[completionCue,setCompletionCue]=useState(null);
-const pushCompletionCue=useCallback((cue)=>{
-  setCompletionCue({...cue,id:Date.now()});
-  setTimeout(()=>setCompletionCue(null),3200);
-},[]);
-const handleLog=async()=>{if(submitting||!active)return;const validation=activeScoreValidation;if(!validation.ok)return;const v=validation.score;setSubmitting(true);const oldStreak=streak;
-const prevBest=activeScores.filter(s=>s.drillId===active.id).reduce((m,s)=>Math.max(m,s.score),0);
-const isPB=v>prevBest&&prevBest>0;
-const saveResult=await addScore(active.id,v,activeMode);
-if(!saveResult?.ok){setSubmitting(false);return;}
-playScore();const pct=hasDrillMax(active)?Math.round(v/active.max*100):null;setShareData({drill:active.name,score:v,max:hasDrillMax(active)?active.max:null,pct,name:u.name,streak,date:todayStr(),drillId:active.id,icon:active.icon,badges:earnedBadges,isPB,prevBest,src:activeMode});setSaved(true);setConfetti(true);setInput("");setTimeout(()=>setConfetti(false),1200);
-pushCompletionCue({title:activeMode==="program"?"Program drill completed":"Drill completed",detail:`${active.name} ¬∑ ${v}${hasDrillMax(active)?`/${active.max}`:""} logged`,momentum:`${Math.max(1,streak+(activeMode==="program"?0:1))}-day momentum`,next:activeMode==="program"?"Review Program leaderboard":"Continue today‚Äôs plan",nextAction:{target:activeMode==="program"?"duels":"home"}});
-if(isPB){setTimeout(()=>{setPbReveal({drill:active.name,score:v,prev:prevBest});setTimeout(()=>setPbReveal(null),3000)},400)}
-if(activeMode!=="program"){setTimeout(()=>{const ns=calcStreak([...homeScores,{date:todayStr()}]);const nb=STREAK_BADGES.find(b=>oldStreak<b.days&&ns>=b.days);if(nb){playUnlock();setBadgeReveal(nb);setTimeout(()=>setBadgeReveal(null),3500)}},700)}
-};
-const closeShare=()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setChallengeSaveError("");setSubmitting(false);switchTab(activeMode==="program"?"duels":"home")};
-const sendChallenge=async()=>{if(!challTarget||challengeSending)return;setChallengeSending(true);setChallengeSaveError("");const result=await addChallenge({to:challTarget,toName:players.find(p=>p.email===challTarget)?.name||challTarget.split("@")[0],drillId:shareData.drillId,drillName:shareData.drill,score:shareData.score,max:shareData.max});setChallengeSending(false);if(!result?.ok){setChallengeSaveError(result?.error||"Challenge could not be delivered. Please try again.");return}setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setSubmitting(false);switchTab("duels")};
-
-// Pull-to-refresh
-const[tStart,setTStart]=useState(0);
-const onTS=e=>{setTStart(e.touches[0].clientY)};
-const onTM=e=>{if(!tStart)return;const el=e.currentTarget;if(el.scrollTop>0)return;const dy=Math.max(0,Math.min(70,(e.touches[0].clientY-tStart)*.35));setPullY(dy)};
-const onTE=()=>{if(pullY>40){setPullY(50);setTimeout(()=>setPullY(0),700)}else setPullY(0);setTStart(0)};
-const playerNavItems=[
-  {k:"home",l:"Home",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>},
-  ...(u.isCoach
-    ? [{k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><path d="M20 8v6"/><path d="M23 11h-6"/></svg>}]
-    : [{k:"duels",l:"Program Log",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>}]),
-  {k:"log-drill",l:"AT Home Log",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg>},
-  {k:"sc",l:"Lifting",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>,dot:soonSC>0?VOLT:null},
-  {k:"program",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>,dot:unrsvpEvents>0?VOLT:null},
-  {k:"team-store",l:"Team Store",accentVar:"--accent",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10h16l-1-5H5l-1 5Z"/><path d="M6 10v9h12v-9"/><path d="M9 19v-5h6v5"/><path d="M4 10c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2"/></svg>},
-  {k:"profile",l:"Profile",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>},
-];
-const getPlayerNavItem=(key,overrides={})=>{const item=playerNavItems.find(candidate=>candidate.k===key);return item?{...item,...overrides}:null;};
-const playerMobilePrimaryItems=[
-  getPlayerNavItem("home",{mobileLabel:"Home"}),
-  getPlayerNavItem("log-drill",{mobileLabel:"At Home"}),
-  getPlayerNavItem("duels",{mobileLabel:"Program"}),
-].filter(Boolean);
-const playerMobileSecondaryItems=[
-  getPlayerNavItem("program",{mobileLabel:"Events",description:"Team schedule and RSVPs"}),
-  getPlayerNavItem("sc",{mobileLabel:"Lifting",description:"Strength and conditioning"}),
-  {k:"leaderboards",l:"Leaderboards",mobileLabel:"Rankings",description:"Current and all-time team rankings",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>},
-  getPlayerNavItem("team-store",{mobileLabel:"Team Store",description:"Official team apparel and fan gear"}),
-  getPlayerNavItem("profile",{mobileLabel:"Profile",description:"Progress, settings, and account"}),
-].filter(Boolean);
-const handleDailyCommandAction=useCallback((action={})=>{
-  const target=action?.target||"home";
-  const candidateDrills=target==="duels"?programDrills:drills;
-  const actionDrill=action?.drillId?candidateDrills.find((drill)=>String(drill?.id||drill?.drillId||drill?.drill_id||"")===String(action.drillId)):null;
-  switchTab(target);
-  if(actionDrill)window.setTimeout(()=>setActive(actionDrill),0);
-},[drills,programDrills,switchTab]);
-const handlePlayerWorkspaceAction=useCallback((action={})=>{
-  if(action?.focus==="shot-stats"){switchTab("log-drill");setShowShotStats(true);return;}
-  handleDailyCommandAction(action);
-},[handleDailyCommandAction,switchTab]);
-const handlePlayerInsightAction=useCallback((action={})=>{
-  handlePlayerWorkspaceAction(action);
-  scheduleWorkspaceActionReveal(action);
-},[handlePlayerWorkspaceAction]);
-const handleAtHomeMetric=useCallback((metric)=>{if(metric?.filter){setHomeDrillFilter(metric.filter);return;}handlePlayerWorkspaceAction(metric?.action||atHomeWorkspaceModel.primaryAction);},[atHomeWorkspaceModel.primaryAction,handlePlayerWorkspaceAction]);
-const handleProgramMetric=useCallback((metric)=>{if(metric?.filter){setProgramDrillFilter(metric.filter);return;}handlePlayerWorkspaceAction(metric?.action||programWorkspaceModel.primaryAction);},[programWorkspaceModel.primaryAction,handlePlayerWorkspaceAction]);
-
-return <div className={`app-shell performance-shell performance-shell--player ${isDesktop?"is-desktop":"is-mobile"}`} data-workspace-tab={tab}>
-{isDesktop&&<aside className="sidebar-nav" aria-label="Player navigation"><div className="nav-title">PLAYER DASHBOARD</div>{playerNavItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>switchTab(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={tab} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":T.BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",transition:"background .3s",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}>
-<BrandBackdrop/>
-{completionCue&&<div className="fade-up" data-testid="player-completion-cue" style={{position:"sticky",top:70,zIndex:18,margin:"8px 12px 0",padding:"12px 14px",borderRadius:14,background:"linear-gradient(155deg, rgba(200,255,26,0.14), rgba(94,208,255,0.08))",border:"1px solid rgba(200,255,26,0.34)",boxShadow:"0 12px 24px rgba(0,0,0,0.25)"}}>
-  <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>COMPLETED</div>
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1.2,marginTop:2}}>{completionCue.title}</div>
-  <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:2}}>{completionCue.detail}</div>
-  <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:8}}>
-    <span style={{fontFamily:FB,fontSize:10,color:CYAN,border:"1px solid rgba(94,208,255,0.28)",borderRadius:999,padding:"3px 8px"}}>{completionCue.momentum}</span>
-    <span style={{fontFamily:FB,fontSize:10,color:LIGHT,border:"1px solid rgba(255,255,255,0.16)",borderRadius:999,padding:"3px 8px"}}>Next: {completionCue.next}</span>
-  </div>
-  {completionCue.nextAction&&<button type="button" onClick={()=>{handleDailyCommandAction(completionCue.nextAction);setCompletionCue(null);}} style={{marginTop:10,minHeight:44,width:"100%",border:0,borderRadius:10,background:VOLT,color:"#071007",fontFamily:FB,fontSize:11,fontWeight:800,letterSpacing:"0.08em",cursor:"pointer"}}>CONTINUE ‚Üí</button>}
-</div>}
-{statSyncError&&<div style={{position:"relative",zIndex:2,margin:"10px 12px 0",padding:"10px 12px",borderRadius:10,border:"1px solid rgba(255,69,69,0.45)",background:"rgba(255,69,69,0.10)",color:"#FFB5B5",fontFamily:FB,fontSize:11,fontWeight:600,letterSpacing:"0.02em"}}>{statSyncError}</div>}
-<div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={theme==="light"?.028:.012}/><GlowOrb color={tab==="program"?CYAN:tab==="duels"?ORANGE:tab==="players"?VOLT:VOLT} top="0" left="70%" size={300} animate/><GlowOrb color={tab==="program"?VOLT:tab==="duels"?CYAN:tab==="players"?CYAN:ORANGE} top="60%" left="20%" size={250} animate/></div>
-
-{/* Badge Reveal Overlay */}
-{badgeReveal&&<div className="performanceRevealOverlay" data-testid="player-streak-achievement-reveal" onClick={()=>setBadgeReveal(null)}>
-  <div className="performanceRevealCard" role="dialog" aria-modal="true" aria-label={`Streak milestone: ${badgeReveal.name}`} onClick={event=>event.stopPropagation()}>
-    <div className="performanceRevealEyebrow">STREAK MILESTONE</div>
-    <ShotLabPerformanceMark kind="streak" value={`${badgeReveal.days}D`} label={badgeReveal.name} detail="Training streak achieved" testId="player-streak-achievement-mark" />
-    <div className="performanceRevealSummary">Consistency banked. Your {badgeReveal.days}-day training streak is now part of your ShotLab record.</div>
-    <button type="button" className="performanceRevealDismiss" onClick={()=>setBadgeReveal(null)}>Continue</button>
-  </div>
-</div>}
-
-{/* Personal Best Reveal */}
-{pbReveal&&<div className="performanceRevealOverlay" data-testid="player-pb-achievement-reveal" onClick={()=>setPbReveal(null)}>
-  <div className="performanceRevealCard performanceRevealCard--pb" role="dialog" aria-modal="true" aria-label={`New personal best in ${pbReveal.drill}`} onClick={event=>event.stopPropagation()}>
-    <div className="performanceRevealEyebrow">PERSONAL BEST</div>
-    <ShotLabPerformanceMark kind="pb" value={pbReveal.score} label="New high mark" detail={pbReveal.drill} tone="warning" testId="player-pb-achievement-mark" />
-    <div className="performanceRevealDelta"><span>Previous</span><strong>{pbReveal.prev}</strong><span>Improvement</span><strong>+{Math.max(0,Number(pbReveal.score)-Number(pbReveal.prev))}</strong></div>
-    <div className="performanceRevealSummary">That result moved your benchmark. The next comparable session now measures against this score.</div>
-    <button type="button" className="performanceRevealDismiss" onClick={()=>setPbReveal(null)}>Bank this result</button>
-  </div>
-</div>}
-
-{/* Header ‚Äî Premium dashboard heading */}
-<PlayerDashboardHeader
-  userName={u.name}
-  subtitle="Train. Track. Improve."
-  mission={(()=>{
-    const allDone=todayS.length>=drills.length;const shotsToday=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);
-    if(allDone&&shotsToday>0)return <span>All drills complete ¬∑ {streak}D streak üî•</span>;
-    if(todayS.length>0)return <span>{todayS.length}/{drills.length} drills ¬∑ {shotsToday>0?shotsToday+" shots ¬∑ ":""}{streak}D streak</span>;
-    return "Today's mission awaits";
-  })()}
-/>
-
-{isDesktop&&<div className="player-quick-actions" aria-label="Player quick actions" style={{display:"flex",gap:12,justifyContent:"flex-end",alignItems:"center",padding:"5px 20px 0",position:"relative",zIndex:2}}>
-  <button type="button" aria-label="Profile" onClick={()=>switchTab("profile")} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.SUB,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Profile</button>
-  <button type="button" aria-label="Logout" onClick={logout} style={{minHeight:34,padding:"0 2px",border:0,background:"transparent",color:T.MUT,fontFamily:FB,fontSize:10,fontWeight:800,letterSpacing:"0.06em",textTransform:"uppercase",cursor:"pointer"}}>Logout</button>
-</div>}
-
-<div ref={playerScrollRef} className="player-scroll-container" style={{flex:1,padding:isDesktop?"14px 20px 36px":"8px 20px var(--player-scroll-bottom-padding)",overflowY:"auto",overflowX:"hidden",position:"relative",zIndex:1,transform:`translateY(${pullY}px)`,transition:pullY?"none":"transform .3s",width:"100%",maxWidth:isDesktop?"none":760,margin:"0 auto"}} onTouchStart={isDesktop?undefined:onTS} onTouchMove={isDesktop?undefined:onTM} onTouchEnd={isDesktop?undefined:onTE}>
-  {/* Pull-to-refresh basketball */}
-  {pullY>5&&<div style={{position:"absolute",top:-44,left:"50%",transform:"translateX(-50%)",textAlign:"center",opacity:Math.min(pullY/30,1)}}>
-    <svg width="24" height="24" viewBox="0 0 40 40" fill="none" style={{animation:pullY>40?"bbBounce .5s ease infinite":"none"}}><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="2.5"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="1.5"/><path d="M20 3v34" stroke={ORANGE} strokeWidth="1.5"/><path d="M8 5c4.5 5 6.5 9 6.5 15s-2 10-6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/><path d="M32 5c-4.5 5-6.5 9-6.5 15s2 10 6.5 15" stroke={ORANGE} strokeWidth="1.5" fill="none"/></svg>
-    <div style={{fontFamily:FB,color:ORANGE,fontSize:8,letterSpacing:2,marginTop:2}}>{pullY>40?"REFRESHING":"PULL"}</div>
-  </div>}
-
-  {tab!=="home"&&!active&&<DashboardReturnButton onClick={()=>switchTab("home")} label="Back to Dashboard" />}
-
-  {/* ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê HOME ‚Äî DASHBOARD ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê */}
-  {tab==="home"&&!active&&<div className={slideClass} key="home">
-    {(()=>{
-      const { sortedEvents: sorted, upcomingEvents, attendanceRows }=normalizeEventsAndRsvps({events,rsvps,userEmail:u?.email,today});
-      const nextWeekEnd=new Date(`${today}T00:00:00`);
-      nextWeekEnd.setDate(nextWeekEnd.getDate()+6);
-      const nextWeekEndStr=`${nextWeekEnd.getFullYear()}-${String(nextWeekEnd.getMonth()+1).padStart(2,"0")}-${String(nextWeekEnd.getDate()).padStart(2,"0")}`;
-      const upcomingWeekEvents=upcomingEvents.filter(e=>e.date<=nextWeekEndStr).slice(0,isNarrow?3:4);
-      const nextEvent=upcomingEvents[0]||null;
-      const upcomingEventsCount=upcomingEvents.length||0;
-      const eventsAttended=attendanceRows.length;
-      const attendancePct=upcomingEventsCount>0&&attendanceRows.length>0?`${Math.min(100,Math.round((attendanceRows.length/upcomingEventsCount)*100))}%`:"‚Äî";
-      const nextEventLabel=nextEvent?
-        <><button type="button" onClick={(event)=>{event.stopPropagation();switchTab("program");}} aria-label="View all events" style={{background:"none",border:"none",padding:0,margin:0,color:"inherit",font:"inherit",cursor:"pointer",lineHeight:"inherit"}}>{nextEvent.date.slice(5)}</button> &#183; {nextEvent.time}</>
-        :"None";
-      const nextEventBadge=nextEvent?`Next ¬∑ ${nextEvent.date.slice(5).replace("-","/")}`:"Schedule";
-      const isWithinLastSevenDays=(dateValue)=>{
-        if(!dateValue)return false;
-        const shotDate=new Date(`${dateValue}T00:00:00`);
-        const todayDate=new Date(`${today}T00:00:00`);
-        if(Number.isNaN(shotDate.getTime())||Number.isNaN(todayDate.getTime()))return false;
-        const diffDays=Math.floor((todayDate-shotDate)/86400000);
-        return diffDays>=0&&diffDays<=6;
-      };
-      const normalizedActivity=normalizePlayerActivity({shotLogs,scLogs,scores,userEmail:u?.email,teamId:u?.teamId});
-      const { shotLogs: normalizedShotLogs, scLogs: normalizedScLogs } = normalizeWorkoutAndLogs(normalizedActivity);
-      // regression guard: const weeklyMakes=shotLogs.filter(s=>s.email===u.email&&isWithinLastSevenDays(s.date)).reduce((a,s)=>a+s.made,0);
-      const weeklyMakes=normalizedShotLogs.filter(s=>isWithinLastSevenDays(s.date)).reduce((a,s)=>a+s.made,0);
-      const todaysMakes=normalizedShotLogs.filter(s=>s.date===today).reduce((a,s)=>a+s.made,0);
-      const hasAnyShots=normalizedShotLogs.some(s=>s.made>0);
-      const leaderboardRank=Array.isArray(homeShotsLeaderboard?.rows)?homeShotsLeaderboard.rows.findIndex((row)=>normalizeEmail(row?.email||"")===normalizeEmail(u.email))+1:0;
-      const missionCtaLabel="Log Shots";
-      const missionStatus=hasAnyShots?`Momentum is live ‚Äî ${weeklyMakes>0?"stack your next quality reps":"start your first quality reps"} and keep the cycle moving.`:"Momentum begins today. Log your first reps to establish rhythm and build your foundation.";
-      const homeStats=[{label:"Makes Today",value:<AnimNum v={todaysMakes} c={VOLT} size={26}/>,color:VOLT},{label:"Training Streak",value:formatStreakDays(streak),color:CYAN},{label:"Drills Completed",value:`${todayS.length}/${drills.length}`,color:LIGHT}];
-      const programStats=[{label:"Next Team Event",value:nextEventLabel,color:LIGHT},{label:"Upcoming Events",value:upcomingEventsCount,color:VOLT},{label:"Attendance Rate",value:attendancePct,color:CYAN}];
-      const quickStats=[
-        {label:"Today's Makes",value:todaysMakes,color:VOLT},
-        {label:"Weekly Total",value:weeklyMakes,color:LIGHT},
-        {label:"Streak",value:formatStreakDays(streak),color:CYAN},
-        {label:"Rank",value:leaderboardRank>0?`#${leaderboardRank}`:"‚Äî",color:ORANGE},
-        {label:"Events Attended",value:eventsAttended,color:LIGHT},
-      ];
-      const dailyGoal=PLAYER_DAILY_SHOT_TARGET;
-      const weeklyGoal=PLAYER_WEEKLY_SHOT_TARGET;
-      const dailyPct=deriveCompletionRatio({todayMakes:todaysMakes,dailyGoal});
-      const weeklyPct=deriveCompletionRatio({todayMakes:weeklyMakes,dailyGoal:weeklyGoal});
-      const seasonProgressPct=Math.min(100,Math.round(((weeklyPct*0.45)+(dailyPct*0.2)+Math.min(streak*6,100)*0.35)));
-      const momentumLabel=deriveMomentumLabel({weeklyMakes,weeklyGoal,streak,weeklyPct});
-      const missionMomentumBadge=momentumLabel==="Building base volume"?"Building Base":momentumLabel;
-      const { trainingIdentity, commitmentLevel }=deriveTrainingIdentityLabels({eventsAttended,weeklyMakes,weeklyGoal,weeklyPct,streak});
-      const currentFocus=deriveNextFocusLabel({todaysMakes,dailyGoal});
-      const playerHasTeam=Boolean(u?.teamId);
-      const hasUpcomingEvents=upcomingEventsCount>0;
-      const hasRsvped=rsvps.some(r=>normalizeEmail(r.email)===normalizeEmail(u.email)&&r.teamId===u?.teamId);
-      const hasShotLogs=normalizedShotLogs.some(s=>Number(s.made)>0);
-      const firstWorkoutComplete=hasShotLogs||normalizedScLogs.length>0;
-      const firstEventInteraction=hasUpcomingEvents||rsvps.some(r=>normalizeEmail(r?.email||"")===normalizeEmail(u.email));
-      const playerChecklist=[
-        {label:"Join team",done:playerHasTeam},
-        {label:"View upcoming event",done:hasUpcomingEvents,onClick:()=>switchTab("program"),ariaLabel:"View upcoming events in Program"},
-        {label:"RSVP to an event",done:hasRsvped,onClick:()=>switchTab("program"),ariaLabel:"Go to Program events to RSVP"},
-        {label:"Log At Home Shots",done:hasShotLogs,onClick:()=>switchTab("log-drill"),ariaLabel:"Go to Log Drill to log At Home Shots"},
-        {label:"Check progress",done:false,info:true,onClick:()=>switchTab("profile"),ariaLabel:"Go to profile progress"},
-      ];
-      const firstWeekActivation=deriveFirstWeekActivationMilestones({hasRsvped,firstWorkoutComplete,firstEventInteraction}).map((item)=>({...item,onClick:()=>switchTab(item.target)}));
-      const recentPlayerActivity=deriveActivityFeedItems({view:"player",user:u,events,rsvps,shotLogs,players:playerLeaderboardPlayers,scores,today,activeTeamPlayerEmails:playerActiveTeamEmailSet,activeTeamPlayerKeys:playerActiveTeamKeySet});
-      const eventTypeTone=(type)=>{
-        const key=String(type||"event").toLowerCase();
-        if(key.includes("game"))return {label:"GAME",color:ORANGE,bg:"rgba(255,165,0,0.12)"};
-        if(key.includes("practice"))return {label:"PRACTICE",color:CYAN,bg:"rgba(94,208,255,0.14)"};
-        if(key.includes("workout")||key.includes("lift"))return {label:"WORKOUT",color:VOLT,bg:"rgba(200,255,0,0.16)"};
-        if(key.includes("meeting"))return {label:"MEETING",color:"#D2C6FF",bg:"rgba(210,198,255,0.16)"};
-        return {label:"EVENT",color:LIGHT,bg:"rgba(255,255,255,0.12)"};
-      };
-      const dayLabel=(dateValue)=>{
-        if(dateValue===today)return "TODAY";
-        const tmr=new Date(`${today}T00:00:00`);tmr.setDate(tmr.getDate()+1);
-        const tmrStr=`${tmr.getFullYear()}-${String(tmr.getMonth()+1).padStart(2,"0")}-${String(tmr.getDate()).padStart(2,"0")}`;
-        if(dateValue===tmrStr)return "TOMORROW";
-        const d=new Date(`${dateValue}T00:00:00`);
-        return Number.isNaN(d.getTime())?"UPCOMING":d.toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();
-      };
-      const weekConfirmedCount=upcomingWeekEvents.filter(ev=>rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email)&&r.status==="yes")).length;
-      const weekMissingCount=upcomingWeekEvents.filter(ev=>!rsvps.some(r=>r.eventId===ev.id&&normalizeEmail(r.email)===normalizeEmail(u.email))).length;
-      const unresolvedBadgeLabel=weekMissingCount>0?`${weekMissingCount} unresolved RSVP${weekMissingCount===1?"":"s"}`:"All RSVPs set";
-      const upcomingScheduleItems=deriveUpcomingSchedule({events,rsvps,scSessions,scRsvps,userEmail:u?.email,today});
-      const coachName=players.find(p=>p.role==="coach"&&p.teamId===u?.teamId)?.name||"Your coach";
-      const emphasisLabel=String(coachPriorities?.focusEmphasis||"Volume").trim();
-      const coachTodayFocus=String(coachPriorities?.todayFocusText||"Daily shot volume + clean mechanics").trim();
-      const coachPriorityDrill=String(coachPriorities?.priorityDrillText||drills.find(d=>!todayS.some(s=>s.drillId===d.id))?.name||drills[0]?.name||"At-home drill block").trim();
-      const coachChallengeText=String(coachPriorities?.challengeText||"Build momentum: complete one drill and log shots today.").trim();
-      const coachWeeklyMakesTarget=Math.max(0,Number(coachPriorities?.weeklyMakesTarget)||weeklyGoal);
-      const coachWeeklyCheckinsTarget=Math.max(1,Number(coachPriorities?.weeklyCheckinsTarget)||Math.min(3,Math.max(1,upcomingWeekEvents.length||2)));
-      const weeklyGoalLabel=`${coachWeeklyMakesTarget} makes + ${coachWeeklyCheckinsTarget} team check-ins`;
-      const consistencyExpectation=weeklyPct>=80?"Consistency is on track ‚Äî maintain pace through weekend.":"Target one focused session daily to keep weekly pace.";
-      const teamPlayers=players.filter((p)=>p.teamId===u?.teamId&&p.role!=="coach");
-      const completionsTodayCount=teamPlayers.filter((player)=>scores.some((score)=>normalizeEmail(score?.email||score?.playerId||"")===normalizeEmail(player?.email||"")&&score?.date===today)).length;
-      const sevenDayScores=scores.filter((score)=>score?.teamId===u?.teamId&&isWithinLastSevenDays(score?.date));
-      const activeTeamPlayersCount=new Set(sevenDayScores.map((score)=>normalizeEmail(score?.email||score?.playerId||"")).filter(Boolean)).size;
-      const recentTeamCompletions=scores
-        .filter((score)=>score?.teamId===u?.teamId)
-        .sort((a,b)=>new Date(`${b.date||"1970-01-01"}T00:00:00`).getTime()-new Date(`${a.date||"1970-01-01"}T00:00:00`).getTime())
-        .slice(0,3)
-        .map((score)=>`${score?.name||score?.playerId||"Team player"} completed ${score?.drillName||"a drill"} ¬∑ ${score?.date===today?"Today":score?.date||"Recent"}`);
-      const teamMomentumLabel=activeTeamPlayersCount>=Math.max(2,Math.ceil(teamPlayers.length*0.5))?"Team streak building":"Momentum ramping";
-      const coachPresenceUpdates=[
-        `${coachName} updated priorities: ${coachTodayFocus}`,
-        `${coachName} emphasized: ${coachPriorityDrill}`,
-        `Challenge active: ${coachChallengeText}`,
-      ];
-      const coachPresenceTimestamp=today===todayStr()?"Updated today":"Recently updated";
-      const dailyCommandModel=derivePlayerDailyCommandCenter({today,userEmail:u?.email,teamId:u?.teamId,todayMakes:todaysMakes,weeklyMakes,dailyGoal,weeklyGoal:coachWeeklyMakesTarget,streak,leaderboardRank,drills,programDrills,todayHomeScores:todayS,todayProgramScores,events,rsvps,scSessions,scRsvps,shotLogs:normalizedShotLogs,scLogs:normalizedScLogs,coachPriorities});
-      return <div className="player-home-compact-dashboard" style={{marginBottom:24,display:"grid",gap:"var(--player-dashboard-gap, 14px)"}}>
-        <PlayerDailyCommandCenter model={dailyCommandModel} onAction={handleDailyCommandAction}/>
-        <ProgressiveDisclosure
-          title="Upcoming schedule"
-          summary={upcomingScheduleItems.length?`${upcomingScheduleItems.length} scheduled ¬∑ ${unresolvedBadgeLabel}`:"No sessions scheduled"}
-          testId="player-upcoming-schedule"
-        >
-          {upcomingScheduleItems.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:13,lineHeight:1.5}}>No upcoming event or S&amp;C session is scheduled yet.</div>:<div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:10}}>
-            {upcomingScheduleItems.map(item=><div key={item.kind} style={{borderTop:"1px solid var(--stroke-1)",padding:"11px 2px",minWidth:0}}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><span style={{fontFamily:FB,color:item.kind==="sc"?"#A0A0A0":VOLT,fontSize:10,fontWeight:800,letterSpacing:"0.08em"}}>{item.label}</span><span style={{fontFamily:FB,color:item.rsvpStatus==="Going"?VOLT:"#FFCE73",fontSize:10}}>{item.rsvpStatus}</span></div>
-              <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1,marginTop:6,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.title}</div>
-              <div style={{fontFamily:FB,color:T.SUB,fontSize:12,marginTop:5,lineHeight:1.45}}><span style={{color:CYAN,fontWeight:700}}>{item.date}</span> ¬∑ {item.time}<br/>{item.location}</div>
-              <button type="button" onClick={()=>switchTab(item.target)} style={{marginTop:8,minHeight:38,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>{item.cta} ‚Üí</button>
-            </div>)}
-          </div>}
-        </ProgressiveDisclosure>
-        <ProgressiveDisclosure title="Team standings" summary="Home-shot rankings and your position" testId="player-team-standings">
-          <CompactLeaderboardPreviewCard
-            title="Team Leaders"
-            areaTitle="Leaderboards"
-            categoryLabel="Home Shots"
-            mode="player"
-            userEmail={u?.email||""}
-            status={playerDashboardLeaderboardStatus}
-            rows={playerDashboardLeaderboardRows}
-            emptyMessage="No leaderboard data yet. Log shots to enter the rankings."
-            maxRows={3}
-            onViewAll={()=>switchTab("leaderboards")}
-          />
-        </ProgressiveDisclosure>
-        <ProgressiveDisclosure
-          title="Coach guidance"
-          summary={`${coachName} ¬∑ ${coachPriorityDrill}`}
-          testId="player-coach-guidance"
-        >
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,lineHeight:1.5}}>Coach focus: {coachTodayFocus}</div>
-          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(2,minmax(0,1fr))",gap:8,marginTop:10}}>
-            {[{k:"Priority drill",v:coachPriorityDrill},{k:"Coach challenge",v:coachChallengeText},{k:"Weekly goal",v:weeklyGoalLabel},{k:"Consistency",v:consistencyExpectation}].map(item=><div key={item.k} style={{borderTop:"1px solid var(--stroke-1)",padding:"9px 2px"}}><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k.toUpperCase()}</div><div style={{fontFamily:FB,fontSize:12,color:LIGHT,fontWeight:700,marginTop:4,lineHeight:1.45}}>{item.v}</div></div>)}
-          </div>
-          <button type="button" onClick={()=>switchTab("duels")} style={{marginTop:9,minHeight:40,border:0,background:"transparent",color:VOLT,fontFamily:FB,fontSize:11,fontWeight:800,padding:0,cursor:"pointer"}}>Open Program ‚Üí</button>
-        </ProgressiveDisclosure>
-        <ProgressiveDisclosure
-          title="More progress"
-          summary="Rank, attendance, season progress, and shortcuts"
-          testId="player-secondary-intelligence"
-        >
-          <MetricStrip items={[
-            {label:"Team Rank",value:leaderboardRank>0?`#${leaderboardRank}`:"‚Äî",detail:"Home shots"},
-            {label:"Events",value:eventsAttended,detail:"Attended"},
-            {label:"Season",value:`${seasonProgressPct}%`,detail:trainingIdentity},
-          ]}/>
-          <QuietSection title="Next step" eyebrow="Recommended">
-            <div style={{fontFamily:FD,color:LIGHT,fontSize:20}}>{nextEvent?nextEvent.title:"Build your next session plan"}</div>
-            <div style={{fontFamily:FB,color:MUTED,fontSize:12,marginTop:4,lineHeight:1.45}}>{nextEvent?`${nextEvent.date} ¬∑ ${nextEvent.time} ¬∑ ${nextEvent.location}`:"No event locked yet ‚Äî open Program and set the next rep target for your week."}</div>
-          </QuietSection>
-          <div style={{display:"grid",gridTemplateColumns:isNarrow?"1fr":"repeat(3,minmax(0,1fr))",gap:8,marginTop:12}}>
-            {[{label:"View Program",onClick:()=>switchTab("duels")},{label:"Events",onClick:()=>switchTab("program")},{label:"Progress",onClick:()=>switchTab("profile")}].map(action=><button key={action.label} onClick={action.onClick} style={{minHeight:44,borderRadius:10,border:"1px solid var(--stroke-1)",background:"transparent",color:LIGHT,fontFamily:FB,fontWeight:800,fontSize:11,cursor:"pointer"}}>{action.label}</button>)}
-          </div>
-        </ProgressiveDisclosure>
-        
-        
-      </div>
-    })()}
-
-  </div>}
-
-  {/* ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê AT HOME (sub-screen) ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê */}
-  {(tab==="log-drill")&&!active&&!showShotStats&&<div className="fade-up player-training-workspace player-training-workspace--home" data-player-journey="at-home">
-    
-    <PlayerWorkspaceCommandBar model={atHomeWorkspaceModel} activeMetric={homeDrillFilter==="open"?"open":homeDrillFilter==="completed"?"complete":""} onAction={handlePlayerWorkspaceAction} onMetric={handleAtHomeMetric} testId="player-at-home-workspace"/>
-    <PlayerWorkspaceFilterRail value={homeDrillFilter} onChange={setHomeDrillFilter} ariaLabel="At Home drill filters" testId="player-at-home-filter-rail" options={[{value:"all",label:"All drills",count:drills.length},{value:"open",label:"Open",count:atHomeWorkspaceModel.metrics.find(metric=>metric.id==="open")?.value||0},{value:"completed",label:"Completed",count:atHomeWorkspaceModel.metrics.find(metric=>metric.id==="complete")?.value||0}]}/>
-
-    {/* ‚îÄ‚îÄ SHOT TRACKER ‚îÄ‚îÄ */}
-    <div className="player-training-kicker">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      SHOT TRACKER
-    </div>
-    <div className="player-primary-logging-region" data-testid="player-shot-logging-region" data-layout-role="primary-decision">
-      <div className="player-logging-fields">
-        <div className="player-logging-field">
-          <label htmlFor="player-home-shots-made">SHOTS MADE</label>
-          <input id="player-home-shots-made" className="player-logging-input player-logging-input--score" type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} placeholder="0"/>
-        </div>
-        <div className="player-logging-field">
-          <label htmlFor="player-home-shot-date">DATE</label>
-          <input id="player-home-shot-date" className="player-logging-input" type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)}/>
-        </div>
-      </div>
-
-    <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice} isDemoSession={isDemoHomeShotSession}/>
-    {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
-      <button className="btn-v cta-primary" disabled={shotSaving} onClick={async()=>{if(shotSaving)return;const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}setShotInputError("");setShotSaveNotice("");setShotSaving(true);try{const result=await addShotLog(validation.made,shotDate);if(result?.ok){pushCompletionCue({title:"Shots logged",detail:`${validation.made} makes added to today‚Äôs total`,momentum:"Daily progress updated",next:"Return to the command center",nextAction:{target:"home"}});if(result.mode==="local_pending"){setShotSaveNotice("Saved locally ‚Äî team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800)}}finally{setShotSaving(false);}}} style={{opacity:shotSaving||shotSaved?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
-        {shotSaving?"SAVING‚Ä¶":shotSaved?"‚úì SAVED":"LOG SHOTS"}
-      </button>
-      {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,textAlign:"center",marginTop:8,letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
-      {(()=>{const t=shotLogs.filter(s=>s.email===u.email&&s.date===today).reduce((a,s)=>a+s.made,0);return t>0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,textAlign:"center",marginTop:8}}>{t} makes logged today</div>:null})()}
-      <button onClick={()=>setShowShotStats(true)} className="cta-secondary-link" style={{width:"100%",textAlign:"center",opacity:.85}}>SHOT STATS ‚Üí</button>
-    </div>
-
-    {/* ‚îÄ‚îÄ DAILY DRILLS (PRIMARY ACTION) ‚îÄ‚îÄ */}
-    <section className="player-training-plan" data-testid="player-at-home-drill-plan" data-layout-role="supporting-evidence">
-    <div className="player-training-plan__header"><div><span>Training plan</span><strong>Daily drills</strong></div><span>{todayS.length}/{drills.length} done</span></div>
-    <div className="player-training-progress" aria-hidden="true"><div style={{width:`${drills.length>0?Math.min(100,Math.round(todayS.length/drills.length*100)):0}%`}}/></div>
-    {visibleHomeDrills.length===0&&<PlayerWorkspaceEmptyState title={homeDrillFilter==="open"?"All assigned drills are complete":"No completed drills yet"} detail={homeDrillFilter==="open"?"Your daily drill block is finished. Add quality makes or review your stats.":"Complete a drill and it will appear here."} actionLabel={homeDrillFilter==="open"?"Review shot stats":"Show open drills"} onAction={()=>homeDrillFilter==="open"?setShowShotStats(true):setHomeDrillFilter("open")}/>}
-    {visibleHomeDrills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);
-      return <button key={d.id} className={`player-drill-row ${done?"is-complete":""}`} onClick={()=>!done&&setActive(d)} disabled={Boolean(done)} style={{"--drill-accent":VOLT}}>
-        <div className="player-drill-row__icon"><DrillIcon type={d.icon} size={22} color={done?VOLT+"99":VOLT}/></div>
-        <div className="player-drill-row__copy">
-          <div className="player-drill-row__title">{d.name}</div>
-          <div className="player-drill-row__detail">{d.desc}</div>
-        </div>
-        {done?<div className="player-drill-row__action"><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-         :<div className="player-drill-row__action"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
-      </button>})}
-    </section>
-  </div>}
-
-  {tab==="leaderboards"&&!active&&<div className={slideClass} key="leaderboards">
-    <PlayerWorkspaceCommandBar model={leaderboardWorkspaceModel} onAction={handlePlayerWorkspaceAction} onMetric={(metric)=>handlePlayerWorkspaceAction(metric?.action||{target:"leaderboards"})} testId="player-leaderboards-workspace"/>
-    <PremiumLeaderboardsHub viewerRole="player" leaderboardRows={playerLeaderboardRows} leaderboardStatus={homeShotsLeaderboard?.status||"idle"} userEmail={u?.email||""} currentUser={u} programScores={teamProgramScores} programDrills={programDrills} players={playerLeaderboardPlayers} teamId={u?.teamId||""} events={events} rsvps={rsvps} scSessions={scSessions} scLogs={scLogs} homeScores={scores} shotLogs={shotLogs} seasonArchives={seasonArchives} />
-  </div>}
-
-  {/* ‚ïê‚ïê‚ïê‚ïê‚ïê SHOT STATS sub-screen ‚ïê‚ïê‚ïê‚ïê‚ïê */}
-  {tab==="log-drill"&&showShotStats&&!active&&<div className="fade-up">
-    <button onClick={()=>setShowShotStats(false)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:20,padding:0}}>&#8592; BACK TO DRILLS</button>
-    <ShotTracker u={u} shotLogs={shotLogs} addShotLog={addShotLog} retryHomeShotLog={retryHomeShotLog} shotMade={shotMade} setShotMade={setShotMade} shotDate={shotDate} setShotDate={setShotDate} shotSaved={shotSaved} setShotSaved={setShotSaved} shotSaving={shotSaving} setShotSaving={setShotSaving} shotSaveNotice={shotSaveNotice} setShotSaveNotice={setShotSaveNotice}/>
-  </div>}
-
-
-  {/* ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê ACTIVE DRILL INPUT ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê */}
-  {(tab==="home"||tab==="log-drill"||tab==="duels")&&active&&<div className="detail-enter player-training-session" data-testid="player-training-session" style={{textAlign:"center",paddingTop:12,position:"relative"}}>
-    {confetti&&<ConfettiBurst/>}
-    {saved&&shareData?<div className="fade-up player-training-completion-wrap" data-testid="player-training-completion-wrap" style={{padding:"16px 0"}}>
-      {!showChallForm?<PlayerTrainingCompletion data={shareData} shareCard={<ShareCard data={shareData}/>} canChallenge={shareData?.src!=="program"} completedCount={(shareData?.src==="program"?todayProgramScores:todayS).length} plannedTotal={shareData?.src==="program"?programDrills.length:drills.length} nextCommitment={events.filter(e=>e.date>=today).sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")))[0]||null} currentStreak={streak} onContinue={closeShare} onChallenge={()=>setShowChallForm(true)} onViewProgress={()=>{setSaved(false);setActive(null);setShareData(null);setShowChallForm(false);setChallTarget("");setChallengeSaveError("");setSubmitting(false);switchTab("profile")}}/>
-      :<div className="fade-up" style={{marginTop:16,background:CARD_BG,borderRadius:16,padding:"20px 18px",border:`1px solid ${ORANGE}33`,textAlign:"left"}}>
-        <div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3,marginBottom:4}}>SEND A CHALLENGE</div>
-        <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:14}}>Dare a teammate to beat your {shareData.score}{shareData.max?`/${shareData.max}`:""} on {shareData.drill}</div>
-        {shareData?.src==="program"?<div style={{fontFamily:FB,color:T.SUB,fontSize:11}}>Program scores save directly to the team program leaderboard.</div>:players.filter(p=>p.email!==u.email).length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:12,textAlign:"center",padding:16}}>No other players yet. They need to log in first.</div>
-        :<><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:8}}>PICK YOUR OPPONENT</div>
-          <div style={{display:"flex",flexDirection:"column",gap:4,marginBottom:14}}>{players.filter(p=>p.email!==u.email).map(p=>
-            <button key={p.email} onClick={()=>{setChallTarget(p.email);setChallengeSaveError("")}} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 12px",background:challTarget===p.email?ORANGE+"15":BG,border:`1px solid ${challTarget===p.email?ORANGE:BORDER_CLR}`,borderRadius:10,cursor:"pointer",textAlign:"left"}}>
-              <Av n={p.name} sz={28} email={p.email}/><span style={{fontFamily:FB,color:challTarget===p.email?ORANGE:LIGHT,fontSize:13,fontWeight:600,flex:1}}>{p.name}</span>
-              {challTarget===p.email&&<svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={ORANGE} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-            </button>)}
-          </div>
-          {challengeSaveError&&<div role="alert" style={{fontFamily:FB,color:DANGER,fontSize:11,lineHeight:1.45,marginBottom:10}}>{challengeSaveError}</div>}
-          <div style={{display:"flex",gap:8}}>
-            <button onClick={()=>{setShowChallForm(false);setChallTarget("");setChallengeSaveError("")}} disabled={challengeSending} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:challengeSending?"not-allowed":"pointer"}}>CANCEL</button>
-            <button className="btn-v cta-primary" onClick={sendChallenge} disabled={!challTarget||challengeSending} style={{width:"100%",opacity:challTarget&&!challengeSending?1:.5}}>{challengeSending?"SENDING...":"SEND IT"}</button>
-          </div>
-        </>}
-      </div>}
-
-    </div>
-    :<><PlayerTrainingSessionHeader drill={active} mode={activeMode} currentIndex={(activeMode==="program"?todayProgramScores:todayS).length+1} total={activeMode==="program"?programDrills.length:drills.length} score={input} onBack={()=>{setActive(null);if(tab==="home")switchTab("log-drill");if(tab==="duels")switchTab("duels")}}/>
-      {/* Personal Best + Average */}
-      {(()=>{const ds=activeScores.filter(s=>s.drillId===active.id);const pb=ds.reduce((m,s)=>Math.max(m,s.score),0);const avg=ds.length?Math.round(ds.reduce((a,s)=>a+s.score,0)/ds.length*10)/10:0;const statAccent=activeMode==="program"?CYAN:ORANGE;
-        return ds.length>0?<div style={{display:"flex",gap:8,justifyContent:"center",margin:"12px 0 6px"}}>
-          <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${statAccent}33`,textAlign:"center"}}>
-            <div style={{fontFamily:FD,color:statAccent,fontSize:18}}>{pb}</div>
-            <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>YOUR PB</div>
-          </div>
-          <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-            <div style={{fontFamily:FD,color:activeMode==="program"?CYAN:VOLT,fontSize:18}}>{avg}</div>
-            <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>AVG</div>
-          </div>
-          <div style={{background:CARD_BG,borderRadius:10,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"center"}}>
-            <div style={{fontFamily:FD,color:activeMode==="program"?CYAN:LIGHT,fontSize:18}}>{ds.length}</div>
-            <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:MUTED,fontSize:8,letterSpacing:2,fontWeight:600}}>LOGGED</div>
-          </div>
-        </div>:null})()}
-      {active.instructions&&<div style={{margin:"12px auto 0",maxWidth:300,background:CARD_BG,borderRadius:12,padding:"14px 16px",border:`1px solid ${BORDER_CLR}`,textAlign:"left"}}>
-        <div style={{fontFamily:FD,color:CYAN,fontSize:10,letterSpacing:3,marginBottom:6,display:"flex",alignItems:"center",gap:6}}>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke={CYAN} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
-          COACH NOTES
-        </div>
-        <p style={{fontFamily:FB,color:CYAN,fontSize:12,lineHeight:1.6,margin:0,whiteSpace:"pre-wrap",textShadow:`0 0 18px ${CYAN}18`}}>{active.instructions}</p>
-      </div>}
-      {/* Motivational line */}
-      <div style={{fontFamily:FB,color:activeMode==="program"?CYAN:"#555555",fontSize:12,fontStyle:"italic",letterSpacing:1,margin:"20px 0 8px",fontWeight:500,textShadow:activeMode==="program"?`0 0 16px ${CYAN}18`:"none"}}>{["Lock in.","No shortcuts.","This rep counts.","Earn it.","Be honest with yourself.","Own the work.","Details matter.","Trust the process.","Stay disciplined.","Championship habits."][Math.floor((active.id*7+new Date().getDate())%10)]}</div>
-      {hasDrillMax(active)&&<div style={{fontFamily:FD,color:activeMode==="program"?CYAN:T.SUB,fontSize:13,letterSpacing:3,marginBottom:28}}>MAX: {active.max}</div>}
-      <div className="player-training-score-zone" data-testid="player-training-score-zone">
-      <div className="player-training-score-zone-label">LOG YOUR RESULT</div>
-      {/* Score input with reactive color */}
-      {(()=>{const v=Number(input)||0;const pct=hasDrillMax(active)&&active.max>0?v/active.max:0;const glowColor=hasDrillMax(active)?(pct>=.9?VOLT:pct>=.6?ORANGE:pct>.01?"#FF4545":VOLT):VOLT;const borderColor=v>0?glowColor:VOLT;
-        return <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:8,marginBottom:40}}>
-        <input autoFocus type="number" inputMode="decimal" pattern="[0-9]*" min={active?.allowZeroScore===true||active?.minScore===0?"0":"1"} max={hasDrillMax(active)?active.max:undefined} value={input} onChange={e=>{setInput(e.target.value);playTick()}} onKeyDown={e=>{if(e.key==="Enter")handleLog();}} placeholder="0" style={{width:120,padding:"24px 8px",background:BG,border:`2px solid ${borderColor}`,borderRadius:20,color:borderColor,fontFamily:FD,fontSize:64,textAlign:"center",outline:"none",letterSpacing:2,boxShadow:v>0?`0 0 30px ${glowColor}20,0 0 60px ${glowColor}08`:`0 0 20px ${VOLT}15`,transition:"border-color .3s,color .3s,box-shadow .3s"}}/>
-        {hasDrillMax(active)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:32}}>/{active.max}</div>}
-      </div>})()}
-      {/* Score quality indicator */}
-      {(()=>{const v=parseInt(input)||0;if(v<=0||!hasDrillMax(active))return null;const pct=Math.round(v/active.max*100);const label=pct>=90?"ELITE":pct>=75?"STRONG":pct>=50?"SOLID":"KEEP PUSHING";const c=pct>=90?SUCCESS:pct>=75?SUCCESS:pct>=50?WARNING:DANGER;
-        return <div className="fade-up" style={{fontFamily:FB,color:c,fontSize:10,fontWeight:700,letterSpacing:3,marginBottom:16,marginTop:-20,transition:"color .3s"}}>{pct}% ‚Äî {label}</div>})()}
-      <button data-testid="player-training-log-score" className="btn-v cta-primary" onClick={handleLog} disabled={submitting||activeScoreInvalid} style={{width:"100%",maxWidth:"none",margin:"0 auto",opacity:(submitting||activeScoreInvalid)?0.55:1,cursor:submitting||activeScoreInvalid?"not-allowed":"pointer"}}>LOG SCORE &#8594;</button>
-      </div>
-    </>}
-  </div>}
-
-  {/* ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê PROGRAM (Coach-Verified) ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê */}
-  {tab==="program"&&<div className={slideClass} key="program"><PlayerCommitmentCenter mode="events" model={eventsWorkspaceModel} items={events} responses={rsvps} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-events-operational-list"><EventsPanel events={events} rsvps={rsvps} user={u} toggleRsvp={toggleRsvp} scores={scores} drills={drills} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter></div>}
-
-
-
-  {/* ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê PROGRAM LOG ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê */}
-  {tab==="duels"&&!active&&<div className="fade-up player-training-workspace player-training-workspace--program" data-player-journey="program">
-    <PlayerWorkspaceCommandBar model={programWorkspaceModel} activeMetric={programDrillFilter==="open"?"open":programDrillFilter==="completed"?"complete":""} onAction={handlePlayerWorkspaceAction} onMetric={handleProgramMetric} testId="player-program-workspace"/>
-    <PlayerWorkspaceFilterRail value={programDrillFilter} onChange={setProgramDrillFilter} ariaLabel="Program drill filters" testId="player-program-filter-rail" options={[{value:"all",label:"Full plan",count:programDrills.length},{value:"open",label:"Open",count:programWorkspaceModel.metrics.find(metric=>metric.id==="open")?.value||0},{value:"completed",label:"Completed",count:programWorkspaceModel.metrics.find(metric=>metric.id==="complete")?.value||0}]}/>
-
-    <DuelsPanel u={u} challenges={challenges} drills={drills} respondChallenge={respondChallenge} players={players}/>
-    <CourtDivider color={CYAN} my={18}/>
-
-    <section className="player-training-plan player-training-plan--program" data-testid="player-program-drill-plan" data-layout-role="supporting-evidence">
-    <div className="player-training-plan__header"><div><span>Coach assigned</span><strong>Program drills</strong></div><span>{todayProgramScores.length}/{programDrills.length} done</span></div>
-    <div className="player-training-progress" aria-hidden="true"><div style={{width:`${programDrills.length>0?Math.min(100,Math.round(todayProgramScores.length/programDrills.length*100)):0}%`,"--progress-accent":CYAN}}/></div>
-    {visibleProgramSessionBlocks.length===0&&<PlayerWorkspaceEmptyState title={programDrillFilter==="open"?"Program plan complete":"No completed Program drills yet"} detail={programDrillFilter==="open"?"Every coach-assigned drill is complete for today.":"Complete a Program drill and it will appear here."} actionLabel={programDrillFilter==="open"?"Review rankings":"Show open drills"} onAction={()=>programDrillFilter==="open"?switchTab("leaderboards"):setProgramDrillFilter("open")}/>}
-    {visibleProgramSessionBlocks.map((block,blockIndex)=>{const isPrimarySession=block.drills.some((drill)=>programSessionBlocks.nextPriority===drill.id);return <div key={block.phase} className={`player-program-session ${isPrimarySession?"player-program-session--primary":""}`} data-layout-role={isPrimarySession?"primary-program-session":"quiet-secondary"}>
-      <div className="player-program-session__header">
-        <div>
-          <div className="player-program-session__title">{`SESSION ${blockIndex+1} ¬∑ ${block.phase.toUpperCase()}`}</div>
-          <div className="player-program-session__detail">{block.emphasis}</div>
-        </div>
-        <div className="player-program-session__status" data-status={block.status}>{block.status==="completed"?"COMPLETED":block.status==="in-progress"?"IN PROGRESS":"UPCOMING"}</div>
-      </div>
-      {block.drills.map(d=>{const done=todayProgramScores.find(s=>s.drillId===d.id);const isPriority=programSessionBlocks.nextPriority===d.id;
-        const leaderboardRows=getProgramLeaderboardRows(teamProgramScores,d,players,3);
-        return <button key={d.id} className={`player-drill-row player-drill-row--program ${done?"is-complete":""} ${isPriority&&!done?"is-priority":""}`} onClick={()=>setActive(d)} style={{"--drill-accent":CYAN}}>
-          <div className="player-drill-row__icon"><DrillIcon type={d.icon} size={20} color={done?CYAN+"99":CYAN}/></div>
-          <div className="player-drill-row__copy">
-            <div className="player-drill-row__title">{d.name}{isPriority&&!done&&<span className="player-drill-row__priority">PRIORITY</span>}</div>
-            <div className="player-drill-row__detail">{d.desc}</div>
-            <div className="player-drill-row__meta">Drill leaderboard: {leaderboardRows.length===0?"No scores yet":leaderboardRows.map(row=>`#${row.rank} ${row.name||row.email?.split("@")[0]} ${row.total}`).join(" ¬∑ ")}</div>
-          </div>
-          {done?<div className="player-drill-row__action"><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={CYAN} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-          :<div className="player-drill-row__action"><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={CYAN} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
-        </button>})}
-    </div>})}
-    </section>
-  </div>}
-
-  {/* ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê CHALLENGES ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê */}
-  {u.isCoach&&tab==="players"&&<div className={slideClass} key="players"><PlayersScreen/></div>}
-
-  {/* ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê STRENGTH & CONDITIONING ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê */}
-  {tab==="sc"&&<div className={slideClass} key="sc"><PlayerCommitmentCenter mode="strength" model={strengthWorkspaceModel} items={scSessions} responses={scRsvps} logs={scLogs} user={u} today={today} onAction={handlePlayerWorkspaceAction}><div data-testid="player-strength-operational-panel"><SCPanel sessions={scSessions} scRsvps={scRsvps} user={u} toggleScRsvp={toggleScRsvp} scLogs={scLogs} addScLog={addScLog} players={players} onCompletionCue={pushCompletionCue}/></div></PlayerCommitmentCenter></div>}
-
-  {/* ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê PROFILE ‚Äî Offseason Resume ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê */}
-  {tab==="profile"&&<div className={slideClass+" player-progress-story-route"} key="profile" data-testid="player-profile-workspace">
-  <PlayerProgressStory userName={u.name} userEmail={u.email} teamId={u.teamId} shotLogs={shotLogs} scores={scores} programScores={programScores} drills={drills} programDrills={programDrills} streak={streak} coachPriorities={coachPriorities} today={today} onStartTraining={()=>switchTab("log-drill")} onOpenFullProfile={()=>{const details=document.querySelector('[data-testid="player-progress-full-profile"]');if(details instanceof HTMLDetailsElement)details.open=true;window.setTimeout(()=>document.querySelector('[data-testid="player-profile-readout"]')?.scrollIntoView({behavior:"smooth",block:"start"}),0)}}/>
-  <ProgressiveDisclosure title="Full progress profile" summary="Report card, performance intelligence, drill development, history, and privacy" testId="player-progress-full-profile">
-    <ProfilePage u={u} scores={scores} shotLogs={shotLogs} drills={drills} programDrills={programDrills} programScores={programScores} rsvps={rsvps} events={events} players={players} scSessions={scSessions} scRsvps={scRsvps} scLogs={scLogs} seasonArchives={seasonArchives} challenges={challenges} streak={streak} earnedBadges={earnedBadges} T={T} deleteAccount={deleteAccount} onToggleLeaderboardVisibility={toggleLeaderboardVisibility}/>
-  </ProgressiveDisclosure>
-</div>}
-</div>
-
-{!isDesktop&&<MobileNavigation primaryItems={playerMobilePrimaryItems} secondaryItems={playerMobileSecondaryItems} activeKey={tab} onChange={switchTab} onLogout={logout} ariaLabel="Player navigation"/>}
-
-  </div></div></main>
-{isDesktop&&<aside className="insights-panel"><OperationalInsightRail model={playerInsightRailModel} onAction={handlePlayerInsightAction} testId="player-operational-insight-rail"/></aside>}
-  </div>;
-}
-
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// SHAREABLE WORKOUT CARD
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-function ShareCard({data}){
-const pct=data.pct||0;const pcol=pct>=80?SUCCESS:pct>=50?WARNING:DANGER;
-return <div style={{background:`linear-gradient(145deg,#0A0A0A,#141414)`,borderRadius:24,padding:"28px 24px 24px",border:`1px solid ${VOLT}22`,position:"relative",overflow:"hidden",textAlign:"center",maxWidth:340,margin:"0 auto"}}>
-{/* Corner accents */}
-<div style={{position:"absolute",top:0,left:0,width:60,height:60,borderTop:`3px solid ${VOLT}`,borderLeft:`3px solid ${VOLT}`,borderRadius:"24px 0 0 0",opacity:.4}}/>
-<div style={{position:"absolute",bottom:0,right:0,width:60,height:60,borderBottom:`3px solid ${VOLT}`,borderRight:`3px solid ${VOLT}`,borderRadius:"0 0 24px 0",opacity:.4}}/>
-{/* Glow */}
-<div style={{position:"absolute",top:"-30%",left:"50%",width:200,height:200,borderRadius:"50%",background:`radial-gradient(circle,${VOLT}0c,transparent)`,transform:"translateX(-50%)",pointerEvents:"none"}}/>
-{/* Brand */}
-<div style={{position:"relative",zIndex:1}}>
-<div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:4,marginBottom:4}}>
-<SLLogo size={22}/>
-<span style={{fontFamily:FD,color:VOLT,fontSize:12,letterSpacing:4}}>SHOT LAB</span>
-</div>
-<div style={{fontFamily:FB,color:T.MUT,fontSize:9,letterSpacing:2,marginBottom:20}}>WORKOUT COMPLETE</div>
-{/* Player name */}
-<div style={{fontFamily:FD,color:LIGHT,fontSize:28,letterSpacing:3,lineHeight:1}}>{data.name.toUpperCase()}</div>
-<div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,marginTop:4,marginBottom:20}}>{data.date}</div>
-{/* Drill + Score */}
-<div style={{display:"inline-flex",alignItems:"center",gap:8,background:BG,borderRadius:12,padding:"8px 16px",border:`1px solid ${BORDER_CLR}`,marginBottom:16}}>
-<DrillIcon type={data.icon} size={20}/>
-<span style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2}}>{data.drill}</span>
-</div>
-{/* Big score */}
-<div style={{fontFamily:FD,fontSize:72,color:VOLT,lineHeight:.9,letterSpacing:2}}>{data.score}{data.max?<span style={{color:MUTED,fontSize:32}}>/{data.max}</span>:null}</div>
-{/* Personal Best badge */}
-{data.isPB&&<div style={{display:"inline-flex",alignItems:"center",gap:6,background:ORANGE+"15",borderRadius:10,padding:"6px 16px",border:`1px solid ${ORANGE}33`,marginTop:12}}>
-<span style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>‚òÖ NEW PERSONAL BEST</span>
-</div>}
-{/* Accuracy ring */}
-{typeof data.pct==="number"&&<div style={{margin:"16px auto 12px",width:80,position:"relative"}}>
-<svg width="80" height="40" viewBox="0 0 80 40">
-<path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke="#242424" strokeWidth="6" strokeLinecap="round"/>
-<path d="M5 35 A 35 35 0 0 1 75 35" fill="none" stroke={pcol} strokeWidth="6" strokeLinecap="round" strokeDasharray={`${pct*1.1} 110`}/>
-</svg>
-<div style={{position:"absolute",bottom:0,left:"50%",transform:"translateX(-50%)",fontFamily:FD,color:pcol,fontSize:18}}>{pct}%</div>
-</div>}
-{/* Streak */}
-{data.streak>0&&<div style={{display:"inline-flex",alignItems:"center",gap:4,background:ORANGE+"12",borderRadius:8,padding:"4px 12px",border:`1px solid ${ORANGE}22`}}>
-<span style={{fontSize:14}}>üî•</span>
-<span style={{fontFamily:FD,color:ORANGE,fontSize:14,letterSpacing:2}}>{data.streak} DAY STREAK</span>
-</div>}
-{data.badges&&data.badges.length>0&&<div style={{display:"flex",gap:3,justifyContent:"center",flexWrap:"wrap",marginTop:6}}>{data.badges.map(b=><span key={b.days} style={{fontFamily:FD,fontSize:8,color:b.color,background:`${b.color}12`,border:`1px solid ${b.color}33`,borderRadius:5,padding:"1px 6px",letterSpacing:1}}>{b.icon}D</span>)}</div>}
-</div>
-
-  </div>;
-}
-
-function DashboardReturnButton({onClick,label="Dashboard"}){
-  return <button
-    type="button"
-    onClick={onClick}
-    style={{
-      display:"inline-flex",
-      alignItems:"center",
-      gap:8,
-      border:"1px solid var(--team-brand-border, var(--stroke-1))",
-      background:"linear-gradient(135deg, color-mix(in srgb, var(--surface-1) 90%, transparent), color-mix(in srgb, var(--surface-2) 88%, transparent))",
-      color:"var(--text-2)",
-      padding:"9px 14px",
-      borderRadius:999,
-      fontFamily:FB,
-      fontSize:11,
-      letterSpacing:"0.07em",
-      fontWeight:700,
-      textTransform:"uppercase",
-      cursor:"pointer",
-      marginBottom:12
-    }}
-  >
-    <span aria-hidden="true">‚Üê</span>{label}
-  </button>;
-}
-
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// HEAD-TO-HEAD DUELS
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-function DuelsPanel({u,challenges,drills,respondChallenge,players}){
-const[respId,setRespId]=useState(null),[respInput,setRespInput]=useState(""),[respSaved,setRespSaved]=useState(null),[respSaving,setRespSaving]=useState(false),[respError,setRespError]=useState("");
-const incoming=useMemo(()=>challenges.filter(c=>c.to===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
-const outgoing=useMemo(()=>challenges.filter(c=>c.from===u.email).sort((a,b)=>b.ts-a.ts),[challenges,u]);
-const pending=incoming.filter(c=>c.status==="pending");
-const resolved=[...incoming.filter(c=>c.status!=="pending"),...outgoing].sort((a,b)=>(b.respTs||b.ts)-(a.respTs||a.ts));
-
-const handleRespond=async(ch)=>{
-const v=parseInt(respInput);if(isNaN(v)||v<0||(hasDrillMax(ch)&&v>ch.max))return;
-if(respSaving)return;setRespSaving(true);setRespError("");const result=await respondChallenge(ch.id,v);setRespSaving(false);if(!result?.ok){setRespError(result?.error||"Response could not be saved. Please try again.");return}setRespSaved(ch.id);setRespId(null);setRespInput("");
-setTimeout(()=>setRespSaved(null),2000);
-};
-
-return <div className="fade-up">
-{/* Duels banner ‚Äî aggressive, asymmetric */}
-<div style={{background:`linear-gradient(135deg,${ORANGE}10,${CARD_BG},${ORANGE}05)`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${ORANGE}22`,position:"relative",overflow:"hidden"}}>
-<div style={{position:"absolute",top:-12,right:-8,opacity:.08}}><svg width="100" height="100" viewBox="0 0 24 24" fill={ORANGE} stroke="none"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-
-<div style={{position:"absolute",bottom:0,left:0,right:0,height:3,background:`linear-gradient(90deg,${ORANGE},${ORANGE}44,transparent)`}}/>
-<div style={{display:"flex",alignItems:"center",gap:14,position:"relative"}}>
-<div style={{width:48,height:48,borderRadius:14,background:`${ORANGE}15`,border:`1.5px solid ${ORANGE}33`,display:"flex",alignItems:"center",justifyContent:"center",transform:"rotate(-6deg)"}}>
-<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-</div>
-<div>
-<div style={{fontFamily:FD,color:ORANGE,fontSize:18,letterSpacing:3}}>HEAD-TO-HEAD</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Challenge teammates. Beat their score.</div>
-</div>
-</div>
-</div>
-
-{/* Pending challenges */}
-{pending.length>0&&<><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="INCOMING" s={`${pending.length} WAITING`}/>
-  {pending.map(ch=>{const dr=drills.find(d=>d.id===ch.drillId);const isResp=respId===ch.id;
-    return <div key={ch.id} className="fade-up card-glow-o" style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:16,padding:"18px 20px",marginBottom:10,border:`1px solid ${ORANGE}33`,position:"relative",overflow:"hidden"}}>
-      <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:ORANGE,borderRadius:"4px 0 0 4px"}}/>
-      <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:12}}>
-        <Av n={ch.fromName} sz={38} email={ch.from}/>
-        <div style={{flex:1}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:15,letterSpacing:1}}>{ch.fromName.toUpperCase()}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>challenged you on <span style={{color:ORANGE,fontWeight:700}}>{ch.drillName}</span></div>
-        </div>
-        <div style={{textAlign:"right"}}>
-          <div style={{fontFamily:FD,color:ORANGE,fontSize:24}}>{ch.score}{hasDrillMax(ch)&&<span style={{color:MUTED,fontSize:14}}>/{ch.max}</span>}</div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1}}>TO BEAT</div>
-        </div>
-      </div>
-      {respSaved===ch.id?<div style={{textAlign:"center",padding:8}}><div style={{fontFamily:FD,color:VOLT,fontSize:18,letterSpacing:3}}>RESPONSE LOGGED!</div></div>
-      :isResp?<div className="fade-up">
-        <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
-          <div style={{flex:1}}><div style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,letterSpacing:2,fontWeight:700,marginBottom:6}}>YOUR SCORE</div>
-            <input autoFocus type="number" min="0" max={hasDrillMax(ch)?ch.max:undefined} value={respInput} onChange={e=>{setRespInput(e.target.value);setRespError("")}} onKeyDown={e=>e.key==="Enter"&&handleRespond(ch)} placeholder="0" style={{width:"100%",padding:"14px 8px",background:BG,border:`2px solid ${ORANGE}`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none"}}/>
-          </div>
-          {hasDrillMax(ch)&&<div style={{fontFamily:FD,color:T.SUB,fontSize:24,paddingTop:20}}>/{ch.max}</div>}
-        </div>
-        {respError&&<div role="alert" style={{fontFamily:FB,color:DANGER,fontSize:11,lineHeight:1.45,marginBottom:10}}>{respError}</div>}
-        <div style={{display:"flex",gap:8}}>
-          <button onClick={()=>{setRespId(null);setRespInput("");setRespError("")}} disabled={respSaving} style={{flex:1,padding:"11px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:13,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:respSaving?"not-allowed":"pointer"}}>CANCEL</button>
-          <button className="btn-v cta-primary" onClick={()=>handleRespond(ch)} disabled={respSaving} style={{width:"100%",opacity:respSaving?0.65:1}}>{respSaving?"SAVING...":"SUBMIT"}</button>
-        </div>
-      </div>
-      :<button className="btn-v cta-primary" onClick={()=>setRespId(ch.id)} style={{}}>
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>ACCEPT CHALLENGE
-      </button>}
-    </div>;
-  })}</>}
-
-{/* Resolved / History */}
-{pending.length>0&&<CourtDivider color={ORANGE} my={12}/>}
-<SH t={pending.length>0?"COMPLETED":"ALL DUELS"} s={`${resolved.length} TOTAL`}/>
-{resolved.length===0&&pending.length===0&&<Empty t="No duels yet" action="Log a drill score, then tap CHALLENGE to dare a teammate to beat it!"/>}
-{resolved.map(ch=>{
-  const isMine=ch.from===u.email;const dr=drills.find(d=>d.id===ch.drillId);
-  const won=isMine?(ch.status==="lost"):(ch.status==="won");const tied=ch.status==="tied";const isPending=ch.status==="pending";
-  const oppName=isMine?ch.toName:ch.fromName;
-  const myScore=isMine?ch.score:ch.respScore;const oppScore=isMine?ch.respScore:ch.score;
-  const resultColor=isPending?WARNING:won?SUCCESS:tied?INFO:DANGER;
-  const resultText=isPending?"PENDING":won?"YOU WON":tied?"TIE":"YOU LOST";
-
-  return <div key={ch.id+"-"+ch.ts} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"14px 16px",marginBottom:6,border:`1px solid ${isPending?ORANGE+"22":BORDER_CLR}`}}>
-    <div style={{width:40,height:40,borderRadius:12,background:resultColor+"12",border:`1px solid ${resultColor}33`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
-      {isPending?<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={MUTED} strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-      :won?<svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>
-      :tied?<span style={{fontFamily:FD,color:"#C8FF00",fontSize:14}}>=</span>
-      :<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FF4545" strokeWidth="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>}
-    </div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{isMine?"YOU":"YOU"} vs {oppName.toUpperCase()}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ch.drillName} &#183; {isPending?<span style={{color:ORANGE}}>Waiting for response</span>:<span style={{color:resultColor,fontWeight:700}}>{resultText}</span>}</div>
-    </div>
-    <div style={{textAlign:"right",flexShrink:0}}>
-      {isPending?<div style={{fontFamily:FD,color:ORANGE,fontSize:18}}>{ch.score}{hasDrillMax(ch)&&<span style={{color:MUTED,fontSize:11}}>/{ch.max}</span>}</div>
-      :<><div style={{fontFamily:FD,color:won?VOLT:"#FF4545",fontSize:16}}>{myScore??"-"}<span style={{color:MUTED,fontSize:10}}> v </span><span style={{color:won?"#FF4545":VOLT}}>{oppScore??"-"}</span></div>
-        {hasDrillMax(ch)&&<div style={{fontFamily:FB,color:MUTED,fontSize:8}}>/{ch.max}</div>}</>}
-    </div>
-  </div>;
-})}
-
-  </div>;
-}
-
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// STRENGTH & CONDITIONING PANEL
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-function SCPanel({sessions,scRsvps,user,toggleScRsvp,scLogs,addScLog,players,onCompletionCue}){
-const[expanded,setExpanded]=useState(null);
-const[newLog,setNewLog]=useState({date:todayStr(),time:"",place:"School",sport:""}),[logErr,setLogErr]=useState(""),[logSaved,setLogSaved]=useState(false),[rsvpError,setRsvpError]=useState("");
-const sorted=useMemo(()=>[...sessions].sort((a,b)=>a.date.localeCompare(b.date)),[sessions]);
-const upcoming=sorted.filter(s=>s.date>=todayStr()),past=sorted.filter(s=>s.date<todayStr());
-const myCount=scRsvps.filter(r=>r.email===user.email).length;
-const currentYear=String(new Date().getFullYear());
-const myAttendanceByDate=useMemo(()=>{
-  const dateCounts={};
-  const sessionsById={};
-  sessions.forEach(s=>{sessionsById[s.id]=s});
-  scRsvps.forEach(r=>{
-    if(r.email!==user.email)return;
-    const session=sessionsById[r.sessionId];
-    if(!session?.date||!session.date.startsWith(currentYear))return;
-    dateCounts[session.date]=(dateCounts[session.date]||0)+1;
-  });
-  return Object.entries(dateCounts)
-    .sort((a,b)=>a[0].localeCompare(b[0]))
-    .map(([date,count])=>({date,count}));
-},[sessions,scRsvps,user,currentYear]);
-const medals=[VOLT,"#A0A0A0","#A0A0A0"];
-
-const board=useMemo(()=>{const m={};scRsvps.forEach(r=>{if(!isLeaderboardEligible(players,r.email))return;if(!m[r.email])m[r.email]={email:r.email,name:r.name,count:0};m[r.email].count++});return Object.values(m).sort((a,b)=>b.count-a.count)},[scRsvps,players]);
-
-const LiftIcon=({size=24,color="#A0A0A0"})=><svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>;
-const SC_COLOR="#A0A0A0";
-const myScLogs=useMemo(()=>scLogs.filter(l=>l.email===user.email),[scLogs,user]);
-const handleAddScLog=async()=>{
-  const date=newLog.date?.trim();
-  const time=newLog.time?.trim();
-  const place=newLog.place?.trim();
-  const sport=newLog.sport?.trim();
-  if(!date||!time||!place||!sport){setLogSaved(false);setLogErr("Please complete date, time, place, and sport.");return}
-  setLogErr("");
-  setLogSaved(false);
-  const result=await addScLog({date,time,place,sport,ts:Date.now()});
-  if(!result?.ok){setLogErr(result?.err||"Session could not be saved. Please try again.");return}
-  onCompletionCue?.({title:"S&C activity logged",detail:`${sport} ¬∑ ${place} ¬∑ ${time}`,momentum:"Consistency compounds",next:"RSVP to your next session"});
-  setNewLog({date:todayStr(),time:"",place:"School",sport:""});
-  setLogSaved(true);
-  setTimeout(()=>setLogSaved(false),1800);
-};
-const handleScRsvp=async(sessionId)=>{
-  setRsvpError("");
-  const result=await toggleScRsvp(sessionId);
-  if(!result?.ok)setRsvpError(result?.error||"RSVP could not be saved. Please try again.");
-};
-
-return <div className="fade-up">
-{/* S&C banner ‚Äî heavy, grounded */}
-<div style={{background:`linear-gradient(180deg,${SC_COLOR}0c,${CARD_BG})`,borderRadius:18,padding:0,marginBottom:16,border:`1px solid ${SC_COLOR}18`,overflow:"hidden",position:"relative"}}>
-<div style={{position:"absolute",inset:0,background:"radial-gradient(ellipse at top left, rgba(200, 255, 0, 0.06) 0%, transparent 70%)",pointerEvents:"none"}}/>
-<div style={{padding:"18px 22px",display:"flex",alignItems:"center",gap:12,position:"relative"}}>
-<div style={{width:42,height:42,borderRadius:12,background:`${SC_COLOR}12`,border:`1px solid ${SC_COLOR}22`,display:"flex",alignItems:"center",justifyContent:"center"}}><LiftIcon size={22} color={SC_COLOR}/></div>
-<div>
-<div style={{fontFamily:FD,color:SC_COLOR,fontSize:16,letterSpacing:3}}>STRENGTH & CONDITIONING</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Show up. Get stronger. Track sessions.</div>
-</div>
-</div>
-</div>
-
-{/* Personal stats */}
-<div style={{display:"flex",gap:8,marginBottom:16}}>
-  <div className="grd-bdr" style={{flex:1.5}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
-    <AnimNum v={myCount} c={SC_COLOR} big/>
-    <div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:3,marginTop:6,fontWeight:600}}>SESSIONS ATTENDED</div>
-  </div></div>
-  <div style={{flex:1,display:"flex",flexDirection:"column",gap:8}}>
-    <div style={{flex:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"12px 12px",border:`1px solid ${BORDER_CLR}`}}>
-      <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:1,lineHeight:1}}>{upcoming.length}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:2,marginTop:4,fontWeight:600}}>UPCOMING</div>
-    </div>
-    <div style={{flex:1,background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"12px 12px",border:`1px solid ${BORDER_CLR}`}}>
-      <div style={{fontFamily:FD,color:SC_COLOR,fontSize:22,letterSpacing:1,lineHeight:1}}>#{board.findIndex(b=>b.email===user.email)+1||"-"}</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:8,letterSpacing:2,marginTop:4,fontWeight:600}}>YOUR RANK</div>
-    </div>
-  </div>
-</div>
-
-<div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
-  <div style={{display:"flex",alignItems:"baseline",justifyContent:"space-between",gap:10,marginBottom:10}}>
-    <div style={{fontFamily:FD,color:SC_COLOR,fontSize:22,letterSpacing:2}}>ATTENDANCE BY DATE ({currentYear})</div>
-    <div style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:1}}>{myAttendanceByDate.reduce((a,d)=>a+d.count,0)}</div>
-  </div>
-  {myAttendanceByDate.length===0
-    ?<div style={{fontFamily:FB,color:MUTED,fontSize:12}}>No S&C sessions attended yet this year.</div>
-    :<div style={{display:"grid",gap:6}}>
-      {myAttendanceByDate.map(entry=><div key={entry.date} style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:10,padding:"8px 10px"}}>
-        <span style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700}}>{entry.date}</span>
-        <span style={{fontFamily:FD,color:SC_COLOR,fontSize:18,lineHeight:1}}>{entry.count}</span>
-      </div>)}
-    </div>}
-</div></div>
-
-<div style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.5,margin:"-2px 0 16px",padding:"10px 12px",borderRadius:12,border:`1px solid ${BORDER_CLR}`,background:"rgba(255,255,255,0.02)"}}>RSVP privacy is protected for players. You can see your own status; coaches can manage the full attendance list.</div>
-
-<SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SESSION LOG"/>
-<div className="grd-bdr" style={{marginBottom:16}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"16px"}}>
-  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-    <FF l="DATE" v={newLog.date} set={v=>setNewLog({...newLog,date:v})} tp="date"/>
-    <FF l="TIME" v={newLog.time} set={v=>setNewLog({...newLog,time:v})} ph="e.g. 7:00 AM"/>
-    <div style={{gridColumn:"1 / -1"}}><FF l="PLACE" v={newLog.place} set={v=>setNewLog({...newLog,place:v})} opts={["School","Private Trainer","Gym Membership","At Home"]}/></div>
-    <div style={{gridColumn:"1 / -1"}}><FF l="SPORT" v={newLog.sport} set={v=>setNewLog({...newLog,sport:v})} ph="Basketball"/></div>
-  </div>
-  {logErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:11,marginTop:8}}>{logErr}</div>}
-  {logSaved&&<div style={{fontFamily:FB,color:SC_COLOR,fontSize:11,marginTop:8}}>Session logged.</div>}
-  <button className="btn-v cta-primary" onClick={handleAddScLog} style={{marginTop:10}}>ADD SESSION</button>
-</div></div>
-
-<div style={{marginBottom:16,background:"#141414",border:"1px solid #242424",borderRadius:16,minHeight:100,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"16px"}}>
-  <div style={{fontFamily:FD,color:"#C8FF00",fontSize:48,fontWeight:900,lineHeight:1}}>{myScLogs.length}</div>
-  <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,letterSpacing:"0.08em",fontWeight:700,marginTop:8,textTransform:"uppercase"}}>TOTAL S&C SESSIONS LOGGED</div>
-</div>
-
-{/* Upcoming sessions */}
-<SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING SESSIONS" s={`${upcoming.length} SCHEDULED`}/>
-{upcoming.length===0&&<Empty t="No upcoming sessions" action="Your coach will add S&C sessions here. Check back soon!" icon={<LiftIcon size={40} color="#555555"/>}/>}
-{upcoming.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const going=sr.some(r=>r.email===user.email);const exp=expanded===s.id;
-  return <div key={s.id} style={{marginBottom:12}}>
-    <button onClick={()=>setExpanded(exp?null:s.id)} className="ch" style={{width:"100%",background:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?SC_COLOR+"33":BORDER_CLR}`,borderRadius:exp?"16px 16px 0 0":16,padding:"18px 20px",textAlign:"left",cursor:"pointer",position:"relative",overflow:"hidden"}}>
-      {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:SC_COLOR,borderRadius:"4px 0 0 4px"}}/>}
-      <div style={{display:"flex",alignItems:"flex-start",gap:14}}>
-        <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={24} color={going?SC_COLOR:MUTED}/></div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:2}}>{s.sport||s.title}</div>
-          <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:3}}><span style={{color:SC_COLOR,fontWeight:700}}>{s.date}</span> &#183; {s.time}</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{s.location}</div>
-        </div>
-        <div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:going?SC_COLOR:MUTED,fontSize:14}}>{going?"GOING":"OPEN"}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,letterSpacing:1}}>YOUR RSVP</div></div>
-      </div>
-    </button>
-    {exp&&<div className="fade-up" style={{background:`linear-gradient(180deg,${CARD_BG},#141414)`,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
-      {s.desc&&<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.6,marginBottom:14}}>{s.desc}</p>}
-      <button className="btn-v cta-primary" onClick={()=>handleScRsvp(s.id)} style={{}}>
-        {going?<>‚úì YOU'RE IN ‚Äî TAP TO CANCEL</>:<><LiftIcon size={16} color={BG}/> RSVP NOW</>}
-      </button>
-      {rsvpError&&<div role="alert" style={{fontFamily:FB,color:"#FF6969",fontSize:11,marginTop:10,fontWeight:700}}>{rsvpError}</div>}
-      <div style={{fontFamily:FB,color:going?SC_COLOR:MUTED,fontSize:11,marginTop:10,fontWeight:700}}>Your RSVP status: {going?"Going":"Not RSVP‚Äôd"}</div>
-    </div>}
-  </div>;
-})}
-
-{/* Past sessions */}
-{past.length>0&&<><CourtDivider color={SC_COLOR} my={12}/><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PAST SESSIONS" s={`${past.length} COMPLETED`}/>
-  {past.map(s=>{const sr=scRsvps.filter(r=>r.sessionId===s.id);const went=sr.some(r=>r.email===user.email);
-    return <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:12,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.7}}>
-      <div style={{width:36,height:36,borderRadius:10,background:went?SC_COLOR+"12":BG,border:`1px solid ${went?SC_COLOR+"33":BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><LiftIcon size={16} color={went?SC_COLOR:MUTED}/></div>
-      <div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:LIGHT,fontSize:13,letterSpacing:1}}>{s.sport||s.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{s.date} &#183; {sr.length} attended</div></div>
-      {went&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,color:SC_COLOR,background:SC_COLOR+"12",padding:"2px 8px",borderRadius:4,letterSpacing:1}}>ATTENDED</span>}
-    </div>;
-  })}</>}
-
-  </div>;
-}
-
-
-function StatTile({value,label,color,style}){
-return <div style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:"12px 10px",minHeight:98,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.02)",...style}}><div style={{fontFamily:FD,color:color||LIGHT,fontSize:24,lineHeight:1.05,wordBreak:"break-word"}}>{value}</div><div style={{fontFamily:FB,color:TOKENS.TEXT_SECONDARY,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase"}}>{label}</div></div>
-}
-
-function ModeCard({title,subtitle,icon,stats,accent="home",variant="active",infoLayout="equal",isActive,onClick,actionLabel="Open",titleColor=LIGHT,subtitleColor}){
-const a=MODE_CARD_ACCENTS[accent]||MODE_CARD_ACCENTS.home;
-const v=MODE_CARD_VARIANTS[variant]||MODE_CARD_VARIANTS.active;
-const infoLayoutConfig=MODE_CARD_INFO_LAYOUTS[infoLayout]||MODE_CARD_INFO_LAYOUTS.equal;
-const baseBorder=isActive?`1.5px solid ${a.glow}`:`1.5px solid ${MODE_CARD_TOKENS.BASE_BORDER}`;
-const baseShadow=isActive?`0 14px 32px rgba(0,0,0,.45), 0 0 0 1px ${a.glow} inset`:MODE_CARD_TOKENS.BASE_SHADOW;
-const chipBackground=v.chipBackground==="accent"?a.chipBackground:v.chipBackground;
-const chipBorder=v.chipBorder==="accent"?a.chipBorder:v.chipBorder;
-const chipColor=v.chipColor==="accent"?a.chipColor:v.chipColor;
-const ctaBackground=v.ctaBackground==="accent"?a.ctaBackground:v.ctaBackground;
-const ctaShadow=v.ctaShadow==="accent"?a.ctaShadow:v.ctaShadow;
-const themedIcon=isValidElement(icon)?cloneElement(icon,{stroke:a.iconStroke,color:a.iconStroke}):icon;
-return <button type="button" onClick={onClick} className="mode-card" style={{"--glow":a.glow,width:"100%",background:`radial-gradient(circle at 12% 10%, ${a.tint} 0%, transparent 55%), ${MODE_CARD_TOKENS.BASE_BG}`,border:baseBorder,borderRadius:24,padding:22,cursor:"pointer",textAlign:"left",position:"relative",overflow:"hidden",minHeight:272,display:"flex",flexDirection:"column",justifyContent:"space-between",boxShadow:baseShadow,transition:"transform .12s ease, border-color .2s ease, box-shadow .2s ease"}} onMouseEnter={e=>{e.currentTarget.style.borderColor=a.glow;e.currentTarget.style.boxShadow=`0 16px 34px rgba(0,0,0,.48), 0 0 0 1px ${a.glow} inset, 0 0 24px ${a.glow}`}} onMouseLeave={e=>{e.currentTarget.style.border=baseBorder;e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}} onMouseDown={e=>{e.currentTarget.style.transform="scale(0.99)";e.currentTarget.style.boxShadow=`0 0 0 2px ${a.glow}, 0 14px 28px rgba(0,0,0,.45)`}} onMouseUp={e=>{e.currentTarget.style.transform="scale(1)"}} onFocus={e=>{e.currentTarget.style.outline="none";e.currentTarget.style.boxShadow=`0 0 0 3px ${a.focusRing}, 0 14px 28px rgba(0,0,0,.45), 0 0 0 1px ${a.glow} inset`}} onBlur={e=>{e.currentTarget.style.boxShadow=baseShadow;e.currentTarget.style.transform="scale(1)"}}>
-  {v.showTopAccent&&<div aria-hidden="true" style={{position:"absolute",top:0,left:0,right:0,height:4,background:`linear-gradient(90deg, ${a.topAccentStart}, ${a.topAccentEnd})`,opacity:.9}}/>}
-  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:10,marginBottom:16}}>
-    <div style={{display:"flex",alignItems:"center",gap:12,minWidth:0}}>
-      <div style={{width:50,height:50,borderRadius:14,background:MODE_CARD_TOKENS.ICON_INNER,border:`${v.iconBorderWidth} solid ${a.glow}`,boxShadow:v.iconGlow.replaceAll("var(--glow)",a.glow),display:"flex",alignItems:"center",justifyContent:"center",color:a.iconStroke,flexShrink:0}}>{themedIcon}</div>
-      <div style={{minWidth:0}}>
-        <div style={{fontFamily:FD,color:titleColor,fontSize:22,letterSpacing:2.5,lineHeight:1,textTransform:"uppercase"}}>{title}</div>
-        <div style={{fontFamily:FB,color:subtitleColor||chipColor,fontSize:11,fontWeight:600,marginTop:5,letterSpacing:"0.04em"}}>{subtitle}</div>
-      </div>
-    </div>
-    <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
-      {actionLabel&&<div style={{fontFamily:FB,color:chipColor,fontSize:10,fontWeight:700,letterSpacing:"0.08em",textTransform:"uppercase",padding:"7px 10px",borderRadius:999,border:chipBorder,background:chipBackground,whiteSpace:"nowrap"}}>{actionLabel}</div>}
-      <div style={{width:38,height:38,borderRadius:10,background:ctaBackground,border:`1.5px solid ${a.glow}`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:ctaShadow.replaceAll("var(--glow)",a.glow)}}><svg width="16" height="16" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={a.iconStroke} strokeWidth="2.2" fill="none" strokeLinecap="round"/></svg></div>
-    </div>
-  </div>
-  <div style={infoLayoutConfig.container}>{stats.map((s,index)=><StatTile key={s.label} value={s.value} label={s.label} color={s.color} style={infoLayoutConfig.getTileStyle(index,stats.length)}/>)}</div>
-</button>
-}
-
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// DASHBOARD LEADERBOARD ‚Äî The hero section
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-function DashboardLeaderboard({scores,drills,programDrills,user,scRsvps,rsvps,shotLogs,players}){
-const[mode,setMode]=useState("home");
-const[sub,setSub]=useState("total");
-const medals=[VOLT,"#A0A0A0","#A0A0A0"];
-const homeScores=useMemo(()=>scores.filter(s=>s.src==="home"||!s.src),[scores]);
-const progScores=useMemo(()=>scores.filter(s=>s.src==="program"),[scores]);
-
-const leaderboardEligible=useMemo(()=>new Set(players.filter(p=>p.role!=="coach"&&isLeaderboardEligible(players,p.email)).map(p=>p.email)),[players]);
-const board=useMemo(()=>{
-if(mode==="home"){
-if(sub==="shots"){
-const m={};shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-}
-if(sub==="total"){
-// Combine drill scores + shot logs
-const m={};
-homeScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
-shotLogs.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.made});
-return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-}
-// Per-drill
-const did=parseInt(sub);const m={};
-homeScores.filter(s=>s.drillId===did).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
-return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-}
-// Program
-if(sub==="events"){
-const m={};rsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-}
-if(sub==="sc"){
-const m={};scRsvps.forEach(r=>{if(!m[r.email])m[r.email]={email:r.email,name:r.name,total:0};m[r.email].total++});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-}
-if(sub.startsWith("prog-")){const did=sub.slice(5);const m={};progScores.filter(s=>String(s.drillId||s.drill_id)===String(did)).forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);}
-const m={};progScores.forEach(s=>{if(!m[s.email])m[s.email]={email:s.email,name:s.name||s.email,total:0};m[s.email].total+=s.score});
-return Object.values(m).filter(entry=>leaderboardEligible.has(entry.email)).sort((a,b)=>b.total-a.total);
-},[homeScores,progScores,mode,sub,scores,scRsvps,rsvps,shotLogs,programDrills,leaderboardEligible]);
-
-const isHome=mode==="home";
-const accentColor=isHome?VOLT:CYAN;
-const unit=sub==="shots"?"makes":sub==="events"?"events":sub==="sc"?"sessions":"makes";
-const title=isHome?"AT HOME":"PROGRAM";
-const modeStyles={
-home:{accent:VOLT,bg:"rgba(200, 255, 0, 0.14)",glow:"0 0 18px rgba(200, 255, 0, 0.28)",label:"üè†"},
-prog:{accent:CYAN,bg:"rgba(0, 229, 255, 0.14)",glow:"0 0 18px rgba(0, 229, 255, 0.28)",label:"üìÖ"}
-};
-
-// Swap sub when switching modes
-const switchMode=(m)=>{setMode(m);setSub(m==="home"?"total":"events")};
-
-return <div>
-{/* Mode toggle */}
-<div style={{display:"flex",gap:8,background:"#121212",borderRadius:14,padding:6,marginBottom:16,border:"1px solid rgba(200, 255, 0, 0.24)"}}>
-{[{k:"home",l:"AT HOME"},{k:"prog",l:"PROGRAM"}].map(m=>{
-const active=mode===m.k;
-const thisMode=modeStyles[m.k];
-return <button key={m.k} onClick={()=>switchMode(m.k)} style={{flex:1,padding:"10px 0",borderRadius:10,border:`1px solid ${active?thisMode.accent+"AA":"#353535"}`,cursor:"pointer",fontFamily:FB,fontSize:13,fontWeight:700,letterSpacing:2,transition:"all 180ms ease",background:active?`linear-gradient(180deg, ${thisMode.bg}, #131313 85%)`:"#171717",color:active?thisMode.accent:"#7A7A7A",boxShadow:active?thisMode.glow:"none",display:"flex",alignItems:"center",justifyContent:"center",gap:8,textShadow:active?`0 0 8px ${thisMode.accent}55`:"none"}}><span aria-hidden="true" style={{fontSize:12,lineHeight:1,opacity:active?1:.65}}>{thisMode.label}</span>{m.l}</button>
-})}
-</div>
-
-{/* Sub-tabs */}
-<div style={{overflowX:"auto",marginBottom:16,paddingBottom:4,paddingLeft:16,WebkitOverflowScrolling:"touch",scrollbarWidth:"none",msOverflowStyle:"none"}}>
-  <div style={{display:"flex",gap:8,minWidth:"max-content"}}>
-    {isHome?
-      [{k:"total",l:"ALL"},{k:"shots",l:"SHOTS"},...drills.map(d=>({k:String(d.id),l:d.name}))].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?"#C8FF00":"#1E1E1E",color:sub===t.k?"#000000":"#555555",transition:"all .2s"}}>{t.l}</button>)
-    :[{k:"events",l:"ATTENDANCE"},{k:"sc",l:"S&C"},{k:"prog-total",l:"DRILL SCORES"},...programDrills.map(d=>({k:`prog-${d.id}`,l:d.name}))].map(t=>
-        <button key={t.k} onClick={()=>setSub(t.k)} style={{height:32,padding:"0 14px",borderRadius:20,border:sub===t.k?"none":"1px solid #333333",cursor:"pointer",fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"0.06em",textTransform:"uppercase",whiteSpace:"nowrap",background:sub===t.k?CYAN:"#1E1E1E",color:sub===t.k?"#041014":"#555555",transition:"all .2s",boxShadow:sub===t.k?"0 0 14px rgba(0, 229, 255, 0.35)":"none"}}>{t.l}</button>)}
-  </div>
-</div>
-
-{/* Title */}
-<div style={{display:"flex",alignItems:"center",gap:8,marginBottom:14}}>
-  <div style={{width:4,height:22,borderRadius:2,background:accentColor}}/>
-  <div style={{fontFamily:FD,color:accentColor,fontSize:18,letterSpacing:3,flex:1}}>{title} LEADERBOARD</div>
-  <div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:2,fontWeight:600}}>{board.length}</div>
-</div>
-
-{/* Board */}
-<div key={mode+sub} className="slide-r">
-{board.length===0&&<Empty t={`No ${unit} logged yet`} action="Log a drill score to get on the board!" onTap={null}/>}
-
-{/* YOUR POSITION ‚Äî sticky anchor */}
-{(()=>{const myIdx=board.findIndex(p=>p.email===user.email);const myEntry=board[myIdx];
-  if(myIdx<0)return null;
-  return <div style={{background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:14,padding:"12px 16px",marginBottom:14,border:`2px solid ${accentColor}44`,display:"flex",alignItems:"center",gap:12,position:"sticky",top:0,zIndex:5,backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)"}}>
-    <div style={{width:4,height:28,borderRadius:2,background:accentColor,flexShrink:0}}/>
-    <div style={{fontFamily:FD,color:accentColor,fontSize:24}}>#{myIdx+1}</div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,letterSpacing:1}}>YOUR POSITION</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{myEntry.total} {unit}</div>
-    </div>
-    {myIdx>0&&<div style={{fontFamily:FB,color:T.SUB,fontSize:9,fontWeight:600,letterSpacing:1}}>{board[myIdx-1].total-myEntry.total} to #{myIdx}</div>}
-  </div>})()}
-
-{board.map((p,i)=>{
-  const isMe=p.email===user.email;
-  const isLeader=i===0&&board.length>1;
-  const isTop3=i<3;
-  const leaderTotal=board[0]?.total||1;
-  const pct=Math.round((p.total/leaderTotal)*100);
-  const rowBg=i%2===0?CARD_BG:T.SURFACE;
-  const rosterIdentity=p.email||p.playerId||p.id||p.name||i;
-
-  if(isLeader) return <div key={rosterIdentity} className="podium-glow" style={{"--pod-c":accentColor,display:"flex",alignItems:"center",gap:14,background:"rgba(10, 12, 14, 0.94)",backgroundClip:"padding-box",borderRadius:16,padding:"20px 18px",marginBottom:12,border:`2px solid ${accentColor}33`,position:"relative",overflow:"hidden"}}>
-    <div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:accentColor,borderRadius:"4px 0 0 4px"}}/>
-    <div style={{width:32,height:32,borderRadius:9,background:`${accentColor}18`,border:`2px solid ${accentColor}`,display:"flex",alignItems:"center",justifyContent:"center",fontFamily:FD,fontSize:14,color:accentColor,flexShrink:0}}>üëë</div>
-    <div className="playersAvatarRing"><Av n={p.name} sz={40} email={p.email}/></div>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:LIGHT,fontSize:15,fontWeight:700,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"2px 6px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1}}>YOU</span>}</div>
-      <div style={{fontFamily:FB,color:accentColor,fontSize:9,letterSpacing:2,fontWeight:700,marginTop:2}}>#1</div>
-    </div>
-    <div style={{textAlign:"right",flexShrink:0}}>
-      <div style={{fontFamily:FD,fontSize:28,color:accentColor}}>{p.total}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:600}}>{unit.toUpperCase()}</div>
-    </div>
-  </div>;
-
-  return <div key={rosterIdentity} style={{display:"flex",alignItems:"center",gap:12,background:isMe?"rgba(10, 12, 14, 0.94)":rowBg,backgroundClip:"padding-box",borderRadius:12,padding:"14px 14px",marginBottom:isTop3?10:8,border:isMe?`2px solid ${accentColor}44`:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
-    {isTop3&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor+"66",borderRadius:"3px 0 0 3px"}}/>}
-    {isMe&&<div style={{position:"absolute",top:0,left:0,width:3,height:"100%",background:accentColor,borderRadius:"3px 0 0 3px"}}/>}
-    <RB r={i+1} m={medals}/>
-    <Av n={p.name} sz={32} email={p.email}/>
-    <div style={{flex:1,minWidth:0}}>
-      <div style={{fontFamily:FB,color:isMe?LIGHT:LIGHT,fontSize:13,fontWeight:isMe?700:600,letterSpacing:1}}>{p.name.toUpperCase()}{isMe&&<span style={{fontFamily:FB,fontSize:8,fontWeight:700,padding:"1px 5px",borderRadius:4,background:accentColor,color:BG,marginLeft:6,letterSpacing:1,verticalAlign:"middle"}}>YOU</span>}</div>
-      <div style={{marginTop:5,height:3,borderRadius:2,background:T.TRACK,overflow:"hidden"}}>
-        <div style={{width:`${pct}%`,height:"100%",background:isMe?accentColor:isTop3?accentColor:accentColor+"66",borderRadius:2,transition:"width .4s ease"}}/>
-      </div>
-    </div>
-
-    <DividerDot/>
-
-    {/* ‚îÄ‚îÄ DAILY DRILLS (PRIMARY ACTION) ‚îÄ‚îÄ */}
-    <div style={{fontFamily:FB,color:VOLT,fontSize:10,letterSpacing:3,fontWeight:700,marginBottom:10}}>DAILY DRILLS ¬∑ {todayS.length}/{drills.length} DONE</div>
-    {drills.map(d=>{const done=todayS.find(s=>s.drillId===d.id);const pct=done&&hasDrillMax(d)?Math.round(done.score/d.max*100):0;
-      return <button key={d.id} className="ch" onClick={()=>!done&&setActive(d)} style={{width:"100%",display:"flex",alignItems:"center",gap:14,background:CARD_BG,border:`1px solid ${done?VOLT+"22":BORDER_CLR}`,borderRadius:16,padding:"16px 18px",marginBottom:10,cursor:done?"default":"pointer",textAlign:"left",opacity:done?.65:1}}>
-        <div style={{width:46,height:46,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${done?VOLT+"44":BORDER_CLR}`,flexShrink:0,position:"relative"}}><DrillIcon type={d.icon} size={22} color={done?VOLT+"88":VOLT}/>{done&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",background:BG+"cc",borderRadius:12}}><svg width="16" height="16" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>}</div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-          <div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{d.desc}</div>
-        </div>
-        {done?<div style={{textAlign:"right",flexShrink:0}}>
-          <div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{done.score}{hasDrillMax(d)&&<span style={{color:MUTED,fontSize:11}}>/{d.max}</span>}</div>
-          {hasDrillMax(d)&&<div style={{width:40,height:3,background:T.TRACK,borderRadius:2,marginTop:4,overflow:"hidden"}}><div style={{width:`${pct}%`,height:"100%",background:pct>=80?VOLT:pct>=50?ORANGE:"#FF4545",borderRadius:2}}/></div>}
-        </div>
-        :<div style={{width:44,height:44,borderRadius:10,background:VOLT+"11",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="12" height="12" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke={VOLT} strokeWidth="2" fill="none" strokeLinecap="round"/></svg></div>}
-      </button>})}
-    <div style={{textAlign:"right",flexShrink:0}}>
-      <div style={{fontFamily:FD,color:isMe?accentColor:isTop3?accentColor:LIGHT,fontSize:20}}>{p.total}</div>
-      <div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1,fontWeight:500}}>{unit.toUpperCase()}</div>
-    </div>
-  </div>;
-})}
-</div>
-
-  </div>;
-}
-
-
-function HomeShotSyncRetryPanel({syncIssueShots=[],retryHomeShotLog,setShotSaveNotice,isDemoSession=false}){
-const[retryingShotId,setRetryingShotId]=useState("");
-const debugMode=typeof window!=="undefined"&&window.location.search.includes("homeShotDebug=1");
-const visibleSyncIssueShots=syncIssueShots.filter(log=>!isDemoAccount(log));
-if(isDemoSession||!visibleSyncIssueShots.length)return null;
-const diagnosticLines=(diag={})=>["status","error","stage","message","authorized_by","uuid_membership_query_result","email_membership_query_result","player_record_query_result","team_binding_repair_attempted","team_binding_repair_account_probe","team_binding_repair_players_result","team_binding_repair_memberships_result","team_binding_repair_result"].map(key=>diag?.[key]?`${key}: ${diag[key]}`:"").filter(Boolean);
-return <div style={{border:"1px solid rgba(255,181,71,0.34)",background:"rgba(255,181,71,0.07)",borderRadius:12,padding:"10px 12px",margin:"0 0 12px"}}>
-  <div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:800,letterSpacing:"0.08em",marginBottom:6}}>TEAM SYNC NEEDS ATTENTION</div>
-  {visibleSyncIssueShots.slice(0,3).map(log=>{const isRetrying=retryingShotId===log.id;const needsRepair=log.syncError==="missing_durable_team_binding"||log.syncError==="forbidden";const lines=debugMode?diagnosticLines(log.syncDiagnostic):[];return <div key={log.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"6px 0",borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-    <div style={{fontFamily:FB,color:LIGHT,fontSize:12,lineHeight:1.35}}>{log.made} makes on {log.date}<div style={{color:log.syncState==="failed_sync"?"#FF8B8B":CYAN,fontSize:10,fontWeight:700}}>{needsRepair?"Your player account is not durably linked to this team yet. Ask your coach to review your team link.":log.syncState==="failed_sync"?"Not synced to coach dashboard":"Saved locally ‚Äî sync pending"}</div>{debugMode&&lines.length>0&&<pre style={{whiteSpace:"pre-wrap",margin:"6px 0 0",color:MUTED,fontSize:9,lineHeight:1.35,fontFamily:"monospace"}}>{lines.join("\n")}</pre>}</div>
-    <button type="button" disabled={isRetrying} onClick={async()=>{if(isRetrying)return;setRetryingShotId(log.id);setShotSaveNotice(needsRepair?"Team link needs coach review ‚Äî retrying sync‚Ä¶":"Retrying team sync‚Ä¶");try{const result=await retryHomeShotLog?.(log);setShotSaveNotice(result?.ok?"Team sync complete":needsRepair?"Team link still needs attention":"Could not sync yet ‚Äî try again");setTimeout(()=>setShotSaveNotice(""),4200);}finally{setRetryingShotId("");}}} style={{border:`1px solid ${ORANGE}66`,background:ORANGE+"12",color:ORANGE,borderRadius:999,padding:"6px 10px",fontFamily:FB,fontSize:11,fontWeight:800,cursor:isRetrying?"not-allowed":"pointer",whiteSpace:"nowrap",opacity:isRetrying?0.7:1}}>{isRetrying?"SYNCING‚Ä¶":"RETRY SYNC"}</button>
-  </div>})}
-</div>;
-}
-
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// SHOT TRACKER ‚Äî Log makes by date with running totals
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-function ShotTracker({u,shotLogs,addShotLog,retryHomeShotLog,shotMade,setShotMade,shotDate,setShotDate,shotSaved,setShotSaved,shotSaving,setShotSaving,shotSaveNotice,setShotSaveNotice}){
-const my=useMemo(()=>shotLogs.filter(s=>s.email===u.email),[shotLogs,u]);
-const isDemoHomeShotSession=isDemoMode()||isDemoAccount(u);
-const syncIssueShots=useMemo(()=>isDemoHomeShotSession?[]:my.filter(s=>!isDemoAccount(s)&&s.syncState==="failed_sync"),[isDemoHomeShotSession,my]);
-const today=todayStr();
-const[shotInputError,setShotInputError]=useState("");
-
-const handleLog=async()=>{
-if(shotSaving)return;
-const validation=validateHomeShotLogInput({made:shotMade,date:shotDate});if(!validation.ok){setShotInputError(validation.error);setShotSaveNotice("");return;}
-setShotInputError("");
-setShotSaveNotice("");
-setShotSaving(true);
-try{
-const result=await addShotLog(validation.made,shotDate);
-if(result?.ok){if(result.mode==="local_pending"){setShotSaveNotice("Saved locally ‚Äî team sync pending");setTimeout(()=>setShotSaveNotice(""),4200);}setShotSaved(true);setShotMade("");setTimeout(()=>setShotSaved(false),1800);}
-}finally{
-setShotSaving(false);
-}
-};
-
-// Running totals
-const todayTotal=useMemo(()=>my.filter(s=>s.date===today).reduce((a,s)=>a+s.made,0),[my,today]);
-const weekTotal=useMemo(()=>{
-const d=new Date();const day=d.getDay();const start=new Date(d.getFullYear(),d.getMonth(),d.getDate()-day);const startStr=`${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,"0")}-${String(start.getDate()).padStart(2,"0")}`;
-return my.filter(s=>s.date>=startStr&&s.date<=today).reduce((a,s)=>a+s.made,0);
-},[my,today]);
-const monthTotal=useMemo(()=>{const mo=today.slice(0,7);return my.filter(s=>s.date.startsWith(mo)).reduce((a,s)=>a+s.made,0)},[my,today]);
-const yearTotal=useMemo(()=>{const yr=today.slice(0,4);return my.filter(s=>s.date.startsWith(yr)).reduce((a,s)=>a+s.made,0)},[my,today]);
-const allTime=useMemo(()=>my.reduce((a,s)=>a+s.made,0),[my]);
-
-return <div className="fade-up">
-{/* Header */}
-{/* Shot Tracker banner ‚Äî arc-inspired */}
-<div style={{background:`linear-gradient(180deg,${ORANGE}08,${CARD_BG})`,borderRadius:18,padding:"18px 22px",marginBottom:16,border:`1px solid ${ORANGE}12`,position:"relative",overflow:"hidden"}}>
-<div style={{position:"absolute",top:-20,right:20,opacity:.06}}><svg width="80" height="80" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="17" stroke={ORANGE} strokeWidth="3"/><path d="M3 20h34" stroke={ORANGE} strokeWidth="2"/></svg></div>
-
-<div style={{display:"flex",alignItems:"center",gap:12,position:"relative"}}>
-<div style={{width:42,height:42,borderRadius:12,background:`${ORANGE}12`,border:`1px solid ${ORANGE}22`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={ORANGE} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-</div>
-<div>
-<div style={{fontFamily:FD,color:ORANGE,fontSize:16,letterSpacing:3}}>SHOT TRACKER</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Log makes ¬∑ Running totals ¬∑ Heat map</div>
-</div>
-</div>
-</div>
-
-{/* Running totals */}
-<div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:16}}>
-  <div className="grd-bdr" style={{gridColumn:"1/3"}}><div style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:16,padding:"18px 16px"}}>
-    <AnimNum v={allTime} c={VOLT} big/><div style={{fontFamily:FB,color:T.SUB,fontSize:10,letterSpacing:3,marginTop:6,fontWeight:600}}>ALL-TIME MAKES</div>
-  </div></div>
-  {[{l:"TODAY",v:todayTotal,c:LIGHT},{l:"THIS WEEK",v:weekTotal,c:VOLT},{l:"THIS MONTH",v:monthTotal,c:CYAN},{l:"THIS YEAR",v:yearTotal,c:ORANGE}].map((s,i)=>
-    <div key={i} style={{background:`linear-gradient(145deg,${SURFACE},${CARD_BG})`,borderRadius:14,padding:"14px 14px",border:`1px solid ${BORDER_CLR}`}}>
-      <AnimNum v={s.v} c={s.c}/>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:2,marginTop:4,fontWeight:600}}>{s.l}</div>
-    </div>
-  )}
-</div>
-
-{/* Input card */}
-<div style={{background:`linear-gradient(135deg,${CARD_BG},#141414)`,borderRadius:18,padding:"24px 22px",border:`1px solid ${BORDER_CLR}`,marginBottom:20}}>
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:3,marginBottom:18}}>LOG MADE SHOTS</div>
-
-  {shotSaved?<div style={{textAlign:"center",padding:"24px 0"}}>
-    <div style={{width:60,height:60,borderRadius:"50%",background:VOLT+"15",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px"}}><svg width="28" height="28" viewBox="0 0 40 40"><path d="M10 20l8 8 12-14" stroke={VOLT} strokeWidth="3.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-    <div style={{fontFamily:FD,color:VOLT,fontSize:22,letterSpacing:4}}>SHOTS LOGGED</div>
-    {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,marginTop:8,letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
-  </div>
-  :<>
-    <div style={{display:"flex",gap:10,marginBottom:16}}>
-      <div style={{flex:1}}>
-        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>SHOTS MADE</label>
-        <input type="number" min="1" value={shotMade} onChange={e=>setShotMade(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")handleLog();}} placeholder="0" style={{width:"100%",padding:"16px 14px",background:BG,border:`2px solid ${ORANGE}66`,borderRadius:14,color:ORANGE,fontFamily:FD,fontSize:36,textAlign:"center",outline:"none",letterSpacing:2}} onFocus={e=>e.target.style.borderColor=ORANGE} onBlur={e=>e.target.style.borderColor=ORANGE+"66"}/>
-      </div>
-      <div style={{flex:1}}>
-        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:10,fontWeight:700,letterSpacing:3,display:"block",marginBottom:6}}>DATE</label>
-        <input type="date" value={shotDate} onChange={e=>setShotDate(e.target.value)} max={today} style={{width:"100%",padding:"16px 10px",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14,color:LIGHT,fontFamily:FB,fontSize:16,fontWeight:600,outline:"none",textAlign:"center"}} onFocus={e=>e.target.style.borderColor=ORANGE+"66"} onBlur={e=>e.target.style.borderColor=BORDER_CLR}/>
-      </div>
-    </div>
-    <HomeShotSyncRetryPanel syncIssueShots={syncIssueShots} retryHomeShotLog={retryHomeShotLog} setShotSaveNotice={setShotSaveNotice} isDemoSession={isDemoHomeShotSession}/>
-    {shotInputError&&<div style={{fontFamily:FB,color:"#FFB547",fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotInputError}</div>}
-    {shotSaveNotice&&<div style={{fontFamily:FB,color:CYAN,fontSize:11,fontWeight:700,margin:"-4px 0 10px",letterSpacing:"0.02em"}}>{shotSaveNotice}</div>}
-    <button className="btn-v cta-primary" disabled={shotSaving} onClick={handleLog} style={{opacity:shotSaving?0.7:1,cursor:shotSaving?"not-allowed":"pointer"}}>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={BG} strokeWidth="2.5" strokeLinecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      {shotSaving?"SAVING‚Ä¶":"LOG SHOTS"}
-    </button>
-  </>}
-</div>
-
-{/* Heat Map Calendar */}
-{my.length>0||true?<>
-  <CourtDivider color={ORANGE} my={12}/>
-  <SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="SHOT HEAT MAP" s="LAST 12 WEEKS"/>
-  {(()=>{
-    const dayMap={};my.forEach(s=>{if(!dayMap[s.date])dayMap[s.date]=0;dayMap[s.date]+=s.made});
-    const weeks=[];const d=new Date();d.setDate(d.getDate()-d.getDay());// start of current week
-    for(let w=0;w<12;w++){const week=[];for(let day=0;day<7;day++){const dd=new Date(d);dd.setDate(dd.getDate()-(11-w)*7+day);const ds=`${dd.getFullYear()}-${String(dd.getMonth()+1).padStart(2,"0")}-${String(dd.getDate()).padStart(2,"0")}`;const count=dayMap[ds]||0;const isFuture=ds>today;week.push({date:ds,count,isFuture,isToday:ds===today})}weeks.push(week)}
-    const maxCount=Math.max(1,...Object.values(dayMap));
-    const getColor=(c)=>{if(c===0)return BORDER_CLR;const intensity=Math.min(c/Math.max(maxCount*.6,20),1);const r=parseInt(VOLT.slice(1,3),16);const g=parseInt(VOLT.slice(3,5),16);const b=parseInt(VOLT.slice(5,7),16);return `rgba(${r},${g},${b},${.15+intensity*.85})`};
-    return <div style={{overflowX:"auto",paddingBottom:8}}>
-      <div style={{display:"flex",gap:3,minWidth:"fit-content"}}>
-        <div style={{display:"flex",flexDirection:"column",gap:3,paddingTop:2,marginRight:2}}>{["S","M","T","W","T","F","S"].map((d,i)=>i%2===1?<div key={i} style={{fontFamily:FB,fontSize:7,color:MUTED,height:12,lineHeight:"12px",textAlign:"right"}}>{d}</div>:<div key={i} style={{height:12}}/>)}</div>
-        {weeks.map((week,wi)=><div key={wi} style={{display:"flex",flexDirection:"column",gap:3}}>{week.map((day,di)=>
-          <div key={di} title={`${day.date}: ${day.count} makes`} style={{width:12,height:12,borderRadius:2,background:day.isFuture?"transparent":getColor(day.count),border:day.isToday?`1.5px solid ${ORANGE}`:day.isFuture?"none":`1px solid ${day.count?getColor(day.count):BORDER_CLR}44`,opacity:day.isFuture?.2:1,transition:"background .3s"}}/>
-        )}</div>)}
-      </div>
-      <div style={{display:"flex",alignItems:"center",gap:4,marginTop:8,justifyContent:"flex-end"}}>
-        <span style={{fontFamily:FB,fontSize:8,color:MUTED}}>Less</span>
-        {[0,.2,.4,.7,1].map((v,i)=><div key={i} style={{width:10,height:10,borderRadius:2,background:`rgba(200,255,0,${.1+v*.9})`,border:`1px solid ${VOLT}22`}}/>)}
-        <span style={{fontFamily:FB,fontSize:8,color:MUTED}}>More</span>
-      </div>
-    </div>;
-  })()}
-</>:null}
-{my.length===0&&<Empty t="No shots logged yet" action="Track your makes from any session ‚Äî gym, driveway, anywhere. Every shot counts!"/>}
-
-  </div>;
-}
-
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// EVENTS PANEL (Player Program View)
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-function EventsPanel({events,rsvps,user,toggleRsvp,scores,drills,onCompletionCue}){
-const[expanded,setExpanded]=useState(null),[rankFx,setRankFx]=useState(false),[lastRank,setLastRank]=useState(null);
-const sorted=useMemo(()=>[...events].sort((a,b)=>a.date.localeCompare(b.date)),[events]);
-const upcoming=sorted.filter(e=>e.date>=todayStr()),past=sorted.filter(e=>e.date<todayStr());
-const nextEvent=upcoming[0]||null;
-const eventTypeLabel=(type="event")=>{
-  const value=String(type||"event").toLowerCase();
-  if(["game","scrimmage"].includes(value))return "Game";
-  if(["practice","run","workout","clinic","shooting"].includes(value))return "Practice";
-  if(["recovery","training","lift"].includes(value))return "Training";
-  if(["meeting","film"].includes(value))return "Meeting";
-  return "Team Event";
-};
-const myRsvps=rsvps.filter(r=>r.email===user.email).length,myTier=getTier(myRsvps);useEffect(()=>{if(lastRank===null){setLastRank(myTier.name);return;}if(lastRank!==myTier.name){setRankFx(true);setLastRank(myTier.name);const t=setTimeout(()=>setRankFx(false),650);return ()=>clearTimeout(t);}},[myTier.name,lastRank]);
-
-const handleEventRsvp=(event)=>{const going=rsvps.some(r=>r.eventId===event.id&&r.email===user.email);toggleRsvp(event.id);if(!going){onCompletionCue?.({title:"Event participation confirmed",detail:`You're in for ${event.title}`,momentum:"Attendance momentum building",next:"Show up and log post-session activity"});}};
-
-return <div className="fade-up">
-<div className="accent-card" style={{borderRadius:18,padding:"16px 16px",marginBottom:12,background:"linear-gradient(145deg, rgba(119,215,255,.14), rgba(11,13,16,.94) 64%)",border:"1px solid color-mix(in srgb,var(--accent-events) 35%, var(--stroke-1))"}}>
-  <div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",fontWeight:700,letterSpacing:"0.08em"}}>WHAT'S NEXT</div>
-  <div style={{fontFamily:FD,color:LIGHT,fontSize:22,lineHeight:1.05,marginTop:7}}>{nextEvent?.title||"No session locked in"}</div>
-  <div style={{display:"flex",gap:8,flexWrap:"wrap",marginTop:10}}>
-    <span style={{padding:"4px 8px",borderRadius:999,border:`1px solid ${BORDER_CLR}`,fontFamily:FB,fontSize:10,color:T.SUB}}>{nextEvent?`${nextEvent.date} ¬∑ ${nextEvent.time||"TBD"}`:"Set your next team event"}</span>
-    {nextEvent&&<span style={{padding:"4px 8px",borderRadius:999,border:`1px solid ${VOLT}44`,background:`${VOLT}15`,fontFamily:FB,fontSize:10,color:VOLT,fontWeight:700}}>{eventTypeLabel(nextEvent.type)}</span>}
-  </div>
-</div>
-{/* Events banner ‚Äî structured, timeline-oriented */}
-<div style={{background:`linear-gradient(135deg,${VOLT}04,${CARD_BG})`,borderRadius:18,padding:"20px 22px",marginBottom:16,border:`1px solid ${BORDER_CLR}`,position:"relative",overflow:"hidden"}}>
-
-<div style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
-<div style={{width:42,height:42,borderRadius:12,background:`${VOLT}08`,border:`1px solid ${VOLT}15`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={VOLT} strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-</div>
-<div>
-<div style={{fontFamily:FD,color:LIGHT,fontSize:16,letterSpacing:3}}>PROGRAM EVENTS</div>
-<div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:2}}>Official workouts & verified attendance</div>
-</div>
-</div>
-{/* Timeline strip ‚Äî next 3 events as dots */}
-{upcoming.length>0&&<div style={{display:"flex",alignItems:"center",gap:0,paddingLeft:4}}>
-<div style={{flex:1,display:"flex",alignItems:"center"}}>
-{upcoming.slice(0,3).map((ev,i)=>{
-const going=rsvps.some(r=>r.eventId===ev.id&&r.email===user.email);
-return <div key={ev.id} style={{display:"flex",alignItems:"center",flex:1}}>
-<div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
-<div style={{width:10,height:10,borderRadius:"50%",background:going?VOLT:BORDER_CLR,border:going?`2px solid ${VOLT}`:`2px solid ${MUTED}44`,boxShadow:going?`0 0 8px ${VOLT}44`:"none"}}/>
-<div style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,color:going?VOLT:MUTED,whiteSpace:"nowrap"}}>{ev.date.slice(5)}</div>
-</div>
-{i<Math.min(upcoming.length,3)-1&&<div style={{flex:1,height:1,background:`linear-gradient(90deg,${going?VOLT+"44":BORDER_CLR},${BORDER_CLR})`,margin:"0 6px",marginBottom:14}}/>}
-</div>})}
-</div>
-{upcoming.length>3&&<div style={{fontFamily:FB,fontSize:9,color:MUTED,marginLeft:8,marginBottom:14}}>+{upcoming.length-3}</div>}
-</div>}
-</div>
-
-{/* Tier card */}
-<div style={{background:CARD_BG,borderRadius:18,padding:"20px 22px",border:`1px solid ${BORDER_CLR}`,marginBottom:16,position:"relative",overflow:"hidden"}}>
-  <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",position:"relative",gap:14}}>
-    <div>
-      <div style={{fontFamily:FB,color:VOLT,fontSize:13,letterSpacing:"0.10em",fontWeight:700,textTransform:"uppercase"}}>ATTENDANCE RANK</div>
-      <div style={{display:"flex",alignItems:"center",gap:10,marginTop:6}}>
-        <svg className={rankFx?"rank-badge-flash":""} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C8FF00" strokeWidth="2"><path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/></svg>
-        <div className={rankFx?"rank-bounce":""} style={{fontFamily:FD,color:LIGHT,fontSize:28,fontWeight:900,letterSpacing:2}}>{myTier.name}</div>
-        <div style={{fontFamily:FD,color:VOLT,fontSize:28,fontWeight:700,lineHeight:1}}>{myRsvps}</div>
-      </div>
-      <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,marginTop:4}}>{myRsvps} event{myRsvps!==1?"s":""} attended</div>
-    </div>
-  </div>
-  {(()=>{const nx=[...TIERS].find(t=>t.min>myRsvps);if(!nx)return <div style={{fontFamily:FB,color:"#A0A0A0",fontSize:12,marginTop:8}}>MAX RANK ACHIEVED</div>;const p=Math.round(myRsvps/nx.min*100);return <div style={{marginTop:8}}><div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}><span style={{fontFamily:FB,color:"#A0A0A0",fontSize:12}}>{nx.min-myRsvps} more to <span style={{color:LIGHT,fontWeight:700}}>{nx.name}</span></span><span style={{fontFamily:FB,color:"#555555",fontSize:11}}>{p}%</span></div><div style={{height:4,background:"#242424",borderRadius:2,overflow:"hidden"}}><div style={{width:`${p}%`,height:"100%",background:"#C8FF00",borderRadius:2}}/></div><div style={{fontFamily:FB,color:"#555555",fontSize:10,letterSpacing:"0.10em",marginTop:6}}>NEXT RANK: {nx.name}</div></div>})()}
-</div>
-
-{/* Upcoming */}
-<SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="UPCOMING EVENTS" s={`${upcoming.length} SCHEDULED`}/>
-{upcoming.length===0&&<Empty t="NO EVENTS SCHEDULED" action="Your coach will post workouts and events here" cta="NOTIFY MY COACH" ctaVariant="secondary" icon={<EventIcon type="clinic" size={48} color="#555555"/>}/>}
-{upcoming.map((ev,index)=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const going=evR.some(r=>r.email===user.email);const exp=expanded===ev.id;
-  return <div key={ev.id} style={{marginBottom:12}}>
-    <div className="ch" style={{width:"100%",background:index===0?`linear-gradient(140deg, ${VOLT}18, ${CARD_BG} 58%)`:`linear-gradient(135deg,${CARD_BG},#141414)`,border:`1px solid ${going?VOLT+"55":index===0?VOLT+"40":BORDER_CLR}`,borderRadius:exp?"18px 18px 0 0":18,padding:"20px 20px",textAlign:"left",position:"relative",overflow:"hidden",boxShadow:index===0?"0 10px 24px rgba(0,0,0,0.28)":"none"}}>
-      {going&&<div style={{position:"absolute",top:0,left:0,width:4,height:"100%",background:VOLT,borderRadius:"4px 0 0 4px"}}/>}
-      <div style={{display:"flex",alignItems:"flex-start",gap:14,cursor:"pointer"}} onClick={()=>setExpanded(exp?null:ev.id)}>
-        <div style={{width:50,height:50,borderRadius:14,background:BG,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><EventIcon type={ev.type} size={24} color={going?CYAN:MUTED}/></div>
-        <div style={{flex:1,minWidth:0}}><div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}><div style={{fontFamily:FD,color:LIGHT,fontSize:17,letterSpacing:1.6}}>{ev.title}</div>{index===0&&<span style={{fontFamily:FB,fontSize:8,padding:"2px 7px",borderRadius:999,color:"#0b0d10",background:VOLT,fontWeight:700,letterSpacing:"0.07em"}}>UP NEXT</span>}</div><div style={{fontFamily:FB,color:MUTED,fontSize:11,marginTop:5}}><span style={{color:VOLT,fontWeight:700}}>{ev.date}</span> &#183; {ev.time||"TBD"} &#183; {eventTypeLabel(ev.type)}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:2}}>{ev.location||"Location TBD"}</div></div>
-      </div>
-      {/* Inline quick-RSVP pill */}
-      <button onClick={(e)=>{e.stopPropagation();handleEventRsvp(ev);}} style={{marginTop:14,padding:"11px 0",width:"100%",borderRadius:12,border:going?`1px solid ${VOLT}66`:"none",background:going?`${VOLT}24`:VOLT,cursor:"pointer",fontFamily:FD,fontSize:12,letterSpacing:2,color:going?VOLT:BG,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"all .2s"}}>
-        {going?<><svg width="14" height="14" viewBox="0 0 20 20"><path d="M5 10l4 4 6-7" stroke={VOLT} strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/></svg>YOU'RE LOCKED IN</>:"RSVP NOW ‚Üí"}
-      </button>
-    </div>
-    {exp&&<div className="fade-up" style={{background:SURFACE,borderRadius:"0 0 16px 16px",padding:"16px 20px",border:`1px solid ${BORDER_CLR}`,borderTop:"none"}}>
-      <p style={{fontFamily:FB,color:MUTED,fontSize:13,lineHeight:1.6,marginBottom:14}}>{ev.desc}</p>
-      <button className="btn-v cta-primary" onClick={()=>handleEventRsvp(ev)} style={{marginBottom:14}}>
-        {going?"‚úì I'M GOING":"RSVP NOW ‚Üí"}
-      </button>
-    </div>}
-  </div>})}
-
-{past.length>0&&<><div style={{marginTop:8}}><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="PAST EVENTS" s={`${past.length} COMPLETED`}/></div>
-  {past.map(ev=>{const evR=rsvps.filter(r=>r.eventId===ev.id);const was=evR.some(r=>r.email===user.email);return <div key={ev.id} style={{display:"flex",alignItems:"center",gap:12,background:CARD_BG,borderRadius:14,padding:"12px 16px",marginBottom:6,border:`1px solid ${BORDER_CLR}`,opacity:.5}}><EventIcon type={ev.type} size={20} color={MUTED}/><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FD,color:MUTED,fontSize:13,letterSpacing:2}}>{ev.title}</div><div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:1}}>{ev.date}</div></div>{was&&<span style={{fontFamily:FB,fontSize:9,fontWeight:700,padding:"3px 7px",borderRadius:5,color:VOLT,background:VOLT+"15",letterSpacing:1}}>ATTENDED</span>}</div>})}</>}
-
-  </div>;
-}
-
-
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-// COACH SCREEN
-// ‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê‚ïê
-
-const toSafeNumber=(value)=>{const parsed=Number(value);return Number.isFinite(parsed)?parsed:0;};
-const getPlayerHomeShotMakes=(playerEmail,logs,teamId)=>{const targetEmail=normalizeEmail(playerEmail);if(!targetEmail)return 0;return (Array.isArray(logs)?logs:[]).reduce((total,log)=>{if(normalizeEmail(log?.email)!==targetEmail)return total;const logTeamId=log?.teamId||null;if(teamId&&logTeamId&&logTeamId!==teamId)return total;return total+toSafeNumber(log?.made||0);},0);};
-
-function CoachPlayerDevelopmentProfile({player,programDrills=[],programScores=[],scores=[],shotLogs=[],homeLeaderboardRows=[],rsvps=[],events=[],scRsvps=[],scLogs=[],teamId=""}){
-const profile=buildCoachPlayerDevelopmentProfile({player,programDrills,programScores,scores,shotLogs,homeLeaderboardRows,rsvps,events,scRsvps,scLogs,teamId});
-const stat=(label,value,detail)=><div className="coachPlayerProfileMetric"><span>{label}</span><strong>{value}</strong><small>{detail}</small></div>;
-return <section className="coachPlayerProfile" data-testid="coach-player-development-profile">
-  <div className="coachPlayerProfileHero">
-    <div className="coachPlayerProfileHero__identity">
-      <Av n={profile.identity.name} sz={64} email={profile.identity.email}/>
-      <div><span className="coachPlayerProfileHero__eyebrow">Development pulse</span><h2>{profile.identity.name}</h2><p>{profile.identity.email||profile.identity.playerId||"Manual roster profile"}</p><span className="coachPlayerProfileHero__status" data-status={profile.statusLabel}>{profile.statusLabel}</span></div>
-    </div>
-    <div className="coachPlayerProfileHero__headline"><strong>{profile.totalAtHomeMakes}</strong><span>At-home makes</span><small>{profile.lastActivityDate?`Last active ${profile.lastActivityDate}`:"Waiting on first activity"}</small></div>
-  </div>
-  <div className="coachPlayerProfileMetrics" aria-label="Player performance summary">
-    {stat("At-home makes",profile.totalAtHomeMakes,"Independent work")}
-    {stat("Program attempts",profile.totalProgramAttempts,"Coach-scored reps")}
-    {stat("Event readiness",`${profile.eventSummary.attended}/${profile.eventSummary.rsvps}`,"Attended / RSVP")}
-    {stat("S&C logs",profile.scSummary.logs,`${profile.scSummary.rsvps} commitments`)}
-  </div>
-  {!profile.hasActivity&&<div className="coachPlayerProfileEmpty"><strong>The profile is ready for its first signal.</strong><span>At-home shots, Program drills, RSVPs, and S&amp;C work will build this development record automatically.</span></div>}
-  <div className="coachPlayerProfileEvidence">
-    <section className="coachPlayerProfileSection"><span>Program development</span><h3>Drill trajectory</h3>{profile.programByDrill.length===0?<p>No Program drill attempts logged yet. Assign a first standard to begin comparison.</p>:profile.programByDrill.map(row=><div className="coachPlayerProfileDrill" key={row.id||row.name}><div><strong>{row.name}</strong><small>{row.attempts} attempts ¬∑ recent {row.recentScores.map(s=>`${s.score}${s.date?` (${s.date})`:""}`).join(", ")}</small></div><em>{row.bestScore}<small>Best</small></em></div>)}</section>
-    <section className="coachPlayerProfileSection"><span>Current activity</span><h3>Participation summary</h3><dl><div><dt>Last activity</dt><dd>{profile.lastActivityDate||"None yet"}</dd></div><div><dt>Events</dt><dd>{profile.eventSummary.attended} attended / {profile.eventSummary.rsvps} RSVP</dd></div><div><dt>Strength &amp; conditioning</dt><dd>{profile.scSummary.logs} logs / {profile.scSummary.rsvps} RSVP</dd></div></dl></section>
-  </div>
-</section>;
-}
-
-function CoachPlayerProgramAttemptDetails({player,programDrills=[],programScores=[],teamId=""}){
-const playerEmail=normalizeEmail(player?.email||player?.player_email||"");
-const playerIds=[player?.playerId,player?.player_id,player?.id,player?.userId,player?.user_id].map(v=>normalizeEmail(v||"")).filter(Boolean);
-const matchesPlayer=score=>{
-  const scoreEmail=normalizeEmail(score?.email||score?.player_email||"");
-  const scoreId=normalizeEmail(score?.playerId||score?.player_id||"");
-  return (playerEmail&&scoreEmail===playerEmail)||(scoreId&&playerIds.includes(scoreId));
-};
-const formatAttemptDate=score=>score?.date||score?.session_date||(score?.ts?new Date(score.ts).toLocaleDateString():"No date");
-const playerBreakdownKey=playerEmail||playerIds[0]||"";
-const rows=getProgramDrillBreakdownRows(programDrills,programScores,playerBreakdownKey,teamId).filter(row=>row.count>0);
-return <div data-testid="coach-player-program-attempts" style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:16,marginBottom:18}}><div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:2,marginBottom:6}}>PROGRAM DRILL ATTEMPTS</div>{rows.length===0?<div style={{fontFamily:FB,color:MUTED,fontSize:11,lineHeight:1.5}}>No Program drill attempts logged yet.</div>:rows.map(row=>{const attempts=getProgramScoresForDrill(programScores,row).filter(matchesPlayer).sort((a,b)=>(a.ts||0)-(b.ts||0));return <div key={row.id} style={{border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:12,marginTop:10,background:BG}}><div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:800,letterSpacing:.5}}>{row.name||row.drillName||"Program Drill"}</div><div style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:8,marginTop:8}}>{[{l:"LOGGED",v:row.count},{l:"PB",v:row.pb},{l:"AVG",v:row.avg}].map(stat=><div key={stat.l} style={{border:`1px solid ${BORDER_CLR}`,borderRadius:9,padding:"7px 8px",background:CARD_BG}}><div style={{fontFamily:FD,color:CYAN,fontSize:18}}>{stat.v}</div><div style={{fontFamily:FB,color:MUTED,fontSize:8,letterSpacing:1.2,fontWeight:700}}>{stat.l}</div></div>)}</div><div style={{marginTop:10,display:"grid",gap:6}}>{attempts.map((attempt,index)=><div key={attempt.id||`${row.id}-${index}`} style={{display:"flex",justifyContent:"space-between",gap:8,fontFamily:FB,fontSize:11,color:LIGHT,borderTop:index===0?"none":`1px solid ${BORDER_CLR}`,paddingTop:index===0?0:6}}><span>Score {attempt.score}</span><span style={{color:MUTED}}>{formatAttemptDate(attempt)}</span></div>)}</div></div>})}</div>;
-}
-
-
-function ArchiveDetailStat({ label, value }){
-  return <div className="seasonArchiveStat"><strong>{value ?? 0}</strong><span>{label}</span></div>;
-}
-function SeasonArchiveDetail({ archive, onBack }){
-  const detail=getSeasonArchiveDetailModel(archive);
-  const archiveDate=detail.createdAt?new Date(detail.createdAt).toLocaleString():"Unknown date";
-  return <article className="seasonArchiveDetail" data-testid="season-archive-detail"><button type="button" aria-label="Back to archived seasons list" onClick={onBack}>Back to archived seasons</button><header><span>Archived season</span><h3>{detail.seasonName}</h3><p>Created {archiveDate} ¬∑ Archived by {detail.archivedBy}{detail.seasonRange?` ¬∑ ${detail.seasonRange}`:""}</p></header><div className="seasonArchiveStats">{detail.summaryStats.map(stat=><ArchiveDetailStat key={stat.label} label={stat.label} value={stat.value}/>)}</div><div className="seasonArchiveSections">{detail.sections.map(section=><section key={section.title} data-testid={section.title==="PLAYER SEASON SUMMARIES"?"season-archive-player-summaries":undefined}><h4>{section.title}</h4>{section.rows.length===0?<p>{section.empty}</p>:<div>{section.rows.map((row,index)=><p key={`${section.title}-${index}`}>{row}</p>)}</div>}</section>)}</div></article>;
-}
-
-function Coach({u,team,regenerateJoinCode,addRosterPlayer,removeRosterPlayer,archiveRosterPlayer,deleteTeamLocalRosterPlayerData,archiveSeason,seasonArchives=[],playerProfiles,drills,programDrills,scores,programScores=[],players,addCoachProgramScore,updateDrill,addDrill,removeDrill,addProgramDrill,removeProgramDrill,events,rsvps,addEvent,removeEvent,removeRsvp,addRsvp,scSessions,scRsvps,scLogs=[],addScSession,removeScSession,shotLogs,coachHomeLeaderboardRows=[],coachPriorities,onSaveCoachPriorities,logout,deleteAccount,openTeamBranding,coachTextSize="standard",demoSettingsBusy=false,onLoadDemoData,onClearDemoData,homeShotsLeaderboard,refreshHomeShotsLeaderboard}){
-const[tab,setTab]=useState("feed"),[editD,setEditD]=useState(null),[eName,setEName]=useState(""),[eDesc,setEDesc]=useState(""),[eInstr,setEInstr]=useState(""),[eMax,setEMax]=useState(""),[eIcon,setEIcon]=useState("ft"),[selP,setSelP]=useState(null),[showAdd,setShowAdd]=useState(false),[expEv,setExpEv]=useState(null),[ne,setNe]=useState({title:"",date:"",time:"",location:"",desc:"",type:"run"}),[addEmail,setAddEmail]=useState(""),[showAddSC,setShowAddSC]=useState(false),[nsc,setNsc]=useState({sport:"",date:"",time:"",sessionType:"School"});
-const[showNewDrill,setShowNewDrill]=useState(false),[nd,setNd]=useState({name:"",desc:"",max:"",icon:"ft",instructions:""}),[programErr,setProgramErr]=useState(""),[newProgramDrill,setNewProgramDrill]=useState({name:"",desc:"",max:"",icon:"ft"});
-const[eventFilter,setEventFilter]=useState("all"),[eventSaveError,setEventSaveError]=useState(""),[playerDashboardFilter,setPlayerDashboardFilter]=useState("all"),[playerDashboardQuery,setPlayerDashboardQuery]=useState(""),[eventDashboardStatus,setEventDashboardStatus]=useState("upcoming"),[eventDashboardQuery,setEventDashboardQuery]=useState(""),[coachPageMetric,setCoachPageMetric]=useState("active");
-const[playerDrawerKey,setPlayerDrawerKey]=useState(""),[eventDrawerId,setEventDrawerId]=useState(""),[drillIntelligenceScope,setDrillIntelligenceScope]=useState("all"),[drillIntelligenceQuery,setDrillIntelligenceQuery]=useState(""),[strengthIntelligenceScope,setStrengthIntelligenceScope]=useState("all"),[strengthIntelligenceQuery,setStrengthIntelligenceQuery]=useState(""),[leaderboardIntelligenceScope,setLeaderboardIntelligenceScope]=useState("all"),[leaderboardIntelligenceQuery,setLeaderboardIntelligenceQuery]=useState(""),[activityIntelligenceScope,setActivityIntelligenceScope]=useState("all"),[activityIntelligenceQuery,setActivityIntelligenceQuery]=useState("");
-const[coachPriorityDraft,setCoachPriorityDraft]=useState(sanitizeCoachPriorities(coachPriorities));
-const[showProgramScoreEntry,setShowProgramScoreEntry]=useState(false);
-const[coachPrioritiesMessage,setCoachPrioritiesMessage]=useState("");
-const[coachPrioritiesError,setCoachPrioritiesError]=useState("");
-const[coachPrioritySaveState,setCoachPrioritySaveState]=useState("idle");
-const[scSaveError,setScSaveError]=useState("");
-const persistedCoachPriorities=useMemo(()=>sanitizeCoachPriorities(coachPriorities),[coachPriorities]);
-useEffect(()=>{setCoachPriorityDraft(persistedCoachPriorities);},[persistedCoachPriorities]);
-const customProgramDrillCount=countCustomProgramDrills(programDrills);
-const[nudged,setNudged]=useState([]);
-const[confirmDelete,setConfirmDelete]=useState(null);const[playerDataConfirm,setPlayerDataConfirm]=useState(null);const[playerDataConfirmText,setPlayerDataConfirmText]=useState("");const[playerDataMessage,setPlayerDataMessage]=useState("");const[seasonArchiveForm,setSeasonArchiveForm]=useState({seasonName:"",seasonStartDate:"",seasonEndDate:""});const[seasonArchiveConfirm,setSeasonArchiveConfirm]=useState(false);const[seasonArchiveMessage,setSeasonArchiveMessage]=useState("");const[selectedSeasonArchiveId,setSelectedSeasonArchiveId]=useState(null);const[codeErr,setCodeErr]=useState("");const[newProfile,setNewProfile]=useState({firstName:"",lastName:"",jerseyNumber:""});const[profileErr,setProfileErr]=useState("");
-const coachRosterPlayers=useMemo(()=>getCoachRosterPlayers({players,playerProfiles,teamId:u?.teamId}),[players,playerProfiles,u?.teamId]);
-const ups=useMemo(()=>coachRosterPlayers.map(p=>({email:p.email||"",name:p.name||resolvePlayerDisplayName(p,playerProfiles),playerId:p.playerId||p.player_id||p.id||p.userId||p.user_id||p.profileId,player_id:p.player_id||p.playerId||p.id,userId:p.userId||p.user_id,user_id:p.user_id||p.userId,id:p.id,profileId:p.profileId,source:p.source})),[coachRosterPlayers,playerProfiles]);
-const activeTeamPlayerIdentity=useMemo(()=>getActiveTeamPlayerIdentity(coachRosterPlayers,u?.teamId),[coachRosterPlayers,u?.teamId]);
-const activeTeamPlayerEmails=activeTeamPlayerIdentity.emails;
-const activeTeamPlayerEmailSet=activeTeamPlayerIdentity.emailSet;
-const activeTeamPlayerNameSet=activeTeamPlayerIdentity.nameSet;
-const activeTeamPlayerKeySet=activeTeamPlayerIdentity.keySet;
-const safeEvents=useMemo(()=>Array.isArray(events)?events:[],[events]);
-const safeRsvps=useMemo(()=>filterActiveTeamPlayerRows(rsvps,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[rsvps,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
-const safeScores=useMemo(()=>filterActiveTeamPlayerRows(scores,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[scores,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
-const safeProgramScores=useMemo(()=>filterActiveTeamPlayerRows(getAllProgramScoreRows(programScores).filter(score=>!u?.teamId||score.teamId===u.teamId),activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[programScores,u?.teamId,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
-const safeScRsvps=useMemo(()=>filterActiveTeamPlayerRows(scRsvps,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[scRsvps,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
-const safeScLogs=useMemo(()=>filterActiveTeamPlayerRows(scLogs,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[scLogs,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
-const safeShotLogs=useMemo(()=>filterActiveTeamPlayerRows(shotLogs,activeTeamPlayerEmailSet,activeTeamPlayerKeySet),[shotLogs,activeTeamPlayerEmailSet,activeTeamPlayerKeySet]);
-const activeLeaderboardRows=useMemo(()=>filterActiveTeamLeaderboardRows(homeShotsLeaderboard?.rows||[],activeTeamPlayerKeySet,activeTeamPlayerEmailSet,activeTeamPlayerNameSet),[homeShotsLeaderboard?.rows,activeTeamPlayerKeySet,activeTeamPlayerEmailSet,activeTeamPlayerNameSet]);
-const canonicalCoachHomeLeaderboardRows=useMemo(()=>Array.isArray(coachHomeLeaderboardRows)?coachHomeLeaderboardRows:[],[coachHomeLeaderboardRows]);
-const coachDashboardLeaderboardRows=canonicalCoachHomeLeaderboardRows.slice(0,5);
-const coachDashboardLeaderboardStatus=homeShotsLeaderboard?.status==="success"||coachDashboardLeaderboardRows.length>0?"success":homeShotsLeaderboard?.status||"idle";
-useEffect(()=>{
-  if(!isShotLabDebugMode())return;
-  const rosterKeys=new Set(coachRosterPlayers.flatMap(p=>[p?.email,p?.player_email,p?.playerId,p?.player_id,p?.userId,p?.user_id,p?.profileId,p?.profile_id,p?.id].map(normalizeEmail).filter(Boolean)));
-  (Array.isArray(canonicalCoachHomeLeaderboardRows)?canonicalCoachHomeLeaderboardRows:[]).forEach(row=>{
-    const rowKeys=[row?.email,row?.player_email,row?.playerId,row?.player_id,row?.userId,row?.user_id,row?.profileId,row?.profile_id,row?.id].map(normalizeEmail).filter(Boolean);
-    if(rowKeys.length&&!rowKeys.some(key=>rosterKeys.has(key))){
-      const candidates=coachRosterPlayers.filter(p=>normalizeEmail(p?.email||p?.player_email)===normalizeEmail(row?.email||row?.player_email)||normalizeEmail(p?.playerId||p?.player_id||p?.id)===normalizeEmail(row?.playerId||row?.player_id||row?.id));
-      console.warn("[coach-roster] At Home leaderboard player missing from coach roster",{normalizedEmail:normalizeEmail(row?.email||row?.player_email),rawEmailFields:{email:row?.email,player_email:row?.player_email},identityFields:{playerId:row?.playerId,player_id:row?.player_id,profileId:row?.profileId,profile_id:row?.profile_id,userId:row?.userId,user_id:row?.user_id,id:row?.id},coachTeamId:u?.teamId||"",filteredAsInactiveOrDeleted:candidates.some(isPlayerHiddenFromActiveLeaderboards),matchCandidates:candidates.map(p=>({email:p?.email,playerId:p?.playerId||p?.player_id,id:p?.id,profileId:p?.profileId||p?.profile_id,userId:p?.userId||p?.user_id,rosterStatus:p?.rosterStatus||p?.roster_status,archived:p?.archived,hideFromLeaderboards:p?.hideFromLeaderboards}))});
-    }
-  });
-},[canonicalCoachHomeLeaderboardRows,coachRosterPlayers,u?.teamId]);
-const leaderboardPlayers=useMemo(()=>[...(Array.isArray(players)?players:[]),...(Array.isArray(playerProfiles)?playerProfiles:[])],[players,playerProfiles]);
-const selectedSeasonArchive=useMemo(()=>seasonArchives.find(a=>String(a?.id||"")===String(selectedSeasonArchiveId||""))||null,[seasonArchives,selectedSeasonArchiveId]);
-useEffect(()=>{
-  if(!isShotLabDebugMode())return;
-  const rawHomeScores=(Array.isArray(scores)?scores:[]).filter(row=>isHomeLeaderboardScoreRow(row,programDrills));
-  if(rawHomeScores.length>0&&canonicalCoachHomeLeaderboardRows.length===0){
-    console.warn("[home-leaderboard] Coach At Home rows empty despite home scores",{
-      rawHomeScoreCount:Array.isArray(scores)?scores.length:0,
-      scopedHomeScoreCount:rawHomeScores.length,
-      generatedCoachAtHomeLeaderboardRowCount:canonicalCoachHomeLeaderboardRows.length,
-      teamId:u?.teamId||"",
-      selectedLeaderboardCategory:tab==="leaderboards"?"home_shots":tab,
-      filteredBySrcCount:(Array.isArray(scores)?scores:[]).filter(row=>String(row?.src||"").toLowerCase()==="program").length,
-      sampleNormalizedHomeRow:rawHomeScores[0]||null,
-      samplePlayerNameResolution:leaderboardPlayers[0]?{name:resolvePlayerDisplayName(leaderboardPlayers[0],playerProfiles),email:leaderboardPlayers[0]?.email||leaderboardPlayers[0]?.player_email||"",playerId:leaderboardPlayers[0]?.playerId||leaderboardPlayers[0]?.player_id||leaderboardPlayers[0]?.id||""}:null,
-    });
-  }
-},[scores,programDrills,canonicalCoachHomeLeaderboardRows,leaderboardPlayers,playerProfiles,u?.teamId,tab]);
-const safeRoster=useMemo(()=>Array.isArray(ups)?ups:[],[ups]);
-const normalizedCoachRoster=useMemo(()=>normalizeCoachRoster(safeRoster),[safeRoster]);
-const normalizedCoachEvents=useMemo(()=>normalizeCoachEvents(safeEvents),[safeEvents]);
-const normalizedCoachRsvps=useMemo(()=>normalizeCoachRsvps(safeRsvps),[safeRsvps]);
-const normalizedCoachScores=useMemo(()=>normalizeCoachScores(safeScores),[safeScores]);
-const coachAttendancePct=useMemo(()=>{
-  if(safeRoster.length===0)return 0;
-  const weekStartDate=new Date();
-  weekStartDate.setDate(weekStartDate.getDate()-weekStartDate.getDay());
-  const weekStart=`${weekStartDate.getFullYear()}-${String(weekStartDate.getMonth()+1).padStart(2,"0")}-${String(weekStartDate.getDate()).padStart(2,"0")}`;
-  const activeThisWeek=new Set(safeScores.filter((score)=>score?.email&&score?.date>=weekStart).map((score)=>score.email));
-  const pct=Math.round((activeThisWeek.size/safeRoster.length)*100);
-  return Number.isFinite(pct)?pct:0;
-},[safeRoster,safeScores]);
-const allKnown=useMemo(()=>ups.map(p=>({email:normalizeEmail(p.email),name:p.name})),[ups]);
-const today=todayStr(),todayS=safeScores.filter(s=>s.date===today);
-const saveDrill=()=>{const m=parseInt(eMax);updateDrill(editD.id,{name:san(eName),desc:san(eDesc),instructions:san(eInstr),max:m>0?m:null,icon:eIcon});setEditD(null)};
-const handleAddDrill=()=>{if(!nd.name)return;const m=parseInt(nd.max);addDrill({name:san(nd.name).toUpperCase(),desc:san(nd.desc),max:m>0?m:null,icon:nd.icon,instructions:san(nd.instructions)});setNd({name:"",desc:"",max:"",icon:"ft",instructions:""});setShowNewDrill(false)};
-const handleAddProgramDrill=async()=>{if(!newProgramDrill.name)return;const m=parseInt(newProgramDrill.max);const r=await addProgramDrill({name:san(newProgramDrill.name).toUpperCase(),desc:san(newProgramDrill.desc),max:m>0?m:null,icon:newProgramDrill.icon,instructions:""});if(!r.ok){setProgramErr(r.err||"Could not add drill");return;}setProgramErr("");setNewProgramDrill({name:"",desc:"",max:"",icon:"ft"});};
-const handleRemoveDrill=(id)=>{setConfirmDelete(id)};
-const confirmDrillDelete=()=>{if(confirmDelete)removeDrill(confirmDelete);setConfirmDelete(null)};
-const handleAddEvent=async()=>{const title=san(ne.title).trim(),date=String(ne.date||"").trim();if(!title||!date){setEventSaveError("Event title and date are required.");return;}setEventSaveError("");try{const result=await addEvent({...ne,title,date,desc:san(ne.desc),location:san(ne.location)});if(!result?.ok){setEventSaveError(result?.err||"Event could not be saved. Please try again.");return;}setNe({title:"",date:"",time:"",location:"",desc:"",type:"run"});setShowAdd(false);}catch(_error){setEventSaveError("Event could not be saved. Please try again.");}};
-const coachPrioritiesDirty=useMemo(()=>{
-  const current=sanitizeCoachPriorities(coachPriorityDraft);
-  return JSON.stringify(current)!==JSON.stringify(persistedCoachPriorities);
-},[coachPriorityDraft,persistedCoachPriorities]);
-
-const handleSaveCoachPriorities=async()=>{
-  setCoachPrioritySaveState("saving");
-  const result=await savePlayerPriorities({teamId:u?.teamId,draft:coachPriorityDraft,onSaveCoachPriorities});
-  if(result?.ok){
-    setCoachPrioritiesError("");
-    setCoachPrioritiesMessage("Priorities saved");
-    setCoachPrioritySaveState("saved");
-    setTimeout(()=>setCoachPrioritiesMessage(""),2200);
-    return;
-  }
-  setCoachPrioritySaveState("error");
-  setCoachPrioritiesError(result?.message||"Could not save priorities.");
-};
-
-const handleAddWalkin=(evId)=>{
-const e=addEmail.trim().toLowerCase();if(!e)return;
-const known=allKnown.find(p=>normalizeEmail(p.email)===e);
-if(!known)return;
-const name=known.name||e.split("@")[0].replace(/[._-]/g," ").replace(/\b\w/g,c=>c.toUpperCase());
-addRsvp(evId,e,name);setAddEmail("")};
-const focusCoachScSessionForm=()=>setTimeout(()=>{const form=document.getElementById("coach-sc-session-form");form?.scrollIntoView({behavior:"smooth",block:"start"});form?.querySelector("input,select,textarea")?.focus?.({preventScroll:true});},120);
-const openCoachScSessionForm=()=>{setShowAddSC(true);focusCoachScSessionForm();};
-const toggleCoachScSessionForm=()=>{if(showAddSC){setShowAddSC(false);return;}openCoachScSessionForm();};
-const handleAddSC=async()=>{if(!nsc.sport||!nsc.date)return;setScSaveError("");const result=await addScSession({...nsc,sport:san(nsc.sport),sessionType:san(nsc.sessionType||"School")});if(!result?.ok){setScSaveError(result?.error||"Session could not be saved. Please try again.");return}setNsc({sport:"",date:"",time:"",sessionType:"School"});setShowAddSC(false)};
-const totalPlayers=ups.length;
-const activeTodayCount=new Set(todayS.map(s=>s.email)).size;
-const sortedEvents=useMemo(()=>[...safeEvents].sort((a,b)=>String(a?.date||"").localeCompare(String(b?.date||""))),[safeEvents]);
-const eventFilterPills=useMemo(()=>[
-  {label:"All",value:"all"},
-  {label:"Practice",value:"run"},
-  {label:"Game",value:"game"},
-  {label:"Camp",value:"clinic"},
-  {label:"Meeting",value:"recovery"},
-],[]);
-const nextEvent=sortedEvents.find(e=>e.date>=today);
-const nextEventDateFormatted=nextEvent?new Date(`${nextEvent.date}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"}):"None";
-const rsvpsByEvent=useMemo(()=>{const buckets=new Map();for(const rsvp of safeRsvps){if(!buckets.has(rsvp.eventId))buckets.set(rsvp.eventId,[]);buckets.get(rsvp.eventId).push(rsvp);}return buckets;},[safeRsvps]);
-const attendanceCountByEmail=useMemo(()=>{const counts=new Map();for(const rsvp of safeRsvps){counts.set(rsvp.email,(counts.get(rsvp.email)||0)+1);}return counts;},[safeRsvps]);
-const availableWalkInByEvent=useMemo(()=>{const byEvent=new Map();for(const ev of sortedEvents){const attendees=new Set((rsvpsByEvent.get(ev.id)||[]).map(r=>r.email));byEvent.set(ev.id,allKnown.filter(p=>!attendees.has(p.email)));}return byEvent;},[allKnown,sortedEvents,rsvpsByEvent]);
-const rosterNameByEmail=useMemo(()=>{const map=new Map();for(const p of players){const email=String(p?.email||'').toLowerCase();if(email&&!map.has(email))map.set(email,p?.name||'');}for(const p of allKnown){const email=String(p?.email||'').toLowerCase();if(email&&!map.has(email))map.set(email,p?.name||'');}return map;},[players,allKnown]);
-const coachEventRsvpRows=useCallback((eventId)=>getCoachEventRsvpRows(safeRsvps,eventId,u?.teamId),[safeRsvps,u?.teamId]);
-const coachRsvpLabel=useCallback((r)=>getCoachRsvpLabel(r,rosterNameByEmail),[rosterNameByEmail]);
-const highlightAddPlayer=totalPlayers===0;
-const highlightAddDrill=drills.length===0;
-const highlightScheduleEvent=events.length===0||!nextEvent;
-const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-const activeThisWeek=new Set(safeScores.filter(s=>s.date>=weekStr).map(s=>s.email));
-const inactivePlayersCount=ups.filter(p=>!activeThisWeek.has(p.email)).length;
-const highlightPlayersAttention=inactivePlayersCount>0;
-const primaryQuickAction=highlightAddPlayer?"addPlayer":highlightAddDrill?"addDrill":highlightScheduleEvent?"scheduleEvent":null;
-const coachPlayerDashboardRows=useMemo(()=>buildCoachPlayerDashboardRows({players:coachRosterPlayers,scores:safeScores,shotLogs,rsvps:safeRsvps,scLogs:safeScLogs,weekStart:weekStr}),[coachRosterPlayers,safeScores,shotLogs,safeRsvps,safeScLogs,weekStr]);
-const coachPlayerDashboardMetrics=useMemo(()=>buildCoachPlayerDashboardMetrics(coachPlayerDashboardRows),[coachPlayerDashboardRows]);
-const filteredCoachPlayerDashboardRows=useMemo(()=>filterCoachPlayerDashboardRows(coachPlayerDashboardRows,{filter:playerDashboardFilter,query:playerDashboardQuery}),[coachPlayerDashboardRows,playerDashboardFilter,playerDashboardQuery]);
-const filteredCoachRosterPlayers=useMemo(()=>filteredCoachPlayerDashboardRows.map(row=>row.player),[filteredCoachPlayerDashboardRows]);
-const coachEventDashboardRows=useMemo(()=>buildCoachEventDashboardRows({events:safeEvents,rsvps:safeRsvps,roster:coachRosterPlayers,today}),[safeEvents,safeRsvps,coachRosterPlayers,today]);
-const coachEventDashboardMetrics=useMemo(()=>buildCoachEventDashboardMetrics(coachEventDashboardRows),[coachEventDashboardRows]);
-const filteredCoachEventDashboardRows=useMemo(()=>filterCoachEventDashboardRows(coachEventDashboardRows,{status:eventDashboardStatus,type:eventFilter,query:eventDashboardQuery}),[coachEventDashboardRows,eventDashboardStatus,eventFilter,eventDashboardQuery]);
-const filteredEvents=useMemo(()=>filteredCoachEventDashboardRows.map(row=>row.event),[filteredCoachEventDashboardRows]);
-const coachPageDashboardSummary=useMemo(()=>buildCoachPageDashboardSummary({drills,programDrills,scSessions,scRsvps:safeScRsvps,scLogs:safeScLogs,leaderboardRows:canonicalCoachHomeLeaderboardRows,activityRows:safeScores,seasonArchives}),[drills,programDrills,scSessions,safeScRsvps,safeScLogs,canonicalCoachHomeLeaderboardRows,safeScores,seasonArchives]);
-const previousWeekStart=useMemo(()=>{const value=new Date(`${weekStr}T00:00:00`);value.setDate(value.getDate()-7);return `${value.getFullYear()}-${String(value.getMonth()+1).padStart(2,"0")}-${String(value.getDate()).padStart(2,"0")}`;},[weekStr]);
-const selectedPlayerDashboardRow=useMemo(()=>coachPlayerDashboardRows.find(row=>row.key===playerDrawerKey)||null,[coachPlayerDashboardRows,playerDrawerKey]);
-const selectedPlayerIntelligence=useMemo(()=>buildPlayerIntelligenceModel({playerRow:selectedPlayerDashboardRow,scores:safeScores,shotLogs:safeShotLogs,rsvps:safeRsvps,events:safeEvents,scRsvps:safeScRsvps,scLogs:safeScLogs,weekStart:weekStr,previousWeekStart,today}),[selectedPlayerDashboardRow,safeScores,safeShotLogs,safeRsvps,safeEvents,safeScRsvps,safeScLogs,weekStr,previousWeekStart,today]);
-const selectedEventDashboardRow=useMemo(()=>coachEventDashboardRows.find(row=>String(row.event?.id||row.key||"")===String(eventDrawerId||""))||null,[coachEventDashboardRows,eventDrawerId]);
-const selectedEventIntelligence=useMemo(()=>buildEventIntelligenceModel({eventRow:selectedEventDashboardRow,roster:coachRosterPlayers,rsvps:safeRsvps}),[selectedEventDashboardRow,coachRosterPlayers,safeRsvps]);
-const coachDrillIntelligenceRows=useMemo(()=>buildDrillIntelligenceRows({drills,programDrills,scores:safeScores,programScores:safeProgramScores}),[drills,programDrills,safeScores,safeProgramScores]);
-const filteredCoachDrillRows=useMemo(()=>filterDrillIntelligenceRows(coachDrillIntelligenceRows,{scope:drillIntelligenceScope,query:drillIntelligenceQuery}),[coachDrillIntelligenceRows,drillIntelligenceScope,drillIntelligenceQuery]);
-const visibleHomeDrills=useMemo(()=>filteredCoachDrillRows.filter(row=>row.type==="home").map(row=>row.drill),[filteredCoachDrillRows]);
-const visibleProgramDrills=useMemo(()=>filteredCoachDrillRows.filter(row=>row.type==="program").map(row=>row.drill),[filteredCoachDrillRows]);
-const coachStrengthIntelligenceRows=useMemo(()=>buildStrengthIntelligenceRows({sessions:scSessions,rsvps:safeScRsvps,logs:safeScLogs,roster:coachRosterPlayers,today}),[scSessions,safeScRsvps,safeScLogs,coachRosterPlayers,today]);
-const filteredCoachStrengthRows=useMemo(()=>filterStrengthIntelligenceRows(coachStrengthIntelligenceRows,{scope:strengthIntelligenceScope,query:strengthIntelligenceQuery}),[coachStrengthIntelligenceRows,strengthIntelligenceScope,strengthIntelligenceQuery]);
-const coachLeaderboardIntelligenceRows=useMemo(()=>buildLeaderboardIntelligenceRows({leaderboardRows:canonicalCoachHomeLeaderboardRows,shotLogs:safeShotLogs,weekStart:weekStr,previousWeekStart}),[canonicalCoachHomeLeaderboardRows,safeShotLogs,weekStr,previousWeekStart]);
-const filteredCoachLeaderboardIntelligenceRows=useMemo(()=>filterLeaderboardIntelligenceRows(coachLeaderboardIntelligenceRows,{scope:leaderboardIntelligenceScope,query:leaderboardIntelligenceQuery}),[coachLeaderboardIntelligenceRows,leaderboardIntelligenceScope,leaderboardIntelligenceQuery]);
-const coachActivityIntelligenceRows=useMemo(()=>buildActivityIntelligenceRows({scores:safeScores,shotLogs:safeShotLogs,scLogs:safeScLogs,events:safeEvents,today}),[safeScores,safeShotLogs,safeScLogs,safeEvents,today]);
-const filteredCoachActivityIntelligenceRows=useMemo(()=>filterActivityIntelligenceRows(coachActivityIntelligenceRows,{scope:activityIntelligenceScope,query:activityIntelligenceQuery}),[coachActivityIntelligenceRows,activityIntelligenceScope,activityIntelligenceQuery]);
-const coachSeasonComparisonModel=useMemo(()=>buildSeasonComparisonModel({currentRoster:coachRosterPlayers,currentScores:safeScores,currentShotLogs:safeShotLogs,currentEvents:safeEvents,currentRsvps:safeRsvps,currentScSessions:scSessions,currentScLogs:safeScLogs,archives:seasonArchives,selectedArchiveId:selectedSeasonArchiveId}),[coachRosterPlayers,safeScores,safeShotLogs,safeEvents,safeRsvps,scSessions,safeScLogs,seasonArchives,selectedSeasonArchiveId]);
-const openPlayerIntelligence=useCallback((player={})=>{const candidates=[player.email,player.player_email,player.playerId,player.player_id,player.userId,player.user_id,player.profileId,player.profile_id,player.id].map(normalizeEmail).filter(Boolean);const normalizedName=normalizeEmail(player.name||player.displayName);const row=coachPlayerDashboardRows.find(candidate=>candidates.includes(candidate.key)||candidates.includes(normalizeEmail(candidate.email))||candidates.some(key=>[candidate.player?.email,candidate.player?.player_email,candidate.player?.playerId,candidate.player?.player_id,candidate.player?.userId,candidate.player?.user_id,candidate.player?.profileId,candidate.player?.profile_id,candidate.player?.id].map(normalizeEmail).includes(key))||(normalizedName&&normalizeEmail(candidate.name)===normalizedName));setPlayerDrawerKey(row?.key||candidates[0]||"");},[coachPlayerDashboardRows]);
-const coachCommandAttentionItems=useMemo(()=>coachPlayerDashboardRows.filter(row=>row.statusKey!=="active").map(row=>({name:row.name,detail:row.statusKey==="new"?"No training activity has been logged yet.":"No training activity was logged this week.",meta:row.lastActivityDate?`Last active ${new Date(`${row.lastActivityDate}T00:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric"})}`:"New roster member",tone:row.statusKey==="attention"?"danger":"warning",actionLabel:"Open profile",onClick:()=>{setPlayerDashboardFilter("attention");openPlayerIntelligence(row.player);setTab("players");}})),[coachPlayerDashboardRows,openPlayerIntelligence]);
-const coachCommandActivityItems=useMemo(()=>coachActivityIntelligenceRows.slice(0,5).map(row=>({name:row.player||row.title,detail:row.type==="event"?`${row.title} ¬∑ ${row.detail}`:`${row.type} ¬∑ ${row.detail}`,meta:row.date})),[coachActivityIntelligenceRows]);
-const jumpToSection=(targetTab,sectionId)=>{setTab(targetTab);setSelP(null);setTimeout(()=>document.getElementById(sectionId)?.scrollIntoView({behavior:"smooth",block:"start"}),120)};
-const openEventCreateFlow=useCallback(()=>{setEventSaveError("");setTab("events");setSelP(null);setExpEv(null);setShowAddSC(false);setShowAdd(true);setTimeout(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth",block:"start"}),120);},[]);
-const handleLogScoreAction=()=>{
-  setShowProgramScoreEntry(true);
-};
-const shellVars=(k)=>({"--pageAccent":PAGE_ACCENTS[k].accent,"--pageAccentGlow":PAGE_ACCENTS[k].glow,"--pageAccentBg":PAGE_ACCENTS[k].bg,"--page-accent":PAGE_ACCENTS[k].accent,"--page-accent-soft":PAGE_ACCENTS[k].bg,"--page-accent-border":PAGE_ACCENTS[k].glow});
-const navItems=[
-  {k:"feed",l:"Feed",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>},
-  {k:"drills",l:"Drills",accentVar:"--accent-drills",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2v20"/><path d="M5 4.5c3.5 4 5 7 5 7.5s-1.5 3.5-5 7.5"/><path d="M19 4.5c-3.5 4-5 7-5 7.5s1.5 3.5 5 7.5"/></svg>},
-  {k:"events",l:"Events",accentVar:"--accent-events",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4"/><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18"/></svg>},
-  {k:"sc",l:"S&C",accentVar:"--accent-lifting",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5h-2a1 1 0 00-1 1v9a1 1 0 001 1h2M17.5 6.5h2a1 1 0 011 1v9a1 1 0 01-1 1h-2M6.5 12h11M1.5 9.5v5M22.5 9.5v5"/></svg>},
-  {k:"players",l:"Players",accentVar:"--accent-players",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="7" r="3"/><path d="M2 21v-2a4 4 0 014-4h6a4 4 0 014 4v2"/><path d="M16 3.13a4 4 0 010 7.75M21 21v-2a4 4 0 00-3-3.87"/></svg>},
-  {k:"activity",l:"Activity",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/><path d="M4 6l5-3 6 4 5-3"/></svg>},
-  {k:"leaderboards",l:"Leaderboards",accentVar:"--accent-feed",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>},
-  {k:"settings",l:"Team & Account",accentVar:"--accent",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 21v-7m0-4V3m8 18v-9m0-4V3m8 18v-5m0-4V3M1 14h6m2-6h6m2 5h6"/></svg>},
-  {k:"team-store",l:"Team Store",accentVar:"--accent",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 10h16l-1-5H5l-1 5Z"/><path d="M6 10v9h12v-9"/><path d="M9 19v-5h6v5"/><path d="M4 10c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2c0 1.2.8 2 2 2s2-.8 2-2"/></svg>},
-  {k:"branding",l:"Brand",accentVar:"--accent",svg:<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l8 4v6c0 4.5-3 7.7-8 8-5-.3-8-3.5-8-8V7l8-4z"/><path d="M9.5 12.5l1.8 1.8 3.2-3.2"/></svg>},
-];
-const getCoachNavItem=(key,overrides={})=>{const item=navItems.find(candidate=>candidate.k===key);return item?{...item,...overrides}:null;};
-const coachMobilePrimaryItems=[
-  getCoachNavItem("feed",{mobileLabel:"Home"}),
-  getCoachNavItem("players",{mobileLabel:"Players"}),
-  getCoachNavItem("events",{mobileLabel:"Events"}),
-].filter(Boolean);
-const coachMobileSecondaryItems=[
-  getCoachNavItem("drills",{mobileLabel:"Drills",description:"Drill library and assignments"}),
-  getCoachNavItem("sc",{mobileLabel:"S&C",description:"Strength sessions and compliance"}),
-  getCoachNavItem("activity",{mobileLabel:"Activity",description:"Filtered team signals and follow-up"}),
-  getCoachNavItem("leaderboards",{mobileLabel:"Rankings",description:"Current and all-time team rankings"}),
-  getCoachNavItem("settings",{mobileLabel:"Settings",description:"Season history, demo tools, support, and account"}),
-  getCoachNavItem("team-store",{mobileLabel:"Team Store",description:"Connect SquadLocker or another apparel partner"}),
-  getCoachNavItem("branding",{mobileLabel:"Brand",description:"Team identity and visual settings"}),
-].filter(Boolean);
-
-const handleNavChange=(k)=>{
-  if(k==="team-store"){
-    openTeamStorePortal({email:u?.email,role:"coach",isCoach:true,teamId:u?.teamId||team?.id,teamName:team?.name||team?.teamName||"Your Team"});
-    return;
-  }
-  if(k==="branding"){
-    openTeamBranding();
-    return;
-  }
-  setTab(k);setEditD(null);setSelP(null);setShowAdd(false);setExpEv(null);setShowAddSC(false)
-};
-const coachInsightRailModel=useMemo(()=>buildCoachOperationalInsightRail({activeTab:tab,rosterCount:totalPlayers,activeTodayCount,activeThisWeekCount:activeThisWeek.size,inactivePlayersCount,eventMetrics:coachEventDashboardMetrics,strengthRows:coachStrengthIntelligenceRows,pageSummary:coachPageDashboardSummary}),[tab,totalPlayers,activeTodayCount,activeThisWeek,inactivePlayersCount,coachEventDashboardMetrics,coachStrengthIntelligenceRows,coachPageDashboardSummary]);
-const handleCoachInsightAction=(action={})=>{
-  const target=action?.target||"feed";
-  if(target==="events"&&action?.intent==="add"){openEventCreateFlow();return;}
-  if(target==="players"){
-    setPlayerDashboardFilter(action?.filter||"all");
-    handleNavChange("players");
-    if(action?.intent==="add")setTimeout(()=>setShowAdd(true),0);
-    if(action?.intent==="archive")setTimeout(()=>document.getElementById("coach-season-tools")?.scrollIntoView({behavior:"smooth",block:"start"}),120);
-    return;
-  }
-  if(target==="events"&&action?.filter)setEventDashboardStatus(action.filter);
-  if(target==="sc"&&action?.filter)setStrengthIntelligenceScope(action.filter);
-  handleNavChange(target);
-};
-const openCoachLeaderboards=()=>handleNavChange("leaderboards");
-const [isDesktop,setIsDesktop]=useState(()=>typeof window!=="undefined"?window.innerWidth>=1024:false);
-const [showMiniHeader,setShowMiniHeader]=useState(false);
-const heroRef=useRef(null);
-const coachScrollRef=useRef(null);
-const isOverviewTab=tab==="feed";
-const coachTabs=["feed","drills","events","sc","players","activity"];
-const isCoachTab=u.isCoach&&coachTabs.includes(tab);
-const showFullCommandCenter=isCoachTab&&tab==="feed";
-const handleManageEventsScroll=useCallback(()=>document.getElementById("coach-events-management")?.scrollIntoView({behavior:"smooth"}),[]);
-const handleToggleAddEvent=openEventCreateFlow;
-const coachTextScale=COACH_TEXT_SIZES.includes(coachTextSize)?coachTextSize:"standard";
-
-useEffect(()=>{
-  const onResize=()=>setIsDesktop(window.innerWidth>=1024);
-  onResize();
-  window.addEventListener("resize",onResize);
-  return()=>window.removeEventListener("resize",onResize);
-},[]);
-
-useEffect(()=>{
-  const heroNode=heroRef.current;
-  if(!heroNode){
-    setShowMiniHeader(false);
-    return;
-  }
-  const updateFromRect=()=>{
-    const rect=heroNode.getBoundingClientRect();
-    const viewport=Math.max(window.innerHeight||0,1);
-    const visibleTop=Math.max(rect.top,0);
-    const visibleBottom=Math.min(rect.bottom,viewport);
-    const visibleHeight=Math.max(0,visibleBottom-visibleTop);
-    const ratio=Math.min(1,visibleHeight/Math.max(rect.height,1));
-    setShowMiniHeader(ratio<0.25);
-  };
-  if(typeof window!=="undefined" && "IntersectionObserver" in window){
-    const observer=new IntersectionObserver((entries)=>{
-      const ratio=entries[0]?.intersectionRatio ?? 1;
-      setShowMiniHeader(ratio<0.25);
-    },{threshold:[0,0.25,0.5,0.75,1]});
-    observer.observe(heroNode);
-    return()=>observer.disconnect();
-  }
-  let ticking=false;
-  const onScroll=()=>{
-    if(ticking)return;
-    ticking=true;
-    window.requestAnimationFrame(()=>{updateFromRect();ticking=false;});
-  };
-  updateFromRect();
-  window.addEventListener("scroll",onScroll,{passive:true});
-  window.addEventListener("resize",onScroll);
-  return()=>{window.removeEventListener("scroll",onScroll);window.removeEventListener("resize",onScroll);};
-},[tab]);
-useEffect(()=>{
-  coachScrollRef.current?.scrollTo?.({top:0,left:0,behavior:"auto"});
-  window.scrollTo({top:0,left:0,behavior:"auto"});
-},[tab,selP]);
-
-return <div className={`app-shell performance-shell performance-shell--coach ${isDesktop?"is-desktop":"is-mobile"}`} data-workspace-tab={tab} data-text-scale={coachTextScale}>
-{isDesktop&&<aside className="sidebar-nav" aria-label="Coach navigation"><div className="nav-title">COACH DASHBOARD</div>{navItems.map(item=>{const active=tab===item.k;return <button key={item.k} className={`nav-item ${active?"is-active":""}`} onClick={()=>handleNavChange(item.k)}>{item.svg}<span>{item.l}</span></button>;})}</aside>}
-<main className="shell-main"><div ref={coachScrollRef} className="content-wrap"><div className={`team-brand ${u.isCoach?"coach-mode ":""}page performance-workspace ${u.isCoach?"performance-workspace--coach":"performance-workspace--player"}`} data-accent={u.isCoach&&["feed","drills","events","sc","players","activity"].includes(tab)?(tab==="activity"?"feed":tab):"feed"} style={{minHeight:"100dvh",background:u.isCoach?"#0B0A09":BG,display:"flex",flexDirection:"column",fontFamily:FB,position:"relative",paddingBottom:isDesktop?0:"calc(var(--bottom-nav-content-padding, 88px) + env(safe-area-inset-bottom, 0px))"}}><BrandBackdrop/>
-{/* Delete confirmation dialog */}
-{confirmDelete&&<div style={{position:"fixed",inset:0,zIndex:30,background:"#000c",display:"flex",alignItems:"center",justifyContent:"center",backdropFilter:"blur(6px)"}} onClick={()=>setConfirmDelete(null)}>
-<div onClick={e=>e.stopPropagation()} style={{background:CARD_BG,borderRadius:20,padding:"28px 24px",border:`1px solid ${BORDER_CLR}`,maxWidth:300,width:"90%",textAlign:"center"}}>
-<div style={{fontFamily:FD,color:LIGHT,fontSize:20,letterSpacing:3,marginBottom:8}}>DELETE DRILL?</div>
-<p style={{fontFamily:FB,color:MUTED,fontSize:12,lineHeight:1.5,marginBottom:20}}>Player scores will be kept but this drill will no longer appear.</p>
-<div style={{display:"flex",gap:8}}>
-<button onClick={()=>setConfirmDelete(null)} style={{flex:1,padding:"12px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-<button onClick={confirmDrillDelete} className="btn-v cta-danger" style={{}}>DELETE</button>
-</div>
-</div>
-</div>}
-<div style={{position:"absolute",inset:0,pointerEvents:"none",zIndex:0}}><CourtBG opacity={.01}/><GlowOrb color={ORANGE} top="0" left="80%" size={250}/></div>
-<CoachMiniHeader
-  visible={isOverviewTab&&showMiniHeader}
-  avatar={<Av n={u.name} sz={24} email={u.email} isCoach={u.isCoach}/>}
-  wordmark={<BrandWordmark size={16} small/>}
-  borderColor={BORDER_CLR}
-  mutedColor={MUTED}
-  onLogout={logout}
-/>
-<div style={{position:"relative",zIndex:1,padding:"max(20px,env(safe-area-inset-top)) 20px 0"}}>
-{isOverviewTab&&<>
-<CoachDashboardHeader
-  heroRef={heroRef}
-  userName={u.name}
-  onOpenTeamBranding={openTeamBranding}
-/>
-<CoachCommandCenter
-  variant="full"
-  totalPlayers={totalPlayers}
-  activeTodayCount={activeTodayCount}
-  nextEventDateFormatted={nextEventDateFormatted}
-  highlightPlayersAttention={highlightPlayersAttention}
-  primaryQuickAction={primaryQuickAction}
-  onPlayersClick={()=>setTab("players")}
-  onActiveTodayClick={()=>setTab("players")}
-  onAnalyticsClick={openCoachLeaderboards}
-  onNextEventClick={()=>setTab("events")}
-  onAddPlayer={()=>jumpToSection("players","coach-add-player-form")}
-  onAddDrill={()=>jumpToSection("drills","coach-drills-management")}
-  onScheduleEvent={openEventCreateFlow}
-  onLogScore={handleLogScoreAction}
-  joinCode={team?.joinCode}
-  onCopyJoinCode={()=>navigator.clipboard?.writeText(team?.joinCode||"")}
-  onRegenerateJoinCode={async()=>{const r=await regenerateJoinCode(team?.id);if(!r.ok)setCodeErr(r.err||"Failed")}}
-  codeErr={codeErr}
-  attentionItems={coachCommandAttentionItems}
-  activityItems={coachCommandActivityItems}
-  eventReadiness={coachEventDashboardMetrics.next}
-  onEventReadinessClick={(eventId)=>setEventDrawerId(eventId)}
-/>
-</>}
-</div>
-<div style={{flex:1,padding:`${isOverviewTab&&showMiniHeader?"74px":"12px"} 16px 104px`,overflowY:"auto",position:"relative",zIndex:showAdd?40:1}}>
-  {/* FEED */}
-  {tab==="feed"&&<div className="page pageShell page-feed coach-home-dashboard fade-up" data-accent="feed" style={shellVars("feed")}>
-    <ProgressiveDisclosure title="Team standings" summary="Home-shot leaders and roster position" testId="coach-team-standings">
-      <CompactLeaderboardPreviewCard
-        title="Home Shot Leaders"
-        areaTitle="Leaderboards"
-        categoryLabel="Home Shots"
-        mode="coach"
-        status={coachDashboardLeaderboardStatus}
-        rows={coachDashboardLeaderboardRows}
-        emptyMessage="No team leaderboard data yet. Players will appear here after they log shots."
-        maxRows={5}
-        onViewAll={openCoachLeaderboards}
-      />
-    </ProgressiveDisclosure>
-    {(()=>{const coachChecklist=[
-        {label:"Create or restore team",done:Boolean(u?.teamId)},
-        {label:"Invite or add players",done:ups.length>0,onClick:()=>setTab("players"),ariaLabel:"Go to Players tab"},
-        {label:"Add first event",done:events.length>0,onClick:()=>setTab("events"),ariaLabel:"Go to Events tab"},
-        {label:"Review Today's Pulse",done:false,info:true},
-        {label:"Check At Home Shots leaderboard",done:activeLeaderboardRows.length>0,info:activeLeaderboardRows.length===0},
-      ];
-      const coachActivation=[
-        {label:"First attendance flow",done:coachAttendancePct>0||safeRsvps.length>0,onClick:()=>setTab("events")},
-        {label:"First team-management action",done:ups.length>0||events.length>0,onClick:()=>setTab("players")},
-        {label:"First RSVP tracking pass",done:rsvps.length>0,onClick:()=>setTab("events")},
-      ];
-      return <ProgressiveDisclosure title="Coach setup" summary={`${coachChecklist.filter(item=>item.done).length}/${coachChecklist.length} complete`} testId="coach-setup-checklist">
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-          <div style={{fontFamily:FB,color:VOLT,fontSize:10,fontWeight:700,letterSpacing:"0.11em",textTransform:"uppercase"}}>Coach Setup</div>
-          <span style={{fontFamily:FB,color:T.SUB,fontSize:10,fontWeight:700}}>{coachChecklist.filter(item=>item.done).length}/{coachChecklist.length}</span>
-        </div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:4}}>Operational onboarding: roster flow, event readiness, RSVP visibility, and alert confidence.</div>
-        <div style={{display:"grid",gap:6,marginTop:8}}>
-          {coachChecklist.map((item)=>{
-            const rowStyle={display:"flex",alignItems:"center",gap:8,width:"100%",textAlign:"left",padding:0,margin:0,background:"none",border:"none"};
-            return item.onClick
-              ?<button key={item.label} type="button" onClick={item.onClick} aria-label={item.ariaLabel||item.label} style={{...rowStyle,cursor:"pointer"}}>
-                <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"‚úì":"‚Ä¢"}</span>
-                <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
-              </button>
-              :<div key={item.label} style={rowStyle}>
-                <span style={CHECKLIST_ITEM_DOT_STYLE(item.done)}>{item.done?"‚úì":"‚Ä¢"}</span>
-                <span style={{fontFamily:FB,color:item.done?LIGHT:T.SUB,fontSize:11,fontWeight:item.done?700:600}}>{item.label}</span>
-              </div>;
-          })}
-        </div>
-        <div style={{display:"grid",gap:6,marginTop:9,paddingTop:8,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:10,fontWeight:700,letterSpacing:"0.08em"}}>FIRST-WEEK ACTIVATION</div>
-          {coachActivation.map(item=><button key={item.label} type="button" onClick={item.onClick} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"7px 8px",borderRadius:9,border:"1px solid rgba(255,255,255,0.12)",background:"rgba(255,255,255,0.015)",color:LIGHT,fontFamily:FB,fontSize:11,cursor:"pointer"}}><span>{item.done?"‚úì":"‚Ä¢"} {item.label}</span><span style={{fontSize:9,color:item.done?VOLT:T.SUB}}>{item.done?"Completed":"Next best action"}</span></button>)}
-        </div>
-      </ProgressiveDisclosure>;})()}
-    {(()=>{
-      const todayDate=today;
-      const nextWeekEndDate=new Date(`${todayDate}T00:00:00`);
-      nextWeekEndDate.setDate(nextWeekEndDate.getDate()+6);
-      const nextWeekEndStr=`${nextWeekEndDate.getFullYear()}-${String(nextWeekEndDate.getMonth()+1).padStart(2,"0")}-${String(nextWeekEndDate.getDate()).padStart(2,"0")}`;
-      const sortedEvents=[...safeEvents].filter(ev=>ev?.date).sort((a,b)=>a.date.localeCompare(b.date));
-      const next7Events=sortedEvents.filter(ev=>ev.date>=todayDate&&ev.date<=nextWeekEndStr).slice(0,isDesktop?5:4);
-      const todaySession=sortedEvents.find(ev=>ev.date===todayDate);
-      const nextSession=sortedEvents.find(ev=>ev.date>todayDate);
-      const session=todaySession||nextSession||null;
-      const sessionRsvps=session?safeRsvps.filter(r=>r.eventId===session.id):[];
-      const activeTodaySet=new Set(safeScores.filter(s=>s?.date===todayDate).map(s=>s.email));
-      const weekStart=new Date();weekStart.setDate(weekStart.getDate()-weekStart.getDay());
-      const weekStr=`${weekStart.getFullYear()}-${String(weekStart.getMonth()+1).padStart(2,"0")}-${String(weekStart.getDate()).padStart(2,"0")}`;
-      const weekScores=safeScores.filter(s=>s?.date>=weekStr);
-      const weekActiveSet=new Set(weekScores.map(s=>s.email));
-      const attendancePct=coachAttendancePct;
-      const attendance=coachAttendancePct;
-      const streakLeaders=Object.values(safeScores.reduce((acc,s)=>{acc[s.email]=(acc[s.email]||0)+1;return acc;},{})).sort((a,b)=>b-a).slice(0,3);
-      const avgStreak=streakLeaders.length?Math.round(streakLeaders.reduce((a,b)=>a+b,0)/streakLeaders.length):0;
-      const inactivePlayers=safeRoster.filter(p=>p?.email&&!weekActiveSet.has(p.email));
-      const lowRsvpPlayers=safeRoster.filter(p=>{if(!p?.email)return false;const playerRsvps=safeRsvps.filter(r=>r.email===p.email);if(playerRsvps.length<2)return false;const yes=playerRsvps.filter(r=>r.status==="yes").length;return yes/playerRsvps.length<0.4;});
-      const pulseCopy=formatInactivePlayersPulseCopy(inactivePlayers,safeRoster.length);
-      const attention=[
-        inactivePlayers.length?`${inactivePlayers.length} inactive 5+ days`:null,
-        lowRsvpPlayers.length?`${lowRsvpPlayers.length} low RSVP participation`:null,
-      ].filter(Boolean).slice(0,3);
-      const readinessCopy=safeRoster.length===0?"Roster needs players":`${activeTodaySet.size}/${safeRoster.length} athletes active today`;
-      const rsvpPct=session&&safeRoster.length?Math.round((sessionRsvps.length/safeRoster.length)*100):0;
-      const participationMomentum=Math.max(-100,Math.min(100,rsvpPct-attendancePct));
-      const participationMomentumLabel=participationMomentum>=8?`+${participationMomentum}% rising`:participationMomentum<=-8?`${participationMomentum}% slipping`:"Stable";
-      const playersNeedingAttention=inactivePlayers.slice(0,3);
-      const topEngagedPlayers=[...safeRoster]
-        .map((player)=>{
-          const playerScores=weekScores.filter((score)=>score.email===player.email).length;
-          const playerRsvps=safeRsvps.filter((rsvp)=>rsvp.email===player.email&&rsvp.status==="yes").length;
-          const score=(playerScores*2)+playerRsvps;
-          return { player, score };
-        })
-        .filter((entry)=>entry.score>0)
-        .sort((a,b)=>b.score-a.score)
-        .slice(0,3);
-      const trendCards=[
-        {label:"Participation momentum",value:participationMomentumLabel,tone:participationMomentum>=8?"good":participationMomentum<=-8?"warn":"neutral"},
-        {label:"Consistency pulse",value:avgStreak>=4?`Strong (${avgStreak} avg streak)`:`Needs reps (${avgStreak} avg streak)`,tone:avgStreak>=4?"good":"warn"},
-        {label:"Attendance trend",value:attendancePct>=70?`${attendancePct}% in rhythm`:`${attendancePct}% this week`,tone:attendancePct>=70?"good":"warn"},
-      ];
-      const teamCommitmentLabel=attendancePct>=75&&rsvpPct>=75?"High standard":attendancePct>=60?"Building standard":"Addressing standards";
-      const readinessLabel=session?`${rsvpPct}% session readiness`:"Session not set";
-      const cultureMomentum=participationMomentum>=8?"Rising":participationMomentum<=-8?"Slipping":"Steady";
-      const nextActions=[
-        inactivePlayers.length?{label:"Check in with inactive athletes",detail:`${inactivePlayers.length} need a follow-up touch`,onClick:()=>setTab("players")}:null,
-        session?{label:"Confirm today's session attendance",detail:`${rsvpPct}% RSVP for ${session.title}`,onClick:()=>setTab("events")}:{label:"Schedule next team session",detail:"No session is currently set",onClick:()=>setTab("events")},
-        {label:"Review weekly activity feed",detail:`${weekScores.length} logs this week`,onClick:()=>setTab("feed")},
-      ].filter(Boolean);
-      const coachTypeTone=(type)=>{
-        const key=String(type||"session").toLowerCase();
-        if(key.includes("game"))return {label:"GAME",color:ORANGE};
-        if(key.includes("practice"))return {label:"PRACTICE",color:CYAN};
-        if(key.includes("workout")||key.includes("lift"))return {label:"WORKOUT",color:VOLT};
-        if(key.includes("meeting"))return {label:"MEETING",color:"#D2C6FF"};
-        return {label:"SESSION",color:LIGHT};
-      };
-      const dayBadge=(dateValue)=>{
-        if(dateValue===todayDate)return "TODAY";
-        const d=new Date(`${todayDate}T00:00:00`);d.setDate(d.getDate()+1);
-        const tomorrow=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
-        if(dateValue===tomorrow)return "TOMORROW";
-        return new Date(`${dateValue}T00:00:00`).toLocaleDateString(undefined,{weekday:"short"}).toUpperCase();
-      };
-      const unresolvedNext7Count=next7Events.reduce((acc,ev)=>acc+Math.max(0,safeRoster.length-safeRsvps.filter(r=>r.eventId===ev.id).length),0);
-      const criticalNext7Count=next7Events.filter((ev)=>dayBadge(ev.date)==="TODAY"||dayBadge(ev.date)==="TOMORROW").length;
-      const unresolvedGapsLabel=unresolvedNext7Count===0?"No open gaps":`${unresolvedNext7Count} unresolved RSVPs`;
-      const coachPriorityStyle={critical:{label:"CRITICAL",color:"#FF8D8D",border:"rgba(255,95,95,0.46)",bg:"rgba(120,20,20,0.26)"},important:{label:"IMPORTANT",color:"#FFD27D",border:"rgba(255,184,107,0.46)",bg:"rgba(120,78,18,0.22)"},passive:{label:"PASSIVE",color:"#B8C0CC",border:"rgba(184,192,204,0.36)",bg:"rgba(115,124,138,0.14)"}};
-      const readinessRisk=session&&rsvpPct<60;
-      const scheduleGap=next7Events.length<2;
-      const coachAlerts=[
-        unresolvedNext7Count>0?{priority:unresolvedNext7Count>=Math.max(3,safeRoster.length)?"critical":"important",title:"Unresolved RSVPs",detail:`${unresolvedNext7Count} unresolved RSVP slots in the next 7 days.`,cta:"Open events",onClick:()=>setTab("events")}:null,
-        inactivePlayers.length>0?{priority:inactivePlayers.length>=Math.max(2,Math.ceil(safeRoster.length*0.4))?"important":"passive",title:"Inactive players",detail:`${inactivePlayers.length} player${inactivePlayers.length===1?"":"s"} need follow-up this week.`,cta:"Open players",onClick:()=>setTab("players")}:null,
-        {priority:readinessRisk?"critical":"passive",title:"Session readiness",detail:session?`${rsvpPct}% RSVP for ${session.title}.`:"No active session is scheduled.",cta:"Review session",onClick:()=>setTab("events")},
-        {priority:scheduleGap?"important":"passive",title:"Schedule stability",detail:scheduleGap?"Add at least one more session to stabilize the 7-day calendar.":"7-day schedule cadence is stable.",cta:"Manage schedule",onClick:()=>setTab("events")},
-      ].filter(Boolean).slice(0,4);
-      return <>
-        <QuietSection
-          eyebrow="Today‚Äôs practice"
-          title={session?.title||"No session scheduled"}
-          actionLabel={session?"Open session":"Add session"}
-          onAction={()=>setTab("events")}
-          testId="coach-today-practice"
-        >
-          <div style={{fontFamily:FB,color:"var(--text-2)",fontSize:13,lineHeight:1.45}}>{session?`Focus area: ${session.desc||"Team development"}`:"Set the team agenda and publish today‚Äôs focus."}</div>
-          <div data-testid="coach-practice-status-row" style={{display:"grid",gridTemplateColumns:"repeat(3,minmax(0,1fr))",gap:0,marginTop:9,borderTop:"1px solid var(--stroke-1)",borderBottom:"1px solid var(--stroke-1)"}}>
-            {[
-              {label:"Readiness",value:readinessCopy},
-              {label:"Time",value:session?.time||"TBD"},
-              {label:"RSVP",value:session?`${rsvpPct}%`:"‚Äî"},
-            ].map((item,index)=><div key={item.label} style={{minWidth:0,padding:"9px 7px",textAlign:"center",borderLeft:index?"1px solid var(--stroke-1)":"none"}}><div style={{fontFamily:FD,color:"var(--text-1)",fontSize:16,lineHeight:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{item.value}</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:9,fontWeight:700,letterSpacing:"0.05em",textTransform:"uppercase",marginTop:4}}>{item.label}</div></div>)}
-          </div>
-        </QuietSection>
-        <ProgressiveDisclosure title="Next 7 days" summary={`${next7Events.length} sessions ¬∑ ${unresolvedNext7Count} unresolved`} testId="coach-next-seven-days">
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:8}}>
-            <div><div style={{fontFamily:FD,fontSize:15,color:LIGHT,letterSpacing:"0.04em"}}>NEXT 7 DAYS</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Critical sessions, unresolved RSVP risk, and readiness.</div></div>
-            <button className="pageHeaderPill" onClick={()=>setTab("events")}>Open Events</button>
-          </div>
-          <div style={{display:"flex",gap:6,flexWrap:"wrap",marginBottom:8}}>
-            <span style={{fontFamily:FB,fontSize:10,color:LIGHT,padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,255,255,0.22)"}}>Sessions {next7Events.length}</span>
-            <span style={{fontFamily:FB,fontSize:10,color:"#FFB86B",padding:"3px 8px",borderRadius:999,border:"1px solid rgba(255,184,107,0.42)"}}>Unresolved {unresolvedNext7Count}</span>
-            <span style={{fontFamily:FB,fontSize:10,color:VOLT,padding:"3px 8px",borderRadius:999,border:"1px solid rgba(200,255,0,0.45)"}}>Today/Tomorrow {criticalNext7Count}</span>
-          </div>
-          <div style={{display:"grid",gap:7}}>
-            {next7Events.length===0?<div style={{fontFamily:FB,color:"var(--text-2)",fontSize:11}}>No sessions scheduled this week.</div>:next7Events.map((ev)=>{
-              const tone=coachTypeTone(ev.type);
-              const evRsvps=safeRsvps.filter((r)=>r?.eventId===ev.id);
-              const missingCount=Math.max(0,safeRoster.length-evRsvps.length);
-              const pct=safeRoster.length?Math.round((evRsvps.length/safeRoster.length)*100):0;
-              const day=dayBadge(ev.date);
-              const isPriority=day==="TODAY"||day==="TOMORROW";
-              return <button key={ev.id} type="button" onClick={()=>setTab("events")} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",width:"100%",textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${isPriority?"rgba(200,255,0,0.36)":"rgba(255,255,255,0.12)"}`,background:isPriority?"rgba(200,255,0,0.08)":"rgba(255,255,255,0.02)",cursor:"pointer"}}>
-                <span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.color}44`,borderRadius:999,padding:"3px 7px"}}>{tone.label}</span>
-                <div style={{minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div><div style={{fontFamily:FB,color:"var(--text-3)",fontSize:10,marginTop:2}}>{day} ¬∑ {ev.time||"TBD"} ¬∑ {pct}% RSVP</div></div>
-                <span style={{fontFamily:FB,fontSize:9,color:missingCount>0?"#FFB86B":VOLT,border:`1px solid ${missingCount>0?"rgba(255,184,107,0.4)":"rgba(200,255,0,0.45)"}`,borderRadius:999,padding:"3px 7px"}}>{missingCount>0?`${missingCount} missing`:`${evRsvps.length} confirmed`}</span>
-              </button>;
-            })}
-          </div>
-        </ProgressiveDisclosure>
-        <ProgressiveDisclosure title="Operational alerts" summary={`${coachAlerts.filter(alert=>alert.priority!=="passive").length} items need review`} testId="coach-operational-alerts">
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}><div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>COACH OPERATIONAL ALERTS</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Prioritized alerts for RSVP closure, readiness, activity, and schedule reliability.</div></div><button className="pageHeaderPill" onClick={()=>setTab("events")}>Open events</button></div>
-          <div style={{display:"grid",gap:7,marginTop:9}}>{coachAlerts.map((alert)=>{const tone=coachPriorityStyle[alert.priority]||coachPriorityStyle.passive;return <button key={alert.title} type="button" onClick={alert.onClick} style={{display:"grid",gridTemplateColumns:"auto 1fr auto",gap:8,alignItems:"center",textAlign:"left",padding:"9px 10px",borderRadius:11,border:`1px solid ${tone.border}`,background:"rgba(255,255,255,0.015)",cursor:"pointer"}}><span style={{fontFamily:FB,fontSize:9,color:tone.color,border:`1px solid ${tone.border}`,borderRadius:999,padding:"3px 7px",background:tone.bg}}>{tone.label}</span><span><span style={{display:"block",fontFamily:FB,fontSize:11,color:"var(--text-1)",fontWeight:700}}>{alert.title}</span><span style={{display:"block",fontFamily:FB,fontSize:10,color:"var(--text-2)",marginTop:2}}>{alert.detail}</span></span><span style={{fontFamily:FB,fontSize:10,color:"var(--text-3)"}}>{alert.cta} ‚Ä∫</span></button>;})}</div>
-        </ProgressiveDisclosure>
-        <ProgressiveDisclosure title="Coach priority editor" summary={coachPrioritiesDirty?"Unsaved changes":"Player-facing focus and weekly targets"} testId="coach-priority-editor">
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,marginBottom:10}}>
-            <div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>COACH PRIORITY EDITOR</div><div style={{fontFamily:FB,fontSize:10,color:"var(--text-3)",marginTop:2}}>Set the exact priorities players see across the dashboard and check-ins.</div></div>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(2,minmax(0,1fr))":"1fr",gap:8}}>
-            <FF l="Today's Focus" v={coachPriorityDraft?.todayFocusText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,todayFocusText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ph="Set today‚Äôs top coaching focus." />
-            <FF l="Today's Focus Theme" v={coachPriorityDraft?.focusEmphasis||"Volume"} set={v=>{setCoachPriorityDraft(prev=>({...prev,focusEmphasis:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} opts={["Volume","Technique","Consistency","Recovery","Readiness"]} />
-            <FF l="Priority Drill" v={coachPriorityDraft?.priorityDrillText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,priorityDrillText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ph="Name the drill players should prioritize." />
-            <FF l="Coach Challenge" v={coachPriorityDraft?.challengeText||""} set={v=>{setCoachPriorityDraft(prev=>({...prev,challengeText:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} ta ph="Set challenge language players will see today." />
-            <FF l="Weekly Goal" v={coachPriorityDraft?.weeklyMakesTarget??""} set={v=>{setCoachPriorityDraft(prev=>({...prev,weeklyMakesTarget:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} tp="number" ph="500" />
-            <FF l="Check-In Target" v={coachPriorityDraft?.weeklyCheckinsTarget??""} set={v=>{setCoachPriorityDraft(prev=>({...prev,weeklyCheckinsTarget:v}));setCoachPrioritySaveState("dirty");setCoachPrioritiesMessage("");}} tp="number" ph="2" />
-          </div>
-          {coachPrioritiesError&&<div style={{fontFamily:FB,fontSize:11,color:"#FF8D8D",marginTop:8}}>{coachPrioritiesError}</div>}
-          {coachPrioritiesMessage&&<div style={{fontFamily:FB,fontSize:11,color:VOLT,marginTop:8}}>{coachPrioritiesMessage}</div>}
-          <div style={{fontFamily:FB,fontSize:10,color:coachPrioritiesError?"#FF8D8D":coachPrioritySaveState==="saved"?VOLT:"var(--text-3)",letterSpacing:"0.03em",marginTop:10}}>{coachPrioritySaveState==="saving"?"Saving priorities...":coachPrioritiesError?"Save failed. Review fields and retry.":coachPrioritiesDirty?"Unsaved changes":"All changes saved"}</div>
-          <button className="btn-v cta-primary" type="button" onClick={handleSaveCoachPriorities} style={{marginTop:10,width:"100%"}}>{coachPrioritySaveState==="saving"?"Saving priorities...":"SAVE PRIORITIES"}</button>
-        </ProgressiveDisclosure>
-
-        <MetricStrip testId="coach-primary-metrics-feed" items={[
-          {label:"Active Today",value:activeTodaySet.size,detail:`${safeRoster.length?Math.round((activeTodaySet.size/safeRoster.length)*100):0}% of roster`},
-          {label:"Attendance",value:`${attendance}%`,detail:"7-day participation"},
-          {label:"Weekly Activity",value:weekScores.length,detail:"Workouts logged"},
-        ]}/>
-        <ProgressiveDisclosure title="Program intelligence" summary="Trends, athlete attention, engagement, and activity" testId="coach-program-intelligence">
-        <section style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(3,minmax(0,1fr))":"1fr",gap:8,marginBottom:12}}>
-          {trendCards.map((trend)=><div key={trend.label} style={{border:"1px solid var(--stroke-1)",background:"linear-gradient(160deg, rgba(255,255,255,0.035), rgba(0,0,0,0.18))",borderRadius:12,padding:"11px 10px"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.06em"}}>{trend.label}</div><div style={{fontFamily:FB,fontSize:13,color:trend.tone==="good"?"var(--accent)":trend.tone==="warn"?"#FFB86B":"var(--text-1)",fontWeight:700,marginTop:5}}>{trend.value}</div></div>)}
-        </section>
-        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:"linear-gradient(152deg, rgba(200,255,0,0.12), rgba(255,255,255,0.03) 32%, rgba(8,10,14,0.82))",border:"1px solid rgba(200,255,0,0.3)"}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-            <div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>TEAM CULTURE READINESS</div>
-            <span style={{fontFamily:FB,fontSize:10,color:VOLT,border:"1px solid rgba(200,255,0,0.45)",borderRadius:999,padding:"3px 8px"}}>{cultureMomentum}</span>
-          </div>
-          <div style={{display:"grid",gridTemplateColumns:isDesktop?"repeat(2,minmax(0,1fr))":"1fr",gap:8,marginTop:9}}>
-            {[{k:"Team Commitment",v:teamCommitmentLabel},{k:"Attendance / Readiness",v:readinessLabel},{k:"Participation Gaps",v:unresolvedGapsLabel},{k:"Current Momentum",v:participationMomentumLabel}].map((item)=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 9px",background:"rgba(255,255,255,0.02)"}}><div style={{fontFamily:FB,fontSize:9,color:"var(--text-3)",letterSpacing:"0.05em"}}>{item.k}</div><div style={{fontFamily:FB,fontSize:12,color:"var(--text-1)",fontWeight:700,marginTop:4}}>{item.v}</div></div>)}
-          </div>
-        </section>
-
-        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8}}>
-            <div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)",letterSpacing:"0.03em"}}>Players needing attention</div>
-            <button className="pageHeaderPill" onClick={()=>setTab("players")}>Open roster</button>
-          </div>
-          {(()=>{
-            const inactive=inactivePlayers;
-            const hasRosterPlayers=ups.length>0;
-            const pulseIsGood=hasRosterPlayers&&inactive.length===0;
-            return <div style={{fontFamily:FB,color:pulseIsGood?VOLT:T.SUB,fontSize:10,fontWeight:600,letterSpacing:1,marginTop:8}}>
-              {pulseIsGood?"‚úì ":"‚Ä¢ "}{pulseCopy}
-            </div>;
-          })()}
-          <div style={{display:"grid",gap:6,marginTop:8}}>{attention.length?attention.map((line,idx)=><div key={idx} style={{fontFamily:FB,fontSize:11,color:"var(--text-2)"}}>‚Ä¢ {line}</div>):<div style={{fontFamily:FB,fontSize:11,color:VOLT}}>No high-risk alerts today.</div>}</div>
-          {playersNeedingAttention.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:6,marginTop:9}}>{playersNeedingAttention.map((player)=><span key={player.email} style={{fontFamily:FB,fontSize:10,color:"var(--text-2)",border:"1px solid var(--stroke-1)",borderRadius:999,padding:"5px 8px",background:"rgba(255,255,255,0.02)"}}>{player.name?.split(" ")[0]||player.email?.split("@")[0]}</span>)}</div>}
-        </section>
-
-        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
-          <div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>Top engagement patterns</div>
-          <div style={{fontFamily:FB,fontSize:11,color:"var(--text-3)",marginTop:4}}>Who is setting the tone this week.</div>
-          <div style={{display:"grid",gap:7,marginTop:10}}>
-            {topEngagedPlayers.length?topEngagedPlayers.map((entry,idx)=><div key={entry.player.email} style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"8px 10px",borderRadius:10,border:"1px solid var(--stroke-1)",background:"rgba(255,255,255,0.015)"}}><div style={{display:"flex",alignItems:"center",gap:8,minWidth:0}}><span style={{fontFamily:FD,fontSize:14,color:idx===0?VOLT:"var(--text-2)"}}>#{idx+1}</span><span style={{fontFamily:FB,fontSize:12,color:"var(--text-1)",fontWeight:700,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{entry.player.name||entry.player.email}</span></div><span style={{fontFamily:FB,fontSize:10,color:"var(--text-2)"}}>{entry.score} engagement pts</span></div>):<div style={{fontFamily:FB,fontSize:11,color:"var(--text-2)"}}>No standout engagement pattern yet. Activity will surface here as athletes log and RSVP.</div>}
-          </div>
-        </section>
-
-        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:10}}><div><div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>Next session</div><div style={{fontFamily:FB,fontSize:11,color:"var(--text-3)",marginTop:2}}>{nextSession?nextSession.date:"No upcoming session"}</div></div><button className="pageHeaderPill" onClick={()=>setTab("events")}>View calendar</button></div>
-          {nextSession&&<div style={{fontFamily:FB,fontSize:12,color:"var(--text-2)",marginTop:6}}>{nextSession.title} ¬∑ {nextSession.time||"TBD"}</div>}
-        </section>
-
-        <section className="accent-card" style={{borderRadius:14,padding:"12px 14px",marginBottom:12,background:SURFACE,border:`1px solid ${BORDER_CLR}`}}>
-          <div style={{fontFamily:FD,fontSize:14,color:"var(--text-1)"}}>Recommended next actions</div>
-          <div style={{display:"grid",gap:8,marginTop:10}}>
-            {nextActions.map((action)=><button key={action.label} type="button" onClick={action.onClick} style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,minHeight:44,borderRadius:11,border:"1px solid var(--stroke-1)",background:"var(--surface-1)",color:"var(--text-1)",fontFamily:FB,fontWeight:700,fontSize:11,cursor:"pointer",padding:"9px 10px",textAlign:"left"}}><span>{action.label}<span style={{display:"block",fontSize:10,color:"var(--text-2)",fontWeight:500,marginTop:3}}>{action.detail}</span></span><span aria-hidden="true" style={{color:"var(--text-3)"}}>‚Ä∫</span></button>)}
-          </div>
-        </section>
-
-        {(()=>{const recentCoachActivity=deriveActivityFeedItems({view:"coach",user:u,events:safeEvents,rsvps:safeRsvps,shotLogs,players:ups,scores:safeScores,today,activeTeamPlayerEmails:activeTeamPlayerEmailSet,activeTeamPlayerKeys:activeTeamPlayerKeySet});return <RecentActivityCard title="Activity" items={recentCoachActivity}/>;})()}
-        <CoachActivityIntelligencePanel rows={filteredCoachActivityIntelligenceRows} scope={activityIntelligenceScope} query={activityIntelligenceQuery} onScopeChange={setActivityIntelligenceScope} onQueryChange={setActivityIntelligenceQuery} onOpenItem={(item)=>{if(item.type==="event")setEventDrawerId(item.source?.id||"");else openPlayerIntelligence(item.source||{});}}/><SH isCoach={typeof u!=="undefined"&&u?.isCoach} t="ACTIVITY FEED" s="ALL SOURCES" identity/><div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"6px 14px",marginTop:12}}>{safeScores.length===0&&<Empty t="No activity yet" action="No activity yet ‚Äî invite players or have them log their first workout." cta="Invite Players" onTap={()=>setTab("players")} icon={<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>}/>}{safeScores.slice(-20).reverse().map((s,i)=>{const drillList=(s.src==="program"?programDrills:drills);const dr=drillList.find(d=>d.id===s.drillId);const pct=dr&&hasDrillMax(dr)?Math.round(s.score/dr.max*100):null;const isHome=s.src==="home"||!s.src;return <div key={i} className="feedListItem" style={{display:"flex",alignItems:"center",gap:12,padding:"14px 10px",borderBottom:`1px solid ${BORDER_CLR}33`,borderRadius:12,background:i%2===0?"rgba(255,255,255,0.01)":"transparent"}}><Av n={s.name||s.email} sz={36} email={s.email}/><div style={{flex:1,minWidth:0}}><div style={{color:LIGHT,fontSize:13,fontWeight:700,display:"flex",alignItems:"center",gap:6}}>{s.name||s.email}<span style={{fontFamily:FB,fontSize:8,fontWeight:700,letterSpacing:1,padding:"1px 6px",borderRadius:999,color:isHome?"#0B0D10":LIGHT,background:isHome?"var(--accent)":LIGHT+"10"}}>{isHome?"HOME":"PROGRAM"}</span></div><div style={{color:T.MUT,fontSize:11,marginTop:2,fontWeight:500}}>{dr?.name} &#183; {s.date}</div></div><div style={{textAlign:"right",flexShrink:0}}><div style={{fontFamily:FD,color:VOLT,fontSize:18}}>{s.score}{hasDrillMax(dr)&&<span style={{color:MUTED,fontSize:12}}>/{dr?.max}</span>}</div>{typeof pct==="number"&&<div style={{fontSize:10,fontWeight:700,color:pct>=70?"var(--accent)":T.SUB}}>{pct}%</div>}</div></div>})}</div>
-        </ProgressiveDisclosure>
-      </>;
-    })()}
-  </div>}
-  {/** DRILLS */}
-  {tab==="drills"&&!editD&&<div className="page pageShell fade-up" data-accent="drills" id="coach-drills-management" style={shellVars("drills")}><DashboardReturnButton onClick={()=>setTab("feed")} /><CoachPageDashboardHeader eyebrow="Development operations" title="Drills Dashboard" summary="Manage the training library, program standards, and player execution pathways." status={`${coachPageDashboardSummary.drills.total} total options`} actions={[{key:"add",label:"Add Drill",onClick:()=>setShowNewDrill(true)}]} metrics={[{key:"active",label:"At Home Library",value:coachPageDashboardSummary.drills.active,detail:"Player-facing drills"},{key:"program",label:"Program Set",value:coachPageDashboardSummary.drills.program,detail:"Coach-scored standards",tone:"info"},{key:"total",label:"Total Options",value:coachPageDashboardSummary.drills.total,detail:"All development paths",tone:"positive"},{key:"create",label:"Custom Capacity",value:`${customProgramDrillCount}/7`,detail:"Program drill slots"}]} activeMetric={coachPageMetric} onMetricSelect={(key)=>{setCoachPageMetric(key);if(key==="create")setShowNewDrill(true);else document.getElementById("coach-drills-management")?.scrollIntoView({behavior:"smooth",block:"start"});}} testId="coach-page-dashboard-drills"/><CoachDrillsOperationalPanel rows={coachDrillIntelligenceRows} scope={drillIntelligenceScope} query={drillIntelligenceQuery} onScopeChange={setDrillIntelligenceScope} onQueryChange={setDrillIntelligenceQuery} onOpenDrill={(drill)=>{setEditD(drill);setEName(drill.name);setEDesc(drill.desc||"");setEInstr(drill.instructions||"");setEMax(hasDrillMax(drill)?String(drill.max):"");setEIcon(drill.icon||"ft");}}/><details className="coach-drills-library-disclosure" data-testid="coach-drills-library-management">
-  <summary className="coach-drills-library-summary">
-    <span className="coach-drills-library-summary-copy">
-      <span className="coach-drills-library-kicker">LIBRARY MANAGEMENT</span>
-      <strong>Manage drill library</strong>
-      <small>{visibleHomeDrills.length} player-facing drills ¬∑ {customProgramDrillCount}/7 custom program slots</small>
-    </span>
-    <span className="coach-drills-library-chevron" aria-hidden="true">‚åÑ</span>
-  </summary>
-  <div className="coach-drills-library-body">
-    <div style={{fontFamily:FB,color:MUTED,fontSize:11,marginBottom:16,lineHeight:1.5}}>Customize the drills your players see in their "At Home" section. Each drill gets its own leaderboard.</div>
-    <div className="accent-card" style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:14,padding:14,marginBottom:16}}>
-      <div style={{fontFamily:FD,color:PAGE_ACCENTS.drills.accent,fontSize:12,letterSpacing:"var(--tracking-default)",marginBottom:6}}>PROGRAM SHOOTING DRILLS ({customProgramDrillCount}/7 CUSTOM)</div>
-      <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginBottom:10}}>The 7 demo defaults are seeded automatically. Coaches can still add up to 7 custom program drills for player score tracking and per-drill team leaderboards.</div>
-      <div style={{display:"grid",gridTemplateColumns:"1.2fr 1fr .7fr",gap:6,marginBottom:8}}>
-        <input value={newProgramDrill.name} onChange={e=>{setNewProgramDrill({...newProgramDrill,name:e.target.value});setProgramErr("")}} placeholder="Drill name" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
-        <input value={newProgramDrill.desc} onChange={e=>setNewProgramDrill({...newProgramDrill,desc:e.target.value})} placeholder="Description" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
-        <input value={newProgramDrill.max} onChange={e=>setNewProgramDrill({...newProgramDrill,max:e.target.value})} type="number" placeholder="Max (optional)" style={{padding:9,background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:LIGHT}}/>
-      </div>
-      <div style={{display:"flex",gap:5,marginBottom:8}}>{ICONS.map(ic=><button key={`prog-${ic}`} onClick={()=>setNewProgramDrill({...newProgramDrill,icon:ic})} style={{width:34,height:34,borderRadius:8,border:`1px solid ${newProgramDrill.icon===ic?PAGE_ACCENTS.drills.accent+"55":BORDER_CLR}`,background:newProgramDrill.icon===ic?PAGE_ACCENTS.drills.glow:BG,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={14} color={newProgramDrill.icon===ic?PAGE_ACCENTS.drills.accent:MUTED}/></button>)}</div>
-      <button onClick={handleAddProgramDrill} disabled={customProgramDrillCount>=7} className="btn-v cta-primary" style={{opacity:customProgramDrillCount>=7?.6:1}}>+ ADD PROGRAM DRILL</button>
-      {programErr&&<div style={{fontFamily:FB,color:"#FF4545",fontSize:10,marginTop:6}}>{programErr}</div>}
-      <div style={{marginTop:12}}>{programDrills.length===0?<div style={{fontFamily:FB,color:T.SUB,fontSize:10}}>No program drills yet.</div>:visibleProgramDrills.map(pd=>{const lead=getProgramLeaderboardRows(safeProgramScores,pd,leaderboardPlayers,3);return <div key={pd.id} style={{display:"flex",alignItems:"center",gap:10,background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:12,padding:"10px 12px",marginBottom:8}}><div style={{width:28,height:28,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:8,background:BG,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><DrillIcon type={pd.icon} size={14}/></div><div style={{flex:1,minWidth:0}}><div style={{fontFamily:FB,color:LIGHT,fontSize:11,fontWeight:700}}>{pd.name}</div><div style={{fontFamily:FB,color:MUTED,fontSize:9,marginTop:1}}>Leaderboard: {lead.length===0?"No scores":lead.map(row=>`#${row.rank} ${row.name||row.email?.split("@")[0]} ${row.total}`).join(" ¬∑ ")}</div></div>{pd.isDefaultDemo?<span style={{background:"transparent",border:`1px solid ${BORDER_CLR}`,borderRadius:8,color:MUTED,padding:"5px 8px",fontSize:9,fontWeight:700,letterSpacing:".04em"}}>DEMO DEFAULT</span>:<button onClick={()=>removeProgramDrill(pd.id)} style={{background:"transparent",border:"1px solid #FF454544",borderRadius:8,color:"#FF6A6A",padding:"5px 8px",fontSize:9,fontWeight:700,cursor:"pointer",letterSpacing:".04em"}}>DELETE</button>}</div>})}</div>
-    </div>
-
-    {visibleHomeDrills.map(d=>{const dS=safeScores.filter(s=>s.drillId===d.id);const avg=dS.length?Math.round(dS.reduce((a,s)=>a+s.score,0)/dS.length*10)/10:0;return <div key={d.id} style={{background:CARD_BG,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:"14px 14px 12px",marginBottom:10}}>
-      <div style={{display:"flex",alignItems:"center",gap:14,textAlign:"left"}}>
-        <div style={{width:44,height:44,display:"flex",alignItems:"center",justifyContent:"center",background:BG,borderRadius:12,border:`1px solid ${BORDER_CLR}`,flexShrink:0}}><DrillIcon type={d.icon} size={22}/></div>
-        <div style={{flex:1,minWidth:0}}>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:14,fontWeight:700,letterSpacing:1}}>{d.name}</div>
-          <div style={{color:T.SUB,fontSize:10,marginTop:2,fontWeight:500}}>{d.desc}</div>
-          <div style={{color:MUTED,fontSize:9,marginTop:4,fontWeight:600}}>{hasDrillMax(d)?`MAX: ${d.max} ¬∑ `:""}{dS.length} logged ¬∑ Avg: {avg}</div>
-        </div>
-      </div>
-      <div style={{display:"flex",justifyContent:"flex-end",gap:8,marginTop:12,paddingTop:10,borderTop:`1px solid ${BORDER_CLR}66`}}>
-        <button className="pageHeaderPill" onClick={()=>{setEditD(d);setEName(d.name);setEDesc(d.desc);setEInstr(d.instructions||"");setEMax(hasDrillMax(d)?String(d.max):"");setEIcon(d.icon||"ft")}} style={{minHeight:34,padding:"0 12px",fontSize:10}}>Edit</button>
-        {d.isDefaultDemo?<span style={{minHeight:34,background:"transparent",border:`1px solid ${BORDER_CLR}`,borderRadius:999,display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"0 12px",color:MUTED,fontFamily:FB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em"}}>DEMO DEFAULT</span>:<button onClick={()=>handleRemoveDrill(d.id)} style={{minHeight:34,background:"transparent",border:`1px solid #FF454544`,borderRadius:999,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:6,padding:"0 12px",color:"#FF6A6A",fontFamily:FB,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:".06em"}}>
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-          Delete
-        </button>}
-      </div>
-    </div>})}
-  </div>
-</details>
-
-    {/* Add new drill */}
-    {!showNewDrill?<button onClick={()=>setShowNewDrill(true)} className="btn-v cta-primary" style={{marginTop:8}}>+ ADD DRILL</button>
-    :<div className="fade-up" style={{background:SURFACE,borderRadius:16,padding:"22px 18px",border:`1px solid ${BORDER_CLR}`,marginTop:8}}>
-      <div style={{fontFamily:FD,color:VOLT,fontSize:16,letterSpacing:3,marginBottom:16}}>NEW DRILL</div>
-      <FF l="DRILL NAME" v={nd.name} set={v=>setNd({...nd,name:v})} ph="e.g. STEP-BACK JUMPER"/>
-      <FF l="SHORT DESCRIPTION" v={nd.desc} set={v=>setNd({...nd,desc:v})} ph="Brief description for players"/>
-      <div style={{display:"flex",gap:8}}>
-        <div style={{flex:1}}><FF l="MAX SCORE" v={nd.max} set={v=>setNd({...nd,max:v})} tp="number" ph="Optional"/></div>
-        <div style={{flex:1}}>
-          <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
-          <div style={{display:"flex",gap:4,marginBottom:14}}>{ICONS.map(ic=><button key={ic} onClick={()=>setNd({...nd,icon:ic})} style={{width:44,height:44,borderRadius:10,background:nd.icon===ic?VOLT+"22":BG,border:`1px solid ${nd.icon===ic?VOLT:BORDER_CLR}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={16} color={nd.icon===ic?VOLT:MUTED}/></button>)}</div>
-        </div>
-      </div>
-      <FF l="DETAILED INSTRUCTIONS (OPTIONAL)" v={nd.instructions} set={v=>setNd({...nd,instructions:v})} ta ph="Coaching cues, setup details..."/>
-      <div style={{display:"flex",gap:8}}>
-        <button onClick={()=>{setShowNewDrill(false);setNd({name:"",desc:"",max:"",icon:"ft",instructions:""})}} style={{flex:1,padding:"13px",background:"transparent",color:MUTED,fontFamily:FD,fontSize:14,letterSpacing:2,border:`1px solid ${BORDER_CLR}`,borderRadius:10,cursor:"pointer"}}>CANCEL</button>
-        <button className="btn-v cta-primary" onClick={handleAddDrill} style={{width:"100%"}}>ADD DRILL</button>
-      </div>
-    </div>}
-  </div>}
-  {tab==="drills"&&editD&&<div className="scale-in" style={{paddingTop:8}}>
-    <button onClick={()=>setEditD(null)} style={{background:"none",border:"none",color:VOLT,fontFamily:FB,fontSize:13,cursor:"pointer",fontWeight:700,letterSpacing:2,marginBottom:28}}>&#8592; BACK</button>
-    <div style={{width:80,height:80,borderRadius:18,background:`linear-gradient(135deg,${SURFACE},${CARD_BG})`,border:`1px solid ${BORDER_CLR}`,display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 20px"}}><DrillIcon type={eIcon} size={40}/></div>
-    <h2 style={{fontFamily:FD,color:LIGHT,fontSize:26,letterSpacing:4,textAlign:"center",margin:"0 0 28px"}}>EDIT DRILL</h2>
-    <FF l="DRILL NAME" v={eName} set={setEName}/><FF l="SHORT DESCRIPTION" v={eDesc} set={setEDesc} ph="Brief summary shown on cards"/>
-    <div style={{display:"flex",gap:8}}>
-      <div style={{flex:1}}><FF l="MAX SCORE" v={eMax} set={setEMax} tp="number"/></div>
-      <div style={{flex:1}}>
-        <label style={{fontFamily:FB,color:"#A0A0A0",fontSize:11,fontWeight:700,letterSpacing:3,display:"block",marginBottom:8}}>ICON</label>
-        <div style={{display:"flex",gap:4,marginBottom:14}}>{ICONS.map(ic=><button key={ic} onClick={()=>setEIcon(ic)} style={{width:44,height:44,borderRadius:10,background:eIcon===ic?VOLT+"22":BG,border:`1px solid ${eIcon===ic?VOLT:BORDER_CLR}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}><DrillIcon type={ic} size={16} color={eIcon===ic?VOLT:MUTED}/></button>)}</div>
-      </div>
-    </div>
-    <FF l="DETAILED INSTRUCTIONS" v={eInstr} set={setEInstr} ta ph="Step-by-step breakdown, coaching cues, key focus areas..."/>
-    <button className="btn-v cta-primary" onClick={saveDrill} style={{}}>SAVE &#8594;</button>
-  </div>}
-
-  {/* EVENTS */}
-  {tab==="events"&&<div className={`page pageShell fade-up ${isDesktop?"accent-card":"coach-events-mobile-surface"}`} data-accent="events" id="coach-events-management" style={isDesktop?shellVars("events"):{...shellVars("events"),padding:0,border:0,background:"transparent",boxShadow:"none"}}>{isDesktop&&<DashboardReturnButton onClick={()=>setTab("feed")} />}<CoachEventsInteractiveDashboard metrics={coachEventDashboardMetrics} rows={coachEventDashboardRows} status={eventDashboardStatus} type={eventFilter} query={eventDashboardQuery} onStatusChange={setEventDashboardStatus} onTypeChange={setEventFilter} onQueryChange={setEventDashboardQuery} onCreateEvent={openEventCreateFlow} onOpenEvent={setEventDrawerId}/>{filteredEvents.length===0&&safeEvents.length>0&&<div className="coachDashboardNoResults">No events match the current dashboard filters.</div>}
-    {isDesktop?<>
-      <div className="coachEventsHeaderCard dashboardLegacyHeader"><PageHeader title="EVENTS" subtitle="Schedule team moments and track attendance" accent="amber" icon={<EventIcon type="event" size={22} color={PAGE_ACCENTS.events.accent}/>} actionLabel="+ Create Event" onAction={handleToggleAddEvent} /></div>
-      {nextEvent&&(()=>{const nextRows=coachEventRsvpRows(nextEvent.id);const rosterCount=allKnown.length;const missingCount=Math.max(rosterCount-nextRows.length,0);return <div className="heroModule" style={{background:"linear-gradient(145deg, rgba(200,255,26,0.16), rgba(15,20,28,0.94) 60%)",border:`1px solid ${VOLT}55`,boxShadow:"0 20px 45px rgba(0,0,0,0.38)",padding:16}}>
-        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-          <div style={{fontFamily:FD,color:PAGE_ACCENTS.events.accent,fontSize:12,letterSpacing:"var(--tracking-default)"}}>UPCOMING TEAM SESSION</div>
-          <span style={{padding:"3px 10px",borderRadius:999,border:`1px solid ${VOLT}66`,background:`${VOLT}1A`,fontFamily:FB,color:VOLT,fontSize:9,fontWeight:700,textTransform:"uppercase"}}>{nextEvent.type||"event"}</span>
-        </div>
-        <div style={{fontFamily:FD,color:LIGHT,fontSize:22,letterSpacing:1.1,marginTop:10,lineHeight:1}}>{nextEvent.title}</div>
-        <div style={{display:"grid",gridTemplateColumns:"repeat(2,minmax(0,1fr))",gap:8,marginTop:12}}>
-          {[{k:"Date",v:nextEvent.date},{k:"Time",v:nextEvent.time||"TBD"},{k:"Confirmed",v:`${nextRows.length}`},{k:"Missing RSVP",v:`${missingCount}`}].map(item=><div key={item.k} style={{border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,padding:"8px 10px",background:"rgba(255,255,255,0.03)"}}><div style={{fontFamily:FB,color:T.SUB,fontSize:9,letterSpacing:".08em",textTransform:"uppercase"}}>{item.k}</div><div style={{fontFamily:FB,color:LIGHT,fontSize:12,fontWeight:700,marginTop:2}}>{item.v}</div></div>)}
-        </div>
-        <div style={{fontFamily:FB,color:T.SUB,fontSize:10,marginTop:10}}>üìç {nextEvent.location||"Location TBD"}</div>
-        <button onClick={()=>setExpEv(nextEvent.id)} className="btn-v cta-primary" style={{marginTop:12,minHeight:42,height:42,width:"100%"}}>REVIEW ATTENDANCE</button>
-      </div>;})()}
-      <div style={{background:SURFACE,border:`1px solid ${BORDER_CLR}`,borderRadius:16,padding:14,marginBottom:12}}>
-        <div style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:10,marginBottom:events.length===0?0:8}}>
-          <div>
-            <div style={{fontFamily:FD,color:LIGHT,fontSize:14,letterSpacing:"var(--tracking-tight)"}}>EVENT MANAGEMENT</div>
-            <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:4}}>{events.length} total scheduled</div>
-          </div>
-        </div>
-        {eventSaveError&&<div role="alert" style={{marginTop:8,marginBottom:8,padding:"10px 12px",borderRadius:10,background:"rgba(255,69,69,0.12)",border:"1px solid rgba(255,69,69,0.45)",color:"#FFD2D2",fontFamily:FB,fontSize:12,fontWeight:700}}>Event could not be saved. Please try again.</div>}
-      {events.length===0&&<div style={{marginTop:6,padding:"14px 12px",textAlign:"center",background:BG,border:`1px solid ${BORDER_CLR}`,borderRadius:14}}>
-          <div style={{width:44,height:44,borderRadius:12,border:`1px solid ${VOLT}33`,background:`${VOLT}12`,display:"inline-flex",alignItems:"center",justifyContent:"center",marginBottom:8}}><EventIcon type="event" size={20} color={VOLT}/></div>
-          <div style={{fontFamily:FB,color:LIGHT,fontSize:13,fontWeight:700}}>No events yet ‚Äî add your first event to get the team moving.</div>
-          <div style={{fontFamily:FB,color:T.SUB,fontSize:11,marginTop:6,lineHeight:1.45,maxWidth:360,marginLeft:"auto",marginRight:"auto"}}>Create your first event to organize practices, games, camps, or meetings.</div>
-        </div>}
-      </div>
-      {events.length>0&&<div style={{display:"flex",gap:8,overflowX:"auto",overflowY:"hidden",whiteSpace:"nowrap",flexWrap:"nowrap",maxWidth:"100%",paddingBottom:4,marginBottom:14}}>
-        {eventFilterPills.map(pill=>{const active=eventFilter===pill.value;return <button key={pill.label} onClick={()=>setEventFilter(pill.value)} style={{flexShrink:0,padding:"8px 14px",borderRadius:999,border:`1px solid ${active?VOLT+"66":BORDER_CLR}`,background:active?VOLT:SURFACE,color:active?"#111827":(T.SUB||LIGHT),fontFamily:FB,fontSize:11,fontWeight:700,letterSpacing:"var(--tracking-tight)",textTransform:"uppercase",cursor:"pointer"}}>{pill.label}</button>})}
-      </div>}
-    </>:<div data-testid="coach-events-mobile-page" style={{maxWidth:560,margin:"0 auto",padding:"0 2px"}}>
-      <header className="dashboardLegacyHeader" data-testid="coach-events-mobile-header" style={{display:"flex",alignItems:"flex-start",justifyContent:"space-between",gap:14,padding:"4px 2px 14px",borderBottom:`1px solid ${BORDER_CLR}`}}>
-        <div style={{minWidth:0}}>
-          <div style={{fontFamily:FB,color:"var(--semantic-info)",fontSize:9,fontWeight:800,letterSpacing:".12em",textTransform:"uppercase"}}>Team schedule</div>
-          <h1 style={{fontFamily:FD,color:LIGHT,fontSize:30,lineHeight:.95,letterSpacing:1.2,margin:"6px 0 0"}}>EVENTS</h1>
-          <p style={{fontFamily:FB,color:T.SUB,fontSize:11,lineHeight:1.4,margin:"7px 0 0"}}>{events.length?`${events.length} scheduled team ${events.length===1?"event":"events"}. Manage timing, location, and attendance.`:"Plan practices, games, camps, and team meetings in one place."}</p>
-        </div>
-        {events.length>0&&<button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} type="button" style={{flexShrink:0,minHeight:40,borderRadius:10,border:`1px solid ${VOLT}`,background:VOLT,color:"#0b0d10",fontFamily:FB,fontSize:10,fontWeight:900,letterSpacing:".04em",textTransform:"uppercase",padding:"0 14px",cursor:"pointer"}}>+ ADD</button>}
-      </header>
-      {eventSaveError&&<div role="alert" style={{marginTop:12,padding:"10px 12px",borderRadius:10,background:"rgba(255,69,69,0.12)",border:"1px solid rgba(255,69,69,0.45)",color:"#FFD2D2",fontFamily:FB,fontSize:12,fontWeight:700}}>Event could not be saved. Please try again.</div>}
-      {events.length===0?<section data-testid="coach-events-mobile-empty-state" style={{minHeight:"calc(100dvh - 330px)",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"44px 20px 54px"}}>
-        <div style={{width:62,height:62,borderRadius:18,border:"1px solid color-mix(in srgb,var(--semantic-info) 42%, transparent)",background:"color-mix(in srgb,var(--semantic-info) 10%, transparent)",display:"grid",placeItems:"center",marginBottom:18}}><EventIcon type="event" size={27} color="var(--semantic-info)"/></div>
-        <div style={{fontFamily:FD,color:LIGHT,fontSize:25,letterSpacing:1.1,lineHeight:1}}>NO EVENTS SCHEDULED</div>
+Y™Áäx-ÆÈ‹j◊ù¢Îi∫⁄+äßj[hëÈ‹¢ÈÌ◊Æzﬂ¥Ëµ©h∫⁄n∂XßzÕKÀ»‹òÀ–\öúﬁÇö[\‹ù¬à€€ôQ[[Y[ùà\’ò[Y[[Y[ùà\ŸPÿ[òX⁄Àà\ŸQYôôX›à\ŸSY[[Àà\ŸTôYãà\ŸT›]KüHúõ€HúôXX›é¬Çö[\‹ù]]úõ€Hããÿ€€\€ô[ùÀ–]]€‹ö‹‹XŸKöúﬁé¬ö[\‹ù»úò[ôòX⁄Ÿõ‹úò[ô€‹ôX\öÀ”Ÿ€»Húõ€Hããÿ€€\€ô[ùÀ‘⁄›Xêúò[ôöúﬁé¬ö[\‹ù»—T“’‘‘“S–‘‘À‘Q—W‘“Q”êUTëW–‘‘À‘VQTó–””TP’—T“ì–Të–‘‘À‘’ST◊–‘‘»Húõ€Hãã‹›[\Àÿ\YÿXﬁT›[\Àöú»é¬Çö[\‹ù^Y\ú‘ÿ‹ôY[àúõ€Hãã‹ÿ‹ôY[úÀ‘^Y\ú‘ÿ‹ôY[àé¬ö[\‹ùô]‘ŸX\€€ï⁄^ò\ôúõ€Hããÿ€€\€ô[ùÀ”ô]‘ŸX\€€ï⁄^ò\ôöúﬁé¬ö[\‹ù€ÿX⁄^Y\í[ùö]Qõ‹õHúõ€Hããÿ€€\€ô[ùÀ–€ÿX⁄^Y\í[ùö]Qõ‹õKöúﬁé¬ö[\‹ù€ÿX⁄õŸ‹ò[Tÿ€‹ôQò]Ÿ\àúõ€Hããÿ€€\€ô[ùÀ–€ÿX⁄õŸ‹ò[Tÿ€‹ôQò]Ÿ\ãöúﬁé¬ö[\‹ù€ÿX⁄X[Púò[ô[ô‘ÿ‹ôY[àúõ€Hãã‹ÿ‹ôY[úÀ–€ÿX⁄X[Púò[ô[ô‘ÿ‹ôY[àé¬Çö[\‹ùYŸRXY\àúõ€Hããÿ€€\€ô[ùÀ‘YŸRXY\àé¬ö[\‹ù\XY\àúõ€Hããÿ€€\€ô[ùÀ–\XY\àé¬ö[\‹ù€ÿX⁄€€[X[ôŸ[ù\àúõ€Hããÿ€€\€ô[ùÀ–€ÿX⁄€€[X[ôŸ[ù\àé¬ö[\‹ù€ÿX⁄\⁄õÿ\ôXY\àúõ€Hããÿ€€\€ô[ùÀ–€ÿX⁄\⁄õÿ\ôXY\àé¬ö[\‹ù^Y\ë\⁄õÿ\ôXY\àúõ€Hããÿ€€\€ô[ùÀ‘^Y\ë\⁄õÿ\ôXY\àé¬ö[\‹ù€ÿX⁄Z[öRXY\àúõ€Hããÿ€€\€ô[ùÀ–€ÿX⁄Z[öRXY\àé¬ö[\‹ù⁄›Xê⁄\ù»úõ€Hããÿ€€\€ô[ùÀ‘⁄›Xê⁄\ù»é¬ö[\‹ù€€\X›XY\òõÿ\ôô]öY]–ÿ\ôúõ€Hããÿ€€\€ô[ùÀ–€€\X›XY\òõÿ\ôô]öY]–ÿ\ôé¬ö[\‹ùô[Z][SXY\òõÿ\ô“Xàúõ€Hããÿ€€\€ô[ùÀ‘ô[Z][SXY\òõÿ\ô“Xàé¬ö[\‹ù»€Z[ò[ùÿöôX›]ôPÿ\ôY]öX‘›ö\õŸ‹ô\‹⁄]ôQ\ÿ€‹›\ôK]ZY]ŸX›[€àHúõ€Hããÿ€€\€ô[ùÀ’ö\›X[Y\ò\ò⁄Köúﬁé¬ö[\‹ù[ÿö[Sò]öYÿ][€àúõ€Hããÿ€€\€ô[ùÀ”[ÿö[Sò]öYÿ][€ãöúﬁé¬ö[\‹ùŸ[X[ùX‘›]\»úõ€Hããÿ€€\€ô[ùÀ‘Ÿ[X[ùX‘›]\Àöúﬁé¬ö[\‹ù»\⁄õÿ\ôŸX›[€àHúõ€Hããÿ€€\€ô[ùÀ–€ÿX⁄\⁄õÿ\ôö[Z]]ô\Àöúﬁé¬ö[\‹ù»€ÿX⁄]ô[ù“[ù\òX›]ôQ\⁄õÿ\ô€ÿX⁄YŸQ\⁄õÿ\ôXY\ã€ÿX⁄^Y\ú“[ù\òX›]ôQ\⁄õÿ\ôHúõ€Hããÿ€€\€ô[ùÀ–€ÿX⁄[ù\òX›]ôQ\⁄õÿ\ôÀöúﬁé¬ö[\‹ù»€ÿX⁄X›]ö]R[ù[YŸ[òŸT[ô[€ÿX⁄ö[”‹\ò][€ò[[ô[€ÿX⁄]ô[ù[ù[YŸ[òŸQò]Ÿ\ã€ÿX⁄XY\òõÿ\ô‹\ò][€ò[[ô[€ÿX⁄^Y\í[ù[YŸ[òŸQò]Ÿ\ã€ÿX⁄ŸX\€€ê€€\\ö\€€î[ô[€ÿX⁄›ô[ô›‹\ò][€ò[[ô[Húõ€Hããÿ€€\€ô[ùÀ–€ÿX⁄\⁄õÿ\ô\ŸLãöúﬁé¬ö[\‹ù»ŸX€€ô\ûTYŸQX⁄\⁄[€ãŸX€€ô\ûTYŸR[ùõÀŸX€€ô\ûTYŸT⁄[Húõ€Hããÿ€€\€ô[ùÀ‘ŸX€€ô\ûTYŸTﬁ\›[Köúﬁé¬ö[\‹ù^Y\ëZ[P€€[X[ôŸ[ù\àúõ€Hããÿ€€\€ô[ùÀ‘^Y\ëZ[P€€[X[ôŸ[ù\ãöúﬁé¬ö[\‹ù⁄›Xî›]T[ô[úõ€Hããÿ€€\€ô[ùÀ‘⁄›Xî›]T[ô[öúﬁé¬ö[\‹ù⁄›Xî\ôõ‹õX[òŸSX\ö»úõ€Hããÿ€€\€ô[ùÀ‘⁄›Xî\ôõ‹õX[òŸSX\öÀöúﬁé¬ö[\‹ù^Y\êÿ\ôY\í\›‹ûHúõ€Hããÿ€€\€ô[ùÀ‘^Y\êÿ\ôY\í\›‹ûKöúﬁé¬ö[\‹ù^Y\îõŸ‹ô\‹‘›‹ûHúõ€Hããÿ€€\€ô[ùÀ‘^Y\îõŸ‹ô\‹‘›‹ûKöúﬁé¬ö[\‹ù»^Y\ï€‹ö‹‹XŸP€€[X[ôò\ã^Y\ï€‹ö‹‹XŸQ[\T›]K^Y\ï€‹ö‹‹XŸQö[\îòZ[Húõ€Hããÿ€€\€ô[ùÀ‘^Y\ì‹\ò][€ò[€‹ö‹‹XŸKöúﬁé¬ö[\‹ù^Y\ê€€[Z]Y[ùŸ[ù\àúõ€Hããÿ€€\€ô[ùÀ‘^Y\ê€€[Z]Y[ùŸ[ù\ãöúﬁé¬ö[\‹ù^Y\ïòZ[ö[ô‘Ÿ\‹⁄[€íXY\àúõ€Hããÿ€€\€ô[ùÀ‘^Y\ïòZ[ö[ô‘Ÿ\‹⁄[€íXY\ãöúﬁé¬ö[\‹ù^Y\ïòZ[ö[ô–€€\][€àúõ€Hããÿ€€\€ô[ùÀ‘^Y\ïòZ[ö[ô–€€\][€ãöúﬁé¬ö[\‹ù‹\ò][€ò[[ú⁄Y⁄òZ[úõ€Hããÿ€€\€ô[ùÀ”‹\ò][€ò[[ú⁄Y⁄òZ[öúﬁé¬ö[\‹ùãã‹›[\À‘ô[Z][U€‹ö‹‹XŸKò‹‹»é¬ö[\‹ùãã‹›[\À–€ÿX⁄[ù\òX›]ôQ\⁄õÿ\ôò‹‹»é¬Çö[\‹ù»X[Púò[ô[ô‘õ›öY\àHúõ€Hããÿ€€ù^’X[Púò[ô[ô–€€ù^é¬Çö[\‹ùQêUS–îêSëSë»úõ€Hãã›[YKÿúò[ô[ô—Yò][»é¬ö[\‹ùô\€€ôUX[Púò[ô[ô»úõ€Hãã›[YK‹ô\€€ôUX[Púò[ô[ô»é¬ö[\‹ù“—Sî»úõ€Hãã›[YKÿ\⁄Ÿ[ú»é¬Çö[\‹ù»[ö][ò[]X‹ÀòX⁄–òX⁄Ÿ[ô]ô[ùHúõ€Hãã€Xãÿ[ò[]X‹»é¬ö[\‹ù»ùZ[[[—]Pù[ôK\Q[[—]K€X\ë[[—]HHúõ€Hãã€XãŸ[[—]Hé¬ö[\‹ù»\—[[–Xÿ€›[ù\—[[”[ŸK\—[[‘\ú⁄\›[òŸTŸ\‹⁄[€ã\—[[‘^Y\îŸ\‹⁄[€î⁄›ŸÀŸ][[”[ŸHHúõ€Hãã€XãŸ[[”[ŸKöú»é¬ö[\‹ù»X‹]Z\ôP€€ú›[YT⁄[ô€QõY⁄ùZ[€€ú›[YR[ëõY⁄Ÿ^K€X\ê€€ú›[YQ›X\ôHúõ€Hãã€Xã⁄õ⁄[ê€€ú›[YQ›X\ôöú»é¬Çö[\‹ù»›\Xò\ŸHHúõ€Hãã€Xã‹›\Xò\ŸKöú»é¬ö[\‹ù»õ‹õX[^ôQ[XZ[\Ÿ\ù^Y\îõŸö[K\‘[ô[ô–€€ôö\õX][€àHúõ€Hãã€Xãÿ]]õ›Àöú»é¬ö[\‹ù»ùZ[\õ›‹ÀùZ[ô[[›Tõ›‹Àõ‹õX]ô[[›T\ú⁄\›\úõ‹ëõ‹ëXùYÀY\ôŸRYò]Yõ›‹Àõ‹õX[^ôT⁄›Ÿ‘õ›—õ‹ê\Húõ€Hãã€Xã‹ô[[›T\ú⁄\›[òŸKöú»é¬ö[\‹ù»\ö]ôPX›]ö]QôYY][\»Húõ€Hãã€XãÿX›]ö]QôYYöú»é¬ö[\‹ù»‹ôX]P\\ú⁄\›[òŸTŸ\ùöXŸHHúõ€Hãã€Xãÿ\\ú⁄\›[òŸTŸ\ùöXŸHé¬ö[\‹ù¬à”QW‘“’‘÷Sê◊—Tîì‘ó”QT‘–Q—KàùZ[ÿÿ[€YT⁄›ŸÀà^òX›€YT⁄›ﬁ[ò—XY€õ‹›XÀàõ‹õX]€YT⁄›ﬁ[ò“\‹›YSY\‹ÿYŸKàõ‹õX[^ôR€YT⁄›ô[[›Q^Ÿ\[€ãàõ‹õX[^ôTÿ]ôY€YT⁄›ŸÀàô\€€ôR€YT⁄›ô]ûQòZ[\ôKàô\€€ôR€YT⁄›ÿ]ôQòZ[\ôKà⁄›[\ŸT]ZY]€YT⁄›ò[òX⁄Ààò[Y]R€YT⁄›Ÿ“[ú]üHúõ€Hãã€Xã⁄€YT⁄›ŸŸ⁄[ôÀöú»é¬ö[\‹ù»õ€››ò\€ÿX⁄õŸö[HHúõ€Hãã€Xãÿ€ÿX⁄õŸö[Põ€››ò\öú»é¬ö[\‹ù»PìW”PT”–P“‘íS‘íUQT◊“SíUÿ[ö]^ôP€ÿX⁄ö[‹ö]Y\ÀVQTó—RSW‘“’’Të—UVQTó’—QR”W‘“’’Të—U’‘êQ—W“—VT»Húõ€Hãã€Xãÿ\]S[Ÿ[»é¬ö[\‹ù»ÿ[›[]SXY\òõÿ\ôúõ€T⁄›Ÿ‹»Húõ€Hãã€Xã€XY\òõÿ\ôŸ\ùöXŸKöú»é¬ö[\‹ù»ùZ[]€YSXY\òõÿ\ôõ›‹À\“€YSXY\òõÿ\ôÿ€‹ôTõ›»Húõ€Hãã€Xã⁄€YSXY\òõÿ\ôõ›‹Àöú»é¬ö[\‹ù»ùZ[õŸ‹ò[Tÿ€‹ôTõ›ÀŸ][õŸ‹ò[Tÿ€‹ôTõ›‹ÀŸ]õŸ‹ò[Qö[úôXZŸ›€îõ›‹ÀŸ]õŸ‹ò[SXY\òõÿ\ôõ›‹ÀŸ]õŸ‹ò[Tÿ€‹ô\—õ‹ëö[Ÿ]õŸ‹ò[Tÿ€‹ô\—õ‹î^Y\ãò[Y]TõŸ‹ò[Qö[ÿ€‹ôHHúõ€Hãã€Xã‹õŸ‹ò[Qö[ÿ€‹ö[ôÀöú»é¬ö[\‹ù»\ò⁄]ôT^Y\ëõ‹ïX[K[]UX[Sÿÿ[^Y\ë]Kö[\êX›]ôUX[P⁄[[ôŸTõ›‹Àö[\êX›]ôUX[SXY\òõÿ\ôõ›‹Àö[\êX›]ôUX[T^Y\îõ›‹ÀŸ]X›]ôUX[T^Y\íY[ù]KŸ]€ÿX⁄õ‹›\î^Y\úÀ\‘^Y\íY[ëúõ€PX›]ôSXY\òõÿ\ôÀô[[›ôT^Y\ëúõ€UX[Kô\€€ôSZY‹ò]Yõ‹›\ïX[RYô\€€ôT^Y\ë\‹^Sò[YKùZ[€ÿX⁄^Y\ë]ô[‹Y[ùõŸö[HHúõ€Hãã€Xã‹^Y\ë]SX[òYŸ[Y[ùöú»é¬ö[\‹ù»[]UX[Q]ô[ù[]UX[Tÿ‘Ÿ\‹⁄[€àHúõ€Hãã€Xã›X[Tÿ⁄Y[Q[][€ãöú»é¬ö[\‹ù»‹ôX]TŸX\€€ê\ò⁄]ôKŸ]ŸX\€€ê\ò⁄]ôQ]Z[[Ÿ[Húõ€Hãã€Xã‹ŸX\€€ê\ò⁄]ôKöú»é¬ö[\‹ù»[Z]ô[X\ŸQXY€õ‹›XÀ\‘⁄›XëXùY”[ŸHHúõ€Hãã€Xã‹ô[X\ŸQXY€õ‹›X‹Àöú»é¬ö[\‹ù»\ö]ôT^Y\îõŸ‹ô\‹‘õŸö[HHúõ€Hãã€Xã‹õŸ‹ô\‹‘õŸö[Köú»é¬ö[\‹ù»Ÿ]€ÿX⁄]ô[ùú›úõ›‹ÀŸ]€ÿX⁄ú›úXô[Húõ€Hãã€Xãÿ€ÿX⁄]ô[ùú›úö\⁄Xö[]Köú»é¬ö[\‹ù¬àõ‹õX[^ôT^Y\êX›]ö]Kàõ‹õX[^ôU€‹ö€›][ôŸ‹Ààõ‹õX[^ôQ]ô[ù–[ôú›úÀà\ö]ôP€€\][€îò][Àà\ö]ôS[€Y[ù[SXô[à\ö]ôSô^õÿ›\”Xô[à\ö]ôT^Y\ìõ›YöXÿ][€êúöYYö[ôÀà\ö]ôU\€€Z[ô‘ÿ⁄Y[Kà\ö]ôQö\ú›ŸYZ–X›]ò][€ìZ[\›€ô\Àà\ö]ôUòZ[ö[ô“Y[ù]SXô[Àà\ö]ôR[ù\úô]Y\ôõ‹õX[òŸUô[ôÀüHúõ€Hãã€Xã‹^Y\ë\⁄õÿ\ôŸ[X›‹úÀöú»é¬ö[\‹ù¬àõ‹õX[^ôP€ÿX⁄õ‹›\ãàõ‹õX[^ôP€ÿX⁄]ô[ùÀàõ‹õX[^ôP€ÿX⁄ú›úÀàõ‹õX[^ôP€ÿX⁄ÿ€‹ô\Ààÿ[–€ÿX⁄][ô[òŸTôXY[ô\‹ÀàŸ][úô\€€ôYú›ú€›[ùàŸ]ô^—^Q]ô[ù›[[X\ûKà\ö]ôP€ÿX⁄[\ùÀà\ö]ôP›[\ôTôXY[ô\‹”Xô[Àà\ö]ôP€ÿX⁄[ú⁄Y⁄›[[X\ûKüHúõ€Hãã€Xãÿ€ÿX⁄\⁄õÿ\ôŸ[X›‹úÀöú»é¬ö[\‹ù»ùZ[€ÿX⁄]ô[ù\⁄õÿ\ôY]öX‹ÀùZ[€ÿX⁄]ô[ù\⁄õÿ\ôõ›‹ÀùZ[€ÿX⁄YŸQ\⁄õÿ\ô›[[X\ûKùZ[€ÿX⁄^Y\ë\⁄õÿ\ôY]öX‹ÀùZ[€ÿX⁄^Y\ë\⁄õÿ\ôõ›‹Àö[\ê€ÿX⁄]ô[ù\⁄õÿ\ôõ›‹Àö[\ê€ÿX⁄^Y\ë\⁄õÿ\ôõ›‹»Húõ€Hãã€Xãÿ€ÿX⁄‹\ò][€ò[\⁄õÿ\ôöú»é¬ö[\‹ù»ùZ[X›]ö]R[ù[YŸ[òŸTõ›‹ÀùZ[ö[[ù[YŸ[òŸTõ›‹ÀùZ[]ô[ù[ù[YŸ[òŸS[Ÿ[ùZ[XY\òõÿ\ô[ù[YŸ[òŸTõ›‹ÀùZ[^Y\í[ù[YŸ[òŸS[Ÿ[ùZ[ŸX\€€ê€€\\ö\€€ì[Ÿ[ùZ[›ô[ô›[ù[YŸ[òŸTõ›‹Àö[\êX›]ö]R[ù[YŸ[òŸTõ›‹Àö[\ëö[[ù[YŸ[òŸTõ›‹Àö[\ìXY\òõÿ\ô[ù[YŸ[òŸTõ›‹Àö[\î›ô[ô›[ù[YŸ[òŸTõ›‹»Húõ€Hãã€Xãÿ€ÿX⁄‹\ò][€ò[[ù[YŸ[òŸKöú»é¬ö[\‹ù»\ö]ôT^Y\ëZ[P€€[X[ôŸ[ù\àHúõ€Hãã€Xã‹^Y\ëZ[P€€[X[ôŸ[ù\ãöú»é¬ö[\‹ù»ùZ[]€YU€‹ö‹‹XŸS[Ÿ[ùZ[]ô[ù’€‹ö‹‹XŸS[Ÿ[ùZ[XY\òõÿ\ô€‹ö‹‹XŸS[Ÿ[ùZ[õŸö[U€‹ö‹‹XŸS[Ÿ[ùZ[õŸ‹ò[U€‹ö‹‹XŸS[Ÿ[ùZ[›ô[ô›€‹ö‹‹XŸS[Ÿ[ö[\ê]€YQö[Àö[\îõŸ‹ò[TŸ\‹⁄[€êõÿ⁄‹»Húõ€Hãã€Xã‹^Y\ì‹\ò][€ò[€‹ö‹‹XŸ\Àöú»é¬ö[\‹ù»ùZ[€ÿX⁄‹\ò][€ò[[ú⁄Y⁄òZ[ùZ[^Y\ì‹\ò][€ò[[ú⁄Y⁄òZ[Húõ€Hãã€Xã€‹\ò][€ò[[ú⁄Y⁄òZ[Àöú»é¬ö[\‹ù»ùZ[€ÿX⁄ô\öYöYYõŸ‹ò[Tÿ€‹ôTõ›»Húõ€Hãã€Xãÿ€ÿX⁄õŸ‹ò[Tÿ€‹ôQ[ùûKöú»é¬ö[\‹ù»ÿ⁄Y[U€‹ö‹‹XŸPX›[€îô]ôX[Húõ€Hãã€Xã‹^Y\ï€‹ö‹‹XŸPX›[€îõ›][ôÀöú»é¬ö[\‹ù»‹ôX]UòZ[ö[ô–ÿ][Ÿ‘\ú⁄\›[òŸTŸ\ùöXŸHHúõ€Hãã€Xã›òZ[ö[ô–ÿ][Ÿ‘\ú⁄\›[òŸTŸ\ùöXŸKöú»é¬ö[\‹ù»‹ôX]T^Y\ê⁄[[ôŸT\ú⁄\›[òŸTŸ\ùöXŸKY\ôŸT^Y\ê⁄[[ôŸ\»Húõ€Hãã€Xã‹^Y\ê⁄[[ôŸT\ú⁄\›[òŸTŸ\ùöXŸKöú»é¬ö[\‹ù»‹[ïX[T›‹ôT‹ù[Húõ€Hãã€Xã›X[T›‹ôT‹ù[úöYŸKöú»é¬ò€€ú›ì”H“—SîÀîíSPTñN¬ò€€ú›’P–—T‘»H“—SîÀî’P–—T‘Œ¬ò€€ú›Sëì»H“—SîÀíSëìŒ¬ò€€ú›–TìíSë»H“—SîÀï–TìíSëŒ¬ò€€ú›Së—TàH“—SîÀëSë—Té¬ò€€ú›ëUUêSH“—SîÀìëUUêS¬ò€€ú›‘êSë—HH–TìíSëŒ¬ò€€ú›÷PSàHSëìŒ¬ò€€ú›ë»H“—SîÀêë◊–êT—N¬ò€€ú›’TëêP—HH“—SîÀêë◊––Të¬ò€€ú›–Të–ë»H“—SîÀêë◊––Të¬ò€€ú›ì‘ëTó–”àH“—SîÀêë◊‘’PïN¬ò€€ú›UUQU“—SîÀïV”UUQQ“U“—SîÀïV‘íSPTñN¬ò€€ú›ëHâ–ôXò\»ô]YIÀ	“[\X›	À	–\öX[õX⁄…Àÿ[úÀ\Ÿ\öYàãêèHâ–ò\õ›»€€ô[úŸY	À	–\öX[ò\úõ›…À	“[ô]XÿHô]YIÀÿ[úÀ\Ÿ\öYàé¬ò€€ú›Q—W–P–—Sïœ^¬ôôYYûÿXÿŸ[ùàùò\äKXXÿŸ[ù
+Hã€›Œàùò\äKXXÿŸ[ù\€Ÿù
+HãôŒàùò\äK]X[KXúò[ôXXÿŸ[ùXôÀôÿòJåçMKçãå
+JHüKôö[ŒûÿXÿŸ[ùàùò\äK]X[KXúò[ô\ö[X\ûKò\äKXXÿŸ[ù
+JHã€›Œàùò\äK]X[KXúò[ô\ö[X\ûK\€Ÿùò\äKXXÿŸ[ù\€Ÿù
+JHãôŒàùò\äK]X[KXúò[ôXXÿŸ[ùXôÀôÿòJåçMKçãå
+JHüKô]ô[ùŒûÿXÿŸ[ùàùò\äK\Ÿ[X[ùXÀZ[ôõ Hã€›Œàùò\äK\Ÿ[X[ùXÀZ[ôõÀXõ‹ô\äHãôŒàùò\äK\Ÿ[X[ùXÀZ[ôõÀ\›\ôòXŸJHüKúÿŒûÿXÿŸ[ùàùò\äK\Ÿ[X[ùXÀ[ô]]ò[
+Hã€›Œàùò\äK\Ÿ[X[ùXÀ[ô]]ò[Xõ‹ô\äHãôŒàùò\äK\Ÿ[X[ùXÀ[ô]]ò[\›\ôòXŸJHüKú^Y\úŒûÿXÿŸ[ùàùò\äK]X[KXúò[ô\ŸX€€ô\ûKò\äKXXÿŸ[ù
+JHã€›Œàò€€‹ã[Z^
+[à‹ôÿãò\äK]X[KXúò[ô\ŸX€€ô\ûKò\äKXXÿŸ[ù
+JHÕ	Kò[ú‹\ô[ù
+HãôŒàò€€‹ã[Z^
+[à‹ôÿãò\äK]X[KXúò[ô\ŸX€€ô\ûKò\äKXXÿŸ[ù
+JHL	Kò[ú‹\ô[ù
+HüKüN¬ò€€ú›S—W––Të’“—Sîœ^¬êêT—W–ëŒàõ[ôX\ãY‹òYY[ù
+MåYÀôÿòJÃÃÃéMäH	KôÿòJMKMKMKéM
+HL	JHãêêT—W–ì‘ëTéàúôÿòJçMKçMKçMKåN
+HãêêT—W‘“Q’ŒàåLúÃôÿòJçäHãí”QW’SïàúôÿòJåçMKåN
+Hãîì—‘êSW’SïàúôÿòJMÕãçMKåM
+Hãí”QW—”’ŒàúôÿòJåçMKåå
+Hãîì—‘êSW—”’ŒàúôÿòJMÕãçMKååäHãí”QW—ì–’T◊‘íSëŒàúôÿòJåçMKçJHãîì—‘êSW—ì–’T◊‘íSëŒàúôÿòJMÕãçMKåŒ
+Hãîì—‘êSW–P–—Sï”SëNàúôÿòJLçååÀçMKéJHãîì—‘êSW–’W–ëŒàúôÿòJMÕãçMKåJHãîì—‘êSW–’W‘“Q’ŒàåMúôÿòJMÕãçMKåLäHãîì—‘êSW–“T–ëŒàúôÿòJMÕãçMKå
+Hãîì—‘êSW–“T–ì‘ëTéàúôÿòJMÕãçMKåçäHãíP””ó“SìëTéàúôÿòJçMKçMKçMKåäHãê“Uîì”ó–ëŒàúôÿòJçMKçMKçMKåäHãüN¬ò€€ú›S—W––Të–P–—Sïœ^¬ö€YNû¬à[ùìS—W––Të’“—SîÀí”QW’Sïà€›ŒìS—W––Të’“—SîÀí”QW—”’ÀàX€€î›õ⁄ŸNïì”àõÿ›\‘ö[ôŒìS—W––Të’“—SîÀí”QW—ì–’T◊‘íSëÀà‹XÿŸ[ù›\ùïì”à‹XÿŸ[ù[ôìS—W––Të’“—SîÀí”QW—”’Àà›PòX⁄Ÿ‹õ›[ôìS—W––Të’“—SîÀê“Uîì”ó–ëÀà›T⁄Y›ŒàåLò\äKY€› Hãà⁄\òX⁄Ÿ‹õ›[ôàùò\äKX⁄\Xô Hãà⁄\õ‹ô\éàåKç\€€Yò\äKX⁄\Xõ‹ô\äHãà⁄\€€‹éàùò\äKX⁄\X€€‹äHãüKúõŸ‹ò[Nû¬à[ùìS—W––Të’“—SîÀîì—‘êSW’Sïà€›ŒìS—W––Të’“—SîÀîì—‘êSW—”’ÀàX€€î›õ⁄ŸNê÷PSãàõÿ›\‘ö[ôŒìS—W––Të’“—SîÀîì—‘êSW—ì–’T◊‘íSëÀà‹XÿŸ[ù›\ùìS—W––Të’“—SîÀîì—‘êSW–P–—Sï”SëKà‹XÿŸ[ù[ôìS—W––Të’“—SîÀîì—‘êSW—”’Àà›PòX⁄Ÿ‹õ›[ôìS—W––Të’“—SîÀîì—‘êSW–’W–ëÀà›T⁄Y›ŒìS—W––Të’“—SîÀîì—‘êSW–’W‘“Q’Àà⁄\òX⁄Ÿ‹õ›[ôìS—W––Të’“—SîÀîì—‘êSW–“T–ëÀà⁄\õ‹ô\éò\€€Y	”S—W––Të’“—SîÀîì—‘êSW–“T–ì‘ëTüXà⁄\€€‹éê÷PSãüKüN¬ôù[ò›[€àôXŸ[ùX›]ö]Pÿ\ô
+»]HHîôXŸ[ùX›]ö]Hã][\»H◊HJH¬à€€ú›YÿXﬁP€ÿX⁄[\T›]P€‹HHìõ»X›]ö]HY]8†%[ùö]H^Y\ú»‹à]ôH[HŸ»Z\àö\ú›€‹ö€›]àé¬àô]\õàŸX›[€à›[O^ﬁ€X\ô⁄[ï‹åMX\ô⁄[êõ›€NåMãY[ôŒàåLúãõ‹ô\îòY]\ŒåMõ‹ô\éò\€€Y	–ì‘ëTó–”üXòX⁄Ÿ‹õ›[ôàõ[ôX\ãY‹òYY[ù
+MÃYÀôÿòJçMKçMKçMKåäKôÿòJåäJHü_OÇà]à›[O^ﬁŸ\‹^Nàôõ^ã[Y€í][\ŒàòŸ[ù\àãù\›YûP€€ù[ùàú‹XŸKXô]ŸY[àãX\ô⁄[êõ›€Né_OÇà]à›[O^ﬁŸõ€ùò[Z[Nëë€€‹éìQ“õ€ù⁄^ôNåMã]\î‹X⁄[ôŒåKç^ò[úŸõ‹õNàù\\òÿ\ŸHü_Oû›]_OŸ]èÇà]à›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éï“—SîÀïV”UUQõ€ù⁄^ôNåL]\î‹X⁄[ôŒåKåü_OïŸ^OŸ]èÇàŸ]èÇà⁄][\Àõ[ô›OOLœ]à›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éï“—SîÀïV”UUQõ€ù⁄^ôNåLKY[ôŒàéúü_H]O^€YÿXﬁP€ÿX⁄[\T›]P€‹_OïX[HX›]ö]H⁄[\X\à\ôH\»^Y\ú»[ô€ÿX⁄\»\ŸH⁄›XãèŸ]èéö][\ÀõX\
+
+][KY
+OOè]àŸ^O^ÿ	⁄][Kù^KI⁄YXH›[O^ﬁŸ\‹^Nàôõ^ãÿ\é[Y€í][\Œàôõ^\›\ùãY[ôŒàéúãõ‹ô\ï‹öYOOL»õõ€ôHéò\€€Y	–ì‘ëTó–”üMMX_OÇà‹[à›[O^ﬁ›⁄YçãZY⁄çãõ‹ô\îòY]\ŒéNNKòX⁄Ÿ‹õ›[ôàùò\äKXXÿŸ[ù
+HãX\ô⁄[ï‹çãõ^⁄ö[öŒå_KœÇà]à›[O^ﬁŸõ^åKZ[ï⁄Yå_OÇà]à›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éìQ“õ€ù⁄^ôNåLãõ€ùŸZY⁄çå[ôRZY⁄åKåÕ__Oû⁄][Kù^OŸ]èÇà]à›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éï“—SîÀïV”UUQõ€ù⁄^ôNåLX\ô⁄[ï‹åü_Oû⁄][Kô]OOO]Ÿ^T›ä
+O»ïŸ^Héö][Kô]_OŸ]èÇàŸ]èÇàŸ]èä_Bà‹ŸX›[€èé¬üBò€€ú›S—W––Të’êTíPSïœ^¬òX›]ôNû¬ú⁄›’‹XÿŸ[ùùùYKò⁄\òX⁄Ÿ‹õ›[ôàòXÿŸ[ùãò⁄\õ‹ô\éàòXÿŸ[ùãò⁄\€€‹éàòXÿŸ[ùãöX€€êõ‹ô\ï⁄YàåKç\ãöX€€ë€›Œàö[úŸ]Lò\äKY€› Hãò›T⁄Y›ŒàòXÿŸ[ùãò›PòX⁄Ÿ‹õ›[ôàòXÿŸ[ùãüKú›ùX›\ôYû¬ú⁄›’‹XÿŸ[ùôò[ŸKò⁄\òX⁄Ÿ‹õ›[ôàòXÿŸ[ùãò⁄\õ‹ô\éàòXÿŸ[ùãò⁄\€€‹éàòXÿŸ[ùãöX€€êõ‹ô\ï⁄Yàå\ãöX€€ë€›Œàõõ€ôHãò›T⁄Y›ŒàòXÿŸ[ùãò›PòX⁄Ÿ‹õ›[ôàòXÿŸ[ùãÇ_KüN¬ò€€ú›S—W––Të“Sëì◊”VS’Uœ^¬ô\]X[û¬ò€€ùZ[ô\éûŸ\‹^Nàô‹öYã‹öY[\]P€€[[úŒàúô\X]
+ÀZ[õX^
+YúäJHãÿ\åLKôŸ][T›[Nä
+OOäﬂJKüKúÿ⁄Y[Nû¬ò€€ùZ[ô\éûŸ\‹^Nàô‹öYã‹öY[\]P€€[[úŒàåKçYúàYúàã‹öY[\]Tõ›‹Œàúô\X]
+ãZ[õX^
+YúäJHãÿ\åLKôŸ][T›[Nä[ô^›[
+OOù›[èL…âö[ô^OOLﬁŸ‹öYõ›ŒàåH»‹[ààüNàﬂKüKüN¬ò€€ú›”–P“’V‘“VëTœV»ú›[ô\ôãõ\ôŸHãûóN¬ò€€ú›PQTêì–Të‘–”‘W–”–P“T◊”PëSHê”–P“T»é¬Çò€€ú›QêUS—SS◊—íS––US—œV¬û⁄Ÿ^Nàùÿ\õK]\\⁄€›[ôÀM[Z[ù]Hãò[YNàçRSïUH–TìHT“”’Së»ã\ÿŒàç[Z[ù]HŸZY⁄Y⁄€›[ô»⁄\ò›Z]àãX€€éàõ\àã[ú›ùX›[€úŒòŸ]\àH⁄€›\ãHò[HôXõ›[ô\ãÇÇå\›Z[ù]Nàï[ôHù[\\ú»HH⁄[ùåõôZ[ù]Nà⁄[ô»MHõ€›ù[\\ú»Hà⁄[ù¬å‹ôZ[ù]Nàò\Ÿ[[ôHMHõ€›ù[\\ú»Hà⁄[ù¬çZ[ù]Nà‹ŸàŸ^H»⁄[ù\ú»H»⁄[ùÿ€YRYàô[[ÀZ€YK]ÿ\õK]\\⁄€›[ôÀM[Z[ù]HãõŸ‹ò[RYàô[[À\õŸ‹ò[K]ÿ\õK]\\⁄€›[ôÀM[Z[ù]HüKû⁄Ÿ^Nàòÿ[\\öK\⁄€›[ô»ãò[YNàê–STTíH“”’Së»ã\ÿŒàê€€\]H\»X[ûHÀ\⁄[ù‹›»\»‹‹⁄XõH[àNåÃàãX€€éàå‹ã[ú›ùX›[€úŒòŸ]\àH⁄€›\ãHò[HôXõ›[ô\ãÇÇåNåÃ€à€ÿ⁄¬çH‹›Œàà€‹õô\úÀà⁄[ô‹À‹ŸàŸ^Bê[»⁄[ù\ú¬ìXZŸHà[àHõ›»úõ€HXX⁄‹›[à[›ôH€Çîÿ€‹ôH\»›»X[ûH‹›»Ÿ\ôH€€\]Y[àNåÃ€YRYàô[[ÀZ€YKXÿ[\\öK\⁄€›[ô»ãõŸ‹ò[RYàô[[À\õŸ‹ò[KXÿ[\\öK\⁄€›[ô»üKû⁄Ÿ^NàåÀ[Z[ù]K\⁄€›[ô»ãò[YNàå»RSïUH“”’Së»ã\ÿŒàìXZŸH\»X[ûH‹»\»‹‹⁄XõH[à»Z[ù]\ÀàãX€€éàå‹ã[ú›ùX›[€úŒòŸ]\àH⁄€›\ãHò[HôXõ›[ô\ãÇÇìXZŸH\»X[ûH‹»\»‹‹⁄XõH[à»Z[ù]\»][ûH‹›‹à‹›¬ÇîôYô\ô[òŸNÇî›[ô\ôÿ€‹ôHHÃÇë€€Ÿ⁄€›\ú»H
+ÿ€YRYàô[[ÀZ€YKLÀ[Z[ù]K\⁄€›[ô»ãõŸ‹ò[RYàô[[À\õŸ‹ò[KLÀ[Z[ù]K\⁄€›[ô»üKû⁄Ÿ^NàçÀ\⁄€›[ô»ãò[YNàç»“”’Së»ã\ÿŒàëö[ö\⁄HŸ\]Y[òŸK[àÿ€‹ôH‹[ŸãZŸ^H‹»⁄][YHYùàãX€€éàå‹ã[ú›ùX›[€úŒòŸ]\àH⁄€›\ãHò[HôXõ›[ô\ãÇÇçå€à€ÿ⁄¬çH‹›Œàà€‹õô\úÀà⁄[ô‹À‹ŸàŸ^Bëö\ú›XZŸHÀÕH]XX⁄ŸàHH‹›¬íYà^Y\à€Ÿ\»ãÕH]H‹››^H\ôH[ôô\›\ùúõ€HÃìô^XZŸHH[àHõ›ÀHúõ€HXX⁄ŸàHH‹›¬íYà[ûHŸàHH\»Z\‹ŸYô\›\ùúõ€HZ]\à€‹õô\à]ï[àXZŸHH[àHõ›»YÿZ[à⁄]Hÿ[YHù[\¬ì€òŸH€€\]Y€»»‹ŸàŸ^H[ôXZŸH\»X[ûH‹»\»‹‹⁄XõH[àHô[XZ[ö[ô»[YBì€õH‹ŸHö[ò[‹ŸàŸ^HXZŸ\»€›[ù\»H‹›Yÿ€‹ôX€YRYàô[[ÀZ€YKMÀ\⁄€›[ô»ãõŸ‹ò[RYàô[[À\õŸ‹ò[KMÀ\⁄€›[ô»üKû⁄Ÿ^NàòùYKZY[\⁄€›[ô»ãò[YNàêïQHQS“”’Së»ã\ÿŒàíŸY\⁄€›[ô»[ù[[›HZ\‹»⁄XŸH[àHõ›ÀàãX€€éàå‹ã[ú›ùX›[€úŒòŸ]\àH⁄€›\ãHò[HôXõ›[ô\ãÇÇìõ»[YBî›\ù⁄]HXZŸBê€€ù[ùYH⁄€›[ô»[ù[àZ\‹Ÿ\»[àHõ›¬îÿ€‹ôH\»›[XZŸ\»ôYõ‹ôHHö[[ôÿ€YRYàô[[ÀZ€YKXùYKZY[\⁄€›[ô»ãõŸ‹ò[RYàô[[À\õŸ‹ò[KXùYKZY[\⁄€›[ô»üKû⁄Ÿ^NàõXZŸKLåãò[YNàìPR—Håã\ÿŒàïòX⁄»›»X[ûH⁄›»]ZŸ\»»XZŸHåôY\ÀàãX€€éàå‹ã[ú›ùX›[€úŒòŸ]\àH⁄€›\ãHò[HôXõ›[ô\ãÇÇìõ»[YBïZŸH‹»úõ€H[ûH‹›ê€€ù[ùYH[ù[åXYH»⁄[ù\ú¬îÿ€‹ôH\»›[⁄›»ZŸ[ò€YRYàô[[ÀZ€YK[XZŸKLåãõŸ‹ò[RYàô[[À\õŸ‹ò[K[XZŸKLåüKû⁄Ÿ^NàååÃ»ãò[YNàååÃ	‘»ã\ÿŒàåéåÃŸZY⁄Y⁄€›[ô»⁄\ò›Z]úõ€H[õ›‹À€‹õô\úÀ[ô‹àãX€€éàå‹ã[ú›ùX›[€úŒòŸ]\àH⁄€›\ãHò[HôXõ›[ô\ãÇÇåàZ[ù]\»ÃŸX€€ô»€à€ÿ⁄¬åÃŸX€€ô»úõ€H€ôH[õ›¬åÃŸX€€ô»úõ€HH›\à[õ›¬åÃŸX€€ô»úõ€H€ôH€‹õô\ÇåÃŸX€€ô»úõ€HH›\à€‹õô\ÇåÃŸX€€ô»úõ€H‹ŸàŸ^H‹¬Çîÿ€‹ö[ôŒÇë[õ›‹»[ô€‹õô\ú»HH⁄[ù\àXZŸBï‹ŸàŸ^H‹»Hà⁄[ù»\àXZŸX€YRYàô[[ÀZ€YKLåÃ»ãõŸ‹ò[RYàô[[À\õŸ‹ò[KLåÃ»üKóN¬ò€€ú›QêUS“”QW—íSœQQêUS—SS◊—íS––US—ÀõX\
+
+⁄€YRYŸ^Kããôö[JOOäÀããôö[Yö€YRY€YŒò€YKI⁄Ÿ^_X\—Yò][[[ŒùùYK[ŸNàö€YHüJJN¬ò€€ú›QêUS‘ì—‘êSW—íSœQQêUS—SS◊—íS––US—ÀõX\
+
+‹õŸ‹ò[RYŸ^Kããôö[JOOäÀããôö[YúõŸ‹ò[RY€YŒòõŸ‹ò[KI⁄Ÿ^_X\—Yò][[[ŒùùYK[ŸNàúõŸ‹ò[HüJJN¬ò€€ú›QêUS“”QW—íS‘”Q‘œ[ô]»Ÿ]
+QêUS“”QW—íSÀõX\
+Oôú€Y JN¬ò€€ú›QêUS‘ì—‘êSW—íS‘”Q‘œ[ô]»Ÿ]
+QêUS‘ì—‘êSW—íSÀõX\
+Oôú€Y JN¬ò€€ú›õ‹õX[^ôQö[^]ò[YOOî›ö[ô ò[Y_àäKùö[J
+Kù”›Ÿ\êÿ\ŸJ
+Kúô\XŸJ◊ ÀŸÀàäN¬ò€€ú›ùZ[Yò][ö[[ô^YYò][œOûÿ€€ú›ûRY[ô]»X\
+
+KûT€Yœ[ô]»X\
+
+KûSò[YO[ô]»X\
+
+NŸYò][Àôõ‹ëXX⁄
+YèOûÿûRYúŸ]
+›ö[ô YãöY
+KYäNÿûT€YÀúŸ]
+Yãú€YÀYäNÿûSò[YKúŸ]
+õ‹õX[^ôQö[^
+Yãõò[YJKYäNﬂJN‹ô]\õûÿûRYûT€YÀûSò[Y_NﬂN¬ò€€ú›QêUS“”QW—íS“SëVXùZ[Yò][ö[[ô^
+QêUS“”QW—íS N¬ò€€ú›QêUS‘ì—‘êSW—íS“SëVXùZ[Yò][ö[[ô^
+QêUS‘ì—‘êSW—íS N¬ò€€ú›ö[ôX]⁄[ô—Yò][ö[Jö[[ô^
+OOû⁄YäYö[
+\ô]\õàù[‹ô]\õà[ô^òûRYôŸ]
+›ö[ô ö[öY
+J_[ô^òûT€YÀôŸ]
+ö[ú€Y _[ô^òûSò[YKôŸ]
+õ‹õX[^ôQö[^
+ö[õò[YJJ_ù[ﬂN¬ò€€ú›Y\ôŸQYò][ö[œJ^\›[ôœV◊KYò][œV◊JOOûÿ€€ú›\›P\úò^Kö\–\úò^J^\›[ô OŸ^\›[ôŒñ◊Nÿ€€ú›[ô^YYò][œOOQQêUS‘ì—‘êSW—íSœ—QêUS‘ì—‘êSW—íS“SëVëQêUS“”QW—íS“SëVÿ€€ú››\›€OV◊Nÿ€€ú›ŸY[ëYò][œ[ô]»Ÿ]
+
+N€\›ôõ‹ëXX⁄
+][OOûÿ€€ú›X]⁄Yö[ôX]⁄[ô—Yò][ö[
+][K[ô^
+N⁄YäX]⁄
+^⁄YäŸY[ëYò][Àö\ X]⁄ú€Y J\ô]\õé‹ŸY[ëYò][ÀòY
+X]⁄ú€Y Nÿ›\›€Kú\⁄
+Àããö][KããõX]⁄YõX]⁄öY€YŒõX]⁄ú€YÀ\—Yò][[[ŒùùYK[ŸNõX]⁄õ[Ÿ_JN‹ô]\õéﬂX›\›€Kú\⁄
+][JNﬂJNŸYò][Àôõ‹ëXX⁄
+YèOû⁄Yä\ŸY[ëYò][Àö\ Yãú€Y JX›\›€Kú\⁄
+YäNﬂJN‹ô]\õà›\›€NﬂN¬ò€€ú›ùZ[Yò][ö[Y[X\Ÿ\œJ^\›[ôœV◊KYò][œV◊JOOûÿ€€ú›[X\Ÿ\œ[ô]»X\
+
+Nÿ€€ú›[ô^YYò][œOOQQêUS‘ì—‘êSW—íSœ—QêUS‘ì—‘êSW—íS“SëVëQêUS“”QW—íS“SëV \úò^Kö\–\úò^J^\›[ô OŸ^\›[ôŒñ◊JKôõ‹ëXX⁄
+][OOûÿ€€ú›X]⁄Yö[ôX]⁄[ô—Yò][ö[
+][K[ô^
+N⁄Yä[X]⁄
+\ô]\õéÿ[X\Ÿ\ÀúŸ]
+›ö[ô X]⁄öY
+KX]⁄öY
+N⁄Yä][OÀöYO[ù[
+X[X\Ÿ\ÀúŸ]
+›ö[ô ][KöY
+KX]⁄öY
+N⁄Yä][OÀú€Y X[X\Ÿ\ÀúŸ]
+][Kú€YÀX]⁄öY
+NﬂJNŸYò][Àôõ‹ëXX⁄
+YèOûÿ[X\Ÿ\ÀúŸ]
+›ö[ô YãöY
+KYãöY
+Nÿ[X\Ÿ\ÀúŸ]
+Yãú€YÀYãöY
+NﬂJN‹ô]\õà[X\Ÿ\ŒﬂN¬ò€€ú›õ‹õX[^ôTÿ€‹ô\—õ‹ëYò][ö[œJÿ€‹ô\œV◊K€YP[X\Ÿ\œ[ô]»X\
+
+KõŸ‹ò[P[X\Ÿ\œ[ô]»X\
+
+JOOä\úò^Kö\–\úò^Jÿ€‹ô\ O‹ÿ€‹ô\Œñ◊JKõX\
+ÿ€‹ôOOûÿ€€ú›‹òœ\ÿ€‹ôOÀú‹òﬂö€YHéÿ€€ú›[X\Ÿ\œ\‹òœOOHúõŸ‹ò[Hè‹õŸ‹ò[P[X\Ÿ\Œö€YP[X\Ÿ\Œÿ€€ú›ô^ö[YX[X\Ÿ\ÀôŸ]
+›ö[ô ÿ€‹ôOÀôö[Y
+J_ÿ€‹ôOÀôö[Y‹ô]\õàô^ö[YOO\ÿ€‹ôOÀôö[Y	âú‹òœOO\ÿ€‹ôOÀú‹òœ‹ÿ€‹ôNûÀããúÿ€‹ôK‹òÀö[Yõô^ö[YNﬂJN¬ò€€ú›€›[ù›\›€TõŸ‹ò[Qö[œ[\›Oä\úò^Kö\–\úò^J\›
+O€\›ñ◊JKôö[\äOàYö[ôX]⁄[ô—Yò][ö[
+QêUS‘ì—‘êSW—íS“SëV
+JKõ[ô›¬ò€€ú›íS◊“SíUQQêUS“”QW—íSŒ¬ò€€ú›ì—‘êSW—íS◊“SíUQQêUS‘ì—‘êSW—íSŒ¬ò€€ú›P””îœV»ôùãå‹ãõ\àãôõãúÿàóN¬ò€€ú›\—ö[X^Yö[Oìù[Xô\ãö\—ö[ö]Jù[Xô\äö[ÀõX^
+JIâìù[Xô\äö[õX^
+Oå¬ò€€ú›UëSï◊“SíUV¬û⁄YåK]Nàì‘Sà÷SHïSàã]NàååçãLãLéã[YNàçéåHãÿÿ][€éàìXZ[àﬁ[H8†%€›\ùHã\ÿŒàëù[X€›\ù]çHù[úÀàö\ú›å^Y\úÀàã\Nàúù[àüKû⁄Yåã]Nàî“”’Së»”SíP»ã]NàååçãLÀLHã[YNàçåHãÿÿ][€éàïòZ[ö[ô»òX⁄[]H8†%ò^H»ã\ÿŒàë›ZYY⁄€›[ô»⁄]ö[Hô]öY]Ààã\Nàò€[öX»üKû⁄YåÀ]NàîìÀPSH–‘íSSPQ—Hã]NàååçãLÀLLàã[YNàçŒåHãÿÿ][€éàê€€[][ö]HŸ[ù\àã\ÿŒàê€€\]]]ôHÿ‹ö[[XYŸKàô\úŸ^Hô\]Z\ôYàã\Nàôÿ[YHüKû⁄Yç]Nàî““S»“SSë—Hã]NàååçãLÀLNHã[YNàçNåÃHãÿÿ][€éàìXZ[àﬁ[H8†%€›\ùàã\ÿŒàï[YY⁄⁄[»€›\úŸKàö^ô\»õ‹à‹Ààã\Nàò⁄[[ôŸHüKû⁄YçK]NàëíSH
+»ëP”’ëTñHã]NàååçãLÀLçàã[YNàåŒåHãÿÿ][€éàëö[Hõ€€H
+»ôX€›ô\ûH›Z]Hã\ÿŒàëö[HúôXZŸ›€à
+»€€[ôŸH[ô›ô]⁄àã\NàúôX€›ô\ûHüKóN¬ò€€ú›–◊“SíUV¬û⁄YåLK]NàïTTàì—H’—Tàã]NàååçãLãLçHã[YNàçéåSHãÿÿ][€éàïŸZY⁄õ€€H8†%ò^HHã\ÿŒàêô[ò⁄ô\‹À›ô\öXYô\‹Àõ›‹À[ôXÿŸ\‹€‹ûH€‹öÀàúö[ô»[›\àYù[ô»⁄Ÿ\ÀàüKû⁄YåLã]Nàì’—Tàì—H’ëSë’ã]NàååçãLãLç»ã[YNàçéåSHãÿÿ][€éàïŸZY⁄õ€€H8†%ò^HHã\ÿŒàî‹]X]ÀXYYùÀ[ôŸ\Ààõÿ›\»€à‹›\ö[‹à⁄Z[ãàüKû⁄YåLÀ]NàëïSì—H“Tê’RUã]NàååçãLÀLã[YNàçŒåSHãÿÿ][€éàïŸZY⁄õ€€H8†%ò^Hàã\ÿŒàíY⁄Z[ù[ú⁄]H⁄\ò›Z]òZ[ö[ôÀàHZ[ãàúö[ô»ÿ]\ãàüKû⁄YåL]Nàì”STP»Qï»ã]NàååçãLÀLLHã[YNàçéåSHãÿÿ][€éàïŸZY⁄õ€€H8†%]õ‹õH\ôXHã\ÿŒàê€X[à	àô\öÀ€ò]⁄õŸ‹ô\‹⁄[€úÀà€ÿX⁄YŸ\‹⁄[€ãàüKû⁄YåLK]Nàê”‘ëH	à””ëUS”íSë»ã]NàååçãLÀLNã[YNàçéåÃSHãÿÿ][€éàïòZ[ö[ô»òX⁄[]H8†%\ôàã\ÿŒàê€‹ôH›Xö[]K€Y\⁄\ÀY⁄[]HY\ãàÿ[YKY^H€€ô][€ö[ôÀàüKóN¬ò€€ú›VQTó’Pó‘Uœ^⁄€YNàã»ãY[Œàã‹õŸ‹ò[K[Ÿ»ãõŸÀYö[éàã‹]ZX⁄À[Y[ùHãÿŒàã€Yù[ô»ãõŸ‹ò[NàãŸ]ô[ù»ãXY\òõÿ\ôŒàã€XY\òõÿ\ô»ãõŸö[Nàã‹õŸö[Hã^Y\úŒàã‹^Y\ú»üN¬ò€€ú›VQTó‘U’Pîœ^»ã»éàö€YHããŸY[»éàôY[»ãã‹õŸ‹ò[K[Ÿ»éàôY[»ãã‹]ZX⁄À[Y[ùHéàõŸÀYö[ãã€Yù[ô»éàúÿ»ããŸ]ô[ù»éàúõŸ‹ò[Hãã€XY\òõÿ\ô»éàõXY\òõÿ\ô»ãã‹õŸö[HéàúõŸö[Hãã‹^Y\ú»éàú^Y\ú»üN¬ò€€ú›QTîœV¬û€Z[éåò[YNàîì”““QHã€€‹éààÕMMHãôŒààÕMMMMMLMHüKû€Z[éåÀò[YNàî’TïTàã€€‹éààÕ———ãôŒààÕ———MHüKû€Z[éçãò[YNàïêTî“UHã€€‹éàà–LLLãôŒàà–LLLMHüKû€Z[éåLò[YNàêST’Tàã€€‹éàà——M—ëàãôŒàà——M—ëåMHüKû€Z[éåMKò[YNàëSUHã€€‹éàà–ŒëåãôŒàà–ŒëåMHüKû€Z[éååãò[YNàìUîã€€‹éàà—ëëLàãôŒàà—ëëLåMHüKû€Z[éåÃò[YNàìQ—Sëã€€‹éê÷PSãôŒê÷PSä»åMHüKóN¬ò€€ú›Ÿ]Y\àH»OàÀããïQTî◊Kúô]ô\úŸJ
+Kôö[ô
+Oà»èHõZ[äHQTî÷ÃN¬ò€€ú›Ÿ^T›èJ
+OOûÿ€€ú›[ô]»]J
+N‹ô]\õà	ŸôŸ]ù[YX\ä
+_KI‘›ö[ô ôŸ][€ù
+
+JÃJKúY›\ù
+ãåä_KI‘›ö[ô ôŸ]]J
+JKúY›\ù
+ãåä_XN¬ò€€ú›SïSOHêPê—Që“í”SîTî’Uï÷VååÕMçŒHé¬ò€€ú›SS◊‘VQTè^Ÿ[XZ[àô[[–⁄›Xãò\ã\‹›€‹ôàô[[ÃLåÕãò[YNàë[[»^Y\àãõ€Nàú^Y\àüN¬ò€€ú›SS◊–”–P“^Ÿ[XZ[àò€ÿX⁄ô[[–⁄›Xãò\ã\‹›€‹ôàô[[ÃLåÕãò[YNàë[[»€ÿX⁄ãõ€Nàò€ÿX⁄üN¬ò€€ú›Ÿ[íYJHöYäOOò	‹KI—]Kõõ› 
+_KI”X]úò[ô€J
+Kù‘›ö[ô ÕäKú€XŸJã
+_X¬ôù[ò›[€àŸ[ô\ò]Rõ⁄[ê€ŸJ^\›[ôœV◊K[ô›Mä^¬ôõ‹ä]öY\œL›öY\œÃ›öY\   ^¬õ]€ŸOHàé¬ôõ‹ä]OL⁄O[ô›⁄J  X€ŸJœPSïSV”X]ôõ€‹äX]úò[ô€J
+JêSïSKõ[ô›
+WN¬öYäY^\›[ôÀö[ò€Y\ €ŸJJ\ô]\õà€ŸN¬üBúô]\õàX]úò[ô€J
+Kù‘›ö[ô ÕäKú€XŸJãä€[ô›
+Kù’\\êÿ\ŸJ
+N¬üBò€€ú›SëSë◊“ì“Só–””ïV“—VHHú€ú[ô[ôÀZõ⁄[ãX€€ù^é¬ò€€ú›”QW‘“’◊”PQTêì–Të”SRUHL¬ò€€ú›SïíUW–””ïV‘’‘êQ—W“—VHHú€ö[ùö]KX€€ù^é¬ò€€ú›’TPêT—W–UU—SêPìQH›ö[ô [\‹ùõY]Kô[ùãïíUW—SêPìW‘’TPêT—W–UUàäKùö[J
+HOOHùùYHé¬ò€€ú›”QW‘“’◊‘–”‘W–ïU”ó–êT—W‘’SHH¬àõ‹ô\îòY]\ŒàNNKàY[ôŒàç‹Lúãàõ€ù⁄^ôNàLàõ€ùŸZY⁄àÃà]\î‹X⁄[ôŒàåå[Hãà›\ú€‹éàú⁄[ù\àãüN¬ò€€ú›“P“”T’––Të‘’SHH¬àX\ô⁄[êõ›€NàMãàY[ôŒàåL\Lúãàõ‹ô\îòY]\ŒàMàõ‹ô\éà\€€Y	–ì‘ëTó–”üXàòX⁄Ÿ‹õ›[ôàõ[ôX\ãY‹òYY[ù
+MMYYÀôÿòJçMKçMKçMKå KôÿòJçMKçMKçMKåJJHãüN¬ò€€ú›“P“”T’“USW—’‘’SHH
+€ôJHOà
+¬à⁄YàNàZY⁄àNàõ‹ô\îòY]\ŒàçL	Hãàõ‹ô\éà\€€Y	Ÿ€ôH»úôÿòJåçMKç Hààì‘ëTó–”üXàòX⁄Ÿ‹õ›[ôà€ôH»úôÿòJåçMKåN
+Hààùò[ú‹\ô[ùãà€€‹éà€ôH»ì”àUUQà\‹^Nàö[õ[ôKYõ^ãà[Y€í][\ŒàòŸ[ù\àãàù\›YûP€€ù[ùàòŸ[ù\àãàõ€ù⁄^ôNàLKàõ^⁄ö[öŒàüJN¬Çò€€ú›àH¬à\ﬁ[ò»Ÿ]
+ H¬à€€ú›\—]HH
+ò[YJHOà¬àYà
+\úò^Kö\–\úò^Jò[YJJHô]\õàò[YKõ[ô›à¬àYà
+ò[YH	âà\[Ÿàò[YHOOHõÿöôX›äHô]\õàÿöôX›öŸ^\ ò[YJKõ[ô›à¬àô]\õàõ€€X[äò[YJN¬àN¬Çà]ÿÿ[Hù[¬àûH¬à€€ú›àH]ÿZ]⁄[ô›Àú›‹òYŸOÀôŸ]
+ÀùYJN¬àÿÿ[HèÀùò[YH»î””ãú\úŸJãùò[YJHàù[¬àHÿ]⁄
+JHﬂBàYà
+ÿÿ[OOHù[
+H¬àûH¬à€€ú›ò]»H⁄[ô›Àõÿÿ[›‹òYŸOÀôŸ]][J N¬àÿÿ[Hò]»»î””ãú\úŸJò] Hàù[¬àHÿ]⁄
+JHﬂBàBÇà€€ú›XõHHPìW”PT⁄◊N¬àYà
+XõJH¬àûH¬à€€ú›»]HHH]ÿZ]›\Xò\ŸKôúõ€JXõJKúŸ[X›
+äàäN¬à€€ú›ÿÿ[õ›‹»H\—]Jÿÿ[
+H»ùZ[\õ›‹ Àÿÿ[»€›\òŸNàõÿÿ[àJHà◊N¬à€€ú›ô[[›Tõ›‹»H\—]J]JH»ùZ[\õ›‹ À]K»€›\òŸNàúô[[›HàJHà◊N¬àYà
+»OOHú€ô]ô[ù»à»OOHú€úú›ú»à»OOHú€ú^Y\ú»à»OOHú€ú^Y\ã\õŸö[\»à»OOHú€ú⁄›Ÿ‹»äH¬à€€ú›Y\ôŸYHY\ôŸRYò]Yõ›‹ Àÿÿ[õ›‹Àô[[›Tõ›‹ N¬àYà
+\—]JY\ôŸY
+JHô]\õàY\ôŸY¬àBàYà
+\—]Jô[[›Tõ›‹ JHô]\õàô[[›Tõ›‹Œ¬àHÿ]⁄
+JHﬂBàBÇàÀ»õ€ã]XõHŸ^\»
+^à€ò€ÿX⁄\ö[‹ö]Y\ H⁄›[õ›[ô]ö\ò]»î””ÇàÀ»€»\[]ô[\ú⁄\›YŸ][ô‹»\ôHõ›õ‹YûHõ›»õ‹õX[^ô\úÀÇàYà
+]XõJHô]\õà\—]Jÿÿ[
+H»ÿÿ[àù[¬àô]\õà\—]Jÿÿ[
+H»ùZ[\õ›‹ Àÿÿ[»€›\òŸNàõÿÿ[àJHàù[¬àKà\ﬁ[ò»Ÿ]
+Àã‹[€ú»HﬂJH¬à€€ú››öX›ô[[›HH‹[€úœÀú›öX›ô[[›HOOHùYN¬à€€ú››öX›ÿÿ[H‹[€úœÀú›öX›ÿÿ[OOHùYN¬à€€ú›Ÿ\öX[^ôYHî””ãú›ö[ô⁄YûJäN¬à]ÿÿ[\ú⁄\›YHò[ŸN¬à]ÿÿ[\úõ‹àHù[¬àûH¬àYà
+\[Ÿà⁄[ô›Àú›‹òYŸOÀúŸ]OOHôù[ò›[€àäH¬à]ÿZ]⁄[ô›Àú›‹òYŸKúŸ]
+ÀŸ\öX[^ôYùYJN¬àÿÿ[\ú⁄\›YHùYN¬àBàHÿ]⁄
+JH»ÿÿ[\úõ‹àHN»BàûH¬à⁄[ô›Àõÿÿ[›‹òYŸOÀúŸ]][JÀŸ\öX[^ôY
+N¬àÿÿ[\ú⁄\›YHùYN¬àHÿ]⁄
+JH»ÿÿ[\úõ‹àHÿÿ[\úõ‹àN»BàYà
+›öX›ÿÿ[	âà[ÿÿ[\ú⁄\›Y
+Hõ›»
+ÿÿ[\úõ‹àô]»\úõ‹äõÿÿ[‹\ú⁄\›ŸòZ[YäJN¬àYà
+\—[[‘\ú⁄\›[òŸTŸ\‹⁄[€ä
+JHô]\õà»›‹òYŸS[ŸNàô[[◊€ÿÿ[àN¬à€€ú›XõHHPìW”PT⁄◊N¬à€€ú›ô[[›Tõ›‹»HùZ[ô[[›Tõ›‹ Àã‹[€ú N¬àYà
+
+»OOHú€ô]ô[ù»à»OOHú€ú^Y\ú»à»OOHú€ú^Y\ã\õŸö[\»äH	âà\úò^Kö\–\úò^JäH	âàãõ[ô›à	âàô[[›Tõ›‹Àõ[ô›OOH
+H¬à€€ú€€Kùÿ\õäñ‹ô[[›K\\ú⁄\›HùZ[ô[[›Tõ›‹»õ‹Y[õ›‹»ã»Ÿ^NàÀ[ú]€›[ùàãõ[ô›JN¬àBà€€ú›⁄Y€ôYô\XŸ[Y[ù€€X›[€àH»OOHú€úÿÀ\Ÿ\‹⁄[€ú»à»OOHú€úÿÀ\ú›ú»à»OOHú€úÿÀ[Ÿ‹»é¬àYà
+XõH	âà
+ô[[›Tõ›‹Àõ[ô›à⁄Y€ôYô\XŸ[Y[ù€€X›[€äJH¬àûH¬àYà
+›öX›ô[[›H	âà\‘⁄›XëXùY”[ŸJ
+JH¬à€€ú€€Kö[ôõ ñ‹ô[[›K\\ú⁄\›H›öX›ô[[›H^[ÿYã¬àŸ^NàÀàXõKà›\Xò\ŸU\õà›\Xò\ŸKù\õàãàõ⁄ôX›ôYéà›\Xò\ŸKúõ⁄ôX›ôYààãàô[[›Tõ›‹ÀàJN¬àBà€€ú›»\úõ‹àHH]ÿZ]›\Xò\ŸKôúõ€JXõJKù\Ÿ\ù
+ô[[›Tõ›‹À»€ê€€ôõX›àöYàJN¬àYà
+\úõ‹äH¬à€€ú€€Kô\úõ‹äñ‹ô[[›K\\ú⁄\›H\Ÿ\ùòZ[Yã¬àŸ^NàÀàXõKàY\‹ÿYŸNà\úõ‹èÀõY\‹ÿYŸHàãà€ŸNà\úõ‹èÀò€ŸHàãà]Z[Œà\úõ‹èÀô]Z[»àãà[ùà\úõ‹èÀö[ùàãàõ›–€›[ùàô[[›Tõ›‹Àõ[ô›àJN¬àYà
+›öX›ô[[›JH¬à€€ú›ô[[›Q\úõ‹àHô]»\úõ‹ä\úõ‹èÀõY\‹ÿYŸHúô[[›W‹\ú⁄\›ŸòZ[YäN¬àô[[›Q\úõ‹ãõò[YHHîô[[›T\ú⁄\›\úõ‹àé¬àô[[›Q\úõ‹ãò€ŸHH\úõ‹èÀò€ŸHàé¬àô[[›Q\úõ‹ãô]Z[»H\úõ‹èÀô]Z[»àé¬àô[[›Q\úõ‹ãö[ùH\úõ‹èÀö[ùàé¬àô[[›Q\úõ‹ãöŸ^HHŒ¬àô[[›Q\úõ‹ãùXõHHXõN¬àô[[›Q\úõ‹ãúõ›–€›[ùHô[[›Tõ›‹Àõ[ô›¬àô[[›Q\úõ‹ãúô[[›Tõ›‹»Hô[[›Tõ›‹Œ¬àô[[›Q\úõ‹ãú›\Xò\ŸU\õH›\Xò\ŸKù\õàé¬àô[[›Q\úõ‹ãúõ⁄ôX›ôYàH›\Xò\ŸKúõ⁄ôX›ôYààé¬àYà
+\‘⁄›XëXùY”[ŸJ
+JH€€ú€€Kô\úõ‹äñ‹ô[[›K\\ú⁄\›H›öX›ô[[›H\úõ‹àã»\úõ‹éàô[[›Q\úõ‹ãô[[›Tõ›‹»JN¬àõ›»ô[[›Q\úõ‹é¬àBàBàHÿ]⁄
+JH¬àYà
+›öX›ô[[›JHõ›»N¬àBàBàBüN¬Çò€€ú›\ú⁄\›[òŸTŸ\ùöXŸOX‹ôX]P\\ú⁄\›[òŸTŸ\ùöXŸJŸéëãô]⁄[\ôô]⁄JN¬ò€€ú›òZ[ö[ô–ÿ][Ÿ‘\ú⁄\›[òŸOX‹ôX]UòZ[ö[ô–ÿ][Ÿ‘\ú⁄\›[òŸTŸ\ùöXŸJ¬ôô]⁄[\äããò\ô‹ OOô€ÿò[\Àôô]⁄
+ããò\ô‹ Kú›‹òYŸNô€ÿò[\œÀõÿÿ[›‹òYŸKüJN¬ò€€ú›^Y\ê⁄[[ôŸT\ú⁄\›[òŸOX‹ôX]T^Y\ê⁄[[ôŸT\ú⁄\›[òŸTŸ\ùöXŸJ¬ôô]⁄[\äããò\ô‹ OOô€ÿò[\Àôô]⁄
+ããò\ô‹ Kú›‹òYŸNô€ÿò[\œÀõÿÿ[›‹òYŸKüJN¬Çò€€ú›\úŸSXY\òõÿ\ô\úõ‹ìY\‹ÿYŸHH
+\úõ‹ê€ŸHHàã›]\»H\úŸS[ŸHHöú€€àäHOà¬àYà
+\úŸS[ŸHOOHõõ€ó⁄ú€€àäHô]\õàìXY\òõÿ\ô[ô⁄[ù[ò]òZ[XõH
+[ùò[Yô\‹€úŸHõ‹õX]
+Kàé¬àYà
+›]\»OOH
+Hô]\õàìXY\òõÿ\ô[ô⁄[ùZ\‹⁄[ôÀàé¬àYà
+›]\»èHL
+Hô]\õàìXY\òõÿ\ôŸ\ùöXŸH\úõ‹ãàé¬à›⁄]⁄
+›ö[ô \úõ‹ê€ŸHàäKù”›Ÿ\êÿ\ŸJ
+JH¬àÿ\ŸHù[ò]]‹ö^ôYéÇàô]\õàî⁄Y€à[àô\]Z\ôYàé¬àÿ\ŸHôõ‹òöY[àéÇàô]\õàìõ›[›ŸYõ‹à\»X[Kàé¬àÿ\ŸHùX[W⁄Y‹ô\]Z\ôYéÇàô]\õàïX[HY\»ô\]Z\ôYàé¬àÿ\ŸHö[ùò[Y‹ÿ€‹HéÇàô]\õàìXY\òõÿ\ôÿ€‹H\»[ùò[Yàé¬àÿ\ŸHö[ù\õò[Ÿ\úõ‹àéÇàô]\õàìXY\òõÿ\ôŸ\ùöXŸH\úõ‹ãàé¬àÿ\ŸHúò]W€[Z]YéÇàô]\õàï€»X[ûHô\]Y\›ÀàûHYÿZ[à⁄‹ùKàé¬àYò][Çàô]\õàìXY\òõÿ\ô[ò]òZ[XõKàé¬àBüN¬ò€€ú›\úŸP‹ôX]UX[Q\úõ‹ìY\‹ÿYŸOJ›]\œL\úõ‹ê€ŸOHàã\úŸS[ŸOHöú€€àäOOû¬öYä\úŸS[ŸOOOHõõ€ó⁄ú€€àü\úŸS[ŸOOOHö[ùò[Y⁄ú€€àä\ô]\õàïX[HŸ]\ô]\õôY[à[ùò[Yô\‹€úŸKàé¬öYä›]\œOOM
+\ô]\õàïX[HŸ]\[ô⁄[ù\»Z\‹⁄[ôÀàé¬öYä›]\œOOM_›]\œOOM \ô]\õàê€ÿX⁄]]‹ö^ò][€àòZ[YàX\ŸH⁄Y€à[àYÿZ[ãàé¬öYä›]\œèML	âî›ö[ô \úõ‹ê€Ÿ_àäKù”›Ÿ\êÿ\ŸJ
+OOOHô[ùóÿ€€ôöY◊€Z\€X]⁄ä\ô]\õàïX[HŸ]\\»õ›€€ôöY›\ôY€àHŸ\ùô\ãàé¬öYä›]\œèML
+\ô]\õàïX[HŸ]\Ÿ\ùöXŸH\úõ‹ãàX\ŸHûHYÿZ[ãàé¬ò€€ú›õ‹õX[^ôY\úõ‹ê€ŸOT›ö[ô \úõ‹ê€Ÿ_àäKù”›Ÿ\êÿ\ŸJ
+N¬öYäõ‹õX[^ôY\úõ‹ê€ŸKú›\ù’⁄]
+ùXõW€Z\‹⁄[ô◊»äJ\ô]\õòX[HŸ]\\»Z\‹⁄[ô»òX⁄Ÿ[ôXõNà	€õ‹õX[^ôY\úõ‹ê€ŸKúô\XŸJùXõW€Z\‹⁄[ô◊»ãàä_Kò¬öYäõ‹õX[^ôY\úõ‹ê€ŸKú›\ù’⁄]
+õZ\‹⁄[ô◊Ÿù[ò›[€ó»äJ\ô]\õòX[HŸ]\\»Z\‹⁄[ô»òX⁄Ÿ[ôù[ò›[€éà	€õ‹õX[^ôY\úõ‹ê€ŸKúô\XŸJõZ\‹⁄[ô◊Ÿù[ò›[€ó»ãàä_Kò¬ú›⁄]⁄
+õ‹õX[^ôY\úõ‹ê€ŸJ^¬òÿ\ŸHùX[W⁄[ùö]Wÿ‹ôX][€óŸòZ[YéÇúô]\õàê€›[õ›‹ôX]HX[H€ŸKàé¬òÿ\ŸHù[ò]]‹ö^ôYéÇúô]\õàê€ÿX⁄]]‹ö^ò][€àòZ[YàX\ŸH⁄Y€à[àYÿZ[ãàé¬òÿ\ŸHò€ÿX⁄›\Ÿ\ó€õ›Ÿõ›[ôéÇúô]\õàê€ÿX⁄Xÿ€›[ùÿ\»õ›õ›[ô[àòX⁄Ÿ[ô]]\Ÿ\úÀàé¬òÿ\ŸHõZ\‹⁄[ô◊‹ú»éÇúô]\õàïX[HŸ]\î»\»Z\‹⁄[ô»€àHòX⁄Ÿ[ôàé¬òÿ\ŸHúú◊‹\õZ\‹⁄[€óŸ[öYYéÇúô]\õàïX[HŸ]\î»\õZ\‹⁄[€àÿ\»[öYYàé¬òÿ\ŸHùXõW€Z\‹⁄[ô»éÇúô]\õàïX[HŸ]\Xõ\»\ôHZ\‹⁄[ô»€àHòX⁄Ÿ[ôàé¬òÿ\ŸHö[ùò[Y‹Ÿ\ùöXŸW⁄Ÿ^HéÇúô]\õàïX[HŸ]\òX⁄Ÿ[ôŸ^H\»[ùò[Yàé¬òÿ\ŸHúú◊ÿ\ô›[Y[ù€Z\€X]⁄éÇúô]\õàïX[HŸ]\î»\ô›[Y[ù»»õ›X]⁄òX⁄Ÿ[ô⁄Y€ò]\ôKàé¬òÿ\ŸHúÿ⁄[XW›\W€Z\€X]⁄›X[\◊⁄YéÇúô]\õàïX[HŸ]\òX⁄Ÿ[ôÿ⁄[XH\»[ò€€\]XõHX[\»Y\\Ààé¬òÿ\ŸHù[ö€õ›€ó‹ú◊ŸòZ[\ôHéÇúô]\õàïX[HŸ]\î»òZ[Y[ô^X›YKàé¬ôYò][Çúô]\õàê€›[õ›‹ôX]HX[Kàé¬üBüN¬ò€€ú›\’X⁄öXÿ[òX⁄Ÿ[ôY\‹ÿYŸO]ò[YOOûÿ€€ú›ò]œT›ö[ô ò[Y_àäKù”›Ÿ\êÿ\ŸJ
+N⁄Yä\ò] \ô]\õàò[ŸN‹ô]\õñ»ú›\Xò\ŸHãú‹›‹ô\»ãú‹[ãúô[][€àãúÿ⁄[XHãöù›ãúú»ãôù[ò›[€àãò€€[[àóKú€€YJ⁄Ÿ[èOúò]Àö[ò€Y\ ⁄Ÿ[äJNﬂN¬ò€€ú›\úŸT›\ù\\úõ‹ìY\‹ÿYŸOJ\úõ‹äOOû¬ò€€ú›ò]œT›ö[ô \úõ‹èÀõY\‹ÿYŸ_\úõ‹üàäKù”›Ÿ\êÿ\ŸJ
+N¬öYäò]Àö[ò€Y\ ú›\Xò\ŸHäIâúò]Àö[ò€Y\ õZ\‹⁄[ô»äJ\ô]\õàïŸH€›[õ››\ù⁄›XàôXÿ]\ŸHX[H]H\»[\‹ò\ö[H[ò]òZ[XõKàé¬öYäò]Àö[ò€Y\ ò€€ôöY◊€Z\‹⁄[ô»ä_ò]Àö[ò€Y\ ò€€ôöY◊⁄[ùò[YäJ\ô]\õàî⁄›Xà\»›[ÿ\õZ[ô»\àX\ŸHôYúô\⁄[àH[€Y[ùàé¬öYäò]Àö[ò€Y\ ù[ò]]‹ö^ôYä_ò]Àö[ò€Y\ ôõ‹òöY[àäJ\ô]\õàñ[›\àŸ\‹⁄[€àôYY»»ôHôYúô\⁄YàX\ŸH⁄Y€à[àYÿZ[ãàé¬öYäò]Àö[ò€Y\ õô]€‹ö»ä_ò]Àö[ò€Y\ ôòZ[Y»ô]⁄äJ\ô]\õàê€€õôX›[€àÿ\»[ù\úù\Y⁄[HÿY[ô»[›\àX[H]KàX\ŸHô]ûKàé¬öYä\’X⁄öXÿ[òX⁄Ÿ[ôY\‹ÿYŸJò] J\ô]\õàî⁄›Xà\»[\‹ò\ö[H[ò]òZ[XõKàX\ŸHûHYÿZ[à⁄‹ùKàé¬úô]\õàî⁄›Xàò[à[ù»HÿY[ô»\‹›YKàX\ŸHôYúô\⁄[ôûHYÿZ[ãàé¬üN¬ãÀ»\‹›€‹ô\⁄[ô»
+⁄[\Hù]õ›Z[ù^
+Bôù[ò›[€à\⁄  ^€]LLXŒYÕNŸõ‹ä]OL⁄OÀõ[ô›⁄J  ^⁄è\Àò⁄\ê€ŸP]
+JN⁄SX]ö[][
+LNL _\ô]\õäèèå
+Kù‘›ö[ô Õä_BãÀ»]Y[–€€ù^]\›ôH^ûKZ[ö]X[^ôY€à\Ÿ\àŸ\›\ôH
+S‘»ŸXí⁄]ô\]Z\ô[Y[ù
+Bõ]ÿ]Y[–›[ù[¬ôù[ò›[€àŸ]]Y[–›
+
+^⁄YäWÿ]Y[–›	âù\[Ÿà]Y[–€€ù^OOHù[ôYö[ôYä^›û^◊ÿ]Y[–›[ô]»]Y[–€€ù^
+
+_Xÿ]⁄
+\úõ‹ä^ﬂ_ZYäÿ]Y[–›	âóÿ]Y[–›ú›]OOOHú›\‹[ôYä^◊ÿ]Y[–›úô\›[YJ
+Kòÿ]⁄
+
+
+OOûﬂJ_\ô]\õàÿ]Y[–›Bôù[ò›[€à^UX⁄ 
+^ÿ€€ú›]Y[–›YŸ]]Y[–›
+
+N⁄YäX]Y[–›
+\ô]\õé›û^ÿ€€ú›œX]Y[–›ò‹ôX]S‹ÿ⁄[]‹ä
+KœX]Y[–›ò‹ôX]QÿZ[ä
+N€Àò€€õôX›
+ NŸÀò€€õôX›
+]Y[–›ô\›[ò][€äN€Àôúô\]Y[òﬁKùò[YOLLå€Àù\OHú⁄[ôHéŸÀôÿZ[ãúŸ]ò[YP][YJåÀ]Y[–›ò›\úô[ù[YJNŸÀôÿZ[ãô^€ô[ùX[ò[\’ò[YP][YJåK]Y[–›ò›\úô[ù[YJÀåJN€Àú›\ù
+
+N€Àú›‹
+]Y[–›ò›\úô[ù[YJÀåJ_Xÿ]⁄
+\úõ‹ä^ﬂ_Bôù[ò›[€à^Tÿ€‹ôJ
+^ÿ€€ú›]Y[–›YŸ]]Y[–›
+
+N⁄YäX]Y[–›
+\ô]\õé›û^÷ŒLåMåKôõ‹ëXX⁄
+
+ãJOOûÿ€€ú›œX]Y[–›ò‹ôX]S‹ÿ⁄[]‹ä
+KœX]Y[–›ò‹ôX]QÿZ[ä
+N€Àò€€õôX›
+ NŸÀò€€õôX›
+]Y[–›ô\›[ò][€äN€Àôúô\]Y[òﬁKùò[YOYé€Àù\OHú⁄[ôHéŸÀôÿZ[ãúŸ]ò[YP][YJåK]Y[–›ò›\úô[ù[YJ⁄Jãå
+NŸÀôÿZ[ãô^€ô[ùX[ò[\’ò[YP][YJåK]Y[–›ò›\úô[ù[YJ⁄Jãå
+ÀåLäN€Àú›\ù
+]Y[–›ò›\úô[ù[YJ⁄Jãå
+N€Àú›‹
+]Y[–›ò›\úô[ù[YJ⁄Jãå
+ÀåLä_J_Xÿ]⁄
+\úõ‹ä^ﬂ_Bôù[ò›[€à^U[õÿ⁄ 
+^ÿ€€ú›]Y[–›YŸ]]Y[–›
+
+N⁄YäX]Y[–›
+\ô]\õé›û^÷ÕLåÀçNKŒL◊Kôõ‹ëXX⁄
+
+ãJOOûÿ€€ú›œX]Y[–›ò‹ôX]S‹ÿ⁄[]‹ä
+KœX]Y[–›ò‹ôX]QÿZ[ä
+N€Àò€€õôX›
+ NŸÀò€€õôX›
+]Y[–›ô\›[ò][€äN€Àôúô\]Y[òﬁKùò[YOYé€Àù\OHùöX[ô€HéŸÀôÿZ[ãúŸ]ò[YP][YJåã]Y[–›ò›\úô[ù[YJ⁄JãåJNŸÀôÿZ[ãô^€ô[ùX[ò[\’ò[YP][YJåK]Y[–›ò›\úô[ù[YJ⁄JãåJÀåçJN€Àú›\ù
+]Y[–›ò›\úô[ù[YJ⁄JãåJN€Àú›‹
+]Y[–›ò›\úô[ù[YJ⁄JãåJÀåçJ_J_Xÿ]⁄
+\úõ‹ä^ﬂ_Bô^‹ùù[ò›[€àõ‹õX][òX›]ôT^Y\ú‘[ŸP€‹J[òX›]ôT^Y\úœV◊K›[^Y\úœL
+^¬öYä›[^Y\úœL
+\ô]\õàìõ»^Y\ú»Y]8†%[ùö]H^Y\ú»»›\ùòX⁄⁄[ô»X›]ö]Kàé¬öYä[òX›]ôT^Y\úÀõ[ô›OOL
+\ô]\õàê[^Y\ú»]ôHŸŸŸYX›]ö]H\»ŸYZÀàé¬öYä[òX›]ôT^Y\úÀõ[ô›OOLJ^¬ò€€ú›ò[YOZ[òX›]ôT^Y\ú÷ÃOÀõò[YOÀú‹]
+àäVÃ_î^Y\àé¬úô]\õòôYY»õ€›À]\à	€ò[Y_H\€â›ŸŸŸYX›]ö]H\»ŸYZÀò¬üBò€€ú›\›Yò[Y\œZ[òX›]ôT^Y\úÀú€XŸJ KõX\
+OúÀõò[YOÀú‹]
+àäVÃ_î^Y\àäKöõ⁄[äãäN¬ò€€ú›[‹ôT›Yôö^Z[òX›]ôT^Y\úÀõ[ô›åœÿ
+…⁄[òX›]ôT^Y\úÀõ[ô›LﬂH[‹ôXààé¬úô]\õòôYY»õ€›À]\à	⁄[òX›]ôT^Y\úÀõ[ô›H^Y\ú»]ô[â›ŸŸŸYX›]ö]H\»ŸYZŒà	€\›Yò[Y\ﬂI€[‹ôT›Yôö^X¬üBò€€ú›SQTœ^Ÿ\öŒû–ëŒï“—SîÀêë◊–êT—K’TëêP—Nï“—SîÀêë◊––Të–Të–ëŒï“—SîÀêë◊––Tëì‘ëTéï“—SîÀêë◊‘’PïKUUï“—SîÀïV”UUQï“—SîÀïV‘íSPTñK’Péï“—SîÀïV‘—P””ëTñKêP“Œï“—SîÀêë◊‘’Pï_KY⁄û–ëŒï“—SîÀêë◊–êT—K’TëêP—Nï“—SîÀêë◊––Të–Të–ëŒï“—SîÀêë◊––Tëì‘ëTéï“—SîÀêë◊‘’PïKUUï“—SîÀïV”UUQï“—SîÀïV‘íSPTñK’Péï“—SîÀïV‘—P””ëTñKêP“Œï“—SîÀêë◊‘’Pï__N¬ò€€ú›USQTÀô\öŒ»À»[Ÿ[K[]ô[Yò][õ‹à›[ô[€ôH€€\€ô[ù¬ò€€ú›’ëPR◊–êQ—TœVﬁŸ^\ŒçÀò[YNàï—QR»–TîíS‘àãX€€éàç»ã€€‹éàà–LLLüKŸ^\ŒåMò[YNàï”ÀU—QR»‘íSëãX€€éàåMã€€‹éàà–LLLüKŸ^\ŒåÃò[YNàìS”ïHëPT’ãX€€éàåÃã€€‹éàà–ŒëåüKŸ^\Œçåò[YNàíTì”à“SãX€€éàçåã€€‹éê÷PSüKŸ^\ŒåLò[YNàê—SïTíS”àãX€€éàº'‰´»ã€€‹éïì”WN¬ò€€ú›Ÿ]X\õôYòYŸ\œ\œOî’ëPR◊–êQ—TÀôö[\äèOúœèXãô^\ N¬ò€€ú›íS–P–—Sïœ^»ëì‘ìH“”’Së»éïì”ëîëQHì’‘»éïì”ê–U“	à“”’éïì”êêSSëSë»éïì”ìRQTêSë—Héïì”ëì–UTî»éïì”N¬ò€€ú›Ÿ]ö[XÿŸ[ù€€‹è[ò[YOOëíS–P–—Sï÷€ò[YW_à–Œëåé¬ò€€ú›\”XY\òõÿ\ô[Y⁄XõOJ^Y\úÀ[XZ[
+OOûÿ€€ú›\^Y\úÀôö[ô
+Oõõ‹õX[^ôQ[XZ[
+ô[XZ[
+OOO[õ‹õX[^ôQ[XZ[
+[XZ[
+JN‹ô]\õàH\	âàZ\‘^Y\íY[ëúõ€PX›]ôSXY\òõÿ\ô 
+NﬂN¬ôù[ò›[€à‹\ö€[ôJŸ]K€€‹èUì”œMLMüJ^⁄YäY]_]Kõ[ô›ä\ô]\õàù[ÿ€€ú›X^SX]õX^
+ããô]KJNÿ€€ú›œY]KõX\
+
+ãJOOò	 K ]Kõ[ô›LJJJùﬂK	⁄J
+ã€X^
+Jö
+ãé
+⁄
+ãåJ_X
+Köõ⁄[äàäN‹ô]\õà›ô»⁄Y^›ﬂHZY⁄^⁄H›[O^ﬁŸ\‹^Nàòõÿ⁄»ã‹X⁄]Nãçü_Oè€[[ôH⁄[ùœ^‹ﬂHö[Hõõ€ôHà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHà›õ⁄ŸS[ôXÿ\Húõ›[ôà›õ⁄ŸS[ôZõ⁄[èHúõ›[ôãœè‹›ôœüBÇò€€ú›]ô[ùX€€èJ›\K⁄^ôOLç€€‹èUì”JOOûÿ€€ú›œ^›⁄Yú⁄^ôKZY⁄ú⁄^ôK\‹^Nàòõÿ⁄»üN¬öYä\OOOHúù[àä\ô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOè⁄\ò€HﬁHååàﬁOHéàèHçHà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàãœè]HìLLàŒLMàMàMà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåààö[Hõõ€ôHà›õ⁄ŸS[ôXÿ\Húõ›[ôà›õ⁄ŸS[ôZõ⁄[èHúõ›[ôãœè]HìLMçLàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHãœè‹›ôœé¬öYä\OOOHò€[öX»ä\ô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOèôX›HçààOHåLà⁄YHåéàZY⁄HååààûHå»à›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàãœè]HìMàNéà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHãœè⁄\ò€HﬁHååàﬁOHåç»àèHçà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHãœè]HìLMùçìLçàùçàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàà›õ⁄ŸS[ôXÿ\Húõ›[ôãœè‹›ôœé¬öYä\OOOHôÿ[YHä\ô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOè⁄\ò€HﬁHååàﬁOHååàèHåMàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàãœè]HìMåÃìLååÃàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHãœè]HìNòÕçHHãçHHãçHMÀLàKMãçHMà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHàö[Hõõ€ôHãœè]HìLÃàòÀMçHKMãçHKMãçHMÃàHãçHMà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHàö[Hõõ€ôHãœè‹›ôœé¬öYä\OOOHò⁄[[ôŸHä\ô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOè]HìLåãMàààNMNãNMãMàLûàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåààö[Hõõ€ôHà›õ⁄ŸS[ôZõ⁄[èHúõ›[ôãœè‹›ôœé¬öYä\OOOHúôX€›ô\ûHä\ô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOè]HìLåùåLààà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàà›õ⁄ŸS[ôXÿ\Húõ›[ôà›õ⁄ŸS[ôZõ⁄[èHúõ›[ôãœè⁄\ò€HﬁHååàﬁOHååàèHåMàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàãœè‹›ôœé¬úô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOèôX›HçààOHåLà⁄YHåéàZY⁄HååààûHå»à›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàãœè]HìLMùçìLçàùçìMàNéà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàà›õ⁄ŸS[ôXÿ\Húõ›[ôãœè‹›ôœé¬üN¬ò€€ú›ö[X€€èJ›\K⁄^ôOLé€€‹èUì”JOOûÿ€€ú›œ^›⁄Yú⁄^ôKZY⁄ú⁄^ôK\‹^Nàòõÿ⁄»üN¬öYä\OOOHôùä\ô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOè⁄\ò€HﬁHååàﬁOHååàèHåM»à›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàãœè]HìL»åÕà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHãœè]HìLå›åÕà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHãœè]HìNXÕçHHãçHHãçHM\ÀLàLMãçHMHà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHàö[Hõõ€ôHãœè]HìLÃàXÀMçHKMãçHKMãçHM\ÃàLãçHMHà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHàö[Hõõ€ôHãœè‹›ôœé¬öYä\OOOHå‹ä\ô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOè]HìMàÕîLåÕÕàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåààö[Hõõ€ôHãœè⁄\ò€HﬁHååàﬁOHåNàèHçàö[^ÿ€€‹üH‹X⁄]OHãéãœè[ôHOHååàLOHååààèHååàLèHåÕàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHãœè‹›ôœé¬öYä\OOOHõ\àä\ô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOèôX›HçààOHçàà⁄YHåéàZY⁄HåéàûHå»à›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHãœè⁄\ò€HﬁHååàﬁOHååàèHéà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHàö[Hõõ€ôHãœè⁄\ò€HﬁHååàﬁOHååàèHåãçHàö[^ÿ€€‹üKœè‹›ôœé¬öYä\OOOHôõä\ô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOè]HìLLÕLLàMåLLéMÃÕà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåààö[Hõõ€ôHãœè⁄\ò€HﬁHååàﬁOHåLàèHçà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHàö[Hõõ€ôHãœè]HìLMàåà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHà›õ⁄ŸQ\⁄\úò^OHåààãœè‹›ôœé¬öYä\OOOHúÿàä\ô]\õà›ô»öY]–õﬁHåàö[Hõõ€ôHà›[O^‹ﬂOè]HìLéÃìLàçåàLàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåãçHàö[Hõõ€ôHà›õ⁄ŸS[ôXÿ\Húõ›[ôà›õ⁄ŸS[ôZõ⁄[èHúõ›[ôãœè⁄\ò€HﬁHååààﬁOHåLààèHçHà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHàö[Hõõ€ôHãœè]HìLÃàMàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåKçHà›õ⁄ŸS[ôXÿ\Húõ›[ôãœè‹›ôœé¬úô]\õà›ô»öY]–õﬁHåà›[O^‹ﬂOè⁄\ò€HﬁHååàﬁOHååàèHåMàà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåààö[Hõõ€ôHãœè‹›ôœé¬üN¬ò€€ú›⁄\›RX€€èJ‹⁄^ôOLLã€€‹èUì”›[O^ﬂ_JOOè›ô»⁄Y^‹⁄^ô_HZY⁄^‹⁄^ô_HöY]–õﬁHåççàö[Hõõ€ôHà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàà›õ⁄ŸS[ôXÿ\Húõ›[ôà›õ⁄ŸS[ôZõ⁄[èHúõ›[ôà›[O^‹›[_Oè]HìMHMMLNåòLààLKMãLàãœè]HìLL»MÿL»»LöL»ãœè⁄\ò€HﬁHåNHàﬁOHéHàèHåKçHãœè‹›ôœÇò€€ú›⁄Y[X€€èJ‹⁄^ôOLLã€€‹èUì”›[O^ﬂ_JOOè›ô»⁄Y^‹⁄^ô_HZY⁄^‹⁄^ô_HöY]–õﬁHåççàö[Hõõ€ôHà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàà›õ⁄ŸS[ôXÿ\Húõ›[ôà›õ⁄ŸS[ôZõ⁄[èHúõ›[ôà›[O^‹›[_Oè]HìLLà€»›çòÃKLÀçéM»LLÀçãLKåãMÀMKMÀLLçõÀLﬁàãœè‹›ôœÇò€€ú›\Ÿ\ú“X€€èJ‹⁄^ôOLM€€‹èHà–LLLüJOOè›ô»⁄Y^‹⁄^ô_HZY⁄^‹⁄^ô_HöY]–õﬁHåççàö[Hõõ€ôHà›õ⁄ŸO^ÿ€€‹üH›õ⁄ŸU⁄YHåàà›õ⁄ŸS[ôXÿ\Húõ›[ôà›õ⁄ŸS[ôZõ⁄[èHúõ›[ôèè]HìLMàå]ãLòMMMXMMåàãœè⁄\ò€HﬁHéçHàﬁOHç»àèHçãœè]HìLåçàãœè]HìLå»LZMàãœè‹›ôœÇò€€ú›€›\ùëœJ€‹X⁄]OKåüJOOè›ô»›[O^ﬁ‹‹⁄][€éàòXú€€]Hã[úŸ]å⁄YàåL	HãZY⁄àåL	Hã⁄[ù\ë]ô[ùŒàõõ€ôHã‹X⁄]__HöY]–õﬁHåLàö[Hõõ€ôHàô\Ÿ\ùôP\‹X›ò][œHûZYSZY€XŸHèèôX›HååàOHçà⁄YHåÕåàZY⁄HçÃà›õ⁄ŸO^’ì”H›õ⁄ŸU⁄YHåHãœè[ôHOHååàLOHåŒLàèHåŒàLèHåŒLà›õ⁄ŸO^’ì”H›õ⁄ŸU⁄YHãéãœè⁄\ò€HﬁHååàﬁOHåŒLàèHçåà›õ⁄ŸO^’ì”H›õ⁄ŸU⁄YHãéàö[Hõõ€ôHãœèôX›HåLLàOHçà⁄YHåNàZY⁄HåNLà›õ⁄ŸO^’ì”H›õ⁄ŸU⁄YHãéãœè]HìLMLåMçåà›õ⁄ŸO^’ì”H›õ⁄ŸU⁄YHãéàö[Hõõ€ôHãœèôX›HåLLàOHçMLà⁄YHåNàZY⁄HåNLà›õ⁄ŸO^’ì”H›õ⁄ŸU⁄YHãéãœè]HìLMÕLåççåÕà›õ⁄ŸO^’ì”H›õ⁄ŸU⁄YHãéàö[Hõõ€ôHãœè‹›ôœé¬ò€€ú›€›”‹òèJÿ€€‹èUì”‹Håå	HãYùHçL	Hã⁄^ôOLÃ[ö[X]_JOOè]à›[O^ﬁ‹‹⁄][€éàòXú€€]Hã‹Yù⁄Yú⁄^ôKZY⁄ú⁄^ôKõ‹ô\îòY]\ŒàçL	HãòX⁄Ÿ‹õ›[ôòòYX[Y‹òYY[ù
+⁄\ò€K	ÿ€€‹üLH	Kò[ú‹\ô[ùÃ	JXò[úŸõ‹õNàùò[ú€]JML	KML	JHã⁄[ù\ë]ô[ùŒàõõ€ôHã[ö[X][€éò[ö[X]O»õ‹òëöYùLú»X\ŸKZ[ã[›][ôö[ö]H[\õò]Héàõõ€ôHü_Kœé¬ÇÇÇÇò€€ú››[\œJ
+OOèè›[Oû◊‘’ST◊–‘‘ﬂO‹›[Oè›[Oû◊‘VQTó–””TP’—T“ì–Të–‘‘ﬂO‹›[Oè›[Oû◊‘Q—W‘“Q”êUTëW–‘‘ﬂO‹›[Oè›[Oû◊—T“’‘‘“S–‘‘ﬂO‹›[Oèœé¬ÇãÀ»8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•dãÀ»Tì”’ãÀ»8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•d8•dãÀ»\úõ‹àõ›[ô\ûH\⁄[ô»ûKXÿ]⁄]\õà
+ù[ò›[€ò[
+Bôù[ò›[€à\úõ‹ëò[òX⁄ 
+^‹ô]\õà]à›[O^ﬁ€Z[íZY⁄àåLöãòX⁄Ÿ‹õ›[ôêëÀ\‹^Nàôõ^ã[Y€í][\ŒàòŸ[ù\àãù\›YûP€€ù[ùàòŸ[ù\àãõ^\ôX›[€éàò€€[[àãÿ\åMãY[ôŒç_OÇè”Ÿ€»⁄^ôO^ÕçH€›ÀœÇÇà]à›[O^ﬁŸõ€ùò[Z[Nëë€€‹éìQ“õ€ù⁄^ôNåç]\î‹X⁄[ôŒåﬂ_Oî””QUSë»—Sï‘ì”ëœŸ]èÇà›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éìUUQõ€ù⁄^ôNåLÀ^[Y€éàòŸ[ù\àã[ôRZY⁄åKçãX^⁄YåÃ_OïH\][à[ô^X›Y\úõ‹ãàûHôYúô\⁄[ô»HYŸKè‹Çàù]€à€ê€X⁄œ^ 
+OOù⁄[ô›Àõÿÿ][€ãúô[ÿY
+
+_H›[O^ﬁ‹Y[ôŒàåLúÃúãòX⁄Ÿ‹õ›[ôïì”€€‹éààÃãõ€ùò[Z[Nëëõ€ù⁄^ôNåMã]\î‹X⁄[ôŒåÀõ‹ô\éàõõ€ôHãõ‹ô\îòY]\ŒåL›\ú€‹éàú⁄[ù\àü_OîëS–Qÿù]€èÇèŸ]èüBÇò€€ú›Q–S‘ì’UTœ^¬àã‹ö]òXﬁHéàúö]òXﬁHãàã‹ö]òXﬁK\€XﬁHéàúö]òXﬁHãàã›\õ\»éàù\õ\»ãàã›\õ\À[Ÿã]\ŸHéàù\õ\»ãàã‹›\‹ùéàú›\‹ùãàãŸ[]KXXÿ€›[ùéàô[]KXXÿ€›[ùãàãŸ]K\ô\]Y\›éàô]K\ô\]Y\›ãàãŸ[]KXXÿ€›[ùY]K\ô\]Y\›éàô]K\ô\]Y\›ãüN¬ò€€ú›Q–S–””ïP’—SPRSHú›\‹ù⁄›Xãò\é¬ò€€ú›ùZ[Yÿ[€€ùX›ôYèJ›XöôX›Hî⁄›Xà›\‹ùäOOòXZ[Œâ”Q–S–””ïP’—SPRSO‹›XöôX›IŸ[ò€ŸUTíP€€\€ô[ù
+›XöôX›
+_X¬ò€€ú›Q–S‘Q—W–”‘O^¬úö]òXﬁNûŸ^YXúõ›Œàîö]òXﬁHã]Nàîö]òXﬁH€XﬁHã\]Yàï\]Yù[ôHåçàã›[[X\ûNàî⁄›Xà€€X›»€õHHXÿ€›[ùX[KòZ[ö[ôÀî’î[ô›\‹ù[ôõ‹õX][€àôYYY»‹\ò]Hò\⁄Ÿ]ò[]ô[‹Y[ù€‹öŸõ›‹ÀàãŸX›[€úŒñ¬û⁄àí[ôõ‹õX][€àŸH\ŸHãàïŸH\ŸHXÿ€›[ùY[ùYöY\úÀX[HY[Xô\ú⁄\]Z[À€‹ö€›]ÿ€‹ô\À⁄›Ÿ‹À]ô[ùî’îÀ[ô›\‹ùY\‹ÿYŸ\»»õ›öYHH\^\öY[òŸKàüKû⁄àí›»ŸH\ŸH]ãàë]H›Ÿ\ú»^Y\àõŸ‹ô\‹À€ÿX⁄õ‹›\àöY]‹ÀX[H[ò[]X‹À›\‹ùô\‹€úŸ\ÀÿYô]HXY€õ‹›X‹À[ôXÿ€›[ùYZ[ö\›ò][€ãàüKû⁄àñ[›\à⁄⁄XŸ\»ãàñ[›Hÿ[àô\]Y\›XÿŸ\‹À€‹úôX›[€ã^‹ù‹à[][€à\⁄[ô»H]Hô\]Y\›[ô[]KXXÿ€›[ù[ö‹»€à\»YŸKàüKó_Kù\õ\ŒûŸ^YXúõ›Œàï\õ\»ã]Nàï\õ\»Ÿà\ŸHã\]Yàï\]Yù[ôHåçàã›[[X\ûNàï\ŸH⁄›Xàõ‹à]Ÿù[X[HòZ[ö[ôÀ^Y\à]ô[‹Y[ù[ô€ÿX⁄‹^Y\à€€‹ô[ò][€ãàãŸX›[€úŒñ¬û⁄àêXÿ€›[ù»ãàíŸY\[›\à⁄Y€ãZ[à]Z[»Xÿ›\ò]H[ôŸX›\ôKà€ÿX⁄\»\ôHô\‹€ú⁄XõHõ‹àX[òY⁄[ô»X[HXÿŸ\‹»[ôõ‹›\àY[Xô\ú⁄\àüKû⁄àïòZ[ö[ô»€€ù[ùãàî⁄›Xà[»‹ôÿ[ö^ôHö[À]ô[ùÀ[ô\ôõ‹õX[òŸH]Kù]]Ÿ\»õ›ô\XŸHõŸô\‹⁄[€ò[YYXÿ[ÿYô]K‹à€ÿX⁄[ô»ùY€Y[ùàüKû⁄àêXÿŸ\XõH\ŸHãàë»õ›Z\›\ŸHHŸ\ùöXŸK][\[ò]]‹ö^ôYXÿŸ\‹À‹à\ÿY€€ù[ù]ö[€]\»›\ú…»öY⁄»‹àÿYô]KàüKó_Kú›\‹ùûŸ^YXúõ›Œàî›\‹ùã]Nàî›\‹ùã\]YàïŸHZ[H»ô\‹€ô\»]ZX⁄€H\»‹‹⁄XõKàã›[[X\ûNàìôYY[⁄]⁄Y€ãZ[ãX[HXÿŸ\‹À\]K‹àö[[ôÀÿYZ[à]Y\›[€úœ»€€ùX›⁄›Xà›\‹ùàãŸX›[€úŒñ¬û⁄àë[XZ[›\‹ùãàîŸ[ôHY\‹ÿYŸH»›\‹ù⁄›Xãò\⁄][›\àXÿ€›[ù[XZ[X[Hò[YK]öXŸKúõ›‹Ÿ\ã[ôH⁄‹ù\ÿ‹ö\[€àŸàH\‹›YKàüKû⁄àêXÿ€›[ù[ãàíYà[›Hÿ[õõ›XÿŸ\‹»HX[K[ò€YH[ûH[ùö]H€ŸH‹à€ÿX⁄€€ùX›€»›\‹ùÿ[àõ›Xõ\⁄€›Y[Xô\ú⁄\›]\ÀàüKû⁄àîö]òXﬁHô\]Y\›»ãàï\ŸHH]Hô\]Y\›‹à[]KXXÿ€›[ùô\]Y\›YŸ\»õ‹àõ‹õX[ö]òXﬁH[ôXÿ€›[ù]Hô\]Y\›ÀàüKó_Kàô[]KXXÿ€›[ùéûŸ^YXúõ›ŒàêXÿ€›[ù[][€àã]Nàë[]HXÿ€›[ùã\]Yàîô\]Y\›»\ôHô]öY]ŸYõ‹àXÿ€›[ùÿYô]Kàã›[[X\ûNàñ[›Hÿ[àô\]Y\›[][€àŸà[›\à⁄›XàXÿ€›[ù[ô\‹€ÿ⁄X]Y\ú€€ò[òZ[ö[ô»]KàãŸX›[€úŒñ¬û⁄àí[ãX\[][€àãàî⁄Y€ôYZ[à\Ÿ\ú»⁄›[€»»õŸö[H8°§àXÿ€›[ù	à]H8°§à[]HXÿ€›[ù	à]H»›\ù[ô€€ôö\õH[][€à[ú⁄YH⁄›XãàüKû⁄àî›\‹ùò[òX⁄»ãàë[XZ[›\‹ù\»€õHõ‹à[‹à‹X⁄X[ô\]Y\›À›X⁄\»⁄[à[›Hÿ[õõ›⁄Y€à[à»\ŸHH[ãX\[][€àõ›ÀàüKû⁄àï⁄][][€à[ò€Y\»ãàïŸH⁄[ô[[›ôH‹àKZY[ùYûH\ú€€ò[Xÿ€›[ù]Z[À^Y\àÿ€‹ô\À⁄›Ÿ‹Àî’îÀ[ô›\‹ùôX€‹ô»[õ\‹»ô][ù[€à\»Yÿ[Hô\]Z\ôYàüKû⁄àê€ÿX⁄›X[H]HãàïX[K[]ô[õŸ‹ò[H€€ù[ùX^Hô[XZ[àõ‹à›\à]]‹ö^ôYY[Xô\ú»[õ\‹»]\ôX›HY[ùYöY\»H[]YXÿ€›[ùàüKó_Kàô]K\ô\]Y\›éûŸ^YXúõ›Œàë]Hô\]Y\›ã]NàêXÿ€›[ù]Hô\]Y\›ã\]Yàîô\]Y\›»\ôHô\öYöYYôYõ‹ôHù[ö[Y[ùàã›[[X\ûNàîô\]Y\›XÿŸ\‹»À^‹ùŸã€‹úôX›[€àŸã‹à[][€àŸà\ú€€ò[⁄›Xà]KàãŸX›[€úŒñ¬û⁄àî›XõZ]Hô\]Y\›ãàë[XZ[›\‹ù⁄›Xãò\úõ€H[›\àXÿ€›[ù[XZ[[ô[ò€YH⁄]\à[›HôYYXÿŸ\‹À^‹ù€‹úôX›[€ã‹à[][€ãàüKû⁄àïô\öYöXÿ][€àãàïŸHX^H\⁄»õ‹à[ôõ‹õX][€àôYYY»€€ôö\õHXÿ€›[ù›€ô\ú⁄\ôYõ‹ôH⁄\ö[ô»‹à[][ô»]KàüKû⁄àîô\‹€úŸHãàî⁄›Xà⁄[ô\‹€ôXÿ€‹ô[ô»»\XÿXõHö]òXﬁH]»[ôHÿ€‹HŸà]H\‹€ÿ⁄X]Y⁄][›\àXÿ€›[ùàüKó_KüN¬ò€€ú›Q–S‘’T‘ï”Sí‘œV¬û⁄ôYéàã‹ö]òXﬁHãXô[àîö]òXﬁHüKû⁄ôYéàã›\õ\»ãXô[àï\õ\»üKû⁄ôYéàã‹›\‹ùãXô[àî›\‹ùüKû⁄ôYéàãŸ[]KXXÿ€›[ùãXô[àë[]HXÿ€›[ùüKû⁄ôYéàãŸ]K\ô\]Y\›ãXô[àë]Hô\]Y\›üKóN¬ò€€ú›Ÿ]Yÿ[õ›]RŸ^OJ]
+OOìQ–S‘ì’UT÷‘›ö[ô ]àäKúô\XŸJ◊…Ààä_ã»ó_ù[¬ôù[ò›[€àYÿ[›\‹ù[ö‹ ÿ€€\X›Yò[Ÿ_J^‹ô]\õà]à\öXK[Xô[HìYÿ[[ô›\‹ù[ö‹»à›[O^ﬁŸ\‹^Nàôõ^ãõ^‹ò\àù‹ò\ãù\›YûP€€ù[ùò€€\X›»ôõ^\›\ùéàòŸ[ù\àãÿ\ò€€\X›ŒåLãX\ô⁄[ï‹ò€€\X›ÃLåN_Oû”Q–S‘’T‘ï”Sí‘ÀõX\
+[öœOèHŸ^O^€[öÀöôYüHôYè^€[öÀöôYüH›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éò€€\X›’ì”ìUUQõ€ù⁄^ôNò€€\X›ÃLåLKõ€ùŸZY⁄çÃ]\î‹X⁄[ôŒàåå[Hã^ò[úŸõ‹õNàù\\òÿ\ŸHã^X€‹ò][€éàõõ€ôHãõ‹ô\éò\€€Y	ÿ€€\X›’ì”
+»åÃ»éàùò[ú‹\ô[ùüXõ‹ô\îòY]\ŒéNNKY[ôŒò€€\X›»çúLéàçãZ[íZY⁄åÕã\‹^Nàö[õ[ôKYõ^ã[Y€í][\ŒàòŸ[ù\àãù\›YûP€€ù[ùàòŸ[ù\àã›X⁄X›[€éàõX[ö\[][€àü_Oû€[öÀõXô[OÿOä_OŸ]èüBôù[ò›[€àXÿ€›[ùù\›X›[€ú Ÿ[]PXÿ€›[ùô\Ÿ\ùôUX[Q]OYò[Ÿ_J^¬ò€€ú›ÿ€€ôö\õZ[ôÀŸ]€€ôö\õZ[ô◊O]\ŸT›]Jò[ŸJN¬ò€€ú›ÿù\ﬁKŸ]ù\ﬁWO]\ŸT›]Jò[ŸJN¬ò€€ú›€Y\‹ÿYŸKŸ]Y\‹ÿYŸWO]\ŸT›]JàäN¬ò€€ú›Ÿ]Tô\]Y\›Ÿ[ùŸ]]Tô\]Y\›Ÿ[ùO]\ŸT›]Jò[ŸJN¬ò€€ú›ô\]Y\›ôYèXùZ[Yÿ[€€ùX›ôYäî⁄›XàXÿ€›[ù]Hô\]Y\›äN¬ò€€ú›[]RôYèXùZ[Yÿ[€€ùX›ôYäë[]H^H⁄›XàXÿ€›[ùäN¬úô]\õà]à]K]\›YHòXÿ€›[ùY]K\ô\]Y\›Y[ùûHà›[O^ﬁ€X\ô⁄[ï‹åÃãY[ô’‹åçõ‹ô\ï‹ò\€€Y	–ì‘ëTó–”üM_OÇà]à›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éïî’Pãõ€ù⁄^ôNåL]\î‹X⁄[ôŒåÀõ€ùŸZY⁄çÃX\ô⁄[êõ›€NåLü_OêP–”’Sï	àUOŸ]èÇà]à›[O^ﬁÿòX⁄Ÿ‹õ›[ôê–Të–ëÀõ‹ô\éò\€€Y	–ì‘ëTó–”üXõ‹ô\îòY]\ŒåMãY[ôŒàåMMúãX\ô⁄[êõ›€NåLü_OÇà]à›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éìQ“õ€ù⁄^ôNåLÀõ€ùŸZY⁄é]\î‹X⁄[ôŒåKX\ô⁄[êõ›€Nç_Oë]Hô\]Y\›Ÿ]èÇà]à›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éìUUQõ€ù⁄^ôNåL[ôRZY⁄åKçKX\ô⁄[êõ›€NåL_Oîô\]Y\›XÿŸ\‹À^‹ù€‹úôX›[€ã‹à[][€à[úõ€H⁄›Xà›\‹ùèŸ]èÇà]à›[O^ﬁŸ\‹^Nàô‹öYã‹öY[\]P€€[[úŒàåYúàãÿ\é_OÇàHôYè^‹ô\]Y\›ôYüH€ê€X⁄œ^ 
+OOúŸ]]Tô\]Y\›Ÿ[ù
+ùYJ_H›[O^ﬁŸ\‹^Nàö[õ[ôKYõ^ã[Y€í][\ŒàòŸ[ù\àãù\›YûP€€ù[ùàòŸ[ù\àãZ[íZY⁄çãõ‹ô\îòY]\ŒåLòX⁄Ÿ‹õ›[ôïì”€€‹éààÃãõ€ùò[Z[Nëëõ€ù⁄^ôNåM]\î‹X⁄[ôŒåã^X€‹ò][€éàõõ€ôHã›X⁄X›[€éàõX[ö\[][€àü_OîëTUQT’UOÿOÇàŸ]Tô\]Y\›Ÿ[ù	âè]àõ€OHú›]\»à›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éïì”õ€ù⁄^ôNåL[ôRZY⁄åKç_Oîô\]Y\›[XZ[‹[ôYàŸ[ô]úõ€H[›\àXÿ€›[ù[XZ[€»›\‹ùÿ[àô\öYûH[›KèŸ]èüBàŸ]èÇàŸ]èÇà»X€€ôö\õZ[ôœœù]€à€ê€X⁄œ^ 
+OOû‹Ÿ]€€ôö\õZ[ô ùYJN‹Ÿ]Y\‹ÿYŸJàäNﬂ_H›[O^ﬁ›⁄YàåL	HãY[ôŒàåMãòX⁄Ÿ‹õ›[ôàùò[ú‹\ô[ùãõ‹ô\éò\€€Y—ëçMMõ‹ô\îòY]\ŒåLã›\ú€‹éàú⁄[ù\àãõ€ùò[Z[Nëêãõ€ù⁄^ôNåLÀ€€‹éàà—ëçéMéHãõ€ùŸZY⁄çÃ]\î‹X⁄[ôŒå__Oë[]HXÿ€›[ù	à]Oÿù]€èÇàè]à€\‹”ò[YOHôòYK]\à›[O^ﬁÿòX⁄Ÿ‹õ›[ôàà—ëçMLãõ‹ô\îòY]\ŒåMãY[ôŒàåNãõ‹ô\éò\€€Y—ëçMLÃÿ_OÇà]à›[O^ﬁŸõ€ùò[Z[Nëë€€‹éàà—ëçéMéHãõ€ù⁄^ôNåN]\î‹X⁄[ôŒåÀX\ô⁄[êõ›€Né_Oê””ëíTìHP–”’SïëTUQT’Ÿ]èÇà›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éìUUQõ€ù⁄^ôNåLã[ôRZY⁄åKçKX\ô⁄[êõ›€NåLü_Oû‹ô\Ÿ\ùôUX[Q]O»ï\»ô[[›ô\»[›\à€ÿX⁄Xÿ€›[ùúõ€H\»]öXŸKà^Y\àõ‹›\ãX[Hö[À[ô›\à\Ÿ\ú»\ôHô\Ÿ\ùôYàéàï\»ô[[›ô\»€õH[›\àXÿ€›[ùÿ€‹ô\À⁄›Ÿ‹Àî’îÀ[ô\ú€€ò[X›]ö]Húõ€H\»]öXŸKà›\à\Ÿ\ú»›^H[ù›X⁄YàüO‹Çà€Y\‹ÿYŸIâè]àõ€OHú›]\»à›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éõY\‹ÿYŸKú›\ù’⁄]
+ê€›[õ›äO»à—ëêçPçHéïì”õ€ù⁄^ôNåLK[ôRZY⁄åKçKX\ô⁄[êõ›€NåLü_Oû€Y\‹ÿYŸ_OŸ]èüBà]à›[O^ﬁŸ\‹^Nàôõ^ãÿ\é_OÇàù]€à€ê€X⁄œ^ 
+OOû‹Ÿ]€€ôö\õZ[ô ò[ŸJN‹Ÿ]Y\‹ÿYŸJàäNﬂ_H\ÿXõY^ÿù\ﬁ_H›[O^ﬁŸõ^åKY[ôŒàåLúãòX⁄Ÿ‹õ›[ôàùò[ú‹\ô[ùã€€‹éìUUQõ€ùò[Z[Nëëõ€ù⁄^ôNåM]\î‹X⁄[ôŒåãõ‹ô\éò\€€Y	–ì‘ëTó–”üXõ‹ô\îòY]\ŒåL›\ú€‹éàú⁄[ù\àü_Oê–Sê—Sÿù]€èÇàù]€à€ê€X⁄œ^ÿ\ﬁ[ò 
+OOû⁄Yäù\ﬁJ\ô]\õé‹Ÿ]ù\ﬁJùYJN‹Ÿ]Y\‹ÿYŸJàäNÿ€€ú›ô\›[X]ÿZ][]PXÿ€›[ù
+
+N⁄Yä\ô\›[Àõ⁄ ^‹Ÿ]Y\‹ÿYŸJô\›[Àô\úõ‹üê€›[õ›€€\]H]ô\]Y\›àX\ŸHûHYÿZ[à‹à€€ùX››\‹ùàäN‹Ÿ]ù\ﬁJò[ŸJN‹ô]\õéﬂ\Ÿ]Y\‹ÿYŸJêXÿ€›[ùô\]Y\›€€\]Kà[›H]ôHôY[à⁄Y€ôY›]ÿYô[KàäNﬂ_H\ÿXõY^ÿù\ﬁ_H€\‹”ò[YOHòùã]à›KY[ôŸ\àà›[O^ﬁ€‹X⁄]Nòù\ﬁOÃççNå__Oê””ëíTìHSUHP–”’Sïÿù]€èÇàŸ]èÇàHôYè^Ÿ[]RôYüH›[O^ﬁŸ\‹^Nàö[õ[ôKYõ^ã[Y€í][\ŒàòŸ[ù\àãZ[íZY⁄åÕã€€‹éïì”õ€ùò[Z[Nëêãõ€ù⁄^ôNåLKõ€ùŸZY⁄é^X€‹ò][€éàõõ€ôHãX\ô⁄[ï‹åL_OìôYY[»[XZ[›\‹ùÿOÇàŸ]èüBà›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éïî’Pãõ€ù⁄^ôNåL^[Y€éàòŸ[ù\àãX\ô⁄[ï‹åLã[ôRZY⁄åKç__OêXÿ€›[ù[ô]Hô\]Y\›»\ôH]òZ[XõH\ôH[ô[àYÿ[	à›\‹ùàŸHô\öYûHô\]Y\›»ôYõ‹ôHù[ö[[ô»Ÿ\ùô\ã\⁄YH]H⁄[ôŸ\Àè‹ÇèŸ]èÇüBôù[ò›[€à›]X”Yÿ[YŸJ‹YŸRŸ^_J^¬ò€€ú›YŸOSQ–S‘Q—W–”‘V‹YŸRŸ^W_Q–S‘Q—W–”‘Kú›\‹ù¬ò€€ú›€€ùX›ôYèXùZ[Yÿ[€€ùX›ôYäYŸKù]_î⁄›Xà›\‹ùäN¬ù\ŸQYôôX›
+
+
+OOû›û^›⁄[ô›Àó◊‹⁄›Xêõ€›X\öœÀäõYÿ[‹õ›]W‹ôXYHãYŸRŸ^JN›⁄[ô›Àô\‹]⁄]ô[ù
+ô]»›\›€Q]ô[ù
+ú⁄›XéõYÿ[\õ›]K\ôXYHãŸ]Z[û‹õ›]NúYŸRŸ^__JJNﬂXÿ]⁄
+\úõ‹ä^ﬂ_K‹YŸRŸ^WJN¬úô]\õàè›[\ÀœèXZ[à]K]\›YHú›]XÀ[Yÿ[\YŸHà›[O^ﬁ€Z[íZY⁄àåLöãòX⁄Ÿ‹õ›[ôêëÀ€€‹éìQ“Y[ôŒàçåãõ€ùò[Z[Nëêü_Oè]à›[O^ﬁ€X^⁄YçÕåX\ô⁄[éàå]]»ü_OèHôYèHã»à›[O^ﬁŸ\‹^Nàö[õ[ôKYõ^ã[Y€í][\ŒàòŸ[ù\àãÿ\é€€‹éïì”^X€‹ò][€éàõõ€ôHãõ€ùò[Z[Nëëõ€ù⁄^ôNåMã]\î‹X⁄[ôŒåãX\ô⁄[êõ›€NåçãZ[íZY⁄ç›X⁄X›[€éàõX[ö\[][€àü_Oè”Ÿ€»⁄^ôO^ÃçKœà“’PèÿOèŸX›[€à›[O^ﬁÿòX⁄Ÿ‹õ›[ôò[ôX\ãY‹òYY[ù
+MYYÀ	––Të–ëﬂKÃLLLLLJXõ‹ô\éò\€€Y	–ì‘ëTó–”üXõ‹ô\îòY]\ŒåçY[ôŒàåéçãõﬁ⁄Y›ŒàåNúôÿòJåŒ
+Hü_Oè]à›[O^ﬁŸõ€ùò[Z[Nëêã€€‹éïì”õ€ù⁄^ôNåLKõ€ùŸZY⁄é]\î‹X⁄[ôŒàååMô[Hã^ò[úŸõ‹õNàù\\òÿ\ŸHãX\ô⁄[êõ›€NåL_Oû‹YŸKô^YXúõ›ﬂOŸ]èèH›[O^ﬁŸõ€ùò[Z[Nëë€€‹éìQ“õ€ù⁄^ôNçã]\î‹X⁄[ôŒåÀ[ôRZY⁄åKX\ô⁄[êõ›€Né_Oû‹YŸKù]_O⁄Oè]à›[O^ﬁÿ€€‹éìUUQõ€ù⁄^ôNåLã]\î‹X⁄[ôŒàååô[HãX\ô⁄[êõ›€NåN_Oû‹YŸKù\]YOŸ]èè›[O^ﬁŸõ€ù⁄^ôNåMÀ[ôRZY⁄åKçMK€€‹éìQ“X\ô⁄[êõ›€Nåç_Oû‹YŸKú›[[X\û_O‹è]à›[O^ﬁŸ\‹^Nàô‹öYãÿ\åM_Oû‹YŸKúŸX›[€úÀõX\
+ŸX›[€èOè\ùX€HŸ^O^‹ŸX›[€ãöH›[O^ﬁÿòX⁄Ÿ‹õ›[ôàúôÿòJçMKçMKçMKåÕJHãõ‹ô\éò\€€Y	–ì‘ëTó–”üXõ‹ô\îòY]\ŒåMãY[ôŒàåMúNü_Oèà›[O^ﬁŸõ€ùò[Z[Nëë€€‹éïì”õ€ù⁄^ôNåå]\î‹X⁄[ôŒåãX\ô⁄[êõ›€Nçü_Oû‹ŸX›[€ãöO⁄èè›[O^ﬁÿ€€‹éìUUQõ€ù⁄^ôNåM[ôRZY⁄åKçü_Oû‹ŸX›[€ãúO‹èÿ\ùX€Oä_OŸ]èèHôYè^ÿ€€ùX›ôYüH›[O^ﬁŸ\‹^Nàö[õ[ôKYõ^ã[Y€í][\ŒàòŸ[ù\àãù\›YûP€€ù[ùàòŸ[ù\àãZ[íZY⁄çX\ô⁄[ï‹åMãY[ôŒàåMúãõ‹ô\îòY]\ŒéNNKòX⁄Ÿ‹õ›[ôïì”€€‹éààÃãõ€ùò[Z[Nëëõ€ù⁄^ôNåMK]\î‹X⁄[ôŒåã^X€‹ò][€éàõõ€ôHã›X⁄X›[€éàõX[ö\[][€àü_OëSPRS’T‘ïÿOèYÿ[›\‹ù[ö‹»€€\X›œè‹ŸX›[€èè›[O^ﬁ›^[Y€éàòŸ[ù\àã€€‹éìUUQõ€ù⁄^ôNåLK[ôRZY⁄åKçKX\ô⁄[ï‹åN_Oëõ‹à\ôŸ[ùXÿ€›[ù‹àÿYô]H€€òŸ\õúÀHôYè^ÿ€€ùX›ôYüH›[O^ﬁÿ€€‹éïì”^X€‹ò][€éàõõ€ôHãõ€ùŸZY⁄çÃ_Oò€€ùX›”Q–S–””ïP’—SPRSOÿOãè‹èŸ]èè€XZ[èèœé¬üBÇò€€ú›UU’”‘í‘‘P—W‘ïSïSQOSÿöôX›ôúôY^ôJ¬àëÀàì‘ëTó–”ãà–Të–ëÀà€›\ùëÀàSS◊–”–P“àSS◊‘VQTãàö[X€€ãàêãàëà€›”‹òãàQ“àYÿ[›\‹ù[ö‹ÀàUUQà‘êSë—Kà”Ÿ€Àà“—SîÀàì”üJN¬Çô^‹ùYò][ù[ò›[€à\
+
+^¬ò€€ú›ÿ\\úãŸ]\\úóO]\ŸT›]Jò[ŸJN¬ò€€ú›Yÿ[õ›]RŸ^O]\[Ÿà⁄[ô›»OOHù[ôYö[ôYèŸŸ]Yÿ[õ›]RŸ^J⁄[ô›Àõÿÿ][€ãú]ò[YJNõù[¬ù\ŸQYôôX›
+
+
+OOû¬ùû^¬ù⁄[ô›Àó◊‹⁄›Xêõ€›X\öœÀäò\‹ôXYWŸ\‹]⁄YäN¬ù⁄[ô›Àô\‹]⁄]ô[ù
+ô]»]ô[ù
+ú⁄›Xéò\\ôXYHäJN¬üXÿ]⁄
+\úõ‹ä^ﬂBüK◊JN¬öYä\\úä\ô]\õàè›[\Àœè\úõ‹ëò[òX⁄Àœèœé¬öYäYÿ[õ›]RŸ^IâõYÿ[õ›]RŸ^HOOHô[]KXXÿ€›[ùä\ô]\õà›]X”Yÿ[YŸHYŸRŸ^O^€Yÿ[õ›]RŸ^_Kœé¬ùû^‹ô]\õà\[õô\ãœüXÿ]⁄
+J^‹ô]\õàè›[\Àœè\úõ‹ëò[òX⁄ÀœèœüBüBÇôù[ò›[€à\[õô\ä
+^¬ò€€ú››öY]ÀŸ]öY]◊O]\ŸT›]Jò]]äK›\Ÿ\ãŸ]\Ÿ\óO]\ŸT›]Jù[
+KŸö[ÀŸ]ö[◊O]\ŸT›]JíS◊“SíU
+K‹õŸ‹ò[Qö[ÀŸ]õŸ‹ò[Qö[◊O]\ŸT›]Jì—‘êSW—íS◊“SíU
+K‹ÿ€‹ô\ÀŸ]ÿ€‹ô\◊O]\ŸT›]J◊JK‹õŸ‹ò[Tÿ€‹ô\ÀŸ]õŸ‹ò[Tÿ€‹ô\◊O]\ŸT›]J◊JK‹^Y\úÀŸ]^Y\ú◊O]\ŸT›]J◊JK‹^Y\îõŸö[\ÀŸ]^Y\îõŸö[\◊O]\ŸT›]J◊JKŸ]ô[ùÀŸ]]ô[ù◊O]\ŸT›]JUëSï◊“SíU
+K‹ú›úÀŸ]ú›ú◊O]\ŸT›]J◊JK‹⁄›Ÿ‹ÀŸ]⁄›Ÿ‹◊O]\ŸT›]J◊JKÿ⁄[[ôŸ\ÀŸ]⁄[[ôŸ\◊O]\ŸT›]J◊JK›[YKŸ][YWO]\ŸT›]Jô\ö»äK‹ÿ‘Ÿ\‹⁄[€úÀŸ]ÿ‘Ÿ\‹⁄[€ú◊O]\ŸT›]J–◊“SíU
+K‹ÿ‘ú›úÀŸ]ÿ‘ú›ú◊O]\ŸT›]J◊JK‹ÿ”Ÿ‹ÀŸ]ÿ”Ÿ‹◊O]\ŸT›]J◊JK›X[\ÀŸ]X[\◊O]\ŸT›]J◊JK‹ŸX\€€ê\ò⁄]ô\ÀŸ]ŸX\€€ê\ò⁄]ô\◊O]\ŸT›]J◊JKÿ€ÿX⁄ö[‹ö]Y\ÀŸ]€ÿX⁄ö[‹ö]Y\◊O]\ŸT›]J”–P“‘íS‘íUQT◊“SíU
+K‹ôXYKŸ]ôXYWO]\ŸT›]Jò[ŸJK‹[ô[ô“õ⁄[ê€€ù^Ÿ][ô[ô“õ⁄[ê€€ù^O]\ŸT›]Jù[
+N¬ò€€ú›Ÿ[[‘Ÿ][ô‹–ù\ﬁKŸ][[‘Ÿ][ô‹–ù\ﬁWO]\ŸT›]Jò[ŸJN¬ò€€ú›ÿXÿ€›[ùõ›XŸKŸ]Xÿ€›[ùõ›XŸWO]\ŸT›]JàäN¬ò€€ú›‹›\ù\\úõ‹ãŸ]›\ù\\úõ‹óO]\ŸT›]JàäN¬ò€€ú›⁄€YT⁄›”XY\òõÿ\ôŸ]€YT⁄›”XY\òõÿ\ôO]\ŸT›]J‹›]\ŒàöYHãõ›‹Œñ◊K\úõ‹éààüJN¬ò€€ú›⁄€YT⁄›”XY\òõÿ\ôÿ€‹KŸ]€YT⁄›”XY\òõÿ\ôÿ€‹WO]\ŸT›]Jú^Y\ú»äN¬ò€€ú›‹›]ﬁ[ò—\úõ‹ãŸ]›]ﬁ[ò—\úõ‹óO]\ŸT›]JàäN¬ò€€ú›Ÿ]QXùYÀŸ]]QXùY◊O]\ŸT›]J⁄õ⁄[éûŸ[ù\ôY€ŸNààãõ‹õX[^ôY€ŸNààã›]\ŒàöYHã€⁄›\€›\òŸNàõõ€ôHã€⁄›\öY[àõõ€ôHã€⁄›\\⁄ôYö^ààã€⁄›\\⁄€›\òŸNààã€⁄›\€›[ùõù[X]⁄YX[RYààã[ùö]T›]Nààã^\ô\–]õù[[ùö]P€€ù^ÿ]ôYàõõ»ã[ùö]P€€ù^›‹òYŸRŸ^NíSïíUW–””ïV‘’‘êQ—W“—VK[ùö]P€€ù^⁄Ÿ[îô\Ÿ[ùàõõ»ã[ùö]P€€ù^X[RYààã[ùö]P€€ù^›XöôX›ààã›\úô[ù\Ÿ\ë[XZ[ààã€€ù^›XöôX›X]⁄\’\Ÿ\éàõõ»ã€€ú›[YQ[ô⁄[ùàã›åK›X[K[Y[Xô\ú⁄\Àÿ€€ôö\õKX€€ù^ã€€ú›[YR›]\Œõù[€€ú›[YQXY€õ‹›X–€ŸNààã€€ú›[YQXY€õ‹›X”Y\‹ÿYŸNààã€€ú›[YU⁄Ÿ[îô\Ÿ[ùàõõ»ã€€ú›[YUX[RY\ŸYààã€€ú›[YU\Ÿ\ë[XZ[ààã€€ú›[YTô\€€ôY\Ÿ\ï]ZYààã€€ú›[YP][\›\ùYàõõ»ã€€ú›[YP][\õÿ⁄ŸYàõõ»ã€€ú›[YP][\õÿ⁄ŸYôX\€€éààã€€ú›[YR[ëõY⁄Ÿ^Nààã€€ú›[YR[ëõY⁄YŸS\Œõù[€€ú›[YQ›X\ô€X\ôYàõõ»ã€€ú›[YQ›X\ô€X\îôX\€€éààã€€ú›[YU[Y[›]\ŒåML€€ú›[YQô]⁄›\ùYàõõ»ã€€ú›[YQô]⁄ö[ö\⁄Yàõõ»ãY[Xô\ú⁄\[úŸ\ù›]\ŒàöYHãY[Xô\ú⁄\[úŸ\ù\úõ‹éààãõŸö[U\]T›]\ŒàöYHãö[ò[õ›]QX⁄\⁄[€éàöYHã\]NàöYHã\úõ‹éààüK]]û€[ŸNî’TPêT—W–UU—SêPìQ»ú›\Xò\ŸHéàõYÿXﬁHã›\Xò\ŸQ[òXõYî’TPêT—W–UU—SêPìQ»ûY\»éàõõ»ãŸ\‹⁄[€îô\Ÿ[ùàõõ»ã⁄Y€ù\›]\Œõù[⁄Y€ù\€ŸNààã⁄Y€ù\›YŸNààã⁄Y€ù\Y\‹ÿYŸNààãŸ⁄[í›]\Œõù[Ÿ⁄[ê€ŸNààãŸ⁄[ìY\‹ÿYŸNààãõ›öY\í[ùààãõŸö[SÿYàöYHãô\›‹ôYõ€UX[RYàõõ»ãõŸö[T\ú⁄\››]\ŒàöYHãõŸö[Tô\›‹ôT›]\ŒàöYHãYÿXﬁP]]ôY⁄\›\î›]\ŒàöYHãYÿXﬁP]]Ÿ⁄[î›]\ŒàöYHãYÿXﬁP]]\]T›]\ŒàöYHãõŸö[UX[RYààãôY⁄\›\ë[ô⁄[ùàã›åK€YÿXﬁKX]]‹ôY⁄\›\àãôY⁄\›\î\úŸS[ŸNààüKXY\òõÿ\ôûŸ[ô⁄[ùààã›]\Œõù[\úõ‹ê€ŸNààãô\›[€›[ùõù[\—[\Nôò[Ÿ_K‹ôX]UX[Nû›X[Sò[YNààã[ô⁄[ùààã›]\Œõù[\úõ‹ê€ŸNààãô\‹€úŸT›[[X\ûNààãX[RYààãõ⁄[ê€ŸNààã›]U\]Yôò[ŸKô[[›T\ú⁄\›Yôò[ŸK›]\ŒàöYHü_JN¬ò€€ú›XY\òõÿ\ôô\]Y\›ôYè]\ŸTôYä›X[RYõù[ô\]Y\›YåJN¬ò€€ú›⁄\“õ⁄[ê€€ú›[YPX›]ôKŸ]\“õ⁄[ê€€ú›[YPX›]ôWO]\ŸT›]Jò[ŸJN¬ò€€ú›õ⁄[ê€€ú›[YQõY⁄ôYè]\ŸTôYäÿX›]ôNôò[ŸKŸ^Nààã›\ùY]å\›€X\ôY]å\›€X\ôYôX\€€éààãõ€Z\ŸNõù[Xõ‹ù€€ùõ€\éõù[JN¬ò€€ú›]]“õ⁄[ê][\ôYè]\ŸTôYäàäN¬ò€€ú›YÿXﬁP]]ŸX‹ô]ôYè]\ŸTôYäŸ[XZ[ààã\‹›€‹ôààüJN¬ò€€ú›õ€›X\öœJ›YŸK]Z[HàäOOû›û^›⁄[ô›Àó◊‹⁄›Xêõ€›X\öœÀä›YŸK]Z[
+NﬂXÿ]⁄
+\úõ‹ä^ﬂ_N¬ò€€ú›USQT÷›[YWN¬ò€€ú›]QXùY‘ô\]Y\›Y]\[Ÿà⁄[ô›»OOHù[ôYö[ôYââõô]»TìŸX\ò⁄\ò[\ ⁄[ô›Àõÿÿ][€ãúŸX\ò⁄
+KôŸ]
+ô]QXùY»äOOOHåHé¬ò€€ú›]QXùY—[ùì›ô\úöYOT›ö[ô [\‹ùõY]Kô[ùãïíUW—SêPìW—UW—PïQﬂàäKùö[J
+Kù”›Ÿ\êÿ\ŸJ
+N¬ò€€ú›]QXùY—[ùë[òXõYY]QXùY—[ùì›ô\úöYOOOHåHü]QXùY—[ùì›ô\úöYOOOHùùYHü]QXùY—[ùì›ô\úöYOOOHûY\»é¬ò€€ú›]QXùY”ÿÿ[‹›]\[Ÿà⁄[ô›»OOHù[ôYö[ôYââñ»õÿÿ[‹›ãåLçÀåååHãééåHóKö[ò€Y\ ⁄[ô›Àõÿÿ][€ãö‹›ò[YJN¬ò€€ú›]QXùY‘ÿYôS[ŸOPõ€€X[ä[\‹ùõY]Kô[ùãëUü]QXùY”ÿÿ[‹›
+]QXùY—[ùë[òXõY	âù\Ÿ\èÀúõ€OOOHò€ÿX⁄äJN¬ò€€ú›]QXùY—[òXõYY]QXùY‘ô\]Y\›Y	âô]QXùY‘ÿYôS[ŸN¬ò€€ú›õ‹õX[^ôRõ⁄[è]èOî›ö[ô üàäKùö[J
+Kù’\\êÿ\ŸJ
+N¬ò€€ú›ÿY€ÿX⁄ö[‹ö]Y\—õ‹ïX[HH\ŸPÿ[òX⁄ \ﬁ[ò»
+X[RY
+HOà¬àYà
+]X[RY
+Hô]\õé¬à€€ú›ÿ]ôYH]ÿZ]\ú⁄\›[òŸTŸ\ùöXŸKôŸ]^Y\îö[‹ö]Y\ 
+N¬à€€ú›ÿ€‹YHÿ]ôYÀñ›X[RYN¬àYà
+ÿ€‹Y
+HŸ]€ÿX⁄ö[‹ö]Y\ ÿ[ö]^ôP€ÿX⁄ö[‹ö]Y\ ÿ€‹Y
+JN¬à[ŸHŸ]€ÿX⁄ö[‹ö]Y\ ”–P“‘íS‘íUQT◊“SíU
+N¬üK◊JN¬ò€€ú›ÿ]ôP€ÿX⁄ö[‹ö]Y\—õ‹ïX[HH\ŸPÿ[òX⁄ \ﬁ[ò»
+X[RYô^ö[‹ö]Y\ HOà¬àYà
+]X[RY
+Hô]\õà»⁄Œàò[ŸKY\‹ÿYŸNàìZ\‹⁄[ô»X[HYààN¬à€€ú›ÿ]ôYH]ÿZ]\ú⁄\›[òŸTŸ\ùöXŸKôŸ]^Y\îö[‹ö]Y\ 
+N¬à€€ú›ô^H»ããäÿ]ôYﬂJK›X[RYNàÿ[ö]^ôP€ÿX⁄ö[‹ö]Y\ ô^ö[‹ö]Y\ HN¬à]ÿZ]\ú⁄\›[òŸTŸ\ùöXŸKúÿ]ôT^Y\îö[‹ö]Y\ ô^
+N¬àŸ]€ÿX⁄ö[‹ö]Y\ ô^›X[RYJN¬àô]\õà»⁄ŒàùYKY\‹ÿYŸNàîö[‹ö]Y\»ÿ]ôYà^Y\à\⁄õÿ\ô\]YààN¬üK◊JN¬ò€€ú›X\€€ú›[YQXY€õ‹›XœJ\úõ‹ê€ŸK›]\ OOû¬ò€€ú›€ŸOT›ö[ô \úõ‹ê€Ÿ_àäKù”›Ÿ\êÿ\ŸJ
+N¬öYä€ŸOOOHò€€ú›[YWÿ€€ù^›⁄Ÿ[ó€Z\‹⁄[ô»ü€ŸOOOHöõ⁄[óÿ€€ù^›⁄Ÿ[ó‹ô\]Z\ôYä\ô]\õûÿ€ŸNàò€€ú›[YWÿ€€ù^›⁄Ÿ[ó€Z\‹⁄[ô»ãY\‹ÿYŸNàïò[Y]Y€€ù^⁄Ÿ[à\»Z\‹⁄[ôÀàüN¬öYä€ŸOOOHò€€ú›[YW‹›XöôX›€Z\€X]⁄ü€ŸOOOHú›XöôX›‹ô\]Z\ôYä\ô]\õûÿ€ŸNàò€€ú›[YW‹›XöôX›€Z\€X]⁄ãY\‹ÿYŸNàí[ùö]H€€ù^›XöôX›Ÿ\»õ›X]⁄›\úô[ù\Ÿ\ãàüN¬öYä€ŸOOOHò€€ú›[YW›\Ÿ\ó⁄Y›\W€Z\€X]⁄ä\ô]\õûÿ€ŸNàò€€ú›[YW›\Ÿ\ó⁄Y›\W€Z\€X]⁄ãY\‹ÿYŸNàï\Ÿ\àY[ùYöY\à\HYõ›X]⁄òX⁄Ÿ[ô^X›][€ãàüN¬öYä€ŸOOOHò€€ú›[YW›X[W⁄Y›\W€Z\€X]⁄ä\ô]\õûÿ€ŸNàò€€ú›[YW›X[W⁄Y›\W€Z\€X]⁄ãY\‹ÿYŸNàïX[HY[ùYöY\à\HYõ›X]⁄òX⁄Ÿ[ô^X›][€ãàüN¬öYä€ŸOOOHúò]W€[Z]Yä\ô]\õûÿ€ŸNàúô]ûXXõW⁄[ôõY⁄ãY\‹ÿYŸNàíõ⁄[à\»[ôXYH[àõŸ‹ô\‹ÀàX\ŸHô]ûH[àH[€Y[ùàüN¬öYä€ŸOOOHö[ùò[Y⁄õ⁄[óÿ€€ù^ü€ŸOOOHöõ⁄[óÿ€€ù^Ÿ^\ôYü€ŸOOOHöõ⁄[óÿ€€ù^›\ŸYä\ô]\õûÿ€ŸNàò€€ú›[YW‹Ÿ\‹⁄[€ó€€⁄›\ŸòZ[YãY\‹ÿYŸNàîÿ]ôY[ùö]H€€ù^€›[õ›ôHõ›[ô‹à\»õ»€ôŸ\àò[YàüN¬öYä€ŸOOOHò€€ú›[YW€Y[Xô\ú⁄\⁄[úŸ\ùŸòZ[Yü€ŸOOOHõY[Xô\ú⁄\⁄[úŸ\ùŸòZ[Yä\ô]\õûÿ€ŸNàò€€ú›[YW€Y[Xô\ú⁄\⁄[úŸ\ùŸòZ[YãY\‹ÿYŸNàêòX⁄Ÿ[ô€›[õ›[úŸ\ùY[Xô\ú⁄\õ‹à\»^Y\ãàüN¬öYä€ŸOOOHö[ù\õò[Ÿ\úõ‹àü›]\œèML
+\ô]\õûÿ€ŸNàò€€ú›[YW€Y[Xô\ú⁄\⁄[úŸ\ùŸòZ[YãY\‹ÿYŸNàêòX⁄Ÿ[ôòZ[Y⁄[H‹ôX][ô»Y[Xô\ú⁄\àüN¬úô]\õûÿ€ŸNò€Ÿ_ò€€ú›[YW€Y[Xô\ú⁄\⁄[úŸ\ùŸòZ[YãY\‹ÿYŸNàï[òXõH»€€ú›[YH[ùö]H€€ù^àüN¬üN¬ò€€ú›Ÿ]]]\úõ‹ê€ŸOY\úõ‹èOî›ö[ô \úõ‹èÀò€Ÿ_\úõ‹èÀô\úõ‹üàäKùö[J
+Kù”›Ÿ\êÿ\ŸJ
+N¬ò€€ú›Ÿ]]]\úõ‹ìY\‹ÿYŸOY\úõ‹èOî›ö[ô \úõ‹èÀõY\‹ÿYŸ_\úõ‹èÀô\úõ‹óŸ\ÿ‹ö\[€ü\úõ‹èÀõ\Ÿﬂ\úõ‹èÀô\úõ‹üàäKùö[J
+N¬ò€€ú›]]XùY‘›Yôö^Y\úõ‹èOò…‘›ö[ô \úõ‹èÀò€Ÿ_\úõ‹èÀô\úõ‹üù[ö€õ›€óŸ\úõ‹àä_Nà	ŸŸ]]]\úõ‹ìY\‹ÿYŸJ\úõ‹ä_ù[ö€õ›€àüWX¬ò€€ú›X\⁄Y€ù\\úõ‹ìY\‹ÿYŸOJ\úõ‹ã]QXùY‘ô\]Y\›Y
+OOû¬ò€€ú›€ŸOYŸ]]]\úõ‹ê€ŸJ\úõ‹äN¬ò€€ú›Y\‹ÿYŸOYŸ]]]\úõ‹ìY\‹ÿYŸJ\úõ‹äKù”›Ÿ\êÿ\ŸJ
+N¬öYä€ŸKö[ò€Y\ ú⁄Y€ù\Ÿ\ÿXõYä_Y\‹ÿYŸKö[ò€Y\ ú⁄Y€ù\»õ›[›ŸYäJ\ô]\õàë[XZ[⁄Y€ù\\»\ÿXõY[à›\Xò\ŸH]]Ÿ][ô‹Ààé¬öYä€ŸKö[ò€Y\ ùŸXZ◊‹\‹›€‹ôä_Y\‹ÿYŸKö[ò€Y\ ú\‹›€‹ôäIâõY\‹ÿYŸKö[ò€Y\ ùŸXZ»äJ\ô]\õàî\‹›€‹ôŸ\»õ›YY]Hô\]Z\ôY€XﬁKàé¬öYä€ŸKö[ò€Y\ ù\Ÿ\óÿ[ôXYWŸ^\›»ä_Y\‹ÿYŸKö[ò€Y\ ò[ôXYHôY⁄\›\ôYä_Y\‹ÿYŸKö[ò€Y\ ò[ôXYHôY[àôY⁄\›\ôYäJ\ô]\õàêXÿ€›[ù[ôXYH^\›ÀàX\ŸH⁄Y€à[ãàé¬öYä€ŸKö[ò€Y\ ô[XZ[‹õ›öY\óŸ\ÿXõYä_Y\‹ÿYŸKö[ò€Y\ ô[XZ[õ›öY\à\»\ÿXõYäJ\ô]\õàë[XZ[Ÿ⁄[à\»õ›[òXõY[à›\Xò\ŸH]]Ÿ][ô‹Ààé¬öYä€ŸKö[ò€Y\ õ›ô\ó‹ô\]Y\›‹ò]W€[Z]ä_Y\‹ÿYŸKö[ò€Y\ úò]H[Z]äJ\ô]\õàï€»X[ûH][\ÀàÿZ][ôûHYÿZ[ãàé¬öYäY]QXùY‘ô\]Y\›Y	âö\’X⁄öXÿ[òX⁄Ÿ[ôY\‹ÿYŸJŸ]]]\úõ‹ìY\‹ÿYŸJ\úõ‹äJJ\ô]\õàï[òXõH»ôY⁄\›\àöY⁄õ›ÀàX\ŸHûHYÿZ[à[àH[€Y[ùàé¬úô]\õà]QXùY‘ô\]Y\›Yÿ[òXõH»ôY⁄\›\ãàX\ŸHûHYÿZ[ãâÿ]]XùY‘›Yôö^
+\úõ‹ä_Xàï[òXõH»ôY⁄\›\ãàX\ŸHûHYÿZ[ãàé¬üN¬ò€€ú›X\Ÿ⁄[ë\úõ‹ìY\‹ÿYŸOJ\úõ‹ã]QXùY‘ô\]Y\›Y
+OOû¬ò€€ú›€ŸOYŸ]]]\úõ‹ê€ŸJ\úõ‹äN¬ò€€ú›Y\‹ÿYŸOYŸ]]]\úõ‹ìY\‹ÿYŸJ\úõ‹äKù”›Ÿ\êÿ\ŸJ
+N¬öYä€ŸKö[ò€Y\ ö[ùò[Yÿ‹ôY[ùX[»ä_Y\‹ÿYŸKö[ò€Y\ ö[ùò[YŸ⁄[à‹ôY[ùX[»äJ\ô]\õàí[ùò[Y[XZ[‹à\‹›€‹ôàé¬öYä€ŸKö[ò€Y\ ô[XZ[€õ›ÿ€€ôö\õYYä_Y\‹ÿYŸKö[ò€Y\ ô[XZ[õ›€€ôö\õYYäJ\ô]\õàîX\ŸH€€ôö\õH[›\à[XZ[ôYõ‹ôH⁄Y€ö[ô»[ãàé¬öYä€ŸKö[ò€Y\ ù\Ÿ\ó€õ›Ÿõ›[ôä_Y\‹ÿYŸKö[ò€Y\ ù\Ÿ\àõ›õ›[ôä_Y\‹ÿYŸKö[ò€Y\ òXÿ€›[ùŸ\»õ›^\›ä_Y\‹ÿYŸKö[ò€Y\ õõ»Xÿ€›[ùäJ\ô]\õàìõ»Xÿ€›[ùõ›[ôà‹ôX]H[àXÿ€›[ùö\ú›àé¬öYäY]QXùY‘ô\]Y\›Y	âö\’X⁄öXÿ[òX⁄Ÿ[ôY\‹ÿYŸJŸ]]]\úõ‹ìY\‹ÿYŸJ\úõ‹äJJ\ô]\õàï[òXõH»⁄Y€à[àöY⁄õ›ÀàX\ŸHûHYÿZ[à[àH[€Y[ùàé¬úô]\õà]QXùY‘ô\]Y\›YÿŸ⁄[àòZ[Yâÿ]]XùY‘›Yôö^
+\úõ‹ä_Xàï[òXõH»⁄Y€à[ãàX\ŸHûHYÿZ[ãàé¬üN¬ò€€ú›ô\]Z\ôP€ÿX⁄JX›‹ãX[RY
+OOòX›‹èÀúõ€OOOHò€ÿX⁄ââòX›‹ãùX[RY	âòX›‹ãùX[RYOO]X[RY¬ò€€ú›ô\]Z\ôT^Y\èJX›‹ãX[RY[XZ[
+OOòX›‹èÀúõ€OOOHú^Y\àââòX›‹ãùX[RY	âòX›‹ãùX[RYOO]X[RY	âòX›‹ãô[XZ[OOY[XZ[¬ò€€ú›òX⁄—]ô[ù]\ŸPÿ[òX⁄ 
+\KY]O^ﬂKX›‹è]\Ÿ\äOOû¬ùòX⁄–òX⁄Ÿ[ô]ô[ù
+\K¬ùX[RYõY]KùX[RYœÿX›‹èÀùX[RYœ€ù[ù\Ÿ\ë[XZ[òX›‹èÀô[XZ[Y]Kù\Ÿ\ë[XZ[ù[ù\Ÿ\îõ€NòX›‹èÀúõ€_Y]Kù\Ÿ\îõ€_ù[ùöY]ÀõY]KüJN¬üK›\Ÿ\ãöY]◊JN¬Çò€€ú›€YT⁄›XùY”[ŸO]\[Ÿà⁄[ô›»OOHù[ôYö[ôYââõô]»TìŸX\ò⁄\ò[\ ⁄[ô›Àõÿÿ][€ãúŸX\ò⁄
+KôŸ]
+ö€YT⁄›XùY»äOOOHåHé¬ò€€ú›ô]⁄€YT⁄›”XY\òõÿ\ô]\ŸPÿ[òX⁄ \ﬁ[ò X[RYÿ€‹OZ€YT⁄›”XY\òõÿ\ôÿ€‹JOOû¬öYä]X[RY]\Ÿ\èÀô[XZ[
+\ô]\õé¬ò€€ú›ô\]Y\›YQ]Kõõ› 
+N¬ò€€ú›XùY”[ŸOZ\‘⁄›XëXùY”[ŸJ
+N¬ò€€ú›ÿÿ[XY\òõÿ\ôõ›‹œJ
+OOòÿ[›[]SXY\òõÿ\ôúõ€T⁄›Ÿ‹ ‹⁄›Ÿ‹ÀX[RY^Y\ê€€ù^û‹^Y\úÀõŸö[\Œú^Y\îõŸö[\Àÿ€‹__JKú€XŸJ”QW‘“’◊”PQTêì–Të”SRU
+N¬ò€€ú›\SXY\òõÿ\ôõ›‹œJõ›‹À⁄›]\œ[ù[\úõ‹ê€ŸOHàã\—[\O[ù[O^ﬂJOOû¬öYäXY\òõÿ\ôô\]Y\›ôYãò›\úô[ùúô\]Y\›YOO\ô\]Y\›Y
+\ô]\õàò[ŸN¬úŸ]€YT⁄›”XY\òõÿ\ô
+‹›]\Œàú›XÿŸ\‹»ãõ›‹À\úõ‹éààüJN¬úŸ]]QXùY ô]èOäÀããúô]ãXY\òõÿ\ôûÀããúô]ãõXY\òõÿ\ô›]\À\úõ‹ê€ŸKô\›[€›[ùúõ›‹Àõ[ô›\—[\Nö\—[\Oœ‹õ›‹Àõ[ô›OOL_JJN¬úô]\õàùYN¬üN¬õXY\òõÿ\ôô\]Y\›ôYãò›\úô[ù^›X[RYô\]Y\›YN¬úŸ]€YT⁄›”XY\òõÿ\ô
+ô]èOäÀããúô]ã›]\ŒàõÿY[ô»ã\úõ‹éààüJJN¬öYä\—[[–Xÿ€›[ù
+\Ÿ\ä_\—[[”[ŸJ
+J^¬ò€€ú›õ›‹œ[ÿÿ[XY\òõÿ\ôõ›‹ 
+N¬ò\SXY\òõÿ\ôõ›‹ õ›‹À⁄›]\Œåå\úõ‹ê€ŸNàô[[◊€ÿÿ[ã\—[\Núõ›‹Àõ[ô›OOLJN¬úô]\õé¬üBùû^¬ò€€ú›\õX›åK€XY\òõÿ\ôÀ⁄€YK\⁄›œ›X[W⁄YIŸ[ò€ŸUTíP€€\€ô[ù
+X[RY
+_Iõ[Z]I“”QW‘“’◊”PQTêì–Të”SRUIúÿ€‹OIŸ[ò€ŸUTíP€€\€ô[ù
+ÿ€‹J_X¬úŸ]]QXùY ô]èOäÀããúô]ãXY\òõÿ\ôûÀããúô]ãõXY\òõÿ\ô[ô⁄[ùù\õ›]\Œõù[\úõ‹ê€ŸNààãô\›[€›[ùõù[\—[\Nôò[Ÿ__JJN¬ò€€ú›ô\œX]ÿZ]ô]⁄
+\õ⁄XY\úŒû»û]\Ÿ\ãZYéù\Ÿ\ãô[XZ[_JN¬ò€€ú›€€ù[ù\OT›ö[ô ô\ÀöXY\úÀôŸ]
+ò€€ù[ù]\Hä_àäKù”›Ÿ\êÿ\ŸJ
+N¬õ]õŸO^ﬂN¬õ]\úŸS[ŸOHöú€€àé¬öYä€€ù[ù\Kö[ò€Y\ ò\Xÿ][€ã⁄ú€€àäJ^¬òõŸOX]ÿZ]ô\Àöú€€ä
+Kòÿ]⁄
+
+
+OOû‹\úŸS[ŸOHö[ùò[Y⁄ú€€àé‹ô]\õûﬂNﬂJN¬üY[Ÿ^¬ú\úŸS[ŸOHõõ€ó⁄ú€€àé¬ò]ÿZ]ô\Àù^
+
+Kòÿ]⁄
+
+
+OOààäN¬üBöYä\ô\Àõ⁄ ^¬ò€€ú›\Ÿœ\\úŸSXY\òõÿ\ô\úõ‹ìY\‹ÿYŸJõŸOÀô\úõ‹ãô\Àú›]\À\úŸS[ŸOOOHõõ€ó⁄ú€€àè»õõ€ó⁄ú€€àéàöú€€àäN¬ò€€ú›òX⁄Ÿ[ô\úõ‹ê€ŸOT›ö[ô õŸOÀôXY€õ‹›X‹œÀúú◊Ÿ\úõ‹èÀò€Ÿ_õŸOÀô\úõ‹üù[ö€õ›€àäN¬ò€€ú›òX⁄Ÿ[ô\úõ‹ìY\‹ÿYŸOT›ö[ô õŸOÀôXY€õ‹›X‹œÀúú◊Ÿ\úõ‹èÀõY\‹ÿYŸ_ù[ö€õ›€óŸ\úõ‹àäN¬ò€€ú›XùY—\úõ‹ë]Z[X	ÿòX⁄Ÿ[ô\úõ‹ê€Ÿ_Nà	ÿòX⁄Ÿ[ô\úõ‹ìY\‹ÿYŸ_X¬ò€€ú€€Kùÿ\õäñ⁄€YK\⁄›À[XY\òõÿ\ôHôYúô\⁄òZ[Yã‹›]\Œúô\Àú›]\À\úõ‹éòõŸOÀô\úõ‹üàãÿ€‹KX[RYô\]Y\›\íY[ù]Tô\Ÿ[ùòõŸOÀôXY€õ‹›X‹œÀúô\]Y\›\ó⁄Y[ù]W‹ô\Ÿ[ùù[ö€õ›€àãX[RYô\Ÿ[ùòõŸOÀôXY€õ‹›X‹œÀùX[W⁄Y‹ô\Ÿ[ùù[ö€õ›€àãú”ò[YNòõŸOÀôXY€õ‹›X‹œÀúú◊€ò[YWÿÿ[Yàãú‘›XÿŸ\‹ŒòõŸOÀôXY€õ‹›X‹œÀúú◊‹›XÿŸ\‹ﬂù[ö€õ›€àãú—^\›—]X›XõNòõŸOÀôXY€õ‹›X‹œÀúú◊Ÿ^\›◊Ÿ]X›Xõ_ù[ö€õ›€àãô\]Y\›\îô\€€ôY]ZY]òZ[XõNòõŸOÀôXY€õ‹›X‹œÀúô\]Y\›\ó‹ô\€€ôY›]ZYÿ]òZ[Xõ_ù[ö€õ›€àãú—\úõ‹ê€ŸNòòX⁄Ÿ[ô\úõ‹ê€ŸKú—\úõ‹ìY\‹ÿYŸNòòX⁄Ÿ[ô\úõ‹ìY\‹ÿYŸ_JN¬ò€€ú›ò[òX⁄‘õ›‹œ[ÿÿ[XY\òõÿ\ôõ›‹ 
+N¬ô[Z]ô[X\ŸQXY€õ‹›X Ÿ]ô[ùàõXY\òõÿ\ôŸô]⁄ŸòZ[YãXY\òõÿ\ôú‘ô\›[€›[ùåò[òX⁄”XY\òõÿ\ôô\›[€›[ùôò[òX⁄‘õ›‹Àõ[ô›X[RY^Y\íYù\Ÿ\èÀöY\Ÿ\èÀô[XZ[]][ùXÿ]Y\Ÿ\ë[XZ[ù\Ÿ\èÀô[XZ[^òNû‹ÿ€‹K›]\Œúô\Àú›]\À\úõ‹ê€ŸNî›ö[ô õŸOÀô\úõ‹ü\úŸS[Ÿ_ù[ö€õ›€àä__KŸXùYŒôXùY”[Ÿ_JN¬öYä\SXY\òõÿ\ôõ›‹ ò[òX⁄‘õ›‹À⁄›]\Œúô\Àú›]\À\úõ‹ê€ŸNî›ö[ô õŸOÀô\úõ‹ü\úŸS[Ÿ_ù[ö€õ›€àäK\—[\Nôò[òX⁄‘õ›‹Àõ[ô›OOLJJ\ô]\õé¬úô]\õé¬üBò€€ú›õ›‹œP\úò^Kö\–\úò^JõŸOÀõXY\òõÿ\ô
+OÿõŸKõXY\òõÿ\ôñ◊N¬ò€€ú›ú‘õ›‹œ\õ›‹Œ¬ò€€ú›ò[òX⁄‘õ›‹œ\ú‘õ›‹Àõ[ô›÷◊Nõÿÿ[XY\òõÿ\ôõ›‹ 
+N¬ãÀ»YÿXﬁHXùY»€€ùòX›õ‹à[\Hî»ô\‹€úŸ\Œà\—[\Núõ›‹Àõ[ô›OOLò€€ú›XY\òõÿ\ôõ›‹œ\ú‘õ›‹Àõ[ô›‹ú‘õ›‹Œôò[òX⁄‘õ›‹Œ¬ô[Z]ô[X\ŸQXY€õ‹›X Ÿ]ô[ùàõXY\òõÿ\ôŸô]⁄ÿ€€\]YãXY\òõÿ\ôú‘ô\›[€›[ùúú‘õ›‹Àõ[ô›ò[òX⁄”XY\òõÿ\ôô\›[€›[ùôò[òX⁄‘õ›‹Àõ[ô›X[RY^Y\íYù\Ÿ\èÀöY\Ÿ\èÀô[XZ[]][ùXÿ]Y\Ÿ\ë[XZ[ù\Ÿ\èÀô[XZ[^òNû‹ÿ€‹K›]\Œúô\Àú›]\À\ŸYò[òX⁄Œúú‘õ›‹Àõ[ô›OOL	âôò[òX⁄‘õ›‹Àõ[ô›å_KŸXùYŒôXùY”[Ÿ_JN¬öYä\SXY\òõÿ\ôõ›‹ XY\òõÿ\ôõ›‹À⁄›]\Œúô\Àú›]\À\úõ‹ê€ŸNúú‘õ›‹Àõ[ô›Yò[òX⁄‘õ›‹Àõ[ô›»àéàúú◊Ÿ[\W€ÿÿ[Ÿò[òX⁄»ã\—[\NõXY\òõÿ\ôõ›‹Àõ[ô›OOLJJ\ô]\õé¬üXÿ]⁄
+\úõ‹ä^¬öYäXY\òõÿ\ôô\]Y\›ôYãò›\úô[ùúô\]Y\›YOO\ô\]Y\›Y
+\ô]\õé¬ò€€ú€€Kùÿ\õäñ⁄€YK\⁄›À[XY\òõÿ\ôHôYúô\⁄ô]€‹ö»òZ[\ôHã‹ÿ€‹KX[RYY\‹ÿYŸNî›ö[ô \úõ‹èÀõY\‹ÿYŸ_õô]€‹ö◊Ÿ\úõ‹àä_JN¬ò€€ú›ò[òX⁄‘õ›‹œ[ÿÿ[XY\òõÿ\ôõ›‹ 
+N¬ô[Z]ô[X\ŸQXY€õ‹›X Ÿ]ô[ùàõXY\òõÿ\ôŸô]⁄€ô]€‹ö◊ŸòZ[\ôHãXY\òõÿ\ôú‘ô\›[€›[ùåò[òX⁄”XY\òõÿ\ôô\›[€›[ùôò[òX⁄‘õ›‹Àõ[ô›X[RY^Y\íYù\Ÿ\èÀöY\Ÿ\èÀô[XZ[]][ùXÿ]Y\Ÿ\ë[XZ[ù\Ÿ\èÀô[XZ[^òNû‹ÿ€‹K\úõ‹ê€ŸNàõô]€‹ö◊Ÿ\úõ‹àü_KŸXùYŒôXùY”[Ÿ_JN¬ò\SXY\òõÿ\ôõ›‹ ò[òX⁄‘õ›‹À⁄›]\Œõù[\úõ‹ê€ŸNàõô]€‹ö◊Ÿ\úõ‹àã\—[\Nôò[òX⁄‘õ›‹Àõ[ô›OOLJN¬üBüK›\Ÿ\ã€YT⁄›”XY\òõÿ\ôÿ€‹K⁄›Ÿ‹À^Y\úÀ^Y\îõŸö[\◊JN¬Çò€€ú›ZY‹ò]Q]O]\ŸPÿ[òX⁄ 
+‹^Y\úŒúò]‘^Y\úÀ^Y\îõŸö[\Œúò]‘^Y\îõŸö[\Àÿ€‹ô\Œúò]‘ÿ€‹ô\ÀõŸ‹ò[Tÿ€‹ô\Œúò]‘õŸ‹ò[Tÿ€‹ô\À]ô[ùŒúò]—]ô[ùÀú›úŒúò]‘ú›úÀ⁄›Ÿ‹Œúò]‘⁄›Ÿ‹À⁄[[ôŸ\Œúò]–⁄[[ôŸ\Àÿ‘Ÿ\‹⁄[€úŒúò]‘ÿ‘Ÿ\‹⁄[€úÀÿ‘ú›úŒúò]‘ÿ‘ú›úÀÿ”Ÿ‹Œúò]‘ÿ”Ÿ‹ÀX[\Œúò]’X[\ﬂJOOû¬ò€€ú›œJò]‘^Y\úﬂ◊JKõX\
+OäÀããúõ€Núúõ€_ú^Y\àüJJN¬ò€€ú›^\›[ô’X[\œ\ò]’X[\ﬂ◊N¬ò€€ú›€ÿX⁄\œ\Àôö[\äOúúõ€OOOHò€ÿX⁄äN¬ò€€ú›\’X[\œY^\›[ô’X[\Àõ[ô›å¬ò€€ú›X\^ﬂN¬õ]œVÀããô^\›[ô’X[\◊N¬ò€€ú›\ŸY]ÀõX\
+Oùöõ⁄[ê€ŸJN¬öYäZ\’X[\ ^¬öYä€ÿX⁄\Àõ[ô›OOL
+^¬ò€€ú›YYŸ[íY
+ùX[HäN¬ùœVﬁ⁄YùYò[YNàî⁄›XàX[Hã›€ô\ê€ÿX⁄Yõù[õ⁄[ê€ŸNôŸ[ô\ò]Rõ⁄[ê€ŸJ\ŸY
+Kõ⁄[ê€ŸU\]Y]ë]Kõõ› 
+K‹ôX]Y]ë]Kõõ› 
+Kúò[ô[ôŒëQêUS–îêSëSëﬂWN¬úÀôõ‹ëXX⁄
+Oû€X\‹ô[XZ[O]YJN¬üY[Ÿ^¬ò€ÿX⁄\Àôõ‹ëXX⁄
+
+ÀJOOûÿ€€ú›YYŸ[íY
+ùX[HäNÿ€€ú›€ŸOYŸ[ô\ò]Rõ⁄[ê€ŸJÀããù\ŸYããùÀõX\
+Oùöõ⁄[ê€ŸJWJN›Àú\⁄
+⁄YùYò[YNòÀõò[YOÿ	ÿÀõò[YKú‹]
+àäVÃ_I‹»X[XòX[H	⁄JÃ_X›€ô\ê€ÿX⁄YòÀô[XZ[õ⁄[ê€ŸNò€ŸKõ⁄[ê€ŸU\]Y]ë]Kõõ› 
+K‹ôX]Y]ë]Kõõ› 
+Kúò[ô[ôŒëQêUS–îêSëSëﬂJN€X\ÿÀô[XZ[O]YﬂJN¬úÀôõ‹ëXX⁄
+Oû⁄Yäúõ€HOOHò€ÿX⁄ä^ÿ€€ú›ö\ú›€ÿX⁄X€ÿX⁄\÷ÃN⁄Yäö\ú›€ÿX⁄
+[X\‹ô[XZ[O[X\Ÿö\ú›€ÿX⁄ô[XZ[Nﬂ_JN¬üBüY[Ÿ^¬ùÀôõ‹ëXX⁄
+Oû⁄Yäõ›€ô\ê€ÿX⁄Y
+[X\›õ›€ô\ê€ÿX⁄YO]öYﬂJN¬üBò€€ú›X[\’⁄]úò[ô[ôœ]ÀõX\
+OäÀããùúò[ô[ôŒúô\€€ôUX[Púò[ô[ô òúò[ô[ôﬂQêUS–îêSëSë _JJN¬ò€€ú›^Y\ú”ZY‹ò]Y\ÀõX\
+OäÀããúX[RYúô\€€ôSZY‹ò]Yõ‹›\ïX[RY
+‹õ›ŒúX\YX[RYõX\‹ô[XZ[Kò[òX⁄’X[RYùX[\’⁄]úò[ô[ô÷ÃOÀöYJKYQúõ€SXY\òõÿ\ôŒúöYQúõ€SXY\òõÿ\ôœOO]ùY_öYWŸúõ€W€XY\òõÿ\ôœOO]ùY_JJN¬ò€€ú›õŸö[\—^\›[ôœ\ò]‘^Y\îõŸö[\ﬂ◊N¬ò€€ú›õŸö[\”ZY‹ò]YJõŸö[\—^\›[ôÀõ[ô›‹õŸö[\—^\›[ôŒú^Y\ú”ZY‹ò]Yôö[\äOúúõ€HOOHò€ÿX⁄äKõX\
+Oä⁄YôŸ[íY
+úäK\Ÿ\íYúô[XZ[X[RYúùX[RYö\ú›ò[YNäõò[Y_àäKú‹]
+àäVÃ_î^Y\àã\›ò[YNäõò[Y_àäKú‹]
+àäKú€XŸJJKöõ⁄[äàäK‹ôX]Y]ë]Kõõ› 
+_JJJKõX\
+OäÀããúX[RYúùX[RY^Y\ú”ZY‹ò]Yôö[ô
+Oúô[XZ[OO\ù\Ÿ\íY
+OÀùX[RY÷ÃOÀöYù[JJN¬ò€€ú›X[Qõ‹ë[XZ[YOOú^Y\ú”ZY‹ò]Yôö[ô
+Oúô[XZ[OOYJOÀùX[RY÷ÃOÀöYù[¬ò€€ú›ÿ€‹ô\”OJò]‘ÿ€‹ô\ﬂ◊JKôö[\äœOäÀú‹òﬂö€YHäHOOHúõŸ‹ò[HäKõX\
+œOäÀããúÀ^Y\íYúÀú^Y\íYÀú^Y\ó⁄YÀô[XZ[X[RYúÀùX[RYÀùX[W⁄YX[Qõ‹ë[XZ[
+Àô[XZ[
+Kö[YúÀôö[YÀôö[⁄Y‹òŒúÀú‹òﬂö€YHüJJN¬ò€€ú›õŸ‹ò[Tÿ€‹ô\”OVÀããäò]‘õŸ‹ò[Tÿ€‹ô\ﬂ◊JKããäò]‘ÿ€‹ô\ﬂ◊JKôö[\äœOúÀú‹òœOOHúõŸ‹ò[HäWKõX\
+œOäÀããúÀ[XZ[úÀô[XZ[Àú^Y\óŸ[XZ[^Y\íYúÀú^Y\íYÀú^Y\ó⁄YÀô[XZ[Àú^Y\óŸ[XZ[^Y\ó⁄YúÀú^Y\ó⁄YÀú^Y\íYÀô[XZ[Àú^Y\óŸ[XZ[X[RYúÀùX[RYÀùX[W⁄YX[Qõ‹ë[XZ[
+Àô[XZ[Àú^Y\óŸ[XZ[
+KX[W⁄YúÀùX[W⁄YÀùX[RYX[Qõ‹ë[XZ[
+Àô[XZ[Àú^Y\óŸ[XZ[
+Kö[YúÀôö[YÀôö[⁄Yö[⁄YúÀôö[⁄YÀôö[Yö[ò[YNúÀôö[ò[Y_Àôö[€ò[Y_îõŸ‹ò[Hö[ãÿ€‹ôNìù[Xô\äÀúÿ€‹ô_
+K]NúÀô]_ÀúŸ\‹⁄[€óŸ]_Ÿ^T›ä
+K‹òŒàúõŸ‹ò[HüJJN¬ò€€ú›]ô[ù”OJò]—]ô[ùﬂ◊JKõX\
+OOäÀããôKX[RYôKùX[RYX[Qõ‹ë[XZ[
+Kõ›€ô\ê€ÿX⁄Y
+_JJN¬ò€€ú›ú›ú”OJò]‘ú›úﬂ◊JKõX\
+èOäÀããúã^Y\íYúãú^Y\íYãô[XZ[X[RYúãùX[RYX[Qõ‹ë[XZ[
+ãô[XZ[
+_JJN¬ò€€ú›⁄›OJò]‘⁄›Ÿ‹ﬂ◊JKõX\
+Oõõ‹õX[^ôT⁄›Ÿ‘õ›—õ‹ê\
+ÀããõX[RYõùX[RYùX[W⁄YX[Qõ‹ë[XZ[
+ô[XZ[
+_K‹€›\òŸNàõÿÿ[üJJKôö[\äõ€€X[äN¬ò€€ú›⁄OJò]–⁄[[ôŸ\ﬂ◊JKõX\
+œOäÀããòÀX[RYòÀùX[RYX[Qõ‹ë[XZ[
+Àôúõ€JK^Y\íYòÀú^Y\íYÀôúõ€_JJN¬ò€€ú›ÿ‘”OJò]‘ÿ‘Ÿ\‹⁄[€úﬂ◊JKõX\
+œOäÀããúÀX[RYúÀùX[RYX[Qõ‹ë[XZ[
+Àõ›€ô\ê€ÿX⁄Y
+_JJN¬ò€€ú›ÿ‘ìOJò]‘ÿ‘ú›úﬂ◊JKõX\
+èOäÀããúã^Y\íYúãú^Y\íYãô[XZ[X[RYúãùX[RYX[Qõ‹ë[XZ[
+ãô[XZ[
+_JJN¬ò€€ú›ÿ”OJò]‘ÿ”Ÿ‹ﬂ◊JKõX\
+OäÀããõ^Y\íYõú^Y\íYô[XZ[X[RYõùX[RYX[Qõ‹ë[XZ[
+ô[XZ[
+_JJN¬úô]\õà‹^Y\ú”ZY‹ò]YõŸö[\”ZY‹ò]YX[\”ZY‹ò]YùX[\’⁄]úò[ô[ôÀÿ€‹ô\”KõŸ‹ò[Tÿ€‹ô\”K]ô[ù”Kú›ú”K⁄›K⁄Kÿ‘”Kÿ‘ìKÿ”_N¬üK◊JN¬Çò€€ú›ò]öYÿ]U‘^Y\í€YO]\ŸPÿ[òX⁄ 
+
+OOû¬öYä\[Ÿà⁄[ô›œOOHù[ôYö[ôYä\ô]\õé¬ò€€ú›€YT]TVQTó’Pó‘UÀö€Y_ã»é¬öYä⁄[ô›Àõÿÿ][€ãú]ò[YHOOZ€YT]
+]⁄[ô›Àö\›‹ûKúô\XŸT›]JﬂKàã€YT]
+N¬üK◊JN¬Çò€€ú›õ‹õX[^ôT›‹ôY[ùö]P€€ù^]\ŸPÿ[òX⁄ 
+›
+OOû¬öYäX›\[Ÿà›OOHõÿöôX›ä\ô]\õàù[¬ò€€ú›õ⁄[ê€€ù^⁄Ÿ[èT›ö[ô ›öõ⁄[ê€€ù^⁄Ÿ[ü›ù⁄Ÿ[üàäKùö[J
+N¬öYäZõ⁄[ê€€ù^⁄Ÿ[ä\ô]\õàù[¬úô]\õû¬öõ⁄[ê€€ù^⁄Ÿ[ãù⁄Ÿ[éöõ⁄[ê€€ù^⁄Ÿ[ãö[ùö]RYî›ö[ô ›ö[ùö]RY›ö[ùö]W⁄YàäKùö[J
+KùX[RYî›ö[ô ›ùX[RY›ùX[W⁄YàäKùö[J
+Kö[ùö]P€ŸNî›ö[ô ›ö[ùö]P€Ÿ_›ö[ùö]Wÿ€Ÿ_›õõ‹õX[^ôY€Ÿ_àäKùö[J
+Kù’\\êÿ\ŸJ
+Kú›XöôX›î›ö[ô ›ú›XöôX››ú›XöôX›Ÿ^_›ú›XöôX›⁄Ÿ^_àäKùö[J
+Kù”›Ÿ\êÿ\ŸJ
+Kú›XöôX›Ÿ^Nî›ö[ô ›ú›XöôX››ú›XöôX›Ÿ^_›ú›XöôX›⁄Ÿ^_àäKùö[J
+Kù”›Ÿ\êÿ\ŸJ
+Kô^\ô\–]ò›ô^\ô\–]›ô^\ô\◊ÿ]ù[ò‹ôX]Y]ìù[Xô\ä›ò‹ôX]Y]]Kõõ› 
+JKüN¬üK◊JN¬ò€€ú›ôXY[ùö]P€€ù^úõ€T›‹òYŸO]\ŸPÿ[òX⁄ 
+
+OOû¬öYä\[Ÿà⁄[ô›œOOHù[ôYö[ôYä\ô]\õàù[¬ò€€ú›\úŸOJò] OOû⁄Yä\ò] \ô]\õàù[›û^‹ô]\õàî””ãú\úŸJò] NﬂXÿ]⁄
+\úõ‹ä^‹ô]\õàù[ﬂ_N¬ò€€ú›Ÿ\‹⁄[€ïò[YO\\úŸJ⁄[ô›ÀúŸ\‹⁄[€î›‹òYŸOÀôŸ]][JSïíUW–””ïV‘’‘êQ—W“—VJ_àäN¬ò€€ú›ÿÿ[ò[YO\\úŸJ⁄[ô›Àõÿÿ[›‹òYŸOÀôŸ]][JSïíUW–””ïV‘’‘êQ—W“—VJ_àäN¬úô]\õàõ‹õX[^ôT›‹ôY[ùö]P€€ù^
+Ÿ\‹⁄[€ïò[Y_ÿÿ[ò[Y_ù[
+N¬üK€õ‹õX[^ôT›‹ôY[ùö]P€€ù^JN¬ò€€ú›‹ö]R[ùö]P€€ù^‘›‹òYŸO]\ŸPÿ[òX⁄ 
+›
+OOû¬öYä\[Ÿà⁄[ô›œOOHù[ôYö[ôYä\ô]\õé¬ò€€ú›õ‹õX[^ôY[õ‹õX[^ôT›‹ôY[ùö]P€€ù^
+›
+N¬ò€€ú›Ÿ\öX[^ôYRî””ãú›ö[ô⁄YûJõ‹õX[^ôYù[
+N¬ù⁄[ô›ÀúŸ\‹⁄[€î›‹òYŸOÀúŸ]][JSïíUW–””ïV‘’‘êQ—W“—VKŸ\öX[^ôY
+N¬ù⁄[ô›Àõÿÿ[›‹òYŸOÀúŸ]][JSïíUW–””ïV‘’‘êQ—W“—VKŸ\öX[^ôY
+N¬üK€õ‹õX[^ôT›‹ôY[ùö]P€€ù^JN¬ò€€ú›ÿ]ôT[ô[ô“õ⁄[ê€€ù^]\ŸPÿ[òX⁄ \ﬁ[ò ô^
+OOû¬ò€€ú›õ‹õX[^ôY[õ‹õX[^ôT›‹ôY[ùö]P€€ù^
+ô^
+N¬úŸ][ô[ô“õ⁄[ê€€ù^
+õ‹õX[^ôYù[
+N¬ù‹ö]R[ùö]P€€ù^‘›‹òYŸJõ‹õX[^ôYù[
+N¬ò]ÿZ]ãúŸ]
+SëSë◊“ì“Só–””ïV“—VKõ‹õX[^ôYù[
+N¬üK€õ‹õX[^ôT›‹ôY[ùö]P€€ù^‹ö]R[ùö]P€€ù^‘›‹òYŸWJN¬ò€€ú›Yò]T\ú⁄\›Y]O]\ŸPÿ[òX⁄ \ﬁ[ò 
+OOûÿ€€ú›ŸÀÀ]ãùã€⁄ÿ‹Àÿ‹ãÿ€KÿKŸ\‹À[ô[ô–›OX]ÿZ]õ€Z\ŸKò[
+—ãôŸ]
+ú€ôö[»äKãôŸ]
+ú€úõŸ‹ò[KYö[»äKãôŸ]
+ú€úÿ€‹ô\»äKãôŸ]
+ú€úõŸ‹ò[K\ÿ€‹ô\»äKãôŸ]
+ú€ú^Y\ú»äKãôŸ]
+ú€ú^Y\ã\õŸö[\»äKãôŸ]
+ú€ô]ô[ù»äKãôŸ]
+ú€úú›ú»äKãôŸ]
+ú€ú⁄›Ÿ‹»äKãôŸ]
+ú€ò⁄[[ôŸ\»äKãôŸ]
+ú€úÿÀ\Ÿ\‹⁄[€ú»äKãôŸ]
+ú€úÿÀ\ú›ú»äKãôŸ]
+ú€úÿÀ[Ÿ‹»äKãôŸ]
+ú€ùX[\»äKãôŸ]
+ú€úŸX\€€ãX\ò⁄]ô\»äKãôŸ]
+ú€úŸ\‹⁄[€àäKãôŸ]
+SëSë◊“ì“Só–””ïV“—VJWJNÿ€€ú›€YQö[[X\Ÿ\œXùZ[Yò][ö[Y[X\Ÿ\ íS◊“SíU
+Nÿ€€ú›õŸ‹ò[Qö[[X\Ÿ\œXùZ[Yò][ö[Y[X\Ÿ\ ì—‘êSW—íS◊“SíU
+Nÿ€€ú›ÿÿ[ŸYYYö[œ[Y\ôŸQYò][ö[ íS◊“SíU
+Nÿ€€ú›ÿÿ[ŸYYYõŸ‹ò[Qö[œ[Y\ôŸQYò][ö[ ì—‘êSW—íS◊“SíU
+N€]ÿ][ŸŒ⁄YäŸ\‹œÀô[XZ[
+^›û^ÿÿ][ŸœX]ÿZ]òZ[ö[ô–ÿ][Ÿ‘\ú⁄\›[òŸKöYò]Pÿ][Ÿ €ÿÿ[€YQö[Œõÿÿ[ŸYYYö[Àÿÿ[õŸ‹ò[Qö[Œõÿÿ[ŸYYYõŸ‹ò[Qö[ﬂJNﬂXÿ]⁄
+\úõ‹ä^Ÿ[Z]ô[X\ŸQXY€õ‹›X ùòZ[ö[ô◊ÿÿ][Ÿ◊⁄Yò][€óŸòZ[Yã€Y\‹ÿYŸNî›ö[ô \úõ‹èÀõY\‹ÿYŸ_ù[ö€õ›€àä_JNﬂ_X€€ú›ŸYYYö[œXÿ][ŸœÀù\ŸTô[[›O€Y\ôŸQYò][ö[ ÿ][ŸÀö€YQö[ÀíS◊“SíU
+Nõÿÿ[ŸYYYö[Œÿ€€ú›ŸYYYõŸ‹ò[Qö[œXÿ][ŸœÀù\ŸTô[[›O€Y\ôŸQYò][ö[ ÿ][ŸÀúõŸ‹ò[Qö[Àì—‘êSW—íS◊“SíU
+Nõÿÿ[ŸYYYõŸ‹ò[Qö[Œ‹Ÿ]ö[ ŸYYYö[ N‹Ÿ]õŸ‹ò[Qö[ ŸYYYõŸ‹ò[Qö[ N¬ò€€ú›õ‹õX[^ôYÿ€‹ô\œ[õ‹õX[^ôTÿ€‹ô\—õ‹ëYò][ö[ À€YQö[[X\Ÿ\ÀõŸ‹ò[Qö[[X\Ÿ\ Nÿ€€ú›õ‹õX[^ôYõŸ‹ò[Tÿ€‹ô\œ[õ‹õX[^ôTÿ€‹ô\—õ‹ëYò][ö[ À€YQö[[X\Ÿ\ÀõŸ‹ò[Qö[[X\Ÿ\ Nÿ€€ú›O[ZY‹ò]Q]J‹^Y\úŒú^Y\îõŸö[\Œúÿ€‹ô\Œõõ‹õX[^ôYÿ€‹ô\ÀõŸ‹ò[Tÿ€‹ô\Œõõ‹õX[^ôYõŸ‹ò[Tÿ€‹ô\À]ô[ùŒô]ãú›úŒúùã⁄›Ÿ‹Œú€⁄[[ôŸ\Œò⁄ÿ‘Ÿ\‹⁄[€úŒúÿ‹Àÿ‘ú›úŒúÿ‹ãÿ”Ÿ‹Œúÿ€X[\Œù_JN¬úŸ]^Y\ú Kú^Y\ú”ZY‹ò]Y
+N‹Ÿ]^Y\îõŸö[\ KúõŸö[\”ZY‹ò]Y
+N‹Ÿ]X[\ KùX[\”ZY‹ò]Y
+N‹Ÿ]ŸX\€€ê\ò⁄]ô\ \úò^Kö\–\úò^JÿJO‹ÿNñ◊JN‹Ÿ]ÿ€‹ô\ Kúÿ€‹ô\”JN‹Ÿ]õŸ‹ò[Tÿ€‹ô\ KúõŸ‹ò[Tÿ€‹ô\”JN‹Ÿ]]ô[ù Kô]ô[ù”JN‹Ÿ]ú›ú Kúú›ú”JN‹Ÿ]⁄›Ÿ‹ Kú⁄›JN‹Ÿ]⁄[[ôŸ\ Kò⁄JN‹Ÿ]ÿ‘Ÿ\‹⁄[€ú Kúÿ‘”JN‹Ÿ]ÿ‘ú›ú Kúÿ‘ìJN‹Ÿ]ÿ”Ÿ‹ Kúÿ”JN¬ò]ÿZ]ãúŸ]
+ú€úÿÀ\Ÿ\‹⁄[€ú»ãKúÿ‘”JN¬ò]ÿZ]õ€Z\ŸKò[
+—ãúŸ]
+ú€ôö[»ãŸYYYö[ KãúŸ]
+ú€úõŸ‹ò[KYö[»ãŸYYYõŸ‹ò[Qö[ KãúŸ]
+ú€ú^Y\ú»ãKú^Y\ú”ZY‹ò]Y
+KãúŸ]
+ú€ú^Y\ã\õŸö[\»ãKúõŸö[\”ZY‹ò]Y
+KãúŸ]
+ú€ùX[\»ãKùX[\”ZY‹ò]Y
+KãúŸ]
+ú€úÿ€‹ô\»ãKúÿ€‹ô\”JKãúŸ]
+ú€úõŸ‹ò[K\ÿ€‹ô\»ãKúõŸ‹ò[Tÿ€‹ô\”JKãúŸ]
+ú€ô]ô[ù»ãKô]ô[ù”JKãúŸ]
+ú€úú›ú»ãKúú›ú”JKãúŸ]
+ú€ú⁄›Ÿ‹»ãKú⁄›JKãúŸ]
+ú€ò⁄[[ôŸ\»ãKò⁄JKãúŸ]
+ú€úÿÀ\ú›ú»ãKúÿ‘ìJKãúŸ]
+ú€úÿÀ[Ÿ‹»ãKúÿ”JWJN¬ò€€ú›]][XZ[[õ‹õX[^ôQ[XZ[
+’TPêT—W–UU—SêPìQ ]ÿZ]õ€Z\ŸKúòXŸJ‹›\Xò\ŸKò]]ôŸ]Ÿ\‹⁄[€ä
+Kô]»õ€Z\ŸJèOúŸ][Y[›]
+ãŸL JWJJOÀô]OÀúŸ\‹⁄[€èÀù\Ÿ\èÀô[XZ[úŸ\‹œÀô[XZ[
+N»Ÿ]]QXùY ô]èOäÀããúô]ã]]ûÀããúô]ãò]]Ÿ\‹⁄[€îô\Ÿ[ùò]][XZ[»ûY\»éàõõ»ü_JJN»Yä]][XZ[	âàT’TPêT—W–UU—SêPìQ
+^ÿ€€ú›ô\›‹ôOX]ÿZ]YÿXﬁP]]ô]⁄
+ã›åK€YÿXﬁKX]]‹ô\›‹ôHãŸ[XZ[ò]][XZ[JN»Yäô\›‹ôKõ⁄…âúô\›‹ôKòõŸOÀúõŸö[J^ÿ€€ú›ú[õ‹õX[^ôSYÿXﬁTõŸö[Jô\›‹ôKòõŸKúõŸö[JN⁄YäúùX[RY
+X]ÿZ]ô\›‹ôSYÿXﬁUX[P€€ù^
+ú
+Kòÿ]⁄
+
+
+OOõù[
+N‹Ÿ]\Ÿ\äú
+N‹Ÿ]]QXùY ô]èOäÀããúô]ã]]ûÀããúô]ãò]]õŸö[Tô\›‹ôT›]\Œàú›XÿŸ\‹»ãõŸö[SÿYàú›XÿŸ\‹»ãõŸö[UX[RYúúùX[RYàü_JJN⁄Yäúúõ€OOOHò€ÿX⁄ââà\úùX[RY
+\Ÿ]öY] ò‹ôX]K]X[HäNŸ[ŸHYäúúõ€OOOHú^Y\àââà\úùX[RY
+\Ÿ]öY] öõ⁄[ã]X[HäNŸ[Ÿ^⁄Yäúúõ€OOOHú^Y\àä[ò]öYÿ]U‘^Y\í€YJ
+N‹Ÿ]öY] úúõ€_ú^Y\àäNﬂ_Y[Ÿ^‹Ÿ]]QXùY ô]èOäÀããúô]ã]]ûÀããúô]ãò]]õŸö[Tô\›‹ôT›]\ŒàôòZ[YãõŸö[SÿYàôòZ[Yü_JJNﬂ_H[ŸHYä]][XZ[
+^ÿ€€ú›õ›[ô[Kú^Y\ú”ZY‹ò]Yôö[ô
+Oõõ‹õX[^ôQ[XZ[
+ô[XZ[
+OOOX]][XZ[
+N⁄Yäõ›[ô
+^‹Ÿ]\Ÿ\äŸ[XZ[ôõ›[ôô[XZ[õ€Nôõ›[ôúõ€_ú^Y\àã\–€ÿX⁄äõ›[ôúõ€_ú^Y\àäOOOHò€ÿX⁄ãò[YNôõ›[ôõò[YKX[RYôõ›[ôùX[RYYQúõ€SXY\òõÿ\ôŒôõ›[ôöYQúõ€SXY\òõÿ\ôœOO]ùY_JN‹Ÿ]]QXùY ô]èOäÀããúô]ã]]ûÀããúô]ãò]]õŸö[SÿYàú›XÿŸ\‹»ãô\›‹ôYõ€UX[RYäõ›[ôúõ€Iâôõ›[ôùX[RY
+O»ûY\»éàõõ»ü_JJN⁄Yäõ›[ôúõ€OOOHò€ÿX⁄ââàYõ›[ôùX[RY
+\Ÿ]öY] ò‹ôX]K]X[HäNŸ[ŸHYäõ›[ôúõ€OOOHú^Y\àââàYõ›[ôùX[RY
+\Ÿ]öY] öõ⁄[ã]X[HäNŸ[ŸH⁄Yä
+õ›[ôúõ€_ú^Y\àäOOOHú^Y\àä[ò]öYÿ]U‘^Y\í€YJ
+N‹Ÿ]öY] õ›[ôúõ€_ú^Y\àä__H[ŸH‹Ÿ]]QXùY ô]èOäÀããúô]ã]]ûÀããúô]ãò]]õŸö[SÿYàôòZ[Yü_JJNﬂ_BúŸ][ô[ô“õ⁄[ê€€ù^
+õ‹õX[^ôT›‹ôY[ùö]P€€ù^
+[ô[ô–›
+_ôXY[ùö]P€€ù^úõ€T›‹òYŸJ
+_ù[
+N¬úô]\õà›X[\ŒõKùX[\”ZY‹ò]Y^Y\úŒõKú^Y\ú”ZY‹ò]YN¬üK€ZY‹ò]Q]Kò]öYÿ]U‘^Y\í€YKõ‹õX[^ôT›‹ôY[ùö]P€€ù^ôXY[ùö]P€€ù^úõ€T›‹òYŸWJN¬ò€€ú›]\ŸPÿ[òX⁄ \ﬁ[ò ÀãŸ]‹[€ú OOû‹Ÿ]
+äNÿ]ÿZ]ãúŸ]
+Àã‹[€ú _K◊JN¬ù\ŸQYôôX›
+
+
+OOû¬öYä\ôXY_\Ÿ\èÀúõ€HOOHú^Y\àü]\Ÿ\èÀùX[RY]\Ÿ\èÀô[XZ[
+\ô]\õà[ôYö[ôY¬õ]ÿ[òŸ[YYò[ŸN¬ò€€ú›ÿÿ[€ò\⁄›X⁄[[ôŸ\Œ¬ú^Y\ê⁄[[ôŸT\ú⁄\›[òŸKöYò]P⁄[[ôŸ\ ›X[RYù\Ÿ\ãùX[RYÿÿ[⁄[[ôŸ\Œõÿÿ[€ò\⁄›JKù[ä\ﬁ[ò ô\›[
+OOû¬öYäÿ[òŸ[Y\ô\›[Àõ⁄ \ô]\õé¬ò€€ú›õ›‹œP\úò^Kö\–\úò^Jô\›[úõ›‹ O‹ô\›[úõ›‹Œõÿÿ[€ò\⁄›¬úŸ]⁄[[ôŸ\ õ›‹ N¬ò]ÿZ]ãúŸ]
+ú€ò⁄[[ôŸ\»ãõ›‹À‹›öX›ÿÿ[ùùY_JN¬üJKòÿ]⁄
+\úõ‹èOô[Z]ô[X\ŸQXY€õ‹›X ú^Y\óÿ⁄[[ôŸW⁄Yò][€óŸòZ[Yã›X[RYù\Ÿ\ãùX[RYY\‹ÿYŸNî›ö[ô \úõ‹èÀõY\‹ÿYŸ_ù[ö€õ›€àä_JJN¬úô]\õä
+OOûÿÿ[òŸ[Y]ùY_N¬üK‹ôXYK\Ÿ\èÀô[XZ[\Ÿ\èÀúõ€K\Ÿ\èÀùX[RYJN¬ò€€ú›\ú⁄\›òZ[ö[ô–ÿ][Ÿœ]\ŸPÿ[òX⁄ \ﬁ[ò ô^€YQö[Àô^õŸ‹ò[Qö[ OOû¬úŸ]ö[ ô^€YQö[ N‹Ÿ]õŸ‹ò[Qö[ ô^õŸ‹ò[Qö[ N¬ò]ÿZ]õ€Z\ŸKò[
+—ãúŸ]
+ú€ôö[»ãô^€YQö[À‹›öX›ÿÿ[ùùY_JKãúŸ]
+ú€úõŸ‹ò[KYö[»ãô^õŸ‹ò[Qö[À‹›öX›ÿÿ[ùùY_JWJN¬öYä]\Ÿ\èÀùX[RY
+\ô]\õû€⁄ŒùùYK›‹òYŸS[ŸNàõÿÿ[‹[ô[ô»üN¬ùû^ÿ€€ú›ô\›[X]ÿZ]òZ[ö[ô–ÿ][Ÿ‘\ú⁄\›[òŸKúﬁ[ò–ÿ][Ÿ ›X[RYù\Ÿ\ãùX[RY€YQö[Œõô^€YQö[ÀõŸ‹ò[Qö[Œõô^õŸ‹ò[Qö[ﬂJN‹ô]\õû€⁄ŒùùYK›‹òYŸS[ŸNúô\›[ú›‹òYŸS[ŸKô[[›Tõ›‹Œúô\›[úõ›‹ﬂNﬂBòÿ]⁄
+\úõ‹ä^Ÿ[Z]ô[X\ŸQXY€õ‹›X ùòZ[ö[ô◊ÿÿ][Ÿ◊‹ﬁ[ò◊‹[ô[ô»ã›X[RYù\Ÿ\ãùX[RYY\‹ÿYŸNî›ö[ô \úõ‹èÀõY\‹ÿYŸ_ù[ö€õ›€àä_JN‹ô]\õû€⁄ŒùùYK›‹òYŸS[ŸNàõÿÿ[‹[ô[ô»ãô[[›T[ô[ôŒùùY_NﬂBüK›\Ÿ\èÀùX[RYJN¬ò€€ú›\ò⁄]ôTŸX\€€è]\ŸPÿ[òX⁄ \ﬁ[ò [ú]^ﬂJOOû¬ò€€ú›X›]ôTõ‹›\î^Y\úœYŸ]€ÿX⁄õ‹›\î^Y\ú ¬ú^Y\úÀú^Y\îõŸö[\ÀùX[RYù\Ÿ\èÀùX[RYüJN¬ò€€ú›ô\›[X]ÿZ]‹ôX]TŸX\€€ê\ò⁄]ôJ¬ãããö[ú]ùX[RYù\Ÿ\èÀùX[RYò€ÿX⁄ù\Ÿ\ãú^Y\úÀú^Y\îõŸö[\ÀòX›]ôTõ‹›\î^Y\úÀúÿ€‹ô\ÀúõŸ‹ò[Tÿ€‹ô\Àú⁄›Ÿ‹Àô]ô[ùÀúú›úÀúÿ‘Ÿ\‹⁄[€úÀúÿ‘ú›úÀúÿ”Ÿ‹ÀúõŸ‹ò[Qö[Àôö[Àò⁄[[ôŸ\Àô^\›[ô–\ò⁄]ô\ŒúŸX\€€ê\ò⁄]ô\Àõõ›Œä
+OOõô]»]J
+Kù“T”‘›ö[ô 
+KüJN¬öYä\ô\›[õ⁄ \ô]\õàô\›[ÿ]ÿZ]
+ú€úŸX\€€ãX\ò⁄]ô\»ãô\›[úŸX\€€ê\ò⁄]ô\ÀŸ]ŸX\€€ê\ò⁄]ô\À‹›öX›ÿÿ[ùùY_JN›òX⁄—]ô[ù
+úŸX\€€óÿ\ò⁄]ôWÿ‹ôX]Yãÿ\ò⁄]ôRYúô\›[ò\ò⁄]ôKöYŸX\€€ìò[YNúô\›[ò\ò⁄]ôKúŸX\€€ìò[Y_JN‹ô]\õàô\›[ﬂK›\Ÿ\ã^Y\úÀ^Y\îõŸö[\Àÿ€‹ô\ÀõŸ‹ò[Tÿ€‹ô\À⁄›Ÿ‹À]ô[ùÀú›úÀÿ‘Ÿ\‹⁄[€úÀÿ‘ú›úÀÿ”Ÿ‹ÀõŸ‹ò[Qö[Àö[À⁄[[ôŸ\ÀŸX\€€ê\ò⁄]ô\ÀòX⁄—]ô[ùJN¬ò€€ú››\ùõ⁄[ê€€ù^]\ŸPÿ[òX⁄ \ﬁ[ò €ŸK›XöôX›Ÿ^JOOû¬ò€€ú›õ‹õX[^ôY€ŸO[õ‹õX[^ôRõ⁄[ä€ŸJKúô\XŸJ÷ÀW◊JÀŸÀàäN¬ò€€ú›õ‹õX[^ôY›XöôX›T›ö[ô ›XöôX›Ÿ^_àäKùö[J
+Kù”›Ÿ\êÿ\ŸJ
+N¬úŸ]]QXùY ô]èOäÀããúô]ãõ⁄[éûÀããúô]ãöõ⁄[ã[ù\ôY€ŸNî›ö[ô €Ÿ_àäKõ‹õX[^ôY€ŸK›]\Œàõ€⁄›\ã€⁄›\€›\òŸNàòòX⁄Ÿ[ô⁄[ùö]Wÿ€€ù^ã€⁄›\öY[àùX[W⁄[ùö]\Àò€ŸW⁄\⁄ã€⁄›\\⁄ôYö^ààã€⁄›\\⁄€›\òŸNàúXõXÀö\⁄⁄[ùö]Wÿ€ŸJXõXÀõõ‹õX[^ôW⁄[ùö]Wÿ€ŸJ€ŸJJHã€⁄›\€›[ùõù[X]⁄YX[RYààã[ùö]T›]Nààã^\ô\–]õù[[ùö]P€€ù^ÿ]ôYàõõ»ã[ùö]P€€ù^›‹òYŸRŸ^NíSïíUW–””ïV‘’‘êQ—W“—VK[ùö]P€€ù^⁄Ÿ[îô\Ÿ[ùàõõ»ã[ùö]P€€ù^X[RYààã[ùö]P€€ù^›XöôX›õõ‹õX[^ôY›XöôX››\úô[ù\Ÿ\ë[XZ[õõ‹õX[^ôY›XöôX›€€ù^›XöôX›X]⁄\’\Ÿ\éàõõ»ã\]NàöYHã\úõ‹éààü_JJN¬öYä[õ‹õX[^ôY€ŸJ\ô]\õû€⁄Œôò[ŸK\úéàë[ù\àHò[YX[H€ŸKàüN¬öYä[õ‹õX[^ôY›XöôX›
+\ô]\õû€⁄Œôò[ŸK\úéàë[ù\àHò[Y[XZ[àüN¬ùû^¬ò€€ú›ô\œX]ÿZ]ô]⁄
+ã›åK›X[KZ[ùö]\Àÿ€€ù^‹›\ùã€Y]Ÿàî‘’ãXY\úŒû»ê€€ù[ùU\Héàò\Xÿ][€ã⁄ú€€àüKõŸNíî””ãú›ö[ô⁄YûJ⁄[ùö]Wÿ€ŸNõõ‹õX[^ôY€ŸK›XöôX›⁄Ÿ^Nõõ‹õX[^ôY›XöôX›J_JN¬ò€€ú›õŸOX]ÿZ]ô\Àöú€€ä
+Kòÿ]⁄
+
+
+OOäﬂJJN¬ò€€ú›ô\€€ôYõ‹õX[^ôY€ŸOT›ö[ô õŸOÀõõ‹õX[^ôYÿ€Ÿ_õ‹õX[^ôY€Ÿ_àäN¬ò€€ú›ô\€€ôY\⁄ôYö^T›ö[ô õŸOÀõ€⁄›\⁄\⁄‹ôYö^àäN¬ò€€ú›ô\€€ôY\⁄€›\òŸOT›ö[ô õŸOÀö\⁄‹€›\òŸ_úXõXÀö\⁄⁄[ùö]Wÿ€ŸJXõXÀõõ‹õX[^ôW⁄[ùö]Wÿ€ŸJ€ŸJJHäN¬ò€€ú›ô\€€ôY€⁄›\€›[ùSù[Xô\ãö\—ö[ö]Jù[Xô\äõŸOÀõ€⁄›\ÿ€›[ù
+JO”ù[Xô\äõŸOÀõ€⁄›\ÿ€›[ù
+Nå¬ò€€ú›ô\€€ôYX]⁄YX[RYT›ö[ô õŸOÀõX]⁄Y›X[W⁄YõŸOÀùX[W⁄YàäN¬ò€€ú›ô\€€ôY[ùö]T›]OT›ö[ô õŸOÀö[ùö]W‹›]_àäN¬ò€€ú›ô\€€ôY^\ô\–]XõŸOÀô^\ô\◊ÿ]õŸOÀö[ùö]WŸ^\ô\◊ÿ]ù[¬öYä\ô\Àõ⁄ ^¬ò€€ú›ÿYôQ\úõ‹èT›ö[ô õŸOÀô\úõ‹üõ€⁄›\ŸòZ[YäN¬úŸ]]QXùY ô]èOäÀããúô]ãõ⁄[éûÀããúô]ãöõ⁄[ãõ‹õX[^ôY€ŸNúô\€€ôYõ‹õX[^ôY€ŸK›]\ŒàôòZ[Yã€⁄›\\⁄ôYö^úô\€€ôY\⁄ôYö^€⁄›\\⁄€›\òŸNúô\€€ôY\⁄€›\òŸK€⁄›\€›[ùúô\€€ôY€⁄›\€›[ùX]⁄YX[RYúô\€€ôYX]⁄YX[RY[ùö]T›]Núô\€€ôY[ùö]T›]K^\ô\–]úô\€€ôY^\ô\–][ùö]P€€ù^ÿ]ôYàõõ»ã[ùö]P€€ù^⁄Ÿ[îô\Ÿ[ùàõõ»ã[ùö]P€€ù^X[RYúô\€€ôYX]⁄YX[RY[ùö]P€€ù^›XöôX›õõ‹õX[^ôY›XöôX››\úô[ù\Ÿ\ë[XZ[õõ‹õX[^ôY›XöôX›€€ù^›XöôX›X]⁄\’\Ÿ\éàõõ»ã\úõ‹éúÿYôQ\úõ‹ü_JJN¬öYäÿYôQ\úõ‹èOOHö[ùò[Y€‹ó›[ò]òZ[XõWÿ€ŸHüÿYôQ\úõ‹èOOHö[ùò[Yÿ€ŸHä\ô]\õû€⁄Œôò[ŸK\úéàí[ùò[YX[H€ŸKàüN¬úô]\õû€⁄Œôò[ŸK\úéàê€›[õ›ò[Y]HX[H€ŸKàüN¬üBò€€ú››^⁄õ⁄[ê€€ù^⁄Ÿ[éòõŸKöõ⁄[óÿ€€ù^›⁄Ÿ[ã⁄Ÿ[éòõŸKöõ⁄[óÿ€€ù^›⁄Ÿ[ã^\ô\–]òõŸKô^\ô\◊ÿ]›XöôX›õõ‹õX[^ôY›XöôX››XöôX›Ÿ^Nõõ‹õX[^ôY›XöôX›[ùö]RYòõŸKö[ùö]W⁄YX[RYúô\€€ôYX]⁄YX[RY[ùö]P€ŸNúô\€€ôYõ‹õX[^ôY€ŸK‹ôX]Y]ë]Kõõ› 
+_N¬úŸ]]QXùY ô]èOäÀããúô]ãõ⁄[éûÀããúô]ãöõ⁄[ãõ‹õX[^ôY€ŸNúô\€€ôYõ‹õX[^ôY€ŸK›]\Œàùò[Y]Yã€⁄›\\⁄ôYö^úô\€€ôY\⁄ôYö^€⁄›\\⁄€›\òŸNúô\€€ôY\⁄€›\òŸK€⁄›\€›[ùìù[Xô\ãö\—ö[ö]Jô\€€ôY€⁄›\€›[ù
+Iâúô\€€ôY€⁄›\€›[ùå‹ô\€€ôY€⁄›\€›[ùåKX]⁄YX[RYúô\€€ôYX]⁄YX[RY[ùö]T›]Núô\€€ôY[ùö]T›]K^\ô\–]úô\€€ôY^\ô\–]\úõ‹éààü_JJN¬ò]ÿZ]ÿ]ôT[ô[ô“õ⁄[ê€€ù^
+›
+N¬úŸ]]QXùY ô]èOäÀããúô]ãõ⁄[éûÀããúô]ãöõ⁄[ã[ùö]P€€ù^ÿ]ôYàûY\»ã[ùö]P€€ù^›‹òYŸRŸ^NíSïíUW–””ïV‘’‘êQ—W“—VK[ùö]P€€ù^⁄Ÿ[îô\Ÿ[ùò›öõ⁄[ê€€ù^⁄Ÿ[è»ûY\»éàõõ»ã[ùö]P€€ù^X[RYò›ùX[RYàã[ùö]P€€ù^›XöôX›ò›ú›XöôX›àã›\úô[ù\Ÿ\ë[XZ[õõ‹õX[^ôY›XöôX›€€ù^›XöôX›X]⁄\’\Ÿ\éàûY\»ü_JJN¬úô]\õû€⁄ŒùùYK€€ù^ò›N¬üXÿ]⁄
+\úõ‹ä^¬úŸ]]QXùY ô]èOäÀããúô]ãõ⁄[éûÀããúô]ãöõ⁄[ã›]\ŒàôòZ[Yã€⁄›\€›[ùå\úõ‹éàõô]€‹ö◊Ÿ\úõ‹àü_JJN¬úô]\õû€⁄Œôò[ŸK\úéàê€›[õ›ò[Y]HX[H€ŸKàüN¬üBüK€õ‹õX[^ôRõ⁄[ãÿ]ôT[ô[ô“õ⁄[ê€€ù^JN¬ò€€ú›€€ú›[YRõ⁄[ê€€ù^]\ŸPÿ[òX⁄ \ﬁ[ò X›‹ã€Y[ùô\]Y\›Y[ù[€€ù^›ô\úöYO[ù[
+OOû¬ò€€ú››\úô[ù\Ÿ\ë[XZ[T›ö[ô X›‹èÀô[XZ[àäKùö[J
+Kù”›Ÿ\êÿ\ŸJ
+N¬ò€€ú›€€ú›[YQ[ô⁄[ùHã›åK›X[K[Y[Xô\ú⁄\Àÿ€€ôö\õKX€€ù^é¬ò€€ú›ô\€€ôY€€ù^[õ‹õX[^ôT›‹ôY[ùö]P€€ù^
+€€ù^›ô\úöYJ_õ‹õX[^ôT›‹ôY[ùö]P€€ù^
+[ô[ô“õ⁄[ê€€ù^
+_ôXY[ùö]P€€ù^úõ€T›‹òYŸJ
+N¬öYäX›\úô[ù\Ÿ\ë[XZ[
+^¬ò€€ú›XY€õ‹›Xœ[X\€€ú›[YQXY€õ‹›X ò€€ú›[YW›\Ÿ\ó⁄Y›\W€Z\€X]⁄ã
+N¬úŸ]]QXùY ô]èOäÀããúô]ãõ⁄[éûÀããúô]ãöõ⁄[ã€€ú›[YQ[ô⁄[ù€€ú›[YP][\›\ùYàûY\»ã€€ú›[YP][\õÿ⁄ŸYàõõ»ã€€ú›[YP][\õÿ⁄ŸYôX\€€éààã€€ú›[YR›]\Œç€€ú›[YQXY€õ‹›X–€ŸNôXY€õ‹›XÀò€ŸK€€ú›[YQXY€õ‹›X”Y\‹ÿYŸNôXY€õ‹›XÀõY\‹ÿYŸK€€ú›[YU⁄Ÿ[îô\Ÿ[ùàõõ»ã€€ú›[YUX[RY\ŸYààã€€ú›[YU\Ÿ\ë[XZ[ààã€€ú›[YTô\€€ôY\Ÿ\ï]ZYààãY[Xô\ú⁄\[úŸ\ù›]\ŒàôòZ[YãY[Xô\ú⁄\[úŸ\ù\úõ‹éôXY€õ‹›XÀò€ŸKö[ò[õ›]QX⁄\⁄[€éàú›^W⁄õ⁄[ó›X[Hã[ùö]P€€ù^ÿ]ôYàõõ»ã[ùö]P€€ù^›‹òYŸRŸ^NíSïíUW–””ïV‘’‘êQ—W“—VK[ùö]P€€ù^⁄Ÿ[îô\Ÿ[ùàõõ»ã[ùö]P€€ù^X[RYààã[ùö]P€€ù^›XöôX›ààã›\úô[ù\Ÿ\ë[XZ[ààã€€ù^›XöôX›X]⁄\’\Ÿ\éàõõ»ã\úõ‹éôXY€õ‹›XÀò€Ÿ__JJN¬úô]\õû€⁄Œôò[ŸK\úéôXY€õ‹›XÀõY\‹ÿYŸKXY€õ‹›X–€ŸNôXY€õ‹›XÀò€ŸKXY€õ‹›X”Y\‹ÿYŸNôXY€õ‹›XÀõY\‹ÿYŸ_N¬üBöYä\ô\€€ôY€€ù^Àöõ⁄[ê€€ù^⁄Ÿ[ä^¬ò€€ú›XY€õ‹›Xœ[X\€€ú›[YQXY€õ‹›X ò€€ú›[YWÿ€€ù^›⁄Ÿ[ó€Z\‹⁄[ô»ã
+N¬úŸ]]QXùY ô]èOäÀããúô]ãõ⁄[éûÀããúô]ãöõ⁄[ã€€ú›[YQ[ô⁄[ù€€ú›[YP][\›\ùYàûY\»ã€€ú›[YP][\õÿ⁄ŸYàõõ»ã€€ú›[YP][\õÿ⁄ŸYôX\€€éààã€€ú›[YR›]\Œç€€ú›[YQXY€õ‹›X–€ŸNôXY€õ‹›XÀò€ŸK€€ú›[YQXY€õ‹›X”Y\‹ÿYŸNò	ŸXY€õ‹›XÀõY\‹ÿYŸ_H⁄X⁄ŸY	“SïíUW–””ïV‘’‘êQ—W“—V_Kò€€ú›[YU⁄Ÿ[îô\Ÿ[ùàõõ»ã€€ú›[YUX[RY\ŸYààã€€ú›[YU\Ÿ\ë[XZ[ò›\úô[ù\Ÿ\ë[XZ[€€ú›[YTô\€€ôY\Ÿ\ï]ZYààãY[Xô\ú⁄\[úŸ\ù›]\ŒàôòZ[YãY[Xô\ú⁄\[úŸ\ù\úõ‹éôXY€õ‹›XÀò€ŸKö[ò[õ›]QX⁄\⁄[€éàú›^W⁄õ⁄[ó›X[Hã[ùö]P€€ù^ÿ]ôYàõõ»ã[ùö]P€€ù^›‹òYŸRŸ^NíSïíUW–””ïV‘’‘êQ—W“—VK[ùö]P€€ù^⁄Ÿ[îô\Ÿ[ùàõõ»ã[ùö]P€€ù^X[RYààã[ùö]P€€ù^›XöôX›ààã›\úô[ù\Ÿ\ë[XZ[€€ù^›XöôX›X]⁄\’\Ÿ\éàõõ»ã\úõ‹éòZ\‹⁄[ô◊⁄[ùö]Wÿ€€ù^â“SïíUW–””ïV‘’‘êQ—W“—V_X_JJN¬úô]\õû€⁄Œôò[ŸK\úéòõ»ò[Y]Y[ùö]H€€ù^
+⁄X⁄ŸY	“SïíUW–””ïV‘’‘êQ—W“—V_JKòXY€õ‹›X–€ŸNôXY€õ‹›XÀò€ŸKXY€õ‹›X”Y\‹ÿYŸNôXY€õ‹›XÀõY\‹ÿYŸ_N¬üBò€€ú››XöôX›T›ö[ô ô\€€ôY€€ù^ú›XöôX›ô\€€ôY€€ù^ú›XöôX›Ÿ^_àäKùö[J
+Kù”›Ÿ\êÿ\ŸJ
+N¬ò€€ú›€€ù^›XöôX›X]⁄\’\Ÿ\è\›XöôX›OOX›\úô[ù\Ÿ\ë[XZ[»ûY\»éàõõ»é¬öYä€€ù^›XöôX›X]⁄\’\Ÿ\àOOHûY\»ä^¬ò€€ú›XY€õ‹›Xœ[X\€€ú›[YQXY€õ‹›X ò€€ú›[YW‹›XöôX›€Z\€X]⁄ã
+N¬úŸ]]QXùY ô]èOäÀããúô]ãõ⁄[éûÀããúô]ãöõ⁄[ã€€ú›[YR›]\Œç€€ú›[YQXY€õ‹›X–€ŸNôXY€õ‹›XÀò€ŸK€€ú›[YQXY€õ‹›X”Y\‹ÿYŸNôXY€õ‹›XÀõY\‹ÿYŸKY[Xô\ú⁄\[úŸ\ù›]\ŒàôòZ[YãY[Xô\ú⁄\[úŸ\ù\úõ‹éôXY€õ‹›XÀò€ŸKö[ò[õ›]QX⁄\⁄[€éàú›^W⁄õ⁄[ó›X[Hã\úõ‹éôXY€õ‹›XÀò€Ÿ__JJN¬úô]\õû€⁄Œôò[ŸK\úéôXY€õ‹›XÀõY\‹ÿYŸKXY€õ‹›X–€Ÿu”û∑Ó⁄$z{-ÆÈ‹j◊ùS SCHEDULED</div>
         <p style={{fontFamily:FB,color:T.SUB,fontSize:12,lineHeight:1.55,maxWidth:310,margin:"10px auto 0"}}>Create the first team event, then players can RSVP and you can track attendance from this screen.</p>
         <button data-testid="coach-events-mobile-create-event" onClick={openEventCreateFlow} type="button" className="btn-v cta-primary" style={{width:"auto",minWidth:190,minHeight:46,height:46,borderRadius:12,margin:"22px 0 0",padding:"0 20px",fontSize:11}}>CREATE FIRST EVENT</button>
         <div style={{fontFamily:FB,color:T.MUT,fontSize:9,fontWeight:800,letterSpacing:".1em",textTransform:"uppercase",marginTop:18}}>Practices ¬∑ Games ¬∑ Camps ¬∑ Meetings</div>
