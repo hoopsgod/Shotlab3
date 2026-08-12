@@ -25,15 +25,12 @@ html [class*="demoBanner" i],html [class*="demoNotice" i],html [class*="demoBadg
 html [data-testid="coach-command-center-full"],html [data-testid="coach-players-interactive-dashboard"],html [data-testid="coach-events-interactive-dashboard"]{background:var(--demo-canvas)!important;color:var(--demo-ink)!important}
 
 /* Player surfaces: one coherent light workspace with deliberate dark focus cards only. */
-html [data-testid*="player" i]{opacity:1!important;filter:none!important;mix-blend-mode:normal!important}
+html [data-testid*="player" i]{opacity:1!important;mix-blend-mode:normal!important}
 html [data-testid*="player" i] [class*="hero" i],html [data-testid*="player" i] [class*="focus" i]{border-radius:24px!important}
 html [data-testid*="player" i] [class*="metric" i]{opacity:1!important;visibility:visible!important;filter:none!important;transform:none!important}
 html [data-testid*="player" i] [class*="empty" i]{border:1px solid var(--demo-line)!important;border-radius:22px!important;background:var(--demo-surface)!important;color:var(--demo-ink)!important;box-shadow:none!important}
 
-/* Navigation parity across Coach and Player. */
-html [class*="mobileNav" i],html nav[aria-label*="navigation" i]{border:1px solid rgba(255,255,255,.08)!important;background:rgba(23,27,24,.96)!important;color:#fff!important;backdrop-filter:blur(20px)!important;box-shadow:0 16px 38px rgba(20,24,21,.18)!important}
-html [class*="mobileNav" i] button,html nav[aria-label*="navigation" i] button{color:rgba(255,255,255,.58)!important;-webkit-text-fill-color:rgba(255,255,255,.58)!important}
-html [class*="mobileNav" i] [aria-current="page"],html nav[aria-label*="navigation" i] [aria-current="page"]{color:#c7ed45!important;-webkit-text-fill-color:#c7ed45!important}
+/* Navigation defers to the shared native navigation authority. */
 
 /* Team Store remains in the same product language. */
 html .ts-overlay{background:rgba(22,26,23,.38)!important;backdrop-filter:blur(14px)!important}
