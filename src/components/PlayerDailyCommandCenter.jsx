@@ -39,7 +39,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   const momentumTone = dailyComplete ? "positive" : primary.urgency === "urgent" ? "attention" : "info";
   const momentumTitle = dailyComplete ? "Daily target complete" : dailyRemaining > 0 ? `${dailyRemaining} makes from today’s target` : "Your next action is ready";
   const momentumDetail = dailyComplete
-    ? weeklyComplete ? "Today and this week are complete. Review progress or protect the streak with optional work." : `${model.weekly.makes}/${model.weekly.goal} makes this week. The next action should build on the work already completed.`
+    ? weeklyComplete ? "Today and this week are complete. Review progress or protect the streak with optional work." : `${model.weekly.makes} of ${model.weekly.goal} makes this week. Choose the next action that best builds on today’s work.`
     : `${model.streak || 0}-day streak · ${rankLabel(model.leaderboardRank)} team rank · ${model.actionableCount} open ${model.actionableCount === 1 ? "action" : "actions"}.`;
   const progressShouldOpen = dailyComplete || primary.urgency === "urgent";
   const runAction = (action) => {
@@ -73,8 +73,8 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
           </ExperiencePill>
           <div className={styles.meta}>About {primary.estimatedMinutes || 1} min</div>
         </div>
-        <h1 className={styles.title}>{dailyComplete ? "Work banked. Keep building." : primary.title}</h1>
-        <p className={styles.description}>{dailyComplete ? "Your daily standard is complete. Use the next action to extend the week, review progress, or handle a team commitment." : primary.detail}</p>
+        <h1 className={styles.title}>{dailyComplete ? "Daily work banked." : primary.title}</h1>
+        <p className={styles.description}>{dailyComplete ? "Today’s standard is complete. Build on the week, review progress, or handle the next team commitment." : primary.detail}</p>
         <button type="button" className={styles.primaryButton} style={iconButtonStyle} data-testid="player-daily-primary-action" data-state={primaryWorking ? "working" : "idle"} onClick={() => runAction(primary)}>
           <span>{primaryWorking ? "Opening…" : primary.actionLabel}</span>
           <ShotLabIcon name={primaryWorking ? "clock" : dailyComplete ? "check" : "arrow"} size={18} />

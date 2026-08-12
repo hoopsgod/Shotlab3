@@ -65,7 +65,7 @@ test("production keeps the bundled visual authority without shipping duplicate l
 });
 
 
-test("Phase 1 intelligence rail owns readable light-shell and dark-card materials", () => {
+test("Phase 2 intelligence rail keeps one dark priority and readable light support materials", () => {
   for (const token of [
     "--insight-rail-canvas: #f0f1ed",
     "--insight-rail-ink: #111a21",
@@ -76,8 +76,11 @@ test("Phase 1 intelligence rail owns readable light-shell and dark-card material
   ]) assert.ok(foundation.includes(token), "missing " + token);
 
   assert.match(insightRail, /\.header h2[\s\S]*var\(--insight-rail-ink, #111a21\)/);
-  assert.match(insightRail, /\.card h3[\s\S]*var\(--insight-card-copy, #f5f8f9\)/);
-  assert.match(insightRail, /\.card p[\s\S]*var\(--insight-card-muted, #b6c0c6\)/);
+  assert.match(insightRail, /\.card\s*\{[\s\S]*background: #fbfbf8/);
+  assert.match(insightRail, /\.card h3[\s\S]*color: #172019/);
+  assert.match(insightRail, /\.card p[\s\S]*color: #5f6962/);
+  assert.match(insightRail, /\.primaryCard h3[\s\S]*color: #f5f8f6/);
+  assert.match(insightRail, /\.primaryCard p[\s\S]*color: #b8c2bc/);
   assert.match(insightRail, /min-height: var\(--touch-target, 44px\)/);
 });
 

@@ -3,7 +3,9 @@
 html,html body,html #root{min-height:100%;background:var(--demo-canvas)!important;background-image:none!important;color:var(--demo-ink)!important;color-scheme:light!important}
 html body::before,html body::after,html #root::before,html #root::after{display:none!important;background:none!important}
 html body,html button,html input,html select,html textarea{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important}
-html [class*="page" i],html [class*="shell" i],html [class*="workspace" i],html [class*="dashboard" i]{background-color:transparent!important;background-image:none!important}
+/* Keep structural canvases transparent without matching component names such as
+   secondaryPageAction and secondaryPageDecision. */
+html :is(.page,.pageShell,.performance-shell,.performance-workspace,.secondaryPageShell){background-color:transparent!important;background-image:none!important}
 html main,html [role="main"]{color:var(--demo-ink)!important}
 
 /* Cards, panels and rows use the same calm surface system for every identity. */

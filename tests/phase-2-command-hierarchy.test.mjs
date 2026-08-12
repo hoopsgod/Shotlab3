@@ -7,6 +7,11 @@ const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 const main = read("../src/main.jsx");
 const player = read("../src/components/PlayerDailyCommandCenter.jsx");
 const hierarchy = read("../src/styles/CommandHierarchy2026.css");
+const rail = read("../src/components/OperationalInsightRail.jsx");
+const railCss = read("../src/components/OperationalInsightRail.module.css");
+const railModel = read("../src/lib/operationalInsightRails.js");
+const coach = read("../src/components/CoachCommandCenter.jsx");
+const sessionIntegrity = read("../public/shotlab-v15-session-integrity.css");
 
 test("Phase 2 Player authority loads after the Phase 1 visual foundation", () => {
   const foundationIndex = main.indexOf("await import('./styles/VisualFoundation2026.css')");
@@ -62,4 +67,30 @@ test("Player mobile hierarchy preserves a dominant action and deliberate disclos
   assert.match(hierarchy, /font-size: clamp\(32px, 10vw, 44px\)/);
   assert.match(hierarchy, /\.playerProgressDisclosure > summary:focus-visible/);
   assert.match(hierarchy, /@media \(prefers-reduced-motion: reduce\)/);
+});
+
+test("Phase 2 gives desktop insight rails one dark priority and quiet supporting cards", () => {
+  assert.match(rail, /data-density="decision-first"/);
+  assert.match(rail, /data-rail-role=\{index === 0 \? "primary" : "supporting"\}/);
+  assert.match(railCss, /\.card\s*\{[\s\S]*#fbfbf8[\s\S]*box-shadow:\s*0 6px 16px/s);
+  assert.match(railCss, /\.card h3\s*\{[\s\S]*color: #172019/s);
+  assert.match(railCss, /\.card p\s*\{[\s\S]*color: #5f6962/s);
+  assert.match(railCss, /\.primaryCard\s*\{[\s\S]*linear-gradient\(155deg, #151b1c, #0a0e11\)/s);
+  assert.match(railCss, /\.primaryCard h3\s*\{[\s\S]*#f5f8f6/s);
+});
+
+test("Phase 2 copy is concise, grammatical, and does not overclaim verification", () => {
+  assert.match(player, /Daily work banked\./);
+  assert.match(railModel, /title: "Daily brief"/);
+  assert.match(railModel, /"1 RSVP needs a response"/);
+  assert.match(railModel, /at-home makes logged/);
+  assert.doesNotMatch(railModel, /RSVP\$\{[^}]+\} need action/);
+  assert.doesNotMatch(railModel, /verified At Home makes/);
+});
+
+test("Coach home reserves the brand accent for the primary decision", () => {
+  assert.match(coach, /data-home-hierarchy="decision-first"/);
+  assert.match(coach, /data-testid="coach-primary-objective" data-home-role="primary"/);
+  assert.match(coach, /data-testid="coach-onboarding-state" data-home-role="supporting"/);
+  assert.match(sessionIntegrity, /\[data-testid="coach-onboarding-state"\]::before\{inset:0 auto 0 0!important;width:4px!important/);
 });

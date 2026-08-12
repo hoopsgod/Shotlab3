@@ -163,17 +163,7 @@ export const _PAGE_SIGNATURE_CSS=`
 .report,
 .Report,
 .sessionLog,
-.SessionLog,
-[class*="Hero"],
-[class*="hero"],
-[class*="Report"],
-[class*="report"],
-[class*="Summary"],
-[class*="summary"],
-[class*="Session"],
-[class*="session"],
-[class*="Log"],
-[class*="log"]{
+.SessionLog{
   background: var(--surface-3) !important;
   border: 1px solid var(--stroke-2) !important;
   box-shadow: var(--shadow-2) !important;
@@ -247,17 +237,7 @@ export const _PAGE_SIGNATURE_CSS=`
   .report:hover,
   .Report:hover,
   .sessionLog:hover,
-  .SessionLog:hover,
-  [class*="Hero"]:hover,
-  [class*="hero"]:hover,
-  [class*="Report"]:hover,
-  [class*="report"]:hover,
-  [class*="Summary"]:hover,
-  [class*="summary"]:hover,
-  [class*="Session"]:hover,
-  [class*="session"]:hover,
-  [class*="Log"]:hover,
-  [class*="log"]:hover{
+  .SessionLog:hover{
     box-shadow: 0 12px 28px rgba(0,0,0,0.50) !important;
     transform: translateY(-2px);
     transition: transform 150ms ease, box-shadow 150ms ease;

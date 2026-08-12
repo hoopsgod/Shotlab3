@@ -29,11 +29,13 @@ test("player rail prioritizes unresolved team commitments before training work",
     leaderboard: workspace({ metrics: [{ id: "weekly", value: 180 }, { id: "rank", value: "#2" }, { id: "streak", value: "4D" }] }),
     profile: workspace({ metrics: [{ id: "makes", value: 1200 }] }),
   });
-  assert.equal(model.status, "6 open");
-  assert.equal(model.items[0].title, "1 event response open");
+  assert.equal(model.title, "Daily brief");
+  assert.equal(model.status, "6 to review");
+  assert.equal(model.items[0].title, "1 event response due");
   assert.equal(model.items[0].action.target, "program");
   assert.match(model.items[1].title, /#2/);
-  assert.match(model.items[1].body, /1200 verified/);
+  assert.match(model.items[1].body, /1200 at-home makes logged/);
+  assert.equal(model.items[2].title, "1 RSVP needs a response");
 });
 
 test("player rail becomes positive when assigned work and responses are current", () => {
@@ -66,7 +68,8 @@ test("coach rail prioritizes attendance gaps and keeps every card actionable", (
     strengthRows: [{ statusKey: "overdue" }],
     pageSummary: { archives: { total: 1 }, leaderboards: { ranked: 8 } },
   });
-  assert.equal(model.status, "8 signals");
+  assert.equal(model.title, "Coach brief");
+  assert.equal(model.status, "8 to review");
   assert.equal(model.items[0].action.target, "events");
   assert.equal(model.items[0].action.filter, "gaps");
   assert.equal(model.items[2].title, "4/10 active today");
@@ -92,6 +95,8 @@ test("desktop shells mount live insight rails and remove shipped placeholder cop
   assert.match(app, /testId="player-operational-insight-rail"/);
   assert.match(app, /testId="coach-operational-insight-rail"/);
   assert.doesNotMatch(app, /Add widgets here later/);
-  assert.match(component, /Live decision support/);
+  assert.match(component, /Decision brief/);
+  assert.match(component, /data-density="decision-first"/);
+  assert.match(component, /data-rail-role=/);
   assert.match(component, /onAction/);
 });

@@ -17,7 +17,7 @@ const playerPriority = ({ atHome, program, events, strength, leaderboard }) => {
   if (eventGaps > 0) {
     return {
       eyebrow: "Next best action",
-      title: `${eventGaps} event response${eventGaps === 1 ? "" : "s"} open`,
+      title: `${eventGaps} event response${eventGaps === 1 ? "" : "s"} due`,
       body: clean(events?.subtitle) || "Confirm the next team commitment.",
       tone: "attention",
       action: events?.primaryAction,
@@ -86,8 +86,8 @@ export function buildPlayerOperationalInsightRail({
   const priority = playerPriority({ atHome, program, events, strength, leaderboard });
 
   return {
-    title: "Player Intelligence",
-    status: openCount > 0 ? `${openCount} open` : "Current",
+    title: "Daily brief",
+    status: openCount > 0 ? `${openCount} to review` : "Current",
     activeTab,
     items: [
       {
@@ -97,15 +97,15 @@ export function buildPlayerOperationalInsightRail({
       {
         eyebrow: "Momentum",
         title: rank === "—" ? `${weeklyMakes} makes this week` : `${rank} · ${weeklyMakes} weekly makes`,
-        body: `${streak} training streak · ${totalMakes} verified At Home makes in your development record.`,
+        body: `${streak} training streak · ${totalMakes} at-home makes logged.`,
         tone: safeNumber(weeklyMakes) > 0 ? "positive" : "neutral",
         action: leaderboard?.primaryAction,
         actionLabel: "View rankings",
       },
       {
         eyebrow: "Commitments",
-        title: eventGaps > 0 ? `${eventGaps} RSVP${eventGaps === 1 ? "" : "s"} need action` : "Team responses are current",
-        body: `${sAndCLogged} S&C log${safeNumber(sAndCLogged) === 1 ? "" : "s"} recorded · ${programOpen} Program drill${programOpen === 1 ? "" : "s"} open.`,
+        title: eventGaps === 1 ? "1 RSVP needs a response" : eventGaps > 1 ? `${eventGaps} RSVPs need responses` : "Team responses are current",
+        body: `${sAndCLogged} strength log${safeNumber(sAndCLogged) === 1 ? "" : "s"} · ${programOpen} program drill${programOpen === 1 ? "" : "s"} remaining.`,
         tone: eventGaps > 0 ? "attention" : "info",
         action: eventGaps > 0 ? events?.primaryAction : strength?.primaryAction,
         actionLabel: eventGaps > 0 ? "Resolve RSVP" : "Open S&C",
@@ -184,8 +184,8 @@ export function buildCoachOperationalInsightRail({
   const activeRate = totalPlayers > 0 ? Math.round((safeNumber(activeThisWeekCount) / totalPlayers) * 100) : 0;
 
   return {
-    title: "Coach Intelligence",
-    status: attentionCount > 0 ? `${attentionCount} signals` : "Current",
+    title: "Coach brief",
+    status: attentionCount > 0 ? `${attentionCount} to review` : "Current",
     activeTab,
     items: [
       priority,
