@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "platform": "ios",
+  "productName": "ShotLab",
+  "bundleIdentifier": "com.shotlab.training",
+  "marketingVersion": "1.0",
+  "buildNumber": 1,
+  "distributionIntent": "internal-testflight-first",
+  "signing": {
+    "style": "automatic",
+    "developerTeamId": "pending_owner_input",
+    "appStoreConnectRecord": "pending_owner_input",
+    "credentials": {
+      "sourceControlAllowed": false,
+      "requiredEnvironment": [
+        "SHOTLAB_DEVELOPMENT_TEAM"
+      ],
+      "optionalUploadAutomationEnvironment": [
+        "SHOTLAB_ASC_KEY_ID",
+        "SHOTLAB_ASC_ISSUER_ID",
+        "SHOTLAB_ASC_PRIVATE_KEY_PATH"
+      ]
+    }
+  },
+  "physicalDevice": {
+    "status": "pending",
+    "evidenceRequired": true,
+    "deviceIdentifierEnvironment": "SHOTLAB_DEVICE_UDID",
+    "checks": [
+      "cold_launch",
+      "status_bar_and_dynamic_island_safe_area",
+      "home_indicator_safe_area",
+      "keyboard_auth_and_entry_flows",
+      "registered_coach_login_and_core_navigation",
+      "registered_player_login_and_core_navigation",
+      "shot_log_persistence",
+      "event_rsvp_persistence",
+      "offline_recovery_without_duplicate_data",
+      "account_deletion_reachability",
+      "background_foreground_session_recovery"
+    ]
+  },
+  "testFlight": {
+    "status": "pending",
+    "firstAudience": "internal",
+    "internalGroupName": "ShotLab Internal",
+    "betaAppDescription": "ShotLab connects basketball coaches and players around daily training, shot logging, program work, events, strength sessions, leaderboards, and long-term development.",
+    "whatToTest": "Verify Coach and Player sign-in, core navigation, training and shot logging, event commitments, leaderboards, progress, safe-area behavior, keyboard behavior, relaunch persistence, offline recovery, and account deletion. Report any visual seam, blocked action, stale data, duplicate submission, or session-recovery issue.",
+    "feedbackEmail": "pending_owner_input",
+    "processedBuild": "pending",
+    "installedFromTestFlight": "pending",
+    "postInstallSmokeQa": "pending"
+  },
+  "completionRule": "Do not mark this handoff complete until the signed build has run on a physical iPhone and the processed internal TestFlight build has been installed and smoke-tested."
+}
