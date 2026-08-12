@@ -1,0 +1,36 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+
+const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
+
+test("shared state panel covers loading offline completion and recovery states", async () => {
+  const source = await read("src/components/ShotLabStatePanel.jsx");
+  assert.match(source, /completion: \{ eyebrow: "Session complete"/);
+  assert.match(source, /offline: \{ eyebrow: "Working offline"/);
+  assert.match(source, /state === "completion"/);
+  assert.match(source, /className=\{styles\.loadingTrack\}/);
+  assert.match(source, /aria-busy=\{busy \|\| undefined\}/);
+});
+
+test("state motion is restrained and collapses under reduced-motion preference", async () => {
+  const css = await read("src/components/ShotLabStatePanel.module.css");
+  assert.match(css, /@keyframes stateTrackSweep/);
+  assert.match(css, /@keyframes stateCompleteIn/);
+  assert.match(css, /\.offline\{--state-accent:/);
+  assert.match(css, /touch-action:manipulation/);
+  assert.match(css, /prefers-reduced-motion:reduce/);
+  assert.doesNotMatch(css, /confetti|bounce/);
+});
+
+test("release boundary routes connectivity through the single premium feedback layer", async () => {
+  const source = await read("src/components/ReleaseReadinessBoundary.jsx");
+  assert.match(source, /import AppFeedbackLayer, \{ announceFeedback, clearFeedback \}/);
+  assert.match(source, /CONNECTIVITY_FEEDBACK_KEY = "release-connectivity"/);
+  assert.match(source, /title: "Working offline"/);
+  assert.match(source, /title: "Connection restored"/);
+  assert.match(source, /title: "Team sync complete"/);
+  assert.match(source, /clearFeedback\(CONNECTIVITY_FEEDBACK_KEY\)/);
+  assert.match(source, /<AppFeedbackLayer \/>/);
+  assert.doesNotMatch(source, /data-testid="release-connectivity-status"/);
+});
