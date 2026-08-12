@@ -15,7 +15,8 @@ import {
 
 const SESSION_NOTICE_KEY = "sl:release-session-notice";
 const SESSION_NOTICE = "Your secure session expired. Sign in again to continue. Training data saved on this device has been preserved.";
-const DEMO_BUTTON_LABELS = new Set(["DEMO PLAYER", "DEMO COACH", "LOAD DEMO DATA", "CLEAR DEMO DATA"]);
+const DEMO_AUTH_BUTTON_LABELS = new Set(["DEMO PLAYER", "DEMO COACH"]);
+const DEMO_WORKSPACE_BUTTON_LABELS = new Set(["LOAD DEMO DATA", "CLEAR DEMO DATA"]);
 const CONNECTIVITY_FEEDBACK_KEY = "release-connectivity";
 
 const bannerStyle = {
@@ -48,17 +49,18 @@ function ProductionDemoGuard({ enabled }) {
   useEffect(() => {
     if (typeof document === "undefined") return undefined;
     document.documentElement.dataset.shotlabDemoEnabled = enabled ? "true" : "false";
-    if (enabled) return undefined;
-
-    const style = document.createElement("style");
-    style.dataset.shotlabProductionDemoGuard = "true";
-    style.textContent = `html[data-shotlab-demo-enabled="false"] .auth-demo-enter{display:none!important}`;
-    document.head.appendChild(style);
+    const style = enabled ? null : document.createElement("style");
+    if (style) {
+      style.dataset.shotlabProductionDemoGuard = "true";
+      style.textContent = `html[data-shotlab-demo-enabled="false"] .auth-demo-enter{display:none!important}`;
+      document.head.appendChild(style);
+    }
 
     const suppressDemoButtons = (root = document) => {
       root.querySelectorAll?.("button").forEach((button) => {
         const label = String(button.textContent || "").trim().toUpperCase();
-        if (!DEMO_BUTTON_LABELS.has(label)) return;
+        const isWorkspaceUtility = DEMO_WORKSPACE_BUTTON_LABELS.has(label);
+        if (!isWorkspaceUtility && (enabled || !DEMO_AUTH_BUTTON_LABELS.has(label))) return;
         button.hidden = true;
         button.setAttribute("aria-hidden", "true");
         button.tabIndex = -1;
@@ -69,7 +71,7 @@ function ProductionDemoGuard({ enabled }) {
     observer.observe(document.body, { childList: true, subtree: true });
     return () => {
       observer.disconnect();
-      style.remove();
+      style?.remove();
     };
   }, [enabled]);
   return null;

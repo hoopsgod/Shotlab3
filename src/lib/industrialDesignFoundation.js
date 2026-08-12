@@ -186,31 +186,30 @@ const CSS = `
  * Identity-neutral control contract. Route-level styles load on demand, so
  * geometry must be owned here to keep demo and registered sessions identical.
  */
-html[data-shotlab-design="industrial-light-v1"] body .performance-shell button,
-html[data-shotlab-design="industrial-light-v1"] body .premium-screen button {
-  min-width:44px !important;
+html body .performance-shell.performance-shell button,
+html body .premium-screen.premium-screen button {
   min-height:44px !important;
 }
-html[data-shotlab-design="industrial-light-v1"] body .performance-shell .secondaryPageAction,
-html[data-shotlab-design="industrial-light-v1"] body .premium-screen .secondaryPageAction {
+html body .performance-shell.performance-shell .secondaryPageAction,
+html body .premium-screen.premium-screen .secondaryPageAction {
   min-height:48px !important;
 }
-html[data-shotlab-design="industrial-light-v1"] body .performance-shell input,
-html[data-shotlab-design="industrial-light-v1"] body .performance-shell select,
-html[data-shotlab-design="industrial-light-v1"] body .premium-screen input,
-html[data-shotlab-design="industrial-light-v1"] body .premium-screen select {
+html body .performance-shell.performance-shell input,
+html body .performance-shell.performance-shell select,
+html body .premium-screen.premium-screen input,
+html body .premium-screen.premium-screen select {
   min-height:48px !important;
 }
-html[data-shotlab-design="industrial-light-v1"] body .performance-shell select,
-html[data-shotlab-design="industrial-light-v1"] body .premium-screen select {
+html body .performance-shell.performance-shell select,
+html body .premium-screen.premium-screen select {
   border-radius:14px !important;
 }
-html[data-shotlab-design="industrial-light-v1"] body .performance-shell .btn-v,
-html[data-shotlab-design="industrial-light-v1"] body .premium-screen .btn-v {
+html body .performance-shell.performance-shell .btn-v,
+html body .premium-screen.premium-screen .btn-v {
   font-family:var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif) !important;
 }
-html[data-shotlab-design="industrial-light-v1"] body .performance-shell .ts-close,
-html[data-shotlab-design="industrial-light-v1"] body .premium-screen .ts-close {
+html body .performance-shell.performance-shell .ts-close,
+html body .premium-screen.premium-screen .ts-close {
   width:44px !important;
   min-width:44px !important;
   height:44px !important;
