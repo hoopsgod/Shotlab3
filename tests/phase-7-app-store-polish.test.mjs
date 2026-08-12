@@ -6,6 +6,8 @@ const header = fs.readFileSync("src/components/PlayerDashboardHeader.jsx", "utf8
 const styles = fs.readFileSync("src/components/DashboardIdentityHeader.module.css", "utf8");
 const leaderboardDeferred = fs.readFileSync("src/components/DeferredPremiumLeaderboardsHub.jsx", "utf8");
 const leaderboardPolish = fs.readFileSync("src/components/LeaderboardsRoutePolish.css", "utf8");
+const sharedDeferred = fs.readFileSync("src/components/DeferredSharedAuthenticatedUi.jsx", "utf8");
+const sharedChrome = fs.readFileSync("src/components/Phase7AuthenticatedChrome.css", "utf8");
 
 test("Phase 7 exposes stable Player identity semantics", () => {
   for (const role of ["inner", "identity", "mode-row", "badge", "team-name", "name", "tagline", "mission", "brand-panel", "brand-mark"]) {
@@ -37,9 +39,11 @@ test("Phase 7 removes the retired black Coach Leaderboards route canvas", () => 
   assert.match(leaderboardPolish, /performance-workspace::after/);
 });
 
-test("Phase 7 gives Coach Leaderboards a compact 44px mobile return control", () => {
-  assert.match(leaderboardPolish, /page\.pageShell > button\[type="button"\]:first-child/);
-  assert.match(leaderboardPolish, /width:\s*44px !important/);
-  assert.match(leaderboardPolish, /height:\s*44px !important/);
-  assert.match(leaderboardPolish, /content:\s*"‹"/);
+test("Phase 7 loads one shared compact Coach secondary return contract", () => {
+  assert.match(sharedDeferred, /import "\.\/Phase7AuthenticatedChrome\.css"/);
+  assert.match(sharedChrome, /performance-shell--coach\.is-mobile \.page\.pageShell > button\[type="button"\]:first-child/);
+  assert.match(sharedChrome, /width:\s*44px !important/);
+  assert.match(sharedChrome, /height:\s*44px !important/);
+  assert.match(sharedChrome, /content:\s*"‹"/);
+  assert.match(sharedChrome, /:focus-visible/);
 });
