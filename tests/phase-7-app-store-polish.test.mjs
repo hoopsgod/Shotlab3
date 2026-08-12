@@ -15,8 +15,9 @@ test("Phase 7 exposes stable Player identity semantics", () => {
   }
 });
 
-test("Phase 7 compacts Player identity only away from Home", () => {
+test("Phase 7 compacts Player identity only away from Home while preserving the mobile gutter", () => {
   assert.match(styles, /performance-shell--player\.is-mobile:not\(\[data-workspace-tab=\\?"home\\?"\]\)/);
+  assert.match(styles, /margin:0 14px 8px!important/);
   assert.match(styles, /min-height:92px!important/);
   assert.match(styles, /\.player \.tagline\{\s*display:none!important/);
   assert.match(styles, /\.player \.brandMark\{\s*width:58px!important/);
@@ -46,4 +47,10 @@ test("Phase 7 loads one shared compact Coach secondary return contract", () => {
   assert.match(sharedChrome, /height:\s*44px !important/);
   assert.match(sharedChrome, /content:\s*"‹"/);
   assert.match(sharedChrome, /:focus-visible/);
+});
+
+test("Phase 7 keeps Player Home hero supporting copy readable on the dark performance surface", () => {
+  assert.match(sharedChrome, /player-daily-command-center/);
+  assert.match(sharedChrome, /data-command-role="primary"/);
+  assert.match(sharedChrome, /color:\s*#c7d0d5 !important/);
 });
