@@ -26,7 +26,6 @@ const exists = (file) => fs.existsSync(path.join(root, file));
 const text = (file) => fs.readFileSync(path.join(root, file), "utf8");
 const json = (file) => JSON.parse(text(file));
 const major = (value) => Number.parseInt(String(value || "").match(/\d+/)?.[0] || "0", 10);
-const semverish = (value) => String(value ?? "").trim();
 
 function run(executable, args) {
   const result = spawnSync(executable, args, { cwd: root, encoding: "utf8" });
@@ -81,7 +80,7 @@ if (config && profile && listing && privacy && project && info && manifest && na
   const identityMatch = config.appId === profile.bundleIdentifier && nativeConfig.appId === profile.bundleIdentifier;
   add("Bundle identity", identityMatch ? "pass" : "fail", `${config.appId} / ${nativeConfig.appId} / ${profile.bundleIdentifier}`);
   add("Product name", config.appName === "ShotLab" && profile.productName === "ShotLab" && listing.productName === "ShotLab" ? "pass" : "fail", `${config.appName} / ${profile.productName} / ${listing.productName}`);
-  add("Native web bundle mode", config.webDir === "dist" && nativeConfig.webDir === undefined ? "pass" : "fail", `root webDir=${config.webDir}; native webDir=${nativeConfig.webDir ?? "embedded"}`);
+  add("Native web bundle mode", config.webDir === "dist" && nativeConfig.webDir === "dist" ? "pass" : "fail", `root webDir=${config.webDir}; native webDir=${nativeConfig.webDir ?? "missing"}`);
   add("Capacitor release pin", profile.capacitorVersion === "8.4.2" ? "pass" : "fail", profile.capacitorVersion);
   add("Native dependency manager", profile.nativePackageManager === "Swift Package Manager" ? "pass" : "fail", profile.nativePackageManager);
 
@@ -103,6 +102,7 @@ if (config && profile && listing && privacy && project && info && manifest && na
   add("Export compliance declaration", /<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/.test(info) ? "pass" : "fail", "ITSAppUsesNonExemptEncryption=false");
   add("Privacy manifest bundled contract", /NSPrivacyTracking<\/key>\s*<false\/>/.test(manifest) && /NSPrivacyCollectedDataTypes/.test(manifest) && /NSPrivacyAccessedAPITypes/.test(manifest) ? "pass" : "fail", paths.manifest);
   add("Privacy inventory alignment", privacy.tracking === false && profile.appStorePrivacyProfile === paths.privacy ? "pass" : "fail", `${privacy.collectedData?.length || 0} declared data types`);
+  add("App Store listing profile", profile.appStoreListingProfile === paths.listing ? "pass" : "fail", profile.appStoreListingProfile || "missing");
 
   const allowed69Portrait = new Set(["1260x2736", "1290x2796", "1320x2868"]);
   const screenshotSpec = `${listing.screenshots?.width}x${listing.screenshots?.height}`;
