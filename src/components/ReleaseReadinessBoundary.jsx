@@ -264,7 +264,7 @@ export default function ReleaseReadinessBoundary({ children }) {
       announceFeedback({
         key: CONNECTIVITY_FEEDBACK_KEY,
         tone: "info",
-        title: "Connection restored",
+        title: "Checking team sync",
         message: statusCopy,
         persistent: true,
         dismissible: false,
