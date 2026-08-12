@@ -8,13 +8,16 @@ on:
       - "src/components/ReleaseReadinessBoundary.jsx"
       - "src/components/ShotLabStatePanel.jsx"
       - "src/components/ShotLabStatePanel.module.css"
+      - "src/components/MobileNavigation.module.css"
       - "src/components/VisualHierarchy.jsx"
       - "src/components/VisualHierarchy.module.css"
+      - "src/components/PlayerTrainingCompletion.jsx"
       - "src/components/PlayerTrainingCompletion.module.css"
       - "src/styles/PremiumMotion2026.css"
       - "src/screens/CoachTeamBrandingScreen.jsx"
       - "tests/app-feedback-system.test.mjs"
       - "tests/phase-4-premium-states-motion.test.mjs"
+      - "tests/phase-4-premium-experience-closure.test.mjs"
       - ".github/workflows/app-feedback-system.yml"
 
 jobs:
@@ -30,7 +33,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Verify premium state contracts
-        run: node --test tests/app-feedback-system.test.mjs tests/phase-4-premium-states-motion.test.mjs
+      - name: Verify premium state and motion contracts
+        run: node --test tests/app-feedback-system.test.mjs tests/phase-4-premium-states-motion.test.mjs tests/phase-4-premium-experience-closure.test.mjs
       - name: Build application
         run: npm run build
