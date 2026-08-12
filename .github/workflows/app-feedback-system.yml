@@ -1,16 +1,20 @@
-name: App Feedback System
+name: Phase 4 Premium States and Feedback
 
 on:
   pull_request:
     paths:
       - "src/components/AppFeedbackLayer.jsx"
       - "src/components/AppFeedbackLayer.css"
+      - "src/components/ReleaseReadinessBoundary.jsx"
+      - "src/components/ShotLabStatePanel.jsx"
+      - "src/components/ShotLabStatePanel.module.css"
       - "src/screens/CoachTeamBrandingScreen.jsx"
       - "tests/app-feedback-system.test.mjs"
+      - "tests/phase-4-premium-states-motion.test.mjs"
       - ".github/workflows/app-feedback-system.yml"
 
 jobs:
-  verify-feedback-system:
+  verify-phase-4-premium-states:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -22,7 +26,7 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm ci
-      - name: Verify feedback contracts
-        run: node --test tests/app-feedback-system.test.mjs
+      - name: Verify premium state contracts
+        run: node --test tests/app-feedback-system.test.mjs tests/phase-4-premium-states-motion.test.mjs
       - name: Build application
         run: npm run build
