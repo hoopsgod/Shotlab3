@@ -55,12 +55,7 @@ export default function ShotLabStatePanel({
         <div className={styles.eyebrow}>{eyebrow || meta.eyebrow}</div>
         <h3 className={styles.title}>{title || meta.title}</h3>
         {detail ? <p className={styles.detail}>{detail}</p> : null}
-        {busy ? (
-          <div className={styles.loadingTrack} aria-hidden="true">
-            <span />
-            <span />
-          </div>
-        ) : null}
+        {busy ? <div className={styles.loadingTrack} aria-hidden="true" /> : null}
         {actionLabel && typeof onAction === "function" ? (
           <button type="button" className={styles.action} onClick={onAction}>
             {actionLabel}
