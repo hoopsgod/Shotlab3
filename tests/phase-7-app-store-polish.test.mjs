@@ -4,6 +4,8 @@ import fs from "node:fs";
 
 const header = fs.readFileSync("src/components/PlayerDashboardHeader.jsx", "utf8");
 const styles = fs.readFileSync("src/components/DashboardIdentityHeader.module.css", "utf8");
+const leaderboardDeferred = fs.readFileSync("src/components/DeferredPremiumLeaderboardsHub.jsx", "utf8");
+const leaderboardPolish = fs.readFileSync("src/components/LeaderboardsRoutePolish.css", "utf8");
 
 test("Phase 7 exposes stable Player identity semantics", () => {
   for (const role of ["inner", "identity", "mode-row", "badge", "team-name", "name", "tagline", "mission", "brand-panel", "brand-mark"]) {
@@ -18,11 +20,26 @@ test("Phase 7 compacts Player identity only away from Home", () => {
   assert.match(styles, /\.player \.brandMark\{\s*width:58px!important/);
 });
 
-test("Phase 7 preserves a 44px accessible secondary return target", () => {
+test("Phase 7 preserves a 44px accessible Player secondary return target", () => {
   assert.match(styles, /player-scroll-container>button\[type=\\?"button\\?"\]/);
   assert.match(styles, /width:44px!important/);
   assert.match(styles, /height:44px!important/);
   assert.match(styles, /content:\s*"‹"/);
   assert.match(styles, /:focus-visible/);
   assert.doesNotMatch(styles, /display:none!important[^}]*player-scroll-container>button/);
+});
+
+test("Phase 7 removes the retired black Coach Leaderboards route canvas", () => {
+  assert.match(leaderboardDeferred, /import ['"]\.\/LeaderboardsRoutePolish\.css['"]/);
+  assert.match(leaderboardPolish, /performance-shell--coach\[data-workspace-tab="leaderboards"\]/);
+  assert.match(leaderboardPolish, /background:\s*var\(--bg-0, #f3f1ea\) !important/);
+  assert.match(leaderboardPolish, /performance-workspace::before/);
+  assert.match(leaderboardPolish, /performance-workspace::after/);
+});
+
+test("Phase 7 gives Coach Leaderboards a compact 44px mobile return control", () => {
+  assert.match(leaderboardPolish, /page\.pageShell > button\[type="button"\]:first-child/);
+  assert.match(leaderboardPolish, /width:\s*44px !important/);
+  assert.match(leaderboardPolish, /height:\s*44px !important/);
+  assert.match(leaderboardPolish, /content:\s*"‹"/);
 });
