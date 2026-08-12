@@ -49,6 +49,17 @@ async function navigate(page, key) {
   await settle(page);
 }
 
+async function focusByKeyboard(page, target) {
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  });
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    await page.keyboard.press("Tab");
+    if (await target.evaluate((node) => document.activeElement === node)) return;
+  }
+  throw new Error("Shared dashboard back action was not reachable by keyboard Tab navigation");
+}
+
 async function verifyBackControl(page, role, surface) {
   const back = page.locator("button.shared-dashboard-back-action");
   await expect(back, `${role}/${surface} shared back action`).toHaveCount(1);
@@ -98,10 +109,14 @@ async function verifyBackControl(page, role, surface) {
   expect(presentation.iconFontSize).toBeGreaterThanOrEqual(20);
   expect(presentation.iconColor).not.toBe("rgba(0, 0, 0, 0)");
 
-  await back.focus();
+  await focusByKeyboard(page, back);
   await expect(back).toBeFocused();
-  const focusOutline = await back.evaluate((node) => getComputedStyle(node).outlineStyle);
-  expect(focusOutline).not.toBe("none");
+  const focusState = await back.evaluate((node) => ({
+    focusVisible: node.matches(":focus-visible"),
+    outlineStyle: getComputedStyle(node).outlineStyle,
+  }));
+  expect(focusState.focusVisible).toBe(true);
+  expect(focusState.outlineStyle).not.toBe("none");
 
   const viewport = await page.evaluate(() => ({
     innerWidth,
