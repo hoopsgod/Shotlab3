@@ -21,6 +21,7 @@ export default function AppFeedbackLayer() {
   const [leaving, setLeaving] = useState(false);
   const timeoutRef = useRef(null);
   const exitRef = useRef(null);
+  const feedbackKeyRef = useRef(null);
 
   const cancelTimers = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
@@ -32,12 +33,14 @@ export default function AppFeedbackLayer() {
   const dismiss = useCallback((immediate = false) => {
     cancelTimers();
     if (immediate) {
+      feedbackKeyRef.current = null;
       setLeaving(false);
       setFeedback(null);
       return;
     }
     setLeaving(true);
     exitRef.current = window.setTimeout(() => {
+      feedbackKeyRef.current = null;
       setLeaving(false);
       setFeedback(null);
       exitRef.current = null;
@@ -48,7 +51,7 @@ export default function AppFeedbackLayer() {
     const handleFeedback = (event) => {
       const detail = event?.detail || {};
       if (detail.action === "clear") {
-        if (!detail.key || detail.key === feedback?.key) dismiss();
+        if (!detail.key || detail.key === feedbackKeyRef.current) dismiss();
         return;
       }
 
@@ -66,6 +69,7 @@ export default function AppFeedbackLayer() {
         persistent,
         dismissible: detail.dismissible !== false,
       };
+      feedbackKeyRef.current = nextFeedback.key;
       setFeedback(nextFeedback);
 
       if (!persistent) {
@@ -82,7 +86,7 @@ export default function AppFeedbackLayer() {
       window.removeEventListener(FEEDBACK_EVENT, handleFeedback);
       cancelTimers();
     };
-  }, [cancelTimers, dismiss, feedback?.key]);
+  }, [cancelTimers, dismiss]);
 
   if (!feedback) return null;
 
