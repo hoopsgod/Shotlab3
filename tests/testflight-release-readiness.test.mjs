@@ -38,12 +38,14 @@ test("native identity, version, build, deployment target, and device family stay
 });
 
 test("release archive path cannot bypass production web rebuild and native sync", () => {
-  assert.equal(packageJson.scripts["ios:release-candidate"], "node scripts/ios-release.mjs release-candidate");
+  assert.equal(packageJson.scripts["ios:release-candidate"], undefined);
+  assert.equal(packageJson.scripts["ios:release-readiness"], undefined);
   assert.match(release, /syncReleaseBundle\(\)/);
   assert.match(release, /npmCommand, \["run", "native:sync:ios"\]/);
   assert.match(release, /case "archive":\s*\n\s*case "release-candidate":/);
   assert.match(release, /verifyReadiness\(\{ requireSigning: true \}\)/);
   assert.match(release, /archiveRelease\(\)/);
+  assert.match(runbook, /node scripts\/ios-release\.mjs release-candidate/);
 });
 
 test("release profile distinguishes code readiness from external submission readiness", () => {
