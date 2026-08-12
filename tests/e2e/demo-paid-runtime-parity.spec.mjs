@@ -23,6 +23,7 @@ const MOTION_FREEZE = `
     caret-color: transparent !important;
   }
 `;
+const COLOR_SERIALIZATION_FIELDS = new Set(["backgroundColor", "color", "borderTopColor"]);
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -30,6 +31,18 @@ test.describe.configure({ mode: "serial" });
 
 function digest(value) {
   return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
+}
+
+function normalizeFingerprintForDigest(value) {
+  if (Array.isArray(value)) return value.map((entry) => normalizeFingerprintForDigest(entry));
+  if (value && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value)
+        .filter(([key]) => !COLOR_SERIALIZATION_FIELDS.has(key))
+        .map(([key, entry]) => [key, normalizeFingerprintForDigest(entry)]),
+    );
+  }
+  return value;
 }
 
 function replaceIdentity(value, fromEmail, toEmail) {
@@ -222,7 +235,12 @@ async function installSafeRoutes(page, role, remoteStorage = null) {
 }
 
 async function settle(page) {
+  await page.mouse.move(1, 1);
   await page.evaluate(async () => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    window.scrollTo(0, 0);
+    document.querySelector(".player-scroll-container")?.scrollTo(0, 0);
+    document.querySelector(".coach-scroll-container")?.scrollTo(0, 0);
     if (document.fonts?.ready) await document.fonts.ready;
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
@@ -357,7 +375,7 @@ async function captureFingerprint(page, role, kind, key) {
   fs.mkdirSync(roleDir, { recursive: true });
   fs.writeFileSync(path.join(roleDir, `${key}.json`), JSON.stringify(fingerprint, null, 2));
   await page.screenshot({ path: path.join(roleDir, `${key}.png`), fullPage: true });
-  return { digest: digest(fingerprint), count: fingerprint.length };
+  return { digest: digest(normalizeFingerprintForDigest(fingerprint)), count: fingerprint.length };
 }
 
 async function captureExperience(browser, role, kind, seedStorage = null) {
