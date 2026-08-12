@@ -47,3 +47,20 @@ test("interpreted performance trends expose a readable strongest drill", () => {
   assert.equal(trends.strongestDrill, "4-Minute Warm-Up Shooting");
   assert.doesNotMatch(JSON.stringify(trends), /demo-home-warm-up-shooting-4-minute/);
 });
+
+test("language cleanup preserves strongest-drill grouping by drill name", () => {
+  const trends = deriveInterpretedPerformanceTrends({
+    today: "2026-08-11",
+    scores: [
+      { drillId: "pressure-a", drillName: "Pressure Shooting", date: "2026-08-11" },
+      { drillId: "pressure-a", drillName: "Pressure Shooting", date: "2026-08-10" },
+      { drillId: "pressure-b", drillName: "Pressure Shooting", date: "2026-08-09" },
+      { drillId: "pressure-b", drillName: "Pressure Shooting", date: "2026-08-08" },
+      { drillId: "finishing", drillName: "Finishing", date: "2026-08-11" },
+      { drillId: "finishing", drillName: "Finishing", date: "2026-08-10" },
+      { drillId: "finishing", drillName: "Finishing", date: "2026-08-09" },
+    ],
+  });
+
+  assert.equal(trends.strongestDrill, "Pressure Shooting");
+});
