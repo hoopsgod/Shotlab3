@@ -38,13 +38,15 @@ test("Phase 7 uses one shared 44px native return-control authority", () => {
   assert.doesNotMatch(styles, /shared-dashboard-back-action/);
 });
 
-test("Phase 7 removes the retired black Coach mobile canvas without a separate stylesheet chunk", () => {
+test("Phase 7 removes the retired black Coach document canvas without a separate stylesheet chunk", () => {
   assert.doesNotMatch(leaderboardDeferred, /LeaderboardsRoutePolish\.css/);
-  assert.match(sharedChrome, /\.performance-shell--coach\.is-mobile\{background:var\(--bg-0\)!important\}/);
+  assert.match(sharedChrome, /body:has\(\.performance-shell--coach\)\{background:var\(--bg-0\)!important\}/);
 });
 
 test("Phase 7 keeps authenticated chrome bounded to route framing rather than duplicating component paint", () => {
   assert.doesNotMatch(sharedChrome, /player-daily-command-center/);
   assert.doesNotMatch(sharedChrome, /performance-workspace::before/);
   assert.doesNotMatch(sharedChrome, /player-scroll-container>button/);
+  assert.doesNotMatch(sharedChrome, /background:#fff!important/);
+  assert.doesNotMatch(sharedChrome, /box-shadow:none!important/);
 });
