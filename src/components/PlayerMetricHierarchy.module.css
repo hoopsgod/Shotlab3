@@ -2,6 +2,7 @@
   grid-template-columns:minmax(0,1.55fr) minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
   align-items:stretch;
 }
+.metricPrimary,.metricSupporting{--text-1:#f7f9f5;--text-3:#929e94}
 .metricPrimary{
   min-height:112px!important;
   border-color:color-mix(in srgb,var(--accent) 28%,rgba(255,255,255,.07))!important;

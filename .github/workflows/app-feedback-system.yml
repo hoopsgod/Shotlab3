@@ -18,6 +18,7 @@ on:
       - "tests/app-feedback-system.test.mjs"
       - "tests/phase-4-premium-states-motion.test.mjs"
       - "tests/phase-4-premium-experience-closure.test.mjs"
+      - "tests/phase-5-cross-screen-reconciliation.test.mjs"
       - ".github/workflows/app-feedback-system.yml"
 
 jobs:
@@ -34,6 +35,6 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Verify premium state and motion contracts
-        run: node --test tests/app-feedback-system.test.mjs tests/phase-4-premium-states-motion.test.mjs tests/phase-4-premium-experience-closure.test.mjs
+        run: node --test tests/app-feedback-system.test.mjs tests/phase-4-premium-states-motion.test.mjs tests/phase-4-premium-experience-closure.test.mjs tests/phase-5-cross-screen-reconciliation.test.mjs
       - name: Build application
         run: npm run build

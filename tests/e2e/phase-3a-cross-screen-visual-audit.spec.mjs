@@ -50,10 +50,66 @@ async function expectNoHorizontalOverflow(page) {
   expect(geometry.bodyWidth - geometry.viewportWidth).toBeLessThanOrEqual(1);
 }
 
+async function expectPlayerIdentityInsideViewport(page) {
+  const identity = page.getByTestId("player-dashboard-identity-header");
+  if (!(await identity.count())) return;
+  const geometry = await identity.evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return { left: rect.left, right: rect.right, width: rect.width, viewportWidth: window.innerWidth };
+  });
+  expect(geometry.left).toBeGreaterThanOrEqual(8);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth - 8);
+  expect(geometry.width).toBeGreaterThan(300);
+}
+
+async function expectReadablePlayerMetrics(page, testId) {
+  const workspace = page.getByTestId(testId);
+  await expect(workspace).toBeVisible();
+  const colors = await workspace.locator('[data-layout-role="supporting-evidence"]').evaluate((container) => {
+    const values = [...container.querySelectorAll('[class*="metricValue"]')];
+    const labels = [...container.querySelectorAll('[class*="metricLabel"]')];
+    const details = [...container.querySelectorAll('[class*="metricDetail"]')];
+    const channels = (element) => (getComputedStyle(element).color.match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
+    return { values: values.map(channels), labels: labels.map(channels), details: details.map(channels) };
+  });
+  expect(colors.values.length).toBeGreaterThan(0);
+  expect(colors.labels.length).toBe(colors.values.length);
+  expect(colors.details.length).toBe(colors.values.length);
+  for (const rgb of [...colors.values, ...colors.labels, ...colors.details]) expect(rgb).toHaveLength(3);
+  for (const rgb of colors.values) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(220);
+  for (const rgb of colors.labels) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(140);
+  for (const rgb of colors.details) expect(Math.min(...rgb)).toBeGreaterThanOrEqual(125);
+}
+
+async function expectPersistentFeedbackRestored(page) {
+  await page.evaluate(() => {
+    window.dispatchEvent(new CustomEvent("shotlab:feedback", { detail: {
+      key: "phase-5-connectivity",
+      tone: "warning",
+      title: "Working offline",
+      message: "Training data remains safely on this device.",
+      persistent: true,
+    } }));
+    window.dispatchEvent(new CustomEvent("shotlab:feedback", { detail: {
+      tone: "success",
+      title: "Team identity saved",
+      message: "Your branding update is ready.",
+      duration: 80,
+    } }));
+  });
+  await expect(page.getByText("Team identity saved", { exact: true })).toBeVisible();
+  await expect(page.getByText("Working offline", { exact: true })).toBeVisible({ timeout: 1_000 });
+  await page.evaluate(() => {
+    window.dispatchEvent(new CustomEvent("shotlab:feedback", { detail: { action: "clear", key: "phase-5-connectivity" } }));
+  });
+  await expect(page.getByText("Working offline", { exact: true })).toHaveCount(0);
+}
+
 async function capture(page, fileName, { authenticated = true } = {}) {
   await stabilize(page);
   await expectNoHorizontalOverflow(page);
   if (authenticated) await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible();
+  if (authenticated) await expectPlayerIdentityInsideViewport(page);
   const outputPath = path.join(OUTPUT_DIR, fileName);
   await page.screenshot({ path: outputPath, animations: "disabled" });
   expect(fs.statSync(outputPath).size).toBeGreaterThan(20_000);
@@ -96,6 +152,7 @@ test("Phase 3A captures auth and Coach visual hierarchy at iPhone width", async 
   await suppressMotion(page);
   await expect(page.getByRole("button", { name: /Coach demo/i })).toBeVisible({ timeout: 20_000 });
   await expect(page.getByRole("button", { name: /Player demo/i })).toBeVisible({ timeout: 20_000 });
+  await expectPersistentFeedbackRestored(page);
   await capture(page, "01-auth-entry.png", { authenticated: false });
 
   await page.getByRole("button", { name: /Coach demo/i }).click();
@@ -122,6 +179,7 @@ test("Phase 3A captures Player activation and progress hierarchy at iPhone width
   await capture(page, "06-player-home.png");
 
   await navigateByKey(page, "log-drill");
+  await expectReadablePlayerMetrics(page, "player-at-home-workspace");
   await capture(page, "07-player-train.png");
 
   await navigateByKey(page, "profile");
@@ -131,6 +189,7 @@ test("Phase 3A captures Player activation and progress hierarchy at iPhone width
   await capture(page, "09-player-program.png");
 
   await navigateByKey(page, "leaderboards");
+  await expectReadablePlayerMetrics(page, "player-leaderboards-workspace");
   await capture(page, "10-player-rankings.png");
 
   expect(pageErrors).toEqual([]);

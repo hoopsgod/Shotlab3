@@ -22,6 +22,8 @@ export default function AppFeedbackLayer() {
   const timeoutRef = useRef(null);
   const exitRef = useRef(null);
   const feedbackKeyRef = useRef(null);
+  const activeFeedbackRef = useRef(null);
+  const persistentFeedbackRef = useRef(null);
 
   const cancelTimers = useCallback(() => {
     if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
@@ -30,28 +32,44 @@ export default function AppFeedbackLayer() {
     exitRef.current = null;
   }, []);
 
-  const dismiss = useCallback((immediate = false) => {
+  const showFeedback = useCallback((nextFeedback) => {
+    activeFeedbackRef.current = nextFeedback;
+    feedbackKeyRef.current = nextFeedback?.key || null;
+    setLeaving(false);
+    setFeedback(nextFeedback);
+  }, []);
+
+  const dismiss = useCallback(({ immediate = false, userInitiated = false } = {}) => {
     cancelTimers();
-    if (immediate) {
-      feedbackKeyRef.current = null;
+    const dismissedFeedback = activeFeedbackRef.current;
+    if (userInitiated && dismissedFeedback?.persistent && persistentFeedbackRef.current?.id === dismissedFeedback.id) {
+      persistentFeedbackRef.current = null;
+    }
+    const finishDismissal = () => {
+      const persistentFeedback = persistentFeedbackRef.current;
+      const fallback = persistentFeedback?.id === dismissedFeedback?.id ? null : persistentFeedback;
+      activeFeedbackRef.current = fallback;
+      feedbackKeyRef.current = fallback?.key || null;
       setLeaving(false);
-      setFeedback(null);
+      setFeedback(fallback);
+      exitRef.current = null;
+    };
+    if (immediate) {
+      finishDismissal();
       return;
     }
     setLeaving(true);
-    exitRef.current = window.setTimeout(() => {
-      feedbackKeyRef.current = null;
-      setLeaving(false);
-      setFeedback(null);
-      exitRef.current = null;
-    }, EXIT_DURATION);
+    exitRef.current = window.setTimeout(finishDismissal, EXIT_DURATION);
   }, [cancelTimers]);
 
   useEffect(() => {
     const handleFeedback = (event) => {
       const detail = event?.detail || {};
       if (detail.action === "clear") {
-        if (!detail.key || detail.key === feedbackKeyRef.current) dismiss();
+        const key = String(detail.key || "").trim();
+        const persistentFeedback = persistentFeedbackRef.current;
+        if (!key || persistentFeedback?.key === key) persistentFeedbackRef.current = null;
+        if (!key || activeFeedbackRef.current?.key === key) dismiss();
         return;
       }
 
@@ -69,8 +87,8 @@ export default function AppFeedbackLayer() {
         persistent,
         dismissible: detail.dismissible !== false,
       };
-      feedbackKeyRef.current = nextFeedback.key;
-      setFeedback(nextFeedback);
+      if (persistent) persistentFeedbackRef.current = nextFeedback;
+      showFeedback(nextFeedback);
 
       if (!persistent) {
         const requestedDuration = Number(detail.duration);
@@ -86,7 +104,7 @@ export default function AppFeedbackLayer() {
       window.removeEventListener(FEEDBACK_EVENT, handleFeedback);
       cancelTimers();
     };
-  }, [cancelTimers, dismiss]);
+  }, [cancelTimers, dismiss, showFeedback]);
 
   if (!feedback) return null;
 
@@ -116,7 +134,7 @@ export default function AppFeedbackLayer() {
           <span>{feedback.message}</span>
         </div>
         {feedback.dismissible ? (
-          <button className="app-feedback__dismiss" type="button" onClick={() => dismiss()} aria-label="Dismiss notification">×</button>
+          <button className="app-feedback__dismiss" type="button" onClick={() => dismiss({ userInitiated: true })} aria-label="Dismiss notification">×</button>
         ) : <span className="app-feedback__dismiss-spacer" aria-hidden="true" />}
       </section>
     </div>
