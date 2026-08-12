@@ -1,0 +1,36 @@
+name: Phase 7 App Store Polish
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  phase-7-polish:
+    runs-on: ubuntu-24.04
+    env:
+      VITE_ENABLE_PRODUCTION_DEMOS: "true"
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Phase 7 visual contracts
+        run: node --test tests/phase-7-app-store-polish.test.mjs
+
+      - name: Build exact production bundle
+        run: npm run build
