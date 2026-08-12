@@ -54,7 +54,7 @@ Only after that evidence exists should the native shell style be changed or acce
 npm ci
 npm test
 npm run build:performance
-npm run ios:release-readiness
+node scripts/testflight-readiness.mjs
 ```
 
 ### macOS
@@ -68,8 +68,8 @@ npm run ios:simulator-build
 ### Signed release candidate
 
 ```bash
-npm run ios:release-readiness:strict
-npm run ios:release-candidate
+node scripts/testflight-readiness.mjs --strict-owner --require-macos --require-signing
+node scripts/ios-release.mjs release-candidate
 ```
 
 The strict command is intentionally blocked until every external release requirement has been deliberately completed.
