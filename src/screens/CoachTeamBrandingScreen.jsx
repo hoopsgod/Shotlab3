@@ -3,7 +3,7 @@ import { DEFAULT_BRANDING } from "../theme/brandingDefaults";
 import TeamBrandingForm from "../components/team/TeamBrandingForm";
 import TeamBrandingPreview from "../components/team/TeamBrandingPreview";
 import { SecondaryPageIntro, SecondaryPageShell } from "../components/SecondaryPageSystem";
-import AppFeedbackLayer, { announceFeedback } from "../components/AppFeedbackLayer";
+import { announceFeedback } from "../components/AppFeedbackLayer";
 import "../styles/PremiumWorkspace.css";
 import "./CoachTeamBrandingScreen.css";
 
@@ -39,7 +39,6 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
 
   return (
     <main className="team-brand premium-screen premium-screen--branding branding-industrial">
-      <AppFeedbackLayer />
       <SecondaryPageShell className="brandingEditorialWorkspace" testId="coach-branding-workspace">
         <SecondaryPageIntro
           eyebrow="Team identity system"
