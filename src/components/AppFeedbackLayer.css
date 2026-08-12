@@ -10,7 +10,7 @@
 
 .app-feedback {
   --feedback-accent: #637083;
-  --feedback-accent-soft: color-mix(in srgb, var(--feedback-accent) 11%, transparent);
+  position: relative;
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr) 44px;
   align-items: start;
@@ -26,9 +26,7 @@
   -webkit-backdrop-filter: blur(20px) saturate(125%);
   pointer-events: auto;
   overflow: hidden;
-  isolation: isolate;
   animation: app-feedback-enter 220ms cubic-bezier(.2,.75,.25,1) both;
-  transform-origin: 82% 0;
 }
 
 .app-feedback::before {
@@ -37,20 +35,6 @@
   inset: 0 auto 0 0;
   width: 3px;
   background: var(--feedback-accent);
-}
-
-.app-feedback::after {
-  content: "";
-  position: absolute;
-  width: 116px;
-  height: 116px;
-  right: -54px;
-  top: -72px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--feedback-accent) 22%, transparent);
-  background: radial-gradient(circle at center, var(--feedback-accent-soft), transparent 68%);
-  pointer-events: none;
-  z-index: -1;
 }
 
 .app-feedback--success { --feedback-accent: #16825d; }
@@ -73,7 +57,6 @@
   border: 1px solid color-mix(in srgb, var(--feedback-accent) 24%, transparent);
   color: var(--feedback-accent);
   font: 850 15px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.7);
 }
 
 .app-feedback__copy {
@@ -125,17 +108,13 @@
 .app-feedback__dismiss:active { transform: scale(.96); }
 .app-feedback__dismiss:focus-visible { outline: 3px solid color-mix(in srgb, var(--feedback-accent) 25%, transparent); outline-offset: 1px; }
 
-.app-feedback[data-persistent="true"] .app-feedback__mark {
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.7), 0 0 18px var(--feedback-accent-soft);
-}
-
 @keyframes app-feedback-enter {
   from { opacity: 0; transform: translate3d(0, -8px, 0) scale(.985); }
-  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  to { opacity: 1; transform: none; }
 }
 
 @keyframes app-feedback-exit {
-  from { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+  from { opacity: 1; transform: none; }
   to { opacity: 0; transform: translate3d(0, -5px, 0) scale(.99); }
 }
 
@@ -147,8 +126,6 @@
 
   .app-feedback {
     grid-template-columns: 34px minmax(0, 1fr) 44px;
-    border-radius: 18px;
-    transform-origin: 50% 100%;
   }
 }
 
