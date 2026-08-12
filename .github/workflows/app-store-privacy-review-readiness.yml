@@ -62,7 +62,7 @@ jobs:
           git diff --exit-code -- ios/App/App.xcodeproj/project.pbxproj ios/App/App/Info.plist
 
       - name: Verify TestFlight release metadata
-        run: npm run ios:release-readiness
+        run: node scripts/testflight-readiness.mjs
 
       - name: Verify privacy and review contracts
         run: node --test tests/app-store-privacy-review-readiness.test.mjs
