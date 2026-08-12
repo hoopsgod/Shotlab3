@@ -17,6 +17,7 @@ import {
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const packageJson = JSON.parse(await readFile(path.join(rootDir, 'package.json'), 'utf8'))
 const phase5aEnhancer = await readFile(path.join(rootDir, 'scripts/apply-phase5a-coach-daily-intelligence.mjs'), 'utf8')
+const releaseAuthRecoveryEnhancer = await readFile(path.join(rootDir, 'scripts/apply-release-auth-session-recovery.mjs'), 'utf8')
 
 const buildPrefix = [
   'scripts/run-finish-v9-compatible.mjs',
@@ -104,6 +105,17 @@ test('Phase 5A prepared source includes both home and program scores in season c
   assert.match(phase5aEnhancer, /currentScores:\[\.\.\.safeScores,\.\.\.safeProgramScores\]/)
   assert.match(phase5aEnhancer, /\[coachRosterPlayers,safeScores,safeProgramScores,safeShotLogs/)
   assert.match(phase5aEnhancer, /season comparison must include both home and program score collections/)
+})
+
+test('release auth recovery keeps the bounded bootstrap and restores an eventually valid Supabase session', () => {
+  assert.ok(BUILD_ROUTE_ENHANCERS.includes('scripts/apply-release-auth-session-recovery.mjs'))
+  assert.ok(DEV_ROUTE_ENHANCERS.includes('scripts/apply-release-auth-session-recovery.mjs'))
+  assert.match(releaseAuthRecoveryEnhancer, /const supabaseSessionRequest=SUPABASE_AUTH_ENABLED\?supabase\.auth\.getSession\(\):null;/)
+  assert.match(releaseAuthRecoveryEnhancer, /Promise\.race\(\[supabaseSessionRequest,new Promise\(r=>setTimeout\(\(\)=>r\(null\),3e3\)\)\]\)/)
+  assert.match(releaseAuthRecoveryEnhancer, /void supabaseSessionRequest\.then\(async\(result\)=>/)
+  assert.match(releaseAuthRecoveryEnhancer, /currentSessionResult=await supabase\.auth\.getSession\(\)\.catch\(\(\)=>null\)/)
+  assert.match(releaseAuthRecoveryEnhancer, /if\(currentEmail!==lateEmail\)return;/)
+  assert.match(releaseAuthRecoveryEnhancer, /lateSessionRestore:"success"/)
 })
 
 test('mode selection is explicit and rejects silent fallback', () => {
