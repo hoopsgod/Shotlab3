@@ -34,3 +34,34 @@ test("release boundary routes connectivity through the single premium feedback l
   assert.match(source, /<AppFeedbackLayer \/>/);
   assert.doesNotMatch(source, /data-testid="release-connectivity-status"/);
 });
+
+test("shared metrics acknowledge changed values without animated counting", async () => {
+  const source = await read("src/components/VisualHierarchy.jsx");
+  const css = await read("src/components/VisualHierarchy.module.css");
+  assert.match(source, /function MetricValue/);
+  assert.match(source, /data-metric-change=\{changeKey\}/);
+  assert.match(source, /Object\.is\(previousRef\.current, displayValue\)/);
+  assert.match(css, /@keyframes metricValueSettle/);
+  assert.match(css, /animation: metricValueSettle 220ms/);
+  assert.doesNotMatch(source, /setInterval|requestAnimationFrame/);
+});
+
+test("premium motion authority keeps route and completion motion restrained", async () => {
+  const css = await read("src/styles/PremiumMotion2026.css");
+  assert.match(css, /shotlab-route-enter 180ms/);
+  assert.match(css, /shotlab-completion-cue-enter 220ms/);
+  assert.match(css, /player-training-session \.particle/);
+  assert.match(css, /display: none !important/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(css, /bounce|spin|pulse.*infinite/i);
+});
+
+test("training completion emphasizes the saved result with short settle motion", async () => {
+  const css = await read("src/components/PlayerTrainingCompletion.module.css");
+  assert.match(css, /completionPanelSettle 240ms/);
+  assert.match(css, /completionMarkSettle 260ms/);
+  assert.match(css, /completionScoreSettle 220ms/);
+  assert.match(css, /completionTrackSettle 340ms/);
+  assert.match(css, /touch-action: manipulation/);
+  assert.match(css, /prefers-reduced-motion: reduce/);
+});
