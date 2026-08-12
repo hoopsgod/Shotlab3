@@ -8,9 +8,11 @@ const css=fs.readFileSync(new URL("../src/components/CoachMissionControlV2.css",
 const headerCss=fs.readFileSync(new URL("../src/components/CoachMissionControlHeader.css",import.meta.url),"utf8");
 const polishCss=fs.readFileSync(new URL("../src/components/CoachMissionControlPolish.css",import.meta.url),"utf8");
 const premiumCss=fs.readFileSync(new URL("../src/components/CoachMissionControl2026.css",import.meta.url),"utf8");
+const navigationCss=fs.readFileSync(new URL("../src/components/MobileNavigation.module.css",import.meta.url),"utf8");
 const shellCss=fs.readFileSync(new URL("../src/components/CoachMissionControlShell.css",import.meta.url),"utf8");
 const finalCss=fs.readFileSync(new URL("../src/components/CoachMissionControlFinal.css",import.meta.url),"utf8");
 const activationCss=fs.readFileSync(new URL("../src/components/CoachActivationPath.css",import.meta.url),"utf8");
+const cascadeLockCss=fs.readFileSync(new URL("../src/styles/MissionControlCascadeLock2026.css",import.meta.url),"utf8");
 const logoSource=fs.readFileSync(new URL("../src/components/useCleanTeamLogo.js",import.meta.url),"utf8");
 const brandingForm=fs.readFileSync(new URL("../src/components/team/TeamBrandingForm.jsx",import.meta.url),"utf8");
 
@@ -111,6 +113,9 @@ test("coach tools remain available without permanent dashboard clutter",()=>{
   assert.match(source,/data-testid="coach-team-code-bar"/);
   assert.match(source,/avatarUrl/);
   assert.match(source,/headshot placeholder/);
+  assert.match(cascadeLockCss,/\.performance-workspace--coach\.page\s*\{[\s\S]*?animation-fill-mode:\s*none\s*!important/);
+  assert.match(cascadeLockCss,/\.mcFocusGrid\.is-onboarding-grid \.mcActivationPlan\s*\{[\s\S]*?grid-template-columns:\s*48px minmax\(0, 1fr\)\s*!important/);
+  assert.match(cascadeLockCss,/\.mcFocusGrid\.is-onboarding-grid \.mcActivationPlan > button\s*\{[\s\S]*?grid-column:\s*1 \/ -1\s*!important/);
 });
 
 test("Mission Control keeps Players and Analytics as distinct destinations",()=>{
@@ -133,7 +138,7 @@ test("responsive CSS creates a compact native-feeling mobile operating system",(
   assert.match(finalCss,/min-height:\s*286px\s*!important/);
   assert.match(shellCss,/padding-bottom:\s*calc\(78px \+ env\(safe-area-inset-bottom\)\)\s*!important/);
   assert.match(premiumCss,/mobile-navigation-dock/);
-  assert.match(premiumCss,/backdrop-filter:blur\(24px\)/);
+  assert.match(navigationCss,/backdrop-filter:\s*blur\(28px\) saturate\(150%\)/);
   assert.match(finalCss,/\.mcPrimary:active/);
   assert.match(finalCss,/@media \(prefers-reduced-motion: reduce\)/);
   assert.match(activationCss,/@media\(prefers-reduced-motion:reduce\)/);

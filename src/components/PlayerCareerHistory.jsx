@@ -53,33 +53,69 @@ export default function PlayerCareerHistory({
   const participation = history.career.eventRsvpCount + history.career.scRsvpCount + history.career.scLogCount;
   const identity = playerName(player);
   const milestone = buildPlayerCareerMilestoneStory(history.career.totalShootingMakes);
+  const isPlayerView = viewerRole === "player";
   const metrics = [
     { label: "Career makes", value: number(history.career.totalShootingMakes), detail: "Verified shooting work", primary: true },
     { label: "At-home makes", value: number(history.career.totalHomeMakes), detail: "Independent training" },
     { label: "Program entries", value: number(history.career.programEntryCount), detail: "Coach-programmed work" },
     { label: "Team participation", value: number(participation), detail: "Events and strength work" },
   ];
+  const visibleMetrics = isPlayerView ? metrics.slice(1) : metrics;
   const records = [
     { label: "Best shooting season", value: recordLabel(history.records.bestShootingSeason, "shootingMakes", " makes") },
     { label: "Best at-home season", value: recordLabel(history.records.bestHomeSeason, "totalHomeMakes", " makes") },
     { label: "Most program work", value: recordLabel(history.records.mostProgramEntries, "programScoreCount", " entries") },
   ];
 
-  return (
+  const recordsSection = (
+    <section className={styles.recordsSection} aria-label="Personal records">
+      <div className={styles.sectionHeading}><div><div className={styles.sectionLabel}>Personal records</div><h3>Career bests</h3></div><p>Recognition without collapsing unlike metrics into one score.</p></div>
+      <div className={styles.records}>{records.map((record, index) => <article className={styles.record} key={record.label}><span className={styles.recordNumber}>0{index + 1}</span><div><div className={styles.sectionLabel}>{record.label}</div><strong>{record.value}</strong></div></article>)}</div>
+    </section>
+  );
+
+  const seasonSection = (
+    <section className={styles.seasonSection}>
+      <div className={styles.sectionHeading}><div><div className={styles.sectionLabel}>Career timeline</div><h3>Season by season</h3></div><p>Current activity stays live. Completed seasons remain preserved.</p></div>
+      <div className={styles.seasonList} data-testid="career-season-list">
+        {history.seasons.map((season, index) => (
+          <article className={`${styles.season} ${season.isCurrent ? styles.seasonCurrent : ""}`} key={`${season.isCurrent ? "current" : season.archiveId}-${season.seasonName}`}>
+            <div className={styles.timelineRail} aria-hidden="true"><span>{String(index + 1).padStart(2, "0")}</span></div>
+            <div className={styles.seasonIdentity}><div className={styles.seasonName}>{season.seasonName}</div><div className={styles.seasonRange}>{season.isCurrent ? "Active season" : seasonRange(season) || "Archived season"}</div></div>
+            <div className={styles.seasonMetrics}>{[["Shooting", season.shootingMakes], ["Home", season.totalHomeMakes], ["Program", season.programScoreCount]].map(([label, value]) => <div key={label}><div className={styles.seasonMetricValue}>{number(value)}</div><div className={styles.seasonMetricLabel}>{label}</div></div>)}</div>
+            {season.isCurrent ? <span className={`${styles.status} ${styles.statusCurrent}`}>Current</span> : typeof onOpenArchive === "function" && season.archiveId ? <button className={styles.archiveButton} type="button" onClick={() => onOpenArchive(season.archiveId)} aria-label={`View archive ${season.seasonName}`}>View archive</button> : <span className={styles.status}>Archived</span>}
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+
+  const careerContent = (
     <section className={styles.shell} data-testid="player-career-history" data-viewer-role={viewerRole} aria-labelledby={`player-career-history-title-${viewerRole}`}>
-      <header className={styles.hero}>
-        <div className={styles.identityMark} aria-hidden="true">{initials(identity)}</div>
-        <div className={styles.identityCopy}>
-          <div className={styles.eyebrow}>{viewerRole === "coach" ? "Coach athlete view" : "Athlete profile"}</div>
-          <h2 className={styles.title} id={`player-career-history-title-${viewerRole}`}>{identity}</h2>
-          <p className={styles.copy}>A trusted record of current-season work, personal bests, and immutable season history.</p>
-          <div className={styles.identityMeta}><span>{currentSeasonName}</span><span>{history.career.seasons} {history.career.seasons === 1 ? "season" : "seasons"}</span></div>
-        </div>
-        <div className={styles.careerTotal} aria-label={`${number(history.career.totalShootingMakes)} career shooting makes`}><strong>{number(history.career.totalShootingMakes)}</strong><span>Career makes</span></div>
+      <header className={`${styles.hero} ${isPlayerView ? styles.heroPlayer : ""}`}>
+        {isPlayerView ? (
+          <div className={styles.playerSnapshotCopy}>
+            <div className={styles.eyebrow}>Career snapshot</div>
+            <h2 className={styles.playerSnapshotTitle} id={`player-career-history-title-${viewerRole}`}>Progress that stays with you.</h2>
+            <p className={styles.copy}>Current-season work and completed seasons, kept in one verified record.</p>
+            <div className={styles.identityMeta}><span>{currentSeasonName}</span><span>{history.career.seasons} {history.career.seasons === 1 ? "season" : "seasons"}</span></div>
+          </div>
+        ) : (
+          <>
+            <div className={styles.identityMark} aria-hidden="true">{initials(identity)}</div>
+            <div className={styles.identityCopy}>
+              <div className={styles.eyebrow}>Coach athlete view</div>
+              <h2 className={styles.title} id={`player-career-history-title-${viewerRole}`}>{identity}</h2>
+              <p className={styles.copy}>A trusted record of current-season work, personal bests, and immutable season history.</p>
+              <div className={styles.identityMeta}><span>{currentSeasonName}</span><span>{history.career.seasons} {history.career.seasons === 1 ? "season" : "seasons"}</span></div>
+            </div>
+          </>
+        )}
+        <div className={`${styles.careerTotal} ${isPlayerView ? styles.careerTotalPlayer : ""}`} aria-label={`${number(history.career.totalShootingMakes)} career shooting makes`}><strong>{number(history.career.totalShootingMakes)}</strong><span>Career makes</span></div>
       </header>
 
-      <div className={styles.ledger} aria-label="Career summary">
-        {metrics.map((metric) => <div className={`${styles.metric} ${metric.primary ? styles.metricPrimary : ""}`} key={metric.label}><div className={styles.metricLabel}>{metric.label}</div><div className={styles.metricValue}>{metric.value}</div><div className={styles.metricDetail}>{metric.detail}</div></div>)}
+      <div className={`${styles.ledger} ${isPlayerView ? styles.ledgerPlayer : ""}`} aria-label="Career summary">
+        {visibleMetrics.map((metric) => <div className={`${styles.metric} ${metric.primary ? styles.metricPrimary : ""}`} key={metric.label}><div className={styles.metricLabel}>{metric.label}</div><div className={styles.metricValue}>{metric.value}</div><div className={styles.metricDetail}>{metric.detail}</div></div>)}
       </div>
 
       <section className={styles.progressBrief}>
@@ -87,7 +123,7 @@ export default function PlayerCareerHistory({
         <div><div className={styles.sectionLabel}>Season momentum</div><strong data-testid="career-improvement">{comparisonLabel(history.comparison)}</strong></div>
       </section>
 
-      <section className={styles.milestoneCard} data-testid="career-milestone-story" aria-labelledby={`career-milestone-title-${viewerRole}`}>
+      <section className={`${styles.milestoneCard} ${isPlayerView ? styles.milestoneCardPlayer : ""}`} data-testid="career-milestone-story" aria-labelledby={`career-milestone-title-${viewerRole}`}>
         <span className={styles.milestoneIcon} aria-hidden="true"><ShotLabIcon name="trophy" size={24} /></span>
         <div className={styles.milestoneBody}>
           <div className={styles.milestoneTopline}><div><div className={styles.sectionLabel}>Career milestone</div><h3 id={`career-milestone-title-${viewerRole}`}>{milestone.title}</h3></div><strong>{Math.round(milestone.progress)}%</strong></div>
@@ -110,26 +146,29 @@ export default function PlayerCareerHistory({
         </div>
       </section>
 
-      <section className={styles.recordsSection} aria-label="Personal records">
-        <div className={styles.sectionHeading}><div><div className={styles.sectionLabel}>Personal records</div><h3>Career bests</h3></div><p>Recognition without collapsing unlike metrics into one score.</p></div>
-        <div className={styles.records}>{records.map((record, index) => <article className={styles.record} key={record.label}><span className={styles.recordNumber}>0{index + 1}</span><div><div className={styles.sectionLabel}>{record.label}</div><strong>{record.value}</strong></div></article>)}</div>
-      </section>
-
-      <section className={styles.seasonSection}>
-        <div className={styles.sectionHeading}><div><div className={styles.sectionLabel}>Career timeline</div><h3>Season by season</h3></div><p>Current activity stays live. Completed seasons remain preserved.</p></div>
-        <div className={styles.seasonList} data-testid="career-season-list">
-          {history.seasons.map((season, index) => (
-            <article className={`${styles.season} ${season.isCurrent ? styles.seasonCurrent : ""}`} key={`${season.isCurrent ? "current" : season.archiveId}-${season.seasonName}`}>
-              <div className={styles.timelineRail} aria-hidden="true"><span>{String(index + 1).padStart(2, "0")}</span></div>
-              <div className={styles.seasonIdentity}><div className={styles.seasonName}>{season.seasonName}</div><div className={styles.seasonRange}>{season.isCurrent ? "Active season" : seasonRange(season) || "Archived season"}</div></div>
-              <div className={styles.seasonMetrics}>{[["Shooting", season.shootingMakes], ["Home", season.totalHomeMakes], ["Program", season.programScoreCount]].map(([label, value]) => <div key={label}><div className={styles.seasonMetricValue}>{number(value)}</div><div className={styles.seasonMetricLabel}>{label}</div></div>)}</div>
-              {season.isCurrent ? <span className={`${styles.status} ${styles.statusCurrent}`}>Current</span> : typeof onOpenArchive === "function" && season.archiveId ? <button className={styles.archiveButton} type="button" onClick={() => onOpenArchive(season.archiveId)} aria-label={`View archive ${season.seasonName}`}>View archive</button> : <span className={styles.status}>Archived</span>}
-            </article>
-          ))}
-        </div>
-      </section>
+      {isPlayerView ? (
+        <details className={styles.careerDisclosure} data-testid="player-career-detail-disclosure">
+          <summary className={styles.careerDisclosureSummary}>
+            <span><span className={styles.sectionLabel}>Career details</span><strong>Records & season archive</strong></span>
+          </summary>
+          <div className={styles.careerDisclosureBody}>{recordsSection}{seasonSection}</div>
+        </details>
+      ) : (
+        <>{recordsSection}{seasonSection}</>
+      )}
 
       {!history.hasHistory && <div className={styles.empty}><ShotLabIcon name="training" size={24} /><strong>Your career record starts here.</strong><span>The first logged workout and every completed season archive will appear automatically.</span></div>}
     </section>
+  );
+
+  if (!isPlayerView) return careerContent;
+
+  return (
+    <details className={styles.careerDisclosure} data-testid="player-profile-career-disclosure">
+      <summary className={styles.careerDisclosureSummary}>
+        <span><span className={styles.sectionLabel}>Career history</span><strong>Verified season record</strong></span>
+      </summary>
+      <div className={styles.careerDisclosureBody}>{careerContent}</div>
+    </details>
   );
 }

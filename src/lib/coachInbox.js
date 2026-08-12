@@ -14,18 +14,20 @@ export function buildCoachInboxModel({
   eventReadiness = null,
 } = {}) {
   const eventId = clean(eventReadiness?.eventId || eventReadiness?.key || eventReadiness?.event?.id);
-  const confirmed = count(eventReadiness?.confirmed);
-  const missing = count(eventReadiness?.missing);
-  const rosterSize = confirmed + missing;
-  const calculatedRate = rosterSize ? (confirmed / rosterSize) * 100 : 0;
+  const responded = count(eventReadiness?.responded ?? eventReadiness?.rsvpConfirmed ?? eventReadiness?.confirmed);
+  const awaitingResponse = count(eventReadiness?.awaitingResponse ?? eventReadiness?.missing);
+  const observedRoster = count(eventReadiness?.rosterCount);
+  const rosterSize = observedRoster || (responded + awaitingResponse);
+  const boundedResponded = Math.min(rosterSize, responded);
+  const calculatedRate = rosterSize ? (boundedResponded / rosterSize) * 100 : 0;
   const responseRate = percent(eventReadiness?.responseRate, calculatedRate);
   const dateLabel = clean(eventReadiness?.dateLabel) || [clean(eventReadiness?.date), clean(eventReadiness?.time)].filter(Boolean).join(" at ");
-  const readiness = eventId && dateLabel && missing > 0 && rosterSize > 0
+  const readiness = eventId && dateLabel && awaitingResponse > 0 && rosterSize > 0
     ? [{
         kind: "event-readiness",
         title: clean(eventReadiness?.title) || "Next team event",
-        detail: `${missing} of ${rosterSize} ${rosterSize === 1 ? "player" : "players"} still ${missing === 1 ? "needs" : "need"} to RSVP.`,
-        meta: [`${responseRate}% confirmed`, dateLabel].filter(Boolean).join(" · "),
+        detail: `${awaitingResponse} of ${rosterSize} ${rosterSize === 1 ? "player" : "players"} still ${awaitingResponse === 1 ? "needs" : "need"} to RSVP.`,
+        meta: [`${boundedResponded} RSVP${boundedResponded === 1 ? "" : "s"} received`, `${responseRate}% responded`, dateLabel].filter(Boolean).join(" · "),
         label: "Review RSVPs",
         action: "open-event-readiness",
         eventId,
@@ -65,13 +67,7 @@ export function buildCoachInboxModel({
     actionableCount: items.length,
     allClear: items.length === 0,
     context: validSession
-      ? {
-          kind: "session",
-          title: "Next team session",
-          detail: sessionDate,
-          label: "Open session",
-          action: "open-session",
-        }
+      ? { kind: "session", title: "Next team session", detail: sessionDate, label: "Open session", action: "open-session" }
       : null,
   };
 }

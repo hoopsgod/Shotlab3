@@ -103,6 +103,10 @@ test("daily command center resolves urgent commitment then launches one bounded 
   await expect(primary).toHaveText(/Confirm attendance/i);
   await primary.click();
 
+  const eventsRoute = page.getByTestId("player-commitment-route-header-events");
+  await expect(eventsRoute).toBeVisible({ timeout: 20_000 });
+  await expect(eventsRoute.getByRole("heading", { name: "Events & Attendance", exact: true })).toBeVisible();
+  await page.getByTestId("player-commitment-hero-events").getByRole("button", { name: "Respond now", exact: true }).click();
   await expect(page.getByText("UPCOMING EVENTS", { exact: true })).toBeVisible({ timeout: 20_000 });
   await expect(page.getByText("Team Practice", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: /RSVP NOW/ }).first().click();

@@ -136,6 +136,9 @@ test("coach completes all four new-season steps with zero historical carry-forwa
   const playersButton = await enterCoachDemo(page);
   await playersButton.click();
 
+  await page.getByTestId("coach-players-command-bar").getByRole("button", { name: "Team & Account", exact: true }).click();
+  await expect(page.getByTestId("coach-administration-workspace")).toBeVisible({ timeout: 20_000 });
+
   const wizard = page.getByTestId("new-season-wizard");
   await expect(wizard).toBeVisible();
 

@@ -1,0 +1,118 @@
+/* Phase 3R — stable late authority for the Player Progress Story. */
+body #root [data-testid="player-progress-story"] {
+  color: #101a20 !important;
+}
+
+body #root [data-testid="player-progress-story-hero"] {
+  background-color: #0f1412 !important;
+  background-image:
+    radial-gradient(circle at 88% 10%, rgba(200,255,26,.15), transparent 34%),
+    linear-gradient(150deg, #0f1412 0%, #151b17 55%, #0f1412 100%) !important;
+  border-color: rgba(255,255,255,.10) !important;
+  color: #f8faf5 !important;
+}
+
+body #root [data-testid="player-progress-story-topline"],
+body #root [data-testid="player-progress-story-hero-grid"],
+body #root [data-testid="player-progress-story-copy"],
+body #root [data-testid="player-progress-metrics"] {
+  background-color: transparent !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body #root [data-testid="player-progress-story-hero"] h2 {
+  color: #f8faf5 !important;
+  opacity: 1 !important;
+}
+
+body #root [data-testid="player-progress-story-copy"] p {
+  color: rgba(248,250,245,.62) !important;
+}
+
+body #root [data-testid="player-progress-story-topline"] > span:first-child {
+  color: rgba(248,250,245,.50) !important;
+}
+
+body #root [data-testid="player-progress-trend-chart"],
+body #root [data-testid="player-progress-metrics"] > div {
+  background-color: rgba(255,255,255,.04) !important;
+  background-image: none !important;
+  border-color: rgba(255,255,255,.08) !important;
+  box-shadow: none !important;
+}
+
+body #root [data-testid="player-progress-trend-summary"] {
+  background-color: transparent !important;
+  background-image: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body #root [data-testid="player-progress-trend-summary"] > span {
+  color: rgba(248,250,245,.42) !important;
+}
+
+body #root [data-testid="player-progress-trend-summary"] > strong {
+  color: #f8faf5 !important;
+  opacity: 1 !important;
+}
+
+body #root [data-testid="player-progress-trend-summary"] > small {
+  color: rgba(248,250,245,.52) !important;
+}
+
+body #root [data-testid="player-progress-trend-badge"] {
+  background-color: rgba(200,255,26,.08) !important;
+  background-image: none !important;
+  color: #c8ff1a !important;
+  border-color: rgba(200,255,26,.24) !important;
+  box-shadow: none !important;
+}
+
+body #root [data-testid="player-progress-strongest-signal"],
+body #root [data-testid="player-progress-opportunity"] {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  color: #101a20 !important;
+  border-color: rgba(17,26,33,.09) !important;
+}
+
+body #root [data-testid="player-progress-strongest-signal"] strong,
+body #root [data-testid="player-progress-opportunity"] strong,
+body #root [data-testid="player-progress-next-focus"] strong {
+  color: #101a20 !important;
+  opacity: 1 !important;
+}
+
+body #root [data-testid="player-progress-next-focus"] {
+  background-color: #f7f8f4 !important;
+  background-image: none !important;
+  color: #101a20 !important;
+  border-color: rgba(111,139,0,.18) !important;
+}
+
+body #root [data-testid="player-progress-start-focus"] {
+  background: #c8ff1a !important;
+  color: #101310 !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+body #root [data-testid="player-progress-open-profile"] {
+  background: #ffffff !important;
+  color: #25323b !important;
+  border-color: rgba(17,26,33,.10) !important;
+  box-shadow: none !important;
+}
+
+body #root .player-progress-story-route > [data-testid="player-progress-full-profile"] {
+  margin-top: 8px !important;
+}
+
+@media (max-width: 767px) {
+  body #root .player-scroll-container:has([data-testid="player-progress-story"]) {
+    padding-bottom: calc(112px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+}

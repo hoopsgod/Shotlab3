@@ -152,7 +152,7 @@ async function enterPlayer(page) {
   await installSafeRoutes(page)
   await seedStorage(page)
   await page.goto('/')
-  await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
+  await page.getByRole('button', { name: 'Player demo', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('player-dashboard-identity-header')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('player-daily-command-center')).toBeVisible({ timeout: 20_000 })
@@ -178,7 +178,7 @@ test('Player interface stays out of auth and initializes only after Player entry
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
-  await page.getByRole('button', { name: 'Demo Player', exact: true }).click()
+  await page.getByRole('button', { name: 'Player demo', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('player-dashboard-identity-header')).toBeVisible({ timeout: 20_000 })
   await expect(page.getByTestId('player-daily-command-center')).toBeVisible({ timeout: 20_000 })
@@ -196,17 +196,26 @@ test('Profile workspaces load together only after the player opens Profile', asy
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
-  await openMoreDestination(page, 'profile')
+  await page.getByTestId('mobile-navigation-dock').getByRole('button', { name: 'Progress', exact: true }).click()
+  await expect(page.getByTestId('player-progress-story')).toBeVisible({ timeout: 20_000 })
+  const fullProfile = page.getByTestId('player-progress-full-profile')
+  await expect(fullProfile).toBeAttached({ timeout: 20_000 })
   const workspace = page.getByTestId('progress-charts-workspace')
-  await expect(workspace).toBeVisible({ timeout: 20_000 })
-  await expect(workspace.getByText(/MY\s*PROGRESS/i)).toBeVisible({ timeout: 20_000 })
-  await expect(page.getByTestId('player-career-history')).toBeVisible({ timeout: 20_000 })
+  await expect(workspace).toBeAttached({ timeout: 20_000 })
+  await expect(workspace).toBeHidden()
+  await expect(page.getByTestId('player-career-history')).toBeAttached({ timeout: 20_000 })
   await expect(page.getByTestId('progress-charts-loading')).toHaveCount(0)
   await expect(page.getByTestId('player-career-history-loading')).toHaveCount(0)
   await expect.poll(() => playerInterfaceLoaded(page)).toBe(true)
   await expect.poll(() => playerProfileLoaded(page)).toBe(true)
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
+
+  await page.getByTestId('player-progress-open-profile').click()
+  await expect(fullProfile).toHaveAttribute('open', '')
+  await expect(page.getByTestId('player-profile-readout')).toBeVisible({ timeout: 20_000 })
+  await expect(workspace).toBeAttached()
+  await expect(page.getByTestId('player-career-history')).toBeAttached()
 })
 
 test('leaderboard analytics load only after the player opens Leaderboards', async ({ page }) => {
@@ -237,7 +246,7 @@ test('Coach operational and administration workspaces stay out of auth and Playe
   await expect.poll(() => coachOperationalLoaded(page)).toBe(false)
   await expect.poll(() => coachAdministrationLoaded(page)).toBe(false)
 
-  await page.getByRole('button', { name: 'Demo Coach', exact: true }).click()
+  await page.getByRole('button', { name: 'Coach demo', exact: true }).click()
   await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible({ timeout: 20_000 })
 
   await expect(page.getByTestId('coach-command-center-full')).toBeVisible({ timeout: 20_000 })

@@ -1,4 +1,10 @@
 /* Final Phase 2 cascade lock for legacy mobile authorities loaded after the app bundle. */
+html body #root .performance-workspace--coach.page {
+  /* A retained identity transform makes fixed Coach overlays use the full
+     document as their containing block instead of the viewport. */
+  animation-fill-mode: none !important;
+}
+
 html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcHero {
   background-color: #0d171e !important;
   background-image:
@@ -29,4 +35,40 @@ html body #root .performance-workspace--coach [data-testid="coach-command-center
 html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcRowAction {
   color: #44515b !important;
   -webkit-text-fill-color: #44515b !important;
+}
+
+@media (max-width: 980px) {
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: calc(50% - 50vw) !important;
+    margin-right: calc(50% - 50vw) !important;
+    overflow-x: clip;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .missionControl {
+    width: 100%;
+    max-width: none;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"].mcShellV3 .mcBrandCopy small {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 701px) {
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcFocusGrid.is-onboarding-grid .mcActivationPlan {
+    grid-template-columns: 48px minmax(0, 1fr) !important;
+    align-items: start !important;
+  }
+
+  html body #root .performance-workspace--coach [data-testid="coach-command-center-full"] .mcFocusGrid.is-onboarding-grid .mcActivationPlan > button {
+    grid-column: 1 / -1 !important;
+    width: 100% !important;
+  }
 }

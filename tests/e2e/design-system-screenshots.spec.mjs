@@ -39,23 +39,95 @@ async function more(page) {
   return sheet;
 }
 
+async function expectImmersiveTeamStore(page) {
+  await expect(page.locator("html")).toHaveClass(/team-store-portal-open/);
+  await expect(page.locator("body")).toHaveClass(/team-store-portal-open/);
+  const overlay = page.getByTestId("team-store-portal-overlay");
+  const panel = page.getByTestId("team-store-portal-panel");
+  await expect(overlay).toBeVisible({ timeout: 20_000 });
+  await expect(panel).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator("#root")).toBeHidden();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeHidden();
+  const bounds = await panel.evaluate((node) => {
+    const rect = node.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height, innerWidth: window.innerWidth, innerHeight: window.innerHeight };
+  });
+  expect(Math.abs(bounds.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(bounds.y)).toBeLessThanOrEqual(1);
+  expect(Math.abs(bounds.width - bounds.innerWidth)).toBeLessThanOrEqual(1);
+  expect(Math.abs(bounds.height - bounds.innerHeight)).toBeLessThanOrEqual(1);
+}
+
 test("Player visual system remains integrated across core and secondary pages", async ({ page }) => {
   await enterDemo(page, "player");
   await capture(page, "01-player-home");
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
-  await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
-  await capture(page, "02-player-leaderboards");
+  await expect(page.getByTestId("player-progress-story")).toBeVisible({ timeout: 20_000 });
+  await capture(page, "02-player-progress");
 
   let sheet = await more(page);
-  await sheet.locator('[data-nav-key="profile"]').click();
-  await expect(page.getByTestId("player-career-history")).toBeVisible({ timeout: 20_000 });
+  await sheet.locator('[data-nav-key="leaderboards"]').click();
+  await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
+  await capture(page, "02b-player-leaderboards");
+
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
+  await page.getByTestId("player-progress-open-profile").click();
+  const careerDisclosure = page.getByTestId("player-profile-career-disclosure");
+  const performanceDisclosure = page.getByTestId("player-profile-performance-intelligence");
+  const drillDisclosure = page.getByTestId("player-profile-drill-development");
+  await expect(careerDisclosure).toBeVisible({ timeout: 20_000 });
+  await expect(careerDisclosure).not.toHaveAttribute("open", "");
+  await expect(page.getByTestId("player-career-history")).toBeHidden();
+  await expect(page.getByText("OFFSEASON PLAYER", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("OFFSEASON REPORT CARD", { exact: true })).toBeVisible();
+  await expect(page.getByText("PLAYER PROGRESS PROFILE", { exact: true })).toBeVisible();
+  await expect(page.getByTestId("player-profile-current-progress")).toBeVisible();
+  await expect(page.getByTestId("player-profile-readout")).toBeVisible();
+  await expect(performanceDisclosure).toBeVisible();
+  await expect(performanceDisclosure).not.toHaveAttribute("open", "");
+  await expect(drillDisclosure).toBeVisible();
+  await expect(drillDisclosure).not.toHaveAttribute("open", "");
+  await expect(page.getByTestId("player-profile-analytics")).toBeHidden();
   await capture(page, "03-player-profile-career");
+
+  await performanceDisclosure.locator(":scope > summary").click();
+  await expect(performanceDisclosure).toHaveAttribute("open", "");
+  const analytics = page.getByTestId("player-profile-analytics");
+  await expect(analytics).toBeVisible({ timeout: 20_000 });
+  const analyticsSections = page.getByTestId("player-analytics-sections");
+  const progressTab = analyticsSections.getByRole("button", { name: "Progress", exact: true });
+  const skillsTab = analyticsSections.getByRole("button", { name: "Skills", exact: true });
+  await expect(progressTab).toHaveAttribute("aria-pressed", "true");
+  await skillsTab.click();
+  await expect(skillsTab).toHaveAttribute("aria-pressed", "true");
+  await expect(progressTab).toHaveAttribute("aria-pressed", "false");
+  await capture(page, "03c-player-profile-performance-intelligence");
+  await performanceDisclosure.locator(":scope > summary").click();
+  await expect(performanceDisclosure).not.toHaveAttribute("open", "");
+
+  await drillDisclosure.locator(":scope > summary").click();
+  await expect(drillDisclosure).toHaveAttribute("open", "");
+  const fullDrillDetails = page.getByTestId("player-profile-full-drill-details");
+  await expect(fullDrillDetails).toBeVisible();
+  await expect(fullDrillDetails).not.toHaveAttribute("open", "");
+  await fullDrillDetails.locator(":scope > summary").click();
+  await expect(fullDrillDetails).toHaveAttribute("open", "");
+  await expect(fullDrillDetails.getByText("DRILL BREAKDOWN", { exact: true })).toBeVisible();
+  await capture(page, "03d-player-profile-drill-development");
+  await fullDrillDetails.locator(":scope > summary").click();
+  await drillDisclosure.locator(":scope > summary").click();
+
+  await careerDisclosure.locator(":scope > summary").click();
+  await expect(careerDisclosure).toHaveAttribute("open", "");
+  await expect(page.getByTestId("player-career-history")).toBeVisible({ timeout: 20_000 });
+  await capture(page, "03b-player-profile-career-expanded");
 
   sheet = await more(page);
   await sheet.locator('[data-nav-key="team-store"]').click();
   const store = page.getByRole("dialog", { name: "Team Store" });
   await expect(store).toBeVisible();
+  await expectImmersiveTeamStore(page);
   await capture(page, "04-player-team-store");
 });
 
@@ -64,18 +136,61 @@ test("Coach visual system remains integrated across command and management pages
   await capture(page, "05-coach-home");
 
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
+  await expect(page.getByTestId("coach-players-interactive-dashboard")).toBeVisible({ timeout: 20_000 });
+  const inviteForm = page.getByTestId("coach-player-invite-form");
+  await expect(inviteForm).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator("#coach-roster-operations")).toBeVisible();
+  await expect(page.getByTestId("coach-season-archive")).toHaveCount(0);
   await capture(page, "06-coach-players");
 
+  await page.getByTestId("coach-players-command-bar").getByRole("button", { name: "Add Player", exact: true }).click();
+  await expect(inviteForm).toBeVisible({ timeout: 20_000 });
+  await capture(page, "06b-coach-player-add");
+
+  await page.getByTestId("coach-players-command-bar").getByRole("button", { name: "Team & Account", exact: true }).click();
+  await expect(page.getByTestId("coach-administration-workspace")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("coach-season-archive")).toBeVisible();
+  await expect(page.getByText("Start a New Season", { exact: true })).toBeVisible();
+  await capture(page, "06c-coach-team-account");
+
   await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Schedule", exact: true }).click();
+  const eventInsights = page.getByTestId("coach-events-supporting-intelligence");
+  await expect(eventInsights).toBeVisible({ timeout: 20_000 });
+  await expect(eventInsights).not.toHaveAttribute("open", "");
+  await expect(page.getByTestId("coach-events-insight-grid")).toBeHidden();
+  await expect(page.getByRole("button", { name: /MANAGE/ }).first()).toBeVisible();
   await capture(page, "07-coach-events");
+
+  await eventInsights.locator(":scope > summary").click();
+  await expect(eventInsights).toHaveAttribute("open", "");
+  await expect(page.getByTestId("coach-events-insight-grid")).toBeVisible();
+  await capture(page, "07b-coach-events-insights-expanded");
+  await eventInsights.locator(":scope > summary").click();
+  await expect(eventInsights).not.toHaveAttribute("open", "");
 
   let sheet = await more(page);
   await sheet.locator('[data-nav-key="drills"]').click();
   await expect(page.locator("#coach-drills-management")).toBeVisible({ timeout: 20_000 });
+  const drillLibrary = page.getByTestId("coach-drills-library-management");
+  await expect(drillLibrary).toBeVisible({ timeout: 20_000 });
+  await expect(drillLibrary).not.toHaveAttribute("open", "");
+  await expect(page.getByText(/PROGRAM SHOOTING DRILLS/)).toBeHidden();
   await capture(page, "08-coach-drills");
+
+  await drillLibrary.locator(":scope > summary").click();
+  await expect(drillLibrary).toHaveAttribute("open", "");
+  await expect(page.getByText(/PROGRAM SHOOTING DRILLS/)).toBeVisible();
+  await capture(page, "08b-coach-drills-library-expanded");
+  await drillLibrary.locator(":scope > summary").click();
+  await expect(drillLibrary).not.toHaveAttribute("open", "");
+
+  await page.getByRole("button", { name: "Add Drill", exact: true }).click();
+  await expect(page.getByText("NEW DRILL", { exact: true })).toBeVisible({ timeout: 20_000 });
+  await noOverflow(page);
 
   sheet = await more(page);
   await sheet.locator('[data-nav-key="team-store"]').click();
   await expect(page.getByRole("dialog", { name: "Team Store" })).toBeVisible();
+  await expectImmersiveTeamStore(page);
   await capture(page, "09-coach-team-store");
 });

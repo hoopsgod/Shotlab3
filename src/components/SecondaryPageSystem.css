@@ -1,1 +1,708 @@
-.secondaryPageShell{width:min(100%,1080px);margin-inline:auto;display:grid;gap:22px;padding:18px 18px 96px;color:var(--sl-ink,#171a18)}.secondaryPageIntro{display:grid;grid-template-columns:56px minmax(0,1fr) auto;align-items:end;gap:20px;padding:24px;border:1px solid var(--sl-line,rgba(23,26,24,.1));border-radius:20px;background-image:linear-gradient(135deg,rgba(255,255,255,.99),rgba(247,248,244,.96)),linear-gradient(90deg,color-mix(in srgb,var(--sl-accent,#71851f) 9%,transparent),transparent 58%);color:var(--sl-ink,#171a18);box-shadow:0 12px 34px rgba(23,28,24,.07);overflow:hidden}.secondaryPageIntro__icon,.secondaryPageDecision__icon{display:grid;place-items:center;border:1px solid color-mix(in srgb,var(--sl-accent,#71851f) 24%,transparent);background:color-mix(in srgb,var(--sl-accent,#71851f) 7%,#fff);color:var(--sl-accent,#71851f);box-shadow:inset 0 1px rgba(255,255,255,.8)}.secondaryPageIntro__icon{width:56px;height:56px;border-radius:17px;align-self:start}.secondaryPageIntro__copy{min-width:0;max-width:720px}.secondaryPageIntro__eyebrow,.secondaryPageDecision__eyebrow{margin-bottom:8px;color:var(--sl-accent,#71851f);font:760 11px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.065em}.secondaryPageIntro__title{margin:0;color:var(--sl-ink,#171a18);font:790 clamp(38px,6vw,58px)/.98 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;letter-spacing:-.055em;overflow-wrap:anywhere}.secondaryPageIntro__summary{max-width:58ch;margin:12px 0 0;color:var(--sl-muted,#68706a);font:500 16px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:-.01em}.secondaryPageIntro__actions{display:grid;justify-items:end;gap:10px;min-width:min(100%,260px)}.secondaryPageIntro__status{max-width:30ch;color:var(--sl-muted,#68706a);font:650 12px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;text-align:right}.secondaryPageIntro__buttonRow{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}.secondaryPageAction{min-height:46px;padding:0 16px;display:inline-flex;align-items:center;justify-content:center;gap:10px;border:1px solid var(--sl-line,rgba(23,26,24,.1));border-radius:13px;font:720 13px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;cursor:pointer;transition:transform 180ms ease,background-color 180ms ease,border-color 180ms ease}.secondaryPageAction__icon{display:inline-grid;place-items:center}.secondaryPageAction--primary{border-color:#202421;background:#202421;color:#fff}.secondaryPageAction--secondary{background:rgba(255,255,255,.84);color:var(--sl-ink,#171a18)}.secondaryPageAction:hover:not(:disabled){transform:translateY(-1px)}.secondaryPageAction:focus-visible,.secondaryPageDecision button:focus-visible{outline:3px solid color-mix(in srgb,var(--sl-accent,#71851f) 35%,transparent);outline-offset:3px}.secondaryPageAction:disabled,.secondaryPageDecision button:disabled{opacity:.5;cursor:not-allowed}.secondaryPageToolbar{display:grid;gap:14px}.secondaryPageToolbar [class*="metricStrip"],.secondaryPageToolbar [class*="filterRail"]{border:1px solid var(--sl-line,rgba(23,26,24,.1));border-radius:18px;background:#fff;color:var(--sl-ink,#171a18);box-shadow:none}.secondaryPageToolbar input{min-height:48px;border:1px solid var(--sl-line-strong,rgba(23,26,24,.16));border-radius:13px;background:#fff;color:var(--sl-ink,#171a18);box-shadow:none}.secondaryPageDecision{display:grid;grid-template-columns:46px minmax(0,1fr);gap:16px;min-height:0;padding:24px;border:1px solid var(--sl-line,rgba(23,26,24,.1));border-radius:20px;background:#fff;color:var(--sl-ink,#171a18);box-shadow:0 12px 34px rgba(23,28,24,.07)}.secondaryPageDecision__icon{width:46px;height:46px;border-radius:14px}.secondaryPageDecision h2{max-width:22ch;margin:0;color:var(--sl-ink,#171a18);font:770 clamp(25px,5vw,36px)/1.04 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;letter-spacing:-.045em;overflow-wrap:anywhere}.secondaryPageDecision p{max-width:60ch;margin:10px 0 0;color:var(--sl-muted,#68706a);font:500 15px/1.55 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif}.secondaryPageDecision button{min-height:44px;margin-top:14px;padding:0 15px;display:inline-flex;align-items:center;gap:12px;border:1px solid var(--sl-line,rgba(23,26,24,.1));border-radius:12px;background:#f7f7f4;color:var(--sl-ink,#171a18);font:720 13px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;cursor:pointer}.secondaryPageDecision__visual{display:none}.secondaryPageEvidence{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.secondaryPageEvidence>*{min-width:0;padding:18px!important;border:1px solid var(--sl-line,rgba(23,26,24,.1))!important;border-radius:18px!important;background:#fff!important;color:var(--sl-ink,#171a18)!important;box-shadow:none!important}.secondaryPageEvidence :is(h2,h3,strong){color:var(--sl-ink,#171a18)!important}.secondaryPageEvidence :is(p,small){color:var(--sl-muted,#68706a)!important}@media(max-width:760px){.secondaryPageShell{gap:18px;padding:12px 16px 96px}.secondaryPageIntro{grid-template-columns:46px minmax(0,1fr);align-items:start;gap:13px;padding:16px}.secondaryPageIntro__icon{width:46px;height:46px;border-radius:14px}.secondaryPageIntro__title{font-size:clamp(34px,10vw,44px)}.secondaryPageIntro__summary{font-size:15px}.secondaryPageIntro__actions{grid-column:1/-1;width:100%;justify-items:start}.secondaryPageIntro__buttonRow{width:100%;justify-content:flex-start}.secondaryPageIntro__status{text-align:left}.secondaryPageAction{flex:1 1 0}.secondaryPageDecision{padding:20px}.secondaryPageEvidence{grid-template-columns:1fr}}@media(max-width:390px){.secondaryPageIntro{grid-template-columns:40px minmax(0,1fr);padding:15px}.secondaryPageIntro__icon{width:40px;height:40px;border-radius:12px}.secondaryPageIntro__title{font-size:32px}.secondaryPageDecision{grid-template-columns:40px minmax(0,1fr);padding:16px}.secondaryPageDecision__icon{width:40px;height:40px;border-radius:12px}}@media(prefers-reduced-motion:reduce){.secondaryPageAction{transition:none}}
+.secondaryPageShell {
+  width: min(100%, 1080px);
+  margin-inline: auto;
+  padding: 14px var(--layout-gutter, 18px) 96px;
+  display: grid;
+  gap: 28px;
+  color: var(--sl-ink, #171a18);
+}
+
+/* Editorial page opening: hierarchy comes from type and whitespace, not another card. */
+.secondaryPageIntro {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 18px;
+  padding: 12px 2px 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--sl-ink, #171a18);
+}
+
+.secondaryPageIntro__icon,
+.secondaryPageDecision__icon {
+  display: grid;
+  place-items: center;
+  color: var(--sl-accent, #71851f);
+}
+
+.secondaryPageIntro__icon {
+  width: 48px;
+  height: 48px;
+  align-self: start;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.secondaryPageIntro__copy {
+  min-width: 0;
+  max-width: 720px;
+}
+
+.secondaryPageIntro__eyebrow,
+.secondaryPageDecision__eyebrow {
+  margin-bottom: 8px;
+  font: 760 var(--type-micro, 11px)/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.secondaryPageIntro__eyebrow { color: var(--sl-accent, #71851f); }
+
+.secondaryPageIntro__title {
+  margin: 0;
+  color: var(--sl-ink, #171a18);
+  font: 790 clamp(40px, 6vw, 58px)/.96 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.055em;
+  overflow-wrap: anywhere;
+}
+
+.secondaryPageIntro__summary {
+  max-width: 58ch;
+  margin: 11px 0 0;
+  color: var(--sl-muted, #68706a);
+  font: 500 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: -.01em;
+}
+
+.secondaryPageIntro__actions {
+  display: grid;
+  justify-items: end;
+  gap: 10px;
+  min-width: min(100%, 250px);
+}
+
+.secondaryPageIntro__status {
+  max-width: 30ch;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #536057;
+  background: transparent;
+  font: 680 var(--type-meta, 12px)/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  text-align: right;
+}
+
+.secondaryPageIntro__status::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--sl-accent, #71851f);
+  vertical-align: 1px;
+}
+
+.secondaryPageIntro__buttonRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.secondaryPageAction {
+  min-height: var(--control-height, 48px);
+  padding: 0 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
+  border-radius: 13px;
+  font: 720 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.secondaryPageAction--primary {
+  border-color: #202421;
+  background: #202421;
+  color: #fff;
+}
+
+.secondaryPageAction--secondary {
+  background: transparent;
+  color: var(--sl-ink, #171a18);
+}
+
+.secondaryPageAction:hover:not(:disabled) { transform: translateY(-1px); }
+.secondaryPageAction:active:not(:disabled) { transform: scale(.985); }
+.secondaryPageAction:disabled { opacity: .5; cursor: not-allowed; }
+.secondaryPageAction:focus-visible,
+.secondaryPageDecision button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sl-accent, #71851f) 30%, transparent);
+  outline-offset: 3px;
+}
+
+/* One information rail, not four floating metric cards. */
+.secondaryPageToolbar {
+  display: grid;
+  gap: 13px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.secondaryPageToolbar [class*="metricStrip"] {
+  margin: 0 !important;
+  gap: 0 !important;
+  overflow: hidden;
+  border: 0 !important;
+  border-block: 1px solid var(--sl-line, rgba(23, 26, 24, .1)) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.secondaryPageToolbar [class*="metricStrip"] > button {
+  min-height: 100px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.secondaryPageToolbar [class*="metricStrip"] > button + button {
+  border-left: 1px solid var(--sl-line, rgba(23, 26, 24, .1)) !important;
+}
+
+.secondaryPageToolbar [class*="metricStrip"] > button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--sl-accent, #71851f) 8%, #fff) !important;
+}
+
+.secondaryPageToolbar [class*="filterRail"] {
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.secondaryPageToolbar input {
+  min-height: var(--control-height, 48px);
+  border: 1px solid var(--sl-line-strong, rgba(23, 26, 24, .16));
+  border-radius: 13px;
+  background: #fff;
+  color: var(--sl-ink, #171a18);
+  box-shadow: none;
+}
+
+/* Dark = decision/performance mode. This is the single dominant card on the page. */
+.secondaryPageDecision {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) minmax(180px, 30%);
+  align-items: center;
+  gap: 18px;
+  min-height: 190px;
+  padding: 25px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 90% 0%, color-mix(in srgb, var(--sl-accent, #c8ff1a) 16%, transparent), transparent 36%),
+    linear-gradient(145deg, #171b18, #0c0f0d 72%);
+  color: #f5f7f4;
+  box-shadow: 0 24px 58px rgba(25, 31, 26, .16);
+}
+
+.secondaryPageDecision::after {
+  content: "";
+  position: absolute;
+  inset: auto 8% -58px;
+  z-index: -1;
+  height: 100px;
+  background: radial-gradient(ellipse at center, color-mix(in srgb, var(--sl-accent, #c8ff1a) 13%, transparent), transparent 72%);
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.secondaryPageDecision__icon {
+  width: 44px;
+  height: 44px;
+  align-self: start;
+  border: 1px solid color-mix(in srgb, var(--sl-accent, #c8ff1a) 28%, rgba(255, 255, 255, .08));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--sl-accent, #c8ff1a) 8%, rgba(255, 255, 255, .025));
+  color: var(--sl-accent, #c8ff1a);
+}
+
+.secondaryPageDecision__eyebrow { color: var(--sl-accent, #c8ff1a); }
+.secondaryPageDecision__copy { min-width: 0; }
+
+.secondaryPageDecision h2 {
+  max-width: 24ch;
+  margin: 0;
+  color: #f5f7f4;
+  font: 770 clamp(27px, 5vw, 38px)/1.02 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.045em;
+  overflow-wrap: anywhere;
+}
+
+.secondaryPageDecision p {
+  max-width: 58ch;
+  margin: 10px 0 0;
+  color: #aeb7b0;
+  font: 500 var(--type-secondary, 14px)/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.secondaryPageDecision button {
+  min-height: var(--touch-target, 44px);
+  margin-top: 15px;
+  padding: 0 15px;
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid color-mix(in srgb, var(--sl-accent, #c8ff1a) 32%, rgba(255, 255, 255, .12));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sl-accent, #c8ff1a) 9%, rgba(255, 255, 255, .025));
+  color: #eff7dc;
+  font: 720 13px/1 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  cursor: pointer;
+  transition: transform 150ms ease, background-color 150ms ease;
+}
+
+.secondaryPageDecision button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--sl-accent, #c8ff1a) 13%, rgba(255, 255, 255, .025));
+}
+
+.secondaryPageDecision button:active:not(:disabled) { transform: scale(.985); }
+.secondaryPageDecision button:disabled { opacity: .5; cursor: not-allowed; }
+
+.secondaryPageDecision__visual {
+  display: block;
+  min-width: 0;
+  padding-left: 18px;
+  border-left: 1px solid rgba(255, 255, 255, .09);
+}
+
+/* Evidence reads like one editorial section instead of three competing cards. */
+.secondaryPageEvidence {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  border-block: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
+}
+
+.secondaryPageEvidence > * {
+  min-width: 0;
+  min-height: 0 !important;
+  padding: 20px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--sl-ink, #171a18) !important;
+  box-shadow: none !important;
+}
+
+.secondaryPageEvidence > * + * {
+  border-left: 1px solid var(--sl-line, rgba(23, 26, 24, .1)) !important;
+}
+
+.secondaryPageEvidence :is(h2, h3, strong) { color: var(--sl-ink, #171a18) !important; }
+.secondaryPageEvidence :is(p, small) { color: #5d665f !important; }
+.secondaryPageEvidence [class*="insightActions"] { margin-top: 14px !important; }
+.secondaryPageEvidence [class*="insightActions"] button {
+  min-height: var(--touch-target, 44px) !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: #f2f4ee !important;
+  color: #33402f !important;
+  box-shadow: none !important;
+}
+.secondaryPageEvidence [class*="quietAction"] { background: transparent !important; color: var(--sl-muted, #68706a) !important; }
+
+.secondaryPageShell [aria-busy="true"] { cursor: progress; }
+.secondaryPageShell [aria-busy="true"] button { pointer-events: none; }
+
+/* Coach Player Detail: performance first, history second, account controls last. */
+.coachPlayerDetailWorkspace { gap: 22px; }
+
+.coachPlayerProfile {
+  display: grid;
+  gap: 0;
+  color: var(--sl-ink, #171a18);
+}
+
+.coachPlayerProfileHero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 22px;
+  align-items: center;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, .08);
+  border-radius: 24px 24px 0 0;
+  background: radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--sl-accent, #c8ff1a) 16%, transparent), transparent 34%), linear-gradient(145deg, #171b18, #0c0f0d 72%);
+  color: #f5f7f4;
+  box-shadow: 0 22px 54px rgba(25, 31, 26, .15);
+}
+
+.coachPlayerProfileHero__identity { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.coachPlayerProfileHero__identity > div { min-width: 0; }
+.coachPlayerProfileHero__eyebrow { color: var(--sl-accent, #c8ff1a); font: 760 11px/1.2 system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.coachPlayerProfileHero h2 { margin: 5px 0 0; color: #f5f7f4; font: 780 clamp(28px, 5vw, 40px)/1 system-ui, sans-serif; letter-spacing: -.045em; overflow-wrap: anywhere; }
+.coachPlayerProfileHero p { margin: 6px 0 0; color: #aeb7b0; font: 500 13px/1.4 system-ui, sans-serif; overflow-wrap: anywhere; }
+.coachPlayerProfileHero__status { display: inline-flex; margin-top: 10px; padding: 6px 9px; border: 1px solid color-mix(in srgb, var(--sl-accent, #c8ff1a) 28%, rgba(255, 255, 255, .12)); border-radius: 999px; background: color-mix(in srgb, var(--sl-accent, #c8ff1a) 8%, transparent); color: #e8f3d1; font: 760 11px/1 system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+.coachPlayerProfileHero__headline { min-width: 150px; padding-left: 22px; border-left: 1px solid rgba(255, 255, 255, .1); text-align: right; }
+.coachPlayerProfileHero__headline strong { display: block; color: #f5f7f4; font: 800 clamp(38px, 8vw, 56px)/.9 system-ui, sans-serif; letter-spacing: -.07em; }
+.coachPlayerProfileHero__headline span,.coachPlayerProfileHero__headline small { display: block; }
+.coachPlayerProfileHero__headline span { margin-top: 7px; color: var(--sl-accent, #c8ff1a); font: 740 12px/1.2 system-ui, sans-serif; }
+.coachPlayerProfileHero__headline small { margin-top: 5px; color: #919c94; font: 500 11px/1.35 system-ui, sans-serif; }
+
+.coachPlayerProfileMetrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); border-top: 0; border-radius: 0 0 20px 20px; background: #fff; }
+.coachPlayerProfileMetric { min-width: 0; padding: 18px; }
+.coachPlayerProfileMetric + .coachPlayerProfileMetric { border-left: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+.coachPlayerProfileMetric span,.coachPlayerProfileMetric small { display: block; color: var(--sl-muted, #68706a); }
+.coachPlayerProfileMetric span { font: 760 11px/1.2 system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+.coachPlayerProfileMetric strong { display: block; margin-top: 7px; color: var(--sl-ink, #171a18); font: 790 28px/1 system-ui, sans-serif; letter-spacing: -.05em; }
+.coachPlayerProfileMetric small { margin-top: 5px; font: 500 12px/1.35 system-ui, sans-serif; }
+
+.coachPlayerProfileEmpty { display: grid; gap: 5px; margin-top: 14px; padding: 18px; border: 1px dashed var(--sl-line-strong, rgba(23, 26, 24, .16)); border-radius: 18px; background: #fafaf7; }
+.coachPlayerProfileEmpty strong { font: 740 15px/1.3 system-ui, sans-serif; }
+.coachPlayerProfileEmpty span { color: var(--sl-muted, #68706a); font: 500 13px/1.5 system-ui, sans-serif; }
+
+.coachPlayerProfileEvidence { display: grid; grid-template-columns: 1.35fr 1fr; gap: 0; margin-top: 22px; border-block: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+.coachPlayerProfileSection { min-width: 0; padding: 22px 20px; }
+.coachPlayerProfileSection + .coachPlayerProfileSection { border-left: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+.coachPlayerProfileSection > span { color: var(--sl-accent, #71851f); font: 760 11px/1.2 system-ui, sans-serif; letter-spacing: .07em; text-transform: uppercase; }
+.coachPlayerProfileSection h3 { margin: 6px 0 15px; color: var(--sl-ink, #171a18); font: 780 24px/1.05 system-ui, sans-serif; letter-spacing: -.04em; }
+.coachPlayerProfileSection > p { margin: 0; color: var(--sl-muted, #68706a); font: 500 13px/1.55 system-ui, sans-serif; }
+.coachPlayerProfileDrill { display: flex; justify-content: space-between; gap: 14px; padding: 12px 0; border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+.coachPlayerProfileDrill strong,.coachPlayerProfileDrill small { display: block; }
+.coachPlayerProfileDrill strong { color: var(--sl-ink, #171a18); font: 720 14px/1.35 system-ui, sans-serif; }
+.coachPlayerProfileDrill small { margin-top: 4px; color: var(--sl-muted, #68706a); font: 500 12px/1.4 system-ui, sans-serif; }
+.coachPlayerProfileDrill em { color: var(--sl-accent, #71851f); font: 790 23px/1 system-ui, sans-serif; font-style: normal; text-align: right; }
+.coachPlayerProfileDrill em small { font-size: 11px; text-transform: uppercase; }
+.coachPlayerProfileSection dl { display: grid; gap: 0; margin: 0; }
+.coachPlayerProfileSection dl div { padding: 12px 0; border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+.coachPlayerProfileSection dt { color: var(--sl-muted, #68706a); font: 650 12px/1.3 system-ui, sans-serif; }
+.coachPlayerProfileSection dd { margin: 4px 0 0; color: var(--sl-ink, #171a18); font: 720 14px/1.4 system-ui, sans-serif; }
+
+.coachPlayerDataManagement { overflow: hidden; border: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); border-radius: 18px; background: #fff; color: var(--sl-ink, #171a18); }
+.coachPlayerDataManagement__summary { display: flex; justify-content: space-between; align-items: center; gap: 14px; min-height: 64px; padding: 14px 17px; cursor: pointer; list-style: none; }
+.coachPlayerDataManagement__summary::-webkit-details-marker { display: none; }
+.coachPlayerDataManagement__summary span { display: grid; gap: 4px; }
+.coachPlayerDataManagement__summary small { color: var(--sl-muted, #68706a); font: 700 11px/1.2 system-ui, sans-serif; letter-spacing: .06em; text-transform: uppercase; }
+.coachPlayerDataManagement__summary strong { color: var(--sl-ink, #171a18); font: 740 15px/1.25 system-ui, sans-serif; }
+.coachPlayerDataManagement__summary em { padding: 7px 10px; border-radius: 999px; background: #f1f2ed; color: #59625b; font: 760 11px/1 system-ui, sans-serif; font-style: normal; text-transform: uppercase; }
+.coachPlayerDataManagement__body { padding: 17px; border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+.coachPlayerDataManagement__body > p { margin: 0 0 14px; color: var(--sl-muted, #68706a); font: 500 13px/1.55 system-ui, sans-serif; }
+.coachPlayerDataManagement__summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--sl-accent, #71851f) 30%, transparent); outline-offset: -3px; }
+
+/* Coach administration: calm governance surfaces stay separate from roster work. */
+.coachAdministrationWorkspace { gap: 26px; }
+
+.coachAdministrationPulse {
+  display: grid;
+  gap: 4px;
+  padding-left: 20px;
+  border-left: 1px solid rgba(255, 255, 255, .1);
+}
+
+.coachAdministrationPulse strong {
+  color: #f5f7f4;
+  font: 800 clamp(42px, 8vw, 58px)/.9 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.07em;
+}
+
+.coachAdministrationPulse span {
+  color: var(--sl-accent, #c8ff1a);
+  font: 740 12px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coachAdministrationPulse small {
+  color: #919c94;
+  font: 520 12px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coachAdministrationSection {
+  display: grid;
+  gap: 20px;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
+  color: var(--sl-ink, #171a18);
+}
+
+.coachAdministrationSection > header { max-width: 700px; }
+.coachAdministrationSection > header > span,
+.coachAdministrationCard > span {
+  color: var(--sl-accent, #71851f);
+  font: 760 11px/1.2 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.coachAdministrationSection > header h2 {
+  margin: 6px 0 0;
+  color: var(--sl-ink, #171a18);
+  font: 790 clamp(28px, 5vw, 38px)/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.045em;
+}
+
+.coachAdministrationSection > header p,
+.coachSeasonArchivePanel > p,
+.coachAdministrationCard > p {
+  max-width: 65ch;
+  margin: 8px 0 0;
+  color: var(--sl-muted, #68706a);
+  font: 500 14px/1.55 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coachSeasonArchivePanel {
+  display: grid;
+  gap: 16px;
+  padding: 20px;
+  border: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
+  border-radius: 20px;
+  background: rgba(255, 255, 255, .78);
+  box-shadow: 0 16px 42px rgba(31, 37, 35, .055);
+}
+
+.coachAdministrationSectionTitle {
+  color: var(--sl-ink, #171a18);
+  font: 790 22px/1 -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  letter-spacing: -.035em;
+}
+
+.coachAdministrationNotice {
+  padding: 11px 13px;
+  border: 1px solid color-mix(in srgb, var(--sl-accent, #71851f) 24%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--sl-accent, #71851f) 7%, #fff);
+  color: #44551b;
+  font: 680 13px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif;
+}
+
+.coachSeasonArchiveForm {
+  display: grid;
+  grid-template-columns: 1.35fr 1fr 1fr;
+  gap: 12px;
+  align-items: end;
+}
+
+.coachAdministrationWorkspace :is(.coachSeasonArchivePanel, .coachAdministrationCard) label {
+  color: #4d5750 !important;
+  font-size: 12px !important;
+  letter-spacing: .06em !important;
+}
+
+.coachAdministrationWorkspace :is(.coachSeasonArchivePanel, .coachAdministrationCard) :is(input, select, textarea) {
+  min-height: var(--control-height, 48px) !important;
+  border: 1px solid var(--sl-line-strong, rgba(23, 26, 24, .16)) !important;
+  border-radius: 12px !important;
+  background: #fbfbf8 !important;
+  color: var(--sl-ink, #171a18) !important;
+  font: 520 15px/1.3 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif !important;
+  box-shadow: none !important;
+}
+
+.coachAdministrationWorkspace :is(input, select, textarea):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sl-accent, #71851f) 25%, transparent) !important;
+  outline-offset: 2px !important;
+}
+
+.coachSeasonArchivePanel > .cta-primary {
+  width: fit-content !important;
+  min-width: 170px;
+  margin: 0 !important;
+  color: #151a12 !important;
+}
+
+.coachSeasonArchiveConfirm {
+  padding: 16px;
+  border: 1px solid color-mix(in srgb, var(--sl-accent, #71851f) 22%, transparent);
+  border-radius: 16px;
+  background: #f8f9f3;
+}
+
+.coachSeasonArchiveConfirm > p { margin: 0; color: #59625b; font: 500 13px/1.55 system-ui, sans-serif; }
+.coachSeasonArchiveConfirm > div { display: flex; gap: 9px; margin-top: 13px; }
+.coachSeasonArchiveConfirm button,
+.seasonArchiveDetail > button {
+  min-height: var(--touch-target, 44px);
+  padding: 0 14px;
+  border: 1px solid var(--sl-line-strong, rgba(23, 26, 24, .16));
+  border-radius: 11px;
+  background: #fff;
+  color: var(--sl-ink, #171a18);
+  font: 720 13px/1 system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.coachSeasonArchiveConfirm button:last-child { border-color: #202421; background: #202421; color: #fff; }
+.coachSeasonArchiveList { padding-top: 2px; }
+.coachSeasonArchiveList > h3 { margin: 0 0 8px; color: #4e5851; font: 760 12px/1.2 system-ui, sans-serif; letter-spacing: .07em; text-transform: uppercase; }
+.coachSeasonArchiveList > button {
+  width: 100%;
+  min-height: 68px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 20px;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 2px;
+  border: 0;
+  border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
+  background: transparent;
+  color: var(--sl-ink, #171a18);
+  text-align: left;
+  cursor: pointer;
+}
+.coachSeasonArchiveList > button span { display: grid; gap: 4px; }
+.coachSeasonArchiveList > button span:nth-child(2) { text-align: right; }
+.coachSeasonArchiveList > button strong { font: 720 14px/1.25 system-ui, sans-serif; }
+.coachSeasonArchiveList > button small { color: var(--sl-muted, #68706a); font: 520 12px/1.25 system-ui, sans-serif; }
+
+.coachAdministrationEmpty {
+  display: grid;
+  gap: 5px;
+  padding: 18px;
+  border: 1px dashed var(--sl-line-strong, rgba(23, 26, 24, .16));
+  border-radius: 15px;
+  background: #fafaf7;
+}
+.coachAdministrationEmpty strong { font: 730 14px/1.3 system-ui, sans-serif; }
+.coachAdministrationEmpty span { color: var(--sl-muted, #68706a); font: 500 13px/1.45 system-ui, sans-serif; }
+
+.seasonArchiveDetail {
+  display: grid;
+  gap: 16px;
+  margin-top: 12px;
+  padding: 18px;
+  border: 1px solid var(--sl-line, rgba(23, 26, 24, .1));
+  border-radius: 18px;
+  background: #fff;
+}
+.seasonArchiveDetail > button { width: fit-content; }
+.seasonArchiveDetail header > span { color: var(--sl-accent, #71851f); font: 760 11px/1.2 system-ui, sans-serif; letter-spacing: .08em; text-transform: uppercase; }
+.seasonArchiveDetail header h3 { margin: 5px 0 0; color: var(--sl-ink, #171a18); font: 790 26px/1 system-ui, sans-serif; letter-spacing: -.04em; }
+.seasonArchiveDetail header p { margin: 7px 0 0; color: var(--sl-muted, #68706a); font: 500 13px/1.45 system-ui, sans-serif; }
+.seasonArchiveStats { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); overflow: hidden; border: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); border-radius: 15px; }
+.seasonArchiveStat { min-width: 0; padding: 14px; }
+.seasonArchiveStat + .seasonArchiveStat { border-left: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+.seasonArchiveStat strong,.seasonArchiveStat span { display: block; }
+.seasonArchiveStat strong { color: var(--sl-ink, #171a18); font: 790 24px/1 system-ui, sans-serif; letter-spacing: -.04em; }
+.seasonArchiveStat span { margin-top: 5px; color: var(--sl-muted, #68706a); font: 700 11px/1.25 system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase; }
+.seasonArchiveSections { display: grid; gap: 0; border-block: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+.seasonArchiveSections section { padding: 16px 0; }
+.seasonArchiveSections section + section { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+.seasonArchiveSections h4 { margin: 0 0 8px; color: var(--sl-ink, #171a18); font: 760 13px/1.3 system-ui, sans-serif; letter-spacing: .05em; text-transform: uppercase; }
+.seasonArchiveSections p { margin: 0; padding: 7px 0; color: #5d665f; font: 500 13px/1.45 system-ui, sans-serif; }
+.seasonArchiveSections p + p { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+
+.coachNewSeasonWorkspace { padding-top: 4px; }
+.coachAdministrationGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.coachAdministrationCard { min-width: 0; padding: 19px; border: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); border-radius: 18px; background: rgba(255, 255, 255, .74); }
+.coachAdministrationCard h3 { margin: 6px 0 0; color: var(--sl-ink, #171a18); font: 780 20px/1.05 system-ui, sans-serif; letter-spacing: -.025em; }
+.coachAdministrationActions { display: grid; gap: 9px; margin-top: 16px; }
+.coachAdministrationActions .btn-v { width: 100% !important; min-height: var(--control-height, 48px) !important; height: auto !important; margin: 0 !important; }
+.coachAdministrationActions .cta-secondary { border-color: var(--sl-line-strong, rgba(23, 26, 24, .16)) !important; background: #f5f6f1 !important; color: var(--sl-ink, #171a18) !important; }
+.coachAdministrationActions .cta-danger { box-shadow: none !important; }
+.coachAdministrationAccount { overflow: hidden; border: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); border-radius: 18px; background: #fff; }
+
+.coachAdministrationWorkspace :is(button, a):focus-visible,
+.seasonArchiveDetail > button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--sl-accent, #71851f) 28%, transparent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .secondaryPageShell {
+    gap: 22px;
+    padding: 10px var(--layout-gutter, 16px) 96px;
+  }
+
+  .secondaryPageIntro {
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: start;
+    gap: 12px;
+    padding: 8px 0 2px;
+  }
+
+  .secondaryPageIntro__icon { width: 42px; height: 42px; border-radius: 13px; }
+  .secondaryPageIntro__title { font-size: clamp(35px, 10vw, 43px); }
+  .secondaryPageIntro__summary { font-size: var(--type-secondary, 14px); }
+  .secondaryPageIntro__actions { grid-column: 1 / -1; width: 100%; justify-items: start; }
+  .secondaryPageIntro__status { text-align: left; }
+  .secondaryPageIntro__buttonRow { width: 100%; justify-content: flex-start; }
+  .secondaryPageAction { flex: 1 1 0; }
+
+  .secondaryPageToolbar [class*="metricStrip"] {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .secondaryPageToolbar [class*="metricStrip"]::-webkit-scrollbar { display: none; }
+  .secondaryPageToolbar [class*="metricStrip"] > button {
+    min-width: 132px !important;
+    min-height: 92px !important;
+    scroll-snap-align: start;
+  }
+
+  .secondaryPageDecision {
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+    min-height: 0;
+    gap: 14px;
+    padding: 19px 17px 18px;
+    border-radius: 21px;
+  }
+
+  .secondaryPageDecision__icon { width: 40px; height: 40px; border-radius: 12px; }
+  .secondaryPageDecision h2 { font-size: 29px; }
+  .secondaryPageDecision__visual {
+    grid-column: 1 / -1;
+    padding: 15px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, .09);
+    border-left: 0;
+  }
+
+  .secondaryPageEvidence { grid-template-columns: 1fr; }
+  .secondaryPageEvidence > * { padding: 18px 2px !important; }
+  .secondaryPageEvidence > * + * {
+    border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)) !important;
+    border-left: 0 !important;
+  }
+
+  .coachPlayerProfileHero { grid-template-columns: 1fr; padding: 19px 17px; border-radius: 21px 21px 0 0; }
+  .coachPlayerProfileHero__headline { display: flex; align-items: end; justify-content: space-between; min-width: 0; padding: 15px 0 0; border-top: 1px solid rgba(255, 255, 255, .1); border-left: 0; text-align: left; }
+  .coachPlayerProfileHero__headline small { max-width: 130px; text-align: right; }
+  .coachPlayerProfileMetrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .coachPlayerProfileMetric:nth-child(3) { border-left: 0; }
+  .coachPlayerProfileMetric:nth-child(n+3) { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+  .coachPlayerProfileEvidence { grid-template-columns: 1fr; }
+  .coachPlayerProfileSection { padding: 19px 2px; }
+  .coachPlayerProfileSection + .coachPlayerProfileSection { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); border-left: 0; }
+
+  .coachAdministrationPulse { padding: 15px 0 0; border-top: 1px solid rgba(255, 255, 255, .1); border-left: 0; }
+  .coachSeasonArchiveForm,
+  .coachAdministrationGrid { grid-template-columns: 1fr; }
+  .coachSeasonArchivePanel { padding: 17px; border-radius: 18px; }
+  .coachSeasonArchivePanel > .cta-primary { width: 100% !important; }
+  .seasonArchiveStats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .seasonArchiveStat:nth-child(odd) { border-left: 0; }
+  .seasonArchiveStat:nth-child(n+3) { border-top: 1px solid var(--sl-line, rgba(23, 26, 24, .1)); }
+}
+
+@media (max-width: 390px) {
+  .secondaryPageIntro { grid-template-columns: 40px minmax(0, 1fr); }
+  .secondaryPageIntro__icon { width: 40px; height: 40px; border-radius: 12px; }
+  .secondaryPageIntro__title { font-size: 34px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .secondaryPageAction,
+  .secondaryPageDecision button { transition: none; }
+  .secondaryPageAction:active:not(:disabled),
+  .secondaryPageDecision button:active:not(:disabled) { transform: none; }
+  .secondaryPageDecision::after { filter: none; }
+}

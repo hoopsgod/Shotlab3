@@ -94,6 +94,14 @@ jobs:
         run: npm run build
       - name: Coach-to-player invitation, response, assignment, deadline, player priority, history, effectiveness, quick assign, and accountability browser flows
         run: npx playwright test tests/e2e/coach-player-invitation.spec.mjs tests/e2e/coach-player-cross-device-first-result.spec.mjs tests/e2e/coach-player-assignment-delivery.spec.mjs tests/e2e/coach-assignment-accountability.spec.mjs tests/e2e/coach-quick-assign.spec.mjs tests/e2e/coach-assignment-deadline.spec.mjs tests/e2e/player-assignment-next-action.spec.mjs tests/e2e/coach-assignment-history.spec.mjs tests/e2e/coach-assignment-effectiveness.spec.mjs
+      - name: Upload Coach browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coach-player-invitation-browser-evidence
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Live provision, claim, login, replay, and cleanup verification
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}

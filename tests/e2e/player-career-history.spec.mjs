@@ -162,6 +162,16 @@ async function enterDemo(page, roleName) {
   await button.click();
 }
 
+async function openFullProgressProfileIfPresent(page) {
+  const fullProfile = page.getByTestId("player-progress-full-profile");
+  if (!(await fullProfile.count())) return;
+  await expect(fullProfile).toBeVisible();
+  if (!(await fullProfile.getAttribute("open"))) {
+    await fullProfile.locator(":scope > summary").click();
+  }
+  await expect(fullProfile).toHaveAttribute("open", "");
+}
+
 async function expectCareerSeasons(career, viewerRole) {
   await expect(career).toBeVisible();
   await expect(career).toHaveAttribute("data-viewer-role", viewerRole);
@@ -182,10 +192,26 @@ test.beforeEach(async ({ page }) => {
 test("player sees current and archived career history on Profile without horizontal overflow", async ({ page }) => {
   await page.goto("/");
   await enterDemo(page, "Demo Player");
-  await page.getByTestId("mobile-navigation-more").click();
-  await page.getByTestId("mobile-navigation-sheet").getByRole("button", { name: "Profile", exact: true }).click();
+  const dock = page.getByTestId("mobile-navigation-dock");
+  await expect(dock).toHaveAttribute("data-navigation-intent", "development-first");
+  await dock.getByRole("button", { name: "Progress", exact: true }).click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await openFullProgressProfileIfPresent(page);
+
+  const careerDisclosure = page.getByTestId("player-profile-career-disclosure");
   const career = page.getByTestId("player-career-history");
+  await expect(careerDisclosure).toBeVisible();
+  await expect(career).toBeHidden();
+
+  await careerDisclosure.locator(":scope > summary").click();
+  await expect(careerDisclosure).toHaveAttribute("open", "");
+  await expect(career).toBeVisible();
+
+  const detailDisclosure = career.getByTestId("player-career-detail-disclosure");
+  await detailDisclosure.locator(":scope > summary").click();
+  await expect(detailDisclosure).toHaveAttribute("open", "");
   await expectCareerSeasons(career, "player");
+
   const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   expect(overflow).toBeLessThanOrEqual(1);
 });
@@ -194,7 +220,13 @@ test("coach sees the shared career record and can open its immutable archive", a
   await page.goto("/");
   await enterDemo(page, "Demo Coach");
   await page.getByRole("button", { name: "Players", exact: true }).first().click();
-  await page.getByText("DEMO PLAYER", { exact: true }).last().click();
+
+  await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
+
+  await page
+    .locator("#coach-roster-operations")
+    .getByRole("button", { name: /Demo Player/i })
+    .click();
   await page.getByRole("button", { name: "Open Full Profile", exact: true }).click();
   const career = page.getByTestId("player-career-history");
   await expectCareerSeasons(career, "coach");

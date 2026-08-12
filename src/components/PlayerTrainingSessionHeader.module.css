@@ -1,0 +1,180 @@
+.root {
+  display: grid;
+  gap: 16px;
+  margin: 0 0 18px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(200,255,26,.14), transparent 34%),
+    linear-gradient(155deg,#20231f 0%,#121512 58%,#0b0d0b 100%);
+  box-shadow: 0 22px 44px rgba(21,26,22,.17);
+  color: #f8faf5;
+}
+
+.topline,
+.hero,
+.targetRow {
+  display: flex;
+  align-items: center;
+}
+
+.topline {
+  gap: 10px;
+}
+
+.back {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 12px;
+  background: rgba(255,255,255,.045);
+  color: #f8faf5;
+  font: 700 17px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  cursor: pointer;
+}
+
+.mode {
+  color: var(--accent,#c8ff1a);
+  font: 820 9px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  letter-spacing: .12em;
+}
+
+.step {
+  margin-left: auto;
+  color: rgba(246,249,242,.52);
+  font: 700 9px/1 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  letter-spacing: .05em;
+}
+
+.hero {
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.mark {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(200,255,26,.2);
+  border-radius: 17px;
+  background: rgba(200,255,26,.07);
+  color: var(--accent,#c8ff1a);
+}
+
+.mark svg {
+  width: 25px;
+  height: 25px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.copy {
+  min-width: 0;
+}
+
+.eyebrow,
+.targetRow span {
+  color: rgba(242,246,238,.45);
+  font: 800 8px/1.2 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+  letter-spacing: .11em;
+}
+
+.copy h1 {
+  margin: 6px 0 0;
+  color: #f8faf5;
+  font: 790 clamp(29px,7.6vw,38px)/.96 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+  letter-spacing: -.05em;
+}
+
+.copy p {
+  margin: 8px 0 0;
+  color: rgba(242,246,238,.56);
+  font: 570 12px/1.45 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;
+}
+
+.targetRow {
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.targetRow > div {
+  display: grid;
+  gap: 4px;
+}
+
+.targetRow strong {
+  color: #f8faf5;
+  font: 760 16px/1 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;
+}
+
+.liveScore {
+  text-align: right;
+}
+
+.liveScore strong {
+  color: var(--accent,#c8ff1a);
+  font-size: 24px;
+}
+
+.liveScore small {
+  color: rgba(242,246,238,.45);
+  font-size: 12px;
+}
+
+.progressTrack,
+.scoreProgress {
+  overflow: hidden;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.08);
+}
+
+.progressTrack i,
+.scoreProgress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent,#c8ff1a);
+  transition: width .18s ease;
+}
+
+.scoreProgress {
+  height: 3px;
+  margin-top: -9px;
+  background: rgba(200,255,26,.07);
+}
+
+@media (max-width: 390px) {
+  .root {
+    padding: 16px;
+    border-radius: 24px;
+  }
+
+  .copy h1 {
+    font-size: 28px;
+  }
+
+  .mark {
+    width: 46px;
+    height: 46px;
+    border-radius: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .progressTrack i,
+  .scoreProgress span {
+    transition: none;
+  }
+}

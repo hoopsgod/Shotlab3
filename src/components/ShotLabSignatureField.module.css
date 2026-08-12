@@ -1,0 +1,147 @@
+.root {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  color: var(--team-brand-primary, var(--accent, #c8ff1a));
+  opacity: .82;
+  isolation: isolate;
+}
+
+.court,
+.ball {
+  position: absolute;
+  fill: none;
+  stroke: currentColor;
+  vector-effect: non-scaling-stroke;
+}
+
+.court {
+  width: 430px;
+  height: 308px;
+  right: -172px;
+  bottom: -88px;
+  opacity: .16;
+  transform: rotate(-5deg);
+  filter: drop-shadow(0 0 18px color-mix(in srgb, currentColor 10%, transparent));
+}
+
+.court path,
+.court circle {
+  stroke-width: 1.35;
+}
+
+.boundary { opacity: .48; }
+.centerLine,
+.centerCircle { opacity: .44; }
+.key,
+.arc { opacity: .88; }
+.backboard,
+.rim { opacity: 1; stroke-width: 1.8 !important; }
+.cornerTop,
+.cornerBottom { opacity: .72; }
+
+.ball {
+  width: 104px;
+  height: 104px;
+  right: 34px;
+  top: 42px;
+  opacity: .115;
+  transform: rotate(11deg);
+}
+
+.ball circle,
+.ball path { stroke-width: 2.1; }
+
+.trajectory {
+  position: absolute;
+  right: 64px;
+  top: 150px;
+  width: 126px;
+  height: 72px;
+  transform: rotate(-8deg);
+}
+
+.trajectory::before {
+  content: "";
+  position: absolute;
+  inset: 4px 0 0;
+  border-top: 1px dashed color-mix(in srgb, currentColor 55%, transparent);
+  border-radius: 50% 50% 0 0;
+  transform: rotate(-18deg);
+  opacity: .28;
+}
+
+.trajectory span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 10px color-mix(in srgb, currentColor 45%, transparent);
+  opacity: .34;
+}
+
+.trajectory span:nth-child(1) { left: 4px; bottom: 9px; }
+.trajectory span:nth-child(2) { left: 29px; bottom: 29px; }
+.trajectory span:nth-child(3) { left: 58px; bottom: 43px; }
+.trajectory span:nth-child(4) { left: 89px; bottom: 36px; }
+.trajectory span:nth-child(5) { right: 4px; bottom: 16px; }
+
+.wordmark {
+  position: absolute;
+  right: 26px;
+  bottom: 22px;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -.08em;
+  color: currentColor;
+  opacity: .055;
+}
+
+.trajectoryVariant .court { right: -214px; bottom: -122px; opacity: .11; }
+.trajectoryVariant .ball { right: 18px; top: 18px; width: 132px; height: 132px; opacity: .09; }
+.trajectoryVariant .trajectory { right: 92px; top: 128px; transform: rotate(-14deg) scale(1.12); }
+
+.identity .court {
+  width: 520px;
+  height: 370px;
+  right: -244px;
+  bottom: -102px;
+  opacity: .10;
+  transform: rotate(-9deg);
+}
+.identity .ball {
+  width: 176px;
+  height: 176px;
+  right: -28px;
+  top: 76px;
+  opacity: .075;
+}
+.identity .trajectory {
+  right: 118px;
+  top: 206px;
+  transform: rotate(-12deg) scale(1.35);
+  opacity: .78;
+}
+.identity .wordmark {
+  right: 22px;
+  bottom: 10px;
+  font-size: 92px;
+  opacity: .035;
+}
+
+@media (max-width: 620px) {
+  .court { right: -214px; bottom: -104px; opacity: .14; }
+  .ball { width: 92px; height: 92px; right: 15px; top: 52px; }
+  .trajectory { right: 40px; top: 152px; transform: rotate(-10deg) scale(.92); }
+  .wordmark { right: 20px; bottom: 16px; font-size: 50px; }
+  .identity .court { right: -286px; bottom: -118px; opacity: .085; }
+  .identity .ball { width: 150px; height: 150px; right: -30px; top: 92px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root, .root * { animation: none !important; transition: none !important; }
+}

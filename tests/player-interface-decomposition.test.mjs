@@ -88,13 +88,10 @@ test('Daily Command Center imports Player-isolated primitives directly', () => {
   assert.doesNotMatch(dailyPrimitives, /ExperiencePrimitives\.jsx/)
 })
 
-test('Player interface stays route-aligned while assignment card joins Player Profile', () => {
-  for (const boundary of boundaries) {
-    assert.ok(viteConfig.includes(boundary.implementationPath))
-  }
-  assert.ok(viteConfig.includes('/src/components/PlayerDailyPrimitives.jsx'))
-  assert.match(viteConfig, /return ["']PlayerInterfaceWorkspaces["']/)
-  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/PlayerCoachAssignmentCard\.jsx["']\)/)
-  assert.match(viteConfig, /return ["']PlayerProfileWorkspaces["']/)
+test('Player interface and assignment surfaces share one role workspace chunk', () => {
+  assert.match(viteConfig, /PLAYER_WORKSPACE_FRAGMENTS/)
+  assert.match(viteConfig, /['"]\/src\/components\/Player['"]/)
+  assert.match(viteConfig, /return ["']PlayerWorkspaces["']/)
+  assert.doesNotMatch(viteConfig, /return ["'](?:PlayerInterfaceWorkspaces|PlayerProfileWorkspaces)["']/)
   assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })

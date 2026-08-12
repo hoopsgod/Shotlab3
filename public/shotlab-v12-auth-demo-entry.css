@@ -62,6 +62,64 @@ html body:has(.auth-card-enter) .auth-card-enter > div:not(.auth-demo-enter):has
   text-transform:none!important;
 }
 
+/* Entry regression lock — the auth content wrapper previously inherited a
+   legacy dark .fade-up treatment, producing the large black/charcoal block
+   visible above the sign-in card on iPhone. Auth owns a light canvas, so keep
+   this wrapper and any legacy decorative pseudo-elements transparent. */
+[data-testid="auth-workspace"] > .fade-up{
+  background:transparent!important;
+  background-image:none!important;
+  color:#111a21!important;
+  box-shadow:none!important;
+  filter:none!important;
+  opacity:1!important;
+}
+[data-testid="auth-workspace"] > .fade-up::before,
+[data-testid="auth-workspace"] > .fade-up::after{
+  content:none!important;
+  display:none!important;
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+[data-testid="auth-workspace"] > .fade-up > header,
+[data-testid="auth-workspace"] > .fade-up > section{
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+
+/* First-paint logo safety — DashboardIdentityHeader is role-chunk styled. On a
+   cold Player Demo launch the high-resolution team PNG could paint at its
+   natural dimensions before that CSS chunk arrived. These eager constraints
+   are loaded with the auth shell, so the logo can never expand to viewport size. */
+[data-testid="player-dashboard-identity-header"],
+[data-testid="coach-dashboard-identity-header"]{
+  overflow:hidden!important;
+}
+[data-testid="player-dashboard-identity-header"] img,
+[data-testid="coach-dashboard-identity-header"] img{
+  display:block!important;
+  width:96px!important;
+  height:92px!important;
+  max-width:96px!important;
+  max-height:92px!important;
+  object-fit:contain!important;
+  background:transparent!important;
+}
+
+@media(max-width:700px){
+  [data-testid="player-dashboard-identity-header"] img,
+  [data-testid="coach-dashboard-identity-header"] img{
+    width:72px!important;
+    height:70px!important;
+    max-width:72px!important;
+    max-height:70px!important;
+  }
+}
+
 @media(max-width:390px){
   .auth-demo-enter{grid-template-columns:1fr!important}
   .auth-demo-enter::before{grid-column:1!important}

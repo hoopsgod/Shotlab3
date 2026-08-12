@@ -1,0 +1,82 @@
+name: Phase 4A Interaction State Audit
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: phase-4a-interaction-state-audit-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  interaction-state-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build exact production bundle
+        run: npm run build
+
+      - name: Start exact built production preview
+        run: |
+          npm run preview:agent > /tmp/phase-4a-interaction-preview.log 2>&1 &
+          for attempt in {1..40}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/phase-4a-interaction-preview.log
+          exit 1
+
+      - name: Audit iPhone interaction ergonomics and state behavior
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-4a-interaction-state-audit.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line --timeout=120000 --retries=0
+
+      - name: Upload Phase 4A interaction evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-4a-interaction-state-audit
+          path: artifacts/phase-4a-interaction-state-audit/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-4a-interaction-state-audit-failure
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/phase-4a-interaction-preview.log
+          if-no-files-found: ignore
+          retention-days: 7

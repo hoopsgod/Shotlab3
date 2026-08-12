@@ -129,9 +129,16 @@ async function openAndVerifyMoreSheet(page, role) {
   await expect(sheet).toHaveAttribute("role", "dialog");
   await expect(sheet).toHaveAttribute("aria-modal", "true");
   await expect(sheet.getByText(role === "coach" ? "Coach workspace" : "Player workspace")).toBeVisible();
-  await expect(sheet.getByRole("heading", { name: "Everything else, organized" })).toBeVisible();
+  await expect(sheet.getByRole("heading", { name: role === "player" ? "More" : "Everything else, organized" })).toBeVisible();
   await expect(page.locator('[data-navigation-group="program"]')).toBeVisible();
   await expect(page.locator('[data-navigation-group="team"]')).toBeVisible();
+
+  // The sheet enters with a short native-style translate animation. Verify the
+  // settled geometry rather than sampling the transient transform mid-frame.
+  await expect.poll(
+    () => sheet.evaluate((element) => window.innerHeight - element.getBoundingClientRect().bottom),
+    { timeout: 1_000 },
+  ).toBeGreaterThanOrEqual(8);
 
   const sheetGeometry = await sheet.evaluate((element) => {
     const rect = element.getBoundingClientRect();

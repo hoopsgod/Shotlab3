@@ -14,17 +14,23 @@ const STORAGE_KEYS = Object.freeze({
 const DEMO_TEAM_ID = "team-demo-titans";
 const DEMO_TIMESTAMP = Date.parse("2026-03-20T12:00:00.000Z");
 
+const padDatePart = (value) => String(value).padStart(2, "0");
+export const localDateKey = (value = new Date()) => {
+  const date = value instanceof Date ? value : new Date(value);
+  return `${date.getFullYear()}-${padDatePart(date.getMonth() + 1)}-${padDatePart(date.getDate())}`;
+};
+
 const relativeDate = (days = 0) => {
   const date = new Date();
-  date.setUTCHours(12, 0, 0, 0);
-  date.setUTCDate(date.getUTCDate() + days);
-  return date.toISOString().slice(0, 10);
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + days);
+  return localDateKey(date);
 };
 
 const relativeTimestamp = (days = 0, hour = 18, minute = 0) => {
   const date = new Date();
-  date.setUTCHours(hour, minute, 0, 0);
-  date.setUTCDate(date.getUTCDate() + days);
+  date.setHours(hour, minute, 0, 0);
+  date.setDate(date.getDate() + days);
   return date.getTime();
 };
 
@@ -142,10 +148,84 @@ export function buildDemoDataBundle({ teamId = DEMO_TEAM_ID, coachEmail = null, 
   };
 }
 
+function parseStored(value, fallback) {
+  if (value == null) return fallback;
+  if (typeof value !== "string") return value;
+  try { return JSON.parse(value); } catch { return fallback; }
+}
+
+export function unwrapManagedStorageValue(result) {
+  if (result && typeof result === "object" && Object.prototype.hasOwnProperty.call(result, "value")) return result.value;
+  return result;
+}
+
+async function readStored(key, fallback) {
+  if (typeof window === "undefined") return fallback;
+  try {
+    if (window.storage && typeof window.storage.get === "function") {
+      const result = await window.storage.get(key);
+      const parsed = parseStored(unwrapManagedStorageValue(result), null);
+      if (parsed != null) return parsed;
+    }
+  } catch {}
+  return parseStored(window.localStorage?.getItem(key), fallback);
+}
+
+async function writeStored(key, value) {
+  const json = JSON.stringify(value);
+  if (typeof window === "undefined") return;
+  if (window.localStorage) window.localStorage.setItem(key, json);
+  if (window.storage && typeof window.storage.set === "function") {
+    await window.storage.set(key, json, true);
+  }
+}
+
+const normalizeIdentity = (value) => String(value || "").trim().toLowerCase();
+const rowTeamId = (row) => String(row?.teamId ?? row?.team_id ?? "").trim();
+
+function demoIdentitySet(payload) {
+  const identities = new Set();
+  for (const row of payload.players || []) {
+    for (const value of [row.email, row.playerId, row.player_id, row.userId, row.user_id]) {
+      const normalized = normalizeIdentity(value);
+      if (normalized) identities.add(normalized);
+    }
+  }
+  for (const row of payload.playerProfiles || []) {
+    for (const value of [row.email, row.playerId, row.player_id, row.userId, row.user_id]) {
+      const normalized = normalizeIdentity(value);
+      if (normalized) identities.add(normalized);
+    }
+  }
+  return identities;
+}
+
+function rowUsesManagedDemoIdentity(row, identities) {
+  return [row?.email, row?.player_email, row?.playerEmail, row?.playerId, row?.player_id, row?.userId, row?.user_id]
+    .map(normalizeIdentity)
+    .some((value) => value && identities.has(value));
+}
+
+export function mergeDemoCollection(existing, incoming, { teamId = "", managedIdentities = new Set(), teamsOnly = false } = {}) {
+  const prior = Array.isArray(existing) ? existing : [];
+  const next = Array.isArray(incoming) ? incoming : [];
+  const incomingIds = new Set(next.map((row) => String(row?.id || "")).filter(Boolean));
+  const preserved = prior.filter((row) => {
+    if (incomingIds.has(String(row?.id || ""))) return false;
+    if (teamsOnly) return String(row?.id || "") !== String(teamId || "");
+    if (teamId && rowTeamId(row) === String(teamId)) return false;
+    if (rowUsesManagedDemoIdentity(row, managedIdentities)) return false;
+    return true;
+  });
+  return [...preserved, ...next];
+}
+
 export async function applyDemoData(bundle) {
   const payload = bundle || buildDemoDataBundle();
-  const keys = [
-    ["sl:teams", payload.teams || []],
+  const teamId = String(payload.demoMeta?.teamId || payload.teams?.[0]?.id || "");
+  const managedIdentities = demoIdentitySet(payload);
+  const collections = [
+    ["sl:teams", payload.teams || [], { teamsOnly: true }],
     ["sl:players", payload.players || []],
     ["sl:player-profiles", payload.playerProfiles || []],
     ["sl:events", payload.events || []],
@@ -153,17 +233,14 @@ export async function applyDemoData(bundle) {
     ["sl:scores", payload.scores || []],
     ["sl:shotlogs", payload.shotLogs || []],
     ["sl:progress-snapshots", payload.progressSnapshots || []],
-    ["sl:demo-data-meta", payload.demoMeta || {}],
   ];
-  for (const [key, value] of keys) {
-    const json = JSON.stringify(value);
-    if (typeof window !== "undefined") {
-      if (window.localStorage) window.localStorage.setItem(key, json);
-      if (window.storage && typeof window.storage.set === "function") {
-        await window.storage.set(key, json, true);
-      }
-    }
+
+  for (const [key, incoming, options = {}] of collections) {
+    const existing = await readStored(key, []);
+    const merged = mergeDemoCollection(existing, incoming, { teamId, managedIdentities, ...options });
+    await writeStored(key, merged);
   }
+  await writeStored("sl:demo-data-meta", payload.demoMeta || {});
 }
 
 export async function clearDemoData() {

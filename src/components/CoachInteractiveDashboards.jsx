@@ -36,15 +36,15 @@ const resolveEventAction = (action, { onStatusChange, onCreateEvent, onOpenEvent
 export function CoachPlayersInteractiveDashboard({ metrics = {}, rows = [], filter, query, onFilterChange, onQueryChange, onAddPlayer, onOpenArchives }) {
   const briefing = buildCoachPlayerActionBriefing({ metrics, rows });
   const metricItems = [
-    { key: "all", label: "Roster", value: briefing.total, detail: "Active team players", evidence: rows.slice(0, 8).map((row) => row.engagementScore || 0), evidenceLabel: "Roster engagement distribution" },
-    { key: "active", label: "Active This Week", value: briefing.active, detail: `${briefing.activeRate}% of roster`, tone: "positive", evidence: rows.slice(0, 8).map((row) => row.statusKey === "active" ? 100 : row.statusKey === "attention" ? 45 : 8), evidenceLabel: "Current activity distribution" },
-    { key: "attention", label: "Needs Attention", value: briefing.attentionRows.length, detail: briefing.noActivityRows.length ? `${briefing.noActivityRows.length} with no activity` : "No current-week activity", tone: "attention", evidence: rows.slice(0, 8).map((row) => row.statusKey === "new" ? 100 : row.statusKey === "attention" ? 65 : 10), evidenceLabel: "Attention-risk distribution" },
-    { key: "leaders", label: "Weekly Makes", value: Number(metrics.weeklyMakes) || 0, detail: `${Number(metrics.weeklyActions) || 0} logged actions`, tone: "info", evidence: rows.slice(0, 8).map((row) => row.weeklyMakes || 0), evidenceLabel: "Weekly makes distribution" },
+    { key: "all", label: "Roster", displayLabel: "Roster", value: briefing.total, detail: "Active team players", evidence: rows.slice(0, 8).map((row) => row.engagementScore || 0), evidenceLabel: "Roster engagement distribution" },
+    { key: "active", label: "Active This Week", displayLabel: "Active", value: briefing.active, detail: `${briefing.activeRate}% of roster`, tone: "positive", evidence: rows.slice(0, 8).map((row) => row.statusKey === "active" ? 100 : row.statusKey === "attention" ? 45 : 8), evidenceLabel: "Current activity distribution" },
+    { key: "attention", label: "Needs Attention", displayLabel: "Attention", value: briefing.attentionRows.length, detail: briefing.noActivityRows.length ? `${briefing.noActivityRows.length} with no activity` : "No current-week activity", tone: "attention", evidence: rows.slice(0, 8).map((row) => row.statusKey === "new" ? 100 : row.statusKey === "attention" ? 65 : 10), evidenceLabel: "Attention-risk distribution" },
+    { key: "leaders", label: "Weekly Makes", displayLabel: "Weekly Makes", value: Number(metrics.weeklyMakes) || 0, detail: `${Number(metrics.weeklyActions) || 0} logged actions`, tone: "info", evidence: rows.slice(0, 8).map((row) => row.weeklyMakes || 0), evidenceLabel: "Weekly makes distribution" },
   ];
 
   return (
     <SecondaryPageShell testId="coach-players-interactive-dashboard">
-      <SecondaryPageIntro eyebrow="Roster intelligence" title="Players" summary="See who is progressing, where engagement is slipping, and the coaching action that matters next." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "archives", label: "Season Tools", onClick: onOpenArchives }]} testId="coach-players-command-bar" />
+      <SecondaryPageIntro eyebrow="Roster intelligence" title="Players" summary="See who is progressing, where engagement is slipping, and the coaching action that matters next." status={`${briefing.active}/${briefing.total || 0} active this week`} actions={[{ key: "add", label: "Add Player", onClick: onAddPlayer }, { key: "administration", label: "Team & Account", onClick: onOpenArchives }]} testId="coach-players-command-bar" />
       <SecondaryPageToolbar testId="coach-players-toolbar">
         <InteractiveMetricStrip items={metricItems} activeKey={filter} onSelect={onFilterChange} testId="coach-players-metric-strip" />
         <DashboardFilterRail searchValue={query} onSearchChange={onQueryChange} searchPlaceholder="Search player name or email" filters={[{ key: "all", label: "All", count: briefing.total }, { key: "active", label: "Active", count: briefing.active }, { key: "attention", label: "Attention", count: briefing.attentionRows.length }, { key: "new", label: "No Activity", count: briefing.noActivityRows.length }, { key: "leaders", label: "Top Engagement", count: Math.min(briefing.total, 5) }]} activeFilter={filter} onFilterChange={onFilterChange} testId="coach-players-filter-rail" />
@@ -67,10 +67,10 @@ export function CoachEventsInteractiveDashboard({ metrics = {}, rows = [], statu
   const briefing = buildCoachEventActionBriefing({ metrics, rows });
   const next = briefing.next;
   const metricItems = [
-    { key: "upcoming", label: "Upcoming", value: briefing.upcoming, detail: next ? `Next: ${formatCoachScheduleDate(next.date)}` : "No event scheduled", tone: "info" },
-    { key: "gaps", label: "Missing RSVPs", value: briefing.missing, detail: `${briefing.gapEvents.length} affected events`, tone: "attention" },
-    { key: "all", label: "Response Rate", value: `${briefing.responseRate}%`, detail: `${briefing.confirmed} confirmations`, tone: briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },
-    { key: "past", label: "Completed", value: briefing.past, detail: `${briefing.total} total events` },
+    { key: "upcoming", label: "Upcoming", displayLabel: "Upcoming", value: briefing.upcoming, detail: next ? `Next: ${formatCoachScheduleDate(next.date)}` : "No event scheduled", tone: "info" },
+    { key: "gaps", label: "Missing RSVPs", displayLabel: "RSVP Gaps", value: briefing.missing, detail: `${briefing.gapEvents.length} affected events`, tone: "attention" },
+    { key: "all", label: "Response Rate", displayLabel: "Response", value: `${briefing.responseRate}%`, detail: `${briefing.confirmed} confirmations`, tone: briefing.responseRate >= 80 ? "positive" : briefing.responseRate >= 55 ? "info" : "attention" },
+    { key: "past", label: "Completed", displayLabel: "Completed", value: briefing.past, detail: `${briefing.total} total events` },
   ];
 
   return (
@@ -154,11 +154,6 @@ export function CoachPageDashboardHeader({ eyebrow, title, summary, status, acti
   return (
     <SecondaryPageShell testId={testId}>
       <SecondaryPageIntro eyebrow={eyebrow || model.eyebrow} title={title} summary={summary} status={status} actions={actions} />
-      {metrics.length ? (
-        <SecondaryPageToolbar testId={`${testId}-toolbar`}>
-          <InteractiveMetricStrip items={metrics} activeKey={activeMetric} onSelect={onMetricSelect} testId={`${testId}-metric-strip`} />
-        </SecondaryPageToolbar>
-      ) : null}
       <SecondaryPageDecision
         eyebrow={model.decisionEyebrow}
         title={model.decisionTitle}
@@ -171,6 +166,11 @@ export function CoachPageDashboardHeader({ eyebrow, title, summary, status, acti
           <DashboardProgress value={model.primary.value} max={Math.max(model.primary.value, 1)} label={model.primary.label} detail={model.primary.detail} />
         ) : null}
       </SecondaryPageDecision>
+      {metrics.length ? (
+        <SecondaryPageToolbar testId={`${testId}-toolbar`}>
+          <InteractiveMetricStrip items={metrics} activeKey={activeMetric} onSelect={onMetricSelect} testId={`${testId}-metric-strip`} />
+        </SecondaryPageToolbar>
+      ) : null}
       {model.supporting.length ? (
         <SecondaryPageEvidence testId={`${testId}-evidence`}>
           {model.supporting.map((metric, index) => (

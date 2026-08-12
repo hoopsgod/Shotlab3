@@ -1,0 +1,70 @@
+/* Phase 4D — Premium State System & Final Visual Reconciliation */
+
+.phase4dBootState{
+  min-height:100dvh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:max(28px,env(safe-area-inset-top,0px)) 20px max(28px,env(safe-area-inset-bottom,0px));
+  background:
+    radial-gradient(circle at 78% 12%,color-mix(in srgb,var(--team-brand-primary,var(--accent,#c8ff1a)) 10%,transparent),transparent 29rem),
+    linear-gradient(180deg,#0b1014 0%,#080b0d 100%);
+  color:#f8faf5;
+}
+.phase4dBootStateInner{width:min(100%,430px)}
+.phase4dBootBrand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:0 2px 18px;
+  color:#f8faf5;
+}
+.phase4dBootBrandCopy{min-width:0}
+.phase4dBootBrandTitle{font:820 19px/1 -apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",sans-serif;letter-spacing:-.03em}
+.phase4dBootBrandDetail{margin-top:4px;color:rgba(238,241,235,.56);font:650 10px/1.3 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif;letter-spacing:.055em;text-transform:uppercase}
+
+/* Existing completion confirmation receives the same semantic depth without becoming another hero. */
+[data-command-role="confirmation"]{
+  position:relative;
+  overflow:hidden;
+}
+[data-command-role="confirmation"]::after{
+  content:"";
+  position:absolute;
+  width:84px;
+  height:84px;
+  top:-48px;
+  right:-42px;
+  border:1px solid color-mix(in srgb,var(--semantic-success,#73d59a) 24%,transparent);
+  border-radius:999px;
+  pointer-events:none;
+}
+
+/* Disabled controls should look intentionally unavailable, not merely faded. */
+[data-testid="player-training-session"] button:disabled,
+[data-testid^="player-workspace-"] button:disabled,
+[data-testid^="coach-"] button:disabled,
+[data-testid="mobile-navigation-sheet"] button:disabled{
+  transform:none!important;
+  box-shadow:none!important;
+  filter:saturate(.48) contrast(.92);
+  cursor:not-allowed!important;
+}
+[data-testid="player-training-session"] button:disabled{
+  border-color:rgba(17,26,33,.10)!important;
+}
+
+/* Recovery and first-use panels remain content surfaces, not Liquid Glass. */
+[data-testid^="leaderboard-"][data-state],
+[data-testid^="player-workspace-"][data-state],
+[data-testid^="auth-"][data-state]{
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
+}
+
+@media(max-width:560px){
+  .phase4dBootState{align-items:flex-start;padding-top:max(88px,calc(env(safe-area-inset-top,0px) + 62px))}
+}
+@media(prefers-reduced-motion:reduce){
+  [data-command-role="confirmation"]::after{animation:none!important}
+}

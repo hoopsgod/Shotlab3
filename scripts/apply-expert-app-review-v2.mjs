@@ -40,17 +40,21 @@ patch("src/components/CoachInteractiveDashboards.jsx",
 
 const primitivePath = "src/components/CoachDashboardPrimitives.jsx";
 let primitives = readFileSync(primitivePath, "utf8");
-if (!primitives.includes("function MetricEvidenceSparkline")) {
-  const anchor = 'const cx = (...values) => values.filter(Boolean).join(" ");\n';
-  const helper = `\nfunction MetricEvidenceSparkline({ values = [], label = \"Metric evidence\" }) {\n  const points = values.map(Number).filter(Number.isFinite).slice(-10);\n  if (points.length < 2) return null;\n  const min = Math.min(...points);\n  const max = Math.max(...points);\n  const span = Math.max(max - min, 1);\n  const path = points.map((value, index) => {\n    const x = (index / Math.max(points.length - 1, 1)) * 100;\n    const y = 28 - ((value - min) / span) * 24;\n    return \`\${index === 0 ? \"M\" : \"L\"}\${x.toFixed(2)} \${y.toFixed(2)}\`;\n  }).join(\" \" );\n  return <svg className={styles.metricSparkline} viewBox=\"0 0 100 32\" role=\"img\" aria-label={label} preserveAspectRatio=\"none\"><path className={styles.metricSparklineTrack} d=\"M0 28 L100 28\" /><path className={styles.metricSparklinePath} d={path} /></svg>;\n}\n`;
-  if (!primitives.includes(anchor)) throw new Error("Metric sparkline anchor missing");
-  primitives = primitives.replace(anchor, `${anchor}${helper}`);
-}
-const detailAnchor = "{item.detail ? <span className={styles.metricDetail}>{item.detail}</span> : null}";
-const detailReplacement = "{item.detail ? <span className={styles.metricDetail}>{item.detail}</span> : null}\n            {item.evidence?.length ? <MetricEvidenceSparkline values={item.evidence} label={item.evidenceLabel || `${item.label} evidence`} /> : null}";
-if (!primitives.includes(detailReplacement)) {
-  if (!primitives.includes(detailAnchor)) throw new Error("Metric evidence render anchor missing");
-  primitives = primitives.replace(detailAnchor, detailReplacement);
+const phase2OwnsMetricEvidence = primitives.includes("function PremiumMetricEvidence") && primitives.includes("data-premium-metric-evidence");
+
+if (!phase2OwnsMetricEvidence) {
+  if (!primitives.includes("function MetricEvidenceSparkline")) {
+    const anchor = 'const cx = (...values) => values.filter(Boolean).join(" ");\n';
+    const helper = `\nfunction MetricEvidenceSparkline({ values = [], label = \"Metric evidence\" }) {\n  const points = values.map(Number).filter(Number.isFinite).slice(-10);\n  if (points.length < 2) return null;\n  const min = Math.min(...points);\n  const max = Math.max(...points);\n  const span = Math.max(max - min, 1);\n  const path = points.map((value, index) => {\n    const x = (index / Math.max(points.length - 1, 1)) * 100;\n    const y = 28 - ((value - min) / span) * 24;\n    return \`\${index === 0 ? \"M\" : \"L\"}\${x.toFixed(2)} \${y.toFixed(2)}\`;\n  }).join(\" \" );\n  return <svg className={styles.metricSparkline} viewBox=\"0 0 100 32\" role=\"img\" aria-label={label} preserveAspectRatio=\"none\"><path className={styles.metricSparklineTrack} d=\"M0 28 L100 28\" /><path className={styles.metricSparklinePath} d={path} /></svg>;\n}\n`;
+    if (!primitives.includes(anchor)) throw new Error("Metric sparkline anchor missing");
+    primitives = primitives.replace(anchor, `${anchor}${helper}`);
+  }
+  const detailAnchor = "{item.detail ? <span className={styles.metricDetail}>{item.detail}</span> : null}";
+  const detailReplacement = "{item.detail ? <span className={styles.metricDetail}>{item.detail}</span> : null}\n            {item.evidence?.length ? <MetricEvidenceSparkline values={item.evidence} label={item.evidenceLabel || `${item.label} evidence`} /> : null}";
+  if (!primitives.includes(detailReplacement)) {
+    if (!primitives.includes(detailAnchor)) throw new Error("Metric evidence render anchor missing");
+    primitives = primitives.replace(detailAnchor, detailReplacement);
+  }
 }
 writeFileSync(primitivePath, primitives);
 

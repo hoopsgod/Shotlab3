@@ -235,25 +235,7 @@
 }
 .mcShellV3 .mcActionGrid>button:hover{border-color:rgba(217,228,235,.15);background:rgba(10,16,20,.92)}
 
-/* Premiumize the shared mobile dock while Mission Control is active */
-body.mission-control-active [data-testid="mobile-navigation-dock"]{
-  padding:7px 10px calc(8px + env(safe-area-inset-bottom,0px));
-}
-body.mission-control-active [data-testid="mobile-navigation-dock"]:before{
-  inset:-28px 0 0;
-  background:linear-gradient(180deg,transparent,rgba(2,4,5,.72) 36%,rgba(2,4,5,.97) 100%);
-}
-body.mission-control-active [data-testid="mobile-navigation-dock"]>div{
-  min-height:62px;
-  max-width:520px;
-  padding:5px;
-  border-color:rgba(217,228,235,.12);
-  border-radius:19px;
-  background:rgba(9,14,18,.88);
-  box-shadow:0 18px 46px rgba(0,0,0,.48),inset 0 1px rgba(255,255,255,.035);
-  backdrop-filter:blur(24px) saturate(1.2);
-  -webkit-backdrop-filter:blur(24px) saturate(1.2);
-}
+/* Mission Control inherits the shared native navigation surface. */
 body.mission-control-active [data-testid="mobile-navigation-dock"] button{
   font-family:var(--mc-body-2026,Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif);
 }

@@ -1,4 +1,5 @@
 import { scheduleWorkspaceActionReveal } from "../lib/playerWorkspaceActionRouting.js";
+import ShotLabStatePanel from "./ShotLabStatePanel.jsx";
 import styles from "./PlayerOperationalWorkspace.module.css";
 import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 
@@ -12,6 +13,15 @@ function MetricContent({ metric }) {
   );
 }
 
+function resolveWorkspaceSubtitle(model) {
+  const subtitle = String(model?.subtitle || "");
+  if (model?.id !== "leaderboards" || !/own the top spot/i.test(subtitle)) return subtitle;
+  const rankMetric = (model?.metrics || []).find((metric) => metric?.id === "rank");
+  const rank = Number(String(rankMetric?.value || "").replace(/\D/g, ""));
+  if (!Number.isFinite(rank) || rank <= 1) return subtitle;
+  return `You are ranked #${rank}. You are tied on makes with the position ahead.`;
+}
+
 export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMetric = "", testId }) {
   if (!model) return null;
   const runAction = (action) => {
@@ -23,25 +33,26 @@ export function PlayerWorkspaceCommandBar({ model, onAction, onMetric, activeMet
     if (metric?.action) scheduleWorkspaceActionReveal(metric.action);
   };
   const metrics = model.metrics || [];
+  const subtitle = resolveWorkspaceSubtitle(model);
 
   return (
-    <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`}>
-      <div className={styles.commandBar}>
+    <section className={styles.root} data-testid={testId || `player-workspace-${model.id}`} data-page-hierarchy="editorial">
+      <header className={styles.commandBar} data-layout-role="editorial-header">
         <div className={styles.copy}>
           <div className={styles.eyebrow}>{model.eyebrow}</div>
           <div className={styles.titleRow}>
             <h1 className={styles.title}>{model.title}</h1>
             <span className={styles.status}>{model.status}</span>
           </div>
-          <p className={styles.subtitle}>{model.subtitle}</p>
+          <p className={styles.subtitle}>{subtitle}</p>
         </div>
         {model.primaryAction && (
           <button type="button" className={styles.primaryAction} onClick={() => runAction(model.primaryAction)}>
             {model.primaryAction.label} →
           </button>
         )}
-      </div>
-      <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} aria-label={`${model.title} metrics`}>
+      </header>
+      <div className={`${styles.metrics} ${hierarchyStyles.metricsHierarchy}`} data-layout-role="supporting-evidence" aria-label={`${model.title} metrics`}>
         {metrics.map((metric, index) => {
           const interactive = Boolean(metric?.filter || metric?.action);
           const hierarchyClass = index === 0 ? hierarchyStyles.metricPrimary : hierarchyStyles.metricSupporting;
@@ -101,10 +112,17 @@ export function PlayerWorkspaceFilterRail({ value = "all", onChange, options = [
 
 export function PlayerWorkspaceEmptyState({ title, detail, actionLabel, onAction }) {
   return (
-    <div className={styles.emptyState}>
-      <div className={styles.emptyTitle}>{title}</div>
-      <div className={styles.emptyDetail}>{detail}</div>
-      {actionLabel && <button type="button" onClick={onAction}>{actionLabel} →</button>}
+    <div className={styles.emptyState} data-testid="player-workspace-state-shell">
+      <ShotLabStatePanel
+        state={actionLabel ? "first-use" : "empty"}
+        eyebrow={actionLabel ? "Next useful move" : "Current view"}
+        title={title}
+        detail={detail}
+        actionLabel={actionLabel}
+        onAction={onAction}
+        compact
+        testId="player-workspace-empty-state"
+      />
     </div>
   );
 }

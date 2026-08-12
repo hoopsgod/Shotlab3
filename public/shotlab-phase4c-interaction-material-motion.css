@@ -1,0 +1,139 @@
+/* Phase 4C — premium interaction material and motion.
+   Presentation-only. Scoped to Player navigation and training interactions. */
+
+:root{
+  --phase4c-spring:cubic-bezier(.2,.82,.2,1);
+  --phase4c-fast:140ms;
+  --phase4c-medium:220ms;
+  --phase4c-press-scale:.975;
+  --phase4c-focus-ring:0 0 0 4px color-mix(in srgb,var(--team-brand-primary,var(--accent,#c8ff1a)) 13%,transparent);
+}
+
+/* Player dock: consistent selected-state lift and tactile press response. */
+[data-navigation-role="player"][data-testid="mobile-navigation-dock"] button{
+  transform-origin:center bottom;
+  transition:transform var(--phase4c-fast) var(--phase4c-spring),background-color var(--phase4c-fast) ease,border-color var(--phase4c-fast) ease,box-shadow var(--phase4c-medium) var(--phase4c-spring),color var(--phase4c-fast) ease!important;
+}
+[data-navigation-role="player"][data-testid="mobile-navigation-dock"] button[data-active="true"]{
+  box-shadow:0 7px 20px rgba(17,26,33,.09),inset 0 1px rgba(255,255,255,.88)!important;
+}
+[data-navigation-role="player"][data-testid="mobile-navigation-dock"] button:active{
+  transform:translateY(1px) scale(var(--phase4c-press-scale))!important;
+}
+[data-navigation-role="player"][data-testid="mobile-navigation-dock"] button:focus-visible{
+  outline:0!important;
+  box-shadow:var(--phase4c-focus-ring),0 7px 20px rgba(17,26,33,.09)!important;
+}
+
+/* More sheet: restrained translucent material only where navigation benefits from it. */
+[data-navigation-role="player"][data-testid="mobile-navigation-overlay"]{
+  background:rgba(12,20,25,.38)!important;
+  -webkit-backdrop-filter:blur(10px) saturate(96%)!important;
+  backdrop-filter:blur(10px) saturate(96%)!important;
+}
+[data-navigation-role="player"][data-testid="mobile-navigation-sheet"]{
+  transform-origin:50% 100%;
+  background-color:rgba(250,249,245,.965)!important;
+  background-image:linear-gradient(180deg,rgba(255,255,255,.52),rgba(250,249,245,.95) 24%,rgba(247,246,241,.98))!important;
+  box-shadow:0 -8px 30px rgba(17,26,33,.09),0 30px 90px rgba(17,26,33,.25),inset 0 1px rgba(255,255,255,.9)!important;
+  animation:phase4cSheetIn var(--phase4c-medium) var(--phase4c-spring) both!important;
+}
+[data-navigation-role="player"][data-testid="mobile-navigation-sheet"] [data-nav-key]{
+  transition:transform var(--phase4c-fast) var(--phase4c-spring),background-color var(--phase4c-fast) ease,color var(--phase4c-fast) ease!important;
+}
+[data-navigation-role="player"][data-testid="mobile-navigation-sheet"] [data-nav-key]:active{
+  transform:translateY(1px) scale(.986)!important;
+}
+[data-navigation-role="player"][data-testid="mobile-navigation-sheet"] [data-nav-key]:focus-visible{
+  outline:0!important;
+  box-shadow:inset 0 0 0 2px color-mix(in srgb,var(--team-brand-primary,var(--accent,#c8ff1a)) 26%,transparent)!important;
+}
+
+/* Active score entry: focus should feel deliberate and physically anchored. */
+html body #root [data-testid="player-training-score-zone"]{
+  transform:translateZ(0);
+  transition:transform var(--phase4c-medium) var(--phase4c-spring),border-color var(--phase4c-fast) ease,box-shadow var(--phase4c-medium) var(--phase4c-spring)!important;
+}
+html body #root [data-testid="player-training-score-zone"]:focus-within{
+  transform:translateY(-2px)!important;
+  border-color:color-mix(in srgb,var(--team-brand-primary,var(--accent,#c8ff1a)) 36%,rgba(22,27,22,.09))!important;
+  box-shadow:0 20px 48px rgba(22,27,22,.11),var(--phase4c-focus-ring)!important;
+}
+html body #root [data-testid="player-training-session"] input[type="number"]{
+  transition:border-color var(--phase4c-fast) ease,box-shadow var(--phase4c-medium) var(--phase4c-spring),transform var(--phase4c-fast) var(--phase4c-spring)!important;
+}
+html body #root [data-testid="player-training-session"] input[type="number"]:focus{
+  outline:0!important;
+  transform:scale(1.012)!important;
+  box-shadow:0 0 0 1px rgba(200,255,26,.20),0 0 0 5px rgba(200,255,26,.07),0 16px 30px rgba(22,27,22,.10)!important;
+}
+html body #root [data-testid="player-training-log-score"]{
+  transition:transform var(--phase4c-fast) var(--phase4c-spring),box-shadow var(--phase4c-fast) ease,filter var(--phase4c-fast) ease!important;
+}
+html body #root [data-testid="player-training-log-score"]:active:not(:disabled){
+  transform:translateY(1px) scale(.986)!important;
+  box-shadow:0 5px 12px rgba(126,160,21,.12)!important;
+}
+
+/* Completion: one restrained arrival motion and tactile next-step action. */
+body #root [data-testid="player-training-completion"]{
+  animation:phase4cCompletionIn 280ms var(--phase4c-spring) both;
+}
+body #root [data-testid="player-training-completion"] [data-testid="player-training-result-hero"]{
+  animation:phase4cResultIn 320ms 55ms var(--phase4c-spring) both;
+}
+body #root [data-testid="player-training-completion"][data-pb="true"] [data-pb="true"]{
+  animation:phase4cPBMarkIn 420ms 90ms var(--phase4c-spring) both;
+}
+body #root [data-testid="player-training-next-action"],
+body #root [data-testid="player-training-finish-session"],
+body #root [data-testid="player-training-share-toggle"],
+body #root [data-testid="player-training-challenge-action"]{
+  transition:transform var(--phase4c-fast) var(--phase4c-spring),box-shadow var(--phase4c-fast) ease,filter var(--phase4c-fast) ease!important;
+}
+body #root [data-testid="player-training-next-action"]:active,
+body #root [data-testid="player-training-finish-session"]:active,
+body #root [data-testid="player-training-share-toggle"]:active,
+body #root [data-testid="player-training-challenge-action"]:active{
+  transform:translateY(1px) scale(.986)!important;
+}
+body #root [data-testid="player-training-next-action"] span:last-child{
+  transition:transform var(--phase4c-fast) var(--phase4c-spring)!important;
+}
+@media(hover:hover){
+  [data-navigation-role="player"][data-testid="mobile-navigation-dock"] button:hover{transform:translateY(-1px)}
+  [data-navigation-role="player"][data-testid="mobile-navigation-sheet"] [data-nav-key]:hover{background-color:rgba(126,158,30,.055)!important}
+  body #root [data-testid="player-training-next-action"]:hover span:last-child{transform:translateX(3px)}
+}
+
+@keyframes phase4cSheetIn{from{opacity:0;transform:translateY(22px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes phase4cCompletionIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes phase4cResultIn{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes phase4cPBMarkIn{0%{opacity:.5;transform:scale(.78) rotate(-4deg)}65%{opacity:1;transform:scale(1.08) rotate(1deg)}100%{opacity:1;transform:scale(1) rotate(0)}}
+
+@media(prefers-reduced-transparency:reduce){
+  [data-navigation-role="player"][data-testid="mobile-navigation-overlay"]{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background:#d9ddd7!important}
+  [data-navigation-role="player"][data-testid="mobile-navigation-sheet"]{-webkit-backdrop-filter:none!important;backdrop-filter:none!important;background-color:#faf9f5!important;background-image:none!important}
+}
+@media(prefers-reduced-motion:reduce){
+  [data-navigation-role="player"][data-testid="mobile-navigation-dock"] button,
+  [data-navigation-role="player"][data-testid="mobile-navigation-sheet"],
+  [data-navigation-role="player"][data-testid="mobile-navigation-sheet"] [data-nav-key],
+  html body #root [data-testid="player-training-score-zone"],
+  html body #root [data-testid="player-training-session"] input[type="number"],
+  html body #root [data-testid="player-training-log-score"],
+  body #root [data-testid="player-training-completion"],
+  body #root [data-testid="player-training-completion"] [data-testid="player-training-result-hero"],
+  body #root [data-testid="player-training-completion"][data-pb="true"] [data-pb="true"],
+  body #root [data-testid="player-training-next-action"],
+  body #root [data-testid="player-training-finish-session"],
+  body #root [data-testid="player-training-share-toggle"],
+  body #root [data-testid="player-training-challenge-action"]{
+    animation:none!important;
+    transition:none!important;
+  }
+  html body #root [data-testid="player-training-score-zone"]:focus-within,
+  html body #root [data-testid="player-training-session"] input[type="number"]:focus{
+    transform:none!important;
+  }
+}

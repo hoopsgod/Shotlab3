@@ -140,13 +140,13 @@ test("Player home presents action, evidence, priority, and disclosure in order",
   expect(presentation.positions.priority).toBeGreaterThan(presentation.positions.evidence);
   if (presentation.positions.nextActions >= 0) expect(presentation.positions.progress).toBeGreaterThan(presentation.positions.nextActions);
 
-  expectDark(presentation.rootBackground);
+  expect(presentation.rootBackground).toBe("rgba(0, 0, 0, 0)");
   expectDark(presentation.heroBackground);
   expectLight(presentation.heroTitle);
-  expectDarkSurface(presentation.evidenceBackground);
-  if (presentation.positions.nextActions >= 0) expectDarkSurface(presentation.nextBackground);
-  expectDarkSurface(presentation.disclosureBackground);
-  if (presentation.activationBackground) expectDarkSurface(presentation.activationBackground);
+  expect(presentation.evidenceBackground).toBe("rgba(0, 0, 0, 0)");
+  if (presentation.positions.nextActions >= 0) expect(presentation.nextBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(presentation.disclosureBackground).toBe("rgba(0, 0, 0, 0)");
+  if (presentation.activationBackground) expect(presentation.activationBackground).toBe("rgba(0, 0, 0, 0)");
 
   await disclosure.scrollIntoViewIfNeeded();
   const progressOpen = await disclosure.evaluate((element) => element.open);

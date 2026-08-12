@@ -51,10 +51,9 @@ function normalizeAddPlayerDescription(root = document) {
 }
 
 function condenseDuplicateTouchpoint(root = document) {
-  const fullPlayersSurface = root.querySelector?.('[data-testid="coach-players-interactive-dashboard"]');
   for (const element of root.querySelectorAll?.("h1,h2,h3,strong") || []) {
     if (!/players? need(?:s)? a (?:coaching )?touchpoint/i.test(normalize(element.textContent))) continue;
-    if (fullPlayersSurface?.contains(element)) continue;
+    if (element.closest?.('[data-testid="coach-players-interactive-dashboard"]')) continue;
     const card = element.closest("article,section,div");
     if (!card || card.dataset.touchpointTeaser === "true") continue;
     card.dataset.touchpointTeaser = "true";

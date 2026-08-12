@@ -36,7 +36,7 @@ test("canonical secondary page system defines one page, toolbar, decision, and e
   assert.match(pageSystemCss, /\.secondaryPageToolbar/);
   assert.match(pageSystemCss, /\.secondaryPageDecision/);
   assert.match(pageSystemCss, /\.secondaryPageEvidence/);
-  assert.match(pageSystemCss, /min-height:\s*46px/);
+  assert.match(pageSystemCss, /min-height:\s*var\(--control-height, 48px\)/);
   assert.match(pageSystemCss, /@media\s*\(max-width:\s*760px\)/);
   assert.match(pageSystemCss, /@media\s*\(prefers-reduced-motion:\s*reduce\)/);
 });

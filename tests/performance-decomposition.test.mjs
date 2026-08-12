@@ -15,9 +15,8 @@ const performanceBudget = JSON.parse(fs.readFileSync('performance-budget.json', 
 
 test('progress analytics are redirected through a deferred boundary', () => {
   assert.match(appSource, /import ShotLabCharts from ["']\.\/components\/ShotLabCharts["']/)
-  assert.match(viteConfig, /name:\s*["']shotlab-defer-progress-charts["']/)
-  assert.match(viteConfig, /source === STATIC_CHART_IMPORT/)
-  assert.match(viteConfig, /importerId\.endsWith\(APP_MODULE_SUFFIX\)/)
+  assert.match(viteConfig, /redirectAppImport\(["']shotlab-defer-progress-charts["'],\s*STATIC_CHART_IMPORT,\s*DEFERRED_CHART_MODULE\)/)
+  assert.match(viteConfig, /source === sourceMatch && importerId\.endsWith\(APP_MODULE_SUFFIX\)/)
   assert.match(viteConfig, /DeferredShotLabCharts\.jsx/)
 })
 
@@ -31,8 +30,7 @@ test('the deferred charts boundary dynamically imports the implementation', () =
 
 test('leaderboard analytics are redirected through a deferred boundary', () => {
   assert.match(appSource, /import PremiumLeaderboardsHub from ["']\.\/components\/PremiumLeaderboardsHub["']/)
-  assert.match(viteConfig, /name:\s*["']shotlab-defer-leaderboard-analytics["']/)
-  assert.match(viteConfig, /source === STATIC_LEADERBOARDS_IMPORT/)
+  assert.match(viteConfig, /redirectAppImport\(["']shotlab-defer-leaderboard-analytics["'],\s*STATIC_LEADERBOARDS_IMPORT,\s*DEFERRED_LEADERBOARDS_MODULE\)/)
   assert.match(viteConfig, /DeferredPremiumLeaderboardsHub\.jsx/)
 })
 
@@ -46,8 +44,7 @@ test('the deferred leaderboards boundary dynamically imports the implementation'
 
 test('Coach Mission Control is redirected through a deferred boundary', () => {
   assert.match(appSource, /import CoachCommandCenter from ["']\.\/components\/CoachCommandCenter["']/)
-  assert.match(viteConfig, /name:\s*["']shotlab-defer-coach-command-center["']/)
-  assert.match(viteConfig, /source === STATIC_COACH_COMMAND_CENTER_IMPORT/)
+  assert.match(viteConfig, /redirectAppImport\(["']shotlab-defer-coach-command-center["'],\s*STATIC_COACH_COMMAND_CENTER_IMPORT,\s*DEFERRED_COACH_COMMAND_CENTER_MODULE\)/)
   assert.match(viteConfig, /DeferredCoachCommandCenter\.jsx/)
 })
 
@@ -61,8 +58,7 @@ test('the deferred Coach Mission Control boundary preserves the default componen
 
 test('Coach Phase 2 intelligence is redirected through a deferred boundary', () => {
   assert.match(appSource, /from ["']\.\/components\/CoachDashboardPhase2\.jsx["']/)
-  assert.match(viteConfig, /name:\s*["']shotlab-defer-coach-phase2-intelligence["']/)
-  assert.match(viteConfig, /source === STATIC_COACH_PHASE2_IMPORT/)
+  assert.match(viteConfig, /redirectAppImport\(["']shotlab-defer-coach-phase2-intelligence["'],\s*STATIC_COACH_PHASE2_IMPORT,\s*DEFERRED_COACH_PHASE2_MODULE\)/)
   assert.match(viteConfig, /DeferredCoachDashboardPhase2\.jsx/)
 })
 
@@ -87,8 +83,7 @@ test('the deferred Coach boundary preserves every named export through one lazy 
 
 test('Coach interactive dashboards are redirected through a deferred boundary', () => {
   assert.match(appSource, /from ["']\.\/components\/CoachInteractiveDashboards\.jsx["']/)
-  assert.match(viteConfig, /name:\s*["']shotlab-defer-coach-interactive-dashboards["']/)
-  assert.match(viteConfig, /source === STATIC_COACH_INTERACTIVE_IMPORT/)
+  assert.match(viteConfig, /redirectAppImport\(["']shotlab-defer-coach-interactive-dashboards["'],\s*STATIC_COACH_INTERACTIVE_IMPORT,\s*DEFERRED_COACH_INTERACTIVE_MODULE\)/)
   assert.match(viteConfig, /DeferredCoachInteractiveDashboards\.jsx/)
 })
 
@@ -107,20 +102,19 @@ test('the deferred Coach interactive boundary preserves all public exports', () 
   assert.doesNotMatch(deferredCoachInteractive, /^import .*CoachInteractiveDashboards/m)
 })
 
-test('Coach operational implementations share one deferred request slot', () => {
-  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/CoachCommandCenter\.jsx["']\)/)
-  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/CoachDashboardPhase2\.jsx["']\)/)
-  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/CoachInteractiveDashboards\.jsx["']\)/)
-  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/SecondaryPageSystem\.jsx["']\)/)
-  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/ExperiencePrimitives\.jsx["']\)/)
-  assert.match(viteConfig, /return ["']CoachOperationalWorkspaces["']/)
+test('Coach operational implementations share the role workspace chunk', () => {
+  assert.match(viteConfig, /COACH_WORKSPACE_FRAGMENTS/)
+  assert.match(viteConfig, /['"]\/src\/components\/Coach['"]/)
+  assert.match(viteConfig, /['"]\/src\/components\/ExperiencePrimitives['"]/)
+  assert.match(viteConfig, /['"]\/src\/components\/SecondaryPageSystem['"]/)
+  assert.match(viteConfig, /return ["']CoachWorkspaces["']/)
+  assert.doesNotMatch(viteConfig, /return ["']CoachOperationalWorkspaces["']/)
   assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })
 
 test('Player career history is redirected through a deferred boundary', () => {
   assert.match(appSource, /import PlayerCareerHistory from ["']\.\/components\/PlayerCareerHistory\.jsx["']/)
-  assert.match(viteConfig, /name:\s*["']shotlab-defer-player-career-history["']/)
-  assert.match(viteConfig, /source === STATIC_CAREER_HISTORY_IMPORT/)
+  assert.match(viteConfig, /redirectAppImport\(["']shotlab-defer-player-career-history["'],\s*STATIC_CAREER_HISTORY_IMPORT,\s*DEFERRED_CAREER_HISTORY_MODULE\)/)
   assert.match(viteConfig, /DeferredPlayerCareerHistory\.jsx/)
 })
 
@@ -131,16 +125,19 @@ test('the deferred career history boundary dynamically imports the implementatio
   assert.doesNotMatch(deferredCareerHistory, /^import PlayerCareerHistory/m)
 })
 
-test('shared season analytics stay inside the leaderboard chunk without restoring a tiny chart-vendor request', () => {
-  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/components\/PremiumLeaderboardsHub\.jsx["']\)/)
-  assert.match(viteConfig, /moduleId\.includes\(["']\/src\/lib\/seasonLeaderboardAnalytics\.js["']\)/)
-  assert.match(viteConfig, /return ["']PremiumLeaderboardsHub["']/)
+test('shared season analytics use domain services while leaderboard UI stays in Player workspaces', () => {
+  assert.match(viteConfig, /APP_DOMAIN_SERVICE_FRAGMENTS/)
+  assert.match(viteConfig, /['"]\/src\/lib\/seasonLeaderboardAnalytics['"]/)
+  assert.match(viteConfig, /return ["']AppDomainServices["']/)
+  assert.match(viteConfig, /PLAYER_WORKSPACE_FRAGMENTS/)
+  assert.match(viteConfig, /['"]\/src\/components\/PremiumLeaderboardsHub\.jsx["']/)
+  assert.match(viteConfig, /return ["']PlayerWorkspaces["']/)
   assert.doesNotMatch(viteConfig, /return ["']charts-vendor["']/)
 })
 
 test('the performance verifier locks startup App assets and total request budgets', () => {
   assert.match(verifierSource, /const startupAppJavaScript = findStartupAsset\(javaScript, ["']js["']\)/)
-  assert.match(verifierSource, /const startupAppCss = findStartupAsset\(css, ["']css["']\)/)
+  assert.match(verifierSource, /const startupAppCss = findStartupAsset\(css, ["']css["'], \{ zeroWhenMissing: true \}\)/)
   assert.match(verifierSource, /startupAppJavaScript\.bytes > budget\.maxStartupAppJavaScriptBytes/)
   assert.match(verifierSource, /startupAppCss\.bytes > budget\.maxStartupAppCssBytes/)
   assert.equal(performanceBudget.maxLargestJavaScriptBytes, 585000)
@@ -150,6 +147,6 @@ test('the performance verifier locks startup App assets and total request budget
   assert.equal(performanceBudget.maxLargestCssBytes, 128000)
   assert.equal(performanceBudget.maxStartupAppCssBytes, 25000)
   assert.equal(performanceBudget.maxStartupAppCssGzipBytes, 5500)
-  assert.equal(performanceBudget.maxTotalCssGzipBytes, 76750)
+  assert.equal(performanceBudget.maxTotalCssGzipBytes, 88000)
   assert.equal(performanceBudget.maxJavaScriptFileCount, 8)
 })

@@ -1,0 +1,51 @@
+name: Phase 5C CSS Headroom
+
+on:
+  pull_request:
+    paths:
+      - 'package.json'
+      - 'vite.config.js'
+      - 'vite.phase5b.config.js'
+      - 'scripts/restructure-production-css.mjs'
+      - 'scripts/prune-overridden-coach-declarations.mjs'
+      - 'scripts/dedupe-coach-font-stacks.mjs'
+      - 'scripts/prune-unreachable-global-selectors.mjs'
+      - 'scripts/verify-performance-budget.mjs'
+      - 'scripts/verify-phase5c-css-headroom.mjs'
+      - 'tests/prune-overridden-coach-declarations.test.mjs'
+      - 'tests/dedupe-coach-font-stacks.test.mjs'
+      - '.github/workflows/phase-5c-css-headroom.yml'
+  workflow_dispatch:
+
+jobs:
+  css-headroom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Verify Coach CSS optimizer safety contracts
+        run: node --test tests/prune-overridden-coach-declarations.test.mjs tests/dedupe-coach-font-stacks.test.mjs
+      - name: Build exact production candidate
+        run: npm run build
+      - name: Keep fixed production budgets green
+        run: npm run verify:performance-budget
+      - name: Enforce durable Phase 5C CSS reserve
+        run: node scripts/verify-phase5c-css-headroom.mjs
+      - name: Record Coach CSS debt evidence
+        if: always()
+        run: node scripts/analyze-coach-css-recovery.mjs
+      - name: Upload Phase 5C evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-5c-css-headroom-evidence
+          path: |
+            artifacts/performance/build-metrics.json
+            artifacts/performance/coach-css-recovery-analysis.json
+            dist/assets/CoachWorkspaces-*.css
+          if-no-files-found: warn

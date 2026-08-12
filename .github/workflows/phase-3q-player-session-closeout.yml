@@ -1,0 +1,83 @@
+name: Phase 3Q Player Session Closeout
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-3p-player-training-completion
+    paths:
+      - "src/App.jsx"
+      - "src/components/PlayerTrainingCompletion.jsx"
+      - "src/components/PlayerSessionCloseout.jsx"
+      - "src/components/PlayerSessionCloseout.module.css"
+      - "public/shotlab-phase3q-player-session-closeout.css"
+      - "index.html"
+      - "playwright.screenshots.config.mjs"
+      - "scripts/apply-phase3q-player-session-closeout.mjs"
+      - "tests/phase-3q-player-session-closeout.test.mjs"
+      - "tests/e2e/phase-3q-player-session-closeout-screenshots.spec.mjs"
+      - "package.json"
+      - ".github/workflows/phase-3q-player-session-closeout.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: phase-3q-player-session-closeout-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-player-session-closeout:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Phase 3Q contracts
+        run: node --test tests/phase-3q-player-session-closeout.test.mjs tests/phase-3p-player-training-completion.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Capture and verify iPhone session closeout
+        run: npx playwright test tests/e2e/phase-3q-player-session-closeout-screenshots.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
+
+      - name: Upload Phase 3Q evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-3q-player-session-closeout-evidence
+          path: |
+            artifacts/design-audit/iphone/04t-player-session-closeout.png
+            artifacts/design-audit/iphone/04u-player-session-closeout-actions.png
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Phase 3Q failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-3q-player-session-closeout-failure
+          path: |
+            test-results/
+            artifacts/design-audit/iphone/
+          if-no-files-found: ignore
+          retention-days: 7

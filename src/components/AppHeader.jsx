@@ -29,10 +29,10 @@ const ACTION_BASE = {
   border: "1px solid var(--stroke-1)",
   background: "rgba(255,255,255,.86)",
   color: "var(--text-1)",
-  minHeight: 42,
-  minWidth: 42,
+  minHeight: "var(--touch-target, 44px)",
+  minWidth: "var(--touch-target, 44px)",
   padding: "9px 13px",
-  fontSize: 12,
+  fontSize: "var(--type-meta, 12px)",
   lineHeight: 1.2,
   fontWeight: 700,
   letterSpacing: "-0.005em",
@@ -60,8 +60,8 @@ export default function AppHeader({
   const isIconOnlyAction = Boolean(action && !action.label);
   const quietBrandedActionStyle = variant === "branded" && isIconOnlyAction
     ? {
-      minHeight: 38,
-      minWidth: 38,
+      minHeight: "var(--touch-target, 44px)",
+      minWidth: "var(--touch-target, 44px)",
       padding: 7,
       color: "var(--text-2)",
       background: "var(--surface-3)",
@@ -89,21 +89,22 @@ export default function AppHeader({
           justifyContent: "space-between",
           gap: 16,
           flexWrap: "wrap",
+          minWidth: 0,
         }}
       >
-        <div className="appHeaderIdentity" style={{ display: "flex", alignItems: "flex-start", gap: 13, minWidth: 0, flex: "1 1 230px" }}>
+        <div className="appHeaderIdentity" style={{ display: "flex", alignItems: "flex-start", gap: 13, minWidth: 0, flex: "1 1 230px", maxWidth: "100%" }}>
           {leading ? <div className="appHeaderLeading" style={{ marginTop: 2, color: "var(--text-2)", flexShrink: 0 }}>{leading}</div> : null}
-          <div className="appHeaderCopy" style={{ minWidth: 0 }}>
+          <div className="appHeaderCopy" style={{ minWidth: 0, maxWidth: "100%" }}>
             {eyebrow ? (
-              <div className="appHeaderEyebrow" style={{ fontFamily: "var(--font-body)", fontSize: 11, letterSpacing: ".01em", color: "var(--accent-strong, #617900)", fontWeight: 720, marginBottom: 7, lineHeight: 1.25 }}>
+              <div className="appHeaderEyebrow" style={{ fontFamily: "var(--font-body)", fontSize: "var(--type-micro, 11px)", letterSpacing: ".01em", color: "var(--accent-strong, #617900)", fontWeight: 720, marginBottom: 7, lineHeight: 1.25 }}>
                 {eyebrow}
               </div>
             ) : null}
-            <h1 className="appHeaderTitle" style={{ fontFamily: "var(--font-display)", fontSize: variant === "utility" ? 24 : 38, fontWeight: 780, lineHeight: 1.02, margin: 0, color: "var(--text-1)", letterSpacing: "-.038em" }}>
+            <h1 className="appHeaderTitle" style={{ fontFamily: "var(--font-display)", fontSize: variant === "utility" ? 24 : 38, fontWeight: 780, lineHeight: 1.02, margin: 0, color: "var(--text-1)", letterSpacing: "-.038em", maxWidth: "100%", overflowWrap: "break-word" }}>
               {title}
             </h1>
             {subtitle ? (
-              <p className="appHeaderSubtitle" style={{ marginTop: 8, marginBottom: 0, color: "var(--text-2)", fontFamily: "var(--font-body)", fontSize: 14, letterSpacing: "-.008em", lineHeight: 1.5, overflowWrap: "anywhere", maxWidth: 680 }}>
+              <p className="appHeaderSubtitle" style={{ marginTop: 8, marginBottom: 0, color: "var(--text-2)", fontFamily: "var(--font-body)", fontSize: "var(--type-secondary, 14px)", letterSpacing: "-.008em", lineHeight: 1.5, overflowWrap: "anywhere", maxWidth: 680 }}>
                 {subtitle}
               </p>
             ) : null}

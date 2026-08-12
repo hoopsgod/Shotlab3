@@ -57,13 +57,13 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   ];
 
   return (
-    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" aria-label="Daily training command center">
-      <div className={styles.header}>
+    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" aria-label="Daily training command center">
+      <div className={styles.header} data-layout-role="editorial-header">
         <div className={styles.eyebrow}>{firstSession.pending ? "First session · Create your baseline" : "Today · Daily Command Center"}</div>
         <div className={styles.status}>{firstSession.pending ? "Activation" : urgencyLabel(primary.urgency)}</div>
       </div>
 
-      <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`} data-command-role="primary">
+      <div className={`${styles.hero} ${dailyComplete ? styles.heroComplete : ""}`} data-command-role="primary" data-layout-role="primary-decision">
         <div className={styles.heroTop}>
           <ExperiencePill tone={primary.source === "coach" ? "info" : primary.source === "team" ? "attention" : "positive"}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
@@ -81,7 +81,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </button>
       </div>
 
-      <div className={styles.progressGrid} role="group" data-testid="player-command-evidence" aria-label="Today’s training evidence">
+      <div className={styles.progressGrid} role="group" data-testid="player-command-evidence" data-layout-role="supporting-evidence" aria-label="Today’s training evidence">
         {evidence.map((item) => <div className={styles.progressCard} key={item.label} aria-label={item.aria}>
           <div className={styles.progressHeader}><div className={styles.sectionLabel}>{item.label}</div>{item.pct != null && <div className={styles.meta}>{item.pct}%</div>}</div>
           <div className={styles.progressValue}>{item.value}</div>
@@ -93,7 +93,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         <ExperienceSignal eyebrow="First session complete" title={firstSession.title || "First result banked"} detail={firstSession.detail || "Your training baseline is active. Every result from here builds your progress history."} tone="positive" icon="verified" />
       </div>}
 
-      <section className={styles.coachSignal} data-testid="player-coach-priority-signal" data-command-role="coach-priority" data-freshness={coachSignal.freshness || "unknown"} aria-label="Coach assignment" style={coachSignal.stale ? { borderColor: "rgba(255,181,71,.42)", background: "linear-gradient(145deg, rgba(255,181,71,.075), rgba(0,0,0,.16))" } : undefined}>
+      <section className={styles.coachSignal} data-testid="player-coach-priority-signal" data-command-role="coach-priority" data-layout-role="supporting-evidence" data-freshness={coachSignal.freshness || "unknown"} aria-label="Coach assignment" style={coachSignal.stale ? { "--coach-signal-accent": "#ffb547" } : undefined}>
         <div className={styles.coachSignalHeader}>
           <div>
             <div className={styles.coachSignalEyebrow} style={coachSignal.stale ? { color: "#ffca76" } : undefined}>{coachSignal.stale ? "Coach assignment needs refresh" : "Coach assignment"}</div>
@@ -114,7 +114,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </div>
       </section>
 
-      {queue.length > 0 && <div className={styles.section} data-command-role="next-actions">
+      {queue.length > 0 && <div className={styles.section} data-command-role="next-actions" data-layout-role="quiet-secondary">
         <div className={styles.sectionHeading}><div><div className={styles.sectionLabel}>After this</div><div className={styles.sectionTitle}>Your next moves</div></div><div className={styles.meta}>{queue.length} queued</div></div>
         <div className={styles.tasks} data-testid="player-daily-task-queue">
           {queue.map((task, index) => {
@@ -128,7 +128,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </div>
       </div>}
 
-      <details className="playerProgressDisclosure" data-testid="player-progress-disclosure" data-command-role="progress-details" open={progressShouldOpen || undefined}>
+      <details className="playerProgressDisclosure" data-testid="player-progress-disclosure" data-command-role="progress-details" data-layout-role="quiet-secondary" open={progressShouldOpen || undefined}>
         <summary><span><small>Progress snapshot</small><strong>{model.daily.pct}% today · {model.weekly.pct}% this week</strong></span><span>View details</span></summary>
         <div className="playerProgressDisclosureBody">
           <div className={styles.momentumSignal}>
@@ -143,7 +143,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
         </div>
       </details>
 
-      {!model.activation.complete && <details className={styles.activation} data-testid="player-activation-loop" data-command-role="activation" open={model.activation.completeCount < 2}>
+      {!model.activation.complete && <details className={styles.activation} data-testid="player-activation-loop" data-command-role="activation" data-layout-role="quiet-secondary" open={model.activation.completeCount < 2}>
         <summary>First-week activation · {model.activation.completeCount}/{model.activation.total} complete</summary>
         <div className={styles.activationRows}>{model.activation.steps.map((step) => <div className={styles.activationRow} key={step.id}>
           <span className={`${styles.activationDot} ${step.done ? styles.activationDotDone : ""}`} aria-hidden="true"><ShotLabIcon name={step.done ? "verified" : "neutral"} size={17} /></span>

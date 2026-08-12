@@ -1,0 +1,109 @@
+name: Phase 5A Route Enhancer Orchestration
+
+on:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      base_sha:
+        description: Exact cumulative baseline commit to compare against
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  PHASE5A_HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  PHASE5A_BASE_SHA: ${{ github.event.pull_request.base.sha || inputs.base_sha }}
+
+concurrency:
+  group: phase-5a-route-enhancer-orchestration-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  route-enhancer-orchestration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.PHASE5A_HEAD_SHA }}
+          fetch-depth: 0
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Verify source-stage promotion contracts
+        run: |
+          mkdir -p artifacts/phase-5a-route-enhancer-orchestration
+          node --test \
+            tests/phase-5a-route-enhancer-orchestration.test.mjs \
+            tests/team-auth-foundation.contract.test.mjs \
+            tests/app-store-release-hardening.test.mjs \
+            tests/coach-operational-intelligence.test.mjs \
+            2>&1 | tee artifacts/phase-5a-route-enhancer-orchestration/source-contracts.log
+      - name: Build exact candidate through centralized enhancer pipeline
+        run: npm run build
+      - name: Verify built production CSS integrity
+        run: |
+          node --test tests/production-css-module-integrity.test.mjs \
+            2>&1 | tee artifacts/phase-5a-route-enhancer-orchestration/built-css-integrity.log
+      - name: Capture candidate performance metrics
+        run: |
+          set +e
+          npm run verify:performance-budget
+          absolute_budget_status=$?
+          set -e
+          test -f artifacts/performance/build-metrics.json
+          cp artifacts/performance/build-metrics.json /tmp/phase5a-head-metrics.json
+          echo "Candidate absolute performance-budget exit code: ${absolute_budget_status}"
+      - name: Enforce absolute budget for production promotion
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'march-3-reset-85393dd'
+        run: npm run verify:performance-budget
+      - name: Build exact cumulative baseline through legacy npm chain
+        if: github.event_name != 'pull_request' || github.event.pull_request.base.ref != 'march-3-reset-85393dd'
+        run: |
+          git reset --hard "${PHASE5A_HEAD_SHA}"
+          git clean -fd
+          git checkout --force "${PHASE5A_BASE_SHA}"
+          npm ci
+          npm run build
+          set +e
+          npm run verify:performance-budget
+          absolute_budget_status=$?
+          set -e
+          test -f artifacts/performance/build-metrics.json
+          cp artifacts/performance/build-metrics.json /tmp/phase5a-base-metrics.json
+          echo "Baseline absolute performance-budget exit code: ${absolute_budget_status}"
+      - name: Verify candidate bundle does not regress from exact base
+        if: github.event_name != 'pull_request' || github.event.pull_request.base.ref != 'march-3-reset-85393dd'
+        run: |
+          git reset --hard "${PHASE5A_BASE_SHA}"
+          git checkout --force "${PHASE5A_HEAD_SHA}"
+          node scripts/verify-phase5a-build-equivalence.mjs /tmp/phase5a-base-metrics.json /tmp/phase5a-head-metrics.json
+          mkdir -p artifacts/phase-5a-route-enhancer-orchestration
+          cp /tmp/phase5a-base-metrics.json artifacts/phase-5a-route-enhancer-orchestration/base-build-metrics.json
+          cp /tmp/phase5a-head-metrics.json artifacts/phase-5a-route-enhancer-orchestration/head-build-metrics.json
+      - name: Record production-promotion scope
+        if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'march-3-reset-85393dd'
+        run: |
+          mkdir -p artifacts/phase-5a-route-enhancer-orchestration
+          cp /tmp/phase5a-head-metrics.json artifacts/phase-5a-route-enhancer-orchestration/head-build-metrics.json
+          cat > artifacts/phase-5a-route-enhancer-orchestration/production-promotion-scope.txt <<'EOF'
+          Relative Phase 5A build equivalence is intentionally scoped to Phase 5A development PRs and stacked descendants where the PR base is the certified cumulative predecessor.
+          A production promotion contains later independently certified product phases, so comparing its cumulative bundle size to the older production branch is not the Phase 5A invariant.
+          This production-targeted run verifies stage-correct source contracts, the centralized orchestration manifest, bounded late auth recovery, home + program season-comparison coverage, the exact production build, built CSS integrity, and the current absolute performance budget.
+          Historical per-phase transformation tests intentionally target different source stages and are therefore not executed as one contradictory monolithic suite in this production-promotion gate; their dedicated workflows remain authoritative for those phase-local contracts.
+          EOF
+      - name: Upload exact-base equivalence evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-5a-route-enhancer-orchestration-evidence
+          path: artifacts/phase-5a-route-enhancer-orchestration/
+          if-no-files-found: warn
+          retention-days: 14

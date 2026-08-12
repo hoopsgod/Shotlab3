@@ -5,16 +5,18 @@
   "description": "Offseason Basketball Development Platform",
   "type": "module",
   "scripts": {
-    "dev": "node scripts/apply-expert-app-review-v2.mjs && node scripts/minify-visual-authority-css.mjs && vite --host 0.0.0.0 --port 4173",
-    "prepare:route-enhancers": "node scripts/finish-v9-route-enhancers.mjs && node scripts/align-v9-player-boundary-contract.mjs && node scripts/apply-expert-app-review-v2.mjs && node scripts/minify-visual-authority-css.mjs",
-    "build": "npm run prepare:route-enhancers && vite build",
+    "dev": "node scripts/run-route-enhancers.mjs dev && vite --host 0.0.0.0 --port 4173",
+    "prepare:route-enhancers": "node scripts/run-route-enhancers.mjs build",
+    "build": "npm run prepare:route-enhancers && vite build --config vite.phase5b.config.js && node scripts/optimize-production-css.mjs && node scripts/restructure-production-css.mjs && node scripts/prune-overridden-coach-declarations.mjs && node scripts/prune-unreferenced-keyframes.mjs && node scripts/prune-unreachable-global-selectors.mjs && node scripts/dedupe-coach-font-stacks.mjs && node scripts/restructure-production-css.mjs --final-coach && node scripts/remove-unreferenced-authority-css.mjs",
     "build:performance": "npm run build && npm run verify:performance-budget",
     "test": "node --test tests/**/*.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:season-archive": "playwright test tests/e2e/season-archive.spec.mjs",
+    "test:e2e:player-career-history": "playwright test tests/e2e/player-career-history.spec.mjs --config=playwright.acceptance.config.mjs",
     "test:e2e:visual-hierarchy": "playwright test tests/e2e/visual-hierarchy.spec.mjs",
     "test:e2e:mobile-navigation": "playwright test tests/e2e/mobile-navigation.spec.mjs",
     "test:e2e:semantic-colors": "playwright test tests/e2e/semantic-color-system.spec.mjs",
+    "verify:phase3r": "node --test tests/phase-3r-player-progress-intelligence.test.mjs tests/phase-3q-player-session-closeout.test.mjs",
     "preview": "vite preview",
     "deploy:cloudflare": "npm run build && npx wrangler pages deploy dist --project-name shotlab3",
     "dev:agent": "npm run dev",
@@ -46,6 +48,9 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.2.0",
+    "csso": "5.0.5",
+    "lightningcss": "1.33.0",
+    "terser": "5.49.2",
     "vite": "^5.4.0"
   }
 }

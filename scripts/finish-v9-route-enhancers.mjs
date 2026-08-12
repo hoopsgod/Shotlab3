@@ -79,40 +79,62 @@ replaceOnce(
   '  assert.match(activation, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer/);\n  assert.match(commandCenter, /installCoachResponseLoopEnhancer\\(\\)/);\n  assert.match(commandCenter, /openLiveResultResponse/);\n  assert.match(commandCenter, /coach-live-evidence-region/);\n  assert.doesNotMatch(followUp, /message sent|notification delivered|player was notified/i);',
 );
 
-replaceOnce(
-  "vite.config.js",
-  "    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')\n    || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n  ) {\n    return 'PlayerProfileWorkspaces'\n  }\n\n  if (\n    moduleId.includes('/src/components/PlayerDashboardHeader.jsx')",
-  "    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')\n  ) {\n    return 'PlayerProfileWorkspaces'\n  }\n\n  if (\n    moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n    || moduleId.includes('/src/components/PlayerDashboardHeader.jsx')",
-);
+{
+  const path = "vite.config.js";
+  const source = readFileSync(path, "utf8");
+  const consolidatedPhase4fChunking = [
+    "AuthenticatedUi",
+    "AppDomainServices",
+    "PlayerWorkspaces",
+    "CoachWorkspaces",
+  ].every((token) => source.includes(token));
+  const legacyPhase4fChunking = [
+    "PlayerAnalyticsWorkspaces",
+    "PlayerInterfaceWorkspaces",
+    "PlayerCoachAssignmentCard.jsx",
+    "PlayerDashboardHeader.jsx",
+  ].every((token) => source.includes(token));
+
+  if (!consolidatedPhase4fChunking && !legacyPhase4fChunking) {
+    replaceOnce(
+      path,
+      "    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')\n    || moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n  ) {\n    return 'PlayerProfileWorkspaces'\n  }\n\n  if (\n    moduleId.includes('/src/components/PlayerDashboardHeader.jsx')",
+      "    || moduleId.includes('/src/components/PlayerCareerHistory.jsx')\n  ) {\n    return 'PlayerProfileWorkspaces'\n  }\n\n  if (\n    moduleId.includes('/src/components/PlayerCoachAssignmentCard.jsx')\n    || moduleId.includes('/src/components/PlayerDashboardHeader.jsx')",
+    );
+  }
+}
 
 {
   const path = "tests/e2e/coach-player-invitation.spec.mjs";
   let source = readFileSync(path, "utf8");
   const robustHelper = `async function enterCoachPlayers(page) {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route("**/v1/legacy-auth/restore", (route) => route.fulfill({
+    status: 200,
+    contentType: "application/json",
+    body: JSON.stringify({ ok: true, profile: { email: COACH_EMAIL, name: "Demo Coach", role: "coach", team_id: TEAM_ID } }),
+  }));
   await page.goto("/");
-  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });
-  const allPlayers = page.getByRole("button", { name: "Players", exact: true });
-  await expect(demoCoach.or(allPlayers.first()).first()).toBeVisible({ timeout: 15_000 });
-  if (await demoCoach.isVisible()) await demoCoach.click();
-  await expect.poll(async () => {
-    const count = await allPlayers.count();
-    for (let index = 0; index < count; index += 1) {
-      if (await allPlayers.nth(index).isVisible()) return index;
-    }
-    return -1;
-  }, { timeout: 15_000 }).toBeGreaterThanOrEqual(0);
-  const count = await allPlayers.count();
-  for (let index = 0; index < count; index += 1) {
-    const candidate = allPlayers.nth(index);
-    if (await candidate.isVisible()) {
-      await candidate.click();
-      return;
-    }
-  }
-  throw new Error("No visible Players navigation control was available.");
+  await expect(page.getByTestId("coach-command-center-full")).toBeVisible({ timeout: 20_000 });
+  const dock = page.getByTestId("mobile-navigation-dock");
+  await expect(dock).toBeVisible({ timeout: 15_000 });
+  const players = dock.getByRole("button", { name: "Players", exact: true });
+  await expect(players).toBeVisible();
+  await players.click();
 }`;
   if (!source.includes(robustHelper)) {
     source = source.replace(/async function enterCoachPlayers\(page\) \{[\s\S]*?\n\}\n\ntest\(/, `${robustHelper}\n\ntest(`);
+    writeFileSync(path, source);
+  }
+}
+
+{
+  const path = "tests/e2e/coach-player-cross-device-first-result.spec.mjs";
+  let source = readFileSync(path, "utf8");
+  const before = '  await expect(playerPage.getByText("UPCOMING EVENTS", { exact: true })).toBeVisible({ timeout: 20_000 });\n  await playerPage.getByRole("button", { name: /RSVP NOW/ }).first().click();';
+  const after = '  const rsvpButton = playerPage.getByRole("button", { name: /RSVP NOW/ }).first();\n  await expect(rsvpButton).toBeVisible({ timeout: 20_000 });\n  await rsvpButton.click();';
+  if (!source.includes(after) && source.includes(before)) {
+    source = source.replace(before, after);
     writeFileSync(path, source);
   }
 }

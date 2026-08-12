@@ -1,0 +1,112 @@
+name: Phase 4E Final Cross-Screen Polish
+
+on:
+  pull_request:
+    branches:
+      - agent/phase-4d-premium-state-system
+    paths:
+      - "package.json"
+      - "src/components/AppHeader.jsx"
+      - "src/components/VisualHierarchy.module.css"
+      - "scripts/apply-phase4e-final-polish.mjs"
+      - "public/shotlab-phase4e-final-polish.css"
+      - "tests/phase-4e-final-polish.test.mjs"
+      - "tests/phase-4d-premium-state-system.test.mjs"
+      - "tests/mobile-navigation-contract.test.mjs"
+      - "tests/app-store-mobile-shell.test.mjs"
+      - "tests/e2e/phase-4e-final-polish-screenshots.spec.mjs"
+      - "tests/e2e/mobile-navigation.spec.mjs"
+      - "tests/e2e/production-acceptance.spec.mjs"
+      - "playwright.screenshots.config.mjs"
+      - ".github/workflows/phase-4e-final-polish.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+
+concurrency:
+  group: phase-4e-final-polish-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-final-polish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Apply full production enhancer chain
+        id: enhancers
+        run: npm run prepare:route-enhancers
+
+      - name: Verify Phase 4E final polish contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/phase-4e-final-polish.test.mjs
+
+      - name: Verify Phase 4D predecessor contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/phase-4d-premium-state-system.test.mjs
+
+      - name: Verify mobile navigation contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/mobile-navigation-contract.test.mjs
+
+      - name: Verify app-store mobile shell contract
+        if: ${{ always() && steps.enhancers.outcome == 'success' }}
+        run: node --test tests/app-store-mobile-shell.test.mjs
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Install Playwright test runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify current mobile navigation
+        run: npx playwright test tests/e2e/mobile-navigation.spec.mjs --config=playwright.config.mjs --reporter=line
+
+      - name: Verify production acceptance
+        run: npx playwright test tests/e2e/production-acceptance.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Capture Phase 4E iPhone evidence
+        run: npx playwright test tests/e2e/phase-4e-final-polish-screenshots.spec.mjs --config=playwright.screenshots.config.mjs --reporter=line
+
+      - name: Upload Phase 4E evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-4e-final-polish-evidence
+          path: |
+            artifacts/design-audit/iphone/12a-phase4e-player-home-polish.png
+            artifacts/design-audit/iphone/12b-phase4e-player-program-polish.png
+            artifacts/design-audit/iphone/12c-phase4e-player-profile-polish.png
+            artifacts/design-audit/iphone/12d-phase4e-coach-home-polish.png
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Phase 4E failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: shotlab-phase-4e-final-polish-failure
+          path: |
+            test-results/
+            artifacts/design-audit/iphone/
+          if-no-files-found: ignore
+          retention-days: 7

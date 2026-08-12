@@ -1,0 +1,79 @@
+name: Demo Paid Experience Parity
+
+on:
+  pull_request:
+    paths:
+      - "src/**"
+      - "functions/**"
+      - "tests/**"
+      - ".github/workflows/**"
+      - "package.json"
+      - "package-lock.json"
+      - "playwright.acceptance.config.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: "true"
+  VITE_SUPABASE_URL: "https://parity.supabase.co"
+  VITE_SUPABASE_ANON_KEY: "parity-anon-key"
+
+concurrency:
+  group: demo-paid-parity-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  parity-lock:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Enforce shared UI and paid leaderboard parity contracts
+        run: node --test tests/demo-visual-parity-contract.test.mjs tests/home-shots-leaderboard-route.test.mjs tests/remote-leaderboard-roster-parity.test.mjs
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Compare registered and demo runtime experiences
+        run: npx playwright test tests/e2e/demo-paid-parity.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Upload parity certification screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-paid-parity-certification
+          path: parity-evidence/
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload parity failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-paid-parity-failure
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 7

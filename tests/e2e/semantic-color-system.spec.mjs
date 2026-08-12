@@ -64,6 +64,8 @@ test("coach roster statuses and Schedule metadata render with semantic roles", a
   const dock = page.getByTestId("mobile-navigation-dock");
   await dock.getByRole("button", { name: "Players", exact: true }).click();
 
+  await expect(page.locator("#coach-roster-operations")).toBeVisible({ timeout: 20_000 });
+
   const status = page.getByTestId("semantic-roster-status").first();
   await expect(status).toBeVisible({ timeout: 20_000 });
   const tone = await status.getAttribute("data-tone");

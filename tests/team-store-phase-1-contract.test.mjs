@@ -48,23 +48,15 @@ test("click analytics are team scoped and contain no shopper identity", () => {
   const click = buildTeamStoreClick({ store, userRole: "player", source: "player_portal" });
   assert.equal("email" in click, false);
   assert.equal("name" in click, false);
-  const rows = appendTeamStoreClick([], click);
-  const metrics = getStoreVisitMetrics(rows, "team-1");
+  const metrics = getStoreVisitMetrics(appendTeamStoreClick([], click), "team-1");
   assert.equal(metrics.total, 1);
   assert.equal(metrics.today, 1);
 });
 
 test("SquadLocker creation requires an official partner destination", () => {
-  assert.deepEqual(getSquadLockerPartnerReadiness(), {
-    ready: false,
-    reason: "missing_partner_url",
-    url: "",
-  });
+  assert.deepEqual(getSquadLockerPartnerReadiness(), { ready: false, reason: "missing_partner_url", url: "" });
   assert.equal(buildSquadLockerCreationUrl(), "");
-
-  const configured = getSquadLockerPartnerReadiness({
-    baseUrl: "https://partner.example/shotlab?affiliate_id=abc123",
-  });
+  const configured = getSquadLockerPartnerReadiness({ baseUrl: "https://partner.example/shotlab?affiliate_id=abc123" });
   assert.equal(configured.ready, true);
   assert.equal(configured.reason, "configured");
   const url = new URL(configured.url);
@@ -75,12 +67,7 @@ test("SquadLocker creation requires an official partner destination", () => {
   assert.equal(url.searchParams.get("utm_medium"), "partner_referral");
   assert.equal(url.searchParams.get("utm_campaign"), "team_store_creation");
   assert.equal(url.searchParams.get("referral_partner_master"), "ShotLab");
-
-  assert.deepEqual(getSquadLockerPartnerReadiness({ baseUrl: "http://example.com" }), {
-    ready: false,
-    reason: "invalid_partner_url",
-    url: "",
-  });
+  assert.deepEqual(getSquadLockerPartnerReadiness({ baseUrl: "http://example.com" }), { ready: false, reason: "invalid_partner_url", url: "" });
   assert.equal(buildSquadLockerCreationUrl({ baseUrl: "http://example.com" }), "");
 });
 
@@ -93,35 +80,32 @@ test("referral starts are team scoped and contain no coach identity", () => {
   assert.equal(start.attribution, "unverified");
   assert.equal("email" in start, false);
   assert.equal("name" in start, false);
-
   const rows = upsertTeamStoreReferralStart([], start);
   assert.equal(getTeamStoreReferralStart(rows, "team-1")?.id, start.id);
   assert.equal(getTeamStoreReferralStart(rows, "team-2"), null);
-
-  const verified = buildTeamStoreReferralStart({
-    teamId: "team-1",
-    attribution: "official_partner_url",
-  });
+  const verified = buildTeamStoreReferralStart({ teamId: "team-1", attribution: "official_partner_url" });
   assert.equal(verified.attribution, "official_partner_url");
 });
 
 test("portal exposes coach setup and player shopping with clear affiliate disclosure", () => {
-  assert.match(portalSource, /PUBLISH STORE/);
-  assert.match(portalSource, /SHOP TEAM STORE/);
-  assert.match(portalSource, /Connect\. Preview\. Publish\./);
-  assert.match(portalSource, /What players will see/);
-  assert.match(portalSource, /Name players will see/);
-  assert.match(portalSource, /Public store link/);
-  assert.match(portalSource, /CREATE SQUADLOCKER STORE/);
-  assert.match(portalSource, /PARTNER SETUP PENDING/);
-  assert.match(portalSource, /unverified signup link/i);
-  assert.match(portalSource, /official partner link is applied automatically/i);
-  assert.match(portalSource, /STORE VISITS/);
-  assert.match(portalSource, /Store link opens/);
-  assert.match(portalSource, /ShotLab does not process orders, payments, shipping, returns, or sales tax/);
-  assert.match(portalSource, /handles products, payments, shipping, returns, and support/);
-  assert.match(portalSource, /required school or club approvals/);
-  assert.match(portalSource, /AFFILIATE_DISCLOSURE/);
+  for (const pattern of [
+    /PUBLISH STORE/,
+    /SHOP TEAM STORE/,
+    /Connect\. Preview\. Publish\./,
+    /What players will see/,
+    /Name players will see/,
+    /Public store link/,
+    /CREATE SQUADLOCKER STORE/,
+    /PARTNER SETUP PENDING/,
+    /unverified signup link/i,
+    /official partner link is applied automatically/i,
+    /STORE VISITS/,
+    /Store link opens/,
+    /ShotLab does not process orders, payments, shipping, returns, or sales tax/,
+    /handles products, payments, shipping, returns, and support/,
+    /required school or club approvals/,
+    /AFFILIATE_DISCLOSURE/,
+  ]) assert.match(portalSource, pattern);
   assert.match(AFFILIATE_DISCLOSURE, /ShotLab may receive referral compensation/);
 });
 
@@ -134,33 +118,14 @@ test("team store portal is mounted independently from the large App shell", () =
 test("authenticated app navigation can open the portal with authoritative role identity", () => {
   const events = [];
   class FakeCustomEvent {
-    constructor(type, init) {
-      this.type = type;
-      this.detail = init.detail;
-    }
+    constructor(type, init) { this.type = type; this.detail = init.detail; }
   }
   const target = {
     CustomEvent: FakeCustomEvent,
-    dispatchEvent(event) {
-      events.push(event);
-      return true;
-    },
+    dispatchEvent(event) { events.push(event); return true; },
   };
-
-  const identity = normalizeTeamStorePortalIdentity({
-    email: " COACH@EXAMPLE.COM ",
-    role: "coach",
-    teamId: " team-1 ",
-    teamName: " Varsity ",
-  });
-
-  assert.deepEqual(identity, {
-    email: "coach@example.com",
-    role: "coach",
-    isCoach: true,
-    teamId: "team-1",
-    teamName: "Varsity",
-  });
+  const identity = normalizeTeamStorePortalIdentity({ email: " COACH@EXAMPLE.COM ", role: "coach", teamId: " team-1 ", teamName: " Varsity " });
+  assert.deepEqual(identity, { email: "coach@example.com", role: "coach", isCoach: true, teamId: "team-1", teamName: "Varsity" });
   assert.equal(openTeamStorePortal(identity, target), true);
   assert.equal(events.length, 1);
   assert.equal(events[0].type, TEAM_STORE_OPEN_EVENT);
@@ -177,8 +142,9 @@ test("authenticated app navigation can open the portal with authoritative role i
   assert.match(portalSource, /window\.addEventListener\(TEAM_STORE_OPEN_EVENT, handleNavigationOpen\)/);
 });
 
-test("player demo shows a truthful storefront preview without a fabricated shopping destination", () => {
-  assert.match(portalSource, /isDemoAccount\(activeIdentity\?\.email\)/);
-  assert.match(portalSource, /DEMO STOREFRONT/);
-  assert.match(portalSource, /A real team store will open only after the coach publishes a verified storefront link\./);
+test("player demo stays on the registered Team Store path without a fabricated shopping destination", () => {
+  assert.doesNotMatch(portalSource, /isDemoAccount|isDemoPlayerPreview|DEMO STOREFRONT|Preview only in demo mode/);
+  assert.match(portalSource, /if \(!store\?\.storeUrl\) return;/);
+  assert.match(portalSource, /Your team store is not open yet/);
+  assert.match(portalSource, /Your coach has not published a store link/);
 });

@@ -29,9 +29,9 @@ async function seedCoach(page) {
 async function enterCoachPlayers(page) {
   await page.goto("/");
   const dock = page.getByTestId("mobile-navigation-dock");
-  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });
-  await expect(dock.or(demoCoach).first()).toBeVisible({ timeout: 15_000 });
-  if (await demoCoach.isVisible()) await demoCoach.click();
+  const coachDemo = page.getByRole("button", { name: "Coach demo", exact: true });
+  await expect(dock.or(coachDemo).first()).toBeVisible({ timeout: 15_000 });
+  if (await coachDemo.isVisible()) await coachDemo.click();
   await expect(dock).toBeVisible({ timeout: 15_000 });
   const players = dock.getByRole("button", { name: "Players", exact: true });
   await expect(players).toBeVisible();

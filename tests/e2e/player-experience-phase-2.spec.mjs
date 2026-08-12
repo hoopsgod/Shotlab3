@@ -60,7 +60,7 @@ async function enterSeededDemoPlayer(page) {
     window.sessionStorage.setItem("player-phase-two-seeded", "1");
   }, seedData);
   await page.goto("/");
-  await page.getByRole("button", { name: "Demo Player", exact: true }).click();
+  await page.getByRole("button", { name: "Player demo", exact: true }).click();
   await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
 }
 
@@ -78,21 +78,22 @@ async function expectNoHorizontalOverflow(page) {
   expect(widths.body).toBeLessThanOrEqual(widths.viewport + 2);
 }
 
-async function expectWorkspaceTouchTargets(page, testId) {
-  const workspace = page.getByTestId(testId);
-  await expect(workspace).toBeVisible({ timeout: 20_000 });
-
-  const metrics = workspace.locator("[data-interactive]");
-  await expect(metrics).toHaveCount(4);
-
-  const buttons = workspace.getByRole("button");
+async function expectButtonTouchTargets(root, minimum = 1) {
+  const buttons = root.getByRole("button");
   const count = await buttons.count();
-  expect(count).toBeGreaterThanOrEqual(1);
+  expect(count).toBeGreaterThanOrEqual(minimum);
   for (let index = 0; index < count; index += 1) {
     const box = await buttons.nth(index).boundingBox();
     expect(box).not.toBeNull();
     expect(box.height).toBeGreaterThanOrEqual(44);
   }
+}
+
+async function expectWorkspaceTouchTargets(page, testId) {
+  const workspace = page.getByTestId(testId);
+  await expect(workspace).toBeVisible({ timeout: 20_000 });
+  await expect(workspace.locator("[data-interactive]")).toHaveCount(4);
+  await expectButtonTouchTargets(workspace);
 }
 
 test.beforeEach(async ({ page }) => {
@@ -101,7 +102,7 @@ test.beforeEach(async ({ page }) => {
 
 test("At Home workspace filters drills and routes the Today metric to shot entry", async ({ page }) => {
   await enterSeededDemoPlayer(page);
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "At Home", exact: true }).click();
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Train", exact: true }).click();
 
   await expectWorkspaceTouchTargets(page, "player-at-home-workspace");
   const filters = page.getByTestId("player-at-home-filter-rail");
@@ -121,7 +122,7 @@ test("At Home workspace filters drills and routes the Today metric to shot entry
 
 test("Program workspace filters the plan and launches the exact coach-priority drill", async ({ page }) => {
   await enterSeededDemoPlayer(page);
-  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Program", exact: true }).click();
+  await openMoreDestination(page, "duels");
 
   await expectWorkspaceTouchTargets(page, "player-program-workspace");
   const filters = page.getByTestId("player-program-filter-rail");
@@ -136,33 +137,54 @@ test("Program workspace filters the plan and launches the exact coach-priority d
   await expectNoHorizontalOverflow(page);
 });
 
-test("Events and S&C command bars reveal the exact unresolved commitment", async ({ page }) => {
+test("Events and S&C commitment centers reveal the exact unresolved commitment", async ({ page }) => {
   await enterSeededDemoPlayer(page);
 
   await openMoreDestination(page, "program");
-  await expectWorkspaceTouchTargets(page, "player-events-workspace");
-  await expect(page.getByText("Team Practice", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Film Session", { exact: true }).first()).toBeVisible();
-  await page.getByTestId("player-events-workspace").getByRole("button", { name: /Resolve next RSVP/i }).click();
-  await expect(page.getByRole("button", { name: "RSVP NOW →", exact: true })).toBeFocused({ timeout: 3_000 });
+  const eventCenter = page.getByTestId("player-commitment-center-events");
+  await expect(eventCenter).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("player-commitment-route-header-events")).toBeVisible();
+  await expect(eventCenter.getByText("Team Practice", { exact: true }).first()).toBeVisible();
+  await expect(eventCenter.getByText("Film Session", { exact: true }).first()).toBeVisible();
+  await expectButtonTouchTargets(eventCenter);
+  await eventCenter.getByRole("button", { name: "Respond now", exact: true }).click();
+  await expect(page.getByTestId("player-commitment-details-events")).toHaveAttribute("open", "");
+  await expect(page.getByTestId("player-events-operational-list")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole("button", { name: "RSVP NOW →", exact: true }).first()).toBeVisible();
 
   await openMoreDestination(page, "sc");
-  await expectWorkspaceTouchTargets(page, "player-strength-workspace");
-  await expect(page.getByText("Team Lift", { exact: true }).first()).toBeVisible();
-  await expect(page.getByText("Speed Session", { exact: true }).first()).toBeVisible();
-  await page.getByTestId("player-strength-workspace").getByRole("button", { name: /Open next session/i }).click();
-  await expect(page.getByRole("button", { name: /RSVP NOW/i })).toBeFocused({ timeout: 3_000 });
+  const strengthCenter = page.getByTestId("player-commitment-center-strength");
+  await expect(strengthCenter).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("player-commitment-route-header-strength")).toBeVisible();
+  await expect(strengthCenter.getByText("Team Lift", { exact: true }).first()).toBeVisible();
+  await expect(strengthCenter.getByText("Speed Session", { exact: true }).first()).toBeVisible();
+  await expectButtonTouchTargets(strengthCenter);
+  await strengthCenter.getByRole("button", { name: "Respond now", exact: true }).click();
+  await expect(page.getByTestId("player-commitment-details-strength")).toHaveAttribute("open", "");
+  const strengthPanel = page.getByTestId("player-strength-operational-panel");
+  await expect(strengthPanel).toBeVisible({ timeout: 10_000 });
+  await strengthPanel.getByRole("button", { name: /Speed Session/i }).click();
+  await expect(strengthPanel.getByRole("button", { name: /RSVP NOW/i })).toBeVisible();
   await expectNoHorizontalOverflow(page);
 });
 
-test("Leaderboards and Profile retain the operational workspace system", async ({ page }) => {
+test("Leaderboards and Progress retain the current operational hierarchy", async ({ page }) => {
   await enterSeededDemoPlayer(page);
 
   await openMoreDestination(page, "leaderboards");
   await expectWorkspaceTouchTargets(page, "player-leaderboards-workspace");
   await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible({ timeout: 20_000 });
 
-  await openMoreDestination(page, "profile");
-  await expectWorkspaceTouchTargets(page, "player-profile-workspace");
+  await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
+  const profile = page.getByTestId("player-profile-workspace");
+  await expect(profile).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByTestId("player-progress-story")).toBeVisible();
+  await expect(page.getByTestId("player-progress-metrics")).toBeVisible();
+  await expect(profile.locator("[data-interactive]")).toHaveCount(0);
+  await expectButtonTouchTargets(profile, 2);
+
+  await page.getByTestId("player-progress-open-profile").click();
+  await expect(page.getByTestId("player-progress-full-profile")).toHaveAttribute("open", "");
+  await expect(page.getByTestId("player-profile-readout")).toBeVisible({ timeout: 10_000 });
   await expectNoHorizontalOverflow(page);
 });

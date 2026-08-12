@@ -26,33 +26,61 @@ async function openMore(page) {
   return page.getByTestId("mobile-navigation-sheet");
 }
 
-test("player mobile dock keeps Home, Train, and Progress direct while grouping secondary areas", async ({ page }) => {
+async function expectDockIcon(dock, name, icon) {
+  await expect(dock.getByRole("button", { name, exact: true })).toHaveAttribute("data-icon-name", icon);
+}
+
+test("player mobile dock makes Development Story primary with semantic native iconography", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await installRoutes(page);
   await enterDemo(page, "player");
 
   const dock = page.getByTestId("mobile-navigation-dock");
+  await expect(dock).toHaveAttribute("data-navigation-intent", "development-first");
   await expect(dock.getByRole("button")).toHaveCount(4);
-  await expect(dock.getByRole("button", { name: "Home", exact: true })).toBeVisible();
-  await expect(dock.getByRole("button", { name: "Train", exact: true })).toBeVisible();
-  await expect(dock.getByRole("button", { name: "Progress", exact: true })).toBeVisible();
-  await expect(dock.getByRole("button", { name: "More", exact: true })).toBeVisible();
-  await expect(dock.getByRole("button", { name: "Events", exact: true })).toHaveCount(0);
-  await expect(dock.getByRole("button", { name: "Lifting", exact: true })).toHaveCount(0);
+  await expectDockIcon(dock, "Home", "home");
+  await expectDockIcon(dock, "Train", "target");
+  await expectDockIcon(dock, "Progress", "momentum");
+  await expectDockIcon(dock, "More", "more");
+  await expect(dock.getByRole("button", { name: "Program", exact: true })).toHaveCount(0);
+  await expect(dock.getByRole("button", { name: "Rankings", exact: true })).toHaveCount(0);
   await expect(dock.getByRole("button", { name: "Profile", exact: true })).toHaveCount(0);
 
+  await dock.getByRole("button", { name: "Progress", exact: true }).click();
+  await expect(page).toHaveURL(/\/profile$/);
+  await expect(page.getByTestId("player-progress-story")).toBeVisible();
+  await expect(page.getByTestId("player-progress-story-topline")).toContainText("DEVELOPMENT STORY");
+  await expectNoHorizontalOverflow(page);
+
   let sheet = await openMore(page);
-  for (const key of ["program", "sc", "team-store", "profile"]) {
+  await expect(sheet.getByRole("heading", { name: "More", exact: true })).toBeVisible();
+  await expect(sheet.getByText("Program work, schedule, rankings, and team tools.", { exact: true })).toBeVisible();
+  await expect(sheet.getByRole("heading", { name: "Team program", exact: true })).toBeVisible();
+  await expect(sheet.getByRole("heading", { name: "Rankings", exact: true })).toBeVisible();
+  for (const key of ["duels", "program", "sc", "leaderboards", "team-store"]) {
     await expect(sheet.locator(`[data-nav-key="${key}"]`)).toBeVisible();
   }
-  await expect(sheet.locator('[data-nav-key="leaderboards"]')).toHaveCount(0);
+  await expect(sheet.locator('[data-nav-key="duels"]')).toHaveAttribute("data-icon-name", "program");
+  await expect(sheet.locator('[data-nav-key="program"]')).toHaveAttribute("data-icon-name", "calendar");
+  await expect(sheet.locator('[data-nav-key="sc"]')).toHaveAttribute("data-icon-name", "custom");
+  await expect(sheet.locator('[data-nav-key="leaderboards"]')).toHaveAttribute("data-icon-name", "chart");
+  await expect(sheet.locator('[data-nav-key="team-store"]')).toHaveAttribute("data-icon-name", "store");
+  await expect(sheet.locator('[data-nav-key="profile"]')).toHaveCount(0);
 
+  await sheet.locator('[data-nav-key="leaderboards"]').click();
+  await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
+  await expect(page).toHaveURL(/\/leaderboards$/);
+  await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible();
+
+  sheet = await openMore(page);
   await sheet.locator('[data-nav-key="team-store"]').click();
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
   const teamStoreDialog = page.getByRole("dialog", { name: "Team Store" });
   await expect(teamStoreDialog).toBeVisible();
-  await expect(teamStoreDialog.getByText("DEMO STOREFRONT", { exact: true })).toBeVisible();
-  await expect(teamStoreDialog.getByText("Your team store is not open yet", { exact: true })).toHaveCount(0);
+  await expect(teamStoreDialog.getByTestId("player-team-store-retail")).toBeVisible();
+  await expect(teamStoreDialog.getByTestId("player-team-store-hero")).toHaveCount(0);
+  await expect(teamStoreDialog.getByText("Your team. Your gear.", { exact: true })).toHaveCount(0);
+  await expect(teamStoreDialog.getByText("Your team store is not open yet", { exact: true })).toBeVisible();
   await expect(teamStoreDialog.getByRole("button", { name: "SHOP TEAM STORE" })).toHaveCount(0);
   await teamStoreDialog.getByRole("button", { name: "Close team store" }).click();
 
@@ -60,25 +88,24 @@ test("player mobile dock keeps Home, Train, and Progress direct while grouping s
   await sheet.locator('[data-nav-key="program"]').click();
   await expect(page.getByTestId("mobile-navigation-sheet")).toHaveCount(0);
   await expect(page).toHaveURL(/\/events$/);
-  await expect(page.getByText("PROGRAM EVENTS", { exact: true }).first()).toBeVisible();
-
-  await dock.getByRole("button", { name: "Progress", exact: true }).click();
-  await expect(page).toHaveURL(/\/leaderboards$/);
-  await expect(page.getByTestId("premium-leaderboards-hub")).toBeVisible();
+  const eventsCommitmentCenter = page.getByTestId("player-commitment-center-events");
+  await expect(eventsCommitmentCenter).toBeVisible();
+  await expect(eventsCommitmentCenter.getByRole("heading", { name: "Events & Attendance", exact: true })).toBeVisible();
+  await expect(page.getByTestId("player-events-operational-list")).toBeHidden();
   await expectNoHorizontalOverflow(page);
 });
 
-test("coach mobile dock keeps Home, Players, and Schedule direct while preserving management areas", async ({ page }) => {
+test("coach mobile dock uses Home, Players, and Schedule icons that match their destinations", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await installRoutes(page);
   await enterDemo(page, "coach");
 
   const dock = page.getByTestId("mobile-navigation-dock");
   await expect(dock.getByRole("button")).toHaveCount(4);
-  await expect(dock.getByRole("button", { name: "Home", exact: true })).toBeVisible();
-  await expect(dock.getByRole("button", { name: "Players", exact: true })).toBeVisible();
-  await expect(dock.getByRole("button", { name: "Schedule", exact: true })).toBeVisible();
-  await expect(dock.getByRole("button", { name: "More", exact: true })).toBeVisible();
+  await expectDockIcon(dock, "Home", "home");
+  await expectDockIcon(dock, "Players", "team");
+  await expectDockIcon(dock, "Schedule", "calendar");
+  await expectDockIcon(dock, "More", "more");
   await expect(dock.getByRole("button", { name: "Drills", exact: true })).toHaveCount(0);
   await expect(dock.getByRole("button", { name: "S&C", exact: true })).toHaveCount(0);
 
