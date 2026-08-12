@@ -6,6 +6,7 @@ import { minifyVisualAuthorityCss } from "../scripts/minify-visual-authority-css
 const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 
 const parity = read("../public/shotlab-v8-demo-parity.css");
+const sessionIntegrity = read("../public/shotlab-v15-session-integrity.css");
 const legacy = read("../src/styles/appLegacyStyles.js");
 const secondary = read("../src/components/SecondaryPageSystem.css");
 
@@ -32,6 +33,15 @@ test("legacy hero authority no longer repaints modern semantic hero components",
   assert.doesNotMatch(legacy, /\[class\*="hero"\]/);
   assert.doesNotMatch(legacy, /\[class\*="Session"\]/);
   assert.doesNotMatch(legacy, /\[class\*="session"\]/);
+});
+
+test("dark title authority uses explicit surface contracts instead of test-id heuristics", () => {
+  assert.match(sessionIntegrity, /\[data-home-role="primary"\]/);
+  assert.match(sessionIntegrity, /\[data-command-role="primary"\]/);
+  assert.match(sessionIntegrity, /\.secondaryPageDecision/);
+  assert.match(sessionIntegrity, /\.coachPlayerProfileHero/);
+  assert.doesNotMatch(sessionIntegrity, /\[data-testid\*="signal"\]/);
+  assert.doesNotMatch(sessionIntegrity, /\[data-testid\*="insight"\]/);
 });
 
 test("Coach Players preserves dark surfaces wherever white foreground copy is intentional", () => {
