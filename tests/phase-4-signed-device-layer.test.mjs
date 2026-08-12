@@ -9,6 +9,7 @@ const info = read("ios/App/App/Info.plist");
 const packageJson = JSON.parse(read("package.json"));
 const releaseProfile = JSON.parse(read("native/ios-release-profile.json"));
 const releaseScript = read("scripts/ios-release.mjs");
+const readinessScript = read("scripts/testflight-readiness.mjs");
 const exists = (path) => fs.existsSync(new URL(`../${path}`, import.meta.url));
 
 test("committed iOS project contains the finalized ShotLab identity", () => {
@@ -54,16 +55,19 @@ test("production app icon and launch assets are deterministic", () => {
 
 test("signed-device commands are explicit, sync current web assets, enforce current Apple tooling, and keep secrets out of the repository", () => {
   assert.equal(packageJson.scripts["ios:configure-signing"], "node scripts/configure-ios-signing.mjs");
-  assert.equal(packageJson.scripts["ios:release-readiness"], "node scripts/testflight-readiness.mjs");
   assert.equal(packageJson.scripts["ios:device-build"], "node scripts/ios-release.mjs device");
   assert.equal(packageJson.scripts["ios:archive"], "node scripts/ios-release.mjs archive");
-  assert.equal(packageJson.scripts["ios:release-candidate"], "node scripts/ios-release.mjs release-candidate");
   assert.equal(packageJson.scripts["ios:generate-assets"], "node scripts/generate-ios-assets.mjs");
+  assert.equal(packageJson.scripts["ios:release-readiness"], undefined);
+  assert.equal(packageJson.scripts["ios:release-candidate"], undefined);
   assert.match(read("scripts/configure-ios-signing.mjs"), /SHOTLAB_DEVELOPMENT_TEAM/);
+  assert.match(releaseScript, /case "release-candidate"/);
   assert.match(releaseScript, /syncReleaseBundle/);
   assert.match(releaseScript, /native:sync:ios/);
   assert.match(releaseScript, /verifyAppleToolchain/);
   assert.match(releaseScript, /submissionMinimums/);
   assert.match(releaseScript, /--require-signing/);
+  assert.match(readinessScript, /--strict-owner/);
+  assert.match(readinessScript, /--require-signing/);
   assert.doesNotMatch(project, /DEVELOPMENT_TEAM = [A-Z0-9]{10};/);
 });
