@@ -35,6 +35,9 @@ async function enterPerformanceIntelligence(page) {
   await page.getByTestId("player-progress-open-profile").click();
   await settle(page);
 
+  const readout = page.getByTestId("player-profile-readout");
+  await expect(readout).toBeVisible({ timeout: 20_000 });
+
   const performance = page.getByTestId("player-profile-performance-intelligence");
   if (!(await performance.evaluate((node) => node.open === true))) {
     await performance.locator("summary").click();
@@ -43,19 +46,21 @@ async function enterPerformanceIntelligence(page) {
   await expect(performance).toBeVisible({ timeout: 20_000 });
   await performance.scrollIntoViewIfNeeded();
   await settle(page);
-  return performance;
+  return { performance, readout };
 }
 
 test("Phase 6A keeps internal drill identifiers out of Player Performance Intelligence", async ({ page }) => {
   const pageErrors = [];
   page.on("pageerror", (error) => pageErrors.push(error.message));
 
-  const performance = await enterPerformanceIntelligence(page);
+  const { performance, readout } = await enterPerformanceIntelligence(page);
   const text = String(await performance.textContent()).replace(/\s+/g, " ").trim();
+  const readoutText = String(await readout.textContent()).replace(/\s+/g, " ").trim();
 
   expect(text).not.toMatch(/demo-(?:home|program|training|drill)[a-z0-9_-]*/i);
+  expect(readoutText).not.toMatch(/demo-(?:home|program|training|drill)[a-z0-9_-]*/i);
   expect(text).toContain("Strongest drill pattern: 4-Minute Warm-Up Shooting.");
-  expect(text).toContain("Strength: 4-Minute Warm-Up Shooting");
+  expect(readoutText).toContain("Strength: 4-Minute Warm-Up Shooting");
 
   const horizontal = await page.evaluate(() => ({
     innerWidth,
@@ -65,13 +70,17 @@ test("Phase 6A keeps internal drill identifiers out of Player Performance Intell
   expect(horizontal.documentWidth - horizontal.innerWidth, "Profile document overflow").toBeLessThanOrEqual(1);
   expect(horizontal.bodyWidth - horizontal.innerWidth, "Profile body overflow").toBeLessThanOrEqual(1);
 
+  await readout.screenshot({
+    path: path.join(OUTPUT_DIR, "player-drill-trend-readout.png"),
+    animations: "disabled",
+  });
   await performance.screenshot({
     path: path.join(OUTPUT_DIR, "player-performance-intelligence.png"),
     animations: "disabled",
   });
   fs.writeFileSync(
     path.join(OUTPUT_DIR, "player-performance-intelligence.json"),
-    JSON.stringify({ text, horizontal }, null, 2),
+    JSON.stringify({ text, readoutText, horizontal }, null, 2),
   );
 
   expect(pageErrors).toEqual([]);
