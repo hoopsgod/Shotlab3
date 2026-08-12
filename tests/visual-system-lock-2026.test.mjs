@@ -5,6 +5,9 @@ import fs from "node:fs";
 const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 const foundation = read("../src/styles/VisualFoundation2026.css");
 const insightRail = read("../src/components/OperationalInsightRail.module.css");
+const commandHierarchy = read("../src/styles/CommandHierarchy2026.css");
+const missionControl = read("../src/styles/MissionControlHierarchy2026.css");
+const secondaryPages = read("../src/components/SecondaryPageSystem.css");
 const header = read("../src/components/AppHeader.jsx");
 const navigation = read("../src/components/MobileNavigation.module.css");
 const states = read("../src/components/ShotLabStatePanel.module.css");
@@ -81,4 +84,43 @@ test("Phase 1 intelligence rail owns readable light-shell and dark-card material
 test("Phase 1 intelligence rail does not ship sub-11px interface text", () => {
   assert.doesNotMatch(insightRail, /font-size:\s*(?:8|9|10)px\b/);
   assert.doesNotMatch(insightRail, /font:\s*[^;]*(?:8|9|10)px\b/);
+});
+
+
+test("Phase 1 shell materials and legacy namespaces resolve through the canonical foundation", () => {
+  for (const token of [
+    "--shell-rail-surface: #0d171e",
+    "--shell-rail-ink: #f5f8f9",
+    "--shell-rail-muted: #a9b5bc",
+    "--sl-accent: var(--accent)",
+    "--sl-ink: var(--text-1)",
+    "--sl-muted: var(--text-2)",
+    "--sl-line: var(--stroke-1)",
+  ]) assert.ok(foundation.includes(token), "missing " + token);
+
+  assert.match(foundation, /\.performance-shell \.sidebar-nav[\s\S]*var\(--shell-rail-surface-raised\)[\s\S]*var\(--shell-rail-surface\)/);
+  assert.match(foundation, /\.nav-item\.is-active[\s\S]*var\(--accent\)/);
+
+  for (const alias of [
+    "--mc-surface: var(--surface-1)",
+    "--mc-surface-quiet: var(--surface-3)",
+    "--mc-ink: var(--text-1)",
+    "--mc-muted: var(--text-2)",
+    "--mc-line: var(--stroke-1)",
+  ]) assert.ok(missionControl.includes(alias), "missing " + alias);
+
+  assert.match(secondaryPages, /border-radius: var\(--radius-xl, 24px\)/);
+  assert.match(secondaryPages, /border-radius: var\(--radius-md, 14px\)/);
+});
+
+test("Phase 1 command surfaces enforce readable labels and canonical interaction geometry", () => {
+  const commandSurfaces = [commandHierarchy, missionControl].join("\n");
+  assert.doesNotMatch(commandSurfaces, /font-size:\s*(?:8|9|10)px\b/);
+  assert.doesNotMatch(commandSurfaces, /font:\s*[^;]*(?:8|9|10)px\b/);
+  assert.match(commandHierarchy, /width: var\(--touch-target, 44px\)/);
+  assert.match(commandHierarchy, /height: var\(--touch-target, 44px\)/);
+  assert.doesNotMatch(missionControl, /border-radius:\s*(?:13|15|16|20|22|26)px\b/);
+  assert.match(missionControl, /border-radius: var\(--radius-xl, 24px\)/);
+  assert.match(missionControl, /border-radius: var\(--radius-lg, 18px\)/);
+  assert.match(missionControl, /border-radius: var\(--radius-md, 14px\)/);
 });
