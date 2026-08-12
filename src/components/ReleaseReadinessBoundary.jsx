@@ -1,4 +1,5 @@
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import AppFeedbackLayer, { announceFeedback, clearFeedback } from "./AppFeedbackLayer.jsx";
 import { releaseAuthService } from "../lib/releaseAuthService.js";
 import {
   RUNTIME_STORAGE_KEYS,
@@ -14,6 +15,7 @@ import {
 const SESSION_NOTICE_KEY = "sl:release-session-notice";
 const SESSION_NOTICE = "Your secure session expired. Sign in again to continue. Training data saved on this device has been preserved.";
 const DEMO_BUTTON_LABELS = new Set(["DEMO PLAYER", "DEMO COACH", "LOAD DEMO DATA", "CLEAR DEMO DATA"]);
+const CONNECTIVITY_FEEDBACK_KEY = "release-connectivity";
 
 const bannerStyle = {
   position: "fixed",
@@ -231,21 +233,59 @@ export default function ReleaseReadinessBoundary({ children }) {
 
   const status = !isOnline ? "offline" : syncState;
   const statusCopy = status === "offline"
-    ? "Offline — local training data remains available. Team updates will resume when your connection returns."
+    ? "Local training remains available. Team updates will resume when your connection returns."
     : status === "syncing"
-      ? "Connection restored — checking locally saved training updates."
+      ? "Checking locally saved training updates and restoring team sync."
       : status === "synced"
         ? `${syncSummary.synced} locally saved update${syncSummary.synced === 1 ? "" : "s"} synced to your team.`
         : status === "attention"
           ? `${syncSummary.pending || syncSummary.failed} update${(syncSummary.pending || syncSummary.failed) === 1 ? "" : "s"} still need attention. Open At Home training to retry.`
           : "";
 
+  useEffect(() => {
+    if (!statusCopy) {
+      clearFeedback(CONNECTIVITY_FEEDBACK_KEY);
+      return;
+    }
+
+    if (status === "offline") {
+      announceFeedback({
+        key: CONNECTIVITY_FEEDBACK_KEY,
+        tone: "warning",
+        title: "Working offline",
+        message: statusCopy,
+        persistent: true,
+        dismissible: false,
+      });
+      return;
+    }
+
+    if (status === "syncing") {
+      announceFeedback({
+        key: CONNECTIVITY_FEEDBACK_KEY,
+        tone: "info",
+        title: "Checking team sync",
+        message: statusCopy,
+        persistent: true,
+        dismissible: false,
+      });
+      return;
+    }
+
+    announceFeedback({
+      key: CONNECTIVITY_FEEDBACK_KEY,
+      tone: status === "synced" ? "success" : "warning",
+      title: status === "synced" ? "Team sync complete" : "Sync needs attention",
+      message: statusCopy,
+      persistent: status === "attention",
+      dismissible: true,
+    });
+  }, [status, statusCopy]);
+
   return <>
     <ProductionDemoGuard enabled={demoEnabled} />
     <Fragment key={appMountVersion}>{children}</Fragment>
-    {statusCopy && <aside role="status" aria-live="polite" data-testid="release-connectivity-status" style={{...bannerStyle,background:status === "attention" ? "rgba(51,35,10,.94)" : "rgba(7,10,12,.94)",border:`1px solid ${status === "attention" ? "rgba(255,181,71,.48)" : "rgba(200,255,26,.34)"}`,color:"#F3F6F7"}}>
-      <div style={{display:"flex",alignItems:"center",gap:9}}><span aria-hidden="true" style={{width:8,height:8,borderRadius:99,background:status === "attention" ? "#FFB547" : status === "offline" ? "#AAB2BA" : "#C8FF1A",boxShadow:status === "syncing" ? "0 0 14px rgba(200,255,26,.65)" : "none",flexShrink:0}}/><span>{statusCopy}</span></div>
-    </aside>}
+    <AppFeedbackLayer />
     {sessionNotice && <aside role="alert" data-testid="release-session-notice" style={{...bannerStyle,top:"auto",bottom:"max(12px, env(safe-area-inset-bottom, 0px))",background:"rgba(18,21,23,.97)",border:"1px solid rgba(200,255,26,.42)",color:"#F3F6F7"}}>
       <div style={{display:"flex",alignItems:"flex-start",gap:12}}><div style={{flex:1}}><div style={{fontWeight:800,color:"#C8FF1A",marginBottom:3}}>Sign-in required</div><div>{sessionNotice}</div></div><button type="button" aria-label="Dismiss session notice" onClick={dismissSessionNotice} style={{width:36,height:36,borderRadius:10,border:"1px solid rgba(255,255,255,.16)",background:"transparent",color:"#F3F6F7",fontSize:18,cursor:"pointer",flexShrink:0}}>×</button></div>
     </aside>}

@@ -4,27 +4,37 @@ import { readFile } from "node:fs/promises";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8");
 
-test("shared feedback layer exposes accessible success error and dismiss behavior", async () => {
+test("shared feedback layer exposes accessible keyed premium states", async () => {
   const source = await read("src/components/AppFeedbackLayer.jsx");
   assert.match(source, /shotlab:feedback/);
+  assert.match(source, /ALLOWED_TONES = \["success", "error", "info", "warning"\]/);
+  assert.match(source, /export function clearFeedback/);
+  assert.match(source, /persistent: detail\.persistent === true|const persistent = detail\.persistent === true/);
+  assert.match(source, /dismissible: detail\.dismissible !== false/);
   assert.match(source, /aria-live=/);
   assert.match(source, /role=\{feedback\.tone === "error" \? "alert" : "status"\}/);
   assert.match(source, /Dismiss notification/);
-  assert.match(source, /tone: \["success", "error", "info"\]/);
+  assert.match(source, /feedbackKeyRef/);
 });
 
-test("feedback styling uses restrained motion mobile safe areas and accessibility preferences", async () => {
+test("feedback styling uses restrained motion mobile safe areas and touch-safe dismissal", async () => {
   const css = await read("src/components/AppFeedbackLayer.css");
   assert.match(css, /env\(safe-area-inset-top\)/);
   assert.match(css, /env\(safe-area-inset-bottom\)/);
+  assert.match(css, /app-feedback--leaving/);
+  assert.match(css, /width:\s*44px/);
+  assert.match(css, /height:\s*44px/);
+  assert.match(css, /touch-action:\s*manipulation/);
   assert.match(css, /prefers-reduced-motion: reduce/);
   assert.match(css, /prefers-reduced-transparency: reduce/);
   assert.match(css, /focus-visible/);
-  assert.doesNotMatch(css, /confetti|bounce|infinite/);
+  assert.doesNotMatch(css, /confetti|bounce/);
 });
 
-test("branding workflow reports verified save success and recoverable failure without changing persistence authority", async () => {
+test("branding workflow reports verified save feedback through the global app layer", async () => {
   const source = await read("src/screens/CoachTeamBrandingScreen.jsx");
+  assert.match(source, /import \{ announceFeedback \} from "\.\.\/components\/AppFeedbackLayer"/);
+  assert.doesNotMatch(source, /<AppFeedbackLayer\s*\/>/);
   assert.match(source, /await onSave\?\.\(next\)/);
   assert.match(source, /Team identity saved/);
   assert.match(source, /Branding was not saved/);

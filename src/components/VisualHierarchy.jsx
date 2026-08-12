@@ -1,7 +1,25 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./VisualHierarchy.module.css";
 
 const cx = (...values) => values.filter(Boolean).join(" ");
+
+function MetricValue({ value }) {
+  const displayValue = value ?? "—";
+  const previousRef = useRef(displayValue);
+  const [changeKey, setChangeKey] = useState(0);
+
+  useEffect(() => {
+    if (Object.is(previousRef.current, displayValue)) return;
+    previousRef.current = displayValue;
+    setChangeKey((current) => current + 1);
+  }, [displayValue]);
+
+  return (
+    <div className={styles.metricValue} data-metric-change={changeKey} key={changeKey}>
+      {displayValue}
+    </div>
+  );
+}
 
 export function DominantObjectiveCard({
   eyebrow,
@@ -59,7 +77,7 @@ export function MetricStrip({ items = [], testId }) {
     <section className={styles.metricStrip} data-testid={testId} aria-label="Key metrics">
       {safeItems.map((item, index) => (
         <div className={styles.metric} key={item?.label || index}>
-          <div className={styles.metricValue}>{item?.value ?? "—"}</div>
+          <MetricValue value={item?.value} />
           <div className={styles.metricLabel}>{item?.label || "Metric"}</div>
           {item?.detail ? <div className={styles.metricDetail}>{item.detail}</div> : null}
         </div>

@@ -134,12 +134,15 @@ test("startup is authentication-first and cannot bootstrap demo data automatical
 
 test("release boundary monitors network and session lifecycle with accessible status", async () => {
   const boundary = await readFile(new URL("../src/components/ReleaseReadinessBoundary.jsx", import.meta.url), "utf8");
+  const feedback = await readFile(new URL("../src/components/AppFeedbackLayer.jsx", import.meta.url), "utf8");
   assert.match(boundary, /addEventListener\("offline"/);
   assert.match(boundary, /addEventListener\("online"/);
   assert.match(boundary, /visibilitychange/);
   assert.match(boundary, /onAuthStateChange/);
   assert.match(boundary, /SIGNED_OUT/);
-  assert.match(boundary, /role="status"/);
+  assert.match(boundary, /<AppFeedbackLayer \/>/);
+  assert.match(feedback, /role=\{feedback\.tone === "error" \? "alert" : "status"\}/);
+  assert.match(feedback, /aria-live=\{feedback\.tone === "error" \? "assertive" : "polite"\}/);
   assert.match(boundary, /role="alert"/);
   assert.match(boundary, /auth-demo-enter/);
   assert.match(boundary, /LOAD DEMO DATA/);
