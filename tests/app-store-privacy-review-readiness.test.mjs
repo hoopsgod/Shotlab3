@@ -10,6 +10,7 @@ const projectPath = "ios/App/App.xcodeproj/project.pbxproj";
 const infoPlistPath = "ios/App/App/Info.plist";
 const capacitorPath = "ios/App/App/capacitor.config.json";
 const privacyProfilePath = "native/app-store-connect-privacy.json";
+const listingProfilePath = "native/app-store-listing.json";
 const releaseProfilePath = "native/ios-release-profile.json";
 const reviewPackagePath = "docs/app-store-review-package.md";
 
@@ -81,15 +82,32 @@ test("native network and WebView configuration fail closed", () => {
   assert.equal(capacitor.server?.iosScheme, "https");
 });
 
-test("release profile records privacy readiness without hiding owner blockers", () => {
-  assert.equal(releaseProfile.schemaVersion, 2);
+test("release profile records 2026 submission readiness without hiding external blockers", () => {
+  assert.equal(releaseProfile.schemaVersion, 3);
   assert.equal(releaseProfile.privacyManifest, manifestPath);
   assert.equal(releaseProfile.appStorePrivacyProfile, privacyProfilePath);
+  assert.equal(releaseProfile.appStoreListingProfile, listingProfilePath);
   assert.equal(releaseProfile.networkSecurity.allowsArbitraryLoads, false);
   assert.equal(releaseProfile.networkSecurity.remoteServerUrl, false);
-  assert.equal(releaseProfile.releaseStatus, "prepared_owner_input_pending");
+  assert.equal(releaseProfile.releaseStatus, "code_ready_owner_and_device_input_pending");
+  assert.equal(releaseProfile.submissionMinimums.xcodeMajor, 26);
+  assert.equal(releaseProfile.submissionMinimums.iosSdkMajor, 26);
   const pending = Object.entries(releaseProfile.releaseRequirements).filter(([, value]) => value === "pending").map(([key]) => key).sort();
-  assert.deepEqual(pending, ["coachReviewAccount", "playerReviewAccount", "privacyPolicyUrl", "supportUrl", "termsUrl"]);
+  assert.deepEqual(pending, [
+    "ageRatingQuestionnaire",
+    "appPrivacyAnswers",
+    "appStoreConnectRecord",
+    "appleDeveloperTeamId",
+    "coachReviewAccount",
+    "copyright",
+    "internalTestFlightBuild",
+    "physicalDeviceQa",
+    "playerReviewAccount",
+    "pricing",
+    "privacyPolicyUrl",
+    "supportUrl",
+    "termsUrl",
+  ]);
 });
 
 test("review handoff is explicit about analytics and unresolved submission inputs", () => {
