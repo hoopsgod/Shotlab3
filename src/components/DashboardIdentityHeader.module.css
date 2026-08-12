@@ -15,7 +15,7 @@
    the first viewport on Train, Progress, Program, Rankings, and other Player routes. */
 @media(max-width:767px){
   :global(.performance-shell--player.is-mobile:not([data-workspace-tab="home"])) .header.player{
-    margin:0 0 8px!important;
+    margin:0 14px 8px!important;
   }
 
   :global(.performance-shell--player.is-mobile:not([data-workspace-tab="home"])) .player .inner{
