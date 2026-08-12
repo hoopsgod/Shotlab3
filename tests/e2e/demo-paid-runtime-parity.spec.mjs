@@ -24,6 +24,7 @@ const MOTION_FREEZE = `
   }
 `;
 const COLOR_SERIALIZATION_FIELDS = new Set(["backgroundColor", "color", "borderTopColor"]);
+const INTERACTIVE_FINGERPRINT_TAGS = new Set(["button", "a", "input", "select", "textarea"]);
 
 fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
@@ -38,8 +39,8 @@ function normalizeFingerprintForDigest(value) {
   if (value && typeof value === "object") {
     return Object.fromEntries(
       Object.entries(value)
-        .filter(([key]) => !COLOR_SERIALIZATION_FIELDS.has(key))
-        .map(([key, entry]) => [key, normalizeFingerprintForDigest(entry)]),
+        .filter(([key]) => !COLOR_SERIALIZATION_FIELDS.has(key) && (key !== "box" || INTERACTIVE_FINGERPRINT_TAGS.has(value.tag)))
+        .map(([key, entry]) => [key, key === "box" ? entry.slice(2) : normalizeFingerprintForDigest(entry)]),
     );
   }
   return value;
@@ -392,6 +393,10 @@ async function captureFingerprint(page, role, kind, key) {
 
     return [...document.body.querySelectorAll("*")]
       .filter((node) => !excludedTags.has(node.tagName))
+      // Demo-data cleanup is intentionally state-dependent: the action is only
+      // available while managed sample data exists. It is not a paid/demo UI
+      // branch and therefore is outside the commercial surface comparison.
+      .filter((node) => !(node.tagName === "BUTTON" && normalizeText(node.textContent) === "CLEAR DEMO DATA"))
       .map((node) => {
         const rect = node.getBoundingClientRect();
         const style = getComputedStyle(node);

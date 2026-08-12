@@ -143,6 +143,7 @@ const CSS = `
 }
 .performance-shell .pageHeaderPillBrand,
 .performance-shell .cta-primary,
+.premium-screen .cta-primary,
 .performance-shell .btn-v.is-primary {
   border-color:#17191b !important;
   border-radius:var(--radius-md, 14px) !important;
@@ -180,6 +181,11 @@ const CSS = `
 }
 .performance-shell label,
 .premium-screen label { color:#74797c !important; }
+
+html[data-shotlab-design="industrial-light-v1"] .performance-shell select,
+html[data-shotlab-design="industrial-light-v1"] .premium-screen select {
+  border-radius:var(--radius-md, 14px) !important;
+}
 
 .performance-shell p:not([data-command-role="primary"] p),
 .performance-shell small,
