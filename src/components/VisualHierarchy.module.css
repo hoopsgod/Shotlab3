@@ -169,7 +169,15 @@
 }
 
 .metric + .metric { border-left: 0; }
-.metricValue { color: #f0f4f6; font-family: 'Bebas Neue','Impact','Arial Black',sans-serif; font-size: 29px; line-height: 1; letter-spacing: .035em; }
+.metricValue {
+  color: #f0f4f6;
+  font-family: 'Bebas Neue','Impact','Arial Black',sans-serif;
+  font-size: 29px;
+  line-height: 1;
+  letter-spacing: .035em;
+  transform-origin: 50% 65%;
+  animation: metricValueSettle 220ms cubic-bezier(.2,.75,.25,1) both;
+}
 .metricLabel { margin-top: 5px; color: #87939a; font-size: var(--type-micro, 11px); font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .metricDetail { margin-top: 4px; color: #78848b; font-size: var(--type-micro, 11px); line-height: 1.3; }
 
@@ -229,6 +237,11 @@
 .quietAction:focus-visible { transform: translateY(-1px); background: color-mix(in srgb, var(--accent) 10%, transparent); }
 .quietBody { min-width: 0; }
 
+@keyframes metricValueSettle {
+  from { opacity: .62; transform: translateY(2px) scale(.975); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 :global(.coach-home-dashboard) { gap: 10px !important; }
 :global(.coach-home-dashboard) > * { order: 5; margin-top: 0 !important; margin-bottom: 0 !important; }
 :global(.coach-home-dashboard) > [data-testid="coach-today-practice"] { order: 1; }
@@ -257,6 +270,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .metricValue { animation: none; }
   .disclosure,
   .disclosureChevron,
   .primaryAction,
