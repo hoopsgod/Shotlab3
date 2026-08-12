@@ -8,6 +8,8 @@ const safeNumber = (value) => {
 
 const MACHINE_DRILL_PREFIXES = new Set(["demo", "home", "program", "training"]);
 const MACHINE_DRILL_ID_RE = /^[a-z0-9]+(?:[-_][a-z0-9]+)+$/i;
+const INTERNAL_MACHINE_DRILL_ID_RE = /^(?:demo|home|program|training)[-_]/i;
+const GENERATED_CATALOG_NAME_RE = /^[A-Z0-9][A-Z0-9 &'+./-]*$/;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const LOWERCASE_TITLE_WORDS = new Set(["and", "at", "for", "from", "in", "of", "on", "the", "to", "vs"]);
 
@@ -53,9 +55,16 @@ export const resolvePlayerDrillDisplayName = ({ drillId = "", drillName = "", dr
   const catalogMatch = safeArray(drills).find((drill) => String(drill?.id || drill?.drillId || drill?.drill_id || "").trim() === normalizedId);
   const catalogName = String(catalogMatch?.name || catalogMatch?.title || "").trim();
 
-  const preferredName = [inlineName, catalogName].find((candidate) => candidate && !MACHINE_DRILL_ID_RE.test(candidate) && !UUID_RE.test(candidate));
-  if (preferredName) return preferredName;
-  return formatPlayerDrillDisplayName(catalogName || inlineName || normalizedId);
+  const inlineNameIsHuman = inlineName && !MACHINE_DRILL_ID_RE.test(inlineName) && !UUID_RE.test(inlineName);
+  if (inlineNameIsHuman) return inlineName;
+
+  const catalogNameIsHuman = catalogName && !MACHINE_DRILL_ID_RE.test(catalogName) && !UUID_RE.test(catalogName);
+  if (catalogNameIsHuman) {
+    const generatedInternalLabel = INTERNAL_MACHINE_DRILL_ID_RE.test(normalizedId) && GENERATED_CATALOG_NAME_RE.test(catalogName);
+    if (!generatedInternalLabel) return catalogName;
+  }
+
+  return formatPlayerDrillDisplayName(normalizedId || catalogName || inlineName);
 };
 
 export const normalizePlayerActivity = ({ shotLogs = [], scLogs = [], scores = [], userEmail = "", teamId = "" } = {}) => {
