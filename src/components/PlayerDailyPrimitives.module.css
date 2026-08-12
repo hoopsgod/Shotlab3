@@ -61,7 +61,7 @@
 
 .signal {
   display: grid;
-  grid-template-columns: 44px minmax(0, 1fr) auto;
+  grid-template-columns:42px minmax(0,1fr) auto;
   gap: 13px;
   align-items: center;
   min-width: 0;
@@ -74,8 +74,8 @@
 
 .signalIcon {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 42px;
+  height: 42px;
   place-items: center;
   border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
   border-radius: var(--radius-md, 14px);
