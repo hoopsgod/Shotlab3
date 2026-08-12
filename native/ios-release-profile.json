@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "platform": "ios",
   "productName": "ShotLab",
   "bundleIdentifier": "com.shotlab.training",
@@ -8,13 +8,20 @@
   "primaryCategory": "Sports",
   "deviceFamily": "iPhone",
   "orientation": "portrait",
-  "appearance": "dark",
+  "appearance": "light-first",
   "capacitorVersion": "8.4.2",
   "nativePackageManager": "Swift Package Manager",
+  "minimumDeploymentTarget": "15.0",
   "capabilities": [],
   "privacyUsageDescriptions": {},
   "privacyManifest": "ios/App/App/PrivacyInfo.xcprivacy",
   "appStorePrivacyProfile": "native/app-store-connect-privacy.json",
+  "appStoreListingProfile": "native/app-store-listing.json",
+  "submissionMinimums": {
+    "verifiedOn": "2026-08-12",
+    "xcodeMajor": 26,
+    "iosSdkMajor": 26
+  },
   "networkSecurity": {
     "allowsArbitraryLoads": false,
     "allowsArbitraryLoadsInWebContent": false,
@@ -22,12 +29,20 @@
     "remoteServerUrl": false,
     "allowNavigationDomains": []
   },
-  "releaseStatus": "prepared_owner_input_pending",
+  "releaseStatus": "code_ready_owner_and_device_input_pending",
   "releaseRequirements": {
+    "appleDeveloperTeamId": "pending",
+    "appStoreConnectRecord": "pending",
     "privacyPolicyUrl": "pending",
     "termsUrl": "pending",
     "supportUrl": "pending",
+    "copyright": "pending",
+    "pricing": "pending",
+    "ageRatingQuestionnaire": "pending",
+    "appPrivacyAnswers": "pending",
     "coachReviewAccount": "pending",
-    "playerReviewAccount": "pending"
+    "playerReviewAccount": "pending",
+    "physicalDeviceQa": "pending",
+    "internalTestFlightBuild": "pending"
   }
 }
