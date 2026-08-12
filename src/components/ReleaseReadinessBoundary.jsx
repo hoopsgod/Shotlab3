@@ -62,6 +62,7 @@ function ProductionDemoGuard({ enabled }) {
         const isWorkspaceUtility = DEMO_WORKSPACE_BUTTON_LABELS.has(label);
         if (!isWorkspaceUtility && (enabled || !DEMO_AUTH_BUTTON_LABELS.has(label))) return;
         button.hidden = true;
+        button.style.setProperty("display", "none", "important");
         button.setAttribute("aria-hidden", "true");
         button.tabIndex = -1;
       });
