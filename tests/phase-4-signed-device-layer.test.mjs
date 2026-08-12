@@ -7,6 +7,9 @@ const read = (path) => fs.readFileSync(new URL(`../${path}`, import.meta.url), "
 const project = read("ios/App/App.xcodeproj/project.pbxproj");
 const info = read("ios/App/App/Info.plist");
 const packageJson = JSON.parse(read("package.json"));
+const releaseProfile = JSON.parse(read("native/ios-release-profile.json"));
+const releaseScript = read("scripts/ios-release.mjs");
+const readinessScript = read("scripts/testflight-readiness.mjs");
 const exists = (path) => fs.existsSync(new URL(`../${path}`, import.meta.url));
 
 test("committed iOS project contains the finalized ShotLab identity", () => {
@@ -14,13 +17,19 @@ test("committed iOS project contains the finalized ShotLab identity", () => {
   assert.match(project, /MARKETING_VERSION = 1\.0;/);
   assert.match(project, /CURRENT_PROJECT_VERSION = 1;/);
   assert.match(project, /TARGETED_DEVICE_FAMILY = 1;/);
+  assert.equal(releaseProfile.marketingVersion, "1.0");
+  assert.equal(releaseProfile.buildNumber, 1);
 });
 
-test("first release is dark, portrait, iPhone-only, and export-compliance explicit", () => {
+test("initial native shell is portrait, iPhone-only, export-compliance explicit, and queued for real-device chrome review", () => {
   assert.match(info, /<key>UIUserInterfaceStyle<\/key>\s*<string>Dark<\/string>/);
   assert.match(info, /<string>UIInterfaceOrientationPortrait<\/string>/);
   assert.doesNotMatch(info, /UIInterfaceOrientationLandscape/);
   assert.match(info, /<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/);
+  assert.equal(releaseProfile.deviceFamily, "iPhone");
+  assert.equal(releaseProfile.orientation, "portrait");
+  assert.equal(releaseProfile.appearance, "light-first");
+  assert.equal(releaseProfile.releaseRequirements.physicalDeviceQa, "pending");
 });
 
 test("production app icon and launch assets are deterministic", () => {
@@ -44,11 +53,21 @@ test("production app icon and launch assets are deterministic", () => {
   }
 });
 
-test("signed-device commands are explicit and keep secrets out of the repository", () => {
+test("signed-device commands are explicit, sync current web assets, enforce current Apple tooling, and keep secrets out of the repository", () => {
   assert.equal(packageJson.scripts["ios:configure-signing"], "node scripts/configure-ios-signing.mjs");
   assert.equal(packageJson.scripts["ios:device-build"], "node scripts/ios-release.mjs device");
   assert.equal(packageJson.scripts["ios:archive"], "node scripts/ios-release.mjs archive");
   assert.equal(packageJson.scripts["ios:generate-assets"], "node scripts/generate-ios-assets.mjs");
+  assert.equal(packageJson.scripts["ios:release-readiness"], undefined);
+  assert.equal(packageJson.scripts["ios:release-candidate"], undefined);
   assert.match(read("scripts/configure-ios-signing.mjs"), /SHOTLAB_DEVELOPMENT_TEAM/);
+  assert.match(releaseScript, /case "release-candidate"/);
+  assert.match(releaseScript, /syncReleaseBundle/);
+  assert.match(releaseScript, /native:sync:ios/);
+  assert.match(releaseScript, /verifyAppleToolchain/);
+  assert.match(releaseScript, /submissionMinimums/);
+  assert.match(releaseScript, /--require-signing/);
+  assert.match(readinessScript, /--strict-owner/);
+  assert.match(readinessScript, /--require-signing/);
   assert.doesNotMatch(project, /DEVELOPMENT_TEAM = [A-Z0-9]{10};/);
 });

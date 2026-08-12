@@ -2,23 +2,26 @@
 
 ## Status
 
-Prepared for App Store Connect setup, with owner-supplied URLs, review accounts, Apple Developer identity, signing, physical-device validation, and TestFlight submission still pending.
+Engineering is being hardened for TestFlight from the merged Phase 7 product. Owner-supplied App Store Connect metadata, Apple Developer identity/signing, physical-device validation, and the first internal TestFlight build remain deliberately pending.
 
 This document is a release handoff. It does not claim that App Store Connect metadata has been entered or that Apple has reviewed the app.
 
 ## Product identity
 
 - Product name: ShotLab
-- Bundle identifier: `com.shotlab.training`
-- Version: `1.0.0`
+- Bundle identifier: `com.shotlab.training` (provisional until the Apple Developer/App Store Connect record is confirmed)
+- Version: `1.0`
 - Build: `1`
 - Primary category: Sports
 - Device family: iPhone
 - Orientation: Portrait
 - Minimum iOS version: 15.0
-- Appearance: Dark
+- Product appearance: Phase 7 light-first UI with intentional dark performance moments
+- Native launch/status shell: currently dark; must be accepted on a physical iPhone before release
 - Custom encryption: No
 - Advertising or cross-app tracking: No
+
+As verified on August 12, 2026, App Store Connect requires iOS uploads to be built with Xcode 26 or later using the iOS 26 SDK or later. The release profile and release scripts enforce that minimum.
 
 ## App purpose
 
@@ -43,7 +46,7 @@ ShotLab is a coach-connected basketball training and team operations app. Coache
 5. Log a test result only when the review account is configured for disposable review data.
 6. Confirm account deletion and data-request controls are reachable from Profile.
 
-Production demo access is disabled by default. App Review must receive real, non-expiring review accounts or controlled review credentials. Do not submit the development Demo Player or Demo Coach accounts.
+Production demo access is disabled by default. App Review must receive real, non-expiring review accounts or controlled review credentials. Do not submit development Demo Player or Demo Coach accounts as review credentials.
 
 ## App privacy inventory
 
@@ -101,8 +104,12 @@ Required owner inputs:
 - Support URL: pending
 - Coach App Review account: pending
 - Player App Review account: pending
+- Copyright owner/legal name: pending
+- Pricing decision: pending
+- App Store age-rating questionnaire: pending
+- App Store privacy answers: pending
 
-Do not replace these values with guessed URLs or temporary pages. Apple reviews broken links and placeholder content as completeness failures.
+Do not replace these values with guessed URLs, placeholder metadata, or temporary pages simply to make a gate green.
 
 ## Account deletion
 
@@ -110,34 +117,49 @@ ShotLab supports account creation, so the in-app deletion flow must remain easy 
 
 Before submission, verify the deletion flow against both review accounts and confirm removed player data no longer appears in active rosters, leaderboards, activity, events, or strength and conditioning attendance.
 
-## Submission blockers that require the owner
+## TestFlight release blockers
 
 1. Confirm the final bundle identifier registration in Apple Developer.
-2. Provide the 10-character Apple Team ID.
-3. Apply automatic signing in Xcode.
-4. Provide public Privacy, Terms, and Support URLs.
-5. Create stable Coach and Player App Review accounts.
-6. Run the first physical-iPhone installation.
-7. Generate Xcode's privacy report and reconcile third-party SDK manifests.
-8. Create, validate, and upload the first archive to TestFlight.
-9. Enter the App Store privacy questionnaire using `native/app-store-connect-privacy.json` and the final production analytics configuration.
+2. Provide the 10-character Apple Developer Team ID.
+3. Create/confirm the matching App Store Connect app record.
+4. Apply automatic signing with `npm run ios:configure-signing`.
+5. Provide public Privacy, Terms, and Support URLs.
+6. Complete copyright, pricing, age-rating, and App Store privacy metadata.
+7. Create stable Coach and Player App Review accounts.
+8. Run physical-iPhone QA, including safe areas, status-bar legibility, keyboard behavior, registered Coach/Player flows, offline recovery, and account deletion.
+9. Generate Xcode's privacy report and reconcile third-party SDK manifests.
+10. Create and validate the Release archive from the current synced production web bundle.
+11. Upload the archive to App Store Connect and install the processed build through internal TestFlight.
+12. Repeat the smoke path from the installed TestFlight build before treating the release as App Store-submission-ready.
 
 ## Verification commands
 
+Static/code-ready validation:
+
 ```bash
+npm ci
 node scripts/configure-ios-privacy-readiness.mjs
 git diff --exit-code -- ios/App/App.xcodeproj/project.pbxproj ios/App/App/Info.plist
-node --test tests/app-store-privacy-review-readiness.test.mjs
-npm run build
+node scripts/testflight-readiness.mjs
+node --test tests/app-store-privacy-review-readiness.test.mjs tests/testflight-release-readiness.test.mjs
+npm run build:performance
+```
+
+macOS/native validation:
+
+```bash
+npm run native:sync:ios
+npm run ios:validate
 npm run ios:simulator-build
+```
+
+Signed release candidate, only after the external blockers are complete:
+
+```bash
+node scripts/testflight-readiness.mjs --strict-owner --require-macos --require-signing
+node scripts/ios-release.mjs release-candidate
 ```
 
 ## Apple source references
 
-- Privacy manifest files: https://developer.apple.com/documentation/bundleresources/privacy-manifest-files
-- Adding a privacy manifest: https://developer.apple.com/documentation/bundleresources/adding-a-privacy-manifest-to-your-app-or-third-party-sdk
-- Describing data use: https://developer.apple.com/documentation/bundleresources/describing-data-use-in-privacy-manifests
-- Required-reason APIs: https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api
-- App privacy details: https://developer.apple.com/app-store/app-privacy-details/
-- App Review Guidelines: https://developer.apple.com/app-store/review/guidelines/
-- Account deletion: https://developer.apple.com/support/offering-account-deletion-in-your-app/
+The release requirements in this package should be checked against Apple's current App Store Connect Help, App Review Guidelines, App Privacy documentation, screenshot specifications, and upcoming SDK minimum requirements immediately before submission.

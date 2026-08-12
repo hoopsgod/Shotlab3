@@ -5,12 +5,18 @@ on:
     paths:
       - "ios/**"
       - "native/assets/**"
+      - "native/ios-release-profile.json"
       - "scripts/configure-ios-signing.mjs"
       - "scripts/generate-ios-assets.mjs"
       - "scripts/native-ios.mjs"
+      - "scripts/native-release-doctor.mjs"
       - "scripts/ios-release.mjs"
+      - "scripts/testflight-readiness.mjs"
       - "docs/signed-device-release-runbook.md"
+      - "docs/testflight-release-runbook.md"
       - "tests/phase-4-signed-device-layer.test.mjs"
+      - "tests/phase-4-native-ios-foundation.test.mjs"
+      - "tests/testflight-release-readiness.test.mjs"
       - "package.json"
       - ".github/workflows/phase-4-signed-device.yml"
   workflow_dispatch:
@@ -33,7 +39,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run native:install:toolchain
-      - run: node --test tests/phase-4-signed-device-layer.test.mjs tests/phase-4-native-ios-foundation.test.mjs
+      - run: node --test tests/phase-4-signed-device-layer.test.mjs tests/phase-4-native-ios-foundation.test.mjs tests/testflight-release-readiness.test.mjs
       - run: npm run build
       - run: npm run native:verify:ios -- --require-build --require-ios --require-assets
 
@@ -46,8 +52,15 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run build
+      - name: Select current release Xcode
+        shell: bash
+        run: |
+          set -euo pipefail
+          XCODE_PATH="$(find /Applications -maxdepth 1 -type d -name 'Xcode_26.*.app' | sort -V | tail -1)"
+          test -n "$XCODE_PATH"
+          sudo xcode-select --switch "$XCODE_PATH/Contents/Developer"
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
       - run: npm run native:install:toolchain
-      - run: npm run native:sync:ios
-      - name: Compile the committed Xcode project without signing
+      - name: Rebuild, sync, validate, and compile the committed Xcode project without signing
         run: npm run ios:simulator-build
