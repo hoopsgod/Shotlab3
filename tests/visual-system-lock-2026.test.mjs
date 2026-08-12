@@ -4,6 +4,7 @@ import fs from "node:fs";
 
 const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 const foundation = read("../src/styles/VisualFoundation2026.css");
+const insightRail = read("../src/components/OperationalInsightRail.module.css");
 const header = read("../src/components/AppHeader.jsx");
 const navigation = read("../src/components/MobileNavigation.module.css");
 const states = read("../src/components/ShotLabStatePanel.module.css");
@@ -58,4 +59,26 @@ test("production keeps the bundled visual authority without shipping duplicate l
   assert.match(finalAuthorityCleanup, /data-shotlab-authority-bundle/);
   assert.match(finalAuthorityCleanup, /!referenced\.has\(entry\.name\)/);
   assert.match(pkg.scripts.build, /prune-unreachable-global-selectors\.mjs.*remove-unreferenced-authority-css\.mjs$/);
+});
+
+
+test("Phase 1 intelligence rail owns readable light-shell and dark-card materials", () => {
+  for (const token of [
+    "--insight-rail-canvas: #f0f1ed",
+    "--insight-rail-ink: #111a21",
+    "--insight-rail-muted: #65717a",
+    "--insight-card-surface: #10171d",
+    "--insight-card-copy: #f5f8f9",
+    "--insight-card-muted: #b6c0c6",
+  ]) assert.ok(foundation.includes(token), "missing " + token);
+
+  assert.match(insightRail, /\.header h2[\s\S]*var\(--insight-rail-ink, #111a21\)/);
+  assert.match(insightRail, /\.card h3[\s\S]*var\(--insight-card-copy, #f5f8f9\)/);
+  assert.match(insightRail, /\.card p[\s\S]*var\(--insight-card-muted, #b6c0c6\)/);
+  assert.match(insightRail, /min-height: var\(--touch-target, 44px\)/);
+});
+
+test("Phase 1 intelligence rail does not ship sub-11px interface text", () => {
+  assert.doesNotMatch(insightRail, /font-size:\s*(?:8|9|10)px\b/);
+  assert.doesNotMatch(insightRail, /font:\s*[^;]*(?:8|9|10)px\b/);
 });

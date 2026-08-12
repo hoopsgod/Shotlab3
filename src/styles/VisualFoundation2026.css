@@ -69,6 +69,14 @@
   --performance-surface: #101c23;
   --performance-copy: #f5f8f9;
   --performance-muted: #a9b5bc;
+  /* Phase 1 system lock: one explicit material contract for live intelligence. */
+  --insight-rail-canvas: #f0f1ed;
+  --insight-rail-ink: #111a21;
+  --insight-rail-muted: #65717a;
+  --insight-card-surface: #10171d;
+  --insight-card-copy: #f5f8f9;
+  --insight-card-muted: #b6c0c6;
+  --insight-card-radius: var(--radius-lg);
 }
 
 html,

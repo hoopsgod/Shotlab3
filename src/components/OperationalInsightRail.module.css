@@ -1,55 +1,60 @@
 .root {
   display: grid;
-  gap: 12px;
+  gap: var(--space-3, 12px);
+  color: var(--insight-rail-ink, #111a21);
 }
 
 .header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--space-3, 12px);
   padding: 6px 4px 0;
 }
 
 .eyebrow,
 .cardEyebrow {
-  color: var(--text-3, rgba(255, 255, 255, 0.55));
-  font-family: var(--font-body, "Barlow Condensed", sans-serif);
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.14em;
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
+  font-size: var(--type-micro, 11px);
+  font-weight: 760;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
+}
+
+.eyebrow {
+  color: var(--insight-rail-muted, #65717a);
 }
 
 .header h2 {
-  color: var(--text-1, #f5f7f8);
-  font-family: var(--font-display, "Bebas Neue", sans-serif);
-  font-size: 19px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  line-height: 1;
+  color: var(--insight-rail-ink, #111a21);
+  font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
+  font-size: 20px;
+  font-weight: 760;
+  letter-spacing: -0.025em;
+  line-height: 1.05;
   margin: 5px 0 0;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .status {
-  background: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 10%, transparent);
-  border: 1px solid color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 32%, transparent);
+  background: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 12%, white);
+  border: 1px solid color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 34%, #7b8500);
   border-radius: 999px;
-  color: var(--team-brand-primary, #c8ff1a);
+  color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 34%, #263100);
   flex: 0 0 auto;
-  font-size: 9px;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  padding: 5px 8px;
+  font-size: var(--type-micro, 11px);
+  font-weight: 760;
+  letter-spacing: 0.06em;
+  padding: 5px 9px;
   text-transform: uppercase;
 }
 
 .context {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  color: var(--text-3, rgba(255, 255, 255, 0.55));
-  font-size: 10px;
-  letter-spacing: 0.08em;
+  border-bottom: 1px solid rgba(17, 26, 33, 0.09);
+  color: var(--insight-rail-muted, #65717a);
+  font-size: var(--type-micro, 11px);
+  font-weight: 650;
+  letter-spacing: 0.06em;
   margin: -2px 4px 0;
   padding-bottom: 10px;
   text-transform: uppercase;
@@ -61,14 +66,14 @@
 }
 
 .card {
-  --rail-tone: rgba(255, 255, 255, 0.38);
+  --rail-tone: rgba(255, 255, 255, 0.72);
   background:
-    linear-gradient(155deg, color-mix(in srgb, var(--rail-tone) 6%, rgba(17, 22, 30, 0.98)), rgba(10, 14, 20, 0.96));
-  border: 1px solid color-mix(in srgb, var(--rail-tone) 26%, rgba(255, 255, 255, 0.08));
-  border-radius: 15px;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 10px 24px rgba(0, 0, 0, 0.16);
+    linear-gradient(155deg, color-mix(in srgb, var(--rail-tone) 6%, var(--insight-card-surface, #10171d)), #0a0e14);
+  border: 1px solid color-mix(in srgb, var(--rail-tone) 24%, rgba(255, 255, 255, 0.08));
+  border-radius: var(--insight-card-radius, 18px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 10px 24px rgba(17, 26, 33, 0.14);
   overflow: hidden;
-  padding: 13px 13px 12px;
+  padding: 14px;
   position: relative;
 }
 
@@ -76,15 +81,15 @@
   background: var(--rail-tone);
   content: "";
   height: 2px;
-  left: 13px;
-  opacity: 0.78;
+  left: 14px;
+  opacity: 0.82;
   position: absolute;
   top: 0;
   width: 40px;
 }
 
 .primaryCard {
-  padding: 15px 14px 13px;
+  padding: 16px 15px 14px;
 }
 
 .tone_primary {
@@ -104,29 +109,29 @@
 }
 
 .tone_neutral {
-  --rail-tone: rgba(255, 255, 255, 0.4);
+  --rail-tone: #aeb8bd;
 }
 
 .cardEyebrow {
   color: var(--rail-tone);
-  margin-bottom: 5px;
+  margin-bottom: 6px;
 }
 
 .card h3 {
-  color: var(--text-1, #f5f7f8);
-  font-family: var(--font-body, "Barlow Condensed", sans-serif);
+  color: var(--insight-card-copy, #f5f8f9);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
   font-size: 14px;
-  font-weight: 800;
-  line-height: 1.2;
+  font-weight: 760;
+  line-height: 1.24;
   margin: 0;
 }
 
 .card p {
-  color: var(--text-2, rgba(255, 255, 255, 0.68));
-  font-family: var(--font-body, "Barlow Condensed", sans-serif);
-  font-size: 11px;
-  line-height: 1.42;
-  margin: 6px 0 0;
+  color: var(--insight-card-muted, #b6c0c6);
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
+  font-size: var(--type-meta, 12px);
+  line-height: 1.48;
+  margin: 7px 0 0;
 }
 
 .card button {
@@ -136,23 +141,29 @@
   color: var(--rail-tone);
   cursor: pointer;
   display: inline-flex;
-  font-family: var(--font-body, "Barlow Condensed", sans-serif);
-  font-size: 10px;
-  font-weight: 800;
+  font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
+  font-size: var(--type-micro, 11px);
+  font-weight: 760;
   gap: 5px;
-  letter-spacing: 0.06em;
-  margin-top: 10px;
-  min-height: 32px;
+  letter-spacing: 0.045em;
+  margin-top: 9px;
+  min-height: var(--touch-target, 44px);
   padding: 0;
   text-transform: uppercase;
 }
 
 .card button:hover {
-  filter: brightness(1.15);
+  filter: brightness(1.12);
 }
 
 .card button:focus-visible {
-  border-radius: 5px;
+  border-radius: 6px;
   outline: 2px solid var(--rail-tone);
   outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card button {
+    transition: none;
+  }
 }
