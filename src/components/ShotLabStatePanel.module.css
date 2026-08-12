@@ -1,6 +1,5 @@
 .root{
   --state-accent:var(--accent,#c8ff1a);
-  --state-accent-soft:color-mix(in srgb,var(--state-accent) 14%,transparent);
   position:relative;
   display:grid;
   grid-template-columns:auto minmax(0,1fr);
@@ -17,7 +16,6 @@
   color:#f7f8f3;
   overflow:hidden;
   isolation:isolate;
-  transition:border-color .18s ease,background-color .18s ease,box-shadow .18s ease;
 }
 .root::after{
   content:"";
@@ -81,22 +79,15 @@
 }
 .light .detail{color:#5e6971}
 .loadingTrack{
-  display:grid;
-  gap:6px;
-  width:min(260px,100%);
-  margin-top:10px;
-}
-.loadingTrack span{
   position:relative;
-  display:block;
-  height:5px;
+  width:min(220px,100%);
+  height:4px;
+  margin-top:10px;
   overflow:hidden;
   border-radius:999px;
   background:color-mix(in srgb,var(--state-accent) 9%,rgba(255,255,255,.055));
 }
-.loadingTrack span:first-child{width:100%}
-.loadingTrack span:last-child{width:68%}
-.loadingTrack span::after{
+.loadingTrack::after{
   content:"";
   position:absolute;
   inset:0;
@@ -152,5 +143,5 @@
   to{opacity:1;transform:scale(1)}
 }
 @media (prefers-reduced-motion:reduce){
-  .root,.loading .iconWell,.completion .iconWell,.loadingTrack span::after,.action{animation:none!important;transition:none!important}
+  .loading .iconWell,.completion .iconWell,.loadingTrack::after,.action{animation:none!important;transition:none!important}
 }
