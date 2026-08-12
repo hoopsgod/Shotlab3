@@ -7,15 +7,25 @@ const capacitorConfig = JSON.parse(fs.readFileSync("capacitor.config.json", "utf
 const releaseProfile = JSON.parse(fs.readFileSync("native/ios-release-profile.json", "utf8"));
 const nativeScript = fs.readFileSync("scripts/native-ios.mjs", "utf8");
 const doctorScript = fs.readFileSync("scripts/native-release-doctor.mjs", "utf8");
+const readinessScript = fs.readFileSync("scripts/testflight-readiness.mjs", "utf8");
+const releaseScript = fs.readFileSync("scripts/ios-release.mjs", "utf8");
 const runbook = fs.readFileSync("docs/testflight-release-runbook.md", "utf8");
 const workflow = fs.readFileSync(".github/workflows/phase-4-native-ios.yml", "utf8");
 
 const REQUIRED_RELEASE_ITEMS = [
+  "appleDeveloperTeamId",
+  "appStoreConnectRecord",
   "privacyPolicyUrl",
   "termsUrl",
   "supportUrl",
+  "copyright",
+  "pricing",
+  "ageRatingQuestionnaire",
+  "appPrivacyAnswers",
   "coachReviewAccount",
   "playerReviewAccount",
+  "physicalDeviceQa",
+  "internalTestFlightBuild",
 ];
 
 test("Capacitor identity is deterministic and aligned with the release profile", () => {
@@ -26,9 +36,10 @@ test("Capacitor identity is deterministic and aligned with the release profile",
   assert.equal(capacitorConfig.server?.iosScheme, "https");
   assert.equal(releaseProfile.capacitorVersion, "8.4.2");
   assert.equal(releaseProfile.nativePackageManager, "Swift Package Manager");
+  assert.equal(releaseProfile.schemaVersion, 3);
 });
 
-test("native scripts expose a repeatable build, sync, verify, doctor, and Xcode workflow", () => {
+test("native scripts expose a repeatable build, sync, verify, release-readiness, and Xcode workflow", () => {
   for (const script of [
     "native:doctor",
     "native:install:toolchain",
@@ -36,6 +47,12 @@ test("native scripts expose a repeatable build, sync, verify, doctor, and Xcode 
     "native:sync:ios",
     "native:verify:ios",
     "native:open:ios",
+    "ios:release-readiness",
+    "ios:validate",
+    "ios:simulator-build",
+    "ios:device-build",
+    "ios:archive",
+    "ios:release-candidate",
   ]) assert.equal(typeof packageJson.scripts?.[script], "string", `Missing ${script}`);
 
   assert.match(nativeScript, /CAPACITOR_VERSION = "8\.4\.2"/);
@@ -47,13 +64,21 @@ test("native scripts expose a repeatable build, sync, verify, doctor, and Xcode 
   assert.match(nativeScript, /cap\(\["sync", "ios"\]\)/);
   assert.match(nativeScript, /process\.platform !== "darwin"/);
   assert.match(doctorScript, /Node\.js/);
-  assert.match(doctorScript, /App Store metadata/);
+  assert.match(doctorScript, /App Store submission inputs/);
+  assert.match(doctorScript, /Apple upload floor/);
+  assert.match(readinessScript, /submissionMinimums/);
+  assert.match(readinessScript, /--strict-owner/);
+  assert.match(readinessScript, /--require-signing/);
+  assert.match(releaseScript, /syncReleaseBundle/);
+  assert.match(releaseScript, /verifyAppleToolchain/);
 });
 
 test("release readiness stays explicit instead of inventing submission metadata", () => {
   for (const key of REQUIRED_RELEASE_ITEMS) assert.equal(releaseProfile.releaseRequirements?.[key], "pending", `${key} should remain visibly pending`);
   assert.deepEqual(releaseProfile.capabilities, []);
   assert.deepEqual(releaseProfile.privacyUsageDescriptions, {});
+  assert.equal(releaseProfile.submissionMinimums.xcodeMajor, 26);
+  assert.equal(releaseProfile.submissionMinimums.iosSdkMajor, 26);
   assert.match(runbook, /provisional bundle identifier/i);
   assert.match(runbook, /Do not submit the build for Apple review/i);
   assert.match(runbook, /npm run native:prepare:ios/);
