@@ -1,5 +1,4 @@
 import { lazy, Suspense } from 'react'
-import './LeaderboardsRoutePolish.css'
 
 const LazyPremiumLeaderboardsHub = lazy(() => import('./PremiumLeaderboardsHub.jsx'))
 
