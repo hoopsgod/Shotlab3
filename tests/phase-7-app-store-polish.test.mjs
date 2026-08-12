@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 
+const app = fs.readFileSync("src/App.jsx", "utf8");
 const header = fs.readFileSync("src/components/PlayerDashboardHeader.jsx", "utf8");
 const styles = fs.readFileSync("src/components/DashboardIdentityHeader.module.css", "utf8");
 const leaderboardDeferred = fs.readFileSync("src/components/DeferredPremiumLeaderboardsHub.jsx", "utf8");
@@ -38,9 +39,12 @@ test("Phase 7 uses one shared 44px native return-control authority", () => {
   assert.doesNotMatch(styles, /shared-dashboard-back-action/);
 });
 
-test("Phase 7 removes the retired black Coach document canvas without a separate stylesheet chunk", () => {
+test("Phase 7 overrides the legacy dark Coach workspace canvas at the exact source layer", () => {
   assert.doesNotMatch(leaderboardDeferred, /LeaderboardsRoutePolish\.css/);
-  assert.match(sharedChrome, /body:has\(\.performance-shell--coach\)\{background:var\(--bg-0\)!important\}/);
+  assert.match(app, /performance-workspace--coach/);
+  assert.match(app, /background:u\.isCoach\?"#0B0A09":BG/);
+  assert.match(sharedChrome, /\.performance-workspace--coach\{background:var\(--bg-0\)!important\}/);
+  assert.doesNotMatch(sharedChrome, /body:has/);
 });
 
 test("Phase 7 keeps authenticated chrome bounded to route framing rather than duplicating component paint", () => {
