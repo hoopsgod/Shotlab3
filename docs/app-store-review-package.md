@@ -140,7 +140,7 @@ Static/code-ready validation:
 npm ci
 node scripts/configure-ios-privacy-readiness.mjs
 git diff --exit-code -- ios/App/App.xcodeproj/project.pbxproj ios/App/App/Info.plist
-npm run ios:release-readiness
+node scripts/testflight-readiness.mjs
 node --test tests/app-store-privacy-review-readiness.test.mjs tests/testflight-release-readiness.test.mjs
 npm run build:performance
 ```
@@ -156,8 +156,8 @@ npm run ios:simulator-build
 Signed release candidate, only after the external blockers are complete:
 
 ```bash
-npm run ios:release-readiness:strict
-npm run ios:release-candidate
+node scripts/testflight-readiness.mjs --strict-owner --require-macos --require-signing
+node scripts/ios-release.mjs release-candidate
 ```
 
 ## Apple source references
