@@ -39,6 +39,8 @@ jobs:
         run: npm ci
       - name: Verify orchestration and equivalence contracts
         run: node --test tests/phase-5a-route-enhancer-orchestration.test.mjs
+      - name: Build exact candidate through centralized enhancer pipeline
+        run: npm run build
       - name: Verify full source suite for production promotion
         if: github.event_name == 'pull_request' && github.event.pull_request.base.ref == 'march-3-reset-85393dd'
         run: |
@@ -57,8 +59,6 @@ jobs:
                 done
             exit "${source_status}"
           fi
-      - name: Build exact candidate through centralized enhancer pipeline
-        run: npm run build
       - name: Capture candidate performance metrics
         run: |
           set +e
