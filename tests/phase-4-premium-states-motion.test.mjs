@@ -46,14 +46,17 @@ test("shared metrics acknowledge changed values without animated counting", asyn
   assert.doesNotMatch(source, /setInterval|requestAnimationFrame/);
 });
 
-test("premium motion authority keeps route and completion motion restrained", async () => {
-  const css = await read("src/styles/PremiumMotion2026.css");
-  assert.match(css, /shotlab-route-enter 180ms/);
-  assert.match(css, /shotlab-completion-cue-enter 220ms/);
-  assert.match(css, /player-training-session \.particle/);
-  assert.match(css, /display: none !important/);
-  assert.match(css, /prefers-reduced-motion: reduce/);
-  assert.doesNotMatch(css, /bounce|spin|pulse.*infinite/i);
+test("premium completion cue motion stays bounded while navigation motion remains component-owned", async () => {
+  const motion = await read("src/styles/PremiumMotion2026.css");
+  const nav = await read("src/components/MobileNavigation.module.css");
+  assert.match(motion, /shotlab-completion-cue-enter 220ms/);
+  assert.match(motion, /player-training-session \.particle/);
+  assert.match(motion, /display: none !important/);
+  assert.match(motion, /prefers-reduced-motion: reduce/);
+  assert.match(nav, /navOverlayIn 150ms/);
+  assert.match(nav, /navSheetIn 220ms/);
+  assert.match(nav, /prefers-reduced-motion: reduce/);
+  assert.doesNotMatch(motion, /bounce|spin|pulse.*infinite/i);
 });
 
 test("training completion emphasizes the saved result with short settle motion", async () => {
