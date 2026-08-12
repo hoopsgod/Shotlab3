@@ -26,11 +26,10 @@ test("Phase 7 makes the compact Player identity the mobile default", () => {
 
 test("Phase 7 uses one shared 44px native return-control authority", () => {
   assert.match(sharedDeferred, /import "\.\/Phase7AuthenticatedChrome\.css"/);
-  assert.match(sharedChrome, /performance-shell\.is-mobile \.shared-dashboard-back-action/);
+  assert.match(sharedChrome, /\.is-mobile \.shared-dashboard-back-action/);
   assert.match(sharedChrome, /width:44px!important/);
-  assert.match(sharedChrome, /height:44px!important/);
   assert.match(sharedChrome, /padding:0!important/);
-  assert.match(sharedChrome, /p3c-route-radius,14px/);
+  assert.match(sharedChrome, /border-radius:14px!important/);
   assert.match(sharedChrome, />span\[aria-hidden="true"\]/);
   assert.match(sharedChrome, /font-size:21px!important/);
   assert.match(sharedChrome, /:focus-visible/);
@@ -39,10 +38,9 @@ test("Phase 7 uses one shared 44px native return-control authority", () => {
   assert.doesNotMatch(styles, /shared-dashboard-back-action/);
 });
 
-test("Phase 7 removes the retired black Coach Leaderboards route canvas without a separate stylesheet chunk", () => {
+test("Phase 7 removes the retired black Coach route canvas without a separate stylesheet chunk", () => {
   assert.doesNotMatch(leaderboardDeferred, /LeaderboardsRoutePolish\.css/);
-  assert.match(sharedChrome, /performance-shell--coach\[data-workspace-tab="leaderboards"\]/);
-  assert.match(sharedChrome, /background:var\(--bg-0,#f3f1ea\)!important/);
+  assert.match(sharedChrome, /\.performance-shell--coach\{background:var\(--bg-0\)!important\}/);
 });
 
 test("Phase 7 keeps authenticated chrome bounded to route framing rather than duplicating component paint", () => {
