@@ -59,7 +59,7 @@ function buildRegisteredStorage(demoStorage, role) {
   const registeredIdentity = REGISTERED_IDENTITIES[role];
   const next = {};
   for (const [key, rawValue] of Object.entries(demoStorage || {})) {
-    if (key === "sl:session" || key === "sl:demoMode" || key === "sl:demo-data-meta") continue;
+    if (key === "sl:session" || key === "sl:demoMode") continue;
     let parsed;
     try {
       parsed = JSON.parse(rawValue);
@@ -242,9 +242,34 @@ async function settle(page) {
     document.querySelector(".player-scroll-container")?.scrollTo(0, 0);
     document.querySelector(".coach-scroll-container")?.scrollTo(0, 0);
     if (document.fonts?.ready) await document.fonts.ready;
+    await Promise.all([...document.images].map((image) => image.complete ? image.decode?.().catch(() => {}) : new Promise((resolve) => {
+      image.addEventListener("load", resolve, { once: true });
+      image.addEventListener("error", resolve, { once: true });
+    })));
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
-  await page.waitForTimeout(80);
+
+  let previousLayout = "";
+  let stableSamples = 0;
+  for (let attempt = 0; attempt < 12 && stableSamples < 2; attempt += 1) {
+    const layout = await page.evaluate(() => JSON.stringify([...document.body.querySelectorAll("*")].map((node) => {
+      const rect = node.getBoundingClientRect();
+      const style = getComputedStyle(node);
+      if (style.display === "none" || style.visibility === "hidden" || rect.width <= 0 || rect.height <= 0) return null;
+      return [
+        Math.round(rect.x * 2) / 2,
+        Math.round(rect.y * 2) / 2,
+        Math.round(rect.width * 2) / 2,
+        Math.round(rect.height * 2) / 2,
+        style.fontFamily,
+        style.borderRadius,
+      ];
+    }).filter(Boolean)));
+    stableSamples = layout === previousLayout ? stableSamples + 1 : 0;
+    previousLayout = layout;
+    if (stableSamples < 2) await page.waitForTimeout(100);
+  }
+  expect(stableSamples, "Visual parity capture requires a stable computed layout").toBeGreaterThanOrEqual(2);
 }
 
 async function collectDemoStorage(page) {
