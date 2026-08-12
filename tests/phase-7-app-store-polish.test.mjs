@@ -8,6 +8,7 @@ const styles = fs.readFileSync("src/components/DashboardIdentityHeader.module.cs
 const leaderboardDeferred = fs.readFileSync("src/components/DeferredPremiumLeaderboardsHub.jsx", "utf8");
 const sharedDeferred = fs.readFileSync("src/components/DeferredSharedAuthenticatedUi.jsx", "utf8");
 const sharedChrome = fs.readFileSync("src/components/Phase7AuthenticatedChrome.css", "utf8");
+const secondaryAcceptance = fs.readFileSync("public/shotlab-phase3-secondary-acceptance.css", "utf8");
 const backEnhancer = fs.readFileSync("scripts/apply-phase4d-shared-back-hit-area.mjs", "utf8");
 
 test("Phase 7 exposes stable Player identity semantics", () => {
@@ -45,6 +46,12 @@ test("Phase 7 overrides the legacy dark Coach workspace canvas at the exact sour
   assert.match(app, /background:u\.isCoach\?"#0B0A09":BG/);
   assert.match(sharedChrome, /\.performance-workspace--coach\{background:var\(--bg-0\)!important\}/);
   assert.doesNotMatch(sharedChrome, /body:has/);
+});
+
+test("Phase 7 includes Coach Leaderboards in the established light secondary-route canvas authority", () => {
+  assert.match(secondaryAcceptance, /coach-page-dashboard-leaderboards/);
+  assert.match(secondaryAcceptance, /#root \.coach-scroll-container/);
+  assert.match(secondaryAcceptance, /background:var\(--p3-canvas\)!important/);
 });
 
 test("Phase 7 keeps authenticated chrome bounded to route framing rather than duplicating component paint", () => {
