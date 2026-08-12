@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 const index = readFileSync('index.html', 'utf8');
 const css = readFileSync('public/shotlab-phase3-native-route-framing.css', 'utf8');
 const phase7Chrome = readFileSync('src/components/Phase7AuthenticatedChrome.css', 'utf8');
+const backEnhancer = readFileSync('scripts/apply-phase4d-shared-back-hit-area.mjs', 'utf8');
 const workspaceSource = readFileSync('src/components/PlayerOperationalWorkspace.jsx', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 
@@ -23,16 +24,17 @@ test('Player secondary destinations keep one gutter authority and explicit accou
   assert.match(css, /\[data-testid="premium-leaderboards-hub"\],[\s\S]*?\[data-testid="player-career-history"\][\s\S]*?width:100%!important;/);
 });
 
-test('Phase 7 supersedes the duplicated Phase 3 return-control paint while retaining the shared tokens', () => {
+test('Phase 7 supersedes the duplicated Phase 3 return-control paint while retaining shared touch safety', () => {
   assert.match(css, /--p3c-route-control:44px/);
   assert.match(css, /--p3c-route-radius:14px/);
   assert.doesNotMatch(css, /player-scroll-container>button\[type="button"\]/);
   assert.doesNotMatch(css, /page\.pageShell>button\[type="button"\]:first-child/);
-  assert.match(phase7Chrome, /player-scroll-container>button\.shared-dashboard-back-action/);
-  assert.match(phase7Chrome, /page\.pageShell>button\.shared-dashboard-back-action:first-child/);
-  assert.match(phase7Chrome, /p3c-route-control,44px/);
+  assert.match(phase7Chrome, /performance-shell\.is-mobile \.shared-dashboard-back-action/);
+  assert.match(phase7Chrome, /width:44px!important/);
+  assert.match(phase7Chrome, /height:44px!important/);
   assert.match(phase7Chrome, /p3c-route-radius,14px/);
-  assert.match(phase7Chrome, /touch-action:manipulation!important/);
+  assert.match(backEnhancer, /minHeight:44/);
+  assert.match(backEnhancer, /touchAction:"manipulation"/);
 });
 
 test('Leaderboard destination removes the duplicated inner title while keeping context content', () => {
