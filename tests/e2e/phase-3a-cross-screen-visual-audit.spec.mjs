@@ -66,9 +66,9 @@ async function expectReadablePlayerMetrics(page, testId) {
   const workspace = page.getByTestId(testId);
   await expect(workspace).toBeVisible();
   const colors = await workspace.locator('[data-layout-role="supporting-evidence"]').evaluate((container) => {
-    const values = [...container.querySelectorAll('[class*="metricValue"]')];
-    const labels = [...container.querySelectorAll('[class*="metricLabel"]')];
-    const details = [...container.querySelectorAll('[class*="metricDetail"]')];
+    const values = [...container.querySelectorAll('[data-metric-role="value"]')];
+    const labels = [...container.querySelectorAll('[data-metric-role="label"]')];
+    const details = [...container.querySelectorAll('[data-metric-role="detail"]')];
     const channels = (element) => (getComputedStyle(element).color.match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
     return { values: values.map(channels), labels: labels.map(channels), details: details.map(channels) };
   });
