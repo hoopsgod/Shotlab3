@@ -6,6 +6,67 @@ const safeNumber = (value) => {
   return Number.isFinite(n) ? n : 0;
 };
 
+const MACHINE_DRILL_PREFIXES = new Set(["demo", "home", "program", "training"]);
+const MACHINE_DRILL_ID_RE = /^[a-z0-9]+(?:[-_][a-z0-9]+)+$/i;
+const INTERNAL_MACHINE_DRILL_ID_RE = /^(?:demo|home|program|training)[-_]/i;
+const GENERATED_CATALOG_NAME_RE = /^[A-Z0-9][A-Z0-9 &'+./-]*$/;
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const LOWERCASE_TITLE_WORDS = new Set(["and", "at", "for", "from", "in", "of", "on", "the", "to", "vs"]);
+
+const titleCaseDrillToken = (token, index) => {
+  const value = String(token || "").trim();
+  if (!value) return "";
+  if (/^\d+$/.test(value)) return value;
+  const lower = value.toLowerCase();
+  if (index > 0 && LOWERCASE_TITLE_WORDS.has(lower)) return lower;
+  return `${lower.charAt(0).toUpperCase()}${lower.slice(1)}`;
+};
+
+export const formatPlayerDrillDisplayName = (value) => {
+  const raw = String(value || "").trim();
+  if (!raw) return "Training Drill";
+  if (UUID_RE.test(raw)) return "Training Drill";
+  if (!MACHINE_DRILL_ID_RE.test(raw)) return raw;
+
+  const tokens = raw.split(/[-_]+/).map((token) => token.trim()).filter(Boolean);
+  while (tokens.length && MACHINE_DRILL_PREFIXES.has(tokens[0].toLowerCase())) tokens.shift();
+  if (!tokens.length) return "Training Drill";
+  if (tokens.length === 1 && tokens[0].toLowerCase() === "drill") return "Practice Drill";
+
+  let minuteCount = "";
+  if (
+    tokens.length >= 2
+    && /^\d+$/.test(tokens[tokens.length - 2])
+    && /^minutes?$/.test(tokens[tokens.length - 1])
+  ) {
+    minuteCount = tokens[tokens.length - 2];
+    tokens.splice(-2, 2);
+  }
+
+  let label = tokens.map(titleCaseDrillToken).filter(Boolean).join(" ");
+  label = label.replace(/\bWarm Up\b/g, "Warm-Up");
+  if (minuteCount) label = `${minuteCount}-Minute ${label || "Drill"}`;
+  return label || "Training Drill";
+};
+
+export const resolvePlayerDrillDisplayName = ({ drillId = "", drillName = "", drills = [] } = {}) => {
+  const normalizedId = String(drillId || "").trim();
+  const inlineName = String(drillName || "").trim();
+  const catalogMatch = safeArray(drills).find((drill) => String(drill?.id || drill?.drillId || drill?.drill_id || "").trim() === normalizedId);
+  const catalogName = String(catalogMatch?.name || catalogMatch?.title || "").trim();
+
+  const inlineNameIsHuman = inlineName && !MACHINE_DRILL_ID_RE.test(inlineName) && !UUID_RE.test(inlineName);
+  if (inlineNameIsHuman) return inlineName;
+
+  const catalogNameIsHuman = catalogName && !MACHINE_DRILL_ID_RE.test(catalogName) && !UUID_RE.test(catalogName);
+  if (catalogNameIsHuman) {
+    const generatedInternalLabel = INTERNAL_MACHINE_DRILL_ID_RE.test(normalizedId) && GENERATED_CATALOG_NAME_RE.test(catalogName);
+    if (!generatedInternalLabel) return catalogName;
+  }
+
+  return formatPlayerDrillDisplayName(normalizedId || catalogName || inlineName);
+};
+
 export const normalizePlayerActivity = ({ shotLogs = [], scLogs = [], scores = [], userEmail = "", teamId = "" } = {}) => {
   const normalizedEmail = normalizeEmail(userEmail || "");
   const scoped = (row) => {
@@ -127,8 +188,20 @@ export const deriveInterpretedPerformanceTrends = ({ shotLogs = [], scores = [],
   const volume = recentMakes > earlyMakes ? "increasing" : recentMakes < earlyMakes ? "decreasing" : "stable";
   const consistency = deriveStreakDays(allScores) >= 4 ? "improving" : "building";
   const byDrill = new Map();
-  allScores.forEach((s)=>{const k=String(s?.drillName||s?.drillId||"Drill"); byDrill.set(k,(byDrill.get(k)||0)+1);});
-  const strongestDrill = [...byDrill.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0] || "Not enough data yet";
+  allScores.forEach((score) => {
+    const drillId = String(score?.drillId || "").trim();
+    const drillName = String(score?.drillName || "").trim();
+    const key = drillName || drillId || "Drill";
+    const current = byDrill.get(key) || { count: 0, drillId, drillName };
+    current.count += 1;
+    if (!current.drillId && drillId) current.drillId = drillId;
+    if (!current.drillName && drillName) current.drillName = drillName;
+    byDrill.set(key, current);
+  });
+  const strongestPattern = [...byDrill.values()].sort((a,b)=>b.count-a.count)[0] || null;
+  const strongestDrill = strongestPattern
+    ? resolvePlayerDrillDisplayName({ drillId: strongestPattern.drillId, drillName: strongestPattern.drillName, drills })
+    : "Not enough data yet";
   const weakArea = momentum === "cooling" ? "Recent output dipped — schedule one extra focused session." : (volume === "decreasing" ? "Training volume is trending down — protect your daily reps." : "Keep reinforcing consistency under fatigue.");
   return { consistency, momentum, volume, strongestDrill, weakArea };
 };
