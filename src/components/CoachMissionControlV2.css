@@ -185,3 +185,6 @@ body.mission-control-active .coach-home-dashboard{display:none!important}
 }
 
 @media(prefers-reduced-motion:reduce){.mcShellV3 *{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Phase 1 interaction floor: modal and drawer close controls remain 44px. */
+.mcActionSheetHead>button,.mcInboxHead>button,.mcDrawerBrand button{width:44px;height:44px}
