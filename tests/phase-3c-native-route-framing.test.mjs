@@ -4,6 +4,8 @@ import { readFileSync } from 'node:fs';
 
 const index = readFileSync('index.html', 'utf8');
 const css = readFileSync('public/shotlab-phase3-native-route-framing.css', 'utf8');
+const phase7Chrome = readFileSync('src/components/Phase7AuthenticatedChrome.css', 'utf8');
+const backEnhancer = readFileSync('scripts/apply-phase4d-shared-back-hit-area.mjs', 'utf8');
 const workspaceSource = readFileSync('src/components/PlayerOperationalWorkspace.jsx', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 
@@ -14,14 +16,24 @@ test('Phase 3C route framing loads after the existing Phase 3 secondary authorit
   assert.ok(framing > acceptance, 'Phase 3C framing must load after Phase 3 acceptance');
 });
 
-test('Player secondary destinations use compact native route chrome and one gutter authority', () => {
+test('Player secondary destinations keep one gutter authority and explicit account access', () => {
   assert.match(css, /\.performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\) \.player-quick-actions\{[\s\S]*?height:0!important;[\s\S]*?overflow:visible!important;/);
   assert.match(css, /player-quick-actions button\[aria-label="Logout"\][\s\S]*?min-height:44px!important;[\s\S]*?pointer-events:auto;/);
   assert.doesNotMatch(css, /player-quick-actions\{\s*display:none!important;/s);
-  assert.match(css, /\.performance-shell--player\.is-mobile:not\(\[data-workspace-tab="home"\]\) \.player-scroll-container>button\[type="button"\][\s\S]*?width:var\(--p3c-route-control\)!important;[\s\S]*?font-size:0!important;/);
-  assert.match(css, /player-scroll-container>button\[type="button"\]>span\[aria-hidden="true"\][\s\S]*?font-size:20px!important;/);
   assert.match(css, /\[data-testid\^="player-workspace-"\]\{\s*margin-left:0!important;\s*margin-right:0!important;/s);
   assert.match(css, /\[data-testid="premium-leaderboards-hub"\],[\s\S]*?\[data-testid="player-career-history"\][\s\S]*?width:100%!important;/);
+});
+
+test('Phase 7 supersedes the duplicated Phase 3 return-control paint while retaining shared touch safety', () => {
+  assert.match(css, /--p3c-route-control:44px/);
+  assert.match(css, /--p3c-route-radius:14px/);
+  assert.doesNotMatch(css, /player-scroll-container>button\[type="button"\]/);
+  assert.doesNotMatch(css, /page\.pageShell>button\[type="button"\]:first-child/);
+  assert.match(phase7Chrome, /\.is-mobile \.shared-dashboard-back-action/);
+  assert.match(phase7Chrome, /width:44px!important/);
+  assert.match(phase7Chrome, /border-radius:14px!important/);
+  assert.match(backEnhancer, /minHeight:44/);
+  assert.match(backEnhancer, /touchAction:"manipulation"/);
 });
 
 test('Leaderboard destination removes the duplicated inner title while keeping context content', () => {
@@ -39,19 +51,10 @@ test('Leaderboard hero cannot claim the top spot for a lower displayed rank', ()
   assert.match(workspaceSource, /<p className=\{styles\.subtitle\}>\{subtitle\}<\/p>/);
 });
 
-test('Coach secondary routes share the same compact return affordance', () => {
-  assert.match(css, /\.performance-shell--coach\.is-mobile \.page\.pageShell>button\[type="button"\]:first-child\{/);
-  assert.match(css, /width:var\(--p3c-route-control\)!important;/);
-  assert.match(css, /border-radius:var\(--p3c-route-radius\)!important;/);
-  assert.match(css, /touch-action:manipulation;/);
-});
-
-test('Phase 3C keeps account access, focus, and reduced-motion behavior explicit', () => {
+test('Secondary route focus behavior remains explicit after Phase 7 reconciliation', () => {
   assert.match(css, /button\[aria-label="Logout"\]:focus-visible/);
-  assert.match(css, /:focus-visible\{/);
-  assert.match(css, /outline:3px solid color-mix/);
-  assert.match(css, /@media \(prefers-reduced-motion:reduce\)/);
-  assert.match(css, /transform:none!important;/);
+  assert.match(phase7Chrome, /shared-dashboard-back-action:focus-visible/);
+  assert.match(phase7Chrome, /outline:3px solid color-mix/);
 });
 
 test('App Store presentation workflow verifies the stacked Phase 3C contract', () => {

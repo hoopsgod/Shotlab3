@@ -49,6 +49,17 @@ async function navigate(page, key) {
   await settle(page);
 }
 
+async function focusByKeyboard(page, target) {
+  await page.evaluate(() => {
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  });
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    await page.keyboard.press("Tab");
+    if (await target.evaluate((node) => document.activeElement === node)) return;
+  }
+  throw new Error("Shared dashboard back action was not reachable by keyboard Tab navigation");
+}
+
 async function verifyBackControl(page, role, surface) {
   const back = page.locator("button.shared-dashboard-back-action");
   await expect(back, `${role}/${surface} shared back action`).toHaveCount(1);
@@ -60,6 +71,8 @@ async function verifyBackControl(page, role, surface) {
 
   const presentation = await back.evaluate((node) => {
     const style = getComputedStyle(node);
+    const icon = node.querySelector('span[aria-hidden="true"]');
+    const iconStyle = icon ? getComputedStyle(icon) : null;
     return {
       text: String(node.textContent || "").replace(/\s+/g, " ").trim(),
       minHeight: Number.parseFloat(style.minHeight),
@@ -69,27 +82,43 @@ async function verifyBackControl(page, role, surface) {
       paddingLeft: Number.parseFloat(style.paddingLeft),
       paddingRight: Number.parseFloat(style.paddingRight),
       borderTopWidth: style.borderTopWidth,
-      borderRadius: style.borderRadius,
+      borderRadius: Number.parseFloat(style.borderRadius),
       backgroundImage: style.backgroundImage,
       fontSize: Number.parseFloat(style.fontSize),
-      fontWeight: style.fontWeight,
-      textTransform: style.textTransform,
       touchAction: style.touchAction,
+      iconText: String(icon?.textContent || "").trim(),
+      iconFontSize: Number.parseFloat(iconStyle?.fontSize || "0"),
+      iconColor: iconStyle?.color || "",
     };
   });
 
+  expect(presentation.text).toMatch(/dashboard/i);
   expect(presentation.minHeight).toBeGreaterThanOrEqual(44);
-  expect(presentation.paddingTop).toBe(9);
-  expect(presentation.paddingBottom).toBe(9);
-  expect(presentation.paddingLeft).toBe(14);
-  expect(presentation.paddingRight).toBe(14);
+  expect(presentation.height).toBeGreaterThanOrEqual(44);
+  expect(presentation.paddingTop).toBe(0);
+  expect(presentation.paddingBottom).toBe(0);
+  expect(presentation.paddingLeft).toBe(0);
+  expect(presentation.paddingRight).toBe(0);
   expect(presentation.borderTopWidth).toBe("1px");
-  expect(Number.parseFloat(presentation.borderRadius)).toBeGreaterThan(100);
-  expect(presentation.backgroundImage).not.toBe("none");
-  expect(presentation.fontSize).toBe(11);
-  expect(Number(presentation.fontWeight)).toBe(700);
-  expect(presentation.textTransform).toBe("uppercase");
+  expect(presentation.borderRadius).toBeGreaterThanOrEqual(13);
+  expect(presentation.borderRadius).toBeLessThanOrEqual(15);
+  expect(presentation.backgroundImage).not.toContain("url(");
+  expect(presentation.backgroundImage).not.toContain("radial-gradient");
+  if (presentation.backgroundImage !== "none") expect(presentation.backgroundImage).toContain("linear-gradient");
+  expect(presentation.fontSize).toBe(0);
   expect(presentation.touchAction).toBe("manipulation");
+  expect(presentation.iconText.length).toBeGreaterThan(0);
+  expect(presentation.iconFontSize).toBeGreaterThanOrEqual(20);
+  expect(presentation.iconColor).not.toBe("rgba(0, 0, 0, 0)");
+
+  await focusByKeyboard(page, back);
+  await expect(back).toBeFocused();
+  const focusState = await back.evaluate((node) => ({
+    focusVisible: node.matches(":focus-visible"),
+    outlineStyle: getComputedStyle(node).outlineStyle,
+  }));
+  expect(focusState.focusVisible).toBe(true);
+  expect(focusState.outlineStyle).not.toBe("none");
 
   const viewport = await page.evaluate(() => ({
     innerWidth,
@@ -102,7 +131,7 @@ async function verifyBackControl(page, role, surface) {
   return { role, surface, box, presentation, viewport };
 }
 
-test("shared Coach and Player dashboard back actions are touch-safe without visual restyling", async ({ browser }) => {
+test("shared Coach and Player dashboard back actions stay touch-safe under Phase 7 compact framing", async ({ browser }) => {
   const evidence = [];
 
   const coachContext = await browser.newContext({ viewport: { width: 390, height: 844 } });

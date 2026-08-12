@@ -2,29 +2,16 @@
    Exact runtime selectors discovered by rendered iPhone review. Presentation only. */
 
 /* Force the real mobile route canvases light, including wrappers that sit outside the new dashboard root. */
-html body:has([data-testid="coach-events-interactive-dashboard"]),
-html body:has(#coach-drills-management),
-html body:has([data-testid="coach-players-interactive-dashboard"]){
+html body:has(:is([data-testid="coach-events-interactive-dashboard"],#coach-drills-management,[data-testid="coach-players-interactive-dashboard"],[data-testid="coach-page-dashboard-leaderboards"])){
   background:var(--p3-canvas)!important;
   background-image:none!important;
 }
-html body:has([data-testid="coach-events-interactive-dashboard"]) #root,
-html body:has([data-testid="coach-events-interactive-dashboard"]) #root .performance-shell,
-html body:has([data-testid="coach-events-interactive-dashboard"]) #root .performance-workspace,
-html body:has([data-testid="coach-events-interactive-dashboard"]) #root .content-wrap,
-html body:has([data-testid="coach-events-interactive-dashboard"]) #root .coach-scroll-container,
-html body:has([data-testid="coach-events-interactive-dashboard"]) #coach-events-management,
-html body:has(#coach-drills-management) #root,
-html body:has(#coach-drills-management) #root .performance-shell,
-html body:has(#coach-drills-management) #root .performance-workspace,
-html body:has(#coach-drills-management) #root .content-wrap,
-html body:has(#coach-drills-management) #root .coach-scroll-container,
-html body:has(#coach-drills-management) #coach-drills-management,
-html body:has([data-testid="coach-players-interactive-dashboard"]) #root,
-html body:has([data-testid="coach-players-interactive-dashboard"]) #root .performance-shell,
-html body:has([data-testid="coach-players-interactive-dashboard"]) #root .performance-workspace,
-html body:has([data-testid="coach-players-interactive-dashboard"]) #root .content-wrap,
-html body:has([data-testid="coach-players-interactive-dashboard"]) #root .coach-scroll-container{
+html body:has(:is([data-testid="coach-events-interactive-dashboard"],#coach-drills-management,[data-testid="coach-players-interactive-dashboard"],[data-testid="coach-page-dashboard-leaderboards"])) #root,
+html body:has(:is([data-testid="coach-events-interactive-dashboard"],#coach-drills-management,[data-testid="coach-players-interactive-dashboard"],[data-testid="coach-page-dashboard-leaderboards"])) #root .performance-shell,
+html body:has(:is([data-testid="coach-events-interactive-dashboard"],#coach-drills-management,[data-testid="coach-players-interactive-dashboard"],[data-testid="coach-page-dashboard-leaderboards"])) #root .performance-workspace,
+html body:has(:is([data-testid="coach-events-interactive-dashboard"],#coach-drills-management,[data-testid="coach-players-interactive-dashboard"],[data-testid="coach-page-dashboard-leaderboards"])) #root .content-wrap,
+html body:has(:is([data-testid="coach-events-interactive-dashboard"],#coach-drills-management,[data-testid="coach-players-interactive-dashboard"],[data-testid="coach-page-dashboard-leaderboards"])) #root .coach-scroll-container,
+html body:has([data-testid="coach-events-interactive-dashboard"]) #coach-events-management{
   background:var(--p3-canvas)!important;
   background-image:none!important;
   color:var(--p3-ink)!important;

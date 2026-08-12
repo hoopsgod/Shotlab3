@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import WorkspaceRecoveryBoundary from "./WorkspaceRecoveryBoundary.jsx";
+import "./Phase7AuthenticatedChrome.css";
 
 const lazyDefault = (loader) => lazy(loader);
 const lazyNamed = (loader, name) => lazy(() => loader().then((module) => ({ default: module[name] })));
