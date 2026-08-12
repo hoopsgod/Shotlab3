@@ -8,7 +8,7 @@ const urgencyLabel = (urgency = "normal") => {
   if (urgency === "urgent") return "Needs attention";
   if (urgency === "priority") return "Priority";
   if (urgency === "complete") return "Complete";
-  return "Next best action";
+  return "Next action";
 };
 const rankLabel = (rank = 0) => (Number(rank) > 0 ? `#${Number(rank)}` : "—");
 const actionKey = (action = {}) => String(action.id || action.kind || action.target || action.title || "action");
@@ -59,7 +59,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   return (
     <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" aria-label="Daily training command center">
       <div className={styles.header} data-layout-role="editorial-header">
-        <div className={styles.eyebrow}>{firstSession.pending ? "First session · Create your baseline" : "Today · Daily Command Center"}</div>
+        <div className={styles.eyebrow}>{firstSession.pending ? "First session · Create your baseline" : "Today’s focus"}</div>
         <div className={styles.status}>{firstSession.pending ? "Activation" : urgencyLabel(primary.urgency)}</div>
       </div>
 

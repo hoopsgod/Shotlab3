@@ -36,6 +36,13 @@
   justify-content: space-between;
 }
 
+.header {
+  min-height: 32px;
+  gap: 12px;
+  padding: 0 2px 8px;
+  border-bottom: 1px solid rgba(23, 26, 24, .1);
+}
+
 .eyebrow,
 .status,
 .meta,
@@ -59,13 +66,13 @@
 .status {
   display: inline-flex;
   align-items: center;
-  min-height: 30px;
+  min-height: 28px;
   padding: 0 11px;
   border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 28%, transparent);
   border-radius: 999px;
   color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 66%, #354039);
   background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 8%, transparent);
-  font-size: 10px;
+  font-size: var(--type-micro, 11px);
   font-weight: 700;
   letter-spacing: .07em;
   text-transform: uppercase;
@@ -135,7 +142,7 @@
 
 .meta {
   color: var(--text-3, #858d92);
-  font-size: 10px;
+  font-size: var(--type-micro, 11px);
   font-weight: 650;
   letter-spacing: .055em;
   text-transform: uppercase;
@@ -145,7 +152,7 @@
 .taskButton,
 .activationButton {
   min-height: 48px;
-  border-radius: 14px;
+  border-radius: var(--radius-md, 14px);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif;
   font-weight: 700;
   letter-spacing: -.004em;
@@ -223,7 +230,7 @@
 
 .coachSignalEyebrow {
   color: color-mix(in srgb, var(--coach-signal-accent, var(--team-brand-secondary, var(--accent))) 66%, #354039);
-  font-size: 10px;
+  font-size: var(--type-micro, 11px);
 }
 
 .coachSignalTitle {
@@ -248,7 +255,7 @@
   border-radius: 0;
   color: color-mix(in srgb, var(--coach-signal-accent, var(--team-brand-secondary, var(--accent))) 62%, #354039);
   background: transparent;
-  font-size: 9px;
+  font-size: var(--type-micro, 11px);
 }
 
 .coachSignalGrid {
@@ -269,7 +276,7 @@
 
 .coachSignalLabel {
   color: var(--text-3, #858d92);
-  font-size: 9px;
+  font-size: var(--type-micro, 11px);
 }
 
 .coachSignalValue {
@@ -312,7 +319,7 @@
 }
 
 .progressTrack {
-  height: 8px;
+  height: 6px;
   margin-top: 10px;
   overflow: hidden;
   border-radius: 999px;
@@ -357,7 +364,7 @@
 .metricLabel {
   margin-top: 4px;
   color: var(--text-3, #858d92);
-  font-size: 9px;
+  font-size: var(--type-micro, 11px);
   font-weight: 680;
   letter-spacing: .055em;
   text-transform: uppercase;
@@ -372,7 +379,7 @@
 .sectionHeading { gap: 12px; }
 .sectionLabel {
   color: var(--text-3, #858d92);
-  font-size: 10px;
+  font-size: var(--type-micro, 11px);
   font-weight: 700;
   letter-spacing: .07em;
   text-transform: uppercase;
@@ -416,7 +423,7 @@
   height: 32px;
   flex: 0 0 auto;
   border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 24%, rgba(255, 255, 255, .06));
-  border-radius: 11px;
+  border-radius: var(--radius-sm, 10px);
   color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 86%, white 14%);
   background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 7%, transparent);
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
@@ -439,7 +446,7 @@
 .taskMeta {
   margin-top: 4px;
   color: var(--text-3, #858d92);
-  font-size: 9px;
+  font-size: var(--type-micro, 11px);
   font-weight: 650;
   letter-spacing: .045em;
   text-transform: uppercase;
@@ -448,7 +455,7 @@
 .taskButton,
 .activationButton {
   flex: 0 0 auto;
-  min-height: 42px;
+  min-height: var(--touch-target, 44px);
   border: 1px solid color-mix(in srgb, var(--team-brand-primary, var(--accent)) 24%, rgba(255, 255, 255, .06));
   background: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 7%, transparent);
   color: color-mix(in srgb, var(--team-brand-primary, var(--accent)) 86%, white 14%);
@@ -515,12 +522,13 @@
   .root { padding: 0; border-radius: 0; }
   .header { align-items: flex-start; gap: 10px; }
   .status { max-width: 44%; text-align: center; }
-  .hero { margin-top: 14px; padding: 18px; border-radius: 21px; }
+  .hero { margin-top: 14px; padding: 18px; border-radius: var(--radius-xl, 24px); }
   .heroTop { align-items: flex-start; gap: 10px; }
   .title { font-size: clamp(31px, 10vw, 41px); }
   .description { font-size: 14px; }
   .coachSignal { padding: 18px 2px; border-radius: 0; }
-  .coachSignalHeader { align-items: flex-start; flex-direction: column; gap: 10px; }
+  .coachSignalHeader { align-items: flex-start; flex-direction: row; gap: 12px; }
+  .coachSignalStatus { max-width: 104px; justify-content: flex-end; text-align: right; }
   .coachSignalGrid { grid-template-columns: 1fr; gap: 0; }
   .coachSignalItem + .coachSignalItem { margin-top: 12px; padding: 12px 0 0; border-left: 0; border-top: 1px solid rgba(23, 26, 24, .1); }
   .progressGrid { gap: 0; }
