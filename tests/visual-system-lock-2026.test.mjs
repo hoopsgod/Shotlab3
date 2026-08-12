@@ -4,6 +4,10 @@ import fs from "node:fs";
 
 const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 const foundation = read("../src/styles/VisualFoundation2026.css");
+const insightRail = read("../src/components/OperationalInsightRail.module.css");
+const commandHierarchy = read("../src/styles/CommandHierarchy2026.css");
+const missionControl = read("../src/styles/MissionControlHierarchy2026.css");
+const secondaryPages = read("../src/components/SecondaryPageSystem.css");
 const header = read("../src/components/AppHeader.jsx");
 const navigation = read("../src/components/MobileNavigation.module.css");
 const states = read("../src/components/ShotLabStatePanel.module.css");
@@ -58,4 +62,66 @@ test("production keeps the bundled visual authority without shipping duplicate l
   assert.match(finalAuthorityCleanup, /data-shotlab-authority-bundle/);
   assert.match(finalAuthorityCleanup, /!referenced\.has\(entry\.name\)/);
   assert.match(pkg.scripts.build, /prune-unreachable-global-selectors\.mjs.*remove-unreferenced-authority-css\.mjs$/);
+});
+
+
+test("Phase 1 intelligence rail owns readable light-shell and dark-card materials", () => {
+  for (const token of [
+    "--insight-rail-canvas: #f0f1ed",
+    "--insight-rail-ink: #111a21",
+    "--insight-rail-muted: #65717a",
+    "--insight-card-surface: #10171d",
+    "--insight-card-copy: #f5f8f9",
+    "--insight-card-muted: #b6c0c6",
+  ]) assert.ok(foundation.includes(token), "missing " + token);
+
+  assert.match(insightRail, /\.header h2[\s\S]*var\(--insight-rail-ink, #111a21\)/);
+  assert.match(insightRail, /\.card h3[\s\S]*var\(--insight-card-copy, #f5f8f9\)/);
+  assert.match(insightRail, /\.card p[\s\S]*var\(--insight-card-muted, #b6c0c6\)/);
+  assert.match(insightRail, /min-height: var\(--touch-target, 44px\)/);
+});
+
+test("Phase 1 intelligence rail does not ship sub-11px interface text", () => {
+  assert.doesNotMatch(insightRail, /font-size:\s*(?:8|9|10)px\b/);
+  assert.doesNotMatch(insightRail, /font:\s*[^;]*(?:8|9|10)px\b/);
+});
+
+
+test("Phase 1 shell materials and legacy namespaces resolve through the canonical foundation", () => {
+  for (const token of [
+    "--shell-rail-surface: #0d171e",
+    "--shell-rail-ink: #f5f8f9",
+    "--shell-rail-muted: #a9b5bc",
+    "--sl-accent: var(--accent)",
+    "--sl-ink: var(--text-1)",
+    "--sl-muted: var(--text-2)",
+    "--sl-line: var(--stroke-1)",
+  ]) assert.ok(foundation.includes(token), "missing " + token);
+
+  assert.match(foundation, /\.performance-shell \.sidebar-nav[\s\S]*var\(--shell-rail-surface-raised\)[\s\S]*var\(--shell-rail-surface\)/);
+  assert.match(foundation, /\.nav-item\.is-active[\s\S]*var\(--accent\)/);
+
+  for (const isolatedMaterial of [
+    "--mc-surface: #ffffff",
+    "--mc-surface-quiet: #f5f4ef",
+    "--mc-ink: #111a21",
+    "--mc-muted: #44515b",
+  ]) assert.ok(missionControl.includes(isolatedMaterial), "missing " + isolatedMaterial);
+  assert.doesNotMatch(missionControl, /--mc-surface:\s*var\(--surface-1/);
+  assert.doesNotMatch(missionControl, /--mc-surface-quiet:\s*var\(--surface-3/);
+
+  assert.match(secondaryPages, /border-radius: var\(--radius-xl, 24px\)/);
+  assert.match(secondaryPages, /border-radius: var\(--radius-md, 14px\)/);
+});
+
+test("Phase 1 command surfaces enforce readable labels and canonical interaction geometry", () => {
+  const commandSurfaces = [commandHierarchy, missionControl].join("\n");
+  assert.doesNotMatch(commandSurfaces, /font-size:\s*(?:8|9|10)px\b/);
+  assert.doesNotMatch(commandSurfaces, /font:\s*[^;]*(?:8|9|10)px\b/);
+  assert.match(commandHierarchy, /width: var\(--touch-target, 44px\)/);
+  assert.match(commandHierarchy, /height: var\(--touch-target, 44px\)/);
+  assert.doesNotMatch(missionControl, /border-radius:\s*(?:13|15|16|20|22|26)px\b/);
+  assert.match(missionControl, /border-radius: var\(--radius-xl, 24px\)/);
+  assert.match(missionControl, /border-radius: var\(--radius-lg, 18px\)/);
+  assert.match(missionControl, /border-radius: var\(--radius-md, 14px\)/);
 });

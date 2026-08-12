@@ -69,6 +69,25 @@
   --performance-surface: #101c23;
   --performance-copy: #f5f8f9;
   --performance-muted: #a9b5bc;
+  /* Phase 1 system lock: shared shell materials and legacy namespace aliases. */
+  --shell-rail-surface: #0d171e;
+  --shell-rail-surface-raised: #13222b;
+  --shell-rail-ink: #f5f8f9;
+  --shell-rail-muted: #a9b5bc;
+  --shell-rail-line: rgba(255, 255, 255, .10);
+  --sl-accent: var(--accent);
+  --sl-ink: var(--text-1);
+  --sl-muted: var(--text-2);
+  --sl-line: var(--stroke-1);
+  --sl-line-strong: var(--stroke-2);
+  /* One explicit material contract for live intelligence. */
+  --insight-rail-canvas: #f0f1ed;
+  --insight-rail-ink: #111a21;
+  --insight-rail-muted: #65717a;
+  --insight-card-surface: #10171d;
+  --insight-card-copy: #f5f8f9;
+  --insight-card-muted: #b6c0c6;
+  --insight-card-radius: var(--radius-lg);
 }
 
 html,
@@ -160,15 +179,16 @@ button {
 }
 
 .performance-shell .sidebar-nav {
-  border-right: 1px solid var(--stroke-1) !important;
-  background: rgba(248, 247, 242, .94) !important;
-  box-shadow: 12px 0 34px rgba(17, 26, 33, .035) !important;
+  border-right: 1px solid var(--shell-rail-line) !important;
+  background:
+    linear-gradient(180deg, var(--shell-rail-surface-raised), var(--shell-rail-surface)) !important;
+  box-shadow: 12px 0 34px rgba(17, 26, 33, .10) !important;
   -webkit-backdrop-filter: blur(20px) saturate(125%);
   backdrop-filter: blur(20px) saturate(125%);
 }
 
 .performance-shell .sidebar-nav .nav-title {
-  color: var(--text-3) !important;
+  color: var(--shell-rail-muted) !important;
   font-family: var(--font-body) !important;
   font-size: var(--type-micro) !important;
   font-weight: 700 !important;
@@ -179,24 +199,24 @@ button {
   min-height: 46px !important;
   border: 1px solid transparent !important;
   border-radius: var(--radius-md) !important;
-  color: var(--text-2) !important;
+  color: var(--shell-rail-muted) !important;
   background: transparent !important;
   box-shadow: none !important;
 }
 
 .performance-shell .sidebar-nav .nav-item:hover,
 .performance-shell .sidebar-nav .nav-item:focus-visible {
-  color: var(--text-1) !important;
-  border-color: var(--stroke-1) !important;
-  background: rgba(255, 255, 255, .72) !important;
+  color: var(--shell-rail-ink) !important;
+  border-color: var(--shell-rail-line) !important;
+  background: rgba(255, 255, 255, .055) !important;
   transform: none !important;
 }
 
 .performance-shell .sidebar-nav .nav-item.is-active {
-  color: var(--text-1) !important;
-  border-color: rgba(95, 118, 0, .20) !important;
-  background: rgba(255, 255, 255, .94) !important;
-  box-shadow: inset 3px 0 #7e9e1e, var(--shadow-1) !important;
+  color: var(--shell-rail-ink) !important;
+  border-color: rgba(200, 255, 26, .22) !important;
+  background: rgba(255, 255, 255, .075) !important;
+  box-shadow: inset 3px 0 var(--accent), 0 8px 22px rgba(0, 0, 0, .14) !important;
 }
 
 .appHeader,
@@ -462,6 +482,13 @@ input[type="radio"] {
   .glass-hdr {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
+  }
+
+  .performance-shell .sidebar-nav {
+    background: var(--shell-rail-surface) !important;
+  }
+
+  .glass-hdr {
     background: #f8f7f2 !important;
   }
 }
