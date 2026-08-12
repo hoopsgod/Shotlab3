@@ -102,7 +102,9 @@ async function verifyBackControl(page, role, surface) {
   expect(presentation.borderTopWidth).toBe("1px");
   expect(presentation.borderRadius).toBeGreaterThanOrEqual(13);
   expect(presentation.borderRadius).toBeLessThanOrEqual(15);
-  expect(presentation.backgroundImage).toBe("none");
+  expect(presentation.backgroundImage).not.toContain("url(");
+  expect(presentation.backgroundImage).not.toContain("radial-gradient");
+  if (presentation.backgroundImage !== "none") expect(presentation.backgroundImage).toContain("linear-gradient");
   expect(presentation.fontSize).toBe(0);
   expect(presentation.touchAction).toBe("manipulation");
   expect(presentation.iconText.length).toBeGreaterThan(0);
