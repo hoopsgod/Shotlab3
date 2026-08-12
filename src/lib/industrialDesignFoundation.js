@@ -178,7 +178,7 @@ const CSS = `
 .performance-shell label,
 .premium-screen label { color:#74797c !important; }
 
-.performance-shell p,
+.performance-shell p:not([data-command-role="primary"] p),
 .performance-shell small,
 .performance-shell [class*="Subtitle"],
 .performance-shell [class*="Meta"],
