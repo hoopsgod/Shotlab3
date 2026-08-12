@@ -21,7 +21,7 @@ As verified on August 12, 2026, App Store Connect requires iOS uploads to be bui
 
 ## What “code-ready” means
 
-The repository can be code-ready before it is submit-ready. `npm run ios:release-readiness` is allowed to finish with warnings for external inputs that cannot be created safely in source control.
+The repository can be code-ready before it is submit-ready. `node scripts/testflight-readiness.mjs` is allowed to finish with warnings for external inputs that cannot be created safely in source control.
 
 Code-ready requires:
 
@@ -63,7 +63,7 @@ Use Node.js 22 or newer.
 npm ci
 npm run native:doctor
 npm run native:prepare:ios
-npm run ios:release-readiness
+node scripts/testflight-readiness.mjs
 ```
 
 `native:prepare:ios` performs a production Vite build, installs the pinned Capacitor toolchain without modifying `package.json` or `package-lock.json`, creates the iOS project when absent, and otherwise runs a native sync. It also regenerates the committed native icon and splash assets.
@@ -105,7 +105,7 @@ If the final App Store bundle identifier differs from `com.shotlab.training`, al
 Then run:
 
 ```bash
-npm run ios:release-readiness
+node scripts/testflight-readiness.mjs
 npm run ios:device-build
 ```
 
@@ -142,11 +142,11 @@ The repository stores screenshot copy/specification, but App Store Connect remai
 After signing is configured and physical-device QA is complete:
 
 ```bash
-npm run ios:release-readiness:strict
-npm run ios:release-candidate
+node scripts/testflight-readiness.mjs --strict-owner --require-macos --require-signing
+node scripts/ios-release.mjs release-candidate
 ```
 
-`ios:release-candidate` performs these safeguards before archiving:
+`node scripts/ios-release.mjs release-candidate` performs these safeguards before archiving:
 
 1. verifies macOS, Xcode, and the iOS SDK;
 2. rebuilds the current production web app;
@@ -179,6 +179,6 @@ The final repository gate is:
 npm ci
 npm test
 npm run build:performance
-npm run ios:release-readiness:strict
-npm run ios:release-candidate
+node scripts/testflight-readiness.mjs --strict-owner --require-macos --require-signing
+node scripts/ios-release.mjs release-candidate
 ```
