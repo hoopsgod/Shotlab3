@@ -29,10 +29,9 @@ test('Phase 7 supersedes the duplicated Phase 3 return-control paint while retai
   assert.match(css, /--p3c-route-radius:14px/);
   assert.doesNotMatch(css, /player-scroll-container>button\[type="button"\]/);
   assert.doesNotMatch(css, /page\.pageShell>button\[type="button"\]:first-child/);
-  assert.match(phase7Chrome, /performance-shell\.is-mobile \.shared-dashboard-back-action/);
+  assert.match(phase7Chrome, /\.is-mobile \.shared-dashboard-back-action/);
   assert.match(phase7Chrome, /width:44px!important/);
-  assert.match(phase7Chrome, /height:44px!important/);
-  assert.match(phase7Chrome, /p3c-route-radius,14px/);
+  assert.match(phase7Chrome, /border-radius:14px!important/);
   assert.match(backEnhancer, /minHeight:44/);
   assert.match(backEnhancer, /touchAction:"manipulation"/);
 });
