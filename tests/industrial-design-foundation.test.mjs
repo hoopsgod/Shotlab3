@@ -11,7 +11,7 @@ test("industrial design tokens establish a restrained editorial light system", (
 
 test("industrial design foundation covers coach and player premium surfaces without changing behavior", () => {
   const source = fs.readFileSync(new URL("../src/lib/industrialDesignFoundation.js", import.meta.url), "utf8");
-  const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
+  const bootstrap = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
   assert.match(source, /industrial-light-v1/);
   assert.match(source, /\.performance-shell/);
   assert.match(source, /\.premium-screen/);
@@ -19,5 +19,9 @@ test("industrial design foundation covers coach and player premium surfaces with
   assert.match(source, /focus-visible/);
   assert.match(source, /min-height|appHeader/);
   assert.match(bootstrap, /installIndustrialDesignFoundation\(\)/);
+  assert.ok(
+    bootstrap.indexOf("installIndustrialDesignFoundation()") < bootstrap.indexOf("await import('./App.jsx')"),
+    "industrial compatibility styles must install before the app and canonical 2026 foundation",
+  );
   assert.doesNotMatch(source, /fetch\(|localStorage|supabase|save[A-Z]/);
 });
