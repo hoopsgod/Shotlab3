@@ -6,11 +6,14 @@ const STATE_META = {
   empty: { eyebrow: "No current signal", icon: "target", title: "Nothing here yet" },
   "first-use": { eyebrow: "Start here", icon: "plus", title: "Build the first result" },
   success: { eyebrow: "Saved", icon: "verified", title: "Update complete" },
+  completion: { eyebrow: "Session complete", icon: "verified", title: "Work logged" },
+  offline: { eyebrow: "Working offline", icon: "alert", title: "Your local work is still available" },
   error: { eyebrow: "Needs attention", icon: "alert", title: "Something needs a retry" },
 };
 
 const stateClass = (state) => {
   if (state === "first-use") return styles.firstUse;
+  if (state === "completion") return styles.completion;
   return styles[state] || styles.empty;
 };
 
@@ -52,6 +55,12 @@ export default function ShotLabStatePanel({
         <div className={styles.eyebrow}>{eyebrow || meta.eyebrow}</div>
         <h3 className={styles.title}>{title || meta.title}</h3>
         {detail ? <p className={styles.detail}>{detail}</p> : null}
+        {busy ? (
+          <div className={styles.loadingTrack} aria-hidden="true">
+            <span />
+            <span />
+          </div>
+        ) : null}
         {actionLabel && typeof onAction === "function" ? (
           <button type="button" className={styles.action} onClick={onAction}>
             {actionLabel}
