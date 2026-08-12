@@ -1,0 +1,78 @@
+name: Apple Signing and First TestFlight Handoff
+
+on:
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "native/first-testflight-handoff.json"
+      - "native/ios-release-profile.json"
+      - "capacitor.config.json"
+      - "ios/App/App.xcodeproj/project.pbxproj"
+      - "scripts/apple-signing-first-build.mjs"
+      - "scripts/configure-ios-signing.mjs"
+      - "scripts/ios-release.mjs"
+      - "docs/apple-signing-first-testflight-phase.md"
+      - "docs/signed-device-release-runbook.md"
+      - "tests/apple-signing-first-testflight.test.mjs"
+      - ".github/workflows/apple-signing-first-testflight.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-signing-first-testflight-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  handoff-contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Verify signed-device and first-TestFlight contracts
+        run: node --test tests/apple-signing-first-testflight.test.mjs tests/testflight-release-readiness.test.mjs tests/phase-4-signed-device-layer.test.mjs
+      - name: Generate owner-input-aware signing preflight
+        run: node scripts/apple-signing-first-build.mjs
+      - name: Upload signing handoff report
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-signing-first-testflight-static
+          path: artifacts/testflight/first-build-handoff.json
+          if-no-files-found: error
+          retention-days: 14
+
+  macos-signing-environment:
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Select Xcode 26 toolchain
+        shell: bash
+        run: |
+          set -euo pipefail
+          XCODE_PATH="$(find /Applications -maxdepth 1 -type d -name 'Xcode_26.*.app' | sort -V | tail -1)"
+          test -n "$XCODE_PATH"
+          sudo xcode-select --switch "$XCODE_PATH/Contents/Developer"
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
+      - name: Verify Mac signing handoff environment
+        run: node scripts/apple-signing-first-build.mjs --require-macos
+      - name: Upload Mac handoff report
+        uses: actions/upload-artifact@v4
+        with:
+          name: apple-signing-first-testflight-macos
+          path: artifacts/testflight/first-build-handoff.json
+          if-no-files-found: error
+          retention-days: 14
