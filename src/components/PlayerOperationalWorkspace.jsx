@@ -6,9 +6,9 @@ import hierarchyStyles from "./PlayerMetricHierarchy.module.css";
 function MetricContent({ metric }) {
   return (
     <>
-      <span className={styles.metricLabel}>{metric.label}</span>
-      <span className={styles.metricValue}>{metric.value}</span>
-      <span className={styles.metricDetail}>{metric.detail}</span>
+      <span className={styles.metricLabel} data-metric-role="label">{metric.label}</span>
+      <span className={styles.metricValue} data-metric-role="value">{metric.value}</span>
+      <span className={styles.metricDetail} data-metric-role="detail">{metric.detail}</span>
     </>
   );
 }

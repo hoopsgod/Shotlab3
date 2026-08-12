@@ -15,6 +15,10 @@ test("shared feedback layer exposes accessible keyed premium states", async () =
   assert.match(source, /role=\{feedback\.tone === "error" \? "alert" : "status"\}/);
   assert.match(source, /Dismiss notification/);
   assert.match(source, /feedbackKeyRef/);
+  assert.match(source, /persistentFeedbackRef/);
+  assert.match(source, /activeFeedbackRef/);
+  assert.match(source, /const fallback = persistentFeedback\?\.id === dismissedFeedback\?\.id \? null : persistentFeedback/);
+  assert.match(source, /userInitiated: true/);
 });
 
 test("feedback styling uses restrained motion mobile safe areas and touch-safe dismissal", async () => {

@@ -6,10 +6,11 @@ import TeamStorePortal from "./components/TeamStorePortal.jsx";
 import "./components/TeamStoreIndustrial.css";
 
 const mount = document.getElementById("team-store-root");
+const primaryAppMount = document.getElementById("root");
 if (mount) {
   ReactDOM.createRoot(mount).render(
     <React.StrictMode>
-      <AppFeedbackLayer />
+      {primaryAppMount ? null : <AppFeedbackLayer />}
       <TeamStoreFeedbackBridge />
       <TeamStorePortal />
     </React.StrictMode>,

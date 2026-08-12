@@ -74,35 +74,31 @@ body:has(#coach-drills-management) .performance-workspace::after{
 }
 
 /* Compact player identity chrome on secondary destinations. Keep identity and brand, remove repeated Home-only mission content. */
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"],
-body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"]{
+.performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"]{
   margin:10px 16px 8px!important;
+  overflow:hidden!important;
   border:1px solid var(--p3-line)!important;
   border-radius:22px!important;
   background:rgba(255,255,255,.92)!important;
   box-shadow:0 8px 24px rgba(24,31,27,.055)!important;
+  transform:none!important;
 }
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"]>div,
-body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"]>div{
+.performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"]>div{
   min-height:78px!important;
   padding:13px 15px!important;
   align-items:center!important;
 }
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"] h1,
-body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"] h1{
+.performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] h1{
   margin:4px 0 0!important;
   font-size:26px!important;
   line-height:1!important;
   letter-spacing:-.045em!important;
 }
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"] [class*="tagline"],
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"] [class*="mission"],
-body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"] [class*="tagline"],
-body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"] [class*="mission"]{
+.performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [class*="tagline"],
+.performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [class*="mission"]{
   display:none!important;
 }
-body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"] img,
-body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"] img{
+.performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] img{
   width:58px!important;
   height:58px!important;
   object-fit:contain!important;
@@ -305,8 +301,7 @@ body:has(#coach-drills-management) [data-testid="mobile-navigation-dock"]{
 @media(max-width:390px){
   [data-testid="premium-leaderboards-hub"],
   [data-testid="player-career-history"]{width:calc(100% - 20px)!important;padding:14px!important}
-  body:has([data-testid="premium-leaderboards-hub"]) [data-testid="player-dashboard-identity-header"],
-  body:has([data-testid="player-career-history"]) [data-testid="player-dashboard-identity-header"]{margin-inline:10px!important}
+  .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"]{margin-inline:10px!important}
 }
 
 @media(prefers-reduced-motion:reduce){
