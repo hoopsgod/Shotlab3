@@ -48,7 +48,8 @@ test('demo fallback service no-ops safely without backend/team data', async () =
 test('startup is not hard-blocked by missing Supabase env', () => {
   const mainSource = fs.readFileSync(path.join(repoRoot, 'src/main.jsx'), 'utf8');
   assert.doesNotMatch(mainSource, /Missing Supabase configuration for this deployment\./);
-  assert.match(mainSource, /demoBootstrap\(\)/);
+  assert.match(mainSource, /await clearStaleDemoSession/);
+  assert.doesNotMatch(mainSource, /demoBootstrap/);
   assert.match(mainSource, /ReactDOM\.createRoot\(rootEl\)\.render/);
 });
 
