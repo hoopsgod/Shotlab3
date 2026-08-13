@@ -32,12 +32,22 @@
 }
 
 /*
- * Major headings resolve through the nearest declared surface. Because the
- * declaration uses inherited surface variables, a nested dark material inside a
- * light page correctly resets its own foreground without specificity tricks.
+ * Foregrounds resolve through the nearest declared surface. These generic copy
+ * rules intentionally come after the legacy industrial layer so a broad historic
+ * paragraph/small selector cannot turn dark-surface copy into low-contrast gray.
  */
 [data-surface] :is(h1, h2, h3, h4) {
   color: var(--surface-title);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface] p {
+  color: var(--surface-body);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface] :is(small, [data-copy-tone="muted"]) {
+  color: var(--surface-muted);
   -webkit-text-fill-color: currentColor;
 }
 
