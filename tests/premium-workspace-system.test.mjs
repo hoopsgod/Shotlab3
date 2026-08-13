@@ -64,7 +64,7 @@ test("visual hierarchy primitives match Mission Control interaction standards", 
 
 test("roster and branding screens use the shared premium system", () => {
   assert.match(brandingSource, /premium-screen premium-screen--branding/);
-  assert.match(brandingSource, /eyebrow="Team identity system"/);
+  assert.match(brandingSource, /eyebrow="Program identity"/);
   assert.match(rosterSource, /premium-roster-workspace/);
   assert.match(rosterSource, /coach-players-primary-objective/);
   assert.match(rosterSource, /coach-players-metrics/);
