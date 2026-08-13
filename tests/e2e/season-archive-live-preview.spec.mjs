@@ -18,13 +18,13 @@ const LIVE_DATA_KEYS = [
 ];
 
 async function enterCoachDemo(page, onBeforeClick = () => {}) {
-  const demoCoach = page.getByRole("button", { name: "Demo Coach", exact: true });
+  const coachDemo = page.getByRole("button", { name: "Coach demo", exact: true });
   const players = page.getByRole("button", { name: "Players", exact: true });
   await expect(page.locator("body")).not.toBeEmpty({ timeout: 20_000 });
-  await expect(page.getByRole("button", { name: /^(Demo Coach|Players)$/ }).first()).toBeVisible({ timeout: 20_000 });
-  if (await demoCoach.isVisible().catch(() => false)) {
+  await expect(page.getByRole("button", { name: /^(Coach demo|Players)$/ }).first()).toBeVisible({ timeout: 20_000 });
+  if (await coachDemo.isVisible().catch(() => false)) {
     onBeforeClick();
-    await demoCoach.click();
+    await coachDemo.click();
   }
   await expect(players).toBeVisible({ timeout: 20_000 });
   return players;
@@ -118,7 +118,7 @@ test("corrected Cloudflare preview completes isolated demo-local season archive 
   );
   expect(
     demoProductionWrites.map((write) => `${write.method} ${write.url}`),
-    "Demo Coach must never write demo identities or the generated demo team to production Supabase",
+    "Coach demo must never write demo identities or the generated demo team to production Supabase",
   ).toEqual([]);
 
   const relevantConsoleErrors = consoleErrors.filter((message) =>
