@@ -35,6 +35,8 @@ test('runtime mount carries a non-prunable mobile immersion safety contract', ()
   assert.match(enhancer, /#team-store-root[\s\S]*height:100dvh!important/);
   assert.match(enhancer, /\.ts-overlay[\s\S]*height:100dvh!important/);
   assert.match(enhancer, /\.ts-panel[\s\S]*height:100dvh!important[\s\S]*border-radius:0!important/);
+  assert.match(enhancer, /\.ts-empty-state p\{color:#5f6861!important;-webkit-text-fill-color:#5f6861!important;\}/);
+  assert.match(enhancer, /\.ts-empty-state \.ts-button-secondary[\s\S]*color:#273129!important/);
   assert.match(enhancer, /runtimeStyle\.remove\(\)/);
 });
 
