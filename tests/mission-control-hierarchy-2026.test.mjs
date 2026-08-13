@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const main = fs.readFileSync(new URL("../src/main.jsx", import.meta.url), "utf8");
+const runtimeAuthority = fs.readFileSync(new URL("../src/styles/RuntimeVisualAuthority.js", import.meta.url), "utf8");
 const index = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const css = fs.readFileSync(new URL("../src/styles/MissionControlHierarchy2026.css", import.meta.url), "utf8");
 const criticalCss = fs.readFileSync(new URL("../public/shotlab-phase2-critical.css", import.meta.url), "utf8");
@@ -15,8 +16,11 @@ const indexOfOrFail = (source, value) => {
 };
 
 test("Mission Control hierarchy loads after the canonical visual foundation", () => {
-  const foundation = indexOfOrFail(main, "./styles/VisualFoundation2026.css");
-  const hierarchy = indexOfOrFail(main, "./styles/MissionControlHierarchy2026.css");
+  const app = indexOfOrFail(main, "await import('./App.jsx')");
+  const authority = indexOfOrFail(main, "await import('./styles/RuntimeVisualAuthority.js')");
+  const foundation = indexOfOrFail(runtimeAuthority, "./VisualFoundation2026.css");
+  const hierarchy = indexOfOrFail(runtimeAuthority, "./MissionControlHierarchy2026.css");
+  assert.ok(authority > app, "Runtime visual authority must load after the application module");
   assert.ok(hierarchy > foundation, "Mission Control hierarchy must load after the foundation");
   assert.match(index, /shotlab-phase2-critical\.css/);
   assert.doesNotMatch(index, /appendChild\(sheet\)/);

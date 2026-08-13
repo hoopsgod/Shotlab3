@@ -4,8 +4,7 @@ import { minify } from "csso";
 
 const ROOT_DIR = process.cwd();
 const DIST_DIR = path.resolve(ROOT_DIR, "dist");
-const SOURCE_DIR = path.resolve(ROOT_DIR, "src");
-const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".html"]);
+const RUNTIME_EXTENSIONS = new Set([".js", ".html"]);
 const DYNAMIC_CLASS = /^(?:is|has|tone|status|state|role|mode|rank|theme|size|variant)(?:-|_|$)|^(?:active|selected|disabled|open|closed|expanded|collapsed|loading|success|error|warning|danger)$/i;
 const COMPLEX_PSEUDO = /:(?:not|is|where|has)\s*\(/i;
 const GENERATED_CSS_MODULE_CLASS = /^s_[A-Za-z0-9_-]+$/;
@@ -22,8 +21,10 @@ async function listFiles(directory, predicate) {
 }
 
 async function buildRuntimeCorpus() {
-  const files = await listFiles(SOURCE_DIR, (file) => SOURCE_EXTENSIONS.has(path.extname(file)));
-  files.push(path.resolve(ROOT_DIR, "index.html"));
+  // Reachability must be proven against the compiled graph, not source text.
+  // Vite-generated CSS-module names only exist after compilation; every class
+  // that can be applied at runtime is therefore present in dist JS or HTML.
+  const files = await listFiles(DIST_DIR, (file) => RUNTIME_EXTENSIONS.has(path.extname(file)));
   return (await Promise.all(files.map((file) => readFile(file, "utf8").catch(() => "")))).join("\n");
 }
 
@@ -60,19 +61,26 @@ function classNames(selector) {
 
 function classIsReachable(name, corpus) {
   if (!name || name.startsWith("_")) return true;
-  // Vite generates CSS-module classes with the stable `s_` prefix configured in
-  // vite.config.js. Those names only exist after compilation, so source-text
-  // reachability can never prove them. Treating them as dead stripped the
-  // Player workspace stylesheet from production while dev remained correct.
-  if (GENERATED_CSS_MODULE_CLASS.test(name)) return true;
   if (DYNAMIC_CLASS.test(name)) return true;
+  // Generated CSS-module names are no longer exempted from reachability proof:
+  // the compiled JS graph is precisely where their runtime mappings live.
+  if (GENERATED_CSS_MODULE_CLASS.test(name)) return corpus.includes(name);
   return corpus.includes(name);
 }
 
 function armIsReachable(selector, corpus) {
-  if (COMPLEX_PSEUDO.test(selector)) return true;
   const classes = classNames(selector);
   if (!classes.length) return true;
+
+  // Complex pseudos are deliberately preserved because their inner selector
+  // semantics are easy to misinterpret with a lightweight parser. The one safe
+  // exception is a Vite-generated CSS-module class that is absent from the
+  // compiled JS/HTML graph: no runtime element can receive that class, so the
+  // entire selector arm is unreachable regardless of :is/:not/:where/:has.
+  const generatedClasses = classes.filter((name) => GENERATED_CSS_MODULE_CLASS.test(name));
+  if (generatedClasses.some((name) => !corpus.includes(name))) return false;
+  if (COMPLEX_PSEUDO.test(selector)) return true;
+
   return classes.every((name) => classIsReachable(name, corpus));
 }
 
@@ -116,7 +124,7 @@ async function main() {
     changedFiles += 1;
   }
 
-  console.log(`Pruned global selectors: ${removedArms} unreachable selector arms across ${removedRules} rules in ${changedFiles} files; saved ${(bytesSaved / 1024).toFixed(1)} KiB raw.`);
+  console.log(`Pruned compiled-unreachable selectors: ${removedArms} selector arms across ${removedRules} rules in ${changedFiles} files; saved ${(bytesSaved / 1024).toFixed(1)} KiB raw.`);
 }
 
 await main();

@@ -51,6 +51,9 @@ jobs:
       - name: Build exact production bundle
         run: npm run build
 
+      - name: Prepare Team Store lifecycle parity harness
+        run: node scripts/prepare-demo-paid-runtime-parity.mjs
+
       - name: Start exact built bundle
         if: ${{ !inputs.acceptance_base_url }}
         run: |

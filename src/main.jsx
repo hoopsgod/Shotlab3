@@ -163,11 +163,10 @@ window.addEventListener('shotlab:app-ready', () => {
     const { installIndustrialDesignFoundation } = await import('./lib/industrialDesignFoundation.js')
     installIndustrialDesignFoundation()
     const { default: App } = await import('./App.jsx')
-    await import('./styles/VisualFoundation2026.css')
-    await import('./styles/CommandHierarchy2026.css')
-    await import('./styles/MissionControlHierarchy2026.css')
-    await import('./styles/MissionControlCascadeLock2026.css')
-    await import('./styles/Phase3SurfaceContracts.css')
+    // These five authorities are always required together before first render.
+    // Loading them through one dynamic module preserves their exact cascade order
+    // while allowing production to compress them as a single CSS dictionary.
+    await import('./styles/RuntimeVisualAuthority.js')
     const rootEl = document.getElementById('root')
     if (!rootEl) throw new Error('Missing root container (#root).')
 

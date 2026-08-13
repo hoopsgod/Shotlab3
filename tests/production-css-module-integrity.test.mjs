@@ -5,10 +5,13 @@ import path from "node:path";
 
 const root = process.cwd();
 
-test("production pruning preserves generated CSS-module selectors", async () => {
+test("production pruning proves generated CSS-module selectors against the compiled runtime graph", async () => {
   const pruneScript = await readFile(path.join(root, "scripts/prune-unreachable-global-selectors.mjs"), "utf8");
+  assert.match(pruneScript, /RUNTIME_EXTENSIONS/);
+  assert.match(pruneScript, /DIST_DIR/);
   assert.match(pruneScript, /GENERATED_CSS_MODULE_CLASS/);
-  assert.match(pruneScript, /GENERATED_CSS_MODULE_CLASS\.test\(name\)/);
+  assert.match(pruneScript, /GENERATED_CSS_MODULE_CLASS\.test\(name\)\) return corpus\.includes\(name\)/);
+  assert.doesNotMatch(pruneScript, /SOURCE_DIR/);
 });
 
 test("built Player workspace CSS remains substantive after production optimization", async () => {

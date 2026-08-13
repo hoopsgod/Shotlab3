@@ -33,11 +33,10 @@
   color: var(--surface-body);
 }
 
-/* A declared dark decision surface owns its material as well as its foreground.
- * This prevents later legacy light-card authorities from producing white-on-white
- * decision cards on generic Coach operations routes such as Strength & Conditioning. */
+/* A declared dark decision surface owns its base material and foreground.
+ * Use background-color rather than the background shorthand so route-specific
+ * premium gradients can layer over this semantic fallback without being erased. */
 [data-surface="dark"][data-visual-role="primary-decision"] {
-  background: var(--sl-surface-dark-material) !important;
   background-color: var(--sl-surface-dark-material) !important;
   color: var(--surface-body) !important;
   border-color: rgba(255, 255, 255, 0.08) !important;
