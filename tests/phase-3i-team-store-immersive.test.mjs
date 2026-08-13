@@ -7,7 +7,6 @@ const css = readFileSync('public/shotlab-phase3i-team-store-immersive.css', 'utf
 const html = readFileSync('index.html', 'utf8');
 const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
 const routeEnhancers = readFileSync('scripts/run-route-enhancers.mjs', 'utf8');
-const globalSelectorPruner = readFileSync('scripts/prune-unreachable-global-selectors.mjs', 'utf8');
 const workflow = readFileSync('.github/workflows/app-store-presentation-readiness.yml', 'utf8');
 const screenshots = readFileSync('tests/e2e/design-system-screenshots.spec.mjs', 'utf8');
 const production = readFileSync('tests/e2e/team-store-production.spec.mjs', 'utf8');
@@ -29,11 +28,14 @@ test('Team Store open lifecycle owns and cleans a document-level immersive state
   assert.match(enhancer, /document\.body\.style\.overflow = previousOverflow/);
 });
 
-test('production selector pruning preserves build-injected runtime classes', () => {
-  assert.match(globalSelectorPruner, /BUILD_SCRIPT_DIR/);
-  assert.match(globalSelectorPruner, /listFiles\(BUILD_SCRIPT_DIR/);
-  assert.match(globalSelectorPruner, /\.mjs/);
-  assert.match(globalSelectorPruner, /Route enhancers are part of the production source-authority pipeline/);
+test('runtime mount carries a non-prunable mobile immersion safety contract', () => {
+  assert.match(enhancer, /shotlab-team-store-immersive-runtime/);
+  assert.match(enhancer, /body > #root\{display:none!important;\}/);
+  assert.match(enhancer, /mobile-navigation-dock[\s\S]*display:none!important/);
+  assert.match(enhancer, /#team-store-root[\s\S]*height:100dvh!important/);
+  assert.match(enhancer, /\.ts-overlay[\s\S]*height:100dvh!important/);
+  assert.match(enhancer, /\.ts-panel[\s\S]*height:100dvh!important[\s\S]*border-radius:0!important/);
+  assert.match(enhancer, /runtimeStyle\.remove\(\)/);
 });
 
 test('mobile Team Store exclusively owns the viewport instead of behaving as a bottom sheet', () => {
