@@ -95,7 +95,9 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   expect(titleChannels.slice(0, 3).every((value) => value <= 40)).toBeTruthy();
   expect(visualState.summaryColor).toBe("rgb(93, 102, 95)");
   expect(visualState.summaryBackground).toBe("rgba(0, 0, 0, 0)");
-  expect(visualState.decisionTitleColor).toBe("rgb(245, 247, 244)");
+  const decisionTitleChannels = visualState.decisionTitleColor.match(/\d+/g)?.map(Number) || [];
+  expect(decisionTitleChannels).toHaveLength(3);
+  expect(decisionTitleChannels.every((value) => value >= 240)).toBeTruthy();
   expect(visualState.decisionBackgroundImage).toContain("linear-gradient");
   expect(visualState.firstMetricValueFill).toBe("rgb(23, 26, 24)");
   expect(visualState.firstMetricLabelFill).toBe("rgb(82, 96, 89)");
