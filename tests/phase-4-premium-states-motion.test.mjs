@@ -42,7 +42,7 @@ test("shared metrics acknowledge changed values without animated counting", asyn
   assert.match(source, /data-metric-change=\{changeKey\}/);
   assert.match(source, /Object\.is\(previousRef\.current, displayValue\)/);
   assert.match(css, /@keyframes metricValueSettle/);
-  assert.match(css, /animation: metricValueSettle 220ms/);
+  assert.match(css, /animation: metricValueSettle 200ms/);
   assert.doesNotMatch(source, /setInterval|requestAnimationFrame/);
 });
 
