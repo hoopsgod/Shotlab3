@@ -51,7 +51,7 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
         />
 
         <div className="branding-industrial__workspace" data-testid="branding-identity-workspace">
-          <section className="branding-industrial__panel" aria-labelledby="branding-controls-title" aria-busy={saving}>
+          <section className="branding-industrial__panel" data-surface="light" data-visual-role="branding-controls" aria-labelledby="branding-controls-title" aria-busy={saving}>
             <header className="branding-industrial__panel-header">
               <div>
                 <div className="branding-industrial__kicker">Identity controls</div>
@@ -63,7 +63,7 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
             <TeamBrandingForm branding={branding} onChange={setDraftBranding} onSave={handleSave} onCancel={onBack} saving={saving} />
           </section>
 
-          <aside className="branding-industrial__panel branding-industrial__preview" aria-labelledby="branding-preview-title">
+          <aside className="branding-industrial__panel branding-industrial__preview" data-surface="light" data-visual-role="branding-preview" aria-labelledby="branding-preview-title">
             <header className="branding-industrial__panel-header">
               <div>
                 <div className="branding-industrial__kicker">Shared preview</div>
