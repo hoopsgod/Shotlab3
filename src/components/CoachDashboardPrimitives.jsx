@@ -61,7 +61,7 @@ export function DashboardCommandBar({
   testId,
 }) {
   return (
-    <section className={styles.commandBar} data-testid={testId}>
+    <section className={styles.commandBar} data-testid={testId} data-surface="light" data-visual-role="command-bar">
       <div className={styles.commandCopy}>
         {eyebrow ? <div className={styles.eyebrow}>{eyebrow}</div> : null}
         <div className={styles.commandTitleRow}>
@@ -93,7 +93,7 @@ export function DashboardCommandBar({
 
 export function InteractiveMetricStrip({ items = [], activeKey, onSelect, testId }) {
   return (
-    <div className={styles.metricStrip} data-testid={testId} role="group" aria-label="Dashboard filters">
+    <div className={styles.metricStrip} data-testid={testId} data-visual-role="metric-strip" role="group" aria-label="Dashboard filters">
       {items.map((item) => {
         const active = item.key === activeKey;
         const accessibleLabel = `${item.label}: ${item.value}${item.detail ? ` · ${item.detail}` : ""}`;
@@ -139,7 +139,7 @@ export function DashboardFilterRail({
   testId,
 }) {
   return (
-    <div className={styles.filterRail} data-testid={testId}>
+    <div className={styles.filterRail} data-testid={testId} data-visual-role="filter-rail">
       <label className={styles.searchField}>
         <span className={styles.srOnly}>Search dashboard</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -187,15 +187,15 @@ export function DashboardInsightCard({
   testId,
 }) {
   return (
-    <article className={cx(styles.insightCard, styles[`insight_${tone}`])} data-testid={testId}>
+    <article className={cx(styles.insightCard, styles[`insight_${tone}`])} data-testid={testId} data-surface="light" data-visual-role="insight-card">
       {eyebrow ? <div className={styles.insightEyebrow}>{eyebrow}</div> : null}
       <h2 className={styles.insightTitle}>{title}</h2>
       {body ? <p className={styles.insightBody}>{body}</p> : null}
       {children ? <div className={styles.insightContent}>{children}</div> : null}
       {(action || secondaryAction) ? (
-        <div className={styles.insightActions}>
+        <div className={styles.insightActions} data-visual-role="insight-actions">
           {action ? <button type="button" onClick={action.onClick}>{action.label}</button> : null}
-          {secondaryAction ? <button type="button" className={styles.quietAction} onClick={secondaryAction.onClick}>{secondaryAction.label}</button> : null}
+          {secondaryAction ? <button type="button" className={styles.quietAction} data-action-role="tertiary" onClick={secondaryAction.onClick}>{secondaryAction.label}</button> : null}
         </div>
       ) : null}
     </article>
@@ -204,7 +204,7 @@ export function DashboardInsightCard({
 
 export function DashboardSection({ eyebrow, title, summary, action, children, testId, compact = false }) {
   return (
-    <section className={cx(styles.section, compact && styles.sectionCompact)} data-testid={testId}>
+    <section className={cx(styles.section, compact && styles.sectionCompact)} data-testid={testId} data-surface="light" data-visual-role="dashboard-section">
       <div className={styles.sectionHeader}>
         <div>
           {eyebrow ? <div className={styles.sectionEyebrow}>{eyebrow}</div> : null}
@@ -239,7 +239,7 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
   const drawer = (
     <div className={styles.drawerLayer} data-testid={testId}>
       <button type="button" className={styles.drawerBackdrop} aria-label="Close details" onClick={onClose} />
-      <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label={title}>
+      <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label={title} data-surface="light" data-visual-role="detail-drawer">
         <div className={styles.drawerHeader}>
           <div>
             {eyebrow ? <div className={styles.eyebrow}>{eyebrow}</div> : null}
