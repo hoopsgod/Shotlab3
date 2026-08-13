@@ -36,6 +36,47 @@ async function capture(page, name, locator = null) {
   expect(fs.statSync(file).size).toBeGreaterThan(15_000);
 }
 
+async function expectRenderedTextContrast(locator, minimum = 4.5) {
+  const result = await locator.evaluate((element) => {
+    const parse = (value) => {
+      const numbers = (String(value).match(/\d+(?:\.\d+)?/g) || []).map(Number);
+      return {
+        rgb: [numbers[0] || 0, numbers[1] || 0, numbers[2] || 0],
+        alpha: Number.isFinite(numbers[3]) ? numbers[3] : 1,
+      };
+    };
+    const blend = (foreground, background) => foreground.rgb.map((channel, index) => (
+      channel * foreground.alpha + background[index] * (1 - foreground.alpha)
+    ));
+    const layers = [];
+    let node = element;
+    while (node instanceof HTMLElement) {
+      const layer = parse(getComputedStyle(node).backgroundColor);
+      if (layer.alpha > 0) layers.push(layer);
+      node = node.parentElement;
+    }
+    let background = [255, 255, 255];
+    for (const layer of layers.reverse()) background = blend(layer, background);
+    const foregroundLayer = parse(getComputedStyle(element).color);
+    const foreground = blend(foregroundLayer, background);
+    const linear = (channel) => {
+      const value = channel / 255;
+      return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance = (rgb) => 0.2126 * linear(rgb[0]) + 0.7152 * linear(rgb[1]) + 0.0722 * linear(rgb[2]);
+    const foregroundLuminance = luminance(foreground);
+    const backgroundLuminance = luminance(background);
+    const ratio = (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
+    return {
+      text: element.textContent?.trim() || element.getAttribute("aria-label") || "control",
+      foreground,
+      background,
+      ratio,
+    };
+  });
+  expect(result.ratio, `${result.text} contrast ${result.ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(minimum);
+}
+
 async function enterDemo(page, role) {
   await installSafeRoutes(page);
   await page.goto("/");
@@ -136,14 +177,22 @@ test.describe("Phase 3 release certification — 390x844", () => {
     const story = page.getByTestId("player-progress-story");
     await expect(story).toBeVisible({ timeout: 20_000 });
     await story.getByTestId("player-progress-open-profile").click();
+    const privacy = page.getByTestId("player-profile-privacy");
+    await expect(privacy).toBeVisible({ timeout: 10_000 });
+    await expectRenderedTextContrast(privacy.getByRole("button"), 4.5);
+
     const account = page.getByTestId("player-profile-account-data");
     await expect(account).toBeVisible({ timeout: 10_000 });
     await account.scrollIntoViewIfNeeded();
     await capture(page, "20-player-account-collapsed");
     await account.locator(":scope > summary").click();
-    await expect(account.getByRole("link", { name: "Privacy", exact: true })).toBeVisible();
-    await expect(account.getByRole("link", { name: "Terms", exact: true })).toBeVisible();
-    await expect(account.getByRole("link", { name: "Support", exact: true })).toBeVisible();
+    const legalLinks = account.locator('[aria-label="Legal and support links"] a');
+    await expect(legalLinks).toHaveCount(5);
+    for (const name of ["Privacy", "Terms", "Support", "Delete Account", "Data Request"]) {
+      const link = account.getByRole("link", { name, exact: true });
+      await expect(link).toBeVisible();
+      await expectRenderedTextContrast(link, 4.5);
+    }
     await capture(page, "21-player-account-expanded");
 
     await enterDemo(page, "Player");
