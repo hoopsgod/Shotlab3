@@ -146,13 +146,7 @@
   border-block: 1px solid rgba(220,235,241,.12);
   background: rgba(5,21,29,.36);
 }
-
-.metric {
-  min-width: 0;
-  padding: 15px 12px 14px;
-  text-align: left;
-  background: transparent;
-}
+.metric { min-width: 0; padding: 15px 12px 14px; text-align: left; background: transparent; }
 .metric + .metric { border-left: 1px solid rgba(220,235,241,.1); }
 .metricValue {
   color: #f6f8f9;
@@ -214,7 +208,7 @@
 }
 .quietHeader { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 9px; min-width: 0; }
 .quietTitle { margin: 4px 0 0; color: #edf3f5; font-size: 18px; line-height: 1.12; font-weight: 760; letter-spacing: -.02em; overflow-wrap: break-word; }
-.quietAction { padding: 8px 12px; border: 1px solid rgba(200,255,26,.2); background: rgba(200,255,26,.05); color: #dff99a; flex-shrink: 0; }
+.quietAction { min-height: var(--touch-target, 44px); padding: 8px 12px; border: 1px solid rgba(200,255,26,.2); background: rgba(200,255,26,.05); color: #dff99a; flex-shrink: 0; }
 .quietAction:hover,
 .quietAction:focus-visible { transform: translateY(-1px); background: rgba(200,255,26,.08); }
 .quietBody { min-width: 0; }
