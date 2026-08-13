@@ -121,10 +121,16 @@ test("team branding stays decorative when light-surface controls require a stabl
   assert.match(surfaceCss, /--sl-accent-foreground-light:\s*#465717/);
   assert.match(surfaceCss, /button\[data-player-profile-privacy-toggle\][\s\S]*color:\s*var\(--sl-accent-foreground-light\)/);
   assert.match(surfaceCss, /a\[data-player-profile-legal-link\][\s\S]*color:\s*var\(--sl-accent-foreground-light\)/);
-  assert.match(accountTouchEnhancer, /color:u\.hideFromLeaderboards\?MUTED:"#465717"/);
-  assert.match(accountTouchEnhancer, /color:compact\?"#465717":MUTED/);
-  assert.doesNotMatch(accountTouchEnhancer, /color:u\.hideFromLeaderboards\?MUTED:VOLT/);
-  assert.doesNotMatch(accountTouchEnhancer, /color:compact\?VOLT:MUTED/);
+  assert.match(accountTouchEnhancer, /const privacyAccentBefore = 'color:u\.hideFromLeaderboards\?MUTED:VOLT'/);
+  assert.match(accountTouchEnhancer, /const privacyAccentAfter = 'color:u\.hideFromLeaderboards\?MUTED:"#465717"'/);
+  assert.match(accountTouchEnhancer, /app = app\.replace\(privacyAccentBefore, privacyAccentAfter\)/);
+  assert.match(accountTouchEnhancer, /const legalBefore = '<a[^\n]+color:compact\?VOLT:MUTED/);
+  assert.match(accountTouchEnhancer, /const legalAfter = '<a[^\n]+color:compact\?"#465717":MUTED/);
+});
+
+test("Player Rankings removes the repeated embedded hub introduction but keeps live status", () => {
+  assert.match(surfaceCss, /data-workspace-tab="leaderboards"[\s\S]*premium-leaderboards-hub[\s\S]*:not\(\[data-testid="leaderboard-status-line"\]\)[\s\S]*display:\s*none/);
+  assert.match(surfaceCss, /leaderboard-status-line[\s\S]*margin-top:\s*0/);
 });
 
 test("Team Store mobile portal owns the viewport and light empty-state foregrounds", () => {
