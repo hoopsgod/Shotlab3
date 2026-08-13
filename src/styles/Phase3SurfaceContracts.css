@@ -84,6 +84,14 @@
   -webkit-text-fill-color: currentColor;
 }
 
+/* Progress metadata is supporting copy. It must inherit from the material that
+ * actually contains it, including dark decision cards on Coach operational pages. */
+[data-surface] [data-visual-role="progress-meta"],
+[data-surface] [data-visual-role="progress-meta"] > span {
+  color: var(--surface-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
 /* Controls resolve from the nearest material instead of a hard-coded light rule. */
 [data-surface] :is(input, select, textarea) {
   color: var(--surface-title);
