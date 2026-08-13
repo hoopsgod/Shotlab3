@@ -54,11 +54,24 @@ const immersiveEffect = `  useEffect(() => {
     runtimeStyle.id = runtimeStyleId;
     runtimeStyle.textContent = [
       '@media (max-width:759px){',
+      'html.team-store-portal-open,html.team-store-portal-open body{width:100%;height:100%;overflow:hidden!important;overscroll-behavior:none;background:#f6f7f3!important;}',
       'html.team-store-portal-open body > #root{display:none!important;}',
       'html.team-store-portal-open [data-testid="mobile-navigation-dock"],html.team-store-portal-open [data-testid="mobile-navigation-overlay"]{display:none!important;visibility:hidden!important;pointer-events:none!important;}',
       'html.team-store-portal-open #team-store-root{position:fixed!important;inset:0!important;z-index:2147483000!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;overflow:hidden!important;background:#f6f7f3!important;}',
+      'html.team-store-portal-open .ts-launcher{display:none!important;}',
       'html.team-store-portal-open .ts-overlay{position:fixed!important;inset:0!important;z-index:1!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important;display:block!important;background:#f6f7f3!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;overflow:hidden!important;}',
-      'html.team-store-portal-open .ts-panel{position:fixed!important;inset:0!important;z-index:2!important;width:100vw!important;max-width:none!important;height:100dvh!important;min-height:100dvh!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;transform:none!important;overflow-x:hidden!important;overflow-y:auto!important;background:#f6f7f3!important;}',
+      'html.team-store-portal-open .ts-panel{position:fixed!important;inset:0!important;z-index:2!important;width:100vw!important;max-width:none!important;height:100dvh!important;min-height:100dvh!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;transform:none!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scroll-padding-top:calc(76px + env(safe-area-inset-top,0px));background:#f6f7f3!important;color:#171a18!important;}',
+      'html.team-store-portal-open .ts-header{position:sticky!important;top:0!important;z-index:20!important;padding-top:calc(14px + env(safe-area-inset-top,0px))!important;border-radius:0!important;background:rgba(246,247,243,.96)!important;color:#171a18!important;box-shadow:0 1px 0 rgba(23,28,23,.08)!important;backdrop-filter:blur(18px) saturate(1.08)!important;-webkit-backdrop-filter:blur(18px) saturate(1.08)!important;}',
+      'html.team-store-portal-open .ts-header h2{color:#171a18!important;-webkit-text-fill-color:#171a18!important;}',
+      'html.team-store-portal-open .ts-header p{color:#68706a!important;-webkit-text-fill-color:#68706a!important;}',
+      'html.team-store-portal-open .ts-eyebrow{color:#5b7119!important;-webkit-text-fill-color:#5b7119!important;}',
+      'html.team-store-portal-open .ts-close{min-width:44px!important;min-height:44px!important;border-color:rgba(23,26,24,.14)!important;background:#fff!important;color:#171a18!important;-webkit-text-fill-color:#171a18!important;touch-action:manipulation;}',
+      'html.team-store-portal-open .ts-coach-content,html.team-store-portal-open .ts-player-content{min-height:calc(100dvh - 84px - env(safe-area-inset-top,0px));padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))!important;box-sizing:border-box;}',
+      'html.team-store-portal-open .ts-empty-state{min-height:calc(100dvh - 160px - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));align-content:center;padding:32px 18px calc(36px + env(safe-area-inset-bottom,0px))!important;color:#171a18!important;}',
+      'html.team-store-portal-open .ts-empty-icon{border:1px solid rgba(91,113,25,.16)!important;background:rgba(91,113,25,.08)!important;color:#5b7119!important;}',
+      'html.team-store-portal-open .ts-empty-state h3{color:#171a18!important;-webkit-text-fill-color:#171a18!important;}',
+      'html.team-store-portal-open .ts-empty-state p{color:#5f6861!important;-webkit-text-fill-color:#5f6861!important;}',
+      'html.team-store-portal-open .ts-empty-state .ts-button-secondary{min-width:132px;min-height:48px!important;border-color:rgba(23,26,24,.16)!important;background:#fff!important;color:#273129!important;-webkit-text-fill-color:#273129!important;box-shadow:0 8px 22px rgba(23,28,24,.06)!important;}',
       '}',
     ].join("");
     if (!runtimeStyle.isConnected) document.head.appendChild(runtimeStyle);
