@@ -96,22 +96,39 @@
   opacity: 1;
 }
 
-/* Bright team/accent colors remain decorative on light surfaces; control text gets
- * a stable high-contrast foreground so custom branding cannot wash labels out. */
-[data-testid="player-profile-privacy"] button,
-[data-testid="player-profile-account-data"] [aria-label="Legal and support links"] a {
+/* Bright team/accent colors remain decorative on light surfaces; textual controls
+ * use a stable high-contrast ink. The production build adds the semantic control
+ * attributes below before Vite, so these selectors survive route enhancement and
+ * outrank older profile presentation rules without affecting dark legal pages. */
+.performance-shell--player[data-workspace-tab="profile"]
+  [data-testid="player-profile-privacy"]
+  button[data-player-profile-privacy-toggle],
+.performance-shell--player[data-workspace-tab="profile"]
+  [data-testid="player-profile-account-data"]
+  a[data-player-profile-legal-link] {
   color: var(--sl-accent-foreground-light) !important;
   -webkit-text-fill-color: var(--sl-accent-foreground-light) !important;
 }
 
-[data-testid="player-profile-privacy"] button {
+.performance-shell--player[data-workspace-tab="profile"]
+  [data-testid="player-profile-privacy"]
+  button[data-player-profile-privacy-toggle] {
   border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 34%, rgba(23, 26, 24, .16)) !important;
   background: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 8%, #fff) !important;
 }
 
-[data-testid="player-profile-account-data"] [aria-label="Legal and support links"] a {
+.performance-shell--player[data-workspace-tab="profile"]
+  [data-testid="player-profile-account-data"]
+  a[data-player-profile-legal-link] {
   border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 28%, rgba(23, 26, 24, .14)) !important;
   background: rgba(255, 255, 255, .72) !important;
+}
+
+/* Keep a source-mode fallback for environments that intentionally skip route enhancers. */
+[data-testid="player-profile-privacy"] button,
+[data-testid="player-profile-account-data"] [aria-label="Legal and support links"] a {
+  color: var(--sl-accent-foreground-light) !important;
+  -webkit-text-fill-color: var(--sl-accent-foreground-light) !important;
 }
 
 /* Shared secondary-page geometry: same contract for Coach, Player, demo and paid. */
