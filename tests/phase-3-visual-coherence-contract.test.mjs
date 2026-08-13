@@ -11,6 +11,7 @@ const coachSecondary = read("../src/components/CoachInteractiveDashboards.jsx");
 const playerDaily = read("../src/components/PlayerDailyCommandCenter.jsx");
 const visualHierarchy = read("../src/components/VisualHierarchy.jsx");
 const surfaceCss = read("../src/styles/Phase3SurfaceContracts.css");
+const runtimeVisualAuthority = read("../src/styles/RuntimeVisualAuthority.js");
 const expertCss = read("../src/styles/ExpertVisualPolish.css");
 const v5CoachIntegrityCss = read("../public/shotlab-v5-coach-integrity.css");
 const parityCss = read("../public/shotlab-v8-demo-parity.css");
@@ -162,8 +163,11 @@ test("surface contract is role-neutral for Coach, Player, demo and registered se
 });
 
 test("semantic surface contract loads after the previous cascade lock", () => {
-  const cascadeLock = main.indexOf("MissionControlCascadeLock2026.css");
-  const phase3 = main.indexOf("Phase3SurfaceContracts.css");
+  const app = main.indexOf("await import('./App.jsx')");
+  const authority = main.indexOf("await import('./styles/RuntimeVisualAuthority.js')");
+  const cascadeLock = runtimeVisualAuthority.indexOf("./MissionControlCascadeLock2026.css");
+  const phase3 = runtimeVisualAuthority.indexOf("./Phase3SurfaceContracts.css");
+  assert.ok(app >= 0 && authority > app, "consolidated runtime visual authority must load after the application module");
   assert.ok(cascadeLock >= 0, "existing cascade lock import must remain present");
   assert.ok(phase3 > cascadeLock, "Phase 3 semantic contract must load after the previous visual authority");
 });
