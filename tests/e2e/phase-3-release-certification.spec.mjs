@@ -39,7 +39,14 @@ async function capture(page, name, locator = null) {
 async function expectRenderedTextContrast(locator, minimum = 4.5) {
   const result = await locator.evaluate((element) => {
     const parse = (value) => {
-      const numbers = (String(value).match(/\d+(?:\.\d+)?/g) || []).map(Number);
+      const raw = String(value || "").trim().toLowerCase();
+      if (raw.startsWith("color(srgb")) {
+        const body = raw.slice(raw.indexOf(" ") + 1, raw.lastIndexOf(")")).trim();
+        const [channelsPart, alphaPart] = body.split("/").map((part) => part.trim());
+        const channels = channelsPart.split(/\s+/).slice(0, 3).map((part) => Number(part) * 255);
+        return { rgb: channels, alpha: alphaPart ? Number(alphaPart) : 1 };
+      }
+      const numbers = (raw.match(/\d+(?:\.\d+)?/g) || []).map(Number);
       return {
         rgb: [numbers[0] || 0, numbers[1] || 0, numbers[2] || 0],
         alpha: Number.isFinite(numbers[3]) ? numbers[3] : 1,
@@ -74,7 +81,9 @@ async function expectRenderedTextContrast(locator, minimum = 4.5) {
       ratio,
     };
   });
-  expect(result.ratio, `${result.text} contrast ${result.ratio.toFixed(2)}:1`).toBeGreaterThanOrEqual(minimum);
+  const fg = result.foreground.map((value) => Math.round(value)).join(",");
+  const bg = result.background.map((value) => Math.round(value)).join(",");
+  expect(result.ratio, `${result.text} contrast ${result.ratio.toFixed(2)}:1 fg=${fg} bg=${bg}`).toBeGreaterThanOrEqual(minimum);
 }
 
 async function enterDemo(page, role) {
