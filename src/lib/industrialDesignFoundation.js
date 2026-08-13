@@ -93,22 +93,25 @@ const CSS = `
 .performance-shell .appHeaderEyebrow,
 .premium-screen .appHeaderEyebrow { color:#555b5e !important; }
 
+/*
+ * Material authority is explicit. Stable legacy primitives remain listed by exact
+ * class while migrated components opt in through data-surface. Never infer a
+ * background or foreground from a class-name fragment such as "Card"/"Panel".
+ */
 .performance-shell .accent-card,
 .performance-shell .premiumSummaryPanel,
 .performance-shell .premiumStatTile,
 .performance-shell .ch,
-.performance-shell [class*="Card"],
-.performance-shell [class*="Panel"],
-.premium-screen [class*="Card"],
-.premium-screen [class*="Panel"] {
+.performance-shell [data-surface="light"],
+.premium-screen [data-surface="light"] {
   border-color:var(--pw-border) !important;
   color:#151719;
 }
 .performance-shell .accent-card,
 .performance-shell .premiumSummaryPanel,
 .performance-shell .ch,
-.premium-screen [class*="Card"],
-.premium-screen [class*="Panel"] {
+.performance-shell [data-surface="light"],
+.premium-screen [data-surface="light"] {
   background:#fff !important;
   box-shadow:0 12px 38px rgba(26,30,33,.065) !important;
 }
@@ -221,10 +224,10 @@ html body .ts-overlay.ts-overlay select {
 
 .performance-shell p:not([data-command-role="primary"] p),
 .performance-shell small,
-.performance-shell [class*="Subtitle"],
-.performance-shell [class*="Meta"],
+.performance-shell [data-copy-tone="muted"],
 .premium-screen p,
-.premium-screen small { color:#6b7073; }
+.premium-screen small,
+.premium-screen [data-copy-tone="muted"] { color:#6b7073; }
 
 .performance-shell .feedListItem:hover { background:#f7f6f2 !important; }
 
