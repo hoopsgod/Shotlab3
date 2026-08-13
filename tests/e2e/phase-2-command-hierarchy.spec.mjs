@@ -114,6 +114,8 @@ test("Player home presents action, evidence, priority, and disclosure in order",
     const rootStyle = style('[data-testid="player-daily-command-center"]');
     const heroStyle = style('[data-command-role="primary"]');
     const titleStyle = style('[data-command-role="primary"] h1');
+    const primaryButtonStyle = style('[data-testid="player-daily-primary-action"]');
+    const primaryButtonLabelStyle = style('[data-testid="player-daily-primary-action"] span');
     const evidenceStyle = style('[data-testid="player-command-evidence"] > div');
     const nextStyle = style('[data-command-role="next-actions"]');
     const disclosureStyle = style('[data-command-role="progress-details"]');
@@ -129,6 +131,10 @@ test("Player home presents action, evidence, priority, and disclosure in order",
       rootBackground: rootStyle?.backgroundColor || "",
       heroBackground: heroStyle?.backgroundColor || "",
       heroTitle: titleStyle?.color || "",
+      primaryButtonColor: primaryButtonStyle?.color || "",
+      primaryButtonFill: primaryButtonStyle?.webkitTextFillColor || "",
+      primaryButtonLabelColor: primaryButtonLabelStyle?.color || "",
+      primaryButtonLabelFill: primaryButtonLabelStyle?.webkitTextFillColor || "",
       evidenceBackground: evidenceStyle?.backgroundColor || "",
       nextBackground: nextStyle?.backgroundColor || "",
       disclosureBackground: disclosureStyle?.backgroundColor || "",
@@ -144,6 +150,9 @@ test("Player home presents action, evidence, priority, and disclosure in order",
   expect(presentation.rootBackground).toBe("rgba(0, 0, 0, 0)");
   expectDark(presentation.heroBackground);
   expectLight(presentation.heroTitle);
+  expect(presentation.primaryButtonFill).toBe(presentation.primaryButtonColor);
+  expect(presentation.primaryButtonLabelColor).toBe(presentation.primaryButtonColor);
+  expect(presentation.primaryButtonLabelFill).toBe(presentation.primaryButtonColor);
   expect(presentation.evidenceBackground).toBe("rgba(0, 0, 0, 0)");
   if (presentation.positions.nextActions >= 0) expect(presentation.nextBackground).toBe("rgba(0, 0, 0, 0)");
   expect(presentation.disclosureBackground).toBe("rgba(0, 0, 0, 0)");
