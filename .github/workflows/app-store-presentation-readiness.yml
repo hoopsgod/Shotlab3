@@ -41,6 +41,7 @@ on:
       - "tests/e2e/phase-3l-coach-leaderboard-screenshots.spec.mjs"
       - "tests/e2e/phase-3m-player-team-store-retail-screenshots.spec.mjs"
       - "tests/e2e/phase-3n-player-commitments-screenshots.spec.mjs"
+      - "tests/e2e/phase-3v-final-closure-screenshots.spec.mjs"
       - "tests/e2e/visual-foundation-2026.spec.mjs"
       - "tests/e2e/native-app-shell-2026.spec.mjs"
       - "tests/e2e/phase-2-command-hierarchy.spec.mjs"
