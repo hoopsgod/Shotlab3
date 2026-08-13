@@ -115,11 +115,40 @@ test("Player home presents action, evidence, priority, and disclosure in order",
     const heroStyle = style('[data-command-role="primary"]');
     const titleStyle = style('[data-command-role="primary"] h1');
     const primaryButtonStyle = style('[data-testid="player-daily-primary-action"]');
-    const primaryButtonLabelStyle = style('[data-testid="player-daily-primary-action"] span');
+    const primaryButtonLabel = document.querySelector('[data-testid="player-daily-primary-action"] span');
+    const primaryButtonLabelStyle = primaryButtonLabel ? getComputedStyle(primaryButtonLabel) : null;
     const evidenceStyle = style('[data-testid="player-command-evidence"] > div');
     const nextStyle = style('[data-command-role="next-actions"]');
     const disclosureStyle = style('[data-command-role="progress-details"]');
     const activationStyle = style('[data-command-role="activation"]');
+
+    const matchedLabelColorRules = [];
+    const inspectRules = (rules, source) => {
+      for (const rule of rules || []) {
+        if (rule.cssRules) {
+          inspectRules(rule.cssRules, source);
+          continue;
+        }
+        if (!rule.selectorText || !primaryButtonLabel) continue;
+        let matches = false;
+        try { matches = primaryButtonLabel.matches(rule.selectorText); } catch { matches = false; }
+        if (!matches) continue;
+        const color = rule.style?.getPropertyValue("color") || "";
+        const fill = rule.style?.getPropertyValue("-webkit-text-fill-color") || "";
+        if (color || fill) matchedLabelColorRules.push({
+          source,
+          selector: rule.selectorText,
+          color,
+          fill,
+          colorPriority: rule.style?.getPropertyPriority("color") || "",
+          fillPriority: rule.style?.getPropertyPriority("-webkit-text-fill-color") || "",
+        });
+      }
+    };
+    for (const sheet of [...document.styleSheets]) {
+      try { inspectRules(sheet.cssRules, sheet.href || sheet.ownerNode?.id || "inline-style"); } catch { /* same-origin sheets only */ }
+    }
+
     return {
       positions: {
         primary: top('[data-command-role="primary"]'),
@@ -135,6 +164,7 @@ test("Player home presents action, evidence, priority, and disclosure in order",
       primaryButtonFill: primaryButtonStyle?.webkitTextFillColor || "",
       primaryButtonLabelColor: primaryButtonLabelStyle?.color || "",
       primaryButtonLabelFill: primaryButtonLabelStyle?.webkitTextFillColor || "",
+      matchedLabelColorRules,
       evidenceBackground: evidenceStyle?.backgroundColor || "",
       nextBackground: nextStyle?.backgroundColor || "",
       disclosureBackground: disclosureStyle?.backgroundColor || "",
@@ -151,7 +181,7 @@ test("Player home presents action, evidence, priority, and disclosure in order",
   expectDark(presentation.heroBackground);
   expectLight(presentation.heroTitle);
   expect(presentation.primaryButtonFill).toBe(presentation.primaryButtonColor);
-  expect(presentation.primaryButtonLabelColor).toBe(presentation.primaryButtonColor);
+  expect(presentation.primaryButtonLabelColor, JSON.stringify(presentation.matchedLabelColorRules, null, 2)).toBe(presentation.primaryButtonColor);
   expect(presentation.primaryButtonLabelFill).toBe(presentation.primaryButtonColor);
   expect(presentation.evidenceBackground).toBe("rgba(0, 0, 0, 0)");
   if (presentation.positions.nextActions >= 0) expect(presentation.nextBackground).toBe("rgba(0, 0, 0, 0)");
