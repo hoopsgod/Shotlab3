@@ -17,6 +17,7 @@ if (source.includes('data-testid="team-store-portal-overlay"')) {
   for (const marker of [
     'data-testid="team-store-portal-panel"',
     'team-store-portal-open',
+    'shotlab-team-store-immersive-runtime',
     'document.documentElement.classList.add',
     'document.documentElement.classList.remove',
   ]) {
@@ -48,6 +49,19 @@ const immersiveEffect = `  useEffect(() => {
     if (!open) return undefined;
     const previousOverflow = document.body.style.overflow;
     const portalClass = "team-store-portal-open";
+    const runtimeStyleId = "shotlab-team-store-immersive-runtime";
+    const runtimeStyle = document.getElementById(runtimeStyleId) || document.createElement("style");
+    runtimeStyle.id = runtimeStyleId;
+    runtimeStyle.textContent = [
+      '@media (max-width:759px){',
+      'html.team-store-portal-open body > #root{display:none!important;}',
+      'html.team-store-portal-open [data-testid="mobile-navigation-dock"],html.team-store-portal-open [data-testid="mobile-navigation-overlay"]{display:none!important;visibility:hidden!important;pointer-events:none!important;}',
+      'html.team-store-portal-open #team-store-root{position:fixed!important;inset:0!important;z-index:2147483000!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;overflow:hidden!important;background:#f6f7f3!important;}',
+      'html.team-store-portal-open .ts-overlay{position:fixed!important;inset:0!important;z-index:1!important;width:100vw!important;height:100dvh!important;min-height:100dvh!important;margin:0!important;padding:0!important;display:block!important;background:#f6f7f3!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;overflow:hidden!important;}',
+      'html.team-store-portal-open .ts-panel{position:fixed!important;inset:0!important;z-index:2!important;width:100vw!important;max-width:none!important;height:100dvh!important;min-height:100dvh!important;max-height:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;transform:none!important;overflow-x:hidden!important;overflow-y:auto!important;background:#f6f7f3!important;}',
+      '}',
+    ].join("");
+    if (!runtimeStyle.isConnected) document.head.appendChild(runtimeStyle);
     const handleKeyDown = (event) => {
       if (event.key !== "Escape") return;
       setOpen(false);
@@ -62,6 +76,7 @@ const immersiveEffect = `  useEffect(() => {
     return () => {
       document.documentElement.classList.remove(portalClass);
       document.body.classList.remove(portalClass);
+      runtimeStyle.remove();
       document.body.style.overflow = previousOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
