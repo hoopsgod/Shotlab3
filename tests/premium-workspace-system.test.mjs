@@ -52,10 +52,11 @@ test("reusable headers expose stable hooks for premium page treatment", () => {
   }
 });
 
-test("visual hierarchy primitives match Mission Control interaction standards", () => {
+test("visual hierarchy primitives match the Phase 4 Mission Control standard", () => {
   assert.match(hierarchyCss, /\.objective \{/);
-  assert.match(hierarchyCss, /box-shadow: 0 24px 62px/);
-  assert.match(hierarchyCss, /\.primaryAction::after/);
+  assert.match(hierarchyCss, /box-shadow: 0 20px 52px/);
+  assert.match(hierarchyCss, /\.objective::before/);
+  assert.match(hierarchyCss, /abstract half-court geometry/);
   assert.match(hierarchyCss, /\.metricStrip \{/);
   assert.match(hierarchyCss, /\.disclosure\[open\]/);
   assert.match(hierarchyCss, /\.quietSection \{/);
