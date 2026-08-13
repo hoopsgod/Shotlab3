@@ -61,7 +61,7 @@ export function DashboardCommandBar({
   testId,
 }) {
   return (
-    <section className={styles.commandBar} data-testid={testId} data-surface="light" data-visual-role="command-bar">
+    <section className={styles.commandBar} data-testid={testId} data-surface="dark" data-visual-role="command-bar">
       <div className={styles.commandCopy}>
         {eyebrow ? <div className={styles.eyebrow}>{eyebrow}</div> : null}
         <div className={styles.commandTitleRow}>
@@ -77,6 +77,7 @@ export function DashboardCommandBar({
               key={action.key || action.label}
               type="button"
               className={cx(styles.commandAction, index === 0 && styles.primaryAction, action.danger && styles.dangerAction)}
+              data-action-role={action.danger ? "destructive" : index === 0 ? "primary" : "secondary"}
               onClick={action.onClick}
               disabled={action.disabled}
             >
@@ -91,9 +92,9 @@ export function DashboardCommandBar({
   );
 }
 
-export function InteractiveMetricStrip({ items = [], activeKey, onSelect, testId }) {
+export function InteractiveMetricStrip({ items = [], activeKey, onSelect, testId, surface = "dark" }) {
   return (
-    <div className={styles.metricStrip} data-testid={testId} data-visual-role="metric-strip" role="group" aria-label="Dashboard filters">
+    <div className={styles.metricStrip} data-testid={testId} data-surface={surface} data-visual-role="metric-strip" role="group" aria-label="Dashboard filters">
       {items.map((item) => {
         const active = item.key === activeKey;
         const accessibleLabel = `${item.label}: ${item.value}${item.detail ? ` · ${item.detail}` : ""}`;
@@ -137,9 +138,10 @@ export function DashboardFilterRail({
   onFilterChange,
   trailing,
   testId,
+  surface = "dark",
 }) {
   return (
-    <div className={styles.filterRail} data-testid={testId} data-visual-role="filter-rail">
+    <div className={styles.filterRail} data-testid={testId} data-surface={surface} data-visual-role="filter-rail">
       <label className={styles.searchField}>
         <span className={styles.srOnly}>Search dashboard</span>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -173,7 +175,7 @@ export function DashboardFilterRail({
 }
 
 export function DashboardInsightGrid({ children, testId }) {
-  return <div className={styles.insightGrid} data-testid={testId}>{children}</div>;
+  return <div className={styles.insightGrid} data-testid={testId} data-visual-role="insight-grid">{children}</div>;
 }
 
 export function DashboardInsightCard({
@@ -185,16 +187,17 @@ export function DashboardInsightCard({
   secondaryAction,
   children,
   testId,
+  surface = "dark",
 }) {
   return (
-    <article className={cx(styles.insightCard, styles[`insight_${tone}`])} data-testid={testId} data-surface="light" data-visual-role="insight-card">
+    <article className={cx(styles.insightCard, styles[`insight_${tone}`])} data-testid={testId} data-surface={surface} data-visual-role="insight-card">
       {eyebrow ? <div className={styles.insightEyebrow}>{eyebrow}</div> : null}
       <h2 className={styles.insightTitle}>{title}</h2>
       {body ? <p className={styles.insightBody}>{body}</p> : null}
       {children ? <div className={styles.insightContent}>{children}</div> : null}
       {(action || secondaryAction) ? (
         <div className={styles.insightActions} data-visual-role="insight-actions">
-          {action ? <button type="button" onClick={action.onClick}>{action.label}</button> : null}
+          {action ? <button type="button" data-action-role="secondary" onClick={action.onClick}>{action.label}</button> : null}
           {secondaryAction ? <button type="button" className={styles.quietAction} data-action-role="tertiary" onClick={secondaryAction.onClick}>{secondaryAction.label}</button> : null}
         </div>
       ) : null}
@@ -202,16 +205,16 @@ export function DashboardInsightCard({
   );
 }
 
-export function DashboardSection({ eyebrow, title, summary, action, children, testId, compact = false }) {
+export function DashboardSection({ eyebrow, title, summary, action, children, testId, compact = false, surface = "dark" }) {
   return (
-    <section className={cx(styles.section, compact && styles.sectionCompact)} data-testid={testId} data-surface="light" data-visual-role="dashboard-section">
+    <section className={cx(styles.section, compact && styles.sectionCompact)} data-testid={testId} data-surface={surface} data-visual-role="dashboard-section">
       <div className={styles.sectionHeader}>
         <div>
           {eyebrow ? <div className={styles.sectionEyebrow}>{eyebrow}</div> : null}
           <h2 className={styles.sectionTitle}>{title}</h2>
           {summary ? <p className={styles.sectionSummary}>{summary}</p> : null}
         </div>
-        {action ? <button type="button" className={styles.sectionAction} onClick={action.onClick}>{action.label}</button> : null}
+        {action ? <button type="button" className={styles.sectionAction} data-action-role="secondary" onClick={action.onClick}>{action.label}</button> : null}
       </div>
       <div className={styles.sectionBody}>{children}</div>
     </section>
@@ -239,14 +242,14 @@ export function DashboardDetailDrawer({ open, onClose, eyebrow, title, meta, chi
   const drawer = (
     <div className={styles.drawerLayer} data-testid={testId}>
       <button type="button" className={styles.drawerBackdrop} aria-label="Close details" onClick={onClose} />
-      <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label={title} data-surface="light" data-visual-role="detail-drawer">
+      <aside className={styles.drawer} role="dialog" aria-modal="true" aria-label={title} data-surface="dark" data-visual-role="detail-drawer">
         <div className={styles.drawerHeader}>
           <div>
             {eyebrow ? <div className={styles.eyebrow}>{eyebrow}</div> : null}
             <h2>{title}</h2>
             {meta ? <p>{meta}</p> : null}
           </div>
-          <button type="button" className={styles.drawerClose} aria-label="Close details" onClick={onClose}>×</button>
+          <button type="button" className={styles.drawerClose} data-action-role="tertiary" aria-label="Close details" onClick={onClose}>×</button>
         </div>
         <div className={styles.drawerBody}>{children}</div>
       </aside>
