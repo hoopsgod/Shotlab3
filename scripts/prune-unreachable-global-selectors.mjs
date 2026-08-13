@@ -69,9 +69,18 @@ function classIsReachable(name, corpus) {
 }
 
 function armIsReachable(selector, corpus) {
-  if (COMPLEX_PSEUDO.test(selector)) return true;
   const classes = classNames(selector);
   if (!classes.length) return true;
+
+  // Complex pseudos are deliberately preserved because their inner selector
+  // semantics are easy to misinterpret with a lightweight parser. The one safe
+  // exception is a Vite-generated CSS-module class that is absent from the
+  // compiled JS/HTML graph: no runtime element can receive that class, so the
+  // entire selector arm is unreachable regardless of :is/:not/:where/:has.
+  const generatedClasses = classes.filter((name) => GENERATED_CSS_MODULE_CLASS.test(name));
+  if (generatedClasses.some((name) => !corpus.includes(name))) return false;
+  if (COMPLEX_PSEUDO.test(selector)) return true;
+
   return classes.every((name) => classIsReachable(name, corpus));
 }
 
