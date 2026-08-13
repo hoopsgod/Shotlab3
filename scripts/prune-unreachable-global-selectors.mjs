@@ -5,7 +5,8 @@ import { minify } from "csso";
 const ROOT_DIR = process.cwd();
 const DIST_DIR = path.resolve(ROOT_DIR, "dist");
 const SOURCE_DIR = path.resolve(ROOT_DIR, "src");
-const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".html"]);
+const BUILD_SCRIPT_DIR = path.resolve(ROOT_DIR, "scripts");
+const SOURCE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".html", ".mjs"]);
 const DYNAMIC_CLASS = /^(?:is|has|tone|status|state|role|mode|rank|theme|size|variant)(?:-|_|$)|^(?:active|selected|disabled|open|closed|expanded|collapsed|loading|success|error|warning|danger)$/i;
 const COMPLEX_PSEUDO = /:(?:not|is|where|has)\s*\(/i;
 const GENERATED_CSS_MODULE_CLASS = /^s_[A-Za-z0-9_-]+$/;
@@ -22,8 +23,13 @@ async function listFiles(directory, predicate) {
 }
 
 async function buildRuntimeCorpus() {
-  const files = await listFiles(SOURCE_DIR, (file) => SOURCE_EXTENSIONS.has(path.extname(file)));
-  files.push(path.resolve(ROOT_DIR, "index.html"));
+  const sourceFiles = await listFiles(SOURCE_DIR, (file) => SOURCE_EXTENSIONS.has(path.extname(file)));
+  // Route enhancers are part of the production source-authority pipeline. They can
+  // inject runtime class names after checkout but before Vite compiles the app.
+  // Include those scripts in reachability so the post-build CSS pruner does not
+  // delete selectors for legitimate dynamic states such as Team Store immersion.
+  const enhancerFiles = await listFiles(BUILD_SCRIPT_DIR, (file) => SOURCE_EXTENSIONS.has(path.extname(file)));
+  const files = [...sourceFiles, ...enhancerFiles, path.resolve(ROOT_DIR, "index.html")];
   return (await Promise.all(files.map((file) => readFile(file, "utf8").catch(() => "")))).join("\n");
 }
 
