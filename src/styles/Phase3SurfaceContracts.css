@@ -139,6 +139,24 @@
   -webkit-text-fill-color: var(--sl-accent-foreground-light) !important;
 }
 
+/* Player Rankings already owns the page title in the route frame. The embedded
+ * competition hub keeps only live context/status so the hierarchy is not repeated. */
+.performance-shell--player[data-workspace-tab="leaderboards"]
+  [data-testid="premium-leaderboards-hub"] > header > :not([data-testid="leaderboard-status-line"]) {
+  display: none !important;
+}
+
+.performance-shell--player[data-workspace-tab="leaderboards"]
+  [data-testid="premium-leaderboards-hub"] > header {
+  margin-bottom: 8px !important;
+  padding: 0 0 12px !important;
+}
+
+.performance-shell--player[data-workspace-tab="leaderboards"]
+  [data-testid="premium-leaderboards-hub"] [data-testid="leaderboard-status-line"] {
+  margin-top: 0 !important;
+}
+
 /* Shared secondary-page geometry: same contract for Coach, Player, demo and paid. */
 [data-visual-role="secondary-page"] {
   min-width: 0;
