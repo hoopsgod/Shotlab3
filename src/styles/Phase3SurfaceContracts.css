@@ -13,6 +13,7 @@
   --sl-surface-dark-title: #f5f7f4;
   --sl-surface-dark-body: #d7ddd8;
   --sl-surface-dark-muted: #aeb7b0;
+  --sl-surface-dark-material: #171b18;
   --sl-phase3-mobile-gutter: 18px;
   --sl-phase3-touch-target: 44px;
 }
@@ -29,6 +30,16 @@
   --surface-body: var(--sl-surface-dark-body);
   --surface-muted: var(--sl-surface-dark-muted);
   color: var(--surface-body);
+}
+
+/* A declared dark decision surface owns its material as well as its foreground.
+ * This prevents later legacy light-card authorities from producing white-on-white
+ * decision cards on generic Coach operations routes such as Strength & Conditioning. */
+[data-surface="dark"][data-visual-role="primary-decision"] {
+  background: var(--sl-surface-dark-material) !important;
+  background-color: var(--sl-surface-dark-material) !important;
+  color: var(--surface-body) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
 }
 
 /*
