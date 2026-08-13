@@ -31,38 +31,46 @@
   color: var(--surface-body);
 }
 
-/* Explicit title/body foregrounds permanently protect the two regression classes:
- * white-on-light and dark-on-dark. -webkit-text-fill-color is reset only on the
- * semantic copy nodes because legacy gradient-text rules previously leaked here. */
-[data-surface="light"][data-visual-role="page-intro"] :is(h1, h2, h3),
-[data-surface="light"][data-visual-role="supporting-evidence"] :is(h2, h3, strong) {
+/*
+ * Major headings resolve through the nearest declared surface. Because the
+ * declaration uses inherited surface variables, a nested dark material inside a
+ * light page correctly resets its own foreground without specificity tricks.
+ */
+[data-surface] :is(h1, h2, h3, h4) {
   color: var(--surface-title);
   -webkit-text-fill-color: currentColor;
 }
 
-[data-surface="light"][data-visual-role="page-intro"] p,
-[data-surface="light"][data-visual-role="supporting-evidence"] :is(p, small) {
+[data-visual-role="page-intro"] p,
+[data-visual-role="supporting-evidence"] :is(p, small),
+[data-visual-role="primary-decision"] p,
+[data-visual-role="command-bar"] p,
+[data-visual-role="insight-card"] p,
+[data-visual-role="dashboard-section"] p,
+[data-visual-role="detail-drawer"] p {
   color: var(--surface-muted);
   -webkit-text-fill-color: currentColor;
 }
 
-[data-surface="dark"][data-visual-role="primary-decision"] :is(h1, h2, h3, strong) {
+[data-visual-role="supporting-evidence"] strong,
+[data-visual-role="primary-decision"] strong,
+[data-visual-role="insight-card"] strong,
+[data-visual-role="dashboard-section"] strong,
+[data-visual-role="detail-drawer"] strong,
+[data-visual-role="metric-strip"] output {
   color: var(--surface-title);
   -webkit-text-fill-color: currentColor;
 }
 
-[data-surface="dark"][data-visual-role="primary-decision"] p {
+/* Controls resolve from the nearest material instead of a hard-coded light rule. */
+[data-surface] :is(input, select, textarea) {
+  color: var(--surface-title);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface] :is(input, textarea)::placeholder {
   color: var(--surface-muted);
   -webkit-text-fill-color: currentColor;
-}
-
-[data-surface="light"] :is(input, select, textarea) {
-  color: var(--sl-surface-light-title);
-  -webkit-text-fill-color: currentColor;
-}
-
-[data-surface="light"] :is(input, textarea)::placeholder {
-  color: #757d77;
   opacity: 1;
 }
 
@@ -86,6 +94,13 @@
 }
 
 [data-visual-role="secondary-page"] :is(button, [role="button"], input, select) {
+  min-height: var(--sl-phase3-touch-target);
+}
+
+[data-action-role="primary"],
+[data-action-role="secondary"],
+[data-action-role="tertiary"],
+[data-action-role="destructive"] {
   min-height: var(--sl-phase3-touch-target);
 }
 
