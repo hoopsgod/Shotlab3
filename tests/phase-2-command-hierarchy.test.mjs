@@ -6,6 +6,7 @@ import fs from "node:fs";
 const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 const main = read("../src/main.jsx");
 const player = read("../src/components/PlayerDailyCommandCenter.jsx");
+const playerCss = read("../src/components/PlayerDailyCommandCenter.module.css");
 const hierarchy = read("../src/styles/CommandHierarchy2026.css");
 const rail = read("../src/components/OperationalInsightRail.jsx");
 const railCss = read("../src/components/OperationalInsightRail.module.css");
@@ -67,6 +68,13 @@ test("Player mobile hierarchy preserves a dominant action and deliberate disclos
   assert.match(hierarchy, /font-size: clamp\(32px, 10vw, 44px\)/);
   assert.match(hierarchy, /\.playerProgressDisclosure > summary:focus-visible/);
   assert.match(hierarchy, /@media \(prefers-reduced-motion: reduce\)/);
+});
+
+test("Dark-surface copy authority cannot recolor generic control labels", () => {
+  assert.match(sessionIntegrity, /:is\(p,small\)\{color:#b8c0ba!important;-webkit-text-fill-color:currentColor!important\}/);
+  assert.doesNotMatch(sessionIntegrity, /:is\(p,small,span\)\{color:#b8c0ba!important/);
+  assert.match(playerCss, /\.primaryButton,\s*\.taskButton,\s*\.activationButton\s*\{[\s\S]*-webkit-text-fill-color: currentColor;/);
+  assert.match(playerCss, /\.primaryButton > \*,\s*\.taskButton > \*,\s*\.activationButton > \*\s*\{[\s\S]*color: inherit;[\s\S]*-webkit-text-fill-color: currentColor;/);
 });
 
 test("Phase 2 gives desktop insight rails one dark priority and quiet supporting cards", () => {
