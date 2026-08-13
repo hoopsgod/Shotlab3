@@ -1,0 +1,108 @@
+/*
+ * ShotLab Phase 3 — semantic surface contracts.
+ *
+ * This is the final foreground authority for components that explicitly declare
+ * their material. A surface must never be inferred from class names, test ids,
+ * route names, or team colors. The contract intentionally stays small so older
+ * visual authorities can be narrowed and retired instead of patched around.
+ */
+:root {
+  --sl-surface-light-title: #171a18;
+  --sl-surface-light-body: #3f4842;
+  --sl-surface-light-muted: #68706a;
+  --sl-surface-dark-title: #f5f7f4;
+  --sl-surface-dark-body: #d7ddd8;
+  --sl-surface-dark-muted: #aeb7b0;
+  --sl-phase3-mobile-gutter: 18px;
+  --sl-phase3-touch-target: 44px;
+}
+
+[data-surface="light"] {
+  --surface-title: var(--sl-surface-light-title);
+  --surface-body: var(--sl-surface-light-body);
+  --surface-muted: var(--sl-surface-light-muted);
+  color: var(--surface-body);
+}
+
+[data-surface="dark"] {
+  --surface-title: var(--sl-surface-dark-title);
+  --surface-body: var(--sl-surface-dark-body);
+  --surface-muted: var(--sl-surface-dark-muted);
+  color: var(--surface-body);
+}
+
+/* Explicit title/body foregrounds permanently protect the two regression classes:
+ * white-on-light and dark-on-dark. -webkit-text-fill-color is reset only on the
+ * semantic copy nodes because legacy gradient-text rules previously leaked here. */
+[data-surface="light"][data-visual-role="page-intro"] :is(h1, h2, h3),
+[data-surface="light"][data-visual-role="supporting-evidence"] :is(h2, h3, strong) {
+  color: var(--surface-title);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface="light"][data-visual-role="page-intro"] p,
+[data-surface="light"][data-visual-role="supporting-evidence"] :is(p, small) {
+  color: var(--surface-muted);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface="dark"][data-visual-role="primary-decision"] :is(h1, h2, h3, strong) {
+  color: var(--surface-title);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface="dark"][data-visual-role="primary-decision"] p {
+  color: var(--surface-muted);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface="light"] :is(input, select, textarea) {
+  color: var(--sl-surface-light-title);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface="light"] :is(input, textarea)::placeholder {
+  color: #757d77;
+  opacity: 1;
+}
+
+/* Shared secondary-page geometry: same contract for Coach, Player, demo and paid. */
+[data-visual-role="secondary-page"] {
+  min-width: 0;
+  max-width: 1080px;
+  box-sizing: border-box;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+[data-visual-role="secondary-page"] :is(h1, h2, h3, p, button, input, select, textarea) {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+[data-visual-role="secondary-page"] :is(h1, h2, h3) {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+[data-visual-role="secondary-page"] :is(button, [role="button"], input, select) {
+  min-height: var(--sl-phase3-touch-target);
+}
+
+@media (max-width: 430px) {
+  [data-visual-role="secondary-page"] {
+    width: 100%;
+    max-width: 100%;
+    padding-left: max(var(--sl-phase3-mobile-gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--sl-phase3-mobile-gutter), env(safe-area-inset-right, 0px));
+  }
+
+  [data-visual-role="page-intro"] {
+    min-width: 0;
+  }
+
+  [data-visual-role="page-intro"] h1 {
+    max-width: 100%;
+    line-height: .98;
+  }
+}
