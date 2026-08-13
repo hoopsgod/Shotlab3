@@ -11,6 +11,7 @@ const coachSecondary = read("../src/components/CoachInteractiveDashboards.jsx");
 const surfaceCss = read("../src/styles/Phase3SurfaceContracts.css");
 const expertCss = read("../src/styles/ExpertVisualPolish.css");
 const parityCss = read("../public/shotlab-v8-demo-parity.css");
+const sessionIntegrityCss = read("../public/shotlab-v15-session-integrity.css");
 const industrial = read("../src/lib/industrialDesignFoundation.js");
 const main = read("../src/main.jsx");
 
@@ -52,14 +53,15 @@ test("secondary Coach dashboards opt context-dependent dark primitives into the 
   assert.match(coachSecondary, /<DashboardInsightCard surface="light"/);
 });
 
-test("active visual authorities contain no substring-selector material heuristics", () => {
-  for (const authority of [secondaryCss, surfaceCss, expertCss, parityCss, industrial]) {
+test("active consolidated visual authorities contain no substring-selector material heuristics", () => {
+  for (const authority of [secondaryCss, surfaceCss, expertCss, parityCss, sessionIntegrityCss, industrial]) {
     assert.doesNotMatch(authority, /\[class\s*\*=/i);
     assert.doesNotMatch(authority, /\[data-testid\s*\*=/i);
   }
   assert.match(secondaryCss, /\[data-visual-role="metric-strip"\]/);
   assert.match(secondaryCss, /\[data-visual-role="filter-rail"\]/);
   assert.match(secondaryCss, /\[data-visual-role="insight-actions"\]/);
+  assert.match(sessionIntegrityCss, /\[data-visual-role="insight-card"\]\[data-surface="dark"\]/);
   assert.match(industrial, /\[data-surface="light"\]/);
 });
 
@@ -78,6 +80,8 @@ test("semantic foreground authority protects both known contrast regressions thr
   assert.match(surfaceCss, /\[data-surface="light"\][\s\S]*--surface-title:\s*var\(--sl-surface-light-title\)/);
   assert.match(surfaceCss, /\[data-surface="dark"\][\s\S]*--surface-title:\s*var\(--sl-surface-dark-title\)/);
   assert.match(surfaceCss, /\[data-surface\]\s+:is\(h1, h2, h3, h4\)[\s\S]*color:\s*var\(--surface-title\)/);
+  assert.match(surfaceCss, /\[data-surface\]\s+p\s*\{[\s\S]*color:\s*var\(--surface-body\)/);
+  assert.match(surfaceCss, /\[data-surface\]\s+:is\(small, \[data-copy-tone="muted"\]\)[\s\S]*color:\s*var\(--surface-muted\)/);
   assert.match(surfaceCss, /\[data-surface\]\s+:is\(input, select, textarea\)[\s\S]*color:\s*var\(--surface-title\)/);
   assert.match(surfaceCss, /-webkit-text-fill-color:\s*currentColor/);
   assert.doesNotMatch(expertCss, /\[data-testid\s*\*=\s*"(?:insight|decision)/i);
