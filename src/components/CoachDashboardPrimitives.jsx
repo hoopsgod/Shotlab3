@@ -225,12 +225,12 @@ export function DashboardProgress({ value = 0, max = 100, label, detail }) {
   const safeMax = Math.max(Number(max) || 0, 1);
   const pct = Math.max(0, Math.min(100, Math.round(((Number(value) || 0) / safeMax) * 100)));
   return (
-    <div className={styles.progressBlock}>
-      <div className={styles.progressMeta}>
+    <div className={styles.progressBlock} data-visual-role="progress-block">
+      <div className={styles.progressMeta} data-visual-role="progress-meta">
         <span>{label}</span>
         <span>{detail || `${pct}%`}</span>
       </div>
-      <div className={styles.progressTrack} aria-label={label} aria-valuenow={pct} aria-valuemin="0" aria-valuemax="100" role="progressbar">
+      <div className={styles.progressTrack} data-visual-role="progress-track" aria-label={label} aria-valuenow={pct} aria-valuemin="0" aria-valuemax="100" role="progressbar">
         <span style={{ width: `${pct}%` }} />
       </div>
     </div>
