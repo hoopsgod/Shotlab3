@@ -14,6 +14,7 @@
   --sl-surface-dark-body: #d7ddd8;
   --sl-surface-dark-muted: #aeb7b0;
   --sl-surface-dark-material: #171b18;
+  --sl-accent-foreground-light: #465717;
   --sl-phase3-mobile-gutter: 18px;
   --sl-phase3-touch-target: 44px;
 }
@@ -93,6 +94,24 @@
   color: var(--surface-muted);
   -webkit-text-fill-color: currentColor;
   opacity: 1;
+}
+
+/* Bright team/accent colors remain decorative on light surfaces; control text gets
+ * a stable high-contrast foreground so custom branding cannot wash labels out. */
+[data-testid="player-profile-privacy"] button,
+[data-testid="player-profile-account-data"] [aria-label="Legal and support links"] a {
+  color: var(--sl-accent-foreground-light) !important;
+  -webkit-text-fill-color: var(--sl-accent-foreground-light) !important;
+}
+
+[data-testid="player-profile-privacy"] button {
+  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 34%, rgba(23, 26, 24, .16)) !important;
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 8%, #fff) !important;
+}
+
+[data-testid="player-profile-account-data"] [aria-label="Legal and support links"] a {
+  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 28%, rgba(23, 26, 24, .14)) !important;
+  background: rgba(255, 255, 255, .72) !important;
 }
 
 /* Shared secondary-page geometry: same contract for Coach, Player, demo and paid. */
