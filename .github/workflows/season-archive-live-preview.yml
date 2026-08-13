@@ -4,13 +4,19 @@ on:
   push:
     branches:
       - march-3-reset-85393dd
+  pull_request:
+    branches:
+      - march-3-reset-85393dd
+    paths:
+      - "tests/e2e/season-archive-live-preview.spec.mjs"
+      - ".github/workflows/season-archive-live-preview.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: season-archive-production-smoke-${{ github.ref }}
+  group: season-archive-production-smoke-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
