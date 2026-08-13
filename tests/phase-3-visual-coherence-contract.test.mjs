@@ -15,6 +15,7 @@ const parityCss = read("../public/shotlab-v8-demo-parity.css");
 const sessionIntegrityCss = read("../public/shotlab-v15-session-integrity.css");
 const phase2CriticalCss = read("../public/shotlab-phase2-critical.css");
 const secondaryCohesionCss = read("../public/shotlab-phase3-secondary-cohesion.css");
+const teamStoreImmersiveCss = read("../public/shotlab-phase3i-team-store-immersive.css");
 const industrial = read("../src/lib/industrialDesignFoundation.js");
 const main = read("../src/main.jsx");
 
@@ -57,7 +58,7 @@ test("secondary Coach dashboards opt context-dependent dark primitives into the 
 });
 
 test("active consolidated visual authorities contain no substring-selector material heuristics", () => {
-  for (const authority of [secondaryCss, surfaceCss, expertCss, v5CoachIntegrityCss, parityCss, sessionIntegrityCss, phase2CriticalCss, secondaryCohesionCss, industrial]) {
+  for (const authority of [secondaryCss, surfaceCss, expertCss, v5CoachIntegrityCss, parityCss, sessionIntegrityCss, phase2CriticalCss, secondaryCohesionCss, teamStoreImmersiveCss, industrial]) {
     assert.doesNotMatch(authority, /\[class\s*\*=/i);
     assert.doesNotMatch(authority, /\[data-testid\s*\*=/i);
   }
@@ -76,7 +77,7 @@ test("active consolidated visual authorities contain no substring-selector mater
 test("light and dark semantic foreground tokens clear WCAG normal-text contrast", () => {
   const lightCanvas = "#f5f5f2";
   const darkCanvas = "#171b18";
-  for (const foreground of ["#171a18", "#3f4842", "#68706a"]) {
+  for (const foreground of ["#171a18", "#3f4842", "#68706a", "#465717"]) {
     assert.ok(contrast(foreground, lightCanvas) >= 4.5, `${foreground} must remain readable on the light canvas`);
   }
   for (const foreground of ["#f5f7f4", "#d7ddd8", "#aeb7b0"]) {
@@ -93,6 +94,19 @@ test("semantic foreground authority protects both known contrast regressions thr
   assert.match(surfaceCss, /\[data-surface\]\s+:is\(input, select, textarea\)[\s\S]*color:\s*var\(--surface-title\)/);
   assert.match(surfaceCss, /-webkit-text-fill-color:\s*currentColor/);
   assert.doesNotMatch(expertCss, /\[data-testid\s*\*=\s*"(?:insight|decision)/i);
+});
+
+test("team branding stays decorative when light-surface controls require a stable foreground", () => {
+  assert.match(surfaceCss, /--sl-accent-foreground-light:\s*#465717/);
+  assert.match(surfaceCss, /\[data-testid="player-profile-privacy"\]\s+button[\s\S]*color:\s*var\(--sl-accent-foreground-light\)/);
+  assert.match(surfaceCss, /\[data-testid="player-profile-account-data"\]\s+\[aria-label="Legal and support links"\]\s+a[\s\S]*color:\s*var\(--sl-accent-foreground-light\)/);
+});
+
+test("Team Store mobile portal owns the viewport and light empty-state foregrounds", () => {
+  assert.match(teamStoreImmersiveCss, /html\.team-store-portal-open body > #root[\s\S]*display:\s*none\s*!important/);
+  assert.match(teamStoreImmersiveCss, /\[data-testid="mobile-navigation-dock"\][\s\S]*display:\s*none\s*!important/);
+  assert.match(teamStoreImmersiveCss, /\.ts-empty-state p[\s\S]*color:\s*#5f6861\s*!important/);
+  assert.match(teamStoreImmersiveCss, /\.ts-empty-state \.ts-button-secondary[\s\S]*color:\s*#273129\s*!important/);
 });
 
 test("Phase 3 mobile contract protects 390px geometry, touch targets and iPhone safe areas", () => {
