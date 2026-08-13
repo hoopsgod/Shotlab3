@@ -7,7 +7,9 @@ const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 const secondaryJsx = read("../src/components/SecondaryPageSystem.jsx");
 const secondaryCss = read("../src/components/SecondaryPageSystem.css");
 const primitives = read("../src/components/CoachDashboardPrimitives.jsx");
+const coachSecondary = read("../src/components/CoachInteractiveDashboards.jsx");
 const surfaceCss = read("../src/styles/Phase3SurfaceContracts.css");
+const expertCss = read("../src/styles/ExpertVisualPolish.css");
 const parityCss = read("../public/shotlab-v8-demo-parity.css");
 const industrial = read("../src/lib/industrialDesignFoundation.js");
 const main = read("../src/main.jsx");
@@ -33,15 +35,25 @@ test("secondary page materials are explicit instead of inferred from names", () 
   assert.match(secondaryJsx, /data-surface="light" data-visual-role="supporting-evidence"/);
 });
 
-test("shared dashboard primitives publish stable semantic roles", () => {
-  for (const role of ["metric-strip", "filter-rail", "insight-card", "insight-actions", "dashboard-section", "detail-drawer"]) {
+test("shared dashboard primitives publish material-aware semantic roles", () => {
+  for (const role of ["command-bar", "metric-strip", "filter-rail", "insight-grid", "insight-card", "insight-actions", "dashboard-section", "detail-drawer"]) {
     assert.match(primitives, new RegExp(`data-visual-role="${role}"`));
   }
+  assert.match(primitives, /surface = "dark"/);
+  assert.match(primitives, /data-surface="dark" data-visual-role="command-bar"/);
+  assert.match(primitives, /data-surface="dark" data-visual-role="detail-drawer"/);
+  assert.match(primitives, /data-action-role=\{action\.danger \? "destructive" : index === 0 \? "primary" : "secondary"\}/);
   assert.match(primitives, /data-action-role="tertiary"/);
 });
 
+test("secondary Coach dashboards opt context-dependent dark primitives into the light editorial material", () => {
+  assert.match(coachSecondary, /<InteractiveMetricStrip surface="light"/);
+  assert.match(coachSecondary, /<DashboardFilterRail surface="light"/);
+  assert.match(coachSecondary, /<DashboardInsightCard surface="light"/);
+});
+
 test("active visual authorities contain no substring-selector material heuristics", () => {
-  for (const authority of [secondaryCss, surfaceCss, parityCss, industrial]) {
+  for (const authority of [secondaryCss, surfaceCss, expertCss, parityCss, industrial]) {
     assert.doesNotMatch(authority, /\[class\s*\*=/i);
     assert.doesNotMatch(authority, /\[data-testid\s*\*=/i);
   }
@@ -62,11 +74,13 @@ test("light and dark semantic foreground tokens clear WCAG normal-text contrast"
   }
 });
 
-test("semantic foreground authority protects both known contrast regressions", () => {
+test("semantic foreground authority protects both known contrast regressions through nearest-surface variables", () => {
   assert.match(surfaceCss, /\[data-surface="light"\][\s\S]*--surface-title:\s*var\(--sl-surface-light-title\)/);
   assert.match(surfaceCss, /\[data-surface="dark"\][\s\S]*--surface-title:\s*var\(--sl-surface-dark-title\)/);
-  assert.match(surfaceCss, /\[data-surface="light"\]\[data-visual-role="page-intro"\][\s\S]*-webkit-text-fill-color:\s*currentColor/);
-  assert.match(surfaceCss, /\[data-surface="dark"\]\[data-visual-role="primary-decision"\][\s\S]*-webkit-text-fill-color:\s*currentColor/);
+  assert.match(surfaceCss, /\[data-surface\]\s+:is\(h1, h2, h3, h4\)[\s\S]*color:\s*var\(--surface-title\)/);
+  assert.match(surfaceCss, /\[data-surface\]\s+:is\(input, select, textarea\)[\s\S]*color:\s*var\(--surface-title\)/);
+  assert.match(surfaceCss, /-webkit-text-fill-color:\s*currentColor/);
+  assert.doesNotMatch(expertCss, /\[data-testid\s*\*=\s*"(?:insight|decision)/i);
 });
 
 test("Phase 3 mobile contract protects 390px geometry, touch targets and iPhone safe areas", () => {
@@ -84,6 +98,7 @@ test("surface contract is role-neutral for Coach, Player, demo and registered se
   assert.doesNotMatch(surfaceCss, /\.coach[A-Z_-]|\.player[A-Z_-]/);
   assert.match(surfaceCss, /\[data-visual-role="secondary-page"\]/);
   assert.doesNotMatch(parityCss, /\.shotlab-demo/);
+  assert.doesNotMatch(parityCss, /demoCard|demoPanel|demoBanner|demoNotice|demoBadge/);
 });
 
 test("semantic surface contract loads after the previous cascade lock", () => {
