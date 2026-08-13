@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Verify Phase 3 visual contracts
-        run: node --test tests/phase-2-contrast-integrity.test.mjs tests/phase-3-visual-coherence-contract.test.mjs tests/demo-paid-parity.test.mjs
+        run: node --test tests/phase-2-contrast-integrity.test.mjs tests/phase-3-visual-coherence-contract.test.mjs tests/demo-visual-parity-contract.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
