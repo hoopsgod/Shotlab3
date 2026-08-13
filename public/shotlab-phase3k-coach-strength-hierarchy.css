@@ -73,13 +73,13 @@ body:has([data-testid="coach-page-dashboard-strength"]) .performance-workspace::
   box-shadow:none!important;
 }
 
-[data-testid="coach-page-dashboard-strength-metric-strip"] [class*="metricLabel"],
-[data-testid="coach-page-dashboard-strength-metric-strip"] [class*="metricDetail"]{
+[data-testid="coach-page-dashboard-strength-metric-strip"] [data-premium-metric-label],
+[data-testid="coach-page-dashboard-strength-metric-strip"] [data-premium-metric-detail]{
   color:var(--p3-muted,#68716a)!important;
   -webkit-text-fill-color:var(--p3-muted,#68716a)!important;
 }
 
-[data-testid="coach-page-dashboard-strength-metric-strip"] [class*="metricValue"]{
+[data-testid="coach-page-dashboard-strength-metric-strip"] [data-premium-metric-value]{
   color:var(--p3-ink,#151a16)!important;
   -webkit-text-fill-color:var(--p3-ink,#151a16)!important;
 }

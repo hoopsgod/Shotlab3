@@ -1,4 +1,6 @@
-/* ShotLab V5 coach integrity layer: one canvas, one readable component system. */
+/* ShotLab V5 coach integrity layer.
+   Phase 3 retires its former generic secondary-page authority: shared secondary
+   materials now belong to SecondaryPageSystem + explicit data-surface contracts. */
 :root{
   --v5-canvas:#f4f3ef;
   --v5-surface:#fffefa;
@@ -11,47 +13,8 @@
   --v5-dark:#151916;
 }
 
-/* Search/filter rail uses one compact native control language. */
-.secondaryPageToolbar [class*="filterRail"]{
-  border:1px solid var(--v5-line)!important;
-  border-radius:20px!important;
-  background:var(--v5-surface)!important;
-  box-shadow:0 10px 28px rgba(21,25,22,.06)!important;
-}
-.secondaryPageToolbar input{
-  color:var(--v5-ink)!important;
-  -webkit-text-fill-color:var(--v5-ink)!important;
-  background:#fff!important;
-}
-.secondaryPageToolbar input::placeholder{
-  color:#8a908c!important;
-  -webkit-text-fill-color:#8a908c!important;
-}
-.secondaryPageToolbar button{
-  color:var(--v5-copy)!important;
-  -webkit-text-fill-color:var(--v5-copy)!important;
-  opacity:1!important;
-}
-
-/* Decision and evidence surfaces continue the same light system. */
-.secondaryPageDecision,
-.secondaryPageEvidence>*{
-  background:var(--v5-surface)!important;
-  background-image:none!important;
-  color:var(--v5-ink)!important;
-  -webkit-text-fill-color:var(--v5-ink)!important;
-  border:1px solid var(--v5-line)!important;
-  opacity:1!important;
-  filter:none!important;
-}
-.secondaryPageDecision p,
-.secondaryPageEvidence p,
-.secondaryPageEvidence small{
-  color:var(--v5-copy)!important;
-  -webkit-text-fill-color:var(--v5-copy)!important;
-}
-
-/* Mission Control: retain one intentional dark focus card, fix all contrast. */
+/* Mission Control legacy integrity only. Secondary-page composition is no longer
+   inferred or overridden from this historical layer. */
 body.mission-control-active .mcHero,
 body.mission-control-active .mcHero *{
   opacity:1!important;

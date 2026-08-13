@@ -94,8 +94,7 @@ body:has(#coach-drills-management) .performance-workspace::after{
   line-height:1!important;
   letter-spacing:-.045em!important;
 }
-.performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [class*="tagline"],
-.performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] [class*="mission"]{
+.performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] :is([data-identity-role="tagline"],[data-identity-role="mission"]){
   display:none!important;
 }
 .performance-shell--player.is-mobile:not([data-workspace-tab="home"]) [data-testid="player-dashboard-identity-header"] img{
@@ -187,20 +186,17 @@ body:has(#coach-drills-management) .performance-workspace::after{
   border-radius:12px!important;
   background:linear-gradient(90deg,color-mix(in srgb,var(--p3-accent) 7%,#fff),transparent)!important;
 }
-[data-testid="premium-leaderboards-hub"] details,
-[data-testid="premium-leaderboards-hub"] [class*="disclosure"]{
+[data-testid="premium-leaderboards-hub"] details{
   border-color:var(--p3-line)!important;
   background:var(--p3-surface-soft)!important;
   color:var(--p3-ink)!important;
   box-shadow:none!important;
 }
-[data-testid="premium-leaderboards-hub"] details :is(summary,strong),
-[data-testid="premium-leaderboards-hub"] [class*="disclosure"] :is(summary,strong){
+[data-testid="premium-leaderboards-hub"] details :is(summary,strong){
   color:var(--p3-ink)!important;
   -webkit-text-fill-color:var(--p3-ink)!important;
 }
-[data-testid="premium-leaderboards-hub"] details :is(p,small),
-[data-testid="premium-leaderboards-hub"] [class*="disclosure"] :is(p,small){
+[data-testid="premium-leaderboards-hub"] details :is(p,small){
   color:var(--p3-muted)!important;
   -webkit-text-fill-color:var(--p3-muted)!important;
 }
@@ -217,21 +213,18 @@ body:has(#coach-drills-management) .performance-workspace::after{
   color:var(--p3-ink)!important;
   box-shadow:var(--p3-shadow)!important;
 }
-[data-testid="player-career-history"] [class*="hero"]{
+[data-testid="player-career-history"] [data-visual-role="career-hero"]{
   padding-bottom:18px!important;
 }
-[data-testid="player-career-history"] [class*="title"]{
+[data-testid="player-career-history"] [data-copy-role="title"]{
   color:var(--p3-ink)!important;
   -webkit-text-fill-color:var(--p3-ink)!important;
 }
-[data-testid="player-career-history"] [class*="copy"],
-[data-testid="player-career-history"] [class*="metricDetail"],
-[data-testid="player-career-history"] [class*="seasonRange"]{
+[data-testid="player-career-history"] [data-copy-tone="muted"]{
   color:var(--p3-muted)!important;
   -webkit-text-fill-color:var(--p3-muted)!important;
 }
-[data-testid="player-career-history"] [class*="record"],
-[data-testid="player-career-history"] [class*="season"]{
+[data-testid="player-career-history"] :is([data-visual-role="career-record"],[data-visual-role="career-season"]){
   border-color:var(--p3-line)!important;
   background:var(--p3-surface-soft)!important;
   box-shadow:none!important;

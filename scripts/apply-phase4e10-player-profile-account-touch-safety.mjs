@@ -16,20 +16,38 @@ if (!app.includes('data-player-profile-privacy-toggle')) {
   app = app.replace(privacyBefore, privacyAfter);
 }
 
+/* Bright team/VOLT hues are decorative on light controls. The component itself
+   must carry a stable readable foreground; CSS remains regression protection,
+   not the only thing preventing bright-on-white text. */
+const privacyAccentBefore = 'color:u.hideFromLeaderboards?MUTED:VOLT';
+const privacyAccentAfter = 'color:u.hideFromLeaderboards?MUTED:"#465717"';
+if (!app.includes(privacyAccentAfter)) {
+  const count = app.split(privacyAccentBefore).length - 1;
+  if (count !== 1) throw new Error(`Phase 4E.10 expected one bright privacy foreground, found ${count}.`);
+  app = app.replace(privacyAccentBefore, privacyAccentAfter);
+}
+
 const legalBefore = '<a key={link.href} href={link.href} style={{fontFamily:FB,color:compact?VOLT:MUTED,';
-const legalAfter = '<a key={link.href} href={link.href} data-player-profile-legal-link={link.href} style={{fontFamily:FB,color:compact?VOLT:MUTED,';
+const legalAfter = '<a key={link.href} href={link.href} data-player-profile-legal-link={link.href} style={{fontFamily:FB,color:compact?"#465717":MUTED,';
+const legalAccessibleExisting = '<a key={link.href} href={link.href} data-player-profile-legal-link={link.href} style={{fontFamily:FB,color:compact?VOLT:MUTED,';
 if (!app.includes('data-player-profile-legal-link={link.href}')) {
   const count = app.split(legalBefore).length - 1;
   if (count !== 1) throw new Error(`Phase 4E.10 expected one shared legal-link template, found ${count}.`);
   app = app.replace(legalBefore, legalAfter);
+} else if (!app.includes('color:compact?"#465717":MUTED')) {
+  const count = app.split(legalAccessibleExisting).length - 1;
+  if (count !== 1) throw new Error(`Phase 4E.10 expected one existing legal-link foreground, found ${count}.`);
+  app = app.replace(legalAccessibleExisting, legalAfter);
 }
 
 for (const required of [
   'data-testid="player-profile-privacy"',
   'data-player-profile-privacy-toggle',
   'aria-pressed={!u.hideFromLeaderboards}',
+  'color:u.hideFromLeaderboards?MUTED:"#465717"',
   'testId="player-profile-account-data"',
   'data-player-profile-legal-link={link.href}',
+  'color:compact?"#465717":MUTED',
   'data-player-account-data-request',
 ]) {
   if (!app.includes(required)) throw new Error(`Phase 4E.10 reconciled account contract missing: ${required}`);

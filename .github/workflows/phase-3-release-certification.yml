@@ -1,0 +1,108 @@
+name: Phase 3 Release Certification
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  VITE_ENABLE_PRODUCTION_DEMOS: true
+
+jobs:
+  release-certification:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+
+    steps:
+      - name: Check out exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Verify exact checkout
+        shell: bash
+        run: |
+          actual="$(git rev-parse HEAD)"
+          expected="${{ github.event.pull_request.head.sha || github.sha }}"
+          printf 'Expected head: %s\nActual head:   %s\n' "$expected" "$actual"
+          test "$actual" = "$expected"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify Phase 2 and Phase 3 visual contracts
+        run: node --test tests/phase-2-contrast-integrity.test.mjs tests/phase-3-visual-coherence-contract.test.mjs tests/demo-visual-parity-contract.test.mjs
+
+      - name: Install pinned Playwright runner
+        run: npm install --no-save @playwright/test@1.55.1
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Build exact production head
+        run: npm run build
+
+      - name: Start built production preview
+        run: |
+          npm run preview:agent > /tmp/phase-3-cert-preview.log 2>&1 &
+          echo $! > /tmp/phase-3-cert-preview.pid
+          for attempt in {1..40}; do
+            if curl --fail --silent --show-error http://127.0.0.1:4173/ > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          cat /tmp/phase-3-cert-preview.log
+          exit 1
+
+      - name: Capture 390px primary cross-screen matrix
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-3a-cross-screen-visual-audit.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Capture secondary, 430px, and desktop release matrix
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-3-release-certification.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Certify immersive Team Store runtime contract
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-3-team-store-portal-certification.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
+      - name: Record exact certification SHA
+        if: always()
+        run: |
+          mkdir -p artifacts/phase-3-release-certification
+          git rev-parse HEAD > artifacts/phase-3-release-certification/exact-head-sha.txt
+
+      - name: Upload Phase 3 visual certification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-3-release-certification
+          path: |
+            artifacts/phase-3a-cross-screen-visual-audit/
+            artifacts/phase-3-release-certification/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: phase-3-release-certification-failure
+          path: |
+            playwright-report/
+            test-results/
+            /tmp/phase-3-cert-preview.log
+          if-no-files-found: ignore
+          retention-days: 7

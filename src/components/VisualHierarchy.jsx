@@ -94,15 +94,15 @@ export function ProgressiveDisclosure({
   testId,
 }) {
   return (
-    <details className={styles.disclosure} open={defaultOpen} data-testid={testId}>
-      <summary className={styles.disclosureSummary}>
+    <details className={styles.disclosure} open={defaultOpen} data-testid={testId} data-visual-role="progressive-disclosure">
+      <summary className={styles.disclosureSummary} data-visual-role="disclosure-summary">
         <span>
-          <span className={styles.disclosureTitle}>{title}</span>
-          {summary ? <span className={styles.disclosureMeta}>{summary}</span> : null}
+          <span className={styles.disclosureTitle} data-visual-role="disclosure-title">{title}</span>
+          {summary ? <span className={styles.disclosureMeta} data-visual-role="disclosure-meta">{summary}</span> : null}
         </span>
-        <span className={styles.disclosureChevron} aria-hidden="true">⌄</span>
+        <span className={styles.disclosureChevron} data-visual-role="disclosure-chevron" aria-hidden="true">⌄</span>
       </summary>
-      <div className={styles.disclosureBody}>{children}</div>
+      <div className={styles.disclosureBody} data-visual-role="disclosure-body">{children}</div>
     </details>
   );
 }

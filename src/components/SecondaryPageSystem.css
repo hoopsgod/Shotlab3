@@ -140,7 +140,8 @@
   outline-offset: 3px;
 }
 
-/* One information rail, not four floating metric cards. */
+/* One information rail, not four floating metric cards. Semantic roles are explicit
+ * so minified CSS-module class names never become visual authority. */
 .secondaryPageToolbar {
   display: grid;
   gap: 13px;
@@ -149,7 +150,7 @@
   background: transparent;
 }
 
-.secondaryPageToolbar [class*="metricStrip"] {
+.secondaryPageToolbar [data-visual-role="metric-strip"] {
   margin: 0 !important;
   gap: 0 !important;
   overflow: hidden;
@@ -160,7 +161,7 @@
   box-shadow: none !important;
 }
 
-.secondaryPageToolbar [class*="metricStrip"] > button {
+.secondaryPageToolbar [data-visual-role="metric-strip"] > button {
   min-height: 100px !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -168,15 +169,15 @@
   box-shadow: none !important;
 }
 
-.secondaryPageToolbar [class*="metricStrip"] > button + button {
+.secondaryPageToolbar [data-visual-role="metric-strip"] > button + button {
   border-left: 1px solid var(--sl-line, rgba(23, 26, 24, .1)) !important;
 }
 
-.secondaryPageToolbar [class*="metricStrip"] > button[aria-pressed="true"] {
+.secondaryPageToolbar [data-visual-role="metric-strip"] > button[aria-pressed="true"] {
   background: color-mix(in srgb, var(--sl-accent, #71851f) 8%, #fff) !important;
 }
 
-.secondaryPageToolbar [class*="filterRail"] {
+.secondaryPageToolbar [data-visual-role="filter-rail"] {
   margin: 0 !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -310,8 +311,8 @@
 
 .secondaryPageEvidence :is(h2, h3, strong) { color: var(--sl-ink, #171a18) !important; }
 .secondaryPageEvidence :is(p, small) { color: #5d665f !important; }
-.secondaryPageEvidence [class*="insightActions"] { margin-top: 14px !important; }
-.secondaryPageEvidence [class*="insightActions"] button {
+.secondaryPageEvidence [data-visual-role="insight-actions"] { margin-top: 14px !important; }
+.secondaryPageEvidence [data-visual-role="insight-actions"] button {
   min-height: var(--touch-target, 44px) !important;
   border: 0 !important;
   border-radius: 10px !important;
@@ -319,7 +320,7 @@
   color: #33402f !important;
   box-shadow: none !important;
 }
-.secondaryPageEvidence [class*="quietAction"] { background: transparent !important; color: var(--sl-muted, #68706a) !important; }
+.secondaryPageEvidence [data-action-role="tertiary"] { background: transparent !important; color: var(--sl-muted, #68706a) !important; }
 
 .secondaryPageShell [aria-busy="true"] { cursor: progress; }
 .secondaryPageShell [aria-busy="true"] button { pointer-events: none; }
@@ -537,7 +538,6 @@
   font: 720 13px/1 system-ui, sans-serif;
   cursor: pointer;
 }
-
 .coachSeasonArchiveConfirm button:last-child { border-color: #202421; background: #202421; color: #fff; }
 .coachSeasonArchiveList { padding-top: 2px; }
 .coachSeasonArchiveList > h3 { margin: 0 0 8px; color: #4e5851; font: 760 12px/1.2 system-ui, sans-serif; letter-spacing: .07em; text-transform: uppercase; }
@@ -635,14 +635,14 @@
   .secondaryPageIntro__buttonRow { width: 100%; justify-content: flex-start; }
   .secondaryPageAction { flex: 1 1 0; }
 
-  .secondaryPageToolbar [class*="metricStrip"] {
+  .secondaryPageToolbar [data-visual-role="metric-strip"] {
     overflow-x: auto;
     scroll-snap-type: x proximity;
     scrollbar-width: none;
   }
 
-  .secondaryPageToolbar [class*="metricStrip"]::-webkit-scrollbar { display: none; }
-  .secondaryPageToolbar [class*="metricStrip"] > button {
+  .secondaryPageToolbar [data-visual-role="metric-strip"]::-webkit-scrollbar { display: none; }
+  .secondaryPageToolbar [data-visual-role="metric-strip"] > button {
     min-width: 132px !important;
     min-height: 92px !important;
     scroll-snap-align: start;

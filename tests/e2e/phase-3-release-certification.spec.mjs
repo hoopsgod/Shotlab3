@@ -1,0 +1,248 @@
+import { test, expect } from "@playwright/test";
+import fs from "node:fs";
+import path from "node:path";
+
+const OUTPUT = path.resolve(process.cwd(), "artifacts/phase-3-release-certification");
+fs.mkdirSync(OUTPUT, { recursive: true });
+
+async function installSafeRoutes(page) {
+  await page.route("**/v1/season-archives", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, archives: [] }) }));
+  await page.route("**/v1/leaderboards/home-shots**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ leaderboard: [] }) }));
+  await page.route("**/v1/coach/players/provision**", (route) => route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: [] }) }));
+  await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
+}
+
+async function suppressMotion(page) {
+  await page.addStyleTag({ content: `
+    *, *::before, *::after { animation-duration:0s!important; animation-delay:0s!important; transition-duration:0s!important; caret-color:transparent!important; }
+    html,body { scrollbar-width:none!important; }
+    ::-webkit-scrollbar { display:none!important; }
+  ` });
+}
+
+async function expectNoHorizontalOverflow(page) {
+  const geometry = await page.evaluate(() => ({ viewport: innerWidth, document: document.documentElement.scrollWidth, body: document.body.scrollWidth }));
+  expect(geometry.document - geometry.viewport).toBeLessThanOrEqual(2);
+  expect(geometry.body - geometry.viewport).toBeLessThanOrEqual(2);
+}
+
+async function capture(page, name, locator = null) {
+  await page.evaluate(() => document.fonts?.ready);
+  await page.waitForTimeout(250);
+  await expectNoHorizontalOverflow(page);
+  const target = locator || page;
+  const file = path.join(OUTPUT, `${name}.png`);
+  await target.screenshot({ path: file, animations: "disabled", ...(locator ? {} : { fullPage: false }) });
+  expect(fs.statSync(file).size).toBeGreaterThan(15_000);
+}
+
+async function expectRenderedTextContrast(locator, minimum = 4.5) {
+  const result = await locator.evaluate((element) => {
+    const parse = (value) => {
+      const raw = String(value || "").trim().toLowerCase();
+      if (raw.startsWith("color(srgb")) {
+        const body = raw.slice(raw.indexOf(" ") + 1, raw.lastIndexOf(")")).trim();
+        const [channelsPart, alphaPart] = body.split("/").map((part) => part.trim());
+        const channels = channelsPart.split(/\s+/).slice(0, 3).map((part) => Number(part) * 255);
+        return { rgb: channels, alpha: alphaPart ? Number(alphaPart) : 1 };
+      }
+      const numbers = (raw.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+      return {
+        rgb: [numbers[0] || 0, numbers[1] || 0, numbers[2] || 0],
+        alpha: Number.isFinite(numbers[3]) ? numbers[3] : 1,
+      };
+    };
+    const blend = (foreground, background) => foreground.rgb.map((channel, index) => (
+      channel * foreground.alpha + background[index] * (1 - foreground.alpha)
+    ));
+    const layers = [];
+    let node = element;
+    while (node instanceof HTMLElement) {
+      const layer = parse(getComputedStyle(node).backgroundColor);
+      if (layer.alpha > 0) layers.push(layer);
+      node = node.parentElement;
+    }
+    let background = [255, 255, 255];
+    for (const layer of layers.reverse()) background = blend(layer, background);
+    const foregroundLayer = parse(getComputedStyle(element).color);
+    const foreground = blend(foregroundLayer, background);
+    const linear = (channel) => {
+      const value = channel / 255;
+      return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    };
+    const luminance = (rgb) => 0.2126 * linear(rgb[0]) + 0.7152 * linear(rgb[1]) + 0.0722 * linear(rgb[2]);
+    const foregroundLuminance = luminance(foreground);
+    const backgroundLuminance = luminance(background);
+    const ratio = (Math.max(foregroundLuminance, backgroundLuminance) + 0.05) / (Math.min(foregroundLuminance, backgroundLuminance) + 0.05);
+    return {
+      text: element.textContent?.trim() || element.getAttribute("aria-label") || "control",
+      foreground,
+      background,
+      ratio,
+    };
+  });
+  const fg = result.foreground.map((value) => Math.round(value)).join(",");
+  const bg = result.background.map((value) => Math.round(value)).join(",");
+  expect(result.ratio, `${result.text} contrast ${result.ratio.toFixed(2)}:1 fg=${fg} bg=${bg}`).toBeGreaterThanOrEqual(minimum);
+}
+
+async function enterDemo(page, role) {
+  await installSafeRoutes(page);
+  await page.goto("/");
+  await suppressMotion(page);
+  await page.getByRole("button", { name: new RegExp(`${role} demo`, "i") }).click();
+  await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible({ timeout: 20_000 });
+}
+
+async function openMore(page) {
+  await page.getByTestId("mobile-navigation-more").click();
+  const sheet = page.getByTestId("mobile-navigation-sheet");
+  await expect(sheet).toBeVisible();
+  return sheet;
+}
+
+async function openMoreDestination(page, key) {
+  const sheet = await openMore(page);
+  const destination = sheet.locator(`[data-nav-key="${key}"]`);
+  await expect(destination).toBeVisible();
+  await destination.click();
+  await expect(sheet).toHaveCount(0);
+}
+
+async function closeTeamStore(page) {
+  const close = page.locator(".ts-close");
+  if (await close.count()) await close.first().click();
+}
+
+test.describe("Phase 3 release certification — 390x844", () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  test("Coach secondary matrix includes roster detail, drawer, operations, branding, More, and Team Store", async ({ page }) => {
+    await enterDemo(page, "Coach");
+
+    await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
+    const roster = page.locator("#coach-roster-operations");
+    await expect(roster).toBeVisible({ timeout: 20_000 });
+    const row = roster.locator('> .fade-up > [role="button"]').first();
+    await expect(row).toBeVisible();
+    const rowName = (await row.locator("span").first().textContent())?.trim() || "Player";
+    await row.click({ position: { x: 18, y: 18 } });
+    const playerDrawer = page.getByRole("dialog", { name: rowName });
+    await expect(playerDrawer).toBeVisible({ timeout: 10_000 });
+    await capture(page, "11-coach-player-drawer");
+    await playerDrawer.getByRole("button", { name: "Open Full Profile", exact: true }).click();
+    await expect(page.getByTestId("coach-player-detail-workspace")).toBeVisible({ timeout: 10_000 });
+    await capture(page, "12-coach-player-detail");
+
+    await enterDemo(page, "Coach");
+    const more = await openMore(page);
+    await capture(page, "13-coach-more-sheet");
+    await more.locator('[data-nav-key="sc"]').click();
+    await expect(page.getByTestId("coach-page-dashboard-strength")).toBeVisible({ timeout: 20_000 });
+    const strengthDecision = page.getByTestId("coach-page-dashboard-strength-decision-brief");
+    await expect(strengthDecision).toBeVisible();
+    const strengthContrast = await strengthDecision.evaluate((element) => {
+      const channels = (value) => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
+      const title = element.querySelector("h2");
+      const body = element.querySelector("p");
+      return {
+        background: channels(getComputedStyle(element).backgroundColor),
+        title: title ? channels(getComputedStyle(title).color) : [],
+        body: body ? channels(getComputedStyle(body).color) : [],
+      };
+    });
+    expect(strengthContrast.background).toHaveLength(3);
+    expect(Math.max(...strengthContrast.background)).toBeLessThan(80);
+    expect(strengthContrast.title).toHaveLength(3);
+    expect(Math.min(...strengthContrast.title)).toBeGreaterThan(220);
+    expect(strengthContrast.body).toHaveLength(3);
+    expect(Math.min(...strengthContrast.body)).toBeGreaterThan(140);
+    await capture(page, "14-coach-strength");
+
+    await openMoreDestination(page, "branding");
+    await expect(page.getByTestId("coach-branding-workspace")).toBeVisible({ timeout: 20_000 });
+    await capture(page, "15-coach-branding");
+
+    await enterDemo(page, "Coach");
+    await openMoreDestination(page, "team-store");
+    const store = page.locator(".ts-panel");
+    await expect(store).toBeVisible({ timeout: 10_000 });
+    await capture(page, "16-coach-team-store");
+  });
+
+  test("Player secondary matrix includes More, Events, Lifting, account/legal disclosure, and Team Store", async ({ page }) => {
+    await enterDemo(page, "Player");
+
+    const more = await openMore(page);
+    await capture(page, "17-player-more-sheet");
+    await more.locator('[data-nav-key="program"]').click();
+    await expect(page.getByTestId("mobile-navigation-dock")).toBeVisible();
+    await capture(page, "18-player-events");
+
+    await openMoreDestination(page, "sc");
+    await capture(page, "19-player-lifting");
+
+    await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
+    const story = page.getByTestId("player-progress-story");
+    await expect(story).toBeVisible({ timeout: 20_000 });
+    await story.getByTestId("player-progress-open-profile").click();
+    const privacy = page.getByTestId("player-profile-privacy");
+    await expect(privacy).toBeVisible({ timeout: 10_000 });
+    await expectRenderedTextContrast(privacy.getByRole("button"), 4.5);
+
+    const account = page.getByTestId("player-profile-account-data");
+    await expect(account).toBeVisible({ timeout: 10_000 });
+    await account.scrollIntoViewIfNeeded();
+    await capture(page, "20-player-account-collapsed");
+    await account.locator(":scope > summary").click();
+    const legalLinks = account.locator('[aria-label="Legal and support links"] a');
+    await expect(legalLinks).toHaveCount(5);
+    for (const name of ["Privacy", "Terms", "Support", "Delete Account", "Data Request"]) {
+      const link = account.getByRole("link", { name, exact: true });
+      await expect(link).toBeVisible();
+      await expectRenderedTextContrast(link, 4.5);
+    }
+    await capture(page, "21-player-account-expanded");
+
+    await enterDemo(page, "Player");
+    await openMoreDestination(page, "team-store");
+    const store = page.locator(".ts-panel");
+    await expect(store).toBeVisible({ timeout: 10_000 });
+    await capture(page, "22-player-team-store");
+    await closeTeamStore(page);
+  });
+});
+
+test.describe("Phase 3 release certification — responsive spot checks", () => {
+  test("430px preserves Coach and Player hierarchy without overflow", async ({ page }) => {
+    await page.setViewportSize({ width: 430, height: 932 });
+    await enterDemo(page, "Coach");
+    await capture(page, "23-coach-home-430");
+    await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Players", exact: true }).click();
+    await expect(page.getByTestId("coach-players-interactive-dashboard")).toBeVisible({ timeout: 20_000 });
+    await capture(page, "24-coach-players-430");
+
+    await enterDemo(page, "Player");
+    await capture(page, "25-player-home-430");
+    await page.getByTestId("mobile-navigation-dock").getByRole("button", { name: "Progress", exact: true }).click();
+    await expect(page.getByTestId("player-progress-story")).toBeVisible({ timeout: 20_000 });
+    await capture(page, "26-player-progress-430");
+  });
+
+  test("desktop preserves representative Coach and Player production composition", async ({ page }) => {
+    await page.setViewportSize({ width: 1440, height: 1000 });
+    await installSafeRoutes(page);
+    await page.goto("/");
+    await suppressMotion(page);
+    await capture(page, "27-auth-desktop");
+
+    await page.getByRole("button", { name: /Coach demo/i }).click();
+    await expect(page.getByText(/Coach/i).first()).toBeVisible({ timeout: 20_000 });
+    await capture(page, "28-coach-home-desktop");
+
+    await page.goto("/");
+    await page.getByRole("button", { name: /Player demo/i }).click();
+    await expect(page.getByText(/Player/i).first()).toBeVisible({ timeout: 20_000 });
+    await capture(page, "29-player-home-desktop");
+  });
+});

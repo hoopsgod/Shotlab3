@@ -1,0 +1,206 @@
+/*
+ * ShotLab Phase 3 — semantic surface contracts.
+ *
+ * This is the final foreground authority for components that explicitly declare
+ * their material. A surface must never be inferred from class names, test ids,
+ * route names, or team colors. The contract intentionally stays small so older
+ * visual authorities can be narrowed and retired instead of patched around.
+ */
+:root {
+  --sl-surface-light-title: #171a18;
+  --sl-surface-light-body: #3f4842;
+  --sl-surface-light-muted: #68706a;
+  --sl-surface-dark-title: #f5f7f4;
+  --sl-surface-dark-body: #d7ddd8;
+  --sl-surface-dark-muted: #aeb7b0;
+  --sl-surface-dark-material: #171b18;
+  --sl-accent-foreground-light: #465717;
+  --sl-phase3-mobile-gutter: 18px;
+  --sl-phase3-touch-target: 44px;
+}
+
+[data-surface="light"] {
+  --surface-title: var(--sl-surface-light-title);
+  --surface-body: var(--sl-surface-light-body);
+  --surface-muted: var(--sl-surface-light-muted);
+  color: var(--surface-body);
+}
+
+[data-surface="dark"] {
+  --surface-title: var(--sl-surface-dark-title);
+  --surface-body: var(--sl-surface-dark-body);
+  --surface-muted: var(--sl-surface-dark-muted);
+  color: var(--surface-body);
+}
+
+/* A declared dark decision surface owns its material as well as its foreground.
+ * This prevents later legacy light-card authorities from producing white-on-white
+ * decision cards on generic Coach operations routes such as Strength & Conditioning. */
+[data-surface="dark"][data-visual-role="primary-decision"] {
+  background: var(--sl-surface-dark-material) !important;
+  background-color: var(--sl-surface-dark-material) !important;
+  color: var(--surface-body) !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/*
+ * Foregrounds resolve through the nearest declared surface. These generic copy
+ * rules intentionally come after the legacy industrial layer so a broad historic
+ * paragraph/small selector cannot turn dark-surface copy into low-contrast gray.
+ */
+[data-surface] :is(h1, h2, h3, h4) {
+  color: var(--surface-title);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface] p {
+  color: var(--surface-body);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface] :is(small, [data-copy-tone="muted"]) {
+  color: var(--surface-muted);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-visual-role="page-intro"] p,
+[data-visual-role="supporting-evidence"] :is(p, small),
+[data-visual-role="primary-decision"] p,
+[data-visual-role="command-bar"] p,
+[data-visual-role="insight-card"] p,
+[data-visual-role="dashboard-section"] p,
+[data-visual-role="detail-drawer"] p {
+  color: var(--surface-muted);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-visual-role="supporting-evidence"] strong,
+[data-visual-role="primary-decision"] strong,
+[data-visual-role="insight-card"] strong,
+[data-visual-role="dashboard-section"] strong,
+[data-visual-role="detail-drawer"] strong,
+[data-visual-role="metric-strip"] output {
+  color: var(--surface-title);
+  -webkit-text-fill-color: currentColor;
+}
+
+/* Progress metadata is supporting copy. It must inherit from the material that
+ * actually contains it, including dark decision cards on Coach operational pages. */
+[data-surface] [data-visual-role="progress-meta"],
+[data-surface] [data-visual-role="progress-meta"] > span {
+  color: var(--surface-muted) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* Controls resolve from the nearest material instead of a hard-coded light rule. */
+[data-surface] :is(input, select, textarea) {
+  color: var(--surface-title);
+  -webkit-text-fill-color: currentColor;
+}
+
+[data-surface] :is(input, textarea)::placeholder {
+  color: var(--surface-muted);
+  -webkit-text-fill-color: currentColor;
+  opacity: 1;
+}
+
+/* Bright team/accent colors remain decorative on light surfaces; textual controls
+ * use a stable high-contrast ink. The production build adds the semantic control
+ * attributes below before Vite, so these selectors survive route enhancement and
+ * outrank older profile presentation rules without affecting dark legal pages. */
+.performance-shell--player[data-workspace-tab="profile"]
+  [data-testid="player-profile-privacy"]
+  button[data-player-profile-privacy-toggle],
+.performance-shell--player[data-workspace-tab="profile"]
+  [data-testid="player-profile-account-data"]
+  a[data-player-profile-legal-link] {
+  color: var(--sl-accent-foreground-light) !important;
+  -webkit-text-fill-color: var(--sl-accent-foreground-light) !important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"]
+  [data-testid="player-profile-privacy"]
+  button[data-player-profile-privacy-toggle] {
+  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 34%, rgba(23, 26, 24, .16)) !important;
+  background: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 8%, #fff) !important;
+}
+
+.performance-shell--player[data-workspace-tab="profile"]
+  [data-testid="player-profile-account-data"]
+  a[data-player-profile-legal-link] {
+  border-color: color-mix(in srgb, var(--team-brand-primary, var(--accent, #8fae25)) 28%, rgba(23, 26, 24, .14)) !important;
+  background: rgba(255, 255, 255, .72) !important;
+}
+
+/* Keep a source-mode fallback for environments that intentionally skip route enhancers. */
+[data-testid="player-profile-privacy"] button,
+[data-testid="player-profile-account-data"] [aria-label="Legal and support links"] a {
+  color: var(--sl-accent-foreground-light) !important;
+  -webkit-text-fill-color: var(--sl-accent-foreground-light) !important;
+}
+
+/* Player Rankings already owns the page title in the route frame. The embedded
+ * competition hub keeps only live context/status so the hierarchy is not repeated. */
+.performance-shell--player[data-workspace-tab="leaderboards"]
+  [data-testid="premium-leaderboards-hub"] > header > :not([data-testid="leaderboard-status-line"]) {
+  display: none !important;
+}
+
+.performance-shell--player[data-workspace-tab="leaderboards"]
+  [data-testid="premium-leaderboards-hub"] > header {
+  margin-bottom: 8px !important;
+  padding: 0 0 12px !important;
+}
+
+.performance-shell--player[data-workspace-tab="leaderboards"]
+  [data-testid="premium-leaderboards-hub"] [data-testid="leaderboard-status-line"] {
+  margin-top: 0 !important;
+}
+
+/* Shared secondary-page geometry: same contract for Coach, Player, demo and paid. */
+[data-visual-role="secondary-page"] {
+  min-width: 0;
+  max-width: 1080px;
+  box-sizing: border-box;
+  padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px));
+}
+
+[data-visual-role="secondary-page"] :is(h1, h2, h3, p, button, input, select, textarea) {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+[data-visual-role="secondary-page"] :is(h1, h2, h3) {
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+[data-visual-role="secondary-page"] :is(button, [role="button"], input, select) {
+  min-height: var(--sl-phase3-touch-target);
+}
+
+[data-action-role="primary"],
+[data-action-role="secondary"],
+[data-action-role="tertiary"],
+[data-action-role="destructive"] {
+  min-height: var(--sl-phase3-touch-target);
+}
+
+@media (max-width: 430px) {
+  [data-visual-role="secondary-page"] {
+    width: 100%;
+    max-width: 100%;
+    padding-left: max(var(--sl-phase3-mobile-gutter), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--sl-phase3-mobile-gutter), env(safe-area-inset-right, 0px));
+  }
+
+  [data-visual-role="page-intro"] {
+    min-width: 0;
+  }
+
+  [data-visual-role="page-intro"] h1 {
+    max-width: 100%;
+    line-height: .98;
+  }
+}

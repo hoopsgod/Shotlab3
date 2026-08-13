@@ -49,31 +49,30 @@
   -webkit-tap-highlight-color:transparent;touch-action:manipulation
 }
 .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary span{color:inherit}
-.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary span:first-child > span:first-child{
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary [data-visual-role="disclosure-title"]{
   color:var(--p3v-ink)!important;-webkit-text-fill-color:var(--p3v-ink)!important;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
   font-size:14px!important;font-weight:780!important;line-height:1.15!important;letter-spacing:-.012em!important;text-transform:none!important
 }
-.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary span:first-child > span:last-child{
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary [data-visual-role="disclosure-meta"]{
   color:var(--p3v-muted)!important;-webkit-text-fill-color:var(--p3v-muted)!important;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",sans-serif!important;
   font-size:11px!important;line-height:1.35!important
 }
-.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary > span:last-child{color:var(--p3v-muted)!important}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary [data-visual-role="disclosure-chevron"]{color:var(--p3v-muted)!important}
 .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"][open]{border-color:color-mix(in srgb,var(--p3v-accent) 24%,var(--p3v-line))!important;box-shadow:0 10px 26px rgba(24,31,27,.055)!important}
-.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"][open] > summary > span:last-child{color:var(--p3v-accent-deep)!important}
-.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > div{padding:14px!important;border-top:1px solid var(--p3v-line)!important;background:var(--p3v-soft)!important;color:var(--p3v-ink)!important}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"][open] > summary [data-visual-role="disclosure-chevron"]{color:var(--p3v-accent-deep)!important}
+.performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > [data-visual-role="disclosure-body"]{padding:14px!important;border-top:1px solid var(--p3v-line)!important;background:var(--p3v-soft)!important;color:var(--p3v-ink)!important}
 .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] :is(a,button,summary):focus-visible{outline:3px solid color-mix(in srgb,var(--p3v-accent) 32%,transparent)!important;outline-offset:2px!important}
 .performance-shell--player[data-workspace-tab="profile"] [data-testid="player-profile-account-data"] > summary:active{transform:scale(.985)!important}
 
 /* Final Player Home support contrast: keep command hierarchy dark, then transition cleanly into light native support cards. */
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="sectionHeading"]{
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [data-visual-role="next-actions-heading"]{
   padding:0!important;border:0!important;background:transparent!important;background-image:none!important;
   box-shadow:none!important;filter:none!important;text-shadow:none!important
 }
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="sectionLabel"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="meta"]{
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] :is([data-visual-role="next-actions-eyebrow"],[data-visual-role="next-actions-meta"]){
   color:var(--p3v-muted)!important;-webkit-text-fill-color:var(--p3v-muted)!important;background:transparent!important
 }
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [class*="sectionTitle"]{
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-daily-command-center"] [data-command-role="next-actions"] [data-visual-role="next-actions-title"]{
   color:var(--p3v-ink)!important;-webkit-text-fill-color:var(--p3v-ink)!important;background:transparent!important
 }
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"],
@@ -89,26 +88,22 @@
 .performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > summary{
   background:transparent!important;background-image:none!important;color:var(--p3v-ink)!important;box-shadow:none!important
 }
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > summary [class*="disclosureTitle"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > summary [class*="disclosureTitle"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > summary [class*="disclosureTitle"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > summary [class*="disclosureTitle"]{
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > summary [data-visual-role="disclosure-title"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > summary [data-visual-role="disclosure-title"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > summary [data-visual-role="disclosure-title"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > summary [data-visual-role="disclosure-title"]{
   color:var(--p3v-ink)!important;-webkit-text-fill-color:var(--p3v-ink)!important
 }
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > summary [class*="disclosureMeta"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > summary [class*="disclosureMeta"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > summary [class*="disclosureMeta"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > summary [class*="disclosureMeta"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > summary [class*="disclosureChevron"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > summary [class*="disclosureChevron"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > summary [class*="disclosureChevron"],
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > summary [class*="disclosureChevron"]{
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > summary :is([data-visual-role="disclosure-meta"],[data-visual-role="disclosure-chevron"]),
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > summary :is([data-visual-role="disclosure-meta"],[data-visual-role="disclosure-chevron"]),
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > summary :is([data-visual-role="disclosure-meta"],[data-visual-role="disclosure-chevron"]),
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > summary :is([data-visual-role="disclosure-meta"],[data-visual-role="disclosure-chevron"]){
   color:var(--p3v-muted)!important;-webkit-text-fill-color:var(--p3v-muted)!important
 }
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > div,
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > div,
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > div,
-.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > div{
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-upcoming-schedule"] > [data-visual-role="disclosure-body"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-team-standings"] > [data-visual-role="disclosure-body"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-coach-guidance"] > [data-visual-role="disclosure-body"],
+.performance-shell--player[data-workspace-tab="home"] [data-testid="player-secondary-intelligence"] > [data-visual-role="disclosure-body"]{
   border-top:1px solid var(--p3v-line)!important;background:transparent!important;color:#44515b!important
 }
 

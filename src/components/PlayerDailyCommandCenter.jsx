@@ -115,7 +115,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
       </section>
 
       {queue.length > 0 && <div className={styles.section} data-command-role="next-actions" data-layout-role="quiet-secondary">
-        <div className={styles.sectionHeading}><div><div className={styles.sectionLabel}>After this</div><div className={styles.sectionTitle}>Your next moves</div></div><div className={styles.meta}>{queue.length} queued</div></div>
+        <div className={styles.sectionHeading} data-visual-role="next-actions-heading"><div><div className={styles.sectionLabel} data-visual-role="next-actions-eyebrow">After this</div><div className={styles.sectionTitle} data-visual-role="next-actions-title">Your next moves</div></div><div className={styles.meta} data-visual-role="next-actions-meta">{queue.length} queued</div></div>
         <div className={styles.tasks} data-testid="player-daily-task-queue">
           {queue.map((task, index) => {
             const taskWorking = activeAction === actionKey(task);

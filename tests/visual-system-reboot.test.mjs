@@ -6,22 +6,21 @@ const source = fs.readFileSync(new URL("../src/lib/visualSystemReboot.js", impor
 const bootstrap = fs.readFileSync(new URL("../src/lib/coachActivationPath.js", import.meta.url), "utf8");
 const playerBootstrap = fs.readFileSync(new URL("../src/components/PlayerDailyCommandCenter.jsx", import.meta.url), "utf8");
 
-test("visual reboot creates one light product language across coach surfaces", () => {
-  assert.match(source, /product-light-v2/);
+test("visual reboot owns one restrained Mission Control product language", () => {
+  assert.match(source, /product-light-v3-mission-control/);
   assert.match(source, /--sl-canvas/);
   assert.match(source, /body\.mission-control-active/);
-  assert.match(source, /\.secondaryPageShell/);
   assert.match(source, /coach-assignment-accountability/);
-  assert.match(source, /\.coachDashboardNoResults/);
 });
 
-test("reboot removes legacy poster proportions and yields secondary-page ownership to the component system", () => {
+test("reboot no longer competes with secondary-page or empty-state component authorities", () => {
   assert.match(source, /mcHero[\s\S]*min-height: 0 !important/);
   assert.match(source, /mcHeroContent[\s\S]*grid-template-columns/);
-  assert.match(source, /const secondaryStart = CSS\.indexOf\("\/\* Canonical secondary pages:"\)/);
-  assert.match(source, /const secondaryEnd = CSS\.indexOf\("\/\* Empty states:"/);
-  assert.match(source, /CSS\.slice\(0, secondaryStart\).*CSS\.slice\(secondaryEnd\)/s);
   assert.match(source, /mcAssignmentStateFacts[\s\S]*repeat\(5/);
+  assert.doesNotMatch(source, /\.secondaryPageShell|\.secondaryPageDecision|\.secondaryPageEvidence/);
+  assert.doesNotMatch(source, /\[class\s*\*=|\[data-testid\s*\*=/i);
+  assert.doesNotMatch(source, /EmptyState|emptyState|coachDashboardNoResults/);
+  assert.doesNotMatch(source, /secondaryStart|secondaryEnd|CSS\.slice/);
 });
 
 test("reboot uses restrained typography controls and responsive behavior", () => {
@@ -29,7 +28,7 @@ test("reboot uses restrained typography controls and responsive behavior", () =>
   assert.match(source, /SF Pro Text/);
   assert.match(source, /@media \(max-width: 760px\)/);
   assert.match(source, /prefers-reduced-motion/);
-  assert.match(source, /min-height: 46px/);
+  assert.match(source, /min-height: 50px/);
 });
 
 test("visual reboot installs after coach interaction enhancers without crossing into player bootstrap or adding product writes", () => {

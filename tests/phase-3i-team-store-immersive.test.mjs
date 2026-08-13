@@ -28,6 +28,18 @@ test('Team Store open lifecycle owns and cleans a document-level immersive state
   assert.match(enhancer, /document\.body\.style\.overflow = previousOverflow/);
 });
 
+test('runtime mount carries a non-prunable mobile immersion safety contract', () => {
+  assert.match(enhancer, /shotlab-team-store-immersive-runtime/);
+  assert.match(enhancer, /body > #root\{display:none!important;\}/);
+  assert.match(enhancer, /mobile-navigation-dock[\s\S]*display:none!important/);
+  assert.match(enhancer, /#team-store-root[\s\S]*height:100dvh!important/);
+  assert.match(enhancer, /\.ts-overlay[\s\S]*height:100dvh!important/);
+  assert.match(enhancer, /\.ts-panel[\s\S]*height:100dvh!important[\s\S]*border-radius:0!important/);
+  assert.match(enhancer, /\.ts-empty-state p\{color:#5f6861!important;-webkit-text-fill-color:#5f6861!important;\}/);
+  assert.match(enhancer, /\.ts-empty-state \.ts-button-secondary[\s\S]*color:#273129!important/);
+  assert.match(enhancer, /runtimeStyle\.remove\(\)/);
+});
+
 test('mobile Team Store exclusively owns the viewport instead of behaving as a bottom sheet', () => {
   assert.match(css, /@media \(max-width:\s*759px\)/);
   assert.match(css, /body\s*>\s*#root[\s\S]*display:\s*none !important/);

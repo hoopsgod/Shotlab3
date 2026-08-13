@@ -49,7 +49,7 @@ html body.mission-control-active #root .performance-workspace--coach .mcShellV3 
 }
 
 /* The viewport-root More sheet must not inherit generic paragraph cards. */
-html body [data-testid="mobile-navigation-sheet"] [class*="sheetSummary"] {
+html body [data-testid="mobile-navigation-sheet"] p {
   margin-top: 6px !important;
   padding: 0 !important;
   border: 0 !important;
