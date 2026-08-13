@@ -101,7 +101,7 @@ test("Phase 3 closure: Player Home has one dock reserve, clean support contrast,
   await expect(momentum).toBeVisible();
   const momentumContrast = await momentum.evaluate((node) => {
     const title = [...node.querySelectorAll("div")].find((item) => item.textContent === "Daily target complete");
-    const detail = [...node.querySelectorAll("div")].find((item) => item.textContent?.startsWith("125/500 makes this week"));
+    const detail = title?.nextElementSibling;
     if (!title || !detail) throw new Error("Missing Player momentum contrast targets");
     return {
       titleColor: getComputedStyle(title).color,
