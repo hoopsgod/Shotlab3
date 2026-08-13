@@ -10,6 +10,7 @@ const primitives = read("../src/components/CoachDashboardPrimitives.jsx");
 const coachSecondary = read("../src/components/CoachInteractiveDashboards.jsx");
 const surfaceCss = read("../src/styles/Phase3SurfaceContracts.css");
 const expertCss = read("../src/styles/ExpertVisualPolish.css");
+const v5CoachIntegrityCss = read("../public/shotlab-v5-coach-integrity.css");
 const parityCss = read("../public/shotlab-v8-demo-parity.css");
 const sessionIntegrityCss = read("../public/shotlab-v15-session-integrity.css");
 const phase2CriticalCss = read("../public/shotlab-phase2-critical.css");
@@ -56,10 +57,11 @@ test("secondary Coach dashboards opt context-dependent dark primitives into the 
 });
 
 test("active consolidated visual authorities contain no substring-selector material heuristics", () => {
-  for (const authority of [secondaryCss, surfaceCss, expertCss, parityCss, sessionIntegrityCss, phase2CriticalCss, secondaryCohesionCss, industrial]) {
+  for (const authority of [secondaryCss, surfaceCss, expertCss, v5CoachIntegrityCss, parityCss, sessionIntegrityCss, phase2CriticalCss, secondaryCohesionCss, industrial]) {
     assert.doesNotMatch(authority, /\[class\s*\*=/i);
     assert.doesNotMatch(authority, /\[data-testid\s*\*=/i);
   }
+  assert.doesNotMatch(v5CoachIntegrityCss, /\.secondaryPage(?:Decision|Evidence|Toolbar)/);
   assert.match(secondaryCss, /\[data-visual-role="metric-strip"\]/);
   assert.match(secondaryCss, /\[data-visual-role="filter-rail"\]/);
   assert.match(secondaryCss, /\[data-visual-role="insight-actions"\]/);
