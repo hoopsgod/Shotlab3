@@ -50,35 +50,66 @@ test("Coach Leaderboards uses the accepted light editorial and dark decision hie
   const metricStrip = page.getByTestId("coach-page-dashboard-leaderboards-metric-strip");
   const metrics = metricStrip.locator("[data-premium-metric]");
 
-  await expect(pageSurface).toHaveCSS("background-color", "rgb(247, 248, 242)");
-  await expect(title).toHaveCSS("-webkit-text-fill-color", "rgb(23, 26, 24)");
-  const titleColor = await title.evaluate((node) => getComputedStyle(node).color);
-  const titleChannels = titleColor.match(/\d+/g)?.map(Number) || [];
-  expect(titleChannels.slice(0, 3).every((value) => value <= 40)).toBeTruthy();
-  await expect(summary).toHaveCSS("color", "rgb(93, 102, 95)");
-  await expect(summary).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-  await expect(decision.locator("h2")).toHaveCSS("color", "rgb(245, 247, 244)");
-  expect(await decision.evaluate((node) => getComputedStyle(node).backgroundImage)).toContain("linear-gradient");
-  await expect(metricStrip.locator("[data-premium-metric-value]").first()).toHaveCSS("-webkit-text-fill-color", "rgb(23, 26, 24)");
-  await expect(metricStrip.locator("[data-premium-metric-label]").first()).toHaveCSS("-webkit-text-fill-color", "rgb(82, 96, 89)");
-  await expect(metrics).toHaveCount(4);
-  await expect(metricStrip).toHaveCSS("display", "grid");
+  const outputPath = path.join(OUTPUT_DIR, "coach-leaderboards-390x844.png");
+  await page.screenshot({ path: outputPath, animations: "disabled" });
 
-  const metricGeometry = await metrics.evaluateAll((nodes) => nodes.map((node) => {
-    const rect = node.getBoundingClientRect();
-    return { left: rect.left, right: rect.right, top: rect.top, width: rect.width };
-  }));
+  const visualState = await page.evaluate(() => {
+    const shellNode = document.querySelector('[data-testid="coach-page-dashboard-leaderboards"]');
+    const pageSurfaceNode = shellNode?.closest(".pageShell");
+    const titleNode = shellNode?.querySelector(".secondaryPageIntro__title");
+    const summaryNode = shellNode?.querySelector(".secondaryPageIntro__summary");
+    const decisionNode = document.querySelector('[data-testid="coach-page-dashboard-leaderboards-decision-brief"]');
+    const decisionTitleNode = decisionNode?.querySelector("h2");
+    const metricStripNode = document.querySelector('[data-testid="coach-page-dashboard-leaderboards-metric-strip"]');
+    const metricNodes = [...(metricStripNode?.querySelectorAll("[data-premium-metric]") || [])];
+    const metricValueNode = metricStripNode?.querySelector("[data-premium-metric-value]");
+    const metricLabelNode = metricStripNode?.querySelector("[data-premium-metric-label]");
+    if (!pageSurfaceNode || !titleNode || !summaryNode || !decisionNode || !decisionTitleNode || !metricStripNode || !metricValueNode || !metricLabelNode) {
+      throw new Error("Missing Coach Leaderboards visual-contract target");
+    }
+    const metricGeometry = metricNodes.map((node) => {
+      const rect = node.getBoundingClientRect();
+      return { left: rect.left, right: rect.right, top: rect.top, width: rect.width };
+    });
+    return {
+      pageBackground: getComputedStyle(pageSurfaceNode).backgroundColor,
+      titleFill: getComputedStyle(titleNode).webkitTextFillColor,
+      titleColor: getComputedStyle(titleNode).color,
+      summaryColor: getComputedStyle(summaryNode).color,
+      summaryBackground: getComputedStyle(summaryNode).backgroundColor,
+      decisionTitleColor: getComputedStyle(decisionTitleNode).color,
+      decisionBackgroundImage: getComputedStyle(decisionNode).backgroundImage,
+      firstMetricValueFill: getComputedStyle(metricValueNode).webkitTextFillColor,
+      firstMetricLabelFill: getComputedStyle(metricLabelNode).webkitTextFillColor,
+      metricCount: metricNodes.length,
+      metricDisplay: getComputedStyle(metricStripNode).display,
+      metricGeometry,
+      overflow: document.documentElement.scrollWidth - window.innerWidth,
+    };
+  });
+  fs.writeFileSync(path.join(OUTPUT_DIR, "coach-leaderboards-390x844.json"), `${JSON.stringify({ ...visualState, pageErrors }, null, 2)}\n`);
+
+  expect(visualState.pageBackground).toBe("rgb(247, 248, 242)");
+  expect(visualState.titleFill).toBe("rgb(23, 26, 24)");
+  const titleChannels = visualState.titleColor.match(/\d+/g)?.map(Number) || [];
+  expect(titleChannels.slice(0, 3).every((value) => value <= 40)).toBeTruthy();
+  expect(visualState.summaryColor).toBe("rgb(93, 102, 95)");
+  expect(visualState.summaryBackground).toBe("rgba(0, 0, 0, 0)");
+  expect(visualState.decisionTitleColor).toBe("rgb(245, 247, 244)");
+  expect(visualState.decisionBackgroundImage).toContain("linear-gradient");
+  expect(visualState.firstMetricValueFill).toBe("rgb(23, 26, 24)");
+  expect(visualState.firstMetricLabelFill).toBe("rgb(82, 96, 89)");
+  expect(visualState.metricCount).toBe(4);
+  expect(visualState.metricDisplay).toBe("grid");
+
+  const metricGeometry = visualState.metricGeometry;
   expect(metricGeometry[0].right).toBeLessThanOrEqual(374);
   expect(metricGeometry[1].right).toBeLessThanOrEqual(374);
   expect(Math.abs(metricGeometry[0].top - metricGeometry[1].top)).toBeLessThanOrEqual(1);
   expect(metricGeometry[2].top).toBeGreaterThan(metricGeometry[0].top + 60);
   expect(Math.abs(metricGeometry[0].width - metricGeometry[1].width)).toBeLessThanOrEqual(2);
 
-  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-  expect(overflow).toBeLessThanOrEqual(1);
+  expect(visualState.overflow).toBeLessThanOrEqual(1);
   expect(pageErrors).toEqual([]);
-
-  const outputPath = path.join(OUTPUT_DIR, "coach-leaderboards-390x844.png");
-  await page.screenshot({ path: outputPath, animations: "disabled" });
   expect(fs.statSync(outputPath).size).toBeGreaterThan(20_000);
 });
