@@ -9,7 +9,7 @@ if (source.includes(marker)) {
   process.exit(0);
 }
 
-const oldBlock = `      <SecondaryPageEvidence testId="coach-events-insight-grid">
+const legacyBlock = `      <SecondaryPageEvidence testId="coach-events-insight-grid">
         {briefing.insights.map((insight) => (
           <DashboardInsightCard key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolveEventAction(insight.action, { onStatusChange, onCreateEvent, onOpenEvent })}>
             {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
@@ -17,11 +17,22 @@ const oldBlock = `      <SecondaryPageEvidence testId="coach-events-insight-grid
         ))}
       </SecondaryPageEvidence>`;
 
-const occurrences = source.split(oldBlock).length - 1;
-if (occurrences !== 1) {
-  throw new Error(`Phase 3J expected exactly one Coach Events insight-grid anchor, found ${occurrences}.`);
+const semanticBlock = `      <SecondaryPageEvidence testId="coach-events-insight-grid">
+        {briefing.insights.map((insight) => (
+          <DashboardInsightCard surface="light" key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolveEventAction(insight.action, { onStatusChange, onCreateEvent, onOpenEvent })}>
+            {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
+          </DashboardInsightCard>
+        ))}
+      </SecondaryPageEvidence>`;
+
+const candidates = [semanticBlock, legacyBlock];
+const matches = candidates.filter((block) => source.includes(block));
+if (matches.length !== 1) {
+  throw new Error(`Phase 3J expected exactly one Coach Events insight-grid anchor, found ${matches.length}.`);
 }
 
+const oldBlock = matches[0];
+const insightSurface = oldBlock === semanticBlock ? ' surface="light"' : '';
 const newBlock = `      <details
         className="coachEventsSupportingIntelligence"
         data-testid="coach-events-supporting-intelligence"
@@ -38,7 +49,7 @@ const newBlock = `      <details
         <div className="coachEventsSupportingBody">
           <SecondaryPageEvidence testId="coach-events-insight-grid">
             {briefing.insights.map((insight) => (
-              <DashboardInsightCard key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolveEventAction(insight.action, { onStatusChange, onCreateEvent, onOpenEvent })}>
+              <DashboardInsightCard${insightSurface} key={insight.key} eyebrow={insight.eyebrow} title={insight.title} body={insight.body} tone={insight.tone} action={resolveEventAction(insight.action, { onStatusChange, onCreateEvent, onOpenEvent })}>
                 {insight.progress ? <DashboardProgress value={insight.progress.value} max={insight.progress.max} label={insight.progress.label} detail={insight.progress.detail} /> : null}
               </DashboardInsightCard>
             ))}
