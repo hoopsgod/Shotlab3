@@ -20,6 +20,7 @@ const secondaryCohesionCss = read("../public/shotlab-phase3-secondary-cohesion.c
 const teamStoreImmersiveCss = read("../public/shotlab-phase3i-team-store-immersive.css");
 const strengthHierarchyCss = read("../public/shotlab-phase3k-coach-strength-hierarchy.css");
 const finalClosureCss = read("../public/shotlab-phase3v-final-closure.css");
+const accountTouchEnhancer = read("../scripts/apply-phase4e10-player-profile-account-touch-safety.mjs");
 const industrial = read("../src/lib/industrialDesignFoundation.js");
 const visualReboot = read("../src/lib/visualSystemReboot.js");
 const main = read("../src/main.jsx");
@@ -46,7 +47,7 @@ test("secondary page materials are explicit instead of inferred from names", () 
 });
 
 test("shared dashboard primitives publish material-aware semantic roles", () => {
-  for (const role of ["command-bar", "metric-strip", "filter-rail", "insight-grid", "insight-card", "insight-actions", "dashboard-section", "detail-drawer"]) {
+  for (const role of ["command-bar", "metric-strip", "filter-rail", "insight-grid", "insight-card", "insight-actions", "dashboard-section", "progress-block", "progress-meta", "progress-track", "detail-drawer"]) {
     assert.match(primitives, new RegExp(`data-visual-role="${role}"`));
   }
   assert.match(primitives, /surface = "dark"/);
@@ -104,12 +105,13 @@ test("light and dark semantic foreground tokens clear WCAG normal-text contrast"
   }
 });
 
-test("semantic foreground authority protects both known contrast regressions through nearest-surface variables", () => {
+test("semantic foreground authority protects known contrast regressions through nearest-surface variables", () => {
   assert.match(surfaceCss, /\[data-surface="light"\][\s\S]*--surface-title:\s*var\(--sl-surface-light-title\)/);
   assert.match(surfaceCss, /\[data-surface="dark"\][\s\S]*--surface-title:\s*var\(--sl-surface-dark-title\)/);
   assert.match(surfaceCss, /\[data-surface\]\s+:is\(h1, h2, h3, h4\)[\s\S]*color:\s*var\(--surface-title\)/);
   assert.match(surfaceCss, /\[data-surface\]\s+p\s*\{[\s\S]*color:\s*var\(--surface-body\)/);
   assert.match(surfaceCss, /\[data-surface\]\s+:is\(small, \[data-copy-tone="muted"\]\)[\s\S]*color:\s*var\(--surface-muted\)/);
+  assert.match(surfaceCss, /\[data-surface\]\s+\[data-visual-role="progress-meta"\][\s\S]*color:\s*var\(--surface-muted\)/);
   assert.match(surfaceCss, /\[data-surface\]\s+:is\(input, select, textarea\)[\s\S]*color:\s*var\(--surface-title\)/);
   assert.match(surfaceCss, /-webkit-text-fill-color:\s*currentColor/);
   assert.doesNotMatch(expertCss, /\[data-testid\s*\*=\s*"(?:insight|decision)/i);
@@ -117,8 +119,12 @@ test("semantic foreground authority protects both known contrast regressions thr
 
 test("team branding stays decorative when light-surface controls require a stable foreground", () => {
   assert.match(surfaceCss, /--sl-accent-foreground-light:\s*#465717/);
-  assert.match(surfaceCss, /\[data-testid="player-profile-privacy"\]\s+button[\s\S]*color:\s*var\(--sl-accent-foreground-light\)/);
-  assert.match(surfaceCss, /\[data-testid="player-profile-account-data"\]\s+\[aria-label="Legal and support links"\]\s+a[\s\S]*color:\s*var\(--sl-accent-foreground-light\)/);
+  assert.match(surfaceCss, /button\[data-player-profile-privacy-toggle\][\s\S]*color:\s*var\(--sl-accent-foreground-light\)/);
+  assert.match(surfaceCss, /a\[data-player-profile-legal-link\][\s\S]*color:\s*var\(--sl-accent-foreground-light\)/);
+  assert.match(accountTouchEnhancer, /color:u\.hideFromLeaderboards\?MUTED:"#465717"/);
+  assert.match(accountTouchEnhancer, /color:compact\?"#465717":MUTED/);
+  assert.doesNotMatch(accountTouchEnhancer, /color:u\.hideFromLeaderboards\?MUTED:VOLT/);
+  assert.doesNotMatch(accountTouchEnhancer, /color:compact\?VOLT:MUTED/);
 });
 
 test("Team Store mobile portal owns the viewport and light empty-state foregrounds", () => {
