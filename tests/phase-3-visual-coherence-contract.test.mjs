@@ -18,6 +18,7 @@ const sessionIntegrityCss = read("../public/shotlab-v15-session-integrity.css");
 const phase2CriticalCss = read("../public/shotlab-phase2-critical.css");
 const secondaryCohesionCss = read("../public/shotlab-phase3-secondary-cohesion.css");
 const teamStoreImmersiveCss = read("../public/shotlab-phase3i-team-store-immersive.css");
+const teamStoreImmersiveRuntime = read("../scripts/apply-phase3i-team-store-immersive.mjs");
 const strengthHierarchyCss = read("../public/shotlab-phase3k-coach-strength-hierarchy.css");
 const finalClosureCss = read("../public/shotlab-phase3v-final-closure.css");
 const accountTouchEnhancer = read("../scripts/apply-phase4e10-player-profile-account-touch-safety.mjs");
@@ -133,11 +134,13 @@ test("Player Rankings removes the repeated embedded hub introduction but keeps l
   assert.match(surfaceCss, /leaderboard-status-line[\s\S]*margin-top:\s*0/);
 });
 
-test("Team Store mobile portal owns the viewport and light empty-state foregrounds", () => {
-  assert.match(teamStoreImmersiveCss, /html\.team-store-portal-open body > #root[\s\S]*display:\s*none\s*!important/);
-  assert.match(teamStoreImmersiveCss, /\[data-testid="mobile-navigation-dock"\][\s\S]*display:\s*none\s*!important/);
-  assert.match(teamStoreImmersiveCss, /\.ts-empty-state p[\s\S]*color:\s*#5f6861\s*!important/);
-  assert.match(teamStoreImmersiveCss, /\.ts-empty-state \.ts-button-secondary[\s\S]*color:\s*#273129\s*!important/);
+test("Team Store mobile portal owns the viewport and light empty-state foregrounds through runtime authority", () => {
+  assert.match(teamStoreImmersiveRuntime, /body > #root\{display:none!important;\}/);
+  assert.match(teamStoreImmersiveRuntime, /mobile-navigation-dock[\s\S]*display:none!important/);
+  assert.match(teamStoreImmersiveRuntime, /\.ts-empty-state p\{color:#5f6861!important;-webkit-text-fill-color:#5f6861!important;\}/);
+  assert.match(teamStoreImmersiveRuntime, /\.ts-empty-state \.ts-button-secondary[\s\S]*color:#273129!important/);
+  assert.match(teamStoreImmersiveCss, /prefers-reduced-motion:\s*reduce/);
+  assert.doesNotMatch(teamStoreImmersiveCss, /@media \(max-width:\s*759px\)/);
 });
 
 test("Phase 3 mobile contract protects 390px geometry, touch targets and iPhone safe areas", () => {
