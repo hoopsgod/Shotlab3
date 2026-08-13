@@ -8,6 +8,8 @@ const secondaryJsx = read("../src/components/SecondaryPageSystem.jsx");
 const secondaryCss = read("../src/components/SecondaryPageSystem.css");
 const primitives = read("../src/components/CoachDashboardPrimitives.jsx");
 const surfaceCss = read("../src/styles/Phase3SurfaceContracts.css");
+const parityCss = read("../public/shotlab-v8-demo-parity.css");
+const industrial = read("../src/lib/industrialDesignFoundation.js");
 const main = read("../src/main.jsx");
 
 const rgb = (hex) => {
@@ -38,14 +40,15 @@ test("shared dashboard primitives publish stable semantic roles", () => {
   assert.match(primitives, /data-action-role="tertiary"/);
 });
 
-test("active secondary visual authority contains no substring-selector heuristics", () => {
-  for (const css of [secondaryCss, surfaceCss]) {
-    assert.doesNotMatch(css, /\[class\s*\*=/i);
-    assert.doesNotMatch(css, /\[data-testid\s*\*=/i);
+test("active visual authorities contain no substring-selector material heuristics", () => {
+  for (const authority of [secondaryCss, surfaceCss, parityCss, industrial]) {
+    assert.doesNotMatch(authority, /\[class\s*\*=/i);
+    assert.doesNotMatch(authority, /\[data-testid\s*\*=/i);
   }
   assert.match(secondaryCss, /\[data-visual-role="metric-strip"\]/);
   assert.match(secondaryCss, /\[data-visual-role="filter-rail"\]/);
   assert.match(secondaryCss, /\[data-visual-role="insight-actions"\]/);
+  assert.match(industrial, /\[data-surface="light"\]/);
 });
 
 test("light and dark semantic foreground tokens clear WCAG normal-text contrast", () => {
@@ -80,6 +83,7 @@ test("surface contract is role-neutral for Coach, Player, demo and registered se
   assert.doesNotMatch(surfaceCss, /\.shotlab-demo|\[data-demo/i);
   assert.doesNotMatch(surfaceCss, /\.coach[A-Z_-]|\.player[A-Z_-]/);
   assert.match(surfaceCss, /\[data-visual-role="secondary-page"\]/);
+  assert.doesNotMatch(parityCss, /\.shotlab-demo/);
 });
 
 test("semantic surface contract loads after the previous cascade lock", () => {
