@@ -73,6 +73,11 @@ jobs:
           ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
         run: npx playwright test tests/e2e/phase-3-release-certification.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
 
+      - name: Certify immersive Team Store runtime contract
+        env:
+          ACCEPTANCE_BASE_URL: http://127.0.0.1:4173
+        run: npx playwright test tests/e2e/phase-3-team-store-portal-certification.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+
       - name: Record exact certification SHA
         if: always()
         run: |
