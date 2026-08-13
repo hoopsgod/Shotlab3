@@ -6,6 +6,7 @@ const read = (path) => fs.readFileSync(new URL(path, import.meta.url), "utf8");
 const tokens = read("../src/theme/appTokens.js");
 const semantics = read("../src/theme/semanticColors.js");
 const foundation = read("../src/styles/VisualFoundation2026.css");
+const runtimeAuthority = read("../src/styles/RuntimeVisualAuthority.js");
 const main = read("../src/main.jsx");
 const header = read("../src/components/AppHeader.jsx");
 const auth = read("../src/components/AuthWorkspace.jsx");
@@ -56,9 +57,11 @@ test("muted copy and placeholders meet normal-text AA contrast", () => {
 
 test("the visual foundation loads after the application module", () => {
   const appImportIndex = main.indexOf("await import('./App.jsx')");
-  const foundationImportIndex = main.indexOf("await import('./styles/VisualFoundation2026.css')");
+  const authorityImportIndex = main.indexOf("await import('./styles/RuntimeVisualAuthority.js')");
+  const foundationImportIndex = runtimeAuthority.indexOf("import './VisualFoundation2026.css'");
   assert.ok(appImportIndex >= 0);
-  assert.ok(foundationImportIndex > appImportIndex);
+  assert.ok(authorityImportIndex > appImportIndex);
+  assert.ok(foundationImportIndex >= 0);
 });
 
 test("canonical foundation removes dark-only and glow-heavy authority", () => {
