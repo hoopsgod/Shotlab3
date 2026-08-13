@@ -12,6 +12,7 @@ const surfaceCss = read("../src/styles/Phase3SurfaceContracts.css");
 const expertCss = read("../src/styles/ExpertVisualPolish.css");
 const parityCss = read("../public/shotlab-v8-demo-parity.css");
 const sessionIntegrityCss = read("../public/shotlab-v15-session-integrity.css");
+const secondaryCohesionCss = read("../public/shotlab-phase3-secondary-cohesion.css");
 const industrial = read("../src/lib/industrialDesignFoundation.js");
 const main = read("../src/main.jsx");
 
@@ -54,7 +55,7 @@ test("secondary Coach dashboards opt context-dependent dark primitives into the 
 });
 
 test("active consolidated visual authorities contain no substring-selector material heuristics", () => {
-  for (const authority of [secondaryCss, surfaceCss, expertCss, parityCss, sessionIntegrityCss, industrial]) {
+  for (const authority of [secondaryCss, surfaceCss, expertCss, parityCss, sessionIntegrityCss, secondaryCohesionCss, industrial]) {
     assert.doesNotMatch(authority, /\[class\s*\*=/i);
     assert.doesNotMatch(authority, /\[data-testid\s*\*=/i);
   }
@@ -62,6 +63,9 @@ test("active consolidated visual authorities contain no substring-selector mater
   assert.match(secondaryCss, /\[data-visual-role="filter-rail"\]/);
   assert.match(secondaryCss, /\[data-visual-role="insight-actions"\]/);
   assert.match(sessionIntegrityCss, /\[data-visual-role="insight-card"\]\[data-surface="dark"\]/);
+  assert.match(secondaryCohesionCss, /\[data-identity-role="tagline"\]/);
+  assert.match(secondaryCohesionCss, /\[data-visual-role="career-record"\]/);
+  assert.match(secondaryCohesionCss, /\[data-copy-tone="muted"\]/);
   assert.match(industrial, /\[data-surface="light"\]/);
 });
 
