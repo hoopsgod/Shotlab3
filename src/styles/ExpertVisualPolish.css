@@ -52,23 +52,12 @@ button[data-visual-role="demo-destructive"][hidden] { display: none !important; 
   padding: 0 !important;
 }
 
-[data-testid*="insight"],
-[data-testid*="decision"],
-.mcSection,
-.mcCard {
-  --text-1: #f5f7f8;
-  --text-2: #c0c7cc;
-  --text-3: #98a2a9;
-}
-
-[data-testid*="insight"] p,
-[data-testid*="decision"] p,
-.mcSection p,
-.mcSection small {
-  color: var(--text-2, #c0c7cc);
-}
-
-[role="progressbar"] {
+/*
+ * Phase 3 foregrounds are surface-owned. Do not infer material from test ids,
+ * class-name fragments, route names, or copy. Components without data-surface
+ * keep their component-scoped styling until they adopt the shared contract.
+ */
+[data-surface="dark"] [role="progressbar"] {
   min-height: 8px;
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.1) !important;
@@ -76,7 +65,15 @@ button[data-visual-role="demo-destructive"][hidden] { display: none !important; 
   overflow: hidden;
 }
 
-[role="progressbar"] > span {
+[data-surface="light"] [role="progressbar"] {
+  min-height: 8px;
+  border: 1px solid rgba(23, 26, 24, 0.12);
+  background: rgba(23, 26, 24, 0.07) !important;
+  box-shadow: none;
+  overflow: hidden;
+}
+
+[data-surface] [role="progressbar"] > span {
   min-height: 100%;
   background: var(--semantic-positive, #62d98b);
 }
