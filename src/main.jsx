@@ -167,6 +167,7 @@ window.addEventListener('shotlab:app-ready', () => {
     await import('./styles/CommandHierarchy2026.css')
     await import('./styles/MissionControlHierarchy2026.css')
     await import('./styles/MissionControlCascadeLock2026.css')
+    await import('./styles/Phase3SurfaceContracts.css')
     const rootEl = document.getElementById('root')
     if (!rootEl) throw new Error('Missing root container (#root).')
 
