@@ -89,6 +89,24 @@ test.describe("Phase 3 release certification — 390x844", () => {
     await capture(page, "13-coach-more-sheet");
     await more.locator('[data-nav-key="sc"]').click();
     await expect(page.getByTestId("coach-page-dashboard-strength")).toBeVisible({ timeout: 20_000 });
+    const strengthDecision = page.getByTestId("coach-page-dashboard-strength-decision-brief");
+    await expect(strengthDecision).toBeVisible();
+    const strengthContrast = await strengthDecision.evaluate((element) => {
+      const channels = (value) => (String(value).match(/\d+(?:\.\d+)?/g) || []).slice(0, 3).map(Number);
+      const title = element.querySelector("h2");
+      const body = element.querySelector("p");
+      return {
+        background: channels(getComputedStyle(element).backgroundColor),
+        title: title ? channels(getComputedStyle(title).color) : [],
+        body: body ? channels(getComputedStyle(body).color) : [],
+      };
+    });
+    expect(strengthContrast.background).toHaveLength(3);
+    expect(Math.max(...strengthContrast.background)).toBeLessThan(80);
+    expect(strengthContrast.title).toHaveLength(3);
+    expect(Math.min(...strengthContrast.title)).toBeGreaterThan(220);
+    expect(strengthContrast.body).toHaveLength(3);
+    expect(Math.min(...strengthContrast.body)).toBeGreaterThan(140);
     await capture(page, "14-coach-strength");
 
     await openMoreDestination(page, "branding");
