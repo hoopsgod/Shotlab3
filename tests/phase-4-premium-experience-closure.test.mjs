@@ -20,7 +20,7 @@ test("Phase 4 live metrics communicate change without decorative motion", async 
   const css = await read("src/components/VisualHierarchy.module.css");
   assert.match(source, /previousRef = useRef\(displayValue\)/);
   assert.match(source, /data-metric-change=\{changeKey\}/);
-  assert.match(css, /animation:\s*metricValueSettle\s+220ms/);
+  assert.match(css, /animation:\s*metricValueSettle\s+200ms/);
   assert.match(css, /@keyframes metricValueSettle/);
   assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
   assert.match(css, /\.metricValue \{ animation: none; \}/);
