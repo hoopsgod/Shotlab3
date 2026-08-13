@@ -8,6 +8,8 @@ const secondaryJsx = read("../src/components/SecondaryPageSystem.jsx");
 const secondaryCss = read("../src/components/SecondaryPageSystem.css");
 const primitives = read("../src/components/CoachDashboardPrimitives.jsx");
 const coachSecondary = read("../src/components/CoachInteractiveDashboards.jsx");
+const playerDaily = read("../src/components/PlayerDailyCommandCenter.jsx");
+const visualHierarchy = read("../src/components/VisualHierarchy.jsx");
 const surfaceCss = read("../src/styles/Phase3SurfaceContracts.css");
 const expertCss = read("../src/styles/ExpertVisualPolish.css");
 const v5CoachIntegrityCss = read("../public/shotlab-v5-coach-integrity.css");
@@ -16,7 +18,10 @@ const sessionIntegrityCss = read("../public/shotlab-v15-session-integrity.css");
 const phase2CriticalCss = read("../public/shotlab-phase2-critical.css");
 const secondaryCohesionCss = read("../public/shotlab-phase3-secondary-cohesion.css");
 const teamStoreImmersiveCss = read("../public/shotlab-phase3i-team-store-immersive.css");
+const strengthHierarchyCss = read("../public/shotlab-phase3k-coach-strength-hierarchy.css");
+const finalClosureCss = read("../public/shotlab-phase3v-final-closure.css");
 const industrial = read("../src/lib/industrialDesignFoundation.js");
+const visualReboot = read("../src/lib/visualSystemReboot.js");
 const main = read("../src/main.jsx");
 
 const rgb = (hex) => {
@@ -57,12 +62,22 @@ test("secondary Coach dashboards opt context-dependent dark primitives into the 
   assert.match(coachSecondary, /<DashboardInsightCard surface="light"/);
 });
 
+test("Player Home and disclosure support copy publish stable semantic roles", () => {
+  for (const role of ["next-actions-heading", "next-actions-eyebrow", "next-actions-title", "next-actions-meta"]) {
+    assert.match(playerDaily, new RegExp(`data-visual-role="${role}"`));
+  }
+  for (const role of ["progressive-disclosure", "disclosure-summary", "disclosure-title", "disclosure-meta", "disclosure-chevron", "disclosure-body"]) {
+    assert.match(visualHierarchy, new RegExp(`data-visual-role="${role}"`));
+  }
+});
+
 test("active consolidated visual authorities contain no substring-selector material heuristics", () => {
-  for (const authority of [secondaryCss, surfaceCss, expertCss, v5CoachIntegrityCss, parityCss, sessionIntegrityCss, phase2CriticalCss, secondaryCohesionCss, teamStoreImmersiveCss, industrial]) {
+  for (const authority of [secondaryCss, surfaceCss, expertCss, v5CoachIntegrityCss, parityCss, sessionIntegrityCss, phase2CriticalCss, secondaryCohesionCss, teamStoreImmersiveCss, strengthHierarchyCss, finalClosureCss, industrial, visualReboot]) {
     assert.doesNotMatch(authority, /\[class\s*\*=/i);
     assert.doesNotMatch(authority, /\[data-testid\s*\*=/i);
   }
   assert.doesNotMatch(v5CoachIntegrityCss, /\.secondaryPage(?:Decision|Evidence|Toolbar)/);
+  assert.doesNotMatch(visualReboot, /\.secondaryPageShell|\.secondaryPageDecision|EmptyState|emptyState/);
   assert.match(secondaryCss, /\[data-visual-role="metric-strip"\]/);
   assert.match(secondaryCss, /\[data-visual-role="filter-rail"\]/);
   assert.match(secondaryCss, /\[data-visual-role="insight-actions"\]/);
@@ -71,6 +86,10 @@ test("active consolidated visual authorities contain no substring-selector mater
   assert.match(secondaryCohesionCss, /\[data-identity-role="tagline"\]/);
   assert.match(secondaryCohesionCss, /\[data-visual-role="career-record"\]/);
   assert.match(secondaryCohesionCss, /\[data-copy-tone="muted"\]/);
+  assert.match(strengthHierarchyCss, /\[data-premium-metric-label\]/);
+  assert.match(strengthHierarchyCss, /\[data-premium-metric-value\]/);
+  assert.match(finalClosureCss, /\[data-visual-role="next-actions-title"\]/);
+  assert.match(finalClosureCss, /\[data-visual-role="disclosure-title"\]/);
   assert.match(industrial, /\[data-surface="light"\]/);
 });
 
