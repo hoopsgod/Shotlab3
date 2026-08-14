@@ -43,8 +43,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Enforce shared UI and registered leaderboard parity contracts
-        run: node --test tests/demo-visual-parity-contract.test.mjs tests/home-shots-leaderboard-route.test.mjs tests/remote-leaderboard-roster-parity.test.mjs
+      - name: Enforce shared UI, capability, isolation, and registered leaderboard contracts
+        run: >-
+          node --test
+          tests/demo-visual-parity-contract.test.mjs
+          tests/demo-capability-boundary.test.mjs
+          tests/account-capabilities.test.mjs
+          tests/demo-data-isolation.test.mjs
+          tests/demo-invitation-safety.test.mjs
+          tests/home-shots-leaderboard-route.test.mjs
+          tests/remote-leaderboard-roster-parity.test.mjs
 
       - name: Install pinned Playwright runner
         run: npm install --no-save @playwright/test@1.55.1
