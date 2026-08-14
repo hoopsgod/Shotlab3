@@ -73,7 +73,7 @@ function NavigationItem({ item, active, onSelect, compact = false }) {
     >
       <span className={compact ? styles.dockIcon : styles.sheetIcon} style={compact ? { width: 32, height: 26, background: active ? ACTIVE_HALO : undefined } : { width: 40, height: 40, borderRadius: 12, background: active ? ACTIVE_HALO : undefined }} aria-hidden="true">
         {normalizeNavigationIcon(item)}
-        {item.dot && <span style={{ position: "absolute", top: 0, right: 1, width: 7, height: 7, borderRadius: "50%", background: "#a85f0c" }} />}
+        {item.dot && <span style={{ position: "absolute", top: 0, right: 1, width: 7, height: 7, borderRadius: "50%", background: "var(--semantic-warning, #a85f0c)" }} />}
       </span>
       <span className={compact ? styles.dockLabel : styles.sheetText}>
         <span className={compact ? styles.dockLabelText : styles.sheetLabel}>{label}</span>
@@ -153,7 +153,7 @@ export default function MobileNavigation({ primaryItems = [], secondaryItems = [
         <div className={styles.dockInner}>
           {visiblePrimaryItems.map((item) => <NavigationItem key={item.k} item={item} active={item.k === activeKey} onSelect={handleSelect} compact />)}
           <button type="button" className={`${styles.dockItem} ${activeMore ? styles.active : ""}`} style={activeMore ? { color: ACTIVE_COLOR } : undefined} aria-expanded={open} aria-controls="mobile-navigation-more-sheet" aria-label="More" aria-description={secondaryHasNotification ? "Updates available" : undefined} data-testid="mobile-navigation-more" data-active={activeMore ? "true" : "false"} data-icon-name="more" onClick={() => setOpen((value) => !value)}>
-            <span className={styles.dockIcon} style={{ width: 32, height: 26, background: activeMore ? ACTIVE_HALO : undefined }} aria-hidden="true"><MoreIcon />{secondaryHasNotification && <span style={{ position: "absolute", top: 0, right: 1, width: 7, height: 7, borderRadius: "50%", background: "#a85f0c" }} />}</span>
+            <span className={styles.dockIcon} style={{ width: 32, height: 26, background: activeMore ? ACTIVE_HALO : undefined }} aria-hidden="true"><MoreIcon />{secondaryHasNotification && <span style={{ position: "absolute", top: 0, right: 1, width: 7, height: 7, borderRadius: "50%", background: "var(--semantic-warning, #a85f0c)" }} />}</span>
             <span className={styles.dockLabelText}>More</span>
           </button>
         </div>

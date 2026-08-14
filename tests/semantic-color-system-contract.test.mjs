@@ -11,7 +11,7 @@ const appSource = read("src/App.jsx");
 const legacyStylesSource = read("src/styles/appLegacyStyles.js");
 const statusSource = read("src/components/SemanticStatus.jsx");
 const statusCss = read("src/components/SemanticStatus.module.css");
-const mobileCss = read("src/components/MobileNavigation.module.css");
+const mobileSource = read("src/components/MobileNavigation.jsx");
 
 const semanticHexes = [...semanticSource.matchAll(/(?:SUCCESS|INFO|WARNING|DANGER|NEUTRAL):\s*"(#[0-9A-F]{6})"/g)].map((match) => match[1]);
 
@@ -71,7 +71,7 @@ test("high-signal feedback uses semantic roles", () => {
 });
 
 test("navigation attention indicators use warning rather than brand accent", () => {
-  const notificationRule = mobileCss.slice(mobileCss.indexOf(".notificationDot"), mobileCss.indexOf(".overlay"));
-  assert.match(notificationRule, /--semantic-warning/);
-  assert.doesNotMatch(notificationRule, /background: var\(--accent/);
+  const notificationColors = [...mobileSource.matchAll(/background: "var\(--semantic-warning, #a85f0c\)"/g)];
+  assert.equal(notificationColors.length, 2);
+  assert.doesNotMatch(mobileSource, /background: "var\(--accent[^\n]*item\.dot/);
 });
