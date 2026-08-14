@@ -39,6 +39,13 @@ test("Phase 4A signature imports remain idempotent across repeated production en
   }
 });
 
+test("Phase 4A anchors Player Home by stable structure instead of an exact attribute list", () => {
+  assert.match(script, /const insertAfterOne =/);
+  assert.match(script, /data-testid=\"player-daily-command-center\"/);
+  assert.match(script, /data-layout-role=\"editorial-header\"/);
+  assert.doesNotMatch(script, /data-page-hierarchy=\"activation-loop\" aria-label/);
+});
+
 test("Phase 4A keeps Liquid Glass out of the content identity layer", () => {
   assert.doesNotMatch(identityCss, /backdrop-filter/i);
   assert.doesNotMatch(identityCss, /-webkit-backdrop-filter/i);
