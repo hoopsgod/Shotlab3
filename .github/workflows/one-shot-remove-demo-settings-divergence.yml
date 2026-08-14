@@ -1,0 +1,89 @@
+name: One-shot remove demo settings divergence
+
+on:
+  push:
+    branches:
+      - agent/demo-paid-experience-unification
+    paths:
+      - .github/workflows/one-shot-remove-demo-settings-divergence.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/demo-paid-experience-unification
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Remove demo-only Coach Settings presentation
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          def replace_once(text, old, new, label):
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"{label}: expected exactly one match, found {count}")
+              return text.replace(old, new, 1)
+
+          app = Path("src/App.jsx")
+          text = app.read_text()
+          old_card = '''        {accountCapabilities?.canResetSandbox&&<article className="coachAdministrationCard">\n          <span>Demo workspace</span><h3>DEMO SETTINGS</h3><p>Load or clear demo data using the shared demo tools.</p>\n          <div className="coachAdministrationActions">\n            <button onClick={onLoadDemoData} disabled={demoSettingsBusy} className="btn-v cta-secondary">LOAD DEMO DATA</button>\n            <button onClick={onClearDemoData} disabled={demoSettingsBusy} className="btn-v cta-danger">CLEAR DEMO DATA</button>\n          </div>\n        </article>}\n'''
+          text = replace_once(text, old_card, "", "demo settings card")
+          text = replace_once(
+              text,
+              'Keep demo utilities, legal resources, and account-level actions separate from day-to-day coaching decisions.',
+              'Keep legal resources, support, and account-level actions separate from day-to-day coaching decisions.',
+              'trust/support copy',
+          )
+          app.write_text(text)
+
+          parity = Path("tests/e2e/demo-paid-runtime-parity.spec.mjs")
+          text = parity.read_text()
+          helper = '''async function canonicalizeAllowedSandboxUtility(page, role, kind, key) {\n  if (role !== "coach" || key !== "settings") return;\n\n  const sandboxCards = page.locator(".coachAdministrationCard").filter({\n    has: page.getByRole("heading", { name: "DEMO SETTINGS", exact: true }),\n  });\n\n  if (kind === "registered") {\n    await expect(sandboxCards, "Registered Coach settings must never expose demo reset controls").toHaveCount(0);\n    return;\n  }\n\n  await expect(sandboxCards, "Demo Coach settings must expose exactly one sandbox reset utility").toHaveCount(1);\n  await sandboxCards.evaluate((node) => {\n    node.setAttribute("data-parity-excluded-sandbox-utility", "true");\n    node.style.setProperty("display", "none", "important");\n  });\n  await settle(page);\n}\n\n'''
+          text = replace_once(text, helper, "", "sandbox canonicalization helper")
+          text = replace_once(text, '  await canonicalizeAllowedSandboxUtility(page, role, kind, key);\n', '', 'sandbox canonicalization call')
+          exclusion = '''      // Sandbox reset controls are an intentional capability-only difference:\n      // registered tenants must never be able to load or clear demo seed data.\n      // Exclude only that tightly identified utility card from product parity.\n      .filter((node) => {\n        const sandboxCard = node.closest?.(".coachAdministrationCard");\n        if (!sandboxCard) return true;\n        const isSandboxUtility = [...sandboxCard.querySelectorAll("h3")].some((heading) => normalizeText(heading.textContent) === "DEMO SETTINGS");\n        return !isSandboxUtility;\n      })\n'''
+          text = replace_once(text, exclusion, "", "sandbox fingerprint exclusion")
+          parity.write_text(text)
+
+          contract = Path("tests/demo-capability-boundary.test.mjs")
+          text = contract.read_text()
+          old_tests = '''test("demo reset controls are sandbox-only at both action and presentation boundaries", () => {\n  const resetGuards = appSource.match(/requireAccountCapability\\(accountCapabilities,"canResetSandbox"\\)/g) || [];\n  assert.equal(resetGuards.length, 2, "load and clear actions must independently require sandbox reset authority");\n  assert.match(appSource, /accountCapabilities\\?\\.canResetSandbox&&<article className="coachAdministrationCard">/);\n  assert.match(appSource, /accountCapabilities=\\{accountCapabilities\\}/);\n});\n\ntest("runtime parity excludes only the explicitly allowed sandbox reset utility", () => {\n  assert.match(runtimeParitySource, /normalizeText\\(heading\\.textContent\\) === "DEMO SETTINGS"/);\n  assert.match(runtimeParitySource, /node\\.closest\\?\\.\\("\\.coachAdministrationCard"\\)/);\n  assert.doesNotMatch(runtimeParitySource, /normalizeText\\(node\\.textContent\\) === "CLEAR DEMO DATA"/);\n});\n'''
+          new_tests = '''test("sandbox reset internals remain capability-protected without demo-only Coach Settings UI", () => {\n  const resetGuards = appSource.match(/requireAccountCapability\\(accountCapabilities,"canResetSandbox"\\)/g) || [];\n  assert.equal(resetGuards.length, 2, "sandbox reset actions must remain capability-protected even when not presented in product UI");\n  assert.doesNotMatch(appSource, /<h3>DEMO SETTINGS<\\/h3>/);\n  assert.doesNotMatch(appSource, />LOAD DEMO DATA</);\n  assert.doesNotMatch(appSource, />CLEAR DEMO DATA</);\n  assert.match(appSource, /await applyDemoData\\(bundle\\)/, "entering Demo must continue to reseed its isolated sandbox data");\n});\n\ntest("runtime parity has no whitelist for demo-only Coach Settings presentation", () => {\n  assert.doesNotMatch(runtimeParitySource, /canonicalizeAllowedSandboxUtility/);\n  assert.doesNotMatch(runtimeParitySource, /data-parity-excluded-sandbox-utility/);\n  assert.doesNotMatch(runtimeParitySource, /normalizeText\\(heading\\.textContent\\) === "DEMO SETTINGS"/);\n});\n'''
+          text = replace_once(text, old_tests, new_tests, "demo capability parity contract tests")
+          contract.write_text(text)
+          PY
+
+      - name: Verify strengthened parity contracts
+        run: |
+          node --test tests/demo-capability-boundary.test.mjs tests/demo-visual-parity-contract.test.mjs
+          if grep -R -n -E 'DEMO SETTINGS|>LOAD DEMO DATA<|>CLEAR DEMO DATA<' src tests/e2e; then
+            echo 'demo-only settings presentation still exists' >&2
+            exit 1
+          fi
+
+      - name: Verify production build
+        run: npm run build
+
+      - name: Commit repair and remove one-shot workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/one-shot-remove-demo-settings-divergence.yml
+          git add src/App.jsx tests/e2e/demo-paid-runtime-parity.spec.mjs tests/demo-capability-boundary.test.mjs
+          git diff --cached --check
+          git commit -m "Remove demo-only Coach Settings divergence"
+          git push origin HEAD:agent/demo-paid-experience-unification
