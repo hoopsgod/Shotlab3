@@ -1,5 +1,6 @@
 -- Preserve the S&C venue/location across the signed persistence path.
 -- This is additive and idempotent so already-provisioned databases upgrade safely.
+-- Demo and registered sessions now share the same persisted location contract.
 
 alter table if exists public.sc_sessions
   add column if not exists location text;
