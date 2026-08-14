@@ -1,29 +1,251 @@
 const MOBILE_TITLE_STAGE_CSS = String.raw`
 @media(max-width:700px){
-/* Coach secondary route title stages. */
-html body [data-testid="coach-players-interactive-dashboard"],html body [data-testid="coach-events-interactive-dashboard"]{gap:16px!important;padding-top:10px!important;padding-inline:14px!important}
-html body [data-testid="coach-players-command-bar"],html body [data-testid="coach-events-command-bar"]{position:relative!important;isolation:isolate!important;overflow:hidden!important;display:grid!important;grid-template-columns:46px minmax(0,1fr)!important;align-items:start!important;gap:12px!important;margin:0!important;padding:20px 18px 18px!important;border:1px solid rgba(200,255,26,.16)!important;border-radius:30px 30px 30px 11px!important;background:radial-gradient(circle at 91% 3%,rgba(200,255,26,.20),transparent 29%),radial-gradient(circle at 0 100%,rgba(67,112,131,.26),transparent 43%),linear-gradient(145deg,#0b2a38,#06151c 76%)!important;color:#f7fafb!important;box-shadow:0 24px 58px rgba(7,24,32,.22),inset 0 1px rgba(255,255,255,.08)!important}
-html body [data-testid="coach-players-command-bar"]:before,html body [data-testid="coach-events-command-bar"]:before{content:"";position:absolute;right:-25px;top:24px;width:114px;height:114px;z-index:-1;border:1px solid rgba(200,255,26,.14);border-radius:50%;box-shadow:0 0 0 18px rgba(200,255,26,.025),0 0 0 38px rgba(255,255,255,.018);pointer-events:none}
-html body [data-testid="coach-players-command-bar"]:after,html body [data-testid="coach-events-command-bar"]:after{content:"";position:absolute;left:18px;right:18px;bottom:0;height:1px;background:linear-gradient(90deg,#c8ff1a,transparent);opacity:.42;pointer-events:none}
-html body [data-testid="coach-players-command-bar"] .secondaryPageIntro__icon,html body [data-testid="coach-events-command-bar"] .secondaryPageIntro__icon{width:46px!important;height:46px!important;display:grid!important;place-items:center!important;border:1px solid rgba(200,255,26,.25)!important;border-radius:15px 15px 15px 6px!important;background:rgba(255,255,255,.07)!important;color:#c8ff1a!important;box-shadow:inset 0 1px rgba(255,255,255,.08)!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageIntro__copy,html body [data-testid="coach-events-command-bar"] .secondaryPageIntro__copy{position:relative!important;z-index:1!important;max-width:none!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageIntro__eyebrow,html body [data-testid="coach-events-command-bar"] .secondaryPageIntro__eyebrow{margin:1px 0 7px!important;color:#c8ff1a!important;-webkit-text-fill-color:#c8ff1a!important;font-size:10px!important;font-weight:780!important;line-height:1.2!important;letter-spacing:.115em!important;text-transform:uppercase!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageIntro__title,html body [data-testid="coach-events-command-bar"] .secondaryPageIntro__title{max-width:8ch!important;margin:0!important;color:#f7fafb!important;-webkit-text-fill-color:#f7fafb!important;font-size:46px!important;font-weight:840!important;line-height:.91!important;letter-spacing:-.065em!important;overflow-wrap:normal!important;text-wrap:balance!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageIntro__summary,html body [data-testid="coach-events-command-bar"] .secondaryPageIntro__summary{max-width:30ch!important;margin:11px 0 0!important;color:#b7c5cb!important;-webkit-text-fill-color:#b7c5cb!important;font-size:14px!important;font-weight:520!important;line-height:1.45!important;letter-spacing:-.012em!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageIntro__actions,html body [data-testid="coach-events-command-bar"] .secondaryPageIntro__actions{position:relative!important;z-index:1!important;grid-column:1/-1!important;width:100%!important;min-width:0!important;margin-top:2px!important;display:grid!important;gap:11px!important;justify-items:stretch!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageIntro__status,html body [data-testid="coach-events-command-bar"] .secondaryPageIntro__status{max-width:none!important;color:#d7e0e4!important;-webkit-text-fill-color:#d7e0e4!important;font-size:12px!important;font-weight:690!important;line-height:1.25!important;text-align:left!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageIntro__status:before,html body [data-testid="coach-events-command-bar"] .secondaryPageIntro__status:before{width:7px!important;height:7px!important;margin-right:8px!important;background:#c8ff1a!important;box-shadow:0 0 0 4px rgba(200,255,26,.09)!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageIntro__buttonRow{width:100%!important;display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:9px!important}
-html body [data-testid="coach-events-command-bar"] .secondaryPageIntro__buttonRow{width:100%!important;display:grid!important;grid-template-columns:1fr!important;gap:9px!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageAction,html body [data-testid="coach-events-command-bar"] .secondaryPageAction{min-width:0!important;min-height:50px!important;padding:0 14px!important;border-radius:16px 16px 16px 6px!important;font-size:13px!important;font-weight:780!important;letter-spacing:-.012em!important;box-shadow:none!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageAction--primary,html body [data-testid="coach-events-command-bar"] .secondaryPageAction--primary{border-color:transparent!important;background:linear-gradient(135deg,#c8ff1a,#aee800)!important;color:#071007!important;-webkit-text-fill-color:#071007!important;box-shadow:0 12px 26px rgba(174,232,0,.15),inset 0 1px rgba(255,255,255,.35)!important}
-html body [data-testid="coach-players-command-bar"] .secondaryPageAction--secondary,html body [data-testid="coach-events-command-bar"] .secondaryPageAction--secondary{border-color:rgba(255,255,255,.14)!important;background:rgba(255,255,255,.07)!important;color:#eef4f6!important;-webkit-text-fill-color:#eef4f6!important;box-shadow:inset 0 1px rgba(255,255,255,.06)!important}
-html body [data-testid="coach-players-decision-brief"],html body [data-testid="coach-events-decision-brief"]{min-height:0!important;margin:0!important;padding:20px 18px!important;border:1px solid rgba(13,23,28,.11)!important;border-radius:24px 24px 24px 9px!important;background:linear-gradient(150deg,#fffefa,#f1f2e9)!important;color:#0d171c!important;box-shadow:0 14px 34px rgba(20,24,21,.09)!important}
-html body [data-testid="coach-players-decision-brief"] .secondaryPageDecision__icon,html body [data-testid="coach-events-decision-brief"] .secondaryPageDecision__icon{border-color:rgba(113,133,31,.25)!important;background:#edf3d8!important;color:#667d2d!important}
-html body [data-testid="coach-players-decision-brief"] .secondaryPageDecision__eyebrow,html body [data-testid="coach-events-decision-brief"] .secondaryPageDecision__eyebrow{color:#667d2d!important;-webkit-text-fill-color:#667d2d!important}
-html body [data-testid="coach-players-decision-brief"] h2,html body [data-testid="coach-events-decision-brief"] h2{max-width:15ch!important;color:#0d171c!important;-webkit-text-fill-color:#0d171c!important;font-size:29px!important;line-height:1!important;letter-spacing:-.045em!important}
-html body [data-testid="coach-players-decision-brief"] p,html body [data-testid="coach-events-decision-brief"] p{max-width:34ch!important;color:#59645f!important;-webkit-text-fill-color:#59645f!important;font-size:14px!important;line-height:1.48!important}
-html body [data-testid="coach-players-decision-brief"] button,html body [data-testid="coach-events-decision-brief"] button{min-height:46px!important;border-color:rgba(13,23,28,.10)!important;border-radius:14px!important;background:#111916!important;color:#fff!important;-webkit-text-fill-color:#fff!important;box-shadow:none!important}
+/*
+ * Final mobile title-stage authority. These selectors intentionally outrank the
+ * legacy route stylesheets that still ship with !important declarations.
+ */
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"]).secondaryPageShell{
+  gap:16px!important;
+  padding-top:10px!important;
+  padding-inline:14px!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]).secondaryPageIntro.appHeader{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
+  display:grid!important;
+  grid-template-columns:46px minmax(0,1fr)!important;
+  align-items:start!important;
+  gap:12px!important;
+  margin:0!important;
+  padding:20px 18px 18px!important;
+  border:1px solid rgba(200,255,26,.18)!important;
+  border-radius:30px 30px 30px 11px!important;
+  background-color:#071820!important;
+  background-image:radial-gradient(circle at 91% 3%,rgba(200,255,26,.20),transparent 29%),radial-gradient(circle at 0 100%,rgba(67,112,131,.27),transparent 43%),linear-gradient(145deg,#0b2a38 0%,#06151c 76%)!important;
+  color:#f7fafb!important;
+  box-shadow:0 24px 58px rgba(7,24,32,.22),inset 0 1px rgba(255,255,255,.08)!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]).secondaryPageIntro.appHeader:before{
+  content:""!important;
+  position:absolute!important;
+  right:-25px!important;
+  top:24px!important;
+  width:114px!important;
+  height:114px!important;
+  z-index:-1!important;
+  display:block!important;
+  border:1px solid rgba(200,255,26,.14)!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  box-shadow:0 0 0 18px rgba(200,255,26,.025),0 0 0 38px rgba(255,255,255,.018)!important;
+  pointer-events:none!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]).secondaryPageIntro.appHeader:after{
+  content:""!important;
+  position:absolute!important;
+  left:18px!important;
+  right:18px!important;
+  bottom:0!important;
+  display:block!important;
+  height:1px!important;
+  background:linear-gradient(90deg,#c8ff1a,transparent)!important;
+  opacity:.44!important;
+  pointer-events:none!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageIntro__icon{
+  width:46px!important;
+  height:46px!important;
+  display:grid!important;
+  place-items:center!important;
+  border:1px solid rgba(200,255,26,.26)!important;
+  border-radius:15px 15px 15px 6px!important;
+  background:rgba(255,255,255,.07)!important;
+  color:#c8ff1a!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.08)!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageIntro__copy{
+  position:relative!important;
+  z-index:1!important;
+  max-width:none!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageIntro__eyebrow{
+  margin:1px 0 7px!important;
+  color:#c8ff1a!important;
+  -webkit-text-fill-color:#c8ff1a!important;
+  font-size:10px!important;
+  font-weight:780!important;
+  line-height:1.2!important;
+  letter-spacing:.115em!important;
+  text-transform:uppercase!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageIntro__title.appHeaderTitle{
+  max-width:8ch!important;
+  margin:0!important;
+  color:#f7fafb!important;
+  -webkit-text-fill-color:#f7fafb!important;
+  font-size:46px!important;
+  font-weight:840!important;
+  line-height:.91!important;
+  letter-spacing:-.065em!important;
+  overflow-wrap:normal!important;
+  text-wrap:balance!important;
+  text-shadow:none!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageIntro__summary{
+  max-width:30ch!important;
+  margin:11px 0 0!important;
+  color:#b7c5cb!important;
+  -webkit-text-fill-color:#b7c5cb!important;
+  font-size:14px!important;
+  font-weight:520!important;
+  line-height:1.45!important;
+  letter-spacing:-.012em!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageIntro__actions{
+  position:relative!important;
+  z-index:1!important;
+  grid-column:1/-1!important;
+  width:100%!important;
+  min-width:0!important;
+  margin-top:2px!important;
+  display:grid!important;
+  gap:11px!important;
+  justify-items:stretch!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageIntro__status{
+  max-width:none!important;
+  color:#d7e0e4!important;
+  -webkit-text-fill-color:#d7e0e4!important;
+  font-size:12px!important;
+  font-weight:690!important;
+  line-height:1.25!important;
+  text-align:left!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageIntro__status:before{
+  width:7px!important;
+  height:7px!important;
+  margin-right:8px!important;
+  background:#c8ff1a!important;
+  box-shadow:0 0 0 4px rgba(200,255,26,.09)!important;
+}
+
+html body:has([data-testid="coach-players-interactive-dashboard"]) #root .performance-shell [data-testid="coach-players-command-bar"] .secondaryPageIntro__buttonRow{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:9px!important;
+}
+html body:has([data-testid="coach-events-interactive-dashboard"]) #root .performance-shell [data-testid="coach-events-command-bar"] .secondaryPageIntro__buttonRow{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:1fr!important;
+  gap:9px!important;
+}
+
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageAction{
+  min-width:0!important;
+  min-height:50px!important;
+  padding:0 14px!important;
+  border-radius:16px 16px 16px 6px!important;
+  font-size:13px!important;
+  font-weight:780!important;
+  letter-spacing:-.012em!important;
+  box-shadow:none!important;
+}
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageAction--primary{
+  border-color:transparent!important;
+  background-color:#baf200!important;
+  background-image:linear-gradient(135deg,#c8ff1a,#aee800)!important;
+  color:#071007!important;
+  -webkit-text-fill-color:#071007!important;
+  box-shadow:0 12px 26px rgba(174,232,0,.15),inset 0 1px rgba(255,255,255,.35)!important;
+}
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageAction--secondary{
+  border-color:rgba(255,255,255,.14)!important;
+  background-color:rgba(255,255,255,.07)!important;
+  background-image:none!important;
+  color:#eef4f6!important;
+  -webkit-text-fill-color:#eef4f6!important;
+  box-shadow:inset 0 1px rgba(255,255,255,.06)!important;
+}
+
+/* Supporting decision card deliberately becomes light so it cannot compete with the title stage. */
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-decision-brief"],[data-testid="coach-events-decision-brief"]).secondaryPageDecision{
+  min-height:0!important;
+  margin:0!important;
+  padding:20px 18px!important;
+  border:1px solid rgba(13,23,28,.11)!important;
+  border-radius:24px 24px 24px 9px!important;
+  background-color:#f7f6ef!important;
+  background-image:linear-gradient(150deg,#fffefa,#f1f2e9)!important;
+  color:#0d171c!important;
+  box-shadow:0 14px 34px rgba(20,24,21,.09)!important;
+}
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-decision-brief"],[data-testid="coach-events-decision-brief"]) .secondaryPageDecision__icon{
+  border-color:rgba(113,133,31,.25)!important;
+  background:#edf3d8!important;
+  color:#667d2d!important;
+}
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-decision-brief"],[data-testid="coach-events-decision-brief"]) .secondaryPageDecision__eyebrow{
+  color:#667d2d!important;
+  -webkit-text-fill-color:#667d2d!important;
+}
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-decision-brief"],[data-testid="coach-events-decision-brief"]) h2{
+  max-width:15ch!important;
+  color:#0d171c!important;
+  -webkit-text-fill-color:#0d171c!important;
+  font-size:29px!important;
+  line-height:1!important;
+  letter-spacing:-.045em!important;
+}
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-decision-brief"],[data-testid="coach-events-decision-brief"]) p{
+  max-width:34ch!important;
+  color:#59645f!important;
+  -webkit-text-fill-color:#59645f!important;
+  font-size:14px!important;
+  line-height:1.48!important;
+}
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-decision-brief"],[data-testid="coach-events-decision-brief"]) button{
+  min-height:46px!important;
+  border-color:rgba(13,23,28,.10)!important;
+  border-radius:14px!important;
+  background:#111916!important;
+  color:#fff!important;
+  -webkit-text-fill-color:#fff!important;
+  box-shadow:none!important;
+}
+
+/* Shared back control reads as quiet navigation, not a detached oversized title block. */
+html body:has([data-testid="coach-players-interactive-dashboard"]) #root .shared-dashboard-back-action{
+  width:44px!important;
+  min-width:44px!important;
+  min-height:44px!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border:1px solid rgba(13,23,28,.14)!important;
+  border-radius:14px!important;
+  background:rgba(255,254,250,.86)!important;
+  color:#0d171c!important;
+  box-shadow:0 5px 16px rgba(20,24,21,.05)!important;
+  font-size:0!important;
+}
+html body:has([data-testid="coach-players-interactive-dashboard"]) #root .shared-dashboard-back-action span{
+  font-size:19px!important;
+  line-height:1!important;
+}
 
 /* Coach Home opening viewport. */
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .missionControl{padding:8px 12px 108px!important;gap:14px!important}
@@ -31,26 +253,29 @@ html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcBrandLockup{gap:9px!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeaderTeamMark{width:40px!important;height:40px!important;flex-basis:40px!important;border-radius:12px!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeaderTeamMark img{width:42px!important;height:42px!important}
-html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcBrandCopy small{color:#9aabb2!important;font-size:9px!important;letter-spacing:.09em!important}
-html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcBrandCopy strong{max-width:none!important;color:#f7fafb!important;-webkit-text-fill-color:#f7fafb!important;font-size:18px!important;font-weight:810!important;line-height:1!important;letter-spacing:-.045em!important}
+html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcBrandCopy small{display:none!important}
+html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcBrandCopy strong{max-width:none!important;color:#f7fafb!important;-webkit-text-fill-color:#f7fafb!important;font-size:17px!important;font-weight:810!important;line-height:1!important;letter-spacing:-.04em!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeaderActions{display:block!important;width:40px!important;min-width:40px!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcTeamSelect{display:none!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcBell{width:40px!important;height:40px!important;border-radius:13px!important}
-html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHero{min-height:356px!important;max-height:none!important;border:1px solid rgba(200,255,26,.16)!important;border-radius:30px 30px 30px 11px!important;background:radial-gradient(circle at 88% 7%,rgba(200,255,26,.16),transparent 29%),radial-gradient(circle at 5% 100%,rgba(64,116,137,.22),transparent 44%),linear-gradient(145deg,#0b2a38,#06151c 79%)!important;box-shadow:0 28px 62px rgba(7,24,32,.25),inset 0 1px rgba(255,255,255,.08)!important}
-html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroContent{grid-template-columns:minmax(0,1fr) 62px!important;padding:86px 18px 17px!important;gap:8px 11px!important;background:transparent!important}
-html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroTeamMark{top:80px!important;right:17px!important;width:62px!important;height:62px!important;opacity:.96!important}
-html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroTeamMark img{width:60px!important;height:60px!important;filter:drop-shadow(0 14px 22px rgba(0,0,0,.28))!important}
+html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHero{min-height:350px!important;max-height:none!important;border:1px solid rgba(200,255,26,.16)!important;border-radius:30px 30px 30px 11px!important;background:radial-gradient(circle at 88% 7%,rgba(200,255,26,.14),transparent 28%),radial-gradient(circle at 5% 100%,rgba(64,116,137,.22),transparent 44%),linear-gradient(145deg,#0b2a38,#06151c 79%)!important;box-shadow:0 28px 62px rgba(7,24,32,.25),inset 0 1px rgba(255,255,255,.08)!important}
+html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroContent{grid-template-columns:minmax(0,1fr)!important;padding:84px 18px 17px!important;gap:8px!important;background:transparent!important}
+html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroTeamMark{display:none!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcDecisionIndex{display:none!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcEyebrow{color:#c8ff1a!important;-webkit-text-fill-color:#c8ff1a!important;font-size:10px!important;font-weight:780!important;letter-spacing:.115em!important}
-html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHero h1{max-width:10.4ch!important;margin-top:8px!important;color:#f7fafb!important;-webkit-text-fill-color:#f7fafb!important;font-size:42px!important;font-weight:850!important;line-height:.91!important;letter-spacing:-.064em!important}
-html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroContent>p{max-width:29ch!important;margin-top:8px!important;color:#b7c5cb!important;-webkit-text-fill-color:#b7c5cb!important;font-size:13.5px!important;line-height:1.42!important}
+html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHero h1{max-width:13ch!important;margin-top:8px!important;color:#f7fafb!important;-webkit-text-fill-color:#f7fafb!important;font-size:40px!important;font-weight:850!important;line-height:.92!important;letter-spacing:-.06em!important}
+html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHeroContent>p{max-width:30ch!important;margin-top:8px!important;color:#b7c5cb!important;-webkit-text-fill-color:#b7c5cb!important;font-size:13.5px!important;line-height:1.42!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcRealityStrip{margin-top:11px!important;border:1px solid rgba(255,255,255,.10)!important;border-radius:18px 18px 18px 7px!important;background:rgba(255,255,255,.055)!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcRealityStrip>button{min-height:48px!important;padding:5px 4px!important;background:transparent!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcRealityStrip strong{color:#f7fafb!important;-webkit-text-fill-color:#f7fafb!important;font-size:20px!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcRealityStrip small{color:#9fb0b7!important;-webkit-text-fill-color:#9fb0b7!important;font-size:9.5px!important}
 html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcPrimary{min-height:52px!important;margin-top:11px!important;border-radius:16px 16px 16px 6px!important;background:linear-gradient(135deg,#c8ff1a,#aee800)!important;color:#071007!important;-webkit-text-fill-color:#071007!important;font-size:13.5px!important;font-weight:800!important}
 }
-@media(max-width:390px){html body [data-testid="coach-players-command-bar"] .secondaryPageIntro__title,html body [data-testid="coach-events-command-bar"] .secondaryPageIntro__title{font-size:41px!important}html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHero h1{font-size:37px!important}}
+
+@media(max-width:390px){
+html body:has(:is([data-testid="coach-players-interactive-dashboard"],[data-testid="coach-events-interactive-dashboard"])) #root .performance-shell :is([data-testid="coach-players-command-bar"],[data-testid="coach-events-command-bar"]) .secondaryPageIntro__title.appHeaderTitle{font-size:41px!important}
+html body.mission-control-active [data-mobile-visual-system="phase-2"].mcShellV3 .mcHero h1{font-size:38px!important}
+}
 `;
 
 export function installMobileTitleStagePolish() {
