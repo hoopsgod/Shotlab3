@@ -123,6 +123,7 @@ import { scheduleWorkspaceActionReveal } from "./lib/playerWorkspaceActionRoutin
 import { createTrainingCatalogPersistenceService } from "./lib/trainingCatalogPersistenceService.js";
 import { createPlayerChallengePersistenceService, mergePlayerChallenges } from "./lib/playerChallengePersistenceService.js";
 import { openTeamStorePortal } from "./lib/teamStorePortalBridge.js";
+import { STARTUP_HYDRATION_TIMEOUT_MS, settleStartupHydration } from "./lib/startupHydrationDeadline.js";
 const VOLT = TOKENS.PRIMARY;
 const SUCCESS = TOKENS.SUCCESS;
 const INFO = TOKENS.INFO;
@@ -1136,17 +1137,22 @@ return await acquired.promise;
 useEffect(()=>{
 let canceled=false;
 (async()=>{
-try{
 bootMark("hydration_started");
-await hydratePersistedData();
-bootMark("hydration_data_loaded");
-}catch(error){
+const result=await settleStartupHydration(hydratePersistedData,{
+timeoutMs:STARTUP_HYDRATION_TIMEOUT_MS,
+onTimeout:()=>bootMark("hydration_timeout",String(STARTUP_HYDRATION_TIMEOUT_MS)),
+});
 if(canceled)return;
+if(result.status==="completed"){
+bootMark("hydration_data_loaded");
+}else if(result.status==="failed"){
+const error=result.error;
 bootMark("hydration_failed",String(error?.message||error||"unknown"));
 setStartupError(parseStartupErrorMessage(error));
-}finally{
-if(!canceled)setReady(true);
+}else{
+setAccountNotice("Saved team data is still syncing. Sign in or use a demo while ShotLab reconnects.");
 }
+setReady(true);
 })();
 return()=>{canceled=true;};
 },[hydratePersistedData]);
