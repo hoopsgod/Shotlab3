@@ -57,8 +57,11 @@ async function expectPlayerIdentityInsideViewport(page) {
     const rect = element.getBoundingClientRect();
     return { left: rect.left, right: rect.right, width: rect.width, viewportWidth: window.innerWidth };
   });
-  expect(geometry.left).toBeGreaterThanOrEqual(8);
-  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth - 8);
+  // Player Home now intentionally owns the full mobile canvas. The identity can meet
+  // the viewport edge, but it may never bleed outside it. Secondary pages remain
+  // protected by the same no-horizontal-overflow contract below.
+  expect(geometry.left).toBeGreaterThanOrEqual(0);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
   expect(geometry.width).toBeGreaterThan(300);
 }
 
