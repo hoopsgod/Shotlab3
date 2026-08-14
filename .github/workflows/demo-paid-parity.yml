@@ -64,7 +64,12 @@ jobs:
         run: npm run build
 
       - name: Compare registered and demo runtime experiences
-        run: npx playwright test tests/e2e/demo-paid-parity.spec.mjs --config=playwright.acceptance.config.mjs --reporter=line
+        run: >-
+          npx playwright test
+          tests/e2e/demo-paid-parity.spec.mjs
+          tests/e2e/demo-sandbox-safety.spec.mjs
+          --config=playwright.acceptance.config.mjs
+          --reporter=line
 
       - name: Upload parity certification screenshots
         if: always()
