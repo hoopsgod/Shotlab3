@@ -13,6 +13,7 @@ const TEAM_ID = crypto.randomUUID();
 const COACH_EMAIL = `shotlab-live-parity-coach-${RUN_ID}@example.invalid`;
 const PLAYER_EMAIL = `shotlab-live-parity-player-${RUN_ID}@example.invalid`;
 const COACH_USER_UUID = emailUuid(COACH_EMAIL);
+const REGISTERED_STATES = ["empty", "sparse", "populated"];
 
 const identities = {
   coach: { email: COACH_EMAIL, name: "Demo Coach" },
@@ -33,6 +34,14 @@ const MOTION_FREEZE = `
 function emailUuid(email) {
   const hash = crypto.createHash("md5").update(`shotlab-email-user:${String(email).toLowerCase()}`).digest("hex");
   return `${hash.slice(0, 8)}-${hash.slice(8, 12)}-${hash.slice(12, 16)}-${hash.slice(16, 20)}-${hash.slice(20, 32)}`;
+}
+
+function localDateKey(offsetDays = 0) {
+  const date = new Date();
+  date.setHours(12, 0, 0, 0);
+  date.setDate(date.getDate() + offsetDays);
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
 async function rest(table, { method = "GET", query = "", body, prefer = "return=representation" } = {}) {
@@ -56,15 +65,37 @@ async function safeDelete(table, query) {
   await rest(table, { method: "DELETE", query, prefer: "return=minimal" }).catch(() => null);
 }
 
-async function cleanupFixture() {
-  const encodedTeam = encodeURIComponent(TEAM_ID);
-  const emails = [COACH_EMAIL, PLAYER_EMAIL];
-  for (const email of emails) await safeDelete("legacy_auth_sessions", `user_email=eq.${encodeURIComponent(email)}`);
-  for (const table of ["coach_player_invitations", "player_profiles", "team_priorities", "team_memberships", "team_invites", "players"]) {
-    await safeDelete(table, `team_id=eq.${encodedTeam}`);
+async function clearTeamData() {
+  const teamQuery = `team_id=eq.${encodeURIComponent(TEAM_ID)}`;
+  for (const table of [
+    "sc_logs",
+    "sc_rsvps",
+    "sc_sessions",
+    "program_scores",
+    "shot_logs",
+    "scores",
+    "rsvps",
+    "events",
+    "coach_player_invitations",
+    "player_profiles",
+    "team_priorities",
+    "team_memberships",
+    "team_invites",
+    "players",
+  ]) {
+    await safeDelete(table, teamQuery);
   }
-  for (const email of emails) await safeDelete("legacy_auth_profiles", `email=eq.${encodeURIComponent(email)}`);
-  await safeDelete("teams", `id=eq.${encodedTeam}`);
+}
+
+async function cleanupFixture() {
+  for (const email of [COACH_EMAIL, PLAYER_EMAIL]) {
+    await safeDelete("legacy_auth_sessions", `user_email=eq.${encodeURIComponent(email)}`);
+  }
+  await clearTeamData();
+  for (const email of [COACH_EMAIL, PLAYER_EMAIL]) {
+    await safeDelete("legacy_auth_profiles", `email=eq.${encodeURIComponent(email)}`);
+  }
+  await safeDelete("teams", `id=eq.${encodeURIComponent(TEAM_ID)}`);
 }
 
 async function authRow(email, name, role) {
@@ -80,43 +111,22 @@ async function authRow(email, name, role) {
   };
 }
 
-async function seedFixture() {
-  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) throw new Error("Live parity requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY");
-  await cleanupFixture();
+function coreRoster(now = Date.now()) {
+  return [
+    { id: `live-coach-${RUN_ID}`, email: COACH_EMAIL, name: "Demo Coach", role: "coach", team_id: TEAM_ID, hide_from_leaderboards: true, created_at: now },
+    { id: `live-player-${RUN_ID}`, email: PLAYER_EMAIL, name: "Demo Player", role: "player", team_id: TEAM_ID, hide_from_leaderboards: false, created_at: now + 1 },
+  ];
+}
 
-  await rest("teams", {
-    method: "POST",
-    body: {
-      id: TEAM_ID,
-      name: "Demo Titans",
-      coach_user_id: COACH_USER_UUID,
-      owner_coach_id: COACH_EMAIL,
-      join_code: `LP${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
-      school: "ShotLab Academy",
-      level: "Varsity",
-    },
-  });
+function extraRoster(now = Date.now()) {
+  return [
+    { id: `live-roster-a-${RUN_ID}`, email: `live-roster-a-${RUN_ID}@example.invalid`, name: "Ava Brooks", role: "player", team_id: TEAM_ID, hide_from_leaderboards: false, created_at: now + 2 },
+    { id: `live-roster-b-${RUN_ID}`, email: `live-roster-b-${RUN_ID}@example.invalid`, name: "Jordan Lee", role: "player", team_id: TEAM_ID, hide_from_leaderboards: false, created_at: now + 3 },
+    { id: `live-roster-c-${RUN_ID}`, email: `live-roster-c-${RUN_ID}@example.invalid`, name: "Micah Santos", role: "player", team_id: TEAM_ID, hide_from_leaderboards: false, created_at: now + 4 },
+  ];
+}
 
-  await rest("legacy_auth_profiles", {
-    method: "POST",
-    body: [
-      await authRow(COACH_EMAIL, "Demo Coach", "coach"),
-      await authRow(PLAYER_EMAIL, "Demo Player", "player"),
-    ],
-  });
-
-  const now = Date.now();
-  await rest("players", {
-    method: "POST",
-    body: [
-      { id: `live-coach-${RUN_ID}`, email: COACH_EMAIL, name: "Demo Coach", role: "coach", team_id: TEAM_ID, hide_from_leaderboards: false, created_at: now },
-      { id: `live-player-${RUN_ID}`, email: PLAYER_EMAIL, name: "Demo Player", role: "player", team_id: TEAM_ID, hide_from_leaderboards: false, created_at: now + 1 },
-      { id: `live-roster-a-${RUN_ID}`, email: `live-roster-a-${RUN_ID}@example.invalid`, name: "Alex Morgan", role: "player", team_id: TEAM_ID, hide_from_leaderboards: false, created_at: now + 2 },
-      { id: `live-roster-b-${RUN_ID}`, email: `live-roster-b-${RUN_ID}@example.invalid`, name: "Jordan Lee", role: "player", team_id: TEAM_ID, hide_from_leaderboards: false, created_at: now + 3 },
-      { id: `live-roster-c-${RUN_ID}`, email: `live-roster-c-${RUN_ID}@example.invalid`, name: "Taylor Reed", role: "player", team_id: TEAM_ID, hide_from_leaderboards: false, created_at: now + 4 },
-    ],
-  });
-
+async function seedPrimaryProfile(now = Date.now()) {
   await rest("player_profiles", {
     method: "POST",
     body: {
@@ -132,6 +142,199 @@ async function seedFixture() {
       created_at: now,
     },
   }).catch(() => null);
+}
+
+async function applyRegisteredState(state) {
+  if (!REGISTERED_STATES.includes(state)) throw new Error(`Unknown registered state: ${state}`);
+  await clearTeamData();
+  const now = Date.now();
+  const extras = extraRoster(now);
+  const roster = state === "empty"
+    ? coreRoster(now)
+    : state === "sparse"
+      ? [...coreRoster(now), extras[0]]
+      : [...coreRoster(now), ...extras];
+  await rest("players", { method: "POST", body: roster });
+  await seedPrimaryProfile(now);
+
+  if (state === "empty") return;
+
+  const events = [
+    {
+      id: `live-event-practice-${RUN_ID}`,
+      team_id: TEAM_ID,
+      title: "Team Practice",
+      date: localDateKey(1),
+      time: "6:00 PM",
+      location: "Main Gym",
+      description: "Team shooting standards and controlled five-on-five.",
+      type: "practice",
+    },
+  ];
+  if (state === "populated") {
+    events.push({
+      id: `live-event-skill-${RUN_ID}`,
+      team_id: TEAM_ID,
+      title: "Skill Lab: Rim Pressure",
+      date: localDateKey(3),
+      time: "6:15 PM",
+      location: "Main Gym Court 2",
+      description: "Paint touch creation, contact finishes, and late-clock reads.",
+      type: "workout",
+    });
+  }
+  await rest("events", { method: "POST", body: events });
+
+  const scoreRows = [
+    {
+      id: `live-score-primary-${RUN_ID}`,
+      email: PLAYER_EMAIL,
+      name: "Demo Player",
+      player_id: PLAYER_EMAIL,
+      team_id: TEAM_ID,
+      drill_id: "live-parity-home-shooting",
+      score: state === "sparse" ? 8 : 12,
+      date: localDateKey(0),
+      ts: now,
+      src: "home",
+    },
+  ];
+  if (state === "populated") {
+    scoreRows.push({
+      id: `live-score-ava-${RUN_ID}`,
+      email: extras[0].email,
+      name: extras[0].name,
+      player_id: extras[0].email,
+      team_id: TEAM_ID,
+      drill_id: "live-parity-home-shooting",
+      score: 14,
+      date: localDateKey(0),
+      ts: now + 1,
+      src: "home",
+    });
+  }
+  await rest("scores", { method: "POST", body: scoreRows });
+
+  await rest("shot_logs", {
+    method: "POST",
+    body: [{
+      id: `live-shotlog-primary-${RUN_ID}`,
+      email: PLAYER_EMAIL,
+      name: "Demo Player",
+      player_id: PLAYER_EMAIL,
+      team_id: TEAM_ID,
+      made: state === "sparse" ? 45 : 125,
+      date: localDateKey(0),
+      ts: now + 2,
+      hide_from_leaderboards: false,
+    }],
+  });
+
+  if (state !== "populated") return;
+
+  await rest("program_scores", {
+    method: "POST",
+    body: [
+      {
+        id: `live-program-primary-${RUN_ID}`,
+        team_id: TEAM_ID,
+        player_id: PLAYER_EMAIL,
+        player_email: PLAYER_EMAIL,
+        player_name: "Demo Player",
+        drill_id: "live-parity-program-230s",
+        drill_name: "2:30 Shooting",
+        score: 31,
+        session_date: localDateKey(-2),
+        logged_at: new Date(now - 2 * 86400000).toISOString(),
+        recorded_by: COACH_EMAIL,
+        recorded_by_role: "coach",
+        src: "program",
+      },
+      {
+        id: `live-program-ava-${RUN_ID}`,
+        team_id: TEAM_ID,
+        player_id: extras[0].email,
+        player_email: extras[0].email,
+        player_name: extras[0].name,
+        drill_id: "live-parity-program-230s",
+        drill_name: "2:30 Shooting",
+        score: 34,
+        session_date: localDateKey(-3),
+        logged_at: new Date(now - 3 * 86400000).toISOString(),
+        recorded_by: COACH_EMAIL,
+        recorded_by_role: "coach",
+        src: "program",
+      },
+    ],
+  });
+
+  const scSessionId = `live-sc-power-${RUN_ID}`;
+  await rest("sc_sessions", {
+    method: "POST",
+    body: [
+      {
+        id: scSessionId,
+        team_id: TEAM_ID,
+        sport: "Strength",
+        date: localDateKey(2),
+        time: "6:15 AM",
+        location: "Weight Room",
+        session_type: "Program",
+        owner_coach_id: COACH_EMAIL,
+      },
+      {
+        id: `live-sc-speed-${RUN_ID}`,
+        team_id: TEAM_ID,
+        sport: "Performance",
+        date: localDateKey(6),
+        time: "7:00 AM",
+        location: "Turf",
+        session_type: "Program",
+        owner_coach_id: COACH_EMAIL,
+      },
+    ],
+  });
+  await rest("sc_logs", {
+    method: "POST",
+    body: [{
+      id: `live-sclog-primary-${RUN_ID}`,
+      team_id: TEAM_ID,
+      session_id: scSessionId,
+      email: PLAYER_EMAIL,
+      player_id: PLAYER_EMAIL,
+      name: "Demo Player",
+      date: localDateKey(-3),
+      time: "6:30 AM",
+      place: "Performance Center",
+      sport: "Recovery",
+      ts: now - 3 * 86400000,
+    }],
+  });
+}
+
+async function seedFixture() {
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) throw new Error("Live parity requires SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY");
+  await cleanupFixture();
+  await rest("teams", {
+    method: "POST",
+    body: {
+      id: TEAM_ID,
+      name: "Demo Titans",
+      coach_user_id: COACH_USER_UUID,
+      owner_coach_id: COACH_EMAIL,
+      join_code: `LP${crypto.randomBytes(3).toString("hex").toUpperCase()}`,
+      school: "ShotLab Academy",
+      level: "Varsity",
+    },
+  });
+  await rest("legacy_auth_profiles", {
+    method: "POST",
+    body: [
+      await authRow(COACH_EMAIL, "Demo Coach", "coach"),
+      await authRow(PLAYER_EMAIL, "Demo Player", "player"),
+    ],
+  });
+  await applyRegisteredState("empty");
 }
 
 async function settle(page) {
@@ -274,14 +477,21 @@ test.afterAll(async () => {
 });
 
 for (const role of ["coach", "player"]) {
-  test(`${role} demo matches a genuine registered account presentation on the same build`, async ({ browser }) => {
+  test(`${role} demo shares the production presentation system with genuine registered states`, async ({ browser }) => {
     const demo = await captureRole(browser, role, "demo");
-    const registered = await captureRole(browser, role, "registered");
-
-    expect(registered.navKeys, `${role} must expose the same production navigation in demo and registered sessions`).toEqual(demo.navKeys);
     expect(demo.navKeys.length).toBeGreaterThanOrEqual(5);
-    for (const key of demo.navKeys) {
-      expect(stableContract(registered.contracts[key]), `${role}/${key} production shell must not change by account type`).toEqual(stableContract(demo.contracts[key]));
+
+    for (const state of REGISTERED_STATES) {
+      await applyRegisteredState(state);
+      const kind = `registered-${state}`;
+      const registered = await captureRole(browser, role, kind);
+      expect(registered.navKeys, `${role}/${state} must expose the same production navigation as demo`).toEqual(demo.navKeys);
+      for (const key of demo.navKeys) {
+        expect(
+          stableContract(registered.contracts[key]),
+          `${role}/${state}/${key} production shell must not change by account type or data density`,
+        ).toEqual(stableContract(demo.contracts[key]));
+      }
     }
   });
 }
