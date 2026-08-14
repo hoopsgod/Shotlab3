@@ -65,11 +65,21 @@ function condenseDuplicateTouchpoint(root = document) {
   }
 }
 
+function tightenPrimaryCoachTitleFraming() {
+  const players = document.querySelector('[data-testid="coach-players-interactive-dashboard"]');
+  if (!players || window.innerWidth > 700) return;
+  players.style.setProperty("margin-top", "-34px", "important");
+  const back = document.querySelector("button.shared-dashboard-back-action");
+  const icon = back?.querySelector('span[aria-hidden="true"]');
+  if (icon) icon.style.setProperty("font-size", "20px", "important");
+}
+
 function apply(root = document) {
   classifyButtons(root);
   fixCopy(root);
   normalizeAddPlayerDescription(root);
   condenseDuplicateTouchpoint(root);
+  tightenPrimaryCoachTitleFraming();
 }
 
 export function installExpertVisualPolish() {
