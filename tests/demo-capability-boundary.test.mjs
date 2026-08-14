@@ -5,6 +5,7 @@ import { readFile } from "node:fs/promises";
 const appSource = await readFile(new URL("../src/App.jsx", import.meta.url), "utf8");
 const demoDataSource = await readFile(new URL("../src/lib/demoData.js", import.meta.url), "utf8");
 const inviteSource = await readFile(new URL("../src/lib/coachPlayerInvitationService.js", import.meta.url), "utf8");
+const runtimeParitySource = await readFile(new URL("./e2e/demo-paid-runtime-parity.spec.mjs", import.meta.url), "utf8");
 
 test("App resolves sandbox behavior through centralized account capabilities", () => {
   assert.match(appSource, /buildAccountCapabilities, requireAccountCapability/);
@@ -31,6 +32,12 @@ test("demo reset controls are sandbox-only at both action and presentation bound
   assert.equal(resetGuards.length, 2, "load and clear actions must independently require sandbox reset authority");
   assert.match(appSource, /accountCapabilities\?\.canResetSandbox&&<article className="coachAdministrationCard">/);
   assert.match(appSource, /accountCapabilities=\{accountCapabilities\}/);
+});
+
+test("runtime parity excludes only the explicitly allowed sandbox reset utility", () => {
+  assert.match(runtimeParitySource, /normalizeText\(heading\.textContent\) === "DEMO SETTINGS"/);
+  assert.match(runtimeParitySource, /node\.closest\?\.\("\.coachAdministrationCard"\)/);
+  assert.doesNotMatch(runtimeParitySource, /normalizeText\(node\.textContent\) === "CLEAR DEMO DATA"/);
 });
 
 test("demo cleanup is row-scoped and cannot wipe shared local collections", () => {
