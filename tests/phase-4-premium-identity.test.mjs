@@ -33,7 +33,7 @@ test("Phase 4 stats use a coherent editorial numeric treatment", () => {
 });
 
 test("Phase 4 mobile performance copy stays readable", () => {
-  assert.match(coach, /font-size: 13px !important/);
-  assert.match(player, /\.description \{ font-size: 14px; \}/);
+  assert.match(coach, /font-size: 14px !important/);
+  assert.match(player, /\.description \{[^}]*font-size: 15px;/);
   assert.match(foundation, /prefers-reduced-motion: reduce/);
 });

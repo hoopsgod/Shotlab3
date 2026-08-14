@@ -57,7 +57,7 @@ export default function PlayerDailyCommandCenter({ model, onAction }) {
   ];
 
   return (
-    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" aria-label="Daily training command center">
+    <section className={styles.root} data-testid="player-daily-command-center" data-phase="phase-2-command-hierarchy" data-page-hierarchy="activation-loop" data-mobile-product-reset="phase-1" aria-label="Daily training command center">
       <div className={styles.header} data-layout-role="editorial-header">
         <div className={styles.eyebrow}>{firstSession.pending ? "First session · Create your baseline" : "Today’s focus"}</div>
         <div className={styles.status}>{firstSession.pending ? "Activation" : urgencyLabel(primary.urgency)}</div>

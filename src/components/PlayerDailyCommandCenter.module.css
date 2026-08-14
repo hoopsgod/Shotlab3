@@ -5,6 +5,7 @@
   position: relative;
   overflow: visible;
   border: 0;
+  border-radius: 0;
   padding: 0;
   background: transparent;
   box-shadow: none;
@@ -158,7 +159,7 @@
 .coachSignalLabel { color: var(--text-3,#858d92); font-size: var(--type-micro,11px); }
 .coachSignalValue { margin-top: 7px; color: var(--text-1,#171a18); font-family: var(--font-body,-apple-system,BlinkMacSystemFont,'SF Pro Text','Segoe UI',sans-serif); font-size: 14px; font-weight: 650; line-height: 1.38; }
 
-.progressGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 16px; border-block: 1px solid rgba(23,26,24,.1); }
+.progressGrid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 16px; border-block: 1px solid rgba(23,26,24,.1); scroll-snap-type: x proximity; }
 .progressCard { min-width: 0; padding: 13px 10px 14px 0; border: 0; background: transparent; box-shadow: none; }
 .progressCard + .progressCard { padding-left: 10px; border-left: 1px solid rgba(23,26,24,.1); }
 .progressValue {
@@ -201,9 +202,15 @@
 .activationText { min-width: 0; flex: 1 1 auto; color: #38433c; font-size: 13px; font-weight: 650; }
 
 @media (max-width: 700px) {
-  .hero { padding: 18px; }
-  .title { font-size: 37px; }
-  .description { font-size: 14px; }
+  /* Mobile Product Reset — Phase 1: one decision, one CTA, then evidence. */
+  .header { min-height: 28px; padding-bottom: 7px; }
+  .hero { margin-top: 12px; padding: 20px 18px 18px; border-radius: 22px; }
+  .heroTop { min-height: 26px; }
+  .title { margin-top: 12px; font-size: clamp(32px,9.2vw,37px); line-height: .96; }
+  .description { font-size: 15px; line-height: 1.48; }
+  .primaryButton { min-height: 52px; margin-top: 17px; font-size: 15px; }
+  .progressGrid { margin-top: 13px; }
+  .progressCard { padding-top: 12px; padding-bottom: 13px; }
   .coachSignalHeader { display: block; }
   .coachSignalStatus { margin-top: 10px; }
 }
