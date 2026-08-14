@@ -1,0 +1,36 @@
+name: Protect Demo Reset Controls
+
+on:
+  push:
+    branches:
+      - agent/demo-paid-experience-unification
+    paths:
+      - ".github/workflows/protect-demo-reset-controls.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  protect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/demo-paid-experience-unification
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Protect registered tenants from demo reset controls
+        run: node scripts/protect-demo-reset-controls.mjs
+      - name: Run capability and cleanup contracts
+        run: node --test tests/account-capabilities.test.mjs tests/demo-capability-boundary.test.mjs tests/demo-data-isolation.test.mjs tests/demo-mode-cleanup.test.mjs
+      - name: Commit protected source and remove one-time tooling
+        run: |
+          rm scripts/protect-demo-reset-controls.mjs
+          rm .github/workflows/protect-demo-reset-controls.yml
+          git config user.name "shotlab-unification-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          git commit -m "Restrict demo reset controls to sandbox sessions"
+          git push origin HEAD:agent/demo-paid-experience-unification
