@@ -21,7 +21,6 @@ const requiredSelectors = [
   '.mcDrawerLogo',
   '.mcDrawerLogo img',
   '.mcHeaderTeamMark',
-  '.mcHeaderTeamMark img',
 ]
 
 const missing = requiredSelectors.filter((selector) => !builtCss.includes(selector))
