@@ -1270,6 +1270,9 @@ trackEvent("auth_login",{method:"password"},{email:normalizeEmail(p.email),role:
 return{ok:true};
 };
 const demoSignIn=async(kind="player")=>{
+// Demo identity must never inherit a subscribed user's authentication credentials.
+await supabase.auth.signOut();
+legacyAuthSecretRef.current={email:"",password:""};
 setDemoMode(true);
 const acct=kind==="coach"?DEMO_COACH:DEMO_PLAYER;
 // Establish the hard-coded demo identity before any seed collection is saved.
