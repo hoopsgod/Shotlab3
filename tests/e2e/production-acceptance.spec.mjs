@@ -121,7 +121,7 @@ test.beforeEach(async ({ page }) => {
   await installSafeRoutes(page);
 });
 
-test("coach branding save persists and renders a cleaned prominent logo", async ({ page }) => {
+test("coach branding save persists and renders the compact header logo", async ({ page }) => {
   await enterSeededDemoCoach(page);
   await openCoachDestination(page, "branding");
 
@@ -130,12 +130,13 @@ test("coach branding save persists and renders a cleaned prominent logo", async 
   await page.getByRole("button", { name: "Save team branding", exact: true }).click();
   await page.getByRole("button", { name: "Back to Coach", exact: true }).click();
 
-  const heroLogo = page.locator(".mcHeroTeamMark img");
-  await expect(heroLogo).toBeVisible({ timeout: 20_000 });
+  const headerLogo = page.locator(".mcHeaderTeamMark img");
+  await expect(headerLogo).toBeVisible({ timeout: 20_000 });
+  await expect(page.locator(".mcHeroTeamMark")).toBeHidden();
   const savedBranding = await readTeamBranding(page);
   expect(stripCacheBuster(savedBranding?.logoUrl)).toBe(FULL_LOGO_URL);
   expect(stripCacheBuster(savedBranding?.logoMarkUrl)).toBe(MARK_LOGO_URL);
-  expect(await heroLogo.getAttribute("src")).toMatch(/^data:image\/png;base64,/);
+  expect(await headerLogo.getAttribute("src")).toMatch(/^data:image\/png;base64,/);
 
   await page.reload();
   await expect(page.getByRole("button", { name: "Coach demo", exact: true })).toBeVisible({ timeout: 20_000 });
