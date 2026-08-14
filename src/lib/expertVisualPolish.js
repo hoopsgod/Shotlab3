@@ -69,9 +69,18 @@ function tightenPrimaryCoachTitleFraming() {
   const players = document.querySelector('[data-testid="coach-players-interactive-dashboard"]');
   if (!players || window.innerWidth > 700) return;
   players.style.setProperty("margin-top", "-34px", "important");
+
   const back = document.querySelector("button.shared-dashboard-back-action");
   const icon = back?.querySelector('span[aria-hidden="true"]');
   if (icon) icon.style.setProperty("font-size", "20px", "important");
+
+  const buttonRow = players.querySelector('[data-testid="coach-players-command-bar"] .secondaryPageIntro__buttonRow');
+  if (buttonRow) buttonRow.style.setProperty("grid-template-columns", ".95fr 1.05fr", "important");
+  const secondaryAction = players.querySelector('[data-testid="coach-players-command-bar"] .secondaryPageAction--secondary');
+  if (secondaryAction) {
+    secondaryAction.style.setProperty("padding-inline", "11px", "important");
+    secondaryAction.querySelector("span")?.style.setProperty("white-space", "nowrap", "important");
+  }
 }
 
 function apply(root = document) {
