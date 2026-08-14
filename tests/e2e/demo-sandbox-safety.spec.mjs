@@ -60,7 +60,7 @@ test.describe('demo sandbox runtime safety', () => {
     await expect(page.getByText('CONFIRM ACCOUNT REQUEST', { exact: true })).toBeVisible();
     await page.getByRole('button', { name: 'CONFIRM DELETE ACCOUNT', exact: true }).click();
 
-    await expect(page.getByRole('status')).toContainText('Account deletion is disabled in the demo sandbox.');
+    await expect(page.getByText('Account deletion is disabled in the demo sandbox.', { exact: true })).toBeVisible();
     await expect(page.getByTestId('coach-administration-workspace')).toBeVisible();
     await expect(page.getByTestId('mobile-navigation-dock')).toBeVisible();
   });
