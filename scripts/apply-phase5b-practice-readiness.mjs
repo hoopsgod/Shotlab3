@@ -29,7 +29,7 @@ update("src/components/CoachInteractiveDashboards.jsx", (source) => {
   next = replaceRequired(
     next,
     '      <SecondaryPageIntro eyebrow="Schedule intelligence" title="Events" summary="Run the team agenda, resolve attendance gaps, and move from schedule insight to action." status={next ? `${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />',
-    '      <SecondaryPageIntro eyebrow="Schedule intelligence" title="Events" summary="Run the team agenda, resolve RSVP gaps, and move from schedule insight to action." status={next ? `${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />',
+    '      <SecondaryPageIntro eyebrow="Schedule control" title="Events" summary="Run the week. Close RSVP gaps. Keep the team aligned." status={next ? `${formatCoachScheduleDate(next.date, { weekday: true })} · ${next.time || "TBD"}` : "No upcoming event"} actions={[{ key: "create", label: "Create Event", onClick: onCreateEvent }]} testId="coach-events-command-bar" />',
     "RSVP-specific schedule summary",
   );
   next = replaceRequired(
