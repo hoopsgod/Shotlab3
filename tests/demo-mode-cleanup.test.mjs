@@ -118,7 +118,7 @@ test('demo sign-in establishes local-only persistence before seeding collections
   assert.match(demoSignInSource, /shotlab:demo-session-started/)
 })
 
-test('Phase 1 keeps demo database writes local and demo leaderboards deterministic', () => {
+test('Phase 1 keeps demo database writes local and demo leaderboards deterministic through the capability boundary', () => {
   const appSource = fs.readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8')
   const databaseSetStart = appSource.indexOf('async set(k, v, options = {})')
   const databaseSetEnd = appSource.indexOf('\n};\n\nconst persistenceService', databaseSetStart)
@@ -132,10 +132,11 @@ test('Phase 1 keeps demo database writes local and demo leaderboards determinist
   const leaderboardStart = appSource.indexOf('const fetchHomeShotsLeaderboard=')
   const leaderboardEnd = appSource.indexOf('\n\nconst migrateData=', leaderboardStart)
   const leaderboardSource = appSource.slice(leaderboardStart, leaderboardEnd)
-  const demoFallback = leaderboardSource.indexOf('isDemoAccount(user)||isDemoMode()')
+  const capabilityBoundary = leaderboardSource.indexOf('if(accountCapabilities.isSandbox)')
   const remoteFetch = leaderboardSource.indexOf('await fetch(url')
 
   assert.ok(leaderboardStart >= 0 && leaderboardEnd > leaderboardStart)
-  assert.ok(demoFallback >= 0 && demoFallback < remoteFetch)
+  assert.ok(capabilityBoundary >= 0 && capabilityBoundary < remoteFetch)
+  assert.doesNotMatch(leaderboardSource, /isDemoMode\s*\(/)
   assert.match(leaderboardSource, /errorCode:"demo_local"/)
 })
