@@ -1,0 +1,138 @@
+name: One-shot S&C location contract fix
+
+on:
+  push:
+    branches:
+      - agent/demo-paid-experience-unification
+    paths:
+      - .github/workflows/one-shot-sc-location-contract-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/demo-paid-experience-unification
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Patch production S&C location persistence contract
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def replace_once(path, old, new):
+              p = Path(path)
+              text = p.read_text()
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f"expected exactly one match in {path}, found {count}: {old!r}")
+              p.write_text(text.replace(old, new, 1))
+
+          replace_once(
+              "src/lib/remotePersistence.js",
+              '    date: cleanText(row.date),\n    time: cleanText(row.time),\n    session_type: cleanText(row.session_type || row.sessionType),\n    owner_coach_id: cleanText(row.owner_coach_id || row.ownerCoachId).toLowerCase(),',
+              '    date: cleanText(row.date),\n    time: cleanText(row.time),\n    location: cleanText(row.location),\n    session_type: cleanText(row.session_type || row.sessionType),\n    owner_coach_id: cleanText(row.owner_coach_id || row.ownerCoachId).toLowerCase(),',
+          )
+          replace_once(
+              "src/lib/remotePersistence.js",
+              '    date: db.date,\n    time: db.time,\n    sessionType: db.session_type,\n    ownerCoachId: db.owner_coach_id,',
+              '    date: db.date,\n    time: db.time,\n    location: db.location,\n    sessionType: db.session_type,\n    ownerCoachId: db.owner_coach_id,',
+          )
+
+          replace_once(
+              "functions/v1/strength-conditioning/index.js",
+              '    date: cleanText(value?.date, 40),\n    time: cleanText(value?.time, 40),\n    sessionType: cleanText(value?.session_type || value?.sessionType, 160),',
+              '    date: cleanText(value?.date, 40),\n    time: cleanText(value?.time, 40),\n    location: cleanText(value?.location, 320),\n    sessionType: cleanText(value?.session_type || value?.sessionType, 160),',
+          )
+          replace_once(
+              "functions/v1/strength-conditioning/index.js",
+              '    date: row.date || null,\n    time: row.time || null,\n    session_type: row.sessionType || null,',
+              '    date: row.date || null,\n    time: row.time || null,\n    location: row.location || null,\n    session_type: row.sessionType || null,',
+          )
+          replace_once(
+              "functions/v1/strength-conditioning/index.js",
+              '    date: normalized.date,\n    time: normalized.time,\n    session_type: normalized.sessionType,',
+              '    date: normalized.date,\n    time: normalized.time,\n    location: normalized.location,\n    session_type: normalized.sessionType,',
+          )
+          replace_once(
+              "functions/v1/strength-conditioning/index.js",
+              '      `select=team_id,id,sport,date,time,session_type,owner_coach_id&team_id=eq.${encodeURIComponent(teamId)}&order=date.asc&limit=${RESOURCE_LIMITS.sessions}`',
+              '      `select=team_id,id,sport,date,time,location,session_type,owner_coach_id&team_id=eq.${encodeURIComponent(teamId)}&order=date.asc&limit=${RESOURCE_LIMITS.sessions}`',
+          )
+
+          migration = Path("migrations/054_strength_conditioning_session_location.sql")
+          if migration.exists():
+              raise SystemExit(f"migration already exists: {migration}")
+          migration.write_text("""-- Preserve the S&C venue/location across the signed persistence path.\n-- This is additive and idempotent so already-provisioned databases upgrade safely.\n\nalter table if exists public.sc_sessions\n  add column if not exists location text;\n\ncomment on column public.sc_sessions.location is\n  'Venue for a Strength & Conditioning session, preserved for coach and player views.';\n\nnotify pgrst, 'reload schema';\n""")
+
+          replace_once(
+              "tests/signed-strength-conditioning-persistence.test.mjs",
+              '  sanitizeScRsvp,\n} from "../functions/v1/strength-conditioning/index.js";',
+              '  sanitizeScRsvp,\n  sanitizeScSession,\n} from "../functions/v1/strength-conditioning/index.js";',
+          )
+          replace_once(
+              "tests/signed-strength-conditioning-persistence.test.mjs",
+              'import { buildAppRows, normalizeScRsvpRowForApp } from "../src/lib/remotePersistence.js";',
+              'import {\n  buildAppRows,\n  normalizeScRsvpRowForApp,\n  normalizeScSessionRowForApp,\n  normalizeScSessionRowForDb,\n} from "../src/lib/remotePersistence.js";',
+          )
+          replace_once(
+              "tests/signed-strength-conditioning-persistence.test.mjs",
+              '  time: "8:00 AM",\n  session_type: "School",',
+              '  time: "8:00 AM",\n  location: "Weight Room",\n  session_type: "School",',
+          )
+          replace_once(
+              "tests/signed-strength-conditioning-persistence.test.mjs",
+              '    assert.deepEqual(body.sessions.map((row) => row.id), ["lift-a"]);\n    assert.deepEqual(body.rsvps.map((row) => row.email), ["player@example.com"]);',
+              '    assert.deepEqual(body.sessions.map((row) => row.id), ["lift-a"]);\n    assert.equal(body.sessions[0].location, "Weight Room");\n    assert.deepEqual(body.rsvps.map((row) => row.email), ["player@example.com"]);',
+          )
+          replace_once(
+              "tests/signed-strength-conditioning-persistence.test.mjs",
+              '    assert.equal(body.deleted_count, 1);\n    assert.deepEqual(backend.state.sc_sessions.map((row) => row.id), ["lift-a"]);',
+              '    assert.equal(body.deleted_count, 1);\n    assert.deepEqual(backend.state.sc_sessions.map((row) => row.id), ["lift-a"]);\n    assert.equal(backend.state.sc_sessions[0].location, "Weight Room");',
+          )
+
+          anchor = 'test("local S&C fallback preserves legacy IDs and absent timestamps exactly", () => {'
+          test_text = Path("tests/signed-strength-conditioning-persistence.test.mjs").read_text()
+          if anchor not in test_text:
+              raise SystemExit("S&C regression test anchor missing")
+          regression = '''test("S&C session location survives API sanitization and remote browser normalization", () => {\n  const sanitized = sanitizeScSession(SESSION);\n  assert.equal(sanitized.location, "Weight Room");\n\n  const dbRow = normalizeScSessionRowForDb({\n    id: "lift-a",\n    teamId: "team-a",\n    sport: "Team Lift",\n    date: "2026-08-03",\n    time: "8:00 AM",\n    location: "Weight Room",\n    sessionType: "School",\n  });\n  assert.equal(dbRow.location, "Weight Room");\n\n  const appRow = normalizeScSessionRowForApp({ ...dbRow });\n  assert.equal(appRow.location, "Weight Room");\n});\n\n'''
+          Path("tests/signed-strength-conditioning-persistence.test.mjs").write_text(test_text.replace(anchor, regression + anchor, 1))
+
+          replace_once(
+              "tests/signed-strength-conditioning-persistence.test.mjs",
+              '  const migration = fs.readFileSync(new URL("../migrations/052_strength_conditioning_signed_api.sql", import.meta.url), "utf8");\n  const app = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");',
+              '  const migration = fs.readFileSync(new URL("../migrations/052_strength_conditioning_signed_api.sql", import.meta.url), "utf8");\n  const locationMigration = fs.readFileSync(new URL("../migrations/054_strength_conditioning_session_location.sql", import.meta.url), "utf8");\n  const app = fs.readFileSync(new URL("../src/App.jsx", import.meta.url), "utf8");',
+          )
+          replace_once(
+              "tests/signed-strength-conditioning-persistence.test.mjs",
+              '  assert.doesNotMatch(migration, /create policy/i);\n  assert.match(dataModels, /\\[STORAGE_KEYS\\.scSessions\\]: "sc_sessions"/);',
+              '  assert.doesNotMatch(migration, /create policy/i);\n  assert.match(locationMigration, /alter table if exists public\\.sc_sessions[\\s\\S]*add column if not exists location text/i);\n  assert.match(dataModels, /\\[STORAGE_KEYS\\.scSessions\\]: "sc_sessions"/);',
+          )
+          PY
+
+      - name: Run focused S&C regression suite
+        run: node --test tests/signed-strength-conditioning-persistence.test.mjs
+
+      - name: Build production app
+        run: npm run build
+
+      - name: Commit fix and remove one-shot workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/one-shot-sc-location-contract-fix.yml
+          git add src/lib/remotePersistence.js functions/v1/strength-conditioning/index.js migrations/054_strength_conditioning_session_location.sql tests/signed-strength-conditioning-persistence.test.mjs
+          git diff --cached --check
+          git commit -m "Preserve S&C session locations across paid persistence"
+          git push origin HEAD:agent/demo-paid-experience-unification
