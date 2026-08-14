@@ -31,8 +31,8 @@ async function enterFreshCoachDemo(page) {
 }
 
 async function expectTeamBrandingWorkspace(page) {
-  await expect(page.getByText("TEAM BRANDING", { exact: true })).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByText("Brand system", { exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Program Branding", exact: true })).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole("heading", { name: "Refine the system", exact: true })).toBeVisible();
   await expect(page.getByRole("button", { name: "Save team branding", exact: true })).toBeVisible();
   await expect(page.getByRole("dialog", { name: "Create event" })).toHaveCount(0);
 }

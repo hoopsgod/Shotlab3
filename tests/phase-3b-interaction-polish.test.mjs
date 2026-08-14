@@ -10,14 +10,14 @@ const expertPolishSource = readFileSync('src/lib/expertVisualPolish.js', 'utf8')
 
 test('Phase 3B gives secondary actions tactile pressed, focus, and reduced-motion states', () => {
   assert.match(secondaryCss, /secondaryPageAction:active:not\(:disabled\)/);
-  assert.match(secondaryCss, /metricStrip"\]\s*> button\[aria-pressed="true"\]/);
+  assert.match(secondaryCss, /\[data-visual-role="metric-strip"\]\s*> button\[aria-pressed="true"\]/);
   assert.match(secondaryCss, /secondaryPageDecision button:focus-visible/);
   assert.match(secondaryCss, /prefers-reduced-motion:\s*reduce/);
 });
 
 test('Phase 3B makes insight actions deliberate rather than a loose button cluster', () => {
-  assert.match(secondaryCss, /\[class\*="insightActions"\]/);
-  assert.match(secondaryCss, /\[class\*="quietAction"\]/);
+  assert.match(secondaryCss, /\[data-visual-role="insight-actions"\]/);
+  assert.match(secondaryCss, /\[data-action-role="tertiary"\]/);
   assert.match(secondaryCss, /min-height: var\(--touch-target, 44px\) !important/);
 });
 

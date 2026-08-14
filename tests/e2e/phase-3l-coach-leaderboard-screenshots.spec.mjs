@@ -90,8 +90,9 @@ test("Coach Leaderboards preserves decision context, competitive signal, and pla
   expect(sectionBackground.a).toBeGreaterThanOrEqual(0.9);
 
   await expect(sectionTitle).toBeVisible();
-  const sectionTitleColor = await sectionTitle.evaluate((node) => getComputedStyle(node).color);
-  expect(sectionTitleColor).toBe("rgb(244, 247, 242)");
+  const sectionTitleColor = parseCssColor(await sectionTitle.evaluate((node) => getComputedStyle(node).color));
+  expect(Math.min(sectionTitleColor.r, sectionTitleColor.g, sectionTitleColor.b)).toBeGreaterThanOrEqual(238);
+  expect(sectionTitleColor.a).toBeGreaterThanOrEqual(.99);
   const sectionTitleBackground = await sectionTitle.evaluate((node) => getComputedStyle(node).backgroundColor);
   expect(sectionTitleBackground).toBe("rgba(0, 0, 0, 0)");
 

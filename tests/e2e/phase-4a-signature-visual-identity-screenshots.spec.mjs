@@ -91,8 +91,15 @@ test("Phase 4A Player Progress carries the same visual DNA with a different crop
   await expect(field).toBeVisible();
   await expect(field).toHaveAttribute("data-shotlab-signature", "trajectoryVariant");
   expect(await field.evaluate((node) => node.parentElement?.getAttribute("data-testid"))).toBe("player-progress-story-hero");
-  const metricRing = await page.getByTestId("player-progress-metrics").locator(":scope > div").first().evaluate((node) => Number.parseFloat(getComputedStyle(node, "::after").width || "0"));
-  expect(metricRing).toBeGreaterThanOrEqual(24);
+  const marks = page.getByTestId("player-progress-metrics").locator("[data-performance-kind]");
+  await expect(marks).toHaveCount(3);
+  for (const mark of await marks.all()) {
+    await expect(mark).toBeVisible();
+    const box = await mark.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box.width).toBeGreaterThanOrEqual(38);
+    expect(box.height).toBeGreaterThanOrEqual(38);
+  }
   await expectNoOverflow(page);
   await capture(page, "08c-phase4a-player-progress-signature.png");
 });
@@ -105,16 +112,17 @@ test("Phase 4A Rankings gets restrained competitive branding without becoming a 
   await sheet.locator('[data-nav-key="leaderboards"]').click();
   const hub = page.getByTestId("premium-leaderboards-hub");
   await expect(hub).toBeVisible({ timeout: 20_000 });
-  const header = hub.locator(":scope > header");
-  const treatment = await header.evaluate((node) => ({
-    background: getComputedStyle(node).backgroundColor,
-    ringWidth: Number.parseFloat(getComputedStyle(node, "::after").width || "0"),
-    ringBorder: getComputedStyle(node, "::after").borderTopColor,
-    dotWidth: Number.parseFloat(getComputedStyle(node, "::before").width || "0"),
+  const workspace = page.getByTestId("player-leaderboards-workspace");
+  const title = workspace.getByRole("heading", { level: 1, name: "Leaderboards", exact: true });
+  await expect(title).toBeVisible();
+  await expect(hub.locator(":scope > header").getByText("LEADERBOARDS", { exact: true })).toBeHidden();
+  const treatment = await title.evaluate((node) => ({
+    fontSize: Number.parseFloat(getComputedStyle(node).fontSize),
+    color: getComputedStyle(node).color,
   }));
-  expect(treatment.ringWidth).toBeGreaterThanOrEqual(100);
-  expect(treatment.ringBorder).not.toBe("rgba(0, 0, 0, 0)");
-  expect(treatment.dotWidth).toBeGreaterThanOrEqual(6);
+  expect(treatment.fontSize).toBeGreaterThanOrEqual(28);
+  expect(treatment.color).not.toBe("rgba(0, 0, 0, 0)");
+  await expect(page.getByTestId("leaderboard-status-line")).toBeVisible();
   await expectNoOverflow(page);
   await capture(page, "08d-phase4a-player-rankings-signature.png");
 });
@@ -130,12 +138,14 @@ test("Phase 4A preserves Coach Mission Control's established mobile team-mark id
   await expect(teamMark.locator("img")).toBeVisible();
   const coachIdentity = await hero.evaluate((node) => ({
     courtArtworkDisplay: getComputedStyle(node.querySelector(".mcCourtArtwork")).display,
+    courtArtworkBackground: getComputedStyle(node.querySelector(".mcCourtArtwork")).backgroundImage,
     teamMarkDisplay: getComputedStyle(node.querySelector(".mcHeroTeamMark")).display,
     teamMarkOpacity: Number.parseFloat(getComputedStyle(node.querySelector(".mcHeroTeamMark")).opacity),
     backgroundImage: getComputedStyle(node).backgroundImage,
     shadow: getComputedStyle(node).boxShadow,
   }));
-  expect(coachIdentity.courtArtworkDisplay).toBe("none");
+  expect(coachIdentity.courtArtworkDisplay).not.toBe("none");
+  expect(coachIdentity.courtArtworkBackground).toContain("gradient");
   expect(coachIdentity.teamMarkDisplay).not.toBe("none");
   expect(coachIdentity.teamMarkOpacity).toBeGreaterThanOrEqual(.9);
   expect(coachIdentity.backgroundImage).toContain("gradient");

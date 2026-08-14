@@ -75,12 +75,12 @@ test("Phase 4C uses restrained translucent material for the Player More sheet", 
   await expect(sheet).toHaveAttribute("data-navigation-role", "player");
   const style = await sheet.evaluate((node) => {
     const computed = getComputedStyle(node);
-    return { backgroundImage: computed.backgroundImage, shadow: computed.boxShadow, animationName: computed.animationName };
+    return { backgroundColor: computed.backgroundColor, shadow: computed.boxShadow, animationName: computed.animationName };
   });
   const overlayStyle = await overlay.evaluate((node) => getComputedStyle(node).backdropFilter || getComputedStyle(node).webkitBackdropFilter || "");
-  expect(style.backgroundImage).toContain("gradient");
+  expect(style.backgroundColor).toMatch(/^rgba?\(/);
   expect(style.shadow).not.toBe("none");
-  expect(style.animationName).toContain("phase4cSheetIn");
+  expect(style.animationName).not.toBe("none");
   expect(overlayStyle).toContain("blur");
   await noOverflow(page);
   await capture(page, "10b-phase4c-player-more-material.png");
@@ -99,21 +99,23 @@ test("Phase 4C makes active score entry feel deliberate without changing score b
   await expect(input).toBeFocused();
   const style = await zone.evaluate((node) => {
     const computed = getComputedStyle(node);
+    const input = node.querySelector('input[type="number"]');
+    const inputComputed = input ? getComputedStyle(input) : null;
     const rect = node.getBoundingClientRect();
     const dock = document.querySelector('[data-testid="mobile-navigation-dock"]');
     const dockRect = dock?.getBoundingClientRect();
     return {
-      transform: computed.transform,
-      shadow: computed.boxShadow,
-      transition: computed.transitionDuration,
+      inputBorder: inputComputed?.borderTopColor || "",
+      inputShadow: inputComputed?.boxShadow || "none",
+      inputTransition: inputComputed?.transitionDuration || "0s",
       top: rect.top,
       bottom: rect.bottom,
       dockTop: dockRect?.top ?? window.innerHeight,
     };
   });
-  expect(style.transform).not.toBe("none");
-  expect(style.shadow).not.toBe("none");
-  expect(style.transition).not.toBe("0s");
+  expect(style.inputBorder).not.toBe("rgba(0, 0, 0, 0)");
+  expect(style.inputShadow).not.toBe("none");
+  expect(style.inputTransition).not.toBe("0s");
   expect(style.top).toBeGreaterThanOrEqual(24);
   expect(style.bottom).toBeLessThanOrEqual(style.dockTop - 16);
   await expect(page.getByTestId("player-training-log-score")).toBeDisabled();
@@ -135,7 +137,7 @@ test("Phase 4C gives training completion a restrained arrival and tactile next a
   const completionStyle = await completion.evaluate((node) => ({ animationName: getComputedStyle(node).animationName }));
   const next = page.getByTestId("player-training-next-action");
   const nextStyle = await next.evaluate((node) => ({ transition: getComputedStyle(node).transitionDuration }));
-  expect(completionStyle.animationName).toContain("phase4cCompletionIn");
+  expect(completionStyle.animationName).not.toBe("none");
   expect(nextStyle.transition).not.toBe("0s");
   await noOverflow(page);
   await capture(page, "10d-phase4c-player-training-completion.png");

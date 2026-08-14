@@ -10,12 +10,10 @@
     background: #f6f7f3 !important;
   }
 
-  /* Team Store mounts in a sibling portal root, so the app can disappear without unmounting. */
   html.team-store-portal-open body > #root {
     display: none !important;
   }
 
-  /* MobileNavigation is itself portaled to document.body and must yield to the store. */
   html.team-store-portal-open [data-testid="mobile-navigation-dock"],
   html.team-store-portal-open [data-testid="mobile-navigation-overlay"] {
     display: none !important;
@@ -119,23 +117,51 @@
     box-sizing: border-box;
   }
 
-  /* Empty player storefront is a native light state, not a dark-modal remnant. */
   html.team-store-portal-open .ts-empty-state {
-    min-height: calc(100dvh - 160px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    position: relative;
+    width: min(520px, calc(100% - 8px));
+    min-height: min(470px, calc(100dvh - 180px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)));
+    margin: 18px auto;
     align-content: center;
-    padding: 32px 18px calc(36px + env(safe-area-inset-bottom, 0px)) !important;
+    overflow: hidden;
+    padding: 34px 22px calc(38px + env(safe-area-inset-bottom, 0px)) !important;
+    border: 1px solid rgba(91, 113, 25, .13);
+    border-radius: 28px;
+    background: radial-gradient(circle at 88% 0%, rgba(200, 255, 26, .14), transparent 32%), linear-gradient(145deg, #ffffff, #f0f3e7) !important;
     color: #171a18 !important;
+    box-shadow: 0 20px 50px rgba(28, 35, 22, .09);
   }
 
+  html.team-store-portal-open .ts-empty-state::after {
+    position: absolute;
+    right: -72px;
+    bottom: -92px;
+    width: 220px;
+    height: 220px;
+    border: 1px solid rgba(91, 113, 25, .10);
+    border-radius: 50%;
+    content: "";
+    pointer-events: none;
+  }
+
+  html.team-store-portal-open .ts-empty-state > * { position: relative; z-index: 1; }
+
   html.team-store-portal-open .ts-empty-icon {
+    width: 58px;
+    height: 58px;
     border: 1px solid rgba(91, 113, 25, .16) !important;
+    border-radius: 18px;
     background: rgba(91, 113, 25, .08) !important;
     color: #5b7119 !important;
   }
 
   html.team-store-portal-open .ts-empty-state h3 {
+    max-width: 350px;
     color: #171a18 !important;
     -webkit-text-fill-color: #171a18 !important;
+    font-size: clamp(27px, 7vw, 34px);
+    line-height: 1.02;
+    letter-spacing: -.04em;
   }
 
   html.team-store-portal-open .ts-empty-state p {

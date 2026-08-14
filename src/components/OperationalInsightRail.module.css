@@ -17,60 +17,55 @@
   font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
   font-size: var(--type-micro, 11px);
   font-weight: 760;
-  letter-spacing: 0.09em;
+  letter-spacing: .075em;
   text-transform: uppercase;
 }
 
-.eyebrow {
-  color: var(--insight-rail-muted, #65717a);
-}
+.eyebrow { color: var(--insight-rail-muted, #65717a); }
 
 .header h2 {
   color: var(--insight-rail-ink, #111a21);
   font-family: var(--font-display, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif);
-  font-size: 20px;
-  font-weight: 760;
-  letter-spacing: -0.025em;
-  line-height: 1.05;
+  font-size: 21px;
+  font-weight: 780;
+  letter-spacing: -.03em;
+  line-height: 1.04;
   margin: 5px 0 0;
   text-transform: none;
 }
 
 .status {
-  background: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 12%, white);
-  border: 1px solid color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 34%, #7b8500);
+  background: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 10%, white);
+  border: 1px solid color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 30%, #7b8500);
   border-radius: 999px;
-  color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 34%, #263100);
+  color: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 28%, #263100);
   flex: 0 0 auto;
   font-size: var(--type-micro, 11px);
   font-weight: 760;
-  letter-spacing: 0.06em;
+  letter-spacing: .045em;
   padding: 5px 9px;
   text-transform: uppercase;
 }
 
 .context {
-  border-bottom: 1px solid rgba(17, 26, 33, 0.09);
+  border-bottom: 1px solid rgba(17,26,33,.09);
   color: var(--insight-rail-muted, #65717a);
   font-size: var(--type-micro, 11px);
   font-weight: 650;
-  letter-spacing: 0.06em;
+  letter-spacing: .055em;
   margin: -2px 4px 0;
   padding-bottom: 10px;
   text-transform: uppercase;
 }
 
-.stack {
-  display: grid;
-  gap: 9px;
-}
+.stack { display: grid; gap: 9px; }
 
 .card {
   --rail-tone: #67736b;
-  background: #fbfbf8;
-  border: 1px solid color-mix(in srgb, var(--rail-tone) 15%, rgba(17, 26, 33, 0.09));
+  background: #fffefd;
+  border: 1px solid color-mix(in srgb, var(--rail-tone) 14%, rgba(17,26,33,.09));
   border-radius: var(--insight-card-radius, 18px);
-  box-shadow: 0 6px 16px rgba(17, 26, 33, 0.045);
+  box-shadow: 0 5px 15px rgba(17,26,33,.04);
   overflow: hidden;
   padding: 14px;
   position: relative;
@@ -81,45 +76,29 @@
   content: "";
   height: 2px;
   left: 14px;
-  opacity: 0.82;
+  opacity: .78;
   position: absolute;
   top: 0;
-  width: 40px;
+  width: 38px;
 }
 
 .primaryCard {
   background:
-    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--rail-tone) 10%, transparent), transparent 42%),
-    linear-gradient(155deg, #151b1c, #0a0e11);
-  border-color: color-mix(in srgb, var(--rail-tone) 26%, rgba(255, 255, 255, 0.08));
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025), 0 12px 26px rgba(17, 26, 33, 0.15);
+    radial-gradient(ellipse 44% 64% at 103% 50%, transparent 64%, rgba(225,236,241,.12) 65%, transparent 66%),
+    radial-gradient(circle at 100% 0, color-mix(in srgb, var(--rail-tone) 9%, transparent), transparent 40%),
+    linear-gradient(145deg, #0b2633, #071820);
+  border-color: color-mix(in srgb, var(--rail-tone) 24%, rgba(220,235,241,.1));
+  box-shadow: inset 0 1px rgba(255,255,255,.025), 0 12px 28px rgba(7,24,32,.16);
   padding: 16px 15px 14px;
 }
 
-.tone_primary {
-  --rail-tone: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 68%, #405400);
-}
+.tone_primary { --rail-tone: color-mix(in srgb, var(--team-brand-primary, #c8ff1a) 66%, #405400); }
+.tone_positive { --rail-tone: #2b7a5d; }
+.tone_attention { --rail-tone: #b56a20; }
+.tone_info { --rail-tone: #187795; }
+.tone_neutral { --rail-tone: #68746d; }
 
-.tone_positive {
-  --rail-tone: #2b7a5d;
-}
-
-.tone_attention {
-  --rail-tone: #b56a20;
-}
-
-.tone_info {
-  --rail-tone: #187795;
-}
-
-.tone_neutral {
-  --rail-tone: #68746d;
-}
-
-.cardEyebrow {
-  color: var(--rail-tone);
-  margin-bottom: 6px;
-}
+.cardEyebrow { color: var(--rail-tone); margin-bottom: 6px; }
 
 .card h3 {
   color: #172019;
@@ -134,17 +113,12 @@
   color: #5f6962;
   font-family: var(--font-body, -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif);
   font-size: var(--type-meta, 12px);
-  line-height: 1.48;
+  line-height: 1.5;
   margin: 7px 0 0;
 }
 
-.primaryCard h3 {
-  color: #f5f8f6;
-}
-
-.primaryCard p {
-  color: #b8c2bc;
-}
+.primaryCard h3 { color: #f6f8f9; font-size: 15px; letter-spacing: -.01em; }
+.primaryCard p { color: #bdc9cf; }
 
 .card button {
   align-items: center;
@@ -157,7 +131,7 @@
   font-size: var(--type-micro, 11px);
   font-weight: 760;
   gap: 5px;
-  letter-spacing: 0.045em;
+  letter-spacing: .025em;
   margin-top: 9px;
   min-height: var(--touch-target, 44px);
   padding: 0;
@@ -165,22 +139,17 @@
 }
 
 .primaryCard .cardEyebrow,
-.primaryCard button {
-  color: color-mix(in srgb, var(--rail-tone) 64%, white);
-}
+.primaryCard button { color: color-mix(in srgb, var(--rail-tone) 62%, white); }
+.card button:hover { filter: brightness(1.1); }
+.card button:focus-visible { border-radius: 6px; outline: 2px solid var(--rail-tone); outline-offset: 3px; }
 
-.card button:hover {
-  filter: brightness(1.12);
-}
-
-.card button:focus-visible {
-  border-radius: 6px;
-  outline: 2px solid var(--rail-tone);
-  outline-offset: 3px;
+@media (max-width: 430px) {
+  .header { align-items: center; }
+  .header h2 { font-size: 20px; }
+  .card { padding: 13px; }
+  .primaryCard { padding: 15px 14px 13px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card button {
-    transition: none;
-  }
+  .card button { transition: none; }
 }

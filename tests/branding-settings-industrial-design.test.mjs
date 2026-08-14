@@ -6,12 +6,13 @@ const screen = fs.readFileSync("src/screens/CoachTeamBrandingScreen.jsx", "utf8"
 const preview = fs.readFileSync("src/components/team/TeamBrandingPreview.jsx", "utf8");
 const styles = fs.readFileSync("src/screens/CoachTeamBrandingScreen.css", "utf8");
 
-test("branding screen uses a cohesive identity workspace", () => {
+test("branding screen leads with program identity while retaining controls", () => {
   assert.match(screen, /branding-industrial__workspace/);
-  assert.match(screen, /Identity controls/);
-  assert.match(screen, /Shared preview/);
+  assert.match(screen, /Program identity/);
+  assert.match(screen, /Refine the system/);
   assert.match(screen, /TeamBrandingForm/);
   assert.match(screen, /TeamBrandingPreview/);
+  assert.ok(screen.indexOf('data-visual-role="branding-preview"') < screen.indexOf('data-visual-role="branding-controls"'));
 });
 
 test("live preview shows distinct coach and player product surfaces", () => {
@@ -21,13 +22,13 @@ test("live preview shows distinct coach and player product surfaces", () => {
   assert.match(preview, /Typography ·/);
 });
 
-test("branding workspace follows warm light tokens and accessibility rules", () => {
+test("branding workspace gives identity the dominant surface and subordinates controls", () => {
   assert.match(styles, /#f5f3ee/);
-  assert.match(styles, /rgba\(255,255,255,.94\)/);
+  assert.match(styles, /linear-gradient\(145deg,#0a2633/);
+  assert.match(styles, /branding-industrial__controls\{width:min\(100%,820px\)/);
   assert.match(styles, /min-height:48px!important/);
   assert.match(styles, /focus-visible/);
   assert.match(styles, /prefers-reduced-motion/);
-  assert.match(styles, /max-width:860px/);
 });
 
 test("branding presentation adds no persistence or network behavior", () => {

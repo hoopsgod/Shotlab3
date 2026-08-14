@@ -41,9 +41,9 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
     <main className="team-brand premium-screen premium-screen--branding branding-industrial">
       <SecondaryPageShell className="brandingEditorialWorkspace" testId="coach-branding-workspace">
         <SecondaryPageIntro
-          eyebrow="Team identity system"
-          title="Branding"
-          summary={`${teamName} branding flows through coach, player, training, event, leaderboard, and storefront experiences.`}
+          eyebrow="Program identity"
+          title="Program Branding"
+          summary={`${teamName} should feel unmistakably yours across coach, player, training, event, leaderboard, and storefront experiences.`}
           status="Coach + Player"
           actions={[{ key: "back", label: "Back to Coach", onClick: onBack }]}
           testId="coach-branding-header"
@@ -51,29 +51,29 @@ export default function CoachTeamBrandingScreen({ branding, onSave, onBack, team
         />
 
         <div className="branding-industrial__workspace" data-testid="branding-identity-workspace">
-          <section className="branding-industrial__panel" data-surface="light" data-visual-role="branding-controls" aria-labelledby="branding-controls-title" aria-busy={saving}>
+          <aside className="branding-industrial__panel branding-industrial__preview" data-surface="dark" data-visual-role="branding-preview" aria-labelledby="branding-preview-title">
             <header className="branding-industrial__panel-header">
               <div>
-                <div className="branding-industrial__kicker">Identity controls</div>
-                <h2 id="branding-controls-title">Build one recognizable team system</h2>
-                <p>Choose an approved palette, set readable typography, and prepare transparent logos without exposing technical setup to players.</p>
-              </div>
-              <span className="branding-industrial__status" role="status" aria-live="polite">{saving ? "Saving changes…" : "Live preview"}</span>
-            </header>
-            <TeamBrandingForm branding={branding} onChange={setDraftBranding} onSave={handleSave} onCancel={onBack} saving={saving} />
-          </section>
-
-          <aside className="branding-industrial__panel branding-industrial__preview" data-surface="light" data-visual-role="branding-preview" aria-labelledby="branding-preview-title">
-            <header className="branding-industrial__panel-header">
-              <div>
-                <div className="branding-industrial__kicker">Shared preview</div>
-                <h2 id="branding-preview-title">See the identity in context</h2>
-                <p>Coach and player surfaces update together so the program feels consistent before anything is saved.</p>
+                <div className="branding-industrial__kicker">Program identity</div>
+                <h2 id="branding-preview-title">{teamName}, recognized at a glance</h2>
+                <p>This is the shared identity players, coaches, and families carry from training to competition to the team storefront.</p>
               </div>
               <span className="branding-industrial__status">Coach + Player</span>
             </header>
             <TeamBrandingPreview branding={draftBranding} />
           </aside>
+
+          <section className="branding-industrial__panel branding-industrial__controls" data-surface="light" data-visual-role="branding-controls" aria-labelledby="branding-controls-title" aria-busy={saving}>
+            <header className="branding-industrial__panel-header">
+              <div>
+                <div className="branding-industrial__kicker">Identity controls</div>
+                <h2 id="branding-controls-title">Refine the system</h2>
+                <p>Adjust the approved palette, typography, and marks that power the program identity above.</p>
+              </div>
+              <span className="branding-industrial__status" role="status" aria-live="polite">{saving ? "Saving changes…" : "Live preview"}</span>
+            </header>
+            <TeamBrandingForm branding={branding} onChange={setDraftBranding} onSave={handleSave} onCancel={onBack} saving={saving} />
+          </section>
         </div>
       </SecondaryPageShell>
     </main>
