@@ -38,17 +38,11 @@ async function enterCoachPlayers(page) {
   await players.click();
 }
 
-test("coach adds a player and receives secure copy and email-app fallbacks", async ({ page }) => {
-  let postBody = null;
-  const invitation = { id: "invite-1", player_name: "Ari Player", player_email: "ari@example.com", status: "pending" };
+test("demo coach blocks real player invitation delivery at the sandbox boundary", async ({ page }) => {
+  let provisionRequests = 0;
   await page.route("**/v1/coach/players/provision**", async (route) => {
-    const request = route.request();
-    if (request.method() === "GET") {
-      await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, invitations: postBody ? [invitation] : [] }) });
-      return;
-    }
-    postBody = request.postDataJSON();
-    await route.fulfill({ status: 201, contentType: "application/json", body: JSON.stringify({ ok: true, status: "pending", email_delivery_status: "not_configured", setup_url: "https://example.test/player-setup.html?token=single-use", expires_at: "2026-07-26T12:00:00.000Z", profile: { id: "pp-1", team_id: TEAM_ID, invited_email: "ari@example.com" } }) });
+    provisionRequests += 1;
+    await route.fulfill({ status: 500, contentType: "application/json", body: JSON.stringify({ ok: false, error: "demo_must_not_reach_provision_api" }) });
   });
   await page.route(/https:\/\/[^/]+\.supabase\.co\/.*/, (route) => route.fulfill({ status: 200, contentType: "application/json", body: "[]" }));
   await seedCoach(page);
@@ -62,11 +56,10 @@ test("coach adds a player and receives secure copy and email-app fallbacks", asy
   await form.getByLabel("Jersey number").fill("22");
   await form.getByRole("button", { name: "ADD PLAYER & SEND INVITE" }).click();
 
-  await expect(form.getByRole("status")).toContainText("Email delivery is not configured");
-  await expect(form.getByRole("button", { name: "COPY SECURE LINK" })).toBeVisible();
-  await expect(form.getByRole("button", { name: "OPEN EMAIL APP" })).toBeVisible();
-  expect(postBody).toEqual({ team_id: TEAM_ID, first_name: "Ari", last_name: "Player", email: "ari@example.com", jersey_number: "22" });
-  expect("password" in postBody).toBe(false);
+  await expect(form.getByRole("alert")).toContainText("Player invitations are disabled in the demo sandbox.");
+  await expect(form.getByRole("button", { name: "COPY SECURE LINK" })).toHaveCount(0);
+  await expect(form.getByRole("button", { name: "OPEN EMAIL APP" })).toHaveCount(0);
+  expect(provisionRequests).toBe(0);
 });
 
 test("player chooses a password on the single-use setup page", async ({ page }) => {
